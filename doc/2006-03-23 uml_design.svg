@@ -1,0 +1,377 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20001102//EN" "http://www.w3.org/TR/2000/CR-SVG-20001102/DTD/svg-20001102.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="3319" x="0" y="0" height="1628" id="/home/jb/devel/cc/jam/doc/2006-03-23 uml_design" >
+ <rect width="3319" x="109" y="407" height="1628" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1525" y2="1369" x1="2145" x2="2254" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1038" y2="1225" x1="2350" x2="2323" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="570" y2="893" x1="1725" x2="2128" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="749" y2="612" x1="2350" x2="2464" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="797" y2="612" x1="2942" x2="2566" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="924" y2="893" x1="2790" x2="2572" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="797" y2="594" x1="3094" x2="3127" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1052" y2="1132" x1="3018" x2="3037" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="594" y2="670" x1="2982" x2="3033" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="638" y2="1225" x1="1605" x2="2185" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;stroke-dasharray:18,6;fill:none;" y1="652" y2="586" x1="164" x2="206" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;stroke-dasharray:18,6;fill:none;" y1="652" y2="586" x1="307" x2="244" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="555" y2="565" x1="373" x2="282" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;stroke-dasharray:18,6;fill:none;" y1="937" y2="851" x1="1019" x2="1102" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="772" y2="809" x1="1130" x2="1121" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="592" y2="742" x1="1485" x2="1208" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="547" y2="555" x1="1485" x2="485" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;stroke-dasharray:18,6;fill:none;" y1="1036" y2="998" x1="580" x2="618" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;stroke-dasharray:18,6;fill:none;" y1="1037" y2="998" x1="714" x2="656" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;stroke-dasharray:18,6;fill:none;" y1="937" y2="851" x1="1289" x2="1140" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1014" y2="975" x1="238" x2="312" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1015" y2="975" x1="394" x2="331" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="958" y2="977" x1="350" x2="580" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="572" y2="666" x1="429" x2="497" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="742" y2="682" x1="1052" x2="556" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="942" y2="699" x1="321" x2="497" />
+ <polygon points="2254 1369 2242 1375 2253 1382 2254 1369" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="2350 1038 2344 1047 2347 1060 2353 1049" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="1725 570 1730 580 1742 584 1736 573" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="2350 749 2360 744 2364 732 2353 738" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="2942 797 2935 789 2922 787 2931 796" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="2790 924 2781 918 2768 921 2779 927" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="3094 797 3100 788 3098 775 3091 786" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="3018 1052 3016 1063 3023 1073 3024 1061" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="2982 594 2984 605 2994 612 2991 600" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,0,0);" />
+ <polygon points="1605 638 1609 648 1620 654 1615 642" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="206 586 194 592 205 599 206 586" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="244 586 247 599 256 590 244 586" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="373 555 362 552 351 557 363 560" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="1102 851 1090 855 1099 864 1102 851" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="1130 772 1124 781 1125 793 1132 783" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="1485 592 1474 593 1466 602 1478 601" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="1485 547 1475 543 1463 547 1475 551" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="618 998 605 1001 615 1011 618 998" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="656 998 662 1010 669 999 656 998" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="1140 851 1147 862 1153 851 1140 851" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="312 975 299 974 305 986 312 975" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="331 975 337 987 344 976 331 975" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="350 958 360 963 372 960 360 955" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="429 572 432 583 442 590 438 578" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="556 682 566 690 568 677 556 682" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <polygon points="497 699 485 704 496 712 497 699" transform="translate(-109,-407)" style="stroke:rgb(0,0,0);stroke-width:0;fill:rgb(255,255,255);" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1369" y2="1375" x1="2254" x2="2242" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1375" y2="1382" x1="2242" x2="2253" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1369" y2="1382" x1="2254" x2="2253" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1038" y2="1047" x1="2350" x2="2344" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1060" y2="1049" x1="2347" x2="2353" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1047" y2="1060" x1="2344" x2="2347" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1049" y2="1038" x1="2353" x2="2350" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="570" y2="580" x1="1725" x2="1730" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="584" y2="573" x1="1742" x2="1736" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="580" y2="584" x1="1730" x2="1742" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="573" y2="570" x1="1736" x2="1725" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="749" y2="744" x1="2350" x2="2360" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="732" y2="738" x1="2364" x2="2353" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="744" y2="732" x1="2360" x2="2364" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="738" y2="749" x1="2353" x2="2350" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="797" y2="789" x1="2942" x2="2935" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="787" y2="796" x1="2922" x2="2931" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="789" y2="787" x1="2935" x2="2922" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="796" y2="797" x1="2931" x2="2942" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="924" y2="918" x1="2790" x2="2781" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="921" y2="927" x1="2768" x2="2779" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="918" y2="921" x1="2781" x2="2768" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="927" y2="924" x1="2779" x2="2790" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="797" y2="788" x1="3094" x2="3100" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="775" y2="786" x1="3098" x2="3091" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="788" y2="775" x1="3100" x2="3098" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="786" y2="797" x1="3091" x2="3094" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1052" y2="1063" x1="3018" x2="3016" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1073" y2="1061" x1="3023" x2="3024" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1063" y2="1073" x1="3016" x2="3023" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1061" y2="1052" x1="3024" x2="3018" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="594" y2="605" x1="2982" x2="2984" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="612" y2="600" x1="2994" x2="2991" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="605" y2="612" x1="2984" x2="2994" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="600" y2="594" x1="2991" x2="2982" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="638" y2="648" x1="1605" x2="1609" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="654" y2="642" x1="1620" x2="1615" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="648" y2="654" x1="1609" x2="1620" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="642" y2="638" x1="1615" x2="1605" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="586" y2="592" x1="206" x2="194" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="592" y2="599" x1="194" x2="205" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="586" y2="599" x1="206" x2="205" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="586" y2="599" x1="244" x2="247" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="599" y2="590" x1="247" x2="256" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="586" y2="590" x1="244" x2="256" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="555" y2="552" x1="373" x2="362" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="557" y2="560" x1="351" x2="363" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="552" y2="557" x1="362" x2="351" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="560" y2="555" x1="363" x2="373" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="851" y2="855" x1="1102" x2="1090" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="855" y2="864" x1="1090" x2="1099" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="851" y2="864" x1="1102" x2="1099" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="772" y2="781" x1="1130" x2="1124" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="793" y2="783" x1="1125" x2="1132" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="781" y2="793" x1="1124" x2="1125" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="783" y2="772" x1="1132" x2="1130" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="592" y2="593" x1="1485" x2="1474" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="602" y2="601" x1="1466" x2="1478" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="593" y2="602" x1="1474" x2="1466" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="601" y2="592" x1="1478" x2="1485" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="547" y2="543" x1="1485" x2="1475" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="547" y2="551" x1="1463" x2="1475" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="543" y2="547" x1="1475" x2="1463" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="551" y2="547" x1="1475" x2="1485" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="998" y2="1001" x1="618" x2="605" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1001" y2="1011" x1="605" x2="615" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="998" y2="1011" x1="618" x2="615" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="998" y2="1010" x1="656" x2="662" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="1010" y2="999" x1="662" x2="669" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="998" y2="999" x1="656" x2="669" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="851" y2="862" x1="1140" x2="1147" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="862" y2="851" x1="1147" x2="1153" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="851" y2="851" x1="1140" x2="1153" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="975" y2="974" x1="312" x2="299" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="974" y2="986" x1="299" x2="305" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="975" y2="986" x1="312" x2="305" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="975" y2="987" x1="331" x2="337" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="987" y2="976" x1="337" x2="344" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="975" y2="976" x1="331" x2="344" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="958" y2="963" x1="350" x2="360" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="960" y2="955" x1="372" x2="360" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="963" y2="960" x1="360" x2="372" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="955" y2="958" x1="360" x2="350" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="572" y2="583" x1="429" x2="432" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="590" y2="578" x1="442" x2="438" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="583" y2="590" x1="432" x2="442" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="578" y2="572" x1="438" x2="429" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="682" y2="690" x1="556" x2="566" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="690" y2="677" x1="566" x2="568" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="682" y2="677" x1="556" x2="568" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="699" y2="704" x1="497" x2="485" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="704" y2="712" x1="485" x2="496" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:none;" y1="699" y2="712" x1="497" x2="496" />
+ <rect width="240" x="1485" y="502" height="136" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="1605" y="517" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >JAM</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="519" y2="519" x1="1485" x2="1724" />
+ <text x="1490" y="534" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- streamplayer : JAMStreamPlayer*</text>
+ <text x="1490" y="551" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- tv : JAMTV*</text>
+ <text x="1490" y="568" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_screen : QWidgetStack*</text>
+ <text x="1490" y="585" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_menu : Menu*</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="587" y2="587" x1="1485" x2="1724" />
+ <text x="1490" y="602" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ JAM()</text>
+ <text x="1490" y="619" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ JAM()</text>
+ <text x="1490" y="636" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" ># keyPressEvent(k : QKeyEvent*)</text>
+ <rect width="414" x="2047" y="1225" height="144" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="2254" y="1240" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >JAMStreamPlayer</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1242" y2="1242" x1="2047" x2="2460" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1242" y2="1242" x1="2047" x2="2460" />
+ <text x="2052" y="1257" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ JAMStreamPlayer(parent : QWidget*, name : const char*)</text>
+ <text x="2052" y="1274" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ JAMStreamPlayer()</text>
+ <text x="2052" y="1291" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ tvMRL(channelid : QString) : QString</text>
+ <text x="2052" y="1308" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ play(mrl : QString)</text>
+ <text x="2052" y="1325" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ stop()</text>
+ <text x="2052" y="1342" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ showOSD(text : QString, duration : uint)</text>
+ <text x="2052" y="1359" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ hideOSD()</text>
+ <rect width="1407" x="1442" y="1525" height="510" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="2145" y="1540" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >JAMStreamPlayerXine</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1542" y2="1542" x1="1442" x2="2848" />
+ <text x="1447" y="1557" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- xineEngine : xine_t*</text>
+ <text x="1447" y="1574" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- audioDriver : xine_audio_port_t*</text>
+ <text x="1447" y="1591" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- videoDriver : xine_video_port_t*</text>
+ <text x="1447" y="1608" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- xineStream : xine_stream_t*</text>
+ <text x="1447" y="1625" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- xineWindow : Window</text>
+ <text x="1447" y="1642" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- xineDisplay : Display*</text>
+ <text x="1447" y="1659" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- xineScreen : int</text>
+ <text x="1447" y="1676" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- videoFrameWidth : int</text>
+ <text x="1447" y="1693" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- videoFrameHeight : int</text>
+ <text x="1447" y="1710" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- globX : int</text>
+ <text x="1447" y="1727" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- globY : int</text>
+ <text x="1447" y="1744" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- res_v : double</text>
+ <text x="1447" y="1761" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- res_h : double</text>
+ <text x="1447" y="1778" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- pixel_aspect : double</text>
+ <text x="1447" y="1795" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_OSD : xine_osd_t*</text>
+ <text x="1447" y="1812" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- visual : x11_visual_t</text>
+ <text x="1447" y="1829" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- eventQueue : xine_event_queue_t*</text>
+ <text x="1447" y="1846" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_marginOSD : uint</text>
+ <text x="1447" y="1863" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_OSDTimer : QTimer</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1865" y2="1865" x1="1442" x2="2848" />
+ <text x="1447" y="1880" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ JAMStreamPlayerXine(parent : QWidget*, name : const char*)</text>
+ <text x="1447" y="1897" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ JAMStreamPlayerXine()</text>
+ <text x="1447" y="1914" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ tvMRL(channelid : QString) : QString</text>
+ <text x="1447" y="1931" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ play(mrl : QString)</text>
+ <text x="1447" y="1948" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ stop()</text>
+ <text x="1447" y="1965" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ showOSD(text : QString, duration : uint)</text>
+ <text x="1447" y="1982" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ hideOSD()</text>
+ <text x="1447" y="1999" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- DestSizeCallback(p : void*,  : int)</text>
+ <text x="1447" y="2016" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- FrameOutputCallback(p : void*, video_width : int, video_height : int, video_aspect : double, dest_x : int*, dest_y : int*, dest_width : int*, dest_height : int*, dest_aspect : double*, win_x : int*, win_y : int*)</text>
+ <text x="1447" y="2033" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- initOSD()</text>
+ <rect width="444" x="2128" y="749" height="289" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="2350" y="764" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >JAMTV</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="766" y2="766" x1="2128" x2="2571" />
+ <text x="2133" y="781" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_channelList : ChannelListT</text>
+ <text x="2133" y="798" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_currentChannel : int</text>
+ <text x="2133" y="815" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_numberChannels : int</text>
+ <text x="2133" y="832" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_streamplayer : JAMStreamPlayer*</text>
+ <text x="2133" y="849" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_controlVDR : SVDRP*</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="851" y2="851" x1="2128" x2="2571" />
+ <text x="2133" y="866" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ JAMTV(streamplayer : JAMStreamPlayer*)</text>
+ <text x="2133" y="883" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ JAMTV()</text>
+ <text x="2133" y="900" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ insertChannel(channelnumber : int, channel : TVChannel*)</text>
+ <text x="2133" y="917" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ appendChannel(channel : TVChannel*)</text>
+ <text x="2133" y="934" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ setCurrentChannel(channelnumber : int)</text>
+ <text x="2133" y="951" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getChannelId(channelnumber : int) : QString</text>
+ <text x="2133" y="968" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getChannelName(channelnumber : int) : QString</text>
+ <text x="2133" y="985" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getChannelPointer(channelsignature : QString) : TVChannel*</text>
+ <text x="2133" y="1002" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getCurrentChannelPointer() : TVChannel*</text>
+ <text x="2133" y="1019" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getCurrentChannel() : int</text>
+ <text x="2133" y="1036" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getChannelCount() : int</text>
+ <rect width="332" x="853" y="937" height="85" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="1019" y="952" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >Menu</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="954" y2="954" x1="853" x2="1184" />
+ <text x="858" y="969" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_list : QListView*</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="971" y2="971" x1="853" x2="1184" />
+ <text x="858" y="986" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ Menu(parent : QWidget*, name : const char*)</text>
+ <text x="858" y="1003" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ Menu()</text>
+ <text x="858" y="1020" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ showCurrentProgram(tv : JAMTV*)</text>
+ <rect width="307" x="2362" y="425" height="187" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="2515" y="440" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >SVDRP</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="442" y2="442" x1="2362" x2="2668" />
+ <text x="2367" y="457" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_server : QString</text>
+ <text x="2367" y="474" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_port : Q_UINT16</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="476" y2="476" x1="2362" x2="2668" />
+ <text x="2367" y="491" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ SVDRP(server : QString, port : Q_UINT16)</text>
+ <text x="2367" y="508" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ SVDRP()</text>
+ <text x="2367" y="525" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ server() : QString</text>
+ <text x="2367" y="542" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ port() : Q_UINT16</text>
+ <text x="2367" y="559" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getChannels(tv : JAMTV*)</text>
+ <text x="2367" y="576" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getEPG(tv : JAMTV*)</text>
+ <text x="2367" y="593" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getRecordings(tv : JAMTV*)</text>
+ <text x="2367" y="610" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getTimers(tv : JAMTV*)</text>
+ <rect width="457" x="2790" y="797" height="255" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="3018" y="812" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >SVDRPRequest</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="814" y2="814" x1="2790" x2="3246" />
+ <text x="2795" y="829" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_requestMutex : QMutex</text>
+ <text x="2795" y="846" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_svdrp : SVDRP*</text>
+ <text x="2795" y="863" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_request : QString</text>
+ <text x="2795" y="880" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_tv : JAMTV*</text>
+ <text x="2795" y="897" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_socket : QSocketDevice*</text>
+ <text x="2795" y="914" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_reply : QStringList</text>
+ <text x="2795" y="931" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_currentChannel : TVChannel*</text>
+ <text x="2795" y="948" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_currentEPGEntry : EPGEntry*</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="950" y2="950" x1="2790" x2="3246" />
+ <text x="2795" y="965" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ SVDRPRequest(svdrp : SVDRP*, request : QString, tv : JAMTV*)</text>
+ <text x="2795" y="982" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ SVDRPRequest()</text>
+ <text x="2795" y="999" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ run()</text>
+ <text x="2795" y="1016" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ startRequest()</text>
+ <text x="2795" y="1033" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- writeToSocket(str : const QString&amp;)</text>
+ <text x="2795" y="1050" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- processReply()</text>
+ <rect width="436" x="2837" y="407" height="187" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="3055" y="422" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >TVChannel</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="424" y2="424" x1="2837" x2="3272" />
+ <text x="2842" y="439" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_id : QString</text>
+ <text x="2842" y="456" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_name : QString</text>
+ <text x="2842" y="473" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_signature : QString</text>
+ <text x="2842" y="490" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_epg : EPGListT</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="492" y2="492" x1="2837" x2="3272" />
+ <text x="2842" y="507" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ TVChannel(id : QString, name : QString, signature : QString)</text>
+ <text x="2842" y="524" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getId() : QString</text>
+ <text x="2842" y="541" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getName() : QString</text>
+ <text x="2842" y="558" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getSignature() : QString</text>
+ <text x="2842" y="575" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ appendEPGEntry(epgentry : EPGEntry*)</text>
+ <text x="2842" y="592" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getCurrentEPGEntry() : EPGEntry*</text>
+ <rect width="782" x="2646" y="1132" height="272" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="3037" y="1147" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >EPGEntry</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1149" y2="1149" x1="2646" x2="3427" />
+ <text x="2651" y="1164" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_id : QString</text>
+ <text x="2651" y="1181" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_start : time_t</text>
+ <text x="2651" y="1198" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_duration : time_t</text>
+ <text x="2651" y="1215" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_title : QString</text>
+ <text x="2651" y="1232" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_shorttext : QString</text>
+ <text x="2651" y="1249" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >- m_description : QString</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1251" y2="1251" x1="2646" x2="3427" />
+ <text x="2651" y="1266" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ EPGEntry(id : QString, start : time_t, duration : time_t, title : QString, shorttext : QString, description : QString)</text>
+ <text x="2651" y="1283" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ setTitle(title : QString)</text>
+ <text x="2651" y="1300" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ setShortText(shorttext : QString)</text>
+ <text x="2651" y="1317" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ setDescription(description : QString)</text>
+ <text x="2651" y="1334" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getStartTime() : time_t</text>
+ <text x="2651" y="1351" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getDurationTime() : time_t</text>
+ <text x="2651" y="1368" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getTitle() : QString</text>
+ <text x="2651" y="1385" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getShortText() : QString</text>
+ <text x="2651" y="1402" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ getDescription() : QString</text>
+ <rect width="71" x="2998" y="670" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="3033" y="685" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >EPGListT</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="687" y2="687" x1="2998" x2="3068" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="687" y2="687" x1="2998" x2="3068" />
+ <rect width="156" x="1052" y="713" height="59" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="1130" y="728" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >ScreenManager</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="730" y2="730" x1="1052" x2="1207" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="730" y2="730" x1="1052" x2="1207" />
+ <text x="1057" y="745" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ScreenManager()</text>
+ <text x="1057" y="762" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" >+ ~ ScreenManager()</text>
+ <rect width="112" x="373" y="539" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="429" y="554" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >EventManager</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="556" y2="556" x1="373" x2="484" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="556" y2="556" x1="373" x2="484" />
+ <rect width="111" x="109" y="652" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="164" y="667" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >InputKeyboard</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="669" y2="669" x1="109" x2="219" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="669" y2="669" x1="109" x2="219" />
+ <rect width="70" x="272" y="652" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="307" y="667" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >InputLirc</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="669" y2="669" x1="272" x2="341" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="669" y2="669" x1="272" x2="341" />
+ <rect width="114" x="168" y="544" height="42" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="225" y="559" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >«Schnittstelle»</text>
+ <text x="225" y="576" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:italic;font-weight:700;font-family:Arial;" text-anchor="middle" >Input</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="578" y2="578" x1="168" x2="281" />
+ <rect width="114" x="1064" y="809" height="42" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="1121" y="824" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >«Schnittstelle»</text>
+ <text x="1121" y="841" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:italic;font-weight:700;font-family:Arial;" text-anchor="middle" >Screen</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="843" y2="843" x1="1064" x2="1177" />
+ <rect width="138" x="169" y="1014" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="238" y="1029" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >AudioVideoStream</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1031" y2="1031" x1="169" x2="306" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1031" y2="1031" x1="169" x2="306" />
+ <rect width="98" x="345" y="1015" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="394" y="1030" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >AudioStream</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1032" y2="1032" x1="345" x2="442" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1032" y2="1032" x1="345" x2="442" />
+ <rect width="114" x="580" y="956" height="42" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="637" y="971" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >«Schnittstelle»</text>
+ <text x="637" y="988" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:italic;font-weight:700;font-family:Arial;" text-anchor="middle" >Engine</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="990" y2="990" x1="580" x2="693" />
+ <rect width="89" x="536" y="1036" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="580" y="1051" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >EngineXine</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1053" y2="1053" x1="536" x2="624" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1053" y2="1053" x1="536" x2="624" />
+ <rect width="82" x="673" y="1037" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="714" y="1052" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >EngineGst</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1054" y2="1054" x1="673" x2="754" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="1054" y2="1054" x1="673" x2="754" />
+ <rect width="139" x="1220" y="937" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="1289" y="952" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >AudioVideoScreen</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="954" y2="954" x1="1220" x2="1358" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="954" y2="954" x1="1220" x2="1358" />
+ <rect width="57" x="293" y="942" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="321" y="957" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >Stream</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="959" y2="959" x1="293" x2="349" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="959" y2="959" x1="293" x2="349" />
+ <rect width="117" x="439" y="666" height="33" transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" />
+ <text x="497" y="681" transform="translate(-109,-407)" style="fill:rgb(0,0,0);stroke-width:0;font-size:12;font-style:normal;font-weight:700;font-family:Arial;" text-anchor="middle" >EventObserver</text>
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="683" y2="683" x1="439" x2="555" />
+ <line transform="translate(-109,-407)" style="stroke:rgb(255,0,0);stroke-width:0.9;fill:rgb(255,255,192);" y1="683" y2="683" x1="439" x2="555" />
+ <text x="2309" y="1219" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2383" y="1219" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_streamplayer</text>
+ <text x="2114" y="908" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2112" y="887" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+tv</text>
+ <text x="2482" y="631" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2408" y="631" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_controlVDR</text>
+ <text x="2909" y="909" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2854" y="959" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_svdrp</text>
+ <text x="2622" y="887" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2547" y="912" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_tv</text>
+ <text x="3000" y="613" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="3058" y="613" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_currentChannel</text>
+ <text x="2696" y="1237" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2818" y="1126" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_currentEPGEntry</text>
+ <text x="3001" y="664" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+m_epg</text>
+ <text x="2203" y="1219" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >0..1</text>
+ <text x="2134" y="1219" transform="translate(-109,-407)" style="fill:rgb(50,50,50);stroke-width:0;font-size:12;font-style:normal;font-weight:400;font-family:Arial;" text-anchor="middle" >+streamplayer</text>
+</svg>
