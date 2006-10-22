@@ -54,11 +54,21 @@ SVDRP::getEPG(JAMTV *tv)
 
 
 void
-SVDRP::getRecordings(JAMTV *tv)
+SVDRP::getRecs(JAMTV *tv)
 {
-    //qDebug("SVDRP::getRecordings()");
+    //qDebug("SVDRP::getRecs()");
 
     SVDRPRequest request(this, "LSTR", tv);
+    request.startRequest();
+}
+
+
+void
+SVDRP::delRec(JAMTV *tv, TVRec *rec)
+{
+    qDebug("SVDRP::delRec() %s", ("DELR " + rec->getId()).latin1());
+    // FIX: deleting is disabled. Enable it for release version.
+    SVDRPRequest request(this, "DELR " + rec->getId(), tv);
     request.startRequest();
 }
 
@@ -69,6 +79,28 @@ SVDRP::getTimers(JAMTV *tv)
     //qDebug("SVDRP::getTimers()");
 
     SVDRPRequest request(this, "LSTT", tv);
+    request.startRequest();
+}
+
+
+void
+SVDRP::setTimer(JAMTV *tv, TVTimer *timer)
+{
+    QString reqParam = timer->getActiveStr() + ":" + timer->getChannelId() + ":" + timer->getDayStr() + ":" + 
+                       timer->getStartStr() + ":" + timer->getEndStr() + ":" + timer->getPrioStr() + ":" + 
+                       timer->getResistStr() + ":" + timer->getTitle() + ":";
+    qDebug("SVDRP::setTimer() %s", ("NEWT " + reqParam).latin1());
+    SVDRPRequest request(this, "NEWT " +  reqParam, tv);
+    request.startRequest();
+}
+
+
+void
+SVDRP::delTimer(JAMTV *tv, TVTimer *timer)
+{
+    qDebug("SVDRP::delTimer() %s", ("DELT " + timer->getId()).latin1());
+    // FIX: deleting is disabled. Enable it for release version.
+    SVDRPRequest request(this, "DELT " + timer->getId(), tv);
     request.startRequest();
 }
 
@@ -177,41 +209,66 @@ SVDRPRequest::processReply()
         {
             if ((*it)[4] == 'C')
             {
-                //qDebug("SVDRPRequest::processReply(), new Channel: %s", (*it).latin1());
                 QString signature = (*it).section(' ', 1, 1);
-                //qDebug("SVDRPRequest::processReply(), Channel signature: %s", signature.latin1());
                 m_currentChannel = m_tv->getChannelPointer(signature);
-                //qDebug("SVDRPRequest::processReply(), currentChannel: %s", m_currentChannel->getName().latin1());
-                // new channel (identify by channel name or by "signature"?)
             } else
             if ((*it)[4] == 'E')
             {
-                //qDebug("SVDRPRequest::processReply(), new Event: %s", (*it).latin1());
-                // new event
                 m_currentEPGEntry = new EPGEntry((*it).section(' ', 1, 1), (time_t)(*it).section(' ', 2, 2).toUInt(), (time_t)(*it).section(' ', 3, 3).toUInt());
-                // append EPGEntry to channel
-                //qDebug("SVDRPRequest::processReply(), adding new EPG entry");
-                //if (m_currentChannel != NULL)
-                    m_currentChannel->appendEPGEntry(m_currentEPGEntry);
+                m_currentChannel->appendEPGEntry(m_currentEPGEntry);
             } else
             if ((*it)[4] == 'T')
             {
-                //qDebug("SVDRPRequest::processReply(), new Title, start: %s, %i", (*it).latin1(), (int)m_currentEPGEntry->getStartTime());
                 // title
-                m_currentEPGEntry->setTitle((*it).right((*it).length() - 6));
+                m_currentEPGEntry->setTitle((*it).right((*it).length() - 6).stripWhiteSpace());
             } else
             if ((*it)[4] == 'S')
             {
-                //qDebug("SVDRPRequest::processReply(), new Shorttext: %s", (*it).latin1());
                 // short description
-                m_currentEPGEntry->setShortText((*it).right((*it).length() - 6));
+                m_currentEPGEntry->setShortText((*it).right((*it).length() - 6).stripWhiteSpace());
             } else
             if ((*it)[4] == 'D')
             {
-                //qDebug("SVDRPRequest::processReply(), new Description: %s", (*it).latin1());
                 // description
-                m_currentEPGEntry->setDescription((*it).right((*it).length() - 6));
+                m_currentEPGEntry->setDescription((*it).right((*it).length() - 6).stripWhiteSpace());
             }
+        }
+    } else
+    if (m_request == "LSTT")
+    {
+        for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
+        {
+            uint pos = (*it).find(' ', 4);  // it->find() is not possible ...? Inconsistency in Qt ...?
+            QString id = (*it).mid(4, pos - 4);
+            pos++;
+            int active = QString((*it)[pos]).toInt();
+            QString channelId = (*it).section(':', 1, 1);
+            QString day = (*it).section(':', 2, 2);
+            QString start = (*it).section(':', 3, 3);
+            QString end = (*it).section(':', 4, 4);
+            int prio = (*it).section(':', 5, 5).toInt();
+            int resist = (*it).section(':', 6, 6).toInt();
+            QString title = (*it).section(':', 7, 7);
+            //qDebug("SVDRPRequest::processReply() new TVTimer: %s, %s, %s, %s, %s, %i, %i, %i, %s", 
+            //    id.latin1(), channelId.latin1(), day.latin1(), start.latin1(), end.latin1(), active, prio, resist, title.latin1());
+            TVTimer *tvTimer = new TVTimer(id, channelId, new TimerDay(day), new TimerTime(start), new TimerTime(end), active, prio, resist, title);
+            m_tv->appendTimer(tvTimer);
+        }
+    }
+    if (m_request == "LSTR")
+    {
+        for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
+        {
+            uint pos = (*it).find(' ', 4);  // it->find() is not possible ...? Inconsistency in Qt ...?
+            QString id = (*it).mid(4, pos - 4);
+            pos++;
+            QString day = (*it).mid(pos, 8);
+            QString start = (*it).mid(pos + 9, 6);
+            QString title = (*it).right((*it).length() - pos - 16).stripWhiteSpace();
+            //qDebug("SVDRPRequest::processReply() new TVRec: %s, %s, %s, %s", 
+            //    id.latin1(), day.latin1(), start.latin1(), title.latin1());
+            TVRec *tvRec = new TVRec(id, day, start, title);
+            m_tv->appendRec(tvRec);
         }
     }
 }

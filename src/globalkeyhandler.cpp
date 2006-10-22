@@ -20,7 +20,6 @@
 #include "globalkeyhandler.h"
 // somewhere in the included headers, there is this macro hidden which conflicts with QEvent::KeyPress
 // and results in stragen error messages.
-#undef KeyPress
 
 
 GlobalKeyHandler::GlobalKeyHandler(JAM *controler, QObject *parent, const char *name)
@@ -38,11 +37,11 @@ GlobalKeyHandler::~GlobalKeyHandler()
 bool
 GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
 {
-    qDebug( "GlobalKeyHandler::eventFilter() event type %d", e->type() );
+    //qDebug( "GlobalKeyHandler::eventFilter() event type %d", e->type() );
     if ( e->type() == QEvent::KeyPress ) {
         // special processing for key press
         QKeyEvent *k = (QKeyEvent *)e;
-        qDebug( "GlobalKeyHandler::eventFilter() key press %d", k->key() );
+        //qDebug( "GlobalKeyHandler::eventFilter() key press %d", k->key() );
         switch (k->key()) {
         case Qt::Key_M:                               // menu
             qDebug("GlobalKeyHandler::eventFilter() switching to menu");

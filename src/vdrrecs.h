@@ -17,46 +17,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef MENUMAIN_H
-#define MENUMAIN_H
+#ifndef VDRRECS_H
+#define VDRRECS_H
 
-#include "globalkeyhandler.h"
+#include <qobject.h>
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qdir.h>
 
-#include <qwidget.h>
-#include <qlistview.h>
-#include <qptrdict.h>
+#include "jamtv.h"
+class JAMTV;
+class TVRec;
 
-#include "menu.h"
-#include "jam.h"
-
-
-class GlobalKeyHandler;
-class JAM;
 
 /**
-@author Jörg Bakker
+	@author Jörg Bakker <joerg@hakker.de>
 */
-class MenuMain : public Menu
+class VdrRecs : public QObject
 {
-    Q_OBJECT
-
+Q_OBJECT
 public:
-    MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    VdrRecs(QString videoPath, QObject *parent = 0, const char *name = 0);
 
-    ~MenuMain();
+    ~VdrRecs();
 
-    void registerMenuItem(Menu* menu, bool isDefault=false);
-    void action();
-    void selectDefault();
-
-public slots:
-    void mainMenuItemSelected(QListViewItem* i);
+    void getRecs(JAMTV *tv);
 
 private:
-    QListView *m_list;
-    QListViewItem *m_defaultItem;
-    JAM *m_controler;
-    QPtrDict<Menu> m_itemDict;
+    QString m_videoPath;
+    QDir m_videoDir;
+
+    void getRecInfo(JAMTV *tv, QDir d);
 };
 
 #endif

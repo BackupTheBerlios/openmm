@@ -17,46 +17,66 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef MENUMAIN_H
-#define MENUMAIN_H
+#ifndef MENUTIMERS_H
+#define MENUTIMERS_H
 
 #include "globalkeyhandler.h"
 
 #include <qwidget.h>
 #include <qlistview.h>
-#include <qptrdict.h>
 
-#include "menu.h"
-#include "jam.h"
+#include "jamtv.h"
 
 
 class GlobalKeyHandler;
-class JAM;
+class JAMTV;
+class TVChannel;
+class TVTimer;
+class TimersEntry;
 
 /**
 @author Jörg Bakker
 */
-class MenuMain : public Menu
+class MenuTimers : public Menu
 {
     Q_OBJECT
 
 public:
-    MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    enum TimersColumns {TimersColNum=0, TimersColChan, TimersColDay, TimersColStart, TimersColEnd, TimersColActive, TimersColPrio, TimersColTitle};
+    enum TimersMenu {TimersMenuEdit=0, TimersMenuDelete};
 
-    ~MenuMain();
+    MenuTimers(JAM *controler, JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
-    void registerMenuItem(Menu* menu, bool isDefault=false);
+    ~MenuTimers();
+    
+    void showTimers();
     void action();
     void selectDefault();
 
-public slots:
-    void mainMenuItemSelected(QListViewItem* i);
+protected slots:
+    void showTimersMenu(QListViewItem *timer);
+    void timerMenuEdit();
+    void timerMenuDelete();
 
 private:
     QListView *m_list;
-    QListViewItem *m_defaultItem;
     JAM *m_controler;
-    QPtrDict<Menu> m_itemDict;
+    JAMTV *m_tv;
+    TimersEntry *m_cur;
+    TimersEntry *m_selected;
 };
 
+
+class TimersEntry : public QListViewItem
+{
+public:
+    TimersEntry(QListView *parent, TVTimer *timer);
+
+    ~TimersEntry();
+
+    TVTimer *getTimer() { return m_timer; }
+
+private:
+    TVTimer *m_timer;
+};
 #endif

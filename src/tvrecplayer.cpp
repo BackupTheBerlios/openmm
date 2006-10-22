@@ -17,46 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef MENUMAIN_H
-#define MENUMAIN_H
+#include "tvrecplayer.h"
 
-#include "globalkeyhandler.h"
-
-#include <qwidget.h>
-#include <qlistview.h>
-#include <qptrdict.h>
-
-#include "menu.h"
-#include "jam.h"
-
-
-class GlobalKeyHandler;
-class JAM;
-
-/**
-@author Jörg Bakker
-*/
-class MenuMain : public Menu
+TvRecPlayer::TvRecPlayer(GlobalKeyHandler *keyh, QWidget *parent, const char *name)
+ : Menu(parent, name)
 {
-    Q_OBJECT
+    m_streamPlayer = new JAMStreamPlayerXine(this);
+    installEventFilter(keyh);
+    m_streamPlayer->setFocus();
+    m_isPlaying = false;
+}
 
-public:
-    MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
-    ~MenuMain();
+TvRecPlayer::~TvRecPlayer()
+{
+}
 
-    void registerMenuItem(Menu* menu, bool isDefault=false);
-    void action();
-    void selectDefault();
 
-public slots:
-    void mainMenuItemSelected(QListViewItem* i);
+void
+TvRecPlayer::action()
+{
+}
 
-private:
-    QListView *m_list;
-    QListViewItem *m_defaultItem;
-    JAM *m_controler;
-    QPtrDict<Menu> m_itemDict;
-};
 
-#endif
+void
+TvRecPlayer::selectDefault()
+{
+}
+
+
+void
+TvRecPlayer::startFile(QString mrl)
+{
+    m_isPlaying = true;
+    //m_streamPlayer->play("file:///data/video/001.vdr");
+    qDebug("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).ascii());
+    m_streamPlayer->play(("file://" + mrl).utf8());
+}

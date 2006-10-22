@@ -30,9 +30,11 @@
 class JAMTV;
 class TVChannel;
 class EPGEntry;
+class TVTimer;
+class TVRec;
 
 /**
-@author J�g Bakker
+@author Jörg Bakker
 */
 class SVDRP : public QObject
 {
@@ -45,8 +47,11 @@ public:
     Q_UINT16 port() { return m_port; }
     void getChannels(JAMTV *tv);
     void getEPG(JAMTV *tv);
-    void getRecordings(JAMTV *tv);
+    void getRecs(JAMTV *tv);
+    void delRec(JAMTV *tv, TVRec *rec);
     void getTimers(JAMTV *tv);
+    void setTimer(JAMTV *tv, TVTimer *timer);
+    void delTimer(JAMTV *tv, TVTimer *timer);
 
 private:
     QString m_server;
@@ -75,6 +80,7 @@ private:
     SVDRP *m_svdrp;
     QString m_request;
     JAMTV *m_tv;
+    TVTimer *m_timer;
     QSocketDevice *m_socket;
     QStringList m_reply;
 

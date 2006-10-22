@@ -20,15 +20,25 @@
 #ifndef JAMSTREAMPLAYERXINE_H
 #define JAMSTREAMPLAYERXINE_H
 
-#include <jamstreamplayer.h>
+
+#include <X11/Xlib.h>
+// undef some nasty preprocessor macros in Xlib, they mess up the Qt headers
+#undef Always
+#undef KeyPress
+#undef Unsorted
 
 #include <xine.h>
-#include <X11/Xlib.h>
+// undef some nasty preprocessor macros in xine, they mess up the Qt headers
+#undef None
+#undef KeyRelease
+#undef FocusIn
+#undef FocusOut
 
+#include <jamstreamplayer.h>
 #include <qtimer.h>
 
 /**
-@author J?g Bakker
+@author Jörg Bakker
 */
 class JAMStreamPlayerXine : public JAMStreamPlayer
 {

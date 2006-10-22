@@ -30,18 +30,22 @@
 
 class GlobalKeyHandler;
 class JAMTV;
+class TVChannel;
+class EPGEntry;
+class ProGuideEntry;
 
 /**
 @author Jörg Bakker
 */
 class MenuProGuide : public Menu
 {
-Q_OBJECT
-
-enum ProGuideColumns {ProGuideColNum=0, ProGuideColChan, ProGuideColStart, ProGuideColEnd, ProGuideColTitel};
+    Q_OBJECT
 
 public:
-    MenuProGuide(JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    enum ProGuideColumns {ProGuideColNum=0, ProGuideColChan, ProGuideColStart, ProGuideColEnd, ProGuideColTitle};
+    enum ChannelMenu {ChannelMenuTimer=0, ChannelMenuSwitch, ChannelMenuShow};
+
+    MenuProGuide(JAM *controler, JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
     ~MenuProGuide();
     
@@ -50,14 +54,20 @@ public:
     void showPrevProgram();
     void action();
     void selectDefault();
-    void selectCurrent();
+    ProGuideEntry *findChannel(TVChannel *channel);
 
 protected slots:
     void showChannelMenu(QListViewItem *channel);
+    void channelMenuTimer();
+    void channelMenuSwitch();
+    void channelMenuShow();
 
 private:
     QListView *m_list;
+    JAM *m_controler;
     JAMTV *m_tv;
+    ProGuideEntry *m_cur;
+    ProGuideEntry *m_selectedChannel;
     unsigned int m_defaultChannel;
     unsigned int m_currentChannel;
 
@@ -67,7 +77,8 @@ private:
 
 class ProGuideEventFilter : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
+
 public:
     ProGuideEventFilter(MenuProGuide *controler, QObject *parent = 0, const char *name = 0);
 
@@ -80,4 +91,21 @@ private:
     MenuProGuide *m_controler;
 };
 
+
+class ProGuideEntry : public QListViewItem
+{
+public:
+    ProGuideEntry(QListView *parent, TVChannel *channel, EPGEntry *epgEntry);
+
+    ~ProGuideEntry();
+
+    TVChannel *getChannel() { return m_channel; }
+    EPGEntry *getEPGEntry() { return m_epgEntry; }
+
+    void update(EPGEntry *epgEntry);
+
+private:
+    TVChannel *m_channel;
+    EPGEntry *m_epgEntry;
+};
 #endif

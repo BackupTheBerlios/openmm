@@ -28,7 +28,8 @@
 */
 class JAMStreamPlayer : public QWidget
 {
-Q_OBJECT
+    Q_OBJECT
+
 public:
     JAMStreamPlayer(QWidget *parent = 0, const char *name = 0);
 

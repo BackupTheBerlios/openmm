@@ -22,20 +22,28 @@
 #ifndef JAM_H
 #define JAM_H
 
+
+
 #include "globalkeyhandler.h"
+#include "menu.h"
+#include "menumain.h"
+#include "jamtv.h"
+#include "tvrecplayer.h"
+#include "menuproguide.h"
+#include "menutimers.h"
+#include "menurecs.h"
 
 #include <qmainwindow.h>
 #include <qwidgetstack.h>
 
-#include "menu.h"
-#include "menumain.h"
-#include "jamtv.h"
-#include "menuproguide.h"
 
 class GlobalKeyHandler;
 class MenuMain;
 class JAMTV;
+class TvRecPlayer;
 class MenuProGuide;
+class MenuTimers;
+class MenuRecs;
 
 
 class JAM: public QWidget
@@ -56,7 +64,10 @@ private:
     GlobalKeyHandler *m_keyh;
     MenuMain *m_menu;
     JAMTV *m_tv;
+    TvRecPlayer *m_tvRecPlayer;
     MenuProGuide *m_proGuide;
+    MenuTimers *m_timers;
+    MenuRecs *m_recs;
 };
 
 

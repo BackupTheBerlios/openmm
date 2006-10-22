@@ -11,7 +11,11 @@ HEADERS += jam.h \
            globalkeyhandler.h \
            menumain.h \
            menu.h \
-           menuproguide.h 
+           menuproguide.h \
+           menutimers.h \
+           menurecs.h \
+           vdrrecs.h \
+           tvrecplayer.h 
 SOURCES += jam.cpp \
            main.cpp \
            jamstreamplayer.cpp \
@@ -21,7 +25,11 @@ SOURCES += jam.cpp \
            globalkeyhandler.cpp \
            menumain.cpp \
            menu.cpp \
-           menuproguide.cpp 
+           menuproguide.cpp \
+           menutimers.cpp \
+           menurecs.cpp \
+           vdrrecs.cpp \
+           tvrecplayer.cpp 
 LIBS += -lX11 \
 `xine-config --libs`
 TARGET = ../bin/jam

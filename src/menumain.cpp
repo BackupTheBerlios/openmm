@@ -32,6 +32,7 @@ MenuMain::MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent, cons
     m_list->installEventFilter(keyh);
     m_list->addColumn(m_name);
     m_defaultItem = 0;
+    connect(m_list, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(mainMenuItemSelected(QListViewItem*)));
 }
 
 
@@ -41,12 +42,13 @@ MenuMain::~MenuMain()
 
 
 void
-MenuMain::menuItemSelected(QListViewItem* i)
+MenuMain::mainMenuItemSelected(QListViewItem* i)
 {
-    qDebug("MenuMain::menuItemSelected()");
+    qDebug("MenuMain::mainMenuItemSelected()");
     Menu *m = m_itemDict[i];
     m_controler->showMenu(m);
 }
+
 
 void
 MenuMain::registerMenuItem(Menu* menu, bool isDefault)
@@ -55,7 +57,6 @@ MenuMain::registerMenuItem(Menu* menu, bool isDefault)
     if (isDefault)
         m_defaultItem = i;
     m_itemDict.insert(i, menu);
-    connect(m_list, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(menuItemSelected(QListViewItem*)));
 }
 
 

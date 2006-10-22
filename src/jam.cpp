@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "jam.h"
 
 #include <qapplication.h>
 #include <qlayout.h>
-#include "jam.h"
 
 JAM::JAM()
     : QWidget(0, "JAM")
@@ -40,8 +40,17 @@ JAM::JAM()
     m_tv = new JAMTV(m_keyh, m_screen);
     registerMenu(m_tv, true);
 
-    m_proGuide = new MenuProGuide(m_tv, m_keyh, m_screen);
+    //m_tvRecPlayer = new TvRecPlayer(m_keyh, m_screen);
+    //m_screen->addWidget(m_tvRecPlayer);
+
+    m_proGuide = new MenuProGuide(this, m_tv, m_keyh, m_screen);
     registerMenu(m_proGuide);
+
+    m_timers = new MenuTimers(this, m_tv, m_keyh, m_screen);
+    registerMenu(m_timers);
+
+    m_recs = new MenuRecs(this, m_tv, m_tvRecPlayer, m_keyh, m_screen);
+    registerMenu(m_recs);
 
     resize(720, 576);
 

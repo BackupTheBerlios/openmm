@@ -17,46 +17,68 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef MENUMAIN_H
-#define MENUMAIN_H
+#ifndef MENURECS_H
+#define MENURECS_H
 
 #include "globalkeyhandler.h"
+#include "jamtv.h"
+#include "tvrecplayer.h"
 
 #include <qwidget.h>
 #include <qlistview.h>
-#include <qptrdict.h>
-
-#include "menu.h"
-#include "jam.h"
 
 
 class GlobalKeyHandler;
-class JAM;
+class JAMTV;
+class TvRecPlayer;
+class TVChannel;
+class TVRec;
+class RecsEntry;
 
 /**
 @author Jörg Bakker
 */
-class MenuMain : public Menu
+class MenuRecs : public Menu
 {
     Q_OBJECT
 
 public:
-    MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    enum RecsColumns {RecsColNum=0, RecsColDay, RecsColStart, RecsColTitle};
+    enum RecsMenu {RecsMenuPlay=0, RecsMenuDelete};
 
-    ~MenuMain();
+    MenuRecs(JAM *controler, JAMTV *tv, TvRecPlayer *tvRecPlayer, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
-    void registerMenuItem(Menu* menu, bool isDefault=false);
+    ~MenuRecs();
+    
+    void showRecs();
     void action();
     void selectDefault();
 
-public slots:
-    void mainMenuItemSelected(QListViewItem* i);
+protected slots:
+    void showRecsMenu(QListViewItem *rec);
+    void recMenuPlay();
+    void recMenuDelete();
 
 private:
     QListView *m_list;
-    QListViewItem *m_defaultItem;
     JAM *m_controler;
-    QPtrDict<Menu> m_itemDict;
+    JAMTV *m_tv;
+    TvRecPlayer *m_tvRecPlayer;
+    RecsEntry *m_cur;
+    RecsEntry *m_selected;
 };
 
+
+class RecsEntry : public QListViewItem
+{
+public:
+    RecsEntry(QListView *parent, TVRec *rec);
+
+    ~RecsEntry();
+
+    TVRec *getRec() { return m_rec; }
+
+private:
+    TVRec *m_rec;
+};
 #endif
