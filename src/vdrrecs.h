@@ -25,9 +25,9 @@
 #include <qstringlist.h>
 #include <qdir.h>
 
-#include "jamtv.h"
-class JAMTV;
-class TVRec;
+#include "tv.h"
+class Tv;
+class TvRec;
 
 
 /**
@@ -41,13 +41,13 @@ public:
 
     ~VdrRecs();
 
-    void getRecs(JAMTV *tv);
+    void getRecs(Tv *tv);
 
 private:
     QString m_videoPath;
     QDir m_videoDir;
 
-    void getRecInfo(JAMTV *tv, QDir d);
+    void getRecInfo(Tv *tv, QDir d);
 };
 
 #endif

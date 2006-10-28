@@ -22,7 +22,7 @@
 #include <qpopupmenu.h>
 #include "menuproguide.h"
 
-MenuProGuide::MenuProGuide(JAM *controler, JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
+MenuProGuide::MenuProGuide(Controler *controler, Tv *tv, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
  : Menu(parent, name)
 {
     QVBoxLayout *l = new QVBoxLayout(this);
@@ -83,20 +83,20 @@ MenuProGuide::showProgram(int direction)
     for (int i = 0; i < m_tv->getChannelCount(); i++)
     {
         //qDebug("MenuProGuide::showProgram() channel %i: %s", i, m_tv->getChannelName(i).latin1());
-        EPGEntry *currentEPGEntry;
+        EpgEntry *currentEpgEntry;
         if (direction == 0)
-            currentEPGEntry = m_tv->getChannelPointer(i)->getCurrentEPGEntry();
+            currentEpgEntry = m_tv->getChannelPointer(i)->getCurrentEpgEntry();
         else if (direction == 1)
-            currentEPGEntry = m_tv->getChannelPointer(i)->getNextEPGEntry();
+            currentEpgEntry = m_tv->getChannelPointer(i)->getNextEpgEntry();
         else
-            currentEPGEntry = m_tv->getChannelPointer(i)->getPrevEPGEntry();
+            currentEpgEntry = m_tv->getChannelPointer(i)->getPrevEpgEntry();
 
         ProGuideEntry *p;
         if ((p = findChannel(m_tv->getChannelPointer(i)))) {
-            p->update(currentEPGEntry);
+            p->update(currentEpgEntry);
         }
         else
-            p = new ProGuideEntry(m_list, m_tv->getChannelPointer(i), currentEPGEntry);
+            p = new ProGuideEntry(m_list, m_tv->getChannelPointer(i), currentEpgEntry);
 
         if (i == m_tv->getCurrentChannel()) {
             m_cur = p;
@@ -138,9 +138,9 @@ MenuProGuide::showChannelMenu(QListViewItem *channel)
 void
 MenuProGuide::channelMenuTimer()
 {
-    TVTimer *timer;
-    EPGEntry *e = m_selectedChannel->getEPGEntry();
-    timer = new TVTimer(QString(""), m_selectedChannel->getChannel()->getId(), new TimerDay(e->getStartTime()), new TimerTime(e->getStartTime()), new TimerTime(e->getEndTime()), 1, 50, 90, e->getTitle());
+    TvTimer *timer;
+    EpgEntry *e = m_selectedChannel->getEpgEntry();
+    timer = new TvTimer(QString(""), m_selectedChannel->getChannel()->getId(), new TimerDay(e->getStartTime()), new TimerTime(e->getStartTime()), new TimerTime(e->getEndTime()), 1, 50, 90, e->getTitle());
     m_tv->newTimer(timer);
 }
 
@@ -149,19 +149,19 @@ void
 MenuProGuide::channelMenuSwitch()
 {
     m_tv->setCurrentChannel(m_tv->getChannelNumber(m_selectedChannel->getChannel()->getId()));
-    m_tv->startLiveTV();
+    m_tv->startLiveTv();
     m_controler->showMenu(m_tv);
 }
 
 void
 MenuProGuide::channelMenuShow()
 {
-    //TODO: show EPG entries of one channel.
+    //TODO: show Epg entries of one channel.
 }
 
 
 ProGuideEntry *
-MenuProGuide::findChannel(TVChannel *channel)
+MenuProGuide::findChannel(TvChannel *channel)
 {
     QListViewItemIterator it(m_list);
 
@@ -213,7 +213,7 @@ ProGuideEventFilter::eventFilter(QObject *o, QEvent *e)
 }
 
 
-ProGuideEntry::ProGuideEntry(QListView *parent, TVChannel *channel, EPGEntry *epgEntry)
+ProGuideEntry::ProGuideEntry(QListView *parent, TvChannel *channel, EpgEntry *epgEntry)
  : QListViewItem(parent, "", "", "", "", "")
 {
     m_channel = channel;
@@ -229,7 +229,7 @@ ProGuideEntry::~ProGuideEntry()
 
 
 void
-ProGuideEntry::update(EPGEntry *epgEntry)
+ProGuideEntry::update(EpgEntry *epgEntry)
 {
     m_epgEntry = epgEntry;
     if (m_epgEntry) {

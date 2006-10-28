@@ -17,79 +17,79 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "streamplayer.h"
 
-#include "jam.h"
+// Have to initialize (and thus allocate in gcc) m_instance somewhere
+// (not in the default ctor, which is called from getInstance())
+StreamPlayer* StreamPlayer::m_instance = 0;
 
-#include <qapplication.h>
-#include <qlayout.h>
-
-JAM::JAM()
-    : QWidget(0, "JAM")
+StreamPlayer::StreamPlayer(QWidget *parent, const char *name)
+ : QWidget(parent, name)
 {
-
-    QHBoxLayout *l = new QHBoxLayout(this);
-    l->setAutoAdd(TRUE);
-
-    m_screen = new QWidgetStack(this);
-    m_keyh = new GlobalKeyHandler(this);
-    installEventFilter(m_keyh);
-
-    m_menu = new MenuMain(this, m_keyh, m_screen);
-    m_screen->addWidget(m_menu);
-
-    m_tv = new JAMTV(m_keyh, m_screen);
-    registerMenu(m_tv, true);
-
-    //m_tvRecPlayer = new TvRecPlayer(m_keyh, m_screen);
-    //m_screen->addWidget(m_tvRecPlayer);
-
-    m_proGuide = new MenuProGuide(this, m_tv, m_keyh, m_screen);
-    registerMenu(m_proGuide);
-
-    m_timers = new MenuTimers(this, m_tv, m_keyh, m_screen);
-    registerMenu(m_timers);
-
-    m_recs = new MenuRecs(this, m_tv, m_tvRecPlayer, m_keyh, m_screen);
-    registerMenu(m_recs);
-
-    resize(720, 576);
-
-    showMainMenu();
+    qDebug("StreamPlayer::StreamPlayer()");
+    initStream();
 }
 
 
-JAM::~JAM()
+StreamPlayer*
+StreamPlayer::getInstance(QWidget *parent, const char *name)
 {
-//    delete m_screen;
-//    delete m_menu;
-//    delete streamplayer;
-//    delete tv;
-}
-
-
-void
-JAM::registerMenu(Menu* menu, bool isDefaultMenu)
-{
-    m_screen->addWidget(menu);
-    m_menu->registerMenuItem(menu, isDefaultMenu);
-}
-
-
-void
-JAM::showMainMenu()
-{
-    showMenu(m_menu);
-}
-
-
-void
-JAM::showMenu(Menu *m)
-{
-    if (m != 0) // some menu entries don't have real menu screens (for example "quit")
-    {
-        m_screen->raiseWidget(m);
-        m->action();
-        m->selectDefault();
+    qDebug("StreamPlayer::getInstance()");
+    if (m_instance == 0) {
+        m_instance = new StreamPlayer(parent, name);
     }
+    return m_instance;
 }
 
+
+StreamPlayer::~StreamPlayer()
+{
+    closeStream();
+}
+
+
+void
+StreamPlayer::initStream()
+{
+    qDebug("StreamPlayer::initStream()");
+}
+
+
+void
+StreamPlayer::closeStream()
+{
+    qDebug("StreamPlayer::closeStream()");
+}
+
+
+void
+StreamPlayer::play(QString mrl)
+{
+    qDebug("StreamPlayer::play()");
+}
+
+
+void
+StreamPlayer::stop()
+{
+    qDebug("StreamPlayer::stop()");
+}
+
+
+void
+StreamPlayer::showOSD(QString text, uint duration)
+{
+}
+
+
+void
+StreamPlayer::hideOSD()
+{
+}
+
+
+QString
+StreamPlayer::tvMRL(QString channelId)
+{
+    return QString("");
+}

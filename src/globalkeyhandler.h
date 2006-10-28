@@ -24,9 +24,9 @@
 #include <qevent.h>
 #include <qapplication.h>
 
-#include "jam.h"
+#include "controler.h"
 
-class JAM;
+class Controler;
 
 /**
 	@author Jörg Bakker <joerg@hakker.de>
@@ -35,7 +35,7 @@ class GlobalKeyHandler : public QObject
 {
 Q_OBJECT
 public:
-    GlobalKeyHandler(JAM *controler, QObject *parent = 0, const char *name = 0);
+    GlobalKeyHandler(Controler *controler, QObject *parent = 0, const char *name = 0);
 
     ~GlobalKeyHandler();
 
@@ -43,7 +43,7 @@ protected:
     bool eventFilter(QObject *o, QEvent *e);
 
 private:
-    JAM *m_controler;
+    Controler *m_controler;
 };
 
 #endif

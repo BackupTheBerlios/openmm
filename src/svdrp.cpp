@@ -20,7 +20,7 @@
 #include "svdrp.h"
 
 
-SVDRP::SVDRP(QString server, Q_UINT16 port)
+Svdrp::Svdrp(QString server, Q_UINT16 port)
  : QObject()
 {
     m_server = server;
@@ -28,84 +28,84 @@ SVDRP::SVDRP(QString server, Q_UINT16 port)
 }
 
 
-SVDRP::~SVDRP()
+Svdrp::~Svdrp()
 {
 }
 
 
 void
-SVDRP::getChannels(JAMTV *tv)
+Svdrp::getChannels(Tv *tv)
 {
-    //qDebug("SVDRP::getChannels()");
+    //qDebug("Svdrp::getChannels()");
 
-    SVDRPRequest request(this, "LSTC", tv);
+    SvdrpRequest request(this, "LSTC", tv);
     request.startRequest();
 }
 
 
 void
-SVDRP::getEPG(JAMTV *tv)
+Svdrp::getEpg(Tv *tv)
 {
-    //qDebug("SVDRP::getEPG()");
+    //qDebug("Svdrp::getEpg()");
 
-    SVDRPRequest request(this, "LSTE", tv);
+    SvdrpRequest request(this, "LSTE", tv);
     request.startRequest();
 }
 
 
 void
-SVDRP::getRecs(JAMTV *tv)
+Svdrp::getRecs(Tv *tv)
 {
-    //qDebug("SVDRP::getRecs()");
+    //qDebug("Svdrp::getRecs()");
 
-    SVDRPRequest request(this, "LSTR", tv);
+    SvdrpRequest request(this, "LSTR", tv);
     request.startRequest();
 }
 
 
 void
-SVDRP::delRec(JAMTV *tv, TVRec *rec)
+Svdrp::delRec(Tv *tv, TvRec *rec)
 {
-    qDebug("SVDRP::delRec() %s", ("DELR " + rec->getId()).latin1());
+    qDebug("Svdrp::delRec() %s", ("DELR " + rec->getId()).latin1());
     // FIX: deleting is disabled. Enable it for release version.
-    SVDRPRequest request(this, "DELR " + rec->getId(), tv);
+    SvdrpRequest request(this, "DELR " + rec->getId(), tv);
     request.startRequest();
 }
 
 
 void
-SVDRP::getTimers(JAMTV *tv)
+Svdrp::getTimers(Tv *tv)
 {
-    //qDebug("SVDRP::getTimers()");
+    //qDebug("Svdrp::getTimers()");
 
-    SVDRPRequest request(this, "LSTT", tv);
+    SvdrpRequest request(this, "LSTT", tv);
     request.startRequest();
 }
 
 
 void
-SVDRP::setTimer(JAMTV *tv, TVTimer *timer)
+Svdrp::setTimer(Tv *tv, TvTimer *timer)
 {
     QString reqParam = timer->getActiveStr() + ":" + timer->getChannelId() + ":" + timer->getDayStr() + ":" + 
                        timer->getStartStr() + ":" + timer->getEndStr() + ":" + timer->getPrioStr() + ":" + 
                        timer->getResistStr() + ":" + timer->getTitle() + ":";
-    qDebug("SVDRP::setTimer() %s", ("NEWT " + reqParam).latin1());
-    SVDRPRequest request(this, "NEWT " +  reqParam, tv);
+    qDebug("Svdrp::setTimer() %s", ("NEWT " + reqParam).latin1());
+    SvdrpRequest request(this, "NEWT " +  reqParam, tv);
     request.startRequest();
 }
 
 
 void
-SVDRP::delTimer(JAMTV *tv, TVTimer *timer)
+Svdrp::delTimer(Tv *tv, TvTimer *timer)
 {
-    qDebug("SVDRP::delTimer() %s", ("DELT " + timer->getId()).latin1());
+    qDebug("Svdrp::delTimer() %s", ("DELT " + timer->getId()).latin1());
     // FIX: deleting is disabled. Enable it for release version.
-    SVDRPRequest request(this, "DELT " + timer->getId(), tv);
+    SvdrpRequest request(this, "DELT " + timer->getId(), tv);
     request.startRequest();
 }
 
 
-SVDRPRequest::SVDRPRequest(SVDRP *svdrp, QString request, JAMTV *tv)
+SvdrpRequest::SvdrpRequest(Svdrp *svdrp, QString request, Tv *tv)
     : QThread()
 {
     m_svdrp = svdrp;
@@ -116,32 +116,32 @@ SVDRPRequest::SVDRPRequest(SVDRP *svdrp, QString request, JAMTV *tv)
     m_socket->setBlocking(true);
 
     m_currentChannel = NULL;
-    m_currentEPGEntry = NULL;
+    m_currentEpgEntry = NULL;
 
     QHostAddress server;
     server.setAddress(m_svdrp->server());
 }
 
 
-SVDRPRequest::~SVDRPRequest()
+SvdrpRequest::~SvdrpRequest()
 {
     delete m_socket;
 }
 
 
 void
-SVDRPRequest::startRequest()
+SvdrpRequest::startRequest()
 {
     run();
 }
 
 
 void
-SVDRPRequest::run()
+SvdrpRequest::run()
 {
     // FIX: does this reliably synchronize access to the VDR socket in order of request call in the main thread?
     QMutexLocker requestLocker(&m_requestMutex);
-    const int MaxLen = 2048; // FIX: make this variable length (EPG description may be longer ...?)
+    const int MaxLen = 2048; // FIX: make this variable length (Epg description may be longer ...?)
     char line[MaxLen];
 
     if (!m_socket->connect(m_svdrp->server(), m_svdrp->port()))
@@ -168,7 +168,7 @@ SVDRPRequest::run()
 
 
 void
-SVDRPRequest::writeToSocket(const QString &str)
+SvdrpRequest::writeToSocket(const QString &str)
 {
     QByteArray ba;
     QTextOStream out(ba);
@@ -181,12 +181,12 @@ SVDRPRequest::writeToSocket(const QString &str)
 
 
 void
-SVDRPRequest::processReply()
+SvdrpRequest::processReply()
 {
     // TODO: dispatch requests LSTC, etc ...
     if (m_request == "LSTC")
     {
-        //qDebug("SVDRPRequest::processReply(), m_request = LSTC");
+        //qDebug("SvdrpRequest::processReply(), m_request = LSTC");
         for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
             uint pos = (*it).find(' ', 4);  // it->find() is not possible ...? Inconsistency in Qt ...?
@@ -196,15 +196,15 @@ SVDRPRequest::processReply()
             uint sigStart = (*it).find(';', pos);
             QString name = (*it).mid(pos, sigStart - pos);
             QString signature = (*it).section(':', 3, 3) + "-" + (*it).section(':', 10, 10) + "-" + (*it).section(':', 11, 11) + "-" + (*it).section(':', 9, 9);
-            //qDebug("SVDRPRequest::processReply(), adding channel: %s, %s", name.latin1(), signature.latin1());
-            TVChannel *channel = new TVChannel(id, name, signature);
+            //qDebug("SvdrpRequest::processReply(), adding channel: %s, %s", name.latin1(), signature.latin1());
+            TvChannel *channel = new TvChannel(id, name, signature);
             m_tv->appendChannel(channel);
         }
-        //FIX: send an event, that the channellist is constructed (for further EPG data insertion)
+        //FIX: send an event, that the channellist is constructed (for further Epg data insertion)
     } else
     if (m_request == "LSTE")
     {
-        //qDebug("SVDRPRequest::processReply(), m_request = LSTE");
+        //qDebug("SvdrpRequest::processReply(), m_request = LSTE");
         for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
             if ((*it)[4] == 'C')
@@ -214,23 +214,23 @@ SVDRPRequest::processReply()
             } else
             if ((*it)[4] == 'E')
             {
-                m_currentEPGEntry = new EPGEntry((*it).section(' ', 1, 1), (time_t)(*it).section(' ', 2, 2).toUInt(), (time_t)(*it).section(' ', 3, 3).toUInt());
-                m_currentChannel->appendEPGEntry(m_currentEPGEntry);
+                m_currentEpgEntry = new EpgEntry((*it).section(' ', 1, 1), (time_t)(*it).section(' ', 2, 2).toUInt(), (time_t)(*it).section(' ', 3, 3).toUInt());
+                m_currentChannel->appendEpgEntry(m_currentEpgEntry);
             } else
             if ((*it)[4] == 'T')
             {
                 // title
-                m_currentEPGEntry->setTitle((*it).right((*it).length() - 6).stripWhiteSpace());
+                m_currentEpgEntry->setTitle((*it).right((*it).length() - 6).stripWhiteSpace());
             } else
             if ((*it)[4] == 'S')
             {
                 // short description
-                m_currentEPGEntry->setShortText((*it).right((*it).length() - 6).stripWhiteSpace());
+                m_currentEpgEntry->setShortText((*it).right((*it).length() - 6).stripWhiteSpace());
             } else
             if ((*it)[4] == 'D')
             {
                 // description
-                m_currentEPGEntry->setDescription((*it).right((*it).length() - 6).stripWhiteSpace());
+                m_currentEpgEntry->setDescription((*it).right((*it).length() - 6).stripWhiteSpace());
             }
         }
     } else
@@ -249,9 +249,9 @@ SVDRPRequest::processReply()
             int prio = (*it).section(':', 5, 5).toInt();
             int resist = (*it).section(':', 6, 6).toInt();
             QString title = (*it).section(':', 7, 7);
-            //qDebug("SVDRPRequest::processReply() new TVTimer: %s, %s, %s, %s, %s, %i, %i, %i, %s", 
+            //qDebug("SvdrpRequest::processReply() new TvTimer: %s, %s, %s, %s, %s, %i, %i, %i, %s", 
             //    id.latin1(), channelId.latin1(), day.latin1(), start.latin1(), end.latin1(), active, prio, resist, title.latin1());
-            TVTimer *tvTimer = new TVTimer(id, channelId, new TimerDay(day), new TimerTime(start), new TimerTime(end), active, prio, resist, title);
+            TvTimer *tvTimer = new TvTimer(id, channelId, new TimerDay(day), new TimerTime(start), new TimerTime(end), active, prio, resist, title);
             m_tv->appendTimer(tvTimer);
         }
     }
@@ -265,9 +265,9 @@ SVDRPRequest::processReply()
             QString day = (*it).mid(pos, 8);
             QString start = (*it).mid(pos + 9, 6);
             QString title = (*it).right((*it).length() - pos - 16).stripWhiteSpace();
-            //qDebug("SVDRPRequest::processReply() new TVRec: %s, %s, %s, %s", 
+            //qDebug("SvdrpRequest::processReply() new TvRec: %s, %s, %s, %s", 
             //    id.latin1(), day.latin1(), start.latin1(), title.latin1());
-            TVRec *tvRec = new TVRec(id, day, start, title);
+            TvRec *tvRec = new TvRec(id, day, start, title);
             m_tv->appendRec(tvRec);
         }
     }

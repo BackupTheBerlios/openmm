@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef JAMTV_H
-#define JAMTV_H
+#ifndef TV_H
+#define TV_H
 
 #include "globalkeyhandler.h"
 
@@ -28,21 +28,21 @@
 #include <time.h>
 
 #include "vdrrecs.h"
-#include "jamstreamplayerxine.h"
+#include "streamplayerxine.h"
 #include "svdrp.h"
 
 // forward declaration
-class SVDRP;
+class Svdrp;
 class VdrRecs;
 class GlobalKeyHandler;
-class JAM;
+class Controler;
 
 // TODO: MenuTimerEdit classes
 
-class TVRec
+class TvRec
 {
 public:
-    TVRec(QString id, QString day, QString start, QString title);
+    TvRec(QString id, QString day, QString start, QString title);
 
     QString getId() { return m_id; }
     QString getIdStr();
@@ -88,10 +88,10 @@ private:
 };
 
 
-class TVTimer
+class TvTimer
 {
 public:
-    TVTimer(QString id, QString channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist, QString title);
+    TvTimer(QString id, QString channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist, QString title);
 
     QString getId() { return m_id; }
     QString getChannelId() { return m_channelId; }
@@ -116,10 +116,10 @@ private:
 };
 
 
-class EPGEntry
+class EpgEntry
 {
 public:
-    EPGEntry(QString id, time_t start, time_t duration, QString title = "", QString shortText = "", QString description = "");
+    EpgEntry(QString id, time_t start, time_t duration, QString title = "", QString shortText = "", QString description = "");
     
     void setTitle(QString title);
     void setShortText(QString shortText);
@@ -145,24 +145,24 @@ private:
 };
 
 
-class TVChannel
+class TvChannel
 {
 public:
-    TVChannel(QString id, QString name, QString signature = "");
+    TvChannel(QString id, QString name, QString signature = "");
 
     QString getId() { return m_id; }
     QString getIdStr();
     QString getName() { return m_name; }
     QString getSignature() { return m_signature; }
-    void appendEPGEntry(EPGEntry *epgEntry);
-    EPGEntry* getEPGEntry(time_t at);
-    EPGEntry* getCurrentEPGEntry();
-    EPGEntry* getNextEPGEntry();
-    EPGEntry* getPrevEPGEntry();
+    void appendEpgEntry(EpgEntry *epgEntry);
+    EpgEntry* getEpgEntry(time_t at);
+    EpgEntry* getCurrentEpgEntry();
+    EpgEntry* getNextEpgEntry();
+    EpgEntry* getPrevEpgEntry();
 
 private:
-    typedef QPtrList<EPGEntry> EPGListT;
-    EPGListT m_epg;
+    typedef QPtrList<EpgEntry> EpgListT;
+    EpgListT m_epg;
 
     QString m_id;
     QString m_name;
@@ -172,61 +172,61 @@ private:
 
 
 /**
-Metadata and menu for watching TV and recordings
+Metadata and menu for watching Tv and recordings
 
 @author Jörg Bakker
 */
-class JAMTV: public Menu
+class Tv: public Menu
 {
     Q_OBJECT
 
 public:
-    JAMTV(GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    Tv(GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
-    ~JAMTV();
+    ~Tv();
 
-    void insertChannel(int channelNumber, TVChannel *channel);
-    void appendChannel(TVChannel *channel);
+    void insertChannel(int channelNumber, TvChannel *channel);
+    void appendChannel(TvChannel *channel);
     QString getChannelId(int channelNumber);
     int getChannelNumber(QString channelId);
     QString getChannelName(int channelNumber);
-    TVChannel* getChannelPointer(int channelNumber);
-    TVChannel* getChannelPointer(QString channelSignature);
-    TVChannel* getCurrentChannelPointer();
+    TvChannel* getChannelPointer(int channelNumber);
+    TvChannel* getChannelPointer(QString channelSignature);
+    TvChannel* getCurrentChannelPointer();
     int getChannelCount();
-    TVTimer* getTimerPointer(int timerNumber);
+    TvTimer* getTimerPointer(int timerNumber);
     int getTimerCount();
     int getRecCount();
-    TVRec* getRecPointer(int recNumber);
+    TvRec* getRecPointer(int recNumber);
 
-    void updateEPG();
+    void updateEpg();
 
     void clearTimers();
     void updateTimers();
-    void appendTimer(TVTimer *timer);
-    void newTimer(TVTimer *timer);
-    void delTimer(TVTimer *timer);
+    void appendTimer(TvTimer *timer);
+    void newTimer(TvTimer *timer);
+    void delTimer(TvTimer *timer);
 
     void clearRecs();
     void updateRecs();
-    void appendRec(TVRec *rec);
-    void delRec(TVRec *rec);
+    void appendRec(TvRec *rec);
+    void delRec(TvRec *rec);
 
     void action();
     void selectDefault();
 
     int getCurrentChannel();
     void setCurrentChannel(int channelNumber);
-    void startLiveTV();
-    void stopLiveTV();
+    void startLiveTv();
+    void stopLiveTv();
 
 protected:
     void keyPressEvent(QKeyEvent *k);
 
 private:
-    typedef QPtrList<TVChannel> ChannelListT;
-    typedef QPtrList<TVTimer> TimerListT;
-    typedef QPtrList<TVRec> RecListT;
+    typedef QPtrList<TvChannel> ChannelListT;
+    typedef QPtrList<TvTimer> TimerListT;
+    typedef QPtrList<TvRec> RecListT;
 
     ChannelListT m_channelList;
     TimerListT m_timerList;
@@ -238,8 +238,8 @@ private:
     int m_numberRecs;
 
     bool m_isPlaying;
-    JAMStreamPlayer *m_streamPlayer;
-    SVDRP *m_controlVDR;
+    StreamPlayer *m_streamPlayer;
+    Svdrp *m_controlVDR;
     VdrRecs *m_vdrRecs;
 };
 

@@ -22,7 +22,7 @@
 // and results in stragen error messages.
 
 
-GlobalKeyHandler::GlobalKeyHandler(JAM *controler, QObject *parent, const char *name)
+GlobalKeyHandler::GlobalKeyHandler(Controler *controler, QObject *parent, const char *name)
  : QObject(parent, name)
 {
     m_controler = controler;

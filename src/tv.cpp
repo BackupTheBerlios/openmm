@@ -20,10 +20,10 @@
 
 #include <qlayout.h>
 #include <qdatetime.h>
-#include "jamtv.h"
+#include "tv.h"
 
 
-TVRec::TVRec(QString id, QString day, QString start, QString title)
+TvRec::TvRec(QString id, QString day, QString start, QString title)
 {
     m_id = id;
     m_day = day;
@@ -33,16 +33,16 @@ TVRec::TVRec(QString id, QString day, QString start, QString title)
 
 
 QString
-TVRec::getIdStr()
+TvRec::getIdStr()
 {
     return m_id.rightJustify(2, '0');
 }
 
 
 void
-TVRec::setRecFiles(QStringList fileList)
+TvRec::setRecFiles(QStringList fileList)
 {
-    qDebug("TVRec::setRecFiles() first entry of fileList: %s", (*fileList.begin()).latin1());
+    qDebug("TvRec::setRecFiles() first entry of fileList: %s", (*fileList.begin()).latin1());
     m_fileList = fileList;
 }
 
@@ -85,7 +85,7 @@ TimerDay::TimerDay(time_t t)
 }
 
 
-TVTimer::TVTimer(QString id, QString channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist, QString title)
+TvTimer::TvTimer(QString id, QString channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist, QString title)
 {
     m_id = id;
     m_channelId = channelId;
@@ -99,7 +99,7 @@ TVTimer::TVTimer(QString id, QString channelId, TimerDay *day, TimerTime *start,
 }
 
 
-EPGEntry::EPGEntry(QString id, time_t start, time_t duration, QString title, QString shortText, QString description)
+EpgEntry::EpgEntry(QString id, time_t start, time_t duration, QString title, QString shortText, QString description)
 {
     m_id = id;
     m_start = start;
@@ -111,42 +111,42 @@ EPGEntry::EPGEntry(QString id, time_t start, time_t duration, QString title, QSt
 
 
 void
-EPGEntry::setTitle(QString title)
+EpgEntry::setTitle(QString title)
 {
     m_title = title;
 }
 
 
 void
-EPGEntry::setShortText(QString shortText)
+EpgEntry::setShortText(QString shortText)
 {
     m_shortText = shortText;
 }
 
 
 void
-EPGEntry::setDescription(QString description)
+EpgEntry::setDescription(QString description)
 {
     m_description = description;
 }
 
 
 QString
-EPGEntry::getStartTimeStr()
+EpgEntry::getStartTimeStr()
 {
     return timeStr(m_start);
 }
 
 
 QString
-EPGEntry::getEndTimeStr()
+EpgEntry::getEndTimeStr()
 {
     return timeStr(m_start + m_duration);
 }
 
 
 QString
-EPGEntry::timeStr(time_t t)
+EpgEntry::timeStr(time_t t)
 {
     QDateTime date;
     date.setTime_t(t);
@@ -154,7 +154,7 @@ EPGEntry::timeStr(time_t t)
 }
 
 
-TVChannel::TVChannel(QString id, QString name, QString signature)
+TvChannel::TvChannel(QString id, QString name, QString signature)
 {
     m_id = id;
     m_name = name;
@@ -164,25 +164,25 @@ TVChannel::TVChannel(QString id, QString name, QString signature)
 
 
 QString
-TVChannel::getIdStr()
+TvChannel::getIdStr()
 {
     return m_id.rightJustify(2, '0');
 }
 
 
 void
-TVChannel::appendEPGEntry(EPGEntry *epgEntry)
+TvChannel::appendEpgEntry(EpgEntry *epgEntry)
 {
     m_epg.append(epgEntry);
 }
 
 
-EPGEntry*
-TVChannel::getEPGEntry(time_t at)
+EpgEntry*
+TvChannel::getEpgEntry(time_t at)
 {
-    // iterate through all EPG entries, to find the one at time at.
+    // iterate through all Epg entries, to find the one at time at.
     int index = 0;
-    for (EPGListT::iterator it = m_epg.begin(); it != m_epg.end(); ++it)
+    for (EpgListT::iterator it = m_epg.begin(); it != m_epg.end(); ++it)
     {
         if ((*it)->getStartTime() + (*it)->getDurationTime() > at)
         {
@@ -195,15 +195,15 @@ TVChannel::getEPGEntry(time_t at)
 }
 
 
-EPGEntry*
-TVChannel::getCurrentEPGEntry()
+EpgEntry*
+TvChannel::getCurrentEpgEntry()
 {
     QDateTime now = QDateTime::currentDateTime();
     time_t now_t = now.toTime_t();
 
-    // iterate through all EPG entries, to find the current one.
+    // iterate through all Epg entries, to find the current one.
     int index = 0;
-    for (EPGListT::iterator it = m_epg.begin(); it != m_epg.end(); ++it)
+    for (EpgListT::iterator it = m_epg.begin(); it != m_epg.end(); ++it)
     {
         if ((*it)->getStartTime() + (*it)->getDurationTime() > now_t)
         {
@@ -216,8 +216,8 @@ TVChannel::getCurrentEPGEntry()
 }
 
 
-EPGEntry*
-TVChannel::getNextEPGEntry()
+EpgEntry*
+TvChannel::getNextEpgEntry()
 {
     if (m_current < m_epg.count()-1)
         m_current++;
@@ -225,8 +225,8 @@ TVChannel::getNextEPGEntry()
 }
 
 
-EPGEntry*
-TVChannel::getPrevEPGEntry()
+EpgEntry*
+TvChannel::getPrevEpgEntry()
 {
     if (m_current > 0)
         m_current--;
@@ -234,14 +234,14 @@ TVChannel::getPrevEPGEntry()
 }
 
 
-JAMTV::JAMTV(GlobalKeyHandler *keyh, QWidget *parent, const char *name) : Menu(parent, name)
+Tv::Tv(GlobalKeyHandler *keyh, QWidget *parent, const char *name) : Menu(parent, name)
 {
     QVBoxLayout *l = new QVBoxLayout(this);
     l->setAutoAdd(TRUE);
 
-    m_name = "Live TV";
+    m_name = "Live Tv";
     m_isPlaying = false;
-    m_streamPlayer = new JAMStreamPlayerXine(this);
+    m_streamPlayer = StreamPlayerXine::getInstance(this);
     installEventFilter(keyh);
     m_streamPlayer->setFocus();
     m_currentChannel = 0;
@@ -249,23 +249,23 @@ JAMTV::JAMTV(GlobalKeyHandler *keyh, QWidget *parent, const char *name) : Menu(p
     m_numberTimers = 0;
     m_timerList.setAutoDelete(true);
     m_recList.setAutoDelete(true);
-    m_controlVDR = new SVDRP("192.168.178.10", 2001);
+    m_controlVDR = new Svdrp("192.168.178.10", 2001);
     m_controlVDR->getChannels(this);  // this call is asynchronous
     // FIX: need to synchronize these two calls somehow !!!!!
-    m_controlVDR->getEPG(this);
+    m_controlVDR->getEpg(this);
     //m_controlVDR->getTimers(this);
     //m_controlVDR->getRecs(this);
     m_vdrRecs = new VdrRecs("/video");
 }
 
 
-JAMTV::~JAMTV()
+Tv::~Tv()
 {
 }
 
 
 void
-JAMTV::insertChannel(int channelNumber, TVChannel *channel)
+Tv::insertChannel(int channelNumber, TvChannel *channel)
 {
     m_channelList.insert(channelNumber, channel);
     m_numberChannels++;
@@ -273,7 +273,7 @@ JAMTV::insertChannel(int channelNumber, TVChannel *channel)
 
 
 void
-JAMTV::appendChannel(TVChannel *channel)
+Tv::appendChannel(TvChannel *channel)
 {
     m_channelList.append(channel);
     m_numberChannels++;
@@ -281,26 +281,26 @@ JAMTV::appendChannel(TVChannel *channel)
 
 
 void
-JAMTV::setCurrentChannel(int channelNumber)
+Tv::setCurrentChannel(int channelNumber)
 {
     m_currentChannel = channelNumber;
-    qDebug("JAMTV::setCurrentChannel() to: %s", getChannelName(channelNumber).latin1());
-    qDebug("JAMTV::setCurrentChannel() title: %s", m_channelList.at(m_currentChannel)->getCurrentEPGEntry()->getTitle().latin1());
-    qDebug("JAMTV::setCurrentChannel() description: %s", m_channelList.at(m_currentChannel)->getCurrentEPGEntry()->getDescription().latin1());
+    qDebug("Tv::setCurrentChannel() to: %s", getChannelName(channelNumber).latin1());
+    qDebug("Tv::setCurrentChannel() title: %s", m_channelList.at(m_currentChannel)->getCurrentEpgEntry()->getTitle().latin1());
+    qDebug("Tv::setCurrentChannel() description: %s", m_channelList.at(m_currentChannel)->getCurrentEpgEntry()->getDescription().latin1());
 }
 
 
 void
-JAMTV::startLiveTV()
+Tv::startLiveTv()
 {
     m_isPlaying = true;
     m_streamPlayer->play(m_streamPlayer->tvMRL(getChannelId(getCurrentChannel())));
-    m_streamPlayer->showOSD(getChannelName(getCurrentChannel()) + "   " + getCurrentChannelPointer()->getCurrentEPGEntry()->getTitle(), 5000);
+    m_streamPlayer->showOSD(getChannelName(getCurrentChannel()) + "   " + getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
 }
 
 
 void
-JAMTV::stopLiveTV()
+Tv::stopLiveTv()
 {
     m_isPlaying = false;
     m_streamPlayer->stop();
@@ -308,16 +308,16 @@ JAMTV::stopLiveTV()
 
 
 QString
-JAMTV::getChannelId(int channelNumber)
+Tv::getChannelId(int channelNumber)
 {
     return m_channelList.at(channelNumber)->getId();
 }
 
 
 int
-JAMTV::getChannelNumber(QString channelId)
+Tv::getChannelNumber(QString channelId)
 {
-    TVChannel *ch;
+    TvChannel *ch;
     int i = 0;
     for (ch = m_channelList.first(); ch; ch = m_channelList.next()) {
         if (ch->getId() == channelId)
@@ -329,81 +329,81 @@ JAMTV::getChannelNumber(QString channelId)
 
 
 QString
-JAMTV::getChannelName(int channelNumber)
+Tv::getChannelName(int channelNumber)
 {
     return m_channelList.at(channelNumber)->getName();
 }
 
 
-TVChannel*
-JAMTV::getChannelPointer(int channelNumber)
+TvChannel*
+Tv::getChannelPointer(int channelNumber)
 {
     return m_channelList.at(channelNumber);
 }
 
 
-TVChannel*
-JAMTV::getChannelPointer(QString channelSignature)
+TvChannel*
+Tv::getChannelPointer(QString channelSignature)
 {
-    //qDebug("JAMTV::getChannelPointer(), channelSignature: %s", channelSignature.latin1());
+    //qDebug("Tv::getChannelPointer(), channelSignature: %s", channelSignature.latin1());
     for (ChannelListT::iterator it = m_channelList.begin(); it != m_channelList.end(); ++it)
     {
-        //qDebug("JAMTV::getChannelPointer(), checking channel: %s", (*it)->getName().latin1());
+        //qDebug("Tv::getChannelPointer(), checking channel: %s", (*it)->getName().latin1());
         if ((*it)->getSignature() == channelSignature)
         {
-            //qDebug("JAMTV::getChannelPointer(), got channel: %s", (*it)->getName().latin1());
+            //qDebug("Tv::getChannelPointer(), got channel: %s", (*it)->getName().latin1());
             return (*it);
         }
     }
-    //qDebug("JAMTV::getChannelPointer(), channel not found!");
+    //qDebug("Tv::getChannelPointer(), channel not found!");
     return NULL;
 }
 
 
-TVChannel*
-JAMTV::getCurrentChannelPointer()
+TvChannel*
+Tv::getCurrentChannelPointer()
 {
     return m_channelList.at(m_currentChannel);
 }
 
 
 int
-JAMTV::getCurrentChannel()
+Tv::getCurrentChannel()
 {
     return m_currentChannel;
 }
 
 
 int
-JAMTV::getChannelCount()
+Tv::getChannelCount()
 {
     return m_channelList.count();
 }
 
 
-TVTimer*
-JAMTV::getTimerPointer(int timerNumber)
+TvTimer*
+Tv::getTimerPointer(int timerNumber)
 {
     return m_timerList.at(timerNumber);
 }
 
 
 int
-JAMTV::getTimerCount()
+Tv::getTimerCount()
 {
     return m_timerList.count();
 }
 
 
 void
-JAMTV::keyPressEvent(QKeyEvent *k)
+Tv::keyPressEvent(QKeyEvent *k)
 {
-    qDebug("JAMTV::keyPressEvent()");
+    qDebug("Tv::keyPressEvent()");
     switch (k->key()) {
         case Qt::Key_I:                               // info
         case Qt::Key_Return:
         case Qt::Key_Enter:
-            m_streamPlayer->showOSD(getChannelName(getCurrentChannel()) + "   " + getCurrentChannelPointer()->getCurrentEPGEntry()->getTitle(), 5000);
+            m_streamPlayer->showOSD(getChannelName(getCurrentChannel()) + "   " + getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
             return;
         case Qt::Key_Up:                              // channel up
             setCurrentChannel(getCurrentChannel() + 1);
@@ -439,28 +439,28 @@ JAMTV::keyPressEvent(QKeyEvent *k)
             setCurrentChannel(8);
             break;
     }
-    stopLiveTV();
-    startLiveTV();
+    stopLiveTv();
+    startLiveTv();
 }
 
 
 void
-JAMTV::action()
+Tv::action()
 {
-    qDebug("JAMTV::action()");
+    qDebug("Tv::action()");
     if (!m_isPlaying)
-        startLiveTV();
+        startLiveTv();
 }
 
 
 void
-JAMTV::selectDefault()
+Tv::selectDefault()
 {
 }
 
 
 void
-JAMTV::appendTimer(TVTimer *timer)
+Tv::appendTimer(TvTimer *timer)
 {
     m_timerList.append(timer);
     m_numberTimers++;
@@ -469,7 +469,7 @@ JAMTV::appendTimer(TVTimer *timer)
 
 
 void
-JAMTV::newTimer(TVTimer *timer)
+Tv::newTimer(TvTimer *timer)
 {
     //m_timerList.append(timer);
     //m_numberTimers++;
@@ -478,7 +478,7 @@ JAMTV::newTimer(TVTimer *timer)
 
 
 void
-JAMTV::delTimer(TVTimer *timer)
+Tv::delTimer(TvTimer *timer)
 {
     //m_timerList.append(timer);
     //m_numberTimers++;
@@ -486,22 +486,22 @@ JAMTV::delTimer(TVTimer *timer)
 }
 
 
-TVRec*
-JAMTV::getRecPointer(int recNumber)
+TvRec*
+Tv::getRecPointer(int recNumber)
 {
     return m_recList.at(recNumber);
 }
 
 
 int
-JAMTV::getRecCount()
+Tv::getRecCount()
 {
     return m_recList.count();
 }
 
 
 void
-JAMTV::appendRec(TVRec *rec)
+Tv::appendRec(TvRec *rec)
 {
     m_recList.append(rec);
     m_numberRecs++;
@@ -509,28 +509,28 @@ JAMTV::appendRec(TVRec *rec)
 
 
 void
-JAMTV::delRec(TVRec *rec)
+Tv::delRec(TvRec *rec)
 {
     m_controlVDR->delRec(this, rec);
 }
 
 
 void
-JAMTV::updateEPG()
+Tv::updateEpg()
 {
-    m_controlVDR->getEPG(this);
+    m_controlVDR->getEpg(this);
 }
 
 
 void
-JAMTV::clearTimers()
+Tv::clearTimers()
 {
     m_timerList.clear();
 }
 
 
 void
-JAMTV::updateTimers()
+Tv::updateTimers()
 {
     clearTimers();
     m_controlVDR->getTimers(this);
@@ -538,14 +538,14 @@ JAMTV::updateTimers()
 
 
 void
-JAMTV::clearRecs()
+Tv::clearRecs()
 {
     m_recList.clear();
 }
 
 
 void
-JAMTV::updateRecs()
+Tv::updateRecs()
 {
     clearRecs();
     //m_controlVDR->getRecs(this);

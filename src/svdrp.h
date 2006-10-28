@@ -24,34 +24,34 @@
 #include <qthread.h>
 #include <qsocketdevice.h>
 
-#include "jamtv.h"
+#include "tv.h"
 
 // forward declaration
-class JAMTV;
-class TVChannel;
-class EPGEntry;
-class TVTimer;
-class TVRec;
+class Tv;
+class TvChannel;
+class EpgEntry;
+class TvTimer;
+class TvRec;
 
 /**
 @author Jörg Bakker
 */
-class SVDRP : public QObject
+class Svdrp : public QObject
 {
 Q_OBJECT
 public:
-    SVDRP(QString server, Q_UINT16 port);
-    ~SVDRP();
+    Svdrp(QString server, Q_UINT16 port);
+    ~Svdrp();
 
     QString server() { return m_server; }
     Q_UINT16 port() { return m_port; }
-    void getChannels(JAMTV *tv);
-    void getEPG(JAMTV *tv);
-    void getRecs(JAMTV *tv);
-    void delRec(JAMTV *tv, TVRec *rec);
-    void getTimers(JAMTV *tv);
-    void setTimer(JAMTV *tv, TVTimer *timer);
-    void delTimer(JAMTV *tv, TVTimer *timer);
+    void getChannels(Tv *tv);
+    void getEpg(Tv *tv);
+    void getRecs(Tv *tv);
+    void delRec(Tv *tv, TvRec *rec);
+    void getTimers(Tv *tv);
+    void setTimer(Tv *tv, TvTimer *timer);
+    void delTimer(Tv *tv, TvTimer *timer);
 
 private:
     QString m_server;
@@ -59,12 +59,12 @@ private:
 };
 
 
-class SVDRPRequest : public QObject, private QThread
+class SvdrpRequest : public QObject, private QThread
 {
 Q_OBJECT
 public:
-    SVDRPRequest(SVDRP *svdrp, QString request, JAMTV *tv);
-    ~SVDRPRequest();
+    SvdrpRequest(Svdrp *svdrp, QString request, Tv *tv);
+    ~SvdrpRequest();
 
     void run();
 
@@ -77,15 +77,15 @@ private:
 
     QMutex m_requestMutex;
 
-    SVDRP *m_svdrp;
+    Svdrp *m_svdrp;
     QString m_request;
-    JAMTV *m_tv;
-    TVTimer *m_timer;
+    Tv *m_tv;
+    TvTimer *m_timer;
     QSocketDevice *m_socket;
     QStringList m_reply;
 
-    TVChannel *m_currentChannel;
-    EPGEntry *m_currentEPGEntry;
+    TvChannel *m_currentChannel;
+    EpgEntry *m_currentEpgEntry;
 };
 
 #endif

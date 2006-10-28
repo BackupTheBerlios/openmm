@@ -21,17 +21,16 @@
 #define MENUPROGUIDE_H
 
 #include "globalkeyhandler.h"
+#include "tv.h"
 
 #include <qwidget.h>
 #include <qlistview.h>
 
-#include "jamtv.h"
-
 
 class GlobalKeyHandler;
-class JAMTV;
-class TVChannel;
-class EPGEntry;
+class Tv;
+class TvChannel;
+class EpgEntry;
 class ProGuideEntry;
 
 /**
@@ -45,7 +44,7 @@ public:
     enum ProGuideColumns {ProGuideColNum=0, ProGuideColChan, ProGuideColStart, ProGuideColEnd, ProGuideColTitle};
     enum ChannelMenu {ChannelMenuTimer=0, ChannelMenuSwitch, ChannelMenuShow};
 
-    MenuProGuide(JAM *controler, JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    MenuProGuide(Controler *controler, Tv *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
     ~MenuProGuide();
     
@@ -54,7 +53,7 @@ public:
     void showPrevProgram();
     void action();
     void selectDefault();
-    ProGuideEntry *findChannel(TVChannel *channel);
+    ProGuideEntry *findChannel(TvChannel *channel);
 
 protected slots:
     void showChannelMenu(QListViewItem *channel);
@@ -64,8 +63,8 @@ protected slots:
 
 private:
     QListView *m_list;
-    JAM *m_controler;
-    JAMTV *m_tv;
+    Controler *m_controler;
+    Tv *m_tv;
     ProGuideEntry *m_cur;
     ProGuideEntry *m_selectedChannel;
     unsigned int m_defaultChannel;
@@ -95,17 +94,17 @@ private:
 class ProGuideEntry : public QListViewItem
 {
 public:
-    ProGuideEntry(QListView *parent, TVChannel *channel, EPGEntry *epgEntry);
+    ProGuideEntry(QListView *parent, TvChannel *channel, EpgEntry *epgEntry);
 
     ~ProGuideEntry();
 
-    TVChannel *getChannel() { return m_channel; }
-    EPGEntry *getEPGEntry() { return m_epgEntry; }
+    TvChannel *getChannel() { return m_channel; }
+    EpgEntry *getEpgEntry() { return m_epgEntry; }
 
-    void update(EPGEntry *epgEntry);
+    void update(EpgEntry *epgEntry);
 
 private:
-    TVChannel *m_channel;
-    EPGEntry *m_epgEntry;
+    TvChannel *m_channel;
+    EpgEntry *m_epgEntry;
 };
 #endif

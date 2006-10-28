@@ -17,58 +17,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef STREAMPLAYER_H
+#define STREAMPLAYER_H
 
+#include <qwidget.h>
+#include <qstring.h>
 
-#ifndef JAM_H
-#define JAM_H
+// TODO: rework implementation of singleton with inheritance.
+// TODO: QWidget as singleton can have two different parent widgets ...?
 
-
-
-#include "globalkeyhandler.h"
-#include "menu.h"
-#include "menumain.h"
-#include "jamtv.h"
-#include "tvrecplayer.h"
-#include "menuproguide.h"
-#include "menutimers.h"
-#include "menurecs.h"
-
-#include <qmainwindow.h>
-#include <qwidgetstack.h>
-
-
-class GlobalKeyHandler;
-class MenuMain;
-class JAMTV;
-class TvRecPlayer;
-class MenuProGuide;
-class MenuTimers;
-class MenuRecs;
-
-
-class JAM: public QWidget
+/**
+@author Jörg Bakker
+*/
+class StreamPlayer : public QWidget
 {
     Q_OBJECT
 
 public:
-    JAM();
-    ~JAM();
+    static StreamPlayer *getInstance(QWidget *parent = 0, const char *name = 0);
 
-    void showMainMenu();
-    void showMenu(Menu *m);
+    virtual QString tvMRL(QString channelId);
+
+public slots:
+    virtual void play(QString mrl);
+    virtual void stop();
+
+    virtual void showOSD(QString text, uint duration);
+    virtual void hideOSD();
+
+protected:
+    StreamPlayer(QWidget *parent = 0, const char *name = 0);
+    ~StreamPlayer();
+
+    virtual void initStream();
+    virtual void closeStream();
 
 private:
-    void registerMenu(Menu* menu, bool isDefaultMenu=false);
-
-    QWidgetStack *m_screen;
-    GlobalKeyHandler *m_keyh;
-    MenuMain *m_menu;
-    JAMTV *m_tv;
-    TvRecPlayer *m_tvRecPlayer;
-    MenuProGuide *m_proGuide;
-    MenuTimers *m_timers;
-    MenuRecs *m_recs;
+    static StreamPlayer *m_instance;
 };
-
 
 #endif

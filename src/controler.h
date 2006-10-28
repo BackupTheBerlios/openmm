@@ -17,33 +17,57 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef JAMSTREAMPLAYER_H
-#define JAMSTREAMPLAYER_H
 
-#include <qwidget.h>
-#include <qstring.h>
 
-/**
-@author J?g Bakker
-*/
-class JAMStreamPlayer : public QWidget
+#ifndef CONTROLER_H
+#define CONTROLER_H
+
+
+#include "globalkeyhandler.h"
+#include "menu.h"
+#include "menumain.h"
+#include "tv.h"
+#include "tvrecplayer.h"
+#include "menuproguide.h"
+#include "menutimers.h"
+#include "menurecs.h"
+
+#include <qmainwindow.h>
+#include <qwidgetstack.h>
+
+
+class GlobalKeyHandler;
+class MenuMain;
+class Tv;
+class TvRecPlayer;
+class MenuProGuide;
+class MenuTimers;
+class MenuRecs;
+
+
+class Controler: public QWidget
 {
     Q_OBJECT
 
 public:
-    JAMStreamPlayer(QWidget *parent = 0, const char *name = 0);
+    Controler();
+    ~Controler();
 
-    ~JAMStreamPlayer();
+    void showMainMenu();
+    void showMenu(Menu *m);
 
-    virtual QString tvMRL(QString channelId);
-    
-public slots:
-    virtual void play(QString mrl);
-    virtual void stop();
-    
-    virtual void showOSD(QString text, uint duration);
-    virtual void hideOSD();
-    
+private:
+    void registerMenu(Menu* menu, bool isDefaultMenu=false);
+
+    QWidgetStack *m_screen;
+    GlobalKeyHandler *m_keyh;
+    MenuMain *m_menu;
+    Tv *m_tv;
+    TvRecPlayer *m_tvRecPlayer;
+    MenuProGuide *m_proGuide;
+    MenuTimers *m_timers;
+    MenuRecs *m_recs;
 };
+
 
 #endif

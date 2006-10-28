@@ -19,12 +19,12 @@
  ***************************************************************************/
 
 #include <qapplication.h>
-#include "jam.h"
+#include "controler.h"
 
 int main(int argc, char **argv) {
     QApplication a(argc, argv);
-    JAM *mainWindow = new JAM();
-    mainWindow->setCaption("JAM");
+    Controler *mainWindow = new Controler();
+    mainWindow->setCaption("JAM V0.1");
     a.setMainWidget(mainWindow);
 
     //connect(mainWindow, quit(), a, quit());

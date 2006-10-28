@@ -21,7 +21,7 @@
 #define TVRECPLAYER_H
 
 #include "globalkeyhandler.h"
-#include "jamstreamplayerxine.h"
+#include "streamplayerxine.h"
 
 #include <menu.h>
 
@@ -46,7 +46,7 @@ public:
 
 private:
     bool m_isPlaying;
-    JAMStreamPlayerXine *m_streamPlayer;
+    StreamPlayer *m_streamPlayer;
 };
 
 #endif

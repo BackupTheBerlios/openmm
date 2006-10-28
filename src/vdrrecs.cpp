@@ -34,7 +34,7 @@ VdrRecs::~VdrRecs()
 
 
 void
-VdrRecs::getRecs(JAMTV *tv)
+VdrRecs::getRecs(Tv *tv)
 {
     const QFileInfoList *list = m_videoDir.entryInfoList();
     QFileInfoListIterator it( *list );
@@ -70,7 +70,7 @@ VdrRecs::getRecs(JAMTV *tv)
 
 
 void
-VdrRecs::getRecInfo(JAMTV *tv, QDir d)
+VdrRecs::getRecInfo(Tv *tv, QDir d)
 {
     // go through all directories, each of them contains the actual recordings 001.vdr, 002.vdr, ...
     QDir drecs = d;
@@ -85,9 +85,9 @@ VdrRecs::getRecInfo(JAMTV *tv, QDir d)
             qDebug("VdrRecs::getRecInfo() failed to change directory to: %s", (*it).latin1());
         else
             qDebug("VdrRecs::getRecInfo() changing to directory: %s", (*it).latin1());
-        // TODO: get title of recording from info.vdr (last parameter of TVRec ctor)
-        //       alternatively: map SVDRP infos to disc infos and get title from SVDRP
-        TVRec *recEntry = new TVRec("", day, hour + ":" + min, "");
+        // TODO: get title of recording from info.vdr (last parameter of TvRec ctor)
+        //       alternatively: map Svdrp infos to disc infos and get title from Svdrp
+        TvRec *recEntry = new TvRec("", day, hour + ":" + min, "");
         tv->appendRec(recEntry);
 
         QString digits = QString("[0123456789]");

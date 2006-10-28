@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef JAMSTREAMPLAYERXINE_H
-#define JAMSTREAMPLAYERXINE_H
+#ifndef STREAMPLAYERXINE_H
+#define STREAMPLAYERXINE_H
 
 
 #include <X11/Xlib.h>
@@ -34,29 +34,36 @@
 #undef FocusIn
 #undef FocusOut
 
-#include <jamstreamplayer.h>
+#include <streamplayer.h>
 #include <qtimer.h>
 
 /**
 @author Jörg Bakker
 */
-class JAMStreamPlayerXine : public JAMStreamPlayer
+class StreamPlayerXine : public StreamPlayer
 {
 public:
-    JAMStreamPlayerXine(QWidget *parent = 0, const char *name = 0);
+    static StreamPlayerXine *getInstance(QWidget *parent = 0, const char *name = 0);
 
-    ~JAMStreamPlayerXine();
-
-    QString tvMRL(QString channelId);
+    virtual QString tvMRL(QString channelId);
 
 public slots:
-    void play(QString mrl);
-    void stop();
-    
-    void showOSD(QString text, uint duration);
-    void hideOSD();
-    
+    virtual void play(QString mrl);
+    virtual void stop();
+
+    virtual void showOSD(QString text, uint duration);
+    virtual void hideOSD();
+
+protected:
+    StreamPlayerXine(QWidget *parent = 0, const char *name = 0);
+    //~StreamPlayerXine();
+
+    virtual void initStream();
+    virtual void closeStream();
+
 private:
+    static StreamPlayerXine *m_instance;
+
     static void DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
                        int* dest_width, int* dest_height, double* dest_aspect);
 

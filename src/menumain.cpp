@@ -20,7 +20,7 @@
 #include <qlayout.h>
 #include "menumain.h"
 
-MenuMain::MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
+MenuMain::MenuMain(Controler *controler, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
  : Menu(parent, name)
 {
     QVBoxLayout *l = new QVBoxLayout(this);

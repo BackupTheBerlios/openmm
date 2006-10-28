@@ -17,46 +17,81 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "jamstreamplayer.h"
-//#include "qpushbutton.h"
 
-JAMStreamPlayer::JAMStreamPlayer(QWidget *parent, const char *name)
- : QWidget(parent, name)
+#include "controler.h"
+
+#include <qapplication.h>
+#include <qlayout.h>
+
+// TODO: addWidget() should be registerMenu() without adding a menu item (call it registerScreen())
+
+Controler::Controler()
+    : QWidget(0, "Controler")
 {
+
+    QHBoxLayout *l = new QHBoxLayout(this);
+    l->setAutoAdd(TRUE);
+
+    m_screen = new QWidgetStack(this);
+    m_keyh = new GlobalKeyHandler(this);
+    installEventFilter(m_keyh);
+
+    m_menu = new MenuMain(this, m_keyh, m_screen);
+    m_screen->addWidget(m_menu);
+
+    m_tv = new Tv(m_keyh, m_screen);
+    registerMenu(m_tv, true);
+
+    m_tvRecPlayer = new TvRecPlayer(m_keyh, m_screen);
+    m_screen->addWidget(m_tvRecPlayer);
+
+    m_proGuide = new MenuProGuide(this, m_tv, m_keyh, m_screen);
+    registerMenu(m_proGuide);
+
+    m_timers = new MenuTimers(this, m_tv, m_keyh, m_screen);
+    registerMenu(m_timers);
+
+    m_recs = new MenuRecs(this, m_tv, m_tvRecPlayer, m_keyh, m_screen);
+    registerMenu(m_recs);
+
+    resize(720, 576);
+
+    showMainMenu();
 }
 
 
-JAMStreamPlayer::~JAMStreamPlayer()
+Controler::~Controler()
 {
+//    delete m_screen;
+//    delete m_menu;
+//    delete streamplayer;
+//    delete tv;
 }
 
 
 void
-JAMStreamPlayer::play(QString mrl)
+Controler::registerMenu(Menu* menu, bool isDefaultMenu)
 {
+    m_screen->addWidget(menu);
+    m_menu->registerMenuItem(menu, isDefaultMenu);
 }
 
 
 void
-JAMStreamPlayer::stop()
+Controler::showMainMenu()
 {
+    showMenu(m_menu);
 }
 
 
 void
-JAMStreamPlayer::showOSD(QString text, uint duration)
+Controler::showMenu(Menu *m)
 {
+    if (m != 0) // some menu entries don't have real menu screens (for example "quit")
+    {
+        m_screen->raiseWidget(m);
+        m->action();
+        m->selectDefault();
+    }
 }
 
-
-void
-JAMStreamPlayer::hideOSD()
-{
-}
-
-
-QString
-JAMStreamPlayer::tvMRL(QString channelId)
-{
-    return QString("");
-}

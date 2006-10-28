@@ -20,12 +20,39 @@
 #include <qdir.h>
 #include <iostream>
 
-#include "jamstreamplayerxine.h"
+#include "streamplayerxine.h"
 
+StreamPlayerXine* StreamPlayerXine::m_instance = 0;
 
-JAMStreamPlayerXine::JAMStreamPlayerXine(QWidget *parent, const char *name)
- : JAMStreamPlayer(parent, name)
+StreamPlayerXine::StreamPlayerXine(QWidget *parent, const char *name)
+ : StreamPlayer(parent, name)
 {
+    qDebug("StreamPlayerXine::StreamPlayerXine()");
+    initStream();
+}
+
+/*
+StreamPlayerXine::~StreamPlayerXine()
+{
+    closeStream();
+}
+*/
+
+StreamPlayerXine*
+StreamPlayerXine::getInstance(QWidget *parent, const char *name)
+{
+    qDebug("StreamPlayerXine::getInstance()");
+    if (m_instance == 0) {
+        m_instance = new StreamPlayerXine(parent, name);
+    }
+    return m_instance;
+}
+
+
+void
+StreamPlayerXine::initStream()
+{
+    qDebug("StreamPlayerXine::initStream()");
     QPoint g = mapToGlobal(QPoint(0,0));
     globX = g.x();
     globY = g.y();
@@ -76,12 +103,12 @@ JAMStreamPlayerXine::JAMStreamPlayerXine(QWidget *parent, const char *name)
     
     if (!videoDriver)
     {
-        std::cout << "JAM: Can't init Video Driver! (" << videoDriverName << ")\n";
+        std::cout << "Controler: Can't init Video Driver! (" << videoDriverName << ")\n";
     }
 
     audioDriver = xine_open_audio_driver(xineEngine, audioDriverName, NULL);
 
-    std::cout << "JAM: Creating new xine stream.\n";
+    std::cout << "Controler: Creating new xine stream.\n";
     xineStream = xine_stream_new(xineEngine, audioDriver, videoDriver);
     
     m_OSD = NULL;
@@ -89,9 +116,11 @@ JAMStreamPlayerXine::JAMStreamPlayerXine(QWidget *parent, const char *name)
 }
 
 
-JAMStreamPlayerXine::~JAMStreamPlayerXine()
+void
+StreamPlayerXine::closeStream()
 {
-    std::cout << "JAM: closing xine streamplayer\n";
+    qDebug("StreamPlayerXine::closeStream()");
+    std::cout << "Controler: closing xine streamplayer\n";
     xine_close(xineStream);
     xine_dispose(xineStream);
     xine_close_audio_driver(xineEngine, audioDriver);
@@ -104,10 +133,10 @@ JAMStreamPlayerXine::~JAMStreamPlayerXine()
 
 
 void
-JAMStreamPlayerXine::showOSD(QString text, uint duration)
+StreamPlayerXine::showOSD(QString text, uint duration)
 {
     initOSD();
-    qDebug("JAMStreamPlayerXine::showOSD(), with text: %s", text.latin1());
+    qDebug("StreamPlayerXine::showOSD(), with text: %s", text.latin1());
     xine_osd_draw_text(m_OSD, 0, 0, text, XINE_OSD_TEXT1);
     //xine_osd_draw_rect(m_OSD, 0, 0, 500, 100, 200, 1 );
 
@@ -117,9 +146,9 @@ JAMStreamPlayerXine::showOSD(QString text, uint duration)
 
 
 void
-JAMStreamPlayerXine::hideOSD()
+StreamPlayerXine::hideOSD()
 {
-    qDebug("JAMStreamPlayerXine::hideOSD()");
+    qDebug("StreamPlayerXine::hideOSD()");
     xine_osd_hide(m_OSD, 0);
     xine_osd_free(m_OSD);
     m_OSD = NULL;
@@ -127,9 +156,9 @@ JAMStreamPlayerXine::hideOSD()
 
 
 void
-JAMStreamPlayerXine::initOSD()
+StreamPlayerXine::initOSD()
 {
-    qDebug("JAMStreamPlayerXine::initOSD()");
+    qDebug("StreamPlayerXine::initOSD()");
     if (m_OSD != NULL)
         hideOSD();
     if (m_OSDTimer.isActive())
@@ -138,19 +167,19 @@ JAMStreamPlayerXine::initOSD()
     m_marginOSD = this->height() / 10;
     m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(this->height() * 0.75), this->width() - 2*m_marginOSD, (int)((this->height() * 0.25)) - m_marginOSD);
     if (!m_OSD)
-        qDebug("JAMStreamPlayerXine::initOSD(), initialization of OSD failed");
+        qDebug("StreamPlayerXine::initOSD(), initialization of OSD failed");
     if (!xine_osd_set_font(m_OSD, "sans", 24))
-        qDebug("JAMStreamPlayerXine::initOSD(), initialization of OSD font failed");
+        qDebug("StreamPlayerXine::initOSD(), initialization of OSD font failed");
     //xine_osd_set_text_palette(m_OSD, XINE_TEXTPALETTE_WHITE_BLACK_TRANSPARENT, XINE_OSD_TEXT1);
 }
 
 
 void
-JAMStreamPlayerXine::DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
+StreamPlayerXine::DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
                        int* dest_width, int* dest_height, double* dest_aspect)
 {
     if (p == NULL) return;
-    JAMStreamPlayerXine* vw = (JAMStreamPlayerXine*) p;
+    StreamPlayerXine* vw = (StreamPlayerXine*) p;
 
     *dest_width = vw->width();
     *dest_height = vw->height();
@@ -159,13 +188,13 @@ JAMStreamPlayerXine::DestSizeCallback(void* p, int /*video_width*/, int /*video_
 
 
 void
-JAMStreamPlayerXine::FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
+StreamPlayerXine::FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
                           int* dest_x, int* dest_y, int* dest_width, int* dest_height,
                           double* dest_aspect, int* win_x, int* win_y)
 
 {
     if (p == NULL) return;
-    JAMStreamPlayerXine* vw = (JAMStreamPlayerXine*) p;
+    StreamPlayerXine* vw = (StreamPlayerXine*) p;
 
     *dest_x = 0;
     *dest_y = 0 ;
@@ -178,26 +207,25 @@ JAMStreamPlayerXine::FrameOutputCallback(void* p, int video_width, int video_hei
 
 
 void
-JAMStreamPlayerXine::play(QString mrl)
+StreamPlayerXine::play(QString mrl)
 {
-    std::cout << "JAM: Opening xine stream.\n";
+    qDebug("StreamPlayerXine::play() mrl: %s", mrl.ascii());
     xine_open(xineStream, mrl);
-    std::cout << "JAM: Playing xine stream...\n";
     xine_play(xineStream, 0, 0);
 }
 
+
 void
-JAMStreamPlayerXine::stop()
+StreamPlayerXine::stop()
 {
-    std::cout << "JAM: stopping xine stream.\n";
+    qDebug("StreamPlayerXine::stop()");
     xine_stop(xineStream);
-    std::cout << "JAM: closing xine stream...\n";
     xine_close(xineStream);
 }
 
 
 QString
-JAMStreamPlayerXine::tvMRL(QString channelId)
+StreamPlayerXine::tvMRL(QString channelId)
 {
     return QString("http://tristan:3000/PES/" + channelId + "#demux:mpeg_pes");
 }

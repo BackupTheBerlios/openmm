@@ -21,17 +21,16 @@
 #define MENUTIMERS_H
 
 #include "globalkeyhandler.h"
+#include "tv.h"
 
 #include <qwidget.h>
 #include <qlistview.h>
 
-#include "jamtv.h"
-
 
 class GlobalKeyHandler;
-class JAMTV;
-class TVChannel;
-class TVTimer;
+class Tv;
+class TvChannel;
+class TvTimer;
 class TimersEntry;
 
 /**
@@ -45,7 +44,7 @@ public:
     enum TimersColumns {TimersColNum=0, TimersColChan, TimersColDay, TimersColStart, TimersColEnd, TimersColActive, TimersColPrio, TimersColTitle};
     enum TimersMenu {TimersMenuEdit=0, TimersMenuDelete};
 
-    MenuTimers(JAM *controler, JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    MenuTimers(Controler *controler, Tv *tv, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
     ~MenuTimers();
     
@@ -60,8 +59,8 @@ protected slots:
 
 private:
     QListView *m_list;
-    JAM *m_controler;
-    JAMTV *m_tv;
+    Controler *m_controler;
+    Tv *m_tv;
     TimersEntry *m_cur;
     TimersEntry *m_selected;
 };
@@ -70,13 +69,13 @@ private:
 class TimersEntry : public QListViewItem
 {
 public:
-    TimersEntry(QListView *parent, TVTimer *timer);
+    TimersEntry(QListView *parent, TvTimer *timer);
 
     ~TimersEntry();
 
-    TVTimer *getTimer() { return m_timer; }
+    TvTimer *getTimer() { return m_timer; }
 
 private:
-    TVTimer *m_timer;
+    TvTimer *m_timer;
 };
 #endif

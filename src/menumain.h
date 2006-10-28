@@ -21,17 +21,16 @@
 #define MENUMAIN_H
 
 #include "globalkeyhandler.h"
+#include "menu.h"
+#include "controler.h"
 
 #include <qwidget.h>
 #include <qlistview.h>
 #include <qptrdict.h>
 
-#include "menu.h"
-#include "jam.h"
-
 
 class GlobalKeyHandler;
-class JAM;
+class Controler;
 
 /**
 @author Jörg Bakker
@@ -41,7 +40,7 @@ class MenuMain : public Menu
     Q_OBJECT
 
 public:
-    MenuMain(JAM *controler, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    MenuMain(Controler *controler, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
     ~MenuMain();
 
@@ -55,7 +54,7 @@ public slots:
 private:
     QListView *m_list;
     QListViewItem *m_defaultItem;
-    JAM *m_controler;
+    Controler *m_controler;
     QPtrDict<Menu> m_itemDict;
 };
 

@@ -22,7 +22,7 @@
 #include <qpopupmenu.h>
 #include "menutimers.h"
 
-MenuTimers::MenuTimers(JAM *controler, JAMTV *tv, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
+MenuTimers::MenuTimers(Controler *controler, Tv *tv, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
  : Menu(parent, name)
 {
     QVBoxLayout *l = new QVBoxLayout(this);
@@ -116,7 +116,7 @@ MenuTimers::timerMenuDelete()
 
 
 
-TimersEntry::TimersEntry(QListView *parent, TVTimer *timer)
+TimersEntry::TimersEntry(QListView *parent, TvTimer *timer)
  : QListViewItem(parent, "", "", "", "", "", "", "", "")
 {
     m_timer = timer;

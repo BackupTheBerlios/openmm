@@ -22,7 +22,7 @@
 #include <qpopupmenu.h>
 #include "menurecs.h"
 
-MenuRecs::MenuRecs(JAM *controler, JAMTV *tv, TvRecPlayer *tvRecPlayer, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
+MenuRecs::MenuRecs(Controler *controler, Tv *tv, TvRecPlayer *tvRecPlayer, GlobalKeyHandler *keyh, QWidget *parent, const char *name)
  : Menu(parent, name)
 {
     QVBoxLayout *l = new QVBoxLayout(this);
@@ -98,9 +98,10 @@ MenuRecs::showRecsMenu(QListViewItem *rec)
 void
 MenuRecs::recMenuPlay()
 {
-    m_tv->stopLiveTV();
+    m_tv->stopLiveTv();
     m_tvRecPlayer->startFile(m_selected->getRec()->getFirstRec());
     m_controler->showMenu(m_tvRecPlayer);
+    // FIX: video is visible only in Tv widget.
     //m_controler->showMenu(m_tv);
 }
 
@@ -114,7 +115,7 @@ MenuRecs::recMenuDelete()
 
 
 
-RecsEntry::RecsEntry(QListView *parent, TVRec *rec)
+RecsEntry::RecsEntry(QListView *parent, TvRec *rec)
  : QListViewItem(parent, "", "", "", "")
 {
     m_rec = rec;

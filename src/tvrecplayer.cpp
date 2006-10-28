@@ -22,7 +22,9 @@
 TvRecPlayer::TvRecPlayer(GlobalKeyHandler *keyh, QWidget *parent, const char *name)
  : Menu(parent, name)
 {
-    m_streamPlayer = new JAMStreamPlayerXine(this);
+//    m_streamPlayer = new StreamPlayerXine(this);
+    // FIX: plays video in TV widget, not in this widget (despite singleton StreamPlayer class).
+    m_streamPlayer = StreamPlayerXine::getInstance(this);
     installEventFilter(keyh);
     m_streamPlayer->setFocus();
     m_isPlaying = false;

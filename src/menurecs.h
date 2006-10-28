@@ -21,7 +21,7 @@
 #define MENURECS_H
 
 #include "globalkeyhandler.h"
-#include "jamtv.h"
+#include "tv.h"
 #include "tvrecplayer.h"
 
 #include <qwidget.h>
@@ -29,10 +29,10 @@
 
 
 class GlobalKeyHandler;
-class JAMTV;
+class Tv;
 class TvRecPlayer;
-class TVChannel;
-class TVRec;
+class TvChannel;
+class TvRec;
 class RecsEntry;
 
 /**
@@ -46,7 +46,7 @@ public:
     enum RecsColumns {RecsColNum=0, RecsColDay, RecsColStart, RecsColTitle};
     enum RecsMenu {RecsMenuPlay=0, RecsMenuDelete};
 
-    MenuRecs(JAM *controler, JAMTV *tv, TvRecPlayer *tvRecPlayer, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
+    MenuRecs(Controler *controler, Tv *tv, TvRecPlayer *tvRecPlayer, GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
 
     ~MenuRecs();
     
@@ -61,8 +61,8 @@ protected slots:
 
 private:
     QListView *m_list;
-    JAM *m_controler;
-    JAMTV *m_tv;
+    Controler *m_controler;
+    Tv *m_tv;
     TvRecPlayer *m_tvRecPlayer;
     RecsEntry *m_cur;
     RecsEntry *m_selected;
@@ -72,13 +72,13 @@ private:
 class RecsEntry : public QListViewItem
 {
 public:
-    RecsEntry(QListView *parent, TVRec *rec);
+    RecsEntry(QListView *parent, TvRec *rec);
 
     ~RecsEntry();
 
-    TVRec *getRec() { return m_rec; }
+    TvRec *getRec() { return m_rec; }
 
 private:
-    TVRec *m_rec;
+    TvRec *m_rec;
 };
 #endif

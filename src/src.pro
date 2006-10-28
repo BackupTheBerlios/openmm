@@ -3,11 +3,7 @@
 # Unterordner relativ zum Projektordner: ./src
 # Das Target ist eine Anwendung:  ../bin/jam
 
-HEADERS += jam.h \
-           jamstreamplayer.h \
-           jamstreamplayerxine.h \
-           jamtv.h \
-           svdrp.h \
+HEADERS += svdrp.h \
            globalkeyhandler.h \
            menumain.h \
            menu.h \
@@ -15,12 +11,12 @@ HEADERS += jam.h \
            menutimers.h \
            menurecs.h \
            vdrrecs.h \
-           tvrecplayer.h 
-SOURCES += jam.cpp \
-           main.cpp \
-           jamstreamplayer.cpp \
-           jamstreamplayerxine.cpp \
-           jamtv.cpp \
+           tvrecplayer.h \
+           controler.h \
+           streamplayer.h \
+           streamplayerxine.h \
+           tv.h 
+SOURCES += main.cpp \
            svdrp.cpp \
            globalkeyhandler.cpp \
            menumain.cpp \
@@ -29,7 +25,11 @@ SOURCES += jam.cpp \
            menutimers.cpp \
            menurecs.cpp \
            vdrrecs.cpp \
-           tvrecplayer.cpp 
+           tvrecplayer.cpp \
+           controler.cpp \
+           streamplayer.cpp \
+           streamplayerxine.cpp \
+           tv.cpp 
 LIBS += -lX11 \
 `xine-config --libs`
 TARGET = ../bin/jam
