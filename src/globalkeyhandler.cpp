@@ -18,19 +18,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "globalkeyhandler.h"
-// somewhere in the included headers, there is this macro hidden which conflicts with QEvent::KeyPress
-// and results in stragen error messages.
 
-
-GlobalKeyHandler::GlobalKeyHandler(Controler *controler, QObject *parent, const char *name)
- : QObject(parent, name)
+/*
+GlobalKeyHandler::GlobalKeyHandler()
+ : QObject()
 {
-    m_controler = controler;
+
 }
 
 
 GlobalKeyHandler::~GlobalKeyHandler()
 {
+}
+*/
+
+GlobalKeyHandler *GlobalKeyHandler::m_instance = 0;
+
+GlobalKeyHandler*
+GlobalKeyHandler::instance()
+{
+    if (m_instance == 0) {
+        m_instance = new GlobalKeyHandler();
+    }
+    return m_instance;
 }
 
 
@@ -45,28 +55,24 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
         switch (k->key()) {
         case Qt::Key_M:                               // menu
             qDebug("GlobalKeyHandler::eventFilter() switching to menu");
-            m_controler->showMainMenu();
-            return TRUE;
+            Controler::mainMenuShow();
+            return true;
         case Qt::Key_Q:                               // quit
-/*
-            m_menu->close();
-            streamplayer->close();
-            m_screen->close();
-            delete streamplayer;
-            delete tv;
-            delete m_menu;
-            delete m_screen;
-*/
             //destroy();
             qDebug("GlobalKeyHandler::eventFilter() exiting QApplication");
-            QApplication::exit();  // FIX this does nothing!!
+            QApplication::exit();  // TODO: this (sometimes) does nothing!!
             qDebug("GlobalKeyHandler::eventFilter() after exiting QApplication");
-            return TRUE;
+            return true;
+        case Qt::Key_Backspace:                       // go back
+        case Qt::Key_Escape:
+            qDebug("GlobalKeyHandler::eventFilter() going back");
+            Controler::goBack();
+            return true;
         default:
-            return FALSE;
+            return false;
         }
     } else {
         // standard event processing
-        return FALSE;
+        return false;
     }
 }

@@ -22,27 +22,14 @@
 #ifndef CONTROLER_H
 #define CONTROLER_H
 
-
 #include "globalkeyhandler.h"
 #include "menu.h"
-#include "menumain.h"
-#include "tv.h"
-#include "tvrecplayer.h"
-#include "menuproguide.h"
-#include "menutimers.h"
-#include "menurecs.h"
+#include "streamplayer.h"
+#include "module.h"
 
 #include <qmainwindow.h>
 #include <qwidgetstack.h>
-
-
-class GlobalKeyHandler;
-class MenuMain;
-class Tv;
-class TvRecPlayer;
-class MenuProGuide;
-class MenuTimers;
-class MenuRecs;
+#include <qdict.h>
 
 
 class Controler: public QWidget
@@ -50,24 +37,37 @@ class Controler: public QWidget
     Q_OBJECT
 
 public:
+    static void addModule(Module *module);
+    static void mainMenuAddEntry(Page *page) { m_mainMenu->addEntry(page); };
+    static void mainMenuShow();  // only used by GlobalKeyHandler (later by server-IP wizzard?)
+
+    // TODO: can we hide the following? (should not be exposed to third party modules!).
+    static Controler *instance();  // only used by main() and Page::Page().
+    static void init();  // only used by main().
+    // TODO: store StreamPlayer* pointing to e.g. instance of StreamPlayerXine in class StreamPlayer instead of
+    //       in Controler? Controler decides which implementation of StreamPlayer to use.
+    //       -> problem of inheriting a singleton.
+    static StreamPlayer *streamPlayer() { return m_streamPlayer; }  // only used by MediaPlayer.
+    static QWidgetStack *pageStack() { return m_pageStack; }  // only used by Page::Page().
+    static void showPage(Page *page);  // make showPage() a friend of class Page? -> use Page->showUp() only.
+    static void addPage(Page *page);  // used by Page only: addPage(this).
+    //static Page* getPrevPage();  // used by Page only: prevPage()->postShowAction().
+    static Page* getCurrentPage() { return (Page*)m_pageStack->visibleWidget(); };
+    static void goBack();
+
+protected:
     Controler();
     ~Controler();
 
-    void showMainMenu();
-    void showMenu(Menu *m);
-
 private:
-    void registerMenu(Menu* menu, bool isDefaultMenu=false);
-
-    QWidgetStack *m_screen;
-    GlobalKeyHandler *m_keyh;
-    MenuMain *m_menu;
-    Tv *m_tv;
-    TvRecPlayer *m_tvRecPlayer;
-    MenuProGuide *m_proGuide;
-    MenuTimers *m_timers;
-    MenuRecs *m_recs;
+    static Controler *m_instance;
+    static QWidgetStack *m_pageStack;
+    static StreamPlayer *m_streamPlayer;
+    static Menu *m_mainMenu;
+    static QDict<Module> m_module;
+    static QPtrList<Page> m_pageHistory;  // TODO: use a QPtrStack instead of QPtrList?
+    //static Page *m_previousPage;
+    static bool m_goingBack;
 };
-
 
 #endif

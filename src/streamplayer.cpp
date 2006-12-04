@@ -19,26 +19,62 @@
  ***************************************************************************/
 #include "streamplayer.h"
 
+//#include <qcursor.h>
+
+
 // Have to initialize (and thus allocate in gcc) m_instance somewhere
 // (not in the default ctor, which is called from getInstance())
-StreamPlayer* StreamPlayer::m_instance = 0;
+StreamPlayer    *StreamPlayer::m_instance = 0;
+MediaPlayer     *StreamPlayer::m_keyHandler = 0;
+bool             StreamPlayer::m_isPlaying = false;
 
-StreamPlayer::StreamPlayer(QWidget *parent, const char *name)
- : QWidget(parent, name)
+
+StreamPlayer::StreamPlayer()
+ : Page()
 {
     qDebug("StreamPlayer::StreamPlayer()");
-    initStream();
+    //initStream();
 }
 
 
 StreamPlayer*
-StreamPlayer::getInstance(QWidget *parent, const char *name)
+StreamPlayer::instance()
 {
-    qDebug("StreamPlayer::getInstance()");
+    qDebug("StreamPlayer::instance()");
     if (m_instance == 0) {
-        m_instance = new StreamPlayer(parent, name);
+        m_instance = new StreamPlayer();
     }
     return m_instance;
+}
+
+
+void
+StreamPlayer::setKeyHandler(MediaPlayer *player)
+{
+    m_keyHandler = player;
+}
+
+
+void
+StreamPlayer::keyPressEvent(QKeyEvent *k)
+{
+    qDebug("StreamPlayer::keyPressEvent()");
+    m_keyHandler->keyHandler(k);
+}
+
+
+void
+StreamPlayer::enterPage()
+{
+    setFocus();
+//    setCursor(QCursor(Qt::BlankCursor));
+}
+
+
+void
+StreamPlayer::exitPage()
+{
+    stop();
 }
 
 
@@ -63,9 +99,17 @@ StreamPlayer::closeStream()
 
 
 void
-StreamPlayer::play(QString mrl)
+StreamPlayer::play(Title *title)
 {
     qDebug("StreamPlayer::play()");
+    if (m_isPlaying) {
+        stopStream();
+    }
+    if (!title->getMrl()) {
+        return;
+    }
+    m_isPlaying = true;
+    playStream(title->getMrl());
 }
 
 
@@ -73,23 +117,30 @@ void
 StreamPlayer::stop()
 {
     qDebug("StreamPlayer::stop()");
+    m_isPlaying = false;
+    stopStream();
 }
 
 
 void
-StreamPlayer::showOSD(QString text, uint duration)
+StreamPlayer::playStream(Mrl *mrl)
 {
 }
 
 
 void
-StreamPlayer::hideOSD()
+StreamPlayer::stopStream()
 {
 }
 
 
-QString
-StreamPlayer::tvMRL(QString channelId)
+void
+StreamPlayer::showOsd(QString text, uint duration)
 {
-    return QString("");
+}
+
+
+void
+StreamPlayer::hideOsd()
+{
 }

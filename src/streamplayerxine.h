@@ -20,6 +20,7 @@
 #ifndef STREAMPLAYERXINE_H
 #define STREAMPLAYERXINE_H
 
+#include "streamplayer.h"
 
 #include <X11/Xlib.h>
 // undef some nasty preprocessor macros in Xlib, they mess up the Qt headers
@@ -34,8 +35,12 @@
 #undef FocusIn
 #undef FocusOut
 
-#include <streamplayer.h>
 #include <qtimer.h>
+
+
+// TODO: gapless playback with multiple .vdr files
+// TODO: gapless playback while switching streams (possible with xine 1.1.1)
+// TODO: DirectFB support
 
 /**
 @author Jörg Bakker
@@ -43,23 +48,20 @@
 class StreamPlayerXine : public StreamPlayer
 {
 public:
-    static StreamPlayerXine *getInstance(QWidget *parent = 0, const char *name = 0);
-
-    virtual QString tvMRL(QString channelId);
+    static StreamPlayerXine *instance();
 
 public slots:
-    virtual void play(QString mrl);
-    virtual void stop();
-
-    virtual void showOSD(QString text, uint duration);
-    virtual void hideOSD();
+    virtual void showOsd(QString text, uint duration);
+    virtual void hideOsd();
 
 protected:
-    StreamPlayerXine(QWidget *parent = 0, const char *name = 0);
-    //~StreamPlayerXine();
+    StreamPlayerXine();
+    ~StreamPlayerXine();
 
     virtual void initStream();
     virtual void closeStream();
+    virtual void playStream(Mrl *mrl);
+    virtual void stopStream();
 
 private:
     static StreamPlayerXine *m_instance;
@@ -72,15 +74,17 @@ private:
                           double* dest_aspect, int* win_x, int* win_y);
 
     void initOSD();
-    
+
     xine_t *xineEngine;
     xine_audio_port_t *audioDriver;
     xine_video_port_t *videoDriver;
     xine_stream_t *xineStream;
 
-    Window xineWindow;
-    Display* xineDisplay;
-    int xineScreen;
+#ifndef QWS
+    Display* x11Display;
+    int x11Screen;
+    Window x11Window;
+#endif
 
     int videoFrameWidth;
     int videoFrameHeight;
@@ -88,12 +92,11 @@ private:
     int globY;
     double res_v, res_h;
     double pixel_aspect;
-    
+
     xine_osd_t *m_OSD;
 
-    x11_visual_t visual;
     xine_event_queue_t *eventQueue;
-    
+
     uint m_marginOSD;
     QTimer m_OSDTimer;
 };

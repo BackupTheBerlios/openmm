@@ -19,79 +19,140 @@
  ***************************************************************************/
 
 #include "controler.h"
+#include "streamplayerxine.h"
+#include "tv.h"
 
 #include <qapplication.h>
 #include <qlayout.h>
 
-// TODO: addWidget() should be registerMenu() without adding a menu item (call it registerScreen())
+
+Controler           *Controler::m_instance = 0;
+QWidgetStack        *Controler::m_pageStack = 0;
+StreamPlayer        *Controler::m_streamPlayer = 0;
+Menu                *Controler::m_mainMenu = 0;
+QDict<Module>        Controler::m_module;
+QPtrList<Page>       Controler::m_pageHistory;
+//Page                *Controler::m_previousPage = 0;
+bool                 Controler::m_goingBack = false;
+
+
+Controler*
+Controler::instance()
+{
+    qDebug("Controler::instance()");
+    if (m_instance == 0) {
+        m_instance = new Controler();
+    }
+    qDebug("Controler::instance() m_instance: %p", m_instance);
+    return m_instance;
+}
+
 
 Controler::Controler()
     : QWidget(0, "Controler")
 {
+    qDebug("Controler::Controler()");
+    setCaption("Jam V0.1");
+    resize(720, 576);
 
     QHBoxLayout *l = new QHBoxLayout(this);
     l->setAutoAdd(TRUE);
 
-    m_screen = new QWidgetStack(this);
-    m_keyh = new GlobalKeyHandler(this);
-    installEventFilter(m_keyh);
-
-    m_menu = new MenuMain(this, m_keyh, m_screen);
-    m_screen->addWidget(m_menu);
-
-    m_tv = new Tv(m_keyh, m_screen);
-    registerMenu(m_tv, true);
-
-    m_tvRecPlayer = new TvRecPlayer(m_keyh, m_screen);
-    m_screen->addWidget(m_tvRecPlayer);
-
-    m_proGuide = new MenuProGuide(this, m_tv, m_keyh, m_screen);
-    registerMenu(m_proGuide);
-
-    m_timers = new MenuTimers(this, m_tv, m_keyh, m_screen);
-    registerMenu(m_timers);
-
-    m_recs = new MenuRecs(this, m_tv, m_tvRecPlayer, m_keyh, m_screen);
-    registerMenu(m_recs);
-
-    resize(720, 576);
-
-    showMainMenu();
+    m_pageStack = new QWidgetStack(this);
+    installEventFilter(GlobalKeyHandler::instance());
 }
 
 
 Controler::~Controler()
 {
-//    delete m_screen;
-//    delete m_menu;
-//    delete streamplayer;
-//    delete tv;
 }
 
 
 void
-Controler::registerMenu(Menu* menu, bool isDefaultMenu)
+Controler::init()
 {
-    m_screen->addWidget(menu);
-    m_menu->registerMenuItem(menu, isDefaultMenu);
+    qDebug("Adding Main Menu.");
+    m_mainMenu = new Menu("Main Menu");
+    qDebug("Added: %p", m_mainMenu);
+
+    // Decide, which implementation of StreamPlayer to use.
+    qDebug("Adding Xine StreamPlayer.");
+    m_streamPlayer = StreamPlayerXine::instance();
+
+    qDebug("Adding TV module.");
+    addModule(new Tv());
+
+    qDebug("Showing Main Menu.");
+    mainMenuShow();
 }
 
 
 void
-Controler::showMainMenu()
+Controler::addModule(Module *module)
 {
-    showMenu(m_menu);
+    // register module in hash array.
+    m_module.insert(module->getName(), module);
 }
 
 
 void
-Controler::showMenu(Menu *m)
+Controler::addPage(Page *page)
 {
-    if (m != 0) // some menu entries don't have real menu screens (for example "quit")
-    {
-        m_screen->raiseWidget(m);
-        m->action();
-        m->selectDefault();
+    m_pageStack->addWidget(page);
+}
+
+
+void
+Controler::showPage(Page *page)
+{
+    if (page != 0) { // some menu entries don't have real screen pages (for example "quit")
+        qDebug("Controler::showPage() raising page: %p named: %s", page, page->getName().latin1());
+        m_pageStack->raiseWidget(page);
+        //m_previousPage = m_pageHistory.getLast();
+        if (m_goingBack) {
+            m_goingBack = false;
+            m_pageHistory.removeLast();
+        }
+        else {
+            if (page == m_mainMenu) {
+                // forget the history, we are in the main menu again.
+                qDebug("Controler::showPage() pageHistory clear");
+                m_pageHistory.clear();
+            }
+            m_pageHistory.append(page);
+        }
+        qDebug("Controler::showPage() pageHistory count: %i", m_pageHistory.count());
     }
 }
 
+/*
+Page*
+Controler::getPrevPage()
+{
+//    if (m_pageHistory.count() > 1) {
+//        qDebug("Controler::getPrevPage() pageHistory count: %i", m_pageHistory.count());
+//        return m_pageHistory.at(m_pageHistory.count() - 2);
+//    }
+//    return 0;
+    return m_previousPage;
+}
+*/
+
+void
+Controler::goBack()
+{
+    int count = m_pageHistory.count();
+    if ( count > 1) {
+        m_goingBack = true;
+        m_pageHistory.at(count - 2)->showUp();
+        //m_pageHistory.remove(count - 1);
+        qDebug("Controler::goBack() pageHistory count: %i", m_pageHistory.count());
+    }
+}
+
+
+void
+Controler::mainMenuShow()
+{
+    m_mainMenu->showUp();
+}

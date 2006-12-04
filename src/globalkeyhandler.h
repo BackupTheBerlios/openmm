@@ -20,11 +20,11 @@
 #ifndef GLOBALKEYHANDLER_H
 #define GLOBALKEYHANDLER_H
 
+#include "controler.h"
+
 #include <qobject.h>
 #include <qevent.h>
 #include <qapplication.h>
-
-#include "controler.h"
 
 class Controler;
 
@@ -33,17 +33,19 @@ class Controler;
 */
 class GlobalKeyHandler : public QObject
 {
-Q_OBJECT
-public:
-    GlobalKeyHandler(Controler *controler, QObject *parent = 0, const char *name = 0);
+    Q_OBJECT
 
-    ~GlobalKeyHandler();
+public:
+    static GlobalKeyHandler *instance();
 
 protected:
+//    GlobalKeyHandler();
+//    ~GlobalKeyHandler();
+
     bool eventFilter(QObject *o, QEvent *e);
 
 private:
-    Controler *m_controler;
+    static GlobalKeyHandler *m_instance;
 };
 
 #endif

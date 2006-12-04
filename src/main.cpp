@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by J�g Bakker                                     *
+ *   Copyright (C) 2006 by Jörg Bakker                                     *
  *   joerg@hakker.de                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,13 +19,15 @@
  ***************************************************************************/
 
 #include <qapplication.h>
+#include <qcursor.h>
 #include "controler.h"
 
 int main(int argc, char **argv) {
     QApplication a(argc, argv);
-    Controler *mainWindow = new Controler();
-    mainWindow->setCaption("JAM V0.1");
+    Controler *mainWindow = Controler::instance();
+    mainWindow->init();
     a.setMainWidget(mainWindow);
+    a.setOverrideCursor(Qt::BlankCursor);
 
     //connect(mainWindow, quit(), a, quit());
     mainWindow->show();

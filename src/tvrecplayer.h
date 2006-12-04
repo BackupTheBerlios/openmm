@@ -20,33 +20,29 @@
 #ifndef TVRECPLAYER_H
 #define TVRECPLAYER_H
 
-#include "globalkeyhandler.h"
-#include "streamplayerxine.h"
-
-#include <menu.h>
+#include "mediaplayer.h"
+#include "list.h"
 
 
 /**
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvRecPlayer : public Menu
+class TvRecPlayer : public MediaPlayer
 {
     Q_OBJECT
 
 public:
-    TvRecPlayer(GlobalKeyHandler *keyh, QWidget *parent = 0, const char *name = 0);
-
+    TvRecPlayer(List *recList);
     ~TvRecPlayer();
 
-    void action();
-    void selectDefault();
+    void startRec(Title *title);
 
-    void startFile(QString mrl);
-
+protected:
+    void keyHandler(QKeyEvent *k);
+    void enterPage();
 
 private:
-    bool m_isPlaying;
-    StreamPlayer *m_streamPlayer;
+    List *m_recList;
 };
 
 #endif

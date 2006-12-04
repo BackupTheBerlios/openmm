@@ -18,16 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvrecplayer.h"
+#include "controler.h"
 
-TvRecPlayer::TvRecPlayer(GlobalKeyHandler *keyh, QWidget *parent, const char *name)
- : Menu(parent, name)
+
+TvRecPlayer::TvRecPlayer(List *recList)
+ : MediaPlayer()
 {
-//    m_streamPlayer = new StreamPlayerXine(this);
-    // FIX: plays video in TV widget, not in this widget (despite singleton StreamPlayer class).
-    m_streamPlayer = StreamPlayerXine::getInstance(this);
-    installEventFilter(keyh);
-    m_streamPlayer->setFocus();
-    m_isPlaying = false;
+    m_recList = recList;
+    setName("Recordings");
 }
 
 
@@ -37,22 +35,23 @@ TvRecPlayer::~TvRecPlayer()
 
 
 void
-TvRecPlayer::action()
+TvRecPlayer::enterPage()
 {
+    qDebug("TvRecPlayer::enterPage()");
+    //startRec("/data/video/002.vdr");
 }
 
 
 void
-TvRecPlayer::selectDefault()
+TvRecPlayer::startRec(Title *title)
 {
+    //qDebug("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).ascii());
+    //play(("file://" + mrl).utf8());
+    play(title);
 }
 
 
 void
-TvRecPlayer::startFile(QString mrl)
+TvRecPlayer::keyHandler(QKeyEvent *k)
 {
-    m_isPlaying = true;
-    //m_streamPlayer->play("file:///data/video/001.vdr");
-    qDebug("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).ascii());
-    m_streamPlayer->play(("file://" + mrl).utf8());
 }

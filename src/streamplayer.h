@@ -20,40 +20,55 @@
 #ifndef STREAMPLAYER_H
 #define STREAMPLAYER_H
 
+#include "page.h"
+#include "mediaplayer.h"
+#include "title.h"
+
 #include <qwidget.h>
 #include <qstring.h>
 
+class MediaPlayer;
+
 // TODO: rework implementation of singleton with inheritance.
-// TODO: QWidget as singleton can have two different parent widgets ...?
+//       QWidget as singleton can have two different parent widgets ...?
+//       Where to store: StreamPlayer* streamPlayerInstance;
 
 /**
 @author Jörg Bakker
 */
-class StreamPlayer : public QWidget
+class StreamPlayer : public Page
 {
     Q_OBJECT
 
 public:
-    static StreamPlayer *getInstance(QWidget *parent = 0, const char *name = 0);
-
-    virtual QString tvMRL(QString channelId);
+    static StreamPlayer *instance();
+    static void setKeyHandler(MediaPlayer *player);
+    static bool isPlaying() { return m_isPlaying; };
 
 public slots:
-    virtual void play(QString mrl);
-    virtual void stop();
+    void play(Title *title);
+    void stop();
 
-    virtual void showOSD(QString text, uint duration);
-    virtual void hideOSD();
+    virtual void showOsd(QString text, uint duration);
+    virtual void hideOsd();
 
 protected:
-    StreamPlayer(QWidget *parent = 0, const char *name = 0);
+    StreamPlayer();
     ~StreamPlayer();
+
+    void keyPressEvent(QKeyEvent *k);
+    virtual void enterPage();
+    virtual void exitPage();
 
     virtual void initStream();
     virtual void closeStream();
+    virtual void playStream(Mrl *mrl);
+    virtual void stopStream();
 
 private:
     static StreamPlayer *m_instance;
+    static bool m_isPlaying;
+    static MediaPlayer *m_keyHandler;
 };
 
 #endif

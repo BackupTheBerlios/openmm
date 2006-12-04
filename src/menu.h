@@ -20,25 +20,40 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include <qwidget.h>
+#include "page.h"
+
+#include <qlistview.h>
+#include <qptrdict.h>
+
 
 /**
 @author Jörg Bakker
 */
-class Menu : public QWidget
+class Menu : public Page
 {
-Q_OBJECT
-public:
-    Menu(QWidget *parent = 0, const char *name = 0);
+    Q_OBJECT
 
+public:
+    Menu(QString name="");
     ~Menu();
 
-    QString getName();
-    virtual void action()=0;
-    virtual void selectDefault()=0;
+    void addEntry(Page *page);
+    void setDefaultEntry(Page *page);
+
+public slots:
+    void selectEntry(QListViewItem* i);
 
 protected:
-    QString m_name;
+    void enterPage();
+
+private:
+    QListView *m_list;
+    QListViewItem *m_defaultEntry;
+    QListViewItem *m_selectedEntry;
+    QPtrDict<Page> m_entryDict;
+    uint m_entryNumber;
+
+    QListViewItem *findEntry(Page *page);
 };
 
 #endif
