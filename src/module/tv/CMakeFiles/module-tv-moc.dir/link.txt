@@ -1,0 +1,2 @@
+/usr/bin/ar cr libmodule-tv-moc.a  "CMakeFiles/module-tv-moc.dir/moc_tv.o" "CMakeFiles/module-tv-moc.dir/moc_tvprogrampopup.o" "CMakeFiles/module-tv-moc.dir/moc_tvrecplayer.o" "CMakeFiles/module-tv-moc.dir/moc_tvrecpopup.o" "CMakeFiles/module-tv-moc.dir/moc_tvtimerpopup.o" 
+/usr/bin/ranlib libmodule-tv-moc.a 

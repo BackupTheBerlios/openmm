@@ -1,0 +1,2 @@
+/usr/bin/ar cr libjam-backend-moc.a  "CMakeFiles/jam-backend-moc.dir/moc_vdrrequest.o" 
+/usr/bin/ranlib libjam-backend-moc.a 

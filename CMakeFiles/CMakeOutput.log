@@ -1,0 +1,684 @@
+The system is: Linux - 2.6.15-27-686 - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCCompiler.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckTypeSize.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/usr/bin/c++    -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/c++         -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function XOpenDisplay exists in the /usr/lib/libX11.so;/usr/lib/libXext.so passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=XOpenDisplay   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=XOpenDisplay  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lX11 -lXext 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethostbyname exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=gethostbyname   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=gethostbyname  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function connect exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=connect   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=connect  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function remove exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=remove   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=remove  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function shmat exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=shmat   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=shmat  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function IceConnectionNumber exists in the ICE passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=IceConnectionNumber   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=IceConnectionNumber  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lICE 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions    -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+The system is: Linux - 2.6.15-27-686 - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCCompiler.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckTypeSize.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/usr/bin/c++    -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/c++         -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function XOpenDisplay exists in the /usr/lib/libX11.so;/usr/lib/libXext.so passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=XOpenDisplay   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=XOpenDisplay  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lX11 -lXext 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethostbyname exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=gethostbyname   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=gethostbyname  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function connect exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=connect   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=connect  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function remove exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=remove   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=remove  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function shmat exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=shmat   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=shmat  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function IceConnectionNumber exists in the ICE passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lICE 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+The system is: Linux - 2.6.15-27-686 - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCCompiler.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckTypeSize.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/usr/bin/c++    -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/c++         -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function XOpenDisplay exists in the /usr/lib/libX11.so;/usr/lib/libXext.so passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=XOpenDisplay   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=XOpenDisplay  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lX11 -lXext 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethostbyname exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=gethostbyname   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=gethostbyname  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function connect exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=connect   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=connect  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function remove exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=remove   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=remove  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function shmat exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=shmat   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=shmat  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function IceConnectionNumber exists in the ICE passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lICE 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+The system is: Linux - 2.6.15-27-686 - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+# 1 "<eingebaut>"
+# 1 "<Kommandozeile>"
+# 1 "/usr/share/CMake/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCCompiler.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckTypeSize.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/usr/bin/c++    -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/c++         -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function XOpenDisplay exists in the /usr/lib/libX11.so;/usr/lib/libXext.so passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=XOpenDisplay   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=XOpenDisplay  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lX11 -lXext 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethostbyname exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=gethostbyname   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=gethostbyname  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function connect exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=connect   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=connect  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function remove exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=remove   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=remove  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function shmat exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=shmat   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=shmat  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function IceConnectionNumber exists in the ICE passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lICE 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+

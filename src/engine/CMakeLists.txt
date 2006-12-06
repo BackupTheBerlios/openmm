@@ -1,0 +1,9 @@
+SET(JAM_ENGINE_SRCS
+    streamplayerxine.cpp)
+
+EXECUTE_PROCESS(COMMAND /usr/bin/xine-config --libs OUTPUT_VARIABLE XINE_LIBRARIES)
+
+ADD_LIBRARY(engine-xine SHARED
+    ${JAM_ENGINE_SRCS})
+
+TARGET_LINK_LIBRARIES(engine-xine ${XINE_LIBRARIES})

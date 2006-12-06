@@ -1,0 +1,17 @@
+FILE(REMOVE
+"libmodule-tv.a"
+"libmodule-tv.so"
+"module-tv"
+"CMakeFiles/module-tv.dir/tvchannel.o"
+"CMakeFiles/module-tv.dir/tv.o"
+"CMakeFiles/module-tv.dir/tvplayer.o"
+"CMakeFiles/module-tv.dir/tvprogrambrowser.o"
+"CMakeFiles/module-tv.dir/tvprogram.o"
+"CMakeFiles/module-tv.dir/tvprogramfilter.o"
+"CMakeFiles/module-tv.dir/tvprogrampopup.o"
+"CMakeFiles/module-tv.dir/tvrec.o"
+"CMakeFiles/module-tv.dir/tvrecplayer.o"
+"CMakeFiles/module-tv.dir/tvrecpopup.o"
+"CMakeFiles/module-tv.dir/tvtimer.o"
+"CMakeFiles/module-tv.dir/tvtimerpopup.o"
+)

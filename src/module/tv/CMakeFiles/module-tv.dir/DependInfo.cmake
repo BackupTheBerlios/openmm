@@ -1,0 +1,30 @@
+# The set of files whose dependency integrity should be checked:
+SET(CMAKE_DEPENDS_LANGUAGES
+  "CXX"
+  )
+SET(CMAKE_DEPENDS_CHECK_CXX
+  "/home/jb/devel/cc/jam/src/module/tv/tv.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tv.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvchannel.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvchannel.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvplayer.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvplayer.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvprogram.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvprogram.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvprogrambrowser.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvrecplayer.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvrecplayer.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvprogramfilter.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvprogramfilter.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvprogrampopup.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvprogrampopup.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvrec.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvrec.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvtimer.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvtimer.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvrecpopup.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvrecpopup.o"
+  "/home/jb/devel/cc/jam/src/module/tv/tvtimerpopup.cpp"
+  "/home/jb/devel/cc/jam/src/module/tv/CMakeFiles/module-tv.dir/tvtimerpopup.o"
+  )

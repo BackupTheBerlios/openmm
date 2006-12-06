@@ -1,0 +1,72 @@
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions  -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: ld gab 1 als Ende-Status zurück
+make[1]: *** [cmTryCompileExec] Fehler 1
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec/fast] Fehler 2
+
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: ld gab 1 als Ende-Status zurück
+make[2]: *** [cmTryCompileExec] Fehler 1
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec/fast] Fehler 2
+
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: ld gab 1 als Ende-Status zurück
+make[1]: *** [cmTryCompileExec] Fehler 1
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make: *** [cmTryCompileExec/fast] Fehler 2
+
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+make[1]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[2]: Betrete Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/jb/devel/cc/jam/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o
+/usr/bin/gcc  -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o   -c /usr/share/CMake/Modules/CheckFunctionExists.c
+`-mcpu=' is deprecated. Use `-mtune=' or '-march=' instead.
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/usr/bin/gcc   -O9 -funroll-loops -ffast-math -malign-double -mcpu=pentiumpro -march=pentiumpro -fomit-frame-pointer -fno-exceptions   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/usr/share/CMake/Modules/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: ld gab 1 als Ende-Status zurück
+make[2]: *** [cmTryCompileExec] Fehler 1
+make[2]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec/fast] Fehler 2
+make[1]: Verlasse Verzeichnis '/home/jb/devel/cc/jam/CMakeFiles/CMakeTmp'
+
+

@@ -1,0 +1,13 @@
+SET(JAM_BACKEND_SRCS
+    vdr.cpp
+    vdrrequest.cpp)
+
+ADD_LIBRARY(backend-vdr SHARED
+    ${JAM_BACKEND_SRCS})
+
+SET(JAM_BACKEND_MOC_HEADERS
+    vdrrequest.h)
+
+QT_WRAP_CPP(jam JAM_BACKEND_MOC_FILES ${JAM_BACKEND_MOC_HEADERS}) 
+ADD_LIBRARY (backend-moc STATIC
+    ${JAM_BACKEND_MOC_FILES})

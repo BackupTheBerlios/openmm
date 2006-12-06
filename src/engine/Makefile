@@ -31,7 +31,7 @@ default_target: all
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/jb/devel/cc/jam/src/engine && /usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target edit_cache
 edit_cache/fast: edit_cache
@@ -39,17 +39,17 @@ edit_cache/fast: edit_cache
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	cd /home/jb/devel/cc/jam/src/engine && /usr/bin/cmake -P cmake_install.cmake
 
 # Special rule for the target install
 install/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	cd /home/jb/devel/cc/jam/src/engine && /usr/bin/cmake -P cmake_install.cmake
 
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/jb/devel/cc/jam/src/engine && /usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
@@ -67,94 +67,43 @@ $(VERBOSE).SILENT:
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jb/devel/cc/jam/CMakeFiles $(CMAKE_ALL_PROGRESS)
-	$(MAKE) -f CMakeFiles/Makefile2 all
+	cd /home/jb/devel/cc/jam && $(CMAKE_COMMAND) -E cmake_progress_start /home/jb/devel/cc/jam/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	cd /home/jb/devel/cc/jam && $(MAKE) -f CMakeFiles/Makefile2 src/engine/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/jb/devel/cc/jam/CMakeFiles 0
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/jb/devel/cc/jam && $(MAKE) -f CMakeFiles/Makefile2 src/engine/clean
 
 # The main clean target
 clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/jb/devel/cc/jam && $(MAKE) -f CMakeFiles/Makefile2 src/engine/preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/jb/devel/cc/jam && $(MAKE) -f CMakeFiles/Makefile2 src/engine/preinstall
 
 # clear depends
 depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
-#=============================================================================
-# Target rules for targets named jam
+# Convenience name for target.
+src/engine/CMakeFiles/engine-xine.dir/rule:
+	cd /home/jb/devel/cc/jam && $(MAKE) -f CMakeFiles/Makefile2 src/engine/CMakeFiles/engine-xine.dir/rule
 
-# Build rule for target.
-jam: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 jam
-
-# fast build rule for target.
-jam/fast:
-	$(MAKE) -f src/CMakeFiles/jam.dir/build.make src/CMakeFiles/jam.dir/build
-
-#=============================================================================
-# Target rules for targets named backend-moc
-
-# Build rule for target.
-backend-moc: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 backend-moc
-
-# fast build rule for target.
-backend-moc/fast:
-	$(MAKE) -f src/backend/CMakeFiles/backend-moc.dir/build.make src/backend/CMakeFiles/backend-moc.dir/build
-
-#=============================================================================
-# Target rules for targets named backend-vdr
-
-# Build rule for target.
-backend-vdr: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 backend-vdr
-
-# fast build rule for target.
-backend-vdr/fast:
-	$(MAKE) -f src/backend/CMakeFiles/backend-vdr.dir/build.make src/backend/CMakeFiles/backend-vdr.dir/build
-
-#=============================================================================
-# Target rules for targets named engine-xine
-
-# Build rule for target.
-engine-xine: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 engine-xine
+# Convenience name for target.
+engine-xine: src/engine/CMakeFiles/engine-xine.dir/rule
 
 # fast build rule for target.
 engine-xine/fast:
-	$(MAKE) -f src/engine/CMakeFiles/engine-xine.dir/build.make src/engine/CMakeFiles/engine-xine.dir/build
+	cd /home/jb/devel/cc/jam && $(MAKE) -f src/engine/CMakeFiles/engine-xine.dir/build.make src/engine/CMakeFiles/engine-xine.dir/build
 
-#=============================================================================
-# Target rules for targets named module-tv
-
-# Build rule for target.
-module-tv: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 module-tv
-
-# fast build rule for target.
-module-tv/fast:
-	$(MAKE) -f src/module/tv/CMakeFiles/module-tv.dir/build.make src/module/tv/CMakeFiles/module-tv.dir/build
-
-#=============================================================================
-# Target rules for targets named module-tv-moc
-
-# Build rule for target.
-module-tv-moc: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 module-tv-moc
-
-# fast build rule for target.
-module-tv-moc/fast:
-	$(MAKE) -f src/module/tv/CMakeFiles/module-tv-moc.dir/build.make src/module/tv/CMakeFiles/module-tv-moc.dir/build
+# target for object file
+streamplayerxine.o:
+	cd /home/jb/devel/cc/jam && $(MAKE) -f src/engine/CMakeFiles/engine-xine.dir/build.make src/engine/CMakeFiles/engine-xine.dir/streamplayerxine.o
 
 # Help Target
 help::
@@ -163,14 +112,10 @@ help::
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... engine-xine"
 	@echo "... install"
 	@echo "... rebuild_cache"
-	@echo "... jam"
-	@echo "... backend-moc"
-	@echo "... backend-vdr"
-	@echo "... engine-xine"
-	@echo "... module-tv"
-	@echo "... module-tv-moc"
+	@echo "... streamplayerxine.o"
 
 
 
@@ -181,5 +126,5 @@ help::
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/jb/devel/cc/jam && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 
