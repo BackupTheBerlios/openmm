@@ -13,7 +13,7 @@ SET (JAM_MODULE_TV_SRCS
     tvtimerpopup.cpp)
 
 
-ADD_LIBRARY(module-tv SHARED
+ADD_LIBRARY(module-tv STATIC
     ${JAM_MODULE_TV_SRCS})
 
 SET(JAM_MODULE_TV_MOC_HEADERS

@@ -1,2 +1,0 @@
-/usr/bin/ar cr libbackend-moc.a  "CMakeFiles/backend-moc.dir/moc_vdrrequest.o" 
-/usr/bin/ranlib libbackend-moc.a 
