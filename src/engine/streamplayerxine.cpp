@@ -34,13 +34,10 @@ StreamPlayerXine::StreamPlayerXine()
  : StreamPlayer()
 {
     qDebug("StreamPlayerXine::StreamPlayerXine()");
-    //m_xineWidget = new XineWidget(this);
-    QPoint g = mapToGlobal(QPoint(0,0));
-    globX = g.x();
-    globY = g.y();
+    globX = globalPositionX();
+    globY = globalPositionY();
 
     initStream();
-    //setFocus();
 }
 
 
@@ -70,7 +67,7 @@ StreamPlayerXine::initStream()
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
     //QString configFile = QDir::homeDirPath();
     //configFile.append("/.jam/xineconfig");
-    QString configFile = "/etc/jam/xineconfig";
+    char* configFile = "/etc/jam/xineconfig";
     if (QFile::exists(configFile))
     {
         xine_config_load(xineEngine, configFile);
@@ -81,7 +78,7 @@ StreamPlayerXine::initStream()
 //    QWSServer::setDesktopBackground(QColor(QColor::black));
 //    QString videoDriverName = "fb";
 //    QString videoDriverName = "vidixfb";
-    QString videoDriverName = "directfb";
+    char* videoDriverName = "directfb";
 //    int visualType = XINE_VISUAL_TYPE_FB;
     int visualType = XINE_VISUAL_TYPE_DFB;
     fb_visual_t visual;
@@ -91,7 +88,7 @@ StreamPlayerXine::initStream()
     //xineDisplay = XOpenDisplay( getenv("DISPLAY") );
     x11Display = XOpenDisplay(NULL);
     x11Screen = DefaultScreen(x11Display);
-    x11Window = winId();
+    x11Window = windowId();
 
     XLockDisplay( x11Display );
 //    XSelectInput( x11Display, x11Window, ExposureMask );
@@ -101,7 +98,7 @@ StreamPlayerXine::initStream()
     XSync(x11Display, False);
     XUnlockDisplay(x11Display);
 
-    QString videoDriverName = "xv";
+    char* videoDriverName = "xv";
     int visualType = XINE_VISUAL_TYPE_X11;
     x11_visual_t visual;
     visual.display = x11Display;
@@ -122,14 +119,15 @@ StreamPlayerXine::initStream()
         std::cout << "Controler: Can't init Video Driver! (" << videoDriverName << ")\n";
     }
 
-    QString audioDriverName = "auto";
+    char* audioDriverName = "auto";
     audioDriver = xine_open_audio_driver(xineEngine, audioDriverName, NULL);
 
     std::cout << "Controler: Creating new xine stream.\n";
     xineStream = xine_stream_new(xineEngine, audioDriver, videoDriver);
 
     m_OSD = NULL;
-    connect(&m_OSDTimer, SIGNAL(timeout()), this, SLOT(hideOsd()));
+    // TODO: implement timer without Qt
+    //connect(&m_OSDTimer, SIGNAL(timeout()), this, SLOT(hideOsd()));
 }
 
 
@@ -182,8 +180,9 @@ StreamPlayerXine::initOSD()
     if (m_OSDTimer.isActive())
         m_OSDTimer.stop();
 
-    m_marginOSD = this->height() / 10;
-    m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(this->height() * 0.75), this->width() - 2*m_marginOSD, (int)((this->height() * 0.25)) - m_marginOSD);
+    m_marginOSD = height() / 10;
+    m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(height() * 0.75), width() - 2*m_marginOSD,
+                        (int)((height() * 0.25)) - m_marginOSD);
     if (!m_OSD)
         qDebug("StreamPlayerXine::initOSD(), initialization of OSD failed");
     if (!xine_osd_set_font(m_OSD, "sans", 24))
@@ -254,11 +253,3 @@ StreamPlayerXine::stopStream()
     xine_stop(xineStream);
     xine_close(xineStream);
 }
-
-/*
-QString
-StreamPlayerXine::tvMrl(QString channelId)
-{
-    return QString("http://tristan:3000/PES/" + channelId + "#demux:mpeg_pes");
-}
-*/

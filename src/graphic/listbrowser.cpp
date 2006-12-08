@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "listbrowser.h"
 #include "globalkeyhandler.h"
+#include "widgetfactory.h"
 
 #include <qlayout.h>
 
@@ -33,15 +34,13 @@ ListBrowser::ListBrowser(QString name, QString cols, List *list)
     m_list = list;
     m_popupMenu = 0;
 
-    m_listView = new QListView(this);
-    m_listView->installEventFilter(GlobalKeyHandler::instance());
+    qDebug("ListBrowser::ListBrowser() creating ListBrowser widget");
+    m_listBrowserWidget = WidgetFactory::instance()->createListBrowser(this);
 
     for (QStringList::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
-        m_listView->addColumn(*i);
+        addViewColumn(*i);
     }
 
-    connect(m_listView, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(showPopupMenu(QListViewItem*)));
-    connect(m_list, SIGNAL(changed()), this, SLOT(update()));
     connect(m_list, SIGNAL(pushTitle(Title*)), this, SLOT(addEntry(Title*)));
     connect(m_list, SIGNAL(popTitle(Title*)), this, SLOT(delEntry(Title*)));
 }
@@ -50,25 +49,6 @@ ListBrowser::ListBrowser(QString name, QString cols, List *list)
 ListBrowser::~ListBrowser()
 {
 }
-
-
-// void
-// ListBrowser::update()
-// {
-//     qDebug("ListBrowser::update()");
-//     clear();
-//     if (!m_list) {
-//         return;
-//     }
-// 
-// //    m_list->stepReset();
-// //    while (Title *t = m_list->step()) {
-// //        addEntry(t);
-// //    }
-//     for (int i = 0; i < m_list->count(); i++) {
-//         addEntry(m_list->getTitle(i));
-//     }
-// }
 
 
 void
@@ -80,6 +60,7 @@ ListBrowser::enterPage()
         return;
     }
     m_list->update();
+    m_listBrowserWidget->enterPage();
     if (m_list->count()) {
         selectEntry(0);  // TODO: list in browser is sorted somehow, how to select top most entry?
     }
@@ -89,47 +70,37 @@ ListBrowser::enterPage()
 void
 ListBrowser::addEntry(Title *title)
 {
-    //qDebug("ListBrowser::addEntry() with name: %s", title->getText("Name").latin1());
-    if (!title) {
-        return;
-    }
-    QListViewItem *entry = new QListViewItem(m_listView);
-    m_titleList.insert(entry, title);
-    m_itemList.insert(title, entry);
-    for (uint i = 0; i < m_cols.count(); i++) {
-        entry->setText(i, title->getText(m_cols[i]));
-    }
+    m_listBrowserWidget->addEntry(title);
 }
 
 
 void
 ListBrowser::delEntry(Title *title)
 {
-    qDebug("ListBrowser::delEntry()");
-    if (!title) {
-        return;
-    }
-    m_listView->takeItem(m_itemList[title]);
+    m_listBrowserWidget->delEntry(title);
 }
 
 
 void
 ListBrowser::selectEntry(int number)
 {
-    // TODO: get the right entry to select.
-    qDebug("ListBrowser::selectEntry()");
-    m_listView->setCurrentItem(m_itemList[m_list->getTitle(number)]);
-    m_listView->setSelected(m_itemList[m_list->getTitle(number)], true);
+    qDebug("ListBrowser::selectEntry() number: %i", number);
+    selectEntry(m_list->getTitle(number));
+}
+
+
+void
+ListBrowser::selectEntry(Title *title)
+{
+    qDebug("ListBrowser::selectEntry() from Title");
+    m_listBrowserWidget->selectEntry(title);
 }
 
 
 void
 ListBrowser::clear()
 {
-    qDebug("ListBrowser::clear()");
-    m_listView->clear();
-    m_titleList.clear();
-    m_itemList.clear();
+    m_listBrowserWidget->clear();
 }
 
 
@@ -139,15 +110,5 @@ ListBrowser::setPopupMenu(PopupMenu *popupMenu)
     m_popupMenu = popupMenu;
     m_popupMenu->setParent(this);
     m_popupMenu->setList(m_list);
-}
-
-
-void
-ListBrowser::showPopupMenu(QListViewItem *entry)
-{
-    qDebug("ListBrowser::showPopupMenu()");
-    if (m_popupMenu) {
-        m_popupMenu->popup(m_titleList[entry]);
-    }
 }
 

@@ -92,3 +92,5 @@ src/backend/vdrrequest.h
 CMakeFiles/Makefile.cmake
 CMakeFiles/Makefile2
 bin/Makefile
+/widgetfactory.h
+/widgetfactory.cpp

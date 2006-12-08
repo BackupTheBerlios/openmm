@@ -22,10 +22,10 @@
 
 
 TvRecPlayer::TvRecPlayer(List *recList)
- : MediaPlayer()
+ : MediaPlayer("Recordings")
 {
     m_recList = recList;
-    setName("Recordings");
+    //setNameP("Recordings");
 }
 
 

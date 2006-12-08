@@ -23,11 +23,13 @@
 #include "mediaplayer.h"
 #include "list.h"
 
+#include <qobject.h>
+
 
 /**
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvRecPlayer : public MediaPlayer
+class TvRecPlayer : public QObject, public MediaPlayer
 {
     Q_OBJECT
 

@@ -17,40 +17,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef POPUPMENU_H
-#define POPUPMENU_H
+#include "pagestack.h"
+#include "widgetfactory.h"
 
-#include "title.h"
-#include "list.h"
 
-#include <qobject.h>
-#include <qpopupmenu.h>
-
-/**
-Just a simple popup menu.
-
-	@author Jörg Bakker <joerg@hakker.de>
-*/
-class PopupMenu : public QObject
+PageStack::PageStack()
 {
-    Q_OBJECT
+    qDebug("PageStack::PageStack()");
+    m_pageStackWidget = WidgetFactory::instance()->createPageStack(this);
+    m_visiblePage = 0;
+    qDebug("PageStack::PageStack() complete");
+}
 
-public:
-    PopupMenu(QWidget *parent = 0);
-    ~PopupMenu();
 
-    void setParent(QWidget *parent);
-    void setList(List *list) { m_list = list; }
-    void popup();
-    void popup(Title *title);
+PageStack::~PageStack()
+{
+    delete m_pageStackWidget;
+}
 
-protected:
-    QPopupMenu *m_popupMenu;
-    Title      *m_title;
-    List       *m_list;
 
-private:
-    QWidget *m_parent;
-};
-
-#endif
+void
+PageStack::raisePage(Page *page)
+{
+    qDebug("PageStack::raisePage()");
+    m_pageStackWidget->raisePage(page);
+    m_visiblePage = page;
+    qDebug("PageStack::raisePage() complete");
+}

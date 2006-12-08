@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,28 +16,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVTIMERPOPUP_H
-#define TVTIMERPOPUP_H
+#ifndef WIDGETFACTORY_H
+#define WIDGETFACTORY_H
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include "pagestack.h"
+#include "page.h"
+#include "menu.h"
+#include "listbrowser.h"
+#include "popupmenu.h"
 
 /**
-Implements the specialized popup menu for handling Timers.
+Factory to produce instances for all widgets in one toolkit. Currently there are widgets for the Qt toolkit implemented.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvTimerPopup : public QObject, public PopupMenu
-{
-    Q_OBJECT
-
+class WidgetFactory{
 public:
-    TvTimerPopup(Page *parent = 0);
-    ~TvTimerPopup();
+    enum ToolkitT {ToolkitQt};
 
-private slots:
-    void timerEdit();
-    void timerDelete();
+    static WidgetFactory* instance();
+
+    void setToolkit(ToolkitT toolkit) { m_toolkit = toolkit; }
+
+    PageStack* createPageStack(PageStack *pageStackLogic);
+    Page* createPage(Page *pageLogic);
+    Menu* createMenu(Menu *menuLogic);
+    ListBrowser* createListBrowser(ListBrowser *listBrowserLogic);
+    PopupMenu* createPopupMenu(PopupMenu *popupMenuLogic);
+
+protected:
+    WidgetFactory();
+    ~WidgetFactory();
+
+private:
+    static WidgetFactory *m_instance;
+    ToolkitT              m_toolkit;
 };
 
 #endif

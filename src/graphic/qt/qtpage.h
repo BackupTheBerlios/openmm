@@ -17,52 +17,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef QTPAGE_H
+#define QTPAGE_H
+
 #include "page.h"
-#include "controler.h"
 
-#include <qlayout.h>
+#include <qwidget.h>
 
+/**
+A full page on the screen, which can be a menu, mediaplayer, list, ...
+Basically, it can be shown, or not.
 
-Page::Page(QString name)
- : QWidget(Controler::instance()->pageStack())
+	@author Jörg Bakker <joerg@hakker.de>
+*/
+class QtPage : public QObject, public Page
 {
-    m_name = name;
-    // add this page to the global widget stack.
-    qDebug("Page::Page() adding Page %s: %p to Controler.", m_name.latin1(), this);
-    Controler::addPage(this);
-    installEventFilter(GlobalKeyHandler::instance());
+    Q_OBJECT
 
-    QVBoxLayout *l = new QVBoxLayout(this);
-    l->setAutoAdd(TRUE);
-}
+public:
+    QtPage(Page *PageLogic);
+    ~QtPage();
 
+    virtual int globalPositionX() { m_frame->mapToGlobal(QPoint(0,0)).x(); }
+    virtual int globalPositionY() { m_frame->mapToGlobal(QPoint(0,0)).y(); }
+    virtual int width() { return m_frame->width(); }
+    virtual int height() { return m_frame->height(); }
+    virtual unsigned long windowId() { return m_frame->winId(); }
+    virtual void* frame() { return (void*) m_frame; }
+    virtual void enterPage() { qDebug("QtPage::enterPage()"); m_frame->setFocus(); }
 
-Page::~Page()
-{
-}
+private:
+    Page    *m_pageLogic;
+    QWidget *m_frame;
+};
 
-
-void
-Page::showUp()
-{
-    qDebug("Page::showUp()");
-    if (Controler::getCurrentPage()) {
-        Controler::getCurrentPage()->exitPage();
-    }
-    enterPage();
-    Controler::showPage(this);
-}
-
-
-void
-Page::enterPage()
-{
-    qDebug("Page::enterPage()");
-}
-
-
-void
-Page::exitPage()
-{
-    qDebug("Page::postShowAction()");
-}
+#endif

@@ -30,7 +30,7 @@ bool             StreamPlayer::m_isPlaying = false;
 
 
 StreamPlayer::StreamPlayer()
- : Page()
+ : Page("StreamPlayer")
 {
     qDebug("StreamPlayer::StreamPlayer()");
     //initStream();
@@ -60,14 +60,6 @@ StreamPlayer::keyPressEvent(QKeyEvent *k)
 {
     qDebug("StreamPlayer::keyPressEvent()");
     m_keyHandler->keyHandler(k);
-}
-
-
-void
-StreamPlayer::enterPage()
-{
-    setFocus();
-//    setCursor(QCursor(Qt::BlankCursor));
 }
 
 

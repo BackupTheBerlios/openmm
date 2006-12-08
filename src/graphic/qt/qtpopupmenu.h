@@ -17,28 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVTIMERPOPUP_H
-#define TVTIMERPOPUP_H
+#ifndef QTPOPUPMENU_H
+#define QTPOPUPMENU_H
 
-#include <popupmenu.h>
+#include "popupmenu.h"
+
 #include <qobject.h>
+#include <qpopupmenu.h>
 
 /**
-Implements the specialized popup menu for handling Timers.
+Qt implementation of PopupMenu.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvTimerPopup : public QObject, public PopupMenu
+class QtPopupMenu : public QObject, public PopupMenu
 {
     Q_OBJECT
 
 public:
-    TvTimerPopup(Page *parent = 0);
-    ~TvTimerPopup();
+    QtPopupMenu(PopupMenu *popupMenuLogic);
+    ~QtPopupMenu();
 
-private slots:
-    void timerEdit();
-    void timerDelete();
+    virtual void popup();
+    virtual void insertItem(QString text, QObject *receiver, const char *member) 
+            { m_popupMenu->insertItem(text, receiver, member); }
+
+private:
+    PopupMenu    *m_popupMenuLogic;
+    QPopupMenu   *m_popupMenu;
 };
 
 #endif

@@ -21,8 +21,8 @@
 #include "controler.h"
 
 
-MediaPlayer::MediaPlayer()
- : Page()
+MediaPlayer::MediaPlayer(QString name)
+ : Page(name)
 {
 }
 
@@ -37,41 +37,41 @@ MediaPlayer::showUp()
 {
     qDebug("MediaPlayer::showUp()");
     enterPage();
-    Controler::streamPlayer()->setKeyHandler(this);
-    Controler::streamPlayer()->showUp();
+    Controler::instance()->streamPlayer()->setKeyHandler(this);
+    Controler::instance()->streamPlayer()->showUp();
 }
 
 
 bool
 MediaPlayer::isPlaying()
 {
-    return Controler::streamPlayer()->isPlaying();
+    return Controler::instance()->streamPlayer()->isPlaying();
 }
 
 
 void
 MediaPlayer::play(Title* title)
 {
-    Controler::streamPlayer()->play(title);
+    Controler::instance()->streamPlayer()->play(title);
 }
 
 
 void
 MediaPlayer::stop()
 {
-    Controler::streamPlayer()->stop();
+    Controler::instance()->streamPlayer()->stop();
 }
 
 
 void
 MediaPlayer::showOsd(QString text, uint duration)
 {
-    Controler::streamPlayer()->showOsd(text, duration);
+    Controler::instance()->streamPlayer()->showOsd(text, duration);
 }
 
 
 void
 MediaPlayer::hideOsd()
 {
-    Controler::streamPlayer()->hideOsd();
+    Controler::instance()->streamPlayer()->hideOsd();
 }

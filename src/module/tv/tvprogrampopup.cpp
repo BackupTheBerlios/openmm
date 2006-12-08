@@ -22,15 +22,15 @@
 #include "titlepair.h"
 
 
-TvProgramPopup::TvProgramPopup(List *timerList, TvPlayer *tvPlayer, QWidget *parent)
+TvProgramPopup::TvProgramPopup(List *timerList, TvPlayer *tvPlayer, Page *parent)
  : PopupMenu(parent)
 {
     qDebug("TvProgramPopup::TvProgramPopup()");
     m_timerList = timerList;
     m_tvPlayer = tvPlayer;
-    m_popupMenu->insertItem("Timer", this, SLOT(addTimer()));
-    m_popupMenu->insertItem("Switch", this, SLOT(switchChannel()));
-    m_popupMenu->insertItem("Show", this, SLOT(showChannel()));
+    insertItem("Timer", this, SLOT(addTimer()));
+    insertItem("Switch", this, SLOT(switchChannel()));
+    insertItem("Show", this, SLOT(showChannel()));
 }
 
 

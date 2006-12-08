@@ -17,28 +17,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVTIMERPOPUP_H
-#define TVTIMERPOPUP_H
+#include "qtpagestack.h"
+#include "controler.h"
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include <qlayout.h>
+#include <qcursor.h>
 
-/**
-Implements the specialized popup menu for handling Timers.
 
-	@author Jörg Bakker <joerg@hakker.de>
-*/
-class TvTimerPopup : public QObject, public PopupMenu
+QtPageStack::QtPageStack(PageStack *pageStackLogic)
+ : PageStack(true)
 {
-    Q_OBJECT
+    qDebug("QtPageStack::QtPageStack()");
+    m_pageStackLogic = pageStackLogic;
+    m_qtapp = new QApplication(Controler::instance()->getArgc(), Controler::instance()->getArgv());
+    m_pageStack = new QWidgetStack();
+    m_pageStack->setCaption("Jam");
+    m_pageStack->resize(720, 576);
+    m_qtapp->setMainWidget(m_pageStack);
+    m_qtapp->setOverrideCursor(Qt::BlankCursor);
+}
 
-public:
-    TvTimerPopup(Page *parent = 0);
-    ~TvTimerPopup();
 
-private slots:
-    void timerEdit();
-    void timerDelete();
-};
+QtPageStack::~QtPageStack()
+{
+    delete m_pageStack;
+    delete m_qtapp;
+}
 
-#endif
+
+int
+QtPageStack::loop()
+{
+    m_pageStack->show();
+    qDebug("QtPageStack::loop(), entering main loop.");
+    return m_qtapp->exec();
+    qDebug("QtPageStack::loop(), exiting main loop.");
+}

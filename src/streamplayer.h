@@ -24,7 +24,6 @@
 #include "mediaplayer.h"
 #include "title.h"
 
-#include <qwidget.h>
 #include <qstring.h>
 
 class MediaPlayer;
@@ -36,7 +35,7 @@ class MediaPlayer;
 /**
 @author Jörg Bakker
 */
-class StreamPlayer : public Page
+class StreamPlayer : public QObject, public Page
 {
     Q_OBJECT
 
@@ -57,7 +56,6 @@ protected:
     ~StreamPlayer();
 
     void keyPressEvent(QKeyEvent *k);
-    virtual void enterPage();
     virtual void exitPage();
 
     virtual void initStream();

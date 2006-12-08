@@ -17,43 +17,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef MENU_H
-#define MENU_H
+#ifndef PAGE_H
+#define PAGE_H
 
-#include "page.h"
-
-#include <qlistview.h>
-#include <qptrdict.h>
-
+#include <qstring.h>
 
 /**
-@author Jörg Bakker
+A full page on the screen, which can be a menu, mediaplayer, list, ...
+Basically, it can be shown, or not.
+
+	@author Jörg Bakker <joerg@hakker.de>
 */
-class Menu : public Page
+class Page
 {
-    Q_OBJECT
-
 public:
-    Menu(QString name="");
-    ~Menu();
+    Page(QString name);
+    Page() { qDebug("Page::Page() - nothing to do"); }
+    ~Page();
 
-    void addEntry(Page *page);
-    void setDefaultEntry(Page *page);
+    QString getName() { return m_name; };
+    // TODO: setName conflicts with QObject. Rename it after getting rid of the Q stuff.
+    void setNameP(QString name) { m_name = name; };
 
-public slots:
-    void selectEntry(QListViewItem* i);
+    virtual void showUp();
+    virtual int globalPositionX() { return m_pageWidget->globalPositionX(); }
+    virtual int globalPositionY() { return m_pageWidget->globalPositionY(); }
+    virtual int width() { return m_pageWidget->width(); }
+    virtual int height() { return m_pageWidget->height(); }
+    virtual unsigned long windowId() { return m_pageWidget->windowId(); }
+    virtual void* frame() { return m_pageWidget->frame(); }
+    virtual void enterPage() { m_pageWidget->enterPage(); }
+    virtual void exitPage() { qDebug("Page::exitPage()"); }
 
 protected:
-    void enterPage();
-
-private:
-    QListView *m_list;
-    QListViewItem *m_defaultEntry;
-    QListViewItem *m_selectedEntry;
-    QPtrDict<Page> m_entryDict;
-    uint m_entryNumber;
-
-    QListViewItem *findEntry(Page *page);
+    QString m_name;
+    Page   *m_pageWidget;
 };
 
 #endif

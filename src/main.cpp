@@ -18,21 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <qapplication.h>
-#include <qcursor.h>
 #include "controler.h"
 
+
 int main(int argc, char **argv) {
-    QApplication a(argc, argv);
-    Controler *mainWindow = Controler::instance();
-    mainWindow->init();
-    a.setMainWidget(mainWindow);
-    a.setOverrideCursor(Qt::BlankCursor);
-
-    //connect(mainWindow, quit(), a, quit());
-    mainWindow->show();
-
-    qDebug("JAM: entering event loop");
-    return a.exec();
-    qDebug("JAM: exiting event loop");
+    Controler *controler = Controler::instance();
+    controler->init(argc, argv);
+    return controler->loop();
 }

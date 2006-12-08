@@ -19,12 +19,12 @@
  ***************************************************************************/
 #include "tvtimerpopup.h"
 
-TvTimerPopup::TvTimerPopup(QWidget *parent)
+TvTimerPopup::TvTimerPopup(Page *parent)
  : PopupMenu(parent)
 {
     qDebug("TvTimerPopup::TvTimerPopup()");
-    m_popupMenu->insertItem("Edit", this, SLOT(timerEdit()));
-    m_popupMenu->insertItem("Delete", this, SLOT(timerDelete()));
+    insertItem("Edit", this, SLOT(timerEdit()));
+    insertItem("Delete", this, SLOT(timerDelete()));
 }
 
 

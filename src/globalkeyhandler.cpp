@@ -55,7 +55,7 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
         switch (k->key()) {
         case Qt::Key_M:                               // menu
             qDebug("GlobalKeyHandler::eventFilter() switching to menu");
-            Controler::mainMenuShow();
+            Controler::instance()->mainMenuShow();
             return true;
         case Qt::Key_Q:                               // quit
             //destroy();
@@ -66,7 +66,7 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
         case Qt::Key_Backspace:                       // go back
         case Qt::Key_Escape:
             qDebug("GlobalKeyHandler::eventFilter() going back");
-            Controler::goBack();
+            Controler::instance()->goBack();
             return true;
         default:
             return false;

@@ -42,7 +42,7 @@ playing files, recordings, live-TV, have all different keys, OSD, ...
 class MediaPlayer : public Page
 {
 public:
-    MediaPlayer();
+    MediaPlayer(QString name);
     ~MediaPlayer();
 
     // Define the specific keys and resulting actions to control this media player.

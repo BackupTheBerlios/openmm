@@ -17,28 +17,50 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVTIMERPOPUP_H
-#define TVTIMERPOPUP_H
+#ifndef QTLISTBROWSER_H
+#define QTLISTBROWSER_H
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include "listbrowser.h"
+
+#include <qlistview.h>
+#include <qstringlist.h>
+#include <qptrdict.h>
+
 
 /**
-Implements the specialized popup menu for handling Timers.
+Page for browsing lists of timers, recordings, files, channels, ...
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvTimerPopup : public QObject, public PopupMenu
+
+
+class QtListBrowser : public ListBrowser
 {
     Q_OBJECT
 
 public:
-    TvTimerPopup(Page *parent = 0);
-    ~TvTimerPopup();
+    QtListBrowser(ListBrowser *listBrowserLogic);
+    ~QtListBrowser();
 
-private slots:
-    void timerEdit();
-    void timerDelete();
+    virtual void enterPage();
+
+public slots:
+    void addEntry(Title *title);
+    void delEntry(Title *title);
+    Title *getCurrent() { return m_titleList[m_listView->currentItem()]; }
+
+protected slots:
+    void showPopupMenu(QListViewItem *entry);
+    void clear();
+    virtual void selectEntry(Title *title);
+    virtual void addViewColumn(QString colName) { m_listView->addColumn(colName); }
+
+private:
+    QListView              *m_listView;
+    QPtrDict<Title>         m_titleList;
+    QPtrDict<QListViewItem> m_itemList;
+
+    ListBrowser            *m_listBrowserLogic;
 };
 
 #endif

@@ -29,6 +29,10 @@ ListComposer looks like a List from the outside, and for example can be viewed w
 
 In addition to a normal List, ListComposer is able to perform some very simple relational database functionality, like joining and selecting (=filtering out rows) of Lists. The big difference compared to real relational table algebra is, that Lists can hold Titles of differend kind, that is, they can have different columns, whereas tables in a database are homogenous in terms of columns (each row in a table has the same number and type of columns).
 
+// ListComposer provides functionality like a simple SELECT statement in an RDBMS:
+//       1. joining two lists.
+//       2. selecting columns of the lists.
+//       3. selecting rows of the lists.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */

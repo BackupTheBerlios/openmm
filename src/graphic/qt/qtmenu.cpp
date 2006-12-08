@@ -18,31 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "menu.h"
+#include "qtmenu.h"
 #include "controler.h"
 #include "globalkeyhandler.h"
 
 
-Menu::Menu(QString name)
- : Page(name)
+QtMenu::QtMenu(Menu *menuLogic)
+// : Menu(true)
 {
-    m_list = new QListView(this);
+    qDebug("QtMenu::QtMenu()");
+    m_menuLogic = menuLogic;
+    m_list = new QListView((QWidget*) menuLogic->frame());
     // install global event filter on m_list
     m_list->installEventFilter(GlobalKeyHandler::instance());
-    m_list->addColumn(m_name);
     m_entryNumber = 0;
 
     connect(m_list, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(selectEntry(QListViewItem*)));
 }
 
 
-Menu::~Menu()
+QtMenu::~QtMenu()
 {
 }
 
 
+
 void
-Menu::addEntry(Page* page)
+QtMenu::addEntry(Page* page)
 {
     m_entryNumber++;
     QString entryNumberStr = QString().setNum(m_entryNumber).rightJustify(2, '0') + ".  ";
@@ -57,9 +59,9 @@ Menu::addEntry(Page* page)
 
 
 void
-Menu::setDefaultEntry(Page* page)
+QtMenu::setDefaultEntry(Page* page)
 {
-    qDebug("Menu::setDefaultEntry() for page: %p", page);
+    qDebug("QtMenu::setDefaultEntry() for page: %p", page);
     // Search for page in QPtrList and set corresponding QListViewItem as m_defaultItem.
     // TODO: implement findItem()
     //m_defaultItem = findItem(page);
@@ -67,9 +69,9 @@ Menu::setDefaultEntry(Page* page)
 
 
 void
-Menu::enterPage()
+QtMenu::enterPage()
 {
-    qDebug("Menu::enterPage(), set default entry to: %p", m_defaultEntry);
+    qDebug("QtMenu::enterPage(), set default entry to: %p", m_defaultEntry);
     m_list->setCurrentItem(m_defaultEntry);
     m_list->setSelected(m_defaultEntry, true);
     m_list->setFocus();
@@ -77,16 +79,16 @@ Menu::enterPage()
 
 
 void
-Menu::selectEntry(QListViewItem* i)
+QtMenu::selectEntry(QListViewItem* i)
 {
-    qDebug("Menu::selectEntry()");
-    Page *s = m_entryDict[i];
-    s->showUp();
+    qDebug("QtMenu::selectEntry()");
+    Page *p = m_entryDict[i];
+    p->showUp();
 }
 
 
 QListViewItem*
-Menu::findEntry(Page *page)
+QtMenu::findEntry(Page *page)
 {
     qDebug("Menu::findEntry() with page: %p", page);
     // TODO: implement findItem()

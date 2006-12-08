@@ -22,10 +22,10 @@
 
 
 TvPlayer::TvPlayer(List *channelList)
- : MediaPlayer()
+ : MediaPlayer("Live TV")
 {
     m_channelList = channelList;
-    setName("Live TV");
+    //setNameP("Live TV");
     m_currentChannel = 0;
 }
 

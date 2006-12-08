@@ -17,67 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef LISTBROWSER_H
-#define LISTBROWSER_H
+#ifndef MENU_H
+#define MENU_H
 
 #include "page.h"
-#include "title.h"
-#include "list.h"
-#include "popupmenu.h"
-
-#include <qlistview.h>
-#include <qstringlist.h>
-#include <qptrdict.h>
-
 
 /**
-Page for browsing lists of timers, recordings, files, channels, ...
-
-	@author Jörg Bakker <joerg@hakker.de>
+@author Jörg Bakker
 */
-
-
-// TODO: ListBrowser should provide functionality like a simple SELECT statement in an RDBMS:
-//       1. joining two lists.
-//       2. selecting columns of the lists.
-//       3. selecting rows of the lists.
-
-class ListBrowser : public Page
+class Menu : public Page
 {
-    Q_OBJECT
-
 public:
-    ListBrowser(QString name, QString cols, List *list);
-    ~ListBrowser();
+    Menu(QString name);
+    Menu() { qDebug("Menu::Menu() - nothing to do"); }
+    ~Menu();
 
-    int cols() { return m_cols.count(); }
-    QListView* getListView() { return m_listView; }
-    void setPopupMenu(PopupMenu *popupMenu);
-
-public slots:
-    void addEntry(Title *title);
-    void delEntry(Title *title);
-    //void update();  // TODO: do we need this? Things are done via enterPage() and addEntry()
-    Title *getCurrent() { return m_titleList[m_listView->currentItem()]; }
+    virtual void addEntry(Page *page) { m_menuWidget->addEntry(page) ;}
+    virtual void setDefaultEntry(Page *page) { m_menuWidget->setDefaultEntry(page) ;}
+    virtual void setMenuName(QString name) { m_menuWidget->setMenuName(name) ;}
+    virtual void enterPage() { m_menuWidget->enterPage(); }
+    virtual void exitPage() { qDebug("Menu::exitPage()"); }
 
 protected:
-    virtual void enterPage();
-
-protected slots:
-    void showPopupMenu(QListViewItem *entry);
-    List *m_list;
-    QListView *m_listView;
-    void clear();
-
-private:
-    static QString colSeperator;
-
-    QStringList m_cols;
-    QPtrDict<Title> m_titleList;
-    QPtrDict<QListViewItem> m_itemList;
-    PopupMenu *m_popupMenu;
-
-    void selectEntry(int number);
+    Menu *m_menuWidget;
 };
 
 #endif

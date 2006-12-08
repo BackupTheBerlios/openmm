@@ -17,28 +17,59 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVTIMERPOPUP_H
-#define TVTIMERPOPUP_H
+#ifndef LISTBROWSER_H
+#define LISTBROWSER_H
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include "page.h"
+#include "title.h"
+#include "list.h"
+#include "popupmenu.h"
+
+#include <qstringlist.h>
+#include <qptrdict.h>
+
 
 /**
-Implements the specialized popup menu for handling Timers.
+Page for browsing lists of timers, recordings, files, channels, ...
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvTimerPopup : public QObject, public PopupMenu
+
+
+class ListBrowser : public QObject, public Page
 {
     Q_OBJECT
 
 public:
-    TvTimerPopup(Page *parent = 0);
-    ~TvTimerPopup();
+    ListBrowser(QString name, QString cols, List *list);
+    ListBrowser() {}
+    ~ListBrowser();
 
-private slots:
-    void timerEdit();
-    void timerDelete();
+    int cols() { return m_cols.count(); }
+    QString colText(int i) { return m_cols[i]; }
+    void setPopupMenu(PopupMenu *popupMenu);
+    PopupMenu* getPopupMenu() { return m_popupMenu; }
+    virtual void enterPage();
+
+public slots:
+    virtual void addEntry(Title *title);
+    virtual void delEntry(Title *title);
+    virtual Title *getCurrent() { return m_listBrowserWidget->getCurrent(); }
+
+protected slots:
+    virtual void clear();
+
+protected:
+    void selectEntry(int number);
+    virtual void selectEntry(Title *title);
+    virtual void addViewColumn(QString colName) { m_listBrowserWidget->addViewColumn(colName); }
+
+    static QString      colSeperator;
+    List               *m_list;
+    QStringList         m_cols;
+    PopupMenu          *m_popupMenu;
+
+    ListBrowser        *m_listBrowserWidget;
 };
 
 #endif

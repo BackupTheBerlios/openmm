@@ -28,7 +28,8 @@ TvProgramBrowser::TvProgramBrowser(ListComposer *list)
 {
     m_filter = new TvProgramFilter();
     ((ListComposer*)m_list)->setFilter(m_filter);
-    m_listView->installEventFilter(this);
+    // TODO: handle events independent from Toolkit.
+    //m_listView->installEventFilter(this);
 }
 
 
@@ -40,6 +41,11 @@ TvProgramBrowser::~TvProgramBrowser()
 void
 TvProgramBrowser::enterPage()
 {
+    qDebug("TvProgramBrowser::enterPage()");
+    m_listBrowserWidget->enterPage();
+    if (m_list->count()) {
+        selectEntry(0);
+    }
 }
 
 

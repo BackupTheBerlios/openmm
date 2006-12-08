@@ -17,45 +17,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "popupmenu.h"
+#ifndef QTMENU_H
+#define QTMENU_H
 
-PopupMenu::PopupMenu(QWidget *parent)
- : QObject(parent)
+#include "menu.h"
+
+#include <qlistview.h>
+#include <qptrdict.h>
+
+
+/**
+@author Jörg Bakker
+*/
+class QtMenu : public QObject, public Menu
 {
-    qDebug("PopupMenu::PopupMenu()");
-    m_parent = parent;
-    m_title = 0;
-    m_list = 0;
-    m_popupMenu = new QPopupMenu();
-}
+    Q_OBJECT
 
+public:
+    QtMenu(Menu *menuLogic);
+    ~QtMenu();
 
-PopupMenu::~PopupMenu()
-{
-}
+    void addEntry(Page *page);
+    void setDefaultEntry(Page *page);
+    virtual void setMenuName(QString name) { m_list->addColumn(m_name); }
+    virtual void enterPage();
 
+public slots:
+    void selectEntry(QListViewItem* i);
 
-void
-PopupMenu::setParent(QWidget *parent)
-{
-    m_parent = parent;
-}
+private:
+    QListViewItem *findEntry(Page *page);
 
+    Menu          *m_menuLogic;
+    QPtrDict<Page> m_entryDict;
+    QListView     *m_list;
+    QListViewItem *m_defaultEntry;
+    QListViewItem *m_selectedEntry;
+    int            m_entryNumber;
+};
 
-void
-PopupMenu::popup()
-{
-    if (m_parent) {
-        QSize center = m_parent->size()/2 - m_popupMenu->sizeHint()/2;
-        m_popupMenu->popup(m_parent->mapToGlobal(QPoint(center.width(), center.height())));
-        m_popupMenu->setActiveItem(0);
-    }
-}
-
-
-void
-PopupMenu::popup(Title *title)
-{
-    m_title = title;
-    popup();
-}
+#endif

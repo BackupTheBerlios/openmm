@@ -22,20 +22,21 @@
 
 #include "list.h"
 #include "tvplayer.h"
+#include "popupmenu.h"
 
-#include <popupmenu.h>
+#include <qobject.h>
 
 /**
 Implements the specialized popup menu for handling programs and channels.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvProgramPopup : public PopupMenu
+class TvProgramPopup : public QObject, public PopupMenu
 {
     Q_OBJECT
 
 public:
-    TvProgramPopup(List *timerList, TvPlayer *tvPlayer, QWidget *parent = 0);
+    TvProgramPopup(List *timerList, TvPlayer *tvPlayer, Page *parent = 0);
     ~TvProgramPopup();
 
 private slots:

@@ -17,37 +17,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PAGE_H
-#define PAGE_H
+#include "qtpage.h"
+#include "controler.h"
 
-#include <qwidget.h>
+#include <qlayout.h>
 
-/**
-A full page on the screen, which can be a menu, mediaplayer, list, ...
-Basically, it can be shown, or not.
 
-	@author Jörg Bakker <joerg@hakker.de>
-*/
-class Page : public QWidget
+QtPage::QtPage(Page *pageLogic)
 {
-    Q_OBJECT
+    qDebug("QtPage::QtPage() creating Page %s", pageLogic->getName().latin1());
+    m_pageLogic = pageLogic;
 
-public:
-    Page(QString name="");
-    ~Page();
-
-    // the member show() is already used by QWidget
-    virtual void showUp();
-
-    QString getName() { return m_name; };
-    void setName(QString name) { m_name = name; };
+    m_frame = new QWidget((QWidget*) Controler::instance()->pageStack()->frame());
+    qDebug("QtPage::QtPage() creating Page %s widget: %p.", pageLogic->getName().latin1(), m_frame);
+    m_frame->installEventFilter(GlobalKeyHandler::instance());
+    QVBoxLayout *l = new QVBoxLayout(m_frame);
+    l->setAutoAdd(TRUE);
+}
 
 
-protected:
-    virtual void enterPage();
-    virtual void exitPage();
-
-    QString m_name;
-};
-
-#endif
+QtPage::~QtPage()
+{
+}

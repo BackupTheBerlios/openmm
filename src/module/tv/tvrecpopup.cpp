@@ -19,13 +19,14 @@
  ***************************************************************************/
 #include "tvrecpopup.h"
 
-TvRecPopup::TvRecPopup(TvRecPlayer *tvRecPlayer, QWidget *parent)
+
+TvRecPopup::TvRecPopup(TvRecPlayer *tvRecPlayer, Page *parent)
  : PopupMenu(parent)
 {
     qDebug("TvRecPopup::TvRecPopup()");
     m_tvRecPlayer = tvRecPlayer;
-    m_popupMenu->insertItem("Play", this, SLOT(play()));
-    m_popupMenu->insertItem("Delete", this, SLOT(del()));
+    insertItem("Play", this, SLOT(play()));
+    insertItem("Delete", this, SLOT(del()));
 }
 
 

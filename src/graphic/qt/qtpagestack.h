@@ -17,28 +17,35 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVTIMERPOPUP_H
-#define TVTIMERPOPUP_H
+#ifndef QTPAGESTACK_H
+#define QTPAGESTACK_H
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include "pagestack.h"
+#include "controler.h"
+
+#include <qapplication.h>
+#include <qwidgetstack.h>
+
 
 /**
-Implements the specialized popup menu for handling Timers.
-
-	@author Jörg Bakker <joerg@hakker.de>
+@author Jörg Bakker
 */
-class TvTimerPopup : public QObject, public PopupMenu
+class QtPageStack : public PageStack
 {
-    Q_OBJECT
-
 public:
-    TvTimerPopup(Page *parent = 0);
-    ~TvTimerPopup();
+    QtPageStack(PageStack* pageStackLogic);
+    ~QtPageStack();
 
-private slots:
-    void timerEdit();
-    void timerDelete();
+    virtual void addPage(Page *page) { m_pageStack->addWidget((QWidget*) page->frame()); }
+    virtual void raisePage(Page *page) { m_pageStack->raiseWidget((QWidget*) page->frame()); }
+    virtual int loop();
+    virtual void* frame() { return (void*) m_pageStack; }
+
+
+protected:
+    PageStack    *m_pageStackLogic;
+    QWidgetStack *m_pageStack;
+    QApplication *m_qtapp;
 };
 
 #endif
