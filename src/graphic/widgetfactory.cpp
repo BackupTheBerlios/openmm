@@ -23,6 +23,8 @@
 #include "qtlistbrowser.h"
 #include "qtpopupmenu.h"
 
+#include <dlfcn.h>
+
 // TODO: this looks a bit like too much similar code, ... (templates somehow?)
 
 WidgetFactory *WidgetFactory::m_instance = 0;
@@ -34,6 +36,7 @@ WidgetFactory::WidgetFactory()
 
 WidgetFactory::~WidgetFactory()
 {
+    dlclose(m_toolkitLib);
 }
 
 
@@ -46,15 +49,56 @@ WidgetFactory::instance()
     return m_instance;
 }
 
+//void*  pageStackCtor;
+
+void
+WidgetFactory::setToolkit(ToolkitT toolkit)
+{
+    m_toolkit = toolkit;
+    char *error = "";
+    switch(m_toolkit) {
+    case ToolkitQt:
+        m_toolkitLibName = "libgraphic-qt.so";
+        m_pageStackCtorName = "createPageStack";
+    default:
+        break;
+    }
+    m_toolkitLib = dlopen(m_toolkitLibName, RTLD_NOW);
+    if (!m_toolkitLib) {
+        qDebug("WidgetFactory::WidgetFactory() could not load toolkit library: %s", m_toolkitLibName);
+        return;
+    }
+    qDebug("WidgetFactory::WidgetFactory() opened toolkit library: %s", m_toolkitLibName);
+    dlerror();  // clear any pending error.
+    *(void **) (&m_pageStackCtor) = dlsym(m_toolkitLib, m_pageStackCtorName);
+    //m_pageStackCtorSym = dlsym(m_toolkitLib, m_pageStackCtorName);
+    //pageStackCtor = dlsym(m_toolkitLib, m_pageStackCtorName);
+    if ((error = dlerror()) != NULL)  {
+        qDebug("WidgetFactory::WidgetFactory() could not find symbol %s in library %s, error was: %s",
+                 m_pageStackCtorName, m_toolkitLibName, error);
+        return;
+    }
+    qDebug("WidgetFactory::WidgetFactory() found symbol %s in library %s", m_pageStackCtorName, m_toolkitLibName);
+}
+
 
 PageStack* 
 WidgetFactory::createPageStack(PageStack *pageStackLogic)
 {
     qDebug("WidgetFactory::createPageStack()");
+    //PageStack *foo;
+    //void *(*ctor)(void *) = (void *(*)(void *))(m_pageStackCtorSym);
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createPageStack() for toolkit Qt");
-        return new QtPageStack(pageStackLogic);
+        //foo = ( (PageStack*) (*m_pageStackCtor)(pageStackLogic) );
+        //return new QtPageStack(pageStackLogic);
+        //return new ( (PageStack*) (*m_pageStackCtor)(pageStackLogic) );
+        //return (PageStack*)  (*ctor)(pageStackLogic);
+        //return new foo;
+        //return   static_cast<PageStack *(PageStack*)>(m_pageStackCtor)(pageStackLogic);
+        //return   ((PageStack *(PageStack*)) (pageStackCtor))(pageStackLogic);
+        return (PageStack*) (*m_pageStackCtor)(pageStackLogic);
     default:
         return 0;
     }

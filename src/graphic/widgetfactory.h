@@ -36,7 +36,7 @@ public:
 
     static WidgetFactory* instance();
 
-    void setToolkit(ToolkitT toolkit) { m_toolkit = toolkit; }
+    void setToolkit(ToolkitT toolkit);
 
     PageStack* createPageStack(PageStack *pageStackLogic);
     Page* createPage(Page *pageLogic);
@@ -51,6 +51,14 @@ protected:
 private:
     static WidgetFactory *m_instance;
     ToolkitT              m_toolkit;
+    char*                 m_toolkitLibName;
+    void*                 m_toolkitLib;
+
+    char*                 m_pageStackCtorName;
+    PageStack*            (*m_pageStackCtor)(PageStack *pageStackLogic);
+    //const void*           m_pageStackCtorSym;
+    //PageStack*            m_pageStackCtor(PageStack*);
+    //void*  pageStackCtor;
 };
 
 #endif

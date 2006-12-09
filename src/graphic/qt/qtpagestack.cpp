@@ -53,3 +53,13 @@ QtPageStack::loop()
     return m_qtapp->exec();
     qDebug("QtPageStack::loop(), exiting main loop.");
 }
+
+
+extern "C" {
+
+PageStack* createPageStack(PageStack *pageStackLogic)
+{
+    return new QtPageStack(pageStackLogic);
+}
+
+}
