@@ -23,13 +23,10 @@
 #include <qlayout.h>
 
 
-QtPage::QtPage(Page *pageLogic)
+QtPage::QtPage()
 {
-    qDebug("QtPage::QtPage() creating Page %s", pageLogic->getName().latin1());
-    m_pageLogic = pageLogic;
-
     m_frame = new QWidget((QWidget*) Controler::instance()->pageStack()->frame());
-    qDebug("QtPage::QtPage() creating Page %s widget: %p.", pageLogic->getName().latin1(), m_frame);
+    qDebug("QtPage::QtPage() creating Page widget: %p.", m_frame);
     m_frame->installEventFilter(GlobalKeyHandler::instance());
     QVBoxLayout *l = new QVBoxLayout(m_frame);
     l->setAutoAdd(TRUE);

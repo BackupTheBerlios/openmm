@@ -36,7 +36,7 @@ WidgetFactory::WidgetFactory()
 
 WidgetFactory::~WidgetFactory()
 {
-    dlclose(m_toolkitLib);
+//    dlclose(m_toolkitLib);
 }
 
 
@@ -49,112 +49,78 @@ WidgetFactory::instance()
     return m_instance;
 }
 
-//void*  pageStackCtor;
 
 void
 WidgetFactory::setToolkit(ToolkitT toolkit)
 {
     m_toolkit = toolkit;
-    char *error = "";
-    switch(m_toolkit) {
-    case ToolkitQt:
-        m_toolkitLibName = "libgraphic-qt.so";
-        m_pageStackCtorName = "createPageStack";
-    default:
-        break;
-    }
-    m_toolkitLib = dlopen(m_toolkitLibName, RTLD_NOW);
-    if (!m_toolkitLib) {
-        qDebug("WidgetFactory::WidgetFactory() could not load toolkit library: %s", m_toolkitLibName);
-        return;
-    }
-    qDebug("WidgetFactory::WidgetFactory() opened toolkit library: %s", m_toolkitLibName);
-    dlerror();  // clear any pending error.
-    *(void **) (&m_pageStackCtor) = dlsym(m_toolkitLib, m_pageStackCtorName);
-    //m_pageStackCtorSym = dlsym(m_toolkitLib, m_pageStackCtorName);
-    //pageStackCtor = dlsym(m_toolkitLib, m_pageStackCtorName);
-    if ((error = dlerror()) != NULL)  {
-        qDebug("WidgetFactory::WidgetFactory() could not find symbol %s in library %s, error was: %s",
-                 m_pageStackCtorName, m_toolkitLibName, error);
-        return;
-    }
-    qDebug("WidgetFactory::WidgetFactory() found symbol %s in library %s", m_pageStackCtorName, m_toolkitLibName);
 }
 
 
-PageStack* 
-WidgetFactory::createPageStack(PageStack *pageStackLogic)
+PageStackWidget*
+WidgetFactory::createPageStackWidget()
 {
-    qDebug("WidgetFactory::createPageStack()");
-    //PageStack *foo;
-    //void *(*ctor)(void *) = (void *(*)(void *))(m_pageStackCtorSym);
+    qDebug("WidgetFactory::createPageStackWidget()");
     switch(m_toolkit) {
     case ToolkitQt:
-        qDebug("WidgetFactory::createPageStack() for toolkit Qt");
-        //foo = ( (PageStack*) (*m_pageStackCtor)(pageStackLogic) );
-        //return new QtPageStack(pageStackLogic);
-        //return new ( (PageStack*) (*m_pageStackCtor)(pageStackLogic) );
-        //return (PageStack*)  (*ctor)(pageStackLogic);
-        //return new foo;
-        //return   static_cast<PageStack *(PageStack*)>(m_pageStackCtor)(pageStackLogic);
-        //return   ((PageStack *(PageStack*)) (pageStackCtor))(pageStackLogic);
-        return (PageStack*) (*m_pageStackCtor)(pageStackLogic);
+        qDebug("WidgetFactory::createPageStackWidget() for toolkit Qt");
+        return new QtPageStack();
     default:
         return 0;
     }
 }
 
 
-Page* 
-WidgetFactory::createPage(Page *pageLogic)
+PageWidget* 
+WidgetFactory::createPageWidget()
 {
     qDebug("WidgetFactory::createPage()");
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createPage() for toolkit Qt");
-        return new QtPage(pageLogic);
+        return new QtPage();
     default:
         return 0;
     }
 }
 
 
-Menu* 
-WidgetFactory::createMenu(Menu *menuLogic)
+MenuWidget* 
+WidgetFactory::createMenuWidget()
 {
     qDebug("WidgetFactory::createMenu()");
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createMenu() for toolkit Qt");
-        return new QtMenu(menuLogic);
+        return new QtMenu();
     default:
         return 0;
     }
 }
 
 
-ListBrowser* 
-WidgetFactory::createListBrowser(ListBrowser *listBrowserLogic)
+ListBrowserWidget* 
+WidgetFactory::createListBrowserWidget(QStringList *cols)
 {
     qDebug("WidgetFactory::createListBrowser()");
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createListBrowser() for toolkit Qt");
-        return new QtListBrowser(listBrowserLogic);
+        return new QtListBrowser(cols);
     default:
         return 0;
     }
 }
 
 
-PopupMenu* 
-WidgetFactory::createPopupMenu(PopupMenu *popupMenuLogic)
+PopupMenuWidget* 
+WidgetFactory::createPopupMenuWidget(Page *parent)
 {
     qDebug("WidgetFactory::createPopupMenu()");
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createPopupMenu() for toolkit Qt");
-        return new QtPopupMenu(popupMenuLogic);
+        return new QtPopupMenu(parent);
     default:
         return 0;
     }

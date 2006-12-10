@@ -6,6 +6,11 @@ SET(JAM_GRAPHIC_SRCS
     menu.cpp
     listbrowser.cpp
     popupmenu.cpp
+#     pagestackwidget.cpp
+#     pagewidget.cpp
+#     menuwidget.cpp
+    listbrowserwidget.cpp
+#     popupmenuwidget.cpp
     widgetfactory.cpp)
 
 INCLUDE_DIRECTORIES(qt)

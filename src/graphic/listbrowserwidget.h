@@ -17,37 +17,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "qtpagestack.h"
-#include "controler.h"
+#ifndef LISTBROWSERWIDGET_H
+#define LISTBROWSERWIDGET_H
 
-#include <qlayout.h>
-#include <qcursor.h>
+#include "title.h"
+
+#include <qstring.h>
+#include <qstringlist.h>
+
+/**
+Page for browsing lists of timers, recordings, files, channels, ...
+
+	@author Jörg Bakker <joerg@hakker.de>
+*/
 
 
-QtPageStack::QtPageStack()
+class ListBrowserWidget
 {
-    qDebug("QtPageStack::QtPageStack()");
-    m_qtApp = new QApplication(Controler::instance()->getArgc(), Controler::instance()->getArgv());
-    m_pageStack = new QWidgetStack();
-    m_pageStack->setCaption("Jam");
-    m_pageStack->resize(720, 576);
-    m_qtApp->setMainWidget(m_pageStack);
-    m_qtApp->setOverrideCursor(Qt::BlankCursor);
-}
+public:
+    ListBrowserWidget(QStringList *cols);
+    ListBrowserWidget();
+//     ~ListBrowserWidget();
 
+    virtual void enterPage() = 0;
 
-QtPageStack::~QtPageStack()
-{
-    delete m_pageStack;
-    delete m_qtApp;
-}
+public slots:
+    virtual void addEntry(Title *title) = 0;
+    virtual void delEntry(Title *title) = 0;
+    virtual Title *getCurrent() = 0;
+    virtual void addViewColumn(QString colName) = 0;
+//    virtual void showPopupMenu(QListViewItem *entry) = 0;
+    virtual void clear() = 0;
+    virtual void selectEntry(Title *title) = 0;
+};
 
-
-int
-QtPageStack::loop()
-{
-    m_pageStack->show();
-    qDebug("QtPageStack::loop(), entering main loop.");
-    return m_qtApp->exec();
-    qDebug("QtPageStack::loop(), exiting main loop.");
-}
+#endif

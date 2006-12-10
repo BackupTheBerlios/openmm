@@ -20,7 +20,7 @@
 #ifndef QTPAGE_H
 #define QTPAGE_H
 
-#include "page.h"
+#include "pagewidget.h"
 
 #include <qwidget.h>
 
@@ -30,12 +30,12 @@ Basically, it can be shown, or not.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class QtPage : public QObject, public Page
+class QtPage : public QObject, public PageWidget
 {
     Q_OBJECT
 
 public:
-    QtPage(Page *PageLogic);
+    QtPage();
     ~QtPage();
 
     virtual int globalPositionX() { m_frame->mapToGlobal(QPoint(0,0)).x(); }
@@ -46,8 +46,7 @@ public:
     virtual void* frame() { return (void*) m_frame; }
     virtual void enterPage() { qDebug("QtPage::enterPage()"); m_frame->setFocus(); }
 
-private:
-    Page    *m_pageLogic;
+protected:
     QWidget *m_frame;
 };
 

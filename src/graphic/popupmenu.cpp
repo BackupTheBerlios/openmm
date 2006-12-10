@@ -27,7 +27,7 @@ PopupMenu::PopupMenu(Page *parent)
     m_parent = parent;
     m_title = 0;
     m_list = 0;
-    m_popupMenuWidget = WidgetFactory::instance()->createPopupMenu(this);
+    m_popupMenuWidget = WidgetFactory::instance()->createPopupMenuWidget(parent);
 }
 
 

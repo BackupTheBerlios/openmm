@@ -23,13 +23,12 @@
 #include <qlayout.h>
 
 
-QtListBrowser::QtListBrowser(ListBrowser *listBrowserLogic)
-// : ListBrowser()
+QtListBrowser::QtListBrowser(QStringList *cols)
 {
     qDebug("QtListBrowser::QtListBrowser()");
 
-    m_listBrowserLogic = listBrowserLogic;
-    QWidget *parent = (QWidget*) listBrowserLogic->frame();
+    m_cols = cols;
+    QWidget *parent = m_frame;
     qDebug("QtListBrowser::QtListBrowser(), parent widget: %p", parent);
     m_listView = new QListView(parent);
     qDebug("QtListBrowser::QtListBrowser(), build QListView widget: %p", m_listView);
@@ -64,8 +63,8 @@ QtListBrowser::addEntry(Title *title)
     QListViewItem *entry = new QListViewItem(m_listView);
     m_titleList.insert(entry, title);
     m_itemList.insert(title, entry);
-    for (uint i = 0; i < m_listBrowserLogic->cols(); i++) {
-        entry->setText(i, title->getText(m_listBrowserLogic->colText(i)));
+    for (uint i = 0; i < m_cols->count(); i++) {
+        entry->setText(i, title->getText((*m_cols->at(i))));
     }
 }
 
@@ -107,8 +106,8 @@ void
 QtListBrowser::showPopupMenu(QListViewItem *entry)
 {
     qDebug("QtListBrowser::showPopupMenu()");
-    if (m_listBrowserLogic->getPopupMenu()) {
-        m_listBrowserLogic->getPopupMenu()->popup(m_titleList[entry]);
-    }
+//    if (m_listBrowserLogic->getPopupMenu()) {
+//        m_listBrowserLogic->getPopupMenu()->popup(m_titleList[entry]);
+//    }
 }
 

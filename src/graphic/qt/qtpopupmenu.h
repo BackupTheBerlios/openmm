@@ -20,7 +20,8 @@
 #ifndef QTPOPUPMENU_H
 #define QTPOPUPMENU_H
 
-#include "popupmenu.h"
+#include "page.h"
+#include "popupmenuwidget.h"
 
 #include <qobject.h>
 #include <qpopupmenu.h>
@@ -30,12 +31,12 @@ Qt implementation of PopupMenu.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class QtPopupMenu : public QObject, public PopupMenu
+class QtPopupMenu : public QObject, public PopupMenuWidget
 {
     Q_OBJECT
 
 public:
-    QtPopupMenu(PopupMenu *popupMenuLogic);
+    QtPopupMenu(Page *parent);
     ~QtPopupMenu();
 
     virtual void popup();
@@ -43,8 +44,8 @@ public:
             { m_popupMenu->insertItem(text, receiver, member); }
 
 private:
-    PopupMenu    *m_popupMenuLogic;
     QPopupMenu   *m_popupMenu;
+    Page         *m_parent;
 };
 
 #endif

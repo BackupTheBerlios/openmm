@@ -24,6 +24,7 @@
 #include "title.h"
 #include "list.h"
 #include "popupmenu.h"
+#include "listbrowserwidget.h"
 
 #include <qstringlist.h>
 #include <qptrdict.h>
@@ -69,7 +70,7 @@ protected:
     QStringList         m_cols;
     PopupMenu          *m_popupMenu;
 
-    ListBrowser        *m_listBrowserWidget;
+    ListBrowserWidget  *m_listBrowserWidget;
 };
 
 #endif

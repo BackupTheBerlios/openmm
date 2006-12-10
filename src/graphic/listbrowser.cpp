@@ -21,8 +21,6 @@
 #include "globalkeyhandler.h"
 #include "widgetfactory.h"
 
-#include <qlayout.h>
-
 
 QString ListBrowser::colSeperator = ";";
 
@@ -35,7 +33,7 @@ ListBrowser::ListBrowser(QString name, QString cols, List *list)
     m_popupMenu = 0;
 
     qDebug("ListBrowser::ListBrowser() creating ListBrowser widget");
-    m_listBrowserWidget = WidgetFactory::instance()->createListBrowser(this);
+    m_listBrowserWidget = WidgetFactory::instance()->createListBrowserWidget(&m_cols);
 
     for (QStringList::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
         addViewColumn(*i);

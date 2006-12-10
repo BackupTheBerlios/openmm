@@ -21,6 +21,7 @@
 #define PAGESTACK_H
 
 #include "page.h"
+#include "pagestackwidget.h"
 
 /**
 @author Jörg Bakker
@@ -39,8 +40,8 @@ public:
     Page* visiblePage() { return m_visiblePage; }
 
 protected:
-    PageStack *m_pageStackWidget;
-    Page      *m_visiblePage;
+    PageStackWidget *m_pageStackWidget;
+    Page            *m_visiblePage;
 };
 
 #endif

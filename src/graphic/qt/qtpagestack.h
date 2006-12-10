@@ -20,7 +20,7 @@
 #ifndef QTPAGESTACK_H
 #define QTPAGESTACK_H
 
-#include "pagestack.h"
+#include "pagestackwidget.h"
 #include "controler.h"
 
 #include <qapplication.h>
@@ -30,10 +30,10 @@
 /**
 @author Jörg Bakker
 */
-class QtPageStack : public PageStack
+class QtPageStack : public PageStackWidget
 {
 public:
-    QtPageStack(PageStack* pageStackLogic);
+    QtPageStack();
     ~QtPageStack();
 
     virtual void addPage(Page *page) { m_pageStack->addWidget((QWidget*) page->frame()); }
@@ -43,9 +43,8 @@ public:
 
 
 protected:
-    PageStack    *m_pageStackLogic;
     QWidgetStack *m_pageStack;
-    QApplication *m_qtapp;
+    QApplication *m_qtApp;
 };
 
 #endif

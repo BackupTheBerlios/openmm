@@ -21,6 +21,7 @@
 #define MENU_H
 
 #include "page.h"
+#include "menuwidget.h"
 
 /**
 @author Jörg Bakker
@@ -39,7 +40,7 @@ public:
     virtual void exitPage() { qDebug("Menu::exitPage()"); }
 
 protected:
-    Menu *m_menuWidget;
+    MenuWidget *m_menuWidget;
 };
 
 #endif

@@ -25,7 +25,7 @@
 Page::Page(QString name)
 {
     m_name = name;
-    m_pageWidget = WidgetFactory::instance()->createPage(this);
+    m_pageWidget = WidgetFactory::instance()->createPageWidget();
 
     // add this page to the global widget stack.
     qDebug("Page::Page() adding Page %s: %p to PageStack.", m_name.latin1(), this);

@@ -23,13 +23,10 @@
 #include "globalkeyhandler.h"
 
 
-QtMenu::QtMenu(Menu *menuLogic)
-// : Menu(true)
+QtMenu::QtMenu()
 {
     qDebug("QtMenu::QtMenu()");
-    m_menuLogic = menuLogic;
-    m_list = new QListView((QWidget*) menuLogic->frame());
-    // install global event filter on m_list
+    m_list = new QListView(m_frame);
     m_list->installEventFilter(GlobalKeyHandler::instance());
     m_entryNumber = 0;
 
@@ -40,7 +37,6 @@ QtMenu::QtMenu(Menu *menuLogic)
 QtMenu::~QtMenu()
 {
 }
-
 
 
 void
@@ -62,9 +58,6 @@ void
 QtMenu::setDefaultEntry(Page* page)
 {
     qDebug("QtMenu::setDefaultEntry() for page: %p", page);
-    // Search for page in QPtrList and set corresponding QListViewItem as m_defaultItem.
-    // TODO: implement findItem()
-    //m_defaultItem = findItem(page);
 }
 
 
@@ -92,13 +85,5 @@ QtMenu::findEntry(Page *page)
 {
     qDebug("Menu::findEntry() with page: %p", page);
     // TODO: implement findItem()
-/*
-    QPtrDictIterator<Page> i(m_itemDict);
-    for( ; i.current(); ++i ) {
-        if (i.current() == page) {
-            return i;
-        }
-    }
-*/
     return 0;
 }

@@ -23,6 +23,7 @@
 #include "title.h"
 #include "list.h"
 #include "page.h"
+#include "popupmenuwidget.h"
 
 /**
 Just a simple popup menu.
@@ -51,8 +52,8 @@ protected:
     List       *m_list;
 
 private:
-    PopupMenu *m_popupMenuWidget;
-    Page      *m_parent;
+    PopupMenuWidget *m_popupMenuWidget;
+    Page            *m_parent;
 };
 
 #endif

@@ -24,7 +24,7 @@
 PageStack::PageStack()
 {
     qDebug("PageStack::PageStack()");
-    m_pageStackWidget = WidgetFactory::instance()->createPageStack(this);
+    m_pageStackWidget = WidgetFactory::instance()->createPageStackWidget();
     m_visiblePage = 0;
     qDebug("PageStack::PageStack() complete");
 }

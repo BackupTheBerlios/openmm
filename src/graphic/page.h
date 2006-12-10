@@ -20,6 +20,8 @@
 #ifndef PAGE_H
 #define PAGE_H
 
+#include "pagewidget.h"
+
 #include <qstring.h>
 
 /**
@@ -36,10 +38,13 @@ public:
     ~Page();
 
     QString getName() { return m_name; };
-    // TODO: setName conflicts with QObject. Rename it after getting rid of the Q stuff.
-    void setNameP(QString name) { m_name = name; };
+    void setName(QString name) { m_name = name; };
 
+    // for all widgets common part of the class
     virtual void showUp();
+    virtual void exitPage() { qDebug("Page::exitPage()"); }
+
+    // widget specific part of the class
     virtual int globalPositionX() { return m_pageWidget->globalPositionX(); }
     virtual int globalPositionY() { return m_pageWidget->globalPositionY(); }
     virtual int width() { return m_pageWidget->width(); }
@@ -47,11 +52,10 @@ public:
     virtual unsigned long windowId() { return m_pageWidget->windowId(); }
     virtual void* frame() { return m_pageWidget->frame(); }
     virtual void enterPage() { m_pageWidget->enterPage(); }
-    virtual void exitPage() { qDebug("Page::exitPage()"); }
 
 protected:
-    QString m_name;
-    Page   *m_pageWidget;
+    QString       m_name;
+    PageWidget   *m_pageWidget;
 };
 
 #endif

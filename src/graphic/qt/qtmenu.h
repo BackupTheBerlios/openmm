@@ -20,7 +20,8 @@
 #ifndef QTMENU_H
 #define QTMENU_H
 
-#include "menu.h"
+#include "menuwidget.h"
+#include "qtpage.h"
 
 #include <qlistview.h>
 #include <qptrdict.h>
@@ -29,26 +30,25 @@
 /**
 @author Jörg Bakker
 */
-class QtMenu : public QObject, public Menu
+class QtMenu : public QtPage, public MenuWidget
 {
     Q_OBJECT
 
 public:
-    QtMenu(Menu *menuLogic);
+    QtMenu();
     ~QtMenu();
 
-    void addEntry(Page *page);
-    void setDefaultEntry(Page *page);
-    virtual void setMenuName(QString name) { m_list->addColumn(m_name); }
+    virtual void addEntry(Page *page);
+    virtual void setDefaultEntry(Page *page);
+    virtual void setMenuName(QString name) { m_list->addColumn(name); }
     virtual void enterPage();
 
-public slots:
+private slots:
     void selectEntry(QListViewItem* i);
 
 private:
     QListViewItem *findEntry(Page *page);
 
-    Menu          *m_menuLogic;
     QPtrDict<Page> m_entryDict;
     QListView     *m_list;
     QListViewItem *m_defaultEntry;
