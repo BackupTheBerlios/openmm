@@ -21,7 +21,9 @@
 #include "controler.h"
 #include "widgetfactory.h"
 #include "streamplayer.h"
+//#include "streamplayerxine.h"
 #include "tv.h"
+#include "debug.h"
 
 
 Controler           *Controler::m_instance = 0;
@@ -38,7 +40,7 @@ Controler::instance()
 
 Controler::Controler()
 {
-    qDebug("Controler::Controler()");
+    TRACE(("Controler::Controler()"));
 }
 
 
@@ -58,19 +60,19 @@ Controler::init(int argc, char **argv)
 
     m_pageStack = new PageStack();
 
-    qDebug("Adding Main Menu.");
+    TRACE("Adding Main Menu.");
     m_mainMenu = new Menu("Main Menu");
-    qDebug("Added Main Menu: %p", m_mainMenu);
+    TRACE("Added Main Menu: %p", m_mainMenu);
 
     // Decide, which implementation of StreamPlayer to use.
-    qDebug("Adding Xine StreamPlayer.");
+    TRACE(("Adding Xine StreamPlayer."));
     m_streamPlayer = StreamPlayer::instance();
     m_streamPlayer->setEngine(StreamPlayer::EngineXine);
 
-    qDebug("Adding TV module.");
+    TRACE("Adding TV module.");
     addModule(new Tv());
 
-    qDebug("Showing Main Menu.");
+    TRACE("Showing Main Menu.");
     mainMenuShow();
 }
 
@@ -94,9 +96,9 @@ void
 Controler::showPage(Page *page)
 {
     if (page != 0) { // some menu entries don't have real screen pages (for example "quit")
-        qDebug("Controler::showPage() raising page: %p named: %s", page, page->getName().latin1());
+        TRACE("Controler::showPage() raising page: %p named: %s", page, page->getName().latin1());
         m_pageStack->raisePage(page);
-        qDebug("Controler::showPage() done raising page");
+        TRACE("Controler::showPage() done raising page");
         //m_previousPage = m_pageHistory.getLast();
         if (m_goingBack) {
             m_goingBack = false;
@@ -105,12 +107,12 @@ Controler::showPage(Page *page)
         else {
             if (page == m_mainMenu) {
                 // forget the history, we are in the main menu again.
-                qDebug("Controler::showPage() pageHistory clear");
+                TRACE("Controler::showPage() pageHistory clear");
                 m_pageHistory.clear();
             }
             m_pageHistory.append(page);
         }
-        qDebug("Controler::showPage() pageHistory count: %i", m_pageHistory.count());
+        TRACE("Controler::showPage() pageHistory count: %i", m_pageHistory.count());
     }
 }
 
@@ -123,7 +125,7 @@ Controler::goBack()
         m_goingBack = true;
         m_pageHistory.at(count - 2)->showUp();
         //m_pageHistory.remove(count - 1);
-        qDebug("Controler::goBack() pageHistory count: %i", m_pageHistory.count());
+        TRACE("Controler::goBack() pageHistory count: %i", m_pageHistory.count());
     }
 }
 

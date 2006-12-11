@@ -29,9 +29,7 @@ Abstract class for the concrete implementation of the toolkit functionality.
 class PageWidget
 {
 public:
-//     PageWidget(Page *abstractPage);
-//     ~PageWidget();
-
+    //virtual ~PageWidget() = 0;
     virtual int globalPositionX() = 0;
     virtual int globalPositionY() = 0;
     virtual int width() = 0;
@@ -39,9 +37,6 @@ public:
     virtual unsigned long windowId() = 0;
     virtual void* frame() = 0;
     virtual void enterPage() = 0;
-
-// private:
-//     Page    *m_abstractPage;
 };
 
 #endif

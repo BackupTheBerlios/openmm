@@ -4,32 +4,14 @@
 // uncomment this to turn debugging on (or provide it on the compiler command line)
 #define __DEBUG__
 
-#include <cstdio>
-//#include "debugthread.h"
-
-
-// using namespace std;
-// 
-// class Debug
-// {
-// public:
-// //  Debug ();
-// //  ~Debug ();
-// 
-// //    void trace (string s, bool newline = true);
-// //    void trace (const char* s1, const char* s2, bool newline = true);
-// //    void trace (const char* s, long i, unsigned int radix = 10, bool newline = true);
-//     static void trace(string s);
-// 
-// 
-// //private:
-// //    DebugThread* dt;
-// };
-
-//extern Debug* dp;
-
 #ifdef __DEBUG__
-#define TRACE(args) printf args
+extern void TRACE( const char *, ... );
+
+//#define TRACE(args) printf args
+//#define TRACE( const char *, ... ) __attribute__ ((format (printf, 1, 2)))
+//void TRACE( const char *, ... ) __attribute__ ((format (printf, 1, 2)));
+//extern void trace( const char *, ... ) __attribute__ ((format (printf, 1, 2)));
+//#define TRACE(args) trace args
 #else
 #define TRACE(args) 
 #endif  // __DEBUG__

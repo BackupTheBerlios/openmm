@@ -35,7 +35,7 @@ class Page
 public:
     Page(QString name);
     Page() { qDebug("Page::Page() - nothing to do"); }
-    ~Page();
+    virtual ~Page();
 
     QString getName() { return m_name; };
     void setName(QString name) { m_name = name; };

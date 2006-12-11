@@ -30,6 +30,7 @@ Interface for toolkit specific implementation of PageStackWidget.
 class PageStackWidget
 {
 public:
+    //virtual ~PageStackWidget() = 0;
     virtual void addPage(Page *page) = 0;
     virtual void raisePage(Page *page) = 0;
     virtual int loop() = 0;

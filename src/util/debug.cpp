@@ -1,60 +1,22 @@
 #include "debug.h"
-
-// Debug::Debug ()
-// {
-// #ifdef __DEBUG__
-// 	dt = new DebugThread ();
-// #ifdef USE_THREADS
-// 	dt->Create ();
-// 	dt->Run ();
-// #endif  // USE_THREADS
-// #endif // __DEBUG__
-// }
+#include <cstdio>
+#include <cstdarg>
 
 
-// Debug::~Debug ()
-// {
-// #ifdef __DEBUG__
-// #ifdef USE_THREADS
-// 	dt->Kill ();
-// #endif  // USE_THREADS
-// #endif // __DEBUG__
-// }
+// basically we use the standard printf functions, with two changes:
+// 1. we name it TRACE(), so we have to go through the hassle with varargs.
+// 2. we append a newline.
 
+#ifdef __DEBUG__
 
 void
-Debug::trace (string format, ...)
-{
-#ifdef __DEBUG__
-    printf (s, newline);
-#endif // __DEBUG__
+TRACE(const char *msg, ...) {
+    char buf[256];
+    va_list ap;
+    va_start( ap, msg );                    // use variable arg list
+    vsprintf( buf, msg, ap );
+    va_end( ap );
+    fprintf( stderr, "%s\n", buf );         // add newline
 }
 
-
-// void
-// Debug::trace (string s, bool newline)
-// {
-// #ifdef __DEBUG__
-// 	dt->Write (s, newline);
-// #endif // __DEBUG__
-// }
-// 
-// 
-// void
-// Debug::trace (const char* s1, const char* s2, bool newline)
-// {
-// #ifdef __DEBUG__
-// 	dt->Write (string(s1) + s2, newline);
-// #endif // __DEBUG__
-// }
-// 
-// 
-// void
-// Debug::trace (const char* s, long i, unsigned int radix, bool newline)
-// {
-// #ifdef __DEBUG__
-// 	char buf[sizeof(long)*4+1];  // #bytes / 2 = #bits * 4 and terminating '\0'
-// 	ltoa (i, buf, radix);
-// 	dt->Write (string(s) + buf, newline);
-// #endif // __DEBUG__
-// }
+#endif  // __DEBUG__

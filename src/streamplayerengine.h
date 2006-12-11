@@ -33,6 +33,7 @@ class MediaPlayer;
 class StreamPlayerEngine
 {
 public:
+    //virtual ~StreamPlayerEngine() = 0;
     virtual void showOsd(QString text, uint duration) = 0;
     virtual void hideOsd() = 0;
     virtual void initStream() = 0;

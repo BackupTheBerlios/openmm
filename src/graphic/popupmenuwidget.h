@@ -31,6 +31,7 @@ Interface for toolkit specific implementation of PopupMenuWidget.
 class PopupMenuWidget
 {
 public:
+    //virtual ~PopupMenuWidget();
     virtual void popup() = 0;
     virtual void insertItem(QString text, QObject *receiver, const char *member) = 0;
 };

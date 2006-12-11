@@ -31,7 +31,7 @@ class PageStack
 public:
     PageStack();
     PageStack(bool widgetAllocated) {}
-    ~PageStack();
+    virtual ~PageStack();
 
     virtual void addPage(Page *page) { m_pageStackWidget->addPage(page); }
     virtual void raisePage(Page *page);

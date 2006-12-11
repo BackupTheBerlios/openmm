@@ -32,6 +32,7 @@ Interface for toolkit specific implementation of MenuWidget.
 class MenuWidget
 {
 public:
+    //virtual ~MenuWidget() = 0;
     virtual void addEntry(Page *page) = 0;
     virtual void setDefaultEntry(Page *page) = 0;
     virtual void setMenuName(QString name) = 0;

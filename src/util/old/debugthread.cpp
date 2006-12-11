@@ -2,7 +2,7 @@
 
 #include "wx/utils.h"
 
-wxMutex MutexLog;
+//wxMutex MutexLog;
 
 DebugThread::DebugThread () : wxThread (wxTHREAD_DETACHED)
 {

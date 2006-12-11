@@ -35,6 +35,7 @@ Interface for toolkit specific implementation of ListBrowserWidget.
 class ListBrowserWidget
 {
 public:
+    //virtual ~ListBrowserWidget() = 0;
     virtual void enterPage() = 0;
     virtual void addEntry(Title *title) = 0;
     virtual void delEntry(Title *title) = 0;

@@ -35,7 +35,7 @@ class PopupMenu
 public:
     PopupMenu(Page *parent);
     PopupMenu() { qDebug("PopupMenu::PopupMenu() - nothing to do"); }
-    ~PopupMenu();
+    virtual ~PopupMenu();
 
     virtual void popup() { m_popupMenuWidget->popup(); }
     virtual void insertItem(QString text, QObject *receiver, const char *member) 

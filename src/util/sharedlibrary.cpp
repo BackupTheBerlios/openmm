@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "sharedlibrary.h"
-//#include "debug.h"
+#include "debug.h"
 
 #include <dlfcn.h>
 
@@ -25,10 +25,10 @@ SharedLibrary::SharedLibrary(string filename)
 {
     m_libHandle = dlopen(filename.c_str(), RTLD_NOW);
     if (!m_libHandle) {
-        printf("SharedLibrary::SharedLibrary() could not load library: %s\n", filename.c_str());
+        TRACE("SharedLibrary::SharedLibrary() could not load library: %s", filename.c_str());
         return;
     }
-    printf("SharedLibrary::SharedLibrary() opened library: %s\n", filename.c_str());
+    TRACE("SharedLibrary::SharedLibrary() opened library: %s", filename.c_str());
     dlerror();  // clear any pending error.
 }
 
@@ -45,11 +45,11 @@ SharedLibrary::resolve(const char * symb)
     void* res = dlsym(m_libHandle, symb);
     char* error;
     if ((error = dlerror()) != NULL)  {
-        printf("SharedLibrary::SharedLibrary() could not find symbol %s in library %s, error was: %s\n",
-                 symb, m_libHandle, error);
+        TRACE("SharedLibrary::SharedLibrary() could not find symbol %s, error was: %s",
+                 symb, error);
     }
     else {
-        printf("SharedLibrary::SharedLibrary() found symbol %s in library %s\n", symb, m_libHandle);
+        TRACE("SharedLibrary::SharedLibrary() found symbol %s", symb);
     }
     return res;
 }
