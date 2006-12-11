@@ -193,17 +193,17 @@ TvChannelList::getChannelPointer(int channelNumber)
 TvChannel*
 TvChannelList::getChannelPointer(QString channelSignature)
 {
-    //qDebug("Tv::getChannelPointer(), channelSignature: %s", channelSignature.latin1());
+    //TRACE("Tv::getChannelPointer(), channelSignature: %s", channelSignature.latin1());
     for (ChannelListT::iterator it = m_channelList.begin(); it != m_channelList.end(); ++it)
     {
-        //qDebug("Tv::getChannelPointer(), checking channel: %s", (*it)->getName().latin1());
+        //TRACE("Tv::getChannelPointer(), checking channel: %s", (*it)->getName().latin1());
         if ((*it)->getSignature() == channelSignature)
         {
-            //qDebug("Tv::getChannelPointer(), got channel: %s", (*it)->getName().latin1());
+            //TRACE("Tv::getChannelPointer(), got channel: %s", (*it)->getName().latin1());
             return (*it);
         }
     }
-    //qDebug("Tv::getChannelPointer(), channel not found!");
+    //TRACE("Tv::getChannelPointer(), channel not found!");
     return NULL;
 }
 

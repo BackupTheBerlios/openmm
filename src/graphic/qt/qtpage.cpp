@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "qtpage.h"
 #include "controler.h"
+#include "debug.h"
 
 #include <qlayout.h>
 
@@ -26,7 +27,7 @@
 QtPage::QtPage()
 {
     m_frame = new QWidget((QWidget*) Controler::instance()->pageStack()->frame());
-    qDebug("QtPage::QtPage() creating Page widget: %p.", m_frame);
+    TRACE("QtPage::QtPage() creating Page widget: %p.", m_frame);
     m_frame->installEventFilter(GlobalKeyHandler::instance());
     QVBoxLayout *l = new QVBoxLayout(m_frame);
     l->setAutoAdd(TRUE);

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "tvplayer.h"
 #include "controler.h"
+#include "debug.h"
 
 
 TvPlayer::TvPlayer(List *channelList)
@@ -38,7 +39,7 @@ TvPlayer::~TvPlayer()
 void
 TvPlayer::enterPage()
 {
-    qDebug("TvPlayer::enterPage()");
+    TRACE("TvPlayer::enterPage()");
     //m_channelList->update();
     startLiveTv();
 }
@@ -47,7 +48,7 @@ TvPlayer::enterPage()
 Title*
 TvPlayer::getCurrentChannelTitle()
 {
-    qDebug("TvPlayer::getCurrentChannelTitle() returns: %p", m_channelList->getTitle(getCurrentChannelNumber()));
+    TRACE("TvPlayer::getCurrentChannelTitle() returns: %p", m_channelList->getTitle(getCurrentChannelNumber()));
     return m_channelList->getTitle(getCurrentChannelNumber());
 }
 
@@ -55,7 +56,7 @@ TvPlayer::getCurrentChannelTitle()
 void
 TvPlayer::keyHandler(QKeyEvent *k)
 {
-    qDebug("TvPlayer::keyHandler()");
+    TRACE("TvPlayer::keyHandler()");
     switch (k->key()) {
         case Qt::Key_I:                               // info
         case Qt::Key_Return:
@@ -105,7 +106,7 @@ TvPlayer::keyHandler(QKeyEvent *k)
 void
 TvPlayer::startLiveTv()
 {
-    qDebug("TvPlayer::startLiveTv() on channel: %s", getCurrentChannelTitle()->getMrl()->getPath().latin1());
+    TRACE("TvPlayer::startLiveTv() on channel: %s", getCurrentChannelTitle()->getMrl()->getPath().latin1());
     //play("/data/video/001.vdr");
     play(getCurrentChannelTitle());
     showOsd(getCurrentChannelTitle()->getText("Name") + "   "

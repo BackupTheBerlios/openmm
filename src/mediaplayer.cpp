@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "mediaplayer.h"
 #include "controler.h"
+#include "debug.h"
 
 
 MediaPlayer::MediaPlayer(QString name)
@@ -35,7 +36,7 @@ MediaPlayer::~MediaPlayer()
 void
 MediaPlayer::showUp()
 {
-    qDebug("MediaPlayer::showUp()");
+    TRACE("MediaPlayer::showUp()");
     enterPage();
     Controler::instance()->streamPlayer()->setKeyHandler(this);
     Controler::instance()->streamPlayer()->showUp();

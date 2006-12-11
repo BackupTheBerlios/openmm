@@ -71,7 +71,7 @@ TvRec::getIdStr()
 void
 TvRec::setRecFiles(QStringList fileList)
 {
-    qDebug("TvRec::setRecFiles() first entry of fileList: %s", (*fileList.begin()).latin1());
+    TRACE("TvRec::setRecFiles() first entry of fileList: %s", (*fileList.begin()).latin1());
     m_fileList = fileList;
 }
 

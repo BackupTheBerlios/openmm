@@ -22,6 +22,7 @@
 #include "qtmenu.h"
 #include "qtlistbrowser.h"
 #include "qtpopupmenu.h"
+#include "debug.h"
 
 #include <dlfcn.h>
 
@@ -53,7 +54,7 @@ WidgetFactory::instance()
 void
 WidgetFactory::setToolkit(ToolkitT toolkit)
 {
-    qDebug("WidgetFactory::setToolkit()");
+    TRACE("WidgetFactory::setToolkit()");
     m_toolkit = toolkit;
     m_pageStackCtorName = "createPageStackWidget";
     m_pageCtorName = "createPageWidget";
@@ -81,10 +82,10 @@ WidgetFactory::setToolkit(ToolkitT toolkit)
 PageStackWidget*
 WidgetFactory::createPageStackWidget()
 {
-    qDebug("WidgetFactory::createPageStackWidget()");
+    TRACE("WidgetFactory::createPageStackWidget()");
     switch(m_toolkit) {
     case ToolkitQt:
-        qDebug("WidgetFactory::createPageStackWidget() for toolkit Qt");
+        TRACE("WidgetFactory::createPageStackWidget() for toolkit Qt");
         //return new QtPageStack();
         return (PageStackWidget*) (*m_pageStackCtor)();
     default:
@@ -96,10 +97,10 @@ WidgetFactory::createPageStackWidget()
 PageWidget* 
 WidgetFactory::createPageWidget()
 {
-    qDebug("WidgetFactory::createPage()");
+    TRACE("WidgetFactory::createPage()");
     switch(m_toolkit) {
     case ToolkitQt:
-        qDebug("WidgetFactory::createPage() for toolkit Qt");
+        TRACE("WidgetFactory::createPage() for toolkit Qt");
         //return new QtPage();
         return (PageWidget*) (*m_pageCtor)();
     default:
@@ -111,10 +112,10 @@ WidgetFactory::createPageWidget()
 MenuWidget* 
 WidgetFactory::createMenuWidget(Page *parent)
 {
-    qDebug("WidgetFactory::createMenu()");
+    TRACE("WidgetFactory::createMenu()");
     switch(m_toolkit) {
     case ToolkitQt:
-        qDebug("WidgetFactory::createMenu() for toolkit Qt");
+        TRACE("WidgetFactory::createMenu() for toolkit Qt");
         //return new QtMenu(parent);
         return (MenuWidget*) (*m_menuCtor)(parent);
     default:
@@ -126,10 +127,10 @@ WidgetFactory::createMenuWidget(Page *parent)
 ListBrowserWidget* 
 WidgetFactory::createListBrowserWidget(Page *parent, QStringList *cols)
 {
-    qDebug("WidgetFactory::createListBrowser()");
+    TRACE("WidgetFactory::createListBrowser()");
     switch(m_toolkit) {
     case ToolkitQt:
-        qDebug("WidgetFactory::createListBrowser() for toolkit Qt");
+        TRACE("WidgetFactory::createListBrowser() for toolkit Qt");
         //return new QtListBrowser(parent, cols);
         return (ListBrowserWidget*) (*m_listBrowserCtor)(parent, cols);
     default:
@@ -141,10 +142,10 @@ WidgetFactory::createListBrowserWidget(Page *parent, QStringList *cols)
 PopupMenuWidget* 
 WidgetFactory::createPopupMenuWidget(Page *parent)
 {
-    qDebug("WidgetFactory::createPopupMenu()");
+    TRACE("WidgetFactory::createPopupMenu()");
     switch(m_toolkit) {
     case ToolkitQt:
-        qDebug("WidgetFactory::createPopupMenu() for toolkit Qt");
+        TRACE("WidgetFactory::createPopupMenu() for toolkit Qt");
         //return new QtPopupMenu(parent);
         return (PopupMenuWidget*) (*m_popupMenuCtor)(parent);
     default:

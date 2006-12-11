@@ -18,12 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvrecpopup.h"
+#include "debug.h"
 
 
 TvRecPopup::TvRecPopup(TvRecPlayer *tvRecPlayer, Page *parent)
  : PopupMenu(parent)
 {
-    qDebug("TvRecPopup::TvRecPopup()");
+    TRACE("TvRecPopup::TvRecPopup()");
     m_tvRecPlayer = tvRecPlayer;
     insertItem("Play", this, SLOT(play()));
     insertItem("Delete", this, SLOT(del()));
@@ -38,7 +39,7 @@ TvRecPopup::~TvRecPopup()
 void
 TvRecPopup::play()
 {
-    qDebug("TvRecPopup::play() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvRecPopup::play() title: %s", m_title->getText("Name").latin1());
     m_tvRecPlayer->play(m_title);
     m_tvRecPlayer->showUp();
 }
@@ -47,5 +48,5 @@ TvRecPopup::play()
 void
 TvRecPopup::del()
 {
-    qDebug("TvRecPopup::del() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvRecPopup::del() title: %s", m_title->getText("Name").latin1());
 }

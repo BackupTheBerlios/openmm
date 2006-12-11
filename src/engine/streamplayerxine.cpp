@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "streamplayerxine.h"
+#include "debug.h"
 
 // #ifdef QWS
 // #include <qwindowsystem_qws.h>
@@ -35,7 +36,7 @@ double StreamPlayerXine::m_pixel_aspect = 0.0;
 
 StreamPlayerXine::StreamPlayerXine(Page *parent)
 {
-    qDebug("StreamPlayerXine::StreamPlayerXine()");
+    TRACE("StreamPlayerXine::StreamPlayerXine()");
     m_parent = parent;
     m_globX = m_parent->globalPositionX();
     m_globY = m_parent->globalPositionY();
@@ -53,7 +54,7 @@ StreamPlayerXine::~StreamPlayerXine()
 void
 StreamPlayerXine::initStream()
 {
-    qDebug("StreamPlayerXine::initStream()");
+    TRACE("StreamPlayerXine::initStream()");
 
     xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
@@ -127,7 +128,7 @@ StreamPlayerXine::initStream()
 void
 StreamPlayerXine::closeStream()
 {
-    qDebug("StreamPlayerXine::closeStream()");
+    TRACE("StreamPlayerXine::closeStream()");
     xine_close(xineStream);
     xine_dispose(xineStream);
     xine_close_audio_driver(xineEngine, audioDriver);
@@ -145,7 +146,7 @@ void
 StreamPlayerXine::showOsd(QString text, uint duration)
 {
     initOSD();
-    qDebug("StreamPlayerXine::showOSD(), with text: %s", text.latin1());
+    TRACE("StreamPlayerXine::showOSD(), with text: %s", text.latin1());
     xine_osd_draw_text(m_OSD, 0, 0, text, XINE_OSD_TEXT1);
     //xine_osd_draw_rect(m_OSD, 0, 0, 500, 100, 200, 1 );
 
@@ -157,7 +158,7 @@ StreamPlayerXine::showOsd(QString text, uint duration)
 void
 StreamPlayerXine::hideOsd()
 {
-    qDebug("StreamPlayerXine::hideOSD()");
+    TRACE("StreamPlayerXine::hideOSD()");
     xine_osd_hide(m_OSD, 0);
     xine_osd_free(m_OSD);
     m_OSD = NULL;
@@ -167,7 +168,7 @@ StreamPlayerXine::hideOsd()
 void
 StreamPlayerXine::initOSD()
 {
-    qDebug("StreamPlayerXine::initOSD()");
+    TRACE("StreamPlayerXine::initOSD()");
     if (m_OSD != NULL)
         hideOsd();
     if (m_OSDTimer.isActive())
@@ -177,9 +178,9 @@ StreamPlayerXine::initOSD()
     m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(m_parent->height() * 0.75), m_parent->width() - 2*m_marginOSD,
                         (int)((m_parent->height() * 0.25)) - m_marginOSD);
     if (!m_OSD)
-        qDebug("StreamPlayerXine::initOSD(), initialization of OSD failed");
+        TRACE("StreamPlayerXine::initOSD(), initialization of OSD failed");
     if (!xine_osd_set_font(m_OSD, "sans", 24))
-        qDebug("StreamPlayerXine::initOSD(), initialization of OSD font failed");
+        TRACE("StreamPlayerXine::initOSD(), initialization of OSD font failed");
     //xine_osd_set_text_palette(m_OSD, XINE_TEXTPALETTE_WHITE_BLACK_TRANSPARENT, XINE_OSD_TEXT1);
 }
 
@@ -221,19 +222,19 @@ StreamPlayerXine::playStream(Mrl *mrl)
 {
     QString xineMrl = mrl->getProtocol() + mrl->getServer() + mrl->getPath();
     if (mrl->getType() == Mrl::TvVdr) {
-         qDebug("StreamPlayerXine::playStream(), setting demuxer to mpeg_pes");
+         TRACE("StreamPlayerXine::playStream(), setting demuxer to mpeg_pes");
          xineMrl += "#demux:mpeg_pes";
     }
     if (mrl->getFiles().count() > 0) {
         // this is a multi-file mrl
         // TODO: loop over all files.
         xineMrl = mrl->getProtocol() + mrl->getServer() + mrl->getPath() + "/" + mrl->getFiles()[0];
-        qDebug("StreamPlayerXine::play() mrl: %s", xineMrl.ascii());
+        TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.ascii());
         xine_open(xineStream, xineMrl.utf8());
         xine_play(xineStream, 0, 0);
     }
     else {
-        qDebug("StreamPlayerXine::play() mrl: %s", xineMrl.ascii());
+        TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.ascii());
         xine_open(xineStream, xineMrl.utf8());
         xine_play(xineStream, 0, 0);
     }
@@ -243,7 +244,7 @@ StreamPlayerXine::playStream(Mrl *mrl)
 void
 StreamPlayerXine::stopStream()
 {
-    qDebug("StreamPlayerXine::stop()");
+    TRACE("StreamPlayerXine::stop()");
     xine_stop(xineStream);
     xine_close(xineStream);
 }

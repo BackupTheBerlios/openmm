@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "qtpagestack.h"
 #include "controler.h"
+#include "debug.h"
 
 #include <qlayout.h>
 #include <qcursor.h>
@@ -26,7 +27,7 @@
 
 QtPageStack::QtPageStack()
 {
-    qDebug("QtPageStack::QtPageStack()");
+    TRACE("QtPageStack::QtPageStack()");
     m_qtApp = new QApplication(Controler::instance()->getArgc(), Controler::instance()->getArgv());
     m_pageStack = new QWidgetStack();
     m_pageStack->setCaption("Jam");
@@ -47,9 +48,9 @@ int
 QtPageStack::loop()
 {
     m_pageStack->show();
-    qDebug("QtPageStack::loop(), entering main loop.");
+    TRACE("QtPageStack::loop(), entering main loop.");
     return m_qtApp->exec();
-    qDebug("QtPageStack::loop(), exiting main loop.");
+    TRACE("QtPageStack::loop(), exiting main loop.");
 }
 
 

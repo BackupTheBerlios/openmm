@@ -43,7 +43,7 @@ TvProgram::~TvProgram()
 QString
 TvProgram::getColText(QString col)
 {
-    //qDebug("TvProgram::getColText()");
+    //TRACE("TvProgram::getColText()");
     if (col == colName(1)) {
         return m_id;
     }
@@ -72,7 +72,7 @@ TvProgram::getColText(QString col)
 void
 TvProgram::setColText(QString col, QString text)
 {
-    //qDebug("TvProgram::setColText() col: %s, text: %s", col.latin1(), text.latin1());
+    //TRACE("TvProgram::setColText() col: %s, text: %s", col.latin1(), text.latin1());
     if (col == colName(1)) {
         m_id = text;
     }
@@ -95,7 +95,7 @@ TvProgram::setColText(QString col, QString text)
 QString
 TvProgram::timeStr(time_t t)
 {
-    //qDebug("TvProgram::timeStr()");
+    //TRACE("TvProgram::timeStr()");
     QDateTime date;
     date.setTime_t(t);
     return date.toString("dd@hh:mm");

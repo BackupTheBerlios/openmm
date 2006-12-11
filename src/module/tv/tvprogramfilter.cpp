@@ -36,7 +36,7 @@ TvProgramFilter::~TvProgramFilter()
 bool
 TvProgramFilter::passTitle(Title *title)
 {
-    //qDebug("TvProgramFilter::pass() m_at: %i, start: %i, end: %i", m_at, ((TvProgram*)title)->getStart(),
+    //TRACE("TvProgramFilter::pass() m_at: %i, start: %i, end: %i", m_at, ((TvProgram*)title)->getStart(),
     //      ((TvProgram*)title)->getEnd());
 
 // TODO: philosophical question: filter out if type doesn't match, or pass all other types through?

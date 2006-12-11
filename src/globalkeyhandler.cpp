@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "globalkeyhandler.h"
+#include "debug.h"
 
 /*
 GlobalKeyHandler::GlobalKeyHandler()
@@ -47,25 +48,25 @@ GlobalKeyHandler::instance()
 bool
 GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
 {
-    //qDebug( "GlobalKeyHandler::eventFilter() event type %d", e->type() );
+    //TRACE( "GlobalKeyHandler::eventFilter() event type %d", e->type() );
     if ( e->type() == QEvent::KeyPress ) {
         // special processing for key press
         QKeyEvent *k = (QKeyEvent *)e;
-        //qDebug( "GlobalKeyHandler::eventFilter() key press %d", k->key() );
+        //TRACE( "GlobalKeyHandler::eventFilter() key press %d", k->key() );
         switch (k->key()) {
         case Qt::Key_M:                               // menu
-            qDebug("GlobalKeyHandler::eventFilter() switching to menu");
+            TRACE("GlobalKeyHandler::eventFilter() switching to menu");
             Controler::instance()->mainMenuShow();
             return true;
         case Qt::Key_Q:                               // quit
             //destroy();
-            qDebug("GlobalKeyHandler::eventFilter() exiting QApplication");
+            TRACE("GlobalKeyHandler::eventFilter() exiting QApplication");
             QApplication::exit();  // TODO: this (sometimes) does nothing!!
-            qDebug("GlobalKeyHandler::eventFilter() after exiting QApplication");
+            TRACE("GlobalKeyHandler::eventFilter() after exiting QApplication");
             return true;
         case Qt::Key_Backspace:                       // go back
         case Qt::Key_Escape:
-            qDebug("GlobalKeyHandler::eventFilter() going back");
+            TRACE("GlobalKeyHandler::eventFilter() going back");
             Controler::instance()->goBack();
             return true;
         default:

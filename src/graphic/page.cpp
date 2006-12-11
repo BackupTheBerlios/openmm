@@ -20,6 +20,7 @@
 #include "page.h"
 #include "controler.h"
 #include "widgetfactory.h"
+#include "debug.h"
 
 
 Page::Page(QString name)
@@ -28,7 +29,7 @@ Page::Page(QString name)
     m_pageWidget = WidgetFactory::instance()->createPageWidget();
 
     // add this page to the global widget stack.
-    qDebug("Page::Page() adding Page %s: %p to PageStack.", m_name.latin1(), this);
+    TRACE("Page::Page() adding Page %s: %p to PageStack.", m_name.latin1(), this);
     Controler::instance()->addPage(this);
 }
 
@@ -41,7 +42,7 @@ Page::~Page()
 void
 Page::showUp()
 {
-    qDebug("Page::showUp()");
+    TRACE("Page::showUp()");
     if (Controler::instance()->getCurrentPage()) {
         Controler::instance()->getCurrentPage()->exitPage();
     }

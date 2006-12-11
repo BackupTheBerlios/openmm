@@ -22,7 +22,7 @@
 TitlePair::TitlePair(Title *left, Title *right)
  : Title("", Title::TitlePairT)
 {
-    //qDebug("TitlePair::TitlePair() of left: %s, right: %s", left->getText("Name").latin1(), 
+    //TRACE("TitlePair::TitlePair() of left: %s, right: %s", left->getText("Name").latin1(), 
     //      right->getText("Name").latin1());
     m_left = left;
     m_right = right;
@@ -51,7 +51,7 @@ TitlePair::~TitlePair()
 QString
 TitlePair::getColText(QString col)
 {
-    //qDebug("TitlePair::getColText() left # right: %s # %s", m_left->getText(col).latin1(), m_right->getText(col).latin1());
+    //TRACE("TitlePair::getColText() left # right: %s # %s", m_left->getText(col).latin1(), m_right->getText(col).latin1());
     if (m_left && col == "Left.Name") {
         return m_left->getText("Name");
     }

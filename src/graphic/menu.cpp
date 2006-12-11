@@ -22,12 +22,13 @@
 #include "controler.h"
 #include "globalkeyhandler.h"
 #include "widgetfactory.h"
+#include "debug.h"
 
 
 Menu::Menu(QString name)
  : Page(name)
 {
-    qDebug("Menu::Menu(), name: %s", name.latin1());
+    TRACE("Menu::Menu(), name: %s", name.latin1());
     m_menuWidget = WidgetFactory::instance()->createMenuWidget(this);
     setMenuName(name);
 }

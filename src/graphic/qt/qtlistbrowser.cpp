@@ -19,24 +19,25 @@
  ***************************************************************************/
 #include "qtlistbrowser.h"
 #include "globalkeyhandler.h"
+#include "debug.h"
 
 #include <qlayout.h>
 
 
 QtListBrowser::QtListBrowser(Page *parent, QStringList *cols)
 {
-    qDebug("QtListBrowser::QtListBrowser()");
+    TRACE("QtListBrowser::QtListBrowser()");
 
     m_cols = cols;
     QWidget *p = (QWidget*) parent->frame();
-    qDebug("QtListBrowser::QtListBrowser(), parent widget: %p", p);
+    TRACE("QtListBrowser::QtListBrowser(), parent widget: %p", p);
     m_listView = new QListView(p);
-    qDebug("QtListBrowser::QtListBrowser(), build QListView widget: %p", m_listView);
+    TRACE("QtListBrowser::QtListBrowser(), build QListView widget: %p", m_listView);
     m_listView->installEventFilter(GlobalKeyHandler::instance());
-    qDebug("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
+    TRACE("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
 
     connect(m_listView, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(showPopupMenu(QListViewItem*)));
-    qDebug("QtListBrowser::QtListBrowser() done");
+    TRACE("QtListBrowser::QtListBrowser() done");
 }
 
 
@@ -48,7 +49,7 @@ QtListBrowser::~QtListBrowser()
 void
 QtListBrowser::enterPage()
 {
-    qDebug("QtListBrowser::enterPage()");
+    TRACE("QtListBrowser::enterPage()");
     m_listView->setFocus();
 }
 
@@ -59,7 +60,7 @@ QtListBrowser::addEntry(Title *title)
     if (!title) {
         return;
     }
-    //qDebug("QtListBrowser::addEntry() with name: %s", title->getText("Name").latin1());
+    //TRACE("QtListBrowser::addEntry() with name: %s", title->getText("Name").latin1());
     QListViewItem *entry = new QListViewItem(m_listView);
     m_titleList.insert(entry, title);
     m_itemList.insert(title, entry);
@@ -72,7 +73,7 @@ QtListBrowser::addEntry(Title *title)
 void
 QtListBrowser::delEntry(Title *title)
 {
-    qDebug("QtListBrowser::delEntry()");
+    TRACE("QtListBrowser::delEntry()");
     if (!title) {
         return;
     }
@@ -86,7 +87,7 @@ void
 QtListBrowser::selectEntry(Title *title)
 {
     // TODO: get the right entry to select.
-    qDebug("QtListBrowser::selectEntry()");
+    TRACE("QtListBrowser::selectEntry()");
     m_listView->setCurrentItem(m_itemList[title]);
     m_listView->setSelected(m_itemList[title], true);
 }
@@ -95,7 +96,7 @@ QtListBrowser::selectEntry(Title *title)
 void
 QtListBrowser::clear()
 {
-    qDebug("QtListBrowser::clear()");
+    TRACE("QtListBrowser::clear()");
     m_listView->clear();
     m_titleList.clear();
     m_itemList.clear();
@@ -105,7 +106,7 @@ QtListBrowser::clear()
 void
 QtListBrowser::showPopupMenu(QListViewItem *entry)
 {
-    qDebug("QtListBrowser::showPopupMenu()");
+    TRACE("QtListBrowser::showPopupMenu()");
     if (m_popupMenu) {
         m_popupMenu->popup(m_titleList[entry]);
     }

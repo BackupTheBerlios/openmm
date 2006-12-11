@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "streamplayer.h"
+#include "debug.h"
 
 
 // Have to initialize (and thus allocate in gcc) m_instance somewhere
@@ -28,14 +29,14 @@ StreamPlayer    *StreamPlayer::m_instance = 0;
 StreamPlayer::StreamPlayer()
  : Page("StreamPlayer")
 {
-    qDebug("StreamPlayer::StreamPlayer()");
+    TRACE("StreamPlayer::StreamPlayer()");
 }
 
 
 StreamPlayer*
 StreamPlayer::instance()
 {
-    qDebug("StreamPlayer::instance()");
+    TRACE("StreamPlayer::instance()");
     if (m_instance == 0) {
         m_instance = new StreamPlayer();
     }
@@ -53,7 +54,7 @@ StreamPlayer::setKeyHandler(MediaPlayer *player)
 void
 StreamPlayer::keyPressEvent(QKeyEvent *k)
 {
-    qDebug("StreamPlayer::keyPressEvent()");
+    TRACE("StreamPlayer::keyPressEvent()");
     m_keyHandler->keyHandler(k);
 }
 
@@ -97,7 +98,7 @@ StreamPlayer::setEngine(EngineT engine)
 void
 StreamPlayer::play(Title *title)
 {
-    qDebug("StreamPlayer::play()");
+    TRACE("StreamPlayer::play()");
     if (m_isPlaying) {
         stopStream();
     }
@@ -112,7 +113,7 @@ StreamPlayer::play(Title *title)
 void
 StreamPlayer::stop()
 {
-    qDebug("StreamPlayer::stop()");
+    TRACE("StreamPlayer::stop()");
     m_isPlaying = false;
     stopStream();
 }

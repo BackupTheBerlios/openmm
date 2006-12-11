@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "tvprogrambrowser.h"
 #include "titlepair.h"
+#include "debug.h"
 
 #include <qdatetime.h>
 
@@ -41,7 +42,7 @@ TvProgramBrowser::~TvProgramBrowser()
 void
 TvProgramBrowser::enterPage()
 {
-    qDebug("TvProgramBrowser::enterPage()");
+    TRACE("TvProgramBrowser::enterPage()");
     m_listBrowserWidget->enterPage();
     if (m_list->count()) {
         selectEntry(0);
@@ -52,13 +53,13 @@ TvProgramBrowser::enterPage()
 bool
 TvProgramBrowser::eventFilter(QObject *o, QEvent *e)
 {
-    //qDebug("TvProgramBrowser::eventFilter()");
+    //TRACE("TvProgramBrowser::eventFilter()");
     if ( e->type() == QEvent::KeyPress ) {
         QKeyEvent *k = (QKeyEvent *)e;
         time_t at;
         switch (k->key()) {
             case Qt::Key_Left:
-                qDebug("TvProgramBrowser::eventFilter(), Key_Left, Title: %s", 
+                TRACE("TvProgramBrowser::eventFilter(), Key_Left, Title: %s", 
                         ((TitlePair*)getCurrent())->getRight()->getText("Name").latin1());
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getStart() - 1;
                 if (at < QDateTime::currentDateTime().toTime_t()) {
@@ -69,7 +70,7 @@ TvProgramBrowser::eventFilter(QObject *o, QEvent *e)
                 ((ListComposer*)m_list)->pushFiltered();
                 return true;
             case Qt::Key_Right:
-                qDebug("TvProgramBrowser::eventFilter(), Key_Right, Title: %s", 
+                TRACE("TvProgramBrowser::eventFilter(), Key_Right, Title: %s", 
                         ((TitlePair*)getCurrent())->getRight()->getText("Name").latin1());
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getEnd();
                 m_filter->setTime(at);

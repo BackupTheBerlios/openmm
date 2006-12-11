@@ -21,6 +21,7 @@
 #include "tvtimer.h"
 #include "tvprogram.h"
 #include "tvchannel.h"
+#include "debug.h"
 
 #include <qdir.h>
 #include <qregexp.h>
@@ -70,7 +71,7 @@ VdrRequest::run()
         return;
 
     m_socket->readLine(line, MaxLen);
-    //qDebug("Connect Reply: %s", line);
+    //TRACE("Connect Reply: %s", line);
 
     writeToSocket(m_request + "\r\n");
 
@@ -78,7 +79,7 @@ VdrRequest::run()
     {
         m_socket->readLine(line, MaxLen);
         m_reply.append(QString::fromUtf8(line));
-        //qDebug("Reply: %s", (QString(line).stripWhiteSpace()).latin1());
+        //TRACE("Reply: %s", (QString(line).stripWhiteSpace()).latin1());
     } while (line[3] != ' ');
 
     writeToSocket("QUIT\r\n");
@@ -108,7 +109,7 @@ VdrRequest::writeToSocket(const QString &str)
 void
 VdrRequest::processReply()
 {
-    qDebug("VdrRequest::processReply()");
+    TRACE("VdrRequest::processReply()");
     if (m_request == "LSTC")
     {
         for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
@@ -138,7 +139,7 @@ VdrRequest::processReply()
         QString channelName = "";
         for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
-            //qDebug("VdrRequest::processReply() line: %s", (*it).latin1());
+            //TRACE("VdrRequest::processReply() line: %s", (*it).latin1());
             if ((*it)[4] == 'C') {
                 channelSignature = (*it).section(' ', 1, 1);
                 channelId = channelSignature.section('-', 3, 3).toInt();
@@ -198,7 +199,7 @@ VdrRequest::processReply()
             QString day = (*it).mid(pos, 8);
             QString start = (*it).mid(pos + 9, 6);
             QString name = (*it).right((*it).length() - pos - 16).stripWhiteSpace();
-            //qDebug("SvdrpRequest::processReply() new TvRec: %s, %s, %s, %s", 
+            //TRACE("SvdrpRequest::processReply() new TvRec: %s, %s, %s, %s", 
             //    id.latin1(), day.latin1(), start.latin1(), title.latin1());
             TvRec *tvRec = new TvRec(id, name, day, start);
             // no video directory specified, no infos about the recordings and no video files to play.
@@ -211,7 +212,7 @@ VdrRequest::processReply()
             m_list->addTitleEntry(tvRec);
         }
     }
-    qDebug("VdrRequest::processReply() finished.");
+    TRACE("VdrRequest::processReply() finished.");
 }
 
 
@@ -223,19 +224,19 @@ VdrRequest::locateRecDir(TvRec *tvRec)
     vdrRecNamePath.replace(QRegExp("\\W"), "*");  // TODO: dangerous! All non-word characters are
                                                  // replaced by arbitrary character sequences.
                                                 // maybe do a more exact RegExp matching: .{1,2}
-    qDebug("VdrRequest::locateRecDir() vdrRecNamePath: %s", vdrRecNamePath.latin1());
+    TRACE("VdrRequest::locateRecDir() vdrRecNamePath: %s", vdrRecNamePath.latin1());
     QStringList recList = videoDir.entryList(vdrRecNamePath);
-    qDebug("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
     vdrRecNamePath = recList[0];
     QDir d(m_videoDir + "/" + vdrRecNamePath);
     //recList = d.entryList("*.rec");
-    //qDebug("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    //TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
 
     QString vdrRecDirPath = "";
     recList = d.entryList("_");
-    //qDebug("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    //TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
     if (recList.count() > 0) {
-        qDebug("VdrRequest::locateRecDir() this is a serial!");
+        TRACE("VdrRequest::locateRecDir() this is a serial!");
         vdrRecNamePath += "/_";
         d = QDir(m_videoDir + "/" + vdrRecNamePath);
     }
@@ -246,13 +247,13 @@ VdrRequest::locateRecDir(TvRec *tvRec)
     start[2] = '?';
     vdrRecDirPath = date + "." + start;
     recList = d.entryList(vdrRecDirPath + ".??.??.rec");
-    qDebug("VdrRequest::locateRecDir() vdrRecDirPath: %s", vdrRecDirPath.latin1());
-    qDebug("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    TRACE("VdrRequest::locateRecDir() vdrRecDirPath: %s", vdrRecDirPath.latin1());
+    TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
     QString vdrRecPath = m_videoDir + "/" + vdrRecNamePath + "/" + recList[0];
-    qDebug("VdrRequest::locateRecDir() vdrRecPath: %s", vdrRecPath.latin1());
+    TRACE("VdrRequest::locateRecDir() vdrRecPath: %s", vdrRecPath.latin1());
     QDir recDir(vdrRecPath);
     recList = recDir.entryList("???.vdr");
-    qDebug("VdrRequest::locateRecDir() recDir number of entries: %i, first recDir entry: %s", 
+    TRACE("VdrRequest::locateRecDir() recDir number of entries: %i, first recDir entry: %s", 
         recList.count(), recList[0].latin1());
     Mrl *mrl = new Mrl("file://", vdrRecPath);
     mrl->setFiles(recList);

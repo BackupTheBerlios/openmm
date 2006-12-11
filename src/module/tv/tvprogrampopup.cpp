@@ -20,12 +20,13 @@
 #include "tvprogrampopup.h"
 #include "tvtimer.h"
 #include "titlepair.h"
+#include "debug.h"
 
 
 TvProgramPopup::TvProgramPopup(List *timerList, TvPlayer *tvPlayer, Page *parent)
  : PopupMenu(parent)
 {
-    qDebug("TvProgramPopup::TvProgramPopup()");
+    TRACE("TvProgramPopup::TvProgramPopup()");
     m_timerList = timerList;
     m_tvPlayer = tvPlayer;
     insertItem("Timer", this, SLOT(addTimer()));
@@ -56,7 +57,7 @@ TvProgramPopup::addTimer()
 void
 TvProgramPopup::switchChannel()
 {
-    qDebug("TvProgramPopup::switchChannel() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvProgramPopup::switchChannel() title: %s", m_title->getText("Name").latin1());
     // TODO: switch to the selected channel.
     if ((m_title->getType() == Title::TitlePairT)) {
         Title *l = ((TitlePair*)m_title)->getLeft();
@@ -70,6 +71,6 @@ TvProgramPopup::switchChannel()
 void
 TvProgramPopup::showChannel()
 {
-    qDebug("TvProgramPopup::showChannel() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvProgramPopup::showChannel() title: %s", m_title->getText("Name").latin1());
     // TODO: show a Page with the EPG of this channel.
 }

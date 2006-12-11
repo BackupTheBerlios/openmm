@@ -18,11 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvtimerpopup.h"
+#include "debug.h"
 
 TvTimerPopup::TvTimerPopup(Page *parent)
  : PopupMenu(parent)
 {
-    qDebug("TvTimerPopup::TvTimerPopup()");
+    TRACE("TvTimerPopup::TvTimerPopup()");
     insertItem("Edit", this, SLOT(timerEdit()));
     insertItem("Delete", this, SLOT(timerDelete()));
 }
@@ -36,7 +37,7 @@ TvTimerPopup::~TvTimerPopup()
 void
 TvTimerPopup::timerEdit()
 {
-    qDebug("TvTimerPopup::timerEdit() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvTimerPopup::timerEdit() title: %s", m_title->getText("Name").latin1());
     // TODO: edit this timer in a Page.
 }
 
@@ -44,6 +45,6 @@ TvTimerPopup::timerEdit()
 void
 TvTimerPopup::timerDelete()
 {
-    qDebug("TvTimerPopup::timerDelete() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvTimerPopup::timerDelete() title: %s", m_title->getText("Name").latin1());
     m_list->delTitle(m_title);
 }

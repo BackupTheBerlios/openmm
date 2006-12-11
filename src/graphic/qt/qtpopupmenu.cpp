@@ -18,10 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "qtpopupmenu.h"
+#include "debug.h"
 
 QtPopupMenu::QtPopupMenu(Page *parent)
 {
-    qDebug("QtPopupMenu::QtPopupMenu()");
+    TRACE("QtPopupMenu::QtPopupMenu()");
     m_popupMenu = new QPopupMenu();
     m_parent = parent;
 }
@@ -35,7 +36,7 @@ QtPopupMenu::~QtPopupMenu()
 void
 QtPopupMenu::popup()
 {
-    qDebug("QtPopupMenu::popup()");
+    TRACE("QtPopupMenu::popup()");
     if (m_parent) {
         QSize center = QSize(m_parent->width(), m_parent->height())/2 - m_popupMenu->sizeHint()/2;
         m_popupMenu->popup(QPoint(center.width() + m_parent->globalPositionX(),

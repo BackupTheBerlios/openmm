@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "tvrecplayer.h"
 #include "controler.h"
+#include "debug.h"
 
 
 TvRecPlayer::TvRecPlayer(List *recList)
@@ -37,7 +38,7 @@ TvRecPlayer::~TvRecPlayer()
 void
 TvRecPlayer::enterPage()
 {
-    qDebug("TvRecPlayer::enterPage()");
+    TRACE("TvRecPlayer::enterPage()");
     //startRec("/data/video/002.vdr");
 }
 
@@ -45,7 +46,7 @@ TvRecPlayer::enterPage()
 void
 TvRecPlayer::startRec(Title *title)
 {
-    //qDebug("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).ascii());
+    //TRACE("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).ascii());
     //play(("file://" + mrl).utf8());
     play(title);
 }

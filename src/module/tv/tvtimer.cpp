@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvtimer.h"
+#include "debug.h"
 
 #include <qdatetime.h>
 
@@ -88,7 +89,7 @@ TvTimer::TvTimer(TvChannel *channel, TvProgram *program)
     m_resist = 99;  // TODO: get these default settings from config.
     setHeader("Id;Channel;Day;Time Start;Time End;Active;Priority;Resistance");
 
-    qDebug("TvTimer::TvTimer(TvProgram) with channelId: %s, start: %s, end: %s, day: %s", 
+    TRACE("TvTimer::TvTimer(TvProgram) with channelId: %s, start: %s, end: %s, day: %s", 
             m_channelId.latin1(), m_start->str().latin1(), m_end->str().latin1(), m_day->str().latin1());
 }
 

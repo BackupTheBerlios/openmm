@@ -20,6 +20,7 @@
 #include "listbrowser.h"
 #include "globalkeyhandler.h"
 #include "widgetfactory.h"
+#include "debug.h"
 
 
 QString ListBrowser::colSeperator = ";";
@@ -27,12 +28,12 @@ QString ListBrowser::colSeperator = ";";
 ListBrowser::ListBrowser(QString name, QString cols, List *list)
  : Page(name)
 {
-    qDebug("ListBrowser::ListBrowser()");
+    TRACE("ListBrowser::ListBrowser()");
     m_cols = QStringList::split(colSeperator, cols);
     m_list = list;
     m_popupMenu = 0;
 
-    qDebug("ListBrowser::ListBrowser() creating ListBrowser widget");
+    TRACE("ListBrowser::ListBrowser() creating ListBrowser widget");
     m_listBrowserWidget = WidgetFactory::instance()->createListBrowserWidget(this, &m_cols);
 
     for (QStringList::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
@@ -52,7 +53,7 @@ ListBrowser::~ListBrowser()
 void
 ListBrowser::enterPage()
 {
-    qDebug("ListBrowser::enterPage()");
+    TRACE("ListBrowser::enterPage()");
     clear();  // TODO: update(), fill(), ... when and what?
     if (!m_list) {
         return;
@@ -82,7 +83,7 @@ ListBrowser::delEntry(Title *title)
 void
 ListBrowser::selectEntry(int number)
 {
-    qDebug("ListBrowser::selectEntry() number: %i", number);
+    TRACE("ListBrowser::selectEntry() number: %i", number);
     selectEntry(m_list->getTitle(number));
 }
 
@@ -90,7 +91,7 @@ ListBrowser::selectEntry(int number)
 void
 ListBrowser::selectEntry(Title *title)
 {
-    qDebug("ListBrowser::selectEntry() from Title");
+    TRACE("ListBrowser::selectEntry() from Title");
     m_listBrowserWidget->selectEntry(title);
 }
 

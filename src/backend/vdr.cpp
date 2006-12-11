@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "vdr.h"
 #include "vdrrequest.h"
+#include "debug.h"
 
 
 Vdr::Vdr()
@@ -53,7 +54,7 @@ Vdr::fill(List *list, Title::TitleT type)
     default:
         break;
     }
-    qDebug("Vdr::fill() starting request: %s", vdrRequest.latin1());
+    TRACE("Vdr::fill() starting request: %s", vdrRequest.latin1());
 
     VdrRequest request(this, list, vdrRequest);
     request.startRequest();
@@ -83,7 +84,7 @@ Vdr::addProxyTitle(Title *title)
     default:
         break;
     }
-    qDebug("Vdr::addProxyTitle() starting request: %s", vdrRequest.latin1());
+    TRACE("Vdr::addProxyTitle() starting request: %s", vdrRequest.latin1());
 
     VdrRequest request(this, 0, vdrRequest);
     request.startRequest();
@@ -108,7 +109,7 @@ Vdr::delProxyTitle(Title *title)
     default:
         break;
     }
-    qDebug("Vdr::delProxyTitle() starting request: %s", vdrRequest.latin1());
+    TRACE("Vdr::delProxyTitle() starting request: %s", vdrRequest.latin1());
 
     VdrRequest request(this, 0, vdrRequest);
     request.startRequest();

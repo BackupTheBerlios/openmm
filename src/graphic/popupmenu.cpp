@@ -19,11 +19,12 @@
  ***************************************************************************/
 #include "popupmenu.h"
 #include "widgetfactory.h"
+#include "debug.h"
 
 
 PopupMenu::PopupMenu(Page *parent)
 {
-    qDebug("PopupMenu::PopupMenu()");
+    TRACE("PopupMenu::PopupMenu()");
     m_parent = parent;
     m_title = 0;
     m_list = 0;

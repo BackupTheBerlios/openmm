@@ -19,12 +19,13 @@
  ***************************************************************************/
 #include "listcomposer.h"
 #include "titlepair.h"
+#include "debug.h"
 
 
 ListComposer::ListComposer(List *left, List *right, JoinT join)
  : List()
 {
-    qDebug("ListComposer::ListComposer()");
+    TRACE("ListComposer::ListComposer()");
     m_left = left;
     m_right = right;
     m_filter = 0;
@@ -49,7 +50,7 @@ ListComposer::~ListComposer()
 void
 ListComposer::addTitleLeft(Title *entry)
 {
-    //qDebug("ListComposer::addTitleLeft() with name: %s", entry->getText("Name").latin1());
+    //TRACE("ListComposer::addTitleLeft() with name: %s", entry->getText("Name").latin1());
     // find a matching ident in the right Titles (columns of type Identifier with same name).
     bool match = false;
     for (int i = 0; i < m_right->count(); i++) {
@@ -77,7 +78,7 @@ ListComposer::addTitleLeft(Title *entry)
 void
 ListComposer::pushFiltered()
 {
-    qDebug("ListComposer::pushFiltered()");
+    TRACE("ListComposer::pushFiltered()");
     for (int i = 0; i < count(); i++) {
         if (m_filter) {  // only push a filtered Title to the outside (for example to a TitleBrowser)
             if (!((TitlePair*)getTitle(i))->getLeft() 

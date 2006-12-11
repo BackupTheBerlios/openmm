@@ -19,14 +19,15 @@
  ***************************************************************************/
 #include "pagestack.h"
 #include "widgetfactory.h"
+#include "debug.h"
 
 
 PageStack::PageStack()
 {
-    qDebug("PageStack::PageStack()");
+    TRACE("PageStack::PageStack()");
     m_pageStackWidget = WidgetFactory::instance()->createPageStackWidget();
     m_visiblePage = 0;
-    qDebug("PageStack::PageStack() complete");
+    TRACE("PageStack::PageStack() complete");
 }
 
 
@@ -39,8 +40,8 @@ PageStack::~PageStack()
 void
 PageStack::raisePage(Page *page)
 {
-    qDebug("PageStack::raisePage()");
+    TRACE("PageStack::raisePage()");
     m_pageStackWidget->raisePage(page);
     m_visiblePage = page;
-    qDebug("PageStack::raisePage() complete");
+    TRACE("PageStack::raisePage() complete");
 }

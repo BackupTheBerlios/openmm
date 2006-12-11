@@ -21,11 +21,12 @@
 #include "qtmenu.h"
 #include "controler.h"
 #include "globalkeyhandler.h"
+#include "debug.h"
 
 
 QtMenu::QtMenu(Page *parent)
 {
-    qDebug("QtMenu::QtMenu()");
+    TRACE("QtMenu::QtMenu()");
     m_list = new QListView((QWidget*) parent->frame());
     m_list->installEventFilter(GlobalKeyHandler::instance());
     m_entryNumber = 0;
@@ -57,14 +58,14 @@ QtMenu::addEntry(Page* page)
 void
 QtMenu::setDefaultEntry(Page* page)
 {
-    qDebug("QtMenu::setDefaultEntry() for page: %p", page);
+    TRACE("QtMenu::setDefaultEntry() for page: %p", page);
 }
 
 
 void
 QtMenu::enterPage()
 {
-    qDebug("QtMenu::enterPage(), set default entry to: %p", m_defaultEntry);
+    TRACE("QtMenu::enterPage(), set default entry to: %p", m_defaultEntry);
     m_list->setCurrentItem(m_defaultEntry);
     m_list->setSelected(m_defaultEntry, true);
     m_list->setFocus();
@@ -74,7 +75,7 @@ QtMenu::enterPage()
 void
 QtMenu::selectEntry(QListViewItem* i)
 {
-    qDebug("QtMenu::selectEntry()");
+    TRACE("QtMenu::selectEntry()");
     Page *p = m_entryDict[i];
     p->showUp();
 }
@@ -83,7 +84,7 @@ QtMenu::selectEntry(QListViewItem* i)
 QListViewItem*
 QtMenu::findEntry(Page *page)
 {
-    qDebug("Menu::findEntry() with page: %p", page);
+    TRACE("Menu::findEntry() with page: %p", page);
     // TODO: implement findItem()
     return 0;
 }

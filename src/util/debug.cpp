@@ -7,7 +7,7 @@
 // 1. we name it TRACE(), so we have to go through the hassle with varargs.
 // 2. we append a newline.
 
-#ifdef __DEBUG__
+// // #ifdef __DEBUG__
 
 void
 TRACE(const char *msg, ...) {
@@ -19,4 +19,4 @@ TRACE(const char *msg, ...) {
     fprintf( stderr, "%s\n", buf );         // add newline
 }
 
-#endif  // __DEBUG__
+// // #endif  // __DEBUG__

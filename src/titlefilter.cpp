@@ -34,10 +34,10 @@ TitleFilter::~TitleFilter()
 bool
 TitleFilter::pass(Title *title)
 {
-//    qDebug("TitleFilter::pass()");
+//    TRACE("TitleFilter::pass()");
     // if title is a TitlePair, recurse down left and right Title and return if one of them passes.
     if (title->getType() == Title::TitlePairT) {
-        //qDebug("TitleFilter::pass(), type: TitlePair, left: %i,right: %i", pass(((TitlePair*)title)->getLeft())?1:0, 
+        //TRACE("TitleFilter::pass(), type: TitlePair, left: %i,right: %i", pass(((TitlePair*)title)->getLeft())?1:0, 
         //    pass(((TitlePair*)title)->getRight())?1:0);
         return pass(((TitlePair*)title)->getLeft()) || pass(((TitlePair*)title)->getRight());
     }
