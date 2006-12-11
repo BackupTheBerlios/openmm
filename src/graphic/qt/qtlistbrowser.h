@@ -20,7 +20,8 @@
 #ifndef QTLISTBROWSER_H
 #define QTLISTBROWSER_H
 
-#include "qtpage.h"
+#include "page.h"
+#include "popupmenu.h"
 #include "listbrowserwidget.h"
 
 #include <qlistview.h>
@@ -35,12 +36,12 @@ Page for browsing lists of timers, recordings, files, channels, ...
 */
 
 
-class QtListBrowser : public QtPage, public ListBrowserWidget
+class QtListBrowser : public QObject, public ListBrowserWidget
 {
     Q_OBJECT
 
 public:
-    QtListBrowser(QStringList *cols);
+    QtListBrowser(Page *parent, QStringList *cols);
     ~QtListBrowser();
 
     virtual void enterPage();
@@ -51,6 +52,7 @@ public slots:
     virtual Title *getCurrent() { return m_titleList[m_listView->currentItem()]; }
     virtual void clear();
     virtual void selectEntry(Title *title);
+    virtual void setPopupMenu(PopupMenu *popupMenu) { m_popupMenu = popupMenu; }
 
 protected slots:
     virtual void showPopupMenu(QListViewItem *entry);
@@ -58,6 +60,7 @@ protected slots:
 
 private:
     QStringList            *m_cols;
+    PopupMenu              *m_popupMenu;
     QListView              *m_listView;
     QPtrDict<Title>         m_titleList;
     QPtrDict<QListViewItem> m_itemList;

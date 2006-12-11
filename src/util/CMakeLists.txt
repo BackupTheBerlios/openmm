@@ -1,0 +1,5 @@
+SET(JAM_UTIL_SRCS
+    sharedlibrary.cpp)
+
+ADD_LIBRARY(jam-util STATIC
+    ${JAM_UTIL_SRCS})

@@ -48,7 +48,7 @@ Tv::Tv() : Module("Television")
     // listManagerVdr supplies timer lists, so go and get them ...
     ListProxy *timerList = new ListProxy(listManagerVdr, Title::TvTimerT);
     ListBrowser *timerListBrowser = new ListBrowser("Timers", "Id;Name;Channel;Day;Time Start;Time End", timerList);
-    timerListBrowser->setPopupMenu(new TvTimerPopup());
+    timerListBrowser->setPopupMenu(new TvTimerPopup(timerListBrowser));
 
     ListProxy *channelList = new ListProxy(listManagerVdr, Title::TvChannelT);
     TvPlayer *channelPlayer = new TvPlayer(channelList);
@@ -57,13 +57,13 @@ Tv::Tv() : Module("Television")
 
     ListComposer *programGuide = new ListComposer(channelList, programList, ListComposer::OuterJoin);
     TvProgramBrowser *programGuideBrowser = new TvProgramBrowser(programGuide);
-    programGuideBrowser->setPopupMenu(new TvProgramPopup(timerList, channelPlayer));
+    programGuideBrowser->setPopupMenu(new TvProgramPopup(timerList, channelPlayer, programGuideBrowser));
     programGuide->fill();  // TODO: first show main menu, then fill the program guide tables in an extra thread.
 
     ListProxy *recList = new ListProxy(listManagerVdr, Title::TvRecT);
     ListBrowser *recListBrowser = new ListBrowser("Recordings", "Id;Name;Day;Start", recList);
     TvRecPlayer *recPlayer = new TvRecPlayer(recList);  // TODO: recList isn't really needed ...?
-    recListBrowser->setPopupMenu(new TvRecPopup(recPlayer));
+    recListBrowser->setPopupMenu(new TvRecPopup(recPlayer, recListBrowser));
 
     controler->mainMenuAddEntry(channelPlayer);
     controler->mainMenuAddEntry(programGuideBrowser);

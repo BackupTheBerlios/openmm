@@ -35,10 +35,19 @@ QtPopupMenu::~QtPopupMenu()
 void
 QtPopupMenu::popup()
 {
+    qDebug("QtPopupMenu::popup()");
     if (m_parent) {
         QSize center = QSize(m_parent->width(), m_parent->height())/2 - m_popupMenu->sizeHint()/2;
         m_popupMenu->popup(QPoint(center.width() + m_parent->globalPositionX(),
                                   center.height() + m_parent->globalPositionY()));
         m_popupMenu->setActiveItem(0);
     }
+}
+
+
+extern "C" {
+PopupMenuWidget* createPopupMenuWidget(Page *parent)
+{
+    return new QtPopupMenu(parent);
+}
 }

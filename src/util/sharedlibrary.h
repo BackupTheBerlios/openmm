@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,16 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "menuwidget.h"
+#ifndef SHAREDLIBRARY_H
+#define SHAREDLIBRARY_H
 
-// MenuWidget::MenuWidget(Menu *abstractMenu)
-// // : Menu(true)
-// {
-//     qDebug("QtMenu::QtMenu()");
-//     m_abstractMenu = abstractMenu;
-// }
-// 
-// 
-// MenuWidget::~MenuWidget()
-// {
-// }
+#include <string>
+using namespace std;
+
+/**
+Utility class for handling shared libraries.
+
+	@author Jörg Bakker <joerg@hakker.de>
+*/
+
+// TODO: add code to automatically load all exported symbols from the shared library.
+
+class SharedLibrary{
+public:
+    SharedLibrary(string filename);
+    ~SharedLibrary();
+
+    void* resolve(const char * symb);
+
+private:
+    void *m_libHandle;
+};
+
+#endif

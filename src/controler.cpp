@@ -20,7 +20,8 @@
 
 #include "controler.h"
 #include "widgetfactory.h"
-#include "streamplayerxine.h"
+#include "streamplayer.h"
+//#include "streamplayerxine.h"
 #include "tv.h"
 
 
@@ -29,11 +30,9 @@ Controler           *Controler::m_instance = 0;
 Controler*
 Controler::instance()
 {
-//    qDebug("Controler::instance()");
     if (m_instance == 0) {
         m_instance = new Controler();
     }
-//    qDebug("Controler::instance() m_instance: %p", m_instance);
     return m_instance;
 }
 
@@ -61,13 +60,13 @@ Controler::init(int argc, char **argv)
     m_pageStack = new PageStack();
 
     qDebug("Adding Main Menu.");
-//    m_mainMenu = new Menu(QString("Main Menu"));
     m_mainMenu = new Menu("Main Menu");
     qDebug("Added Main Menu: %p", m_mainMenu);
 
     // Decide, which implementation of StreamPlayer to use.
     qDebug("Adding Xine StreamPlayer.");
-    m_streamPlayer = StreamPlayerXine::instance();
+    m_streamPlayer = StreamPlayer::instance();
+    m_streamPlayer->setEngine(StreamPlayer::EngineXine);
 
     qDebug("Adding TV module.");
     addModule(new Tv());

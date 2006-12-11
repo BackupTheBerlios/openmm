@@ -28,7 +28,7 @@ Menu::Menu(QString name)
  : Page(name)
 {
     qDebug("Menu::Menu(), name: %s", name.latin1());
-    m_menuWidget = WidgetFactory::instance()->createMenuWidget();
+    m_menuWidget = WidgetFactory::instance()->createMenuWidget(this);
     setMenuName(name);
 }
 

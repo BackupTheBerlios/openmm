@@ -23,14 +23,14 @@
 #include <qlayout.h>
 
 
-QtListBrowser::QtListBrowser(QStringList *cols)
+QtListBrowser::QtListBrowser(Page *parent, QStringList *cols)
 {
     qDebug("QtListBrowser::QtListBrowser()");
 
     m_cols = cols;
-    QWidget *parent = m_frame;
-    qDebug("QtListBrowser::QtListBrowser(), parent widget: %p", parent);
-    m_listView = new QListView(parent);
+    QWidget *p = (QWidget*) parent->frame();
+    qDebug("QtListBrowser::QtListBrowser(), parent widget: %p", p);
+    m_listView = new QListView(p);
     qDebug("QtListBrowser::QtListBrowser(), build QListView widget: %p", m_listView);
     m_listView->installEventFilter(GlobalKeyHandler::instance());
     qDebug("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
@@ -106,8 +106,15 @@ void
 QtListBrowser::showPopupMenu(QListViewItem *entry)
 {
     qDebug("QtListBrowser::showPopupMenu()");
-//    if (m_listBrowserLogic->getPopupMenu()) {
-//        m_listBrowserLogic->getPopupMenu()->popup(m_titleList[entry]);
-//    }
+    if (m_popupMenu) {
+        m_popupMenu->popup(m_titleList[entry]);
+    }
 }
 
+
+extern "C" {
+ListBrowserWidget* createListBrowserWidget(Page *parent, QStringList *cols)
+{
+    return new QtListBrowser(parent, cols);
+}
+}

@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,16 +16,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "listbrowserwidget.h"
+#include "sharedlibrary.h"
+//#include "debug.h"
 
+#include <dlfcn.h>
 
-ListBrowserWidget::ListBrowserWidget(QStringList *cols)
+SharedLibrary::SharedLibrary(string filename)
 {
-    qDebug("ListBrowserWidget::ListBrowserWidget()");
-    //m_abstractListBrowser = abstractListBrowser;
+    m_libHandle = dlopen(filename.c_str(), RTLD_NOW);
+    if (!m_libHandle) {
+        printf("SharedLibrary::SharedLibrary() could not load library: %s\n", filename.c_str());
+        return;
+    }
+    printf("SharedLibrary::SharedLibrary() opened library: %s\n", filename.c_str());
+    dlerror();  // clear any pending error.
 }
 
 
-ListBrowserWidget::ListBrowserWidget()
+SharedLibrary::~SharedLibrary()
 {
+    dlclose(m_libHandle);
+}
+
+
+void*
+SharedLibrary::resolve(const char * symb)
+{
+    void* res = dlsym(m_libHandle, symb);
+    char* error;
+    if ((error = dlerror()) != NULL)  {
+        printf("SharedLibrary::SharedLibrary() could not find symbol %s in library %s, error was: %s\n",
+                 symb, m_libHandle, error);
+    }
+    else {
+        printf("SharedLibrary::SharedLibrary() found symbol %s in library %s\n", symb, m_libHandle);
+    }
+    return res;
 }

@@ -21,12 +21,12 @@
 #define LISTBROWSERWIDGET_H
 
 #include "title.h"
+#include "popupmenu.h"
 
 #include <qstring.h>
-#include <qstringlist.h>
 
 /**
-Page for browsing lists of timers, recordings, files, channels, ...
+Interface for toolkit specific implementation of ListBrowserWidget.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
@@ -35,18 +35,12 @@ Page for browsing lists of timers, recordings, files, channels, ...
 class ListBrowserWidget
 {
 public:
-    ListBrowserWidget(QStringList *cols);
-    ListBrowserWidget();
-//     ~ListBrowserWidget();
-
     virtual void enterPage() = 0;
-
-public slots:
     virtual void addEntry(Title *title) = 0;
     virtual void delEntry(Title *title) = 0;
     virtual Title *getCurrent() = 0;
     virtual void addViewColumn(QString colName) = 0;
-//    virtual void showPopupMenu(QListViewItem *entry) = 0;
+    virtual void setPopupMenu(PopupMenu *popupMenu) = 0;
     virtual void clear() = 0;
     virtual void selectEntry(Title *title) = 0;
 };

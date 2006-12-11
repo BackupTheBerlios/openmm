@@ -21,7 +21,7 @@
 #define QTMENU_H
 
 #include "menuwidget.h"
-#include "qtpage.h"
+//#include "qtpage.h"
 
 #include <qlistview.h>
 #include <qptrdict.h>
@@ -30,12 +30,12 @@
 /**
 @author Jörg Bakker
 */
-class QtMenu : public QtPage, public MenuWidget
+class QtMenu : public QObject, public MenuWidget
 {
     Q_OBJECT
 
 public:
-    QtMenu();
+    QtMenu(Page *parent);
     ~QtMenu();
 
     virtual void addEntry(Page *page);

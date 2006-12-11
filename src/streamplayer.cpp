@@ -19,21 +19,16 @@
  ***************************************************************************/
 #include "streamplayer.h"
 
-//#include <qcursor.h>
-
 
 // Have to initialize (and thus allocate in gcc) m_instance somewhere
 // (not in the default ctor, which is called from getInstance())
 StreamPlayer    *StreamPlayer::m_instance = 0;
-MediaPlayer     *StreamPlayer::m_keyHandler = 0;
-bool             StreamPlayer::m_isPlaying = false;
 
 
 StreamPlayer::StreamPlayer()
  : Page("StreamPlayer")
 {
     qDebug("StreamPlayer::StreamPlayer()");
-    //initStream();
 }
 
 
@@ -72,21 +67,30 @@ StreamPlayer::exitPage()
 
 StreamPlayer::~StreamPlayer()
 {
+    delete m_engineLib;
     closeStream();
 }
 
 
 void
-StreamPlayer::initStream()
+StreamPlayer::setEngine(EngineT engine)
 {
-    qDebug("StreamPlayer::initStream()");
-}
+    m_engineType = engine;
+    string engineLibName;
+    char* engineCtorName;
 
+    switch(engine) {
+    case EngineXine:
+        engineLibName = "/home/jb/devel/cc/jambin/src/engine/libjam-engine-xine.so";
+        engineCtorName = "createStreamPlayerXine";
+        break;
+    default:
+        break;
+    }
 
-void
-StreamPlayer::closeStream()
-{
-    qDebug("StreamPlayer::closeStream()");
+    m_engineLib = new SharedLibrary(engineLibName);
+    *(void **) (&m_engineCtor) = m_engineLib->resolve(engineCtorName);
+    m_engine = (StreamPlayerEngine*) (*m_engineCtor)(this);
 }
 
 
@@ -111,28 +115,4 @@ StreamPlayer::stop()
     qDebug("StreamPlayer::stop()");
     m_isPlaying = false;
     stopStream();
-}
-
-
-void
-StreamPlayer::playStream(Mrl *mrl)
-{
-}
-
-
-void
-StreamPlayer::stopStream()
-{
-}
-
-
-void
-StreamPlayer::showOsd(QString text, uint duration)
-{
-}
-
-
-void
-StreamPlayer::hideOsd()
-{
 }

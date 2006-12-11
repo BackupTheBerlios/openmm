@@ -8,7 +8,8 @@ EXEC_PROGRAM(/usr/bin/xine-config ARGS --libs OUTPUT_VARIABLE XINE_LIBRARIES)
 
 #SET(XINE_LIBRARIES -L/usr/lib -lxine -lz -lnsl -lpthread -lrt)
 
-ADD_LIBRARY(engine-xine SHARED
+ADD_LIBRARY(jam-engine-xine SHARED
     ${JAM_ENGINE_SRCS})
 
-TARGET_LINK_LIBRARIES(engine-xine ${XINE_LIBRARIES})
+TARGET_LINK_LIBRARIES(jam-engine-xine
+    ${XINE_LIBRARIES})

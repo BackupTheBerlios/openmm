@@ -36,3 +36,11 @@ QtPage::QtPage()
 QtPage::~QtPage()
 {
 }
+
+
+extern "C" {
+PageWidget* createPageWidget()
+{
+    return new QtPage();
+}
+}

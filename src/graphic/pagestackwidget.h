@@ -23,22 +23,17 @@
 #include "page.h"
 
 /**
+Interface for toolkit specific implementation of PageStackWidget.
+
 @author Jörg Bakker
 */
 class PageStackWidget
 {
 public:
-//     PageStackWidget(PageStack* abstractPageStack);
-//     ~PageStackWidget();
-
     virtual void addPage(Page *page) = 0;
     virtual void raisePage(Page *page) = 0;
     virtual int loop() = 0;
     virtual void* frame()  = 0;
-
-/*
-protected:
-    PageStack    *m_abstractPageStack;*/
 };
 
 #endif

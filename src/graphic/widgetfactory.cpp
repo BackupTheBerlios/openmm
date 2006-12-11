@@ -25,7 +25,7 @@
 
 #include <dlfcn.h>
 
-// TODO: this looks a bit like too much similar code, ... (templates somehow?)
+// TODO: this looks a bit like too much duplicate code, ...
 
 WidgetFactory *WidgetFactory::m_instance = 0;
 
@@ -36,7 +36,7 @@ WidgetFactory::WidgetFactory()
 
 WidgetFactory::~WidgetFactory()
 {
-//    dlclose(m_toolkitLib);
+    delete m_lib;
 }
 
 
@@ -53,7 +53,28 @@ WidgetFactory::instance()
 void
 WidgetFactory::setToolkit(ToolkitT toolkit)
 {
+    qDebug("WidgetFactory::setToolkit()");
     m_toolkit = toolkit;
+    m_pageStackCtorName = "createPageStackWidget";
+    m_pageCtorName = "createPageWidget";
+    m_menuCtorName = "createMenuWidget";
+    m_listBrowserCtorName = "createListBrowserWidget";
+    m_popupMenuCtorName = "createPopupMenuWidget";
+
+    switch(m_toolkit) {
+    case ToolkitQt:
+        //m_toolkitLibName = "libgraphic-qt.so";
+        m_toolkitLibName = "/home/jb/devel/cc/jambin/src/graphic/qt/libjam-graphic-qt.so";
+    default:
+        break;
+    }
+    m_lib = new SharedLibrary(m_toolkitLibName);
+
+    *(void **) (&m_pageStackCtor) = m_lib->resolve(m_pageStackCtorName);
+    *(void **) (&m_pageCtor) = m_lib->resolve(m_pageCtorName);
+    *(void **) (&m_menuCtor) = m_lib->resolve(m_menuCtorName);
+    *(void **) (&m_listBrowserCtor) = m_lib->resolve(m_listBrowserCtorName);
+    *(void **) (&m_popupMenuCtor) = m_lib->resolve(m_popupMenuCtorName);
 }
 
 
@@ -64,7 +85,8 @@ WidgetFactory::createPageStackWidget()
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createPageStackWidget() for toolkit Qt");
-        return new QtPageStack();
+        //return new QtPageStack();
+        return (PageStackWidget*) (*m_pageStackCtor)();
     default:
         return 0;
     }
@@ -78,7 +100,8 @@ WidgetFactory::createPageWidget()
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createPage() for toolkit Qt");
-        return new QtPage();
+        //return new QtPage();
+        return (PageWidget*) (*m_pageCtor)();
     default:
         return 0;
     }
@@ -86,13 +109,14 @@ WidgetFactory::createPageWidget()
 
 
 MenuWidget* 
-WidgetFactory::createMenuWidget()
+WidgetFactory::createMenuWidget(Page *parent)
 {
     qDebug("WidgetFactory::createMenu()");
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createMenu() for toolkit Qt");
-        return new QtMenu();
+        //return new QtMenu(parent);
+        return (MenuWidget*) (*m_menuCtor)(parent);
     default:
         return 0;
     }
@@ -100,13 +124,14 @@ WidgetFactory::createMenuWidget()
 
 
 ListBrowserWidget* 
-WidgetFactory::createListBrowserWidget(QStringList *cols)
+WidgetFactory::createListBrowserWidget(Page *parent, QStringList *cols)
 {
     qDebug("WidgetFactory::createListBrowser()");
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createListBrowser() for toolkit Qt");
-        return new QtListBrowser(cols);
+        //return new QtListBrowser(parent, cols);
+        return (ListBrowserWidget*) (*m_listBrowserCtor)(parent, cols);
     default:
         return 0;
     }
@@ -120,7 +145,8 @@ WidgetFactory::createPopupMenuWidget(Page *parent)
     switch(m_toolkit) {
     case ToolkitQt:
         qDebug("WidgetFactory::createPopupMenu() for toolkit Qt");
-        return new QtPopupMenu(parent);
+        //return new QtPopupMenu(parent);
+        return (PopupMenuWidget*) (*m_popupMenuCtor)(parent);
     default:
         return 0;
     }

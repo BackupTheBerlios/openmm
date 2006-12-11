@@ -19,12 +19,7 @@
 #ifndef WIDGETFACTORY_H
 #define WIDGETFACTORY_H
 
-// #include "pagestack.h"
-// #include "page.h"
-// #include "menu.h"
-// #include "listbrowser.h"
-// #include "popupmenu.h"
-
+#include "sharedlibrary.h"
 #include "pagestackwidget.h"
 #include "pagewidget.h"
 #include "menuwidget.h"
@@ -32,9 +27,12 @@
 #include "popupmenuwidget.h"
 
 #include <qstringlist.h>
+#include <string>
+
+using namespace std;
 
 /**
-Factory to produce instances for all widgets in one toolkit. Currently there are widgets for the Qt toolkit implemented.
+Factory to produce instances for all widgets of one toolkit. Currently there are widgets for the Qt toolkit implemented.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
@@ -48,8 +46,8 @@ public:
 
     PageStackWidget* createPageStackWidget();
     PageWidget* createPageWidget();
-    MenuWidget* createMenuWidget();
-    ListBrowserWidget* createListBrowserWidget(QStringList *cols);
+    MenuWidget* createMenuWidget(Page *parent);
+    ListBrowserWidget* createListBrowserWidget(Page *parent, QStringList *cols);
     PopupMenuWidget* createPopupMenuWidget(Page *parent);
 
 protected:
@@ -59,6 +57,18 @@ protected:
 private:
     static WidgetFactory *m_instance;
     ToolkitT              m_toolkit;
+    SharedLibrary        *m_lib;
+    string                m_toolkitLibName;
+    char*                 m_pageStackCtorName;
+    char*                 m_pageCtorName;
+    char*                 m_menuCtorName;
+    char*                 m_listBrowserCtorName;
+    char*                 m_popupMenuCtorName;
+    PageStackWidget*    (*m_pageStackCtor)();
+    PageStackWidget*    (*m_pageCtor)();
+    PageStackWidget*    (*m_menuCtor)(Page *parent);
+    PageStackWidget*    (*m_listBrowserCtor)(Page *parent, QStringList *cols);
+    PageStackWidget*    (*m_popupMenuCtor)(Page *parent);
 };
 
 #endif

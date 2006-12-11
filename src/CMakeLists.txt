@@ -26,7 +26,8 @@ INCLUDE_DIRECTORIES(${jamproj_SOURCE_DIR}/src
     ${jamproj_SOURCE_DIR}/src/backend
     ${jamproj_SOURCE_DIR}/src/engine
     ${jamproj_SOURCE_DIR}/src/graphic
-    ${jamproj_SOURCE_DIR}/src/module/tv)
+    ${jamproj_SOURCE_DIR}/src/module/tv
+    ${jamproj_SOURCE_DIR}/src/util)
 
 ADD_DEFINITIONS(-D_REENTRANT -DQT_THREAD_SUPPORT)
 
@@ -39,6 +40,7 @@ ADD_SUBDIRECTORY(backend)
 ADD_SUBDIRECTORY(engine)
 ADD_SUBDIRECTORY(graphic)
 ADD_SUBDIRECTORY(module)
+ADD_SUBDIRECTORY(util)
 
 QT_WRAP_CPP(jam JAM_BASE_MOC_FILES ${JAM_BASE_MOC_HEADERS})
 
@@ -50,12 +52,7 @@ ADD_EXECUTABLE(jam
 TARGET_LINK_LIBRARIES(jam ${QT_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(jam
-    backend-vdr
-    backend-moc
-    engine-xine
-    graphic
-    graphic-moc
-    graphic-qt
-    graphic-qt-moc
-    module-tv
-    module-tv-moc)
+    jam-backend-vdr
+    jam-graphic
+    jam-module-tv
+    jam-util)

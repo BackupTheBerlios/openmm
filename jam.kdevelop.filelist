@@ -94,3 +94,5 @@ CMakeFiles/Makefile2
 bin/Makefile
 /widgetfactory.h
 /widgetfactory.cpp
+/library.h
+/library.cpp

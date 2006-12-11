@@ -12,10 +12,6 @@ SET (JAM_MODULE_TV_SRCS
     tvtimer.cpp
     tvtimerpopup.cpp)
 
-
-ADD_LIBRARY(module-tv STATIC
-    ${JAM_MODULE_TV_SRCS})
-
 SET(JAM_MODULE_TV_MOC_HEADERS
     tv.h
     tvprogrampopup.h
@@ -24,5 +20,6 @@ SET(JAM_MODULE_TV_MOC_HEADERS
     tvtimerpopup.h)
 
 QT_WRAP_CPP(jam JAM_MODULE_TV_MOC_FILES ${JAM_MODULE_TV_MOC_HEADERS})
-ADD_LIBRARY (module-tv-moc STATIC
-    ${JAM_MODULE_TV_MOC_FILES})
+
+ADD_LIBRARY(jam-module-tv SHARED
+    ${JAM_MODULE_TV_SRCS} ${JAM_MODULE_TV_MOC_FILES})

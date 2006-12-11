@@ -24,21 +24,15 @@
 #include <qstring.h>
 
 /**
-Qt implementation of PopupMenu.
+Interface for toolkit specific implementation of PopupMenuWidget.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
 class PopupMenuWidget
 {
 public:
-//     PopupMenuWidget(PopupMenu *abstractPopupMenu);
-//     ~PopupMenuWidget();
-
     virtual void popup() = 0;
     virtual void insertItem(QString text, QObject *receiver, const char *member) = 0;
-
-// private:
-//     PopupMenu    *m_popupMenuLogic;
 };
 
 #endif

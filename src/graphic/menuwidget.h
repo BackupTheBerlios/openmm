@@ -25,21 +25,17 @@
 #include <qstring.h>
 
 /**
+Interface for toolkit specific implementation of MenuWidget.
+
 @author Jörg Bakker
 */
 class MenuWidget
 {
 public:
-//     MenuWidget(Menu *abstractMenu);
-//     ~MenuWidget();
-
     virtual void addEntry(Page *page) = 0;
     virtual void setDefaultEntry(Page *page) = 0;
     virtual void setMenuName(QString name) = 0;
     virtual void enterPage() = 0;
-
-// private:
-//     Menu          *m_abstractMenu;
 };
 
 #endif

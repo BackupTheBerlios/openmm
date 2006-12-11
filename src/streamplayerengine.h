@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   Copyright (C) 2006 by Jörg Bakker                                     *
+ *   joerg@hakker.de                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,17 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "pagestackwidget.h"
+#ifndef STREAMPLAYERENGINE_H
+#define STREAMPLAYERENGINE_H
 
+#include "page.h"
+#include "title.h"
 
-// PageStackWidget::PageStackWidget(PageStack *abstractPageStack)
-//  : PageStack(true)
-// {
-//     qDebug("PageStackWidget::PageStackWidget()");
-//     m_abstractPageStack = abstractPageStack;
-// }
-// 
-// 
-// PageStackWidget::~PageStackWidget()
-// {
-// }
+#include <qstring.h>
+
+class MediaPlayer;
+
+/**
+@author Jörg Bakker
+*/
+class StreamPlayerEngine
+{
+public:
+    virtual void showOsd(QString text, uint duration) = 0;
+    virtual void hideOsd() = 0;
+    virtual void initStream() = 0;
+    virtual void closeStream() = 0;
+    virtual void playStream(Mrl *mrl) = 0;
+    virtual void stopStream() = 0;
+};
+
+#endif

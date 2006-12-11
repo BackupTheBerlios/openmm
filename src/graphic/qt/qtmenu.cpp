@@ -23,10 +23,10 @@
 #include "globalkeyhandler.h"
 
 
-QtMenu::QtMenu()
+QtMenu::QtMenu(Page *parent)
 {
     qDebug("QtMenu::QtMenu()");
-    m_list = new QListView(m_frame);
+    m_list = new QListView((QWidget*) parent->frame());
     m_list->installEventFilter(GlobalKeyHandler::instance());
     m_entryNumber = 0;
 
@@ -86,4 +86,12 @@ QtMenu::findEntry(Page *page)
     qDebug("Menu::findEntry() with page: %p", page);
     // TODO: implement findItem()
     return 0;
+}
+
+
+extern "C" {
+MenuWidget* createMenuWidget(Page *parent)
+{
+    return new QtMenu(parent);
+}
 }

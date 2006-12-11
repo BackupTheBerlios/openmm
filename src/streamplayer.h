@@ -21,16 +21,17 @@
 #define STREAMPLAYER_H
 
 #include "page.h"
-#include "mediaplayer.h"
 #include "title.h"
+#include "mediaplayer.h"
+#include "streamplayerengine.h"
+#include "sharedlibrary.h"
 
 #include <qstring.h>
+#include <string>
+using namespace std;
 
 class MediaPlayer;
 
-// TODO: rework implementation of singleton with inheritance.
-//       QWidget as singleton can have two different parent widgets ...?
-//       Where to store: StreamPlayer* streamPlayerInstance;
 
 /**
 @author Jörg Bakker
@@ -40,16 +41,20 @@ class StreamPlayer : public QObject, public Page
     Q_OBJECT
 
 public:
+    enum EngineT {EngineXine};
+
     static StreamPlayer *instance();
-    static void setKeyHandler(MediaPlayer *player);
-    static bool isPlaying() { return m_isPlaying; };
+    void setEngine(EngineT engine);
+    void setKeyHandler(MediaPlayer *player);
+    bool isPlaying() { return m_isPlaying; };
 
 public slots:
     void play(Title *title);
     void stop();
 
-    virtual void showOsd(QString text, uint duration);
-    virtual void hideOsd();
+    // interface to StreamPlayerEngine
+    void showOsd(QString text, uint duration) { m_engine->showOsd(text, duration); }
+    void hideOsd() { m_engine->hideOsd(); }
 
 protected:
     StreamPlayer();
@@ -58,15 +63,20 @@ protected:
     void keyPressEvent(QKeyEvent *k);
     virtual void exitPage();
 
-    virtual void initStream();
-    virtual void closeStream();
-    virtual void playStream(Mrl *mrl);
-    virtual void stopStream();
-
 private:
-    static StreamPlayer *m_instance;
-    static bool m_isPlaying;
-    static MediaPlayer *m_keyHandler;
+    // interface to StreamPlayerEngine
+    void initStream() { m_engine->initStream(); }
+    void closeStream() { m_engine->closeStream(); }
+    void playStream(Mrl *mrl) { m_engine->playStream(mrl); }
+    void stopStream() { m_engine->stopStream(); }
+
+    static StreamPlayer  *m_instance;
+    bool                  m_isPlaying;
+    MediaPlayer          *m_keyHandler;
+    EngineT               m_engineType;
+    StreamPlayerEngine   *m_engine;
+    SharedLibrary        *m_engineLib;
+    StreamPlayerEngine* (*m_engineCtor)(Page *parent);
 };
 
 #endif

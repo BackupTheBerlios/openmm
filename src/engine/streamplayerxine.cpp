@@ -28,14 +28,17 @@
 #include <iostream>
 
 
-StreamPlayerXine* StreamPlayerXine::m_instance = 0;
+int StreamPlayerXine::m_globX = 0;
+int StreamPlayerXine::m_globY = 0;
+double StreamPlayerXine::m_pixel_aspect = 0.0;
 
-StreamPlayerXine::StreamPlayerXine()
- : StreamPlayer()
+
+StreamPlayerXine::StreamPlayerXine(Page *parent)
 {
     qDebug("StreamPlayerXine::StreamPlayerXine()");
-    globX = globalPositionX();
-    globY = globalPositionY();
+    m_parent = parent;
+    m_globX = m_parent->globalPositionX();
+    m_globY = m_parent->globalPositionY();
 
     initStream();
 }
@@ -44,17 +47,6 @@ StreamPlayerXine::StreamPlayerXine()
 StreamPlayerXine::~StreamPlayerXine()
 {
     closeStream();
-}
-
-
-StreamPlayerXine*
-StreamPlayerXine::instance()
-{
-    qDebug("StreamPlayerXine::instance()");
-    if (m_instance == 0) {
-        m_instance = new StreamPlayerXine();
-    }
-    return m_instance;
 }
 
 
@@ -74,6 +66,7 @@ StreamPlayerXine::initStream()
     }
     xine_init(xineEngine);
 
+    m_pixel_aspect = 1.0;
 #ifdef QWS
 //    QWSServer::setDesktopBackground(QColor(QColor::black));
 //    QString videoDriverName = "fb";
@@ -82,21 +75,21 @@ StreamPlayerXine::initStream()
 //    int visualType = XINE_VISUAL_TYPE_FB;
     int visualType = XINE_VISUAL_TYPE_DFB;
     fb_visual_t visual;
-    pixel_aspect = 1.0;  // TODO: set this to a proper value.
 #else
     XInitThreads ();
     //xineDisplay = XOpenDisplay( getenv("DISPLAY") );
     x11Display = XOpenDisplay(NULL);
     x11Screen = DefaultScreen(x11Display);
-    x11Window = windowId();
+    x11Window = m_parent->windowId();
 
-    XLockDisplay( x11Display );
-//    XSelectInput( x11Display, x11Window, ExposureMask );
-    res_h = (DisplayWidth(x11Display, x11Screen) * 1000 / DisplayWidthMM(x11Display, x11Screen));
-    res_v = (DisplayHeight(x11Display, x11Screen) * 1000 / DisplayHeightMM(x11Display, x11Screen));
-    pixel_aspect = res_v / res_h;
-    XSync(x11Display, False);
-    XUnlockDisplay(x11Display);
+//     // determine pixel aspect of display.
+//     XLockDisplay( x11Display );
+// //    XSelectInput( x11Display, x11Window, ExposureMask );
+//     res_h = (DisplayWidth(x11Display, x11Screen) * 1000 / DisplayWidthMM(x11Display, x11Screen));
+//     res_v = (DisplayHeight(x11Display, x11Screen) * 1000 / DisplayHeightMM(x11Display, x11Screen));
+//     m_pixel_aspect = res_v / res_h;
+//     XSync(x11Display, False);
+//     XUnlockDisplay(x11Display);
 
     char* videoDriverName = "xv";
     int visualType = XINE_VISUAL_TYPE_X11;
@@ -104,11 +97,11 @@ StreamPlayerXine::initStream()
     visual.display = x11Display;
     visual.screen = x11Screen;
     visual.d = x11Window;
-    visual.dest_size_cb = DestSizeCallback;
+    //visual.dest_size_cb = DestSizeCallback;
 #endif
 
     visual.frame_output_cb = FrameOutputCallback;
-    visual.user_data = (void*)this;
+    visual.user_data = (void*)m_parent;
 
     videoDriver = xine_open_video_driver(xineEngine,
         videoDriverName,  visualType,
@@ -180,9 +173,9 @@ StreamPlayerXine::initOSD()
     if (m_OSDTimer.isActive())
         m_OSDTimer.stop();
 
-    m_marginOSD = height() / 10;
-    m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(height() * 0.75), width() - 2*m_marginOSD,
-                        (int)((height() * 0.25)) - m_marginOSD);
+    m_marginOSD = m_parent->height() / 10;
+    m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(m_parent->height() * 0.75), m_parent->width() - 2*m_marginOSD,
+                        (int)((m_parent->height() * 0.25)) - m_marginOSD);
     if (!m_OSD)
         qDebug("StreamPlayerXine::initOSD(), initialization of OSD failed");
     if (!xine_osd_set_font(m_OSD, "sans", 24))
@@ -191,17 +184,17 @@ StreamPlayerXine::initOSD()
 }
 
 
-void
-StreamPlayerXine::DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
-                       int* dest_width, int* dest_height, double* dest_aspect)
-{
-    if (p == NULL) return;
-    StreamPlayerXine* vw = (StreamPlayerXine*) p;
-
-    *dest_width = vw->width();
-    *dest_height = vw->height();
-    *dest_aspect = vw->pixel_aspect;
-}
+// void
+// StreamPlayerXine::DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
+//                        int* dest_width, int* dest_height, double* dest_aspect)
+// {
+//     if (p == NULL) return;
+//     Page* vw = (Page*) p;
+// 
+//     *dest_width = vw->width();
+//     *dest_height = vw->height();
+//     *dest_aspect = m_pixel_aspect;
+// }
 
 
 void
@@ -210,15 +203,16 @@ StreamPlayerXine::FrameOutputCallback(void* p, int video_width, int video_height
                           double* dest_aspect, int* win_x, int* win_y)
 {
     if (p == NULL) return;
-    StreamPlayerXine* vw = (StreamPlayerXine*) p;
+    Page* vw = (Page*) p;
 
     *dest_x = 0;
     *dest_y = 0 ;
     *dest_width = vw->width();
     *dest_height = vw->height();
-    *dest_aspect = vw->pixel_aspect;
-    *win_x = vw->globX;
-    *win_y = vw->globY;
+    *dest_aspect = 1.0;
+    //*dest_aspect = m_pixel_aspect;
+    //*win_x = m_globX;
+    //*win_y = m_globY;
 }
 
 
@@ -252,4 +246,12 @@ StreamPlayerXine::stopStream()
     qDebug("StreamPlayerXine::stop()");
     xine_stop(xineStream);
     xine_close(xineStream);
+}
+
+
+extern "C" {
+StreamPlayerEngine* createStreamPlayerXine(Page *parent)
+{
+    return new StreamPlayerXine(parent);
+}
 }

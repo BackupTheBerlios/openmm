@@ -35,7 +35,6 @@ class PopupMenu
 public:
     PopupMenu(Page *parent);
     PopupMenu() { qDebug("PopupMenu::PopupMenu() - nothing to do"); }
-//    PopupMenu(bool popupMenuAllocated) {}
     ~PopupMenu();
 
     virtual void popup() { m_popupMenuWidget->popup(); }

@@ -20,7 +20,8 @@
 #ifndef STREAMPLAYERXINE_H
 #define STREAMPLAYERXINE_H
 
-#include "streamplayer.h"
+#include "page.h"
+#include "streamplayerengine.h"
 
 #include <X11/Xlib.h>
 // undef some nasty preprocessor macros in Xlib, they mess up the Qt headers
@@ -45,29 +46,25 @@
 /**
 @author Jörg Bakker
 */
-class StreamPlayerXine : public StreamPlayer
+class StreamPlayerXine : public StreamPlayerEngine
 {
 public:
-    static StreamPlayerXine *instance();
+    StreamPlayerXine(Page *parent);
+    ~StreamPlayerXine();
 
 public slots:
     virtual void showOsd(QString text, uint duration);
     virtual void hideOsd();
-
-protected:
-    StreamPlayerXine();
-    ~StreamPlayerXine();
-
     virtual void initStream();
     virtual void closeStream();
     virtual void playStream(Mrl *mrl);
     virtual void stopStream();
 
 private:
-    static StreamPlayerXine *m_instance;
+    Page *m_parent;
 
-    static void DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
-                       int* dest_width, int* dest_height, double* dest_aspect);
+//     static void DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
+//                        int* dest_width, int* dest_height, double* dest_aspect);
 
     static void FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
                           int* dest_x, int* dest_y, int* dest_width, int* dest_height,
@@ -88,10 +85,9 @@ private:
 
     int videoFrameWidth;
     int videoFrameHeight;
-    int globX;
-    int globY;
+    static int m_globX, m_globY;
+    static double m_pixel_aspect;
     double res_v, res_h;
-    double pixel_aspect;
 
     xine_osd_t *m_OSD;
 
