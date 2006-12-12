@@ -25,10 +25,10 @@
 #include "debug.h"
 
 
-Menu::Menu(QString name)
+Menu::Menu(string name)
  : Page(name)
 {
-    TRACE("Menu::Menu(), name: %s", name.latin1());
+    TRACE("Menu::Menu(), name: %s", name.c_str());
     m_menuWidget = WidgetFactory::instance()->createMenuWidget(this);
     setMenuName(name);
 }

@@ -23,7 +23,8 @@
 #include "list.h"
 #include "listmanager.h"
 
-#include <qstring.h>
+#include <string>
+using namespace std;
 
 
 /**

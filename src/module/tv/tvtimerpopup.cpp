@@ -37,7 +37,7 @@ TvTimerPopup::~TvTimerPopup()
 void
 TvTimerPopup::timerEdit()
 {
-    TRACE("TvTimerPopup::timerEdit() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvTimerPopup::timerEdit() title: %s", m_title->getText("Name").c_str());
     // TODO: edit this timer in a Page.
 }
 
@@ -45,6 +45,6 @@ TvTimerPopup::timerEdit()
 void
 TvTimerPopup::timerDelete()
 {
-    TRACE("TvTimerPopup::timerDelete() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvTimerPopup::timerDelete() title: %s", m_title->getText("Name").c_str());
     m_list->delTitle(m_title);
 }

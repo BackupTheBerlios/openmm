@@ -2,7 +2,7 @@
 <kdevelop>
   <general>
     <author>Jörg Bakker</author>
-    <email>joerg@hakker.de</email>
+    <email>joerg&lt;at>hakker&lt;dot>de</email>
     <version>$VERSION$</version>
     <projectmanagement>KDevCustomProject</projectmanagement>
     <primarylanguage>C++</primarylanguage>
@@ -14,7 +14,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>../jambin/src/jam</mainprogram>
+      <mainprogram/>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs/>
@@ -163,4 +163,8 @@
       <usermanualurl/>
     </projectdoc>
   </kdevdocumentation>
+  <ctagspart>
+    <customArguments/>
+    <customTagfilePath/>
+  </ctagspart>
 </kdevelop>

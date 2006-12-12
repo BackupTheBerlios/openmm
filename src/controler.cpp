@@ -95,7 +95,7 @@ void
 Controler::showPage(Page *page)
 {
     if (page != 0) { // some menu entries don't have real screen pages (for example "quit")
-        TRACE("Controler::showPage() raising page: %p named: %s", page, page->getName().latin1());
+        TRACE("Controler::showPage() raising page: %p named: %s", page, page->getName().c_str());
         m_pageStack->raisePage(page);
         TRACE("Controler::showPage() done raising page");
         //m_previousPage = m_pageHistory.getLast();

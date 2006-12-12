@@ -57,7 +57,7 @@ TvProgramPopup::addTimer()
 void
 TvProgramPopup::switchChannel()
 {
-    TRACE("TvProgramPopup::switchChannel() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvProgramPopup::switchChannel() title: %s", m_title->getText("Name").c_str());
     // TODO: switch to the selected channel.
     if ((m_title->getType() == Title::TitlePairT)) {
         Title *l = ((TitlePair*)m_title)->getLeft();
@@ -71,6 +71,6 @@ TvProgramPopup::switchChannel()
 void
 TvProgramPopup::showChannel()
 {
-    TRACE("TvProgramPopup::showChannel() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvProgramPopup::showChannel() title: %s", m_title->getText("Name").c_str());
     // TODO: show a Page with the EPG of this channel.
 }

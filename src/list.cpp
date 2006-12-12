@@ -63,7 +63,7 @@ List::delTitle(Title *entry)
 void
 List::addTitleEntry(Title *entry)
 {
-    //TRACE("List::addTitle() with name: %s", entry->getText("Name").latin1());
+    //TRACE("List::addTitle() with name: %s", entry->getText("Name").c_str());
     m_list.append(entry);
     emit pushTitle(entry);
 }

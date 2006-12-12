@@ -21,8 +21,11 @@
 #define PAGE_H
 
 #include "pagewidget.h"
+#include "debug.h"
 
-#include <qstring.h>
+#include <string>
+using namespace std;
+
 
 /**
 A full page on the screen, which can be a menu, mediaplayer, list, ...
@@ -33,16 +36,16 @@ Basically, it can be shown, or not.
 class Page
 {
 public:
-    Page(QString name);
-    Page() { qDebug("Page::Page() - nothing to do"); }
+    Page(string name);
+    Page() { TRACE("Page::Page() - nothing to do"); }
     virtual ~Page();
 
-    QString getName() { return m_name; };
-    void setName(QString name) { m_name = name; };
+    string getName() { return m_name; };
+    void setName(string name) { m_name = name; };
 
     // for all widgets common part of the class
     virtual void showUp();
-    virtual void exitPage() { qDebug("Page::exitPage()"); }
+    virtual void exitPage() { TRACE("Page::exitPage()"); }
 
     // widget specific part of the class
     virtual int globalPositionX() { return m_pageWidget->globalPositionX(); }
@@ -54,7 +57,7 @@ public:
     virtual void enterPage() { m_pageWidget->enterPage(); }
 
 protected:
-    QString       m_name;
+    string       m_name;
     PageWidget   *m_pageWidget;
 };
 

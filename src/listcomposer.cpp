@@ -50,17 +50,20 @@ ListComposer::~ListComposer()
 void
 ListComposer::addTitleLeft(Title *entry)
 {
-    //TRACE("ListComposer::addTitleLeft() with name: %s", entry->getText("Name").latin1());
+    //TRACE("ListComposer::addTitleLeft() with name: %s", entry->getText("Name").c_str());
     // find a matching ident in the right Titles (columns of type Identifier with same name).
     bool match = false;
     for (int i = 0; i < m_right->count(); i++) {
         if (entry->match(m_right->getTitle(i))) {
+//             TRACE("ListComposer::addTitleLeft() inner join");
             match = true;
             TitlePair *newPair = new TitlePair(entry, m_right->getTitle(i));
             m_list.append(newPair);
+//             TRACE("ListComposer::addTitleLeft() inner join done.");
         }
     }
     if (m_join == OuterJoin && !match) {
+//         TRACE("ListComposer::addTitleLeft() outer join");
         // no match on the right side, but nevertheless make an outer join.
         TitlePair *newPair = new TitlePair(entry, 0);
         m_list.append(newPair);
@@ -125,6 +128,10 @@ ListComposer::fillList()
     m_right->fill();
     for (int i = 0; i < m_left->count(); i++) {
         addTitleLeft(m_left->getTitle(i));
+            /*
+            results in:
+            terminate called after throwing an instance of 'std::bad_alloc'
+            what():  St9bad_alloc*/
     }
     pushFiltered();
 }

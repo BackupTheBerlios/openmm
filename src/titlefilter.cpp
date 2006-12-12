@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "titlefilter.h"
 #include "titlepair.h"
+#include "debug.h"
 
 
 TitleFilter::TitleFilter()
@@ -34,7 +35,7 @@ TitleFilter::~TitleFilter()
 bool
 TitleFilter::pass(Title *title)
 {
-//    TRACE("TitleFilter::pass()");
+    //TRACE("TitleFilter::pass() title: %s", title->getText("Name").c_str());
     // if title is a TitlePair, recurse down left and right Title and return if one of them passes.
     if (title->getType() == Title::TitlePairT) {
         //TRACE("TitleFilter::pass(), type: TitlePair, left: %i,right: %i", pass(((TitlePair*)title)->getLeft())?1:0, 
@@ -42,6 +43,7 @@ TitleFilter::pass(Title *title)
         return pass(((TitlePair*)title)->getLeft()) || pass(((TitlePair*)title)->getRight());
     }
     else {
+        //TRACE("TitleFilter::pass(), title: %i", passTitle(title)?1:0);
         return passTitle(title);
     }
 }

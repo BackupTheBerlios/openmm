@@ -26,7 +26,6 @@
 
 #include <dlfcn.h>
 
-// TODO: this looks a bit like too much duplicate code, ...
 
 WidgetFactory *WidgetFactory::m_instance = 0;
 
@@ -86,7 +85,6 @@ WidgetFactory::createPageStackWidget()
     switch(m_toolkit) {
     case ToolkitQt:
         TRACE("WidgetFactory::createPageStackWidget() for toolkit Qt");
-        //return new QtPageStack();
         return (PageStackWidget*) (*m_pageStackCtor)();
     default:
         return 0;
@@ -101,7 +99,6 @@ WidgetFactory::createPageWidget()
     switch(m_toolkit) {
     case ToolkitQt:
         TRACE("WidgetFactory::createPage() for toolkit Qt");
-        //return new QtPage();
         return (PageWidget*) (*m_pageCtor)();
     default:
         return 0;
@@ -116,7 +113,6 @@ WidgetFactory::createMenuWidget(Page *parent)
     switch(m_toolkit) {
     case ToolkitQt:
         TRACE("WidgetFactory::createMenu() for toolkit Qt");
-        //return new QtMenu(parent);
         return (MenuWidget*) (*m_menuCtor)(parent);
     default:
         return 0;
@@ -125,13 +121,12 @@ WidgetFactory::createMenuWidget(Page *parent)
 
 
 ListBrowserWidget* 
-WidgetFactory::createListBrowserWidget(Page *parent, QStringList *cols)
+WidgetFactory::createListBrowserWidget(Page *parent, vector<string> *cols)
 {
     TRACE("WidgetFactory::createListBrowser()");
     switch(m_toolkit) {
     case ToolkitQt:
         TRACE("WidgetFactory::createListBrowser() for toolkit Qt");
-        //return new QtListBrowser(parent, cols);
         return (ListBrowserWidget*) (*m_listBrowserCtor)(parent, cols);
     default:
         return 0;
@@ -146,7 +141,6 @@ WidgetFactory::createPopupMenuWidget(Page *parent)
     switch(m_toolkit) {
     case ToolkitQt:
         TRACE("WidgetFactory::createPopupMenu() for toolkit Qt");
-        //return new QtPopupMenu(parent);
         return (PopupMenuWidget*) (*m_popupMenuCtor)(parent);
     default:
         return 0;

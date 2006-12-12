@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "module.h"
 
-Module::Module(QString name)
+Module::Module(string name)
  : QObject()
 {
     m_name = name;

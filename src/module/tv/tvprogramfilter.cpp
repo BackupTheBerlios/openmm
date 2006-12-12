@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvprogramfilter.h"
+#include "debug.h"
 
 #include <qdatetime.h>
 
@@ -36,8 +37,8 @@ TvProgramFilter::~TvProgramFilter()
 bool
 TvProgramFilter::passTitle(Title *title)
 {
-    //TRACE("TvProgramFilter::pass() m_at: %i, start: %i, end: %i", m_at, ((TvProgram*)title)->getStart(),
-    //      ((TvProgram*)title)->getEnd());
+//     TRACE("TvProgramFilter::pass() m_at: %i, start: %i, end: %i", m_at, ((TvProgram*)title)->getStart(),
+//           ((TvProgram*)title)->getEnd());
 
 // TODO: philosophical question: filter out if type doesn't match, or pass all other types through?
 //       for now, we filter them out. Take care of TitlePairs, they must be treated accordingly.

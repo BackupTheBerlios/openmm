@@ -25,7 +25,8 @@
 
 #include <qlistview.h>
 #include <qptrdict.h>
-
+#include <string>
+using namespace std;
 
 /**
 @author Jörg Bakker
@@ -40,7 +41,7 @@ public:
 
     virtual void addEntry(Page *page);
     virtual void setDefaultEntry(Page *page);
-    virtual void setMenuName(QString name) { m_list->addColumn(name); }
+    virtual void setMenuName(string name) { m_list->addColumn(name); }
     virtual void enterPage();
 
 private slots:

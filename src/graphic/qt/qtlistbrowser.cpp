@@ -24,7 +24,7 @@
 #include <qlayout.h>
 
 
-QtListBrowser::QtListBrowser(Page *parent, QStringList *cols)
+QtListBrowser::QtListBrowser(Page *parent, vector<string> *cols)
 {
     TRACE("QtListBrowser::QtListBrowser()");
 
@@ -37,7 +37,6 @@ QtListBrowser::QtListBrowser(Page *parent, QStringList *cols)
     TRACE("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
 
     connect(m_listView, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(showPopupMenu(QListViewItem*)));
-    TRACE("QtListBrowser::QtListBrowser() done");
 }
 
 
@@ -60,12 +59,12 @@ QtListBrowser::addEntry(Title *title)
     if (!title) {
         return;
     }
-    //TRACE("QtListBrowser::addEntry() with name: %s", title->getText("Name").latin1());
+    //TRACE("QtListBrowser::addEntry() with name: %s", title->getText("Name").c_str());
     QListViewItem *entry = new QListViewItem(m_listView);
     m_titleList.insert(entry, title);
     m_itemList.insert(title, entry);
-    for (uint i = 0; i < m_cols->count(); i++) {
-        entry->setText(i, title->getText((*m_cols->at(i))));
+    for (uint i = 0; i < m_cols->size(); i++) {
+        entry->setText(i, title->getText(m_cols->at(i)));
     }
 }
 
@@ -114,7 +113,7 @@ QtListBrowser::showPopupMenu(QListViewItem *entry)
 
 
 extern "C" {
-ListBrowserWidget* createListBrowserWidget(Page *parent, QStringList *cols)
+ListBrowserWidget* createListBrowserWidget(Page *parent, vector<string> *cols)
 {
     return new QtListBrowser(parent, cols);
 }

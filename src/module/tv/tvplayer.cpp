@@ -106,7 +106,7 @@ TvPlayer::keyHandler(QKeyEvent *k)
 void
 TvPlayer::startLiveTv()
 {
-    TRACE("TvPlayer::startLiveTv() on channel: %s", getCurrentChannelTitle()->getMrl()->getPath().latin1());
+    TRACE("TvPlayer::startLiveTv() on channel: %s", getCurrentChannelTitle()->getMrl()->getPath().c_str());
     //play("/data/video/001.vdr");
     play(getCurrentChannelTitle());
     showOsd(getCurrentChannelTitle()->getText("Name") + "   "

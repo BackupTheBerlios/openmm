@@ -29,6 +29,7 @@
 #include "module.h"
 
 #include <qdict.h>
+#include <qptrlist.h>
 
 
 class Controler

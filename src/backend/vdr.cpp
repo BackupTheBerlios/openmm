@@ -36,7 +36,7 @@ Vdr::~Vdr()
 void
 Vdr::fill(List *list, Title::TitleT type)
 {
-    QString vdrRequest = "";
+    string vdrRequest = "";
 
     switch (type) {
     case Title::TvTimerT:
@@ -54,10 +54,11 @@ Vdr::fill(List *list, Title::TitleT type)
     default:
         break;
     }
-    TRACE("Vdr::fill() starting request: %s", vdrRequest.latin1());
+    TRACE("Vdr::fill() starting request: %s", vdrRequest.c_str());
 
     VdrRequest request(this, list, vdrRequest);
     request.startRequest();
+    TRACE("Vdr::fill() finished");
     // TODO: check the answer of the backend.
 }
 
@@ -65,18 +66,18 @@ Vdr::fill(List *list, Title::TitleT type)
 void
 Vdr::addProxyTitle(Title *title)
 {
-    QString vdrRequest = "";
+    string vdrRequest = "";
 
     switch (title->getType()) {
     case Title::TvTimerT: {
-        QString active = title->getText("Active");
-        QString channel = title->getText("Channel");
-        QString day = title->getText("Day");
-        QString start = title->getText("Time Start");
-        QString end = title->getText("Time End");
-        QString prio = title->getText("Priority");
-        QString resist = title->getText("Resistance");
-        QString name = title->getText("Name");
+        string active = title->getText("Active");
+        string channel = title->getText("Channel");
+        string day = title->getText("Day");
+        string start = title->getText("Time Start");
+        string end = title->getText("Time End");
+        string prio = title->getText("Priority");
+        string resist = title->getText("Resistance");
+        string name = title->getText("Name");
         vdrRequest = "NEWT " + active + ":" + channel + ":" + day + ":" + 
                     start + ":" + end + ":" + prio + ":" + resist + ":" + name + ":";
         break;
@@ -84,7 +85,7 @@ Vdr::addProxyTitle(Title *title)
     default:
         break;
     }
-    TRACE("Vdr::addProxyTitle() starting request: %s", vdrRequest.latin1());
+    TRACE("Vdr::addProxyTitle() starting request: %s", vdrRequest.c_str());
 
     VdrRequest request(this, 0, vdrRequest);
     request.startRequest();
@@ -95,7 +96,7 @@ Vdr::addProxyTitle(Title *title)
 void
 Vdr::delProxyTitle(Title *title)
 {
-    QString vdrRequest = "";
+    string vdrRequest = "";
 
     switch (title->getType()) {
     case Title::TvTimerT:
@@ -109,7 +110,7 @@ Vdr::delProxyTitle(Title *title)
     default:
         break;
     }
-    TRACE("Vdr::delProxyTitle() starting request: %s", vdrRequest.latin1());
+    TRACE("Vdr::delProxyTitle() starting request: %s", vdrRequest.c_str());
 
     VdrRequest request(this, 0, vdrRequest);
     request.startRequest();

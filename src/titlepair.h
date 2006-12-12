@@ -40,8 +40,8 @@ public:
     Title *getRight() { return m_right; }
 
 protected:
-    virtual QString getColText(QString col);
-    virtual void setColText(QString col, QString text);
+    virtual string getColText(string col);
+    virtual void setColText(string col, string text);
 
 private:
     Title *m_left;

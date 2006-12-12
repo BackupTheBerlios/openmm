@@ -28,10 +28,10 @@
 class TimerTime
 {
 public:
-    TimerTime(QString time);
+    TimerTime(string time);
     TimerTime(time_t t);
 
-    QString str();
+    string str();
 
 private:
     int m_hour;
@@ -42,40 +42,40 @@ private:
 class TimerDay
 {
 public:
-    TimerDay(QString day);
+    TimerDay(string day);
     TimerDay(time_t t);
 
-    QString str() { return m_day; }
+    string str() { return m_day; }
 
 private:
-    QString m_day;
+    string m_day;
 };
 
 
 class TvTimer : public Title
 {
 public:
-    TvTimer(QString name, QString id, QString channelId, TimerDay *day, TimerTime *start, TimerTime *end,
+    TvTimer(string name, string id, string channelId, TimerDay *day, TimerTime *start, TimerTime *end,
             int active, int prio, int resist);
     TvTimer(TvChannel *channel, TvProgram *program); // TODO: why the heck is TvProgram not recognized as a type?
 
-    //virtual int getId(QString col);
+    //virtual int getId(string col);
 
 protected:
-    virtual QString getColText(QString col);
-    virtual void setColText(QString col, QString text);
+    virtual string getColText(string col);
+    virtual void setColText(string col, string text);
 
 private:
     // TODO: m_header should be static in the derived class (headers are the same for all TvTimers), to save memory.
-    QString m_id;
-    QString m_channelId;
+    string m_id;
+    string m_channelId;
     TimerDay *m_day;
     TimerTime *m_start;
     TimerTime *m_end;
     int m_active;
     int m_prio;
     int m_resist;
-    QString m_title;
+    string m_title;
 };
 
 

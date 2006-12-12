@@ -53,7 +53,7 @@ public:
     ~StreamPlayerXine();
 
 public slots:
-    virtual void showOsd(QString text, uint duration);
+    virtual void showOsd(string text, uint duration);
     virtual void hideOsd();
     virtual void initStream();
     virtual void closeStream();

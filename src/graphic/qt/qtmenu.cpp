@@ -30,6 +30,7 @@ QtMenu::QtMenu(Page *parent)
     m_list = new QListView((QWidget*) parent->frame());
     m_list->installEventFilter(GlobalKeyHandler::instance());
     m_entryNumber = 0;
+    m_defaultEntry = 0;
 
     connect(m_list, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(selectEntry(QListViewItem*)));
 }
@@ -43,6 +44,7 @@ QtMenu::~QtMenu()
 void
 QtMenu::addEntry(Page* page)
 {
+    TRACE("QtMenu::addEntry() for page: %p", page);
     m_entryNumber++;
     QString entryNumberStr = QString().setNum(m_entryNumber).rightJustify(2, '0') + ".  ";
     QListViewItem *i = new QListViewItem(m_list, entryNumberStr + page->getName(), "");
@@ -66,8 +68,10 @@ void
 QtMenu::enterPage()
 {
     TRACE("QtMenu::enterPage(), set default entry to: %p", m_defaultEntry);
-    m_list->setCurrentItem(m_defaultEntry);
-    m_list->setSelected(m_defaultEntry, true);
+    if (m_defaultEntry) {
+        m_list->setCurrentItem(m_defaultEntry);
+        m_list->setSelected(m_defaultEntry, true);
+    }
     m_list->setFocus();
 }
 

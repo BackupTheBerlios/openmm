@@ -26,9 +26,9 @@
 #include "popupmenu.h"
 #include "listbrowserwidget.h"
 
-#include <qstringlist.h>
 #include <qptrdict.h>
-
+#include <string>
+using namespace std;
 
 /**
 Page for browsing lists of timers, recordings, files, channels, ...
@@ -42,12 +42,12 @@ class ListBrowser : public QObject, public Page
     Q_OBJECT
 
 public:
-    ListBrowser(QString name, QString cols, List *list);
+    ListBrowser(string name, string cols, List *list);
     ListBrowser() {}
     ~ListBrowser();
 
-    int cols() { return m_cols.count(); }
-    QString colText(int i) { return m_cols[i]; }
+    int cols() { return m_cols.size(); }
+    string colText(int i) { return m_cols[i]; }
     void setPopupMenu(PopupMenu *popupMenu);
     PopupMenu* getPopupMenu() { return m_popupMenu; }
     virtual void enterPage();
@@ -63,11 +63,11 @@ protected slots:
 protected:
     void selectEntry(int number);
     virtual void selectEntry(Title *title);
-    virtual void addViewColumn(QString colName) { m_listBrowserWidget->addViewColumn(colName); }
+    virtual void addViewColumn(string colName) { m_listBrowserWidget->addViewColumn(colName); }
 
-    static QString      colSeperator;
+    static string      colSeperator;
     List               *m_list;
-    QStringList         m_cols;
+    vector<string>         m_cols;
     PopupMenu          *m_popupMenu;
 
     ListBrowserWidget  *m_listBrowserWidget;

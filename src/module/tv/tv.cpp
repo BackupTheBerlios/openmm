@@ -59,6 +59,7 @@ Tv::Tv() : Module("Television")
     TvProgramBrowser *programGuideBrowser = new TvProgramBrowser(programGuide);
     programGuideBrowser->setPopupMenu(new TvProgramPopup(timerList, channelPlayer, programGuideBrowser));
     programGuide->fill();  // TODO: first show main menu, then fill the program guide tables in an extra thread.
+    TRACE("Tv::Tv() after programGuide->fill()");
 
     ListProxy *recList = new ListProxy(listManagerVdr, Title::TvRecT);
     ListBrowser *recListBrowser = new ListBrowser("Recordings", "Id;Name;Day;Start", recList);

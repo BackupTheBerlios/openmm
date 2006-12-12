@@ -21,13 +21,14 @@
 #include "tvtimer.h"
 #include "tvprogram.h"
 #include "tvchannel.h"
+#include "otherutil.h"
 #include "debug.h"
 
 #include <qdir.h>
 #include <qregexp.h>
 
 
-VdrRequest::VdrRequest(ListManager *listManager, List *list, QString request)
+VdrRequest::VdrRequest(ListManager *listManager, List *list, string request)
     : QThread()
 {
     m_listManager = listManager;
@@ -64,10 +65,10 @@ VdrRequest::run()
 {
     // TODO: does this reliably synchronize access to the VDR socket in order of request call in the main thread?
     QMutexLocker requestLocker(&m_requestMutex);
-    const int MaxLen = 2048; // TODO: make this variable length (Epg description may be longer ...?)
+    const int MaxLen = 4096; // TODO: make this variable length (Epg description may be longer ...?)
     char line[MaxLen];
 
-    if (!m_socket->connect(m_server, m_svdrpPort))
+    if (!m_socket->connect(QString(m_server.c_str()), m_svdrpPort))
         return;
 
     m_socket->readLine(line, MaxLen);
@@ -78,8 +79,9 @@ VdrRequest::run()
     do
     {
         m_socket->readLine(line, MaxLen);
-        m_reply.append(QString::fromUtf8(line));
-        //TRACE("Reply: %s", (QString(line).stripWhiteSpace()).latin1());
+        //m_reply.push_back(string::fromUtf8(line));
+        m_reply.push_back(line);
+        //TRACE("Reply: %s", (string(line).stripWhiteSpace()).c_str());
     } while (line[3] != ' ');
 
     writeToSocket("QUIT\r\n");
@@ -91,7 +93,7 @@ VdrRequest::run()
 
 
 void
-VdrRequest::writeToSocket(const QString &str)
+VdrRequest::writeToSocket(const string &str)
 {
     QByteArray ba;
     QTextOStream out(ba);
@@ -109,24 +111,27 @@ VdrRequest::writeToSocket(const QString &str)
 void
 VdrRequest::processReply()
 {
-    TRACE("VdrRequest::processReply()");
+    //TRACE("VdrRequest::processReply()");
     if (m_request == "LSTC")
     {
-        for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
+        for ( vector<string>::iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
-            uint pos = (*it).find(' ', 4);  // it->find() is not possible ...? Inconsistency in Qt ...?
-            QString id = (*it).mid(4, pos - 4);
+            uint pos = (*it).find(' ', 4);
+            string id = (*it).substr(4, pos - 4);
             // channel name ends at first semicolon
             pos++;
             uint sigStart = (*it).find(';', pos);
-            QString name = (*it).mid(pos, sigStart - pos);
-            QString signature = (*it).section(':', 3, 3) + "-" + (*it).section(':', 10, 10) + "-" + 
-                (*it).section(':', 11, 11) + "-" + (*it).section(':', 9, 9);
+            string name = (*it).substr(pos, sigStart - pos);
+            vector<string> s;
+            OtherUtil::stringSplit((*it), ":", s);
+            string signature = s[3] + "-" + s[10] + "-" + s[11] + "-" + s[9];
             TvChannel *tvChannel = new TvChannel(id, name, signature);
-            Mrl *mrl = new Mrl("http://", "/PES/" + id, m_server + ":" + QString().setNum(m_httpPort), Mrl::TvVdr);
+            char buf[8];
+            sprintf(buf,"%i", m_httpPort);
+            Mrl *mrl = new Mrl("http://", "/PES/" + id, m_server + ":" + string(buf), Mrl::TvVdr);
             tvChannel->setMrl(mrl);
             // take the SID as the unique channel identification number.
-            int channelId = (*it).section(':', 9, 9).toInt();
+            int channelId = atoi(s[9].c_str());
             tvChannel->setId("ChannelId", channelId);
             m_list->addTitleEntry(tvChannel);
         }
@@ -134,80 +139,78 @@ VdrRequest::processReply()
     else if (m_request == "LSTE")
     {
         TvProgram *program = 0;
-        QString channelSignature = "";
+        string channelSignature = "";
         int channelId = 0;
-        QString channelName = "";
-        for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
+        string channelName = "";
+        for ( vector<string>::iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
-            //TRACE("VdrRequest::processReply() line: %s", (*it).latin1());
+            //TRACE("VdrRequest::processReply() line: %s", (*it).c_str());
             if ((*it)[4] == 'C') {
-                channelSignature = (*it).section(' ', 1, 1);
-                channelId = channelSignature.section('-', 3, 3).toInt();
-                channelName = (*it).section(' ', 2);
-                //m_currentChannel = m_list->channelList()->getChannelPointer(signature);
+                int firstSpace = (*it).find(' ');
+                int secondSpace = (*it).find(' ', firstSpace + 1);
+                channelName = OtherUtil::s_trim((*it).substr(secondSpace));
+                channelSignature = (*it).substr(firstSpace, secondSpace - firstSpace);
+                channelId = atoi(channelSignature.substr(channelSignature.find_last_of('-') + 1).c_str());
+                TRACE("VdrRequest::processReply(), channelName: %s, channelId: %i", channelName.c_str(), channelId);
             }
             else if ((*it)[4] == 'E') {
-                program = new TvProgram((*it).section(' ', 1, 1), (time_t)(*it).section(' ', 2, 2).toUInt(),
-                    (time_t)(*it).section(' ', 3, 3).toUInt());
+                vector<string> s;
+                OtherUtil::stringSplit((*it), " ", s);
+                program = new TvProgram(s[1], (time_t)atoi(s[2].c_str()), (time_t)atoi(s[3].c_str()));
                 program->setText("Channel", channelName);
                 program->setId("ChannelId", channelId);
             }
             else if ((*it)[4] == 'T') {
-                // title
-                program->setText("Name", (*it).right((*it).length() - 6).stripWhiteSpace());
+                program->setText("Name", OtherUtil::s_trim((*it).substr(6)));
             }
             else if ((*it)[4] == 'S') {
-                // short description
-                program->setText("Short Text", (*it).right((*it).length() - 6).stripWhiteSpace());
+                program->setText("Short Text", OtherUtil::s_trim((*it).substr(6)));
             }
             else if ((*it)[4] == 'D') {
-                // description
-                program->setText("Description", (*it).right((*it).length() - 6).stripWhiteSpace());
+                program->setText("Description", OtherUtil::s_trim((*it).substr(6)));
             }
             else if ((*it)[4] == 'e' && program) {
-                    m_list->addTitleEntry(program);
+                m_list->addTitleEntry(program);
             }
         }
     }
     else if (m_request == "LSTT")
     {
-        for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
+        for ( vector<string>::iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
-            uint pos = (*it).find(' ', 4);  // it->find() is not possible ...? Inconsistency in Qt ...?
-            QString id = (*it).mid(4, pos - 4);
+//             TRACE("VdrRequest::processReply() line: %s", (*it).c_str());
+            uint pos = (*it).find(' ', 4);
+            string id = (*it).substr(4, pos - 4);
             pos++;
-            int active = QString((*it)[pos]).toInt();
-            QString channelId = (*it).section(':', 1, 1);
-            QString day = (*it).section(':', 2, 2);
-            QString start = (*it).section(':', 3, 3);
-            QString end = (*it).section(':', 4, 4);
-            int prio = (*it).section(':', 5, 5).toInt();
-            int resist = (*it).section(':', 6, 6).toInt();
-            QString title = (*it).section(':', 7, 7);
-            TvTimer *tvTimer = new TvTimer(title, id, channelId, new TimerDay(day), new TimerTime(start), 
-                new TimerTime(end), active, prio, resist);
+            int active = atoi((*it).substr(pos, 1).c_str());
+            vector<string> s;
+            OtherUtil::stringSplit((*it), ":", s);
+            // channelId=1,day=2,start=3,end=4,prio=5,resist=6,title=7
+            TvTimer *tvTimer = new TvTimer(s[7], id, s[1], new TimerDay(s[2]), new TimerTime(s[3]), 
+                new TimerTime(s[4]), active, atoi(s[5].c_str()), atoi(s[6].c_str()));
             m_list->addTitleEntry(tvTimer);
         }
     }
     else if (m_request == "LSTR")
     {
-        for ( QStringList::Iterator it = m_reply.begin(); it != m_reply.end(); ++it )
+        for ( vector<string>::iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
-            uint pos = (*it).find(' ', 4);  // it->find() is not possible ...? Inconsistency in Qt ...?
-            QString id = (*it).mid(4, pos - 4);
+            TRACE("VdrRequest::processReply() line: %s", (*it).c_str());
+            uint pos = (*it).find(' ', 4);
+            string id = (*it).substr(4, pos - 4);
             pos++;
-            QString day = (*it).mid(pos, 8);
-            QString start = (*it).mid(pos + 9, 6);
-            QString name = (*it).right((*it).length() - pos - 16).stripWhiteSpace();
-            //TRACE("SvdrpRequest::processReply() new TvRec: %s, %s, %s, %s", 
-            //    id.latin1(), day.latin1(), start.latin1(), title.latin1());
+            string day = (*it).substr(pos, 8);
+            string start = (*it).substr(pos + 9, 6);
+            string name = OtherUtil::s_trim((*it).substr(pos + 16));
+            TRACE("SvdrpRequest::processReply() new TvRec: %s, %s, %s, %s", 
+                id.c_str(), day.c_str(), start.c_str(), name.c_str());
             TvRec *tvRec = new TvRec(id, name, day, start);
             // no video directory specified, no infos about the recordings and no video files to play.
             if (m_videoDir != "") {
                 // TODO: locate recording in video directory of VDR (if available).
-                QString recDir = locateRecDir(tvRec);
+//                 string recDir = locateRecDir(tvRec);
                 // TODO: retrieve extra info from recording directory (.vdr files, description)
-                addRecFileInfo(tvRec, recDir);
+//                 addRecFileInfo(tvRec, recDir);
             }
             m_list->addTitleEntry(tvRec);
         }
@@ -216,54 +219,57 @@ VdrRequest::processReply()
 }
 
 
-QString
+string
 VdrRequest::locateRecDir(TvRec *tvRec)
 {
     QDir videoDir(m_videoDir);
-    QString vdrRecNamePath = tvRec->getText("Name").replace(' ', '_');
-    vdrRecNamePath.replace(QRegExp("\\W"), "*");  // TODO: dangerous! All non-word characters are
+    string vdrRecNamePath = OtherUtil::s_replace(tvRec->getText("Name"), ' ', '_');
+    //vdrRecNamePath.replace(QRegExp("\\W"), "*");  // TODO: dangerous! All non-word characters are
                                                  // replaced by arbitrary character sequences.
                                                 // maybe do a more exact RegExp matching: .{1,2}
-    TRACE("VdrRequest::locateRecDir() vdrRecNamePath: %s", vdrRecNamePath.latin1());
-    QStringList recList = videoDir.entryList(vdrRecNamePath);
-    TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    TRACE("VdrRequest::locateRecDir() vdrRecNamePath: %s", vdrRecNamePath.c_str());
+/*
+    vector<string> recList = videoDir.entryList(vdrRecNamePath);
+    TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].c_str());
     vdrRecNamePath = recList[0];
     QDir d(m_videoDir + "/" + vdrRecNamePath);
     //recList = d.entryList("*.rec");
-    //TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    //TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].c_str());
 
-    QString vdrRecDirPath = "";
+    string vdrRecDirPath = "";
     recList = d.entryList("_");
-    //TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
+    //TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].c_str());
     if (recList.count() > 0) {
         TRACE("VdrRequest::locateRecDir() this is a serial!");
         vdrRecNamePath += "/_";
         d = QDir(m_videoDir + "/" + vdrRecNamePath);
     }
 
-    QStringList splitDate = QStringList::split(".", tvRec->getText("Day"));  // TODO: fix this!!
-    QString date = "20" + splitDate[2] + "-" + splitDate[1] + "-" + splitDate[0];  // TODO: fix this!!
-    QString start = tvRec->getText("Start").left(5);
+    vector<string> splitDate = vector<string>::split(".", tvRec->getText("Day"));  // TODO: fix this!!
+    string date = "20" + splitDate[2] + "-" + splitDate[1] + "-" + splitDate[0];  // TODO: fix this!!
+    string start = tvRec->getText("Start").left(5);
     start[2] = '?';
     vdrRecDirPath = date + "." + start;
     recList = d.entryList(vdrRecDirPath + ".??.??.rec");
-    TRACE("VdrRequest::locateRecDir() vdrRecDirPath: %s", vdrRecDirPath.latin1());
-    TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].latin1());
-    QString vdrRecPath = m_videoDir + "/" + vdrRecNamePath + "/" + recList[0];
-    TRACE("VdrRequest::locateRecDir() vdrRecPath: %s", vdrRecPath.latin1());
+    TRACE("VdrRequest::locateRecDir() vdrRecDirPath: %s", vdrRecDirPath.c_str());
+    TRACE("VdrRequest::locateRecDir() recList size: %i, first recList entry: %s", recList.count(), recList[0].c_str());
+    string vdrRecPath = m_videoDir + "/" + vdrRecNamePath + "/" + recList[0];
+    TRACE("VdrRequest::locateRecDir() vdrRecPath: %s", vdrRecPath.c_str());
     QDir recDir(vdrRecPath);
     recList = recDir.entryList("???.vdr");
     TRACE("VdrRequest::locateRecDir() recDir number of entries: %i, first recDir entry: %s", 
-        recList.count(), recList[0].latin1());
+        recList.count(), recList[0].c_str());
     Mrl *mrl = new Mrl("file://", vdrRecPath);
     mrl->setFiles(recList);
     tvRec->setMrl(mrl);
     return vdrRecPath;
+*/
+    return vdrRecNamePath;
 }
 
 
 void
-VdrRequest::addRecFileInfo(TvRec *tvRec, QString recDir)
+VdrRequest::addRecFileInfo(TvRec *tvRec, string recDir)
 {
     // TODO: add extra info to recording, like description text, ...
 }

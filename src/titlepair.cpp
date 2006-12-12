@@ -18,18 +18,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "titlepair.h"
+#include "otherutil.h"
+#include "debug.h"
+
 
 TitlePair::TitlePair(Title *left, Title *right)
  : Title("", Title::TitlePairT)
 {
-    //TRACE("TitlePair::TitlePair() of left: %s, right: %s", left->getText("Name").latin1(), 
-    //      right->getText("Name").latin1());
+/*    TRACE("TitlePair::TitlePair() of left: %s, right: %s", left->getText("Name").c_str(), 
+          right->getText("Name").c_str());*/
     m_left = left;
     m_right = right;
 
     if (left && right) { // left and right are defined.
         // union of both headers (with duplicates).
-        m_header = left->getHeader() + right->getHeader();
+        // TODO: add right side of header !!! (vector + vector in STL?)
+        m_header = vector<string>(left->getHeader());
+        //OtherUtil::stringVectorConcat(m_header, left->getHeader(), right->getHeader());
+        //m_header.assign(left->getHeader().begin(), left->getHeader().end());
+        //m_header.insert(left->getHeader().end(), right->getHeader().begin(), right->getHeader().end());
+
         // first valid Mrl (from left to right).
         m_mrl = left->getMrl()?left->getMrl():right->getMrl();
         setText("Name", left->getText("Name") + "#" + right->getText("Name"));
@@ -48,10 +56,10 @@ TitlePair::~TitlePair()
 
 
 // return first fitting column (from left to right).
-QString
-TitlePair::getColText(QString col)
+string
+TitlePair::getColText(string col)
 {
-    //TRACE("TitlePair::getColText() left # right: %s # %s", m_left->getText(col).latin1(), m_right->getText(col).latin1());
+    //TRACE("TitlePair::getColText() left # right: %s # %s", m_left->getText(col).c_str(), m_right->getText(col).c_str());
     if (m_left && col == "Left.Name") {
         return m_left->getText("Name");
     }
@@ -70,7 +78,7 @@ TitlePair::getColText(QString col)
 
 // set each fitting column.
 void
-TitlePair::setColText(QString col, QString text)
+TitlePair::setColText(string col, string text)
 {
     if (m_left) {
         m_left->setText(col, text);

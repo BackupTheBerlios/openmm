@@ -21,7 +21,8 @@
 #define MODULE_H
 
 #include <qobject.h>
-#include <qstring.h>
+#include <string>
+using namespace std;
 
 /**
 An application-like collection, that defines a group of functionality, e.g. Television:
@@ -36,13 +37,13 @@ class Module : public QObject
 {
 Q_OBJECT
 public:
-    Module(QString name);
+    Module(string name);
     ~Module();
 
-    QString getName() { return m_name; }
+    string getName() { return m_name; }
 
 private:
-    QString m_name;
+    string m_name;
 };
 
 #endif

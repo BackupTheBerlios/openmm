@@ -22,7 +22,8 @@
 
 #include "page.h"
 
-#include <qstring.h>
+#include <string>
+using namespace std;
 
 /**
 Interface for toolkit specific implementation of MenuWidget.
@@ -35,7 +36,7 @@ public:
     //virtual ~MenuWidget() = 0;
     virtual void addEntry(Page *page) = 0;
     virtual void setDefaultEntry(Page *page) = 0;
-    virtual void setMenuName(QString name) = 0;
+    virtual void setMenuName(string name) = 0;
     virtual void enterPage() = 0;
 };
 

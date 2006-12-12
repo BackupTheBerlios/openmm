@@ -23,8 +23,11 @@
 #include "mrl.h"
 
 #include <qobject.h>
-#include <qstringlist.h>
-#include <qdict.h>
+//#include <qdict.h>
+#include <vector>
+#include <map>
+#include <string>
+using namespace std;
 
 /**
 An entity that represents the meta data of a playable or other handlable item,
@@ -44,36 +47,33 @@ class Title : public QObject
 public:
     enum TitleT {TitlePairT, TvChannelT, TvProgramT, TvTimerT, TvRecT};
 
-    Title(QString name, TitleT type);
+    Title(string name, TitleT type);
     ~Title();
 
-    void setText(QString col, QString text);
-    void setId(QString col, int id) { m_idents.insert(col, new int(id)); }
+    void setText(string col, string text);
+    void setId(string col, int id) { m_idents[col] = id; }
     void setMrl(Mrl *mrl) { m_mrl = mrl; }
-    QString getText(QString col);
-    int getId(QString col) { return m_idents[col]?(*m_idents[col]):-1; }
+    string getText(string col);
+    int getId(string col) { return (m_idents.find(col) != m_idents.end())?(m_idents[col]):-1; }
     Mrl *getMrl() { return m_mrl; }
     TitleT getType() { return m_type; }
-    QStringList getHeader() { return m_header; }
-    //QStringList getHeaderIdents() { return m_headerIdents; }
-    QString colName(int i) { return m_header[i]; }
+    vector<string> getHeader() { return m_header; }
+    string colName(int i) { return m_header[i]; }
     bool match(Title *other);
 
-    static const QString headDelimiter;
+    static const string headDelimiter;
 
 protected:
-    virtual QString getColText(QString col) = 0;
-    virtual void setColText(QString col, QString text) = 0;
-    void setHeader(QString header);
-    //void appendCol(QString name);
+    virtual string getColText(string col) = 0;
+    virtual void setColText(string col, string text) = 0;
+    void setHeader(string header);
 
-    QStringList m_header;
-    //QStringList m_headerIdents;
-    QDict<int> m_idents;
+    vector<string> m_header;
+    map<string,int> m_idents;
     Mrl *m_mrl;
 
 private:
-    QString m_name;
+    string m_name;
     TitleT m_type;
 };
 

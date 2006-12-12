@@ -26,7 +26,6 @@
 #include "streamplayerengine.h"
 #include "sharedlibrary.h"
 
-#include <qstring.h>
 #include <string>
 using namespace std;
 
@@ -53,7 +52,7 @@ public slots:
     void stop();
 
     // interface to StreamPlayerEngine
-    void showOsd(QString text, uint duration) { m_engine->showOsd(text, duration); }
+    void showOsd(string text, uint duration) { m_engine->showOsd(text, duration); }
     void hideOsd() { m_engine->hideOsd(); }
 
 protected:

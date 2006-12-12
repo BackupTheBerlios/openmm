@@ -11,7 +11,7 @@
 
 void
 TRACE(const char *msg, ...) {
-    char buf[256];
+    char buf[10240];  // TODO: fix these horrible fixed size C-String buffers, ..., aarghhh!
     va_list ap;
     va_start( ap, msg );                    // use variable arg list
     vsprintf( buf, msg, ap );

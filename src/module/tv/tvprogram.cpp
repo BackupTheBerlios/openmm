@@ -18,13 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvprogram.h"
+#include "debug.h"
 
 #include <qdatetime.h>
 
 
-TvProgram::TvProgram(QString id, time_t start, time_t duration, QString name, QString shortText, QString description, QString channel)
+TvProgram::TvProgram(string id, time_t start, time_t duration, string name, string shortText, string description, string channel)
  : Title(name, Title::TvProgramT)
 {
+    //TRACE("TvProgram::TvProgram(), id: %s, start: %i, name: %s, channel: %s", 
+    //        id.c_str(), start, name.c_str(), channel.c_str());
     m_id = id;
     m_start = start;
     m_duration = duration;
@@ -40,8 +43,8 @@ TvProgram::~TvProgram()
 }
 
 
-QString
-TvProgram::getColText(QString col)
+string
+TvProgram::getColText(string col)
 {
     //TRACE("TvProgram::getColText()");
     if (col == colName(1)) {
@@ -70,9 +73,9 @@ TvProgram::getColText(QString col)
 
 
 void
-TvProgram::setColText(QString col, QString text)
+TvProgram::setColText(string col, string text)
 {
-    //TRACE("TvProgram::setColText() col: %s, text: %s", col.latin1(), text.latin1());
+    //TRACE("TvProgram::setColText() col: %s, text: %s", col.c_str(), text.c_str());
     if (col == colName(1)) {
         m_id = text;
     }
@@ -92,7 +95,7 @@ TvProgram::setColText(QString col, QString text)
 }
 
 
-QString
+string
 TvProgram::timeStr(time_t t)
 {
     //TRACE("TvProgram::timeStr()");
@@ -103,7 +106,7 @@ TvProgram::timeStr(time_t t)
 
 
 // int
-// TvProgram::getId(QString col)
+// TvProgram::getId(string col)
 // {
 //     return 0;
 // }

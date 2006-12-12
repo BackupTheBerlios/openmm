@@ -26,29 +26,29 @@
 class TvRec : public Title
 {
 public:
-    TvRec(QString id, QString name, QString day, QString start);
+    TvRec(string id, string name, string day, string start);
 
-    //virtual int getId( QString col );
+    //virtual int getId( string col );
 
 /*
-    QString getId() { return m_id; }
-    QString getIdStr();
-    QString getDayStr() { return m_day; }
-    QString getStartStr() { return m_start; }
-    QString getTitle() { return m_title; }
-    QString getFirstRec() { return m_fileList[0]; }
-    void setRecFiles(QStringList fileList);
+    string getId() { return m_id; }
+    string getIdStr();
+    string getDayStr() { return m_day; }
+    string getStartStr() { return m_start; }
+    string getTitle() { return m_title; }
+    string getFirstRec() { return m_fileList[0]; }
+    void setRecFiles(vector<string> fileList);
 */
 
 protected:
-    virtual QString getColText(QString col);
-    virtual void setColText(QString col, QString text);
+    virtual string getColText(string col);
+    virtual void setColText(string col, string text);
 
 private:
-    QString m_id;
-    QString m_day;
-    QString m_start;
-//    QStringList m_fileList;
+    string m_id;
+    string m_day;
+    string m_start;
+//    vector<string> m_fileList;
 };
 
 /*

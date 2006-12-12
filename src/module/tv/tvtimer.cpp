@@ -21,13 +21,15 @@
 #include "debug.h"
 
 #include <qdatetime.h>
+#include <cstdlib>
 
 
-TimerTime::TimerTime(QString time)
+TimerTime::TimerTime(string time)
 {
     // TODO: range checking
-    m_hour = time.left(2).toInt();
-    m_min = time.right(2).toInt();
+//     TRACE("TimerTime::TimerTime()");
+    m_hour = atoi(time.substr(0, 2).c_str());
+    m_min = atoi(time.substr(time.length() - 2).c_str());
 }
 
 
@@ -40,15 +42,18 @@ TimerTime::TimerTime(time_t t)
 }
 
 
-QString
+string
 TimerTime::str()
 {
-    return QString().sprintf("%02i%02i", m_hour, m_min);
+    char buf[5];
+    sprintf(buf, "%02i%02i", m_hour, m_min);
+    return buf;
 }
 
 
-TimerDay::TimerDay(QString day)
+TimerDay::TimerDay(string day)
 {
+    TRACE("TimerDay::TimerDay()");
     m_day = day;
 }
 
@@ -57,13 +62,14 @@ TimerDay::TimerDay(time_t t)
 {
     QDateTime date;
     date.setTime_t(t);
-    m_day = date.toString("yyyy-MM-dd");
+    m_day = date.toString("yyyy-MM-dd").latin1();
 }
 
 
-TvTimer::TvTimer(QString name, QString id, QString channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist)
+TvTimer::TvTimer(string name, string id, string channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist)
  : Title(name, Title::TvTimerT)
 {
+    TRACE("TvTimer::TvTimer(), name: %s, id: %s, channelId: %s", name.c_str(), id.c_str(), channelId.c_str());
     m_id = id;
     m_channelId = channelId;
     m_day = day;
@@ -90,13 +96,15 @@ TvTimer::TvTimer(TvChannel *channel, TvProgram *program)
     setHeader("Id;Channel;Day;Time Start;Time End;Active;Priority;Resistance");
 
     TRACE("TvTimer::TvTimer(TvProgram) with channelId: %s, start: %s, end: %s, day: %s", 
-            m_channelId.latin1(), m_start->str().latin1(), m_end->str().latin1(), m_day->str().latin1());
+            m_channelId.c_str(), m_start->str().c_str(), m_end->str().c_str(), m_day->str().c_str());
 }
 
 
-QString
-TvTimer::getColText(QString col)
+string
+TvTimer::getColText(string col)
 {
+    char buf[10];
+
     if (col == colName(1)) { // Id
         return m_id;
     }
@@ -113,27 +121,30 @@ TvTimer::getColText(QString col)
         return m_end->str();
     }
     else if (col == colName(6)) {  // Active
-        return QString().setNum(m_active);
+        sprintf(buf, "%i", m_active);
+        return string(buf);
     }
     else if (col == colName(7)) {  // Priority
-        return QString().setNum(m_prio);
+        sprintf(buf, "%i", m_prio);
+        return string(buf);
     }
     else if (col == colName(8)) {  // Resistance
-        return QString().setNum(m_resist);
+        sprintf(buf, "%i", m_resist);
+        return string(buf);
     }
     return "";
 }
 
 
 void
-TvTimer::setColText(QString col, QString text)
+TvTimer::setColText(string col, string text)
 {
 // TODO: convert strings into appropriate values for column fields.
 }
 
 
 // int
-// TvTimer::getId(QString col)
+// TvTimer::getId(string col)
 // {
 //     return 0;
 // }

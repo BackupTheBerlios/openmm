@@ -42,7 +42,7 @@ playing files, recordings, live-TV, have all different keys, OSD, ...
 class MediaPlayer : public Page
 {
 public:
-    MediaPlayer(QString name);
+    MediaPlayer(string name);
     ~MediaPlayer();
 
     // Define the specific keys and resulting actions to control this media player.
@@ -60,7 +60,7 @@ public slots:
     void play(Title* title);
     //void start();  // starts the current title
     void stop();
-    void showOsd(QString text, uint duration);
+    void showOsd(string text, uint duration);
     void hideOsd();
 
 //private:

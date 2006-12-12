@@ -30,52 +30,15 @@
 class TvChannel : public Title
 {
 public:
-    TvChannel(QString id, QString name, QString signature = "");
-
-    //virtual int getId(QString col);
+    TvChannel(string id, string name, string signature = "");
 
 protected:
-    virtual QString getColText(QString col);
-    virtual void setColText(QString col, QString text);
-
-    //void appendProgram(Program *program);
-//     EpgEntry* getEpgEntry(time_t at);
-//     EpgEntry* getCurrentEpgEntry();
-//     EpgEntry* getNextEpgEntry();
-//     EpgEntry* getPrevEpgEntry();
+    virtual string getColText(string col);
+    virtual void setColText(string col, string text);
 
 private:
-    QString m_id;
-    QString m_signature;
-//    unsigned int m_current;
+    string m_id;
+    string m_signature;
 };
-
-
-/**
-	@author Jörg Bakker <joerg@hakker.de>
-*/
-/*
-class TvChannelList{
-public:
-    TvChannelList();
-    ~TvChannelList();
-
-    void insertChannel(int channelNumber, TvChannel *channel);
-    void appendChannel(TvChannel *channel);
-    QString getChannelId(int channelNumber);
-    int getChannelNumber(QString channelId);
-    QString getChannelName(int channelNumber);
-    TvChannel* getChannelPointer(int channelNumber);
-    TvChannel* getChannelPointer(QString channelSignature);
-    int getChannelCount();
-    void updateEpg();
-
-private:
-    typedef QPtrList<TvChannel> ChannelListT;
-
-    ChannelListT m_channelList;
-    int m_numberChannels;
-};
-*/
 
 #endif

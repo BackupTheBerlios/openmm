@@ -20,23 +20,24 @@
 #include "listbrowser.h"
 #include "globalkeyhandler.h"
 #include "widgetfactory.h"
+#include "otherutil.h"
 #include "debug.h"
 
 
-QString ListBrowser::colSeperator = ";";
+string ListBrowser::colSeperator = ";";
 
-ListBrowser::ListBrowser(QString name, QString cols, List *list)
+ListBrowser::ListBrowser(string name, string cols, List *list)
  : Page(name)
 {
     TRACE("ListBrowser::ListBrowser()");
-    m_cols = QStringList::split(colSeperator, cols);
+    OtherUtil::stringSplit(cols, colSeperator, m_cols);
     m_list = list;
     m_popupMenu = 0;
 
     TRACE("ListBrowser::ListBrowser() creating ListBrowser widget");
     m_listBrowserWidget = WidgetFactory::instance()->createListBrowserWidget(this, &m_cols);
 
-    for (QStringList::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
+    for (vector<string>::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
         addViewColumn(*i);
     }
 
@@ -69,6 +70,7 @@ ListBrowser::enterPage()
 void
 ListBrowser::addEntry(Title *title)
 {
+//     TRACE("ListBrowser::addEntry(), title: %s", title->getText("Name").c_str());
     m_listBrowserWidget->addEntry(title);
 }
 

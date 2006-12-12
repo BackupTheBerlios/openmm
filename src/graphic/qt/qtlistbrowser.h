@@ -27,6 +27,8 @@
 #include <qlistview.h>
 #include <qstringlist.h>
 #include <qptrdict.h>
+#include <string>
+using namespace std;
 
 
 /**
@@ -41,7 +43,7 @@ class QtListBrowser : public QObject, public ListBrowserWidget
     Q_OBJECT
 
 public:
-    QtListBrowser(Page *parent, QStringList *cols);
+    QtListBrowser(Page *parent, vector<string> *cols);
     ~QtListBrowser();
 
     virtual void enterPage();
@@ -56,10 +58,10 @@ public slots:
 
 protected slots:
     virtual void showPopupMenu(QListViewItem *entry);
-    virtual void addViewColumn(QString colName) { m_listView->addColumn(colName); }
+    virtual void addViewColumn(string colName) { m_listView->addColumn(colName); }
 
 private:
-    QStringList            *m_cols;
+    vector<string>         *m_cols;
     PopupMenu              *m_popupMenu;
     QListView              *m_listView;
     QPtrDict<Title>         m_titleList;

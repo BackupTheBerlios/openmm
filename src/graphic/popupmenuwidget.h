@@ -21,7 +21,9 @@
 #define POPUPMENUWIDGET_H
 
 #include <qobject.h>
-#include <qstring.h>
+#include <string>
+using namespace std;
+
 
 /**
 Interface for toolkit specific implementation of PopupMenuWidget.
@@ -33,7 +35,7 @@ class PopupMenuWidget
 public:
     //virtual ~PopupMenuWidget();
     virtual void popup() = 0;
-    virtual void insertItem(QString text, QObject *receiver, const char *member) = 0;
+    virtual void insertItem(string text, QObject *receiver, const char *member) = 0;
 };
 
 #endif

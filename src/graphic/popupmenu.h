@@ -24,6 +24,10 @@
 #include "list.h"
 #include "page.h"
 #include "popupmenuwidget.h"
+#include "debug.h"
+
+#include <string>
+using namespace std;
 
 /**
 Just a simple popup menu.
@@ -34,11 +38,11 @@ class PopupMenu
 {
 public:
     PopupMenu(Page *parent);
-    PopupMenu() { qDebug("PopupMenu::PopupMenu() - nothing to do"); }
+    PopupMenu() { TRACE("PopupMenu::PopupMenu() - nothing to do"); }
     virtual ~PopupMenu();
 
     virtual void popup() { m_popupMenuWidget->popup(); }
-    virtual void insertItem(QString text, QObject *receiver, const char *member) 
+    virtual void insertItem(string text, QObject *receiver, const char *member) 
             { m_popupMenuWidget->insertItem(text, receiver, member); }
 
     void setParent(Page *parent) {m_parent = parent; }

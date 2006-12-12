@@ -26,9 +26,7 @@
 #include "listbrowserwidget.h"
 #include "popupmenuwidget.h"
 
-#include <qstringlist.h>
 #include <string>
-
 using namespace std;
 
 /**
@@ -47,7 +45,7 @@ public:
     PageStackWidget* createPageStackWidget();
     PageWidget* createPageWidget();
     MenuWidget* createMenuWidget(Page *parent);
-    ListBrowserWidget* createListBrowserWidget(Page *parent, QStringList *cols);
+    ListBrowserWidget* createListBrowserWidget(Page *parent, vector<string> *cols);
     PopupMenuWidget* createPopupMenuWidget(Page *parent);
 
 protected:
@@ -67,7 +65,7 @@ private:
     PageStackWidget*    (*m_pageStackCtor)();
     PageStackWidget*    (*m_pageCtor)();
     PageStackWidget*    (*m_menuCtor)(Page *parent);
-    PageStackWidget*    (*m_listBrowserCtor)(Page *parent, QStringList *cols);
+    PageStackWidget*    (*m_listBrowserCtor)(Page *parent, vector<string> *cols);
     PageStackWidget*    (*m_popupMenuCtor)(Page *parent);
 };
 

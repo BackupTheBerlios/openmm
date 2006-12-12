@@ -27,6 +27,8 @@
 
 #include <qdir.h>
 #include <iostream>
+#include <string>
+using namespace std;
 
 
 int StreamPlayerXine::m_globX = 0;
@@ -58,7 +60,7 @@ StreamPlayerXine::initStream()
 
     xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
-    //QString configFile = QDir::homeDirPath();
+    //char* configFile = QDir::homeDirPath();
     //configFile.append("/.jam/xineconfig");
     char* configFile = "/etc/jam/xineconfig";
     if (QFile::exists(configFile))
@@ -70,8 +72,8 @@ StreamPlayerXine::initStream()
     m_pixel_aspect = 1.0;
 #ifdef QWS
 //    QWSServer::setDesktopBackground(QColor(QColor::black));
-//    QString videoDriverName = "fb";
-//    QString videoDriverName = "vidixfb";
+//    char* videoDriverName = "fb";
+//    char* videoDriverName = "vidixfb";
     char* videoDriverName = "directfb";
 //    int visualType = XINE_VISUAL_TYPE_FB;
     int visualType = XINE_VISUAL_TYPE_DFB;
@@ -143,11 +145,11 @@ StreamPlayerXine::closeStream()
 
 
 void
-StreamPlayerXine::showOsd(QString text, uint duration)
+StreamPlayerXine::showOsd(string text, uint duration)
 {
     initOSD();
-    TRACE("StreamPlayerXine::showOSD(), with text: %s", text.latin1());
-    xine_osd_draw_text(m_OSD, 0, 0, text, XINE_OSD_TEXT1);
+    TRACE("StreamPlayerXine::showOSD(), with text: %s", text.c_str());
+    xine_osd_draw_text(m_OSD, 0, 0, text.c_str(), XINE_OSD_TEXT1);
     //xine_osd_draw_rect(m_OSD, 0, 0, 500, 100, 200, 1 );
 
     xine_osd_show(m_OSD, 0 );
@@ -220,22 +222,24 @@ StreamPlayerXine::FrameOutputCallback(void* p, int video_width, int video_height
 void
 StreamPlayerXine::playStream(Mrl *mrl)
 {
-    QString xineMrl = mrl->getProtocol() + mrl->getServer() + mrl->getPath();
+    string xineMrl = mrl->getProtocol() + mrl->getServer() + mrl->getPath();
     if (mrl->getType() == Mrl::TvVdr) {
          TRACE("StreamPlayerXine::playStream(), setting demuxer to mpeg_pes");
          xineMrl += "#demux:mpeg_pes";
     }
-    if (mrl->getFiles().count() > 0) {
+    if (mrl->getFiles().size() > 0) {
         // this is a multi-file mrl
         // TODO: loop over all files.
         xineMrl = mrl->getProtocol() + mrl->getServer() + mrl->getPath() + "/" + mrl->getFiles()[0];
-        TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.ascii());
-        xine_open(xineStream, xineMrl.utf8());
+        TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.c_str());
+        //xine_open(xineStream, xineMrl.utf8());
+        xine_open(xineStream, xineMrl.c_str());
         xine_play(xineStream, 0, 0);
     }
     else {
-        TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.ascii());
-        xine_open(xineStream, xineMrl.utf8());
+        TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.c_str());
+        //xine_open(xineStream, xineMrl.utf8());
+        xine_open(xineStream, xineMrl.c_str());
         xine_play(xineStream, 0, 0);
     }
 }

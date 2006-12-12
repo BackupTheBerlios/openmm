@@ -60,7 +60,7 @@ TvProgramBrowser::eventFilter(QObject *o, QEvent *e)
         switch (k->key()) {
             case Qt::Key_Left:
                 TRACE("TvProgramBrowser::eventFilter(), Key_Left, Title: %s", 
-                        ((TitlePair*)getCurrent())->getRight()->getText("Name").latin1());
+                        ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getStart() - 1;
                 if (at < QDateTime::currentDateTime().toTime_t()) {
                     return true;
@@ -71,7 +71,7 @@ TvProgramBrowser::eventFilter(QObject *o, QEvent *e)
                 return true;
             case Qt::Key_Right:
                 TRACE("TvProgramBrowser::eventFilter(), Key_Right, Title: %s", 
-                        ((TitlePair*)getCurrent())->getRight()->getText("Name").latin1());
+                        ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getEnd();
                 m_filter->setTime(at);
                 clear();

@@ -22,6 +22,10 @@
 
 #include "page.h"
 #include "menuwidget.h"
+#include "debug.h"
+
+#include <string>
+using namespace std;
 
 /**
 @author Jörg Bakker
@@ -29,15 +33,15 @@
 class Menu : public Page
 {
 public:
-    Menu(QString name);
-    Menu() { qDebug("Menu::Menu() - nothing to do"); }
+    Menu(string name);
+    Menu() { TRACE("Menu::Menu() - nothing to do"); }
     ~Menu();
 
     virtual void addEntry(Page *page) { m_menuWidget->addEntry(page) ;}
     virtual void setDefaultEntry(Page *page) { m_menuWidget->setDefaultEntry(page) ;}
-    virtual void setMenuName(QString name) { m_menuWidget->setMenuName(name) ;}
+    virtual void setMenuName(string name) { m_menuWidget->setMenuName(name) ;}
     virtual void enterPage() { m_menuWidget->enterPage(); }
-    virtual void exitPage() { qDebug("Menu::exitPage()"); }
+    virtual void exitPage() { TRACE("Menu::exitPage()"); }
 
 protected:
     MenuWidget *m_menuWidget;

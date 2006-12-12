@@ -21,7 +21,11 @@
 #define MRL_H
 
 #include <qobject.h>
-#include <qstringlist.h>
+#include <vector>
+#include <string>
+
+using namespace std;
+
 
 /**
 An Mrl is a unique indentifier for a Title. It specifies the type (protocol), server and path to the media resource.
@@ -34,34 +38,34 @@ class Mrl : public QObject
 
 public:
     enum MrlT {None, TvVdr};
-    Mrl(QString protocol, QString path, QString server = "", MrlT type = None);
+    Mrl(string protocol, string path, string server = "", MrlT type = None);
     ~Mrl();
 
-//    void setProtocol(QString protocol) { m_protocol = protocol; }
-//    void setServer(QString server) { m_server = server; }
-//    void setPath(QString path) { m_path.append(path); }
+//    void setProtocol(string protocol) { m_protocol = protocol; }
+//    void setServer(string server) { m_server = server; }
+//    void setPath(string path) { m_path.append(path); }
 //    void setType(MrlT type) { m_type = type; }
 
-    QString getProtocol() { return m_protocol; }
-    QString getServer() { return m_server; }  // complete mrl is assembled in StreamPlayer
-    QString getPath() { return m_path; }     // from elements protocol, server, and path
+    string getProtocol() { return m_protocol; }
+    string getServer() { return m_server; }  // complete mrl is assembled in StreamPlayer
+    string getPath() { return m_path; }     // from elements protocol, server, and path
     MrlT    getType() { return m_type; }
 
-    void setFiles(QStringList files) { m_files = files; }
-    QStringList getFiles() { return m_files; }
+    void setFiles(vector<string> files) { m_files = files; }
+    vector<string> getFiles() { return m_files; }
 
 protected:
-    QString m_path;
+    string m_path;
     /**
     m_files is a needed for resource that points to several data files, where the media is stored (split into).
     Example: vdr recordings in a filesystem.
     */
-    QStringList m_files;
+    vector<string> m_files;
 
 private:
-    QString m_protocol;  // internal protocol naming: e.g. tvchan://, tvprog://, vdrchan://
+    string m_protocol;  // internal protocol naming: e.g. tvchan://, tvprog://, vdrchan://
                          // this is set only by the constructor of the derived class, e.g. TvChannel, TvProgram
-    QString m_server;  // encode the type of server? e.g. 192.168.1.10(vdr) or better store it in m_protocol?
+    string m_server;  // encode the type of server? e.g. 192.168.1.10(vdr) or better store it in m_protocol?
     MrlT m_type;
 };
 

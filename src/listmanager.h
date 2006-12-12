@@ -23,7 +23,8 @@
 #include "list.h"
 
 #include <qobject.h>
-#include <qstring.h>
+#include <string>
+using namespace std;
 
 /**
 Produces and also deletes titles which it gets from servers on the net or local filesystems or just about anywhere.

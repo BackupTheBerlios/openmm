@@ -18,14 +18,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "title.h"
+#include "otherutil.h"
+#include "debug.h"
 
-Title::Title(QString name, TitleT type)
+
+Title::Title(string name, TitleT type)
  : QObject()
 {
     m_name = name;
     m_type = type;
     m_mrl = 0;
-    m_header = QStringList("Name");
+    m_header.push_back("Name");
 }
 
 
@@ -34,11 +37,11 @@ Title::~Title()
 }
 
 
-const QString Title::headDelimiter = ";";
+const string Title::headDelimiter = ";";
 
 
-QString
-Title::getText(QString col)
+string
+Title::getText(string col)
 {
     if (col == colName(0)) {
         return m_name;
@@ -48,7 +51,7 @@ Title::getText(QString col)
 
 
 void
-Title::setText(QString col, QString text)
+Title::setText(string col, string text)
 {
     if (col == colName(0)) {
         m_name = text;
@@ -59,30 +62,26 @@ Title::setText(QString col, QString text)
 
 
 void
-Title::setHeader(QString header)
+Title::setHeader(string header)
 {
-    m_header = QStringList("Name") + QStringList::split(headDelimiter, header); 
+    //TRACE("Title::setHeader() to: %s", header.c_str());
+    m_header.clear();
+    OtherUtil::stringSplit(header, headDelimiter, m_header);
+    m_header.insert(m_header.begin(), "Name");
 }
-
-
-// void
-// Title::appendCol(QString name)
-// {
-//     m_header.append(name);
-// }
 
 
 bool
 Title::match(Title *other)
 {
-    QDictIterator<int> i(m_idents);
+    //TRACE("Title::match() with title: %s", other->getText("Name").c_str());
     bool commonIdents = false;
 
-    for( ; i.current(); ++i ) {
-        int otherId = other->getId(i.currentKey());
+    for(map<string,int>::iterator i = m_idents.begin(); i != m_idents.end(); ++i ) {
+        int otherId = other->getId(i->first);
         if (otherId > -1) {
             commonIdents = true;
-            if (otherId != getId(i.currentKey())) {
+            if (otherId != i->second) {
                 return false;
             }
         }

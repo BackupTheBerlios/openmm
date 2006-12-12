@@ -25,6 +25,8 @@
 
 #include <qobject.h>
 #include <qpopupmenu.h>
+#include <string>
+using namespace std;
 
 /**
 Qt implementation of PopupMenu.
@@ -40,7 +42,7 @@ public:
     ~QtPopupMenu();
 
     virtual void popup();
-    virtual void insertItem(QString text, QObject *receiver, const char *member) 
+    virtual void insertItem(string text, QObject *receiver, const char *member) 
             { m_popupMenu->insertItem(text, receiver, member); }
 
 private:

@@ -39,7 +39,7 @@ TvRecPopup::~TvRecPopup()
 void
 TvRecPopup::play()
 {
-    TRACE("TvRecPopup::play() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvRecPopup::play() title: %s", m_title->getText("Name").c_str());
     m_tvRecPlayer->play(m_title);
     m_tvRecPlayer->showUp();
 }
@@ -48,5 +48,5 @@ TvRecPopup::play()
 void
 TvRecPopup::del()
 {
-    TRACE("TvRecPopup::del() title: %s", m_title->getText("Name").latin1());
+    TRACE("TvRecPopup::del() title: %s", m_title->getText("Name").c_str());
 }

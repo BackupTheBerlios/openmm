@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "mrl.h"
 
-Mrl::Mrl(QString protocol, QString path, QString server, MrlT type)
+Mrl::Mrl(string protocol, string path, string server, MrlT type)
  : QObject()
 {
     m_type = type;

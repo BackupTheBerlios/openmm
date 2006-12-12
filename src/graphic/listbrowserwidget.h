@@ -23,7 +23,8 @@
 #include "title.h"
 #include "popupmenu.h"
 
-#include <qstring.h>
+#include <string>
+using namespace std;
 
 /**
 Interface for toolkit specific implementation of ListBrowserWidget.
@@ -40,7 +41,7 @@ public:
     virtual void addEntry(Title *title) = 0;
     virtual void delEntry(Title *title) = 0;
     virtual Title *getCurrent() = 0;
-    virtual void addViewColumn(QString colName) = 0;
+    virtual void addViewColumn(string colName) = 0;
     virtual void setPopupMenu(PopupMenu *popupMenu) = 0;
     virtual void clear() = 0;
     virtual void selectEntry(Title *title) = 0;

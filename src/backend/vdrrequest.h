@@ -37,32 +37,32 @@ class VdrRequest : public QObject, private QThread
     Q_OBJECT
 
 public:
-    VdrRequest(ListManager *listManager, List *list, QString request);
+    VdrRequest(ListManager *listManager, List *list, string request);
     ~VdrRequest();
 
 public slots:
     void startRequest();
 
 private:
-    void writeToSocket(const QString& str);
+    void writeToSocket(const string& str);
     void processReply();
     void run();
 
     // some helper functions to deal with the particular difficulties of VDR.
-    QString locateRecDir(TvRec *tvRec);
-    void addRecFileInfo(TvRec *tvRec, QString recDir);
+    string locateRecDir(TvRec *tvRec);
+    void addRecFileInfo(TvRec *tvRec, string recDir);
 
     QMutex m_requestMutex;
 
     ListManager *m_listManager;
     List *m_list;
-    QString m_request;
-    QString m_server;
+    string m_request;
+    string m_server;
     Q_UINT16 m_svdrpPort;
     Q_UINT16 m_httpPort;
     QSocketDevice *m_socket;
-    QStringList m_reply;
-    QString m_videoDir;
+    vector<string> m_reply;
+    string m_videoDir;
 };
 
 #endif

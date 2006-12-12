@@ -31,27 +31,27 @@ A program entry - think of EPG (Electronic Program Guide)
 class TvProgram : public Title
 {
 public:
-    TvProgram(QString id, time_t start, time_t duration, QString title = "", QString shortText = "", 
-                QString description =  "", QString channel = "");
+    TvProgram(string id, time_t start, time_t duration, string title = "", string shortText = "", 
+                string description =  "", string channel = "");
    ~TvProgram();
 
     time_t getStart() { return m_start; }
     time_t getEnd() { return m_start + m_duration; }
-    //virtual int getId(QString col);
+    //virtual int getId(string col);
 
 protected:
-    virtual QString getColText(QString col);
-    virtual void setColText( QString col, QString text );
+    virtual string getColText(string col);
+    virtual void setColText( string col, string text );
 
 private:
-    QString m_id;
+    string m_id;
     time_t m_start;
     time_t m_duration;
-    QString m_shortText;
-    QString m_description;
-    QString m_channel;
+    string m_shortText;
+    string m_description;
+    string m_channel;
 
-    QString timeStr(time_t t);
+    string timeStr(time_t t);
 };
 
 #endif

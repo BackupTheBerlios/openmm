@@ -22,7 +22,7 @@
 #include "debug.h"
 
 
-MediaPlayer::MediaPlayer(QString name)
+MediaPlayer::MediaPlayer(string name)
  : Page(name)
 {
 }
@@ -65,7 +65,7 @@ MediaPlayer::stop()
 
 
 void
-MediaPlayer::showOsd(QString text, uint duration)
+MediaPlayer::showOsd(string text, uint duration)
 {
     Controler::instance()->streamPlayer()->showOsd(text, duration);
 }

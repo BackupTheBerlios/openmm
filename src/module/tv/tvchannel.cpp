@@ -18,23 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvchannel.h"
-//#include "svdrp.h"
+#include "debug.h"
 
 
-TvChannel::TvChannel(QString id, QString name, QString signature)
+TvChannel::TvChannel(string id, string name, string signature)
  : Title(name, Title::TvChannelT)
 {
+    TRACE("TvChannel::TvChannel() id: %s, name: %s, signature: %s", id.c_str(), name.c_str(), signature.c_str());
     m_id = id;
     m_signature = signature;
     setHeader("Id;Signature");
 }
 
 
-QString
-TvChannel::getColText(QString col)
+string
+TvChannel::getColText(string col)
 {
     if (col == colName(1)) {
-        return m_id.rightJustify(2, '0');
+        // TODO: padding with leading '0' works only for under 100 channels.
+        return m_id.size()==2?m_id:"0"+m_id;
     }
     else if (col == colName(2)) {
         return m_signature;
@@ -44,181 +46,7 @@ TvChannel::getColText(QString col)
 
 
 void
-TvChannel::setColText(QString col, QString text)
+TvChannel::setColText(string col, string text)
 {
 // TODO: convert strings into appropriate values for column fields.
 }
-
-
-// int
-// TvChannel::getId(QString col)
-// {
-//     return 0;
-// }
-
-/*
-QString
-TvChannel::getIdStr()
-{
-    return m_id.rightJustify(2, '0');
-}
-*/
-/*
-void
-TvChannel::appendProgram(Program *program)
-{
-    m_epg.append(Program);
-}
-*/
-/*
-TvProgram*
-TvChannel::getProgram(time_t at)
-{
-    // iterate through all Epg entries, to find the one at time at.
-    int index = 0;
-    for (EpgListT::iterator it = m_epg.begin(); it != m_epg.end(); ++it)
-    {
-        if ((*it)->getStartTime() + (*it)->getDurationTime() > at)
-        {
-            m_current = index;
-            return (*it);
-        }
-        index++;
-    }
-    return NULL;
-}
-
-
-Program*
-TvChannel::getCurrentProgram()
-{
-    QDateTime now = QDateTime::currentDateTime();
-    time_t now_t = now.toTime_t();
-
-    // iterate through all Epg entries, to find the current one.
-    int index = 0;
-    for (EpgListT::iterator it = m_epg.begin(); it != m_epg.end(); ++it)
-    {
-        if ((*it)->getStartTime() + (*it)->getDurationTime() > now_t)
-        {
-            m_current = index;
-            return (*it);
-        }
-        index++;
-    }
-    return NULL;
-}
-
-
-Program*
-TvChannel::getNextProgram()
-{
-    if (m_current < m_epg.count()-1)
-        m_current++;
-    return m_epg.at(m_current);
-}
-
-
-Program*
-TvChannel::getPrevProgram()
-{
-    if (m_current > 0)
-        m_current--;
-    return m_epg.at(m_current);
-}
-*/
-
-/*
-TvChannelList::TvChannelList()
-{
-}
-
-
-TvChannelList::~TvChannelList()
-{
-}
-
-
-void
-TvChannelList::insertChannel(int channelNumber, TvChannel *channel)
-{
-    m_channelList.insert(channelNumber, channel);
-    m_numberChannels++;
-}
-
-
-void
-TvChannelList::appendChannel(TvChannel *channel)
-{
-    m_channelList.append(channel);
-    m_numberChannels++;
-}
-
-
-QString
-TvChannelList::getChannelId(int channelNumber)
-{
-    return m_channelList.at(channelNumber)->getId();
-}
-
-
-int
-TvChannelList::getChannelNumber(QString channelId)
-{
-    TvChannel *ch;
-    int i = 0;
-    for (ch = m_channelList.first(); ch; ch = m_channelList.next()) {
-        if (ch->getId() == channelId)
-            return i;
-        i++;
-    }
-    return -1;
-}
-
-
-QString
-TvChannelList::getChannelName(int channelNumber)
-{
-    return m_channelList.at(channelNumber)->getName();
-}
-
-
-TvChannel*
-TvChannelList::getChannelPointer(int channelNumber)
-{
-    return m_channelList.at(channelNumber);
-}
-
-
-TvChannel*
-TvChannelList::getChannelPointer(QString channelSignature)
-{
-    //TRACE("Tv::getChannelPointer(), channelSignature: %s", channelSignature.latin1());
-    for (ChannelListT::iterator it = m_channelList.begin(); it != m_channelList.end(); ++it)
-    {
-        //TRACE("Tv::getChannelPointer(), checking channel: %s", (*it)->getName().latin1());
-        if ((*it)->getSignature() == channelSignature)
-        {
-            //TRACE("Tv::getChannelPointer(), got channel: %s", (*it)->getName().latin1());
-            return (*it);
-        }
-    }
-    //TRACE("Tv::getChannelPointer(), channel not found!");
-    return NULL;
-}
-
-
-int
-TvChannelList::getChannelCount()
-{
-    return m_channelList.count();
-}
-
-
-void
-TvChannelList::updateEpg()
-{
-    // TODO: synchronize with SVDRP
-    //m_controlVDR->getEpg(this);
-}
-*/

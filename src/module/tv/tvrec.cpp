@@ -21,7 +21,7 @@
 #include "tvrec.h"
 
 
-TvRec::TvRec(QString id, QString name, QString day, QString start)
+TvRec::TvRec(string id, string name, string day, string start)
  : Title(name, Title::TvRecT)
 {
     m_id = id;
@@ -31,11 +31,11 @@ TvRec::TvRec(QString id, QString name, QString day, QString start)
 }
 
 
-QString
-TvRec::getColText(QString col)
+string
+TvRec::getColText(string col)
 {
     if (col == colName(1)) {
-        return m_id.rightJustify(2, '0');
+        return m_id.size()==2?m_id:"0"+m_id;
     }
     else if (col == colName(2)) {
         return m_day;
@@ -48,20 +48,20 @@ TvRec::getColText(QString col)
 
 
 void
-TvRec::setColText(QString col, QString text)
+TvRec::setColText(string col, string text)
 {
 // TODO: convert strings into appropriate values for column fields.
 }
 
 
 // int
-// TvRec::getId(QString col)
+// TvRec::getId(string col)
 // {
 //     return 0;
 // }
 
 /*
-QString
+string
 TvRec::getIdStr()
 {
     return m_id.rightJustify(2, '0');
@@ -69,9 +69,9 @@ TvRec::getIdStr()
 
 
 void
-TvRec::setRecFiles(QStringList fileList)
+TvRec::setRecFiles(vector<string> fileList)
 {
-    TRACE("TvRec::setRecFiles() first entry of fileList: %s", (*fileList.begin()).latin1());
+    TRACE("TvRec::setRecFiles() first entry of fileList: %s", (*fileList.begin()).c_str());
     m_fileList = fileList;
 }
 
