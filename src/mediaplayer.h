@@ -46,7 +46,7 @@ public:
     ~MediaPlayer();
 
     // Define the specific keys and resulting actions to control this media player.
-    virtual void keyHandler(QKeyEvent *k)=0;
+    virtual bool eventHandler(QEvent *e)=0;
 
     // Needs to be reimplemented from base class, because it actually shows up the
     // StreamPlayer page and not the MediaPlayer page.

@@ -58,7 +58,7 @@ ListComposer::addTitleLeft(Title *entry)
 //             TRACE("ListComposer::addTitleLeft() inner join");
             match = true;
             TitlePair *newPair = new TitlePair(entry, m_right->getTitle(i));
-            m_list.append(newPair);
+            m_list.push_back(newPair);
 //             TRACE("ListComposer::addTitleLeft() inner join done.");
         }
     }
@@ -66,7 +66,7 @@ ListComposer::addTitleLeft(Title *entry)
 //         TRACE("ListComposer::addTitleLeft() outer join");
         // no match on the right side, but nevertheless make an outer join.
         TitlePair *newPair = new TitlePair(entry, 0);
-        m_list.append(newPair);
+        m_list.push_back(newPair);
     }
 }
 
@@ -105,7 +105,7 @@ ListComposer::addTitleRight(Title *entry)
     for (int i = 0; i < m_left->count(); i++) {
         if (entry->match(m_left->getTitle(i))) {
             TitlePair *newPair = new TitlePair(m_left->getTitle(i), entry);
-            m_list.append(newPair);
+            m_list.push_back(newPair);
 
             if (m_filter) {  // only push a filtered Title to the outside (for example to a TitleBrowser)
                 if (m_filter->pass(newPair)) {

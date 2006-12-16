@@ -18,9 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvprogram.h"
+#include "stringutil.h"
 #include "debug.h"
 
-#include <qdatetime.h>
+// #include <qdatetime.h>
 
 
 TvProgram::TvProgram(string id, time_t start, time_t duration, string name, string shortText, string description, string channel)
@@ -99,9 +100,11 @@ string
 TvProgram::timeStr(time_t t)
 {
     //TRACE("TvProgram::timeStr()");
-    QDateTime date;
+/*    QDateTime date;
     date.setTime_t(t);
-    return date.toString("dd@hh:mm");
+    return date.toString("dd@hh:mm");*/
+//     return StringUtil::timeToString("%d@%H:%M", t);
+    return StringUtil::s_time("%F@%H:%M", t);
 }
 
 

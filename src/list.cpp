@@ -18,17 +18,22 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "list.h"
+#include "debug.h"
 
 
 List::List()
  : QObject()
 {
-    m_list.setAutoDelete(true);
 }
 
 
 List::~List()
 {
+    TRACE("List::~List()");
+/*    for(ListT::iterator i = m_list.begin(); i != m_list.end(); ++i) {
+        delete (*i);
+    }*/
+    m_list.clear(); // TODO: does this delete all Titles?
 }
 
 
@@ -64,7 +69,7 @@ void
 List::addTitleEntry(Title *entry)
 {
     //TRACE("List::addTitle() with name: %s", entry->getText("Name").c_str());
-    m_list.append(entry);
+    m_list.push_back(entry);
     emit pushTitle(entry);
 }
 
@@ -72,7 +77,11 @@ List::addTitleEntry(Title *entry)
 void
 List::delTitleEntry(Title *entry)
 {
-    m_list.remove(entry);
+    ListT::iterator pos;
+    pos = find(m_list.begin(), m_list.end(), entry);
+    if (pos != m_list.end()) {
+        m_list.erase(pos);
+    }
     emit popTitle(entry);
 }
 
@@ -88,14 +97,15 @@ List::getTitle(int number)
 int
 List::findTitle(Title *title)
 {
-    return m_list.find(title);
+    ListT::iterator pos = find(m_list.begin(), m_list.end(), title);
+    return distance(m_list.begin(), pos);
 }
 
 
 int
 List::count()
 {
-    return m_list.count();
+    return m_list.size();
 }
 
 

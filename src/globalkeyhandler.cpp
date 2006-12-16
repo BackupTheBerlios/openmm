@@ -52,7 +52,7 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
     if ( e->type() == QEvent::KeyPress ) {
         // special processing for key press
         QKeyEvent *k = (QKeyEvent *)e;
-        //TRACE( "GlobalKeyHandler::eventFilter() key press %d", k->key() );
+        TRACE( "GlobalKeyHandler::eventFilter() key press %d", k->key() );
         switch (k->key()) {
         case Qt::Key_M:                               // menu
             TRACE("GlobalKeyHandler::eventFilter() switching to menu");
@@ -61,7 +61,7 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
         case Qt::Key_Q:                               // quit
             //destroy();
             TRACE("GlobalKeyHandler::eventFilter() exiting QApplication");
-            QApplication::exit();  // TODO: this (sometimes) does nothing!!
+            Controler::instance()->exit();  // TODO: this (sometimes) does nothing!!
             TRACE("GlobalKeyHandler::eventFilter() after exiting QApplication");
             return true;
         case Qt::Key_Backspace:                       // go back
@@ -70,10 +70,43 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
             Controler::instance()->goBack();
             return true;
         default:
-            return false;
+            TRACE("GlobalKeyHandler::eventFilter() notifying observers");
+            return notify(e);
+            // all other key events go to the GUI event loop.
         }
     } else {
         // standard event processing
         return false;
     }
+}
+
+
+void
+GlobalKeyHandler::attach(Page *page)
+{
+    m_observer.push_back(page);
+}
+
+
+void
+GlobalKeyHandler::detach(Page *page)
+{
+    m_observer.erase(find(m_observer.begin(), m_observer.end(), page));
+}
+
+
+bool
+GlobalKeyHandler::notify(QEvent *e)
+{
+    TRACE("GlobalKeyHandler::notify() sending event to Page: %p named: %s", 
+            Controler::instance()->getCurrentPage(), Controler::instance()->getCurrentPage()->getName().c_str());
+/*    bool ret = false;
+    // TODO: notify the event handler of the active page only, not all pages!
+    for (vector<Page*>::iterator i = m_observer.begin(); i != m_observer.end(); ++i) {
+        if ((*i)->eventHandler(e)) {
+            ret = true;
+        }
+    }
+    return ret;*/
+    return Controler::instance()->getCurrentPage()->eventHandler(e);
 }

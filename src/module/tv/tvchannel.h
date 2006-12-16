@@ -22,10 +22,6 @@
 
 #include "listproxy.h"
 
-#include <qstring.h>
-#include <qptrlist.h>
-#include <qdatetime.h>
-
 
 class TvChannel : public Title
 {

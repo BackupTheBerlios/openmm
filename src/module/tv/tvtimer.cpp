@@ -18,9 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "tvtimer.h"
+#include "stringutil.h"
 #include "debug.h"
 
-#include <qdatetime.h>
+//#include <qdatetime.h>
 #include <cstdlib>
 
 
@@ -35,10 +36,14 @@ TimerTime::TimerTime(string time)
 
 TimerTime::TimerTime(time_t t)
 {
-    QDateTime date;
-    date.setTime_t(t);
-    m_hour = date.time().hour();
-    m_min = date.time().minute();
+//     QDateTime date;
+//     date.setTime_t(t);
+//     m_hour = date.time().hour();
+//     m_min = date.time().minute();
+
+    tm *brokenDownTime = localtime(&t);
+    m_hour = brokenDownTime->tm_hour;
+    m_min = brokenDownTime->tm_min;
 }
 
 
@@ -60,9 +65,10 @@ TimerDay::TimerDay(string day)
 
 TimerDay::TimerDay(time_t t)
 {
-    QDateTime date;
-    date.setTime_t(t);
-    m_day = date.toString("yyyy-MM-dd").latin1();
+//     QDateTime date;
+//     date.setTime_t(t);
+//     m_day = date.toString("yyyy-MM-dd").latin1();
+    m_day = StringUtil::s_time("%Y-%m-%d", t);
 }
 
 

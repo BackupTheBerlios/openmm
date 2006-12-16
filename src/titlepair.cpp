@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "titlepair.h"
-#include "otherutil.h"
+#include "stringutil.h"
 #include "debug.h"
 
 
@@ -34,7 +34,7 @@ TitlePair::TitlePair(Title *left, Title *right)
         // union of both headers (with duplicates).
         // TODO: add right side of header !!! (vector + vector in STL?)
         m_header = vector<string>(left->getHeader());
-        //OtherUtil::stringVectorConcat(m_header, left->getHeader(), right->getHeader());
+        //StringUtil::stringVectorConcat(m_header, left->getHeader(), right->getHeader());
         //m_header.assign(left->getHeader().begin(), left->getHeader().end());
         //m_header.insert(left->getHeader().end(), right->getHeader().begin(), right->getHeader().end());
 

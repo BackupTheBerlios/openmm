@@ -59,7 +59,7 @@ protected:
     StreamPlayer();
     ~StreamPlayer();
 
-    void keyPressEvent(QKeyEvent *k);
+    virtual bool eventHandler(QEvent *e);
     virtual void exitPage();
 
 private:

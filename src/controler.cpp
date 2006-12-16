@@ -25,7 +25,7 @@
 #include "debug.h"
 
 
-Controler           *Controler::m_instance = 0;
+Controler *Controler::m_instance = 0;
 
 Controler*
 Controler::instance()
@@ -79,8 +79,7 @@ Controler::init(int argc, char **argv)
 void
 Controler::addModule(Module *module)
 {
-    // register module in hash array.
-    m_module.insert(module->getName(), module);
+    m_module[module->getName()] = module;
 }
 
 
@@ -98,10 +97,9 @@ Controler::showPage(Page *page)
         TRACE("Controler::showPage() raising page: %p named: %s", page, page->getName().c_str());
         m_pageStack->raisePage(page);
         TRACE("Controler::showPage() done raising page");
-        //m_previousPage = m_pageHistory.getLast();
         if (m_goingBack) {
             m_goingBack = false;
-            m_pageHistory.removeLast();
+            m_pageHistory.pop_back();
         }
         else {
             if (page == m_mainMenu) {
@@ -109,9 +107,9 @@ Controler::showPage(Page *page)
                 TRACE("Controler::showPage() pageHistory clear");
                 m_pageHistory.clear();
             }
-            m_pageHistory.append(page);
+            m_pageHistory.push_back(page);
         }
-        TRACE("Controler::showPage() pageHistory count: %i", m_pageHistory.count());
+        TRACE("Controler::showPage() pageHistory count: %i", m_pageHistory.size());
     }
 }
 
@@ -119,12 +117,11 @@ Controler::showPage(Page *page)
 void
 Controler::goBack()
 {
-    int count = m_pageHistory.count();
+    int count = m_pageHistory.size();
     if ( count > 1) {
         m_goingBack = true;
         m_pageHistory.at(count - 2)->showUp();
-        //m_pageHistory.remove(count - 1);
-        TRACE("Controler::goBack() pageHistory count: %i", m_pageHistory.count());
+        TRACE("Controler::goBack() pageHistory count: %i", m_pageHistory.size());
     }
 }
 

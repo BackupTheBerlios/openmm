@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "title.h"
-#include "otherutil.h"
+#include "stringutil.h"
 #include "debug.h"
 
 
@@ -34,6 +34,7 @@ Title::Title(string name, TitleT type)
 
 Title::~Title()
 {
+    TRACE("Title::~Title()");
 }
 
 
@@ -66,7 +67,7 @@ Title::setHeader(string header)
 {
     //TRACE("Title::setHeader() to: %s", header.c_str());
     m_header.clear();
-    OtherUtil::stringSplit(header, headDelimiter, m_header);
+    StringUtil::s_split(header, headDelimiter, m_header);
     m_header.insert(m_header.begin(), "Name");
 }
 

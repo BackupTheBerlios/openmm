@@ -102,3 +102,5 @@ src/titlefilter.cpp
 src/titlepair.cpp
 src/streamplayerengine.h
 src/listmanager.cpp
+/directory.h
+/directory.cpp

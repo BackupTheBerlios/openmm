@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,34 +16,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVRECPLAYER_H
-#define TVRECPLAYER_H
+#ifndef NETSOCKET_H
+#define NETSOCKET_H
 
-#include "mediaplayer.h"
-#include "list.h"
-
-#include <qobject.h>
+#include <string>
+using namespace std;
 
 
 /**
-	@author Jörg Bakker <joerg@hakker.de>
+Simple socket encapsulation.
+
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
-class TvRecPlayer : public QObject, public MediaPlayer
+
+class NetSocket
 {
-    Q_OBJECT
-
 public:
-    TvRecPlayer(List *recList);
-    ~TvRecPlayer();
+    NetSocket();
+    ~NetSocket();
 
-    void startRec(Title *title);
-
-protected:
-    bool eventHandler(QEvent *e);
-    void enterPage();
+    bool open(string server, unsigned int port);
+    string readLine();
+    void writeLine(string);
+    void close();
+    void setBlocking(bool enable);
 
 private:
-    List *m_recList;
+    int                m_socket;
+    FILE              *m_socketIn;
+    FILE              *m_socketOut;
+/*
+    static const int   m_bufSize = 1024;
+    char               m_buf[m_bufSize];
+    int                m_bytesRead;
+    int                m_bytesScanned;
+    bool               m_lineEndFound;
+    string             m_line;
+    string             m_strBuf;*/
 };
 
 #endif

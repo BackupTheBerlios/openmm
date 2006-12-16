@@ -20,7 +20,7 @@
 #include "listbrowser.h"
 #include "globalkeyhandler.h"
 #include "widgetfactory.h"
-#include "otherutil.h"
+#include "stringutil.h"
 #include "debug.h"
 
 
@@ -30,7 +30,7 @@ ListBrowser::ListBrowser(string name, string cols, List *list)
  : Page(name)
 {
     TRACE("ListBrowser::ListBrowser()");
-    OtherUtil::stringSplit(cols, colSeperator, m_cols);
+    StringUtil::s_split(cols, colSeperator, m_cols);
     m_list = list;
     m_popupMenu = 0;
 

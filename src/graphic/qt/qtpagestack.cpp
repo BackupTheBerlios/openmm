@@ -54,6 +54,15 @@ QtPageStack::loop()
 }
 
 
+void
+QtPageStack::exit()
+{
+    TRACE("QtPageStack::loop(), exiting main loop.");
+    m_qtApp->exit();
+    TRACE("QtPageStack::loop(), exited.");
+}
+
+
 extern "C" {
 PageStackWidget* createPageStackWidget()
 {

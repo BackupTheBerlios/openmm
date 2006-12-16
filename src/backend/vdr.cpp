@@ -57,7 +57,7 @@ Vdr::fill(List *list, Title::TitleT type)
     TRACE("Vdr::fill() starting request: %s", vdrRequest.c_str());
 
     VdrRequest request(this, list, vdrRequest);
-    request.startRequest();
+    request.start();
     TRACE("Vdr::fill() finished");
     // TODO: check the answer of the backend.
 }
@@ -88,7 +88,7 @@ Vdr::addProxyTitle(Title *title)
     TRACE("Vdr::addProxyTitle() starting request: %s", vdrRequest.c_str());
 
     VdrRequest request(this, 0, vdrRequest);
-    request.startRequest();
+    request.start();
     // TODO: check the answer of the backend.
 }
 
@@ -113,6 +113,6 @@ Vdr::delProxyTitle(Title *title)
     TRACE("Vdr::delProxyTitle() starting request: %s", vdrRequest.c_str());
 
     VdrRequest request(this, 0, vdrRequest);
-    request.startRequest();
+    request.start();
    // TODO: check the answer of the backend.
 }

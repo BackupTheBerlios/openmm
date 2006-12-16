@@ -20,12 +20,11 @@
 #include "tvprogramfilter.h"
 #include "debug.h"
 
-#include <qdatetime.h>
 
 TvProgramFilter::TvProgramFilter()
  : TitleFilter()
 {
-    m_at = QDateTime::currentDateTime().toTime_t();
+    m_at = time(0);
 }
 
 

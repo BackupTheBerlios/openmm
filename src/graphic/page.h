@@ -23,6 +23,8 @@
 #include "pagewidget.h"
 #include "debug.h"
 
+#include<qevent.h>
+
 #include <string>
 using namespace std;
 
@@ -46,6 +48,7 @@ public:
     // for all widgets common part of the class
     virtual void showUp();
     virtual void exitPage() { TRACE("Page::exitPage()"); }
+    virtual bool eventHandler(QEvent *e) { return false; }
 
     // widget specific part of the class
     virtual int globalPositionX() { return m_pageWidget->globalPositionX(); }

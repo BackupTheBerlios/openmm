@@ -52,7 +52,8 @@ TvRecPlayer::startRec(Title *title)
 }
 
 
-void
-TvRecPlayer::keyHandler(QKeyEvent *k)
+bool
+TvRecPlayer::eventHandler(QEvent *e)
 {
+    return false;
 }

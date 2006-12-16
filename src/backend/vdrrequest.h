@@ -22,17 +22,16 @@
 
 #include "listmanager.h"
 #include "tvrec.h"
-
-#include <qthread.h>
-#include <qsocketdevice.h>
+#include "thread.h"
+#include "netsocket.h"
 
 
 /**
-Handles all details about the communication to vdr via svdrp protocol.
+Handles the communication to vdr via svdrp protocol.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class VdrRequest : public QObject, private QThread
+class VdrRequest : public QObject, public Thread
 {
     Q_OBJECT
 
@@ -40,11 +39,7 @@ public:
     VdrRequest(ListManager *listManager, List *list, string request);
     ~VdrRequest();
 
-public slots:
-    void startRequest();
-
 private:
-    void writeToSocket(const string& str);
     void processReply();
     void run();
 
@@ -52,17 +47,17 @@ private:
     string locateRecDir(TvRec *tvRec);
     void addRecFileInfo(TvRec *tvRec, string recDir);
 
-    QMutex m_requestMutex;
+    Mutex            m_requestMutex;
 
-    ListManager *m_listManager;
-    List *m_list;
-    string m_request;
-    string m_server;
-    Q_UINT16 m_svdrpPort;
-    Q_UINT16 m_httpPort;
-    QSocketDevice *m_socket;
-    vector<string> m_reply;
-    string m_videoDir;
+    ListManager     *m_listManager;
+    List            *m_list;
+    string           m_request;
+    string           m_server;
+    unsigned int     m_svdrpPort;
+    unsigned int     m_httpPort;
+    NetSocket       *m_socket;
+    vector<string>   m_reply;
+    string           m_videoDir;
 };
 
 #endif

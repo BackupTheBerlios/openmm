@@ -1,16 +1,25 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="3" >
-  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/vdrrequest.cpp" >
-   <View0 line="230" Type="Source" />
+ <DocsAndViews NumberOfDocuments="6" >
+  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/vdrrequest.h" >
+   <View0 Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvrec.cpp" >
-   <View0 line="37" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/vdrrequest.cpp" >
+   <View0 line="72" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvchannel.cpp" >
-   <View0 line="38" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/netsocket.cpp" >
+   <View0 line="138" Type="Source" />
   </Doc2>
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/netsocket.h" >
+   <View0 line="34" Type="Source" />
+  </Doc3>
+  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/stringutil.cpp" >
+   <View0 Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/stringutil.h" >
+   <View0 line="0" Type="Source" />
+  </Doc5>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

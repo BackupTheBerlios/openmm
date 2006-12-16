@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,34 +16,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVRECPLAYER_H
-#define TVRECPLAYER_H
+#include "directory.h"
+#include "stringutil.h"
+#include "debug.h"
 
-#include "mediaplayer.h"
-#include "list.h"
+#include <cstring>
 
-#include <qobject.h>
-
-
-/**
-	@author Jörg Bakker <joerg@hakker.de>
-*/
-class TvRecPlayer : public QObject, public MediaPlayer
+Directory::Directory(string path)
 {
-    Q_OBJECT
+    m_path = path;
+    m_dir = opendir(m_path.c_str());
+}
 
-public:
-    TvRecPlayer(List *recList);
-    ~TvRecPlayer();
 
-    void startRec(Title *title);
+Directory::~Directory()
+{
+    closedir(m_dir);
+}
 
-protected:
-    bool eventHandler(QEvent *e);
-    void enterPage();
 
-private:
-    List *m_recList;
-};
+vector<string>
+Directory::entryList(string pattern, bool ignoreNonAscii)
+{
+//     TRACE("Directory::entryList() listing pattern: %s", pattern.c_str());
+    dirent *dirEntry;
+    vector<string> res;
 
-#endif
+    while(dirEntry = readdir(m_dir)) {
+        if (strcmp(dirEntry->d_name, ".") == 0 || strcmp(dirEntry->d_name, "..") == 0) {
+        }
+        else if (StringUtil::s_wildcmp(pattern.c_str(), dirEntry->d_name, ignoreNonAscii)) {
+//             TRACE("Directory::entryList() found match.");
+            res.push_back(dirEntry->d_name);
+        }
+    }
+    rewinddir(m_dir);
+//     TRACE("Directory::entryList() finished");
+    return res;
+}

@@ -23,8 +23,6 @@
 #include "title.h"
 #include "titlefilter.h"
 
-#include <qobject.h>
-#include <qptrlist.h>
 
 class TitleFilter;
 
@@ -70,8 +68,7 @@ protected:
 //    Title *step();  // steps through the list. Returns 0 if no Title is left. Honors a TitleFilter, if set.
 
 protected:
-    typedef QPtrList<Title> ListT;
-
+    typedef vector<Title*> ListT;
     ListT m_list;
 //    int m_step;
 };

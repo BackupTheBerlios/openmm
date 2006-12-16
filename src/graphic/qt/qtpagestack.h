@@ -39,6 +39,7 @@ public:
     virtual void addPage(Page *page) { m_pageStack->addWidget((QWidget*) page->frame()); }
     virtual void raisePage(Page *page) { m_pageStack->raiseWidget((QWidget*) page->frame()); }
     virtual int loop();
+    virtual void exit();
     virtual void* frame() { return (void*) m_pageStack; }
 
 

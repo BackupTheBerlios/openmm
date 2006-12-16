@@ -21,10 +21,12 @@
 #define GLOBALKEYHANDLER_H
 
 #include "controler.h"
+#include "page.h"
 
 #include <qobject.h>
 #include <qevent.h>
-#include <qapplication.h>
+
+#include <vector>
 
 class Controler;
 
@@ -37,6 +39,9 @@ class GlobalKeyHandler : public QObject
 
 public:
     static GlobalKeyHandler *instance();
+    void attach(Page *page);
+    void detach(Page *page);
+    bool notify(QEvent *e);
 
 protected:
 //    GlobalKeyHandler();
@@ -46,6 +51,7 @@ protected:
 
 private:
     static GlobalKeyHandler *m_instance;
+    vector<Page*> m_observer;
 };
 
 #endif

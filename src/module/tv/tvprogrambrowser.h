@@ -34,7 +34,7 @@ public:
     TvProgramBrowser(ListComposer *list);
     ~TvProgramBrowser();
 
-    bool eventFilter(QObject *o, QEvent *e);
+    virtual bool eventHandler(QEvent *e);
 
 protected:
     virtual void enterPage();

@@ -28,9 +28,8 @@
 #include "streamplayer.h"
 #include "module.h"
 
-#include <qdict.h>
-#include <qptrlist.h>
-
+#include <map>
+#include <vector>
 
 class Controler
 {
@@ -42,6 +41,7 @@ public:
 
     void init(int argc, char **argv);  // only used by main().
     int loop() { return m_pageStack->loop(); }
+    void exit() { m_pageStack->exit(); }
     int& getArgc() { return m_argc; }
     char** getArgv() { return m_argv; }
     StreamPlayer *streamPlayer() { return m_streamPlayer; }  // only used by MediaPlayer.
@@ -56,15 +56,15 @@ protected:
     ~Controler();
 
 private:
-    static Controler *m_instance;
-    int              m_argc;
-    char           **m_argv;
-    PageStack       *m_pageStack;
-    StreamPlayer    *m_streamPlayer;
-    Menu            *m_mainMenu;
-    QDict<Module>    m_module;
-    QPtrList<Page>   m_pageHistory;  // TODO: use a QPtrStack instead of QPtrList?
-    bool             m_goingBack;
+    static Controler       *m_instance;
+    int                     m_argc;
+    char                  **m_argv;
+    PageStack              *m_pageStack;
+    StreamPlayer           *m_streamPlayer;
+    Menu                   *m_mainMenu;
+    map<string, Module*>    m_module;
+    vector<Page*>           m_pageHistory;
+    bool                    m_goingBack;
 };
 
 #endif

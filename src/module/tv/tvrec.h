@@ -28,18 +28,6 @@ class TvRec : public Title
 public:
     TvRec(string id, string name, string day, string start);
 
-    //virtual int getId( string col );
-
-/*
-    string getId() { return m_id; }
-    string getIdStr();
-    string getDayStr() { return m_day; }
-    string getStartStr() { return m_start; }
-    string getTitle() { return m_title; }
-    string getFirstRec() { return m_fileList[0]; }
-    void setRecFiles(vector<string> fileList);
-*/
-
 protected:
     virtual string getColText(string col);
     virtual void setColText(string col, string text);
@@ -48,28 +36,6 @@ private:
     string m_id;
     string m_day;
     string m_start;
-//    vector<string> m_fileList;
 };
 
-/*
-class TvRecList
-{
-public:
-    TvRecList();
-    ~TvRecList();
-
-    void clearRecList();
-    void updateRecList();
-    void appendRec(TvRec *rec);
-    void delRec(TvRec *rec);
-    int getRecCount();
-    TvRec* getRecPointer(int recNumber);
-
-private:
-    typedef QPtrList<TvRec> RecListT;
-
-    RecListT m_recList;
-    int m_numberRecs;
-};
-*/
 #endif

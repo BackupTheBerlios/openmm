@@ -53,17 +53,17 @@ TvPlayer::getCurrentChannelTitle()
 }
 
 
-void
-TvPlayer::keyHandler(QKeyEvent *k)
+bool
+TvPlayer::eventHandler(QEvent *e)
 {
-    TRACE("TvPlayer::keyHandler()");
-    switch (k->key()) {
+    TRACE("TvPlayer::eventHandler()");
+    switch (((QKeyEvent *)e)->key()) {
         case Qt::Key_I:                               // info
         case Qt::Key_Return:
         case Qt::Key_Enter:
             //showOsd(m_channelList->getChannelName(getCurrentChannelNumber()) + "   " +
             //     getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
-            return;
+            return true;
         case Qt::Key_Up:                              // channel up
             setCurrentChannel(getCurrentChannelNumber() + 1);
             break;
@@ -97,9 +97,13 @@ TvPlayer::keyHandler(QKeyEvent *k)
         case Qt::Key_9:                               // channel 9
             setCurrentChannel(8);
             break;
+        default:
+            // all other keys are returned to the GUI loop.
+            return false;
     }
     stopLiveTv();
     startLiveTv();
+    return true;
 }
 
 

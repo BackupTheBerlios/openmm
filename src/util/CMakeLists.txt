@@ -1,7 +1,10 @@
 SET(JAM_UTIL_SRCS
-    sharedlibrary.cpp
     debug.cpp
-    otherutil.cpp)
+    directory.cpp
+    netsocket.cpp
+    stringutil.cpp
+    sharedlibrary.cpp
+    thread.cpp)
 
 ADD_LIBRARY(jam-util STATIC
     ${JAM_UTIL_SRCS})
