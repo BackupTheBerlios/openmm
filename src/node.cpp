@@ -16,43 +16,65 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NETSOCKET_H
-#define NETSOCKET_H
-
-#include <string>
-using namespace std;
+#include "node.h"
+#include "debug.h"
 
 
-/**
-Simple socket encapsulation.
-
-	@author Jörg Bakker <joerg<at>hakker<dot>de>
-*/
-
-class NetSocket
+Node::Node()
 {
-public:
-    NetSocket();
-    ~NetSocket();
+}
 
-    bool open(string server, unsigned int port);
-    string readLine();
-    void writeLine(string);
-    void close();
-    void setBlocking(bool enable);
 
-private:
-    int                m_socket;
-    FILE              *m_socketIn;
-    FILE              *m_socketOut;
-/*
-    static const int   m_bufSize = 1024;
-    char               m_buf[m_bufSize];
-    int                m_bytesRead;
-    int                m_bytesScanned;
-    bool               m_lineEndFound;
-    string             m_line;
-    string             m_strBuf;*/
-};
+Node::~Node()
+{
+}
 
-#endif
+
+void
+Node::addTitle(Title *title)
+{
+    TRACE("Node::addTitle()");
+}
+
+
+void
+Node::delTitle(Title *title)
+{
+    TRACE("Node::delTitle()");
+}
+
+
+void
+Node::pushTitle(Title* title)
+{
+//     TRACE("Node::pushTitle()");
+    for (vector<Node*>::iterator i = m_sinkList.begin(); i != m_sinkList.end(); ++i) {
+        (*i)->addTitle(title);
+    }
+}
+
+
+void
+Node::popTitle(Title* title)
+{
+    TRACE("Node::popTitle()");
+    for (vector<Node*>::iterator i = m_sinkList.begin(); i != m_sinkList.end(); ++i) {
+        (*i)->delTitle(title);
+    }
+}
+
+
+void
+Node::addSink(Node* sink)
+{
+    TRACE("Node::link()");
+    m_sinkList.push_back(sink);
+}
+
+
+void
+Node::delSink(Node* sink)
+{
+    TRACE("Node::link()");
+    m_sinkList.erase(find(m_sinkList.begin(), m_sinkList.end(), sink));
+}

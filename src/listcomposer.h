@@ -47,7 +47,9 @@ public:
 
     void setFilter(TitleFilter *filter) { m_filter = filter; }
 
-public slots:
+// public slots:
+    virtual void addTitle(Title *title);
+    virtual void delTitle(Title *title);
     void addTitleLeft(Title *entry);
     void addTitleRight(Title *entry);
     void pushFiltered();

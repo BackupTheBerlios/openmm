@@ -22,7 +22,6 @@
 
 
 List::List()
- : QObject()
 {
 }
 
@@ -30,9 +29,6 @@ List::List()
 List::~List()
 {
     TRACE("List::~List()");
-/*    for(ListT::iterator i = m_list.begin(); i != m_list.end(); ++i) {
-        delete (*i);
-    }*/
     m_list.clear(); // TODO: does this delete all Titles?
 }
 
@@ -45,23 +41,16 @@ List::clear()
 
 
 void
-List::update()
+List::addTitle(Title *title)
 {
-//    emit changed();
+    addTitleEntry(title);
 }
 
 
 void
-List::addTitle(Title *entry)
+List::delTitle(Title *title)
 {
-    addTitleEntry(entry);
-}
-
-
-void
-List::delTitle(Title *entry)
-{
-    delTitleEntry(entry);
+    delTitleEntry(title);
 }
 
 
@@ -70,7 +59,8 @@ List::addTitleEntry(Title *entry)
 {
     //TRACE("List::addTitle() with name: %s", entry->getText("Name").c_str());
     m_list.push_back(entry);
-    emit pushTitle(entry);
+//     pushTitle(entry);
+    pushTitle(entry);
 }
 
 
@@ -82,7 +72,44 @@ List::delTitleEntry(Title *entry)
     if (pos != m_list.end()) {
         m_list.erase(pos);
     }
-    emit popTitle(entry);
+//     popTitle(entry);
+    popTitle(entry);
+}
+
+
+void
+List::pushTitle(Title* title)
+{
+//     TRACE("List::pushTitle()");
+    for (vector<List*>::iterator i = m_sinkList.begin(); i != m_sinkList.end(); ++i) {
+        (*i)->addTitle(title);
+    }
+}
+
+
+void
+List::popTitle(Title* title)
+{
+    TRACE("List::popTitle()");
+    for (vector<List*>::iterator i = m_sinkList.begin(); i != m_sinkList.end(); ++i) {
+        (*i)->delTitle(title);
+    }
+}
+
+
+void
+List::addSink(List* sink)
+{
+    TRACE("List::link()");
+    m_sinkList.push_back(sink);
+}
+
+
+void
+List::delSink(List* sink)
+{
+    TRACE("List::link()");
+    m_sinkList.erase(find(m_sinkList.begin(), m_sinkList.end(), sink));
 }
 
 

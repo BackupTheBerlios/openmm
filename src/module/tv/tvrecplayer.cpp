@@ -52,8 +52,8 @@ TvRecPlayer::startRec(Title *title)
 }
 
 
-bool
-TvRecPlayer::eventHandler(QEvent *e)
-{
-    return false;
-}
+// bool
+// TvRecPlayer::eventHandler(QEvent *e)
+// {
+//     return false;
+// }

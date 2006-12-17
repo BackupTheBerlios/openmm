@@ -31,9 +31,9 @@ Handles the communication to vdr via svdrp protocol.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class VdrRequest : public QObject, public Thread
+class VdrRequest : /*public QObject,*/ public Thread
 {
-    Q_OBJECT
+//     Q_OBJECT
 
 public:
     VdrRequest(ListManager *listManager, List *list, string request);

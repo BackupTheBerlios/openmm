@@ -24,13 +24,13 @@
 #include "debug.h"
 
 
-string ListBrowser::colSeperator = ";";
+string ListBrowser::m_colSeperator = ";";
 
 ListBrowser::ListBrowser(string name, string cols, List *list)
  : Page(name)
 {
     TRACE("ListBrowser::ListBrowser()");
-    StringUtil::s_split(cols, colSeperator, m_cols);
+    StringUtil::s_split(cols, m_colSeperator, m_cols);
     m_list = list;
     m_popupMenu = 0;
 
@@ -41,8 +41,7 @@ ListBrowser::ListBrowser(string name, string cols, List *list)
         addViewColumn(*i);
     }
 
-    connect(m_list, SIGNAL(pushTitle(Title*)), this, SLOT(addEntry(Title*)));
-    connect(m_list, SIGNAL(popTitle(Title*)), this, SLOT(delEntry(Title*)));
+    m_list->addSink(this);
 }
 
 
@@ -68,7 +67,7 @@ ListBrowser::enterPage()
 
 
 void
-ListBrowser::addEntry(Title *title)
+ListBrowser::addTitle(Title *title)
 {
 //     TRACE("ListBrowser::addEntry(), title: %s", title->getText("Name").c_str());
     m_listBrowserWidget->addEntry(title);
@@ -76,7 +75,7 @@ ListBrowser::addEntry(Title *title)
 
 
 void
-ListBrowser::delEntry(Title *title)
+ListBrowser::delTitle(Title *title)
 {
     m_listBrowserWidget->delEntry(title);
 }

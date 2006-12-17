@@ -51,13 +51,13 @@ StreamPlayer::setKeyHandler(MediaPlayer *player)
 }
 
 
-bool
-StreamPlayer::eventHandler(QEvent *e)
-{
-    TRACE("StreamPlayer::eventHandler()");
-    m_keyHandler->eventHandler(e);
-    return false;
-}
+// bool
+// StreamPlayer::eventHandler(QEvent *e)
+// {
+//     TRACE("StreamPlayer::eventHandler()");
+//     m_keyHandler->eventHandler(e);
+//     return false;
+// }
 
 
 void

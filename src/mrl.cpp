@@ -20,7 +20,7 @@
 #include "mrl.h"
 
 Mrl::Mrl(string protocol, string path, string server, MrlT type)
- : QObject()
+//  : QObject()
 {
     m_type = type;
     m_protocol = protocol;

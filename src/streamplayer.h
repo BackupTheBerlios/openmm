@@ -35,9 +35,9 @@ class MediaPlayer;
 /**
 @author Jörg Bakker
 */
-class StreamPlayer : public QObject, public Page
+class StreamPlayer : /*public QObject,*/ public Page
 {
-    Q_OBJECT
+//     Q_OBJECT
 
 public:
     enum EngineT {EngineXine};
@@ -47,7 +47,7 @@ public:
     void setKeyHandler(MediaPlayer *player);
     bool isPlaying() { return m_isPlaying; };
 
-public slots:
+// public slots:
     void play(Title *title);
     void stop();
 
@@ -59,7 +59,7 @@ protected:
     StreamPlayer();
     ~StreamPlayer();
 
-    virtual bool eventHandler(QEvent *e);
+//     virtual bool eventHandler(QEvent *e);
     virtual void exitPage();
 
 private:

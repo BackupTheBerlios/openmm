@@ -31,12 +31,28 @@ ListComposer::ListComposer(List *left, List *right, JoinT join)
     m_filter = 0;
     m_join = join;
 
-    connect(left, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleLeft(Title*)));
-    connect(right, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleRight(Title*)));
+    m_left->addSink(this);
+    m_left->addSink(this);
+//     connect(left, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleLeft(Title*)));
+//     connect(right, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleRight(Title*)));
 }
 
 
 ListComposer::~ListComposer()
+{
+}
+
+
+void
+ListComposer::addTitle(Title *title)
+{
+    addTitleLeft(title);  // TODO: we don't know, if title is pushed from m_left or m_right ...
+                          //       this works at the moment, because addTitleRight() is not implemented, yet.
+}
+
+
+void
+ListComposer::delTitle(Title *title)
 {
 }
 
@@ -87,11 +103,13 @@ ListComposer::pushFiltered()
             if (!((TitlePair*)getTitle(i))->getLeft() 
                 || !((TitlePair*)getTitle(i))->getRight()
                 || m_filter->pass(getTitle(i))) {
-                emit pushTitle(getTitle(i));
+//                 emit pushTitle(getTitle(i));
+                pushTitle(getTitle(i));
             }
         }
         else {
-            emit pushTitle(getTitle(i));
+//             emit pushTitle(getTitle(i));
+            pushTitle(getTitle(i));
         }
     }
 }
@@ -128,10 +146,6 @@ ListComposer::fillList()
     m_right->fill();
     for (int i = 0; i < m_left->count(); i++) {
         addTitleLeft(m_left->getTitle(i));
-            /*
-            results in:
-            terminate called after throwing an instance of 'std::bad_alloc'
-            what():  St9bad_alloc*/
     }
     pushFiltered();
 }

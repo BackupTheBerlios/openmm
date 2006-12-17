@@ -44,7 +44,7 @@ GlobalKeyHandler::instance()
     return m_instance;
 }
 
-
+/*
 bool
 GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
 {
@@ -79,7 +79,7 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
         return false;
     }
 }
-
+*/
 
 void
 GlobalKeyHandler::attach(Page *page)
@@ -95,18 +95,10 @@ GlobalKeyHandler::detach(Page *page)
 }
 
 
-bool
-GlobalKeyHandler::notify(QEvent *e)
-{
-    TRACE("GlobalKeyHandler::notify() sending event to Page: %p named: %s", 
-            Controler::instance()->getCurrentPage(), Controler::instance()->getCurrentPage()->getName().c_str());
-/*    bool ret = false;
-    // TODO: notify the event handler of the active page only, not all pages!
-    for (vector<Page*>::iterator i = m_observer.begin(); i != m_observer.end(); ++i) {
-        if ((*i)->eventHandler(e)) {
-            ret = true;
-        }
-    }
-    return ret;*/
-    return Controler::instance()->getCurrentPage()->eventHandler(e);
-}
+// bool
+// GlobalKeyHandler::notify(QEvent *e)
+// {
+//     TRACE("GlobalKeyHandler::notify() sending event to Page: %p named: %s", 
+//             Controler::instance()->getCurrentPage(), Controler::instance()->getCurrentPage()->getName().c_str());
+//     return Controler::instance()->getCurrentPage()->eventHandler(e);
+// }

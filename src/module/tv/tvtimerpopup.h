@@ -20,23 +20,24 @@
 #ifndef TVTIMERPOPUP_H
 #define TVTIMERPOPUP_H
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include "popupmenu.h"
 
 /**
 Implements the specialized popup menu for handling Timers.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvTimerPopup : public QObject, public PopupMenu
+class TvTimerPopup : public PopupMenu
 {
-    Q_OBJECT
 
 public:
     TvTimerPopup(Page *parent = 0);
     ~TvTimerPopup();
 
-private slots:
+protected:
+    virtual void itemDispatcher(string item);
+
+private:
     void timerEdit();
     void timerDelete();
 };

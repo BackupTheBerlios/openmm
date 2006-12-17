@@ -31,7 +31,7 @@ Put all stuff together for watching Live TV and programming timers.
 */
 class Tv: public Module
 {
-    Q_OBJECT
+//     Q_OBJECT
 
 public:
     Tv();

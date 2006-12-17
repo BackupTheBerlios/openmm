@@ -23,8 +23,8 @@
 #include "controler.h"
 #include "page.h"
 
-#include <qobject.h>
-#include <qevent.h>
+// #include <qobject.h>
+// #include <qevent.h>
 
 #include <vector>
 
@@ -33,21 +33,23 @@ class Controler;
 /**
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class GlobalKeyHandler : public QObject
+class GlobalKeyHandler //: public QObject
 {
-    Q_OBJECT
+//     Q_OBJECT
 
 public:
     static GlobalKeyHandler *instance();
     void attach(Page *page);
     void detach(Page *page);
-    bool notify(QEvent *e);
+// TODO: implement toolkit independet events.
+//     bool notify(QEvent *e);
 
 protected:
 //    GlobalKeyHandler();
 //    ~GlobalKeyHandler();
 
-    bool eventFilter(QObject *o, QEvent *e);
+// TODO: implement toolkit independet events.
+//     bool eventFilter(QObject *o, QEvent *e);
 
 private:
     static GlobalKeyHandler *m_instance;

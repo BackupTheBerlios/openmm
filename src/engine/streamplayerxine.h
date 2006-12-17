@@ -23,20 +23,10 @@
 #include "page.h"
 #include "streamplayerengine.h"
 
+#ifdef __X11__
 #include <X11/Xlib.h>
-// undef some nasty preprocessor macros in Xlib, they mess up the Qt headers
-#undef Always
-#undef KeyPress
-#undef Unsorted
-
+#endif
 #include <xine.h>
-// undef some nasty preprocessor macros in xine, they mess up the Qt headers
-#undef None
-#undef KeyRelease
-#undef FocusIn
-#undef FocusOut
-
-#include <qtimer.h>
 
 
 // TODO: gapless playback with multiple .vdr files
@@ -52,7 +42,7 @@ public:
     StreamPlayerXine(Page *parent);
     ~StreamPlayerXine();
 
-public slots:
+// public slots:
     virtual void showOsd(string text, uint duration);
     virtual void hideOsd();
     virtual void initStream();
@@ -94,7 +84,8 @@ private:
     xine_event_queue_t *eventQueue;
 
     uint m_marginOSD;
-    QTimer m_OSDTimer;
+//  TODO: implement timer for OSD
+//     QTimer m_OSDTimer;
 };
 
 #endif

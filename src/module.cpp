@@ -20,7 +20,7 @@
 #include "module.h"
 
 Module::Module(string name)
- : QObject()
+//  : QObject()
 {
     m_name = name;
 }

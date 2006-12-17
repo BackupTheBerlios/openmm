@@ -23,7 +23,6 @@
 #include "list.h"
 #include "listmanager.h"
 
-#include <qstring.h>
 
 /**
 Backend to manage channels, recs, and timers using the SVDRP protocol of the vdr server.
@@ -42,8 +41,6 @@ public:
 
     virtual bool pushUpdates() { return false; }  // there's no way to push updates with SVDRP.
     virtual void fill(List *list, Title::TitleT type);
-    //virtual void addTitle(Title *entry);
-    //virtual void delTitle(Title *entry);
     virtual void addProxyTitle(Title *title);
     virtual void delProxyTitle(Title *title);
 };

@@ -81,52 +81,17 @@ NetSocket::open(string server, unsigned int port)
 }
 
 // TODO: maybe try getline(stream, string, delimiter) of the standard C++ library?
-
-// string
-// NetSocket::readLine()
-// {
-//     const char maxLineLength = 10240;
-//     char buf[maxLineLength + 1];  // TODO: fixed buffer size ...
-//     if (fgets(buf, maxLineLength, m_socketIn)) {
-//         TRACE("NetSocket::readLine() read one line");
-//     }
-//     else {
-//         TRACE("NetSocket::readLine() failed to read one line");
-//     }
-//     return string(buf);
-// }
-// 
-// 
-// void
-// NetSocket::writeLine(string data)
-// {
-//     // write out the data.
-//     int bytesWritten;
-//     if ((bytesWritten = fprintf(m_socketOut, "%s\r\n", data.c_str())) < 0) {
-//         TRACE("NetSocket::writeLine() write failed with error: %s", strerror(errno));
-//     }
-//     else {
-//         TRACE("NetSocket::writeLine() written %i bytes", bytesWritten);
-//     }
-//     // flush stream buffers (C library internal).
-//     if (fflush(m_socketOut) != 0) {
-//         TRACE("NetSocket::writeLine() flush failed with error: %s", strerror(errno));
-//     }
-//     else {
-//         TRACE("NetSocket::writeLine() stream flushed");
-//     }
-// }
-
+//       fgets() from the standard C library seemed to block.
 
 string
 NetSocket::readLine()
 {
-    TRACE("NetSocket::readLine()");
+//     TRACE("NetSocket::readLine()");
     bool eof = false;
     bool eol = false;
     while (!eof && !eol) {
         if (m_bytesScanned >= m_bytesRead) {
-            TRACE("NetSocket::readLine() fetching new buffer");
+//             TRACE("NetSocket::readLine() fetching new buffer");
             // we need to fetch new data.
             m_bytesRead = readBuf();
             m_bytesScanned = 0;
@@ -136,7 +101,7 @@ NetSocket::readLine()
             break;
         }
         else if (m_bytesRead == 0) {
-            TRACE("NetSocket::readLine() EOF reached");
+//             TRACE("NetSocket::readLine() EOF reached");
             m_bytesScanned = 0;
             eof = true;
         }
@@ -163,7 +128,7 @@ NetSocket::readLine()
                 }
                 m_line.append(m_strBuf.substr(m_bytesScannedOld, m_bytesScanned - m_bytesScannedOld - newline));
             }
-            TRACE("NetSocket::readLine() read: %i, scanned: %i bytes", m_bytesRead, m_bytesScanned);
+//             TRACE("NetSocket::readLine() read: %i, scanned: %i bytes", m_bytesRead, m_bytesScanned);
             if (m_bytesScanned == m_bytesRead) {
                 m_bytesScanned = 0;
                 m_bytesRead = 0;
@@ -173,7 +138,7 @@ NetSocket::readLine()
     // get rid of a newline at the beginning of m_line, copy the result and return
     string res = ((m_line[0] == '\n') || (m_line[0] == '\r'))?string(m_line, 1):m_line;
     m_line = "";
-    TRACE("NetSocket::readLine() returns: %s", res.c_str());
+//     TRACE("NetSocket::readLine() returns: %s", res.c_str());
     return res;
 }
 
@@ -181,21 +146,20 @@ NetSocket::readLine()
 int
 NetSocket::readBuf()
 {
-    TRACE("NetSocket::readBuf()");
+//     TRACE("NetSocket::readBuf()");
     int bytesRead = 0;
     int bytesReadSum = 0;
     int bytesLeft = m_bufSize;
     m_strBuf = "";
     while (bytesLeft) {
         if (isReadable()) {
-//            bytesRead = read(m_socket, m_buf, bytesLeft);
-            bytesRead = recv(m_socket, m_buf, bytesLeft, 0);
+           bytesRead = read(m_socket, m_buf, bytesLeft);
         }
         else {
             TRACE("NetSocket::readBuf() timed out");
             return bytesReadSum;
         }
-        TRACE("NetSocket::readBuf() bytesRead: %i", bytesRead);
+//         TRACE("NetSocket::readBuf() bytesRead: %i", bytesRead);
         bytesReadSum += bytesRead;
         bytesLeft = m_bufSize - bytesReadSum;
         if (bytesRead == -1) { // read failure
@@ -218,15 +182,14 @@ NetSocket::readBuf()
 void
 NetSocket::writeLine(string data)
 {
-    TRACE("NetSocket::writeLine() data: %s", data.c_str());
+//     TRACE("NetSocket::writeLine() data: %s", data.c_str());
     string outString = data + "\r\n";
     int bytesWritten = 0;
     int bytesWrittenSum = 0;
     int bytesLeft = outString.length();
     while (bytesLeft) {
         if (isWriteable()) {
-//            bytesWritten = write(m_socket, outString.substr(bytesWritten).c_str(), bytesLeft);
-            bytesWritten = send(m_socket, outString.substr(bytesWritten).c_str(), bytesLeft, 0);
+            bytesWritten = write(m_socket, outString.substr(bytesWritten).c_str(), bytesLeft);
         }
         else {
             TRACE("NetSocket::writeLine() timed out");
@@ -239,7 +202,7 @@ NetSocket::writeLine(string data)
             return;
         }
         else {
-            TRACE("NetSocket::writeLine() written %i bytes", bytesWritten);
+//             TRACE("NetSocket::writeLine() written %i bytes", bytesWritten);
         }
     }
 }
@@ -267,7 +230,7 @@ NetSocket::setBlocking(bool enable)
 bool
 NetSocket::isReadable()
 {
-    TRACE("NetSocket::isReadable()");
+//     TRACE("NetSocket::isReadable()");
     if (m_blocking) {
         return true;
     }
@@ -283,7 +246,7 @@ NetSocket::isReadable()
 bool
 NetSocket::isWriteable()
 {
-    TRACE("NetSocket::isWriteable()");
+//     TRACE("NetSocket::isWriteable()");
     if (m_blocking) {
         return true;
     }

@@ -36,20 +36,20 @@ class Controler
 public:
     static Controler *instance();  // only used by main() and Page::Page().
     void addModule(Module *module);
-    void mainMenuAddEntry(Page *page) { m_mainMenu->addEntry(page); };
+    void mainMenuAddEntry(Page *page)   { m_mainMenu->addEntry(page); };
     void mainMenuShow();  // only used by GlobalKeyHandler (later by server-IP wizzard?)
 
     void init(int argc, char **argv);  // only used by main().
-    int loop() { return m_pageStack->loop(); }
-    void exit() { m_pageStack->exit(); }
-    int& getArgc() { return m_argc; }
-    char** getArgv() { return m_argv; }
-    StreamPlayer *streamPlayer() { return m_streamPlayer; }  // only used by MediaPlayer.
-    PageStack *pageStack() { return m_pageStack; }  // only used by Page::Page().
-    void showPage(Page *page);  // make showPage() a friend of class Page? -> use Page->showUp() only.
-    void addPage(Page *page);  // used by Page only: addPage(this).
-    Page* getCurrentPage() { return (Page*)m_pageStack->visiblePage(); };
+    int loop()                          { return m_pageStack->loop(); }
+    void exit()                         { m_pageStack->exit(); }
+    int& getArgc()                      { return m_argc; }
+    char** getArgv()                    { return m_argv; }
+    Page* getCurrentPage()              { return (Page*)m_pageStack->visiblePage(); };
     void goBack();
+    StreamPlayer *streamPlayer()        { return m_streamPlayer; }  // only used by MediaPlayer.
+    PageStack *pageStack()              { return m_pageStack; }
+    void showPage(Page *page);
+    void addPage(Page *page);
 
 protected:
     Controler();

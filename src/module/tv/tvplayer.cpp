@@ -53,58 +53,58 @@ TvPlayer::getCurrentChannelTitle()
 }
 
 
-bool
-TvPlayer::eventHandler(QEvent *e)
-{
-    TRACE("TvPlayer::eventHandler()");
-    switch (((QKeyEvent *)e)->key()) {
-        case Qt::Key_I:                               // info
-        case Qt::Key_Return:
-        case Qt::Key_Enter:
-            //showOsd(m_channelList->getChannelName(getCurrentChannelNumber()) + "   " +
-            //     getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
-            return true;
-        case Qt::Key_Up:                              // channel up
-            setCurrentChannel(getCurrentChannelNumber() + 1);
-            break;
-        case Qt::Key_Down:                            // channel down
-            setCurrentChannel(getCurrentChannelNumber() - 1);
-            break;
-        case Qt::Key_1:                               // channel 1
-            setCurrentChannel(0);
-            break;
-        case Qt::Key_2:                               // channel 2
-            setCurrentChannel(1);
-            break;
-        case Qt::Key_3:                               // channel 3
-            setCurrentChannel(2);
-            break;
-        case Qt::Key_4:                               // channel 4
-            setCurrentChannel(3);
-            break;
-        case Qt::Key_5:                               // channel 5
-            setCurrentChannel(4);
-            break;
-        case Qt::Key_6:                               // channel 6
-            setCurrentChannel(5);
-            break;
-        case Qt::Key_7:                               // channel 7
-            setCurrentChannel(6);
-            break;
-        case Qt::Key_8:                               // channel 8
-            setCurrentChannel(7);
-            break;
-        case Qt::Key_9:                               // channel 9
-            setCurrentChannel(8);
-            break;
-        default:
-            // all other keys are returned to the GUI loop.
-            return false;
-    }
-    stopLiveTv();
-    startLiveTv();
-    return true;
-}
+// bool
+// TvPlayer::eventHandler(QEvent *e)
+// {
+//     TRACE("TvPlayer::eventHandler()");
+//     switch (((QKeyEvent *)e)->key()) {
+//         case Qt::Key_I:                               // info
+//         case Qt::Key_Return:
+//         case Qt::Key_Enter:
+//             //showOsd(m_channelList->getChannelName(getCurrentChannelNumber()) + "   " +
+//             //     getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
+//             return true;
+//         case Qt::Key_Up:                              // channel up
+//             setCurrentChannel(getCurrentChannelNumber() + 1);
+//             break;
+//         case Qt::Key_Down:                            // channel down
+//             setCurrentChannel(getCurrentChannelNumber() - 1);
+//             break;
+//         case Qt::Key_1:                               // channel 1
+//             setCurrentChannel(0);
+//             break;
+//         case Qt::Key_2:                               // channel 2
+//             setCurrentChannel(1);
+//             break;
+//         case Qt::Key_3:                               // channel 3
+//             setCurrentChannel(2);
+//             break;
+//         case Qt::Key_4:                               // channel 4
+//             setCurrentChannel(3);
+//             break;
+//         case Qt::Key_5:                               // channel 5
+//             setCurrentChannel(4);
+//             break;
+//         case Qt::Key_6:                               // channel 6
+//             setCurrentChannel(5);
+//             break;
+//         case Qt::Key_7:                               // channel 7
+//             setCurrentChannel(6);
+//             break;
+//         case Qt::Key_8:                               // channel 8
+//             setCurrentChannel(7);
+//             break;
+//         case Qt::Key_9:                               // channel 9
+//             setCurrentChannel(8);
+//             break;
+//         default:
+//             // all other keys are returned to the GUI loop.
+//             return false;
+//     }
+//     stopLiveTv();
+//     startLiveTv();
+//     return true;
+// }
 
 
 void

@@ -20,13 +20,8 @@
 #include "streamplayerxine.h"
 #include "debug.h"
 
-// #ifdef QWS
-// #include <qwindowsystem_qws.h>
-// #include <qcolor.h>
-// #endif
-
-#include <qdir.h>
-#include <iostream>
+#include <sys/stat.h>
+#include <cerrno>
 #include <string>
 using namespace std;
 
@@ -60,39 +55,31 @@ StreamPlayerXine::initStream()
 
     xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
-    //char* configFile = QDir::homeDirPath();
-    //configFile.append("/.jam/xineconfig");
     char* configFile = "/etc/jam/xineconfig";
-    if (QFile::exists(configFile))
+    struct stat s;
+    if (stat(configFile, &s) == 0)
     {
+        TRACE("StreamPlayerXine::initStream() loading config file: %s", configFile);
         xine_config_load(xineEngine, configFile);
+    }
+    else {
+        TRACE("StreamPlayerXine::initStream() no config file loaded: %s", strerror(errno));
     }
     xine_init(xineEngine);
 
     m_pixel_aspect = 1.0;
-#ifdef QWS
-//    QWSServer::setDesktopBackground(QColor(QColor::black));
+#ifdef __FRAMEBUFFER___
 //    char* videoDriverName = "fb";
 //    char* videoDriverName = "vidixfb";
     char* videoDriverName = "directfb";
 //    int visualType = XINE_VISUAL_TYPE_FB;
     int visualType = XINE_VISUAL_TYPE_DFB;
     fb_visual_t visual;
-#else
+#elif __X11__
     XInitThreads ();
-    //xineDisplay = XOpenDisplay( getenv("DISPLAY") );
     x11Display = XOpenDisplay(NULL);
     x11Screen = DefaultScreen(x11Display);
     x11Window = m_parent->windowId();
-
-//     // determine pixel aspect of display.
-//     XLockDisplay( x11Display );
-// //    XSelectInput( x11Display, x11Window, ExposureMask );
-//     res_h = (DisplayWidth(x11Display, x11Screen) * 1000 / DisplayWidthMM(x11Display, x11Screen));
-//     res_v = (DisplayHeight(x11Display, x11Screen) * 1000 / DisplayHeightMM(x11Display, x11Screen));
-//     m_pixel_aspect = res_v / res_h;
-//     XSync(x11Display, False);
-//     XUnlockDisplay(x11Display);
 
     char* videoDriverName = "xv";
     int visualType = XINE_VISUAL_TYPE_X11;
@@ -112,13 +99,13 @@ StreamPlayerXine::initStream()
 
     if (!videoDriver)
     {
-        std::cout << "Controler: Can't init Video Driver! (" << videoDriverName << ")\n";
+        TRACE("StreamPlayerXine::initStream() can't init Video Driver! (%s)", videoDriverName);
     }
 
     char* audioDriverName = "auto";
     audioDriver = xine_open_audio_driver(xineEngine, audioDriverName, NULL);
 
-    std::cout << "Controler: Creating new xine stream.\n";
+    TRACE("StreamPlayerXine::initStream() creating new xine stream.");
     xineStream = xine_stream_new(xineEngine, audioDriver, videoDriver);
 
     m_OSD = NULL;
@@ -153,7 +140,7 @@ StreamPlayerXine::showOsd(string text, uint duration)
     //xine_osd_draw_rect(m_OSD, 0, 0, 500, 100, 200, 1 );
 
     xine_osd_show(m_OSD, 0 );
-    m_OSDTimer.start(duration, TRUE);
+//     m_OSDTimer.start(duration, TRUE);
 }
 
 
@@ -173,8 +160,8 @@ StreamPlayerXine::initOSD()
     TRACE("StreamPlayerXine::initOSD()");
     if (m_OSD != NULL)
         hideOsd();
-    if (m_OSDTimer.isActive())
-        m_OSDTimer.stop();
+//     if (m_OSDTimer.isActive())
+//         m_OSDTimer.stop();
 
     m_marginOSD = m_parent->height() / 10;
     m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(m_parent->height() * 0.75), m_parent->width() - 2*m_marginOSD,

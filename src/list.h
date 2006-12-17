@@ -29,37 +29,40 @@ class TitleFilter;
 // TODO: list of unique Titles? -> only addTitle(), when Title is not in the list already.
 
 /**
-List to use for all types of Titles: timers, recordings, channels, files, ...
+  List to use for all types of Titles: timers, recordings, channels, files, ...
+  Lists can be linked together. A source List can push or pop Titles to several sink Lists.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class List : public QObject
+class List //: public Node
 {
-    Q_OBJECT
 
 public:
     List();
     ~List();
 
+    // use these methods for actively adding titles (for example timers)
+    virtual void addTitle(Title *title);
+    virtual void delTitle(Title *title);
+
+    // use these methods for synchronization with a backend
+    // TODO: rethink back and forward communication between Lists (flow of Titles)
+    //       connection of lists (for now only trees are possible)
+    void addTitleEntry(Title *entry);
+    void delTitleEntry(Title *entry);
+
+    void pushTitle(Title* title);
+    void popTitle(Title* title);
+    void addSink(List* sink);
+    void delSink(List* sink);
+
     virtual void clear();
-    virtual void update();  // only actually does somethin in subclass ListProxy (but is called from ListBrowser)
+    virtual void update() {}  // only actually does somethin in subclass ListProxy (but is called from ListBrowser)
     Title* getTitle(int number);
     int findTitle(Title *title);
     void fill();
     int count();
 
-signals:
-    void changed();
-    void pushTitle(Title*);
-    void popTitle(Title*);
-
-public slots:
-    // use these methods for actively adding titles (for example timers)
-    virtual void addTitle(Title *entry);
-    virtual void delTitle(Title *entry);
-    // use these methods for synchronization with a backend
-    void addTitleEntry(Title *entry);
-    void delTitleEntry(Title *entry);
 
 protected:
     virtual void fillList();
@@ -71,6 +74,9 @@ protected:
     typedef vector<Title*> ListT;
     ListT m_list;
 //    int m_step;
+
+private:
+    vector<List*> m_sinkList;
 };
 
 #endif

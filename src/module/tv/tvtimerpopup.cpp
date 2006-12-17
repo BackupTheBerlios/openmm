@@ -24,13 +24,25 @@ TvTimerPopup::TvTimerPopup(Page *parent)
  : PopupMenu(parent)
 {
     TRACE("TvTimerPopup::TvTimerPopup()");
-    insertItem("Edit", this, SLOT(timerEdit()));
-    insertItem("Delete", this, SLOT(timerDelete()));
+    insertItem("Edit");
+    insertItem("Delete");
 }
 
 
 TvTimerPopup::~TvTimerPopup()
 {
+}
+
+
+void
+TvTimerPopup::itemDispatcher(string item)
+{
+    if (item == "Edit") {
+        timerEdit();
+    }
+    else if (item == "Delete") {
+        timerDelete();
+    }
 }
 
 

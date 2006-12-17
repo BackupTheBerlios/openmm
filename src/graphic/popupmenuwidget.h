@@ -20,7 +20,6 @@
 #ifndef POPUPMENUWIDGET_H
 #define POPUPMENUWIDGET_H
 
-#include <qobject.h>
 #include <string>
 using namespace std;
 
@@ -34,8 +33,10 @@ class PopupMenuWidget
 {
 public:
     //virtual ~PopupMenuWidget();
-    virtual void popup() = 0;
-    virtual void insertItem(string text, QObject *receiver, const char *member) = 0;
+    // TODO: for now, we need a synchronous implementation of a popup menu,
+    //       popup() returns with the name of the selected item.
+    virtual string popup() = 0;
+    virtual void insertItem(string text) = 0;
 };
 
 #endif

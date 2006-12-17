@@ -22,27 +22,27 @@
 
 #include "tvrecplayer.h"
 
-#include <popupmenu.h>
-#include <qobject.h>
+#include "popupmenu.h"
+
 
 /**
 Implements the specialized popup menu for handling recordings.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvRecPopup : public QObject, public PopupMenu
+class TvRecPopup : public PopupMenu
 {
-    Q_OBJECT
-
 public:
     TvRecPopup(TvRecPlayer *tvRecPlayer, Page *parent = 0);
     ~TvRecPopup();
 
-private slots:
+protected:
+    virtual void itemDispatcher(string item);
+
+private:
     void play();
     void del();
 
-private:
     TvRecPlayer *m_tvRecPlayer;
 };
 

@@ -23,7 +23,7 @@
 #include "pagewidget.h"
 #include "debug.h"
 
-#include<qevent.h>
+// #include<qevent.h>
 
 #include <string>
 using namespace std;
@@ -39,28 +39,29 @@ class Page
 {
 public:
     Page(string name);
-    Page() { TRACE("Page::Page() - nothing to do"); }
+    Page()                               { TRACE("Page::Page() - nothing to do"); }
     virtual ~Page();
 
-    string getName() { return m_name; };
-    void setName(string name) { m_name = name; };
+    string getName()                     { return m_name; };
+    void setName(string name)            { m_name = name; };
 
     // for all widgets common part of the class
     virtual void showUp();
-    virtual void exitPage() { TRACE("Page::exitPage()"); }
-    virtual bool eventHandler(QEvent *e) { return false; }
+    virtual void exitPage()              { TRACE("Page::exitPage()"); }
+    // TODO: implement toolkit independet events.
+//     virtual bool eventHandler(QEvent *e) { return false; }
 
     // widget specific part of the class
-    virtual int globalPositionX() { return m_pageWidget->globalPositionX(); }
-    virtual int globalPositionY() { return m_pageWidget->globalPositionY(); }
-    virtual int width() { return m_pageWidget->width(); }
-    virtual int height() { return m_pageWidget->height(); }
-    virtual unsigned long windowId() { return m_pageWidget->windowId(); }
-    virtual void* frame() { return m_pageWidget->frame(); }
-    virtual void enterPage() { m_pageWidget->enterPage(); }
+    virtual int globalPositionX()        { return m_pageWidget->globalPositionX(); }
+    virtual int globalPositionY()        { return m_pageWidget->globalPositionY(); }
+    virtual int width()                  { return m_pageWidget->width(); }
+    virtual int height()                 { return m_pageWidget->height(); }
+    virtual unsigned long windowId()     { return m_pageWidget->windowId(); }
+    virtual void* frame()                { return m_pageWidget->frame(); }
+    virtual void enterPage()             { m_pageWidget->enterPage(); }
 
 protected:
-    string       m_name;
+    string        m_name;
     PageWidget   *m_pageWidget;
 };
 

@@ -4,11 +4,15 @@ src/util/debug.h
 src/util/debug.cpp
 src/util/CMakeLists.txt
 src/util/sharedlibrary.h
-src/util/debugthread.h
-src/util/debugthread.cpp
-src/util/debug.cpp.save
-src/util/debug.h.save
+src/util/debug.cpp
+src/util/debug.h
 src/util/sharedlibrary.cpp
+src/util/netsocket.cpp
+src/util/netsocket.h
+src/util/directory.cpp
+src/util/directory.h
+src/util/stringutil.cpp
+src/util/stringutil.h
 src/listcomposer.cpp
 src/list.cpp
 src/listproxy.cpp
@@ -101,6 +105,3 @@ src/backend/vdrrequest.cpp
 src/titlefilter.cpp
 src/titlepair.cpp
 src/streamplayerengine.h
-src/listmanager.cpp
-/directory.h
-/directory.cpp

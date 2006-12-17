@@ -20,7 +20,7 @@
 #ifndef MRL_H
 #define MRL_H
 
-#include <qobject.h>
+// #include <qobject.h>
 #include <vector>
 #include <string>
 
@@ -32,9 +32,9 @@ An Mrl is a unique indentifier for a Title. It specifies the type (protocol), se
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class Mrl : public QObject
+class Mrl //: public QObject
 {
-    Q_OBJECT
+//     Q_OBJECT
 
 public:
     enum MrlT {None, TvVdr};

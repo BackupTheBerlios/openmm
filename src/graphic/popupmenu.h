@@ -27,6 +27,7 @@
 #include "debug.h"
 
 #include <string>
+#include <map>
 using namespace std;
 
 /**
@@ -41,16 +42,23 @@ public:
     PopupMenu() { TRACE("PopupMenu::PopupMenu() - nothing to do"); }
     virtual ~PopupMenu();
 
-    virtual void popup() { m_popupMenuWidget->popup(); }
-    virtual void insertItem(string text, QObject *receiver, const char *member) 
-            { m_popupMenuWidget->insertItem(text, receiver, member); }
-
-    void setParent(Page *parent) {m_parent = parent; }
-    Page* getParent() { return m_parent; }
-    void setList(List *list) { m_list = list; }
+    void popup()                                  { itemDispatcher(m_popupMenuWidget->popup()); }
     void popup(Title *title);
+    void insertItem(string text)                  { m_popupMenuWidget->insertItem(text); }
+    // TODO: itemDispatcher is a bit ugly, but simple, I may change this ...
+
+// TODO: connect the slots to the event handling
+//     virtual void insertItem(string text, QObject *receiver, const char *member) 
+//             { m_popupMenuWidget->insertItem(text, receiver, member); }
+
+//    virtual void insertItem(string text, unary_function<void, void>) {}
+
+    void setParent(Page *parent)                  { m_parent = parent; }
+    Page* getParent()                             { return m_parent; }
+    void setList(List *list)                      { m_list = list; }
 
 protected:
+    virtual void itemDispatcher(string item) = 0;
     Title      *m_title;
     List       *m_list;
 

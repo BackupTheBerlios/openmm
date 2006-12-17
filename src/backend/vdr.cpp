@@ -23,7 +23,7 @@
 
 
 Vdr::Vdr()
- : ListManager()
+//  : ListManager()
 {
 }
 

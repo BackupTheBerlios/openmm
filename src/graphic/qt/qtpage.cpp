@@ -28,7 +28,8 @@ QtPage::QtPage()
 {
     m_frame = new QWidget((QWidget*) Controler::instance()->pageStack()->frame());
     TRACE("QtPage::QtPage() creating Page widget: %p.", m_frame);
-    m_frame->installEventFilter(GlobalKeyHandler::instance());
+    // TODO: implement toolkit independent event handling
+//     m_frame->installEventFilter(GlobalKeyHandler::instance());
     QVBoxLayout *l = new QVBoxLayout(m_frame);
     l->setAutoAdd(TRUE);
 }

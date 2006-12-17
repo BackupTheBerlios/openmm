@@ -21,8 +21,6 @@
 #include "stringutil.h"
 #include "debug.h"
 
-// #include <qdatetime.h>
-
 
 TvProgram::TvProgram(string id, time_t start, time_t duration, string name, string shortText, string description, string channel)
  : Title(name, Title::TvProgramT)
@@ -100,9 +98,6 @@ string
 TvProgram::timeStr(time_t t)
 {
     //TRACE("TvProgram::timeStr()");
-/*    QDateTime date;
-    date.setTime_t(t);
-    return date.toString("dd@hh:mm");*/
 //     return StringUtil::timeToString("%d@%H:%M", t);
     return StringUtil::s_time("%F@%H:%M", t);
 }

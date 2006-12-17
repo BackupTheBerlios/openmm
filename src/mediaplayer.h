@@ -46,7 +46,8 @@ public:
     ~MediaPlayer();
 
     // Define the specific keys and resulting actions to control this media player.
-    virtual bool eventHandler(QEvent *e)=0;
+// TODO: implement toolkit independet events.
+//     virtual bool eventHandler(QEvent *e) = 0;
 
     // Needs to be reimplemented from base class, because it actually shows up the
     // StreamPlayer page and not the MediaPlayer page.
@@ -56,7 +57,7 @@ public:
     bool isPlaying();
     //void setCurrent(Title *title) { m_current = title; }
 
-public slots:
+// public slots:
     void play(Title* title);
     //void start();  // starts the current title
     void stop();

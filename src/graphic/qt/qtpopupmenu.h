@@ -23,9 +23,9 @@
 #include "page.h"
 #include "popupmenuwidget.h"
 
-#include <qobject.h>
 #include <qpopupmenu.h>
 #include <string>
+#include <map>
 using namespace std;
 
 /**
@@ -41,13 +41,14 @@ public:
     QtPopupMenu(Page *parent);
     ~QtPopupMenu();
 
-    virtual void popup();
-    virtual void insertItem(string text, QObject *receiver, const char *member) 
-            { m_popupMenu->insertItem(text, receiver, member); }
+    virtual string popup();
+    virtual void insertItem(string text) 
+            { m_idMap[m_popupMenu->insertItem(text)] =  text; }
 
 private:
-    QPopupMenu   *m_popupMenu;
-    Page         *m_parent;
+    QPopupMenu          *m_popupMenu;
+    map<int, string>     m_idMap;
+    Page                *m_parent;
 };
 
 #endif

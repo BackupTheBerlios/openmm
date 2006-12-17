@@ -28,7 +28,8 @@ QtMenu::QtMenu(Page *parent)
 {
     TRACE("QtMenu::QtMenu()");
     m_list = new QListView((QWidget*) parent->frame());
-    m_list->installEventFilter(GlobalKeyHandler::instance());
+    // TODO: implement toolkit independent event handling
+//     m_list->installEventFilter(GlobalKeyHandler::instance());
     m_entryNumber = 0;
     m_defaultEntry = 0;
 

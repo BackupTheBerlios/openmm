@@ -33,7 +33,8 @@ QtListBrowser::QtListBrowser(Page *parent, vector<string> *cols)
     TRACE("QtListBrowser::QtListBrowser(), parent widget: %p", p);
     m_listView = new QListView(p);
     TRACE("QtListBrowser::QtListBrowser(), build QListView widget: %p", m_listView);
-    m_listView->installEventFilter(GlobalKeyHandler::instance());
+    // TODO: implement toolkit independent event handling
+//     m_listView->installEventFilter(GlobalKeyHandler::instance());
     TRACE("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
 
     connect(m_listView, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(showPopupMenu(QListViewItem*)));

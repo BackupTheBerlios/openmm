@@ -26,7 +26,6 @@
 #include "popupmenu.h"
 #include "listbrowserwidget.h"
 
-#include <qptrdict.h>
 #include <string>
 using namespace std;
 
@@ -37,37 +36,33 @@ Page for browsing lists of timers, recordings, files, channels, ...
 */
 
 
-class ListBrowser : public QObject, public Page
+class ListBrowser : public List, public Page
 {
-    Q_OBJECT
-
 public:
     ListBrowser(string name, string cols, List *list);
-    ListBrowser() {}
+    ListBrowser()                               {}
     ~ListBrowser();
 
-    int cols() { return m_cols.size(); }
-    string colText(int i) { return m_cols[i]; }
+    int cols()                                  { return m_cols.size(); }
+    string colText(int i)                       { return m_cols[i]; }
     void setPopupMenu(PopupMenu *popupMenu);
-    PopupMenu* getPopupMenu() { return m_popupMenu; }
+    PopupMenu* getPopupMenu()                   { return m_popupMenu; }
     virtual void enterPage();
 
-public slots:
-    virtual void addEntry(Title *title);
-    virtual void delEntry(Title *title);
-    virtual Title *getCurrent() { return m_listBrowserWidget->getCurrent(); }
+    virtual void addTitle(Title *title);
+    virtual void delTitle(Title *title);
+    virtual Title *getCurrent()                 { return m_listBrowserWidget->getCurrent(); }
 
-protected slots:
     virtual void clear();
 
 protected:
     void selectEntry(int number);
     virtual void selectEntry(Title *title);
-    virtual void addViewColumn(string colName) { m_listBrowserWidget->addViewColumn(colName); }
+    virtual void addViewColumn(string colName)  { m_listBrowserWidget->addViewColumn(colName); }
 
-    static string      colSeperator;
+    static string       m_colSeperator;
     List               *m_list;
-    vector<string>         m_cols;
+    vector<string>      m_cols;
     PopupMenu          *m_popupMenu;
 
     ListBrowserWidget  *m_listBrowserWidget;

@@ -29,14 +29,30 @@ TvProgramPopup::TvProgramPopup(List *timerList, TvPlayer *tvPlayer, Page *parent
     TRACE("TvProgramPopup::TvProgramPopup()");
     m_timerList = timerList;
     m_tvPlayer = tvPlayer;
-    insertItem("Timer", this, SLOT(addTimer()));
-    insertItem("Switch", this, SLOT(switchChannel()));
-    insertItem("Show", this, SLOT(showChannel()));
+
+    insertItem("Timer");
+    insertItem("Switch");
+    insertItem("Show");
 }
 
 
 TvProgramPopup::~TvProgramPopup()
 {
+}
+
+
+void
+TvProgramPopup::itemDispatcher(string item)
+{
+    if (item == "Timer") {
+        addTimer();
+    }
+    else if (item == "Switch") {
+        switchChannel();
+    }
+    else if (item == "Show") {
+        showChannel();
+    }
 }
 
 

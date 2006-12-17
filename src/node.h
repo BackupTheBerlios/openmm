@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,16 +16,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "listmanager.h"
+#ifndef NODE_H
+#define NODE_H
 
-ListManager::ListManager()
- : QObject()
-{
-}
+#include "title.h"
 
+#include <vector>
+using namespace std;
 
-ListManager::~ListManager()
-{
-}
+/**
+Nodes can be linked together. A source node can push or pop Titles to several sink nodes.
 
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
+*/
+class Node {
+public:
+    Node();
+    ~Node();
 
+    virtual void addTitle(Title *title);
+    virtual void delTitle(Title *title);
+
+    void pushTitle(Title* title);
+    void popTitle(Title* title);
+    void addSink(Node* sink);
+    void delSink(Node* sink);
+
+private:
+    vector<Node*> m_sinkList;
+};
+
+#endif

@@ -26,13 +26,25 @@ TvRecPopup::TvRecPopup(TvRecPlayer *tvRecPlayer, Page *parent)
 {
     TRACE("TvRecPopup::TvRecPopup()");
     m_tvRecPlayer = tvRecPlayer;
-    insertItem("Play", this, SLOT(play()));
-    insertItem("Delete", this, SLOT(del()));
+    insertItem("Play");
+    insertItem("Delete");
 }
 
 
 TvRecPopup::~TvRecPopup()
 {
+}
+
+
+void
+TvRecPopup::itemDispatcher(string item)
+{
+    if (item == "Play") {
+        play();
+    }
+    else if (item == "Delete") {
+        del();
+    }
 }
 
 

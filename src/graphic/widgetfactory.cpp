@@ -17,14 +17,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "widgetfactory.h"
-#include "qtpagestack.h"
-#include "qtpage.h"
-#include "qtmenu.h"
-#include "qtlistbrowser.h"
-#include "qtpopupmenu.h"
+// #include "qtpagestack.h"
+// #include "qtpage.h"
+// #include "qtmenu.h"
+// #include "qtlistbrowser.h"
+// #include "qtpopupmenu.h"
 #include "debug.h"
 
 #include <dlfcn.h>
+
+class QtPageStack;
+class QtPage;
+class QtMenu;
+class QtListBrowser;
+class QtPopupMenu;
 
 
 WidgetFactory *WidgetFactory::m_instance = 0;

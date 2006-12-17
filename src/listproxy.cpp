@@ -20,15 +20,16 @@
 #include "listproxy.h"
 
 ListProxy::ListProxy(ListManager *listManager, Title::TitleT type)
- : List()
+//  : List()
 {
     m_listManager = listManager;
     m_type = type;
 
     if (m_listManager->pushUpdates()) {
         fill();  // Initially fill the list with Titles. Later listManager will push updates.
-        connect(listManager, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleEntry(Title*)));
-        connect(listManager, SIGNAL(popTitle(Title*)), this, SLOT(delTitleEntry(Title*)));
+        m_listManager->addSink(this);
+//         connect(listManager, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleEntry(Title*)));
+//         connect(listManager, SIGNAL(popTitle(Title*)), this, SLOT(delTitleEntry(Title*)));
     }
 }
 

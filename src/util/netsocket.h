@@ -24,7 +24,8 @@ using namespace std;
 
 
 /**
-Simple socket encapsulation.
+Simple socket encapsulation with methods for handling a line-based protocol.
+readLine() is buffered and attempts to read blocks of 1024 bytes from the network.
 
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */

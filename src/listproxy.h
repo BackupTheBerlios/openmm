@@ -38,7 +38,7 @@ public:
 
     virtual void update();
 
-public slots:
+// public slots:
     virtual void addTitle(Title *entry) { m_listManager->addProxyTitle(entry); }
     virtual void delTitle(Title *entry) { m_listManager->delProxyTitle(entry); }
 

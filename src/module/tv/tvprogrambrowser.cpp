@@ -21,16 +21,12 @@
 #include "titlepair.h"
 #include "debug.h"
 
-//#include <qdatetime.h>
-
 
 TvProgramBrowser::TvProgramBrowser(ListComposer *list)
  : ListBrowser("Program Guide", "Id;Left.Name;Start;End;Right.Name", list)
 {
     m_filter = new TvProgramFilter();
     ((ListComposer*)m_list)->setFilter(m_filter);
-    // TODO: handle events independent from Toolkit.
-    //m_listView->installEventFilter(this);
 }
 
 
@@ -50,38 +46,37 @@ TvProgramBrowser::enterPage()
 }
 
 
-bool
-TvProgramBrowser::eventHandler(QEvent *e)
-{
-    //TRACE("TvProgramBrowser::eventFilter()");
-    if ( e->type() == QEvent::KeyPress ) {
-        QKeyEvent *k = (QKeyEvent *)e;
-        time_t at;
-        switch (k->key()) {
-            case Qt::Key_Left:
-                TRACE("TvProgramBrowser::eventFilter(), Key_Left, Title: %s",
-                        ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
-                at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getStart() - 1;
-                if (at < time(0)) {
-                    return true;
-                }
-                m_filter->setTime(at);
-                clear();
-                ((ListComposer*)m_list)->pushFiltered();
-                return true;
-            case Qt::Key_Right:
-                TRACE("TvProgramBrowser::eventFilter(), Key_Right, Title: %s",
-                        ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
-                at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getEnd();
-                m_filter->setTime(at);
-                clear();
-                ((ListComposer*)m_list)->pushFiltered();
-                return true;
-            default:
-                return false;
-        }
-    } else {
-        // standard event processing
-        return false;
-    }
-}
+// bool
+// TvProgramBrowser::eventHandler(QEvent *e)
+// {
+//     if ( e->type() == QEvent::KeyPress ) {
+//         QKeyEvent *k = (QKeyEvent *)e;
+//         time_t at;
+//         switch (k->key()) {
+//             case Qt::Key_Left:
+//                 TRACE("TvProgramBrowser::eventHandler(), Key_Left, Title: %s",
+//                         ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
+//                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getStart() - 1;
+//                 if (at < time(0)) {
+//                     return true;
+//                 }
+//                 m_filter->setTime(at);
+//                 clear();
+//                 ((ListComposer*)m_list)->pushFiltered();
+//                 return true;
+//             case Qt::Key_Right:
+//                 TRACE("TvProgramBrowser::eventHandler(), Key_Right, Title: %s",
+//                         ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
+//                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getEnd();
+//                 m_filter->setTime(at);
+//                 clear();
+//                 ((ListComposer*)m_list)->pushFiltered();
+//                 return true;
+//             default:
+//                 return false;
+//         }
+//     } else {
+//         // standard event processing
+//         return false;
+//     }
+// }
