@@ -39,8 +39,8 @@ class GlobalKeyHandler //: public QObject
 
 public:
     static GlobalKeyHandler *instance();
-    void attach(Page *page);
-    void detach(Page *page);
+//     void attach(Page *page);
+//     void detach(Page *page);
 // TODO: implement toolkit independet events.
 //     bool notify(QEvent *e);
 
@@ -53,7 +53,7 @@ protected:
 
 private:
     static GlobalKeyHandler *m_instance;
-    vector<Page*> m_observer;
+//     vector<Page*> m_observer;
 };
 
 #endif

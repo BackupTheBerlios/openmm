@@ -17,11 +17,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "widgetfactory.h"
-// #include "qtpagestack.h"
-// #include "qtpage.h"
-// #include "qtmenu.h"
-// #include "qtlistbrowser.h"
-// #include "qtpopupmenu.h"
 #include "debug.h"
 
 #include <dlfcn.h>
@@ -69,7 +64,6 @@ WidgetFactory::setToolkit(ToolkitT toolkit)
 
     switch(m_toolkit) {
     case ToolkitQt:
-        //m_toolkitLibName = "libgraphic-qt.so";
         m_toolkitLibName = "/home/jb/devel/cc/jambin/src/graphic/qt/libjam-graphic-qt.so";
     default:
         break;

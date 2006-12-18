@@ -54,6 +54,8 @@ Controler::init(int argc, char **argv)
     m_argc = argc;
     m_argv = argv;
     m_goingBack = false;
+    pthread_mutex_init(&m_eventTriggerMutex, 0);
+    pthread_cond_init (&m_eventTrigger, 0);
 
     WidgetFactory::instance()->setToolkit(WidgetFactory::ToolkitQt);
 
@@ -76,6 +78,51 @@ Controler::init(int argc, char **argv)
 }
 
 
+int
+Controler::mainLoop()
+{
+    TRACE("Controler::mainLoop()");
+    // start all other event loop threads
+    for(vector<Thread*>::iterator i = m_eventLoop.begin(); i != m_eventLoop.end(); ++i) {
+        (*i)->start();
+    }
+    // enter main event loop
+    pthread_mutex_lock(&m_eventTriggerMutex);
+    TRACE("Controler::mainLoop() starting event loop!!!");
+    while(1) {
+        TRACE("Controler::mainLoop() waiting for events...");
+        pthread_cond_wait(&m_eventTrigger, &m_eventTriggerMutex);
+        TRACE("Controler::mainLoop() event received");
+        // process the pending events.
+    }
+    pthread_mutex_unlock(&m_eventTriggerMutex);
+    // exit main event loop
+
+    // exit all other event loop threads.
+    for(vector<Thread*>::iterator i = m_eventLoop.begin(); i != m_eventLoop.end(); ++i) {
+        (*i)->exit();
+    }
+    // cleanup and exit main thread.
+    pthread_mutex_destroy(&m_eventTriggerMutex);
+    pthread_cond_destroy(&m_eventTrigger);
+    pthread_exit(0);
+//     exit();
+}
+
+
+void
+Controler::queueEvent()
+{
+    TRACE("Controler::queueEvent()");
+    // queue event in the event fifo.
+
+    // signal the main loop to wake up and process the event.
+    pthread_mutex_lock(&m_eventTriggerMutex);
+    pthread_cond_signal(&m_eventTrigger);
+    pthread_mutex_unlock(&m_eventTriggerMutex);
+}
+
+
 void
 Controler::addModule(Module *module)
 {
@@ -87,6 +134,13 @@ void
 Controler::addPage(Page *page)
 {
     m_pageStack->addPage(page);
+}
+
+
+void
+Controler::addEventLoop(Thread *eventLoop)
+{
+    m_eventLoop.push_back(eventLoop);
 }
 
 

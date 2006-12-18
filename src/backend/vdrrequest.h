@@ -22,7 +22,7 @@
 
 #include "listmanager.h"
 #include "tvrec.h"
-#include "thread.h"
+// #include "thread.h"
 #include "netsocket.h"
 
 
@@ -31,13 +31,13 @@ Handles the communication to vdr via svdrp protocol.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class VdrRequest : /*public QObject,*/ public Thread
+class VdrRequest //: public Thread
 {
-//     Q_OBJECT
-
 public:
     VdrRequest(ListManager *listManager, List *list, string request);
     ~VdrRequest();
+
+    void start() { run(); }
 
 private:
     void processReply();
@@ -47,7 +47,7 @@ private:
     string locateRecDir(TvRec *tvRec);
     void addRecFileInfo(TvRec *tvRec, string recDir);
 
-    Mutex            m_requestMutex;
+//     Mutex            m_requestMutex;
 
     ListManager     *m_listManager;
     List            *m_list;

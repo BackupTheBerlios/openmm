@@ -31,7 +31,7 @@ Page::Page(string name)
     // add this page to the global widget stack.
     TRACE("Page::Page() adding Page %s: %p to PageStack.", m_name.c_str(), this);
     Controler::instance()->addPage(this);
-    GlobalKeyHandler::instance()->attach(this);
+//     GlobalKeyHandler::instance()->attach(this);
 }
 
 

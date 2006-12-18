@@ -35,9 +35,9 @@ public:
 
     virtual void addPage(Page *page) { m_pageStackWidget->addPage(page); }
     virtual void raisePage(Page *page);
-    virtual int loop() { return m_pageStackWidget->loop(); }  // TODO: start this in a seperate thread.
-    virtual void exit() { return m_pageStackWidget->exit(); }
-    virtual void* frame() { return m_pageStackWidget->frame(); }
+//     virtual int loop() { return m_pageStackWidget->loop(); }  // TODO: start this in a seperate thread.
+//     void exit() { return m_pageStackWidget->exit(); }
+    void* frame() { return m_pageStackWidget->frame(); }
     Page* visiblePage() { return m_visiblePage; }
 
 protected:

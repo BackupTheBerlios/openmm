@@ -13,6 +13,8 @@ src/util/directory.cpp
 src/util/directory.h
 src/util/stringutil.cpp
 src/util/stringutil.h
+src/util/thread.cpp
+src/util/thread.h
 src/listcomposer.cpp
 src/list.cpp
 src/listproxy.cpp

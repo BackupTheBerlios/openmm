@@ -27,6 +27,8 @@
 #include "menu.h"
 #include "streamplayer.h"
 #include "module.h"
+#include "thread.h"
+#include <pthread.h>
 
 #include <map>
 #include <vector>
@@ -40,8 +42,7 @@ public:
     void mainMenuShow();  // only used by GlobalKeyHandler (later by server-IP wizzard?)
 
     void init(int argc, char **argv);  // only used by main().
-    int loop()                          { return m_pageStack->loop(); }
-    void exit()                         { m_pageStack->exit(); }
+    int mainLoop();
     int& getArgc()                      { return m_argc; }
     char** getArgv()                    { return m_argv; }
     Page* getCurrentPage()              { return (Page*)m_pageStack->visiblePage(); };
@@ -50,6 +51,8 @@ public:
     PageStack *pageStack()              { return m_pageStack; }
     void showPage(Page *page);
     void addPage(Page *page);
+    void addEventLoop(Thread *eventLoop);
+    void queueEvent();
 
 protected:
     Controler();
@@ -64,7 +67,10 @@ private:
     Menu                   *m_mainMenu;
     map<string, Module*>    m_module;
     vector<Page*>           m_pageHistory;
+    vector<Thread*>         m_eventLoop;
     bool                    m_goingBack;
+    pthread_mutex_t         m_eventTriggerMutex;
+    pthread_cond_t          m_eventTrigger;
 };
 
 #endif

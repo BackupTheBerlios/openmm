@@ -24,5 +24,6 @@
 int main(int argc, char **argv) {
     Controler *controler = Controler::instance();
     controler->init(argc, argv);
-    return controler->loop();
+//     return controler->loop();
+    return controler->mainLoop();
 }

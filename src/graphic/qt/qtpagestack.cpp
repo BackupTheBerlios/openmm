@@ -34,6 +34,7 @@ QtPageStack::QtPageStack()
     m_pageStack->resize(720, 576);
     m_qtApp->setMainWidget(m_pageStack);
     m_qtApp->setOverrideCursor(Qt::BlankCursor);
+    Controler::instance()->addEventLoop(this);
 }
 
 
@@ -44,22 +45,23 @@ QtPageStack::~QtPageStack()
 }
 
 
-int
-QtPageStack::loop()
+void
+QtPageStack::beforeExit()
 {
-    m_pageStack->show();
-    TRACE("QtPageStack::loop(), entering main loop.");
-    return m_qtApp->exec();
-    TRACE("QtPageStack::loop(), exiting main loop.");
+    TRACE("QtPageStack::beforeExit()");
+    m_qtApp->exit();
+    TRACE("QtPageStack::beforeExit(), Qt main loop exited");
 }
 
 
 void
-QtPageStack::exit()
+QtPageStack::run()
 {
-    TRACE("QtPageStack::loop(), exiting main loop.");
-    m_qtApp->exit();
-    TRACE("QtPageStack::loop(), exited.");
+    TRACE("QtPageStack::run(), starting event loop!!!!");
+    m_pageStack->show();
+    TRACE("QtPageStack::run(), entering Qt main loop.");
+    m_qtApp->exec();
+    TRACE("QtPageStack::run(), exiting Qt main loop.");
 }
 
 

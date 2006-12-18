@@ -22,6 +22,7 @@
 
 #include "pagestackwidget.h"
 #include "controler.h"
+#include "thread.h"
 
 #include <qapplication.h>
 #include <qwidgetstack.h>
@@ -30,7 +31,7 @@
 /**
 @author Jörg Bakker
 */
-class QtPageStack : public PageStackWidget
+class QtPageStack : public PageStackWidget, private Thread
 {
 public:
     QtPageStack();
@@ -38,12 +39,12 @@ public:
 
     virtual void addPage(Page *page) { m_pageStack->addWidget((QWidget*) page->frame()); }
     virtual void raisePage(Page *page) { m_pageStack->raiseWidget((QWidget*) page->frame()); }
-    virtual int loop();
-    virtual void exit();
     virtual void* frame() { return (void*) m_pageStack; }
 
+private:
+    virtual void run();
+    virtual void beforeExit();
 
-protected:
     QWidgetStack *m_pageStack;
     QApplication *m_qtApp;
 };

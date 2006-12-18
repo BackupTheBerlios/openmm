@@ -33,8 +33,8 @@ public:
     //virtual ~PageStackWidget() = 0;
     virtual void addPage(Page *page) = 0;
     virtual void raisePage(Page *page) = 0;
-    virtual int loop() = 0;
-    virtual void exit() = 0;
+//     virtual int loop() = 0;
+//     virtual void exit() = 0;
     virtual void* frame()  = 0;
 };
 

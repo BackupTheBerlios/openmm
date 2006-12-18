@@ -81,6 +81,7 @@ void
 QtMenu::selectEntry(QListViewItem* i)
 {
     TRACE("QtMenu::selectEntry()");
+    Controler::instance()->queueEvent();
     Page *p = m_entryDict[i];
     p->showUp();
 }

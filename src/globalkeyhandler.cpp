@@ -81,18 +81,18 @@ GlobalKeyHandler::eventFilter(QObject *o, QEvent *e)
 }
 */
 
-void
-GlobalKeyHandler::attach(Page *page)
-{
-    m_observer.push_back(page);
-}
-
-
-void
-GlobalKeyHandler::detach(Page *page)
-{
-    m_observer.erase(find(m_observer.begin(), m_observer.end(), page));
-}
+// void
+// GlobalKeyHandler::attach(Page *page)
+// {
+//     m_observer.push_back(page);
+// }
+// 
+// 
+// void
+// GlobalKeyHandler::detach(Page *page)
+// {
+//     m_observer.erase(find(m_observer.begin(), m_observer.end(), page));
+// }
 
 
 // bool

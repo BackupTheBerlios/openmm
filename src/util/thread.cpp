@@ -24,11 +24,14 @@
 Thread::Thread()
 {
     TRACE("Thread::Thread()");
+    pthread_attr_init(&m_attr);
+    pthread_attr_setdetachstate(&m_attr, PTHREAD_CREATE_JOINABLE);
 }
 
 
 Thread::~Thread()
 {
+    pthread_attr_destroy(&m_attr);
 }
 
 
@@ -37,12 +40,12 @@ Thread::start()
 {
     TRACE("Thread::start()");
     // TODO: uncomment this (and comment out run()), and you get the threads kick ...
-//      void **arg;
-//      *arg = this;
-//      pthread_create(&m_thread, NULL, (ThreadStarter)Thread::startThread, arg);  // TODO: threads won't start ...?
+     void **arg;
+     *arg = this;
+     pthread_create(&m_thread, NULL, (ThreadStarter)Thread::startThread, arg);  // TODO: threads won't start ...?
 
     // TODO: for now we don't create a thread and execute synchronous!!
-    run();
+//     run();
 }
 
 
@@ -55,12 +58,27 @@ Thread::wait()
 }
 
 
+void
+Thread::exit()
+{
+    beforeExit();
+    pthread_exit(0);
+}
+
+
+void
+Thread::beforeExit()
+{
+}
+
+
 void*
-Thread::startThread(void *arg)
+Thread::startThread(void **arg)
 {
     TRACE("Thread::startThread()");
     (*((Thread**) arg))->run();
 }
+
 
 Mutex::Mutex()
 {

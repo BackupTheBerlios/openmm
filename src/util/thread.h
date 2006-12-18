@@ -37,14 +37,17 @@ public:
 
     void start();
     void wait();
+    void exit();
 
 protected:
     virtual void run() = 0;
+    virtual void beforeExit();
 
 private:
     typedef void*(*ThreadStarter)(void*);
-    static void *startThread(void *);
-    pthread_t m_thread;
+    static void     *startThread(void **);
+    pthread_t        m_thread;
+    pthread_attr_t   m_attr;
 };
 
 

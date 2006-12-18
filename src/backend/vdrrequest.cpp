@@ -51,7 +51,7 @@ VdrRequest::run()
 {
     TRACE("VdrRequest::run()");
     // TODO: does this reliably synchronize access to the VDR socket in order of request call in the main thread?
-    MutexLocker requestLocker(&m_requestMutex);
+//     MutexLocker requestLocker(&m_requestMutex);
     string line;
 
     m_reply.clear();
