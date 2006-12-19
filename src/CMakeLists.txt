@@ -1,5 +1,6 @@
 SET( JAM_BASE_SRCS
     controler.cpp
+    event.cpp
     globalkeyhandler.cpp
     listcomposer.cpp
     list.cpp

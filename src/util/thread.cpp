@@ -18,8 +18,7 @@
  ***************************************************************************/
 #include "thread.h"
 #include "debug.h"
-// #include <functional>  // mem_fun_ref() ...
-// using namespace std;
+
 
 Thread::Thread()
 {
@@ -61,8 +60,11 @@ Thread::wait()
 void
 Thread::exit()
 {
+    TRACE("Thread::exit()");
     beforeExit();
-    pthread_exit(0);
+//     TRACE("Thread::exit() pthread_exit()");
+// //     sleep(1);
+//     pthread_exit(0);  // this hangs in Qt event loop (maybe QApp.exec() does a pthread_exit(), too?)
 }
 
 

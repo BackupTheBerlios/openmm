@@ -28,10 +28,13 @@
 #include "streamplayer.h"
 #include "module.h"
 #include "thread.h"
+#include "event.h"
+
 #include <pthread.h>
 
 #include <map>
 #include <vector>
+#include <queue>
 
 class Controler
 {
@@ -42,23 +45,27 @@ public:
     void mainMenuShow();  // only used by GlobalKeyHandler (later by server-IP wizzard?)
 
     void init(int argc, char **argv);  // only used by main().
-    int mainLoop();
+    int loop();
     int& getArgc()                      { return m_argc; }
     char** getArgv()                    { return m_argv; }
-    Page* getCurrentPage()              { return (Page*)m_pageStack->visiblePage(); };
+    Page* getCurrentPage()              { return (Page*)m_pageStack->logicalPage(); };
     void goBack();
     StreamPlayer *streamPlayer()        { return m_streamPlayer; }  // only used by MediaPlayer.
     PageStack *pageStack()              { return m_pageStack; }
     void showPage(Page *page);
     void addPage(Page *page);
     void addEventLoop(Thread *eventLoop);
-    void queueEvent();
+    void queueEvent(Event *event);
+    void lockGui()                      { m_pageStack->lockGui(); }
+    void unlockGui()                    { m_pageStack->unlockGui(); }
 
 protected:
     Controler();
     ~Controler();
 
 private:
+    bool dispatchEvents();
+
     static Controler       *m_instance;
     int                     m_argc;
     char                  **m_argv;
@@ -69,6 +76,7 @@ private:
     vector<Page*>           m_pageHistory;
     vector<Thread*>         m_eventLoop;
     bool                    m_goingBack;
+    queue<Event*>           m_eventQueue;
     pthread_mutex_t         m_eventTriggerMutex;
     pthread_cond_t          m_eventTrigger;
 };

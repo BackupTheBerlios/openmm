@@ -28,9 +28,9 @@
 class StreamPlayer;
 
 /**
-Proxy interface for StreamPlayer (which is a singleton).
-Adds functionality, which is special for the specific user-interface, e.g.
-playing files, recordings, live-TV, have all different keys, OSD, ...
+  Proxy interface for StreamPlayer (which is a singleton).
+  Adds functionality, which is special for the specific user-interface, e.g.
+  playing files, recordings, live-TV, have all different keys, OSD, ...
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
@@ -45,27 +45,17 @@ public:
     MediaPlayer(string name);
     ~MediaPlayer();
 
-    // Define the specific keys and resulting actions to control this media player.
-// TODO: implement toolkit independet events.
-//     virtual bool eventHandler(QEvent *e) = 0;
-
     // Needs to be reimplemented from base class, because it actually shows up the
     // StreamPlayer page and not the MediaPlayer page.
     virtual void showUp();
 
     // Actually returns if the StreamPlayer is running.
     bool isPlaying();
-    //void setCurrent(Title *title) { m_current = title; }
 
-// public slots:
     void play(Title* title);
-    //void start();  // starts the current title
     void stop();
     void showOsd(string text, uint duration);
     void hideOsd();
-
-//private:
-//    Title *m_current;
 };
 
 #endif

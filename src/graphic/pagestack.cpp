@@ -27,6 +27,7 @@ PageStack::PageStack()
     TRACE("PageStack::PageStack()");
     m_pageStackWidget = WidgetFactory::instance()->createPageStackWidget();
     m_visiblePage = 0;
+    m_logicalPage = 0;
     TRACE("PageStack::PageStack() complete");
 }
 

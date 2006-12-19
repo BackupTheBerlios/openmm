@@ -45,7 +45,7 @@ public:
     void setCurrentChannel(Title *channel);
 
 protected:
-//     bool eventHandler(QEvent *e);
+    virtual bool eventHandler(Event *e);
     void enterPage();
 
 private:

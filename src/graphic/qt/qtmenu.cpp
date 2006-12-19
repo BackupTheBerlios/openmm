@@ -28,8 +28,6 @@ QtMenu::QtMenu(Page *parent)
 {
     TRACE("QtMenu::QtMenu()");
     m_list = new QListView((QWidget*) parent->frame());
-    // TODO: implement toolkit independent event handling
-//     m_list->installEventFilter(GlobalKeyHandler::instance());
     m_entryNumber = 0;
     m_defaultEntry = 0;
 
@@ -46,6 +44,7 @@ void
 QtMenu::addEntry(Page* page)
 {
     TRACE("QtMenu::addEntry() for page: %p", page);
+    Controler::instance()->lockGui();
     m_entryNumber++;
     QString entryNumberStr = QString().setNum(m_entryNumber).rightJustify(2, '0') + ".  ";
     QListViewItem *i = new QListViewItem(m_list, entryNumberStr + page->getName(), "");
@@ -55,6 +54,7 @@ QtMenu::addEntry(Page* page)
     if (m_entryDict.count() == 1) {
         m_defaultEntry = i;
     }
+    Controler::instance()->unlockGui();
 }
 
 
@@ -69,11 +69,13 @@ void
 QtMenu::enterPage()
 {
     TRACE("QtMenu::enterPage(), set default entry to: %p", m_defaultEntry);
+    Controler::instance()->lockGui();
     if (m_defaultEntry) {
         m_list->setCurrentItem(m_defaultEntry);
         m_list->setSelected(m_defaultEntry, true);
     }
     m_list->setFocus();
+    Controler::instance()->unlockGui();
 }
 
 
@@ -81,9 +83,10 @@ void
 QtMenu::selectEntry(QListViewItem* i)
 {
     TRACE("QtMenu::selectEntry()");
-    Controler::instance()->queueEvent();
+    Controler::instance()->lockGui();
     Page *p = m_entryDict[i];
     p->showUp();
+    Controler::instance()->unlockGui();
 }
 
 

@@ -21,17 +21,16 @@
 #define PAGE_H
 
 #include "pagewidget.h"
+#include "event.h"
 #include "debug.h"
-
-// #include<qevent.h>
 
 #include <string>
 using namespace std;
 
 
 /**
-A full page on the screen, which can be a menu, mediaplayer, list, ...
-Basically, it can be shown, or not.
+  A full page on the screen, which can be a menu, mediaplayer, list, ...
+  Basically, it can be shown, or not.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
@@ -48,8 +47,7 @@ public:
     // for all widgets common part of the class
     virtual void showUp();
     virtual void exitPage()              { TRACE("Page::exitPage()"); }
-    // TODO: implement toolkit independet events.
-//     virtual bool eventHandler(QEvent *e) { return false; }
+    virtual bool eventHandler(Event *e)  { return false; }
 
     // widget specific part of the class
     virtual int globalPositionX()        { return m_pageWidget->globalPositionX(); }

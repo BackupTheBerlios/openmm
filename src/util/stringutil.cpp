@@ -35,6 +35,9 @@ StringUtil::s_trim(const string& s)
     general enough).
 */
 
+// TODO: put ignoreNonAscii out of this function and make an extra function
+//       which compares two strings without wildcards and ignores all non-ascii characters.
+
 int
 StringUtil::s_wildcmp(const char *wild, const char *str, bool ignoreNonAscii) {
 //     TRACE("StringUtil::wildcmp(), pattern: %s, str: %s", wild, str);

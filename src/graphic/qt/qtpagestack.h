@@ -41,12 +41,22 @@ public:
     virtual void raisePage(Page *page) { m_pageStack->raiseWidget((QWidget*) page->frame()); }
     virtual void* frame() { return (void*) m_pageStack; }
 
+    void lockGui() { m_qtApp->lock(); }
+    void unlockGui() { m_qtApp->unlock(); }
+
 private:
     virtual void run();
     virtual void beforeExit();
 
     QWidgetStack *m_pageStack;
     QApplication *m_qtApp;
+};
+
+
+class QtEventFilter : public QObject
+{
+private:
+    virtual bool eventFilter(QObject *o, QEvent *e);
 };
 
 #endif

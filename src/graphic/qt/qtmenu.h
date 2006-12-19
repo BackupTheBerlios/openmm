@@ -21,10 +21,10 @@
 #define QTMENU_H
 
 #include "menuwidget.h"
-//#include "qtpage.h"
 
 #include <qlistview.h>
 #include <qptrdict.h>
+
 #include <string>
 using namespace std;
 

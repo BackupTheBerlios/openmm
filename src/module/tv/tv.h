@@ -25,14 +25,12 @@
 class Controler;
 
 /**
-Put all stuff together for watching Live TV and programming timers.
+  Put all stuff together for watching Live TV and programming timers.
 
 @author Jörg Bakker
 */
 class Tv: public Module
 {
-//     Q_OBJECT
-
 public:
     Tv();
     ~Tv();

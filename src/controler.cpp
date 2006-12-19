@@ -79,7 +79,7 @@ Controler::init(int argc, char **argv)
 
 
 int
-Controler::mainLoop()
+Controler::loop()
 {
     TRACE("Controler::mainLoop()");
     // start all other event loop threads
@@ -87,39 +87,83 @@ Controler::mainLoop()
         (*i)->start();
     }
     // enter main event loop
-    pthread_mutex_lock(&m_eventTriggerMutex);
     TRACE("Controler::mainLoop() starting event loop!!!");
-    while(1) {
+    bool processEvents = true;
+    while (processEvents) {
         TRACE("Controler::mainLoop() waiting for events...");
+        pthread_mutex_lock(&m_eventTriggerMutex);
         pthread_cond_wait(&m_eventTrigger, &m_eventTriggerMutex);
+        pthread_mutex_unlock(&m_eventTriggerMutex);
         TRACE("Controler::mainLoop() event received");
         // process the pending events.
+        processEvents = dispatchEvents();
+        // while events are processed, all new event triggers are ignored (but events are queued, anyway).
     }
-    pthread_mutex_unlock(&m_eventTriggerMutex);
     // exit main event loop
+    TRACE("Controler::mainLoop() exit main loop");
 
     // exit all other event loop threads.
     for(vector<Thread*>::iterator i = m_eventLoop.begin(); i != m_eventLoop.end(); ++i) {
         (*i)->exit();
     }
     // cleanup and exit main thread.
+    TRACE("Controler::mainLoop() cleaning up and exit");
     pthread_mutex_destroy(&m_eventTriggerMutex);
     pthread_cond_destroy(&m_eventTrigger);
-    pthread_exit(0);
-//     exit();
+    exit(0);
 }
 
 
 void
-Controler::queueEvent()
+Controler::queueEvent(Event *event)
 {
     TRACE("Controler::queueEvent()");
     // queue event in the event fifo.
-
+    m_eventQueue.push(event);
     // signal the main loop to wake up and process the event.
     pthread_mutex_lock(&m_eventTriggerMutex);
     pthread_cond_signal(&m_eventTrigger);
     pthread_mutex_unlock(&m_eventTriggerMutex);
+}
+
+
+bool
+Controler::dispatchEvents()
+{
+    // go through queued events and handle each ...
+    while(!m_eventQueue.empty()) {
+        TRACE("Controler::dispatchEvents() next event ...");
+        Event *e = m_eventQueue.front();
+        switch(e->type()) {
+        case Event::QuitE:
+            // quit application, no more event processing.
+            return false;
+        case Event::MenuE:
+            TRACE("Controler::dispatchEvents() showing main menu");
+            mainMenuShow();
+            TRACE("Controler::dispatchEvents() showing main menu done");
+            break;
+        case Event::BackE:
+            TRACE("Controler::dispatchEvents() going back");
+            goBack();
+            TRACE("Controler::dispatchEvents() going back done");
+            break;
+        case Event::UpE:
+        case Event::DownE:
+        case Event::LeftE:
+        case Event::RightE:
+            TRACE("Controler::dispatchEvents() up, down, left or right to page: %p", getCurrentPage());
+            getCurrentPage()->eventHandler(e);
+            break;
+        default:
+            ;
+        }
+        m_eventQueue.pop();
+        delete e;
+        TRACE("Controler::dispatchEvents() event done");
+    }
+    TRACE("Controler::dispatchEvents() all events processed");
+    return true;  // go on waiting for events
 }
 
 

@@ -30,19 +30,22 @@ class PageStack
 {
 public:
     PageStack();
-    PageStack(bool widgetAllocated) {}
+    PageStack(bool widgetAllocated)         {}
     virtual ~PageStack();
 
-    virtual void addPage(Page *page) { m_pageStackWidget->addPage(page); }
+    virtual void addPage(Page *page)        { m_pageStackWidget->addPage(page); }
     virtual void raisePage(Page *page);
-//     virtual int loop() { return m_pageStackWidget->loop(); }  // TODO: start this in a seperate thread.
-//     void exit() { return m_pageStackWidget->exit(); }
-    void* frame() { return m_pageStackWidget->frame(); }
-    Page* visiblePage() { return m_visiblePage; }
+    void* frame()                           { return m_pageStackWidget->frame(); }
+    Page* visiblePage()                     { return m_visiblePage; }
+    Page* logicalPage()                     { return m_logicalPage ? m_logicalPage : m_visiblePage; }
+    void setLogicalPage(Page *page)         { m_logicalPage = page; }
+    void lockGui()                          { m_pageStackWidget->lockGui(); }
+    void unlockGui()                        { m_pageStackWidget->unlockGui(); }
 
 protected:
     PageStackWidget *m_pageStackWidget;
     Page            *m_visiblePage;
+    Page            *m_logicalPage;
 };
 
 #endif

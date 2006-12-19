@@ -33,8 +33,6 @@ QtListBrowser::QtListBrowser(Page *parent, vector<string> *cols)
     TRACE("QtListBrowser::QtListBrowser(), parent widget: %p", p);
     m_listView = new QListView(p);
     TRACE("QtListBrowser::QtListBrowser(), build QListView widget: %p", m_listView);
-    // TODO: implement toolkit independent event handling
-//     m_listView->installEventFilter(GlobalKeyHandler::instance());
     TRACE("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
 
     connect(m_listView, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(showPopupMenu(QListViewItem*)));
@@ -50,13 +48,16 @@ void
 QtListBrowser::enterPage()
 {
     TRACE("QtListBrowser::enterPage()");
+    Controler::instance()->lockGui();
     m_listView->setFocus();
+    Controler::instance()->unlockGui();
 }
 
 
 void
 QtListBrowser::addEntry(Title *title)
 {
+    Controler::instance()->lockGui();
     if (!title) {
         return;
     }
@@ -67,6 +68,7 @@ QtListBrowser::addEntry(Title *title)
     for (uint i = 0; i < m_cols->size(); i++) {
         entry->setText(i, title->getText(m_cols->at(i)));
     }
+    Controler::instance()->unlockGui();
 }
 
 
@@ -74,12 +76,14 @@ void
 QtListBrowser::delEntry(Title *title)
 {
     TRACE("QtListBrowser::delEntry()");
+    Controler::instance()->lockGui();
     if (!title) {
         return;
     }
     m_listView->takeItem(m_itemList[title]);
     m_titleList.remove(m_titleList.find(title));
     m_itemList.remove(title);
+    Controler::instance()->unlockGui();
 }
 
 
@@ -88,8 +92,10 @@ QtListBrowser::selectEntry(Title *title)
 {
     // TODO: get the right entry to select.
     TRACE("QtListBrowser::selectEntry()");
+    Controler::instance()->lockGui();
     m_listView->setCurrentItem(m_itemList[title]);
     m_listView->setSelected(m_itemList[title], true);
+    Controler::instance()->unlockGui();
 }
 
 
@@ -97,9 +103,11 @@ void
 QtListBrowser::clear()
 {
     TRACE("QtListBrowser::clear()");
+    Controler::instance()->lockGui();
     m_listView->clear();
     m_titleList.clear();
     m_itemList.clear();
+    Controler::instance()->unlockGui();
 }
 
 
