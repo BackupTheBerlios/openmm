@@ -117,7 +117,12 @@ Title*
 List::getTitle(int number)
 {
     //TRACE("List::getTitle()");
-    return m_list.at(number);
+    if (number >= 0 && number < m_list.size()) {
+        return m_list.at(number);
+    }
+    else {
+        return 0;
+    }
 }
 
 

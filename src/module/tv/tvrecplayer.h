@@ -23,16 +23,12 @@
 #include "mediaplayer.h"
 #include "list.h"
 
-// #include <qobject.h>
-
 
 /**
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class TvRecPlayer : /*public QObject,*/ public MediaPlayer
+class TvRecPlayer : public MediaPlayer
 {
-//     Q_OBJECT
-
 public:
     TvRecPlayer(List *recList);
     ~TvRecPlayer();
@@ -40,7 +36,6 @@ public:
     void startRec(Title *title);
 
 protected:
-//     bool eventHandler(QEvent *e);
     void enterPage();
 
 private:

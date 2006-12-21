@@ -22,7 +22,6 @@
 
 #include "mrl.h"
 
-// #include <qobject.h>
 #include <vector>
 #include <map>
 #include <string>
@@ -39,10 +38,8 @@ Lists of Titles are produced by a TitleManager.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class Title //: public QObject
+class Title
 {
-//     Q_OBJECT
-
 public:
     enum TitleT {TitlePairT, TvChannelT, TvProgramT, TvTimerT, TvRecT};
 

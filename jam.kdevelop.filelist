@@ -21,7 +21,6 @@ src/listproxy.cpp
 src/streamplayer.cpp
 src/mrl.h
 src/module.cpp
-src/globalkeyhandler.h
 src/titlepair.h
 src/mediaplayer.cpp
 src/CMakeLists.txt
@@ -67,7 +66,6 @@ src/module/tv/tvrecplayer.cpp
 src/module/tv/tvrecplayer.h
 src/module/tv/tvprogram.cpp
 src/module/CMakeLists.txt
-src/globalkeyhandler.cpp
 src/streamplayer.h
 src/mediaplayer.h
 src/graphic/qt/qtlistbrowser.h

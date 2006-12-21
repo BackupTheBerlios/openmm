@@ -23,7 +23,6 @@
 
 
 Title::Title(string name, TitleT type)
-//  : QObject()
 {
     m_name = name;
     m_type = type;

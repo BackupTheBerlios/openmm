@@ -23,7 +23,6 @@
 
 
 ListComposer::ListComposer(List *left, List *right, JoinT join)
- : List()
 {
     TRACE("ListComposer::ListComposer()");
     m_left = left;
@@ -31,10 +30,7 @@ ListComposer::ListComposer(List *left, List *right, JoinT join)
     m_filter = 0;
     m_join = join;
 
-    m_left->addSink(this);
-    m_left->addSink(this);
-//     connect(left, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleLeft(Title*)));
-//     connect(right, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleRight(Title*)));
+//     m_left->addSink(this);
 }
 
 
@@ -66,7 +62,7 @@ ListComposer::delTitle(Title *title)
 void
 ListComposer::addTitleLeft(Title *entry)
 {
-    //TRACE("ListComposer::addTitleLeft() with name: %s", entry->getText("Name").c_str());
+    TRACE("ListComposer::addTitleLeft() with name: %s", entry->getText("Name").c_str());
     // find a matching ident in the right Titles (columns of type Identifier with same name).
     bool match = false;
     for (int i = 0; i < m_right->count(); i++) {
@@ -78,7 +74,8 @@ ListComposer::addTitleLeft(Title *entry)
 //             TRACE("ListComposer::addTitleLeft() inner join done.");
         }
     }
-    if (m_join == OuterJoin && !match) {
+//     if (m_join == OuterJoin && !match) {
+    if (m_join == OuterJoin) {  // always push a right-empty entry into the result
 //         TRACE("ListComposer::addTitleLeft() outer join");
         // no match on the right side, but nevertheless make an outer join.
         TitlePair *newPair = new TitlePair(entry, 0);
@@ -87,62 +84,52 @@ ListComposer::addTitleLeft(Title *entry)
 }
 
 
-// TODO: channels disappear, that have partial program entries,
-//       while channels with no entries go through the filter.
-//       -> all channels should always appear on the left side.
-
-// TODO: channels appear double, because of errors in the EPG data
-//       for example: N24, two programs are overlapping on the same channel.
-
 void
 ListComposer::pushFiltered()
 {
     TRACE("ListComposer::pushFiltered()");
+    Title *lastLeftTitle = 0;
     for (int i = 0; i < count(); i++) {
+        TitlePair *currentTitle = (TitlePair*)getTitle(i);
+        if (!currentTitle || currentTitle->getType() != Title::TitlePairT) {
+            continue;
+        }
+        Title *currentLeftTitle = currentTitle->getLeft();
+        Title *currentRightTitle = currentTitle->getRight();
+//         TRACE("ListComposer::pushFiltered() for Title: %s", currentTitle->getText("Name").c_str());
         if (m_filter) {  // only push a filtered Title to the outside (for example to a TitleBrowser)
-            if (!((TitlePair*)getTitle(i))->getLeft() 
-                || !((TitlePair*)getTitle(i))->getRight()
-                || m_filter->pass(getTitle(i))) {
-//                 emit pushTitle(getTitle(i));
-                pushTitle(getTitle(i));
+//             TRACE("ListComposer::pushFiltered() filter currentRightTitle: %p", currentRightTitle);
+            if (currentRightTitle && m_filter->pass(currentRightTitle)) {
+                if ((currentLeftTitle != lastLeftTitle)) {
+                    pushTitle(currentTitle);
+                }
+//                 TRACE("ListComposer::pushFiltered() lastLeft, currentLeft: %p, %p", lastLeftTitle, currentLeftTitle);
+                lastLeftTitle = currentLeftTitle;
+            }
+            else if(!currentRightTitle && (lastLeftTitle != currentLeftTitle)) {
+                    pushTitle(currentTitle);
             }
         }
-        else {
-//             emit pushTitle(getTitle(i));
-            pushTitle(getTitle(i));
+        else {  // no filter, we can push all Titles
+            pushTitle(currentTitle);
         }
     }
+    TRACE("ListComposer::pushFiltered() done");
 }
 
 
 void
 ListComposer::addTitleRight(Title *entry)
 {
-/*
-    // TODO: eliminate identical code shared with addTitleLeft().
-    for (int i = 0; i < m_left->count(); i++) {
-        if (entry->match(m_left->getTitle(i))) {
-            TitlePair *newPair = new TitlePair(m_left->getTitle(i), entry);
-            m_list.push_back(newPair);
-
-            if (m_filter) {  // only push a filtered Title to the outside (for example to a TitleBrowser)
-                if (m_filter->pass(newPair)) {
-                    emit pushTitle(newPair);
-                }
-            }
-            else {
-                emit pushTitle(newPair);
-            }
-        }
-    }
-*/
 }
 
 
 void
 ListComposer::fillList()
 {
+    TRACE("ListComposer::fillList() fill left List.");
     m_left->fill();
+    TRACE("ListComposer::fillList() fill right List.");
     m_right->fill();
     for (int i = 0; i < m_left->count(); i++) {
         addTitleLeft(m_left->getTitle(i));

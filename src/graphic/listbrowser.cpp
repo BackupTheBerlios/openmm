@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "listbrowser.h"
-#include "globalkeyhandler.h"
 #include "widgetfactory.h"
 #include "stringutil.h"
 #include "debug.h"
@@ -42,6 +41,8 @@ ListBrowser::ListBrowser(string name, string cols, List *list)
     }
 
     m_list->addSink(this);
+    addEventType(Event::LeftE);
+    addEventType(Event::RightE);
 }
 
 

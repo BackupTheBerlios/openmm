@@ -48,9 +48,6 @@ public:
     // TODO: itemDispatcher is a bit ugly, but simple, I may change this ...
 
 // TODO: connect the slots to the event handling
-//     virtual void insertItem(string text, QObject *receiver, const char *member) 
-//             { m_popupMenuWidget->insertItem(text, receiver, member); }
-
 //    virtual void insertItem(string text, unary_function<void, void>) {}
 
     void setParent(Page *parent)                  { m_parent = parent; }

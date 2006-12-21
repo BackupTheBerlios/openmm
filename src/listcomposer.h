@@ -45,11 +45,9 @@ public:
     ListComposer(List *left, List *right = 0, JoinT join = InnerJoin);
     ~ListComposer();
 
-    void setFilter(TitleFilter *filter) { m_filter = filter; }
-
-// public slots:
     virtual void addTitle(Title *title);
     virtual void delTitle(Title *title);
+    void setFilter(TitleFilter *filter) { m_filter = filter; }
     void addTitleLeft(Title *entry);
     void addTitleRight(Title *entry);
     void pushFiltered();

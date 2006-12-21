@@ -25,6 +25,7 @@
 #include "debug.h"
 
 #include <string>
+#include <set>
 using namespace std;
 
 
@@ -43,6 +44,8 @@ public:
 
     string getName()                     { return m_name; };
     void setName(string name)            { m_name = name; };
+    void addEventType(Event::EventT e)   { m_eventTypes.insert(e); }
+    bool hasEventType(Event::EventT e);
 
     // for all widgets common part of the class
     virtual void showUp();
@@ -59,8 +62,9 @@ public:
     virtual void enterPage()             { m_pageWidget->enterPage(); }
 
 protected:
-    string        m_name;
-    PageWidget   *m_pageWidget;
+    string               m_name;
+    PageWidget          *m_pageWidget;
+    set<Event::EventT>   m_eventTypes;
 };
 
 #endif

@@ -26,7 +26,8 @@ Base class for all types of events (Key presses, quit, ...)
 */
 class Event{
 public:
-    enum EventT {NullE, QuitE, MenuE, BackE, UpE, DownE, LeftE, RightE, KeyPressE};
+    enum EventT {NullE, AllE, QuitE, MenuE, BackE, UpE, DownE, LeftE, RightE, KeyPressE,
+                 Key0E, Key1E, Key2E, Key3E, Key4E, Key5E, Key6E, Key7E, Key8E, Key9E };
     Event(EventT type = NullE);
     ~Event();
 

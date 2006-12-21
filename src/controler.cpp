@@ -135,28 +135,22 @@ Controler::dispatchEvents()
         TRACE("Controler::dispatchEvents() next event ...");
         Event *e = m_eventQueue.front();
         switch(e->type()) {
+        // handle all global events
         case Event::QuitE:
             // quit application, no more event processing.
             return false;
         case Event::MenuE:
             TRACE("Controler::dispatchEvents() showing main menu");
             mainMenuShow();
-            TRACE("Controler::dispatchEvents() showing main menu done");
             break;
         case Event::BackE:
             TRACE("Controler::dispatchEvents() going back");
             goBack();
-            TRACE("Controler::dispatchEvents() going back done");
             break;
-        case Event::UpE:
-        case Event::DownE:
-        case Event::LeftE:
-        case Event::RightE:
-            TRACE("Controler::dispatchEvents() up, down, left or right to page: %p", getCurrentPage());
-            getCurrentPage()->eventHandler(e);
-            break;
+        // all none global events are forwarded to the current visible Page.
         default:
-            ;
+            TRACE("Controler::dispatchEvents() forward event to page: %p", getCurrentPage());
+            getCurrentPage()->eventHandler(e);
         }
         m_eventQueue.pop();
         delete e;

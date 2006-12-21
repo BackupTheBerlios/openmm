@@ -20,7 +20,6 @@
 
 #include "qtmenu.h"
 #include "controler.h"
-#include "globalkeyhandler.h"
 #include "debug.h"
 
 

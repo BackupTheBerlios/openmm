@@ -42,6 +42,7 @@ protected:
 
 private:
     TvProgramFilter *m_filter;
+    time_t           m_lastAt;
 };
 
 #endif

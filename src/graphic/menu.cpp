@@ -20,7 +20,6 @@
 
 #include "menu.h"
 #include "controler.h"
-#include "globalkeyhandler.h"
 #include "widgetfactory.h"
 #include "debug.h"
 

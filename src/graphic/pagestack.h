@@ -37,15 +37,12 @@ public:
     virtual void raisePage(Page *page);
     void* frame()                           { return m_pageStackWidget->frame(); }
     Page* visiblePage()                     { return m_visiblePage; }
-    Page* logicalPage()                     { return m_logicalPage ? m_logicalPage : m_visiblePage; }
-    void setLogicalPage(Page *page)         { m_logicalPage = page; }
     void lockGui()                          { m_pageStackWidget->lockGui(); }
     void unlockGui()                        { m_pageStackWidget->unlockGui(); }
 
 protected:
     PageStackWidget *m_pageStackWidget;
     Page            *m_visiblePage;
-    Page            *m_logicalPage;
 };
 
 #endif

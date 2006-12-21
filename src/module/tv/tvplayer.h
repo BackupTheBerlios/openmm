@@ -46,7 +46,7 @@ public:
 
 protected:
     virtual bool eventHandler(Event *e);
-    void enterPage();
+    virtual void enterPage();
 
 private:
     int m_currentChannel;

@@ -22,6 +22,7 @@
 
 #include "page.h"
 #include "title.h"
+#include "event.h"
 #include "mediaplayer.h"
 #include "streamplayerengine.h"
 #include "sharedlibrary.h"
@@ -35,10 +36,8 @@ class MediaPlayer;
 /**
 @author Jörg Bakker
 */
-class StreamPlayer : /*public QObject,*/ public Page
+class StreamPlayer : public Page
 {
-//     Q_OBJECT
-
 public:
     enum EngineT {EngineXine};
 
@@ -46,8 +45,6 @@ public:
     void setEngine(EngineT engine);
     void setKeyHandler(MediaPlayer *player);
     bool isPlaying() { return m_isPlaying; };
-
-// public slots:
     void play(Title *title);
     void stop();
 
@@ -59,7 +56,7 @@ protected:
     StreamPlayer();
     ~StreamPlayer();
 
-//     virtual bool eventHandler(QEvent *e);
+    virtual bool eventHandler(Event *e);
     virtual void exitPage();
 
 private:

@@ -30,6 +30,9 @@ StreamPlayer::StreamPlayer()
  : Page("StreamPlayer")
 {
     TRACE("StreamPlayer::StreamPlayer()");
+    // all events are received by StreamPlayer, none are forwarded to the GUI.
+    addEventType(Event::AllE);
+    TRACE("StreamPlayer::StreamPlayer() adding event types, we now have: %i", m_eventTypes.size());
 }
 
 
@@ -51,18 +54,19 @@ StreamPlayer::setKeyHandler(MediaPlayer *player)
 }
 
 
-// bool
-// StreamPlayer::eventHandler(QEvent *e)
-// {
-//     TRACE("StreamPlayer::eventHandler()");
-//     m_keyHandler->eventHandler(e);
-//     return false;
-// }
+bool
+StreamPlayer::eventHandler(Event *e)
+{
+    TRACE("StreamPlayer::eventHandler()");
+    m_keyHandler->eventHandler(e);
+    return false;
+}
 
 
 void
 StreamPlayer::exitPage()
 {
+    TRACE("StreamPlayer::exitPage");
     stop();
 }
 

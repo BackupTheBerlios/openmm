@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "qtlistbrowser.h"
-#include "globalkeyhandler.h"
+#include "controler.h"
 #include "debug.h"
 
 #include <qlayout.h>

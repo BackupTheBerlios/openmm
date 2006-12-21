@@ -26,7 +26,6 @@ TvPlayer::TvPlayer(List *channelList)
  : MediaPlayer("Live TV")
 {
     m_channelList = channelList;
-    //setNameP("Live TV");
     m_currentChannel = 0;
 }
 
@@ -42,7 +41,6 @@ TvPlayer::enterPage()
     TRACE("TvPlayer::enterPage()");
     //m_channelList->update();
     startLiveTv();
-//     Controler::instance()->pageStack()->setLogicalPage(this);
 }
 
 
@@ -58,53 +56,72 @@ bool
 TvPlayer::eventHandler(Event *e)
 {
     TRACE("TvPlayer::eventHandler()");
-//     switch (((QKeyEvent *)e)->key()) {
     switch (e->type()) {
-/*        case Qt::Key_I:                               // info
-        case Qt::Key_Return:
-        case Qt::Key_Enter:
+/*        case Event::Key_I:                               // info
+        case Event::Key_Return:
+        case Event::Key_Enter:
             //showOsd(m_channelList->getChannelName(getCurrentChannelNumber()) + "   " +
             //     getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
             return true;*/
         case Event::UpE:                              // channel up
             setCurrentChannel(getCurrentChannelNumber() + 1);
+            stopLiveTv();
+            startLiveTv();
             break;
         case Event::DownE:                            // channel down
             setCurrentChannel(getCurrentChannelNumber() - 1);
+            stopLiveTv();
+            startLiveTv();
             break;
-/*        case Qt::Key_1:                               // channel 1
+        case Event::Key1E:                               // channel 1
             setCurrentChannel(0);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_2:                               // channel 2
+        case Event::Key2E:                               // channel 2
             setCurrentChannel(1);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_3:                               // channel 3
+        case Event::Key3E:                               // channel 3
             setCurrentChannel(2);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_4:                               // channel 4
+        case Event::Key4E:                               // channel 4
             setCurrentChannel(3);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_5:                               // channel 5
+        case Event::Key5E:                               // channel 5
             setCurrentChannel(4);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_6:                               // channel 6
+        case Event::Key6E:                               // channel 6
             setCurrentChannel(5);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_7:                               // channel 7
+        case Event::Key7E:                               // channel 7
             setCurrentChannel(6);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_8:                               // channel 8
+        case Event::Key8E:                               // channel 8
             setCurrentChannel(7);
+            stopLiveTv();
+            startLiveTv();
             break;
-        case Qt::Key_9:                               // channel 9
+        case Event::Key9E:                               // channel 9
             setCurrentChannel(8);
-            break;*/
+            stopLiveTv();
+            startLiveTv();
+            break;
         default:
             // all other keys are returned to the GUI loop.
             return false;
     }
-    stopLiveTv();
-    startLiveTv();
     return true;
 }
 
@@ -112,6 +129,9 @@ TvPlayer::eventHandler(Event *e)
 void
 TvPlayer::startLiveTv()
 {
+    if (!getCurrentChannelTitle()) {
+        return;
+    }
     TRACE("TvPlayer::startLiveTv() on channel: %s", getCurrentChannelTitle()->getMrl()->getPath().c_str());
     //play("/data/video/001.vdr");
     play(getCurrentChannelTitle());
@@ -123,6 +143,7 @@ TvPlayer::startLiveTv()
 void
 TvPlayer::stopLiveTv()
 {
+    TRACE("TvPlayer::stopLiveTv()");
     stop();
 }
 

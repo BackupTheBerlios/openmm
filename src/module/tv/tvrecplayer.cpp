@@ -26,7 +26,6 @@ TvRecPlayer::TvRecPlayer(List *recList)
  : MediaPlayer("Recordings")
 {
     m_recList = recList;
-    //setNameP("Recordings");
 }
 
 
@@ -46,14 +45,6 @@ TvRecPlayer::enterPage()
 void
 TvRecPlayer::startRec(Title *title)
 {
-    //TRACE("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).ascii());
-    //play(("file://" + mrl).utf8());
+    //TRACE("TvRecPlayer::startFile() playing: %s", ("file://" + mrl).c_str());
     play(title);
 }
-
-
-// bool
-// TvRecPlayer::eventHandler(QEvent *e)
-// {
-//     return false;
-// }

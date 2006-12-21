@@ -51,12 +51,10 @@ Tv::Tv() : Module("Television")
     timerListBrowser->setPopupMenu(new TvTimerPopup(timerListBrowser));
 
     ListProxy *channelList = new ListProxy(listManagerVdr, Title::TvChannelT);
-    TvPlayer *channelPlayer = new TvPlayer(channelList);
-
     ListProxy *programList = new ListProxy(listManagerVdr, Title::TvProgramT);
-
     ListComposer *programGuide = new ListComposer(channelList, programList, ListComposer::OuterJoin);
     TvProgramBrowser *programGuideBrowser = new TvProgramBrowser(programGuide);
+    TvPlayer *channelPlayer = new TvPlayer(channelList);
     programGuideBrowser->setPopupMenu(new TvProgramPopup(timerList, channelPlayer, programGuideBrowser));
     programGuide->fill();  // TODO: first show main menu, then fill the program guide tables in an extra thread.
     TRACE("Tv::Tv() after programGuide->fill()");

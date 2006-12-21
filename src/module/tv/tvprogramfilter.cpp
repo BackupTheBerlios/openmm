@@ -36,14 +36,17 @@ TvProgramFilter::~TvProgramFilter()
 bool
 TvProgramFilter::passTitle(Title *title)
 {
-//     TRACE("TvProgramFilter::pass() m_at: %i, start: %i, end: %i", m_at, ((TvProgram*)title)->getStart(),
-//           ((TvProgram*)title)->getEnd());
-
 // TODO: philosophical question: filter out if type doesn't match, or pass all other types through?
 //       for now, we filter them out. Take care of TitlePairs, they must be treated accordingly.
 //    if (title->getType() != Title::TvProgram) {
 //        return true;
 //    }
+//     TRACE("TvProgramFilter::pass() Title: %p", title);
+    if (!title) {
+        return false; // no program entry, nothing to show.
+    }
+//     TRACE("TvProgramFilter::pass() m_at: %i, start: %i, end: %i", m_at, ((TvProgram*)title)->getStart(),
+//           ((TvProgram*)title)->getEnd());
     if (((TvProgram*)title)->getStart() <= m_at && ((TvProgram*)title)->getEnd() > m_at) {
         return true;
     }

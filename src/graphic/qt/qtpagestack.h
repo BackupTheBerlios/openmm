@@ -23,10 +23,13 @@
 #include "pagestackwidget.h"
 #include "controler.h"
 #include "thread.h"
+#include "event.h"
 
 #include <qapplication.h>
 #include <qwidgetstack.h>
 
+#include <map>
+using namespace std;
 
 /**
 @author Jörg Bakker
@@ -55,8 +58,13 @@ private:
 
 class QtEventFilter : public QObject
 {
+public:
+    QtEventFilter::QtEventFilter();
+
 private:
     virtual bool eventFilter(QObject *o, QEvent *e);
+
+    map<int, Event::EventT> m_eventMap;
 };
 
 #endif

@@ -40,7 +40,6 @@ MediaPlayer::showUp()
     enterPage();
     Controler::instance()->streamPlayer()->setKeyHandler(this);
     Controler::instance()->streamPlayer()->showUp();
-    Controler::instance()->pageStack()->setLogicalPage(this);
 }
 
 

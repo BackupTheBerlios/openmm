@@ -22,7 +22,6 @@
 #ifndef CONTROLER_H
 #define CONTROLER_H
 
-#include "globalkeyhandler.h"
 #include "pagestack.h"
 #include "menu.h"
 #include "streamplayer.h"
@@ -48,7 +47,7 @@ public:
     int loop();
     int& getArgc()                      { return m_argc; }
     char** getArgv()                    { return m_argv; }
-    Page* getCurrentPage()              { return (Page*)m_pageStack->logicalPage(); };
+    Page* getCurrentPage()              { return (Page*)m_pageStack->visiblePage(); };
     void goBack();
     StreamPlayer *streamPlayer()        { return m_streamPlayer; }  // only used by MediaPlayer.
     PageStack *pageStack()              { return m_pageStack; }

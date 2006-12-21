@@ -20,7 +20,6 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-// #include <qobject.h>
 #include <string>
 using namespace std;
 
@@ -33,9 +32,8 @@ class Controler. Maybe for use as a plugin, later.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class Module //: public QObject
+class Module
 {
-// Q_OBJECT
 public:
     Module(string name);
     ~Module();

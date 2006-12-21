@@ -31,7 +31,11 @@ Page::Page(string name)
     // add this page to the global widget stack.
     TRACE("Page::Page() adding Page %s: %p to PageStack.", m_name.c_str(), this);
     Controler::instance()->addPage(this);
-//     GlobalKeyHandler::instance()->attach(this);
+    // catch all global key events for all pages.
+    addEventType(Event::MenuE);
+    addEventType(Event::QuitE);
+    addEventType(Event::BackE);
+    TRACE("Page::Page() adding event types, we now have: %i", m_eventTypes.size());
 }
 
 
@@ -49,4 +53,20 @@ Page::showUp()
     }
     enterPage();
     Controler::instance()->showPage(this);
+}
+
+
+bool
+Page::hasEventType(Event::EventT e)
+{
+    TRACE("Page::hasEventType() type: %i", e);
+    if (m_eventTypes.find(Event::AllE) != m_eventTypes.end()) {
+        TRACE("Page::hasEventType() all events are accepted by: %s", getName().c_str());
+        return true;
+    }
+    else {
+        TRACE("Page::hasEventType() event accepted by: %s, yes/no: %i", getName().c_str(),
+                 m_eventTypes.find(e) != m_eventTypes.end() ? 1 : 0);
+        return (m_eventTypes.find(e) != m_eventTypes.end());
+    }
 }
