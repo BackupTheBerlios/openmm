@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,44 +16,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef QTMENU_H
-#define QTMENU_H
+#include "qtstyle.h"
+#include "debug.h"
 
-#include "menuwidget.h"
+#include <qfontdatabase.h>
 
-#include <qlistview.h>
-#include <qptrdict.h>
 
-#include <string>
-using namespace std;
+QtStyle* QtStyle::m_instance = 0;
 
-/**
-@author Jörg Bakker
-*/
-class QtMenu : public QObject, public MenuWidget
+QtStyle*
+QtStyle::instance()
 {
-    Q_OBJECT
+    if (m_instance == 0) {
+        return new QtStyle();
+    }
+    return m_instance;
+}
 
-public:
-    QtMenu(Page *parent);
-    ~QtMenu();
 
-    virtual void addEntry(Page *page);
-    virtual void setDefaultEntry(Page *page);
-    virtual void setMenuName(string name)       { m_list->addColumn(name); }
-    virtual void enterPage();
+QtStyle::QtStyle()
+{
+    QFontDatabase fdb;
+    QFont f;
+    TRACE("QtStyle::QtStyle() try to get the default font");
+    f = fdb.font(QString::null, QString::null, 0);
+    f.setBold(true);
+    f.setPointSize(24);
+    m_bigFont = f;
+    f.setPointSize(18);
+    m_mediumFont = f;
+    f.setPointSize(12);
+    m_miniFont = f;
+    m_foregroundColor = QColor(Qt::gray);
+    m_backgroundColor = QColor(Qt::black);
+}
 
-private slots:
-    void selectEntry(QListViewItem* i);
 
-private:
-    QListViewItem *findEntry(Page *page);
-
-    QPtrDict<Page>   m_entryDict;
-    QListView       *m_list;
-    QListViewItem   *m_defaultEntry;
-    QListViewItem   *m_selectedEntry;
-    int              m_entryNumber;
-};
-
-#endif
+QtStyle::~QtStyle()
+{
+}

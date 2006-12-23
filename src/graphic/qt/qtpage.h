@@ -38,12 +38,12 @@ public:
     QtPage();
     ~QtPage();
 
-    virtual int globalPositionX() { return m_frame->mapToGlobal(QPoint(0,0)).x(); }
-    virtual int globalPositionY() { return m_frame->mapToGlobal(QPoint(0,0)).y(); }
-    virtual int width() { return m_frame->width(); }
-    virtual int height() { return m_frame->height(); }
-    virtual unsigned long windowId() { return m_frame->winId(); }
-    virtual void* frame() { return (void*) m_frame; }
+    virtual int globalPositionX()                   { return m_frame->mapToGlobal(QPoint(0,0)).x(); }
+    virtual int globalPositionY()                   { return m_frame->mapToGlobal(QPoint(0,0)).y(); }
+    virtual int width()                             { return m_frame->width(); }
+    virtual int height()                            { return m_frame->height(); }
+    virtual unsigned long windowId()                { return m_frame->winId(); }
+    virtual void* frame()                           { return (void*) m_frame; }
     virtual void enterPage();
 
 protected:

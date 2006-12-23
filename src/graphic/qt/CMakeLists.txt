@@ -4,6 +4,7 @@ SET( JAM_GRAPHIC_QT_SRCS
     qtmenu.cpp
     qtlistbrowser.cpp
     qtpopupmenu.cpp
+    qtstyle.cpp
 )
 
 SET( JAM_GRAPHIC_QT_MOC_HEADERS

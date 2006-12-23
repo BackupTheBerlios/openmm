@@ -23,7 +23,7 @@
 
 
 TvProgramBrowser::TvProgramBrowser(ListComposer *list)
- : ListBrowser("Program Guide", "Id;Left.Name;Start;End;Right.Name", list)
+ : ListBrowser("Program Guide", "Id;Left.Name;Start;Right.Name", list)
 {
     m_filter = new TvProgramFilter();
     m_lastAt = 0;

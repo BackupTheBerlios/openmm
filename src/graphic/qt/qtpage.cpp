@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "qtpage.h"
 #include "controler.h"
+#include "qtstyle.h"
 #include "debug.h"
 
 #include <qlayout.h>
@@ -30,6 +31,9 @@ QtPage::QtPage()
     TRACE("QtPage::QtPage() creating Page widget: %p.", m_frame);
     QVBoxLayout *l = new QVBoxLayout(m_frame);
     l->setAutoAdd(TRUE);
+
+/* ------------ themeing stuff... ------------ */
+    m_frame->setPaletteBackgroundColor(QtStyle::instance()->backgroundColor());
 }
 
 

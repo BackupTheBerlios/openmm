@@ -109,3 +109,5 @@ src/event.h
 src/event.cpp
 src/util/timer.h
 src/util/timer.cpp
+src/graphic/qt/qtstyle.h
+src/graphic/qt/qtstyle.cpp

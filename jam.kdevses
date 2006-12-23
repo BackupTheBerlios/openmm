@@ -1,46 +1,25 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="13" >
-  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpagestack.h" >
-   <View0 Type="Source" />
+ <DocsAndViews NumberOfDocuments="6" >
+  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpage.h" >
+   <View0 line="45" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpagestack.cpp" >
-   <View0 Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpage.cpp" >
+   <View0 line="34" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
-   <View0 Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtmenu.h" >
+   <View0 line="43" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/timer.h" >
-   <View0 Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtmenu.cpp" >
+   <View0 line="25" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/timer.cpp" >
-   <View0 Type="Source" />
+  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpagestack.h" >
+   <View0 line="26" Type="Source" />
   </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.h" >
-   <View0 Type="Source" />
+  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpagestack.cpp" >
+   <View0 line="48" Type="Source" />
   </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.cpp" >
-   <View0 line="134" Type="Source" />
-  </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayerengine.h" >
-   <View0 Type="Source" />
-  </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/engine/streamplayerxine.h" >
-   <View0 Type="Source" />
-  </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/engine/streamplayerxine.cpp" >
-   <View0 Type="Source" />
-  </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/thread.h" >
-   <View0 Type="Source" />
-  </Doc10>
-  <Doc11 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/util/thread.cpp" >
-   <View0 line="42" Type="Source" />
-  </Doc11>
-  <Doc12 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.cpp" >
-   <View0 line="63" Type="Source" />
-  </Doc12>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

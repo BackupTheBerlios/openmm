@@ -20,7 +20,11 @@
 
 #include "qtmenu.h"
 #include "controler.h"
+#include "qtstyle.h"
 #include "debug.h"
+
+#include <qlayout.h>
+#include <qfontdatabase.h>
 
 
 QtMenu::QtMenu(Page *parent)
@@ -31,6 +35,12 @@ QtMenu::QtMenu(Page *parent)
     m_defaultEntry = 0;
 
     connect(m_list, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(selectEntry(QListViewItem*)));
+
+/* ------------ themeing stuff... ------------ */
+    m_list->setPaletteBackgroundColor(QtStyle::instance()->backgroundColor());
+    m_list->setPaletteForegroundColor(QtStyle::instance()->foregroundColor());
+    m_list->setMargin(100);
+    m_list->setFont(QtStyle::instance()->bigFont());
 }
 
 

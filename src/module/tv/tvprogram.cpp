@@ -99,7 +99,8 @@ TvProgram::timeStr(time_t t)
 {
     //TRACE("TvProgram::timeStr()");
 //     return StringUtil::timeToString("%d@%H:%M", t);
-    return StringUtil::s_time("%F@%H:%M", t);
+//     return StringUtil::s_time("%F@%H:%M", t);
+    return StringUtil::s_time("%H:%M", t);
 }
 
 

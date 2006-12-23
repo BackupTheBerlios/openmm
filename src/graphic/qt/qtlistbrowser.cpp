@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "qtlistbrowser.h"
 #include "controler.h"
+#include "qtstyle.h"
 #include "debug.h"
 
 #include <qlayout.h>
@@ -36,6 +37,14 @@ QtListBrowser::QtListBrowser(Page *parent, vector<string> *cols)
     TRACE("QtListBrowser::QtListBrowser(), installed GlobalKeyHandler");
 
     connect(m_listView, SIGNAL(returnPressed(QListViewItem*)), this, SLOT(showPopupMenu(QListViewItem*)));
+
+/* ------------ themeing stuff... ------------ */
+    m_listView->setPaletteBackgroundColor(QtStyle::instance()->backgroundColor());
+    m_listView->setPaletteForegroundColor(QtStyle::instance()->foregroundColor());
+    m_listView->setMargin(100);
+    m_listView->setFont(QtStyle::instance()->miniFont());
+    m_listView->setHScrollBarMode(QScrollView::AlwaysOff);
+    m_listView->setVScrollBarMode(QScrollView::AlwaysOff);
 }
 
 
