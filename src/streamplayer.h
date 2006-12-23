@@ -26,12 +26,13 @@
 #include "mediaplayer.h"
 #include "streamplayerengine.h"
 #include "sharedlibrary.h"
+#include "timer.h"
 
 #include <string>
 using namespace std;
 
 class MediaPlayer;
-
+class OsdTimer;
 
 /**
 @author Jörg Bakker
@@ -49,7 +50,7 @@ public:
     void stop();
 
     // interface to StreamPlayerEngine
-    void showOsd(string text, uint duration) { m_engine->showOsd(text, duration); }
+    void showOsd(string text, uint duration);
     void hideOsd() { m_engine->hideOsd(); }
 
 protected:
@@ -73,6 +74,30 @@ private:
     StreamPlayerEngine   *m_engine;
     SharedLibrary        *m_engineLib;
     StreamPlayerEngine* (*m_engineCtor)(Page *parent);
+    OsdTimer             *m_osdTimer;
+};
+
+
+/* ---------------------------------------------------------------------------------- */
+
+// #include <pthread.h>
+
+
+class OsdTimer : public Timer
+{
+public:
+    OsdTimer(StreamPlayer *streamPlayer, uint sec = 0);
+
+//     void setTimeout(uint sec) { m_timout = sec; }
+//     void start();
+
+private:
+    virtual void exec();
+
+    StreamPlayer *m_streamPlayer;
+//     uint m_timout;
+//     pthread_t        m_thread;
+//     pthread_attr_t   m_attr;
 };
 
 #endif

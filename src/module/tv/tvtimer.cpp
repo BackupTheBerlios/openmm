@@ -24,16 +24,16 @@
 #include <cstdlib>
 
 
-TimerTime::TimerTime(string time)
+TvTimerTime::TvTimerTime(string time)
 {
     // TODO: range checking
-//     TRACE("TimerTime::TimerTime()");
+//     TRACE("TvTimerTime::TimerTime()");
     m_hour = atoi(time.substr(0, 2).c_str());
     m_min = atoi(time.substr(time.length() - 2).c_str());
 }
 
 
-TimerTime::TimerTime(time_t t)
+TvTimerTime::TvTimerTime(time_t t)
 {
     tm *brokenDownTime = localtime(&t);
     m_hour = brokenDownTime->tm_hour;
@@ -42,7 +42,7 @@ TimerTime::TimerTime(time_t t)
 
 
 string
-TimerTime::str()
+TvTimerTime::str()
 {
     char buf[5];
     sprintf(buf, "%02i%02i", m_hour, m_min);
@@ -50,20 +50,20 @@ TimerTime::str()
 }
 
 
-TimerDay::TimerDay(string day)
+TvTimerDay::TvTimerDay(string day)
 {
     TRACE("TimerDay::TimerDay()");
     m_day = day;
 }
 
 
-TimerDay::TimerDay(time_t t)
+TvTimerDay::TvTimerDay(time_t t)
 {
     m_day = StringUtil::s_time("%Y-%m-%d", t);
 }
 
 
-TvTimer::TvTimer(string name, string id, string channelId, TimerDay *day, TimerTime *start, TimerTime *end, int active, int prio, int resist)
+TvTimer::TvTimer(string name, string id, string channelId, TvTimerDay *day, TvTimerTime *start, TvTimerTime *end, int active, int prio, int resist)
  : Title(name, Title::TvTimerT)
 {
     TRACE("TvTimer::TvTimer(), name: %s, id: %s, channelId: %s", name.c_str(), id.c_str(), channelId.c_str());
@@ -83,10 +83,10 @@ TvTimer::TvTimer(TvChannel *channel, TvProgram *program)
  : Title(program->getText("Name"), Title::TvTimerT)
 {
     m_id = "";  // not yet known, ListManager backend will fill in the right value.
-    m_day = new TimerDay(program->getStart());
+    m_day = new TvTimerDay(program->getStart());
     m_channelId = channel->getText("Signature");
-    m_start = new TimerTime(program->getStart() - 300);  // TODO: get default timer offset from config.
-    m_end = new TimerTime(program->getEnd() + 300);  // TODO: get default timer offset from config.
+    m_start = new TvTimerTime(program->getStart() - 300);  // TODO: get default timer offset from config.
+    m_end = new TvTimerTime(program->getEnd() + 300);  // TODO: get default timer offset from config.
     m_active = 1;
     m_prio = 50;  // TODO: get these default settings from config.
     m_resist = 99;  // TODO: get these default settings from config.

@@ -132,7 +132,7 @@ StreamPlayerXine::closeStream()
 
 
 void
-StreamPlayerXine::showOsd(string text, uint duration)
+StreamPlayerXine::showOsd(string text)
 {
     initOSD();
     TRACE("StreamPlayerXine::showOSD(), with text: %s", text.c_str());

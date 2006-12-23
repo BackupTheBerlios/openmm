@@ -47,11 +47,13 @@ QtPageStack::~QtPageStack()
 }
 
 
-void
-QtPageStack::beforeExit()
+bool
+QtPageStack::suicide()
 {
-    TRACE("QtPageStack::beforeExit()");
+    TRACE("QtPageStack::suicide()");
     m_qtApp->exit();
+    // don't try to kill this thread from outside, as we already did this job with m_qtApp->exit().
+    return true;
 }
 
 
@@ -70,6 +72,7 @@ QtEventFilter::QtEventFilter()
 {
     // map Qt keys to internal Events.
     m_eventMap[Qt::Key_M] = Event::MenuE;
+    m_eventMap[Qt::Key_Return] = Event::EnterE;
     m_eventMap[Qt::Key_Q] = Event::QuitE;
     m_eventMap[Qt::Key_Backspace] = Event::BackE;
     m_eventMap[Qt::Key_Up] = Event::UpE;

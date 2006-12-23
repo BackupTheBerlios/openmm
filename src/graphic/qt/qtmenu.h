@@ -50,11 +50,11 @@ private slots:
 private:
     QListViewItem *findEntry(Page *page);
 
-    QPtrDict<Page> m_entryDict;
-    QListView     *m_list;
-    QListViewItem *m_defaultEntry;
-    QListViewItem *m_selectedEntry;
-    int            m_entryNumber;
+    QPtrDict<Page>   m_entryDict;
+    QListView       *m_list;
+    QListViewItem   *m_defaultEntry;
+    QListViewItem   *m_selectedEntry;
+    int              m_entryNumber;
 };
 
 #endif

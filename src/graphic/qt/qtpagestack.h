@@ -49,7 +49,7 @@ public:
 
 private:
     virtual void run();
-    virtual void beforeExit();
+    virtual bool suicide();
 
     QWidgetStack *m_pageStack;
     QApplication *m_qtApp;

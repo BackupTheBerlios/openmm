@@ -158,8 +158,8 @@ VdrRequest::processReply()
             vector<string> s;
             StringUtil::s_split((*it), ":", s);
             // channelId=1,day=2,start=3,end=4,prio=5,resist=6,title=7
-            TvTimer *tvTimer = new TvTimer(s[7], id, s[1], new TimerDay(s[2]), new TimerTime(s[3]), 
-                new TimerTime(s[4]), active, atoi(s[5].c_str()), atoi(s[6].c_str()));
+            TvTimer *tvTimer = new TvTimer(s[7], id, s[1], new TvTimerDay(s[2]), new TvTimerTime(s[3]), 
+                new TvTimerTime(s[4]), active, atoi(s[5].c_str()), atoi(s[6].c_str()));
             m_list->addTitleEntry(tvTimer);
         }
     }

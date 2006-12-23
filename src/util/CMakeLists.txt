@@ -5,6 +5,7 @@ SET( JAM_UTIL_SRCS
     stringutil.cpp
     sharedlibrary.cpp
     thread.cpp
+    timer.cpp
 )
 
 ADD_LIBRARY(jam-util

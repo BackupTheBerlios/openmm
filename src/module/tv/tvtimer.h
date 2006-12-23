@@ -25,11 +25,11 @@
 #include "tvprogram.h"
 
 
-class TimerTime
+class TvTimerTime
 {
 public:
-    TimerTime(string time);
-    TimerTime(time_t t);
+    TvTimerTime(string time);
+    TvTimerTime(time_t t);
 
     string str();
 
@@ -39,11 +39,11 @@ private:
 };
 
 
-class TimerDay
+class TvTimerDay
 {
 public:
-    TimerDay(string day);
-    TimerDay(time_t t);
+    TvTimerDay(string day);
+    TvTimerDay(time_t t);
 
     string str() { return m_day; }
 
@@ -55,7 +55,7 @@ private:
 class TvTimer : public Title
 {
 public:
-    TvTimer(string name, string id, string channelId, TimerDay *day, TimerTime *start, TimerTime *end,
+    TvTimer(string name, string id, string channelId, TvTimerDay *day, TvTimerTime *start, TvTimerTime *end,
             int active, int prio, int resist);
     TvTimer(TvChannel *channel, TvProgram *program); // TODO: why the heck is TvProgram not recognized as a type?
 
@@ -69,9 +69,9 @@ private:
     // TODO: m_header should be static in the derived class (headers are the same for all TvTimers), to save memory.
     string m_id;
     string m_channelId;
-    TimerDay *m_day;
-    TimerTime *m_start;
-    TimerTime *m_end;
+    TvTimerDay *m_day;
+    TvTimerTime *m_start;
+    TvTimerTime *m_end;
     int m_active;
     int m_prio;
     int m_resist;

@@ -104,7 +104,7 @@ Controler::loop()
 
     // exit all other event loop threads.
     for(vector<Thread*>::iterator i = m_eventLoop.begin(); i != m_eventLoop.end(); ++i) {
-        (*i)->exit();
+        (*i)->kill();
     }
     // cleanup and exit main thread.
     TRACE("Controler::mainLoop() cleaning up and exit");

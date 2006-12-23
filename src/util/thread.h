@@ -22,12 +22,13 @@
 #include <pthread.h>
 
 /**
-Simple thread encapsulation.
+  Simple thread encapsulation.
+  start() starts a thread, which executes the method run().
+  Only one thread is created at one time for each object of class Thread.
+  The attempt to start another thread while run() is still running results in no further action.
 
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
-// TODO: this does basically nothing! 
-//       it's not yet finished, because jam crashes at startup with threading enabled.
 
 class Thread
 {
@@ -37,17 +38,24 @@ public:
 
     void start();
     void wait();
-    void exit();
+    void kill();
+    bool isRunning();
 
 protected:
+    // with start() a thread is created and run() is executed in this thread.
     virtual void run() = 0;
-    virtual void beforeExit();
+    // return true if we kill ourselves in suicide() otherwise return false and
+    // the thread that created the run() thread will try to kill run().
+    virtual bool suicide();
 
 private:
     typedef void*(*ThreadStarter)(void*);
-    static void     *startThread(void **);
+    static  void*  startThread   (void*);
+    void setRunning(bool running);
     pthread_t        m_thread;
     pthread_attr_t   m_attr;
+    bool             m_running;
+    pthread_mutex_t  m_runningMutex;
 };
 
 

@@ -57,18 +57,15 @@ TvPlayer::eventHandler(Event *e)
 {
     TRACE("TvPlayer::eventHandler()");
     switch (e->type()) {
-/*        case Event::Key_I:                               // info
-        case Event::Key_Return:
-        case Event::Key_Enter:
-            //showOsd(m_channelList->getChannelName(getCurrentChannelNumber()) + "   " +
-            //     getCurrentChannelPointer()->getCurrentEpgEntry()->getTitle(), 5000);
-            return true;*/
-        case Event::UpE:                              // channel up
+        case Event::EnterE:                          // info
+            showOsd(getCurrentChannelTitle()->getText("Name"), 5);
+            break;
+        case Event::UpE:                                 // channel up
             setCurrentChannel(getCurrentChannelNumber() + 1);
             stopLiveTv();
             startLiveTv();
             break;
-        case Event::DownE:                            // channel down
+        case Event::DownE:                               // channel down
             setCurrentChannel(getCurrentChannelNumber() - 1);
             stopLiveTv();
             startLiveTv();
@@ -136,7 +133,7 @@ TvPlayer::startLiveTv()
     //play("/data/video/001.vdr");
     play(getCurrentChannelTitle());
     showOsd(getCurrentChannelTitle()->getText("Name") + "   "
-            , 5000);  // TODO: need to get Program (current channel and time)
+            , 5);  // TODO: need to get Program (current channel and time)
 }
 
 

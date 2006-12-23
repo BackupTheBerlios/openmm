@@ -35,7 +35,7 @@ class StreamPlayerEngine
 {
 public:
     //virtual ~StreamPlayerEngine() = 0;
-    virtual void showOsd(string text, uint duration) = 0;
+    virtual void showOsd(string text) = 0;
     virtual void hideOsd() = 0;
     virtual void initStream() = 0;
     virtual void closeStream() = 0;

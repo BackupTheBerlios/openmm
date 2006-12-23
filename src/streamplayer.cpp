@@ -33,6 +33,7 @@ StreamPlayer::StreamPlayer()
     // all events are received by StreamPlayer, none are forwarded to the GUI.
     addEventType(Event::AllE);
     TRACE("StreamPlayer::StreamPlayer() adding event types, we now have: %i", m_eventTypes.size());
+    m_osdTimer = new OsdTimer(this);
 }
 
 
@@ -75,6 +76,7 @@ StreamPlayer::~StreamPlayer()
 {
     delete m_engineLib;
     closeStream();
+    delete m_osdTimer;
 }
 
 
@@ -121,4 +123,52 @@ StreamPlayer::stop()
     TRACE("StreamPlayer::stop()");
     m_isPlaying = false;
     stopStream();
+}
+
+
+void
+StreamPlayer::showOsd(string text, uint duration)
+{
+    TRACE("StreamPlayer::showOsd() with text: %s for %i sec", text.c_str(), duration);
+    m_engine->showOsd(text);
+    m_osdTimer->setTimeout(duration);
+    m_osdTimer->start();   // TODO: this gives a segfault.
+}
+
+
+/* ---------------------------------------------------------------------------------- */
+
+// #include <unistd.h>
+
+
+// void* execThread(void *arg)
+// {
+//     sleep(5);
+//     TRACE("execThread(), should hide OSD now!");
+//     ((StreamPlayer*)arg)->hideOsd();
+// }
+
+
+OsdTimer::OsdTimer(StreamPlayer *streamPlayer, uint sec)
+ : Timer(sec)
+{
+    TRACE("OsdTimer::OsdTimer() set to %i sec", sec);
+//     m_timout = sec;
+    m_streamPlayer = streamPlayer;
+//     pthread_attr_init(&m_attr);
+//     pthread_attr_setdetachstate(&m_attr, PTHREAD_CREATE_JOINABLE);
+}
+
+
+// void
+// OsdTimer::start()
+// {
+//     pthread_create(&m_thread, NULL, execThread, m_streamPlayer);
+// }
+
+
+void
+OsdTimer::exec()
+{
+    m_streamPlayer->hideOsd();
 }

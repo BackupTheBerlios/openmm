@@ -44,7 +44,7 @@ public:
     virtual int height() { return m_frame->height(); }
     virtual unsigned long windowId() { return m_frame->winId(); }
     virtual void* frame() { return (void*) m_frame; }
-    virtual void enterPage() { qDebug("QtPage::enterPage()"); m_frame->setFocus(); }
+    virtual void enterPage();
 
 protected:
     QWidget *m_frame;

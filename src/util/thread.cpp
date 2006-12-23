@@ -19,18 +19,45 @@
 #include "thread.h"
 #include "debug.h"
 
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+
 
 Thread::Thread()
 {
     TRACE("Thread::Thread()");
+    m_running = false;
     pthread_attr_init(&m_attr);
     pthread_attr_setdetachstate(&m_attr, PTHREAD_CREATE_JOINABLE);
+    pthread_mutex_init(&m_runningMutex, 0);
 }
 
 
 Thread::~Thread()
 {
     pthread_attr_destroy(&m_attr);
+    pthread_mutex_destroy(&m_runningMutex);
+}
+
+
+bool
+Thread::isRunning()
+{
+    bool res;
+    pthread_mutex_lock(&m_runningMutex);
+    res = m_running;
+    pthread_mutex_unlock(&m_runningMutex);
+    return res;
+}
+
+
+void
+Thread::setRunning(bool running)
+{
+    pthread_mutex_lock(&m_runningMutex);
+    m_running = running;
+    pthread_mutex_unlock(&m_runningMutex);
 }
 
 
@@ -38,13 +65,32 @@ void
 Thread::start()
 {
     TRACE("Thread::start()");
-    // TODO: uncomment this (and comment out run()), and you get the threads kick ...
-     void **arg;
-     *arg = this;
-     pthread_create(&m_thread, NULL, (ThreadStarter)Thread::startThread, arg);  // TODO: threads won't start ...?
+    // don't start thread again, if already running.
+    // if no thread is running, start can only be called once at a time, that means
+    // that m_running is set when a thread is succesfully created, before any other
+    // attempt is made to start another thread.
+    if (!isRunning()) {
+        void *arg;
+        arg = this;
+        if (pthread_create(&m_thread, NULL, (ThreadStarter)Thread::startThread, arg) != 0) {
+            TRACE("Thread::start() pthread_create() returned with error: %s", strerror(errno));
+        }
+        else {
+            setRunning(true);
+        }
+    }
+}
 
-    // TODO: for now we don't create a thread and execute synchronous!!
-//     run();
+
+// use dirty tricks with the argument parameter of pthread_create(), to call the non-static class method run()
+// as a C-function for use as an argument of pthread_create() we need the static method startThread()
+void*
+Thread::startThread(void *arg)
+{
+    TRACE("Thread::startThread()");
+    // now call the real virtual method run() which is the "threaded method" of all Thread subclasses.
+    ((Thread*) arg)->run();
+    ((Thread*) arg)->setRunning(false);
 }
 
 
@@ -58,27 +104,28 @@ Thread::wait()
 
 
 void
-Thread::exit()
+Thread::kill()
 {
     TRACE("Thread::exit()");
-    beforeExit();
-//     TRACE("Thread::exit() pthread_exit()");
-// //     sleep(1);
-//     pthread_exit(0);  // this hangs in Qt event loop (maybe QApp.exec() does a pthread_exit(), too?)
+    if (!suicide()) {
+        TRACE("Thread::exit() pthread_exit()");
+        if (pthread_kill(m_thread, SIGHUP) != 0) {
+            TRACE("Thread::kill() pthread_kill() returned with error: %s", strerror(errno));
+        }
+        else {
+            setRunning(false);
+        }
+    }
+    else {
+        setRunning(false);  // we believe suicide() was successful.
+    }
 }
 
 
-void
-Thread::beforeExit()
+bool
+Thread::suicide()
 {
-}
-
-
-void*
-Thread::startThread(void **arg)
-{
-    TRACE("Thread::startThread()");
-    (*((Thread**) arg))->run();
+    return false;  // default: we don't commit suicide and execute pthread_kill().
 }
 
 
