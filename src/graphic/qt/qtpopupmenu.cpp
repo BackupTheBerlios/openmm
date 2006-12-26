@@ -18,7 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "qtpopupmenu.h"
+#include "qtstyle.h"
+#include "controler.h"
+#include "popupmenuevent.h"
 #include "debug.h"
+
 
 QtPopupMenu::QtPopupMenu(Page *parent)
 {
@@ -26,7 +30,10 @@ QtPopupMenu::QtPopupMenu(Page *parent)
     m_popupMenu = new QPopupMenu();
     m_parent = parent;
 
-//     connect(m_popupMenu, SIGNAL(activated(int id)), this, SLOT(itemDispatcher(int id)));
+    connect(m_popupMenu, SIGNAL(activated(int)), this, SLOT(selectionHandler(int)));
+
+/* ------------ themeing stuff... ------------ */
+    m_popupMenu->setFont(QtStyle::instance()->mediumFont());
 }
 
 
@@ -35,21 +42,30 @@ QtPopupMenu::~QtPopupMenu()
 }
 
 
-string
+void
 QtPopupMenu::popup()
 {
     TRACE("QtPopupMenu::popup()");
     if (m_parent) {
         QSize center = QSize(m_parent->width(), m_parent->height())/2 - m_popupMenu->sizeHint()/2;
-        // TODO: synchronous execution has the disadvantage that secActivateItem() has no effect 
+        // synchronous execution (with QPopupMenu::exec()) has the disadvantage that secActivateItem() has no effect 
         //       (only after the menu is shown).
-        m_popupMenu->setActiveItem(0);
-        // execute the QPopupMenu synchronously (otherwise use popup() and the signal activated(int id))
-        int id = m_popupMenu->exec(QPoint(center.width() + m_parent->globalPositionX(),
+        m_popupMenu->popup(QPoint(center.width() + m_parent->globalPositionX(),
                                           center.height() + m_parent->globalPositionY()));
-        return m_idMap[id];
+        m_popupMenu->setPaletteForegroundColor(QtStyle::instance()->foregroundColor());
+        m_popupMenu->setPaletteBackgroundColor(QtStyle::instance()->backgroundColorHeader());
+        m_popupMenu->setActiveItem(0);
     }
-    return "";
+}
+
+
+void
+QtPopupMenu::selectionHandler(int id)
+{
+    TRACE("QtPopupMenu::selectionHandler()");
+    Controler::instance()->lockGui();
+    Controler::instance()->queueEvent(new PopupMenuEvent(m_idMap[id]));
+    Controler::instance()->unlockGui();
 }
 
 

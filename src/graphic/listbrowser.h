@@ -24,6 +24,7 @@
 #include "title.h"
 #include "list.h"
 #include "popupmenu.h"
+#include "event.h"
 #include "listbrowserwidget.h"
 
 #include <string>
@@ -51,20 +52,23 @@ public:
 
     virtual void addTitle(Title *title);
     virtual void delTitle(Title *title);
-    virtual Title *getCurrent()                 { return m_listBrowserWidget->getCurrent(); }
-
     virtual void clear();
+    Title *getCurrent()                         { return m_listBrowserWidget->getCurrent(); }
+    int getPosition(Title *title)               { return m_listBrowserWidget->getPosition(title); }
+    void selectEntry(int number)                { return m_listBrowserWidget->selectEntry(number); }
+    void selectEntry(Title *title)              { return m_listBrowserWidget->selectEntry(title); }
+    virtual bool eventHandler(Event *e);
+    bool baseEventHandler(Event *e);
 
 protected:
-    void selectEntry(int number);
-    virtual void selectEntry(Title *title);
-    virtual void addViewColumn(string colName)  { m_listBrowserWidget->addViewColumn(colName); }
+    virtual void addViewColumn(string colName, int colWidth)  { m_listBrowserWidget->addViewColumn(colName, colWidth); }
 
     static string       m_colSeperator;
+    static string       m_colFormatSeperator;
+    static string       m_colLabelSeperator;
     List               *m_list;
     vector<string>      m_cols;
     PopupMenu          *m_popupMenu;
-
     ListBrowserWidget  *m_listBrowserWidget;
 };
 

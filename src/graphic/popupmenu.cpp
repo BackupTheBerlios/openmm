@@ -43,3 +43,14 @@ PopupMenu::popup(Title *title)
     m_title = title;
     popup();
 }
+
+
+bool
+PopupMenu::eventHandler(Event *e)
+{
+    TRACE("PopupMenu::eventHandler()");
+    if (e->type() == Event::PopupE) {
+        itemDispatcher(((PopupMenuEvent*)e)->getItem());
+    }
+    return true;
+}

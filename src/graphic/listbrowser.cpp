@@ -22,8 +22,12 @@
 #include "stringutil.h"
 #include "debug.h"
 
+#include <cstdlib>
+
 
 string ListBrowser::m_colSeperator = ";";
+string ListBrowser::m_colFormatSeperator = "%";
+string ListBrowser::m_colLabelSeperator = "$";
 
 ListBrowser::ListBrowser(string name, string cols, List *list)
  : Page(name)
@@ -37,12 +41,29 @@ ListBrowser::ListBrowser(string name, string cols, List *list)
     m_listBrowserWidget = WidgetFactory::instance()->createListBrowserWidget(this, &m_cols);
 
     for (vector<string>::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
-        addViewColumn(*i);
+        int formatPos = (*i).find(m_colFormatSeperator, 0);
+        string formatString = (*i).substr(formatPos + 1);
+        int labelPos = formatString.find(m_colLabelSeperator, 0);
+        int colWidth = 0;
+        if (formatPos != string::npos) {
+            string colWidthStr = formatString.substr(0, labelPos);
+            if (colWidthStr != "") {
+                colWidth = atoi(colWidthStr.c_str());
+            }
+            (*i) = (*i).substr(0, formatPos);
+        }
+        if (labelPos != string::npos) {
+            addViewColumn(formatString.substr(labelPos + 1), colWidth);
+        }
+        else {
+            addViewColumn(*i, colWidth);
+        }
     }
 
     m_list->addSink(this);
     addEventType(Event::LeftE);
     addEventType(Event::RightE);
+    addEventType(Event::PopupE);
 }
 
 
@@ -83,22 +104,6 @@ ListBrowser::delTitle(Title *title)
 
 
 void
-ListBrowser::selectEntry(int number)
-{
-    TRACE("ListBrowser::selectEntry() number: %i", number);
-    selectEntry(m_list->getTitle(number));
-}
-
-
-void
-ListBrowser::selectEntry(Title *title)
-{
-    TRACE("ListBrowser::selectEntry() from Title");
-    m_listBrowserWidget->selectEntry(title);
-}
-
-
-void
 ListBrowser::clear()
 {
     m_listBrowserWidget->clear();
@@ -114,3 +119,27 @@ ListBrowser::setPopupMenu(PopupMenu *popupMenu)
     m_listBrowserWidget->setPopupMenu(popupMenu);
 }
 
+
+bool
+ListBrowser::eventHandler(Event *e)
+{
+    baseEventHandler(e);
+}
+
+
+bool
+ListBrowser::baseEventHandler(Event *e)
+{
+    TRACE("ListBrowser::baseEventHandler() event: %p, type: %i", e, e->type());
+    switch (e->type()) {
+        case Event::PopupE:
+//             getPopupMenu()->itemDispatcher(((PopupMenuEvent*)e)->getItem());
+            if (getPopupMenu()) {
+                return getPopupMenu()->eventHandler(e);
+            }
+            return true;
+        default:
+            return static_cast<Page*>(this)->baseEventHandler(e);
+//             return ((Page*)(this))->baseEventHandler(e);
+    }
+}

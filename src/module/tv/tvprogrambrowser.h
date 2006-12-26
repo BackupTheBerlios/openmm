@@ -35,9 +35,10 @@ public:
     TvProgramBrowser(ListComposer *list);
     ~TvProgramBrowser();
 
+    virtual bool eventHandler(Event *e);
+    bool baseEventHandler(Event *e);
 
 protected:
-    virtual bool eventHandler(Event *e);
     virtual void enterPage();
 
 private:

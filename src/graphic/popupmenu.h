@@ -24,6 +24,7 @@
 #include "list.h"
 #include "page.h"
 #include "popupmenuwidget.h"
+#include "popupmenuevent.h"
 #include "debug.h"
 
 #include <string>
@@ -35,6 +36,9 @@ Just a simple popup menu.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
+
+// TODO: implement modal mode.
+
 class PopupMenu
 {
 public:
@@ -42,17 +46,16 @@ public:
     PopupMenu() { TRACE("PopupMenu::PopupMenu() - nothing to do"); }
     virtual ~PopupMenu();
 
-    void popup()                                  { itemDispatcher(m_popupMenuWidget->popup()); }
+    void popup()                                  { m_popupMenuWidget->popup(); }
     void popup(Title *title);
     void insertItem(string text)                  { m_popupMenuWidget->insertItem(text); }
     // TODO: itemDispatcher is a bit ugly, but simple, I may change this ...
-
-// TODO: connect the slots to the event handling
-//    virtual void insertItem(string text, unary_function<void, void>) {}
+    //    virtual void insertItem(string text, unary_function<void, void>) {}
 
     void setParent(Page *parent)                  { m_parent = parent; }
     Page* getParent()                             { return m_parent; }
     void setList(List *list)                      { m_list = list; }
+    virtual bool eventHandler(Event *e);
 
 protected:
     virtual void itemDispatcher(string item) = 0;

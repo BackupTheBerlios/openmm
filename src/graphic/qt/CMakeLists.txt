@@ -28,3 +28,9 @@ ADD_LIBRARY(jam-graphic-qt
 )
 
 TARGET_LINK_LIBRARIES(jam-graphic-qt ${QT_LIBRARIES})
+
+INSTALL(
+    TARGETS jam-graphic-qt
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+)

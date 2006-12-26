@@ -31,11 +31,13 @@ class QtStyle{
 public:
     static QtStyle* instance();
 
-    QFont bigFont()             { return m_bigFont; }
-    QFont mediumFont()          { return m_mediumFont; }
-    QFont miniFont()            { return m_miniFont; }
-    QColor backgroundColor()    { return m_backgroundColor; }
-    QColor foregroundColor()    { return m_foregroundColor; }
+    QFont bigFont()                 { return m_bigFont; }
+    QFont mediumFont()              { return m_mediumFont; }
+    QFont miniFont()                { return m_miniFont; }
+    QColor backgroundColor()        { return m_backgroundColor; }
+    QColor foregroundColor()        { return m_foregroundColor; }
+    QColor backgroundColorHeader()  { return m_backgroundColorHeader; }
+    QColor foregroundColorHeader()  { return m_foregroundColorHeader; }
 
 private:
     QtStyle();
@@ -47,6 +49,8 @@ private:
     QFont               m_miniFont;
     QColor              m_backgroundColor;
     QColor              m_foregroundColor;
+    QColor              m_backgroundColorHeader;
+    QColor              m_foregroundColorHeader;
 };
 
 #endif

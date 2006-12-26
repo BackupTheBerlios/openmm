@@ -47,7 +47,7 @@ Tv::Tv() : Module("Television")
     Vdr *listManagerVdr = new Vdr();
     // listManagerVdr supplies timer lists, so go and get them ...
     ListProxy *timerList = new ListProxy(listManagerVdr, Title::TvTimerT);
-    ListBrowser *timerListBrowser = new ListBrowser("Timers", "Id;Name;Channel;Day;Time Start;Time End", timerList);
+    ListBrowser *timerListBrowser = new ListBrowser("Timers", "Id;Day;Channel%$Ch;Time Start%$Start;Name", timerList);
     timerListBrowser->setPopupMenu(new TvTimerPopup(timerListBrowser));
 
     ListProxy *channelList = new ListProxy(listManagerVdr, Title::TvChannelT);

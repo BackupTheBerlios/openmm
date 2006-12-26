@@ -41,10 +41,12 @@ public:
     virtual void addEntry(Title *title) = 0;
     virtual void delEntry(Title *title) = 0;
     virtual Title *getCurrent() = 0;
-    virtual void addViewColumn(string colName) = 0;
+    virtual int getPosition(Title *title) = 0;
+    virtual void addViewColumn(string colName, int colWidth) = 0;
     virtual void setPopupMenu(PopupMenu *popupMenu) = 0;
     virtual void clear() = 0;
     virtual void selectEntry(Title *title) = 0;
+    virtual void selectEntry(int number) = 0;
 };
 
 #endif

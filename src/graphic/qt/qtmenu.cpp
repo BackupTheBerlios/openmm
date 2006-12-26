@@ -25,6 +25,7 @@
 
 #include <qlayout.h>
 #include <qfontdatabase.h>
+#include <qheader.h>
 
 
 QtMenu::QtMenu(Page *parent)
@@ -41,6 +42,8 @@ QtMenu::QtMenu(Page *parent)
     m_list->setPaletteForegroundColor(QtStyle::instance()->foregroundColor());
     m_list->setMargin(100);
     m_list->setFont(QtStyle::instance()->bigFont());
+    m_list->setAllColumnsShowFocus(true);
+    m_list->header()->hide();
 }
 
 

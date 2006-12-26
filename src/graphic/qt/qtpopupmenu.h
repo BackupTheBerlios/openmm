@@ -41,9 +41,12 @@ public:
     QtPopupMenu(Page *parent);
     ~QtPopupMenu();
 
-    virtual string popup();
+    virtual void popup();
     virtual void insertItem(string text) 
             { m_idMap[m_popupMenu->insertItem(text)] =  text; }
+
+private slots:
+    void selectionHandler(int id);
 
 private:
     QPopupMenu          *m_popupMenu;

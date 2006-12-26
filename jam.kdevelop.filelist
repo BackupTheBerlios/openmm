@@ -111,3 +111,5 @@ src/util/timer.h
 src/util/timer.cpp
 src/graphic/qt/qtstyle.h
 src/graphic/qt/qtstyle.cpp
+src/graphic/popupmenuevent.h
+src/graphic/popupmenuevent.cpp

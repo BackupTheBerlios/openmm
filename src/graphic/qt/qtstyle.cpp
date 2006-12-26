@@ -41,14 +41,18 @@ QtStyle::QtStyle()
     TRACE("QtStyle::QtStyle() try to get the default font");
     f = fdb.font(QString::null, QString::null, 0);
     f.setBold(true);
+// TODO: use QFont::setPixelSize() instead of QFont::setPointSize(), as the real size of the display
+//       is unknown.
     f.setPointSize(24);
     m_bigFont = f;
-    f.setPointSize(18);
+    f.setPointSize(20);
     m_mediumFont = f;
-    f.setPointSize(12);
+    f.setPointSize(16);
     m_miniFont = f;
     m_foregroundColor = QColor(Qt::gray);
     m_backgroundColor = QColor(Qt::black);
+    m_foregroundColorHeader = QColor(Qt::yellow);
+    m_backgroundColorHeader = QColor(Qt::gray);
 }
 
 

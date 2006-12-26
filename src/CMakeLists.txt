@@ -47,3 +47,9 @@ TARGET_LINK_LIBRARIES( jam
     pthread
     dl
 )
+
+INSTALL(
+    TARGETS jam
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+)

@@ -23,7 +23,7 @@
 
 
 TvProgramBrowser::TvProgramBrowser(ListComposer *list)
- : ListBrowser("Program Guide", "Id;Left.Name;Start;Right.Name", list)
+ : ListBrowser("Program Guide", "Id;Left.Name%20$Channel;Start;Right.Name%$Program", list)
 {
     m_filter = new TvProgramFilter();
     m_lastAt = 0;
@@ -50,17 +50,25 @@ TvProgramBrowser::enterPage()
 bool
 TvProgramBrowser::eventHandler(Event *e)
 {
-    TRACE("TvProgramBrowser::eventHandler() event: %p, type: %i", e, e->type());
+    baseEventHandler(e);
+}
+
+
+bool
+TvProgramBrowser::baseEventHandler(Event *e)
+{
+    TRACE("TvProgramBrowser::baseEventHandler() event: %p, type: %i", e, e->type());
     time_t at;
     if (getCurrent()->getType() != Title::TitlePairT) { // no program infos, no further action ...
-        TRACE("TvProgramBrowser::eventHandler() Title is not a TitlePair, returning");
+        TRACE("TvProgramBrowser::baseEventHandler() Title is not a TitlePair, returning");
         return true;
     }
 
+    int current = getPosition(getCurrent());
     switch (e->type()) {
         case Event::LeftE:
             if (((TitlePair*)getCurrent())->getRight()) {
-                TRACE("TvProgramBrowser::eventHandler(), Key_Left, Title: %s",
+                TRACE("TvProgramBrowser::baseEventHandler(), Key_Left, Title: %s",
                         ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getStart() - 1;
                 m_lastAt = at;
@@ -74,12 +82,13 @@ TvProgramBrowser::eventHandler(Event *e)
             m_filter->setTime(at);
             clear();
             ((ListComposer*)m_list)->pushFiltered();
+            selectEntry(current);
             return true;
         case Event::RightE:
             if (((TitlePair*)getCurrent())->getRight()) {
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getEnd();
                 m_lastAt = at;
-                TRACE("TvProgramBrowser::eventHandler(), Key_Right, Title: %s",
+                TRACE("TvProgramBrowser::baseEventHandler(), Key_Right, Title: %s",
                         ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
             }
             else {
@@ -88,8 +97,11 @@ TvProgramBrowser::eventHandler(Event *e)
             m_filter->setTime(at);
             clear();
             ((ListComposer*)m_list)->pushFiltered();
+            selectEntry(current);
             return true;
         default:
-            return false;
+            return static_cast<ListBrowser*>(this)->baseEventHandler(e);
+//             return static_cast<ListBrowser*>(this)->eventHandler(e);
+//             return ((ListBrowser*)(this))->eventHandler(e);
     }
 }

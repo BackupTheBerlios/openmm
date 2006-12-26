@@ -28,6 +28,7 @@
 #include <qstringlist.h>
 #include <qptrdict.h>
 #include <string>
+#include <vector>
 using namespace std;
 
 
@@ -52,20 +53,24 @@ public slots:
     virtual void addEntry(Title *title);
     virtual void delEntry(Title *title);
     virtual Title *getCurrent() { return m_titleList[m_listView->currentItem()]; }
+    virtual int getPosition(Title *title);
+    virtual void setPopupMenu(PopupMenu *popupMenu) { m_popupMenu = popupMenu; }
     virtual void clear();
     virtual void selectEntry(Title *title);
-    virtual void setPopupMenu(PopupMenu *popupMenu) { m_popupMenu = popupMenu; }
+    virtual void selectEntry(int number);
 
 protected slots:
     virtual void showPopupMenu(QListViewItem *entry);
-    virtual void addViewColumn(string colName) { m_listView->addColumn(colName); }
+    virtual void addViewColumn(string colName, int colWidth);
 
 private:
     vector<string>         *m_cols;
+    Page                   *m_parent;
     PopupMenu              *m_popupMenu;
     QListView              *m_listView;
     QPtrDict<Title>         m_titleList;
     QPtrDict<QListViewItem> m_itemList;
+    vector<Title*>          m_titleVector;
 };
 
 #endif
