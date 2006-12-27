@@ -113,3 +113,7 @@ src/graphic/qt/qtstyle.h
 src/graphic/qt/qtstyle.cpp
 src/graphic/popupmenuevent.h
 src/graphic/popupmenuevent.cpp
+src/system/hal/hal.h
+src/system/hal/hal.cpp
+src/system/hal/halwatcher.h
+src/system/hal/halwatcher.cpp

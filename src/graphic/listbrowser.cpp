@@ -123,14 +123,7 @@ ListBrowser::setPopupMenu(PopupMenu *popupMenu)
 bool
 ListBrowser::eventHandler(Event *e)
 {
-    baseEventHandler(e);
-}
-
-
-bool
-ListBrowser::baseEventHandler(Event *e)
-{
-    TRACE("ListBrowser::baseEventHandler() event: %p, type: %i", e, e->type());
+    TRACE("ListBrowser::eventHandler() event: %p, type: %i", e, e->type());
     switch (e->type()) {
         case Event::PopupE:
 //             getPopupMenu()->itemDispatcher(((PopupMenuEvent*)e)->getItem());
@@ -139,7 +132,6 @@ ListBrowser::baseEventHandler(Event *e)
             }
             return true;
         default:
-            return static_cast<Page*>(this)->baseEventHandler(e);
-//             return ((Page*)(this))->baseEventHandler(e);
+            return Page::eventHandler(e);
     }
 }

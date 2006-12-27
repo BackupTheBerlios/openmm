@@ -169,6 +169,9 @@ VdrRequest::processReply()
         {
 //             TRACE("VdrRequest::processReply() line: %s", (*it).c_str());
             uint pos = (*it).find(' ', 4);
+            if (pos == string::npos) {
+                continue;
+            }
             string id = (*it).substr(4, pos - 4);
             pos++;
             string day = (*it).substr(pos, 8);

@@ -58,7 +58,6 @@ public:
     void selectEntry(int number)                { return m_listBrowserWidget->selectEntry(number); }
     void selectEntry(Title *title)              { return m_listBrowserWidget->selectEntry(title); }
     virtual bool eventHandler(Event *e);
-    bool baseEventHandler(Event *e);
 
 protected:
     virtual void addViewColumn(string colName, int colWidth)  { m_listBrowserWidget->addViewColumn(colName, colWidth); }

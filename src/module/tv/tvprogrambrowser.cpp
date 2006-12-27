@@ -50,17 +50,10 @@ TvProgramBrowser::enterPage()
 bool
 TvProgramBrowser::eventHandler(Event *e)
 {
-    baseEventHandler(e);
-}
-
-
-bool
-TvProgramBrowser::baseEventHandler(Event *e)
-{
-    TRACE("TvProgramBrowser::baseEventHandler() event: %p, type: %i", e, e->type());
+    TRACE("TvProgramBrowser::eventHandler() event: %p, type: %i", e, e->type());
     time_t at;
     if (getCurrent()->getType() != Title::TitlePairT) { // no program infos, no further action ...
-        TRACE("TvProgramBrowser::baseEventHandler() Title is not a TitlePair, returning");
+        TRACE("TvProgramBrowser::eventHandler() Title is not a TitlePair, returning");
         return true;
     }
 
@@ -68,7 +61,7 @@ TvProgramBrowser::baseEventHandler(Event *e)
     switch (e->type()) {
         case Event::LeftE:
             if (((TitlePair*)getCurrent())->getRight()) {
-                TRACE("TvProgramBrowser::baseEventHandler(), Key_Left, Title: %s",
+                TRACE("TvProgramBrowser::eventHandler(), Key_Left, Title: %s",
                         ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getStart() - 1;
                 m_lastAt = at;
@@ -88,7 +81,7 @@ TvProgramBrowser::baseEventHandler(Event *e)
             if (((TitlePair*)getCurrent())->getRight()) {
                 at = ((TvProgram*)((TitlePair*)getCurrent())->getRight())->getEnd();
                 m_lastAt = at;
-                TRACE("TvProgramBrowser::baseEventHandler(), Key_Right, Title: %s",
+                TRACE("TvProgramBrowser::eventHandler(), Key_Right, Title: %s",
                         ((TitlePair*)getCurrent())->getRight()->getText("Name").c_str());
             }
             else {
@@ -100,8 +93,6 @@ TvProgramBrowser::baseEventHandler(Event *e)
             selectEntry(current);
             return true;
         default:
-            return static_cast<ListBrowser*>(this)->baseEventHandler(e);
-//             return static_cast<ListBrowser*>(this)->eventHandler(e);
-//             return ((ListBrowser*)(this))->eventHandler(e);
+            return ListBrowser::eventHandler(e);
     }
 }

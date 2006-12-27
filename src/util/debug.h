@@ -16,4 +16,11 @@ extern void TRACE( const char *, ... );
 // // #define TRACE(args) 
 // // #endif  // __DEBUG__
 
+
+// extern void traceprint( const char *, ... );
+// #define TRACE(args) traceprint( #args )
+
+
+
+
 #endif  // DEBUG_H

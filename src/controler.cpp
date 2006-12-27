@@ -22,6 +22,7 @@
 #include "widgetfactory.h"
 #include "streamplayer.h"
 #include "tv.h"
+#include "halwatcher.h"
 #include "debug.h"
 
 
@@ -72,6 +73,10 @@ Controler::init(int argc, char **argv)
 
     TRACE("Adding TV module.");
     addModule(new Tv());
+
+    TRACE("Adding HalWatcher.");
+    HalWatcher *halWatcher = new HalWatcher();
+    addEventLoop(halWatcher);
 
     TRACE("Showing Main Menu.");
     mainMenuShow();

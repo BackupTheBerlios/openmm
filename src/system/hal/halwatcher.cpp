@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,32 +16,36 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVPROGRAMBROWSER_H
-#define TVPROGRAMBROWSER_H
-
-#include "listbrowser.h"
-#include "listcomposer.h"
-#include "tvprogramfilter.h"
-#include "event.h"
+#include "halwatcher.h"
+#include "hal.h"
+#include "debug.h"
 
 
-/**
-	@author Jörg Bakker <joerg@hakker.de>
-*/
-class TvProgramBrowser : public ListBrowser
+HalWatcher::HalWatcher()
+ : Thread()
 {
-public:
-    TvProgramBrowser(ListComposer *list);
-    ~TvProgramBrowser();
+}
 
-    virtual bool eventHandler(Event *e);
 
-protected:
-    virtual void enterPage();
+HalWatcher::~HalWatcher()
+{
+}
 
-private:
-    TvProgramFilter *m_filter;
-    time_t           m_lastAt;
-};
 
-#endif
+bool
+HalWatcher::suicide()
+{
+    TRACE("HalWatcher::suicide()");
+    m_dispatcher.leave();
+    return true;
+}
+
+void
+HalWatcher::run()
+{
+    DBus::default_dispatcher = &m_dispatcher;
+    DBus::Connection conn = DBus::Connection::SystemBus();
+    HalManager hal(conn);
+    TRACE("HalWatcher::run() starting event loop!!!");
+    m_dispatcher.enter();
+}

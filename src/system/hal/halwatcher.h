@@ -1,11 +1,10 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Jörg Bakker   				   *
- *   joerg@hakker.de   							   *
+ *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   it under the terms of the GNU General Public License version 2 (not   *
+ *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -17,32 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TVPROGRAMBROWSER_H
-#define TVPROGRAMBROWSER_H
+#ifndef HALWATCHER_H
+#define HALWATCHER_H
 
-#include "listbrowser.h"
-#include "listcomposer.h"
-#include "tvprogramfilter.h"
-#include "event.h"
+#include "thread.h"
 
+#include <dbus-c++/dbus.h>
 
 /**
-	@author Jörg Bakker <joerg@hakker.de>
+  Event loop that keeps track of all devices. 
+
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
-class TvProgramBrowser : public ListBrowser
+class HalWatcher : public Thread
 {
 public:
-    TvProgramBrowser(ListComposer *list);
-    ~TvProgramBrowser();
-
-    virtual bool eventHandler(Event *e);
-
-protected:
-    virtual void enterPage();
+    HalWatcher();
+    ~HalWatcher();
 
 private:
-    TvProgramFilter *m_filter;
-    time_t           m_lastAt;
+    virtual void run();
+    virtual bool suicide();
+
+    DBus::BusDispatcher m_dispatcher;
 };
 
 #endif

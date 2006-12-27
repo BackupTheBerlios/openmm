@@ -1,52 +1,28 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="15" >
-  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtstyle.h" >
-   <View0 line="51" Type="Source" />
+ <DocsAndViews NumberOfDocuments="7" >
+  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/device.h" >
+   <View0 line="37" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtstyle.cpp" >
-   <View0 line="52" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/device.cpp" >
+   <View0 line="39" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtmenu.h" >
-   <View0 line="17" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.h" >
+   <View0 line="39" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtmenu.cpp" >
-   <View0 line="44" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.cpp" >
+   <View0 line="133" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtlistbrowser.h" >
-   <View0 Type="Source" />
+  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.h" >
+   <View0 line="30" Type="Source" />
   </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtlistbrowser.cpp" >
-   <View0 line="49" Type="Source" />
+  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
+   <View0 line="78" Type="Source" />
   </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpopupmenu.h" >
-   <View0 line="53" Type="Source" />
+  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tv.cpp" >
+   <View0 line="39" Type="Source" />
   </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtpopupmenu.cpp" >
-   <View0 line="22" Type="Source" />
-  </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/event.h" >
-   <View0 line="31" Type="Source" />
-  </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/listbrowser.cpp" >
-   <View0 line="123" Type="Source" />
-  </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/listbrowser.h" >
-   <View0 line="26" Type="Source" />
-  </Doc10>
-  <Doc11 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/listbrowserwidget.h" >
-   <View0 line="35" Type="Source" />
-  </Doc11>
-  <Doc12 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.h" >
-   <View0 line="34" Type="Source" />
-  </Doc12>
-  <Doc13 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.cpp" >
-   <View0 line="93" Type="Source" />
-  </Doc13>
-  <Doc14 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/page.h" >
-   <View0 line="53" Type="Source" />
-  </Doc14>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

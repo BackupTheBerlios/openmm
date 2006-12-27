@@ -51,7 +51,6 @@ public:
     virtual void showUp();
     virtual void exitPage()              { TRACE("Page::exitPage()"); }
     virtual bool eventHandler(Event *e)  { return false; }
-    bool baseEventHandler(Event *e)      { return false; };
 
     // widget specific part of the class
     virtual int globalPositionX()        { return m_pageWidget->globalPositionX(); }
