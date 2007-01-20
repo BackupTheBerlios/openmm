@@ -41,6 +41,15 @@ public:
     virtual void closeStream() = 0;
     virtual void playStream(Mrl *mrl) = 0;
     virtual void stopStream() = 0;
+    virtual void pauseStream() = 0;
+    virtual void forwardStream() = 0;
+    virtual void rewindStream() = 0;
+    virtual void zoomStream(bool in) = 0;
+    virtual void left() = 0;
+    virtual void right() = 0;
+    virtual void up() = 0;
+    virtual void down() = 0;
+    virtual void select() = 0;
 };
 
 #endif

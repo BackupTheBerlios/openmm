@@ -117,3 +117,11 @@ src/system/hal/hal.h
 src/system/hal/hal.cpp
 src/system/hal/halwatcher.h
 src/system/hal/halwatcher.cpp
+src/system/hal/haldeviceevent.h
+src/system/hal/haldeviceevent.cpp
+src/volumelistmanager.h
+src/volumelistmanager.cpp
+src/system/lirc/lircwatcher.h
+src/system/lirc/lircwatcher.cpp
+src/module/disc/dvdplayer.h
+src/module/disc/dvdplayer.cpp

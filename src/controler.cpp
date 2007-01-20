@@ -23,8 +23,16 @@
 #include "streamplayer.h"
 #include "tv.h"
 #include "halwatcher.h"
+#include "volumelistmanager.h"
+#include "haldeviceevent.h"
+#include "lircwatcher.h"
+#include "listproxy.h"
+#include "listbrowser.h"
 #include "debug.h"
 
+#include "tvrecplayer.h"
+#include "tvrecpopup.h"
+#include "dvdplayer.h"
 
 Controler *Controler::m_instance = 0;
 
@@ -68,8 +76,7 @@ Controler::init(int argc, char **argv)
 
     // Decide, which implementation of StreamPlayer to use.
     TRACE("Adding Xine StreamPlayer.");
-    m_streamPlayer = StreamPlayer::instance();
-    m_streamPlayer->setEngine(StreamPlayer::EngineXine);
+    StreamPlayer::instance()->setEngine(StreamPlayer::EngineXine);
 
     TRACE("Adding TV module.");
     addModule(new Tv());
@@ -77,6 +84,10 @@ Controler::init(int argc, char **argv)
     TRACE("Adding HalWatcher.");
     HalWatcher *halWatcher = new HalWatcher();
     addEventLoop(halWatcher);
+
+    TRACE("Adding LircWatcher.");
+    LircWatcher *lircWatcher = new LircWatcher();
+    addEventLoop(lircWatcher);
 
     TRACE("Showing Main Menu.");
     mainMenuShow();
@@ -152,10 +163,38 @@ Controler::dispatchEvents()
             TRACE("Controler::dispatchEvents() going back");
             goBack();
             break;
-        // all none global events are forwarded to the current visible Page.
+        case Event::DeviceE: {
+            TRACE("Controler::dispatchEvents() device added");
+            if (((HalDeviceEvent*)e)->deviceType() == HalDeviceEvent::VolumeT) {
+                VolumeListManager *volMan = new VolumeListManager(((HalDeviceEvent*)e)->getPath());
+                ListProxy *volumeList = new ListProxy(volMan);
+                ListBrowser *volumeListBrowser = new ListBrowser("Volume", "Id;Name%$File Name", volumeList);
+                TvRecPlayer *volumePlayer = new TvRecPlayer(volumeList);
+                volumeListBrowser->setPopupMenu(new TvRecPopup(volumePlayer, volumeListBrowser));
+                mainMenuAddEntry(volumeListBrowser);
+                if (((HalDeviceEvent*)e)->hotplug()) {
+                    volumeListBrowser->showUp();
+                }
+            }
+            else if (((HalDeviceEvent*)e)->deviceType() == HalDeviceEvent::DvdT) {
+                DvdPlayer *dvdPlayer = new DvdPlayer();
+                if (((HalDeviceEvent*)e)->hotplug()) {
+                    dvdPlayer->showUp();
+                }
+            }
+            break;
+            }
+        // all none global events are forwarded to the current visible Page or to the GUI toolkit.
         default:
-            TRACE("Controler::dispatchEvents() forward event to page: %p", getCurrentPage());
-            getCurrentPage()->eventHandler(e);
+            // TODO: if event comes from GUI toolkit, hasEventType() was already called once before.
+            if (getCurrentPage()->hasEventType(e->type())) {
+                TRACE("Controler::dispatchEvents() forward event to page: %p", getCurrentPage());
+                getCurrentPage()->eventHandler(e);
+            }
+            else {
+                TRACE("Controler::dispatchEvents() forward event to GUI toolkit");
+                pageStack()->queueEvent(e);
+            }
         }
         m_eventQueue.pop();
         delete e;

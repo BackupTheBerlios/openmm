@@ -16,41 +16,33 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "halwatcher.h"
-#include "hal.h"
-#include "debug.h"
+#ifndef LIRCWATCHER_H
+#define LIRCWATCHER_H
 
+#include "thread.h"
+#include "event.h"
 
-HalWatcher::HalWatcher()
- : Thread()
+#include <lirc/lirc_client.h>
+
+#include <map>
+using namespace std;
+
+/**
+  Event loop that keeps track of infrared commands. 
+
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
+*/
+class LircWatcher : public Thread
 {
-}
+public:
+    LircWatcher();
+    ~LircWatcher();
 
+private:
+    virtual void run();
 
-HalWatcher::~HalWatcher()
-{
-}
+    lirc_config *m_config;
+    map<string, Event::EventT> m_eventMap;
+};
 
-
-bool
-HalWatcher::suicide()
-{
-    TRACE("HalWatcher::suicide()");
-    m_dispatcher.leave();
-    return true;
-}
-
-void
-HalWatcher::run()
-{
-    DBus::default_dispatcher = &m_dispatcher;
-    DBus::Connection conn = DBus::Connection::SystemBus();
-    HalManager hal(conn);
-    TRACE("HalWatcher::run() starting event loop!!!");
-    try {
-        m_dispatcher.enter();
-    }
-    catch(DBus::Error err) {
-        TRACE("HalWatcher::run() DBus error occured: %s", err.what());
-    }
-}
+#endif

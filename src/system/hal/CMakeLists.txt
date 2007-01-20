@@ -1,5 +1,6 @@
 SET( JAM_SYSTEM_HAL_SRCS
     hal.cpp
+    haldeviceevent.cpp
     halwatcher.cpp
 )
 

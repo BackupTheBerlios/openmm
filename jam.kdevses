@@ -1,28 +1,40 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="7" >
-  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/device.h" >
-   <View0 line="37" Type="Source" />
+ <DocsAndViews NumberOfDocuments="11" >
+  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/event.h" >
+   <View0 line="0" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/backend/device.cpp" >
-   <View0 line="39" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
+   <View0 line="164" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.h" >
-   <View0 line="39" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.cpp" >
+   <View0 line="271" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.cpp" >
-   <View0 line="133" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.h" >
+   <View0 line="77" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.h" >
-   <View0 line="30" Type="Source" />
-  </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
-   <View0 line="78" Type="Source" />
-  </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tv.cpp" >
+  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/haldeviceevent.h" >
    <View0 line="39" Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/haldeviceevent.cpp" >
+   <View0 line="27" Type="Source" />
+  </Doc5>
+  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.h" >
+   <View0 line="64" Type="Source" />
   </Doc6>
+  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/menu.h" >
+   <View0 line="1" Type="Source" />
+  </Doc7>
+  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/menu.cpp" >
+   <View0 line="0" Type="Source" />
+  </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.cpp" >
+   <View0 line="54" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.cpp" >
+   <View0 line="86" Type="Source" />
+  </Doc10>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

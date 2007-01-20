@@ -31,6 +31,8 @@
 #include <map>
 using namespace std;
 
+class QtEventFilter;
+
 /**
 @author Jörg Bakker
 */
@@ -47,24 +49,30 @@ public:
     void lockGui() { m_qtApp->lock(); }
     void unlockGui() { m_qtApp->unlock(); }
 
+    void queueEvent(Event *e);
+
 private:
     virtual void run();
     virtual bool suicide();
 
-    QWidgetStack *m_pageStack;
-    QApplication *m_qtApp;
+    QWidgetStack    *m_pageStack;
+    QApplication    *m_qtApp;
+    QtEventFilter   *m_eventFilter;
 };
 
 
 class QtEventFilter : public QObject
 {
 public:
-    QtEventFilter::QtEventFilter();
+    QtEventFilter();
+
+    int qtEvent(Event::EventT eventT);
 
 private:
     virtual bool eventFilter(QObject *o, QEvent *e);
 
     map<int, Event::EventT> m_eventMap;
+    map<Event::EventT, int> m_reverseEventMap;
 };
 
 #endif

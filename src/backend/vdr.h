@@ -41,6 +41,7 @@ public:
 
     virtual bool pushUpdates() { return false; }  // there's no way to push updates with SVDRP.
     virtual void fill(List *list, Title::TitleT type);
+
     virtual void addProxyTitle(Title *title);
     virtual void delProxyTitle(Title *title);
 };

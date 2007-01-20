@@ -32,6 +32,8 @@ double StreamPlayerXine::m_pixel_aspect = 0.0;
 
 
 StreamPlayerXine::StreamPlayerXine(Page *parent)
+ : m_pause(false),
+   m_currentZoom(100)
 {
     TRACE("StreamPlayerXine::StreamPlayerXine()");
     m_parent = parent;
@@ -106,7 +108,7 @@ StreamPlayerXine::initStream()
     audioDriver = xine_open_audio_driver(xineEngine, audioDriverName, NULL);
 
     TRACE("StreamPlayerXine::initStream() creating new xine stream.");
-    xineStream = xine_stream_new(xineEngine, audioDriver, videoDriver);
+    m_xineStream = xine_stream_new(xineEngine, audioDriver, videoDriver);
 
     m_OSD = NULL;
     // TODO: implement timer without Qt
@@ -118,8 +120,8 @@ void
 StreamPlayerXine::closeStream()
 {
     TRACE("StreamPlayerXine::closeStream()");
-    xine_close(xineStream);
-    xine_dispose(xineStream);
+    xine_close(m_xineStream);
+    xine_dispose(m_xineStream);
     xine_close_audio_driver(xineEngine, audioDriver);
     xine_close_video_driver(xineEngine, videoDriver);
     xine_exit(xineEngine);
@@ -164,7 +166,7 @@ StreamPlayerXine::initOSD()
 //         m_OSDTimer.stop();
 
     m_marginOSD = m_parent->height() / 10;
-    m_OSD = xine_osd_new(xineStream, m_marginOSD, (int)(m_parent->height() * 0.75), m_parent->width() - 2*m_marginOSD,
+    m_OSD = xine_osd_new(m_xineStream, m_marginOSD, (int)(m_parent->height() * 0.75), m_parent->width() - 2*m_marginOSD,
                         (int)((m_parent->height() * 0.25)) - m_marginOSD);
     if (!m_OSD)
         TRACE("StreamPlayerXine::initOSD(), initialization of OSD failed");
@@ -219,15 +221,15 @@ StreamPlayerXine::playStream(Mrl *mrl)
         // TODO: loop over all files.
         xineMrl = mrl->getProtocol() + mrl->getServer() + mrl->getPath() + "/" + mrl->getFiles()[0];
         TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.c_str());
-        //xine_open(xineStream, xineMrl.utf8());
-        xine_open(xineStream, xineMrl.c_str());
-        xine_play(xineStream, 0, 0);
+        //xine_open(m_xineStream, xineMrl.utf8());
+        xine_open(m_xineStream, xineMrl.c_str());
+        xine_play(m_xineStream, 0, 0);
     }
     else {
         TRACE("StreamPlayerXine::play() mrl: %s", xineMrl.c_str());
-        //xine_open(xineStream, xineMrl.utf8());
-        xine_open(xineStream, xineMrl.c_str());
-        xine_play(xineStream, 0, 0);
+        //xine_open(m_xineStream, xineMrl.utf8());
+        xine_open(m_xineStream, xineMrl.c_str());
+        xine_play(m_xineStream, 0, 0);
     }
 }
 
@@ -235,9 +237,137 @@ StreamPlayerXine::playStream(Mrl *mrl)
 void
 StreamPlayerXine::stopStream()
 {
-    TRACE("StreamPlayerXine::stop()");
-    xine_stop(xineStream);
-    xine_close(xineStream);
+    TRACE("StreamPlayerXine::stopStream()");
+    xine_stop(m_xineStream);
+    xine_close(m_xineStream);
+}
+
+
+void
+StreamPlayerXine::pauseStream()
+{
+    if (m_pause) {
+        TRACE("StreamPlayerXine::pauseStream() setting speed to normal");
+        xine_set_param(m_xineStream, XINE_PARAM_SPEED, XINE_SPEED_NORMAL);
+//         xine_play(m_xineStream, m_posStream, 0);
+    }
+    else {
+        TRACE("StreamPlayerXine::pauseStream() setting speed to pause");
+        xine_set_param(m_xineStream, XINE_PARAM_SPEED, XINE_SPEED_PAUSE);
+//         savePosition();
+    }
+    m_pause = !m_pause;
+}
+
+
+void
+StreamPlayerXine::zoomStream(bool in)
+{
+    if (in && (m_currentZoom + 5) <= XINE_VO_ZOOM_MAX) {
+        m_currentZoom += 5;
+    }
+    else if (!in && (m_currentZoom - 5) >= 100) {
+        m_currentZoom -= 5;
+    }
+    xine_set_param(m_xineStream, XINE_PARAM_VO_ZOOM_X, m_currentZoom);
+    xine_set_param(m_xineStream, XINE_PARAM_VO_ZOOM_Y, m_currentZoom);
+}
+
+
+void
+StreamPlayerXine::forwardStream()
+{
+    TRACE("StreamPlayerXine::forwardStream()");
+    if (!isSeekable()) {
+        TRACE("StreamPlayerXine::forwardStream() stream not seekable");
+        return;
+    }
+//     xine_trick_mode(m_xineStream, XINE_TRICK_MODE_FAST_FORWARD, 2);
+    xine_set_param(m_xineStream, XINE_PARAM_SPEED, XINE_SPEED_FAST_4);
+
+}
+
+
+void
+StreamPlayerXine::rewindStream()
+{
+    TRACE("StreamPlayerXine::rewindStream()");
+    if (!isSeekable()) {
+        TRACE("StreamPlayerXine::rewindStream() stream not seekable");
+        return;
+    }
+//     xine_trick_mode(m_xineStream, XINE_TRICK_MODE_FAST_REWIND, 2);
+}
+
+
+bool
+StreamPlayerXine::isSeekable()
+{
+    return (bool)xine_get_stream_info(m_xineStream, XINE_STREAM_INFO_SEEKABLE);
+}
+
+
+void
+StreamPlayerXine::savePosition()
+{
+    if (xine_get_pos_length(m_xineStream, &m_posStream, &m_posTime, &m_lengthStream) == 0) {
+        TRACE("StreamPlayerXine::savePosition() could not get position");
+    }
+}
+
+
+void
+StreamPlayerXine::left()
+{
+    xine_event_t xev;
+    xev.data = NULL;
+    xev.data_length = 0;
+    xev.type = XINE_EVENT_INPUT_LEFT;
+    xine_event_send(m_xineStream, &xev);
+}
+
+
+void
+StreamPlayerXine::right()
+{
+    xine_event_t xev;
+    xev.data = NULL;
+    xev.data_length = 0;
+    xev.type = XINE_EVENT_INPUT_RIGHT;
+    xine_event_send(m_xineStream, &xev);
+}
+
+
+void
+StreamPlayerXine::up()
+{
+    xine_event_t xev;
+    xev.data = NULL;
+    xev.data_length = 0;
+    xev.type = XINE_EVENT_INPUT_UP;
+    xine_event_send(m_xineStream, &xev);
+}
+
+
+void
+StreamPlayerXine::down()
+{
+    xine_event_t xev;
+    xev.data = NULL;
+    xev.data_length = 0;
+    xev.type = XINE_EVENT_INPUT_DOWN;
+    xine_event_send(m_xineStream, &xev);
+}
+
+
+void
+StreamPlayerXine::select()
+{
+    xine_event_t xev;
+    xev.data = NULL;
+    xev.data_length = 0;
+    xev.type = XINE_EVENT_INPUT_SELECT;
+    xine_event_send(m_xineStream, &xev);
 }
 
 

@@ -144,6 +144,7 @@ List::count()
 void
 List::fill()
 {
+    TRACE("List::fill()");
     clear();
     fillList();
 }

@@ -16,41 +16,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "halwatcher.h"
-#include "hal.h"
+#include "volumelistmanager.h"
+#include "directory.h"
+#include "title.h"
+#include "mrl.h"
 #include "debug.h"
 
+#include <vector>
 
-HalWatcher::HalWatcher()
- : Thread()
+
+VolumeListManager::VolumeListManager(string path)
+ : ListManager(),
+    m_path(path)
 {
 }
 
 
-HalWatcher::~HalWatcher()
+VolumeListManager::~VolumeListManager()
 {
 }
 
-
-bool
-HalWatcher::suicide()
-{
-    TRACE("HalWatcher::suicide()");
-    m_dispatcher.leave();
-    return true;
-}
 
 void
-HalWatcher::run()
+VolumeListManager::fill(List *list, Title::TitleT type)
 {
-    DBus::default_dispatcher = &m_dispatcher;
-    DBus::Connection conn = DBus::Connection::SystemBus();
-    HalManager hal(conn);
-    TRACE("HalWatcher::run() starting event loop!!!");
-    try {
-        m_dispatcher.enter();
-    }
-    catch(DBus::Error err) {
-        TRACE("HalWatcher::run() DBus error occured: %s", err.what());
+    TRACE("VolumeListManager::fill() reading path: %s", m_path.c_str());
+    Directory d(m_path);
+    vector<string> entries = d.entryList("*");
+    for (vector<string>::iterator i = entries.begin(); i != entries.end(); ++i) {
+        TRACE("VolumeListManager::fill() adding: %s", (*i).c_str());
+        Title * t = new Title(*i, Title::FileT);
+        t->setMrl(new Mrl("file://", m_path + "/" + (*i)));
+        list->addTitleEntry(t);
     }
 }

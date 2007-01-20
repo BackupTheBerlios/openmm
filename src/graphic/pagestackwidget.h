@@ -21,6 +21,7 @@
 #define PAGESTACKWIDGET_H
 
 #include "page.h"
+#include "event.h"
 
 /**
 Interface for toolkit specific implementation of PageStackWidget.
@@ -36,6 +37,7 @@ public:
     virtual void* frame()  = 0;
     virtual void lockGui() = 0;
     virtual void unlockGui() = 0;
+    virtual void queueEvent(Event *e) = 0;
 };
 
 #endif

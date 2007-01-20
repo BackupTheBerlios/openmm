@@ -35,7 +35,8 @@ QtPageStack::QtPageStack()
     m_pageStack->resize(720, 576);
     m_qtApp->setMainWidget(m_pageStack);
     m_qtApp->setOverrideCursor(Qt::BlankCursor);
-    m_qtApp->installEventFilter(new QtEventFilter());
+    m_eventFilter = new QtEventFilter();
+    m_qtApp->installEventFilter(m_eventFilter);
     Controler::instance()->addEventLoop(this);
 }
 
@@ -68,6 +69,15 @@ QtPageStack::run()
 }
 
 
+void
+QtPageStack::queueEvent(Event *e)
+{
+    TRACE("QtPageStack::queueEvent()");
+    QKeyEvent * qKeyEvent = new QKeyEvent(QEvent::KeyPress, m_eventFilter->qtEvent(e->type()), 0, Qt::NoButton);
+    m_qtApp->postEvent(m_qtApp->focusWidget(), qKeyEvent);
+}
+
+
 QtEventFilter::QtEventFilter()
 {
     // map Qt keys to internal Events.
@@ -89,6 +99,27 @@ QtEventFilter::QtEventFilter()
     m_eventMap[Qt::Key_7] = Event::Key7E;
     m_eventMap[Qt::Key_8] = Event::Key8E;
     m_eventMap[Qt::Key_9] = Event::Key9E;
+    m_eventMap[Qt::Key_Space] = Event::StartE;
+    m_eventMap[Qt::Key_S] = Event::StopE;
+    m_eventMap[Qt::Key_P] = Event::PauseE;
+    m_eventMap[Qt::Key_PageUp] = Event::ForwardE;
+    m_eventMap[Qt::Key_PageDown] = Event::RewindE;
+    m_eventMap[Qt::Key_Plus] = Event::PlusE;
+    m_eventMap[Qt::Key_Minus] = Event::MinusE;
+
+
+    // reverse mapping for events that are forwarded
+    // to the Qt event loop (from lirc for example).
+    for (map<int, Event::EventT>::iterator i = m_eventMap.begin(); i != m_eventMap.end(); ++i) {
+        m_reverseEventMap[(*i).second] = (*i).first;
+    }
+}
+
+
+int
+QtEventFilter::qtEvent(Event::EventT eventT)
+{
+    return m_reverseEventMap.find(eventT)->second;
 }
 
 

@@ -70,6 +70,7 @@ QtListBrowser::enterPage()
 void
 QtListBrowser::addViewColumn(string colName, int colWidth)
 {
+    TRACE("QtListBrowser::addViewColumn() with name: %s", colName.c_str());
     if (colWidth == 0) {
         m_listView->addColumn(colName);
     }
@@ -86,7 +87,7 @@ QtListBrowser::addEntry(Title *title)
     if (!title) {
         return;
     }
-    //TRACE("QtListBrowser::addEntry() with name: %s", title->getText("Name").c_str());
+//     TRACE("QtListBrowser::addEntry() with name: %s", title->getText("Name").c_str());
     QListViewItem *entry = new QListViewItem(m_listView);
     m_titleList.insert(entry, title);
     m_itemList.insert(title, entry);

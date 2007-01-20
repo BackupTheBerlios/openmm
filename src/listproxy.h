@@ -33,7 +33,7 @@ using namespace std;
 class ListProxy : public List
 {
 public:
-    ListProxy(ListManager *listManager, Title::TitleT type);
+    ListProxy(ListManager *listManager, Title::TitleT type = Title::AnyT);
     ~ListProxy();
 
     virtual void update();

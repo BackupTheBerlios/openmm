@@ -16,41 +16,33 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "halwatcher.h"
-#include "hal.h"
-#include "debug.h"
+#ifndef VOLUMELISTMANAGER_H
+#define VOLUMELISTMANAGER_H
 
+#include "listmanager.h"
 
-HalWatcher::HalWatcher()
- : Thread()
+#include <string>
+using namespace std;
+
+/**
+Reads the files on a volume and makes Titles for a List out of them.
+
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
+*/
+class VolumeListManager : public ListManager
 {
-}
+public:
+    VolumeListManager(string path);
+    ~VolumeListManager();
 
+    virtual bool pushUpdates() { return false; }  // Titles can only be pushed if the filesystem changes ...
+    virtual void fill(List *list, Title::TitleT type);
 
-HalWatcher::~HalWatcher()
-{
-}
+    virtual void addProxyTitle(Title *title) {}  // we don't change the filesystem, just read from it.
+    virtual void delProxyTitle(Title *title) {}  // we don't change the filesystem, just read from it.
 
+private:
+    string m_path;
+};
 
-bool
-HalWatcher::suicide()
-{
-    TRACE("HalWatcher::suicide()");
-    m_dispatcher.leave();
-    return true;
-}
-
-void
-HalWatcher::run()
-{
-    DBus::default_dispatcher = &m_dispatcher;
-    DBus::Connection conn = DBus::Connection::SystemBus();
-    HalManager hal(conn);
-    TRACE("HalWatcher::run() starting event loop!!!");
-    try {
-        m_dispatcher.enter();
-    }
-    catch(DBus::Error err) {
-        TRACE("HalWatcher::run() DBus error occured: %s", err.what());
-    }
-}
+#endif

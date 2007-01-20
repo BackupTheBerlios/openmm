@@ -21,6 +21,7 @@
 #define PAGESTACK_H
 
 #include "page.h"
+#include "event.h"
 #include "pagestackwidget.h"
 
 /**
@@ -39,6 +40,7 @@ public:
     Page* visiblePage()                     { return m_visiblePage; }
     void lockGui()                          { m_pageStackWidget->lockGui(); }
     void unlockGui()                        { m_pageStackWidget->unlockGui(); }
+    void queueEvent(Event *e)               { m_pageStackWidget->queueEvent(e); }
 
 protected:
     PageStackWidget *m_pageStackWidget;

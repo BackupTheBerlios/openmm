@@ -16,41 +16,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "halwatcher.h"
-#include "hal.h"
-#include "debug.h"
+#ifndef HALDEVICEEVENT_H
+#define HALDEVICEEVENT_H
+
+#include "event.h"
+
+#include <string>
+using namespace std;
 
 
-HalWatcher::HalWatcher()
- : Thread()
+/**
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
+*/
+class HalDeviceEvent : public Event
 {
-}
+public:
+    enum DeviceT {VolumeT, DvdT, AudioCdT};
 
+    HalDeviceEvent(DeviceT deviceType, bool hotplug, string path = "");
+    ~HalDeviceEvent();
 
-HalWatcher::~HalWatcher()
-{
-}
+    string getPath() { return m_path; }
+    bool hotplug() { return m_hotplug; }
+    DeviceT deviceType() { return m_deviceType; }
 
+private:
+    DeviceT m_deviceType;
+    bool    m_hotplug;
+    string  m_path;
+};
 
-bool
-HalWatcher::suicide()
-{
-    TRACE("HalWatcher::suicide()");
-    m_dispatcher.leave();
-    return true;
-}
-
-void
-HalWatcher::run()
-{
-    DBus::default_dispatcher = &m_dispatcher;
-    DBus::Connection conn = DBus::Connection::SystemBus();
-    HalManager hal(conn);
-    TRACE("HalWatcher::run() starting event loop!!!");
-    try {
-        m_dispatcher.enter();
-    }
-    catch(DBus::Error err) {
-        TRACE("HalWatcher::run() DBus error occured: %s", err.what());
-    }
-}
+#endif

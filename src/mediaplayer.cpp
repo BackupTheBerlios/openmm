@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "mediaplayer.h"
-#include "controler.h"
+#include "streamplayer.h"
 #include "debug.h"
 
 
@@ -38,41 +38,41 @@ MediaPlayer::showUp()
 {
     TRACE("MediaPlayer::showUp()");
     enterPage();
-    Controler::instance()->streamPlayer()->setKeyHandler(this);
-    Controler::instance()->streamPlayer()->showUp();
+    StreamPlayer::instance()->setKeyHandler(this);
+    StreamPlayer::instance()->showUp();
 }
 
 
 bool
 MediaPlayer::isPlaying()
 {
-    return Controler::instance()->streamPlayer()->isPlaying();
+    return StreamPlayer::instance()->isPlaying();
 }
 
 
 void
 MediaPlayer::play(Title* title)
 {
-    Controler::instance()->streamPlayer()->play(title);
+    StreamPlayer::instance()->play(title);
 }
 
 
 void
 MediaPlayer::stop()
 {
-    Controler::instance()->streamPlayer()->stop();
+    StreamPlayer::instance()->stop();
 }
 
 
 void
 MediaPlayer::showOsd(string text, uint duration)
 {
-    Controler::instance()->streamPlayer()->showOsd(text, duration);
+    StreamPlayer::instance()->showOsd(text, duration);
 }
 
 
 void
 MediaPlayer::hideOsd()
 {
-    Controler::instance()->streamPlayer()->hideOsd();
+    StreamPlayer::instance()->hideOsd();
 }

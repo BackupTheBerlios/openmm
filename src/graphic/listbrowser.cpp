@@ -33,14 +33,15 @@ ListBrowser::ListBrowser(string name, string cols, List *list)
  : Page(name)
 {
     TRACE("ListBrowser::ListBrowser()");
-    StringUtil::s_split(cols, m_colSeperator, m_cols);
+    StringUtil::s_split(cols, m_colSeperator, m_cols, false);
     m_list = list;
     m_popupMenu = 0;
 
-    TRACE("ListBrowser::ListBrowser() creating ListBrowser widget");
+    TRACE("ListBrowser::ListBrowser() creating ListBrowser widget with %i columns", m_cols.size());
     m_listBrowserWidget = WidgetFactory::instance()->createListBrowserWidget(this, &m_cols);
 
-    for (vector<string>::iterator i = m_cols.begin(); i != m_cols.end(); i++) {
+    for (vector<string>::iterator i = m_cols.begin(); i != m_cols.end(); ++i) {
+        TRACE("ListBrowser::ListBrowser() adding column: %s", (*i).c_str());
         int formatPos = (*i).find(m_colFormatSeperator, 0);
         string formatString = (*i).substr(formatPos + 1);
         int labelPos = formatString.find(m_colLabelSeperator, 0);
@@ -56,6 +57,7 @@ ListBrowser::ListBrowser(string name, string cols, List *list)
             addViewColumn(formatString.substr(labelPos + 1), colWidth);
         }
         else {
+            TRACE("ListBrowser::ListBrowser() adding column: %s without formating", (*i).c_str());
             addViewColumn(*i, colWidth);
         }
     }
@@ -91,7 +93,7 @@ ListBrowser::enterPage()
 void
 ListBrowser::addTitle(Title *title)
 {
-//     TRACE("ListBrowser::addEntry(), title: %s", title->getText("Name").c_str());
+//     TRACE("ListBrowser::addTitle(), title: %s", title->getText("Name").c_str());
     m_listBrowserWidget->addEntry(title);
 }
 

@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "listproxy.h"
+#include "debug.h"
+
 
 ListProxy::ListProxy(ListManager *listManager, Title::TitleT type)
 //  : List()
@@ -27,7 +29,7 @@ ListProxy::ListProxy(ListManager *listManager, Title::TitleT type)
 
     if (m_listManager->pushUpdates()) {
         fill();  // Initially fill the list with Titles. Later listManager will push updates.
-        m_listManager->addSink(this);
+//         m_listManager->addSink(this);
 //         connect(listManager, SIGNAL(pushTitle(Title*)), this, SLOT(addTitleEntry(Title*)));
 //         connect(listManager, SIGNAL(popTitle(Title*)), this, SLOT(delTitleEntry(Title*)));
     }
@@ -42,6 +44,7 @@ ListProxy::~ListProxy()
 void
 ListProxy::update()
 {
+    TRACE("ListProxy::update()");
     if (!m_listManager->pushUpdates()) {
         // no updates are pushed from ListManager, so we need to pull them ourselves.
         fill();
@@ -52,5 +55,6 @@ ListProxy::update()
 void
 ListProxy::fillList()
 {
+    TRACE("ListProxy::fillList()");
     m_listManager->fill(this, m_type);
 }

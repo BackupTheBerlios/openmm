@@ -27,7 +27,8 @@ StreamPlayer    *StreamPlayer::m_instance = 0;
 
 
 StreamPlayer::StreamPlayer()
- : Page("StreamPlayer")
+ : Page("StreamPlayer"),
+   m_mrl(0)
 {
     TRACE("StreamPlayer::StreamPlayer()");
     // all events are received by StreamPlayer, none are forwarded to the GUI.
@@ -59,7 +60,51 @@ bool
 StreamPlayer::eventHandler(Event *e)
 {
     TRACE("StreamPlayer::eventHandler()");
-    m_keyHandler->eventHandler(e);
+    switch (e->type()) {
+    case Event::StartE:
+        play();
+        break;
+    case Event::StopE:
+        stop();
+        break;
+    case Event::PauseE:
+        pause();
+        break;
+    case Event::ForwardE:
+        forward();
+        break;
+    case Event::RewindE:
+        rewind();
+        break;
+    case Event::PlusE:
+        zoom(true);
+        break;
+    case Event::MinusE:
+        zoom(false);
+        break;
+// TODO: handle the arrow keys in the specialized MediaPlayers
+//       the DvdPlayer should differentiate between DVD menu and playback
+//       and TvPlayer likes to switch channels up and down
+    case Event::LeftE:
+        left();
+        break;
+    case Event::RightE:
+        right();
+        break;
+    case Event::UpE:
+        up();
+        break;
+    case Event::DownE:
+        down();
+        break;
+    case Event::EnterE:
+        select();
+        break;
+    default:
+        // all other keys are forwarded to the MediaPlayer.
+        m_keyHandler->eventHandler(e);
+        return false;
+    }
     return false;
 }
 
@@ -105,15 +150,26 @@ StreamPlayer::setEngine(EngineT engine)
 void
 StreamPlayer::play(Title *title)
 {
-    TRACE("StreamPlayer::play()");
-    if (m_isPlaying) {
-        stopStream();
-    }
+    TRACE("StreamPlayer::play(Title*)");
     if (!title->getMrl()) {
         return;
     }
+    if (m_isPlaying && (title->getMrl() != m_mrl)) {
+        stopStream();
+    }
+    m_mrl = title->getMrl();
     m_isPlaying = true;
-    playStream(title->getMrl());
+    playStream(m_mrl);
+}
+
+
+void
+StreamPlayer::play()
+{
+    TRACE("StreamPlayer::play()");
+    if (m_mrl) {
+        playStream(m_mrl);
+    }
 }
 
 
@@ -123,6 +179,38 @@ StreamPlayer::stop()
     TRACE("StreamPlayer::stop()");
     m_isPlaying = false;
     stopStream();
+}
+
+
+void
+StreamPlayer::pause()
+{
+    TRACE("StreamPlayer::pause()");
+    pauseStream();
+}
+
+
+void
+StreamPlayer::forward()
+{
+    TRACE("StreamPlayer::forward()");
+    forwardStream();
+}
+
+
+void
+StreamPlayer::rewind()
+{
+    TRACE("StreamPlayer::rewind()");
+    rewindStream();
+}
+
+
+void
+StreamPlayer::zoom(bool in)
+{
+    TRACE("StreamPlayer::zoom()");
+    zoomStream(in);
 }
 
 
@@ -138,33 +226,13 @@ StreamPlayer::showOsd(string text, uint duration)
 
 /* ---------------------------------------------------------------------------------- */
 
-// #include <unistd.h>
-
-
-// void* execThread(void *arg)
-// {
-//     sleep(5);
-//     TRACE("execThread(), should hide OSD now!");
-//     ((StreamPlayer*)arg)->hideOsd();
-// }
-
 
 OsdTimer::OsdTimer(StreamPlayer *streamPlayer, uint sec)
  : Timer(sec)
 {
     TRACE("OsdTimer::OsdTimer() set to %i sec", sec);
-//     m_timout = sec;
     m_streamPlayer = streamPlayer;
-//     pthread_attr_init(&m_attr);
-//     pthread_attr_setdetachstate(&m_attr, PTHREAD_CREATE_JOINABLE);
 }
-
-
-// void
-// OsdTimer::start()
-// {
-//     pthread_create(&m_thread, NULL, execThread, m_streamPlayer);
-// }
 
 
 void

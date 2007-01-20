@@ -28,7 +28,8 @@ class Event{
 public:
     enum EventT {NullE, AllE, QuitE, MenuE, EnterE, BackE, UpE, DownE, LeftE, RightE, KeyPressE,
                  Key0E, Key1E, Key2E, Key3E, Key4E, Key5E, Key6E, Key7E, Key8E, Key9E,
-                 PopupE};
+                 StartE, StopE, PauseE, ForwardE, RewindE, PlusE, MinusE,
+                 PopupE, DeviceE};
 
     Event(EventT type = NullE);
     ~Event();

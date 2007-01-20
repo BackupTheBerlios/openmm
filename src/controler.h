@@ -49,8 +49,7 @@ public:
     char** getArgv()                    { return m_argv; }
     Page* getCurrentPage()              { return (Page*)m_pageStack->visiblePage(); };
     void goBack();
-    StreamPlayer *streamPlayer()        { return m_streamPlayer; }  // only used by MediaPlayer.
-    PageStack *pageStack()              { return m_pageStack; }
+    PageStack* pageStack()              { return m_pageStack; }
     void showPage(Page *page);
     void addPage(Page *page);
     void addEventLoop(Thread *eventLoop);
@@ -69,7 +68,6 @@ private:
     int                     m_argc;
     char                  **m_argv;
     PageStack              *m_pageStack;
-    StreamPlayer           *m_streamPlayer;
     Menu                   *m_mainMenu;
     map<string, Module*>    m_module;
     vector<Page*>           m_pageHistory;

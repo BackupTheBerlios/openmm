@@ -34,7 +34,7 @@ class TitleFilter;
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class List //: public Node
+class List
 {
 
 public:

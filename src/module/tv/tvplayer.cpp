@@ -57,67 +57,67 @@ TvPlayer::eventHandler(Event *e)
 {
     TRACE("TvPlayer::eventHandler()");
     switch (e->type()) {
-        case Event::EnterE:                          // info
-            showOsd(getCurrentChannelTitle()->getText("Name"), 5);
-            break;
-        case Event::UpE:                                 // channel up
-            setCurrentChannel(getCurrentChannelNumber() + 1);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::DownE:                               // channel down
-            setCurrentChannel(getCurrentChannelNumber() - 1);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key1E:                               // channel 1
-            setCurrentChannel(0);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key2E:                               // channel 2
-            setCurrentChannel(1);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key3E:                               // channel 3
-            setCurrentChannel(2);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key4E:                               // channel 4
-            setCurrentChannel(3);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key5E:                               // channel 5
-            setCurrentChannel(4);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key6E:                               // channel 6
-            setCurrentChannel(5);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key7E:                               // channel 7
-            setCurrentChannel(6);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key8E:                               // channel 8
-            setCurrentChannel(7);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        case Event::Key9E:                               // channel 9
-            setCurrentChannel(8);
-            stopLiveTv();
-            startLiveTv();
-            break;
-        default:
-            // all other keys are returned to the GUI loop.
-            return false;
+    case Event::EnterE:                          // info
+        showOsd(getCurrentChannelTitle()->getText("Name"), 5);
+        break;
+    case Event::UpE:                                 // channel up
+        setCurrentChannel(getCurrentChannelNumber() + 1);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::DownE:                               // channel down
+        setCurrentChannel(getCurrentChannelNumber() - 1);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key1E:                               // channel 1
+        setCurrentChannel(0);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key2E:                               // channel 2
+        setCurrentChannel(1);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key3E:                               // channel 3
+        setCurrentChannel(2);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key4E:                               // channel 4
+        setCurrentChannel(3);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key5E:                               // channel 5
+        setCurrentChannel(4);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key6E:                               // channel 6
+        setCurrentChannel(5);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key7E:                               // channel 7
+        setCurrentChannel(6);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key8E:                               // channel 8
+        setCurrentChannel(7);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    case Event::Key9E:                               // channel 9
+        setCurrentChannel(8);
+        stopLiveTv();
+        startLiveTv();
+        break;
+    default:
+        // all other keys are returned to the GUI loop.
+        return false;
     }
     return true;
 }

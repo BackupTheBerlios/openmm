@@ -47,7 +47,17 @@ public:
     void setKeyHandler(MediaPlayer *player);
     bool isPlaying() { return m_isPlaying; };
     void play(Title *title);
+    void play();
     void stop();
+    void pause();
+    void forward();
+    void rewind();
+    void zoom(bool in = true);
+    void left() { m_engine->left(); }
+    void right() { m_engine->right(); }
+    void up() { m_engine->up(); }
+    void down() { m_engine->down(); }
+    void select() { m_engine->select(); }
 
     // interface to StreamPlayerEngine
     void showOsd(string text, uint duration);
@@ -66,9 +76,14 @@ private:
     void closeStream() { m_engine->closeStream(); }
     void playStream(Mrl *mrl) { m_engine->playStream(mrl); }
     void stopStream() { m_engine->stopStream(); }
+    void pauseStream() { m_engine->pauseStream(); }
+    void forwardStream() { m_engine->forwardStream(); }
+    void rewindStream() { m_engine->rewindStream(); }
+    void zoomStream(bool in) { m_engine->zoomStream(in); }
 
     static StreamPlayer  *m_instance;
     bool                  m_isPlaying;
+    Mrl                  *m_mrl;
     MediaPlayer          *m_keyHandler;
     EngineT               m_engineType;
     StreamPlayerEngine   *m_engine;

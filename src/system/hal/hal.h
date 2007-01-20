@@ -20,7 +20,7 @@
 #define HAL_H
 
 /**
-  Hal keeps a list of all devices and their properties.
+  Hal manages all local devices and their properties.
 
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
@@ -32,6 +32,23 @@
 using namespace std;
 
 
+class HalVolume : public DBus::InterfaceProxy, public DBus::ObjectProxy
+{
+public:
+    HalVolume(DBus::Connection& connection, DBus::Path& udi);
+    void mount(string mountpoint, string fstype, vector<string> options);
+//     void mount(string mountpoint, string fstype);
+};
+
+
+class HalStorage : public DBus::InterfaceProxy, public DBus::ObjectProxy
+{
+public:
+    HalStorage(DBus::Connection& connection, DBus::Path& udi);
+
+};
+
+
 class HalDevice : public DBus::InterfaceProxy, public DBus::ObjectProxy
 {
 public:
@@ -39,6 +56,8 @@ public:
 
 private:
     map<string, DBus::Variant> getAllProperties();
+    DBus::Variant getProperty(string property);
+    DBus::String getPropertyString(string property);
     void printProperties(map<string, DBus::Variant> props);
     void propertyModifiedCb(const DBus::SignalMessage& sig);
     void conditionCb(const DBus::SignalMessage& sig);
@@ -56,6 +75,7 @@ private:
     vector<string> getAllDevices();
     void deviceAddedCb(const DBus::SignalMessage& sig);
     void deviceRemovedCb(const DBus::SignalMessage& sig);
+    void handleDevice(string devName, bool hotplug);
 
     map<string, DBus::RefPtr<HalDevice> > m_devices;
     map<string, map<string, DBus::Variant> > m_properties;

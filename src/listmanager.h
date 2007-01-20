@@ -22,15 +22,12 @@
 
 #include "list.h"
 
-#include <string>
-using namespace std;
-
 /**
 Produces and also deletes titles which it gets from servers on the net or local filesystems or just about anywhere.
 
 	@author Jörg Bakker <joerg@hakker.de>
 */
-class ListManager : public List
+class ListManager //: public List
 {
 public:
     // TODO: if ListManager is not a singleton, we can have exactly one instance for each List object (and TitleT type).

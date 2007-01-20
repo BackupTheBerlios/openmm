@@ -49,8 +49,20 @@ public:
     virtual void closeStream();
     virtual void playStream(Mrl *mrl);
     virtual void stopStream();
+    virtual void pauseStream();
+    virtual void forwardStream();
+    virtual void rewindStream();
+    virtual void zoomStream(bool in);
+    virtual void left();
+    virtual void right();
+    virtual void up();
+    virtual void down();
+    virtual void select();
 
 private:
+    bool isSeekable();
+    void savePosition();
+
     Page *m_parent;
 
 //     static void DestSizeCallback(void* p, int /*video_width*/, int /*video_height*/, double /*video_aspect*/,
@@ -65,7 +77,7 @@ private:
     xine_t *xineEngine;
     xine_audio_port_t *audioDriver;
     xine_video_port_t *videoDriver;
-    xine_stream_t *xineStream;
+    xine_stream_t *m_xineStream;
 
 #ifndef QWS
     Display* x11Display;
@@ -83,9 +95,13 @@ private:
 
     xine_event_queue_t *eventQueue;
 
-    uint m_marginOSD;
-//  TODO: implement timer for OSD
-//     QTimer m_OSDTimer;
+    bool        m_pause;
+    int         m_posStream;
+    int         m_posTime;
+    int         m_lengthStream;
+    int         m_currentZoom;
+
+    uint        m_marginOSD;
 };
 
 #endif

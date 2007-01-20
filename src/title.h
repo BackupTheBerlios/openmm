@@ -41,7 +41,7 @@ Lists of Titles are produced by a TitleManager.
 class Title
 {
 public:
-    enum TitleT {TitlePairT, TvChannelT, TvProgramT, TvTimerT, TvRecT};
+    enum TitleT {AnyT, TitlePairT, FileT, TvChannelT, TvProgramT, TvTimerT, TvRecT, DvdT};
 
     Title(string name, TitleT type);
     ~Title();
@@ -60,8 +60,8 @@ public:
     static const string headDelimiter;
 
 protected:
-    virtual string getColText(string col) = 0;
-    virtual void setColText(string col, string text) = 0;
+    virtual string getColText(string col) { return ""; }
+    virtual void setColText(string col, string text) {}
     void setHeader(string header);
 
     vector<string> m_header;
