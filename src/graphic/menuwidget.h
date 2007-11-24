@@ -35,6 +35,7 @@ class MenuWidget
 public:
     //virtual ~MenuWidget() = 0;
     virtual void addEntry(Page *page) = 0;
+    virtual void remEntry(Page *page) = 0;
     virtual void setDefaultEntry(Page *page) = 0;
     virtual void setMenuName(string name) = 0;
     virtual void enterPage() = 0;

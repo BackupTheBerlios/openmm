@@ -1,5 +1,6 @@
 SET( JAM_MODULE_DISC_SRCS
     dvdplayer.cpp
+    ejectpage.cpp
 )
 
 ADD_LIBRARY( jam-module-disc

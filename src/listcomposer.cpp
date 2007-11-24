@@ -85,7 +85,7 @@ ListComposer::addTitleLeft(Title *entry)
 
 
 void
-ListComposer::pushFiltered()
+ListComposer::pushFiltered(TitleFilter* filter)
 {
     TRACE("ListComposer::pushFiltered()");
     Title *lastLeftTitle = 0;
@@ -97,9 +97,9 @@ ListComposer::pushFiltered()
         Title *currentLeftTitle = currentTitle->getLeft();
         Title *currentRightTitle = currentTitle->getRight();
 //         TRACE("ListComposer::pushFiltered() for Title: %s", currentTitle->getText("Name").c_str());
-        if (m_filter) {  // only push a filtered Title to the outside (for example to a TitleBrowser)
+        if (filter) {  // only push a filtered Title to the outside (for example to a TitleBrowser)
 //             TRACE("ListComposer::pushFiltered() filter currentRightTitle: %p", currentRightTitle);
-            if (currentRightTitle && m_filter->pass(currentRightTitle)) {
+            if (currentRightTitle && filter->pass(currentRightTitle)) {
                 if ((currentLeftTitle != lastLeftTitle)) {
                     pushTitle(currentTitle);
                 }
@@ -134,5 +134,5 @@ ListComposer::fillList()
     for (int i = 0; i < m_left->count(); i++) {
         addTitleLeft(m_left->getTitle(i));
     }
-    pushFiltered();
+//     pushFiltered();
 }

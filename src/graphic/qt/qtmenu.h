@@ -40,6 +40,7 @@ public:
     ~QtMenu();
 
     virtual void addEntry(Page *page);
+    virtual void remEntry(Page *page);
     virtual void setDefaultEntry(Page *page);
     virtual void setMenuName(string name)       { m_list->addColumn(name); }
     virtual void enterPage();
@@ -50,11 +51,12 @@ private slots:
 private:
     QListViewItem *findEntry(Page *page);
 
-    QPtrDict<Page>   m_entryDict;
-    QListView       *m_list;
-    QListViewItem   *m_defaultEntry;
-    QListViewItem   *m_selectedEntry;
-    int              m_entryNumber;
+    QPtrDict<Page>            m_entryDict;
+    QPtrDict<QListViewItem>   m_itemDict;
+    QListView                *m_list;
+    QListViewItem            *m_defaultEntry;
+    QListViewItem            *m_selectedEntry;
+    int                       m_entryNumber;
 };
 
 #endif

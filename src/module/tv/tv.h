@@ -21,6 +21,7 @@
 #define TV_H
 
 #include "module.h"
+#include "menu.h"
 
 class Controler;
 
@@ -34,6 +35,9 @@ class Tv: public Module
 public:
     Tv();
     ~Tv();
+
+private:
+    Menu m_menu;
 };
 
 #endif

@@ -31,19 +31,29 @@ using namespace std;
 class HalDeviceEvent : public Event
 {
 public:
-    enum DeviceT {VolumeT, DvdT, AudioCdT};
+    enum DeviceT {AnyT, VolumeT, DvdT, AudioCdT, SoundT};
+    enum DeviceAction {Add, Remove};
 
-    HalDeviceEvent(DeviceT deviceType, bool hotplug, string path = "");
+    HalDeviceEvent(string deviceName, DeviceAction deviceAction, DeviceT deviceType, bool hotplug = true,
+                string devPath = "", string label = "", string mediaPath = "");
     ~HalDeviceEvent();
 
-    string getPath() { return m_path; }
+    string getDevName() { return m_deviceName; }
+    DeviceAction getDevAction() { return m_deviceAction; }
+    string getDevPath() { return m_devPath; }
+    string getMediaPath() { return m_mediaPath; }
     bool hotplug() { return m_hotplug; }
     DeviceT deviceType() { return m_deviceType; }
+    string getLabel() { return m_label; }
 
 private:
-    DeviceT m_deviceType;
-    bool    m_hotplug;
-    string  m_path;
+    string          m_deviceName;
+    DeviceT         m_deviceType;
+    bool            m_hotplug;
+    string          m_devPath;
+    string          m_mediaPath;
+    string          m_label;
+    DeviceAction    m_deviceAction;
 };
 
 #endif

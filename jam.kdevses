@@ -1,45 +1,77 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="11" >
-  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/event.h" >
-   <View0 line="0" Type="Source" />
+ <DocsAndViews NumberOfDocuments="20" >
+  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
-   <View0 line="164" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.h" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.cpp" >
-   <View0 line="271" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/event.h" >
+   <View0 Encoding="" line="28" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/hal.h" >
-   <View0 line="77" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.h" >
+   <View0 Encoding="" line="72" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/haldeviceevent.h" >
-   <View0 line="39" Type="Source" />
+  <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.cpp" >
+   <View0 Encoding="" line="171" Type="Source" />
   </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/system/hal/haldeviceevent.cpp" >
-   <View0 line="27" Type="Source" />
+  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.h" >
+   <View0 Encoding="" line="37" Type="Source" />
   </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.h" >
-   <View0 line="64" Type="Source" />
+  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/menu.h" >
-   <View0 line="1" Type="Source" />
+  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.h" >
+   <View0 Encoding="" line="22" Type="Source" />
   </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/menu.cpp" >
-   <View0 line="0" Type="Source" />
+  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.cpp" >
+   <View0 Encoding="" line="30" Type="Source" />
   </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.cpp" >
-   <View0 line="54" Type="Source" />
+  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogramfilter.cpp" >
+   <View0 Encoding="" line="26" Type="Source" />
   </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.cpp" >
-   <View0 line="86" Type="Source" />
+  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listcomposer.h" >
+   <View0 Encoding="" line="55" Type="Source" />
   </Doc10>
+  <Doc11 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogramfilter.h" >
+   <View0 Encoding="" line="28" Type="Source" />
+  </Doc11>
+  <Doc12 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tv.cpp" >
+   <View0 Encoding="" line="44" Type="Source" />
+  </Doc12>
+  <Doc13 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogram.h" >
+   <View0 Encoding="" line="30" Type="Source" />
+  </Doc13>
+  <Doc14 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listcomposer.cpp" >
+   <View0 Encoding="" line="127" Type="Source" />
+  </Doc14>
+  <Doc15 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/list.cpp" >
+   <View0 Encoding="" line="148" Type="Source" />
+  </Doc15>
+  <Doc16 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listproxy.cpp" >
+   <View0 Encoding="" line="55" Type="Source" />
+  </Doc16>
+  <Doc17 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/listbrowser.cpp" >
+   <View0 Encoding="" line="31" Type="Source" />
+  </Doc17>
+  <Doc18 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listproxy.h" >
+   <View0 Encoding="" line="45" Type="Source" />
+  </Doc18>
+  <Doc19 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/list.h" >
+   <View0 Encoding="" line="67" Type="Source" />
+  </Doc19>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>
    <breakpointList/>
+   <showInternalCommands value="0" />
   </kdevdebugger>
+  <kdevastyle>
+   <Extensions ext="*.cpp *.h,*.c *.h,*.cxx *.hxx,*.c++ *.h++,*.cc *.hh,*.C *.H,*.diff,*.inl,*.java,*.moc,*.patch,*.tlh,*.xpm" />
+   <AStyle IndentPreprocessors="0" FillCount="4" PadParenthesesOut="1" IndentNamespaces="1" IndentLabels="1" Fill="Tabs" MaxStatement="40" Brackets="Break" MinConditional="-1" IndentBrackets="0" PadParenthesesUn="1" BlockBreak="0" KeepStatements="1" KeepBlocks="1" BlockIfElse="0" IndentSwitches="1" PadOperators="0" FStyle="UserDefined" IndentCases="0" FillEmptyLines="0" BracketsCloseHeaders="0" BlockBreakAll="0" PadParenthesesIn="1" IndentClasses="1" IndentBlocks="0" FillForce="0" />
+  </kdevastyle>
   <kdevbookmarks>
    <bookmarks/>
   </kdevbookmarks>

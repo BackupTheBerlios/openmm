@@ -106,7 +106,7 @@ QtEventFilter::QtEventFilter()
     m_eventMap[Qt::Key_PageDown] = Event::RewindE;
     m_eventMap[Qt::Key_Plus] = Event::PlusE;
     m_eventMap[Qt::Key_Minus] = Event::MinusE;
-
+    m_eventMap[Qt::Key_A] = Event::SwitchAudioE;
 
     // reverse mapping for events that are forwarded
     // to the Qt event loop (from lirc for example).

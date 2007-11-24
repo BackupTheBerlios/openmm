@@ -76,6 +76,7 @@ LircWatcher::~LircWatcher()
 void
 LircWatcher::run()
 {
+//FIXME: when /etc/jam/lircrc is not present, this thread makes the process dump core
     TRACE("LircWatcher::run() starting event loop!!!");
     char *code;
     char *command;

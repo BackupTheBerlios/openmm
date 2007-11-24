@@ -43,11 +43,14 @@ HalWatcher::suicide()
 void
 HalWatcher::run()
 {
-    DBus::default_dispatcher = &m_dispatcher;
-    DBus::Connection conn = DBus::Connection::SystemBus();
-    HalManager hal(conn);
-    TRACE("HalWatcher::run() starting event loop!!!");
     try {
+        TRACE("HalWatcher::run()");
+        DBus::default_dispatcher = &m_dispatcher;
+        TRACE("HalWatcher::run() connecting system bus");
+        DBus::Connection conn = DBus::Connection::SystemBus();
+        TRACE("HalWatcher::run() initializing HalManager");
+        HalManager hal(conn);
+        TRACE("HalWatcher::run() starting event loop!!!");
         m_dispatcher.enter();
     }
     catch(DBus::Error err) {

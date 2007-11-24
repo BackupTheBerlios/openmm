@@ -46,6 +46,7 @@ public:
 
     int cols()                                  { return m_cols.size(); }
     string colText(int i)                       { return m_cols[i]; }
+    int entryCount()                            { return m_list->count(); }
     void setPopupMenu(PopupMenu *popupMenu);
     PopupMenu* getPopupMenu()                   { return m_popupMenu; }
     virtual void enterPage();

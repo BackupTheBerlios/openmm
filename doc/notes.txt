@@ -1,7 +1,0 @@
-project names:
-JAM - Just Another Mediaplayer
-SIN - Streaming Interface (Instance?) (for Networks)
-SIC - Streaming Interface Client
-SIM - Streaming Interface for Multimedia
-JASS - Just Another Streaming Server
-JASC - Just Another Streaming Client

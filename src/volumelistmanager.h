@@ -35,7 +35,8 @@ public:
     VolumeListManager(string path);
     ~VolumeListManager();
 
-    virtual bool pushUpdates() { return false; }  // Titles can only be pushed if the filesystem changes ...
+    virtual bool pushUpdates() { return false; }  // Titles can only be pushed if the filesystem changes,
+                                                  // for example on a network volume ...
     virtual void fill(List *list, Title::TitleT type);
 
     virtual void addProxyTitle(Title *title) {}  // we don't change the filesystem, just read from it.

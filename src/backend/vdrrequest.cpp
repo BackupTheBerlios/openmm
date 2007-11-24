@@ -31,7 +31,7 @@ VdrRequest::VdrRequest(ListManager *listManager, List *list, string request)
     m_listManager = listManager;
     m_list = list;
     m_request = request;
-    m_server = "192.168.178.10";  // TODO: set the following items with Setup class.
+    m_server = "192.168.178.11";  // TODO: set the following items with Setup class.
     m_svdrpPort = 2001;
     m_httpPort = 3000;
     m_videoDir = "/video";
@@ -88,12 +88,19 @@ VdrRequest::processReply()
     {
         for ( vector<string>::iterator it = m_reply.begin(); it != m_reply.end(); ++it )
         {
+            // TODO: sometimes empty lines appear
+            if ((*it).size() == 0) {
+                continue;
+            }
+            TRACE("VdrRequest::processReply() line: %s", (*it).c_str());
             uint pos = (*it).find(' ', 4);
             string id = (*it).substr(4, pos - 4);
+            TRACE("VdrRequest::processReply() substr() gets id: %s", id.c_str());
             // channel name ends at first semicolon
             pos++;
             uint sigStart = (*it).find(';', pos);
             string name = (*it).substr(pos, sigStart - pos);
+            TRACE("VdrRequest::processReply() substr() gets name: %s", name.c_str());
             vector<string> s;
             StringUtil::s_split((*it), ":", s);
             string signature = s[3] + "-" + s[10] + "-" + s[11] + "-" + s[9];
@@ -151,6 +158,11 @@ VdrRequest::processReply()
         for (vector<string>::iterator it = m_reply.begin(); it != m_reply.end(); ++it)
         {
 //             TRACE("VdrRequest::processReply() line: %s", (*it).c_str());
+            if ((*it).substr(0, 3) == "550")
+            {
+                TRACE("VdrRequest::processReply() no timers present");
+                break;
+            }
             uint pos = (*it).find(' ', 4);
             string id = (*it).substr(4, pos - 4);
             pos++;
@@ -249,4 +261,8 @@ void
 VdrRequest::addRecFileInfo(TvRec *tvRec, string recDir)
 {
     // TODO: add extra info to recording, like description text, ...
+    // marks.vdr contains the time marks from noad (format: 0:06:00.25, each mark on a seperate line)
+    // to convert file position to time, file number (and vice versa), use index.vdr 
+    // (see http://www.vdr-wiki.de/wiki/index.php/Index.vdr)
+    // problem: index.vdr is too big (~ 1 MB) to read it into memory for each recording.
 }

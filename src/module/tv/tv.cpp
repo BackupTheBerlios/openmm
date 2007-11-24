@@ -64,10 +64,12 @@ Tv::Tv() : Module("Television")
     TvRecPlayer *recPlayer = new TvRecPlayer(recList);  // TODO: recList isn't really needed ...?
     recListBrowser->setPopupMenu(new TvRecPopup(recPlayer, recListBrowser));
 
-    controler->mainMenuAddEntry(channelPlayer);
-    controler->mainMenuAddEntry(programGuideBrowser);
-    controler->mainMenuAddEntry(recListBrowser);
-    controler->mainMenuAddEntry(timerListBrowser);
+    m_menu = Menu("TV");
+    m_menu.addEntry(channelPlayer);
+    m_menu.addEntry(programGuideBrowser);
+    m_menu.addEntry(recListBrowser);
+    m_menu.addEntry(timerListBrowser);
+    controler->mainMenuAddEntry(&m_menu);
 }
 
 

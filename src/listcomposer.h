@@ -47,10 +47,10 @@ public:
 
     virtual void addTitle(Title *title);
     virtual void delTitle(Title *title);
-    void setFilter(TitleFilter *filter) { m_filter = filter; }
+//    void setFilter(TitleFilter *filter) { m_filter = filter; }
     void addTitleLeft(Title *entry);
     void addTitleRight(Title *entry);
-    void pushFiltered();
+    void pushFiltered(TitleFilter *filter);
 
 protected:
     virtual void fillList();

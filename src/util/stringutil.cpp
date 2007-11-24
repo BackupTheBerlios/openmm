@@ -100,18 +100,21 @@ int
 StringUtil::s_split(const string& input, const string& delimiter, vector<string>& results,
                     bool includeEmpties)
 {
+//     TRACE("StringUtil::s_split()");
     int iPos = 0;
     int newPos = -1;
     int sizeS2 = (int)delimiter.size();
     int isize = (int)input.size();
 
     if(( isize == 0 ) || ( sizeS2 == 0 )) {
+//         TRACE("StringUtil::s_split() exit");
         return 0;
     }
 
     vector<int> positions;
     newPos = input.find (delimiter, 0);
     if (newPos < 0) { 
+//         TRACE("StringUtil::s_split() exit");
         return 0; 
     }
 
@@ -124,6 +127,7 @@ StringUtil::s_split(const string& input, const string& delimiter, vector<string>
     }
 
     if (numFound == 0) {
+//         TRACE("StringUtil::s_split() exit");
         return 0;
     }
 
@@ -146,6 +150,7 @@ StringUtil::s_split(const string& input, const string& delimiter, vector<string>
             results.push_back(s);
         }
     }
+//     TRACE("StringUtil::s_split() exit");
     return numFound;
 }
 

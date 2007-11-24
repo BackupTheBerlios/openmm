@@ -36,7 +36,7 @@ public:
 
 protected:
     void enterPage();
-
+    virtual bool eventHandler(Event *e);
 };
 
 #endif

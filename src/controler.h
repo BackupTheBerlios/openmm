@@ -28,6 +28,7 @@
 #include "module.h"
 #include "thread.h"
 #include "event.h"
+#include "haldeviceevent.h"
 
 #include <pthread.h>
 
@@ -41,6 +42,7 @@ public:
     static Controler *instance();  // only used by main() and Page::Page().
     void addModule(Module *module);
     void mainMenuAddEntry(Page *page)   { m_mainMenu->addEntry(page); };
+    void mainMenuRemEntry(Page *page)   { m_mainMenu->remEntry(page); };
     void mainMenuShow();  // only used by GlobalKeyHandler (later by server-IP wizzard?)
 
     void init(int argc, char **argv);  // only used by main().
@@ -63,12 +65,16 @@ protected:
 
 private:
     bool dispatchEvents();
+    void addRemovableVolume(string devName, string device, HalDeviceEvent::DeviceT volType, string label, Page *page);
+    void remRemovableVolume(string devName);
 
     static Controler       *m_instance;
     int                     m_argc;
     char                  **m_argv;
     PageStack              *m_pageStack;
     Menu                   *m_mainMenu;
+    Menu                    m_settings;
+    map<string, Menu*>      m_volumeMenuDict;
     map<string, Module*>    m_module;
     vector<Page*>           m_pageHistory;
     vector<Thread*>         m_eventLoop;
@@ -76,6 +82,7 @@ private:
     queue<Event*>           m_eventQueue;
     pthread_mutex_t         m_eventTriggerMutex;
     pthread_cond_t          m_eventTrigger;
+    int                     m_maxAudioDevice;
 };
 
 #endif

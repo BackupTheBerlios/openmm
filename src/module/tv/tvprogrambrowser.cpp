@@ -27,7 +27,8 @@ TvProgramBrowser::TvProgramBrowser(ListComposer *list)
 {
     m_filter = new TvProgramFilter();
     m_lastAt = 0;
-    list->setFilter(m_filter);
+//     list->setFilter(m_filter);
+    list->pushFiltered(m_filter);
 }
 
 
@@ -74,7 +75,7 @@ TvProgramBrowser::eventHandler(Event *e)
             }
             m_filter->setTime(at);
             clear();
-            ((ListComposer*)m_list)->pushFiltered();
+            ((ListComposer*)m_list)->pushFiltered(m_filter);
             selectEntry(current);
             return true;
         case Event::RightE:
@@ -89,7 +90,7 @@ TvProgramBrowser::eventHandler(Event *e)
             }
             m_filter->setTime(at);
             clear();
-            ((ListComposer*)m_list)->pushFiltered();
+            ((ListComposer*)m_list)->pushFiltered(m_filter);
             selectEntry(current);
             return true;
         default:

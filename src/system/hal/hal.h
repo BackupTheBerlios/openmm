@@ -79,6 +79,7 @@ private:
 
     map<string, DBus::RefPtr<HalDevice> > m_devices;
     map<string, map<string, DBus::Variant> > m_properties;
+    int maxAudioCard;
 };
 
 #endif

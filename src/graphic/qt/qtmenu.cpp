@@ -61,11 +61,26 @@ QtMenu::addEntry(Page* page)
     QString entryNumberStr = QString().setNum(m_entryNumber).rightJustify(2, '0') + ".  ";
     QListViewItem *i = new QListViewItem(m_list, entryNumberStr + page->getName(), "");
     m_entryDict.insert(i, page);
+    m_itemDict.insert(page, i);
 
     // make the first entry the default selection.
     if (m_entryDict.count() == 1) {
         m_defaultEntry = i;
     }
+    Controler::instance()->unlockGui();
+}
+
+
+void
+QtMenu::remEntry(Page* page)
+{
+    TRACE("QtMenu::remEntry() for page: %p", page);
+    Controler::instance()->lockGui();
+    m_entryNumber--;
+    QListViewItem *i = findEntry(page);
+    m_list->takeItem(i);
+    m_entryDict.remove(i);
+    m_itemDict.remove(page);
     Controler::instance()->unlockGui();
 }
 
@@ -106,8 +121,7 @@ QListViewItem*
 QtMenu::findEntry(Page *page)
 {
     TRACE("Menu::findEntry() with page: %p", page);
-    // TODO: implement findItem()
-    return 0;
+    return m_itemDict.find(page);
 }
 
 

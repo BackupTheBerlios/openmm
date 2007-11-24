@@ -38,6 +38,7 @@ public:
     ~Menu();
 
     virtual void addEntry(Page *page) { m_menuWidget->addEntry(page) ;}
+    virtual void remEntry(Page *page) { m_menuWidget->remEntry(page) ;}
     virtual void setDefaultEntry(Page *page) { m_menuWidget->setDefaultEntry(page) ;}
     virtual void setMenuName(string name) { m_menuWidget->setMenuName(name) ;}
     virtual void enterPage() { m_menuWidget->enterPage(); }

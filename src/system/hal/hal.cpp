@@ -149,6 +149,11 @@ HalDevice::printProperties(map<string, DBus::Variant> props)
         else if (signature == "b") {
             value = iter->second.reader().get_bool() ? "yes" : "no";
         }
+        else if (signature == "i") {
+            stringstream sstr;
+            sstr << iter->second.reader().get_int32();
+            value = sstr.str();
+        }
         else {
             value = signature;
         }
@@ -182,12 +187,18 @@ HalDevice::conditionCb(const DBus::SignalMessage& sig)
     string condition;
     it >> condition;
     TRACE("HalDevice::ConditionCb() encountered condition %s", condition.c_str());
+
+// TODO: also react on button press on disc-drive -> umount and eject
+// HalDevice::ConditionCb() encountered condition EjectPressed
+// Problem is, which device is in the drive where the button is pressed?
+
 }
 
 
 HalManager::HalManager(DBus::Connection& connection)
  : DBus::InterfaceProxy("org.freedesktop.Hal.Manager"),
-   DBus::ObjectProxy(connection, "/org/freedesktop/Hal/Manager", "org.freedesktop.Hal")
+   DBus::ObjectProxy(connection, "/org/freedesktop/Hal/Manager", "org.freedesktop.Hal"),
+   maxAudioCard(-1)
 {
     connect_signal(HalManager, DeviceAdded, deviceAddedCb);
     connect_signal(HalManager, DeviceRemoved, deviceRemovedCb);
@@ -247,7 +258,8 @@ HalManager::deviceRemovedCb(const DBus::SignalMessage& sig)
     TRACE("HalManager::DeviceRemovedCb() removed device %s", devname.c_str());
     m_devices.erase(devname);
     m_properties.erase(devname);
-    // TODO: send a device removed event (Controler should remove menu entries ...)
+    // send a device removed event (Controler should remove menu entries ...)
+    Controler::instance()->queueEvent(new HalDeviceEvent(devname, HalDeviceEvent::Remove, HalDeviceEvent::AnyT));
 }
 
 
@@ -259,12 +271,14 @@ HalManager::handleDevice(string devName, bool hotplug)
         TRACE("HalManager::handleDevice() found device of category: %s",
             m_properties[devName]["info.category"].reader().get_string());
         if (string(m_properties[devName]["info.category"].reader().get_string()) == "volume") {
+            string label = string(m_properties[devName]["volume.label"].reader().get_string());
             // VIDEO DVD
             if (m_properties[devName]["volume.disc.is_videodvd"].reader().get_bool()) {
                 TRACE("HalManager::handleDevice() found DVD, throttling read speed to 8x");
                 string device = m_properties[devName]["block.device"].reader().get_string();
                 system(("eject -x 8 " + device).c_str());
-                Controler::instance()->queueEvent(new HalDeviceEvent(HalDeviceEvent::DvdT, hotplug));
+                Controler::instance()->queueEvent(new HalDeviceEvent(devName, HalDeviceEvent::Add, HalDeviceEvent::DvdT,
+                                    hotplug, device, "DVD: " + label));
             }
             // CD or DVD with data
             else {
@@ -283,10 +297,82 @@ HalManager::handleDevice(string devName, bool hotplug)
                 // send an event of type volume with the path of the mount point
                 string mountPoint = m_devices[devName]->getPropertyString("volume.mount_point");
                 TRACE("HalManager::handleDevice() mount point is: %s", mountPoint.c_str());
-                Controler::instance()->queueEvent(new HalDeviceEvent(HalDeviceEvent::VolumeT,
-                                    hotplug, mountPoint));
+                Controler::instance()->queueEvent(new HalDeviceEvent(devName, HalDeviceEvent::Add, HalDeviceEvent::VolumeT,
+                                    hotplug, device, "Disc: " + label, mountPoint));
             }
         }
+/*        else if (string(m_properties[devName]["info.category"].reader().get_string()) == "oss") {
+            if (string(m_properties[devName]["oss.type"].reader().get_string()) == "pcm" &&
+                m_properties[devName]["oss.device"].reader().get_int32() == 0) {
+                string device = string(m_properties[devName]["oss.device_file"].reader().get_string());
+                if (m_properties[devName]["oss.card"].reader().get_int32() == 0) {
+                    TRACE("HalManager::handleDevice() adding first sound card with device: %s", device.c_str());
+                    Controler::instance()->queueEvent(new HalDeviceEvent(HalDeviceEvent::SoundT,
+                                    hotplug, device));
+                }
+                else if (m_properties[devName]["oss.card"].reader().get_int32() == 1) {
+                    TRACE("HalManager::handleDevice() adding second sound card with device: %s", device.c_str());
+                    Controler::instance()->queueEvent(new HalDeviceEvent(HalDeviceEvent::SoundT,
+                                    hotplug, device));
+                }
+            }*/
+        else if (string(m_properties[devName]["info.category"].reader().get_string()) == "alsa") {
+            if (string(m_properties[devName]["alsa.type"].reader().get_string()) == "playback") {
+                int cardNum = m_properties[devName]["alsa.card"].reader().get_int32();
+                if (cardNum > maxAudioCard) {
+                    maxAudioCard = cardNum;
+                    TRACE("HalManager::handleDevice() adding sound card number: %i", maxAudioCard);
+                    Controler::instance()->queueEvent(new HalDeviceEvent(devName, HalDeviceEvent::Add, HalDeviceEvent::SoundT,
+                                    hotplug, ""));
+                }
+            }
+        }
+/*
+linux.subsystem: sound
+info.category: alsa
+alsa.type: playback
+alsa.device_file: /dev/snd/pcmC0D0p
+alsa.device_id: Intel 82801DB-ICH4
+alsa.card_id: I82801DBICH4
+alsa.card: 0
+alsa.device: 0
+
+linux.subsystem: sound
+info.category: alsa
+alsa.type: playback
+alsa.device_file: /dev/snd/pcmC0D4p
+alsa.device_id: Intel 82801DB-ICH4 - IEC958
+alsa.card_id: I82801DBICH4
+alsa.card: 0
+alsa.device: 4
+
+linux.subsystem: sound
+info.category: oss
+oss.type: pcm
+oss.device_file: /dev/dsp
+oss.device_id: Intel 82801DB-ICH4
+oss.card_id: I82801DBICH4
+oss.card: 0
+oss.device: 0
+
+linux.subsystem: sound
+info.category: oss
+oss.type: pcm
+oss.device_file: /dev/audio
+oss.device_id: Intel 82801DB-ICH4
+oss.card_id: I82801DBICH4
+oss.card: 0
+oss.device: 0
+
+linux.subsystem: sound
+info.category: oss
+oss.type: pcm
+oss.device_file: /dev/adsp
+oss.device_id: Intel 82801DB-ICH4
+oss.card_id: I82801DBICH4
+oss.card: 0
+oss.device: 1
+*/
     }
     else {
         TRACE("HalManager::handleDevice() found device without \"info.category\"");

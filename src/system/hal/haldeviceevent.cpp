@@ -20,13 +20,18 @@
 #include "debug.h"
 
 
-HalDeviceEvent::HalDeviceEvent(DeviceT deviceType, bool hotplug, string path)
+HalDeviceEvent::HalDeviceEvent(string deviceName, DeviceAction deviceAction, DeviceT deviceType, bool hotplug,
+                            string devPath, string label, string mediaPath)
  : Event(Event::DeviceE)
 {
-    TRACE("HalDeviceEvent::HalDeviceEvent() type: %i, path: %s", deviceType, path.c_str());
+    TRACE("HalDeviceEvent::HalDeviceEvent() type: %i, path: %s", deviceType, devPath.c_str());
+    m_deviceName = deviceName;
     m_deviceType = deviceType;
     m_hotplug = hotplug;
-    m_path = path;
+    m_devPath = devPath;
+    m_mediaPath = mediaPath;
+    m_label = label;
+    m_deviceAction = deviceAction;
 }
 
 

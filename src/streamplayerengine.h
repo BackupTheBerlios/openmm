@@ -35,8 +35,6 @@ class StreamPlayerEngine
 {
 public:
     //virtual ~StreamPlayerEngine() = 0;
-    virtual void showOsd(string text) = 0;
-    virtual void hideOsd() = 0;
     virtual void initStream() = 0;
     virtual void closeStream() = 0;
     virtual void playStream(Mrl *mrl) = 0;
@@ -50,6 +48,9 @@ public:
     virtual void up() = 0;
     virtual void down() = 0;
     virtual void select() = 0;
+    virtual void showOsd(string text) = 0;
+    virtual void hideOsd() = 0;
+    virtual void switchAudioDevice(int maxDeviceNum) = 0;
 };
 
 #endif

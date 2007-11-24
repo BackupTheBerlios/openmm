@@ -62,6 +62,7 @@ public:
     // interface to StreamPlayerEngine
     void showOsd(string text, uint duration);
     void hideOsd() { m_engine->hideOsd(); }
+    void switchAudioDevice(int maxDeviceNum) { m_engine->switchAudioDevice(maxDeviceNum); }
 
 protected:
     StreamPlayer();

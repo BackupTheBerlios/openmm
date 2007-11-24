@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "dvdplayer.h"
 #include "controler.h"
+#include "streamplayer.h"
 #include "debug.h"
 
 
@@ -48,4 +49,29 @@ DvdPlayer::playDvd()
     Title *title = new Title("DVD", Title::DvdT);
     title->setMrl(new Mrl("dvd:/", ""));
     play(title);
+}
+
+
+bool
+DvdPlayer::eventHandler(Event *e)
+{
+    TRACE("DvdPlayer::eventHandler()");
+    switch (e->type()) {
+    case Event::LeftE:
+        StreamPlayer::instance()->left();
+        break;
+    case Event::RightE:
+        StreamPlayer::instance()->right();
+        break;
+    case Event::UpE:
+        StreamPlayer::instance()->up();
+        break;
+    case Event::DownE:
+        StreamPlayer::instance()->down();
+        break;
+    default:
+        // all other keys are returned to the GUI loop.
+        return false;
+    }
+    return false;
 }

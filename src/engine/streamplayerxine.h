@@ -42,9 +42,6 @@ public:
     StreamPlayerXine(Page *parent);
     ~StreamPlayerXine();
 
-// public slots:
-    virtual void showOsd(string text);
-    virtual void hideOsd();
     virtual void initStream();
     virtual void closeStream();
     virtual void playStream(Mrl *mrl);
@@ -58,10 +55,15 @@ public:
     virtual void up();
     virtual void down();
     virtual void select();
+    virtual void showOsd(string text);
+    virtual void hideOsd();
+    virtual void switchAudioDevice(int maxDeviceNum);
 
 private:
     bool isSeekable();
     void savePosition();
+//     void savePositionTime();
+    void seekRelative(int offSec);
 
     Page *m_parent;
 
@@ -74,34 +76,38 @@ private:
 
     void initOSD();
 
-    xine_t *xineEngine;
-    xine_audio_port_t *audioDriver;
-    xine_video_port_t *videoDriver;
-    xine_stream_t *m_xineStream;
+    xine_t              *m_xineEngine;
+    xine_audio_port_t   *m_audioDriver;
+    xine_video_port_t   *m_videoDriver;
+    xine_stream_t       *m_xineStream;
+    string               m_xineMrl;
+    char                *m_audioDriverName;
+    int                  m_audioDeviceNum;
 
 #ifndef QWS
-    Display* x11Display;
-    int x11Screen;
-    Window x11Window;
+    Display*             x11Display;
+    int                  x11Screen;
+    Window               x11Window;
 #endif
 
-    int videoFrameWidth;
-    int videoFrameHeight;
-    static int m_globX, m_globY;
-    static double m_pixel_aspect;
-    double res_v, res_h;
+    int                  videoFrameWidth;
+    int                  videoFrameHeight;
+    static int           m_globX, m_globY;
+    static double        m_pixel_aspect;
+    double               res_v, res_h;
 
-    xine_osd_t *m_OSD;
+    xine_osd_t          *m_OSD;
 
-    xine_event_queue_t *eventQueue;
+    xine_event_queue_t  *eventQueue;
 
-    bool        m_pause;
-    int         m_posStream;
-    int         m_posTime;
-    int         m_lengthStream;
-    int         m_currentZoom;
+    bool                 m_pause;
+    int                  m_posStream;
+    int                  m_posTime;
+    int                  m_lengthStream;
+    int                  m_currentZoom;
+    int                  m_seekOff;
 
-    uint        m_marginOSD;
+    uint                 m_marginOSD;
 };
 
 #endif

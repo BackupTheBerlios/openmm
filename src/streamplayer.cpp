@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "streamplayer.h"
+#include "controler.h"
 #include "debug.h"
 
 
@@ -82,21 +83,9 @@ StreamPlayer::eventHandler(Event *e)
     case Event::MinusE:
         zoom(false);
         break;
-// TODO: handle the arrow keys in the specialized MediaPlayers
-//       the DvdPlayer should differentiate between DVD menu and playback
-//       and TvPlayer likes to switch channels up and down
-    case Event::LeftE:
-        left();
-        break;
-    case Event::RightE:
-        right();
-        break;
-    case Event::UpE:
-        up();
-        break;
-    case Event::DownE:
-        down();
-        break;
+// handle the arrow keys in the specialized MediaPlayers
+// the DvdPlayer should differentiate between DVD menu and playback
+// and TvPlayer likes to switch channels up and down
     case Event::EnterE:
         select();
         break;
@@ -179,6 +168,8 @@ StreamPlayer::stop()
     TRACE("StreamPlayer::stop()");
     m_isPlaying = false;
     stopStream();
+    // go to main menu
+//     Controler::instance()->queueEvent(new Event(Event::MenuE));
 }
 
 
