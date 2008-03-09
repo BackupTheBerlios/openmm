@@ -27,14 +27,16 @@ LircWatcher::LircWatcher()
  : Thread()
 {
     if (lirc_init("jam",1) == -1) {
-        TRACE("LircWatcher::LircWatcher() couldn't connect lircd");
+        TRACE("LircWatcher::LircWatcher() couldn't connect lircd, disabling event-loop");
+        m_setupSuccess = false;
     }
     else {
         TRACE("LircWatcher::LircWatcher() connected to lircd");
     }
 
     if (lirc_readconfig("/etc/jam/lircrc", &m_config, NULL) != 0) {
-        TRACE("LircWatcher::LircWatcher() failed to read config file");
+        TRACE("LircWatcher::LircWatcher() failed to read config file, disabling event-loop");
+        m_setupSuccess = false;
     }
     else {
         TRACE("LircWatcher::LircWatcher() read config file /etc/jam/lircrc");
@@ -76,7 +78,6 @@ LircWatcher::~LircWatcher()
 void
 LircWatcher::run()
 {
-//FIXME: when /etc/jam/lircrc is not present, this thread makes the process dump core
     TRACE("LircWatcher::run() starting event loop!!!");
     char *code;
     char *command;

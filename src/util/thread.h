@@ -47,6 +47,7 @@ protected:
     // return true if we kill ourselves in suicide() otherwise return false and
     // the thread that created the run() thread will try to kill run().
     virtual bool suicide();
+    bool    m_setupSuccess;
 
 private:
     typedef void*(*ThreadStarter)(void*);

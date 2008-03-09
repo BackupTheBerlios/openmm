@@ -46,7 +46,8 @@ void
 QtPage::enterPage()
 {
     Controler::instance()->lockGui();
-    qDebug("QtPage::enterPage()"); m_frame->setFocus();
+    TRACE("QtPage::enterPage()");
+    m_frame->setFocus();
     Controler::instance()->unlockGui();
 }
 

@@ -28,6 +28,7 @@ Thread::Thread()
 {
     TRACE("Thread::Thread()");
     m_running = false;
+    m_setupSuccess = true;
     pthread_attr_init(&m_attr);
     pthread_attr_setdetachstate(&m_attr, PTHREAD_CREATE_JOINABLE);
     pthread_mutex_init(&m_runningMutex, 0);
@@ -64,6 +65,11 @@ Thread::setRunning(bool running)
 void
 Thread::start()
 {
+    if (!m_setupSuccess) {
+        TRACE("Thread::start() setup of thread was not successfull, not starting");
+        return;
+    }
+
     TRACE("Thread::start()");
     // don't start thread again, if already running.
     // if no thread is running, start can only be called once at a time, that means
@@ -106,13 +112,13 @@ Thread::wait()
 void
 Thread::kill()
 {
-    TRACE("Thread::exit()");
+    TRACE("Thread::kill()");
     if (!suicide()) {
-        TRACE("Thread::exit() pthread_exit()");
-        if (pthread_kill(m_thread, SIGHUP) != 0) {
+        if (isRunning() && pthread_kill(m_thread, SIGHUP) != 0) {
             TRACE("Thread::kill() pthread_kill() returned with error: %s", strerror(errno));
         }
         else {
+            TRACE("Thread::kill() pthread_kill() success");
             setRunning(false);
         }
     }

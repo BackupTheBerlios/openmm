@@ -1,0 +1,9 @@
+FILE(REMOVE
+"hal_test.pdb"
+"hal_test"
+"CMakeFiles/hal_test.dir/hal.o"
+"CMakeFiles/hal_test.dir/halwatcher.o"
+"CMakeFiles/hal_test.dir/debug.o"
+"CMakeFiles/hal_test.dir/thread.o"
+"CMakeFiles/hal_test.dir/main.o"
+)

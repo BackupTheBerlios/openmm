@@ -140,7 +140,9 @@ QtListBrowser::selectEntry(int number)
 {
     // TODO: get the right entry to select.
     TRACE("QtListBrowser::selectEntry(int) number: %i", number);
-    selectEntry(m_titleVector.at(number));
+    if (m_titleVector.size() > number) {
+        selectEntry(m_titleVector.at(number));
+    }
 }
 
 

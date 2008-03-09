@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/openwengo/!svn/ver/12449/wengophone-ng/branches/wengophone-dbus-api/libs/dbus
+END
+configure.ac
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/openwengo/!svn/ver/12412/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/configure.ac
+END
+AUTHORS
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/openwengo/!svn/ver/7382/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/AUTHORS
+END
+TODO
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/openwengo/!svn/ver/9708/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/TODO
+END
+INSTALL
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/openwengo/!svn/ver/7382/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/INSTALL
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/openwengo/!svn/ver/7382/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/ChangeLog
+END
+SConscript
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/openwengo/!svn/ver/7715/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/SConscript
+END
+dbus-c++-1.pc.in
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/openwengo/!svn/ver/9708/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/dbus-c++-1.pc.in
+END
+libdbus-c++.spec.in
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/openwengo/!svn/ver/12412/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/libdbus-c++.spec.in
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/openwengo/!svn/ver/7382/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/COPYING
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/openwengo/!svn/ver/12412/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/Makefile.am
+END
+autogen.sh
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/openwengo/!svn/ver/9042/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/autogen.sh
+END
+NEWS
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/openwengo/!svn/ver/7382/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/NEWS
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/openwengo/!svn/ver/7382/wengophone-ng/branches/wengophone-dbus-api/libs/dbus/README
+END

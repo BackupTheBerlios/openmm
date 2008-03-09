@@ -22,6 +22,7 @@
 #include "debug.h"
 
 #include <stdlib.h>
+#include <sstream>
 
 
 // TODO: use interface org.freedesktop.Hal.Device.Volume
@@ -69,8 +70,8 @@ HalDevice::HalDevice(DBus::Connection& connection, DBus::Path& udi)
  : DBus::InterfaceProxy("org.freedesktop.Hal.Device"),
    DBus::ObjectProxy(connection, udi, "org.freedesktop.Hal")
 {
-    connect_signal(HalDevice, PropertyModified, propertyModifiedCb);
-    connect_signal(HalDevice, Condition, conditionCb);
+//     connect_signal(HalDevice, PropertyModified, propertyModifiedCb);
+//     connect_signal(HalDevice, Condition, conditionCb);
 }
 
 
@@ -86,8 +87,8 @@ HalDevice::getAllProperties()
     DBus::MessageIter it = reply.reader();
 
     it >> props;
-//     TRACE("HalDevice::getAllProperties() found properties:");
-//     printProperties(props);
+/*    TRACE("HalDevice::getAllProperties() found properties:");
+    printProperties(props);*/
     return props;
 }
 
@@ -200,9 +201,11 @@ HalManager::HalManager(DBus::Connection& connection)
    DBus::ObjectProxy(connection, "/org/freedesktop/Hal/Manager", "org.freedesktop.Hal"),
    maxAudioCard(-1)
 {
+    TRACE("HalManager::HalManager() connecting callbacks");
     connect_signal(HalManager, DeviceAdded, deviceAddedCb);
     connect_signal(HalManager, DeviceRemoved, deviceRemovedCb);
 
+    TRACE("HalManager::HalManager() getting device information");
     vector<string> devices = getAllDevices();
 
     vector<string>::iterator it;
@@ -219,6 +222,7 @@ HalManager::HalManager(DBus::Connection& connection)
 vector<string>
 HalManager::getAllDevices()
 {
+    TRACE("HalManager::getAllDevices()");
     vector<string> udis;
     DBus::CallMessage call;
 
@@ -270,7 +274,9 @@ HalManager::handleDevice(string devName, bool hotplug)
     if (m_properties[devName].find("info.category") != m_properties[devName].end()) {
         TRACE("HalManager::handleDevice() found device of category: %s",
             m_properties[devName]["info.category"].reader().get_string());
-        if (string(m_properties[devName]["info.category"].reader().get_string()) == "volume") {
+        // handle optical discs
+        if (string(m_properties[devName]["info.category"].reader().get_string()) == "volume" &&
+            m_properties[devName]["volume.is_disc"].reader().get_bool()) {
             string label = string(m_properties[devName]["volume.label"].reader().get_string());
             // VIDEO DVD
             if (m_properties[devName]["volume.disc.is_videodvd"].reader().get_bool()) {
@@ -301,6 +307,7 @@ HalManager::handleDevice(string devName, bool hotplug)
                                     hotplug, device, "Disc: " + label, mountPoint));
             }
         }
+        // handle soundcards
 /*        else if (string(m_properties[devName]["info.category"].reader().get_string()) == "oss") {
             if (string(m_properties[devName]["oss.type"].reader().get_string()) == "pcm" &&
                 m_properties[devName]["oss.device"].reader().get_int32() == 0) {
@@ -327,52 +334,6 @@ HalManager::handleDevice(string devName, bool hotplug)
                 }
             }
         }
-/*
-linux.subsystem: sound
-info.category: alsa
-alsa.type: playback
-alsa.device_file: /dev/snd/pcmC0D0p
-alsa.device_id: Intel 82801DB-ICH4
-alsa.card_id: I82801DBICH4
-alsa.card: 0
-alsa.device: 0
-
-linux.subsystem: sound
-info.category: alsa
-alsa.type: playback
-alsa.device_file: /dev/snd/pcmC0D4p
-alsa.device_id: Intel 82801DB-ICH4 - IEC958
-alsa.card_id: I82801DBICH4
-alsa.card: 0
-alsa.device: 4
-
-linux.subsystem: sound
-info.category: oss
-oss.type: pcm
-oss.device_file: /dev/dsp
-oss.device_id: Intel 82801DB-ICH4
-oss.card_id: I82801DBICH4
-oss.card: 0
-oss.device: 0
-
-linux.subsystem: sound
-info.category: oss
-oss.type: pcm
-oss.device_file: /dev/audio
-oss.device_id: Intel 82801DB-ICH4
-oss.card_id: I82801DBICH4
-oss.card: 0
-oss.device: 0
-
-linux.subsystem: sound
-info.category: oss
-oss.type: pcm
-oss.device_file: /dev/adsp
-oss.device_id: Intel 82801DB-ICH4
-oss.card_id: I82801DBICH4
-oss.card: 0
-oss.device: 1
-*/
     }
     else {
         TRACE("HalManager::handleDevice() found device without \"info.category\"");

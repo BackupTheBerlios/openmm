@@ -1,67 +1,46 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="20" >
+ <DocsAndViews NumberOfDocuments="13" >
   <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.cpp" >
-   <View0 Encoding="" line="0" Type="Source" />
+   <View0 Encoding="" Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/controler.h" >
-   <View0 Encoding="" line="0" Type="Source" />
+   <View0 Encoding="" Type="Source" />
   </Doc1>
   <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/event.h" >
-   <View0 Encoding="" line="28" Type="Source" />
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.h" >
-   <View0 Encoding="" line="72" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/qt/qtlistbrowser.cpp" >
+   <View0 Encoding="" line="123" Type="Source" />
   </Doc3>
   <Doc4 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.cpp" >
-   <View0 Encoding="" line="171" Type="Source" />
+   <View0 Encoding="" line="52" Type="Source" />
   </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.h" >
-   <View0 Encoding="" line="37" Type="Source" />
+  <Doc5 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/streamplayer.h" >
+   <View0 Encoding="" line="89" Type="Source" />
   </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvplayer.cpp" >
-   <View0 Encoding="" line="0" Type="Source" />
+  <Doc6 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/engine/streamplayerxine.cpp" >
+   <View0 Encoding="" line="29" Type="Source" />
   </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.h" >
-   <View0 Encoding="" line="22" Type="Source" />
+  <Doc7 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/engine/streamplayerxine.h" >
+   <View0 Encoding="" line="38" Type="Source" />
   </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogrambrowser.cpp" >
-   <View0 Encoding="" line="30" Type="Source" />
-  </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogramfilter.cpp" >
-   <View0 Encoding="" line="26" Type="Source" />
-  </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listcomposer.h" >
-   <View0 Encoding="" line="55" Type="Source" />
-  </Doc10>
-  <Doc11 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogramfilter.h" >
-   <View0 Encoding="" line="28" Type="Source" />
-  </Doc11>
-  <Doc12 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tv.cpp" >
-   <View0 Encoding="" line="44" Type="Source" />
-  </Doc12>
-  <Doc13 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tvprogram.h" >
-   <View0 Encoding="" line="30" Type="Source" />
-  </Doc13>
-  <Doc14 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listcomposer.cpp" >
-   <View0 Encoding="" line="127" Type="Source" />
-  </Doc14>
-  <Doc15 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/list.cpp" >
-   <View0 Encoding="" line="148" Type="Source" />
-  </Doc15>
-  <Doc16 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listproxy.cpp" >
-   <View0 Encoding="" line="55" Type="Source" />
-  </Doc16>
-  <Doc17 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/listbrowser.cpp" >
-   <View0 Encoding="" line="31" Type="Source" />
-  </Doc17>
-  <Doc18 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/listproxy.h" >
+  <Doc8 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/mediaplayer.cpp" >
    <View0 Encoding="" line="45" Type="Source" />
-  </Doc18>
-  <Doc19 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/list.h" >
-   <View0 Encoding="" line="67" Type="Source" />
-  </Doc19>
+  </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/graphic/listbrowser.h" >
+   <View0 Encoding="" line="39" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/list.cpp" >
+   <View0 Encoding="" line="42" Type="Source" />
+  </Doc10>
+  <Doc11 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/module/tv/tv.cpp" >
+   <View0 Encoding="" line="39" Type="Source" />
+  </Doc11>
+  <Doc12 NumberOfViews="1" URL="file:///home/jb/devel/cc/jam/src/titlepair.h" >
+   <View0 Encoding="" line="32" Type="Source" />
+  </Doc12>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

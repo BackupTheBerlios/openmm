@@ -4,19 +4,13 @@ SET( JAM_SYSTEM_HAL_SRCS
     halwatcher.cpp
 )
 
-INCLUDE_DIRECTORIES(
-    /usr/local/include/dbus-c++-0.3
-)
-
 ADD_LIBRARY( jam-system-hal
     SHARED
     ${JAM_SYSTEM_HAL_SRCS}
 )
 
 TARGET_LINK_LIBRARIES( jam-system-hal
-#    -L${jamproj_SOURCE_DIR}/../jamlibs/dbus/src/.libs
-    -L/usr/local/lib
-    -ldbus-c++-0.3
+    jam-system-dbus
 )
 
 # SET_TARGET_PROPERTIES( jam-system-hal
