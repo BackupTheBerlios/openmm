@@ -31,7 +31,7 @@ QtPageStack::QtPageStack()
     TRACE("QtPageStack::QtPageStack()");
     m_qtApp = new QApplication(Controler::instance()->getArgc(), Controler::instance()->getArgv());
     m_pageStack = new QWidgetStack();
-    m_pageStack->setCaption("Jam");
+    m_pageStack->setCaption("Jamm");
     m_pageStack->resize(720, 576);
     m_qtApp->setMainWidget(m_pageStack);
     m_qtApp->setOverrideCursor(Qt::BlankCursor);

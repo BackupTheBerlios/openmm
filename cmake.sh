@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd ../jambin
-cmake -G KDevelop3 ../jam 
+cd ../jammbin
+cmake -G KDevelop3 ../jamm 

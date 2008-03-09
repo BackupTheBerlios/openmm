@@ -123,7 +123,7 @@ StreamPlayer::setEngine(EngineT engine)
 
     switch(engine) {
     case EngineXine:
-        engineLibName = "/home/jb/devel/cc/jambin/src/engine/libjam-engine-xine.so";
+        engineLibName = "/home/jb/devel/cc/jammbin/src/engine/libjamm-engine-xine.so";
         engineCtorName = "createStreamPlayerXine";
         break;
     default:

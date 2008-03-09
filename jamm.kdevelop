@@ -11,7 +11,7 @@
     <absoluteprojectpath>false</absoluteprojectpath>
     <description/>
     <versioncontrol/>
-    <projectname>jam</projectname>
+    <projectname>jamm</projectname>
   </general>
   <kdevcustomproject>
     <run>
@@ -25,7 +25,7 @@
     </run>
     <build>
       <buildtool>make</buildtool>
-      <builddir>../jambin</builddir>
+      <builddir>../jammbin</builddir>
     </build>
     <make>
       <abortonerror>false</abortonerror>
@@ -185,7 +185,7 @@
   <kdevfileview>
     <tree>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
-      <hidenonprojectfiles>false</hidenonprojectfiles>
+      <hidenonprojectfiles>true</hidenonprojectfiles>
     </tree>
     <groups>
       <hidenonprojectfiles>false</hidenonprojectfiles>

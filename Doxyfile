@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = jam.kdevelop
+PROJECT_NAME           = jamm.kdevelop
 PROJECT_NUMBER         = $VERSION$
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
@@ -80,7 +80,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/jb/devel/cc/jam
+INPUT                  = /home/jb/devel/cc/jamm
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -239,7 +239,7 @@ SKIP_FUNCTION_MACROS   = YES
 # Configuration::additions related to external references   
 #---------------------------------------------------------------------------
 TAGFILES               = 
-GENERATE_TAGFILE       = jam.tag
+GENERATE_TAGFILE       = jamm.tag
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 PERL_PATH              = /usr/bin/perl

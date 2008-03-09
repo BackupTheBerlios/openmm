@@ -1,4 +1,4 @@
-SET( JAM_SYSTEM_DBUS_SRCS
+SET( JAMM_SYSTEM_DBUS_SRCS
     connection.cpp
     debug.cpp
     dispatcher.cpp
@@ -15,17 +15,17 @@ SET( JAM_SYSTEM_DBUS_SRCS
     types.cpp
 )
 
-ADD_LIBRARY( jam-system-dbus
+ADD_LIBRARY( jamm-system-dbus
     SHARED
-    ${JAM_SYSTEM_DBUS_SRCS}
+    ${JAMM_SYSTEM_DBUS_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( jam-system-dbus
+TARGET_LINK_LIBRARIES( jamm-system-dbus
     -ldbus-1
 )
 
 INSTALL( TARGETS
-    jam-system-dbus
+    jamm-system-dbus
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

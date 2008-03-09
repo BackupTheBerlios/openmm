@@ -1,15 +1,15 @@
-SET( JAM_MODULE_DISC_SRCS
+SET( JAMM_MODULE_DISC_SRCS
     dvdplayer.cpp
     ejectpage.cpp
 )
 
-ADD_LIBRARY( jam-module-disc
+ADD_LIBRARY( jamm-module-disc
     SHARED
-    ${JAM_MODULE_DISC_SRCS}
+    ${JAMM_MODULE_DISC_SRCS}
 )
 
 INSTALL(
-    TARGETS jam-module-disc
+    TARGETS jamm-module-disc
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

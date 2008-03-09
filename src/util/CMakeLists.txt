@@ -1,4 +1,4 @@
-SET( JAM_UTIL_SRCS
+SET( JAMM_UTIL_SRCS
     debug.cpp
     directory.cpp
     netsocket.cpp
@@ -8,7 +8,7 @@ SET( JAM_UTIL_SRCS
     timer.cpp
 )
 
-ADD_LIBRARY(jam-util
+ADD_LIBRARY(jamm-util
     STATIC
-    ${JAM_UTIL_SRCS}
+    ${JAMM_UTIL_SRCS}
 )

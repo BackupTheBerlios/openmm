@@ -26,7 +26,7 @@
 LircWatcher::LircWatcher()
  : Thread()
 {
-    if (lirc_init("jam",1) == -1) {
+    if (lirc_init("jamm",1) == -1) {
         TRACE("LircWatcher::LircWatcher() couldn't connect lircd, disabling event-loop");
         m_setupSuccess = false;
     }
@@ -34,12 +34,12 @@ LircWatcher::LircWatcher()
         TRACE("LircWatcher::LircWatcher() connected to lircd");
     }
 
-    if (lirc_readconfig("/etc/jam/lircrc", &m_config, NULL) != 0) {
+    if (lirc_readconfig("/etc/jamm/lircrc", &m_config, NULL) != 0) {
         TRACE("LircWatcher::LircWatcher() failed to read config file, disabling event-loop");
         m_setupSuccess = false;
     }
     else {
-        TRACE("LircWatcher::LircWatcher() read config file /etc/jam/lircrc");
+        TRACE("LircWatcher::LircWatcher() read config file /etc/jamm/lircrc");
     }
     // map lirc commands to internal Events.
     m_eventMap["menu"] = Event::MenuE;

@@ -1,18 +1,18 @@
-SET( JAM_SYSTEM_LIRC_SRCS
+SET( JAMM_SYSTEM_LIRC_SRCS
     lircwatcher.cpp
 )
 
-ADD_LIBRARY( jam-system-lirc
+ADD_LIBRARY( jamm-system-lirc
     SHARED
-    ${JAM_SYSTEM_LIRC_SRCS}
+    ${JAMM_SYSTEM_LIRC_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( jam-system-lirc
+TARGET_LINK_LIBRARIES( jamm-system-lirc
     lirc_client
 )
 
 INSTALL( TARGETS
-    jam-system-lirc
+    jamm-system-lirc
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

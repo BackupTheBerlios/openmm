@@ -1,20 +1,20 @@
-SET( JAM_SYSTEM_HAL_SRCS
+SET( JAMM_SYSTEM_HAL_SRCS
     hal.cpp
     haldeviceevent.cpp
     halwatcher.cpp
 )
 
-ADD_LIBRARY( jam-system-hal
+ADD_LIBRARY( jamm-system-hal
     SHARED
-    ${JAM_SYSTEM_HAL_SRCS}
+    ${JAMM_SYSTEM_HAL_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( jam-system-hal
-    jam-system-dbus
+TARGET_LINK_LIBRARIES( jamm-system-hal
+    jamm-system-dbus
 )
 
-# SET_TARGET_PROPERTIES( jam-system-hal
-#     PROPERTIES INSTALL_RPATH ${jamproj_SOURCE_DIR}/../jamlibs/dbus/src/.libs
+# SET_TARGET_PROPERTIES( jamm-system-hal
+#     PROPERTIES INSTALL_RPATH ${jammproj_SOURCE_DIR}/../jammlibs/dbus/src/.libs
 # )
 
 # ----------------------------------------------------------------------
@@ -38,7 +38,7 @@ TARGET_LINK_LIBRARIES( jam-system-hal
 
 
 INSTALL( TARGETS
-    jam-system-hal
+    jamm-system-hal
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

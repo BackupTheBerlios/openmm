@@ -64,7 +64,7 @@ WidgetFactory::setToolkit(ToolkitT toolkit)
 
     switch(m_toolkit) {
     case ToolkitQt:
-        m_toolkitLibName = "/home/jb/devel/cc/jambin/src/graphic/qt/libjam-graphic-qt.so";
+        m_toolkitLibName = "/home/jb/devel/cc/jammbin/src/graphic/qt/libjamm-graphic-qt.so";
     default:
         break;
     }

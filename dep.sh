@@ -1,8 +1,8 @@
 #!/bin/sh
 
-LIBS=`find ../jambin -name *.so`
+LIBS=`find ../jammbin -name *.so`
 
-echo JAM lib dependencies
+echo JAMM lib dependencies
 echo
 echo shared libraries:
 ls -s $LIBS

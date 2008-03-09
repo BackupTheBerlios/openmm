@@ -1,29 +1,29 @@
-SET( JAM_BACKEND_VDR_SRCS
+SET( JAMM_BACKEND_VDR_SRCS
     vdr.cpp
     vdrrequest.cpp
 )
 
-#SET( JAM_BACKEND_DEVICE_SRCS
+#SET( JAMM_BACKEND_DEVICE_SRCS
 #    device.cpp
 #)
 
-ADD_LIBRARY( jam-backend-vdr
+ADD_LIBRARY( jamm-backend-vdr
     SHARED
-    ${JAM_BACKEND_VDR_SRCS}
+    ${JAMM_BACKEND_VDR_SRCS}
 )
 
-#ADD_LIBRARY( jam-backend-device
+#ADD_LIBRARY( jamm-backend-device
 #    SHARED
-#    ${JAM_BACKEND_DEVICE_SRCS}
+#    ${JAMM_BACKEND_DEVICE_SRCS}
 #)
 
-#TARGET_LINK_LIBRARIES( jam-backend-device
-#    jam-system-hal
+#TARGET_LINK_LIBRARIES( jamm-backend-device
+#    jamm-system-hal
 #)
 
 INSTALL( TARGETS
-    jam-backend-vdr
-#    jam-backend-device
+    jamm-backend-vdr
+#    jamm-backend-device
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

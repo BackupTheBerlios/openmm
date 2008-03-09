@@ -1,6 +1,6 @@
 ADD_SUBDIRECTORY(qt)
 
-SET( JAM_GRAPHIC_SRCS
+SET( JAMM_GRAPHIC_SRCS
     pagestack.cpp
     page.cpp
     menu.cpp
@@ -10,13 +10,13 @@ SET( JAM_GRAPHIC_SRCS
     widgetfactory.cpp
 )
 
-ADD_LIBRARY (jam-graphic
+ADD_LIBRARY (jamm-graphic
     SHARED
-    ${JAM_GRAPHIC_SRCS}
+    ${JAMM_GRAPHIC_SRCS}
 )
 
 INSTALL(
-    TARGETS jam-graphic
+    TARGETS jamm-graphic
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

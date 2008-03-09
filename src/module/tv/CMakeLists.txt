@@ -1,4 +1,4 @@
-SET( JAM_MODULE_TV_SRCS
+SET( JAMM_MODULE_TV_SRCS
     tvchannel.cpp
     tv.cpp
     tvplayer.cpp
@@ -13,13 +13,13 @@ SET( JAM_MODULE_TV_SRCS
     tvtimerpopup.cpp
 )
 
-ADD_LIBRARY( jam-module-tv
+ADD_LIBRARY( jamm-module-tv
     SHARED
-    ${JAM_MODULE_TV_SRCS}
+    ${JAMM_MODULE_TV_SRCS}
 )
 
 INSTALL(
-    TARGETS jam-module-tv
+    TARGETS jamm-module-tv
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )

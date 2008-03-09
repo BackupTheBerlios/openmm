@@ -61,7 +61,7 @@ StreamPlayerXine::initStream()
 
     m_xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
-    char* configFile = "/etc/jam/xineconfig";
+    char* configFile = "/etc/jamm/xineconfig";
     struct stat s;
     if (stat(configFile, &s) == 0)
     {

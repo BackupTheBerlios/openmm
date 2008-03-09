@@ -1,5 +1,5 @@
 # project name
-PROJECT(jamproj)
+PROJECT(jammproj)
 
 ADD_DEFINITIONS(
     -D__DEBUG__

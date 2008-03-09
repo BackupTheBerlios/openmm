@@ -1,4 +1,4 @@
-SET( JAM_ENGINE_SRCS
+SET( JAMM_ENGINE_SRCS
     streamplayerxine.cpp
 )
 
@@ -12,12 +12,12 @@ EXEC_PROGRAM( /usr/bin/xine-config
     OUTPUT_VARIABLE XINE_LIBRARIES
 )
 
-ADD_LIBRARY( jam-engine-xine
+ADD_LIBRARY( jamm-engine-xine
     SHARED
-    ${JAM_ENGINE_SRCS}
+    ${JAMM_ENGINE_SRCS}
 )
 
-# without X11 libraries, jam can't load the xine-plugin (when running under X11)
+# without X11 libraries, jamm can't load the xine-plugin (when running under X11)
 # so we explicitely link the plugin against X11.
 # this is due to the X11 calls when compiling the module with X11 support.
 # for the frambuffer version, this can be left out.
@@ -27,12 +27,12 @@ ADD_DEFINITIONS(
     -D__X11__
 )
 
-TARGET_LINK_LIBRARIES( jam-engine-xine
+TARGET_LINK_LIBRARIES( jamm-engine-xine
     ${XINE_LIBRARIES} -lX11
 )
 
 INSTALL(
-    TARGETS jam-engine-xine
+    TARGETS jamm-engine-xine
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
 )
