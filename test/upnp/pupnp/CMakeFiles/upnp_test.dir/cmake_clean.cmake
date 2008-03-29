@@ -1,0 +1,14 @@
+FILE(REMOVE
+"upnp_test.pdb"
+"upnp_test"
+"CMakeFiles/upnp_test.dir/main.o"
+"CMakeFiles/upnp_test.dir/output_xine.o"
+"CMakeFiles/upnp_test.dir/upnp.o"
+"CMakeFiles/upnp_test.dir/upnp_connmgr.o"
+"CMakeFiles/upnp_test.dir/upnp_control.o"
+"CMakeFiles/upnp_test.dir/upnp_device.o"
+"CMakeFiles/upnp_test.dir/upnp_renderer.o"
+"CMakeFiles/upnp_test.dir/upnp_transport.o"
+"CMakeFiles/upnp_test.dir/webserver.o"
+"CMakeFiles/upnp_test.dir/xmlescape.o"
+)

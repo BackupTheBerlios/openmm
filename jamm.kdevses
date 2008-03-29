@@ -1,16 +1,19 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="3" >
-  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/src/graphic/qt/qtpagestack.h" >
-   <View0 Encoding="" line="38" Type="Source" />
+ <DocsAndViews NumberOfDocuments="4" >
+  <Doc0 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/src/engine/streamplayerxine.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/src/graphic/qt/qtpagestack.cpp" >
-   <View0 Encoding="" line="33" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/test/upnp/platin_upnp/controler/platin_upnp_controler.sh" >
+   <View0 Encoding="" line="2" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/src/engine/streamplayerxine.cpp" >
-   <View0 Encoding="" line="63" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/test/upnp/platin_upnp/controler/log_config" >
+   <View0 Encoding="" line="1" Type="Source" />
   </Doc2>
+  <Doc3 NumberOfViews="1" URL="file:///home/jb/devel/cc/jamm/src/system/platin_upnp/CMakeLists.txt" >
+   <View0 Encoding="" line="83" Type="Source" />
+  </Doc3>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>
