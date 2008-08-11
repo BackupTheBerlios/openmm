@@ -4,12 +4,12 @@ SET( JAMM_MODULE_DISC_SRCS
 )
 
 ADD_LIBRARY( jamm-module-disc
-    SHARED
+    STATIC
     ${JAMM_MODULE_DISC_SRCS}
 )
 
-INSTALL(
-    TARGETS jamm-module-disc
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL(
+#     TARGETS jamm-module-disc
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

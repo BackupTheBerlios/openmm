@@ -1,0 +1,4 @@
+upnp.o: upnp.cpp vdr/plugin.h vdr/i18n.h vdr/menuitems.h vdr/osdbase.h \
+  vdr/config.h vdr/tools.h vdr/osd.h vdr/font.h vdr/skins.h \
+  vdr/channels.h vdr/sources.h vdr/thread.h vdr/epg.h vdr/keys.h \
+  vdr/recording.h vdr/timers.h vdr/themes.h

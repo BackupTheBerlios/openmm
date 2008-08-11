@@ -25,10 +25,13 @@
 #include "pagestack.h"
 #include "menu.h"
 #include "streamplayer.h"
+#include "mediarenderer.h"
 #include "module.h"
 #include "thread.h"
 #include "event.h"
 #include "haldeviceevent.h"
+
+#include "PltUPnP.h"
 
 #include <pthread.h>
 
@@ -41,6 +44,8 @@ class Controler
 public:
     static Controler *instance();  // only used by main() and Page::Page().
     void addModule(Module *module);
+    void addDevice(PLT_DeviceHostReference device, string device_name);
+    void remDevice(PLT_DeviceHostReference device);
     void mainMenuAddEntry(Page *page)   { m_mainMenu->addEntry(page); };
     void mainMenuRemEntry(Page *page)   { m_mainMenu->remEntry(page); };
     void mainMenuShow();  // only used by GlobalKeyHandler (later by server-IP wizzard?)
@@ -71,11 +76,14 @@ private:
     static Controler       *m_instance;
     int                     m_argc;
     char                  **m_argv;
+    PLT_UPnP                m_upnp;
     PageStack              *m_pageStack;
     Menu                   *m_mainMenu;
     Menu                    m_settings;
     map<string, Menu*>      m_volumeMenuDict;
     map<string, Module*>    m_module;
+    map<string, PLT_DeviceHostReference> m_device;
+    Renderer               *m_renderer;
     vector<Page*>           m_pageHistory;
     vector<Thread*>         m_eventLoop;
     bool                    m_goingBack;

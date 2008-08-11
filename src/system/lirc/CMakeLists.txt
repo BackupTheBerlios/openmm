@@ -3,7 +3,7 @@ SET( JAMM_SYSTEM_LIRC_SRCS
 )
 
 ADD_LIBRARY( jamm-system-lirc
-    SHARED
+    STATIC
     ${JAMM_SYSTEM_LIRC_SRCS}
 )
 
@@ -11,8 +11,8 @@ TARGET_LINK_LIBRARIES( jamm-system-lirc
     lirc_client
 )
 
-INSTALL( TARGETS
-    jamm-system-lirc
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL( TARGETS
+#     jamm-system-lirc
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

@@ -8,7 +8,7 @@ SET( JAMM_BACKEND_VDR_SRCS
 #)
 
 ADD_LIBRARY( jamm-backend-vdr
-    SHARED
+    STATIC
     ${JAMM_BACKEND_VDR_SRCS}
 )
 
@@ -21,9 +21,9 @@ ADD_LIBRARY( jamm-backend-vdr
 #    jamm-system-hal
 #)
 
-INSTALL( TARGETS
-    jamm-backend-vdr
-#    jamm-backend-device
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL( TARGETS
+#     jamm-backend-vdr
+# #    jamm-backend-device
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

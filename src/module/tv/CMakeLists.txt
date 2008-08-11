@@ -14,12 +14,12 @@ SET( JAMM_MODULE_TV_SRCS
 )
 
 ADD_LIBRARY( jamm-module-tv
-    SHARED
+    STATIC
     ${JAMM_MODULE_TV_SRCS}
 )
 
-INSTALL(
-    TARGETS jamm-module-tv
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL(
+#     TARGETS jamm-module-tv
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

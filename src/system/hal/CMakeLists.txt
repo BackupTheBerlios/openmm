@@ -5,7 +5,7 @@ SET( JAMM_SYSTEM_HAL_SRCS
 )
 
 ADD_LIBRARY( jamm-system-hal
-    SHARED
+    STATIC
     ${JAMM_SYSTEM_HAL_SRCS}
 )
 
@@ -37,8 +37,8 @@ TARGET_LINK_LIBRARIES( jamm-system-hal
 # ----------------------------------------------------------------------
 
 
-INSTALL( TARGETS
-    jamm-system-hal
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL( TARGETS
+#     jamm-system-hal
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

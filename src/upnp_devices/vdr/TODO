@@ -1,0 +1,6 @@
+- get rid of xineliboutput (dummy output device on budget systems)
+- delete link to vdr headers
+- cmake should create libvdr-upnp.so.<vdr-version>
+- add option to link platin-upnp statically into vdr-upnp-plugin
+- segmentation fault when SIGHUP vdr
+- compatibility with other UPnP Controlers / Renderers

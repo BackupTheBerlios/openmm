@@ -9,8 +9,8 @@ INCLUDE_DIRECTORIES(
     ${jammproj_SOURCE_DIR}/src/module/tv
     ${jammproj_SOURCE_DIR}/src/module/disc
     ${jammproj_SOURCE_DIR}/src/system/hal
-    ${jammproj_SOURCE_DIR}/src/system/lirc
-    ${jammproj_SOURCE_DIR}/src/system/cyber_upnp/include
+#     ${jammproj_SOURCE_DIR}/src/system/lirc
+#     ${jammproj_SOURCE_DIR}/src/system/cyber_upnp/include
     ${jammproj_SOURCE_DIR}/src/system/platin_upnp/include
     ${jammproj_SOURCE_DIR}/src/util
     /usr/include/dbus-1.0
@@ -19,7 +19,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_DEFINITIONS(
     -D_REENTRANT
-    #-Wall
+    #-Wall -O2
 )
 
 ADD_SUBDIRECTORY(backend)
@@ -28,6 +28,7 @@ ADD_SUBDIRECTORY(engine)
 ADD_SUBDIRECTORY(graphic)
 ADD_SUBDIRECTORY(module)
 ADD_SUBDIRECTORY(system)
+ADD_SUBDIRECTORY(upnp_devices)
 ADD_SUBDIRECTORY(util)
 
 ADD_EXECUTABLE( jamm
@@ -39,10 +40,10 @@ TARGET_LINK_LIBRARIES( jamm
     jamm-core
     jamm-system-hal
     jamm-system-lirc
-    jamm-system-cyber_upnp
+#     jamm-system-cyber_upnp
     jamm-system-platin_upnp
-    jamm-graphic
     jamm-module-tv
+    jamm-graphic
     jamm-module-disc
     jamm-util
     pthread

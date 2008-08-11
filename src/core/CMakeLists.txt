@@ -5,6 +5,7 @@ SET( JAMM_CORE_SRCS
     list.cpp
     listproxy.cpp
     mediaplayer.cpp
+    mediarenderer.cpp
     module.cpp
     mrl.cpp
     streamplayer.cpp
@@ -15,12 +16,12 @@ SET( JAMM_CORE_SRCS
 )
 
 ADD_LIBRARY( jamm-core
-    SHARED
+    STATIC
     ${JAMM_CORE_SRCS}
 )
 
-INSTALL(
-    TARGETS jamm-core
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL(
+#     TARGETS jamm-core
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

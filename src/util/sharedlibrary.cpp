@@ -25,7 +25,7 @@ SharedLibrary::SharedLibrary(string filename)
 {
     m_libHandle = dlopen(filename.c_str(), RTLD_NOW);
     if (!m_libHandle) {
-        TRACE("SharedLibrary::SharedLibrary() could not load library: %s", filename.c_str());
+        TRACE("SharedLibrary::SharedLibrary() loading failed: %s", dlerror());
         return;
     }
     TRACE("SharedLibrary::SharedLibrary() opened library: %s", filename.c_str());

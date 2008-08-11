@@ -85,17 +85,17 @@ ADD_DEFINITIONS(
 )
 
 ADD_LIBRARY( jamm-system-platin_upnp
-    SHARED
+    STATIC
     ${JAMM_SYSTEM_PLATIN_UPNP_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( jamm-system-platin_upnp
+# TARGET_LINK_LIBRARIES( jamm-system-platin_upnp
 #     -ldbus-1
 #     z
-)
+# )
 
-INSTALL( TARGETS
-    jamm-system-platin_upnp
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL( TARGETS
+#     jamm-system-platin_upnp
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

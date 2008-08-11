@@ -19,8 +19,6 @@
 #include "widgetfactory.h"
 #include "debug.h"
 
-#include <dlfcn.h>
-
 class QtPageStack;
 class QtPage;
 class QtMenu;

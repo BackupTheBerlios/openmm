@@ -64,7 +64,9 @@ QtPopupMenu::selectionHandler(int id)
 {
     TRACE("QtPopupMenu::selectionHandler()");
     Controler::instance()->lockGui();
-    Controler::instance()->queueEvent(new PopupMenuEvent(m_idMap[id]));
+    // FIXME: PopupMenuEvent is located in the calling executable jamm
+    //        dlopen() failes with unknown symbol.
+//     Controler::instance()->queueEvent(new PopupMenuEvent(m_idMap[id]));
     Controler::instance()->unlockGui();
 }
 

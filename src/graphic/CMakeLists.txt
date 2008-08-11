@@ -11,12 +11,12 @@ SET( JAMM_GRAPHIC_SRCS
 )
 
 ADD_LIBRARY (jamm-graphic
-    SHARED
+    STATIC
     ${JAMM_GRAPHIC_SRCS}
 )
 
-INSTALL(
-    TARGETS jamm-graphic
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL(
+#     TARGETS jamm-graphic
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )

@@ -16,7 +16,7 @@ SET( JAMM_SYSTEM_DBUS_SRCS
 )
 
 ADD_LIBRARY( jamm-system-dbus
-    SHARED
+    STATIC
     ${JAMM_SYSTEM_DBUS_SRCS}
 )
 
@@ -24,8 +24,8 @@ TARGET_LINK_LIBRARIES( jamm-system-dbus
     -ldbus-1
 )
 
-INSTALL( TARGETS
-    jamm-system-dbus
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-)
+# INSTALL( TARGETS
+#     jamm-system-dbus
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+# )
