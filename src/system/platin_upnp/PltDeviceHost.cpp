@@ -2,7 +2,7 @@
 |
 |   Platinum - Device Host
 |
-|   Copyright (c) 2004-2006 Sylvain Rebaud
+|   Copyright (c) 2004-2008 Sylvain Rebaud
 |   Author: Sylvain Rebaud (sylvain@rebaud.com)
 |
  ****************************************************************/
@@ -98,9 +98,9 @@ PLT_DeviceHost::Start(PLT_SsdpListenTask* task)
         }
         url.SetPathPlus(scpd_url);
         m_Services[i]->GetSCPDXML(doc);
-        NPT_HttpStaticRequestHandler* handler = new NPT_HttpStaticRequestHandler(doc, "text/xml");
-        m_HttpServer->AddRequestHandler(handler, url.GetPath(), false);
-        m_RequestHandlers.Add(handler);
+        NPT_HttpStaticRequestHandler* scpd_handler = new NPT_HttpStaticRequestHandler(doc, "text/xml");
+        m_RequestHandlers.Add(scpd_handler);
+        m_HttpServer->AddRequestHandler(scpd_handler, url.GetPath(), false);
 
         // dynamic control url
         NPT_String control_url = m_Services[i]->GetControlURL();

@@ -26,6 +26,7 @@
 #include <dbus-c++/object.h>
 #include <dbus/dbus.h>
 #include <stdarg.h>
+#include <cstdlib>
 
 #include "message_p.h"
 #include "internalerror.h"

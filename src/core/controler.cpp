@@ -35,6 +35,8 @@
 #include "dvdplayer.h"
 #include "ejectpage.h"
 
+#include <cstdlib>
+
 Controler *Controler::m_instance = 0;
 
 Controler*

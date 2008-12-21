@@ -70,6 +70,17 @@ Renderer::OnStop(PLT_ActionReference& action)
 
 
 NPT_Result
+Renderer::OnPause(PLT_ActionReference& action)
+
+{
+    TRACE("JammRenderer::OnPause()");
+//     StreamPlayer::instance()->pause();
+    pause();
+    return NPT_SUCCESS;
+}
+
+
+NPT_Result
 Renderer::OnSetAVTransportURI(PLT_ActionReference& action)
 
 {

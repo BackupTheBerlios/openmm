@@ -2,7 +2,7 @@
 |
 |   Platinum - Control Point
 |
-|   Copyright (c) 2004-2006 Sylvain Rebaud
+|   Copyright (c) 2004-2008 Sylvain Rebaud
 |   Author: Sylvain Rebaud (sylvain@rebaud.com)
 |
  ****************************************************************/
@@ -413,7 +413,7 @@ PLT_CtrlPoint::Discover(const NPT_HttpUrl& url,
 NPT_Result
 PLT_CtrlPoint::DoHouseKeeping()
 {
-    NPT_AutoLock lock(m_Devices);
+    NPT_AutoLock lock_devices(m_Devices);
     NPT_TimeStamp now;
     int count = m_Devices.GetItemCount();
     NPT_System::GetCurrentTimeStamp(now);
@@ -480,7 +480,7 @@ PLT_CtrlPoint::ProcessHttpRequest(NPT_HttpRequest&              request,
     PLT_DeviceData*              device = NULL;
     NPT_String                   content_type;
 
-    NPT_AutoLock lock(m_Subscribers);
+    NPT_AutoLock lock_subs(m_Subscribers);
 
     NPT_String method   = request.GetMethod();
     NPT_String uri      = request.GetUrl().GetPath();
@@ -719,7 +719,7 @@ PLT_CtrlPoint::ProcessSsdpNotify(NPT_HttpRequest&              request,
         if (nts->Compare("ssdp:byebye", true) == 0) {
             PLT_DeviceDataReference data;
             {
-                NPT_AutoLock lock(m_Devices);
+                NPT_AutoLock lock_devices(m_Devices);
                 NPT_ContainerFind(m_Devices, PLT_DeviceDataFinder(uuid), data);
                 if (!data.IsNull()) {
                     m_Devices.Remove(data);
@@ -861,7 +861,7 @@ PLT_CtrlPoint::ProcessGetSCPDResponse(NPT_Result               res,
 {
     PLT_DeviceReadyIterator device_tester;   
     NPT_String              scpd;
-    NPT_AutoLock            lock(m_Devices);
+    NPT_AutoLock            lock_devices(m_Devices);
 
     NPT_LOG_FINER_1("CtrlPoint received SCPD response (result = %d)", res);
 

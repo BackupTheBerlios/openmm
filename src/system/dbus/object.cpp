@@ -29,6 +29,9 @@
 #include <map>
 #include <dbus/dbus.h>
 
+#include <cstdlib>
+#include <cstring>
+
 #include "message_p.h"
 #include "server_p.h"
 #include "connection_p.h"

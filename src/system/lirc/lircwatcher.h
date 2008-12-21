@@ -25,6 +25,8 @@
 #include <lirc/lirc_client.h>
 
 #include <map>
+#include <string>
+
 using namespace std;
 
 /**

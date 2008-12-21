@@ -206,7 +206,7 @@ StreamPlayer::zoom(bool in)
 
 
 void
-StreamPlayer::showOsd(string text, uint duration)
+StreamPlayer::showOsd(string text, unsigned int duration)
 {
     TRACE("StreamPlayer::showOsd() with text: %s for %i sec", text.c_str(), duration);
     m_engine->showOsd(text);
@@ -218,7 +218,7 @@ StreamPlayer::showOsd(string text, uint duration)
 /* ---------------------------------------------------------------------------------- */
 
 
-OsdTimer::OsdTimer(StreamPlayer *streamPlayer, uint sec)
+OsdTimer::OsdTimer(StreamPlayer *streamPlayer, unsigned int sec)
  : Timer(sec)
 {
     TRACE("OsdTimer::OsdTimer() set to %i sec", sec);

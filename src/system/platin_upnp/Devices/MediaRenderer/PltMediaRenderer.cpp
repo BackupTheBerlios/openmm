@@ -2,7 +2,7 @@
 |
 |   Platinum - AV Media Renderer Device
 |
-|   Copyright (c) 2004-2006 Sylvain Rebaud
+|   Copyright (c) 2004-2008 Sylvain Rebaud
 |   Author: Sylvain Rebaud (sylvain@rebaud.com)
 |
 ****************************************************************/
@@ -14,7 +14,7 @@
 #include "PltMediaRenderer.h"
 #include "PltService.h"
 
-NPT_SET_LOCAL_LOGGER("platinum.media.renderer")
+//NPT_SET_LOCAL_LOGGER("platinum.media.renderer")
 
 /*----------------------------------------------------------------------
 |   external references
@@ -127,7 +127,6 @@ PLT_MediaRenderer::OnAction(PLT_ActionReference&          action,
 
     /* parse the action name */
     NPT_String name = action->GetActionDesc()->GetName();
-    NPT_LOG_INFO(name);
 
     /* Is it a ConnectionManager Service Action ? */
     if (name.Compare("GetCurrentConnectionIDs", true) == 0) {
@@ -283,8 +282,6 @@ PLT_MediaRenderer::OnPause(PLT_ActionReference& /* action */)
 NPT_Result
 PLT_MediaRenderer::OnPlay(PLT_ActionReference& /* action */)
 {
-    NPT_LOG_INFO("PLT_MediaRenderer::OnPlay()\n");
-
     return NPT_SUCCESS;
 }
 

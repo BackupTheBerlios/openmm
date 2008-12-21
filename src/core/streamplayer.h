@@ -60,7 +60,7 @@ public:
     void select() { m_engine->select(); }
 
     // interface to StreamPlayerEngine
-    void showOsd(string text, uint duration);
+    void showOsd(string text, unsigned int duration);
     void hideOsd() { m_engine->hideOsd(); }
     void switchAudioDevice(int maxDeviceNum) { m_engine->switchAudioDevice(maxDeviceNum); }
 
@@ -102,7 +102,7 @@ private:
 class OsdTimer : public Timer
 {
 public:
-    OsdTimer(StreamPlayer *streamPlayer, uint sec = 0);
+    OsdTimer(StreamPlayer *streamPlayer, unsigned int sec = 0);
 
 //     void setTimeout(uint sec) { m_timout = sec; }
 //     void start();

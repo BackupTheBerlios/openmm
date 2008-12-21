@@ -2,7 +2,7 @@
 |
 |   Platinum - HTTP Client Tasks
 |
-|   Copyright (c) 2004-2006 Sylvain Rebaud
+|   Copyright (c) 2004-2008 Sylvain Rebaud
 |   Author: Sylvain Rebaud (sylvain@rebaud.com)
 |
  ****************************************************************/
@@ -85,7 +85,6 @@ PLT_HttpClientSocketTask::~PLT_HttpClientSocketTask()
 NPT_Result
 PLT_HttpClientSocketTask::AddRequest(NPT_HttpRequest* request)
 {
-    NPT_AutoLock lock(m_Requests);
     return m_Requests.Push(request);
 }
 
@@ -95,7 +94,6 @@ PLT_HttpClientSocketTask::AddRequest(NPT_HttpRequest* request)
 NPT_Result
 PLT_HttpClientSocketTask::GetNextRequest(NPT_HttpRequest*& request, NPT_Timeout timeout)
 {
-    NPT_AutoLock lock(m_Requests);
     return m_Requests.Pop(request, timeout);
 }
 
@@ -105,10 +103,9 @@ PLT_HttpClientSocketTask::GetNextRequest(NPT_HttpRequest*& request, NPT_Timeout 
 void
 PLT_HttpClientSocketTask::DoRun()
 {
-    NPT_HttpClient         client(m_Connector = new PLT_HttpTcpConnector());
     NPT_HttpRequest*       request;
     NPT_HttpRequestContext context;
-    bool                   reuse_connector = true;
+    bool                   reuse_connector = false;
     NPT_Result             res;
 
     do {
@@ -131,11 +128,11 @@ retry:
 
             // create a new connector if necessary
             if (!reuse_connector) {
-                client.SetConnector(m_Connector = new PLT_HttpTcpConnector());
+                m_Client.SetConnector(m_Connector = new PLT_HttpTcpConnector());
             }
 
             // send request
-            res = client.SendRequest(*request, response);
+            res = m_Client.SendRequest(*request, response);
 
             // retry if we reused a previous connector
             if (NPT_FAILED(res) && reuse_connector) {

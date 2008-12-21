@@ -65,7 +65,7 @@ MediaPlayer::stop()
 
 
 void
-MediaPlayer::showOsd(string text, uint duration)
+MediaPlayer::showOsd(string text, unsigned int duration)
 {
     StreamPlayer::instance()->showOsd(text, duration);
 }

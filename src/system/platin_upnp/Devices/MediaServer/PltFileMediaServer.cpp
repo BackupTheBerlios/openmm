@@ -2,7 +2,7 @@
 |
 |   Platinum - AV Media Server Device
 |
-|   Copyright (c) 2004-2006 Sylvain Rebaud
+|   Copyright (c) 2004-2008 Sylvain Rebaud
 |   Author: Sylvain Rebaud (sylvain@rebaud.com)
 |
 ****************************************************************/
@@ -521,15 +521,15 @@ PLT_FileMediaServer::BuildFromFilePath(const NPT_String&        filepath,
                     /* assign album art uri if we haven't yet */
                     /* prepend the album art base URI and url encode it */ 
                     if (object->m_ExtraInfo.album_art_uri.GetLength() == 0) {
-                        NPT_HttpUrl uri = m_AlbumArtBaseUri;
-                        NPT_HttpUrlQuery query;
-                        query.AddField("path", url);
-                        uri.SetHost(*ip);
-                        uri.SetQuery(query.ToString());
+                        NPT_HttpUrl art_uri = m_AlbumArtBaseUri;
+                        NPT_HttpUrlQuery art_query;
+                        art_query.AddField("path", url);
+                        art_uri.SetHost(*ip);
+                        art_uri.SetQuery(art_query.ToString());
                         //uri.SetPath(uri.GetPath() + url);
 
                         object->m_ExtraInfo.album_art_uri = 
-                            NPT_Uri::PercentEncode(uri.ToString(), 
+                            NPT_Uri::PercentEncode(art_uri.ToString(), 
                                                    NPT_Uri::UnsafeCharsToEncode);
                     }
 

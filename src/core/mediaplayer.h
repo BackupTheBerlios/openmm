@@ -54,7 +54,7 @@ public:
 
     void play(Title* title);
     void stop();
-    void showOsd(string text, uint duration);
+    void showOsd(string text, unsigned int duration);
     void hideOsd();
 };
 

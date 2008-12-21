@@ -2,7 +2,7 @@
 |
 |   Platinum - HTTP Client Tasks
 |
-|   Copyright (c) 2004-2006 Sylvain Rebaud
+|   Copyright (c) 2004-2008 Sylvain Rebaud
 |   Author: Sylvain Rebaud (sylvain@rebaud.com)
 |
  ****************************************************************/
@@ -22,6 +22,7 @@
 +---------------------------------------------------------------------*/
 class PLT_HttpTcpConnector : public NPT_HttpClient::Connector
 {
+    virtual ~PLT_HttpTcpConnector() {}
     virtual NPT_Result Connect(const char*                   hostname, 
                                NPT_UInt16                    port, 
                                NPT_Timeout                   connection_timeout,
@@ -73,9 +74,10 @@ private:
     NPT_Result GetNextRequest(NPT_HttpRequest*& request, NPT_Timeout timeout);
 
 protected:
-    bool                                    m_WaitForever;
-    NPT_Lock<NPT_Queue<NPT_HttpRequest> >   m_Requests;
-    PLT_HttpTcpConnector*                   m_Connector; //TBD: we need a lock to be able to abort
+    NPT_HttpClient              m_Client;
+    bool                        m_WaitForever;
+    NPT_Queue<NPT_HttpRequest>  m_Requests;
+    PLT_HttpTcpConnector*       m_Connector; //TBD: we need a lock to be able to abort
 };
 
 /*----------------------------------------------------------------------

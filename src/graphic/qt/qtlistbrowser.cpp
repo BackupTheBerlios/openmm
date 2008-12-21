@@ -25,6 +25,7 @@
 #include <qlayout.h>
 #include <qheader.h>
 
+#include <algorithm>
 
 QtListBrowser::QtListBrowser(Page *parent, vector<string> *cols)
 {
