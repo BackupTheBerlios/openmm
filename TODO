@@ -1,0 +1,10 @@
+add cmake checks for (depending on compile time options for the different plugins):
+libplatinumupnp
+mplayer as runtime dependency
+
+names:
+JammTV   - TV server
+JammSam  - server
+JammS
+JammUp   - upnp library interface
+JammU

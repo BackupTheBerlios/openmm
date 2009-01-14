@@ -1,0 +1,57 @@
+next steps:
+1. put server into browse tree
+2. AVTransport and controls (QAbstractButton, QButtonGroup)
+3. renderer chooser
+4. playlist
+5. slider (QAbstractSlider) and seecking
+6. status box with time and meta info
+7. volume and AVRender controls
+8. resume
+
+------------------------------------------------------
+
+optimization:
+1. lazy population of data model:
+1.1. hasChildren() checks if parent is container (empty containers o.k.?)
+    advantage: caching is easier
+    disadvantage: in case of children two browse queries are requiered 
+(however, the first is most likely already in the cache)
+1.2. set hasChildren() unconditionally true
+
+2. performance optimization for large amounts of data
+browse n objects (first slice)
+-> what's best n: display dependend? double size of rows in display? 
+smaller than display?
+N = number of total objects in container
+if n < N:
+  canFetchMore() should return true (set a flag in cache)
+  fetchMore() browses next slice ...
+
+3. bredcrump view
+4. more intelligent caching (aging cache) to save memory
+5. parent(): reduce number of browse queries
+
+------------------------------------------------------
+
+future steps:
+1. look & feel, icon decoration (for servers and album covers)
+2. theming
+3. dynamic configuration of layout (floating boxes)
+4. plugins: webbrowser, lirc
+5. input methods: touch screen, gestures, infrared
+6. globbing '*' in bredcrump view
+7. search box
+8. commandline controler (jammcc)
+9. flexible integration of controler, renderer, and servers
+10. time markers (noad)
+11. drap and drop of local files (use local media server or URI file://)
+12. upload of files to media server
+13. exclusive locking of a renderer for one control
+
+concepts/ideas:
+1. replace upnp browsing with html browsing. special meta tag: 
+   "play with upnp-renderer(server_uuid, object_id)" and pass this from
+   the webbrowser-part selection to the renderer part.
+   also a flag is needed to indicate, wether upnp browsing should be
+   replaced with web browsing.
+

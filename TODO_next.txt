@@ -1,5 +1,0 @@
-1. OSD mit Titel der Sendung
-2. Zeitbalken im OSD
-3. ffw, rew
-4. cut marks
-

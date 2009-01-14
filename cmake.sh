@@ -1,8 +1,11 @@
 #!/bin/sh
 
-if [ ! -d ../jammbin ]
+SRCDIR=${PWD}
+BINDIR=../jammbin
+
+if [ ! -d $BINDIR ]
 then
-    mkdir ../jammbin
+    mkdir -p $BINDIR
 fi
-cd ../jammbin
-cmake -G KDevelop3 ../jamm 
+cd $BINDIR
+cmake -G KDevelop3 ${SRCDIR}
