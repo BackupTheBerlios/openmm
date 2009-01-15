@@ -83,15 +83,13 @@ UpnpMediaRenderer::Run()
     while(1) {
         Wait(m_delay);
         if (m_run) {
-            m_engine->getPosition(m_curPosition, m_curPercentage);
-            // TODO: set State Variables according to current position
-            NPT_String pos, per(m_curPercentage);
-            PLT_Didl::FormatTimeStamp(pos, m_curPosition);
-            m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
+            int curPosition;
+            m_engine->getPosition(curPosition);
+            // set State Variables according to current position
+            NPT_String pos;
+            PLT_Didl::FormatTimeStamp(pos, curPosition);
             m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
-            // TODO: segfaults when setting these state variables
-//             m_AvTransport->SetStateVariable("RelativeCounterPosition", (char*)per);
-//             m_AvTransport->SetStateVariable("AbsoluteCounterPosition", (char*)per);
+            m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
         }
         if (m_kill) {
             break;
@@ -263,23 +261,27 @@ UpnpMediaRenderer::OnSetAVTransportURI(PLT_ActionReference& action)
     m_AvTransport->SetStateVariable("CurrentTrackURI", m_currentUri);
     m_engine->setMrl((char*)m_currentUri);
     
-    // TODO: get track duration from meta data and set state variable "CurrentTrackDuration"
     action->GetArgumentValue("CurrentURIMetaData", m_currentUriMetaData);
     m_AvTransport->SetStateVariable("CurrentURIMetaData", m_currentUriMetaData);
     m_AvTransport->SetStateVariable("CurrentTrackMetaData", m_currentUriMetaData);
     TRACE("UpnpMediaRenderer::OnSetAVTransportURI() CurrentTrackMetaData: %s", (char*)m_currentUriMetaData);
     
+    // get track duration from meta data and set state variable "CurrentTrackDuration"
     PLT_MediaItem* item;
     PLT_MediaObjectListReference didl;
     PLT_Didl::FromDidl(m_currentUriMetaData, didl);
     item = (PLT_MediaItem*)(*didl->GetFirstItem());
     int duration = item->m_Resources.GetFirstItem()->m_Duration;
+    // if no track length is in the metadata, try to read it from the stream
+    // TODO: This delay is just a cheap replacement for proper synchronisation
+    Wait(200);
+    if (duration <= 0) {
+        m_engine->getLength(duration);
+    }
     NPT_String timestamp;
     PLT_Didl::FormatTimeStamp(timestamp, duration);
     m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
     m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
     
-    // TODO: This delay is just a cheap replacement for proper synchronisation
-    Wait(100);
     return NPT_SUCCESS;
 }

@@ -34,7 +34,15 @@ EngineMplayer::EngineMplayer()
 {
     TRACE("EngineMplayer::EngineMplayer()");
 //     m_mplayerOptions = "-fs -input file=" + m_mplayerFifoIn + " -quiet";  // full screen
-    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet";
+    // also usefull options:
+    // -wid <window ID> (also see -guiwid) (X11, OpenGL and DirectX only)
+    // -ontop 
+    // -stop-xscreensaver 
+    // -nolirc
+    // -really-quiet
+    // -fixed-vo
+    // -fs
+    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -fs";
     // TODO: error handling after system call
     int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
     err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR);
@@ -46,13 +54,16 @@ EngineMplayer::EngineMplayer()
     if (!m_mplayerFifoStreamOut) {
         TRACE("EngineMplayer::EngineMplayer() error opening: %s", m_mplayerFifoOut.c_str());
     }
+    // start mplayer in idle-mode in a seperate thread
+    Start();
 }
 
 
 EngineMplayer::~EngineMplayer()
 {
-    // TODO: this dtor is not called, why?
+    // TODO: dtor is never called, why?
     TRACE("EngineMplayer::~EngineMplayer()");
+    m_mplayerFifoStreamIn << "quit" << endl;
     m_mplayerFifoStreamIn.close();
     m_mplayerFifoStreamOut.close();
     // TODO: error handling after system call
@@ -78,9 +89,7 @@ void
 EngineMplayer::play()
 {
     TRACE("EngineMplayer::play()");
-    // TODO: better synchronize the threads to get rid of those Wait()'s
-    Wait(100);
-    Start();
+//     m_mplayerFifoStreamIn << "play" << endl;
 }
 
 void
@@ -101,47 +110,67 @@ EngineMplayer::setMrl(string mrl)
 {
     TRACE("EngineMplayer::setMrl() to: %s", mrl.c_str());
     // TODO: lock m_mrl
-    m_mrl = mrl;
+//     m_mrl = mrl;
+    // TODO: should be "pause loadfile" and Play actually starts playing
+    m_mplayerFifoStreamIn << "loadfile " << mrl.c_str() << endl;
 }
 
 void
 EngineMplayer::stop()
 {
     TRACE("EngineMplayer::stop()");
-    m_mplayerFifoStreamIn << "quit" << endl;
+    // TODO: this doesn't work properly
+    m_mplayerFifoStreamIn << "pause seek 0 1" << endl;
 }
 
 
 void
-EngineMplayer::getPosition(int &timesec, int &percent)
+EngineMplayer::getPosition(int &seconds)
 {
     TRACE("EngineMplayer::getPosition()");
-    string mplayerOut;
-    queryMplayer(mplayerOut, "get_time_pos");
-    // TODO: replace 18 by size() ...
-    timesec = atof(mplayerOut.substr(18).c_str());
-    
-    queryMplayer(mplayerOut, "get_percent_pos");
-    TRACE("EngineMplayer::getPosition() percent_pos: %s", mplayerOut.c_str());
-    percent = 99;
+    seconds = atof(queryMplayer("get_time_pos").c_str());
 }
+
+
+void
+EngineMplayer::getLength(int &seconds)
+{
+    TRACE("EngineMplayer::getLength()");
+    seconds = atof(queryMplayer("get_time_length").c_str());
+}
+
 
 void
 EngineMplayer::Run()
 {
-    // TODO: error handling after system call
-    int err = system((m_mplayerBin + " " + m_mplayerOptions + " '" + m_mrl
-                      + "' 1>" + m_mplayerFifoOut).c_str());
-    //     m_mplayerFifoStream << "loadfile " << mrl.c_str() << endl;
+/*    int err = system((m_mplayerBin + " " + m_mplayerOptions + " '" + m_mrl
+                      + "' 1>" + m_mplayerFifoOut).c_str());*/
+    int err = system((m_mplayerBin + " " + m_mplayerOptions + " 1>" + m_mplayerFifoOut).c_str());
+    if (err) {
+        // TODO: error handling after system call
+    }
 }
 
+// also usefull:
+// use_master
+// vo_fullscreen, get_vo_fullscreen
+// vo_ontop
+// volume
+// speed_set, speed_mult, speed_incr
+// get_property, set_property
+// loadfile, loadlist
+// get_audio_bitrate, get_video_bitrate
+// dvdnav
+// [brightness|contrast|gamma|hue|saturation] <value> [abs]
 
-void
-EngineMplayer::queryMplayer(string &answer, const string &query)
+
+string
+EngineMplayer::queryMplayer(const string &query)
 {
     // TODO: lock the whole method, it will be called from position polling thread
     //       and other methods in the main thread.
 //     m_queryMplayerMutex.Lock();
+//     m_mplayerFifoStreamIn << "pausing_keep " << query << endl;
     m_mplayerFifoStreamIn << query << endl;
     TRACE("EngineMplayer::queryMplayer() query: %s", query.c_str());
     string line;
@@ -155,8 +184,9 @@ EngineMplayer::queryMplayer(string &answer, const string &query)
                 break;
         }
     }
-    answer = line;
+    string answer = line.substr(line.find("=")+1);
     TRACE("EngineMplayer::queryMplayer() m_queryResult: %s", answer.c_str());
 //     m_queryMplayerMutex.Unlock();
+    return answer;
 }
 

@@ -48,7 +48,8 @@ public:
     virtual void next() = 0;
     virtual void previous() = 0;
     
-    virtual void getPosition(int &timesec, int &percent) = 0;
+    virtual void getPosition(int &seconds) = 0;
+    virtual void getLength(int &seconds) = 0;
 };
 
 #endif

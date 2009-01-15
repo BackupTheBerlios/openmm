@@ -48,13 +48,14 @@ public:
     virtual void seek(long seekval);
     virtual void setMrl(string mrl);
     virtual void stop();
-    virtual void getPosition(int &timesec, int &percent);
+    virtual void getPosition(int &seconds);
+    virtual void getLength(int &seconds);
 
 private:
     virtual void Run();
-    void queryMplayer(string &answer, const string &query);
+    string queryMplayer(const string &query);
     
-    string m_mrl;
+//     string m_mrl;
     string m_mplayerBin;
     string m_mplayerOptions;
     string m_mplayerFifoIn;

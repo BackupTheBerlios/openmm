@@ -77,8 +77,6 @@ private:
     PLT_Service *m_AvRenderingControl;
     
 //     Timer*       m_pollPositionTimer;
-    int          m_curPosition;
-    int          m_curPercentage;
     int          m_pollIntervall;
 };
 

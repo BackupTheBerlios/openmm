@@ -155,7 +155,7 @@ UpnpController::playButtonPressed()
     // send SetAVTransportURI packet
     m_AVTransportLock.SetValue(0);
     m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
-    m_AVTransportLock.WaitUntilEquals(1, 30000);
+//     m_AVTransportLock.WaitUntilEquals(1, 30000);
     // send Play packet ...
     m_mediaController->Play(m_curMediaRenderer, 0, "1", NULL);
 }
