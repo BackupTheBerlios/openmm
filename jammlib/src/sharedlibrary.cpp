@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Jörg Bakker   				   *
+ *   Copyright (C) 2006 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,3 +16,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#include "sharedlibrary.h"
+#include "debug.h"
+
+#include <dlfcn.h>
+
+JSharedLibrary::JSharedLibrary(string filename)
+{
+    m_libHandle = dlopen(filename.c_str(), RTLD_NOW);
+    if (!m_libHandle) {
+        TRACE("JSharedLibrary::JSharedLibrary() loading failed: %s", dlerror());
+        return;
+    }
+    TRACE("JSharedLibrary::JSharedLibrary() opened library: %s", filename.c_str());
+    dlerror();  // clear any pending error.
+}
+
+
+JSharedLibrary::~JSharedLibrary()
+{
+    dlclose(m_libHandle);
+}
+
+
+void*
+JSharedLibrary::resolve(const char * symb)
+{
+    void* res = dlsym(m_libHandle, symb);
+    char* error;
+    if ((error = dlerror()) != NULL)  {
+        TRACE("JSharedLibrary::JSharedLibrary() could not find symbol %s, error was: %s",
+                 symb, error);
+    }
+    else {
+        TRACE("JSharedLibrary::JSharedLibrary() found symbol %s", symb);
+    }
+    return res;
+}

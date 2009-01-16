@@ -60,6 +60,7 @@ ADD_DEFINITIONS(
 )
 
 TARGET_LINK_LIBRARIES( jammc
+jammlib
 )
 
 INSTALL( TARGETS jammc

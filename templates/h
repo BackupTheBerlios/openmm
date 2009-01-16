@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

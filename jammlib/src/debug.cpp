@@ -12,7 +12,7 @@
 void
 TRACE(const char *msg, ...) {
 #ifdef __DEBUG__
-    static int debug_env = getenv("DEBUG") ? 1 : 0;
+    static int debug_env = getenv("JAMM_DEBUG") ? 1 : 0;
 
     if(debug_env)
     {

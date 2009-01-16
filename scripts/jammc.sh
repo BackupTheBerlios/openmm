@@ -1,2 +1,2 @@
 #!/bin/sh
-DEBUG=1 ../jammbin/jammc/src/jammc
+JAMM_DEBUG=1 ../jammbin/jammc/src/jammc

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "enginemplayer.h"
-#include "debug.h"
+#include <jamm/debug.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -25,24 +25,42 @@
 
 #include <cstdlib>
 
+// TODO: comand line options for jammr
+// TODO: can we determin, which mime types can be played with mplayer?
+// TODO: check for presence of mplayer
+// TODO: check compatibility with mplayer version or with commands available (mplayer -input cmdlist)
+
+// Usefull mplayer commandline options:
+// -wid <window ID> (also see -guiwid) (X11, OpenGL and DirectX only)
+// -ontop 
+// -stop-xscreensaver 
+// -nolirc
+// -really-quiet
+// -fixed-vo
+// -fs
+
+// Usefull mplayer commands:
+// use_master
+// vo_fullscreen, get_vo_fullscreen
+// vo_ontop
+// volume
+// speed_set, speed_mult, speed_incr
+// get_property, set_property
+// loadfile, loadlist
+// get_audio_bitrate, get_video_bitrate
+// dvdnav
+// [brightness|contrast|gamma|hue|saturation] <value> [abs]
+
+
 EngineMplayer::EngineMplayer()
 : Engine(),
   m_mplayerBin("mplayer"),
-  // TODO: choose a unique name for the fifos so serveral instances of jammr can be run.
+  // TODO: choose a unique name for the fifos so serveral instances of jammr can run.
   m_mplayerFifoIn("/tmp/jammr_mplayer_fifo_in"),
   m_mplayerFifoOut("/tmp/jammr_mplayer_fifo_out")
 {
     TRACE("EngineMplayer::EngineMplayer()");
-//     m_mplayerOptions = "-fs -input file=" + m_mplayerFifoIn + " -quiet";  // full screen
-    // also usefull options:
-    // -wid <window ID> (also see -guiwid) (X11, OpenGL and DirectX only)
-    // -ontop 
-    // -stop-xscreensaver 
-    // -nolirc
-    // -really-quiet
-    // -fixed-vo
-    // -fs
-    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -fs";
+    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -fs";
     // TODO: error handling after system call
     int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
     err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR);
@@ -73,54 +91,72 @@ EngineMplayer::~EngineMplayer()
 
 
 void
-EngineMplayer::next()
+EngineMplayer::setMrl(string mrl)
 {
-    TRACE("EngineMplayer::next()");
+    TRACE("EngineMplayer::setMrl() to: %s", mrl.c_str());
+    // TODO: lock m_mrl
+    m_mrl = mrl;
 }
 
-void
-EngineMplayer::pause()
-{
-    TRACE("EngineMplayer::pause()");
-    m_mplayerFifoStreamIn << "pause" << endl;
-}
 
 void
 EngineMplayer::play()
 {
     TRACE("EngineMplayer::play()");
-//     m_mplayerFifoStreamIn << "play" << endl;
+    switch(m_transportState) {
+    case Jamm::TS_STOPPED:
+    case Jamm::TS_PAUSED_PLAY:
+    case Jamm::TS_TRANSITIONING:
+        m_mplayerFifoStreamIn << "loadfile " << m_mrl.c_str() << endl;
+        // TODO: check if media is loaded successfully and running
+        m_transportState = Jamm::TS_PLAYING;
+        break;
+    }
 }
 
-void
-EngineMplayer::previous()
-{
-    TRACE("EngineMplayer::previous()");
-}
 
 void
-EngineMplayer::seek(long seekval)
+EngineMplayer::pause()
 {
-    TRACE("EngineMplayer::seek() to second: %i", seekval);
-    m_mplayerFifoStreamIn << "seek " << seekval << " 2" << endl;
+    TRACE("EngineMplayer::pause()");
+    switch(m_transportState) {
+    case Jamm::TS_PLAYING:
+        m_mplayerFifoStreamIn << "pause" << endl;
+        m_transportState = Jamm::TS_PAUSED_PLAY;
+        break;
+    }
 }
 
-void
-EngineMplayer::setMrl(string mrl)
-{
-    TRACE("EngineMplayer::setMrl() to: %s", mrl.c_str());
-    // TODO: lock m_mrl
-//     m_mrl = mrl;
-    // TODO: should be "pause loadfile" and Play actually starts playing
-    m_mplayerFifoStreamIn << "loadfile " << mrl.c_str() << endl;
-}
 
 void
 EngineMplayer::stop()
 {
     TRACE("EngineMplayer::stop()");
-    // TODO: this doesn't work properly
-    m_mplayerFifoStreamIn << "pause seek 0 1" << endl;
+    // TODO: load a still picture instead of turning brightness down
+    m_mplayerFifoStreamIn << "pause" << endl;
+    m_mplayerFifoStreamIn << "pause" << endl;
+}
+
+
+void
+EngineMplayer::seek(int seconds)
+{
+    TRACE("EngineMplayer::seek() to second: %i", seconds);
+    m_mplayerFifoStreamIn << "seek " << seconds << " 2" << endl;
+}
+
+
+void
+EngineMplayer::next()
+{
+    TRACE("EngineMplayer::next()");
+}
+
+
+void
+EngineMplayer::previous()
+{
+    TRACE("EngineMplayer::previous()");
 }
 
 
@@ -150,18 +186,6 @@ EngineMplayer::Run()
         // TODO: error handling after system call
     }
 }
-
-// also usefull:
-// use_master
-// vo_fullscreen, get_vo_fullscreen
-// vo_ontop
-// volume
-// speed_set, speed_mult, speed_incr
-// get_property, set_property
-// loadfile, loadlist
-// get_audio_bitrate, get_video_bitrate
-// dvdnav
-// [brightness|contrast|gamma|hue|saturation] <value> [abs]
 
 
 string

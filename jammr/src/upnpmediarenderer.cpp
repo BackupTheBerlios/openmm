@@ -19,20 +19,11 @@
  ***************************************************************************/
 #include "upnpmediarenderer.h"
 #include "engine.h"
-#include "debug.h"
 
+#include <jamm/debug.h>
 #include <platinum/PltUPnP.h>
 #include <platinum/PltDidl.h>
 #include <stdlib.h>
-
-// NPT_SET_LOCAL_LOGGER("platinum.core.upnp")
-// NPT_SET_LOCAL_LOGGER("platinum.media.renderer")
-// NPT_SET_LOCAL_LOGGER("platinum.core.action")
-// NPT_SET_LOCAL_LOGGER("platinum.core.event")
-// NPT_SET_LOCAL_LOGGER("platinum.core.service")
-// NPT_SET_LOCAL_LOGGER("platinum.core.statevariable")
-// NPT_SET_LOCAL_LOGGER("platinum.core.devicedata")
-// NPT_SET_LOCAL_LOGGER("platinum.core.devicehost")
 
 // TODO: timer implementation isn't correct:
 //       1. killing and restarting doesn't work, seems that additional threads are started when restarting

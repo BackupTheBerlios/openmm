@@ -16,3 +16,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#ifndef JAMMUPNPAV_H
+#define JAMMUPNPAV_H
+
+namespace Jamm {
+
+enum TransportState {TS_PLAYING, TS_STOPPED, TS_PAUSED_PLAY, TS_TRANSITIONING, TS_NO_MEDIA_PRESENT};
+
+}
+#endif

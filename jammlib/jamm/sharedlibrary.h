@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Jörg Bakker   				   *
+ *   Copyright (C) 2006 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,3 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef SHAREDLIBRARY_H
+#define SHAREDLIBRARY_H
+
+#include <string>
+using namespace std;
+
+/**
+Utility class for handling shared libraries.
+
+	@author Jörg Bakker <joerg@hakker.de>
+*/
+
+// TODO: add code to automatically load all exported symbols from the shared library.
+
+class JSharedLibrary{
+public:
+    JSharedLibrary(string filename);
+    ~JSharedLibrary();
+
+    void* resolve(const char * symb);
+
+private:
+    void *m_libHandle;
+};
+
+#endif

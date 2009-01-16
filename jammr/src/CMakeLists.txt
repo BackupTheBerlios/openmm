@@ -1,5 +1,4 @@
 SET( JAMMR_SRCS
-debug.cpp
 enginemplayer.cpp
 # enginexine.cpp
 main.cpp
@@ -24,6 +23,7 @@ ${JAMMR_SRCS}
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( jammr
 /usr/local/lib/libplatinum_upnp.so
+jammlib
 )
 
 
