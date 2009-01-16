@@ -1,0 +1,185 @@
+<ui version="4.0" >
+ <class>ControllerGui</class>
+ <widget class="QTabWidget" name="ControllerGui" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>TabWidget</string>
+  </property>
+  <property name="tabPosition" >
+   <enum>QTabWidget::West</enum>
+  </property>
+  <property name="currentIndex" >
+   <number>0</number>
+  </property>
+  <widget class="QWidget" name="controllerTab" >
+   <attribute name="title" >
+    <string>Tab 1</string>
+   </attribute>
+   <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <item>
+     <widget class="QListView" name="listView" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTreeView" name="m_browserTreeView" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+        <horstretch>5</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="alternatingRowColors" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="m_controllerGroup" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout" >
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout" >
+           <item>
+            <widget class="QPushButton" name="m_skipForwardButton" >
+             <property name="text" >
+              <string>SkipF</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_seekForwardButton" >
+             <property name="text" >
+              <string>FF</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_playButton" >
+             <property name="text" >
+              <string>Play</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_stopButton" >
+             <property name="text" >
+              <string>Stop</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+             <property name="checked" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_pauseButton" >
+             <property name="text" >
+              <string>Pause</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_seekBackwardButton" >
+             <property name="text" >
+              <string>Rew</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_skipBackwardButton" >
+             <property name="text" >
+              <string>SkipB</string>
+             </property>
+             <property name="checkable" >
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QSlider" name="m_seekSlider" >
+           <property name="orientation" >
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QSlider" name="m_volumeSlider" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="m_rendererListView" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="resizeMode" >
+          <enum>QListView::Fixed</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="settingsTab" >
+   <attribute name="title" >
+    <string>Tab 2</string>
+   </attribute>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
