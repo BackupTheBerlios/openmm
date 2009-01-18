@@ -24,11 +24,13 @@
 #include <sys/fcntl.h>
 
 #include <cstdlib>
+#include <sstream>
 
 // TODO: comand line options for jammr
-// TODO: can we determin, which mime types can be played with mplayer?
+// TODO: can we determine, which mime types can be played with mplayer?
 // TODO: check for presence of mplayer
 // TODO: check compatibility with mplayer version or with commands available (mplayer -input cmdlist)
+
 
 // Usefull mplayer commandline options:
 // -wid <window ID> (also see -guiwid) (X11, OpenGL and DirectX only)
@@ -38,6 +40,85 @@
 // -really-quiet
 // -fixed-vo
 // -fs
+
+MplayerThread::MplayerThread()
+:m_mplayerBin("mplayer"),
+  // TODO: choose a unique name for the fifos so serveral instances of jammr can run.
+m_mplayerFifoIn("/tmp/jammr_mplayer_fifo_in"),
+m_mplayerFifoOut("/tmp/jammr_mplayer_fifo_out"),
+m_answerPollIntervall(20)
+{
+    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -fs";
+    // TODO: error handling after system call
+    int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
+    err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR | O_NONBLOCK);
+    m_mplayerFifoStreamIn.open(m_mplayerFifoIn.c_str());
+    if (!m_mplayerFifoStreamIn) {
+        TRACE("MplayerThread::MplayerThread() error opening: %s", m_mplayerFifoIn.c_str());
+    }
+    m_mplayerFifoStreamOut.open(m_mplayerFifoOut.c_str());
+    if (!m_mplayerFifoStreamOut) {
+        TRACE("MplayerThread::MplayerThread() error opening: %s", m_mplayerFifoOut.c_str());
+    }
+}
+
+
+MplayerThread::~MplayerThread()
+{
+    TRACE("EngineMplayer::~MplayerThread()");
+    m_mplayerFifoStreamIn << "quit" << endl;
+    // TODO: after quit wait(), waitpid() <sys/wait.h> for mplayer to finish
+    //       then kill mplayer when it doesn't want to quit
+    m_mplayerFifoStreamIn.close();
+    m_mplayerFifoStreamOut.close();
+    // TODO: error handling after system call
+    int err = unlink(m_mplayerFifoIn.c_str());
+    err = unlink(m_mplayerFifoOut.c_str());
+}
+
+
+void
+MplayerThread::run()
+{
+    int err = system((m_mplayerBin + " " + m_mplayerOptions + " 1>" + m_mplayerFifoOut).c_str());
+    // now run() thread goes into main loop of mplayer, until mplayer returns after issuing "quit" command
+    if (err) {
+        // TODO: error handling after system call
+    }
+}
+
+
+void
+MplayerThread::command(const string& command)
+{
+    m_mplayerFifoStreamIn << command << endl;
+    TRACE("MplayerThread::command() command: %s", command.c_str());
+}
+
+
+string
+MplayerThread::answer(int timeout, string searchKey)
+{
+    string line;
+    while (timeout > 0 && getline(m_mplayerFifoStreamOut, line)) {
+        // mplayer writes answer to stdout starting with "ANS_"
+        if (line.find(searchKey) == 0) {
+            if (searchKey == "ANS_") {
+                return line.substr(line.find("=")+1);
+            }
+            else {
+                return line;
+            }
+        }
+        // TODO: check all answers for an mplayer message that indicates end of track
+        else if (line.length()) {
+            TRACE("MplayerThread::answer(): %s", line.c_str());
+        }
+        usleep(m_answerPollIntervall);
+        timeout -= m_answerPollIntervall;
+    }
+    return "";
+}
 
 // Usefull mplayer commands:
 // use_master
@@ -54,47 +135,25 @@
 
 EngineMplayer::EngineMplayer()
 // : Engine(),
-:m_mplayerBin("mplayer"),
-  // TODO: choose a unique name for the fifos so serveral instances of jammr can run.
-  m_mplayerFifoIn("/tmp/jammr_mplayer_fifo_in"),
-  m_mplayerFifoOut("/tmp/jammr_mplayer_fifo_out")
 {
     TRACE("EngineMplayer::EngineMplayer()");
-    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0";
-    // TODO: error handling after system call
-    int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
-    err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR);
-    m_mplayerFifoStreamIn.open(m_mplayerFifoIn.c_str());
-    if (!m_mplayerFifoStreamIn) {
-        TRACE("EngineMplayer::EngineMplayer() error opening: %s", m_mplayerFifoIn.c_str());
-    }
-    m_mplayerFifoStreamOut.open(m_mplayerFifoOut.c_str());
-    if (!m_mplayerFifoStreamOut) {
-        TRACE("EngineMplayer::EngineMplayer() error opening: %s", m_mplayerFifoOut.c_str());
-    }
     // start mplayer in idle-mode in a seperate thread
-    Start();
+    m_mplayerMutex = new JMutex();
+    m_mplayerThread.start();
 }
 
 
 EngineMplayer::~EngineMplayer()
 {
-    // TODO: dtor is never called, why?
-    TRACE("EngineMplayer::~EngineMplayer()");
-    m_mplayerFifoStreamIn << "quit" << endl;
-    m_mplayerFifoStreamIn.close();
-    m_mplayerFifoStreamOut.close();
-    // TODO: error handling after system call
-    int err = unlink(m_mplayerFifoIn.c_str());
-    err = unlink(m_mplayerFifoOut.c_str());
 }
 
 
 void
 EngineMplayer::setUri(string uri)
 {
-    TRACE("EngineMplayer::setUri() to: %s", uri.c_str());
-    // TODO: lock m_mrl
+//     TRACE("EngineMplayer::setUri() to: %s", uri.c_str());
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     m_uri = uri;
 }
 
@@ -102,12 +161,12 @@ EngineMplayer::setUri(string uri)
 void
 EngineMplayer::load()
 {
-    TRACE("EngineMplayer::load()");
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
     
-    m_mplayerFifoStreamIn << "loadfile " << m_uri.c_str() << endl;
-    // TODO: check if media is loaded successfully and running instead of waiting 400 msec
-    Wait(400);
-//     m_mplayerFifoStreamIn << "brightness 100" << endl;
+    TRACE("EngineMplayer::load()");
+    m_mplayerThread.command("loadfile " + m_uri);
+    //     m_mplayerFifoStreamIn << "brightness 100" << endl;
+    m_mplayerThread.answer(2000, "Starting playback...");
 }
 
 
@@ -115,9 +174,12 @@ EngineMplayer::load()
 void
 EngineMplayer::stop()
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::stop()");
+    m_mplayerThread.command("pause");
 //     m_mplayerFifoStreamIn << "seek 0 2" << endl;  // makes some noise when pressing stop
-    m_mplayerFifoStreamIn << "pause" << endl;
+//     m_mplayerFifoStreamIn << "pause" << endl;
     // TODO: load a still picture instead of turning brightness down
 //     m_mplayerFifoStreamIn << "brightness 0" << endl;
 }
@@ -126,22 +188,31 @@ EngineMplayer::stop()
 void
 EngineMplayer::pause()
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::pause()");
-    m_mplayerFifoStreamIn << "pause" << endl;
+    m_mplayerThread.command("pause");
 }
 
 
 void
 EngineMplayer::seek(int seconds)
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::seek() to second: %i", seconds);
-    m_mplayerFifoStreamIn << "seek " << seconds << " 2" << endl;
+    // TODO: instead of stringstream, do a command(answer) << "seek " << seconds << " 2";
+    stringstream s;
+    s << "seek " << seconds << " 2";
+    m_mplayerThread.command(s.str());
 }
 
 
 void
 EngineMplayer::setSpeed(int nom, int denom)
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::setSpeed() to speed: %i/%i", nom, denom);
     // TODO: implement mplayer's speed setting
 }
@@ -150,6 +221,8 @@ EngineMplayer::setSpeed(int nom, int denom)
 void
 EngineMplayer::next()
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::next()");
 }
 
@@ -157,6 +230,8 @@ EngineMplayer::next()
 void
 EngineMplayer::previous()
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::previous()");
 }
 
@@ -164,55 +239,23 @@ EngineMplayer::previous()
 void
 EngineMplayer::getPosition(int &seconds)
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::getPosition()");
-    // TODO: need a pausing_keep here?
-    seconds = atof(queryMplayer("get_time_pos").c_str());
+    // FIXME: need a pausing_keep here?
+    m_mplayerThread.command("get_time_pos");
+    seconds = atof(m_mplayerThread.answer(200).c_str());
 }
 
 
 void
 EngineMplayer::getLength(int &seconds)
 {
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
     TRACE("EngineMplayer::getLength()");
-    seconds = atof(queryMplayer("get_time_length").c_str());
+    m_mplayerThread.command("get_time_length");
+    // FIXME: this reads at most 100 lines from mplayer out (
+    //        with m_answerPollIntervall set to 20 msec
+    seconds = atof(m_mplayerThread.answer(2000).c_str());
 }
-
-
-void
-EngineMplayer::Run()
-{
-/*    int err = system((m_mplayerBin + " " + m_mplayerOptions + " '" + m_mrl
-                      + "' 1>" + m_mplayerFifoOut).c_str());*/
-    int err = system((m_mplayerBin + " " + m_mplayerOptions + " 1>" + m_mplayerFifoOut).c_str());
-    if (err) {
-        // TODO: error handling after system call
-    }
-}
-
-
-string
-EngineMplayer::queryMplayer(const string &query)
-{
-    // TODO: lock the whole method, it will be called from position polling thread
-    //       and other methods in the main thread.
-//     m_queryMplayerMutex.Lock();
-//     m_mplayerFifoStreamIn << "pausing_keep " << query << endl;
-    m_mplayerFifoStreamIn << query << endl;
-    TRACE("EngineMplayer::queryMplayer() query: %s", query.c_str());
-    string line;
-    // TODO: race condition may occur when reading before mplayer can answer?
-    //       or does getline block, until a line appears on the stream?
-    //       more likely: it only hangs, when mplayer is not running
-    while (getline(m_mplayerFifoStreamOut, line)) {
-//         TRACE("EngineMplayer::queryMplayer(): %s", line.c_str());
-        // mplayer writes answer to stdout starting with "ANS_" >> result;
-        if (line.substr(0, 4) == "ANS_") {
-                break;
-        }
-    }
-    string answer = line.substr(line.find("=")+1);
-    TRACE("EngineMplayer::queryMplayer() m_queryResult: %s", answer.c_str());
-//     m_queryMplayerMutex.Unlock();
-    return answer;
-}
-

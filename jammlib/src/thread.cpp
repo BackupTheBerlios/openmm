@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <unistd.h>
+#include <time.h>
 
 JThread::JThread()
 {
@@ -136,6 +137,17 @@ JThread::suicide()
 }
 
 
+// void
+// JThread::sleep(int msec)
+// {
+//     timespec sleepTime, remainingTime;
+//     
+//     sleepTime.tv_sec = msec / 1000;
+//     sleepTime.tv_nsec = msec % 1000;
+//     nanosleep(&sleepTime, &remainingTime);
+// }
+
+
 JMutex::JMutex()
 {
     TRACE("JMutex::JMutex()");
@@ -174,7 +186,7 @@ JMutexLocker::JMutexLocker(JMutex *mutex)
 JMutexLocker::~JMutexLocker()
 {
     m_mutex->unlock();
-    TRACE("JMutexLocker::~JMutexLocker(), Mutex unlocked.");
+    TRACE("JMutexLocker::~JMutexLocker(), Mutex released.");
 }
 
 

@@ -93,7 +93,7 @@ private:
     
     NPT_String   m_currentUri;
     bool         m_uriChanged;
-    int          m_duration;
+//     int          m_duration;
     
 //     Timer*       m_pollPositionTimer;
     int          m_pollIntervall;

@@ -135,13 +135,6 @@ UpnpController::selectionChanged(const QItemSelection &selected,
         (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
     qDebug() << "UpnpController::selectionChanged() selected objectId:" << (char*) objectRef->objectId;
     
-    PLT_MediaObjectListReference browseResults;
-    m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
-    PLT_MediaObject* object = (*browseResults->GetFirstItem());
-    
-// send SetAVTransportURI packet
-//     m_AVTransportLock.SetValue(0);
-    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
     
 }
 
@@ -159,17 +152,12 @@ UpnpController::playButtonPressed()
         (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
     qDebug() << "UpnpController::playButtonPressed() selected objectId:" << (char*) objectRef->objectId;
     
-/*    PLT_MediaObjectListReference browseResults;
-    m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
-    PLT_MediaObject* object = (*browseResults->GetFirstItem());*/
-    
     // send SetAVTransportURI packet
-/*    m_AVTransportLock.SetValue(0);
-    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);*/
-//     m_AVTransportLock.WaitUntilEquals(1, 30000);
+    PLT_MediaObjectListReference browseResults;
+    m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
+    PLT_MediaObject* object = (*browseResults->GetFirstItem());
+    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
     
-    // send Play packet ...
-    m_mediaController->Play(m_curMediaRenderer, 0, "1", NULL);
 }
 
 
@@ -219,7 +207,9 @@ UpnpController::OnSetAVTransportURIResult(
                                         void*                     /*userdata*/ )
 {
     qDebug() << "UpnpController::OnSetAVTransportURIResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-//     m_AVTransportLock.SetValue(1);
+    // send Play packet ...
+    m_mediaController->Play(m_curMediaRenderer, 0, "1", NULL);
+    
 }
 
 
@@ -280,18 +270,18 @@ UpnpController::OnSeekResult(
 void
 UpnpController::OnGetPositionInfoResult(
                                       NPT_Result               /* res */,
-                                      PLT_DeviceDataReference& device,
+                                      PLT_DeviceDataReference& /*device*/,
                                       PLT_PositionInfo*        info,
                                       void*                    /* userdata */)
 {
-    qDebug() << "UpnpController::OnGetPositionInfoResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-    qDebug() << "UpnpController::OnGetPositionInfoResult() position:" << endl
-        << "track:" << info->track << endl
-        << "track_duration:" << info->track_duration << endl
-        << "rel_time:" << info->rel_time << endl
-        << "abs_time:" << info->abs_time << endl
-        << "rel_count:" << info->rel_count << endl
-        << "abs_count:" << info->abs_count << endl;
+//     qDebug() << "UpnpController::OnGetPositionInfoResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
+    qDebug() << "UpnpController::OnGetPositionInfoResult() duration:" << info->track_duration << "position:" << info->abs_time;
+//         << "track:" << info->track << endl
+//         << "track_duration:" << info->track_duration << endl
+//         << "rel_time:" << info->rel_time << endl
+//         << "abs_time:" << info->abs_time << endl;
+//         << "rel_count:" << info->rel_count << endl
+//         << "abs_count:" << info->abs_count 
     emit setSlider(info->track_duration, info->abs_time);
 }
 

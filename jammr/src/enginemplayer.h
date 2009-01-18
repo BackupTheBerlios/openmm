@@ -24,22 +24,66 @@
 
 #include <fstream>
 #include <jamm/upnpav.h>
-#include <platinum/NptThreads.h>
+#include <jamm/thread.h>
+
+using namespace Jamm;
 
 /**
 	@author 
 */
 
-// TODO: get rid of NPT_Thread here, we don't want to depend on it in libjammr_engine_mplayer.so
+// TODO: need to implement a signal for "end of track"
+
+class MplayerThread : public JThread
+{
+public:
+    MplayerThread();
+    ~MplayerThread();
+    
+    /**
+        string command(const string& command)
+    
+        issue comman to mplayer
+        return the first occurence starting with "ANS_" in the response of mplayer
+        otherwise return empty string
+    
+        command is a blocking method
+    */
+    void command(const string& command);
+    
+    /**
+        string answer(int timeout, string searchKey="ANS_")
+    
+        wait timeout milli seconds for an answer while polling for any mplayer
+        output every m_answerPollIntervall milli seconds
+    */
+    string answer(int timeout, string searchKey="ANS_");
+    
+private:
+    virtual void run();
+    
+    string      m_mplayerBin;
+    string      m_mplayerOptions;
+    string      m_mplayerFifoIn;
+    string      m_mplayerFifoOut;
+    fstream     m_mplayerFifoStreamIn;
+    fstream     m_mplayerFifoStreamOut;
+    
+    int         m_answerPollIntervall;
+};
+
+
+
 // TODO: implementation with popen() instead of fifo, or mkfifo (3) without call to system()
+//       or use something like fstream fp("| cat | cat",ios::in|ios::out);
+//       -> http://okmij.org/ftp/Communications.html
 // TODO: how can we handle mplayer in slave mode on non-POSIX systems?
 // TODO: renderer isn't shutdown properly since running mplayer in a thread and polling through fifo
 //       "q" stops upnp, but jammr still runs and can be interrupted with ^C
-// TODO: don't inherit NPT_Thread, make it a member reference.
 // TODO: implement 2.2.26.CurrentTransportActions, to indicate for example seekable streams
 
 // class EngineMplayer : public Engine, NPT_Thread
-class EngineMplayer : public NPT_Thread
+class EngineMplayer /*: public NPT_Thread*/
 {
 public:
     EngineMplayer();
@@ -61,18 +105,9 @@ public:
     virtual void getLength(int &seconds);
 
 private:
-    virtual void Run();
-    string queryMplayer(const string &query);
-    
-    string      m_uri;
-    string      m_mplayerBin;
-    string      m_mplayerOptions;
-    string      m_mplayerFifoIn;
-    string      m_mplayerFifoOut;
-    fstream     m_mplayerFifoStreamIn;
-    fstream     m_mplayerFifoStreamOut;
-    
-    NPT_Mutex   m_queryMplayerMutex;
+    string          m_uri;
+    MplayerThread   m_mplayerThread;
+    JMutex*         m_mplayerMutex;
 };
 
 #endif

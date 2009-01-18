@@ -40,6 +40,8 @@ public:
     void wait();
     void kill();
     bool isRunning();
+    
+//     void sleep(int msec);
 
 protected:
     // with start() a thread is created and run() is executed in this thread.

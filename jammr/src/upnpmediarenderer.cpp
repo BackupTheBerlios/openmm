@@ -78,6 +78,21 @@ UpnpMediaRenderer::Run()
             NPT_String transportState;
             m_AvTransport->GetStateVariableValue("TransportState", transportState);
             if (transportState == "PLAYING") {
+                // if no track length could be determined in the metadata by OnSetAVTransportURI(),
+                // try to read it from the stream until we get a sensible value
+                NPT_String timestamp;
+                NPT_UInt32 duration;
+                m_AvTransport->GetStateVariableValue("CurrentTrackDuration", timestamp);
+                PLT_Didl::ParseTimeStamp(timestamp, duration);
+                if (duration == 0) {
+                    int dur;
+                    m_engine->getLength(dur);
+                    PLT_Didl::FormatTimeStamp(timestamp, dur);
+                    m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
+                    m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
+                }
+                
+                // read current position from stream
                 int curPosition;
                 m_engine->getPosition(curPosition);
                 // set State Variables according to current position
@@ -157,10 +172,9 @@ UpnpMediaRenderer::OnSetAVTransportURI(PLT_ActionReference& action)
     PLT_MediaObjectListReference didl;
     PLT_Didl::FromDidl(currentUriMetaData, didl);
     item = (PLT_MediaItem*)(*didl->GetFirstItem());
-    // FIXME: m_duration of current track is overwritten.
-    m_duration = item->m_Resources.GetFirstItem()->m_Duration;
-    NPT_String timestamp;
-    PLT_Didl::FormatTimeStamp(timestamp, m_duration);
+    
+    int meta_duration = item->m_Resources.GetFirstItem()->m_Duration;
+    int duration = (meta_duration>0)?meta_duration:0;
     
     /* perform some actions on the engine
     */
@@ -174,10 +188,11 @@ UpnpMediaRenderer::OnSetAVTransportURI(PLT_ActionReference& action)
     m_AvTransport->SetStateVariable("CurrentTrackMetaData", currentUriMetaData);
     TRACE("UpnpMediaRenderer::OnSetAVTransportURI() CurrentTrackMetaData: %s", (char*)currentUriMetaData);
     
+    NPT_String timestamp;
+    PLT_Didl::FormatTimeStamp(timestamp, duration);
     m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
     m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
-    /* set state variables according to the outcome of the actions
-    */
+    
     if (transportState == "NO_MEDIA_PRESENT") {
         m_AvTransport->SetStateVariable("TransportState", "STOPPED");
     }
@@ -234,21 +249,10 @@ UpnpMediaRenderer::OnPlay(PLT_ActionReference& action)
         }
         // TODO: handle changes in speed
         // TODO: handle fractions of speed ('1/2', ...)
-        // TODO: check state of engine (return value of play()).
+        // TODO: check state of engine (return value of load()).
         //       If start playing takes considerable amount of time
         //       set state to "TRANSITIONING" (-> 2.4.9.3. Effect on State, AVTransport spec)
             
-        // TODO: if no track length could be determined in the metadata by OnSetAVTransportURI(),
-        //       try to read it from the stream
-        // TODO: better read duration from state variable then store it in a member variable?
-            if (m_duration <= 0) {
-                m_engine->getLength(m_duration);
-                NPT_String timestamp;
-                PLT_Didl::FormatTimeStamp(timestamp, m_duration);
-                m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
-                m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
-            }
-        
     /* set state variables according to the outcome of the actions
     */
         m_uriChanged = false;
