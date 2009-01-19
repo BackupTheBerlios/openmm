@@ -5,6 +5,7 @@
 #include "upnpcontroller.h"
 
 UpnpController::UpnpController()
+// poll for current position every second
 : m_pollIntervall(1000)
 {
     qDebug() << "UpnpController::UpnpController()";
@@ -141,9 +142,9 @@ UpnpController::selectionChanged(const QItemSelection &selected,
 void
 UpnpController::playButtonPressed()
 {
-//     if (m_curMediaRenderer.isNull()) {
-//         return;
-//     }
+    if (m_curMediaRenderer.IsNull()) {
+        return;
+    }
     
     QModelIndex selected = m_mainWindow->getBrowserTreeSelectionModel()->currentIndex();
     ObjectReference* objectRef = static_cast<ObjectReference*>(selected.internalPointer());
@@ -165,10 +166,11 @@ void
 UpnpController::stopButtonPressed()
 {
     qDebug() << "UpnpController::stopButtonPressed()"; 
-
+    if (m_curMediaRenderer.IsNull()) {
+        return;
+    }
+    
     m_mediaController->Stop(m_curMediaRenderer, 0, NULL);
-    // TODO: may continue polling position instead of explicitely setting the position of the seekSlider
-//     emit setSlider(1, 0);
 }
 
 
@@ -176,24 +178,22 @@ void
 UpnpController::pauseButtonPressed()
 {
     qDebug() << "UpnpController::pauseButtonPressed()"; 
+    if (m_curMediaRenderer.IsNull()) {
+        return;
+    }
     
     m_mediaController->Pause(m_curMediaRenderer, 0, NULL);
 }
-
-    // TODO: make SetAVTransportURI() blocking (in the controller) to avoid
-    //       that Play() is called first. On arthur, m_mrl is empty when starting mplayer!!
-    // See debug protocol on arthur:
-/*
-UpnpController::playButtonPressed() selected objectId: 1128
-UpnpController::OnPlayResult() device: a9aa99d2-64ec-fb9c-a6a3-b91764e2dc67 JammR UPnP Media Renderer 0 0x0
-UpnpController::OnSetAVTransportURIResult() device: a9aa99d2-64ec-fb9c-a6a3-b91764e2dc67 JammR UPnP Media Renderer
-UpnpController::pollPositionInfo()
-*/
 
 
 void
 UpnpController::sliderMoved(int position)
 {
+    qDebug() << "UpnpController::sliderMoved() to:" << position;
+    if (m_curMediaRenderer.IsNull()) {
+        return;
+    }
+    
     NPT_String timestamp;
     PLT_Didl::FormatTimeStamp(timestamp, position);
     m_mediaController->Seek(m_curMediaRenderer, 0, "ABS_TIME", timestamp, NULL);
@@ -209,7 +209,6 @@ UpnpController::OnSetAVTransportURIResult(
     qDebug() << "UpnpController::OnSetAVTransportURIResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
     // send Play packet ...
     m_mediaController->Play(m_curMediaRenderer, 0, "1", NULL);
-    
 }
 
 
@@ -222,8 +221,7 @@ UpnpController::OnPlayResult(
     qDebug() << "UpnpController::OnPlayResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName() << res << userdata;
     // check if playing
     if (res == NPT_SUCCESS) {
-        // start GetPositionInfo polling thread
-//         m_pollPositionInfoTimer->start(m_pollIntervall);
+        // then do something
     }
 }
 
@@ -235,8 +233,6 @@ UpnpController::OnStopResult(
                            void*                    /* userdata */)
 {
     qDebug() << "UpnpController::OnStopResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-    // stop GetPositionInfo polling thread
-//     m_pollPositionInfoTimer->stop();
     m_mediaController->GetPositionInfo(m_curMediaRenderer, 0, NULL);
 }
 
@@ -248,12 +244,6 @@ UpnpController::OnPauseResult(
                             void*                    /* userdata */)
 {
     qDebug() << "UpnpController::OnPauseResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-/*    if (m_pollPositionInfoTimer->isActive()) {
-        m_pollPositionInfoTimer->stop();
-    }
-    else {
-        m_pollPositionInfoTimer->start();
-    }*/
 }
 
 
@@ -283,6 +273,7 @@ UpnpController::OnGetPositionInfoResult(
 //         << "rel_count:" << info->rel_count << endl
 //         << "abs_count:" << info->abs_count 
     emit setSlider(info->track_duration, info->abs_time);
+//     emit setSlider(222, info->abs_time);
 }
 
 
@@ -290,7 +281,6 @@ void
 UpnpController::pollPositionInfo()
 {
 //     qDebug() << "UpnpController::pollPositionInfo()";
-    // TODO: check if renderer can be asked for position, if no media is loaded.
     if (!m_curMediaRenderer.IsNull()) {
         m_mediaController->GetPositionInfo(m_curMediaRenderer, 0, NULL);
     }

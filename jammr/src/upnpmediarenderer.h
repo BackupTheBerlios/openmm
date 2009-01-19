@@ -92,8 +92,10 @@ private:
     PLT_Service *m_AvRenderingControl;
     
     NPT_String   m_currentUri;
+    // FIXME: m_uriChanged is alway true, because SetAVTransportURI is
+    //        always called before play. Have to compare the last URI
+    //        with the current one ...
     bool         m_uriChanged;
-//     int          m_duration;
     
 //     Timer*       m_pollPositionTimer;
     int          m_pollIntervall;

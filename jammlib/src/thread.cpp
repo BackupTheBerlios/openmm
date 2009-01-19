@@ -177,7 +177,7 @@ JMutex::unlock()
 
 JMutexLocker::JMutexLocker(JMutex *mutex)
 {
-    TRACE("JMutexLocker::JMutexLocker()");
+//     TRACE("JMutexLocker::JMutexLocker()");
     m_mutex = mutex;
     m_mutex->lock();
 }
@@ -186,16 +186,16 @@ JMutexLocker::JMutexLocker(JMutex *mutex)
 JMutexLocker::~JMutexLocker()
 {
     m_mutex->unlock();
-    TRACE("JMutexLocker::~JMutexLocker(), Mutex released.");
+//     TRACE("JMutexLocker::~JMutexLocker(), Mutex released.");
 }
 
 
 
-JTimer::JTimer(int sec)
+JTimer::JTimer(int milliSec)
  : JThread()
 {
-    TRACE("JTimer::JTimer() set to %i sec", sec);
-    m_sec = sec;
+    TRACE("JTimer::JTimer() set to %i milli_sec", milliSec);
+    m_milliSec = milliSec;
 }
 
 
@@ -208,6 +208,6 @@ void
 JTimer::run()
 {
     TRACE("JTimer::run()");
-    sleep(m_sec);
+    usleep(m_milliSec*1000);
     exec();
 }

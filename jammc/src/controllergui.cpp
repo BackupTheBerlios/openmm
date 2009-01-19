@@ -21,7 +21,8 @@
 #include "controllergui.h"
 
 ControllerGui::ControllerGui(QWidget *parent)
-: QTabWidget(parent)
+: QTabWidget(parent),
+m_sliderMoved(false)
 {
     ui.setupUi(this);
     ui.m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
@@ -56,7 +57,8 @@ ControllerGui::ControllerGui(QWidget *parent)
     connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
     connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
     connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
-    connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), SIGNAL(sliderMoved(int)));
+    connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+    connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     
     ui.m_browserListView->hide();
     setWindowTitle("JammC");
@@ -77,6 +79,26 @@ ControllerGui::rendererAddedRemoved(QString uuid, QString name, bool add)
 
 
 void
+ControllerGui::checkSliderMoved(int value)
+{
+    if (m_sliderMoved) {
+        m_sliderMoved = false;
+        qDebug() << "ControllerGui::checkSliderMoved() emit sliderMoved";
+        emit sliderMoved(value);
+    }
+}
+
+
+void
+ControllerGui::setSliderMoved(int)
+{
+    qDebug() << "ControllerGui::setSliderMoved() m_sliderMoved = true";
+    
+    m_sliderMoved = true;
+}
+
+
+void
 ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
 {
     ui.m_browserTreeView->setModel(model);
@@ -91,6 +113,7 @@ ControllerGui::setSlider(int max, int val)
     if (ui.m_seekSlider->isSliderDown()) {
         return;
     }
+    qDebug() << "ControllerGui::setSlider() to:" << max << val;
     ui.m_seekSlider->setRange(0, max>=0?max:0);
     ui.m_seekSlider->setSliderPosition(val);
 }

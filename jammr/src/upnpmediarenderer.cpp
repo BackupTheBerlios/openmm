@@ -63,7 +63,7 @@ Timer::kill()
 void
 UpnpMediaRenderer::Run()
 {
-    /* TODO: figure out, why this stops after the first m_engine->getPosition()
+    /* 
     bool shootTimer;
     do {
         Wait(m_delay);
@@ -232,10 +232,21 @@ UpnpMediaRenderer::OnPlay(PLT_ActionReference& action)
     /* perform some actions on the engine
     */
         if (transportState == "STOPPED") {
+            // TODO: does it mean: play from beginning now?
+            //       if yes: after STOPPED -> TRANSITIONING -> STOPPED we would play from beginning
+            //               and not from the position we were seeking to.
+            //       if no:  Action Stop behaves like Pause
+            //       -> maybe it should be: STOPPED -> TRANSITIONING -> PAUSED_PLAYBACK
+            //          contradicting AVTransport, 1.0, 2.4.12.3.
             m_engine->load();
         }
         else if (transportState == "PLAYING") {
             if (m_uriChanged) {
+                NPT_String pos;
+                PLT_Didl::FormatTimeStamp(pos, 0);
+                m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
+                m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
+                
                 m_engine->load();
             }
         }

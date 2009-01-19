@@ -46,9 +46,9 @@ MplayerThread::MplayerThread()
   // TODO: choose a unique name for the fifos so serveral instances of jammr can run.
 m_mplayerFifoIn("/tmp/jammr_mplayer_fifo_in"),
 m_mplayerFifoOut("/tmp/jammr_mplayer_fifo_out"),
-m_answerPollIntervall(20)
+m_answerPollIntervall(10)
 {
-    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -fs";
+    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0";
     // TODO: error handling after system call
     int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
     err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR | O_NONBLOCK);
@@ -92,7 +92,7 @@ void
 MplayerThread::command(const string& command)
 {
     m_mplayerFifoStreamIn << command << endl;
-    TRACE("MplayerThread::command() command: %s", command.c_str());
+//     TRACE("MplayerThread::command() command: %s", command.c_str());
 }
 
 
@@ -114,7 +114,7 @@ MplayerThread::answer(int timeout, string searchKey)
         else if (line.length()) {
             TRACE("MplayerThread::answer(): %s", line.c_str());
         }
-        usleep(m_answerPollIntervall);
+        usleep(m_answerPollIntervall*1000);
         timeout -= m_answerPollIntervall;
     }
     return "";
@@ -166,7 +166,8 @@ EngineMplayer::load()
     TRACE("EngineMplayer::load()");
     m_mplayerThread.command("loadfile " + m_uri);
     //     m_mplayerFifoStreamIn << "brightness 100" << endl;
-    m_mplayerThread.answer(2000, "Starting playback...");
+    // waiting max 10 secs for answer (AVTransport 1.0 specs give 30 secs)
+    m_mplayerThread.answer(10000, "Starting playback...");
 }
 
 
@@ -203,7 +204,7 @@ EngineMplayer::seek(int seconds)
     TRACE("EngineMplayer::seek() to second: %i", seconds);
     // TODO: instead of stringstream, do a command(answer) << "seek " << seconds << " 2";
     stringstream s;
-    s << "seek " << seconds << " 2";
+    s << "pausing_keep seek " << seconds << " 2";
     m_mplayerThread.command(s.str());
 }
 
@@ -242,9 +243,9 @@ EngineMplayer::getPosition(int &seconds)
     JMutexLocker mplayerMutexLocker(m_mplayerMutex);
     
     TRACE("EngineMplayer::getPosition()");
-    // FIXME: need a pausing_keep here?
     m_mplayerThread.command("get_time_pos");
-    seconds = atof(m_mplayerThread.answer(200).c_str());
+    // waiting max 1 sec for answer (AVTransport 1.0 specs give 30 secs)
+    seconds = atof(m_mplayerThread.answer(1000).c_str());
 }
 
 
@@ -255,7 +256,8 @@ EngineMplayer::getLength(int &seconds)
     
     TRACE("EngineMplayer::getLength()");
     m_mplayerThread.command("get_time_length");
-    // FIXME: this reads at most 100 lines from mplayer out (
-    //        with m_answerPollIntervall set to 20 msec
+    // waiting max 2 secs for answer (AVTransport 1.0 specs give 30 secs)
+    // this reads max 200 lines from mplayer out
+    // with m_answerPollIntervall set to 10 milli_sec
     seconds = atof(m_mplayerThread.answer(2000).c_str());
 }

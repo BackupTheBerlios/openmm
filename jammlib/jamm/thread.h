@@ -94,18 +94,21 @@ private:
 
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
+
+// TODO: implement timer that fires each millisec milli_seconds
+//       -> for proper implementation we need a signal/slot mechanism
 class JTimer : public JThread
 {
 public:
-    JTimer(int sec = 0);
+    JTimer(int millisec = 0);
     ~JTimer();
 
-    void setTimeout(int sec) { m_sec = sec; }
+    void setTimeout(int milliSec) { m_milliSec = milliSec; }
     virtual void exec() = 0;
 
 private:
     virtual void run();
-    int m_sec;
+    int m_milliSec;
 };
 
 #endif

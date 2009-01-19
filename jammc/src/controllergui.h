@@ -45,9 +45,23 @@ public slots:
     
 private slots:
     void rendererAddedRemoved(QString uuid, QString name, bool add);
-
+    /*
+        QAbstractSlider emits signal valueChanged() when the slider was
+        once moved and some time later (a new track is loaded), the range
+        changes. This triggers a Seek in the MediaRenderer to the position
+        of the last Seek (in the previous track). The following two slots
+        make QAbstractSlider only emit valueChanged() when triggered by
+        a user action.
+        This could be considered a bug and not a feature ...
+    */
+    void checkSliderMoved(int value);
+    void setSliderMoved(int value);
+    
 private:
+//     void sliderChange(QAbstractSlider::SliderChange change);
+    
     Ui::ControllerGui ui;
+    bool m_sliderMoved;
 };
 
 #endif //CONTROLLERGUI_H

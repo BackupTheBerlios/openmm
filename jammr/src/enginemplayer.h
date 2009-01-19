@@ -33,6 +33,14 @@ using namespace Jamm;
 */
 
 // TODO: need to implement a signal for "end of track"
+//       no message from mplayer, if not quiting
+//       -> a constant time position over 3 seconds may be an indicator
+//       -> decrease the polling interval and compare the float value of seconds
+
+// TODO: three test files have no duration (everytime.mpg, pepsy piercing.mpeg, vorteile.mpg)
+//       the wmv has duration but is not seekable (UFO-Reportage.wmv)
+
+// TODO: catch seeking beyond end of track
 
 class MplayerThread : public JThread
 {
@@ -54,8 +62,8 @@ public:
     /**
         string answer(int timeout, string searchKey="ANS_")
     
-        wait timeout milli seconds for an answer while polling for any mplayer
-        output every m_answerPollIntervall milli seconds
+        wait timeout milli_seconds for an answer while polling for any mplayer
+        output every m_answerPollIntervall milli_seconds
     */
     string answer(int timeout, string searchKey="ANS_");
     
