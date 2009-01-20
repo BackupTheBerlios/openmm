@@ -83,7 +83,6 @@ ControllerGui::checkSliderMoved(int value)
 {
     if (m_sliderMoved) {
         m_sliderMoved = false;
-        qDebug() << "ControllerGui::checkSliderMoved() emit sliderMoved";
         emit sliderMoved(value);
     }
 }
@@ -92,8 +91,6 @@ ControllerGui::checkSliderMoved(int value)
 void
 ControllerGui::setSliderMoved(int)
 {
-    qDebug() << "ControllerGui::setSliderMoved() m_sliderMoved = true";
-    
     m_sliderMoved = true;
 }
 
@@ -113,7 +110,7 @@ ControllerGui::setSlider(int max, int val)
     if (ui.m_seekSlider->isSliderDown()) {
         return;
     }
-    qDebug() << "ControllerGui::setSlider() to:" << max << val;
+//     qDebug() << "ControllerGui::setSlider() to:" << max << val;
     ui.m_seekSlider->setRange(0, max>=0?max:0);
     ui.m_seekSlider->setSliderPosition(val);
 }

@@ -25,106 +25,17 @@
 #include <platinum/PltDidl.h>
 #include <stdlib.h>
 
-// TODO: timer implementation isn't correct:
-//       1. killing and restarting doesn't work, seems that additional threads are started when restarting
-//       2. when track finishes, and next track is started: additional thread created?
 // TODO: indicate end of: transisioning, track
-void
-Timer::startTimer(int millisec)
-{
-    TRACE("Timer::startTimer()");
-    m_run = true;
-    m_kill = false;
-    if (millisec > 0) {
-        m_delay = millisec;
-        Start();
-    }
-}
-
-
-void
-Timer::stop()
-{
-    TRACE("Timer::stop()");
-    // TODO: lock m_run
-    m_run = false;
-}
-
-
-void
-Timer::kill()
-{
-    TRACE("Timer::stop()");
-    // TODO: lock m_run
-    m_kill = true;
-}
-
-
-void
-UpnpMediaRenderer::Run()
-{
-    /* 
-    bool shootTimer;
-    do {
-        Wait(m_delay);
-        m_curPosition = m_engine->getPosition();
-        // TODO: lock m_run
-        shootTimer = m_run;
-        // unlock m_run
-    } while(shootTimer);*/
-    while(1) {
-        Wait(m_delay);
-        if (m_run) {
-            NPT_String transportState;
-            m_AvTransport->GetStateVariableValue("TransportState", transportState);
-            if (transportState == "PLAYING") {
-                // if no track length could be determined in the metadata by OnSetAVTransportURI(),
-                // try to read it from the stream until we get a sensible value
-                NPT_String timestamp;
-                NPT_UInt32 duration;
-                m_AvTransport->GetStateVariableValue("CurrentTrackDuration", timestamp);
-                PLT_Didl::ParseTimeStamp(timestamp, duration);
-                if (duration == 0) {
-                    int dur;
-                    m_engine->getLength(dur);
-                    PLT_Didl::FormatTimeStamp(timestamp, dur);
-                    m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
-                    m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
-                }
-                
-                // read current position from stream
-                int curPosition;
-                m_engine->getPosition(curPosition);
-                // set State Variables according to current position
-                NPT_String pos;
-                PLT_Didl::FormatTimeStamp(pos, curPosition);
-                m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
-                m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
-            }
-        }
-        if (m_kill) {
-            break;
-        }
-/*        else {
-            break;
-        }*/
-    }
-/*    while(m_run) {
-        Wait(m_delay);
-        m_curPosition = m_engine->getPosition();
-    }*/
-    
-}
-
 
 UpnpMediaRenderer::UpnpMediaRenderer(EngineMplayer* engine,
                       const char*          friendly_name,
                       bool                 show_ip,
                       const char*          uuid,
                       unsigned int         port)
-: PLT_MediaRenderer(friendly_name, show_ip, uuid, port), Timer(), m_engine(engine),
-m_uriChanged(false),
-m_pollIntervall(1000)
+: PLT_MediaRenderer(friendly_name, show_ip, uuid, port),
+JNode(),
+m_engine(engine),
+m_uriChanged(false)
 {
     FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", m_AvTransport);
 //     FindServiceById("urn:upnp-org:serviceId:AVT_1-0", m_AvTransport);
@@ -136,8 +47,8 @@ m_pollIntervall(1000)
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() TransportState sending events indirectly: %s", m_AvTransport->FindStateVariable("TransportState")->IsSendingEvents(true)?"true":"false");
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() LastChange sending events: %s", m_AvTransport->FindStateVariable("LastChange")->IsSendingEvents()?"true":"false");
     
-//     m_pollPositionTimer = new Timer();
-    startTimer(m_pollIntervall);
+    connectNodes(&m_pollPositionTimer, this);
+    m_pollPositionTimer.startTimer(1000);
 }
 
 
@@ -145,6 +56,38 @@ UpnpMediaRenderer::~UpnpMediaRenderer()
 {
     TRACE("UpnpMediaRenderer::~UpnpMediaRenderer()");
 //     delete m_engine;
+}
+
+
+void
+UpnpMediaRenderer::onSignalReceived()
+{
+    NPT_String transportState;
+    m_AvTransport->GetStateVariableValue("TransportState", transportState);
+    if (transportState == "PLAYING") {
+        // if no track length could be determined in the metadata by OnSetAVTransportURI(),
+        // try to read it from the stream until we get a sensible value
+        NPT_String timestamp;
+        NPT_UInt32 duration;
+        m_AvTransport->GetStateVariableValue("CurrentTrackDuration", timestamp);
+        PLT_Didl::ParseTimeStamp(timestamp, duration);
+        if (duration == 0) {
+            int dur;
+            m_engine->getLength(dur);
+            PLT_Didl::FormatTimeStamp(timestamp, dur);
+            m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
+            m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
+        }
+        
+        // read current position from stream
+        int curPosition;
+        m_engine->getPosition(curPosition);
+        // set State Variables according to current position
+        NPT_String pos;
+        PLT_Didl::FormatTimeStamp(pos, curPosition);
+        m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
+        m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
+    }
 }
 
 

@@ -16,13 +16,35 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef JAMMSIGNAL_H
+#define JAMMSIGNAL_H
 
-#ifndef JAMMUPNPAV_H
-#define JAMMUPNPAV_H
+#include <vector>
+using namespace std;
+
 
 namespace Jamm {
 
-enum TransportState {TS_PLAYING, TS_STOPPED, TS_PAUSED_PLAY, TS_TRANSITIONING, TS_NO_MEDIA_PRESENT};
+// TODO: solve multiple inheritance, JNode not accessible when second class inherited
+
+class JNode
+{
+public:
+    JNode();
+    
+    void connectNodes(JNode* sender, JNode* receiver);
+    void disconnectNodes(JNode* sender, JNode* receiver);
+    
+    void registerReceiver(JNode* receiver);
+    void unregisterReceiver(JNode* receiver);
+    
+protected:
+    virtual void onSignalReceived();
+    void emitSignal();
+    
+private:
+    vector<JNode*> m_receiverList;
+};
 
 } // namespace Jamm
 

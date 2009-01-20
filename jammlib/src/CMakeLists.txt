@@ -1,6 +1,7 @@
 SET( JAMM_LIB_SRCS
     debug.cpp
     sharedlibrary.cpp
+    signode.cpp
     thread.cpp
 )
 

@@ -16,7 +16,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #include "thread.h"
+#include "signode.h"
 #include "debug.h"
 
 #include <string>
@@ -25,6 +27,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <time.h>
+
+using namespace Jamm;
 
 JThread::JThread()
 {
@@ -137,20 +141,9 @@ JThread::suicide()
 }
 
 
-// void
-// JThread::sleep(int msec)
-// {
-//     timespec sleepTime, remainingTime;
-//     
-//     sleepTime.tv_sec = msec / 1000;
-//     sleepTime.tv_nsec = msec % 1000;
-//     nanosleep(&sleepTime, &remainingTime);
-// }
-
-
 JMutex::JMutex()
 {
-    TRACE("JMutex::JMutex()");
+//     TRACE("JMutex::JMutex()");
     pthread_mutex_init(&m_mutex, 0);
 }
 
@@ -174,6 +167,7 @@ JMutex::unlock()
     pthread_mutex_unlock(&m_mutex);
 }
 
+/*-----------------------------------------------------------------------*/
 
 JMutexLocker::JMutexLocker(JMutex *mutex)
 {
@@ -189,13 +183,13 @@ JMutexLocker::~JMutexLocker()
 //     TRACE("JMutexLocker::~JMutexLocker(), Mutex released.");
 }
 
+/*-----------------------------------------------------------------------*/
 
-
-JTimer::JTimer(int milliSec)
- : JThread()
+JTimer::JTimer()
+ : JThread(),
+m_milliSec(0),
+m_stopTimer(false)
 {
-    TRACE("JTimer::JTimer() set to %i milli_sec", milliSec);
-    m_milliSec = milliSec;
 }
 
 
@@ -207,7 +201,19 @@ JTimer::~JTimer()
 void
 JTimer::run()
 {
+    // TODO: lock m_stopTimer
     TRACE("JTimer::run()");
-    usleep(m_milliSec*1000);
-    exec();
+    while (!m_stopTimer) {
+        usleep(m_milliSec*1000);
+        emitSignal();
+    }
+}
+
+
+bool
+JTimer::suicide()
+{
+    // TODO: lock m_stopTimer
+    m_stopTimer = true;
+    return true;
 }

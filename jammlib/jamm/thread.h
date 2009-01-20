@@ -16,10 +16,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef THREAD_H
-#define THREAD_H
+#ifndef JAMMTHREAD_H
+#define JAMMTHREAD_H
+
+#include <jamm/signode.h>
 
 #include <pthread.h>
+
+namespace Jamm {
 
 /**
   Simple thread encapsulation.
@@ -87,28 +91,22 @@ private:
 };
 
 
-/**
-  Very simple and unprecise timer for timeouts in the range of seconds.
-  Virtual method exec() is executed after given time in seconds.
-  Start the timer with start().
-
-	@author Jörg Bakker <joerg<at>hakker<dot>de>
-*/
-
-// TODO: implement timer that fires each millisec milli_seconds
-//       -> for proper implementation we need a signal/slot mechanism
-class JTimer : public JThread
+class JTimer : public JNode, JThread
 {
 public:
-    JTimer(int millisec = 0);
+    JTimer();
     ~JTimer();
 
-    void setTimeout(int milliSec) { m_milliSec = milliSec; }
-    virtual void exec() = 0;
+    void startTimer(int milliSec) { m_milliSec = milliSec; start(); }
 
 private:
     virtual void run();
-    int m_milliSec;
+    virtual bool suicide();
+    
+    int     m_milliSec;
+    bool    m_stopTimer;
 };
+
+} // namespace Jamm
 
 #endif

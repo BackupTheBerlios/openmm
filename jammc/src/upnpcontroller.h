@@ -2,9 +2,10 @@
 #define UPNPCONTROLLER_H
 
 #include <QObject>
-// #include <QMap>
 #include <QItemSelection>
-#include <QTimer>
+
+#include <jamm/thread.h>
+#include <jamm/signode.h>
 
 #include <platinum/Platinum.h>
 #include <platinum/PltMediaController.h>
@@ -14,8 +15,9 @@
 #include "upnpbrowsermodel.h"
 #include "controllergui.h"
 
+using namespace Jamm;
 
-class UpnpController : public QObject, PLT_MediaControllerListener
+class UpnpController : public QObject, PLT_MediaControllerListener, JNode
 {
     Q_OBJECT
 
@@ -23,7 +25,6 @@ public:
     UpnpController();
     ~UpnpController();
 
-//     QMap<QString, QString> getServers();
     UpnpBrowserModel* getBrowserModel() {return m_upnpBrowserModel;}
     void showMainWindow();
 
@@ -38,7 +39,10 @@ private slots:
     void stopButtonPressed();
     void pauseButtonPressed();
     void sliderMoved(int position);
-    void pollPositionInfo();
+/*    void pollPositionInfo();*/
+    
+private:
+    virtual void onSignalReceived();
     
 protected:
     /* PLT_MediaControllerListener
@@ -180,8 +184,7 @@ private:
     
     UpnpBrowserModel*               m_upnpBrowserModel;
     ControllerGui*                  m_mainWindow;
-    QTimer*                         m_pollPositionInfoTimer;
-    int                             m_pollIntervall;
+    JTimer                          m_pollPositionInfoTimer;
 };
 
 #endif /* UPNPCONTROLLER_H */

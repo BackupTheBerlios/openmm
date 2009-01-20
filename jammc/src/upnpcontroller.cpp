@@ -1,15 +1,11 @@
-#include <platinum/PltLog.h>
 #include <platinum/PltDidl.h>
 #include <QtDebug>
 
 #include "upnpcontroller.h"
 
 UpnpController::UpnpController()
-// poll for current position every second
-: m_pollIntervall(1000)
 {
     qDebug() << "UpnpController::UpnpController()";
-    PLT_SetLogLevel(PLT_LOG_LEVEL_MAX);
 
     m_upnp = new PLT_UPnP(1900, true);
     m_ctrlPoint = PLT_CtrlPointReference(new PLT_CtrlPoint());
@@ -38,13 +34,11 @@ UpnpController::UpnpController()
     connect(m_mainWindow, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
     connect(m_mainWindow, SIGNAL(pauseButtonPressed()), this, SLOT(pauseButtonPressed()));
     connect(m_mainWindow, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
-    
-    m_pollPositionInfoTimer = new QTimer(this);
-    connect(m_pollPositionInfoTimer, SIGNAL(timeout()),
-            this, SLOT(pollPositionInfo()));
     connect(this, SIGNAL(setSlider(int, int)), m_mainWindow, SLOT(setSlider(int, int)));
     
-    m_pollPositionInfoTimer->start(m_pollIntervall);
+    connectNodes(&m_pollPositionInfoTimer, this);
+    // poll for current position every second
+    m_pollPositionInfoTimer.startTimer(1000);
 }
 
 
@@ -278,7 +272,7 @@ UpnpController::OnGetPositionInfoResult(
 
 
 void
-UpnpController::pollPositionInfo()
+UpnpController::onSignalReceived()
 {
 //     qDebug() << "UpnpController::pollPositionInfo()";
     if (!m_curMediaRenderer.IsNull()) {

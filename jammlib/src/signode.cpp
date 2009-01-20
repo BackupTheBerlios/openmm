@@ -16,14 +16,54 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "signode.h"
 
-#ifndef JAMMUPNPAV_H
-#define JAMMUPNPAV_H
+using namespace Jamm;
 
-namespace Jamm {
+JNode::JNode()
+{
+}
 
-enum TransportState {TS_PLAYING, TS_STOPPED, TS_PAUSED_PLAY, TS_TRANSITIONING, TS_NO_MEDIA_PRESENT};
 
-} // namespace Jamm
+void
+JNode::connectNodes(JNode* sender, JNode* receiver)
+{
+    sender->registerReceiver(receiver);
+}
 
-#endif
+
+void
+JNode::disconnectNodes(JNode* sender, JNode* receiver)
+{
+    sender->unregisterReceiver(receiver);
+}
+
+
+void
+JNode::registerReceiver(JNode* receiver)
+{
+    m_receiverList.push_back(receiver);
+}
+
+
+void
+JNode::unregisterReceiver(JNode* /*receiver*/)
+{
+    //TODO: implement deleting of receivers
+//     m_receiverList.erase(m_receiverList.find(receiver));
+}
+
+
+void
+JNode::emitSignal()
+{
+    for (vector<JNode*>::iterator i = m_receiverList.begin(); i != m_receiverList.end() ;++i) {
+        (*i)->onSignalReceived();
+    }
+}
+
+
+void 
+JNode::onSignalReceived()
+{
+}

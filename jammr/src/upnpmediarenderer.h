@@ -21,24 +21,14 @@
 #define UPNPMEDIARENDERER_H
 
 #include "enginemplayer.h"
+
 #include <platinum/PltMediaRenderer.h>
-#include <platinum/NptThreads.h>
+#include <jamm/thread.h>
+#include <jamm/signode.h>
 
-class Timer : public NPT_Thread
-{
-public:
-    void startTimer(int millisec = 0);
-    void stop();
-    void kill();
-    bool isActive() { return m_run; }
-    
-protected:
-    int  m_delay;
-    bool m_run, m_kill;
-};
+using namespace Jamm;
 
-
-class UpnpMediaRenderer : public PLT_MediaRenderer, Timer
+class UpnpMediaRenderer : public PLT_MediaRenderer, JNode
 {
 public:
     UpnpMediaRenderer(EngineMplayer*              engine,
@@ -85,20 +75,18 @@ protected:
     // TODO: lock all actions
     
 private:
-    virtual void Run();
+    virtual void onSignalReceived();
     
-    EngineMplayer      *m_engine;
-    PLT_Service *m_AvTransport;
-    PLT_Service *m_AvRenderingControl;
+    EngineMplayer*  m_engine;
+    PLT_Service*    m_AvTransport;
+    PLT_Service*    m_AvRenderingControl;
     
-    NPT_String   m_currentUri;
+    NPT_String      m_currentUri;
     // FIXME: m_uriChanged is alway true, because SetAVTransportURI is
     //        always called before play. Have to compare the last URI
     //        with the current one ...
-    bool         m_uriChanged;
-    
-//     Timer*       m_pollPositionTimer;
-    int          m_pollIntervall;
+    bool            m_uriChanged;
+    JTimer          m_pollPositionTimer;
 };
 
 #endif
