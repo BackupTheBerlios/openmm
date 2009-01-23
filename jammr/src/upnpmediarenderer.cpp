@@ -27,13 +27,51 @@
 
 // TODO: indicate end of: transisioning, track
 
+
+void
+UpnpMediaRenderer::PollSlot::onSignalReceived() {
+    NPT_String transportState;
+    s->m_AvTransport->GetStateVariableValue("TransportState", transportState);
+    if (transportState == "PLAYING") {
+        // if no track length could be determined in the metadata by OnSetAVTransportURI(),
+        // try to read it from the stream until we get a sensible value
+        NPT_String timestamp;
+        NPT_UInt32 duration;
+        s->m_AvTransport->GetStateVariableValue("CurrentTrackDuration", timestamp);
+        PLT_Didl::ParseTimeStamp(timestamp, duration);
+        if (duration == 0) {
+            float dur;
+            s->m_engine->getLength(dur);
+            PLT_Didl::FormatTimeStamp(timestamp, dur);
+            s->m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
+            s->m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
+        }
+        
+        // read current position from stream
+        float curPosition;
+        s->m_engine->getPosition(curPosition);
+        // set State Variables according to current position
+        NPT_String pos;
+        PLT_Didl::FormatTimeStamp(pos, curPosition);
+        s->m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
+        s->m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
+    }
+}
+
+
+void
+UpnpMediaRenderer::EndOfTrackSlot::onSignalReceived() {
+    TRACE("UpnpMediaRenderer::EndOfTrackSlot::onSignalReceived()");
+    s->m_AvTransport->SetStateVariable("TransportState", "STOPPED");
+}
+
+
 UpnpMediaRenderer::UpnpMediaRenderer(EngineMplayer* engine,
                       const char*          friendly_name,
                       bool                 show_ip,
                       const char*          uuid,
                       unsigned int         port)
 : PLT_MediaRenderer(friendly_name, show_ip, uuid, port),
-JNode(),
 m_engine(engine),
 m_uriChanged(false)
 {
@@ -47,7 +85,8 @@ m_uriChanged(false)
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() TransportState sending events indirectly: %s", m_AvTransport->FindStateVariable("TransportState")->IsSendingEvents(true)?"true":"false");
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() LastChange sending events: %s", m_AvTransport->FindStateVariable("LastChange")->IsSendingEvents()?"true":"false");
     
-    connectNodes(&m_pollPositionTimer, this);
+    JSignal::connectNodes(&m_engine->endOfTrack, new EndOfTrackSlot(this));
+    JSignal::connectNodes(&m_pollPositionTimer.fire, new PollSlot(this));
     m_pollPositionTimer.startTimer(1000);
 }
 
@@ -56,38 +95,6 @@ UpnpMediaRenderer::~UpnpMediaRenderer()
 {
     TRACE("UpnpMediaRenderer::~UpnpMediaRenderer()");
 //     delete m_engine;
-}
-
-
-void
-UpnpMediaRenderer::onSignalReceived()
-{
-    NPT_String transportState;
-    m_AvTransport->GetStateVariableValue("TransportState", transportState);
-    if (transportState == "PLAYING") {
-        // if no track length could be determined in the metadata by OnSetAVTransportURI(),
-        // try to read it from the stream until we get a sensible value
-        NPT_String timestamp;
-        NPT_UInt32 duration;
-        m_AvTransport->GetStateVariableValue("CurrentTrackDuration", timestamp);
-        PLT_Didl::ParseTimeStamp(timestamp, duration);
-        if (duration == 0) {
-            int dur;
-            m_engine->getLength(dur);
-            PLT_Didl::FormatTimeStamp(timestamp, dur);
-            m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);
-            m_AvTransport->SetStateVariable("CurrentTrackDuration", timestamp);
-        }
-        
-        // read current position from stream
-        int curPosition;
-        m_engine->getPosition(curPosition);
-        // set State Variables according to current position
-        NPT_String pos;
-        PLT_Didl::FormatTimeStamp(pos, curPosition);
-        m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
-        m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
-    }
 }
 
 

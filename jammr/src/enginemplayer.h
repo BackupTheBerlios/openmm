@@ -25,6 +25,8 @@
 #include <fstream>
 #include <jamm/upnpav.h>
 #include <jamm/thread.h>
+#include <jamm/signode.h>
+#include <jamm/iodevice.h>
 
 using namespace Jamm;
 
@@ -65,7 +67,12 @@ public:
         wait timeout milli_seconds for an answer while polling for any mplayer
         output every m_answerPollIntervall milli_seconds
     */
-    string answer(int timeout, string searchKey="ANS_");
+    enum mplayerError {Found=0, Timeout=1, EndOfTrack=2};
+    int answer(string& ans, int timeout, string searchKey="ANS_");
+    
+//     bool readLine(string& line, int timeout);
+    
+    JSignal endOfTrack;
     
 private:
     virtual void run();
@@ -75,7 +82,7 @@ private:
     string      m_mplayerFifoIn;
     string      m_mplayerFifoOut;
     fstream     m_mplayerFifoStreamIn;
-    fstream     m_mplayerFifoStreamOut;
+    JIoDevice   m_mplayerFifoStreamOut;
     
     int         m_answerPollIntervall;
 };
@@ -109,9 +116,11 @@ public:
     virtual void setSpeed(int nom, int denom);
     virtual void next();
     virtual void previous();
-    virtual void getPosition(int &seconds);
-    virtual void getLength(int &seconds);
-
+    virtual void getPosition(float &seconds);
+    virtual void getLength(float &seconds);
+    
+    JSignal endOfTrack;
+    
 private:
     string          m_uri;
     MplayerThread   m_mplayerThread;

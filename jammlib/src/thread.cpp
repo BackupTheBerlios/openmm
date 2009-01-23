@@ -205,7 +205,7 @@ JTimer::run()
     TRACE("JTimer::run()");
     while (!m_stopTimer) {
         usleep(m_milliSec*1000);
-        emitSignal();
+        fire.emitSignal();
     }
 }
 

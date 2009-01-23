@@ -36,7 +36,7 @@ UpnpController::UpnpController()
     connect(m_mainWindow, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
     connect(this, SIGNAL(setSlider(int, int)), m_mainWindow, SLOT(setSlider(int, int)));
     
-    connectNodes(&m_pollPositionInfoTimer, this);
+    JSignal::connectNodes(&m_pollPositionInfoTimer.fire, this);
     // poll for current position every second
     m_pollPositionInfoTimer.startTimer(1000);
 }

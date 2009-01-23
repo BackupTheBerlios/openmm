@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Jörg Bakker   				   *
+ *   Copyright (C) 2006 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,34 +16,56 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "signode.h"
+#ifndef JAMMIODEVICE_H
+#define JAMMIODEVICE_H
 
-using namespace Jamm;
+#include <sys/time.h>
 
-JSignal::JSignal()
+#include <string>
+using namespace std;
+
+
+/**
+Simple socket encapsulation with methods for handling a line-based protocol.
+readLine() is buffered and attempts to read blocks of 1024 bytes from the network.
+
+	@author Jörg Bakker <joerg<at>hakker<dot>de>
+*/
+
+class JIoDevice
 {
-}
+public:
+    JIoDevice(bool blocking = false);
+    ~JIoDevice();
 
+    bool open(const char* pathname);
+    int readLine(string& line);
+//     void writeLine(string);
+    void close();
 
-void
-JSignal::connectNodes(JSignal* sender, JSlot* receiver)
-{
-//     sender->registerReceiver(receiver);
-    sender->m_receiverList.push_back(receiver);
-}
+private:
+    int readBuf();
+//     void setBlocking(bool enable);
+    bool isReadable();
+//     bool isWriteable();
 
+    int                m_device;
+    bool               m_blocking;
 
-void
-JSignal::disconnectNodes(JSignal* /*sender*/, JSlot* /*receiver*/)
-{
-    //TODO: implement deleting of receivers
-}
+    timeval            m_tv;
+    fd_set             m_readfds;
+    fd_set             m_writefds;
 
+    static const int   m_timeout = 4; // timeout in seconds.
+    static const int   m_bufSize = 1024;
+    char               m_buf[m_bufSize];
+//     string::size_type  m_bytesRead;
+//     string::size_type  m_bytesScanned;
+    int  m_bytesRead;
+    int  m_bytesScanned;
+    bool               m_lineEndFound;
+    string             m_line;
+    string             m_strBuf;
+};
 
-void
-JSignal::emitSignal()
-{
-    for (vector<JSlot*>::iterator i = m_receiverList.begin(); i != m_receiverList.end() ;++i) {
-        (*i)->onSignalReceived();
-    }
-}
+#endif

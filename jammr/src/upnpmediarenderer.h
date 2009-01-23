@@ -28,7 +28,7 @@
 
 using namespace Jamm;
 
-class UpnpMediaRenderer : public PLT_MediaRenderer, JNode
+class UpnpMediaRenderer : public PLT_MediaRenderer
 {
 public:
     UpnpMediaRenderer(EngineMplayer*              engine,
@@ -38,6 +38,25 @@ public:
                       unsigned int         port = 0);
 
     ~UpnpMediaRenderer();
+    
+    class PollSlot : public JSlot {
+    public:
+        PollSlot(void* slotUser) { s = static_cast<UpnpMediaRenderer*>(slotUser); }
+        virtual void onSignalReceived();
+    private:
+        UpnpMediaRenderer* s;
+    };
+    friend class PollSlot;
+    
+    class EndOfTrackSlot : public JSlot {
+    public:
+        EndOfTrackSlot(void* slotUser) { s = static_cast<UpnpMediaRenderer*>(slotUser); }
+        virtual void onSignalReceived();
+    private:
+        UpnpMediaRenderer* s;
+    };
+    friend class EndOfTrackSlot;
+    
     
 protected:
     // ConnectionManager
@@ -75,7 +94,7 @@ protected:
     // TODO: lock all actions
     
 private:
-    virtual void onSignalReceived();
+//     virtual void onSignalReceived();
     
     EngineMplayer*  m_engine;
     PLT_Service*    m_AvTransport;
@@ -88,5 +107,16 @@ private:
     bool            m_uriChanged;
     JTimer          m_pollPositionTimer;
 };
+
+
+// class PollSlot : public JSlot
+// {
+// public:
+//     PollSlot(void* slotUser) { m_signalReceiver = static_cast<UpnpMediaRenderer*>(slotUser); }
+//     virtual void onSignalReceived();
+//     
+// private:
+//     UpnpMediaRenderer* m_signalReceiver;
+// };
 
 #endif

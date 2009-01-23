@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef JAMMSIGNAL_H
-#define JAMMSIGNAL_H
+#ifndef JAMMSIGNODE_H
+#define JAMMSIGNODE_H
 
 #include <vector>
 using namespace std;
@@ -25,25 +25,42 @@ using namespace std;
 
 namespace Jamm {
 
-// TODO: solve multiple inheritance, JNode not accessible when second class inherited
+// TODO: solve multiple inheritance, JNode not accessible when inherited as second class
+//       -> NodeInterface with pure virtual method onSignalReceived()
+//       -> Node that sends singals kann have a member of type Node
+//          and a getNode() returning a pointer to it.
+//       we like to be symmetric, so keep it in one class (no NodeInterface)
+// TODO: more than one signal
+// TODO: signal arguments
+// TODO: signals between threads
 
-class JNode
+class JSlot
 {
 public:
-    JNode();
+    virtual void onSignalReceived() = 0;
+};
+
+
+// template<class T> class JJSlot {
+// public:
+//     JJSlot(void* slotUser) { s = static_cast<T*>(slotUser); }
+//     virtual void onSignalReceived();
+// protected:
+//     T* s;
+// };
+
+
+class JSignal
+{
+public:
+    JSignal();
     
-    void connectNodes(JNode* sender, JNode* receiver);
-    void disconnectNodes(JNode* sender, JNode* receiver);
-    
-    void registerReceiver(JNode* receiver);
-    void unregisterReceiver(JNode* receiver);
-    
-protected:
-    virtual void onSignalReceived();
+    static void connectNodes(JSignal* sender, JSlot* receiver);
+    static void disconnectNodes(JSignal* sender, JSlot* receiver);
     void emitSignal();
     
 private:
-    vector<JNode*> m_receiverList;
+    vector<JSlot*> m_receiverList;
 };
 
 } // namespace Jamm

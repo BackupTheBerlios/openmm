@@ -91,13 +91,15 @@ private:
 };
 
 
-class JTimer : public JNode, JThread
+class JTimer : public JThread
 {
 public:
     JTimer();
     ~JTimer();
 
     void startTimer(int milliSec) { m_milliSec = milliSec; start(); }
+    
+    JSignal fire;
 
 private:
     virtual void run();

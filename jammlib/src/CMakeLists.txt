@@ -1,5 +1,6 @@
 SET( JAMM_LIB_SRCS
     debug.cpp
+    iodevice.cpp
     sharedlibrary.cpp
     signode.cpp
     thread.cpp

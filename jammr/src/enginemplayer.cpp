@@ -51,15 +51,15 @@ m_answerPollIntervall(10)
     m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0";
     // TODO: error handling after system call
     int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
-    err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR | O_NONBLOCK);
+    err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR /*| O_NONBLOCK*/);
     m_mplayerFifoStreamIn.open(m_mplayerFifoIn.c_str());
     if (!m_mplayerFifoStreamIn) {
         TRACE("MplayerThread::MplayerThread() error opening: %s", m_mplayerFifoIn.c_str());
     }
     m_mplayerFifoStreamOut.open(m_mplayerFifoOut.c_str());
-    if (!m_mplayerFifoStreamOut) {
+/*    if (!m_mplayerFifoStreamOut) {
         TRACE("MplayerThread::MplayerThread() error opening: %s", m_mplayerFifoOut.c_str());
-    }
+    }*/
 }
 
 
@@ -92,32 +92,89 @@ void
 MplayerThread::command(const string& command)
 {
     m_mplayerFifoStreamIn << command << endl;
-//     TRACE("MplayerThread::command() command: %s", command.c_str());
+    TRACE("MplayerThread::command() command: %s", command.c_str());
 }
 
 
-string
-MplayerThread::answer(int timeout, string searchKey)
+// TODO: no answer isn't handled correctly:
+/*
+    MplayerThread::command() command: get_time_pos
+    MplayerThread::answer(): ANS_TIME_POSITION=129.2
+    MplayerThread::answer(): returns Found
+    MplayerThread::command() command: get_time_pos
+    MplayerThread::answer(): ANS_TIME_POSITION=130.2
+    MplayerThread::answer(): returns Found
+    MplayerThread::command() command: get_time_pos
+    MplayerThread::answer():
+    EngineMplayer::~MplayerThread()
+    Segmentation fault
+*/
+
+
+// bool
+// MplayerThread::readLine(string& line, int timeout)
+// {
+//     const int lineBufLen = 256;
+//     char buf[lineBufLen];
+//     line = "";
+//     std::streamsize bytesRead;
+//     
+//     while (timeout > 0 && (bytesRead = m_mplayerFifoStreamOut.readsome(buf, lineBufLen))) {
+//         line += string(buf, bytesRead);
+//     }
+//     return false;
+// }
+
+
+int
+MplayerThread::answer(string& ans, int /*timeout*/, string searchKey)
 {
     string line;
-    while (timeout > 0 && getline(m_mplayerFifoStreamOut, line)) {
+//     const int lineBufLen = 256;
+//     char buf[lineBufLen];
+//     bool eot = false;
+//     int to = timeout;
+/*    m_mplayerFifoStreamOut.peek();
+    if (m_mplayerFifoStreamOut.eof()) {
+        TRACE("MplayerThread::answer(): EOF");
+    }*/
+//     while (timeout > 0 && getline(m_mplayerFifoStreamOut, line)) {
+//     while (timeout > 0 && m_mplayerFifoStreamOut.readsome(buf, lineBufLen)) {
+    while (m_mplayerFifoStreamOut.readLine(line)) {
+        TRACE("MplayerThread::answer(): %s", line.c_str());
         // mplayer writes answer to stdout starting with "ANS_"
-        if (line.find(searchKey) == 0) {
+//         string line(buf);
+        if (/*line.length() &&*/ line.find(searchKey) == 0) {
             if (searchKey == "ANS_") {
-                return line.substr(line.find("=")+1);
+                ans = line.substr(line.find("=")+1);
             }
             else {
-                return line;
+                ans = line;
             }
+            TRACE("MplayerThread::answer(): returns Found");
+            return Found;
         }
         // TODO: check all answers for an mplayer message that indicates end of track
-        else if (line.length()) {
-            TRACE("MplayerThread::answer(): %s", line.c_str());
-        }
-        usleep(m_answerPollIntervall*1000);
-        timeout -= m_answerPollIntervall;
+//         else if (line.length()) {
+//             TRACE("MplayerThread::answer(): %s", line.c_str());
+/*            if (line.find("Cannot") == 0) {
+                eot = true;
+                TRACE("MplayerThread::answer() set eot: %i", eot);
+            }*/
+//         }
+//         usleep(m_answerPollIntervall*1000);
+//         TRACE("MplayerThread::answer() timeout: %i", timeout);
+//         timeout -= m_answerPollIntervall;
     }
-    return "";
+//     TRACE("MplayerThread::answer() eot: %i", eot);
+/*    if (eot) {
+        return EndOfTrack;
+    }
+    else {
+        return Timeout;
+    }*/
+    TRACE("MplayerThread::answer(): returns Timeout");
+    return Timeout;
 }
 
 // Usefull mplayer commands:
@@ -167,7 +224,8 @@ EngineMplayer::load()
     m_mplayerThread.command("loadfile " + m_uri);
     //     m_mplayerFifoStreamIn << "brightness 100" << endl;
     // waiting max 10 secs for answer (AVTransport 1.0 specs give 30 secs)
-    m_mplayerThread.answer(10000, "Starting playback...");
+    string ans;
+    m_mplayerThread.answer(ans, 10000, "Starting playback...");
 }
 
 
@@ -238,19 +296,34 @@ EngineMplayer::previous()
 
 
 void
-EngineMplayer::getPosition(int &seconds)
+EngineMplayer::getPosition(float &seconds)
 {
     JMutexLocker mplayerMutexLocker(m_mplayerMutex);
     
-    TRACE("EngineMplayer::getPosition()");
+//     TRACE("EngineMplayer::getPosition() pos: %f", seconds);
     m_mplayerThread.command("get_time_pos");
     // waiting max 1 sec for answer (AVTransport 1.0 specs give 30 secs)
-    seconds = atof(m_mplayerThread.answer(1000).c_str());
+    string ans;
+    int err = m_mplayerThread.answer(ans, 1000);
+    if (err == MplayerThread::Found) {
+        seconds = atof(ans.c_str());
+    }
+    else if (err == MplayerThread::Timeout) {
+        endOfTrack.emitSignal();
+    }
+    // end of track detection doesn't work this way:
+/*    EngineMplayer::getPosition() cur: 175.800003 last: 174.800003
+    EngineMplayer::getPosition() cur: 176.800003 last: 175.800003
+    EngineMplayer::getPosition() cur: 177.800003 last: 176.800003
+    EngineMplayer::getPosition() cur: 178.800003 last: 177.800003
+    MplayerThread::answer(): Cannot sync MAD frame
+    MplayerThread::answer(): Cannot sync MAD frame
+    MplayerThread::answer(): Cannot sync MAD frame*/
 }
 
 
 void
-EngineMplayer::getLength(int &seconds)
+EngineMplayer::getLength(float &seconds)
 {
     JMutexLocker mplayerMutexLocker(m_mplayerMutex);
     
@@ -259,5 +332,7 @@ EngineMplayer::getLength(int &seconds)
     // waiting max 2 secs for answer (AVTransport 1.0 specs give 30 secs)
     // this reads max 200 lines from mplayer out
     // with m_answerPollIntervall set to 10 milli_sec
-    seconds = atof(m_mplayerThread.answer(2000).c_str());
+    string ans;
+    seconds = m_mplayerThread.answer(ans, 2000);
+    seconds = atof(ans.c_str());
 }

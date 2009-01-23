@@ -17,7 +17,7 @@
 
 using namespace Jamm;
 
-class UpnpController : public QObject, PLT_MediaControllerListener, JNode
+class UpnpController : public QObject, PLT_MediaControllerListener, JSlot
 {
     Q_OBJECT
 
