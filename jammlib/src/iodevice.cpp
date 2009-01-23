@@ -30,16 +30,6 @@
 JIoDevice::JIoDevice(bool blocking)
 : m_blocking(blocking)
 {
-/*    TRACE("JIoDevice::JIoDevice()");
-    if ((m_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-        TRACE("JIoDevice::JIoDevice() socket creation failed with error: %s", strerror(errno));
-    }
-    else {
-        TRACE("JIoDevice::JIoDevice() socket created");*/
-//     }
-//     setBlocking(blocking);
-    m_tv.tv_sec = m_timeout;
-    m_tv.tv_usec = 0;
 }
 
 
@@ -51,53 +41,28 @@ JIoDevice::~JIoDevice()
 bool
 JIoDevice::open(const char* pathname)
 {
-//     TRACE("JIoDevice::open() connection to server: %s, port: %i", server.c_str(), port);
     m_bytesRead = 0;
     m_bytesScanned = 0;
     m_lineEndFound = false;
-
-/*    sockaddr_in sin;
-    hostent *host = gethostbyname(server.c_str());
-    memcpy(&sin.sin_addr.s_addr, host->h_addr, host->h_length);
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(port);
-
-    if (connect(m_socket, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
-        // 
-        if (errno == EINPROGRESS) {
-            TRACE("JIoDevice::open() %s", strerror(errno));
-            // TODO: do a select and wait until connection is established
-            //       or print an error if not succesfull.
-        }
-        else {
-            TRACE("JIoDevice::open() connect failed with error: %s", strerror(errno));
-            ::close(m_socket);
-            return false;
-        }
-    }
-    else {
-        TRACE("JIoDevice::open() connect succeeded");
-    }*/
     
     m_device = ::open(pathname, m_blocking?(O_RDWR):(O_RDWR | O_NONBLOCK));
     
     return true;
 }
 
-// TODO: maybe try getline(stream, string, delimiter) of the standard C++ library?
-//       fgets() from the standard C library seemed to block.
 
-int
-JIoDevice::readLine(string& res)
+bool
+JIoDevice::readLine(string& res, int milliSec)
 {
     TRACE("JIoDevice::readLine()");
     bool eof = false;
     bool eol = false;
+    bool noTimeout = true;
     while (!eof && !eol) {
         if (m_bytesScanned >= m_bytesRead) {
             TRACE("JIoDevice::readLine() fetching new buffer");
             // we need to fetch new data.
-            m_bytesRead = readBuf();
+            noTimeout = readBuf(m_bytesRead, milliSec);
             m_bytesScanned = 0;
         }
         if (m_bytesRead < 0) {
@@ -142,36 +107,35 @@ JIoDevice::readLine(string& res)
     // get rid of a newline at the beginning of m_line, copy the result and return
     /*string*/ res = ((m_line[0] == '\n') || (m_line[0] == '\r'))?string(m_line, 1):m_line;
     m_line = "";
-//     TRACE("JIoDevice::readLine() returns: %s", res.c_str());
-//     return res;
-    return res.length();
+    TRACE("JIoDevice::readLine() returns %i bytes: %s", res.length(), res.c_str());
+    return noTimeout;
 }
 
 
-int
-JIoDevice::readBuf()
+bool
+JIoDevice::readBuf(int& bytesReadSum, int milliSec)
 {
     TRACE("JIoDevice::readBuf()");
     int bytesRead = 0;
-    int bytesReadSum = 0;
+    /*int*/ bytesReadSum = 0;
     int bytesLeft = m_bufSize;
     m_strBuf = "";
     while (bytesLeft) {
-        if (isReadable()) {
-           bytesRead = read(m_device, m_buf, bytesLeft);
+        if (isReadable(milliSec)) {
+            bytesRead = read(m_device, m_buf, bytesLeft);
+            TRACE("JIoDevice::readBuf() bytesRead: %i", bytesRead);
         }
         else {
             TRACE("JIoDevice::readBuf() timed out");
-            return bytesReadSum;
+            return false;
         }
-        TRACE("JIoDevice::readBuf() bytesRead: %i", bytesRead);
         bytesReadSum += bytesRead;
         bytesLeft = m_bufSize - bytesReadSum;
         if (bytesRead == -1) { // read failure
-            return bytesRead;
+            return false;
         }
         else if (bytesRead == 0) { // EOF  
-            return bytesReadSum;
+            return true;
         }
         m_strBuf.append(string(m_buf).substr(0, bytesRead));
         // if the last byte read is a newline or carriage return, we don't read any further
@@ -180,7 +144,7 @@ JIoDevice::readBuf()
             break;
         }
     }
-    return bytesReadSum;
+    return true;
 }
 
 
@@ -220,25 +184,15 @@ JIoDevice::close()
 }
 
 
-// void
-// JIoDevice::setBlocking(bool enable)
-// {
-//     int tmp = fcntl(m_socket, F_GETFL, 0);
-//     if (tmp >= 0) {
-//         TRACE("JIoDevice::setBlocking() setting to %s", enable ? "blocking" : "not blocking");
-//         tmp = fcntl(m_socket, F_SETFL, enable ? (tmp&~O_NDELAY) : (tmp|O_NDELAY));
-//     }
-//     m_blocking = enable;
-// }
-
-
 bool
-JIoDevice::isReadable()
+JIoDevice::isReadable(int milliSec)
 {
 //     TRACE("JIoDevice::isReadable()");
     if (m_blocking) {
         return true;
     }
+    m_tv.tv_sec = milliSec/1000;
+    m_tv.tv_usec = milliSec%1000;
     FD_ZERO(&m_readfds);
     FD_SET(m_device, &m_readfds);
     if (select(m_device+1, &m_readfds, NULL, NULL, &m_tv) == -1) {

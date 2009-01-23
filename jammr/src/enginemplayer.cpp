@@ -95,20 +95,7 @@ MplayerThread::command(const string& command)
     TRACE("MplayerThread::command() command: %s", command.c_str());
 }
 
-
 // TODO: no answer isn't handled correctly:
-/*
-    MplayerThread::command() command: get_time_pos
-    MplayerThread::answer(): ANS_TIME_POSITION=129.2
-    MplayerThread::answer(): returns Found
-    MplayerThread::command() command: get_time_pos
-    MplayerThread::answer(): ANS_TIME_POSITION=130.2
-    MplayerThread::answer(): returns Found
-    MplayerThread::command() command: get_time_pos
-    MplayerThread::answer():
-    EngineMplayer::~MplayerThread()
-    Segmentation fault
-*/
 
 
 // bool
@@ -127,24 +114,13 @@ MplayerThread::command(const string& command)
 
 
 int
-MplayerThread::answer(string& ans, int /*timeout*/, string searchKey)
+MplayerThread::answer(string& ans, int timeout, string searchKey)
 {
     string line;
-//     const int lineBufLen = 256;
-//     char buf[lineBufLen];
-//     bool eot = false;
-//     int to = timeout;
-/*    m_mplayerFifoStreamOut.peek();
-    if (m_mplayerFifoStreamOut.eof()) {
-        TRACE("MplayerThread::answer(): EOF");
-    }*/
-//     while (timeout > 0 && getline(m_mplayerFifoStreamOut, line)) {
-//     while (timeout > 0 && m_mplayerFifoStreamOut.readsome(buf, lineBufLen)) {
-    while (m_mplayerFifoStreamOut.readLine(line)) {
+    while (m_mplayerFifoStreamOut.readLine(line, timeout)) {
         TRACE("MplayerThread::answer(): %s", line.c_str());
         // mplayer writes answer to stdout starting with "ANS_"
-//         string line(buf);
-        if (/*line.length() &&*/ line.find(searchKey) == 0) {
+        if (line.find(searchKey) == 0) {
             if (searchKey == "ANS_") {
                 ans = line.substr(line.find("=")+1);
             }
@@ -154,26 +130,8 @@ MplayerThread::answer(string& ans, int /*timeout*/, string searchKey)
             TRACE("MplayerThread::answer(): returns Found");
             return Found;
         }
-        // TODO: check all answers for an mplayer message that indicates end of track
-//         else if (line.length()) {
-//             TRACE("MplayerThread::answer(): %s", line.c_str());
-/*            if (line.find("Cannot") == 0) {
-                eot = true;
-                TRACE("MplayerThread::answer() set eot: %i", eot);
-            }*/
-//         }
-//         usleep(m_answerPollIntervall*1000);
-//         TRACE("MplayerThread::answer() timeout: %i", timeout);
-//         timeout -= m_answerPollIntervall;
     }
-//     TRACE("MplayerThread::answer() eot: %i", eot);
-/*    if (eot) {
-        return EndOfTrack;
-    }
-    else {
-        return Timeout;
-    }*/
-    TRACE("MplayerThread::answer(): returns Timeout");
+    TRACE("MplayerThread::answer(): returns not Found / Timeout");
     return Timeout;
 }
 
@@ -306,6 +264,7 @@ EngineMplayer::getPosition(float &seconds)
     string ans;
     int err = m_mplayerThread.answer(ans, 1000);
     if (err == MplayerThread::Found) {
+//         ans = ans.substr(0, ans.length()-1);
         seconds = atof(ans.c_str());
     }
     else if (err == MplayerThread::Timeout) {
@@ -334,5 +293,6 @@ EngineMplayer::getLength(float &seconds)
     // with m_answerPollIntervall set to 10 milli_sec
     string ans;
     seconds = m_mplayerThread.answer(ans, 2000);
+//     ans = ans.substr(0, ans.length()-1);
     seconds = atof(ans.c_str());
 }

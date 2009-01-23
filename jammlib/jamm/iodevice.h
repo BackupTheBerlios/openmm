@@ -39,14 +39,14 @@ public:
     ~JIoDevice();
 
     bool open(const char* pathname);
-    int readLine(string& line);
+    bool readLine(string& line, int milliSec);
 //     void writeLine(string);
     void close();
 
 private:
-    int readBuf();
+    bool readBuf(int& bytesRead, int milliSec);
 //     void setBlocking(bool enable);
-    bool isReadable();
+    bool isReadable(int milliSec);
 //     bool isWriteable();
 
     int                m_device;
@@ -56,7 +56,7 @@ private:
     fd_set             m_readfds;
     fd_set             m_writefds;
 
-    static const int   m_timeout = 4; // timeout in seconds.
+    static const int   m_timeout = 5; // timeout in seconds.
     static const int   m_bufSize = 1024;
     char               m_buf[m_bufSize];
 //     string::size_type  m_bytesRead;
