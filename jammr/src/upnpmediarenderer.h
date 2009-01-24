@@ -73,9 +73,9 @@ protected:
 //     virtual NPT_Result OnSetPlayMode(PLT_ActionReference& action);
     
     // RenderingControl
-//     //virtual NPT_Result OnGetVolume(PLT_ActionReference& action);
-//     virtual NPT_Result OnSetVolume(PLT_ActionReference& action);
-//     virtual NPT_Result OnSetMute(PLT_ActionReference& action);
+//     virtual NPT_Result OnGetVolume(PLT_ActionReference& action);
+    virtual NPT_Result OnSetVolume(PLT_ActionReference& action);
+    virtual NPT_Result OnSetMute(PLT_ActionReference& action);
 
     // TODO: add required missing actions:
     //       OnGetMediaInfo (?)
@@ -94,29 +94,12 @@ protected:
     // TODO: lock all actions
     
 private:
-//     virtual void onSignalReceived();
-    
     EngineMplayer*  m_engine;
     PLT_Service*    m_AvTransport;
     PLT_Service*    m_AvRenderingControl;
     
-    NPT_String      m_currentUri;
-    // FIXME: m_uriChanged is alway true, because SetAVTransportURI is
-    //        always called before play. Have to compare the last URI
-    //        with the current one ...
-    bool            m_uriChanged;
+    NPT_String      m_lastCurrentTrackUri;
     JTimer          m_pollPositionTimer;
 };
-
-
-// class PollSlot : public JSlot
-// {
-// public:
-//     PollSlot(void* slotUser) { m_signalReceiver = static_cast<UpnpMediaRenderer*>(slotUser); }
-//     virtual void onSignalReceived();
-//     
-// private:
-//     UpnpMediaRenderer* m_signalReceiver;
-// };
 
 #endif

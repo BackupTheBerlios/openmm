@@ -11,11 +11,15 @@
 #include <platinum/PltMediaController.h>
 #include <platinum/PltMediaControllerListener.h>
 
+#include "upnprenderingcontrol.h"
 #include "upnpsyncmediabrowser.h"
 #include "upnpbrowsermodel.h"
+#include "upnprendererlistmodel.h"
 #include "controllergui.h"
 
 using namespace Jamm;
+
+class UpnpRendererListModel;
 
 class UpnpController : public QObject, PLT_MediaControllerListener, JSlot
 {
@@ -25,7 +29,7 @@ public:
     UpnpController();
     ~UpnpController();
 
-    UpnpBrowserModel* getBrowserModel() {return m_upnpBrowserModel;}
+    UpnpBrowserModel* getBrowserModel() { return m_upnpBrowserModel; }
     void showMainWindow();
 
 signals:
@@ -39,7 +43,7 @@ private slots:
     void stopButtonPressed();
     void pauseButtonPressed();
     void sliderMoved(int position);
-/*    void pollPositionInfo();*/
+    void volSliderMoved(int position);
     
 private:
     virtual void onSignalReceived();
@@ -155,16 +159,14 @@ private:
     PLT_CtrlPointReference          m_ctrlPoint;
 
     NPT_Lock<PLT_DeviceMap>         m_mediaServers;
-    NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
 
     /* The UPnP MediaServer control point (a synchronous one)
      */
     UpnpSyncMediaBrowser*           m_mediaBrowser;
-
+    JRenderingController*           m_renderingController;
     /* The UPnP MediaRenderer control point (an asynchronous one)
      */
     PLT_MediaController*            m_mediaController;
-//     PLT_MediaControllerListener*    m_controllerListener;
 
     /* The currently selected media server as well as 
      * a lock.  If you ever want to hold both the m_CurMediaRendererLock lock and the 
@@ -183,8 +185,13 @@ private:
 //     NPT_SharedVariable              m_AVTransportLock;
     
     UpnpBrowserModel*               m_upnpBrowserModel;
+    UpnpRendererListModel*          m_upnpRendererListModel;
     ControllerGui*                  m_mainWindow;
     JTimer                          m_pollPositionInfoTimer;
+    
+public:
+    // TODO: access from UpnpRendererListModel to the list of renderers is a mess ...
+    NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
 };
 
 #endif /* UPNPCONTROLLER_H */

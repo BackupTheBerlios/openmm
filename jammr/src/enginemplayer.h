@@ -23,7 +23,6 @@
 #include "engine.h"
 
 #include <fstream>
-#include <jamm/upnpav.h>
 #include <jamm/thread.h>
 #include <jamm/signode.h>
 #include <jamm/iodevice.h>
@@ -33,11 +32,6 @@ using namespace Jamm;
 /**
 	@author 
 */
-
-// TODO: need to implement a signal for "end of track"
-//       no message from mplayer, if not quiting
-//       -> a constant time position over 3 seconds may be an indicator
-//       -> decrease the polling interval and compare the float value of seconds
 
 // TODO: three test files have no duration (everytime.mpg, pepsy piercing.mpeg, vorteile.mpg)
 //       the wmv has duration but is not seekable (UFO-Reportage.wmv)
@@ -70,10 +64,6 @@ public:
     enum mplayerError {Found=0, Timeout=1, EndOfTrack=2};
     int answer(string& ans, int timeout, string searchKey="ANS_");
     
-//     bool readLine(string& line, int timeout);
-    
-    JSignal endOfTrack;
-    
 private:
     virtual void run();
     
@@ -83,8 +73,6 @@ private:
     string      m_mplayerFifoOut;
     fstream     m_mplayerFifoStreamIn;
     JIoDevice   m_mplayerFifoStreamOut;
-    
-    int         m_answerPollIntervall;
 };
 
 
@@ -105,6 +93,9 @@ public:
 
     ~EngineMplayer();
 
+    /*
+      AVTransport
+    */
     virtual void setUri(string uri);
     // load uri and play from beginning
     virtual void load();
@@ -120,6 +111,12 @@ public:
     virtual void getLength(float &seconds);
     
     JSignal endOfTrack;
+    
+    /*
+      Rendering Control
+    */
+    virtual void setVolume(int channel, float vol);
+    
     
 private:
     string          m_uri;

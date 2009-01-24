@@ -19,7 +19,6 @@
 #include "upnpbrowsermodel.h"
 
 #include <QtDebug>
-// #include <platinum/NptMap.h>
 
 UpnpBrowserModel::UpnpBrowserModel(UpnpSyncMediaBrowser* mediaBrowser, QObject *parent)
 : QAbstractItemModel(parent), m_mediaBrowser(mediaBrowser)

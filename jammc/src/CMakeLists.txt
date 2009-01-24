@@ -10,6 +10,8 @@ controllergui.cpp
 main.cpp
 upnpbrowsermodel.cpp
 upnpcontroller.cpp
+upnprenderingcontrol.cpp
+upnprendererlistmodel.cpp
 upnpsyncmediabrowser.cpp
 )
 
@@ -21,6 +23,7 @@ controllergui.ui
 SET( JAMMC_MOC
 controllergui.h
 upnpbrowsermodel.h
+upnprendererlistmodel.h
 upnpcontroller.h
 )
 

@@ -9,22 +9,24 @@ UpnpController::UpnpController()
 
     m_upnp = new PLT_UPnP(1900, true);
     m_ctrlPoint = PLT_CtrlPointReference(new PLT_CtrlPoint());
-//     m_controllerListener = new PLT_MediaControllerListener();
     m_upnp->AddCtrlPoint(m_ctrlPoint);
     m_mediaBrowser = new UpnpSyncMediaBrowser(m_ctrlPoint, true);
     m_upnpBrowserModel = new UpnpBrowserModel(m_mediaBrowser);
     m_mediaController = new PLT_MediaController(m_ctrlPoint, this);
+    m_upnpRendererListModel = new UpnpRendererListModel(this);
+    m_renderingController = new JRenderingController(m_ctrlPoint);
     m_upnp->Start();
     // tell control point to perform extra broadcast discover every secs
     // in case our device doesn't support multicast
     m_ctrlPoint->Discover(NPT_HttpUrl("255.255.255.255", 1900, "*"), "upnp:rootdevice", 1, 6000);
     m_ctrlPoint->Discover(NPT_HttpUrl("239.255.255.250", 1900, "*"), "upnp:rootdevice", 1, 6000);
     // TODO: get rid of this sleep and do it proper
-    sleep(1);
+    usleep(250000);
     
     m_mainWindow = new ControllerGui();
     
     m_mainWindow->setBrowserTreeItemModel(m_upnpBrowserModel);
+//     m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
     connect(this, SIGNAL(rendererAddedRemoved(QString, QString, bool)),
             m_mainWindow, SLOT(rendererAddedRemoved(QString, QString, bool)));
     connect(m_mainWindow->getBrowserTreeSelectionModel(),
@@ -35,6 +37,7 @@ UpnpController::UpnpController()
     connect(m_mainWindow, SIGNAL(pauseButtonPressed()), this, SLOT(pauseButtonPressed()));
     connect(m_mainWindow, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
     connect(this, SIGNAL(setSlider(int, int)), m_mainWindow, SLOT(setSlider(int, int)));
+    connect(m_mainWindow, SIGNAL(volSliderMoved(int)), this, SLOT(volSliderMoved(int)));
     
     JSignal::connectNodes(&m_pollPositionInfoTimer.fire, this);
     // poll for current position every second
@@ -94,6 +97,7 @@ UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
         if (m_mediaRenderers.GetEntryCount() == 1) {
             m_curMediaRenderer = device;
         }
+        // TODO: add Renderer to the UpnpMediaRendererListModel
         emit rendererAddedRemoved((char*) uuid, name, true);
     } else { /* removed */
         m_mediaRenderers.Erase(uuid);
@@ -101,6 +105,7 @@ UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
         if (!m_curMediaRenderer.IsNull() && m_curMediaRenderer == device) {
             m_curMediaRenderer = NULL;
         }
+        // TODO: delete Renderer from the UpnpMediaRendererListModel
         emit rendererAddedRemoved((char*) uuid, name, false);
     }
 }
@@ -279,3 +284,16 @@ UpnpController::onSignalReceived()
         m_mediaController->GetPositionInfo(m_curMediaRenderer, 0, NULL);
     }
 }
+
+
+void
+UpnpController::volSliderMoved(int position)
+{
+    qDebug() << "UpnpController::volSliderMoved() to:" << position;
+    if (m_curMediaRenderer.IsNull()) {
+        return;
+    }
+    
+    m_renderingController->setVolume(m_curMediaRenderer, 0, position);
+}
+

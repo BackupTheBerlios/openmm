@@ -59,6 +59,7 @@ m_sliderMoved(false)
     connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
     connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+    connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
     
     ui.m_browserListView->hide();
     setWindowTitle("JammC");
@@ -100,6 +101,13 @@ ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
 {
     ui.m_browserTreeView->setModel(model);
     ui.m_browserTreeView->expandToDepth(1);
+}
+
+
+void
+ControllerGui::setRendererListItemModel(QAbstractItemModel* model)
+{
+    ui.m_rendererListView->setModel(model);
 }
 
 

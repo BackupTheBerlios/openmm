@@ -54,14 +54,14 @@ JIoDevice::open(const char* pathname)
 bool
 JIoDevice::readLine(string& res, int milliSec)
 {
-    TRACE("JIoDevice::readLine()");
+//     TRACE("JIoDevice::readLine()");
     bool eof = false;
     bool eol = false;
     bool noTimeout = true;
     while (!eof && !eol) {
         if (m_bytesScanned >= m_bytesRead) {
-            TRACE("JIoDevice::readLine() fetching new buffer");
-            // we need to fetch new data.
+//             TRACE("JIoDevice::readLine() fetching new buffer");
+            // need to fetch new data.
             noTimeout = readBuf(m_bytesRead, milliSec);
             m_bytesScanned = 0;
         }
@@ -97,7 +97,7 @@ JIoDevice::readLine(string& res, int milliSec)
                 }
                 m_line.append(m_strBuf.substr(m_bytesScannedOld, m_bytesScanned - m_bytesScannedOld - newline));
             }
-            TRACE("JIoDevice::readLine() read: %i, scanned: %i bytes", m_bytesRead, m_bytesScanned);
+//             TRACE("JIoDevice::readLine() read: %i, scanned: %i bytes", m_bytesRead, m_bytesScanned);
             if (m_bytesScanned == m_bytesRead) {
                 m_bytesScanned = 0;
                 m_bytesRead = 0;
@@ -107,7 +107,7 @@ JIoDevice::readLine(string& res, int milliSec)
     // get rid of a newline at the beginning of m_line, copy the result and return
     /*string*/ res = ((m_line[0] == '\n') || (m_line[0] == '\r'))?string(m_line, 1):m_line;
     m_line = "";
-    TRACE("JIoDevice::readLine() returns %i bytes: %s", res.length(), res.c_str());
+//     TRACE("JIoDevice::readLine() returns %i bytes: %s", res.length(), res.c_str());
     return noTimeout;
 }
 
@@ -115,18 +115,18 @@ JIoDevice::readLine(string& res, int milliSec)
 bool
 JIoDevice::readBuf(int& bytesReadSum, int milliSec)
 {
-    TRACE("JIoDevice::readBuf()");
+//     TRACE("JIoDevice::readBuf()");
     int bytesRead = 0;
-    /*int*/ bytesReadSum = 0;
     int bytesLeft = m_bufSize;
+    bytesReadSum = 0;
     m_strBuf = "";
     while (bytesLeft) {
         if (isReadable(milliSec)) {
             bytesRead = read(m_device, m_buf, bytesLeft);
-            TRACE("JIoDevice::readBuf() bytesRead: %i", bytesRead);
+//             TRACE("JIoDevice::readBuf() bytesRead: %i", bytesRead);
         }
         else {
-            TRACE("JIoDevice::readBuf() timed out");
+//             TRACE("JIoDevice::readBuf() timed out");
             return false;
         }
         bytesReadSum += bytesRead;
@@ -192,7 +192,7 @@ JIoDevice::isReadable(int milliSec)
         return true;
     }
     m_tv.tv_sec = milliSec/1000;
-    m_tv.tv_usec = milliSec%1000;
+    m_tv.tv_usec = (milliSec%1000)*1000;
     FD_ZERO(&m_readfds);
     FD_SET(m_device, &m_readfds);
     if (select(m_device+1, &m_readfds, NULL, NULL, &m_tv) == -1) {

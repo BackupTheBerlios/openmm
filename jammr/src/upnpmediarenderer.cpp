@@ -25,8 +25,7 @@
 #include <platinum/PltDidl.h>
 #include <stdlib.h>
 
-// TODO: indicate end of: transisioning, track
-
+// TODO: indicate end of: transisioning
 
 void
 UpnpMediaRenderer::PollSlot::onSignalReceived() {
@@ -63,6 +62,12 @@ void
 UpnpMediaRenderer::EndOfTrackSlot::onSignalReceived() {
     TRACE("UpnpMediaRenderer::EndOfTrackSlot::onSignalReceived()");
     s->m_AvTransport->SetStateVariable("TransportState", "STOPPED");
+    // FIXME: reset position? doesn't work?
+    NPT_String pos;
+    PLT_Didl::FormatTimeStamp(pos, 0);
+    s->m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
+    s->m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
+    s->m_AvTransport->SetStateVariable("Speed", "0");
 }
 
 
@@ -73,7 +78,7 @@ UpnpMediaRenderer::UpnpMediaRenderer(EngineMplayer* engine,
                       unsigned int         port)
 : PLT_MediaRenderer(friendly_name, show_ip, uuid, port),
 m_engine(engine),
-m_uriChanged(false)
+m_lastCurrentTrackUri("")
 {
     FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", m_AvTransport);
 //     FindServiceById("urn:upnp-org:serviceId:AVT_1-0", m_AvTransport);
@@ -109,9 +114,9 @@ UpnpMediaRenderer::OnSetAVTransportURI(PLT_ActionReference& action)
     // OnSetAVTransportURI is active in all transport states
     /* get arguments
     */
-    NPT_String currentUriMetaData;
-    action->GetArgumentValue("InstanceID", m_currentUri);
-    action->GetArgumentValue("CurrentURI", m_currentUri);
+    NPT_String currentUriMetaData, instanceId, currentUri;
+    action->GetArgumentValue("InstanceID", instanceId);
+    action->GetArgumentValue("CurrentURI", currentUri);
     action->GetArgumentValue("CurrentURIMetaData", currentUriMetaData);
     
     /* get further info from state variables and meta data
@@ -128,12 +133,11 @@ UpnpMediaRenderer::OnSetAVTransportURI(PLT_ActionReference& action)
     
     /* perform some actions on the engine
     */
-    m_engine->setUri((char*)m_currentUri);
+    m_engine->setUri((char*)currentUri);
     
     /* set state variables according to the outcome of the actions
     */
-    m_uriChanged = true;
-    m_AvTransport->SetStateVariable("CurrentTrackURI", m_currentUri);
+    m_AvTransport->SetStateVariable("CurrentTrackURI", currentUri);
     m_AvTransport->SetStateVariable("CurrentURIMetaData", currentUriMetaData);
     m_AvTransport->SetStateVariable("CurrentTrackMetaData", currentUriMetaData);
     TRACE("UpnpMediaRenderer::OnSetAVTransportURI() CurrentTrackMetaData: %s", (char*)currentUriMetaData);
@@ -162,6 +166,9 @@ UpnpMediaRenderer::OnPlay(PLT_ActionReference& action)
     /* check TransportState and do something only if specified for this state
     */
 //     TRACE("UpnpMediaRenderer::OnPlay()");
+    NPT_String currentTrackUri;
+    m_AvTransport->GetStateVariableValue("CurrentTrackURI", currentTrackUri);
+    
     NPT_String transportState;
     m_AvTransport->GetStateVariableValue("TransportState", transportState);
     TRACE("UpnpMediaRenderer::OnPlay() enters in state: %s", (char*) transportState);
@@ -191,12 +198,11 @@ UpnpMediaRenderer::OnPlay(PLT_ActionReference& action)
             m_engine->load();
         }
         else if (transportState == "PLAYING") {
-            if (m_uriChanged) {
+            if (currentTrackUri != m_lastCurrentTrackUri) {
                 NPT_String pos;
                 PLT_Didl::FormatTimeStamp(pos, 0);
                 m_AvTransport->SetStateVariable("AbsoluteTimePosition", (char*)pos);
                 m_AvTransport->SetStateVariable("RelativeTimePosition", (char*)pos);
-                
                 m_engine->load();
             }
         }
@@ -216,9 +222,10 @@ UpnpMediaRenderer::OnPlay(PLT_ActionReference& action)
             
     /* set state variables according to the outcome of the actions
     */
-        m_uriChanged = false;
         m_AvTransport->SetStateVariable("TransportState", "PLAYING");
         m_AvTransport->SetStateVariable("Speed", speed);
+        
+        m_lastCurrentTrackUri = currentTrackUri;
     }
     /* error handling
     */
@@ -364,5 +371,49 @@ UpnpMediaRenderer::OnPrevious(PLT_ActionReference& /*action*/)
 {
     TRACE("UpnpMediaRenderer::OnPrevious()");
     m_engine->previous();
+    return NPT_SUCCESS;
+}
+
+
+// NPT_Result
+// UpnpMediaRenderer::OnGetVolume(PLT_ActionReference& /*action*/)
+// {
+//     TRACE("UpnpMediaRenderer::OnGetVolume()");
+// //     m_engine->previous();
+//     return NPT_SUCCESS;
+// }
+
+
+NPT_Result
+UpnpMediaRenderer::OnSetVolume(PLT_ActionReference& action)
+{
+    TRACE("UpnpMediaRenderer::OnSetVolume()");
+    /* get arguments
+    */
+    NPT_String channel, volume;
+    action->GetArgumentValue("Channel", channel);
+    action->GetArgumentValue("DesiredVolume", volume);
+    TRACE("UpnpMediaRenderer::OnSetVolume() channel: %s, seek volume: %s", (char*)channel, (char*)volume);
+    /* perform some actions on the engine
+    */
+    float vol;
+    volume.ToFloat(vol);
+    long chan;
+    channel.ToInteger(chan);
+    m_engine->setVolume(chan, vol);
+    
+    /* set state variables according to the outcome of the actions
+    */
+    /* error handling
+    */
+    return NPT_SUCCESS;
+}
+
+
+NPT_Result
+UpnpMediaRenderer::OnSetMute(PLT_ActionReference& /*action*/)
+{
+    TRACE("UpnpMediaRenderer::OnSetMute()");
+//     m_engine->previous();
     return NPT_SUCCESS;
 }

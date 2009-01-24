@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,55 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef JAMMIODEVICE_H
-#define JAMMIODEVICE_H
+#ifndef JAMMRENDERINGCONTROLLER_H
+#define JAMMRENDERINGCONTROLLER_H
 
-#include <sys/time.h>
+#include <platinum/PltCtrlPoint.h>
 
-#include <string>
-using namespace std;
-
-
-/**
-Simple socket encapsulation with methods for handling a line-based protocol.
-readLine() is buffered and attempts to read blocks of 1024 bytes from the network.
-
-	@author Jörg Bakker <joerg<at>hakker<dot>de>
-*/
-
-class JIoDevice
+class JRenderingController  : public PLT_CtrlPointListener
 {
 public:
-    JIoDevice(bool blocking = false);
-    ~JIoDevice();
-
-    bool open(const char* pathname);
-    bool readLine(string& line, int milliSec);
-//     void writeLine(string);
-    void close();
-
+    JRenderingController(PLT_CtrlPointReference& ctrl_point);
+    ~JRenderingController();
+    
+    // PLT_CtrlPointListener methods
+    virtual NPT_Result OnDeviceAdded(PLT_DeviceDataReference& device);
+    virtual NPT_Result OnDeviceRemoved(PLT_DeviceDataReference& device);
+    virtual NPT_Result OnActionResponse(NPT_Result res, PLT_ActionReference& action, void* userdata);
+    virtual NPT_Result OnEventNotify(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
+    
+    
+    void setVolume(PLT_DeviceDataReference& device, int channel, int volume);
+    
 private:
-    bool readBuf(int& bytesRead, int milliSec);
-//     void setBlocking(bool enable);
-    bool isReadable(int milliSec);
-//     bool isWriteable();
-
-    int                m_device;
-    bool               m_blocking;
-
-    timeval            m_tv;
-    fd_set             m_readfds;
-    fd_set             m_writefds;
-
-    static const int   m_bufSize = 1024;
-    char               m_buf[m_bufSize];
-//     string::size_type  m_bytesRead;
-//     string::size_type  m_bytesScanned;
-    int  m_bytesRead;
-    int  m_bytesScanned;
-    bool               m_lineEndFound;
-    string             m_line;
-    string             m_strBuf;
+    PLT_CtrlPointReference       m_CtrlPoint;
+    
 };
 
 #endif

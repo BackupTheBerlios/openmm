@@ -42,6 +42,8 @@ private:
     NPT_Map<NPT_String, PLT_MediaObjectListReference> m_Items;
 };
 
+
+
 typedef NPT_Map<NPT_String, PLT_MediaObjectListReference>::Entry UpnpMediaCacheEntry;
 
 struct ObjectReference {

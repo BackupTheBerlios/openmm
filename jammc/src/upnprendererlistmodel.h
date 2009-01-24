@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -16,55 +16,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef JAMMIODEVICE_H
-#define JAMMIODEVICE_H
+#ifndef UPNPRENDERERLISTMODEL_H
+#define UPNPRENDERERLISTMODEL_H
 
-#include <sys/time.h>
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QVariant>
+#include <QList>
+#include <QTextCodec>
 
-#include <string>
-using namespace std;
+#include "upnpcontroller.h"
 
+class UpnpController;
 
-/**
-Simple socket encapsulation with methods for handling a line-based protocol.
-readLine() is buffered and attempts to read blocks of 1024 bytes from the network.
-
-	@author Jörg Bakker <joerg<at>hakker<dot>de>
-*/
-
-class JIoDevice
+class UpnpRendererListModel : public QAbstractItemModel
 {
+    Q_OBJECT
+        
 public:
-    JIoDevice(bool blocking = false);
-    ~JIoDevice();
-
-    bool open(const char* pathname);
-    bool readLine(string& line, int milliSec);
-//     void writeLine(string);
-    void close();
-
+    UpnpRendererListModel(UpnpController* mediaController, QObject *parent = 0);
+    ~UpnpRendererListModel();
+    
+    QVariant data(const QModelIndex &index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column,
+                      const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex &index) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    
 private:
-    bool readBuf(int& bytesRead, int milliSec);
-//     void setBlocking(bool enable);
-    bool isReadable(int milliSec);
-//     bool isWriteable();
-
-    int                m_device;
-    bool               m_blocking;
-
-    timeval            m_tv;
-    fd_set             m_readfds;
-    fd_set             m_writefds;
-
-    static const int   m_bufSize = 1024;
-    char               m_buf[m_bufSize];
-//     string::size_type  m_bytesRead;
-//     string::size_type  m_bytesScanned;
-    int  m_bytesRead;
-    int  m_bytesScanned;
-    bool               m_lineEndFound;
-    string             m_line;
-    string             m_strBuf;
+    UpnpController*       m_mediaController;
+    QTextCodec*           m_charEncoding;
 };
 
 #endif
+

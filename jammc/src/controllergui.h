@@ -31,14 +31,17 @@ public:
     ControllerGui(QWidget *parent = 0);
     
     void setBrowserTreeItemModel(QAbstractItemModel* model);
+    void setRendererListItemModel(QAbstractItemModel* model);
     
     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserTreeView->selectionModel(); }
-
+    QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
+    
 signals:
     void playButtonPressed();
     void stopButtonPressed();
     void pauseButtonPressed();
     void sliderMoved(int);
+    void volSliderMoved(int);
     
 public slots:
     void setSlider(int max, int val);
