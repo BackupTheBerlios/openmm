@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include "upnprendererlistmodel.h"
 
+#include <algorithm>
 #include <QtDebug>
 
 UpnpRendererListModel::UpnpRendererListModel(UpnpController* mediaController, QObject *parent)
@@ -35,29 +36,25 @@ UpnpRendererListModel::~UpnpRendererListModel()
 QVariant
 UpnpRendererListModel::data(const QModelIndex &index, int role) const
 {
-    qDebug() << "UpnpRendererListModel::data() role:" << role;
-//     NPT_AutoLock lock(m_mediaController->m_mediaRenderers);
+//     qDebug() << "UpnpRendererListModel::data() role:" << role;
     
     if (!index.isValid())
         return QVariant();
     
-/*    if (index.internalPointer() == NULL) {
+    if (index.internalPointer() == NULL) {
         qWarning() << "UpnpRendererListModel::data() objectId reference is NULL:";
         return QVariant();
-    }*/
+    }
     
-//     qDebug() << "UpnpRendererListModel::data() objectId reference:" << index.internalPointer();
+//     qDebug() << "UpnpRendererListModel::data() renderer reference:" << index.internalPointer();
     if (role != Qt::DisplayRole)
         return QVariant();
     
-/*    PLT_DeviceMap::Entry* rendererP = static_cast<PLT_DeviceMap::Entry*>(index.internalPointer());
-//     qDebug() << "UpnpRendererListModel::data() returns:" << (char*) renderer->GetFriendlyName();
-    return m_charEncoding->toUnicode(rendererP->GetValue()->GetFriendlyName());*/
 /*    QString renderer = *static_cast<QString*>(index.internalPointer());*/
 //     qDebug() << "UpnpRendererListModel::data() returns:" << (char*) renderer->GetFriendlyName();
 //     return m_charEncoding->toUnicode(renderer);
 //     qRegisterMetaType<string>("string");
-    return m_rendererList.at(index.row());
+    return QString(static_cast<string*>(index.internalPointer())->c_str());
 }
 
 
@@ -85,14 +82,8 @@ QModelIndex
 UpnpRendererListModel::index(int row, int column,
                         const QModelIndex &/*parent*/) const
 {
-    qDebug() << "UpnpRendererListModel::index()";
-//     NPT_AutoLock lock(m_mediaController->m_mediaRenderers);
-    
-//     PLT_DeviceMap::Entry* rendererP = *(m_mediaController->m_mediaRenderers.GetEntries().GetItem(row));
-//     return createIndex(row, column, rendererP/*.AsPointer()*/);
-//     const QString* rendererP = &(m_rendererList.at(row));
-    return createIndex(row, column, NULL);
-    
+//     qDebug() << "UpnpRendererListModel::index()";
+    return createIndex(row, column, m_rendererList.at(row));
 }
 
 
@@ -106,11 +97,8 @@ UpnpRendererListModel::parent(const QModelIndex &/*index*/) const
 int
 UpnpRendererListModel::rowCount(const QModelIndex &/*parent*/) const
 {
-    qDebug() << "UpnpRendererListModel::rowCount()";
+//     qDebug() << "UpnpRendererListModel::rowCount()";
     
-//     NPT_AutoLock lock(m_mediaController->m_mediaRenderers);
-    
-//     return m_mediaController->m_mediaRenderers.GetEntryCount();
     return m_rendererList.size();
 }
 
@@ -122,56 +110,29 @@ UpnpRendererListModel::columnCount(const QModelIndex &/*parent*/) const
 }
 
 
-// bool
-// UpnpRendererListModel::insertRows(int position, int rows, const QModelIndex &/*parent*/)
-// {
-//     beginInsertRows(QModelIndex(), position, position+rows-1);
-//     // data should be inserted here, but this is already done by CtrlPointListener thread ...?
-//     endInsertRows();
-//     return true;
-// }
-// 
-// 
-// bool
-// UpnpRendererListModel::removeRows(int position, int rows, const QModelIndex &/*parent*/)
-// {
-//     beginRemoveRows(QModelIndex(), position, position+rows-1);
-//    // data should be removed here, but this is already done by CtrlPointListener thread ...?
-//     endRemoveRows();
-//     return true;
-// }
-
-
 void
 UpnpRendererListModel::rendererAddedRemoved(string uuid, bool add)
 {
-//     NPT_AutoLock lock(m_mediaController->m_mediaRenderers);
-//     qDebug() << "UpnpRendererListModel::rendererAddedRemoved()" << (add?"add":"remove") << "renderer:" << (char*) (*device)->GetUUID();
     qDebug() << "UpnpRendererListModel::rendererAddedRemoved()" << (add?"add":"remove") << "renderer:" << uuid.c_str();
     
-//     unsigned int nr;
-    
-    
     if (add) {
-//         nr = m_mediaController->m_mediaRenderers.GetEntryCount();
-//         qDebug() << "UpnpRendererListModel::rendererAddedRemoved() add nr:" << nr;
-        beginInsertRows(QModelIndex(), 0, 0);
-//         m_mediaController->m_mediaRenderers.Put((*device)->GetUUID(), (*device));
-        m_rendererList.push_back(QString(uuid.c_str()));
+        beginInsertRows(QModelIndex(), m_rendererList.size(), m_rendererList.size());
+        m_rendererList.push_back(new string(uuid));
         endInsertRows();
     }
     else {
-/*        for (nr = 0; nr < m_mediaController->m_mediaRenderers.GetEntryCount(); ++nr) {
-            if ((*m_mediaController->m_mediaRenderers.GetEntries().GetItem(nr))->GetKey() == (*device)->GetUUID()) {
-                break;
-            }
-        }*/
-//         nr = 0;
-//         qDebug() << "UpnpRendererListModel::rendererAddedRemoved() remove nr:" << nr;
-        beginRemoveRows(QModelIndex(), 0, 0);
-//         m_mediaController->m_mediaRenderers.Erase((*device)->GetUUID());
-//         reset();
-        m_rendererList.pop_back();
+        vector<string*>::iterator i = m_rendererList.begin();
+        while (**i != uuid && i != m_rendererList.end()) ++i;
+        if (i == m_rendererList.end()) {
+            qDebug() << "UpnpRendererListModel::rendererAddedRemoved() renderer not found";
+            return;
+        }
+        int n = i - m_rendererList.begin();
+        qDebug() << "UpnpRendererListModel::rendererAddedRemoved() remove nr:" << n;
+        beginRemoveRows(QModelIndex(), n, n);
+        qDebug() << "UpnpRendererListModel::rendererAddedRemoved() erase";
+        m_rendererList.erase(i);
+        qDebug() << "UpnpRendererListModel::rendererAddedRemoved() end remove";
         endRemoveRows();
     }
     

@@ -33,7 +33,6 @@ public:
     void showMainWindow();
 
 signals:
-//     void rendererAddedRemoved(PLT_DeviceDataReference* device, bool add);
     void rendererAddedRemoved(string uuid, bool add);
     void setSlider(int max, int val);
 

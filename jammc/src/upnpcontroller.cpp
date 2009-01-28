@@ -28,8 +28,8 @@ UpnpController::UpnpController()
     
     m_mainWindow->setBrowserTreeItemModel(m_upnpBrowserModel);
     m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
-//     qRegisterMetaType<PLT_DeviceDataReference*>("PLT_DeviceDataReference*");
     qRegisterMetaType<string>("string");
+    qRegisterMetaType<QItemSelection>("QItemSelection");
     connect(this, SIGNAL(rendererAddedRemoved(string, bool)),
             m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
     connect(m_mainWindow->getBrowserTreeSelectionModel(),
@@ -102,45 +102,16 @@ UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
     QString name = (char*) device->GetFriendlyName();
     qDebug() << "UpnpController::OnMRAddedRemoved()" << (added?"added":"removed") << "renderer:" << name << (char*) uuid;
 
-//     m_upnpRendererListModel->rendererAddedRemoved(device, added);
-//     emit rendererAddedRemoved(&device, added);
-    
     if (added) {
         m_mediaRenderers.Put(uuid, device);
-    } else { 
+    } else {
+//         if (m_mediaRenderers.GetEntryCount() == 1) {
+//             m_mainWindow->getRendererListSelectionModel()->clearSelection();
+//             m_curMediaRenderer = NULL;
+//         }
         m_mediaRenderers.Erase(uuid);
     }
-    emit rendererAddedRemoved((char*)uuid, added);
-    
-/*    unsigned int rendererNr;
-    if (added) {
-        m_mediaRenderers.Put(uuid, device);
-        for (rendererNr = 0; rendererNr < m_mediaRenderers.GetEntryCount(); ++rendererNr) {
-            if ((*m_mediaRenderers.GetEntries().GetItem(rendererNr))->GetKey() == uuid) {
-                break;
-            }
-        }
-//         m_upnpRendererListModel->insertRows();
-        // TODO: initially select first renderer in RendererListView.
-        if (m_mediaRenderers.GetEntryCount() == 1) {
-            m_curMediaRenderer = device;
-        }
-//         m_upnpRendererListModel->insertRows(rendererNr, 1);
-        emit rendererAddedRemoved(PLT_DeviceDataReference& device, true);
-    } else { 
-        for (rendererNr = 0; rendererNr < m_mediaRenderers.GetEntryCount(); ++rendererNr) {
-            if ((*m_mediaRenderers.GetEntries().GetItem(rendererNr))->GetKey() == uuid) {
-                break;
-            }
-        }
-        m_mediaRenderers.Erase(uuid);
-        // if it's the currently selected one, we have to get rid of it
-        if (!m_curMediaRenderer.IsNull() && m_curMediaRenderer == device) {
-            m_curMediaRenderer = NULL;
-        }
-//         m_upnpRendererListModel->removeRows(rendererNr, 1);
-       emit rendererAddedRemoved(rendererNr, false);
-    }*/
+    emit rendererAddedRemoved(string((char*)uuid), added);
 }
 
 
@@ -180,13 +151,18 @@ UpnpController::rendererSelectionChanged(const QItemSelection &selected,
     if (selected.count() > 1) {
         return;
     }
-    
+    if (selected.empty()) {
+        qDebug() << "UpnpController::rendererSelectionChanged() nothing selected";
+        m_curMediaRenderer = NULL;
+        return;
+    }
     QModelIndex index = selected.indexes().first();
     
-    m_curMediaRenderer = (static_cast<PLT_DeviceMap::Entry*>(index.internalPointer()))->GetValue();
+    string* uuidRef = static_cast<string*>(index.internalPointer());
+    m_curMediaRenderer = m_mediaRenderers[uuidRef->c_str()];
     
-    qDebug() << "UpnpController::selectionChanged() row:" << index.row() << "col:" << index.column();
-    qDebug() << "UpnpController::selectionChanged() selected renderer:" << 
+    qDebug() << "UpnpController::rendererSelectionChanged() row:" << index.row();
+    qDebug() << "UpnpController::rendererSelectionChanged() selected renderer:" << 
         (char*) m_curMediaRenderer->GetFriendlyName() << "," << (char*) m_curMediaRenderer->GetUUID();
 }
 
