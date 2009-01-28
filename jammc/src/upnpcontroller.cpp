@@ -21,17 +21,24 @@ UpnpController::UpnpController()
     m_ctrlPoint->Discover(NPT_HttpUrl("255.255.255.255", 1900, "*"), "upnp:rootdevice", 1, 6000);
     m_ctrlPoint->Discover(NPT_HttpUrl("239.255.255.250", 1900, "*"), "upnp:rootdevice", 1, 6000);
     // TODO: get rid of this sleep and do it proper
+    //       check somehow when m_upnp->Start() has finished and is ready to go ...
     usleep(250000);
     
     m_mainWindow = new ControllerGui();
     
     m_mainWindow->setBrowserTreeItemModel(m_upnpBrowserModel);
-//     m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
-    connect(this, SIGNAL(rendererAddedRemoved(QString, QString, bool)),
-            m_mainWindow, SLOT(rendererAddedRemoved(QString, QString, bool)));
+    m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
+//     qRegisterMetaType<PLT_DeviceDataReference*>("PLT_DeviceDataReference*");
+    qRegisterMetaType<string>("string");
+    connect(this, SIGNAL(rendererAddedRemoved(string, bool)),
+            m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
     connect(m_mainWindow->getBrowserTreeSelectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
+    connect(m_mainWindow->getRendererListSelectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
+    
     connect(m_mainWindow, SIGNAL(playButtonPressed()), this, SLOT(playButtonPressed()));
     connect(m_mainWindow, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
     connect(m_mainWindow, SIGNAL(pauseButtonPressed()), this, SLOT(pauseButtonPressed()));
@@ -83,31 +90,57 @@ UpnpController::~UpnpController()
 // }
 
 
+// TODO: update BrowserModel when MediaServer is added / removed.
+//       don't do a complete reset() on the BrowserModel.
+
 void
 UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
 {
     NPT_AutoLock lock(m_mediaRenderers);
-    NPT_AutoLock lockCurRenderer(m_curMediaRendererLock);
+    
     NPT_String uuid = device->GetUUID();
     QString name = (char*) device->GetFriendlyName();
     qDebug() << "UpnpController::OnMRAddedRemoved()" << (added?"added":"removed") << "renderer:" << name << (char*) uuid;
 
+//     m_upnpRendererListModel->rendererAddedRemoved(device, added);
+//     emit rendererAddedRemoved(&device, added);
+    
     if (added) {
         m_mediaRenderers.Put(uuid, device);
+    } else { 
+        m_mediaRenderers.Erase(uuid);
+    }
+    emit rendererAddedRemoved((char*)uuid, added);
+    
+/*    unsigned int rendererNr;
+    if (added) {
+        m_mediaRenderers.Put(uuid, device);
+        for (rendererNr = 0; rendererNr < m_mediaRenderers.GetEntryCount(); ++rendererNr) {
+            if ((*m_mediaRenderers.GetEntries().GetItem(rendererNr))->GetKey() == uuid) {
+                break;
+            }
+        }
+//         m_upnpRendererListModel->insertRows();
+        // TODO: initially select first renderer in RendererListView.
         if (m_mediaRenderers.GetEntryCount() == 1) {
             m_curMediaRenderer = device;
         }
-        // TODO: add Renderer to the UpnpMediaRendererListModel
-        emit rendererAddedRemoved((char*) uuid, name, true);
-    } else { /* removed */
+//         m_upnpRendererListModel->insertRows(rendererNr, 1);
+        emit rendererAddedRemoved(PLT_DeviceDataReference& device, true);
+    } else { 
+        for (rendererNr = 0; rendererNr < m_mediaRenderers.GetEntryCount(); ++rendererNr) {
+            if ((*m_mediaRenderers.GetEntries().GetItem(rendererNr))->GetKey() == uuid) {
+                break;
+            }
+        }
         m_mediaRenderers.Erase(uuid);
         // if it's the currently selected one, we have to get rid of it
         if (!m_curMediaRenderer.IsNull() && m_curMediaRenderer == device) {
             m_curMediaRenderer = NULL;
         }
-        // TODO: delete Renderer from the UpnpMediaRendererListModel
-        emit rendererAddedRemoved((char*) uuid, name, false);
-    }
+//         m_upnpRendererListModel->removeRows(rendererNr, 1);
+       emit rendererAddedRemoved(rendererNr, false);
+    }*/
 }
 
 
@@ -119,10 +152,10 @@ UpnpController::showMainWindow()
 
 
 void
-UpnpController::selectionChanged(const QItemSelection &selected,
+UpnpController::selectionChanged(const QItemSelection &/*selected*/,
                                 const QItemSelection &/*deselected*/)
 {
-    if (selected.count() > 1) {
+/*    if (selected.count() > 1) {
         return;
     }
     
@@ -133,10 +166,30 @@ UpnpController::selectionChanged(const QItemSelection &selected,
     qDebug() << "UpnpController::selectionChanged() row:" << index.row() << "col:" << index.column();
     qDebug() << "UpnpController::selectionChanged() selected server:" << 
         (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
-    qDebug() << "UpnpController::selectionChanged() selected objectId:" << (char*) objectRef->objectId;
-    
-    
+    qDebug() << "UpnpController::selectionChanged() selected objectId:" << (char*) objectRef->objectId;*/
 }
+
+
+void
+UpnpController::rendererSelectionChanged(const QItemSelection &selected,
+                                 const QItemSelection &/*deselected*/)
+{
+    NPT_AutoLock lock(m_mediaRenderers);
+    NPT_AutoLock lockCurRenderer(m_curMediaRendererLock);
+    
+    if (selected.count() > 1) {
+        return;
+    }
+    
+    QModelIndex index = selected.indexes().first();
+    
+    m_curMediaRenderer = (static_cast<PLT_DeviceMap::Entry*>(index.internalPointer()))->GetValue();
+    
+    qDebug() << "UpnpController::selectionChanged() row:" << index.row() << "col:" << index.column();
+    qDebug() << "UpnpController::selectionChanged() selected renderer:" << 
+        (char*) m_curMediaRenderer->GetFriendlyName() << "," << (char*) m_curMediaRenderer->GetUUID();
+}
+
 
 void
 UpnpController::playButtonPressed()
@@ -146,6 +199,10 @@ UpnpController::playButtonPressed()
     }
     
     QModelIndex selected = m_mainWindow->getBrowserTreeSelectionModel()->currentIndex();
+    if (selected == QModelIndex()) {
+        return;
+    }
+    
     ObjectReference* objectRef = static_cast<ObjectReference*>(selected.internalPointer());
     
     qDebug() << "UpnpController::playButtonPressed() selected server:" << 

@@ -33,12 +33,16 @@ public:
     void showMainWindow();
 
 signals:
-    void rendererAddedRemoved(QString uuid, QString name, bool add);
+//     void rendererAddedRemoved(PLT_DeviceDataReference* device, bool add);
+    void rendererAddedRemoved(string uuid, bool add);
     void setSlider(int max, int val);
 
 private slots:
     void selectionChanged(const QItemSelection &selected,
                          const QItemSelection &deselected);
+    void rendererSelectionChanged(const QItemSelection &selected,
+                          const QItemSelection &deselected);
+    
     void playButtonPressed();
     void stopButtonPressed();
     void pauseButtonPressed();
@@ -191,6 +195,7 @@ private:
     
 public:
     // TODO: access from UpnpRendererListModel to the list of renderers is a mess ...
+    
     NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
 };
 

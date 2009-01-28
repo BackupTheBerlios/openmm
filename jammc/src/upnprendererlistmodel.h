@@ -25,6 +25,9 @@
 #include <QList>
 #include <QTextCodec>
 
+#include <vector>
+using namespace std;
+
 #include "upnpcontroller.h"
 
 class UpnpController;
@@ -47,9 +50,16 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     
+/*    bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex());*/
+    
+public slots:
+    void rendererAddedRemoved(string uuid, bool add);
+    
 private:
     UpnpController*       m_mediaController;
     QTextCodec*           m_charEncoding;
+    vector<QString>       m_rendererList;
 };
 
 #endif

@@ -47,7 +47,6 @@ public slots:
     void setSlider(int max, int val);
     
 private slots:
-    void rendererAddedRemoved(QString uuid, QString name, bool add);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
         once moved and some time later (a new track is loaded), the range

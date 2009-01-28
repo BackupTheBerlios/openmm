@@ -17,7 +17,7 @@ int main(int /*argc*/, char **/*argv*/)
     EngineMplayer *engine;
     
     engine = new EngineMplayer();
-    renderer = new UpnpMediaRenderer(engine, "JammR UPnP Media Renderer");
+    renderer = new UpnpMediaRenderer(engine, "Tristan JammR UPnP Media Renderer");
 
     PLT_SetLogLevel(PLT_LOG_LEVEL_MAX);
 

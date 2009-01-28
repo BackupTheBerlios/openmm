@@ -66,17 +66,6 @@ m_sliderMoved(false)
 }
 
 
-void
-ControllerGui::rendererAddedRemoved(QString uuid, QString name, bool add)
-{
-    if (add) {
-//         m_rendererLabel->setText(name);
-    }
-    else {
-//         m_rendererLabel->setText("");
-    }
-    qDebug() << "ControllerGui::rendererAddedRemoved()" << (add?"added":"removed") << "renderer:" << name << uuid;
-}
 
 
 void
