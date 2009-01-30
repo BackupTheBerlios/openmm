@@ -32,6 +32,7 @@ public:
     
     void setBrowserTreeItemModel(QAbstractItemModel* model);
     void setRendererListItemModel(QAbstractItemModel* model);
+    void expand();
     
     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserTreeView->selectionModel(); }
     QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }

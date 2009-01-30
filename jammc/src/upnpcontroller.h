@@ -37,8 +37,6 @@ signals:
     void setSlider(int max, int val);
 
 private slots:
-    void selectionChanged(const QItemSelection &selected,
-                         const QItemSelection &deselected);
     void rendererSelectionChanged(const QItemSelection &selected,
                           const QItemSelection &deselected);
     
@@ -162,6 +160,7 @@ private:
     PLT_CtrlPointReference          m_ctrlPoint;
 
     NPT_Lock<PLT_DeviceMap>         m_mediaServers;
+    NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
 
     /* The UPnP MediaServer control point (a synchronous one)
      */
@@ -191,11 +190,6 @@ private:
     UpnpRendererListModel*          m_upnpRendererListModel;
     ControllerGui*                  m_mainWindow;
     JTimer                          m_pollPositionInfoTimer;
-    
-public:
-    // TODO: access from UpnpRendererListModel to the list of renderers is a mess ...
-    
-    NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
 };
 
 #endif /* UPNPCONTROLLER_H */

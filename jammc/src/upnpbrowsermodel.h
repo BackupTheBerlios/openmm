@@ -45,6 +45,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+public slots:
+    void serverAddedRemoved(string uuid, bool add);
+    
 private:
     UpnpSyncMediaBrowser* m_mediaBrowser;
     QTextCodec*           m_charEncoding;

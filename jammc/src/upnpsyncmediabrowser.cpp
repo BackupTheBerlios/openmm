@@ -39,9 +39,7 @@ UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
                       const char*              sort)
 {
 //     qDebug() << "UpnpSyncMediaBrowser::syncBrowse() object_id:" << object_id;
-    
     NPT_Result res = NPT_FAILURE;
-    
         // reset output params
     list = NULL;
     
@@ -113,6 +111,22 @@ UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
     }
 
     return res;
+}
+
+
+void
+UpnpSyncMediaBrowser::OnMSAddedRemoved(PLT_DeviceDataReference& device, int added)
+{
+    PLT_SyncMediaBrowser::OnMSAddedRemoved(device, added);
+    
+    string uuid = (char*) device->GetUUID();
+    string name = (char*) device->GetFriendlyName();
+    
+    qDebug() << "UpnpSyncMediaBrowser::OnMSAddedRemoved() object_id:" << (added?"added":"removed") << "server:" << name.c_str() << uuid.c_str();
+    
+    // TODO: call ControllerGui::expand() to expand the first two levels of the tree.
+    //       or better: ControllerGui should automatically always expand to this level.
+    emit serverAddedRemoved(uuid, added);
 }
 
 
@@ -211,6 +225,7 @@ UpnpMediaCache::Clear(PLT_DeviceData* device)
     
     return NPT_SUCCESS;
 }
+
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::Put

@@ -22,6 +22,8 @@
 
 #include <dlfcn.h>
 
+using namespace Jamm;
+
 JSharedLibrary::JSharedLibrary(string filename)
 {
     m_libHandle = dlopen(filename.c_str(), RTLD_NOW);

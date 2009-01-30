@@ -24,6 +24,7 @@ SET( JAMMC_MOC
 controllergui.h
 upnpbrowsermodel.h
 upnprendererlistmodel.h
+upnpsyncmediabrowser.h
 upnpcontroller.h
 )
 

@@ -91,9 +91,8 @@ UpnpBrowserModel::index(int row, int column,
 //     qDebug() << "UpnpBrowserModel::index()";
     ObjectReference* objectRef;
     if (!parent.isValid()) {
-        PLT_DeviceMap mediaServers = m_mediaBrowser->GetMediaServers();
+        PLT_DeviceMap mediaServers = m_mediaBrowser->getMediaServers();
         PLT_DeviceDataReference server = (*mediaServers.GetEntries().GetItem(row))->GetValue();
-//         PLT_DeviceDataReference server = (*mediaServers.GetEntries().GetFirstItem())->GetValue();
         return createIndex(row, column, m_mediaBrowser->getInternalPointer(server, "0"));
     }
     else {
@@ -140,7 +139,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
     if (parentObjectId == "0") {
         typedef NPT_Map<NPT_String, PLT_DeviceDataReference>::Entry NptMapEntry;
         
-        PLT_DeviceMap mediaServers = m_mediaBrowser->GetMediaServers();
+        PLT_DeviceMap mediaServers = m_mediaBrowser->getMediaServers();
         NPT_List<NptMapEntry*>::Iterator server = mediaServers.GetEntries().GetFirstItem();
         int row = 0;
         while (server) {
@@ -180,7 +179,7 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
     
     ObjectReference* objectRef;
     if (!parent.isValid()) {
-        return m_mediaBrowser->GetMediaServers().GetEntryCount();
+        return m_mediaBrowser->getMediaServers().GetEntryCount();
     }
     else {
         objectRef = static_cast<ObjectReference*>(parent.internalPointer());
@@ -222,4 +221,15 @@ UpnpBrowserModel::columnCount(const QModelIndex &parent) const
 //         qDebug() << "UpnpBrowserModel::columnCount() columns: 0";
         return 0;
     }
+}
+
+
+void
+UpnpBrowserModel::serverAddedRemoved(string uuid, bool add)
+{
+    qDebug() << "UpnpBrowserModel::serverAddedRemoved()" << (add?"add":"remove") << "server:" << uuid.c_str();
+    
+    // TODO: do a more selective update of the BrowserModel and don't reset the whole model.
+    m_mediaBrowser->clearCache();
+    reset();
 }

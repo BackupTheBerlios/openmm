@@ -56,6 +56,9 @@ public slots:
 private:
     UpnpController*       m_mediaController;
     QTextCodec*           m_charEncoding;
+    // TODO: use a pointer to the renderer device instead of the uuid string
+    //       (should be the same as in BrowserModel, where a string takes
+    //        to much memory compared to a pointer)
     vector<string*>       m_rendererList;
 };
 

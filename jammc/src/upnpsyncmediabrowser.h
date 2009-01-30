@@ -19,6 +19,10 @@
 #ifndef UPNPSYNCMEDIABROWSER_H
 #define UPNPSYNCMEDIABROWSER_H
 
+#include "string"
+using namespace std;
+
+#include <QObject>
 #include <platinum/PltSyncMediaBrowser.h>
 
 class UpnpMediaCache
@@ -43,7 +47,6 @@ private:
 };
 
 
-
 typedef NPT_Map<NPT_String, PLT_MediaObjectListReference>::Entry UpnpMediaCacheEntry;
 
 struct ObjectReference {
@@ -52,8 +55,11 @@ struct ObjectReference {
     // TODO: store index of parent when browsing the children
 };
 
-class UpnpSyncMediaBrowser : public PLT_SyncMediaBrowser
+
+class UpnpSyncMediaBrowser : public QObject, PLT_SyncMediaBrowser
 {
+    Q_OBJECT
+        
 public:
     UpnpSyncMediaBrowser(PLT_CtrlPointReference& ctrlPoint, bool use_cache = false, PLT_MediaContainerChangesListener* listener = NULL);
     
@@ -66,7 +72,15 @@ public:
                           const char*              filter = "*", 
                           const char*              sort = "");
     
+    virtual void OnMSAddedRemoved(PLT_DeviceDataReference& device, int added);
+    const PLT_DeviceMap& getMediaServers() const { return GetMediaServers(); }
+    
     ObjectReference* getInternalPointer(PLT_DeviceDataReference server, NPT_String objectId);
+    
+    void clearCache() { m_objectIdMap.Clear(); m_Cache.Clear(); }
+    
+signals:
+    void serverAddedRemoved(string uuid, bool add);
     
 private:
     NPT_Map<NPT_String, ObjectReference*> m_objectIdMap;

@@ -22,6 +22,8 @@
 #include <string>
 using namespace std;
 
+namespace Jamm {
+
 /**
 Utility class for handling shared libraries.
 
@@ -40,5 +42,7 @@ public:
 private:
     void *m_libHandle;
 };
+
+} // namespace Jamm
 
 #endif

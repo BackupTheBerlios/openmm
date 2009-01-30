@@ -15,23 +15,17 @@ UpnpController::UpnpController()
     m_mediaController = new PLT_MediaController(m_ctrlPoint, this);
     m_upnpRendererListModel = new UpnpRendererListModel(this);
     m_renderingController = new JRenderingController(m_ctrlPoint);
-    m_upnp->Start();
-    // tell control point to perform extra broadcast discover every secs
-    // in case our device doesn't support multicast
-    m_ctrlPoint->Discover(NPT_HttpUrl("255.255.255.255", 1900, "*"), "upnp:rootdevice", 1, 6000);
-    m_ctrlPoint->Discover(NPT_HttpUrl("239.255.255.250", 1900, "*"), "upnp:rootdevice", 1, 6000);
-    // TODO: get rid of this sleep and do it proper
-    //       check somehow when m_upnp->Start() has finished and is ready to go ...
-    usleep(250000);
     
     m_mainWindow = new ControllerGui();
     
     m_mainWindow->setBrowserTreeItemModel(m_upnpBrowserModel);
     m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
     qRegisterMetaType<string>("string");
-    qRegisterMetaType<QItemSelection>("QItemSelection");
+    qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
     connect(this, SIGNAL(rendererAddedRemoved(string, bool)),
             m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
+    connect(m_mediaBrowser, SIGNAL(serverAddedRemoved(string, bool)),
+            m_upnpBrowserModel, SLOT(serverAddedRemoved(string, bool)));
     connect(m_mainWindow->getBrowserTreeSelectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -47,6 +41,14 @@ UpnpController::UpnpController()
     connect(m_mainWindow, SIGNAL(volSliderMoved(int)), this, SLOT(volSliderMoved(int)));
     
     JSignal::connectNodes(&m_pollPositionInfoTimer.fire, this);
+    
+    qDebug() << "UpnpController::UpnpController() starting threads ...";
+    // now start up all threads and let the show begin ...
+    m_upnp->Start();
+    // tell control point to perform extra broadcast discover every secs
+    // in case our device doesn't support multicast
+    m_ctrlPoint->Discover(NPT_HttpUrl("255.255.255.255", 1900, "*"), "upnp:rootdevice", 1, 6000);
+    m_ctrlPoint->Discover(NPT_HttpUrl("239.255.255.250", 1900, "*"), "upnp:rootdevice", 1, 6000);
     // poll for current position every second
     m_pollPositionInfoTimer.startTimer(1000);
 }
@@ -64,32 +66,6 @@ UpnpController::~UpnpController()
 }
 
 
-// QMap<QString, QString>
-// UpnpController::getServers()
-// {
-//     NPT_AutoLock lock(m_mediaServers);
-//     NPT_AutoLock lockCurServer(m_curMediaServerLock);
-//     QMap<QString, QString> result;
-// 
-//     m_mediaServers = m_mediaBrowser->GetMediaServers();
-//     const NPT_List<PLT_DeviceMapEntry*>& entries = m_mediaServers.GetEntries();
-//     NPT_List<PLT_DeviceMapEntry*>::Iterator entry = entries.GetFirstItem();
-//     qDebug() << "UpnpController::getServers() found" << m_mediaServers.GetEntryCount() << "server(s)";
-//     while (entry) {
-//         PLT_DeviceDataReference device = (*entry)->GetValue();
-//         NPT_String name = device->GetFriendlyName();
-//         NPT_String uuid = device->GetUUID();
-//         result.insert((char*)uuid, (char*)name);
-//         qDebug() << "UpnpController::getServers() add server:" << (char*)name << (char*)uuid;
-//         ++entry;
-//     }
-// /*    if (m_mediaServers.GetEntryCount() == 1) {
-//         m_curMediaServer = (*entries.GetFirstItem())->GetValue();
-//     }*/
-//     return result;
-// }
-
-
 // TODO: update BrowserModel when MediaServer is added / removed.
 //       don't do a complete reset() on the BrowserModel.
 
@@ -99,16 +75,12 @@ UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
     NPT_AutoLock lock(m_mediaRenderers);
     
     NPT_String uuid = device->GetUUID();
-    QString name = (char*) device->GetFriendlyName();
-    qDebug() << "UpnpController::OnMRAddedRemoved()" << (added?"added":"removed") << "renderer:" << name << (char*) uuid;
+    string name = (char*) device->GetFriendlyName();
+    qDebug() << "UpnpController::OnMRAddedRemoved()" << (added?"added":"removed") << "renderer:" << name.c_str() << (char*) uuid;
 
     if (added) {
         m_mediaRenderers.Put(uuid, device);
     } else {
-//         if (m_mediaRenderers.GetEntryCount() == 1) {
-//             m_mainWindow->getRendererListSelectionModel()->clearSelection();
-//             m_curMediaRenderer = NULL;
-//         }
         m_mediaRenderers.Erase(uuid);
     }
     emit rendererAddedRemoved(string((char*)uuid), added);
@@ -119,25 +91,6 @@ void
 UpnpController::showMainWindow()
 {
     m_mainWindow->show();
-}
-
-
-void
-UpnpController::selectionChanged(const QItemSelection &/*selected*/,
-                                const QItemSelection &/*deselected*/)
-{
-/*    if (selected.count() > 1) {
-        return;
-    }
-    
-    QModelIndex index = selected.indexes().first();
-    
-    ObjectReference* objectRef = static_cast<ObjectReference*>(index.internalPointer());
-        
-    qDebug() << "UpnpController::selectionChanged() row:" << index.row() << "col:" << index.column();
-    qDebug() << "UpnpController::selectionChanged() selected server:" << 
-        (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
-    qDebug() << "UpnpController::selectionChanged() selected objectId:" << (char*) objectRef->objectId;*/
 }
 
 
@@ -173,7 +126,6 @@ UpnpController::playButtonPressed()
     if (m_curMediaRenderer.IsNull()) {
         return;
     }
-    
     QModelIndex selected = m_mainWindow->getBrowserTreeSelectionModel()->currentIndex();
     if (selected == QModelIndex()) {
         return;
@@ -296,16 +248,8 @@ UpnpController::OnGetPositionInfoResult(
                                       PLT_PositionInfo*        info,
                                       void*                    /* userdata */)
 {
-//     qDebug() << "UpnpController::OnGetPositionInfoResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
     qDebug() << "UpnpController::OnGetPositionInfoResult() duration:" << info->track_duration << "position:" << info->abs_time;
-//         << "track:" << info->track << endl
-//         << "track_duration:" << info->track_duration << endl
-//         << "rel_time:" << info->rel_time << endl
-//         << "abs_time:" << info->abs_time << endl;
-//         << "rel_count:" << info->rel_count << endl
-//         << "abs_count:" << info->abs_count 
     emit setSlider(info->track_duration, info->abs_time);
-//     emit setSlider(222, info->abs_time);
 }
 
 

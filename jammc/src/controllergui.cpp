@@ -89,6 +89,12 @@ void
 ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
 {
     ui.m_browserTreeView->setModel(model);
+}
+
+
+void
+ControllerGui::expand()
+{
     ui.m_browserTreeView->expandToDepth(1);
 }
 

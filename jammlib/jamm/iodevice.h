@@ -24,6 +24,7 @@
 #include <string>
 using namespace std;
 
+namespace Jamm {
 
 /**
 Simple socket encapsulation with methods for handling a line-based protocol.
@@ -66,5 +67,7 @@ private:
     string             m_line;
     string             m_strBuf;
 };
+
+} // namespace Jamm
 
 #endif

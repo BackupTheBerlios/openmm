@@ -26,6 +26,7 @@
 #include <string.h>
 #include <cerrno>
 
+using namespace Jamm;
 
 JIoDevice::JIoDevice(bool blocking)
 : m_blocking(blocking)

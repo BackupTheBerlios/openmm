@@ -50,10 +50,6 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-/*    QString renderer = *static_cast<QString*>(index.internalPointer());*/
-//     qDebug() << "UpnpRendererListModel::data() returns:" << (char*) renderer->GetFriendlyName();
-//     return m_charEncoding->toUnicode(renderer);
-//     qRegisterMetaType<string>("string");
     return QString(static_cast<string*>(index.internalPointer())->c_str());
 }
 
@@ -128,15 +124,8 @@ UpnpRendererListModel::rendererAddedRemoved(string uuid, bool add)
             return;
         }
         int n = i - m_rendererList.begin();
-        qDebug() << "UpnpRendererListModel::rendererAddedRemoved() remove nr:" << n;
         beginRemoveRows(QModelIndex(), n, n);
-        qDebug() << "UpnpRendererListModel::rendererAddedRemoved() erase";
         m_rendererList.erase(i);
-        qDebug() << "UpnpRendererListModel::rendererAddedRemoved() end remove";
         endRemoveRows();
     }
-    
-    // TODO: need to reset the whole model?
-//     reset();
-    
 }
