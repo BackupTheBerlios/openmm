@@ -40,6 +40,7 @@
 // -really-quiet
 // -fixed-vo
 // -fs
+// -softvol
 
 MplayerThread::MplayerThread()
 :m_mplayerBin("mplayer"),
@@ -47,7 +48,7 @@ MplayerThread::MplayerThread()
 m_mplayerFifoIn("/tmp/jammr_mplayer_fifo_in"),
 m_mplayerFifoOut("/tmp/jammr_mplayer_fifo_out")
 {
-    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -fs";
+    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -fs -softvol";
     // TODO: error handling after system call
     int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
     err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR /*| O_NONBLOCK*/);
@@ -165,10 +166,12 @@ EngineMplayer::load()
     //     m_mplayerFifoStreamIn << "brightness 100" << endl;
     // waiting max 10 secs for answer (AVTransport 1.0 specs give 30 secs)
     string ans;
-    m_mplayerThread.answer(ans, 10000, "Starting playback...");
+    /*int err =*/ m_mplayerThread.answer(ans, 10000, "Starting playback...");
 }
 
 
+// FIXME: pausing a live stream causes a buffer overflow on the server side
+//        (for example vdr-streamdev-server)
 // mplayer has no stop, so we try to emulate it somehow
 void
 EngineMplayer::stop()
@@ -266,7 +269,7 @@ EngineMplayer::getLength(float &seconds)
     m_mplayerThread.command("get_time_length");
     // waiting max 2 secs for answer
     string ans;
-    seconds = m_mplayerThread.answer(ans, 2000);
+    /*int err =*/ m_mplayerThread.answer(ans, 2000);
     seconds = atof(ans.c_str());
 }
 
@@ -278,6 +281,29 @@ EngineMplayer::setVolume(int /*channel*/, float vol)
     
     TRACE("EngineMplayer::setVolume()");
     stringstream s;
+    // insane mplayer API: need pausing_keep, otherwise mplayer starts
+    // playing when changing the volume ...
     s << "pausing_keep volume " << vol << " 1";
     m_mplayerThread.command(s.str());
+}
+
+
+void
+EngineMplayer::getVolume(int /*channel*/, float &vol)
+{
+    JMutexLocker mplayerMutexLocker(m_mplayerMutex);
+    
+    // FIXME: mplayer doesn't answer, when no stream is loaded
+    //        and when stream is loaded:
+    //        ANS_volume=0.000000
+    //        even while hearing a sound ...
+        
+    TRACE("EngineMplayer::getVolume()");
+    stringstream s;
+    s << "get_property volume";
+//     m_mplayerThread.command(s.str());
+//     string ans;
+//     int err = m_mplayerThread.answer(ans, 2000);
+//     vol = atof(ans.c_str());
+    vol = 0.6; // arbitrary value, for testing purposes, only.
 }

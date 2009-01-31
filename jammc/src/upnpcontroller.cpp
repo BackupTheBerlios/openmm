@@ -26,9 +26,6 @@ UpnpController::UpnpController()
             m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
     connect(m_mediaBrowser, SIGNAL(serverAddedRemoved(string, bool)),
             m_upnpBrowserModel, SLOT(serverAddedRemoved(string, bool)));
-    connect(m_mainWindow->getBrowserTreeSelectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-            this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
     connect(m_mainWindow->getRendererListSelectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -84,6 +81,30 @@ UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
         m_mediaRenderers.Erase(uuid);
     }
     emit rendererAddedRemoved(string((char*)uuid), added);
+    
+    PLT_Service* serviceAVRC;
+    NPT_String type;
+    type = "urn:schemas-upnp-org:service:RenderingControl:1";
+    if (NPT_FAILED(device->FindServiceByType(type, serviceAVRC))) {
+        NPT_LOG_FINE_1("Service %s not found", (const char*)type);
+    }
+    m_ctrlPoint->Subscribe(serviceAVRC);
+}
+
+
+void
+UpnpController::OnMRStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars)
+{
+    qDebug() << "UpnpController::OnMRStateVariablesChanged() on service:" << (char*)service->GetServiceType();
+    for (unsigned int i = 0; i < vars->GetItemCount(); ++i) {
+        qDebug() << "UpnpController::OnMRStateVariablesChanged():" 
+            << (char*)(*vars->GetItem(i))->GetName()
+            << (char*)(*vars->GetItem(i))->GetValue()
+            << (char*)(*vars->GetItem(i))->GetDataType();
+    }
+    // TODO: handle change of StateVariables
+    // for example: react on volume change from another controller
+    // how should our volume slider differ between own changes and other controller's changes?
 }
 
 
@@ -117,6 +138,10 @@ UpnpController::rendererSelectionChanged(const QItemSelection &selected,
     qDebug() << "UpnpController::rendererSelectionChanged() row:" << index.row();
     qDebug() << "UpnpController::rendererSelectionChanged() selected renderer:" << 
         (char*) m_curMediaRenderer->GetFriendlyName() << "," << (char*) m_curMediaRenderer->GetUUID();
+    
+    // TODO: get RendererControl StateVariables and set the ControllerGui accordingly
+//     m_mediaController->GetVolume(m_curMediaRenderer);
+    m_mainWindow->setVolumeSlider(100, 50);
 }
 
 

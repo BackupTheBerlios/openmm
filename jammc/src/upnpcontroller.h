@@ -12,6 +12,7 @@
 #include <platinum/PltMediaControllerListener.h>
 
 #include "upnprenderingcontrol.h"
+// #include "upnpmediacontroller.h"
 #include "upnpsyncmediabrowser.h"
 #include "upnpbrowsermodel.h"
 #include "upnprendererlistmodel.h"
@@ -54,7 +55,9 @@ protected:
      * these callbacks are called from the listener thread
      */
     virtual void OnMRAddedRemoved(PLT_DeviceDataReference& device, int added);
-//     virtual void OnMRStateVariablesChanged(PLT_Service* /* service */, NPT_List<PLT_StateVariable*>* /* vars */) {};
+    virtual void OnMRStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
+    
+    
         // AVTransport
 //     virtual void OnGetCurrentTransportActionsResult(
 //         NPT_Result               /* res */, 

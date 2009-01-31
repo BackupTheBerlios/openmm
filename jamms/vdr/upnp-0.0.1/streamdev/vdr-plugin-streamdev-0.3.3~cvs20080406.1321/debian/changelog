@@ -1,0 +1,443 @@
+vdr-plugin-streamdev (0.3.3~cvs20080406.1321-3) unstable; urgency=low
+
+  * Upload to unstable
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Mon, 09 Jun 2008 00:05:47 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20080406.1321-2) experimental; urgency=low
+
+  * Increased package version to force rebuild for vdr 1.6.0-1ctvdr7
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 12 May 2008 13:13:31 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20080406.1321-1) experimental; urgency=low
+
+  * New Upstream Snapshot
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 06 Apr 2008 15:21:39 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20080303.1753-2) experimental; urgency=low
+
+  [ Thomas Schmidt ]
+  * Build-Depend on vdr-dev (>=1.6.0)
+  * Updated years in debian/copyright
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 03 Apr 2008 23:59:25 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20080303.1753-1) experimental; urgency=low
+
+  * New Upstream Snapshot
+  * Updated debian/copyright
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 03 Mar 2008 18:53:54 +0100
+
+vdr-plugin-streamdev (0.3.3~cvs20070921-6) experimental; urgency=low
+
+  * Force rebuild for vdr 1.5.15
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 18 Feb 2008 21:09:09 +0100
+
+vdr-plugin-streamdev (0.3.3~cvs20070921-5) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.13
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 16 Jan 2008 10:31:39 +0100
+
+vdr-plugin-streamdev (0.3.3~cvs20070921-4) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.12
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 20 Nov 2007 23:46:31 +0100
+
+vdr-plugin-streamdev (0.3.3~cvs20070921-3) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.11
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue,  6 Nov 2007 23:34:23 +0100
+
+vdr-plugin-streamdev (0.3.3~cvs20070921-2) unstable; urgency=low
+
+  [ Thomas Schmidt ]
+  * Added Copyright information for Debian packaging to debian/copyright
+  * Re-Added DVBDIR to debian/rules
+  * Changed clean-target in debian/rules to not ignore errors anymore
+
+  [ Thomas Günther ]
+  * Release for vdrdevel 1.5.10
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 16 Oct 2007 23:51:03 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070921-1) unstable; urgency=low
+
+  * First upload to the official archive (Closes: #445648)
+  * Updated debian/copyright
+  * Updated package short descriptions
+  * New Upstream Snapshot Release
+  * Added get-orig-source target to debian/rules
+  * Build-Depend on debhelper (>= 5), set COMPAT-Level to 5
+  * Switched Build-System to cdbs, Build-Depend on cdbs
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Sun, 07 Oct 2007 18:16:18 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070509-5) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.9
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 28 Aug 2007 01:01:14 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070509-4) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.8
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu, 23 Aug 2007 01:09:12 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070509-3) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.6
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 14 Aug 2007 01:46:24 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070509-2) experimental; urgency=low
+
+  [ Thomas Schmidt ]
+  * Added XS-Vcs-Svn and XS-Vcs-Browser fields to debian/control
+
+  [ Thomas Günther ]
+  * Release for vdrdevel 1.5.5
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 27 Jun 2007 23:02:47 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070509-1) experimental; urgency=low
+
+  * New upstream cvs snapshot (fixes a segfault)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Wed,  9 May 2007 19:50:29 +0200
+
+vdr-plugin-streamdev (0.3.3~cvs20070505-1) experimental; urgency=low
+
+  [ Thomas Schmidt ]
+  * New upstream cvs snapshot
+    - removed following dpatches:
+      + 01_Makefile-fPIC-fix.dpatch
+      + 91_cvs-20051209.dpatch
+      + 92_streamdev-csv-vdr-1.3.47.dpatch
+      + 93_streamdev-1.5.0.dpatch
+      + 90_APIVERSION.dpatch
+    - added 01_include-fix.dpatch
+  * Removed versioned Build-Dependancy to dpatch, because even sarge has the
+    required version of dpatch (2.0.9)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon,  7 May 2007 02:20:28 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-28) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.2
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sat, 28 Apr 2007 00:00:44 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-27) experimental; urgency=low
+
+  * Release for vdrdevel 1.5.1
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 27 Feb 2007 19:59:23 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-26) experimental; urgency=low
+
+  * Added 93_streamdev-1.5.0.dpatch
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sun, 21 Jan 2007 16:38:16 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-25) experimental; urgency=low
+
+  [ Thomas Günther ]
+  * Replaced VDRdevel adaptions in debian/rules with make-special-vdr
+  * Adapted call of dependencies.sh and patchlevel.sh to the new location
+    in /usr/share/vdr-dev/
+
+  [ Tobias Grimm ]
+  * Build-Depend on vdr-dev (>=1.4.5-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 14 Jan 2007 20:22:20 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-24) unstable; urgency=low
+
+  * Build-Depend on vdr-dev (>=1.4.4-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun,  5 Nov 2006 00:00:46 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-23) unstable; urgency=low
+
+  [ Thomas Schmidt ]
+  * Build-Depend on vdr-dev (>=1.4.3-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 30 Sep 2006 16:43:41 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-22) unstable; urgency=low
+
+  * Bumped Standards-Version to 3.7.2
+  * Added note about the Debian Maintainers to debian/copyright
+  * Changed my email address in debian/control to the debian one
+  * Added Tobias Grimm and Thomas Günther to Uploaders
+  * Build-Depend on vdr-dev (>=1.4.2-1)
+
+ -- Thomas Schmidt <tschmidt@debian.org>  Mon, 28 Aug 2006 20:59:53 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-21) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr-dev (>=1.4.1-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 18 Jun 2006 15:54:42 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-20) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr-dev (>=1.4.0-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed,  3 May 2006 22:16:56 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-19) unstable; urgency=low
+
+  * Thomas Günther <tom@toms-cafe.de>
+    - Build-Depend on vdr-dev (>= 1.3.48-1)
+    - Added 92_streamdev-csv-vdr-1.3.47.dpatch
+    - Shortened debian/copyright
+  * Tobias Grimm <tg@e-tobi.net>
+    - Added 90_APIVERSION.dpatch
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon, 24 Apr 2006 20:17:14 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-18) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr-dev (>=1.3.46-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Thu, 13 Apr 2006 00:29:12 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-17) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr-dev (>=1.3.45-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon, 27 Mar 2006 23:18:12 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-16) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Depend/Build-Depend on vdr (>=1.3.41-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Tue, 31 Jan 2006 20:03:23 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-15) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Build-Depend on vdr-dev (>=1.3.40-1)
+    
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Thu, 26 Jan 2006 19:42:01 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-14) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr (>=1.3.38-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon,  9 Jan 2006 20:23:49 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-13) unstable; urgency=low
+
+  * Replaced 91_cvs-20051107.dpatch by 91_cvs-20051209.dpatch to fix gcc4 issue
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Fri,  9 Dec 2005 22:14:29 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-12) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>  
+    - Build-Depend on vdr (>=1.3.37-1)
+  * Thomas Günther <tom@toms-cafe.de>
+    - Removed 02_vdr_1.3.32-fix.dpatch
+    - Added 91_cvs-20051107.dpatch
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon, 28 Nov 2005 22:37:35 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-11) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr (>=1.3.35-1)
+    - Corrected FSF address in debian/copyright
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Tue,  1 Nov 2005 22:16:58 +0100
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-10) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr (>=1.3.33-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun,  2 Oct 2005 12:24:13 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-9) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr (>=1.3.32-1)
+    - Added 02_vdr_1.3.32-fix.dpatch so the plugin compiles for vdr>=1.3.32
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 11 Sep 2005 21:44:59 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-8) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr (>=1.3.31-1)
+    - Use dependencies.sh from vdr-dev to set vdr dependencies and
+      conflicts to the right vdr version when building the package
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 28 Aug 2005 19:40:15 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-7) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Depend/Build-Depend on vdr (>=1.3.30-1)
+    - Conflict with vdr (>=1.3.30.99)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Tue, 23 Aug 2005 19:20:04 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-6) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Depend/Build-Depend on vdr (>=1.3.29-1)
+    - Conflict with vdr (>=1.3.29.99)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon, 15 Aug 2005 19:47:09 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-5) unstable; urgency=low
+ 
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Depend/Build-Depend on vdr (>=1.3.28-1)
+    - Conflict with vdr (>=1.3.29)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed, 10 Aug 2005 21:12:52 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-4) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Depend/Build-Depend on vdr (>=1.3.27-1)
+    - Conflict with vdr (>=1.3.28)
+  * Tobias Grimm <tg@e-tobi.net>
+    - Bumped Standards-Version to 3.6.2
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 19 Jun 2005 18:10:37 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-3) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Depend/Build-Depend on vdr (>=1.3.26-1)
+    - Conflict with vdr (>=1.3.27)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 12 Jun 2005 17:14:16 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-2) experimental; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Depend/Build-Depend on vdr >= 1.3.25-1
+    - Conflict with vdr >=1.3.26
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Tue, 31 May 2005 14:22:28 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050522-1) experimental; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - New upstream cvs snapshot
+      + Disabled 02_vdr-1.3.23-fix.dpatch - not needed anymore
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 22 May 2005 00:31:51 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050410-2) experimental; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Depend/Build-Depend on vdr >= 1.3.24-1
+    - Conflict with vdr >=1.3.25
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon,  9 May 2005 16:15:34 +0200
+
+vdr-plugin-streamdev (0.3.1+cvs20050410-1) experimental; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - New upstream cvs release
+    - Depend/Build-Depend on vdr >= 1.3.23-1
+    - Conflict with vdr >=1.3.24
+    - Added 02_vdr-1.3.23-fix.dpatch
+    - Updated 01_Makefile-fPIC-fix.dpatch
+    - Changed my email address to the one from Debian
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 10 Apr 2005 12:21:50 +0200
+
+vdr-plugin-streamdev (0.3.1-4) unstable; urgency=low
+
+  * Thomas Schmidt <thomas.schmidt@in.stud.tu-ilmenau.de>
+    - Changed maintainer to Debian VDR Team
+    - Added Peter Siering and myself as Uploaders
+    - Build-depend on vdr 1.2.6-6 only
+    - Conflict with vdr (>=1.2.7)
+    - Converted debian/changelog to UTF8
+    - Converted existing dpatch-file to new short format
+    - Build-depend on dpatch (>=2.0.9)
+  * Tobias Grimm <tg@e-tobi.net>
+    - Using debian/compat now
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun,  2 Jan 2005 12:55:03 +0100
+
+vdr-plugin-streamdev (0.3.1-3) unstable; urgency=low
+
+  * adapted for vdr 1.2.6-27
+  * taken from vdrdevel by Thomas Günther <tom@toms-cafe.de>
+    - Adapted control file to alioth packages
+    - Using patchlevel.sh and custom control field "vdr-patchlevel"
+    - Added Makefile-fPIC-fix patch to fix potential FTBFS
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue,  28 Sep 2004 00:25:00 +0200
+
+vdr-plugin-streamdev (0.3.1-2) unstable; urgency=low
+
+  * Using dh_install
+  * Added debian/watch file for uscan
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed,  7 Jul 2004 03:03:20 +0200
+
+vdr-plugin-streamdev (0.3.1-1) unstable; urgency=low
+
+  * New upstream release (breaks it into two, client and server)
+
+ -- Peter Siering <ps@ctmagazin.de>  Fri, 20 Feb 2004 19:34:00 +0100
+
+vdr-plugin-streamdev (0.3.0-2) unstable; urgency=low
+
+  * integrated patchlevel info
+
+ -- Peter Siering <ps@ctmagazin.de>  Tue, 13 Jan 2004 23:45:00 +0200
+
+vdr-plugin-streamdev (0.3.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Peter Siering <ps@ctmagazin.de>  Thu, 8 Jan 2004 21:47:54 +0100
+
+vdr-plugin-streamdev (0.2.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Peter Siering <ps@ctmagazin.de>  Mon,  6 Oct 2003 18:28:08 +0200
+
+vdr-plugin-streamdev (0.1.0beta4-3) unstable; urgency=low
+
+  * move plugin from /usr/share to /usr/lib
+
+ -- Peter Siering <ps@ctmagazin.de>  Thu, 04 Oct 2003 12:00:00 +0200
+
+vdr-plugin-streamdev (0.1.0beta4-2) unstable; urgency=low
+
+  * fixed depends, fixed control file
+
+ -- Peter Siering <ps@ctmagazin.de>  Thu, 29 Sep 2003 15:00:00 +0200
+
+vdr-plugin-streamdev (0.1.0beta4-1) unstable; urgency=low
+
+  * debianized
+
+ -- Peter Siering <ps@ctmagazin.de>  Thu, 17 Sep 2003 22:00:00 +0200

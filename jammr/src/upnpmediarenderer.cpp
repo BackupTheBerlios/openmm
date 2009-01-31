@@ -81,18 +81,22 @@ m_engine(engine),
 m_lastCurrentTrackUri("")
 {
     FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", m_AvTransport);
-//     FindServiceById("urn:upnp-org:serviceId:AVT_1-0", m_AvTransport);
-//     m_AvTransport = GetServices()[0];
-    FindServiceByType("urn:schemas-upnp-org:service:AVRenderingControl:1", m_AvRenderingControl);
+    FindServiceByType("urn:schemas-upnp-org:service:RenderingControl:1", m_AvRenderingControl);
     
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() m_AvTransport: %p", m_AvTransport);
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() TransportState sending events: %s", m_AvTransport->FindStateVariable("TransportState")->IsSendingEvents()?"true":"false");
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() TransportState sending events indirectly: %s", m_AvTransport->FindStateVariable("TransportState")->IsSendingEvents(true)?"true":"false");
     TRACE("UpnpMediaRenderer::UpnpMediaRenderer() LastChange sending events: %s", m_AvTransport->FindStateVariable("LastChange")->IsSendingEvents()?"true":"false");
     
+    TRACE("UpnpMediaRenderer::UpnpMediaRenderer() m_AvRenderingControl: %p", m_AvRenderingControl);
+    TRACE("UpnpMediaRenderer::UpnpMediaRenderer() LastChange sending events: %s", m_AvRenderingControl->FindStateVariable("LastChange")->IsSendingEvents()?"true":"false");
+    
     JSignal::connectNodes(&m_engine->endOfTrack, new EndOfTrackSlot(this));
     JSignal::connectNodes(&m_pollPositionTimer.fire, new PollSlot(this));
     m_pollPositionTimer.startTimer(1000);
+    float volume;
+    m_engine->getVolume(0, volume);
+    m_AvRenderingControl->SetStateVariable("Volume", NPT_String(volume));
 }
 
 
@@ -375,15 +379,6 @@ UpnpMediaRenderer::OnPrevious(PLT_ActionReference& /*action*/)
 }
 
 
-// NPT_Result
-// UpnpMediaRenderer::OnGetVolume(PLT_ActionReference& /*action*/)
-// {
-//     TRACE("UpnpMediaRenderer::OnGetVolume()");
-// //     m_engine->previous();
-//     return NPT_SUCCESS;
-// }
-
-
 NPT_Result
 UpnpMediaRenderer::OnSetVolume(PLT_ActionReference& action)
 {
@@ -404,6 +399,7 @@ UpnpMediaRenderer::OnSetVolume(PLT_ActionReference& action)
     
     /* set state variables according to the outcome of the actions
     */
+    m_AvRenderingControl->SetStateVariable("Volume", volume);
     /* error handling
     */
     return NPT_SUCCESS;

@@ -116,6 +116,7 @@ public:
       Rendering Control
     */
     virtual void setVolume(int channel, float vol);
+    virtual void getVolume(int channel, float &vol);
     
     
 private:

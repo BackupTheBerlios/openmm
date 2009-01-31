@@ -46,6 +46,7 @@ signals:
     
 public slots:
     void setSlider(int max, int val);
+    void setVolumeSlider(int max, int val);
     
 private slots:
     /*

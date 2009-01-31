@@ -117,3 +117,16 @@ ControllerGui::setSlider(int max, int val)
     ui.m_seekSlider->setRange(0, max>=0?max:0);
     ui.m_seekSlider->setSliderPosition(val);
 }
+
+
+void
+ControllerGui::setVolumeSlider(int max, int val)
+{
+    // don't set slider position when user drags the slider
+    if (ui.m_volumeSlider->isSliderDown()) {
+        return;
+    }
+//     qDebug() << "ControllerGui::setSlider() to:" << max << val;
+    ui.m_volumeSlider->setRange(0, max>=0?max:0);
+    ui.m_volumeSlider->setSliderPosition(val);
+}
