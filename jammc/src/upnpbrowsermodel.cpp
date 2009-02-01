@@ -176,7 +176,9 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 //     qDebug() << "UpnpBrowserModel::rowCount()";
     
     // TODO: optimize this to browse only one (or first slice) of objects and ask for "TotalMatches"
-    
+    // TODO: optimize this to not BrowseChildren when parent is an item and not a
+    //       container (without browsing parent! Is it worth the effort?)
+    //       it may even not conform to the specs!
     ObjectReference* objectRef;
     if (!parent.isValid()) {
         return m_mediaBrowser->getMediaServers().GetEntryCount();

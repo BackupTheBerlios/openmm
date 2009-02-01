@@ -40,21 +40,45 @@ public:
 
     ~VdrMediaServer();
 
-    // overridable methods
-    virtual NPT_Result OnBrowseMetadata(PLT_ActionReference& action, const char* object_id, const NPT_HttpRequestContext& context);
-    virtual NPT_Result OnBrowseDirectChildren(PLT_ActionReference& action, const char* object_id, const NPT_HttpRequestContext& context);
-    virtual NPT_Result OnSearch(PLT_ActionReference& action, const NPT_String& object_id, const NPT_String& searchCriteria, const NPT_HttpRequestContext& context);
+    virtual NPT_Result OnBrowseMetadata(PLT_ActionReference& action,
+                                        const char* object_id,
+                                        const NPT_HttpRequestContext& context);
+    virtual NPT_Result OnBrowseDirectChildren(PLT_ActionReference& action,
+                                              const char* object_id,
+                                              const NPT_HttpRequestContext& context);
+    virtual NPT_Result OnSearch(PLT_ActionReference& action,
+                                const NPT_String& object_id,
+                                const NPT_String& searchCriteria,
+                                const NPT_HttpRequestContext& context);
 
+protected:
+    virtual NPT_Result ProcessHttpRequest(NPT_HttpRequest&              request, 
+                                          const NPT_HttpRequestContext& context,
+                                          NPT_HttpResponse&             response);
+    
+    virtual NPT_Result ProcessFileRequest(NPT_HttpRequest&              request, 
+                                          const NPT_HttpRequestContext& context,
+                                          NPT_HttpResponse&             response);
+    
+    virtual NPT_Result ServeFile(NPT_HttpRequest&              request, 
+                                 const NPT_HttpRequestContext& context,
+                                 NPT_HttpResponse&             response,
+                                 NPT_String                    uri_path,
+                                 NPT_String                    file_path);
+    
 private:
     NPT_String channelToDidl(NPT_String filter, cChannel *channel);
+    NPT_String recToDidl(NPT_String filter, cRecording *rec);
     
     NPT_String m_localIp;
     int m_localPort;
+    int m_recPort;
     
     PLT_MediaContainer* m_containerRoot;
     PLT_MediaContainer* m_containerLiveTv;
     PLT_MediaContainer* m_containerRecordings;
     
+    // TODO: need to lock m_itemCache
     map<NPT_String, PLT_MediaItem*> m_itemCache;
 };
 

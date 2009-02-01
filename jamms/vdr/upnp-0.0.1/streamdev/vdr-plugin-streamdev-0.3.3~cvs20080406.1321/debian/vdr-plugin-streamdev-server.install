@@ -1,2 +1,0 @@
-libvdr-streamdev-server.so.*            usr/lib/vdr/plugins/
-streamdevhosts.conf                     etc/vdr/plugins/

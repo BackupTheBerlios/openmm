@@ -33,6 +33,13 @@ using namespace Jamm;
 	@author 
 */
 
+// FIXME: mplayer is too slow at loading a vdr stream:
+//        mplayer http://192.168.178.22:3000/PES/S19.2E-1-1089-12003
+//        vlc is much faster ...
+
+// FIXME: mplayer can't determine lenth / end of vdr recording
+//        vlc can seek in streamed vdr recordings ...
+
 // TODO: three test files have no duration (everytime.mpg, pepsy piercing.mpeg, vorteile.mpg)
 //       the wmv has duration but is not seekable (UFO-Reportage.wmv)
 

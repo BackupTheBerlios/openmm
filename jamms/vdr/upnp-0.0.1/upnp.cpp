@@ -14,7 +14,7 @@
 #include <platinum/PltUPnP.h>
 
 static const char *VERSION        = "0.0.1";
-static const char *DESCRIPTION    = "Expose VDR's capabilities to the UPnP world";
+static const char *DESCRIPTION    = "Expose VDR's capabilities to UPnP-AV";
 static const char *MAINMENUENTRY  = "UPnP";
 
 class cPluginUpnp : public cPlugin {
@@ -56,8 +56,8 @@ cPluginUpnp::cPluginUpnp(void)
 cPluginUpnp::~cPluginUpnp()
 {
   // Clean up after yourself!
-  delete m_vdrMediaServer;
-  delete m_upnp;
+//   delete m_vdrMediaServer;
+//   delete m_upnp;
 }
 
 const char *cPluginUpnp::CommandLineHelp(void)
@@ -76,7 +76,7 @@ bool cPluginUpnp::Initialize(void)
 {
   // Initialize any background activities the plugin shall perform.
   m_upnp = new PLT_UPnP(1900, true);
-  m_vdrMediaServer = new VdrMediaServer("VDR");
+  m_vdrMediaServer = new VdrMediaServer("Video Disc Recorder", false, NULL, 5656);
   return true;
 }
 

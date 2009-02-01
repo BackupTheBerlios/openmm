@@ -48,7 +48,7 @@ MplayerThread::MplayerThread()
 m_mplayerFifoIn("/tmp/jammr_mplayer_fifo_in"),
 m_mplayerFifoOut("/tmp/jammr_mplayer_fifo_out")
 {
-    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -fs -softvol";
+    m_mplayerOptions = "-input file=" + m_mplayerFifoIn + " -quiet -idle -nolirc -osdlevel 0 -softvol -fs";
     // TODO: error handling after system call
     int err = mkfifo(m_mplayerFifoIn.c_str(), S_IRUSR | S_IWUSR);
     err = mkfifo(m_mplayerFifoOut.c_str(), S_IRUSR | S_IWUSR /*| O_NONBLOCK*/);
