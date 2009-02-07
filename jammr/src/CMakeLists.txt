@@ -1,3 +1,8 @@
+# TODO: do a proper search for libxine (FIND_PACKAGE?)
+FIND_LIBRARY( XINE_LIB
+xine
+)
+
 SET( JAMMR_SRCS
 enginemplayer.cpp
 # enginexine.cpp

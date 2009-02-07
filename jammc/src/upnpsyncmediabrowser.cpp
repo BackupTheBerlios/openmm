@@ -180,85 +180,47 @@ UpnpMediaCache::GenerateKey(const char* device_uuid,
     return key;
 }
 
-/*----------------------------------------------------------------------
-|   UpnpMediaCache::Clear
-+---------------------------------------------------------------------*/
-NPT_Result
-UpnpMediaCache::Clear(PLT_DeviceDataReference& device, 
-                      const char*              item_id,
-                      const char* meta_data)
-{
-    NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
-    if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
-    
-    NPT_List<UpnpMediaCacheEntry*>::Iterator entries = m_Items.GetEntries().GetFirstItem();
-    NPT_List<UpnpMediaCacheEntry*>::Iterator entry;
-    while (entries) {
-        entry = entries++;
-        if ((*entry)->GetKey() == (key)) {
-            m_Items.Erase(key);
-            return NPT_SUCCESS;
-        }
-    }
-    
-    return NPT_FAILURE;
-}
 
-/*----------------------------------------------------------------------
-|   UpnpMediaCache::Clear
-+---------------------------------------------------------------------*/
 NPT_Result
-UpnpMediaCache::Clear(PLT_DeviceData* device)
+UpnpMediaCache::Clear()
 {
-    if (!device) return m_Items.Clear();
-    
-    NPT_String key = GenerateKey(device->GetUUID(), "", "");
-    NPT_List<UpnpMediaCacheEntry*>::Iterator entries = m_Items.GetEntries().GetFirstItem();
-    NPT_List<UpnpMediaCacheEntry*>::Iterator entry;
-    while (entries) {
-        entry = entries++;
-        NPT_String entry_key = (*entry)->GetKey();
-        if (entry_key.StartsWith(key)) {
-            m_Items.Erase(entry_key);
-        }
-    }
-    
+    m_items.clear();
     return NPT_SUCCESS;
 }
-
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::Put
 +---------------------------------------------------------------------*/
 NPT_Result
-UpnpMediaCache::Put(PLT_DeviceDataReference&      device, 
-                    const char*                   item_id, 
+UpnpMediaCache::Put(PLT_DeviceDataReference&      device,
+                    const char*                   item_id,
                     const char*                   meta_data,
                     PLT_MediaObjectListReference& list)
 {
     NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
     if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
     
-    m_Items.Erase(key);
-    return m_Items.Put(key, list);
+    m_items.insert(make_pair(key, list));
+    return NPT_SUCCESS;
 }
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::Get
 +---------------------------------------------------------------------*/
 NPT_Result
-UpnpMediaCache::Get(PLT_DeviceDataReference&      device, 
-                    const char*                   item_id, 
+UpnpMediaCache::Get(PLT_DeviceDataReference&      device,
+                    const char*                   item_id,
                     const char*                   meta_data,
                     PLT_MediaObjectListReference& list)
 {
     NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
     if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
     
-    PLT_MediaObjectListReference* val = NULL;
-    NPT_CHECK_FINE(m_Items.Get(key, val));
-    
-    list = *val;
+    map<NPT_String, PLT_MediaObjectListReference>::iterator i = m_items.find(key);
+    if (i == m_items.end()) {
+        return NPT_ERROR_NO_SUCH_ITEM;
+    }
+    list = (*i).second;
     return NPT_SUCCESS;
 }
 

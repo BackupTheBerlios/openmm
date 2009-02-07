@@ -10,8 +10,9 @@ fi
 cd $BINDIR
 
 cmake -G KDevelop3 ${SRCDIR}
+make
 
-if [ $1 = install ]
+if [ "$1" = "install" ]
 then
     sudo make install
 fi

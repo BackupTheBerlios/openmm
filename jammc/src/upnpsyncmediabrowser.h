@@ -19,7 +19,8 @@
 #ifndef UPNPSYNCMEDIABROWSER_H
 #define UPNPSYNCMEDIABROWSER_H
 
-#include "string"
+#include <string>
+#include <map>
 using namespace std;
 
 #include <QObject>
@@ -35,15 +36,14 @@ public:
                    PLT_MediaObjectListReference& list);
     NPT_Result Get(PLT_DeviceDataReference& device, const char* item_id, const char* meta_data,
                    PLT_MediaObjectListReference& list);
-    NPT_Result Clear(PLT_DeviceDataReference& device, const char* item_id, const char* meta_data);
-    NPT_Result Clear(PLT_DeviceData* device = NULL);
+    //    NPT_Result Clear(PLT_DeviceData* device = NULL);
+    NPT_Result Clear();
     
 private:
     NPT_String GenerateKey(const char* device_uuid, const char* item_id, const char* meta_data);
     
 private:
-    // TODO: NPT_Map is too slow for the cache (it is actually an NPT_List and searched with O(n))
-    NPT_Map<NPT_String, PLT_MediaObjectListReference> m_Items;
+    map<NPT_String, PLT_MediaObjectListReference> m_items;
 };
 
 
@@ -83,6 +83,7 @@ signals:
     void serverAddedRemoved(string uuid, bool add);
     
 private:
+    // TODO: replace NPT_Map with std::map
     NPT_Map<NPT_String, ObjectReference*> m_objectIdMap;
     bool                                  m_UseCache;
     UpnpMediaCache                        m_Cache;

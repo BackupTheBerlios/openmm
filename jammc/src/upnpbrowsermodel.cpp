@@ -88,7 +88,7 @@ QModelIndex
 UpnpBrowserModel::index(int row, int column,
                         const QModelIndex &parent) const
 {
-//     qDebug() << "UpnpBrowserModel::index()";
+    qDebug() << "UpnpBrowserModel::index()";
     ObjectReference* objectRef;
     if (!parent.isValid()) {
         PLT_DeviceMap mediaServers = m_mediaBrowser->getMediaServers();
@@ -114,7 +114,7 @@ UpnpBrowserModel::index(int row, int column,
 QModelIndex
 UpnpBrowserModel::parent(const QModelIndex &index) const
 {
-//     qDebug() << "UpnpBrowserModel::parent()";
+    qDebug() << "UpnpBrowserModel::parent()";
     
     // TODO: optimize this, as we need currently three (!) browse requests to determine parent's row.
     if (!index.isValid())
@@ -173,7 +173,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 int
 UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
-//     qDebug() << "UpnpBrowserModel::rowCount()";
+    qDebug() << "UpnpBrowserModel::rowCount()";
     
     // TODO: optimize this to browse only one (or first slice) of objects and ask for "TotalMatches"
     // TODO: optimize this to not BrowseChildren when parent is an item and not a
