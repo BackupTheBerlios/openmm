@@ -10,8 +10,8 @@ UpnpController::UpnpController()
     m_upnp = new PLT_UPnP(1900, true);
     m_ctrlPoint = PLT_CtrlPointReference(new PLT_CtrlPoint());
     m_upnp->AddCtrlPoint(m_ctrlPoint);
-    m_mediaBrowser = new UpnpSyncMediaBrowser(m_ctrlPoint, true);
-    m_upnpBrowserModel = new UpnpBrowserModel(m_mediaBrowser);
+    m_mediaBrowser = new PLT_MediaBrowser(m_ctrlPoint, this);
+    m_upnpBrowserModel = new UpnpBrowserModel();
     m_mediaController = new PLT_MediaController(m_ctrlPoint, this);
     m_upnpRendererListModel = new UpnpRendererListModel(this);
     m_renderingController = new JRenderingController(m_ctrlPoint);
@@ -20,12 +20,14 @@ UpnpController::UpnpController()
     
     m_mainWindow->setBrowserTreeItemModel(m_upnpBrowserModel);
     m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
+    
     qRegisterMetaType<string>("string");
     qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
+    
     connect(this, SIGNAL(rendererAddedRemoved(string, bool)),
             m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
-    connect(m_mediaBrowser, SIGNAL(serverAddedRemoved(string, bool)),
-            m_upnpBrowserModel, SLOT(serverAddedRemoved(string, bool)));
+    connect(this, SIGNAL(serverAddedRemoved(UpnpServer*, bool)),
+            m_upnpBrowserModel, SLOT(serverAddedRemoved(UpnpServer*, bool)));
     connect(m_mainWindow->getRendererListSelectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -62,9 +64,6 @@ UpnpController::~UpnpController()
     delete m_upnp;*/
 }
 
-
-// TODO: update BrowserModel when MediaServer is added / removed.
-//       don't do a complete reset() on the BrowserModel.
 
 void
 UpnpController::OnMRAddedRemoved(PLT_DeviceDataReference& device, int added)
@@ -105,6 +104,59 @@ UpnpController::OnMRStateVariablesChanged(PLT_Service* service, NPT_List<PLT_Sta
     // TODO: handle change of StateVariables
     // for example: react on volume change from another controller
     // how should our volume slider differ between own changes and other controller's changes?
+}
+
+
+void
+UpnpController::OnMSAddedRemoved(PLT_DeviceDataReference& device, int added)
+{
+    NPT_String uuid = device->GetUUID();
+    string name = (char*) device->GetFriendlyName();
+    qDebug() << "UpnpController::OnMSAddedRemoved()" << (added?"added":"removed") << "server:" << name.c_str() << (char*) uuid;
+    
+    PLT_Service* serviceAVCD;
+    NPT_String type;
+    type = "urn:schemas-upnp-org:service:ContentDirectory:1";
+    if (NPT_FAILED(device->FindServiceByType(type, serviceAVCD))) {
+        NPT_LOG_FINE_1("Service %s not found", (const char*)type);
+        return;
+    }
+    m_ctrlPoint->Subscribe(serviceAVCD);
+    
+    UpnpServer* s = new UpnpServer();
+    s->m_pltDevice = device;
+    s->m_pltBrowser = m_mediaBrowser;
+//     s->m_pltBrowser = new PLT_MediaBrowser(m_ctrlPoint, s);
+    emit serverAddedRemoved(s, added);
+}
+
+
+void
+UpnpController::OnMSStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars)
+{
+    qDebug() << "UpnpController::OnMSStateVariablesChanged() on service:" << (char*)service->GetServiceType();
+    for (unsigned int i = 0; i < vars->GetItemCount(); ++i) {
+        qDebug() << "UpnpController::OnMSStateVariablesChanged():" 
+            << (char*)(*vars->GetItem(i))->GetName()
+            << (char*)(*vars->GetItem(i))->GetValue()
+            << (char*)(*vars->GetItem(i))->GetDataType();
+    }
+    // TODO: handle change of StateVariables
+}
+
+// TODO: avoid this nasty trick to synchronize browsing
+void
+UpnpController::OnMSBrowseResult(NPT_Result res, PLT_DeviceDataReference& /*device*/, PLT_BrowseInfo* info, void* userdata)
+{
+    if (!userdata) return;
+    
+    PLT_BrowseDataReference* data = (PLT_BrowseDataReference*) userdata;
+    (*data)->res = res;
+    if (NPT_SUCCEEDED(res) && info) {
+        (*data)->info = *info;
+    }
+    (*data)->shared_var.SetValue(1);
+    delete data;
 }
 
 
@@ -156,17 +208,20 @@ UpnpController::playButtonPressed()
         return;
     }
     
-    ObjectReference* objectRef = static_cast<ObjectReference*>(selected.internalPointer());
+/*    ObjectReference* objectRef = static_cast<ObjectReference*>(selected.internalPointer());
     
     qDebug() << "UpnpController::playButtonPressed() selected server:" << 
         (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
     qDebug() << "UpnpController::playButtonPressed() selected objectId:" << (char*) objectRef->objectId;
-    
-    // send SetAVTransportURI packet
-    PLT_MediaObjectListReference browseResults;
+    */
+/*    PLT_MediaObjectListReference browseResults;
     m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
-    PLT_MediaObject* object = (*browseResults->GetFirstItem());
-    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
+    PLT_MediaObject* object = (*browseResults->GetFirstItem());*/
+    
+    UpnpObject* object = m_upnpBrowserModel->getObject(selected);
+    PLT_MediaObject* pltObject = object->m_pltObject;
+    // send SetAVTransportURI packet
+    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, pltObject->m_Resources[0].m_Uri, pltObject->m_Didl, NULL);
     
 }
 

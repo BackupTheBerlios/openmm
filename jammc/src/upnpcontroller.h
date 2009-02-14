@@ -22,7 +22,7 @@ using namespace Jamm;
 
 class UpnpRendererListModel;
 
-class UpnpController : public QObject, PLT_MediaControllerListener, JSlot
+class UpnpController : public QObject, PLT_MediaControllerListener, PLT_MediaBrowserListener, JSlot
 {
     Q_OBJECT
 
@@ -34,6 +34,7 @@ public:
     void showMainWindow();
 
 signals:
+    void serverAddedRemoved(UpnpServer* server, bool add);
     void rendererAddedRemoved(string uuid, bool add);
     void setSlider(int max, int val);
 
@@ -57,6 +58,9 @@ protected:
     virtual void OnMRAddedRemoved(PLT_DeviceDataReference& device, int added);
     virtual void OnMRStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
     
+    virtual void OnMSAddedRemoved(PLT_DeviceDataReference& device, int added);
+    virtual void OnMSStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
+    virtual void OnMSBrowseResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_BrowseInfo* info, void* userdata);
     
         // AVTransport
 //     virtual void OnGetCurrentTransportActionsResult(
@@ -167,7 +171,8 @@ private:
 
     /* The UPnP MediaServer control point (a synchronous one)
      */
-    UpnpSyncMediaBrowser*           m_mediaBrowser;
+//     UpnpSyncMediaBrowser*           m_mediaBrowser;
+    PLT_MediaBrowser*               m_mediaBrowser;
     JRenderingController*           m_renderingController;
     /* The UPnP MediaRenderer control point (an asynchronous one)
      */
@@ -177,8 +182,8 @@ private:
      * a lock.  If you ever want to hold both the m_CurMediaRendererLock lock and the 
      * m_CurMediaServerLock lock, make sure you grab the server lock first.
      */
-    PLT_DeviceDataReference         m_curMediaServer;
-    NPT_Mutex                       m_curMediaServerLock;
+//     PLT_DeviceDataReference         m_curMediaServer;
+//     NPT_Mutex                       m_curMediaServerLock;
 
     /* The currently selected media renderer as well as 
      * a lock.  If you ever want to hold both the m_CurMediaRendererLock lock and the 

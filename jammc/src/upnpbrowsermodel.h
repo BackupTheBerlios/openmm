@@ -32,7 +32,7 @@ class UpnpBrowserModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(UpnpSyncMediaBrowser* mediaBrowser, QObject *parent = 0);
+    UpnpBrowserModel(QObject *parent = 0);
     ~UpnpBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -44,12 +44,19 @@ public:
     QModelIndex parent(const QModelIndex &index) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
+    bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
+    void fetchMore (const QModelIndex & parent);
+    bool canFetchMore (const QModelIndex & parent) const;
+    
+    UpnpObject* getObject(const QModelIndex &index) const {
+        return index.isValid() ? static_cast<UpnpObject*>(index.internalPointer()) : m_root;
+    }
+    
 public slots:
-    void serverAddedRemoved(string uuid, bool add);
+    void serverAddedRemoved(UpnpServer* server, bool add);
     
 private:
-    UpnpSyncMediaBrowser* m_mediaBrowser;
+    UpnpObject*           m_root;
     QTextCodec*           m_charEncoding;
 };
 

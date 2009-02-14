@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,14 +20,176 @@
 
 #include <QtDebug>
 
-UpnpSyncMediaBrowser::UpnpSyncMediaBrowser(PLT_CtrlPointReference& ctrlPoint,
-                                           bool                    use_cache /* = false */, 
-                                           PLT_MediaContainerChangesListener* listener /* = NULL */) :
-PLT_SyncMediaBrowser(ctrlPoint, use_cache, listener), m_UseCache(use_cache)
+
+UpnpDevice::UpnpDevice()
+: m_pltDevice(NULL)
 {
 }
 
 
+string
+UpnpDevice::getFriendlyName()
+{
+    return string((const char*)m_pltDevice->GetFriendlyName());
+}
+
+
+UpnpServer::UpnpServer()
+: UpnpDevice(),
+m_pltBrowser(NULL)
+{
+}
+
+
+vector<UpnpObject*>
+UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filter, string sort)
+{
+    qDebug() << "UpnpServer::browseChildren() objectId:" << object->m_objectId.c_str();
+    vector<UpnpObject*> res;
+    
+    if (m_pltDevice.IsNull()) {
+        qWarning() << "UpnpServer::browseChildren() no mediaServer found";
+        return res;
+    }
+    
+    qDebug() << "UpnpServer::browseChildren() send browse packet";
+    // TODO: send out a singal when starting browsing and one when finished
+    //       so that ControlerGui can inform the user that browsing activity
+    //       takes place.
+    do {	
+        PLT_BrowseDataReference pltBrowseData(new PLT_BrowseData());
+        pltBrowseData->shared_var.SetValue(0);
+        // send off the browse packet.  Note that this will
+        // not block.  There is a call to WaitForResponse in order
+        // to block until the response comes back.
+        NPT_Result nptRes = m_pltBrowser->Browse(m_pltDevice,
+                                                 object->m_objectId.c_str(),
+                                                 NPT_UInt32(index),
+                                                 NPT_UInt32(count),
+                                                 false,
+                                                 filter.c_str(),
+                                                 sort.c_str(),
+                                                 new PLT_BrowseDataReference(pltBrowseData));
+        pltBrowseData->shared_var.WaitUntilEquals(1, 30000);
+        if (NPT_FAILED(nptRes)) {
+            qWarning() << "UpnpServer::browseChildren() **FAILED**, parent objectId:" << object->m_objectId.c_str();
+            break;
+        }
+        if (NPT_FAILED(pltBrowseData->res)) {
+            qWarning() << "UpnpServer::browseChildren() **FAILED** to browse_data, parent objectId:" << object->m_objectId.c_str();
+            return res;
+        }
+        if (pltBrowseData->info.items->GetItemCount() == 0) {
+            qWarning() << "UpnpServer::browseChildren() **FAILED**, no objects found, parent objectId:" << object->m_objectId.c_str();
+            break;
+        }
+        
+        qDebug() << "UpnpServer::browseChildren() number of objects found:" << pltBrowseData->info.items->GetItemCount();
+        // build a vector<UpnpObject*> out of pltBrowseData->info.items
+        // info.items is of type PLT_MediaObjectListReference
+        NPT_List<PLT_MediaObject*>::Iterator i = pltBrowseData->info.items->GetFirstItem();
+        while (i) {
+            UpnpObject* o = new UpnpObject();
+            o->m_objectId = string((const char*)(*i)->m_ObjectID);
+            o->m_server = object->m_server;
+            o->m_parent = object;
+            o->m_pltObject = (*i);
+            res.push_back(o);
+            ++i;
+        }
+        // clear the list items so that the data inside is not
+        // cleaned up by PLT_MediaItemList dtor since we copied
+        // each pointer into the new list.
+        pltBrowseData->info.items->Clear();
+        // stop now if our list contains exactly what the server said it had
+        if (pltBrowseData->info.tm && pltBrowseData->info.tm == res.size())
+            break;
+        // ask for the next chunk of entries
+        index = res.size();
+        // TODO: put the last if clause into the while loop condition
+    } while(1);
+    
+    return res;
+}
+
+
+UpnpObject::UpnpObject()
+: m_server(NULL),
+m_objectId(""),
+m_parent(NULL),
+m_fetchedChildren(false)
+{
+}
+
+
+bool
+UpnpObject::isContainer()
+{
+    qDebug() << "UpnpObject::isContainer() objectId:" << m_objectId.c_str();
+    if (m_objectId == "0") {
+        return true;
+    }
+    else {
+        return m_pltObject->IsContainer();
+    }
+}
+
+
+string
+UpnpObject::getTitle()
+{
+    qDebug() << "UpnpObject::getTitle() objectId:" << m_objectId.c_str();
+    if (m_objectId == "0") {
+        return m_server->getFriendlyName();
+    }
+    else {
+        return string((const char*)m_pltObject->m_Title.GetChars());
+    }
+}
+
+
+void
+UpnpObject::fetchChildren()
+{
+    qDebug() << "UpnpObject::fetchChildren() objectId:" << m_objectId.c_str();
+    if (m_server) {
+        vector<UpnpObject*> res = m_server->browseChildren(this);
+        // append the list of browsed objects to our children list.
+        m_children.insert(m_children.end(), res.begin(), res.end());
+    }
+}
+
+/*
+---------------------------------------------------------------------------------
+*/
+
+
+// UpnpSyncMediaBrowser::UpnpSyncMediaBrowser(PLT_CtrlPointReference& ctrlPoint,
+//                                            bool                    use_cache 
+//                                            PLT_MediaContainerChangesListener* listener ) :
+// PLT_SyncMediaBrowser(ctrlPoint, use_cache, listener), m_UseCache(use_cache)
+// {
+// }
+
+
+/*
+UpnpBrowserModel::rowCount() objectId: 28
+UpnpSyncMediaBrowser::syncBrowse() object_id: 28 (browse children)
+UpnpSyncMediaBrowser::syncBrowse() send browse packet
+UpnpSyncMediaBrowser::syncBrowse() failed
+... or on a late call ...
+UpnpBrowserModel::rowCount() objectId: 28
+UpnpSyncMediaBrowser::syncBrowse() object_id: 28 (browse children)
+UpnpSyncMediaBrowser::syncBrowse() send browse packet
+UpnpSyncMediaBrowser::syncBrowse() number of objects found: 9407
+... and ...
+UpnpBrowserModel::rowCount() objectId: 11
+UpnpSyncMediaBrowser::syncBrowse() object_id: 11 (browse children)
+UpnpSyncMediaBrowser::syncBrowse() send browse packet
+UpnpSyncMediaBrowser::syncBrowse() number of objects found: 9407
+... take a whole lot a time ...
+*/
+/*
 NPT_Result
 UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
                       const char*              object_id,
@@ -38,7 +200,7 @@ UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
                       const char*              filter,
                       const char*              sort)
 {
-//     qDebug() << "UpnpSyncMediaBrowser::syncBrowse() object_id:" << object_id;
+    qDebug() << "UpnpSyncMediaBrowser::syncBrowse() object_id:" << object_id << (!browse_metadata?"(browse children)":"");
     NPT_Result res = NPT_FAILURE;
         // reset output params
     list = NULL;
@@ -52,11 +214,14 @@ UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
     if (m_UseCache && NPT_SUCCEEDED(m_Cache.Get(device, object_id, 
                                                 browse_metadata?"meta":"children",
                                                 list))) {
-//         qDebug() << "UpnpSyncMediaBrowser::syncBrowse() cache hit";
+        qDebug() << "UpnpSyncMediaBrowser::syncBrowse() CACHE HIT";
         return NPT_SUCCESS;
     }
-//     qDebug() << "UpnpSyncMediaBrowser::syncBrowse() send browse packet";
+    qDebug() << "UpnpSyncMediaBrowser::syncBrowse() send browse packet";
     
+    // TODO: send out a singal when starting browsing and one when finished
+    //       so that ControlerGui can inform the user that browsing activity
+    //       takes place.
     do {	
         PLT_BrowseDataReference browse_data(new PLT_BrowseData());
             // send off the browse packet.  Note that this will
@@ -71,21 +236,21 @@ UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
                     filter,
                     sort);
         if (NPT_FAILED(res)) {
-            qWarning() << "UpnpSyncMediaBrowser::syncBrowse() failed";
+            qWarning() << "UpnpSyncMediaBrowser::syncBrowse() **FAILED**, object_id:" << object_id;
             break;
         }
         
         if (NPT_FAILED(browse_data->res)) {
-            qWarning() << "UpnpSyncMediaBrowser::syncBrowse() failed on browse_data";
+            qWarning() << "UpnpSyncMediaBrowser::syncBrowse() **FAILED** to browse_data, object_id:" << object_id;
             return browse_data->res;
         }
         
         if (browse_data->info.items->GetItemCount() == 0) {
-            qWarning() << "UpnpSyncMediaBrowser::syncBrowse() failed, no objects found";
+            qWarning() << "UpnpSyncMediaBrowser::syncBrowse() **FAILED**, no objects found, object_id:" << object_id;
             break;
         }
         
-//         qDebug() << "UpnpSyncMediaBrowser::syncBrowse() number of objects found:" << browse_data->info.items->GetItemCount();
+        qDebug() << "UpnpSyncMediaBrowser::syncBrowse() number of objects found:" << browse_data->info.items->GetItemCount();
         
         if (list.IsNull()) {
             list = browse_data->info.items;
@@ -111,116 +276,117 @@ UpnpSyncMediaBrowser::syncBrowse(PLT_DeviceDataReference& device,
     }
 
     return res;
-}
+}*/
 
 
-void
-UpnpSyncMediaBrowser::OnMSAddedRemoved(PLT_DeviceDataReference& device, int added)
-{
-    PLT_SyncMediaBrowser::OnMSAddedRemoved(device, added);
-    
-    string uuid = (char*) device->GetUUID();
-    string name = (char*) device->GetFriendlyName();
-    
-    qDebug() << "UpnpSyncMediaBrowser::OnMSAddedRemoved() object_id:" << (added?"added":"removed") << "server:" << name.c_str() << uuid.c_str();
-    
-    // TODO: call ControllerGui::expand() to expand the first two levels of the tree.
-    //       or better: ControllerGui should automatically always expand to this level.
-    emit serverAddedRemoved(uuid, added);
-}
+// void
+// UpnpSyncMediaBrowser::OnMSAddedRemoved(PLT_DeviceDataReference& device, int added)
+// {
+//     PLT_SyncMediaBrowser::OnMSAddedRemoved(device, added);
+//     
+//     string uuid = (char*) device->GetUUID();
+//     string name = (char*) device->GetFriendlyName();
+//     
+//     qDebug() << "UpnpSyncMediaBrowser::OnMSAddedRemoved() object_id:" << (added?"added":"removed") << "server:" << name.c_str() << uuid.c_str();
+//     
+//     // TODO: call ControllerGui::expand() to expand the first two levels of the tree.
+//     //       or better: ControllerGui should automatically always expand to this level.
+//     emit serverAddedRemoved(uuid, added);
+// }
 
 
-ObjectReference*
-UpnpSyncMediaBrowser::getInternalPointer(PLT_DeviceDataReference server, NPT_String objectId)
-{
-    NPT_String key = server->GetUUID() + "/" + objectId;
-    ObjectReference* res;
-    if (!m_objectIdMap.HasKey(key)) {
-        res = new ObjectReference();
-        res->objectId = objectId;
-        res->server = server;
-        m_objectIdMap.Put(key, res);
-    }
-    else {
-        res = m_objectIdMap[key];
-    }
-    return res;
-}
+// ObjectReference*
+// UpnpSyncMediaBrowser::getInternalPointer(PLT_DeviceDataReference server, NPT_String objectId)
+// {
+//     NPT_String key = server->GetUUID() + "/" + objectId;
+//     ObjectReference* res = new ObjectReference();
+//     pair<map<NPT_String, ObjectReference*>::iterator, bool> insRes = m_objectIdMap.insert(make_pair(key, res));
+//     
+//     if (insRes.second) {
+//         res->objectId = objectId;
+//         res->server = server;
+//         res->lastFetched = 0;
+//     }
+//     else {
+//         delete res;
+//     }
+//     return (*insRes.first).second;
+// }
 
 
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::UpnpMediaCache
 +---------------------------------------------------------------------*/
-UpnpMediaCache::UpnpMediaCache()
-{
-}
+// UpnpMediaCache::UpnpMediaCache()
+// {
+// }
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::~UpnpMediaCache
 +---------------------------------------------------------------------*/
-UpnpMediaCache::~UpnpMediaCache()
-{
-}
+// UpnpMediaCache::~UpnpMediaCache()
+// {
+// }
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::GenerateKey
 +---------------------------------------------------------------------*/
-NPT_String
-UpnpMediaCache::GenerateKey(const char* device_uuid, 
-                            const char* item_id,
-                            const char* meta_data)
-{
-    NPT_String key = "upnp://";
-    key += device_uuid;
-    key += "/";
-    key += item_id;
-    key += meta_data;
-    
-    return key;
-}
-
-
-NPT_Result
-UpnpMediaCache::Clear()
-{
-    m_items.clear();
-    return NPT_SUCCESS;
-}
+// NPT_String
+// UpnpMediaCache::GenerateKey(const char* device_uuid, 
+//                             const char* item_id,
+//                             const char* meta_data)
+// {
+//     NPT_String key = "upnp://";
+//     key += device_uuid;
+//     key += "/";
+//     key += item_id;
+//     key += meta_data;
+//     
+//     return key;
+// }
+// 
+// 
+// NPT_Result
+// UpnpMediaCache::clear()
+// {
+//     m_items.clear();
+//     return NPT_SUCCESS;
+// }
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::Put
 +---------------------------------------------------------------------*/
-NPT_Result
-UpnpMediaCache::Put(PLT_DeviceDataReference&      device,
-                    const char*                   item_id,
-                    const char*                   meta_data,
-                    PLT_MediaObjectListReference& list)
-{
-    NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
-    if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
-    
-    m_items.insert(make_pair(key, list));
-    return NPT_SUCCESS;
-}
+// NPT_Result
+// UpnpMediaCache::Put(PLT_DeviceDataReference&      device,
+//                     const char*                   item_id,
+//                     const char*                   meta_data,
+//                     PLT_MediaObjectListReference& list)
+// {
+//     NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
+//     if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
+//     
+//     m_items.insert(make_pair(key, list));
+//     return NPT_SUCCESS;
+// }
 
 /*----------------------------------------------------------------------
 |   UpnpMediaCache::Get
 +---------------------------------------------------------------------*/
-NPT_Result
-UpnpMediaCache::Get(PLT_DeviceDataReference&      device,
-                    const char*                   item_id,
-                    const char*                   meta_data,
-                    PLT_MediaObjectListReference& list)
-{
-    NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
-    if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
-    
-    map<NPT_String, PLT_MediaObjectListReference>::iterator i = m_items.find(key);
-    if (i == m_items.end()) {
-        return NPT_ERROR_NO_SUCH_ITEM;
-    }
-    list = (*i).second;
-    return NPT_SUCCESS;
-}
+// NPT_Result
+// UpnpMediaCache::Get(PLT_DeviceDataReference&      device,
+//                     const char*                   item_id,
+//                     const char*                   meta_data,
+//                     PLT_MediaObjectListReference& list)
+// {
+//     NPT_String key = GenerateKey(device->GetUUID(), item_id, meta_data);
+//     if (key.GetLength() == 0) return NPT_ERROR_INVALID_PARAMETERS;
+//     
+//     map<NPT_String, PLT_MediaObjectListReference>::iterator i = m_items.find(key);
+//     if (i == m_items.end()) {
+//         return NPT_ERROR_NO_SUCH_ITEM;
+//     }
+//     list = (*i).second;
+//     return NPT_SUCCESS;
+// }
 
