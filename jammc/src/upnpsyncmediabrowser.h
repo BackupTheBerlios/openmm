@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -73,65 +73,5 @@ public:
     PLT_MediaObject*    m_pltObject;
 };
 
-
-/*
------------------------------------------------------------------------------------
-*/
-
-
-// class UpnpMediaCache
-// {
-// public:
-//     UpnpMediaCache();
-//     virtual ~UpnpMediaCache();
-//     
-//     NPT_Result Put(PLT_DeviceDataReference& device, const char* item_id, const char* meta_data,
-//                    PLT_MediaObjectListReference& list);
-//     NPT_Result Get(PLT_DeviceDataReference& device, const char* item_id, const char* meta_data,
-//                    PLT_MediaObjectListReference& list);
-//     //    NPT_Result Clear(PLT_DeviceData* device = NULL);
-//     NPT_Result clear();
-//     
-// private:
-//     NPT_String GenerateKey(const char* device_uuid, const char* item_id, const char* meta_data);
-//     map<NPT_String, PLT_MediaObjectListReference> m_items;
-// };
-// 
-// 
-// 
-// 
-// class UpnpSyncMediaBrowser : public QObject, PLT_SyncMediaBrowser
-// {
-//     Q_OBJECT
-//         
-// public:
-//     UpnpSyncMediaBrowser(PLT_CtrlPointReference& ctrlPoint, bool use_cache = false, PLT_MediaContainerChangesListener* listener = NULL);
-//     
-//     NPT_Result syncBrowse(PLT_DeviceDataReference& device,
-//                           const char*              object_id,
-//                           bool                     browse_metadata,
-//                           PLT_MediaObjectListReference& list,
-//                           NPT_Int32                index = 0, 
-//                           NPT_Int32                count = 0, // 0 means "get all" ...
-//                           const char*              filter = "*", 
-//                           const char*              sort = "");
-//     
-//     virtual void OnMSAddedRemoved(PLT_DeviceDataReference& device, int added);
-//     const PLT_DeviceMap& getMediaServers() const { return GetMediaServers(); }
-//     
-//     // we need a pointer to server and object_id, to store it in the internal data model of UpnpBrowserModel
-//     // see: createIndex(row, col, void*) ...
-//     ObjectReference* getInternalPointer(PLT_DeviceDataReference server, NPT_String objectId);
-//     
-//     void clearCache() { m_objectIdMap.clear(); m_Cache.clear(); }
-//     
-// signals:
-//     void serverAddedRemoved(string uuid, bool add);
-//     
-// private:
-//     map<NPT_String, ObjectReference*>     m_objectIdMap;
-//     bool                                  m_UseCache;
-//     UpnpMediaCache                        m_Cache;
-// };
 
 #endif //UPNPSYNCMEDIABROWSER_H

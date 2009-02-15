@@ -2,6 +2,7 @@
 #include <QtDebug>
 
 #include "upnpcontroller.h"
+#include "modeltest.h"
 
 UpnpController::UpnpController()
 {
@@ -11,7 +12,8 @@ UpnpController::UpnpController()
     m_ctrlPoint = PLT_CtrlPointReference(new PLT_CtrlPoint());
     m_upnp->AddCtrlPoint(m_ctrlPoint);
     m_mediaBrowser = new PLT_MediaBrowser(m_ctrlPoint, this);
-    m_upnpBrowserModel = new UpnpBrowserModel();
+    m_upnpBrowserModel = new UpnpBrowserModel(this);
+    //    new ModelTest(m_upnpBrowserModel, this);
     m_mediaController = new PLT_MediaController(m_ctrlPoint, this);
     m_upnpRendererListModel = new UpnpRendererListModel(this);
     m_renderingController = new JRenderingController(m_ctrlPoint);

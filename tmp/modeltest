@@ -1,0 +1,134 @@
+UpnpController::UpnpController() 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::fetchMore() parent objectId:  
+UpnpObject::fetchChildren() objectId:  
+UpnpBrowserModel::fetchMore() number of children: 0 
+UpnpBrowserModel::hasChildren() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 0 
+UpnpController::UpnpController() starting threads ... 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpController::OnMSAddedRemoved() added server: MediaTomb b0c3c946-7315-46a3-883c-0d150866e4b6 
+UpnpBrowserModel::hasChildren() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 35 ui4 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMRStateVariablesChanged(): SystemUpdateID 35 ui4 
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ConnectionManager:1 
+UpnpController::OnMSStateVariablesChanged(): CurrentConnectionIDs 0 string 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ConnectionManager:1 
+UpnpController::OnMRStateVariablesChanged(): CurrentConnectionIDs 0 string 
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 35 ui4 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMRStateVariablesChanged(): SystemUpdateID 35 ui4 
+UpnpBrowserModel::serverAddedRemoved() add server: MediaTomb 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::fetchMore() parent objectId:  
+UpnpBrowserModel::hasChildren() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::hasChildren() parent objectId:  
+UpnpBrowserModel::hasChildren() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 0 
+UpnpObject::isContainer() objectId: 0 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::canFetchMore() parent objectId: 0 
+UpnpBrowserModel::fetchMore() parent objectId: 0 
+UpnpObject::fetchChildren() objectId: 0 
+UpnpServer::browseChildren() objectId: 0 
+UpnpServer::browseChildren() send browse packet 
+UpnpServer::browseChildren() number of objects found: 4 
+UpnpBrowserModel::fetchMore() number of children: 4 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::hasChildren() parent objectId: 0 
+UpnpObject::isContainer() objectId: 0 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::hasChildren() parent objectId: 0 
+UpnpObject::isContainer() objectId: 0 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::canFetchMore() parent objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() index objectId: 10 
+ASSERT: "model->parent(index) == parent" in file /home/jb/devel/cc/jamm/jammc/src/modeltest.cpp, line 362

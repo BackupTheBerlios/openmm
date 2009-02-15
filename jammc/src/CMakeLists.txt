@@ -8,6 +8,7 @@ ${QT_USE_FILE}
 SET( JAMMC_SRCS
 controllergui.cpp
 main.cpp
+modeltest.cpp
 upnpbrowsermodel.cpp
 upnpcontroller.cpp
 upnprenderingcontrol.cpp
@@ -22,6 +23,7 @@ controllergui.ui
 
 SET( JAMMC_MOC
 controllergui.h
+modeltest.h
 upnpbrowsermodel.h
 upnprendererlistmodel.h
 upnpsyncmediabrowser.h

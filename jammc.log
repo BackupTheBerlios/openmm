@@ -8,24 +8,35 @@ UpnpBrowserModel::canFetchMore() parent objectId:
 UpnpBrowserModel::canFetchMore() parent objectId:  
 UpnpBrowserModel::canFetchMore() parent objectId:  
 UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::hasChildren() parent objectId:  
 UpnpController::OnMSAddedRemoved() added server: MediaTomb b0c3c946-7315-46a3-883c-0d150866e4b6 
-UpnpBrowserModel::hasChildren() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
 UpnpBrowserModel::serverAddedRemoved() add server: MediaTomb 
-UpnpBrowserModel::canFetchMore() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 35 ui4 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMRStateVariablesChanged(): SystemUpdateID 35 ui4 
 UpnpBrowserModel::hasChildren() parent objectId:  
 UpnpBrowserModel::hasChildren() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::fetchMore() parent objectId:  
-UpnpObject::fetchChildren() objectId:  
-UpnpBrowserModel::canFetchMore() parent objectId:  
-UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 0 
+UpnpObject::isContainer() objectId: 0 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 0 
 UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
 UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 35 ui4 
 UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
@@ -34,397 +45,908 @@ UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:ser
 UpnpController::OnMSStateVariablesChanged(): CurrentConnectionIDs 0 string 
 UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ConnectionManager:1 
 UpnpController::OnMRStateVariablesChanged(): CurrentConnectionIDs 0 string 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::fetchMore() parent objectId:  
+UpnpObject::fetchChildren() objectId:  
+UpnpBrowserModel::fetchMore() number of children: 1 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
-UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 35 ui4 
-UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
-UpnpController::OnMRStateVariablesChanged(): SystemUpdateID 35 ui4 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpBrowserModel::canFetchMore() parent objectId:  
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId: 0 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId: 0 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 0 
 UpnpBrowserModel::canFetchMore() parent objectId: 0 
 UpnpBrowserModel::fetchMore() parent objectId: 0 
 UpnpObject::fetchChildren() objectId: 0 
 UpnpServer::browseChildren() objectId: 0 
 UpnpServer::browseChildren() send browse packet 
 UpnpServer::browseChildren() number of objects found: 4 
+UpnpBrowserModel::fetchMore() number of children: 4 
 UpnpObject::getTitle() objectId: 0 
 UpnpBrowserModel::canFetchMore() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
 UpnpBrowserModel::canFetchMore() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpBrowserModel::parent() index objectId: 0 
 UpnpBrowserModel::hasChildren() parent objectId: 0 
 UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::canFetchMore() parent objectId: 0 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpObject::getTitle() objectId: 10 
+UpnpObject::getTitle() objectId: 41447 
+UpnpObject::getTitle() objectId: 32 
+UpnpObject::getTitle() objectId: 96013 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpObject::getTitle() objectId: 96013 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpObject::getTitle() objectId: 32 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpObject::getTitle() objectId: 41447 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpObject::getTitle() objectId: 10 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 10 
+UpnpObject::isContainer() objectId: 10 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 10 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 41447 
+UpnpObject::isContainer() objectId: 41447 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 41447 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 32 
+UpnpObject::isContainer() objectId: 32 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 32 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 96013 
+UpnpObject::isContainer() objectId: 96013 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 96013 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 10 
+UpnpObject::isContainer() objectId: 10 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 10 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 41447 
+UpnpObject::isContainer() objectId: 41447 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 41447 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 32 
+UpnpObject::isContainer() objectId: 32 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 32 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 96013 
+UpnpObject::isContainer() objectId: 96013 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 96013 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::rowCount() parent objectId:  
-UpnpBrowserModel::hasChildren() parent objectId: 0 
-UpnpObject::isContainer() objectId: 0 
-UpnpBrowserModel::rowCount() parent objectId:  
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 10 
+UpnpObject::isContainer() objectId: 10 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 10 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 41447 
+UpnpObject::isContainer() objectId: 41447 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 41447 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 32 
+UpnpObject::isContainer() objectId: 32 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 32 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 96013 
+UpnpObject::isContainer() objectId: 96013 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 96013 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
 UpnpObject::getTitle() objectId: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 10 
+UpnpObject::isContainer() objectId: 10 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 10 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 41447 
+UpnpObject::isContainer() objectId: 41447 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 41447 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 32 
+UpnpObject::isContainer() objectId: 32 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 32 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 96013 
+UpnpObject::isContainer() objectId: 96013 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 96013 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpBrowserModel::index() parent objectId:  row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 0 
+UpnpBrowserModel::parent() index objectId: 10 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 10 
+UpnpObject::isContainer() objectId: 10 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 10 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 1 
+UpnpBrowserModel::parent() index objectId: 41447 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 41447 
+UpnpObject::isContainer() objectId: 41447 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 41447 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 2 
+UpnpBrowserModel::parent() index objectId: 32 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 32 
+UpnpObject::isContainer() objectId: 32 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 32 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::index() parent objectId: 0 row: 3 
+UpnpBrowserModel::parent() index objectId: 96013 
+UpnpBrowserModel::parent() return row: 0 
+UpnpBrowserModel::parent() index objectId: 0 
+UpnpBrowserModel::hasChildren() parent objectId: 96013 
+UpnpObject::isContainer() objectId: 96013 
+UpnpObject::isContainer() return: true 
+UpnpBrowserModel::rowCount() parent objectId: 0 return rows: 4 
+UpnpBrowserModel::rowCount() parent objectId:  return rows: 1 
+UpnpObject::getTitle() objectId: 96013 
 UpnpBrowserModel::canFetchMore() parent objectId:  
 UpnpController::~UpnpController() 
