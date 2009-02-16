@@ -116,8 +116,8 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
 UpnpObject::UpnpObject()
 : m_server(NULL),
 m_objectId(""),
-m_parent(NULL),
-m_fetchedChildren(false)
+m_parent(NULL)
+// m_fetchedChildren(false)
 {
 }
 
@@ -154,10 +154,24 @@ void
 UpnpObject::fetchChildren()
 {
     qDebug() << "UpnpObject::fetchChildren() objectId:" << m_objectId.c_str();
+    if (fetchedAllChildren()) {
+        return;
+    }
     if (m_server) {
-        vector<UpnpObject*> res = m_server->browseChildren(this);
+        vector<UpnpObject*> res = m_server->browseChildren(this, m_children.size(), UpnpServer::m_sliceSize);
         // append the list of browsed objects to our children list.
         m_children.insert(m_children.end(), res.begin(), res.end());
+/*        if (fetchedAllChildren()) {
+            m_fetchedChildren = true;
+        }*/
     }
 }
 
+
+bool
+UpnpObject::fetchedAllChildren()
+{
+    qDebug() << "UpnpObject::fetchedAllChildren()";
+    return (m_parent == NULL) || (!m_pltObject->IsContainer()) ||
+        (static_cast<PLT_MediaContainer*>(m_pltObject)->m_ChildrenCount <= (NPT_Int32)m_children.size());
+}

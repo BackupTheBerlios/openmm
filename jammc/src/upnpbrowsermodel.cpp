@@ -25,6 +25,7 @@ UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
     m_root = new UpnpObject();
+//     m_root->m_fetchedChildren = true;
 }
 
 
@@ -36,8 +37,13 @@ UpnpBrowserModel::~UpnpBrowserModel()
 int
 UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
-    qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << getObject(parent)->m_objectId.c_str() << "return rows:" << getObject(parent)->m_children.size();
-    return getObject(parent)->m_children.size();
+    UpnpObject* object = getObject(parent);
+    qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
+    // FIXME: double click bug is fixed by a fetchChildren() here, but browsing is really slooow ...
+    //        -> implement lazy fetching, so rowCount() is > 0 before expanding an index
+    //        and it won't be empty when expanding for the first time
+    //object->fetchChildren();
+    return object->m_children.size();
 
 }
 
@@ -69,7 +75,7 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
     if (object == m_root && m_root->m_children.size() == 0) {
         return false;
     }
-    return (!object->m_fetchedChildren);
+    return (!object->fetchedAllChildren());
 }
 
 
@@ -78,10 +84,9 @@ UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
     UpnpObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
-    if (object->m_fetchedChildren) {
+/*    if (object->fetchedAllChildren()) {
         return;
-    }
-    object->m_fetchedChildren = true;
+    }*/
     object->fetchChildren();
     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
 }

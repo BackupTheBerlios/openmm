@@ -47,6 +47,7 @@ public:
     UpnpServer();
     // TODO: return reference or pointer to vector to avoid calling vector's copy constructor
     vector<UpnpObject*> browseChildren(UpnpObject* object, int index = 0, int count = 0, string filter = "*", string sort = "");
+    static const int m_sliceSize = 10;
     
 // private:
     PLT_MediaBrowser* m_pltBrowser;
@@ -61,13 +62,13 @@ public:
     bool isContainer();
     string getTitle();
     void fetchChildren();
+    bool fetchedAllChildren();
 
     UpnpServer*         m_server;
     string              m_objectId;
     UpnpObject*         m_parent;
     vector<UpnpObject*> m_children;
-    //    int                 m_lastSliceFetched;
-    bool                m_fetchedChildren;
+//     bool                m_fetchedChildren;
     
 // private:
     PLT_MediaObject*    m_pltObject;

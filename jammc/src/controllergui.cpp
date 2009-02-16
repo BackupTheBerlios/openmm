@@ -61,6 +61,9 @@ m_sliderMoved(false)
     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
     
+    connect(ui.m_browserTreeView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
+    connect(ui.m_browserTreeView, SIGNAL(expanded(const QModelIndex&)), SIGNAL(expanded(const QModelIndex&)));
+    
     ui.m_browserListView->hide();
     setWindowTitle("JammC");
 }

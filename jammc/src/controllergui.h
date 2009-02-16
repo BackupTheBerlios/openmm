@@ -44,6 +44,9 @@ signals:
     void sliderMoved(int);
     void volSliderMoved(int);
     
+    void activated(const QModelIndex& index);
+    void expanded(const QModelIndex& index);
+    
 public slots:
     void setSlider(int max, int val);
     void setVolumeSlider(int max, int val);

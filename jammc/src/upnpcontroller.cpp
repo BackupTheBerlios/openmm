@@ -30,6 +30,8 @@ UpnpController::UpnpController()
             m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
     connect(this, SIGNAL(serverAddedRemoved(UpnpServer*, bool)),
             m_upnpBrowserModel, SLOT(serverAddedRemoved(UpnpServer*, bool)));
+    connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
+    connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
     connect(m_mainWindow->getRendererListSelectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -64,6 +66,20 @@ UpnpController::~UpnpController()
     delete m_mediaBrowser;
     delete m_controllerListener;
     delete m_upnp;*/
+}
+
+
+void
+UpnpController::modelIndexActivated(const QModelIndex& index)
+{
+    qDebug() << "++++++++ Object activated:" << m_upnpBrowserModel->getObject(index)->m_objectId.c_str();
+}
+
+
+void
+UpnpController::modelIndexExpanded(const QModelIndex& index)
+{
+    qDebug() << "++++++++ Object expanded:" << m_upnpBrowserModel->getObject(index)->m_objectId.c_str();
 }
 
 

@@ -48,6 +48,9 @@ private slots:
     void sliderMoved(int position);
     void volSliderMoved(int position);
     
+    void modelIndexActivated(const QModelIndex& index);
+    void modelIndexExpanded(const QModelIndex& index);
+    
 private:
     virtual void onSignalReceived();
     
