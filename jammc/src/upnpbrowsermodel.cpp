@@ -25,7 +25,7 @@ UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
     m_root = new UpnpObject();
-//     m_root->m_fetchedChildren = true;
+    m_root->m_fetchedChildren = true;
 }
 
 
@@ -42,7 +42,7 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
     // FIXME: double click bug is fixed by a fetchChildren() here, but browsing is really slooow ...
     //        -> implement lazy fetching, so rowCount() is > 0 before expanding an index
     //        and it won't be empty when expanding for the first time
-    //object->fetchChildren();
+    object->fetchChildren();
     return object->m_children.size();
 
 }

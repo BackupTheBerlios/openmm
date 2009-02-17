@@ -41,11 +41,11 @@ m_pltBrowser(NULL)
 }
 
 
-vector<UpnpObject*>
+UpnpBrowseResult
 UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filter, string sort)
 {
     qDebug() << "UpnpServer::browseChildren() objectId:" << object->m_objectId.c_str();
-    vector<UpnpObject*> res;
+    UpnpBrowseResult res;
     
     if (m_pltDevice.IsNull()) {
         qWarning() << "UpnpServer::browseChildren() no mediaServer found";
@@ -56,7 +56,8 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
     // TODO: send out a singal when starting browsing and one when finished
     //       so that ControlerGui can inform the user that browsing activity
     //       takes place.
-    do {	
+    // FIXME: should the server reply in with one answer? is do-while-loop necessary?
+//     do {	
         PLT_BrowseDataReference pltBrowseData(new PLT_BrowseData());
         pltBrowseData->shared_var.SetValue(0);
         // send off the browse packet.  Note that this will
@@ -73,7 +74,8 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
         pltBrowseData->shared_var.WaitUntilEquals(1, 30000);
         if (NPT_FAILED(nptRes)) {
             qWarning() << "UpnpServer::browseChildren() **FAILED**, parent objectId:" << object->m_objectId.c_str();
-            break;
+//             break;
+            return res;
         }
         if (NPT_FAILED(pltBrowseData->res)) {
             qWarning() << "UpnpServer::browseChildren() **FAILED** to browse_data, parent objectId:" << object->m_objectId.c_str();
@@ -81,7 +83,8 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
         }
         if (pltBrowseData->info.items->GetItemCount() == 0) {
             qWarning() << "UpnpServer::browseChildren() **FAILED**, no objects found, parent objectId:" << object->m_objectId.c_str();
-            break;
+//             break;
+            return res;
         }
         
         qDebug() << "UpnpServer::browseChildren() number of objects found:" << pltBrowseData->info.items->GetItemCount();
@@ -94,7 +97,7 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
             o->m_server = object->m_server;
             o->m_parent = object;
             o->m_pltObject = (*i);
-            res.push_back(o);
+            res.m_result.push_back(o);
             ++i;
         }
         // clear the list items so that the data inside is not
@@ -102,13 +105,18 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
         // each pointer into the new list.
         pltBrowseData->info.items->Clear();
         // stop now if our list contains exactly what the server said it had
-        if (pltBrowseData->info.tm && pltBrowseData->info.tm == res.size())
-            break;
+        // FIXME: info.tm should == res.size only if parameter count == 0
+        //        if count != 0 it should be res.size() == count
+/*        if (pltBrowseData->info.tm && pltBrowseData->info.tm == res.m_result.size())
+            break;*/
         // ask for the next chunk of entries
-        index = res.size();
+//         index = res.m_result.size();
         // TODO: put the last if clause into the while loop condition
-    } while(1);
+//        } while(1);
     
+    res.m_numberReturned = pltBrowseData->info.nr;
+    res.m_totalMatches = pltBrowseData->info.tm;
+    res.m_updateId = pltBrowseData->info.uid;
     return res;
 }
 
@@ -116,8 +124,10 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
 UpnpObject::UpnpObject()
 : m_server(NULL),
 m_objectId(""),
-m_parent(NULL)
-// m_fetchedChildren(false)
+m_parent(NULL),
+m_children(vector<UpnpObject*>()),
+m_fetchedChildren(false),
+m_pltObject(NULL)
 {
 }
 
@@ -158,12 +168,14 @@ UpnpObject::fetchChildren()
         return;
     }
     if (m_server) {
-        vector<UpnpObject*> res = m_server->browseChildren(this, m_children.size(), UpnpServer::m_sliceSize);
+        UpnpBrowseResult res = m_server->browseChildren(this, m_children.size(), UpnpServer::m_sliceSize);
         // append the list of browsed objects to our children list.
-        m_children.insert(m_children.end(), res.begin(), res.end());
-/*        if (fetchedAllChildren()) {
+        m_children.insert(m_children.end(), res.m_result.begin(), res.m_result.end());
+        // m_totalMatches is the number of items in the browse result, that matches
+        // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
+        if (m_children.size() >= res.m_totalMatches) {
             m_fetchedChildren = true;
-        }*/
+        }
     }
 }
 
@@ -171,7 +183,21 @@ UpnpObject::fetchChildren()
 bool
 UpnpObject::fetchedAllChildren()
 {
-    qDebug() << "UpnpObject::fetchedAllChildren()";
-    return (m_parent == NULL) || (!m_pltObject->IsContainer()) ||
-        (static_cast<PLT_MediaContainer*>(m_pltObject)->m_ChildrenCount <= (NPT_Int32)m_children.size());
+    return m_fetchedChildren;
+    /*
+    qDebug() << "UpnpObject::fetchedAllChildren() begin";
+    // this is m_root, children are server that are added by 
+    // UpnpBrowserModel::serverAddedRemoved(), so nothing to browse here
+    if (m_parent == NULL) return true;
+    // this is a root of a device, objectId == "0" and m_pltObject == NULL
+    if (m_objectId == "0") ;
+    bool b = IsContainer();
+    if (!b) return true;
+    int s = m_children.size();
+    NPT_Int32 c = ((PLT_MediaContainer*)m_pltObject)->m_ChildrenCount;
+    bool res = (c <= (NPT_Int32)s);
+    qDebug() << "UpnpObject::fetchedAllChildren() end";
+    return res;
+    //    (static_cast<PLT_MediaContainer*>(m_pltObject)->m_ChildrenCount <= (NPT_Int32)m_children.size());
+*/
 }

@@ -6,7 +6,8 @@ PROJECT(jamm)
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 #add definitions, compiler switches, etc.
-ADD_DEFINITIONS(-Wall -O2 -D__DEBUG__ -pipe -W)
+#ADD_DEFINITIONS(-Wall -O2 -D__DEBUG__ -pipe -W)
+ADD_DEFINITIONS(-Wall -D__DEBUG__ -pipe -W -g)
 # ADD_DEFINITIONS(-Wall -D__DEBUG__)
 
 INCLUDE_DIRECTORIES(

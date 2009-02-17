@@ -41,12 +41,24 @@ public:
 };
 
 
+class UpnpBrowseResult
+{
+public:
+    UpnpBrowseResult() 
+    : m_result(vector<UpnpObject*>()), m_numberReturned(0), m_totalMatches(0), m_updateId(0) {}
+    
+    vector<UpnpObject*> m_result;
+    unsigned int        m_numberReturned;
+    unsigned int        m_totalMatches;
+    unsigned int        m_updateId;
+};
+
+
 class UpnpServer : public UpnpDevice
 {
 public:
     UpnpServer();
-    // TODO: return reference or pointer to vector to avoid calling vector's copy constructor
-    vector<UpnpObject*> browseChildren(UpnpObject* object, int index = 0, int count = 0, string filter = "*", string sort = "");
+    UpnpBrowseResult browseChildren(UpnpObject* object, int index = 0, int count = 0, string filter = "*", string sort = "");
     static const int m_sliceSize = 10;
     
 // private:
@@ -68,7 +80,7 @@ public:
     string              m_objectId;
     UpnpObject*         m_parent;
     vector<UpnpObject*> m_children;
-//     bool                m_fetchedChildren;
+    bool                m_fetchedChildren;
     
 // private:
     PLT_MediaObject*    m_pltObject;
