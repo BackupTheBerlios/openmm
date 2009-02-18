@@ -27,6 +27,8 @@
 
 #include "upnpsyncmediabrowser.h"
 
+// TODO: check out uniformRowHeights() for speed boost
+
 class UpnpBrowserModel : public QAbstractItemModel
 {
     Q_OBJECT

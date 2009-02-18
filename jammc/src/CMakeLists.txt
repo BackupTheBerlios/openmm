@@ -26,7 +26,7 @@ controllergui.h
 modeltest.h
 upnpbrowsermodel.h
 upnprendererlistmodel.h
-upnpsyncmediabrowser.h
+# upnpsyncmediabrowser.h
 upnpcontroller.h
 )
 

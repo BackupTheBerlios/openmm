@@ -56,7 +56,7 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
     // TODO: send out a singal when starting browsing and one when finished
     //       so that ControlerGui can inform the user that browsing activity
     //       takes place.
-    // FIXME: should the server reply in with one answer? is do-while-loop necessary?
+    // FIXME: shouldn't the server reply with only one answer? Is do-while-loop necessary?
 //     do {	
         PLT_BrowseDataReference pltBrowseData(new PLT_BrowseData());
         pltBrowseData->shared_var.SetValue(0);
@@ -126,7 +126,8 @@ UpnpObject::UpnpObject()
 m_objectId(""),
 m_parent(NULL),
 m_children(vector<UpnpObject*>()),
-m_fetchedChildren(false),
+m_fetchedAllChildren(false),
+m_childCount(0),
 m_pltObject(NULL)
 {
 }
@@ -160,30 +161,30 @@ UpnpObject::getTitle()
 }
 
 
-void
+int
 UpnpObject::fetchChildren()
 {
     qDebug() << "UpnpObject::fetchChildren() objectId:" << m_objectId.c_str();
-    if (fetchedAllChildren()) {
-        return;
-    }
-    if (m_server) {
+    if (m_server && !m_fetchedAllChildren) {
         UpnpBrowseResult res = m_server->browseChildren(this, m_children.size(), UpnpServer::m_sliceSize);
         // append the list of browsed objects to our children list.
         m_children.insert(m_children.end(), res.m_result.begin(), res.m_result.end());
         // m_totalMatches is the number of items in the browse result, that matches
         // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
         if (m_children.size() >= res.m_totalMatches) {
-            m_fetchedChildren = true;
+            m_fetchedAllChildren = true;
         }
+        m_childCount = res.m_totalMatches;
     }
+    return m_childCount;
 }
 
 
-bool
+/*bool
 UpnpObject::fetchedAllChildren()
-{
-    return m_fetchedChildren;
+{*/
+//     return m_fetchedChildren;
+//     return m_children.size() >= m_childCount;
     /*
     qDebug() << "UpnpObject::fetchedAllChildren() begin";
     // this is m_root, children are server that are added by 
@@ -200,4 +201,4 @@ UpnpObject::fetchedAllChildren()
     return res;
     //    (static_cast<PLT_MediaContainer*>(m_pltObject)->m_ChildrenCount <= (NPT_Int32)m_children.size());
 */
-}
+// }

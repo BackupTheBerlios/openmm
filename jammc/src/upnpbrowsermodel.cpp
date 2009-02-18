@@ -25,7 +25,7 @@ UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
     m_root = new UpnpObject();
-    m_root->m_fetchedChildren = true;
+//     m_root->m_fetchedChildren = true;
 }
 
 
@@ -39,12 +39,12 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
     UpnpObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
-    // FIXME: double click bug is fixed by a fetchChildren() here, but browsing is really slooow ...
-    //        -> implement lazy fetching, so rowCount() is > 0 before expanding an index
-    //        and it won't be empty when expanding for the first time
-    object->fetchChildren();
-    return object->m_children.size();
-
+    // model/view rule: never lie about rowCount -> first browse and determine the real number of children
+    // TODO: see source of QDirModel and setLazyChildCount() for more information
+    if (object == m_root) {
+        return object->m_children.size();
+    }
+    return object->fetchChildren();
 }
 
 
@@ -75,7 +75,7 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
     if (object == m_root && m_root->m_children.size() == 0) {
         return false;
     }
-    return (!object->fetchedAllChildren());
+    return (!object->m_fetchedAllChildren);
 }
 
 
@@ -84,9 +84,6 @@ UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
     UpnpObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
-/*    if (object->fetchedAllChildren()) {
-        return;
-    }*/
     object->fetchChildren();
     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
 }
@@ -106,7 +103,6 @@ UpnpBrowserModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
     UpnpObject* object = getObject(index);
-//     qDebug() << "UpnpBrowserModel::data() objectId reference:" << object;
     return m_charEncoding->toUnicode(object->getTitle().c_str());
 }
 
@@ -130,7 +126,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
     row = find(grandp->m_children.begin(), grandp->m_children.end(), object->m_parent);
     if (row != grandp->m_children.end()) {
         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->m_children.begin());
-        return createIndex(row - grandp->m_children.begin(), 0, object->m_parent);
+        return createIndex(row - grandp->m_children.begin(), 0, (void*)(object->m_parent));
     }
 
     return QModelIndex();
@@ -140,12 +136,17 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 QModelIndex
 UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
 {
-    // TODO: why is that needed?
+    // TODO: why is that needed? Without this, it fetches children only once when expanding an index.
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
     UpnpObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->m_objectId.c_str() << "row:" << row;
+    // if we can't deliver an index, because m_children.size()-1 < row
+    // then fetchMore() is triggered -> return QModelIndex()
+    if (row > int(object->m_children.size()) - 1) {
+        return QModelIndex();
+    }
     return createIndex(row, 0, (void*)(object->m_children[row]));
 }
 

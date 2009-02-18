@@ -73,14 +73,16 @@ public:
 
     bool isContainer();
     string getTitle();
-    void fetchChildren();
-    bool fetchedAllChildren();
+    // fetchChildren() returns the number of children
+    int fetchChildren();
+//     bool fetchedAllChildren() { return m_children.size() >= m_childCount; }
 
     UpnpServer*         m_server;
     string              m_objectId;
     UpnpObject*         m_parent;
     vector<UpnpObject*> m_children;
-    bool                m_fetchedChildren;
+    bool                m_fetchedAllChildren;
+    unsigned int        m_childCount;
     
 // private:
     PLT_MediaObject*    m_pltObject;
