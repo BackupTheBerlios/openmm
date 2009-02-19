@@ -25,7 +25,8 @@ UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
     m_root = new UpnpObject();
-//     m_root->m_fetchedChildren = true;
+    m_root->m_fetchedAllChildren = true;
+    m_lazyRowCount = true;
 }
 
 
@@ -41,7 +42,7 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
     // model/view rule: never lie about rowCount -> first browse and determine the real number of children
     // TODO: see source of QDirModel and setLazyChildCount() for more information
-    if (object == m_root) {
+    if (!parent.isValid() || m_lazyRowCount) {
         return object->m_children.size();
     }
     return object->fetchChildren();
@@ -72,9 +73,9 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
     UpnpObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->m_objectId.c_str();
-    if (object == m_root && m_root->m_children.size() == 0) {
+/*    if (object == m_root && m_root->m_children.size() == 0) {
         return false;
-    }
+    }*/
     return (!object->m_fetchedAllChildren);
 }
 

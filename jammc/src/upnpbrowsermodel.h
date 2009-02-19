@@ -59,6 +59,7 @@ public slots:
     
 private:
     UpnpObject*           m_root;
+    bool                  m_lazyRowCount;
     QTextCodec*           m_charEncoding;
 };
 
