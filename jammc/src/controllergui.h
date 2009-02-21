@@ -23,7 +23,7 @@
 
 #include <QtGui>
 
-class ControllerGui : public QTabWidget
+class ControllerGui : public QFrame
 {
     Q_OBJECT
 
@@ -34,7 +34,7 @@ public:
     void setRendererListItemModel(QAbstractItemModel* model);
     void expand();
     
-    QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserTreeView->selectionModel(); }
+    QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserView->selectionModel(); }
     QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
     
 signals:
@@ -52,6 +52,9 @@ public slots:
     void setVolumeSlider(int max, int val);
     
 private slots:
+    void browserItemActivated(const QModelIndex& index);
+    void browserRootButtonPressed();
+//     void onExpanded(const QModelIndex& index);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
         once moved and some time later (a new track is loaded), the range

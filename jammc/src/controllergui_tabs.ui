@@ -1,6 +1,6 @@
 <ui version="4.0" >
  <class>ControllerGui</class>
- <widget class="QFrame" name="ControllerGui" >
+ <widget class="QTabWidget" name="ControllerGui" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,121 +10,97 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Frame</string>
+   <string>TabWidget</string>
   </property>
-  <property name="frameShape" >
-   <enum>QFrame::StyledPanel</enum>
+  <property name="tabPosition" >
+   <enum>QTabWidget::West</enum>
   </property>
-  <property name="frameShadow" >
-   <enum>QFrame::Raised</enum>
+  <property name="currentIndex" >
+   <number>0</number>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" >
-   <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-       <horstretch>2</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="tabPosition" >
-      <enum>QTabWidget::West</enum>
-     </property>
-     <property name="currentIndex" >
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="m_browserTab" >
-      <attribute name="title" >
-       <string>Browser</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
+  <widget class="QWidget" name="m_controllerTab" >
+   <attribute name="title" >
+    <string>Browser</string>
+   </attribute>
+   <layout class="QHBoxLayout" name="horizontalLayout_6" >
+    <item>
+     <widget class="QWidget" native="1" name="m_browser" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7" >
        <item>
-        <widget class="QWidget" native="1" name="m_browser" >
+        <widget class="QWidget" native="1" name="m_breadCrump" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-           <horstretch>1</horstretch>
+           <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7" >
+         <layout class="QHBoxLayout" name="horizontalLayout_2" >
           <item>
-           <widget class="QWidget" native="1" name="m_breadCrump" >
+           <widget class="QPushButton" name="m_browserRootButton" >
             <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2" >
-             <item>
-              <widget class="QPushButton" name="m_browserRootButton" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>servers</string>
-               </property>
-               <property name="flat" >
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_2" >
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0" >
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
+            <property name="text" >
+             <string>servers</string>
+            </property>
+            <property name="flat" >
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
           <item>
-           <widget class="QTableView" name="m_browserView" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-              <horstretch>2</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <spacer name="horizontalSpacer_2" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QTableView" name="m_browserView" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="m_rendererTab" >
-      <attribute name="title" >
-       <string>Renderer</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="m_settingsTab" >
-      <attribute name="title" >
-       <string>Settings</string>
-      </attribute>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDockWidget" name="dockWidget" >
-     <property name="floating" >
-      <bool>false</bool>
-     </property>
-     <property name="features" >
-      <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-     </property>
-     <widget class="QWidget" name="dockWidgetContents" >
-      <layout class="QVBoxLayout" name="verticalLayout" >
+    </item>
+    <item>
+     <widget class="QFrame" name="m_controllerGroup" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4" >
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4" >
          <item>
@@ -298,9 +274,6 @@
        </item>
        <item>
         <widget class="QListView" name="m_rendererListView" >
-         <property name="enabled" >
-          <bool>true</bool>
-         </property>
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
            <horstretch>0</horstretch>
@@ -314,9 +287,21 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-  </layout>
+    </item>
+   </layout>
+   <zorder>m_controllerGroup</zorder>
+   <zorder>m_browser</zorder>
+  </widget>
+  <widget class="QWidget" name="m_renderControlTab" >
+   <attribute name="title" >
+    <string>RenderControl</string>
+   </attribute>
+  </widget>
+  <widget class="QWidget" name="m_settingsTab" >
+   <attribute name="title" >
+    <string>Settings</string>
+   </attribute>
+  </widget>
  </widget>
  <resources/>
  <connections/>

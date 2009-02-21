@@ -21,7 +21,7 @@
 #include "controllergui.h"
 
 ControllerGui::ControllerGui(QWidget *parent)
-: QTabWidget(parent),
+: QFrame(parent),
 m_sliderMoved(false)
 {
     ui.setupUi(this);
@@ -61,10 +61,12 @@ m_sliderMoved(false)
     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
     
-    connect(ui.m_browserTreeView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
-    connect(ui.m_browserTreeView, SIGNAL(expanded(const QModelIndex&)), SIGNAL(expanded(const QModelIndex&)));
+    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
+    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
+    connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
+//     connect(ui.m_browserTreeView, SIGNAL(expanded(const QModelIndex&)), SIGNAL(expanded(const QModelIndex&)));
     
-    ui.m_browserListView->hide();
+//     ui.m_browserListView->hide();
     setWindowTitle("JammC");
 }
 
@@ -91,15 +93,46 @@ ControllerGui::setSliderMoved(int)
 void
 ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
 {
-    ui.m_browserTreeView->setModel(model);
+    ui.m_browserView->setModel(model);
 }
 
 
 void
 ControllerGui::expand()
 {
-    ui.m_browserTreeView->expandToDepth(1);
+//     ui.m_browserTreeView->expandToDepth(1);
 }
+
+
+void
+ControllerGui::browserItemActivated(const QModelIndex& index)
+{
+    qDebug() << "ControllerGui::onActivated";
+    ui.m_browserView->setRootIndex(index);
+}
+
+
+void
+ControllerGui::browserRootButtonPressed()
+{
+    qDebug() << "ControllerGui::browserRootButtonPressed";
+    ui.m_browserView->setRootIndex(QModelIndex());
+}
+
+
+// void
+// ControllerGui::onExpanded(const QModelIndex& index)
+// {
+//     qDebug() << "ControllerGui::onExpanded";
+//     const QAbstractItemModel* m = index.model();
+//     if (m->canFetchMore(index)) {
+//          index.model->fetchMore(index);
+//     }
+//     QModelIndex lastChild = index.child(m->rowCount(index)-1, 0);
+//     QWidget* w = ui.m_browserTreeView->indexWidget(lastChild);
+//     ui.m_browserTreeView->update(lastChild);
+//     
+// }
 
 
 void

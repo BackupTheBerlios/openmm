@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>ControllerGui</class>
- <widget class="QFrame" name="ControllerGui" >
+ <class>Frame</class>
+ <widget class="QFrame" name="Frame" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -298,9 +298,6 @@
        </item>
        <item>
         <widget class="QListView" name="m_rendererListView" >
-         <property name="enabled" >
-          <bool>true</bool>
-         </property>
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
            <horstretch>0</horstretch>

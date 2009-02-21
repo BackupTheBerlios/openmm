@@ -115,7 +115,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
         return QModelIndex();
 
     UpnpObject* object = getObject(index);
-    qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->m_objectId.c_str();
+//     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->m_objectId.c_str();
     if (!object->m_parent || object->m_parent == m_root) {
         return QModelIndex();
     }
@@ -126,7 +126,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
     vector<UpnpObject*>::iterator row;
     row = find(grandp->m_children.begin(), grandp->m_children.end(), object->m_parent);
     if (row != grandp->m_children.end()) {
-        qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->m_children.begin());
+//         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->m_children.begin());
         return createIndex(row - grandp->m_children.begin(), 0, (void*)(object->m_parent));
     }
 
@@ -142,7 +142,7 @@ UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
         return QModelIndex();
     }
     UpnpObject* object = getObject(parent);
-    qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->m_objectId.c_str() << "row:" << row;
+//     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->m_objectId.c_str() << "row:" << row;
     // if we can't deliver an index, because m_children.size()-1 < row
     // then fetchMore() is triggered -> return QModelIndex()
     if (row > int(object->m_children.size()) - 1) {
