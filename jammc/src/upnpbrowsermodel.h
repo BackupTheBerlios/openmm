@@ -24,10 +24,10 @@
 #include <QVariant>
 #include <QList>
 #include <QTextCodec>
+#include <QFileIconProvider>
 
 #include "upnpsyncmediabrowser.h"
 
-// TODO: check out uniformRowHeights() for speed boost
 
 class UpnpBrowserModel : public QAbstractItemModel
 {
@@ -53,14 +53,16 @@ public:
     UpnpObject* getObject(const QModelIndex &index) const {
         return index.isValid() ? static_cast<UpnpObject*>(index.internalPointer()) : m_root;
     }
+    QIcon icon(const QModelIndex &index) const;
     
 public slots:
     void serverAddedRemoved(UpnpServer* server, bool add);
     
 private:
     UpnpObject*           m_root;
-    bool                  m_lazyRowCount;
+//     bool                  m_lazyRowCount;
     QTextCodec*           m_charEncoding;
+    QFileIconProvider*    m_iconProvider;
 };
 
 #endif // UPNPBROWSERMODEL_H

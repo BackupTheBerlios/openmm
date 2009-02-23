@@ -20,7 +20,88 @@
 
 #include "controllergui.h"
 
-ControllerGui::ControllerGui(QWidget *parent)
+CrumbButton* CrumbButton::m_lastCrumbButton;
+
+CrumbButton::CrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent)
+:
+QWidget(parent),
+m_parentLayout(parent->layout()),
+m_browserView(browserView),
+m_index(index),
+m_child(NULL)
+{
+    QString label;
+    if (index == QModelIndex()) {
+        label = "Servers";
+    }
+    else {
+        label = index.data(Qt::DisplayRole).toString();
+    }
+    
+    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+//     sizePolicy.setHorizontalStretch(0);
+//     sizePolicy.setVerticalStretch(0);
+//     sizePolicy.setHeightForWidth(m_browserRootButton->sizePolicy().hasHeightForWidth());
+    
+    m_boxLayout = new QHBoxLayout(this);
+    m_boxLayout->setSpacing(0);
+    m_boxLayout->setMargin(0);
+    m_boxLayout->setContentsMargins(0, 0, 0, 0);
+    m_button = new QPushButton(label, this);
+    m_boxLayout->addWidget(m_button);
+//     m_button->setSizePolicy(sizePolicy);
+    m_button->setFlat(true);
+    m_button->setCheckable(false);
+    m_button->setAutoDefault(false);
+    
+    if (m_lastCrumbButton) {
+        m_lastCrumbButton->setChild(this);
+    }
+    m_lastCrumbButton = this;
+    if (m_parentLayout) {
+        m_parentLayout->addWidget(this);
+    }
+    connect(m_button, SIGNAL(pressed()), this, SLOT(buttonPressed()));
+    m_browserView->setRootIndex(index);
+    show();
+}
+
+
+void
+CrumbButton::buttonPressed()
+{
+    m_browserView->setRootIndex(m_index);
+    if (m_child) {
+        m_browserView->scrollTo(m_child->m_index, QAbstractItemView::PositionAtTop);
+        m_browserView->setCurrentIndex(m_child->m_index);
+    }
+    m_lastCrumbButton = this;
+    deleteChildren();
+}
+
+
+void
+CrumbButton::deleteChildren()
+{
+    if (m_child) {
+        m_child->deleteChildren();
+        m_child->hide();
+        if (m_parentLayout) {
+            m_parentLayout->removeWidget(m_child);
+        }
+        delete m_child;
+        m_child = NULL;
+    }
+}
+
+
+CrumbButton::~CrumbButton()
+{
+    delete m_button;
+}
+
+
+ControllerGui::ControllerGui(QWidget* parent)
 : QFrame(parent),
 m_sliderMoved(false)
 {
@@ -50,9 +131,6 @@ m_sliderMoved(false)
     m_buttonGroup->addButton(ui.m_seekForwardButton);
     m_buttonGroup->addButton(ui.m_seekBackwardButton);*/
     
-/*    connect(&m_controller, SIGNAL(rendererAddedRemoved(QString, QString, bool)),
-            this, SLOT(rendererAddedRemoved(QString, QString, bool)));*/
-    
     // Forward some signals from GUI Elements
     connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
     connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
@@ -63,10 +141,14 @@ m_sliderMoved(false)
     
     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
-    connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
-//     connect(ui.m_browserTreeView, SIGNAL(expanded(const QModelIndex&)), SIGNAL(expanded(const QModelIndex&)));
+//     connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
     
-//     ui.m_browserListView->hide();
+    ui.m_browserView->setUniformRowHeights(true);
+    
+    ui.m_breadCrumpLayout->setAlignment(Qt::AlignLeft);
+    ui.m_breadCrumpLayout->setSpacing(0);
+    new CrumbButton(ui.m_browserView, QModelIndex(), ui.m_breadCrump);
+    
     setWindowTitle("JammC");
 }
 
@@ -98,41 +180,13 @@ ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
 
 
 void
-ControllerGui::expand()
-{
-//     ui.m_browserTreeView->expandToDepth(1);
-}
-
-
-void
 ControllerGui::browserItemActivated(const QModelIndex& index)
 {
     qDebug() << "ControllerGui::onActivated";
-    ui.m_browserView->setRootIndex(index);
+    if (index.model()->hasChildren(index)) {
+        new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
+    }
 }
-
-
-void
-ControllerGui::browserRootButtonPressed()
-{
-    qDebug() << "ControllerGui::browserRootButtonPressed";
-    ui.m_browserView->setRootIndex(QModelIndex());
-}
-
-
-// void
-// ControllerGui::onExpanded(const QModelIndex& index)
-// {
-//     qDebug() << "ControllerGui::onExpanded";
-//     const QAbstractItemModel* m = index.model();
-//     if (m->canFetchMore(index)) {
-//          index.model->fetchMore(index);
-//     }
-//     QModelIndex lastChild = index.child(m->rowCount(index)-1, 0);
-//     QWidget* w = ui.m_browserTreeView->indexWidget(lastChild);
-//     ui.m_browserTreeView->update(lastChild);
-//     
-// }
 
 
 void

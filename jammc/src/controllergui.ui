@@ -39,6 +39,21 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2" >
        <item>
+        <widget class="QWidget" native="1" name="m_breadCrump" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QHBoxLayout" name="m_breadCrumpLayout" >
+          <property name="bottomMargin" >
+           <number>0</number>
+          </property>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QWidget" native="1" name="m_browser" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
@@ -48,53 +63,21 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7" >
           <item>
-           <widget class="QWidget" native="1" name="m_breadCrump" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2" >
-             <item>
-              <widget class="QPushButton" name="m_browserRootButton" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>servers</string>
-               </property>
-               <property name="flat" >
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_2" >
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0" >
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTableView" name="m_browserView" >
+           <widget class="QTreeView" name="m_browserView" >
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
               <horstretch>2</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="alternatingRowColors" >
+             <bool>true</bool>
+            </property>
+            <property name="rootIsDecorated" >
+             <bool>false</bool>
+            </property>
+            <property name="itemsExpandable" >
+             <bool>false</bool>
             </property>
            </widget>
           </item>

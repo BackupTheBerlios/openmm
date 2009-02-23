@@ -52,67 +52,54 @@ UpnpServer::browseChildren(UpnpObject* object, int index, int count, string filt
         return res;
     }
     
-    qDebug() << "UpnpServer::browseChildren() send browse packet";
+//     qDebug() << "UpnpServer::browseChildren() send browse packet";
     // TODO: send out a singal when starting browsing and one when finished
     //       so that ControlerGui can inform the user that browsing activity
     //       takes place.
-    // FIXME: shouldn't the server reply with only one answer? Is do-while-loop necessary?
-//     do {	
-        PLT_BrowseDataReference pltBrowseData(new PLT_BrowseData());
-        pltBrowseData->shared_var.SetValue(0);
-        // send off the browse packet.  Note that this will
-        // not block.  There is a call to WaitForResponse in order
-        // to block until the response comes back.
-        NPT_Result nptRes = m_pltBrowser->Browse(m_pltDevice,
-                                                 object->m_objectId.c_str(),
-                                                 NPT_UInt32(index),
-                                                 NPT_UInt32(count),
-                                                 false,
-                                                 filter.c_str(),
-                                                 sort.c_str(),
-                                                 new PLT_BrowseDataReference(pltBrowseData));
-        pltBrowseData->shared_var.WaitUntilEquals(1, 30000);
-        if (NPT_FAILED(nptRes)) {
-            qWarning() << "UpnpServer::browseChildren() **FAILED**, parent objectId:" << object->m_objectId.c_str();
-//             break;
-            return res;
-        }
-        if (NPT_FAILED(pltBrowseData->res)) {
-            qWarning() << "UpnpServer::browseChildren() **FAILED** to browse_data, parent objectId:" << object->m_objectId.c_str();
-            return res;
-        }
-        if (pltBrowseData->info.items->GetItemCount() == 0) {
-            qWarning() << "UpnpServer::browseChildren() **FAILED**, no objects found, parent objectId:" << object->m_objectId.c_str();
-//             break;
-            return res;
-        }
-        
-        qDebug() << "UpnpServer::browseChildren() number of objects found:" << pltBrowseData->info.items->GetItemCount();
-        // build a vector<UpnpObject*> out of pltBrowseData->info.items
-        // info.items is of type PLT_MediaObjectListReference
-        NPT_List<PLT_MediaObject*>::Iterator i = pltBrowseData->info.items->GetFirstItem();
-        while (i) {
-            UpnpObject* o = new UpnpObject();
-            o->m_objectId = string((const char*)(*i)->m_ObjectID);
-            o->m_server = object->m_server;
-            o->m_parent = object;
-            o->m_pltObject = (*i);
-            res.m_result.push_back(o);
-            ++i;
-        }
-        // clear the list items so that the data inside is not
-        // cleaned up by PLT_MediaItemList dtor since we copied
-        // each pointer into the new list.
-        pltBrowseData->info.items->Clear();
-        // stop now if our list contains exactly what the server said it had
-        // FIXME: info.tm should == res.size only if parameter count == 0
-        //        if count != 0 it should be res.size() == count
-/*        if (pltBrowseData->info.tm && pltBrowseData->info.tm == res.m_result.size())
-            break;*/
-        // ask for the next chunk of entries
-//         index = res.m_result.size();
-        // TODO: put the last if clause into the while loop condition
-//        } while(1);
+    PLT_BrowseDataReference pltBrowseData(new PLT_BrowseData());
+    pltBrowseData->shared_var.SetValue(0);
+    // send off the browse packet.  Note that this will
+    // not block.  There is a call to WaitForResponse in order
+    // to block until the response comes back.
+    NPT_Result nptRes = m_pltBrowser->Browse(m_pltDevice,
+                                            object->m_objectId.c_str(),
+                                            NPT_UInt32(index),
+                                            NPT_UInt32(count),
+                                            false,
+                                            filter.c_str(),
+                                            sort.c_str(),
+                                            new PLT_BrowseDataReference(pltBrowseData));
+    pltBrowseData->shared_var.WaitUntilEquals(1, 30000);
+    if (NPT_FAILED(nptRes)) {
+    qWarning() << "UpnpServer::browseChildren() **FAILED**, parent objectId:" << object->m_objectId.c_str();
+        return res;
+    }
+    if (NPT_FAILED(pltBrowseData->res)) {
+        qWarning() << "UpnpServer::browseChildren() **FAILED** to browse_data, parent objectId:" << object->m_objectId.c_str();
+        return res;
+    }
+    if (pltBrowseData->info.items->GetItemCount() == 0) {
+        qWarning() << "UpnpServer::browseChildren() **FAILED**, no objects found, parent objectId:" << object->m_objectId.c_str();
+        return res;
+    }
+    
+    qDebug() << "UpnpServer::browseChildren() number of objects found:" << pltBrowseData->info.items->GetItemCount();
+    // build a vector<UpnpObject*> out of pltBrowseData->info.items
+    // info.items is of type PLT_MediaObjectListReference
+    NPT_List<PLT_MediaObject*>::Iterator i = pltBrowseData->info.items->GetFirstItem();
+    while (i) {
+        UpnpObject* o = new UpnpObject();
+        o->m_objectId = string((const char*)(*i)->m_ObjectID);
+        o->m_server = object->m_server;
+        o->m_parent = object;
+        o->m_pltObject = (*i);
+        res.m_result.push_back(o);
+        ++i;
+    }
+    // clear the list items so that the data inside is not
+    // cleaned up by PLT_MediaItemList dtor since we copied
+    // each pointer into the new list.
+    pltBrowseData->info.items->Clear();
     
     res.m_numberReturned = pltBrowseData->info.nr;
     res.m_totalMatches = pltBrowseData->info.tm;
@@ -136,13 +123,13 @@ m_pltObject(NULL)
 bool
 UpnpObject::isContainer()
 {
-    qDebug() << "UpnpObject::isContainer() objectId:" << m_objectId.c_str();
+//     qDebug() << "UpnpObject::isContainer() objectId:" << m_objectId.c_str();
     if (m_objectId == "0") {
-        qDebug() << "UpnpObject::isContainer() return: true";
+//         qDebug() << "UpnpObject::isContainer() return: true";
         return true;
     }
     else {
-        qDebug() << "UpnpObject::isContainer() return:" << (m_pltObject->IsContainer() ? "true" : "false");
+//         qDebug() << "UpnpObject::isContainer() return:" << (m_pltObject->IsContainer() ? "true" : "false");
         return m_pltObject->IsContainer();
     }
 }
@@ -151,7 +138,7 @@ UpnpObject::isContainer()
 string
 UpnpObject::getTitle()
 {
-    qDebug() << "UpnpObject::getTitle() objectId:" << m_objectId.c_str();
+//     qDebug() << "UpnpObject::getTitle() objectId:" << m_objectId.c_str();
     if (m_objectId == "0") {
         return m_server->getFriendlyName();
     }

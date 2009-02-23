@@ -23,6 +23,34 @@
 
 #include <QtGui>
 
+
+class CrumbButton : public QWidget
+{
+    Q_OBJECT
+
+public:
+    CrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0);
+    ~CrumbButton();
+    
+    void setChild(CrumbButton* child) { m_child = child; }
+    
+    static CrumbButton* m_lastCrumbButton;
+    
+private slots:
+    void buttonPressed();
+    
+private:
+    void deleteChildren();
+    
+    QLayout*           m_parentLayout;
+    QHBoxLayout*       m_boxLayout;
+    QPushButton*       m_button;
+    QAbstractItemView* m_browserView;
+    const QModelIndex  m_index;
+    CrumbButton*       m_child;
+};
+
+
 class ControllerGui : public QFrame
 {
     Q_OBJECT
@@ -32,7 +60,6 @@ public:
     
     void setBrowserTreeItemModel(QAbstractItemModel* model);
     void setRendererListItemModel(QAbstractItemModel* model);
-    void expand();
     
     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserView->selectionModel(); }
     QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
@@ -45,7 +72,6 @@ signals:
     void volSliderMoved(int);
     
     void activated(const QModelIndex& index);
-    void expanded(const QModelIndex& index);
     
 public slots:
     void setSlider(int max, int val);
@@ -53,8 +79,6 @@ public slots:
     
 private slots:
     void browserItemActivated(const QModelIndex& index);
-    void browserRootButtonPressed();
-//     void onExpanded(const QModelIndex& index);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
         once moved and some time later (a new track is loaded), the range

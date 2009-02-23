@@ -75,7 +75,6 @@ public:
     string getTitle();
     // fetchChildren() returns the number of children
     int fetchChildren();
-//     bool fetchedAllChildren() { return m_children.size() >= m_childCount; }
 
     UpnpServer*         m_server;
     string              m_objectId;

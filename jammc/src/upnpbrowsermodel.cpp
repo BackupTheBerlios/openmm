@@ -26,7 +26,7 @@ UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
     m_charEncoding = QTextCodec::codecForName("UTF-8");
     m_root = new UpnpObject();
     m_root->m_fetchedAllChildren = true;
-    m_lazyRowCount = true;
+    m_iconProvider = new QFileIconProvider();
 }
 
 
@@ -39,13 +39,8 @@ int
 UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
     UpnpObject* object = getObject(parent);
-    qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
-    // model/view rule: never lie about rowCount -> first browse and determine the real number of children
-    // TODO: see source of QDirModel and setLazyChildCount() for more information
-    if (!parent.isValid() || m_lazyRowCount) {
-        return object->m_children.size();
-    }
-    return object->fetchChildren();
+//     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
+    return object->m_children.size();
 }
 
 
@@ -60,7 +55,7 @@ bool
 UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 {
     UpnpObject* object = getObject(parent);
-    qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->m_objectId.c_str();
+//     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->m_objectId.c_str();
     if (!parent.isValid()) {
         return (object->m_children.size() > 0);
     }
@@ -73,9 +68,6 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
     UpnpObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->m_objectId.c_str();
-/*    if (object == m_root && m_root->m_children.size() == 0) {
-        return false;
-    }*/
     return (!object->m_fetchedAllChildren);
 }
 
@@ -84,9 +76,10 @@ void
 UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
     UpnpObject* object = getObject(parent);
-    qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
+//     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
     object->fetchChildren();
     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
+    emit layoutChanged();
 }
 
 
@@ -100,11 +93,33 @@ UpnpBrowserModel::data(const QModelIndex &index, int role) const
         qWarning() << "UpnpBrowserModel::data() objectId reference is NULL:";
         return QVariant();
     }
-    if (role != Qt::DisplayRole) {
+/*    if (role != Qt::DisplayRole) {
         return QVariant();
-    }
+    }*/
     UpnpObject* object = getObject(index);
-    return m_charEncoding->toUnicode(object->getTitle().c_str());
+//     return m_charEncoding->toUnicode(object->getTitle().c_str());
+    
+    switch (role) {
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+        switch (index.column()) {
+        case 0: return m_charEncoding->toUnicode(object->getTitle().c_str());
+        case 1: return QString("1:00");
+//         case 2: return type(index);
+//         case 3: return time(index);
+        }
+        break;
+    case Qt::DecorationRole:
+        if (index.column() == 0)
+            return icon(index);
+        break;
+    case Qt::TextAlignmentRole:
+        if (index.column() == 1)
+            return Qt::AlignRight;
+        break;
+    }
+    
+    return QVariant();
 }
 
 
@@ -163,12 +178,36 @@ UpnpBrowserModel::flags(const QModelIndex &index) const
 
 
 QVariant
-UpnpBrowserModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
-                             int /*role*/) const
+UpnpBrowserModel::headerData(int section, Qt::Orientation orientation,
+                             int role) const
 {
-//     if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-//     }
-    return "";
+/*    if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+        return QVariant("Title");
+    }
+    return QVariant();
+*/
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+        switch (section) {
+            case 0: return tr("Name");
+            case 1: return tr("Length");
+            case 2: return tr("Type");
+            default : return QVariant();
+        }
+    }
+    return QAbstractItemModel::headerData(section, orientation, role);
+}
+
+
+QIcon
+UpnpBrowserModel::icon(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return QIcon();
+    UpnpObject* object = getObject(index);
+    if (object->isContainer())
+        return m_iconProvider->icon(QFileIconProvider::Folder);
+    
+    return m_iconProvider->icon(QFileIconProvider::File);
 }
 
 
