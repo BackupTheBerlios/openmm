@@ -5,6 +5,7 @@ xine
 
 SET( JAMMR_SRCS
 enginemplayer.cpp
+enginevlc.cpp
 # enginexine.cpp
 main.cpp
 upnpmediarenderer.cpp
@@ -45,6 +46,7 @@ ADD_DEFINITIONS(
 TARGET_LINK_LIBRARIES( jammr
 # ${XINE_LIBRARIES}
 # X11
+vlc
 pthread
 dl
 )

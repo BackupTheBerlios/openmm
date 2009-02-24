@@ -92,8 +92,7 @@ private:
 //       "q" stops upnp, but jammr still runs and can be interrupted with ^C
 // TODO: implement 2.2.26.CurrentTransportActions, to indicate for example seekable streams
 
-// class EngineMplayer : public Engine, NPT_Thread
-class EngineMplayer /*: public NPT_Thread*/
+class EngineMplayer : public Engine
 {
 public:
     EngineMplayer();
@@ -116,8 +115,6 @@ public:
     virtual void previous();
     virtual void getPosition(float &seconds);
     virtual void getLength(float &seconds);
-    
-    JSignal endOfTrack;
     
     /*
       Rendering Control

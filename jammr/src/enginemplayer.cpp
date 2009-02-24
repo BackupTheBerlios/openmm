@@ -132,7 +132,7 @@ MplayerThread::answer(string& ans, int timeout, string searchKey)
 
 
 EngineMplayer::EngineMplayer()
-// : Engine(),
+: Engine()
 {
     TRACE("EngineMplayer::EngineMplayer()");
     // start mplayer in idle-mode in a seperate thread

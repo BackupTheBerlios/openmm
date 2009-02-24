@@ -1,5 +1,6 @@
 #include "enginexine.h"
 #include "enginemplayer.h"
+#include "enginevlc.h"
 #include "upnpmediarenderer.h"
 
 #include <cstdio>
@@ -9,14 +10,13 @@
 #include <platinum/PltLog.h>
 
 
-int main(int /*argc*/, char **/*argv*/)
+int main(int argc, char **argv)
 {
     PLT_UPnP upnp;
     UpnpMediaRenderer *renderer;
-//     Engine *engine;
-    EngineMplayer *engine;
+    Engine *engine;
     
-    engine = new EngineMplayer();
+    engine = new EngineVlc(argc, argv);
     renderer = new UpnpMediaRenderer(engine, "Tristan JammR UPnP Media Renderer");
 
     PLT_SetLogLevel(PLT_LOG_LEVEL_MAX);

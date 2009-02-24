@@ -71,7 +71,7 @@ UpnpMediaRenderer::EndOfTrackSlot::onSignalReceived() {
 }
 
 
-UpnpMediaRenderer::UpnpMediaRenderer(EngineMplayer* engine,
+UpnpMediaRenderer::UpnpMediaRenderer(Engine* engine,
                       const char*          friendly_name,
                       bool                 show_ip,
                       const char*          uuid,

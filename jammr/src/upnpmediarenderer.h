@@ -31,7 +31,7 @@ using namespace Jamm;
 class UpnpMediaRenderer : public PLT_MediaRenderer
 {
 public:
-    UpnpMediaRenderer(EngineMplayer*              engine,
+    UpnpMediaRenderer(Engine*              engine,
                       const char*          friendly_name,
                       bool                 show_ip = false,
                       const char*          uuid = NULL,
@@ -94,7 +94,7 @@ protected:
     // TODO: lock all actions
     
 private:
-    EngineMplayer*  m_engine;
+    Engine*         m_engine;
     PLT_Service*    m_AvTransport;
     PLT_Service*    m_AvRenderingControl;
     

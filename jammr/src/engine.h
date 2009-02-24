@@ -20,6 +20,9 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <jamm/signode.h>
+using namespace Jamm;
+
 #include <string>
 using namespace std;
 
@@ -37,12 +40,18 @@ public:
     // virtual void setAudioAdapter(string) = 0;
 
     // UPnP methods
-    virtual void setUri(string uri) = 0;
-    /**
-        void play(int nom, int denom)
-        play current URI from current position at speed nom/denom
+    /*
+      AVTransport
     */
-    virtual void play(int nom, int denom) = 0;
+    
+    virtual void setUri(string uri) = 0;
+    virtual void load() = 0;
+    
+    /**
+        void setSpeed(int nom, int denom)
+        set speed to nom/denom
+    */
+    virtual void setSpeed(int nom, int denom) = 0;
     /**
         void pause()
         toggle pause
@@ -56,8 +65,19 @@ public:
     virtual void next() = 0;
     virtual void previous() = 0;
     
-    virtual void getPosition(int &seconds) = 0;
-    virtual void getLength(int &seconds) = 0;
+    virtual void getPosition(float &seconds) = 0;
+    virtual void getLength(float &seconds) = 0;
+    
+    /*
+      Rendering Control
+    */
+    virtual void setVolume(int channel, float vol) = 0;
+    virtual void getVolume(int channel, float &vol) = 0;
+    
+    /*
+      Events
+    */
+    JSignal endOfTrack;
 };
 
 #endif
