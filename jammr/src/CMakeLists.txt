@@ -45,7 +45,7 @@ ADD_DEFINITIONS(
 
 TARGET_LINK_LIBRARIES( jammr
 # ${XINE_LIBRARIES}
-# X11
+X11
 vlc
 pthread
 dl

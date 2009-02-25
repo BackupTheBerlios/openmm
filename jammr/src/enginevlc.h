@@ -21,6 +21,9 @@
 
 #include "engine.h"
 
+#ifdef __X11__
+#include <X11/Xlib.h>
+#endif
 #include <vlc/vlc.h>
 
 
@@ -50,7 +53,6 @@ public:
     virtual void seek(int seconds);
     virtual void next();
     virtual void previous();
-    
     virtual void getPosition(float &seconds);
     virtual void getLength(float &seconds);
     
@@ -63,13 +65,13 @@ public:
 private:
     void clearException();
     void handleException();
+    int openXWindow();
+    void closeXWindow();
     
     libvlc_exception_t      m_exception;
     libvlc_instance_t*      m_vlcInstance;
-    
     libvlc_media_player_t*  m_vlcPlayer;
-    
-    string             m_uri;
+    string                  m_uri;
 };
 
 
