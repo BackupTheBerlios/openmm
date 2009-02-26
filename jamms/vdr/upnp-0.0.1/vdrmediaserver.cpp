@@ -219,21 +219,33 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
 
     }
     else if (NPT_String(object_id) == m_containerLiveTv->m_ObjectID) {
-        for (cChannel *chan = Channels.First(); chan; chan = Channels.Next(chan)) {
-            if (!chan) break;
+        for (cChannel *chan = Channels.GetByNumber(start_index, 1); chan; chan = Channels.Next(chan)) {
+            if (!chan) {
+                break;
+            }
+            NPT_LOG_INFO(NPT_String(chan->Name()));
             // TODO: need to convert it to string or is there something like a NULL-ChannelID?
-            if (chan->GetChannelID().ToString() == "0-0-0-0") break;
+            if (chan->GetChannelID().ToString() == "0-0-0-0") continue;
             didl += channelToDidl(filter, chan);
             numberReturned++;
-            totalMatches++;
+            totalMatches = Channels.MaxNumber();
+            NPT_LOG_INFO_1("totalMatches = %i", totalMatches);
+            if (numberReturned >= req_count) {
+                break;
+            }
         }
     }
     else if (NPT_String(object_id) == m_containerRecordings->m_ObjectID) {
-        for (cRecording *rec = Recordings.First(); rec; rec = Recordings.Next(rec)) {
-            if (!rec) break;
+        for (cRecording *rec = Recordings.Get(start_index); rec; rec = Recordings.Next(rec)) {
+            if (!rec) {
+                break;
+            }
             didl += recToDidl(filter, rec);
             numberReturned++;
-            totalMatches++;
+            totalMatches = Recordings.Count();
+            if (numberReturned >= req_count) {
+                break;
+            }
         }
     }
     else {
