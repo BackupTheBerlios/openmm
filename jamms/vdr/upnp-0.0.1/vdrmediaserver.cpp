@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Jörg Bakker   				   *
+ *   Copyright (C) 2009 by Jörg Bakker   				   *
  *   joerg<at>hakker<dot>de   						   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,6 +25,10 @@
 #include <platinum/PltUPnPHelper.h>
 #include <platinum/PltHttpServer.h>
 
+#include <cerrno>
+#include <cstring>
+#include <dirent.h>
+
 NPT_SET_LOCAL_LOGGER("vdr.plugin.upnp");
 
 VdrMediaServer::VdrMediaServer(const char*  friendly_name,
@@ -41,7 +45,7 @@ VdrMediaServer::VdrMediaServer(const char*  friendly_name,
 //     if (ips.GetItemCount() == 0) return NPT_ERROR_INTERNAL;
     m_localIp = *ips.GetFirstItem();
 //     m_localPort = StreamdevServerSetup.HTTPServerPort;
-    m_localPort = 3000;
+    m_liveTvPort = 3000;
     m_recPort = GetPort();
     
     m_containerRoot = new PLT_MediaContainer();
@@ -85,12 +89,13 @@ VdrMediaServer::channelToDidl(NPT_String filter, cChannel *channel)
     // check if item is already in itemCache
     ins = m_itemCache.insert(make_pair(objectId, object));
     if (ins.second) {
+        cerr << "VdrMediaServer::channelToDidl() new channel: " << (char*)objectId << endl;
         object->m_Title = channel->Name();
         object->m_ObjectClass.type = "object.item";
         object->m_ParentID = m_containerLiveTv->m_ObjectID;
         object->m_ObjectID = objectId;
         resource.m_Size = 0;
-        resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_localPort) + "/PES/") + objectId;
+        resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_liveTvPort) + "/PES/") + objectId;
         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
         object->m_ObjectClass.type = "object.item.videoItem.movie";
         object->m_Resources.Add(resource);
@@ -114,17 +119,19 @@ VdrMediaServer::recToDidl(NPT_String filter, cRecording *rec)
     PLT_MediaItemResource resource;
     pair<map<NPT_String, PLT_MediaItem*>::iterator, bool> ins;
     
-    objectId = rec->FileName();
+    objectId = rec->FileName() + NPT_String("/");
 //     NPT_LOG_INFO(NPT_String(rec->Name()) + ": " + objectId);
     // check if item is already in itemCache
     ins = m_itemCache.insert(make_pair(objectId, object));
     if (ins.second) {
+        cerr << "VdrMediaServer::recToDidl() new multistream: " << (char*)objectId << endl;
+        m_recCache.insert(make_pair(objectId, NPT_InputStreamReference(new MultiFileInputStream(rec->FileName() + string("/")))));
         object->m_Title = rec->Name();
         object->m_ObjectClass.type = "object.item";
         object->m_ParentID = m_containerRecordings->m_ObjectID;
         object->m_ObjectID = objectId;
         resource.m_Size = 0;
-        resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_recPort) + "/") + objectId + "/001.vdr";
+        resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_recPort) + "/") + objectId;
         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
         object->m_ObjectClass.type = "object.item.videoItem.movie";
         object->m_Resources.Add(resource);
@@ -311,6 +318,7 @@ VdrMediaServer::ProcessFileRequest(NPT_HttpRequest&              request,
 //     NPT_String uri_path = NPT_Uri::PercentDecode(request.GetUrl().GetPath());
 //     NPT_String uri_path = request.GetUrl().GetPath();
     NPT_String file_path = request.GetUrl().GetPath();
+    file_path = file_path.Right(file_path.GetLength() - 1);
     NPT_LOG_INFO_1("FileRequest file_path: %s", (char*)file_path);
     
 /*    // extract file path from query
@@ -328,19 +336,12 @@ VdrMediaServer::ProcessFileRequest(NPT_HttpRequest&              request,
     NPT_Position start, end;
     PLT_HttpHelper::GetRange(request, start, end);
     
-    return PLT_FileServer::ServeFile(response,
-                                         /*m_Path +*/ file_path,
-                                     start,
-                                     end,
-                                     !request.GetMethod().Compare("HEAD"));
-    
-    
-/*    NPT_CHECK_LABEL_WARNING(ServeFile(request,
-                                      context,
-                                      response,
-                                      uri_path,
-                                      file_path),
-                            failure);*/
+    return ServeFile(response,
+                    file_path,
+                    start,
+                    end,
+                    !request.GetMethod().Compare("HEAD"));
+
     
 failure:
     response.SetStatus(404, "File Not Found");
@@ -349,30 +350,228 @@ failure:
 
 
 NPT_Result 
-VdrMediaServer::ServeFile(NPT_HttpRequest&              request, 
-                               const NPT_HttpRequestContext& /*context*/,
-                               NPT_HttpResponse&             response,
-                               NPT_String                    uri_path,
-                               NPT_String                    file_path)
+VdrMediaServer::ServeFile(NPT_HttpResponse& response,
+                          NPT_String        file_path,
+                          NPT_Position      start,
+                          NPT_Position      end,
+                          bool              request_is_head) 
 {
+    cerr << "MultiFileInputStream::ServeFile() path: " << (char*)file_path << ", start: " << start << ", end: " << end << endl;
+    NPT_LargeSize            total_len;
+    NPT_InputStreamReference stream;
+    NPT_File                 file(file_path);
+    NPT_Result               result;
+    
     // prevent hackers from accessing files outside of our root
     if ((file_path.Find("/..") >= 0) || (file_path.Find("\\..") >= 0)) {
         return NPT_FAILURE;
     }
     
-/*    // File requested
-    NPT_String path = "/";
-    if (path.Compare(uri_path.Left(path.GetLength()), true) == 0) {*/
-        
-        NPT_Position start, end;
-        PLT_HttpHelper::GetRange(request, start, end);
-        
-        return PLT_FileServer::ServeFile(response,
-                                         /*m_Path +*/ file_path,
-                                         start,
-                                         end,
-                                         !request.GetMethod().Compare("HEAD"));
-//     } 
+    if (file_path.EndsWith("/")) {
+        cerr << "MultiFileInputStream::ServeFile() multistream: " << (const char*)file_path << endl;
+        map<NPT_String, NPT_InputStreamReference>::iterator i = m_recCache.find((const char*)file_path);
+        if (i != m_recCache.end()) {
+            stream = (*i).second;
+        }
+        else {
+            cerr << "MultiFileInputStream::ServeFile() could not find multistream" << endl;
+            response.SetStatus(404, "File Not Found");
+            return NPT_SUCCESS;
+        }
+    }
+    else {
+        if (NPT_FAILED(result = file.Open(NPT_FILE_OPEN_MODE_READ)) || 
+            NPT_FAILED(result = file.GetInputStream(stream))) {
+            response.SetStatus(404, "File Not Found");
+            return NPT_SUCCESS;
+        }
+    }
     
-    return NPT_FAILURE;
+    if (/*NPT_FAILED(result = file.Open(NPT_FILE_OPEN_MODE_READ)) || 
+        NPT_FAILED(result = file.GetInputStream(stream))        ||*/
+        NPT_FAILED(result = stream->GetSize(total_len))) {
+        // file didn't open
+            response.SetStatus(404, "File Not Found");
+            return NPT_SUCCESS;
+        } else {
+            NPT_HttpEntity* entity = new NPT_HttpEntity();
+            entity->SetContentLength(total_len);
+            response.SetEntity(entity);
+            entity->SetContentType("video/mpeg");
+        // request is HEAD, returns without setting a body
+            if (request_is_head) return NPT_SUCCESS;
+            
+        // see if it was a byte range request
+            if (start != (NPT_Position)-1 || end != (NPT_Position)-1) {
+            // we can only support a range from an offset to the end of the resource for now
+            // due to the fact we can't limit how much to read from a stream yet
+                NPT_Position start_offset = (NPT_Position)-1, end_offset = total_len - 1, len;
+                if (start == (NPT_Position)-1 && end != (NPT_Position)-1) {
+                // we are asked for the last N=end bytes
+                // adjust according to total length
+                    if (end >= total_len) {
+                        start_offset = 0;
+                    } else {
+                        start_offset = total_len-end;
+                    }
+                } else if (start != (NPT_Position)-1) {
+                    start_offset = start;
+                // if the end is specified but incorrect
+                // set the end_offset in order to generate a bad response
+                    if (end != (NPT_Position)-1 && end < start) {
+                        end_offset = (NPT_Position)-1;
+                    }
+                }
+                
+            // in case the range request was invalid or we can't seek then respond appropriately
+                if (start_offset == (NPT_Position)-1 || end_offset == (NPT_Position)-1 || 
+                    start_offset > end_offset || NPT_FAILED(stream->Seek(start_offset))) {
+                        response.SetStatus(416, "Requested range not satisfiable");
+                    } else {
+                        len = end_offset - start_offset + 1;
+                        response.SetStatus(206, "Partial Content");
+                        PLT_HttpHelper::SetContentRange(response, start_offset, end_offset, total_len);
+                        
+                        entity->SetInputStream(stream);
+                        entity->SetContentLength(len);
+                    }
+        // no byte range request
+            } else {
+                entity->SetInputStream(stream); 
+            }
+            return NPT_SUCCESS;
+        }
+}
+
+
+MultiFileInputStream::MultiFileInputStream(string path)
+: m_totalSize(0)
+{
+    cerr << "MultiFileInputStream::MultiFileInputStream()" << endl;
+    // TODO: open files later, when they are accessed and store filename in m_streams
+    DIR* dir;
+    struct dirent* dirent;
+    dir = opendir(path.c_str());
+    if (!dir)
+    {
+        cerr << "opendir() on " << path << " failed: " << strerror(errno) << endl;
+        exit(1);
+    }
+    vector<string> fnames;
+    while ((dirent = readdir(dir))) {
+        string fname = string(dirent->d_name);
+//         if (/*fname != "." && fname != ".." && */fname.rfind(".vdr") != string::npos && fname[0] == '0') {
+        if (fname[0] == '0' && fname.substr(fname.size() - 4) == ".vdr") {
+            fnames.push_back(fname);
+        }
+    }
+    sort(fnames.begin(), fnames.end());
+    for (vector<string>::iterator i = fnames.begin(); i != fnames.end(); ++i) {
+        string fname = *i;
+        struct stat statval;
+        if (stat ((path + fname).c_str(), &statval) != 0) {
+            cerr << "stat() failed on " + fname + ": " + strerror (errno) << endl;
+        }
+        if (S_ISREG (statval.st_mode)) {
+            FILE* s = fopen((path + fname).c_str(), "rb");
+            if (ferror(s)) {
+                perror("MultiFileInputStream::MultiFileInputStream() opening file");
+            }
+            m_totalSize += statval.st_size;
+            m_streams.insert(make_pair(m_totalSize, s));
+            cerr << "MultiFileInputStream::MultiFileInputStream() file: " << path + fname << ", size: " << statval.st_size << endl;
+        }
+    }
+    m_currentStream = m_streams.begin();
+}
+
+
+MultiFileInputStream::~MultiFileInputStream()
+{
+    cerr << "MultiFileInputStream::~MultiFileInputStream()" << endl;
+    // close all files
+   for (map<long long, FILE*>::iterator i = m_streams.begin(); i != m_streams.end(); ++i) {
+       fclose((*i).second);
+    }
+    m_streams.clear();
+}
+
+
+NPT_Result
+MultiFileInputStream::Read(void*     buffer,
+                        NPT_Size  bytes_to_read,
+                        NPT_Size* bytes_read)
+{
+//     cerr << "MultiFileInputStream::Read()" << endl;
+    FILE* s = (*m_currentStream).second;
+    *bytes_read = fread(buffer, 1, bytes_to_read, s);
+//     cerr << "MultiFileInputStream::Read() read: " << *bytes_read << endl;
+    if (feof(s)) {
+        cerr << "************* MultiFileInputStream::Read() switch to next stream *************" << endl;
+        m_currentStream++;
+    }
+    if (ferror(s)) {
+        perror("MultiFileInputStream::Read error");
+        clearerr(s);
+        return NPT_FAILURE;
+    }
+    return NPT_SUCCESS;
+}
+
+
+NPT_Result
+MultiFileInputStream::Seek(NPT_Position offset)
+{
+    cerr << "MultiFileInputStream::Seek() to offset: " << offset << endl;
+    map<long long, FILE*>::iterator i = m_streams.begin();
+    int counter = 0;
+    long long startOffset = 0;
+    while (i != m_streams.end() && (*i).first < offset) {
+        cerr << "MultiFileInputStream::Seek() counter: " << counter << ", start: " << startOffset << ", end: " << (*i).first << endl;
+        startOffset = (*i).first;
+        ++i;
+        ++counter;
+    }
+    if (fseek((*i).second, offset - startOffset, SEEK_SET)) {
+        perror("MultiFileInputStream::Seek()");
+        return NPT_FAILURE;
+    }
+    else {
+        cerr << "MultiFileInputStream::Seek() currentStream: " << counter << endl;
+        m_currentStream = i;
+    }
+    return NPT_SUCCESS;
+}
+
+
+NPT_Result
+MultiFileInputStream::Tell(NPT_Position& offset)
+{
+    cerr << "MultiFileInputStream::Tell()" << endl;
+    long curOffset = ftell((*m_currentStream).second);
+    if (curOffset == -1) {
+        perror("MultiFileInputStream::Tell()");
+        return NPT_FAILURE;
+    }
+    offset = curOffset + (*m_currentStream).first;
+    return NPT_SUCCESS;
+}
+
+
+NPT_Result
+MultiFileInputStream::GetSize(NPT_LargeSize& size)
+{
+    cerr << "MultiFileInputStream::GetSize(): " << m_totalSize << endl;
+    size = m_totalSize;
+    return NPT_SUCCESS;
+}
+
+
+NPT_Result
+MultiFileInputStream::GetAvailable(NPT_LargeSize& available)
+{
+    cerr << "MultiFileInputStream::GetAvailable()" << endl;
+    NPT_Result res = Tell(available);
+    available = m_totalSize - available;
+    return res;
 }

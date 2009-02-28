@@ -25,11 +25,20 @@
 #include <vdr/recording.h>
 
 #include <map>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <iostream>
+#include <cstdio>
+// #include <fstream>
 using namespace std;
 
 /**
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
+
+class MultiFileInputStream;
+
 class VdrMediaServer : public PLT_MediaServer
 {
 public:
@@ -40,6 +49,7 @@ public:
 
     ~VdrMediaServer();
 
+private:
     virtual NPT_Result OnBrowseMetadata(PLT_ActionReference& action,
                                         const char* object_id,
                                         const NPT_HttpRequestContext& context);
@@ -50,28 +60,24 @@ public:
                                 const NPT_String& object_id,
                                 const NPT_String& searchCriteria,
                                 const NPT_HttpRequestContext& context);
-
-protected:
-    virtual NPT_Result ProcessHttpRequest(NPT_HttpRequest&              request, 
-                                          const NPT_HttpRequestContext& context,
-                                          NPT_HttpResponse&             response);
     
-    virtual NPT_Result ProcessFileRequest(NPT_HttpRequest&              request, 
-                                          const NPT_HttpRequestContext& context,
-                                          NPT_HttpResponse&             response);
-    
-    virtual NPT_Result ServeFile(NPT_HttpRequest&              request, 
-                                 const NPT_HttpRequestContext& context,
-                                 NPT_HttpResponse&             response,
-                                 NPT_String                    uri_path,
-                                 NPT_String                    file_path);
-    
-private:
     NPT_String channelToDidl(NPT_String filter, cChannel *channel);
     NPT_String recToDidl(NPT_String filter, cRecording *rec);
     
+    virtual NPT_Result ProcessHttpRequest(NPT_HttpRequest&              request, 
+                                          const NPT_HttpRequestContext& context,
+                                          NPT_HttpResponse&             response);
+    NPT_Result ProcessFileRequest(NPT_HttpRequest&              request, 
+                                  const NPT_HttpRequestContext& context,
+                                  NPT_HttpResponse&             response);
+    NPT_Result ServeFile(NPT_HttpResponse& response,
+                         NPT_String        file_path, 
+                         NPT_Position      start,
+                         NPT_Position      end,
+                         bool              request_is_head);
+    
     NPT_String m_localIp;
-    int m_localPort;
+    int m_liveTvPort;
     int m_recPort;
     
     PLT_MediaContainer* m_containerRoot;
@@ -80,6 +86,28 @@ private:
     
     // TODO: need to lock m_itemCache
     map<NPT_String, PLT_MediaItem*> m_itemCache;
+    map<NPT_String, NPT_InputStreamReference> m_recCache;
+};
+
+
+class MultiFileInputStream : public NPT_InputStream
+{
+public:
+    MultiFileInputStream(string path);
+    virtual ~MultiFileInputStream();
+    
+    virtual NPT_Result Read(void*     buffer, 
+                            NPT_Size  bytes_to_read, 
+                            NPT_Size* bytes_read = NULL);
+    virtual NPT_Result Seek(NPT_Position offset);
+    virtual NPT_Result Tell(NPT_Position& offset);
+    virtual NPT_Result GetSize(NPT_LargeSize& size);
+    virtual NPT_Result GetAvailable(NPT_LargeSize& available);
+    
+private:
+    map<long long, FILE*>           m_streams;
+    map<long long, FILE*>::iterator m_currentStream;
+    long long                       m_totalSize;
 };
 
 #endif
