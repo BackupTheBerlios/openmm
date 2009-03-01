@@ -125,12 +125,13 @@ VdrMediaServer::recToDidl(NPT_String filter, cRecording *rec)
     ins = m_itemCache.insert(make_pair(objectId, object));
     if (ins.second) {
         cerr << "VdrMediaServer::recToDidl() new multistream: " << (char*)objectId << endl;
-        m_recCache.insert(make_pair(objectId, NPT_InputStreamReference(new MultiFileInputStream(rec->FileName() + string("/")))));
+        MultiFileInputStream* m = new MultiFileInputStream(rec->FileName() + string("/"));
+        m_recCache.insert(make_pair(objectId, NPT_InputStreamReference(m)));
         object->m_Title = rec->Name();
         object->m_ObjectClass.type = "object.item";
         object->m_ParentID = m_containerRecordings->m_ObjectID;
         object->m_ObjectID = objectId;
-        resource.m_Size = 0;
+        m->GetSize(resource.m_Size);
         resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_recPort) + "/") + objectId;
         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
         object->m_ObjectClass.type = "object.item.videoItem.movie";
@@ -519,6 +520,25 @@ MultiFileInputStream::Read(void*     buffer,
 }
 
 
+// Possible implementation with m_streams.upper_bound ...
+// NPT_Result
+// MultiFileInputStream::Seek(NPT_Position offset)
+// {
+//     cerr << "MultiFileInputStream::Seek() to offset: " << offset << endl;
+//     map<long long, FILE*>::iterator i = m_streams.begin();
+//     i = m_streams.upper_bound(offset);
+//     long long startOffset = (i == m_streams.begin()) ? 0 : (*(--i)).first;
+//     if (fseek((*i).second, offset - startOffset, SEEK_SET)) {
+//         perror("MultiFileInputStream::Seek()");
+//         return NPT_FAILURE;
+//     }
+//     else {
+//         m_currentStream = i;
+//         return NPT_SUCCESS;
+//     }
+// }
+
+
 NPT_Result
 MultiFileInputStream::Seek(NPT_Position offset)
 {
@@ -539,8 +559,8 @@ MultiFileInputStream::Seek(NPT_Position offset)
     else {
         cerr << "MultiFileInputStream::Seek() currentStream: " << counter << endl;
         m_currentStream = i;
+        return NPT_SUCCESS;
     }
-    return NPT_SUCCESS;
 }
 
 

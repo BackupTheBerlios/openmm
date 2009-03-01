@@ -22,28 +22,28 @@
 
 
 EngineVlc::EngineVlc(int argc, char **argv)
-: m_lastPos(0),
-m_offsetPos(0)
 {
-    m_exception = mediacontrol_exception_create();
-    mediacontrol_exception_init(m_exception);
-    
     clearException();
-    m_instance = mediacontrol_new(argc, argv, m_exception);
+    m_vlcInstance = libvlc_new(argc, argv, &m_exception);
     handleException();
-    
+    clearException();
+    m_vlcPlayer = libvlc_media_player_new(m_vlcInstance, &m_exception);
+    handleException();
+        
     int xWindow = openXWindow();
     clearException();
-//     libvlc_media_player_set_drawable(m_vlcPlayer, xWindow, &m_exception);
-    mediacontrol_set_visual(m_instance, xWindow, m_exception);
+    libvlc_media_player_set_drawable(m_vlcPlayer, xWindow, &m_exception);
     handleException();
+    
+/*    clearException();
+    libvlc_event_attach(vlc_my_object_event_manager(), NULL, &m_exception);
+    handleException();*/
 }
 
 
 EngineVlc::~EngineVlc()
 {
-    mediacontrol_exit(m_instance);
-    mediacontrol_exception_free(m_exception);
+    libvlc_release(m_vlcInstance);
     closeXWindow();
 }
 
@@ -85,39 +85,21 @@ EngineVlc::closeXWindow()
 void
 EngineVlc::load()
 {
-    m_lastPos = 0;
-    m_offsetPos = 0;
     clearException();
-    mediacontrol_set_mrl(m_instance, m_uri.c_str(), m_exception);
+    libvlc_media_t* media = libvlc_media_new(m_vlcInstance, m_uri.c_str(), &m_exception);
     handleException();
-    
-    mediacontrol_Position pos;
-    pos.origin = mediacontrol_AbsolutePosition;
-    pos.key = mediacontrol_MediaTime;
-    pos.value = 0;
-    
     clearException();
-    mediacontrol_start(m_instance, &pos, m_exception);
+    libvlc_media_player_set_media(m_vlcPlayer, media, &m_exception);
     handleException();
-}
-
-
-void
-EngineVlc::getStreamInfo()
-{
-    mediacontrol_StreamInformation* info;
-/*    clearException();
-    info = mediacontrol_get_stream_information(m_instance, mediacontrol_ByteCount, m_exception);
+    libvlc_media_release(media);
+    clearException();
+    if(!libvlc_media_player_is_seekable(m_vlcPlayer, &m_exception)) {
+        TRACE("EngineVlc::load(): media is not seekable");
+    }
     handleException();
-    long long bytePos = info->position;
-    long long byteLen = info->length;
-    clearException();*/
-    info = mediacontrol_get_stream_information(m_instance, mediacontrol_MediaTime, m_exception);
+    clearException();
+    libvlc_media_player_play(m_vlcPlayer, &m_exception);
     handleException();
-    long long timePos = info->position;
-    long long timeLen = info->length;
-//     TRACE("EngineVlc::getStreamInfo() bytePos: %lli, byteLen: %lli, timePos: %lli timeLen: %lli", bytePos, byteLen, timePos, timeLen);
-    TRACE("EngineVlc::getStreamInfo() timePos: %lli, timeLen: %lli, offset: %lli", timePos, timeLen, m_offsetPos);
 }
 
 
@@ -131,7 +113,7 @@ void
 EngineVlc::pause()
 {
     clearException();
-    mediacontrol_pause(m_instance, m_exception);
+    libvlc_media_player_pause(m_vlcPlayer, &m_exception);
     handleException();
 }
 
@@ -140,7 +122,7 @@ void
 EngineVlc::stop()
 {
     clearException();
-    mediacontrol_stop(m_instance, m_exception);
+    libvlc_media_player_stop(m_vlcPlayer, &m_exception);
     handleException();
 }
 
@@ -148,17 +130,8 @@ EngineVlc::stop()
 void
 EngineVlc::seek(int seconds)
 {
-    // FIXME: vlc jumps back to current playing position when trying to seek in
-    //        vdr recording streams. vlc-player is able to seek ...?
-    TRACE("seek to second: %i", seconds);
-    mediacontrol_Position pos;
-    pos.origin = mediacontrol_AbsolutePosition;
-    pos.key = mediacontrol_MediaTime;
-    pos.value = seconds * 1000 + m_offsetPos;
-    TRACE("seek to position: %lli", pos.value);
-    
     clearException();
-    mediacontrol_set_media_position(m_instance, &pos, m_exception);
+    libvlc_media_player_set_time(m_vlcPlayer, seconds * 1000, &m_exception);
     handleException();
 }
 
@@ -178,39 +151,32 @@ EngineVlc::previous()
 void
 EngineVlc::getPosition(float &seconds)
 {
-    getStreamInfo();
+/*    clearException();
+    libvlc_media_player_t* media = libvlc_media_player_get_media(m_vlcPlayer, &m_exception);
+    handleException();*/
     
-    mediacontrol_StreamInformation* streamInfo;
     clearException();
-    streamInfo = mediacontrol_get_stream_information(m_instance, mediacontrol_MediaTime, m_exception);
+//     libvlc_state_t state = libvlc_media_get_state(media, &m_exception);
+    libvlc_state_t state = libvlc_media_player_get_state(m_vlcPlayer, &m_exception);
     handleException();
-    
-    if (streamInfo->streamstatus == mediacontrol_EndStatus) {
+    if (state == libvlc_Ended) {
         endOfTrack.emitSignal();
         seconds = 0.0;
         return;
     }
     
-    if (m_lastPos == 0 && streamInfo->position > 10000) {
-        m_offsetPos = streamInfo->position;
-    }
-//     TRACE("EngineVlc::getPosition position [ms]: %lli", streamInfo->position);
-    m_lastPos = streamInfo->position;
-    seconds = (streamInfo->position - m_offsetPos) / 1000.0;
+    clearException();
+    seconds = libvlc_media_player_get_time(m_vlcPlayer, &m_exception) / 1000.0;
+    handleException();
 }
 
 
 void
 EngineVlc::getLength(float &seconds)
 {
-    mediacontrol_StreamInformation* streamInfo;
     clearException();
-    streamInfo = mediacontrol_get_stream_information(m_instance, mediacontrol_MediaTime, m_exception);
+    seconds = libvlc_media_player_get_length(m_vlcPlayer, &m_exception) / 1000.0;
     handleException();
-    
-    // FIXME: m_offsetPos is still 0 when getLength is called -> Controller shows a completely wrong length
-    seconds = (streamInfo->length - m_offsetPos)/ 1000.0;
-    TRACE("EngineVlc::getLength length [ms]: %lli, float: %f", (streamInfo->length - m_offsetPos), seconds);
 }
 
 
@@ -218,7 +184,7 @@ void
 EngineVlc::setVolume(int channel, float vol)
 {
     clearException();
-    mediacontrol_sound_set_volume(m_instance, vol, m_exception);
+    libvlc_audio_set_volume(m_vlcInstance, vol, &m_exception);
     handleException();
 }
 
@@ -227,7 +193,7 @@ void
 EngineVlc::getVolume(int channel, float &vol)
 {
     clearException();
-    vol = mediacontrol_sound_get_volume(m_instance, m_exception);
+    vol = libvlc_audio_get_volume(m_vlcInstance, &m_exception);
     handleException();
 }
 
@@ -235,14 +201,14 @@ EngineVlc::getVolume(int channel, float &vol)
 void
 EngineVlc::clearException()
 {
-    mediacontrol_exception_cleanup(m_exception);
+    libvlc_exception_init(&m_exception);
 }
 
 
 void
 EngineVlc::handleException()
 {
-    if (m_exception->code) {
-        TRACE(m_exception->message);
+    if (libvlc_exception_raised(&m_exception)) {
+        TRACE(libvlc_exception_get_message(&m_exception));
     }
 }
