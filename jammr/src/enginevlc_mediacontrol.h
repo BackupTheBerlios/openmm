@@ -25,6 +25,7 @@
 #include <X11/Xlib.h>
 #endif
 #include <vlc/vlc.h>
+#include <vlc/mediacontrol.h>
 
 
 class EngineVlc : public Engine
@@ -67,12 +68,14 @@ private:
     int openXWindow();
     void closeXWindow();
     
-    libvlc_exception_t      m_exception;
-    libvlc_instance_t*      m_vlcInstance;
-    libvlc_media_player_t*  m_vlcPlayer;
+    void getStreamInfo();
+    
+    mediacontrol_Exception* m_exception;
+    mediacontrol_Instance*  m_instance;
+    
     string                  m_uri;
-    long long               m_startTime;
-    float                   m_length; // length of media in seconds
+    long long               m_lastPos;
+    long long               m_offsetPos;
 };
 
 
