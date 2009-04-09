@@ -1,10 +1,10 @@
 # TODO: do a proper search for libxine (FIND_PACKAGE?)
-FIND_LIBRARY( XINE_LIB
-xine
-)
+##FIND_LIBRARY( XINE_LIB
+##xine
+##)
 
 SET( JAMMR_SRCS
-enginemplayer.cpp
+#enginemplayer.cpp
 enginevlc.cpp
 # enginexine.cpp
 main.cpp
@@ -16,10 +16,10 @@ upnpmediarenderer.cpp
 
 #EXECUTE_PROCESS(COMMAND /usr/bin/xine-config --libs OUTPUT_VARIABLE XINE_LIBRARIES)
 #SET(XINE_LIBRARIES -L/usr/lib -lxine -lz -lnsl -lpthread -lrt)
-EXEC_PROGRAM( /usr/bin/xine-config
-ARGS --libs
-OUTPUT_VARIABLE XINE_LIBRARIES
-)
+##EXEC_PROGRAM( /usr/bin/xine-config
+##ARGS --libs
+##OUTPUT_VARIABLE XINE_LIBRARIES
+##)
 
 #list all source files here
 ADD_EXECUTABLE( jammr
@@ -28,8 +28,9 @@ ${JAMMR_SRCS}
 
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( jammr
-/usr/local/lib/libplatinum_upnp.so
-jammlib
+#/usr/lib/libplatinum-upnp.so
+platinum-upnp
+jamm
 )
 
 

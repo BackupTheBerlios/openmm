@@ -357,7 +357,7 @@ VdrMediaServer::ServeFile(NPT_HttpResponse& response,
                           NPT_Position      end,
                           bool              request_is_head) 
 {
-    cerr << "MultiFileInputStream::ServeFile() path: " << (char*)file_path << ", start: " << start << ", end: " << end << endl;
+    cerr << "VdrMediaServer::ServeFile() path: " << (char*)file_path << ", start: " << start << ", end: " << end << endl;
     NPT_LargeSize            total_len;
     NPT_InputStreamReference stream;
     NPT_File                 file(file_path);
@@ -369,13 +369,13 @@ VdrMediaServer::ServeFile(NPT_HttpResponse& response,
     }
     
     if (file_path.EndsWith("/")) {
-        cerr << "MultiFileInputStream::ServeFile() multistream: " << (const char*)file_path << endl;
+        cerr << "VdrMediaServer::ServeFile() multistream: " << (const char*)file_path << endl;
         map<NPT_String, NPT_InputStreamReference>::iterator i = m_recCache.find((const char*)file_path);
         if (i != m_recCache.end()) {
             stream = (*i).second;
         }
         else {
-            cerr << "MultiFileInputStream::ServeFile() could not find multistream" << endl;
+            cerr << "VdrMediaServer::ServeFile() could not find multistream" << endl;
             response.SetStatus(404, "File Not Found");
             return NPT_SUCCESS;
         }
@@ -499,23 +499,30 @@ MultiFileInputStream::~MultiFileInputStream()
 
 
 NPT_Result
-MultiFileInputStream::Read(void*     buffer,
+MultiFileInputStream::Read(void*  buffer,
                         NPT_Size  bytes_to_read,
                         NPT_Size* bytes_read)
 {
+    // obviously, if *bytes_read < bytes_to_read, same 4k packet is read again (from same offset with a seek?)
 //     cerr << "MultiFileInputStream::Read()" << endl;
-    FILE* s = (*m_currentStream).second;
-    *bytes_read = fread(buffer, 1, bytes_to_read, s);
-//     cerr << "MultiFileInputStream::Read() read: " << *bytes_read << endl;
-    if (feof(s)) {
-        cerr << "************* MultiFileInputStream::Read() switch to next stream *************" << endl;
-        m_currentStream++;
-    }
-    if (ferror(s)) {
-        perror("MultiFileInputStream::Read error");
-        clearerr(s);
-        return NPT_FAILURE;
-    }
+    NPT_Size bytes_read_attempt = 0;
+    do {
+        FILE* s = (*m_currentStream).second;
+        bytes_read_attempt = fread((char*)buffer + bytes_read_attempt, 1, bytes_to_read, s);
+        *bytes_read += bytes_read_attempt;
+//         cerr << "MultiFileInputStream::Read() to_read: " << bytes_to_read << " read: " << *bytes_read << " FILE: " << s << endl;
+        bytes_to_read -= bytes_read_attempt;
+        if (feof(s)) {
+            m_currentStream++;
+            rewind((*m_currentStream).second);
+            cerr << "****** MultiFileInputStream::Read() switch to next FILE: " << (*m_currentStream).second << " ******" << endl;
+        }
+        if (ferror(s)) {
+            perror("MultiFileInputStream::Read error");
+            clearerr(s);
+            return NPT_FAILURE;
+        }
+    } while(bytes_to_read > 0);
     return NPT_SUCCESS;
 }
 

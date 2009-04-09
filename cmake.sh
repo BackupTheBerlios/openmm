@@ -2,6 +2,7 @@
 
 SRCDIR=${PWD}
 BINDIR=../jammbin
+CMAKE_CMD="cmake -DCMAKE_INSTALL_PREFIX=/usr"
 
 if [ ! -d $BINDIR ]
 then
@@ -9,7 +10,7 @@ then
 fi
 cd $BINDIR
 
-cmake -G KDevelop3 ${SRCDIR}
+${CMAKE_CMD} -G KDevelop3 ${SRCDIR}
 make
 
 if [ "$1" = "install" ]

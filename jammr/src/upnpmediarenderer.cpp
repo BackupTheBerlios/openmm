@@ -40,6 +40,7 @@ UpnpMediaRenderer::PollSlot::onSignalReceived() {
         PLT_Didl::ParseTimeStamp(timestamp, duration);
         if (duration == 0) {
             float dur;
+            timestamp = "";
             s->m_engine->getLength(dur);
             PLT_Didl::FormatTimeStamp(timestamp, dur);
             s->m_AvTransport->SetStateVariable("CurrentMediaDuration", timestamp);

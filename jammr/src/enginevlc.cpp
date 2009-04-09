@@ -53,8 +53,8 @@ EngineVlc::openXWindow()
     Window      xWindow;
     int xPos    = 0;
     int yPos    = 0;
-    int width   = 320;
-    int height  = 200;
+    int width   = 720;
+    int height  = 576;
     
     XInitThreads ();
     xDisplay = XOpenDisplay(NULL);

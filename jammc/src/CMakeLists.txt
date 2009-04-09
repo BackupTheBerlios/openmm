@@ -56,7 +56,8 @@ ${JAMMC_MOC_CPP}
 )
 
 TARGET_LINK_LIBRARIES( jammc
-/usr/local/lib/libplatinum_upnp.so
+# /usr/local/lib/libplatinum_upnp.so
+platinum-upnp
 ${QT_LIBRARIES}
 )
 
@@ -66,7 +67,8 @@ ADD_DEFINITIONS(
 )
 
 TARGET_LINK_LIBRARIES( jammc
-jammlib
+# jammlib
+jamm
 )
 
 INSTALL( TARGETS jammc

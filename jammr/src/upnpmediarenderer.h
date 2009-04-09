@@ -20,7 +20,8 @@
 #ifndef UPNPMEDIARENDERER_H
 #define UPNPMEDIARENDERER_H
 
-#include "enginemplayer.h"
+// #include "enginemplayer.h"
+#include "engine.h"
 
 #include <platinum/PltMediaRenderer.h>
 #include <jamm/thread.h>

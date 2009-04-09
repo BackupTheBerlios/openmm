@@ -23,7 +23,9 @@ ADD_LIBRARY( vdr-upnp
 )
 
 TARGET_LINK_LIBRARIES( vdr-upnp
-/usr/local/lib/libplatinum_upnp.so
+# /usr/local/lib/libplatinum_upnp.so
+platinum-upnp
+jamm
 #    vdr-upnp-streamdev
 )
 

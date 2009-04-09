@@ -19,7 +19,7 @@
 #ifndef JAMMTHREAD_H
 #define JAMMTHREAD_H
 
-#include <jamm/signode.h>
+#include "signode.h"
 
 #include <pthread.h>
 
