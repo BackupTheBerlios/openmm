@@ -1,24 +1,36 @@
 next steps:
-1. put server into browse tree
-2. AVTransport and controls (QAbstractButton, QButtonGroup)
-3. renderer chooser
-4. playlist
-5. slider (QAbstractSlider) and seecking
-6. status box with time and meta info
-7. volume and AVRender controls
+
+JammC
+1. put server into browse tree - DONE
+2. AVTransport and controls (QAbstractButton, QButtonGroup) - DONE
+3. renderer chooser - DONE
+4. slider (QAbstractSlider) and seecking - DONE
+5. volume and AVRender controls - volume DONE
+6. playlist
+7. status box with time and meta info
 8. resume
+9. handle dynamic changes in objects (TV channel lists ...)
+
+JammS
+1. JammS - web:
+   proxy for webradio (shoutcast ...)
+
+JammR
+1. hide pointer
+2. window size management
+3. multiple audio devices (each announced by seperate renderer device)
 
 ------------------------------------------------------
 
-optimization:
-1. lazy population of data model:
+basic browser optimization:
+1. lazy population of data model - DONE
 1.1. hasChildren() checks if parent is container (empty containers o.k.?)
     advantage: caching is easier
     disadvantage: in case of children two browse queries are requiered 
 (however, the first is most likely already in the cache)
 1.2. set hasChildren() unconditionally true
 
-2. performance optimization for large amounts of data
+2. performance optimization for large amounts of data - DONE
 browse n objects (first slice)
 -> what's best n: display dependend? double size of rows in display? 
 smaller than display?
@@ -27,9 +39,34 @@ if n < N:
   canFetchMore() should return true (set a flag in cache)
   fetchMore() browses next slice ...
 
-3. bredcrump view
+3. bredcrump view - DONE (but still looks ugly)
 4. more intelligent caching (aging cache) to save memory
-5. parent(): reduce number of browse queries
+5. parent(): reduce number of browse queries (not possible ...?)
+
+------------------------------------------------------
+
+refactor:
+1. abstract out UPnP and provide an interface to a UPnP plugin
+   (do all UPnP-AV stuff within libjamm)
+2. implement other UPnP backends (based on libupnp for example)
+3. messaging system based on UPnP messaging
+   (extend JSignal across threads/processes)
+4. abstract out Qt and provide an interface to a gui plugin
+5. implement other GUI backends
+
+------------------------------------------------------
+
+platforms:
+1. anubis
+   faster boot from flash
+   general purpose x86 image
+
+2. aaron
+   SheevaPlug image ...?
+
+3. argus
+   Zaurus image ...?
+   Nokia i800 image ...?
 
 ------------------------------------------------------
 
@@ -37,10 +74,12 @@ further steps:
 1. add cmake checks for (depending on compile time options for the different plugins):
    libplatinumupnp
    mplayer as runtime dependency
+   libvlc
+   libxine
 
 ------------------------------------------------------
 
-future steps:
+future steps/ideas:
 1. look & feel, icon decoration (for servers and album covers)
 2. theming
 3. dynamic configuration of layout (floating boxes)
@@ -63,4 +102,7 @@ concepts/ideas:
    replaced with web browsing.
 
 2. firefox browser plugin for renderer
+
+3. integration into KDE or any other DE.
+   especially the feature to choose a UPnP renderer for output
 

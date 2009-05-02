@@ -1,6 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 PROJECT(jammlib)
+SET(CMAKE_INSTALL_PREFIX
+/usr
+)
 
 #if you don't want the full compiler output, remove the following line
 #SET(CMAKE_VERBOSE_MAKEFILE ON)

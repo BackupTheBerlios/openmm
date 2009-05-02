@@ -20,14 +20,18 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QApplication>
+#include "lsupnp.h"
 
-#include "upnpcontroller.h"
+#include <cstdio>
+#include <cstdlib>
+
 
 int main(int argc, char** argv)
 {
-    QApplication app(argc, argv);
     UpnpController upnpController;
-    upnpController.showMainWindow();
-    return app.exec();
+    char keystroke;
+    while ((keystroke = getchar())) {
+        if (keystroke == 'q')
+            break;
+    }
 }

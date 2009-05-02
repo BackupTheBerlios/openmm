@@ -1,20 +1,23 @@
-/***************************************************************************
- *   Copyright (C) 2009 by Jörg Bakker   				   *
- *   joerg<at>hakker<dot>de   						   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License version 2 (not   *
- *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+/***************************************************************************|
+|  Jamm - Just another multimedia ...                                       |
+|         ... set of applications and libraries based on the UPnP-AV specs  |
+|                                                                           |
+|  Copyright (C) 2009                                                       |
+|  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
+|                                                                           |
+|  This file is part of Jamm.                                               |
+|                                                                           |
+|  Jamm is free software: you can redistribute it and/or modify             |
+|  it under the terms of the GNU General Public License as published by     |
+|  the Free Software Foundation version 3 of the License.                   |
+|                                                                           |
+|  Jamm is distributed in the hope that it will be useful,                  |
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of           |
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
+|  GNU General Public License for more details.                             |
+|                                                                           |
+|  You should have received a copy of the GNU General Public License        |
+|  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
 #include "vdrmediaserver.h"
@@ -59,14 +62,16 @@ VdrMediaServer::VdrMediaServer(const char*  friendly_name,
     m_containerLiveTv = new PLT_MediaContainer();
     m_containerLiveTv->m_Title = "Live TV";
     m_containerLiveTv->m_ObjectClass.type = "object.container";
-    m_containerLiveTv->m_ChildrenCount = 0;
+    // let m_ChildrenCount be > 0, otherwise xbmc doesn't display the container
+    m_containerLiveTv->m_ChildrenCount = 1;
     m_containerLiveTv->m_ParentID = m_containerRoot->m_ObjectID;
     m_containerLiveTv->m_ObjectID = "1";
     
     m_containerRecordings = new PLT_MediaContainer();
     m_containerRecordings->m_Title = "Recordings";
     m_containerRecordings->m_ObjectClass.type = "object.container";
-    m_containerRecordings->m_ChildrenCount = 0;
+    // let m_ChildrenCount be > 0, otherwise xbmc doesn't display the container
+    m_containerRecordings->m_ChildrenCount = 1;
     m_containerRecordings->m_ParentID = m_containerRoot->m_ObjectID;
     m_containerRecordings->m_ObjectID = "2";
 }
@@ -118,8 +123,9 @@ VdrMediaServer::recToDidl(NPT_String filter, cRecording *rec)
     NPT_String objectId;
     PLT_MediaItemResource resource;
     pair<map<NPT_String, PLT_MediaItem*>::iterator, bool> ins;
-    
-    objectId = rec->FileName() + NPT_String("/");
+
+    objectId = NPT_String("vdr-rec/") + rec->Info()->ChannelID().ToString() + NPT_String("/") + NPT_String::FromInteger(rec->start) + NPT_String("/");
+//     objectId = rec->FileName() + NPT_String("/");
 //     NPT_LOG_INFO(NPT_String(rec->Name()) + ": " + objectId);
     // check if item is already in itemCache
     ins = m_itemCache.insert(make_pair(objectId, object));
@@ -151,7 +157,7 @@ VdrMediaServer::recToDidl(NPT_String filter, cRecording *rec)
 NPT_Result
 VdrMediaServer::OnBrowseMetadata(PLT_ActionReference& action, const char* object_id, const NPT_HttpRequestContext& /*context*/)
 {
-//     NPT_LOG_INFO_1("VDR BrowseMetadata Action on object_id = %s", object_id);
+    NPT_LOG_INFO_1("VDR BrowseMetadata Action on object_id = %s", object_id);
     NPT_String didl, tmp;
     NPT_String filter;
     NPT_CHECK_SEVERE(action->GetArgumentValue("Filter", filter));
@@ -180,7 +186,7 @@ VdrMediaServer::OnBrowseMetadata(PLT_ActionReference& action, const char* object
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*item, filter, tmp));
     }
     didl = didl_header + tmp + didl_footer;
-//     NPT_LOG_INFO(didl);
+    NPT_LOG_INFO(didl);
     
     NPT_CHECK_SEVERE(action->SetArgumentValue("Result", didl));
     NPT_CHECK_SEVERE(action->SetArgumentValue("NumberReturned", "1"));
@@ -197,7 +203,7 @@ VdrMediaServer::OnBrowseMetadata(PLT_ActionReference& action, const char* object
 NPT_Result
 VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* object_id, const NPT_HttpRequestContext& /*context*/)
 {
-//     NPT_LOG_INFO_1("VDR BrowseDirectChildren Action on object_id = %s", object_id);
+    NPT_LOG_INFO_1("VDR BrowseDirectChildren Action on object_id = %s", object_id);
     NPT_String didl = didl_header;
 
     NPT_String filter;
@@ -267,7 +273,7 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
         totalMatches = 1;
     }
     didl += didl_footer;
-//     NPT_LOG_INFO(didl);
+    NPT_LOG_INFO(didl);
 
     NPT_CHECK_SEVERE(action->SetArgumentValue("Result", didl));
     NPT_CHECK_SEVERE(action->SetArgumentValue("NumberReturned", itoa(numberReturned)));
@@ -292,7 +298,7 @@ VdrMediaServer::ProcessHttpRequest(NPT_HttpRequest&              request,
 {
     NPT_LOG_INFO_1("HttpRequest Path: %s", (char*)request.GetUrl().GetPath());
     
-    if (request.GetUrl().GetPath().StartsWith("//")) {
+    if (request.GetUrl().GetPath().StartsWith("/vdr-rec")) {
             return ProcessFileRequest(request, context, response);
         }
     
@@ -504,13 +510,11 @@ MultiFileInputStream::Read(void*  buffer,
                         NPT_Size* bytes_read)
 {
     // obviously, if *bytes_read < bytes_to_read, same 4k packet is read again (from same offset with a seek?)
-//     cerr << "MultiFileInputStream::Read()" << endl;
     NPT_Size bytes_read_attempt = 0;
     do {
         FILE* s = (*m_currentStream).second;
         bytes_read_attempt = fread((char*)buffer + bytes_read_attempt, 1, bytes_to_read, s);
         *bytes_read += bytes_read_attempt;
-//         cerr << "MultiFileInputStream::Read() to_read: " << bytes_to_read << " read: " << *bytes_read << " FILE: " << s << endl;
         bytes_to_read -= bytes_read_attempt;
         if (feof(s)) {
             m_currentStream++;

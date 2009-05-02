@@ -3,6 +3,34 @@
 ##xine
 ##)
 
+SET(CMAKE_LIBRARY_PATH
+${CMAKE_SYSTEM_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_PLATINUM_UPNP
+NAME platinum-upnp
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_VLC
+NAME vlc
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+if(TARGET jamm)
+SET(LIB_JAMM
+jamm
+)
+INCLUDE_DIRECTORIES(
+${jamm_SOURCE_DIR}/jammlib
+)
+else(TARGET jamm)
+FIND_LIBRARY(LIB_JAMM
+NAME jamm
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+endif(TARGET jamm)
+
 SET( JAMMR_SRCS
 #enginemplayer.cpp
 enginevlc.cpp
@@ -29,8 +57,10 @@ ${JAMMR_SRCS}
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( jammr
 #/usr/lib/libplatinum-upnp.so
-platinum-upnp
-jamm
+# platinum-upnp
+# jamm
+${LIB_JAMM}
+${LIB_PLATINUM_UPNP}
 )
 
 
@@ -46,8 +76,8 @@ ADD_DEFINITIONS(
 
 TARGET_LINK_LIBRARIES( jammr
 # ${XINE_LIBRARIES}
+${LIB_VLC}
 X11
-vlc
 pthread
 dl
 )

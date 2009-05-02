@@ -1,21 +1,25 @@
-/***************************************************************************
- *   Copyright (C) 2009 by Jörg Bakker   				   *
- *   joerg<at>hakker<dot>de   						   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License version 2 (not   *
- *   v2.2 or v3.x or other) as published by the Free Software Foundation.  *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+/***************************************************************************|
+|  Jamm - Just another multimedia ...                                       |
+|         ... set of applications and libraries based on the UPnP-AV specs  |
+|                                                                           |
+|  Copyright (C) 2009                                                       |
+|  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
+|                                                                           |
+|  This file is part of Jamm.                                               |
+|                                                                           |
+|  Jamm is free software: you can redistribute it and/or modify             |
+|  it under the terms of the GNU General Public License as published by     |
+|  the Free Software Foundation version 3 of the License.                   |
+|                                                                           |
+|  Jamm is distributed in the hope that it will be useful,                  |
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of           |
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
+|  GNU General Public License for more details.                             |
+|                                                                           |
+|  You should have received a copy of the GNU General Public License        |
+|  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+
 #include "enginevlc.h"
 
 #include <jamm/debug.h>
@@ -83,6 +87,9 @@ EngineVlc::closeXWindow()
 void
 EngineVlc::load()
 {
+    m_startTime = 0;
+    m_length = 0.0;
+
     libvlc_media_t* media = libvlc_media_new(m_vlcInstance, m_uri.c_str(), &m_exception);
     handleException();
     libvlc_media_player_set_media(m_vlcPlayer, media, &m_exception);
@@ -94,17 +101,29 @@ EngineVlc::load()
     // settle to a defined state
     libvlc_state_t state;
     do {
+        usleep(100000); // limit the cpu-load while loading the media
         state = libvlc_media_player_get_state(m_vlcPlayer, &m_exception);
         handleException();
     } while(state != libvlc_Playing && state != libvlc_Error && state != libvlc_MediaPlayerEndReached );
 
-    // wait for position information
+    int hasVideo = 0;
+    int trackCount = 0;
     do {
-        m_startTime = libvlc_media_player_get_time(m_vlcPlayer, &m_exception);
+        usleep(100000); // limit the cpu-load while waiting for stream demux
+        hasVideo = libvlc_media_player_has_vout(m_vlcPlayer, &m_exception);
         handleException();
-    } while(state == libvlc_Playing && m_startTime == 0);
+        trackCount = libvlc_audio_get_track_count(m_vlcPlayer, &m_exception);
+        handleException();
+    } while(state == libvlc_Playing && !hasVideo && !trackCount);
+    TRACE("EngineVlc::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
+
+    m_length = (libvlc_media_player_get_length(m_vlcPlayer, &m_exception) - m_startTime) / 1000.0;
+    libvlc_time_t d = libvlc_media_get_duration(media, &m_exception);
+    TRACE("EngineVlc::load() m_length: %f, duration: %lli", m_length, d);
     
-    TRACE("EngineVlc::load() m_length: %f, m_startTime: %lli", m_length, m_startTime);
+    m_startTime = libvlc_media_player_get_time(m_vlcPlayer, &m_exception);
+    handleException();
+    TRACE("EngineVlc::load() m_startTime [ms]: %lli", m_startTime);
 
     if(!libvlc_media_player_is_seekable(m_vlcPlayer, &m_exception)) {
         TRACE("EngineVlc::load() media is not seekable");
@@ -114,6 +133,15 @@ EngineVlc::load()
         TRACE("EngineVlc::load() pause not possible on media");
     }
     handleException();
+    
+    // TODO: receive video size changed - events and adjust display size
+    int videoWidth = libvlc_video_get_width(m_vlcPlayer, &m_exception);
+    handleException();
+    int videoHeight = libvlc_video_get_height(m_vlcPlayer, &m_exception);
+    handleException();
+    TRACE("EngineVlc::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
+/*    libvlc_video_resize(m_vlcPlayer, videoWidth, videoHeight, &m_exception);
+    handleException();*/
 }
 
 
@@ -199,6 +227,13 @@ EngineVlc::getLength(float &seconds)
     handleException();
     seconds = m_length;
     TRACE("EngineVlc::getLength() seconds: %f", seconds);
+    
+    /* use instead?:
+    libvlc_time_t
+    libvlc_media_get_duration( libvlc_media_t * p_md,
+                               libvlc_exception_t * p_e )
+    */
+    
 /*    seconds = libvlc_media_player_get_length(m_vlcPlayer, &m_exception) / 1000.0;
     handleException();
     seconds = 100.0;
@@ -220,13 +255,6 @@ EngineVlc::getVolume(int channel, float &vol)
     vol = libvlc_audio_get_volume(m_vlcInstance, &m_exception);
     handleException();
 }
-
-
-// void
-// EngineVlc::clearException()
-// {
-//     libvlc_exception_init(&m_exception);
-// }
 
 
 void

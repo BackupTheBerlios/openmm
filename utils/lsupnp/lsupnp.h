@@ -20,14 +20,29 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QApplication>
+#ifndef LSUPNP_H
+#define LSUPNP_H
 
-#include "upnpcontroller.h"
+#include <platinum/Platinum.h>
+#include <platinum/PltCtrlPoint.h>
 
-int main(int argc, char** argv)
+class UpnpController : public PLT_CtrlPointListener
 {
-    QApplication app(argc, argv);
-    UpnpController upnpController;
-    upnpController.showMainWindow();
-    return app.exec();
-}
+public:
+    UpnpController();
+    ~UpnpController();
+
+protected:
+    virtual NPT_Result OnDeviceAdded(PLT_DeviceDataReference& device);
+    virtual NPT_Result OnDeviceRemoved(PLT_DeviceDataReference& device);
+    virtual NPT_Result OnActionResponse(NPT_Result res, PLT_ActionReference& action, void* userdata);
+    virtual NPT_Result OnEventNotify(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
+
+
+private:
+    PLT_UPnP*                       m_upnp;
+    PLT_CtrlPointReference          m_ctrlPoint;
+};
+
+#endif /* LSUPNP_H */
+

@@ -1,5 +1,28 @@
 FIND_PACKAGE(Qt4)
 
+SET(CMAKE_LIBRARY_PATH
+${CMAKE_SYSTEM_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_PLATINUM_UPNP
+NAME platinum-upnp
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+if(TARGET jamm)
+SET(LIB_JAMM
+jamm
+)
+INCLUDE_DIRECTORIES(
+${jamm_SOURCE_DIR}/jammlib
+)
+else(TARGET jamm)
+FIND_LIBRARY(LIB_JAMM
+NAME jamm
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+endif(TARGET jamm)
+
 MESSAGE (STATUS "Use file: ${QT_USE_FILE}")
 INCLUDE(
 ${QT_USE_FILE}
@@ -8,7 +31,7 @@ ${QT_USE_FILE}
 SET( JAMMC_SRCS
 controllergui.cpp
 main.cpp
-modeltest.cpp
+# modeltest.cpp
 upnpbrowsermodel.cpp
 upnpcontroller.cpp
 upnprenderingcontrol.cpp
@@ -23,7 +46,7 @@ controllergui.ui
 
 SET( JAMMC_MOC
 controllergui.h
-modeltest.h
+# modeltest.h
 upnpbrowsermodel.h
 upnprendererlistmodel.h
 # upnpsyncmediabrowser.h
@@ -57,18 +80,14 @@ ${JAMMC_MOC_CPP}
 
 TARGET_LINK_LIBRARIES( jammc
 # /usr/local/lib/libplatinum_upnp.so
-platinum-upnp
+#platinum-upnp
+${LIB_JAMM}
+${LIB_PLATINUM_UPNP}
 ${QT_LIBRARIES}
 )
 
-
 ADD_DEFINITIONS(
 # -D_REENTRANT -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT -DQT_NO_WARNING_OUTPUT -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DQT_SHARED
-)
-
-TARGET_LINK_LIBRARIES( jammc
-# jammlib
-jamm
 )
 
 INSTALL( TARGETS jammc

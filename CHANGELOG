@@ -1,0 +1,37 @@
+-------------------------------------------------------------------------------------------------------
+2009-04-15  JammS
+
+vdr-upnp 0.0.2
+ changed number of children in top level containers (Live-TV, Recordings) from 0 to 1 to satisfy xbmc
+
+ changed objectId of recordings from "/<channel id>/<start time>/" to 
+ "vdr-rec/<channel id>/<start time>/" to satisfy xbmc
+
+initial version of lsupnp 0.0.1
+
+-------------------------------------------------------------------------------------------------------
+2009-04-15  Jamm 0.0.1
+Initial version with basic features (list incomplete):
+
+JammC:
+device discovery: select UPnP server/renderer, dynamicely add/remove server/renderer
+browse: lazy browsing
+transport: start, stop, pause, seek, position-info thread
+render control: volume
+
+JammR:
+engines: vlc, mplayer, xine
+state machine
+EOT detection
+seek in streams
+position-info thread
+
+JammS-vdr:
+channel-list
+recording-list
+http server for recordings
+handle 2GiB sliced VDR-recordings
+seek in recordings
+
+JammSession:
+epia image with Xorg and openchrome driver

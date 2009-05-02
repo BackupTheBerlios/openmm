@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-PROJECT(jamm)
+PROJECT(utils)
 
 #if you don't want the full compiler output, remove the following line
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
@@ -10,8 +10,4 @@ PROJECT(jamm)
 ADD_DEFINITIONS(-Wall -D__DEBUG__ -pipe -W -g)
 # ADD_DEFINITIONS(-Wall -D__DEBUG__)
 
-ADD_SUBDIRECTORY(jammlib)
-ADD_SUBDIRECTORY(jammc)
-ADD_SUBDIRECTORY(jammr)
-ADD_SUBDIRECTORY(jamms)
-ADD_SUBDIRECTORY(utils)
+ADD_SUBDIRECTORY(lsupnp)
