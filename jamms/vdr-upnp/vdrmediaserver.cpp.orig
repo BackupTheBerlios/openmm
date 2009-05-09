@@ -74,13 +74,6 @@ VdrMediaServer::VdrMediaServer(const char*  friendly_name,
     m_containerRecordings->m_ChildrenCount = 1;
     m_containerRecordings->m_ParentID = m_containerRoot->m_ObjectID;
     m_containerRecordings->m_ObjectID = "2";
-
-    m_containerLiveRadio = new PLT_MediaContainer();
-    m_containerLiveRadio->m_Title = "Live Radio";
-    m_containerLiveRadio->m_ObjectClass.type = "object.container";
-    m_containerLiveRadio->m_ChildrenCount = 1;
-    m_containerLiveRadio->m_ParentID = m_containerRoot->m_ObjectID;
-    m_containerLiveRadio->m_ObjectID = "3";
 }
 
 VdrMediaServer::~VdrMediaServer()
@@ -89,7 +82,7 @@ VdrMediaServer::~VdrMediaServer()
 
 
 NPT_String
-VdrMediaServer::videoToDidl(NPT_String filter, cChannel *channel)
+VdrMediaServer::channelToDidl(NPT_String filter, cChannel *channel)
 {
     PLT_MediaItem* object = new PLT_MediaItem();
     NPT_String objectId;
@@ -101,7 +94,7 @@ VdrMediaServer::videoToDidl(NPT_String filter, cChannel *channel)
     // check if item is already in itemCache
     ins = m_itemCache.insert(make_pair(objectId, object));
     if (ins.second) {
-        cerr << "VdrMediaServer::videoToDidl() new channel: " << (char*)objectId << endl;
+        cerr << "VdrMediaServer::channelToDidl() new channel: " << (char*)objectId << endl;
         object->m_Title = channel->Name();
         object->m_ObjectClass.type = "object.item";
         object->m_ParentID = m_containerLiveTv->m_ObjectID;
@@ -117,40 +110,6 @@ VdrMediaServer::videoToDidl(NPT_String filter, cChannel *channel)
         object = (*ins.first).second;
     }
     
-    NPT_String res;
-    NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*object, filter, res));
-    return res;
-}
-
-NPT_String
-VdrMediaServer::audioToDidl(NPT_String filter, cChannel *channel)
-{
-    PLT_MediaItem* object = new PLT_MediaItem();
-    NPT_String objectId;
-    PLT_MediaItemResource resource;
-    pair<map<NPT_String, PLT_MediaItem*>::iterator, bool> ins;
-
-    objectId = NPT_String("vdr-radio/") + channel->GetChannelID().ToString();
-//     NPT_LOG_INFO(NPT_String(channel->Name()) + ": " + objectId);
-    // check if item is already in itemCache
-    ins = m_itemCache.insert(make_pair(objectId, object));
-    if (ins.second) {
-        cerr << "VdrMediaServer::audioToDidl() new channel: " << (char*)objectId << endl;
-        object->m_Title = channel->Name();
-        object->m_ObjectClass.type = "object.item";
-        object->m_ParentID = m_containerLiveRadio->m_ObjectID;
-        object->m_ObjectID = objectId;
-        resource.m_Size = 0;
-        resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_liveTvPort) + "/") + objectId;
-        resource.m_ProtocolInfo = "http-get:*:audio/mpeg:*";
-        object->m_ObjectClass.type = "object.item.audioItem.musicTrack";
-        object->m_Resources.Add(resource);
-    }
-    else {
-        delete object;
-        object = (*ins.first).second;
-    }
-
     NPT_String res;
     NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*object, filter, res));
     return res;
@@ -212,9 +171,6 @@ VdrMediaServer::OnBrowseMetadata(PLT_ActionReference& action, const char* object
     else if (NPT_String(object_id) == m_containerRecordings->m_ObjectID) {
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRecordings, filter, tmp));
     }
-    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
-        NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveRadio, filter, tmp));
-    }
     else {
         PLT_MediaItem* item;
         map<NPT_String, PLT_MediaItem*>::iterator i = m_itemCache.find(NPT_String(object_id));
@@ -270,24 +226,21 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveTv, filter, tmp));
         didl += tmp;
         tmp = "";
-        NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveRadio, filter, tmp));
-        didl += tmp;
-        tmp = "";
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRecordings, filter, tmp));
         didl += tmp;
-        numberReturned = 3;
-        totalMatches = 3;
+        numberReturned = 2;
+        totalMatches = 2;
 
     }
     else if (NPT_String(object_id) == m_containerLiveTv->m_ObjectID) {
         for (cChannel *chan = Channels.GetByNumber(start_index, 1); chan; chan = Channels.Next(chan)) {
-            if (!chan || chan->Vpid() == 0) {
+            if (!chan) {
                 break;
             }
             NPT_LOG_INFO(NPT_String(chan->Name()));
             // TODO: need to convert it to string or is there something like a NULL-ChannelID?
             if (chan->GetChannelID().ToString() == "0-0-0-0") continue;
-            didl += videoToDidl(filter, chan);
+            didl += channelToDidl(filter, chan);
             numberReturned++;
             totalMatches = Channels.MaxNumber();
             NPT_LOG_INFO_1("totalMatches = %i", totalMatches);
@@ -304,23 +257,6 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
             didl += recToDidl(filter, rec);
             numberReturned++;
             totalMatches = Recordings.Count();
-            if (numberReturned >= req_count) {
-                break;
-            }
-        }
-    }
-    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
-        for (cChannel *chan = Channels.GetByNumber(start_index, 1); chan; chan = Channels.Next(chan)) {
-            if (!chan || chan->Vpid() != 0) {
-                break;
-            }
-            NPT_LOG_INFO(NPT_String(chan->Name()));
-            // TODO: need to convert it to string or is there something like a NULL-ChannelID?
-            if (chan->GetChannelID().ToString() == "0-0-0-0") continue;
-            didl += audioToDidl(filter, chan);
-            numberReturned++;
-            totalMatches = Channels.MaxNumber();
-            NPT_LOG_INFO_1("totalMatches = %i", totalMatches);
             if (numberReturned >= req_count) {
                 break;
             }
@@ -526,7 +462,7 @@ MultiFileInputStream::MultiFileInputStream(string path)
     if (!dir)
     {
         cerr << "opendir() on " << path << " failed: " << strerror(errno) << endl;
-        return;
+        exit(1);
     }
     vector<string> fnames;
     while ((dirent = readdir(dir))) {

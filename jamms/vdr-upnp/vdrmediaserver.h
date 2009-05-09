@@ -64,8 +64,9 @@ private:
                                 const NPT_String& searchCriteria,
                                 const NPT_HttpRequestContext& context);
     
-    NPT_String channelToDidl(NPT_String filter, cChannel *channel);
+    NPT_String videoToDidl(NPT_String filter, cChannel *channel);
     NPT_String recToDidl(NPT_String filter, cRecording *rec);
+    NPT_String audioToDidl(NPT_String filter, cChannel *channel);
     
     virtual NPT_Result ProcessHttpRequest(NPT_HttpRequest&              request, 
                                           const NPT_HttpRequestContext& context,
@@ -86,6 +87,7 @@ private:
     PLT_MediaContainer* m_containerRoot;
     PLT_MediaContainer* m_containerLiveTv;
     PLT_MediaContainer* m_containerRecordings;
+    PLT_MediaContainer* m_containerLiveRadio;
     
     // TODO: need to lock m_itemCache
     map<NPT_String, PLT_MediaItem*> m_itemCache;
