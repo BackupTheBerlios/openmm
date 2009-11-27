@@ -108,7 +108,8 @@ VdrMediaServer::videoToDidl(NPT_String filter, cChannel *channel)
         object->m_ObjectID = objectId;
         resource.m_Size = 0;
         resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_liveTvPort) + "/PES/") + objectId;
-        resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
+//         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
+        resource.m_ProtocolInfo = "http-get:*:video/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MPEG_ES_PAL;DLNA.ORG_FLAGS=01700000000000000000000000000000";
         object->m_ObjectClass.type = "object.item.videoItem.movie";
         object->m_Resources.Add(resource);
     }
@@ -180,7 +181,8 @@ VdrMediaServer::recToDidl(NPT_String filter, cRecording *rec)
         object->m_ObjectID = objectId;
         m->GetSize(resource.m_Size);
         resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_recPort) + "/") + objectId;
-        resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
+//         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
+        resource.m_ProtocolInfo = "http-get:*:video/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MPEG_ES_PAL;DLNA.ORG_FLAGS=01700000000000000000000000000000";
         object->m_ObjectClass.type = "object.item.videoItem.movie";
         object->m_Resources.Add(resource);
     }

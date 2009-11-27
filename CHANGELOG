@@ -1,6 +1,12 @@
 -------------------------------------------------------------------------------------------------------
 2009-04-15  JammS
 
+vdr-upnp 0.0.3
+ cmake extracts API version from /usr/include/vdr and renames plugin .so file
+
+-------------------------------------------------------------------------------------------------------
+2009-04-15  JammS
+
 vdr-upnp 0.0.2
  changed number of children in top level containers (Live-TV, Recordings) from 0 to 1 to satisfy xbmc
 

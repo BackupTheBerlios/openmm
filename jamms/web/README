@@ -1,0 +1,11 @@
+JammR - a UPnP-AV Media Renderer
+JammR (pronounced like "the one who jamms") is the "set-top box" for you TV. It renders the media streams
+coming from the UPnP-AV Server to a screen and a sound system.
+
+Quick'n dirty installation:
+You need CMake 2.6 or later. Run the following commands:
+$ cmake .
+$ make
+$ sudo make install
+
+See the README of the Jamm-Project for more information.

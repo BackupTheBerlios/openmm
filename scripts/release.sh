@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RN="0.0.2"
+RN="0.0.3"
 RN_DIR=${JAMM}/../jammarchive/release-${RN}
 SUB_PKGS="jammc jammr jammlib"
 SUB_SRVS="vdr-upnp"

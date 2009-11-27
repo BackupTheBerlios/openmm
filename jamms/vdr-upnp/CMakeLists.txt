@@ -56,20 +56,24 @@ ${LIB_JAMM}
 ${LIB_PLATINUM_UPNP}
 )
 
-# EXEC_PROGRAM( sed
-#     ARGS "-ne" "\'/define APIVERSION/s/^.*\"\\(.*\\)\".*$$/\1/p\'" "vdr/config.h"
-#     OUTPUT_VARIABLE VDR_API_VERSION
-# )
+# find API Version of vdr from it's headers in /usr/include/vdr
+EXECUTE_PROCESS( COMMAND
+    sh -c "echo -n `grep \"define APIVERSION\" /usr/include/vdr/config.h | cut -d'\"' -f2`"
+    OUTPUT_VARIABLE VDR_API_VERSION
+)
 
-# ADD_CUSTOM_COMMAND( vdr-upnp
-#     POST_BUILD
-#     COMMAND EXEC_PROGRAM("cp
-# )
+MESSAGE( STATUS
+    "VDR's API_VERSION is: ${VDR_API_VERSION}"
+)
+
+SET_TARGET_PROPERTIES( vdr-upnp
+    PROPERTIES SOVERSION ${VDR_API_VERSION}
+)
 
 # TODO:
 # add option to link libjamm-system-platin_upnp.so staticly into libvdr-upnp
-# cp libvdr-upnp to libvdr-upnp-${VDR-VERSION}
 
 INSTALL( TARGETS vdr-upnp
-LIBRARY DESTINATION /usr/lib/vdr/plugins/
+    LIBRARY DESTINATION /usr/lib/vdr/plugins/
+    OPTIONAL NAMELINK_SKIP
 )

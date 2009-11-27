@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding='UTF-8' ?>
+<stationlist>
+<tunein base="/sbin/tunein-station.pls"></tunein>
+<station name="idobi Radio: Music that doesn't suck! News, interviews and the best in alternative, rock, and punk m - [SHOUTcast.com]" mt="audio/mpeg" id="1480" br="128" genre="Alternative  Rock  Punk" ct="The Cab - This City Is Contagious" lc="2623"></station>
+<station name="181.FM - The Buzz (Your Alternative Station!) - [SHOUTcast.com]" mt="audio/mpeg" id="5283" br="128" genre="Alternative Rock" ct="Depeche Mode - Wrong" lc="2466"></station>
+<station name="#MUSIK.EXTREME - WWW.RAUTEMUSIK.FM - 24H ROCK METAL PUNK SKA ALTERNATIVE AND MORE! - [SHOUTcast.com]" mt="audio/mpeg" id="4361" br="128" genre="Rock Metal Alternative" ct="Track Update on www.RauteMusik.FM" lc="2292"></station>
+<station name="ChroniX Aggression - Loud &amp; Clear - www.chronixradio.com - [SHOUTcast.com]" mt="audio/mpeg" id="2103" br="128" genre="METAL  ROCK  ALTERNATIVE" ct="Scar Symmetry - Artificial Sun Projection" lc="2010"></station>
+<station name="Big R Radio - 90s Alternative  - [SHOUTcast.com]" mt="audio/mpeg" id="1556" br="128" genre="Alternative 90s Rock Punk" ct="Third Eye Blind - Semi-Charmed Life (Original Version)" lc="1460"></station>
+<station name=".977 The Alternative Channel - 977MUSIC.COM - The Alternative Music Internet Radio Channel - [SHOUTcast.com]" mt="audio/mpeg" id="903669" br="128" genre="Rock Alternative" ct="Foo Fighters - Hero" lc="581"></station>
+<station name="www.kinkfm.com - [SHOUTcast.com]" mt="audio/mpeg" id="4004" br="160" genre="alternative" ct="Kink FM Now Playing: Florence and The Machine - Dog Days Are Over" lc="561"></station>
+<station name="NME Radio - [SHOUTcast.com]" mt="audio/mpeg" id="2889" br="128" genre="Alternative Indie Rock" ct="Arctic Monkeys - My Propeller" lc="493"></station>
+<station name="1.FM - Channel X - [SHOUTcast.com]" mt="audio/mpeg" id="1453" br="128" genre="modern rock  alternative " ct="Blue October - Dirt Room" lc="454"></station>
+<station name="FM4 - [SHOUTcast.com]" mt="audio/mpeg" id="581319" br="120" genre="Alternative Mainstream" ct="Connected: FIGHT CLUB (Deichkind Rx) - Electro Ferris" lc="447"></station>
+<station name="Big R Radio - 80s FM  - [SHOUTcast.com]" mt="audio/mpeg" id="9929" br="128" genre="80s Retro Alternative Top" ct="B-52`s - Love Shack (Radio Edit)" lc="402"></station>
+<station name="KCRW Music Stream - [SHOUTcast.com]" mt="audio/mpeg" id="159" br="128" genre="Alternative  Eclectic " ct="Estelle - American Boy" lc="361"></station>
+<station name="WOXY Live [128k] - [SHOUTcast.com]" mt="audio/mpeg" id="1656" br="128" genre="Indie Alternative Rock" ct="The Thermals - Here`s Your Future" lc="356"></station>
+<station name="shoutcast - [SHOUTcast.com]" mt="audio/mpeg" id="375767" br="128" genre="Alternative Talk Chill" ct="live" lc="349"></station>
+<station name="Alternative Rock - S K Y . F M - Alternative rock hits You want to hear!! - [SHOUTcast.com]" mt="audio/mpeg" id="55470" br="96" genre="Alternative Rock Adult Hi" ct="Crazy Town - Butterfly" lc="322"></station>
+<station name="ZenRadio.FM: Relaxation Meditation Concentration Peace Yoga Relaxare Chillout Lounge Holiday Colinde - [SHOUTcast.com]" mt="audio/mpeg" id="1291" br="64" genre="Ambient Alternative Zen" ct="Tracks on www.zenradio.fm" lc="319"></station>
+<station name="KCRW Simulcast - [SHOUTcast.com]" mt="audio/mpeg" id="8291" br="128" genre="Eclectic  Alternative  NP" ct="Morning Edition  -  7A-9A" lc="317"></station>
+<station name="KCRW ECLECTIC24: All Music Channel - [SHOUTcast.com]" mt="audio/mpeg" id="31958" br="128" genre="alternative  eclectic" ct="" lc="276"></station>
+<station name="Big R Radio - Alternative Rock  - [SHOUTcast.com]" mt="audio/mpeg" id="782" br="128" genre="Alternative 90s Rock Pop " ct="After Midnight Project - Take Me Home" lc="254"></station>
+<station name="[XRM] - Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="2173" br="96" genre="Rock Alternative" ct="Pearl Jam - Corduroy" lc="227"></station>
+<station name="Distortion Radio | 24/7 nonstop punk, rock, emo, screamo, and more! - [SHOUTcast.com]" mt="audio/mpeg" id="2409" br="128" genre="Alternative Punk Rock Emo" ct="Brand New - The Quiet Things That No One Ever Knows" lc="215"></station>
+<station name="KEXP Live 128kbps - [SHOUTcast.com]" mt="audio/mpeg" id="483113" br="128" genre="Alternative" ct="KEXP 90.3 FM - Time: 9:06AM Artist: Kelley Stoltz Song: `Ever Thought Of Coming Back` Album: Below The Branches" lc="206"></station>
+<station name="Hurricane Rock - [SHOUTcast.com]" mt="audio/mpeg" id="816211" br="128" genre="Rock Metal Alternative Pu" ct="Breed 77 - Alive" lc="197"></station>
+<station name="KEXP Live 128kbps - [SHOUTcast.com]" mt="audio/mpeg" id="611032" br="128" genre="Alternative" ct="KEXP 90.3 FM - Time: 9:06AM Artist: Kelley Stoltz Song: `Ever Thought Of Coming Back` Album: Below The Branches" lc="196"></station>
+<station name="The Current from Minnesota Public Radio - [SHOUTcast.com]" mt="audio/mpeg" id="8478" br="128" genre="Alternative  Eclectic  Po" ct="Lissie - Little Lovin`" lc="193"></station>
+<station name="Radio Nigel - [SHOUTcast.com]" mt="audio/mpeg" id="2667" br="96" genre="80s Alternative New Wave" ct="Duran Duran - A View to a Kill" lc="181"></station>
+<station name="Alternative HD  -= alternativehd.com =- - [SHOUTcast.com]" mt="audio/mpeg" id="462461" br="160" genre="alternative  punk  rock" ct="Chevelle - Comfortable Liar" lc="149"></station>
+<station name="[radio.wazee] modern alternative rock (www.wazee.org) - [SHOUTcast.com]" mt="audio/mpeg" id="9730" br="128" genre="Alternative Rock" ct="OK Go - Get Over It" lc="139"></station>
+<station name="Indie Rock - S K Y . F M - Indie, Alternative, and Underground Rock! - [SHOUTcast.com]" mt="audio/mpeg" id="277556" br="96" genre="Indie Rock Alternative" ct="The Banshee - Cut Me Clear" lc="138"></station>
+<station name="WOXY Vintage [128k] - [SHOUTcast.com]" mt="audio/mpeg" id="733559" br="128" genre="Classic Alternative Rock" ct="Buffalo Tom - Sodajerk" lc="117"></station>
+<station name="CBC Radio 3 - [SHOUTcast.com]" mt="audio/mpeg" id="297039" br="120" genre="Alternative Indie Rock" ct="Extra Happy Ghost - Mash-Up: Neither Being Nor Nothingness" lc="108"></station>
+<station name="1.FM - Channel X - [SHOUTcast.com]" mt="audio/aacp" id="6892" br="64" genre="alternative" ct="Blue October - Dirt Room" lc="106"></station>
+<station name=".977 The 90s Channel - 977MUSIC.COM - The 90s Internet Radio Channel - [SHOUTcast.com]" mt="audio/mpeg" id="742845" br="128" genre="Rock Pop Alternative" ct="Ace of Base - All That She Wants (1993)" lc="102"></station>
+<station name="Pop Fusion Radio - [SHOUTcast.com]" mt="audio/mpeg" id="761170" br="64" genre="Pop Rock Alternative" ct="Gin Blossoms - Learning The Hard Way" lc="102"></station>
+<station name="Devil's Night Radio! - [SHOUTcast.com]" mt="audio/mpeg" id="531403" br="128" genre="Classic Alternative  Punk" ct="Billy Idol - Hot In The City" lc="80"></station>
+<station name="La Grosse Radio Rock Alternative - Pop Hits Legends Indie - From Paris - www.LaGrosseRadio.com - [SHOUTcast.com]" mt="audio/mpeg" id="6423" br="192" genre="Rock Alternative Pop" ct="Doves - Kingdom Of Rust" lc="78"></station>
+<station name="WOXY Live [64k] - [SHOUTcast.com]" mt="audio/mpeg" id="425863" br="64" genre="Indie Alternative Rock" ct="Times New Viking - Martin Luther King Day" lc="77"></station>
+<station name="3WK Classic Undergroundradio - [SHOUTcast.com]" mt="audio/mpeg" id="16829" br="96" genre="Indie College Alternative" ct="74490:savoy brown/is that so - raw sienna/parrot" lc="75"></station>
+<station name="Radio Heartland from Minnesota Public Radio - [SHOUTcast.com]" mt="audio/mpeg" id="9355" br="128" genre="Alternative  Electric  Po" ct="K.D. Lang - Hallelujah" lc="71"></station>
+<station name="Alternative Rock - S K Y . F M - Alternative rock hits You want to hear!! - [SHOUTcast.com]" mt="audio/aacp" id="285301" br="64" genre="Alternative Rock Adult Hi" ct="Armchair Cynics - Coalmine" lc="68"></station>
+<station name="Radio im Internet.de - Rock, Indie, Alternative (Deutschland/Germany) RadioimInternet.de - [SHOUTcast.com]" mt="audio/mpeg" id="159582" br="128" genre="Alternative Rock Indie" ct="Bob Dylan - Stuck Inside Of Mobile With The Memphis Blues Again" lc="62"></station>
+<station name="MegarockRadio.Net - this is REAL ROCK RADIO! - [SHOUTcast.com]" mt="audio/mpeg" id="691440" br="128" genre="Rock  Metal  Alternative" ct="Heaven &amp; Hell - Follow The Tears" lc="61"></station>
+<station name="MEGASTACJA.NET ++ ROCK ++ | Rock Music | Muzyka Rockowa | Polskie Radio - [SHOUTcast.com]" mt="audio/mpeg" id="7949" br="96" genre="rock hardrock alternative" ct="H-Blockx [Time To Move] - Little Girl" lc="59"></station>
+<station name="100hitz - Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="8052" br="128" genre="Alternative  Alternative " ct="Manchester Orchestra - Shake It Out" lc="58"></station>
+<station name="GotRadio - Hot Hits - [SHOUTcast.com]" mt="audio/aacp" id="215978" br="48" genre="Top 40  Pop  Alternative " ct="Kid Rock - All Summer Long" lc="57"></station>
+<station name="Gutter-Punk-Radio - [SHOUTcast.com]" mt="audio/mpeg" id="157289" br="128" genre="Punk Ska Alternative Deat" ct="one way system - 16 - one day soon" lc="56"></station>
+<station name="Zeilsteen Radio  from the Netherlands, Holland. Playing the Killers, Coldplay, Snow Patrol, Radiohea - [SHOUTcast.com]" mt="audio/mpeg" id="156177" br="128" genre="Alternative  Indie  Rock" ct="Snow Patrol - If There`s A Rocket Tie Me To It " lc="55"></station>
+<station name="88Nine Radio Milwaukee - [SHOUTcast.com]" mt="audio/mpeg" id="470204" br="128" genre="Alternative" ct="Off The Record BY My Morning Jacket" lc="55"></station>
+<station name="GotRadio - AAA Boulevard - [SHOUTcast.com]" mt="audio/mpeg" id="518468" br="128" genre="Adult Alternative  Rock" ct="Sugarplum Fairies - Hold On To Me" lc="54"></station>
+<station name="GotRadio - 90's Alternative - [SHOUTcast.com]" mt="audio/aacp" id="989810" br="48" genre="90 s  90 s Alternative  9" ct="Nirvana - Where Did You Sleep Last Night (Unplugged)" lc="54"></station>
+<station name="---- RADIOBLAGON ---- Bordeaux ---LA SCENE ALTERNATIVE - FRANCE QUEBEC SUISSE BELGIQUE AFRICA CANADA - [SHOUTcast.com]" mt="audio/mpeg" id="962604" br="128" genre="ALTERNATIVE ROCK FRENCH" ct="MERZHIN-Fanny" lc="50"></station>
+<station name="koelncampus.com - [SHOUTcast.com]" mt="audio/mpeg" id="275138" br="128" genre="alternative" ct="" lc="49"></station>
+<station name="MEGASHUFFLE.com  - [SHOUTcast.com]" mt="audio/mpeg" id="157688" br="128" genre="Alternative  Rock  Top40 " ct="Franz Ferdinand - Do You Want To `2005`" lc="46"></station>
+<station name="181.FM - 90's Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="2858" br="128" genre="Alternative" ct="Kid Rock - Bawitdaba (Edit)" lc="44"></station>
+<station name="RADIO ELECTRACKS .:best tunes only:. Punk Hardcore Alternative Metal NEW SERVER HTTP://85.31.186.249 - [SHOUTcast.com]" mt="audio/mpeg" id="44281" br="192" genre="Alternative Punk Hardcore" ct="Disco Ensemble - Fresh New Blood" lc="44"></station>
+<station name="181.FM - Classic Buzz -=- Classic Alternative Rock - [SHOUTcast.com]" mt="audio/mpeg" id="4448" br="128" genre="Alternative Classic Rock" ct="Metallica - The Unforgiven" lc="41"></station>
+<station name="Distortion Radio | 24/7 nonstop punk, rock, emo, screamo, and more! - [SHOUTcast.com]" mt="audio/mpeg" id="4879" br="64" genre="Alternative Punk Rock Emo" ct="Feeder - Come Back Around" lc="41"></station>
+<station name="=Buzz Radio= the NOT so famous alternative station - [SHOUTcast.com]" mt="audio/mpeg" id="869564" br="64" genre="Alternative Metal Punk" ct="Anberlin - Retrace" lc="40"></station>
+<station name="RadioHab.com - Rock Without Reason - [SHOUTcast.com]" mt="audio/mpeg" id="138" br="192" genre=" Alternative Pop Rock" ct="Soundgarden - Down On The Upside [IMPORT] (1996) - Blow Up The Outside World" lc="39"></station>
+<station name="3WK Undergroundradio - [SHOUTcast.com]" mt="audio/mpeg" id="234513" br="96" genre="Indie College Alternative" ct="61942:animal collective/the purple bottle - feels/fat cat" lc="36"></station>
+<station name="Indie Rock - S K Y . F M - Indie, Alternative, and Underground Rock! - [SHOUTcast.com]" mt="audio/aacp" id="448215" br="64" genre="Indie Rock Alternative" ct="The Others - William" lc="36"></station>
+<station name="Deeper Into Music - [SHOUTcast.com]" mt="audio/mpeg" id="932365" br="128" genre="Rock Alternative Eclectic" ct="Julian Plenti - Fly As You Might " lc="36"></station>
+<station name="The Rock HD - [SHOUTcast.com]" mt="audio/mpeg" id="83343" br="128" genre="Rock  Alternative" ct="" lc="35"></station>
+<station name="100 XR - #1 Rock Web Station!!! Today's Best New Rock &amp; XtReme Rock, Modern Rock, Classic Rock - HI - [SHOUTcast.com]" mt="audio/mpeg" id="594008" br="96" genre="Alternative Rock Metal" ct="Uriah Heep - Look At Yourself |from:  Look At Yourself - 1971 " lc="35"></station>
+<station name="radio-dijaspora.com - [SHOUTcast.com]" mt="audio/mpeg" id="184373" br="128" genre="Alternative" ct="Alka Vuica - 1994 - Lazi Me" lc="32"></station>
+<station name="KEXP Live 32kbps - [SHOUTcast.com]" mt="audio/mpeg" id="284869" br="32" genre="Alternative" ct="KEXP 90.3 FM - Time: 9:06AM Artist: Kelley Stoltz Song: `Ever Thought Of Coming Back` Album: Below The Branches" lc="31"></station>
+<station name="KEXP Live 32kbps - [SHOUTcast.com]" mt="audio/mpeg" id="571994" br="32" genre="Alternative" ct="KEXP 90.3 FM - Time: 9:06AM Artist: Kelley Stoltz Song: `Ever Thought Of Coming Back` Album: Below The Branches" lc="30"></station>
+<station name="1Club.FM - Classic Alternative Rock Channel - [SHOUTcast.com]" mt="audio/mpeg" id="39986" br="64" genre="Alternative Rock   Classi" ct="The Revolting Cocks - Do Ya Think I`m Sexy" lc="27"></station>
+<station name="GotRadio - Hot Hits - [SHOUTcast.com]" mt="audio/mpeg" id="59244" br="128" genre="Top40  pop  alternative " ct="Kid Rock - All Summer Long" lc="27"></station>
+<station name="WOXY Live [32k aacPlus] - [SHOUTcast.com]" mt="audio/aacp" id="736618" br="32" genre="Indie Alternative Rock" ct="Times New Viking - Martin Luther King Day" lc="27"></station>
+<station name="GotRadio - 90's Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="802769" br="128" genre="90s  Alternative  College" ct="Nirvana - Where Did You Sleep Last Night (Unplugged)" lc="27"></station>
+<station name="radioNtenna.org - 89.5 WHRV HD3 - Indie, Rock, Blues, Americana &amp; Oldies  - [SHOUTcast.com]" mt="audio/mpeg" id="333626" br="128" genre="Alternative" ct="Conor Oberst - Conor Oberst (2008) - Get-well-cards" lc="25"></station>
+<station name="181.fm - Chloe - [SHOUTcast.com]" mt="audio/mpeg" id="6342" br="128" genre="Alternative AAA Adult" ct="Marc Cohn - Walking In Memphis" lc="23"></station>
+<station name="3WK Classic Alternative Radio - [SHOUTcast.com]" mt="audio/mpeg" id="508287" br="96" genre="Alternative College 80s R" ct="93181:10,000 maniacs/my mother the war - the wishing chair/elektra/asylum" lc="23"></station>
+<station name="KGRL - 24/7 hi-def radio playing the best indie/eclectic/alt female music - www.kgrl.fm - [SHOUTcast.com]" mt="audio/mpeg" id="175095" br="128" genre="Mixed Alternative Rock" ct="The Wishing Tree - Falling" lc="22"></station>
+<station name="Alternative Addiction Radio - [SHOUTcast.com]" mt="audio/mpeg" id="578771" br="48" genre="Alternative" ct="No Love Lost - Wasted" lc="22"></station>
+<station name="WEVL FM 89.9 - Streaming Live From Memphis, TN - [SHOUTcast.com]" mt="audio/mpeg" id="661677" br="32" genre="Alternative" ct="Be WEVL`s Facebook fan at http://tinyurl.com/wevlfb" lc="22"></station>
+<station name="RADIO GRUNGE - PRAWDOPODOBNIE NAJLEPSZE RADIO W SIECI - [SHOUTcast.com]" mt="audio/aacp" id="288292" br="32" genre="Grunge Rock Alternative" ct="Alice in Chains - A Looking in View" lc="21"></station>
+<station name="Radio - DD63  The Power from the Eastide - [SHOUTcast.com]" mt="audio/mpeg" id="476817" br="128" genre="Alternative" ct="Radio-DD63 - Das Beste am ganzen Tag! Radio-DD63 hier spielt Deine Musik" lc="21"></station>
+<station name="ISD Records - Blood &amp; Honour Radio   - [SHOUTcast.com]" mt="audio/mpeg" id="954101" br="96" genre="Alternative hardcore hate" ct="No Remorse - Barbecue in Rostock" lc="21"></station>
+<station name="((Metaphoric.me)) IndieSpot Light, Indie Rock, New Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="7204" br="128" genre="Indie Rock Alternative" ct="Parts &amp; Labor - Nowheres Nigh" lc="20"></station>
+<station name="EARWAX FM - Donde esta la Radio? - [SHOUTcast.com]" mt="audio/mpeg" id="773719" br="64" genre="Alternative" ct="Radiohead - In Rainbows - Bodysnatchers" lc="20"></station>
+<station name="Radio Nigel - [SHOUTcast.com]" mt="audio/aacp" id="488407" br="64" genre="80s Alternative New Wave" ct="Squeeze - Black Coffee In Bed" lc="19"></station>
+<station name="Alternative Addiction Radio - [SHOUTcast.com]" mt="audio/mpeg" id="514348" br="128" genre="Alternative" ct="No Love Lost - Wasted" lc="19"></station>
+<station name="MHB Radio - From Heavy Metal, Rock &amp; Alternative We've got you covered! - [SHOUTcast.com]" mt="audio/mpeg" id="620435" br="128" genre="Rock  Metal  Alternative" ct="Doro - Rock On" lc="19"></station>
+<station name="RadioU - [SHOUTcast.com]" mt="audio/mpeg" id="787858" br="40" genre="Alternative" ct="" lc="19"></station>
+<station name="Fresh Air: Fresh Air, the Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="278243" br="128" genre="Student Alternative" ct="BED - Jamie T - Sheila" lc="18"></station>
+<station name="ChristianHardRock.Net - [SHOUTcast.com]" mt="audio/mpeg" id="485439" br="128" genre="rock alternative metal" ct="The Night Your Guardian Angel Fell Asleep - Chasing Victory" lc="18"></station>
+<station name="Radio Super Live Romania - [SHOUTcast.com]" mt="audio/mpeg" id="562380" br="128" genre="Alternative" ct="**= =Un Radio Pentru Inimile Voastre!! Live TG= =** Acolo unde cuvintele esueaza,muzica vorbeste !! " lc="18"></station>
+<station name="PlaZma Radio - [SHOUTcast.com]" mt="audio/mpeg" id="4678" br="128" genre="80s Pop Alternative" ct="Duran Duran - Rio (12` Version)" lc="17"></station>
+<station name="We rock the nation - ROCKSTATION - [SHOUTcast.com]" mt="audio/mpeg" id="218873" br="56" genre="rock metal alternative" ct="Ten - Remembrance For The Brave/Red" lc="17"></station>
+<station name="GotRadio - Women's World - [SHOUTcast.com]" mt="audio/mpeg" id="704535" br="128" genre="Adult Alternative  Ambien" ct="Patty Larkin - Don`t" lc="17"></station>
+<station name="HPR3: The Alternative Country Channel from Heartland Public Radio - [SHOUTcast.com]" mt="audio/mpeg" id="898559" br="128" genre="Alternative Country " ct="Amber Digby - Somebody Somewhere [CD: Music" lc="17"></station>
+<station name="GotRadio- Indie Underground - [SHOUTcast.com]" mt="audio/mpeg" id="2589" br="128" genre="Indie  Rock  Alternative " ct="Ramones - Beat On The Brat" lc="16"></station>
+<station name="Chilangaradio - Sintoniza tu oido - [SHOUTcast.com]" mt="audio/mpeg" id="47615" br="40" genre="Alternative" ct="www.chilangaradio.com" lc="16"></station>
+<station name="Gimme Noise - [SHOUTcast.com]" mt="audio/mpeg" id="187730" br="32" genre="Alternative Indie College" ct="Yo La Tengo - Stockholm Syndrome" lc="16"></station>
+<station name="killedbydeath.org -- only the finest raw punk crap you've not heard of. if they're famous, they won' - [SHOUTcast.com]" mt="audio/mpeg" id="250719" br="128" genre="Punk Alternative" ct="Sham 69 - Borstal Breakout  - V.A. - 100 Pure British Oi" lc="16"></station>
+<station name="UnserDiscofoxRadio - [SHOUTcast.com]" mt="audio/mpeg" id="268668" br="128" genre="alternative" ct="Der schreckliche Sven &amp; die tollk hnen Plattenreiter - Hey, Wickie (Funkytown Remix)---Dj-Wicky (Hauptsendestudio Kiel)" lc="16"></station>
+<station name="WOXY Vintage [64k] - [SHOUTcast.com]" mt="audio/mpeg" id="387744" br="64" genre="Classic Alternative Rock" ct="Buffalo Tom - Sodajerk" lc="16"></station>
+<station name="Errorfm.com: indie pop music - [SHOUTcast.com]" mt="audio/mpeg" id="900667" br="128" genre="indie pop alternative" ct="ErrorFM Archives - Larry Woodside 2009_01_23" lc="16"></station>
+<station name="X1FM Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="492528" br="128" genre="Alternative" ct="Soul Coughing - El Oso - I Miss the Girl" lc="15"></station>
+<station name="Impact 89fm WDBM East Lansing, MI - [SHOUTcast.com]" mt="audio/mpeg" id="561062" br="96" genre="Alternative" ct="" lc="15"></station>
+<station name="Frequence Banane - Student radio EPFL UNIL Lausanne Switzerland - [SHOUTcast.com]" mt="audio/mpeg" id="779995" br="128" genre="Alternative college rock" ct=" " lc="15"></station>
+<station name="#MUSIK.EXTREME - WWW.RAUTEMUSIK.FM - 24H ROCK METAL PUNK SKA ALTERNATIVE AND MORE! - [SHOUTcast.com]" mt="audio/aacp" id="8922" br="48" genre="ROCK METAL ALTERNATIVE" ct="Track Update on www.RauteMusik.FM" lc="14"></station>
+<station name="GotRadio - Alternative - [SHOUTcast.com]" mt="audio/aacp" id="628412" br="48" genre="Alternative Rock  Rock" ct="Saosin - Changing" lc="14"></station>
+<station name="moonpie.fm - bumpin your b0x...back in full effex - [SHOUTcast.com]" mt="audio/mpeg" id="816341" br="128" genre="Rock Alternative Metal" ct="AFI - The Interview" lc="14"></station>
+<station name="Little Radio - [SHOUTcast.com]" mt="audio/mpeg" id="865197" br="128" genre="Alternative" ct="British Sea Power - Apologies To Insect Life" lc="14"></station>
+<station name="The Cutting Edge of Christmas - [SHOUTcast.com]" mt="audio/mpeg" id="4451" br="128" genre="Alternative Holiday" ct="Asteria - Have Yourself a Lonely Little Christmas" lc="13"></station>
+<station name="1Club.FM - Alternative Rock (Q97 FM) - [SHOUTcast.com]" mt="audio/aacp" id="111500" br="64" genre="Alternative" ct="Offspring - The Kids Aren`t Alright" lc="13"></station>
+<station name="Frukie - Alternative Indie Folk - [SHOUTcast.com]" mt="audio/mpeg" id="1547" br="128" genre="Folk  Alternative  Indie " ct="Levon Helm - Calvary" lc="12"></station>
+<station name="Radio: Radio-Frenzy Pausenstream - [SHOUTcast.com]" mt="audio/mpeg" id="8813" br="256" genre="Alternative" ct="Eagles - One of these nights" lc="12"></station>
+<station name="GotRadio- Indie Underground - [SHOUTcast.com]" mt="audio/aacp" id="93186" br="48" genre="Alternative  Rock  Indie " ct="Ramones - Beat On The Brat" lc="12"></station>
+<station name="radio stadtfilter 96.3Mhz - [SHOUTcast.com]" mt="audio/mpeg" id="669791" br="128" genre="Alternative" ct="Destillator" lc="12"></station>
+<station name="Kanal K - Shoutcast Streaming Technology by www.init7.net - [SHOUTcast.com]" mt="audio/mpeg" id="829548" br="128" genre="Alternative" ct="" lc="12"></station>
+<station name="GotRadio - Women's World - [SHOUTcast.com]" mt="audio/aacp" id="852241" br="48" genre="Pop  Alternative  Women s" ct="Sara Bareilles - Bottle It Up" lc="12"></station>
+<station name="GotRadio - AAA Boulevard - [SHOUTcast.com]" mt="audio/aacp" id="619184" br="48" genre="Adult Alternative " ct="My Friend Steve - All In All" lc="11"></station>
+<station name="Dandelion Radio - Inspired by Peel - Independent - Original - Uncompromising - [SHOUTcast.com]" mt="audio/mpeg" id="638643" br="128" genre="Alternative Eclectic" ct="Marcelle: Dandelion Radio" lc="11"></station>
+<station name="KANM Student Radio (192k) - The college station of College Station - [SHOUTcast.com]" mt="audio/mpeg" id="666094" br="192" genre="Indie College Alternative" ct="Yo La Tengo - Cherry Chapstick" lc="11"></station>
+<station name="HKGFM.net - THE UNDERGROUND - [SHOUTcast.com]" mt="audio/mpeg" id="670479" br="128" genre="Alternative   Indie" ct="The Gossip - Standing In The Way Of Control " lc="11"></station>
+<station name="Fantastic-Radio FRH MainStream: Non Stop Music - [SHOUTcast.com]" mt="audio/mpeg" id="876639" br="128" genre="Alternative" ct="S hne Mannheims - Dein Leben" lc="11"></station>
+<station name="Alternative HD  -= alternativehd.com =- - [SHOUTcast.com]" mt="audio/mpeg" id="330258" br="160" genre="alternative  punk  rock" ct="The Beautiful Mistake - Stabbing Backyards" lc="10"></station>
+<station name="Radio A.G.A - [SHOUTcast.com]" mt="audio/mpeg" id="456944" br="128" genre="alternative world" ct="Joseph Krikorian - Nisit Al Nom" lc="10"></station>
+<station name="RAAR FM -No Excuse Raar FM Rocks- visit our website @ raarfm.com - [SHOUTcast.com]" mt="audio/mpeg" id="57522" br="256" genre="Alternative  Electronic  " ct="4) Roisin Murphy - Orally fixated" lc="9"></station>
+<station name="KRVM 91.9 FM  Eugene, Oregon - HQ (MP3) - [SHOUTcast.com]" mt="audio/mpeg" id="405898" br="48" genre="music alternative" ct="" lc="9"></station>
+<station name="LIVE WITH DJ ALEXEY - [SHOUTcast.com]" mt="audio/aacp" id="620033" br="24" genre="alternative" ct="By ` DaNnY   - 04-britney_spears-break_the_ice" lc="9"></station>
+<station name="Source Radio - Coventry University's Student Radio Station (High MP3) - [SHOUTcast.com]" mt="audio/mpeg" id="821077" br="128" genre="Pop Rock Alternative RnB" ct="LILY ALLEN - NOT FAIR" lc="9"></station>
+<station name="Alternative Rock - S K Y . F M - Alternative rock hits You want to hear!! - [SHOUTcast.com]" mt="audio/aacp" id="854622" br="24" genre="Alternative Rock Adult Hi" ct="Armchair Cynics - Coalmine" lc="9"></station>
+<station name="Atlantic Wave 1 - www.atlanticwaveradio.com - [SHOUTcast.com]" mt="audio/mpeg" id="19834" br="64" genre="Alternative Pop Rock" ct="Zander Bleck - Meant To Be [c7c]" lc="8"></station>
+<station name="KGRL - 24/7 hi-def radio playing the best indie/eclectic/alt female music - www.kgrl.fm - [SHOUTcast.com]" mt="audio/aacp" id="417839" br="64" genre="Mixed Alternative Rock" ct="The Wishing Tree - Falling" lc="8"></station>
+<station name="ANDYS 80S - The Rarest New Wave 80s Music - Make requests at ANDYS80S.com - Stream Live 24-7 - NewWa - [SHOUTcast.com]" mt="audio/mpeg" id="609642" br="128" genre="80s New Wave Alternative " ct="Associates - Those First Impressions" lc="8"></station>
+<station name="piu Lounge - [SHOUTcast.com]" mt="audio/mpeg" id="616447" br="128" genre="Alternative" ct="Let It Go (feat. Izzi Dunn) - Airmate" lc="8"></station>
+<station name="WOXY Vintage [32k aac+] - [SHOUTcast.com]" mt="audio/aacp" id="643783" br="32" genre="Classic Alternative Rock" ct="Buffalo Tom - Sodajerk" lc="8"></station>
+<station name="M2 PURPLE : ONLY ROCK - Live From Paris France - www.m2radio.fr - [SHOUTcast.com]" mt="audio/mpeg" id="1093" br="128" genre="Rock Alternative Metal" ct="Goose - Low Mode" lc="7"></station>
+<station name="LegatoCafe.Net - Cleveland, Ohio - [SHOUTcast.com]" mt="audio/mpeg" id="1894" br="128" genre="Adult Alternative Rock" ct="Tori Amos - Welcome To England" lc="7"></station>
+<station name="www.radio-lucky-star.de  - [SHOUTcast.com]" mt="audio/mpeg" id="75901" br="64" genre="Alternative" ct="diese Sendung wird moderiert von Rolf Br ckner" lc="7"></station>
+<station name="Radio Fabryka Tczew aac+ - [SHOUTcast.com]" mt="audio/aacp" id="158240" br="64" genre="Rock Alternative LocalNew" ct="Blok reklamowy - Radia Fabryka" lc="7"></station>
+<station name="...* KMROCK *... (( ( Rock, Metal, Alternative, Guitar &amp; Drum Instrumental, Pop....from KOREA ) )) - [SHOUTcast.com]" mt="audio/mpeg" id="194640" br="128" genre="ROCK METAL ALTERNATIVE PO" ct="Cinderella - Don`t Know What You Got (Till It`s Gone) ...:: DJ.Abyss ::... kmrock.fu.to/listen.pls" lc="7"></station>
+<station name="Big R Radio - Alternative Rock (iRadioSuite) - [SHOUTcast.com]" mt="audio/mpeg" id="309623" br="64" genre="Alternative 90s Rock Pop " ct="Jet - Are You Gonna Be My Girl" lc="7"></station>
+<station name="RADIO EMUZYKA - Pearl Jam - [SHOUTcast.com]" mt="audio/mpeg" id="527167" br="96" genre="Grunge Alternative Rock" ct="Pearl Jam - Sleight Of Hand" lc="7"></station>
+<station name="RADIO BETON ! 93.6 FM *** Radio Ferarock de TOURS *** France - [SHOUTcast.com]" mt="audio/mpeg" id="609418" br="64" genre="Alternative" ct="" lc="7"></station>
+<station name="ANTENNE VORARLBERG - Laendlebands - [SHOUTcast.com]" mt="audio/mpeg" id="625454" br="128" genre="Alternative" ct="Lou Rawls - Christmas is the time" lc="7"></station>
+<station name="koelncampus.com - [SHOUTcast.com]" mt="audio/mpeg" id="718828" br="48" genre="alternative" ct="" lc="7"></station>
+<station name="Atlantic Wave 2 - www.atlanticwaveradio.com - [SHOUTcast.com]" mt="audio/mpeg" id="759867" br="32" genre="Alternative Pop Rock" ct="Looker - Animal Dreams [c3h]" lc="7"></station>
+<station name="Big R Radio - 90s Alternative (iRadioSuite) - [SHOUTcast.com]" mt="audio/mpeg" id="870086" br="64" genre="Alternative  90s  Rock " ct="Stone Temple Pilots - Big Bang Baby" lc="7"></station>
+<station name="Auralgasms Radio - [SHOUTcast.com]" mt="audio/mpeg" id="911881" br="64" genre="Alternative" ct="Moev - A Thousand Lashes" lc="7"></station>
+<station name="Indie Rock - S K Y . F M - Indie, Alternative, and Underground Rock! - [SHOUTcast.com]" mt="audio/aacp" id="990637" br="24" genre="Indie Rock Alternative" ct="The Banshee - Cut Me Clear" lc="7"></station>
+<station name="Radio Pulsar - [SHOUTcast.com]" mt="audio/mpeg" id="997309" br="128" genre="Alternative" ct="" lc="7"></station>
+<station name="Hotmixradio Metal - La radio Metal &amp; Hard Rock (Paris France) http://www.hotmixradiometal.fr - [SHOUTcast.com]" mt="audio/mpeg" id="3603" br="128" genre="Metal Rock Alternative Ha" ct="LINKIN PARK `Somewhere i belong` - http://www.hotmixradiometal.fr" lc="6"></station>
+<station name="ChroniX Radio: Grit - Loud &amp; Clear - www.chronixradio.com - [SHOUTcast.com]" mt="audio/mpeg" id="96037" br="24" genre="Rock  Alternative  Metal" ct="Metallica - The Four Horsemen" lc="6"></station>
+<station name="Jungle- Radio...der Sender der suechtig macht - [SHOUTcast.com]" mt="audio/mpeg" id="257410" br="128" genre="Alternative" ct="Icon - Right Now (Na Na Na) (Full Vocal Radio Edit)" lc="6"></station>
+<station name="RADIO ENERGY - [SHOUTcast.com]" mt="audio/mpeg" id="326913" br="96" genre="Alternative" ct="VIN SARBATORILE:*" lc="6"></station>
+<station name="Alternative Rock - S K Y . F M - Alternative rock hits You want to hear!! - [SHOUTcast.com]" mt="audio/mpeg" id="358792" br="24" genre="Alternative Rock Adult Hi" ct="Autopulver - By Leaving Rome I Found My Home" lc="6"></station>
+<station name="SOLID ROCK RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="430432" br="64" genre="Alternative" ct="" lc="6"></station>
+<station name="Radio AF - [SHOUTcast.com]" mt="audio/mpeg" id="494853" br="192" genre="Alternative Electronic Hi" ct=" " lc="6"></station>
+<station name="Rock401 - The Rock Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="526835" br="96" genre="Alternative  Modern Rock " ct="Red Hot Chili Peppers - Stadium Arcadium (2006) - Snow (Hey Oh)" lc="6"></station>
+<station name="MEGASTACJA.NET ++ ROCK ++ | Rock Music | Muzyka Rockowa | Polskie Radio - [SHOUTcast.com]" mt="audio/mpeg" id="870307" br="96" genre="rock hardrock alternative" ct="H-Blockx [Time To Move] - Little Girl" lc="6"></station>
+<station name="GotRadio - Alternaitve - [SHOUTcast.com]" mt="audio/mpeg" id="962274" br="128" genre="Alternative  Rock  Colleg" ct="Saosin - Changing" lc="6"></station>
+<station name="Dj zuK en directo para Radio Coolcode Club powered by HispaSMS.net - [SHOUTcast.com]" mt="audio/mpeg" id="12978" br="96" genre="Alternative" ct="mischa daniels - another place (maximal d essed mix)" lc="5"></station>
+<station name="BI FM | La Alternativa - [SHOUTcast.com]" mt="audio/mpeg" id="37807" br="64" genre="Rock  Pop  Alternative  I" ct="511 Bi fm Hits (27 nov 09)" lc="5"></station>
+<station name="MusicVictim - MV1 - [SHOUTcast.com]" mt="audio/mpeg" id="44059" br="96" genre="alternative pop rock indi" ct="Atlas Sound - I Know I Will Escape" lc="5"></station>
+<station name="radio AlterVision - [SHOUTcast.com]" mt="audio/mpeg" id="64115" br="128" genre="Alternative" ct="Serj Tankian - Empy Walls" lc="5"></station>
+<station name="Canada's Edge Of Heavy:::SKELTER RADIO:::Tool, Ozzy, Linkin Park - Wicked Rock Canada - 128k MP3 - [SHOUTcast.com]" mt="audio/mpeg" id="74598" br="128" genre="Metal Rock Alternative" ct="Three days Grace - Now or never" lc="5"></station>
+<station name="Radio Campus Lille - [SHOUTcast.com]" mt="audio/mpeg" id="135535" br="128" genre="Alternative" ct="" lc="5"></station>
+<station name="radio8online - [SHOUTcast.com]" mt="audio/mpeg" id="179184" br="256" genre="Alternative" ct="041 - Kid Rock - All Summer Long" lc="5"></station>
+<station name="One8Two - [SHOUTcast.com]" mt="audio/mpeg" id="427494" br="96" genre="Alternative" ct="Panic! At The Disco - Nine In The Afternoon" lc="5"></station>
+<station name="1.FM - Channel X - [SHOUTcast.com]" mt="audio/aacp" id="448003" br="32" genre="Alternative" ct="Depeche Mode - Suffer Well" lc="5"></station>
+<station name="DJ Cola live bei Babsy's Schlager - Radio - [SHOUTcast.com]" mt="audio/mpeg" id="480925" br="128" genre="Alternative" ct="Schlager Hitmix" lc="5"></station>
+<station name="L'UniCo Campusradio Paderborn - [SHOUTcast.com]" mt="audio/mpeg" id="543268" br="192" genre="Alternative" ct="Metronomy - Not Made For Love" lc="5"></station>
+<station name="Radio Bemba 955 Fm - [SHOUTcast.com]" mt="audio/mpeg" id="575210" br="56" genre="Alternative" ct="" lc="5"></station>
+<station name="Radio Krishna Network - RKC Terni - Live Stream New Music - FULL TRANSCENDENTAL VIBRATION ! - [SHOUTcast.com]" mt="audio/mpeg" id="680922" br="24" genre="Spiritual  Alternative" ct="RKC Live Stream - Sulle rive del Gange - Srila Prabhupada pranam" lc="5"></station>
+<station name="RUC: 107.9FM, Sempre no AR !! - [SHOUTcast.com]" mt="audio/mpeg" id="792858" br="48" genre="alternative" ct="" lc="5"></station>
+<station name="DJ|Medusa bei Madhouse-Radio 24 Hours a Day - [SHOUTcast.com]" mt="audio/mpeg" id="855752" br="128" genre="Gotic Rock Alternative" ct="P.A.L. - Das Gel bnis" lc="5"></station>
+<station name="DJ Daywalker aus dem Sendestudio Monheim  - [SHOUTcast.com]" mt="audio/mpeg" id="864824" br="160" genre="Alternative" ct="J rgen Drews - Ich bau dir ein Schloss" lc="5"></station>
+<station name="GRUNDFUNK.net - [SHOUTcast.com]" mt="audio/mpeg" id="905837" br="128" genre="Alternative" ct="Ohrange - Egal Was Soll`s (Party)" lc="5"></station>
+<station name="dataheaven - indie rock radio (see website for more steams) - [SHOUTcast.com]" mt="audio/mpeg" id="921332" br="128" genre="Alternative" ct="Morrissey - Jack the Ripper" lc="5"></station>
+<station name="Zeilsteen Radio  from the Netherlands, Holland. Playing the Killers, Coldplay, Snow Patrol, Radiohea - [SHOUTcast.com]" mt="audio/mpeg" id="1676" br="128" genre="Alternative  Indie  Rock" ct="Snow Patrol - If There`s A Rocket Tie Me To It " lc="4"></station>
+<station name="Hotmixradio Japan - La radio J-Music (Paris France) http://www.hotmixradiojapan.fr - [SHOUTcast.com]" mt="audio/mpeg" id="7542" br="128" genre="rock alternative manga ja" ct="Ajoutez HotmixRadio sur votre Facebook : http://apps.facebook.com/hotmixradio/" lc="4"></station>
+<station name="Yepradio ! La radio 100%Hits , 100%Musique - [SHOUTcast.com]" mt="audio/mpeg" id="17670" br="128" genre="Alternative" ct="YepRadio - Meddley" lc="4"></station>
+<station name="Alachua Temple Live - [SHOUTcast.com]" mt="audio/mpeg" id="35784" br="48" genre="Alternative Spiritual" ct="" lc="4"></station>
+<station name="STOP RADIO - Pop Rock et Nouvelle Sc?ne Non Stop - [SHOUTcast.com]" mt="audio/mpeg" id="38733" br="128" genre="Pop Rock Alternative Nouv" ct="OXYGEN - 80`s Girl" lc="4"></station>
+<station name="Radio freeFM Ulm/Germany - [SHOUTcast.com]" mt="audio/mpeg" id="45639" br="128" genre="Alternative" ct="" lc="4"></station>
+<station name="AKAradio.com: FiveBot: Rock Out With Your Turkey Out! - [SHOUTcast.com]" mt="audio/mpeg" id="215071" br="96" genre="Rock  Alternative  90 s " ct="David Bowie - The Man Who Sold The World" lc="4"></station>
+<station name="NewTownRadio - Dj_Firebird - [SHOUTcast.com]" mt="audio/mpeg" id="287617" br="128" genre="Alternative" ct="..:: live aus New Town City ::.." lc="4"></station>
+<station name="Indie Rock - S K Y . F M - Indie, Alternative, and Underground Rock! - [SHOUTcast.com]" mt="audio/mpeg" id="299064" br="24" genre="Indie Rock Alternative" ct="The Zutons - Valerie" lc="4"></station>
+<station name="UtahKrishnas.Com - [SHOUTcast.com]" mt="audio/mpeg" id="324781" br="96" genre="Spiritual Alternative" ct="Sri - Govindam Adi Purusam" lc="4"></station>
+<station name="Gruftiradio Gruftiradio - [SHOUTcast.com]" mt="audio/mpeg" id="326388" br="96" genre="Gothic  Alternative  80er" ct="The Retrosic - Ground Zero" lc="4"></station>
+<station name="ChristianHardRock.Net - [SHOUTcast.com]" mt="audio/mpeg" id="339258" br="32" genre="rock alternative metal" ct="The Night Your Guardian Angel Fell Asleep - Chasing Victory" lc="4"></station>
+<station name="Hopecore.com | Hope for a dying world... - [SHOUTcast.com]" mt="audio/mpeg" id="395439" br="128" genre="Alternative Metal" ct="Jonezetta - The City We Live In" lc="4"></station>
+<station name="The Edge 101 - an education in alternative music - [SHOUTcast.com]" mt="audio/mpeg" id="427460" br="96" genre="Classic Alternative" ct="Joe Jackson - Breaking Us In Two" lc="4"></station>
+<station name="mvyradio - [SHOUTcast.com]" mt="audio/mpeg" id="447886" br="96" genre="Alternative" ct="mvyradio News  " lc="4"></station>
+<station name="you get it: Legit Radio - [SHOUTcast.com]" mt="audio/mpeg" id="479557" br="128" genre="Alternative" ct="Donavon Frankenreiter - The Way It Is" lc="4"></station>
+<station name="ChroniX Aggression - [SHOUTcast.com]" mt="audio/mpeg" id="498646" br="24" genre="Metal  Rock  Alternative" ct="Sinch - Tabula Rasa" lc="4"></station>
+<station name="100hitz - Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="502030" br="32" genre="Alternative  Alternative " ct="Paramore - Ignorance" lc="4"></station>
+<station name="Big R Radio - 90s FM (iRadioSuite) - [SHOUTcast.com]" mt="audio/mpeg" id="512969" br="64" genre="Pop Top40 Alternative iPh" ct="Adcor - Home Depot (2/12/09-1/17/10) - HomeDepot_YHTY6517_ALL.mp3" lc="4"></station>
+<station name="Radio SSC - [SHOUTcast.com]" mt="audio/mpeg" id="543913" br="128" genre="Alternative" ct="Nordic Stars - Car Tunes - Tell me why" lc="4"></station>
+<station name="91.1 KLSU YOUR LSU RADIO STATION - [SHOUTcast.com]" mt="audio/aacp" id="705018" br="32" genre="Alternative college" ct="`HARLAM SHAKES` - `TFO` - `TECHNICOLOR HEALTH`" lc="4"></station>
+<station name="1Club.FM - Alternative Rock (Q97 FM) - [SHOUTcast.com]" mt="audio/mpeg" id="743770" br="64" genre="Rock   Alternative" ct="Offspring - The Kids Aren`t Alright" lc="4"></station>
+<station name="Mondo Radio - [SHOUTcast.com]" mt="audio/mpeg" id="784706" br="96" genre="alternative pop rock indi" ct="Tar ntula - El Vals De Las Mariposas" lc="4"></station>
+<station name="RadioGlobal  - [SHOUTcast.com]" mt="audio/mpeg" id="790646" br="48" genre="de tocho Alternative" ct="Lindstrom &amp; Prins Thomas - Tirsdagsjam (Lang Versjon)" lc="4"></station>
+<station name="Radio centraal - [SHOUTcast.com]" mt="audio/mpeg" id="830103" br="64" genre="Alternative" ct="" lc="4"></station>
+<station name="Radio Galaxy Dj ADRIANO - [SHOUTcast.com]" mt="audio/aacp" id="883657" br="128" genre="Alternative" ct="-YULYAN19- - BUG Mafia feat Jasmine - Cu talpile arse-YULYAN19-" lc="4"></station>
+<station name="913. The Summit - [SHOUTcast.com]" mt="audio/mpeg" id="942334" br="32" genre="Alternative" ct="Marc Broussard - Home" lc="4"></station>
+<station name="Remedy.FM - [SHOUTcast.com]" mt="audio/mpeg" id="974233" br="128" genre="Rock  Alternative" ct="Listen and Watch Remedy.FM - Listen and Watch Remedy.FM" lc="4"></station>
+<station name="RADIO EMUZYKA - Modern Rock - [SHOUTcast.com]" mt="audio/mpeg" id="997771" br="96" genre="ROCK  ALTERNATIVE " ct="Modest Mouse - Float On" lc="4"></station>
+<station name="La Grosse Radio Rock Alternative - Pop Hits Legends Indie - From Paris - www.LaGrosseRadio.com - [SHOUTcast.com]" mt="audio/mpeg" id="2503" br="64" genre="Rock Alternative Pop" ct="__ La Grosse Radio Rock __" lc="3"></station>
+<station name="Lucky Time - Das Radio, da? Dich gl?cklich macht! - Nur hier ist das Original! - [SHOUTcast.com]" mt="audio/mpeg" id="5347" br="128" genre="Alternative" ct="Benny Bennassi - Vinyl - Sweet Dreams remix" lc="3"></station>
+<station name="DJ LadyGeiger - [SHOUTcast.com]" mt="audio/mpeg" id="54925" br="128" genre="Alternative" ct="Lady Geiger OnAir" lc="3"></station>
+<station name=".....:::Sl?ger-Szt?r-R?di?:::..... - [SHOUTcast.com]" mt="audio/mpeg" id="61269" br="194" genre="Alternative" ct="The Underdog Project - Summer Jam (Denis The Menace Club Mix)" lc="3"></station>
+<station name="J-RADIO - Classics - Album Tracks - Nowadays Hits - [SHOUTcast.com]" mt="audio/mpeg" id="75604" br="128" genre="Pop   Rock   Alternative" ct="Jim Diamond - I Should Have Know Better" lc="3"></station>
+<station name="The Best of Euphoric Radio... ~ Euphoric Radio...Everything that Rocks! - [SHOUTcast.com]" mt="audio/mpeg" id="156781" br="96" genre="Rock Metal   Alternative" ct="Tool - Sober" lc="3"></station>
+<station name="GermanMetal.com Radio - German metal, industrial, goth, rock, electronic, EBM, punk... - [SHOUTcast.com]" mt="audio/mpeg" id="158979" br="96" genre="Alternative" ct="Staubkind - Mein Herz" lc="3"></station>
+<station name="Hala Bedi Irratia - [SHOUTcast.com]" mt="audio/mpeg" id="189008" br="32" genre="Alternative" ct="" lc="3"></station>
+<station name="KSDB 919 Manhattan, KS - [SHOUTcast.com]" mt="audio/mpeg" id="195010" br="128" genre="Alternative" ct="" lc="3"></station>
+<station name="KCOU 88.1 FM - Mizzou - Student-run since 1963 - Live Studio Feed - 573-882-8262 - [SHOUTcast.com]" mt="audio/mpeg" id="199885" br="128" genre="College Indie Alternative" ct="Capybara - Dynamite Dare" lc="3"></station>
+<station name="Radio Grunge 24hs - [SHOUTcast.com]" mt="audio/mpeg" id="236979" br="96" genre="Alternative" ct="RADIOHEAD (PABLO HONEY) - Track  4 - Stop whispering" lc="3"></station>
+<station name="LSRfm.com - Live Stream (128kbps) - [SHOUTcast.com]" mt="audio/mpeg" id="247110" br="128" genre="Alternative" ct="" lc="3"></station>
+<station name="RadioRevolt.com - Where The Internet Rocks 24/7 Request - [SHOUTcast.com]" mt="audio/mpeg" id="247293" br="96" genre="Alternative Classic Rock" ct="Pepper - Back Home [live]" lc="3"></station>
+<station name="SLITSCAN RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="259403" br="96" genre="Alternative" ct="Nathan Payne - Dope is a Thing with Feathers" lc="3"></station>
+<station name="idobi Radio: Music that doesn't suck! News, interviews and the best in alternative, rock, and punk m - [SHOUTcast.com]" mt="audio/mpeg" id="276142" br="24" genre="Alternative  Rock  Punk" ct="Monty Are I - One In A Million" lc="3"></station>
+<station name="Jenn's 311 Radio - The Fall Tour has Begun - 311 Day 2010 in Vegas! Get Info @ 311.com - [SHOUTcast.com]" mt="audio/mpeg" id="304874" br="128" genre="Alternative" ct="311 - Dont Dwell (John Anno Remix)" lc="3"></station>
+<station name="Rock104 - The Hard Rock Channel (Powered by Star104.net) - [SHOUTcast.com]" mt="audio/aacp" id="343744" br="48" genre="Metal Rock Alternative" ct="Stone Temple Pilots - Interstate Love Song" lc="3"></station>
+<station name="07ROCK - [SHOUTcast.com]" mt="audio/mpeg" id="359548" br="128" genre="Alternative Rock" ct="The Radio Dept. - why wont you talk about it" lc="3"></station>
+<station name="KSCR - Los Angeles - [SHOUTcast.com]" mt="audio/mpeg" id="516489" br="160" genre="Alternative" ct="Animal Collective - Merriweather Post Pavilion - Bluish" lc="3"></station>
+<station name="bit eXpress - Mainstream Independent Mix - [SHOUTcast.com]" mt="audio/mpeg" id="571778" br="128" genre="Pop Alternative" ct="" lc="3"></station>
+<station name="CJSW - University of Calgary Radio - [SHOUTcast.com]" mt="audio/mpeg" id="584670" br="128" genre="college alternative jazz" ct="CJSW - The Two And A Half Hour Coffee Break (Ian Chiclo) - cjsw.com" lc="3"></station>
+<station name="X3Mradio.ru - [SHOUTcast.com]" mt="audio/mpeg" id="617628" br="192" genre="Metal Rock Alternative" ct="Soundgarden - Black Hole Sun" lc="3"></station>
+<station name="CT's Webradio for Demanding Listeners (soon to be renamed to skippy.fm) - [SHOUTcast.com]" mt="audio/mpeg" id="631363" br="192" genre="Pop Alternative Indie Sin" ct="Anna Nalick - Wreck Of The Day - Acoustic" lc="3"></station>
+<station name="RMX-LAREDO - [SHOUTcast.com]" mt="audio/mpeg" id="651190" br="24" genre="ALTERNATIVE MUSIC" ct="" lc="3"></station>
+<station name="SUBSTANZ.FM - [SHOUTcast.com]" mt="audio/mpeg" id="666900" br="128" genre="Alternative" ct="TV On The Radio - Wolf Like Me" lc="3"></station>
+<station name="WRTS Milsic Share - [SHOUTcast.com]" mt="audio/mpeg" id="695841" br="40" genre="Alternative" ct="michael jackson - billie jean" lc="3"></station>
+<station name="Periszkop Radio - Pecs  - [SHOUTcast.com]" mt="audio/mpeg" id="700039" br="160" genre="alternative" ct="disszeminator - ligeti macabremix " lc="3"></station>
+<station name="KRVM 91.9 FM Eugene, Oregon - (AAC+ 64kbps) - [SHOUTcast.com]" mt="audio/aacp" id="707001" br="64" genre="music alternative" ct="" lc="3"></station>
+<station name="http://www.wanderersfm.cl - [SHOUTcast.com]" mt="audio/mpeg" id="735566" br="64" genre="Alternative" ct="http://www.wanderersfm.cl" lc="3"></station>
+<station name="Vinz's Radio, enjoy ! - [SHOUTcast.com]" mt="audio/mpeg" id="796717" br="160" genre="Alternative   Electronic" ct="Beck - 00 - 08 - Where it`s at" lc="3"></station>
+<station name="91.121.21.215 - [SHOUTcast.com]" mt="audio/mpeg" id="800066" br="128" genre="alternative" ct="Mamadou[1]" lc="3"></station>
+<station name="Radio Cualquiera 94.3MHz - Parana - Entre Rios - [SHOUTcast.com]" mt="audio/aacp" id="859545" br="32" genre="Alternative" ct="" lc="3"></station>
+<station name="PUB Radio - your FIRST Choice in SECOND LIFE music - [SHOUTcast.com]" mt="audio/mpeg" id="886185" br="128" genre="Alternative  Indie " ct="The Jesus &amp; Mary Chain - April Skies" lc="3"></station>
+<station name="WIDB - The Revolution - [SHOUTcast.com]" mt="audio/mpeg" id="909673" br="128" genre="College  Alternative  Ind" ct="Pivot-In The Blood" lc="3"></station>
+<station name="Radio Delux - [SHOUTcast.com]" mt="audio/aacp" id="961331" br="48" genre="Alternative" ct="Live by Dj.Cosmin" lc="3"></station>
+<station name="RadioSoundCity: www.radiosoundcity.net - [SHOUTcast.com]" mt="audio/mpeg" id="995850" br="192" genre="alternative rock pop" ct="" lc="3"></station>
+<station name="Kirtan From The Hare Krishna Temple In Los Angeles - [SHOUTcast.com]" mt="audio/mpeg" id="7406" br="24" genre="Spiritual Alternative" ct="Agnideva - Sandhya Arati Kirtan - Live In New Dwaraka" lc="2"></station>
+<station name="FesterHead Radio - Rock -n- Roll with Aloha from Maui, Hawaii - [SHOUTcast.com]" mt="audio/mpeg" id="8331" br="128" genre="Rock  Alternative  Classi" ct="Black Sabbath || Tomorrow`s Dream" lc="2"></station>
+<station name="100 XR - #1 Rock Web Station! Today's Best New Rock &amp; XtReme Rock, Modern Rock, Classic Rock aacPlus - [SHOUTcast.com]" mt="audio/aacp" id="8353" br="24" genre="Alternative Rock Metal" ct="Uriah Heep - Look At Yourself |from:  Look At Yourself - 1971 " lc="2"></station>
+<station name="La Grosse Radio Rock Alternative - Pop Hits Legends Indie - From Paris - www.LaGrosseRadio.com - [SHOUTcast.com]" mt="audio/mpeg" id="9578" br="24" genre="Rock Alternative Pop" ct="Doves - Kingdom Of Rust" lc="2"></station>
+<station name="KCSC.ASChico.com - 128Kbps MP3 - Student Owned &amp; Operated - an Associated Students Activity Fee prog - [SHOUTcast.com]" mt="audio/mpeg" id="44077" br="128" genre="Alternative College" ct="" lc="2"></station>
+<station name="Kink FM - [SHOUTcast.com]" mt="audio/aacp" id="100633" br="32" genre="Indie Alternative" ct="www.kinkfm.com - Florence and The Machine" lc="2"></station>
+<station name="RhythmFish 21.5FM - English, Alternative, CCR, Eagles, Desi, Bollywood, Bangla - [SHOUTcast.com]" mt="audio/mpeg" id="186778" br="96" genre="Grunge Alternative Rock 8" ct="Aerosmith - Livin` On The Edge" lc="2"></station>
+<station name="Fun-Fox-Radio: Der gute Laune Stream Nonstop mit dem Auto-DJ (Discofox,Schlager,Oldies uvm) - [SHOUTcast.com]" mt="audio/mpeg" id="227399" br="128" genre="Alternative" ct="Andreas Lebbing &amp; Band - An Einer Dosis Liebe Stirbt Man Nicht (Dance Version)" lc="2"></station>
+<station name="Radio X - [SHOUTcast.com]" mt="audio/mpeg" id="248676" br="64" genre="Spanish Rock Alternative " ct="Monareta - Llama" lc="2"></station>
+<station name="Pop Fusion Radio - [SHOUTcast.com]" mt="audio/aacp" id="269959" br="32" genre="Pop Rock Alternative" ct="ProviderA - Hydrolyze" lc="2"></station>
+<station name="EL DESCAFEINADO - [SHOUTcast.com]" mt="audio/mpeg" id="275275" br="56" genre="Alternative" ct="Portishead - Theme from To Kill a Dead Man" lc="2"></station>
+<station name="Apapa-Liverpool - [SHOUTcast.com]" mt="audio/mpeg" id="293502" br="128" genre="Alternative" ct="Track 12" lc="2"></station>
+<station name="Deeper into Music - [SHOUTcast.com]" mt="audio/mpeg" id="294668" br="128" genre="Rock Alternative Eclectic" ct="Wire - I Should Have Known Better " lc="2"></station>
+<station name="DBC Radio TV Join us inside Second Life - [SHOUTcast.com]" mt="audio/mpeg" id="307400" br="80" genre="Alternative" ct="Man - Revenir" lc="2"></station>
+<station name="The Putre Factor: The Putre Factor - [SHOUTcast.com]" mt="audio/mpeg" id="347070" br="128" genre="Alternative" ct="Killing Miranda - Discotheque Necronomicon" lc="2"></station>
+<station name="RadioGruta.Com - [SHOUTcast.com]" mt="audio/mpeg" id="349819" br="32" genre=" Alternative" ct="" lc="2"></station>
+<station name="Radio Fabryka Tczew mp3 - [SHOUTcast.com]" mt="audio/mpeg" id="359434" br="128" genre="Rock Alternative Local Ne" ct="Blok reklamowy - Radia Fabryka" lc="2"></station>
+<station name="Radio-T&amp;A_EL84 - [SHOUTcast.com]" mt="audio/mpeg" id="430404" br="128" genre="Alternative" ct="U2 - Where the Streets Have No Name" lc="2"></station>
+<station name="Radio: Singlestreff-Radio Auto-DJ - [SHOUTcast.com]" mt="audio/mpeg" id="430899" br="256" genre="Alternative" ct="neuerservermp3" lc="2"></station>
+<station name="www.yle.fi/free - [SHOUTcast.com]" mt="audio/mpeg" id="435088" br="256" genre=" Alternative" ct="" lc="2"></station>
+<station name="Radio Nigel - [SHOUTcast.com]" mt="audio/mpeg" id="446026" br="32" genre="80s Alternative New Wave" ct="Squeeze - Black Coffee In Bed" lc="2"></station>
+<station name="Radio ZUU www.radiozuu.net - BE ZUU  - [SHOUTcast.com]" mt="audio/aacp" id="467262" br="64" genre="Electronic Alternative" ct="" lc="2"></station>
+<station name="Radio:  - [SHOUTcast.com]" mt="audio/mpeg" id="491026" br="48" genre="Alternative" ct="Jauchzet dem Herr ihr Gerechten" lc="2"></station>
+<station name="BaseTraxx.FM - 80er 90er Schlager Top100 Die beste PartymusikBaseTraxx.FM 80er 90er Schlager Top 100 - [SHOUTcast.com]" mt="audio/mpeg" id="520012" br="128" genre="Alternative" ct="Kajagoogoo - Too Shy" lc="2"></station>
+<station name="KANM Student Radio (128k) - The college station of College Station - [SHOUTcast.com]" mt="audio/mpeg" id="526778" br="128" genre="Indie College Alternative" ct="Yo La Tengo - Cherry Chapstick" lc="2"></station>
+<station name="Living On The Edge Radio - [SHOUTcast.com]" mt="audio/mpeg" id="532071" br="128" genre="Rock  Alternative  Classi" ct="Rolling Stones - Bitch " lc="2"></station>
+<station name="MCM - [SHOUTcast.com]" mt="audio/mpeg" id="546193" br="64" genre="Alternative" ct="Israel Houghton - Quien como el Se or" lc="2"></station>
+<station name="96KBPS.COM The Rock Station - Tool, Alice in Chains, Chevelle, Radiohead - [SHOUTcast.com]" mt="audio/mpeg" id="548308" br="96" genre="Classic Rock Alternative" ct="Matthew Sweet - Girlfriend" lc="2"></station>
+<station name="181.FM - The Buzz (Your Alternative Station!) - [SHOUTcast.com]" mt="audio/mpeg" id="556726" br="32" genre="Alternative Rock" ct="Depeche Mode - Wrong" lc="2"></station>
+<station name="WPCD - [SHOUTcast.com]" mt="audio/mpeg" id="594581" br="48" genre="Alternative" ct="BEFORE ALTERNATIVE" lc="2"></station>
+<station name="Irola Irratia 107.5 FM La Radio Libre de Bilbo desde 1987 - [SHOUTcast.com]" mt="audio/mpeg" id="609804" br="32" genre="Alternative" ct="" lc="2"></station>
+<station name="Gap Radio [Greece] - [SHOUTcast.com]" mt="audio/mpeg" id="637468" br="128" genre="Alternative" ct="Counting Crows - Mr. Jones (1994)" lc="2"></station>
+<station name="crazyroadshow www.crazyroadshow.isoke.nl - [SHOUTcast.com]" mt="audio/mpeg" id="643857" br="128" genre="alternative" ct="" lc="2"></station>
+<station name="Tribute Radio - Bands who COVER other Bands. - [SHOUTcast.com]" mt="audio/mpeg" id="653442" br="96" genre="Alternative Rock" ct="Paradise Lost - The Last Time - Walk (Away) (The Smiths)" lc="2"></station>
+<station name="CBC Radio 3 (56k) - [SHOUTcast.com]" mt="audio/mpeg" id="672334" br="54" genre="Alternative Indie Rock" ct="Extra Happy Ghost - Mash-Up: Neither Being Nor Nothingness" lc="2"></station>
+<station name="radio stadtfilter 96.3Mhz - [SHOUTcast.com]" mt="audio/mpeg" id="707506" br="56" genre="Alternative" ct="Destillator" lc="2"></station>
+<station name="Canada's Edge Of Heavy:::SKELTER RADIO:::Tool, Ozzy, Linkin Park - Wicked Rock Canada - 32k aacPlus - [SHOUTcast.com]" mt="audio/aacp" id="736722" br="32" genre="Metal Rock Alternative" ct="Fear Factory - Cloning Technology (Replica)" lc="2"></station>
+<station name="+.+ Chinjang Hitz Song By PJ.Himawari +.+ - [SHOUTcast.com]" mt="audio/mpeg" id="775745" br="56" genre="Alternative" ct="              -    " lc="2"></station>
+<station name="Orlando's Positive Rock and Alternative - TheRockHD - [SHOUTcast.com]" mt="audio/aacp" id="787717" br="64" genre="Rock  Alternative" ct="Kutless - Tonight (4:18)" lc="2"></station>
+<station name="XYZ Radio - [SHOUTcast.com]" mt="audio/mpeg" id="805748" br="160" genre="Adult Alternative" ct="Alison Krauss - Heaven`s Bright Shore" lc="2"></station>
+<station name="Coloriage mp3 Ferarock Bourgogne - [SHOUTcast.com]" mt="audio/mpeg" id="824354" br="128" genre="rock alternative" ct="I AM KLOOT - GODS AND MONSTERS" lc="2"></station>
+<station name="Studenckie Radio Frycz - [SHOUTcast.com]" mt="audio/mpeg" id="881786" br="128" genre="Rock  Alternative  Reggae" ct="" lc="2"></station>
+<station name="whfr.fm Live Stream - [SHOUTcast.com]" mt="audio/mpeg" id="901407" br="128" genre="College Alternative" ct="Natalie Cole - When I Fall In love (ambient)" lc="2"></station>
+<station name="KGRL - 24/7 hi-def radio playing the best indie/eclectic/alt female music - www.kgrl.fm - [SHOUTcast.com]" mt="audio/mpeg" id="935321" br="24" genre="Mixed Alternative Rock" ct="The Cardigans - Rise And Shine" lc="2"></station>
+<station name="Radio-Funny: radio-funny - [SHOUTcast.com]" mt="audio/mpeg" id="940879" br="192" genre="Alternative" ct="Darude - Sandstorm" lc="2"></station>
+<station name="Mediterran+ Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="948498" br="128" genre="Alternative  Rock  Ska " ct="Balkan Fanatik - Csinld, csinld, jl csinld" lc="2"></station>
+<station name="Graffiti Urban Radio - [SHOUTcast.com]" mt="audio/mpeg" id="966487" br="128" genre="Alternative" ct="LE R  SEAU URBAIN - en direct !" lc="2"></station>
+<station name="MHB Radio - From  Rock to Heavy Metal, we've got you covered! - [SHOUTcast.com]" mt="audio/mpeg" id="974152" br="128" genre="Rock  Metal  Alternative" ct="Doro - Rock On" lc="2"></station>
+<station name="The Torch..(Adult Hit Radio) Rob Thomas,Taylor Swift.Pink,Nickelback,Kelly Clarkson,Train &amp; Daughtry - [SHOUTcast.com]" mt="audio/mpeg" id="989540" br="128" genre="Adult Alternative" ct="Kid Rock - All Summer Long" lc="2"></station>
+<station name="Hare Krishna Bhajan From The Bhaktivedanta Book Trust In Los Angeles - [SHOUTcast.com]" mt="audio/mpeg" id="6225" br="24" genre="Spiritual Alternative" ct="Srila Prabhupada - Sri Sri Sad-gosvamy-astaka" lc="1"></station>
+<station name="LegatoCafe.Net - Cleveland, Ohio - [SHOUTcast.com]" mt="audio/aacp" id="9374" br="64" genre="Adult Alternative Rock" ct="Tori Amos - Welcome To England" lc="1"></station>
+<station name="RADIO A CHODZIEZ - [SHOUTcast.com]" mt="audio/aacp" id="10297" br="28" genre="Mixed Alternative Classic" ct="" lc="1"></station>
+<station name="G?nen Radyo Ven?s 91.50 - [SHOUTcast.com]" mt="audio/mpeg" id="14896" br="64" genre="Alternative" ct="" lc="1"></station>
+<station name="Ismanorfm  Plus proche du coeur de vous et des Amis  From Belgium, france, canada, luxembourg, suiss - [SHOUTcast.com]" mt="audio/mpeg" id="26316" br="128" genre="Alternative" ct=" Les Annees Guitare [Live]" lc="1"></station>
+<station name="Radio Scorpio - 106 FM - [SHOUTcast.com]" mt="audio/mpeg" id="27941" br="128" genre="Alternative" ct="" lc="1"></station>
+<station name="4ZZZ FM - [SHOUTcast.com]" mt="audio/mpeg" id="32271" br="96" genre="Alternative" ct="" lc="1"></station>
+<station name="KANM Student Radio (96k AAC+)- The college station of College Station - [SHOUTcast.com]" mt="audio/aacp" id="38917" br="96" genre="Indie College Alternative" ct="Ocrilim - 3 [Untitled Track]" lc="1"></station>
+<station name="KROK Channel 95.7 FM - [SHOUTcast.com]" mt="audio/mpeg" id="49019" br="128" genre="Triple A  Alternative" ct="" lc="1"></station>
+<station name="mambo809 - [SHOUTcast.com]" mt="audio/mpeg" id="52042" br="64" genre="Alternative" ct="dj wilson en mix" lc="1"></station>
+<station name="Radio Reencuentros - [SHOUTcast.com]" mt="audio/mpeg" id="67353" br="64" genre="Alternative" ct="DJ Shah - Back To You (Original Mix edit) [www.djtunes.com]" lc="1"></station>
+<station name="DenzRadio L!VE ! **The Netherlands** nonstop  THE ALTERNATIVE ! http://www.denzradio.nl.tt - [SHOUTcast.com]" mt="audio/mpeg" id="69844" br="128" genre="Metal  Rock  Alternative " ct="Red Hot Chili Peppers - Snow (Hey Oh)" lc="1"></station>
+<station name="The All New MavRadio - [SHOUTcast.com]" mt="audio/mpeg" id="70814" br="96" genre="Alternative" ct="[timed out] http://137.48.61.137 (The All New MavRadio) (The All New MavRadio) (The All New MavRadio) (The All New MavRadio) (The All New MavRadio) (The All New MavRadio) (The All New Machangeme" lc="1"></station>
+<station name="DiscoDanceFox-Radio-Duisburg - MusicBox - [SHOUTcast.com]" mt="audio/mpeg" id="84986" br="128" genre="Alternative" ct="..:: DiscoDanceFox-Radio-Duisburg ::.." lc="1"></station>
+<station name="Studio-Denia ( Musikbox ) - [SHOUTcast.com]" mt="audio/mpeg" id="91726" br="256" genre="Alternative" ct="Magic Lauster - Greatest Hits von Elvis" lc="1"></station>
+<station name="Radio Kaboom - [SHOUTcast.com]" mt="audio/mpeg" id="104073" br="96" genre="Indie   Alternative Rock " ct="Suede - The Power" lc="1"></station>
+<station name="'Unicorn' Alternative Music Internet Radio - [SHOUTcast.com]" mt="audio/mpeg" id="106822" br="96" genre="Alternative" ct="versus - frederick`s of hollywood" lc="1"></station>
+<station name="KRSJ - San Jose California - [SHOUTcast.com]" mt="audio/mpeg" id="114606" br="128" genre="Classic and  Alternative " ct="The Smashing Pumpkins {Cherub Rock} - Cherub Rock" lc="1"></station>
+<station name="100hitz - Indie Rock - [SHOUTcast.com]" mt="audio/mpeg" id="138387" br="32" genre="Alternative  Rock  Indie " ct="Radio 4 - Absolute Affirmation" lc="1"></station>
+<station name="Conexao Evolution  - [SHOUTcast.com]" mt="audio/mpeg" id="145824" br="32" genre="Alternative" ct="CoNeXaoEvoLuTiOn.Com.Br - msn@CoNeXaoEvoLuTiOn.Com.Br - CoNeXaoEvoLuTiOn.Com.Br" lc="1"></station>
+<station name="RADIO eNova - ARGENTINA - [SHOUTcast.com]" mt="audio/mpeg" id="148334" br="128" genre="INDIE ALTERNATIVE ELECTRO" ct="(RADIO eNova - ARGENTINA)" lc="1"></station>
+<station name="Deeper Into Music - [SHOUTcast.com]" mt="audio/aacp" id="167820" br="128" genre="Rock Alternative Eclectic" ct="Julian Plenti - Fly As You Might " lc="1"></station>
+<station name="Radio Rojo y Negro - [SHOUTcast.com]" mt="audio/mpeg" id="180656" br="24" genre="Alternative  Electronic  " ct="Rollins Band - 06 Liar " lc="1"></station>
+<station name="Radio Krishna Network - RKC Terni - Live Stream Music / English - FULL TRANSCENDENTAL VIBRATION ! - [SHOUTcast.com]" mt="audio/mpeg" id="224016" br="24" genre="Spiritual  Alternative" ct="RKC Live Stream - Compilations - Music 04 (Indian Genre)" lc="1"></station>
+<station name="Pimba FM - [SHOUTcast.com]" mt="audio/mpeg" id="225522" br="64" genre="Rock  Pop  Alternative" ct="The B-52`s - Roam" lc="1"></station>
+<station name="FCCFREE RADIO 107.3 FM SAN FRANCISCO FCCFREERADIO.COM - [SHOUTcast.com]" mt="audio/mpeg" id="243553" br="128" genre="Comedy   Alternative" ct="" lc="1"></station>
+<station name="E-R@dio24 - [SHOUTcast.com]" mt="audio/mpeg" id="248686" br="64" genre="Alternative" ct="" lc="1"></station>
+<station name="radiofolclor - [SHOUTcast.com]" mt="audio/mpeg" id="260544" br="64" genre="Alternative" ct="Antonio Aguilar Y Jose Alfredo Jimenez - Nadie Es Eterno" lc="1"></station>
+<station name="mvyradio - [SHOUTcast.com]" mt="audio/aacp" id="262781" br="48" genre="Alternative" ct="mvyradio News  " lc="1"></station>
+<station name="~~~ PFR ~~~ am Mic DJsteve ~~~ - [SHOUTcast.com]" mt="audio/mpeg" id="276622" br="128" genre="Alternative" ct="Led Zeppelin - Dyer Maker" lc="1"></station>
+<station name="SYDNEY TAFE RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="293121" br="96" genre="Alternative" ct="" lc="1"></station>
+<station name="ANDEAD RADIO!!! Indie, Rock, Alternative, Britpop! '' FRIENDS MOSTLY! '' ;-) - [SHOUTcast.com]" mt="audio/mpeg" id="300604" br="48" genre="Rock  Alternative  Britpo" ct="Audrey - Bleak" lc="1"></station>
+<station name="Divergence FM - 93.9 Mhz - Montpellier - France - [SHOUTcast.com]" mt="audio/mpeg" id="312920" br="128" genre="Mixed Talk Alternative" ct="" lc="1"></station>
+<station name="RADIO BETON ! 93.6 FM *** Radio Ferarock de TOURS *** France - [SHOUTcast.com]" mt="audio/mpeg" id="334478" br="24" genre="Alternative" ct="" lc="1"></station>
+<station name="WVYC York College of Pennsylvania, FM Stereo, Digital 99.7.  Requests? (717) 815-1311 - [SHOUTcast.com]" mt="audio/mpeg" id="348980" br="128" genre="College Alternative" ct="This is a live feed from the WVYC FM 99.7 Master Control Room." lc="1"></station>
+<station name="Hare Krishna Temple In Los Angeles - [SHOUTcast.com]" mt="audio/mpeg" id="351149" br="24" genre="Spiritual Alternative" ct="Live In New Dwaraka" lc="1"></station>
+<station name="Radio Ballade : Radio Ballade 101.8 (Ferarock) !! - [SHOUTcast.com]" mt="audio/mpeg" id="376858" br="64" genre="Alternative" ct="Agenda vend" lc="1"></station>
+<station name="MusicVictim - MV1 - [SHOUTcast.com]" mt="audio/aacp" id="379765" br="48" genre="alternative pop rock indi" ct="Beth Jeans Houghton - Golden" lc="1"></station>
+<station name="Australian Internet Radio - [SHOUTcast.com]" mt="audio/mpeg" id="382392" br="96" genre="Alternative" ct="01 baba o`rilely Woman (Part 2)" lc="1"></station>
+<station name="YES Radio - [SHOUTcast.com]" mt="audio/mpeg" id="382617" br="160" genre="Alternative" ct="Coolio - Sumpin` New (1995)" lc="1"></station>
+<station name="Metalafisha.ru - [SHOUTcast.com]" mt="audio/mpeg" id="385008" br="128" genre="Alternative   Metal" ct="Mila Ayuhara - No Hands, So She Gotta Deep Throat" lc="1"></station>
+<station name="PAC101Radio.com - [SHOUTcast.com]" mt="audio/mpeg" id="407999" br="64" genre="Alternative" ct="Bob Seger - Nutbush City Limits" lc="1"></station>
+<station name="Alternative Christmas - [SHOUTcast.com]" mt="audio/mpeg" id="409489" br="128" genre="Holiday  Alternative  Pun" ct="It Dies Today - Feliz Navidad" lc="1"></station>
+<station name="Smash Radio - Frankoradio.com (Alternative &amp; Rock 90's) - [SHOUTcast.com]" mt="audio/mpeg" id="414904" br="128" genre="Alternative" ct="SRID05" lc="1"></station>
+<station name="STAR RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="433477" br="128" genre="Alternative" ct="" lc="1"></station>
+<station name="Marquesa 101.7 Fm Barinas - [SHOUTcast.com]" mt="audio/mpeg" id="437042" br="128" genre="alternative" ct="" lc="1"></station>
+<station name="www.sismico.com - [SHOUTcast.com]" mt="audio/mpeg" id="446951" br="96" genre="rock  prog  alternative  " ct="The Mars Volta - Day of the Baphomets" lc="1"></station>
+<station name="RADIO DIMENSIONE STEREO - [SHOUTcast.com]" mt="audio/mpeg" id="452168" br="128" genre="ALTERNATIVE" ct="ORA IN ONDA ANNA OXA - UN`EMOZIONE DA POCO" lc="1"></station>
+<station name="mojo coffee bar - [SHOUTcast.com]" mt="audio/mpeg" id="452221" br="96" genre="lounge alternative pop" ct="all day 69" lc="1"></station>
+<station name="Orions Radio - [SHOUTcast.com]" mt="audio/mpeg" id="454007" br="128" genre="Metal Rock Alternative" ct="Metal Church - Temple Of The Sea" lc="1"></station>
+<station name="La Reciclada - [SHOUTcast.com]" mt="audio/mpeg" id="486370" br="64" genre="Alternative" ct="" lc="1"></station>
+<station name="Piraju FM Web Brazil - [SHOUTcast.com]" mt="audio/mpeg" id="486943" br="32" genre="Alternative" ct="12. charm2 - Track 12" lc="1"></station>
+<station name="radiopro - [SHOUTcast.com]" mt="audio/aacp" id="491248" br="64" genre="Alternative" ct="CANSEI DE SER SEXY - Off The Hook (05)" lc="1"></station>
+<station name="Nightclub - [SHOUTcast.com]" mt="audio/mpeg" id="501259" br="128" genre="Alternative" ct="Era - Mystera 6 - Misere Mani" lc="1"></station>
+<station name="Lectures From The Hare Krishna Temple In Los Angeles - [SHOUTcast.com]" mt="audio/mpeg" id="503443" br="24" genre="Spiritual Alternative" ct="Sukadeva Prabhu - SB 5-10-12 - 10-10-09" lc="1"></station>
+<station name="Hambre Radio: hambreradio puebla mexico - [SHOUTcast.com]" mt="audio/mpeg" id="508659" br="80" genre="alternative" ct="Quiero Club - Frogger" lc="1"></station>
+<station name="Boundsubs Radio ... tunes with the wench - [SHOUTcast.com]" mt="audio/mpeg" id="543496" br="48" genre="Alternative" ct="Celtic Woman - At The Ceili" lc="1"></station>
+<station name="Graffiti Radio  - [SHOUTcast.com]" mt="audio/mpeg" id="561286" br="96" genre="alternative" ct="Rage Against The Machine - Killing In The Name" lc="1"></station>
+<station name="www.radiorock.to : RadioRock.to -  Radio Rock The original - [SHOUTcast.com]" mt="audio/mpeg" id="564228" br="64" genre="alternative" ct="GianpaoloCastaldo" lc="1"></station>
+<station name="WHDY 87.7 FM   PANAMA CITY FL - [SHOUTcast.com]" mt="audio/mpeg" id="574166" br="96" genre="Alternative" ct="CONJUNTO CLASSICO - FAISAN" lc="1"></station>
+<station name="DJ Erus [Second Life] - [SHOUTcast.com]" mt="audio/mpeg" id="581791" br="128" genre="Alternative" ct="Nature`s Relaxing Music - Bagatelle in F Major" lc="1"></station>
+<station name="Hack FM - [SHOUTcast.com]" mt="audio/mpeg" id="611371" br="128" genre="Alternative" ct="Incubus - Are You In?" lc="1"></station>
+<station name="RadioHome a Webradio que voc? queria! - [SHOUTcast.com]" mt="audio/mpeg" id="639469" br="128" genre="alternative" ct="Avril lavigne - Avril avigne - Contagious" lc="1"></station>
+<station name="...:::NOVASONIC RADIO:::... +++NEW+++ A nice mix of free Music. - [SHOUTcast.com]" mt="audio/mpeg" id="646639" br="256" genre="Pop Alternative Jazz" ct="Black Cat Jazz Cafe Band - Don`t Worry, Tomorrow Will Come" lc="1"></station>
+<station name="HITSONLINE - [SHOUTcast.com]" mt="audio/mpeg" id="647809" br="64" genre="ALTERNATIVE" ct="Sonia - Listen to your heart" lc="1"></station>
+<station name="Alternative Radio Music - [SHOUTcast.com]" mt="audio/mpeg" id="652032" br="160" genre="Metal  Rock  Alternative" ct="7689. E 40 Feat. Keak The Sneak - Tell Me When Go" lc="1"></station>
+<station name="Fresh Digital Radio - www.freshdigitalradio.com - [SHOUTcast.com]" mt="audio/mpeg" id="662420" br="64" genre="Alternative Pop Rock Indi" ct="Reid Maclean - Full Time Job [cn4]" lc="1"></station>
+<station name="Voice2Cool: Alternative Sounds by Voice2Cool - [SHOUTcast.com]" mt="audio/mpeg" id="663508" br="96" genre="Alternative" ct="Saber Amar" lc="1"></station>
+<station name="megamix tropical  - [SHOUTcast.com]" mt="audio/mpeg" id="676921" br="32" genre="Alternative " ct="009 - mezgalla - chica cosmica - rmx nico dj 08`" lc="1"></station>
+<station name="KUMM, THE U90 ALTERNATIVE - [SHOUTcast.com]" mt="audio/mpeg" id="690122" br="128" genre="Alternative" ct="" lc="1"></station>
+<station name="FM 2012 - Great 80s 90s 00s Alternative - [SHOUTcast.com]" mt="audio/aacp" id="691103" br="32" genre="Adult Alternative " ct="Fleet Foxes - Mykonos" lc="1"></station>
+<station name="Freeland Radio-Alternative Stream - [SHOUTcast.com]" mt="audio/mpeg" id="716261" br="128" genre="Alternative" ct="Linkin Park - Live in Texas - Lying from you" lc="1"></station>
+<station name="Salem FM - One guy. Doing it all. Email requests to DJ@salemfm.com - [SHOUTcast.com]" mt="audio/mpeg" id="728817" br="64" genre="Alternative" ct="Pixies - Debaser" lc="1"></station>
+<station name="JaK - [SHOUTcast.com]" mt="audio/mpeg" id="741490" br="128" genre="Rock Alternative Techno T" ct="Azerothian Gamerz - AG Witch AD" lc="1"></station>
+<station name="KHEN 106.9 Salida - [SHOUTcast.com]" mt="audio/mpeg" id="751387" br="48" genre="Alternative" ct="" lc="1"></station>
+<station name="Radio MetalForce - [SHOUTcast.com]" mt="audio/mpeg" id="762283" br="128" genre="metal alternative rock" ct="Lost In A Portrait" lc="1"></station>
+<station name="Wind Sound System Station - [SHOUTcast.com]" mt="audio/mpeg" id="770098" br="96" genre="Alternative" ct="C.C. Catch - If I Feel Love" lc="1"></station>
+<station name="house mix radio - [SHOUTcast.com]" mt="audio/mpeg" id="772300" br="40" genre="alternative" ct="Vicente  Fernandez - 15 Primaveras" lc="1"></station>
+<station name="ROTACION RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="798792" br="56" genre="alternative" ct="CLASICOS DEL ROCK EN ESPA OL - 01 CANNABIS" lc="1"></station>
+<station name="Bear Radio Network - [SHOUTcast.com]" mt="audio/aacp" id="811433" br="56" genre="Alternative" ct="Gregory Douglass - Cathedrals" lc="1"></station>
+<station name="Weyoum, den stille kriger - [SHOUTcast.com]" mt="audio/mpeg" id="818259" br="80" genre="alternative" ct="09 - Enya - Stars And Midnight Blue" lc="1"></station>
+<station name="WVYC AM 640 York College of Pennsylvania.  Requests? Call 717 815-1453 - [SHOUTcast.com]" mt="audio/mpeg" id="835091" br="96" genre="College Alternative" ct="This is a live feed from the WVYC AM 640 Master Control Room." lc="1"></station>
+<station name="RAAR FM Mobile AAC+ [Now on iPhone and Windows Mobile] visit our website @ raarfm.com - [SHOUTcast.com]" mt="audio/aacp" id="848998" br="32" genre="Alternative  Electronic  " ct="4) Roisin Murphy - Orally fixated" lc="1"></station>
+<station name="WIDB - The Revolution - [SHOUTcast.com]" mt="audio/mpeg" id="867791" br="128" genre="College  Alternative  Ind" ct="Pivot-In The Blood" lc="1"></station>
+<station name="MusicSelection.fm MusicSelection.FM - [SHOUTcast.com]" mt="audio/mpeg" id="883121" br="128" genre="Alternative &amp; Club House" ct="Gabro &amp; Libe - I Can Be This (Original Mix)" lc="1"></station>
+<station name="RadioWelleKempen Dein Musiksender vom Niederrhein - [SHOUTcast.com]" mt="audio/mpeg" id="893186" br="128" genre="Alternative" ct="Eisblumen - Louise" lc="1"></station>
+<station name="SPACEWALK-Alternative,Indie Rock,Indie Pop,Post Rock,Electronica,etc...Selected by moony moor - [SHOUTcast.com]" mt="audio/mpeg" id="922924" br="96" genre="Alternative Indie Rock In" ct="Cyber C H U M P - Pressure Tactic" lc="1"></station>
+<station name="YRockOnXPN - [SHOUTcast.com]" mt="audio/mpeg" id="923523" br="24" genre="Alternative" ct="" lc="1"></station>
+<station name=".: ZonRadio :. Rock, Alt &amp; Indie Music - [SHOUTcast.com]" mt="audio/mpeg" id="932749" br="48" genre="Rock Alternative Indie Tw" ct="Maserati - Kilinichta" lc="1"></station>
+<station name="Z-Rock 102.5  WZMC - [SHOUTcast.com]" mt="audio/mpeg" id="943561" br="96" genre="Rock Talk  Alternative ME" ct="The Rock of the Hudson Valley" lc="1"></station>
+<station name="Pimba FM - [SHOUTcast.com]" mt="audio/mpeg" id="956876" br="128" genre="Rock  Pop  Alternative" ct="The B-52`s - Roam" lc="1"></station>
+<station name="CFBU 103.7 FM - Brock University Radio - [SHOUTcast.com]" mt="audio/mpeg" id="957723" br="24" genre="Alternative  Blues  Metal" ct="" lc="1"></station>
+<station name="Radio Filou - [SHOUTcast.com]" mt="audio/mpeg" id="959700" br="128" genre="Alternative" ct="Eric Clapton - White Room" lc="1"></station>
+<station name="WDFH-FM 90.3 - wdfh.org - Hudson Valley Community Radio - [SHOUTcast.com]" mt="audio/mpeg" id="985687" br="160" genre="Alternative" ct="" lc="1"></station>
+<station name="[KarenKoltrane] Radio - [SHOUTcast.com]" mt="audio/mpeg" id="993688" br="96" genre="Alternative Rock Punk Ind" ct="Silverblood - Silverblood" lc="1"></station>
+<station name="Zeilsteen Radio  from the Netherlands, Holland. Playing the Killers, Coldplay, Snow Patrol, Radiohea - [SHOUTcast.com]" mt="audio/aacp" id="996752" br="16" genre="Alternative  Indie  Rock" ct="Snow Patrol - If There`s A Rocket Tie Me To It " lc="1"></station>
+<station name="WWRN - Your Christian Rock Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="1483" br="128" genre="Alternative Christian Roc" ct="X-Sinner - Holy Ghost &amp; Fire" lc="0"></station>
+<station name="Cactus Radio - live from the desert at 96.3 FM, Tempe, Arizona, U.S.A. with 5,000+ songs - [SHOUTcast.com]" mt="audio/mpeg" id="1707" br="128" genre="alternative indie rock" ct="R.E.M. - Radio Free Europe (Live)" lc="0"></station>
+<station name="181.FM - Classic Buzz -=- Classic Alternative Rock - [SHOUTcast.com]" mt="audio/mpeg" id="2221" br="32" genre="Alternative Classic Rock" ct="Metallica - The Unforgiven" lc="0"></station>
+<station name="Wonderground from Minnesota Public Radio - [SHOUTcast.com]" mt="audio/mpeg" id="2336" br="128" genre="Alternative  Eclectic  Po" ct="James Brown - I Got You (I Feel Good)" lc="0"></station>
+<station name="radio 8000 - [SHOUTcast.com]" mt="audio/mpeg" id="9264" br="64" genre="Alternative" ct="Ed Lamoureux - Next Set [2cP]" lc="0"></station>
+<station name="darksideradio.de(Blacky on air) - [SHOUTcast.com]" mt="audio/mpeg" id="14863" br="128" genre="Alternative Rock electro" ct="(Re)Adjust - The Calling (ES23 Club Mix)" lc="0"></station>
+<station name="Rock Nation - Frankoradio.com (Alternative/Rock Today &amp; 90's) - [SHOUTcast.com]" mt="audio/mpeg" id="20123" br="128" genre="Alternative" ct="Scott Stapp - Justify" lc="0"></station>
+<station name="Radio Roncudo 106.1fm - [SHOUTcast.com]" mt="audio/mpeg" id="25349" br="56" genre="Alternative" ct="" lc="0"></station>
+<station name="SoMA Radio - Santa Barbara City College  - [SHOUTcast.com]" mt="audio/aacp" id="28184" br="32" genre="Eclectic Rock Alternative" ct="Bruce Springsteen {The River - Disc 2} - Fade Away " lc="0"></station>
+<station name="ProjectSystem12 - [SHOUTcast.com]" mt="audio/mpeg" id="30066" br="96" genre="alternative" ct="Project System 12 - King Richard Theme" lc="0"></station>
+<station name="ANDEAD RADIO!!! Indie, Rock, Alternative, Britpop! '' FRIENDS MOSTLY! '' ;-) - [SHOUTcast.com]" mt="audio/mpeg" id="37725" br="128" genre="Rock  Alternative  Britpo" ct="Audrey - Bleak" lc="0"></station>
+<station name="KSDB 919 Manhattan, KS - [SHOUTcast.com]" mt="audio/mpeg" id="41721" br="56" genre="Alternative" ct="" lc="0"></station>
+<station name="KTEQ - [SHOUTcast.com]" mt="audio/mpeg" id="49035" br="64" genre="Alternative" ct="" lc="0"></station>
+<station name="KCSC.ASChico.com - 24Kbps MP3 - Student Owned &amp; Operated - an Associated Students Activity Fee progr - [SHOUTcast.com]" mt="audio/mpeg" id="53936" br="24" genre="Alternative College" ct="" lc="0"></station>
+<station name="SpacialNet: Horse Radio HOOF-it  - [SHOUTcast.com]" mt="audio/mpeg" id="55698" br="48" genre=" Other Mixed Alternative" ct="HOOF-it Radio - HOOF-it Radio - Turn Out One" lc="0"></station>
+<station name="Radio ApolloFM - your freakquency: Radio ApolloFM - [SHOUTcast.com]" mt="audio/mpeg" id="55925" br="48" genre="alternative" ct="Moby - Machete" lc="0"></station>
+<station name="GotRadio - Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="57881" br="16" genre="Alternative Rock  Rock" ct="Green Day - 21 Guns" lc="0"></station>
+<station name="alt.CT.FM - for Mobile MP3 32kbps - [SHOUTcast.com]" mt="audio/mpeg" id="76888" br="32" genre="Alternative" ct="11th Dimension - Julian Casablancas              ." lc="0"></station>
+<station name="Xtacy Radio - [SHOUTcast.com]" mt="audio/mpeg" id="90440" br="96" genre="Rock  Alternative  Metal" ct="Iron Maiden - Somewhere in Time - Heaven Can Wait" lc="0"></station>
+<station name="R?dio Tudoem - [SHOUTcast.com]" mt="audio/mpeg" id="98096" br="64" genre="Alternative" ct="" lc="0"></station>
+<station name="Loudcaster: Exploit Boston! Radio - [SHOUTcast.com]" mt="audio/aacp" id="100818" br="24" genre="Alternative Indie Rock" ct="Sarah Rabdau - Weekend" lc="0"></station>
+<station name="Hare Krishna Lectures From The Bhaktivedanta Book Trust In Los Angeles  - [SHOUTcast.com]" mt="audio/mpeg" id="105762" br="24" genre="Spiritual Alternative" ct="Srila Prabhupada - Lecture London 1973-08-23" lc="0"></station>
+<station name="100hitz - Indie Rock - [SHOUTcast.com]" mt="audio/aacp" id="105849" br="48" genre="Alternative  Rock  Indie " ct="Radiohead - Ceremony" lc="0"></station>
+<station name="GotRadio - Indie Underground - [SHOUTcast.com]" mt="audio/mpeg" id="106739" br="32" genre="Alternative  Rock  Indie " ct="Sonic Youth - Anti-Orgasm" lc="0"></station>
+<station name="WUVI Radio - Underground - [SHOUTcast.com]" mt="audio/mpeg" id="107936" br="40" genre="Alternative" ct="" lc="0"></station>
+<station name="GotRadio - Women's World - [SHOUTcast.com]" mt="audio/mpeg" id="114723" br="32" genre="Pop  Alternative  Women s" ct="Sara Bareilles - Bottle It Up" lc="0"></station>
+<station name="Living On The Edge Radio - [SHOUTcast.com]" mt="audio/aacp" id="114873" br="64" genre="Rock  alternative  classi" ct="Neil Young - When You Dance I Can Really Love " lc="0"></station>
+<station name="Radio Nosferatu backup stream - [SHOUTcast.com]" mt="audio/mpeg" id="116671" br="24" genre="Alternative" ct="Wolfsheim - Heroin, She Said" lc="0"></station>
+<station name="~FunHouse~ R@d!o - [SHOUTcast.com]" mt="audio/aacp" id="118172" br="48" genre="Alternative" ct="Dj Cr@zy" lc="0"></station>
+<station name="Wave 1049 Online - Savannah GA - [SHOUTcast.com]" mt="audio/mpeg" id="122107" br="128" genre="AAA Adult Alternative" ct="Squeeze - Black Coffee in Bed" lc="0"></station>
+<station name="Illuminated Hosting Radio - [SHOUTcast.com]" mt="audio/aacp" id="123364" br="96" genre="Alternative Industrial Go" ct="Nosferatu - Time of Legends" lc="0"></station>
+<station name="Radio Alternativa UK - [SHOUTcast.com]" mt="audio/mpeg" id="126369" br="128" genre="Alternative" ct="Scorpions - Holiday" lc="0"></station>
+<station name="UtahKrishnas.Com - [SHOUTcast.com]" mt="audio/mpeg" id="127629" br="96" genre="Spiritual Alternative" ct="" lc="0"></station>
+<station name="Divergence FM - 93.9 Mhz - Montpellier - France - [SHOUTcast.com]" mt="audio/mpeg" id="143764" br="64" genre="Mixed Talk Alternative" ct="" lc="0"></station>
+<station name="Choq.fm la radio Web de l'UQAM - [SHOUTcast.com]" mt="audio/mpeg" id="158611" br="128" genre="Alternative" ct=" (CHOQ.FM)" lc="0"></station>
+<station name="RSDB RCA MUSIQUE [ALTERNATIVE] - [SHOUTcast.com]" mt="audio/mpeg" id="164631" br="128" genre="Alternative" ct="K-DJ - FABULOUS (LCC)" lc="0"></station>
+<station name="www.javbar.com.ar - [SHOUTcast.com]" mt="audio/mpeg" id="165408" br="64" genre="Alternative" ct="ada - " lc="0"></station>
+<station name="KUMM, THE U90 ALTERNATIVE - [SHOUTcast.com]" mt="audio/mpeg" id="180756" br="56" genre="Alternative" ct="" lc="0"></station>
+<station name="Cactus Radio - live from the desert at 96.3 FM, Tempe, Arizona, U.S.A. with 5,000+ songs - [SHOUTcast.com]" mt="audio/mpeg" id="180787" br="24" genre="alternative indie rock" ct="Athenaeum - Comfort (Acoustic)" lc="0"></station>
+<station name="KHEN 106.9 Salida - [SHOUTcast.com]" mt="audio/mpeg" id="182687" br="128" genre="Alternative" ct="" lc="0"></station>
+<station name="WILT Radio - Alternative Music From The 80's To Today. http://wiltradio.ke5wrt.com  - [SHOUTcast.com]" mt="audio/mpeg" id="192597" br="48" genre="Alternative" ct="The Cardigans - My Favorite Game" lc="0"></station>
+<station name="Bitownia HFM - [SHOUTcast.com]" mt="audio/aacp" id="197955" br="128" genre="House Tech Alternative Fu" ct="Groovin iz what we do." lc="0"></station>
+<station name="Most Dangerous Race - [SHOUTcast.com]" mt="audio/mpeg" id="199480" br="128" genre="Alternative" ct="the most dangerous race - torrential" lc="0"></station>
+<station name="Bob's Resurrected Golden Stream  - [SHOUTcast.com]" mt="audio/mpeg" id="200227" br="48" genre="Alternative " ct="2009-08-27 - Puzzling Evidence for August 28th 2009" lc="0"></station>
+<station name="RADIO DIMENSIONE STEREO - [SHOUTcast.com]" mt="audio/mpeg" id="200480" br="24" genre="ALTERNATIVE" ct="ORA IN ONDA ANNA OXA - UN`EMOZIONE DA POCO" lc="0"></station>
+<station name="91.7 The Edge - WSUW - [SHOUTcast.com]" mt="audio/mpeg" id="201880" br="96" genre="CollegeAlternative" ct="" lc="0"></station>
+<station name="Radio Revy - [SHOUTcast.com]" mt="audio/mpeg" id="209419" br="128" genre="alternative pop" ct="03 - Red Hot Chili Peppers - Scar Tissue" lc="0"></station>
+<station name="RadIQ, find your Music I.Q. - [SHOUTcast.com]" mt="audio/aacp" id="209720" br="48" genre="Pop  Rock  Alternative  D" ct="Depeche Mode - I Feel You" lc="0"></station>
+<station name="WUTS 91.3 Sewanee - The University of the South - [SHOUTcast.com]" mt="audio/mpeg" id="219123" br="128" genre="Alternative" ct="" lc="0"></station>
+<station name="novaoneFM - Alternative, Indie, College, Ambient - [SHOUTcast.com]" mt="audio/mpeg" id="221075" br="128" genre="Alternative  Indie  Colle" ct="novaoneFM - Five" lc="0"></station>
+<station name="Mais FM Joinville - IPhone - [SHOUTcast.com]" mt="audio/aacp" id="228967" br="32" genre="Alternative" ct="Mais FM Joinville 103,1Mhz. a radio do seu jeito" lc="0"></station>
+<station name="MY------RADIO------  :) - [SHOUTcast.com]" mt="audio/mpeg" id="234957" br="32" genre="Alternative" ct="vivir lo nuestro - operacion triunfo - rosa lopez y david bisbal" lc="0"></station>
+<station name="GotRadio - Indie Underground - [SHOUTcast.com]" mt="audio/mpeg" id="240842" br="16" genre="Alternative  Rock  Indie " ct="ir31145" lc="0"></station>
+<station name="RADIO DREYECKLAND LIBRE COLMAR RDL 103.5FM - [SHOUTcast.com]" mt="audio/aacp" id="254842" br="48" genre="ALTERNATIVES MUSIC" ct="" lc="0"></station>
+<station name="X1FM Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="258009" br="96" genre="Alternative" ct="Soul Coughing - El Oso - I Miss the Girl" lc="0"></station>
+<station name="MondoRadio - [SHOUTcast.com]" mt="audio/aacp" id="264793" br="48" genre="alternative pop rock indi" ct="Tar ntula - El Vals De Las Mariposas" lc="0"></station>
+<station name="F M NORTE 98,5 MHZ-SAN JAVIER(SF)-en la mitad de su dial- - [SHOUTcast.com]" mt="audio/mpeg" id="268059" br="24" genre="alternative" ct="" lc="0"></station>
+<station name="Chat Cafe Radio - [SHOUTcast.com]" mt="audio/mpeg" id="268740" br="48" genre="alternative" ct="80`s Freestyle Mix - 80`s Freestyle Mix" lc="0"></station>
+<station name="i7 Radio - [SHOUTcast.com]" mt="audio/mpeg" id="269054" br="128" genre="Pop Alternative Persian" ct="DJ Farid - Aug-Sep 2008 Persian Mix" lc="0"></station>
+<station name="Ladodos.com Radio sin cortes - [SHOUTcast.com]" mt="audio/mpeg" id="274371" br="80" genre="Alternative Top 20 Pop Ro" ct="Story of the Year - And the Hero Will Drown.wma" lc="0"></station>
+<station name="RADIO BLINDSIGHT -  WWW.BLINDSIGHT.EU - [SHOUTcast.com]" mt="audio/mpeg" id="276282" br="128" genre="Alternative" ct="Blindsight Project - DIFFONDI LA CAMPAGNA CANE GUIDA DI BLINDSIGHT PROJECT" lc="0"></station>
+<station name="YES Mobile - [SHOUTcast.com]" mt="audio/mpeg" id="285477" br="64" genre="Alternative" ct="Coolio - Sumpin` New (1995)" lc="0"></station>
+<station name="Wxou 88.3 FM - [SHOUTcast.com]" mt="audio/mpeg" id="291807" br="128" genre="Alternative   College" ct="" lc="0"></station>
+<station name="m-ART WebRadio - [SHOUTcast.com]" mt="audio/mpeg" id="304771" br="192" genre="Metal  Rock  Alternative" ct="" lc="0"></station>
+<station name="Smash Radio - Frankoradio.com (Alternative &amp; Rock 90's) - [SHOUTcast.com]" mt="audio/aacp" id="313847" br="32" genre="Alternative" ct="Tripping Daisy - I got a girl" lc="0"></station>
+<station name="EdgeRadio Two ** 100% Music 24/7 ** AAC+ - [SHOUTcast.com]" mt="audio/aacp" id="322638" br="32" genre="Indie Alternative College" ct="FURY IN THE SLAUGHTERHOUSE - Every Generation Got It`s Own Disease" lc="0"></station>
+<station name="SuperMix - Onondaga's Campus Connection - [SHOUTcast.com]" mt="audio/aacp" id="327865" br="32" genre="Alternative" ct="Polaris at Noon  - Wasteland" lc="0"></station>
+<station name="MrPlu Records Radio !!! - [SHOUTcast.com]" mt="audio/mpeg" id="335199" br="48" genre="Alternative Electro Funk" ct="Suspensivos Inflamables - Kanilla Fresca" lc="0"></station>
+<station name="Ford Radio - [SHOUTcast.com]" mt="audio/mpeg" id="335278" br="128" genre=" Alternative" ct="Pink Floyd - The Atom Heart Mother" lc="0"></station>
+<station name="GotRadio - Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="336199" br="32" genre="Alternative  Alternative " ct="Green Day - 21 Guns" lc="0"></station>
+<station name="Deeper Into Music - [SHOUTcast.com]" mt="audio/mpeg" id="337717" br="32" genre="Rock Alternative Eclectic" ct="Julian Plenti - Fly As You Might " lc="0"></station>
+<station name="FloridaSecurityOfficers.org Talk Radio - [SHOUTcast.com]" mt="audio/mpeg" id="339473" br="48" genre="Alternative" ct="Thrice - Digital Sea" lc="0"></station>
+<station name="TClive Radio - [SHOUTcast.com]" mt="audio/mpeg" id="342872" br="64" genre="Alternative" ct="Keri Hilson - Knock You Down" lc="0"></station>
+<station name="House Mini Radio 89.1FM bestial - [SHOUTcast.com]" mt="audio/mpeg" id="344570" br="24" genre="Alternative" ct="" lc="0"></station>
+<station name="KRVM 91.9 FM  Eugene, Oregon - LQ (MP3) - [SHOUTcast.com]" mt="audio/mpeg" id="354108" br="24" genre="music alternative" ct="" lc="0"></station>
+<station name="100hitz - Alternative - [SHOUTcast.com]" mt="audio/aacp" id="359959" br="48" genre="VariousAlternative " ct="Rise Against - Savior" lc="0"></station>
+<station name="WKNH: Keene State College Radio - [SHOUTcast.com]" mt="audio/mpeg" id="365488" br="40" genre="College Alternative" ct="" lc="0"></station>
+<station name="Coloriage AAC+ Ferarock Bourgogne - [SHOUTcast.com]" mt="audio/aacp" id="369544" br="64" genre="rock alternative" ct="I AM KLOOT - GODS AND MONSTERS" lc="0"></station>
+<station name="Super Alex  - [SHOUTcast.com]" mt="audio/mpeg" id="370218" br="224" genre="Alternative " ct="" lc="0"></station>
+<station name="www.FreeSHOUTCast.com - rede ecologia cosmica - [SHOUTcast.com]" mt="audio/mpeg" id="377807" br="56" genre="Alternative" ct="" lc="0"></station>
+<station name="Rascal Radio - [SHOUTcast.com]" mt="audio/mpeg" id="378831" br="128" genre="Alternative" ct="Silversun Pickups - Common Reactor (email requests to: rascalradio.net@gmail.com)" lc="0"></station>
+<station name="Radio Porodin  - [SHOUTcast.com]" mt="audio/mpeg" id="380552" br="56" genre="Alternative " ct="Srbija" lc="0"></station>
+<station name="100hitz - Indie Rock - [SHOUTcast.com]" mt="audio/mpeg" id="384665" br="16" genre="Alternative  Rock  Indie " ct="100hitz_streaming hit_v1" lc="0"></station>
+<station name="Wavering Station - [SHOUTcast.com]" mt="audio/mpeg" id="384775" br="128" genre="Diverse  Alternative" ct="L`ame Immortelle - Ohne Dich" lc="0"></station>
+<station name="Brentwood and Billericay's Community Radio station - Powered by Wavestreaming.com - [SHOUTcast.com]" mt="audio/mpeg" id="388506" br="48" genre="Alternative Community Pop" ct="" lc="0"></station>
+<station name="X1FM Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="393571" br="64" genre="Alternative" ct="Soul Coughing - El Oso - I Miss the Girl" lc="0"></station>
+<station name="interneta radio - [SHOUTcast.com]" mt="audio/mpeg" id="395521" br="24" genre="alternative" ct="Simple Minds - Somebody up there likes you" lc="0"></station>
+<station name="barryaxis - [SHOUTcast.com]" mt="audio/mpeg" id="401930" br="64" genre="Alternative" ct="" lc="0"></station>
+<station name="WDFH-FM 90.3 - wdfh.org - Hudson Valley Community Radio - [SHOUTcast.com]" mt="audio/mpeg" id="419576" br="64" genre="Alternative" ct="" lc="0"></station>
+<station name="sipru Rock - [SHOUTcast.com]" mt="audio/aacp" id="425546" br="32" genre="Rock Alternative" ct="Korn - Freak on a Leash (feat. Amy Lee)" lc="0"></station>
+<station name="alt.CT.FM - MP3 128kbps - [SHOUTcast.com]" mt="audio/mpeg" id="430616" br="128" genre="Alternative" ct="11th Dimension - Julian Casablancas              ." lc="0"></station>
+<station name="WCDB Albany 90.9FM - [SHOUTcast.com]" mt="audio/mpeg" id="435689" br="32" genre="COLLEGE ALTERNATIVE" ct="" lc="0"></station>
+<station name="IgorBone - [SHOUTcast.com]" mt="audio/mpeg" id="438701" br="56" genre="Alternative" ct="Tori Amos - Blood Roses" lc="0"></station>
+<station name="Hermetic Garage - [SHOUTcast.com]" mt="audio/mpeg" id="439540" br="128" genre="Alternative" ct="Ennio Morricone - Man With A Harmonica" lc="0"></station>
+<station name="Quiz Beat Radio: www.Quiz-Beat-Radio.de - [SHOUTcast.com]" mt="audio/mpeg" id="448037" br="128" genre="Alternative" ct="Obsession - Viva Viva (Latin Mix)" lc="0"></station>
+<station name="WWRN - Your Christian Rock Alternative - [SHOUTcast.com]" mt="audio/aacp" id="448316" br="48" genre="Alternative Christian Roc" ct="VanZant - Things I Miss The Most" lc="0"></station>
+<station name="cegonri - [SHOUTcast.com]" mt="audio/mpeg" id="455876" br="24" genre="alternative recuerdos" ct="04 - el mar musica de relajacion y" lc="0"></station>
+<station name="Kixn 90's &amp; Todays Radio - [SHOUTcast.com]" mt="audio/mpeg" id="458978" br="24" genre="Alternative" ct="Bon Jovi - Till We Ain`t Strangers Anymor - DJ Ragdyman" lc="0"></station>
+<station name="e-Razors Radio - [SHOUTcast.com]" mt="audio/mpeg" id="463293" br="96" genre="Alternative" ct="Ektomorf - I`m against" lc="0"></station>
+<station name="WSLU 1620 AM/100.1 FM, Saint Leo, FL - [SHOUTcast.com]" mt="audio/mpeg" id="472208" br="128" genre="Alternative College" ct="Thanksgiving Break" lc="0"></station>
+<station name="MHB Radio - From Heavy Metal, Rock &amp; Alternative We've got you covered! - [SHOUTcast.com]" mt="audio/mpeg" id="478129" br="32" genre="Rock  Metal  Alternative" ct="Doro - Rock On" lc="0"></station>
+<station name="RWS relay: Radio Babylon - [SHOUTcast.com]" mt="audio/mpeg" id="478808" br="96" genre="Eclectic  Alternative  Ot" ct="Ryuichi Sakamoto - Energy Flow" lc="0"></station>
+<station name="tu mejor compa?ia | www.radiolubna.cl - [SHOUTcast.com]" mt="audio/mpeg" id="480009" br="64" genre="Alternative" ct="" lc="0"></station>
+<station name="Loudcaster: Exploit Boston! Radio - [SHOUTcast.com]" mt="audio/mpeg" id="480682" br="64" genre="Alternative Indie Rock" ct="Sarah Rabdau - Weekend" lc="0"></station>
+<station name="Radio Cero. Todo lo que te imaginas en musica en un solo lugar. - [SHOUTcast.com]" mt="audio/mpeg" id="486374" br="128" genre="alternative" ct="Matt Bianco - Anna-Marie" lc="0"></station>
+<station name="WVYC York College FM 99.7 AM 640 Eclectic Stream. - [SHOUTcast.com]" mt="audio/mpeg" id="491756" br="128" genre="College Alternative" ct="This is a live feed from WVYC Radio, York`s Only True Alternative." lc="0"></station>
+<station name="XFX RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="492884" br="56" genre="Alternative" ct="XFX 24 - 7" lc="0"></station>
+<station name="Spixfm Mobile - [SHOUTcast.com]" mt="audio/aacp" id="494762" br="56" genre="Alternative" ct="Jennifer Carbonell Vs. Friscia &amp; Lamboy - Broken Pieces  (F&amp;L Mixshow Edit)" lc="0"></station>
+<station name="1.FM - Channel X - [SHOUTcast.com]" mt="audio/mpeg" id="499185" br="32" genre="Alternative Rock" ct="Blue October - Dirt Room" lc="0"></station>
+<station name="Dabbl - [SHOUTcast.com]" mt="audio/aacp" id="500987" br="48" genre="Alternative" ct="" lc="0"></station>
+<station name="The Fringe - [SHOUTcast.com]" mt="audio/aacp" id="505037" br="48" genre="Alternative" ct="" lc="0"></station>
+<station name="Rock Nation - Frankoradio.com (Alternative/Rock Today &amp; 90's) - [SHOUTcast.com]" mt="audio/aacp" id="505561" br="32" genre="Alternative" ct="Scott Stapp - Justify" lc="0"></station>
+<station name="Fuzzy FM (UK) - [SHOUTcast.com]" mt="audio/mpeg" id="506384" br="24" genre="Alternative" ct="Dead Star - Sex Sell" lc="0"></station>
+<station name="X92 - Music With Attidude - [SHOUTcast.com]" mt="audio/mpeg" id="507034" br="56" genre="Alternative" ct="" lc="0"></station>
+<station name="The C-Radio // The New Rock Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="514827" br="128" genre="Alternative  Rock  Classi" ct="The Gandharvas - Downtime" lc="0"></station>
+<station name="Remedy.FM - [SHOUTcast.com]" mt="audio/mpeg" id="516411" br="56" genre="Alternative  Rock" ct="Listen and Watch Remedy.FM - Listen and Watch Remedy.FM" lc="0"></station>
+<station name="Lifestyle-Radio - DJ Atlantis - [SHOUTcast.com]" mt="audio/mpeg" id="519413" br="128" genre="Alternative" ct="Atlantis spielt: * ~~~ Pia Vanelly - Vielleicht macht es Bumm (3 Select Rmx) ~~~ *" lc="0"></station>
+<station name="DADE CITY RADIO AM-1710 - [SHOUTcast.com]" mt="audio/mpeg" id="523972" br="128" genre="Alternative Talk" ct="The Animals - San Franciscan Nights [c8J]" lc="0"></station>
+<station name="RADIO YUBOSKO 106.5FM PATI INDONESIA - [SHOUTcast.com]" mt="audio/mpeg" id="525157" br="24" genre="ALTERNATIVE" ct="" lc="0"></station>
+<station name="Radio Pulse - [SHOUTcast.com]" mt="audio/mpeg" id="528797" br="64" genre="alternative musicale" ct="06h-Vendredi 27 Novembre 2009" lc="0"></station>
+<station name="radio Pixeo - [SHOUTcast.com]" mt="audio/mpeg" id="529411" br="56" genre="Alternative" ct="Dernier Tango   Paris - Derniertango14hommeideal" lc="0"></station>
+<station name="radio.c3w.org - [SHOUTcast.com]" mt="audio/mpeg" id="532659" br="192" genre="Alternative" ct="jan6-openfield" lc="0"></station>
+<station name="Wave 1049 Online - Savannah - [SHOUTcast.com]" mt="audio/mpeg" id="547465" br="96" genre="AAA Adult Alternative" ct="Squeeze - Black Coffee in Bed" lc="0"></station>
+<station name="Radio Jovem - [SHOUTcast.com]" mt="audio/mpeg" id="551179" br="64" genre="Alternative" ct="" lc="0"></station>
+<station name="Gnadombo?ni - [SHOUTcast.com]" mt="audio/mpeg" id="556286" br="128" genre="Alternative" ct="" lc="0"></station>
+<station name="SixCry Deathcab - [SHOUTcast.com]" mt="audio/mpeg" id="558519" br="96" genre="Alternative" ct="Snow Patrol- Chasing Cars" lc="0"></station>
+<station name="Airado Fm - [SHOUTcast.com]" mt="audio/mpeg" id="563972" br="32" genre="alternative" ct="Jay Sean - Maybe" lc="0"></station>
+<station name="Radio Nordland HITWELLE Mecklenburg-Vorpommern - [SHOUTcast.com]" mt="audio/mpeg" id="565759" br="128" genre="Alternative" ct="Kid Cudy - Day` n Night" lc="0"></station>
+<station name="*** 108.pl RADIO *** - [SHOUTcast.com]" mt="audio/mpeg" id="567918" br="64" genre="alternative" ct="" lc="0"></station>
+<station name="X3Mradio.ru - [SHOUTcast.com]" mt="audio/mpeg" id="568765" br="64" genre="Metal Rock Alternative" ct="Soundgarden - Black Hole Sun" lc="0"></station>
+<station name="alt.CT.FM - MP3 64kbps - [SHOUTcast.com]" mt="audio/mpeg" id="569070" br="64" genre="Alternative" ct="11th Dimension - Julian Casablancas              ." lc="0"></station>
+<station name="GotRadio - Hot Hits - [SHOUTcast.com]" mt="audio/mpeg" id="569804" br="32" genre="Top 40  Pop  Alternative " ct="Colbie Caillat - Fallin` For You" lc="0"></station>
+<station name="Radio Krishna Network - RKC Terni - Live Stream 89.500 MHz F.M. ITALY - [SHOUTcast.com]" mt="audio/mpeg" id="575643" br="24" genre="Spiritual  Alternative" ct="RKC Live Stream - Srila Prabhupada Lilamrita 56" lc="0"></station>
+<station name="GotRadio - 90's Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="585158" br="32" genre="90 s  90 s Alternative  9" ct="Stabbing Westward - Shame" lc="0"></station>
+<station name="radiovenetia - [SHOUTcast.com]" mt="audio/mpeg" id="592044" br="32" genre="Alternative" ct="Tatal meu cu suflet bun - Tatal meu cu suflet bun" lc="0"></station>
+<station name="Paradise Webradio GSM - [SHOUTcast.com]" mt="audio/mpeg" id="592434" br="24" genre="Alternative" ct="demo" lc="0"></station>
+<station name="MEGASHUFFLE.com - The Variety Station - playing Alternative, Rock, &amp; Top 40 Variety  - [SHOUTcast.com]" mt="audio/aacp" id="599138" br="48" genre="alternative  rock  pop  h" ct="Incubus - Dig `2006`" lc="0"></station>
+<station name="GotRadio - Women's World - [SHOUTcast.com]" mt="audio/mpeg" id="612433" br="16" genre="Pop  Alternative  Women s" ct="Fiona Apple - Criminal" lc="0"></station>
+<station name="WDFH-FM 90.3 - wdfh.org - Hudson Valley Community Radio - [SHOUTcast.com]" mt="audio/mpeg" id="617079" br="24" genre="Alternative" ct="" lc="0"></station>
+<station name="Radio Fiat+/-Lux (lofi) - [SHOUTcast.com]" mt="audio/mpeg" id="619348" br="32" genre="Alternative" ct="Daniel Boucher - Deviens-Tu C`que T`as Voulu :: La Soupe automate" lc="0"></station>
+<station name="Wave 1049 Online - Savannah GA - [SHOUTcast.com]" mt="audio/aacp" id="621688" br="64" genre="AAA Adult Alternative" ct="Squeeze - Black Coffee in Bed" lc="0"></station>
+<station name="Rock-Front - [SHOUTcast.com]" mt="audio/mpeg" id="621876" br="128" genre="Rock  Alternative" ct="OneRepublic - Stop And Stare" lc="0"></station>
+<station name="Town Park Radio - [SHOUTcast.com]" mt="audio/aacp" id="622342" br="128" genre="Alternative" ct="Sidicium - Test Drive Subtune 1 (G-Funk Style)" lc="0"></station>
+<station name="EdgeRadio One  **Indie Music &amp; Progressive News** - [SHOUTcast.com]" mt="audio/aacp" id="633836" br="32" genre="Indie Alternative College" ct="OMD - Telegraph" lc="0"></station>
+<station name="SBCC Radio - Santa Barbara City College - [SHOUTcast.com]" mt="audio/mpeg" id="635606" br="128" genre="Eclectic Rock Alternative" ct="Bruce Springsteen {The River - Disc 2} - Fade Away " lc="0"></station>
+<station name="Kaolin Fm 88.4  (www.kaolin-fm.com) - [SHOUTcast.com]" mt="audio/mpeg" id="642572" br="128" genre="alternative" ct="KAOLIN FM" lc="0"></station>
+<station name="100hitz - Alternative - [SHOUTcast.com]" mt="audio/mpeg" id="643064" br="16" genre="Alternative  Alternative " ct="Incubus - Pardon Me" lc="0"></station>
+<station name="Spider Radio - [SHOUTcast.com]" mt="audio/mpeg" id="645471" br="56" genre="Alternative" ct="Kansas - Carry On Wayward Son" lc="0"></station>
+<station name="Cardiffusion Live! - [SHOUTcast.com]" mt="audio/mpeg" id="650343" br="96" genre="Alternative" ct="" lc="0"></station>
+<station name="STOP RADIO - Pop Rock et Nouvelle Sc?ne Non Stop - [SHOUTcast.com]" mt="audio/mpeg" id="659730" br="48" genre="Pop Rock Alternative Nouv" ct="OXYGEN - 80`s Girl" lc="0"></station>
+<station name="100 XR - #1 Rock Web Station!!! Today's Best New Rock &amp; XtReme Rock, Modern Rock, Classic Rock-low - [SHOUTcast.com]" mt="audio/mpeg" id="662823" br="24" genre="Alternative Rock Metal" ct="Uriah Heep - Look At Yourself |from:  Look At Yourself - 1971 " lc="0"></station>
+<station name="WSHC - the Alternative to repetitive radio - Powered by Wavestreaming.com - [SHOUTcast.com]" mt="audio/mpeg" id="670821" br="128" genre="Alternative" ct="" lc="0"></station>
+<station name="KCOU 88.1 FM - Mizzou - Student-run since 1963 - Live Studio Feed - 573-882-8262 - [SHOUTcast.com]" mt="audio/mpeg" id="687215" br="56" genre="College Indie Alternative" ct="An Horse - Company" lc="0"></station>
+<station name="Deeper Into Music - [SHOUTcast.com]" mt="audio/mpeg" id="690079" br="64" genre="Rock Alternative Eclectic" ct="Julian Plenti - Fly As You Might " lc="0"></station>
+<station name="Errorfm.com: ch1 mobile - [SHOUTcast.com]" mt="audio/aacp" id="692754" br="48" genre="talk alternative variety" ct="LIVE NOW - Nov. 27, 2009 - playlist at http://deaconlight.com (Errorfm.com: Deaconlight)" lc="0"></station>
+<station name="KANM Student Radio (48k) - The college station of College Station - [SHOUTcast.com]" mt="audio/mpeg" id="693227" br="48" genre="Indie College Alternative" ct="Yo La Tengo - Cherry Chapstick" lc="0"></station>
+<station name="RADIOKATIAItalywebradio - [SHOUTcast.com]" mt="audio/mpeg" id="693241" br="128" genre=" Alternative Pop Rock" ct="Inercia - Premiso" lc="0"></station>
+<station name="espreso romantico  - [SHOUTcast.com]" mt="audio/mpeg" id="703038" br="32" genre="Alternative " ct="ricardo arjona - mujeres182" lc="0"></station>
+<station name="RETROPHONIC REWIND CHANNEL - [SHOUTcast.com]" mt="audio/mpeg" id="703128" br="128" genre="Alternative" ct="Seal - Crazy" lc="0"></station>
+<station name="Auralgasms Radio - [SHOUTcast.com]" mt="audio/mpeg" id="704749" br="32" genre="Alternative" ct="Hercules &amp; Love Affair - Blind" lc="0"></station>
+<station name="Kixn 90's &amp; Todays Radio - [SHOUTcast.com]" mt="audio/mpeg" id="705700" br="64" genre="Alternative" ct="FSN World News - DJ Ragdyman" lc="0"></station>
+<station name="KANM Student Radio (40k AAC+) - The college station of College Station - [SHOUTcast.com]" mt="audio/aacp" id="705856" br="40" genre="Indie College Alternative" ct="Yo La Tengo - Cherry Chapstick" lc="0"></station>
+<station name="((CAT [FM] EYE)) - [SHOUTcast.com]" mt="audio/mpeg" id="706135" br="96" genre="Rock   Alternative" ct="Maroon 5 - The Fog [album: My Blue Ocean, 2005]" lc="0"></station>
+<station name="Pacific.FM : Alternative Indie Rock - [SHOUTcast.com]" mt="audio/mpeg" id="711866" br="128" genre="Alternative Indy" ct="Pop Will Eat Itself - Familus Horribilus (Hia W.y.g." lc="0"></station>
+<station name="KSDB 919 Manhattan, KS - [SHOUTcast.com]" mt="audio/mpeg" id="716544" br="24" genre="Alternative" ct="" lc="0"></station>
+<station name="The rocker 2.0  - [SHOUTcast.com]" mt="audio/mpeg" id="718485" br="56" genre="Alternative " ct="Smoke On The Water" lc="0"></station>
+<station name="DJ Plague - Play it Loud Sing it Hard - Rocking Out - [SHOUTcast.com]" mt="audio/mpeg" id="721438" br="128" genre="Alternative Rock Humor" ct="Placebo - English Summer Rain" lc="0"></station>
+<station name="THE AUDIO FIASCO 24/7 - hosted by Chris Rohn - WDET HD2 / IPM / Sanctuary Radio  - [SHOUTcast.com]" mt="audio/aacp" id="722096" br="32" genre="Alternative" ct="The Chris Rohn Program - Issue #069 - 08 02 2007" lc="0"></station>
+<station name="Radio: Auto DJ - [SHOUTcast.com]" mt="audio/mpeg" id="722689" br="128" genre="Alternative" ct="03 Alexander Moren - Eine Geile Zeit" lc="0"></station>
+<station name="RGI.fm - Radio Groeba International - [SHOUTcast.com]" mt="audio/mpeg" id="726698" br="128" genre="Alternative" ct="Live aus dem Studio - Sendung 59 vom 20.11.2009" lc="0"></station>
+<station name="Diamond Web Music-myspace.com/diamondwebmusic - [SHOUTcast.com]" mt="audio/mpeg" id="729135" br="128" genre="alternative folk songwrit" ct="Eggheads - Wobble Energy" lc="0"></station>
+<station name="Zintzilik.irratia - [SHOUTcast.com]" mt="audio/mpeg" id="738646" br="24" genre="Alternative" ct="" lc="0"></station>
+<station name="i7 Radio - [SHOUTcast.com]" mt="audio/mpeg" id="742155" br="32" genre="Pop Alternative Persian" ct="i7Radio.com - DJ Farid - Aug-Sep 2008 Persian Mix" lc="0"></station>
+<station name="A1A RADIO - [SHOUTcast.com]" mt="audio/mpeg" id="747297" br="128" genre="Alternative" ct="Beach Boys - California Dreaming" lc="0"></station>
+<station name="GotRadio - AAA Boulevard - [SHOUTcast.com]" mt="audio/mpeg" id="754960" br="16" genre="Adult Alternative " ct="Sugarplum Fairies - Hold On To Me" lc="0"></station>
+<station name="Living On The Edge Radio - [SHOUTcast.com]" mt="audio/aacp" id="761101" br="32" genre="Rock Alternative Classic " ct="Grateful Dead - Playing In The Band [Live] " lc="0"></station>
+<station name="Quiz Beat Radio: www.Quiz-Beat-Radio.de - [SHOUTcast.com]" mt="audio/mpeg" id="764135" br="128" genre="Alternative" ct="Olaf Henning - Blinder Passagier (Mallora-Mix)" lc="0"></station>
+<station name="RadIQ, find your Music I.Q. - [SHOUTcast.com]" mt="audio/mpeg" id="767479" br="112" genre="Pop  Rock  Alternative  D" ct="vac (44100Hz 16bps Stereo, buffers: 10x4608 bytes)" lc="0"></station>
+<station name="LegatoCafe.Net - Cleveland, Ohio - [SHOUTcast.com]" mt="audio/aacp" id="768269" br="32" genre="Adult Alternative Eclecti" ct="Tori Amos - Welcome To England" lc="0"></station>
+<station name="RGI.fm - Radio Groeba International - Electroghetto - [SHOUTcast.com]" mt="audio/mpeg" id="771536" br="128" genre="Alternative" ct="Revolting Cocks - Da ya think Im sexy - Da ya think Im sexy" lc="0"></station>
+<station name="Wagner College Radio - [SHOUTcast.com]" mt="audio/mpeg" id="792015" br="112" genre="Alternative" ct="" lc="0"></station>
+<station name="Radio Pulsar - [SHOUTcast.com]" mt="audio/mpeg" id="800235" br="24" genre="Alternative" ct="" lc="0"></station>
+<station name="CFNXCHAOS.com Alternative - [SHOUTcast.com]" mt="audio/aacp" id="800289" br="48" genre="alternative" ct="Rise Against - Savior" lc="0"></station>
+<station name="SCR-Strand Club Radio - [SHOUTcast.com]" mt="audio/mpeg" id="807878" br="128" genre="Alternative" ct="210-sarah_whatmore-when_i_lost_you" lc="0"></station>
+<station name="Alternativa Rock - www.diversaogarantida.com - [SHOUTcast.com]" mt="audio/mpeg" id="810745" br="64" genre="Indie Alternative Pop Roc" ct="Gary Numan - Replicas" lc="0"></station>
+<station name="Radio Costa Azul_Dj Alfonzo - [SHOUTcast.com]" mt="audio/mpeg" id="816393" br="32" genre="Alternative" ct="" lc="0"></station>
+<station name="Feminist International Radio Endeavour - [SHOUTcast.com]" mt="audio/mpeg" id="827211" br="32" genre="Alternative" ct="" lc="0"></station>
+<station name="Pwnradio - Pwns the shit out of you! - #pwnradio @ quakenet - [SHOUTcast.com]" mt="audio/mpeg" id="830527" br="192" genre="Alternative  Rock  Metal " ct="Sebastien Leger &amp; Chris Lake - Aqualight" lc="0"></station>
+<station name="Absolute Radio Xtreme - [SHOUTcast.com]" mt="audio/aacp" id="832441" br="48" genre="Alternative" ct="" lc="0"></station>
+<station name="Radio: CityStarRadio AutoDJ - [SHOUTcast.com]" mt="audio/mpeg" id="834759" br="128" genre="Alternative" ct="Steffen J rgens - Wir Beide(1)" lc="0"></station>
+<station name="oOo EKO DES GARRIGUES oOo live from montpellier [f][128][scast] oOo - [SHOUTcast.com]" mt="audio/mpeg" id="836239" br="128" genre="Techno Alternative" ct="depuis 18h00 : joining the circus" lc="0"></station>
+<station name="DJ Zeke - [SHOUTcast.com]" mt="audio/mpeg" id="844852" br="80" genre="Alternative" ct="Children of Bodom - Oops, I Did it Again (DJ Coyote @ IYC)" lc="0"></station>
+<station name="radioNtenna - [SHOUTcast.com]" mt="audio/aacp" id="848932" br="48" genre="Alternative" ct="Conor Oberst - Conor Oberst (2008) - Get-well-cards (radioNtenna.org - 89.5 WHRV HD3 - Indie, Rock, Blues, Americana &amp; Oldies )" lc="0"></station>
+<station name="Studio Ter Apel (www.studioterapel.wordpress.com) - [SHOUTcast.com]" mt="audio/mpeg" id="851377" br="96" genre="Alternative  Pop  Rock " ct="JB Meijers - JB Meijers At the face of a brand new day" lc="0"></station>
+<station name="shUmnoeRadio - [SHOUTcast.com]" mt="audio/aacp" id="851441" br="64" genre="Alternative  Classic Rock" ct="Sam Roberts - Detroit `67" lc="0"></station>
+<station name="House Mini Radio 89.1FM bestial - [SHOUTcast.com]" mt="audio/mpeg" id="853977" br="24" genre="Alternative" ct="" lc="0"></station>
+<station name="Alternative Music - [SHOUTcast.com]" mt="audio/mpeg" id="858014" br="64" genre="Alternative" ct="Cranberries - Dreams" lc="0"></station>
+<station name="KCSC.ASChico.com - 64Kbps MP3 - Student Owned &amp; Operated - an Associated Students Activity Fee progr - [SHOUTcast.com]" mt="audio/mpeg" id="862066" br="64" genre="Alternative College" ct="" lc="0"></station>
+<station name="eX1065 - [SHOUTcast.com]" mt="audio/mpeg" id="869785" br="96" genre="Alternative" ct="Them Crooked Vultures - New Fang" lc="0"></station>
+<station name="Interactiva 91.7 FM - [SHOUTcast.com]" mt="audio/mpeg" id="870543" br="80" genre="Alternative" ct="" lc="0"></station>
+<station name="Deeper Into Music - [SHOUTcast.com]" mt="audio/aacp" id="872533" br="64" genre="Rock Alternative Eclectic" ct="Julian Plenti - Fly As You Might " lc="0"></station>
+<station name="MUSICVOX FM 95.1 Pasto/Colombia - [SHOUTcast.com]" mt="audio/mpeg" id="875994" br="112" genre="Rock  Alternative" ct="Musicvox Fm" lc="0"></station>
+<station name="KCSC.ASChico.com - 32Kbps AAC+ - Student Owned &amp; Operated - an Associated Students Activity Fee prog - [SHOUTcast.com]" mt="audio/aacp" id="888341" br="32" genre="Alternative College" ct="" lc="0"></station>
+<station name="radio AlterVision - [SHOUTcast.com]" mt="audio/mpeg" id="908530" br="192" genre="Alternative" ct="Serj Tankian - Empy Walls" lc="0"></station>
+<station name="Sleepy Cat Records, Adelanto, CA - Hits First! The Latest of Today, and The Best of Yesterday. Alway - [SHOUTcast.com]" mt="audio/mpeg" id="916316" br="24" genre="Adult Album Alternative" ct="Shakira - She Wolf" lc="0"></station>
+<station name="WRPS/WebRadioPugetSound Cream of the Crop Indies - [SHOUTcast.com]" mt="audio/mpeg" id="924124" br="32" genre="Pop Rock   Alternative " ct="WRPSDayPartSept2009B" lc="0"></station>
+<station name="Radio Cruzeiro AM - [SHOUTcast.com]" mt="audio/mpeg" id="926254" br="32" genre="Alternative" ct="" lc="0"></station>
+<station name="GotRadio - AAA Boulevard - [SHOUTcast.com]" mt="audio/mpeg" id="939538" br="32" genre="Adult Alternative " ct="Sugarplum Fairies - Hold On To Me" lc="0"></station>
+<station name="RSDB RCA MUSIQUE [ALTERNATIVE,AIMSA] - [SHOUTcast.com]" mt="audio/mpeg" id="945295" br="128" genre="Alternative" ct="Bigbonobo - Maracana" lc="0"></station>
+<station name="Op.tosys-Radio - [SHOUTcast.com]" mt="audio/mpeg" id="958806" br="64" genre="Alternative" ct="Wendy Hausoe - Ragged dance I" lc="0"></station>
+<station name="WDET HD2 - [SHOUTcast.com]" mt="audio/mpeg" id="965642" br="96" genre="Alternative" ct="" lc="0"></station>
+<station name="Horde Border Patrol - [SHOUTcast.com]" mt="audio/mpeg" id="975294" br="56" genre="Alternative" ct="Alice In Chains - Angry Chair" lc="0"></station>
+<station name="CJSR - Edmonton - Radio Worth Watching! - [SHOUTcast.com]" mt="audio/mpeg" id="975511" br="56" genre="Alternative" ct="" lc="0"></station>
+<station name="Radio:  - [SHOUTcast.com]" mt="audio/mpeg" id="984335" br="128" genre="Alternative" ct="DJ Bobo - 90`s Euro Dance - There`s A Party" lc="0"></station>
+<station name="181.FM - The Buzz (Your Alternative Station!) - [SHOUTcast.com]" mt="audio/mpeg" id="985226" br="64" genre="Alternative" ct="Depeche Mode - Wrong" lc="0"></station>
+<station name="MusicVictim - MV1 - [SHOUTcast.com]" mt="audio/aacp" id="987842" br="24" genre="alternative pop rock indi" ct="Micah P Hinson - While My Guitar Gently Weeps" lc="0"></station>
+<station name="Spix 103.8 FM - 128 kbps - [SHOUTcast.com]" mt="audio/mpeg" id="990615" br="128" genre="Alternative" ct="" lc="0"></station>
+<station name="RADIO TPM SP - [SHOUTcast.com]" mt="audio/mpeg" id="999135" br="64" genre="Alternative" ct="" lc="0"></station>
+</stationlist>

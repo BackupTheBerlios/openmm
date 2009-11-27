@@ -23,7 +23,6 @@
 #include <vdr/plugin.h>
 
 #include "vdrmediaserver.h"
-// #include "streamdev/server/server.h"
 
 #include <platinum/PltUPnP.h>
 
