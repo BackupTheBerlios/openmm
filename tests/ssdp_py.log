@@ -1,0 +1,47 @@
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 3
+socket(PF_NETLINK, SOCK_RAW, 0)         = 7
+bind(7, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(7, {sa_family=AF_NETLINK, pid=11962, groups=00000000}, [12]) = 0
+sendto(7, "\24\0\0\0\26\0\1\3\341\227\23K\0\0\0\0\0\0\0\0", 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(7, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\341\227\23K\272.\0\0\2\10\200\376\1\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(7, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\341\227\23K\272.\0\0\n\200\200\376\1\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(7, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\341\227\23K\272.\0\0\0\0\0\0\1\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+bind(3, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+getsockname(3, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+setsockopt(3, SOL_IP, IP_ADD_MEMBERSHIP, "\357\377\377\372\0\0\0\0", 8) = 0
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 299
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 308
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 371
+recvfrom(3, 0x85f83ec, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 308
+recvfrom(3, 0x85f825c, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 347
+recvfrom(3, 0x85f8284, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 308
+recvfrom(3, 0x85f825c, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 367
+recvfrom(3, 0x85f829c, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 335
+recvfrom(3, 0x85f827c, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 379
+recvfrom(3, 0x85f82a4, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 363
+recvfrom(3, 0x85f8294, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "NOTIFY * HTTP/1.1\r\nHOST: 239.255"..., 8192, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 361
+recvfrom(3, 0x85f8294, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+recvfrom(3, "M-SEARCH * HTTP/1.1\r\nMX: 1\r\nST: "..., 8192, 0, {sa_family=AF_INET, sin_port=htons(56209), sin_addr=inet_addr("192.168.178.20")}, [16]) = 148
+recvfrom(3, "M-SEARCH * HTTP/1.1\r\nMX: 1\r\nST: "..., 8192, 0, {sa_family=AF_INET, sin_port=htons(53687), sin_addr=inet_addr("192.168.178.20")}, [16]) = 148
+recvfrom(3, 0x85f826c, 8192, 0, 0xbfa5cb38, 0xbfa5cb34) = -1 EAGAIN (Resource temporarily unavailable)
+Traceback (most recent call last):
+  File "/home/jb/devel/cc/jamm/tests/ssdp.py", line 29, in <module>
+    reactor.run()
+  File "/usr/lib/python2.5/site-packages/twisted/internet/base.py", line 1048, in run
+    self.mainLoop()
+  File "/usr/lib/python2.5/site-packages/twisted/internet/base.py", line 1057, in mainLoop
+    self.runUntilCurrent()
+--- <exception caught here> ---
+  File "/usr/lib/python2.5/site-packages/twisted/internet/base.py", line 677, in runUntilCurrent
+    f(*a, **kw)
+  File "/usr/lib/python2.5/site-packages/twisted/internet/base.py", line 495, in stop
+    "Can't stop reactor that isn't running.")
+twisted.internet.error.ReactorNotRunning: Can't stop reactor that isn't running.

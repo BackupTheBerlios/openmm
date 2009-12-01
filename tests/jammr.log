@@ -1,0 +1,220 @@
+[00000001] main libvlc debug: VLC media player - version 0.9.4 Grishenko - (c) 1996-2008 the VideoLAN team
+[00000001] main libvlc debug: libvlc was configured with ./configure  '--build=i486-linux-gnu' '--enable-maintaner-mode' '--enable-release' '--prefix=/usr' '--enable-libtool' '--enable-fast-install' '--with-binary-version=1ubuntu3.2' '--disable-update-check' '--disable-gnome' '--disable-gtk' '--disable-familiar' '--disable-fb' '--enable-ggi' '--enable-sdl' '--enable-esd' '--enable-mad' '--enable-arts' '--enable-jack' '--enable-pulse' '--enable-lirc' '--enable-a52' '--enable-aa' '--enable-dvbpsi' '--enable-mozilla' '--with-mozilla-pkg=libxul-plugin' '--disable-kde' '--enable-mp4' '--enable-dvb' '--disable-satellite' '--enable-ogg' '--enable-vorbis' '--enable-shout' '--enable-qt4' '--disable-slp' '--enable-flac' '--disable-skins' '--disable-basic-skins' '--enable-skins2' '--enable-freetype' '--enable-mkv' '--enable-speex' '--enable-caca' '--enable-live555' '--enable-libmpeg2' '--enable-fribidi' '--enable-cdio' '--enable-mod' '--enable-theora' '--enable-modplug' '--enable-dvdnav' '--enable-gnutls' '--enable-ffmpeg' '--enable-ncurses' '--enable-smb' '--disable-gnomevfs' '--enable-bonjour' '--enable-mpc' '--enable-vcd' '--enable-vcdx' '--enable-notify' '--enable-twolame' '--enable-x264' '--enable-faad' '--disable-zvbi' '--enable-telx' '--enable-mediacontrol-bindings' '--disable-atmo' '--enable-taglib' '--enable-libass' '--enable-libdca' '--enable-alsa' '--enable-dv' '--enable-v4l' '--enable-v4l2' '--enable-pvr' '--enable-svgalib' '--enable-dvd' '--without-dvdcss' 'build_alias=i486-linux-gnu' 'CFLAGS=-g -O2' 'LDFLAGS=-Wl,--as-needed' 'CPPFLAGS=' 'CXXFLAGS=-g -O2'
+[00000001] main libvlc debug: translation test: code is "C"
+socket(PF_FILE, SOCK_STREAM, 0)         = 3
+connect(3, {sa_family=AF_FILE, path="/var/run/dbus/system_bus_socket"}, 33) = 0
+Process 8776 attached
+Process 8777 attached
+Process 8778 attached
+Process 8779 attached
+Process 8780 attached
+[pid  8775] socket(PF_FILE, SOCK_STREAM, 0) = 5
+[pid  8775] connect(5, {sa_family=AF_FILE, path=@/tmp/dbus-mR29PMZ1Qe}, 23) = 0
+Process 8781 attached (waiting for parent)
+Process 8781 resumed (parent 8775 ready)
+Process 8782 attached
+[pid  8775] socket(PF_FILE, SOCK_STREAM, 0) = 6
+[pid  8775] connect(6, {sa_family=AF_FILE, path="/tmp/.X11-unix/X0"}, 110) = 0
+[pid  8775] getpeername(6, {sa_family=AF_FILE, path="/tmp/.X11-unix/X0"}, [20]) = 0
+Process 8783 attached
+[pid  8775] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 7
+[pid  8775] getsockname(7, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(7, 0xbfe3e4dc, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8775] setsockopt(7, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8775] setsockopt(7, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8775] setsockopt(7, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+[pid  8775] bind(7, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+[pid  8775] getsockname(7, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(7, 0xbfe3e55c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8784 attached
+[pid  8775] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 16
+[pid  8775] getsockname(16, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(16, 0xbfe3e43c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8775] bind(16, {sa_family=AF_INET, sin_port=htons(57467), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+[pid  8775] getsockname(16, {sa_family=AF_INET, sin_port=htons(57467), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(16, 0xbfe3e40c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8785 attached
+Process 8786 attached
+[pid  8784] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8784] setsockopt(7, SOL_IP, IP_ADD_MEMBERSHIP, "\357\377\377\372\0\0\0\0", 8) = 0
+[pid  8784] setsockopt(7, SOL_IP, IP_ADD_MEMBERSHIP, "\357\377\377\372\0\0\0\0", 8) = -1 EADDRINUSE (Address already in use)
+[pid  8785] listen(16, 20)              = 0
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8786] getsockname(20, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(20, 0xaeff603c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(20, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 25
+[pid  8786] getsockname(25, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(25, 0xaeff607c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(25, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_IF, [16777343], 4) = 0
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8786] getsockname(20, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(20, 0xaeff603c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(20, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 25
+[pid  8786] getsockname(25, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(25, 0xaeff607c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(25, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_IF, [347252928], 4) = 0
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 172
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 228
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 226
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 238
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 236
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 181
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 172
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 228
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 226
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 238
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 236
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51020), sin_addr=inet_addr("192.168.178.20")}, [16]) = 181
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8786] getsockname(20, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(20, 0xaeff603c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(20, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 25
+[pid  8786] getsockname(25, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(25, 0xaeff607c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(25, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_IF, [16777343], 4) = 0
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 278, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 278
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 334, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 334
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 332, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 332
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 344, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 344
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 342, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 342
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 287, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 287
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 278, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 278
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 334, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 334
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 332, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 332
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 344, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 344
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 342, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 342
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 287, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 287
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8786] getsockname(20, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(20, 0xaeff603c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(20, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8786] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 25
+[pid  8786] getsockname(25, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8786] getpeername(25, 0xaeff607c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8786] setsockopt(25, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8786] setsockopt(20, SOL_IP, IP_MULTICAST_IF, [347252928], 4) = 0
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 283, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 283
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 339, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 339
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 337, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 337
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 349, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 349
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 347, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 347
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 292, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 292
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 283, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 283
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 339, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 339
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 337, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 337
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 349, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 349
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 347, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 347
+[pid  8786] sendto(20, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 292, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 292
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 283
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 339
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 337
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 349
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 347
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 292
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 283
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 339
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 337
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 349
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 347
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56932), sin_addr=inet_addr("192.168.178.20")}, [16]) = 292
+Process 8786 detached
+Process 8785 detached
+[pid  8775] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 16
+[pid  8775] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 16
+[pid  8775] getsockname(16, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(16, 0xbfe3e2dc, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8775] setsockopt(16, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8775] setsockopt(16, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8775] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8775] getsockname(20, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(20, 0xbfe3e31c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8775] setsockopt(20, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8775] setsockopt(16, SOL_IP, IP_MULTICAST_IF, [16777343], 4) = 0
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8775] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 16
+[pid  8775] getsockname(16, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(16, 0xbfe3e2dc, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8775] setsockopt(16, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8775] setsockopt(16, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8775] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 20
+[pid  8775] getsockname(20, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8775] getpeername(20, 0xbfe3e31c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8775] setsockopt(20, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8775] setsockopt(16, SOL_IP, IP_MULTICAST_IF, [347252928], 4) = 0
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 236
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16 <unfinished ...>
+[pid  8784] recvfrom(7,  <unfinished ...>
+[pid  8775] <... sendto resumed> )      = 181
+[pid  8784] <... recvfrom resumed> "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44263), sin_addr=inet_addr("192.168.178.20")}, [16]) = 172
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 172, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 172
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 228, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 228
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44263), sin_addr=inet_addr("192.168.178.20")}, [16]) = 228
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 226, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 226
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 238, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 238
+[pid  8784] recvfrom(7,  <unfinished ...>
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 236, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16 <unfinished ...>
+[pid  8784] <... recvfrom resumed> "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44263), sin_addr=inet_addr("192.168.178.20")}, [16]) = 226
+[pid  8775] <... sendto resumed> )      = 236
+[pid  8775] sendto(16, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 181, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 181
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44263), sin_addr=inet_addr("192.168.178.20")}, [16]) = 238
+[pid  8784] recvfrom(7, "NOTIFY * HTTP/1.1\r\nHost: 239.255"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44263), sin_addr=inet_addr("192.168.178.20")}, [16]) = 236
+Process 8784 detached
+Process 8783 detached
+Process 8782 detached
+Process 8780 detached
+Process 8779 detached
+Process 8778 detached
+Process 8777 detached
+Process 8776 detached
+Process 8781 detached
+Process 8775 detached

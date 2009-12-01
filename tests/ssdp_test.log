@@ -1,0 +1,8 @@
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 3
+setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+bind(3, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 5
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 6
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 6
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 5
+setsockopt(3, SOL_IP, IP_ADD_MEMBERSHIP, "\357\377\377\372\0\0\0\0", 8) = 0

@@ -24,6 +24,10 @@
 #define WEBMEDIASERVER_H
 
 #include <platinum/PltMediaServer.h>
+#include <Poco/URI.h>
+#include "Poco/SAX/InputSource.h"
+#include "Poco/Net/HTTPClientSession.h"
+
 
 #include <map>
 #include <vector>
@@ -34,21 +38,14 @@
 #include <sstream>
 
 using namespace std;
+using Poco::Net::HTTPClientSession;
+using Poco::URI;
+using Poco::XML::InputSource;
 
 
 /**
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
-
-class RadioStation
-{
-public:
-    RadioStation(string name, string mrl) { m_name = name; m_mrl = mrl; }
-    
-    string m_name;
-    string m_mrl;
-};
-
 
 class WebMediaServer : public PLT_MediaServer
 {
@@ -71,14 +68,20 @@ private:
                                 const NPT_String& object_id,
                                 const NPT_String& searchCriteria,
                                 const NPT_HttpRequestContext& context);
+    NPT_String genreToDidl(NPT_String filter, string genre);
+    NPT_String stationToDidl(NPT_String filter, string parent_id, string name, string id);
+    
     
     NPT_String m_localIp;
     
     PLT_MediaContainer* m_containerRoot;
+    PLT_MediaContainer* m_containerShout;
     
-    vector<RadioStation*> m_stationList;
-    
+    URI m_uriShout;
+    stringstream m_xmlShoutGenre;
+    HTTPClientSession* session;
     // TODO: need to lock m_itemCache
+    map<string, stringstream*> m_stationCache;
     map<NPT_String, PLT_MediaItem*> m_itemCache;
 //     map<NPT_String, NPT_InputStreamReference> m_recCache;
 };

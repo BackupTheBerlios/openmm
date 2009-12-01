@@ -1,0 +1,596 @@
+socket(PF_FILE, SOCK_STREAM, 0)         = 8
+connect(8, {sa_family=AF_FILE, path="/tmp/.X11-unix/X0"}, 110) = 0
+getpeername(8, {sa_family=AF_FILE, path="/tmp/.X11-unix/X0"}, [20]) = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 11
+connect(11, {sa_family=AF_FILE, path=@/tmp/dbus-mR29PMZ1Qe}, 23) = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 16
+connect(16, {sa_family=AF_FILE, path="/tmp/.ICE-unix/6444"}, 21) = 0
+UpnpController::UpnpController() 
+socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 17
+getsockname(17, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+getpeername(17, 0xbfb5112c, [16])       = -1 ENOTCONN (Transport endpoint is not connected)
+Object::connect: No such signal ControllerGui::expanded(QModelIndex)
+Object::connect:  (sender name:   'ControllerGui')
+UpnpController::UpnpController() starting threads ... 
+socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 23
+getsockname(23, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+getpeername(23, 0xbfb5110c, [16])       = -1 ENOTCONN (Transport endpoint is not connected)
+setsockopt(23, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+setsockopt(23, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+setsockopt(23, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+bind(23, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+getsockname(23, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+getpeername(23, 0xbfb5118c, [16])       = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8677 attached
+[pid  8676] bind(17, {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+[pid  8677] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP <unfinished ...>
+[pid  8676] getsockname(17,  <unfinished ...>
+[pid  8677] <... socket resumed> )      = 27
+[pid  8676] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8676] getpeername(17, 0xbfb50fdc, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8678 attached (waiting for parent)
+Process 8678 resumed (parent 8676 ready)
+Process 8679 attached (waiting for parent)
+Process 8679 resumed (parent 8676 ready)
+[pid  8676] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP <unfinished ...>
+[pid  8678] listen(17, 20 <unfinished ...>
+[pid  8676] <... socket resumed> )      = 28
+[pid  8678] <... listen resumed> )      = 0
+[pid  8677] setsockopt(23, SOL_IP, IP_ADD_MEMBERSHIP, "\357\377\377\372\0\0\0\0", 8) = 0
+[pid  8677] setsockopt(23, SOL_IP, IP_ADD_MEMBERSHIP, "\357\377\377\372\0\0\0\0", 8) = -1 EADDRINUSE (Address already in use)
+[pid  8676] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 27
+[pid  8676] getsockname(27, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8676] getpeername(27, 0xbfb50f3c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8676] setsockopt(27, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8676] setsockopt(27, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8676] setsockopt(27, SOL_IP, IP_MULTICAST_IF, [347252928], 4) = 0
+[pid  8676] setsockopt(27, SOL_IP, IP_MULTICAST_TTL, "\4", 1) = 0
+Process 8680 attached
+[pid  8676] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 30
+[pid  8676] getsockname(30, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8676] getpeername(30, 0xbfb50f3c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8676] setsockopt(30, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+[pid  8676] setsockopt(30, SOL_IP, IP_MULTICAST_LOOP, [1], 4) = 0
+[pid  8676] setsockopt(30, SOL_IP, IP_MULTICAST_IF, [16777343], 4 <unfinished ...>
+[pid  8680] sendto(27, "M-SEARCH * HTTP/1.1\r\nMX: 5\r\nST: "..., 148, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16 <unfinished ...>
+[pid  8676] <... setsockopt resumed> )  = 0
+[pid  8676] setsockopt(30, SOL_IP, IP_MULTICAST_TTL, "\4", 1) = 0
+[pid  8680] <... sendto resumed> )      = 148
+[pid  8677] recvfrom(23, "M-SEARCH * HTTP/1.1\r\nMX: 5\r\nST: "..., 4096, 0, {sa_family=AF_INET, sin_port=htons(41626), sin_addr=inet_addr("192.168.178.20")}, [16]) = 148
+Process 8681 attached (waiting for parent)
+Process 8681 resumed (parent 8676 ready)
+[pid  8681] sendto(30, "M-SEARCH * HTTP/1.1\r\nMX: 5\r\nST: "..., 148, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 148
+[pid  8676] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 33
+[pid  8676] getsockname(33, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8676] getpeername(33, 0xbfb5115c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8676] setsockopt(33, SOL_SOCKET, SO_BROADCAST, [1], 4) = 0
+Process 8682 attached
+[pid  8676] socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 36
+[pid  8676] getsockname(36, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8676] getpeername(36, 0xbfb5115c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8682] sendto(33, "M-SEARCH * HTTP/1.1\r\nMX: 1\r\nST: "..., 148, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("255.255.255.255")}, 16 <unfinished ...>
+[pid  8676] setsockopt(36, SOL_SOCKET, SO_BROADCAST, [1], 4 <unfinished ...>
+[pid  8682] <... sendto resumed> )      = 148
+[pid  8676] <... setsockopt resumed> )  = 0
+[pid  8677] recvfrom(23, "M-SEARCH * HTTP/1.1\r\nMX: 1\r\nST: "..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56220), sin_addr=inet_addr("192.168.178.20")}, [16]) = 148
+Process 8683 attached
+Process 8684 attached
+[pid  8683] sendto(36, "M-SEARCH * HTTP/1.1\r\nMX: 1\r\nST: "..., 148, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("239.255.255.250")}, 16) = 148
+[pid  8677] recvfrom(23, "M-SEARCH * HTTP/1.1\r\nMX: 1\r\nST: "..., 4096, 0, {sa_family=AF_INET, sin_port=htons(40157), sin_addr=inet_addr("192.168.178.20")}, [16]) = 148
+[pid  8680] recvfrom(27, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 258
+Process 8685 attached
+[pid  8685] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 39
+[pid  8685] getsockname(39, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8685] getpeername(39, 0xb1dfa05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8685] connect(39, {sa_family=AF_INET, sin_port=htons(49000), sin_addr=inet_addr("192.168.178.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8682] recvfrom(33, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(34528), sin_addr=inet_addr("192.168.178.21")}, [16]) = 263
+Process 8686 attached
+[pid  8682] recvfrom(33, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(34528), sin_addr=inet_addr("192.168.178.21")}, [16]) = 263
+[pid  8682] recvfrom(33, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56405), sin_addr=inet_addr("192.168.178.21")}, [16]) = 243
+Process 8687 attached
+[pid  8682] recvfrom(33, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(56405), sin_addr=inet_addr("192.168.178.21")}, [16]) = 243
+[pid  8682] recvfrom(33, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 258
+[pid  8683] recvfrom(36, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(57899), sin_addr=inet_addr("192.168.178.21")}, [16]) = 263
+[pid  8685] getsockopt(39, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+[pid  8685] getsockname(39, {sa_family=AF_INET, sin_port=htons(44757), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8685] getpeername(39, {sa_family=AF_INET, sin_port=htons(49000), sin_addr=inet_addr("192.168.178.1")}, [16]) = 0
+[pid  8687] socket(PF_INET, SOCK_STREAM, IPPROTO_IP <unfinished ...>
+[pid  8686] socket(PF_INET, SOCK_STREAM, IPPROTO_IP <unfinished ...>
+[pid  8687] <... socket resumed> )      = 42
+[pid  8686] <... socket resumed> )      = 43
+[pid  8687] getsockname(42,  <unfinished ...>
+[pid  8685] send(39, "GET /igddesc.xml HTTP/1.0\r\nConne"..., 121, MSG_NOSIGNAL <unfinished ...>
+[pid  8687] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8686] getsockname(43,  <unfinished ...>
+[pid  8687] getpeername(42,  <unfinished ...>
+[pid  8685] <... send resumed> )        = 121
+[pid  8687] <... getpeername resumed> 0xb0d6f05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8686] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8686] getpeername(43,  <unfinished ...>
+[pid  8685] getsockopt(39, SOL_TCP, TCP_NODELAY <unfinished ...>
+[pid  8686] <... getpeername resumed> 0xb157005c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8685] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8687] connect(42, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, 16 <unfinished ...>
+[pid  8685] setsockopt(39, SOL_TCP, TCP_NODELAY, [1], 4 <unfinished ...>
+[pid  8687] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8686] connect(43, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8685] <... setsockopt resumed> )  = 0
+[pid  8685] send(39, "", 0, 0)          = 0
+[pid  8685] setsockopt(39, SOL_TCP, TCP_NODELAY, [0], 4 <unfinished ...>
+[pid  8683] recvfrom(36, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(57899), sin_addr=inet_addr("192.168.178.21")}, [16]) = 263
+[pid  8685] <... setsockopt resumed> )  = 0
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+[pid  8676] socket(PF_FILE, SOCK_STREAM, 0) = 48
+[pid  8676] connect(48, {sa_family=AF_FILE, path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+[pid  8676] socket(PF_FILE, SOCK_STREAM, 0) = 48
+[pid  8676] connect(48, {sa_family=AF_FILE, path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
+[pid  8687] getsockopt(42, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8686] getsockopt(43, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8687] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8686] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8687] getsockname(42,  <unfinished ...>
+[pid  8686] getsockname(43,  <unfinished ...>
+[pid  8687] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(45389), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8686] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(49602), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8687] getpeername(42,  <unfinished ...>
+[pid  8686] getpeername(43,  <unfinished ...>
+[pid  8687] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8686] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8687] send(42, "GET / HTTP/1.0\r\nConnection: clos"..., 111, MSG_NOSIGNAL <unfinished ...>
+[pid  8686] send(43, "GET /DeviceDescription.xml HTTP/"..., 131, MSG_NOSIGNAL <unfinished ...>
+[pid  8687] <... send resumed> )        = 111
+[pid  8686] <... send resumed> )        = 131
+[pid  8686] getsockopt(43, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8686] setsockopt(43, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8686] send(43, "", 0, 0 <unfinished ...>
+[pid  8683] recvfrom(36,  <unfinished ...>
+[pid  8686] <... send resumed> )        = 0
+[pid  8683] <... recvfrom resumed> "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44070), sin_addr=inet_addr("192.168.178.21")}, [16]) = 243
+[pid  8686] setsockopt(43, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8687] getsockopt(42, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8687] setsockopt(42, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8687] send(42, "", 0, 0)          = 0
+[pid  8687] setsockopt(42, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8683] recvfrom(36, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(44070), sin_addr=inet_addr("192.168.178.21")}, [16]) = 243
+[pid  8685] recv(39, "HTTP/1.0 200 OK\r\nContent-Length:"..., 4096, 0) = 167
+[pid  8683] recvfrom(36, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(1900), sin_addr=inet_addr("192.168.178.1")}, [16]) = 258
+[pid  8687] recv(42, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 136
+[pid  8687] recv(42, "<?xml version=\"1.0\" encoding=\"UT"..., 2173, 0) = 2173
+[pid  8686] recv(43, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 136
+Process 8688 attached
+[pid  8685] recv(39, "<?xml version=\"1.0\"?>\n<root xmln"..., 3619, 0) = 1448
+[pid  8686] recv(43, Process 8689 attached
+"<?xml version=\"1.0\" encoding=\"UT"..., 1701, 0) = 1701
+[pid  8688] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 48
+[pid  8688] getsockname(48, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8688] getpeername(48, 0xb056e05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8685] recv(39,  <unfinished ...>
+[pid  8688] connect(48, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, 16 <unfinished ...>
+[pid  8685] <... recv resumed> "on>WANDevice - FRITZ!Box Fon WLA"..., 2171, 0) = 2171
+Process 8690 attached (waiting for parent)
+Process 8690 resumed (parent 8686 ready)
+[pid  8689] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 51
+[pid  8689] getsockname(51, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8688] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8689] getpeername(51, 0xafd6d05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8691 attached (waiting for parent)
+Process 8691 resumed (parent 8686 ready)
+[pid  8689] connect(51, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8690] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 54
+Process 8692 attached (waiting for parent)
+Process 8692 resumed (parent 8685 ready)
+Process 8693 attached
+Process 8685 detached
+Process 8694 attached (waiting for parent)
+[pid  8690] getsockname(54, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8688] getsockopt(48, SOL_SOCKET, SO_ERRORProcess 8694 resumed (parent 8687 ready)
+ <unfinished ...>
+[pid  8689] getsockopt(51, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8690] getpeername(54,  <unfinished ...>
+[pid  8688] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8690] <... getpeername resumed> 0xaf3ff05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8688] getsockname(48, {sa_family=AF_INET, sin_port=htons(45391), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8688] getpeername(48,  <unfinished ...>
+[pid  8689] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8689] getsockname(51, {sa_family=AF_INET, sin_port=htons(45392), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8690] connect(54, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, 16 <unfinished ...>
+[pid  8693] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 39
+[pid  8690] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8688] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8692] socket(PF_INET, SOCK_STREAM, IPPROTO_IP <unfinished ...>
+[pid  8691] socket(PF_INET, SOCK_STREAM, IPPROTO_IP <unfinished ...>
+[pid  8692] <... socket resumed> )      = 43
+[pid  8689] getpeername(51,  <unfinished ...>
+[pid  8693] getsockname(39,  <unfinished ...>
+[pid  8691] <... socket resumed> )      = 56
+[pid  8689] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8689] send(51, "GET /ConnectionManager/51c8fb23-"..., 174, MSG_NOSIGNAL <unfinished ...>
+[pid  8693] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8692] getsockname(43,  <unfinished ...>
+[pid  8693] getpeername(39, 0xad3fb05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8692] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8694] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 58
+[pid  8692] getpeername(43, 0xadbfc05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8689] <... send resumed> )        = 174
+[pid  8693] connect(39, {sa_family=AF_INET, sin_port=htons(49000), sin_addr=inet_addr("192.168.178.1")}, 16 <unfinished ...>
+[pid  8688] send(48, "GET /AVTransport/51c8fb23-c700-f"..., 168, MSG_NOSIGNAL <unfinished ...>
+[pid  8693] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8694] getsockname(58,  <unfinished ...>
+[pid  8688] <... send resumed> )        = 168
+[pid  8694] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8692] connect(43, {sa_family=AF_INET, sin_port=htons(49000), sin_addr=inet_addr("192.168.178.1")}, 16 <unfinished ...>
+[pid  8694] getpeername(58, 0xae3fd05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8692] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8691] getsockname(56,  <unfinished ...>
+[pid  8690] getsockopt(54, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8694] connect(58, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, 16 <unfinished ...>
+[pid  8691] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8694] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8691] getpeername(56,  <unfinished ...>
+[pid  8690] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8688] getsockopt(48, SOL_TCP, TCP_NODELAY <unfinished ...>
+[pid  8691] <... getpeername resumed> 0xaebfe05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8690] getsockname(54, {sa_family=AF_INET, sin_port=htons(49605), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8690] getpeername(54, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8688] <... getsockopt resumed> , [0], [4]) = 0
+Process 8686 detached
+[pid  8691] connect(56, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, 16 <unfinished ...>
+[pid  8690] send(54, "GET /ContentDirectory/2bbd7bc7-c"..., 172, MSG_NOSIGNAL <unfinished ...>
+[pid  8691] <... connect resumed> )     = -1 EINPROGRESS (Operation now in progress)
+[pid  8688] setsockopt(48, SOL_TCP, TCP_NODELAY, [1], 4 <unfinished ...>
+[pid  8690] <... send resumed> )        = 172
+[pid  8690] getsockopt(54, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8688] <... setsockopt resumed> )  = 0
+[pid  8690] setsockopt(54, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8688] send(48, "", 0, 0 <unfinished ...>
+[pid  8690] send(54, "", 0, 0 <unfinished ...>
+[pid  8688] <... send resumed> )        = 0
+[pid  8690] <... send resumed> )        = 0
+[pid  8688] setsockopt(48, SOL_TCP, TCP_NODELAY, [0], 4 <unfinished ...>
+[pid  8690] setsockopt(54, SOL_TCP, TCP_NODELAY, [0], 4 <unfinished ...>
+[pid  8688] <... setsockopt resumed> )  = 0
+[pid  8690] <... setsockopt resumed> )  = 0
+[pid  8689] getsockopt(51, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8689] setsockopt(51, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8689] send(51, "", 0, 0)          = 0
+[pid  8689] setsockopt(51, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+Process 8687 detached
+[pid  8693] getsockopt(39, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+[pid  8689] recv(51,  <unfinished ...>
+[pid  8693] getsockname(39,  <unfinished ...>
+[pid  8688] recv(48,  <unfinished ...>
+[pid  8693] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(44763), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8688] <... recv resumed> "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 137
+[pid  8693] getpeername(39, {sa_family=AF_INET, sin_port=htons(49000), sin_addr=inet_addr("192.168.178.1")}, [16]) = 0
+[pid  8693] send(39, "GET /any.xml HTTP/1.0\r\nConnectio"..., 117, MSG_NOSIGNAL) = 117
+[pid  8693] getsockopt(39, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8693] setsockopt(39, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8693] send(39, "", 0, 0)          = 0
+[pid  8693] setsockopt(39, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpBrowserModel::canFetchMore() parent objectId:  
+[pid  8689] <... recv resumed> "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 3032
+[pid  8692] getsockopt(43, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8688] recv(48,  <unfinished ...>
+[pid  8692] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8692] getsockname(43,  <unfinished ...>
+[pid  8688] <... recv resumed> "<?xml version=\"1.0\" encoding=\"UT"..., 4096, 0) = 1448
+[pid  8692] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(44764), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8688] recv(48,  <unfinished ...>
+[pid  8692] getpeername(43,  <unfinished ...>
+[pid  8688] <... recv resumed> "rdQualityModes</relatedStateVari"..., 4096, 0) = 1448
+[pid  8692] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(49000), sin_addr=inet_addr("192.168.178.1")}, [16]) = 0
+[pid  8692] send(43, "GET /igdicfgSCPD.xml HTTP/1.0\r\nC"..., 125, MSG_NOSIGNAL) = 125
+[pid  8692] getsockopt(43, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8692] setsockopt(43, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8692] send(43, "", 0, 0)          = 0
+[pid  8692] setsockopt(43, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8694] getsockopt(58, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+[pid  8694] getsockname(58, {sa_family=AF_INET, sin_port=htons(45396), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8694] getpeername(58, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8694] send(58, "GET /RenderingControl/51c8fb23-c"..., 173, MSG_NOSIGNAL) = 173
+[pid  8694] getsockopt(58, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8694] setsockopt(58, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8694] send(58, "", 0, 0)          = 0
+[pid  8694] setsockopt(58, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8691] getsockopt(56, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+[pid  8691] getsockname(56, {sa_family=AF_INET, sin_port=htons(49609), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8691] getpeername(56, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8691] send(56, "GET /ConnectionManager/2bbd7bc7-"..., 173, MSG_NOSIGNAL) = 173
+[pid  8691] getsockopt(56, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8691] setsockopt(56, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8691] send(56, "", 0, 0)          = 0
+[pid  8691] setsockopt(56, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8690] recv(54, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 3032
+[pid  8689] recv(51, "     <allowedValue>OK</allowedVa"..., 1200, 0) = 1200
+[pid  8689] recv(51, "allowedValueList>\n        <allow"..., 314, 0) = 314
+[pid  8688] recv(48, "       </argument>\n        <argu"..., 4096, 0) = 1448
+Process 8689 detached
+[pid  8688] recv(48, "      <name>TrackURI</name>\n    "..., 4096, 0) = 1448
+[pid  8688] recv(48, "      <direction>out</direction>"..., 4096, 0) = 1448
+[pid  8688] recv(48, "     <relatedStateVariable>A_ARG"..., 4096, 0) = 952
+[pid  8688] recv(48, "     <name>InstanceID</name>\n   "..., 4096, 0) = 1448
+[pid  8688] recv(48, "riable>\n        </argument>\n    "..., 4096, 0) = 1448
+[pid  8690] recv(54, "elatedStateVariable>\n        </a"..., 1200, 0) = 1200
+[pid  8690] recv(54, "tCriteria</relatedStateVariable>"..., 2722, 0) = 248
+[pid  8690] recv(54, "t>\n          <name>NumberReturne"..., 2474, 0) = 1448
+[pid  8690] recv(54, "\">\n      <name>A_ARG_TYPE_Search"..., 1026, 0) = 1026
+[pid  8688] recv(48, "lowedValue>HI8</allowedValue>\n  "..., 4096, 0) = 1448
+Process 8690 detached
+[pid  8688] recv(48, "string</dataType>\n    </stateVar"..., 4096, 0) = 1448
+[pid  8688] recv(48, "taType>string</dataType>\n      <"..., 4096, 0) = 1448
+[pid  8688] recv(48, " <dataType>string</dataType>\n   "..., 4074, 0) = 1448
+[pid  8694] recv(58, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 137
+[pid  8694] recv(58, "<?xml version=\"1.0\" encoding=\"UT"..., 4096, 0) = 1448
+[pid  8694] recv(58, "rentBrightness</name>\n          "..., 4096, 0) = 1448
+[pid  8691] recv(56, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 136
+[pid  8691] recv(56, "<?xml version=\"1.0\" encoding=\"UT"..., 4096, 0) = 1448
+[pid  8691] recv(56, "on</name>\n          <direction>o"..., 2962, 0) = 1448
+[pid  8688] recv(48, "wedValue>\n        <allowedValue>"..., 2626, 0) = 1448
+[pid  8688] recv(48, ">\n        <allowedValue>REL_COUN"..., 1178, 0) = 1178
+Process 8688 detached
+[pid  8693] recv(39, "HTTP/1.0 200 OK\r\nContent-Length:"..., 4096, 0) = 166
+[pid  8692] recv(43, "HTTP/1.0 200 OK\r\nContent-Length:"..., 4096, 0) = 167
+[pid  8691] recv(56, "     <allowedValue>OK</allowedVa"..., 1514, 0) = 1514
+UpnpController::OnMSAddedRemoved() added server: Web Radio 2bbd7bc7-c2e1-2e6d-4a5a-bb0420dac62e 
+Process 8695 attached
+Process 8696 attached
+Process 8697 attached
+Process 8691 detached
+[pid  8694] recv(58, "ideoBlackLevel</name>\n          "..., 4096, 0) = 4096
+[pid  8694] recv(58, "PE_InstanceID</relatedStateVaria"..., 4096, 0) = 4096
+[pid  8694] recv(58, "      <argument>\n          <name"..., 4096, 0) = 4096
+[pid  8694] recv(58, "ection>\n          <relatedStateV"..., 4096, 0) = 4096
+[pid  8694] recv(58, "lue>Master</allowedValue>\n      "..., 4096, 0) = 248
+[pid  8694] recv(58, "pe>\n    </stateVariable>\n    <st"..., 4096, 0) = 1448
+[pid  8696] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 42
+[pid  8696] getsockname(42, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8696] getpeername(42, 0xaf3ff05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8696] connect(42, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8695] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 48
+[pid  8695] getsockname(48, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8695] getpeername(48, 0xb056e05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8695] connect(48, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8694] recv(58, "iable>\n    <stateVariable sendEv"..., 2657, 0) = 1448
+[pid  8697] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 51
+[pid  8697] getsockname(51, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8697] getpeername(51, 0xafd6d05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+[pid  8697] connect(51, {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8693] recv(39, "<?xml version=\"1.0\"?>\n<scpd xmln"..., 154, 0) = 154
+Process 8693 detached
+[pid  8692] recv(43, "<?xml version=\"1.0\"?>\n<scpd xmln"..., 4096, 0) = 1448
+[pid  8692] recv(43, "          <name>NewTotalBytesRec"..., 4096, 0) = 1448
+[pid  8694] recv(58, "llowedValueRange>\n        <minim"..., 1209, 0) = 1209
+[pid  8696] getsockopt(42, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8697] getsockopt(51, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8696] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8695] getsockopt(48, SOL_SOCKET, SO_ERROR <unfinished ...>
+[pid  8697] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8696] getsockname(42,  <unfinished ...>
+[pid  8695] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8697] getsockname(51,  <unfinished ...>
+[pid  8696] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(49610), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8695] getsockname(48,  <unfinished ...>
+[pid  8697] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(49612), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8696] getpeername(42,  <unfinished ...>
+[pid  8695] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(49611), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8697] getpeername(51,  <unfinished ...>
+[pid  8696] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8695] getpeername(48,  <unfinished ...>
+[pid  8697] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8695] <... getpeername resumed> {sa_family=AF_INET, sin_port=htons(5657), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8696] send(42, "SUBSCRIBE /ContentDirectory/2bbd"..., 326, MSG_NOSIGNAL <unfinished ...>
+[pid  8692] recv(43,  <unfinished ...>
+[pid  8696] <... send resumed> )        = 326
+[pid  8697] send(51, "SUBSCRIBE /ConnectionManager/2bb"..., 328, MSG_NOSIGNAL <unfinished ...>
+[pid  8696] getsockopt(42, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8695] send(48, "SUBSCRIBE /ContentDirectory/2bbd"..., 326, MSG_NOSIGNAL <unfinished ...>
+[pid  8697] <... send resumed> )        = 328
+[pid  8696] setsockopt(42, SOL_TCP, TCP_NODELAY, [1], 4 <unfinished ...>
+[pid  8697] getsockopt(51, SOL_TCP, TCP_NODELAY <unfinished ...>
+[pid  8696] <... setsockopt resumed> )  = 0
+[pid  8695] <... send resumed> )        = 326
+[pid  8697] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8696] send(42, "", 0, 0 <unfinished ...>
+[pid  8695] getsockopt(48, SOL_TCP, TCP_NODELAY <unfinished ...>
+[pid  8697] setsockopt(51, SOL_TCP, TCP_NODELAY, [1], 4 <unfinished ...>
+[pid  8696] <... send resumed> )        = 0
+[pid  8695] <... getsockopt resumed> , [0], [4]) = 0
+[pid  8697] <... setsockopt resumed> )  = 0
+[pid  8696] setsockopt(42, SOL_TCP, TCP_NODELAY, [0], 4 <unfinished ...>
+[pid  8695] setsockopt(48, SOL_TCP, TCP_NODELAY, [1], 4 <unfinished ...>
+[pid  8697] send(51, "", 0, 0 <unfinished ...>
+[pid  8696] <... setsockopt resumed> )  = 0
+[pid  8695] <... setsockopt resumed> )  = 0
+[pid  8697] <... send resumed> )        = 0
+[pid  8695] send(48, "", 0, 0 <unfinished ...>
+[pid  8697] setsockopt(51, SOL_TCP, TCP_NODELAY, [0], 4 <unfinished ...>
+[pid  8695] <... send resumed> )        = 0
+[pid  8692] <... recv resumed> "<argument>\n          <name>NewPa"..., 4096, 0) = 4096
+[pid  8697] <... setsockopt resumed> )  = 0
+[pid  8695] setsockopt(48, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8692] recv(43, "teVariable>\n    <stateVariable s"..., 1619, 0) = 1619
+UpnpController::OnMRAddedRemoved() added renderer: Tristan JammR UPnP Media Renderer 51c8fb23-c700-fda9-62b5-f3c743317bdc 
+Process 8698 attached (waiting for parent)
+Process 8698 resumed (parent 8694 ready)
+Process 8699 attached
+[pid  8698] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 39
+[pid  8698] getsockname(39, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8699] socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 44
+[pid  8698] getpeername(39, 0xad3fb05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8694 detached
+[pid  8699] getsockname(44,  <unfinished ...>
+[pid  8698] connect(39, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8699] <... getsockname resumed> {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("0.0.0.0")}, [16]) = 0
+[pid  8699] getpeername(44, 0xaebfe05c, [16]) = -1 ENOTCONN (Transport endpoint is not connected)
+Process 8692 detached
+[pid  8699] connect(44, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, 16) = -1 EINPROGRESS (Operation now in progress)
+[pid  8697] recv(51, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 157
+[pid  8696] recv(42, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 157
+Process 8696 detached
+Process 8697 detached
+[pid  8695] recv(48, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 157
+Process 8695 detached
+[pid  8698] getsockopt(39, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+[pid  8698] getsockname(39, {sa_family=AF_INET, sin_port=htons(45401), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8698] getpeername(39, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8698] send(39, "SUBSCRIBE /RenderingControl/51c8"..., 327, MSG_NOSIGNAL) = 327
+[pid  8698] getsockopt(39, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8698] setsockopt(39, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8698] send(39, "", 0, 0)          = 0
+[pid  8698] setsockopt(39, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8699] getsockopt(44, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+[pid  8699] getsockname(44, {sa_family=AF_INET, sin_port=htons(45402), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8699] getpeername(44, {sa_family=AF_INET, sin_port=htons(56597), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+[pid  8699] send(44, "SUBSCRIBE /AVTransport/51c8fb23-"..., 322, MSG_NOSIGNAL) = 322
+[pid  8699] getsockopt(44, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8699] setsockopt(44, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8699] send(44, "", 0, 0)          = 0
+[pid  8699] setsockopt(44, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8699] recv(44, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 157
+Process 8699 detached
+[pid  8698] recv(39, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 4096, 0) = 157
+Process 8698 detached
+UpnpBrowserModel::serverAddedRemoved() add server: Web Radio 
+UpnpRendererListModel::rendererAddedRemoved() add renderer: 51c8fb23-c700-fda9-62b5-f3c743317bdc 
+UpnpBrowserModel::canFetchMore() parent objectId:  
+[pid  8678] accept(17, {sa_family=AF_INET, sin_port=htons(33101), sin_addr=inet_addr("192.168.178.21")}, [16]) = 39
+[pid  8678] getsockname(39, {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8678] getpeername(39, {sa_family=AF_INET, sin_port=htons(33101), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+Process 8702 attached
+[pid  8678] accept(17, {sa_family=AF_INET, sin_port=htons(33102), sin_addr=inet_addr("192.168.178.21")}, [16]) = 42
+[pid  8678] getsockname(42, {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8678] getpeername(42, {sa_family=AF_INET, sin_port=htons(33102), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+Process 8703 attached (waiting for parent)
+Process 8703 resumed (parent 8678 ready)
+[pid  8702] recv(39, "NOTIFY /2bbd7bc7-c2e1-2e6d-4a5a-"..., 4096, 0) = 544
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMSStateVariablesChanged(): ContainerUpdateIDs 0 string 
+[pid  8703] recv(42, "NOTIFY /2bbd7bc7-c2e1-2e6d-4a5a-"..., 4096, 0) = 643
+UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 0 ui4 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMRStateVariablesChanged(): ContainerUpdateIDs 0 string 
+UpnpController::OnMRStateVariablesChanged(): SystemUpdateID 0 ui4 
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ConnectionManager:1 
+UpnpController::OnMSStateVariablesChanged(): SourceProtocolInfo http-get:*:*:* string 
+UpnpController::OnMSStateVariablesChanged(): SinkProtocolInfo  string 
+UpnpController::OnMSStateVariablesChanged(): CurrentConnectionIDs 0 string 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ConnectionManager:1 
+UpnpController::OnMRStateVariablesChanged(): SourceProtocolInfo http-get:*:*:* string 
+UpnpController::OnMRStateVariablesChanged(): SinkProtocolInfo  string 
+UpnpController::OnMRStateVariablesChanged(): CurrentConnectionIDs 0 string 
+[pid  8703] send(42, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 109, MSG_NOSIGNAL) = 109
+[pid  8703] getsockopt(42, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8703] setsockopt(42, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8703] send(42, "", 0, 0)          = 0
+[pid  8703] setsockopt(42, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8702] send(39, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 109, MSG_NOSIGNAL) = 109
+[pid  8702] getsockopt(39, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8702] setsockopt(39, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8702] send(39, "", 0, 0)          = 0
+[pid  8702] setsockopt(39, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+[pid  8678] accept(17, {sa_family=AF_INET, sin_port=htons(33103), sin_addr=inet_addr("192.168.178.21")}, [16]) = 39
+Process 8702 detached
+Process 8703 detached
+[pid  8678] getsockname(39, {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8678] getpeername(39, {sa_family=AF_INET, sin_port=htons(33103), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+Process 8704 attached
+[pid  8704] recv(39, "NOTIFY /2bbd7bc7-c2e1-2e6d-4a5a-"..., 4096, 0) = 544
+UpnpController::OnMSStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMSStateVariablesChanged(): ContainerUpdateIDs 0 string 
+UpnpController::OnMSStateVariablesChanged(): SystemUpdateID 0 ui4 
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:ContentDirectory:1 
+UpnpController::OnMRStateVariablesChanged(): ContainerUpdateIDs 0 string 
+UpnpController::OnMRStateVariablesChanged(): SystemUpdateID 0 ui4 
+[pid  8704] send(39, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 109, MSG_NOSIGNAL) = 109
+[pid  8704] getsockopt(39, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8704] setsockopt(39, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8704] send(39, "", 0, 0)          = 0
+[pid  8704] setsockopt(39, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+Process 8704 detached
+[pid  8678] accept(17, {sa_family=AF_INET, sin_port=htons(33104), sin_addr=inet_addr("192.168.178.21")}, [16]) = 39
+[pid  8678] getsockname(39, {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8678] getpeername(39, {sa_family=AF_INET, sin_port=htons(33104), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+Process 8705 attached
+[pid  8705] recv(39, "NOTIFY /51c8fb23-c700-fda9-62b5-"..., 4096, 0) = 284
+[pid  8705] recv(39, "<?xml version=\"1.0\" encoding=\"UT"..., 917, 0) = 917
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:RenderingControl:1 
+UpnpController::OnMRStateVariablesChanged(): VerticalKeystone  i2 
+UpnpController::OnMRStateVariablesChanged(): Loudness  boolean 
+UpnpController::OnMRStateVariablesChanged(): HorizontalKeystone  i2 
+UpnpController::OnMRStateVariablesChanged(): BlueVideoBlackLevel  ui2 
+UpnpController::OnMRStateVariablesChanged(): RedVideoGain  ui2 
+UpnpController::OnMRStateVariablesChanged(): GreenVideoBlackLevel  ui2 
+UpnpController::OnMRStateVariablesChanged(): Volume 16 ui2 
+UpnpController::OnMRStateVariablesChanged(): Mute 0 boolean 
+UpnpController::OnMRStateVariablesChanged(): Brightness  ui2 
+UpnpController::OnMRStateVariablesChanged(): PresetNameList  string 
+UpnpController::OnMRStateVariablesChanged(): ColorTemperature  ui2 
+UpnpController::OnMRStateVariablesChanged(): VolumeDB  i2 
+UpnpController::OnMRStateVariablesChanged(): Contrast  ui2 
+UpnpController::OnMRStateVariablesChanged(): GreenVideoGain  ui2 
+UpnpController::OnMRStateVariablesChanged(): RedVideoBlackLevel  ui2 
+[pid  8678] accept(17, {sa_family=AF_INET, sin_port=htons(33105), sin_addr=inet_addr("192.168.178.21")}, [16]) = 42
+[pid  8678] getsockname(42, {sa_family=AF_INET, sin_port=htons(64249), sin_addr=inet_addr("192.168.178.20")}, [16]) = 0
+[pid  8678] getpeername(42, {sa_family=AF_INET, sin_port=htons(33105), sin_addr=inet_addr("192.168.178.21")}, [16]) = 0
+Process 8706 attached
+UpnpController::OnMRStateVariablesChanged(): BlueVideoGain  ui2 
+UpnpController::OnMRStateVariablesChanged(): Sharpness  ui2 
+[pid  8706] recv(42, "NOTIFY /51c8fb23-c700-fda9-62b5-"..., 4096, 0) = 2697
+[pid  8705] send(39, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 109, MSG_NOSIGNAL) = 109
+[pid  8705] getsockopt(39, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8705] setsockopt(39, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8705] send(39, "", 0, 0)          = 0
+[pid  8705] setsockopt(39, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+Process 8705 detached
+UpnpController::OnMRStateVariablesChanged() on service: urn:schemas-upnp-org:service:AVTransport:1 
+UpnpController::OnMRStateVariablesChanged(): CurrentPlayMode NORMAL string 
+UpnpController::OnMRStateVariablesChanged(): RecordStorageMedium NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): CurrentTrackURI http://streamer-dtc-aa01.somafm.com:80/stream/1032 string 
+UpnpController::OnMRStateVariablesChanged(): CurrentTrackDuration 00:00:00.000 string 
+UpnpController::OnMRStateVariablesChanged(): CurrentRecordQualityMode NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): CurrentMediaDuration 00:00:00.000 string 
+UpnpController::OnMRStateVariablesChanged(): AVTransportURI  string 
+UpnpController::OnMRStateVariablesChanged(): TransportState PLAYING string 
+UpnpController::OnMRStateVariablesChanged(): CurrentTrackMetaData <DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:dlna="urn:schemas-dlna-org:metadata-1-0"><?xml version="1.0" encoding="UTF-8"?>
+<item id="SOMA FM - Drone Zone" parentID="0" restricted="1">
+  <dc:title>SOMA FM - Drone Zone</dc:title>
+  <upnp:artist/>
+  <res size="0" protocolInfo="http-get:*:audio/mpeg:*">http://streamer-dtc-aa01.somafm.com:80/stream/1032</res>
+  <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+</item></DIDL-Lite> string 
+UpnpController::OnMRStateVariablesChanged(): NextAVTransportURI NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): PossibleRecordQualityModes NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): CurrentTrack 0 ui4 
+UpnpController::OnMRStateVariablesChanged(): NextAVTransportURIMetaData NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): PlaybackStorageMedium NONE string 
+UpnpController::OnMRStateVariablesChanged(): CurrentTransportActions Play,Pause,Stop,Seek,Next,Previous string 
+UpnpController::OnMRStateVariablesChanged(): RecordMediumWriteStatus NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): PossiblePlaybackStorageMedia NONE,NETWORK string 
+UpnpController::OnMRStateVariablesChanged(): AVTransportURIMetaData  string 
+UpnpController::OnMRStateVariablesChanged(): NumberOfTracks 0 ui4 
+UpnpController::OnMRStateVariablesChanged(): PossibleRecordStorageMedia NOT_IMPLEMENTED string 
+UpnpController::OnMRStateVariablesChanged(): TransportStatus OK string 
+UpnpController::OnMRStateVariablesChanged(): TransportPlaySpeed 1 string 
+[pid  8706] send(42, "HTTP/1.0 200 OK\r\nServer: Platinu"..., 109, MSG_NOSIGNAL) = 109
+[pid  8706] getsockopt(42, SOL_TCP, TCP_NODELAY, [0], [4]) = 0
+[pid  8706] setsockopt(42, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+[pid  8706] send(42, "", 0, 0)          = 0
+[pid  8706] setsockopt(42, SOL_TCP, TCP_NODELAY, [0], 4) = 0
+Process 8706 detached
+[pid  8680] recvfrom(27, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51809), sin_addr=inet_addr("192.168.178.21")}, [16]) = 263
+[pid  8680] recvfrom(27, "HTTP/1.1 200 OK\r\nLOCATION: http:"..., 4096, 0, {sa_family=AF_INET, sin_port=htons(51809), sin_addr=inet_addr("192.168.178.21")}, [16]) = 263
+UpnpBrowserModel::canFetchMore() parent objectId:  
+UpnpController::~UpnpController() 
+Process 8683 detached
+Process 8681 detached
+Process 8680 detached
+Process 8679 detached
+Process 8678 detached
+Process 8682 detached
+Process 8677 detached
+Process 8684 detached
+Process 8676 detached

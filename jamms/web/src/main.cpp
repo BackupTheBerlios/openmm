@@ -34,19 +34,22 @@ int main(int argc, char **argv)
 
     PLT_SetLogLevel(PLT_LOG_LEVEL_MAX);
 
-    webMediaServer = new WebMediaServer("Web", false, NULL, 5657);
+    webMediaServer = new WebMediaServer("Web Radio", false, NULL, 5657);
 
 
     upnp.Start();
     PLT_DeviceHostReference device(webMediaServer);
     upnp.AddDevice(device);
     
-    char keystroke;
+/*    char keystroke;
     while ((keystroke = getchar())) {
         if (keystroke == 'q')
             break;
-    }
+    }*/
     
+    while (1) {
+        sleep(1);
+    }
     upnp.Stop();
     
     return EXIT_SUCCESS;

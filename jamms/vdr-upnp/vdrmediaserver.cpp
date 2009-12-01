@@ -75,12 +75,14 @@ VdrMediaServer::VdrMediaServer(const char*  friendly_name,
     m_containerRecordings->m_ParentID = m_containerRoot->m_ObjectID;
     m_containerRecordings->m_ObjectID = "2";
 
+    /*
     m_containerLiveRadio = new PLT_MediaContainer();
     m_containerLiveRadio->m_Title = "Live Radio";
     m_containerLiveRadio->m_ObjectClass.type = "object.container";
     m_containerLiveRadio->m_ChildrenCount = 1;
     m_containerLiveRadio->m_ParentID = m_containerRoot->m_ObjectID;
     m_containerLiveRadio->m_ObjectID = "3";
+    */
 }
 
 VdrMediaServer::~VdrMediaServer()
@@ -214,9 +216,9 @@ VdrMediaServer::OnBrowseMetadata(PLT_ActionReference& action, const char* object
     else if (NPT_String(object_id) == m_containerRecordings->m_ObjectID) {
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRecordings, filter, tmp));
     }
-    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
+/*    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveRadio, filter, tmp));
-    }
+    }*/
     else {
         PLT_MediaItem* item;
         map<NPT_String, PLT_MediaItem*>::iterator i = m_itemCache.find(NPT_String(object_id));
@@ -271,14 +273,14 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
         NPT_String tmp;
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveTv, filter, tmp));
         didl += tmp;
-        tmp = "";
+/*        tmp = "";
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveRadio, filter, tmp));
-        didl += tmp;
+        didl += tmp;*/
         tmp = "";
         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRecordings, filter, tmp));
         didl += tmp;
-        numberReturned = 3;
-        totalMatches = 3;
+        numberReturned = 2;
+        totalMatches = 2;
 
     }
     else if (NPT_String(object_id) == m_containerLiveTv->m_ObjectID) {
@@ -311,7 +313,7 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
             }
         }
     }
-    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
+/*    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
         for (cChannel *chan = Channels.GetByNumber(start_index, 1); chan; chan = Channels.Next(chan)) {
             if (!chan || chan->Vpid() != 0) {
                 break;
@@ -327,7 +329,7 @@ VdrMediaServer::OnBrowseDirectChildren(PLT_ActionReference& action, const char* 
                 break;
             }
         }
-    }
+    }*/
     else {
         // TODO: is that enough info for the leaves? look at the specs!
         PLT_MediaItem item;

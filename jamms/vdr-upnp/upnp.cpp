@@ -89,7 +89,7 @@ bool cPluginUpnp::Initialize(void)
 {
   // Initialize any background activities the plugin shall perform.
   m_upnp = new PLT_UPnP(1900, true);
-  m_vdrMediaServer = new VdrMediaServer("Video Disc Recorder", false, NULL, 5656);
+  m_vdrMediaServer = new VdrMediaServer("Digital TV", false, NULL, 5656);
   return true;
 }
 

@@ -4,6 +4,22 @@ SET( JAMM_LIB_SRCS
     sharedlibrary.cpp
     signode.cpp
     thread.cpp
+    upnp.cpp
+)
+
+FIND_LIBRARY(LIB_POCO_FOUNDATION
+NAME PocoFoundation
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_NET
+NAME PocoNet
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_XML
+NAME PocoXML
+PATHS ${CMAKE_LIBRARY_PATH}
 )
 
 INCLUDE_DIRECTORIES(
@@ -23,6 +39,9 @@ ${JAMM_LIB_SRCS}
 TARGET_LINK_LIBRARIES( jamm
 pthread
 dl
+${PocoFoundation}
+${LIB_POCO_NET}
+${LIB_POCO_XML}
 )
 
 INSTALL( TARGETS jamm
