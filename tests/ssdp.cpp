@@ -30,6 +30,7 @@
 #include "jamm/upnp.h"
 
 using Jamm::SsdpSocket;
+using Jamm::SsdpMessage;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -104,6 +105,22 @@ protected:
         helpFormatter.format(std::cout);
     }
     
+/*    void handleSsdpMessage(const AutoPtr<SsdpMessage>& pNf)
+//     void handleSsdpMessage(AutoPtr<SsdpMessage> pNf)
+    {
+        std::cout << "SsdpTest::handleSsdpMessage() receives message:" << std::endl;
+        pNf->toString();
+//         std::cout << pNf->toString();
+    }*/
+    
+    void handleSsdpMessage(SsdpMessage* pNf)
+//     void handleSsdpMessage(AutoPtr<SsdpMessage> pNf)
+    {
+        std::cout << "SsdpTest::handleSsdpMessage() receives message:" << std::endl;
+        pNf->toString();
+//         std::cout << pNf->toString();
+    }
+    
     int main(const std::vector<std::string>& args)
     {
         if (_helpRequested)
@@ -116,7 +133,8 @@ protected:
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
             
         // set-up a server socket
-            SsdpSocket s;
+//             SsdpSocket s(NObserver<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
+            SsdpSocket s(Observer<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;
