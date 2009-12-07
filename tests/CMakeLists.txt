@@ -29,9 +29,25 @@ SET( JAMMTEST_SSDP_SRCS
 ssdp.cpp
 )
 
+SET( JAMMTEST_DEVICE_SRCS
+device.cpp
+)
+
+SET( JAMMTEST_CONTROLLER_SRCS
+controller.cpp
+)
+
 #list all source files here
 ADD_EXECUTABLE( ssdp_test
 ${JAMMTEST_SSDP_SRCS}
+)
+
+ADD_EXECUTABLE( device_test
+${JAMMTEST_DEVICE_SRCS}
+)
+
+ADD_EXECUTABLE( controller_test
+${JAMMTEST_CONTROLLER_SRCS}
 )
 
 #need to link to some other libraries ? just add them here
@@ -40,7 +56,17 @@ ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS ssdp_test
+TARGET_LINK_LIBRARIES( device_test
+${LIB_JAMM}
+${LIB_POCO_UTIL}
+)
+
+TARGET_LINK_LIBRARIES( controller_test
+${LIB_JAMM}
+${LIB_POCO_UTIL}
+)
+
+INSTALL( TARGETS ssdp_test device_test controller_test
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

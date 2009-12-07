@@ -37,6 +37,14 @@
 #include "Poco/Notification.h"
 #include "Poco/NotificationQueue.h"
 #include "Poco/NotificationCenter.h"
+#include "Poco/URI.h"
+#include "Poco/UUID.h"
+#include "Poco/UUIDGenerator.h"
+#include "Poco/Timestamp.h"
+#include "Poco/DateTime.h"
+#include "Poco/DateTimeFormat.h"
+#include "Poco/DateTimeFormatter.h"
+#include "Poco/DateTimeParser.h"
 #include "Poco/Net/DatagramSocket.h"
 #include "Poco/Net/MulticastSocket.h"
 #include "Poco/Net/SocketAddress.h"
@@ -58,6 +66,14 @@ using Poco::AbstractObserver;
 using Poco::Notification;
 using Poco::NotificationQueue;
 using Poco::NotificationCenter;
+using Poco::URI;
+using Poco::UUID;
+using Poco::UUIDGenerator;
+using Poco::Timestamp;
+using Poco::DateTime;
+using Poco::DateTimeFormat;
+using Poco::DateTimeFormatter;
+using Poco::DateTimeParser;
 using Poco::Net::Socket;
 using Poco::Net::DatagramSocket;
 using Poco::Net::MulticastSocket;
@@ -78,38 +94,82 @@ namespace Jamm {
 /// HTTP dialect transmitted over UDP Multicast
 /// See "UPnP Device Architecture" for details
 
+static const std::string    UPNP_VERSION        = "1.0";
+static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
+static const std::string    SSDP_SEND_ADDRESS   = "239.255.255.250:0";
+static const std::string    SSDP_ADDRESS        = "239.255.255.250";
+static const UInt16         SSDP_PORT           = 1900;
+static const UInt16         SSDP_CACHE_DURATION = 1800;
+static const UInt16         SSDP_MIN_WAIT_TIME  = 1;
+static const UInt16         SSDP_MAX_WAIT_TIME  = 120;
 
-class SsdpMessage : public Notification // public MessageHeader
+
+class SsdpMessage : public Notification
 {
 public:
     SsdpMessage();
-    SsdpMessage(const std::string& buf);
+    // map the received HTTP header to an SsdpMessage object in memory
+    SsdpMessage(const std::string& buf, const SocketAddress& sender = SocketAddress(SSDP_FULL_ADDRESS));
     ~SsdpMessage();
     
-//     const std::string& toString() const;
-    const std::string& toString();
-//     std::string toString();
-    
-    void setRequestType();
-    void getRequestType();
-    
-    void setCacheControl(int leaseTime);
-    int getCacheControl();
-    
-    enum {
+    // HTTP message envelope
+    typedef enum {
         REQUEST_NOTIFY      = 1,
         REQUEST_SEARCH      = 2,
-        REQUEST_RESPONSE    = 3
-    };
+        REQUEST_RESPONSE    = 3,
+        SUBTYPE_ALIVE       = 4,
+        SUBTYPE_BYEBYE      = 5,
+        SSDP_ALL            = 6,
+        UPNP_ROOT_DEVICES   = 7
+    } TRequestMethod;
     
-    typedef int TRequestMethod;
+    std::string toString();
+    
+    void setRequestMethod(TRequestMethod requestMethod);
+    TRequestMethod getRequestMethod();
+    
+    // set and get the fields of the HTTP message header
+    void setCacheControl(int duration = SSDP_CACHE_DURATION);  // duration of device advertisement in sec.
+    int getCacheControl();
+    
+    void setNotificationType(const std::string& searchTarget);
+    std::string getNotificationType();
+    
+    void setNotificationSubtype(TRequestMethod notificationSubtype);
+    TRequestMethod getNotificationSubtype();
+    
+    void setSearchTarget(const std::string& searchTarget);
+    std::string getSearchTarget();
+    
+    void setUniqueServiceName(const std::string& serviceName);
+    std::string getUniqueServiceName();
+    
+    void setLocation(const URI& location);
+    URI getLocation();
+    
+    void setHost();
+    void setHttpExtensionNamespace();
+    void setHttpExtensionConfirmed();
+    bool getHttpExtensionConfirmed();
+    
+    void setServer(const std::string& productNameVersion);
+    std::string getServerOperatingSystem();
+    std::string getServerUpnpVersion();
+    std::string getServerProductNameVersion();
+    
+    void setMaximumWaitTime(int waitTime = SSDP_MIN_WAIT_TIME);  // max time to delay response, between 1 and 120 seconds.
+    int getMaximumWaitTime();
+    
+    void setDate();
+    DateTime getDate();
+    
+    SocketAddress getSender();
     
 private:
-/*    static const std::string REQUEST_NOTIFY_STR;
-    static const std::string REQUEST_SEARCH_STR;
-    static const std::string REQUEST_RESPONSE_STR;*/
-    
-    TRequestMethod m_requestMethod;
+    TRequestMethod          m_requestMethod;
+    TRequestMethod          m_notificationSubtype;
+    MessageHeader           m_messageHeader;
+    SocketAddress           m_sender;
     
     std::map<TRequestMethod,std::string> m_messageMap;
     std::map<std::string,TRequestMethod> m_messageConstMap;
@@ -124,7 +184,7 @@ public:
     SsdpSocket(const AbstractObserver& observer);
     ~SsdpSocket();
     
-    void sendMessage(SsdpMessage& message);
+    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     
 private:
 //     SocketAddress       m_ssdpAddress;
@@ -137,9 +197,7 @@ private:
     NotificationCenter  m_notificationCenter;
     char*               m_pBuffer;
     
-    static const std::string SSDP_ADDRESS;
     enum {
-        SSDP_PORT   = 1900,
         BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
             // Note that each SSDP message must fit into one UDP Packet.
     };
@@ -148,21 +206,55 @@ private:
 };
 
 
+class Service {
+public:
+    Service();
+    ~Service();
+
+private:
+    std::string     m_vendorDomain;
+    std::string     m_serviceType;
+    std::string     m_serviceVersion;
+};
+
+
 class Device {
 public:
     Device();
     ~Device();
     
-private:
+protected:
+    URI                     m_descriptionUri;
+    UUID                    m_uuid;
+    std::string             m_vendorDomain;
+    std::string             m_deviceType;
+    std::string             m_deviceVersion;
+    std::vector<Service>    m_services;
 };
 
 
-class ControlPoint {
+class RootDevice : public Device {
 public:
-    ControlPoint();
-    ~ControlPoint();
+    RootDevice();
+    ~RootDevice();
+    
+private:
+    void handleSsdpMessage(SsdpMessage* pNf);
+    
+    SsdpSocket              m_ssdpSocket;
+    std::vector<Device>     m_embeddedDevices;
+};
+
+
+class Controller {
+public:
+    Controller();
+    ~Controller();
 
 private:
+    void handleSsdpMessage(SsdpMessage* pNf);
+    
+    SsdpSocket m_ssdpSocket;
 };
 
 } // namespace Jamm

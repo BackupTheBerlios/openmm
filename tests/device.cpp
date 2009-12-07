@@ -31,6 +31,8 @@
 
 using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
+using Jamm::Device;
+using Jamm::RootDevice;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -38,14 +40,14 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
 
-class SsdpTest: public Poco::Util::ServerApplication
+class DeviceTest: public Poco::Util::ServerApplication
 {
 public:
-    SsdpTest(): _helpRequested(false)
+    DeviceTest(): _helpRequested(false)
     {
     }
     
-    ~SsdpTest()
+    ~DeviceTest()
     {
     }
     
@@ -84,22 +86,8 @@ protected:
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
         helpFormatter.setUsage("OPTIONS");
-        helpFormatter.setHeader("A sniffer for SSDP (Simple Service Discovery Protocol).");
+        helpFormatter.setHeader("A simple UPnP Device.");
         helpFormatter.format(std::cout);
-    }
-    
-/*    void handleSsdpMessage(const AutoPtr<SsdpMessage>& pNf)
-//     void handleSsdpMessage(AutoPtr<SsdpMessage> pNf)
-    {
-        std::cout << "SsdpTest::handleSsdpMessage() receives message:" << std::endl;
-        pNf->toString();
-//         std::cout << pNf->toString();
-    }*/
-    
-    void handleSsdpMessage(SsdpMessage* pNf)
-    {
-        std::cout << "SSDP message from " << pNf->getSender().toString() << std::endl;
-        std::cout << pNf->toString();
     }
     
     int main(const std::vector<std::string>& args)
@@ -112,10 +100,7 @@ protected:
         {
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
-            
-        // set-up a server socket
-//             SsdpSocket s(NObserver<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
-            SsdpSocket s(Observer<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
+            RootDevice rootDevice;
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;
@@ -128,6 +113,6 @@ private:
 
 int main(int argc, char** argv)
 {
-    SsdpTest app;
+    DeviceTest app;
     return app.run(argc, argv);
 }
