@@ -39,27 +39,37 @@ using namespace Jamm;
 
 SsdpMessage::SsdpMessage()
 {
-    m_messageMap[REQUEST_NOTIFY]    = "NOTIFY * HTTP/1.1";
-    m_messageMap[REQUEST_SEARCH]    = "M-SEARCH * HTTP/1.1";
-    m_messageMap[REQUEST_RESPONSE]  = "HTTP/1.1 200 OK";
-    m_messageMap[SUBTYPE_ALIVE]     = "ssdp:alive";
-    m_messageMap[SUBTYPE_BYEBYE]    = "ssdp:byebye";
-    m_messageMap[SSDP_ALL]          = "ssdp:all";
-    m_messageMap[UPNP_ROOT_DEVICES] = "upnp:rootdevice";
+    initMessageMap();
+}
+
+
+SsdpMessage::SsdpMessage(TRequestMethod requestMethod)
+{
+    initMessageMap();
+    setRequestMethod(requestMethod);
+    
+    if (requestMethod == REQUEST_NOTIFY ||
+        requestMethod == REQUEST_NOTIFY_ALIVE ||
+        requestMethod == REQUEST_NOTIFY_BYEBYE) {
+            setHost();
+            setServer("Jamm/0.0.3");
+            setCacheControl();
+    }
+    
+    switch (requestMethod) {
+    case REQUEST_NOTIFY_ALIVE:
+        setNotificationSubtype(SsdpMessage::SUBTYPE_ALIVE);          // alive message
+        break;
+    case REQUEST_NOTIFY_BYEBYE:
+        setNotificationSubtype(SsdpMessage::SUBTYPE_BYEBYE);         // byebye message
+        break;
+    }
 }
 
 
 SsdpMessage::SsdpMessage(const std::string& buf, const SocketAddress& sender)
 {
-//     SsdpMessage();
-    // TODO: put this into a singleton or similar ...
-    m_messageMap[REQUEST_NOTIFY]    = "NOTIFY * HTTP/1.1";
-    m_messageMap[REQUEST_SEARCH]    = "M-SEARCH * HTTP/1.1";
-    m_messageMap[REQUEST_RESPONSE]  = "HTTP/1.1 200 OK";
-    m_messageMap[SUBTYPE_ALIVE]     = "ssdp:alive";
-    m_messageMap[SUBTYPE_BYEBYE]    = "ssdp:byebye";
-    m_messageMap[SSDP_ALL]          = "ssdp:all";
-    m_messageMap[UPNP_ROOT_DEVICES] = "upnp:rootdevice";
+    initMessageMap();
     
     for (std::map<TRequestMethod,std::string>::iterator i = m_messageMap.begin(); i != m_messageMap.end(); i++) {
         m_messageConstMap[(*i).second] = (*i).first;
@@ -76,6 +86,21 @@ SsdpMessage::SsdpMessage(const std::string& buf, const SocketAddress& sender)
     m_sender = sender;
     
     m_messageHeader.read(is);
+}
+
+
+void
+SsdpMessage::initMessageMap()
+{
+    m_messageMap[REQUEST_NOTIFY]            = "NOTIFY * HTTP/1.1";
+    m_messageMap[REQUEST_NOTIFY_ALIVE]      = "NOTIFY * HTTP/1.1";
+    m_messageMap[REQUEST_NOTIFY_BYEBYE]     = "NOTIFY * HTTP/1.1";
+    m_messageMap[REQUEST_SEARCH]            = "M-SEARCH * HTTP/1.1";
+    m_messageMap[REQUEST_RESPONSE]          = "HTTP/1.1 200 OK";
+    m_messageMap[SUBTYPE_ALIVE]             = "ssdp:alive";
+    m_messageMap[SUBTYPE_BYEBYE]            = "ssdp:byebye";
+    m_messageMap[SSDP_ALL]                  = "ssdp:all";
+    m_messageMap[UPNP_ROOT_DEVICES]         = "upnp:rootdevice";
 }
 
 
@@ -114,7 +139,7 @@ SsdpMessage::getRequestMethod()
 void
 SsdpMessage::setCacheControl(int duration)
 {
-    m_messageHeader.set("CACHE-CONTROL", "maxe-age = " + NumberFormatter::format(duration));
+    m_messageHeader.set("CACHE-CONTROL", "max-age = " + NumberFormatter::format(duration));
 }
 
 
@@ -363,7 +388,6 @@ SsdpSocket::~SsdpSocket()
 void
 SsdpSocket::onReadable(const AutoPtr<ReadableNotification>& pNf)
 {
-//     int n = m_ssdpSocket.receiveBytes(m_pBuffer, BUFFER_SIZE);
     SocketAddress sender;
     int n = m_ssdpSocket.receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
@@ -379,31 +403,39 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 {
     std::string m = message.toString();
     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
-//     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), SocketAddress(m_ssdpAddress, m_ssdpPort));
 //     std::cerr << "SsdpSocket::sendMessage() message sent, number bytes: " << bytesSent << std::endl;
 }
 
 
-Service::Service(NodeIterator rootNode) :
+Service::Service(Device* device, NodeIterator rootNode) :
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_serviceType("fooservice"),
-m_serviceVersion("fooserviceversion")
+m_serviceVersion("fooserviceversion"),
+m_device(device)
 {
-    std::cerr << "Service::Service(NodeIterator rootNode)" << std::endl;
-    
+    // TODO: offer service description for control-points to download
     Node* pNode = rootNode.nextNode();
-    
     while (pNode)
     {
-//         std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
-        if (pNode->nodeName() == "service" && pNode->hasChildNodes()) {
-            // create Service object from XML fragment enclosed in <service></service>
-        }
         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
-            std::cerr << pNode->nodeName() << ": " << pNode->firstChild()->nodeValue() << std::endl;
+            m_serviceType = pNode->firstChild()->nodeValue();
+        }
+        else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
+            m_descriptionUri = URI(pNode->firstChild()->nodeValue());
+        }
+        else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
+            m_controlUri = URI(pNode->firstChild()->nodeValue());
+        }
+        else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
+            m_eventUri = URI(pNode->firstChild()->nodeValue());
         }
         pNode = rootNode.nextNode();
     }
+    // send SSDP messages
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m.setNotificationType(m_serviceType);  // one message for every service
+    m.setUniqueServiceName(m_device->m_uuidDescription + "::" +  m_serviceType);
+    m_device->m_rootDevice->sendMessage(m);
 }
 
 
@@ -417,41 +449,47 @@ Device::Device()
 }
 
 
-Device::Device(NodeIterator rootNode) :
+Device::Device(RootDevice* rootDevice, NodeIterator rootNode) :
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_deviceType("foodevice"),
-m_deviceVersion("foodeviceversion")
+m_deviceVersion("foodeviceversion"),
+m_rootDevice(rootDevice)
 {
+    // TODO: if uuid is not given in the description, generate one and try to save it on
+    //       persistance storage
 //     UUIDGenerator uuidGen;
 //     m_uuid = uuidGen.createOne();
-    
-    std::cerr << "Device::Device(NodeIterator rootNode)" << std::endl;
     
     Node* pNode = rootNode.nextNode();
     while (pNode)  // TODO: stop when closing tag </device> is reached, or is root node set by copy-ctor?
     {
         if (pNode->nodeName() == "deviceType" && pNode->hasChildNodes()) {
-            std::cerr << pNode->nodeName() << ": " << pNode->firstChild()->nodeValue() << std::endl;
             m_deviceType = pNode->firstChild()->nodeValue();
-            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
         }
-        if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
-            std::cerr << pNode->nodeName() << ": " << pNode->firstChild()->nodeValue() << std::endl;
+        else if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
             m_uuidDescription = pNode->firstChild()->nodeValue();
-            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
         }
-        if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
+        else if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
             // for each childnode append a service
-            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
-            NodeIterator childIterator(pNode, NodeFilter::SHOW_ALL);
+            NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
                 if (c->nodeName() == "service") {
-                    m_services.push_back(Service(NodeIterator(c, NodeFilter::SHOW_ALL)));
+                    m_services.push_back(Service(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
                 }
             }
         }
         pNode = rootNode.nextNode();
     }
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m.setLocation(m_rootDevice->m_descriptionUri);    // location of UPnP description of the root device
+    
+    m.setNotificationType(m_uuidDescription);
+    m.setUniqueServiceName(m_uuidDescription);
+    m_rootDevice->sendMessage(m);  // root device second message
+    
+    m.setNotificationType(m_deviceType);
+    m.setUniqueServiceName(m_uuidDescription + "::" + m_deviceType);
+    m_rootDevice->sendMessage(m);  // root device third message
 }
 
 
@@ -460,113 +498,69 @@ Device::~Device()
 }
 
 
+// SsdpSocket RootDevice::m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMessage));
+
+
 RootDevice::RootDevice(const std::string&  description) :
-m_descriptionUri("http://192.168.178.20:9191/description_uri"),
-m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMessage))
+m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMessage)),
+m_descriptionUri("http://192.168.178.20:9191/description_uri")
 {
-    std::cerr << "RootDevice::RootDevice(const std::string&  description)" << std::endl;
-    
     // TODO: offer device description for download to controllers
     
-// read device description and extract device and service information
-//     InputSource strsource(description);
     
-    // copy the current iterator into ctor of device/service
-    
-    // PUT THIS INTO device() ctor.
+//  read device description and extract device and service information
     DOMParser parser;
-//     Document pDoc = parser.parse(&description);
-//     AutoPtr<Document> pDoc = parser.parse(&strsource);
-//     AutoPtr<Document> pDoc = parser.parse("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
     AutoPtr<Document> pDoc = parser.parseString(description);
     NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
     Node* pNode = it.nextNode();
     
     while (pNode)
     {
-//         std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
-            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
-            // create Device object from XML fragment enclosed in <device></device>
-            m_rootDevice = Device(it);  // TODO: does this set the members of RootDevice?
+            m_rootDevice = Device(this, it);
         }
-        
-        if (pNode->nodeName() == "deviceList" && pNode->hasChildNodes()) {  // root-device only!!!
-            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+        else if (pNode->nodeName() == "deviceList" && pNode->hasChildNodes()) {  // root-device only!!!
             // for each childnode (embedded device) create a Device object
-//             NodeList children = pNode->childNodes();
             // TODO: this doesn't iterate through the childnodes only, but through the whole subtree, which is
             //       unnecessary
-            NodeIterator childIterator(pNode, NodeFilter::SHOW_ALL);
+            NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-//             for (unsigned long i = 0; i < children.length(); ++i) {
                 if (c->nodeName() == "device") {
-                   m_embeddedDevices.push_back(Device(NodeIterator(c, NodeFilter::SHOW_ALL)));
+                   m_embeddedDevices.push_back(Device(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
                 }
-//                 m_embeddedDevices.push_back(Device(children.item(i)));
-//                 m_embeddedDevices.push_back(Device(NodeIterator(children.item(i), NodeFilter::SHOW_ALL)));
             }
         }
         pNode = it.nextNode();
     }
-    
-    
-    
-    // TODO: send NOTIFY alive messages
-    SsdpMessage m;
-    m.setRequestMethod(SsdpMessage::REQUEST_NOTIFY);
-    m.setHost();
-    m.setServer("Jamm/0.0.3");
-    m.setCacheControl();
+    // send NOTIFY alive messages
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m.setLocation(m_descriptionUri);    // location of UPnP description of the root device
-    m.setNotificationSubtype(SsdpMessage::SUBTYPE_ALIVE);         // alive message
     
     m.setNotificationType("upnp:rootdevice");  // once for root device
-    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
+    m.setUniqueServiceName(m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
     m_ssdpSocket.sendMessage(m);  // root device first message
-    
-    m.setNotificationType("uuid:" + m_rootDevice.m_uuidDescription);
-    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuidDescription);
-    m_ssdpSocket.sendMessage(m);  // root device second message
-    
-    m.setNotificationType(m_rootDevice.m_deviceType);
-    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuidDescription + "::" + m_rootDevice.m_deviceType);
-    m_ssdpSocket.sendMessage(m);  // root device third message
-    
-    
-    
-    /*
-    m.setNotificationType("uuid:" + m_uuid.toString());  // once for every device
-    
-    
-    
-    m.setNotificationType("urn:" + m_vendorDomain + ":device:" + m_deviceType + ":" + m_deviceVersion);  // once for every device
-    std::string serviceType = "fooservice";
-    std::string serviceVersion = "fooserviceversion";
-    m.setNotificationType("urn:" + m_vendorDomain + ":service:" + serviceType + ":" + serviceVersion);  // once for every service
-    
-    m.setUniqueServiceName("uuid:" + m_uuid.toString() + "::upnp:rootdevice");
-    
-    m_ssdpSocket.sendMessage(m);
-    */
-    //-------------------------------------------------------------
-    
-    
 }
 
 
 RootDevice::~RootDevice()
 {
     // TODO: send NOTIFY byebye messages
-    SsdpMessage m;
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m.setRequestMethod(SsdpMessage::REQUEST_NOTIFY);
     m.setHost();
     m.setServer("Jamm/0.0.3");
     m.setNotificationSubtype(SsdpMessage::SUBTYPE_BYEBYE);         // byebye message
     
-    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuid.toString() + "::upnp:rootdevice");
+    m.setUniqueServiceName(m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
+}
+
+
+void 
+RootDevice::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
+{
+    m_ssdpSocket.sendMessage(message, receiver);
 }
 
 

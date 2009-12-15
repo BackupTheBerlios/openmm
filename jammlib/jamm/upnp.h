@@ -128,21 +128,27 @@ static const UInt16         SSDP_MAX_WAIT_TIME  = 120;
 class SsdpMessage : public Notification
 {
 public:
+    typedef enum {
+        REQUEST_NOTIFY          = 1,
+        REQUEST_NOTIFY_ALIVE    = 2,
+        REQUEST_NOTIFY_BYEBYE   = 3,
+        REQUEST_SEARCH          = 4,
+        REQUEST_RESPONSE        = 5,
+        SUBTYPE_ALIVE           = 6,
+        SUBTYPE_BYEBYE          = 7,
+        SSDP_ALL                = 8,
+        UPNP_ROOT_DEVICES       = 9
+    } TRequestMethod;
+    
     SsdpMessage();
+    // build sceletons for the different types of SSDP messages
+    SsdpMessage(TRequestMethod requestMethod);
+    
     // map the received HTTP header to an SsdpMessage object in memory
     SsdpMessage(const std::string& buf, const SocketAddress& sender = SocketAddress(SSDP_FULL_ADDRESS));
     ~SsdpMessage();
     
     // HTTP message envelope
-    typedef enum {
-        REQUEST_NOTIFY      = 1,
-        REQUEST_SEARCH      = 2,
-        REQUEST_RESPONSE    = 3,
-        SUBTYPE_ALIVE       = 4,
-        SUBTYPE_BYEBYE      = 5,
-        SSDP_ALL            = 6,
-        UPNP_ROOT_DEVICES   = 7
-    } TRequestMethod;
     
     std::string toString();
     
@@ -187,6 +193,8 @@ public:
     SocketAddress getSender();
     
 private:
+    void initMessageMap();
+    
     TRequestMethod          m_requestMethod;
     TRequestMethod          m_notificationSubtype;
     MessageHeader           m_messageHeader;
@@ -226,10 +234,12 @@ private:
     void onReadable(const AutoPtr<ReadableNotification>& pNf);
 };
 
+class Device;
+class RootDevice;
 
 class Service {
 public:
-    Service(NodeIterator rootNode);
+    Service(Device* device, NodeIterator rootNode);
     ~Service();
 
 private:
@@ -239,13 +249,14 @@ private:
     std::string     m_vendorDomain;
     std::string     m_serviceType;
     std::string     m_serviceVersion;
+    Device*         m_device;
 };
 
 
 class Device {
 public:
     Device();
-    Device(NodeIterator rootNode);
+    Device(RootDevice* rootDevice, NodeIterator rootNode);
     ~Device();
     
 // protected:
@@ -256,19 +267,22 @@ public:
     std::string                         m_deviceVersion;
     std::vector<Service>                m_services;
     std::map<std::string,std::string>   m_deviceInfo;
+    RootDevice*                         m_rootDevice;
 };
 
 
-class RootDevice /*: public Device*/ {
+class RootDevice {
 public:
     RootDevice(const std::string&  description);
     ~RootDevice();
     
-private:
+    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     
-    SsdpSocket              m_ssdpSocket;
     URI                     m_descriptionUri;  // for controller to download description
+    
+private:
+    SsdpSocket              m_ssdpSocket;
     Device                  m_rootDevice;
     std::vector<Device>     m_embeddedDevices;
 };
