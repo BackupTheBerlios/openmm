@@ -20,12 +20,14 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include <fstream>
 
 #include "Poco/Util/ServerApplication.h"
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
-
+#include "Poco/StreamCopier.h"
+#include <sstream>
 
 #include "jamm/upnp.h"
 
@@ -33,11 +35,13 @@ using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
 using Jamm::Device;
 using Jamm::RootDevice;
+using Poco::StreamCopier;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
+using std::stringstream;
 
 
 class DeviceTest: public Poco::Util::ServerApplication
@@ -100,7 +104,11 @@ protected:
         {
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
-            RootDevice rootDevice;
+            std::stringstream ss;
+            std::ifstream ifs("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
+            StreamCopier::copyStream(ifs, ss);
+            std::string s = ss.str();
+            RootDevice rootDevice(s);
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;

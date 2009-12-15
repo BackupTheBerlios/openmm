@@ -1,0 +1,8 @@
+  <device>
+    <serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:SwitchPower.1</serviceId>
+      </service>
+    </serviceList>
+  </device>

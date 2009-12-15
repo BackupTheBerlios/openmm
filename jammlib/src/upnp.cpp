@@ -33,6 +33,7 @@ using std::istringstream;
 using Poco::NumberFormatter;
 using Poco::NumberParser;
 using Poco::Environment;
+
 using namespace Jamm;
 
 
@@ -383,11 +384,26 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 }
 
 
-Service::Service() :
+Service::Service(NodeIterator rootNode) :
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_serviceType("fooservice"),
 m_serviceVersion("fooserviceversion")
 {
+    std::cerr << "Service::Service(NodeIterator rootNode)" << std::endl;
+    
+    Node* pNode = rootNode.nextNode();
+    
+    while (pNode)
+    {
+//         std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+        if (pNode->nodeName() == "service" && pNode->hasChildNodes()) {
+            // create Service object from XML fragment enclosed in <service></service>
+        }
+        if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
+            std::cerr << pNode->nodeName() << ": " << pNode->firstChild()->nodeValue() << std::endl;
+        }
+        pNode = rootNode.nextNode();
+    }
 }
 
 
@@ -396,14 +412,46 @@ Service::~Service()
 }
 
 
-Device::Device() :
-m_descriptionUri("http://192.168.178.20:9191/description_uri"),
+Device::Device()
+{
+}
+
+
+Device::Device(NodeIterator rootNode) :
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_deviceType("foodevice"),
 m_deviceVersion("foodeviceversion")
 {
-    UUIDGenerator uuidGen;
-    m_uuid = uuidGen.createOne();
+//     UUIDGenerator uuidGen;
+//     m_uuid = uuidGen.createOne();
+    
+    std::cerr << "Device::Device(NodeIterator rootNode)" << std::endl;
+    
+    Node* pNode = rootNode.nextNode();
+    while (pNode)  // TODO: stop when closing tag </device> is reached, or is root node set by copy-ctor?
+    {
+        if (pNode->nodeName() == "deviceType" && pNode->hasChildNodes()) {
+            std::cerr << pNode->nodeName() << ": " << pNode->firstChild()->nodeValue() << std::endl;
+            m_deviceType = pNode->firstChild()->nodeValue();
+            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+        }
+        if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
+            std::cerr << pNode->nodeName() << ": " << pNode->firstChild()->nodeValue() << std::endl;
+            m_uuidDescription = pNode->firstChild()->nodeValue();
+            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+        }
+        if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
+            // for each childnode append a service
+            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+            NodeIterator childIterator(pNode, NodeFilter::SHOW_ALL);
+            for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
+                if (c->nodeName() == "service") {
+                    m_services.push_back(Service(NodeIterator(c, NodeFilter::SHOW_ALL)));
+                }
+            }
+        }
+        pNode = rootNode.nextNode();
+    }
 }
 
 
@@ -412,10 +460,58 @@ Device::~Device()
 }
 
 
-RootDevice::RootDevice() :
-Device(),
+RootDevice::RootDevice(const std::string&  description) :
+m_descriptionUri("http://192.168.178.20:9191/description_uri"),
 m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMessage))
 {
+    std::cerr << "RootDevice::RootDevice(const std::string&  description)" << std::endl;
+    
+    // TODO: offer device description for download to controllers
+    
+// read device description and extract device and service information
+//     InputSource strsource(description);
+    
+    // copy the current iterator into ctor of device/service
+    
+    // PUT THIS INTO device() ctor.
+    DOMParser parser;
+//     Document pDoc = parser.parse(&description);
+//     AutoPtr<Document> pDoc = parser.parse(&strsource);
+//     AutoPtr<Document> pDoc = parser.parse("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
+    AutoPtr<Document> pDoc = parser.parseString(description);
+    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
+    Node* pNode = it.nextNode();
+    
+    while (pNode)
+    {
+//         std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+        if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
+            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+            // create Device object from XML fragment enclosed in <device></device>
+            m_rootDevice = Device(it);  // TODO: does this set the members of RootDevice?
+        }
+        
+        if (pNode->nodeName() == "deviceList" && pNode->hasChildNodes()) {  // root-device only!!!
+            std::cerr << pNode->nodeName() << ": " << pNode->nodeValue() <<  " (" << pNode->nodeType() << ")" << std::endl;
+            // for each childnode (embedded device) create a Device object
+//             NodeList children = pNode->childNodes();
+            // TODO: this doesn't iterate through the childnodes only, but through the whole subtree, which is
+            //       unnecessary
+            NodeIterator childIterator(pNode, NodeFilter::SHOW_ALL);
+            for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
+//             for (unsigned long i = 0; i < children.length(); ++i) {
+                if (c->nodeName() == "device") {
+                   m_embeddedDevices.push_back(Device(NodeIterator(c, NodeFilter::SHOW_ALL)));
+                }
+//                 m_embeddedDevices.push_back(Device(children.item(i)));
+//                 m_embeddedDevices.push_back(Device(NodeIterator(children.item(i), NodeFilter::SHOW_ALL)));
+            }
+        }
+        pNode = it.nextNode();
+    }
+    
+    
+    
     // TODO: send NOTIFY alive messages
     SsdpMessage m;
     m.setRequestMethod(SsdpMessage::REQUEST_NOTIFY);
@@ -426,7 +522,24 @@ m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMes
     m.setNotificationSubtype(SsdpMessage::SUBTYPE_ALIVE);         // alive message
     
     m.setNotificationType("upnp:rootdevice");  // once for root device
+    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
+    m_ssdpSocket.sendMessage(m);  // root device first message
+    
+    m.setNotificationType("uuid:" + m_rootDevice.m_uuidDescription);
+    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuidDescription);
+    m_ssdpSocket.sendMessage(m);  // root device second message
+    
+    m.setNotificationType(m_rootDevice.m_deviceType);
+    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuidDescription + "::" + m_rootDevice.m_deviceType);
+    m_ssdpSocket.sendMessage(m);  // root device third message
+    
+    
+    
+    /*
     m.setNotificationType("uuid:" + m_uuid.toString());  // once for every device
+    
+    
+    
     m.setNotificationType("urn:" + m_vendorDomain + ":device:" + m_deviceType + ":" + m_deviceVersion);  // once for every device
     std::string serviceType = "fooservice";
     std::string serviceVersion = "fooserviceversion";
@@ -435,6 +548,10 @@ m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMes
     m.setUniqueServiceName("uuid:" + m_uuid.toString() + "::upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
+    */
+    //-------------------------------------------------------------
+    
+    
 }
 
 
@@ -447,7 +564,7 @@ RootDevice::~RootDevice()
     m.setServer("Jamm/0.0.3");
     m.setNotificationSubtype(SsdpMessage::SUBTYPE_BYEBYE);         // byebye message
     
-    m.setUniqueServiceName("uuid:" + m_uuid.toString() + "::upnp:rootdevice");
+    m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuid.toString() + "::upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
 }
@@ -471,7 +588,7 @@ RootDevice::handleSsdpMessage(SsdpMessage* pNf)
         // ST field in response depends on ST field in M-SEARCH
         m.setSearchTarget("upnp:rootdevice");
         // same as USN in NOTIFY message
-        m.setUniqueServiceName("uuid:" + m_uuid.toString() + "::upnp:rootdevice");
+        m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuid.toString() + "::upnp:rootdevice");
         
         m_ssdpSocket.sendMessage(m, pNf->getSender());
     }

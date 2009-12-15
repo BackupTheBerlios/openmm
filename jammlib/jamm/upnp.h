@@ -54,6 +54,16 @@
 #include "Poco/Net/NetException.h"
 #include "Poco/Net/NetworkInterface.h"
 #include "Poco/Net/MessageHeader.h"
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/AutoPtr.h"
+#include "Poco/DOM/AttrMap.h"
+#include "Poco/DOM/Element.h"
+#include "Poco/SAX/InputSource.h"
+
 
 
 using Poco::SingletonHolder;
@@ -86,6 +96,17 @@ using Poco::Net::ReadableNotification;
 using Poco::Net::ShutdownNotification;
 using Poco::Net::IPAddress;
 using Poco::Net::MessageHeader;
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeFilter;
+using Poco::XML::Node;
+using Poco::XML::NodeList;
+using Poco::XML::NamedNodeMap;
+using Poco::XML::AttrMap;
+using Poco::XML::Element;
+using Poco::XML::AutoPtr;
+using Poco::XML::InputSource;
 
 namespace Jamm {
 
@@ -208,10 +229,13 @@ private:
 
 class Service {
 public:
-    Service();
+    Service(NodeIterator rootNode);
     ~Service();
 
 private:
+    URI             m_descriptionUri;
+    URI             m_controlUri;
+    URI             m_eventUri;
     std::string     m_vendorDomain;
     std::string     m_serviceType;
     std::string     m_serviceVersion;
@@ -221,27 +245,31 @@ private:
 class Device {
 public:
     Device();
+    Device(NodeIterator rootNode);
     ~Device();
     
-protected:
-    URI                     m_descriptionUri;
-    UUID                    m_uuid;
-    std::string             m_vendorDomain;
-    std::string             m_deviceType;
-    std::string             m_deviceVersion;
-    std::vector<Service>    m_services;
+// protected:
+    UUID                                m_uuid;
+    std::string                         m_uuidDescription;
+    std::string                         m_vendorDomain;
+    std::string                         m_deviceType;
+    std::string                         m_deviceVersion;
+    std::vector<Service>                m_services;
+    std::map<std::string,std::string>   m_deviceInfo;
 };
 
 
-class RootDevice : public Device {
+class RootDevice /*: public Device*/ {
 public:
-    RootDevice();
+    RootDevice(const std::string&  description);
     ~RootDevice();
     
 private:
     void handleSsdpMessage(SsdpMessage* pNf);
     
     SsdpSocket              m_ssdpSocket;
+    URI                     m_descriptionUri;  // for controller to download description
+    Device                  m_rootDevice;
     std::vector<Device>     m_embeddedDevices;
 };
 

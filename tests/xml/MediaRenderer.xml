@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+    <friendlyName>GUPnP media renderer</friendlyName>
+    <manufacturer>OpenedHand Ltd</manufacturer>
+    <manufacturerURL>http://openedhand.com/</manufacturerURL>
+    <modelName>gupnp-media-renderer</modelName>
+    <modelNumber>0.1</modelNumber>
+    <modelDescription>GUPnP media renderer</modelDescription>
+    <modelURL>http://www.gupnp.org/</modelURL>
+    <UDN>uuid:UUID_MARKER</UDN>
+    <serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+        <SCPDURL>/xml/RenderingControl.xml</SCPDURL>
+        <controlURL>/RenderingControl/Control</controlURL>
+        <eventSubURL>/RenderingContro/Event</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+        <SCPDURL>/xml/ConnectionManager.xml</SCPDURL>
+        <controlURL>/ConnectionManager/Control</controlURL>
+        <eventSubURL>/ConnectionManager/Event</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
+        <SCPDURL>/xml/AVTransport.xml</SCPDURL>
+        <controlURL>/AVTransport/Control</controlURL>
+        <eventSubURL>/AVTransport/Event</eventSubURL>
+      </service>
+    </serviceList>
+  </device>
+</root>
