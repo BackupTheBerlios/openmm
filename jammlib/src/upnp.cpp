@@ -363,6 +363,7 @@ m_pBuffer(new char[BUFFER_SIZE])
 {
     // set the default interface by providing an empty NetworkInterface as argument
     // TODO: if not default interface, let interface be configurable
+    m_interface = NetworkInterface::forName("wlan0");
     m_ssdpSocket.setInterface(m_interface);
     m_ssdpSocket.setLoopback(true);
     m_ssdpSocket.setTimeToLive(4);  // TODO: let TTL be configurable
@@ -449,7 +450,7 @@ Device::Device()
 }
 
 
-Device::Device(RootDevice* rootDevice, NodeIterator rootNode) :
+Device::Device(DeviceRoot* rootDevice, NodeIterator rootNode) :
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_deviceType("foodevice"),
 m_deviceVersion("foodeviceversion"),
@@ -498,17 +499,14 @@ Device::~Device()
 }
 
 
-// SsdpSocket RootDevice::m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMessage));
+// SsdpSocket DeviceRoot::m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
 
 
-RootDevice::RootDevice(const std::string&  description) :
-m_ssdpSocket(Observer<RootDevice, SsdpMessage>(*this, &RootDevice::handleSsdpMessage)),
-m_descriptionUri("http://192.168.178.20:9191/description_uri")
+DeviceRoot::DeviceRoot(const std::string&  description) :
+m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage))
 {
-    // TODO: offer device description for download to controllers
-    
-    
-//  read device description and extract device and service information
+    //---------------------------------------------------------------------------------
+    //  1. read device description and extract device and service information
     DOMParser parser;
     AutoPtr<Document> pDoc = parser.parseString(description);
     NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
@@ -532,7 +530,33 @@ m_descriptionUri("http://192.168.178.20:9191/description_uri")
         }
         pNode = it.nextNode();
     }
+    
+    //---------------------------------------------------------------------------------
+    // 2. setup HTTP server for description download and action/eventing
+    // TODO: offer device description via HTTP, TCP/IP for download to controllers
+    HTTPServerParams* pParams = new HTTPServerParams;
+//     pParams->setMaxQueued(maxQueued);
+//     pParams->setMaxThreads(maxThreads);
+    // set-up a server socket on a free port
+    ServerSocket socket(0);
+    // TODO: can we somehow bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out?
+    m_httpServerAddress = SocketAddress(m_ssdpSocket.m_interface.address(), socket.address().port());
+    // set-up a HTTPServer instance
+    // TODO: pass a map of all URI (devices and services) -> xml stream
+    // for URI use the device/service name
+    m_pHttpServer = new HTTPServer(new DescriptionRequestHandlerFactory(""), socket, pParams);
+    // start the HTTPServer
+    m_pHttpServer->start();
+    std::cerr << "DeviceRoot started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+    
+    m_descriptionUri = URI("http://" + m_httpServerAddress.toString() + "/device_description");
+    std::cerr << "DeviceRoot offering device description on: " << m_descriptionUri.toString() << std::endl;
+    
+    //---------------------------------------------------------------------------------
+    // 3. send out SSDP messages to announce what we got
+    // TODO: handle services that appear in the same subdevices (no double messages should be send).
     // send NOTIFY alive messages
+    // -> but then a message with (embedded-device uuid, service type) is missing? I don't get the specs here ...
     SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m.setLocation(m_descriptionUri);    // location of UPnP description of the root device
     
@@ -542,7 +566,7 @@ m_descriptionUri("http://192.168.178.20:9191/description_uri")
 }
 
 
-RootDevice::~RootDevice()
+DeviceRoot::~DeviceRoot()
 {
     // TODO: send NOTIFY byebye messages
     SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
@@ -554,18 +578,21 @@ RootDevice::~RootDevice()
     m.setUniqueServiceName(m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
+    
+    m_pHttpServer->stop();
+    delete m_pHttpServer;
 }
 
 
 void 
-RootDevice::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
+DeviceRoot::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 {
     m_ssdpSocket.sendMessage(message, receiver);
 }
 
 
 void
-RootDevice::handleSsdpMessage(SsdpMessage* pNf)
+DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
 {
     std::cout << "root device gets SSDP message:" << std::endl;
     std::cout << pNf->toString();

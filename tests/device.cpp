@@ -34,7 +34,7 @@
 using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
 using Jamm::Device;
-using Jamm::RootDevice;
+using Jamm::DeviceRoot;
 using Poco::StreamCopier;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -108,7 +108,7 @@ protected:
             std::ifstream ifs("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
             StreamCopier::copyStream(ifs, ss);
             std::string s = ss.str();
-            RootDevice rootDevice(s);
+            DeviceRoot rootDevice(s);
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;

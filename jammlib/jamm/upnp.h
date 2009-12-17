@@ -51,9 +51,17 @@
 #include "Poco/Net/SocketReactor.h"
 #include "Poco/Net/SocketNotification.h"
 #include "Poco/Net/SocketStream.h"
+#include "Poco/Net/ServerSocket.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/Net/NetworkInterface.h"
 #include "Poco/Net/MessageHeader.h"
+#include "Poco/Net/HTTPServer.h"
+#include "Poco/Net/HTTPRequestHandler.h"
+#include "Poco/Net/HTTPRequestHandlerFactory.h"
+#include "Poco/Net/HTTPServerParams.h"
+#include "Poco/Net/HTTPServerRequest.h"
+#include "Poco/Net/HTTPServerResponse.h"
+#include "Poco/Net/HTTPServerParams.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeIterator.h"
@@ -96,6 +104,13 @@ using Poco::Net::ReadableNotification;
 using Poco::Net::ShutdownNotification;
 using Poco::Net::IPAddress;
 using Poco::Net::MessageHeader;
+using Poco::Net::ServerSocket;
+using Poco::Net::HTTPRequestHandler;
+using Poco::Net::HTTPRequestHandlerFactory;
+using Poco::Net::HTTPServer;
+using Poco::Net::HTTPServerRequest;
+using Poco::Net::HTTPServerResponse;
+using Poco::Net::HTTPServerParams;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::NodeIterator;
@@ -215,12 +230,13 @@ public:
     
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     
+    NetworkInterface    m_interface;
+
 private:
 //     SocketAddress       m_ssdpAddress;
     IPAddress           m_ssdpAddress;
     UInt16              m_ssdpPort;
     MulticastSocket     m_ssdpSocket;
-    NetworkInterface    m_interface;
     SocketReactor       m_reactor;
     Thread              m_listenerThread;
     NotificationCenter  m_notificationCenter;
@@ -235,7 +251,7 @@ private:
 };
 
 class Device;
-class RootDevice;
+class DeviceRoot;
 
 class Service {
 public:
@@ -253,10 +269,64 @@ private:
 };
 
 
+class DescriptionRequestHandler: public HTTPRequestHandler
+	/// Return service or device description.
+{
+public:
+    DescriptionRequestHandler(const std::string& format): 
+        _format(format)
+    {
+    }
+    
+    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+    {
+//         Application& app = Application::instance();
+//         app.logger().information("Request from " + request.clientAddress().toString());
+        
+        Timestamp now;
+        std::string dt(DateTimeFormatter::format(now, _format));
+        
+        response.setChunkedTransferEncoding(true);
+        response.setContentType("text/html");
+        
+        std::ostream& ostr = response.send();
+        ostr << "<html><head><title>HTTPTimeServer powered by POCO C++ Libraries</title>";
+        ostr << "<meta http-equiv=\"refresh\" content=\"1\"></head>";
+        ostr << "<body><p style=\"text-align: center; font-size: 48px;\">";
+        ostr << dt;
+        ostr << "</p></body></html>";
+    }
+    
+private:
+    std::string _format;
+};
+
+
+class DescriptionRequestHandlerFactory: public HTTPRequestHandlerFactory
+{
+public:
+    DescriptionRequestHandlerFactory(const std::string& format):
+        _format(format)
+    {
+    }
+    
+    HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request)
+    {
+        if (request.getURI() == "/device_description")
+            return new DescriptionRequestHandler(_format);
+        else
+            return 0;
+    }
+    
+private:
+    std::string _format;
+};
+
+
 class Device {
 public:
     Device();
-    Device(RootDevice* rootDevice, NodeIterator rootNode);
+    Device(DeviceRoot* rootDevice, NodeIterator rootNode);
     ~Device();
     
 // protected:
@@ -267,14 +337,16 @@ public:
     std::string                         m_deviceVersion;
     std::vector<Service>                m_services;
     std::map<std::string,std::string>   m_deviceInfo;
-    RootDevice*                         m_rootDevice;
+    DeviceRoot*                         m_rootDevice;
+private:
+    
 };
 
 
-class RootDevice {
+class DeviceRoot {
 public:
-    RootDevice(const std::string&  description);
-    ~RootDevice();
+    DeviceRoot(const std::string&  description);
+    ~DeviceRoot();
     
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
@@ -285,6 +357,10 @@ private:
     SsdpSocket              m_ssdpSocket;
     Device                  m_rootDevice;
     std::vector<Device>     m_embeddedDevices;
+    SocketAddress           m_httpServerAddress;
+//     UInt16                  m_httpServerPort;
+//     ServerSocket            m_httpServerSocket;
+    HTTPServer*             m_pHttpServer;
 };
 
 

@@ -32,7 +32,7 @@
 using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
 using Jamm::Device;
-using Jamm::RootDevice;
+using Jamm::DeviceRoot;
 using Jamm::Controller;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
