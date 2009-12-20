@@ -108,7 +108,7 @@ protected:
             std::ifstream ifs("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
             StreamCopier::copyStream(ifs, ss);
             std::string s = ss.str();
-            DeviceRoot rootDevice(s);
+            DeviceRoot device(s);
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;

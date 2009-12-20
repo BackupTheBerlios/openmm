@@ -27,8 +27,9 @@
 #include <map>
 #include <iostream>
 #include <istream>
+#include <fstream>
 #include <ostream>
-
+#include <sstream>
 
 #include "Poco/SingletonHolder.h"
 #include "Poco/NObserver.h"
@@ -62,6 +63,7 @@
 #include "Poco/Net/HTTPServerRequest.h"
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/HTTPServerParams.h"
+#include "Poco/Net/HTTPResponse.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeIterator.h"
@@ -71,8 +73,7 @@
 #include "Poco/DOM/AttrMap.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/SAX/InputSource.h"
-
-
+#include "Poco/StreamCopier.h"
 
 using Poco::SingletonHolder;
 using Poco::NObserver;
@@ -111,6 +112,7 @@ using Poco::Net::HTTPServer;
 using Poco::Net::HTTPServerRequest;
 using Poco::Net::HTTPServerResponse;
 using Poco::Net::HTTPServerParams;
+using Poco::Net::HTTPResponse;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::NodeIterator;
@@ -122,6 +124,9 @@ using Poco::XML::AttrMap;
 using Poco::XML::Element;
 using Poco::XML::AutoPtr;
 using Poco::XML::InputSource;
+using std::istringstream;
+using Poco::StreamCopier;
+
 
 namespace Jamm {
 
@@ -233,7 +238,6 @@ public:
     NetworkInterface    m_interface;
 
 private:
-//     SocketAddress       m_ssdpAddress;
     IPAddress           m_ssdpAddress;
     UInt16              m_ssdpPort;
     MulticastSocket     m_ssdpSocket;
@@ -258,68 +262,201 @@ public:
     Service(Device* device, NodeIterator rootNode);
     ~Service();
 
-private:
-    URI             m_descriptionUri;
-    URI             m_controlUri;
-    URI             m_eventUri;
-    std::string     m_vendorDomain;
-    std::string     m_serviceType;
-    std::string     m_serviceVersion;
-    Device*         m_device;
+// private:
+    URI                 m_descriptionUri;
+    std::string         m_description;
+//     istringstream       m_descriptionStream;
+//     int                 m_descriptionLength;
+    URI                 m_controlUri;
+    URI                 m_eventUri;
+    std::string         m_vendorDomain;
+    std::string         m_serviceType;
+    std::string         m_serviceVersion;
+    Device*             m_device;
+};
+
+// TODO: possible request handler types:
+//       RequestNotFoundRequestHandler
+//       FileRequestHandler, MultiFileRequestHandler,
+//       ActionResponseRequestHandler, StateVariableQueryRequestHandler,
+//       EventSubscribeRequestHandler
+
+
+class UpnpRequestHandler: public HTTPRequestHandler
+{
+public:
+    virtual UpnpRequestHandler* create() = 0;
 };
 
 
-class DescriptionRequestHandler: public HTTPRequestHandler
-	/// Return service or device description.
+class RequestNotFoundRequestHandler: public UpnpRequestHandler
 {
 public:
-    DescriptionRequestHandler(const std::string& format): 
-        _format(format)
+    RequestNotFoundRequestHandler* create()
     {
+        return new RequestNotFoundRequestHandler();
     }
     
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
     {
-//         Application& app = Application::instance();
-//         app.logger().information("Request from " + request.clientAddress().toString());
-        
-        Timestamp now;
-        std::string dt(DateTimeFormatter::format(now, _format));
-        
-        response.setChunkedTransferEncoding(true);
-        response.setContentType("text/html");
-        
-        std::ostream& ostr = response.send();
-        ostr << "<html><head><title>HTTPTimeServer powered by POCO C++ Libraries</title>";
-        ostr << "<meta http-equiv=\"refresh\" content=\"1\"></head>";
-        ostr << "<body><p style=\"text-align: center; font-size: 48px;\">";
-        ostr << dt;
-        ostr << "</p></body></html>";
+        std::cerr << "handle unknown request with HTTP 404 - not found error on request: " << request.getURI() << std::endl;
+        response.setStatus(HTTPResponse::HTTP_NOT_FOUND);
     }
-    
-private:
-    std::string _format;
 };
 
 
-class DescriptionRequestHandlerFactory: public HTTPRequestHandlerFactory
+class DescriptionRequestHandler: public UpnpRequestHandler
+	/// Return service or device description.
 {
 public:
-    DescriptionRequestHandlerFactory(const std::string& format):
-        _format(format)
+    
+    DescriptionRequestHandler(std::string& description):
+        m_description(description)
     {
+    }
+    
+    DescriptionRequestHandler* create()
+    {
+        // TODO: can we somehow avoid to make a copy of the RequestHandler on each request?
+        return new DescriptionRequestHandler(m_description);
+    }
+    
+    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+    {
+        std::cerr << "handle request: " << request.getURI() << std::endl;
+        std::cerr << "sending contents of length: " << m_description.size() << std::endl;
+        response.setContentLength(m_description.size());
+        response.setContentType("text/xml");
+        std::ostream& ostr = response.send();
+        ostr << m_description;
+    }
+    
+private:
+    // TODO: only store a copy of the device/service description in Device/Service, not
+    // in the RequestHandler. This segfaults, that's why a copy is stored here, for now ...
+//     std::string&        m_description;
+    std::string        m_description;
+//     std::istream&       m_descriptionStream;
+//     int                 m_length;
+};
+
+
+class Action : public Notification
+{
+};
+
+
+class ActionResponse : public Notification
+{
+};
+
+
+class ControlRequestHandler: public UpnpRequestHandler
+	/// Return answer to an action request
+{
+public:
+    
+    ControlRequestHandler()
+    {
+    }
+    
+    ControlRequestHandler* create()
+    {
+        return new ControlRequestHandler();
+    }
+    
+    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+    {
+        std::cerr << "handle request: " << request.getURI() << std::endl;
+        // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
+        // otherwise it should return and an event should be sent on finishing the action request.
+//         handleAction(new Action());
+    }
+    
+    // TODO: send out a notification with Action as argument instead of implementing a callback
+    virtual void handleAction(Action* action)
+    {
+    }
+    
+private:
+};
+
+
+class DeviceRequestHandlerFactory: public HTTPRequestHandlerFactory
+{
+public:
+    DeviceRequestHandlerFactory()
+    {
+        registerRequestHandler(std::string(""), new RequestNotFoundRequestHandler());
     }
     
     HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request)
     {
-        if (request.getURI() == "/device_description")
-            return new DescriptionRequestHandler(_format);
-        else
-            return 0;
+        std::cerr << "dispatch HTTP request: " << request.getURI() << std::endl;
+        // TODO: if no request is registered for the query, return a default request
+        // handler with error 404 or similar ...
+        HTTPRequestHandler* res;
+        std::map<std::string,UpnpRequestHandler*>::iterator i = m_requestHandlerMap.find(request.getURI());
+        if (i != m_requestHandlerMap.end()) {
+            return i->second->create();
+        }
+        else {
+            return m_requestHandlerMap[""]->create();
+        }
+    }
+    
+    void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler)
+    {
+        std::cerr << "register request handler: " << Uri << std::endl;
+        m_requestHandlerMap[Uri] = requestHandler;
     }
     
 private:
-    std::string _format;
+    std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
+};
+
+
+class HttpSocket
+{
+public:
+    HttpSocket(NetworkInterface interface)
+    {
+        std::cerr << "HttpSocket()" << std::endl;
+        
+        m_pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory();
+        
+        // TODO: offer device description via HTTP, TCP/IP for download to controllers
+        HTTPServerParams* pParams = new HTTPServerParams;
+    //     pParams->setMaxQueued(maxQueued);
+    //     pParams->setMaxThreads(maxThreads);
+        // set-up a server socket on an available port
+        ServerSocket socket(0);
+        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out
+    //     socket.bind(m_ssdpSocket.m_interface.address());
+        m_httpServerAddress = SocketAddress(interface.address(), socket.address().port());
+        // set-up a HTTPServer instance
+        // TODO: pass a map of all URI (devices and services) -> xml stream
+        // for URI use the device/service name
+        m_pHttpServer = new HTTPServer(m_pDeviceRequestHandlerFactory, socket, pParams);
+        // start the HTTPServer
+        m_pHttpServer->start();
+        std::cerr << "started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+    }
+    
+    ~HttpSocket()
+    {
+        m_pHttpServer->stop();
+        delete m_pHttpServer;
+    }
+    
+    
+    SocketAddress                   m_httpServerAddress;
+    DeviceRequestHandlerFactory*    m_pDeviceRequestHandlerFactory;
+    
+private:
+    NotificationCenter              m_notificationCenter;
+    
+    HTTPServer*                     m_pHttpServer;
 };
 
 
@@ -337,7 +474,7 @@ public:
     std::string                         m_deviceVersion;
     std::vector<Service>                m_services;
     std::map<std::string,std::string>   m_deviceInfo;
-    DeviceRoot*                         m_rootDevice;
+    DeviceRoot*                         m_deviceRoot;
 private:
     
 };
@@ -345,22 +482,23 @@ private:
 
 class DeviceRoot {
 public:
-    DeviceRoot(const std::string&  description);
+    DeviceRoot(std::string& description);
     ~DeviceRoot();
     
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     
-    URI                     m_descriptionUri;  // for controller to download description
+    URI                             m_descriptionUri;  // for controller to download description
+    SsdpSocket                      m_ssdpSocket;
+    HttpSocket                      m_httpSocket;
     
 private:
-    SsdpSocket              m_ssdpSocket;
-    Device                  m_rootDevice;
-    std::vector<Device>     m_embeddedDevices;
-    SocketAddress           m_httpServerAddress;
-//     UInt16                  m_httpServerPort;
-//     ServerSocket            m_httpServerSocket;
-    HTTPServer*             m_pHttpServer;
+    
+    Device                          m_rootDevice;
+    std::vector<Device>             m_embeddedDevices;
+    
+    DescriptionRequestHandler*      m_descriptionRequestHandler;
+    istringstream                   m_descriptionStream;
 };
 
 

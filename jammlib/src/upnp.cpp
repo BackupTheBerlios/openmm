@@ -20,8 +20,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <sstream>
-using std::istringstream;
 
 #include <Poco/String.h>
 #include <Poco/NumberFormatter.h>
@@ -361,8 +359,11 @@ m_ssdpPort(SSDP_PORT),
 m_ssdpSocket(SocketAddress(m_ssdpAddress, m_ssdpPort), true),
 m_pBuffer(new char[BUFFER_SIZE])
 {
+    std::cerr << "SsdpSocket()" << std::endl;
+    
     // set the default interface by providing an empty NetworkInterface as argument
-    // TODO: if not default interface, let interface be configurable
+    // TODO: let interface be configurable
+    // TODO: default value: find out an interface name, that routes to the default route entry
     m_interface = NetworkInterface::forName("wlan0");
     m_ssdpSocket.setInterface(m_interface);
     m_ssdpSocket.setLoopback(true);
@@ -409,6 +410,7 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 
 
 Service::Service(Device* device, NodeIterator rootNode) :
+// m_description(std::string("")),
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_serviceType("fooservice"),
 m_serviceVersion("fooserviceversion"),
@@ -423,6 +425,15 @@ m_device(device)
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
             m_descriptionUri = URI(pNode->firstChild()->nodeValue());
+            std::ifstream ifs(("/home/jb/devel/cc/jamm/tests/" + m_descriptionUri.getPath()).c_str());
+            std::stringstream ss;
+            StreamCopier::copyStream(ifs, ss);
+            m_description = std::string(ss.str());
+            std::cerr << m_description << std::endl;
+//             std::cerr << m_device << std::endl;
+//             std::cerr << m_deviceRoot << std::endl;
+//             m_descriptionLength = m_description.size();
+            m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
             m_controlUri = URI(pNode->firstChild()->nodeValue());
@@ -436,7 +447,7 @@ m_device(device)
     SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m.setNotificationType(m_serviceType);  // one message for every service
     m.setUniqueServiceName(m_device->m_uuidDescription + "::" +  m_serviceType);
-    m_device->m_rootDevice->sendMessage(m);
+    m_device->m_deviceRoot->sendMessage(m);
 }
 
 
@@ -450,11 +461,11 @@ Device::Device()
 }
 
 
-Device::Device(DeviceRoot* rootDevice, NodeIterator rootNode) :
+Device::Device(DeviceRoot* deviceRoot, NodeIterator rootNode) :
 m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
 m_deviceType("foodevice"),
 m_deviceVersion("foodeviceversion"),
-m_rootDevice(rootDevice)
+m_deviceRoot(deviceRoot)
 {
     // TODO: if uuid is not given in the description, generate one and try to save it on
     //       persistance storage
@@ -482,15 +493,15 @@ m_rootDevice(rootDevice)
         pNode = rootNode.nextNode();
     }
     SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setLocation(m_rootDevice->m_descriptionUri);    // location of UPnP description of the root device
+    m.setLocation(m_deviceRoot->m_descriptionUri);    // location of UPnP description of the root device
     
     m.setNotificationType(m_uuidDescription);
     m.setUniqueServiceName(m_uuidDescription);
-    m_rootDevice->sendMessage(m);  // root device second message
+    m_deviceRoot->sendMessage(m);  // root device second message
     
     m.setNotificationType(m_deviceType);
     m.setUniqueServiceName(m_uuidDescription + "::" + m_deviceType);
-    m_rootDevice->sendMessage(m);  // root device third message
+    m_deviceRoot->sendMessage(m);  // root device third message
 }
 
 
@@ -502,10 +513,13 @@ Device::~Device()
 // SsdpSocket DeviceRoot::m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
 
 
-DeviceRoot::DeviceRoot(const std::string&  description) :
-m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage))
+DeviceRoot::DeviceRoot(std::string& description) :
+m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
+m_httpSocket(m_ssdpSocket.m_interface),
+m_descriptionStream(description)
 {
-    //---------------------------------------------------------------------------------
+    
+//---------------------------------------------------------------------------------
     //  1. read device description and extract device and service information
     DOMParser parser;
     AutoPtr<Document> pDoc = parser.parseString(description);
@@ -533,23 +547,11 @@ m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMes
     
     //---------------------------------------------------------------------------------
     // 2. setup HTTP server for description download and action/eventing
-    // TODO: offer device description via HTTP, TCP/IP for download to controllers
-    HTTPServerParams* pParams = new HTTPServerParams;
-//     pParams->setMaxQueued(maxQueued);
-//     pParams->setMaxThreads(maxThreads);
-    // set-up a server socket on a free port
-    ServerSocket socket(0);
-    // TODO: can we somehow bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out?
-    m_httpServerAddress = SocketAddress(m_ssdpSocket.m_interface.address(), socket.address().port());
-    // set-up a HTTPServer instance
-    // TODO: pass a map of all URI (devices and services) -> xml stream
-    // for URI use the device/service name
-    m_pHttpServer = new HTTPServer(new DescriptionRequestHandlerFactory(""), socket, pParams);
-    // start the HTTPServer
-    m_pHttpServer->start();
-    std::cerr << "DeviceRoot started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+//     m_descriptionRequestHandler = new DescriptionRequestHandler(m_descriptionStream, description.size());
+    m_descriptionRequestHandler = new DescriptionRequestHandler(description);
+    m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler("/device_description", m_descriptionRequestHandler);
     
-    m_descriptionUri = URI("http://" + m_httpServerAddress.toString() + "/device_description");
+    m_descriptionUri = URI("http://" + m_httpSocket.m_httpServerAddress.toString() + "/device_description");
     std::cerr << "DeviceRoot offering device description on: " << m_descriptionUri.toString() << std::endl;
     
     //---------------------------------------------------------------------------------
@@ -578,9 +580,7 @@ DeviceRoot::~DeviceRoot()
     m.setUniqueServiceName(m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
-    
-    m_pHttpServer->stop();
-    delete m_pHttpServer;
+    delete m_descriptionRequestHandler;
 }
 
 
