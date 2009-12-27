@@ -359,7 +359,7 @@ m_ssdpPort(SSDP_PORT),
 m_ssdpSocket(SocketAddress(m_ssdpAddress, m_ssdpPort), true),
 m_pBuffer(new char[BUFFER_SIZE])
 {
-    std::cerr << "SsdpSocket()" << std::endl;
+//     std::cerr << "SsdpSocket()" << std::endl;
     
     // set the default interface by providing an empty NetworkInterface as argument
     // TODO: let interface be configurable
@@ -416,7 +416,6 @@ m_serviceType("fooservice"),
 m_serviceVersion("fooserviceversion"),
 m_device(device)
 {
-    // TODO: offer service description for control-points to download
     Node* pNode = rootNode.nextNode();
     while (pNode)
     {
@@ -424,7 +423,9 @@ m_device(device)
             m_serviceType = pNode->firstChild()->nodeValue();
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
+            // offer service description for control-points to download
             m_descriptionUri = URI(pNode->firstChild()->nodeValue());
+            // TODO: handle base path for xml files
             std::ifstream ifs(("/home/jb/devel/cc/jamm/tests/" + m_descriptionUri.getPath()).c_str());
             std::stringstream ss;
             StreamCopier::copyStream(ifs, ss);
@@ -437,6 +438,8 @@ m_device(device)
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
             m_controlUri = URI(pNode->firstChild()->nodeValue());
+            m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
+            m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
             m_eventUri = URI(pNode->firstChild()->nodeValue());
@@ -550,9 +553,8 @@ m_descriptionStream(description)
 //     m_descriptionRequestHandler = new DescriptionRequestHandler(m_descriptionStream, description.size());
     m_descriptionRequestHandler = new DescriptionRequestHandler(description);
     m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler("/device_description", m_descriptionRequestHandler);
-    
     m_descriptionUri = URI("http://" + m_httpSocket.m_httpServerAddress.toString() + "/device_description");
-    std::cerr << "DeviceRoot offering device description on: " << m_descriptionUri.toString() << std::endl;
+//     std::cerr << "DeviceRoot offering device description on: " << m_descriptionUri.toString() << std::endl;
     
     //---------------------------------------------------------------------------------
     // 3. send out SSDP messages to announce what we got
@@ -594,8 +596,8 @@ DeviceRoot::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 void
 DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
 {
-    std::cout << "root device gets SSDP message:" << std::endl;
-    std::cout << pNf->toString();
+//     std::cerr << "root device gets SSDP message:" << std::endl;
+//     std::cerr << pNf->toString();
     
     // TODO: reply to M-SEARCH messages
     if (pNf->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
@@ -640,8 +642,8 @@ Controller::~Controller()
 void
 Controller::handleSsdpMessage(SsdpMessage* pNf)
 {
-    std::cout << "controller gets SSDP message:" << std::endl;
-    std::cout << pNf->toString();
+//     std::cerr << "controller gets SSDP message:" << std::endl;
+//     std::cerr << pNf->toString();
     // TODO: handle NOTIFY messages and M-SEARCH reply messages
     // do we need to open a seperate socket to receive the M-SEARCH reply on a different port than 1900?
     // device advertisement (chapter 1.1) is HTTPMU (multicast) only,
