@@ -423,6 +423,9 @@ m_device(device)
             m_serviceType = pNode->firstChild()->nodeValue();
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
+            // TODO: analyze service description and create a map of Actions with
+            //       all argument names and default values filled in
+            
             // offer service description for control-points to download
             m_descriptionUri = URI(pNode->firstChild()->nodeValue());
             // TODO: handle base path for xml files
@@ -459,6 +462,311 @@ Service::~Service()
 }
 
 
+void
+Service::setStateVar(std::string name, std::string val)
+{
+    // TODO: lock the m_stateVariables map because different threads could access it
+    m_stateVariables[name] = val;
+}
+
+
+void
+Service::setStateVarBool(std::string name, bool val)
+{
+    if (val) {
+        setStateVar(name, std::string("1"));
+    } else {
+        setStateVar(name, std::string("0"));
+    }
+}
+
+
+std::string
+Service::getStateVar(std::string name)
+{
+    return m_stateVariables[name];
+}
+
+
+bool
+Service::getStateVarBool(std::string name)
+{
+    std::string out = getStateVar(name);
+    if (out == "1") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+Action::Action(std::string requestBody)
+{
+//         std::cerr << "Action request:" << std::endl << requestBody << std::endl;
+    
+    DOMParser parser;
+    AutoPtr<Document> pDoc = parser.parseString(requestBody);
+    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
+    Node* pNode = it.nextNode();
+    
+    while (pNode)
+    {
+//             std::cerr << "XML namespace prefix of node: " << pNode->nodeName() << " is: " << pNode->prefix() << std::endl;
+        if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
+//                 std::cerr << "Action element:" << std::endl;
+//                     << "nodeName(): " << pNode->firstChild()->nodeName() << std::endl
+//                     << "namespaceURI(): " << pNode->firstChild()->namespaceURI() << std::endl
+//                     << "prefix(): " << pNode->firstChild()->prefix() << std::endl;
+            Node* pAction = pNode->firstChild();
+            std::string s = pAction->nodeName();
+            m_actionName = s.substr(s.find(":") + 1);
+            s = pAction->namespaceURI();
+            m_serviceType = s.substr(s.find("service:") + 8);
+            std::cerr << "Service: " << m_serviceType << std::endl;
+            std::cerr << "Action: " << m_actionName << std::endl;
+                // read in the list of arguments
+            NodeIterator childIterator(pAction->firstChild(), NodeFilter::SHOW_ELEMENT);
+            for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
+                std::cerr << "Argument: " << c->nodeName() << " = " << c->firstChild()->nodeValue() << std::endl;
+                m_inArgumentNames.push_back(c->nodeName());
+                m_argumentValues[c->nodeName()] = c->firstChild()->nodeValue();
+            }
+        }
+        pNode = it.nextNode();
+    }
+}
+
+
+std::string
+Action::responseBody()
+{
+//         std::cerr << "Action::responseBody()" << std::endl;
+    AutoPtr<Document> pDoc = new Document;
+    
+    AutoPtr<Element> pEnvelope = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Envelope");
+//         pEnvelope->setAttribute("encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
+    pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
+    AutoPtr<Element> pBody = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
+    AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + m_serviceType, m_actionName + "Response");
+    
+    // TODO: fill vector of out arguments with the help of the service description
+        // append all out arguments
+    for (std::vector<std::string>::iterator i = m_outArgumentNames.begin(); i != m_outArgumentNames.end(); ++i) {
+        AutoPtr<Element> pArgument = pDoc->createElement(*i);
+        AutoPtr<Text> pArgumentValue = pDoc->createTextNode(m_argumentValues[*i]);
+        pArgument->appendChild(pArgumentValue);
+        pActionResponse->appendChild(pArgument);
+    }
+    
+    pBody->appendChild(pActionResponse);
+    pEnvelope->appendChild(pBody);
+    pDoc->appendChild(pEnvelope);
+    
+    DOMWriter writer;
+    writer.setNewLine("\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
+    writer.setOptions(XMLWriter::WRITE_XML_DECLARATION);
+    
+    std::stringstream ss;
+    writer.writeNode(ss, pDoc);
+    m_responseBody = ss.str();
+    std::cerr << "ResponseBody():" << std::endl << m_responseBody << std::endl;
+    return m_responseBody;
+}
+
+
+int
+Action::responseSize()
+{
+    return m_responseBody.size();
+}
+
+
+// Argument handling methods
+void
+Action::setArgument(std::string name, std::string value)
+{
+    m_argumentValues[name] = value;
+}
+
+
+void
+Action::setArgumentBool(std::string name, bool value)
+{
+    if (value) {
+        setArgument(name, std::string("1"));
+    } else {
+        setArgument(name, std::string("0"));
+    }
+}
+
+
+std::string
+Action::getArgument(std::string name)
+{
+    return m_argumentValues[name];
+}
+
+
+bool
+Action::getArgumentBool(std::string name)
+{
+    std::string out = getArgument(name);
+    if (out == "1") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+DeviceRequestHandlerFactory::DeviceRequestHandlerFactory(HttpSocket* pHttpSocket):
+m_pHttpSocket(pHttpSocket)
+{
+    registerRequestHandler(std::string(""), new RequestNotFoundRequestHandler());
+}
+
+
+HTTPRequestHandler*
+DeviceRequestHandlerFactory::createRequestHandler(const HTTPServerRequest& request)
+{
+    std::cerr << "dispatch HTTP request: " << request.getURI() << std::endl;
+        // TODO: if no request is registered for the query, return a default request
+        // handler with error 404 or similar ...
+    HTTPRequestHandler* res;
+    std::map<std::string,UpnpRequestHandler*>::iterator i = m_requestHandlerMap.find(request.getURI());
+    if (i != m_requestHandlerMap.end()) {
+        return i->second->create();
+    }
+    else {
+        return m_requestHandlerMap[""]->create();
+    }
+}
+
+
+void
+DeviceRequestHandlerFactory::registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler)
+{
+    std::cerr << "register request handler: " << Uri << std::endl;
+    m_requestHandlerMap[Uri] = requestHandler;
+}
+
+
+RequestNotFoundRequestHandler*
+RequestNotFoundRequestHandler::create()
+{
+    return new RequestNotFoundRequestHandler();
+}
+
+
+void
+RequestNotFoundRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+{
+    std::cerr << "handle unknown request with HTTP 404 - not found error on request: " << request.getURI() << std::endl;
+    response.setStatus(HTTPResponse::HTTP_NOT_FOUND);
+}
+
+
+ControlRequestHandler::ControlRequestHandler(HttpSocket* pHttpSocket):
+m_pHttpSocket(pHttpSocket)
+{
+}
+
+
+DescriptionRequestHandler::DescriptionRequestHandler(std::string& description):
+m_description(description)
+{
+}
+
+
+DescriptionRequestHandler*
+DescriptionRequestHandler::create()
+{
+        // TODO: can we somehow avoid to make a copy of the RequestHandler on each request?
+    return new DescriptionRequestHandler(m_description);
+}
+
+
+void
+DescriptionRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+{
+    std::cerr << "handle request: " << request.getURI() << std::endl;
+//         std::cerr << "sending contents of length: " << m_description.size() << std::endl;
+    response.setContentLength(m_description.size());
+    response.setContentType("text/xml");
+    std::ostream& ostr = response.send();
+    ostr << m_description;
+}
+
+
+ControlRequestHandler*
+ControlRequestHandler::create()
+{
+    return new ControlRequestHandler(m_pHttpSocket);
+}
+
+
+void
+ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+{
+    std::cerr << "handle request: " << request.getURI() << std::endl;
+        // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
+        // otherwise it should return and an event should be sent on finishing the action request.
+//         handleAction(new Action());
+    int length = request.getContentLength();
+    char buf[length];
+    request.stream().read(buf, length);
+    std::string s(buf, length);
+    
+//         std::stringstream ss;
+//         StreamCopier::copyStream(request.stream(), ss);
+//         std::string s = ss.str();
+    
+    // TODO: Action needs some info about the Service description (e.g. order of out args)
+    Action* pAction = new Action(s);
+        // the corresponding Service should register as a Notification Handler
+    m_pHttpSocket->m_notificationCenter.postNotification(pAction);
+        // return Action response with out arguments filled in by Notification Handler
+    response.setContentType("text/xml");
+        // TODO: set EXT header
+        // TODO: set SERVER header
+    std::ostream& ostr = response.send();
+    ostr << pAction->responseBody();
+    response.setContentLength(pAction->responseSize());
+}
+
+
+HttpSocket::HttpSocket(NetworkInterface interface)
+{
+    std::cerr << "HttpSocket()" << std::endl;
+    
+    m_pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory(this);
+    
+        // TODO: offer device description via HTTP, TCP/IP for download to controllers
+    HTTPServerParams* pParams = new HTTPServerParams;
+    //     pParams->setMaxQueued(maxQueued);
+    //     pParams->setMaxThreads(maxThreads);
+        // set-up a server socket on an available port
+    ServerSocket socket(0);
+        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out
+    //     socket.bind(m_ssdpSocket.m_interface.address());
+    m_httpServerAddress = SocketAddress(interface.address(), socket.address().port());
+        // set-up a HTTPServer instance
+        // TODO: pass a map of all URI (devices and services) -> xml stream
+        // for URI use the device/service name
+    m_pHttpServer = new HTTPServer(m_pDeviceRequestHandlerFactory, socket, pParams);
+        // start the HTTPServer
+    m_pHttpServer->start();
+    std::cerr << "started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+}
+
+HttpSocket::~HttpSocket()
+{
+    m_pHttpServer->stop();
+    delete m_pHttpServer;
+}
+
+
 Device::Device()
 {
 }
@@ -489,7 +797,9 @@ m_deviceRoot(deviceRoot)
             NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
                 if (c->nodeName() == "service") {
-                    m_services.push_back(Service(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
+//                     m_services.push_back(Service(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
+                    Service* pService = new Service(this, NodeIterator(c, NodeFilter::SHOW_ALL));
+                    m_services[pService->m_serviceType] = pService;
                 }
             }
         }
