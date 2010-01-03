@@ -25,6 +25,7 @@
 
 #include <string>
 #include <map>
+#include <stack>
 #include <iostream>
 #include <istream>
 #include <fstream>
@@ -46,6 +47,8 @@
 #include "Poco/DateTimeFormat.h"
 #include "Poco/DateTimeFormatter.h"
 #include "Poco/DateTimeParser.h"
+#include "Poco/Path.h"
+#include "Poco/DynamicAny.h"
 #include "Poco/Net/DatagramSocket.h"
 #include "Poco/Net/MulticastSocket.h"
 #include "Poco/Net/SocketAddress.h"
@@ -76,6 +79,7 @@
 #include "Poco/DOM/Text.h"
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/DOMWriter.h"
+#include "Poco/DOM/DocumentFragment.h"
 #include "Poco/XML/XMLWriter.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/StreamCopier.h"
@@ -98,6 +102,7 @@ using Poco::DateTime;
 using Poco::DateTimeFormat;
 using Poco::DateTimeFormatter;
 using Poco::DateTimeParser;
+using Poco::DynamicAny;
 using Poco::Net::Socket;
 using Poco::Net::DatagramSocket;
 using Poco::Net::MulticastSocket;
@@ -135,6 +140,7 @@ using Poco::XML::Text;
 using Poco::XML::AutoPtr;
 using Poco::XML::DOMWriter;
 using Poco::XML::XMLWriter;
+using Poco::XML::DocumentFragment;
 
 using std::istringstream;
 using Poco::StreamCopier;
@@ -156,10 +162,17 @@ static const UInt16         SSDP_CACHE_DURATION = 1800;
 static const UInt16         SSDP_MIN_WAIT_TIME  = 1;
 static const UInt16         SSDP_MAX_WAIT_TIME  = 120;
 
+
 class Device;
+class Service;
+class Action;
+class Argument;
+class StateVar;
 class DeviceRoot;
 class ControlRequestHandler;
 class HttpSocket;
+class Entity;
+class EntityItem;
 
 
 class SsdpMessage : public Notification
@@ -167,14 +180,14 @@ class SsdpMessage : public Notification
 public:
     typedef enum {
         REQUEST_NOTIFY          = 1,
-        REQUEST_NOTIFY_ALIVE    = 2,
-        REQUEST_NOTIFY_BYEBYE   = 3,
-        REQUEST_SEARCH          = 4,
-        REQUEST_RESPONSE        = 5,
-        SUBTYPE_ALIVE           = 6,
-        SUBTYPE_BYEBYE          = 7,
-        SSDP_ALL                = 8,
-        UPNP_ROOT_DEVICES       = 9
+            REQUEST_NOTIFY_ALIVE    = 2,
+            REQUEST_NOTIFY_BYEBYE   = 3,
+            REQUEST_SEARCH          = 4,
+            REQUEST_RESPONSE        = 5,
+            SUBTYPE_ALIVE           = 6,
+            SUBTYPE_BYEBYE          = 7,
+            SSDP_ALL                = 8,
+            UPNP_ROOT_DEVICES       = 9
     } TRequestMethod;
     
     SsdpMessage();
@@ -253,7 +266,7 @@ public:
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     
     NetworkInterface    m_interface;
-
+    
 private:
     IPAddress           m_ssdpAddress;
     UInt16              m_ssdpPort;
@@ -270,6 +283,171 @@ private:
     
     void onReadable(const AutoPtr<ReadableNotification>& pNf);
 };
+
+
+/// abstract type Entity is a base for all classes that have an XML representation
+// class Entity /*: DocumentFragment*/
+// {
+// public:
+// /*    enum {
+//         XML_DESCRIPTION = 1,
+//         XML_REQUEST,
+//         XML_RESPONSE
+//     };*/
+//     
+//     virtual std::string id() = 0;
+//     
+// //     virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION) = 0;
+//     // TODO: replace std::string with an XML fragment type
+// //     virtual Node* toXml(int mode=XML_DESCRIPTION) = 0;
+//     
+// //     void setDocument(Document* pDoc) { m_pDoc = pDoc; }
+// //     Document* getDocument() { return m_pDoc; }
+//     
+// protected:
+// //     Document*   m_pDoc;
+// };
+
+
+/// EntityItem is like a variant.
+/// it stores data and its type in strings and provides conversion methods.
+/// it is an abstract type can't be instantiated directly.
+class EntityItem /*: public Entity*/
+{
+public:
+    virtual std::string id() { return m_name; }
+    
+    void setName(std::string name) { m_name = name; }
+    std::string getName() { return m_name; }
+    
+    void setType(std::string type) { m_type = type; }
+    std::string getType() { return m_type; }
+    
+    inline void setVal(const std::string& val) { m_val = val; }
+    void setBool(bool val);
+    
+    inline std::string getVal() { return m_val; }
+    bool getBool();
+    
+private:
+    std::string m_name;
+    std::string m_type;
+    std::string m_val;
+};
+
+
+class Variant : DynamicAny
+{
+};
+
+
+template<class E>
+class Container /*: public Entity*/
+{
+public:
+//     virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION);
+//     virtual Node* toXml(int mode=XML_DESCRIPTION);
+    // EntityContainers have no id
+//     virtual std::string id() { return ""; }
+    
+//     Container() {}
+//     Container(Node* pNode, std::string className);
+//     Container(Node* pNode);
+//     ~Container() {/* TODO: clean up data structures */}
+    
+    E* get(std::string key) { return m_pEntities[key]; }
+    void append(std::string key, E* pEntity) { m_pEntities[key] = pEntity; m_keys.push_back(key); }
+    
+    // TODO: implement ctor with constructor function object as argument ...?
+    
+private:
+    std::map<std::string,E*>    m_pEntities;
+    std::vector<std::string>    m_keys;
+//     std::string                 m_itemTag;
+};
+
+
+/// Reader Factory
+class ReaderFactory
+{
+public:
+    virtual DeviceRoot* deviceRoot() { return NULL; }
+    virtual Device* device() { return NULL; }
+    virtual Service* service() { return NULL; }
+    virtual Action* action() { return NULL; }
+    virtual Argument* argument() { return NULL; }
+    virtual StateVar* stateVar() { return NULL; }
+};
+
+
+/// Reader Factory that reads in Xml Device and Service Descriptions
+/// and generates the Entities for a complete DeviceRoot
+class DescriptionReader : public ReaderFactory
+{
+public:
+    DescriptionReader(URI uri);
+    
+    virtual DeviceRoot* deviceRoot();
+    
+private:
+//     setBaseUri(URI baseUri) { m_BaseUri = baseUri; }
+    std::string getDescription(std::string path);
+    
+    virtual Device* device();
+    virtual Service* service();
+    virtual Action* action();
+    virtual Argument* argument();
+    virtual StateVar* stateVar();
+    
+//     Poco::Path              m_path;
+    URI                     m_uri;
+    Node*                   m_pNode;
+    std::stack<Node*>       m_nodeStack;
+    DeviceRoot*             m_pDeviceRoot;
+};
+
+
+class RequestReader : public ReaderFactory
+{
+public:
+    virtual Action* action();
+    
+private:
+    virtual Argument* argument();
+    virtual StateVar* stateVar();
+};
+
+
+/// Writer Factory
+class WriterFactory
+{
+    virtual void device(Device* pDevice) {}
+    virtual void service(Service* pService) {}
+    virtual void action(Action* pAction) {}
+    virtual void argument(Argument* pArgument) {}
+    virtual void stateVar(StateVar* pStateVar) {}
+};
+
+
+class ActionWriter : WriterFactory
+{
+    virtual void argument(Argument* pArgument);
+};
+
+
+class ActionResponseWriter : public ActionWriter
+{
+    virtual void action(Action* pAction);
+};
+
+
+/// Writer Factory for Controllers
+class ActionRequestWriter : public ActionWriter
+{
+    virtual void action(Action* pAction);
+};
+
+
 
 
 // TODO: possible request handler types:
@@ -342,42 +520,61 @@ private:
 };
 
 
-class Service {
-public:
-    Service(Device* device, NodeIterator rootNode);
-    ~Service();
-    
-    void setStateVar(std::string name, std::string val);
-    void setStateVarBool(std::string name, bool val);
-    
-    std::string getStateVar(std::string name);
-    bool getStateVarBool(std::string name);
-    
-// private:
-    URI                                     m_descriptionUri;
-    std::string                             m_description;
-//     istringstream       m_descriptionStream;
-//     int                 m_descriptionLength;
-    URI                                     m_controlUri;
-    ControlRequestHandler*                  m_controlRequestHandler;
-    URI                                     m_eventUri;
-    std::string                             m_vendorDomain;
-    std::string                             m_serviceType;
-    std::string                             m_serviceVersion;
-    std::map<std::string,std::string>       m_stateVariables;
-    Device*                                 m_device;
-};
-
-
-class SoapMessage
+class VariableQuery : public Notification
 {
 };
 
 
-class Action : public Notification
+class ControlRequestHandler: public UpnpRequestHandler
+	/// Return answer to an action request
 {
 public:
+    ControlRequestHandler(HttpSocket* pHttpSocket);
+    
+    ControlRequestHandler* create();
+    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
+    
+private:
+    HttpSocket* m_pHttpSocket;
+};
+
+
+class StateVar : public Variant
+{
+public:
+    std::string getName() { return m_name; }
+    
+private:
+    std::string m_name;
+};
+
+
+class Argument : public Variant
+{
+public:
+/*    virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION);
+    virtual Node* toXml(int mode=XML_DESCRIPTION);*/
+    std::string getName() { return m_name; }
+    
+private:
+    std::string     m_name;
+    bool            m_in;
+};
+
+
+class Action : public Notification/*, public Entity*/
+{
+public:
+    Action() {}
     Action(std::string requestBody);
+    
+    void setName (std::string name) { m_actionName = name; }
+    
+    virtual std::string id() { return m_actionName; }
+    
+    // TODO: append Argument to m_inArguments or m_outArgument
+    void addArgument(Argument* pArgument) { m_arguments.append(pArgument->getName(), pArgument); }
+    std::string getName() { return m_actionName; }
     
     std::string responseBody();
     
@@ -390,81 +587,150 @@ public:
     std::string getArgument(std::string name);
     bool getArgumentBool(std::string name);
     
+    // Argument handling methods
+    void setArgument(Argument arg);
+//     Argument& getArgument(std::string name);
+    
+    
     std::string                         m_actionName;
     std::string                         m_serviceType;
     
 private:
     MessageHeader                       m_messageHeader;
-    SoapMessage                         m_message;
+//     SoapMessage                         m_message;
     // TODO: save some space and store the argument values only once
     //       this information is also stored in the Service Description
     std::map<std::string,std::string>   m_argumentValues;
+    
+    Container<Argument>                 m_arguments;
     std::vector<std::string>            m_inArgumentNames;
     std::vector<std::string>            m_outArgumentNames;
+    
     SocketAddress                       m_sender;
     SocketAddress                       m_receiver;
     std::string                         m_responseBody;
 };
 
 
-class VariableQuery : public Notification
-{
-};
-
-
-class ControlRequestHandler: public UpnpRequestHandler
-	/// Return answer to an action request
-{
+class Service {
 public:
-    ControlRequestHandler(HttpSocket* pHttpSocket);
-   
-    ControlRequestHandler* create();
-    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
+    Service() {}
+    ~Service();
     
-private:
-    HttpSocket* m_pHttpSocket;
+    void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
+    void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
+    std::string getDescriptionPath() { return m_descriptionPath; }
+    void setDescription(std::string description) { m_description = description; }
+    void addAction(Action* pAction) { m_actions.append(pAction->getName(), pAction); }
+    void addStateVar(StateVar* pStateVar) { m_stateVars.append(pStateVar->getName(), pStateVar); }
+    
+// private:
+    std::string                             m_descriptionPath;
+    URI                                     m_descriptionUri;
+    std::string                             m_description;
+    Device*                                 m_device;
+//     istringstream       m_descriptionStream;
+//     int                 m_descriptionLength;
+    URI                                     m_controlUri;
+    ControlRequestHandler*                  m_controlRequestHandler;
+    URI                                     m_eventUri;
+    std::string                             m_vendorDomain;
+    std::string                             m_serviceType;
+    std::string                             m_serviceVersion;
+    Container<Action>                       m_actions;
+    Container<StateVar>                     m_stateVars;
+    
+// obsolete:
+    void setStateVar(std::string name, std::string val);
+    void setStateVarBool(std::string name, bool val);
+    
+    std::string getStateVar(std::string name);
+    bool getStateVarBool(std::string name);
+    std::map<std::string,std::string>       m_stateVariables;
+//     std::map<std::string,Action*>           m_actions;
+    Service(Device* device, NodeIterator rootNode);
+    
 };
 
 
-class Device {
+class Device /*: Entity*/
+{
 public:
     Device();
-    Device(DeviceRoot* rootDevice, NodeIterator rootNode);
     ~Device();
     
-// protected:
+    void setDeviceRoot(DeviceRoot* pDeviceRoot) { m_pDeviceRoot = pDeviceRoot; }
+    std::string getUuid() { return m_uuid.toString(); }
+    void setUuid(std::string uuid) { m_uuid = UUID(uuid); }
+    void setDeviceType(std::string deviceType) { m_deviceType = deviceType; }
+    
+// private:
+    DeviceRoot*                         m_pDeviceRoot;
     UUID                                m_uuid;
-    std::string                         m_uuidDescription;
     std::string                         m_vendorDomain;
     std::string                         m_deviceType;
     std::string                         m_deviceVersion;
-    std::map<std::string,Service*>      m_services;
+    Container<Service>                  m_services;
+    
+// obsolete:
+    Device(DeviceRoot* rootDevice, NodeIterator rootNode);
+/*    virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION);
+    virtual Node* toXml(int mode=XML_DESCRIPTION) {}*/
+    virtual std::string id() { return m_uuidDescription; }
+//     std::map<std::string,Service*>      m_services;
     std::map<std::string,std::string>   m_deviceInfo;
     DeviceRoot*                         m_deviceRoot;
-private:
-    
+    std::string                         m_uuidDescription;
 };
 
 
-class DeviceRoot {
+class DeviceRoot /* : Entity */
+{
+    // NOTE: singleton class to simplify access to it from it's sub components.
+    //       this implies that only one DeviceRoot per process can exist!
+    //       ==> that's why I switched back to multiple objects per class
 public:
-    DeviceRoot(std::string& description);
+    DeviceRoot();
     ~DeviceRoot();
     
+//     static DeviceRoot* instance();
+    
+    // SSDP and HTTP message handling
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     
     URI                             m_descriptionUri;  // for controller to download description
     SsdpSocket                      m_ssdpSocket;
     HttpSocket                      m_httpSocket;
+    DescriptionRequestHandler*      m_descriptionRequestHandler;
+//     istringstream                   m_descriptionStream;
     
-// private:
-    
+    // TODO: replace this with a map of devices, key is uuid, m_rootDevice is uuid of root device.
+    // NOTE: replacement depends on the need to handle the same ServiceType different in different devices.
     Device                          m_rootDevice;
     std::vector<Device>             m_embeddedDevices;
     
-    DescriptionRequestHandler*      m_descriptionRequestHandler;
-    istringstream                   m_descriptionStream;
+    // build in memory representation from XML description
+    void init(std::string& description);
+    
+//     std::string                     m_rootDevice;
+//     std::vector<std::string>        m_embeddedDevices;
+    
+    void insertDevice(std::string uuid, Device* pDevice);
+    void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
+    
+    Device* getDevice(std::string uuid);
+    void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
+    void setDeviceDescription(std::string description) { m_deviceDescription = description; }
+    std::string getDeviceDescription() { return m_deviceDescription; }
+    
+    void startSsdp();
+    void startHttp();
+
+private:
+    Container<Device>               m_devices;
+    Device*                         m_pRootDevice;
+    std::string                     m_deviceDescription;
 };
 
 
@@ -480,5 +746,8 @@ private:
 };
 
 } // namespace Jamm
+
+
+
 
 #endif

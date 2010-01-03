@@ -40,8 +40,10 @@ using Jamm::Service;
 using Jamm::DeviceRoot;
 using Jamm::Action;
 using Jamm::ControlRequestHandler;
+using Jamm::DescriptionReader;
 using Poco::UInt8;
 using Poco::StreamCopier;
+using Poco::Path;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -85,16 +87,27 @@ m_dimmingImpl(dimmingImpl)
 {
     // TODO: stub generator should transform device description into a static string.
     //       Don't read the description from a file in this place.
-    std::stringstream ss;
+/*    std::stringstream ss;
     std::ifstream ifs("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
     StreamCopier::copyStream(ifs, ss);
-    std::string s = ss.str();
+    std::string s = ss.str();*/
     
-    m_deviceRoot = new DeviceRoot(s);
-    m_switchPowerImpl->m_service = m_deviceRoot->m_rootDevice.m_services["SwitchPower:1"];
-    m_dimmingImpl->m_service = m_deviceRoot->m_rootDevice.m_services["Dimming:1"];
+//     DescriptionReader descriptionReader(Path("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml"));
+    DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml"));
+    
+    m_deviceRoot = descriptionReader.deviceRoot();
+    
+//     m_deviceRoot = DeviceRoot::instance();
+//     m_deviceRoot = new DeviceRoot();
+//     m_deviceRoot->init(s);
+    
+//     m_switchPowerImpl->m_service = m_deviceRoot->m_rootDevice.m_services["urn:schemas-upnp-org:service:SwitchPower:1"];
+//     m_dimmingImpl->m_service = m_deviceRoot->m_rootDevice.m_services["urn:schemas-upnp-org:service:Dimming:1"];
     
     m_deviceRoot->m_httpSocket.m_notificationCenter.addObserver(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
+    
+    m_deviceRoot->startHttp();
+    m_deviceRoot->startSsdp();
 }
 
 
