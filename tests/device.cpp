@@ -35,6 +35,7 @@ using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
 using Jamm::Device;
 using Jamm::DeviceRoot;
+using Jamm::DescriptionReader;
 using Poco::StreamCopier;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -104,12 +105,17 @@ protected:
         {
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
-            std::stringstream ss;
+/*            std::stringstream ss;
             std::ifstream ifs("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
             StreamCopier::copyStream(ifs, ss);
             std::string s = ss.str();
             DeviceRoot* device = new DeviceRoot();
-            device->init(s);
+            device->init(s);*/
+            
+            DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+            
+            DeviceRoot* device = descriptionReader.deviceRoot();
+            
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;

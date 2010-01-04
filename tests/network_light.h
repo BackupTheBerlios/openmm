@@ -76,10 +76,10 @@ public:
 protected:
         // getter/setter methods for StatusVariables
     // TODO: implement the StatusVariable stuff (could be some common code with the Action argument stuff).
-    void _setTarget(bool target) { m_service->setStateVarBool("Target", target); }
-    bool _getTarget() { return m_service->getStateVarBool("Target"); }
-    void _setStatus(bool status) { m_service->setStateVarBool("Status", status); }
-    bool _getStatus() { return m_service->getStateVarBool("Status"); }
+    void _setTarget(bool target) { m_service->setStateVar<bool>("Target", target); }
+    bool _getTarget() { return m_service->getStateVar<bool>("Target"); }
+    void _setStatus(bool status) { m_service->setStateVar<bool>("Status", status); }
+    bool _getStatus() { return m_service->getStateVar<bool>("Status"); }
     
 
 private:
@@ -118,19 +118,6 @@ private:
 };
 
 
-
-
-// class NetworkLightDevice // : public Device
-// {
-// public:
-//     SwitchPower     m_switchPowerService;
-//     Dimming         m_dimmingService;
-//     
-// private:
-//     Device          m_device;
-// };
-
-
 class NetworkLight /*: public DeviceRoot*/
 {
     // code for dispatching events to methods etc. ...
@@ -148,11 +135,6 @@ private:
     
     SwitchPower*    m_switchPowerImpl;
     Dimming*        m_dimmingImpl;
-    
-    
-//     NetworkLight(std::string description);
-    
-//     NetworkLightDevice  m_rootDevice;
 };
 
 #endif

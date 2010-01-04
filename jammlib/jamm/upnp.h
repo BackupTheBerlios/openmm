@@ -72,6 +72,7 @@
 #include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NamedNodeMap.h"
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/AttrMap.h"
 #include "Poco/DOM/Element.h"
@@ -285,30 +286,6 @@ private:
 };
 
 
-/// abstract type Entity is a base for all classes that have an XML representation
-// class Entity /*: DocumentFragment*/
-// {
-// public:
-// /*    enum {
-//         XML_DESCRIPTION = 1,
-//         XML_REQUEST,
-//         XML_RESPONSE
-//     };*/
-//     
-//     virtual std::string id() = 0;
-//     
-// //     virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION) = 0;
-//     // TODO: replace std::string with an XML fragment type
-// //     virtual Node* toXml(int mode=XML_DESCRIPTION) = 0;
-//     
-// //     void setDocument(Document* pDoc) { m_pDoc = pDoc; }
-// //     Document* getDocument() { return m_pDoc; }
-//     
-// protected:
-// //     Document*   m_pDoc;
-// };
-
-
 /// EntityItem is like a variant.
 /// it stores data and its type in strings and provides conversion methods.
 /// it is an abstract type can't be instantiated directly.
@@ -336,8 +313,12 @@ private:
 };
 
 
-class Variant : DynamicAny
+class Variant : public DynamicAny
 {
+public:
+    Variant() : DynamicAny() {}
+    Variant(const std::string& val) : DynamicAny(val.c_str()) {}
+    template<typename T> Variant(const T& val) : DynamicAny(val) {}
 };
 
 
@@ -345,25 +326,20 @@ template<class E>
 class Container /*: public Entity*/
 {
 public:
-//     virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION);
-//     virtual Node* toXml(int mode=XML_DESCRIPTION);
-    // EntityContainers have no id
-//     virtual std::string id() { return ""; }
-    
-//     Container() {}
-//     Container(Node* pNode, std::string className);
-//     Container(Node* pNode);
-//     ~Container() {/* TODO: clean up data structures */}
-    
-    E* get(std::string key) { return m_pEntities[key]; }
     void append(std::string key, E* pEntity) { m_pEntities[key] = pEntity; m_keys.push_back(key); }
+    void set(std::string key, std::string val) { m_pEntities[key] = new E(val); }
+    template<typename T> void set(std::string key, const T& val) { m_pEntities[key] = new E(val); }
+    E* get(std::string key) { return m_pEntities[key]; }
+//     template<typename T> const T& get(std::string key) { return m_pEntities[key]->convert<T>(); }
+//     std::string get(std::string key) { return m_pEntities[key]->convert<std::string>(); }
     
-    // TODO: implement ctor with constructor function object as argument ...?
+    typedef typename std::vector<std::string>::iterator Iterator;
+    std::vector<std::string>::iterator begin() { return m_keys.begin(); }
+    std::vector<std::string>::iterator end() { return m_keys.end(); }
     
 private:
     std::map<std::string,E*>    m_pEntities;
     std::vector<std::string>    m_keys;
-//     std::string                 m_itemTag;
 };
 
 
@@ -385,12 +361,11 @@ public:
 class DescriptionReader : public ReaderFactory
 {
 public:
-    DescriptionReader(URI uri);
+    DescriptionReader(URI uri, std::string deviceDescriptionPath);
     
     virtual DeviceRoot* deviceRoot();
     
 private:
-//     setBaseUri(URI baseUri) { m_BaseUri = baseUri; }
     std::string getDescription(std::string path);
     
     virtual Device* device();
@@ -399,22 +374,25 @@ private:
     virtual Argument* argument();
     virtual StateVar* stateVar();
     
-//     Poco::Path              m_path;
     URI                     m_uri;
-    Node*                   m_pNode;
+    std::string             m_deviceDescriptionPath;
+//     AutoPtr<Document>       m_pDoc;
     std::stack<Node*>       m_nodeStack;
     DeviceRoot*             m_pDeviceRoot;
 };
 
 
-class RequestReader : public ReaderFactory
+class ActionRequestReader : public ReaderFactory
 {
 public:
+    ActionRequestReader(const std::string& requestBody);
+    
     virtual Action* action();
     
 private:
-    virtual Argument* argument();
-    virtual StateVar* stateVar();
+//     virtual Argument* argument();
+    
+    std::stack<Node*>       m_nodeStack;
 };
 
 
@@ -511,6 +489,8 @@ public:
     HttpSocket(NetworkInterface interface);
     ~HttpSocket();
     
+    std::string getServerUri() { return "http://" + m_httpServerAddress.toString() + "/"; }
+    
     SocketAddress                   m_httpServerAddress;
     DeviceRequestHandlerFactory*    m_pDeviceRequestHandlerFactory;
     NotificationCenter              m_notificationCenter;
@@ -542,22 +522,40 @@ private:
 class StateVar : public Variant
 {
 public:
+    StateVar() : Variant() {}
+    StateVar(const std::string& val) : Variant(val) {}
+    template<typename T> StateVar(const T& val) : Variant(val) {}
+//     template<typename T> const T& get(std::string key) { return m_stateVars.get(key); }
+    
     std::string getName() { return m_name; }
+    void setName(std::string name) { m_name = name; }
+    void setType(std::string type) { m_type = type; }
+    void setDefaultValue(std::string defaultValue) { m_defaultValue = defaultValue; }
+    void setSendEvents(std::string sendEvents) { m_sendEvents = (sendEvents=="yes") ? true : false; }
     
 private:
-    std::string m_name;
+    std::string     m_name;
+    std::string     m_type;
+    std::string     m_defaultValue;
+    bool            m_sendEvents;
 };
 
 
 class Argument : public Variant
 {
 public:
-/*    virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION);
-    virtual Node* toXml(int mode=XML_DESCRIPTION);*/
+    Argument() : Variant() {}
+    Argument(const std::string& val) : Variant(val) {}
+    template<typename T> Argument(const T& val) : Variant(val) {}
+    
     std::string getName() { return m_name; }
+    void setName(std::string name) { m_name = name; }
+    void setRelatedStateVar(std::string relatedStateVar) { m_relatedStateVar = relatedStateVar; }
+    void setDirection(std::string direction) { m_in = (direction == "in") ? true : false; }
     
 private:
     std::string     m_name;
+    std::string     m_relatedStateVar;
     bool            m_in;
 };
 
@@ -566,36 +564,28 @@ class Action : public Notification/*, public Entity*/
 {
 public:
     Action() {}
-    Action(std::string requestBody);
     
-    void setName (std::string name) { m_actionName = name; }
-    
-    virtual std::string id() { return m_actionName; }
-    
-    // TODO: append Argument to m_inArguments or m_outArgument
-    void addArgument(Argument* pArgument) { m_arguments.append(pArgument->getName(), pArgument); }
+    void setName(std::string name) { m_actionName = name; }
     std::string getName() { return m_actionName; }
     
+    void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
+    std::string getServiceType() { return m_serviceType; }
+    
+    void addArgument(Argument* pArgument) { m_arguments.append(pArgument->getName(), pArgument); }
+    void setArgument(std::string name, std::string val);
+    std::string getArgument(std::string name);
+    template<typename T> void setArgument(std::string key, const T& val) { m_arguments.set(key, val); }
+    template<typename T> const T& getArgument(std::string key) { return m_arguments.get(key)->convert<T>(); }
+    
+    
+// obsolete
+    int responseSize();
     std::string responseBody();
     
-    int responseSize();
-    
-    // Argument handling methods
-    void setArgument(std::string name, std::string value);
-    void setArgumentBool(std::string name, bool value);
-    
-    std::string getArgument(std::string name);
-    bool getArgumentBool(std::string name);
-    
-    // Argument handling methods
-    void setArgument(Argument arg);
-//     Argument& getArgument(std::string name);
-    
-    
+private:
     std::string                         m_actionName;
     std::string                         m_serviceType;
     
-private:
     MessageHeader                       m_messageHeader;
 //     SoapMessage                         m_message;
     // TODO: save some space and store the argument values only once
@@ -618,19 +608,26 @@ public:
     ~Service();
     
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
+    std::string getServiceType() { return m_serviceType; }
     void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
     std::string getDescriptionPath() { return m_descriptionPath; }
     void setDescription(std::string description) { m_description = description; }
+    void setDevice(Device* pDevice) { m_pDevice = pDevice; }
     void addAction(Action* pAction) { m_actions.append(pAction->getName(), pAction); }
     void addStateVar(StateVar* pStateVar) { m_stateVars.append(pStateVar->getName(), pStateVar); }
     
-// private:
+    void setStateVar(std::string name, std::string val);
+    std::string getStateVar(std::string name);
+    template<typename T> void setStateVar(std::string key, const T& val) { m_stateVars.set(key, val); }
+    template<typename T> const T& getStateVar(std::string key) { return m_stateVars.get(key)->convert<T>(); }
+    
+    void ssdpNotifyAlive();
+    
+private:
     std::string                             m_descriptionPath;
     URI                                     m_descriptionUri;
     std::string                             m_description;
-    Device*                                 m_device;
-//     istringstream       m_descriptionStream;
-//     int                 m_descriptionLength;
+    Device*                                 m_pDevice;
     URI                                     m_controlUri;
     ControlRequestHandler*                  m_controlRequestHandler;
     URI                                     m_eventUri;
@@ -639,17 +636,6 @@ public:
     std::string                             m_serviceVersion;
     Container<Action>                       m_actions;
     Container<StateVar>                     m_stateVars;
-    
-// obsolete:
-    void setStateVar(std::string name, std::string val);
-    void setStateVarBool(std::string name, bool val);
-    
-    std::string getStateVar(std::string name);
-    bool getStateVarBool(std::string name);
-    std::map<std::string,std::string>       m_stateVariables;
-//     std::map<std::string,Action*>           m_actions;
-    Service(Device* device, NodeIterator rootNode);
-    
 };
 
 
@@ -660,77 +646,60 @@ public:
     ~Device();
     
     void setDeviceRoot(DeviceRoot* pDeviceRoot) { m_pDeviceRoot = pDeviceRoot; }
-    std::string getUuid() { return m_uuid.toString(); }
-    void setUuid(std::string uuid) { m_uuid = UUID(uuid); }
+    DeviceRoot* getDeviceRoot() { return m_pDeviceRoot; }
+    std::string getUuid() { return m_uuid; }
+    void setUuid(std::string uuid) { m_uuid = uuid; }
     void setDeviceType(std::string deviceType) { m_deviceType = deviceType; }
+    void addService(Service* pService) { m_services.append(pService->getServiceType(), pService); }
+    Service* getService(std::string serviceType) { return m_services.get(serviceType); }
     
-// private:
+    void ssdpNotifyAlive();
+    
+private:
     DeviceRoot*                         m_pDeviceRoot;
-    UUID                                m_uuid;
+//     UUID                                m_uuid;
+    std::string                         m_uuid;
     std::string                         m_vendorDomain;
     std::string                         m_deviceType;
     std::string                         m_deviceVersion;
     Container<Service>                  m_services;
-    
-// obsolete:
-    Device(DeviceRoot* rootDevice, NodeIterator rootNode);
-/*    virtual void fromXml(Node* pNode, int mode=XML_DESCRIPTION);
-    virtual Node* toXml(int mode=XML_DESCRIPTION) {}*/
-    virtual std::string id() { return m_uuidDescription; }
-//     std::map<std::string,Service*>      m_services;
-    std::map<std::string,std::string>   m_deviceInfo;
-    DeviceRoot*                         m_deviceRoot;
-    std::string                         m_uuidDescription;
 };
 
 
 class DeviceRoot /* : Entity */
 {
-    // NOTE: singleton class to simplify access to it from it's sub components.
-    //       this implies that only one DeviceRoot per process can exist!
-    //       ==> that's why I switched back to multiple objects per class
 public:
     DeviceRoot();
     ~DeviceRoot();
     
-//     static DeviceRoot* instance();
-    
-    // SSDP and HTTP message handling
-    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
-    void handleSsdpMessage(SsdpMessage* pNf);
-    
-    URI                             m_descriptionUri;  // for controller to download description
-    SsdpSocket                      m_ssdpSocket;
-    HttpSocket                      m_httpSocket;
-    DescriptionRequestHandler*      m_descriptionRequestHandler;
-//     istringstream                   m_descriptionStream;
-    
-    // TODO: replace this with a map of devices, key is uuid, m_rootDevice is uuid of root device.
-    // NOTE: replacement depends on the need to handle the same ServiceType different in different devices.
-    Device                          m_rootDevice;
-    std::vector<Device>             m_embeddedDevices;
-    
-    // build in memory representation from XML description
-    void init(std::string& description);
-    
-//     std::string                     m_rootDevice;
-//     std::vector<std::string>        m_embeddedDevices;
-    
-    void insertDevice(std::string uuid, Device* pDevice);
     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
-    
-    Device* getDevice(std::string uuid);
+    Device* getDevice(std::string uuid) { return m_devices.get(uuid); }
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string description) { m_deviceDescription = description; }
     std::string getDeviceDescription() { return m_deviceDescription; }
+    URI getDescriptionUri() { return m_descriptionUri; }
+    void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = URI(m_httpSocket.getServerUri() + descriptionPath); }
     
+    void ssdpNotifyAlive();
     void startSsdp();
     void startHttp();
-
+    
+    void registerActionHandler(const AbstractObserver& observer)
+    { m_httpSocket.m_notificationCenter.addObserver(observer); }
+    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler) 
+    { m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler); }
+    
+    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
+    void handleSsdpMessage(SsdpMessage* pNf);
+    
 private:
+    URI                             m_descriptionUri;  // for controller to download description
+    std::string                     m_deviceDescription;
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
-    std::string                     m_deviceDescription;
+    SsdpSocket                      m_ssdpSocket;
+    HttpSocket                      m_httpSocket;
+    DescriptionRequestHandler*      m_descriptionRequestHandler;
 };
 
 
@@ -746,8 +715,6 @@ private:
 };
 
 } // namespace Jamm
-
-
 
 
 #endif

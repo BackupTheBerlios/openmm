@@ -35,105 +35,49 @@ using Poco::Environment;
 using namespace Jamm;
 
 
-
-void
-EntityItem::setBool(bool val)
+DescriptionReader::DescriptionReader(URI uri, std::string deviceDescriptionPath) :
+m_uri(uri),
+m_deviceDescriptionPath(deviceDescriptionPath)
 {
-    setVal(val?std::string("1"):std::string("0"));
-}
-
-
-bool
-EntityItem::getBool()
-{
-    return getVal()=="1"?true:false;
-}
-
-
-// template<class E> void
-// EntityContainer<E>::fromXml(Node* pNode, int mode)
-// {
-//     while (pNode)
-//     {
-//         E entity;
-//         entity.fromXml(pNode, mode);
-//         // TODO: need a valid copy ctor here
-//         m_vals[entity.id()] = entity;
-//         m_keys.push_back(entity.id());
-//         pNode = pNode->nextSibling();
-//     }
-// }
-
-
-/// generate XML code for a list of nodes of type E
-/// return an XML DocumentFragment (which can have multiple top nodes)
-// template<class E> Node*
-// EntityContainer<E>::toXml(int mode)
-// {
-//     DocumentFragment* pRes = m_pDoc->createDocumentFragment();
-//     for (std::vector<std::string>::iterator i = m_keys.begin(); i != m_keys.end(); ++i) {
-//         E entity;
-//         pRes->appendChild(entity.toXml(mode));
-//     }
-//     return pRes;
-// }
-
-
-// template<class E> void
-// Container<E>::Container(Node* pNode)
-// {
-//     while (pNode)
-//     {
-//         append(entity);
-//         entity.fromXml(pNode, mode);
-        // TODO: need a valid copy ctor here
-//         m_vals[entity.id()] = entity;
-//         m_keys.push_back(entity.id());
-//         pNode = pNode->nextSibling();
-//     }
-// }
-
-
-DescriptionReader::DescriptionReader(URI uri) :
-m_uri(uri)
-{
-    // TODO: ASSERT(path is full path with file name)
-//     DOMParser parser;
-//     AutoPtr<Document> pDoc = parser.parse(m_path.toString());
-//     NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
-//     m_pNode = it.nextNode();
-//     m_nodeStack.push(it.nextNode());
 }
 
 
 std::string
 DescriptionReader::getDescription(std::string path)
 {
+    // TODO: get description according to m_uri.service() ("file:/" or "http:/")
+    std::string p = m_uri.getPath() + path;
+    std::cerr << "DescriptionReader::getDescription() from: " << p << std::endl;
     std::stringstream ss;
-//     path = path.isFile() ? m_path.parent().append(path) : path;
-    std::ifstream ifs(path./*toString().*/c_str());
+    std::ifstream ifs(p.c_str());
     StreamCopier::copyStream(ifs, ss);
+    std::string res = ss.str();
     DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parse(m_uri.toString());
-    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
-    m_nodeStack.push(it.nextNode());
-    return ss.str();
+    // TODO: must free pDoc after DescriptionReader has finished
+    Document* pDoc = parser.parseString(res);
+    Node* n = pDoc->documentElement()->firstChild();
+    std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
+    m_nodeStack.push(n);
+    return res;
 }
-
 
 
 DeviceRoot*
 DescriptionReader::deviceRoot()
 {
+    std::cerr << "DescriptionReader::deviceRoot()" << std::endl;
     DeviceRoot* pRes = new DeviceRoot();
-    Node* pNode = m_nodeStack.top();
     m_pDeviceRoot = pRes;
+    pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
+    pRes->setDescriptionUri(m_deviceDescriptionPath);
+    Node* pNode = m_nodeStack.top();
+    std::cerr << "top of stack: " << pNode << std::endl;
     
     while (pNode)
     {
+        std::cerr << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
             m_nodeStack.push(pNode->firstChild());
-            
             Device* pDevice = device();
             m_pDeviceRoot->addDevice(pDevice);
             pRes->setRootDevice(pDevice);
@@ -148,32 +92,40 @@ DescriptionReader::deviceRoot()
 Device*
 DescriptionReader::device()
 {
+    std::cerr << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
     Node* pNode = m_nodeStack.top();
     pRes->setDeviceRoot(m_pDeviceRoot);
 
     while (pNode)
     {
-        // RootDevice only!!!
-        // this should be a sibling and not a child of the RootDevice Node in the device description.
-        // this makes parsing the device description a bit ugly and doesn't reflect the logical structure
-        // of a UPnP device
+        std::cerr << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "deviceType" && pNode->hasChildNodes()) {
             pRes->setDeviceType(pNode->firstChild()->nodeValue());
         }
         else if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
-            pRes->setUuid(pNode->firstChild()->nodeValue());
+            pRes->setUuid(pNode->firstChild()->nodeValue().substr(5));
+        }
+        else if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
+            Node* pChild = pNode->firstChild();
+            while (pChild) {
+                std::cerr << "child: " << pChild->nodeName() << std::endl;
+                if (pChild->nodeName() == "service") {
+                    m_nodeStack.push(pChild->firstChild());
+                    Service* pService = service();
+                    pService->setDevice(pRes);
+                    pRes->addService(pService);
+                }
+                pChild = pChild->nextSibling();
+            }
         }
         else if (pNode->nodeName() == "deviceList" && pNode->hasChildNodes()) {
-            // TODO: this if branch should be written as only one line of code ...
-            // iterate over all embedded devices
             Node* pChild = pNode->firstChild();
-//             ASSERT(pChild->nodeName() == "device");
             while (pChild) {
-                m_nodeStack.push(pNode->firstChild());
-                
-                m_pDeviceRoot->addDevice(device());
-                
+                if (pChild->nodeName() == "device") {
+                    m_nodeStack.push(pChild->firstChild());
+                    m_pDeviceRoot->addDevice(device());
+                }
                 pChild = pChild->nextSibling();
             }
         }
@@ -187,11 +139,13 @@ DescriptionReader::device()
 Service*
 DescriptionReader::service()
 {
+    std::cerr << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
     Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
+        std::cerr << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
             pRes->setServiceType(pNode->firstChild()->nodeValue());
         }
@@ -201,31 +155,38 @@ DescriptionReader::service()
             pRes->setDescription(getDescription(pRes->getDescriptionPath()));
             Node* pScpd = m_nodeStack.top();
             while (pScpd) {
-                if (pScpd->nodeName() == "actionList" && pNode->hasChildNodes()) {
-                    // TODO: this if branch should be written as only one line of code ...
+                std::cerr << "node: " << pScpd->nodeName() << std::endl;
+                if (pScpd->nodeName() == "actionList" && pScpd->hasChildNodes()) {
                     Node* pChild = pScpd->firstChild();
                     while (pChild) {
-                        m_nodeStack.push(pNode->firstChild());
-                        
-                        pRes->addAction(action());
-                        
+                        std::cerr << "node: " << pChild->nodeName() << std::endl;
+                        if (pChild->nodeName() == "action") {
+                            m_nodeStack.push(pChild->firstChild());
+                            pRes->addAction(action());
+                        }
                         pChild = pChild->nextSibling();
                     }
                 }
-                else if (pScpd->nodeName() == "serviceStateTable" && pNode->hasChildNodes()) {
-                    // TODO: this if branch should be written as only one line of code ...
+                else if (pScpd->nodeName() == "serviceStateTable" && pScpd->hasChildNodes()) {
                     Node* pChild = pScpd->firstChild();
                     while (pChild) {
-                        m_nodeStack.push(pNode->firstChild());
-                        
-                        pRes->addStateVar(stateVar());
-                        
+                        std::cerr << "node: " << pChild->nodeName() << std::endl;
+                        if (pChild->nodeName() == "stateVariable") {
+                            m_nodeStack.push(pChild->firstChild());
+                            StateVar* pStateVar = stateVar();
+                            if (pChild->hasAttributes()) {
+                                NamedNodeMap* attr = pChild->attributes();
+                                pStateVar->setSendEvents(attr->getNamedItem("sendEvents")->nodeValue());
+                                attr->release();
+                        }
+                        pRes->addStateVar(pStateVar);
+                        }
                         pChild = pChild->nextSibling();
                     }
                 }
                 pScpd = pScpd->nextSibling();
             }
-            // finished with this service description
+            // finished with this service description, getDescription() did a m_nodeStack.push()
             m_nodeStack.pop();
 // offer service description for control-points to download
 //             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
@@ -249,6 +210,7 @@ DescriptionReader::service()
 Action*
 DescriptionReader::action()
 {
+    std::cerr << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
     Node* pNode = m_nodeStack.top();
     
@@ -261,10 +223,10 @@ DescriptionReader::action()
             // TODO: this if branch should be written as only one line of code ...
             Node* pChild = pNode->firstChild();
             while (pChild) {
-                m_nodeStack.push(pNode->firstChild());
-                
-                pRes->addArgument(argument());
-                
+                if (pChild->nodeName() == "argument") {
+                    m_nodeStack.push(pChild->firstChild());
+                    pRes->addArgument(argument());
+                }
                 pChild = pChild->nextSibling();
             }
         }
@@ -278,11 +240,22 @@ DescriptionReader::action()
 Argument*
 DescriptionReader::argument()
 {
+    std::cerr << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
     Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
+        if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
+            pRes->setName(pNode->firstChild()->nodeValue());
+        }
+        else if (pNode->nodeName() == "relatedStateVariable" && pNode->hasChildNodes()) {
+            pRes->setRelatedStateVar(pNode->firstChild()->nodeValue());
+        }
+        else if (pNode->nodeName() == "direction" && pNode->hasChildNodes()) {
+            pRes->setDirection(pNode->firstChild()->nodeValue());
+        }
+        
         pNode = pNode->nextSibling();
     }
     
@@ -294,11 +267,21 @@ DescriptionReader::argument()
 StateVar*
 DescriptionReader::stateVar()
 {
+    std::cerr << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
     Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
+        if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
+            pRes->setName(pNode->firstChild()->nodeValue());
+        }
+        else if (pNode->nodeName() == "dataType" && pNode->hasChildNodes()) {
+            pRes->setType(pNode->firstChild()->nodeValue());
+        }
+        else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
+            pRes->setDefaultValue(pNode->firstChild()->nodeValue());
+        }
         pNode = pNode->nextSibling();
     }
     m_nodeStack.pop();
@@ -306,45 +289,84 @@ DescriptionReader::stateVar()
 }
 
 
-Service::Service(Device* device, NodeIterator rootNode) :
-// m_description(std::string("")),
-m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
-m_serviceType("fooservice"),
-m_serviceVersion("fooserviceversion"),
-m_device(device)
+
+ActionRequestReader::ActionRequestReader(const std::string& requestBody)
 {
-    Node* pNode = rootNode.nextNode();
+    DOMParser parser;
+    AutoPtr<Document> pDoc = parser.parseString(requestBody);
+    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
+    m_nodeStack.push(it.nextNode());
+}
+
+
+
+Action*
+ActionRequestReader::action()
+{
+    Action* pRes = new Action();
+    Node* pNode = m_nodeStack.top();
+    NodeIterator it(pNode, NodeFilter::SHOW_ELEMENT);
+    
     while (pNode)
     {
-        if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
-            m_serviceType = pNode->firstChild()->nodeValue();
+        if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
+            Node* pAction = pNode->firstChild();
+            std::string s = pAction->nodeName();
+            pRes->setName(s.substr(s.find(":") + 1));
+            s = pAction->namespaceURI();
+            pRes->setServiceType(s.substr(s.find("service:") + 8));
+            
+            Node* pChild = pNode->firstChild();
+            while (pChild) {
+                pRes->setArgument(pChild->nodeName(), pChild->firstChild()->nodeValue());
+            }
         }
-        else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
-            // offer service description for control-points to download
-            m_descriptionUri = URI(pNode->firstChild()->nodeValue());
-            // TODO: handle base path for xml files
-            std::ifstream ifs(("/home/jb/devel/cc/jamm/tests/" + m_descriptionUri.getPath()).c_str());
-            std::stringstream ss;
-            StreamCopier::copyStream(ifs, ss);
-            m_description = std::string(ss.str());
-            m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
-        }
-        else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
-            m_controlUri = URI(pNode->firstChild()->nodeValue());
-            m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
-            m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);
-        }
-        else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
-            m_eventUri = URI(pNode->firstChild()->nodeValue());
-        }
-        pNode = rootNode.nextNode();
+        pNode = it.nextNode();
     }
+    m_nodeStack.pop();
+    return pRes;
+}
+
+
+// Service::Service(Device* device, NodeIterator rootNode) :
+// // m_description(std::string("")),
+// m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
+// m_serviceType("fooservice"),
+// m_serviceVersion("fooserviceversion"),
+// m_device(device)
+// {
+//     Node* pNode = rootNode.nextNode();
+//     while (pNode)
+//     {
+//         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
+//             m_serviceType = pNode->firstChild()->nodeValue();
+//         }
+//         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
+//             // offer service description for control-points to download
+//             m_descriptionUri = URI(pNode->firstChild()->nodeValue());
+//             // TODO: handle base path for xml files
+//             std::ifstream ifs(("/home/jb/devel/cc/jamm/tests/" + m_descriptionUri.getPath()).c_str());
+//             std::stringstream ss;
+//             StreamCopier::copyStream(ifs, ss);
+//             m_description = std::string(ss.str());
+//             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
+//         }
+//         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
+//             m_controlUri = URI(pNode->firstChild()->nodeValue());
+//             m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
+//             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);
+//         }
+//         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
+//             m_eventUri = URI(pNode->firstChild()->nodeValue());
+//         }
+//         pNode = rootNode.nextNode();
+//     }
     // send SSDP messages
-    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+/*    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m.setNotificationType(m_serviceType);  // one message for every service
     m.setUniqueServiceName(m_device->m_uuidDescription + "::" +  m_serviceType);
-    m_device->m_deviceRoot->sendMessage(m);
-}
+    m_device->m_deviceRoot->sendMessage(m);*/
+// }
 
 
 Service::~Service()
@@ -352,135 +374,61 @@ Service::~Service()
 }
 
 
-// void
-// Service:: dissectDescription()
-// {
-//     DOMParser parser;
-//     AutoPtr<Document> pDoc = parser.parseString(m_description);
-//     NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
-//     Node* pNode = it.nextNode();
-//     
-//     while (pNode)
-//     {
-//         if (pNode->nodeName() == "actionList" && pNode->hasChildNodes()) {  // root-device only!!!
-//             // for each childnode (Action) create an Action object
-//             NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
-//             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-//                 if (c->nodeName() == "action") {
-// //                     m_embeddedDevices.push_back(Device(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
-//                 }
-//             }
-//         }
-//         else if (pNode->nodeName() == "serviceStateTable" && pNode->hasChildNodes()) {  // root-device only!!!
-//             // for each childnode (StateVar) create a Device object
-//             NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
-//             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-//                 if (c->nodeName() == "stateVariable") {
-// //                     m_embeddedDevices.push_back(Device(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
-//                 }
-//             }
-//         }
-//         pNode = it.nextNode();
-//     }
-// }
-
-
 void
 Service::setStateVar(std::string name, std::string val)
 {
     // TODO: lock the m_stateVariables map because different threads could access it
-    m_stateVariables[name] = val;
-}
-
-
-void
-Service::setStateVarBool(std::string name, bool val)
-{
-    if (val) {
-        setStateVar(name, std::string("1"));
-    } else {
-        setStateVar(name, std::string("0"));
-    }
+    m_stateVars.set(name, val);
 }
 
 
 std::string
 Service::getStateVar(std::string name)
 {
-    return m_stateVariables[name];
+    return m_stateVars.get(name)->convert<std::string>();
 }
 
 
-bool
-Service::getStateVarBool(std::string name)
+void
+Service::ssdpNotifyAlive()
 {
-    std::string out = getStateVar(name);
-    if (out == "1") {
-        return true;
-    } else {
-        return false;
-    }
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m.setNotificationType(m_serviceType);
+    m.setUniqueServiceName(m_pDevice->getUuid() + "::" +  m_serviceType);
+    m_pDevice->getDeviceRoot()->sendMessage(m);  // service first (and only) message
 }
 
 
-// void
-// Argument::fromXml(Node* pNode, int mode)
+// Action::Action(std::string requestBody)
 // {
-//     // TODO: implement this method
-// }
-
-
-// Node*
-// Argument::toXml(int mode)
-// {
-//     // TODO: implement this method
-// }
-
-
-Action::Action(std::string requestBody)
-{
-//         std::cerr << "Action request:" << std::endl << requestBody << std::endl;
-    
-    DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parseString(requestBody);
-    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
-    Node* pNode = it.nextNode();
-    
-    while (pNode)
-    {
-//             std::cerr << "XML namespace prefix of node: " << pNode->nodeName() << " is: " << pNode->prefix() << std::endl;
-        if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
-            Node* pAction = pNode->firstChild();
-            std::string s = pAction->nodeName();
-            m_actionName = s.substr(s.find(":") + 1);
-            s = pAction->namespaceURI();
-            m_serviceType = s.substr(s.find("service:") + 8);
-            std::cerr << "Service: " << m_serviceType << std::endl;
-            std::cerr << "Action: " << m_actionName << std::endl;
-                // read in the list of arguments
-            NodeIterator childIterator(pAction->firstChild(), NodeFilter::SHOW_ELEMENT);
-            for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-                std::cerr << "Argument: " << c->nodeName() << " = " << c->firstChild()->nodeValue() << std::endl;
-                m_inArgumentNames.push_back(c->nodeName());
-                m_argumentValues[c->nodeName()] = c->firstChild()->nodeValue();
-            }
-        }
-        pNode = it.nextNode();
-    }
-}
-
-
-// void
-// Action::fromXml(Node* pNode, int mode)
-// {
-//     // TODO: implement this method
-// }
-
-
-// Node*
-// Action::toXml(int mode)
-// {
-//     // TODO: implement this method
+// //         std::cerr << "Action request:" << std::endl << requestBody << std::endl;
+//     
+//     DOMParser parser;
+//     AutoPtr<Document> pDoc = parser.parseString(requestBody);
+//     NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
+//     Node* pNode = it.nextNode();
+//     
+//     while (pNode)
+//     {
+// //             std::cerr << "XML namespace prefix of node: " << pNode->nodeName() << " is: " << pNode->prefix() << std::endl;
+//         if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
+//             Node* pAction = pNode->firstChild();
+//             std::string s = pAction->nodeName();
+//             m_actionName = s.substr(s.find(":") + 1);
+//             s = pAction->namespaceURI();
+//             m_serviceType = s.substr(s.find("service:") + 8);
+//             std::cerr << "Service: " << m_serviceType << std::endl;
+//             std::cerr << "Action: " << m_actionName << std::endl;
+//                 // read in the list of arguments
+//             NodeIterator childIterator(pAction->firstChild(), NodeFilter::SHOW_ELEMENT);
+//             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
+//                 std::cerr << "Argument: " << c->nodeName() << " = " << c->firstChild()->nodeValue() << std::endl;
+//                 m_inArgumentNames.push_back(c->nodeName());
+//                 m_argumentValues[c->nodeName()] = c->firstChild()->nodeValue();
+//             }
+//         }
+//         pNode = it.nextNode();
+//     }
 // }
 
 
@@ -536,33 +484,10 @@ Action::setArgument(std::string name, std::string value)
 }
 
 
-void
-Action::setArgumentBool(std::string name, bool value)
-{
-    if (value) {
-        setArgument(name, std::string("1"));
-    } else {
-        setArgument(name, std::string("0"));
-    }
-}
-
-
 std::string
 Action::getArgument(std::string name)
 {
     return m_argumentValues[name];
-}
-
-
-bool
-Action::getArgumentBool(std::string name)
-{
-    std::string out = getArgument(name);
-    if (out == "1") {
-        return true;
-    } else {
-        return false;
-    }
 }
 
 
@@ -665,7 +590,8 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     std::string s(buf, length);
     
     // TODO: Action needs some info about the Service description (e.g. order of out args)
-    Action* pAction = new Action(s);
+    ActionRequestReader requestReader(s);
+    Action* pAction = requestReader.action();
         // the corresponding Service should register as a Notification Handler
     m_pHttpSocket->m_notificationCenter.postNotification(pAction);
         // return Action response with out arguments filled in by Notification Handler
@@ -714,51 +640,51 @@ Device::Device()
 }
 
 
-Device::Device(DeviceRoot* deviceRoot, NodeIterator rootNode) :
-m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
-m_deviceType("foodevice"),
-m_deviceVersion("foodeviceversion"),
-m_deviceRoot(deviceRoot)
-{
-    // TODO: if uuid is not given in the description, generate one and try to save it on
-    //       persistance storage
-//     UUIDGenerator uuidGen;
-//     m_uuid = uuidGen.createOne();
-    
-    Node* pNode = rootNode.nextNode();
-    while (pNode)  // TODO: stop when closing tag </device> is reached, or is root node set by copy-ctor?
-    {
-        if (pNode->nodeName() == "deviceType" && pNode->hasChildNodes()) {
-            m_deviceType = pNode->firstChild()->nodeValue();
-        }
-        else if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
-            m_uuidDescription = pNode->firstChild()->nodeValue();
-        }
-        else if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
-            // for each childnode append a service
-            NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
-            for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-                if (c->nodeName() == "service") {
-//                     m_services.push_back(Service(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
-                    Service* pService = new Service(this, NodeIterator(c, NodeFilter::SHOW_ALL));
-                    std::cerr << "adding service " << pService->m_serviceType << " to device " << m_deviceType << std::endl;
-//                     m_services[pService->m_serviceType] = pService;
-                }
-            }
-        }
-        pNode = rootNode.nextNode();
-    }
-    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setLocation(m_deviceRoot->m_descriptionUri);    // location of UPnP description of the root device
-    
-    m.setNotificationType(m_uuidDescription);
-    m.setUniqueServiceName(m_uuidDescription);
-    m_deviceRoot->sendMessage(m);  // root device second message
-    
-    m.setNotificationType(m_deviceType);
-    m.setUniqueServiceName(m_uuidDescription + "::" + m_deviceType);
-    m_deviceRoot->sendMessage(m);  // root device third message
-}
+// Device::Device(DeviceRoot* deviceRoot, NodeIterator rootNode) :
+// m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
+// m_deviceType("foodevice"),
+// m_deviceVersion("foodeviceversion"),
+// m_deviceRoot(deviceRoot)
+// {
+//     // TODO: if uuid is not given in the description, generate one and try to save it on
+//     //       persistance storage
+// //     UUIDGenerator uuidGen;
+// //     m_uuid = uuidGen.createOne();
+//     
+//     Node* pNode = rootNode.nextNode();
+//     while (pNode)  // TODO: stop when closing tag </device> is reached, or is root node set by copy-ctor?
+//     {
+//         if (pNode->nodeName() == "deviceType" && pNode->hasChildNodes()) {
+//             m_deviceType = pNode->firstChild()->nodeValue();
+//         }
+//         else if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
+//             m_uuidDescription = pNode->firstChild()->nodeValue();
+//         }
+//         else if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
+//             // for each childnode append a service
+//             NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
+//             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
+//                 if (c->nodeName() == "service") {
+// //                     m_services.push_back(Service(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
+//                     Service* pService = new Service(this, NodeIterator(c, NodeFilter::SHOW_ALL));
+//                     std::cerr << "adding service " << pService->m_serviceType << " to device " << m_deviceType << std::endl;
+// //                     m_services[pService->m_serviceType] = pService;
+//                 }
+//             }
+//         }
+//         pNode = rootNode.nextNode();
+//     }
+//     SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+//     m.setLocation(m_deviceRoot->m_descriptionUri);    // location of UPnP description of the root device
+//     
+//     m.setNotificationType(m_uuidDescription);
+//     m.setUniqueServiceName(m_uuidDescription);
+//     m_deviceRoot->sendMessage(m);  // root device second message
+//     
+//     m.setNotificationType(m_deviceType);
+//     m.setUniqueServiceName(m_uuidDescription + "::" + m_deviceType);
+//     m_deviceRoot->sendMessage(m);  // root device third message
+// }
 
 
 Device::~Device()
@@ -766,83 +692,47 @@ Device::~Device()
 }
 
 
-// void
-// Device::fromXml(Node* pNode, int mode)
-// {
-// }
+void
+Device::ssdpNotifyAlive()
+{
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m.setLocation(m_pDeviceRoot->getDescriptionUri());    // location of UPnP description of the root device
+    m.setNotificationType(getUuid());
+    m.setUniqueServiceName(getUuid());
+    m_pDeviceRoot->sendMessage(m);  // device first message (root device second message)
+    
+    m.setNotificationType(m_deviceType);
+    m.setUniqueServiceName(getUuid() + "::" + m_deviceType);
+    m_pDeviceRoot->sendMessage(m);  // device second message (root device third message)
+    
+    for(Container<Service>::Iterator s = m_services.begin(); s != m_services.end(); ++s) {
+        Service* pService = getService(*s);
+        if (pService) {
+            pService->ssdpNotifyAlive();
+        }
+    }
+}
 
-// SsdpSocket DeviceRoot::m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
 
-
-DeviceRoot::DeviceRoot(/*std::string& description*/) :
+DeviceRoot::DeviceRoot() :
 m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
 m_httpSocket(m_ssdpSocket.m_interface)
-// m_descriptionStream(description)
 {
 }
 
-// DeviceRoot *DeviceRoot::m_instance = 0;
 
-// DeviceRoot*
-// DeviceRoot::instance()
-// {
-//     if (m_instance == 0) {
-//         m_instance = new DeviceRoot();
-//     }
-//     return m_instance;
-// }
-
-
-void
+/*void
 DeviceRoot::init(std::string& description)
-{
-//     m_descriptionStream = istringstream(description);
-//---------------------------------------------------------------------------------
-    //  1. read device description and extract device and service information
-    DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parseString(description);
-    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
-    Node* pNode = it.nextNode();
-    
-    while (pNode)
-    {
-        if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
-            m_rootDevice = Device(this, it);
-        }
-        else if (pNode->nodeName() == "deviceList" && pNode->hasChildNodes()) {  // root-device only!!!
-            // for each childnode (embedded device) create a Device object
-            // TODO: this doesn't iterate through the childnodes only, but through the whole subtree, which is
-            //       unnecessary
-            NodeIterator childIterator(pNode, NodeFilter::SHOW_ELEMENT);
-            for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-                if (c->nodeName() == "device") {
-                   m_embeddedDevices.push_back(Device(this, NodeIterator(c, NodeFilter::SHOW_ALL)));
-                }
-            }
-        }
-        pNode = it.nextNode();
-    }
-    
-    //---------------------------------------------------------------------------------
+{*/
     // 2. setup HTTP server for description download and action/eventing
 //     m_descriptionRequestHandler = new DescriptionRequestHandler(m_descriptionStream, description.size());
-    m_descriptionRequestHandler = new DescriptionRequestHandler(description);
+/*    m_descriptionRequestHandler = new DescriptionRequestHandler(description);
     m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler("/device_description", m_descriptionRequestHandler);
-    m_descriptionUri = URI("http://" + m_httpSocket.m_httpServerAddress.toString() + "/device_description");
+    m_descriptionUri = URI("http://" + m_httpSocket.m_httpServerAddress.toString() + "/device_description");*/
 //     std::cerr << "DeviceRoot offering device description on: " << m_descriptionUri.toString() << std::endl;
     
-    //---------------------------------------------------------------------------------
-    // 3. send out SSDP messages to announce what we got
-    // TODO: handle services that appear in the same subdevices (no double messages should be send).
-    // send NOTIFY alive messages
-    // -> but then a message with (embedded-device uuid, service type) is missing? I don't get the specs here ...
-    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setLocation(m_descriptionUri);    // location of UPnP description of the root device
-    
-    m.setNotificationType("upnp:rootdevice");  // once for root device
-    m.setUniqueServiceName(m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
-    m_ssdpSocket.sendMessage(m);  // root device first message
-}
+
+// }
 
 
 DeviceRoot::~DeviceRoot()
@@ -854,29 +744,52 @@ DeviceRoot::~DeviceRoot()
     m.setServer("Jamm/0.0.3");
     m.setNotificationSubtype(SsdpMessage::SUBTYPE_BYEBYE);         // byebye message
     
-    m.setUniqueServiceName(m_rootDevice.m_uuidDescription + "::upnp:rootdevice");
+    m.setUniqueServiceName(m_pRootDevice->getUuid() + "::upnp:rootdevice");
     
-    m_ssdpSocket.sendMessage(m);
+    sendMessage(m);
     delete m_descriptionRequestHandler;
 }
 
 
 void
-DeviceRoot::insertDevice(std::string uuid, Device* pDevice)
+DeviceRoot::ssdpNotifyAlive()
 {
-    m_devices.append(uuid, pDevice);
+    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m.setLocation(m_descriptionUri);    // location of UPnP description of the root device
+    m.setNotificationType("upnp:rootdevice");  // once for root device
+    m.setUniqueServiceName(m_pRootDevice->getUuid() + "::upnp:rootdevice");
+    m_ssdpSocket.sendMessage(m);  // root device first message
+    
+    for(Container<Device>::Iterator d = m_devices.begin(); d != m_devices.end(); ++d) {
+        Device* pDevice = getDevice(*d);
+        if (pDevice) {
+            pDevice->ssdpNotifyAlive();
+        }
+    }
 }
 
 
 void
 DeviceRoot::startSsdp()
 {
+    ssdpNotifyAlive();
 }
 
 
 void
 DeviceRoot::startHttp()
 {
+/*    m_descriptionRequestHandler = new DescriptionRequestHandler(description);
+    m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler("/device_description", m_descriptionRequestHandler);
+    m_descriptionUri = URI("http://" + m_httpSocket.m_httpServerAddress.toString() + "/device_description");
+    
+    // Service description handler
+    m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
+    
+    // Service event handler
+    m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
+    m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);*/
+    
 }
 
 
@@ -905,7 +818,7 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
         // ST field in response depends on ST field in M-SEARCH
         m.setSearchTarget("upnp:rootdevice");
         // same as USN in NOTIFY message
-        m.setUniqueServiceName("uuid:" + m_rootDevice.m_uuid.toString() + "::upnp:rootdevice");
+        m.setUniqueServiceName("uuid:" + m_pRootDevice->getUuid() + "::upnp:rootdevice");
         
         m_ssdpSocket.sendMessage(m, pNf->getSender());
     }
