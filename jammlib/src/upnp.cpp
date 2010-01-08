@@ -42,6 +42,23 @@ m_deviceDescriptionPath(deviceDescriptionPath)
 }
 
 
+DescriptionReader::~DescriptionReader()
+{
+    releaseDescriptionDocument();
+}
+
+
+void
+DescriptionReader::releaseDescriptionDocument()
+{
+/*    std::cerr << "DescriptionReader::releaseDescriptionDocument()" << std::endl;
+    if (!m_pDocStack.empty()) {
+        m_pDocStack.top()->release();
+        m_pDocStack.pop();
+    }*/
+}
+
+
 std::string
 DescriptionReader::getDescription(std::string path)
 {
@@ -53,9 +70,8 @@ DescriptionReader::getDescription(std::string path)
     StreamCopier::copyStream(ifs, ss);
     std::string res = ss.str();
     DOMParser parser;
-    // TODO: must free pDoc after DescriptionReader has finished
-    Document* pDoc = parser.parseString(res);
-    Node* n = pDoc->documentElement()->firstChild();
+    m_pDocStack.push(parser.parseString(res));
+    Node* n = m_pDocStack.top()->documentElement()->firstChild();
     std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
     m_nodeStack.push(n);
     return res;
@@ -188,6 +204,7 @@ DescriptionReader::service()
             }
             // finished with this service description, getDescription() did a m_nodeStack.push()
             m_nodeStack.pop();
+            releaseDescriptionDocument();
 // offer service description for control-points to download
 //             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
         }
@@ -383,19 +400,9 @@ Service::setStateVar(std::string name, std::string val)
 
 
 std::string
-Service::getStateVar(std::string name)
+Service::getStateVar(std::string name) const
 {
-    return m_stateVars.get(name)->convert<std::string>();
-}
-
-
-void
-Service::ssdpNotifyAlive()
-{
-    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setNotificationType(m_serviceType);
-    m.setUniqueServiceName(m_pDevice->getUuid() + "::" +  m_serviceType);
-    m_pDevice->getDeviceRoot()->sendMessage(m);  // service first (and only) message
+    return m_stateVars.get(name).convert<std::string>();
 }
 
 
@@ -692,32 +699,11 @@ Device::~Device()
 }
 
 
-void
-Device::ssdpNotifyAlive()
-{
-    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setLocation(m_pDeviceRoot->getDescriptionUri());    // location of UPnP description of the root device
-    m.setNotificationType(getUuid());
-    m.setUniqueServiceName(getUuid());
-    m_pDeviceRoot->sendMessage(m);  // device first message (root device second message)
-    
-    m.setNotificationType(m_deviceType);
-    m.setUniqueServiceName(getUuid() + "::" + m_deviceType);
-    m_pDeviceRoot->sendMessage(m);  // device second message (root device third message)
-    
-    for(Container<Service>::Iterator s = m_services.begin(); s != m_services.end(); ++s) {
-        Service* pService = getService(*s);
-        if (pService) {
-            pService->ssdpNotifyAlive();
-        }
-    }
-}
-
-
 DeviceRoot::DeviceRoot() :
 m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
 m_httpSocket(m_ssdpSocket.m_interface)
 {
+//     m_ssdpRandomTimeGenerator.seed();
 }
 
 
@@ -737,6 +723,7 @@ DeviceRoot::init(std::string& description)
 
 DeviceRoot::~DeviceRoot()
 {
+    m_ssdpNotifyAliveMessages.stop();
     // TODO: send NOTIFY byebye messages
     SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m.setRequestMethod(SsdpMessage::REQUEST_NOTIFY);
@@ -747,32 +734,144 @@ DeviceRoot::~DeviceRoot()
     m.setUniqueServiceName(m_pRootDevice->getUuid() + "::upnp:rootdevice");
     
     sendMessage(m);
+    
+/*    for (std::vector<SsdpMessage*>::iterator i = m_notifyAliveMessages.begin(); i != m_notifyAliveMessages.end(); ++i) {
+        delete *i;
+    }
+    for (std::vector<SsdpMessage*>::iterator i = m_notifyByebyeMessages.begin(); i != m_notifyByebyeMessages.end(); ++i) {
+        delete *i;
+    }*/
+    
     delete m_descriptionRequestHandler;
 }
 
 
 void
-DeviceRoot::ssdpNotifyAlive()
+DeviceRoot::initSsdp()
 {
-    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setLocation(m_descriptionUri);    // location of UPnP description of the root device
-    m.setNotificationType("upnp:rootdevice");  // once for root device
-    m.setUniqueServiceName(m_pRootDevice->getUuid() + "::upnp:rootdevice");
-    m_ssdpSocket.sendMessage(m);  // root device first message
-    
-    for(Container<Device>::Iterator d = m_devices.begin(); d != m_devices.end(); ++d) {
-        Device* pDevice = getDevice(*d);
-        if (pDevice) {
-            pDevice->ssdpNotifyAlive();
+    std::cerr << "DeviceRoot::initSsdp()" << std::endl;
+    SsdpNotifyAliveWriter w(m_ssdpNotifyAliveMessages);
+//     SsdpNotifyAliveWriter w(m_notifyAliveMessages);
+    w.deviceRoot(*this);
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        Device& dp = *d;
+        w.device(dp);
+        for(Device::ServiceIterator s = dp.beginService(); s != dp.endService(); ++s) {
+            w.service(*s);
         }
     }
 }
 
 
+SsdpMessageSet::SsdpMessageSet()
+{
+    m_randomTimeGenerator.seed();
+}
+
+
+SsdpMessageSet::~SsdpMessageSet()
+{
+    for (std::vector<SsdpMessage*>::iterator i = m_ssdpMessages.begin(); i != m_ssdpMessages.end(); ++i) {
+        delete *i;
+    }
+}
+
+
+void
+SsdpMessageSet::addMessage(SsdpMessage& message)
+{
+    m_ssdpMessages.push_back(&message);
+}
+
+
+void
+SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous)
+{
+    std::cerr << "SsdpMessageSet::send()" << std::endl;
+    m_repeat = repeat;
+    m_delay = delay;
+    m_continuous = continuous;
+    m_sendTimer.setStartInterval(m_randomTimeGenerator.next(m_delay));
+    m_sendTimer.start(TimerCallback<SsdpMessageSet>(*this, &SsdpMessageSet::onTimer));
+}
+
+
+void
+SsdpMessageSet::stop()
+{
+    m_sendTimer.stop();
+}
+
+
+void
+SsdpMessageSet::onTimer(Timer& timer)
+{
+    std::cerr << "SsdpMessageSet::onTimer()" << std::endl;
+    for (int r = m_repeat; r>0; --r) {
+        for (std::vector<SsdpMessage*>::const_iterator i = m_ssdpMessages.begin(); i != m_ssdpMessages.end(); ++i) {
+            m_socket->sendMessage(**i);
+        }
+    }
+    if (m_continuous) {
+        timer.restart(m_randomTimeGenerator.next(m_delay));
+    }
+}
+
+
+/*void
+DeviceRoot::sendMessageSet(SsdpMessageSet& messageSet, int repeat, long delay, bool continuous)
+{
+    std::cerr << "DeviceRoot::sendMessageSet()" << std::endl;*/
+/*    long randomDelay = m_ssdpRandomTimeGenerator.next(delay);
+    m_ssdpMessageSendTimer.setStartInterval(randomDelay);*/
+    
+//     messageSet(m_ssdpSocket, messages);
+/*    messageSet.setRepeat(repeat);
+    messageSet.setDelay(delay);
+    messageSet.setContinuous(continuous);
+    m_ssdpMessageSendTimer.start(TimerCallback<SsdpMessageSet>(messageSet, &SsdpMessageSet::onTimer));*/
+    
+//     if (continuous) {
+//         long randomDelay = m_ssdpRandomTimeGenerator.next(delay);
+//         m_ssdpMessageSendTimer.setStartInterval(randomDelay);
+//     }
+    
+//     Timer(randomDelay, 0);
+// }
+
+
 void
 DeviceRoot::startSsdp()
 {
-    ssdpNotifyAlive();
+    std::cerr << "DeviceRoot::startSsdp()" << std::endl;
+    
+    // TODO: 3. send out initial set also on the occasion of new IP address or network interface.
+    
+    // 1. wait random intervall of less than 100msec when sending message set first time
+    // 2. send out message set two times (max three times according to specs, should be configurable).
+    m_ssdpNotifyAliveMessages.send(m_ssdpSocket, 2, 100, false);
+    // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
+    // 2. send out message set two times (max three times according to specs, should be configurable).
+//     m_ssdpNotifyAliveMessages.send(m_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
+    
+    std::cerr << "DeviceRoot::startSsdp() finished" << std::endl;
+    
+    
+    /*    for (std::vector<SsdpMessage*>::iterator i = m_notifyAliveMessages.begin(); i != m_notifyAliveMessages.end(); ++i) {
+        m_ssdpSocket.sendMessage(**i);
+    }*/
+//     m_ssdpNotifyAliveMessages = new SsdpMessageSet(m_ssdpSocket, m_notifyAliveMessages);
+//     sendMessageSet(*m_ssdpNotifyAliveMessages, 2, 100, false);
+//     sendMessageSet(*m_ssdpNotifyAliveMessages, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
+}
+
+
+void
+DeviceRoot::stopSsdp()
+{
+    std::cerr << "DeviceRoot::stopSsdp()" << std::endl;
+    m_ssdpNotifyAliveMessages.stop();
+//     m_ssdpMessageSendTimer.stop();
 }
 
 
@@ -859,6 +958,60 @@ Controller::handleSsdpMessage(SsdpMessage* pNf)
     // send to multicast address with sender port different than 1900?
     // use a normal DatagramSocket for HTTPU, do a connect(), this socket is not bound to a specific
     // interface then ...
+}
+
+
+// SsdpNotifyAliveWriter::~SsdpNotifyAliveWriter()
+// {
+// }
+
+
+void
+SsdpNotifyAliveWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
+{
+    std::cerr << "SsdpNotifyAliveWriter::deviceRoot()" << std::endl;
+    // root device first message
+    SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m->setLocation(pDeviceRoot.getDescriptionUri());    // location of UPnP description of the root device
+    m->setNotificationType("upnp:rootdevice");  // once for root device
+    m->setUniqueServiceName(pDeviceRoot.getRootDevice()->getUuid() + "::upnp:rootdevice");
+    m_res->addMessage(*m);
+//     m_res.push_back(m);
+}
+
+
+void
+SsdpNotifyAliveWriter::device(const Device& pDevice)
+{
+    std::cerr << "SsdpNotifyAliveWriter::device(): " << pDevice.getUuid() << std::endl;
+    // device first message (root device second message)
+    SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m->setLocation(pDevice.getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
+    m->setNotificationType(pDevice.getUuid());
+    m->setUniqueServiceName(pDevice.getUuid());
+    std::cerr << "Ssdp device message #1: " << m->toString();
+    m_res->addMessage(*m);
+//     m_res.push_back(m);
+    
+    // device second message (root device third message)
+    m->setNotificationType(pDevice.getDeviceType());
+    m->setUniqueServiceName(pDevice.getUuid() + "::" + pDevice.getDeviceType());
+    std::cerr << "Ssdp device message #2: " << m->toString();
+    m_res->addMessage(*m);
+//     m_res.push_back(m);
+}
+
+
+void
+SsdpNotifyAliveWriter::service(const Service& pService)
+{
+    std::cerr << "SsdpNotifyAliveWriter::service()" << std::endl;
+    // service first (and only) message
+    SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m->setNotificationType(pService.getServiceType());
+    m->setUniqueServiceName(pService.getDevice()->getUuid() + "::" +  pService.getServiceType());
+    m_res->addMessage(*m);
+//     m_res.push_back(m);
 }
 
 

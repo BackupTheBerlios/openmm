@@ -68,6 +68,8 @@ m_dimmingImpl(dimmingImpl)
     m_deviceRoot->registerActionHandler(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
     
     m_deviceRoot->startHttp();
+    
+    m_deviceRoot->initSsdp();
     m_deviceRoot->startSsdp();
 }
 

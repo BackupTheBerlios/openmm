@@ -49,6 +49,8 @@
 #include "Poco/DateTimeParser.h"
 #include "Poco/Path.h"
 #include "Poco/DynamicAny.h"
+#include "Poco/Random.h"
+#include "Poco/Timer.h"
 #include "Poco/Net/DatagramSocket.h"
 #include "Poco/Net/MulticastSocket.h"
 #include "Poco/Net/SocketAddress.h"
@@ -104,6 +106,9 @@ using Poco::DateTimeFormat;
 using Poco::DateTimeFormatter;
 using Poco::DateTimeParser;
 using Poco::DynamicAny;
+using Poco::Random;
+using Poco::Timer;
+using Poco::TimerCallback;
 using Poco::Net::Socket;
 using Poco::Net::DatagramSocket;
 using Poco::Net::MulticastSocket;
@@ -181,14 +186,14 @@ class SsdpMessage : public Notification
 public:
     typedef enum {
         REQUEST_NOTIFY          = 1,
-            REQUEST_NOTIFY_ALIVE    = 2,
-            REQUEST_NOTIFY_BYEBYE   = 3,
-            REQUEST_SEARCH          = 4,
-            REQUEST_RESPONSE        = 5,
-            SUBTYPE_ALIVE           = 6,
-            SUBTYPE_BYEBYE          = 7,
-            SSDP_ALL                = 8,
-            UPNP_ROOT_DEVICES       = 9
+        REQUEST_NOTIFY_ALIVE    = 2,
+        REQUEST_NOTIFY_BYEBYE   = 3,
+        REQUEST_SEARCH          = 4,
+        REQUEST_RESPONSE        = 5,
+        SUBTYPE_ALIVE           = 6,
+        SUBTYPE_BYEBYE          = 7,
+        SSDP_ALL                = 8,
+        UPNP_ROOT_DEVICES       = 9
     } TRequestMethod;
     
     SsdpMessage();
@@ -199,12 +204,11 @@ public:
     SsdpMessage(const std::string& buf, const SocketAddress& sender = SocketAddress(SSDP_FULL_ADDRESS));
     ~SsdpMessage();
     
-    // HTTP message envelope
-    
-    std::string toString();
-    
     void setRequestMethod(TRequestMethod requestMethod);
     TRequestMethod getRequestMethod();
+    
+    // HTTP message envelope
+    std::string toString();
     
     // set and get the fields of the HTTP message header
     void setCacheControl(int duration = SSDP_CACHE_DURATION);  // duration of device advertisement in sec.
@@ -256,6 +260,11 @@ private:
 };
 
 
+// class SsdpMessage : UpnpMessage
+// {
+// };
+
+
 /// This class provides an interface to a
 /// UDP Multicast socket.
 class SsdpSocket
@@ -286,30 +295,42 @@ private:
 };
 
 
-/// EntityItem is like a variant.
-/// it stores data and its type in strings and provides conversion methods.
-/// it is an abstract type can't be instantiated directly.
-class EntityItem /*: public Entity*/
+class SsdpMessageSet
 {
 public:
-    virtual std::string id() { return m_name; }
+    SsdpMessageSet();
+    ~SsdpMessageSet();
     
-    void setName(std::string name) { m_name = name; }
-    std::string getName() { return m_name; }
+/*    SsdpMessageSet(SsdpSocket& socket, const std::vector<SsdpMessage*>& messages) :
+        m_socket(&socket),
+        m_messages(&messages),
+        m_repeat(0),
+        m_delay(100),
+        m_continuous(false)
+        {}*/
     
-    void setType(std::string type) { m_type = type; }
-    std::string getType() { return m_type; }
+    void addMessage(SsdpMessage& message);
+    void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
+    void stop();
     
-    inline void setVal(const std::string& val) { m_val = val; }
-    void setBool(bool val);
+    void onTimer(Timer& timer);
     
-    inline std::string getVal() { return m_val; }
-    bool getBool();
+//     bool getContinuous() { return m_continuous; }
+//     long getDelay();
+    
+//     void setRepeat(int repeat) { m_repeat = repeat; }
+//     void setDelay(long delay) { m_delay = delay; }
+//     void setContinuous(bool continuous) { m_continuous = continuous; }
     
 private:
-    std::string m_name;
-    std::string m_type;
-    std::string m_val;
+    Random                              m_randomTimeGenerator;
+    Timer                               m_sendTimer;
+    SsdpSocket*                         m_socket;
+//     const std::vector<SsdpMessage*>*    m_messages;
+    std::vector<SsdpMessage*>           m_ssdpMessages;
+    int                                 m_repeat;
+    long                                m_delay;
+    bool                                m_continuous;
 };
 
 
@@ -326,16 +347,34 @@ template<class E>
 class Container /*: public Entity*/
 {
 public:
-    void append(std::string key, E* pEntity) { m_pEntities[key] = pEntity; m_keys.push_back(key); }
+    const E& get(std::string key) const { return *m_pEntities.find(key)->second; }
+    
     void set(std::string key, std::string val) { m_pEntities[key] = new E(val); }
     template<typename T> void set(std::string key, const T& val) { m_pEntities[key] = new E(val); }
-    E* get(std::string key) { return m_pEntities[key]; }
-//     template<typename T> const T& get(std::string key) { return m_pEntities[key]->convert<T>(); }
-//     std::string get(std::string key) { return m_pEntities[key]->convert<std::string>(); }
     
-    typedef typename std::vector<std::string>::iterator Iterator;
-    std::vector<std::string>::iterator begin() { return m_keys.begin(); }
-    std::vector<std::string>::iterator end() { return m_keys.end(); }
+    void append(std::string key, E* pEntity) { m_pEntities[key] = pEntity; m_keys.push_back(key); }
+    
+    
+    // this gave me lot of headaches. See also:
+    // http://stackoverflow.com/questions/1832704/default-assignment-operator-in-inner-class-with-reference-members
+//     
+    // should be implemented with standard STL iterator stuff ...?
+    class Iterator {
+    public:
+        Iterator(Container& C, std::vector<std::string>::iterator i) : c(&C), pos(i) { }
+//         void operator = (const Iterator& val) { c = val.c; pos = val.pos; }
+        inline bool operator == (const Iterator& val) { return pos == val.pos; }
+        inline bool operator != (const Iterator& val) { return pos != val.pos; }
+        inline Iterator& operator ++ () { ++pos; return *this; }
+        inline E& operator * () { return *c->m_pEntities[*pos]; }
+        
+    private:
+        Container* c;
+        std::vector<std::string>::iterator pos;
+    };
+    
+    inline Iterator begin() { return Iterator(*this, m_keys.begin()); }
+    inline Iterator end() { return Iterator(*this, m_keys.end()); }
     
 private:
     std::map<std::string,E*>    m_pEntities;
@@ -362,11 +401,13 @@ class DescriptionReader : public ReaderFactory
 {
 public:
     DescriptionReader(URI uri, std::string deviceDescriptionPath);
+    ~DescriptionReader();
     
     virtual DeviceRoot* deviceRoot();
     
 private:
     std::string getDescription(std::string path);
+    void releaseDescriptionDocument();
     
     virtual Device* device();
     virtual Service* service();
@@ -378,6 +419,7 @@ private:
     std::string             m_deviceDescriptionPath;
 //     AutoPtr<Document>       m_pDoc;
     std::stack<Node*>       m_nodeStack;
+    std::stack<Document*>   m_pDocStack;
     DeviceRoot*             m_pDeviceRoot;
 };
 
@@ -399,33 +441,53 @@ private:
 /// Writer Factory
 class WriterFactory
 {
-    virtual void device(Device* pDevice) {}
-    virtual void service(Service* pService) {}
-    virtual void action(Action* pAction) {}
-    virtual void argument(Argument* pArgument) {}
-    virtual void stateVar(StateVar* pStateVar) {}
+public:
+    virtual void deviceRoot(const DeviceRoot& pDeviceRoot) {}
+    virtual void device(const Device& pDevice) {}
+    virtual void service(const Service& pService) {}
+    virtual void action(const Action& pAction) {}
+    virtual void argument(const Argument& pArgument) {}
+    virtual void stateVar(const StateVar& pStateVar) {}
 };
 
 
-class ActionWriter : WriterFactory
+class SsdpNotifyAliveWriter : public WriterFactory
 {
-    virtual void argument(Argument* pArgument);
+public:
+    SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
+//     SsdpNotifyAliveWriter(std::vector<SsdpMessage*>& generatedMessages) : m_res(generatedMessages) {}
+//     ~SsdpNotifyAliveWriter;
+    
+    virtual void deviceRoot(const DeviceRoot& pDeviceRoot);
+    virtual void device(const Device& pDevice);
+    virtual void service(const Service& pService);
+
+private:
+    SsdpMessageSet*            m_res;
+//     std::vector<SsdpMessage*>& m_res;
+};
+
+
+class ActionWriter : public WriterFactory
+{
+public:
+    virtual void argument(const Argument& pArgument);
 };
 
 
 class ActionResponseWriter : public ActionWriter
 {
-    virtual void action(Action* pAction);
+public:
+    virtual void action(const Action& pAction);
 };
 
 
 /// Writer Factory for Controllers
 class ActionRequestWriter : public ActionWriter
 {
-    virtual void action(Action* pAction);
+public:
+    virtual void action(const Action& pAction);
 };
-
-
 
 
 // TODO: possible request handler types:
@@ -575,7 +637,7 @@ public:
     void setArgument(std::string name, std::string val);
     std::string getArgument(std::string name);
     template<typename T> void setArgument(std::string key, const T& val) { m_arguments.set(key, val); }
-    template<typename T> const T& getArgument(std::string key) { return m_arguments.get(key)->convert<T>(); }
+    template<typename T> const T& getArgument(std::string key) { return m_arguments.get(key).convert<T>(); }
     
     
 // obsolete
@@ -607,21 +669,22 @@ public:
     Service() {}
     ~Service();
     
+    std::string getServiceType() const { return m_serviceType; }
+    std::string getDescriptionPath() const { return m_descriptionPath; }
+    Device* getDevice() const { return m_pDevice; }
+    std::string getStateVar(std::string name) const;
+    
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
-    std::string getServiceType() { return m_serviceType; }
     void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
-    std::string getDescriptionPath() { return m_descriptionPath; }
     void setDescription(std::string description) { m_description = description; }
     void setDevice(Device* pDevice) { m_pDevice = pDevice; }
+    void setStateVar(std::string name, std::string val);
+    
     void addAction(Action* pAction) { m_actions.append(pAction->getName(), pAction); }
     void addStateVar(StateVar* pStateVar) { m_stateVars.append(pStateVar->getName(), pStateVar); }
     
-    void setStateVar(std::string name, std::string val);
-    std::string getStateVar(std::string name);
     template<typename T> void setStateVar(std::string key, const T& val) { m_stateVars.set(key, val); }
-    template<typename T> const T& getStateVar(std::string key) { return m_stateVars.get(key)->convert<T>(); }
-    
-    void ssdpNotifyAlive();
+    template<typename T> const T& getStateVar(std::string key) { return m_stateVars.get(key).convert<T>(); }
     
 private:
     std::string                             m_descriptionPath;
@@ -645,15 +708,20 @@ public:
     Device();
     ~Device();
     
+    typedef Container<Service>::Iterator ServiceIterator;
+    ServiceIterator beginService() { return m_services.begin(); }
+    ServiceIterator endService() { return m_services.end(); }
+    
+    DeviceRoot* getDeviceRoot() const { return m_pDeviceRoot; }
+    std::string getUuid() const { return m_uuid; }
+    std::string getDeviceType() const { return m_deviceType; }
+    const Service& getService(std::string serviceType) const { return m_services.get(serviceType); }
+    
     void setDeviceRoot(DeviceRoot* pDeviceRoot) { m_pDeviceRoot = pDeviceRoot; }
-    DeviceRoot* getDeviceRoot() { return m_pDeviceRoot; }
-    std::string getUuid() { return m_uuid; }
     void setUuid(std::string uuid) { m_uuid = uuid; }
     void setDeviceType(std::string deviceType) { m_deviceType = deviceType; }
-    void addService(Service* pService) { m_services.append(pService->getServiceType(), pService); }
-    Service* getService(std::string serviceType) { return m_services.get(serviceType); }
     
-    void ssdpNotifyAlive();
+    void addService(Service* pService) { m_services.append(pService->getServiceType(), pService); }
     
 private:
     DeviceRoot*                         m_pDeviceRoot;
@@ -672,17 +740,27 @@ public:
     DeviceRoot();
     ~DeviceRoot();
     
-    void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
-    Device* getDevice(std::string uuid) { return m_devices.get(uuid); }
+    typedef Container<Device>::Iterator DeviceIterator;
+    DeviceIterator beginDevice() { return m_devices.begin(); }
+    DeviceIterator endDevice() { return m_devices.end(); }
+    
+    const Device& getDevice(std::string uuid) const { return m_devices.get(uuid); }
+    Device* getRootDevice() const { return m_pRootDevice; }
+    std::string getDeviceDescription() { return m_deviceDescription; }
+    const URI& getDescriptionUri() const { return m_descriptionUri; }
+    
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string description) { m_deviceDescription = description; }
-    std::string getDeviceDescription() { return m_deviceDescription; }
-    URI getDescriptionUri() { return m_descriptionUri; }
     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = URI(m_httpSocket.getServerUri() + descriptionPath); }
     
-    void ssdpNotifyAlive();
+    void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
+    
+    void initSsdp();
     void startSsdp();
+    void stopSsdp();
     void startHttp();
+    
+//     void sendMessageSet(SsdpMessageSet& messageSet, int repeat, long delay, bool continuous);
     
     void registerActionHandler(const AbstractObserver& observer)
     { m_httpSocket.m_notificationCenter.addObserver(observer); }
@@ -698,6 +776,11 @@ private:
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
     SsdpSocket                      m_ssdpSocket;
+//     Random                          m_ssdpRandomTimeGenerator;
+//     Timer                           m_ssdpMessageSendTimer;
+    SsdpMessageSet                  m_ssdpNotifyAliveMessages;
+    std::vector<SsdpMessage*>       m_notifyAliveMessages;
+    std::vector<SsdpMessage*>       m_notifyByebyeMessages;
     HttpSocket                      m_httpSocket;
     DescriptionRequestHandler*      m_descriptionRequestHandler;
 };
@@ -715,6 +798,5 @@ private:
 };
 
 } // namespace Jamm
-
 
 #endif
