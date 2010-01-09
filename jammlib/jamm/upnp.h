@@ -51,6 +51,7 @@
 #include "Poco/DynamicAny.h"
 #include "Poco/Random.h"
 #include "Poco/Timer.h"
+#include <Poco/Mutex.h>
 #include "Poco/Net/DatagramSocket.h"
 #include "Poco/Net/MulticastSocket.h"
 #include "Poco/Net/SocketAddress.h"
@@ -301,36 +302,21 @@ public:
     SsdpMessageSet();
     ~SsdpMessageSet();
     
-/*    SsdpMessageSet(SsdpSocket& socket, const std::vector<SsdpMessage*>& messages) :
-        m_socket(&socket),
-        m_messages(&messages),
-        m_repeat(0),
-        m_delay(100),
-        m_continuous(false)
-        {}*/
-    
     void addMessage(SsdpMessage& message);
     void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
     void stop();
     
+private:
     void onTimer(Timer& timer);
     
-//     bool getContinuous() { return m_continuous; }
-//     long getDelay();
-    
-//     void setRepeat(int repeat) { m_repeat = repeat; }
-//     void setDelay(long delay) { m_delay = delay; }
-//     void setContinuous(bool continuous) { m_continuous = continuous; }
-    
-private:
     Random                              m_randomTimeGenerator;
     Timer                               m_sendTimer;
     SsdpSocket*                         m_socket;
-//     const std::vector<SsdpMessage*>*    m_messages;
     std::vector<SsdpMessage*>           m_ssdpMessages;
     int                                 m_repeat;
     long                                m_delay;
     bool                                m_continuous;
+//     Poco::FastMutex                     m_sendLock;
 };
 
 
@@ -455,7 +441,6 @@ class SsdpNotifyAliveWriter : public WriterFactory
 {
 public:
     SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
-//     SsdpNotifyAliveWriter(std::vector<SsdpMessage*>& generatedMessages) : m_res(generatedMessages) {}
 //     ~SsdpNotifyAliveWriter;
     
     virtual void deviceRoot(const DeviceRoot& pDeviceRoot);
@@ -464,7 +449,20 @@ public:
 
 private:
     SsdpMessageSet*            m_res;
-//     std::vector<SsdpMessage*>& m_res;
+};
+
+
+class SsdpNotifyByebyeWriter : public WriterFactory
+{
+public:
+    SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
+    
+    virtual void deviceRoot(const DeviceRoot& pDeviceRoot);
+    virtual void device(const Device& pDevice);
+    virtual void service(const Service& pService);
+    
+private:
+    SsdpMessageSet*            m_res;
 };
 
 
@@ -671,12 +669,17 @@ public:
     
     std::string getServiceType() const { return m_serviceType; }
     std::string getDescriptionPath() const { return m_descriptionPath; }
+    std::string getControlPath() const { return m_controlPath; }
+    DescriptionRequestHandler* getDescriptionRequestHandler() const { return m_pDescriptionRequestHandler; }
+    ControlRequestHandler* getControlRequestHandler() const { return m_controlRequestHandler; }
     Device* getDevice() const { return m_pDevice; }
     std::string getStateVar(std::string name) const;
     
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
     void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
     void setDescription(std::string description) { m_description = description; }
+    void setDescriptionRequestHandler() { m_pDescriptionRequestHandler = new DescriptionRequestHandler(m_description); }
+/*    void setControlRequestHandler() { m_controlRequestHandler = new ControlRequestHandler(m_device->m_deviceRoot->m_httpSocket); }*/
     void setDevice(Device* pDevice) { m_pDevice = pDevice; }
     void setStateVar(std::string name, std::string val);
     
@@ -687,16 +690,16 @@ public:
     template<typename T> const T& getStateVar(std::string key) { return m_stateVars.get(key).convert<T>(); }
     
 private:
-    std::string                             m_descriptionPath;
-    URI                                     m_descriptionUri;
-    std::string                             m_description;
     Device*                                 m_pDevice;
-    URI                                     m_controlUri;
-    ControlRequestHandler*                  m_controlRequestHandler;
-    URI                                     m_eventUri;
     std::string                             m_vendorDomain;
     std::string                             m_serviceType;
     std::string                             m_serviceVersion;
+    std::string                             m_descriptionPath;
+    std::string                             m_description;
+    DescriptionRequestHandler*              m_pDescriptionRequestHandler;
+    std::string                             m_controlPath;
+    ControlRequestHandler*                  m_controlRequestHandler;
+    std::string                             m_eventPath;
     Container<Action>                       m_actions;
     Container<StateVar>                     m_stateVars;
 };
@@ -746,7 +749,7 @@ public:
     
     const Device& getDevice(std::string uuid) const { return m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
-    std::string getDeviceDescription() { return m_deviceDescription; }
+    std::string& getDeviceDescription() { return m_deviceDescription; }
     const URI& getDescriptionUri() const { return m_descriptionUri; }
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
@@ -755,12 +758,10 @@ public:
     
     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
     
-    void initSsdp();
+    void init();
     void startSsdp();
     void stopSsdp();
     void startHttp();
-    
-//     void sendMessageSet(SsdpMessageSet& messageSet, int repeat, long delay, bool continuous);
     
     void registerActionHandler(const AbstractObserver& observer)
     { m_httpSocket.m_notificationCenter.addObserver(observer); }
@@ -776,11 +777,8 @@ private:
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
     SsdpSocket                      m_ssdpSocket;
-//     Random                          m_ssdpRandomTimeGenerator;
-//     Timer                           m_ssdpMessageSendTimer;
     SsdpMessageSet                  m_ssdpNotifyAliveMessages;
-    std::vector<SsdpMessage*>       m_notifyAliveMessages;
-    std::vector<SsdpMessage*>       m_notifyByebyeMessages;
+    SsdpMessageSet                  m_ssdpNotifyByebyeMessages;
     HttpSocket                      m_httpSocket;
     DescriptionRequestHandler*      m_descriptionRequestHandler;
 };

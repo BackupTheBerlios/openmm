@@ -69,7 +69,7 @@ m_dimmingImpl(dimmingImpl)
     
     m_deviceRoot->startHttp();
     
-    m_deviceRoot->initSsdp();
+    m_deviceRoot->init();
     m_deviceRoot->startSsdp();
 }
 
