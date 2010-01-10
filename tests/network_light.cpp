@@ -61,10 +61,11 @@ m_dimmingImpl(dimmingImpl)
     DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
     m_deviceRoot = descriptionReader.deviceRoot();
     
-//     m_switchPowerImpl->m_service = m_deviceRoot->m_rootDevice.m_services["urn:schemas-upnp-org:service:SwitchPower:1"];
-//     m_dimmingImpl->m_service = m_deviceRoot->m_rootDevice.m_services["urn:schemas-upnp-org:service:Dimming:1"];
+    // Service implementation needs a pointer to Service to access StateVariables
+    // TODO: use UUID and not getRootDevice() here
+    m_switchPowerImpl->m_service = &m_deviceRoot->getRootDevice()->getService("urn:schemas-upnp-org:service:SwitchPower:1");
+    m_dimmingImpl->m_service = &m_deviceRoot->getRootDevice()->getService("urn:schemas-upnp-org:service:Dimming:1");
     
-//     m_deviceRoot->m_httpSocket.m_notificationCenter.addObserver(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
     m_deviceRoot->registerActionHandler(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
     
     m_deviceRoot->startHttp();
@@ -84,25 +85,26 @@ void
 NetworkLight::actionHandler(Action* action)
 {
     // TODO: dispatch each received Action to the corresponding method of NetworkLight
-//     std::cerr << "NetworkLight::actionHandler() receives Action: " << action->m_actionName 
-//               << " (Service: " <<  action->m_serviceType << ")"  << std::endl;
+    std::cerr << "NetworkLight::actionHandler() receives Action: " << action->getName() 
+        << " (Service: " <<  action->getServiceType() << ")"  << std::endl;
     
     // dispatch all SwitchPower Actions
     if (action->getServiceType() == "SwitchPower:1") {
-        if (action->getName() == "SetTarget") {
-            bool in;
-            in = action->getArgument<bool>("NewTargetValue");
-            m_switchPowerImpl->SetTarget(in);
+        std::string actionName = action->getName();
+        if (actionName == "SetTarget") {
+            bool inArg1;
+            inArg1 = action->getArgument<bool>("NewTargetValue");
+            m_switchPowerImpl->SetTarget(inArg1);
         }
-        else if (action->getName() == "GetTarget") {
-            bool out;
-            m_switchPowerImpl->GetTarget(out);
-            action->setArgument<bool>("RetTargetValue", out);
+        else if (actionName == "GetTarget") {
+            bool outArg1;
+            m_switchPowerImpl->GetTarget(outArg1);
+            action->setArgument<bool>("RetTargetValue", outArg1);
         }
-        else if (action->getName() == "ResultStatus") {
-            bool out;
-            m_switchPowerImpl->ResultStatus(out);
-            action->setArgument<bool>("ResultStatus", out);
+        else if (actionName == "ResultStatus") {
+            bool outArg1;
+            m_switchPowerImpl->ResultStatus(outArg1);
+            action->setArgument<bool>("ResultStatus", outArg1);
         }
     }
 }

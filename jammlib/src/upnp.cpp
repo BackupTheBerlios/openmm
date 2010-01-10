@@ -205,16 +205,12 @@ DescriptionReader::service()
             // finished with this service description, getDescription() did a m_nodeStack.push()
             m_nodeStack.pop();
             releaseDescriptionDocument();
-// offer service description for control-points to download
-//             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
-/*            m_controlUri = URI(pNode->firstChild()->nodeValue());
-            m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
-            m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);*/
+            pRes->setControlPath(pNode->firstChild()->nodeValue());
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
-//             m_eventUri = URI(pNode->firstChild()->nodeValue());
+            pRes->setEventPath(pNode->firstChild()->nodeValue());
         }
         
         pNode = pNode->nextSibling();
@@ -242,7 +238,7 @@ DescriptionReader::action()
             while (pChild) {
                 if (pChild->nodeName() == "argument") {
                     m_nodeStack.push(pChild->firstChild());
-                    pRes->addArgument(argument());
+                    pRes->appendArgument(argument());
                 }
                 pChild = pChild->nextSibling();
             }
@@ -310,18 +306,20 @@ DescriptionReader::stateVar()
 ActionRequestReader::ActionRequestReader(const std::string& requestBody)
 {
     std::cerr << "ActionRequestReader::ActionRequestReader()" << std::endl;
+    std::cerr << "request: " << requestBody << std::endl;
+    
     DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parseString(requestBody);
-    NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
+    m_pDoc = parser.parseString(requestBody);
+    NodeIterator it(m_pDoc, NodeFilter::SHOW_ALL);
     m_nodeStack.push(it.nextNode());
 }
-
 
 
 Action*
 ActionRequestReader::action()
 {
     std::cerr << "ActionRequestReader::action()" << std::endl;
+    // TODO: clone an Action with inArgs and outArgs retained
     Action* pRes = new Action();
     Node* pNode = m_nodeStack.top();
     NodeIterator it(pNode, NodeFilter::SHOW_ELEMENT);
@@ -332,131 +330,52 @@ ActionRequestReader::action()
             Node* pAction = pNode->firstChild();
             std::string s = pAction->nodeName();
             pRes->setName(s.substr(s.find(":") + 1));
+            std::cerr << "action: " << pRes->getName() << std::endl;
             s = pAction->namespaceURI();
             pRes->setServiceType(s.substr(s.find("service:") + 8));
+            std::cerr << "serviceType: " << pRes->getServiceType() << std::endl;
             
-            Node* pChild = pNode->firstChild();
+            Node* pChild = pAction->firstChild();
             while (pChild) {
                 pRes->setArgument(pChild->nodeName(), pChild->firstChild()->nodeValue());
+                pChild = pChild->nextSibling();
             }
         }
         pNode = it.nextNode();
     }
     m_nodeStack.pop();
+    std::cerr << "ActionRequestReader::action() finished" << std::endl;
     return pRes;
 }
 
 
-// Service::Service(Device* device, NodeIterator rootNode) :
-// // m_description(std::string("")),
-// m_vendorDomain("schemas-upnp-org:device"),  // if vendor is UPnP forum
-// m_serviceType("fooservice"),
-// m_serviceVersion("fooserviceversion"),
-// m_device(device)
-// {
-//     Node* pNode = rootNode.nextNode();
-//     while (pNode)
-//     {
-//         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
-//             m_serviceType = pNode->firstChild()->nodeValue();
-//         }
-//         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
-//             // offer service description for control-points to download
-//             m_descriptionUri = URI(pNode->firstChild()->nodeValue());
-//             // TODO: handle base path for xml files
-//             std::ifstream ifs(("/home/jb/devel/cc/jamm/tests/" + m_descriptionUri.getPath()).c_str());
-//             std::stringstream ss;
-//             StreamCopier::copyStream(ifs, ss);
-//             m_description = std::string(ss.str());
-//             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_descriptionUri.getPath(), new DescriptionRequestHandler(m_description));
-//         }
-//         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
-//             m_controlUri = URI(pNode->firstChild()->nodeValue());
-//             m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
-//             m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);
-//         }
-//         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
-//             m_eventUri = URI(pNode->firstChild()->nodeValue());
-//         }
-//         pNode = rootNode.nextNode();
-//     }
-    // send SSDP messages
-/*    SsdpMessage m(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m.setNotificationType(m_serviceType);  // one message for every service
-    m.setUniqueServiceName(m_device->m_uuidDescription + "::" +  m_serviceType);
-    m_device->m_deviceRoot->sendMessage(m);*/
-// }
-
-
-Service::~Service()
+void
+ActionWriter::argument(const Argument& argument)
 {
+}
+
+
+ActionResponseWriter::ActionResponseWriter(std::string& responseBody) :
+m_responseBody(&responseBody)
+{
+    std::cerr << "ActionResponseWriter::ActionResponseWriter()" << std::endl;
 }
 
 
 void
-Service::setStateVar(std::string name, std::string val)
+ActionResponseWriter::action(Action& action)
 {
-    // TODO: lock the m_stateVariables map because different threads could access it
-    m_stateVars.set(name, val);
-}
-
-
-std::string
-Service::getStateVar(std::string name) const
-{
-    return m_stateVars.get(name).convert<std::string>();
-}
-
-
-// Action::Action(std::string requestBody)
-// {
-// //         std::cerr << "Action request:" << std::endl << requestBody << std::endl;
-//     
-//     DOMParser parser;
-//     AutoPtr<Document> pDoc = parser.parseString(requestBody);
-//     NodeIterator it(pDoc, NodeFilter::SHOW_ALL);
-//     Node* pNode = it.nextNode();
-//     
-//     while (pNode)
-//     {
-// //             std::cerr << "XML namespace prefix of node: " << pNode->nodeName() << " is: " << pNode->prefix() << std::endl;
-//         if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
-//             Node* pAction = pNode->firstChild();
-//             std::string s = pAction->nodeName();
-//             m_actionName = s.substr(s.find(":") + 1);
-//             s = pAction->namespaceURI();
-//             m_serviceType = s.substr(s.find("service:") + 8);
-//             std::cerr << "Service: " << m_serviceType << std::endl;
-//             std::cerr << "Action: " << m_actionName << std::endl;
-//                 // read in the list of arguments
-//             NodeIterator childIterator(pAction->firstChild(), NodeFilter::SHOW_ELEMENT);
-//             for (Node* c = childIterator.nextNode(); c; c = childIterator.nextNode()) {
-//                 std::cerr << "Argument: " << c->nodeName() << " = " << c->firstChild()->nodeValue() << std::endl;
-//                 m_inArgumentNames.push_back(c->nodeName());
-//                 m_argumentValues[c->nodeName()] = c->firstChild()->nodeValue();
-//             }
-//         }
-//         pNode = it.nextNode();
-//     }
-// }
-
-
-std::string
-Action::responseBody()
-{
-//         std::cerr << "Action::responseBody()" << std::endl;
-    AutoPtr<Document> pDoc = new Document;
+    std::cerr << "ActionResponseWriter::action()" << std::endl;
     
+    AutoPtr<Document> pDoc = new Document;
     AutoPtr<Element> pEnvelope = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Envelope");
     pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
     AutoPtr<Element> pBody = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
-    AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + m_serviceType, m_actionName + "Response");
+    AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + action.getServiceType(), action.getName() + "Response");
     
-    // TODO: fill vector of out arguments with the help of the service description
-        // append all out arguments
-    for (std::vector<std::string>::iterator i = m_outArgumentNames.begin(); i != m_outArgumentNames.end(); ++i) {
-        AutoPtr<Element> pArgument = pDoc->createElement(*i);
-        AutoPtr<Text> pArgumentValue = pDoc->createTextNode(m_argumentValues[*i]);
+    for(Action::OutArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
+        AutoPtr<Element> pArgument = pDoc->createElement((*i).getName());
+        AutoPtr<Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i).getName()));
         pArgument->appendChild(pArgumentValue);
         pActionResponse->appendChild(pArgument);
     }
@@ -466,37 +385,74 @@ Action::responseBody()
     pDoc->appendChild(pEnvelope);
     
     DOMWriter writer;
-    writer.setNewLine("\n");
+    writer.setNewLine("\r\n");
     writer.setOptions(XMLWriter::PRETTY_PRINT);
     writer.setOptions(XMLWriter::WRITE_XML_DECLARATION);
     
     std::stringstream ss;
     writer.writeNode(ss, pDoc);
-    m_responseBody = ss.str();
-    std::cerr << "ResponseBody():" << std::endl << m_responseBody << std::endl;
-    return m_responseBody;
+    *m_responseBody = ss.str();
+    std::cerr << "ResponseBody():" << std::endl << *m_responseBody << std::endl;
 }
 
 
-int
-Action::responseSize()
+Service::~Service()
 {
-    return m_responseBody.size();
 }
+
+
+// void
+// Service::setStateVar(std::string name, std::string val)
+// {
+    // TODO: lock the m_stateVariables map because different threads could access it
+//     m_stateVars.setValue(name, val);
+// }
+
+
+// std::string
+// Service::getStateVar(const std::string& name) /*const*/
+// {
+//     return m_stateVars.get(name).convert<std::string>();
+//     return m_stateVars.getValue<std::string>(name);
+// }
 
 
 // Argument handling methods
+/*std::string
+Action::getArgument(const std::string& name)
+{*/
+//     std::cerr << "Action::getArgument() name: " << name << ", val: " << m_arguments.get(name) << std::endl;
+//     return m_argumentValues[name];
+//     return m_arguments.get(name);
+// }
+
+
+// template<typename T>
+// const T&
+// Action::getArgument(std::string key)
+// {
+//     return m_arguments.get(key).convert<T>();
+// }
+
+
 void
 Action::setArgument(std::string name, std::string value)
 {
-    m_argumentValues[name] = value;
+    std::cerr << "Action::setArgument() name: " << name << ", val: " << value << std::endl;
+    m_arguments.setValue(name, value);
 }
 
 
-std::string
-Action::getArgument(std::string name)
+void
+Action::appendArgument(Argument* pArgument)
 {
-    return m_argumentValues[name];
+    m_arguments.append(pArgument->getName(), pArgument);
+    if (pArgument->getDirection() == "in") {
+        m_inArguments.append(pArgument->getName(), pArgument);
+    }
+    else {
+        m_outArguments.append(pArgument->getName(), pArgument);
+    }
 }
 
 
@@ -547,12 +503,6 @@ RequestNotFoundRequestHandler::handleRequest(HTTPServerRequest& request, HTTPSer
 }
 
 
-ControlRequestHandler::ControlRequestHandler(HttpSocket* pHttpSocket):
-m_pHttpSocket(pHttpSocket)
-{
-}
-
-
 DescriptionRequestHandler::DescriptionRequestHandler(std::string& description):
 m_description(description)
 {
@@ -570,12 +520,18 @@ DescriptionRequestHandler::create()
 void
 DescriptionRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
 {
-    std::cerr << "handle request: " << request.getURI() << std::endl;
+    std::cerr << "handle description request: " << request.getURI() << std::endl;
 //         std::cerr << "sending contents of length: " << m_description.size() << std::endl;
     response.setContentLength(m_description.size());
     response.setContentType("text/xml");
     std::ostream& ostr = response.send();
     ostr << m_description;
+}
+
+
+ControlRequestHandler::ControlRequestHandler(HttpSocket* pHttpSocket):
+m_pHttpSocket(pHttpSocket)
+{
 }
 
 
@@ -589,27 +545,69 @@ ControlRequestHandler::create()
 void
 ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
 {
-    std::cerr << "handle request: " << request.getURI() << std::endl;
+    std::cerr << "handle control request: " << request.getURI() << std::endl;
         // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
         // otherwise it should return and an event should be sent on finishing the action request.
 //         handleAction(new Action());
     int length = request.getContentLength();
     char buf[length];
     request.stream().read(buf, length);
-    std::string s(buf, length);
+    std::string requestBody(buf, length);
     
     // TODO: Action needs some info about the Service description (e.g. order of out args)
-    ActionRequestReader requestReader(s);
+    ActionRequestReader requestReader(requestBody);
     Action* pAction = requestReader.action();
         // the corresponding Service should register as a Notification Handler
     m_pHttpSocket->m_notificationCenter.postNotification(pAction);
         // return Action response with out arguments filled in by Notification Handler
+    std::string responseBody;
+    ActionResponseWriter responseWriter(responseBody);
+    responseWriter.action(*pAction);
+    
     response.setContentType("text/xml");
         // TODO: set EXT header
         // TODO: set SERVER header
     std::ostream& ostr = response.send();
-    ostr << pAction->responseBody();
-    response.setContentLength(pAction->responseSize());
+    ostr << responseBody;
+    response.setContentLength(responseBody.size());
+}
+
+
+EventRequestHandler::EventRequestHandler(HttpSocket* pHttpSocket):
+m_pHttpSocket(pHttpSocket)
+{
+}
+
+
+EventRequestHandler*
+EventRequestHandler::create()
+{
+    return new EventRequestHandler(m_pHttpSocket);
+}
+
+
+void
+EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+{
+    std::cerr << "handle event request: " << request.getMethod() << std::endl;
+    std::cerr << "HOST: " << request.getHost() << std::endl;
+    std::cerr << "CALLBACK: " << request.get("CALLBACK") << std::endl;
+    std::cerr << "NT: " << request.get("NT") << std::endl;
+    std::cerr << "TIMEOUT: " << request.get("TIMEOUT") << std::endl;
+    
+    if (request.getMethod() == "SUBSCRIBE") {
+        Timestamp t;
+        response.set("DATE", DateTimeFormatter::format(t, DateTimeFormat::HTTP_FORMAT));
+        response.set("SERVER", 
+                    Environment::osName() + "/"
+                    + Environment::osVersion() + ", "
+                    + "UPnP/" + UPNP_VERSION + ", "
+                    + JAMM_VERSION);
+        response.set("SID", "uuid:" + UUIDGenerator().create().toString());
+        response.set("TIMEOUT", "Second-1800");
+    }
+    else if (request.getMethod() == "UNSUBSCRIBE") {
+    }
 }
 
 
@@ -625,7 +623,7 @@ HttpSocket::HttpSocket(NetworkInterface interface)
     //     pParams->setMaxThreads(maxThreads);
         // set-up a server socket on an available port
     ServerSocket socket(0);
-        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out
+        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
     //     socket.bind(m_ssdpSocket.m_interface.address());
     m_httpServerAddress = SocketAddress(interface.address(), socket.address().port());
         // set-up a HTTPServer instance
@@ -688,10 +686,10 @@ DeviceRoot::init()
             aliveWriter.service(service);
             byebyeWriter.service(service);
             
-            // TODO: this should be done in Service ctor
             service.setDescriptionRequestHandler(); // TODO: probably not needed ...
             registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
-            registerHttpRequestHandler(service.getControlPath(), service.getControlRequestHandler());
+            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(&m_httpSocket));
+            registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&m_httpSocket));
         }
     }
     std::cerr << "DeviceRoot::init() finished" << std::endl;
@@ -709,7 +707,7 @@ SsdpMessageSet::~SsdpMessageSet()
     if (m_continuous) {
         m_sendTimer.stop();
     }
-/* // This leads to a segfault:
+/* // This causes a segfault:
    for (std::vector<SsdpMessage*>::iterator i = m_ssdpMessages.begin(); i != m_ssdpMessages.end(); ++i) {
         delete *i;
     }*/
@@ -736,7 +734,9 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous
     m_repeat = repeat;
     m_delay = delay;
     m_continuous = continuous;
-    m_sendTimer.setStartInterval(m_randomTimeGenerator.next(m_delay));
+    if (m_delay > 0) {
+        m_sendTimer.setStartInterval(m_randomTimeGenerator.next(m_delay));
+    }
     if (m_continuous) {
         // start asynchronously
         m_sendTimer.start(TimerCallback<SsdpMessageSet>(*this, &SsdpMessageSet::onTimer));
@@ -796,18 +796,13 @@ DeviceRoot::stopSsdp()
 {
     std::cerr << "DeviceRoot::stopSsdp()" << std::endl;
     m_ssdpNotifyAliveMessages.stop();
-    m_ssdpNotifyByebyeMessages.send(m_ssdpSocket, 2, 1, false);
+    m_ssdpNotifyByebyeMessages.send(m_ssdpSocket, 2, 0, false);
 }
 
 
 void
 DeviceRoot::startHttp()
 {
-    /*
-    // Service event handler
-    m_controlRequestHandler = new ControlRequestHandler(&m_device->m_deviceRoot->m_httpSocket);
-    m_device->m_deviceRoot->m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(m_controlUri.toString(), m_controlRequestHandler);*/
-    
 }
 
 
@@ -908,7 +903,6 @@ SsdpNotifyAliveWriter::device(const Device& pDevice)
     m->setNotificationType("uuid:" + pDevice.getUuid());
     m->setUniqueServiceName("uuid:" + pDevice.getUuid());
     m_res->addMessage(*m);
-    
     // device second message (root device third message)
     m->setNotificationType(pDevice.getDeviceType());
     m->setUniqueServiceName("uuid:" + pDevice.getUuid() + "::" + pDevice.getDeviceType());
@@ -949,7 +943,6 @@ SsdpNotifyByebyeWriter::device(const Device& pDevice)
     m->setNotificationType("uuid:" + pDevice.getUuid());
     m->setUniqueServiceName("uuid:" + pDevice.getUuid());
     m_res->addMessage(*m);
-    
     // device second message (root device third message)
     m->setNotificationType(pDevice.getDeviceType());
     m->setUniqueServiceName("uuid:" + pDevice.getUuid() + "::" + pDevice.getDeviceType());
