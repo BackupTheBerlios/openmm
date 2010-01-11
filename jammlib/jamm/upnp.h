@@ -153,7 +153,7 @@ using std::istringstream;
 using Poco::StreamCopier;
 
 
-// TODO: Argument stuff right done
+// TODO: Argument stuff right done (Action::clone() method!!)
 // TODO: StateVariable stuff right done
 // TODO: Event messages
 // TODO: Stubs generator
@@ -347,16 +347,21 @@ template<class E>
 class Container /*: public Entity*/
 {
 public:
+//     Container() {};
+//     Container(const Container& container);
+//     Container* clone();
+    
     E& get(std::string key) { return *m_pEntities.find(key)->second; }
     void append(std::string key, E* pEntity) { m_pEntities[key] = pEntity; m_keys.push_back(key); }
 
 //     std::string getValue(const std::string& key) { return m_pEntities[key]->getValue(); }
-    template<typename T> T getValue(const std::string& key) { return m_pEntities[key]->convert<T>(); }
+//     template<typename T> T getValue(const std::string& key) { return (*m_pEntities[key]).convert<T>(); }
+    template<typename T> T getValue(const std::string& key) { 
+        DynamicAny* e = (DynamicAny*)(*m_pEntities.find(key)).second;
+        return e->convert<T>(); }
     
 //     void setValue(const std::string& key, const std::string& val) { m_pEntities[key]->setValue(val); }
-    template<typename T> void setValue(const std::string& key, const T& val) { std::cerr << "Container::setValue() key: " << key << "val: " << val << std::endl; *m_pEntities[key] = val; }
-    
-    
+    template<typename T> void setValue(const std::string& key, const T& val) { std::cerr << "Container::setValue() key: " << key << ", val: " << val << std::endl; DynamicAny* e = (DynamicAny*)m_pEntities[key]; *e = val; }
     
     // this gave me lot of headaches. See also:
     // http://stackoverflow.com/questions/1832704/default-assignment-operator-in-inner-class-with-reference-members
@@ -450,13 +455,14 @@ private:
 class ActionRequestReader : public ReaderFactory
 {
 public:
-    ActionRequestReader(const std::string& requestBody);
+    ActionRequestReader(const std::string& requestBody, Action* pActionTemplate);
     
     virtual Action* action();
     
 private:
     std::stack<Node*>       m_nodeStack;
     AutoPtr<Document>       m_pDoc;
+    Action*                 m_pActionTemplate;
 };
 
 
@@ -609,13 +615,13 @@ class ControlRequestHandler: public UpnpRequestHandler
 	/// Return answer to an action request
 {
 public:
-    ControlRequestHandler(HttpSocket* pHttpSocket);
+    ControlRequestHandler(DeviceRoot& deviceRoot);
     
     ControlRequestHandler* create();
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
     
 private:
-    HttpSocket* m_pHttpSocket;
+    DeviceRoot* m_deviceRoot;
 };
 
 
@@ -655,11 +661,12 @@ private:
 };
 
 
-class Argument : public /*Variant*/ DynamicAny
+class Argument : public DynamicAny
 {
 public:
-    Argument() : DynamicAny() {}
-    Argument(const std::string& val) : DynamicAny(val.c_str()) {}
+    Argument() : DynamicAny(std::string("")) {}
+//     Argument(const Argument& arg) : DynamicAny(arg), m_name(arg.name), m_relatedStateVar(arg.m_relatedStateVar), m_in(arg.m_in) {}
+    Argument(const std::string& val) : DynamicAny(val) {}
 //     template<typename T> Argument(const T& val) : DynamicAny(val) {}
     
     std::string getName() { return m_name; }
@@ -682,6 +689,8 @@ class Action : public Notification/*, public Entity*/
 public:
     Action() {}
     
+    Action* clone();
+    
     typedef Container<Argument>::Iterator InArgumentIterator;
     InArgumentIterator beginInArgument() { return m_inArguments.begin(); }
     InArgumentIterator endInArgument() { return m_inArguments.end(); }
@@ -691,13 +700,15 @@ public:
     OutArgumentIterator endOutArgument() { return m_outArguments.end(); }
     
     std::string getName() const { return m_actionName; }
-    std::string getServiceType() const { return m_serviceType; }
+    Service* getService() { return m_pService; }
+//     std::string getServiceType() const { return m_serviceType; }
 //     std::string getArgument (const std::string& name);
 //     template<typename T> const T& getArgument(const std::string& key) { return m_arguments.get(key).convert<T>(); }
     template<typename T> const T& getArgument(const std::string& name) { return m_arguments.getValue<T>(name); }
     
     void setName(std::string name) { m_actionName = name; }
-    void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
+    void setService(Service* pService) { m_pService = pService; }
+//     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
     void setArgument(std::string name, std::string val);
     template<typename T> void setArgument(std::string name, const T& val) { m_arguments.setValue(name, val); }
     
@@ -705,17 +716,12 @@ public:
 
 private:
     std::string                         m_actionName;
-    std::string                         m_serviceType;
-    
-    MessageHeader                       m_messageHeader;
+//     std::string                         m_serviceType;
+    Service*                            m_pService;
     
     Container<Argument>                 m_arguments;
     Container<Argument>                 m_inArguments;
     Container<Argument>                 m_outArguments;
-    
-    SocketAddress                       m_sender;
-    SocketAddress                       m_receiver;
-    std::string                         m_responseBody;
 };
 
 
@@ -731,6 +737,7 @@ public:
     DescriptionRequestHandler* getDescriptionRequestHandler() const { return m_pDescriptionRequestHandler; }
     ControlRequestHandler* getControlRequestHandler() const { return m_controlRequestHandler; }
     Device* getDevice() const { return m_pDevice; }
+    Action* getAction(const std::string& actionName) { return &m_actions.get(actionName); }
 //     std::string getStateVar(const std::string& name) /*const*/;
 //     template<typename T> T getStateVar(const std::string& key) { return m_stateVars.get(key).convert<T>(); }
     template<typename T> T getStateVar(const std::string& key) { return m_stateVars.getValue<T>(key); }
@@ -745,7 +752,7 @@ public:
 //     void setStateVar(std::string name, std::string val);
     template<typename T> void setStateVar(std::string key, const T& val) { m_stateVars.setValue(key, val); }
     
-    void addAction(Action* pAction) { m_actions.append(pAction->getName(), pAction); }
+    void addAction(Action* pAction) { m_actions.append(pAction->getName(), pAction); pAction->setService(this); }
     void addStateVar(StateVar* pStateVar) { m_stateVars.append(pStateVar->getName(), pStateVar); }
     
 private:
@@ -783,7 +790,7 @@ public:
     void setUuid(std::string uuid) { m_uuid = uuid; }
     void setDeviceType(std::string deviceType) { m_deviceType = deviceType; }
     
-    void addService(Service* pService) { m_services.append(pService->getServiceType(), pService); }
+    void addService(Service* pService);
     
 private:
     DeviceRoot*                         m_pDeviceRoot;
@@ -810,12 +817,14 @@ public:
     Device* getRootDevice() const { return m_pRootDevice; }
     std::string& getDeviceDescription() { return m_deviceDescription; }
     const URI& getDescriptionUri() const { return m_descriptionUri; }
+    Service* getServiceType(const std::string& serviceType);
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string description) { m_deviceDescription = description; }
     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = URI(m_httpSocket.getServerUri() + descriptionPath); }
     
     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
+    void addServiceType(std::string serviceType, Service* pService) { m_serviceTypes[serviceType] = pService; }
     
     void init();
     void startSsdp();
@@ -829,12 +838,14 @@ public:
     
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
+    void postAction(Action* pAction) { m_httpSocket.m_notificationCenter.postNotification(pAction); }
     
 private:
     URI                             m_descriptionUri;  // for controller to download description
     std::string                     m_deviceDescription;
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
+    std::map<std::string,Service*>  m_serviceTypes;
     SsdpSocket                      m_ssdpSocket;
     SsdpMessageSet                  m_ssdpNotifyAliveMessages;
     SsdpMessageSet                  m_ssdpNotifyByebyeMessages;

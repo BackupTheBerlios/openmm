@@ -128,9 +128,9 @@ DescriptionReader::device()
 //                 std::cerr << "child: " << pChild->nodeName() << std::endl;
                 if (pChild->nodeName() == "service") {
                     m_nodeStack.push(pChild->firstChild());
-                    Service* pService = service();
-                    pService->setDevice(pRes);
-                    pRes->addService(pService);
+//                     Service* pService = service();
+//                     pService->setDevice(pRes);
+                    pRes->addService(service());
                 }
                 pChild = pChild->nextSibling();
             }
@@ -303,7 +303,7 @@ DescriptionReader::stateVar()
 
 
 
-ActionRequestReader::ActionRequestReader(const std::string& requestBody)
+ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : m_pActionTemplate(pActionTemplate)
 {
     std::cerr << "ActionRequestReader::ActionRequestReader()" << std::endl;
     std::cerr << "request: " << requestBody << std::endl;
@@ -320,7 +320,8 @@ ActionRequestReader::action()
 {
     std::cerr << "ActionRequestReader::action()" << std::endl;
     // TODO: clone an Action with inArgs and outArgs retained
-    Action* pRes = new Action();
+//     Action* pRes = new Action();
+    Action* pRes = m_pActionTemplate;
     Node* pNode = m_nodeStack.top();
     NodeIterator it(pNode, NodeFilter::SHOW_ELEMENT);
     
@@ -328,12 +329,12 @@ ActionRequestReader::action()
     {
         if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
             Node* pAction = pNode->firstChild();
-            std::string s = pAction->nodeName();
-            pRes->setName(s.substr(s.find(":") + 1));
+//             std::string s = pAction->nodeName();
+//             pRes->setName(s.substr(s.find(":") + 1));
             std::cerr << "action: " << pRes->getName() << std::endl;
-            s = pAction->namespaceURI();
-            pRes->setServiceType(s.substr(s.find("service:") + 8));
-            std::cerr << "serviceType: " << pRes->getServiceType() << std::endl;
+//             s = pAction->namespaceURI();
+//             pRes->setServiceType(s.substr(s.find("service:") + 8));
+            std::cerr << "serviceType: " << pRes->getService()->getServiceType() << std::endl;
             
             Node* pChild = pAction->firstChild();
             while (pChild) {
@@ -371,7 +372,7 @@ ActionResponseWriter::action(Action& action)
     AutoPtr<Element> pEnvelope = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Envelope");
     pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
     AutoPtr<Element> pBody = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
-    AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + action.getServiceType(), action.getName() + "Response");
+    AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + action.getService()->getServiceType(), action.getName() + "Response");
     
     for(Action::OutArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
         AutoPtr<Element> pArgument = pDoc->createElement((*i).getName());
@@ -394,6 +395,19 @@ ActionResponseWriter::action(Action& action)
     *m_responseBody = ss.str();
     std::cerr << "ResponseBody():" << std::endl << *m_responseBody << std::endl;
 }
+
+
+// Container::Container<E>(const Container& container)
+// {
+//     for (std::map<std::string,E*>::iterator i = m_pEntities.begin(); i != m_pEntities.end(); ++i) {
+//         
+//     }
+// }
+
+// Container<E>*
+// Container::clone()
+// {
+// }
 
 
 Service::~Service()
@@ -433,6 +447,21 @@ Action::getArgument(const std::string& name)
 // {
 //     return m_arguments.get(key).convert<T>();
 // }
+
+
+Action*
+Action::clone()
+{
+    Action* res = new Action();
+    res->m_actionName = m_actionName;
+    res->m_pService = m_pService;
+//     res->m_serviceType = m_serviceType;
+    // make a deep copy of the Arguments
+    for (Container<Argument>::Iterator i = m_arguments.begin(); i != m_arguments.end(); ++i) {
+        res->appendArgument(new Argument(*i));
+    }
+    return res;
+}
 
 
 void
@@ -529,8 +558,8 @@ DescriptionRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerR
 }
 
 
-ControlRequestHandler::ControlRequestHandler(HttpSocket* pHttpSocket):
-m_pHttpSocket(pHttpSocket)
+ControlRequestHandler::ControlRequestHandler(DeviceRoot& deviceRoot):
+m_deviceRoot(&deviceRoot)
 {
 }
 
@@ -538,7 +567,7 @@ m_pHttpSocket(pHttpSocket)
 ControlRequestHandler*
 ControlRequestHandler::create()
 {
-    return new ControlRequestHandler(m_pHttpSocket);
+    return new ControlRequestHandler(*m_deviceRoot);
 }
 
 
@@ -554,12 +583,26 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     request.stream().read(buf, length);
     std::string requestBody(buf, length);
     
+//     std::string urn("urn:schemas-upnp-org:service:");
+    std::string soap = request.get("SOAPACTION");
+    std::string soapAction = soap.substr(1, soap.size()-2);
+    std::string::size_type hash = soapAction.find('#');
+    std::string serviceType = soapAction.substr(0, hash);
+    std::string actionName = soapAction.substr(hash+1);
+    std::cerr << "SOAP request, service: " << serviceType << ", action: " << actionName << std::endl;
+    
+    Service* pService = m_deviceRoot->getServiceType(serviceType);
+    std::cerr << "getServiceType(): " << pService->getServiceType() << std::endl;
+    Action* pAction = pService->getAction(actionName);
+    std::cerr << "getAction(): " << pAction->getName() << std::endl;
+    pAction = pAction->clone();
+    std::cerr << "cloned Action(): " << pAction->getName() << std::endl;
     // TODO: Action needs some info about the Service description (e.g. order of out args)
-    ActionRequestReader requestReader(requestBody);
-    Action* pAction = requestReader.action();
-        // the corresponding Service should register as a Notification Handler
-    m_pHttpSocket->m_notificationCenter.postNotification(pAction);
-        // return Action response with out arguments filled in by Notification Handler
+    ActionRequestReader requestReader(requestBody, pAction);
+    pAction = requestReader.action();
+    // the corresponding Service should register as a Notification Handler
+    m_deviceRoot->postAction(pAction);
+    // return Action response with out arguments filled in by Notification Handler
     std::string responseBody;
     ActionResponseWriter responseWriter(responseBody);
     responseWriter.action(*pAction);
@@ -652,6 +695,16 @@ Device::~Device()
 }
 
 
+void
+Device::addService(Service* pService)
+{
+    std::cerr << "Device::addService(): " << pService->getServiceType() << std::endl;
+    m_services.append(pService->getServiceType(), pService);
+    m_pDeviceRoot->addServiceType(pService->getServiceType(), pService);
+    pService->setDevice(this);
+}
+
+
 DeviceRoot::DeviceRoot() :
 m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
 m_httpSocket(m_ssdpSocket.m_interface)
@@ -664,6 +717,18 @@ DeviceRoot::~DeviceRoot()
     std::cerr << "DeviceRoot::~DeviceRoot()" << std::endl;
     stopSsdp();
 //     delete m_descriptionRequestHandler;
+}
+
+
+Service*
+DeviceRoot::getServiceType(const std::string& serviceType)
+{
+    std::cerr << "DeviceRoot::getServiceType(): " << serviceType << std::endl;
+    std::map<std::string,Service*>::iterator i = m_serviceTypes.find(serviceType);
+    if (i == m_serviceTypes.end()) {
+        std::cerr << "could not find serviceType" << std::endl;
+    }
+    return m_serviceTypes[serviceType];
 }
 
 
@@ -688,7 +753,7 @@ DeviceRoot::init()
             
             service.setDescriptionRequestHandler(); // TODO: probably not needed ...
             registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
-            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(&m_httpSocket));
+            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(*this));
             registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&m_httpSocket));
         }
     }

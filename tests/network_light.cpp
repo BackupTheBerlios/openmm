@@ -86,10 +86,10 @@ NetworkLight::actionHandler(Action* action)
 {
     // TODO: dispatch each received Action to the corresponding method of NetworkLight
     std::cerr << "NetworkLight::actionHandler() receives Action: " << action->getName() 
-        << " (Service: " <<  action->getServiceType() << ")"  << std::endl;
+        << " (Service: " <<  action->getService()->getServiceType() << ")"  << std::endl;
     
     // dispatch all SwitchPower Actions
-    if (action->getServiceType() == "SwitchPower:1") {
+    if (action->getService()->getServiceType() == "SwitchPower:1") {
         std::string actionName = action->getName();
         if (actionName == "SetTarget") {
             bool inArg1;
