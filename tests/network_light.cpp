@@ -89,7 +89,7 @@ NetworkLight::actionHandler(Action* action)
         << " (Service: " <<  action->getService()->getServiceType() << ")"  << std::endl;
     
     // dispatch all SwitchPower Actions
-    if (action->getService()->getServiceType() == "SwitchPower:1") {
+    if (action->getService()->getServiceType() == "urn:schemas-upnp-org:service:SwitchPower:1") {
         std::string actionName = action->getName();
         if (actionName == "SetTarget") {
             bool inArg1;
@@ -101,7 +101,7 @@ NetworkLight::actionHandler(Action* action)
             m_switchPowerImpl->GetTarget(outArg1);
             action->setArgument<bool>("RetTargetValue", outArg1);
         }
-        else if (actionName == "ResultStatus") {
+        else if (actionName == "GetStatus") {
             bool outArg1;
             m_switchPowerImpl->ResultStatus(outArg1);
             action->setArgument<bool>("ResultStatus", outArg1);

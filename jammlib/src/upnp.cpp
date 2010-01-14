@@ -377,6 +377,7 @@ ActionResponseWriter::action(Action& action)
     for(Action::OutArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
         AutoPtr<Element> pArgument = pDoc->createElement((*i).getName());
         AutoPtr<Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i).getName()));
+        std::cerr << "ActionResponseWriter returns arg: " << (*i).getName() << ", val: " << action.getArgument<std::string>((*i).getName()) << std::endl;
         pArgument->appendChild(pArgumentValue);
         pActionResponse->appendChild(pArgument);
     }
@@ -397,17 +398,79 @@ ActionResponseWriter::action(Action& action)
 }
 
 
-// Container::Container<E>(const Container& container)
-// {
-//     for (std::map<std::string,E*>::iterator i = m_pEntities.begin(); i != m_pEntities.end(); ++i) {
-//         
-//     }
-// }
+void
+EventMessageWriter::stateVar(const StateVar& stateVar)
+{
+    std::cerr << "EventMessageWriter::stateVar()" << std::endl;
+    
+    AutoPtr<Document> pDoc = new Document;
+    AutoPtr<Element> pPropertySet = pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "propertyset");
+    AutoPtr<Element> pProperty = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "property");
+    
+    AutoPtr<Element> pStateVar = pDoc->createElement(stateVar.getName());
+    AutoPtr<Text> pStateVarValue = pDoc->createTextNode(stateVar.convert<std::string>());
+    std::cerr << "EventMessageWriter returns: " << stateVar.getName() << ", val: " << stateVar.convert<std::string>() << std::endl;
+    pStateVar->appendChild(pStateVarValue);
+    pProperty->appendChild(pStateVar);
+    pPropertySet->appendChild(pProperty);
+    pDoc->appendChild(pPropertySet);
+    
+    DOMWriter writer;
+    writer.setNewLine("\r\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
+    writer.setOptions(XMLWriter::WRITE_XML_DECLARATION);
+    
+    std::stringstream ss;
+    writer.writeNode(ss, pDoc);
+    *m_eventMessage = ss.str();
+    std::cerr << "event message():" << std::endl << *m_eventMessage << std::endl;
+}
 
-// Container<E>*
-// Container::clone()
-// {
-// }
+
+Subscription::Subscription(std::string callbackUri) :
+m_deliveryAddress(callbackUri)
+{
+    std::cerr << "Subscription::Subscription() uri: " << callbackUri << std::endl;
+    // TODO: implement timer stuff
+    m_uuid = UUIDGenerator().createRandom();
+    std::cerr << "SID: " << m_uuid.toString() << std::endl;
+    m_eventKey = 0;
+    m_pSession = new HTTPClientSession(m_deliveryAddress.getHost(), m_deliveryAddress.getPort());
+}
+
+
+std::string
+Subscription::getEventKey()
+{
+    // TODO: should lock this
+    m_eventKey = (++m_eventKey == 0) ? 1 : m_eventKey;
+    return NumberFormatter::format(m_eventKey);
+}
+
+
+HTTPRequest*
+Subscription::getRequest()
+{
+    HTTPRequest* res = new HTTPRequest("NOTIFY", m_deliveryAddress.getPath(), "HTTP/1.1");
+    res->set("HOST", m_deliveryAddress.getAuthority());
+    res->setContentType("text/xml");
+    res->set("NT", "upnp:event");
+    res->set("NTS", "upnp:propchange");
+    res->set("SID", "uuid:" + m_uuid.toString());
+    return res;
+}
+
+
+void
+Subscription::renew(int seconds)
+{
+}
+
+
+void
+Subscription::expire(Timer& timer)
+{
+}
 
 
 Service::~Service()
@@ -415,20 +478,78 @@ Service::~Service()
 }
 
 
-// void
-// Service::setStateVar(std::string name, std::string val)
-// {
-    // TODO: lock the m_stateVariables map because different threads could access it
-//     m_stateVars.setValue(name, val);
-// }
+void
+Service::addAction(Action* pAction)
+{
+    m_actions.append(pAction->getName(), pAction);
+    pAction->setService(this);
+}
 
 
-// std::string
-// Service::getStateVar(const std::string& name) /*const*/
-// {
-//     return m_stateVars.get(name).convert<std::string>();
-//     return m_stateVars.getValue<std::string>(name);
-// }
+void
+Service::addStateVar(StateVar* pStateVar)
+{
+    std::cerr << "Service::addStateVar() name: " << pStateVar->getName() << " is evented: " << pStateVar->getSendEvents() << std::endl;
+    
+    m_stateVars.append(pStateVar->getName(), pStateVar);
+    if(pStateVar->getSendEvents()) {
+        m_eventedStateVars.append(pStateVar->getName(), pStateVar);
+    }
+}
+
+void
+Service::registerSubscription(Subscription* subscription)
+{
+    std::cerr << "Service::registerSubscription()" << std::endl;
+    
+    Poco::ScopedLock<Poco::FastMutex> lock(m_serviceLock);
+    // TODO: only register a Subscription once from one distinct Controller
+    //       note that Subscription has a new SID
+    std::string sid = subscription->getUuid();
+    std::cerr << "SID: " << sid << std::endl;
+    m_eventSubscriptions.append(sid, subscription);
+}
+
+
+void
+Service::unregisterSubscription(Subscription* subscription)
+{
+    std::cerr << "Service::unregisterSubscription()" << std::endl;
+    
+    Poco::ScopedLock<Poco::FastMutex> lock(m_serviceLock);
+    m_eventSubscriptions.remove(subscription->getUuid());
+    delete subscription;
+}
+
+
+void
+Service::sendEventMessage(StateVar& stateVar)
+{
+    std::cerr << "Service::sendEventMessage()" << std::endl;
+    
+    // TODO: send the messages asynchronous and don't block the Device main thread
+    std::string eventMessage;
+    EventMessageWriter messageWriter(eventMessage);
+    messageWriter.stateVar(stateVar);
+    
+    for (SubscriptionIterator i = beginEventSubscription(); i != endEventSubscription(); ++i) {
+        // set remaining request header fields
+        HTTPRequest* request = (*i).getRequest();
+        request->set("SEQ", (*i).getEventKey());
+        request->setContentLength(eventMessage.size());
+        // set request body and send request
+        std::ostream& ostr = (*i).getSession()->sendRequest(*request);
+        ostr << eventMessage;
+        // TODO: receive answer ...?
+    }
+}
+
+
+void
+Service::sendInitialEventMessage()
+{
+    // TODO: implement this
+}
 
 
 // Argument handling methods
@@ -610,22 +731,16 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     response.setContentType("text/xml");
         // TODO: set EXT header
         // TODO: set SERVER header
+    response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
-    response.setContentLength(responseBody.size());
-}
-
-
-EventRequestHandler::EventRequestHandler(HttpSocket* pHttpSocket):
-m_pHttpSocket(pHttpSocket)
-{
 }
 
 
 EventRequestHandler*
 EventRequestHandler::create()
 {
-    return new EventRequestHandler(m_pHttpSocket);
+    return new EventRequestHandler(m_pService);
 }
 
 
@@ -638,8 +753,18 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
     std::cerr << "NT: " << request.get("NT") << std::endl;
     std::cerr << "TIMEOUT: " << request.get("TIMEOUT") << std::endl;
     
+    std::string sid;
+    
     if (request.getMethod() == "SUBSCRIBE") {
         Timestamp t;
+        if (request.has("SID")) {
+            sid = request.get("SID");
+            // renew subscription
+            m_pService->getSubscription(sid)->renew(1800);
+        }
+        else {
+            m_pService->registerSubscription(new Subscription(request.get("CALLBACK")));
+        }
         response.set("DATE", DateTimeFormatter::format(t, DateTimeFormat::HTTP_FORMAT));
         response.set("SERVER", 
                     Environment::osName() + "/"
@@ -648,8 +773,14 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
                     + JAMM_VERSION);
         response.set("SID", "uuid:" + UUIDGenerator().create().toString());
         response.set("TIMEOUT", "Second-1800");
+        // TODO: make shure the SUBSCRIBE message is received by the controller before
+        //       sending out the initial event message.
+        // TODO: choose timeout according to controller activity
+        // TODO: provide TCP FIN flag or Content-Length=0 before initial event message (see specs p. 65)
+        // TODO: may make subscription uuid's persistance
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
+        m_pService->unregisterSubscription(m_pService->getSubscription(sid));
     }
 }
 
@@ -753,8 +884,9 @@ DeviceRoot::init()
             
             service.setDescriptionRequestHandler(); // TODO: probably not needed ...
             registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
+            // TODO: better pass a *Service than a *DeviceRoot here ...?
             registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(*this));
-            registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&m_httpSocket));
+            registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&(*s)));
         }
     }
     std::cerr << "DeviceRoot::init() finished" << std::endl;

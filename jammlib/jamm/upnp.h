@@ -70,6 +70,8 @@
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/HTTPServerParams.h"
 #include "Poco/Net/HTTPResponse.h"
+#include "Poco/Net/HTTPRequest.h"
+#include "Poco/Net/HTTPClientSession.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeIterator.h"
@@ -130,6 +132,8 @@ using Poco::Net::HTTPServerRequest;
 using Poco::Net::HTTPServerResponse;
 using Poco::Net::HTTPServerParams;
 using Poco::Net::HTTPResponse;
+using Poco::Net::HTTPRequest;
+using Poco::Net::HTTPClientSession;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::NodeIterator;
@@ -153,8 +157,7 @@ using std::istringstream;
 using Poco::StreamCopier;
 
 
-// TODO: Argument stuff right done (Action::clone() method!!)
-// TODO: StateVariable stuff right done
+// TODO: StateVariable stuff right done (locking, operator =)
 // TODO: Event messages
 // TODO: Stubs generator
 // TODO: Controller stuff
@@ -347,25 +350,21 @@ template<class E>
 class Container /*: public Entity*/
 {
 public:
-//     Container() {};
-//     Container(const Container& container);
-//     Container* clone();
-    
     E& get(std::string key) { return *m_pEntities.find(key)->second; }
+    // TODO: make shure that only one entry exists in m_pEntities and m_keys for key
     void append(std::string key, E* pEntity) { m_pEntities[key] = pEntity; m_keys.push_back(key); }
-
+    void remove(std::string key) { m_pEntities.erase(key); m_keys.erase(find(m_keys.begin(), m_keys.end(), key)); }
+    
 //     std::string getValue(const std::string& key) { return m_pEntities[key]->getValue(); }
 //     template<typename T> T getValue(const std::string& key) { return (*m_pEntities[key]).convert<T>(); }
     template<typename T> T getValue(const std::string& key) { 
         DynamicAny* e = (DynamicAny*)(*m_pEntities.find(key)).second;
+        std::cerr << "Container::getValue() key: " << key << ", val: " << e->convert<T>() << std::endl;
         return e->convert<T>(); }
     
 //     void setValue(const std::string& key, const std::string& val) { m_pEntities[key]->setValue(val); }
     template<typename T> void setValue(const std::string& key, const T& val) { std::cerr << "Container::setValue() key: " << key << ", val: " << val << std::endl; DynamicAny* e = (DynamicAny*)m_pEntities[key]; *e = val; }
     
-    // this gave me lot of headaches. See also:
-    // http://stackoverflow.com/questions/1832704/default-assignment-operator-in-inner-class-with-reference-members
-//     
     // should be implemented with standard STL iterator stuff ...?
     class Iterator {
     public:
@@ -385,24 +384,6 @@ public:
     
     inline Iterator begin() { return Iterator(*this, m_keys.begin()); }
     inline Iterator end() { return Iterator(*this, m_keys.end()); }
-//     inline Iterator begin() const { return Iterator(*this, m_keys.begin()); }
-//     inline Iterator end() const { return Iterator(*this, m_keys.end()); }
-    
-//     class ConstIterator /*: public Iterator*/ {
-//     public:
-//         ConstIterator(Container& C, std::vector<std::string>::const_iterator i) : c(&C), pos(i) { }
-//         inline bool operator == (const ConstIterator& val) { return pos == val.pos; }
-//         inline bool operator != (const ConstIterator& val) { return pos != val.pos; }
-//         inline ConstIterator& operator ++ () { ++pos; return *this; }
-//         inline E& operator * () const { return *c->m_pEntities.find(*pos)->second; }
-//         
-//     private:
-//         const Container* c;
-//         std::vector<std::string>::const_iterator pos;
-//     };
-//     
-//     inline ConstIterator constBegin() { return ConstIterator(*this, m_keys.begin()); }
-//     inline ConstIterator constEnd() { return ConstIterator(*this, m_keys.end()); }
     
 private:
     std::map<std::string,E*>    m_pEntities;
@@ -534,6 +515,17 @@ public:
 };
 
 
+class EventMessageWriter : public WriterFactory
+{
+public:
+    EventMessageWriter(std::string& eventMessage) : m_eventMessage(&eventMessage) {}
+    
+    virtual void stateVar(const StateVar& stateVar);
+private:
+    std::string*    m_eventMessage;
+};
+
+
 // TODO: possible request handler types:
 //       RequestNotFoundRequestHandler
 //       FileRequestHandler, MultiFileRequestHandler,
@@ -629,29 +621,31 @@ class EventRequestHandler: public UpnpRequestHandler
 	/// Return answer to an action request
 {
 public:
-    EventRequestHandler(HttpSocket* pHttpSocket);
+    EventRequestHandler(Service* pService) : m_pService(pService) {}
     
     EventRequestHandler* create();
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
     
 private:
-    HttpSocket* m_pHttpSocket;
+//     HttpSocket* m_pHttpSocket;
+    Service*    m_pService;
 };
 
 
 class StateVar : public /*Variant*/ DynamicAny
 {
 public:
-    StateVar() : DynamicAny() {}
-    StateVar(const std::string& val) : DynamicAny(val.c_str()) {}
+    StateVar() : DynamicAny(std::string("")) {}
+    StateVar(const std::string& val) : DynamicAny(val) {}
 //     template<typename T> StateVar(const T& val) : DynamicAny(val) {}
 //     template<typename T> const T& get(std::string key) { return m_stateVars.get(key); }
     
-    std::string getName() { return m_name; }
+    std::string getName() const { return m_name; }
     void setName(std::string name) { m_name = name; }
     void setType(std::string type) { m_type = type; }
     void setDefaultValue(std::string defaultValue) { m_defaultValue = defaultValue; }
     void setSendEvents(std::string sendEvents) { m_sendEvents = (sendEvents=="yes") ? true : false; }
+    bool getSendEvents() { return m_sendEvents; }
     
 private:
     std::string     m_name;
@@ -704,7 +698,7 @@ public:
 //     std::string getServiceType() const { return m_serviceType; }
 //     std::string getArgument (const std::string& name);
 //     template<typename T> const T& getArgument(const std::string& key) { return m_arguments.get(key).convert<T>(); }
-    template<typename T> const T& getArgument(const std::string& name) { return m_arguments.getValue<T>(name); }
+    template<typename T> const T getArgument(const std::string& name) { return m_arguments.getValue<T>(name); }
     
     void setName(std::string name) { m_actionName = name; }
     void setService(Service* pService) { m_pService = pService; }
@@ -725,6 +719,31 @@ private:
 };
 
 
+class Subscription
+{
+public:
+    Subscription(std::string callbackUri);
+    
+    std::string getUuid() { return m_uuid.toString(); }
+    
+    HTTPClientSession* getSession() { return m_pSession; }
+    HTTPRequest* getRequest();
+    std::string getEventKey();
+    
+    void renew(int seconds);  // TODO: implement this
+    void expire(Timer& timer);  // TODO: implement this
+    
+private:
+    URI                 m_deliveryAddress;
+    HTTPClientSession*  m_pSession;
+    UUID                m_uuid;
+    Poco::UInt32        m_eventKey;
+    std::string         m_duration;
+    Timer               m_timer;
+    Service*            m_pService;
+};
+
+
 class Service {
 public:
     Service() {}
@@ -738,8 +757,10 @@ public:
     ControlRequestHandler* getControlRequestHandler() const { return m_controlRequestHandler; }
     Device* getDevice() const { return m_pDevice; }
     Action* getAction(const std::string& actionName) { return &m_actions.get(actionName); }
+    Subscription* getSubscription(const std::string& sid) { return &m_eventSubscriptions.get(sid); }
 //     std::string getStateVar(const std::string& name) /*const*/;
 //     template<typename T> T getStateVar(const std::string& key) { return m_stateVars.get(key).convert<T>(); }
+    
     template<typename T> T getStateVar(const std::string& key) { return m_stateVars.getValue<T>(key); }
     
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
@@ -750,24 +771,47 @@ public:
     void setEventPath(std::string eventPath) { m_eventPath = eventPath; }
     void setDevice(Device* pDevice) { m_pDevice = pDevice; }
 //     void setStateVar(std::string name, std::string val);
-    template<typename T> void setStateVar(std::string key, const T& val) { m_stateVars.setValue(key, val); }
+//     template<typename T> void setStateVar(std::string key, const T& val) { m_stateVars.setValue(key, val); }
+    template<typename T> void setStateVar(std::string key, const T& val);
     
-    void addAction(Action* pAction) { m_actions.append(pAction->getName(), pAction); pAction->setService(this); }
-    void addStateVar(StateVar* pStateVar) { m_stateVars.append(pStateVar->getName(), pStateVar); }
+    void addAction(Action* pAction);
+    void addStateVar(StateVar* pStateVar);
+    
+    typedef Container<StateVar>::Iterator StateVarIterator;
+    StateVarIterator beginEventedStateVar() { return m_eventedStateVars.begin(); }
+    StateVarIterator endEventedStateVar() { return m_eventedStateVars.end(); }
+    
+    typedef Container<Subscription>::Iterator SubscriptionIterator;
+    SubscriptionIterator beginEventSubscription() { return m_eventSubscriptions.begin(); }
+    SubscriptionIterator endEventSubscription() { return m_eventSubscriptions.end(); }
+    
+    void registerSubscription(Subscription* subscription);
+    void unregisterSubscription(Subscription* subscription);
+    
+    // TODO: moderated event messaging
+    // TODO: honor maximumRate and minimumDelta (specs p. 72)
+    void sendEventMessage(StateVar& stateVar);
+    void sendInitialEventMessage();
     
 private:
     Device*                                 m_pDevice;
     std::string                             m_vendorDomain;
     std::string                             m_serviceType;
     std::string                             m_serviceVersion;
-    std::string                             m_descriptionPath;
     std::string                             m_description;
+    std::string                             m_descriptionPath;
     DescriptionRequestHandler*              m_pDescriptionRequestHandler;
     std::string                             m_controlPath;
     ControlRequestHandler*                  m_controlRequestHandler;
+    // NOTE: eventSubURL must be unique to a particular service in a device
+    // --> prepend device uuid and service-type to m_eventPath?
     std::string                             m_eventPath;
     Container<Action>                       m_actions;
     Container<StateVar>                     m_stateVars;
+    Container<StateVar>                     m_eventedStateVars;
+    Container<Subscription>                 m_eventSubscriptions;
+    
+    Poco::FastMutex                         m_serviceLock;
 };
 
 
@@ -864,6 +908,19 @@ private:
     
     SsdpSocket m_ssdpSocket;
 };
+
+
+template<typename T>
+void
+Service::setStateVar(std::string key, const T& val)
+{
+    // TODO: lock the m_stateVariables map because different threads could access it
+    m_stateVars.setValue(key, val);
+    if (m_stateVars.get(key).getSendEvents()) {
+        sendEventMessage(m_stateVars.get(key));
+    }
+}
+
 
 } // namespace Jamm
 

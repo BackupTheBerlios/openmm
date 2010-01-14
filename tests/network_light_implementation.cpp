@@ -46,6 +46,7 @@ SwitchPowerImplementation::SetTarget(bool NewTargetValue)
     // begin of your own code
     std::cerr << "SwitchPowerImplementation::SetTarget() argument NewTargetValue: " << NewTargetValue << std::endl;
     _setTarget(NewTargetValue);
+    _setStatus(NewTargetValue);
     // end of your own code
 }
 
