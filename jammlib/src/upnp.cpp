@@ -293,7 +293,10 @@ DescriptionReader::stateVar()
             pRes->setType(pNode->firstChild()->nodeValue());
         }
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
-            pRes->setDefaultValue(pNode->firstChild()->nodeValue());
+            std::string val = pNode->firstChild()->nodeValue();
+            pRes->setDefaultValue(val);
+            // FIXME: seems StateVar's value isn't set to the default value
+            pRes->convert(val);
         }
         pNode = pNode->nextSibling();
     }
@@ -350,10 +353,10 @@ ActionRequestReader::action()
 }
 
 
-void
-ActionWriter::argument(const Argument& argument)
-{
-}
+// void
+// ActionWriter::argument(const Argument& argument)
+// {
+// }
 
 
 ActionResponseWriter::ActionResponseWriter(std::string& responseBody) :
@@ -398,22 +401,20 @@ ActionResponseWriter::action(Action& action)
 }
 
 
-void
-EventMessageWriter::stateVar(const StateVar& stateVar)
+EventMessageWriter::EventMessageWriter()
 {
-    std::cerr << "EventMessageWriter::stateVar()" << std::endl;
+    std::cerr << "EventMessageWriter::EventMessageWriter()" << std::endl;
     
-    AutoPtr<Document> pDoc = new Document;
-    AutoPtr<Element> pPropertySet = pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "propertyset");
-    AutoPtr<Element> pProperty = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "property");
-    
-    AutoPtr<Element> pStateVar = pDoc->createElement(stateVar.getName());
-    AutoPtr<Text> pStateVarValue = pDoc->createTextNode(stateVar.convert<std::string>());
-    std::cerr << "EventMessageWriter returns: " << stateVar.getName() << ", val: " << stateVar.convert<std::string>() << std::endl;
-    pStateVar->appendChild(pStateVarValue);
-    pProperty->appendChild(pStateVar);
-    pPropertySet->appendChild(pProperty);
-    pDoc->appendChild(pPropertySet);
+    m_pDoc = new Document;
+    m_pPropertySet = m_pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "propertyset");
+    m_pDoc->appendChild(m_pPropertySet);
+}
+
+
+void
+EventMessageWriter::write(std::string& eventMessage)
+{
+    std::cerr << "EventMessageWriter::write()" << std::endl;
     
     DOMWriter writer;
     writer.setNewLine("\r\n");
@@ -421,9 +422,23 @@ EventMessageWriter::stateVar(const StateVar& stateVar)
     writer.setOptions(XMLWriter::WRITE_XML_DECLARATION);
     
     std::stringstream ss;
-    writer.writeNode(ss, pDoc);
-    *m_eventMessage = ss.str();
-    std::cerr << "event message():" << std::endl << *m_eventMessage << std::endl;
+    writer.writeNode(ss, m_pDoc);
+    eventMessage = ss.str();
+    std::cerr << "event message():" << std::endl << ss.str() << std::endl;
+}
+
+
+void
+EventMessageWriter::stateVar(const StateVar& stateVar)
+{
+    std::cerr << "EventMessageWriter::stateVar()" << std::endl;
+    
+    AutoPtr<Element> pProperty = m_pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "property");
+    AutoPtr<Element> pStateVar = m_pDoc->createElement(stateVar.getName());
+    AutoPtr<Text> pStateVarValue = m_pDoc->createTextNode(stateVar.convert<std::string>());
+    pStateVar->appendChild(pStateVarValue);
+    pProperty->appendChild(pStateVar);
+    m_pPropertySet->appendChild(pProperty);
 }
 
 
@@ -458,6 +473,20 @@ Subscription::getRequest()
     res->set("NTS", "upnp:propchange");
     res->set("SID", "uuid:" + m_uuid.toString());
     return res;
+}
+
+
+void
+Subscription::sendEventMessage(const std::string& eventMessage)
+{
+    // set remaining request header fields
+    HTTPRequest* request = getRequest();
+    request->set("SEQ", getEventKey());
+    request->setContentLength(eventMessage.size());
+    // set request body and send request
+    std::ostream& ostr = getSession()->sendRequest(*request);
+    ostr << eventMessage;
+    // TODO: receive answer ...?
 }
 
 
@@ -529,26 +558,28 @@ Service::sendEventMessage(StateVar& stateVar)
     
     // TODO: send the messages asynchronous and don't block the Device main thread
     std::string eventMessage;
-    EventMessageWriter messageWriter(eventMessage);
+    EventMessageWriter messageWriter;
     messageWriter.stateVar(stateVar);
+    messageWriter.write(eventMessage);
     
     for (SubscriptionIterator i = beginEventSubscription(); i != endEventSubscription(); ++i) {
-        // set remaining request header fields
-        HTTPRequest* request = (*i).getRequest();
-        request->set("SEQ", (*i).getEventKey());
-        request->setContentLength(eventMessage.size());
-        // set request body and send request
-        std::ostream& ostr = (*i).getSession()->sendRequest(*request);
-        ostr << eventMessage;
-        // TODO: receive answer ...?
+        (*i).sendEventMessage(eventMessage);
     }
 }
 
 
 void
-Service::sendInitialEventMessage()
+Service::sendInitialEventMessage(Subscription* pSubscription)
 {
-    // TODO: implement this
+    std::cerr << "Service::sendInitialEventMessage()" << std::endl;
+    
+    std::string eventMessage;
+    EventMessageWriter messageWriter;
+    for (StateVarIterator i = beginEventedStateVar(); i != endEventedStateVar(); ++i) {
+        messageWriter.stateVar(*i);
+    }
+    messageWriter.write(eventMessage);
+    pSubscription->sendEventMessage(eventMessage);
 }
 
 
@@ -763,7 +794,9 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
             m_pService->getSubscription(sid)->renew(1800);
         }
         else {
-            m_pService->registerSubscription(new Subscription(request.get("CALLBACK")));
+            Subscription* pSubscription = new Subscription(request.get("CALLBACK"));
+            m_pService->sendInitialEventMessage(pSubscription);
+            m_pService->registerSubscription(pSubscription);
         }
         response.set("DATE", DateTimeFormatter::format(t, DateTimeFormat::HTTP_FORMAT));
         response.set("SERVER", 
@@ -1016,7 +1049,6 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
 //     std::cerr << "root device gets SSDP message:" << std::endl;
 //     std::cerr << pNf->toString();
     
-    // TODO: reply to M-SEARCH messages
     if (pNf->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
         SsdpMessage m;
         m.setRequestMethod(SsdpMessage::REQUEST_RESPONSE);
@@ -1029,6 +1061,13 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
         m.setSearchTarget("upnp:rootdevice");
         // same as USN in NOTIFY message
         m.setUniqueServiceName("uuid:" + m_pRootDevice->getUuid() + "::upnp:rootdevice");
+        
+        // TODO: react on ST field (search target)
+        // TODO: react on MX field (seconds to delay response)
+        //       -> create an SsdpMessageSet and send it out delayed
+        // TODO: fill in the correct value for CacheControl
+        //       -> m_ssdpNotifyAliveMessages.m_sendTimer
+        //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
         
         m_ssdpSocket.sendMessage(m, pNf->getSender());
     }
@@ -1516,8 +1555,7 @@ SsdpSocket::onReadable(const AutoPtr<ReadableNotification>& pNf)
     SocketAddress sender;
     int n = m_ssdpSocket.receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-//         std::cerr << "SsdpSocket::onReadable() receives: " << std::endl << m_pBuffer << std::endl;
-//         std::cerr << "SsdpSocket::onReadable() receives: " << n << " bytes from: " << s.toString() << std::endl;
+//         std::cerr << "SsdpSocket::onReadable() receives: " << std::endl << std::string(m_pBuffer, n) << std::endl;
         m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
     }
 }
@@ -1528,5 +1566,5 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 {
     std::string m = message.toString();
     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
-//     std::cerr << "SsdpSocket::sendMessage() message sent, number bytes: " << bytesSent << std::endl;
+    std::cerr << "SsdpSocket::sendMessage() message sent: " << std::endl << m;
 }

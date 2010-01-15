@@ -357,13 +357,21 @@ public:
     
 //     std::string getValue(const std::string& key) { return m_pEntities[key]->getValue(); }
 //     template<typename T> T getValue(const std::string& key) { return (*m_pEntities[key]).convert<T>(); }
-    template<typename T> T getValue(const std::string& key) { 
+    
+    template<typename T> T getValue(const std::string& key)
+    {
         DynamicAny* e = (DynamicAny*)(*m_pEntities.find(key)).second;
         std::cerr << "Container::getValue() key: " << key << ", val: " << e->convert<T>() << std::endl;
-        return e->convert<T>(); }
+        return e->convert<T>();
+    }
     
 //     void setValue(const std::string& key, const std::string& val) { m_pEntities[key]->setValue(val); }
-    template<typename T> void setValue(const std::string& key, const T& val) { std::cerr << "Container::setValue() key: " << key << ", val: " << val << std::endl; DynamicAny* e = (DynamicAny*)m_pEntities[key]; *e = val; }
+    template<typename T> void setValue(const std::string& key, const T& val)
+    { 
+        std::cerr << "Container::setValue() key: " << key << ", val: " << val << std::endl;
+        DynamicAny* e = (DynamicAny*)m_pEntities[key];
+        *e = val;
+    }
     
     // should be implemented with standard STL iterator stuff ...?
     class Iterator {
@@ -448,19 +456,19 @@ private:
 
 
 /// Writer Factory
-class WriterFactory
-{
-public:
-    virtual void deviceRoot(const DeviceRoot& pDeviceRoot) {}
-    virtual void device(const Device& pDevice) {}
-    virtual void service(const Service& pService) {}
-    virtual void action(const Action& pAction) {}
-    virtual void argument(const Argument& pArgument) {}
-    virtual void stateVar(const StateVar& pStateVar) {}
-};
+// class WriterFactory
+// {
+// public:
+//     virtual void deviceRoot(const DeviceRoot& pDeviceRoot) {}
+//     virtual void device(const Device& pDevice) {}
+//     virtual void service(const Service& pService) {}
+//     virtual void action(const Action& pAction) {}
+//     virtual void argument(const Argument& pArgument) {}
+//     virtual void stateVar(const StateVar& pStateVar) {}
+// };
 
 
-class SsdpNotifyAliveWriter : public WriterFactory
+class SsdpNotifyAliveWriter /*: public WriterFactory*/
 {
 public:
     SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
@@ -475,7 +483,7 @@ private:
 };
 
 
-class SsdpNotifyByebyeWriter : public WriterFactory
+class SsdpNotifyByebyeWriter /*: public WriterFactory*/
 {
 public:
     SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
@@ -489,14 +497,14 @@ private:
 };
 
 
-class ActionWriter : public WriterFactory
-{
-public:
-    virtual void argument(const Argument& argument);
-};
+// class ActionWriter /*: public WriterFactory*/
+// {
+// public:
+//     virtual void argument(const Argument& argument);
+// };
 
 
-class ActionResponseWriter : public ActionWriter
+class ActionResponseWriter /*: public ActionWriter*/
 {
 public:
     ActionResponseWriter(std::string& responseBody);
@@ -508,21 +516,23 @@ private:
 
 
 /// Writer Factory for Controllers
-class ActionRequestWriter : public ActionWriter
+class ActionRequestWriter /*: public ActionWriter*/
 {
 public:
     virtual void action(const Action& action);
 };
 
 
-class EventMessageWriter : public WriterFactory
+class EventMessageWriter /*: public WriterFactory*/
 {
 public:
-    EventMessageWriter(std::string& eventMessage) : m_eventMessage(&eventMessage) {}
-    
+    EventMessageWriter();
+    void write(std::string& eventMessage);
     virtual void stateVar(const StateVar& stateVar);
+
 private:
-    std::string*    m_eventMessage;
+    AutoPtr<Document>   m_pDoc;
+    AutoPtr<Element>    m_pPropertySet;
 };
 
 
@@ -730,6 +740,7 @@ public:
     HTTPRequest* getRequest();
     std::string getEventKey();
     
+    void sendEventMessage(const std::string& eventMessage);
     void renew(int seconds);  // TODO: implement this
     void expire(Timer& timer);  // TODO: implement this
     
@@ -791,7 +802,7 @@ public:
     // TODO: moderated event messaging
     // TODO: honor maximumRate and minimumDelta (specs p. 72)
     void sendEventMessage(StateVar& stateVar);
-    void sendInitialEventMessage();
+    void sendInitialEventMessage(Subscription* pSubscription);
     
 private:
     Device*                                 m_pDevice;
