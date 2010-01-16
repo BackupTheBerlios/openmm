@@ -20,31 +20,15 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include "Poco/Types.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-
-#include "jamm/upnp.h"
-#include "network_light.h"
+#include <jamm/upnp.h>
 #include "network_light_implementation.h"
-
-using Jamm::Device;
-using Jamm::Service;
-using Jamm::DeviceRoot;
-using Poco::UInt8;
-using Poco::StreamCopier;
-using Poco::Util::ServerApplication;
-using Poco::Util::Application;
-using Poco::Util::Option;
-using Poco::Util::OptionSet;
-using Poco::Util::HelpFormatter;
 
 
 void
-SwitchPowerImplementation::SetTarget(bool NewTargetValue)
+SwitchPowerImplementation::SetTarget(const bool& NewTargetValue)
 {
     // begin of your own code
-    std::cerr << "SwitchPowerImplementation::SetTarget() argument NewTargetValue: " << NewTargetValue << std::endl;
+    std::cerr << "SwitchPowerImplementation::SetTarget()" << std::endl;
     _setTarget(NewTargetValue);
     _setStatus(NewTargetValue);
     // end of your own code
@@ -55,36 +39,48 @@ void
 SwitchPowerImplementation::GetTarget(bool& RetTargetValue)
 {
     // begin of your own code
-    std::cerr << "SwitchPowerImplementation::GetTarget() argument RetTargetValue: " << RetTargetValue << std::endl;
+    std::cerr << "SwitchPowerImplementation::GetTarget()" << std::endl;
     RetTargetValue = _getTarget();
     // end of your own code
 }
 
 
 void
-SwitchPowerImplementation::ResultStatus(bool& ResultStatus)
+SwitchPowerImplementation::GetStatus(bool& ResultStatus)
 {
     // begin of your own code
-    std::cerr << "SwitchPowerImplementation::ResultStatus() argument ResultStatus: " << ResultStatus << std::endl;
+    std::cerr << "SwitchPowerImplementation::GetStatus()" << std::endl;
     ResultStatus = _getStatus();
     // end of your own code
 }
 
 
-
 void
-DimmingImplementation::SetLoadLevelTarget(UInt8 newLoadlevelTarget)
+DimmingImplementation::SetLoadLevelTarget(const Jamm::i1& newLoadLevelTarget)
 {
+    // begin of your own code
+    std::cerr << "DimmingImplementation::SetLoadLevelTarget()" << std::endl;
+    _setLoadLevelTarget(newLoadLevelTarget);
+    _setLoadLevelStatus(newLoadLevelTarget);
+    // end of your own code
 }
 
 
 void
-DimmingImplementation::GetLoadLevelTarget(UInt8& retLoadlevelTarget)
+DimmingImplementation::GetLoadLevelTarget(Jamm::i1& retLoadLevelTarget)
 {
+    // begin of your own code
+    std::cerr << "DimmingImplementation::GetLoadLevelTarget()" << std::endl;
+    retLoadLevelTarget = _getLoadLevelTarget();
+    // end of your own code
 }
 
 
 void
-DimmingImplementation::GetLoadLevelStatus(UInt8& retLoadlevelStatus)
+DimmingImplementation::GetLoadLevelStatus(Jamm::i1& retLoadLevelStatus)
 {
+    // begin of your own code
+    std::cerr << "DimmingImplementation::GetLoadLevelStatus()" << std::endl;
+    retLoadLevelStatus = _getLoadLevelStatus();
+    // end of your own code
 }

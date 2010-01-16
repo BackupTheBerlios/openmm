@@ -22,119 +22,78 @@
 #ifndef NETWORK_LIGHT_H
 #define NETWORK_LIGHT_H
 
-#include <fstream>
-
-#include "Poco/Types.h"
-#include "Poco/Util/ServerApplication.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-#include "Poco/Util/HelpFormatter.h"
-#include "Poco/StreamCopier.h"
-#include <sstream>
-
 #include "jamm/upnp.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
 using Jamm::Service;
 using Jamm::DeviceRoot;
 using Jamm::Action;
-using Poco::UInt8;
-using Poco::StreamCopier;
-using Poco::Util::ServerApplication;
-using Poco::Util::Application;
-using Poco::Util::Option;
-using Poco::Util::OptionSet;
-using Poco::Util::HelpFormatter;
-using std::stringstream;
+
+// TODO: What if all (embedded) devices of NetworkLight have SwitchPower and Dimming Services?
+//      -> same implementation
+//      -> differ only in m_pService
 
 // NetworkLight interface
-// TODO: should be created by a stub generator
-// TODO: declare all in arguments as const references
-// TODO: what if different embedded devices have the same Service?
-// TODO: solve name conflict, when different Services have Action of same name
+class NetworkLight;
 
 // Service SwitchPower
-
-class SwitchPower/* : public Service*/
+class SwitchPower
 {
-        // Interface to be implemented.
+    friend class NetworkLight;
+
 public:
-//     SwitchPower(Service* service/*, SwitchPowerInterface* serviceImpl*/);
-        // Actions received from a Controller
-//     virtual void SetTarget(bool NewTargetValue) {/* empty implementation */}
-//     virtual void GetTarget(bool& RetTargetValue) {/* empty implementation */}
-//     virtual void ResultStatus(bool& ResultStatus) {/* empty implementation */}
-    
-    virtual void SetTarget(bool NewTargetValue) = 0;
+    virtual void SetTarget(const bool& NewTargetValue) = 0;
     virtual void GetTarget(bool& RetTargetValue) = 0;
-    virtual void ResultStatus(bool& ResultStatus) = 0;
+    virtual void GetStatus(bool& ResultStatus) = 0;
     
-    Service*                m_service;
+    // getter/setter methods for StatusVariables
+    void _setTarget(const bool& target);
+    bool _getTarget();
+    void _setStatus(const bool& status);
+    bool _getStatus();
     
-protected:
-        // getter/setter methods for StatusVariables
-    // TODO: implement the StatusVariable stuff (could be some common code with the Action argument stuff).
-    void _setTarget(bool target) { m_service->setStateVar<bool>("Target", target); }
-    bool _getTarget() { return m_service->getStateVar<bool>("Target"); }
-    void _setStatus(bool status) { m_service->setStateVar<bool>("Status", status); }
-    bool _getStatus() { return m_service->getStateVar<bool>("Status"); }
-    
-
 private:
-//     SwitchPowerInterface*   m_serviceImpl;
+    Service*    m_pService;
 };
-
-
 
 
 // Service Dimming
-class Dimming/* : public Service*/
+class Dimming
 {
-        // Interface to be implemented.
+    friend class NetworkLight;
+    
 public:
-//     Dimming(Service* service);
-        // Actions received from a Controller
-//     virtual void SetLoadLevelTarget(UInt8 newLoadlevelTarget) {}
-//     virtual void GetLoadLevelTarget(UInt8& retLoadlevelTarget) {}
-//     virtual void GetLoadLevelStatus(UInt8& retLoadlevelStatus) {}
+    virtual void SetLoadLevelTarget(const Jamm::i1& newLoadLevelTarget) = 0;
+    virtual void GetLoadLevelTarget(Jamm::i1& retLoadLevelTarget) = 0;
+    virtual void GetLoadLevelStatus(Jamm::i1& retLoadLevelStatus) = 0;
     
-    virtual void SetLoadLevelTarget(UInt8 newLoadlevelTarget) = 0;
-    virtual void GetLoadLevelTarget(UInt8& retLoadlevelTarget) = 0;
-    virtual void GetLoadLevelStatus(UInt8& retLoadlevelStatus) = 0;
+    // getter/setter methods for StatusVariables
+    void _setLoadLevelTarget(const Jamm::i1& target);
+    Jamm::i1 _getLoadLevelTarget();
+    void _setLoadLevelStatus(const Jamm::i1& status);
+    Jamm::i1 _getLoadLevelStatus();
     
-    Service*         m_service;
-    
-protected:
-        // getter/setter methods for StatusVariables
-    void _setLoadLevelTarget(bool target) {/* setStatusVariableBool("Target", target); */}
-    bool _getLoadLevelTarget() {}
-    void _setLoadLevelStatus(bool status) {}
-    bool _getLoadLevelStatus() {}
-    
-
 private:
+    Service*    m_pService;
 };
 
 
-class NetworkLight /*: public DeviceRoot*/
+class NetworkLight
 {
-    // code for dispatching events to methods etc. ...
 public:
     NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl);
     ~NetworkLight();
     
+    // TODO: implement this ...
+    void setUuid(std::string uuid);
+    void setFriendlyName(std::string friendlyName);
+    
 private:
     void actionHandler(Action* action);
     
-    // for now, m_deviceRoot is the link into the "dynamic-string-world".
-    // get rid of the ctor DeviceRoot(std::string description) and we can inherit DeviceRoot
-    // and set the description later
-    DeviceRoot*     m_deviceRoot;
-    
-    SwitchPower*    m_switchPowerImpl;
-    Dimming*        m_dimmingImpl;
+    // m_deviceRoot is the link into the "dynamic-string-world".
+    DeviceRoot*     m_pDeviceRoot;
+    SwitchPower*    m_pSwitchPowerImpl;
+    Dimming*        m_pDimmingImpl;
 };
 
 #endif

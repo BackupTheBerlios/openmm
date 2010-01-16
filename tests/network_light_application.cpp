@@ -112,7 +112,7 @@ protected:
             SwitchPowerImplementation   mySwitchPowerServiceImplementation;
             DimmingImplementation       myDimmingServiceImplementation;
             NetworkLight                networkLight(
-                                            &mySwitchPowerServiceImplementation, 
+                                            &mySwitchPowerServiceImplementation,
                                             &myDimmingServiceImplementation
                                         );
             

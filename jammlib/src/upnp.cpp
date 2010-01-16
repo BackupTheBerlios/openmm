@@ -296,7 +296,7 @@ DescriptionReader::stateVar()
             std::string val = pNode->firstChild()->nodeValue();
             pRes->setDefaultValue(val);
             // FIXME: seems StateVar's value isn't set to the default value
-            pRes->convert(val);
+            pRes->setValue(val);
         }
         pNode = pNode->nextSibling();
     }
@@ -435,7 +435,7 @@ EventMessageWriter::stateVar(const StateVar& stateVar)
     
     AutoPtr<Element> pProperty = m_pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "property");
     AutoPtr<Element> pStateVar = m_pDoc->createElement(stateVar.getName());
-    AutoPtr<Text> pStateVarValue = m_pDoc->createTextNode(stateVar.convert<std::string>());
+    AutoPtr<Text> pStateVarValue = m_pDoc->createTextNode(stateVar.getValue());
     pStateVar->appendChild(pStateVarValue);
     pProperty->appendChild(pStateVar);
     m_pPropertySet->appendChild(pProperty);
@@ -583,44 +583,17 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
 }
 
 
-// Argument handling methods
-/*std::string
-Action::getArgument(const std::string& name)
-{*/
-//     std::cerr << "Action::getArgument() name: " << name << ", val: " << m_arguments.get(name) << std::endl;
-//     return m_argumentValues[name];
-//     return m_arguments.get(name);
-// }
-
-
-// template<typename T>
-// const T&
-// Action::getArgument(std::string key)
-// {
-//     return m_arguments.get(key).convert<T>();
-// }
-
-
 Action*
 Action::clone()
 {
     Action* res = new Action();
     res->m_actionName = m_actionName;
     res->m_pService = m_pService;
-//     res->m_serviceType = m_serviceType;
     // make a deep copy of the Arguments
     for (Container<Argument>::Iterator i = m_arguments.begin(); i != m_arguments.end(); ++i) {
         res->appendArgument(new Argument(*i));
     }
     return res;
-}
-
-
-void
-Action::setArgument(std::string name, std::string value)
-{
-    std::cerr << "Action::setArgument() name: " << name << ", val: " << value << std::endl;
-    m_arguments.setValue(name, value);
 }
 
 
@@ -693,7 +666,7 @@ m_description(description)
 DescriptionRequestHandler*
 DescriptionRequestHandler::create()
 {
-        // TODO: can we somehow avoid to make a copy of the RequestHandler on each request?
+    // TODO: can we somehow avoid to make a copy of the RequestHandler on each request?
     return new DescriptionRequestHandler(m_description);
 }
 
@@ -726,7 +699,8 @@ ControlRequestHandler::create()
 void
 ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
 {
-    std::cerr << "handle control request: " << request.getURI() << std::endl;
+    std::cerr << "***********************" << std::endl
+              << "handle control request: " << request.getURI() << std::endl;
         // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
         // otherwise it should return and an event should be sent on finishing the action request.
 //         handleAction(new Action());
@@ -749,7 +723,7 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     std::cerr << "getAction(): " << pAction->getName() << std::endl;
     pAction = pAction->clone();
     std::cerr << "cloned Action(): " << pAction->getName() << std::endl;
-    // TODO: Action needs some info about the Service description (e.g. order of out args)
+    // TODO: introduce ActionRequestReader::write(Action*) to get rid of confusing pAction stuff
     ActionRequestReader requestReader(requestBody, pAction);
     pAction = requestReader.action();
     // the corresponding Service should register as a Notification Handler
@@ -765,6 +739,8 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
+    std::cerr << "finished control request: " << request.getURI() << std::endl
+              << "*************************" << std::endl;
 }
 
 
@@ -824,7 +800,6 @@ HttpSocket::HttpSocket(NetworkInterface interface)
     
     m_pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory(this);
     
-        // TODO: offer device description via HTTP, TCP/IP for download to controllers
     HTTPServerParams* pParams = new HTTPServerParams;
     //     pParams->setMaxQueued(maxQueued);
     //     pParams->setMaxThreads(maxThreads);
@@ -833,9 +808,6 @@ HttpSocket::HttpSocket(NetworkInterface interface)
         // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
     //     socket.bind(m_ssdpSocket.m_interface.address());
     m_httpServerAddress = SocketAddress(interface.address(), socket.address().port());
-        // set-up a HTTPServer instance
-        // TODO: pass a map of all URI (devices and services) -> xml stream
-        // for URI use the device/service name
     m_pHttpServer = new HTTPServer(m_pDeviceRequestHandlerFactory, socket, pParams);
         // start the HTTPServer
     m_pHttpServer->start();
@@ -1051,6 +1023,7 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
     
     if (pNf->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
         SsdpMessage m;
+        // TODO: use a skeleton to create response message
         m.setRequestMethod(SsdpMessage::REQUEST_RESPONSE);
         m.setCacheControl();
         m.setDate();
@@ -1566,5 +1539,5 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 {
     std::string m = message.toString();
     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
-    std::cerr << "SsdpSocket::sendMessage() message sent: " << std::endl << m;
+//     std::cerr << "SsdpSocket::sendMessage() message sent: " << std::endl << m;
 }

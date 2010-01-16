@@ -23,45 +23,26 @@
 #ifndef NETWORK_LIGHT_IMPLEMENTATION_H
 #define NETWORK_LIGHT_IMPLEMENTATION_H
 
-#include "Poco/Types.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-
 #include "jamm/upnp.h"
 #include "network_light.h"
 
-using Jamm::Device;
-using Jamm::Service;
-using Jamm::DeviceRoot;
-using Poco::UInt8;
-using Poco::StreamCopier;
-using Poco::Util::ServerApplication;
-using Poco::Util::Application;
-using Poco::Util::Option;
-using Poco::Util::OptionSet;
-using Poco::Util::HelpFormatter;
-
 // Implementation of Service SwitchPower
-
 class SwitchPowerImplementation : public SwitchPower
 {
 public:
-//     SwitchPowerImplementation(/*Service* service*/);
-    
-    virtual void SetTarget(bool NewTargetValue);
+    virtual void SetTarget(const bool& NewTargetValue);
     virtual void GetTarget(bool& RetTargetValue);
-    virtual void ResultStatus(bool& ResultStatus);
+    virtual void GetStatus(bool& ResultStatus);
 };
 
 
+// Implementation of Service Dimming
 class DimmingImplementation : public Dimming
 {
 public:
-//     DimmingImplementation(/*Service* service*/);
-    
-    virtual void SetLoadLevelTarget(UInt8 newLoadlevelTarget);
-    virtual void GetLoadLevelTarget(UInt8& retLoadlevelTarget);
-    virtual void GetLoadLevelStatus(UInt8& retLoadlevelStatus);
+    virtual void SetLoadLevelTarget(const Jamm::i1& newLoadLevelTarget);
+    virtual void GetLoadLevelTarget(Jamm::i1& retLoadLevelTarget);
+    virtual void GetLoadLevelStatus(Jamm::i1& retLoadLevelStatus);
 };
 
 #endif

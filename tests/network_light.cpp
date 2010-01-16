@@ -20,91 +20,135 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <fstream>
-
-#include "Poco/Types.h"
-#include "Poco/Util/ServerApplication.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-#include "Poco/Util/HelpFormatter.h"
-#include "Poco/StreamCopier.h"
-#include <sstream>
-
-#include "jamm/upnp.h"
+#include <jamm/upnp.h>
 #include "network_light.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
-using Jamm::Service;
-using Jamm::DeviceRoot;
-using Jamm::Action;
-using Jamm::ControlRequestHandler;
-using Jamm::DescriptionReader;
-using Poco::UInt8;
-using Poco::StreamCopier;
-using Poco::Path;
-using Poco::Util::ServerApplication;
-using Poco::Util::Application;
-using Poco::Util::Option;
-using Poco::Util::OptionSet;
-using Poco::Util::HelpFormatter;
-using std::stringstream;
-
-
-NetworkLight::NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl) :
-m_switchPowerImpl(switchPowerImpl),
-m_dimmingImpl(dimmingImpl)
+void
+SwitchPower::_setTarget(const bool& target)
 {
-    // TODO: stub generator should transform device description into a static string.
+    m_pService->setStateVar<bool>("Target", target);
+}
+
+
+bool
+SwitchPower::_getTarget()
+{
+    return m_pService->getStateVar<bool>("Target");
+}
+
+
+void
+SwitchPower::_setStatus(const bool& status)
+{
+    m_pService->setStateVar<bool>("Status", status);
+}
+
+
+bool
+SwitchPower::_getStatus()
+{
+    return m_pService->getStateVar<bool>("Status");
+}
+
+
+void
+Dimming::_setLoadLevelTarget(const Jamm::i1& target)
+{
+    m_pService->setStateVar<Jamm::i1>("LoadLevelTarget", target);
+}
+
+
+Jamm::i1
+Dimming::_getLoadLevelTarget()
+{
+    return m_pService->getStateVar<Jamm::i1>("LoadLevelTarget");
+}
+
+
+void Dimming::_setLoadLevelStatus(const Jamm::i1& status)
+{
+    m_pService->setStateVar<Jamm::i1>("LoadLevelStatus", status);
+}
+
+
+Jamm::i1
+Dimming::_getLoadLevelStatus()
+{
+    return m_pService->getStateVar<Jamm::i1>("LoadLevelStatus");
+}
+
+
+NetworkLight::NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl)
+{
+    // TODO: stub generator should transform device description into a string.
+    //       and add code to set Uuid, friendlyName etc. from application config.
     //       Don't read the description from a file in this place.
-    DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
-    m_deviceRoot = descriptionReader.deviceRoot();
-    
+    Jamm::DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+    m_pDeviceRoot = descriptionReader.deviceRoot();
+    m_pSwitchPowerImpl = switchPowerImpl;
     // Service implementation needs a pointer to Service to access StateVariables
-    // TODO: use UUID and not getRootDevice() here
-    m_switchPowerImpl->m_service = &m_deviceRoot->getRootDevice()->getService("urn:schemas-upnp-org:service:SwitchPower:1");
-    m_dimmingImpl->m_service = &m_deviceRoot->getRootDevice()->getService("urn:schemas-upnp-org:service:Dimming:1");
+    m_pSwitchPowerImpl->m_pService = m_pDeviceRoot->getDevice("23b0189c-549f-11dc-a7c7-001641597c49")->getService("urn:schemas-upnp-org:service:SwitchPower:1");
     
-    m_deviceRoot->registerActionHandler(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
+    m_pDimmingImpl = dimmingImpl;
+    m_pDimmingImpl->m_pService = m_pDeviceRoot->getDevice("23b0189c-549f-11dc-a7c7-001641597c49")->getService("urn:schemas-upnp-org:service:Dimming:1");
     
-    m_deviceRoot->startHttp();
+    m_pDeviceRoot->registerActionHandler(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
     
-    m_deviceRoot->init();
-    m_deviceRoot->startSsdp();
+    m_pDeviceRoot->init();
+    m_pDeviceRoot->startHttp();
+    m_pDeviceRoot->startSsdp();
 }
 
 
 NetworkLight::~NetworkLight()
 {
-    delete m_deviceRoot;
+    delete m_pDeviceRoot;
 }
 
 
 void
-NetworkLight::actionHandler(Action* action)
+NetworkLight::actionHandler(Action* pAction)
 {
-    // TODO: dispatch each received Action to the corresponding method of NetworkLight
-    std::cerr << "NetworkLight::actionHandler() receives Action: " << action->getName() 
-        << " (Service: " <<  action->getService()->getServiceType() << ")"  << std::endl;
+    std::cerr << "NetworkLight::actionHandler() receives Action: " << pAction->getName() 
+        << " (Service: " <<  pAction->getService()->getServiceType() << ")"  << std::endl;
     
     // dispatch all SwitchPower Actions
-    if (action->getService()->getServiceType() == "urn:schemas-upnp-org:service:SwitchPower:1") {
-        std::string actionName = action->getName();
+    if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:SwitchPower:1") {
+        std::string actionName = pAction->getName();
         if (actionName == "SetTarget") {
             bool inArg1;
-            inArg1 = action->getArgument<bool>("NewTargetValue");
-            m_switchPowerImpl->SetTarget(inArg1);
+            inArg1 = pAction->getArgument<bool>("NewTargetValue");
+            m_pSwitchPowerImpl->SetTarget(inArg1);
         }
         else if (actionName == "GetTarget") {
             bool outArg1;
-            m_switchPowerImpl->GetTarget(outArg1);
-            action->setArgument<bool>("RetTargetValue", outArg1);
+            m_pSwitchPowerImpl->GetTarget(outArg1);
+            pAction->setArgument<bool>("RetTargetValue", outArg1);
         }
         else if (actionName == "GetStatus") {
             bool outArg1;
-            m_switchPowerImpl->ResultStatus(outArg1);
-            action->setArgument<bool>("ResultStatus", outArg1);
+            m_pSwitchPowerImpl->GetStatus(outArg1);
+            pAction->setArgument<bool>("ResultStatus", outArg1);
+        }
+    }
+    
+    // dispatch all Dimming Actions
+    if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:Dimming:1") {
+        std::string actionName = pAction->getName();
+        if (actionName == "SetLoadLevelTarget") {
+            Jamm::i1 inArg1;
+            inArg1 = pAction->getArgument<Jamm::i1>("newLoadlevelTarget");
+            m_pDimmingImpl->SetLoadLevelTarget(inArg1);
+        }
+        else if (actionName == "GetLoadLevelTarget") {
+            Jamm::i1 outArg1;
+            m_pDimmingImpl->GetLoadLevelTarget(outArg1);
+            pAction->setArgument<Jamm::i1>("retLoadlevelTarget", outArg1);
+        }
+        else if (actionName == "GetLoadLevelStatus") {
+            Jamm::i1 outArg1;
+            m_pDimmingImpl->GetLoadLevelStatus(outArg1);
+            pAction->setArgument<Jamm::i1>("retLoadlevelStatus", outArg1);
         }
     }
 }
