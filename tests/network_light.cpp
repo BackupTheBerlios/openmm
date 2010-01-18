@@ -83,7 +83,7 @@ NetworkLight::NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl)
     // TODO: stub generator should transform device description into a string.
     //       and add code to set Uuid, friendlyName etc. from application config.
     //       Don't read the description from a file in this place.
-    Jamm::DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+    Jamm::DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/xml/"), "network-light-desc.xml");
     m_pDeviceRoot = descriptionReader.deviceRoot();
     m_pSwitchPowerImpl = switchPowerImpl;
     // Service implementation needs a pointer to Service to access StateVariables

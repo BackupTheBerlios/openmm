@@ -377,7 +377,7 @@ ActionResponseWriter::action(Action& action)
     AutoPtr<Element> pBody = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
     AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + action.getService()->getServiceType(), action.getName() + "Response");
     
-    for(Action::OutArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
+    for(Action::ArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
         AutoPtr<Element> pArgument = pDoc->createElement((*i).getName());
         AutoPtr<Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i).getName()));
         std::cerr << "ActionResponseWriter returns arg: " << (*i).getName() << ", val: " << action.getArgument<std::string>((*i).getName()) << std::endl;
@@ -809,14 +809,27 @@ HttpSocket::HttpSocket(NetworkInterface interface)
     //     socket.bind(m_ssdpSocket.m_interface.address());
     m_httpServerAddress = SocketAddress(interface.address(), socket.address().port());
     m_pHttpServer = new HTTPServer(m_pDeviceRequestHandlerFactory, socket, pParams);
-        // start the HTTPServer
+}
+
+
+void
+HttpSocket::startServer()
+{
     m_pHttpServer->start();
     std::cerr << "started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
 }
 
-HttpSocket::~HttpSocket()
+
+void
+HttpSocket::stopServer()
 {
     m_pHttpServer->stop();
+    std::cerr << "stopped HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+}
+
+
+HttpSocket::~HttpSocket()
+{
     delete m_pHttpServer;
 }
 
@@ -842,6 +855,7 @@ Device::addService(Service* pService)
 
 
 DeviceRoot::DeviceRoot() :
+// TODO: allocate sockets later, not in ctor (e.g. jammgen)
 m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
 m_httpSocket(m_ssdpSocket.m_interface)
 {
@@ -852,6 +866,7 @@ DeviceRoot::~DeviceRoot()
 {
     std::cerr << "DeviceRoot::~DeviceRoot()" << std::endl;
     stopSsdp();
+    stopHttp();
 //     delete m_descriptionRequestHandler;
 }
 
@@ -872,6 +887,9 @@ void
 DeviceRoot::init()
 {
     std::cerr << "DeviceRoot::init()" << std::endl;
+//     m_ssdpSocket = SsdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
+//     m_httpSocket = HttpSocket(m_ssdpSocket.m_interface);
+        
     SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
     aliveWriter.deviceRoot(*this);
@@ -1005,6 +1023,14 @@ DeviceRoot::stopSsdp()
 void
 DeviceRoot::startHttp()
 {
+    m_httpSocket.startServer();
+}
+
+
+void
+DeviceRoot::stopHttp()
+{
+    m_httpSocket.stopServer();
 }
 
 

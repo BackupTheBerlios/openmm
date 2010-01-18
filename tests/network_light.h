@@ -22,7 +22,7 @@
 #ifndef NETWORK_LIGHT_H
 #define NETWORK_LIGHT_H
 
-#include "jamm/upnp.h"
+#include <jamm/upnp.h>
 
 using Jamm::Service;
 using Jamm::DeviceRoot;

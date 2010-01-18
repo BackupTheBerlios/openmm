@@ -599,18 +599,20 @@ private:
 
 class HttpSocket
 {
+    friend class DeviceRoot;
+    
 public:
     HttpSocket(NetworkInterface interface);
     ~HttpSocket();
     
     std::string getServerUri() { return "http://" + m_httpServerAddress.toString() + "/"; }
+    void startServer();
+    void stopServer();
     
-    // TODO: make this private
+private:
     SocketAddress                   m_httpServerAddress;
     DeviceRequestHandlerFactory*    m_pDeviceRequestHandlerFactory;
     NotificationCenter              m_notificationCenter;
-    
-private:
     HTTPServer*                     m_pHttpServer;
 };
 
@@ -695,13 +697,13 @@ public:
     
     Action* clone();
     
-    typedef Container<Argument>::Iterator InArgumentIterator;
-    InArgumentIterator beginInArgument() { return m_inArguments.begin(); }
-    InArgumentIterator endInArgument() { return m_inArguments.end(); }
-    
-    typedef Container<Argument>::Iterator OutArgumentIterator;
-    OutArgumentIterator beginOutArgument() { return m_outArguments.begin(); }
-    OutArgumentIterator endOutArgument() { return m_outArguments.end(); }
+    typedef Container<Argument>::Iterator ArgumentIterator;
+    ArgumentIterator beginArgument() { return m_arguments.begin(); }
+    ArgumentIterator endArgument() { return m_arguments.end(); }
+    ArgumentIterator beginInArgument() { return m_inArguments.begin(); }
+    ArgumentIterator endInArgument() { return m_inArguments.end(); }
+    ArgumentIterator beginOutArgument() { return m_outArguments.begin(); }
+    ArgumentIterator endOutArgument() { return m_outArguments.end(); }
     
     std::string getName() const { return m_actionName; }
     Service* getService() { return m_pService; }
@@ -786,8 +788,14 @@ public:
     void addStateVar(StateVar* pStateVar);
     
     typedef Container<StateVar>::Iterator StateVarIterator;
+    StateVarIterator beginStateVar() { return m_stateVars.begin(); }
+    StateVarIterator endStateVar() { return m_stateVars.end(); }
     StateVarIterator beginEventedStateVar() { return m_eventedStateVars.begin(); }
     StateVarIterator endEventedStateVar() { return m_eventedStateVars.end(); }
+    
+    typedef Container<Action>::Iterator ActionIterator;
+    ActionIterator beginAction() { return m_actions.begin(); }
+    ActionIterator endAction() { return m_actions.end(); }
     
     typedef Container<Subscription>::Iterator SubscriptionIterator;
     SubscriptionIterator beginEventSubscription() { return m_eventSubscriptions.begin(); }
@@ -877,8 +885,9 @@ public:
     
     void init();
     void startSsdp();
-    void stopSsdp();
     void startHttp();
+    void stopSsdp();
+    void stopHttp();
     
     void registerActionHandler(const AbstractObserver& observer)
     { m_httpSocket.m_notificationCenter.addObserver(observer); }
