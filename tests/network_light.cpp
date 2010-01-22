@@ -22,7 +22,43 @@
 
 #include <jamm/upnp.h>
 #include "network_light.h"
+#include "network_light_descriptions.h"
 
+
+void
+NetworkLight::start()
+{
+    // TODO: write modified device description to m_description
+    // TODO: maybe, write newly assigned uuids as keys to DeviceRoot::m_devices
+    //       -> Container needs an append(const Entity&)
+    m_pDeviceRoot->init();
+    m_pDeviceRoot->startHttp();
+    m_pDeviceRoot->startSsdp();
+}
+
+
+void
+NetworkLight::stop()
+{
+    m_pDeviceRoot->stopSsdp();
+    m_pDeviceRoot->stopHttp();
+}
+
+
+NetworkLight::~NetworkLight()
+{
+    delete m_pDeviceRoot;
+}
+
+
+void
+NetworkLight::setFriendlyName(const std::string& friendlyName)
+{
+    // set Property friendlyName of **Device**
+}
+
+
+// getter/setter for each StateVar (which is not an A_ARG ?!)
 void
 SwitchPower::_setTarget(const bool& target)
 {
@@ -78,31 +114,24 @@ Dimming::_getLoadLevelStatus()
 }
 
 
-NetworkLight::NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl)
+NetworkLight::NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl) :
+m_pSwitchPowerImpl(switchPowerImpl),
+m_pDimmingImpl(dimmingImpl)
 {
-    // TODO: stub generator should transform device description into a string.
-    //       and add code to set Uuid, friendlyName etc. from application config.
-    //       Don't read the description from a file in this place.
-    Jamm::DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/xml/"), "network-light-desc.xml");
+    // TODO: stub generator should add code to set Uuid, friendlyName etc. from application config.
+    
+    // register device description
+    m_descriptions["network-light-desc.xml"] = &NetworkLight::m_description;
+    // for each service type register description
+    m_descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::m_description;
+    m_descriptions["/Dimming-scpd.xml"] = &Dimming::m_description;
+    
+    // read in descriptions and build DeviceRoot
+    Jamm::StringDescriptionReader descriptionReader(m_descriptions, "network-light-desc.xml");
     m_pDeviceRoot = descriptionReader.deviceRoot();
-    m_pSwitchPowerImpl = switchPowerImpl;
-    // Service implementation needs a pointer to Service to access StateVariables
-    m_pSwitchPowerImpl->m_pService = m_pDeviceRoot->getDevice("23b0189c-549f-11dc-a7c7-001641597c49")->getService("urn:schemas-upnp-org:service:SwitchPower:1");
     
-    m_pDimmingImpl = dimmingImpl;
-    m_pDimmingImpl->m_pService = m_pDeviceRoot->getDevice("23b0189c-549f-11dc-a7c7-001641597c49")->getService("urn:schemas-upnp-org:service:Dimming:1");
-    
+    // register the great action dispatcher
     m_pDeviceRoot->registerActionHandler(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
-    
-    m_pDeviceRoot->init();
-    m_pDeviceRoot->startHttp();
-    m_pDeviceRoot->startSsdp();
-}
-
-
-NetworkLight::~NetworkLight()
-{
-    delete m_pDeviceRoot;
 }
 
 
@@ -114,6 +143,8 @@ NetworkLight::actionHandler(Action* pAction)
     
     // dispatch all SwitchPower Actions
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:SwitchPower:1") {
+        // TODO: may do some locking here (all SwitchPower Actions set m_pService)
+        m_pSwitchPowerImpl->m_pService = pAction->getService();
         std::string actionName = pAction->getName();
         if (actionName == "SetTarget") {
             bool inArg1;
@@ -134,6 +165,7 @@ NetworkLight::actionHandler(Action* pAction)
     
     // dispatch all Dimming Actions
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:Dimming:1") {
+        m_pDimmingImpl->m_pService = pAction->getService();
         std::string actionName = pAction->getName();
         if (actionName == "SetLoadLevelTarget") {
             Jamm::i1 inArg1;
@@ -152,3 +184,4 @@ NetworkLight::actionHandler(Action* pAction)
         }
     }
 }
+

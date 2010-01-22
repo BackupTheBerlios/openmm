@@ -35,7 +35,7 @@ using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
 using Jamm::Device;
 using Jamm::DeviceRoot;
-using Jamm::DescriptionReader;
+using Jamm::UriDescriptionReader;
 using Poco::StreamCopier;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -112,7 +112,7 @@ protected:
             DeviceRoot* device = new DeviceRoot();
             device->init(s);*/
             
-            DescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+            UriDescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
             
             DeviceRoot* device = descriptionReader.deviceRoot();
             

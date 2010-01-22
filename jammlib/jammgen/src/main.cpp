@@ -124,7 +124,7 @@ protected:
         }
         else
         {
-            Jamm::DescriptionReader descriptionReader(URI("file:" + m_descriptionPath + "/"), m_description);
+            Jamm::UriDescriptionReader descriptionReader(URI("file:" + m_descriptionPath + "/"), m_description);
             Jamm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot();
             
             m_stubWriters.push_back(new DeviceH(pDeviceRoot, m_outputPath));

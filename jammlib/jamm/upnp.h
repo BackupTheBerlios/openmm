@@ -428,57 +428,112 @@ private:
 
 
 /// Reader Factory
-class ReaderFactory
-{
-public:
-    virtual DeviceRoot* deviceRoot() { return NULL; }
-    virtual Device* device() { return NULL; }
-    virtual Service* service() { return NULL; }
-    virtual Action* action() { return NULL; }
-    virtual Argument* argument() { return NULL; }
-    virtual StateVar* stateVar() { return NULL; }
-};
+// class ReaderFactory
+// {
+// public:
+//     virtual DeviceRoot* deviceRoot() { return NULL; }
+//     virtual Device* device() { return NULL; }
+//     virtual Service* service() { return NULL; }
+//     virtual Action* action() { return NULL; }
+//     virtual Argument* argument() { return NULL; }
+//     virtual StateVar* stateVar() { return NULL; }
+// };
 
 
 /// Reader Factory that reads in Xml Device and Service Descriptions
 /// and generates the Entities for a complete DeviceRoot
-class DescriptionReader : public ReaderFactory
+class DescriptionReader /*: public ReaderFactory*/
 {
 public:
-    DescriptionReader(URI uri, std::string deviceDescriptionPath);
+    DescriptionReader(std::string deviceDescriptionPath) : m_deviceDescriptionPath(deviceDescriptionPath) {}
     ~DescriptionReader();
     
-    virtual DeviceRoot* deviceRoot();
+    /*virtual*/ DeviceRoot* deviceRoot();
     
-private:
-    std::string getDescription(std::string path);
+protected:
+    virtual std::string& getDescription(const std::string& path) = 0;
+    
     void releaseDescriptionDocument();
     
-    virtual Device* device();
-    virtual Service* service();
-    virtual Action* action();
-    virtual Argument* argument();
-    virtual StateVar* stateVar();
+    /*virtual*/ Device* device();
+    /*virtual*/ Service* service();
+    /*virtual*/ Action* action();
+    /*virtual*/ Argument* argument();
+    /*virtual*/ StateVar* stateVar();
     
-    URI                     m_uri;
     std::string             m_deviceDescriptionPath;
+    // TODO: replace m_nodeStack by argument Node* in the factory methods
     std::stack<Node*>       m_nodeStack;
     std::stack<Document*>   m_pDocStack;
     DeviceRoot*             m_pDeviceRoot;
 };
 
 
-class ActionRequestReader : public ReaderFactory
+class UriDescriptionReader : public DescriptionReader
+{
+public:
+    UriDescriptionReader(URI uri, const std::string& deviceDescriptionPath);
+    
+private:
+    virtual std::string& getDescription(const std::string& path);
+    URI m_uri;
+};
+
+
+class StringDescriptionReader : public DescriptionReader
+{
+public:
+    StringDescriptionReader(std::map<std::string,std::string*>& stringMap, const std::string& deviceDescriptionPath);
+    
+private:
+    virtual std::string& getDescription(const std::string& path);
+    std::map<std::string,std::string*>*  m_pStringMap;
+};
+
+
+class ActionRequestReader /*: public ReaderFactory*/
 {
 public:
     ActionRequestReader(const std::string& requestBody, Action* pActionTemplate);
     
-    virtual Action* action();
+    /*virtual*/ Action* action();
     
 private:
+    // TODO: replace m_nodeStack by Node* in action()
     std::stack<Node*>       m_nodeStack;
     AutoPtr<Document>       m_pDoc;
     Action*                 m_pActionTemplate;
+};
+
+
+class DeviceDescriptionWriter
+{
+public:
+    DeviceDescriptionWriter();
+    
+    void deviceRoot(DeviceRoot& deviceRoot);
+    void write(std::string& description);
+    
+private:
+    Element* device(Device& device);
+    AutoPtr<Document>   m_pDoc;
+};
+
+
+class ServiceDescriptionWriter
+{
+public:
+    ServiceDescriptionWriter(std::string& description) : m_pDescription(&description), m_pDoc(new Document) {}
+    
+    void service(Service& service);
+    
+private:
+    void stateVar(StateVar& stateVar);
+    void action(Action& action);
+    void argument(Argument& argument);
+    
+    std::string*        m_pDescription;
+    AutoPtr<Document>   m_pDoc;
 };
 
 
@@ -487,9 +542,9 @@ class SsdpNotifyAliveWriter
 public:
     SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
     
-    virtual void deviceRoot(const DeviceRoot& pDeviceRoot);
-    virtual void device(const Device& pDevice);
-    virtual void service(const Service& pService);
+    /*virtual*/ void deviceRoot(const DeviceRoot& pDeviceRoot);
+    /*virtual*/ void device(const Device& pDevice);
+    /*virtual*/ void service(const Service& pService);
 
 private:
     SsdpMessageSet*            m_res;
@@ -501,9 +556,9 @@ class SsdpNotifyByebyeWriter
 public:
     SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
     
-    virtual void deviceRoot(const DeviceRoot& pDeviceRoot);
-    virtual void device(const Device& pDevice);
-    virtual void service(const Service& pService);
+    /*virtual*/ void deviceRoot(const DeviceRoot& pDeviceRoot);
+    /*virtual*/ void device(const Device& pDevice);
+    /*virtual*/ void service(const Service& pService);
     
 private:
     SsdpMessageSet*            m_res;
@@ -515,7 +570,7 @@ class ActionResponseWriter
 public:
     ActionResponseWriter(std::string& responseBody);
     // TODO: couldn't cope with the const argument stuff here ...
-    virtual void action(Action& action);
+    /*virtual*/ void action(Action& action);
 private:
     std::string*    m_responseBody;
 };
@@ -525,7 +580,7 @@ private:
 class ActionRequestWriter
 {
 public:
-    virtual void action(const Action& action);
+    /*virtual*/ void action(const Action& action);
 };
 
 
@@ -534,7 +589,7 @@ class EventMessageWriter
 public:
     EventMessageWriter();
     void write(std::string& eventMessage);
-    virtual void stateVar(const StateVar& stateVar);
+    /*virtual*/ void stateVar(const StateVar& stateVar);
 
 private:
     AutoPtr<Document>   m_pDoc;
@@ -577,7 +632,8 @@ private:
     // TODO: only store a copy of the device/service description in Device/Service, not
     // in the RequestHandler. This segfaults, that's why a copy is stored here, for now ...
 //     std::string&        m_description;
-    std::string        m_description;
+    std::string*    m_pDescription;
+//     std::string        m_description;
 //     std::istream&       m_descriptionStream;
 //     int                 m_length;
 };
@@ -625,13 +681,15 @@ class VariableQuery : public Notification
 class ControlRequestHandler: public UpnpRequestHandler
 {
 public:
-    ControlRequestHandler(DeviceRoot& deviceRoot);
+//     ControlRequestHandler(DeviceRoot& deviceRoot);
+    ControlRequestHandler(Service* service);
     
     ControlRequestHandler* create();
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
     
 private:
-    DeviceRoot* m_deviceRoot;
+//     DeviceRoot* m_deviceRoot;
+    Service*    m_pService;
 };
 
 
@@ -766,6 +824,8 @@ public:
     
     std::string getServiceType() const { return m_serviceType; }
     std::string getDescriptionPath() const { return m_descriptionPath; }
+//     std::string& getDescription() { return m_description; }
+    std::string& getDescription() { return *m_pDescription; }
     std::string getControlPath() const { return m_controlPath; }
     std::string getEventPath() const { return m_eventPath; }
     DescriptionRequestHandler* getDescriptionRequestHandler() const { return m_pDescriptionRequestHandler; }
@@ -777,8 +837,10 @@ public:
     
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
     void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
-    void setDescription(std::string description) { m_description = description; }
-    void setDescriptionRequestHandler() { m_pDescriptionRequestHandler = new DescriptionRequestHandler(m_description); }
+//     void setDescription(std::string description) { m_description = description; }
+    void setDescription(std::string& description) { m_pDescription = &description; }
+//     void setDescriptionRequestHandler() { m_pDescriptionRequestHandler = new DescriptionRequestHandler(m_description); }
+    void setDescriptionRequestHandler() { m_pDescriptionRequestHandler = new DescriptionRequestHandler(*m_pDescription); }
     void setControlPath(std::string controlPath) { m_controlPath = controlPath; }
     void setEventPath(std::string eventPath) { m_eventPath = eventPath; }
     void setDevice(Device* pDevice) { m_pDevice = pDevice; }
@@ -814,7 +876,8 @@ private:
     std::string                             m_vendorDomain;
     std::string                             m_serviceType;
     std::string                             m_serviceVersion;
-    std::string                             m_description;
+//     std::string                             m_description;
+    std::string*                            m_pDescription;
     std::string                             m_descriptionPath;
     DescriptionRequestHandler*              m_pDescriptionRequestHandler;
     std::string                             m_controlPath;
@@ -872,12 +935,12 @@ public:
     
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
-    std::string& getDeviceDescription() { return m_deviceDescription; }
+    std::string& getDeviceDescription() { return *m_pDeviceDescription; }
     const URI& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
-    void setDeviceDescription(std::string description) { m_deviceDescription = description; }
+    void setDeviceDescription(std::string& description) { m_pDeviceDescription = &description; }
     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = URI(m_httpSocket.getServerUri() + descriptionPath); }
     
     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
@@ -900,7 +963,8 @@ public:
     
 private:
     URI                             m_descriptionUri;  // for controller to download description
-    std::string                     m_deviceDescription;
+//     std::string                     m_deviceDescription;
+    std::string*                    m_pDeviceDescription;
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
     std::map<std::string,Service*>  m_serviceTypes;

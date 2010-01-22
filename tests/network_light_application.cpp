@@ -115,8 +115,9 @@ protected:
                                             &mySwitchPowerServiceImplementation,
                                             &myDimmingServiceImplementation
                                         );
-            
+            networkLight.start();
             waitForTerminationRequest();
+            // networkLight.stop();
         }
         return Application::EXIT_OK;
     }

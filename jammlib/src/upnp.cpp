@@ -35,10 +35,52 @@ using Poco::Environment;
 using namespace Jamm;
 
 
-DescriptionReader::DescriptionReader(URI uri, std::string deviceDescriptionPath) :
-m_uri(uri),
-m_deviceDescriptionPath(deviceDescriptionPath)
+UriDescriptionReader::UriDescriptionReader(URI uri, const std::string& deviceDescriptionPath) :
+DescriptionReader(deviceDescriptionPath),
+m_uri(uri)
 {
+}
+
+
+std::string&
+UriDescriptionReader::getDescription(const std::string& path)
+{
+    // TODO: get description according to m_uri.service() ("file:/" or "http:/")
+    std::string p = m_uri.getPath() + path;
+    std::cerr << "DescriptionReader::getDescription() from: " << p << std::endl;
+    std::stringstream ss;
+    std::ifstream ifs(p.c_str());
+    StreamCopier::copyStream(ifs, ss);
+    
+    std::string* res = new std::string(ss.str());
+    // TODO: put this into deviceRoot() as it is common with StringDescriptionReader
+    DOMParser parser;
+    m_pDocStack.push(parser.parseString(*res));
+    Node* n = m_pDocStack.top()->documentElement()->firstChild();
+    std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
+    m_nodeStack.push(n);
+    return *res;
+}
+
+
+StringDescriptionReader::StringDescriptionReader(std::map<std::string,std::string*>& stringMap, const std::string& deviceDescriptionPath) :
+DescriptionReader(deviceDescriptionPath),
+m_pStringMap(&stringMap)
+{
+}
+
+
+std::string&
+StringDescriptionReader::getDescription(const std::string& path)
+{
+    std::cerr << "StringDescriptionReader::getDescription()" << std::endl;
+    std::string* res = (*m_pStringMap)[path];
+    DOMParser parser;
+    m_pDocStack.push(parser.parseString(*res));
+    Node* n = m_pDocStack.top()->documentElement()->firstChild();
+    std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
+    m_nodeStack.push(n);
+    return *res;
 }
 
 
@@ -56,25 +98,6 @@ DescriptionReader::releaseDescriptionDocument()
         m_pDocStack.top()->release();
         m_pDocStack.pop();
     }*/
-}
-
-
-std::string
-DescriptionReader::getDescription(std::string path)
-{
-    // TODO: get description according to m_uri.service() ("file:/" or "http:/")
-    std::string p = m_uri.getPath() + path;
-    std::cerr << "DescriptionReader::getDescription() from: " << p << std::endl;
-    std::stringstream ss;
-    std::ifstream ifs(p.c_str());
-    StreamCopier::copyStream(ifs, ss);
-    std::string res = ss.str();
-    DOMParser parser;
-    m_pDocStack.push(parser.parseString(res));
-    Node* n = m_pDocStack.top()->documentElement()->firstChild();
-    std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
-    m_nodeStack.push(n);
-    return res;
 }
 
 
@@ -350,6 +373,70 @@ ActionRequestReader::action()
     m_nodeStack.pop();
     std::cerr << "ActionRequestReader::action() finished" << std::endl;
     return pRes;
+}
+
+
+DeviceDescriptionWriter::DeviceDescriptionWriter()
+{
+    m_pDoc = new Document;
+}
+
+
+void
+DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
+{
+    AutoPtr<Element> pRoot = m_pDoc->createElementNS("urn:schemas-upnp-org:device-1-0", "root");
+    AutoPtr<Element> pSpecVersion = m_pDoc->createElement("specVersion");
+    AutoPtr<Element> pMajor = m_pDoc->createElement("major");
+    AutoPtr<Element> pMinor = m_pDoc->createElement("major");
+    AutoPtr<Text> pMajorVersion = m_pDoc->createTextNode("1");
+    AutoPtr<Text> pMinorVersion = m_pDoc->createTextNode("0");
+    pMajor->appendChild(pMajorVersion);
+    pMinor->appendChild(pMinorVersion);
+    pSpecVersion->appendChild(pMajor);
+    pSpecVersion->appendChild(pMinor);
+    pRoot->appendChild(pSpecVersion);
+    // write root device
+    Element* pRootDevice = device(*deviceRoot.getRootDevice());
+    pRoot->appendChild(pRootDevice);
+    // end root device
+    
+    // if there are embedded devices open a deviceList
+    // write embedded devices
+    // end embedded devices
+    
+    // end DeviceRoot
+}
+
+
+Element*
+DeviceDescriptionWriter::device(Device& device)
+{
+    AutoPtr<Element> pDevice = m_pDoc->createElement("device");
+    // write Properties
+    
+    // write Services
+    
+    // write PresentationURL
+//     AutoPtr<Element> pPresentationUrl = m_pDoc->createElement(device->getPresentationUri());
+    return pDevice;
+}
+
+
+void
+DeviceDescriptionWriter::write(std::string& description)
+{
+    std::cerr << "DeviceDescriptionWriter::write()" << std::endl;
+    
+    DOMWriter writer;
+    writer.setNewLine("\r\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
+    writer.setOptions(XMLWriter::WRITE_XML_DECLARATION);
+    
+    std::stringstream ss;
+    writer.writeNode(ss, m_pDoc);
+    description = ss.str();
+    std::cerr << "description:" << std::endl << ss.str() << std::endl;
 }
 
 
@@ -658,7 +745,8 @@ RequestNotFoundRequestHandler::handleRequest(HTTPServerRequest& request, HTTPSer
 
 
 DescriptionRequestHandler::DescriptionRequestHandler(std::string& description):
-m_description(description)
+// m_description(description)
+m_pDescription(&description)
 {
 }
 
@@ -667,7 +755,8 @@ DescriptionRequestHandler*
 DescriptionRequestHandler::create()
 {
     // TODO: can we somehow avoid to make a copy of the RequestHandler on each request?
-    return new DescriptionRequestHandler(m_description);
+//     return new DescriptionRequestHandler(m_description);
+    return new DescriptionRequestHandler(*m_pDescription);
 }
 
 
@@ -676,15 +765,30 @@ DescriptionRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerR
 {
     std::cerr << "handle description request: " << request.getURI() << std::endl;
 //         std::cerr << "sending contents of length: " << m_description.size() << std::endl;
-    response.setContentLength(m_description.size());
+//     response.setContentLength(m_description.size());
+    response.setContentLength(m_pDescription->size());
     response.setContentType("text/xml");
     std::ostream& ostr = response.send();
-    ostr << m_description;
+//     ostr << m_description;
+    ostr << *m_pDescription;
 }
 
 
-ControlRequestHandler::ControlRequestHandler(DeviceRoot& deviceRoot):
-m_deviceRoot(&deviceRoot)
+// ControlRequestHandler::ControlRequestHandler(DeviceRoot& deviceRoot):
+// m_deviceRoot(&deviceRoot)
+// {
+// }
+// 
+// 
+// ControlRequestHandler*
+// ControlRequestHandler::create()
+// {
+//     return new ControlRequestHandler(*m_deviceRoot);
+// }
+
+
+ControlRequestHandler::ControlRequestHandler(Service* service):
+m_pService(service)
 {
 }
 
@@ -692,7 +796,7 @@ m_deviceRoot(&deviceRoot)
 ControlRequestHandler*
 ControlRequestHandler::create()
 {
-    return new ControlRequestHandler(*m_deviceRoot);
+    return new ControlRequestHandler(m_pService);
 }
 
 
@@ -701,15 +805,13 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
 {
     std::cerr << "***********************" << std::endl
               << "handle control request: " << request.getURI() << std::endl;
-        // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
-        // otherwise it should return and an event should be sent on finishing the action request.
-//         handleAction(new Action());
+    // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
+    // otherwise it should return and an event should be sent on finishing the action request.
     int length = request.getContentLength();
     char buf[length];
     request.stream().read(buf, length);
     std::string requestBody(buf, length);
     
-//     std::string urn("urn:schemas-upnp-org:service:");
     std::string soap = request.get("SOAPACTION");
     std::string soapAction = soap.substr(1, soap.size()-2);
     std::string::size_type hash = soapAction.find('#');
@@ -717,9 +819,8 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     std::string actionName = soapAction.substr(hash+1);
     std::cerr << "SOAP request, service: " << serviceType << ", action: " << actionName << std::endl;
     
-    Service* pService = m_deviceRoot->getServiceType(serviceType);
-    std::cerr << "getServiceType(): " << pService->getServiceType() << std::endl;
-    Action* pAction = pService->getAction(actionName);
+    std::cerr << "getServiceType(): " << m_pService->getServiceType() << std::endl;
+    Action* pAction = m_pService->getAction(actionName);
     std::cerr << "getAction(): " << pAction->getName() << std::endl;
     pAction = pAction->clone();
     std::cerr << "cloned Action(): " << pAction->getName() << std::endl;
@@ -727,7 +828,7 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     ActionRequestReader requestReader(requestBody, pAction);
     pAction = requestReader.action();
     // the corresponding Service should register as a Notification Handler
-    m_deviceRoot->postAction(pAction);
+    m_pService->getDevice()->getDeviceRoot()->postAction(pAction);
     // return Action response with out arguments filled in by Notification Handler
     std::string responseBody;
     ActionResponseWriter responseWriter(responseBody);
@@ -887,8 +988,6 @@ void
 DeviceRoot::init()
 {
     std::cerr << "DeviceRoot::init()" << std::endl;
-//     m_ssdpSocket = SsdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
-//     m_httpSocket = HttpSocket(m_ssdpSocket.m_interface);
         
     SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
@@ -905,10 +1004,11 @@ DeviceRoot::init()
             aliveWriter.service(service);
             byebyeWriter.service(service);
             
-            service.setDescriptionRequestHandler(); // TODO: probably not needed ...
-            registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
-            // TODO: better pass a *Service than a *DeviceRoot here ...?
-            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(*this));
+//             service.setDescriptionRequestHandler(); // TODO: probably not needed ...
+//             registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
+            
+            registerHttpRequestHandler(service.getDescriptionPath(), new DescriptionRequestHandler((*s).getDescription()));
+            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(&(*s)));
             registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&(*s)));
         }
     }

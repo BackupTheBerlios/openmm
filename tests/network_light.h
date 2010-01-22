@@ -28,14 +28,10 @@ using Jamm::Service;
 using Jamm::DeviceRoot;
 using Jamm::Action;
 
-// TODO: What if all (embedded) devices of NetworkLight have SwitchPower and Dimming Services?
-//      -> same implementation
-//      -> differ only in m_pService
-
 // NetworkLight interface
 class NetworkLight;
 
-// Service SwitchPower
+// Service SwitchPower (ServiceType, like a class)
 class SwitchPower
 {
     friend class NetworkLight;
@@ -52,7 +48,8 @@ public:
     bool _getStatus();
     
 private:
-    Service*    m_pService;
+    static std::string   m_description;
+    Service*             m_pService;  // like pointer this, that points to the object
 };
 
 
@@ -73,7 +70,8 @@ public:
     Jamm::i1 _getLoadLevelStatus();
     
 private:
-    Service*    m_pService;
+    static std::string  m_description;
+    Service*            m_pService;
 };
 
 
@@ -83,17 +81,22 @@ public:
     NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl);
     ~NetworkLight();
     
+    void start();
+    void stop();
+    
     // TODO: implement this ...
-    void setUuid(std::string uuid);
-    void setFriendlyName(std::string friendlyName);
+//     void setUuid(std::string uuid);
+    void setFriendlyName(const std::string& friendlyName);
     
 private:
     void actionHandler(Action* action);
     
+    static std::string                  m_description;
+    std::map<std::string,std::string*>  m_descriptions;
     // m_deviceRoot is the link into the "dynamic-string-world".
-    DeviceRoot*     m_pDeviceRoot;
-    SwitchPower*    m_pSwitchPowerImpl;
-    Dimming*        m_pDimmingImpl;
+    DeviceRoot*                         m_pDeviceRoot;
+    SwitchPower*                        m_pSwitchPowerImpl;
+    Dimming*                            m_pDimmingImpl;
 };
 
 #endif
