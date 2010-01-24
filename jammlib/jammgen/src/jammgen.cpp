@@ -20,12 +20,24 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/String.h>
+
 #include "jammgen.h"
 
 StubWriter::StubWriter(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 m_pDeviceRoot(pDeviceRoot),
 m_outputPath(outputPath)
 {
+    Jamm::Urn deviceType(pDeviceRoot->getRootDevice()->getDeviceType());
+/*    int right = deviceType.rfind(':');
+    int left = deviceType.rfind(':', right - 1);
+    m_deviceName = deviceType.substr(left + 1, right - left - 1);*/
+    m_deviceName = deviceType.getTypeName();
+    m_outputPath += "/";
+    std::cout << "DeviceName: " << m_deviceName << std::endl;
+    
+    m_typeMapper["boolean"] = "bool";
+    m_typeMapper["ui1"] = "Jamm::ui1";
 }
 
 
@@ -33,61 +45,210 @@ void
 StubWriter::write()
 {
     deviceRoot(*m_pDeviceRoot);
-    for (DeviceRoot::DeviceIterator d = m_pDeviceRoot->beginDevice(); d != m_pDeviceRoot->endDevice(); ++d) {
-        Device& rd = *d;
+    for (DeviceRoot::ServiceTypeIterator s = m_pDeviceRoot->beginServiceType(); s != m_pDeviceRoot->endServiceType(); ++s) {
+        Service& rs = *((*s).second);
+        serviceType(rs);
+        for (Service::ActionIterator a = rs.beginAction(); a != rs.endAction(); ++a) {
+            Action& ra = **a;
+            action(ra);
+            for (Action::ArgumentIterator arg = ra.beginArgument(); arg != ra.endArgument(); ++arg) {
+                int dist = distance(arg, ra.endArgument());
+                Argument& rarg = **arg;
+                argument(rarg, dist == 1);
+            }
+            actionEnd(ra);
+        }
+        actionBlockEnd();
+        for (Service::StateVarIterator sv = rs.beginStateVar(); sv != rs.endStateVar(); ++sv) {
+            StateVar& rsv = **sv;
+            stateVar(rsv);
+        }
+        serviceTypeEnd(rs);
+    }
+    deviceRootEnd(*m_pDeviceRoot);
+    
+/*    for (DeviceRoot::DeviceIterator d = m_pDeviceRoot->beginDevice(); d != m_pDeviceRoot->endDevice(); ++d) {
+        Device& rd = **d;
         device(rd);
         for (Device::ServiceIterator s = rd.beginService(); s != rd.endService(); ++s) {
-            Service& rs = *s;
+            Service& rs = **s;
             service(rs);
             for (Service::StateVarIterator sv = rs.beginStateVar(); sv != rs.endStateVar(); ++sv) {
-                StateVar& rsv = *sv;
+                StateVar& rsv = **sv;
                 stateVar(rsv);
             }
             for (Service::ActionIterator a = rs.beginAction(); a != rs.endAction(); ++a) {
-                Action& ra = *a;
+                Action& ra = **a;
                 action(ra);
                 for (Action::ArgumentIterator arg = ra.beginArgument(); arg != ra.endArgument(); ++arg) {
-                    Argument& rarg = *arg;
+                    Argument& rarg = **arg;
                     argument(rarg);
                 }
             }
         }
+    }*/
+}
+
+
+std::string
+StubWriter::indent(int level)
+{
+    std::string res = "";
+    while(level--) {
+        res += "    ";
     }
+    return res;
+}
+
+
+std::string
+StubWriter::firstLetterToLower(const std::string& s)
+{
+    return Poco::toLower(s.substr(0, 1)) + s.substr(1);
+}
+
+
+DeviceH::DeviceH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
+StubWriter(pDeviceRoot, outputPath),
+m_out((m_outputPath + m_deviceName + ".h").c_str())
+{
 }
 
 
 void
 DeviceH::deviceRoot(const DeviceRoot& deviceRoot)
 {
+    m_out
+        << "#ifndef " << Poco::toUpper(m_deviceName) << "_H" << std::endl
+        << "#define " << Poco::toUpper(m_deviceName) << "_H" << std::endl
+        << std::endl
+        << "#include <jamm/upnp.h>" << std::endl
+        << std::endl
+        << "class " << m_deviceName << ";"
+        << std::endl;
 }
 
 
 void
-DeviceH::device(const Device& device)
+DeviceH::deviceRootEnd(const DeviceRoot& deviceRoot)
 {
+    std::string ctorArgs = "";
+//     std::string implPointers = "";
+    int i = m_serviceNames.size();
+    while (i--) {
+        ctorArgs += m_serviceNames[i] + "* p" + m_serviceNames[i] + "Impl" + (i ? ", " : "");
+    }
+    
+    m_out << std::endl
+        << "class " << m_deviceName << " : public DeviceRootImplAdapter" << std::endl
+        << "{" << std::endl
+        << "public:" << std::endl
+        << indent(1) << m_deviceName << "("
+        << ctorArgs
+        << ");" << std::endl
+        << std::endl
+        << "private:" << std::endl
+        << indent(1) << "virtual void actionHandler(Action* action);" << std::endl
+        << std::endl
+        << indent(1) << "static std::string m_deviceDescription;" << std::endl
+        ;
+    
+    i = m_serviceNames.size();
+    while (i--) {
+        m_out << indent(1) << m_serviceNames[i] << "* m_p" << m_serviceNames[i] << "Impl;" << std::endl;
+    }
+    
+    m_out
+        << "}" << std::endl
+        << std::endl
+        << "#endif" << std::endl
+        << std::endl;
 }
 
 
 void
-DeviceH::service(const Service& service)
+DeviceH::serviceType(const Service& service)
 {
+    Jamm::Urn serviceType(service.getServiceType());
+    std::string serviceName = serviceType.getTypeName();
+    m_serviceNames.push_back(serviceName);
+    
+    m_out << std::endl
+        << "class " << serviceName << std::endl
+        << "{" << std::endl
+        << "friend class " << m_deviceName << ";" << std::endl
+        << std::endl
+        << "public:"
+        << std::endl;
 }
 
 
 void
-DeviceH::stateVar(const StateVar& stateVar)
+DeviceH::serviceTypeEnd(const Service& service)
 {
+    m_out << std::endl
+        << "private:" << std::endl
+        << indent(1) << "static std::string  m_description;" << std::endl
+        << indent(1) << "Service*            m_pService;" << std::endl
+        << "};" << std::endl
+        << std::endl;
 }
 
 
 void
 DeviceH::action(const Action& action)
 {
+    m_out
+        << indent(1) << "virtual void " << action.getName() << "("
+        ;
 }
 
 
 void
-DeviceH::argument(const Argument& argument)
+DeviceH::actionEnd(const Action& action)
+{
+    m_out
+        << ") = 0;"
+        << std::endl;
+}
+
+
+void
+DeviceH::actionBlockEnd()
+{
+    m_out << std::endl;
+}
+
+
+void
+DeviceH::argument(const Argument& argument, bool lastArgument)
+{
+    m_out
+        << ((argument.getDirection() == "in") ? "const " : "")
+        << m_typeMapper[argument.getRelatedStateVarReference()->getType()]
+        << "& " << argument.getName()
+        << (lastArgument ? "" : ", ")
+        ;
+}
+
+
+void
+DeviceH::stateVar(const StateVar& stateVar)
+{
+    m_out
+        << indent(1) << "void _set" << stateVar.getName() << "(const "
+        << m_typeMapper[stateVar.getType()] << "& val);"
+        << std::endl
+        << indent(1) << m_typeMapper[stateVar.getType()]
+        << " _get" << stateVar.getName() << "();"
+        << std::endl;
+}
+
+
+DeviceImplH::DeviceImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
+StubWriter(pDeviceRoot, outputPath),
+m_out((m_outputPath + m_deviceName + "Impl.h.sample").c_str())
+// m_out(&std::cout)
 {
 }
 
@@ -95,36 +256,130 @@ DeviceH::argument(const Argument& argument)
 void
 DeviceImplH::deviceRoot(const DeviceRoot& deviceRoot)
 {
+    m_out
+        << "#ifndef " << Poco::toUpper(m_deviceName) << "_IMPLEMENTATION_H" << std::endl
+        << "#define " << Poco::toUpper(m_deviceName) << "_IMPLEMENTATION_H" << std::endl
+        << std::endl
+        << "#include <jamm/upnp.h>" << std::endl
+        << "#include \"" << m_deviceName << ".h\"" << std::endl
+        << std::endl;
 }
 
 
 void
-DeviceImplH::device(const Device& device)
+DeviceImplH::deviceRootEnd(const DeviceRoot& deviceRoot)
 {
+    m_out
+        << "#endif" << std::endl
+        << std::endl;
 }
 
 
 void
-DeviceImplH::service(const Service& service)
+DeviceImplH::serviceType(const Service& service)
 {
+    Jamm::Urn serviceType(service.getServiceType());
+    std::string serviceName = serviceType.getTypeName();
+
+    m_out
+        << "class " << serviceName << "Implementation : public " << serviceName << std::endl
+        << "{" << std::endl
+        << "public:"
+        << std::endl;
 }
 
 
 void
-DeviceImplH::stateVar(const StateVar& stateVar)
+DeviceImplH::serviceTypeEnd(const Service& service)
 {
+    m_out
+        << "};" << std::endl
+        << std::endl;
 }
 
 
 void
 DeviceImplH::action(const Action& action)
 {
+    m_out
+        << indent(1) << "virtual void " << action.getName() << "("
+        ;
 }
 
 
 void
-DeviceImplH::argument(const Argument& argument)
+DeviceImplH::actionEnd(const Action& action)
 {
+    m_out
+        << ");"
+        << std::endl;
+}
+
+
+void
+DeviceImplH::argument(const Argument& argument, bool lastArgument)
+{
+    m_out
+        << ((argument.getDirection() == "in") ? "const " : "")
+        << m_typeMapper[argument.getRelatedStateVarReference()->getType()]
+        << "& " << argument.getName()
+        << (lastArgument ? "" : ", ")
+        ;
+}
+
+
+DeviceImplCpp::DeviceImplCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
+StubWriter(pDeviceRoot, outputPath),
+m_out((m_outputPath + m_deviceName + "Impl.cpp.sample").c_str())
+// m_out(&std::cout)
+{
+}
+
+
+void
+DeviceImplCpp::deviceRoot(const DeviceRoot& deviceRoot)
+{
+    m_out
+        << "#include <jamm/upnp.h>" << std::endl
+        << "#include \"" << m_deviceName << "Impl.h\"" << std::endl
+        << std::endl;
+}
+
+
+void
+DeviceImplCpp::action(const Action& action)
+{
+    Jamm::Urn urn(action.getService()->getServiceType());
+    m_out
+        << "void" << std::endl << urn.getTypeName() << "Implementation::" << action.getName() 
+        << "(";
+}
+
+
+void
+DeviceImplCpp::actionEnd(const Action& action)
+{
+    m_out
+        << ")" << std::endl
+        << "{" << std::endl
+        << "// begin of your own code" << std::endl
+        << std::endl
+        << "// end of your own code" << std::endl
+        << "}" << std::endl
+        << std::endl
+        << std::endl;
+}
+
+
+void
+DeviceImplCpp::argument(const Argument& argument, bool lastArgument)
+{
+    m_out
+        << ((argument.getDirection() == "in") ? "const " : "")
+        << m_typeMapper[argument.getRelatedStateVarReference()->getType()]
+        << "& " << argument.getName()
+        << (lastArgument ? "" : ", ")
+        ;
 }
 
 

@@ -78,7 +78,7 @@ protected:
                             .required(false)
                             .repeatable(false));
         options.addOption(Option("description", "d", "device description file")
-                            .required(true)
+                            .required(false)
                             .repeatable(false)
                             .argument("description name", true));
         options.addOption(Option("description-path", "p", "path to device and service description files")
@@ -129,6 +129,8 @@ protected:
             
             m_stubWriters.push_back(new DeviceH(pDeviceRoot, m_outputPath));
 //             m_stubWriters.push_back(new DeviceCpp(pDeviceRoot, m_outputPath));
+            m_stubWriters.push_back(new DeviceImplH(pDeviceRoot, m_outputPath));
+            m_stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, m_outputPath));
             
             for (std::vector<StubWriter*>::iterator i = m_stubWriters.begin(); i != m_stubWriters.end(); ++i) {
                 (*i)->write();

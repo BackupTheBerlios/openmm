@@ -109,6 +109,7 @@ protected:
         }
         else
         {
+            std::cerr << "NetworkLightApplication::main()" << std::endl;
             SwitchPowerImplementation   mySwitchPowerServiceImplementation;
             DimmingImplementation       myDimmingServiceImplementation;
             NetworkLight                networkLight(

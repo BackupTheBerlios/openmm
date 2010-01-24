@@ -1,4 +1,7 @@
-std::string NetworkLight::m_description = 
+#ifndef NETWORK_LIGHT_DESCRIPTIONS_H
+#define NETWORK_LIGHT_DESCRIPTIONS_H
+
+std::string NetworkLight::m_deviceDescription = 
 "<?xml version=\"1.0\"?>\
 <root xmlns=\"urn:schemas-upnp-org:device-1-0\">\
 <specVersion>\
@@ -162,3 +165,5 @@ std::string Dimming::m_description =
 </stateVariable>\
 </serviceStateTable>\
 </scpd>";
+
+#endif

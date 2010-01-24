@@ -465,9 +465,9 @@ ActionResponseWriter::action(Action& action)
     AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + action.getService()->getServiceType(), action.getName() + "Response");
     
     for(Action::ArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
-        AutoPtr<Element> pArgument = pDoc->createElement((*i).getName());
-        AutoPtr<Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i).getName()));
-        std::cerr << "ActionResponseWriter returns arg: " << (*i).getName() << ", val: " << action.getArgument<std::string>((*i).getName()) << std::endl;
+        AutoPtr<Element> pArgument = pDoc->createElement((*i)->getName());
+        AutoPtr<Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i)->getName()));
+        std::cerr << "ActionResponseWriter returns arg: " << (*i)->getName() << ", val: " << action.getArgument<std::string>((*i)->getName()) << std::endl;
         pArgument->appendChild(pArgumentValue);
         pActionResponse->appendChild(pArgument);
     }
@@ -485,6 +485,13 @@ ActionResponseWriter::action(Action& action)
     writer.writeNode(ss, pDoc);
     *m_responseBody = ss.str();
     std::cerr << "ResponseBody():" << std::endl << *m_responseBody << std::endl;
+}
+
+
+StateVar*
+Argument::getRelatedStateVarReference() const
+{
+    return m_pAction->getService()->getStateVarReference(m_relatedStateVar);
 }
 
 
@@ -650,7 +657,7 @@ Service::sendEventMessage(StateVar& stateVar)
     messageWriter.write(eventMessage);
     
     for (SubscriptionIterator i = beginEventSubscription(); i != endEventSubscription(); ++i) {
-        (*i).sendEventMessage(eventMessage);
+        (*i)->sendEventMessage(eventMessage);
     }
 }
 
@@ -663,7 +670,7 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
     std::string eventMessage;
     EventMessageWriter messageWriter;
     for (StateVarIterator i = beginEventedStateVar(); i != endEventedStateVar(); ++i) {
-        messageWriter.stateVar(*i);
+        messageWriter.stateVar(**i);
     }
     messageWriter.write(eventMessage);
     pSubscription->sendEventMessage(eventMessage);
@@ -678,7 +685,7 @@ Action::clone()
     res->m_pService = m_pService;
     // make a deep copy of the Arguments
     for (Container<Argument>::Iterator i = m_arguments.begin(); i != m_arguments.end(); ++i) {
-        res->appendArgument(new Argument(*i));
+        res->appendArgument(new Argument(**i));
     }
     return res;
 }
@@ -687,6 +694,7 @@ Action::clone()
 void
 Action::appendArgument(Argument* pArgument)
 {
+    pArgument->setAction(this);
     m_arguments.append(pArgument->getName(), pArgument);
     if (pArgument->getDirection() == "in") {
         m_inArguments.append(pArgument->getName(), pArgument);
@@ -996,23 +1004,68 @@ DeviceRoot::init()
     m_descriptionRequestHandler = new DescriptionRequestHandler(getDeviceDescription());
     registerHttpRequestHandler(getDescriptionUri().getPath(), m_descriptionRequestHandler);
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Device& device = *d;
+        Device& device = **d;
         aliveWriter.device(device);
         byebyeWriter.device(device);
         for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
-            Service& service = *s;
+            Service& service = **s;
             aliveWriter.service(service);
             byebyeWriter.service(service);
             
 //             service.setDescriptionRequestHandler(); // TODO: probably not needed ...
 //             registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
             
-            registerHttpRequestHandler(service.getDescriptionPath(), new DescriptionRequestHandler((*s).getDescription()));
-            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(&(*s)));
-            registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&(*s)));
+            registerHttpRequestHandler(service.getDescriptionPath(), new DescriptionRequestHandler((**s).getDescription()));
+            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(&(**s)));
+            registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&(**s)));
         }
     }
     std::cerr << "DeviceRoot::init() finished" << std::endl;
+}
+
+
+DeviceRootImplAdapter::DeviceRootImplAdapter()
+{
+    std::cerr << "DeviceRootImplAdapter::DeviceRootImplAdapter()" << std::endl;
+    // register the great action dispatcher
+};
+
+
+DeviceRootImplAdapter::~DeviceRootImplAdapter()
+{
+    std::cerr << "DeviceRootImplAdapter::~DeviceRootImplAdapter()" << std::endl;
+    delete m_pDeviceRoot;
+}
+
+
+void
+DeviceRootImplAdapter::start()
+{
+    // TODO: write modified device description to m_description
+    // TODO: maybe, write newly assigned uuids as keys to DeviceRoot::m_devices
+    //       -> Container needs an append(const Entity&)
+    std::cerr << "DeviceRootImplAdapter::start()" << std::endl;
+    m_pDeviceRoot->registerActionHandler(Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
+    
+    m_pDeviceRoot->init();
+    m_pDeviceRoot->startHttp();
+    m_pDeviceRoot->startSsdp();
+}
+
+
+void
+DeviceRootImplAdapter::stop()
+{
+    std::cerr << "DeviceRootImplAdapter::stop()" << std::endl;
+    m_pDeviceRoot->stopSsdp();
+    m_pDeviceRoot->stopHttp();
+}
+
+
+void
+DeviceRootImplAdapter::setFriendlyName(const std::string& friendlyName)
+{
+    // set Property friendlyName of **Device**
 }
 
 
@@ -1210,9 +1263,23 @@ Controller::handleSsdpMessage(SsdpMessage* pNf)
 }
 
 
-// SsdpNotifyAliveWriter::~SsdpNotifyAliveWriter()
-// {
-// }
+Urn::Urn(const std::string& urn) :
+m_urn(urn)
+{
+    std::vector<std::string> vec;
+    std::string::size_type left = 0;
+    std::string::size_type right = 0;
+    do 
+    {
+        left = m_urn.find(':', right);
+        right = m_urn.find(':', ++left);
+        vec.push_back(m_urn.substr(left, right - left));
+    } while (right != std::string::npos);
+    m_domainName = vec[0];
+    m_type = vec[1];
+    m_typeName = vec[2];
+    m_version = vec[3];
+}
 
 
 void

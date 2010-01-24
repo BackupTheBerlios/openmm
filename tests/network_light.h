@@ -24,8 +24,8 @@
 
 #include <jamm/upnp.h>
 
+using Jamm::DeviceRootImplAdapter;
 using Jamm::Service;
-using Jamm::DeviceRoot;
 using Jamm::Action;
 
 // NetworkLight interface
@@ -75,26 +75,15 @@ private:
 };
 
 
-class NetworkLight
+class NetworkLight : public DeviceRootImplAdapter
 {
 public:
     NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl);
-    ~NetworkLight();
-    
-    void start();
-    void stop();
-    
-    // TODO: implement this ...
-//     void setUuid(std::string uuid);
-    void setFriendlyName(const std::string& friendlyName);
     
 private:
-    void actionHandler(Action* action);
+    virtual void actionHandler(Action* action);
     
-    static std::string                  m_description;
-    std::map<std::string,std::string*>  m_descriptions;
-    // m_deviceRoot is the link into the "dynamic-string-world".
-    DeviceRoot*                         m_pDeviceRoot;
+    static std::string                  m_deviceDescription;
     SwitchPower*                        m_pSwitchPowerImpl;
     Dimming*                            m_pDimmingImpl;
 };

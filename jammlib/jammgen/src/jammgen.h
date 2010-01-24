@@ -42,30 +42,46 @@ public:
     
 protected:
     virtual void deviceRoot(const DeviceRoot& deviceRoot) {}
-    virtual void device(const Device& device) {}
-    virtual void service(const Service& service) {}
-    virtual void stateVar(const StateVar& stateVar) {}
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot) {}
+//     virtual void device(const Device& device) {}
+    virtual void serviceType(const Service& service) {}
+    virtual void serviceTypeEnd(const Service& service) {}
+//     virtual void stateVarEnd(const StateVar& stateVar) {}
     virtual void action(const Action& action) {}
-    virtual void argument(const Argument& argument) {}
+    virtual void actionEnd(const Action& action) {}
+    virtual void actionBlockEnd() {}
+    virtual void argument(const Argument& argument, bool lastArgument = false) {}
+    virtual void stateVar(const StateVar& stateVar) {}
+//     virtual void argumentEnd(const Argument& argument) {}
     
-private:
-    DeviceRoot*     m_pDeviceRoot;
-    std::string     m_outputPath;
+    std::string indent(int level);
+    std::string firstLetterToLower(const std::string& s);
+    
+    DeviceRoot*                         m_pDeviceRoot;
+    std::string                         m_outputPath;
+    std::string                         m_deviceName;
+    std::map<std::string,std::string>   m_typeMapper;
 };
 
 
 class DeviceH : public StubWriter
 {
 public:
-    DeviceH(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
+    DeviceH(DeviceRoot* pDeviceRoot, const std::string& outputPath);
     
 private:
     virtual void deviceRoot(const DeviceRoot& deviceRoot);
-    virtual void device(const Device& device);
-    virtual void service(const Service& service);
-    virtual void stateVar(const StateVar& stateVar);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
-    virtual void argument(const Argument& argument);
+    virtual void actionEnd(const Action& action);
+    virtual void actionBlockEnd();
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    virtual void stateVar(const StateVar& stateVar);
+    
+    std::ofstream               m_out;
+    std::vector<std::string>    m_serviceNames;
 };
 
 
@@ -88,26 +104,37 @@ private:
 class DeviceImplH : public StubWriter
 {
 public:
-    DeviceImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
+    DeviceImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath);
     
 private:
     virtual void deviceRoot(const DeviceRoot& deviceRoot);
-    virtual void device(const Device& device);
-    virtual void service(const Service& service);
-    virtual void stateVar(const StateVar& stateVar);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
-    virtual void argument(const Argument& argument);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    
+    std::ofstream       m_out;
 };
 
-/*
+
 class DeviceImplCpp : public StubWriter
 {
 public:
-    DeviceImplCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
+    DeviceImplCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath);
+    
+private:
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void action(const Action& action);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    
+    std::ofstream       m_out;
+//     std::ostream*       m_out;
 };
 
-
+/*
 class DeviceAppH : public StubWriter
 {
 public:

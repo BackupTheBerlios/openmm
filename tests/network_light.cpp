@@ -24,40 +24,6 @@
 #include "network_light.h"
 #include "network_light_descriptions.h"
 
-
-void
-NetworkLight::start()
-{
-    // TODO: write modified device description to m_description
-    // TODO: maybe, write newly assigned uuids as keys to DeviceRoot::m_devices
-    //       -> Container needs an append(const Entity&)
-    m_pDeviceRoot->init();
-    m_pDeviceRoot->startHttp();
-    m_pDeviceRoot->startSsdp();
-}
-
-
-void
-NetworkLight::stop()
-{
-    m_pDeviceRoot->stopSsdp();
-    m_pDeviceRoot->stopHttp();
-}
-
-
-NetworkLight::~NetworkLight()
-{
-    delete m_pDeviceRoot;
-}
-
-
-void
-NetworkLight::setFriendlyName(const std::string& friendlyName)
-{
-    // set Property friendlyName of **Device**
-}
-
-
 // getter/setter for each StateVar (which is not an A_ARG ?!)
 void
 SwitchPower::_setTarget(const bool& target)
@@ -115,13 +81,12 @@ Dimming::_getLoadLevelStatus()
 
 
 NetworkLight::NetworkLight(SwitchPower* switchPowerImpl, Dimming* dimmingImpl) :
+DeviceRootImplAdapter(),
 m_pSwitchPowerImpl(switchPowerImpl),
 m_pDimmingImpl(dimmingImpl)
 {
-    // TODO: stub generator should add code to set Uuid, friendlyName etc. from application config.
-    
     // register device description
-    m_descriptions["network-light-desc.xml"] = &NetworkLight::m_description;
+    m_descriptions["network-light-desc.xml"] = &NetworkLight::m_deviceDescription;
     // for each service type register description
     m_descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::m_description;
     m_descriptions["/Dimming-scpd.xml"] = &Dimming::m_description;
@@ -129,9 +94,6 @@ m_pDimmingImpl(dimmingImpl)
     // read in descriptions and build DeviceRoot
     Jamm::StringDescriptionReader descriptionReader(m_descriptions, "network-light-desc.xml");
     m_pDeviceRoot = descriptionReader.deviceRoot();
-    
-    // register the great action dispatcher
-    m_pDeviceRoot->registerActionHandler(Observer<NetworkLight, Action>(*this, &NetworkLight::actionHandler));
 }
 
 
