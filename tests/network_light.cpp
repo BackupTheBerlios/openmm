@@ -105,7 +105,6 @@ NetworkLight::actionHandler(Action* pAction)
     
     // dispatch all SwitchPower Actions
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:SwitchPower:1") {
-        // TODO: may do some locking here (all SwitchPower Actions set m_pService)
         m_pSwitchPowerImpl->m_pService = pAction->getService();
         std::string actionName = pAction->getName();
         if (actionName == "SetTarget") {

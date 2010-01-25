@@ -835,7 +835,7 @@ public:
     std::string getServiceType() const { return m_serviceType; }
     std::string getDescriptionPath() const { return m_descriptionPath; }
 //     std::string& getDescription() { return m_description; }
-    std::string& getDescription() { return *m_pDescription; }
+    std::string& getDescription() const { return *m_pDescription; }
     std::string getControlPath() const { return m_controlPath; }
     std::string getEventPath() const { return m_eventPath; }
     DescriptionRequestHandler* getDescriptionRequestHandler() const { return m_pDescriptionRequestHandler; }
@@ -969,7 +969,7 @@ public:
     
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
-    std::string& getDeviceDescription() { return *m_pDeviceDescription; }
+    std::string& getDeviceDescription() const { return *m_pDeviceDescription; }
     const URI& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     

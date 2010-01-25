@@ -29,12 +29,8 @@ m_pDeviceRoot(pDeviceRoot),
 m_outputPath(outputPath)
 {
     Jamm::Urn deviceType(pDeviceRoot->getRootDevice()->getDeviceType());
-/*    int right = deviceType.rfind(':');
-    int left = deviceType.rfind(':', right - 1);
-    m_deviceName = deviceType.substr(left + 1, right - left - 1);*/
     m_deviceName = deviceType.getTypeName();
     m_outputPath += "/";
-    std::cout << "DeviceName: " << m_deviceName << std::endl;
     
     m_typeMapper["boolean"] = "bool";
     m_typeMapper["ui1"] = "Jamm::ui1";
@@ -66,27 +62,6 @@ StubWriter::write()
         serviceTypeEnd(rs);
     }
     deviceRootEnd(*m_pDeviceRoot);
-    
-/*    for (DeviceRoot::DeviceIterator d = m_pDeviceRoot->beginDevice(); d != m_pDeviceRoot->endDevice(); ++d) {
-        Device& rd = **d;
-        device(rd);
-        for (Device::ServiceIterator s = rd.beginService(); s != rd.endService(); ++s) {
-            Service& rs = **s;
-            service(rs);
-            for (Service::StateVarIterator sv = rs.beginStateVar(); sv != rs.endStateVar(); ++sv) {
-                StateVar& rsv = **sv;
-                stateVar(rsv);
-            }
-            for (Service::ActionIterator a = rs.beginAction(); a != rs.endAction(); ++a) {
-                Action& ra = **a;
-                action(ra);
-                for (Action::ArgumentIterator arg = ra.beginArgument(); arg != ra.endArgument(); ++arg) {
-                    Argument& rarg = **arg;
-                    argument(rarg);
-                }
-            }
-        }
-    }*/
 }
 
 
@@ -245,6 +220,182 @@ DeviceH::stateVar(const StateVar& stateVar)
 }
 
 
+DeviceCpp::DeviceCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
+StubWriter(pDeviceRoot, outputPath),
+m_out((m_outputPath + m_deviceName + ".cpp").c_str())
+// m_out(&std::cout)
+{
+}
+
+
+void
+DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
+{
+    m_out
+        << "#include <jamm/upnp.h>" << std::endl
+        << "#include \"" << m_deviceName << ".h\"" << std::endl
+        << "#include \"" << m_deviceName << "Descriptions.h\"" << std::endl
+        << std::endl
+        << std::endl
+        << "void" << std::endl
+        << m_deviceName << "::actionHandler(Action* pAction)" << std::endl
+        << "{" << std::endl
+        << indent(1) << "// the great action dispatcher" << std::endl;
+}
+
+
+void
+DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
+{
+    std::string deviceDescriptionPath = deviceRoot.getDescriptionUri().getPath();
+    std::string ctorArgs = "";
+    int i = m_serviceNames.size();
+    while (i--) {
+        ctorArgs += m_serviceNames[i] + "* p" + m_serviceNames[i] + "Impl" + (i ? ", " : "");
+    }
+    
+    m_out
+        << "}" << std::endl
+        << std::endl
+        << std::endl
+        << m_deviceName << "::" << m_deviceName << "("
+        << ctorArgs
+        << ") :" << std::endl
+        << "DeviceRootImplAdapter()," << std::endl
+        ;
+    
+    i = m_serviceNames.size();
+    while (i--) {
+        m_out 
+            << "m_p" << m_serviceNames[i] << "Impl(p" << m_serviceNames[i] << "Impl)"
+            << (i ? ", " : "") << std::endl;
+    }
+    
+    m_out
+        << "{" << std::endl
+        << indent(1) << "m_description[\"" << deviceDescriptionPath << "\"]"
+        << " = &" << m_deviceName << "::m_deviceDescription;" << std::endl;
+    
+    i = m_serviceNames.size();
+    while (i--) {
+        m_out
+            << indent(1) << "m_description[\"" << m_servicePaths[i] << "\"]"
+            << " = &" << m_serviceNames[i] << "::m_description;" << std::endl;
+    }
+    
+    m_out << std::endl
+        << indent(1) << "Jamm::StringDescriptionReader descriptionReader(m_descriptions, \""
+        << deviceDescriptionPath << "\");" << std::endl
+        << indent(1) << "m_pDeviceRoot = descriptionReader.deviceRoot();" << std::endl
+        << "}" << std::endl
+        << std::endl
+        << std::endl
+        << m_getSet.str()
+        << std::endl;
+}
+
+
+void
+DeviceCpp::serviceType(const Service& service)
+{
+    Jamm::Urn serviceType(service.getServiceType());
+    std::string serviceName = serviceType.getTypeName();
+    m_serviceNames.push_back(serviceName);
+    m_currentService = serviceName;
+    m_servicePaths.push_back(service.getDescriptionPath());
+    
+    m_out
+        << indent(1) <<  "if (pAction->getService()->getServiceType() == \""
+        << service.getServiceType() << "\") {" << std::endl
+        << indent(2) << "m_pSwitchPowerImpl->m_pService = pAction->getService();" << std::endl
+        << indent(2) << "std::string actionName = pAction->getName();" << std::endl
+        << std::endl;
+}
+
+
+void
+DeviceCpp::serviceTypeEnd(const Service& service)
+{
+    m_out
+        << indent(1) << "}" << std::endl
+        << std::endl;
+}
+
+
+void
+DeviceCpp::action(const Action& action)
+{
+    m_out
+        << indent(2) << "if (actionName == \"" << action.getName() << "\") {" << std::endl
+        ;
+    m_currentOutArgs = "";
+    m_currentOutArgSetter.str("");
+}
+
+
+void
+DeviceCpp::actionEnd(const Action& action)
+{
+    m_out
+        << indent(3) << "m_p" << m_currentService << "->" << action.getName()
+        << "(" << m_currentOutArgs << ");" << std::endl
+        << m_currentOutArgSetter.str()
+        << indent(2) << "}"
+        << std::endl;
+}
+
+
+void
+DeviceCpp::argument(const Argument& argument, bool lastArgument)
+{
+    std::string argType = m_typeMapper[argument.getRelatedStateVarReference()->getType()];
+    m_out
+        << indent(3) << argType
+        << " " /*<< argument.getDirection()*/ << argument.getName();
+    if (argument.getDirection() == "in") {
+        m_out <<
+            " = pAction->getArgument<" << argType << ">(\"" << argument.getName() << "\")";
+    }
+    m_out
+        << ";" << std::endl;
+    m_currentOutArgs += (argument.getDirection() == "in" ? "const " : "")
+        + argType + "& "
+        + argument.getName()
+        + (lastArgument ? "" : ", ");
+    if (argument.getDirection() == "out") {
+        m_currentOutArgSetter
+            << indent(3) << "pAction->setArgument<"
+            << argType << ">(\"" << argument.getName()
+            << "\", " << argument.getName() 
+            << ");" << std::endl;
+    }
+}
+
+
+void
+DeviceCpp::stateVar(const StateVar& stateVar)
+{
+    std::string stateVarType = m_typeMapper[stateVar.getType()];
+    m_getSet
+        << "void" << std::endl
+        << m_currentService << "::_set" << stateVar.getName() 
+        << "(const " << stateVarType << "& val)" << std::endl
+        << "{" << std::endl
+        << indent(1) << "m_pService->setStateVar<" << stateVarType 
+        << ">(\"" << stateVar.getName() << "\", val);" << std::endl
+        << "}" << std::endl
+        << std::endl
+        << stateVarType << std::endl
+        << m_currentService << "::_get" << stateVar.getName() 
+        << "()" << std::endl
+        << "{" << std::endl
+        << indent(1) << "return m_pService->getStateVar<" << stateVarType 
+        << ">(\"" << stateVar.getName() << "\");" << std::endl
+        << "}" << std::endl
+        << std::endl;
+}
+
+
 DeviceImplH::DeviceImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 m_out((m_outputPath + m_deviceName + "Impl.h.sample").c_str())
@@ -383,33 +534,75 @@ DeviceImplCpp::argument(const Argument& argument, bool lastArgument)
 }
 
 
-/*
-void
-DeviceCpp::write()
+DeviceDescH::DeviceDescH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
+StubWriter(pDeviceRoot, outputPath),
+m_out((m_outputPath + m_deviceName + "Descriptions.h").c_str())
+// m_out(&std::cout)
 {
 }
 
 
 void
-DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
+DeviceDescH::deviceRoot(const DeviceRoot& deviceRoot)
 {
+    m_out
+        << "#ifndef " << Poco::toUpper(m_deviceName) << "_DESCRIPTIONS_H" << std::endl
+        << "#define " << Poco::toUpper(m_deviceName) << "_DESCRIPTIONS_H" << std::endl
+        << std::endl
+        << "std::string " << m_deviceName << "::m_deviceDescription =" << std::endl
+        << escapeDescription(deviceRoot.getDeviceDescription())
+        << ";" << std::endl
+        << std::endl;
 }
 
 
 void
-DeviceCpp::device(const Device& device)
+DeviceDescH::deviceRootEnd(const DeviceRoot& deviceRoot)
 {
+    m_out
+        << "#endif" << std::endl
+        << std::endl;
 }
 
 
 void
-DeviceCpp::service(const Service& service)
+DeviceDescH::serviceType(const Service& service)
 {
+    Jamm::Urn serviceType(service.getServiceType());
+    std::string serviceName = serviceType.getTypeName();
+    
+    m_out
+        << "std::string " << serviceName << "::m_description =" << std::endl
+        << escapeDescription(service.getDescription())
+        << ";" << std::endl
+        << std::endl;
 }
 
 
-void
-DeviceCpp::action(const Action& action)
+std::string
+DeviceDescH::escapeDescription(const std::string& description)
 {
+    std::string res = description;
+    
+    // escape all quotes
+    std::string::size_type i = 0;
+    while ((i = res.find("\"", i)) != std::string::npos) {
+        res.insert(i, "\\");
+        ++i; ++i;
+    }
+    
+    // delete all carriage returns
+    i = 0;
+    while ((i = res.find("\r", i)) != std::string::npos) {
+        res.erase(i, 1);
+    }
+    
+    // escape all newlines
+    i = 0;
+    while ((i = res.find("\n", i)) != std::string::npos) {
+        res.insert(i, "\\");
+        ++i; ++i;
+    }
+    
+    return "\"" + res + "\"";
 }
-*/

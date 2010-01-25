@@ -24,6 +24,7 @@
 #define JAMMGEN_H
 
 #include <iostream>
+#include <sstream>
 #include <jamm/upnp.h>
 
 using Jamm::DeviceRoot;
@@ -43,16 +44,13 @@ public:
 protected:
     virtual void deviceRoot(const DeviceRoot& deviceRoot) {}
     virtual void deviceRootEnd(const DeviceRoot& deviceRoot) {}
-//     virtual void device(const Device& device) {}
     virtual void serviceType(const Service& service) {}
     virtual void serviceTypeEnd(const Service& service) {}
-//     virtual void stateVarEnd(const StateVar& stateVar) {}
     virtual void action(const Action& action) {}
     virtual void actionEnd(const Action& action) {}
     virtual void actionBlockEnd() {}
     virtual void argument(const Argument& argument, bool lastArgument = false) {}
     virtual void stateVar(const StateVar& stateVar) {}
-//     virtual void argumentEnd(const Argument& argument) {}
     
     std::string indent(int level);
     std::string firstLetterToLower(const std::string& s);
@@ -86,20 +84,32 @@ private:
 
 
 
-/*
+
 class DeviceCpp : public StubWriter
 {
 public:
-    DeviceCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
+    DeviceCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath);
     
 private:
-    void deviceRoot(const DeviceRoot& deviceRoot);
-    void device(const Device& device);
-    void service(const Service& service);
-    void action(const Action& action);
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void serviceTypeEnd(const Service& service);
+    virtual void action(const Action& action);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    virtual void stateVar(const StateVar& stateVar);
+    
+    std::ofstream               m_out;
+//     std::ostream*       m_out;
+    std::vector<std::string>    m_serviceNames;
+    std::vector<std::string>    m_servicePaths;
+    std::string                 m_currentService;
+    std::string                 m_currentOutArgs;
+    std::stringstream           m_currentOutArgSetter;
+    std::stringstream           m_getSet;
 };
-*/
+
 
 class DeviceImplH : public StubWriter
 {
@@ -134,45 +144,21 @@ private:
 //     std::ostream*       m_out;
 };
 
-/*
-class DeviceAppH : public StubWriter
+
+class DeviceDescH : public StubWriter
 {
 public:
-    DeviceAppH(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
+    DeviceDescH(DeviceRoot* pDeviceRoot, const std::string& outputPath);
+    
+private:
+    std::string escapeDescription(const std::string& description);
+    
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    
+    std::ofstream       m_out;
+//     std::ostream*       m_out;
 };
-
-
-class DeviceAppCpp : public StubWriter
-{
-public:
-    DeviceAppCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
-};
-
-
-class DeviceCtlH : public StubWriter
-{
-public:
-    DeviceCtlH(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
-};
-
-
-class DeviceCtlCpp : public StubWriter
-{
-public:
-    DeviceCtlCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
-};
-
-
-class Cmake : public StubWriter
-{
-public:
-    Cmake(DeviceRoot* pDeviceRoot, const std::string& outputPath) : StubWriter(pDeviceRoot, outputPath) {}
-    virtual void write();
-};
-*/
 
 #endif
