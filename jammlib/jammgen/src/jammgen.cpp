@@ -34,6 +34,15 @@ m_outputPath(outputPath)
     
     m_typeMapper["boolean"] = "bool";
     m_typeMapper["ui1"] = "Jamm::ui1";
+    m_typeMapper["ui2"] = "Jamm::ui2";
+    m_typeMapper["ui4"] = "Jamm::ui4";
+    m_typeMapper["i1"] = "Jamm::i1";
+    m_typeMapper["i2"] = "Jamm::i2";
+    m_typeMapper["i4"] = "Jamm::i4";
+    m_typeMapper["r4"] = "Jamm::r4";
+    m_typeMapper["r8"] = "Jamm::r8";
+    m_typeMapper["number"] = "Jamm::number";
+    m_typeMapper["string"] = "std::string";
 }
 
 
@@ -99,6 +108,10 @@ DeviceH::deviceRoot(const DeviceRoot& deviceRoot)
         << std::endl
         << "#include <jamm/upnp.h>" << std::endl
         << std::endl
+        << "using Jamm::DeviceRootImplAdapter;" << std::endl
+        << "using Jamm::Service;" << std::endl
+        << "using Jamm::Action;" << std::endl
+        << std::endl
         << "class " << m_deviceName << ";"
         << std::endl;
 }
@@ -134,7 +147,7 @@ DeviceH::deviceRootEnd(const DeviceRoot& deviceRoot)
     }
     
     m_out
-        << "}" << std::endl
+        << "};" << std::endl
         << std::endl
         << "#endif" << std::endl
         << std::endl;
@@ -210,6 +223,10 @@ DeviceH::argument(const Argument& argument, bool lastArgument)
 void
 DeviceH::stateVar(const StateVar& stateVar)
 {
+    if (stateVar.getName().substr(0, std::string("A_ARG_TYPE_").size()) == "A_ARG_TYPE_") {
+        return;
+    }
+    
     m_out
         << indent(1) << "void _set" << stateVar.getName() << "(const "
         << m_typeMapper[stateVar.getType()] << "& val);"
@@ -253,6 +270,7 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
     while (i--) {
         ctorArgs += m_serviceNames[i] + "* p" + m_serviceNames[i] + "Impl" + (i ? ", " : "");
     }
+    m_firstService = true;
     
     m_out
         << "}" << std::endl
@@ -273,13 +291,13 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
     
     m_out
         << "{" << std::endl
-        << indent(1) << "m_description[\"" << deviceDescriptionPath << "\"]"
+        << indent(1) << "m_descriptions[\"" << deviceDescriptionPath << "\"]"
         << " = &" << m_deviceName << "::m_deviceDescription;" << std::endl;
     
     i = m_serviceNames.size();
     while (i--) {
         m_out
-            << indent(1) << "m_description[\"" << m_servicePaths[i] << "\"]"
+            << indent(1) << "m_descriptions[\"" << m_servicePaths[i] << "\"]"
             << " = &" << m_serviceNames[i] << "::m_description;" << std::endl;
     }
     
@@ -303,13 +321,17 @@ DeviceCpp::serviceType(const Service& service)
     m_serviceNames.push_back(serviceName);
     m_currentService = serviceName;
     m_servicePaths.push_back(service.getDescriptionPath());
+    m_firstAction = true;
     
     m_out
-        << indent(1) <<  "if (pAction->getService()->getServiceType() == \""
+        << indent(1) << (m_firstService ? "" : "else ")
+        << "if (pAction->getService()->getServiceType() == \""
         << service.getServiceType() << "\") {" << std::endl
-        << indent(2) << "m_pSwitchPowerImpl->m_pService = pAction->getService();" << std::endl
+        << indent(2) << "m_p" << serviceName << "Impl->m_pService = pAction->getService();" << std::endl
         << indent(2) << "std::string actionName = pAction->getName();" << std::endl
         << std::endl;
+    
+    m_firstService = false;
 }
 
 
@@ -317,7 +339,7 @@ void
 DeviceCpp::serviceTypeEnd(const Service& service)
 {
     m_out
-        << indent(1) << "}" << std::endl
+        << indent(1) << "}"
         << std::endl;
 }
 
@@ -326,10 +348,12 @@ void
 DeviceCpp::action(const Action& action)
 {
     m_out
-        << indent(2) << "if (actionName == \"" << action.getName() << "\") {" << std::endl
+        << indent(2) << (m_firstAction ? "" : "else ")
+        << "if (actionName == \"" << action.getName() << "\") {" << std::endl
         ;
     m_currentOutArgs = "";
     m_currentOutArgSetter.str("");
+    m_firstAction = false;
 }
 
 
@@ -337,7 +361,8 @@ void
 DeviceCpp::actionEnd(const Action& action)
 {
     m_out
-        << indent(3) << "m_p" << m_currentService << "->" << action.getName()
+        // do the implementation callback here
+        << indent(3) << "m_p" << m_currentService << "Impl->" << action.getName()
         << "(" << m_currentOutArgs << ");" << std::endl
         << m_currentOutArgSetter.str()
         << indent(2) << "}"
@@ -358,9 +383,9 @@ DeviceCpp::argument(const Argument& argument, bool lastArgument)
     }
     m_out
         << ";" << std::endl;
-    m_currentOutArgs += (argument.getDirection() == "in" ? "const " : "")
-        + argType + "& "
-        + argument.getName()
+    m_currentOutArgs += /*(argument.getDirection() == "in" ? "const " : "")*/
+//         + argType + "& "
+        /*+ */argument.getName()
         + (lastArgument ? "" : ", ");
     if (argument.getDirection() == "out") {
         m_currentOutArgSetter
@@ -375,8 +400,13 @@ DeviceCpp::argument(const Argument& argument, bool lastArgument)
 void
 DeviceCpp::stateVar(const StateVar& stateVar)
 {
+    if (stateVar.getName().substr(0, std::string("A_ARG_TYPE_").size()) == "A_ARG_TYPE_") {
+        return;
+    }
+    
     std::string stateVarType = m_typeMapper[stateVar.getType()];
     m_getSet
+        // StateVar setter method
         << "void" << std::endl
         << m_currentService << "::_set" << stateVar.getName() 
         << "(const " << stateVarType << "& val)" << std::endl
@@ -386,6 +416,8 @@ DeviceCpp::stateVar(const StateVar& stateVar)
         << "}" << std::endl
         << std::endl
         << stateVarType << std::endl
+        
+        // StateVar getter method
         << m_currentService << "::_get" << stateVar.getName() 
         << "()" << std::endl
         << "{" << std::endl

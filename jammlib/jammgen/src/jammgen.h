@@ -101,13 +101,14 @@ private:
     virtual void stateVar(const StateVar& stateVar);
     
     std::ofstream               m_out;
-//     std::ostream*       m_out;
     std::vector<std::string>    m_serviceNames;
     std::vector<std::string>    m_servicePaths;
     std::string                 m_currentService;
     std::string                 m_currentOutArgs;
     std::stringstream           m_currentOutArgSetter;
     std::stringstream           m_getSet;
+    bool                        m_firstService;
+    bool                        m_firstAction;
 };
 
 

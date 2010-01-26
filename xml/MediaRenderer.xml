@@ -6,33 +6,33 @@
   </specVersion>
   <device>
     <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
-    <friendlyName>GUPnP media renderer</friendlyName>
-    <manufacturer>OpenedHand Ltd</manufacturer>
-    <manufacturerURL>http://openedhand.com/</manufacturerURL>
-    <modelName>gupnp-media-renderer</modelName>
-    <modelNumber>0.1</modelNumber>
-    <modelDescription>GUPnP media renderer</modelDescription>
-    <modelURL>http://www.gupnp.org/</modelURL>
-    <UDN>uuid:UUID_MARKER</UDN>
+    <friendlyName>JammR</friendlyName>
+    <manufacturer>joerg at hakker dot de</manufacturer>
+    <manufacturerURL>http://hakker.de/jamm</manufacturerURL>
+    <modelName>Jamm Media Renderer</modelName>
+    <modelNumber>0.3</modelNumber>
+    <modelDescription>Jamm UPnP Suite's Media Renderer</modelDescription>
+    <modelURL>http://hakker.de/jamm</modelURL>
+    <UDN>uuid:23b0189c-549f-11dc-a7c7-001641597c49</UDN>
     <serviceList>
       <service>
         <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
         <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
-        <SCPDURL>/xml/RenderingControl.xml</SCPDURL>
+        <SCPDURL>/RenderingControl.xml</SCPDURL>
         <controlURL>/RenderingControl/Control</controlURL>
-        <eventSubURL>/RenderingContro/Event</eventSubURL>
+        <eventSubURL>/RenderingControl/Event</eventSubURL>
       </service>
       <service>
         <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
         <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
-        <SCPDURL>/xml/ConnectionManager.xml</SCPDURL>
+        <SCPDURL>/ConnectionManager.xml</SCPDURL>
         <controlURL>/ConnectionManager/Control</controlURL>
         <eventSubURL>/ConnectionManager/Event</eventSubURL>
       </service>
       <service>
         <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
         <serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
-        <SCPDURL>/xml/AVTransport.xml</SCPDURL>
+        <SCPDURL>/AVTransport.xml</SCPDURL>
         <controlURL>/AVTransport/Control</controlURL>
         <eventSubURL>/AVTransport/Event</eventSubURL>
       </service>

@@ -7,10 +7,16 @@ SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
 
-FIND_LIBRARY(LIB_PLATINUM_UPNP
-NAME platinum-upnp
+# FIND_LIBRARY(LIB_PLATINUM_UPNP
+# NAME platinum-upnp
+# PATHS ${CMAKE_LIBRARY_PATH}
+# )
+
+FIND_LIBRARY(LIB_POCO_UTIL
+NAME PocoUtil
 PATHS ${CMAKE_LIBRARY_PATH}
 )
+
 
 FIND_LIBRARY(LIB_VLC
 NAME vlc
@@ -33,10 +39,13 @@ endif(TARGET jamm)
 
 SET( JAMMR_SRCS
 #enginemplayer.cpp
-enginevlc.cpp
+# enginevlc.cpp
 # enginexine.cpp
-main.cpp
-upnpmediarenderer.cpp
+# main.cpp
+# upnpmediarenderer.cpp
+MediaRenderer.cpp
+MediaRendererImpl.cpp
+MediaRendererApplication.cpp
 )
 
 # EXECUTE_PROCESS seems to be buggy in cmake 2.4.3 An out-of-source build complains
@@ -60,7 +69,8 @@ TARGET_LINK_LIBRARIES( jammr
 # platinum-upnp
 # jamm
 ${LIB_JAMM}
-${LIB_PLATINUM_UPNP}
+${LIB_POCO_UTIL}
+# ${LIB_PLATINUM_UPNP}
 )
 
 
