@@ -175,6 +175,9 @@ void
 DeviceH::serviceTypeEnd(const Service& service)
 {
     m_out << std::endl
+        << "protected:" << std::endl
+        << indent(1) << "MediaRenderer* m_pMediaRenderer;" << std::endl
+        << std::endl
         << "private:" << std::endl
         << indent(1) << "static std::string  m_description;" << std::endl
         << indent(1) << "Service*            m_pService;" << std::endl
@@ -299,6 +302,15 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
         m_out
             << indent(1) << "m_descriptions[\"" << m_servicePaths[i] << "\"]"
             << " = &" << m_serviceNames[i] << "::m_description;" << std::endl;
+    }
+    
+    m_out << std::endl;
+    
+    i = m_serviceNames.size();
+    while (i--) {
+        m_out
+            << indent(1) << "p" << m_serviceNames[i] << "Impl->m_pMediaRenderer = this;"
+            << std::endl;
     }
     
     m_out << std::endl

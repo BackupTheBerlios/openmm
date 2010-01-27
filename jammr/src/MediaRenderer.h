@@ -82,6 +82,9 @@ public:
     void _setLastChange(const std::string& val);
     std::string _getLastChange();
 
+protected:
+    MediaRenderer* m_pMediaRenderer;
+
 private:
     static std::string  m_description;
     Service*            m_pService;
@@ -103,6 +106,9 @@ public:
     std::string _getSinkProtocolInfo();
     void _setCurrentConnectionIDs(const std::string& val);
     std::string _getCurrentConnectionIDs();
+
+protected:
+    MediaRenderer* m_pMediaRenderer;
 
 private:
     static std::string  m_description;
@@ -158,6 +164,9 @@ public:
     Jamm::i2 _getVolumeDB();
     void _setLoudness(const bool& val);
     bool _getLoudness();
+
+protected:
+    MediaRenderer* m_pMediaRenderer;
 
 private:
     static std::string  m_description;

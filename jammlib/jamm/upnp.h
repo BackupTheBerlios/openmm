@@ -178,7 +178,6 @@ typedef Poco::Int32     i4;
 typedef float           r4;
 typedef double          r8;
 typedef r8              number;
-typedef std::string     string;
 
 static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    JAMM_VERSION        = "Jamm/0.0.3";

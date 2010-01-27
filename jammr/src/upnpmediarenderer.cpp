@@ -146,6 +146,7 @@ UpnpMediaRenderer::OnSetAVTransportURI(PLT_ActionReference& action)
     
     /* set state variables according to the outcome of the actions
     */
+
     m_AvTransport->SetStateVariable("CurrentTrackURI", currentUri);
     m_AvTransport->SetStateVariable("CurrentURIMetaData", currentUriMetaData);
     m_AvTransport->SetStateVariable("CurrentTrackMetaData", currentUriMetaData);

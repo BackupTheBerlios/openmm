@@ -113,14 +113,14 @@ protected:
             AVTransportImplementation       myAVTransportImplementation;
             ConnectionManagerImplementation myConnectionManagerImplementation;
             RenderingControlImplementation  myRenderingControlImplementation;
-            MediaRenderer                mediaRenderer(
+            MediaRendererImplementation     myMediaRenderer(
                 &myRenderingControlImplementation,
                 &myConnectionManagerImplementation,
                 &myAVTransportImplementation
                 );
-            mediaRenderer.start();
+            myMediaRenderer.start();
             waitForTerminationRequest();
-            // mediaRenderer.stop();
+            // myMediaRenderer.stop();
         }
         return Application::EXIT_OK;
     }

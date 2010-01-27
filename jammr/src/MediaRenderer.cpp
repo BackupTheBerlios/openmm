@@ -206,6 +206,10 @@ m_pAVTransportImpl(pAVTransportImpl)
     m_descriptions["/ConnectionManager.xml"] = &ConnectionManager::m_description;
     m_descriptions["/AVTransport.xml"] = &AVTransport::m_description;
 
+    pRenderingControlImpl->m_pMediaRenderer = this;
+    pConnectionManagerImpl->m_pMediaRenderer = this;
+    pAVTransportImpl->m_pMediaRenderer = this;
+
     Jamm::StringDescriptionReader descriptionReader(m_descriptions, "/MediaRenderer.xml");
     m_pDeviceRoot = descriptionReader.deviceRoot();
 }

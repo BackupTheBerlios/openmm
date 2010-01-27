@@ -2,11 +2,18 @@
 #define MEDIARENDERER_IMPLEMENTATION_H
 
 #include <jamm/upnp.h>
+#include "engine.h"
 #include "MediaRenderer.h"
+
+class MediaRendererImplementation;
 
 class AVTransportImplementation : public AVTransport
 {
+    friend class MediaRendererImpl;
+    
 public:
+    AVTransportImplementation();
+    
     virtual void SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
     virtual void GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus);
     virtual void GetTransportInfo(const Jamm::ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed);
@@ -19,6 +26,10 @@ public:
     virtual void Seek(const Jamm::ui4& InstanceID, const std::string& Unit, const std::string& Target);
     virtual void Next(const Jamm::ui4& InstanceID);
     virtual void Previous(const Jamm::ui4& InstanceID);
+    
+private:
+    MediaRendererImplementation*    m_pRenderer;
+    std::string                     m_lastCurrentTrackUri;
 };
 
 class ConnectionManagerImplementation : public ConnectionManager
@@ -31,13 +42,35 @@ public:
 
 class RenderingControlImplementation : public RenderingControl
 {
+    friend class MediaRendererImpl;
+    
 public:
+    RenderingControlImplementation();
+    
     virtual void ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList);
     virtual void SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName);
     virtual void GetMute(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentMute);
     virtual void SetMute(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredMute);
     virtual void GetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::ui2& CurrentVolume);
     virtual void SetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::ui2& DesiredVolume);
+    
+private:
+    MediaRendererImplementation*    m_pRenderer;
+};
+
+
+class MediaRendererImplementation : public MediaRenderer
+{
+    friend class AVTransportImplementation;
+    friend class ConnectionManagerImplementation;
+    friend class RenderingControlImplementation;
+    
+public:
+    MediaRendererImplementation(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
+        MediaRenderer(pRenderingControlImpl, pConnectionManagerImpl, pAVTransportImpl) {}
+    
+private:
+    Engine*         m_engine;
 };
 
 #endif

@@ -23,7 +23,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <jamm/signode.h>
+// #include <jamm/signode.h>
 using namespace Jamm;
 
 #include <string>
@@ -80,7 +80,7 @@ public:
     /*
       Events
     */
-    JSignal endOfTrack;
+//     JSignal endOfTrack;
 };
 
 #endif
