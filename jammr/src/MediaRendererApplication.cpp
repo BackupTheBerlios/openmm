@@ -22,15 +22,16 @@
 
 #include <fstream>
 
-#include "Poco/Types.h"
-#include "Poco/Util/ServerApplication.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-#include "Poco/Util/HelpFormatter.h"
-#include "Poco/StreamCopier.h"
+#include <Poco/Types.h>
+#include <Poco/Util/ServerApplication.h>
+#include <Poco/Util/Option.h>
+#include <Poco/Util/OptionSet.h>
+#include <Poco/Util/HelpFormatter.h>
+#include <Poco/StreamCopier.h>
 #include <sstream>
 
 #include "jamm/upnp.h"
+#include "enginevlc.h"
 #include "MediaRenderer.h"
 #include "MediaRendererImpl.h"
 
@@ -109,15 +110,31 @@ protected:
         }
         else
         {
+//             char* argv[args.size()] = new char*[args.size()];
+//             for (int i = 0; i < args.size(); ++i) {
+//                 argv[i] = args[i].c_str();
+//             }
+            char* argv[1] = {"jammr"};
+//             char** argv
             std::cerr << "MediaRendererApplication::main()" << std::endl;
             AVTransportImplementation       myAVTransportImplementation;
             ConnectionManagerImplementation myConnectionManagerImplementation;
             RenderingControlImplementation  myRenderingControlImplementation;
+            
+            // TODO: change Engine ctor with arg as std::vector<std::string>
+            Engine* pEngine = new EngineVlc(1, argv);
+            std::cerr << "MediaRendererApplication::main() pEngine: " << pEngine << std::endl;
+            std::cerr << "MediaRendererApplication::main() engine id: " << pEngine->getEngineId() << std::endl;
+            
             MediaRendererImplementation     myMediaRenderer(
                 &myRenderingControlImplementation,
                 &myConnectionManagerImplementation,
-                &myAVTransportImplementation
+                &myAVTransportImplementation,
+                pEngine
                 );
+            
+            MediaRendererImplementation* pM = &myMediaRenderer;
+            std::cerr << "MediaRendererImplementation address: " << pM << std::endl;
             myMediaRenderer.start();
             waitForTerminationRequest();
             // myMediaRenderer.stop();

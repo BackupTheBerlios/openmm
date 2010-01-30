@@ -134,9 +134,14 @@ DeviceH::deviceRootEnd(const DeviceRoot& deviceRoot)
         << indent(1) << m_deviceName << "("
         << ctorArgs
         << ");" << std::endl
-        << std::endl
+        << std::endl;
+//         << "private:"
+//         << std::endl;
+    
+    m_out <<  std::endl
         << "private:" << std::endl
         << indent(1) << "virtual void actionHandler(Action* action);" << std::endl
+        << indent(1) << "virtual void initStateVars(const std::string& serviceType, Service* pThis);" << std::endl
         << std::endl
         << indent(1) << "static std::string m_deviceDescription;" << std::endl
         ;
@@ -164,9 +169,9 @@ DeviceH::serviceType(const Service& service)
     m_out << std::endl
         << "class " << serviceName << std::endl
         << "{" << std::endl
-        << "friend class " << m_deviceName << ";" << std::endl
+        << indent(1) << "friend class " << m_deviceName << ";" << std::endl
         << std::endl
-        << "public:"
+        << "protected:"
         << std::endl;
 }
 
@@ -175,12 +180,12 @@ void
 DeviceH::serviceTypeEnd(const Service& service)
 {
     m_out << std::endl
-        << "protected:" << std::endl
-        << indent(1) << "MediaRenderer* m_pMediaRenderer;" << std::endl
-        << std::endl
+//         << "protected:" << std::endl
+//         << indent(1) << "MediaRenderer* m_pMediaRenderer;" << std::endl
         << "private:" << std::endl
         << indent(1) << "static std::string  m_description;" << std::endl
-        << indent(1) << "Service*            m_pService;" << std::endl
+        << indent(1) << "Service* m_pService;" << std::endl
+//         << std::endl
         << "};" << std::endl
         << std::endl;
 }
@@ -207,7 +212,9 @@ DeviceH::actionEnd(const Action& action)
 void
 DeviceH::actionBlockEnd()
 {
-    m_out << std::endl;
+    m_out << std::endl
+        << indent(1) << "virtual void initStateVars() = 0;" << std::endl
+        << std::endl;
 }
 
 
@@ -261,6 +268,12 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
         << m_deviceName << "::actionHandler(Action* pAction)" << std::endl
         << "{" << std::endl
         << indent(1) << "// the great action dispatcher" << std::endl;
+    
+    m_stateVarInitializer
+        << "void" << std::endl
+        << m_deviceName << "::initStateVars(const std::string& serviceType, Service* pThis)" << std::endl
+        << "{"
+        << std::endl;
 }
 
 
@@ -276,6 +289,10 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
     m_firstService = true;
     
     m_out
+        << "}" << std::endl
+        << std::endl
+        << std::endl
+        << m_stateVarInitializer.str()
         << "}" << std::endl
         << std::endl
         << std::endl
@@ -304,19 +321,20 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
             << " = &" << m_serviceNames[i] << "::m_description;" << std::endl;
     }
     
-    m_out << std::endl;
-    
-    i = m_serviceNames.size();
-    while (i--) {
-        m_out
-            << indent(1) << "p" << m_serviceNames[i] << "Impl->m_pMediaRenderer = this;"
-            << std::endl;
-    }
+//     m_out << std::endl;
+//     
+//     i = m_serviceNames.size();
+//     while (i--) {
+//         m_out
+//             << indent(1) << "p" << m_serviceNames[i] << "Impl->m_pMediaRenderer = this;"
+//             << std::endl;
+//     }
     
     m_out << std::endl
         << indent(1) << "Jamm::StringDescriptionReader descriptionReader(m_descriptions, \""
         << deviceDescriptionPath << "\");" << std::endl
         << indent(1) << "m_pDeviceRoot = descriptionReader.deviceRoot();" << std::endl
+        << indent(1) << "m_pDeviceRoot->setImplAdapter(this);" << std::endl
         << "}" << std::endl
         << std::endl
         << std::endl
@@ -342,6 +360,13 @@ DeviceCpp::serviceType(const Service& service)
         << indent(2) << "m_p" << serviceName << "Impl->m_pService = pAction->getService();" << std::endl
         << indent(2) << "std::string actionName = pAction->getName();" << std::endl
         << std::endl;
+    
+    m_stateVarInitializer
+        << indent(1) << (m_firstService ? "" : "else ")
+        << "if (serviceType == \"" << service.getServiceType() << "\") {" << std::endl
+        << indent(2) << "m_p" << serviceName << "Impl->m_pService = pThis;" << std::endl
+        << indent(2) << "m_p" << serviceName << "Impl->initStateVars();" << std::endl
+        << indent(1) << "}" << std::endl;
     
     m_firstService = false;
 }
@@ -443,7 +468,6 @@ DeviceCpp::stateVar(const StateVar& stateVar)
 DeviceImplH::DeviceImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 m_out((m_outputPath + m_deviceName + "Impl.h.sample").c_str())
-// m_out(&std::cout)
 {
 }
 
@@ -479,7 +503,10 @@ DeviceImplH::serviceType(const Service& service)
     m_out
         << "class " << serviceName << "Implementation : public " << serviceName << std::endl
         << "{" << std::endl
-        << "public:"
+//         << "public:" << std::endl
+//         << serviceName << "Implementation();" << std::endl
+//         << std::endl
+        << "private:"
         << std::endl;
 }
 
@@ -488,6 +515,11 @@ void
 DeviceImplH::serviceTypeEnd(const Service& service)
 {
     m_out
+        << std::endl
+        << indent(1) << "virtual void initStateVars();" << std::endl
+//         << std::endl
+//         << indent(1) << deviceName << "Implementation* m_pDeviceImpl;" << std::endl
+//         << std::endl
         << "};" << std::endl
         << std::endl;
 }
@@ -526,7 +558,6 @@ DeviceImplH::argument(const Argument& argument, bool lastArgument)
 DeviceImplCpp::DeviceImplCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 m_out((m_outputPath + m_deviceName + "Impl.cpp.sample").c_str())
-// m_out(&std::cout)
 {
 }
 
@@ -542,11 +573,26 @@ DeviceImplCpp::deviceRoot(const DeviceRoot& deviceRoot)
 
 
 void
+DeviceImplCpp::serviceType(const Service& service)
+{
+    m_serviceName = Jamm::Urn(service.getServiceType()).getTypeName();
+    m_out
+        << "void" << std::endl
+        << m_serviceName << "Implementation::initStateVars()" << std::endl
+        << "{" << std::endl
+        << "// you may set state variables here with the _set<state_variable_name>() methods" << std::endl
+        << "// default values are already set, if defined by the service" << std::endl
+        << "}" << std::endl
+        << std::endl
+        << std::endl;
+}
+
+
+void
 DeviceImplCpp::action(const Action& action)
 {
-    Jamm::Urn urn(action.getService()->getServiceType());
     m_out
-        << "void" << std::endl << urn.getTypeName() << "Implementation::" << action.getName() 
+        << "void" << std::endl << m_serviceName << "Implementation::" << action.getName() 
         << "(";
 }
 
@@ -581,7 +627,6 @@ DeviceImplCpp::argument(const Argument& argument, bool lastArgument)
 DeviceDescH::DeviceDescH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 m_out((m_outputPath + m_deviceName + "Descriptions.h").c_str())
-// m_out(&std::cout)
 {
 }
 

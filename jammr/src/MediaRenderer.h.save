@@ -11,7 +11,7 @@ class MediaRenderer;
 
 class AVTransport
 {
-    friend class MediaRenderer;
+friend class MediaRenderer;
 
 protected:
     virtual void SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData) = 0;
@@ -26,7 +26,7 @@ protected:
     virtual void Seek(const Jamm::ui4& InstanceID, const std::string& Unit, const std::string& Target) = 0;
     virtual void Next(const Jamm::ui4& InstanceID) = 0;
     virtual void Previous(const Jamm::ui4& InstanceID) = 0;
-
+    
     virtual void initStateVars() = 0;
 
     void _setTransportState(const std::string& val);
@@ -84,23 +84,25 @@ protected:
     void _setLastChange(const std::string& val);
     std::string _getLastChange();
 
+    MediaRenderer* m_pMediaRenderer;
+    Service*            m_pService;
+    
 private:
     static std::string  m_description;
-    Service* m_pService;
 };
 
 
 class ConnectionManager
 {
-    friend class MediaRenderer;
+friend class MediaRenderer;
 
 protected:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink) = 0;
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs) = 0;
-    virtual void GetCurrentConnectionInfo(/*const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status*/) = 0;
+//     virtual void GetCurrentConnectionInfo(const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status) = 0;
 
     virtual void initStateVars() = 0;
-
+    
     void _setSourceProtocolInfo(const std::string& val);
     std::string _getSourceProtocolInfo();
     void _setSinkProtocolInfo(const std::string& val);
@@ -108,55 +110,28 @@ protected:
     void _setCurrentConnectionIDs(const std::string& val);
     std::string _getCurrentConnectionIDs();
 
+    MediaRenderer*      m_pMediaRenderer;
+    Service*            m_pService;
+    
 private:
     static std::string  m_description;
-    Service* m_pService;
 };
 
 
 class RenderingControl
 {
-    friend class MediaRenderer;
+friend class MediaRenderer;
 
 protected:
     virtual void ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList) = 0;
     virtual void SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName) = 0;
-    virtual void GetBrightness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBrightness) = 0;
-    virtual void SetBrightness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBrightness) = 0;
-    virtual void GetContrast(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentContrast) = 0;
-    virtual void SetContrast(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredContrast) = 0;
-    virtual void GetSharpness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentSharpness) = 0;
-    virtual void SetSharpness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredSharpness) = 0;
-    virtual void GetRedVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoGain) = 0;
-    virtual void SetRedVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoGain) = 0;
-    virtual void GetGreenVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoGain) = 0;
-    virtual void SetGreenVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoGain) = 0;
-    virtual void GetBlueVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoGain) = 0;
-    virtual void SetBlueVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoGain) = 0;
-    virtual void GetRedVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoBlackLevel) = 0;
-    virtual void SetRedVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoBlackLevel) = 0;
-    virtual void GetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoBlackLevel) = 0;
-    virtual void SetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoBlackLevel) = 0;
-    virtual void GetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoBlackLevel) = 0;
-    virtual void SetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoBlackLevel) = 0;
-    virtual void GetColorTemperature (const Jamm::ui4& InstanceID, Jamm::ui2& CurrentColorTemperature) = 0;
-    virtual void SetColorTemperature(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredColorTemperature) = 0;
-    virtual void GetHorizontalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentHorizontalKeystone) = 0;
-    virtual void SetHorizontalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredHorizontalKeystone) = 0;
-    virtual void GetVerticalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentVerticalKeystone) = 0;
-    virtual void SetVerticalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredVerticalKeystone) = 0;
     virtual void GetMute(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentMute) = 0;
     virtual void SetMute(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredMute) = 0;
     virtual void GetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::ui2& CurrentVolume) = 0;
     virtual void SetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::ui2& DesiredVolume) = 0;
-    virtual void GetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& CurrentVolume) = 0;
-    virtual void SetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::i2& DesiredVolume) = 0;
-    virtual void GetVolumeDBRange(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& MinValue, Jamm::i2& MaxValue) = 0;
-    virtual void GetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness) = 0;
-    virtual void SetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness) = 0;
 
     virtual void initStateVars() = 0;
-
+    
     void _setPresetNameList(const std::string& val);
     std::string _getPresetNameList();
     void _setLastChange(const std::string& val);
@@ -194,9 +169,12 @@ protected:
     void _setLoudness(const bool& val);
     bool _getLoudness();
 
+protected:
+    MediaRenderer*      m_pMediaRenderer;
+    Service*            m_pService;
+    
 private:
     static std::string  m_description;
-    Service* m_pService;
 };
 
 
@@ -205,15 +183,16 @@ class MediaRenderer : public DeviceRootImplAdapter
 public:
     MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
+protected:
+    RenderingControl* m_pRenderingControlImpl;
+    ConnectionManager* m_pConnectionManagerImpl;
+    AVTransport* m_pAVTransportImpl;
 
 private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
-
+    
     static std::string m_deviceDescription;
-    RenderingControl* m_pRenderingControlImpl;
-    ConnectionManager* m_pConnectionManagerImpl;
-    AVTransport* m_pAVTransportImpl;
 };
 
 #endif

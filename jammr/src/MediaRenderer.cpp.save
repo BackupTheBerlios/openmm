@@ -140,7 +140,7 @@ MediaRenderer::actionHandler(Action* pAction)
             Jamm::i4 PeerConnectionID;
             std::string Direction;
             std::string Status;
-            m_pConnectionManagerImpl->GetCurrentConnectionInfo(/*ConnectionID, RcsID, AVTransportID, ProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, Status*/);
+//             m_pConnectionManagerImpl->GetCurrentConnectionInfo(ConnectionID, RcsID, AVTransportID, ProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, Status);
             pAction->setArgument<Jamm::i4>("RcsID", RcsID);
             pAction->setArgument<Jamm::i4>("AVTransportID", AVTransportID);
             pAction->setArgument<std::string>("ProtocolInfo", ProtocolInfo);
@@ -164,138 +164,6 @@ MediaRenderer::actionHandler(Action* pAction)
             Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
             std::string PresetName = pAction->getArgument<std::string>("PresetName");
             m_pRenderingControlImpl->SelectPreset(InstanceID, PresetName);
-        }
-        else if (actionName == "GetBrightness") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentBrightness;
-            m_pRenderingControlImpl->GetBrightness(InstanceID, CurrentBrightness);
-            pAction->setArgument<Jamm::ui2>("CurrentBrightness", CurrentBrightness);
-        }
-        else if (actionName == "SetBrightness") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredBrightness = pAction->getArgument<Jamm::ui2>("DesiredBrightness");
-            m_pRenderingControlImpl->SetBrightness(InstanceID, DesiredBrightness);
-        }
-        else if (actionName == "GetContrast") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentContrast;
-            m_pRenderingControlImpl->GetContrast(InstanceID, CurrentContrast);
-            pAction->setArgument<Jamm::ui2>("CurrentContrast", CurrentContrast);
-        }
-        else if (actionName == "SetContrast") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredContrast = pAction->getArgument<Jamm::ui2>("DesiredContrast");
-            m_pRenderingControlImpl->SetContrast(InstanceID, DesiredContrast);
-        }
-        else if (actionName == "GetSharpness") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentSharpness;
-            m_pRenderingControlImpl->GetSharpness(InstanceID, CurrentSharpness);
-            pAction->setArgument<Jamm::ui2>("CurrentSharpness", CurrentSharpness);
-        }
-        else if (actionName == "SetSharpness") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredSharpness = pAction->getArgument<Jamm::ui2>("DesiredSharpness");
-            m_pRenderingControlImpl->SetSharpness(InstanceID, DesiredSharpness);
-        }
-        else if (actionName == "GetRedVideoGain") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentRedVideoGain;
-            m_pRenderingControlImpl->GetRedVideoGain(InstanceID, CurrentRedVideoGain);
-            pAction->setArgument<Jamm::ui2>("CurrentRedVideoGain", CurrentRedVideoGain);
-        }
-        else if (actionName == "SetRedVideoGain") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredRedVideoGain = pAction->getArgument<Jamm::ui2>("DesiredRedVideoGain");
-            m_pRenderingControlImpl->SetRedVideoGain(InstanceID, DesiredRedVideoGain);
-        }
-        else if (actionName == "GetGreenVideoGain") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentGreenVideoGain;
-            m_pRenderingControlImpl->GetGreenVideoGain(InstanceID, CurrentGreenVideoGain);
-            pAction->setArgument<Jamm::ui2>("CurrentGreenVideoGain", CurrentGreenVideoGain);
-        }
-        else if (actionName == "SetGreenVideoGain") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredGreenVideoGain = pAction->getArgument<Jamm::ui2>("DesiredGreenVideoGain");
-            m_pRenderingControlImpl->SetGreenVideoGain(InstanceID, DesiredGreenVideoGain);
-        }
-        else if (actionName == "GetBlueVideoGain") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentBlueVideoGain;
-            m_pRenderingControlImpl->GetBlueVideoGain(InstanceID, CurrentBlueVideoGain);
-            pAction->setArgument<Jamm::ui2>("CurrentBlueVideoGain", CurrentBlueVideoGain);
-        }
-        else if (actionName == "SetBlueVideoGain") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredBlueVideoGain = pAction->getArgument<Jamm::ui2>("DesiredBlueVideoGain");
-            m_pRenderingControlImpl->SetBlueVideoGain(InstanceID, DesiredBlueVideoGain);
-        }
-        else if (actionName == "GetRedVideoBlackLevel") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentRedVideoBlackLevel;
-            m_pRenderingControlImpl->GetRedVideoBlackLevel(InstanceID, CurrentRedVideoBlackLevel);
-            pAction->setArgument<Jamm::ui2>("CurrentRedVideoBlackLevel", CurrentRedVideoBlackLevel);
-        }
-        else if (actionName == "SetRedVideoBlackLevel") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredRedVideoBlackLevel = pAction->getArgument<Jamm::ui2>("DesiredRedVideoBlackLevel");
-            m_pRenderingControlImpl->SetRedVideoBlackLevel(InstanceID, DesiredRedVideoBlackLevel);
-        }
-        else if (actionName == "GetGreenVideoBlackLevel") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentGreenVideoBlackLevel;
-            m_pRenderingControlImpl->GetGreenVideoBlackLevel(InstanceID, CurrentGreenVideoBlackLevel);
-            pAction->setArgument<Jamm::ui2>("CurrentGreenVideoBlackLevel", CurrentGreenVideoBlackLevel);
-        }
-        else if (actionName == "SetGreenVideoBlackLevel") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredGreenVideoBlackLevel = pAction->getArgument<Jamm::ui2>("DesiredGreenVideoBlackLevel");
-            m_pRenderingControlImpl->SetGreenVideoBlackLevel(InstanceID, DesiredGreenVideoBlackLevel);
-        }
-        else if (actionName == "GetBlueVideoBlackLevel") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentBlueVideoBlackLevel;
-            m_pRenderingControlImpl->GetBlueVideoBlackLevel(InstanceID, CurrentBlueVideoBlackLevel);
-            pAction->setArgument<Jamm::ui2>("CurrentBlueVideoBlackLevel", CurrentBlueVideoBlackLevel);
-        }
-        else if (actionName == "SetBlueVideoBlackLevel") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredBlueVideoBlackLevel = pAction->getArgument<Jamm::ui2>("DesiredBlueVideoBlackLevel");
-            m_pRenderingControlImpl->SetBlueVideoBlackLevel(InstanceID, DesiredBlueVideoBlackLevel);
-        }
-        else if (actionName == "GetColorTemperature ") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 CurrentColorTemperature;
-            m_pRenderingControlImpl->GetColorTemperature (InstanceID, CurrentColorTemperature);
-            pAction->setArgument<Jamm::ui2>("CurrentColorTemperature", CurrentColorTemperature);
-        }
-        else if (actionName == "SetColorTemperature") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::ui2 DesiredColorTemperature = pAction->getArgument<Jamm::ui2>("DesiredColorTemperature");
-            m_pRenderingControlImpl->SetColorTemperature(InstanceID, DesiredColorTemperature);
-        }
-        else if (actionName == "GetHorizontalKeystone") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::i2 CurrentHorizontalKeystone;
-            m_pRenderingControlImpl->GetHorizontalKeystone(InstanceID, CurrentHorizontalKeystone);
-            pAction->setArgument<Jamm::i2>("CurrentHorizontalKeystone", CurrentHorizontalKeystone);
-        }
-        else if (actionName == "SetHorizontalKeystone") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::i2 DesiredHorizontalKeystone = pAction->getArgument<Jamm::i2>("DesiredHorizontalKeystone");
-            m_pRenderingControlImpl->SetHorizontalKeystone(InstanceID, DesiredHorizontalKeystone);
-        }
-        else if (actionName == "GetVerticalKeystone") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::i2 CurrentVerticalKeystone;
-            m_pRenderingControlImpl->GetVerticalKeystone(InstanceID, CurrentVerticalKeystone);
-            pAction->setArgument<Jamm::i2>("CurrentVerticalKeystone", CurrentVerticalKeystone);
-        }
-        else if (actionName == "SetVerticalKeystone") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            Jamm::i2 DesiredVerticalKeystone = pAction->getArgument<Jamm::i2>("DesiredVerticalKeystone");
-            m_pRenderingControlImpl->SetVerticalKeystone(InstanceID, DesiredVerticalKeystone);
         }
         else if (actionName == "GetMute") {
             Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
@@ -323,41 +191,6 @@ MediaRenderer::actionHandler(Action* pAction)
             Jamm::ui2 DesiredVolume = pAction->getArgument<Jamm::ui2>("DesiredVolume");
             m_pRenderingControlImpl->SetVolume(InstanceID, Channel, DesiredVolume);
         }
-        else if (actionName == "GetVolumeDB") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            std::string Channel = pAction->getArgument<std::string>("Channel");
-            Jamm::i2 CurrentVolume;
-            m_pRenderingControlImpl->GetVolumeDB(InstanceID, Channel, CurrentVolume);
-            pAction->setArgument<Jamm::i2>("CurrentVolume", CurrentVolume);
-        }
-        else if (actionName == "SetVolumeDB") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            std::string Channel = pAction->getArgument<std::string>("Channel");
-            Jamm::i2 DesiredVolume = pAction->getArgument<Jamm::i2>("DesiredVolume");
-            m_pRenderingControlImpl->SetVolumeDB(InstanceID, Channel, DesiredVolume);
-        }
-        else if (actionName == "GetVolumeDBRange") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            std::string Channel = pAction->getArgument<std::string>("Channel");
-            Jamm::i2 MinValue;
-            Jamm::i2 MaxValue;
-            m_pRenderingControlImpl->GetVolumeDBRange(InstanceID, Channel, MinValue, MaxValue);
-            pAction->setArgument<Jamm::i2>("MinValue", MinValue);
-            pAction->setArgument<Jamm::i2>("MaxValue", MaxValue);
-        }
-        else if (actionName == "GetLoudness") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            std::string Channel = pAction->getArgument<std::string>("Channel");
-            bool CurrentLoudness;
-            m_pRenderingControlImpl->GetLoudness(InstanceID, Channel, CurrentLoudness);
-            pAction->setArgument<bool>("CurrentLoudness", CurrentLoudness);
-        }
-        else if (actionName == "SetLoudness") {
-            Jamm::ui4 InstanceID = pAction->getArgument<Jamm::ui4>("InstanceID");
-            std::string Channel = pAction->getArgument<std::string>("Channel");
-            bool DesiredLoudness = pAction->getArgument<bool>("DesiredLoudness");
-            m_pRenderingControlImpl->SetLoudness(InstanceID, Channel, DesiredLoudness);
-        }
     }
 }
 
@@ -365,6 +198,8 @@ MediaRenderer::actionHandler(Action* pAction)
 void
 MediaRenderer::initStateVars(const std::string& serviceType, Service* pThis)
 {
+    std::cerr << "MediaRenderer::initStateVars() serviceType: " << serviceType << " , pThis: " << pThis << std::endl;
+    
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
         m_pAVTransportImpl->m_pService = pThis;
         m_pAVTransportImpl->initStateVars();
@@ -373,7 +208,7 @@ MediaRenderer::initStateVars(const std::string& serviceType, Service* pThis)
         m_pConnectionManagerImpl->m_pService = pThis;
         m_pConnectionManagerImpl->initStateVars();
     }
-    else if (serviceType == "urn:schemas-upnp-org:service:RenderingControl:1") {
+    else if(serviceType == "urn:schemas-upnp-org:service:RenderingControl:1") {
         m_pRenderingControlImpl->m_pService = pThis;
         m_pRenderingControlImpl->initStateVars();
     }
@@ -391,6 +226,10 @@ m_pAVTransportImpl(pAVTransportImpl)
     m_descriptions["/ConnectionManager.xml"] = &ConnectionManager::m_description;
     m_descriptions["/AVTransport.xml"] = &AVTransport::m_description;
 
+    pRenderingControlImpl->m_pMediaRenderer = this;
+    pConnectionManagerImpl->m_pMediaRenderer = this;
+    pAVTransportImpl->m_pMediaRenderer = this;
+
     Jamm::StringDescriptionReader descriptionReader(m_descriptions, "/MediaRenderer.xml");
     m_pDeviceRoot = descriptionReader.deviceRoot();
     m_pDeviceRoot->setImplAdapter(this);
@@ -400,6 +239,7 @@ m_pAVTransportImpl(pAVTransportImpl)
 void
 AVTransport::_setTransportState(const std::string& val)
 {
+    std::cerr << "AVTransport::_setTransportState() m_pService: " << m_pService << std::endl;
     m_pService->setStateVar<std::string>("TransportState", val);
 }
 

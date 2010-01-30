@@ -107,6 +107,7 @@ private:
     std::string                 m_currentOutArgs;
     std::stringstream           m_currentOutArgSetter;
     std::stringstream           m_getSet;
+    std::stringstream           m_stateVarInitializer;
     bool                        m_firstService;
     bool                        m_firstAction;
 };
@@ -137,12 +138,13 @@ public:
     
 private:
     virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
     virtual void action(const Action& action);
     virtual void actionEnd(const Action& action);
     virtual void argument(const Argument& argument, bool lastArgument = false);
     
     std::ofstream       m_out;
-//     std::ostream*       m_out;
+    std::string         m_serviceName;
 };
 
 

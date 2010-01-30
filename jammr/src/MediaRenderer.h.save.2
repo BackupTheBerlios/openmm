@@ -85,8 +85,11 @@ protected:
     std::string _getLastChange();
 
 private:
-    static std::string  m_description;
+//     MediaRenderer* m_pMediaRenderer;
     Service* m_pService;
+
+// private:
+    static std::string  m_description;
 };
 
 
@@ -109,8 +112,11 @@ protected:
     std::string _getCurrentConnectionIDs();
 
 private:
-    static std::string  m_description;
+//     MediaRenderer* m_pMediaRenderer;
     Service* m_pService;
+
+// private:
+    static std::string  m_description;
 };
 
 
@@ -194,9 +200,12 @@ protected:
     void _setLoudness(const bool& val);
     bool _getLoudness();
 
-private:
-    static std::string  m_description;
+private: //**
+//     ** MediaRenderer* m_pMediaRenderer;
     Service* m_pService;
+
+// **private:
+    static std::string  m_description;
 };
 
 
@@ -205,15 +214,17 @@ class MediaRenderer : public DeviceRootImplAdapter
 public:
     MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
-
 private:
+// ** protected:
+    RenderingControl* m_pRenderingControlImpl;
+    ConnectionManager* m_pConnectionManagerImpl;
+    AVTransport* m_pAVTransportImpl;
+
+// private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
     static std::string m_deviceDescription;
-    RenderingControl* m_pRenderingControlImpl;
-    ConnectionManager* m_pConnectionManagerImpl;
-    AVTransport* m_pAVTransportImpl;
 };
 
 #endif

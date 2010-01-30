@@ -24,7 +24,7 @@
 #define ENGINE_H
 
 // #include <jamm/signode.h>
-using namespace Jamm;
+// using namespace Jamm;
 
 #include <string>
 using namespace std;
@@ -42,6 +42,8 @@ public:
     // virtual vector<string> getAudioAdapters() = 0;
     // virtual void setAudioAdapter(string) = 0;
 
+    virtual string getEngineId() = 0;
+    
     // UPnP methods
     /*
       AVTransport

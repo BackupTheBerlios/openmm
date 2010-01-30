@@ -40,6 +40,8 @@ EngineVlc::EngineVlc(int argc, char **argv)
 /*    clearException();
     libvlc_event_attach(vlc_my_object_event_manager(), NULL, &m_exception);
     handleException();*/
+    
+    m_engineId = "JammR VLC engine 0.0.3";
 }
 
 
@@ -209,7 +211,7 @@ EngineVlc::getPosition(float &seconds)
     libvlc_state_t state = libvlc_media_player_get_state(m_vlcPlayer, &m_exception);
     handleException();
     if (state == libvlc_Ended) {
-        endOfTrack.emitSignal();
+//         endOfTrack.emitSignal();
         seconds = 0.0;
         return;
     }

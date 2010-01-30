@@ -138,34 +138,50 @@ DescriptionReader::device()
 
     while (pNode)
     {
-//         std::cerr << "node: " << pNode->nodeName() << std::endl;
-        if (pNode->nodeName() == "deviceType" && pNode->hasChildNodes()) {
-            pRes->setDeviceType(pNode->firstChild()->nodeValue());
+        if (pNode->nodeName() == "deviceType") {
+            pRes->setDeviceType(pNode->innerText());
         }
-        else if (pNode->nodeName() == "UDN" && pNode->hasChildNodes()) {
-            pRes->setUuid(pNode->firstChild()->nodeValue().substr(5));
+        else if (pNode->nodeName() == "UDN") {
+            pRes->setUuid(pNode->innerText().substr(5));
         }
-        else if (pNode->nodeName() == "serviceList" && pNode->hasChildNodes()) {
-            Node* pChild = pNode->firstChild();
-            while (pChild) {
-//                 std::cerr << "child: " << pChild->nodeName() << std::endl;
-                if (pChild->nodeName() == "service") {
-                    m_nodeStack.push(pChild->firstChild());
-//                     Service* pService = service();
-//                     pService->setDevice(pRes);
-                    pRes->addService(service());
+        else if (pNode->nodeName() == "serviceList") {
+            if (pNode->hasChildNodes()) {
+                Node* pChild = pNode->firstChild();
+                while (pChild) {
+                    if (pChild->nodeName() == "service") {
+                        if (pChild->hasChildNodes()) {
+                            m_nodeStack.push(pChild->firstChild());
+                            pRes->addService(service());
+                        }
+                        else {
+                            std::cerr << "Error in DescriptionReader: empty service" << std::endl;
+                        }
+                    }
+                    pChild = pChild->nextSibling();
                 }
-                pChild = pChild->nextSibling();
+            }
+            else {
+                std::cerr << "Error in DescriptionReader: service list without services" << std::endl;
             }
         }
-        else if (pNode->nodeName() == "deviceList" && pNode->hasChildNodes()) {
-            Node* pChild = pNode->firstChild();
-            while (pChild) {
-                if (pChild->nodeName() == "device") {
-                    m_nodeStack.push(pChild->firstChild());
-                    m_pDeviceRoot->addDevice(device());
+        else if (pNode->nodeName() == "deviceList") {
+            if (pNode->hasChildNodes()) {
+                Node* pChild = pNode->firstChild();
+                while (pChild) {
+                    if (pChild->nodeName() == "device") {
+                        if (pChild->hasChildNodes()) {
+                            m_nodeStack.push(pChild->firstChild());
+                            m_pDeviceRoot->addDevice(device());
+                        }
+                        else {
+                            std::cerr << "Error in DescriptionReader: empty embedded device" << std::endl;
+                        }
+                    }
+                    pChild = pChild->nextSibling();
                 }
-                pChild = pChild->nextSibling();
+            }
+            else {
+                std::cerr << "Error in DescriptionReader: device list without embedded devices" << std::endl;
             }
         }
         pNode = pNode->nextSibling();
@@ -186,10 +202,10 @@ DescriptionReader::service()
     {
 //         std::cerr << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
-            pRes->setServiceType(pNode->firstChild()->nodeValue());
+            pRes->setServiceType(pNode->innerText());
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
-            pRes->setDescriptionPath(pNode->firstChild()->nodeValue());
+            pRes->setDescriptionPath(pNode->innerText());
             // load the service description into the Service object.
             pRes->setDescription(getDescription(pRes->getDescriptionPath()));
             Node* pScpd = m_nodeStack.top();
@@ -217,8 +233,8 @@ DescriptionReader::service()
                                 NamedNodeMap* attr = pChild->attributes();
                                 pStateVar->setSendEvents(attr->getNamedItem("sendEvents")->nodeValue());
                                 attr->release();
-                        }
-                        pRes->addStateVar(pStateVar);
+                            }
+                            pRes->addStateVar(pStateVar);
                         }
                         pChild = pChild->nextSibling();
                     }
@@ -230,10 +246,10 @@ DescriptionReader::service()
             releaseDescriptionDocument();
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
-            pRes->setControlPath(pNode->firstChild()->nodeValue());
+            pRes->setControlPath(pNode->innerText());
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
-            pRes->setEventPath(pNode->firstChild()->nodeValue());
+            pRes->setEventPath(pNode->innerText());
         }
         
         pNode = pNode->nextSibling();
@@ -253,7 +269,7 @@ DescriptionReader::action()
     while (pNode)
     {
         if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
-            pRes->setName(pNode->firstChild()->nodeValue());
+            pRes->setName(pNode->innerText());
         }
         else if (pNode->nodeName() == "argumentList" && pNode->hasChildNodes()) {
             // TODO: this if branch should be written as only one line of code ...
@@ -283,13 +299,13 @@ DescriptionReader::argument()
     while (pNode)
     {
         if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
-            pRes->setName(pNode->firstChild()->nodeValue());
+            pRes->setName(pNode->innerText());
         }
         else if (pNode->nodeName() == "relatedStateVariable" && pNode->hasChildNodes()) {
-            pRes->setRelatedStateVar(pNode->firstChild()->nodeValue());
+            pRes->setRelatedStateVar(pNode->innerText());
         }
         else if (pNode->nodeName() == "direction" && pNode->hasChildNodes()) {
-            pRes->setDirection(pNode->firstChild()->nodeValue());
+            pRes->setDirection(pNode->innerText());
         }
         
         pNode = pNode->nextSibling();
@@ -310,15 +326,16 @@ DescriptionReader::stateVar()
     while (pNode)
     {
         if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
-            pRes->setName(pNode->firstChild()->nodeValue());
+            pRes->setName(pNode->innerText());
         }
         else if (pNode->nodeName() == "dataType" && pNode->hasChildNodes()) {
-            pRes->setType(pNode->firstChild()->nodeValue());
+            pRes->setType(pNode->innerText());
         }
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
-            std::string val = pNode->firstChild()->nodeValue();
+            std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
             // FIXME: seems StateVar's value isn't set to the default value
+            std::cerr << "DescriptionReader::stateVar() set defaultValue: " << val << std::endl;
             pRes->setValue(val);
         }
         pNode = pNode->nextSibling();
@@ -344,34 +361,38 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
 Action*
 ActionRequestReader::action()
 {
-    std::cerr << "ActionRequestReader::action()" << std::endl;
-    // TODO: clone an Action with inArgs and outArgs retained
-//     Action* pRes = new Action();
+//     std::cerr << "ActionRequestReader::action()" << std::endl;
     Action* pRes = m_pActionTemplate;
     Node* pNode = m_nodeStack.top();
     NodeIterator it(pNode, NodeFilter::SHOW_ELEMENT);
     
-    while (pNode)
-    {
-        if (pNode->nodeName() == pNode->prefix() + ":Body" && pNode->hasChildNodes()) {
-            Node* pAction = pNode->firstChild();
-//             std::string s = pAction->nodeName();
-//             pRes->setName(s.substr(s.find(":") + 1));
-            std::cerr << "action: " << pRes->getName() << std::endl;
-//             s = pAction->namespaceURI();
-//             pRes->setServiceType(s.substr(s.find("service:") + 8));
-            std::cerr << "serviceType: " << pRes->getService()->getServiceType() << std::endl;
-            
-            Node* pChild = pAction->firstChild();
-            while (pChild) {
-                pRes->setArgument(pChild->nodeName(), pChild->firstChild()->nodeValue());
-                pChild = pChild->nextSibling();
-            }
-        }
+    while(pNode && (pNode->nodeName() != pNode->prefix() + ":Body")) {
         pNode = it.nextNode();
     }
+    Node* pBody = pNode;
+    if (pBody && pBody->hasChildNodes()) {
+        Node* pAction = pBody->firstChild();
+//         std::cerr << "action: " << pRes->getName() << std::endl;
+//         std::cerr << "serviceType: " << pRes->getService()->getServiceType() << std::endl;
+        
+        if (pAction->hasChildNodes()) {
+            Node* pArgument = pAction->firstChild();
+    
+            while (pArgument) {
+//                 std::cerr << "ActionRequestReader::action() setting Argument: " << pArgument->nodeName() << " val: " << pArgument->innerText() << std::endl;
+                pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
+                pArgument = pArgument->nextSibling();
+            }
+        }
+        else {
+            std::cerr << "Error in ActionRequestReader(): action without arguments" << std::endl;
+        }
+    }
+    else {
+        std::cerr << "Error in ActionRequestReader(): action without body" << std::endl;
+    }
     m_nodeStack.pop();
-    std::cerr << "ActionRequestReader::action() finished" << std::endl;
+//     std::cerr << "ActionRequestReader::action() finished" << std::endl;
     return pRes;
 }
 
@@ -462,7 +483,7 @@ ActionResponseWriter::action(Action& action)
     AutoPtr<Element> pEnvelope = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Envelope");
     pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
     AutoPtr<Element> pBody = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
-    AutoPtr<Element> pActionResponse = pDoc->createElementNS("urn:schemas-upnp-org:service:" + action.getService()->getServiceType(), action.getName() + "Response");
+    AutoPtr<Element> pActionResponse = pDoc->createElementNS(action.getService()->getServiceType(), action.getName() + "Response");
     
     for(Action::ArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
         AutoPtr<Element> pArgument = pDoc->createElement((*i)->getName());
@@ -993,6 +1014,39 @@ DeviceRoot::getServiceType(const std::string& serviceType)
 
 
 void
+DeviceRoot::print()
+{
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        std::cout << "DeviceType: " << (*d)->getDeviceType() << std::endl;
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            std::cout << "    Service pointer: " << *s << std::endl;
+            std::cout << "    ServiceType: " << (*s)->getServiceType() << std::endl;
+            int stateVarCount = 0;
+            for(Service::StateVarIterator v = (*s)->beginStateVar(); v != (*s)->endStateVar(); ++v) {
+                stateVarCount++;
+                std::string val;
+                (*v)->getValue(val);
+                std::cout
+                    << "        StateVar: " << (*v)->getName() << std::endl
+                    << "          number: " << stateVarCount << std::endl
+                    << "            type: " << (*v)->getType() << std::endl
+                    << "         evented: " << (*v)->getSendEvents() << std::endl
+                    << "             val: " << val << std::endl;
+            }
+        }
+    }
+}
+
+
+void
+DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
+{
+    std::cerr << "DeviceRoot::initStateVars() serviceType: " << serviceType << " , pThis: " << pThis << std::endl;
+    m_pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
+}
+
+
+void
 DeviceRoot::init()
 {
     std::cerr << "DeviceRoot::init()" << std::endl;
@@ -1008,16 +1062,16 @@ DeviceRoot::init()
         aliveWriter.device(device);
         byebyeWriter.device(device);
         for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
-            Service& service = **s;
-            aliveWriter.service(service);
-            byebyeWriter.service(service);
+            Service* ps = *s;
             
-//             service.setDescriptionRequestHandler(); // TODO: probably not needed ...
-//             registerHttpRequestHandler(service.getDescriptionPath(), service.getDescriptionRequestHandler());
+            initStateVars(ps->getServiceType(), ps);
             
-            registerHttpRequestHandler(service.getDescriptionPath(), new DescriptionRequestHandler((**s).getDescription()));
-            registerHttpRequestHandler(service.getControlPath(), new ControlRequestHandler(&(**s)));
-            registerHttpRequestHandler(service.getEventPath(), new EventRequestHandler(&(**s)));
+            aliveWriter.service(*ps);
+            byebyeWriter.service(*ps);
+            
+            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
         }
     }
     std::cerr << "DeviceRoot::init() finished" << std::endl;
@@ -1047,7 +1101,9 @@ DeviceRootImplAdapter::start()
     std::cerr << "DeviceRootImplAdapter::start()" << std::endl;
     m_pDeviceRoot->registerActionHandler(Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
     
+//     m_pDeviceRoot->print();
     m_pDeviceRoot->init();
+//     m_pDeviceRoot->print();
     m_pDeviceRoot->startHttp();
     m_pDeviceRoot->startSsdp();
 }

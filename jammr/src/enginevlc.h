@@ -37,6 +37,8 @@ public:
     EngineVlc(int argc, char **argv);
     ~EngineVlc();
     
+    string getEngineId() { return m_engineId; }
+    
     /*
       AVTransport
     */
@@ -77,6 +79,8 @@ private:
     string                  m_uri;
     long long               m_startTime;
     float                   m_length; // length of media in seconds
+    
+    string                  m_engineId;
 };
 
 

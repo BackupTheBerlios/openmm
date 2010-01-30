@@ -39,7 +39,7 @@ endif(TARGET jamm)
 
 SET( JAMMR_SRCS
 #enginemplayer.cpp
-# enginevlc.cpp
+enginevlc.cpp
 # enginexine.cpp
 # main.cpp
 # upnpmediarenderer.cpp

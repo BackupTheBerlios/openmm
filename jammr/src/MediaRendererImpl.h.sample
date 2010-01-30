@@ -2,22 +2,10 @@
 #define MEDIARENDERER_IMPLEMENTATION_H
 
 #include <jamm/upnp.h>
-#include <jamm/upnpav.h>
-
-#include "engine.h"
 #include "MediaRenderer.h"
-
-// TODO: LastChange
-
-class MediaRendererImplementation;
 
 class AVTransportImplementation : public AVTransport
 {
-    friend class MediaRendererImplementation;
-    
-// public:
-//     AVTransportImplementation();
-    
 private:
     virtual void SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
     virtual void GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus);
@@ -31,41 +19,22 @@ private:
     virtual void Seek(const Jamm::ui4& InstanceID, const std::string& Unit, const std::string& Target);
     virtual void Next(const Jamm::ui4& InstanceID);
     virtual void Previous(const Jamm::ui4& InstanceID);
-    
+
     virtual void initStateVars();
-    
-//     MediaRendererImplementation*    m_pRenderer;
-    Engine* m_pEngine;
-    std::string                     m_lastCurrentTrackUri;
 };
 
 class ConnectionManagerImplementation : public ConnectionManager
 {
-    friend class MediaRendererImplementation;
-    
-// public:
-//     ConnectionManagerImplementation();
-    
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs);
-    // FIXME: strange syntax error which is none, is it gcc???!!!
-//     virtual void GetCurrentConnectionInfo(std::string& Status);
-    virtual void GetCurrentConnectionInfo(/*const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status*/);
-    
+    virtual void GetCurrentConnectionInfo(const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status);
+
     virtual void initStateVars();
-    
-//     MediaRendererImplementation*    m_pRenderer;
-    Engine* m_pEngine;
 };
 
 class RenderingControlImplementation : public RenderingControl
 {
-    friend class MediaRendererImplementation;
-    
-// public:
-//     RenderingControlImplementation();
-    
 private:
     virtual void ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList);
     virtual void SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName);
@@ -102,37 +71,8 @@ private:
     virtual void GetVolumeDBRange(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& MinValue, Jamm::i2& MaxValue);
     virtual void GetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness);
     virtual void SetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness);
-    
+
     virtual void initStateVars();
-    
-//     MediaRendererImplementation*    m_pRenderer;
-    Engine* m_pEngine;
-};
-
-
-class MediaRendererImplementation : public MediaRenderer
-{
-//     friend class AVTransportImplementation;
-//     friend class ConnectionManagerImplementation;
-//     friend class RenderingControlImplementation;
-    
-public:
-    MediaRendererImplementation(RenderingControlImplementation* pRenderingControlImpl,
-                                ConnectionManagerImplementation* pConnectionManagerImpl,
-                                AVTransportImplementation* pAVTransportImpl,
-                                Engine* engine) :
-        MediaRenderer(pRenderingControlImpl,
-                      pConnectionManagerImpl,
-                      pAVTransportImpl)
-//         m_engine(engine)
-    {
-        pRenderingControlImpl->m_pEngine = engine;
-        pConnectionManagerImpl->m_pEngine = engine;
-        pAVTransportImpl->m_pEngine = engine;
-    }
-    
-// private:
-//     Engine*         m_engine;
 };
 
 #endif

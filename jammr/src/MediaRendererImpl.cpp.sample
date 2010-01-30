@@ -1,0 +1,477 @@
+#include <jamm/upnp.h>
+#include "MediaRendererImpl.h"
+
+void
+AVTransportImplementation::initStateVars()
+{
+// you may set state variables here with the _set<state_variable_name>() methods
+// default values are already set, if defined by the service
+}
+
+
+void
+AVTransportImplementation::SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::GetTransportInfo(const Jamm::ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::GetPositionInfo(const Jamm::ui4& InstanceID, Jamm::ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, Jamm::i4& RelCount, Jamm::i4& AbsCount)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::GetDeviceCapabilities(const Jamm::ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::GetTransportSettings(const Jamm::ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::Stop(const Jamm::ui4& InstanceID)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& Speed)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::Pause(const Jamm::ui4& InstanceID)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& Unit, const std::string& Target)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::Next(const Jamm::ui4& InstanceID)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+AVTransportImplementation::Previous(const Jamm::ui4& InstanceID)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+ConnectionManagerImplementation::initStateVars()
+{
+// you may set state variables here with the _set<state_variable_name>() methods
+// default values are already set, if defined by the service
+}
+
+
+void
+ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::string& Sink)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& ConnectionIDs)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+ConnectionManagerImplementation::GetCurrentConnectionInfo(const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::initStateVars()
+{
+// you may set state variables here with the _set<state_variable_name>() methods
+// default values are already set, if defined by the service
+}
+
+
+void
+RenderingControlImplementation::ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetBrightness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBrightness)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetBrightness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBrightness)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetContrast(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentContrast)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetContrast(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredContrast)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetSharpness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentSharpness)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetSharpness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredSharpness)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetRedVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoGain)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetRedVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoGain)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetGreenVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoGain)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetGreenVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoGain)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetBlueVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoGain)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetBlueVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoGain)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetRedVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoBlackLevel)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetRedVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoBlackLevel)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoBlackLevel)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoBlackLevel)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoBlackLevel)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoBlackLevel)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetColorTemperature (const Jamm::ui4& InstanceID, Jamm::ui2& CurrentColorTemperature)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetColorTemperature(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredColorTemperature)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetHorizontalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentHorizontalKeystone)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetHorizontalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredHorizontalKeystone)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetVerticalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentVerticalKeystone)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetVerticalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredVerticalKeystone)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetMute(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetMute(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::ui2& CurrentVolume)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::ui2& DesiredVolume)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& CurrentVolume)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::i2& DesiredVolume)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetVolumeDBRange(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& MinValue, Jamm::i2& MaxValue)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+

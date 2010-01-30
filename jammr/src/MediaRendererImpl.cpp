@@ -2,9 +2,42 @@
 #include "MediaRendererImpl.h"
 
 
-AVTransportImplementation::AVTransportImplementation()
+// AVTransportImplementation::AVTransportImplementation()
+// {
+//     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+// }
+
+
+void
+AVTransportImplementation::initStateVars()
 {
-    m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+    _setTransportState("STOPPED");
+    _setTransportStatus("OK");
+    _setPlaybackStorageMedium("NOT_IMPLEMENTED");
+    _setRecordStorageMedium("NOT_IMPLEMENTED");
+    _setPossiblePlaybackStorageMedia("NOT_IMPLEMENTED");
+    _setPossibleRecordStorageMedia("NOT_IMPLEMENTED");
+    _setCurrentPlayMode("NORMAL");
+    _setTransportPlaySpeed("1");
+    _setRecordMediumWriteStatus("NOT_IMPLEMENTED");
+    _setCurrentRecordQualityMode("NOT_IMPLEMENTED");
+    _setPossibleRecordQualityModes("NOT_IMPLEMENTED");
+    _setNumberOfTracks(0);
+    _setCurrentTrack(0);
+    _setCurrentTrackDuration("00:00:00");
+    _setCurrentMediaDuration("00:00:00");
+    _setCurrentTrackMetaData("NOT_IMPLEMENTED");
+    _setCurrentTrackURI("");
+    _setAVTransportURI("");
+    _setAVTransportURIMetaData("NOT_IMPLEMENTED");
+    _setNextAVTransportURI("");
+    _setNextAVTransportURIMetaData("NOT_IMPLEMENTED");
+    _setRelativeTimePosition("NOT_IMPLEMENTED");
+    _setAbsoluteTimePosition("NOT_IMPLEMENTED");
+    _setRelativeCounterPosition(2147483647);
+    _setAbsoluteCounterPosition(2147483647);
+    _setCurrentTransportActions("NOT_IMPLEMENTED");
+    _setLastChange("");
 }
 
 
@@ -18,7 +51,12 @@ AVTransportImplementation::SetAVTransportURI(const Jamm::ui4& InstanceID, const 
         _setTransportState("STOPPED");
     }
 
-    m_pRenderer->m_engine->setUri(CurrentURI);
+    std::cerr << "m_engine->setUri() uri: " << CurrentURI << std::endl;
+//     std::cerr << "renderer: " << m_pRenderer << std::endl;
+    std::cerr << "engine: " << m_pEngine << std::endl;
+    std::cerr << "id: " << m_pEngine->getEngineId() << std::endl;
+    m_pEngine->setUri(CurrentURI);
+    std::cerr << "m_engine->setUri() finished" << std::endl;
     _setCurrentTrackURI(CurrentURI);
 /*
 2.2.16.CurrentTrackMetaData
@@ -37,10 +75,13 @@ implementation doesn’t support this feature then this state variable must be s
 //     item = (PLT_MediaItem*)(*didl->GetFirstItem());
 //     int meta_duration = item->m_Resources.GetFirstItem()->m_Duration;
 //     int duration = (meta_duration>0)?meta_duration:0;
-    std::string timestamp;
-//     PLT_Didl::FormatTimeStamp(timestamp, duration);
-    _setCurrentMediaDuration(timestamp);
-    _setCurrentTrackDuration(timestamp);
+// //     Jamm::MediaObject obj(CurrentURIMetaData);
+//     Jamm::r8 duration;
+//     std::string timestamp = Jamm::AvTypeConverter::writeDuration(duration);
+// //     std::string duration = obj.getProperty("res@duration");
+// //     _setCurrentMediaDuration(duration);
+// //     _setCurrentTrackDuration(duration);
+    std::cerr << "AVTransportImplementation::SetAVTransportURI() leaves in state: " << transportState << std::endl;
 }
 
 
@@ -65,7 +106,10 @@ AVTransportImplementation::GetTransportInfo(const Jamm::ui4& InstanceID, std::st
 void
 AVTransportImplementation::GetPositionInfo(const Jamm::ui4& InstanceID, Jamm::ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, Jamm::i4& RelCount, Jamm::i4& AbsCount)
 {
+    std::cerr << "AVTransportImplementation::GetPositionInfo()" << std::endl;
+    std::cerr << "_getCurrentTrack()" << std::endl;
     Track = _getCurrentTrack();
+    std::cerr << "_getCurrentTrackDuration()" << std::endl;
     TrackDuration = _getCurrentTrackDuration();
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
@@ -105,7 +149,7 @@ AVTransportImplementation::Stop(const Jamm::ui4& InstanceID)
         // TODO: when in PAUSED_PLAYBACK we should actually stop (according to AVTransport 1.0 specs
         //       -> unfortunately mplayer has it's problems with stopping ...
         if (transportState != "STOPPED" && transportState != "PAUSED_PLAYBACK") {
-            m_pRenderer->m_engine->stop();
+            m_pEngine->stop();
         }
         // TODO: check if engine really stopped (by return value)
         _setTransportState("STOPPED");
@@ -142,7 +186,7 @@ AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& 
             //       if no:  Action Stop behaves like Pause
             //       -> maybe it should be: STOPPED -> TRANSITIONING -> PAUSED_PLAYBACK
             //          contradicting AVTransport, 1.0, 2.4.12.3.
-            m_pRenderer->m_engine->load();
+            m_pEngine->load();
         }
         else if (transportState == "PLAYING") {
             if (_getCurrentTrackURI() != m_lastCurrentTrackUri) {
@@ -150,15 +194,15 @@ AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& 
 //                 PLT_Didl::FormatTimeStamp(pos, 0);
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
-                m_pRenderer->m_engine->load();
+                m_pEngine->load();
             }
         }
         else if (transportState == "PAUSED_PLAYBACK") {
-            m_pRenderer->m_engine->pause();
+            m_pEngine->pause();
         }
         else if (transportState == "TRANSITIONING") {
             // TODO: can we set another speed after transitioning, than normal speed?
-            m_pRenderer->m_engine->setSpeed(1, 1);
+            m_pEngine->setSpeed(1, 1);
             speed = "1";
         }
         // TODO: handle changes in speed
@@ -182,7 +226,7 @@ AVTransportImplementation::Pause(const Jamm::ui4& InstanceID)
     std::cerr << "AVTransportImplementation::Pause() enters in state: " << transportState << std::endl;
     
     if (transportState == "PLAYING" || transportState == "RECORDING") {
-        m_pRenderer->m_engine->pause();
+        m_pEngine->pause();
         
         if (transportState == "PLAYING") {
             _setTransportState("PAUSED_PLAYBACK");
@@ -208,7 +252,7 @@ AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& 
         if (Unit == "ABS_TIME") {
 //             PLT_Didl::ParseTimeStamp(seekTarget, position);
         }
-        m_pRenderer->m_engine->seek(position);
+        m_pEngine->seek(position);
         // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
         //       TransportState should be set to TRANSITIONING, but only while seeking.
         //       OnSeek() should return immediately! So we are not conform here.
@@ -238,6 +282,21 @@ AVTransportImplementation::Previous(const Jamm::ui4& InstanceID)
 }
 
 
+// ConnectionManagerImplementation::ConnectionManagerImplementation()
+// {
+//     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+// }
+
+
+void
+ConnectionManagerImplementation::initStateVars()
+{
+    _setSourceProtocolInfo("http-get:*:*:*");
+    _setSinkProtocolInfo("http-get:*:*:*");
+    _setCurrentConnectionIDs("0");
+}
+
+
 void
 ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::string& Sink)
 {
@@ -257,7 +316,7 @@ ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& Connection
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionInfo(const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status)
+ConnectionManagerImplementation::GetCurrentConnectionInfo(/*const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status*/)
 {
 // begin of your own code
 
@@ -265,9 +324,33 @@ ConnectionManagerImplementation::GetCurrentConnectionInfo(const Jamm::i4& Connec
 }
 
 
-RenderingControlImplementation::RenderingControlImplementation()
+// RenderingControlImplementation::RenderingControlImplementation()
+// {
+//     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+// }
+
+
+void
+RenderingControlImplementation::initStateVars()
 {
-    m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+    _setPresetNameList("");
+    _setLastChange("");
+    _setBrightness(0);
+    _setContrast(0);
+    _setSharpness(0);
+    _setRedVideoGain(0);
+    _setGreenVideoGain(0);
+    _setBlueVideoGain(0);
+    _setRedVideoBlackLevel(0);
+    _setGreenVideoBlackLevel(0);
+    _setBlueVideoBlackLevel(0);
+    _setColorTemperature(0);
+    _setHorizontalKeystone(0);
+    _setVerticalKeystone(0);
+    _setMute(false);
+    _setVolume(0);
+    _setVolumeDB(0);
+    _setLoudness(false);
 }
 
 
@@ -275,7 +358,7 @@ void
 RenderingControlImplementation::ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList)
 {
 // begin of your own code
-
+    
 // end of your own code
 }
 
@@ -284,7 +367,223 @@ void
 RenderingControlImplementation::SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName)
 {
 // begin of your own code
+    
+// end of your own code
+}
 
+
+void
+RenderingControlImplementation::GetBrightness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBrightness)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetBrightness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBrightness)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetContrast(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentContrast)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetContrast(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredContrast)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetSharpness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentSharpness)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetSharpness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredSharpness)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetRedVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoGain)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetRedVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoGain)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetGreenVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoGain)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetGreenVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoGain)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetBlueVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoGain)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetBlueVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoGain)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetRedVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoBlackLevel)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetRedVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoBlackLevel)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoBlackLevel)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoBlackLevel)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoBlackLevel)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoBlackLevel)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetColorTemperature (const Jamm::ui4& InstanceID, Jamm::ui2& CurrentColorTemperature)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetColorTemperature(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredColorTemperature)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetHorizontalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentHorizontalKeystone)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetHorizontalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredHorizontalKeystone)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetVerticalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentVerticalKeystone)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetVerticalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredVerticalKeystone)
+{
+// begin of your own code
+    
 // end of your own code
 }
 
@@ -293,7 +592,7 @@ void
 RenderingControlImplementation::GetMute(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
 // begin of your own code
-
+    
 // end of your own code
 }
 
@@ -302,7 +601,7 @@ void
 RenderingControlImplementation::SetMute(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
 // begin of your own code
-
+    
 // end of your own code
 }
 
@@ -311,7 +610,7 @@ void
 RenderingControlImplementation::GetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::ui2& CurrentVolume)
 {
 // begin of your own code
-
+    
 // end of your own code
 }
 
@@ -323,9 +622,53 @@ RenderingControlImplementation::SetVolume(const Jamm::ui4& InstanceID, const std
     
     Jamm::i4 chan;
     Jamm::Variant(Channel).getValue(chan);
-    m_pRenderer->m_engine->setVolume(chan, DesiredVolume);
+    m_pEngine->setVolume(chan, DesiredVolume);
     
     _setVolume(DesiredVolume);
 }
 
+
+void
+RenderingControlImplementation::GetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& CurrentVolume)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::i2& DesiredVolume)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetVolumeDBRange(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& MinValue, Jamm::i2& MaxValue)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::GetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
+RenderingControlImplementation::SetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+{
+// begin of your own code
+    
+// end of your own code
+}
 

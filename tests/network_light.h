@@ -82,6 +82,7 @@ public:
     
 private:
     virtual void actionHandler(Action* action);
+    virtual void initStateVars(const std::string& serviceType, Service* pThis) {}
     
     static std::string                  m_deviceDescription;
     SwitchPower*                        m_pSwitchPowerImpl;

@@ -5,6 +5,7 @@ SET( JAMM_LIB_SRCS
     signode.cpp
     thread.cpp
     upnp.cpp
+    upnpav.cpp
 )
 
 FIND_LIBRARY(LIB_POCO_FOUNDATION
