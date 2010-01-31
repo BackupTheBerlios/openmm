@@ -15,9 +15,6 @@ class AVTransportImplementation : public AVTransport
 {
     friend class MediaRendererImplementation;
     
-// public:
-//     AVTransportImplementation();
-    
 private:
     virtual void SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
     virtual void GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus);
@@ -34,7 +31,6 @@ private:
     
     virtual void initStateVars();
     
-//     MediaRendererImplementation*    m_pRenderer;
     Engine* m_pEngine;
     std::string                     m_lastCurrentTrackUri;
 };
@@ -42,9 +38,6 @@ private:
 class ConnectionManagerImplementation : public ConnectionManager
 {
     friend class MediaRendererImplementation;
-    
-// public:
-//     ConnectionManagerImplementation();
     
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -55,16 +48,12 @@ private:
     
     virtual void initStateVars();
     
-//     MediaRendererImplementation*    m_pRenderer;
     Engine* m_pEngine;
 };
 
 class RenderingControlImplementation : public RenderingControl
 {
     friend class MediaRendererImplementation;
-    
-// public:
-//     RenderingControlImplementation();
     
 private:
     virtual void ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList);
@@ -105,17 +94,12 @@ private:
     
     virtual void initStateVars();
     
-//     MediaRendererImplementation*    m_pRenderer;
     Engine* m_pEngine;
 };
 
 
 class MediaRendererImplementation : public MediaRenderer
 {
-//     friend class AVTransportImplementation;
-//     friend class ConnectionManagerImplementation;
-//     friend class RenderingControlImplementation;
-    
 public:
     MediaRendererImplementation(RenderingControlImplementation* pRenderingControlImpl,
                                 ConnectionManagerImplementation* pConnectionManagerImpl,
@@ -124,15 +108,11 @@ public:
         MediaRenderer(pRenderingControlImpl,
                       pConnectionManagerImpl,
                       pAVTransportImpl)
-//         m_engine(engine)
     {
         pRenderingControlImpl->m_pEngine = engine;
         pConnectionManagerImpl->m_pEngine = engine;
         pAVTransportImpl->m_pEngine = engine;
     }
-    
-// private:
-//     Engine*         m_engine;
 };
 
 #endif

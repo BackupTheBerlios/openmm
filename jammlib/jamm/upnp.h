@@ -160,6 +160,8 @@ using std::istringstream;
 
 
 // TODO: Variant: catch conversion errors with log message
+// TODO: check path handling in UriDescriptionReader
+
 // TODO: DIDL reading and writing
 
 // TODO: Controller stuff
@@ -182,7 +184,7 @@ typedef double          r8;
 typedef r8              number;
 
 static const std::string    UPNP_VERSION        = "1.0";
-static const std::string    JAMM_VERSION        = "Jamm/0.0.3";
+static const std::string    JAMM_VERSION        = "0.0.3";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 static const std::string    SSDP_SEND_ADDRESS   = "239.255.255.250:0";
 static const std::string    SSDP_ADDRESS        = "239.255.255.250";
@@ -300,11 +302,18 @@ public:
     NetworkInterface    m_interface;
     
 private:
-    IPAddress           m_ssdpAddress;
-    UInt16              m_ssdpPort;
+    void onReadable(const AutoPtr<ReadableNotification>& pNf);
+    void onUnicastReadable(const AutoPtr<ReadableNotification>& pNf);
+    
+//     IPAddress           m_ssdpAddress;
+//     UInt16              m_ssdpPort;
     MulticastSocket     m_ssdpSocket;
+    DatagramSocket      m_ssdpSenderSocket;
+//     SocketAddress       m_ssdpSocketAddress;
     SocketReactor       m_reactor;
+    SocketReactor       m_unicastReactor;
     Thread              m_listenerThread;
+    Thread              m_unicastListenerThread;
     NotificationCenter  m_notificationCenter;
     char*               m_pBuffer;
     
@@ -312,8 +321,6 @@ private:
         BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
             // Note that each SSDP message must fit into one UDP Packet.
     };
-    
-    void onReadable(const AutoPtr<ReadableNotification>& pNf);
 };
 
 
@@ -1047,9 +1054,14 @@ public:
     void stopHttp();
     
     void registerActionHandler(const AbstractObserver& observer)
-    { m_httpSocket.m_notificationCenter.addObserver(observer); }
+    {
+        m_httpSocket.m_notificationCenter.addObserver(observer);
+    }
+    
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler) 
-    { m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler); }
+    {
+        m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
+    }
     
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);

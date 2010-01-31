@@ -20,35 +20,33 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-
 #include "Poco/Util/ServerApplication.h"
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
 
-
 #include "jamm/upnp.h"
+#include "DimmableLight.h"
+#include "DimmableLightImpl.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
-using Jamm::DeviceRoot;
-using Jamm::Controller;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
+// TODO: write a DimmableLightBattery for testing embedded devices
 
-class ControllerTest: public Poco::Util::ServerApplication
+// Application wrapper for NetworkLight class
+
+class DimmableLightApplication: public Poco::Util::ServerApplication
 {
 public:
-    ControllerTest(): _helpRequested(false)
+    DimmableLightApplication(): _helpRequested(false)
     {
     }
     
-    ~ControllerTest()
+    ~DimmableLightApplication()
     {
     }
     
@@ -87,7 +85,7 @@ protected:
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
         helpFormatter.setUsage("OPTIONS");
-        helpFormatter.setHeader("A simple UPnP Controller.");
+        helpFormatter.setHeader("A simple UPnP Device that implements a remote controllable light.");
         helpFormatter.format(std::cout);
     }
     
@@ -99,11 +97,15 @@ protected:
         }
         else
         {
-        // get parameters from configuration file
-//             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
-            Controller controller;
-            std::cerr << "ControllerTest::main() waiting for termination request" << std::endl;
+            std::cerr << "NetworkLightApplication::main()" << std::endl;
+            SwitchPowerImplementation   mySwitchPowerServiceImplementation;
+            DimmingImplementation       myDimmingServiceImplementation;
+            DimmableLight    networkLight(&mySwitchPowerServiceImplementation,
+                                          &myDimmingServiceImplementation
+                                         );
+            networkLight.start();
             waitForTerminationRequest();
+            // networkLight.stop();
         }
         return Application::EXIT_OK;
     }
@@ -115,6 +117,6 @@ private:
 
 int main(int argc, char** argv)
 {
-    ControllerTest app;
+    DimmableLightApplication app;
     return app.run(argc, argv);
 }

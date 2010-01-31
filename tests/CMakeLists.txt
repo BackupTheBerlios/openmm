@@ -33,11 +33,11 @@ SET( JAMMTEST_DEVICE_SRCS
 device.cpp
 )
 
-SET( JAMMTEST_NETWORK_LIGHT_SRCS
-network_light.cpp
-network_light_implementation.cpp
-network_light_application.cpp
-)
+# SET( JAMMTEST_NETWORK_LIGHT_SRCS
+# network_light.cpp
+# network_light_implementation.cpp
+# network_light_application.cpp
+# )
 
 SET( JAMMTEST_CONTROLLER_SRCS
 controller.cpp
@@ -52,9 +52,9 @@ ADD_EXECUTABLE( device_test
 ${JAMMTEST_DEVICE_SRCS}
 )
 
-ADD_EXECUTABLE( network_light
-${JAMMTEST_NETWORK_LIGHT_SRCS}
-)
+# ADD_EXECUTABLE( network_light
+# ${JAMMTEST_NETWORK_LIGHT_SRCS}
+# )
 
 ADD_EXECUTABLE( controller_test
 ${JAMMTEST_CONTROLLER_SRCS}
@@ -71,17 +71,17 @@ ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )
 
-TARGET_LINK_LIBRARIES( network_light
-${LIB_JAMM}
-${LIB_POCO_UTIL}
-)
+# TARGET_LINK_LIBRARIES( network_light
+# ${LIB_JAMM}
+# ${LIB_POCO_UTIL}
+# )
 
 TARGET_LINK_LIBRARIES( controller_test
 ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS ssdp_test device_test network_light controller_test
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib
-)
+#INSTALL( TARGETS ssdp_test device_test controller_test
+#RUNTIME DESTINATION bin
+#LIBRARY DESTINATION lib
+#)

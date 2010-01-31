@@ -45,14 +45,69 @@ m_uri(uri)
 std::string&
 UriDescriptionReader::getDescription(const std::string& path)
 {
-    // TODO: get description according to m_uri.service() ("file:/" or "http:/")
-    std::string p = m_uri.getPath() + path;
-    std::cerr << "DescriptionReader::getDescription() from: " << p << std::endl;
-    std::stringstream ss;
-    std::ifstream ifs(p.c_str());
-    StreamCopier::copyStream(ifs, ss);
+    // FIXME: Bug in Poco? getPath should not return leading "/", it's not part of path
+    //        URL, url-path: 
+    //        http://tools.ietf.org/html/rfc1738, Chapter 3.1  
+    //        in contradiction to:
+    //        URI, abs_path: (url-path corresponds to path_segments)
+    //        http://tools.ietf.org/html/rfc2396#section-3
     
-    std::string* res = new std::string(ss.str());
+    // TODO: make all paths always relative (remove leading "/")
+    // file://bla/foo/file is URI bla must be a host (RFC 1738)
+    // file:/bla/foo/file is URI for path bla/foo/file
+    // URN is: <scheme>://<authority>/<path>
+    // <scheme>:<path>
+    // <scheme>://<authority>
+    // <scheme>://<authority>/<path>
+    //
+    // NOTE: relative URIs see: http://tools.ietf.org/html/rfc2396#section-5
+    //
+    // if m_uri is directory (base directory), it must end with "/"
+    // does file:myfile point to ./myfile ?
+    // if basepath is "" -> "./"
+    // if basepath has no trailing "/", append it
+    //
+    // NOTE: all URLs refer to a base URL, same host and port for all URLs (-> BaseURL)
+    //       details on URL: http://tools.ietf.org/html/rfc1738
+    //       details on URI: http://tools.ietf.org/html/rfc3986
+    //
+    //     URLBase
+    //          Optional. Defines the base URL. Used to construct fully-qualified URLs. 
+    //          All relative URLs that appear elsewhere in
+    //          the description are combined with this base URL according to the rules in RFC 2396. 
+    //          If URLBase is empty or not
+    //          given, the base URL is the URL from which the device description was retrieved 
+    //          (which is the preferred implementation; use of URLBase is no longer recommended).
+    //          Specified by UPnP vendor. Single URL.
+        
+    std::string p = m_uri.getPath() + path;
+    std::cerr << "DescriptionReader::getDescription() from: " << m_uri.toString() << std::endl;
+    std::cerr << "request path is: " << p << std::endl;
+    std::string* res;
+    
+    if (m_uri.getScheme() == "file") {
+        std::stringstream ss;
+        
+        std::ifstream ifs(p.c_str());
+        StreamCopier::copyStream(ifs, ss);
+        res = new std::string(ss.str());
+    }
+    else if (m_uri.getScheme() == "http") {
+        HTTPClientSession session(m_uri.getHost(), m_uri.getPort());
+        HTTPRequest request("GET", path);
+        HTTPResponse response;
+        session.sendRequest(request);
+        
+        std::istream& rs = session.receiveResponse(response);
+        char* buf = new char[response.getContentLength()];
+        rs.read(buf, response.getContentLength());
+        res = new std::string(buf, response.getContentLength());
+        std::cerr << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+    }
+    else {
+        std::cerr << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
+    }
+    
     // TODO: put this into deviceRoot() as it is common with StringDescriptionReader
     DOMParser parser;
     m_pDocStack.push(parser.parseString(*res));
@@ -909,7 +964,7 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
                     Environment::osName() + "/"
                     + Environment::osVersion() + ", "
                     + "UPnP/" + UPNP_VERSION + ", "
-                    + JAMM_VERSION);
+                    + "Jamm/" + JAMM_VERSION);
         response.set("SID", "uuid:" + UUIDGenerator().create().toString());
         response.set("TIMEOUT", "Second-1800");
         // TODO: make shure the SUBSCRIBE message is received by the controller before
@@ -985,7 +1040,7 @@ Device::addService(Service* pService)
 
 
 DeviceRoot::DeviceRoot() :
-// TODO: allocate sockets later, not in ctor (e.g. jammgen)
+// TODO: allocate sockets later, not in ctor (e.g. jammgen doesn't need them)
 m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
 m_httpSocket(m_ssdpSocket.m_interface)
 {
@@ -1285,7 +1340,6 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
 Controller::Controller() :
 m_ssdpSocket(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage))
 {
-    // TODO: send M-SEARCH messages
     SsdpMessage m;
     m.setRequestMethod(SsdpMessage::REQUEST_SEARCH);
     m.setHost();
@@ -1295,6 +1349,12 @@ m_ssdpSocket(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMes
     m.setSearchTarget("upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
+    
+    
+    // TODO: may SCPD-URL, control url, and event url contain their own host and port?
+    // http://192.168.178.20:35306//network-light-desc.xml
+//     UriDescriptionReader descriptionReader(URI("http://192.168.178.20:43189"), "//network-light-desc.xml");
+//     DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot();
 }
 
 
@@ -1307,15 +1367,16 @@ void
 Controller::handleSsdpMessage(SsdpMessage* pNf)
 {
 //     std::cerr << "controller gets SSDP message:" << std::endl;
-//     std::cerr << pNf->toString();
+    std::cerr << pNf->toString();
     // TODO: handle NOTIFY messages and M-SEARCH reply messages
     // do we need to open a seperate socket to receive the M-SEARCH reply on a different port than 1900?
     // device advertisement (chapter 1.1) is HTTPMU (multicast) only,
     // while device search (chapter 1.2) is HTTPU (unicast) and HTTPMU (multicast)
     // need to open a unicast socket ...?? On both sides?? for sending and listening?
     // send to multicast address with sender port different than 1900?
-    // use a normal DatagramSocket for HTTPU, do a connect(), this socket is not bound to a specific
+    // open a normal DatagramSocket for HTTPU, do a connect(), this socket is not bound to a specific
     // interface then ...
+    // set the sender port when sending multicasts to the normal DatagramSocket port
 }
 
 
@@ -1737,25 +1798,44 @@ SsdpMessage::getSender()
 
 
 SsdpSocket::SsdpSocket(const AbstractObserver& observer):
-m_ssdpAddress(SSDP_ADDRESS),
-m_ssdpPort(SSDP_PORT),
+// m_ssdpAddress(SSDP_ADDRESS),
+// m_ssdpPort(SSDP_PORT),      // use a different port here, not 1900 ??!!!
 // set socket in a non-exclusive state, thus allowing other process to bind to the same port
 // i.e. set SO_REUSEADDR flag on socket
-m_ssdpSocket(SocketAddress(m_ssdpAddress, m_ssdpPort), true),
+// m_ssdpSocket(SocketAddress(m_ssdpAddress, m_ssdpPort), true),
+// m_ssdpSocket(SocketAddress(m_ssdpAddress, SSDP_PORT), true),
+m_ssdpSocket(SocketAddress(IPAddress(SSDP_ADDRESS), SSDP_PORT), true),
+// m_ssdpSocket(SocketAddress(m_ssdpAddress, 8789), true),
 m_pBuffer(new char[BUFFER_SIZE])
 {
+    m_notificationCenter.addObserver(observer);
 //     std::cerr << "SsdpSocket()" << std::endl;
     
     // set the default interface by providing an empty NetworkInterface as argument
     // TODO: let interface be configurable
     // TODO: default value: find out an interface name, that routes to the default route entry
     m_interface = NetworkInterface::forName("wlan0");
+    
+//     ServerSocket socket(0);
+        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
+    //     socket.bind(m_ssdpSocket.m_interface.address());
+//     m_ssdpSocketAddress = SocketAddress(m_interface.address(), m_ssdpSocket.address().port());
+    
+    SocketAddress bindAddress("0.0.0.0", 0);
+    m_ssdpSenderSocket.bind(bindAddress);  // listen to UDP unicast and send out to multicast
+//     m_ssdpSenderSocket.listen();
+//     m_ssdpSenderSocket.setTimeToLive(4);
+    m_unicastReactor.addEventHandler(m_ssdpSenderSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onUnicastReadable));
+    m_unicastListenerThread.start(m_unicastReactor);
+    
     m_ssdpSocket.setInterface(m_interface);
     m_ssdpSocket.setLoopback(true);
     m_ssdpSocket.setTimeToLive(4);  // TODO: let TTL be configurable
-    m_ssdpSocket.joinGroup(m_ssdpAddress);
+//     m_ssdpSocket.joinGroup(m_ssdpAddress);
+    m_ssdpSocket.joinGroup(IPAddress(SSDP_ADDRESS));
+    
     m_reactor.addEventHandler(m_ssdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
-    m_notificationCenter.addObserver(observer);
+    // why is that?
     m_listenerThread.start(m_reactor);
 }
 
@@ -1764,9 +1844,13 @@ SsdpSocket::~SsdpSocket()
 {
     std::cerr << std::endl << "closing SSDP socket ..." << std::endl;
     m_reactor.removeEventHandler(m_ssdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
-    m_ssdpSocket.leaveGroup(m_ssdpAddress);
+    m_unicastReactor.removeEventHandler(m_ssdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
+//     m_ssdpSocket.leaveGroup(m_ssdpAddress);
+    m_ssdpSocket.leaveGroup(IPAddress(SSDP_ADDRESS));
     m_reactor.stop();
+    m_unicastReactor.stop();
     m_listenerThread.join();
+    m_unicastListenerThread.join();
     delete [] m_pBuffer;
 }
 
@@ -1777,7 +1861,19 @@ SsdpSocket::onReadable(const AutoPtr<ReadableNotification>& pNf)
     SocketAddress sender;
     int n = m_ssdpSocket.receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-//         std::cerr << "SsdpSocket::onReadable() receives: " << std::endl << std::string(m_pBuffer, n) << std::endl;
+        std::cerr << "SSDP message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
+        m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
+    }
+}
+
+
+void
+SsdpSocket::onUnicastReadable(const AutoPtr<ReadableNotification>& pNf)
+{
+    SocketAddress sender;
+    int n = m_ssdpSenderSocket.receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
+    if (n > 0) {
+        std::cerr << "SSDP Unicast message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
         m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
     }
 }
@@ -1787,6 +1883,7 @@ void
 SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 {
     std::string m = message.toString();
-    int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
-//     std::cerr << "SsdpSocket::sendMessage() message sent: " << std::endl << m;
+//     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
+    int bytesSent = m_ssdpSenderSocket.sendTo(m.c_str(), m.length(), receiver);
+    std::cerr << "SSDP message sent to: " << receiver.toString() << std::endl << m;
 }
