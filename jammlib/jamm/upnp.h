@@ -186,7 +186,6 @@ typedef r8              number;
 static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    JAMM_VERSION        = "0.0.3";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
-static const std::string    SSDP_SEND_ADDRESS   = "239.255.255.250:0";
 static const std::string    SSDP_ADDRESS        = "239.255.255.250";
 static const UInt16         SSDP_PORT           = 1900;
 static const UInt16         SSDP_CACHE_DURATION = 1800;
@@ -251,6 +250,7 @@ public:
     std::string getUniqueServiceName();
     
     void setLocation(const URI& location);
+//     std::string getLocation();
     URI getLocation();
     
     void setHost();
@@ -284,37 +284,32 @@ private:
 };
 
 
-// class SsdpMessage : UpnpMessage
-// {
-// };
-
-
-/// This class provides an interface to a
-/// UDP Multicast socket.
 class SsdpSocket
 { 
 public:
-    SsdpSocket(const AbstractObserver& observer);
+    SsdpSocket(const NetworkInterface& interface);
     ~SsdpSocket();
     
-    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
+    const NetworkInterface& getInterface() { return m_interface; }
+    void setObserver(const AbstractObserver& observer);
+    void setUnicastObserver(const AbstractObserver& observer);
+    void init();
     
-    NetworkInterface    m_interface;
+    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
     
 private:
     void onReadable(const AutoPtr<ReadableNotification>& pNf);
     void onUnicastReadable(const AutoPtr<ReadableNotification>& pNf);
     
-//     IPAddress           m_ssdpAddress;
-//     UInt16              m_ssdpPort;
-    MulticastSocket     m_ssdpSocket;
-    DatagramSocket      m_ssdpSenderSocket;
-//     SocketAddress       m_ssdpSocketAddress;
+    NetworkInterface    m_interface;
+    MulticastSocket*    m_pSsdpSocket;
+    MulticastSocket*    m_pSsdpSenderSocket;
     SocketReactor       m_reactor;
     SocketReactor       m_unicastReactor;
     Thread              m_listenerThread;
     Thread              m_unicastListenerThread;
     NotificationCenter  m_notificationCenter;
+    NotificationCenter  m_unicastNotificationCenter;
     char*               m_pBuffer;
     
     enum {
@@ -733,10 +728,12 @@ public:
     ~HttpSocket();
     
     std::string getServerUri() { return "http://" + m_httpServerAddress.toString() + "/"; }
+    void init();
     void startServer();
     void stopServer();
     
 private:
+    NetworkInterface                m_interface;
     SocketAddress                   m_httpServerAddress;
     DeviceRequestHandlerFactory*    m_pDeviceRequestHandlerFactory;
     NotificationCenter              m_notificationCenter;
@@ -1116,10 +1113,17 @@ public:
     Controller();
     ~Controller();
 
-private:
-    void handleSsdpMessage(SsdpMessage* pNf);
+    void init();
+    void sendMSearch();
     
-    SsdpSocket m_ssdpSocket;
+private:
+    void handleMSearchResponse(SsdpMessage* pMessage);
+    void handleSsdpMessage(SsdpMessage* pMessage);
+    void addDevice(DeviceRoot* pDevice);
+    
+    SsdpSocket              m_ssdpSocket;
+    Container<DeviceRoot>   m_devices;
+//     Poco::FastMutex     m_controllerLock;
 };
 
 

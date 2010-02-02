@@ -979,20 +979,22 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
 }
 
 
-HttpSocket::HttpSocket(NetworkInterface interface)
+HttpSocket::HttpSocket(NetworkInterface interface) :
+m_interface(interface)
 {
-    std::cerr << "HttpSocket()" << std::endl;
-    
+    init();
+}
+
+
+void
+HttpSocket::init()
+{
     m_pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory(this);
-    
-    HTTPServerParams* pParams = new HTTPServerParams;
-    //     pParams->setMaxQueued(maxQueued);
-    //     pParams->setMaxThreads(maxThreads);
-        // set-up a server socket on an available port
     ServerSocket socket(0);
         // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
     //     socket.bind(m_ssdpSocket.m_interface.address());
-    m_httpServerAddress = SocketAddress(interface.address(), socket.address().port());
+    HTTPServerParams* pParams = new HTTPServerParams;
+    m_httpServerAddress = SocketAddress(m_interface.address(), socket.address().port());
     m_pHttpServer = new HTTPServer(m_pDeviceRequestHandlerFactory, socket, pParams);
 }
 
@@ -1000,6 +1002,11 @@ HttpSocket::HttpSocket(NetworkInterface interface)
 void
 HttpSocket::startServer()
 {
+
+    //     pParams->setMaxQueued(maxQueued);
+    //     pParams->setMaxThreads(maxThreads);
+        // set-up a server socket on an available port
+
     m_pHttpServer->start();
     std::cerr << "started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
 }
@@ -1041,8 +1048,9 @@ Device::addService(Service* pService)
 
 DeviceRoot::DeviceRoot() :
 // TODO: allocate sockets later, not in ctor (e.g. jammgen doesn't need them)
-m_ssdpSocket(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)),
-m_httpSocket(m_ssdpSocket.m_interface)
+// m_ssdpSocket(/*Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)*/),
+m_ssdpSocket(NetworkInterface::forName("wlan0")),
+m_httpSocket(m_ssdpSocket.getInterface())
 {
 }
 
@@ -1264,6 +1272,8 @@ void
 DeviceRoot::startSsdp()
 {
     std::cerr << "DeviceRoot::startSsdp()" << std::endl;
+    m_ssdpSocket.setObserver(Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
+    m_ssdpSocket.init();
     // TODO: 3. send out initial set also on the occasion of new IP address or network interface.
     
     // 1. wait random intervall of less than 100msec when sending message set first time
@@ -1306,12 +1316,12 @@ DeviceRoot::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 
 
 void
-DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
+DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
 {
 //     std::cerr << "root device gets SSDP message:" << std::endl;
 //     std::cerr << pNf->toString();
     
-    if (pNf->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
+    if (pMessage->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
         SsdpMessage m;
         // TODO: use a skeleton to create response message
         m.setRequestMethod(SsdpMessage::REQUEST_RESPONSE);
@@ -1332,13 +1342,31 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pNf)
         //       -> m_ssdpNotifyAliveMessages.m_sendTimer
         //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
         
-        m_ssdpSocket.sendMessage(m, pNf->getSender());
+        m_ssdpSocket.sendMessage(m, pMessage->getSender());
     }
 }
 
 
 Controller::Controller() :
-m_ssdpSocket(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage))
+// m_ssdpSocket(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage))
+m_ssdpSocket(NetworkInterface::forName("wlan0"))
+{
+
+}
+
+
+void
+Controller::init()
+{
+    m_ssdpSocket.setObserver(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
+    m_ssdpSocket.setUnicastObserver(Observer<Controller, SsdpMessage>(*this, &Controller::handleMSearchResponse));
+    m_ssdpSocket.init();
+    sendMSearch();
+}
+
+
+void
+Controller::sendMSearch()
 {
     SsdpMessage m;
     m.setRequestMethod(SsdpMessage::REQUEST_SEARCH);
@@ -1349,12 +1377,6 @@ m_ssdpSocket(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMes
     m.setSearchTarget("upnp:rootdevice");
     
     m_ssdpSocket.sendMessage(m);
-    
-    
-    // TODO: may SCPD-URL, control url, and event url contain their own host and port?
-    // http://192.168.178.20:35306//network-light-desc.xml
-//     UriDescriptionReader descriptionReader(URI("http://192.168.178.20:43189"), "//network-light-desc.xml");
-//     DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot();
 }
 
 
@@ -1364,19 +1386,54 @@ Controller::~Controller()
 
 
 void
-Controller::handleSsdpMessage(SsdpMessage* pNf)
+Controller::handleSsdpMessage(SsdpMessage* pMessage)
 {
-//     std::cerr << "controller gets SSDP message:" << std::endl;
-    std::cerr << pNf->toString();
-    // TODO: handle NOTIFY messages and M-SEARCH reply messages
-    // do we need to open a seperate socket to receive the M-SEARCH reply on a different port than 1900?
-    // device advertisement (chapter 1.1) is HTTPMU (multicast) only,
-    // while device search (chapter 1.2) is HTTPU (unicast) and HTTPMU (multicast)
-    // need to open a unicast socket ...?? On both sides?? for sending and listening?
-    // send to multicast address with sender port different than 1900?
-    // open a normal DatagramSocket for HTTPU, do a connect(), this socket is not bound to a specific
-    // interface then ...
-    // set the sender port when sending multicasts to the normal DatagramSocket port
+    std::cerr << "Controller::handleSsdpMessage()" << std::endl;
+    std::cerr << pMessage->toString();
+    // we load all device descriptions, regardless of service types contained in the device
+    switch(pMessage->getRequestMethod()) {
+    case SsdpMessage::REQUEST_NOTIFY_ALIVE:
+        if (pMessage->getNotificationType() == "upnp:rootdevice") {
+        }
+        break;
+    case SsdpMessage::REQUEST_NOTIFY_BYEBYE:
+        if (pMessage->getNotificationType() == "upnp:rootdevice") {
+        }
+        break;
+    }
+    std::cerr << "Controller::handleSsdpMessage() finished" << std::endl;
+}
+
+void
+Controller::handleMSearchResponse(SsdpMessage* pMessage)
+{
+    std::cerr << "Controller::handleMSearchResponse()" << std::endl;
+    std::cerr << pMessage->toString() << std::endl;
+//     SsdpMessage::TRequestMethod requestMethod = pMessage->getRequestMethod();
+//     std::cerr << "Controller::handleMSearchResponse() type: " << requestMethod << std::endl;
+    // NOTE: switch statement ist because UPnP 1.1 needs udp unicast for eventing, too ...?
+    switch(pMessage->getRequestMethod()) {
+    case SsdpMessage::REQUEST_RESPONSE:
+        std::cerr << "Controller::handleMSearchResponse() REQUEST_RESPONSE" << std::endl;
+        URI location = pMessage->getLocation();
+        std::cerr << "Controller::handleMSearchResponse() LOCATION: " <<  location.toString() << std::endl;
+    
+        std::string baseUri = location.getScheme() + "://" + location.getAuthority();
+        std::cerr << "Controller::handleMSearchResponse() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
+        
+        UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
+        // TODO: better trust the device uuid in the SSDP message then in the device description ...
+        addDevice(descriptionReader.deviceRoot());
+        break;
+    }
+    std::cerr << "Controller::handleMSearchResponse() finished" << std::endl;
+}
+
+
+void
+Controller::addDevice(DeviceRoot* pDevice)
+{
+    m_devices.append(pDevice->getRootDevice()->getUuid(), pDevice);
 }
 
 
@@ -1513,12 +1570,14 @@ SsdpMessage::SsdpMessage(TRequestMethod requestMethod)
 
 SsdpMessage::SsdpMessage(const std::string& buf, const SocketAddress& sender)
 {
+    // FIXME: this shouldn't be executed on every SsdpMessage ctor
     initMessageMap();
     
     for (std::map<TRequestMethod,std::string>::iterator i = m_messageMap.begin(); i != m_messageMap.end(); i++) {
         m_messageConstMap[(*i).second] = (*i).first;
     }
     
+    // FIXME: what about Poco::Message header for retrieving the request method?
     istringstream is(buf);
     // get first line and check request method type
     std::string line;
@@ -1529,7 +1588,11 @@ SsdpMessage::SsdpMessage(const std::string& buf, const SocketAddress& sender)
     m_requestMethod = m_messageConstMap[line];
     m_sender = sender;
     
-    m_messageHeader.read(is);
+    try {
+        m_messageHeader.read(is);
+    } catch (Poco::Net::MessageException) {
+        std::cerr << "Error in sdpMessage::SsdpMessage(): malformed header" << std::endl;
+    }
 }
 
 
@@ -1672,7 +1735,13 @@ SsdpMessage::setLocation(const URI& location)
 URI
 SsdpMessage::getLocation()
 {
-    return URI(m_messageHeader["LOCATION"]);
+    try {
+        return URI(m_messageHeader["LOCATION"]);
+    }
+    catch (Poco::NotFoundException) {
+        std::cerr << "Error in SsdpMessage::getLocation(): LOCATION field not found" << std::endl;
+        return URI("");
+    }
 }
 
 
@@ -1693,7 +1762,8 @@ SsdpMessage::setHttpExtensionNamespace()
 void
 SsdpMessage::setHttpExtensionConfirmed()
 {
-    m_messageHeader.set("EXT", "");
+    // FIXME: when value is empty or blanc string, end of line is also killed
+    m_messageHeader.set("EXT", "FIXME: Bug in Poco");
 }
 
 
@@ -1797,45 +1867,51 @@ SsdpMessage::getSender()
 }
 
 
-SsdpSocket::SsdpSocket(const AbstractObserver& observer):
-// m_ssdpAddress(SSDP_ADDRESS),
-// m_ssdpPort(SSDP_PORT),      // use a different port here, not 1900 ??!!!
-// set socket in a non-exclusive state, thus allowing other process to bind to the same port
-// i.e. set SO_REUSEADDR flag on socket
-// m_ssdpSocket(SocketAddress(m_ssdpAddress, m_ssdpPort), true),
-// m_ssdpSocket(SocketAddress(m_ssdpAddress, SSDP_PORT), true),
-m_ssdpSocket(SocketAddress(IPAddress(SSDP_ADDRESS), SSDP_PORT), true),
-// m_ssdpSocket(SocketAddress(m_ssdpAddress, 8789), true),
+SsdpSocket::SsdpSocket(const NetworkInterface& interface):
+m_interface(interface),
 m_pBuffer(new char[BUFFER_SIZE])
 {
+}
+
+
+void
+SsdpSocket::setObserver(const AbstractObserver& observer)
+{
     m_notificationCenter.addObserver(observer);
-//     std::cerr << "SsdpSocket()" << std::endl;
+}
+
+
+void
+SsdpSocket::setUnicastObserver(const AbstractObserver& observer)
+{
+    m_unicastNotificationCenter.addObserver(observer);
+}
+
+
+void
+SsdpSocket::init()
+{
     
     // set the default interface by providing an empty NetworkInterface as argument
     // TODO: let interface be configurable
     // TODO: default value: find out an interface name, that routes to the default route entry
-    m_interface = NetworkInterface::forName("wlan0");
+    // TODO: dynamic adding and removing of interfaces
+//     m_interface = NetworkInterface::forName("wlan0");
     
-//     ServerSocket socket(0);
-        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
-    //     socket.bind(m_ssdpSocket.m_interface.address());
-//     m_ssdpSocketAddress = SocketAddress(m_interface.address(), m_ssdpSocket.address().port());
-    
-    SocketAddress bindAddress("0.0.0.0", 0);
-    m_ssdpSenderSocket.bind(bindAddress);  // listen to UDP unicast and send out to multicast
-//     m_ssdpSenderSocket.listen();
-//     m_ssdpSenderSocket.setTimeToLive(4);
-    m_unicastReactor.addEventHandler(m_ssdpSenderSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onUnicastReadable));
+    // listen to UDP unicast and send out to multicast
+    m_pSsdpSenderSocket = new MulticastSocket(SocketAddress("0.0.0.0", 0));
+    m_pSsdpSenderSocket->setInterface(m_interface);
+    m_pSsdpSenderSocket->setLoopback(true);
+    m_pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
+    m_unicastReactor.addEventHandler(*m_pSsdpSenderSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onUnicastReadable));
     m_unicastListenerThread.start(m_unicastReactor);
     
-    m_ssdpSocket.setInterface(m_interface);
-    m_ssdpSocket.setLoopback(true);
-    m_ssdpSocket.setTimeToLive(4);  // TODO: let TTL be configurable
-//     m_ssdpSocket.joinGroup(m_ssdpAddress);
-    m_ssdpSocket.joinGroup(IPAddress(SSDP_ADDRESS));
-    
-    m_reactor.addEventHandler(m_ssdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
-    // why is that?
+    // listen to UDP multicast
+    m_pSsdpSocket = new MulticastSocket(SocketAddress(IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
+    m_pSsdpSocket->setInterface(m_interface);
+    m_pSsdpSocket->setLoopback(true);
+    m_pSsdpSocket->joinGroup(IPAddress(SSDP_ADDRESS));
+    m_reactor.addEventHandler(*m_pSsdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
     m_listenerThread.start(m_reactor);
 }
 
@@ -1843,14 +1919,16 @@ m_pBuffer(new char[BUFFER_SIZE])
 SsdpSocket::~SsdpSocket()
 {
     std::cerr << std::endl << "closing SSDP socket ..." << std::endl;
-    m_reactor.removeEventHandler(m_ssdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
-    m_unicastReactor.removeEventHandler(m_ssdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
+    m_reactor.removeEventHandler(*m_pSsdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
+    m_unicastReactor.removeEventHandler(*m_pSsdpSocket, NObserver<SsdpSocket, ReadableNotification>(*this, &SsdpSocket::onReadable));
 //     m_ssdpSocket.leaveGroup(m_ssdpAddress);
-    m_ssdpSocket.leaveGroup(IPAddress(SSDP_ADDRESS));
+    m_pSsdpSocket->leaveGroup(IPAddress(SSDP_ADDRESS));
     m_reactor.stop();
     m_unicastReactor.stop();
     m_listenerThread.join();
     m_unicastListenerThread.join();
+    delete m_pSsdpSenderSocket;
+    delete m_pSsdpSocket;
     delete [] m_pBuffer;
 }
 
@@ -1859,9 +1937,9 @@ void
 SsdpSocket::onReadable(const AutoPtr<ReadableNotification>& pNf)
 {
     SocketAddress sender;
-    int n = m_ssdpSocket.receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
+    int n = m_pSsdpSocket->receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-        std::cerr << "SSDP message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
+//         std::cerr << "SSDP message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
         m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
     }
 }
@@ -1871,10 +1949,10 @@ void
 SsdpSocket::onUnicastReadable(const AutoPtr<ReadableNotification>& pNf)
 {
     SocketAddress sender;
-    int n = m_ssdpSenderSocket.receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
+    int n = m_pSsdpSenderSocket->receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-        std::cerr << "SSDP Unicast message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
-        m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
+//         std::cerr << "SSDP Unicast message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
+        m_unicastNotificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
     }
 }
 
@@ -1884,6 +1962,6 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
 {
     std::string m = message.toString();
 //     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
-    int bytesSent = m_ssdpSenderSocket.sendTo(m.c_str(), m.length(), receiver);
+    int bytesSent = m_pSsdpSenderSocket->sendTo(m.c_str(), m.length(), receiver);
     std::cerr << "SSDP message sent to: " << receiver.toString() << std::endl << m;
 }

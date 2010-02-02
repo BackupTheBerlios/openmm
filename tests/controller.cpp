@@ -102,6 +102,7 @@ protected:
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
             Controller controller;
+            controller.init();
             std::cerr << "ControllerTest::main() waiting for termination request" << std::endl;
             waitForTerminationRequest();
         }
