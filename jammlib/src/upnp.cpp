@@ -95,10 +95,19 @@ UriDescriptionReader::getDescription(const std::string& path)
     else if (m_uri.getScheme() == "http") {
         HTTPClientSession session(m_uri.getHost(), m_uri.getPort());
         HTTPRequest request("GET", path);
-        HTTPResponse response;
         session.sendRequest(request);
         
+        // TODO: platinum's URL has no leading / but expects one ...
+        HTTPResponse response;
         std::istream& rs = session.receiveResponse(response);
+        if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
+            std::cerr << "Error: " << path << " HTTP_NOT_FOUND 404" << std::endl;
+            std::cerr << "Trying: /" << path << std::endl;
+            request.setURI("/" + path);
+            session.sendRequest(request);
+            response.clear();
+            std::istream& rs = session.receiveResponse(response);
+        }
         char* buf = new char[response.getContentLength()];
         rs.read(buf, response.getContentLength());
         res = new std::string(buf, response.getContentLength());
@@ -1060,6 +1069,7 @@ DeviceRoot::~DeviceRoot()
     std::cerr << "DeviceRoot::~DeviceRoot()" << std::endl;
     stopSsdp();
     stopHttp();
+    // TODO: free all Devices, Services, Actions, ...
 //     delete m_descriptionRequestHandler;
 }
 
@@ -1359,7 +1369,7 @@ void
 Controller::init()
 {
     m_ssdpSocket.setObserver(Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
-    m_ssdpSocket.setUnicastObserver(Observer<Controller, SsdpMessage>(*this, &Controller::handleMSearchResponse));
+//     m_ssdpSocket.setUnicastObserver(Observer<Controller, SsdpMessage>(*this, &Controller::handleMSearchResponse));
     m_ssdpSocket.init();
     sendMSearch();
 }
@@ -1388,52 +1398,78 @@ Controller::~Controller()
 void
 Controller::handleSsdpMessage(SsdpMessage* pMessage)
 {
-    std::cerr << "Controller::handleSsdpMessage()" << std::endl;
-    std::cerr << pMessage->toString();
     // we load all device descriptions, regardless of service types contained in the device
+    
+    // NOTE: Bug in platinum-upnp, no USN field in M-Search responses
+    // get UUID from USN
+    std::string usn = pMessage->getUniqueServiceName();
+    std::string::size_type left = usn.find(":") + 1;
+    std::string uuid = usn.substr(left, usn.find("::") - left);
+    std::cerr << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
+    std::cerr << pMessage->toString();
+    
     switch(pMessage->getRequestMethod()) {
-    case SsdpMessage::REQUEST_NOTIFY_ALIVE:
-        if (pMessage->getNotificationType() == "upnp:rootdevice") {
+    case SsdpMessage::REQUEST_NOTIFY:
+        std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY" << std::endl;
+        switch(pMessage->getNotificationSubtype()) {
+        case SsdpMessage::SUBTYPE_ALIVE:
+            std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY_ALIVE" << std::endl;
+            if (pMessage->getNotificationType() == "upnp:rootdevice" && !m_devices.contains(uuid)) {
+                URI location = pMessage->getLocation();
+                std::string baseUri = location.getScheme() + "://" + location.getAuthority();
+                UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
+                addDevice(descriptionReader.deviceRoot());
+            }
+            break;
+        case SsdpMessage::SUBTYPE_BYEBYE:
+            std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY_BYEBYE" << std::endl;
+            if (pMessage->getNotificationType() == "upnp:rootdevice") {
+                removeDevice(uuid);
+            }
+            break;
         }
-        break;
-    case SsdpMessage::REQUEST_NOTIFY_BYEBYE:
-        if (pMessage->getNotificationType() == "upnp:rootdevice") {
+    break;
+    case SsdpMessage::REQUEST_RESPONSE:
+        std::cerr << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
+        if (!m_devices.contains(uuid)) {
+            URI location = pMessage->getLocation();
+            std::cerr << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
+            
+            std::string baseUri = location.getScheme() + "://" + location.getAuthority();
+            std::cerr << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
+            
+            UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
+            // TODO: better trust the device uuid in the SSDP message then in the device description ...
+            //       though platinum-upnp doesn't provide a USN field ...
+            addDevice(descriptionReader.deviceRoot());
         }
         break;
     }
     std::cerr << "Controller::handleSsdpMessage() finished" << std::endl;
 }
 
-void
-Controller::handleMSearchResponse(SsdpMessage* pMessage)
-{
-    std::cerr << "Controller::handleMSearchResponse()" << std::endl;
-    std::cerr << pMessage->toString() << std::endl;
-//     SsdpMessage::TRequestMethod requestMethod = pMessage->getRequestMethod();
-//     std::cerr << "Controller::handleMSearchResponse() type: " << requestMethod << std::endl;
-    // NOTE: switch statement ist because UPnP 1.1 needs udp unicast for eventing, too ...?
-    switch(pMessage->getRequestMethod()) {
-    case SsdpMessage::REQUEST_RESPONSE:
-        std::cerr << "Controller::handleMSearchResponse() REQUEST_RESPONSE" << std::endl;
-        URI location = pMessage->getLocation();
-        std::cerr << "Controller::handleMSearchResponse() LOCATION: " <<  location.toString() << std::endl;
-    
-        std::string baseUri = location.getScheme() + "://" + location.getAuthority();
-        std::cerr << "Controller::handleMSearchResponse() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
-        
-        UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
-        // TODO: better trust the device uuid in the SSDP message then in the device description ...
-        addDevice(descriptionReader.deviceRoot());
-        break;
-    }
-    std::cerr << "Controller::handleMSearchResponse() finished" << std::endl;
-}
-
 
 void
 Controller::addDevice(DeviceRoot* pDevice)
 {
-    m_devices.append(pDevice->getRootDevice()->getUuid(), pDevice);
+    // TODO: handle "alive refreshments"
+    std::cerr << "Controller::addDevice()" << std::endl;
+    std::string uuid = pDevice->getRootDevice()->getUuid();
+    if (!m_devices.contains(uuid)) {
+        m_devices.append(uuid, pDevice);
+        deviceAdded(pDevice);
+    }
+}
+
+
+void
+Controller::removeDevice(const std::string& uuid)
+{
+    std::cerr << "Controller::removeDevice()" << std::endl;
+    if (m_devices.contains(uuid)) {
+        deviceRemoved(&m_devices.get(uuid));
+        m_devices.remove(uuid);
+    }
 }
 
 
@@ -1559,9 +1595,11 @@ SsdpMessage::SsdpMessage(TRequestMethod requestMethod)
     
     switch (requestMethod) {
     case REQUEST_NOTIFY_ALIVE:
+        m_requestMethod = REQUEST_NOTIFY;
         setNotificationSubtype(SsdpMessage::SUBTYPE_ALIVE);          // alive message
         break;
     case REQUEST_NOTIFY_BYEBYE:
+        m_requestMethod = REQUEST_NOTIFY;
         setNotificationSubtype(SsdpMessage::SUBTYPE_BYEBYE);         // byebye message
         break;
     }
@@ -1588,11 +1626,29 @@ SsdpMessage::SsdpMessage(const std::string& buf, const SocketAddress& sender)
     m_requestMethod = m_messageConstMap[line];
     m_sender = sender;
     
-    try {
-        m_messageHeader.read(is);
-    } catch (Poco::Net::MessageException) {
-        std::cerr << "Error in sdpMessage::SsdpMessage(): malformed header" << std::endl;
+    while(getline(is, line)) {
+        std::string::size_type col = line.find(":");
+        if (col != std::string::npos) {
+            m_messageHeader[line.substr(0, col)] = Poco::trim(line.substr(col + 1));
+        }
     }
+    
+//     if (getNotificationSubtype() == SsdpMessage::SUBTYPE_ALIVE) {
+//             m_requestMethod = REQUEST_NOTIFY_ALIVE;
+//     }
+//     else if (getNotificationSubtype() == SsdpMessage::SUBTYPE_BYEBYE) {
+//         m_requestMethod = REQUEST_NOTIFY_BYEBYE;
+//     }
+//     try {
+//         m_messageHeader.read(is);
+//     } catch (Poco::Net::MessageException) {
+//         std::cerr << "Error in sdpMessage::SsdpMessage(): malformed header" << std::endl;
+//     }
+    // FIXME: workaround for bug in Poco: empty values are mistreated
+//     if (m_messageHeader.has("EXT")) {
+//         m_messageHeader.set("EXT", "fix bug in poco");
+//         m_messageHeader.erase("EXT");
+//     }
 }
 
 
@@ -1600,8 +1656,8 @@ void
 SsdpMessage::initMessageMap()
 {
     m_messageMap[REQUEST_NOTIFY]            = "NOTIFY * HTTP/1.1";
-    m_messageMap[REQUEST_NOTIFY_ALIVE]      = "NOTIFY * HTTP/1.1";
-    m_messageMap[REQUEST_NOTIFY_BYEBYE]     = "NOTIFY * HTTP/1.1";
+    m_messageMap[REQUEST_NOTIFY_ALIVE]      = "dummy1";
+    m_messageMap[REQUEST_NOTIFY_BYEBYE]     = "dummy2";
     m_messageMap[REQUEST_SEARCH]            = "M-SEARCH * HTTP/1.1";
     m_messageMap[REQUEST_RESPONSE]          = "HTTP/1.1 200 OK";
     m_messageMap[SUBTYPE_ALIVE]             = "ssdp:alive";
@@ -1622,7 +1678,10 @@ SsdpMessage::toString()
     std::ostringstream os;
     
     os << m_messageMap[m_requestMethod] << "\r\n";
-    m_messageHeader.write(os);
+    for (std::map<std::string,std::string>::iterator i = m_messageHeader.begin(); i != m_messageHeader.end(); ++i) {
+        os << (*i).first << ": " << (*i).second << "\r\n";
+    }
+//     m_messageHeader.write(os);
     os << "\r\n";
     
     return os.str();
@@ -1633,6 +1692,9 @@ void
 SsdpMessage::setRequestMethod(TRequestMethod requestMethod)
 {
     m_requestMethod = requestMethod;
+//     if (m_requestMethod == REQUEST_NOTIFY_ALIVE || m_requestMethod == REQUEST_NOTIFY_BYEBYE) {
+//         requestMethod = REQUEST_NOTIFY;
+//     }
 }
 
 
@@ -1646,7 +1708,8 @@ SsdpMessage::getRequestMethod()
 void
 SsdpMessage::setCacheControl(int duration)
 {
-    m_messageHeader.set("CACHE-CONTROL", "max-age = " + NumberFormatter::format(duration));
+//     m_messageHeader.set("CACHE-CONTROL", "max-age = " + NumberFormatter::format(duration));
+    m_messageHeader["CACHE-CONTROL"] = "max-age = " + NumberFormatter::format(duration);
 }
 
 
@@ -1670,7 +1733,8 @@ SsdpMessage::getCacheControl()
 void
 SsdpMessage::setNotificationType(const std::string& searchTarget)
 {
-    m_messageHeader.set("NT", searchTarget);
+//     m_messageHeader.set("NT", searchTarget);
+    m_messageHeader["NT"] =  searchTarget;
 }
 
 
@@ -1684,7 +1748,8 @@ SsdpMessage::getNotificationType()
 void
 SsdpMessage::setNotificationSubtype(TRequestMethod notificationSubtype)
 {
-    m_messageHeader.set("NTS", m_messageMap[notificationSubtype]);
+//     m_messageHeader.set("NTS", m_messageMap[notificationSubtype]);
+    m_messageHeader["NTS"] =  m_messageMap[notificationSubtype];
     m_notificationSubtype = notificationSubtype;
 }
 
@@ -1700,7 +1765,8 @@ SsdpMessage::getNotificationSubtype()
 void
 SsdpMessage::setSearchTarget(const std::string& searchTarget)
 {
-    m_messageHeader.set("ST", searchTarget);
+//     m_messageHeader.set("ST", searchTarget);
+    m_messageHeader["ST"] = searchTarget;
 }
 
 
@@ -1714,7 +1780,8 @@ SsdpMessage::getSearchTarget()
 void
 SsdpMessage::setUniqueServiceName(const std::string& serviceName)
 {
-    m_messageHeader.set("USN", serviceName);
+//     m_messageHeader.set("USN", serviceName);
+    m_messageHeader["USN"] = serviceName;
 }
 
 
@@ -1728,7 +1795,8 @@ SsdpMessage::getUniqueServiceName()
 void
 SsdpMessage::setLocation(const URI& location)
 {
-    m_messageHeader.set("LOCATION", location.toString());
+//     m_messageHeader.set("LOCATION", location.toString());
+    m_messageHeader["LOCATION"] = location.toString();
 }
 
 
@@ -1748,39 +1816,48 @@ SsdpMessage::getLocation()
 void
 SsdpMessage::setHost()
 {
-    m_messageHeader.set("HOST", SSDP_FULL_ADDRESS);
+//     m_messageHeader.set("HOST", SSDP_FULL_ADDRESS);
+    m_messageHeader["HOST"] = SSDP_FULL_ADDRESS;
 }
 
 
 void
 SsdpMessage::setHttpExtensionNamespace()
 {
-    m_messageHeader.set("MAN", "\"ssdp:discover\"");
+//     m_messageHeader.set("MAN", "\"ssdp:discover\"");
+    m_messageHeader["MAN"] = "\"ssdp:discover\"";
 }
 
 
 void
 SsdpMessage::setHttpExtensionConfirmed()
 {
-    // FIXME: when value is empty or blanc string, end of line is also killed
-    m_messageHeader.set("EXT", "FIXME: Bug in Poco");
+//     m_messageHeader.set("EXT", "");
+    m_messageHeader["EXT"] = "";
 }
 
 
 bool
 SsdpMessage::getHttpExtensionConfirmed()
 {
-    return m_messageHeader.has("EXT");
+//     return m_messageHeader.has("EXT");
+    return true;
 }
 
 
 void
 SsdpMessage::setServer(const std::string& productNameVersion)
-{   m_messageHeader.set("SERVER", 
+{   
+//     m_messageHeader.set("SERVER", 
+//                         Environment::osName() + "/"
+//                         + Environment::osVersion() + ", "
+//                         + "UPnP/" + UPNP_VERSION + ", "
+//                         + productNameVersion);
+    m_messageHeader["SERVER"] = 
                         Environment::osName() + "/"
                         + Environment::osVersion() + ", "
                         + "UPnP/" + UPNP_VERSION + ", "
-                        + productNameVersion);
+                        + productNameVersion;
 }
 
 
@@ -1818,7 +1895,8 @@ SsdpMessage::getServerProductNameVersion()
 void
 SsdpMessage::setMaximumWaitTime(int waitTime)
 {
-    m_messageHeader.set("MX", NumberFormatter::format(waitTime));
+//     m_messageHeader.set("MX", NumberFormatter::format(waitTime));
+    m_messageHeader["MX"] = NumberFormatter::format(waitTime);
 }
 
 
@@ -1842,7 +1920,8 @@ void
 SsdpMessage::setDate()
 {
     Timestamp t;
-    m_messageHeader.set("DATE", DateTimeFormatter::format(t, DateTimeFormat::HTTP_FORMAT));
+//     m_messageHeader.set("DATE", DateTimeFormatter::format(t, DateTimeFormat::HTTP_FORMAT));
+    m_messageHeader["DATE"] = DateTimeFormatter::format(t, DateTimeFormat::HTTP_FORMAT);
 }
 
 
@@ -1881,11 +1960,11 @@ SsdpSocket::setObserver(const AbstractObserver& observer)
 }
 
 
-void
-SsdpSocket::setUnicastObserver(const AbstractObserver& observer)
-{
-    m_unicastNotificationCenter.addObserver(observer);
-}
+// void
+// SsdpSocket::setUnicastObserver(const AbstractObserver& observer)
+// {
+//     m_unicastNotificationCenter.addObserver(observer);
+// }
 
 
 void
@@ -1952,7 +2031,7 @@ SsdpSocket::onUnicastReadable(const AutoPtr<ReadableNotification>& pNf)
     int n = m_pSsdpSenderSocket->receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
 //         std::cerr << "SSDP Unicast message received from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
-        m_unicastNotificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
+        m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), sender));
     }
 }
 

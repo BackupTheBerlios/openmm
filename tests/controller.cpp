@@ -41,6 +41,21 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
 
+class MyController : public Controller
+{
+    virtual void deviceAdded(DeviceRoot* device)
+    {
+        std::cerr << "MyController::deviceAdded() uuid: " << device->getRootDevice()->getUuid() << std::endl;
+    }
+    
+    virtual void deviceRemoved(DeviceRoot* device)
+    {
+        std::cerr << "MyController::deviceRemoved() uuid: " << device->getRootDevice()->getUuid() << std::endl;
+    }
+    
+};
+
+
 class ControllerTest: public Poco::Util::ServerApplication
 {
 public:
@@ -101,7 +116,7 @@ protected:
         {
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
-            Controller controller;
+            MyController controller;
             controller.init();
             std::cerr << "ControllerTest::main() waiting for termination request" << std::endl;
             waitForTerminationRequest();

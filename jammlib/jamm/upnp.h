@@ -274,10 +274,11 @@ public:
 private:
     void initMessageMap();
     
-    TRequestMethod          m_requestMethod;
-    TRequestMethod          m_notificationSubtype;
-    MessageHeader           m_messageHeader;
-    SocketAddress           m_sender;
+    TRequestMethod                      m_requestMethod;
+    TRequestMethod                      m_notificationSubtype;
+//     MessageHeader           m_messageHeader;
+    std::map<std::string,std::string>   m_messageHeader;
+    SocketAddress                       m_sender;
     
     std::map<TRequestMethod,std::string> m_messageMap;
     std::map<std::string,TRequestMethod> m_messageConstMap;
@@ -292,7 +293,7 @@ public:
     
     const NetworkInterface& getInterface() { return m_interface; }
     void setObserver(const AbstractObserver& observer);
-    void setUnicastObserver(const AbstractObserver& observer);
+//     void setUnicastObserver(const AbstractObserver& observer);
     void init();
     
     void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
@@ -309,7 +310,7 @@ private:
     Thread              m_listenerThread;
     Thread              m_unicastListenerThread;
     NotificationCenter  m_notificationCenter;
-    NotificationCenter  m_unicastNotificationCenter;
+//     NotificationCenter  m_unicastNotificationCenter;
     char*               m_pBuffer;
     
     enum {
@@ -452,6 +453,16 @@ public:
         E* pEntity = m_pEntities.find(key)->second;
         m_pEntities.erase(key);
         m_keys.erase(find(m_keys.begin(), m_keys.end(), pEntity));
+    }
+    
+    bool contains(const std::string& key)
+    {
+        return m_pEntities.find(key) != m_pEntities.end();
+    }
+    
+    bool contains(E* pEntity)
+    {
+        return find(m_keys.begin(), m_keys.end(), pEntity) != m_keys.end();
     }
     
     template<typename T> T getValue(const std::string& key)
@@ -1108,23 +1119,35 @@ protected:
 };
 
 
-class Controller {
+class Controller
+{
 public:
     Controller();
     ~Controller();
 
     void init();
-    void sendMSearch();
+    virtual void deviceAdded(DeviceRoot* device) = 0;
+    virtual void deviceRemoved(DeviceRoot* device) = 0;
     
 private:
-    void handleMSearchResponse(SsdpMessage* pMessage);
+    void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
     void addDevice(DeviceRoot* pDevice);
+    void removeDevice(const std::string& uuid);
     
     SsdpSocket              m_ssdpSocket;
     Container<DeviceRoot>   m_devices;
 //     Poco::FastMutex     m_controllerLock;
 };
+
+
+// class ControllerImplAdapter
+// {
+//     
+//     
+// private:
+//     Controller*     m_pController;
+// };
 
 
 template<typename T>
