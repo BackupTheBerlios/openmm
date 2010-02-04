@@ -160,9 +160,6 @@ using std::istringstream;
 
 
 // TODO: Variant: catch conversion errors with log message
-// TODO: check path handling in UriDescriptionReader
-
-// TODO: DIDL reading and writing
 
 // TODO: Controller stuff
 // TODO: Error handling
@@ -351,7 +348,7 @@ public:
     
     // TODO: check if string formats are conform to specs (-> p. 33).
     void setValue(const std::string& val) {
-        std::cerr << "Variant::setValue(const std::string& val), val: " << val << std::endl;
+//         std::cerr << "Variant::setValue(const std::string& val), val: " << val << std::endl;
         m_val = val;
     }
     void setValue(bool val) { m_val = val ? "1" : "0"; }
@@ -365,7 +362,7 @@ public:
     void setValue(double val) { m_val = Poco::NumberFormatter::format(val); }
     
     const std::string& getValue() const {
-        std::cerr << "Variant::getValue(), m_val: " << m_val << std::endl;
+//         std::cerr << "Variant::getValue(), m_val: " << m_val << std::endl;
         return m_val; 
     }
     void getValue(std::string& val) { 
@@ -380,37 +377,37 @@ public:
     void getValue(ui2& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(ui4& val) { 
         // FIXME: Poco::NumberParser::parseUnsigned() gets stuck with "" as argument
-        std::cerr << "Variant::getValue(ui4&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
+//         std::cerr << "Variant::getValue(ui4&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
         if (m_val == "") {
             val = 0;
         }
         else {
             val = Poco::NumberParser::parseUnsigned(m_val);
         }
-        std::cerr << "Variant::getValue(ui4&) finished" << std::endl;
+//         std::cerr << "Variant::getValue(ui4&) finished" << std::endl;
     }
     void getValue(i1& val) { 
 //         val = Poco::NumberParser::parse(m_val); 
-        std::cerr << "Variant::getValue(i1&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
+//         std::cerr << "Variant::getValue(i1&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
         if (m_val == "") {
             val = 0;
         }
         else {
             val = Poco::NumberParser::parse(m_val);
         }
-        std::cerr << "Variant::getValue(i1&) finished" << std::endl;
+//         std::cerr << "Variant::getValue(i1&) finished" << std::endl;
     }
     void getValue(i2& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(i4& val) {
 //         val = Poco::NumberParser::parse(m_val);
-        std::cerr << "Variant::getValue(i4&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
+//         std::cerr << "Variant::getValue(i4&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
         if (m_val == "") {
             val = 0;
         }
         else {
             val = Poco::NumberParser::parse(m_val);
         }
-        std::cerr << "Variant::getValue(i4&) finished" << std::endl;
+//         std::cerr << "Variant::getValue(i4&) finished" << std::endl;
     }
     void getValue(float& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(double& val) { val = Poco::NumberParser::parse(m_val); }
@@ -568,15 +565,29 @@ private:
 };
 
 
-class ActionRequestReader /*: public ReaderFactory*/
+class ActionRequestReader
 {
 public:
     ActionRequestReader(const std::string& requestBody, Action* pActionTemplate);
     
-    /*virtual*/ Action* action();
+    Action* action();
     
 private:
     // TODO: replace m_nodeStack by Node* in action()
+    std::stack<Node*>       m_nodeStack;
+    AutoPtr<Document>       m_pDoc;
+    Action*                 m_pActionTemplate;
+};
+
+
+class ActionResponseReader
+{
+public:
+    ActionResponseReader(const std::string& responseBody, Action* pActionTemplate);
+    
+    Action* action();
+    
+private:
     std::stack<Node*>       m_nodeStack;
     AutoPtr<Document>       m_pDoc;
     Action*                 m_pActionTemplate;
@@ -653,11 +664,14 @@ private:
 };
 
 
-/// Writer Factory for Controllers
 class ActionRequestWriter
 {
 public:
-    /*virtual*/ void action(const Action& action);
+    void action(Action* action);
+    void write(std::string& actionMessage);
+    
+private:
+    AutoPtr<Document>   m_pDoc;
 };
 
 
@@ -666,7 +680,7 @@ class EventMessageWriter
 public:
     EventMessageWriter();
     void write(std::string& eventMessage);
-    /*virtual*/ void stateVar(const StateVar& stateVar);
+    void stateVar(const StateVar& stateVar);
 
 private:
     AutoPtr<Document>   m_pDoc;

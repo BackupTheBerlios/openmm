@@ -81,8 +81,8 @@ UriDescriptionReader::getDescription(const std::string& path)
     //          Specified by UPnP vendor. Single URL.
         
     std::string p = m_uri.getPath() + path;
-    std::cerr << "DescriptionReader::getDescription() from: " << m_uri.toString() << std::endl;
-    std::cerr << "request path is: " << p << std::endl;
+//     std::cerr << "DescriptionReader::getDescription() from: " << m_uri.toString() << std::endl;
+//     std::cerr << "request path is: " << p << std::endl;
     std::string* res;
     
     if (m_uri.getScheme() == "file") {
@@ -111,7 +111,7 @@ UriDescriptionReader::getDescription(const std::string& path)
         char* buf = new char[response.getContentLength()];
         rs.read(buf, response.getContentLength());
         res = new std::string(buf, response.getContentLength());
-        std::cerr << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+//         std::cerr << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
         std::cerr << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
@@ -121,7 +121,7 @@ UriDescriptionReader::getDescription(const std::string& path)
     DOMParser parser;
     m_pDocStack.push(parser.parseString(*res));
     Node* n = m_pDocStack.top()->documentElement()->firstChild();
-    std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
+//     std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
     m_nodeStack.push(n);
     return *res;
 }
@@ -137,12 +137,12 @@ m_pStringMap(&stringMap)
 std::string&
 StringDescriptionReader::getDescription(const std::string& path)
 {
-    std::cerr << "StringDescriptionReader::getDescription()" << std::endl;
+//     std::cerr << "StringDescriptionReader::getDescription()" << std::endl;
     std::string* res = (*m_pStringMap)[path];
     DOMParser parser;
     m_pDocStack.push(parser.parseString(*res));
     Node* n = m_pDocStack.top()->documentElement()->firstChild();
-    std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
+//     std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
     m_nodeStack.push(n);
     return *res;
 }
@@ -168,7 +168,7 @@ DescriptionReader::releaseDescriptionDocument()
 DeviceRoot*
 DescriptionReader::deviceRoot()
 {
-    std::cerr << "DescriptionReader::deviceRoot()" << std::endl;
+//     std::cerr << "DescriptionReader::deviceRoot()" << std::endl;
     DeviceRoot* pRes = new DeviceRoot();
     m_pDeviceRoot = pRes;
     pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
@@ -195,7 +195,7 @@ DescriptionReader::deviceRoot()
 Device*
 DescriptionReader::device()
 {
-    std::cerr << "DescriptionReader::device()" << std::endl;
+//     std::cerr << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
     Node* pNode = m_nodeStack.top();
     pRes->setDeviceRoot(m_pDeviceRoot);
@@ -258,7 +258,7 @@ DescriptionReader::device()
 Service*
 DescriptionReader::service()
 {
-    std::cerr << "DescriptionReader::service()" << std::endl;
+//     std::cerr << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
     Node* pNode = m_nodeStack.top();
     
@@ -326,7 +326,7 @@ DescriptionReader::service()
 Action*
 DescriptionReader::action()
 {
-    std::cerr << "DescriptionReader::action()" << std::endl;
+//     std::cerr << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
     Node* pNode = m_nodeStack.top();
     
@@ -356,7 +356,7 @@ DescriptionReader::action()
 Argument*
 DescriptionReader::argument()
 {
-    std::cerr << "DescriptionReader::argument()" << std::endl;
+//     std::cerr << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
     Node* pNode = m_nodeStack.top();
     
@@ -383,7 +383,7 @@ DescriptionReader::argument()
 StateVar*
 DescriptionReader::stateVar()
 {
-    std::cerr << "DescriptionReader::stateVar()" << std::endl;
+//     std::cerr << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
     Node* pNode = m_nodeStack.top();
     
@@ -399,7 +399,7 @@ DescriptionReader::stateVar()
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
             // FIXME: seems StateVar's value isn't set to the default value
-            std::cerr << "DescriptionReader::stateVar() set defaultValue: " << val << std::endl;
+//             std::cerr << "DescriptionReader::stateVar() set defaultValue: " << val << std::endl;
             pRes->setValue(val);
         }
         pNode = pNode->nextSibling();
@@ -459,6 +459,59 @@ ActionRequestReader::action()
 //     std::cerr << "ActionRequestReader::action() finished" << std::endl;
     return pRes;
 }
+
+
+ActionResponseReader::ActionResponseReader(const std::string& responseBody, Action* pActionTemplate)
+{
+    std::cerr << "ActionResponseReader::ActionResponseReader()" << std::endl;
+    std::cerr << "response: " << responseBody << std::endl;
+    
+    DOMParser parser;
+    m_pDoc = parser.parseString(responseBody);
+    NodeIterator it(m_pDoc, NodeFilter::SHOW_ALL);
+    m_nodeStack.push(it.nextNode());
+}
+
+
+Action*
+ActionResponseReader::action()
+{
+    // TODO: same code as in ActionRequestReader
+    std::cerr << "ActionResponseReader::action()" << std::endl;
+    Action* pRes = m_pActionTemplate;
+    Node* pNode = m_nodeStack.top();
+    NodeIterator it(pNode, NodeFilter::SHOW_ELEMENT);
+    
+    while(pNode && (pNode->nodeName() != pNode->prefix() + ":Body")) {
+        pNode = it.nextNode();
+    }
+    Node* pBody = pNode;
+    if (pBody && pBody->hasChildNodes()) {
+        Node* pAction = pBody->firstChild();
+//         std::cerr << "action: " << pRes->getName() << std::endl;
+//         std::cerr << "serviceType: " << pRes->getService()->getServiceType() << std::endl;
+        
+        if (pAction->hasChildNodes()) {
+            Node* pArgument = pAction->firstChild();
+            
+            while (pArgument) {
+//                 std::cerr << "ActionRequestReader::action() setting Argument: " << pArgument->nodeName() << " val: " << pArgument->innerText() << std::endl;
+                pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
+                pArgument = pArgument->nextSibling();
+            }
+        }
+        else {
+            std::cerr << "Error in ActionRequestReader(): action without arguments" << std::endl;
+        }
+    }
+    else {
+        std::cerr << "Error in ActionRequestReader(): action without body" << std::endl;
+    }
+    m_nodeStack.pop();
+//     std::cerr << "ActionRequestReader::action() finished" << std::endl;
+    return pRes;
+}
+
 
 
 DeviceDescriptionWriter::DeviceDescriptionWriter()
@@ -525,10 +578,44 @@ DeviceDescriptionWriter::write(std::string& description)
 }
 
 
-// void
-// ActionWriter::argument(const Argument& argument)
-// {
-// }
+void
+ActionRequestWriter::action(Action* action)
+{
+    // TODO: nearly same code as in ActionResponseWriter
+    m_pDoc = new Document;
+    AutoPtr<Element> pEnvelope = m_pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Envelope");
+    pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
+    AutoPtr<Element> pBody = m_pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
+    AutoPtr<Element> pActionRequest = m_pDoc->createElementNS(action->getService()->getServiceType(), action->getName());
+    
+    for(Action::ArgumentIterator i = action->beginInArgument(); i != action->endInArgument(); ++i) {
+        AutoPtr<Element> pArgument = m_pDoc->createElement((*i)->getName());
+        AutoPtr<Text> pArgumentValue = m_pDoc->createTextNode(action->getArgument<std::string>((*i)->getName()));
+        pArgument->appendChild(pArgumentValue);
+        pActionRequest->appendChild(pArgument);
+        
+        std::cerr << "ActionRequestWriter called with arg: " << (*i)->getName() << ", val: " << action->getArgument<std::string>((*i)->getName()) << std::endl;
+    }
+    
+    pBody->appendChild(pActionRequest);
+    pEnvelope->appendChild(pBody);
+    m_pDoc->appendChild(pEnvelope);
+}
+
+
+void
+ActionRequestWriter::write(std::string& actionMessage)
+{
+    DOMWriter writer;
+    writer.setNewLine("\r\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
+    writer.setOptions(XMLWriter::WRITE_XML_DECLARATION);
+    
+    std::stringstream ss;
+    writer.writeNode(ss, m_pDoc);
+    actionMessage = ss.str();
+    std::cerr << "action request message():" << std::endl << ss.str() << std::endl;
+}
 
 
 ActionResponseWriter::ActionResponseWriter(std::string& responseBody) :
@@ -817,7 +904,7 @@ DeviceRequestHandlerFactory::createRequestHandler(const HTTPServerRequest& reque
 void
 DeviceRequestHandlerFactory::registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler)
 {
-    std::cerr << "register request handler: " << Uri << std::endl;
+//     std::cerr << "register request handler: " << Uri << std::endl;
     m_requestHandlerMap[Uri] = requestHandler;
 }
 
@@ -1405,15 +1492,15 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-    std::cerr << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
-    std::cerr << pMessage->toString();
+//     std::cerr << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
+//     std::cerr << pMessage->toString();
     
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
-        std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY" << std::endl;
+//         std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY" << std::endl;
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
-            std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY_ALIVE" << std::endl;
+//             std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY_ALIVE" << std::endl;
             if (pMessage->getNotificationType() == "upnp:rootdevice" && !m_devices.contains(uuid)) {
                 URI location = pMessage->getLocation();
                 std::string baseUri = location.getScheme() + "://" + location.getAuthority();
@@ -1422,7 +1509,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
-            std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY_BYEBYE" << std::endl;
+//             std::cerr << "Controller::handleSsdpMessage() REQUEST_NOTIFY_BYEBYE" << std::endl;
             if (pMessage->getNotificationType() == "upnp:rootdevice") {
                 removeDevice(uuid);
             }
@@ -1430,13 +1517,13 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-        std::cerr << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
+//         std::cerr << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
         if (!m_devices.contains(uuid)) {
             URI location = pMessage->getLocation();
-            std::cerr << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
+//             std::cerr << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
             
             std::string baseUri = location.getScheme() + "://" + location.getAuthority();
-            std::cerr << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
+//             std::cerr << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
             
             UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
             // TODO: better trust the device uuid in the SSDP message then in the device description ...
@@ -1445,7 +1532,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
         break;
     }
-    std::cerr << "Controller::handleSsdpMessage() finished" << std::endl;
+//     std::cerr << "Controller::handleSsdpMessage() finished" << std::endl;
 }
 
 
@@ -1453,7 +1540,7 @@ void
 Controller::addDevice(DeviceRoot* pDevice)
 {
     // TODO: handle "alive refreshments"
-    std::cerr << "Controller::addDevice()" << std::endl;
+//     std::cerr << "Controller::addDevice()" << std::endl;
     std::string uuid = pDevice->getRootDevice()->getUuid();
     if (!m_devices.contains(uuid)) {
         m_devices.append(uuid, pDevice);
@@ -1465,7 +1552,7 @@ Controller::addDevice(DeviceRoot* pDevice)
 void
 Controller::removeDevice(const std::string& uuid)
 {
-    std::cerr << "Controller::removeDevice()" << std::endl;
+//     std::cerr << "Controller::removeDevice()" << std::endl;
     if (m_devices.contains(uuid)) {
         deviceRemoved(&m_devices.get(uuid));
         m_devices.remove(uuid);
@@ -2042,5 +2129,5 @@ SsdpSocket::sendMessage(SsdpMessage& message, const SocketAddress& receiver)
     std::string m = message.toString();
 //     int bytesSent = m_ssdpSocket.sendTo(m.c_str(), m.length(), receiver);
     int bytesSent = m_pSsdpSenderSocket->sendTo(m.c_str(), m.length(), receiver);
-    std::cerr << "SSDP message sent to: " << receiver.toString() << std::endl << m;
+//     std::cerr << "SSDP message sent to: " << receiver.toString() << std::endl << m;
 }

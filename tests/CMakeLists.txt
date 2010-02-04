@@ -39,6 +39,12 @@ device.cpp
 # network_light_application.cpp
 # )
 
+SET( JAMMTEST_JAMMLIGHT_CTRL_SRCS
+jammlight_ctrl.cpp
+jammlight_ctrl_impl.cpp
+jammlight_ctrl_appl.cpp
+)
+
 SET( JAMMTEST_CONTROLLER_SRCS
 controller.cpp
 )
@@ -55,6 +61,10 @@ ${JAMMTEST_DEVICE_SRCS}
 # ADD_EXECUTABLE( network_light
 # ${JAMMTEST_NETWORK_LIGHT_SRCS}
 # )
+
+ADD_EXECUTABLE( jammlight_ctrl
+${JAMMTEST_JAMMLIGHT_CTRL_SRCS}
+)
 
 ADD_EXECUTABLE( controller_test
 ${JAMMTEST_CONTROLLER_SRCS}
@@ -75,6 +85,11 @@ ${LIB_POCO_UTIL}
 # ${LIB_JAMM}
 # ${LIB_POCO_UTIL}
 # )
+
+TARGET_LINK_LIBRARIES( jammlight_ctrl
+${LIB_JAMM}
+${LIB_POCO_UTIL}
+)
 
 TARGET_LINK_LIBRARIES( controller_test
 ${LIB_JAMM}

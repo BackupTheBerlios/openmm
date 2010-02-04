@@ -70,7 +70,6 @@ AvTypeConverter::writeDuration(const Jamm::r8& duration)
 
 MediaObject::MediaObject(const std::string& metaData)
 {
-    m_pDoc;
     DOMParser parser;
     m_pDoc = parser.parseString(metaData);
     Node* pNode = m_pDoc->documentElement()->firstChild();
