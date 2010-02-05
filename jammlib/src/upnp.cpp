@@ -1537,14 +1537,14 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 
 
 void
-Controller::addDevice(DeviceRoot* pDevice)
+Controller::addDevice(DeviceRoot* pDeviceRoot)
 {
     // TODO: handle "alive refreshments"
 //     std::cerr << "Controller::addDevice()" << std::endl;
-    std::string uuid = pDevice->getRootDevice()->getUuid();
+    std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
     if (!m_devices.contains(uuid)) {
-        m_devices.append(uuid, pDevice);
-        deviceAdded(pDevice);
+        m_devices.append(uuid, pDeviceRoot);
+        deviceAdded(pDeviceRoot);
     }
 }
 

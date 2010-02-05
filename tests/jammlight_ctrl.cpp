@@ -26,7 +26,7 @@ void
 SwitchPowerController::GetStatus(bool& ResultStatus)
 {
     // clone action and set arguments
-    Jamm::Action* pAction = m_pService->getAction("urn:schemas-upnp-org:service:SwitchPower:1")->clone();
+    Jamm::Action* pAction = m_pService->getAction("GetStatus")->clone();
     // action -> xml
     Jamm::ActionRequestWriter actionWriter;
     // post action message to be send via http-session
@@ -51,4 +51,17 @@ SwitchPowerController::_getStatus()
     // TODO: if evented, return StateVar::getValue()
     
     // TODO: else start a QueryStateVarRequest
+}
+
+
+DimmableLightController::DimmableLightController(Jamm::Device* pDevice, SwitchPowerController* pSwitchPowerController) :
+m_pDevice(pDevice),
+m_pSwitchPowerController(pSwitchPowerController)
+{
+    m_pSwitchPowerController->m_pService = m_pDevice->getService("urn:schemas-upnp-org:service:SwitchPower:1");
+    
+    // TODO:
+    // connect to controlURL and eventURL
+    // subscribe to services
+//     pDevice->startSessions();
 }

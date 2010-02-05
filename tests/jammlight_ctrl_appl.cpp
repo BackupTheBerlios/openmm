@@ -19,8 +19,6 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-
-
 #include "Poco/Util/ServerApplication.h"
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
@@ -41,18 +39,36 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
 
-// class MyController : public JammlightControllerImpl
-// {
-//     virtual void deviceAdded(DeviceRoot* device)
-//     {
-//         std::cerr << "MyController::deviceAdded() uuid: " << device->getRootDevice()->getUuid() << std::endl;
-//     }
-//     
-//     virtual void deviceRemoved(DeviceRoot* device)
-//     {
-//         std::cerr << "MyController::deviceRemoved() uuid: " << device->getRootDevice()->getUuid() << std::endl;
-//     }
-// };
+class MyController : public Controller
+{
+    virtual void deviceAdded(DeviceRoot* pDeviceRoot)
+    {
+        std::cout << "MyController::deviceAdded()" << std::endl;
+        std::cout << "uuid: " << pDeviceRoot->getRootDevice()->getUuid() << std::endl;
+        std::cout << "type: " << pDeviceRoot->getRootDevice()->getDeviceType() << std::endl;
+//         std::cout << "friendly name: " << pDeviceRoot->getRootDevice()->getFriendlyName() << std::endl;
+        
+        // NOTE: could write a DeviceFactory here ...
+        // NOTE: could iterate through all devices of DeviceRoot here ...
+        if (pDeviceRoot->getRootDevice()->getDeviceType() == "urn:schemas-upnp-org:device:DimmableLight:1") {
+            DimmableLightController* pDimmableLight = new DimmableLightController(pDeviceRoot->getRootDevice(), new SwitchPowerControllerImpl);
+            
+            bool status;
+            std::cout << "starting sync call of GetStatus()" << std::endl;
+            pDimmableLight->SwitchPower()->GetStatus(status);
+            std::cout << "sync call of GetStatus() returns: " << status << std::endl;
+            std::cout << "starting async request _reqGetStatus()" << std::endl;
+            pDimmableLight->SwitchPower()->_reqGetStatus();
+            status = pDimmableLight->SwitchPower()->_getStatus();
+            std::cout << "state variable Status value: " << status << std::endl;
+        }
+    }
+    
+    virtual void deviceRemoved(DeviceRoot* pDeviceRoot)
+    {
+        std::cerr << "MyController::deviceRemoved() uuid: " << pDeviceRoot->getRootDevice()->getUuid() << std::endl;
+    }
+};
 
 
 class ControllerTest: public Poco::Util::ServerApplication
@@ -116,8 +132,7 @@ protected:
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
             
-            SwitchPowerControllerImpl switchPowerImpl;
-            JammlightControllerImpl controller(&switchPowerImpl);
+            MyController controller;
             controller.init();
 
             std::cerr << "ControllerTest::main() waiting for termination request" << std::endl;

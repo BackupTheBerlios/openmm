@@ -27,7 +27,7 @@ using Jamm::Service;
 
 class SwitchPowerController
 {
-    friend class JammlightController;
+    friend class DimmableLightController;
     
 public:
         // sync interface
@@ -50,6 +50,19 @@ protected:
     
 private:
     Service* m_pService;
+};
+
+
+class DimmableLightController
+{
+public:
+    DimmableLightController(Jamm::Device* pDevice, SwitchPowerController* pSwitchPowerController);
+    
+    SwitchPowerController* SwitchPower() { return m_pSwitchPowerController; }
+    
+private:
+    Jamm::Device* m_pDevice;
+    SwitchPowerController* m_pSwitchPowerController;
 };
 
 #endif

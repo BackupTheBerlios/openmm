@@ -160,6 +160,14 @@ using std::istringstream;
 
 
 // TODO: Variant: catch conversion errors with log message
+// NOTE: Embedded Devices:
+// -> HTTP server for controlling and eventing should move from DeviceRoot into Device
+// -> only SSDP stuff should be in DeviceRoot
+// -> this way ControlURL of same Service can be the same for all embedded devices
+// -> albeit: BaseURL is device description (and thus DeviceRoot) related
+// -> so nope: ControlURLs of embedded devices of same type must differ, as they are relative to BaseURL
+// TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
+
 
 // TODO: Controller stuff
 // TODO: Error handling
@@ -1140,8 +1148,8 @@ public:
     ~Controller();
 
     void init();
-    virtual void deviceAdded(DeviceRoot* device) = 0;
-    virtual void deviceRemoved(DeviceRoot* device) = 0;
+    virtual void deviceAdded(DeviceRoot* pDeviceRoot) = 0;
+    virtual void deviceRemoved(DeviceRoot* pDeviceRoot) = 0;
     
 private:
     void sendMSearch();

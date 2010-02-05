@@ -34,17 +34,4 @@ private:
     virtual void _changedStatus(const bool&);
 };
 
-
-class JammlightControllerImpl : public Jamm::Controller
-{
-public:
-    JammlightControllerImpl(SwitchPowerControllerImpl* pSwitchPowerControllerImpl);
-    
-private:
-    void deviceAdded(Jamm::DeviceRoot* device);
-    void deviceRemoved(Jamm::DeviceRoot* device);
-    
-    SwitchPowerControllerImpl* m_pSwitchPowerCtrlImpl;
-};
-
 #endif
