@@ -51,15 +51,15 @@ class MyController : public Controller
         // NOTE: could write a DeviceFactory here ...
         // NOTE: could iterate through all devices of DeviceRoot here ...
         if (pDeviceRoot->getRootDevice()->getDeviceType() == "urn:schemas-upnp-org:device:DimmableLight:1") {
-            DimmableLightController* pDimmableLight = new DimmableLightController(pDeviceRoot->getRootDevice(), new SwitchPowerControllerImpl);
+            DimmableLightController* pDimmableLightCtrl = new DimmableLightController(pDeviceRoot->getRootDevice(), new SwitchPowerControllerImpl);
             
             bool status;
             std::cout << "starting sync call of GetStatus()" << std::endl;
-            pDimmableLight->SwitchPower()->GetStatus(status);
+            pDimmableLightCtrl->SwitchPower()->GetStatus(status);
             std::cout << "sync call of GetStatus() returns: " << status << std::endl;
             std::cout << "starting async request _reqGetStatus()" << std::endl;
-            pDimmableLight->SwitchPower()->_reqGetStatus();
-            status = pDimmableLight->SwitchPower()->_getStatus();
+            pDimmableLightCtrl->SwitchPower()->_reqGetStatus();
+            status = pDimmableLightCtrl->SwitchPower()->_getStatus();
             std::cout << "state variable Status value: " << status << std::endl;
         }
     }

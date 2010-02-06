@@ -34,12 +34,15 @@ public:
     void GetStatus(bool& ResultStatus);
     
     // async interface request
+    // TODO: call this method as active method in a seperate thread
     void _reqGetStatus();
     
-    // getter for StateVars
-    // -> query for unevented StateVars
-    // -> read cached value for evented StateVars
+    // getter for evented StateVars
     bool _getStatus();
+    
+    // NOTE: do not support QueryStateVar for unevented StateVars 
+    //       on Controller side, because it is depricated.
+    //       Only devices should respond to QueryStateVar requests
     
 protected:
     // async interface answer
@@ -53,7 +56,8 @@ private:
 };
 
 
-class DimmableLightController
+// TODO: eventHandler must be called, so we need a base class
+class DimmableLightController // : public ControllerImplAdapter
 {
 public:
     DimmableLightController(Jamm::Device* pDevice, SwitchPowerController* pSwitchPowerController);
@@ -61,6 +65,8 @@ public:
     SwitchPowerController* SwitchPower() { return m_pSwitchPowerController; }
     
 private:
+    virtual void eventHandler(Jamm::Container<Jamm::StateVar>& stateVars);
+    
     Jamm::Device* m_pDevice;
     SwitchPowerController* m_pSwitchPowerController;
 };

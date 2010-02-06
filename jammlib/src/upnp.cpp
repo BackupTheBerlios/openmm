@@ -81,8 +81,8 @@ UriDescriptionReader::getDescription(const std::string& path)
     //          Specified by UPnP vendor. Single URL.
         
     std::string p = m_uri.getPath() + path;
-//     std::cerr << "DescriptionReader::getDescription() from: " << m_uri.toString() << std::endl;
-//     std::cerr << "request path is: " << p << std::endl;
+    std::cerr << "UriDescriptionReader::getDescription() from: " << m_uri.toString() << std::endl;
+    std::cerr << "request path is: " << p << std::endl;
     std::string* res;
     
     if (m_uri.getScheme() == "file") {
@@ -111,7 +111,8 @@ UriDescriptionReader::getDescription(const std::string& path)
         char* buf = new char[response.getContentLength()];
         rs.read(buf, response.getContentLength());
         res = new std::string(buf, response.getContentLength());
-//         std::cerr << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+        
+        std::cerr << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
         std::cerr << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
@@ -123,6 +124,7 @@ UriDescriptionReader::getDescription(const std::string& path)
     Node* n = m_pDocStack.top()->documentElement()->firstChild();
 //     std::cerr << "first node: " << n->nodeName() << ", " << n << std::endl;
     m_nodeStack.push(n);
+    std::cerr << "UriDescriptionReader::getDescription() finished" << std::endl;
     return *res;
 }
 
@@ -168,10 +170,13 @@ DescriptionReader::releaseDescriptionDocument()
 DeviceRoot*
 DescriptionReader::deviceRoot()
 {
-//     std::cerr << "DescriptionReader::deviceRoot()" << std::endl;
+    std::cerr << "DescriptionReader::deviceRoot()" << std::endl;
     DeviceRoot* pRes = new DeviceRoot();
     m_pDeviceRoot = pRes;
     pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
+    // NOTE: a running HttpSocket is needed here, to set host and port of BaseUri and DescriptionUri
+    //       that's why jammgen crashes without setting up a socket in HttpSocket::init()
+    pRes->setBaseUri();
     pRes->setDescriptionUri(m_deviceDescriptionPath);
     Node* pNode = m_nodeStack.top();
 //     std::cerr << "top of stack: " << pNode << std::endl;
@@ -195,7 +200,7 @@ DescriptionReader::deviceRoot()
 Device*
 DescriptionReader::device()
 {
-//     std::cerr << "DescriptionReader::device()" << std::endl;
+    std::cerr << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
     Node* pNode = m_nodeStack.top();
     pRes->setDeviceRoot(m_pDeviceRoot);
@@ -258,7 +263,7 @@ DescriptionReader::device()
 Service*
 DescriptionReader::service()
 {
-//     std::cerr << "DescriptionReader::service()" << std::endl;
+    std::cerr << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
     Node* pNode = m_nodeStack.top();
     
@@ -326,7 +331,7 @@ DescriptionReader::service()
 Action*
 DescriptionReader::action()
 {
-//     std::cerr << "DescriptionReader::action()" << std::endl;
+    std::cerr << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
     Node* pNode = m_nodeStack.top();
     
@@ -356,7 +361,7 @@ DescriptionReader::action()
 Argument*
 DescriptionReader::argument()
 {
-//     std::cerr << "DescriptionReader::argument()" << std::endl;
+    std::cerr << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
     Node* pNode = m_nodeStack.top();
     
@@ -383,7 +388,7 @@ DescriptionReader::argument()
 StateVar*
 DescriptionReader::stateVar()
 {
-//     std::cerr << "DescriptionReader::stateVar()" << std::endl;
+    std::cerr << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
     Node* pNode = m_nodeStack.top();
     
@@ -449,7 +454,7 @@ ActionRequestReader::action()
             }
         }
         else {
-            std::cerr << "Error in ActionRequestReader(): action without arguments" << std::endl;
+            std::cerr << "ActionRequestReader(): action without arguments" << std::endl;
         }
     }
     else {
@@ -461,7 +466,8 @@ ActionRequestReader::action()
 }
 
 
-ActionResponseReader::ActionResponseReader(const std::string& responseBody, Action* pActionTemplate)
+ActionResponseReader::ActionResponseReader(const std::string& responseBody, Action* pActionTemplate) :
+m_pActionTemplate(pActionTemplate)
 {
     std::cerr << "ActionResponseReader::ActionResponseReader()" << std::endl;
     std::cerr << "response: " << responseBody << std::endl;
@@ -501,14 +507,14 @@ ActionResponseReader::action()
             }
         }
         else {
-            std::cerr << "Error in ActionRequestReader(): action without arguments" << std::endl;
+            std::cerr << "ActionResponseReader(): action without arguments" << std::endl;
         }
     }
     else {
-        std::cerr << "Error in ActionRequestReader(): action without body" << std::endl;
+        std::cerr << "Error in ActionResponseReader(): action without body" << std::endl;
     }
     m_nodeStack.pop();
-//     std::cerr << "ActionRequestReader::action() finished" << std::endl;
+    std::cerr << "ActionResponseReader::action() finished" << std::endl;
     return pRes;
 }
 
@@ -729,30 +735,55 @@ Subscription::getEventKey()
 }
 
 
-HTTPRequest*
-Subscription::getRequest()
-{
-    HTTPRequest* res = new HTTPRequest("NOTIFY", m_deliveryAddress.getPath(), "HTTP/1.1");
-    res->set("HOST", m_deliveryAddress.getAuthority());
-    res->setContentType("text/xml");
-    res->set("NT", "upnp:event");
-    res->set("NTS", "upnp:propchange");
-    res->set("SID", "uuid:" + m_uuid.toString());
-    return res;
-}
-
-
 void
 Subscription::sendEventMessage(const std::string& eventMessage)
 {
-    // set remaining request header fields
-    HTTPRequest* request = getRequest();
-    request->set("SEQ", getEventKey());
-    request->setContentLength(eventMessage.size());
+    // TODO: queue the eventMessages for sending ...?
+    std::cerr << "Subscription::sendEventMessage()" << std::endl;
+    std::string path = m_deliveryAddress.getPath();
+    if (path.substr(0, 1) == "/") {
+        path = path.substr(1);
+    }
+    HTTPRequest request("NOTIFY", path, "HTTP/1.1");
+    request.set("HOST", m_deliveryAddress.getAuthority());
+    request.setContentType("text/xml");
+    request.set("NT", "upnp:event");
+    request.set("NTS", "upnp:propchange");
+    request.set("SID", "uuid:" + m_uuid.toString());
+    
+//     HTTPRequest* request = newRequest();
+    request.set("SEQ", getEventKey());
+    request.setContentLength(eventMessage.size());
     // set request body and send request
-    std::ostream& ostr = getSession()->sendRequest(*request);
+    std::cerr << "Subscription::sendEventMessage() send request to: " << getSession()->getHost() << ":" << getSession()->getPort() << "/" << request.getURI() << " ..." << std::endl;
+    std::cerr << "Header:" << std::endl;
+    request.write(std::cerr);
+    
+    std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
-    // TODO: receive answer ...?
+    
+    // receive answer ...
+    HTTPResponse response;
+    getSession()->receiveResponse(response);
+    int stat = response.getStatus();
+    if (stat == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
+        std::cerr << "Error: " << request.getURI() << " HTTP_NOT_FOUND 404" << std::endl;
+//         std::cerr << "Trying: " << m_deliveryAddress.getPath().substr(1) << std::endl;
+//         request.setURI(m_deliveryAddress.getPath().substr(1));
+//         std::cerr << "Subscription::sendEventMessage() send request to: " << getSession()->getHost() << ":" << getSession()->getPort() << request.getURI() << " ..." << std::endl;
+//         std::cerr << "Header:" << std::endl;
+//         request.write(std::cerr);
+//         
+//         std::ostream& ostr = getSession()->sendRequest(request);
+//         ostr << eventMessage;
+//         
+//         response.clear();
+//         getSession()->receiveResponse(response);
+    }
+    else if (stat == Poco::Net::HTTPResponse::HTTP_OK) {
+        std::cerr << "Subscription::sendEventMessage() recieved HTTP_OK 200" << std::endl;
+    }
+    std::cerr << "Subscription::sendEventMessage() finished" << std::endl;
 }
 
 
@@ -791,6 +822,60 @@ Service::addStateVar(StateVar* pStateVar)
         m_eventedStateVars.append(pStateVar->getName(), pStateVar);
     }
 }
+
+
+void
+Service::initClient()
+{
+    m_pControlRequestSession = new HTTPClientSession(SocketAddress(m_pDevice->getDeviceRoot()->getBaseUri().getAuthority()));
+    // TODO: subscribe to services
+    // -> generate eventHandlerURIs: device uuid + service type
+    // TODO: setup event message handler
+    // -> this should go in DeviceRoot::initClient()?
+    // -> or in Controller::init()?
+    // m_pDevice->getDeviceRoot()->registerEventHandler(...);
+}
+
+
+void
+Service::sendAction(Action* pAction)
+{
+    std::cerr << "*********************" << std::endl;
+    std::cerr << "Service::sendAction()" << std::endl;
+    std::string actionMessage;
+    ActionRequestWriter requestWriter;
+    requestWriter.action(pAction);
+    requestWriter.write(actionMessage);
+    
+    HTTPRequest* request = new HTTPRequest("POST", m_controlPath, "HTTP/1.1");
+    request->set("HOST", m_pDevice->getDeviceRoot()->getBaseUri().getAuthority());
+    request->setContentType("text/xml; charset=\"utf-8\"");
+    request->set("SOAPACTION", "\"" + m_serviceType + "#" + pAction->getName() + "\"");
+    request->setContentLength(actionMessage.size());
+    // set request body and send request
+    std::cerr << "Service::sendAction() send request to: " << m_pDevice->getDeviceRoot()->getBaseUri().getAuthority() << request->getURI() << " ..." << std::endl;
+    std::cerr << "Header:" << std::endl;
+    request->write(std::cerr);
+    
+    std::ostream& ostr = m_pControlRequestSession->sendRequest(*request);
+    ostr << actionMessage;
+    
+    // receive answer ...
+    HTTPResponse response;
+    std::istream& rs = m_pControlRequestSession->receiveResponse(response);
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
+        std::cerr << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
+    }
+    char* buf = new char[response.getContentLength()];
+    rs.read(buf, response.getContentLength());
+    std::string responseBody = std::string(buf, response.getContentLength());
+    std::cerr << "Service::sendAction() response received: " << responseBody << std::endl;
+    ActionResponseReader responseReader(responseBody, pAction);
+    responseReader.action();
+    std::cerr << "Service::sendAction() finished" << std::endl;
+    std::cerr << "******************************" << std::endl;
+}
+
 
 void
 Service::registerSubscription(Subscription* subscription)
@@ -954,19 +1039,6 @@ DescriptionRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerR
 }
 
 
-// ControlRequestHandler::ControlRequestHandler(DeviceRoot& deviceRoot):
-// m_deviceRoot(&deviceRoot)
-// {
-// }
-// 
-// 
-// ControlRequestHandler*
-// ControlRequestHandler::create()
-// {
-//     return new ControlRequestHandler(*m_deviceRoot);
-// }
-
-
 ControlRequestHandler::ControlRequestHandler(Service* service):
 m_pService(service)
 {
@@ -999,7 +1071,8 @@ ControlRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespo
     std::string actionName = soapAction.substr(hash+1);
     std::cerr << "SOAP request, service: " << serviceType << ", action: " << actionName << std::endl;
     
-    std::cerr << "getServiceType(): " << m_pService->getServiceType() << std::endl;
+    std::cerr << "ControlRequestHandler for ServiceType: " << m_pService->getServiceType() << std::endl;
+    // TODO: make getAction() robust against wrong action names
     Action* pAction = m_pService->getAction(actionName);
     std::cerr << "getAction(): " << pAction->getName() << std::endl;
     pAction = pAction->clone();
@@ -1051,7 +1124,9 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
             m_pService->getSubscription(sid)->renew(1800);
         }
         else {
-            Subscription* pSubscription = new Subscription(request.get("CALLBACK"));
+            std::string callback = request.get("CALLBACK");
+            callback = callback.substr(1, callback.size() - 2);
+            Subscription* pSubscription = new Subscription(callback);
             m_pService->sendInitialEventMessage(pSubscription);
             m_pService->registerSubscription(pSubscription);
         }
@@ -1063,6 +1138,7 @@ EventRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespons
                     + "Jamm/" + JAMM_VERSION);
         response.set("SID", "uuid:" + UUIDGenerator().create().toString());
         response.set("TIMEOUT", "Second-1800");
+        response.setContentLength(0);
         // TODO: make shure the SUBSCRIBE message is received by the controller before
         //       sending out the initial event message.
         // TODO: choose timeout according to controller activity
@@ -1207,9 +1283,19 @@ DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 
 
 void
-DeviceRoot::init()
+DeviceRoot::initController()
 {
-    std::cerr << "DeviceRoot::init()" << std::endl;
+    std::cerr << "DeviceRoot::initController()" << std::endl;
+    
+    std::cerr << "DeviceRoot::initController() finished" << std::endl;
+}
+
+
+void
+DeviceRoot::initDevice()
+{
+    // TODO: break this up into DeviceRoot::initDevice(), Device::initDevice(), Service::initDevice()
+    std::cerr << "DeviceRoot::initDevice()" << std::endl;
         
     SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
@@ -1234,7 +1320,7 @@ DeviceRoot::init()
             registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
         }
     }
-    std::cerr << "DeviceRoot::init() finished" << std::endl;
+    std::cerr << "DeviceRoot::initDevice() finished" << std::endl;
 }
 
 
@@ -1262,7 +1348,7 @@ DeviceRootImplAdapter::start()
     m_pDeviceRoot->registerActionHandler(Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
     
 //     m_pDeviceRoot->print();
-    m_pDeviceRoot->init();
+    m_pDeviceRoot->initDevice();
 //     m_pDeviceRoot->print();
     m_pDeviceRoot->startHttp();
     m_pDeviceRoot->startSsdp();
@@ -1487,12 +1573,11 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 {
     // we load all device descriptions, regardless of service types contained in the device
     
-    // NOTE: Bug in platinum-upnp, no USN field in M-Search responses
     // get UUID from USN
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-//     std::cerr << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
+    std::cerr << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
 //     std::cerr << pMessage->toString();
     
     switch(pMessage->getRequestMethod()) {
@@ -1505,7 +1590,9 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
                 URI location = pMessage->getLocation();
                 std::string baseUri = location.getScheme() + "://" + location.getAuthority();
                 UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
-                addDevice(descriptionReader.deviceRoot());
+                DeviceRoot* deviceRoot = descriptionReader.deviceRoot();
+                deviceRoot->setBaseUri(URI(baseUri));
+                addDevice(deviceRoot);
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
@@ -1517,22 +1604,24 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-//         std::cerr << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
+        std::cerr << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
         if (!m_devices.contains(uuid)) {
             URI location = pMessage->getLocation();
-//             std::cerr << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
+            std::cerr << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
             
             std::string baseUri = location.getScheme() + "://" + location.getAuthority();
-//             std::cerr << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
+            std::cerr << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
             
             UriDescriptionReader descriptionReader(URI(baseUri), location.getPath());
             // TODO: better trust the device uuid in the SSDP message then in the device description ...
             //       though platinum-upnp doesn't provide a USN field ...
-            addDevice(descriptionReader.deviceRoot());
+            DeviceRoot* deviceRoot = descriptionReader.deviceRoot();
+            deviceRoot->setBaseUri(URI(baseUri));
+            addDevice(deviceRoot);
         }
         break;
     }
-//     std::cerr << "Controller::handleSsdpMessage() finished" << std::endl;
+    std::cerr << "Controller::handleSsdpMessage() finished" << std::endl;
 }
 
 

@@ -27,30 +27,35 @@ SwitchPowerController::GetStatus(bool& ResultStatus)
 {
     // clone action and set arguments
     Jamm::Action* pAction = m_pService->getAction("GetStatus")->clone();
-    // action -> xml
-    Jamm::ActionRequestWriter actionWriter;
     // post action message to be send via http-session
-    // receive response
-    // xml -> action
+    // sendAction() blocks until answer is received and result is put into *pAction
+    m_pService->sendAction(pAction);
     // get action out arguments and set arguments out1
+    ResultStatus = pAction->getArgument<bool>("ResultStatus");
 }
 
 void
 SwitchPowerController::_reqGetStatus()
 {
-    // TODO: call this method as active method in a seperate thread
     bool ResultStatus;
     GetStatus(ResultStatus);
     _ansGetStatus(ResultStatus);
 }
 
 
-bool
-SwitchPowerController::_getStatus()
+void
+DimmableLightController::eventHandler(Jamm::Container<Jamm::StateVar>& stateVars)
 {
-    // TODO: if evented, return StateVar::getValue()
-    
-    // TODO: else start a QueryStateVarRequest
+    // react on event messages, dispatch to corresponding _changeStateVar() method
+    for (Jamm::Container<Jamm::StateVar>::Iterator i = stateVars.begin(); i != stateVars.end(); ++i) {
+        // (*i) should point to the correct StateVar in the DeviceRoot object
+        // call _changeStateVar() method
+        if ((*i)->getName() == "Status") {
+            bool Status;
+            (*i)->getValue(Status);
+            m_pSwitchPowerController->_changedStatus(Status);
+        }
+    }
 }
 
 
@@ -60,8 +65,14 @@ m_pSwitchPowerController(pSwitchPowerController)
 {
     m_pSwitchPowerController->m_pService = m_pDevice->getService("urn:schemas-upnp-org:service:SwitchPower:1");
     
-    // TODO:
-    // connect to controlURL and eventURL
-    // subscribe to services
-//     pDevice->startSessions();
+    for (Jamm::Device::ServiceIterator i = m_pDevice->beginService(); i != m_pDevice->endService(); ++i) {
+        (*i)->initClient();
+    }
+}
+
+
+bool
+SwitchPowerController::_getStatus()
+{
+    return m_pService->getStateVar<bool>("Status");
 }

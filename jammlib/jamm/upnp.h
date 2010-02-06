@@ -167,6 +167,7 @@ using std::istringstream;
 // -> albeit: BaseURL is device description (and thus DeviceRoot) related
 // -> so nope: ControlURLs of embedded devices of same type must differ, as they are relative to BaseURL
 // TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
+// TODO: Find a proper interface for the readers and writers
 
 
 // TODO: Controller stuff
@@ -905,7 +906,6 @@ public:
     std::string getUuid() { return m_uuid.toString(); }
     
     HTTPClientSession* getSession() { return m_pSession; }
-    HTTPRequest* getRequest();
     std::string getEventKey();
     
     void sendEventMessage(const std::string& eventMessage);
@@ -913,6 +913,8 @@ public:
     void expire(Timer& timer);  // TODO: implement this
     
 private:
+//     HTTPRequest* newRequest();
+    
     URI                 m_deliveryAddress;
     HTTPClientSession*  m_pSession;
     UUID                m_uuid;
@@ -953,6 +955,9 @@ public:
     void addAction(Action* pAction);
     void addStateVar(StateVar* pStateVar);
     
+    void initClient();
+    void sendAction(Action* pAction);
+    
     typedef Container<StateVar>::Iterator StateVarIterator;
     StateVarIterator beginStateVar() { return m_stateVars.begin(); }
     StateVarIterator endStateVar() { return m_stateVars.end(); }
@@ -985,6 +990,7 @@ private:
     DescriptionRequestHandler*              m_pDescriptionRequestHandler;
     std::string                             m_controlPath;
     ControlRequestHandler*                  m_controlRequestHandler;
+    HTTPClientSession*                      m_pControlRequestSession;
     std::string                             m_eventPath;
     Container<Action>                       m_actions;
     Container<StateVar>                     m_stateVars;
@@ -1065,11 +1071,14 @@ public:
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
     std::string& getDeviceDescription() const { return *m_pDeviceDescription; }
+    const URI& getBaseUri() const { return m_baseUri; }
     const URI& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string& description) { m_pDeviceDescription = &description; }
+    void setBaseUri() { m_baseUri = URI(m_httpSocket.getServerUri()); }
+    void setBaseUri(const URI& baseUri) { m_baseUri = baseUri; }
     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = URI(m_httpSocket.getServerUri() + descriptionPath); }
     
     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
@@ -1077,7 +1086,8 @@ public:
     
     void print();
     
-    void init();
+    void initDevice();
+    void initController();
     void startSsdp();
     void startHttp();
     void stopSsdp();
@@ -1102,7 +1112,8 @@ public:
 
     
 private:
-    URI                             m_descriptionUri;  // for controller to download description
+    URI                             m_baseUri;              // base URI for control URI and event URI
+    URI                             m_descriptionUri;       // for controller to download description
     std::string*                    m_pDeviceDescription;
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
