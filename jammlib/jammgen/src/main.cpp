@@ -132,6 +132,10 @@ protected:
             m_stubWriters.push_back(new DeviceImplH(pDeviceRoot, m_outputPath));
             m_stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, m_outputPath));
             m_stubWriters.push_back(new DeviceDescH(pDeviceRoot, m_outputPath));
+            m_stubWriters.push_back(new DeviceCtrlImplH(pDeviceRoot, m_outputPath));
+            m_stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceRoot, m_outputPath));
+            m_stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, m_outputPath));
+            m_stubWriters.push_back(new DeviceCtrlCpp(pDeviceRoot, m_outputPath));
             
             for (std::vector<StubWriter*>::iterator i = m_stubWriters.begin(); i != m_stubWriters.end(); ++i) {
                 (*i)->write();

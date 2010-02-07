@@ -52,6 +52,8 @@ protected:
     virtual void argument(const Argument& argument, bool lastArgument = false) {}
     virtual void stateVar(const StateVar& stateVar) {}
     
+    static std::string preamble;
+    static std::string samplePreamble;
     std::string indent(int level);
     std::string firstLetterToLower(const std::string& s);
     
@@ -162,6 +164,109 @@ private:
     
     std::ofstream       m_out;
 //     std::ostream*       m_out;
+};
+
+
+class DeviceCtrlImplH : public StubWriter
+{
+public:
+    DeviceCtrlImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath);
+    
+private:
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void serviceTypeEnd(const Service& service);
+    virtual void action(const Action& action);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    virtual void stateVar(const StateVar& stateVar);
+    
+    std::ofstream       m_out;
+//     std::ostream*       m_out;
+    std::stringstream   m_eventedStateVars;
+};
+
+
+class DeviceCtrlImplCpp : public StubWriter
+{
+public:
+    DeviceCtrlImplCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath);
+    
+private:
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void action(const Action& action);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    virtual void stateVar(const StateVar& stateVar);
+    
+    std::ofstream       m_out;
+//     std::ostream*       m_out;
+    std::string         m_serviceName;
+};
+
+
+class DeviceCtrlH : public StubWriter
+{
+public:
+    DeviceCtrlH(DeviceRoot* pDeviceRoot, const std::string& outputPath);
+    
+private:
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void serviceTypeEnd(const Service& service);
+    virtual void action(const Action& action);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    virtual void stateVar(const StateVar& stateVar);
+    
+    std::ofstream               m_out;
+    std::stringstream           m_reqAction;
+    std::stringstream           m_ansAction;
+    std::stringstream           m_threadAction;
+    std::stringstream           m_reqActionArgs;
+    std::stringstream           m_ansActionArgs;
+    std::stringstream           m_getEventedStateVars;
+    std::stringstream           m_changeEventedStateVars;
+    std::vector<std::string>    m_serviceNames;
+};
+
+
+class DeviceCtrlCpp : public StubWriter
+{
+public:
+    DeviceCtrlCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath);
+    
+private:
+    virtual void deviceRoot(const DeviceRoot& deviceRoot);
+    virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
+    virtual void serviceType(const Service& service);
+    virtual void serviceTypeEnd(const Service& service);
+    virtual void action(const Action& action);
+    virtual void actionEnd(const Action& action);
+    virtual void argument(const Argument& argument, bool lastArgument = false);
+    virtual void stateVar(const StateVar& stateVar);
+    
+    std::ofstream               m_out;
+    std::stringstream           m_reqAction;
+    std::stringstream           m_ansAction;
+    std::stringstream           m_threadAction;
+    std::stringstream           m_reqActionArgs;
+//     std::stringstream           m_ansActionArgs;
+    std::stringstream           m_getEventedStateVars;
+    std::stringstream           m_changeEventedStateVars;
+    std::stringstream           m_inArgSetter;
+    std::stringstream           m_inArgGetter;
+    std::stringstream           m_outArgGetter;
+    std::stringstream           m_outArgGetterLocal;
+    std::stringstream           m_allArgsCall;
+    std::stringstream           m_eventDispatcher;
+    std::vector<std::string>    m_serviceTypes;
+    std::vector<std::string>    m_serviceNames;
+    std::string                 m_currentService;
+    bool                        m_firstStateVar;
 };
 
 #endif

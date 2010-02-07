@@ -25,7 +25,7 @@
 #include "Poco/Util/HelpFormatter.h"
 
 
-#include "jammlight_ctrl_impl.h"
+#include "DimmableLightCtrlImpl.h"
 
 using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;
@@ -53,7 +53,10 @@ class MyController : public Controller
         if (pDeviceRoot->getRootDevice()->getDeviceType() == "urn:schemas-upnp-org:device:DimmableLight:1") {
             Poco::Timestamp t;
             std::cout << "TIME: " << t.elapsed() << std::endl;
-            DimmableLightController* pDimmableLightCtrl = new DimmableLightController(pDeviceRoot->getRootDevice(), new SwitchPowerControllerImpl);
+            DimmableLightController* pDimmableLightCtrl = new DimmableLightController(
+                pDeviceRoot->getRootDevice(),
+                new SwitchPowerControllerImpl,
+                new DimmingControllerImpl);
             
             bool status;
             std::cout << "sync call of GetStatus() started" << std::endl;

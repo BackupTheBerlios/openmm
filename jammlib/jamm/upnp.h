@@ -168,11 +168,11 @@ using std::istringstream;
 // -> so nope: ControlURLs of embedded devices of same type must differ, as they are relative to BaseURL
 // TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
 // TODO: Find a proper interface for the readers and writers
+// TODO: complete event messaging
 
 
-// TODO: Controller stuff
 // TODO: Error handling
-// TODO: Variable query
+// TODO: Variable query (only for Device)
 // TODO: Service and Device version checking
 // TODO: Presentation
 
@@ -820,7 +820,7 @@ public:
     void setType(std::string type) { m_type = type; }
     void setDefaultValue(std::string defaultValue) { m_defaultValue = defaultValue; }
     void setSendEvents(std::string sendEvents) { m_sendEvents = (sendEvents=="yes") ? true : false; }
-    bool getSendEvents() { return m_sendEvents; }
+    bool getSendEvents() const { return m_sendEvents; }
     
 private:
     std::string     m_name;
@@ -895,6 +895,37 @@ private:
     Container<Argument>                 m_arguments;
     Container<Argument>                 m_inArguments;
     Container<Argument>                 m_outArguments;
+};
+
+
+template<class ServiceClass>
+class ActionThread : public Poco::Runnable
+{
+public:
+    typedef void (ServiceClass::*Callback)(Action* pAction);
+    
+    ActionThread(ServiceClass* pObject, Callback method, Action* arg):
+        m_pObject(pObject),
+        m_method(method),
+        m_arg(arg)
+    {
+    }
+    
+    void run()
+    {
+        (m_pObject->*m_method)(m_arg);
+    }
+    
+    void start()
+    {
+        Poco::Thread t;
+        t.start(*this);
+    }
+    
+private:
+    ServiceClass*   m_pObject;
+    Callback        m_method;
+    Action*         m_arg;
 };
 
 
@@ -1174,13 +1205,18 @@ private:
 };
 
 
-// class ControllerImplAdapter
-// {
-//     
-//     
-// private:
-//     Controller*     m_pController;
-// };
+class ControllerImplAdapter
+{
+protected:
+    ControllerImplAdapter(Device* pDevice) : m_pDevice(pDevice) {}
+    
+    virtual void eventHandler(StateVar* stateVar) = 0;
+    void init();
+    
+private:
+    Controller*     m_pController;
+    Device*         m_pDevice;
+};
 
 
 template<typename T>

@@ -31,8 +31,18 @@ DimmableLightImpl.cpp
 DimmableLightApp.cpp
 )
 
+SET( JAMM_LIGHT_CTRL_SRCS
+DimmableLightCtrl.cpp
+DimmableLightCtrlImpl.cpp
+DimmableLightCtrlAppl.cpp
+)
+
 ADD_EXECUTABLE( jammlight
 ${JAMM_LIGHT_SRCS}
+)
+
+ADD_EXECUTABLE( jammlightctrl
+${JAMM_LIGHT_CTRL_SRCS}
 )
 
 TARGET_LINK_LIBRARIES( jammlight
@@ -40,7 +50,12 @@ ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS jammlight
+TARGET_LINK_LIBRARIES( jammlightctrl
+${LIB_JAMM}
+${LIB_POCO_UTIL}
+)
+
+INSTALL( TARGETS jammlight jammlightctrl
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

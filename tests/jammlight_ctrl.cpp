@@ -25,49 +25,72 @@
 void
 SwitchPowerController::GetStatus(bool& ResultStatus)
 {
-    // clone action and set arguments
+    // TOP
+    // clone action
     Jamm::Action* pAction = m_pService->getAction("GetStatus")->clone();
-    // post action message to be send via http-session
+    // set in arguments of action from method args
+    // ...
+    // BOTTOM
+    // post action message via http-session
     // sendAction() blocks until answer is received and result is put into *pAction
     m_pService->sendAction(pAction);
-    // get action out arguments and set arguments out1
+    // get out arguments and assign to method args
     ResultStatus = pAction->getArgument<bool>("ResultStatus");
+    // ...
 }
+
 
 void
 SwitchPowerController::_reqGetStatus()
 {
-    bool ResultStatus;
-    GetStatus(ResultStatus);
+    // TOP
+    // clone action
+    Jamm::Action* pAction = m_pService->getAction("GetStatus")->clone();
+    // set in arguments of action from method args
+    // ...
+    // BOTTOM
+    // post action message in a new thread
+    Jamm::ActionThread<SwitchPowerController> t(this, &SwitchPowerController::_threadGetStatus, pAction);
+    t.start();
+}
+
+
+void
+SwitchPowerController::_threadGetStatus(Jamm::Action* pAction)
+{
+    m_pService->sendAction(pAction);
+    // get out arguments and assign to allocated variables
+    bool ResultStatus = pAction->getArgument<bool>("ResultStatus");
+    // ...
+    // return all args in answer callback
     _ansGetStatus(ResultStatus);
 }
 
 
 void
-DimmableLightController::eventHandler(Jamm::Container<Jamm::StateVar>& stateVars)
+DimmableLightController::eventHandler(Jamm::StateVar* pStateVar)
 {
     // react on event messages, dispatch to corresponding _changeStateVar() method
-    for (Jamm::Container<Jamm::StateVar>::Iterator i = stateVars.begin(); i != stateVars.end(); ++i) {
-        // (*i) should point to the correct StateVar in the DeviceRoot object
-        // call _changeStateVar() method
-        if ((*i)->getName() == "Status") {
-            bool Status;
-            (*i)->getValue(Status);
-            m_pSwitchPowerController->_changedStatus(Status);
-        }
+    // (*i) should point to the correct StateVar in the DeviceRoot object
+    // call _changeStateVar() method
+    if (pStateVar->getName() == "Status") {
+        bool val;
+        pStateVar->getValue(val);
+        m_pSwitchPowerController->_changedStatus(val);
+    }
+    else {
     }
 }
 
 
 DimmableLightController::DimmableLightController(Jamm::Device* pDevice, SwitchPowerController* pSwitchPowerController) :
+ControllerImplAdapter(pDevice),
 m_pDevice(pDevice),
 m_pSwitchPowerController(pSwitchPowerController)
 {
     m_pSwitchPowerController->m_pService = m_pDevice->getService("urn:schemas-upnp-org:service:SwitchPower:1");
     
-    for (Jamm::Device::ServiceIterator i = m_pDevice->beginService(); i != m_pDevice->endService(); ++i) {
-        (*i)->initClient();
-    }
+    init();
 }
 
 

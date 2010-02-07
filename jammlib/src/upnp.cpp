@@ -1649,6 +1649,15 @@ Controller::removeDevice(const std::string& uuid)
 }
 
 
+void
+ControllerImplAdapter::init()
+{
+    for (Device::ServiceIterator i = m_pDevice->beginService(); i != m_pDevice->endService(); ++i) {
+        (*i)->initClient();
+    }
+}
+
+
 Urn::Urn(const std::string& urn) :
 m_urn(urn)
 {
