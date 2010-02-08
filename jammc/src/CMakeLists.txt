@@ -37,6 +37,10 @@ upnpcontroller.cpp
 upnprenderingcontrol.cpp
 upnprendererlistmodel.cpp
 upnpsyncmediabrowser.cpp
+MediaRendererCtrl.cpp
+# MediaRendererCtrlImpl.cpp
+# MediaServerCtrl.cpp
+# MediaServerCtrlImpl.cpp
 )
 
 SET( JAMMC_UI

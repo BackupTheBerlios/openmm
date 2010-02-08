@@ -1,4 +1,3 @@
-#include <jamm/upnp.h>
 #include "MediaRendererImpl.h"
 
 

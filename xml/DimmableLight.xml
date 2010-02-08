@@ -19,14 +19,14 @@
 <service>
 <serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>
 <serviceId>urn:upnp-org:serviceId:SwitchPower:1</serviceId>
-<SCPDURL>/SwitchPower-scpd.xml</SCPDURL>
+<SCPDURL>/SwitchPower.xml</SCPDURL>
 <controlURL>/SwitchPower/Control</controlURL>
 <eventSubURL>/SwitchPower/Events</eventSubURL>
 </service>
 <service>
 <serviceType>urn:schemas-upnp-org:service:Dimming:1</serviceType>
 <serviceId>urn:upnp-org:serviceId:Dimming:1</serviceId>
-<SCPDURL>/Dimming-scpd.xml</SCPDURL>
+<SCPDURL>/Dimming.xml</SCPDURL>
 <controlURL>/Dimming/Control</controlURL>
 <eventSubURL>/Dimming/Events</eventSubURL>
 </service>

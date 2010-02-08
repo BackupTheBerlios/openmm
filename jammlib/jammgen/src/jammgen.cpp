@@ -86,6 +86,7 @@ m_outputPath(outputPath)
     m_typeMapper["r8"] = "Jamm::r8";
     m_typeMapper["number"] = "Jamm::number";
     m_typeMapper["string"] = "std::string";
+    m_typeMapper["uri"] = "Jamm::uri";
 }
 
 
@@ -301,7 +302,7 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
 {
     m_out
         << preamble
-        << "#include <jamm/upnp.h>" << std::endl
+//         << "#include <jamm/upnp.h>" << std::endl
         << "#include \"" << m_deviceName << ".h\"" << std::endl
         << "#include \"" << m_deviceName << "Descriptions.h\"" << std::endl
         << std::endl
@@ -316,6 +317,8 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
         << m_deviceName << "::initStateVars(const std::string& serviceType, Service* pThis)" << std::endl
         << "{"
         << std::endl;
+    
+    m_firstService = true;
 }
 
 
@@ -328,7 +331,6 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
     while (i--) {
         ctorArgs += m_serviceNames[i] + "* p" + m_serviceNames[i] + "Impl" + (i ? ", " : "");
     }
-    m_firstService = true;
     
     m_out
         << "}" << std::endl
@@ -610,7 +612,7 @@ DeviceImplCpp::deviceRoot(const DeviceRoot& deviceRoot)
 {
     m_out
         << samplePreamble
-        << "#include <jamm/upnp.h>" << std::endl
+//         << "#include <jamm/upnp.h>" << std::endl
         << "#include \"" << m_deviceName << "Impl.h\"" << std::endl
         << std::endl;
 }

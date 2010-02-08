@@ -34,6 +34,8 @@ using Jamm::StateVar;
 using Jamm::Action;
 using Jamm::Argument;
 
+// TODO: the original UPnP-AV XML service description contain eventedAttributes as
+//       elements and not as attributes. This case is not handled here and segfaults.
 
 class StubWriter
 {

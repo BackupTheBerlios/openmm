@@ -1,11 +1,36 @@
+# SET(CMAKE_LIBRARY_PATH
+# ${CMAKE_SYSTEM_LIBRARY_PATH}
+# )
+# 
+# if(TARGET jamm)
+# SET(LIB_JAMM
+# jamm
+# )
+# INCLUDE_DIRECTORIES(
+# ${jamm_SOURCE_DIR}/jammlib
+# )
+# else(TARGET jamm)
+# FIND_LIBRARY(LIB_JAMM
+# NAME jamm
+# PATHS ${CMAKE_LIBRARY_PATH}
+# )
+# endif(TARGET jamm)
+
 SET( JAMM_LIB_SRCS
-    debug.cpp
-    iodevice.cpp
-    sharedlibrary.cpp
-    signode.cpp
-    thread.cpp
-    upnp.cpp
-    upnpav.cpp
+debug.cpp
+iodevice.cpp
+sharedlibrary.cpp
+signode.cpp
+thread.cpp
+upnp.cpp
+upnpav.cpp
+MediaServer.cpp
+MediaServerImpl.cpp
+)
+
+FIND_LIBRARY(LIB_POCO_UTIL
+NAME PocoUtil
+PATHS ${CMAKE_LIBRARY_PATH}
 )
 
 FIND_LIBRARY(LIB_POCO_FOUNDATION

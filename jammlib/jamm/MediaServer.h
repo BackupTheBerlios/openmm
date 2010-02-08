@@ -26,20 +26,21 @@
 |       Don't edit, it will be overriden at the next run of jammgen.        |
 ***************************************************************************/
 
-#ifndef MEDIARENDERER_H
-#define MEDIARENDERER_H
+#ifndef MEDIASERVER_H
+#define MEDIASERVER_H
 
-#include <jamm/upnp.h>
+// #include <jamm/upnp.h>
+#include "upnp.h"
 
 using Jamm::DeviceRootImplAdapter;
 using Jamm::Service;
 using Jamm::Action;
 
-class MediaRenderer;
+class MediaServer;
 
 class AVTransport
 {
-    friend class MediaRenderer;
+    friend class MediaServer;
 
 protected:
     virtual void SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData) = 0;
@@ -120,13 +121,13 @@ private:
 
 class ConnectionManager
 {
-    friend class MediaRenderer;
+    friend class MediaServer;
 
 protected:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink) = 0;
     virtual void ConnectionComplete(const Jamm::i4& ConnectionID) = 0;
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs) = 0;
-    virtual void GetCurrentConnectionInfo(/*const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status*/) = 0;
+    virtual void GetCurrentConnectionInfo(const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status) = 0;
 
     virtual void initStateVars() = 0;
 
@@ -143,85 +144,36 @@ private:
 };
 
 
-class RenderingControl
+class ContentDirectory
 {
-    friend class MediaRenderer;
+    friend class MediaServer;
 
 protected:
-    virtual void ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList) = 0;
-    virtual void SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName) = 0;
-    virtual void GetBrightness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBrightness) = 0;
-    virtual void SetBrightness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBrightness) = 0;
-    virtual void GetContrast(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentContrast) = 0;
-    virtual void SetContrast(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredContrast) = 0;
-    virtual void GetSharpness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentSharpness) = 0;
-    virtual void SetSharpness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredSharpness) = 0;
-    virtual void GetRedVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoGain) = 0;
-    virtual void SetRedVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoGain) = 0;
-    virtual void GetGreenVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoGain) = 0;
-    virtual void SetGreenVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoGain) = 0;
-    virtual void GetBlueVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoGain) = 0;
-    virtual void SetBlueVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoGain) = 0;
-    virtual void GetRedVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoBlackLevel) = 0;
-    virtual void SetRedVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoBlackLevel) = 0;
-    virtual void GetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoBlackLevel) = 0;
-    virtual void SetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoBlackLevel) = 0;
-    virtual void GetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoBlackLevel) = 0;
-    virtual void SetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoBlackLevel) = 0;
-    virtual void GetColorTemperature (const Jamm::ui4& InstanceID, Jamm::ui2& CurrentColorTemperature) = 0;
-    virtual void SetColorTemperature(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredColorTemperature) = 0;
-    virtual void GetHorizontalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentHorizontalKeystone) = 0;
-    virtual void SetHorizontalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredHorizontalKeystone) = 0;
-    virtual void GetVerticalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentVerticalKeystone) = 0;
-    virtual void SetVerticalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredVerticalKeystone) = 0;
-    virtual void GetMute(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentMute) = 0;
-    virtual void SetMute(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredMute) = 0;
-    virtual void GetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::ui2& CurrentVolume) = 0;
-    virtual void SetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::ui2& DesiredVolume) = 0;
-    virtual void GetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& CurrentVolume) = 0;
-    virtual void SetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::i2& DesiredVolume) = 0;
-    virtual void GetVolumeDBRange(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& MinValue, Jamm::i2& MaxValue) = 0;
-    virtual void GetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness) = 0;
-    virtual void SetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness) = 0;
+    virtual void GetSearchCapabilities(std::string& SearchCaps) = 0;
+    virtual void GetSortCapabilities(std::string& SortCaps) = 0;
+    virtual void GetSystemUpdateID(Jamm::ui4& Id) = 0;
+    virtual void Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const Jamm::ui4& StartingIndex, const Jamm::ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, Jamm::ui4& NumberReturned, Jamm::ui4& TotalMatches, Jamm::ui4& UpdateID) = 0;
+    virtual void Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const Jamm::ui4& StartingIndex, const Jamm::ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, Jamm::ui4& NumberReturned, Jamm::ui4& TotalMatches, Jamm::ui4& UpdateID) = 0;
+    virtual void CreateObject(const std::string& ContainerID, const std::string& Elements, std::string& ObjectID, std::string& Result) = 0;
+    virtual void DestroyObject(const std::string& ObjectID) = 0;
+    virtual void UpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue) = 0;
+    virtual void ImportResource(const Jamm::uri& SourceURI, const Jamm::uri& DestinationURI, Jamm::ui4& TransferID) = 0;
+    virtual void GetTransferProgress(const Jamm::ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal) = 0;
+    virtual void DeleteResource(const Jamm::uri& ResourceURI) = 0;
+    virtual void CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID) = 0;
 
     virtual void initStateVars() = 0;
 
-    void _setPresetNameList(const std::string& val);
-    std::string _getPresetNameList();
-    void _setLastChange(const std::string& val);
-    std::string _getLastChange();
-    void _setBrightness(const Jamm::ui2& val);
-    Jamm::ui2 _getBrightness();
-    void _setContrast(const Jamm::ui2& val);
-    Jamm::ui2 _getContrast();
-    void _setSharpness(const Jamm::ui2& val);
-    Jamm::ui2 _getSharpness();
-    void _setRedVideoGain(const Jamm::ui2& val);
-    Jamm::ui2 _getRedVideoGain();
-    void _setGreenVideoGain(const Jamm::ui2& val);
-    Jamm::ui2 _getGreenVideoGain();
-    void _setBlueVideoGain(const Jamm::ui2& val);
-    Jamm::ui2 _getBlueVideoGain();
-    void _setRedVideoBlackLevel(const Jamm::ui2& val);
-    Jamm::ui2 _getRedVideoBlackLevel();
-    void _setGreenVideoBlackLevel(const Jamm::ui2& val);
-    Jamm::ui2 _getGreenVideoBlackLevel();
-    void _setBlueVideoBlackLevel(const Jamm::ui2& val);
-    Jamm::ui2 _getBlueVideoBlackLevel();
-    void _setColorTemperature(const Jamm::ui2& val);
-    Jamm::ui2 _getColorTemperature();
-    void _setHorizontalKeystone(const Jamm::i2& val);
-    Jamm::i2 _getHorizontalKeystone();
-    void _setVerticalKeystone(const Jamm::i2& val);
-    Jamm::i2 _getVerticalKeystone();
-    void _setMute(const bool& val);
-    bool _getMute();
-    void _setVolume(const Jamm::ui2& val);
-    Jamm::ui2 _getVolume();
-    void _setVolumeDB(const Jamm::i2& val);
-    Jamm::i2 _getVolumeDB();
-    void _setLoudness(const bool& val);
-    bool _getLoudness();
+    void _setTransferIDs(const std::string& val);
+    std::string _getTransferIDs();
+    void _setSearchCapabilities(const std::string& val);
+    std::string _getSearchCapabilities();
+    void _setSortCapabilities(const std::string& val);
+    std::string _getSortCapabilities();
+    void _setSystemUpdateID(const Jamm::ui4& val);
+    Jamm::ui4 _getSystemUpdateID();
+    void _setContainerUpdateIDs(const std::string& val);
+    std::string _getContainerUpdateIDs();
 
 private:
     static std::string  m_description;
@@ -229,10 +181,10 @@ private:
 };
 
 
-class MediaRenderer : public DeviceRootImplAdapter
+class MediaServer : public DeviceRootImplAdapter
 {
 public:
-    MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+    MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
 
 private:
@@ -240,7 +192,7 @@ private:
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
     static std::string m_deviceDescription;
-    RenderingControl* m_pRenderingControlImpl;
+    ContentDirectory* m_pContentDirectoryImpl;
     ConnectionManager* m_pConnectionManagerImpl;
     AVTransport* m_pAVTransportImpl;
 };

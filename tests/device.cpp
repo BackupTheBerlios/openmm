@@ -112,7 +112,7 @@ protected:
             DeviceRoot* device = new DeviceRoot();
             device->init(s);*/
             
-            UriDescriptionReader descriptionReader(URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+            UriDescriptionReader descriptionReader(Poco::URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
             
             DeviceRoot* device = descriptionReader.deviceRoot();
             

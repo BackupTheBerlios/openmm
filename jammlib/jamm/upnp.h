@@ -32,7 +32,9 @@
 #include <ostream>
 #include <sstream>
 
-#include <Poco/SingletonHolder.h>
+#include <Poco/NumberFormatter.h>
+#include <Poco/NumberParser.h>
+#include <Poco/StreamCopier.h>
 #include <Poco/NObserver.h>
 #include <Poco/Observer.h>
 #include <Poco/Thread.h>
@@ -48,8 +50,6 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
-#include <Poco/DynamicAny.h>
-#include <Poco/Any.h>
 #include <Poco/Random.h>
 #include <Poco/Timer.h>
 #include <Poco/Mutex.h>
@@ -79,7 +79,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NamedNodeMap.h>
-#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/AttrMap.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Attr.h>
@@ -88,75 +87,6 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/StreamCopier.h>
-
-using Poco::SingletonHolder;
-using Poco::NObserver;
-using Poco::Observer;
-using Poco::Thread;
-using Poco::AutoPtr;
-using Poco::UInt16;
-using Poco::AbstractObserver;
-using Poco::Notification;
-using Poco::NotificationQueue;
-using Poco::NotificationCenter;
-using Poco::URI;
-using Poco::UUID;
-using Poco::UUIDGenerator;
-using Poco::Timestamp;
-using Poco::DateTime;
-using Poco::DateTimeFormat;
-using Poco::DateTimeFormatter;
-using Poco::DateTimeParser;
-using Poco::DynamicAny;
-using Poco::Any;
-using Poco::Random;
-using Poco::Timer;
-using Poco::TimerCallback;
-using Poco::StreamCopier;
-using Poco::Net::Socket;
-using Poco::Net::DatagramSocket;
-using Poco::Net::MulticastSocket;
-using Poco::Net::NetworkInterface;
-using Poco::Net::SocketAddress;
-using Poco::Net::SocketReactor;
-using Poco::Net::SocketInputStream;
-using Poco::Net::SocketOutputStream;
-using Poco::Net::ReadableNotification;
-using Poco::Net::ShutdownNotification;
-using Poco::Net::IPAddress;
-using Poco::Net::MessageHeader;
-using Poco::Net::ServerSocket;
-using Poco::Net::HTTPRequestHandler;
-using Poco::Net::HTTPRequestHandlerFactory;
-using Poco::Net::HTTPServer;
-using Poco::Net::HTTPServerRequest;
-using Poco::Net::HTTPServerResponse;
-using Poco::Net::HTTPServerParams;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPClientSession;
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NamedNodeMap;
-using Poco::XML::AttrMap;
-using Poco::XML::Element;
-using Poco::XML::AutoPtr;
-using Poco::XML::InputSource;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
-using Poco::XML::XMLWriter;
-using Poco::XML::DocumentFragment;
-
-using std::istringstream;
 
 
 // TODO: Variant: catch conversion errors with log message
@@ -188,15 +118,16 @@ typedef Poco::Int32     i4;
 typedef float           r4;
 typedef double          r8;
 typedef r8              number;
+typedef Poco::URI       uri;
 
 static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    JAMM_VERSION        = "0.0.3";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 static const std::string    SSDP_ADDRESS        = "239.255.255.250";
-static const UInt16         SSDP_PORT           = 1900;
-static const UInt16         SSDP_CACHE_DURATION = 1800;
-static const UInt16         SSDP_MIN_WAIT_TIME  = 1;
-static const UInt16         SSDP_MAX_WAIT_TIME  = 120;
+static const Poco::UInt16   SSDP_PORT           = 1900;
+static const Poco::UInt16   SSDP_CACHE_DURATION = 1800;
+static const Poco::UInt16   SSDP_MIN_WAIT_TIME  = 1;
+static const Poco::UInt16   SSDP_MAX_WAIT_TIME  = 120;
 
 class Device;
 class Service;
@@ -210,7 +141,7 @@ class Entity;
 class EntityItem;
 
 
-class SsdpMessage : public Notification
+class SsdpMessage : public Poco::Notification
 {
 public:
     typedef enum {
@@ -230,7 +161,7 @@ public:
     SsdpMessage(TRequestMethod requestMethod);
     
     // map the received HTTP header to an SsdpMessage object in memory
-    SsdpMessage(const std::string& buf, const SocketAddress& sender = SocketAddress(SSDP_FULL_ADDRESS));
+    SsdpMessage(const std::string& buf, const Poco::Net::SocketAddress& sender = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     ~SsdpMessage();
     
     void setRequestMethod(TRequestMethod requestMethod);
@@ -255,9 +186,9 @@ public:
     void setUniqueServiceName(const std::string& serviceName);
     std::string getUniqueServiceName();
     
-    void setLocation(const URI& location);
+    void setLocation(const Poco::URI& location);
 //     std::string getLocation();
-    URI getLocation();
+    Poco::URI getLocation();
     
     void setHost();
     void setHttpExtensionNamespace();
@@ -273,18 +204,17 @@ public:
     int getMaximumWaitTime();
     
     void setDate();
-    DateTime getDate();
+    Poco::DateTime getDate();
     
-    SocketAddress getSender();
+    Poco::Net::SocketAddress getSender();
     
 private:
     void initMessageMap();
     
     TRequestMethod                      m_requestMethod;
     TRequestMethod                      m_notificationSubtype;
-//     MessageHeader           m_messageHeader;
     std::map<std::string,std::string>   m_messageHeader;
-    SocketAddress                       m_sender;
+    Poco::Net::SocketAddress                 m_sender;
     
     std::map<TRequestMethod,std::string> m_messageMap;
     std::map<std::string,TRequestMethod> m_messageConstMap;
@@ -294,30 +224,28 @@ private:
 class SsdpSocket
 { 
 public:
-    SsdpSocket(const NetworkInterface& interface);
+    SsdpSocket(const Poco::Net::NetworkInterface& interface);
     ~SsdpSocket();
     
-    const NetworkInterface& getInterface() { return m_interface; }
-    void setObserver(const AbstractObserver& observer);
-//     void setUnicastObserver(const AbstractObserver& observer);
+    const Poco::Net::NetworkInterface& getInterface() { return m_interface; }
+    void setObserver(const Poco::AbstractObserver& observer);
     void init();
     
-    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     
 private:
-    void onReadable(const AutoPtr<ReadableNotification>& pNf);
-    void onUnicastReadable(const AutoPtr<ReadableNotification>& pNf);
+    void onReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
+    void onUnicastReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
     
-    NetworkInterface    m_interface;
-    MulticastSocket*    m_pSsdpSocket;
-    MulticastSocket*    m_pSsdpSenderSocket;
-    SocketReactor       m_reactor;
-    SocketReactor       m_unicastReactor;
-    Thread              m_listenerThread;
-    Thread              m_unicastListenerThread;
-    NotificationCenter  m_notificationCenter;
-//     NotificationCenter  m_unicastNotificationCenter;
-    char*               m_pBuffer;
+    Poco::Net::NetworkInterface     m_interface;
+    Poco::Net::MulticastSocket*     m_pSsdpSocket;
+    Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
+    Poco::Net::SocketReactor        m_reactor;
+    Poco::Net::SocketReactor        m_unicastReactor;
+    Poco::Thread                    m_listenerThread;
+    Poco::Thread                    m_unicastListenerThread;
+    Poco::NotificationCenter        m_notificationCenter;
+    char*                           m_pBuffer;
     
     enum {
         BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
@@ -337,10 +265,10 @@ public:
     void stop();
     
 private:
-    void onTimer(Timer& timer);
+    void onTimer(Poco::Timer& timer);
     
-    Random                              m_randomTimeGenerator;
-    Timer                               m_sendTimer;
+    Poco::Random                        m_randomTimeGenerator;
+    Poco::Timer                         m_sendTimer;
     SsdpSocket*                         m_socket;
     std::vector<SsdpMessage*>           m_ssdpMessages;
     int                                 m_repeat;
@@ -357,7 +285,7 @@ public:
     
     // TODO: check if string formats are conform to specs (-> p. 33).
     void setValue(const std::string& val) {
-//         std::cerr << "Variant::setValue(const std::string& val), val: " << val << std::endl;
+//         std::clog << "Variant::setValue(const std::string& val), val: " << val << std::endl;
         m_val = val;
     }
     void setValue(bool val) { m_val = val ? "1" : "0"; }
@@ -369,57 +297,45 @@ public:
     void setValue(i4 val) { m_val = Poco::NumberFormatter::format(val); }
     void setValue(float val) { m_val = Poco::NumberFormatter::format(val); }
     void setValue(double val) { m_val = Poco::NumberFormatter::format(val); }
+    void setValue(Poco::URI val) { m_val = val.toString(); }
     
     const std::string& getValue() const {
-//         std::cerr << "Variant::getValue(), m_val: " << m_val << std::endl;
         return m_val; 
     }
     void getValue(std::string& val) { 
-//         val = m_val; 
-//         std::cerr << "Variant::getValue(std::string&), m_val: " << m_val << std::endl;
         val = m_val; 
-//         std::cerr << "Variant::getValue(std::string&) finished" << std::endl;
-        
     }
     void getValue(bool& val) { val = (m_val == "1" || m_val == "true") ? true : false; }
     void getValue(ui1& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(ui2& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(ui4& val) { 
-        // FIXME: Poco::NumberParser::parseUnsigned() gets stuck with "" as argument
-//         std::cerr << "Variant::getValue(ui4&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
         if (m_val == "") {
             val = 0;
         }
         else {
             val = Poco::NumberParser::parseUnsigned(m_val);
         }
-//         std::cerr << "Variant::getValue(ui4&) finished" << std::endl;
     }
     void getValue(i1& val) { 
-//         val = Poco::NumberParser::parse(m_val); 
-//         std::cerr << "Variant::getValue(i1&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
         if (m_val == "") {
             val = 0;
         }
         else {
             val = Poco::NumberParser::parse(m_val);
         }
-//         std::cerr << "Variant::getValue(i1&) finished" << std::endl;
     }
     void getValue(i2& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(i4& val) {
-//         val = Poco::NumberParser::parse(m_val);
-//         std::cerr << "Variant::getValue(i4&), m_val: " << m_val /*<< ", val: " << val*/ << std::endl;
         if (m_val == "") {
             val = 0;
         }
         else {
             val = Poco::NumberParser::parse(m_val);
         }
-//         std::cerr << "Variant::getValue(i4&) finished" << std::endl;
     }
     void getValue(float& val) { val = Poco::NumberParser::parse(m_val); }
     void getValue(double& val) { val = Poco::NumberParser::parse(m_val); }
+    void getValue(Poco::URI& val) { val = Poco::URI(m_val); }
     
 private:
     std::string     m_val;
@@ -473,40 +389,40 @@ public:
     
     template<typename T> T getValue(const std::string& key)
     {
-        std::cerr << "Container::getValue() key: " << key << std::endl;
+        std::clog << "Container::getValue() key: " << key << std::endl;
         Variant* e = (*m_pEntities.find(key)).second;
         T res;
         if (e) {
             e->getValue(res);
         } else {
-            std::cerr << "Container::getValue() could not find key: " << key << std::endl;
+            std::clog << "Container::getValue() could not find key: " << key << std::endl;
         }
-        std::cerr << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
+        std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
         return res;
     }
     
     template<typename T> void setValue(const std::string& key, const T& val)
     {
-        std::cerr << "Container::setValue() key: " << key << std::endl;
-        std::cerr << "m_pEntities has: " << m_pEntities.size() << " entries" << std::endl;
-        std::cerr << "m_keys has: " << m_keys.size() << " entries" << std::endl;
+        std::clog << "Container::setValue() key: " << key << std::endl;
+        std::clog << "m_pEntities has: " << m_pEntities.size() << " entries" << std::endl;
+        std::clog << "m_keys has: " << m_keys.size() << " entries" << std::endl;
         // FIXME: segfault here
-        std::cerr << "first pointer to Variant in m_keys is: " << m_keys[0] << std::endl;
+        std::clog << "first pointer to Variant in m_keys is: " << m_keys[0] << std::endl;
         if (m_pEntities.find(key) == m_pEntities.end()) {
-            std::cerr << "Container::setValue() could not find key"<< std::endl;
+            std::clog << "Container::setValue() could not find key"<< std::endl;
             return;
         }
-        std::cerr << "Container::setValue() found key" << std::endl;
+        std::clog << "Container::setValue() found key" << std::endl;
         Variant* e = (*m_pEntities.find(key)).second;
-        std::cerr << "Container::setValue() found Variant pointer: " << e << std::endl;
+        std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
         if (e) {
-            std::cerr << "Container::setValue() found key: " << key << std::endl;
+            std::clog << "Container::setValue() found key: " << key << std::endl;
             e->setValue(val);
         }
         else {
-            std::cerr << "Container::setValue() pointer to Variant is invalid" << std::endl;
+            std::clog << "Container::setValue() pointer to Variant is invalid" << std::endl;
         }
-        std::cerr << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
+        std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
     }
     
     Iterator begin()
@@ -546,20 +462,20 @@ protected:
     
     std::string             m_deviceDescriptionPath;
     // TODO: replace m_nodeStack by argument Node* in the factory methods
-    std::stack<Node*>       m_nodeStack;
-    std::stack<Document*>   m_pDocStack;
-    DeviceRoot*             m_pDeviceRoot;
+    std::stack<Poco::XML::Node*>        m_nodeStack;
+    std::stack<Poco::XML::Document*>    m_pDocStack;
+    DeviceRoot*                         m_pDeviceRoot;
 };
 
 
 class UriDescriptionReader : public DescriptionReader
 {
 public:
-    UriDescriptionReader(URI uri, const std::string& deviceDescriptionPath);
+    UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath);
     
 private:
     virtual std::string& getDescription(const std::string& path);
-    URI m_uri;
+    Poco::URI m_uri;
 };
 
 
@@ -583,9 +499,9 @@ public:
     
 private:
     // TODO: replace m_nodeStack by Node* in action()
-    std::stack<Node*>       m_nodeStack;
-    AutoPtr<Document>       m_pDoc;
-    Action*                 m_pActionTemplate;
+    std::stack<Poco::XML::Node*>            m_nodeStack;
+    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
+    Action*                                 m_pActionTemplate;
 };
 
 
@@ -597,9 +513,9 @@ public:
     Action* action();
     
 private:
-    std::stack<Node*>       m_nodeStack;
-    AutoPtr<Document>       m_pDoc;
-    Action*                 m_pActionTemplate;
+    std::stack<Poco::XML::Node*>        m_nodeStack;
+    Poco::AutoPtr<Poco::XML::Document>  m_pDoc;
+    Action*                             m_pActionTemplate;
 };
 
 
@@ -612,15 +528,15 @@ public:
     void write(std::string& description);
     
 private:
-    Element* device(Device& device);
-    AutoPtr<Document>   m_pDoc;
+    Poco::XML::Element* device(Device& device);
+    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
 };
 
 
 class ServiceDescriptionWriter
 {
 public:
-    ServiceDescriptionWriter(std::string& description) : m_pDescription(&description), m_pDoc(new Document) {}
+    ServiceDescriptionWriter(std::string& description) : m_pDescription(&description), m_pDoc(new Poco::XML::Document) {}
     
     void service(Service& service);
     
@@ -629,8 +545,8 @@ private:
     void action(Action& action);
     void argument(Argument& argument);
     
-    std::string*        m_pDescription;
-    AutoPtr<Document>   m_pDoc;
+    std::string*                            m_pDescription;
+    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
 };
 
 
@@ -639,9 +555,9 @@ class SsdpNotifyAliveWriter
 public:
     SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
     
-    /*virtual*/ void deviceRoot(const DeviceRoot& pDeviceRoot);
-    /*virtual*/ void device(const Device& pDevice);
-    /*virtual*/ void service(const Service& pService);
+    void deviceRoot(const DeviceRoot& pDeviceRoot);
+    void device(const Device& pDevice);
+    void service(const Service& pService);
 
 private:
     SsdpMessageSet*            m_res;
@@ -653,9 +569,9 @@ class SsdpNotifyByebyeWriter
 public:
     SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
     
-    /*virtual*/ void deviceRoot(const DeviceRoot& pDeviceRoot);
-    /*virtual*/ void device(const Device& pDevice);
-    /*virtual*/ void service(const Service& pService);
+    void deviceRoot(const DeviceRoot& pDeviceRoot);
+    void device(const Device& pDevice);
+    void service(const Service& pService);
     
 private:
     SsdpMessageSet*            m_res;
@@ -667,7 +583,7 @@ class ActionResponseWriter
 public:
     ActionResponseWriter(std::string& responseBody);
     // TODO: couldn't cope with the const argument stuff here ...
-    /*virtual*/ void action(Action& action);
+    void action(Action& action);
 private:
     std::string*    m_responseBody;
 };
@@ -680,7 +596,7 @@ public:
     void write(std::string& actionMessage);
     
 private:
-    AutoPtr<Document>   m_pDoc;
+    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
 };
 
 
@@ -692,8 +608,8 @@ public:
     void stateVar(const StateVar& stateVar);
 
 private:
-    AutoPtr<Document>   m_pDoc;
-    AutoPtr<Element>    m_pPropertySet;
+    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
+    Poco::AutoPtr<Poco::XML::Element>    m_pPropertySet;
 };
 
 
@@ -704,7 +620,7 @@ private:
 //       ControlRequestHandler, StateVariableQueryRequestHandler,
 //       EventSubscribeRequestHandler
 
-class UpnpRequestHandler: public HTTPRequestHandler
+class UpnpRequestHandler: public Poco::Net::HTTPRequestHandler
 {
 public:
     virtual UpnpRequestHandler* create() = 0;
@@ -715,7 +631,7 @@ class RequestNotFoundRequestHandler: public UpnpRequestHandler
 {
 public:
     RequestNotFoundRequestHandler* create();
-    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
 };
 
 
@@ -726,25 +642,19 @@ public:
     DescriptionRequestHandler(std::string& description);
 
     DescriptionRequestHandler* create();
-    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-    // TODO: only store a copy of the device/service description in Device/Service, not
-    // in the RequestHandler. This segfaults, that's why a copy is stored here, for now ...
-//     std::string&        m_description;
     std::string*    m_pDescription;
-//     std::string        m_description;
-//     std::istream&       m_descriptionStream;
-//     int                 m_length;
 };
 
 
-class DeviceRequestHandlerFactory: public HTTPRequestHandlerFactory
+class DeviceRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
     DeviceRequestHandlerFactory(HttpSocket* pHttpSocket);
     
-    HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request);
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
     
 private:
@@ -758,7 +668,7 @@ class HttpSocket
     friend class DeviceRoot;
     
 public:
-    HttpSocket(NetworkInterface interface);
+    HttpSocket(Poco::Net::NetworkInterface interface);
     ~HttpSocket();
     
     std::string getServerUri() { return "http://" + m_httpServerAddress.toString() + "/"; }
@@ -767,15 +677,15 @@ public:
     void stopServer();
     
 private:
-    NetworkInterface                m_interface;
-    SocketAddress                   m_httpServerAddress;
-    DeviceRequestHandlerFactory*    m_pDeviceRequestHandlerFactory;
-    NotificationCenter              m_notificationCenter;
-    HTTPServer*                     m_pHttpServer;
+    Poco::Net::NetworkInterface           m_interface;
+    Poco::Net::SocketAddress              m_httpServerAddress;
+    DeviceRequestHandlerFactory*          m_pDeviceRequestHandlerFactory;
+    Poco::NotificationCenter              m_notificationCenter;
+    Poco::Net::HTTPServer*                m_pHttpServer;
 };
 
 
-class VariableQuery : public Notification
+class VariableQuery : public Poco::Notification
 {
 };
 
@@ -787,7 +697,7 @@ public:
     ControlRequestHandler(Service* service);
     
     ControlRequestHandler* create();
-    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
 //     DeviceRoot* m_deviceRoot;
@@ -801,7 +711,7 @@ public:
     EventRequestHandler(Service* pService) : m_pService(pService) {}
     
     EventRequestHandler* create();
-    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response);
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
     Service*    m_pService;
@@ -855,7 +765,7 @@ private:
 };
 
 
-class Action : public Notification
+class Action : public Poco::Notification
 {
 public:
     Action() {}
@@ -874,7 +784,7 @@ public:
     Service* getService() const { return m_pService; }
     template<typename T> const T getArgument(const std::string& name)
     {
-        std::cerr << "Action::getArgument() name: " << name << std::endl;
+        std::clog << "Action::getArgument() name: " << name << std::endl;
         return m_arguments.getValue<T>(name);
     }
     
@@ -882,7 +792,7 @@ public:
     void setService(Service* pService) { m_pService = pService; }
     template<typename T> void setArgument(std::string name, const T& val)
     {
-        std::cerr << "Action::setArgument() name: " << name << std::endl;
+        std::clog << "Action::setArgument() name: " << name << std::endl;
         m_arguments.setValue(name, val);
     }
     
@@ -936,23 +846,23 @@ public:
     
     std::string getUuid() { return m_uuid.toString(); }
     
-    HTTPClientSession* getSession() { return m_pSession; }
+    Poco::Net::HTTPClientSession* getSession() { return m_pSession; }
     std::string getEventKey();
     
     void sendEventMessage(const std::string& eventMessage);
     void renew(int seconds);  // TODO: implement this
-    void expire(Timer& timer);  // TODO: implement this
+    void expire(Poco::Timer& timer);  // TODO: implement this
     
 private:
 //     HTTPRequest* newRequest();
     
-    URI                 m_deliveryAddress;
-    HTTPClientSession*  m_pSession;
-    UUID                m_uuid;
-    Poco::UInt32        m_eventKey;
-    std::string         m_duration;
-    Timer               m_timer;
-    Service*            m_pService;
+    Poco::URI                       m_deliveryAddress;
+    Poco::Net::HTTPClientSession*   m_pSession;
+    Poco::UUID                      m_uuid;
+    Poco::UInt32                    m_eventKey;
+    std::string                     m_duration;
+    Poco::Timer                     m_timer;
+    Service*                        m_pService;
 };
 
 
@@ -1021,7 +931,7 @@ private:
     DescriptionRequestHandler*              m_pDescriptionRequestHandler;
     std::string                             m_controlPath;
     ControlRequestHandler*                  m_controlRequestHandler;
-    HTTPClientSession*                      m_pControlRequestSession;
+    Poco::Net::HTTPClientSession*                m_pControlRequestSession;
     std::string                             m_eventPath;
     Container<Action>                       m_actions;
     Container<StateVar>                     m_stateVars;
@@ -1102,15 +1012,15 @@ public:
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
     std::string& getDeviceDescription() const { return *m_pDeviceDescription; }
-    const URI& getBaseUri() const { return m_baseUri; }
-    const URI& getDescriptionUri() const { return m_descriptionUri; }
+    const Poco::URI& getBaseUri() const { return m_baseUri; }
+    const Poco::URI& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string& description) { m_pDeviceDescription = &description; }
-    void setBaseUri() { m_baseUri = URI(m_httpSocket.getServerUri()); }
-    void setBaseUri(const URI& baseUri) { m_baseUri = baseUri; }
-    void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = URI(m_httpSocket.getServerUri() + descriptionPath); }
+    void setBaseUri() { m_baseUri = Poco::URI(m_httpSocket.getServerUri()); }
+    void setBaseUri(const Poco::URI& baseUri) { m_baseUri = baseUri; }
+    void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = Poco::URI(m_httpSocket.getServerUri() + descriptionPath); }
     
     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
     void addServiceType(std::string serviceType, Service* pService) { m_serviceTypes[serviceType] = pService; }
@@ -1124,7 +1034,7 @@ public:
     void stopSsdp();
     void stopHttp();
     
-    void registerActionHandler(const AbstractObserver& observer)
+    void registerActionHandler(const Poco::AbstractObserver& observer)
     {
         m_httpSocket.m_notificationCenter.addObserver(observer);
     }
@@ -1134,7 +1044,7 @@ public:
         m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
     }
     
-    void sendMessage(SsdpMessage& message, const SocketAddress& receiver = SocketAddress(SSDP_FULL_ADDRESS));
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     void postAction(Action* pAction) { m_httpSocket.m_notificationCenter.postNotification(pAction); }
     
@@ -1143,8 +1053,8 @@ public:
 
     
 private:
-    URI                             m_baseUri;              // base URI for control URI and event URI
-    URI                             m_descriptionUri;       // for controller to download description
+    Poco::URI                       m_baseUri;              // base URI for control URI and event URI
+    Poco::URI                       m_descriptionUri;       // for controller to download description
     std::string*                    m_pDeviceDescription;
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
@@ -1224,7 +1134,7 @@ T
 Service::getStateVar(const std::string& key)
 {
     // TODO: lock the m_stateVariables map because different threads could access it
-    std::cerr << "Service::getStateVar()" << std::endl;
+    std::clog << "Service::getStateVar()" << std::endl;
     return m_stateVars.getValue<T>(key);
 }
 
@@ -1234,15 +1144,15 @@ void
 Service::setStateVar(std::string key, const T& val)
 {
     // TODO: lock the m_stateVariables map because different threads could access it
-    std::cerr << "Service::setStateVar() name: " << key << std::endl;
+    std::clog << "Service::setStateVar() name: " << key << std::endl;
     // FIXME: segfault here
-    std::cerr << "service type: " << getServiceType() << std::endl;
+    std::clog << "service type: " << getServiceType() << std::endl;
     m_stateVars.setValue(key, val);
     if (m_stateVars.get(key).getSendEvents()) {
-        std::cerr << "Service::setStateVar() " << key << " sends event message" << std::endl;
+        std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
         sendEventMessage(m_stateVars.get(key));
     }
-    std::cerr << "Service::setStateVar() finished" << std::endl;
+    std::clog << "Service::setStateVar() finished" << std::endl;
 }
 
 

@@ -115,8 +115,8 @@ protected:
             
         // set-up a server socket
 //             SsdpSocket s(NObserver<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
-            SsdpSocket s(NetworkInterface::forName("wlan0"));
-            s.setObserver(Observer<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
+            SsdpSocket s(Poco::Net::NetworkInterface::forName("wlan0"));
+            s.setObserver(Poco::Observer<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
             s.init();
             waitForTerminationRequest();
         }
