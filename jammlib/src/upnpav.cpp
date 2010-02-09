@@ -27,15 +27,16 @@
 #include "upnpav.h"
 
 using namespace Jamm;
+using namespace Jamm::Av;
 
-Jamm::r8
+r8
 AvTypeConverter::readDuration(const std::string& duration)
 {
     if (duration == "NOT_IMPLEMENTED") {
         return 0.0;
     }
     
-    Jamm::ui4 res;
+    ui4 res;
     Poco::StringTokenizer tok(duration, ":./");
     
     res = 3600 * Poco::NumberParser::parse(tok[0])
@@ -53,12 +54,12 @@ AvTypeConverter::readDuration(const std::string& duration)
 
 
 std::string
-AvTypeConverter::writeDuration(const Jamm::r8& duration)
+AvTypeConverter::writeDuration(const r8& duration)
 {
     std::string res;
     int hours = duration / 3600 - 0.5;
     int minutes = (duration - hours * 3600) / 60 - 0.5;
-    Jamm::r8 seconds = duration - hours * 3600 - minutes * 60;
+    r8 seconds = duration - hours * 3600 - minutes * 60;
     
     res = Poco::NumberFormatter::format(hours) + ":"
         + Poco::NumberFormatter::format0(minutes, 2) + ":"

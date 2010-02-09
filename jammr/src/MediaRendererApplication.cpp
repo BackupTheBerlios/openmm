@@ -32,7 +32,7 @@
 
 #include "jamm/upnp.h"
 #include "enginevlc.h"
-#include "MediaRenderer.h"
+// #include "MediaRenderer.h"
 #include "MediaRendererImpl.h"
 
 using Jamm::SsdpSocket;

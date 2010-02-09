@@ -24,8 +24,10 @@ signode.cpp
 thread.cpp
 upnp.cpp
 upnpav.cpp
-MediaServer.cpp
-MediaServerImpl.cpp
+UpnpAvControllers.cpp
+UpnpAvDevices.cpp
+# MediaServer.cpp
+# MediaServerImpl.cpp
 )
 
 FIND_LIBRARY(LIB_POCO_UTIL

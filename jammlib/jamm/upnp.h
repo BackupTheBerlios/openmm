@@ -99,6 +99,11 @@
 // TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
 // TODO: Find a proper interface for the readers and writers
 // TODO: complete event messaging
+// TODO: OPTIONAL stuff: optional services, actions: configure it via ImplAdapter and rewrite description
+//       accordingly
+// TODO: change jammgen to dispatch actions not in the "great action dispatcher" but pass the dispatching
+//       to the corresponding services. This avoids double code in devices that have the same service
+//       and may eliminate the friend class statement.
 
 
 // TODO: Error handling

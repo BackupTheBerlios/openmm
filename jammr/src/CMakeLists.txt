@@ -43,7 +43,7 @@ enginevlc.cpp
 # enginexine.cpp
 # main.cpp
 # upnpmediarenderer.cpp
-MediaRenderer.cpp
+# MediaRenderer.cpp
 MediaRendererImpl.cpp
 MediaRendererApplication.cpp
 )

@@ -41,7 +41,7 @@ AVTransportImplementation::initStateVars()
 
 
 void
-AVTransportImplementation::SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+AVTransportImplementation::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     std::string transportState = _getTransportState();
     std::cerr << "AVTransportImplementation::SetAVTransportURI() enters in state: " << transportState << std::endl;
@@ -74,9 +74,9 @@ implementation doesn’t support this feature then this state variable must be s
 //     item = (PLT_MediaItem*)(*didl->GetFirstItem());
 //     int meta_duration = item->m_Resources.GetFirstItem()->m_Duration;
 //     int duration = (meta_duration>0)?meta_duration:0;
-// //     Jamm::MediaObject obj(CurrentURIMetaData);
-//     Jamm::r8 duration;
-//     std::string timestamp = Jamm::AvTypeConverter::writeDuration(duration);
+// //     MediaObject obj(CurrentURIMetaData);
+//     r8 duration;
+//     std::string timestamp = AvTypeConverter::writeDuration(duration);
 // //     std::string duration = obj.getProperty("res@duration");
 // //     _setCurrentMediaDuration(duration);
 // //     _setCurrentTrackDuration(duration);
@@ -85,7 +85,7 @@ implementation doesn’t support this feature then this state variable must be s
 
 
 void
-AVTransportImplementation::GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+AVTransportImplementation::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
 // begin of your own code
 
@@ -94,7 +94,7 @@ AVTransportImplementation::GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& 
 
 
 void
-AVTransportImplementation::GetTransportInfo(const Jamm::ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+AVTransportImplementation::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
 // begin of your own code
 
@@ -103,7 +103,7 @@ AVTransportImplementation::GetTransportInfo(const Jamm::ui4& InstanceID, std::st
 
 
 void
-AVTransportImplementation::GetPositionInfo(const Jamm::ui4& InstanceID, Jamm::ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, Jamm::i4& RelCount, Jamm::i4& AbsCount)
+AVTransportImplementation::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
     std::cerr << "AVTransportImplementation::GetPositionInfo()" << std::endl;
     std::cerr << "_getCurrentTrack()" << std::endl;
@@ -120,7 +120,7 @@ AVTransportImplementation::GetPositionInfo(const Jamm::ui4& InstanceID, Jamm::ui
 
 
 void
-AVTransportImplementation::GetDeviceCapabilities(const Jamm::ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+AVTransportImplementation::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
 // begin of your own code
 
@@ -129,7 +129,7 @@ AVTransportImplementation::GetDeviceCapabilities(const Jamm::ui4& InstanceID, st
 
 
 void
-AVTransportImplementation::GetTransportSettings(const Jamm::ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+AVTransportImplementation::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
 // begin of your own code
 
@@ -138,7 +138,7 @@ AVTransportImplementation::GetTransportSettings(const Jamm::ui4& InstanceID, std
 
 
 void
-AVTransportImplementation::Stop(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Stop(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
     std::cerr << "AVTransportImplementation::Stop() enters in state: " << transportState << std::endl;
@@ -168,7 +168,7 @@ AVTransportImplementation::Stop(const Jamm::ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& Speed)
+AVTransportImplementation::Play(const ui4& InstanceID, const std::string& Speed)
 {
     std::string speed = Speed;
     std::string transportState = _getTransportState();
@@ -219,7 +219,7 @@ AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& 
 
 
 void
-AVTransportImplementation::Pause(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Pause(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
     std::cerr << "AVTransportImplementation::Pause() enters in state: " << transportState << std::endl;
@@ -238,7 +238,7 @@ AVTransportImplementation::Pause(const Jamm::ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& Unit, const std::string& Target)
+AVTransportImplementation::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     std::string transportState = _getTransportState();
     std::cerr << "AVTransportImplementation::Pause() enters in state: " << transportState << std::endl;
@@ -247,7 +247,7 @@ AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& 
         // TODO: does it make sense to handle "PAUSED_PLAYBACK", too?
         std::cerr << "AVTransportImplementation::Seek() seek mode: " << Unit << ", seek target: " << Target << std::endl;
         
-        Jamm::ui4 position;
+        ui4 position;
         if (Unit == "ABS_TIME") {
 //             PLT_Didl::ParseTimeStamp(seekTarget, position);
         }
@@ -264,7 +264,7 @@ AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& 
 
 
 void
-AVTransportImplementation::Next(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Next(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -273,7 +273,7 @@ AVTransportImplementation::Next(const Jamm::ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Previous(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Previous(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -306,6 +306,15 @@ ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::strin
 
 
 void
+ConnectionManagerImplementation::ConnectionComplete(const i4& ConnectionID)
+{
+// begin of your own code
+    
+// end of your own code
+}
+
+
+void
 ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
 // begin of your own code
@@ -315,7 +324,7 @@ ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& Connection
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionInfo(/*const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status*/)
+ConnectionManagerImplementation::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
 // begin of your own code
 
@@ -354,7 +363,7 @@ RenderingControlImplementation::initStateVars()
 
 
 void
-RenderingControlImplementation::ListPresets(const Jamm::ui4& InstanceID, std::string& CurrentPresetNameList)
+RenderingControlImplementation::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
 {
 // begin of your own code
     
@@ -363,7 +372,7 @@ RenderingControlImplementation::ListPresets(const Jamm::ui4& InstanceID, std::st
 
 
 void
-RenderingControlImplementation::SelectPreset(const Jamm::ui4& InstanceID, const std::string& PresetName)
+RenderingControlImplementation::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
 // begin of your own code
     
@@ -372,7 +381,7 @@ RenderingControlImplementation::SelectPreset(const Jamm::ui4& InstanceID, const 
 
 
 void
-RenderingControlImplementation::GetBrightness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBrightness)
+RenderingControlImplementation::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
 {
 // begin of your own code
     
@@ -381,7 +390,7 @@ RenderingControlImplementation::GetBrightness(const Jamm::ui4& InstanceID, Jamm:
 
 
 void
-RenderingControlImplementation::SetBrightness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBrightness)
+RenderingControlImplementation::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
 // begin of your own code
     
@@ -390,7 +399,7 @@ RenderingControlImplementation::SetBrightness(const Jamm::ui4& InstanceID, const
 
 
 void
-RenderingControlImplementation::GetContrast(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentContrast)
+RenderingControlImplementation::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
 {
 // begin of your own code
     
@@ -399,7 +408,7 @@ RenderingControlImplementation::GetContrast(const Jamm::ui4& InstanceID, Jamm::u
 
 
 void
-RenderingControlImplementation::SetContrast(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredContrast)
+RenderingControlImplementation::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
 // begin of your own code
     
@@ -408,7 +417,7 @@ RenderingControlImplementation::SetContrast(const Jamm::ui4& InstanceID, const J
 
 
 void
-RenderingControlImplementation::GetSharpness(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentSharpness)
+RenderingControlImplementation::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
 {
 // begin of your own code
     
@@ -417,7 +426,7 @@ RenderingControlImplementation::GetSharpness(const Jamm::ui4& InstanceID, Jamm::
 
 
 void
-RenderingControlImplementation::SetSharpness(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredSharpness)
+RenderingControlImplementation::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
 // begin of your own code
     
@@ -426,7 +435,7 @@ RenderingControlImplementation::SetSharpness(const Jamm::ui4& InstanceID, const 
 
 
 void
-RenderingControlImplementation::GetRedVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoGain)
+RenderingControlImplementation::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
 {
 // begin of your own code
     
@@ -435,7 +444,7 @@ RenderingControlImplementation::GetRedVideoGain(const Jamm::ui4& InstanceID, Jam
 
 
 void
-RenderingControlImplementation::SetRedVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoGain)
+RenderingControlImplementation::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
 // begin of your own code
     
@@ -444,7 +453,7 @@ RenderingControlImplementation::SetRedVideoGain(const Jamm::ui4& InstanceID, con
 
 
 void
-RenderingControlImplementation::GetGreenVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoGain)
+RenderingControlImplementation::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
 {
 // begin of your own code
     
@@ -453,7 +462,7 @@ RenderingControlImplementation::GetGreenVideoGain(const Jamm::ui4& InstanceID, J
 
 
 void
-RenderingControlImplementation::SetGreenVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoGain)
+RenderingControlImplementation::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
 // begin of your own code
     
@@ -462,7 +471,7 @@ RenderingControlImplementation::SetGreenVideoGain(const Jamm::ui4& InstanceID, c
 
 
 void
-RenderingControlImplementation::GetBlueVideoGain(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoGain)
+RenderingControlImplementation::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
 {
 // begin of your own code
     
@@ -471,7 +480,7 @@ RenderingControlImplementation::GetBlueVideoGain(const Jamm::ui4& InstanceID, Ja
 
 
 void
-RenderingControlImplementation::SetBlueVideoGain(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoGain)
+RenderingControlImplementation::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
 // begin of your own code
     
@@ -480,7 +489,7 @@ RenderingControlImplementation::SetBlueVideoGain(const Jamm::ui4& InstanceID, co
 
 
 void
-RenderingControlImplementation::GetRedVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentRedVideoBlackLevel)
+RenderingControlImplementation::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
 {
 // begin of your own code
     
@@ -489,7 +498,7 @@ RenderingControlImplementation::GetRedVideoBlackLevel(const Jamm::ui4& InstanceI
 
 
 void
-RenderingControlImplementation::SetRedVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredRedVideoBlackLevel)
+RenderingControlImplementation::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
 // begin of your own code
     
@@ -498,7 +507,7 @@ RenderingControlImplementation::SetRedVideoBlackLevel(const Jamm::ui4& InstanceI
 
 
 void
-RenderingControlImplementation::GetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentGreenVideoBlackLevel)
+RenderingControlImplementation::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
 {
 // begin of your own code
     
@@ -507,7 +516,7 @@ RenderingControlImplementation::GetGreenVideoBlackLevel(const Jamm::ui4& Instanc
 
 
 void
-RenderingControlImplementation::SetGreenVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredGreenVideoBlackLevel)
+RenderingControlImplementation::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
 // begin of your own code
     
@@ -516,7 +525,7 @@ RenderingControlImplementation::SetGreenVideoBlackLevel(const Jamm::ui4& Instanc
 
 
 void
-RenderingControlImplementation::GetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, Jamm::ui2& CurrentBlueVideoBlackLevel)
+RenderingControlImplementation::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
 {
 // begin of your own code
     
@@ -525,7 +534,7 @@ RenderingControlImplementation::GetBlueVideoBlackLevel(const Jamm::ui4& Instance
 
 
 void
-RenderingControlImplementation::SetBlueVideoBlackLevel(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredBlueVideoBlackLevel)
+RenderingControlImplementation::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
 // begin of your own code
     
@@ -534,7 +543,7 @@ RenderingControlImplementation::SetBlueVideoBlackLevel(const Jamm::ui4& Instance
 
 
 void
-RenderingControlImplementation::GetColorTemperature (const Jamm::ui4& InstanceID, Jamm::ui2& CurrentColorTemperature)
+RenderingControlImplementation::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
 {
 // begin of your own code
     
@@ -543,7 +552,7 @@ RenderingControlImplementation::GetColorTemperature (const Jamm::ui4& InstanceID
 
 
 void
-RenderingControlImplementation::SetColorTemperature(const Jamm::ui4& InstanceID, const Jamm::ui2& DesiredColorTemperature)
+RenderingControlImplementation::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
 // begin of your own code
     
@@ -552,7 +561,7 @@ RenderingControlImplementation::SetColorTemperature(const Jamm::ui4& InstanceID,
 
 
 void
-RenderingControlImplementation::GetHorizontalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentHorizontalKeystone)
+RenderingControlImplementation::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
 {
 // begin of your own code
     
@@ -561,7 +570,7 @@ RenderingControlImplementation::GetHorizontalKeystone(const Jamm::ui4& InstanceI
 
 
 void
-RenderingControlImplementation::SetHorizontalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredHorizontalKeystone)
+RenderingControlImplementation::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
 // begin of your own code
     
@@ -570,7 +579,7 @@ RenderingControlImplementation::SetHorizontalKeystone(const Jamm::ui4& InstanceI
 
 
 void
-RenderingControlImplementation::GetVerticalKeystone(const Jamm::ui4& InstanceID, Jamm::i2& CurrentVerticalKeystone)
+RenderingControlImplementation::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
 {
 // begin of your own code
     
@@ -579,7 +588,7 @@ RenderingControlImplementation::GetVerticalKeystone(const Jamm::ui4& InstanceID,
 
 
 void
-RenderingControlImplementation::SetVerticalKeystone(const Jamm::ui4& InstanceID, const Jamm::i2& DesiredVerticalKeystone)
+RenderingControlImplementation::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
 // begin of your own code
     
@@ -588,7 +597,7 @@ RenderingControlImplementation::SetVerticalKeystone(const Jamm::ui4& InstanceID,
 
 
 void
-RenderingControlImplementation::GetMute(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
+RenderingControlImplementation::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
 // begin of your own code
     
@@ -597,7 +606,7 @@ RenderingControlImplementation::GetMute(const Jamm::ui4& InstanceID, const std::
 
 
 void
-RenderingControlImplementation::SetMute(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+RenderingControlImplementation::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
 // begin of your own code
     
@@ -606,7 +615,7 @@ RenderingControlImplementation::SetMute(const Jamm::ui4& InstanceID, const std::
 
 
 void
-RenderingControlImplementation::GetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::ui2& CurrentVolume)
+RenderingControlImplementation::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
 // begin of your own code
     
@@ -615,12 +624,12 @@ RenderingControlImplementation::GetVolume(const Jamm::ui4& InstanceID, const std
 
 
 void
-RenderingControlImplementation::SetVolume(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::ui2& DesiredVolume)
+RenderingControlImplementation::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
     std::cerr << "RenderingControlImplementation::SetVolume() channel: " << Channel << ", volume: " << DesiredVolume << std::endl;
     
-    Jamm::i4 chan;
-    Jamm::Variant(Channel).getValue(chan);
+    i4 chan;
+    Variant(Channel).getValue(chan);
     m_pEngine->setVolume(chan, DesiredVolume);
     
     _setVolume(DesiredVolume);
@@ -628,7 +637,7 @@ RenderingControlImplementation::SetVolume(const Jamm::ui4& InstanceID, const std
 
 
 void
-RenderingControlImplementation::GetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& CurrentVolume)
+RenderingControlImplementation::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
 {
 // begin of your own code
     
@@ -637,7 +646,7 @@ RenderingControlImplementation::GetVolumeDB(const Jamm::ui4& InstanceID, const s
 
 
 void
-RenderingControlImplementation::SetVolumeDB(const Jamm::ui4& InstanceID, const std::string& Channel, const Jamm::i2& DesiredVolume)
+RenderingControlImplementation::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
 // begin of your own code
     
@@ -646,7 +655,7 @@ RenderingControlImplementation::SetVolumeDB(const Jamm::ui4& InstanceID, const s
 
 
 void
-RenderingControlImplementation::GetVolumeDBRange(const Jamm::ui4& InstanceID, const std::string& Channel, Jamm::i2& MinValue, Jamm::i2& MaxValue)
+RenderingControlImplementation::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
 {
 // begin of your own code
     
@@ -655,7 +664,7 @@ RenderingControlImplementation::GetVolumeDBRange(const Jamm::ui4& InstanceID, co
 
 
 void
-RenderingControlImplementation::GetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
+RenderingControlImplementation::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
 {
 // begin of your own code
     
@@ -664,7 +673,7 @@ RenderingControlImplementation::GetLoudness(const Jamm::ui4& InstanceID, const s
 
 
 void
-RenderingControlImplementation::SetLoudness(const Jamm::ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+RenderingControlImplementation::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
 // begin of your own code
     

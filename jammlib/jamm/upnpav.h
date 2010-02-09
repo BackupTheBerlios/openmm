@@ -60,12 +60,13 @@ using Poco::XML::XMLWriter;
 using Poco::XML::DocumentFragment;
 
 namespace Jamm {
+namespace Av {
 
 class AvTypeConverter
 {
 public:
-    static Jamm::r8 readDuration(const std::string& duration);
-    static std::string writeDuration(const Jamm::r8& duration);
+    static r8 readDuration(const std::string& duration);
+    static std::string writeDuration(const r8& duration);
 };
 
 
@@ -127,7 +128,7 @@ public:
     // may be cached on disk or dynamically generated
     virtual std::string object(const std::string& objectId) = 0;
     virtual std::string child(const std::string& containerId, 
-                              Jamm::ui4 childNumber,
+                              ui4 childNumber,
                               const std::vector<std::string>& propertySortList) = 0;
 };
 
@@ -144,13 +145,14 @@ public:
     // may be cached on disk or dynamically generated
     virtual std::string object(const std::string& objectId) = 0;
     virtual std::string children(const std::string& containerId, 
-                                 Jamm::ui4 childNumber,
-                                 Jamm::ui4 childCount,
+                                 ui4 childNumber,
+                                 ui4 childCount,
                                  const std::vector<std::string>& propertySortList,
                                  const std::string& searchString) = 0;
 };
 
 
+} // namespace Av
 } // namespace Jamm
 
 #endif

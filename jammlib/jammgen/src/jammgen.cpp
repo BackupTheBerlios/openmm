@@ -1076,8 +1076,14 @@ DeviceCtrlH::actionEnd(const Action& action)
     m_out
         << ");"
         << std::endl;
+    
+    std::string reqActionArgs = m_reqActionArgs.str();
+    std::string::size_type l = reqActionArgs.length();
+    if (l >= 2 && reqActionArgs.substr(l - 2) == ", ") {
+        reqActionArgs = reqActionArgs.substr(0, l - 2);
+    }
     m_reqAction
-        << m_reqActionArgs.str()
+        << reqActionArgs
         << ");"
         << std::endl;
     m_ansAction
@@ -1322,8 +1328,13 @@ DeviceCtrlCpp::actionEnd(const Action& action)
         << "}" << std::endl
         << std::endl;
     
+    std::string reqActionArgs = m_reqActionArgs.str();
+    std::string::size_type l = reqActionArgs.length();
+    if (l >= 2 && reqActionArgs.substr(l - 2) == ", ") {
+        reqActionArgs = reqActionArgs.substr(0, l - 2);
+    }
     m_reqAction
-        << m_reqActionArgs.str()
+        << reqActionArgs
         << ")" << std::endl
         << "{" << std::endl
         << indent(1) << "Jamm::Action* pAction = m_pService->getAction(\"" 
