@@ -22,7 +22,7 @@
 #ifndef JAMMLIGHT_CTRL_H
 #define JAMMLIGHT_CTRL_H
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 // using Jamm::Service;
 
 // NOTE: Controller does not support QueryStateVar for unevented StateVars because it is depricated.

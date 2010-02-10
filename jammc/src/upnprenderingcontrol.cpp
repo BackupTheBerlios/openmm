@@ -22,7 +22,7 @@
 
 #include "upnprenderingcontrol.h"
 
-#include <jamm/debug.h>
+// #include <jamm/debug.h>
 
 JRenderingController::JRenderingController(PLT_CtrlPointReference& ctrl_point)
 : m_CtrlPoint(ctrl_point)
@@ -64,20 +64,20 @@ JRenderingController::OnEventNotify(PLT_Service* service, NPT_List<PLT_StateVari
 void
 JRenderingController::setVolume(PLT_DeviceDataReference& device, int channel, int volume)
 {
-    TRACE("JRenderingController::setVolume() volume: %i", volume);
+//     TRACE("JRenderingController::setVolume() volume: %i", volume);
     const char* service_type = "urn:schemas-upnp-org:service:RenderingControl:1";
     const char* action_name = "SetVolume";
     
     // look for the service
     PLT_Service* service;
     if (NPT_FAILED(device->FindServiceByType(service_type, service))) {
-        TRACE("Service %s not found", (const char*)service_type);
+//         TRACE("Service %s not found", (const char*)service_type);
     }
     
     PLT_ActionDesc* action_desc;
     action_desc = service->FindActionDesc(action_name);
     if (action_desc == NULL) {
-        TRACE("Action %s not found in service", action_name);
+//         TRACE("Action %s not found in service", action_name);
     }
     
     PLT_ActionReference action;

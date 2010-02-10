@@ -22,12 +22,14 @@
 
 #include <QApplication>
 
-#include "upnpcontroller.h"
+#include "UpnpController.h"
 
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
     UpnpController upnpController;
+    upnpController.initGui();
     upnpController.showMainWindow();
+    upnpController.start();
     return app.exec();
 }

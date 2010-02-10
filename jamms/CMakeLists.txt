@@ -8,5 +8,5 @@ PROJECT(jamms)
 #add definitions, compiler switches, etc.
 # ADD_DEFINITIONS(-Wall -O2 -D__DEBUG__)
 
-ADD_SUBDIRECTORY(vdr-upnp)
-ADD_SUBDIRECTORY(web)
+# ADD_SUBDIRECTORY(vdr-upnp)
+# ADD_SUBDIRECTORY(web)

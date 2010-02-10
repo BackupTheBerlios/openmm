@@ -29,7 +29,7 @@
 #ifndef DIMMABLELIGHT_H
 #define DIMMABLELIGHT_H
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 
 using Jamm::DeviceRootImplAdapter;
 using Jamm::Service;

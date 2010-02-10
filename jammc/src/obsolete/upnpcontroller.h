@@ -41,6 +41,8 @@
 #include "controllergui.h"
 
 using namespace Jamm;
+using namespace Jamm::Av;
+
 
 class UpnpRendererListModel;
 

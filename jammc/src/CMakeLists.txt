@@ -30,18 +30,14 @@ ${QT_USE_FILE}
 
 SET( JAMMC_SRCS
 controllergui.cpp
-main.cpp
-# modeltest.cpp
+ControllerApplication.cpp
+# # modeltest.cpp
 upnpbrowsermodel.cpp
-upnpcontroller.cpp
 upnprenderingcontrol.cpp
 upnprendererlistmodel.cpp
 upnpsyncmediabrowser.cpp
-# MediaRendererCtrl.cpp
-# MediaRendererCtrlImpl.cpp
-# MediaServerCtrl.cpp
-# MediaServerCtrlImpl.cpp
 UpnpAvCtrlImpl.cpp
+UpnpController.cpp
 )
 
 SET( JAMMC_UI
@@ -55,7 +51,7 @@ controllergui.h
 upnpbrowsermodel.h
 upnprendererlistmodel.h
 # upnpsyncmediabrowser.h
-upnpcontroller.h
+UpnpController.h
 )
 
 INCLUDE_DIRECTORIES(

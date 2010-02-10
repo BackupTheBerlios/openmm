@@ -8,7 +8,7 @@
 #ifndef DIMMABLELIGHT_IMPLEMENTATION_H
 #define DIMMABLELIGHT_IMPLEMENTATION_H
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 #include "DimmableLight.h"
 
 class DimmingImplementation : public Dimming

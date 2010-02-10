@@ -30,9 +30,8 @@
 #include <Poco/StreamCopier.h>
 #include <sstream>
 
-#include "jamm/upnp.h"
-#include "enginevlc.h"
-// #include "MediaRenderer.h"
+#include <Jamm/Upnp.h>
+#include "EngineVlc.h"
 #include "MediaRendererImpl.h"
 
 using Jamm::SsdpSocket;

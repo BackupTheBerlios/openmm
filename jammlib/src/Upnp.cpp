@@ -26,11 +26,8 @@
 #include <Poco/NumberParser.h>
 #include <Poco/Environment.h>
 
-#include "upnp.h"
+#include "Upnp.h"
 
-using Poco::NumberFormatter;
-using Poco::NumberParser;
-using Poco::Environment;
 
 using namespace Jamm;
 
@@ -731,7 +728,7 @@ Subscription::getEventKey()
 {
     // TODO: should lock this
     m_eventKey = (++m_eventKey == 0) ? 1 : m_eventKey;
-    return NumberFormatter::format(m_eventKey);
+    return Poco::NumberFormatter::format(m_eventKey);
 }
 
 
@@ -1132,8 +1129,8 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
         }
         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
         response.set("SERVER", 
-                    Environment::osName() + "/"
-                    + Environment::osVersion() + ", "
+                     Poco::Environment::osName() + "/"
+                     + Poco::Environment::osVersion() + ", "
                     + "UPnP/" + UPNP_VERSION + ", "
                     + "Jamm/" + JAMM_VERSION);
         response.set("SID", "uuid:" + Poco::UUIDGenerator().create().toString());
@@ -1894,7 +1891,7 @@ void
 SsdpMessage::setCacheControl(int duration)
 {
 //     m_messageHeader.set("CACHE-CONTROL", "max-age = " + NumberFormatter::format(duration));
-    m_messageHeader["CACHE-CONTROL"] = "max-age = " + NumberFormatter::format(duration);
+    m_messageHeader["CACHE-CONTROL"] = "max-age = " + Poco::NumberFormatter::format(duration);
 }
 
 
@@ -1903,7 +1900,7 @@ SsdpMessage::getCacheControl()
 {
     try {
         std::string value = m_messageHeader["CACHE-CONTROL"];
-        return NumberParser::parse(value.substr(value.find('=')+1));
+        return Poco::NumberParser::parse(value.substr(value.find('=')+1));
     }
     catch (Poco::NotFoundException) {
         std::clog << "missing CACHE-CONTROL in SSDP header" << std::endl;

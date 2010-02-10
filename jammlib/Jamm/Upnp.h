@@ -88,7 +88,14 @@
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
 
+// TODO: [jammgen] dispatch actions not in the "great action dispatcher" but pass the dispatching
+//       to the corresponding services. This avoids double code in devices that have the same service
+//       and may eliminate the friend class statement.
+// TODO: [jammgen] remove Device* m_pDevice
+// TODO: [jammgen, Upnp] the name ControllerImplAdapter may be misleading
 
+
+// TODO: proper deep deletion of DeviceRoot in dtor (-> ~Container)
 // TODO: Variant: catch conversion errors with log message
 // NOTE: Embedded Devices:
 // -> HTTP server for controlling and eventing should move from DeviceRoot into Device
@@ -101,9 +108,6 @@
 // TODO: complete event messaging
 // TODO: OPTIONAL stuff: optional services, actions: configure it via ImplAdapter and rewrite description
 //       accordingly
-// TODO: change jammgen to dispatch actions not in the "great action dispatcher" but pass the dispatching
-//       to the corresponding services. This avoids double code in devices that have the same service
-//       and may eliminate the friend class statement.
 
 
 // TODO: Error handling
@@ -1122,14 +1126,15 @@ private:
 
 class ControllerImplAdapter
 {
+public:
+    Device* getDevice() const { return m_pDevice; }
+
 protected:
     ControllerImplAdapter(Device* pDevice) : m_pDevice(pDevice) {}
     
     virtual void eventHandler(StateVar* stateVar) = 0;
     void init();
     
-private:
-    Controller*     m_pController;
     Device*         m_pDevice;
 };
 

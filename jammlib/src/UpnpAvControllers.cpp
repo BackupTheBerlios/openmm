@@ -1545,7 +1545,7 @@ MediaRendererController::eventHandler(StateVar* pStateVar)
 
 MediaRendererController::MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
 ControllerImplAdapter(pDevice),
-m_pDevice(pDevice),
+// m_pDevice(pDevice),
 m_pRenderingControlController(pRenderingControlController), 
 m_pConnectionManagerController(pConnectionManagerController), 
 m_pAVTransportController(pAVTransportController)
@@ -1994,7 +1994,7 @@ MediaServerController::eventHandler(StateVar* pStateVar)
 
 MediaServerController::MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
 ControllerImplAdapter(pDevice),
-m_pDevice(pDevice),
+// m_pDevice(pDevice),
 m_pContentDirectoryController(pContentDirectoryController), 
 m_pConnectionManagerController(pConnectionManagerController), 
 m_pAVTransportController(pAVTransportController)

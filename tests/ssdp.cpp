@@ -27,7 +27,7 @@
 #include "Poco/Util/HelpFormatter.h"
 
 
-#include "jamm/upnp.h"
+#include <Jamm/Upnp.h>
 
 using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;

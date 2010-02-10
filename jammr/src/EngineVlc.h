@@ -23,7 +23,7 @@
 #ifndef ENGINEVLC_H
 #define ENGINEVLC_H
 
-#include "engine.h"
+#include "Engine.h"
 
 #ifdef __X11__
 #include <X11/Xlib.h>

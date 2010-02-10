@@ -29,7 +29,7 @@
 #ifndef DIMMABLELIGHT_CTRL_H
 #define DIMMABLELIGHT_CTRL_H
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 
 class DimmingController
 {

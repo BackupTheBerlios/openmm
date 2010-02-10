@@ -24,7 +24,7 @@
 #include <Poco/NumberParser.h>
 #include <Poco/NumberFormatter.h>
 
-#include "upnpav.h"
+#include "UpnpAvTypes.h"
 
 using namespace Jamm;
 using namespace Jamm::Av;

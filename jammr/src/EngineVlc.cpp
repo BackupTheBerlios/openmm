@@ -20,9 +20,9 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "enginevlc.h"
+#include "EngineVlc.h"
 
-#include <jamm/debug.h>
+// #include <jamm/debug.h>
 
 
 EngineVlc::EngineVlc(int argc, char **argv)
@@ -123,22 +123,22 @@ EngineVlc::load()
         trackCount = libvlc_audio_get_track_count(m_vlcPlayer, &m_exception);
         handleException();
     } while(state == libvlc_Playing && !hasVideo && !trackCount);
-    TRACE("EngineVlc::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
+//     TRACE("EngineVlc::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
 
     m_length = (libvlc_media_player_get_length(m_vlcPlayer, &m_exception) - m_startTime) / 1000.0;
     libvlc_time_t d = libvlc_media_get_duration(media, &m_exception);
-    TRACE("EngineVlc::load() m_length: %f, duration: %lli", m_length, d);
+//     TRACE("EngineVlc::load() m_length: %f, duration: %lli", m_length, d);
     
     m_startTime = libvlc_media_player_get_time(m_vlcPlayer, &m_exception);
     handleException();
-    TRACE("EngineVlc::load() m_startTime [ms]: %lli", m_startTime);
+//     TRACE("EngineVlc::load() m_startTime [ms]: %lli", m_startTime);
 
     if(!libvlc_media_player_is_seekable(m_vlcPlayer, &m_exception)) {
-        TRACE("EngineVlc::load() media is not seekable");
+//         TRACE("EngineVlc::load() media is not seekable");
     }
     handleException();
     if(!libvlc_media_player_can_pause(m_vlcPlayer, &m_exception)) {
-        TRACE("EngineVlc::load() pause not possible on media");
+//         TRACE("EngineVlc::load() pause not possible on media");
     }
     handleException();
     
@@ -147,7 +147,7 @@ EngineVlc::load()
     handleException();
     int videoHeight = libvlc_video_get_height(m_vlcPlayer, &m_exception);
     handleException();
-    TRACE("EngineVlc::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
+//     TRACE("EngineVlc::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
 /*    libvlc_video_resize(m_vlcPlayer, videoWidth, videoHeight, &m_exception);
     handleException();*/
 }
@@ -223,7 +223,7 @@ EngineVlc::getPosition(float &seconds)
         seconds = (libvlc_media_player_get_time(m_vlcPlayer, &m_exception) - m_startTime) / 1000.0;
     }
     handleException();
-    TRACE("EngineVlc::getPosition() seconds: %f", seconds);
+//     TRACE("EngineVlc::getPosition() seconds: %f", seconds);
 }
 
 
@@ -234,7 +234,7 @@ EngineVlc::getLength(float &seconds)
     m_length = (libvlc_media_player_get_length(m_vlcPlayer, &m_exception) - m_startTime) / 1000.0;
     handleException();
     seconds = m_length;
-    TRACE("EngineVlc::getLength() seconds: %f", seconds);
+//     TRACE("EngineVlc::getLength() seconds: %f", seconds);
     
     /* use instead?:
     libvlc_time_t
@@ -269,7 +269,7 @@ void
 EngineVlc::handleException()
 {
     if (libvlc_exception_raised(&m_exception)) {
-        TRACE(libvlc_exception_get_message(&m_exception));
+//         TRACE(libvlc_exception_get_message(&m_exception));
     }
     libvlc_exception_init(&m_exception);
 }

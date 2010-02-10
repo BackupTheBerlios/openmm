@@ -1,8 +1,7 @@
 #ifndef UPNPAV_CTRL_IMPL_H
 #define UPNPAV_CTRL_IMPL_H
 
-#include <jamm/upnp.h>
-#include <jamm/UpnpAvControllers.h>
+#include <Jamm/UpnpAvControllers.h>
 
 using namespace Jamm;
 using namespace Jamm::Av;

@@ -29,7 +29,7 @@
 #include "Poco/StreamCopier.h"
 #include <sstream>
 
-#include "jamm/upnp.h"
+#include <Jamm/Upnp.h>
 
 using Jamm::SsdpSocket;
 using Jamm::SsdpMessage;

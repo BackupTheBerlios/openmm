@@ -5,7 +5,7 @@
 |           It will be overriden at the next run of jammgen.                |
 ***************************************************************************/
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 #include "DimmableLightImpl.h"
 
 void

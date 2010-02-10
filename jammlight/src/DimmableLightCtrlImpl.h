@@ -8,7 +8,7 @@
 #ifndef DIMMABLELIGHT_CTRL_IMPL_H
 #define DIMMABLELIGHT_CTRL_IMPL_H
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 #include "DimmableLightCtrl.h"
 
 class DimmingControllerImpl : public DimmingController

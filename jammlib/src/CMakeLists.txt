@@ -17,17 +17,16 @@
 # endif(TARGET jamm)
 
 SET( JAMM_LIB_SRCS
-debug.cpp
-iodevice.cpp
-sharedlibrary.cpp
-signode.cpp
-thread.cpp
-upnp.cpp
-upnpav.cpp
+# debug.cpp
+# iodevice.cpp
+# sharedlibrary.cpp
+# signode.cpp
+# thread.cpp
+Upnp.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
-# MediaServer.cpp
-# MediaServerImpl.cpp
+UpnpAvTypes.cpp
+UpnpAvToolkit.cpp
 )
 
 FIND_LIBRARY(LIB_POCO_UTIL
@@ -51,7 +50,7 @@ PATHS ${CMAKE_LIBRARY_PATH}
 )
 
 INCLUDE_DIRECTORIES(
-${jammlib_SOURCE_DIR}/jamm
+${jammlib_SOURCE_DIR}/Jamm
 )
 
 ADD_LIBRARY(jammlib

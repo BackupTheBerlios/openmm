@@ -18,53 +18,13 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef UPNPRENDERERLISTMODEL_H
-#define UPNPRENDERERLISTMODEL_H
+#include <Poco/StringTokenizer.h>
+#include <Poco/NumberParser.h>
+#include <Poco/NumberFormatter.h>
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QList>
-#include <QTextCodec>
+#include "UpnpAvToolkit.h"
 
-#include <vector>
-using namespace std;
 
-#include "UpnpController.h"
-
-class UpnpController;
-
-class UpnpRendererListModel : public QAbstractItemModel
-{
-    Q_OBJECT
-        
-public:
-    UpnpRendererListModel(UpnpController* mediaController, QObject *parent = 0);
-    ~UpnpRendererListModel();
-    
-    QVariant data(const QModelIndex &index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column,
-                      const QModelIndex &parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    
-public slots:
-    void rendererAddedRemoved(string uuid, bool add);
-    
-private:
-    UpnpController*       m_mediaController;
-    QTextCodec*           m_charEncoding;
-    // TODO: use a pointer to the renderer device instead of the uuid string
-    //       (should be the same as in BrowserModel, where a string takes
-    //        to much memory compared to a pointer)
-    vector<string*>       m_rendererList;
-};
-
-#endif
 

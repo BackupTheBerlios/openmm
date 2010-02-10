@@ -26,7 +26,7 @@
 |       Don't edit, it will be overriden at the next run of jammgen.        |
 ***************************************************************************/
 
-#include <jamm/upnp.h>
+#include <Jamm/Upnp.h>
 #include "DimmableLight.h"
 #include "DimmableLightDescriptions.h"
 

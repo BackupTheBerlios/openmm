@@ -25,7 +25,7 @@
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
 
-#include "jamm/upnp.h"
+#include <Jamm/Upnp.h>
 #include "DimmableLight.h"
 #include "DimmableLightImpl.h"
 
