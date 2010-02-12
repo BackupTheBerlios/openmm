@@ -20,7 +20,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <platinum/PltDidl.h>
+// #include <platinum/PltDidl.h>
 #include <QtDebug>
 
 #include "UpnpController.h"
@@ -34,18 +34,16 @@ UpnpController::~UpnpController()
 
 
 
-
-
-void
-UpnpController::volSliderMoved(int position)
-{
-    std::clog << "UpnpController::volSliderMoved() to:" << position << std::endl;
-    if (m_curMediaRenderer.IsNull()) {
-        return;
-    }
-    
-    m_renderingController->setVolume(m_curMediaRenderer, 0, position);
-}
+// void
+// UpnpController::volSliderMoved(int position)
+// {
+//     std::clog << "UpnpController::volSliderMoved() to:" << position << std::endl;
+//     if (m_curMediaRenderer.IsNull()) {
+//         return;
+//     }
+//     
+//     m_renderingController->setVolume(m_curMediaRenderer, 0, position);
+// }
 
 
 void
@@ -69,24 +67,11 @@ UpnpController::deviceAdded(DeviceRoot* pDeviceRoot)
     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
 //         std::clog << "friendly name: " << device->getFriendlyName() << std::endl;
     
-    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        MediaRendererController* renderer = new MediaRendererController(
-            pDevice,
-            new RenderingControlControllerImpl,
-            new ConnectionManagerControllerImpl,
-            new AVTransportControllerImpl);
-        m_renderers[pDevice->getUuid()] = renderer;
-        emit rendererAddedRemoved(pDevice, true);
-    }
-    else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        m_servers[pDevice->getUuid()] = new Jamm::Av::MediaServerController(
-            pDevice,
-            new ContentDirectoryControllerImpl,
-            new ConnectionManagerControllerImpl,
-            new AVTransportControllerImpl);
-//         emit serverAddedRemoved(s, true);
-    }
+    m_pUserInterface->beginAddDevice(m_devices.position(pDevice->getUuid()));
+    m_devices.append(pDevice->getUuid(), pDevice);
+    m_pUserInterface->endAddDevice();
 }
+
 
 void
 UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
@@ -97,58 +82,120 @@ UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
 //         std::clog << "friendly name: " << device->getFriendlyName() << std::endl;
     
+    m_pUserInterface->beginRemoveDevice(m_devices.position(pDevice->getUuid()));
+    m_devices.remove(pDevice);
+    m_pUserInterface->endRemoveDevice();
+}
+
+
+void
+UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
+{
+    UpnpController::deviceAdded(pDeviceRoot);
+    Device* pDevice = pDeviceRoot->getRootDevice();
+    
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        m_renderers.erase(pDevice->getUuid());
-        emit rendererAddedRemoved(pDevice, false);
+        MediaRendererController* pRenderer = new MediaRendererController(
+            pDevice,
+            new RenderingControlControllerImpl,
+            new ConnectionManagerControllerImpl,
+            new AVTransportControllerImpl);
+        m_pUserInterface->beginAddRenderer(m_renderers.position(pDevice->getUuid()));
+        m_renderers.append(pDevice->getUuid(), pRenderer);
+        m_pUserInterface->endAddRenderer();
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        m_servers.erase(pDevice->getUuid());
-//         emit serverAddedRemoved(s, true);
-    }
-}
-
-
-
-void
-UpnpController::rendererSelectionChanged(const QItemSelection& selected,
-                                         const QItemSelection& /*deselected*/)
-{
-    if (selected.count() > 1) {
-        return;
-    }
-    if (selected.empty()) {
-        std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
-        m_selectedRenderer = NULL;
-        return;
-    }
-    
-    QModelIndex index = selected.indexes().first();
-    
-    string* pUuid = static_cast<string*>(index.internalPointer());
-    m_selectedRenderer = m_renderers[*pUuid];
-    
-    if (m_selectedRenderer != NULL) {
-        std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
-        std::clog << "UpnpController::rendererSelectionChanged() selected renderer:" << 
-            m_selectedRenderer->getDevice()->getUuid() << std::endl;
-        
-        m_mainWindow->setVolumeSlider(100, 50);
+        MediaServerController* pServer = new Jamm::Av::MediaServerController(
+            pDevice,
+            new ContentDirectoryControllerImpl,
+            new ConnectionManagerControllerImpl,
+            new AVTransportControllerImpl);
+        m_pUserInterface->beginAddServer(m_renderers.position(pDevice->getUuid()));
+        m_servers.append(pDevice->getUuid(), pServer);
+        m_pUserInterface->endAddServer();
     }
 }
 
 
 void
-UpnpController::modelIndexActivated(const QModelIndex& index)
+UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 {
-    std::clog << "++++++++ Object activated:" << m_upnpBrowserModel->getObject(index)->m_objectId.c_str() << std::endl;
+    UpnpController::deviceRemoved(pDeviceRoot);
+    Device* pDevice = pDeviceRoot->getRootDevice();
+    
+    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
+        // TODO: delete renderer controller
+        m_pUserInterface->beginRemoveRenderer(m_renderers.position(pDevice->getUuid()));
+        m_renderers.remove(pDevice->getUuid());
+        m_pUserInterface->endRemoveRenderer();
+    }
+    else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
+        // TODO: delete server controller
+        m_pUserInterface->beginRemoveServer(m_servers.position(pDevice->getUuid()));
+        m_servers.remove(pDevice->getUuid());
+        m_pUserInterface->endRemoveServer();
+    }
 }
 
 
-void
-UpnpController::modelIndexExpanded(const QModelIndex& index)
-{
-    std::clog << "++++++++ Object expanded:" << m_upnpBrowserModel->getObject(index)->m_objectId.c_str() << std::endl;
-}
+// void
+// UserInterface::rendererSelected(MediaRendererController* pRenderer)
+// {
+//     m_pSelectedRenderer = pRenderer;
+// }
+// 
+// 
+// void
+// UserInterface::mediaObjectSelected(MediaObject* pObject)
+// {
+// }
+
+
+
+
+
+
+
+// void
+// UpnpController::rendererSelectionChanged(const QItemSelection& selected,
+//                                          const QItemSelection& /*deselected*/)
+// {
+//     if (selected.count() > 1) {
+//         return;
+//     }
+//     if (selected.empty()) {
+//         std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
+//         m_selectedRenderer = NULL;
+//         return;
+//     }
+//     
+//     QModelIndex index = selected.indexes().first();
+//     
+//     string* pUuid = static_cast<string*>(index.internalPointer());
+//     m_selectedRenderer = m_renderers[*pUuid];
+//     
+//     if (m_selectedRenderer != NULL) {
+//         std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
+//         std::clog << "UpnpController::rendererSelectionChanged() selected renderer:" << 
+//             m_selectedRenderer->getDevice()->getUuid() << std::endl;
+//         
+//         m_mainWindow->setVolumeSlider(100, 50);
+//     }
+// }
+
+
+// void
+// UpnpController::modelIndexActivated(const QModelIndex& index)
+// {
+//     std::clog << "++++++++ Object activated:" << m_upnpBrowserModel->getObject(index)->m_objectId.c_str() << std::endl;
+// }
+// 
+// 
+// void
+// UpnpController::modelIndexExpanded(const QModelIndex& index)
+// {
+//     std::clog << "++++++++ Object expanded:" << m_upnpBrowserModel->getObject(index)->m_objectId.c_str() << std::endl;
+// }
 
 
 // void
@@ -187,202 +234,199 @@ UpnpController::modelIndexExpanded(const QModelIndex& index)
 //             << (char*)(*vars->GetItem(i))->GetValue()
 //             << (char*)(*vars->GetItem(i))->GetDataType();
 //     }
-//     // TODO: handle change of StateVariables
 //     // for example: react on volume change from another controller
 //     // how should our volume slider differ between own changes and other controller's changes?
 // }
 
 
-void
-UpnpController::OnMSAddedRemoved(PLT_DeviceDataReference& device, int added)
-{
-    NPT_String uuid = device->GetUUID();
-    string name = (char*) device->GetFriendlyName();
-    std::clog << "UpnpController::OnMSAddedRemoved()" << (added?"added":"removed") << "server:" << name.c_str() << (char*) uuid;
-    
-    PLT_Service* serviceAVCD;
-    NPT_String type;
-    type = "urn:schemas-upnp-org:service:ContentDirectory:1";
-    if (NPT_FAILED(device->FindServiceByType(type, serviceAVCD))) {
-        NPT_LOG_FINE_1("Service %s not found", (const char*)type);
-        return;
-    }
-    m_ctrlPoint->Subscribe(serviceAVCD);
-    
-    UpnpServer* s = new UpnpServer();
-    s->m_pltDevice = device;
-    s->m_pltBrowser = m_mediaBrowser;
-//     s->m_pltBrowser = new PLT_MediaBrowser(m_ctrlPoint, s);
-    emit serverAddedRemoved(s, added);
-}
+// void
+// UpnpController::OnMSAddedRemoved(PLT_DeviceDataReference& device, int added)
+// {
+//     NPT_String uuid = device->GetUUID();
+//     string name = (char*) device->GetFriendlyName();
+//     std::clog << "UpnpController::OnMSAddedRemoved()" << (added?"added":"removed") << "server:" << name.c_str() << (char*) uuid;
+//     
+//     PLT_Service* serviceAVCD;
+//     NPT_String type;
+//     type = "urn:schemas-upnp-org:service:ContentDirectory:1";
+//     if (NPT_FAILED(device->FindServiceByType(type, serviceAVCD))) {
+//         NPT_LOG_FINE_1("Service %s not found", (const char*)type);
+//         return;
+//     }
+//     m_ctrlPoint->Subscribe(serviceAVCD);
+//     
+//     UpnpServer* s = new UpnpServer();
+//     s->m_pltDevice = device;
+//     s->m_pltBrowser = m_mediaBrowser;
+// //     s->m_pltBrowser = new PLT_MediaBrowser(m_ctrlPoint, s);
+//     emit serverAddedRemoved(s, added);
+// }
 
 
-void
-UpnpController::OnMSStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars)
-{
-    std::clog << "UpnpController::OnMSStateVariablesChanged() on service:" << (char*)service->GetServiceType();
-    for (unsigned int i = 0; i < vars->GetItemCount(); ++i) {
-        std::clog << "UpnpController::OnMSStateVariablesChanged():" 
-            << (char*)(*vars->GetItem(i))->GetName()
-            << (char*)(*vars->GetItem(i))->GetValue()
-            << (char*)(*vars->GetItem(i))->GetDataType();
-    }
-    // TODO: handle change of StateVariables
-}
+// void
+// UpnpController::OnMSStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars)
+// {
+//     std::clog << "UpnpController::OnMSStateVariablesChanged() on service:" << (char*)service->GetServiceType();
+//     for (unsigned int i = 0; i < vars->GetItemCount(); ++i) {
+//         std::clog << "UpnpController::OnMSStateVariablesChanged():" 
+//             << (char*)(*vars->GetItem(i))->GetName()
+//             << (char*)(*vars->GetItem(i))->GetValue()
+//             << (char*)(*vars->GetItem(i))->GetDataType();
+//     }
+// }
 
-// TODO: avoid this nasty trick to synchronize browsing
-void
-UpnpController::OnMSBrowseResult(NPT_Result res, PLT_DeviceDataReference& /*device*/, PLT_BrowseInfo* info, void* userdata)
-{
-    if (!userdata) return;
-    
-    PLT_BrowseDataReference* data = (PLT_BrowseDataReference*) userdata;
-    (*data)->res = res;
-    if (NPT_SUCCEEDED(res) && info) {
-        (*data)->info = *info;
-    }
-    (*data)->shared_var.SetValue(1);
-    delete data;
-}
-
-
-
-
-
-void
-UpnpController::playButtonPressed()
-{
-    if (m_curMediaRenderer.IsNull()) {
-        return;
-    }
-    QModelIndex selected = m_mainWindow->getBrowserTreeSelectionModel()->currentIndex();
-    if (selected == QModelIndex()) {
-        return;
-    }
-    
-/*    ObjectReference* objectRef = static_cast<ObjectReference*>(selected.internalPointer());
-    
-    std::clog << "UpnpController::playButtonPressed() selected server:" << 
-        (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
-    std::clog << "UpnpController::playButtonPressed() selected objectId:" << (char*) objectRef->objectId;
-    */
-/*    PLT_MediaObjectListReference browseResults;
-    m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
-    PLT_MediaObject* object = (*browseResults->GetFirstItem());*/
-    
-    Jamm::Av::MediaObject* object = m_upnpBrowserModel->getObject(selected);
-//     PLT_MediaObject* pltObject = object->m_pltObject;
-    // send SetAVTransportURI packet
-    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
-    
-}
-
-
-void
-UpnpController::stopButtonPressed()
-{
-    std::clog << "UpnpController::stopButtonPressed()"; 
-    if (m_curMediaRenderer.IsNull()) {
-        return;
-    }
-    
-    m_mediaController->Stop(m_curMediaRenderer, 0, NULL);
-}
-
-
-void
-UpnpController::pauseButtonPressed()
-{
-    std::clog << "UpnpController::pauseButtonPressed()"; 
-    if (m_curMediaRenderer.IsNull()) {
-        return;
-    }
-    
-    m_mediaController->Pause(m_curMediaRenderer, 0, NULL);
-}
-
-
-void
-UpnpController::sliderMoved(int position)
-{
-    std::clog << "UpnpController::sliderMoved() to:" << position;
-    if (m_curMediaRenderer.IsNull()) {
-        return;
-    }
-    
-    NPT_String timestamp;
-    PLT_Didl::FormatTimeStamp(timestamp, position);
-    m_mediaController->Seek(m_curMediaRenderer, 0, "ABS_TIME", timestamp, NULL);
-}
-
-
-void
-UpnpController::OnSetAVTransportURIResult(
-                                        NPT_Result                /*res*/ ,
-                                        PLT_DeviceDataReference&  device ,
-                                        void*                     /*userdata*/ )
-{
-    std::clog << "UpnpController::OnSetAVTransportURIResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-    // send Play packet ...
-    m_mediaController->Play(m_curMediaRenderer, 0, "1", NULL);
-}
-
-
-void
-UpnpController::OnPlayResult(
-                           NPT_Result               res,
-                           PLT_DeviceDataReference& device,
-                           void*                    userdata)
-{
-    std::clog << "UpnpController::OnPlayResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName() << res << userdata;
-    // check if playing
-    if (res == NPT_SUCCESS) {
-        // then do something
-    }
-}
-
-
-void
-UpnpController::OnStopResult(
-                           NPT_Result               /* res */,
-                           PLT_DeviceDataReference& device,
-                           void*                    /* userdata */)
-{
-    std::clog << "UpnpController::OnStopResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-    m_mediaController->GetPositionInfo(m_curMediaRenderer, 0, NULL);
-}
-
-
-void
-UpnpController::OnPauseResult(
-                            NPT_Result               /* res */,
-                            PLT_DeviceDataReference& device,
-                            void*                    /* userdata */)
-{
-    std::clog << "UpnpController::OnPauseResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-}
-
-
-void
-UpnpController::OnSeekResult(
-                           NPT_Result               /* res */,
-                           PLT_DeviceDataReference& device,
-                           void*                    /* userdata */)
-{
-    std::clog << "UpnpController::OnSeekResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
-}
-
-
-void
-UpnpController::OnGetPositionInfoResult(
-                                      NPT_Result               /* res */,
-                                      PLT_DeviceDataReference& /*device*/,
-                                      PLT_PositionInfo*        info,
-                                      void*                    /* userdata */)
-{
-    std::clog << "UpnpController::OnGetPositionInfoResult() duration:" << info->track_duration << "position:" << info->abs_time;
-    emit setSlider(info->track_duration, info->abs_time);
-}
+// void
+// UpnpController::OnMSBrowseResult(NPT_Result res, PLT_DeviceDataReference& /*device*/, PLT_BrowseInfo* info, void* userdata)
+// {
+//     if (!userdata) return;
+//     
+//     PLT_BrowseDataReference* data = (PLT_BrowseDataReference*) userdata;
+//     (*data)->res = res;
+//     if (NPT_SUCCEEDED(res) && info) {
+//         (*data)->info = *info;
+//     }
+//     (*data)->shared_var.SetValue(1);
+//     delete data;
+// }
+// 
+// 
+// 
+// 
+// 
+// void
+// UpnpController::playButtonPressed()
+// {
+//     if (m_curMediaRenderer.IsNull()) {
+//         return;
+//     }
+//     QModelIndex selected = m_mainWindow->getBrowserTreeSelectionModel()->currentIndex();
+//     if (selected == QModelIndex()) {
+//         return;
+//     }
+//     
+// /*    ObjectReference* objectRef = static_cast<ObjectReference*>(selected.internalPointer());
+//     
+//     std::clog << "UpnpController::playButtonPressed() selected server:" << 
+//         (char*) objectRef->server->GetFriendlyName() << "," << (char*) objectRef->server->GetUUID();
+//     std::clog << "UpnpController::playButtonPressed() selected objectId:" << (char*) objectRef->objectId;
+//     */
+// /*    PLT_MediaObjectListReference browseResults;
+//     m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
+//     PLT_MediaObject* object = (*browseResults->GetFirstItem());*/
+//     
+//     Jamm::Av::MediaObject* object = m_upnpBrowserModel->getObject(selected);
+// //     PLT_MediaObject* pltObject = object->m_pltObject;
+//     // send SetAVTransportURI packet
+//     m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
+//     
+// }
+// 
+// 
+// void
+// UpnpController::stopButtonPressed()
+// {
+//     std::clog << "UpnpController::stopButtonPressed()"; 
+//     if (m_curMediaRenderer.IsNull()) {
+//         return;
+//     }
+//     
+//     m_mediaController->Stop(m_curMediaRenderer, 0, NULL);
+// }
+// 
+// 
+// void
+// UpnpController::pauseButtonPressed()
+// {
+//     std::clog << "UpnpController::pauseButtonPressed()"; 
+//     if (m_curMediaRenderer.IsNull()) {
+//         return;
+//     }
+//     
+//     m_mediaController->Pause(m_curMediaRenderer, 0, NULL);
+// }
+// 
+// 
+// void
+// UpnpController::sliderMoved(int position)
+// {
+//     std::clog << "UpnpController::sliderMoved() to:" << position;
+//     if (m_curMediaRenderer.IsNull()) {
+//         return;
+//     }
+//     
+//     NPT_String timestamp;
+//     PLT_Didl::FormatTimeStamp(timestamp, position);
+//     m_mediaController->Seek(m_curMediaRenderer, 0, "ABS_TIME", timestamp, NULL);
+// }
+// 
+// 
+// void
+// UpnpController::OnSetAVTransportURIResult(
+//                                         NPT_Result                /*res*/ ,
+//                                         PLT_DeviceDataReference&  device ,
+//                                         void*                     /*userdata*/ )
+// {
+//     std::clog << "UpnpController::OnSetAVTransportURIResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
+//     // send Play packet ...
+//     m_mediaController->Play(m_curMediaRenderer, 0, "1", NULL);
+// }
+// 
+// 
+// void
+// UpnpController::OnPlayResult(
+//                            NPT_Result               res,
+//                            PLT_DeviceDataReference& device,
+//                            void*                    userdata)
+// {
+//     std::clog << "UpnpController::OnPlayResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName() << res << userdata;
+//     // check if playing
+//     if (res == NPT_SUCCESS) {
+//         // then do something
+//     }
+// }
+// 
+// 
+// void
+// UpnpController::OnStopResult(
+//                            NPT_Result               /* res */,
+//                            PLT_DeviceDataReference& device,
+//                            void*                    /* userdata */)
+// {
+//     std::clog << "UpnpController::OnStopResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
+//     m_mediaController->GetPositionInfo(m_curMediaRenderer, 0, NULL);
+// }
+// 
+// 
+// void
+// UpnpController::OnPauseResult(
+//                             NPT_Result               /* res */,
+//                             PLT_DeviceDataReference& device,
+//                             void*                    /* userdata */)
+// {
+//     std::clog << "UpnpController::OnPauseResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
+// }
+// 
+// 
+// void
+// UpnpController::OnSeekResult(
+//                            NPT_Result               /* res */,
+//                            PLT_DeviceDataReference& device,
+//                            void*                    /* userdata */)
+// {
+//     std::clog << "UpnpController::OnSeekResult() device:" << (char*) device->GetUUID() << (char*) device->GetFriendlyName();
+// }
+// 
+// 
+// void
+// UpnpController::OnGetPositionInfoResult(
+//                                       NPT_Result               /* res */,
+//                                       PLT_DeviceDataReference& /*device*/,
+//                                       PLT_PositionInfo*        info,
+//                                       void*                    /* userdata */)
+// {
+//     std::clog << "UpnpController::OnGetPositionInfoResult() duration:" << info->track_duration << "position:" << info->abs_time;
+//     emit setSlider(info->track_duration, info->abs_time);
+// }
 
 
 // void

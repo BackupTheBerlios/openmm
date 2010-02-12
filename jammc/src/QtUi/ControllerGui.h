@@ -57,36 +57,41 @@ private:
 };
 
 
-class ControllerGui : public QFrame
+class ControllerGui : public QFrame, public UserInterface
 {
     Q_OBJECT
 
 public:
     ControllerGui(QWidget *parent = 0);
     
+    virtual int eventLoop();
+    
     virtual void initGui();
     virtual void showMainWindow();
+    
+    
     
     void setBrowserTreeItemModel(QAbstractItemModel* model);
     void setRendererListItemModel(QAbstractItemModel* model);
     
     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserView->selectionModel(); }
-    QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
+//     QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
     
 signals:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void pauseButtonPressed();
-    void sliderMoved(int);
-    void volSliderMoved(int);
+//     void playButtonPressed();
+//     void stopButtonPressed();
+//     void pauseButtonPressed();
+//     void sliderMoved(int);
+//     void volSliderMoved(int);
     
-    void activated(const QModelIndex& index);
+//     void activated(const QModelIndex& index);
     
 public slots:
     void setSlider(int max, int val);
     void setVolumeSlider(int max, int val);
     
 private slots:
+    void rendererSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void browserItemActivated(const QModelIndex& index);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
@@ -101,6 +106,15 @@ private slots:
     void setSliderMoved(int value);
     
 private:
+    virtual void deviceAdded(Device* pDevice) {}
+    virtual void rendererAdded(MediaRendererController* pRenderer) {}
+    virtual void serverAdded(MediaServerController* pRenderer) {}
+    
+    virtual void deviceRemoved(Device* pDevice) {}
+    virtual void rendererRemoved(MediaRendererController* pRenderer) {}
+    virtual void serverRemoved(MediaServerController* pRenderer) {}
+    
+
 //     void sliderChange(QAbstractSlider::SliderChange change);
     UpnpBrowserModel*                                   m_upnpBrowserModel;
     UpnpRendererListModel*                              m_upnpRendererListModel;

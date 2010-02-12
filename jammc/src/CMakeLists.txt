@@ -4,10 +4,10 @@ SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
 
-FIND_LIBRARY(LIB_PLATINUM_UPNP
-NAME platinum-upnp
-PATHS ${CMAKE_LIBRARY_PATH}
-)
+# FIND_LIBRARY(LIB_PLATINUM_UPNP
+# NAME platinum-upnp
+# PATHS ${CMAKE_LIBRARY_PATH}
+# )
 
 if(TARGET jamm)
 SET(LIB_JAMM
@@ -28,16 +28,21 @@ INCLUDE(
 ${QT_USE_FILE}
 )
 
-ADD_SUBDIRECTORY(QtUi)
+# ADD_SUBDIRECTORY(QtUi)
+
+INCLUDE_DIRECTORIES(
+${JAMMC_QTUI_H_DIR}
+)
+
 
 SET( JAMMC_SRCS
 # controllergui.cpp
 ControllerApplication.cpp
 # # modeltest.cpp
 # upnpbrowsermodel.cpp
-upnprenderingcontrol.cpp
+# upnprenderingcontrol.cpp
 # upnprendererlistmodel.cpp
-upnpsyncmediabrowser.cpp
+# upnpsyncmediabrowser.cpp
 UpnpAvCtrlImpl.cpp
 UpnpController.cpp
 )
@@ -71,23 +76,23 @@ INCLUDE_DIRECTORIES(
 # ${JAMMC_UI_H_DIR}
 # )
 
-QT4_WRAP_CPP(
-JAMMC_MOC_CPP ${JAMMC_MOC}
-)
+# QT4_WRAP_CPP(
+# JAMMC_MOC_CPP ${JAMMC_MOC}
+# )
 
 ADD_EXECUTABLE( jammc
 ${JAMMC_SRCS}
 # ${JAMMC_UI}
-${JAMMC_MOC_CPP}
+# ${JAMMC_MOC_CPP}
 )
 
 TARGET_LINK_LIBRARIES( jammc
 # /usr/local/lib/libplatinum_upnp.so
 #platinum-upnp
-jammcUiQt
+# jammcUiQt
 ${LIB_JAMM}
-${LIB_PLATINUM_UPNP}
-${QT_LIBRARIES}
+# ${LIB_PLATINUM_UPNP}
+# ${QT_LIBRARIES}
 )
 
 ADD_DEFINITIONS(

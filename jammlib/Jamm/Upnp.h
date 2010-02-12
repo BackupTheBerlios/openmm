@@ -389,6 +389,11 @@ public:
         m_keys.erase(find(m_keys.begin(), m_keys.end(), pEntity));
     }
     
+    void remove(E* pEntity)
+    {   
+        m_keys.erase(find(m_keys.begin(), m_keys.end(), pEntity));
+    }
+    
     bool contains(const std::string& key)
     {
         return m_pEntities.find(key) != m_pEntities.end();
@@ -397,6 +402,22 @@ public:
     bool contains(E* pEntity)
     {
         return find(m_keys.begin(), m_keys.end(), pEntity) != m_keys.end();
+    }
+    
+    int position(const std::string& key)
+    {
+        E* pEntity = m_pEntities.find(key)->second;
+        return find(m_keys.begin(), m_keys.end(), pEntity) - m_keys.begin();
+    }
+    
+    int position(E* pEntity)
+    {
+        return find(m_keys.begin(), m_keys.end(), pEntity) - m_keys.begin();
+    }
+    
+    int size()
+    {
+        return m_keys.size();
     }
     
     template<typename T> T getValue(const std::string& key)

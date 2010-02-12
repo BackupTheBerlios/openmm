@@ -23,88 +23,155 @@
 #ifndef UPNPCONTROLLER_H
 #define UPNPCONTROLLER_H
 
-#include <QObject>
-#include <QItemSelection>
+// #include <QObject>
+// #include <QItemSelection>
 
-#include <platinum/Platinum.h>
-#include <platinum/PltMediaController.h>
+// #include <platinum/Platinum.h>
+// #include <platinum/PltMediaController.h>
+
+#include <Jamm/UpnpAvTypes.h>
 
 #include "UpnpAvCtrlImpl.h"
 
-#include "upnprenderingcontrol.h"
-#include "upnpsyncmediabrowser.h"
+// #include "upnprenderingcontrol.h"
+// #include "upnpsyncmediabrowser.h"
 // #include "QtUi/UpnpBrowserModel.h"
 // #include "QtUi/UpnpRendererListModel.h"
 // #include "QtUi/ControllerGui.h"
+
 
 
 // class UpnpBrowserModel;
 // class UpnpRendererListModel;
 // class ControllerGui;
 
-class UserInterface
+// class RendererListItem
+// {
+//     RendererListItem(MediaRendererController* pRendererController)
+//         : m_pRendererController(pRendererController) {}
+//     
+//     int index();
+//     int rendererCount();
+//     std::string displayName();
+//     
+// private:
+//     MediaRendererController*    m_pRendererController;
+// };
+
+
+class UpnpUserInterface
 {
+    friend class UpnpController;
+    
 public:
+    // TODO: pass command line arguments to user interface toolkit
     virtual int eventLoop() = 0;
     
-    virtual void deviceAdded(Device* pDevice) {};
-    virtual void rendererAdded(MediaRendererController* pRenderer) {};
-    virtual void serverAdded(MediaServerController* pRenderer) {};
-    
-    virtual void deviceRemoved(Device* pDevice) {};
-    virtual void rendererRemoved(MediaRendererController* pRenderer) 
-    {};
-    virtual void serverRemoved(MediaServerController* pRenderer) {};
-    
+    virtual void initGui() = 0;
+    virtual void showMainWindow() = 0;
     
 protected:
-    void playClicked();
-    void stopClicked();
-    void rendererSelected(MediaRendererController* renderer);
+    virtual void beginAddDevice(int position) = 0;
+    virtual void beginRemoveDevice(int position) = 0;
+    virtual void endAddDevice() = 0;
+    virtual void endRemoveDevice() = 0;
     
+    virtual void deviceAdded(Device* pDevice);
+    virtual void deviceRemoved(Device* pDevice);
+    
+    Jamm::Container<Jamm::Device>*    m_pDevices;
 };
 
 
-class UpnpController : public QObject, public Jamm::Controller
+class UpnpAvUserInterface : UpnpUserInterface
 {
-    Q_OBJECT
+    friend class UpnpAvController;
+    
+protected:
+    virtual void beginAddRenderer(int position) = 0;
+    virtual void beginAddServer(int position) = 0;
+    virtual void beginRemoveRenderer(int position) = 0;
+    virtual void beginRemoveServer(int position) = 0;
+    virtual void endAddRenderer() = 0;
+    virtual void endAddServer() = 0;
+    virtual void endRemoveRenderer() = 0;
+    virtual void endRemoveServer() = 0;
+    
+    void playPressed();
+    void stopPressed();
+    void pausePressed();
+    void positionMoved(int position);
+    void volumeChanged(int value);
+    
+    void rendererSelected(MediaRendererController* pRenderer);
+    void MediaObjectSelected(Jamm::Av::MediaObject* pObject);
+    
+private:
+    MediaRendererController*                     m_pSelectedRenderer;
+    Jamm::Container<MediaRendererController>*    m_pRenderers;
+    Jamm::Container<MediaServerController>*      m_pServers;
+};
 
+
+class UpnpController : public Jamm::Controller
+{
 public:
     ~UpnpController();
     
-    virtual void initGui() {}
-    virtual void showMainWindow() {}
     void start();
-
-    UpnpBrowserModel* getBrowserModel() const { return m_upnpBrowserModel; }
     
-signals:
-    void serverAddedRemoved(UpnpServer* server, bool add);
-    void rendererAddedRemoved(Jamm::Device* renderer, bool add);
-//     void rendererAddedRemoved(string uuid, bool add);
-    void setSlider(int max, int val);
-
-private slots:
-    void rendererSelectionChanged(const QItemSelection &selected,
-                          const QItemSelection &deselected);
-    
-    void playButtonPressed();
-    void stopButtonPressed();
-    void pauseButtonPressed();
-    void sliderMoved(int position);
-    void volSliderMoved(int position);
-    
-    void modelIndexActivated(const QModelIndex& index);
-    void modelIndexExpanded(const QModelIndex& index);
+protected:
+    virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot);
+    virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot);
     
 private:
-    virtual void deviceAdded(DeviceRoot* pDeviceRoot);
-    virtual void deviceRemoved(DeviceRoot* pDeviceRoot);
+    Jamm::Container<Jamm::Device>               m_devices;
+    UpnpUserInterface*                          m_pUserInterface;
+};
+
+
+class UpnpAvController : public UpnpController
+{
+    
+private:
+    virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot);
+    virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot);
+    
+    Jamm::Container<MediaRendererController>    m_renderers;
+    Jamm::Container<MediaServerController>      m_servers;
+    UpnpAvUserInterface*                        m_pUserInterface;
+};
+
+    
+    //     UpnpBrowserModel* getBrowserModel() const { return m_upnpBrowserModel; }
+    
+// signals:
+//     void serverAddedRemoved(UpnpServer* server, bool add);
+//     void rendererAddedRemoved(Jamm::Device* renderer, bool add);
+//     void rendererAddedRemoved(string uuid, bool add);
+//     void setSlider(int max, int val);
+    
+// private slots:
+//     void rendererSelectionChanged(const QItemSelection &selected,
+//                           const QItemSelection &deselected);
+    
+//     void playButtonPressed();
+//     void stopButtonPressed();
+//     void pauseButtonPressed();
+//     void sliderMoved(int position);
+//     void volSliderMoved(int position);
+    
+//     void modelIndexActivated(const QModelIndex& index);
+//     void modelIndexExpanded(const QModelIndex& index);
+    
+    
+//     std::vector<Jamm::Device*>                          m_pDevices;
+//     std::map<Jamm::Device*,MediaRendererController*>    m_pRenderers;
+//     std::map<Jamm::Device*,MediaServerController*>      m_pServers;
+    
+
 //     virtual void onSignalReceived();
     
-    std::map<std::string,MediaRendererController*>      m_renderers;
-    std::map<std::string,MediaServerController*>        m_servers;
-    MediaRendererController*                            m_selectedRenderer;
     
 //     UpnpBrowserModel*                                   m_upnpBrowserModel;
 //     UpnpRendererListModel*                              m_upnpRendererListModel;
@@ -115,68 +182,68 @@ private:
     
     
     // --------------------------------------------------------------
-protected:
+// protected:
 //     virtual void OnMRAddedRemoved(PLT_DeviceDataReference& device, int added);
 //     virtual void OnMRStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
     
-    virtual void OnMSAddedRemoved(PLT_DeviceDataReference& device, int added);
-    virtual void OnMSStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
-    virtual void OnMSBrowseResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_BrowseInfo* info, void* userdata);
-    
-    
-    virtual void OnGetPositionInfoResult(
-                                          NPT_Result               /* res */,
-                                          PLT_DeviceDataReference& /* device */,
-                                          PLT_PositionInfo*        /* info */,
-                                          void*                    /* userdata */);
-    
-
-    
-    virtual void OnPauseResult(
-                                NPT_Result               /* res */,
-                                PLT_DeviceDataReference& /* device */,
-                                void*                    /* userdata */); 
-    
-    virtual void OnPlayResult(
-                               NPT_Result               /* res */,
-                               PLT_DeviceDataReference& /* device */,
-                               void*                    /* userdata */);
-    
-    
-    virtual void OnSeekResult(
-                               NPT_Result               /* res */,
-                               PLT_DeviceDataReference& /* device */,
-                               void*                    /* userdata */);
-    
-    virtual void OnSetAVTransportURIResult(
-                                            NPT_Result               /* res */,
-                                            PLT_DeviceDataReference& /* device */,
-                                            void*                    /* userdata */);
-    
-
-    
-    virtual void OnStopResult(
-                               NPT_Result               /* res */,
-                               PLT_DeviceDataReference& /* device */,
-                               void*                    /* userdata */);
-    
-
-private:
-    
-    PLT_UPnP*                       m_upnp;
-    PLT_CtrlPointReference          m_ctrlPoint;
-
-    NPT_Lock<PLT_DeviceMap>         m_mediaServers;
-    NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
-
-    PLT_MediaBrowser*               m_mediaBrowser;
-    JRenderingController*           m_renderingController;
-    PLT_MediaController*            m_mediaController;
-
-    PLT_DeviceDataReference         m_curMediaRenderer;
-    NPT_Mutex                       m_curMediaRendererLock;
-    
-};
+//     virtual void OnMSAddedRemoved(PLT_DeviceDataReference& device, int added);
+//     virtual void OnMSStateVariablesChanged(PLT_Service* service, NPT_List<PLT_StateVariable*>* vars);
+//     virtual void OnMSBrowseResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_BrowseInfo* info, void* userdata);
+//     
+//     
+//     virtual void OnGetPositionInfoResult(
+//                                           NPT_Result               /* res */,
+//                                           PLT_DeviceDataReference& /* device */,
+//                                           PLT_PositionInfo*        /* info */,
+//                                           void*                    /* userdata */);
+//     
+// 
+//     
+//     virtual void OnPauseResult(
+//                                 NPT_Result               /* res */,
+//                                 PLT_DeviceDataReference& /* device */,
+//                                 void*                    /* userdata */); 
+//     
+//     virtual void OnPlayResult(
+//                                NPT_Result               /* res */,
+//                                PLT_DeviceDataReference& /* device */,
+//                                void*                    /* userdata */);
+//     
+//     
+//     virtual void OnSeekResult(
+//                                NPT_Result               /* res */,
+//                                PLT_DeviceDataReference& /* device */,
+//                                void*                    /* userdata */);
+//     
+//     virtual void OnSetAVTransportURIResult(
+//                                             NPT_Result               /* res */,
+//                                             PLT_DeviceDataReference& /* device */,
+//                                             void*                    /* userdata */);
+//     
+// 
+//     
+//     virtual void OnStopResult(
+//                                NPT_Result               /* res */,
+//                                PLT_DeviceDataReference& /* device */,
+//                                void*                    /* userdata */);
+//     
+// 
+// private:
+//     
+//     PLT_UPnP*                       m_upnp;
+//     PLT_CtrlPointReference          m_ctrlPoint;
+// 
+//     NPT_Lock<PLT_DeviceMap>         m_mediaServers;
+//     NPT_Lock<PLT_DeviceMap>         m_mediaRenderers;
+// 
+//     PLT_MediaBrowser*               m_mediaBrowser;
+//     JRenderingController*           m_renderingController;
+//     PLT_MediaController*            m_mediaController;
+// 
+//     PLT_DeviceDataReference         m_curMediaRenderer;
+//     NPT_Mutex                       m_curMediaRendererLock;
+//     
+// };
 
 #endif /* UPNPCONTROLLER_H */
 

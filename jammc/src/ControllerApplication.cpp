@@ -26,10 +26,16 @@
 
 int main(int argc, char** argv)
 {
-    QApplication app(argc, argv);
-    UpnpController upnpController;
-    upnpController.initGui();
-    upnpController.showMainWindow();
-    upnpController.start();
-    return app.exec();
+//     UpnpAvUserInterface upnpController;
+//     upnpController.initGui();
+//     upnpController.showMainWindow();
+//     upnpController.start();
+//     upnpController.eventLoop();
+    
+//     QApplication app(argc, argv);
+//     UpnpController upnpController;
+//     upnpController.initGui();
+//     upnpController.showMainWindow();
+//     upnpController.start();
+//     return app.exec();
 }

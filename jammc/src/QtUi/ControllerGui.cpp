@@ -109,6 +109,57 @@ ControllerGui::ControllerGui(QWidget* parent)
 : QFrame(parent),
 m_sliderMoved(false)
 {
+//     ui.setupUi(this);
+//     ui.m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+//     ui.m_playButton->setText("");
+//     ui.m_stopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+//     ui.m_stopButton->setText("");
+//     ui.m_pauseButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+//     ui.m_pauseButton->setText("");
+//     ui.m_skipForwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
+//     ui.m_skipForwardButton->setText("");
+//     ui.m_skipBackwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
+//     ui.m_skipBackwardButton->setText("");
+//     ui.m_seekForwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+//     ui.m_seekForwardButton->setText("");
+//     ui.m_seekBackwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
+//     ui.m_seekBackwardButton->setText("");
+    
+    // TODO: add "state logic" to button group, with disabling/enabling ...
+/*    QButtonGroup* m_buttonGroup = new QButtonGroup(ui.m_controllerGroup);
+    m_buttonGroup->addButton(ui.m_playButton);
+    m_buttonGroup->addButton(ui.m_stopButton);
+    m_buttonGroup->addButton(ui.m_pauseButton);
+    m_buttonGroup->addButton(ui.m_skipForwardButton);
+    m_buttonGroup->addButton(ui.m_skipBackwardButton);
+    m_buttonGroup->addButton(ui.m_seekForwardButton);
+    m_buttonGroup->addButton(ui.m_seekBackwardButton);*/
+    
+    // Forward some signals from GUI Elements
+//     connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
+//     connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
+//     connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
+//     connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+//     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+//     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
+//     
+//     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
+//     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
+// //     connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
+//     
+//     ui.m_browserView->setUniformRowHeights(true);
+//     
+//     ui.m_breadCrumpLayout->setAlignment(Qt::AlignLeft);
+//     ui.m_breadCrumpLayout->setSpacing(0);
+//     new CrumbButton(ui.m_browserView, QModelIndex(), ui.m_breadCrump);
+//     
+//     setWindowTitle("JammC");
+}
+
+
+void
+ControllerGui::initGui()
+{
     ui.setupUi(this);
     ui.m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     ui.m_playButton->setText("");
@@ -136,15 +187,10 @@ m_sliderMoved(false)
     m_buttonGroup->addButton(ui.m_seekBackwardButton);*/
     
     // Forward some signals from GUI Elements
-    connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
-    connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
-    connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
-    connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
-    connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
-    connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
-    
-    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
-    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
+//     connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
+//     connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
+//     connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
+//     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
 //     connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
     
     ui.m_browserView->setUniformRowHeights(true);
@@ -154,12 +200,7 @@ m_sliderMoved(false)
     new CrumbButton(ui.m_browserView, QModelIndex(), ui.m_breadCrump);
     
     setWindowTitle("JammC");
-}
-
-
-void
-ControllerGui::initGui()
-{
+    
     m_upnpBrowserModel = new UpnpBrowserModel(this);
     m_upnpRendererListModel = new UpnpRendererListModel(this);
     
@@ -174,19 +215,25 @@ ControllerGui::initGui()
             m_upnpRendererListModel, SLOT(rendererAddedRemoved(Jamm::Device*, bool)));
     connect(this, SIGNAL(serverAddedRemoved(UpnpServer*, bool)),
             m_upnpBrowserModel, SLOT(serverAddedRemoved(UpnpServer*, bool)));
-    connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
+//     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
 //     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
 //     connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
-    connect(m_mainWindow->getRendererListSelectionModel(),
+    connect(ui.m_rendererListView->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
     
-    connect(m_mainWindow, SIGNAL(playButtonPressed()), this, SLOT(playButtonPressed()));
-    connect(m_mainWindow, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
-    connect(m_mainWindow, SIGNAL(pauseButtonPressed()), this, SLOT(pauseButtonPressed()));
-    connect(m_mainWindow, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
-    connect(this, SIGNAL(setSlider(int, int)), m_mainWindow, SLOT(setSlider(int, int)));
-    connect(m_mainWindow, SIGNAL(volSliderMoved(int)), this, SLOT(volSliderMoved(int)));
+    connect(ui.m_playButton, SIGNAL(pressed()), this, SLOT(playPressed()));
+    connect(ui.m_stopButton, SIGNAL(pressed()), this, SLOT(stopPressed()));
+    connect(ui.m_pauseButton, SIGNAL(pressed()), this, SLOT(pausePressed()));
+    connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeChanged(int)));
+    connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+    connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+    connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionMoved(int)));
+//     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSlider(int, int)));
+    
+//     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
+    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
+    
 }
 
 
@@ -226,6 +273,33 @@ ControllerGui::browserItemActivated(const QModelIndex& index)
     qDebug() << "ControllerGui::onActivated";
     if (index.model()->hasChildren(index)) {
         new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
+    }
+}
+
+
+void
+UpnpController::rendererSelectionChanged(const QItemSelection& selected,
+                                         const QItemSelection& /*deselected*/)
+{
+    if (selected.count() > 1) {
+        return;
+    }
+    if (selected.empty()) {
+        std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
+        m_selectedRenderer = NULL;
+        return;
+    }
+    
+    QModelIndex index = selected.indexes().first();
+    
+    m_pSelectedRenderer = static_cast<MediaRendererController*>(index.internalPointer());
+    
+    if (m_pSelectedRenderer != NULL) {
+        std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
+        std::clog << "UpnpController::rendererSelectionChanged() selected renderer:" << 
+            m_pSelectedRenderer->getDevice()->getUuid() << std::endl;
+        
+        setVolumeSlider(100, 50);
     }
 }
 
