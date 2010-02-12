@@ -23,9 +23,11 @@
 #ifndef CONTROLLERGUI_H
 #define CONTROLLERGUI_H
 
-#include "ui_controllergui.h"
-
 #include <QtGui>
+
+#include "UpnpBrowserModel.h"
+#include "UpnpRendererListModel.h"
+#include "ui_ControllerGui.h"
 
 
 class CrumbButton : public QWidget
@@ -62,6 +64,9 @@ class ControllerGui : public QFrame
 public:
     ControllerGui(QWidget *parent = 0);
     
+    virtual void initGui();
+    virtual void showMainWindow();
+    
     void setBrowserTreeItemModel(QAbstractItemModel* model);
     void setRendererListItemModel(QAbstractItemModel* model);
     
@@ -97,6 +102,8 @@ private slots:
     
 private:
 //     void sliderChange(QAbstractSlider::SliderChange change);
+    UpnpBrowserModel*                                   m_upnpBrowserModel;
+    UpnpRendererListModel*                              m_upnpRendererListModel;
     
     Ui::ControllerGui ui;
     bool m_sliderMoved;

@@ -110,6 +110,9 @@
 //       accordingly
 
 
+// TODO: Remaining Event subscription stuff
+// TODO: Remaining SSDP M-Search requests
+// TODO: Device configuration
 // TODO: Error handling
 // TODO: Variable query (only for Device)
 // TODO: Service and Device version checking

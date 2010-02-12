@@ -25,6 +25,8 @@
 
 #include "Upnp.h"
 
+#undef Status
+
 namespace Jamm {
 namespace Av {
 

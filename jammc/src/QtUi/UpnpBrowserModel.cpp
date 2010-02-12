@@ -20,7 +20,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "upnpbrowsermodel.h"
+#include "UpnpBrowserModel.h"
 
 #include <QtDebug>
 
@@ -28,7 +28,7 @@ UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
 : QAbstractItemModel(parent)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
-    m_root = new UpnpObject();
+    m_root = new Jamm::Av::MediaObject();
     m_root->m_fetchedAllChildren = true;
     m_iconProvider = new QFileIconProvider();
 }
@@ -42,7 +42,7 @@ UpnpBrowserModel::~UpnpBrowserModel()
 int
 UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
-    UpnpObject* object = getObject(parent);
+    Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
     return object->m_children.size();
 }
@@ -58,7 +58,7 @@ UpnpBrowserModel::columnCount(const QModelIndex& /*parent*/) const
 bool
 UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 {
-    UpnpObject* object = getObject(parent);
+    Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->m_objectId.c_str();
     if (!parent.isValid()) {
         return (object->m_children.size() > 0);
@@ -70,7 +70,7 @@ UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 bool
 UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
-    UpnpObject* object = getObject(parent);
+    Jamm::Av::MediaObject* object = getObject(parent);
     qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->m_objectId.c_str();
     return (!object->m_fetchedAllChildren);
 }
@@ -79,7 +79,7 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 void
 UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
-    UpnpObject* object = getObject(parent);
+    Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
     object->fetchChildren();
     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
@@ -100,7 +100,7 @@ UpnpBrowserModel::data(const QModelIndex &index, int role) const
 /*    if (role != Qt::DisplayRole) {
         return QVariant();
     }*/
-    UpnpObject* object = getObject(index);
+    Jamm::Av::MediaObject* object = getObject(index);
 //     return m_charEncoding->toUnicode(object->getTitle().c_str());
     
     switch (role) {
@@ -133,16 +133,16 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
-    UpnpObject* object = getObject(index);
+    Jamm::Av::MediaObject* object = getObject(index);
 //     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->m_objectId.c_str();
     if (!object->m_parent || object->m_parent == m_root) {
         return QModelIndex();
     }
-    UpnpObject* grandp = object->m_parent->m_parent;
+    Jamm::Av::MediaObject* grandp = object->m_parent->m_parent;
     if (!grandp) {
         return QModelIndex();
     }
-    vector<UpnpObject*>::iterator row;
+    std::vector<Jamm::Av::MediaObject*>::iterator row;
     row = find(grandp->m_children.begin(), grandp->m_children.end(), object->m_parent);
     if (row != grandp->m_children.end()) {
 //         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->m_children.begin());
@@ -160,7 +160,7 @@ UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
-    UpnpObject* object = getObject(parent);
+    Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->m_objectId.c_str() << "row:" << row;
     // if we can't deliver an index, because m_children.size()-1 < row
     // then fetchMore() is triggered -> return QModelIndex()
@@ -207,7 +207,7 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QIcon();
-    UpnpObject* object = getObject(index);
+    Jamm::Av::MediaObject* object = getObject(index);
     if (object->isContainer())
         return m_iconProvider->icon(QFileIconProvider::Folder);
     
@@ -216,20 +216,20 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 
 
 void
-UpnpBrowserModel::serverAddedRemoved(UpnpServer* server, bool add)
+UpnpBrowserModel::serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add)
 {
-    qDebug() << "UpnpBrowserModel::serverAddedRemoved()" << (add?"add":"remove") << "server:" << server->getFriendlyName().c_str();
+//     qDebug() << "UpnpBrowserModel::serverAddedRemoved()" << (add?"add":"remove") << "server:" << server->getUuid().c_str();
     
     if (add) {
-        UpnpObject* d = new UpnpObject();
+        Jamm::Av::MediaObject* d = new Jamm::Av::MediaObject();
         d->m_objectId = "0";
         d->m_server = server;
         d->m_parent = m_root;
         m_root->m_children.push_back(d);
     }
     else {
-    // TODO: delete the UpnpObject tree of server recursively to avoid a memory leak
-        vector<UpnpObject*>::iterator i = m_root->m_children.begin();
+    // TODO: delete the Jamm::Av::MediaObject tree of server recursively to avoid a memory leak
+        std::vector<Jamm::Av::MediaObject*>::iterator i = m_root->m_children.begin();
         while ((*i)->m_server != server && i != m_root->m_children.end()) {
             ++i;
         }

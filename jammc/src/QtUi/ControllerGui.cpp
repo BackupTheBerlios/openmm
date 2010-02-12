@@ -22,7 +22,7 @@
 
 #include <QtDebug>
 
-#include "controllergui.h"
+#include "ControllerGui.h"
 
 CrumbButton* CrumbButton::m_lastCrumbButton;
 
@@ -157,7 +157,44 @@ m_sliderMoved(false)
 }
 
 
+void
+ControllerGui::initGui()
+{
+    m_upnpBrowserModel = new UpnpBrowserModel(this);
+    m_upnpRendererListModel = new UpnpRendererListModel(this);
+    
+//     m_mainWindow = new ControllerGui();
+    /*m_mainWindow->*/setBrowserTreeItemModel(m_upnpBrowserModel);
+    /*m_mainWindow->*/setRendererListItemModel(m_upnpRendererListModel);
+    
+    qRegisterMetaType<string>("string");
+    qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
+    
+    connect(this, SIGNAL(rendererAddedRemoved(Jamm::Device*, bool)),
+            m_upnpRendererListModel, SLOT(rendererAddedRemoved(Jamm::Device*, bool)));
+    connect(this, SIGNAL(serverAddedRemoved(UpnpServer*, bool)),
+            m_upnpBrowserModel, SLOT(serverAddedRemoved(UpnpServer*, bool)));
+    connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
+//     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
+//     connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
+    connect(m_mainWindow->getRendererListSelectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
+    
+    connect(m_mainWindow, SIGNAL(playButtonPressed()), this, SLOT(playButtonPressed()));
+    connect(m_mainWindow, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
+    connect(m_mainWindow, SIGNAL(pauseButtonPressed()), this, SLOT(pauseButtonPressed()));
+    connect(m_mainWindow, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
+    connect(this, SIGNAL(setSlider(int, int)), m_mainWindow, SLOT(setSlider(int, int)));
+    connect(m_mainWindow, SIGNAL(volSliderMoved(int)), this, SLOT(volSliderMoved(int)));
+}
 
+
+void
+ControllerGui::showMainWindow()
+{
+    show();
+}
 
 void
 ControllerGui::checkSliderMoved(int value)

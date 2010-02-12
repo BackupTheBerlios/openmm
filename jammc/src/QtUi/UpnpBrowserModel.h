@@ -30,7 +30,9 @@
 #include <QTextCodec>
 #include <QFileIconProvider>
 
-#include "upnpsyncmediabrowser.h"
+#include <Jamm/Upnp.h>
+#include <Jamm/UpnpAvTypes.h>
+// #include "upnpsyncmediabrowser.h"
 
 
 class UpnpBrowserModel : public QAbstractItemModel
@@ -54,16 +56,16 @@ public:
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
     
-    UpnpObject* getObject(const QModelIndex &index) const {
-        return index.isValid() ? static_cast<UpnpObject*>(index.internalPointer()) : m_root;
+    Jamm::Av::MediaObject* getObject(const QModelIndex &index) const {
+        return index.isValid() ? static_cast<Jamm::Av::MediaObject*>(index.internalPointer()) : m_root;
     }
     QIcon icon(const QModelIndex &index) const;
     
 public slots:
-    void serverAddedRemoved(UpnpServer* server, bool add);
+    void serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add);
     
 private:
-    UpnpObject*           m_root;
+    Jamm::Av::MediaObject*           m_root;
 //     bool                  m_lazyRowCount;
     QTextCodec*           m_charEncoding;
     QFileIconProvider*    m_iconProvider;

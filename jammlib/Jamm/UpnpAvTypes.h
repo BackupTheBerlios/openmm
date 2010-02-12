@@ -39,6 +39,7 @@
 #include <Poco/XML/XMLWriter.h>
 
 #include "Upnp.h"
+#include "UpnpAvControllers.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -78,7 +79,12 @@ public:
     // MediaObject* createObject(DatabasePointer)
     // and a MediaObjectReader ...
     
+    MediaObject();
+    // NOTE: should be split into a Controller and Device part?
     MediaObject(const std::string& metaData);
+    
+    bool isContainer();
+    int fetchChildren();
     
     std::string getProperty(const std::string& name);
     
@@ -95,9 +101,16 @@ public:
     void setClass(const std::string& id);
     
     
-private:
-    AutoPtr<Document>   m_pDoc;
-    Container<Variant>  m_properties;
+// private:
+    AutoPtr<Document>                       m_pDoc;
+    Container<Variant>                      m_properties;
+    
+    ContentDirectoryController*             m_server;
+    std::string                             m_objectId;
+    MediaObject*                            m_parent;
+    std::vector<MediaObject*>               m_children;
+    bool                                    m_fetchedAllChildren;
+    unsigned int                            m_childCount;
 };
 
 

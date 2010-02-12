@@ -20,13 +20,13 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "upnprendererlistmodel.h"
+#include "UpnpRendererListModel.h"
 
 #include <algorithm>
 #include <QtDebug>
 
-UpnpRendererListModel::UpnpRendererListModel(UpnpController* mediaController, QObject *parent)
-: QAbstractItemModel(parent), m_mediaController(mediaController)
+UpnpRendererListModel::UpnpRendererListModel(/*UpnpController* mediaController, */QObject *parent)
+: QAbstractItemModel(parent)/*, m_mediaController(mediaController)*/
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
 }
@@ -46,7 +46,7 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
         return QVariant();
     
     if (index.internalPointer() == NULL) {
-        qWarning() << "UpnpRendererListModel::data() objectId reference is NULL:";
+        qWarning() << "UpnpRendererListModel::data() reference to renderer device is NULL:";
         return QVariant();
     }
     
@@ -54,7 +54,7 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-    return QString(static_cast<string*>(index.internalPointer())->c_str());
+    return QString(static_cast<Jamm::Device*>(index.internalPointer())->getUuid().c_str());
 }
 
 
@@ -111,22 +111,23 @@ UpnpRendererListModel::columnCount(const QModelIndex &/*parent*/) const
 
 
 void
-UpnpRendererListModel::rendererAddedRemoved(string uuid, bool add)
+UpnpRendererListModel::rendererAddedRemoved(Jamm::Device* renderer, bool add)
 {
-    qDebug() << "UpnpRendererListModel::rendererAddedRemoved()" << (add?"add":"remove") << "renderer:" << uuid.c_str();
+    qDebug() << "UpnpRendererListModel::rendererAddedRemoved()" << (add?"add":"remove") << "renderer:" << renderer->getUuid().c_str();
     
     if (add) {
         beginInsertRows(QModelIndex(), m_rendererList.size(), m_rendererList.size());
-        m_rendererList.push_back(new string(uuid));
+        m_rendererList.push_back(renderer);
         endInsertRows();
     }
     else {
-        vector<string*>::iterator i = m_rendererList.begin();
-        while (**i != uuid && i != m_rendererList.end()) ++i;
-        if (i == m_rendererList.end()) {
-            qDebug() << "UpnpRendererListModel::rendererAddedRemoved() renderer not found";
-            return;
-        }
+//         vector<MediaRendererController*>::iterator i = m_rendererList.begin();
+//         while (**i != renderer && i != m_rendererList.end()) ++i;
+//         if (i == m_rendererList.end()) {
+//             qDebug() << "UpnpRendererListModel::rendererAddedRemoved() renderer not found";
+//             return;
+//         }
+        vector<Jamm::Device*>::iterator i = find(m_rendererList.begin(), m_rendererList.end(), renderer);
         int n = i - m_rendererList.begin();
         beginRemoveRows(QModelIndex(), n, n);
         m_rendererList.erase(i);

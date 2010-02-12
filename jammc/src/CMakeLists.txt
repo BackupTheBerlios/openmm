@@ -28,28 +28,30 @@ INCLUDE(
 ${QT_USE_FILE}
 )
 
+ADD_SUBDIRECTORY(QtUi)
+
 SET( JAMMC_SRCS
-controllergui.cpp
+# controllergui.cpp
 ControllerApplication.cpp
 # # modeltest.cpp
-upnpbrowsermodel.cpp
+# upnpbrowsermodel.cpp
 upnprenderingcontrol.cpp
-upnprendererlistmodel.cpp
+# upnprendererlistmodel.cpp
 upnpsyncmediabrowser.cpp
 UpnpAvCtrlImpl.cpp
 UpnpController.cpp
 )
 
-SET( JAMMC_UI
-# settings.ui
-controllergui.ui
-)
+# SET( JAMMC_UI
+# # settings.ui
+# controllergui.ui
+# )
 
 SET( JAMMC_MOC
-controllergui.h
+# controllergui.h
 # modeltest.h
-upnpbrowsermodel.h
-upnprendererlistmodel.h
+# upnpbrowsermodel.h
+# upnprendererlistmodel.h
 # upnpsyncmediabrowser.h
 UpnpController.h
 )
@@ -57,17 +59,17 @@ UpnpController.h
 INCLUDE_DIRECTORIES(
 )
 
-QT4_WRAP_UI(
-JAMMC_UI_H ${JAMMC_UI}
-)
+# QT4_WRAP_UI(
+# JAMMC_UI_H ${JAMMC_UI}
+# )
 
-GET_FILENAME_COMPONENT(
-JAMMC_UI_H_DIR ${JAMMC_UI_H} PATH
-)
+# GET_FILENAME_COMPONENT(
+# JAMMC_UI_H_DIR ${JAMMC_UI_H} PATH
+# )
 
-INCLUDE_DIRECTORIES(
-${JAMMC_UI_H_DIR}
-)
+# INCLUDE_DIRECTORIES(
+# ${JAMMC_UI_H_DIR}
+# )
 
 QT4_WRAP_CPP(
 JAMMC_MOC_CPP ${JAMMC_MOC}
@@ -75,13 +77,14 @@ JAMMC_MOC_CPP ${JAMMC_MOC}
 
 ADD_EXECUTABLE( jammc
 ${JAMMC_SRCS}
-${JAMMC_UI}
+# ${JAMMC_UI}
 ${JAMMC_MOC_CPP}
 )
 
 TARGET_LINK_LIBRARIES( jammc
 # /usr/local/lib/libplatinum_upnp.so
 #platinum-upnp
+jammcUiQt
 ${LIB_JAMM}
 ${LIB_PLATINUM_UPNP}
 ${QT_LIBRARIES}

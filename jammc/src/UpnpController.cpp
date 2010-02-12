@@ -33,43 +33,7 @@ UpnpController::~UpnpController()
 }
 
 
-void
-UpnpController::initGui()
-{
-    m_upnpBrowserModel = new UpnpBrowserModel(this);
-    m_upnpRendererListModel = new UpnpRendererListModel(this);
-    
-    m_mainWindow = new ControllerGui();
-    m_mainWindow->setBrowserTreeItemModel(m_upnpBrowserModel);
-    m_mainWindow->setRendererListItemModel(m_upnpRendererListModel);
-    
-    qRegisterMetaType<string>("string");
-    qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
-    
-    connect(this, SIGNAL(rendererAddedRemoved(string, bool)),
-            m_upnpRendererListModel, SLOT(rendererAddedRemoved(string, bool)));
-    connect(this, SIGNAL(serverAddedRemoved(UpnpServer*, bool)),
-            m_upnpBrowserModel, SLOT(serverAddedRemoved(UpnpServer*, bool)));
-    connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
-//     connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
-    connect(m_mainWindow->getRendererListSelectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
-    
-    connect(m_mainWindow, SIGNAL(playButtonPressed()), this, SLOT(playButtonPressed()));
-    connect(m_mainWindow, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
-    connect(m_mainWindow, SIGNAL(pauseButtonPressed()), this, SLOT(pauseButtonPressed()));
-    connect(m_mainWindow, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
-    connect(this, SIGNAL(setSlider(int, int)), m_mainWindow, SLOT(setSlider(int, int)));
-    connect(m_mainWindow, SIGNAL(volSliderMoved(int)), this, SLOT(volSliderMoved(int)));
-}
 
-
-void
-UpnpController::showMainWindow()
-{
-    m_mainWindow->show();
-}
 
 
 void
@@ -106,12 +70,13 @@ UpnpController::deviceAdded(DeviceRoot* pDeviceRoot)
 //         std::clog << "friendly name: " << device->getFriendlyName() << std::endl;
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        m_renderers[pDevice->getUuid()] = new Jamm::Av::MediaRendererController(
+        MediaRendererController* renderer = new MediaRendererController(
             pDevice,
             new RenderingControlControllerImpl,
             new ConnectionManagerControllerImpl,
             new AVTransportControllerImpl);
-        emit rendererAddedRemoved(pDevice->getUuid(), true);
+        m_renderers[pDevice->getUuid()] = renderer;
+        emit rendererAddedRemoved(pDevice, true);
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         m_servers[pDevice->getUuid()] = new Jamm::Av::MediaServerController(
@@ -134,7 +99,7 @@ UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         m_renderers.erase(pDevice->getUuid());
-        emit rendererAddedRemoved(pDevice->getUuid(), false);
+        emit rendererAddedRemoved(pDevice, false);
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         m_servers.erase(pDevice->getUuid());
@@ -305,10 +270,10 @@ UpnpController::playButtonPressed()
     m_mediaBrowser->syncBrowse(objectRef->server, objectRef->objectId, true, browseResults);
     PLT_MediaObject* object = (*browseResults->GetFirstItem());*/
     
-    UpnpObject* object = m_upnpBrowserModel->getObject(selected);
-    PLT_MediaObject* pltObject = object->m_pltObject;
+    Jamm::Av::MediaObject* object = m_upnpBrowserModel->getObject(selected);
+//     PLT_MediaObject* pltObject = object->m_pltObject;
     // send SetAVTransportURI packet
-    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, pltObject->m_Resources[0].m_Uri, pltObject->m_Didl, NULL);
+    m_mediaController->SetAVTransportURI(m_curMediaRenderer, 0, object->m_Resources[0].m_Uri, object->m_Didl, NULL);
     
 }
 

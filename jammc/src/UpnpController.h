@@ -33,12 +33,37 @@
 
 #include "upnprenderingcontrol.h"
 #include "upnpsyncmediabrowser.h"
-#include "upnpbrowsermodel.h"
-#include "upnprendererlistmodel.h"
-#include "controllergui.h"
+// #include "QtUi/UpnpBrowserModel.h"
+// #include "QtUi/UpnpRendererListModel.h"
+// #include "QtUi/ControllerGui.h"
 
 
-class UpnpRendererListModel;
+// class UpnpBrowserModel;
+// class UpnpRendererListModel;
+// class ControllerGui;
+
+class UserInterface
+{
+public:
+    virtual int eventLoop() = 0;
+    
+    virtual void deviceAdded(Device* pDevice) {};
+    virtual void rendererAdded(MediaRendererController* pRenderer) {};
+    virtual void serverAdded(MediaServerController* pRenderer) {};
+    
+    virtual void deviceRemoved(Device* pDevice) {};
+    virtual void rendererRemoved(MediaRendererController* pRenderer) 
+    {};
+    virtual void serverRemoved(MediaServerController* pRenderer) {};
+    
+    
+protected:
+    void playClicked();
+    void stopClicked();
+    void rendererSelected(MediaRendererController* renderer);
+    
+};
+
 
 class UpnpController : public QObject, public Jamm::Controller
 {
@@ -47,15 +72,16 @@ class UpnpController : public QObject, public Jamm::Controller
 public:
     ~UpnpController();
     
-    void initGui();
-    void showMainWindow();
+    virtual void initGui() {}
+    virtual void showMainWindow() {}
     void start();
 
     UpnpBrowserModel* getBrowserModel() const { return m_upnpBrowserModel; }
     
 signals:
     void serverAddedRemoved(UpnpServer* server, bool add);
-    void rendererAddedRemoved(string uuid, bool add);
+    void rendererAddedRemoved(Jamm::Device* renderer, bool add);
+//     void rendererAddedRemoved(string uuid, bool add);
     void setSlider(int max, int val);
 
 private slots:
@@ -80,9 +106,9 @@ private:
     std::map<std::string,MediaServerController*>        m_servers;
     MediaRendererController*                            m_selectedRenderer;
     
-    UpnpBrowserModel*                                   m_upnpBrowserModel;
-    UpnpRendererListModel*                              m_upnpRendererListModel;
-    ControllerGui*                                      m_mainWindow;
+//     UpnpBrowserModel*                                   m_upnpBrowserModel;
+//     UpnpRendererListModel*                              m_upnpRendererListModel;
+//     ControllerGui*                                      m_mainWindow;
     
 //     JTimer                          m_pollPositionInfoTimer;
     
