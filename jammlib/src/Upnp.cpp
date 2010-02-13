@@ -109,7 +109,7 @@ UriDescriptionReader::getDescription(const std::string& path)
         rs.read(buf, response.getContentLength());
         res = new std::string(buf, response.getContentLength());
         
-        std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+//         std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
         std::clog << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
@@ -167,7 +167,7 @@ DescriptionReader::releaseDescriptionDocument()
 DeviceRoot*
 DescriptionReader::deviceRoot()
 {
-    std::clog << "DescriptionReader::deviceRoot()" << std::endl;
+//     std::clog << "DescriptionReader::deviceRoot()" << std::endl;
     DeviceRoot* pRes = new DeviceRoot();
     m_pDeviceRoot = pRes;
     pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
@@ -197,7 +197,7 @@ DescriptionReader::deviceRoot()
 Device*
 DescriptionReader::device()
 {
-    std::clog << "DescriptionReader::device()" << std::endl;
+//     std::clog << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
     Poco::XML::Node* pNode = m_nodeStack.top();
     pRes->setDeviceRoot(m_pDeviceRoot);
@@ -260,7 +260,7 @@ DescriptionReader::device()
 Service*
 DescriptionReader::service()
 {
-    std::clog << "DescriptionReader::service()" << std::endl;
+//     std::clog << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
     Poco::XML::Node* pNode = m_nodeStack.top();
     
@@ -328,7 +328,7 @@ DescriptionReader::service()
 Action*
 DescriptionReader::action()
 {
-    std::clog << "DescriptionReader::action()" << std::endl;
+//     std::clog << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
     Poco::XML::Node* pNode = m_nodeStack.top();
     
@@ -358,7 +358,7 @@ DescriptionReader::action()
 Argument*
 DescriptionReader::argument()
 {
-    std::clog << "DescriptionReader::argument()" << std::endl;
+//     std::clog << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
     Poco::XML::Node* pNode = m_nodeStack.top();
     
@@ -385,7 +385,7 @@ DescriptionReader::argument()
 StateVar*
 DescriptionReader::stateVar()
 {
-    std::clog << "DescriptionReader::stateVar()" << std::endl;
+//     std::clog << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
     Poco::XML::Node* pNode = m_nodeStack.top();
     
@@ -812,7 +812,7 @@ Service::addAction(Action* pAction)
 void
 Service::addStateVar(StateVar* pStateVar)
 {
-    std::clog << "Service::addStateVar() name: " << pStateVar->getName() << " is evented: " << pStateVar->getSendEvents() << std::endl;
+//     std::clog << "Service::addStateVar() name: " << pStateVar->getName() << " is evented: " << pStateVar->getSendEvents() << std::endl;
     
     m_stateVars.append(pStateVar->getName(), pStateVar);
     if(pStateVar->getSendEvents()) {
@@ -1574,7 +1574,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-    std::clog << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
+//     std::clog << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
 //     std::clog << pMessage->toString();
     
     switch(pMessage->getRequestMethod()) {
@@ -1601,13 +1601,13 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-        std::clog << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
+//         std::clog << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
         if (!m_devices.contains(uuid)) {
             Poco::URI location = pMessage->getLocation();
-            std::clog << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
+//             std::clog << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
             
             std::string baseUri = location.getScheme() + "://" + location.getAuthority();
-            std::clog << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
+//             std::clog << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
             
             UriDescriptionReader descriptionReader(Poco::URI(baseUri), location.getPath());
             // TODO: better trust the device uuid in the SSDP message then in the device description ...
@@ -1618,7 +1618,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
         break;
     }
-    std::clog << "Controller::handleSsdpMessage() finished" << std::endl;
+//     std::clog << "Controller::handleSsdpMessage() finished" << std::endl;
 }
 
 

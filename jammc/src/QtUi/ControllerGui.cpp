@@ -105,8 +105,10 @@ CrumbButton::~CrumbButton()
 }
 
 
-ControllerGui::ControllerGui(QWidget* parent)
-: QFrame(parent),
+ControllerGui::ControllerGui(int argc, char** argv) :
+m_app(argc, argv),
+m_widget(),
+// : QFrame(parent),
 m_sliderMoved(false)
 {
 //     ui.setupUi(this);
@@ -160,20 +162,20 @@ m_sliderMoved(false)
 void
 ControllerGui::initGui()
 {
-    ui.setupUi(this);
-    ui.m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    ui.setupUi(&m_widget);
+    ui.m_playButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaPlay));
     ui.m_playButton->setText("");
-    ui.m_stopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+    ui.m_stopButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaStop));
     ui.m_stopButton->setText("");
-    ui.m_pauseButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    ui.m_pauseButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaPause));
     ui.m_pauseButton->setText("");
-    ui.m_skipForwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
+    ui.m_skipForwardButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaSkipForward));
     ui.m_skipForwardButton->setText("");
-    ui.m_skipBackwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
+    ui.m_skipBackwardButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaSkipBackward));
     ui.m_skipBackwardButton->setText("");
-    ui.m_seekForwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+    ui.m_seekForwardButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaSeekForward));
     ui.m_seekForwardButton->setText("");
-    ui.m_seekBackwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
+    ui.m_seekBackwardButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui.m_seekBackwardButton->setText("");
     
     // TODO: add "state logic" to button group, with disabling/enabling ...
@@ -187,9 +189,6 @@ ControllerGui::initGui()
     m_buttonGroup->addButton(ui.m_seekBackwardButton);*/
     
     // Forward some signals from GUI Elements
-//     connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
-//     connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
-//     connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
 //     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
 //     connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
     
@@ -199,48 +198,57 @@ ControllerGui::initGui()
     ui.m_breadCrumpLayout->setSpacing(0);
     new CrumbButton(ui.m_browserView, QModelIndex(), ui.m_breadCrump);
     
-    setWindowTitle("JammC");
+    m_widget.setWindowTitle("JammC");
     
-    m_upnpBrowserModel = new UpnpBrowserModel(this);
-    m_upnpRendererListModel = new UpnpRendererListModel(this);
+    m_pBrowserModel = new UpnpBrowserModel(m_pServers);
+    m_pRendererListModel = new UpnpRendererListModel(m_pRenderers);
     
-//     m_mainWindow = new ControllerGui();
-    /*m_mainWindow->*/setBrowserTreeItemModel(m_upnpBrowserModel);
-    /*m_mainWindow->*/setRendererListItemModel(m_upnpRendererListModel);
+    ui.m_rendererListView->setModel(m_pRendererListModel);
+    ui.m_browserView->setModel(m_pBrowserModel);
     
-    qRegisterMetaType<string>("string");
+    qRegisterMetaType<std::string>("string");
     qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
     
-    connect(this, SIGNAL(rendererAddedRemoved(Jamm::Device*, bool)),
-            m_upnpRendererListModel, SLOT(rendererAddedRemoved(Jamm::Device*, bool)));
-    connect(this, SIGNAL(serverAddedRemoved(UpnpServer*, bool)),
-            m_upnpBrowserModel, SLOT(serverAddedRemoved(UpnpServer*, bool)));
+    // connect device adding and removing signals and slots
+//     connect(this, SIGNAL(beginAddRenderer(int)), m_upnpRendererListModel, SLOT(beginAddRenderer(int)));
+//     connect(this, SIGNAL(beginRemoveRenderer(int)), m_upnpRendererListModel, SLOT(beginRemoveRenderer(int)));
+//     connect(this, SIGNAL(endAddRenderer()), m_upnpRendererListModel, SLOT(endAddRenderer()));
+//     connect(this, SIGNAL(endRemoveRenderer()), m_upnpRendererListModel, SLOT(endRemoveRenderer()));
+    
 //     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
 //     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
 //     connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
-    connect(ui.m_rendererListView->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
+
     
-    connect(ui.m_playButton, SIGNAL(pressed()), this, SLOT(playPressed()));
-    connect(ui.m_stopButton, SIGNAL(pressed()), this, SLOT(stopPressed()));
-    connect(ui.m_pauseButton, SIGNAL(pressed()), this, SLOT(pausePressed()));
-    connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeChanged(int)));
+    connect(ui.m_playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
+    connect(ui.m_stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
+    connect(ui.m_pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
+    connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
-    connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionMoved(int)));
+    connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 //     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSlider(int, int)));
     
 //     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
+    connect(ui.m_rendererListView->selectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
-    
+}
+
+
+int
+ControllerGui::eventLoop()
+{
+//     QApplication app(argc, argv);
+    return m_app.exec();
 }
 
 
 void
 ControllerGui::showMainWindow()
 {
-    show();
+    m_widget.show();
 }
 
 void
@@ -260,11 +268,11 @@ ControllerGui::setSliderMoved(int)
 }
 
 
-void
-ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
-{
-    ui.m_browserView->setModel(model);
-}
+// void
+// ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
+// {
+//     ui.m_browserView->setModel(model);
+// }
 
 
 void
@@ -278,7 +286,7 @@ ControllerGui::browserItemActivated(const QModelIndex& index)
 
 
 void
-UpnpController::rendererSelectionChanged(const QItemSelection& selected,
+ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
                                          const QItemSelection& /*deselected*/)
 {
     if (selected.count() > 1) {
@@ -286,7 +294,7 @@ UpnpController::rendererSelectionChanged(const QItemSelection& selected,
     }
     if (selected.empty()) {
         std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
-        m_selectedRenderer = NULL;
+        m_pSelectedRenderer = NULL;
         return;
     }
     
@@ -304,11 +312,11 @@ UpnpController::rendererSelectionChanged(const QItemSelection& selected,
 }
 
 
-void
-ControllerGui::setRendererListItemModel(QAbstractItemModel* model)
-{
-    ui.m_rendererListView->setModel(model);
-}
+// void
+// ControllerGui::setRendererListItemModel(QAbstractItemModel* model)
+// {
+//     ui.m_rendererListView->setModel(model);
+// }
 
 
 void
@@ -334,4 +342,115 @@ ControllerGui::setVolumeSlider(int max, int val)
 //     qDebug() << "ControllerGui::setSlider() to:" << max << val;
     ui.m_volumeSlider->setRange(0, max>=0?max:0);
     ui.m_volumeSlider->setSliderPosition(val);
+}
+
+
+void
+ControllerGui::playButtonPressed()
+{
+    m_pSelectedRenderer->AVTransport()->Play(0, "1");
+}
+
+
+void
+ControllerGui::stopButtonPressed()
+{
+}
+
+
+void
+ControllerGui::pauseButtonPressed()
+{
+}
+
+
+void
+ControllerGui::positionSliderMoved(int position)
+{
+}
+
+
+void
+ControllerGui::volumeSliderMoved(int value)
+{
+}
+
+
+void
+ControllerGui::beginAddRenderer(int position)
+{
+    m_pRendererListModel->beginAddRenderer(position);
+}
+
+
+void
+ControllerGui::beginAddServer(int position)
+{
+    m_pBrowserModel->beginAddServer(position);
+}
+
+
+void
+ControllerGui::beginRemoveRenderer(int position)
+{
+    m_pRendererListModel->beginRemoveRenderer(position);
+}
+
+
+void
+ControllerGui::beginRemoveServer(int position)
+{
+    m_pBrowserModel->beginRemoveServer(position);
+}
+
+
+void
+ControllerGui::endAddRenderer()
+{
+    m_pRendererListModel->endAddRenderer();
+}
+
+
+void
+ControllerGui::endAddServer()
+{
+    m_pBrowserModel->endAddServer();
+}
+
+
+void
+ControllerGui::endRemoveRenderer()
+{
+    m_pRendererListModel->endRemoveRenderer();
+}
+
+
+void
+ControllerGui::endRemoveServer()
+{
+    m_pBrowserModel->endRemoveServer();
+}
+
+
+void
+ControllerGui::beginAddDevice(int position)
+{
+}
+
+
+void
+ControllerGui::beginRemoveDevice(int position)
+{
+}
+
+
+void
+ControllerGui::endAddDevice()
+{
+}
+
+
+void
+ControllerGui::endRemoveDevice()
+{
 }

@@ -20,22 +20,17 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QApplication>
-
 #include "UpnpController.h"
+#include "QtUi/ControllerGui.h"
 
 int main(int argc, char** argv)
 {
-//     UpnpAvUserInterface upnpController;
-//     upnpController.initGui();
-//     upnpController.showMainWindow();
-//     upnpController.start();
-//     upnpController.eventLoop();
+    ControllerGui gui(argc, argv);
+    UpnpAvController controller;
     
-//     QApplication app(argc, argv);
-//     UpnpController upnpController;
-//     upnpController.initGui();
-//     upnpController.showMainWindow();
-//     upnpController.start();
-//     return app.exec();
+    controller.setUserInterface(&gui);
+    gui.initGui();
+    gui.showMainWindow();
+    controller.start();
+    return gui.eventLoop();
 }

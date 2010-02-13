@@ -76,8 +76,8 @@ protected:
     virtual void endAddDevice() = 0;
     virtual void endRemoveDevice() = 0;
     
-    virtual void deviceAdded(Device* pDevice);
-    virtual void deviceRemoved(Device* pDevice);
+//     virtual void deviceAdded(Device* pDevice);
+//     virtual void deviceRemoved(Device* pDevice);
     
     Jamm::Container<Jamm::Device>*    m_pDevices;
 };
@@ -106,7 +106,7 @@ protected:
     void rendererSelected(MediaRendererController* pRenderer);
     void MediaObjectSelected(Jamm::Av::MediaObject* pObject);
     
-private:
+// private:
     MediaRendererController*                     m_pSelectedRenderer;
     Jamm::Container<MediaRendererController>*    m_pRenderers;
     Jamm::Container<MediaServerController>*      m_pServers;
@@ -117,6 +117,8 @@ class UpnpController : public Jamm::Controller
 {
 public:
     ~UpnpController();
+    
+    void setUserInterface(UpnpUserInterface* pUserInterface) { m_pUserInterface = pUserInterface; }
     
     void start();
     
@@ -132,6 +134,8 @@ private:
 
 class UpnpAvController : public UpnpController
 {
+public:
+    void setUserInterface(UpnpAvUserInterface* pUserInterface);
     
 private:
     virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot);
@@ -139,7 +143,7 @@ private:
     
     Jamm::Container<MediaRendererController>    m_renderers;
     Jamm::Container<MediaServerController>      m_servers;
-    UpnpAvUserInterface*                        m_pUserInterface;
+    UpnpAvUserInterface*                        m_pAvUserInterface;
 };
 
     

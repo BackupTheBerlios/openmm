@@ -49,6 +49,10 @@ SET( JAMMTEST_CONTROLLER_SRCS
 controller.cpp
 )
 
+SET( JAMMTEST_MEDIAOBJECT_SRCS
+MediaObjectTest.cpp
+)
+
 #list all source files here
 ADD_EXECUTABLE( ssdp_test
 ${JAMMTEST_SSDP_SRCS}
@@ -68,6 +72,10 @@ ${JAMMTEST_JAMMLIGHT_CTRL_SRCS}
 
 ADD_EXECUTABLE( controller_test
 ${JAMMTEST_CONTROLLER_SRCS}
+)
+
+ADD_EXECUTABLE( media_object_test
+${JAMMTEST_MEDIAOBJECT_SRCS}
 )
 
 #need to link to some other libraries ? just add them here
@@ -94,6 +102,10 @@ ${LIB_POCO_UTIL}
 TARGET_LINK_LIBRARIES( controller_test
 ${LIB_JAMM}
 ${LIB_POCO_UTIL}
+)
+
+TARGET_LINK_LIBRARIES( media_object_test
+${LIB_JAMM}
 )
 
 #INSTALL( TARGETS ssdp_test device_test controller_test

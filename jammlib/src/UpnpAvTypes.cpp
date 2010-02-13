@@ -69,26 +69,103 @@ AvTypeConverter::writeDuration(const r8& duration)
 }
 
 
-MediaObject::MediaObject(const std::string& metaData)
+MediaObject::MediaObject() :
+m_parent(NULL),
+m_childCount(0),
+m_fetchedAllChildren(false),
+m_isContainer(false)
 {
-    DOMParser parser;
-    m_pDoc = parser.parseString(metaData);
-    Node* pNode = m_pDoc->documentElement()->firstChild();
-    while (pNode)
-    {
-//         std::cerr << "node: " << pNode->nodeName() << std::endl;
-//         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
-//         }
-        if (pNode->hasChildNodes()) {
-            m_properties.append(pNode->nodeName(), new Variant(pNode->innerText()));
-        }
-        pNode = pNode->nextSibling();
-    }
 }
 
 
-std::string
+void
+MediaObject::readMetaData(const std::string& metaData)
+{
+    Poco::XML::DOMParser parser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
+    // FIXME: this should be the DIDL-Lite element and not the object.
+    //        because of missing <?xml> document tag?
+    readNode(pDidl);
+//     if (pDidl->hasChildNodes()) {
+//         Poco::XML::Node* pObjectNode = pDidl->firstChild();
+//         readNode(pObjectNode);
+//     }
+}
+
+
+void
+MediaObject::readNode(Poco::XML::Node* pNode)
+{
+    std::clog << "MediaObject::readNode()" << std::endl;
+    
+//     std::clog << "type: " << pNode->nodeName() << std::endl;
+    if (pNode->hasAttributes()) {
+        Poco::XML::NamedNodeMap* attr = pNode->attributes();
+        m_objectId = attr->getNamedItem("id")->nodeValue();
+        m_parentId = attr->getNamedItem("parentID")->nodeValue();
+        m_childCount = Poco::NumberParser::parse(attr->getNamedItem("childCount")->nodeValue());
+        attr->release();
+    }
+    if (pNode->nodeName() == "container") {
+        m_isContainer = true;
+    }
+    std::clog << "isContainer: " << (isContainer() ? "1" : "0") << std::endl;
+    std::clog << "id: " << m_objectId << std::endl;
+    std::clog << "parentId: " << m_parentId << std::endl;
+    std::clog << "childCount: " << m_childCount << std::endl;
+    
+    if (pNode->hasChildNodes()) {
+        Poco::XML::Node* childNode = pNode->firstChild();
+        while (childNode)
+        {
+            std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
+            m_properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
+            childNode = childNode->nextSibling();
+        }
+    }
+    std::clog << std::endl;
+}
+
+
+void
+MediaObject::readChildren(const std::string& metaData)
+{
+    Poco::XML::DOMParser parser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+//     Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
+    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
+//     if (pDidl->hasChildNodes()) {
+//         Poco::XML::Node* pObjectNode = pDidl->firstChild();
+        while (pObjectNode)
+        {
+            if (pObjectNode->hasChildNodes()) {
+                MediaObject* pObject = new MediaObject();
+                pObject->readNode(pObjectNode);
+                pObject->m_parent = this;
+                m_children.push_back(pObject);
+            }
+            pObjectNode = pObjectNode->nextSibling();
+        }
+//     }
+}
+
+
+const std::string&
 MediaObject::getProperty(const std::string& name)
 {
     return m_properties.getValue<std::string>(name);
+}
+
+
+const std::string&
+MediaObject::getTitle()
+{
+    return m_properties.getValue<std::string>("dc:title");
+}
+
+
+int
+MediaObject::fetchChildren()
+{
 }

@@ -25,6 +25,7 @@
 
 #include <QtGui>
 
+#include "../UpnpController.h"
 #include "UpnpBrowserModel.h"
 #include "UpnpRendererListModel.h"
 #include "ui_ControllerGui.h"
@@ -57,40 +58,45 @@ private:
 };
 
 
-class ControllerGui : public QFrame, public UserInterface
+class ControllerGui : public QObject, public UpnpAvUserInterface
 {
     Q_OBJECT
 
+    friend class UpnpRendererListModel;
+    friend class UpnpBrowserModel;
+    
 public:
-    ControllerGui(QWidget *parent = 0);
+    ControllerGui(int argc, char** argv);
     
     virtual int eventLoop();
     
     virtual void initGui();
     virtual void showMainWindow();
+    // TODO: hideMainWindow();
+
     
     
+//     void setBrowserTreeItemModel(QAbstractItemModel* model);
+//     void setRendererListItemModel(QAbstractItemModel* model);
     
-    void setBrowserTreeItemModel(QAbstractItemModel* model);
-    void setRendererListItemModel(QAbstractItemModel* model);
-    
-    QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserView->selectionModel(); }
+//     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserView->selectionModel(); }
 //     QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
     
-signals:
-//     void playButtonPressed();
-//     void stopButtonPressed();
-//     void pauseButtonPressed();
-//     void sliderMoved(int);
-//     void volSliderMoved(int);
-    
-//     void activated(const QModelIndex& index);
+
     
 public slots:
     void setSlider(int max, int val);
     void setVolumeSlider(int max, int val);
     
 private slots:
+    void playButtonPressed();
+    void stopButtonPressed();
+    void pauseButtonPressed();
+    void positionSliderMoved(int position);
+    void volumeSliderMoved(int value);
+    
+//     void activated(const QModelIndex& index);
+    
     void rendererSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void browserItemActivated(const QModelIndex& index);
     /*
@@ -105,22 +111,34 @@ private slots:
     void checkSliderMoved(int value);
     void setSliderMoved(int value);
     
+// signals:
+    virtual void beginAddRenderer(int position);
+    virtual void beginAddServer(int position);
+    virtual void beginRemoveRenderer(int position);
+    virtual void beginRemoveServer(int position);
+    virtual void endAddRenderer();
+    virtual void endAddServer();
+    virtual void endRemoveRenderer();
+    virtual void endRemoveServer();
+    
+    virtual void beginAddDevice(int position);
+    virtual void beginRemoveDevice(int position);
+    virtual void endAddDevice();
+    virtual void endRemoveDevice();
+    
+signals:
+    void sliderMoved(int value);
+    
 private:
-    virtual void deviceAdded(Device* pDevice) {}
-    virtual void rendererAdded(MediaRendererController* pRenderer) {}
-    virtual void serverAdded(MediaServerController* pRenderer) {}
     
-    virtual void deviceRemoved(Device* pDevice) {}
-    virtual void rendererRemoved(MediaRendererController* pRenderer) {}
-    virtual void serverRemoved(MediaServerController* pRenderer) {}
-    
-
 //     void sliderChange(QAbstractSlider::SliderChange change);
-    UpnpBrowserModel*                                   m_upnpBrowserModel;
-    UpnpRendererListModel*                              m_upnpRendererListModel;
+    UpnpBrowserModel*       m_pBrowserModel;
+    UpnpRendererListModel*  m_pRendererListModel;
     
-    Ui::ControllerGui ui;
-    bool m_sliderMoved;
+    QApplication            m_app;
+    QFrame                  m_widget;
+    Ui::ControllerGui       ui;
+    bool                    m_sliderMoved;
 };
 
 #endif //CONTROLLERGUI_H

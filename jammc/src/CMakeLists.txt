@@ -1,13 +1,29 @@
+# FIXME: it shouldn't be necessary to explicitly include qt4 headers here
+#        this should only be done in QtUi/ subdirectory
 FIND_PACKAGE(Qt4)
+
+INCLUDE(
+${QT_USE_FILE}
+)
+
+# MESSAGE( STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH} )
+
+ADD_SUBDIRECTORY(QtUi)
+
+# FIXME: include directory for UI files isn't propagated into the current directory.
+#        how is that done ...?
+INCLUDE_DIRECTORIES(
+/home/jb/devel/cc/jammbin/jammc/src/QtUi
+${JAMMC_QTUI_H_DIR}
+)
+
+MESSAGE(STATUS "JAMMC/SRC: include directory for UI files: ${JAMMC_QTUI_H_DIR}")
+# MESSAGE( STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH} )
+
 
 SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
-
-# FIND_LIBRARY(LIB_PLATINUM_UPNP
-# NAME platinum-upnp
-# PATHS ${CMAKE_LIBRARY_PATH}
-# )
 
 if(TARGET jamm)
 SET(LIB_JAMM
@@ -23,17 +39,6 @@ PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET jamm)
 
-MESSAGE (STATUS "Use file: ${QT_USE_FILE}")
-INCLUDE(
-${QT_USE_FILE}
-)
-
-# ADD_SUBDIRECTORY(QtUi)
-
-INCLUDE_DIRECTORIES(
-${JAMMC_QTUI_H_DIR}
-)
-
 
 SET( JAMMC_SRCS
 # controllergui.cpp
@@ -47,10 +52,6 @@ UpnpAvCtrlImpl.cpp
 UpnpController.cpp
 )
 
-# SET( JAMMC_UI
-# # settings.ui
-# controllergui.ui
-# )
 
 SET( JAMMC_MOC
 # controllergui.h
@@ -61,38 +62,14 @@ SET( JAMMC_MOC
 UpnpController.h
 )
 
-INCLUDE_DIRECTORIES(
-)
-
-# QT4_WRAP_UI(
-# JAMMC_UI_H ${JAMMC_UI}
-# )
-
-# GET_FILENAME_COMPONENT(
-# JAMMC_UI_H_DIR ${JAMMC_UI_H} PATH
-# )
-
-# INCLUDE_DIRECTORIES(
-# ${JAMMC_UI_H_DIR}
-# )
-
-# QT4_WRAP_CPP(
-# JAMMC_MOC_CPP ${JAMMC_MOC}
-# )
 
 ADD_EXECUTABLE( jammc
 ${JAMMC_SRCS}
-# ${JAMMC_UI}
-# ${JAMMC_MOC_CPP}
 )
 
 TARGET_LINK_LIBRARIES( jammc
-# /usr/local/lib/libplatinum_upnp.so
-#platinum-upnp
-# jammcUiQt
+jammc-av-ui-qt
 ${LIB_JAMM}
-# ${LIB_PLATINUM_UPNP}
-# ${QT_LIBRARIES}
 )
 
 ADD_DEFINITIONS(

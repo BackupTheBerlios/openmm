@@ -25,8 +25,9 @@
 #include <algorithm>
 #include <QtDebug>
 
-UpnpRendererListModel::UpnpRendererListModel(/*UpnpController* mediaController, */QObject *parent)
-: QAbstractItemModel(parent)/*, m_mediaController(mediaController)*/
+UpnpRendererListModel::UpnpRendererListModel(Jamm::Container<MediaRendererController>* pRenderers, QObject *parent) :
+QAbstractItemModel(parent),
+m_pRenderers(pRenderers)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
 }
@@ -54,7 +55,7 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-    return QString(static_cast<Jamm::Device*>(index.internalPointer())->getUuid().c_str());
+    return QString(static_cast<MediaRendererController*>(index.internalPointer())->getDevice()->getUuid().c_str());
 }
 
 
@@ -83,7 +84,8 @@ UpnpRendererListModel::index(int row, int column,
                         const QModelIndex &/*parent*/) const
 {
 //     qDebug() << "UpnpRendererListModel::index()";
-    return createIndex(row, column, m_rendererList.at(row));
+//     return createIndex(row, column, m_rendererList.at(row));
+    return createIndex(row, column, &m_pRenderers->get(row));
 }
 
 
@@ -99,7 +101,8 @@ UpnpRendererListModel::rowCount(const QModelIndex &/*parent*/) const
 {
 //     qDebug() << "UpnpRendererListModel::rowCount()";
     
-    return m_rendererList.size();
+//     return m_rendererList.size();
+    return m_pRenderers->size();
 }
 
 
@@ -125,6 +128,7 @@ UpnpRendererListModel::endAddRenderer()
     qDebug() << "UpnpRendererListModel::endAddRenderer()";
     
     endInsertRows();
+    emit layoutChanged();
 }
 
 void
@@ -142,27 +146,6 @@ UpnpRendererListModel::endRemoveRenderer()
     qDebug() << "UpnpRendererListModel::endRemoveRenderer()";
     
     endRemoveRows();
+    emit layoutChanged();
 }
 
-// void
-// UpnpRendererListModel::rendererAdded(MediaRendererController* pRenderer)
-// {
-//     qDebug() << "UpnpRendererListModel::rendererAdded() renderer:" << pRenderer->getDevice()->getUuid().c_str();
-//     
-//     beginInsertRows(QModelIndex(), m_rendererList.size(), m_rendererList.size());
-//     m_rendererList.push_back(renderer);
-//     endInsertRows();
-// }
-// 
-// 
-// void
-// UpnpRendererListModel::rendererRemoved(MediaRendererController* pRenderer)
-// {
-//     qDebug() << "UpnpRendererListModel::rendererRemoved() renderer:" << pRenderer->getDevice()->getUuid().c_str();
-//     
-//     vector<Jamm::Device*>::iterator i = find(m_rendererList.begin(), m_rendererList.end(), renderer);
-//     int n = i - m_rendererList.begin();
-//     beginRemoveRows(QModelIndex(), n, n);
-//     m_rendererList.erase(i);
-//     endRemoveRows();
-// }

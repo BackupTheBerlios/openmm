@@ -29,20 +29,16 @@
 #include <QList>
 #include <QTextCodec>
 
-#include <vector>
-using namespace std;
-
 #include <Jamm/Upnp.h>
-// #include "UpnpController.h"
 
-// class UpnpController;
+#include "../UpnpAvCtrlImpl.h"
 
 class UpnpRendererListModel : public QAbstractItemModel
 {
     Q_OBJECT
         
 public:
-    UpnpRendererListModel(/*UpnpController* mediaController,*/ QObject *parent = 0);
+    UpnpRendererListModel(Jamm::Container<MediaRendererController>* pRenderers, QObject *parent = 0);
     ~UpnpRendererListModel();
     
     QVariant data(const QModelIndex &index, int role) const;
@@ -55,23 +51,15 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     
-public slots:
+// public slots:
     void beginAddRenderer(int position);
     void beginRemoveRenderer(int position);
     void endAddRenderer();
     void endRemoveRenderer();
     
-//     rendererAdded(MediaRendererController* pRenderer);
-//     rendererRemoved(MediaRendererController* pRenderer);
-//     void rendererAddedRemoved(Jamm::Device* renderer, bool add);
-    
 private:
-//     UpnpController*       m_mediaController;
-    QTextCodec*           m_charEncoding;
-    // TODO: use a pointer to the renderer device instead of the uuid string
-    //       (should be the same as in BrowserModel, where a string takes
-    //        too much memory compared to a pointer)
-//     vector<Jamm::Device*>       m_rendererList;
+    Jamm::Container<MediaRendererController>*   m_pRenderers;
+    QTextCodec*                                 m_charEncoding;
 };
 
 #endif

@@ -24,8 +24,9 @@
 
 #include <QtDebug>
 
-UpnpBrowserModel::UpnpBrowserModel(QObject *parent)
-: QAbstractItemModel(parent)
+UpnpBrowserModel::UpnpBrowserModel(Jamm::Container<MediaServerController>* pServers, QObject *parent)
+: QAbstractItemModel(parent),
+m_pServers(pServers)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
     m_root = new Jamm::Av::MediaObject();
@@ -216,25 +217,61 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 
 
 void
-UpnpBrowserModel::serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add)
+UpnpBrowserModel::beginAddServer(int position)
 {
-//     qDebug() << "UpnpBrowserModel::serverAddedRemoved()" << (add?"add":"remove") << "server:" << server->getUuid().c_str();
+    qDebug() << "UpnpBrowserModel::beginAddServer() at position:" << position;
     
-    if (add) {
-        Jamm::Av::MediaObject* d = new Jamm::Av::MediaObject();
-        d->m_objectId = "0";
-        d->m_server = server;
-        d->m_parent = m_root;
-        m_root->m_children.push_back(d);
-    }
-    else {
-    // TODO: delete the Jamm::Av::MediaObject tree of server recursively to avoid a memory leak
-        std::vector<Jamm::Av::MediaObject*>::iterator i = m_root->m_children.begin();
-        while ((*i)->m_server != server && i != m_root->m_children.end()) {
-            ++i;
-        }
-        m_root->m_children.erase(i);
-    }
-    // TODO: do a more selective update of the BrowserModel and don't reset the whole model.
-    reset();
+    beginInsertRows(QModelIndex(), position, position);
 }
+
+
+void
+UpnpBrowserModel::endAddServer()
+{
+    qDebug() << "UpnpBrowserModel::endAddServer()";
+    
+    endInsertRows();
+    emit layoutChanged();
+}
+
+void
+UpnpBrowserModel::beginRemoveServer(int position)
+{
+    qDebug() << "UpnpBrowserModel::beginRemoveServer() at position:" << position;
+    
+    beginRemoveRows(QModelIndex(), position, position);
+}
+
+
+void
+UpnpBrowserModel::endRemoveServer()
+{
+    qDebug() << "UpnpBrowserModel::endRemoveServer()";
+    
+    endRemoveRows();
+    emit layoutChanged();
+}
+
+// void
+// UpnpBrowserModel::serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add)
+// {
+// //     qDebug() << "UpnpBrowserModel::serverAddedRemoved()" << (add?"add":"remove") << "server:" << server->getUuid().c_str();
+//     
+//     if (add) {
+//         Jamm::Av::MediaObject* d = new Jamm::Av::MediaObject();
+//         d->m_objectId = "0";
+//         d->m_server = server;
+//         d->m_parent = m_root;
+//         m_root->m_children.push_back(d);
+//     }
+//     else {
+//     // TODO: delete the Jamm::Av::MediaObject tree of server recursively to avoid a memory leak
+//         std::vector<Jamm::Av::MediaObject*>::iterator i = m_root->m_children.begin();
+//         while ((*i)->m_server != server && i != m_root->m_children.end()) {
+//             ++i;
+//         }
+//         m_root->m_children.erase(i);
+//     }
+//     // TODO: do a more selective update of the BrowserModel and don't reset the whole model.
+//     reset();
+// }

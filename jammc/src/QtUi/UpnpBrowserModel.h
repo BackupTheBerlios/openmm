@@ -32,15 +32,15 @@
 
 #include <Jamm/Upnp.h>
 #include <Jamm/UpnpAvTypes.h>
-// #include "upnpsyncmediabrowser.h"
 
+#include "../UpnpAvCtrlImpl.h"
 
 class UpnpBrowserModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(QObject *parent = 0);
+    UpnpBrowserModel(Jamm::Container<MediaServerController>* pServers, QObject *parent = 0);
     ~UpnpBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -61,10 +61,15 @@ public:
     }
     QIcon icon(const QModelIndex &index) const;
     
-public slots:
-    void serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add);
+    void beginAddServer(int position);
+    void beginRemoveServer(int position);
+    void endAddServer();
+    void endRemoveServer();
+    
+//     void serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add);
     
 private:
+    Jamm::Container<MediaServerController>*   m_pServers;
     Jamm::Av::MediaObject*           m_root;
 //     bool                  m_lazyRowCount;
     QTextCodec*           m_charEncoding;

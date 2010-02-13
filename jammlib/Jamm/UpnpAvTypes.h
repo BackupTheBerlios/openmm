@@ -41,24 +41,6 @@
 #include "Upnp.h"
 #include "UpnpAvControllers.h"
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NamedNodeMap;
-using Poco::XML::AttrMap;
-using Poco::XML::Element;
-using Poco::XML::AutoPtr;
-using Poco::XML::InputSource;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
-using Poco::XML::XMLWriter;
-using Poco::XML::DocumentFragment;
 
 namespace Jamm {
 namespace Av {
@@ -81,36 +63,42 @@ public:
     
     MediaObject();
     // NOTE: should be split into a Controller and Device part?
-    MediaObject(const std::string& metaData);
+//     MediaObject(const std::string& metaData);
+//     MediaObject(Poco::XML::Node* pNode);
     
-    bool isContainer();
+    bool isContainer() { return m_isContainer; }
+    const std::string& getTitle();
     int fetchChildren();
     
-    std::string getProperty(const std::string& name);
+    const std::string& getProperty(const std::string& name);
     
-    // object properties:
-    std::string getId();
-    void setId(const std::string& id);
-    std::string getParentId();
-    void setParentId(const std::string& id);
-    std::string getTitle();
-    void setTitle(const std::string& id);
-    std::string getRes();
-    void setRes(const std::string& id);
-    std::string getClass();
-    void setClass(const std::string& id);
-    
-    
-// private:
-    AutoPtr<Document>                       m_pDoc;
-    Container<Variant>                      m_properties;
-    
-    ContentDirectoryController*             m_server;
-    std::string                             m_objectId;
     MediaObject*                            m_parent;
     std::vector<MediaObject*>               m_children;
-    bool                                    m_fetchedAllChildren;
+    std::string                             m_objectId;
+    std::string                             m_parentId;
     unsigned int                            m_childCount;
+    bool                                    m_fetchedAllChildren;
+    
+    
+    // object properties:
+//     const std::string& getId();
+//     void setId(const std::string& id);
+//     std::string getParentId();
+//     void setParentId(const std::string& id);
+//     void setTitle(const std::string& id);
+//     std::string getRes();
+//     void setRes(const std::string& id);
+//     std::string getClass();
+//     void setClass(const std::string& id);
+    
+    void readChildren(const std::string& metaData);
+    void readMetaData(const std::string& metaData);
+    void readNode(Poco::XML::Node* pNode);
+    
+// private:
+    ContentDirectoryController*             m_server;
+    Container<Variant>                      m_properties;
+    bool                                    m_isContainer;
 };
 
 
