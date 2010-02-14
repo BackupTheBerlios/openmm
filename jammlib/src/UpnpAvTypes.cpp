@@ -84,13 +84,7 @@ MediaObject::readMetaData(const std::string& metaData)
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
     Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
-    // FIXME: this should be the DIDL-Lite element and not the object.
-    //        because of missing <?xml> document tag?
     readNode(pDidl);
-//     if (pDidl->hasChildNodes()) {
-//         Poco::XML::Node* pObjectNode = pDidl->firstChild();
-//         readNode(pObjectNode);
-//     }
 }
 
 
@@ -99,17 +93,23 @@ MediaObject::readNode(Poco::XML::Node* pNode)
 {
     std::clog << "MediaObject::readNode()" << std::endl;
     
-//     std::clog << "type: " << pNode->nodeName() << std::endl;
+    Poco::XML::NamedNodeMap* attr = NULL;
     if (pNode->hasAttributes()) {
-        Poco::XML::NamedNodeMap* attr = pNode->attributes();
+        attr = pNode->attributes();
         m_objectId = attr->getNamedItem("id")->nodeValue();
         m_parentId = attr->getNamedItem("parentID")->nodeValue();
-        m_childCount = Poco::NumberParser::parse(attr->getNamedItem("childCount")->nodeValue());
-        attr->release();
+
     }
     if (pNode->nodeName() == "container") {
         m_isContainer = true;
+        if (attr != NULL) {
+            m_childCount = Poco::NumberParser::parse(attr->getNamedItem("childCount")->nodeValue());
+        }
     }
+    if (attr != NULL) {
+        attr->release();
+    }
+    
     std::clog << "isContainer: " << (isContainer() ? "1" : "0") << std::endl;
     std::clog << "id: " << m_objectId << std::endl;
     std::clog << "parentId: " << m_parentId << std::endl;
@@ -133,39 +133,62 @@ MediaObject::readChildren(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
-//     Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
-//     if (pDidl->hasChildNodes()) {
-//         Poco::XML::Node* pObjectNode = pDidl->firstChild();
-        while (pObjectNode)
-        {
-            if (pObjectNode->hasChildNodes()) {
-                MediaObject* pObject = new MediaObject();
-                pObject->readNode(pObjectNode);
-                pObject->m_parent = this;
-                m_children.push_back(pObject);
-            }
-            pObjectNode = pObjectNode->nextSibling();
+    while (pObjectNode)
+    {
+        if (pObjectNode->hasChildNodes()) {
+            MediaObject* pObject = new MediaObject();
+            pObject->readNode(pObjectNode);
+            pObject->m_parent = this;
+            pObject->m_server = m_server;
+            m_children.push_back(pObject);
         }
-//     }
+        pObjectNode = pObjectNode->nextSibling();
+    }
 }
 
 
-const std::string&
+std::string
 MediaObject::getProperty(const std::string& name)
 {
+    std::clog << "MediaObject::getProperty() name: " << name << std::endl;
+    
     return m_properties.getValue<std::string>(name);
 }
 
 
-const std::string&
+std::string
 MediaObject::getTitle()
 {
-    return m_properties.getValue<std::string>("dc:title");
+    std::clog << "MediaObject::getTitle()" << std::endl;
+    
+    std::string res = m_properties.getValue<std::string>("dc:title");
+    if (res == "") {
+        return "foo";
+    }
+    return res;
 }
 
 
 int
 MediaObject::fetchChildren()
 {
+    // TODO: browse meta data for the root object with id "0"
+    std::clog << "MediaObject::fetchChildren() objectId: " << m_objectId << std::endl;
+    if (m_server && !m_fetchedAllChildren) {
+        std::string result;
+        Jamm::ui4 numberReturned;
+        Jamm::ui4 totalMatches;
+        Jamm::ui4 updateId;
+        m_server->ContentDirectory()->Browse(m_objectId, "BrowseDirectChildren", "*", m_children.size(), 10, "", result, numberReturned, totalMatches, updateId);
+        readChildren(result);
+//         UpnpBrowseResult res = m_server->browseChildren(this, m_children.size(), UpnpServer::m_sliceSize);
+        // m_totalMatches is the number of items in the browse result, that matches
+        // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
+        if (m_children.size() >= totalMatches) {
+            m_fetchedAllChildren = true;
+        }
+        m_childCount = totalMatches;
+    }
+    return m_childCount;
 }

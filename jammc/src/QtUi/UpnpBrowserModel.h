@@ -33,6 +33,7 @@
 #include <Jamm/Upnp.h>
 #include <Jamm/UpnpAvTypes.h>
 
+#include "../UpnpController.h"
 #include "../UpnpAvCtrlImpl.h"
 
 class UpnpBrowserModel : public QAbstractItemModel
@@ -40,7 +41,7 @@ class UpnpBrowserModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(Jamm::Container<MediaServerController>* pServers, QObject *parent = 0);
+    UpnpBrowserModel(Jamm::Container<Server>* pServers, QObject *parent = 0);
     ~UpnpBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -56,9 +57,8 @@ public:
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
     
-    Jamm::Av::MediaObject* getObject(const QModelIndex &index) const {
-        return index.isValid() ? static_cast<Jamm::Av::MediaObject*>(index.internalPointer()) : m_root;
-    }
+    Jamm::Av::MediaObject* getObject(const QModelIndex &index) const;
+    
     QIcon icon(const QModelIndex &index) const;
     
     void beginAddServer(int position);
@@ -66,14 +66,12 @@ public:
     void endAddServer();
     void endRemoveServer();
     
-//     void serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add);
-    
 private:
-    Jamm::Container<MediaServerController>*   m_pServers;
-    Jamm::Av::MediaObject*           m_root;
+    Jamm::Container<Server>*    m_pServers;
+//     Jamm::Av::MediaObject*      m_root;
+    QTextCodec*                 m_charEncoding;
+    QFileIconProvider*          m_iconProvider;
 //     bool                  m_lazyRowCount;
-    QTextCodec*           m_charEncoding;
-    QFileIconProvider*    m_iconProvider;
 };
 
 #endif // UPNPBROWSERMODEL_H

@@ -67,10 +67,10 @@ public:
 //     MediaObject(Poco::XML::Node* pNode);
     
     bool isContainer() { return m_isContainer; }
-    const std::string& getTitle();
-    int fetchChildren();
+    std::string getTitle();
+    std::string getProperty(const std::string& name);
     
-    const std::string& getProperty(const std::string& name);
+    int fetchChildren();
     
     MediaObject*                            m_parent;
     std::vector<MediaObject*>               m_children;
@@ -96,9 +96,9 @@ public:
     void readNode(Poco::XML::Node* pNode);
     
 // private:
-    ContentDirectoryController*             m_server;
-    Container<Variant>                      m_properties;
-    bool                                    m_isContainer;
+    MediaServerController*             m_server;
+    Container<Variant>                 m_properties;
+    bool                               m_isContainer;
 };
 
 

@@ -109,7 +109,7 @@ UriDescriptionReader::getDescription(const std::string& path)
         rs.read(buf, response.getContentLength());
         res = new std::string(buf, response.getContentLength());
         
-//         std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+        std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
         std::clog << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
@@ -271,7 +271,10 @@ DescriptionReader::service()
             pRes->setServiceType(pNode->innerText());
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
-            pRes->setDescriptionPath(pNode->innerText());
+            // FIXME: this is somewhat ugly
+            std::string descriptionPath = pNode->innerText();
+            fixQuirkyPath(descriptionPath);
+            pRes->setDescriptionPath(descriptionPath);
             // load the service description into the Service object.
             pRes->setDescription(getDescription(pRes->getDescriptionPath()));
             Poco::XML::Node* pScpd = m_nodeStack.top();
@@ -312,10 +315,16 @@ DescriptionReader::service()
             releaseDescriptionDocument();
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
-            pRes->setControlPath(pNode->innerText());
+            std::string controlPath = pNode->innerText();
+            fixQuirkyPath(controlPath);
+            fixQuirkyPathRemoveFileName(controlPath);
+            pRes->setControlPath(controlPath);
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
-            pRes->setEventPath(pNode->innerText());
+            std::string eventPath = pNode->innerText();
+            fixQuirkyPath(eventPath);
+            fixQuirkyPathRemoveFileName(eventPath);
+            pRes->setEventPath(eventPath);
         }
         
         pNode = pNode->nextSibling();
@@ -411,6 +420,28 @@ DescriptionReader::stateVar()
 }
 
 
+void
+DescriptionReader::fixQuirkyPath(std::string& path)
+{
+    int len = path.size();
+    if (path.substr(0, 1) != "/") {
+        path = "/" + path;
+        len++;
+        std::clog << "DescriptionReader::fixQuirkyPath() adding leading /: " << path << std::endl;
+    }
+
+}
+
+
+void
+DescriptionReader::fixQuirkyPathRemoveFileName(std::string& path)
+{
+    int len = path.size();
+    if (path.substr(len - 4) == ".xml") {
+        path = path.substr(0, path.find_last_of('/') + 1);
+        std::clog << "DescriptionReader::fixQuirkyPath() removing trailing filename: " << path << std::endl;
+    }
+}
 
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : m_pActionTemplate(pActionTemplate)
 {
@@ -470,7 +501,21 @@ m_pActionTemplate(pActionTemplate)
     std::clog << "response: " << responseBody << std::endl;
     
     Poco::XML::DOMParser parser;
-    m_pDoc = parser.parseString(responseBody);
+    // TODO: set encoding with parser.setEncoding();
+    // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+    try {
+        m_pDoc = parser.parseString(responseBody);
+    }
+    catch (Poco::XML::SAXParseException) {
+        std::cerr << "Error in ActionResponseReader: could not parse action response." << std::endl;
+        return;
+    }
+    catch (Poco::XML::DOMException) {
+        std::cerr << "Error in ActionResponseReader: could not parse action response." << std::endl;
+        return;
+    }
+    // TODO: new reader design: don't go further if parser has failed
     Poco::XML::NodeIterator it(m_pDoc, Poco::XML::NodeFilter::SHOW_ALL);
     m_nodeStack.push(it.nextNode());
 }
@@ -498,7 +543,7 @@ ActionResponseReader::action()
             Poco::XML::Node* pArgument = pAction->firstChild();
             
             while (pArgument) {
-//                 std::clog << "ActionRequestReader::action() setting Argument: " << pArgument->nodeName() << " val: " << pArgument->innerText() << std::endl;
+                std::clog << "ActionRequestReader::action() reading Argument: " << pArgument->nodeName() << ", val: " << pArgument->innerText() << std::endl;
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
                 pArgument = pArgument->nextSibling();
             }
@@ -861,12 +906,12 @@ Service::sendAction(Action* pAction)
     Poco::Net::HTTPResponse response;
     std::istream& rs = m_pControlRequestSession->receiveResponse(response);
     if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-        std::clog << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
+        std::cerr << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
     }
     char* buf = new char[response.getContentLength()];
     rs.read(buf, response.getContentLength());
     std::string responseBody = std::string(buf, response.getContentLength());
-    std::clog << "Service::sendAction() response received: " << responseBody << std::endl;
+    std::clog << "Service::sendAction() response received: " /*<< responseBody*/ << std::endl;
     ActionResponseReader responseReader(responseBody, pAction);
     responseReader.action();
     std::clog << "Service::sendAction() finished" << std::endl;

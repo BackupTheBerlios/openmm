@@ -20,11 +20,22 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-// #include <platinum/PltDidl.h>
 #include <QtDebug>
 
 #include "UpnpController.h"
 // #include "modeltest.h"
+
+Server::Server(MediaServerController* pServerController) :
+m_pServerController(pServerController)
+{
+    m_pRoot = new Jamm::Av::MediaObject();
+    m_pRoot->m_objectId = "0";
+    m_pRoot->m_parent = NULL;
+    m_pRoot->m_server = m_pServerController;
+    m_pRoot->m_fetchedAllChildren = false;
+    // TODO: this should depend on the browse result for root object "0"
+    m_pRoot->m_isContainer = true;
+}
 
 
 UpnpController::~UpnpController()
@@ -111,20 +122,24 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
             new RenderingControlControllerImpl,
             new ConnectionManagerControllerImpl,
             new AVTransportControllerImpl);
-        m_pAvUserInterface->beginAddRenderer(m_renderers.position(pDevice->getUuid()));
+//         m_pAvUserInterface->beginAddRenderer(m_renderers.position(pDevice->getUuid()));
+        m_pAvUserInterface->beginAddRenderer(m_renderers.size());
         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
         m_renderers.append(pDevice->getUuid(), pRenderer);
         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
         m_pAvUserInterface->endAddRenderer();
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        MediaServerController* pServer = new Jamm::Av::MediaServerController(
+        Server* pServer = new Server(new Jamm::Av::MediaServerController(
             pDevice,
             new ContentDirectoryControllerImpl,
             new ConnectionManagerControllerImpl,
-            new AVTransportControllerImpl);
-        m_pAvUserInterface->beginAddServer(m_renderers.position(pDevice->getUuid()));
+            new AVTransportControllerImpl));
+//         m_pAvUserInterface->beginAddServer(m_renderers.position(pDevice->getUuid()));
+        m_pAvUserInterface->beginAddServer(m_servers.size());
+        std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
         m_servers.append(pDevice->getUuid(), pServer);
+        std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
         m_pAvUserInterface->endAddServer();
     }
 }
@@ -149,7 +164,9 @@ UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         // TODO: delete server controller
         m_pAvUserInterface->beginRemoveServer(m_servers.position(pDevice->getUuid()));
+        std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
         m_servers.remove(pDevice->getUuid());
+        std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
         m_pAvUserInterface->endRemoveServer();
     }
 }

@@ -108,7 +108,6 @@ CrumbButton::~CrumbButton()
 ControllerGui::ControllerGui(int argc, char** argv) :
 m_app(argc, argv),
 m_widget(),
-// : QFrame(parent),
 m_sliderMoved(false)
 {
 //     ui.setupUi(this);
@@ -209,12 +208,6 @@ ControllerGui::initGui()
     qRegisterMetaType<std::string>("string");
     qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
     
-    // connect device adding and removing signals and slots
-//     connect(this, SIGNAL(beginAddRenderer(int)), m_upnpRendererListModel, SLOT(beginAddRenderer(int)));
-//     connect(this, SIGNAL(beginRemoveRenderer(int)), m_upnpRendererListModel, SLOT(beginRemoveRenderer(int)));
-//     connect(this, SIGNAL(endAddRenderer()), m_upnpRendererListModel, SLOT(endAddRenderer()));
-//     connect(this, SIGNAL(endRemoveRenderer()), m_upnpRendererListModel, SLOT(endRemoveRenderer()));
-    
 //     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
 //     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
 //     connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
@@ -240,7 +233,6 @@ ControllerGui::initGui()
 int
 ControllerGui::eventLoop()
 {
-//     QApplication app(argc, argv);
     return m_app.exec();
 }
 
@@ -268,19 +260,22 @@ ControllerGui::setSliderMoved(int)
 }
 
 
-// void
-// ControllerGui::setBrowserTreeItemModel(QAbstractItemModel* model)
-// {
-//     ui.m_browserView->setModel(model);
-// }
-
-
 void
 ControllerGui::browserItemActivated(const QModelIndex& index)
 {
-    qDebug() << "ControllerGui::onActivated";
+    qDebug() << "ControllerGui::browserItemActivated()";
     if (index.model()->hasChildren(index)) {
         new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
+    }
+    else {
+        MediaObject* object = static_cast<MediaObject*>(index.internalPointer());
+        if (object == NULL) {
+            return;
+        }
+        m_pSelectedObject = object;
+        std::clog << "ControllerGui::browserItemActivated()" << std::endl;
+        std::clog << "title: " << object->getTitle() << std::endl;
+        std::clog << "res: " << object->getProperty("res") << std::endl;
     }
 }
 
@@ -300,23 +295,19 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
     
     QModelIndex index = selected.indexes().first();
     
-    m_pSelectedRenderer = static_cast<MediaRendererController*>(index.internalPointer());
+    MediaRendererController* selectedRenderer = static_cast<MediaRendererController*>(index.internalPointer());
     
-    if (m_pSelectedRenderer != NULL) {
-        std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
-        std::clog << "UpnpController::rendererSelectionChanged() selected renderer:" << 
-            m_pSelectedRenderer->getDevice()->getUuid() << std::endl;
-        
-        setVolumeSlider(100, 50);
+    if (selectedRenderer == NULL) {
+        return;
     }
+    m_pSelectedRenderer = selectedRenderer;
+    
+    std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
+    std::clog << "UpnpController::rendererSelectionChanged() selected renderer:" << 
+        m_pSelectedRenderer->getDevice()->getUuid() << std::endl;
+    
+    setVolumeSlider(100, 50);
 }
-
-
-// void
-// ControllerGui::setRendererListItemModel(QAbstractItemModel* model)
-// {
-//     ui.m_rendererListView->setModel(model);
-// }
 
 
 void
@@ -348,6 +339,10 @@ ControllerGui::setVolumeSlider(int max, int val)
 void
 ControllerGui::playButtonPressed()
 {
+    if (m_pSelectedRenderer == NULL) {
+        return;
+    }
+    m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, m_pSelectedObject->getProperty("res"), "");
     m_pSelectedRenderer->AVTransport()->Play(0, "1");
 }
 
@@ -355,24 +350,41 @@ ControllerGui::playButtonPressed()
 void
 ControllerGui::stopButtonPressed()
 {
+    if (m_pSelectedRenderer == NULL) {
+        return;
+    }
+    m_pSelectedRenderer->AVTransport()->Stop(0);
 }
 
 
 void
 ControllerGui::pauseButtonPressed()
 {
+    if (m_pSelectedRenderer == NULL) {
+        return;
+    }
+    m_pSelectedRenderer->AVTransport()->Pause(0);
 }
 
 
 void
 ControllerGui::positionSliderMoved(int position)
 {
+    if (m_pSelectedRenderer == NULL) {
+        return;
+    }
+    // TODO: need to support UPnP time format in Variant
+//     m_pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", );
 }
 
 
 void
 ControllerGui::volumeSliderMoved(int value)
 {
+    if (m_pSelectedRenderer == NULL) {
+        return;
+    }
+    m_pSelectedRenderer->RenderingControl()->SetVolume(0, "Master", value);
 }
 
 

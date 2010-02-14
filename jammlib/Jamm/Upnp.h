@@ -87,6 +87,13 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
+#include <Poco/SAX/SAXException.h>
+#include <Poco/DOM/DOMException.h>
+
+// FIXME: mediatomb sometimes doesn't response to M-SEARCHES
+// FIXME: platinum gives empty responses to action requests
+// FIXME: qt gui controller doesn't show children of root "0"
+// FIXME: changing volume causes segfault
 
 // TODO: [jammgen] dispatch actions not in the "great action dispatcher" but pass the dispatching
 //       to the corresponding services. This avoids double code in devices that have the same service
@@ -424,14 +431,16 @@ public:
     {
         std::clog << "Container::getValue() key: " << key << std::endl;
         Variant* e = (*m_pEntities.find(key)).second;
-        T res;
         if (e) {
+            T res;
             e->getValue(res);
+            std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
+            return res;
         } else {
-            std::clog << "Container::getValue() could not find key: " << key << std::endl;
+            std::cerr << "Container::getValue() could not find key: " << key << std::endl;
+            // TODO: through an exception
+            return T();
         }
-        std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
-        return res;
     }
     
     template<typename T> void setValue(const std::string& key, const T& val)
@@ -439,10 +448,8 @@ public:
         std::clog << "Container::setValue() key: " << key << std::endl;
         std::clog << "m_pEntities has: " << m_pEntities.size() << " entries" << std::endl;
         std::clog << "m_keys has: " << m_keys.size() << " entries" << std::endl;
-        // FIXME: segfault here
-        std::clog << "first pointer to Variant in m_keys is: " << m_keys[0] << std::endl;
         if (m_pEntities.find(key) == m_pEntities.end()) {
-            std::clog << "Container::setValue() could not find key"<< std::endl;
+            std::cerr << "Container::setValue() could not find key"<< std::endl;
             return;
         }
         std::clog << "Container::setValue() found key" << std::endl;
@@ -453,7 +460,7 @@ public:
             e->setValue(val);
         }
         else {
-            std::clog << "Container::setValue() pointer to Variant is invalid" << std::endl;
+            std::cerr << "Container::setValue() pointer to Variant is invalid" << std::endl;
         }
         std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
     }
@@ -484,6 +491,8 @@ public:
     
 protected:
     virtual std::string& getDescription(const std::string& path) = 0;
+    virtual void fixQuirkyPath(std::string& path);
+    virtual void fixQuirkyPathRemoveFileName(std::string& path);
     
     void releaseDescriptionDocument();
     
@@ -492,6 +501,7 @@ protected:
     Action* action();
     Argument* argument();
     StateVar* stateVar();
+    
     
     std::string             m_deviceDescriptionPath;
     // TODO: replace m_nodeStack by argument Node* in the factory methods

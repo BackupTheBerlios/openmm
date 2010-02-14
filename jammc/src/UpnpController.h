@@ -23,40 +23,27 @@
 #ifndef UPNPCONTROLLER_H
 #define UPNPCONTROLLER_H
 
-// #include <QObject>
-// #include <QItemSelection>
-
-// #include <platinum/Platinum.h>
-// #include <platinum/PltMediaController.h>
-
 #include <Jamm/UpnpAvTypes.h>
 
 #include "UpnpAvCtrlImpl.h"
 
-// #include "upnprenderingcontrol.h"
-// #include "upnpsyncmediabrowser.h"
-// #include "QtUi/UpnpBrowserModel.h"
-// #include "QtUi/UpnpRendererListModel.h"
-// #include "QtUi/ControllerGui.h"
 
-
-
-// class UpnpBrowserModel;
-// class UpnpRendererListModel;
-// class ControllerGui;
-
-// class RendererListItem
-// {
-//     RendererListItem(MediaRendererController* pRendererController)
-//         : m_pRendererController(pRendererController) {}
-//     
+class Server
+{
+public:
+    Server(MediaServerController* pServerController);
+    
 //     int index();
 //     int rendererCount();
 //     std::string displayName();
-//     
-// private:
-//     MediaRendererController*    m_pRendererController;
-// };
+    
+    MediaServerController* controller() { return m_pServerController; }
+    MediaObject* root() { return m_pRoot; }
+    
+private:
+    MediaServerController*    m_pServerController;
+    MediaObject*              m_pRoot;
+};
 
 
 class UpnpUserInterface
@@ -108,8 +95,9 @@ protected:
     
 // private:
     MediaRendererController*                     m_pSelectedRenderer;
+    Jamm::Av::MediaObject*                       m_pSelectedObject;
     Jamm::Container<MediaRendererController>*    m_pRenderers;
-    Jamm::Container<MediaServerController>*      m_pServers;
+    Jamm::Container<Server>*                     m_pServers;
 };
 
 
@@ -142,7 +130,7 @@ private:
     virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot);
     
     Jamm::Container<MediaRendererController>    m_renderers;
-    Jamm::Container<MediaServerController>      m_servers;
+    Jamm::Container<Server>                     m_servers;
     UpnpAvUserInterface*                        m_pAvUserInterface;
 };
 

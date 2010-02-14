@@ -24,14 +24,12 @@
 
 #include <QtDebug>
 
-UpnpBrowserModel::UpnpBrowserModel(Jamm::Container<MediaServerController>* pServers, QObject *parent)
+UpnpBrowserModel::UpnpBrowserModel(Jamm::Container<Server>* pServers, QObject *parent)
 : QAbstractItemModel(parent),
-m_pServers(pServers)
+m_pServers(pServers),
+m_charEncoding(QTextCodec::codecForName("UTF-8")),
+m_iconProvider(new QFileIconProvider())
 {
-    m_charEncoding = QTextCodec::codecForName("UTF-8");
-    m_root = new Jamm::Av::MediaObject();
-    m_root->m_fetchedAllChildren = true;
-    m_iconProvider = new QFileIconProvider();
 }
 
 
@@ -40,11 +38,26 @@ UpnpBrowserModel::~UpnpBrowserModel()
 }
 
 
+Jamm::Av::MediaObject*
+UpnpBrowserModel::getObject(const QModelIndex &index) const
+{
+    return index.isValid() ? static_cast<Jamm::Av::MediaObject*>(index.internalPointer()) : NULL;
+}
+
+
 int
 UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
+    std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
+    
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
+    if (object == NULL) {
+        std::clog << "UpnpBrowserModel::rowCount() number of servers: " << m_pServers->size() << std::endl;
+        return m_pServers->size();
+    }
+    
+    std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->m_children.size() << std::endl;
     return object->m_children.size();
 }
 
@@ -59,11 +72,18 @@ UpnpBrowserModel::columnCount(const QModelIndex& /*parent*/) const
 bool
 UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 {
+    std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
+    
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->m_objectId.c_str();
-    if (!parent.isValid()) {
-        return (object->m_children.size() > 0);
+    if (object == NULL) {
+        std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((m_pServers->size() > 0) ? "yes" : "nope") << std::endl;
+        return (m_pServers->size() > 0);
     }
+//     if (!parent.isValid()) {
+//         return (object->m_children.size() > 0);
+//     }
+    std::clog << "UpnpBrowserModel::hasChildren() object has children: " << (object->isContainer() ? "yes" : "nope") << std::endl;
     return object->isContainer();
 }
 
@@ -71,7 +91,12 @@ UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 bool
 UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
+    std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
+    
     Jamm::Av::MediaObject* object = getObject(parent);
+    if (object == NULL) {
+        return false;
+    }
     qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->m_objectId.c_str();
     return (!object->m_fetchedAllChildren);
 }
@@ -80,8 +105,13 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 void
 UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
+    std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
+    
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
+    if (object == NULL) {
+        return;
+    }
     object->fetchChildren();
     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
     emit layoutChanged();
@@ -102,14 +132,16 @@ UpnpBrowserModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }*/
     Jamm::Av::MediaObject* object = getObject(index);
-//     return m_charEncoding->toUnicode(object->getTitle().c_str());
+    std::string label = object->m_objectId + ": " + object->getTitle();
     
     switch (role) {
     case Qt::DisplayRole:
     case Qt::EditRole:
         switch (index.column()) {
-        case 0: return m_charEncoding->toUnicode(object->getTitle().c_str());
-        case 1: return QString("1:00");
+        case 0:
+            return m_charEncoding->toUnicode(label.c_str());
+        case 1: 
+            return QString("1:00");
 //         case 2: return type(index);
 //         case 3: return time(index);
         }
@@ -136,11 +168,12 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 
     Jamm::Av::MediaObject* object = getObject(index);
 //     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->m_objectId.c_str();
-    if (!object->m_parent || object->m_parent == m_root) {
-        return QModelIndex();
+//     if (!object->m_parent || object->m_parent == m_root) {
+    if (object->m_parent == NULL) {
+            return QModelIndex();
     }
     Jamm::Av::MediaObject* grandp = object->m_parent->m_parent;
-    if (!grandp) {
+    if (grandp == NULL) {
         return QModelIndex();
     }
     std::vector<Jamm::Av::MediaObject*>::iterator row;
@@ -157,12 +190,16 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 QModelIndex
 UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
 {
-    // TODO: why is that needed? Without this, it fetches children only once when expanding an index.
+    // no index has been created yet, so we must be at the root of the tree ...?
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->m_objectId.c_str() << "row:" << row;
+    if (object == NULL) {
+        return createIndex(row, 0, (void*)(m_pServers->get(row).root()));
+    }
+    
     // if we can't deliver an index, because m_children.size()-1 < row
     // then fetchMore() is triggered -> return QModelIndex()
     if (row > int(object->m_children.size()) - 1) {
@@ -209,6 +246,9 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
     if (!index.isValid())
         return QIcon();
     Jamm::Av::MediaObject* object = getObject(index);
+    if (object == NULL) {
+        return QIcon();
+    }
     if (object->isContainer())
         return m_iconProvider->icon(QFileIconProvider::Folder);
     
@@ -219,7 +259,7 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 void
 UpnpBrowserModel::beginAddServer(int position)
 {
-    qDebug() << "UpnpBrowserModel::beginAddServer() at position:" << position;
+    std::clog << "UpnpBrowserModel::beginAddServer() at position: " << position << std::endl;
     
     beginInsertRows(QModelIndex(), position, position);
 }
@@ -228,7 +268,7 @@ UpnpBrowserModel::beginAddServer(int position)
 void
 UpnpBrowserModel::endAddServer()
 {
-    qDebug() << "UpnpBrowserModel::endAddServer()";
+    std::clog << "UpnpBrowserModel::endAddServer()" << std::endl;
     
     endInsertRows();
     emit layoutChanged();
@@ -237,7 +277,7 @@ UpnpBrowserModel::endAddServer()
 void
 UpnpBrowserModel::beginRemoveServer(int position)
 {
-    qDebug() << "UpnpBrowserModel::beginRemoveServer() at position:" << position;
+    qDebug() << "UpnpBrowserModel::beginRemoveServer() at position: " << position;
     
     beginRemoveRows(QModelIndex(), position, position);
 }
@@ -251,27 +291,3 @@ UpnpBrowserModel::endRemoveServer()
     endRemoveRows();
     emit layoutChanged();
 }
-
-// void
-// UpnpBrowserModel::serverAddedRemoved(Jamm::Av::ContentDirectoryController* server, bool add)
-// {
-// //     qDebug() << "UpnpBrowserModel::serverAddedRemoved()" << (add?"add":"remove") << "server:" << server->getUuid().c_str();
-//     
-//     if (add) {
-//         Jamm::Av::MediaObject* d = new Jamm::Av::MediaObject();
-//         d->m_objectId = "0";
-//         d->m_server = server;
-//         d->m_parent = m_root;
-//         m_root->m_children.push_back(d);
-//     }
-//     else {
-//     // TODO: delete the Jamm::Av::MediaObject tree of server recursively to avoid a memory leak
-//         std::vector<Jamm::Av::MediaObject*>::iterator i = m_root->m_children.begin();
-//         while ((*i)->m_server != server && i != m_root->m_children.end()) {
-//             ++i;
-//         }
-//         m_root->m_children.erase(i);
-//     }
-//     // TODO: do a more selective update of the BrowserModel and don't reset the whole model.
-//     reset();
-// }
