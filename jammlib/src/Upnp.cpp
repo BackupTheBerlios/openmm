@@ -105,9 +105,12 @@ UriDescriptionReader::getDescription(const std::string& path)
             response.clear();
             std::istream& rs = session.receiveResponse(response);
         }
-        char* buf = new char[response.getContentLength()];
-        rs.read(buf, response.getContentLength());
-        res = new std::string(buf, response.getContentLength());
+//         char* buf = new char[response.getContentLength()];
+//         rs.read(buf, response.getContentLength());
+//         res = new std::string(buf, response.getContentLength());
+        
+        res = new std::string;
+        Poco::StreamCopier::copyToString(rs, *res);
         
         std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
@@ -250,6 +253,11 @@ DescriptionReader::device()
                 std::clog << "Error in DescriptionReader: device list without embedded devices" << std::endl;
             }
         }
+        else if (pNode->nodeName() == "iconList") {
+        }
+        else {
+            pRes->addProperty(pNode->nodeName(), pNode->innerText());
+        }
         pNode = pNode->nextSibling();
     }
     m_nodeStack.pop();
@@ -317,13 +325,13 @@ DescriptionReader::service()
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
             std::string controlPath = pNode->innerText();
             fixQuirkyPath(controlPath);
-            fixQuirkyPathRemoveFileName(controlPath);
+//             fixQuirkyPathRemoveFileName(controlPath);
             pRes->setControlPath(controlPath);
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
             std::string eventPath = pNode->innerText();
             fixQuirkyPath(eventPath);
-            fixQuirkyPathRemoveFileName(eventPath);
+//             fixQuirkyPathRemoveFileName(eventPath);
             pRes->setEventPath(eventPath);
         }
         
@@ -662,7 +670,7 @@ ActionRequestWriter::write(std::string& actionMessage)
     std::stringstream ss;
     writer.writeNode(ss, m_pDoc);
     actionMessage = ss.str();
-    std::clog << "action request message():" << std::endl << ss.str() << std::endl;
+    std::clog << "action request message():" << std::endl << ss.str() << std::endl << std::endl;
 }
 
 
@@ -901,6 +909,7 @@ Service::sendAction(Action* pAction)
     
     std::ostream& ostr = m_pControlRequestSession->sendRequest(*request);
     ostr << actionMessage;
+    std::clog << "Action request sent" << std::endl;
     
     // receive answer ...
     Poco::Net::HTTPResponse response;
@@ -908,9 +917,20 @@ Service::sendAction(Action* pAction)
     if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
         std::cerr << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
     }
-    char* buf = new char[response.getContentLength()];
-    rs.read(buf, response.getContentLength());
-    std::string responseBody = std::string(buf, response.getContentLength());
+    std::clog << response.getStatus() << " " << response.getReason() << std::endl;
+    // FIXME: fix similar places in the code
+//     char* buf = 0;
+//     int bufsize = response.getContentLength();
+//     if (bufsize > 0) {
+//         buf = new char[bufsize];
+//         rs.read(buf, response.getContentLength());
+//         std::string responseBody = std::string(buf, bufsize);
+//     }
+//     else {
+//         std::cerr << "Error in Service: empty action response." << std::endl;
+//     }
+    std::string responseBody;
+    Poco::StreamCopier::copyToString(rs, responseBody);
     std::clog << "Service::sendAction() response received: " /*<< responseBody*/ << std::endl;
     ActionResponseReader responseReader(responseBody, pAction);
     responseReader.action();

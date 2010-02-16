@@ -110,51 +110,7 @@ m_app(argc, argv),
 m_widget(),
 m_sliderMoved(false)
 {
-//     ui.setupUi(this);
-//     ui.m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-//     ui.m_playButton->setText("");
-//     ui.m_stopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
-//     ui.m_stopButton->setText("");
-//     ui.m_pauseButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-//     ui.m_pauseButton->setText("");
-//     ui.m_skipForwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
-//     ui.m_skipForwardButton->setText("");
-//     ui.m_skipBackwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
-//     ui.m_skipBackwardButton->setText("");
-//     ui.m_seekForwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
-//     ui.m_seekForwardButton->setText("");
-//     ui.m_seekBackwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
-//     ui.m_seekBackwardButton->setText("");
-    
-    // TODO: add "state logic" to button group, with disabling/enabling ...
-/*    QButtonGroup* m_buttonGroup = new QButtonGroup(ui.m_controllerGroup);
-    m_buttonGroup->addButton(ui.m_playButton);
-    m_buttonGroup->addButton(ui.m_stopButton);
-    m_buttonGroup->addButton(ui.m_pauseButton);
-    m_buttonGroup->addButton(ui.m_skipForwardButton);
-    m_buttonGroup->addButton(ui.m_skipBackwardButton);
-    m_buttonGroup->addButton(ui.m_seekForwardButton);
-    m_buttonGroup->addButton(ui.m_seekBackwardButton);*/
-    
-    // Forward some signals from GUI Elements
-//     connect(ui.m_playButton, SIGNAL(pressed()), SIGNAL(playButtonPressed()));
-//     connect(ui.m_stopButton, SIGNAL(pressed()), SIGNAL(stopButtonPressed()));
-//     connect(ui.m_pauseButton, SIGNAL(pressed()), SIGNAL(pauseButtonPressed()));
-//     connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
-//     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
-//     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
-//     
-//     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
-//     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
-// //     connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
-//     
-//     ui.m_browserView->setUniformRowHeights(true);
-//     
-//     ui.m_breadCrumpLayout->setAlignment(Qt::AlignLeft);
-//     ui.m_breadCrumpLayout->setSpacing(0);
-//     new CrumbButton(ui.m_browserView, QModelIndex(), ui.m_breadCrump);
-//     
-//     setWindowTitle("JammC");
+
 }
 
 
@@ -177,20 +133,6 @@ ControllerGui::initGui()
     ui.m_seekBackwardButton->setIcon(m_widget.style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui.m_seekBackwardButton->setText("");
     
-    // TODO: add "state logic" to button group, with disabling/enabling ...
-/*    QButtonGroup* m_buttonGroup = new QButtonGroup(ui.m_controllerGroup);
-    m_buttonGroup->addButton(ui.m_playButton);
-    m_buttonGroup->addButton(ui.m_stopButton);
-    m_buttonGroup->addButton(ui.m_pauseButton);
-    m_buttonGroup->addButton(ui.m_skipForwardButton);
-    m_buttonGroup->addButton(ui.m_skipBackwardButton);
-    m_buttonGroup->addButton(ui.m_seekForwardButton);
-    m_buttonGroup->addButton(ui.m_seekBackwardButton);*/
-    
-    // Forward some signals from GUI Elements
-//     connect(ui.m_volumeSlider, SIGNAL(sliderMoved(int)), SIGNAL(volSliderMoved(int)));
-//     connect(ui.m_browserRootButton, SIGNAL(pressed()), this, SLOT(browserRootButtonPressed()));
-    
     ui.m_browserView->setUniformRowHeights(true);
     
     ui.m_breadCrumpLayout->setAlignment(Qt::AlignLeft);
@@ -205,14 +147,6 @@ ControllerGui::initGui()
     ui.m_rendererListView->setModel(m_pRendererListModel);
     ui.m_browserView->setModel(m_pBrowserModel);
     
-    qRegisterMetaType<std::string>("string");
-    qRegisterMetaType<QItemSelection>("QItemSelection");  // TODO: why's that needed?
-    
-//     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
-//     connect(m_mainWindow, SIGNAL(activated(const QModelIndex&)), this, SLOT(modelIndexActivated(const QModelIndex&)));
-//     connect(m_mainWindow, SIGNAL(expanded(const QModelIndex&)), this, SLOT(modelIndexExpanded(const QModelIndex&)));
-
-    
     connect(ui.m_playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(ui.m_stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
     connect(ui.m_pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
@@ -221,8 +155,8 @@ ControllerGui::initGui()
     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 //     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSlider(int, int)));
-    
-//     connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), SIGNAL(activated(const QModelIndex&)));
+//     connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+//     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(ui.m_rendererListView->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -272,7 +206,8 @@ ControllerGui::browserItemActivated(const QModelIndex& index)
         if (object == NULL) {
             return;
         }
-        m_pSelectedObject = object;
+        mediaObjectSelected(object);
+//         m_pSelectedObject = object;
         std::clog << "ControllerGui::browserItemActivated()" << std::endl;
         std::clog << "title: " << object->getTitle() << std::endl;
         std::clog << "res: " << object->getProperty("res") << std::endl;
@@ -289,7 +224,7 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
     }
     if (selected.empty()) {
         std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
-        m_pSelectedRenderer = NULL;
+//         m_pSelectedRenderer = NULL;
         return;
     }
     
@@ -300,11 +235,10 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
     if (selectedRenderer == NULL) {
         return;
     }
-    m_pSelectedRenderer = selectedRenderer;
+    rendererSelected(selectedRenderer);
+//     m_pSelectedRenderer = selectedRenderer;
     
     std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
-    std::clog << "UpnpController::rendererSelectionChanged() selected renderer:" << 
-        m_pSelectedRenderer->getDevice()->getUuid() << std::endl;
     
     setVolumeSlider(100, 50);
 }
@@ -339,52 +273,35 @@ ControllerGui::setVolumeSlider(int max, int val)
 void
 ControllerGui::playButtonPressed()
 {
-    if (m_pSelectedRenderer == NULL) {
-        return;
-    }
-    m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, m_pSelectedObject->getProperty("res"), "");
-    m_pSelectedRenderer->AVTransport()->Play(0, "1");
+    playPressed();
 }
 
 
 void
 ControllerGui::stopButtonPressed()
 {
-    if (m_pSelectedRenderer == NULL) {
-        return;
-    }
-    m_pSelectedRenderer->AVTransport()->Stop(0);
+    stopPressed();
 }
 
 
 void
 ControllerGui::pauseButtonPressed()
 {
-    if (m_pSelectedRenderer == NULL) {
-        return;
-    }
-    m_pSelectedRenderer->AVTransport()->Pause(0);
+    pausePressed();
 }
 
 
 void
 ControllerGui::positionSliderMoved(int position)
 {
-    if (m_pSelectedRenderer == NULL) {
-        return;
-    }
-    // TODO: need to support UPnP time format in Variant
-//     m_pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", );
+    positionMoved(position);
 }
 
 
 void
 ControllerGui::volumeSliderMoved(int value)
 {
-    if (m_pSelectedRenderer == NULL) {
-        return;
-    }
-    m_pSelectedRenderer->RenderingControl()->SetVolume(0, "Master", value);
+    volumeChanged(value);
 }
 
 

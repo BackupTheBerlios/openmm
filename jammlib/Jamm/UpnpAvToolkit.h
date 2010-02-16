@@ -39,28 +39,16 @@
 #include <Poco/XML/XMLWriter.h>
 
 #include "Upnp.h"
-
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NamedNodeMap;
-using Poco::XML::AttrMap;
-using Poco::XML::Element;
-using Poco::XML::AutoPtr;
-using Poco::XML::InputSource;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
-using Poco::XML::XMLWriter;
-using Poco::XML::DocumentFragment;
+#include "UpnpAvDevices.h"
 
 namespace Jamm {
 namespace Av {
+
+
+class Server : public MediaServer
+{
+};
+
 
 
 class SimpleMediaObjectModel

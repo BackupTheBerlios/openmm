@@ -91,7 +91,7 @@ MediaObject::readMetaData(const std::string& metaData)
 void
 MediaObject::readNode(Poco::XML::Node* pNode)
 {
-    std::clog << "MediaObject::readNode()" << std::endl;
+//     std::clog << "MediaObject::readNode()" << std::endl;
     
     Poco::XML::NamedNodeMap* attr = NULL;
     if (pNode->hasAttributes()) {
@@ -110,16 +110,16 @@ MediaObject::readNode(Poco::XML::Node* pNode)
         attr->release();
     }
     
-    std::clog << "isContainer: " << (isContainer() ? "1" : "0") << std::endl;
-    std::clog << "id: " << m_objectId << std::endl;
-    std::clog << "parentId: " << m_parentId << std::endl;
-    std::clog << "childCount: " << m_childCount << std::endl;
+//     std::clog << "isContainer: " << (isContainer() ? "1" : "0") << std::endl;
+//     std::clog << "id: " << m_objectId << std::endl;
+//     std::clog << "parentId: " << m_parentId << std::endl;
+//     std::clog << "childCount: " << m_childCount << std::endl;
     
     if (pNode->hasChildNodes()) {
         Poco::XML::Node* childNode = pNode->firstChild();
         while (childNode)
         {
-            std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
+//             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
             m_properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
             childNode = childNode->nextSibling();
         }
@@ -151,7 +151,7 @@ MediaObject::readChildren(const std::string& metaData)
 std::string
 MediaObject::getProperty(const std::string& name)
 {
-    std::clog << "MediaObject::getProperty() name: " << name << std::endl;
+//     std::clog << "MediaObject::getProperty() name: " << name << std::endl;
     
     return m_properties.getValue<std::string>(name);
 }
@@ -160,12 +160,12 @@ MediaObject::getProperty(const std::string& name)
 std::string
 MediaObject::getTitle()
 {
-    std::clog << "MediaObject::getTitle()" << std::endl;
+//     std::clog << "MediaObject::getTitle()" << std::endl;
     
     std::string res = m_properties.getValue<std::string>("dc:title");
-    if (res == "") {
-        return "foo";
-    }
+//     if (res == "") {
+//         return "foo";
+//     }
     return res;
 }
 
@@ -174,7 +174,7 @@ int
 MediaObject::fetchChildren()
 {
     // TODO: browse meta data for the root object with id "0"
-    std::clog << "MediaObject::fetchChildren() objectId: " << m_objectId << std::endl;
+//     std::clog << "MediaObject::fetchChildren() objectId: " << m_objectId << std::endl;
     if (m_server && !m_fetchedAllChildren) {
         std::string result;
         Jamm::ui4 numberReturned;

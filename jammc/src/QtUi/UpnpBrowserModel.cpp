@@ -24,7 +24,7 @@
 
 #include <QtDebug>
 
-UpnpBrowserModel::UpnpBrowserModel(Jamm::Container<Server>* pServers, QObject *parent)
+UpnpBrowserModel::UpnpBrowserModel(Jamm::Container<ServerController>* pServers, QObject *parent)
 : QAbstractItemModel(parent),
 m_pServers(pServers),
 m_charEncoding(QTextCodec::codecForName("UTF-8")),
@@ -48,16 +48,16 @@ UpnpBrowserModel::getObject(const QModelIndex &index) const
 int
 UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
-    std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
+//     std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
     
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
     if (object == NULL) {
-        std::clog << "UpnpBrowserModel::rowCount() number of servers: " << m_pServers->size() << std::endl;
+//         std::clog << "UpnpBrowserModel::rowCount() number of servers: " << m_pServers->size() << std::endl;
         return m_pServers->size();
     }
     
-    std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->m_children.size() << std::endl;
+//     std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->m_children.size() << std::endl;
     return object->m_children.size();
 }
 
@@ -72,18 +72,18 @@ UpnpBrowserModel::columnCount(const QModelIndex& /*parent*/) const
 bool
 UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 {
-    std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
+//     std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
     
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->m_objectId.c_str();
     if (object == NULL) {
-        std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((m_pServers->size() > 0) ? "yes" : "nope") << std::endl;
+//         std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((m_pServers->size() > 0) ? "yes" : "nope") << std::endl;
         return (m_pServers->size() > 0);
     }
 //     if (!parent.isValid()) {
 //         return (object->m_children.size() > 0);
 //     }
-    std::clog << "UpnpBrowserModel::hasChildren() object has children: " << (object->isContainer() ? "yes" : "nope") << std::endl;
+//     std::clog << "UpnpBrowserModel::hasChildren() object has children: " << (object->isContainer() ? "yes" : "nope") << std::endl;
     return object->isContainer();
 }
 
@@ -91,13 +91,13 @@ UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 bool
 UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
-    std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
+//     std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
     
     Jamm::Av::MediaObject* object = getObject(parent);
     if (object == NULL) {
         return false;
     }
-    qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->m_objectId.c_str();
+//     qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->m_objectId.c_str();
     return (!object->m_fetchedAllChildren);
 }
 
@@ -105,7 +105,7 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 void
 UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
-    std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
+//     std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
     
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->m_objectId.c_str();
@@ -113,7 +113,7 @@ UpnpBrowserModel::fetchMore(const QModelIndex &parent)
         return;
     }
     object->fetchChildren();
-    qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
+//     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->m_children.size();
     emit layoutChanged();
 }
 
@@ -168,12 +168,18 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 
     Jamm::Av::MediaObject* object = getObject(index);
 //     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->m_objectId.c_str();
-//     if (!object->m_parent || object->m_parent == m_root) {
     if (object->m_parent == NULL) {
             return QModelIndex();
     }
     Jamm::Av::MediaObject* grandp = object->m_parent->m_parent;
     if (grandp == NULL) {
+        Jamm::Container<ServerController>::Iterator server = m_pServers->begin();
+        while ((*server)->root() != object->m_parent) {
+            ++server;
+        }
+        if (server != m_pServers->end()) {
+            return createIndex(server - m_pServers->begin(), 0, (void*)(object->m_parent));
+        }
         return QModelIndex();
     }
     std::vector<Jamm::Av::MediaObject*>::iterator row;
@@ -182,7 +188,6 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 //         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->m_children.begin());
         return createIndex(row - grandp->m_children.begin(), 0, (void*)(object->m_parent));
     }
-
     return QModelIndex();
 }
 

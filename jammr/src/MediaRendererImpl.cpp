@@ -649,11 +649,10 @@ RenderingControlImplementation::SetVolume(const ui4& InstanceID, const std::stri
 {
     std::cerr << "RenderingControlImplementation::SetVolume() channel: " << Channel << ", volume: " << DesiredVolume << std::endl;
     
-    i4 chan;
-    Variant(Channel).getValue(chan);
-    m_pEngine->setVolume(chan, DesiredVolume);
+    m_pEngine->setVolume(0, DesiredVolume);
     
     _setVolume(DesiredVolume);
+    std::cerr << "RenderingControlImplementation::SetVolume() finished" << std::endl;
 }
 
 

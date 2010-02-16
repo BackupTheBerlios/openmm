@@ -90,40 +90,6 @@
 #include <Poco/SAX/SAXException.h>
 #include <Poco/DOM/DOMException.h>
 
-// FIXME: mediatomb sometimes doesn't response to M-SEARCHES
-// FIXME: platinum gives empty responses to action requests
-// FIXME: qt gui controller doesn't show children of root "0"
-// FIXME: changing volume causes segfault
-
-// TODO: [jammgen] dispatch actions not in the "great action dispatcher" but pass the dispatching
-//       to the corresponding services. This avoids double code in devices that have the same service
-//       and may eliminate the friend class statement.
-// TODO: [jammgen] remove Device* m_pDevice
-// TODO: [jammgen, Upnp] the name ControllerImplAdapter may be misleading
-
-
-// TODO: proper deep deletion of DeviceRoot in dtor (-> ~Container)
-// TODO: Variant: catch conversion errors with log message
-// NOTE: Embedded Devices:
-// -> HTTP server for controlling and eventing should move from DeviceRoot into Device
-// -> only SSDP stuff should be in DeviceRoot
-// -> this way ControlURL of same Service can be the same for all embedded devices
-// -> albeit: BaseURL is device description (and thus DeviceRoot) related
-// -> so nope: ControlURLs of embedded devices of same type must differ, as they are relative to BaseURL
-// TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
-// TODO: Find a proper interface for the readers and writers
-// TODO: complete event messaging
-// TODO: OPTIONAL stuff: optional services, actions: configure it via ImplAdapter and rewrite description
-//       accordingly
-
-
-// TODO: Remaining Event subscription stuff
-// TODO: Remaining SSDP M-Search requests
-// TODO: Device configuration
-// TODO: Error handling
-// TODO: Variable query (only for Device)
-// TODO: Service and Device version checking
-// TODO: Presentation
 
 namespace Jamm {
 
@@ -429,15 +395,15 @@ public:
     
     template<typename T> T getValue(const std::string& key)
     {
-        std::clog << "Container::getValue() key: " << key << std::endl;
+//         std::clog << "Container::getValue() key: " << key << std::endl;
         Variant* e = (*m_pEntities.find(key)).second;
         if (e) {
             T res;
             e->getValue(res);
-            std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
+//             std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
             return res;
         } else {
-            std::cerr << "Container::getValue() could not find key: " << key << std::endl;
+//             std::cerr << "Container::getValue() could not find key: " << key << std::endl;
             // TODO: through an exception
             return T();
         }
@@ -445,24 +411,24 @@ public:
     
     template<typename T> void setValue(const std::string& key, const T& val)
     {
-        std::clog << "Container::setValue() key: " << key << std::endl;
-        std::clog << "m_pEntities has: " << m_pEntities.size() << " entries" << std::endl;
-        std::clog << "m_keys has: " << m_keys.size() << " entries" << std::endl;
+//         std::clog << "Container::setValue() key: " << key << std::endl;
+//         std::clog << "m_pEntities has: " << m_pEntities.size() << " entries" << std::endl;
+//         std::clog << "m_keys has: " << m_keys.size() << " entries" << std::endl;
         if (m_pEntities.find(key) == m_pEntities.end()) {
-            std::cerr << "Container::setValue() could not find key"<< std::endl;
+//             std::cerr << "Container::setValue() could not find key"<< std::endl;
             return;
         }
-        std::clog << "Container::setValue() found key" << std::endl;
+//         std::clog << "Container::setValue() found key" << std::endl;
         Variant* e = (*m_pEntities.find(key)).second;
-        std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
+//         std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
         if (e) {
-            std::clog << "Container::setValue() found key: " << key << std::endl;
+//             std::clog << "Container::setValue() found key: " << key << std::endl;
             e->setValue(val);
         }
         else {
             std::cerr << "Container::setValue() pointer to Variant is invalid" << std::endl;
         }
-        std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
+//         std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
     }
     
     Iterator begin()
@@ -1013,6 +979,7 @@ public:
     DeviceRoot* getDeviceRoot() const { return m_pDeviceRoot; }
     std::string getUuid() const { return m_uuid; }
     std::string getDeviceType() const { return m_deviceType; }
+    const std::string& getFriendlyName() { return getProperty("friendlyName"); }
     Service* getService(std::string serviceType) { return &m_services.get(serviceType); }
     const std::string& getProperty(const std::string& name) { return m_properties.get(name); }
     

@@ -55,7 +55,8 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-    return QString(static_cast<MediaRendererController*>(index.internalPointer())->getDevice()->getUuid().c_str());
+    MediaRendererController* pRenderer = static_cast<MediaRendererController*>(index.internalPointer());
+    return QString(pRenderer->getDevice()->getFriendlyName().c_str());
 }
 
 

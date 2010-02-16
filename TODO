@@ -1,4 +1,46 @@
-next steps:
+current FIXMES:
+// FIXME: [platinum] gives empty responses to action requests
+// FIXME: [mediatomb] sometimes doesn't response to M-SEARCHES ...?
+
+------------------------------------------------------
+
+current TODOS:
+// TODO: hide more details of *Controllers, Device in the UserInterface interface (like renderer engine)
+//       for example: play() instead of 
+// TODO: [jammgen] dispatch actions not in the "great action dispatcher" but pass the dispatching
+//       to the corresponding services. This avoids double code in devices that have the same service
+//       and may eliminate the friend class statement.
+// TODO: [jammgen] remove Device* m_pDevice
+// TODO: [jammgen, Upnp] the name ControllerImplAdapter may be misleading
+
+
+// TODO: proper deep deletion of DeviceRoot in dtor (-> ~Container)
+// TODO: Variant: catch conversion errors with log message
+// NOTE: Embedded Devices:
+// -> HTTP server for controlling and eventing should move from DeviceRoot into Device
+// -> only SSDP stuff should be in DeviceRoot
+// -> this way ControlURL of same Service can be the same for all embedded devices
+// -> albeit: BaseURL is device description (and thus DeviceRoot) related
+// -> so nope: ControlURLs of embedded devices of same type must differ, as they are relative to BaseURL
+// TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
+// TODO: Find a proper interface for the readers and writers
+// TODO: complete event messaging
+// TODO: OPTIONAL stuff: optional services, actions: configure it via ImplAdapter and rewrite description
+//       accordingly
+
+
+// TODO: Remaining Event subscription stuff
+// TODO: Remaining SSDP M-Search requests
+// TODO: Device configuration
+// TODO: Error handling
+// TODO: Variable query (only for Device)
+// TODO: Service and Device version checking
+// TODO: Presentation
+
+
+longterm TODOS:
+
+------------------------------------------------------
 
 JammC
 1. put server into browse tree - DONE
@@ -46,10 +88,10 @@ if n < N:
 ------------------------------------------------------
 
 refactor:
-1. abstract out UPnP and provide an interface to a UPnP plugin
+1. abstract out UPnP and provide an interface to a UPnP plugin - DONE
    (do all UPnP-AV stuff within libjamm)
-2. implement other UPnP backends (based on libupnp for example)
-3. messaging system based on UPnP messaging
+2. implement other UPnP backends (based on libupnp for example) - DONE
+3. messaging system based on UPnP messaging - NOT NEEDED ANYMORE
    (extend JSignal across threads/processes)
 4. abstract out Qt and provide an interface to a gui plugin
 5. implement other GUI backends
@@ -58,7 +100,7 @@ refactor:
 
 platforms:
 1. anubis
-   faster boot from flash
+   faster boot from flash - DONE
    general purpose x86 image
 
 2. aaron
@@ -72,7 +114,7 @@ platforms:
 
 further steps:
 1. add cmake checks for (depending on compile time options for the different plugins):
-   libplatinumupnp
+   libplatinumupnp - NOT NEEDED ANYMORE
    mplayer as runtime dependency
    libvlc
    libxine
