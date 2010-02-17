@@ -34,6 +34,7 @@ m_pServerController(pServerController)
     m_pRoot->m_parent = NULL;
     m_pRoot->m_server = m_pServerController;
     m_pRoot->m_fetchedAllChildren = false;
+    // TODO: browse root object "0" here
     // TODO: this should depend on the browse result for root object "0"
     m_pRoot->m_isContainer = true;
 }
@@ -87,6 +88,19 @@ UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
 }
 
 
+RendererView::RendererView(MediaRendererController* rendererController) :
+m_pRendererController(rendererController)
+{
+}
+
+
+const std::string&
+RendererView::getName()
+{
+    return m_pRendererController->getDevice()->getFriendlyName();
+}
+
+
 void
 UpnpAvController::setUserInterface(UpnpAvUserInterface* pUserInterface)
 {
@@ -113,7 +127,7 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
             new AVTransportControllerImpl);
         m_pAvUserInterface->beginAddRenderer(m_renderers.size());
         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
-        m_renderers.append(pDevice->getUuid(), pRenderer);
+        m_renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
         m_pAvUserInterface->endAddRenderer();
     }
@@ -160,11 +174,38 @@ UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 }
 
 
+int
+UpnpAvUserInterface::rendererCount()
+{
+    return m_pRenderers->size();
+}
+
+
+RendererView*
+UpnpAvUserInterface::rendererView(int numRenderer)
+{
+    return &m_pRenderers->get(numRenderer);
+}
+
+
+int
+UpnpAvUserInterface::serverCount()
+{
+    return m_pServers->size();
+}
+
+
+MediaObject*
+UpnpAvUserInterface::serverRootObject(int numServer)
+{
+    return m_pServers->get(numServer).root();
+}
+
 
 void
-UpnpAvUserInterface::rendererSelected(MediaRendererController* pRenderer)
+UpnpAvUserInterface::rendererSelected(RendererView* pRenderer)
 {
-    m_pSelectedRenderer = pRenderer;
+    m_pSelectedRenderer = pRenderer->m_pRendererController;
 }
 
 

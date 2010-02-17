@@ -41,7 +41,7 @@ class UpnpBrowserModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(Jamm::Container<ServerController>* pServers, QObject *parent = 0);
+    UpnpBrowserModel(UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
     ~UpnpBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -67,7 +67,8 @@ public:
     void endRemoveServer();
     
 private:
-    Jamm::Container<ServerController>*      m_pServers;
+//     Jamm::Container<ServerController>*      m_pServers;
+    UpnpAvUserInterface*                    m_pUserInterface;
     QTextCodec*                             m_charEncoding;
     QFileIconProvider*                      m_iconProvider;
 //     bool                  m_lazyRowCount;

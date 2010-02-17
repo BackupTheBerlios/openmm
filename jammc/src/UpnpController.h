@@ -27,18 +27,17 @@
 
 #include "UpnpAvCtrlImpl.h"
 
-// TODO: delete these forward declarations after implementing the Views
 class ServerController;
 class UpnpAvController;
 
-// begin: exposed interface to UserInterface
+// begin: exposed interface to user interface
 
 class UpnpUserInterface
 {
     friend class UpnpController;
     
 public:
-    // TODO: pass command line arguments to user interface toolkit
+    // TODO: pass command line arguments to user interface gui-toolkit
     virtual int eventLoop() = 0;
     
     virtual void initGui() = 0;
@@ -59,10 +58,15 @@ protected:
 
 class RendererView
 {
+    friend class UpnpAvController;
+    friend class UpnpAvUserInterface;
+    
 public:
     const std::string& getName();
     
 private:
+    RendererView(MediaRendererController* rendererController);
+    
     MediaRendererController*    m_pRendererController;
 };
 
@@ -76,7 +80,7 @@ class UpnpAvUserInterface : UpnpUserInterface
 {
     friend class UpnpAvController;
     
-protected:
+public:
     virtual void beginAddRenderer(int position) = 0;
     virtual void beginAddServer(int position) = 0;
     virtual void beginRemoveRenderer(int position) = 0;
@@ -86,11 +90,10 @@ protected:
     virtual void endRemoveRenderer() = 0;
     virtual void endRemoveServer() = 0;
     
-    // TODO: implement this
     int rendererCount();
     RendererView* rendererView(int numRenderer);
     int serverCount();
-    MediaObjectView* serverRootObject(int numServer);
+    MediaObject* serverRootObject(int numServer);
     
     void playPressed();
     void stopPressed();
@@ -98,21 +101,17 @@ protected:
     void positionMoved(int position);
     void volumeChanged(int value);
     
-    // TODO: this could be moved completely into the child class or m_pSelected* made protected
-    void rendererSelected(MediaRendererController* pRenderer);
+    void rendererSelected(RendererView* pRenderer);
     void mediaObjectSelected(Jamm::Av::MediaObject* pObject);
     
-    // TODO: these Containers should contain the Views and not the Controllers
-    Jamm::Container<MediaRendererController>*    m_pRenderers;
-    Jamm::Container<ServerController>*           m_pServers;
-    
 private:
-    MediaRendererController*                     m_pSelectedRenderer;
-    Jamm::Av::MediaObject*                       m_pSelectedObject;
+    Jamm::Container<RendererView>*              m_pRenderers;
+    Jamm::Container<ServerController>*          m_pServers;
+    MediaRendererController*                    m_pSelectedRenderer;
+    Jamm::Av::MediaObject*                      m_pSelectedObject;
 };
 
-// end: exposed interface to UserInterface
-
+// end: exposed interface to user interface
 
 class ServerController
 {
@@ -127,6 +126,7 @@ private:
     MediaObject*              m_pRoot;
 };
 
+// begin: exposed interface to controller application
 
 class UpnpController : public Jamm::Controller
 {
@@ -156,10 +156,12 @@ private:
     virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot);
     virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot);
     
-    Jamm::Container<MediaRendererController>    m_renderers;
+    Jamm::Container<RendererView>               m_renderers;
     Jamm::Container<ServerController>           m_servers;
     UpnpAvUserInterface*                        m_pAvUserInterface;
 };
+
+// end: exposed interface to controller application
 
 #endif /* UPNPCONTROLLER_H */
 

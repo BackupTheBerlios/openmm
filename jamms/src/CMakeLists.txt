@@ -1,0 +1,41 @@
+# ADD_SUBDIRECTORY(web)
+
+SET(CMAKE_LIBRARY_PATH
+${CMAKE_SYSTEM_LIBRARY_PATH}
+)
+
+if(TARGET jamm)
+SET(LIB_JAMM
+jamm
+)
+INCLUDE_DIRECTORIES(
+${jamm_SOURCE_DIR}/jammlib
+)
+else(TARGET jamm)
+FIND_LIBRARY(LIB_JAMM
+NAME jamm
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+endif(TARGET jamm)
+
+
+SET( JAMMS_SRCS
+UpnpAvServerApplication.cpp
+UpnpAvServer.cpp
+UpnpAvServerImpl.cpp
+)
+
+ADD_EXECUTABLE( jamms
+${JAMMS_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( jamms
+# jamms-av-web
+${LIB_JAMM}
+${LIB_POCO_UTIL}
+)
+
+INSTALL( TARGETS jamms
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+)

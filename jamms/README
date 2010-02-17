@@ -1,0 +1,10 @@
+JammS - a UPnP-AV Media Server
+JammS is a collection of multimedia servers.
+
+Quick'n dirty installation:
+You need CMake 2.6 or later. Run the following commands:
+$ cmake .
+$ make
+$ sudo make install
+
+See the README of the Jamm-Project for more information.

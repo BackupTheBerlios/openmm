@@ -19,36 +19,42 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef JAMMUPNPAV_TOOLKIT_H
-#define JAMMUPNPAV_TOOLKIT_H
+#ifndef JAMMUPNPAV_SERVER_H
+#define JAMMUPNPAV_SERVER_H
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/AttrMap.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/DocumentFragment.h>
-#include <Poco/XML/XMLWriter.h>
+#include <Jamm/Upnp.h>
+#include <Jamm/UpnpAvTypes.h>
+#include <Jamm/UpnpAvDevices.h>
 
-#include "Upnp.h"
-#include "UpnpAvDevices.h"
-
-namespace Jamm {
-namespace Av {
+using namespace Jamm;
+using namespace Jamm::Av;
 
 
-class Server : public MediaServer
+class UpnpAvServer : public MediaServer
 {
+public:
+    UpnpAvServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+
+//      void setServerImplementation(UpnpAvServerInterface* p serverImpl);
+    void setRoot(MediaObject* pRoot);
+    MediaObject* getRoot();
+    void startScanTree();
+    void stopScanTree();
+    
+private:
+    MediaObject* m_pRoot;
+//     MediaObjectCache* m_pCache;
+//      UpnpAvServerInterface* m_pServerInterface;
 };
 
+
+class UpnpAvServerInterface
+{
+protected:
+    
+private:
+    MediaObject* m_pRoot;
+};
 
 
 class SimpleMediaObjectModel
@@ -78,7 +84,7 @@ public:
     // may be cached on disk or dynamically generated
     virtual std::string object(const std::string& objectId) = 0;
     virtual std::string child(const std::string& containerId, 
-                              ui4 childNumber,
+                              Jamm::ui4 childNumber,
                               const std::vector<std::string>& propertySortList) = 0;
 };
 
@@ -95,14 +101,10 @@ public:
     // may be cached on disk or dynamically generated
     virtual std::string object(const std::string& objectId) = 0;
     virtual std::string children(const std::string& containerId, 
-                                 ui4 childNumber,
-                                 ui4 childCount,
+                                 Jamm::ui4 childNumber,
+                                 Jamm::ui4 childCount,
                                  const std::vector<std::string>& propertySortList,
                                  const std::string& searchString) = 0;
 };
-
-
-} // namespace Av
-} // namespace Jamm
 
 #endif

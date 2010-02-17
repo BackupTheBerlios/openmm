@@ -25,9 +25,10 @@
 #include <algorithm>
 #include <QtDebug>
 
-UpnpRendererListModel::UpnpRendererListModel(Jamm::Container<MediaRendererController>* pRenderers, QObject *parent) :
+UpnpRendererListModel::UpnpRendererListModel(UpnpAvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
-m_pRenderers(pRenderers)
+// m_pRenderers(pRenderers)
+m_pUserInterface(pUserInterface)
 {
     m_charEncoding = QTextCodec::codecForName("UTF-8");
 }
@@ -55,8 +56,9 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-    MediaRendererController* pRenderer = static_cast<MediaRendererController*>(index.internalPointer());
-    return QString(pRenderer->getDevice()->getFriendlyName().c_str());
+    RendererView* pRenderer = static_cast<RendererView*>(index.internalPointer());
+    return QString(pRenderer->getName().c_str());
+//     return QString(pRenderer->getDevice()->getFriendlyName().c_str());
 }
 
 
@@ -86,7 +88,8 @@ UpnpRendererListModel::index(int row, int column,
 {
 //     qDebug() << "UpnpRendererListModel::index()";
 //     return createIndex(row, column, m_rendererList.at(row));
-    return createIndex(row, column, &m_pRenderers->get(row));
+//     return createIndex(row, column, &m_pRenderers->get(row));
+    return createIndex(row, column, m_pUserInterface->rendererView(row));
 }
 
 
@@ -103,7 +106,8 @@ UpnpRendererListModel::rowCount(const QModelIndex &/*parent*/) const
 //     qDebug() << "UpnpRendererListModel::rowCount()";
     
 //     return m_rendererList.size();
-    return m_pRenderers->size();
+//     return m_pRenderers->size();
+    return m_pUserInterface->rendererCount();
 }
 
 

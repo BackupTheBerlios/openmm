@@ -31,14 +31,16 @@
 
 #include <Jamm/Upnp.h>
 
-#include "../UpnpAvCtrlImpl.h"
+#include "../UpnpController.h"
+// #include "../UpnpAvCtrlImpl.h"
 
 class UpnpRendererListModel : public QAbstractItemModel
 {
     Q_OBJECT
         
 public:
-    UpnpRendererListModel(Jamm::Container<MediaRendererController>* pRenderers, QObject *parent = 0);
+//     UpnpRendererListModel(Jamm::Container<RendererView>* pRenderers, QObject *parent = 0);
+    UpnpRendererListModel(UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
     ~UpnpRendererListModel();
     
     QVariant data(const QModelIndex &index, int role) const;
@@ -51,15 +53,15 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     
-// public slots:
     void beginAddRenderer(int position);
     void beginRemoveRenderer(int position);
     void endAddRenderer();
     void endRemoveRenderer();
     
 private:
-    Jamm::Container<MediaRendererController>*   m_pRenderers;
-    QTextCodec*                                 m_charEncoding;
+//     Jamm::Container<RendererView>*   m_pRenderers;
+    UpnpAvUserInterface*                m_pUserInterface;
+    QTextCodec*                      m_charEncoding;
 };
 
 #endif

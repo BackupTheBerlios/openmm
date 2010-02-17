@@ -24,9 +24,9 @@
 
 #include <QtDebug>
 
-UpnpBrowserModel::UpnpBrowserModel(Jamm::Container<ServerController>* pServers, QObject *parent)
+UpnpBrowserModel::UpnpBrowserModel(UpnpAvUserInterface* pUserInterface, QObject *parent)
 : QAbstractItemModel(parent),
-m_pServers(pServers),
+m_pUserInterface(pUserInterface),
 m_charEncoding(QTextCodec::codecForName("UTF-8")),
 m_iconProvider(new QFileIconProvider())
 {
@@ -54,7 +54,8 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->m_objectId.c_str() << "return rows:" << object->m_children.size();
     if (object == NULL) {
 //         std::clog << "UpnpBrowserModel::rowCount() number of servers: " << m_pServers->size() << std::endl;
-        return m_pServers->size();
+//         return m_pServers->size();
+        return m_pUserInterface->serverCount();
     }
     
 //     std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->m_children.size() << std::endl;
@@ -78,7 +79,8 @@ UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->m_objectId.c_str();
     if (object == NULL) {
 //         std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((m_pServers->size() > 0) ? "yes" : "nope") << std::endl;
-        return (m_pServers->size() > 0);
+//         return (m_pServers->size() > 0);
+        return (m_pUserInterface->serverCount() > 0);
     }
 //     if (!parent.isValid()) {
 //         return (object->m_children.size() > 0);
@@ -173,13 +175,21 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
     }
     Jamm::Av::MediaObject* grandp = object->m_parent->m_parent;
     if (grandp == NULL) {
-        Jamm::Container<ServerController>::Iterator server = m_pServers->begin();
-        while ((*server)->root() != object->m_parent) {
-            ++server;
+        int i = 0;
+        while (i < m_pUserInterface->serverCount() && m_pUserInterface->serverRootObject(i) != object->m_parent) {
+            ++i;
         }
-        if (server != m_pServers->end()) {
-            return createIndex(server - m_pServers->begin(), 0, (void*)(object->m_parent));
+        if (i < m_pUserInterface->serverCount()) {
+            return createIndex(i, 0, (void*)(object->m_parent));
         }
+        
+//         Jamm::Container<ServerController>::Iterator server = m_pServers->begin();
+//         while ((*server)->root() != object->m_parent) {
+//             ++server;
+//         }
+//         if (server != m_pServers->end()) {
+//             return createIndex(server - m_pServers->begin(), 0, (void*)(object->m_parent));
+//         }
         return QModelIndex();
     }
     std::vector<Jamm::Av::MediaObject*>::iterator row;
@@ -202,7 +212,8 @@ UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
     Jamm::Av::MediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->m_objectId.c_str() << "row:" << row;
     if (object == NULL) {
-        return createIndex(row, 0, (void*)(m_pServers->get(row).root()));
+//         return createIndex(row, 0, (void*)(m_pServers->get(row).root()));
+        return createIndex(row, 0, (void*)(m_pUserInterface->serverRootObject(row)));
     }
     
     // if we can't deliver an index, because m_children.size()-1 < row

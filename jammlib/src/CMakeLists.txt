@@ -26,7 +26,7 @@ Upnp.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
 UpnpAvTypes.cpp
-UpnpAvToolkit.cpp
+# UpnpAvToolkit.cpp
 )
 
 FIND_LIBRARY(LIB_POCO_UTIL

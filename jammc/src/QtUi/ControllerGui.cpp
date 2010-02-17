@@ -141,8 +141,10 @@ ControllerGui::initGui()
     
     m_widget.setWindowTitle("JammC");
     
-    m_pBrowserModel = new UpnpBrowserModel(m_pServers);
-    m_pRendererListModel = new UpnpRendererListModel(m_pRenderers);
+//     m_pBrowserModel = new UpnpBrowserModel(m_pServers);
+//     m_pRendererListModel = new UpnpRendererListModel(m_pRenderers);
+    m_pRendererListModel = new UpnpRendererListModel(this);
+    m_pBrowserModel = new UpnpBrowserModel(this);
     
     ui.m_rendererListView->setModel(m_pRendererListModel);
     ui.m_browserView->setModel(m_pBrowserModel);
@@ -230,7 +232,7 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
     
     QModelIndex index = selected.indexes().first();
     
-    MediaRendererController* selectedRenderer = static_cast<MediaRendererController*>(index.internalPointer());
+    RendererView* selectedRenderer = static_cast<RendererView*>(index.internalPointer());
     
     if (selectedRenderer == NULL) {
         return;

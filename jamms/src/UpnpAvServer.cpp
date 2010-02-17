@@ -20,11 +20,16 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <Poco/StringTokenizer.h>
-#include <Poco/NumberParser.h>
-#include <Poco/NumberFormatter.h>
+#include "UpnpAvServer.h"
 
-#include "UpnpAvToolkit.h"
+using namespace Jamm;
+using namespace Jamm::Av;
+
+UpnpAvServer::UpnpAvServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
+MediaServer(pContentDirectoryImpl, pConnectionManagerImpl, pAVTransportImpl)
+{
+}
+
 
 
 
