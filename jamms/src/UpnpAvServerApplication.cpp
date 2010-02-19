@@ -32,6 +32,8 @@
 #include "UpnpAvServer.h"
 #include "UpnpAvServerImpl.h"
 
+#include "Web/WebRadio.h"
+
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -103,11 +105,14 @@ protected:
             ConnectionManagerImplementation myConnectionManagerImplementation;
             ContentDirectoryImplementation  myContentDirectoryImplementation;
             
-            UpnpAvServer     myMediaServer(
+            UpnpAvServer myMediaServer(
                 &myContentDirectoryImplementation,
                 &myConnectionManagerImplementation,
                 &myAVTransportImplementation
                 );
+            
+            WebRadio webRadio;
+            myMediaServer.setRoot(&webRadio);
             
             myMediaServer.start();
             waitForTerminationRequest();

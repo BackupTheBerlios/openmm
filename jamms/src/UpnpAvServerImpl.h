@@ -59,6 +59,8 @@ private:
 
 class ContentDirectoryImplementation : public Jamm::Av::ContentDirectory
 {
+    friend class UpnpAvServer;
+    
 private:
     virtual void GetSearchCapabilities(std::string& SearchCaps);
     virtual void GetSortCapabilities(std::string& SortCaps);
@@ -74,6 +76,8 @@ private:
     virtual void CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID);
 
     virtual void initStateVars();
+    
+    Jamm::Av::MediaObject* m_pRoot;
 };
 
 #endif

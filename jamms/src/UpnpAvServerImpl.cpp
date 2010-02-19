@@ -198,9 +198,24 @@ ContentDirectoryImplementation::GetSystemUpdateID(Jamm::ui4& Id)
 void
 ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const Jamm::ui4& StartingIndex, const Jamm::ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, Jamm::ui4& NumberReturned, Jamm::ui4& TotalMatches, Jamm::ui4& UpdateID)
 {
-// begin of your own code
-
-// end of your own code
+    Jamm::Av::MediaObject* object;
+    if (ObjectID == "0") {
+        object = m_pRoot;
+    }
+    else {
+        object = m_pRoot->getObject(ObjectID);
+    }
+    
+    if (BrowseFlag == "BrowseMetadata") {
+        object->writeMetaData(Result);
+    }
+    else if (BrowseFlag == "BrowseDirectChildren") {
+        object->writeChildren(StartingIndex, RequestedCount, Result);
+    }
+    else {
+        std::cerr << "Error in Browse: unkown BrowseFlag" << std::endl;
+    }
+    
 }
 
 

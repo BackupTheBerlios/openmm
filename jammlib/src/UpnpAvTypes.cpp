@@ -148,6 +148,24 @@ MediaObject::readChildren(const std::string& metaData)
 }
 
 
+void
+MediaObject::writeMetaData(std::string& metaData)
+{
+}
+
+
+void
+MediaObject::writeObject(MediaObject* object)
+{
+}
+
+
+void
+MediaObject::writeChildren(Jamm::ui4 startingIndex, Jamm::ui4 requestedCount, std::string& metaData)
+{
+}
+
+
 std::string
 MediaObject::getProperty(const std::string& name)
 {
@@ -190,5 +208,76 @@ MediaObject::fetchChildren()
         }
         m_childCount = totalMatches;
     }
+    return m_childCount;
+}
+
+
+void
+MediaObject::setIsContainer(bool isContainer)
+{
+    m_isContainer = isContainer;
+}
+
+
+void
+MediaObject::appendChild(const std::string& objectId, MediaObject* pChild)
+{
+    m_children.push_back(pChild);
+    m_childrenMap[objectId] = pChild;
+    pChild->setObjectId(objectId);
+}
+
+
+MediaObject*
+MediaObject::getObject(const std::string& objectId)
+{
+    MediaObject* pChild = m_childrenMap[objectId];
+    if (pChild->isContainer()) {
+        return pChild->getObject(objectId);
+    }
+    else {
+        return pChild;
+    }
+}
+
+
+void
+MediaObject::setParentId(const std::string& parentId)
+{
+    m_parentId = parentId;
+}
+
+
+void
+MediaObject::setObjectId(const std::string& objectId)
+{
+    m_objectId = objectId;
+}
+
+
+void
+MediaObject::setTitle(const std::string& title)
+{
+    m_properties.append("dc:title", new Jamm::Variant(title));
+}
+
+
+void
+MediaObject::setResource(const std::string& resource)
+{
+    m_properties.append("res", new Jamm::Variant(resource));
+}
+
+
+const std::string&
+MediaObject::getObjectId() const
+{
+    return m_objectId;
+}
+
+
+unsigned int
+MediaObject::getChildCount()
+{
     return m_childCount;
 }

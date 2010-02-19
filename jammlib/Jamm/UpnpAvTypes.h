@@ -66,11 +66,33 @@ public:
 //     MediaObject(const std::string& metaData);
 //     MediaObject(Poco::XML::Node* pNode);
     
+    // controller interface
+    int fetchChildren();
     bool isContainer() { return m_isContainer; }
     std::string getTitle();
     std::string getProperty(const std::string& name);
+    unsigned int getChildCount();
+    void readChildren(const std::string& metaData);
+    void readMetaData(const std::string& metaData);
+    void readNode(Poco::XML::Node* pNode);
     
-    int fetchChildren();
+    MediaServerController*             m_server;
+    
+    // server interface
+    void setParentId(const std::string& parentId);
+    void setIsContainer(bool isContainer=true);
+    void setObjectId(const std::string& objectId);
+    void setTitle(const std::string& title);
+    void setResource(const std::string& resource);
+    void appendChild(const std::string& objectId, MediaObject* pChild);
+    MediaObject* getObject(const std::string& objectId);
+    void writeMetaData(std::string& metaData);
+    void writeObject(MediaObject* object);
+    void writeChildren(Jamm::ui4 startingIndex, Jamm::ui4 requestedCount, std::string& metaData);
+    std::map<std::string,MediaObject*>      m_childrenMap;
+
+// common interface
+    const std::string& getObjectId() const;
     
     MediaObject*                            m_parent;
     std::vector<MediaObject*>               m_children;
@@ -78,6 +100,8 @@ public:
     std::string                             m_parentId;
     unsigned int                            m_childCount;
     bool                                    m_fetchedAllChildren;
+    Container<Variant>                      m_properties;
+    bool                                    m_isContainer;
     
     
     // object properties:
@@ -90,15 +114,6 @@ public:
 //     void setRes(const std::string& id);
 //     std::string getClass();
 //     void setClass(const std::string& id);
-    
-    void readChildren(const std::string& metaData);
-    void readMetaData(const std::string& metaData);
-    void readNode(Poco::XML::Node* pNode);
-    
-// private:
-    MediaServerController*             m_server;
-    Container<Variant>                 m_properties;
-    bool                               m_isContainer;
 };
 
 

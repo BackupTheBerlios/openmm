@@ -1,5 +1,3 @@
-ADD_SUBDIRECTORY(Web)
-
 SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
@@ -19,23 +17,20 @@ PATHS ${CMAKE_LIBRARY_PATH}
 endif(TARGET jamm)
 
 
-SET( JAMMS_SRCS
-UpnpAvServerApplication.cpp
-UpnpAvServer.cpp
-UpnpAvServerImpl.cpp
+SET( JAMMS_WEB_SRCS
+WebRadio.cpp
 )
 
-ADD_EXECUTABLE( jamms
-${JAMMS_SRCS}
+ADD_LIBRARY( jamms-av-web
+SHARED
+${JAMMS_WEB_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( jamms
-jamms-av-web
+TARGET_LINK_LIBRARIES( jamms-av-web
 ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS jamms
-RUNTIME DESTINATION bin
+INSTALL( TARGETS jamms-av-web
 LIBRARY DESTINATION lib
 )

@@ -26,6 +26,8 @@
 #include <Jamm/UpnpAvTypes.h>
 #include <Jamm/UpnpAvDevices.h>
 
+#include "UpnpAvServerImpl.h"
+
 using namespace Jamm;
 using namespace Jamm::Av;
 
@@ -33,16 +35,22 @@ using namespace Jamm::Av;
 class UpnpAvServer : public MediaServer
 {
 public:
-    UpnpAvServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+    UpnpAvServer(ContentDirectoryImplementation* pContentDirectoryImpl, ConnectionManagerImplementation* pConnectionManagerImpl, AVTransportImplementation* pAVTransportImpl);
 
-//      void setServerImplementation(UpnpAvServerInterface* p serverImpl);
     void setRoot(MediaObject* pRoot);
     MediaObject* getRoot();
-    void startScanTree();
-    void stopScanTree();
+
+
+//      void setServerImplementation(UpnpAvServerInterface* p serverImpl);
+//     void startScanTree();
+//     void stopScanTree();
     
 private:
     MediaObject* m_pRoot;
+    ContentDirectoryImplementation*     m_pContentDirectoryImpl;
+    ConnectionManagerImplementation*    m_pConnectionManagerImpl;
+    AVTransportImplementation*          m_pAVTransportImpl;
+    
 //     MediaObjectCache* m_pCache;
 //      UpnpAvServerInterface* m_pServerInterface;
 };

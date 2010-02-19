@@ -20,58 +20,22 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef JAMMIODEVICE_H
-#define JAMMIODEVICE_H
+#ifndef WebRadio_INCLUDED
+#define WebRadio_INCLUDED
 
-#include <sys/time.h>
+#include <Jamm/UpnpAvTypes.h>
 
-#include <string>
-using namespace std;
-
-namespace Jamm {
-
-/**
-Simple socket encapsulation with methods for handling a line-based protocol.
-readLine() is buffered and attempts to read blocks of 1024 bytes from the network.
-
-	@author Jörg Bakker <joerg<at>hakker<dot>de>
-*/
-
-class JIoDevice
+class WebRadio : public Jamm::Av::MediaObject
 {
 public:
-    JIoDevice(bool blocking = false);
-    ~JIoDevice();
-
-    bool open(const char* pathname);
-    bool readLine(string& line, int milliSec);
-//     void writeLine(string);
-    void close();
-
-private:
-    bool readBuf(int& bytesRead, int milliSec);
-//     void setBlocking(bool enable);
-    bool isReadable(int milliSec);
-//     bool isWriteable();
-
-    int                m_device;
-    bool               m_blocking;
-
-    timeval            m_tv;
-    fd_set             m_readfds;
-    fd_set             m_writefds;
-
-    static const int   m_bufSize = 1024;
-    char               m_buf[m_bufSize];
-//     string::size_type  m_bytesRead;
-//     string::size_type  m_bytesScanned;
-    int  m_bytesRead;
-    int  m_bytesScanned;
-    bool               m_lineEndFound;
-    string             m_line;
-    string             m_strBuf;
+    WebRadio();
 };
 
-} // namespace Jamm
+
+class RadioStation : public Jamm::Av::MediaObject
+{
+public:
+    RadioStation(std::string name, std::string mrl);
+};
 
 #endif

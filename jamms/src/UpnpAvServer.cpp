@@ -25,11 +25,26 @@
 using namespace Jamm;
 using namespace Jamm::Av;
 
-UpnpAvServer::UpnpAvServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
-MediaServer(pContentDirectoryImpl, pConnectionManagerImpl, pAVTransportImpl)
+UpnpAvServer::UpnpAvServer(ContentDirectoryImplementation* pContentDirectoryImpl, ConnectionManagerImplementation* pConnectionManagerImpl, AVTransportImplementation* pAVTransportImpl) :
+MediaServer(pContentDirectoryImpl, pConnectionManagerImpl, pAVTransportImpl),
+m_pContentDirectoryImpl(pContentDirectoryImpl),
+m_pConnectionManagerImpl(pConnectionManagerImpl),
+m_pAVTransportImpl(pAVTransportImpl)
 {
 }
 
 
+void
+UpnpAvServer::setRoot(MediaObject* pRoot)
+{
+    m_pRoot = pRoot;
+    m_pContentDirectoryImpl->m_pRoot = m_pRoot;
+    m_pRoot->setObjectId("0");
+}
 
 
+MediaObject*
+UpnpAvServer::getRoot()
+{
+    return m_pRoot;
+}
