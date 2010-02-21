@@ -2,7 +2,7 @@
 |  Jamm - Just another multimedia ...                                       |
 |         ... set of applications and libraries based on the UPnP-AV specs  |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
+|  Copyright (C) 2009 - 2010                                                |
 |  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
 |                                                                           |
 |  This file is part of Jamm.                                               |
@@ -24,38 +24,26 @@
 
 WebRadio::WebRadio()
 {
-    setObjectId("1");
-    setIsContainer(true);
-    setTitle("Web Radio Stations");
+    setTitle("Web Radio");
     
-    appendChild("2", new RadioStation("SOMA FM - Groove Salad",
+    appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad",
                 "http://streamer-dtc-aa04.somafm.com:80/stream/1018"));
-    appendChild("3", new RadioStation("SOMA FM - Indie Pop Rocks (Lush)",
+    appendChild("2", new Jamm::Av::MediaItem("SOMA FM - Indie Pop Rocks (Lush)",
                 "http://streamer-ntc-aa02.somafm.com:80/stream/1073"));
-    appendChild("4", new RadioStation("SOMA FM - Drone Zone",
+    appendChild("3", new Jamm::Av::MediaItem("SOMA FM - Drone Zone",
                 "http://streamer-dtc-aa01.somafm.com:80/stream/1032"));
-    appendChild("5", new RadioStation("Digitally Imported - Chillout",
+    appendChild("4", new Jamm::Av::MediaItem("Digitally Imported - Chillout",
                 "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035"));
-    appendChild("6", new RadioStation("SWR DASDING",
+    appendChild("5", new Jamm::Av::MediaItem("SWR DASDING",
                 "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3"));
-    appendChild("7", new RadioStation("SWR DASDING Lautstark",
+    appendChild("6", new Jamm::Av::MediaItem("SWR DASDING Lautstark",
                 "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3"));
-    appendChild("8", new RadioStation("SWR3",
+    appendChild("7", new Jamm::Av::MediaItem("SWR3",
                 "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3"));
-    appendChild("9", new RadioStation("MotorFM",
+    appendChild("8", new Jamm::Av::MediaItem("MotorFM",
                 "http://www.motorfm.de/stream-berlin"));
-    appendChild("10", new RadioStation("Freies Radio Stuttgart",
+    appendChild("9", new Jamm::Av::MediaItem("Freies Radio Stuttgart",
                 "http://frs.kumbi.org:8000/frs_stereo.ogg"));
-    appendChild("11", new RadioStation("HoRadS",
+    appendChild("10", new Jamm::Av::MediaItem("HoRadS",
                 "http://realserver3.hdm-stuttgart.de:8080/horads"));
-    
-    m_childCount = m_children.size();
-}
-
-
-
-RadioStation::RadioStation(std::string name, std::string mrl)
-{
-    setTitle(name);
-    setResource(mrl);
-}
+};

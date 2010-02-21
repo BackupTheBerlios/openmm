@@ -81,6 +81,8 @@ class UpnpAvUserInterface : UpnpUserInterface
     friend class UpnpAvController;
     
 public:
+    UpnpAvUserInterface();
+    
     virtual void beginAddRenderer(int position) = 0;
     virtual void beginAddServer(int position) = 0;
     virtual void beginRemoveRenderer(int position) = 0;

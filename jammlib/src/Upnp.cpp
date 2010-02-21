@@ -112,7 +112,7 @@ UriDescriptionReader::getDescription(const std::string& path)
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
         
-        std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+//         std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
         std::clog << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
@@ -593,6 +593,7 @@ DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
     // write root device
     Poco::XML::Element* pRootDevice = device(*deviceRoot.getRootDevice());
     pRoot->appendChild(pRootDevice);
+    m_pDoc->appendChild(pRoot);
     // end root device
     
     // if there are embedded devices open a deviceList

@@ -210,7 +210,8 @@ ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::s
         object->writeMetaData(Result);
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
-        object->writeChildren(StartingIndex, RequestedCount, Result);
+        NumberReturned = object->writeChildren(StartingIndex, RequestedCount, Result);
+        TotalMatches = object->getChildCount();
     }
     else {
         std::cerr << "Error in Browse: unkown BrowseFlag" << std::endl;

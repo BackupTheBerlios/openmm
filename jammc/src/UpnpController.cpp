@@ -174,6 +174,15 @@ UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 }
 
 
+UpnpAvUserInterface::UpnpAvUserInterface() :
+m_pRenderers(NULL),
+m_pServers(NULL),
+m_pSelectedRenderer(NULL),
+m_pSelectedObject(NULL)
+{
+}
+
+
 int
 UpnpAvUserInterface::rendererCount()
 {
@@ -219,7 +228,7 @@ UpnpAvUserInterface::mediaObjectSelected(Jamm::Av::MediaObject* pObject)
 void
 UpnpAvUserInterface::playPressed()
 {
-    if (m_pSelectedRenderer == NULL) {
+    if (m_pSelectedRenderer == NULL || m_pSelectedObject == NULL) {
         return;
     }
     m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, m_pSelectedObject->getProperty("res"), "");

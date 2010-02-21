@@ -25,17 +25,10 @@
 
 #include <Jamm/UpnpAvTypes.h>
 
-class WebRadio : public Jamm::Av::MediaObject
+class WebRadio : public Jamm::Av::MediaContainer
 {
 public:
     WebRadio();
-};
-
-
-class RadioStation : public Jamm::Av::MediaObject
-{
-public:
-    RadioStation(std::string name, std::string mrl);
 };
 
 #endif

@@ -23,6 +23,21 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/NumberParser.h>
 #include <Poco/NumberFormatter.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/AttrMap.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/DocumentFragment.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include "UpnpAvTypes.h"
 
@@ -73,7 +88,8 @@ MediaObject::MediaObject() :
 m_parent(NULL),
 m_childCount(0),
 m_fetchedAllChildren(false),
-m_isContainer(false)
+m_isContainer(false),
+m_restricted(true)
 {
 }
 
@@ -149,29 +165,161 @@ MediaObject::readChildren(const std::string& metaData)
 
 
 void
+MediaObject::writeMetaDataHeader()
+{
+    std::clog << "MediaObject::writeMetaDataHeader()" << std::endl;
+    m_pDoc = new Poco::XML::Document;
+    
+    m_pDidl = m_pDoc->createElement("DIDL-Lite");
+
+    // FIXME: is this the right way to set the namespaces?
+    m_pDidl->setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+    m_pDidl->setAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
+    m_pDidl->setAttribute("xmlns", "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
+    
+    m_pDoc->appendChild(m_pDidl);
+    
+//     std::clog << "MediaObject::writeMetaDataHeader() finished" << std::endl;
+
+//     m_pDidl = m_pDoc->createElementNS("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/", "DIDL-Lite");
+//     Poco::AutoPtr<Poco::XML::Attr> pUpnpNs = m_pDoc->createAttributeNS("urn:schemas-upnp-org:metadata-1-0/upnp/", "upnp");
+//     m_pDidl->setAttributeNode(pUpnpNs);
+//     Poco::AutoPtr<Poco::XML::Attr> pDcNs = m_pDoc->createAttributeNS("http://purl.org/dc/elements/1.1/", "dc");
+//     m_pDidl->setAttributeNode(pDcNs);
+//     m_pDidl->setAttributeNS("urn:schemas-upnp-org:metadata-1-0/upnp/", "upnp", "");
+
+}
+
+
+void MediaObject::writeMetaDataClose(std::string& metaData)
+{
+    std::clog << "MediaObject::writeMetaDataClose()" << std::endl;
+    Poco::XML::DOMWriter writer;
+    writer.setNewLine("\r\n");
+//     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
+    std::stringstream ss;
+    writer.writeNode(ss, m_pDoc);
+    metaData = ss.str();
+//     std::clog << "meta data:" << std::endl << ss.str() << std::endl;
+}
+
+
+void
 MediaObject::writeMetaData(std::string& metaData)
 {
+    std::clog << "MediaObject::writeMetaData()" << std::endl;
+    writeMetaDataHeader();
+    writeMetaData(m_pDidl);
+    writeMetaDataClose(metaData);
+    std::clog << "MediaObject::writeMetaData() finished" << std::endl;
 }
 
 
 void
-MediaObject::writeObject(MediaObject* object)
+MediaObject::writeMetaData(Poco::XML::Element* pDidl)
 {
+    std::clog << "MediaObject::writeMetaData() title: " << getTitle() << std::endl;
+    Poco::XML::Document* pDoc = pDidl->ownerDocument();
+    Poco::AutoPtr<Poco::XML::Element> pObject;
+    if (m_isContainer) {
+        std::clog << "MediaObject::writeMetaData() is container" << std::endl;
+        pObject = pDoc->createElement("container");
+        // childCount (Integer)
+        Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
+        pChildCount->setValue(Poco::NumberFormatter::format(m_childCount));
+        pObject->setAttributeNode(pChildCount);
+    }
+    else {
+        std::clog << "MediaObject::writeMetaData() is item" << std::endl;
+        pObject = pDoc->createElement("item");
+    }
+    // write attributes:
+    // id (String, required)
+    std::clog << "MediaObject::writeMetaData() attributes" << std::endl;
+//     Poco::AutoPtr<Poco::XML::Attr> pId = pDoc->createAttribute("id");
+//     pId->setValue(m_objectId);
+//     pObject->setAttributeNode(pId);
+    std::clog << "MediaObject::writeMetaData() id: " << m_objectId << std::endl;
+    pObject->setAttribute("id", m_objectId);
+    // parentID (String, required)
+//     Poco::AutoPtr<Poco::XML::Attr> pParentId = pDoc->createAttribute("parentID");
+//     pParentId->setValue(m_parentId);
+//     pObject->setAttributeNode(pParentId);
+    std::clog << "MediaObject::writeMetaData() parentID: " << m_parentId << std::endl;
+    pObject->setAttribute("parentID", m_parentId);
+    // restricted (Boolean, required)
+//     Poco::AutoPtr<Poco::XML::Attr> pRestricted = pDoc->createAttribute("restricted");
+//     pRestricted->setValue(m_restricted ? "1" : "0");
+//     pObject->setAttributeNode(pRestricted);
+    std::clog << "MediaObject::writeMetaData() restricted: " << (m_restricted ? "1" : "0") << std::endl;
+    pObject->setAttribute("restricted", (m_restricted ? "1" : "0"));
+    
+    // searchable (Boolean)
+    // refID (String)
+    
+    // write elements
+    std::clog << "MediaObject::writeMetaData() property elements" << std::endl;
+    for (Container<Variant>::KeyIterator i = m_properties.beginKey(); i != m_properties.endKey(); ++i) {
+        Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement((*i).first);
+        std::string propVal;
+        (*i).second->getValue(propVal);
+        Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(propVal);
+        pProperty->appendChild(pPropertyValue);
+        pObject->appendChild(pProperty);
+    }
+    
+    pDidl->appendChild(pObject);
+// check somewhere, if the two required elements are there
+    // title (String, dc)
+    // class (String, upnp)
+//     std::clog << "MediaObject::writeMetaData() finished" << std::endl;
 }
 
 
-void
-MediaObject::writeChildren(Jamm::ui4 startingIndex, Jamm::ui4 requestedCount, std::string& metaData)
+ui4
+MediaObject::writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData)
 {
+    writeMetaDataHeader();
+    
+    ui4 c;
+    for (c = 0; c < requestedCount && c < m_children.size(); ++c) {
+        std::clog << "MediaObject::writeChildren() title: " << m_children[startingIndex + c]->getTitle() << std::endl;
+        m_children[startingIndex + c]->writeMetaData(m_pDidl);
+    }
+    
+    writeMetaDataClose(metaData);
+    return c;
 }
 
 
 std::string
 MediaObject::getProperty(const std::string& name)
 {
-//     std::clog << "MediaObject::getProperty() name: " << name << std::endl;
+    std::clog << "MediaObject::getProperty() name: " << name << std::endl;
+    std::clog << "MediaObject::getProperty() number of properties: " << m_properties.size() << std::endl;
+    std::clog << "MediaObject::getProperty() value: " << m_properties.getValue<std::string>(name) << std::endl;
     
     return m_properties.getValue<std::string>(name);
+}
+
+
+std::string
+MediaObject::getObjectId()
+{
+    return m_objectId;
+}
+
+
+std::string
+MediaObject::getParentId()
+{
+    // FIXME: in a larger tree, this returns the objectId of the grandfather and so on ...
+    if (m_parent != NULL) {
+        return m_parent->getObjectId();
+    }
+    else {
+        return m_parentId;
+    }
 }
 
 
@@ -224,27 +372,34 @@ MediaObject::appendChild(const std::string& objectId, MediaObject* pChild)
 {
     m_children.push_back(pChild);
     m_childrenMap[objectId] = pChild;
-    pChild->setObjectId(objectId);
+    m_childCount++;
+    pChild->m_objectId = objectId;
+    pChild->m_parentId = m_objectId;
+    pChild->m_parent = this;
 }
 
 
 MediaObject*
 MediaObject::getObject(const std::string& objectId)
 {
-    MediaObject* pChild = m_childrenMap[objectId];
+    std::clog << "MediaObject::getObject() objectId: " << objectId << std::endl;
+    
+    std::string::size_type slashPos = objectId.find('/');
+    MediaObject* pChild;
+    if (slashPos != std::string::npos) {
+        std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
+        pChild = m_childrenMap[objectId.substr(0, slashPos - 1)];
+    }
+    else {
+        pChild = m_childrenMap[objectId];
+    }
+    
     if (pChild->isContainer()) {
         return pChild->getObject(objectId);
     }
     else {
         return pChild;
     }
-}
-
-
-void
-MediaObject::setParentId(const std::string& parentId)
-{
-    m_parentId = parentId;
 }
 
 
@@ -256,9 +411,18 @@ MediaObject::setObjectId(const std::string& objectId)
 
 
 void
+MediaObject::setParentId(const std::string& parentId)
+{
+    m_parentId = parentId;
+}
+
+
+void
 MediaObject::setTitle(const std::string& title)
 {
+    std::clog << "MediaObject::setTitle() title: " << title << std::endl;
     m_properties.append("dc:title", new Jamm::Variant(title));
+    std::clog << "MediaObject::setTitle() finished" << std::endl;
 }
 
 
@@ -269,15 +433,41 @@ MediaObject::setResource(const std::string& resource)
 }
 
 
-const std::string&
+std::string
 MediaObject::getObjectId() const
 {
-    return m_objectId;
+    if (m_objectId == "0") {
+        return m_objectId;
+    }
+    else {
+        return m_parent->getObjectId() + "/" + m_objectId;
+    }
 }
 
 
-unsigned int
+ui4
 MediaObject::getChildCount()
 {
     return m_childCount;
+}
+
+
+MediaContainer::MediaContainer() :
+MediaObject()
+{
+    m_isContainer = true;
+}
+
+
+MediaItem::MediaItem() :
+MediaObject()
+{
+}
+
+
+MediaItem::MediaItem(const std::string& title, const std::string& uri) :
+MediaObject()
+{
+    setTitle(title);
+    setResource(uri);
 }

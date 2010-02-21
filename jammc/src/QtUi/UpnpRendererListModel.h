@@ -58,6 +58,9 @@ public:
     void endAddRenderer();
     void endRemoveRenderer();
     
+signals:
+    void setCurrentIndex(const QModelIndex & index);
+    
 private:
 //     Jamm::Container<RendererView>*   m_pRenderers;
     UpnpAvUserInterface*                m_pUserInterface;

@@ -332,6 +332,7 @@ class Container
 {
 public:
     typedef typename std::vector<E*>::iterator Iterator;
+    typedef typename std::map<std::string,E*>::iterator KeyIterator;
     
     E& get(std::string key)
     {
@@ -403,8 +404,8 @@ public:
 //             std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
             return res;
         } else {
-//             std::cerr << "Container::getValue() could not find key: " << key << std::endl;
-            // TODO: through an exception
+            std::cerr << "Container::getValue() could not find key: " << key << std::endl;
+            // TODO: throw an exception
             return T();
         }
     }
@@ -440,7 +441,17 @@ public:
     {
         return m_keys.end();
     }
+    
+    KeyIterator beginKey()
+    {
+        return m_pEntities.begin();
+    }
         
+    KeyIterator endKey()
+    {
+        return m_pEntities.end();
+    }
+    
 private:
     std::map<std::string,E*>    m_pEntities;
     std::vector<E*>             m_keys;

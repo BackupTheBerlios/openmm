@@ -22,22 +22,6 @@
 #ifndef JAMMUPNPAV_TYPES_H
 #define JAMMUPNPAV_TYPES_H
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/AttrMap.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/DocumentFragment.h>
-#include <Poco/XML/XMLWriter.h>
-
 #include "Upnp.h"
 #include "UpnpAvControllers.h"
 
@@ -66,12 +50,15 @@ public:
 //     MediaObject(const std::string& metaData);
 //     MediaObject(Poco::XML::Node* pNode);
     
+    
     // controller interface
     int fetchChildren();
     bool isContainer() { return m_isContainer; }
     std::string getTitle();
     std::string getProperty(const std::string& name);
-    unsigned int getChildCount();
+    std::string getObjectId();
+    std::string getParentId();
+    ui4 getChildCount();
     void readChildren(const std::string& metaData);
     void readMetaData(const std::string& metaData);
     void readNode(Poco::XML::Node* pNode);
@@ -87,17 +74,27 @@ public:
     void appendChild(const std::string& objectId, MediaObject* pChild);
     MediaObject* getObject(const std::string& objectId);
     void writeMetaData(std::string& metaData);
-    void writeObject(MediaObject* object);
-    void writeChildren(Jamm::ui4 startingIndex, Jamm::ui4 requestedCount, std::string& metaData);
+    void writeMetaData(Poco::XML::Element* pDidl);
+    ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
+    
+    void writeMetaDataHeader();
+    void writeMetaDataClose(std::string& metaData);
+    
     std::map<std::string,MediaObject*>      m_childrenMap;
+    
+    // TODO: this should be in a seperate class
+    //       (sometimes the XML fragement can be fetched from cache)
+    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
+    Poco::AutoPtr<Poco::XML::Element>       m_pDidl;
 
 // common interface
-    const std::string& getObjectId() const;
+    std::string getObjectId() const;
     
     MediaObject*                            m_parent;
     std::vector<MediaObject*>               m_children;
     std::string                             m_objectId;
     std::string                             m_parentId;
+    bool                                    m_restricted;
     unsigned int                            m_childCount;
     bool                                    m_fetchedAllChildren;
     Container<Variant>                      m_properties;
@@ -114,6 +111,21 @@ public:
 //     void setRes(const std::string& id);
 //     std::string getClass();
 //     void setClass(const std::string& id);
+};
+
+
+class MediaContainer : public MediaObject
+{
+public:
+    MediaContainer();
+};
+
+
+class MediaItem : public MediaObject
+{
+public:
+    MediaItem();
+    MediaItem(const std::string& title, const std::string& uri);
 };
 
 

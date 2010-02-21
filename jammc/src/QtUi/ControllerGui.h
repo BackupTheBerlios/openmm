@@ -30,6 +30,10 @@
 #include "UpnpRendererListModel.h"
 #include "ui_ControllerGui.h"
 
+// TODO: left and right arrows
+// TODO: tab for toggling between browser and renderer
+// TODO: return in broswer should toggle play/stop (pause)
+
 
 class CrumbButton : public QWidget
 {
@@ -99,6 +103,7 @@ private slots:
     
     void rendererSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void browserItemActivated(const QModelIndex& index);
+    void browserItemSelected(const QModelIndex& index);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
         once moved and some time later (a new track is loaded), the range

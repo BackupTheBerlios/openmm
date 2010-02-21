@@ -68,6 +68,10 @@ m_child(NULL)
     connect(m_button, SIGNAL(pressed()), this, SLOT(buttonPressed()));
     m_browserView->setRootIndex(index);
     show();
+//     else {  // TODO: want to select the first item without activating it
+//         m_browserView->selectionModel()->setCurrentIndex(index.child(0, 0), QItemSelectionModel::NoUpdate);
+//         m_browserView->setCurrentIndex(index.child(0, 0));
+//     }
 }
 
 
@@ -159,10 +163,16 @@ ControllerGui::initGui()
 //     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSlider(int, int)));
 //     connect(ui.m_seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
 //     connect(ui.m_seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+    
+    connect(m_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
+            ui.m_rendererListView, SLOT(setCurrentIndex(QModelIndex)));
     connect(ui.m_rendererListView->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
-    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)), this, SLOT(browserItemActivated(const QModelIndex&)));
+    connect(ui.m_browserView, SIGNAL(activated(const QModelIndex&)),
+            this, SLOT(browserItemActivated(const QModelIndex&)));
+    connect(ui.m_browserView, SIGNAL(pressed(const QModelIndex&)),
+            this, SLOT(browserItemSelected(const QModelIndex&)));
 }
 
 
@@ -199,20 +209,42 @@ ControllerGui::setSliderMoved(int)
 void
 ControllerGui::browserItemActivated(const QModelIndex& index)
 {
-    qDebug() << "ControllerGui::browserItemActivated()";
-    if (index.model()->hasChildren(index)) {
+    std::clog << "ControllerGui::browserItemActivated()" << std::endl;
+    MediaObject* object = static_cast<MediaObject*>(index.internalPointer());
+    if (object == NULL) {
+        return;
+    }
+    std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
+    std::clog << "title: " << object->getTitle() << std::endl;
+    std::clog << "res: " << object->getProperty("res") << std::endl;
+    
+    if (object->isContainer()) {
         new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
     }
     else {
-        MediaObject* object = static_cast<MediaObject*>(index.internalPointer());
-        if (object == NULL) {
-            return;
-        }
         mediaObjectSelected(object);
-//         m_pSelectedObject = object;
-        std::clog << "ControllerGui::browserItemActivated()" << std::endl;
-        std::clog << "title: " << object->getTitle() << std::endl;
-        std::clog << "res: " << object->getProperty("res") << std::endl;
+        playPressed();
+    }
+}
+
+
+void
+ControllerGui::browserItemSelected(const QModelIndex& index)
+{
+    std::clog << "ControllerGui::browserItemSelected()" << std::endl;
+    MediaObject* object = static_cast<MediaObject*>(index.internalPointer());
+    if (object == NULL) {
+        return;
+    }
+    std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
+    std::clog << "title: " << object->getTitle() << std::endl;
+    std::clog << "res: " << object->getProperty("res") << std::endl;
+
+    if (object->isContainer()) {
+        new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
+    }
+    else {
+        mediaObjectSelected(object);
     }
 }
 

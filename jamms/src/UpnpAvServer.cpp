@@ -40,6 +40,9 @@ UpnpAvServer::setRoot(MediaObject* pRoot)
     m_pRoot = pRoot;
     m_pContentDirectoryImpl->m_pRoot = m_pRoot;
     m_pRoot->setObjectId("0");
+    m_pRoot->setParentId("-1");
+    // in Controller: set title to something like: <device friendly name> on <host name>
+    // friendly name of device should contain <host name> or <ip>
 }
 
 

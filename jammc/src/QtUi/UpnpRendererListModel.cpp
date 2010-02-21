@@ -134,6 +134,9 @@ UpnpRendererListModel::endAddRenderer()
     
     endInsertRows();
     emit layoutChanged();
+    if (rowCount() == 1) {
+        emit setCurrentIndex(index(0, 0));
+    }
 }
 
 void
