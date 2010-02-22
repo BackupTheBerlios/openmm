@@ -506,7 +506,7 @@ ActionResponseReader::ActionResponseReader(const std::string& responseBody, Acti
 m_pActionTemplate(pActionTemplate)
 {
     std::clog << "ActionResponseReader::ActionResponseReader()" << std::endl;
-    std::clog << "response: " << responseBody << std::endl;
+//     std::clog << "response: " << responseBody << std::endl;
     
     Poco::XML::DOMParser parser;
     // TODO: set encoding with parser.setEncoding();

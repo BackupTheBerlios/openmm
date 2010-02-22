@@ -56,7 +56,7 @@ public:
     bool isContainer() { return m_isContainer; }
     std::string getTitle();
     std::string getProperty(const std::string& name);
-    std::string getObjectId();
+//     std::string getObjectId();
     std::string getParentId();
     ui4 getChildCount();
     void readChildren(const std::string& metaData);
@@ -118,6 +118,7 @@ class MediaContainer : public MediaObject
 {
 public:
     MediaContainer();
+    MediaContainer(const std::string& title);
 };
 
 

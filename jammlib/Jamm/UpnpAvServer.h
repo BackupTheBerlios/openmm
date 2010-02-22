@@ -22,15 +22,13 @@
 #ifndef JAMMUPNPAV_SERVER_H
 #define JAMMUPNPAV_SERVER_H
 
-#include <Jamm/Upnp.h>
-#include <Jamm/UpnpAvTypes.h>
-#include <Jamm/UpnpAvDevices.h>
-
+#include "Upnp.h"
+#include "UpnpAvTypes.h"
+#include "UpnpAvDevices.h"
 #include "UpnpAvServerImpl.h"
 
-using namespace Jamm;
-using namespace Jamm::Av;
-
+namespace Jamm {
+namespace Av {
 
 class UpnpAvServer : public MediaServer
 {
@@ -114,5 +112,8 @@ public:
                                  const std::vector<std::string>& propertySortList,
                                  const std::string& searchString) = 0;
 };
+
+} // namespace Av
+} // namespace Jamm
 
 #endif

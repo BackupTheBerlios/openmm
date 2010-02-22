@@ -22,10 +22,12 @@
 #ifndef MEDIASERVER_IMPLEMENTATION_H
 #define MEDIASERVER_IMPLEMENTATION_H
 
-#include <Jamm/Upnp.h>
-#include <Jamm/UpnpAvTypes.h>
-#include <Jamm/UpnpAvDevices.h>
+#include "Upnp.h"
+#include "UpnpAvTypes.h"
+#include "UpnpAvDevices.h"
 
+namespace Jamm {
+namespace Av {
 
 class AVTransportImplementation : public Jamm::Av::AVTransport
 {
@@ -79,6 +81,9 @@ private:
     
     Jamm::Av::MediaObject* m_pRoot;
 };
+
+} // namespace Av
+} // namespace Jamm
 
 #endif
 

@@ -26,6 +26,8 @@ Upnp.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
 UpnpAvTypes.cpp
+UpnpAvServer.cpp
+UpnpAvServerImpl.cpp
 # UpnpAvToolkit.cpp
 )
 
@@ -64,9 +66,9 @@ ${JAMM_LIB_SRCS}
 )
 
 TARGET_LINK_LIBRARIES( jamm
-pthread
-dl
-${PocoFoundation}
+# pthread
+# dl
+${LIB_POCO_FOUNDATION}
 ${LIB_POCO_NET}
 ${LIB_POCO_XML}
 )
@@ -75,7 +77,7 @@ INSTALL( TARGETS jamm
 LIBRARY DESTINATION lib
 )
 
-INSTALL( DIRECTORY ${jammlib_SOURCE_DIR}/jamm
+INSTALL( DIRECTORY ${jammlib_SOURCE_DIR}/Jamm
 DESTINATION include
 FILES_MATCHING PATTERN "*.h"
 )

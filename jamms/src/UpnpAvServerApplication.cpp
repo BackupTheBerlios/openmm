@@ -29,8 +29,9 @@
 // #include <sstream>
 // #include <fstream>
 
-#include "UpnpAvServer.h"
-#include "UpnpAvServerImpl.h"
+// #include "UpnpAvServer.h"
+// #include "UpnpAvServerImpl.h"
+#include <Jamm/UpnpAvServer.h>
 
 #include "Web/WebRadio.h"
 
@@ -101,11 +102,11 @@ protected:
         {
             std::cerr << "UpnpAvServerApplication::main()" << std::endl;
             
-            AVTransportImplementation       myAVTransportImplementation;
-            ConnectionManagerImplementation myConnectionManagerImplementation;
-            ContentDirectoryImplementation  myContentDirectoryImplementation;
+            Jamm::Av::AVTransportImplementation       myAVTransportImplementation;
+            Jamm::Av::ConnectionManagerImplementation myConnectionManagerImplementation;
+            Jamm::Av::ContentDirectoryImplementation  myContentDirectoryImplementation;
             
-            UpnpAvServer myMediaServer(
+            Jamm::Av::UpnpAvServer myMediaServer(
                 &myContentDirectoryImplementation,
                 &myConnectionManagerImplementation,
                 &myAVTransportImplementation

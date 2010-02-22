@@ -22,8 +22,8 @@ endif(TARGET jamm)
 
 SET( JAMMS_SRCS
 UpnpAvServerApplication.cpp
-UpnpAvServer.cpp
-UpnpAvServerImpl.cpp
+# UpnpAvServer.cpp
+# UpnpAvServerImpl.cpp
 )
 
 ADD_EXECUTABLE( jamms

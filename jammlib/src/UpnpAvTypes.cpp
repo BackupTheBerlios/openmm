@@ -236,21 +236,12 @@ MediaObject::writeMetaData(Poco::XML::Element* pDidl)
     // write attributes:
     // id (String, required)
     std::clog << "MediaObject::writeMetaData() attributes" << std::endl;
-//     Poco::AutoPtr<Poco::XML::Attr> pId = pDoc->createAttribute("id");
-//     pId->setValue(m_objectId);
-//     pObject->setAttributeNode(pId);
-    std::clog << "MediaObject::writeMetaData() id: " << m_objectId << std::endl;
-    pObject->setAttribute("id", m_objectId);
+    std::clog << "MediaObject::writeMetaData() id: " << getObjectId() << std::endl;
+    pObject->setAttribute("id", getObjectId());
     // parentID (String, required)
-//     Poco::AutoPtr<Poco::XML::Attr> pParentId = pDoc->createAttribute("parentID");
-//     pParentId->setValue(m_parentId);
-//     pObject->setAttributeNode(pParentId);
-    std::clog << "MediaObject::writeMetaData() parentID: " << m_parentId << std::endl;
-    pObject->setAttribute("parentID", m_parentId);
+    std::clog << "MediaObject::writeMetaData() parentID: " << getParentId() << std::endl;
+    pObject->setAttribute("parentID", getParentId());
     // restricted (Boolean, required)
-//     Poco::AutoPtr<Poco::XML::Attr> pRestricted = pDoc->createAttribute("restricted");
-//     pRestricted->setValue(m_restricted ? "1" : "0");
-//     pObject->setAttributeNode(pRestricted);
     std::clog << "MediaObject::writeMetaData() restricted: " << (m_restricted ? "1" : "0") << std::endl;
     pObject->setAttribute("restricted", (m_restricted ? "1" : "0"));
     
@@ -282,8 +273,8 @@ MediaObject::writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& m
     writeMetaDataHeader();
     
     ui4 c;
-    for (c = 0; c < requestedCount && c < m_children.size(); ++c) {
-        std::clog << "MediaObject::writeChildren() title: " << m_children[startingIndex + c]->getTitle() << std::endl;
+    for (c = 0; (c < requestedCount) && (c < m_children.size() - startingIndex); ++c) {
+        std::clog << "MediaObject::writeChildren() child title: " << m_children[startingIndex + c]->getTitle() << std::endl;
         m_children[startingIndex + c]->writeMetaData(m_pDidl);
     }
     
@@ -303,22 +294,21 @@ MediaObject::getProperty(const std::string& name)
 }
 
 
-std::string
-MediaObject::getObjectId()
-{
-    return m_objectId;
-}
+// std::string
+// MediaObject::getObjectId()
+// {
+//     return m_objectId;
+// }
 
 
 std::string
 MediaObject::getParentId()
 {
-    // FIXME: in a larger tree, this returns the objectId of the grandfather and so on ...
     if (m_parent != NULL) {
         return m_parent->getObjectId();
     }
     else {
-        return m_parentId;
+        return "-1";
     }
 }
 
@@ -388,18 +378,45 @@ MediaObject::getObject(const std::string& objectId)
     MediaObject* pChild;
     if (slashPos != std::string::npos) {
         std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
-        pChild = m_childrenMap[objectId.substr(0, slashPos - 1)];
+        pChild = m_childrenMap[objectId.substr(0, slashPos)];
+        if (pChild == NULL) {
+            std::cerr << "Error in MediaObject: child object not found" << std::endl;
+            return NULL;
+        }
+        else {
+            return pChild->getObject(objectId.substr(slashPos + 1));
+        }
     }
     else {
+        std::clog << "item id: " << objectId << std::endl;
         pChild = m_childrenMap[objectId];
+        if (pChild == NULL) {
+            std::cerr << "Error in MediaObject: child object not found" << std::endl;
+            return NULL;
+        }
+        else {
+            return pChild;
+        }
     }
-    
-    if (pChild->isContainer()) {
-        return pChild->getObject(objectId);
+}
+
+
+std::string
+MediaObject::getObjectId() const
+{
+    if (m_objectId == "0") {
+        return m_objectId;
     }
     else {
-        return pChild;
+        return m_parent->getObjectId() + "/" + m_objectId;
     }
+}
+
+
+ui4
+MediaObject::getChildCount()
+{
+    return m_childCount;
 }
 
 
@@ -433,29 +450,18 @@ MediaObject::setResource(const std::string& resource)
 }
 
 
-std::string
-MediaObject::getObjectId() const
-{
-    if (m_objectId == "0") {
-        return m_objectId;
-    }
-    else {
-        return m_parent->getObjectId() + "/" + m_objectId;
-    }
-}
-
-
-ui4
-MediaObject::getChildCount()
-{
-    return m_childCount;
-}
-
-
 MediaContainer::MediaContainer() :
 MediaObject()
 {
     m_isContainer = true;
+}
+
+
+MediaContainer::MediaContainer(const std::string& title) :
+MediaObject()
+{
+    m_isContainer = true;
+    setTitle(title);
 }
 
 

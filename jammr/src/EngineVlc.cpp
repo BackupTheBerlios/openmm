@@ -22,8 +22,6 @@
 
 #include "EngineVlc.h"
 
-// #include <jamm/debug.h>
-
 
 EngineVlc::EngineVlc(int argc, char **argv)
 {

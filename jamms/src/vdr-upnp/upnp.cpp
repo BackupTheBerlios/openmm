@@ -21,11 +21,13 @@
  ***************************************************************************/
 
 #include <vdr/plugin.h>
+#include <Jamm/UpnpAvServer.h>
 
 #include "vdrmediaserver.h"
 
-#include "../UpnpAvServer.h"
+// #include "../UpnpAvServer.h"
 // #include "../UpnpAvServerImpl.h"
+
 
 static const char *VERSION        = "0.0.3";
 static const char *DESCRIPTION    = "Expose VDR's capabilities to UPnP-AV";
@@ -34,8 +36,8 @@ static const char *MAINMENUENTRY  = "UPnP";
 class cPluginUpnp : public cPlugin {
 private:
   // Add any member variables or functions you may need here.
-  UpnpAvServer*     m_pUpnpAvServer;
-  VdrMediaTree*     m_pVdrMediaTree;
+    Jamm::Av::UpnpAvServer*     m_pUpnpAvServer;
+    VdrMediaTree*               m_pVdrMediaTree;
 
 public:
   cPluginUpnp(void);
@@ -89,9 +91,9 @@ bool cPluginUpnp::ProcessArgs(int /*argc*/, char */*argv*/[])
 bool cPluginUpnp::Initialize(void)
 {
     // Initialize any background activities the plugin shall perform.
-    m_pUpnpAvServer = new UpnpAvServer(new ContentDirectoryImplementation,
-                                    new ConnectionManagerImplementation,
-                                    new AVTransportImplementation);
+    m_pUpnpAvServer = new Jamm::Av::UpnpAvServer(new Jamm::Av::ContentDirectoryImplementation,
+                                                 new Jamm::Av::ConnectionManagerImplementation,
+                                                 new Jamm::Av::AVTransportImplementation);
         
     m_pVdrMediaTree = new VdrMediaTree();
     m_pUpnpAvServer->setRoot(m_pVdrMediaTree);
