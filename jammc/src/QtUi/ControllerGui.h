@@ -25,7 +25,8 @@
 
 #include <QtGui>
 
-#include "../UpnpController.h"
+#include <Jamm/UpnpController.h>
+
 #include "UpnpBrowserModel.h"
 #include "UpnpRendererListModel.h"
 #include "ui_ControllerGui.h"
@@ -62,7 +63,7 @@ private:
 };
 
 
-class ControllerGui : public QObject, public UpnpAvUserInterface
+class ControllerGui : public QObject, public Jamm::Av::UpnpAvUserInterface
 {
     Q_OBJECT
 

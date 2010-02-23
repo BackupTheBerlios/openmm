@@ -25,10 +25,6 @@
 
 #include "vdrmediaserver.h"
 
-// #include "../UpnpAvServer.h"
-// #include "../UpnpAvServerImpl.h"
-
-
 static const char *VERSION        = "0.0.3";
 static const char *DESCRIPTION    = "Expose VDR's capabilities to UPnP-AV";
 static const char *MAINMENUENTRY  = "UPnP";
@@ -91,11 +87,8 @@ bool cPluginUpnp::ProcessArgs(int /*argc*/, char */*argv*/[])
 bool cPluginUpnp::Initialize(void)
 {
     // Initialize any background activities the plugin shall perform.
-    m_pUpnpAvServer = new Jamm::Av::UpnpAvServer(new Jamm::Av::ContentDirectoryImplementation,
-                                                 new Jamm::Av::ConnectionManagerImplementation,
-                                                 new Jamm::Av::AVTransportImplementation);
-        
-    m_pVdrMediaTree = new VdrMediaTree();
+    m_pUpnpAvServer = new Jamm::Av::UpnpAvServer;
+    m_pVdrMediaTree = new VdrMediaTree;
     m_pUpnpAvServer->setRoot(m_pVdrMediaTree);
     return true;
 }
@@ -103,8 +96,6 @@ bool cPluginUpnp::Initialize(void)
 bool cPluginUpnp::Start(void)
 {
   // Start any background activities the plugin shall perform.
-//   cStreamdevServer::Initialize();
-
   m_pUpnpAvServer->start();
   return true;
 }
@@ -113,8 +104,6 @@ void cPluginUpnp::Stop(void)
 {
   // Stop any background activities the plugin shall perform.
   m_pUpnpAvServer->stop();
-
-//   cStreamdevServer::Destruct();
 }
 
 void cPluginUpnp::Housekeeping(void)

@@ -40,6 +40,7 @@
 #include <Poco/XML/XMLWriter.h>
 
 #include "UpnpAvTypes.h"
+#include "UpnpAvControllers.h"
 
 using namespace Jamm;
 using namespace Jamm::Av;

@@ -20,9 +20,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QtDebug>
-
 #include "UpnpController.h"
+#include "UpnpAvCtrlImpl.h"
+
+using namespace Jamm;
+using namespace Jamm::Av;
 
 ServerController::ServerController(MediaServerController* pServerController) :
 m_pServerController(pServerController)

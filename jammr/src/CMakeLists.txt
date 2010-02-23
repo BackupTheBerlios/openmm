@@ -7,16 +7,10 @@ SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
 
-# FIND_LIBRARY(LIB_PLATINUM_UPNP
-# NAME platinum-upnp
-# PATHS ${CMAKE_LIBRARY_PATH}
-# )
-
 FIND_LIBRARY(LIB_POCO_UTIL
 NAME PocoUtil
 PATHS ${CMAKE_LIBRARY_PATH}
 )
-
 
 FIND_LIBRARY(LIB_VLC
 NAME vlc
@@ -38,13 +32,9 @@ PATHS ${CMAKE_LIBRARY_PATH}
 endif(TARGET jamm)
 
 SET( JAMMR_SRCS
-#enginemplayer.cpp
+#EngineMplayer.cpp
+#EngineXine.cpp
 EngineVlc.cpp
-# enginexine.cpp
-# main.cpp
-# upnpmediarenderer.cpp
-# MediaRenderer.cpp
-MediaRendererImpl.cpp
 MediaRendererApplication.cpp
 )
 
@@ -65,12 +55,8 @@ ${JAMMR_SRCS}
 
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( jammr
-#/usr/lib/libplatinum-upnp.so
-# platinum-upnp
-# jamm
 ${LIB_JAMM}
 ${LIB_POCO_UTIL}
-# ${LIB_PLATINUM_UPNP}
 )
 
 

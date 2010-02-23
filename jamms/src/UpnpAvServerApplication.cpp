@@ -26,11 +26,7 @@
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/StreamCopier.h>
-// #include <sstream>
-// #include <fstream>
 
-// #include "UpnpAvServer.h"
-// #include "UpnpAvServerImpl.h"
 #include <Jamm/UpnpAvServer.h>
 
 #include "Web/WebRadio.h"
@@ -102,16 +98,7 @@ protected:
         {
             std::cerr << "UpnpAvServerApplication::main()" << std::endl;
             
-            Jamm::Av::AVTransportImplementation       myAVTransportImplementation;
-            Jamm::Av::ConnectionManagerImplementation myConnectionManagerImplementation;
-            Jamm::Av::ContentDirectoryImplementation  myContentDirectoryImplementation;
-            
-            Jamm::Av::UpnpAvServer myMediaServer(
-                &myContentDirectoryImplementation,
-                &myConnectionManagerImplementation,
-                &myAVTransportImplementation
-                );
-            
+            Jamm::Av::UpnpAvServer myMediaServer;
             WebRadio webRadio;
             myMediaServer.setRoot(&webRadio);
             

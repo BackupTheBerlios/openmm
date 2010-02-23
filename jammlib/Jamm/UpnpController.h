@@ -23,9 +23,11 @@
 #ifndef UPNPCONTROLLER_H
 #define UPNPCONTROLLER_H
 
-#include <Jamm/UpnpAvTypes.h>
+#include "UpnpAvTypes.h"
+#include "UpnpAvControllers.h"
 
-#include "UpnpAvCtrlImpl.h"
+namespace Jamm {
+namespace Av {
 
 class ServerController;
 class UpnpAvController;
@@ -164,6 +166,9 @@ private:
 };
 
 // end: exposed interface to controller application
+
+} // namespace Av
+} // namespace Jamm
 
 #endif /* UPNPCONTROLLER_H */
 

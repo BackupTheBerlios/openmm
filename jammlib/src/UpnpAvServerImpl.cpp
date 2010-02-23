@@ -33,7 +33,7 @@ AVTransportImplementation::initStateVars()
 
 
 void
-AVTransportImplementation::SetAVTransportURI(const Jamm::ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+AVTransportImplementation::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
 // begin of your own code
 
@@ -42,7 +42,7 @@ AVTransportImplementation::SetAVTransportURI(const Jamm::ui4& InstanceID, const 
 
 
 void
-AVTransportImplementation::GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+AVTransportImplementation::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
 // begin of your own code
 
@@ -51,7 +51,7 @@ AVTransportImplementation::GetMediaInfo(const Jamm::ui4& InstanceID, Jamm::ui4& 
 
 
 void
-AVTransportImplementation::GetTransportInfo(const Jamm::ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+AVTransportImplementation::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
 // begin of your own code
 
@@ -60,7 +60,7 @@ AVTransportImplementation::GetTransportInfo(const Jamm::ui4& InstanceID, std::st
 
 
 void
-AVTransportImplementation::GetPositionInfo(const Jamm::ui4& InstanceID, Jamm::ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, Jamm::i4& RelCount, Jamm::i4& AbsCount)
+AVTransportImplementation::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
 // begin of your own code
 
@@ -69,7 +69,7 @@ AVTransportImplementation::GetPositionInfo(const Jamm::ui4& InstanceID, Jamm::ui
 
 
 void
-AVTransportImplementation::GetDeviceCapabilities(const Jamm::ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+AVTransportImplementation::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
 // begin of your own code
 
@@ -78,7 +78,7 @@ AVTransportImplementation::GetDeviceCapabilities(const Jamm::ui4& InstanceID, st
 
 
 void
-AVTransportImplementation::GetTransportSettings(const Jamm::ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+AVTransportImplementation::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
 // begin of your own code
 
@@ -87,7 +87,7 @@ AVTransportImplementation::GetTransportSettings(const Jamm::ui4& InstanceID, std
 
 
 void
-AVTransportImplementation::Stop(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Stop(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -96,7 +96,7 @@ AVTransportImplementation::Stop(const Jamm::ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& Speed)
+AVTransportImplementation::Play(const ui4& InstanceID, const std::string& Speed)
 {
 // begin of your own code
 
@@ -105,7 +105,7 @@ AVTransportImplementation::Play(const Jamm::ui4& InstanceID, const std::string& 
 
 
 void
-AVTransportImplementation::Pause(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Pause(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -114,7 +114,7 @@ AVTransportImplementation::Pause(const Jamm::ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& Unit, const std::string& Target)
+AVTransportImplementation::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
 // begin of your own code
 
@@ -123,7 +123,7 @@ AVTransportImplementation::Seek(const Jamm::ui4& InstanceID, const std::string& 
 
 
 void
-AVTransportImplementation::Next(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Next(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -132,7 +132,7 @@ AVTransportImplementation::Next(const Jamm::ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Previous(const Jamm::ui4& InstanceID)
+AVTransportImplementation::Previous(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -158,7 +158,7 @@ ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::strin
 
 
 void
-ConnectionManagerImplementation::ConnectionComplete(const Jamm::i4& ConnectionID)
+ConnectionManagerImplementation::ConnectionComplete(const i4& ConnectionID)
 {
 // begin of your own code
 
@@ -176,7 +176,7 @@ ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& Connection
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionInfo(const Jamm::i4& ConnectionID, Jamm::i4& RcsID, Jamm::i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, Jamm::i4& PeerConnectionID, std::string& Direction, std::string& Status)
+ConnectionManagerImplementation::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
 // begin of your own code
 
@@ -211,7 +211,7 @@ ContentDirectoryImplementation::GetSortCapabilities(std::string& SortCaps)
 
 
 void
-ContentDirectoryImplementation::GetSystemUpdateID(Jamm::ui4& Id)
+ContentDirectoryImplementation::GetSystemUpdateID(ui4& Id)
 {
 // begin of your own code
 
@@ -220,9 +220,9 @@ ContentDirectoryImplementation::GetSystemUpdateID(Jamm::ui4& Id)
 
 
 void
-ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const Jamm::ui4& StartingIndex, const Jamm::ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, Jamm::ui4& NumberReturned, Jamm::ui4& TotalMatches, Jamm::ui4& UpdateID)
+ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
-    Jamm::Av::MediaObject* object;
+    MediaObject* object;
     if (ObjectID == "0") {
         object = m_pRoot;
     }
@@ -245,7 +245,7 @@ ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::s
 
 
 void
-ContentDirectoryImplementation::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const Jamm::ui4& StartingIndex, const Jamm::ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, Jamm::ui4& NumberReturned, Jamm::ui4& TotalMatches, Jamm::ui4& UpdateID)
+ContentDirectoryImplementation::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
 // begin of your own code
 
@@ -281,7 +281,7 @@ ContentDirectoryImplementation::UpdateObject(const std::string& ObjectID, const 
 
 
 void
-ContentDirectoryImplementation::ImportResource(const Jamm::uri& SourceURI, const Jamm::uri& DestinationURI, Jamm::ui4& TransferID)
+ContentDirectoryImplementation::ImportResource(const uri& SourceURI, const uri& DestinationURI, ui4& TransferID)
 {
 // begin of your own code
 
@@ -290,7 +290,7 @@ ContentDirectoryImplementation::ImportResource(const Jamm::uri& SourceURI, const
 
 
 void
-ContentDirectoryImplementation::GetTransferProgress(const Jamm::ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal)
+ContentDirectoryImplementation::GetTransferProgress(const ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal)
 {
 // begin of your own code
 
@@ -299,7 +299,7 @@ ContentDirectoryImplementation::GetTransferProgress(const Jamm::ui4& TransferID,
 
 
 void
-ContentDirectoryImplementation::DeleteResource(const Jamm::uri& ResourceURI)
+ContentDirectoryImplementation::DeleteResource(const uri& ResourceURI)
 {
 // begin of your own code
 

@@ -210,7 +210,7 @@ void
 ControllerGui::browserItemActivated(const QModelIndex& index)
 {
     std::clog << "ControllerGui::browserItemActivated()" << std::endl;
-    MediaObject* object = static_cast<MediaObject*>(index.internalPointer());
+    Jamm::Av::MediaObject* object = static_cast<Jamm::Av::MediaObject*>(index.internalPointer());
     if (object == NULL) {
         return;
     }
@@ -232,7 +232,7 @@ void
 ControllerGui::browserItemSelected(const QModelIndex& index)
 {
     std::clog << "ControllerGui::browserItemSelected()" << std::endl;
-    MediaObject* object = static_cast<MediaObject*>(index.internalPointer());
+    Jamm::Av::MediaObject* object = static_cast<Jamm::Av::MediaObject*>(index.internalPointer());
     if (object == NULL) {
         return;
     }
@@ -264,7 +264,7 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
     
     QModelIndex index = selected.indexes().first();
     
-    RendererView* selectedRenderer = static_cast<RendererView*>(index.internalPointer());
+    Jamm::Av::RendererView* selectedRenderer = static_cast<Jamm::Av::RendererView*>(index.internalPointer());
     
     if (selectedRenderer == NULL) {
         return;

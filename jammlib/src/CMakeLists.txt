@@ -22,13 +22,17 @@ SET( JAMM_LIB_SRCS
 # sharedlibrary.cpp
 # signode.cpp
 # thread.cpp
+# UpnpAvToolkit.cpp
 Upnp.cpp
+UpnpController.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
 UpnpAvTypes.cpp
 UpnpAvServer.cpp
 UpnpAvServerImpl.cpp
-# UpnpAvToolkit.cpp
+UpnpAvRenderer.cpp
+UpnpAvRendererImpl.cpp
+UpnpAvCtrlImpl.cpp
 )
 
 FIND_LIBRARY(LIB_POCO_UTIL

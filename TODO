@@ -12,6 +12,7 @@ current TODOS:
 //       and may eliminate the friend class statement.
 // TODO: [jammgen] remove Device* m_pDevice
 // TODO: [jammgen, Upnp] the name ControllerImplAdapter may be misleading
+// TODO: [jammgen] MediaServer::m_pContentDirectoryImpl protected instead of private?
 
 
 // TODO: proper deep deletion of DeviceRoot in dtor (-> ~Container)

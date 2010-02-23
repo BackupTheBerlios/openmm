@@ -20,13 +20,14 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpController.h"
+#include <Jamm/UpnpController.h>
+
 #include "QtUi/ControllerGui.h"
 
 int main(int argc, char** argv)
 {
     ControllerGui gui(argc, argv);
-    UpnpAvController controller;
+    Jamm::Av::UpnpAvController controller;
     
     controller.setUserInterface(&gui);
     gui.initGui();

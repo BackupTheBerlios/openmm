@@ -1,5 +1,8 @@
 #include "UpnpAvCtrlImpl.h"
 
+using namespace Jamm;
+using namespace Jamm::Av;
+
 void
 AVTransportControllerImpl::_ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {

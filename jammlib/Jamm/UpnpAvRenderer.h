@@ -20,36 +20,33 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef UpnpAvRenderer_INCLUDED
+#define UpnpAvRenderer_INCLUDED
 
-// #include <jamm/signode.h>
-// using namespace Jamm;
+#include "UpnpAvDevices.h"
 
-#include <string>
-using namespace std;
+namespace Jamm {
+namespace Av {
 
-/**
-@author Jörg Bakker
-*/
+
 class Engine
 {
 public:
     // Engine handling
-    // virtual void setVideoDriver(string) = 0;
-    // virtual void setAudioDriver(string) = 0;
+    // virtual void setVideoDriver(std::string) = 0;
+    // virtual void setAudioDriver(std::string) = 0;
     // virtual void setFullscreen(bool on) = 0;
-    // virtual vector<string> getAudioAdapters() = 0;
-    // virtual void setAudioAdapter(string) = 0;
+    // virtual vector<std::string> getAudioAdapters() = 0;
+    // virtual void setAudioAdapter(std::string) = 0;
 
-    virtual string getEngineId() = 0;
+    virtual std::string getEngineId() = 0;
     
     // UPnP methods
     /*
       AVTransport
     */
     
-    virtual void setUri(string uri) = 0;
+    virtual void setUri(std::string uri) = 0;
     virtual void load() = 0;
     
     /**
@@ -84,5 +81,15 @@ public:
     */
 //     JSignal endOfTrack;
 };
+
+
+class UpnpAvRenderer : public MediaRenderer
+{
+public:
+    UpnpAvRenderer(Engine* engine);
+};
+
+} // namespace Av
+} // namespace Jamm
 
 #endif

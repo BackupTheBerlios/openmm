@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <QtDebug>
 
-UpnpRendererListModel::UpnpRendererListModel(UpnpAvUserInterface* pUserInterface, QObject *parent) :
+UpnpRendererListModel::UpnpRendererListModel(Jamm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
 // m_pRenderers(pRenderers)
 m_pUserInterface(pUserInterface)
@@ -56,7 +56,7 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-    RendererView* pRenderer = static_cast<RendererView*>(index.internalPointer());
+    Jamm::Av::RendererView* pRenderer = static_cast<Jamm::Av::RendererView*>(index.internalPointer());
     return QString(pRenderer->getName().c_str());
 //     return QString(pRenderer->getDevice()->getFriendlyName().c_str());
 }

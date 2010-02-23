@@ -30,15 +30,9 @@
 #include <Poco/StreamCopier.h>
 #include <sstream>
 
-#include <Jamm/Upnp.h>
+#include <Jamm/UpnpAvRenderer.h>
 #include "EngineVlc.h"
-#include "MediaRendererImpl.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
-using Jamm::Service;
-using Jamm::DeviceRoot;
 using Poco::UInt8;
 using Poco::StreamCopier;
 using Poco::Util::ServerApplication;
@@ -48,8 +42,6 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 using std::stringstream;
 
-
-// Application wrapper for NetworkLight class
 
 class MediaRendererApplication: public Poco::Util::ServerApplication
 {
@@ -117,21 +109,11 @@ protected:
             char* argv[1] = {"jammr"};
 //             char** argv
             // TODO: change Engine ctor with arg as std::vector<std::string>
-            Engine* pEngine = new EngineVlc(1, argv);
+            Jamm::Av::Engine* pEngine = new EngineVlc(1, argv);
             std::cerr << "MediaRendererApplication::main() pEngine: " << pEngine << std::endl;
             std::cerr << "MediaRendererApplication::main() engine id: " << pEngine->getEngineId() << std::endl;
             
-            AVTransportImplementation       myAVTransportImplementation;
-            ConnectionManagerImplementation myConnectionManagerImplementation;
-            RenderingControlImplementation  myRenderingControlImplementation;
-            
-            MediaRendererImplementation     myMediaRenderer(
-                &myRenderingControlImplementation,
-                &myConnectionManagerImplementation,
-                &myAVTransportImplementation,
-                pEngine
-                );
-            
+            Jamm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
             myMediaRenderer.start();
             waitForTerminationRequest();
             // myMediaRenderer.stop();

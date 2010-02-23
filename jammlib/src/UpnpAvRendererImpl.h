@@ -22,20 +22,18 @@
 #ifndef MEDIARENDERER_IMPLEMENTATION_H
 #define MEDIARENDERER_IMPLEMENTATION_H
 
-#include <Jamm/Upnp.h>
-#include <Jamm/UpnpAvTypes.h>
-#include <Jamm/UpnpAvDevices.h>
+#include "UpnpAvTypes.h"
+#include "UpnpAvRenderer.h"
 
-#include "Engine.h"
+namespace Jamm {
+namespace Av {
 
-using namespace Jamm;
-using namespace Jamm::Av;
 
 // TODO: LastChange
 
-class AVTransportImplementation : public AVTransport
+class AVTransportRendererImpl : public AVTransport
 {
-    friend class MediaRendererImplementation;
+    friend class UpnpAvRenderer;
     
 private:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -57,9 +55,9 @@ private:
     std::string                     m_lastCurrentTrackUri;
 };
 
-class ConnectionManagerImplementation : public ConnectionManager
+class ConnectionManagerRendererImpl : public ConnectionManager
 {
-    friend class MediaRendererImplementation;
+    friend class UpnpAvRenderer;
     
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -72,9 +70,9 @@ private:
     Engine* m_pEngine;
 };
 
-class RenderingControlImplementation : public RenderingControl
+class RenderingControlRendererImpl : public RenderingControl
 {
-    friend class MediaRendererImplementation;
+    friend class UpnpAvRenderer;
     
 private:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);
@@ -119,22 +117,9 @@ private:
 };
 
 
-class MediaRendererImplementation : public MediaRenderer
-{
-public:
-    MediaRendererImplementation(RenderingControlImplementation* pRenderingControlImpl,
-                                ConnectionManagerImplementation* pConnectionManagerImpl,
-                                AVTransportImplementation* pAVTransportImpl,
-                                Engine* engine) :
-        MediaRenderer(pRenderingControlImpl,
-                      pConnectionManagerImpl,
-                      pAVTransportImpl)
-    {
-        pRenderingControlImpl->m_pEngine = engine;
-        pConnectionManagerImpl->m_pEngine = engine;
-        pAVTransportImpl->m_pEngine = engine;
-    }
-};
+} // namespace Av
+} // namespace Jamm
+
 
 #endif
 

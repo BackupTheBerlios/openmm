@@ -23,11 +23,12 @@
 #define JAMMUPNPAV_TYPES_H
 
 #include "Upnp.h"
-#include "UpnpAvControllers.h"
 
 
 namespace Jamm {
 namespace Av {
+
+class MediaServerController;
 
 class AvTypeConverter
 {

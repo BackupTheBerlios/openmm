@@ -270,15 +270,16 @@ class MediaRenderer : public DeviceRootImplAdapter
 public:
     MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
+protected:
+    RenderingControl* m_pRenderingControlImpl;
+    ConnectionManager* m_pConnectionManagerImpl;
+    AVTransport* m_pAVTransportImpl;
 
 private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
     static std::string m_deviceDescription;
-    RenderingControl* m_pRenderingControlImpl;
-    ConnectionManager* m_pConnectionManagerImpl;
-    AVTransport* m_pAVTransportImpl;
 };
 
 
@@ -287,15 +288,16 @@ class MediaServer : public DeviceRootImplAdapter
 public:
     MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
-
+protected:
+    ContentDirectory* m_pContentDirectoryImpl;
+    ConnectionManager* m_pConnectionManagerImpl;
+    AVTransport* m_pAVTransportImpl;
+    
 private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
     static std::string m_deviceDescription;
-    ContentDirectory* m_pContentDirectoryImpl;
-    ConnectionManager* m_pConnectionManagerImpl;
-    AVTransport* m_pAVTransportImpl;
 };
 
 } // namespace Av

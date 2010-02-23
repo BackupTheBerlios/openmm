@@ -1,10 +1,10 @@
 #ifndef UPNPAV_CTRL_IMPL_H
 #define UPNPAV_CTRL_IMPL_H
 
-#include <Jamm/UpnpAvControllers.h>
+#include "UpnpAvControllers.h"
 
-using namespace Jamm;
-using namespace Jamm::Av;
+namespace Jamm {
+namespace Av {
 
 class AVTransportControllerImpl : public AVTransportController
 {
@@ -101,6 +101,9 @@ private:
     virtual void _changedSystemUpdateID(const ui4& val);
     virtual void _changedContainerUpdateIDs(const std::string& val);
 };
+
+} // namespace Av
+} // namespace Jamm
 
 #endif
 

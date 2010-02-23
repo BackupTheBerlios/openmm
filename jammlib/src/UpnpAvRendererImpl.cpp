@@ -19,17 +19,13 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#include "MediaRendererImpl.h"
+#include "UpnpAvRendererImpl.h"
 
-
-// AVTransportImplementation::AVTransportImplementation()
-// {
-//     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
-// }
-
+using namespace Jamm;
+using namespace Jamm::Av;
 
 void
-AVTransportImplementation::initStateVars()
+AVTransportRendererImpl::initStateVars()
 {
     _setTransportState("STOPPED");
     _setTransportStatus("OK");
@@ -62,10 +58,10 @@ AVTransportImplementation::initStateVars()
 
 
 void
-AVTransportImplementation::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportImplementation::SetAVTransportURI() enters in state: " << transportState << std::endl;
+    std::cerr << "AVTransportRendererImpl::SetAVTransportURI() enters in state: " << transportState << std::endl;
     
     if (transportState == "NO_MEDIA_PRESENT") {
         _setTransportState("STOPPED");
@@ -101,12 +97,12 @@ implementation doesn’t support this feature then this state variable must be s
 // //     std::string duration = obj.getProperty("res@duration");
 // //     _setCurrentMediaDuration(duration);
 // //     _setCurrentTrackDuration(duration);
-    std::cerr << "AVTransportImplementation::SetAVTransportURI() leaves in state: " << transportState << std::endl;
+    std::cerr << "AVTransportRendererImpl::SetAVTransportURI() leaves in state: " << transportState << std::endl;
 }
 
 
 void
-AVTransportImplementation::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+AVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
 // begin of your own code
 
@@ -115,7 +111,7 @@ AVTransportImplementation::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, st
 
 
 void
-AVTransportImplementation::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
 // begin of your own code
 
@@ -124,9 +120,9 @@ AVTransportImplementation::GetTransportInfo(const ui4& InstanceID, std::string& 
 
 
 void
-AVTransportImplementation::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
+AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
-    std::cerr << "AVTransportImplementation::GetPositionInfo()" << std::endl;
+    std::cerr << "AVTransportRendererImpl::GetPositionInfo()" << std::endl;
     std::cerr << "_getCurrentTrack()" << std::endl;
     Track = _getCurrentTrack();
     std::cerr << "_getCurrentTrackDuration()" << std::endl;
@@ -141,7 +137,7 @@ AVTransportImplementation::GetPositionInfo(const ui4& InstanceID, ui4& Track, st
 
 
 void
-AVTransportImplementation::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+AVTransportRendererImpl::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
 // begin of your own code
 
@@ -150,7 +146,7 @@ AVTransportImplementation::GetDeviceCapabilities(const ui4& InstanceID, std::str
 
 
 void
-AVTransportImplementation::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+AVTransportRendererImpl::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
 // begin of your own code
 
@@ -159,10 +155,10 @@ AVTransportImplementation::GetTransportSettings(const ui4& InstanceID, std::stri
 
 
 void
-AVTransportImplementation::Stop(const ui4& InstanceID)
+AVTransportRendererImpl::Stop(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportImplementation::Stop() enters in state: " << transportState << std::endl;
+    std::cerr << "AVTransportRendererImpl::Stop() enters in state: " << transportState << std::endl;
     
     if (transportState != "NO_MEDIA_PRESENT") {
         // be nice to the engine and don't stop when already in stopped or paused state
@@ -189,11 +185,11 @@ AVTransportImplementation::Stop(const ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Play(const ui4& InstanceID, const std::string& Speed)
+AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
 {
     std::string speed = Speed;
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportImplementation::Play() enters in state: " << transportState << std::endl;
+    std::cerr << "AVTransportRendererImpl::Play() enters in state: " << transportState << std::endl;
     if (transportState == "STOPPED"
         || transportState == "PLAYING"
         || transportState == "PAUSED_PLAYBACK"
@@ -240,10 +236,10 @@ AVTransportImplementation::Play(const ui4& InstanceID, const std::string& Speed)
 
 
 void
-AVTransportImplementation::Pause(const ui4& InstanceID)
+AVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportImplementation::Pause() enters in state: " << transportState << std::endl;
+    std::cerr << "AVTransportRendererImpl::Pause() enters in state: " << transportState << std::endl;
     
     if (transportState == "PLAYING" || transportState == "RECORDING") {
         m_pEngine->pause();
@@ -259,14 +255,14 @@ AVTransportImplementation::Pause(const ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
+AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportImplementation::Pause() enters in state: " << transportState << std::endl;
+    std::cerr << "AVTransportRendererImpl::Pause() enters in state: " << transportState << std::endl;
     
     if (transportState == "STOPPED" || transportState == "PLAYING") {
         // TODO: does it make sense to handle "PAUSED_PLAYBACK", too?
-        std::cerr << "AVTransportImplementation::Seek() seek mode: " << Unit << ", seek target: " << Target << std::endl;
+        std::cerr << "AVTransportRendererImpl::Seek() seek mode: " << Unit << ", seek target: " << Target << std::endl;
         
         ui4 position;
         if (Unit == "ABS_TIME") {
@@ -285,7 +281,7 @@ AVTransportImplementation::Seek(const ui4& InstanceID, const std::string& Unit, 
 
 
 void
-AVTransportImplementation::Next(const ui4& InstanceID)
+AVTransportRendererImpl::Next(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -294,7 +290,7 @@ AVTransportImplementation::Next(const ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Previous(const ui4& InstanceID)
+AVTransportRendererImpl::Previous(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -302,14 +298,14 @@ AVTransportImplementation::Previous(const ui4& InstanceID)
 }
 
 
-// ConnectionManagerImplementation::ConnectionManagerImplementation()
+// ConnectionManagerRendererImpl::ConnectionManagerRendererImpl()
 // {
 //     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
 // }
 
 
 void
-ConnectionManagerImplementation::initStateVars()
+ConnectionManagerRendererImpl::initStateVars()
 {
     _setSourceProtocolInfo("http-get:*:*:*");
     _setSinkProtocolInfo("http-get:*:*:*");
@@ -318,7 +314,7 @@ ConnectionManagerImplementation::initStateVars()
 
 
 void
-ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::string& Sink)
+ConnectionManagerRendererImpl::GetProtocolInfo(std::string& Source, std::string& Sink)
 {
 // begin of your own code
 
@@ -327,7 +323,7 @@ ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::strin
 
 
 void
-ConnectionManagerImplementation::ConnectionComplete(const i4& ConnectionID)
+ConnectionManagerRendererImpl::ConnectionComplete(const i4& ConnectionID)
 {
 // begin of your own code
     
@@ -336,7 +332,7 @@ ConnectionManagerImplementation::ConnectionComplete(const i4& ConnectionID)
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& ConnectionIDs)
+ConnectionManagerRendererImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
 // begin of your own code
 
@@ -345,7 +341,7 @@ ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& Connection
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
+ConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
 // begin of your own code
 
@@ -353,14 +349,14 @@ ConnectionManagerImplementation::GetCurrentConnectionInfo(const i4& ConnectionID
 }
 
 
-// RenderingControlImplementation::RenderingControlImplementation()
+// RenderingControlRendererImpl::RenderingControlRendererImpl()
 // {
 //     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
 // }
 
 
 void
-RenderingControlImplementation::initStateVars()
+RenderingControlRendererImpl::initStateVars()
 {
     _setPresetNameList("");
     _setLastChange("");
@@ -384,7 +380,7 @@ RenderingControlImplementation::initStateVars()
 
 
 void
-RenderingControlImplementation::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
+RenderingControlRendererImpl::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
 {
 // begin of your own code
     
@@ -393,7 +389,7 @@ RenderingControlImplementation::ListPresets(const ui4& InstanceID, std::string& 
 
 
 void
-RenderingControlImplementation::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
+RenderingControlRendererImpl::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
 // begin of your own code
     
@@ -402,7 +398,7 @@ RenderingControlImplementation::SelectPreset(const ui4& InstanceID, const std::s
 
 
 void
-RenderingControlImplementation::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
+RenderingControlRendererImpl::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
 {
 // begin of your own code
     
@@ -411,7 +407,7 @@ RenderingControlImplementation::GetBrightness(const ui4& InstanceID, ui2& Curren
 
 
 void
-RenderingControlImplementation::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
+RenderingControlRendererImpl::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
 // begin of your own code
     
@@ -420,7 +416,7 @@ RenderingControlImplementation::SetBrightness(const ui4& InstanceID, const ui2& 
 
 
 void
-RenderingControlImplementation::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
+RenderingControlRendererImpl::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
 {
 // begin of your own code
     
@@ -429,7 +425,7 @@ RenderingControlImplementation::GetContrast(const ui4& InstanceID, ui2& CurrentC
 
 
 void
-RenderingControlImplementation::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
+RenderingControlRendererImpl::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
 // begin of your own code
     
@@ -438,7 +434,7 @@ RenderingControlImplementation::SetContrast(const ui4& InstanceID, const ui2& De
 
 
 void
-RenderingControlImplementation::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
+RenderingControlRendererImpl::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
 {
 // begin of your own code
     
@@ -447,7 +443,7 @@ RenderingControlImplementation::GetSharpness(const ui4& InstanceID, ui2& Current
 
 
 void
-RenderingControlImplementation::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
+RenderingControlRendererImpl::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
 // begin of your own code
     
@@ -456,7 +452,7 @@ RenderingControlImplementation::SetSharpness(const ui4& InstanceID, const ui2& D
 
 
 void
-RenderingControlImplementation::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
+RenderingControlRendererImpl::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
 {
 // begin of your own code
     
@@ -465,7 +461,7 @@ RenderingControlImplementation::GetRedVideoGain(const ui4& InstanceID, ui2& Curr
 
 
 void
-RenderingControlImplementation::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
+RenderingControlRendererImpl::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
 // begin of your own code
     
@@ -474,7 +470,7 @@ RenderingControlImplementation::SetRedVideoGain(const ui4& InstanceID, const ui2
 
 
 void
-RenderingControlImplementation::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
+RenderingControlRendererImpl::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
 {
 // begin of your own code
     
@@ -483,7 +479,7 @@ RenderingControlImplementation::GetGreenVideoGain(const ui4& InstanceID, ui2& Cu
 
 
 void
-RenderingControlImplementation::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
+RenderingControlRendererImpl::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
 // begin of your own code
     
@@ -492,7 +488,7 @@ RenderingControlImplementation::SetGreenVideoGain(const ui4& InstanceID, const u
 
 
 void
-RenderingControlImplementation::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
+RenderingControlRendererImpl::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
 {
 // begin of your own code
     
@@ -501,7 +497,7 @@ RenderingControlImplementation::GetBlueVideoGain(const ui4& InstanceID, ui2& Cur
 
 
 void
-RenderingControlImplementation::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
+RenderingControlRendererImpl::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
 // begin of your own code
     
@@ -510,7 +506,7 @@ RenderingControlImplementation::SetBlueVideoGain(const ui4& InstanceID, const ui
 
 
 void
-RenderingControlImplementation::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
+RenderingControlRendererImpl::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
 {
 // begin of your own code
     
@@ -519,7 +515,7 @@ RenderingControlImplementation::GetRedVideoBlackLevel(const ui4& InstanceID, ui2
 
 
 void
-RenderingControlImplementation::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
+RenderingControlRendererImpl::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
 // begin of your own code
     
@@ -528,7 +524,7 @@ RenderingControlImplementation::SetRedVideoBlackLevel(const ui4& InstanceID, con
 
 
 void
-RenderingControlImplementation::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
+RenderingControlRendererImpl::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
 {
 // begin of your own code
     
@@ -537,7 +533,7 @@ RenderingControlImplementation::GetGreenVideoBlackLevel(const ui4& InstanceID, u
 
 
 void
-RenderingControlImplementation::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
+RenderingControlRendererImpl::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
 // begin of your own code
     
@@ -546,7 +542,7 @@ RenderingControlImplementation::SetGreenVideoBlackLevel(const ui4& InstanceID, c
 
 
 void
-RenderingControlImplementation::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
+RenderingControlRendererImpl::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
 {
 // begin of your own code
     
@@ -555,7 +551,7 @@ RenderingControlImplementation::GetBlueVideoBlackLevel(const ui4& InstanceID, ui
 
 
 void
-RenderingControlImplementation::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
+RenderingControlRendererImpl::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
 // begin of your own code
     
@@ -564,7 +560,7 @@ RenderingControlImplementation::SetBlueVideoBlackLevel(const ui4& InstanceID, co
 
 
 void
-RenderingControlImplementation::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
+RenderingControlRendererImpl::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
 {
 // begin of your own code
     
@@ -573,7 +569,7 @@ RenderingControlImplementation::GetColorTemperature (const ui4& InstanceID, ui2&
 
 
 void
-RenderingControlImplementation::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
+RenderingControlRendererImpl::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
 // begin of your own code
     
@@ -582,7 +578,7 @@ RenderingControlImplementation::SetColorTemperature(const ui4& InstanceID, const
 
 
 void
-RenderingControlImplementation::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
+RenderingControlRendererImpl::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
 {
 // begin of your own code
     
@@ -591,7 +587,7 @@ RenderingControlImplementation::GetHorizontalKeystone(const ui4& InstanceID, i2&
 
 
 void
-RenderingControlImplementation::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
+RenderingControlRendererImpl::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
 // begin of your own code
     
@@ -600,7 +596,7 @@ RenderingControlImplementation::SetHorizontalKeystone(const ui4& InstanceID, con
 
 
 void
-RenderingControlImplementation::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
+RenderingControlRendererImpl::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
 {
 // begin of your own code
     
@@ -609,7 +605,7 @@ RenderingControlImplementation::GetVerticalKeystone(const ui4& InstanceID, i2& C
 
 
 void
-RenderingControlImplementation::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
+RenderingControlRendererImpl::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
 // begin of your own code
     
@@ -618,7 +614,7 @@ RenderingControlImplementation::SetVerticalKeystone(const ui4& InstanceID, const
 
 
 void
-RenderingControlImplementation::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
+RenderingControlRendererImpl::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
 // begin of your own code
     
@@ -627,7 +623,7 @@ RenderingControlImplementation::GetMute(const ui4& InstanceID, const std::string
 
 
 void
-RenderingControlImplementation::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+RenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
 // begin of your own code
     
@@ -636,7 +632,7 @@ RenderingControlImplementation::SetMute(const ui4& InstanceID, const std::string
 
 
 void
-RenderingControlImplementation::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
+RenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
 // begin of your own code
     
@@ -645,19 +641,19 @@ RenderingControlImplementation::GetVolume(const ui4& InstanceID, const std::stri
 
 
 void
-RenderingControlImplementation::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
+RenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
-    std::cerr << "RenderingControlImplementation::SetVolume() channel: " << Channel << ", volume: " << DesiredVolume << std::endl;
+    std::cerr << "RenderingControlRendererImpl::SetVolume() channel: " << Channel << ", volume: " << DesiredVolume << std::endl;
     
     m_pEngine->setVolume(0, DesiredVolume);
     
     _setVolume(DesiredVolume);
-    std::cerr << "RenderingControlImplementation::SetVolume() finished" << std::endl;
+    std::cerr << "RenderingControlRendererImpl::SetVolume() finished" << std::endl;
 }
 
 
 void
-RenderingControlImplementation::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
+RenderingControlRendererImpl::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
 {
 // begin of your own code
     
@@ -666,7 +662,7 @@ RenderingControlImplementation::GetVolumeDB(const ui4& InstanceID, const std::st
 
 
 void
-RenderingControlImplementation::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
+RenderingControlRendererImpl::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
 // begin of your own code
     
@@ -675,7 +671,7 @@ RenderingControlImplementation::SetVolumeDB(const ui4& InstanceID, const std::st
 
 
 void
-RenderingControlImplementation::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
+RenderingControlRendererImpl::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
 {
 // begin of your own code
     
@@ -684,7 +680,7 @@ RenderingControlImplementation::GetVolumeDBRange(const ui4& InstanceID, const st
 
 
 void
-RenderingControlImplementation::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
+RenderingControlRendererImpl::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
 {
 // begin of your own code
     
@@ -693,7 +689,7 @@ RenderingControlImplementation::GetLoudness(const ui4& InstanceID, const std::st
 
 
 void
-RenderingControlImplementation::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+RenderingControlRendererImpl::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
 // begin of your own code
     

@@ -48,19 +48,19 @@ ControllerApplication.cpp
 # upnprenderingcontrol.cpp
 # upnprendererlistmodel.cpp
 # upnpsyncmediabrowser.cpp
-UpnpAvCtrlImpl.cpp
-UpnpController.cpp
+# UpnpAvCtrlImpl.cpp
+# UpnpController.cpp
 )
 
 
-SET( JAMMC_MOC
+# SET( JAMMC_MOC
 # controllergui.h
 # modeltest.h
 # upnpbrowsermodel.h
 # upnprendererlistmodel.h
 # upnpsyncmediabrowser.h
-UpnpController.h
-)
+# UpnpController.h
+# )
 
 
 ADD_EXECUTABLE( jammc

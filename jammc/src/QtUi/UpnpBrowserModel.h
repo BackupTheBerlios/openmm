@@ -30,18 +30,16 @@
 #include <QTextCodec>
 #include <QFileIconProvider>
 
-#include <Jamm/Upnp.h>
 #include <Jamm/UpnpAvTypes.h>
+#include <Jamm/UpnpController.h>
 
-#include "../UpnpController.h"
-#include "../UpnpAvCtrlImpl.h"
 
 class UpnpBrowserModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
+    UpnpBrowserModel(Jamm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
     ~UpnpBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -68,7 +66,7 @@ public:
     
 private:
 //     Jamm::Container<ServerController>*      m_pServers;
-    UpnpAvUserInterface*                    m_pUserInterface;
+    Jamm::Av::UpnpAvUserInterface*          m_pUserInterface;
     QTextCodec*                             m_charEncoding;
     QFileIconProvider*                      m_iconProvider;
 //     bool                  m_lazyRowCount;

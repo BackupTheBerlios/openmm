@@ -19,28 +19,19 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef USER_INTERFACE_QT_H
-#define USER_INTERFACE_QT_H
 
-#include "../Controller.h"
+#include "UpnpAvRenderer.h"
+#include "UpnpAvRendererImpl.h"
 
-class UserInterfaceQt : public UserInterface
+using namespace Jamm;
+using namespace Jamm::Av;
+
+UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
+MediaRenderer(new RenderingControlRendererImpl,
+              new ConnectionManagerRendererImpl,
+              new AVTransportRendererImpl)
 {
-public:
-    virtual int eventLoop();
-    
-    virtual void initGui() {}
-    virtual void showMainWindow() {}
-    
-    virtual void deviceAdded(Device* pDevice) {}
-    virtual void rendererAdded(MediaRendererController* pRenderer) {}
-    virtual void serverAdded(MediaServerController* pRenderer) {}
-    
-    virtual void deviceRemoved(Device* pDevice) {}
-    virtual void rendererRemoved(MediaRendererController* pRenderer) 
-    {}
-    virtual void serverRemoved(MediaServerController* pRenderer) {}
-    
-};
-
-#endif
+    static_cast<RenderingControlRendererImpl*>(m_pRenderingControlImpl)->m_pEngine = engine;
+    static_cast<ConnectionManagerRendererImpl*>(m_pConnectionManagerImpl)->m_pEngine = engine;
+    static_cast<AVTransportRendererImpl*>(m_pAVTransportImpl)->m_pEngine = engine;
+}

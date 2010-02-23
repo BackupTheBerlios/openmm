@@ -23,7 +23,7 @@
 #ifndef ENGINEVLC_H
 #define ENGINEVLC_H
 
-#include "Engine.h"
+#include <Jamm/UpnpAvRenderer.h>
 
 #ifdef __X11__
 #include <X11/Xlib.h>
@@ -31,18 +31,18 @@
 #include <vlc/vlc.h>
 
 
-class EngineVlc : public Engine
+class EngineVlc : public Jamm::Av::Engine
 {
 public:
     EngineVlc(int argc, char **argv);
     ~EngineVlc();
     
-    string getEngineId() { return m_engineId; }
+    std::string getEngineId() { return m_engineId; }
     
     /*
       AVTransport
     */
-    virtual void setUri(string uri) { m_uri = uri; }
+    virtual void setUri(std::string uri) { m_uri = uri; }
     virtual void load();
     
     /**
@@ -76,11 +76,11 @@ private:
     libvlc_exception_t      m_exception;
     libvlc_instance_t*      m_vlcInstance;
     libvlc_media_player_t*  m_vlcPlayer;
-    string                  m_uri;
+    std::string             m_uri;
     long long               m_startTime;
     float                   m_length; // length of media in seconds
     
-    string                  m_engineId;
+    std::string             m_engineId;
 };
 
 

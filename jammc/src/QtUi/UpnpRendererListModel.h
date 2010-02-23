@@ -29,10 +29,7 @@
 #include <QList>
 #include <QTextCodec>
 
-#include <Jamm/Upnp.h>
-
-#include "../UpnpController.h"
-// #include "../UpnpAvCtrlImpl.h"
+#include <Jamm/UpnpController.h>
 
 class UpnpRendererListModel : public QAbstractItemModel
 {
@@ -40,7 +37,7 @@ class UpnpRendererListModel : public QAbstractItemModel
         
 public:
 //     UpnpRendererListModel(Jamm::Container<RendererView>* pRenderers, QObject *parent = 0);
-    UpnpRendererListModel(UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
+    UpnpRendererListModel(Jamm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
     ~UpnpRendererListModel();
     
     QVariant data(const QModelIndex &index, int role) const;
@@ -63,7 +60,7 @@ signals:
     
 private:
 //     Jamm::Container<RendererView>*   m_pRenderers;
-    UpnpAvUserInterface*                m_pUserInterface;
+    Jamm::Av::UpnpAvUserInterface*   m_pUserInterface;
     QTextCodec*                      m_charEncoding;
 };
 
