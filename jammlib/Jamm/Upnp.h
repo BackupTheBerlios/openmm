@@ -126,6 +126,18 @@ class Entity;
 class EntityItem;
 
 
+class NetworkInterfaceManager
+{
+public:
+    static NetworkInterfaceManager* instance();
+    void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
+    
+private:
+    NetworkInterfaceManager*    m_pInstance;
+    Poco::NotificationCenter    m_notificationCenter;
+};
+
+
 class SsdpMessage : public Poco::Notification
 {
 public:
@@ -398,6 +410,7 @@ public:
     {
 //         std::clog << "Container::getValue() key: " << key << std::endl;
         Variant* e = (*m_pEntities.find(key)).second;
+        // FIXME: is this a proper check for "key not found in m_pEntities"
         if (e) {
             T res;
             e->getValue(res);

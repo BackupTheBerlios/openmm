@@ -108,7 +108,7 @@ MediaObject::readMetaData(const std::string& metaData)
 void
 MediaObject::readNode(Poco::XML::Node* pNode)
 {
-//     std::clog << "MediaObject::readNode()" << std::endl;
+    std::clog << "MediaObject::readNode()" << std::endl;
     
     Poco::XML::NamedNodeMap* attr = NULL;
     if (pNode->hasAttributes()) {
@@ -141,7 +141,7 @@ MediaObject::readNode(Poco::XML::Node* pNode)
             childNode = childNode->nextSibling();
         }
     }
-    std::clog << std::endl;
+//     std::clog << std::endl;
 }
 
 

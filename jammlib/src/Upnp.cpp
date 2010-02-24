@@ -31,6 +31,18 @@
 
 using namespace Jamm;
 
+NetworkInterfaceManager*
+NetworkInterfaceManager::instance()
+{
+}
+
+
+void
+NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObserver& observer)
+{
+    m_notificationCenter.addObserver(observer);
+}
+
 
 UriDescriptionReader::UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath) :
 DescriptionReader(deviceDescriptionPath),

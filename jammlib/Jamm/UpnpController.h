@@ -78,7 +78,7 @@ class MediaObjectView
 };
 
 
-class UpnpAvUserInterface : UpnpUserInterface
+class UpnpAvUserInterface : public UpnpUserInterface
 {
     friend class UpnpAvController;
     

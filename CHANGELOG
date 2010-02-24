@@ -1,4 +1,16 @@
 -------------------------------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------------------------------
+2010-02-22 Jamm 0.0.3
+
+libjamm has all the basic Upnp code, no dependency on libplatinum anymore
+jammc, jammr and jamms are ported to libjamm with almost all functionality as with libplatinum
+API is so much cleaner now
+user interface for controller is a plugin so only the plugin is linked to the gui toolkit
+
+-------------------------------------------------------------------------------------------------------
 2009-04-15  JammS
 
 vdr-upnp 0.0.3

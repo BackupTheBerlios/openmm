@@ -20,18 +20,31 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/ClassLoader.h>
+#include <Poco/Exception.h>
 #include <Jamm/UpnpController.h>
-
-#include "QtUi/ControllerGui.h"
 
 int main(int argc, char** argv)
 {
-    ControllerGui gui(argc, argv);
+    // TODO: write a class loader that checks environment variable JAMM_PLUGIN_PATH
+    Poco::ClassLoader<Jamm::Av::UpnpAvUserInterface> guiLoader;
+    try {
+        guiLoader.loadLibrary("/home/jb/devel/cc/jammbin/jammc/src/QtUi/libjammc-av-ui-qt.so");
+    }
+    catch(Poco::NotFoundException) {
+        std::cerr << "Error in ControllerApplication: could not find plugin for user interface" << std::endl;
+        return 1;
+    }
+    std::clog << "ControllerApplication: user interface loaded successfully" << std::endl;
+    
+    Jamm::Av::UpnpAvUserInterface* pUserInterface;
     Jamm::Av::UpnpAvController controller;
     
-    controller.setUserInterface(&gui);
-    gui.initGui();
-    gui.showMainWindow();
+    pUserInterface = guiLoader.create("ControllerGui");
+    controller.setUserInterface(pUserInterface);
+    pUserInterface->initGui();
+    pUserInterface->showMainWindow();
     controller.start();
-    return gui.eventLoop();
+    std::clog << "ControllerApplication: starting event loop" << std::endl;
+    return pUserInterface->eventLoop();
 }

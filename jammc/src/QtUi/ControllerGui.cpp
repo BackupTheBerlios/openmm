@@ -109,12 +109,18 @@ CrumbButton::~CrumbButton()
 }
 
 
+ControllerGui::ControllerGui() :
+m_app(0, 0),
+m_widget(),
+m_sliderMoved(false)
+{
+}
+
 ControllerGui::ControllerGui(int argc, char** argv) :
 m_app(argc, argv),
 m_widget(),
 m_sliderMoved(false)
 {
-
 }
 
 
@@ -238,7 +244,6 @@ ControllerGui::browserItemSelected(const QModelIndex& index)
     }
     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
     std::clog << "title: " << object->getTitle() << std::endl;
-    std::clog << "res: " << object->getProperty("res") << std::endl;
 
     if (object->isContainer()) {
         new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
@@ -417,3 +422,7 @@ void
 ControllerGui::endRemoveDevice()
 {
 }
+
+POCO_BEGIN_MANIFEST(Jamm::Av::UpnpAvUserInterface)
+POCO_EXPORT_CLASS(ControllerGui)
+POCO_END_MANIFEST

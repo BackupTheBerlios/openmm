@@ -24,7 +24,7 @@
 #define CONTROLLERGUI_H
 
 #include <QtGui>
-
+#include <Poco/ClassLibrary.h>
 #include <Jamm/UpnpController.h>
 
 #include "UpnpBrowserModel.h"
@@ -71,6 +71,7 @@ class ControllerGui : public QObject, public Jamm::Av::UpnpAvUserInterface
     friend class UpnpBrowserModel;
     
 public:
+    ControllerGui();
     ControllerGui(int argc, char** argv);
     
     virtual int eventLoop();
