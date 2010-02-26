@@ -108,13 +108,9 @@ typedef Poco::URI       uri;
 static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    JAMM_VERSION        = "0.0.3";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
-static const std::string    SSDP_ADDRESS        = "239.255.255.250";
-static const Poco::UInt16   SSDP_PORT           = 1900;
-static const Poco::UInt16   SSDP_CACHE_DURATION = 1800;
-static const Poco::UInt16   SSDP_MIN_WAIT_TIME  = 1;
-static const Poco::UInt16   SSDP_MAX_WAIT_TIME  = 120;
 
 class Device;
+class DeviceRoot;
 class Service;
 class Action;
 class Argument;
@@ -124,97 +120,26 @@ class ControlRequestHandler;
 class HttpSocket;
 class Entity;
 class EntityItem;
+class UpnpRequestHandler;
+class DescriptionRequestHandler;
+class DeviceRequestHandlerFactory;
+class ControlRequestHandler;
+class SsdpSocket;
+class SsdpMessage;
+class SsdpMessageSet;
+class Subscription;
+class NetworkInterfaceNotification;
 
 
-class NetworkInterfaceManager
+class SsdpNetworkInterface
 {
 public:
-    static NetworkInterfaceManager* instance();
-    void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
+    SsdpNetworkInterface(const std::string& interfaceName);
     
 private:
-    NetworkInterfaceManager*    m_pInstance;
-    Poco::NotificationCenter    m_notificationCenter;
-};
-
-
-class SsdpMessage : public Poco::Notification
-{
-public:
-    typedef enum {
-        REQUEST_NOTIFY          = 1,
-        REQUEST_NOTIFY_ALIVE    = 2,
-        REQUEST_NOTIFY_BYEBYE   = 3,
-        REQUEST_SEARCH          = 4,
-        REQUEST_RESPONSE        = 5,
-        SUBTYPE_ALIVE           = 6,
-        SUBTYPE_BYEBYE          = 7,
-        SSDP_ALL                = 8,
-        UPNP_ROOT_DEVICES       = 9
-    } TRequestMethod;
-    
-    SsdpMessage();
-    // build sceletons for the different types of SSDP messages
-    SsdpMessage(TRequestMethod requestMethod);
-    
-    // map the received HTTP header to an SsdpMessage object in memory
-    SsdpMessage(const std::string& buf, const Poco::Net::SocketAddress& sender = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    ~SsdpMessage();
-    
-    void setRequestMethod(TRequestMethod requestMethod);
-    TRequestMethod getRequestMethod();
-    
-    // HTTP message envelope
-    std::string toString();
-    
-    // set and get the fields of the HTTP message header
-    void setCacheControl(int duration = SSDP_CACHE_DURATION);  // duration of device advertisement in sec.
-    int getCacheControl();
-    
-    void setNotificationType(const std::string& searchTarget);
-    std::string getNotificationType();
-    
-    void setNotificationSubtype(TRequestMethod notificationSubtype);
-    TRequestMethod getNotificationSubtype();
-    
-    void setSearchTarget(const std::string& searchTarget);
-    std::string getSearchTarget();
-    
-    void setUniqueServiceName(const std::string& serviceName);
-    std::string getUniqueServiceName();
-    
-    void setLocation(const Poco::URI& location);
-//     std::string getLocation();
-    Poco::URI getLocation();
-    
-    void setHost();
-    void setHttpExtensionNamespace();
-    void setHttpExtensionConfirmed();
-    bool getHttpExtensionConfirmed();
-    
-    void setServer(const std::string& productNameVersion);
-    std::string getServerOperatingSystem();
-    std::string getServerUpnpVersion();
-    std::string getServerProductNameVersion();
-    
-    void setMaximumWaitTime(int waitTime = SSDP_MIN_WAIT_TIME);  // max time to delay response, between 1 and 120 seconds.
-    int getMaximumWaitTime();
-    
-    void setDate();
-    Poco::DateTime getDate();
-    
-    Poco::Net::SocketAddress getSender();
-    
-private:
-    void initMessageMap();
-    
-    TRequestMethod                      m_requestMethod;
-    TRequestMethod                      m_notificationSubtype;
-    std::map<std::string,std::string>   m_messageHeader;
-    Poco::Net::SocketAddress                 m_sender;
-    
-    std::map<TRequestMethod,std::string> m_messageMap;
-    std::map<std::string,TRequestMethod> m_messageConstMap;
+    Poco::Net::NetworkInterface*    m_pInterface;
+    Poco::Net::MulticastSocket*     m_pSsdpSocket;
+    Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
 };
 
 
@@ -225,6 +150,8 @@ public:
     ~SsdpSocket();
     
     const Poco::Net::NetworkInterface& getInterface() { return m_interface; }
+    void addInterface(const std::string& name);
+    void removeInterface(const std::string& name);
     void setObserver(const Poco::AbstractObserver& observer);
     void init();
     
@@ -237,12 +164,12 @@ private:
     Poco::Net::NetworkInterface     m_interface;
     Poco::Net::MulticastSocket*     m_pSsdpSocket;
     Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
-    Poco::Net::SocketReactor        m_reactor;
-    Poco::Net::SocketReactor        m_unicastReactor;
-    Poco::Thread                    m_listenerThread;
-    Poco::Thread                    m_unicastListenerThread;
-    Poco::NotificationCenter        m_notificationCenter;
-    char*                           m_pBuffer;
+    
+    std::map<std::string,SsdpNetworkInterface>      m_interfaces;
+    Poco::Net::SocketReactor                        m_reactor;
+    Poco::Thread                                    m_listenerThread;
+    Poco::NotificationCenter                        m_notificationCenter;
+    char*                                           m_pBuffer;
     
     enum {
         BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
@@ -501,17 +428,6 @@ protected:
 };
 
 
-class UriDescriptionReader : public DescriptionReader
-{
-public:
-    UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath);
-    
-private:
-    virtual std::string& getDescription(const std::string& path);
-    Poco::URI m_uri;
-};
-
-
 class StringDescriptionReader : public DescriptionReader
 {
 public:
@@ -520,179 +436,6 @@ public:
 private:
     virtual std::string& getDescription(const std::string& path);
     std::map<std::string,std::string*>*  m_pStringMap;
-};
-
-
-class ActionRequestReader
-{
-public:
-    ActionRequestReader(const std::string& requestBody, Action* pActionTemplate);
-    
-    Action* action();
-    
-private:
-    // TODO: replace m_nodeStack by Node* in action()
-    std::stack<Poco::XML::Node*>            m_nodeStack;
-    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
-    Action*                                 m_pActionTemplate;
-};
-
-
-class ActionResponseReader
-{
-public:
-    ActionResponseReader(const std::string& responseBody, Action* pActionTemplate);
-    
-    Action* action();
-    
-private:
-    std::stack<Poco::XML::Node*>        m_nodeStack;
-    Poco::AutoPtr<Poco::XML::Document>  m_pDoc;
-    Action*                             m_pActionTemplate;
-};
-
-
-class DeviceDescriptionWriter
-{
-public:
-    DeviceDescriptionWriter();
-    
-    void deviceRoot(DeviceRoot& deviceRoot);
-    void write(std::string& description);
-    
-private:
-    Poco::XML::Element* device(Device& device);
-    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
-};
-
-
-class ServiceDescriptionWriter
-{
-public:
-    ServiceDescriptionWriter(std::string& description) : m_pDescription(&description), m_pDoc(new Poco::XML::Document) {}
-    
-    void service(Service& service);
-    
-private:
-    void stateVar(StateVar& stateVar);
-    void action(Action& action);
-    void argument(Argument& argument);
-    
-    std::string*                            m_pDescription;
-    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
-};
-
-
-class SsdpNotifyAliveWriter
-{
-public:
-    SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
-    
-    void deviceRoot(const DeviceRoot& pDeviceRoot);
-    void device(const Device& pDevice);
-    void service(const Service& pService);
-
-private:
-    SsdpMessageSet*            m_res;
-};
-
-
-class SsdpNotifyByebyeWriter
-{
-public:
-    SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
-    
-    void deviceRoot(const DeviceRoot& pDeviceRoot);
-    void device(const Device& pDevice);
-    void service(const Service& pService);
-    
-private:
-    SsdpMessageSet*            m_res;
-};
-
-
-class ActionResponseWriter
-{
-public:
-    ActionResponseWriter(std::string& responseBody);
-    // TODO: couldn't cope with the const argument stuff here ...
-    void action(Action& action);
-private:
-    std::string*    m_responseBody;
-};
-
-
-class ActionRequestWriter
-{
-public:
-    void action(Action* action);
-    void write(std::string& actionMessage);
-    
-private:
-    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
-};
-
-
-class EventMessageWriter
-{
-public:
-    EventMessageWriter();
-    void write(std::string& eventMessage);
-    void stateVar(const StateVar& stateVar);
-
-private:
-    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
-    Poco::AutoPtr<Poco::XML::Element>    m_pPropertySet;
-};
-
-
-// TODO: possible request handler types:
-//       RequestNotFoundRequestHandler
-//       FileRequestHandler, MultiFileRequestHandler,
-//       DescriptionRequestHandler
-//       ControlRequestHandler, StateVariableQueryRequestHandler,
-//       EventSubscribeRequestHandler
-
-class UpnpRequestHandler: public Poco::Net::HTTPRequestHandler
-{
-public:
-    virtual UpnpRequestHandler* create() = 0;
-};
-
-
-class RequestNotFoundRequestHandler: public UpnpRequestHandler
-{
-public:
-    RequestNotFoundRequestHandler* create();
-    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-};
-
-
-class DescriptionRequestHandler: public UpnpRequestHandler
-	/// Return service or device description.
-{
-public:
-    DescriptionRequestHandler(std::string& description);
-
-    DescriptionRequestHandler* create();
-    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    
-private:
-    std::string*    m_pDescription;
-};
-
-
-class DeviceRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
-{
-public:
-    DeviceRequestHandlerFactory(HttpSocket* pHttpSocket);
-    
-    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
-    void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
-    
-private:
-    std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
-    HttpSocket*                               m_pHttpSocket;
 };
 
 
@@ -715,39 +458,6 @@ private:
     DeviceRequestHandlerFactory*          m_pDeviceRequestHandlerFactory;
     Poco::NotificationCenter              m_notificationCenter;
     Poco::Net::HTTPServer*                m_pHttpServer;
-};
-
-
-class VariableQuery : public Poco::Notification
-{
-};
-
-
-class ControlRequestHandler: public UpnpRequestHandler
-{
-public:
-//     ControlRequestHandler(DeviceRoot& deviceRoot);
-    ControlRequestHandler(Service* service);
-    
-    ControlRequestHandler* create();
-    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    
-private:
-//     DeviceRoot* m_deviceRoot;
-    Service*    m_pService;
-};
-
-
-class EventRequestHandler: public UpnpRequestHandler
-{
-public:
-    EventRequestHandler(Service* pService) : m_pService(pService) {}
-    
-    EventRequestHandler* create();
-    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    
-private:
-    Service*    m_pService;
 };
 
 
@@ -872,33 +582,6 @@ private:
 };
 
 
-class Subscription
-{
-public:
-    Subscription(std::string callbackUri);
-    
-    std::string getUuid() { return m_uuid.toString(); }
-    
-    Poco::Net::HTTPClientSession* getSession() { return m_pSession; }
-    std::string getEventKey();
-    
-    void sendEventMessage(const std::string& eventMessage);
-    void renew(int seconds);  // TODO: implement this
-    void expire(Poco::Timer& timer);  // TODO: implement this
-    
-private:
-//     HTTPRequest* newRequest();
-    
-    Poco::URI                       m_deliveryAddress;
-    Poco::Net::HTTPClientSession*   m_pSession;
-    Poco::UUID                      m_uuid;
-    Poco::UInt32                    m_eventKey;
-    std::string                     m_duration;
-    Poco::Timer                     m_timer;
-    Service*                        m_pService;
-};
-
-
 class Service {
 public:
     Service() {}
@@ -920,7 +603,7 @@ public:
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
     void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
     void setDescription(std::string& description) { m_pDescription = &description; }
-    void setDescriptionRequestHandler() { m_pDescriptionRequestHandler = new DescriptionRequestHandler(*m_pDescription); }
+    void setDescriptionRequestHandler();
     void setControlPath(std::string controlPath) { m_controlPath = controlPath; }
     void setEventPath(std::string eventPath) { m_eventPath = eventPath; }
     void setDevice(Device* pDevice) { m_pDevice = pDevice; }
@@ -1073,13 +756,12 @@ public:
         m_httpSocket.m_notificationCenter.addObserver(observer);
     }
     
-    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler) 
-    {
-        m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
-    }
+    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
+    void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
+        
     void postAction(Action* pAction) { m_httpSocket.m_notificationCenter.postNotification(pAction); }
     
     void setImplAdapter(DeviceRootImplAdapter* implAdapter) { m_pDeviceRootImplAdapter = implAdapter; }

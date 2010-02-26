@@ -54,7 +54,7 @@ protected:
 //     virtual void deviceAdded(Device* pDevice);
 //     virtual void deviceRemoved(Device* pDevice);
     
-    Jamm::Container<Jamm::Device>*    m_pDevices;
+    Container<Device>*    m_pDevices;
 };
 
 
@@ -106,13 +106,13 @@ public:
     void volumeChanged(int value);
     
     void rendererSelected(RendererView* pRenderer);
-    void mediaObjectSelected(Jamm::Av::MediaObject* pObject);
+    void mediaObjectSelected(MediaObject* pObject);
     
 private:
-    Jamm::Container<RendererView>*              m_pRenderers;
-    Jamm::Container<ServerController>*          m_pServers;
-    MediaRendererController*                    m_pSelectedRenderer;
-    Jamm::Av::MediaObject*                      m_pSelectedObject;
+    Container<RendererView>*              m_pRenderers;
+    Container<ServerController>*          m_pServers;
+    MediaRendererController*              m_pSelectedRenderer;
+    MediaObject*                          m_pSelectedObject;
 };
 
 // end: exposed interface to user interface
@@ -132,7 +132,7 @@ private:
 
 // begin: exposed interface to controller application
 
-class UpnpController : public Jamm::Controller
+class UpnpController : public Controller
 {
 public:
     ~UpnpController();
@@ -142,12 +142,12 @@ public:
     void start();
     
 protected:
-    virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot);
-    virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot);
+    virtual void deviceAdded(DeviceRoot* pDeviceRoot);
+    virtual void deviceRemoved(DeviceRoot* pDeviceRoot);
     
 private:
-    Jamm::Container<Jamm::Device>               m_devices;
-    UpnpUserInterface*                          m_pUserInterface;
+    Container<Device>               m_devices;
+    UpnpUserInterface*              m_pUserInterface;
 };
 
 
@@ -157,12 +157,12 @@ public:
     void setUserInterface(UpnpAvUserInterface* pUserInterface);
     
 private:
-    virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot);
-    virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot);
+    virtual void deviceAdded(DeviceRoot* pDeviceRoot);
+    virtual void deviceRemoved(DeviceRoot* pDeviceRoot);
     
-    Jamm::Container<RendererView>               m_renderers;
-    Jamm::Container<ServerController>           m_servers;
-    UpnpAvUserInterface*                        m_pAvUserInterface;
+    Container<RendererView>               m_renderers;
+    Container<ServerController>           m_servers;
+    UpnpAvUserInterface*                  m_pAvUserInterface;
 };
 
 // end: exposed interface to controller application

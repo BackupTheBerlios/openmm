@@ -27,13 +27,62 @@
 #include <Poco/Environment.h>
 
 #include "Upnp.h"
+#include "UpnpPrivate.h"
 
 
 using namespace Jamm;
 
+NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
+m_interfaceName(interfaceName),
+m_added(added)
+{
+}
+
+
+NetworkInterfaceManager* NetworkInterfaceManager::m_pInstance = 0;
+
+NetworkInterfaceManager::NetworkInterfaceManager()
+{
+    std::clog << "NetworkInterfaceManager::NetworkInterfaceManager()" << std::endl;
+    
+    std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
+    for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
+        std::clog << "found network interface: " << (*it).name() << std::endl;
+        m_interfaceList.push_back((*it).name());
+    }
+    findValidIpAddress();
+}
+
+
 NetworkInterfaceManager*
 NetworkInterfaceManager::instance()
 {
+    if (!m_pInstance) {
+        return new NetworkInterfaceManager;
+    }
+    else {
+        return m_pInstance;
+    }
+}
+
+
+void
+NetworkInterfaceManager::findValidIpAddress()
+{
+    std::clog << "NetworkInterfaceManager::findValidIpAddress()" << std::endl;
+    
+    bool validAddressFound = false;
+    for (std::vector<std::string>::iterator it = m_interfaceList.begin(); it != m_interfaceList.end(); ++it) {
+        Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName(*it).address();
+        if (address.isUnicast() && !address.isLoopback() && !address.isLinkLocal()) {
+            validAddressFound = true;
+            std::clog << "NetworkInterfaceManager::NetworkInterfaceManager() setting m_validIpAddress to: " << address.toString() << std::endl;
+            m_validIpAddress = address;
+        }
+    }
+    if (!validAddressFound) {
+        std::cerr << "Error in NetworkInterfaceManager: no valid IP address found" << std::endl;
+    }
 }
 
 
@@ -41,6 +90,39 @@ void
 NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObserver& observer)
 {
     m_notificationCenter.addObserver(observer);
+    for (std::vector<std::string>::iterator it = m_interfaceList.begin(); it != m_interfaceList.end(); ++it) {
+        observer.notify(new NetworkInterfaceNotification((*it), true));
+    }
+}
+
+
+void
+NetworkInterfaceManager::addInterface(const std::string& name)
+{
+    if (find(m_interfaceList.begin(), m_interfaceList.end(), name) == m_interfaceList.end()) {
+        m_interfaceList.push_back(name);
+        m_notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
+    }
+    else {
+        std::clog << "NetworkInterfaceManager::addInterface() added interface already known: " << name << std::endl;
+    }
+}
+
+
+void
+NetworkInterfaceManager::removeInterface(const std::string& name)
+{
+    m_interfaceList.erase(find(m_interfaceList.begin(), m_interfaceList.end(), name));
+    m_notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
+    findValidIpAddress();
+}
+
+
+const Poco::Net::IPAddress&
+NetworkInterfaceManager::getValidInterfaceAddress()
+{
+    // TODO: probably need some locking here
+    return m_validIpAddress;
 }
 
 
@@ -1009,6 +1091,13 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
 }
 
 
+void
+Service::setDescriptionRequestHandler()
+{
+    m_pDescriptionRequestHandler = new DescriptionRequestHandler(*m_pDescription);
+}
+
+
 Action*
 Action::clone()
 {
@@ -1371,7 +1460,10 @@ DeviceRoot::initDevice()
 {
     // TODO: break this up into DeviceRoot::initDevice(), Device::initDevice(), Service::initDevice()
     std::clog << "DeviceRoot::initDevice()" << std::endl;
-        
+    
+    NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
+        (Poco::Observer<DeviceRoot,NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
+    
     SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
     aliveWriter.deviceRoot(*this);
@@ -1396,6 +1488,13 @@ DeviceRoot::initDevice()
         }
     }
     std::clog << "DeviceRoot::initDevice() finished" << std::endl;
+}
+
+
+void
+DeviceRoot::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler) 
+{
+    m_httpSocket.m_pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
 }
 
 
@@ -1603,6 +1702,21 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
         m_ssdpSocket.sendMessage(m, pMessage->getSender());
     }
 }
+
+
+void
+DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
+{
+    if (pNotification->m_added) {
+        m_ssdpSocket.addInterface(pNotification->m_interfaceName);
+        // send alive message set on this interface
+    }
+    else {
+        m_ssdpSocket.removeInterface(pNotification->m_interfaceName);
+        // send bye-bye message set on this interface
+    }
+}
+
 
 
 Controller::Controller() :
@@ -2214,17 +2328,22 @@ m_pBuffer(new char[BUFFER_SIZE])
 
 
 void
+SsdpSocket::addInterface(const std::string& name)
+{
+}
+
+
+void
+SsdpSocket::removeInterface(const std::string& name)
+{
+}
+
+
+void
 SsdpSocket::setObserver(const Poco::AbstractObserver& observer)
 {
     m_notificationCenter.addObserver(observer);
 }
-
-
-// void
-// SsdpSocket::setUnicastObserver(const AbstractObserver& observer)
-// {
-//     m_unicastNotificationCenter.addObserver(observer);
-// }
 
 
 void
@@ -2242,8 +2361,7 @@ SsdpSocket::init()
     m_pSsdpSenderSocket->setInterface(m_interface);
     m_pSsdpSenderSocket->setLoopback(true);
     m_pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
-    m_unicastReactor.addEventHandler(*m_pSsdpSenderSocket, Poco::NObserver<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onUnicastReadable));
-    m_unicastListenerThread.start(m_unicastReactor);
+    m_reactor.addEventHandler(*m_pSsdpSenderSocket, Poco::NObserver<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onUnicastReadable));
     
     // listen to UDP multicast
     m_pSsdpSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
@@ -2259,13 +2377,9 @@ SsdpSocket::~SsdpSocket()
 {
     std::clog << std::endl << "closing SSDP socket ..." << std::endl;
     m_reactor.removeEventHandler(*m_pSsdpSocket, Poco::NObserver<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    m_unicastReactor.removeEventHandler(*m_pSsdpSocket, Poco::NObserver<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-//     m_ssdpSocket.leaveGroup(m_ssdpAddress);
     m_pSsdpSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     m_reactor.stop();
-    m_unicastReactor.stop();
     m_listenerThread.join();
-    m_unicastListenerThread.join();
     delete m_pSsdpSenderSocket;
     delete m_pSsdpSocket;
     delete [] m_pBuffer;

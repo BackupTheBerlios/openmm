@@ -27,11 +27,6 @@
 
 #include "DimmableLightCtrlImpl.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
-using Jamm::DeviceRoot;
-using Jamm::Controller;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -39,9 +34,9 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
 
-class MyController : public Controller
+class MyController : public Jamm::Controller
 {
-    virtual void deviceAdded(DeviceRoot* pDeviceRoot)
+    virtual void deviceAdded(Jamm::DeviceRoot* pDeviceRoot)
     {
         std::cout << "MyController::deviceAdded()" << std::endl;
         std::cout << "uuid: " << pDeviceRoot->getRootDevice()->getUuid() << std::endl;
@@ -76,7 +71,7 @@ class MyController : public Controller
         }
     }
     
-    virtual void deviceRemoved(DeviceRoot* pDeviceRoot)
+    virtual void deviceRemoved(Jamm::DeviceRoot* pDeviceRoot)
     {
         std::cerr << "MyController::deviceRemoved() uuid: " << pDeviceRoot->getRootDevice()->getUuid() << std::endl;
     }

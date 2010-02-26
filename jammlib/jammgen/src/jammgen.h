@@ -25,7 +25,9 @@
 
 #include <iostream>
 #include <sstream>
-#include <Jamm/Upnp.h>
+
+#include "Upnp.h"
+#include "UpnpPrivate.h"
 
 using Jamm::DeviceRoot;
 using Jamm::Device;

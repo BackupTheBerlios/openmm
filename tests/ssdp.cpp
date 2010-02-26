@@ -27,10 +27,9 @@
 #include "Poco/Util/HelpFormatter.h"
 
 
-#include <Jamm/Upnp.h>
+#include "Upnp.h"
+#include "UpnpPrivate.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -96,7 +95,7 @@ protected:
 //         std::cout << pNf->toString();
     }*/
     
-    void handleSsdpMessage(SsdpMessage* pNf)
+    void handleSsdpMessage(Jamm::SsdpMessage* pNf)
     {
         std::cout << "SSDP message from " << pNf->getSender().toString() << std::endl;
         std::cout << pNf->toString();
@@ -115,8 +114,8 @@ protected:
             
         // set-up a server socket
 //             SsdpSocket s(NObserver<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
-            SsdpSocket s(Poco::Net::NetworkInterface::forName("wlan0"));
-            s.setObserver(Poco::Observer<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
+            Jamm::SsdpSocket s(Poco::Net::NetworkInterface::forName("wlan0"));
+            s.setObserver(Poco::Observer<SsdpTest, Jamm::SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
             s.init();
             waitForTerminationRequest();
         }

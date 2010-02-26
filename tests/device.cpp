@@ -29,13 +29,9 @@
 #include "Poco/StreamCopier.h"
 #include <sstream>
 
-#include <Jamm/Upnp.h>
+#include "Upnp.h"
+#include "UpnpPrivate.h"
 
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
-using Jamm::DeviceRoot;
-using Jamm::UriDescriptionReader;
 using Poco::StreamCopier;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -112,9 +108,9 @@ protected:
             DeviceRoot* device = new DeviceRoot();
             device->init(s);*/
             
-            UriDescriptionReader descriptionReader(Poco::URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+            Jamm::UriDescriptionReader descriptionReader(Poco::URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
             
-            DeviceRoot* device = descriptionReader.deviceRoot();
+            Jamm::DeviceRoot* device = descriptionReader.deviceRoot();
             
             waitForTerminationRequest();
         }

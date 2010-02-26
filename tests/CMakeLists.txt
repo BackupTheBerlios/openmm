@@ -11,19 +11,13 @@ NAME PocoUtil
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
-if(TARGET jamm)
 SET(LIB_JAMM
 jamm
 )
 INCLUDE_DIRECTORIES(
-${jamm_SOURCE_DIR}/jammlib
+${jamm_SOURCE_DIR}/jammlib/Jamm
+${jamm_SOURCE_DIR}/jammlib/src
 )
-else(TARGET jamm)
-FIND_LIBRARY(LIB_JAMM
-NAME jamm
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET jamm)
 
 SET( JAMMTEST_SSDP_SRCS
 ssdp.cpp

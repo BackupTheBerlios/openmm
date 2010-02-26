@@ -26,14 +26,8 @@
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
 
+#include "Upnp.h"
 
-#include <Jamm/Upnp.h>
-
-using Jamm::SsdpSocket;
-using Jamm::SsdpMessage;
-using Jamm::Device;
-using Jamm::DeviceRoot;
-using Jamm::Controller;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -41,14 +35,14 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
 
-class MyController : public Controller
+class MyController : public Jamm::Controller
 {
-    virtual void deviceAdded(DeviceRoot* device)
+    virtual void deviceAdded(Jamm::DeviceRoot* device)
     {
         std::cerr << "MyController::deviceAdded() uuid: " << device->getRootDevice()->getUuid() << std::endl;
     }
     
-    virtual void deviceRemoved(DeviceRoot* device)
+    virtual void deviceRemoved(Jamm::DeviceRoot* device)
     {
         std::cerr << "MyController::deviceRemoved() uuid: " << device->getRootDevice()->getUuid() << std::endl;
     }

@@ -19,7 +19,8 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#include <Jamm/UpnpAvTypes.h>
+#include "UpnpAvTypes.h"
+#include "UpnpPrivate.h"
 
 // Content Directory 1, 2.8.3.2. Browsing the root level metadata
 

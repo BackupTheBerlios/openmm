@@ -11,19 +11,12 @@ NAME PocoUtil
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
-if(TARGET jamm)
-SET(LIB_JAMM
-jamm
-)
+
 INCLUDE_DIRECTORIES(
-${jamm_SOURCE_DIR}/jammlib
+${jamm_SOURCE_DIR}/jammlib/Jamm
+${jamm_SOURCE_DIR}/jammlib/src
 )
-else(TARGET jamm)
-FIND_LIBRARY(LIB_JAMM
-NAME jamm
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET jamm)
+
 
 SET( JAMMGEN_SRCS
 main.cpp
@@ -37,7 +30,8 @@ ${JAMMGEN_SRCS}
 
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( jammgen
-${LIB_JAMM}
+# ${LIB_JAMM}
+jamm
 ${LIB_POCO_UTIL}
 )
 
