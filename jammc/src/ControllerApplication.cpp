@@ -20,16 +20,14 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/ClassLoader.h>
 #include <Poco/Exception.h>
 #include <Jamm/UpnpController.h>
 
 int main(int argc, char** argv)
 {
-    // TODO: write a class loader that checks environment variable JAMM_PLUGIN_PATH
-    Poco::ClassLoader<Jamm::Av::UpnpAvUserInterface> guiLoader;
+    Jamm::PluginLoader<Jamm::Av::UpnpAvUserInterface> guiLoader;
     try {
-        guiLoader.loadLibrary("/home/jb/devel/cc/jammbin/jammc/src/QtUi/libjammc-av-ui-qt.so");
+        guiLoader.loadPlugin("c-av-ui-qt");
     }
     catch(Poco::NotFoundException) {
         std::cerr << "Error in ControllerApplication: could not find plugin for user interface" << std::endl;

@@ -114,9 +114,9 @@ protected:
             
         // set-up a server socket
 //             SsdpSocket s(NObserver<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
-            Jamm::SsdpSocket s(Poco::Net::NetworkInterface::forName("wlan0"));
+            Jamm::SsdpSocket s;
             s.setObserver(Poco::Observer<SsdpTest, Jamm::SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
-            s.init();
+            s.start();
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;

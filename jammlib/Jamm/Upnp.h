@@ -34,6 +34,7 @@
 
 #include <Poco/NumberFormatter.h>
 #include <Poco/NumberParser.h>
+#include <Poco/StringTokenizer.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/NObserver.h>
 #include <Poco/Observer.h>
@@ -53,6 +54,10 @@
 #include <Poco/Random.h>
 #include <Poco/Timer.h>
 #include <Poco/Mutex.h>
+#include <Poco/ClassLoader.h>
+#include <Poco/String.h>
+#include <Poco/Environment.h>
+#include <Poco/Exception.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/MulticastSocket.h>
 #include <Poco/Net/SocketAddress.h>
@@ -131,50 +136,114 @@ class Subscription;
 class NetworkInterfaceNotification;
 
 
-class SsdpNetworkInterface
+template<class C>
+class PluginLoader
 {
 public:
-    SsdpNetworkInterface(const std::string& interfaceName);
+    PluginLoader() :
+        m_pPluginLoader(new Poco::ClassLoader<C>),
+        m_pluginPath("/usr/lib/jamm:/usr/local/lib/jamm:")
+    {}
+    
+    ~PluginLoader()
+    {
+        delete m_pPluginLoader;
+    }
+    
+    void loadPlugin(const std::string& name)
+    {
+        try {
+            m_pluginPath += Poco::Environment::get("JAMM_PLUGIN_PATH");
+            std::clog << "PluginLoader JAMM_PLUGIN_PATH is: " << m_pluginPath << std::endl;
+        }
+        catch (Poco::NotFoundException) {
+            std::clog << "PluginLoader: JAMM_PLUGIN_PATH not set, standard search path is: " << m_pluginPath << std::endl;
+        }
+        Poco::StringTokenizer pathSplitter(m_pluginPath, ":");
+        Poco::StringTokenizer::Iterator it;
+        for (it = pathSplitter.begin(); it != pathSplitter.end(); ++it) {
+            if (*it == "") {
+                continue;
+            }
+            try {
+                m_pPluginLoader->loadLibrary((*it) + "/libjamm" + name + ".so");
+            }
+            catch (Poco::NotFoundException) {
+                continue;
+            }
+            catch (Poco::LibraryLoadException) {
+                continue;
+            }
+            break;
+        }
+        if (it == pathSplitter.end()) {
+            throw Poco::NotFoundException();
+        }
+    }
+    
+    C* create(const std::string& className)
+    {
+        return m_pPluginLoader->create(className);
+    }
     
 private:
-    Poco::Net::NetworkInterface*    m_pInterface;
-    Poco::Net::MulticastSocket*     m_pSsdpSocket;
-    Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
+    Poco::ClassLoader<C>*    m_pPluginLoader;
+    std::string              m_pluginPath;
 };
 
 
-class SsdpSocket
-{ 
+class SsdpNetworkInterface
+{
+    friend class SsdpSocket;
+    
 public:
-    SsdpSocket(const Poco::Net::NetworkInterface& interface);
-    ~SsdpSocket();
-    
-    const Poco::Net::NetworkInterface& getInterface() { return m_interface; }
-    void addInterface(const std::string& name);
-    void removeInterface(const std::string& name);
-    void setObserver(const Poco::AbstractObserver& observer);
-    void init();
-    
-    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    SsdpNetworkInterface(const std::string& interfaceName, SsdpSocket* pSsdpSocket);
+    ~SsdpNetworkInterface();
     
 private:
-    void onReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
-    void onUnicastReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
+    void onReadable(Poco::Net::ReadableNotification* pNotification);
     
-    Poco::Net::NetworkInterface     m_interface;
-    Poco::Net::MulticastSocket*     m_pSsdpSocket;
+    std::string                     m_name;
+    SsdpSocket*                     m_pSsdpSocket;
+    Poco::Net::NetworkInterface*    m_pInterface;
+    Poco::Net::MulticastSocket*     m_pSsdpListenerSocket;
     Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
-    
-    std::map<std::string,SsdpNetworkInterface>      m_interfaces;
-    Poco::Net::SocketReactor                        m_reactor;
-    Poco::Thread                                    m_listenerThread;
-    Poco::NotificationCenter                        m_notificationCenter;
-    char*                                           m_pBuffer;
+    char*                           m_pBuffer;
     
     enum {
         BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
             // Note that each SSDP message must fit into one UDP Packet.
     };
+};
+
+
+class SsdpSocket
+{ 
+    friend class SsdpNetworkInterface;
+public:
+//     SsdpSocket(const Poco::Net::NetworkInterface& interface);
+    SsdpSocket();
+    ~SsdpSocket();
+    
+//     const Poco::Net::NetworkInterface& getInterface() { return m_interface; }
+    void addInterface(const std::string& name);
+    void removeInterface(const std::string& name);
+    void setObserver(const Poco::AbstractObserver& observer);
+    void start();
+    
+    void sendMessage(SsdpMessage& message, const std::string& interface = "*", const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    
+private:
+//     void onUnicastReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
+    
+//     Poco::Net::NetworkInterface     m_interface;
+//     Poco::Net::MulticastSocket*     m_pSsdpSocket;
+//     Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
+    
+    std::map<std::string,SsdpNetworkInterface*>     m_interfaces;
+    Poco::Net::SocketReactor                        m_reactor;
+    Poco::Thread                                    m_listenerThread;
+    Poco::NotificationCenter                        m_notificationCenter;
 };
 
 
@@ -444,7 +513,8 @@ class HttpSocket
     friend class DeviceRoot;
     
 public:
-    HttpSocket(Poco::Net::NetworkInterface interface);
+//     HttpSocket(Poco::Net::NetworkInterface interface);
+    HttpSocket(Poco::Net::IPAddress address);
     ~HttpSocket();
     
     std::string getServerUri() { return "http://" + m_httpServerAddress.toString() + "/"; }
@@ -453,7 +523,8 @@ public:
     void stopServer();
     
 private:
-    Poco::Net::NetworkInterface           m_interface;
+//     Poco::Net::NetworkInterface           m_interface;
+    Poco::Net::IPAddress                  m_address;
     Poco::Net::SocketAddress              m_httpServerAddress;
     DeviceRequestHandlerFactory*          m_pDeviceRequestHandlerFactory;
     Poco::NotificationCenter              m_notificationCenter;
@@ -588,8 +659,9 @@ public:
     ~Service();
     
     std::string getServiceType() const { return m_serviceType; }
+    std::string getServiceId() const { return m_serviceId; }
     std::string getDescriptionPath() const { return m_descriptionPath; }
-    std::string& getDescription() const { return *m_pDescription; }
+    std::string* getDescription() const { return m_pDescription; }
     std::string getControlPath() const { return m_controlPath; }
     std::string getEventPath() const { return m_eventPath; }
     DescriptionRequestHandler* getDescriptionRequestHandler() const { return m_pDescriptionRequestHandler; }
@@ -601,6 +673,7 @@ public:
     template<typename T> T getStateVar(const std::string& key);
     
     void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
+    void setServiceId(std::string serviceId) { m_serviceId = serviceId; }
     void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
     void setDescription(std::string& description) { m_pDescription = &description; }
     void setDescriptionRequestHandler();
@@ -641,6 +714,7 @@ private:
     Device*                                 m_pDevice;
     std::string                             m_vendorDomain;
     std::string                             m_serviceType;
+    std::string                             m_serviceId;
     std::string                             m_serviceVersion;
     std::string*                            m_pDescription;
     std::string                             m_descriptionPath;
@@ -671,6 +745,8 @@ private:
 
 class Device
 {
+    friend class DeviceDescriptionWriter;
+    
 public:
     Device();
     ~Device();
@@ -692,6 +768,7 @@ public:
     
     void setDeviceRoot(DeviceRoot* pDeviceRoot) { m_pDeviceRoot = pDeviceRoot; }
     void setUuid(std::string uuid) { m_uuid = uuid; }
+    void setRandomUuid();
     void setDeviceType(std::string deviceType) { m_deviceType = deviceType; }
     void setProperty(const std::string& name, const std::string& val) { m_properties.get(name) = val; }
     
@@ -728,7 +805,7 @@ public:
     
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
-    std::string& getDeviceDescription() const { return *m_pDeviceDescription; }
+    std::string* getDeviceDescription() const { return m_pDeviceDescription; }
     const Poco::URI& getBaseUri() const { return m_baseUri; }
     const Poco::URI& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
@@ -758,7 +835,7 @@ public:
     
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     
-    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
         
@@ -815,13 +892,14 @@ public:
     Controller();
     ~Controller();
 
-    void init();
+    void start();
     virtual void deviceAdded(DeviceRoot* pDeviceRoot) = 0;
     virtual void deviceRemoved(DeviceRoot* pDeviceRoot) = 0;
     
 private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
+    void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);
     

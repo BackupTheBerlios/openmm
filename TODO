@@ -5,8 +5,8 @@ current FIXMES:
 ------------------------------------------------------
 
 current TODOS:
-// TODO: hide more details of *Controllers, Device in the UserInterface interface (like renderer engine)
-//       for example: play() instead of 
+// TODO: more cleanup of public headers: put some classes from Upnp.h into UpnpPrivate.h
+// TODO: hotplug of network interfaces (coldplug works)
 // TODO: [jammgen] dispatch actions not in the "great action dispatcher" but pass the dispatching
 //       to the corresponding services. This avoids double code in devices that have the same service
 //       and may eliminate the friend class statement.
@@ -26,8 +26,8 @@ current TODOS:
 // TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
 // TODO: Find a proper interface for the readers and writers
 // TODO: complete event messaging
-// TODO: OPTIONAL stuff: optional services, actions: configure it via ImplAdapter and rewrite description
-//       accordingly
+// TODO: OPTIONAL stuff: optional (not required) services and actions: configure them via ImplAdapter
+//       and rewrite description accordingly
 
 
 // TODO: Remaining Event subscription stuff

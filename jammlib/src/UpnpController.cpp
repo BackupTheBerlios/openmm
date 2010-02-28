@@ -48,15 +48,15 @@ UpnpController::~UpnpController()
 }
 
 
-void
-UpnpController::start()
-{
-    init();
-//     JSignal::connectNodes(&m_pollPositionInfoTimer.fire, this);
-    
-    // poll for current position every second
-//     m_pollPositionInfoTimer.startTimer(1000);
-}
+// void
+// UpnpController::start()
+// {
+//     init();
+// //     JSignal::connectNodes(&m_pollPositionInfoTimer.fire, this);
+//     
+//     // poll for current position every second
+// //     m_pollPositionInfoTimer.startTimer(1000);
+// }
 
 
 

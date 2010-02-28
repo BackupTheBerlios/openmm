@@ -139,7 +139,7 @@ public:
     
     void setUserInterface(UpnpUserInterface* pUserInterface) { m_pUserInterface = pUserInterface; }
     
-    void start();
+//     void start();
     
 protected:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);

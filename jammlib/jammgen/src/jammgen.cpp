@@ -686,7 +686,7 @@ DeviceDescH::deviceRoot(const DeviceRoot& deviceRoot)
         << "#define " << Poco::toUpper(m_deviceName) << "_DESCRIPTIONS_H" << std::endl
         << std::endl
         << "std::string " << m_deviceName << "::m_deviceDescription =" << std::endl
-        << escapeDescription(deviceRoot.getDeviceDescription())
+        << escapeDescription(*deviceRoot.getDeviceDescription())
         << ";" << std::endl
         << std::endl;
 }
@@ -709,7 +709,7 @@ DeviceDescH::serviceType(const Service& service)
     
     m_out
         << "std::string " << serviceName << "::m_description =" << std::endl
-        << escapeDescription(service.getDescription())
+        << escapeDescription(*service.getDescription())
         << ";" << std::endl
         << std::endl;
 }

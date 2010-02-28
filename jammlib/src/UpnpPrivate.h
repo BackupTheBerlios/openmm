@@ -66,10 +66,12 @@ private:
     NetworkInterfaceManager();
     void findValidIpAddress();
     
-    static NetworkInterfaceManager*                     m_pInstance;
-    std::vector<std::string>                            m_interfaceList;
-    Poco::Net::IPAddress                                m_validIpAddress;
-    Poco::NotificationCenter                            m_notificationCenter;
+    static NetworkInterfaceManager*     m_pInstance;
+    std::vector<std::string>            m_interfaceList;
+    Poco::Net::IPAddress                m_validIpAddress;
+    Poco::NotificationCenter            m_notificationCenter;
+    bool                                m_loopbackProvided;
+    Poco::Net::IPAddress                m_loopbackAddress;
 };
 
 
@@ -93,7 +95,7 @@ public:
     SsdpMessage(TRequestMethod requestMethod);
     
     // map the received HTTP header to an SsdpMessage object in memory
-    SsdpMessage(const std::string& buf, const Poco::Net::SocketAddress& sender = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    SsdpMessage(const std::string& buf, const std::string& interface = "*", const Poco::Net::SocketAddress& sender = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     ~SsdpMessage();
     
     void setRequestMethod(TRequestMethod requestMethod);
@@ -138,18 +140,21 @@ public:
     void setDate();
     Poco::DateTime getDate();
     
+    const std::string& getInterface();
     Poco::Net::SocketAddress getSender();
+    
     
 private:
     void initMessageMap();
     
-    TRequestMethod                      m_requestMethod;
-    TRequestMethod                      m_notificationSubtype;
-    std::map<std::string,std::string>   m_messageHeader;
-    Poco::Net::SocketAddress                 m_sender;
+    TRequestMethod                          m_requestMethod;
+    TRequestMethod                          m_notificationSubtype;
+    std::map<std::string,std::string>       m_messageHeader;
+    std::string                             m_interface;
+    Poco::Net::SocketAddress                m_sender;
     
-    std::map<TRequestMethod,std::string> m_messageMap;
-    std::map<std::string,TRequestMethod> m_messageConstMap;
+    std::map<TRequestMethod,std::string>    m_messageMap;
+    std::map<std::string,TRequestMethod>    m_messageConstMap;
 };
 
 
@@ -203,6 +208,7 @@ public:
     
 private:
     Poco::XML::Element* device(Device& device);
+    Poco::XML::Element* service(Service* pService);
     Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
 };
 
@@ -313,8 +319,9 @@ class DescriptionRequestHandler: public UpnpRequestHandler
 	/// Return service or device description.
 {
 public:
-    DescriptionRequestHandler(std::string& description);
-
+//     DescriptionRequestHandler(std::string& description);
+    DescriptionRequestHandler(std::string* pDescription);
+    
     DescriptionRequestHandler* create();
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
