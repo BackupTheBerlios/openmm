@@ -699,7 +699,7 @@ DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
     pRoot->setAttribute("xmlns", "urn:schemas-upnp-org:device-1-0");
     Poco::AutoPtr<Poco::XML::Element> pSpecVersion = m_pDoc->createElement("specVersion");
     Poco::AutoPtr<Poco::XML::Element> pMajor = m_pDoc->createElement("major");
-    Poco::AutoPtr<Poco::XML::Element> pMinor = m_pDoc->createElement("major");
+    Poco::AutoPtr<Poco::XML::Element> pMinor = m_pDoc->createElement("minor");
     Poco::AutoPtr<Poco::XML::Text> pMajorVersion = m_pDoc->createTextNode("1");
     Poco::AutoPtr<Poco::XML::Text> pMinorVersion = m_pDoc->createTextNode("0");
     pMajor->appendChild(pMajorVersion);
@@ -778,7 +778,7 @@ DeviceDescriptionWriter::service(Service* pService)
     pServiceType->appendChild(pServiceTypeVal);
     pServiceElement->appendChild(pServiceType);
     // serviceId
-    Poco::AutoPtr<Poco::XML::Element> pServiceId = m_pDoc->createElement("serviceType");
+    Poco::AutoPtr<Poco::XML::Element> pServiceId = m_pDoc->createElement("serviceId");
     Poco::AutoPtr<Poco::XML::Text> pServiceIdVal = m_pDoc->createTextNode(pService->getServiceId());
     pServiceId->appendChild(pServiceIdVal);
     pServiceElement->appendChild(pServiceId);
@@ -804,8 +804,8 @@ DeviceDescriptionWriter::service(Service* pService)
 }
 
 
-void
-DeviceDescriptionWriter::write(std::string& description)
+std::string*
+DeviceDescriptionWriter::write()
 {
     std::clog << "DeviceDescriptionWriter::write()" << std::endl;
     
@@ -815,7 +815,8 @@ DeviceDescriptionWriter::write(std::string& description)
     
     std::stringstream ss;
     writer.writeNode(ss, m_pDoc);
-    description = ss.str();
+//     description = ss.str();
+    return new std::string(ss.str());
     std::clog << "description:" << std::endl << ss.str() << std::endl;
 }
 
@@ -1072,6 +1073,8 @@ Service::initClient()
     // m_pDevice->getDeviceRoot()->registerEventHandler(...);
 }
 
+// FIXME: when starting 15 servers and killing them with killall at once
+//        jammc still shows a couple of them though they are dead
 
 void
 Service::sendAction(Action* pAction)
@@ -1093,6 +1096,7 @@ Service::sendAction(Action* pAction)
     std::clog << "Header:" << std::endl;
     request->write(std::clog);
     
+    // FIXME: catch Poco::Net::ConnectionRefusedException
     std::ostream& ostr = m_pControlRequestSession->sendRequest(*request);
     ostr << actionMessage;
     std::clog << "Action request sent" << std::endl;
@@ -1569,18 +1573,32 @@ DeviceRoot::initDevice()
     
     std::clog << "DeviceRoot::initDevice() network interface manager installed" << std::endl;
     
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        std::clog << "setting random uuid for device" << std::endl;
+        (*d)->setRandomUuid();
+    }
+    
+    DeviceDescriptionWriter descriptionWriter;
+    descriptionWriter.deviceRoot(*this);
+    std::clog << "original device description: " << *m_pDeviceDescription << std::endl;
+    m_pDeviceDescription = descriptionWriter.write();
+    std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
+    
+    std::clog << "DeviceRoot::initDevice() device description rewritten" << std::endl;
+    
+    m_descriptionRequestHandler = new DescriptionRequestHandler(m_pDeviceDescription);
+    registerHttpRequestHandler(getDescriptionUri().getPath(), m_descriptionRequestHandler);
+    
     SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
     aliveWriter.deviceRoot(*this);
     byebyeWriter.deviceRoot(*this);
-    m_descriptionRequestHandler = new DescriptionRequestHandler(getDeviceDescription());
-    registerHttpRequestHandler(getDescriptionUri().getPath(), m_descriptionRequestHandler);
+//     m_descriptionRequestHandler = new DescriptionRequestHandler(getDeviceDescription());
+//     registerHttpRequestHandler(getDescriptionUri().getPath(), m_descriptionRequestHandler);
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Device& device = **d;
         aliveWriter.device(device);
         byebyeWriter.device(device);
-        std::clog << "setting random uuid for device" << std::endl;
-        device.setRandomUuid();
         for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
             Service* ps = *s;
             
@@ -1594,7 +1612,8 @@ DeviceRoot::initDevice()
             registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
         }
     }
-    std::clog << "DeviceRoot::initDevice() initialized message sets, request handlers and state variables" << std::endl;
+    std::clog << "DeviceRoot::initDevice() initialized message sets, service request handlers and state variables" << std::endl;
+    
     std::clog << "DeviceRoot::initDevice() finished" << std::endl;
 }
 
@@ -1762,11 +1781,6 @@ DeviceRoot::stopSsdp()
 void
 DeviceRoot::startHttp()
 {
-    DeviceDescriptionWriter descriptionWriter;
-    descriptionWriter.deviceRoot(*this);
-    // FIXME: overriding the description causes a segfault in the controller
-    //        and lots of description downloads
-//     descriptionWriter.write(*m_pDeviceDescription);
     m_httpSocket.startServer();
 }
 

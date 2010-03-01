@@ -204,7 +204,8 @@ public:
     DeviceDescriptionWriter();
     
     void deviceRoot(DeviceRoot& deviceRoot);
-    void write(std::string& description);
+//     void write(std::string& description);
+    std::string* write();
     
 private:
     Poco::XML::Element* device(Device& device);
