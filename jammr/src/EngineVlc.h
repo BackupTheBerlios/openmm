@@ -37,6 +37,8 @@ public:
     EngineVlc(int argc, char **argv);
     ~EngineVlc();
     
+    virtual void setFullscreen(bool on = true);
+    
     std::string getEngineId() { return m_engineId; }
     
     /*
@@ -79,6 +81,7 @@ private:
     std::string             m_uri;
     long long               m_startTime;
     float                   m_length; // length of media in seconds
+    bool                    m_fullscreen;
     
     std::string             m_engineId;
 };

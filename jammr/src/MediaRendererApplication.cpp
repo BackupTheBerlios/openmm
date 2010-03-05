@@ -114,6 +114,8 @@ protected:
             std::cerr << "MediaRendererApplication::main() engine id: " << pEngine->getEngineId() << std::endl;
             
             Jamm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
+            
+            myMediaRenderer.setFullscreen();
             myMediaRenderer.start();
             waitForTerminationRequest();
             // myMediaRenderer.stop();

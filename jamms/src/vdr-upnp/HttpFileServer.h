@@ -2,7 +2,7 @@
 |  Jamm - Just another multimedia ...                                       |
 |         ... set of applications and libraries based on the UPnP-AV specs  |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
+|  Copyright (C) 2009 - 2010                                                |
 |  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
 |                                                                           |
 |  This file is part of Jamm.                                               |
@@ -20,26 +20,40 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpAvRenderer.h"
-#include "UpnpAvRendererImpl.h"
+#ifndef HttpFileServer_INCLUDED
+#define HttpFileServer_INCLUDED
 
-using namespace Jamm;
-using namespace Jamm::Av;
+#include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
 
-UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
-MediaRenderer(new RenderingControlRendererImpl,
-              new ConnectionManagerRendererImpl,
-              new AVTransportRendererImpl),
-m_pEngine(engine)
+
+class FileRequestHandler : public Poco::Net::HTTPRequestHandler
 {
-    static_cast<RenderingControlRendererImpl*>(m_pRenderingControlImpl)->m_pEngine = engine;
-    static_cast<ConnectionManagerRendererImpl*>(m_pConnectionManagerImpl)->m_pEngine = engine;
-    static_cast<AVTransportRendererImpl*>(m_pAVTransportImpl)->m_pEngine = engine;
-}
+public:
+//     DescriptionRequestHandler(std::string* pDescription);
+    
+//     DescriptionRequestHandler* create();
+    
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+    
+private:
+//     std::string*    m_pDescription;
+};
 
 
-void
-UpnpAvRenderer::setFullscreen(bool on)
+class FileRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
-    m_pEngine->setFullscreen(on);
-}
+public:
+//     FileRequestHandlerFactory(HttpSocket* pHttpSocket);
+    
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
+    
+//     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
+    
+private:
+//     std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
+//     HttpSocket*                               m_pHttpSocket;
+};
+
+
+#endif

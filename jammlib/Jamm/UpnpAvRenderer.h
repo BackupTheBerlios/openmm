@@ -35,7 +35,7 @@ public:
     // Engine handling
     // virtual void setVideoDriver(std::string) = 0;
     // virtual void setAudioDriver(std::string) = 0;
-    // virtual void setFullscreen(bool on) = 0;
+    virtual void setFullscreen(bool on = true) = 0;
     // virtual vector<std::string> getAudioAdapters() = 0;
     // virtual void setAudioAdapter(std::string) = 0;
 
@@ -87,6 +87,11 @@ class UpnpAvRenderer : public MediaRenderer
 {
 public:
     UpnpAvRenderer(Engine* engine);
+    
+    void setFullscreen(bool on = true);
+    
+private:
+    Engine*     m_pEngine;
 };
 
 } // namespace Av

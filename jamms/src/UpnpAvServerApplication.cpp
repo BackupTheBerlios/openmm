@@ -102,6 +102,7 @@ protected:
             WebRadio webRadio;
             myMediaServer.setRoot(&webRadio);
             
+            myMediaServer.setFriendlyName("Web Radio");
             myMediaServer.start();
             waitForTerminationRequest();
             // myMediaServer.stop();

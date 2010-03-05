@@ -23,7 +23,8 @@
 #include "EngineVlc.h"
 
 
-EngineVlc::EngineVlc(int argc, char **argv)
+EngineVlc::EngineVlc(int argc, char **argv) :
+m_fullscreen(true)
 {
     libvlc_exception_init(&m_exception);
     m_vlcInstance = libvlc_new(argc, argv, &m_exception);
@@ -48,6 +49,14 @@ EngineVlc::~EngineVlc()
     libvlc_release(m_vlcInstance);
     closeXWindow();
 }
+
+
+void
+EngineVlc::setFullscreen(bool on)
+{
+    m_fullscreen = on;
+}
+
 
 int
 EngineVlc::openXWindow()
@@ -148,6 +157,10 @@ EngineVlc::load()
 //     TRACE("EngineVlc::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
 /*    libvlc_video_resize(m_vlcPlayer, videoWidth, videoHeight, &m_exception);
     handleException();*/
+    
+    // TODO: fullscreen could initially be set at start
+    libvlc_set_fullscreen(m_vlcPlayer, (m_fullscreen ? 1 : 0), &m_exception);
+    handleException();
 }
 
 
@@ -267,7 +280,7 @@ void
 EngineVlc::handleException()
 {
     if (libvlc_exception_raised(&m_exception)) {
-//         TRACE(libvlc_exception_get_message(&m_exception));
+        std::cerr << "Error in EngineVlc: " << libvlc_exception_get_message(&m_exception) << std::endl;
     }
     libvlc_exception_init(&m_exception);
 }

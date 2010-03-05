@@ -1593,8 +1593,6 @@ DeviceRoot::initDevice()
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
     aliveWriter.deviceRoot(*this);
     byebyeWriter.deviceRoot(*this);
-//     m_descriptionRequestHandler = new DescriptionRequestHandler(getDeviceDescription());
-//     registerHttpRequestHandler(getDescriptionUri().getPath(), m_descriptionRequestHandler);
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Device& device = **d;
         aliveWriter.device(device);
@@ -1642,9 +1640,6 @@ DeviceRootImplAdapter::~DeviceRootImplAdapter()
 void
 DeviceRootImplAdapter::start()
 {
-    // TODO: write modified device description to m_description
-    // TODO: maybe, write newly assigned uuids as keys to DeviceRoot::m_devices
-    //       -> Container needs an append(const Entity&)
     std::clog << "DeviceRootImplAdapter::start()" << std::endl;
     m_pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
     
@@ -1666,9 +1661,23 @@ DeviceRootImplAdapter::stop()
 
 
 void
-DeviceRootImplAdapter::setFriendlyName(const std::string& friendlyName)
+DeviceRootImplAdapter::setUuid(std::string uuid, int deviceNumber)
 {
-    // set Property friendlyName of **Device**
+    m_pDeviceRoot->m_devices.get(deviceNumber).setUuid(uuid);
+}
+
+
+void
+DeviceRootImplAdapter::setRandomUuid(int deviceNumber)
+{
+    m_pDeviceRoot->m_devices.get(deviceNumber).setRandomUuid();
+}
+
+
+void
+DeviceRootImplAdapter::setFriendlyName(const std::string& friendlyName, int deviceNumber)
+{
+    m_pDeviceRoot->m_devices.get(deviceNumber).setProperty("friendlyName", friendlyName);
 }
 
 

@@ -31,7 +31,8 @@ endif(TARGET jamm)
 
 SET( UPNP_VDR_SRCS
     upnp.cpp
-    vdrmediaserver.cpp
+    VdrMediaServer.cpp
+    HttpFileServer.cpp
 )
 
 ADD_LIBRARY( vdr-upnp

@@ -20,17 +20,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-
-// #include <cerrno>
-// #include <cstring>
-// #include <dirent.h>
-
-#include <Poco/Net/NetworkInterface.h>
-
 #include <vdr/channels.h>
 #include <vdr/recording.h>
 
-#include "vdrmediaserver.h"
+#include "VdrMediaServer.h"
+#include "HttpFileServer.h"
 
 
 VdrMediaTree::VdrMediaTree()
@@ -53,304 +47,88 @@ VdrMediaTree::~VdrMediaTree()
 
 
 VdrChannels::VdrChannels() :
-Jamm::Av::MediaContainer(),
 m_streamDevPort("3000")
 {
-    Poco::Net::NetworkInterface defaultInterface;
-    m_streamDevAddress = defaultInterface.address().toString();
-    Jamm::ui4 startIndex = 0;
-//     Jamm::ui4 totalMatches, reqCount, numberReturned;
-    for (cChannel *chan = Channels.GetByNumber(startIndex, 1); chan; chan = Channels.Next(chan)) {
-        if (!chan || chan->Vpid() == 0) {
-            break;
+    std::string localIp =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+    
+    for (cChannel* pChan = Channels.First(); pChan != Channels.Last(); pChan = Channels.Next(pChan)) {
+        if (!pChan || pChan->Vpid() == 0 || pChan->GetChannelID().ToString() == "0-0-0-0") {
+            continue;
         }
-        std::clog << chan->Name() << std::endl;
-        if (chan->GetChannelID().ToString() == "0-0-0-0") continue;
         
-        std::string objectId(chan->GetChannelID().ToString());
-        std::string title(chan->Name());
-        // m_streamDevAddress and m_streamDevPort should be fetched from streamdev plugin
-        std::string resource = "http://" + m_streamDevAddress + ":" + m_streamDevPort + "/PES/" + objectId;
+        std::string objectId(pChan->GetChannelID().ToString());
+        std::string title(pChan->Name());
+        std::string resource = "http://" + localIp + ":" + m_streamDevPort + "/PES/" + objectId;
         appendChild(objectId, new Jamm::Av::MediaItem(title, resource));
-        
-//         std::string streamDevPort = Poco::NumberFormatter::format(m_streamDevPort);
-//         totalMatches = Channels.MaxNumber();
-//         std::clog << "totalMatches = " <<  totalMatches << std::endl;
-//         if (numberReturned >= reqCount) {
-//             break;
-//         }
     }
 }
 
 
-// NPT_String
-// VdrMediaTree::videoToDidl(NPT_String filter, cChannel *channel)
-// {
-//     PLT_MediaItem* object = new PLT_MediaItem();
-//     NPT_String objectId;
-//     PLT_MediaItemResource resource;
-//     pair<map<NPT_String, PLT_MediaItem*>::iterator, bool> ins;
-//     
-//     objectId = channel->GetChannelID().ToString();
-// //     NPT_LOG_INFO(NPT_String(channel->Name()) + ": " + objectId);
-//     // check if item is already in itemCache
-//     ins = m_itemCache.insert(make_pair(objectId, object));
-//     if (ins.second) {
-//         cerr << "VdrMediaTree::videoToDidl() new channel: " << (char*)objectId << endl;
-//         object->m_Title = channel->Name();
-//         object->m_ObjectClass.type = "object.item";
-//         object->m_ParentID = m_containerLiveTv->m_ObjectID;
-//         object->m_ObjectID = objectId;
-//         resource.m_Size = 0;
-//         resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_liveTvPort) + "/PES/") + objectId;
-// //         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
-//         resource.m_ProtocolInfo = "http-get:*:video/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MPEG_ES_PAL;DLNA.ORG_FLAGS=01700000000000000000000000000000";
-//         object->m_ObjectClass.type = "object.item.videoItem.movie";
-//         object->m_Resources.Add(resource);
-//     }
-//     else {
-//         delete object;
-//         object = (*ins.first).second;
-//     }
-//     
-//     NPT_String res;
-//     NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*object, filter, res));
-//     return res;
-// }
-// 
-// NPT_String
-// VdrMediaTree::audioToDidl(NPT_String filter, cChannel *channel)
-// {
-//     PLT_MediaItem* object = new PLT_MediaItem();
-//     NPT_String objectId;
-//     PLT_MediaItemResource resource;
-//     pair<map<NPT_String, PLT_MediaItem*>::iterator, bool> ins;
-// 
-//     objectId = NPT_String("vdr-radio/") + channel->GetChannelID().ToString();
-// //     NPT_LOG_INFO(NPT_String(channel->Name()) + ": " + objectId);
-//     // check if item is already in itemCache
-//     ins = m_itemCache.insert(make_pair(objectId, object));
-//     if (ins.second) {
-//         cerr << "VdrMediaTree::audioToDidl() new channel: " << (char*)objectId << endl;
-//         object->m_Title = channel->Name();
-//         object->m_ObjectClass.type = "object.item";
-//         object->m_ParentID = m_containerLiveRadio->m_ObjectID;
-//         object->m_ObjectID = objectId;
-//         resource.m_Size = 0;
-//         resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_liveTvPort) + "/") + objectId;
-//         resource.m_ProtocolInfo = "http-get:*:audio/mpeg:*";
-//         object->m_ObjectClass.type = "object.item.audioItem.musicTrack";
-//         object->m_Resources.Add(resource);
-//     }
-//     else {
-//         delete object;
-//         object = (*ins.first).second;
-//     }
-// 
-//     NPT_String res;
-//     NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*object, filter, res));
-//     return res;
-// }
-// 
-// 
-// NPT_String
-// VdrMediaTree::recToDidl(NPT_String filter, cRecording *rec)
-// {
-//     PLT_MediaItem* object = new PLT_MediaItem();
-//     NPT_String objectId;
-//     PLT_MediaItemResource resource;
-//     pair<map<NPT_String, PLT_MediaItem*>::iterator, bool> ins;
-// 
-//     objectId = NPT_String("vdr-rec/") + rec->Info()->ChannelID().ToString() + NPT_String("/") + NPT_String::FromInteger(rec->start) + NPT_String("/");
-// //     objectId = rec->FileName() + NPT_String("/");
-// //     NPT_LOG_INFO(NPT_String(rec->Name()) + ": " + objectId);
-//     // check if item is already in itemCache
-//     ins = m_itemCache.insert(make_pair(objectId, object));
-//     if (ins.second) {
-//         cerr << "VdrMediaTree::recToDidl() new multistream: " << (char*)objectId << endl;
+VdrRecordings::VdrRecordings()
+{
+    setupTree();
+    startHttpServer();
+}
+
+
+void
+VdrRecordings::setupTree()
+{
+    std::clog << "VdrRecordings::VdrRecordings() number of recordings: " << Recordings.Count() << std::endl;
+    
+    m_serverAddress =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+    
+    for (cRecording* pRec = Recordings.First(); pRec/* != Recordings.Last()*/; pRec = Recordings.Next(pRec)) {
+        std::clog << "*** Add Recording ***" << std::endl;
+        if (!pRec) {
+            continue;
+        }
+        std::clog << "Recording Name: " << pRec->Name() << std::endl;
+        
+        std::string objectId(pRec->Info()->ChannelID().ToString());
+        objectId += ":" + Poco::NumberFormatter::format(pRec->start);
+        std::clog << "Recording ObjectID: " << objectId << std::endl;
+        
+        std::string title(pRec->Name());
+        std::string resource = "http://" +
+            m_serverAddress + ":" +
+            Poco::NumberFormatter::format(m_serverPort) + "/" + objectId;
+        std::clog << "Recording resource: " << resource << std::endl;
+        
+        std::clog << "Recording file name: " << pRec->FileName() << std::endl;
+        
+        appendChild(objectId, new Jamm::Av::MediaItem(title, resource));
+    }
+    
+    std::clog << "VdrRecordings::VdrRecordings() finished" << std::endl;
+    
 //         MultiFileInputStream* m = new MultiFileInputStream(rec->FileName() + string("/"));
 //         m_recCache.insert(make_pair(objectId, NPT_InputStreamReference(m)));
-//         object->m_Title = rec->Name();
-//         object->m_ObjectClass.type = "object.item";
-//         object->m_ParentID = m_containerRecordings->m_ObjectID;
-//         object->m_ObjectID = objectId;
-//         m->GetSize(resource.m_Size);
-//         resource.m_Uri = NPT_String("http://" + m_localIp + ":" + itoa(m_recPort) + "/") + objectId;
+    
 // //         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
 //         resource.m_ProtocolInfo = "http-get:*:video/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MPEG_ES_PAL;DLNA.ORG_FLAGS=01700000000000000000000000000000";
 //         object->m_ObjectClass.type = "object.item.videoItem.movie";
-//         object->m_Resources.Add(resource);
-//     }
-//     else {
-//         delete object;
-//         object = (*ins.first).second;
-//     }
-//     
-//     NPT_String res;
-//     NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*object, filter, res));
-//     return res;
-// }
-// 
-// 
-// NPT_Result
-// VdrMediaTree::OnBrowseMetadata(PLT_ActionReference& action, const char* object_id, const NPT_HttpRequestContext& /*context*/)
-// {
-//     NPT_LOG_INFO_1("VDR BrowseMetadata Action on object_id = %s", object_id);
-//     NPT_String didl, tmp;
-//     NPT_String filter;
-//     NPT_CHECK_SEVERE(action->GetArgumentValue("Filter", filter));
-//     
-//     if (NPT_String(object_id) == m_containerRoot->m_ObjectID) {
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRoot, filter, tmp));
-//     }
-//     else if (NPT_String(object_id) == m_containerLiveTv->m_ObjectID) {
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveTv, filter, tmp));
-//     }
-//     else if (NPT_String(object_id) == m_containerRecordings->m_ObjectID) {
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRecordings, filter, tmp));
-//     }
-// /*    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveRadio, filter, tmp));
-//     }*/
-//     else {
-//         PLT_MediaItem* item;
-//         map<NPT_String, PLT_MediaItem*>::iterator i = m_itemCache.find(NPT_String(object_id));
-//         if (i == m_itemCache.end()) {
-//             NPT_LOG_INFO_1("VDR BrowseMetadata NOT IN CACHE: object_id = %s", object_id);
-//             return NPT_FAILURE;
-//         }
-//         item = (*i).second;
-//         if (item == NULL){
-//             NPT_LOG_INFO_1("VDR BrowseMetadata NULL OBJECT IN CACHE: object_id = %s", object_id);
-//             return NPT_FAILURE;
-//         }
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*item, filter, tmp));
-//     }
-//     didl = didl_header + tmp + didl_footer;
-//     NPT_LOG_INFO(didl);
-//     
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("Result", didl));
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("NumberReturned", "1"));
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("TotalMatches", "1"));
-//     
-//     // update ID may be wrong here, it should be the one of the container?
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("UpdateId", "1"));
-//     // TODO: We need to keep track of the overall updateID of the CDS
-//     
-//     return NPT_SUCCESS;
-// }
-// 
-// 
-// NPT_Result
-// VdrMediaTree::OnBrowseDirectChildren(PLT_ActionReference& action, const char* object_id, const NPT_HttpRequestContext& /*context*/)
-// {
-//     NPT_LOG_INFO_1("VDR BrowseDirectChildren Action on object_id = %s", object_id);
-//     NPT_String didl = didl_header;
-// 
-//     NPT_String filter;
-//     NPT_String startingInd;
-//     NPT_String reqCount;
-//     int numberReturned = 0;
-//     int totalMatches = 0;
-//     unsigned long start_index, req_count;
-// 
-//     NPT_CHECK_SEVERE(action->GetArgumentValue("Filter", filter));
-//     NPT_CHECK_SEVERE(action->GetArgumentValue("StartingIndex", startingInd));
-//     NPT_CHECK_SEVERE(action->GetArgumentValue("RequestedCount", reqCount));
-//     if (NPT_FAILED(startingInd.ToInteger(start_index)) ||
-//         NPT_FAILED(reqCount.ToInteger(req_count))) {
-//         return NPT_FAILURE;
-//     }
-// 
-//     if (NPT_String(object_id) == m_containerRoot->m_ObjectID) {
-//         NPT_String tmp;
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveTv, filter, tmp));
-//         didl += tmp;
-// /*        tmp = "";
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerLiveRadio, filter, tmp));
-//         didl += tmp;*/
-//         tmp = "";
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(*m_containerRecordings, filter, tmp));
-//         didl += tmp;
-//         numberReturned = 2;
-//         totalMatches = 2;
-// 
-//     }
-//     else if (NPT_String(object_id) == m_containerLiveTv->m_ObjectID) {
-//         for (cChannel *chan = Channels.GetByNumber(start_index, 1); chan; chan = Channels.Next(chan)) {
-//             if (!chan || chan->Vpid() == 0) {
-//                 break;
-//             }
-//             NPT_LOG_INFO(NPT_String(chan->Name()));
-//             // TODO: need to convert it to string or is there something like a NULL-ChannelID?
-//             if (chan->GetChannelID().ToString() == "0-0-0-0") continue;
-//             didl += videoToDidl(filter, chan);
-//             numberReturned++;
-//             totalMatches = Channels.MaxNumber();
-//             NPT_LOG_INFO_1("totalMatches = %i", totalMatches);
-//             if (numberReturned >= req_count) {
-//                 break;
-//             }
-//         }
-//     }
-//     else if (NPT_String(object_id) == m_containerRecordings->m_ObjectID) {
-//         for (cRecording *rec = Recordings.Get(start_index); rec; rec = Recordings.Next(rec)) {
-//             if (!rec) {
-//                 break;
-//             }
-//             didl += recToDidl(filter, rec);
-//             numberReturned++;
-//             totalMatches = Recordings.Count();
-//             if (numberReturned >= req_count) {
-//                 break;
-//             }
-//         }
-//     }
-// /*    else if (NPT_String(object_id) == m_containerLiveRadio->m_ObjectID) {
-//         for (cChannel *chan = Channels.GetByNumber(start_index, 1); chan; chan = Channels.Next(chan)) {
-//             if (!chan || chan->Vpid() != 0) {
-//                 break;
-//             }
-//             NPT_LOG_INFO(NPT_String(chan->Name()));
-//             // TODO: need to convert it to string or is there something like a NULL-ChannelID?
-//             if (chan->GetChannelID().ToString() == "0-0-0-0") continue;
-//             didl += audioToDidl(filter, chan);
-//             numberReturned++;
-//             totalMatches = Channels.MaxNumber();
-//             NPT_LOG_INFO_1("totalMatches = %i", totalMatches);
-//             if (numberReturned >= req_count) {
-//                 break;
-//             }
-//         }
-//     }*/
-//     else {
-//         // TODO: is that enough info for the leaves? look at the specs!
-//         PLT_MediaItem item;
-//         item.m_ObjectClass.type = "object.item";
-//         NPT_String tmp;
-//         NPT_CHECK_SEVERE(PLT_Didl::ToDidl(item, filter, tmp));
-//         didl += tmp;
-//         numberReturned = 1;
-//         totalMatches = 1;
-//     }
-//     didl += didl_footer;
-//     NPT_LOG_INFO(didl);
-// 
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("Result", didl));
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("NumberReturned", itoa(numberReturned)));
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("TotalMatches", itoa(totalMatches)));
-//     NPT_CHECK_SEVERE(action->SetArgumentValue("UpdateId", "1"));
-// 
-//     return NPT_SUCCESS;
-// }
-// 
-// 
-// NPT_Result
-// VdrMediaTree::OnSearch(PLT_ActionReference& /*action*/, const NPT_String& /*object_id*/, const NPT_String& /*searchCriteria*/, const NPT_HttpRequestContext& /*context*/)
-// {
-//     return NPT_SUCCESS;
-// }
-// 
+}
+
+
+void
+VdrRecordings::startHttpServer()
+{
+//     Poco::Net::ServerSocket socket(0);
+//     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+//     Poco::Net::SocketAddress httpSocketAddress = Poco::Net::SocketAddress(m_serverAddress, socket.address().port());
+//     m_pHttpServer = new Poco::Net::HTTPServer(new FileRequestHandlerFactory, socket, pParams);
+}
+
+
+
+
+
+
+
+
+
+
 // 
 // NPT_Result 
 // VdrMediaTree::ProcessHttpRequest(NPT_HttpRequest&              request,

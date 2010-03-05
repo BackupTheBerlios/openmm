@@ -2,7 +2,7 @@
 |  Jamm - Just another multimedia ...                                       |
 |         ... set of applications and libraries based on the UPnP-AV specs  |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
+|  Copyright (C) 2009 - 2010                                                |
 |  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
 |                                                                           |
 |  This file is part of Jamm.                                               |
@@ -18,28 +18,7 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#include "UpnpAvRenderer.h"
-#include "UpnpAvRendererImpl.h"
+#include "HttpFileServer.h"
 
-using namespace Jamm;
-using namespace Jamm::Av;
-
-UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
-MediaRenderer(new RenderingControlRendererImpl,
-              new ConnectionManagerRendererImpl,
-              new AVTransportRendererImpl),
-m_pEngine(engine)
-{
-    static_cast<RenderingControlRendererImpl*>(m_pRenderingControlImpl)->m_pEngine = engine;
-    static_cast<ConnectionManagerRendererImpl*>(m_pConnectionManagerImpl)->m_pEngine = engine;
-    static_cast<AVTransportRendererImpl*>(m_pAVTransportImpl)->m_pEngine = engine;
-}
-
-
-void
-UpnpAvRenderer::setFullscreen(bool on)
-{
-    m_pEngine->setFullscreen(on);
-}

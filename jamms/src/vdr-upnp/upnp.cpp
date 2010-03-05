@@ -90,6 +90,7 @@ bool cPluginUpnp::Initialize(void)
     m_pUpnpAvServer = new Jamm::Av::UpnpAvServer;
     m_pVdrMediaTree = new VdrMediaTree;
     m_pUpnpAvServer->setRoot(m_pVdrMediaTree);
+    m_pUpnpAvServer->setFriendlyName("Digital TV");
     return true;
 }
 

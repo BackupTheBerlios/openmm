@@ -23,7 +23,6 @@
 #ifndef VDRMEDIASERVER_H
 #define VDRMEDIASERVER_H
 
-
 #include <Jamm/UpnpAvTypes.h>
 
 // #include <map>
@@ -58,8 +57,16 @@ private:
 
 class VdrRecordings : public Jamm::Av::MediaContainer
 {
+public:
+    VdrRecordings();
+    
 private:
-    //     int m_recPort;
+    void setupTree();
+    void startHttpServer();
+    
+    std::string m_serverAddress;
+    int m_serverPort;
+    Poco::Net::HTTPServer* m_pHttpServer;
 };
 
 
@@ -74,21 +81,6 @@ private:
     VdrRecordings*  m_pRecordings;
 
     
-//     virtual NPT_Result OnBrowseMetadata(PLT_ActionReference& action,
-//                                         const char* object_id,
-//                                         const NPT_HttpRequestContext& context);
-//     virtual NPT_Result OnBrowseDirectChildren(PLT_ActionReference& action,
-//                                               const char* object_id,
-//                                               const NPT_HttpRequestContext& context);
-//     virtual NPT_Result OnSearch(PLT_ActionReference& action,
-//                                 const NPT_String& object_id,
-//                                 const NPT_String& searchCriteria,
-//                                 const NPT_HttpRequestContext& context);
-//     
-//     NPT_String videoToDidl(NPT_String filter, cChannel *channel);
-//     NPT_String recToDidl(NPT_String filter, cRecording *rec);
-//     NPT_String audioToDidl(NPT_String filter, cChannel *channel);
-//     
 //     virtual NPT_Result ProcessHttpRequest(NPT_HttpRequest&              request, 
 //                                           const NPT_HttpRequestContext& context,
 //                                           NPT_HttpResponse&             response);
@@ -101,13 +93,6 @@ private:
 //                          NPT_Position      end,
 //                          bool              request_is_head);
 //     
-//     NPT_String m_localIp;
-
-//     PLT_MediaContainer* m_containerRoot;
-//     PLT_MediaContainer* m_containerLiveTv;
-//     PLT_MediaContainer* m_containerRecordings;
-//     PLT_MediaContainer* m_containerLiveRadio;
-    
 //     map<NPT_String, PLT_MediaItem*> m_itemCache;
 //     map<NPT_String, NPT_InputStreamReference> m_recCache;
 };

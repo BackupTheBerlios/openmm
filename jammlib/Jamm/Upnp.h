@@ -192,6 +192,31 @@ private:
 };
 
 
+class NetworkInterfaceManager
+{
+public:
+    static NetworkInterfaceManager* instance();
+    // clients like DeviceRoot and Controller can register here
+    void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
+    // some OS dependent hardware abstraction layer can add and remove devices here
+    void addInterface(const std::string& name);
+    void removeInterface(const std::string& name);
+    // this address can be announced for the HTTP servers to be reached at
+    const Poco::Net::IPAddress& getValidInterfaceAddress();
+    
+private:
+    NetworkInterfaceManager();
+    void findValidIpAddress();
+    
+    static NetworkInterfaceManager*     m_pInstance;
+    std::vector<std::string>            m_interfaceList;
+    Poco::Net::IPAddress                m_validIpAddress;
+    Poco::NotificationCenter            m_notificationCenter;
+    bool                                m_loopbackProvided;
+    Poco::Net::IPAddress                m_loopbackAddress;
+};
+
+
 class SsdpNetworkInterface
 {
     friend class SsdpSocket;
@@ -790,6 +815,8 @@ class DeviceRootImplAdapter;
 
 class DeviceRoot
 {
+    friend class DeviceRootImplAdapter;
+    
 public:
     DeviceRoot();
     ~DeviceRoot();
@@ -816,7 +843,8 @@ public:
     void setBaseUri(const Poco::URI& baseUri) { m_baseUri = baseUri; }
     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = Poco::URI(m_httpSocket.getServerUri() + descriptionPath); }
     
-    void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
+//     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
+    void addDevice(Device* pDevice) { m_devices.append(pDevice); }
     void addServiceType(std::string serviceType, Service* pService) { m_serviceTypes[serviceType] = pService; }
     
     void print();
@@ -872,9 +900,9 @@ public:
     void start();
     void stop();
     
-    // TODO: implement Property setters ...
-//     void setUuid(std::string uuid);
-    void setFriendlyName(const std::string& friendlyName);
+    void setUuid(std::string uuid, int deviceNumber = 0);
+    void setRandomUuid(int deviceNumber = 0);
+    void setFriendlyName(const std::string& friendlyName, int deviceNumber = 0);
     
 protected:
     virtual void actionHandler(Action* action) = 0;
