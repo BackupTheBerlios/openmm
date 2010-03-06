@@ -64,9 +64,9 @@ private:
     void setupTree();
     void startHttpServer();
     
-    std::string m_serverAddress;
-    int m_serverPort;
-    Poco::Net::HTTPServer* m_pHttpServer;
+    std::string             m_serverAddress;
+    int                     m_serverPort;
+    Jamm::HttpFileServer*   m_pFileServer;
 };
 
 

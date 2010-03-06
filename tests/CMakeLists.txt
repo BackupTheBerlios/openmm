@@ -14,6 +14,7 @@ PATHS ${CMAKE_LIBRARY_PATH}
 SET(LIB_JAMM
 jamm
 )
+
 INCLUDE_DIRECTORIES(
 ${jamm_SOURCE_DIR}/jammlib/Jamm
 ${jamm_SOURCE_DIR}/jammlib/src
@@ -47,6 +48,10 @@ SET( JAMMTEST_MEDIAOBJECT_SRCS
 MediaObjectTest.cpp
 )
 
+SET( JAMMTEST_HTTPFILESERVER_SRCS
+HttpFileServerTest.cpp
+)
+
 #list all source files here
 ADD_EXECUTABLE( ssdp_test
 ${JAMMTEST_SSDP_SRCS}
@@ -70,6 +75,10 @@ ${JAMMTEST_CONTROLLER_SRCS}
 
 ADD_EXECUTABLE( media_object_test
 ${JAMMTEST_MEDIAOBJECT_SRCS}
+)
+
+ADD_EXECUTABLE( file_server_test
+${JAMMTEST_HTTPFILESERVER_SRCS}
 )
 
 #need to link to some other libraries ? just add them here
@@ -102,7 +111,7 @@ TARGET_LINK_LIBRARIES( media_object_test
 ${LIB_JAMM}
 )
 
-#INSTALL( TARGETS ssdp_test device_test controller_test
-#RUNTIME DESTINATION bin
-#LIBRARY DESTINATION lib
-#)
+TARGET_LINK_LIBRARIES( file_server_test
+${LIB_JAMM}
+${LIB_POCO_UTIL}
+)

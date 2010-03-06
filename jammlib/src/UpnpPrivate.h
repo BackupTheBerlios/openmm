@@ -23,6 +23,9 @@
 #ifndef JAMMUPNP_PRIVATE_H
 #define JAMMUPNP_PRIVATE_H
 
+#include <Poco/Net/MediaType.h>
+#include <Poco/File.h>
+
 #include "Upnp.h"
 
 namespace Jamm {
@@ -38,6 +41,40 @@ class ControlRequestHandler;
 class HttpSocket;
 class Entity;
 class EntityItem;
+
+
+class FileRequestHandler : public Poco::Net::HTTPRequestHandler
+{
+public:
+    FileRequestHandler(HttpFileServer* pFileServer);
+    
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+    
+//     DescriptionRequestHandler* create();
+private:
+    HttpFileServer*  m_pFileServer;
+    
+//     std::string*    m_pDescription;
+};
+
+
+class FileRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
+{
+public:
+//     FileRequestHandlerFactory(HttpSocket* pHttpSocket);
+    FileRequestHandlerFactory(HttpFileServer* pFileServer);
+    
+    
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
+    
+//     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
+    
+private:
+    HttpFileServer*  m_pFileServer;
+    
+//     std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
+//     HttpSocket*                               m_pHttpSocket;
+};
 
 
 class NetworkInterfaceNotification : public Poco::Notification

@@ -24,7 +24,6 @@
 #include <vdr/recording.h>
 
 #include "VdrMediaServer.h"
-#include "HttpFileServer.h"
 
 
 VdrMediaTree::VdrMediaTree()
@@ -66,8 +65,8 @@ m_streamDevPort("3000")
 
 VdrRecordings::VdrRecordings()
 {
-    setupTree();
     startHttpServer();
+    setupTree();
 }
 
 
@@ -96,6 +95,7 @@ VdrRecordings::setupTree()
         std::clog << "Recording resource: " << resource << std::endl;
         
         std::clog << "Recording file name: " << pRec->FileName() << std::endl;
+        m_pFileServer->registerFile(objectId, std::string(pRec->FileName()) + "/001.vdr");
         
         appendChild(objectId, new Jamm::Av::MediaItem(title, resource));
     }
@@ -114,10 +114,11 @@ VdrRecordings::setupTree()
 void
 VdrRecordings::startHttpServer()
 {
-//     Poco::Net::ServerSocket socket(0);
-//     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-//     Poco::Net::SocketAddress httpSocketAddress = Poco::Net::SocketAddress(m_serverAddress, socket.address().port());
-//     m_pHttpServer = new Poco::Net::HTTPServer(new FileRequestHandlerFactory, socket, pParams);
+    std::clog << "http file server starting ..." << std::endl;
+    m_pFileServer = new Jamm::HttpFileServer;
+    m_pFileServer->start();
+    m_serverPort = m_pFileServer->getPort();
+    std::clog << "http file server running on port: " << m_pFileServer->getPort() << std::endl;
 }
 
 

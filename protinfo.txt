@@ -1,0 +1,20 @@
+SAMSUNG LED TV
+
+<stateVariable sendEvents="yes">
+<name>SinkProtocolInfo</name>
+<dataType>string</dataType>
+<defaultValue>
+http-get:*:video/vnd.dlna.mpeg-tts:DLNA.ORG_PN=MPEG_TS_HD_NA,
+http-get:*:video/vnd.dlna.mpeg-tts:DLNA.ORG_PN=MPEG_TS_HD_NA_T,
+http-get:*:video/vnd.dlna.mpeg-tts:DLNA.ORG_PN=MPEG_TS_SD_NA,
+http-get:*:video/vnd.dlna.mpeg-tts:DLNA.ORG_PN=MPEG_TS_SD_NA_T,
+http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_NTSC,
+http-get:*:audio/L16;rate=44100;channels=1:DLNA.ORG_PN=LPCM,
+http-get:*:audio/L16;rate=44100;channels=2:DLNA.ORG_PN=LPCM,
+http-get:*:audio/L16;rate=48000;channels=1:DLNA.ORG_PN=LPCM,
+http-get:*:audio/L16;rate=48000;channels=2:DLNA.ORG_PN=LPCM,
+http-get:*:audio/mpeg:DLNA.ORG_PN=MP3,
+http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_SM,
+http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_MED,
+http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_TN</defaultValue> 
+</stateVariable>

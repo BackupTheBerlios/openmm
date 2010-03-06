@@ -75,10 +75,15 @@ EngineVlc::openXWindow()
     int width   = 1360;
     int height  = 768;
     
+    
     XInitThreads ();
     xDisplay = XOpenDisplay(NULL);
     xScreen = DefaultScreen(xDisplay);
     XLockDisplay(xDisplay);
+    if(m_fullscreen) {
+        width   = DisplayWidth(xDisplay, xScreen);
+        height  = DisplayHeight(xDisplay, xScreen);
+    }
     xWindow = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
                                   xPos, yPos, width, height, 1, 0, 0);
     XMapRaised(xDisplay, xWindow);
@@ -159,8 +164,8 @@ EngineVlc::load()
     handleException();*/
     
     // TODO: fullscreen could initially be set at start
-    libvlc_set_fullscreen(m_vlcPlayer, (m_fullscreen ? 1 : 0), &m_exception);
-    handleException();
+//     libvlc_set_fullscreen(m_vlcPlayer, (m_fullscreen ? 1 : 0), &m_exception);
+//     handleException();
 }
 
 

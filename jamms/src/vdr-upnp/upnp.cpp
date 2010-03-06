@@ -23,7 +23,7 @@
 #include <vdr/plugin.h>
 #include <Jamm/UpnpAvServer.h>
 
-#include "vdrmediaserver.h"
+#include "VdrMediaServer.h"
 
 static const char *VERSION        = "0.0.3";
 static const char *DESCRIPTION    = "Expose VDR's capabilities to UPnP-AV";

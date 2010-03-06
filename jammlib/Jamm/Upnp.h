@@ -136,6 +136,27 @@ class Subscription;
 class NetworkInterfaceNotification;
 
 
+class HttpFileServer
+{
+    friend class FileRequestHandler;
+    
+public:
+    HttpFileServer();
+    ~HttpFileServer();
+    
+    void start();
+    void stop();
+    Poco::UInt16 getPort() const;
+    
+    void registerFile(const std::string& uri, const std::string& path);
+    
+private:
+    Poco::Net::ServerSocket                     m_socket;
+    Poco::Net::HTTPServer*                      m_pHttpServer;
+    std::map<std::string,std::string>           m_uriPathMap;
+};
+
+
 template<class C>
 class PluginLoader
 {
@@ -514,7 +535,7 @@ protected:
     StateVar* stateVar();
     
     
-    std::string             m_deviceDescriptionPath;
+    std::string                         m_deviceDescriptionPath;
     // TODO: replace m_nodeStack by argument Node* in the factory methods
     std::stack<Poco::XML::Node*>        m_nodeStack;
     std::stack<Poco::XML::Document*>    m_pDocStack;
@@ -928,6 +949,7 @@ private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
     void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
+    void discoverDevice(const Poco::URI& location);
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);
     

@@ -27,6 +27,94 @@
 using namespace Jamm;
 
 
+HttpFileServer::HttpFileServer() :
+m_socket(Poco::Net::ServerSocket(0))
+{
+    
+}
+
+
+HttpFileServer::~HttpFileServer()
+{
+    std::clog << "stopping http file server" << std::endl;
+    m_pHttpServer->stop();
+    delete m_pHttpServer;
+}
+
+
+void
+HttpFileServer::start()
+{
+    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+    m_pHttpServer = new Poco::Net::HTTPServer(new FileRequestHandlerFactory(this), m_socket, pParams);
+    m_pHttpServer->start();
+    std::clog << "http file server started" << std::endl;
+}
+
+
+void
+HttpFileServer::stop()
+{
+    m_pHttpServer->stop();
+}
+
+
+Poco::UInt16
+HttpFileServer::getPort() const
+{
+    return m_socket.address().port();
+}
+
+
+void
+HttpFileServer::registerFile(const std::string& uri, const std::string& path)
+{
+    m_uriPathMap["/" + uri] = path;
+}
+
+
+FileRequestHandlerFactory::FileRequestHandlerFactory(HttpFileServer* pFileServer) :
+m_pFileServer(pFileServer)
+{
+}
+
+
+Poco::Net::HTTPRequestHandler*
+FileRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
+{
+    return new FileRequestHandler(m_pFileServer);
+}
+
+
+FileRequestHandler::FileRequestHandler(HttpFileServer* pFileServer) :
+m_pFileServer(pFileServer)
+{
+}
+
+
+void
+FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+{
+    std::clog << "handle description request: " << request.getURI() << std::endl;
+    
+    std::string fileName = m_pFileServer->m_uriPathMap[request.getURI()];
+    std::clog << "open file: " << fileName << std::endl;
+//     Poco::File inFile(fileName);
+    
+    std::ifstream ifstr(fileName.c_str());
+    
+    response.setChunkedTransferEncoding(true);
+//     response.setContentLength(inFile.getSize());
+    response.setContentLength(Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH);
+//     response.setContentType(Poco::Net::MediaType::NO_CONTENT_TYPE);
+    response.setContentType("multipart/mixed");
+//     response.setContentType("text/plain");
+    std::ostream& ostr = response.send();
+    Poco::StreamCopier::copyStream(ifstr, ostr);
+    std::clog << "handle description request finished" << std::endl;
+}
+
+
 NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
 m_interfaceName(interfaceName),
 m_added(added)
@@ -186,21 +274,22 @@ UriDescriptionReader::getDescription(const std::string& path)
     //          (which is the preferred implementation; use of URLBase is no longer recommended).
     //          Specified by UPnP vendor. Single URL.
         
-    std::string p = m_uri.getPath() + path;
-    std::clog << "UriDescriptionReader::getDescription() from: " << m_uri.toString() << std::endl;
-    std::clog << "request path is: " << p << std::endl;
+//     std::string p = m_uri.getPath() + path;
+    std::clog << "UriDescriptionReader::getDescription() from: " << m_uri.toString() + path << std::endl;
+//     std::clog << "uri path is: " << m_uri.getPath() << std::endl;
+//     std::clog << "path is: " << path << std::endl;
     std::string* res;
     
     if (m_uri.getScheme() == "file") {
         std::stringstream ss;
         
-        std::ifstream ifs(p.c_str());
+        std::ifstream ifs(path.c_str());
         Poco::StreamCopier::copyStream(ifs, ss);
         res = new std::string(ss.str());
     }
     else if (m_uri.getScheme() == "http") {
         Poco::Net::HTTPClientSession session(m_uri.getHost(), m_uri.getPort());
-        Poco::Net::HTTPRequest request("GET", path);
+        Poco::Net::HTTPRequest request("GET", m_uri.getPath() + path);
         session.sendRequest(request);
         
         // TODO: platinum's URL has no leading / but expects one ...
@@ -221,7 +310,7 @@ UriDescriptionReader::getDescription(const std::string& path)
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
         
-//         std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
+        std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
         std::clog << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
@@ -393,7 +482,7 @@ DescriptionReader::service()
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
             // FIXME: this is somewhat ugly
             std::string descriptionPath = pNode->innerText();
-            fixQuirkyPath(descriptionPath);
+//             fixQuirkyPath(descriptionPath);
             pRes->setDescriptionPath(descriptionPath);
             // load the service description into the Service object.
             pRes->setDescription(getDescription(pRes->getDescriptionPath()));
@@ -436,13 +525,13 @@ DescriptionReader::service()
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
             std::string controlPath = pNode->innerText();
-            fixQuirkyPath(controlPath);
+//             fixQuirkyPath(controlPath);
 //             fixQuirkyPathRemoveFileName(controlPath);
             pRes->setControlPath(controlPath);
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
             std::string eventPath = pNode->innerText();
-            fixQuirkyPath(eventPath);
+//             fixQuirkyPath(eventPath);
 //             fixQuirkyPathRemoveFileName(eventPath);
             pRes->setEventPath(eventPath);
         }
@@ -1927,6 +2016,36 @@ Controller::~Controller()
 
 
 void
+Controller::discoverDevice(const Poco::URI& location)
+{
+    std::clog << "Controller::discoverDevice() LOCATION: " <<  location.toString() << std::endl;
+    
+    Poco::Path path(location.getPath());
+    std::clog << "Controller::discoverDevice() path: " << path.toString() << std::endl;
+    std::clog << "Controller::discoverDevice() path depth: " << path.depth() << std::endl;
+    
+    std::string relPath = "";
+    std::string relUri = path.toString();
+    if (path.depth() > 0) {
+        relPath = path.directory(path.depth() - 1) + "/";
+        relUri = path.getFileName();
+    }
+    std::clog << "Controller::discoverDevice() relPath: " << relPath << std::endl;
+    
+    Poco::URI baseUri(location.getScheme() + "://" + location.getAuthority() + "/" + relPath);
+    std::clog << "Controller::discoverDevice() baseUri: " << baseUri.toString() << std::endl;
+    std::clog << "Controller::discoverDevice() relUri: " << relUri << std::endl;
+    
+    UriDescriptionReader descriptionReader(baseUri, relUri);
+
+    DeviceRoot* deviceRoot = descriptionReader.deviceRoot();
+    deviceRoot->setBaseUri(baseUri);
+    addDevice(deviceRoot);
+    std::clog << "Controller::discoverDevice() finished with LOCATION: " <<  location.toString() << std::endl;
+}
+
+
+void
 Controller::handleSsdpMessage(SsdpMessage* pMessage)
 {
     // we load all device descriptions, regardless of service types contained in the device
@@ -1943,18 +2062,13 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 //         std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY" << std::endl;
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
-//             std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY_ALIVE" << std::endl;
+            std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY_ALIVE" << std::endl;
             if (pMessage->getNotificationType() == "upnp:rootdevice" && !m_devices.contains(uuid)) {
-                Poco::URI location = pMessage->getLocation();
-                std::string baseUri = location.getScheme() + "://" + location.getAuthority();
-                UriDescriptionReader descriptionReader(Poco::URI(baseUri), location.getPath());
-                DeviceRoot* deviceRoot = descriptionReader.deviceRoot();
-                deviceRoot->setBaseUri(Poco::URI(baseUri));
-                addDevice(deviceRoot);
+                discoverDevice(pMessage->getLocation());
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
-//             std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY_BYEBYE" << std::endl;
+            std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY_BYEBYE" << std::endl;
             if (pMessage->getNotificationType() == "upnp:rootdevice") {
                 removeDevice(uuid);
             }
@@ -1962,20 +2076,9 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-//         std::clog << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
+        std::clog << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
         if (!m_devices.contains(uuid)) {
-            Poco::URI location = pMessage->getLocation();
-//             std::clog << "Controller::handleSsdpMessage() LOCATION: " <<  location.toString() << std::endl;
-            
-            std::string baseUri = location.getScheme() + "://" + location.getAuthority();
-//             std::clog << "Controller::handleSsdpMessage() root device baseUri: " << baseUri << " , path: " << location.getPath() << std::endl;
-            
-            UriDescriptionReader descriptionReader(Poco::URI(baseUri), location.getPath());
-            // TODO: better trust the device uuid in the SSDP message then in the device description ...
-            //       though platinum-upnp doesn't provide a USN field ...
-            DeviceRoot* deviceRoot = descriptionReader.deviceRoot();
-            deviceRoot->setBaseUri(Poco::URI(baseUri));
-            addDevice(deviceRoot);
+            discoverDevice(pMessage->getLocation());
         }
         break;
     }
