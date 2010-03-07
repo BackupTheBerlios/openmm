@@ -157,9 +157,8 @@ public:
     void setUniqueServiceName(const std::string& serviceName);
     std::string getUniqueServiceName();
     
-    void setLocation(const Poco::URI& location);
-//     std::string getLocation();
-    Poco::URI getLocation();
+    void setLocation(const std::string& location);
+    std::string getLocation();
     
     void setHost();
     void setHttpExtensionNamespace();
@@ -192,17 +191,6 @@ private:
     
     std::map<TRequestMethod,std::string>    m_messageMap;
     std::map<std::string,TRequestMethod>    m_messageConstMap;
-};
-
-
-class UriDescriptionReader : public DescriptionReader
-{
-public:
-    UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath);
-    
-private:
-    virtual std::string& getDescription(const std::string& path);
-    Poco::URI m_uri;
 };
 
 

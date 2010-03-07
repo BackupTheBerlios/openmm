@@ -85,7 +85,7 @@ VdrRecordings::setupTree()
         std::clog << "Recording Name: " << pRec->Name() << std::endl;
         
         std::string objectId(pRec->Info()->ChannelID().ToString());
-        objectId += ":" + Poco::NumberFormatter::format(pRec->start);
+        objectId += "_" + Poco::NumberFormatter::format(pRec->start);
         std::clog << "Recording ObjectID: " << objectId << std::endl;
         
         std::string title(pRec->Name());

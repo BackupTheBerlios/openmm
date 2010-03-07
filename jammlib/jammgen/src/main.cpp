@@ -123,8 +123,9 @@ protected:
         }
         else
         {
-            Jamm::UriDescriptionReader descriptionReader(Poco::URI("file:" + m_descriptionPath + "/"), m_description);
-            Jamm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot();
+//             Jamm::UriDescriptionReader descriptionReader(Poco::URI("file:" + m_descriptionPath + "/"), m_description);
+            Jamm::UriDescriptionReader descriptionReader;
+            Jamm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + m_descriptionPath + "/" + m_description);
             
             m_stubWriters.push_back(new DeviceH(pDeviceRoot, m_outputPath));
             m_stubWriters.push_back(new DeviceCpp(pDeviceRoot, m_outputPath));

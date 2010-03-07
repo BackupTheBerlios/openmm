@@ -417,8 +417,8 @@ m_pAVTransportImpl(pAVTransportImpl)
     m_descriptions["/ConnectionManager.xml"] = &ConnectionManager::m_description;
     m_descriptions["/AVTransport.xml"] = &AVTransport::m_description;
 
-    StringDescriptionReader descriptionReader(m_descriptions, "/MediaRenderer.xml");
-    m_pDeviceRoot = descriptionReader.deviceRoot();
+    StringDescriptionReader descriptionReader(m_descriptions);
+    m_pDeviceRoot = descriptionReader.deviceRoot("/MediaRenderer.xml");
     m_pDeviceRoot->setImplAdapter(this);
 }
 
@@ -1284,8 +1284,8 @@ m_pAVTransportImpl(pAVTransportImpl)
     m_descriptions["/ConnectionManager.xml"] = &ConnectionManager::m_description;
     m_descriptions["/AVTransport.xml"] = &AVTransport::m_description;
 
-    StringDescriptionReader descriptionReader(m_descriptions, "/MediaServer.xml");
-    m_pDeviceRoot = descriptionReader.deviceRoot();
+    StringDescriptionReader descriptionReader(m_descriptions);
+    m_pDeviceRoot = descriptionReader.deviceRoot("/MediaServer.xml");
     m_pDeviceRoot->setImplAdapter(this);
 }
 

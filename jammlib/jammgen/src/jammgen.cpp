@@ -325,7 +325,7 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
 void
 DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
 {
-    std::string deviceDescriptionPath = deviceRoot.getDescriptionUri().getPath();
+    std::string deviceDescriptionPath = deviceRoot.getDescriptionUri();
     std::string ctorArgs = "";
     int i = m_serviceNames.size();
     while (i--) {

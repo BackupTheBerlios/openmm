@@ -229,15 +229,27 @@ NetworkInterfaceManager::getValidInterfaceAddress()
 }
 
 
-UriDescriptionReader::UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath) :
-DescriptionReader(deviceDescriptionPath),
-m_uri(uri)
+// UriDescriptionReader::UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath) :
+// DescriptionReader(deviceDescriptionPath),
+// m_uri(uri)
+// {
+// }
+
+// UriDescriptionReader::UriDescriptionReader(const std::string& deviceDescriptionUri)
+// {
+// }
+
+
+DeviceRoot*
+UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
 {
+    m_deviceDescriptionUri = deviceDescriptionUri;
+    return parseDeviceRoot(parseDescription(getDescription(deviceDescriptionUri)));
 }
 
 
 std::string&
-UriDescriptionReader::getDescription(const std::string& path)
+UriDescriptionReader::getDescription(const std::string& relativeUri)
 {
     // FIXME: Bug in Poco? getPath should not return leading "/", it's not part of path
     //        URL, url-path: 
@@ -273,40 +285,39 @@ UriDescriptionReader::getDescription(const std::string& path)
     //          given, the base URL is the URL from which the device description was retrieved 
     //          (which is the preferred implementation; use of URLBase is no longer recommended).
     //          Specified by UPnP vendor. Single URL.
-        
-//     std::string p = m_uri.getPath() + path;
-    std::clog << "UriDescriptionReader::getDescription() from: " << m_uri.toString() + path << std::endl;
-//     std::clog << "uri path is: " << m_uri.getPath() << std::endl;
-//     std::clog << "path is: " << path << std::endl;
+    
+    // TODO: platinum's URL has no leading / but expects one ...
+    
+    Poco::URI targetUri(m_deviceDescriptionUri);
+    targetUri.resolve(relativeUri);
+    std::clog << "UriDescriptionReader::getDescription() from: " << targetUri.toString() << std::endl;
     std::string* res;
     
-    if (m_uri.getScheme() == "file") {
+    if (targetUri.getScheme() == "file") {
+        std::clog << "reading description from file: " << targetUri.getPath() << std::endl;
+        std::ifstream ifs(targetUri.getPath().c_str());
         std::stringstream ss;
-        
-        std::ifstream ifs(path.c_str());
         Poco::StreamCopier::copyStream(ifs, ss);
         res = new std::string(ss.str());
     }
-    else if (m_uri.getScheme() == "http") {
-        Poco::Net::HTTPClientSession session(m_uri.getHost(), m_uri.getPort());
-        Poco::Net::HTTPRequest request("GET", m_uri.getPath() + path);
+    else if (targetUri.getScheme() == "http") {
+        std::clog << "downloading description from: " << targetUri.getPath() << std::endl;
+        Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
+        Poco::Net::HTTPRequest request("GET", targetUri.getPath());
         session.sendRequest(request);
         
-        // TODO: platinum's URL has no leading / but expects one ...
         Poco::Net::HTTPResponse response;
         std::istream& rs = session.receiveResponse(response);
         if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-            std::clog << "Error: " << path << " HTTP_NOT_FOUND 404" << std::endl;
-            std::clog << "Trying: /" << path << std::endl;
-            request.setURI("/" + path);
-            session.sendRequest(request);
-            response.clear();
-            std::istream& rs = session.receiveResponse(response);
+            std::clog << "Error: " << targetUri.getPath() << " HTTP_NOT_FOUND 404" << std::endl;
+            res = new std::string;
+            return *res;
+//             std::clog << "Trying: /" << path << std::endl;
+//             request.setURI("/" + path);
+//             session.sendRequest(request);
+//             response.clear();
+//             std::istream& rs = session.receiveResponse(response);
         }
-//         char* buf = new char[response.getContentLength()];
-//         rs.read(buf, response.getContentLength());
-//         res = new std::string(buf, response.getContentLength());
-        
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
         
@@ -314,23 +325,27 @@ UriDescriptionReader::getDescription(const std::string& path)
     }
     else {
         std::clog << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
+        res = new std::string;
+        return *res;
     }
     
-    // TODO: put this into deviceRoot() as it is common with StringDescriptionReader
-    Poco::XML::DOMParser parser;
-    m_pDocStack.push(parser.parseString(*res));
-    Poco::XML::Node* n = m_pDocStack.top()->documentElement()->firstChild();
-//     std::clog << "first node: " << n->nodeName() << ", " << n << std::endl;
-    m_nodeStack.push(n);
+//     parseDescription(*res);
+
     std::clog << "UriDescriptionReader::getDescription() finished" << std::endl;
     return *res;
 }
 
 
-StringDescriptionReader::StringDescriptionReader(std::map<std::string,std::string*>& stringMap, const std::string& deviceDescriptionPath) :
-DescriptionReader(deviceDescriptionPath),
+StringDescriptionReader::StringDescriptionReader(std::map<std::string,std::string*>& stringMap) :
 m_pStringMap(&stringMap)
 {
+}
+
+
+DeviceRoot*
+StringDescriptionReader::deviceRoot(const std::string& deviceDescriptionKey)
+{
+    return parseDeviceRoot(parseDescription(getDescription(deviceDescriptionKey)));
 }
 
 
@@ -339,18 +354,35 @@ StringDescriptionReader::getDescription(const std::string& path)
 {
 //     std::clog << "StringDescriptionReader::getDescription()" << std::endl;
     std::string* res = (*m_pStringMap)[path];
-    Poco::XML::DOMParser parser;
-    m_pDocStack.push(parser.parseString(*res));
-    Poco::XML::Node* n = m_pDocStack.top()->documentElement()->firstChild();
-//     std::clog << "first node: " << n->nodeName() << ", " << n << std::endl;
-    m_nodeStack.push(n);
+    parseDescription(*res);
     return *res;
+}
+
+
+// DescriptionReader::DescriptionReader(std::string deviceDescriptionUri) :
+// m_deviceDescriptionUri(deviceDescriptionUri)
+// {
+// }
+
+
+DescriptionReader::DescriptionReader()
+{
 }
 
 
 DescriptionReader::~DescriptionReader()
 {
     releaseDescriptionDocument();
+}
+
+
+Poco::XML::Node*
+DescriptionReader::parseDescription(const std::string& description)
+{
+    Poco::XML::DOMParser parser;
+    m_pDocStack.push(parser.parseString(description));
+    return m_pDocStack.top()->documentElement()->firstChild();
+//     m_nodeStack.push(n);
 }
 
 
@@ -366,42 +398,42 @@ DescriptionReader::releaseDescriptionDocument()
 
 
 DeviceRoot*
-DescriptionReader::deviceRoot()
+DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::deviceRoot()" << std::endl;
     DeviceRoot* pRes = new DeviceRoot();
-    m_pDeviceRoot = pRes;
-    pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
+//     m_pDeviceRoot = pRes;
+//     pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
     // NOTE: a running HttpSocket is needed here, to set host and port of BaseUri and DescriptionUri
     //       that's why jammgen crashes without setting up a socket in HttpSocket::init()
-    pRes->setBaseUri();
-    pRes->setDescriptionUri(m_deviceDescriptionPath);
-    Poco::XML::Node* pNode = m_nodeStack.top();
+//     pRes->setBaseUri();
+//     pRes->setDescriptionUri(m_deviceDescriptionPath);
+//     Poco::XML::Node* pNode = m_nodeStack.top();
 //     std::clog << "top of stack: " << pNode << std::endl;
     
     while (pNode)
     {
 //         std::clog << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
-            m_nodeStack.push(pNode->firstChild());
-            Device* pDevice = device();
-            m_pDeviceRoot->addDevice(pDevice);
+//             m_nodeStack.push(pNode->firstChild());
+            Device* pDevice = device(pNode->firstChild(), pRes);
+            pRes->addDevice(pDevice);
             pRes->setRootDevice(pDevice);
         }
         pNode = pNode->nextSibling();
     }
-    m_nodeStack.pop();
+//     m_nodeStack.pop();
     return pRes;
 }
 
 
 Device*
-DescriptionReader::device()
+DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
 {
 //     std::clog << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
-    Poco::XML::Node* pNode = m_nodeStack.top();
-    pRes->setDeviceRoot(m_pDeviceRoot);
+//     Poco::XML::Node* pNode = m_nodeStack.top();
+    pRes->setDeviceRoot(pDeviceRoot);
 
     while (pNode)
     {
@@ -417,8 +449,8 @@ DescriptionReader::device()
                 while (pChild) {
                     if (pChild->nodeName() == "service") {
                         if (pChild->hasChildNodes()) {
-                            m_nodeStack.push(pChild->firstChild());
-                            pRes->addService(service());
+//                             m_nodeStack.push(pChild->firstChild());
+                            pRes->addService(service(pChild->firstChild()));
                         }
                         else {
                             std::clog << "Error in DescriptionReader: empty service" << std::endl;
@@ -437,11 +469,11 @@ DescriptionReader::device()
                 while (pChild) {
                     if (pChild->nodeName() == "device") {
                         if (pChild->hasChildNodes()) {
-                            m_nodeStack.push(pChild->firstChild());
-                            m_pDeviceRoot->addDevice(device());
+//                             m_nodeStack.push(pChild->firstChild());
+                            pDeviceRoot->addDevice(device(pChild->firstChild(), pDeviceRoot));
                         }
                         else {
-                            std::clog << "Error in DescriptionReader: empty embedded device" << std::endl;
+                            std::cerr << "Error in DescriptionReader: empty embedded device" << std::endl;
                         }
                     }
                     pChild = pChild->nextSibling();
@@ -458,17 +490,17 @@ DescriptionReader::device()
         }
         pNode = pNode->nextSibling();
     }
-    m_nodeStack.pop();
+//     m_nodeStack.pop();
     return pRes;
 }
 
 
 Service*
-DescriptionReader::service()
+DescriptionReader::service(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
-    Poco::XML::Node* pNode = m_nodeStack.top();
+//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -480,13 +512,13 @@ DescriptionReader::service()
             pRes->setServiceId(pNode->innerText());
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
-            // FIXME: this is somewhat ugly
             std::string descriptionPath = pNode->innerText();
 //             fixQuirkyPath(descriptionPath);
             pRes->setDescriptionPath(descriptionPath);
             // load the service description into the Service object.
-            pRes->setDescription(getDescription(pRes->getDescriptionPath()));
-            Poco::XML::Node* pScpd = m_nodeStack.top();
+            pRes->setDescription(getDescription(descriptionPath));
+            Poco::XML::Node* pScpd = parseDescription(*pRes->getDescription());
+//             Poco::XML::Node* pScpd = m_nodeStack.top();
             while (pScpd) {
 //                 std::clog << "node: " << pScpd->nodeName() << std::endl;
                 if (pScpd->nodeName() == "actionList" && pScpd->hasChildNodes()) {
@@ -494,8 +526,8 @@ DescriptionReader::service()
                     while (pChild) {
 //                         std::clog << "node: " << pChild->nodeName() << std::endl;
                         if (pChild->nodeName() == "action") {
-                            m_nodeStack.push(pChild->firstChild());
-                            pRes->addAction(action());
+//                             m_nodeStack.push(pChild->firstChild());
+                            pRes->addAction(action(pChild->firstChild()));
                         }
                         pChild = pChild->nextSibling();
                     }
@@ -505,8 +537,8 @@ DescriptionReader::service()
                     while (pChild) {
 //                         std::clog << "node: " << pChild->nodeName() << std::endl;
                         if (pChild->nodeName() == "stateVariable") {
-                            m_nodeStack.push(pChild->firstChild());
-                            StateVar* pStateVar = stateVar();
+//                             m_nodeStack.push(pChild->firstChild());
+                            StateVar* pStateVar = stateVar(pChild->firstChild());
                             if (pChild->hasAttributes()) {
                                 Poco::XML::NamedNodeMap* attr = pChild->attributes();
                                 pStateVar->setSendEvents(attr->getNamedItem("sendEvents")->nodeValue());
@@ -520,7 +552,7 @@ DescriptionReader::service()
                 pScpd = pScpd->nextSibling();
             }
             // finished with this service description, getDescription() did a m_nodeStack.push()
-            m_nodeStack.pop();
+//             m_nodeStack.pop();
             releaseDescriptionDocument();
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
@@ -538,17 +570,17 @@ DescriptionReader::service()
         
         pNode = pNode->nextSibling();
     }
-    m_nodeStack.pop();
+//     m_nodeStack.pop();
     return pRes;
 }
 
 
 Action*
-DescriptionReader::action()
+DescriptionReader::action(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
-    Poco::XML::Node* pNode = m_nodeStack.top();
+//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -556,29 +588,28 @@ DescriptionReader::action()
             pRes->setName(pNode->innerText());
         }
         else if (pNode->nodeName() == "argumentList" && pNode->hasChildNodes()) {
-            // TODO: this if branch should be written as only one line of code ...
             Poco::XML::Node* pChild = pNode->firstChild();
             while (pChild) {
                 if (pChild->nodeName() == "argument") {
-                    m_nodeStack.push(pChild->firstChild());
-                    pRes->appendArgument(argument());
+//                     m_nodeStack.push(pChild->firstChild());
+                    pRes->appendArgument(argument(pChild->firstChild()));
                 }
                 pChild = pChild->nextSibling();
             }
         }
         pNode = pNode->nextSibling();
     }
-    m_nodeStack.pop();
+//     m_nodeStack.pop();
     return pRes;
 }
 
 
 Argument*
-DescriptionReader::argument()
+DescriptionReader::argument(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
-    Poco::XML::Node* pNode = m_nodeStack.top();
+//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -595,17 +626,17 @@ DescriptionReader::argument()
         pNode = pNode->nextSibling();
     }
     
-    m_nodeStack.pop();
+//     m_nodeStack.pop();
     return pRes;
 }
 
 
 StateVar*
-DescriptionReader::stateVar()
+DescriptionReader::stateVar(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
-    Poco::XML::Node* pNode = m_nodeStack.top();
+//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -618,39 +649,38 @@ DescriptionReader::stateVar()
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
-            // FIXME: seems StateVar's value isn't set to the default value
 //             std::clog << "DescriptionReader::stateVar() set defaultValue: " << val << std::endl;
             pRes->setValue(val);
         }
         pNode = pNode->nextSibling();
     }
-    m_nodeStack.pop();
+//     m_nodeStack.pop();
     return pRes;
 }
 
 
-void
-DescriptionReader::fixQuirkyPath(std::string& path)
-{
-    int len = path.size();
-    if (path.substr(0, 1) != "/") {
-        path = "/" + path;
-        len++;
-        std::clog << "DescriptionReader::fixQuirkyPath() adding leading /: " << path << std::endl;
-    }
+// void
+// DescriptionReader::fixQuirkyPath(std::string& path)
+// {
+//     int len = path.size();
+//     if (path.substr(0, 1) != "/") {
+//         path = "/" + path;
+//         len++;
+//         std::clog << "DescriptionReader::fixQuirkyPath() adding leading /: " << path << std::endl;
+//     }
+// 
+// }
 
-}
 
-
-void
-DescriptionReader::fixQuirkyPathRemoveFileName(std::string& path)
-{
-    int len = path.size();
-    if (path.substr(len - 4) == ".xml") {
-        path = path.substr(0, path.find_last_of('/') + 1);
-        std::clog << "DescriptionReader::fixQuirkyPath() removing trailing filename: " << path << std::endl;
-    }
-}
+// void
+// DescriptionReader::fixQuirkyPathRemoveFileName(std::string& path)
+// {
+//     int len = path.size();
+//     if (path.substr(len - 4) == ".xml") {
+//         path = path.substr(0, path.find_last_of('/') + 1);
+//         std::clog << "DescriptionReader::fixQuirkyPath() removing trailing filename: " << path << std::endl;
+//     }
+// }
 
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : m_pActionTemplate(pActionTemplate)
 {
@@ -1153,7 +1183,8 @@ Service::addStateVar(StateVar* pStateVar)
 void
 Service::initClient()
 {
-    m_pControlRequestSession = new Poco::Net::HTTPClientSession(Poco::Net::SocketAddress(m_pDevice->getDeviceRoot()->getBaseUri().getAuthority()));
+    Poco::URI baseUri(m_pDevice->getDeviceRoot()->getDescriptionUri());
+    m_pControlRequestSession = new Poco::Net::HTTPClientSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
     // TODO: subscribe to services
     // -> generate eventHandlerURIs: device uuid + service type
     // TODO: setup event message handler
@@ -1175,13 +1206,16 @@ Service::sendAction(Action* pAction)
     requestWriter.action(pAction);
     requestWriter.write(actionMessage);
     
-    Poco::Net::HTTPRequest* request = new Poco::Net::HTTPRequest("POST", m_controlPath, "HTTP/1.1");
-    request->set("HOST", m_pDevice->getDeviceRoot()->getBaseUri().getAuthority());
+    Poco::URI baseUri(m_pDevice->getDeviceRoot()->getDescriptionUri());
+    Poco::URI controlUri(baseUri);
+    controlUri.resolve(m_controlPath);
+    Poco::Net::HTTPRequest* request = new Poco::Net::HTTPRequest("POST", controlUri.getPath(), "HTTP/1.1");
+    request->set("HOST", baseUri.getAuthority());
     request->setContentType("text/xml; charset=\"utf-8\"");
     request->set("SOAPACTION", "\"" + m_serviceType + "#" + pAction->getName() + "\"");
     request->setContentLength(actionMessage.size());
     // set request body and send request
-    std::clog << "Service::sendAction() send request to: " << m_pDevice->getDeviceRoot()->getBaseUri().getAuthority() << request->getURI() << " ..." << std::endl;
+    std::clog << "Service::sendAction() send request to: " << baseUri.getAuthority() << request->getURI() << " ..." << std::endl;
     std::clog << "Header:" << std::endl;
     request->write(std::clog);
     
@@ -1193,9 +1227,9 @@ Service::sendAction(Action* pAction)
     // receive answer ...
     Poco::Net::HTTPResponse response;
     std::istream& rs = m_pControlRequestSession->receiveResponse(response);
-    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-        std::cerr << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
-    }
+//     if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
+//         std::cerr << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
+//     }
     std::clog << response.getStatus() << " " << response.getReason() << std::endl;
     // FIXME: fix similar places in the code
 //     char* buf = 0;
@@ -1654,7 +1688,6 @@ DeviceRoot::initController()
 void
 DeviceRoot::initDevice()
 {
-    // TODO: break this up into DeviceRoot::initDevice(), Device::initDevice(), Service::initDevice()
     std::clog << "DeviceRoot::initDevice()" << std::endl;
     
     NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
@@ -1665,42 +1698,20 @@ DeviceRoot::initDevice()
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         std::clog << "setting random uuid for device" << std::endl;
         (*d)->setRandomUuid();
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            Service* ps = *s;
+            initStateVars(ps->getServiceType(), ps);
+            ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
+            ps->setControlPath("/" + ps->getServiceId() + "/Control");
+            ps->setEventPath("/" + ps->getServiceId() + "/EventSubscription");
+        }
     }
     
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
-    std::clog << "original device description: " << *m_pDeviceDescription << std::endl;
     m_pDeviceDescription = descriptionWriter.write();
     std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
-    
     std::clog << "DeviceRoot::initDevice() device description rewritten" << std::endl;
-    
-    m_descriptionRequestHandler = new DescriptionRequestHandler(m_pDeviceDescription);
-    registerHttpRequestHandler(getDescriptionUri().getPath(), m_descriptionRequestHandler);
-    
-    SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
-    SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
-    aliveWriter.deviceRoot(*this);
-    byebyeWriter.deviceRoot(*this);
-    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Device& device = **d;
-        aliveWriter.device(device);
-        byebyeWriter.device(device);
-        for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
-            Service* ps = *s;
-            
-            initStateVars(ps->getServiceType(), ps);
-            
-            aliveWriter.service(*ps);
-            byebyeWriter.service(*ps);
-            
-            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
-            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
-        }
-    }
-    std::clog << "DeviceRoot::initDevice() initialized message sets, service request handlers and state variables" << std::endl;
-    
     std::clog << "DeviceRoot::initDevice() finished" << std::endl;
 }
 
@@ -1854,6 +1865,24 @@ void
 DeviceRoot::startSsdp()
 {
     std::clog << "DeviceRoot::startSsdp()" << std::endl;
+    
+    SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
+    SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
+    aliveWriter.deviceRoot(*this);
+    byebyeWriter.deviceRoot(*this);
+    
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        Device& device = **d;
+        aliveWriter.device(device);
+        byebyeWriter.device(device);
+        for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
+            Service* ps = *s;
+            
+            aliveWriter.service(*ps);
+            byebyeWriter.service(*ps);
+        }
+    }
+    
     m_ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
     m_ssdpSocket.start();
     // TODO: 3. send out initial set also on the occasion of new IP address or network interface.
@@ -1879,7 +1908,28 @@ DeviceRoot::stopSsdp()
 void
 DeviceRoot::startHttp()
 {
+    // TODO: setup network socket here and not in the ctor of HttpSocket
+    
+    m_descriptionUri = m_httpSocket.getServerUri() + "Description.xml";
+    
+    m_descriptionRequestHandler = new DescriptionRequestHandler(m_pDeviceDescription);
+    Poco::URI descriptionUri(m_descriptionUri);
+    registerHttpRequestHandler(descriptionUri.getPath(), m_descriptionRequestHandler);
+
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        Device& device = **d;
+        for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
+            Service* ps = *s;
+            // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
+            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+        }
+    }
+    std::clog << "DeviceRoot::startHttp() initialized message sets, service request handlers and state variables" << std::endl;
+
     m_httpSocket.startServer();
+    std::clog << "DeviceRoot::startHttp() server started" << std::endl;
 }
 
 
@@ -2016,32 +2066,34 @@ Controller::~Controller()
 
 
 void
-Controller::discoverDevice(const Poco::URI& location)
+Controller::discoverDevice(const std::string& location)
 {
-    std::clog << "Controller::discoverDevice() LOCATION: " <<  location.toString() << std::endl;
+//     Poco::Path path(location.getPath());
+//     std::clog << "Controller::discoverDevice() path: " << path.toString() << std::endl;
+//     std::clog << "Controller::discoverDevice() path depth: " << path.depth() << std::endl;
+//     
+//     std::string relPath = "";
+//     std::string relUri = path.toString();
+//     if (path.depth() > 0) {
+//         relPath = path.directory(path.depth() - 1) + "/";
+//         relUri = path.getFileName();
+//     }
+//     std::clog << "Controller::discoverDevice() relPath: " << relPath << std::endl;
+//     
+//     Poco::URI baseUri(location.getScheme() + "://" + location.getAuthority() + "/" + relPath);
+//     std::clog << "Controller::discoverDevice() baseUri: " << baseUri.toString() << std::endl;
+//     std::clog << "Controller::discoverDevice() relUri: " << relUri << std::endl;
     
-    Poco::Path path(location.getPath());
-    std::clog << "Controller::discoverDevice() path: " << path.toString() << std::endl;
-    std::clog << "Controller::discoverDevice() path depth: " << path.depth() << std::endl;
+//     UriDescriptionReader descriptionReader(baseUri, relUri);
     
-    std::string relPath = "";
-    std::string relUri = path.toString();
-    if (path.depth() > 0) {
-        relPath = path.directory(path.depth() - 1) + "/";
-        relUri = path.getFileName();
-    }
-    std::clog << "Controller::discoverDevice() relPath: " << relPath << std::endl;
+    std::clog << "Controller::discoverDevice() LOCATION: " <<  location << std::endl;
     
-    Poco::URI baseUri(location.getScheme() + "://" + location.getAuthority() + "/" + relPath);
-    std::clog << "Controller::discoverDevice() baseUri: " << baseUri.toString() << std::endl;
-    std::clog << "Controller::discoverDevice() relUri: " << relUri << std::endl;
-    
-    UriDescriptionReader descriptionReader(baseUri, relUri);
-
-    DeviceRoot* deviceRoot = descriptionReader.deviceRoot();
-    deviceRoot->setBaseUri(baseUri);
+    UriDescriptionReader descriptionReader;
+    DeviceRoot* deviceRoot = descriptionReader.deviceRoot(location);
+//     deviceRoot->setBaseUri(baseUri);
+    deviceRoot->setDescriptionUri(location);
     addDevice(deviceRoot);
-    std::clog << "Controller::discoverDevice() finished with LOCATION: " <<  location.toString() << std::endl;
+    std::clog << "Controller::discoverDevice() finished with LOCATION: " <<  location << std::endl;
 }
 
 
@@ -2442,22 +2494,22 @@ SsdpMessage::getUniqueServiceName()
 
 
 void
-SsdpMessage::setLocation(const Poco::URI& location)
+SsdpMessage::setLocation(const std::string& location)
 {
 //     m_messageHeader.set("LOCATION", location.toString());
-    m_messageHeader["LOCATION"] = location.toString();
+    m_messageHeader["LOCATION"] = location;
 }
 
 
-Poco::URI
+std::string
 SsdpMessage::getLocation()
 {
     try {
-        return Poco::URI(m_messageHeader["LOCATION"]);
+        return m_messageHeader["LOCATION"];
     }
     catch (Poco::NotFoundException) {
         std::clog << "Error in SsdpMessage::getLocation(): LOCATION field not found" << std::endl;
-        return Poco::URI("");
+        return "";
     }
 }
 

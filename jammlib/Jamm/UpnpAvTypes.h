@@ -24,6 +24,9 @@
 
 #include "Upnp.h"
 
+// NOTE: for media object ids only use non-reserved characters for segments 
+// (according to RFC 3986), because object ids may be used in resource URIs.
+// These characters are alphanumerics, digits, "-", ".", "_", "!", ";", ",", "="
 
 namespace Jamm {
 namespace Av {

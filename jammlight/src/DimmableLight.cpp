@@ -100,8 +100,8 @@ m_pDimmingImpl(pDimmingImpl)
     m_descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::m_description;
     m_descriptions["/Dimming-scpd.xml"] = &Dimming::m_description;
 
-    Jamm::StringDescriptionReader descriptionReader(m_descriptions, "/network-light-desc.xml");
-    m_pDeviceRoot = descriptionReader.deviceRoot();
+    Jamm::StringDescriptionReader descriptionReader(m_descriptions);
+    m_pDeviceRoot = descriptionReader.deviceRoot("/network-light-desc.xml");
     m_pDeviceRoot->setImplAdapter(this);
 }
 

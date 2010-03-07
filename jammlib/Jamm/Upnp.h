@@ -513,43 +513,65 @@ private:
 };
 
 
-class DescriptionReader 
+class DescriptionReader
 {
 public:
-    DescriptionReader(std::string deviceDescriptionPath) : m_deviceDescriptionPath(deviceDescriptionPath) {}
+//     DescriptionReader(const std::string& deviceDescriptionUri);  
+    DescriptionReader();
     ~DescriptionReader();
     
-    DeviceRoot* deviceRoot();
     
 protected:
+//     virtual void fixQuirkyPath(std::string& path);
+//     virtual void fixQuirkyPathRemoveFileName(std::string& path);
     virtual std::string& getDescription(const std::string& path) = 0;
-    virtual void fixQuirkyPath(std::string& path);
-    virtual void fixQuirkyPathRemoveFileName(std::string& path);
     
     void releaseDescriptionDocument();
     
-    Device* device();
-    Service* service();
-    Action* action();
-    Argument* argument();
-    StateVar* stateVar();
+    Poco::XML::Node* parseDescription(const std::string& description);
+    DeviceRoot* parseDeviceRoot(Poco::XML::Node* pNode);
+    Device* device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot);
+    Service* service(Poco::XML::Node* pNode);
+    Action* action(Poco::XML::Node* pNode);
+    Argument* argument(Poco::XML::Node* pNode);
+    StateVar* stateVar(Poco::XML::Node* pNode);
     
     
-    std::string                         m_deviceDescriptionPath;
+//     Poco::URI                           m_deviceDescriptionUri;  // this is the base URI
+//     std::string                         m_deviceDescriptionPath;
     // TODO: replace m_nodeStack by argument Node* in the factory methods
-    std::stack<Poco::XML::Node*>        m_nodeStack;
+//     std::stack<Poco::XML::Node*>        m_nodeStack;
     std::stack<Poco::XML::Document*>    m_pDocStack;
-    DeviceRoot*                         m_pDeviceRoot;
+//     DeviceRoot*                         m_pDeviceRoot;
+};
+
+
+class UriDescriptionReader : public DescriptionReader
+{
+public:
+    // deviceDescriptionUri is the base URI
+//     UriDescriptionReader(const std::string& deviceDescriptionUri);
+//     UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath);
+    DeviceRoot* deviceRoot(const std::string& deviceDescriptionUri);
+    
+private:
+    virtual std::string& getDescription(const std::string& relativeUri);
+    
+    std::string   m_deviceDescriptionUri; // this is the base URI
+//     Poco::URI m_uri;
 };
 
 
 class StringDescriptionReader : public DescriptionReader
 {
 public:
-    StringDescriptionReader(std::map<std::string,std::string*>& stringMap, const std::string& deviceDescriptionPath);
+    StringDescriptionReader(std::map<std::string,std::string*>& stringMap);
+    
+    DeviceRoot* deviceRoot(const std::string& deviceDescriptionKey);
     
 private:
-    virtual std::string& getDescription(const std::string& path);
+    virtual std::string& getDescription(const std::string& descriptionKey);
+    
     std::map<std::string,std::string*>*  m_pStringMap;
 };
 
@@ -854,16 +876,17 @@ public:
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
     std::string* getDeviceDescription() const { return m_pDeviceDescription; }
-    const Poco::URI& getBaseUri() const { return m_baseUri; }
-    const Poco::URI& getDescriptionUri() const { return m_descriptionUri; }
+//     const Poco::URI& getBaseUri() const { return m_baseUri; }
+//     const Poco::URI& getDescriptionUri() const { return m_descriptionUri; }
+    const std::string& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string& description) { m_pDeviceDescription = &description; }
-    void setBaseUri() { m_baseUri = Poco::URI(m_httpSocket.getServerUri()); }
-    void setBaseUri(const Poco::URI& baseUri) { m_baseUri = baseUri; }
-    void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = Poco::URI(m_httpSocket.getServerUri() + descriptionPath); }
-    
+//     void setBaseUri() { m_baseUri = Poco::URI(m_httpSocket.getServerUri()); }
+//     void setBaseUri(const Poco::URI& baseUri) { m_baseUri = baseUri; }
+//     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = m_httpSocket.getServerUri() + descriptionPath; }
+    void setDescriptionUri(const std::string uri) { m_descriptionUri = uri; }
 //     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
     void addDevice(Device* pDevice) { m_devices.append(pDevice); }
     void addServiceType(std::string serviceType, Service* pService) { m_serviceTypes[serviceType] = pService; }
@@ -895,8 +918,9 @@ public:
 
     
 private:
-    Poco::URI                       m_baseUri;              // base URI for control URI and event URI
-    Poco::URI                       m_descriptionUri;       // for controller to download description
+//     Poco::URI                       m_baseUri;              // base URI for control URI and event URI
+//     Poco::URI                       m_descriptionUri;       // for controller to download description
+    std::string                     m_descriptionUri;
     std::string*                    m_pDeviceDescription;
     Container<Device>               m_devices;
     Device*                         m_pRootDevice;
@@ -949,7 +973,7 @@ private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
     void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
-    void discoverDevice(const Poco::URI& location);
+    void discoverDevice(const std::string& location);
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);
     

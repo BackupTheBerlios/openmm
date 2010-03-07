@@ -108,9 +108,9 @@ protected:
             DeviceRoot* device = new DeviceRoot();
             device->init(s);*/
             
-            Jamm::UriDescriptionReader descriptionReader(Poco::URI("file:/home/jb/devel/cc/jamm/tests/"), "xml/network-light-desc.xml");
+            Jamm::UriDescriptionReader descriptionReader;
             
-            Jamm::DeviceRoot* device = descriptionReader.deviceRoot();
+            Jamm::DeviceRoot* device = descriptionReader.deviceRoot("file:/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
             
             waitForTerminationRequest();
         }
