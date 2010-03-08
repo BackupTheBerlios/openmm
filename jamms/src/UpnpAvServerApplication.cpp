@@ -29,7 +29,6 @@
 
 #include <Jamm/UpnpAvServer.h>
 
-#include "Web/WebRadio.h"
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -98,9 +97,22 @@ protected:
         {
             std::cerr << "UpnpAvServerApplication::main()" << std::endl;
             
+            Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader;
+            try {
+                objectLoader.loadPlugin("s-av-web");
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error in UpnpAvServerApplication: could not find plugin for media container" << std::endl;
+                return 1;
+            }
+            std::clog << "UpnpAvServerApplication: media container loaded successfully" << std::endl;
+            
+            
+            Jamm::Av::MediaContainer* pWebRadio;
+            pWebRadio = objectLoader.create("WebRadio");
+            
             Jamm::Av::UpnpAvServer myMediaServer;
-            WebRadio webRadio;
-            myMediaServer.setRoot(&webRadio);
+            myMediaServer.setRoot(pWebRadio);
             
             myMediaServer.setFriendlyName("Web Radio");
             myMediaServer.start();

@@ -217,6 +217,11 @@ void
 UpnpAvUserInterface::rendererSelected(RendererView* pRenderer)
 {
     m_pSelectedRenderer = pRenderer->m_pRendererController;
+    std::string sourceInfo;
+    std::string sinkInfo;
+    m_pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
+    std::clog << "UpnpAvUserInterface::rendererSelected() GetProtocolInfo:" << std::endl;
+    std::clog << "sourceInfo: " << sourceInfo << ", sinkInfo: " << sinkInfo << std::endl;
 }
 
 
@@ -233,7 +238,10 @@ UpnpAvUserInterface::playPressed()
     if (m_pSelectedRenderer == NULL || m_pSelectedObject == NULL) {
         return;
     }
-    m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, m_pSelectedObject->getProperty("res"), "");
+    Resource* pRes = m_pSelectedObject->getResource();
+    std::string metaData;
+    m_pSelectedObject->writeMetaData(metaData);
+    m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->m_uri, metaData);
     m_pSelectedRenderer->AVTransport()->Play(0, "1");
 }
 

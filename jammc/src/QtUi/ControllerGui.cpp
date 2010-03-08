@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include <QtDebug>
+#include <Jamm/UpnpController.h>
 
 #include "ControllerGui.h"
 

@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY(Storage)
 ADD_SUBDIRECTORY(Web)
 ADD_SUBDIRECTORY(vdr-upnp)
 
@@ -22,8 +23,6 @@ endif(TARGET jamm)
 
 SET( JAMMS_SRCS
 UpnpAvServerApplication.cpp
-# UpnpAvServer.cpp
-# UpnpAvServerImpl.cpp
 )
 
 ADD_EXECUTABLE( jamms

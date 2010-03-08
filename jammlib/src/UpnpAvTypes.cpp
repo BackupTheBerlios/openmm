@@ -110,7 +110,7 @@ MediaObject::readNode(Poco::XML::Node* pNode)
 {
     std::clog << "MediaObject::readNode()" << std::endl;
     
-    Poco::XML::NamedNodeMap* attr = NULL;
+    Poco::XML::NamedNodeMap* attr = 0;
     if (pNode->hasAttributes()) {
         attr = pNode->attributes();
         m_objectId = attr->getNamedItem("id")->nodeValue();
@@ -119,11 +119,11 @@ MediaObject::readNode(Poco::XML::Node* pNode)
     }
     if (pNode->nodeName() == "container") {
         m_isContainer = true;
-        if (attr != NULL) {
+        if (attr != 0) {
             m_childCount = Poco::NumberParser::parse(attr->getNamedItem("childCount")->nodeValue());
         }
     }
-    if (attr != NULL) {
+    if (attr != 0) {
         attr->release();
     }
     
@@ -136,8 +136,31 @@ MediaObject::readNode(Poco::XML::Node* pNode)
         Poco::XML::Node* childNode = pNode->firstChild();
         while (childNode)
         {
-//             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
-            m_properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
+            std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
+            
+            if (childNode->nodeName() == "res") {
+                Poco::XML::NamedNodeMap* attr = 0;
+                std::string protInfo = "";
+                ui4 size = 0;
+                if (childNode->hasAttributes()) {
+                    attr = childNode->attributes();
+                    Poco::XML::Node* attrNode = attr->getNamedItem("protocolInfo");
+                    if (attrNode) {
+                        protInfo = attrNode->nodeValue();
+                    }
+                    attrNode = attr->getNamedItem("size");
+                    if (attrNode) {
+                        size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
+                    }
+                }
+                addResource(childNode->innerText(), protInfo, size);
+                if (attr != 0) {
+                    attr->release();
+                }
+            }
+            else {
+                m_properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
+            }
             childNode = childNode->nextSibling();
         }
     }
@@ -249,6 +272,20 @@ MediaObject::writeMetaData(Poco::XML::Element* pDidl)
     // searchable (Boolean)
     // refID (String)
     
+    // resources
+    for (std::vector<Resource*>::iterator it = m_resources.begin(); it != m_resources.end(); ++it) {
+        Poco::AutoPtr<Poco::XML::Element> pResource = pDoc->createElement("res");
+        Poco::AutoPtr<Poco::XML::Text> pUri = pDoc->createTextNode((*it)->m_uri);
+        if ((*it)->m_protInfo != "") {
+            pResource->setAttribute("protocolInfo", (*it)->m_protInfo);
+        }
+        if ((*it)->m_size > 0) {
+            pResource->setAttribute("size", Poco::NumberFormatter::format((*it)->m_size));
+        }
+        pResource->appendChild(pUri);
+        pObject->appendChild(pResource);
+    }
+    
     // write elements
     std::clog << "MediaObject::writeMetaData() property elements" << std::endl;
     for (Container<Variant>::KeyIterator i = m_properties.beginKey(); i != m_properties.endKey(); ++i) {
@@ -295,13 +332,8 @@ MediaObject::getProperty(const std::string& name)
 }
 
 
-// std::string
-// MediaObject::getObjectId()
-// {
-//     return m_objectId;
-// }
-
-
+// FIXME: parent id should recurse all parents up to root
+// example: parentId("0/0/1") is "0" but should be "0/0"
 std::string
 MediaObject::getParentId()
 {
@@ -445,9 +477,20 @@ MediaObject::setTitle(const std::string& title)
 
 
 void
-MediaObject::setResource(const std::string& resource)
+MediaObject::addResource(const std::string& uri, const std::string& protInfo, ui4 size)
 {
-    m_properties.append("res", new Jamm::Variant(resource));
+    Resource* pRes = new Resource;
+    pRes->m_uri = uri;
+    pRes->m_protInfo = protInfo;
+    pRes->m_size = size;
+    m_resources.push_back(pRes);
+}
+
+
+Resource*
+MediaObject::getResource(int num)
+{
+    return m_resources[num];
 }
 
 
@@ -463,6 +506,7 @@ MediaObject()
 {
     m_isContainer = true;
     setTitle(title);
+    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container")));
 }
 
 
@@ -472,9 +516,10 @@ MediaObject()
 }
 
 
-MediaItem::MediaItem(const std::string& title, const std::string& uri) :
+MediaItem::MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo, ui4 size) :
 MediaObject()
 {
     setTitle(title);
-    setResource(uri);
+    addResource(uri, protInfo, size);
+    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.item")));
 }

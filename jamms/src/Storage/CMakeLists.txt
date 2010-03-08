@@ -17,20 +17,20 @@ PATHS ${CMAKE_LIBRARY_PATH}
 endif(TARGET jamm)
 
 
-SET( JAMMS_WEB_SRCS
-WebRadio.cpp
+SET( JAMMS_STORAGE_SRCS
+Filesystem.cpp
 )
 
-ADD_LIBRARY( jamms-av-web
+ADD_LIBRARY( jamms-av-storage
 SHARED
-${JAMMS_WEB_SRCS}
+${JAMMS_STORAGE_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( jamms-av-web
+TARGET_LINK_LIBRARIES( jamms-av-storage
 ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS jamms-av-web
+INSTALL( TARGETS jamms-av-storage
 LIBRARY DESTINATION lib/jamm
 )

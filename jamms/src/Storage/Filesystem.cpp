@@ -19,43 +19,33 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#include <Poco/ClassLibrary.h>
 
-#include "WebRadio.h"
+#include "Filesystem.h"
 
-WebRadio::WebRadio()
+Filesystem::Filesystem()
 {
-    setTitle("Web Radio");
+    setTitle("Collection");
     
-    std::string dlnaProtInfoAny = "http-get:*:*";
-    std::string dlnaProtInfoMp3 = "http-get:*:audio/mpeg";
-    std::string dlnaProtInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
-    
-    appendChild("11", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (any protocol)",
-                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018", dlnaProtInfoAny));
-    appendChild("12", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (mp3)",
-                                              "http://streamer-dtc-aa04.somafm.com:80/stream/1018", dlnaProtInfoMp3));
-    
-    appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (dlna)",
-                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018", dlnaProtInfoDlna));
+    appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad",
+                "http://streamer-dtc-aa04.somafm.com:80/stream/1018"));
     appendChild("2", new Jamm::Av::MediaItem("SOMA FM - Indie Pop Rocks (Lush)",
-                                             "http://streamer-ntc-aa02.somafm.com:80/stream/1073", dlnaProtInfoMp3));
+                "http://streamer-ntc-aa02.somafm.com:80/stream/1073"));
     appendChild("3", new Jamm::Av::MediaItem("SOMA FM - Drone Zone",
-                                             "http://streamer-dtc-aa01.somafm.com:80/stream/1032", dlnaProtInfoMp3));
+                "http://streamer-dtc-aa01.somafm.com:80/stream/1032"));
     appendChild("4", new Jamm::Av::MediaItem("Digitally Imported - Chillout",
-                                             "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035", dlnaProtInfoMp3));
+                "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035"));
     appendChild("5", new Jamm::Av::MediaItem("SWR DASDING",
-                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3", dlnaProtInfoMp3));
+                "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3"));
     appendChild("6", new Jamm::Av::MediaItem("SWR DASDING Lautstark",
-                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3", dlnaProtInfoMp3));
+                "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3"));
     appendChild("7", new Jamm::Av::MediaItem("SWR3",
-                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3", dlnaProtInfoMp3));
+                "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3"));
     appendChild("8", new Jamm::Av::MediaItem("MotorFM",
-                                             "http://www.motorfm.de/stream-berlin", dlnaProtInfoMp3));
+                "http://www.motorfm.de/stream-berlin"));
     appendChild("9", new Jamm::Av::MediaItem("Freies Radio Stuttgart",
-                                             "http://frs.kumbi.org:8000/frs_stereo.ogg"));
+                "http://frs.kumbi.org:8000/frs_stereo.ogg"));
     appendChild("10", new Jamm::Av::MediaItem("HoRadS",
-                                              "http://realserver3.hdm-stuttgart.de:8080/horads"));
+                "http://realserver3.hdm-stuttgart.de:8080/horads"));
     
     Jamm::Av::MediaContainer* pFavourites = new Jamm::Av::MediaContainer("Favourites");
     appendChild("11", pFavourites);
@@ -70,7 +60,3 @@ WebRadio::WebRadio()
     Jamm::Av::MediaContainer* pGoodies = new Jamm::Av::MediaContainer("Goodies");
     appendChild("12", pGoodies);
 };
-
-POCO_BEGIN_MANIFEST(Jamm::Av::MediaContainer)
-POCO_EXPORT_CLASS(WebRadio)
-POCO_END_MANIFEST

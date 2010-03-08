@@ -41,6 +41,15 @@ public:
 };
 
 
+class Resource
+{
+public:
+    std::string     m_uri;
+    std::string     m_protInfo;
+    ui4             m_size;
+};
+
+
 class MediaObject
 {
 public:
@@ -60,7 +69,6 @@ public:
     bool isContainer() { return m_isContainer; }
     std::string getTitle();
     std::string getProperty(const std::string& name);
-//     std::string getObjectId();
     std::string getParentId();
     ui4 getChildCount();
     void readChildren(const std::string& metaData);
@@ -74,7 +82,9 @@ public:
     void setIsContainer(bool isContainer=true);
     void setObjectId(const std::string& objectId);
     void setTitle(const std::string& title);
-    void setResource(const std::string& resource);
+    void addResource(const std::string& uri, const std::string& protInfo = "", ui4 size = 0);
+    Resource* getResource(int num = 0);
+    
     void appendChild(const std::string& objectId, MediaObject* pChild);
     MediaObject* getObject(const std::string& objectId);
     void writeMetaData(std::string& metaData);
@@ -103,7 +113,7 @@ public:
     bool                                    m_fetchedAllChildren;
     Container<Variant>                      m_properties;
     bool                                    m_isContainer;
-    
+    std::vector<Resource*>                  m_resources;
     
     // object properties:
 //     const std::string& getId();
@@ -130,7 +140,7 @@ class MediaItem : public MediaObject
 {
 public:
     MediaItem();
-    MediaItem(const std::string& title, const std::string& uri);
+    MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo = "", ui4 size = 0);
 };
 
 

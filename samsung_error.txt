@@ -1,0 +1,70 @@
+Service::sendAction()
+Action::getArgument() name: InstanceID
+Action::getArgument() name: InstanceID
+ActionRequestWriter called with arg: InstanceID, val: 0
+Action::getArgument() name: CurrentURI
+Action::getArgument() name: CurrentURI
+ActionRequestWriter called with arg: CurrentURI, val: http://streamer-dtc-aa04.somafm.com:80/stream/1018
+Action::getArgument() name: CurrentURIMetaData 
+Action::getArgument() name: CurrentURIMetaData 
+ActionRequestWriter called with arg: CurrentURIMetaData, val: <DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"><item id="0/0/1" parentID="0" restricted="1"><res protocolInfo="http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000">http://streamer-dtc-aa04.somafm.com:80/stream/1018</res><dc:title>SOMA FM - Groove Salad</dc:title></item></DIDL-Lite>     
+action request message():     
+<?xml version="1.0" encoding="UTF-8"?><ns1:Envelope encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://schemas.xmlsoap.org/soap/envelope/"><ns1:Body><ns2:SetAVTransportURI xmlns:ns2="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><CurrentURI>http://streamer-dtc-aa04.somafm.com:80/stream/1018</CurrentURI><CurrentURIMetaData>&lt;DIDL-Lite xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot; xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot;&gt;&lt;item id=&quot;0/0/1&quot; parentID=&quot;0&quot; restricted=&quot;1&quot;&gt;&lt;res protocolInfo=&quot;http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000&quot;&gt;http://streamer-dtc-aa04.somafm.com:80/stream/1018&lt;/res&gt;&lt;dc:title&gt;SOMA FM - Groove Salad&lt;/dc:title&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</CurrentURIMetaData></ns2:SetAVTransportURI></ns1:Body></ns1:Envelope>      
+
+Service::sendAction() send request to: 192.168.178.25:52235/upnp/control/AVTransport1 ...
+Header: 
+POST /upnp/control/AVTransport1 HTTP/1.1
+Content-Length: 992     
+Content-Type: text/xml; charset="utf-8" 
+HOST: 192.168.178.25:52235      
+SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"       
+
+Action request sent
+500 Internal Server Error
+Service::sendAction() response received: 
+ActionResponseReader::ActionResponseReader()
+ActionResponseReader::action()      
+ActionRequestReader::action() reading Argument: faultcode, val: s:Client
+Action::setArgument() name: faultcode   
+ActionRequestReader::action() reading Argument: faultstring, val: UPnPError
+Action::setArgument() name: faultstring    
+ActionRequestReader::action() reading Argument: detail, val: 402Invalid Args
+Action::setArgument() name: detail
+ActionResponseReader::action() finished
+Service::sendAction() finished
+******************************
+Action::setArgument() name: InstanceID
+Action::setArgument() name: Speed
+*********************
+Service::sendAction()
+Action::getArgument() name: InstanceID
+Action::getArgument() name: InstanceID
+ActionRequestWriter called with arg: InstanceID, val: 0
+Action::getArgument() name: Speed
+Action::getArgument() name: Speed
+ActionRequestWriter called with arg: Speed, val: 1
+action request message():
+<?xml version="1.0" encoding="UTF-8"?><ns1:Envelope encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://schemas.xmlsoap.org/soap/envelope/"><ns1:Body><ns2:Play xmlns:ns2="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><Speed>1</Speed></ns2:Play></ns1:Body></ns1:Envelope>
+
+Service::sendAction() send request to: 192.168.178.25:52235/upnp/control/AVTransport1 ...
+Header:
+POST /upnp/control/AVTransport1 HTTP/1.1
+Content-Length: 318
+Content-Type: text/xml; charset="utf-8"
+HOST: 192.168.178.25:52235
+SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Play"
+
+Action request sent
+500 Internal Server Error
+Service::sendAction() response received:
+ActionResponseReader::ActionResponseReader()
+ActionResponseReader::action()
+ActionRequestReader::action() reading Argument: faultcode, val: s:Client
+Action::setArgument() name: faultcode
+ActionRequestReader::action() reading Argument: faultstring, val: UPnPError
+Action::setArgument() name: faultstring
+ActionRequestReader::action() reading Argument: detail, val: 716Resource not found
+Action::setArgument() name: detail
+ActionResponseReader::action() finished
+Service::sendAction() finished
+******************************
