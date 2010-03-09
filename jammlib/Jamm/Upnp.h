@@ -846,9 +846,7 @@ public:
 private:
     DeviceRoot*                         m_pDeviceRoot;
     std::string                         m_uuid;
-    std::string                         m_vendorDomain;
     std::string                         m_deviceType;
-    std::string                         m_deviceVersion;
     Container<Service>                  m_services;
     Container<std::string>              m_properties;
 };

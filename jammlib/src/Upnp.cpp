@@ -432,7 +432,6 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
 {
 //     std::clog << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
-//     Poco::XML::Node* pNode = m_nodeStack.top();
     pRes->setDeviceRoot(pDeviceRoot);
 
     while (pNode)
@@ -449,7 +448,6 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
                 while (pChild) {
                     if (pChild->nodeName() == "service") {
                         if (pChild->hasChildNodes()) {
-//                             m_nodeStack.push(pChild->firstChild());
                             pRes->addService(service(pChild->firstChild()));
                         }
                         else {
@@ -469,7 +467,6 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
                 while (pChild) {
                     if (pChild->nodeName() == "device") {
                         if (pChild->hasChildNodes()) {
-//                             m_nodeStack.push(pChild->firstChild());
                             pDeviceRoot->addDevice(device(pChild->firstChild(), pDeviceRoot));
                         }
                         else {
@@ -490,7 +487,6 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
         }
         pNode = pNode->nextSibling();
     }
-//     m_nodeStack.pop();
     return pRes;
 }
 
@@ -1689,6 +1685,8 @@ void
 DeviceRoot::initDevice()
 {
     std::clog << "DeviceRoot::initDevice()" << std::endl;
+    // TODO: setup network socket here and not in the ctor of HttpSocket
+    m_descriptionUri = m_httpSocket.getServerUri() + "Description.xml";
     
     NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<DeviceRoot,NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
@@ -1698,6 +1696,9 @@ DeviceRoot::initDevice()
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         std::clog << "setting random uuid for device" << std::endl;
         (*d)->setRandomUuid();
+        // FIXME: this should override a base uri, if already present in the device description
+        (*d)->addProperty("URLBase", m_httpSocket.getServerUri());
+        
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
             initStateVars(ps->getServiceType(), ps);
@@ -1908,17 +1909,14 @@ DeviceRoot::stopSsdp()
 void
 DeviceRoot::startHttp()
 {
-    // TODO: setup network socket here and not in the ctor of HttpSocket
-    
-    m_descriptionUri = m_httpSocket.getServerUri() + "Description.xml";
+//     m_descriptionUri = m_httpSocket.getServerUri() + "Description.xml";
     
     m_descriptionRequestHandler = new DescriptionRequestHandler(m_pDeviceDescription);
     Poco::URI descriptionUri(m_descriptionUri);
     registerHttpRequestHandler(descriptionUri.getPath(), m_descriptionRequestHandler);
 
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Device& device = **d;
-        for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
             // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
             registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
@@ -2226,6 +2224,7 @@ SsdpNotifyAliveWriter::service(const Service& pService)
     std::clog << "SsdpNotifyAliveWriter::service()" << std::endl;
     // service first (and only) message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
+    m->setLocation(pService.getDevice()->getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
     m->setNotificationType(pService.getServiceType());
     m->setUniqueServiceName("uuid:" + pService.getDevice()->getUuid() + "::" +  pService.getServiceType());
     m_res->addMessage(*m);

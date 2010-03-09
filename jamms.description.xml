@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+<specVersion>
+<major>1</major>
+<minor>0</minor>
+</specVersion>
+<device>
+<deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>
+<UDN>uuid:4b8f7eda-d367-4ee9-903f-4d777a1b78fa</UDN>
+<friendlyName>Web Radio</friendlyName>
+<manufacturer>joerg at hakker dot de</manufacturer>
+<manufacturerURL>http://hakker.de/jamm</manufacturerURL>
+<modelDescription>Jamm UPnP Suite&apos;s Media Server</modelDescription>
+<modelName>Jamm Media Server</modelName>
+<modelNumber>0.3</modelNumber>
+<modelURL>http://hakker.de/jamm</modelURL>
+<serviceList><service><serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+<serviceId>AVTransport</serviceId>
+<SCPDURL>/AVTransport/Description.xml</SCPDURL>
+<controlURL>/AVTransport/Control</controlURL>
+<eventSubURL>/AVTransport/EventSubscription</eventSubURL>
+</service>
+<service>
+<serviceType>urn:schemas-upnp-org:service:ContentDirectory:1</serviceType>
+<serviceId>ContentDirectory</serviceId>
+<SCPDURL>/ContentDirectory/Description.xml</SCPDURL>
+<controlURL>/ContentDirectory/Control</controlURL>
+<eventSubURL>/ContentDirectory/EventSubscription</eventSubURL>
+</service>
+<service>
+<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+<serviceId>ConnectionManager</serviceId>
+<SCPDURL>/ConnectionManager/Description.xml</SCPDURL>
+<controlURL>/ConnectionManager/Control</controlURL>
+<eventSubURL>/ConnectionManager/EventSubscription</eventSubURL>
+</service></serviceList>
+</device>
+</root>

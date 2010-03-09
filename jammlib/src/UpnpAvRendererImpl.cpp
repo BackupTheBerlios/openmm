@@ -104,18 +104,24 @@ implementation doesn’t support this feature then this state variable must be s
 void
 AVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
-// begin of your own code
-
-// end of your own code
+    NrTracks = _getNumberOfTracks();
+    MediaDuration = _getCurrentMediaDuration();
+    CurrentURI = _getCurrentTrackURI();
+    CurrentURIMetaData = _getCurrentTrackMetaData();
+    NextURI = _getNextAVTransportURI();
+    NextURIMetaData = _getNextAVTransportURIMetaData();
+    PlayMedium = _getPlaybackStorageMedium();
+    RecordMedium = _getRecordStorageMedium();
+    WriteStatus = _getRecordMediumWriteStatus();
 }
 
 
 void
 AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
-// begin of your own code
-
-// end of your own code
+    CurrentTransportState = _getTransportState();
+    CurrentTransportStatus = _getTransportStatus();
+    CurrentSpeed = _getTransportPlaySpeed();
 }
 
 
@@ -139,18 +145,17 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
 void
 AVTransportRendererImpl::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
-// begin of your own code
-
-// end of your own code
+    PlayMedia = _getPossiblePlaybackStorageMedia();
+    RecMedia = _getPossibleRecordStorageMedia();
+    RecQualityModes = _getPossibleRecordQualityModes();
 }
 
 
 void
 AVTransportRendererImpl::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
-// begin of your own code
-
-// end of your own code
+    PlayMode = _getCurrentPlayMode();
+    RecQualityMode = _getCurrentRecordQualityMode();
 }
 
 
@@ -307,7 +312,8 @@ AVTransportRendererImpl::Previous(const ui4& InstanceID)
 void
 ConnectionManagerRendererImpl::initStateVars()
 {
-    _setSourceProtocolInfo("http-get:*:*:*");
+//     _setSourceProtocolInfo("http-get:*:*:*");
+    _setSourceProtocolInfo("");
     _setSinkProtocolInfo("http-get:*:*:*");
     _setCurrentConnectionIDs("0");
 }
@@ -317,7 +323,9 @@ void
 ConnectionManagerRendererImpl::GetProtocolInfo(std::string& Source, std::string& Sink)
 {
 // begin of your own code
-
+    Source = "";
+    // TODO: this should ask the rendering engine about the formats it can render
+    Sink = "http-get:*:*:*";
 // end of your own code
 }
 
@@ -335,7 +343,7 @@ void
 ConnectionManagerRendererImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
 // begin of your own code
-
+    ConnectionIDs = "0";
 // end of your own code
 }
 
@@ -634,9 +642,7 @@ RenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& 
 void
 RenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
-// begin of your own code
-    
-// end of your own code
+    CurrentVolume = _getVolume();
 }
 
 
@@ -655,9 +661,7 @@ RenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string
 void
 RenderingControlRendererImpl::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
 {
-// begin of your own code
-    
-// end of your own code
+    CurrentVolume = _getVolumeDB();
 }
 
 
