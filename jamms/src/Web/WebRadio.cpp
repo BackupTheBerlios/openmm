@@ -27,31 +27,31 @@ WebRadio::WebRadio()
 {
     setTitle("Web Radio");
     
-    std::string dlnaProtInfoAny = "http-get:*:*:*";
-    std::string dlnaProtInfoMp3 = "http-get:*:audio/mpeg:*";
-    std::string dlnaProtInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
+    std::string protInfoAny = "http-get:*:*:*";
+    std::string protInfoMp3 = "http-get:*:audio/mpeg:*";
+    std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
     
     appendChild("11", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (any protocol)",
-                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018", dlnaProtInfoAny));
+                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018", protInfoAny));
     appendChild("12", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (mp3)",
-                                              "http://streamer-dtc-aa04.somafm.com:80/stream/1018", dlnaProtInfoMp3));
+                                              "http://streamer-dtc-aa04.somafm.com:80/stream/1018", protInfoMp3));
     
     appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (dlna)",
-                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018", dlnaProtInfoDlna));
+                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018", protInfoDlna));
     appendChild("2", new Jamm::Av::MediaItem("SOMA FM - Indie Pop Rocks (Lush)",
-                                             "http://streamer-ntc-aa02.somafm.com:80/stream/1073", dlnaProtInfoMp3));
+                                             "http://streamer-ntc-aa02.somafm.com:80/stream/1073", protInfoMp3));
     appendChild("3", new Jamm::Av::MediaItem("SOMA FM - Drone Zone",
-                                             "http://streamer-dtc-aa01.somafm.com:80/stream/1032", dlnaProtInfoMp3));
+                                             "http://streamer-dtc-aa01.somafm.com:80/stream/1032", protInfoMp3));
     appendChild("4", new Jamm::Av::MediaItem("Digitally Imported - Chillout",
-                                             "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035", dlnaProtInfoMp3));
+                                             "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035", protInfoMp3));
     appendChild("5", new Jamm::Av::MediaItem("SWR DASDING",
-                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3", dlnaProtInfoMp3));
+                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3", protInfoMp3));
     appendChild("6", new Jamm::Av::MediaItem("SWR DASDING Lautstark",
-                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3", dlnaProtInfoMp3));
+                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3", protInfoMp3));
     appendChild("7", new Jamm::Av::MediaItem("SWR3",
-                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3", dlnaProtInfoMp3));
+                                             "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3", protInfoMp3));
     appendChild("8", new Jamm::Av::MediaItem("MotorFM",
-                                             "http://www.motorfm.de/stream-berlin", dlnaProtInfoMp3));
+                                             "http://www.motorfm.de/stream-berlin", protInfoMp3));
     appendChild("9", new Jamm::Av::MediaItem("Freies Radio Stuttgart",
                                              "http://frs.kumbi.org:8000/frs_stereo.ogg"));
     appendChild("10", new Jamm::Av::MediaItem("HoRadS",

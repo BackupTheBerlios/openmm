@@ -25,6 +25,13 @@
 
 #include <Poco/Net/MediaType.h>
 #include <Poco/File.h>
+#include <Poco/Format.h>
+#include <Poco/Logger.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/ConsoleChannel.h>
+#include <Poco/FileChannel.h>
+#include <Poco/Message.h>
 
 #include "Upnp.h"
 
@@ -41,6 +48,31 @@ class ControlRequestHandler;
 class HttpSocket;
 class Entity;
 class EntityItem;
+
+
+class Log
+{
+public:
+    static Log* instance();
+    
+    Poco::Logger& upnp();
+    Poco::Logger& ssdp();
+    Poco::Logger& http();
+    Poco::Logger& desc();
+    Poco::Logger& ctrl();
+    Poco::Logger& event();
+    
+private:
+    Log();
+    
+    static Log*     m_pInstance;
+    Poco::Logger*   m_pUpnpLogger;
+    Poco::Logger*   m_pSsdpLogger;
+    Poco::Logger*   m_pHttpLogger;
+    Poco::Logger*   m_pDescriptionLogger;
+    Poco::Logger*   m_pControlLogger;
+    Poco::Logger*   m_pEventingLogger;
+};
 
 
 class FileRequestHandler : public Poco::Net::HTTPRequestHandler

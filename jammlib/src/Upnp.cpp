@@ -26,6 +26,75 @@
 
 using namespace Jamm;
 
+Log* Log::m_pInstance = 0;
+
+// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
+
+Log::Log()
+{
+    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
+    pFormatLogger->setChannel(new Poco::ConsoleChannel);
+    pFormatLogger->open();
+    m_pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    m_pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    m_pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    m_pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    m_pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    m_pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_DEBUG);
+}
+
+
+Log*
+Log::instance()
+{
+    if (!m_pInstance) {
+        m_pInstance = new Log;
+    }
+    return m_pInstance;
+}
+
+
+Poco::Logger&
+Log::upnp()
+{
+    return *m_pUpnpLogger;
+}
+
+
+Poco::Logger&
+Log::ssdp()
+{
+    return *m_pSsdpLogger;
+}
+
+
+Poco::Logger&
+Log::http()
+{
+    return *m_pHttpLogger;
+}
+
+
+Poco::Logger&
+Log::desc()
+{
+    return *m_pDescriptionLogger;
+}
+
+
+Poco::Logger&
+Log::ctrl()
+{
+    return *m_pControlLogger;
+}
+
+
+Poco::Logger&
+Log::event()
+{
+    return *m_pEventingLogger;
+}
+
 
 HttpFileServer::HttpFileServer() :
 m_socket(Poco::Net::ServerSocket(0))
@@ -36,9 +105,10 @@ m_socket(Poco::Net::ServerSocket(0))
 
 HttpFileServer::~HttpFileServer()
 {
-    std::clog << "stopping http file server" << std::endl;
+    Log::instance()->http().information("stopping http file server ...");
     m_pHttpServer->stop();
     delete m_pHttpServer;
+    Log::instance()->http().information("done");
 }
 
 
@@ -48,7 +118,7 @@ HttpFileServer::start()
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     m_pHttpServer = new Poco::Net::HTTPServer(new FileRequestHandlerFactory(this), m_socket, pParams);
     m_pHttpServer->start();
-    std::clog << "http file server started" << std::endl;
+    Log::instance()->http().information("http file server started");
 }
 
 
@@ -95,10 +165,10 @@ m_pFileServer(pFileServer)
 void
 FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    std::clog << "handle description request: " << request.getURI() << std::endl;
+    Log::instance()->http().debug(Poco::format("handle file request: %s", request.getURI()));
     
     std::string fileName = m_pFileServer->m_uriPathMap[request.getURI()];
-    std::clog << "open file: " << fileName << std::endl;
+    Log::instance()->http().debug(Poco::format("opening file: %s", fileName));
 //     Poco::File inFile(fileName);
     
     std::ifstream ifstr(fileName.c_str());
@@ -111,7 +181,7 @@ FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 //     response.setContentType("text/plain");
     std::ostream& ostr = response.send();
     Poco::StreamCopier::copyStream(ifstr, ostr);
-    std::clog << "handle description request finished" << std::endl;
+    Log::instance()->http().debug(Poco::format("handle file request: %s finished", request.getURI()));
 }
 
 
@@ -128,12 +198,12 @@ NetworkInterfaceManager* NetworkInterfaceManager::m_pInstance = 0;
 
 NetworkInterfaceManager::NetworkInterfaceManager()
 {
-    std::clog << "NetworkInterfaceManager::NetworkInterfaceManager()" << std::endl;
+//     std::clog << "NetworkInterfaceManager::NetworkInterfaceManager()" << std::endl;
     
     m_loopbackProvided = false;
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
-        std::clog << "found network interface: " << (*it).name() << std::endl;
+        Log::instance()->upnp().information(Poco::format("found network interface: %s", (*it).name()));
         m_interfaceList.push_back((*it).name());
     }
     findValidIpAddress();
@@ -144,18 +214,16 @@ NetworkInterfaceManager*
 NetworkInterfaceManager::instance()
 {
     if (!m_pInstance) {
-        return new NetworkInterfaceManager;
+        m_pInstance = new NetworkInterfaceManager;
     }
-    else {
-        return m_pInstance;
-    }
+    return m_pInstance;
 }
 
 
 void
 NetworkInterfaceManager::findValidIpAddress()
 {
-    std::clog << "NetworkInterfaceManager::findValidIpAddress()" << std::endl;
+//     std::clog << "NetworkInterfaceManager::findValidIpAddress()" << std::endl;
     
     bool validAddressFound = false;
     for (std::vector<std::string>::iterator it = m_interfaceList.begin(); it != m_interfaceList.end(); ++it) {
@@ -167,16 +235,18 @@ NetworkInterfaceManager::findValidIpAddress()
         if (address.isUnicast() && !address.isLoopback()/* && !address.isLinkLocal()*/) {
             validAddressFound = true;
             m_validIpAddress = address;
-            std::clog << "NetworkInterfaceManager::NetworkInterfaceManager() setting m_validIpAddress to: " << m_validIpAddress.toString() << std::endl;
         }
     }
     if (m_interfaceList.size() == 1 && m_loopbackProvided) {
         validAddressFound = true;
         m_validIpAddress = m_loopbackAddress;
-        std::clog << "NetworkInterfaceManager::NetworkInterfaceManager() setting m_validIpAddress to: " << m_validIpAddress.toString() << std::endl;
     }
     if (!validAddressFound) {
-        std::cerr << "Error in NetworkInterfaceManager: no valid IP address found" << std::endl;
+        Log::instance()->upnp().fatal("no valid IP address found");
+        // TODO: bail out of application
+    }
+    else {
+        Log::instance()->upnp().information(Poco::format("found valid IP address: %s", m_validIpAddress.toString()));
     }
 }
 
@@ -184,11 +254,11 @@ NetworkInterfaceManager::findValidIpAddress()
 void
 NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObserver& observer)
 {
-    std::clog << "NetworkInterfaceManager::registerInterfaceChangeHandler()" << std::endl;
+//     std::clog << "NetworkInterfaceManager::registerInterfaceChangeHandler()" << std::endl;
     
     m_notificationCenter.addObserver(observer);
     for (std::vector<std::string>::iterator it = m_interfaceList.begin(); it != m_interfaceList.end(); ++it) {
-        std::clog << "notify observer of new interface: " << (*it) << std::endl;
+        Log::instance()->upnp().information(Poco::format("notify observer of new network interface: %s", (*it)));
         observer.notify(new NetworkInterfaceNotification((*it), true));
     }
 }
@@ -200,12 +270,12 @@ NetworkInterfaceManager::addInterface(const std::string& name)
 //     std::clog << "NetworkInterfaceManager::addInterface() name: " << name << std::endl;
     
     if (find(m_interfaceList.begin(), m_interfaceList.end(), name) == m_interfaceList.end()) {
-        std::clog << "NetworkInterfaceManager::addInterface() name: " << name << std::endl;
+        Log::instance()->upnp().information(Poco::format("adding network interface: %s", name));
         m_interfaceList.push_back(name);
         m_notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
     }
     else {
-        std::clog << "NetworkInterfaceManager::addInterface() added interface already known: " << name << std::endl;
+        Log::instance()->upnp().information(Poco::format("added network interface already known: %s", name));
     }
 }
 
@@ -213,7 +283,7 @@ NetworkInterfaceManager::addInterface(const std::string& name)
 void
 NetworkInterfaceManager::removeInterface(const std::string& name)
 {
-    std::clog << "NetworkInterfaceManager::removeInterface() name: " << name << std::endl;
+    Log::instance()->upnp().information(Poco::format("removing network interface: %s", name));
     
     m_interfaceList.erase(find(m_interfaceList.begin(), m_interfaceList.end(), name));
     m_notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
@@ -251,87 +321,37 @@ UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
 std::string&
 UriDescriptionReader::getDescription(const std::string& relativeUri)
 {
-    // FIXME: Bug in Poco? getPath should not return leading "/", it's not part of path
-    //        URL, url-path: 
-    //        http://tools.ietf.org/html/rfc1738, Chapter 3.1  
-    //        in contradiction to:
-    //        URI, abs_path: (url-path corresponds to path_segments)
-    //        http://tools.ietf.org/html/rfc2396#section-3
-    
-    // TODO: make all paths always relative (remove leading "/")
-    // file://bla/foo/file is URI bla must be a host (RFC 1738)
-    // file:/bla/foo/file is URI for path bla/foo/file
-    // URN is: <scheme>://<authority>/<path>
-    // <scheme>:<path>
-    // <scheme>://<authority>
-    // <scheme>://<authority>/<path>
-    //
-    // NOTE: relative URIs see: http://tools.ietf.org/html/rfc2396#section-5
-    //
-    // if m_uri is directory (base directory), it must end with "/"
-    // does file:myfile point to ./myfile ?
-    // if basepath is "" -> "./"
-    // if basepath has no trailing "/", append it
-    //
-    // NOTE: all URLs refer to a base URL, same host and port for all URLs (-> BaseURL)
-    //       details on URL: http://tools.ietf.org/html/rfc1738
-    //       details on URI: http://tools.ietf.org/html/rfc3986
-    //
-    //     URLBase
-    //          Optional. Defines the base URL. Used to construct fully-qualified URLs. 
-    //          All relative URLs that appear elsewhere in
-    //          the description are combined with this base URL according to the rules in RFC 2396. 
-    //          If URLBase is empty or not
-    //          given, the base URL is the URL from which the device description was retrieved 
-    //          (which is the preferred implementation; use of URLBase is no longer recommended).
-    //          Specified by UPnP vendor. Single URL.
-    
-    // TODO: platinum's URL has no leading / but expects one ...
-    
     Poco::URI targetUri(m_deviceDescriptionUri);
     targetUri.resolve(relativeUri);
-    std::clog << "UriDescriptionReader::getDescription() from: " << targetUri.toString() << std::endl;
+    Log::instance()->desc().information(Poco::format("retrieving device description from: %s", targetUri.toString()));
+    
     std::string* res;
     
     if (targetUri.getScheme() == "file") {
-        std::clog << "reading description from file: " << targetUri.getPath() << std::endl;
+        Log::instance()->desc().information(Poco::format("reading description from file: %s", targetUri.getPath()));
         std::ifstream ifs(targetUri.getPath().c_str());
         std::stringstream ss;
         Poco::StreamCopier::copyStream(ifs, ss);
         res = new std::string(ss.str());
     }
     else if (targetUri.getScheme() == "http") {
-        std::clog << "downloading description from: " << targetUri.getPath() << std::endl;
+        Log::instance()->desc().information(Poco::format("downloading description from: %s", targetUri.getPath()));
         Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
         Poco::Net::HTTPRequest request("GET", targetUri.getPath());
         session.sendRequest(request);
         
         Poco::Net::HTTPResponse response;
         std::istream& rs = session.receiveResponse(response);
-        if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-            std::clog << "Error: " << targetUri.getPath() << " HTTP_NOT_FOUND 404" << std::endl;
-            res = new std::string;
-            return *res;
-//             std::clog << "Trying: /" << path << std::endl;
-//             request.setURI("/" + path);
-//             session.sendRequest(request);
-//             response.clear();
-//             std::istream& rs = session.receiveResponse(response);
-        }
+        Log::instance()->desc().information(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
-        
-        std::clog << "downloaded description:" << std::endl << "*BEGIN*" << *res << "*END*" << std::endl;
     }
     else {
-        std::clog << "Error in UriDescriptionReader: unknown scheme in description uri" << std::endl;
+        Log::instance()->desc().error("Error in UriDescriptionReader: unknown scheme in description uri");
         res = new std::string;
         return *res;
     }
-    
-//     parseDescription(*res);
-
-    std::clog << "UriDescriptionReader::getDescription() finished" << std::endl;
+    Log::instance()->desc().debug(Poco::format("retrieved description:\n*BEGIN*%s*END*", *res));
     return *res;
 }
 
@@ -451,14 +471,14 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
                             pRes->addService(service(pChild->firstChild()));
                         }
                         else {
-                            std::clog << "Error in DescriptionReader: empty service" << std::endl;
+                            Log::instance()->desc().error("empty service");
                         }
                     }
                     pChild = pChild->nextSibling();
                 }
             }
             else {
-                std::clog << "Error in DescriptionReader: service list without services" << std::endl;
+                Log::instance()->desc().error("service list without services");
             }
         }
         else if (pNode->nodeName() == "deviceList") {
@@ -470,14 +490,14 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
                             pDeviceRoot->addDevice(device(pChild->firstChild(), pDeviceRoot));
                         }
                         else {
-                            std::cerr << "Error in DescriptionReader: empty embedded device" << std::endl;
+                            Log::instance()->desc().error("empty embedded device");
                         }
                     }
                     pChild = pChild->nextSibling();
                 }
             }
             else {
-                std::clog << "Error in DescriptionReader: device list without embedded devices" << std::endl;
+                Log::instance()->desc().error("device list without embedded devices");
             }
         }
         else if (pNode->nodeName() == "iconList") {
@@ -496,11 +516,9 @@ DescriptionReader::service(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
-//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
-//         std::clog << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
             pRes->setServiceType(pNode->innerText());
         }
@@ -509,20 +527,15 @@ DescriptionReader::service(Poco::XML::Node* pNode)
         }
         else if (pNode->nodeName() == "SCPDURL" && pNode->hasChildNodes()) {
             std::string descriptionPath = pNode->innerText();
-//             fixQuirkyPath(descriptionPath);
             pRes->setDescriptionPath(descriptionPath);
             // load the service description into the Service object.
             pRes->setDescription(getDescription(descriptionPath));
             Poco::XML::Node* pScpd = parseDescription(*pRes->getDescription());
-//             Poco::XML::Node* pScpd = m_nodeStack.top();
             while (pScpd) {
-//                 std::clog << "node: " << pScpd->nodeName() << std::endl;
                 if (pScpd->nodeName() == "actionList" && pScpd->hasChildNodes()) {
                     Poco::XML::Node* pChild = pScpd->firstChild();
                     while (pChild) {
-//                         std::clog << "node: " << pChild->nodeName() << std::endl;
                         if (pChild->nodeName() == "action") {
-//                             m_nodeStack.push(pChild->firstChild());
                             pRes->addAction(action(pChild->firstChild()));
                         }
                         pChild = pChild->nextSibling();
@@ -531,9 +544,7 @@ DescriptionReader::service(Poco::XML::Node* pNode)
                 else if (pScpd->nodeName() == "serviceStateTable" && pScpd->hasChildNodes()) {
                     Poco::XML::Node* pChild = pScpd->firstChild();
                     while (pChild) {
-//                         std::clog << "node: " << pChild->nodeName() << std::endl;
                         if (pChild->nodeName() == "stateVariable") {
-//                             m_nodeStack.push(pChild->firstChild());
                             StateVar* pStateVar = stateVar(pChild->firstChild());
                             if (pChild->hasAttributes()) {
                                 Poco::XML::NamedNodeMap* attr = pChild->attributes();
@@ -547,26 +558,19 @@ DescriptionReader::service(Poco::XML::Node* pNode)
                 }
                 pScpd = pScpd->nextSibling();
             }
-            // finished with this service description, getDescription() did a m_nodeStack.push()
-//             m_nodeStack.pop();
             releaseDescriptionDocument();
         }
         else if (pNode->nodeName() == "controlURL" && pNode->hasChildNodes()) {
             std::string controlPath = pNode->innerText();
-//             fixQuirkyPath(controlPath);
-//             fixQuirkyPathRemoveFileName(controlPath);
             pRes->setControlPath(controlPath);
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
             std::string eventPath = pNode->innerText();
-//             fixQuirkyPath(eventPath);
-//             fixQuirkyPathRemoveFileName(eventPath);
             pRes->setEventPath(eventPath);
         }
         
         pNode = pNode->nextSibling();
     }
-//     m_nodeStack.pop();
     return pRes;
 }
 
@@ -576,7 +580,6 @@ DescriptionReader::action(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
-//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -587,7 +590,6 @@ DescriptionReader::action(Poco::XML::Node* pNode)
             Poco::XML::Node* pChild = pNode->firstChild();
             while (pChild) {
                 if (pChild->nodeName() == "argument") {
-//                     m_nodeStack.push(pChild->firstChild());
                     pRes->appendArgument(argument(pChild->firstChild()));
                 }
                 pChild = pChild->nextSibling();
@@ -595,7 +597,6 @@ DescriptionReader::action(Poco::XML::Node* pNode)
         }
         pNode = pNode->nextSibling();
     }
-//     m_nodeStack.pop();
     return pRes;
 }
 
@@ -605,7 +606,6 @@ DescriptionReader::argument(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
-//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -622,7 +622,6 @@ DescriptionReader::argument(Poco::XML::Node* pNode)
         pNode = pNode->nextSibling();
     }
     
-//     m_nodeStack.pop();
     return pRes;
 }
 
@@ -632,7 +631,6 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
 {
 //     std::clog << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
-//     Poco::XML::Node* pNode = m_nodeStack.top();
     
     while (pNode)
     {
@@ -645,43 +643,19 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
-//             std::clog << "DescriptionReader::stateVar() set defaultValue: " << val << std::endl;
+            Log::instance()->desc().debug(Poco::format("set default value for state variable to: %s", val));
+            
             pRes->setValue(val);
         }
         pNode = pNode->nextSibling();
     }
-//     m_nodeStack.pop();
     return pRes;
 }
 
 
-// void
-// DescriptionReader::fixQuirkyPath(std::string& path)
-// {
-//     int len = path.size();
-//     if (path.substr(0, 1) != "/") {
-//         path = "/" + path;
-//         len++;
-//         std::clog << "DescriptionReader::fixQuirkyPath() adding leading /: " << path << std::endl;
-//     }
-// 
-// }
-
-
-// void
-// DescriptionReader::fixQuirkyPathRemoveFileName(std::string& path)
-// {
-//     int len = path.size();
-//     if (path.substr(len - 4) == ".xml") {
-//         path = path.substr(0, path.find_last_of('/') + 1);
-//         std::clog << "DescriptionReader::fixQuirkyPath() removing trailing filename: " << path << std::endl;
-//     }
-// }
-
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : m_pActionTemplate(pActionTemplate)
 {
-    std::clog << "ActionRequestReader::ActionRequestReader()" << std::endl;
-    std::clog << "request: " << requestBody << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("action request:\n%s", requestBody));
     
     Poco::XML::DOMParser parser;
     m_pDoc = parser.parseString(requestBody);
@@ -693,7 +667,6 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
 Action*
 ActionRequestReader::action()
 {
-//     std::clog << "ActionRequestReader::action()" << std::endl;
     Action* pRes = m_pActionTemplate;
     Poco::XML::Node* pNode = m_nodeStack.top();
     Poco::XML::NodeIterator it(pNode, Poco::XML::NodeFilter::SHOW_ELEMENT);
@@ -704,27 +677,23 @@ ActionRequestReader::action()
     Poco::XML::Node* pBody = pNode;
     if (pBody && pBody->hasChildNodes()) {
         Poco::XML::Node* pAction = pBody->firstChild();
-//         std::clog << "action: " << pRes->getName() << std::endl;
-//         std::clog << "serviceType: " << pRes->getService()->getServiceType() << std::endl;
         
         if (pAction->hasChildNodes()) {
             Poco::XML::Node* pArgument = pAction->firstChild();
     
             while (pArgument) {
-//                 std::clog << "ActionRequestReader::action() setting Argument: " << pArgument->nodeName() << " val: " << pArgument->innerText() << std::endl;
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
                 pArgument = pArgument->nextSibling();
             }
         }
         else {
-            std::clog << "ActionRequestReader(): action without arguments" << std::endl;
+            Log::instance()->ctrl().error("action without arguments");
         }
     }
     else {
-        std::clog << "Error in ActionRequestReader(): action without body" << std::endl;
+        Log::instance()->ctrl().error("action without body");
     }
     m_nodeStack.pop();
-//     std::clog << "ActionRequestReader::action() finished" << std::endl;
     return pRes;
 }
 
@@ -732,9 +701,7 @@ ActionRequestReader::action()
 ActionResponseReader::ActionResponseReader(const std::string& responseBody, Action* pActionTemplate) :
 m_pActionTemplate(pActionTemplate)
 {
-    std::clog << "ActionResponseReader::ActionResponseReader()" << std::endl;
-//     std::clog << "response: " << responseBody << std::endl;
-    
+//     Log::instance()->ctrl().debug(Poco::format("action response:\n%s", responseBody));
     Poco::XML::DOMParser parser;
     // TODO: set encoding with parser.setEncoding();
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
@@ -743,11 +710,11 @@ m_pActionTemplate(pActionTemplate)
         m_pDoc = parser.parseString(responseBody);
     }
     catch (Poco::XML::SAXParseException) {
-        std::cerr << "Error in ActionResponseReader: could not parse action response." << std::endl;
+        Log::instance()->ctrl().error("could not parse action response");
         return;
     }
     catch (Poco::XML::DOMException) {
-        std::cerr << "Error in ActionResponseReader: could not parse action response." << std::endl;
+        Log::instance()->ctrl().error("could not parse action response");
         return;
     }
     // TODO: new reader design: don't go further if parser has failed
@@ -760,7 +727,6 @@ Action*
 ActionResponseReader::action()
 {
     // TODO: same code as in ActionRequestReader
-    std::clog << "ActionResponseReader::action()" << std::endl;
     Action* pRes = m_pActionTemplate;
     Poco::XML::Node* pNode = m_nodeStack.top();
     Poco::XML::NodeIterator it(pNode, Poco::XML::NodeFilter::SHOW_ELEMENT);
@@ -771,27 +737,23 @@ ActionResponseReader::action()
     Poco::XML::Node* pBody = pNode;
     if (pBody && pBody->hasChildNodes()) {
         Poco::XML::Node* pAction = pBody->firstChild();
-//         std::clog << "action: " << pRes->getName() << std::endl;
-//         std::clog << "serviceType: " << pRes->getService()->getServiceType() << std::endl;
-        
         if (pAction->hasChildNodes()) {
             Poco::XML::Node* pArgument = pAction->firstChild();
             
             while (pArgument) {
-                std::clog << "ActionRequestReader::action() reading Argument: " << pArgument->nodeName() << ", val: " << pArgument->innerText() << std::endl;
+                Log::instance()->ctrl().debug(Poco::format("action response arg: %s = %s", pArgument->nodeName(), pArgument->innerText()));
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
                 pArgument = pArgument->nextSibling();
             }
         }
         else {
-            std::clog << "ActionResponseReader(): action without arguments" << std::endl;
+            Log::instance()->ctrl().error("action without arguments");
         }
     }
     else {
-        std::clog << "Error in ActionResponseReader(): action without body" << std::endl;
+        Log::instance()->ctrl().error("action without body");
     }
     m_nodeStack.pop();
-    std::clog << "ActionResponseReader::action() finished" << std::endl;
     return pRes;
 }
 
@@ -799,8 +761,6 @@ ActionResponseReader::action()
 
 DeviceDescriptionWriter::DeviceDescriptionWriter()
 {
-    std::clog << "DeviceDescriptionWriter::DeviceDescriptionWriter()" << std::endl;
-    
     m_pDoc = new Poco::XML::Document;
 }
 
@@ -808,8 +768,6 @@ DeviceDescriptionWriter::DeviceDescriptionWriter()
 void
 DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
 {
-    std::clog << "DeviceDescriptionWriter::deviceRoot()" << std::endl;
-    
     Poco::AutoPtr<Poco::XML::Element> pRoot = m_pDoc->createElement("root");
     pRoot->setAttribute("xmlns", "urn:schemas-upnp-org:device-1-0");
     Poco::AutoPtr<Poco::XML::Element> pSpecVersion = m_pDoc->createElement("specVersion");
@@ -825,26 +783,20 @@ DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
     // write root device
     Poco::AutoPtr<Poco::XML::Element> pRootDevice = device(*deviceRoot.getRootDevice());
     pRoot->appendChild(pRootDevice);
-    std::clog << "DeviceDescriptionWriter::deviceRoot() pRootDevice inserted" << std::endl;
     m_pDoc->appendChild(pRoot);
-    std::clog << "DeviceDescriptionWriter::deviceRoot() pRoot inserted" << std::endl;
-// end root device
+    // end root device
     
     // TODO: if there are embedded devices open a deviceList
     // write embedded devices
     // end embedded devices
     
     // end DeviceRoot
-    
-    std::clog << "DeviceDescriptionWriter::deviceRoot() finished" << std::endl;
 }
 
 
 Poco::XML::Element*
 DeviceDescriptionWriter::device(Device& device)
 {
-    std::clog << "DeviceDescriptionWriter::device()" << std::endl;
-    
     Poco::XML::Element* pDevice = m_pDoc->createElement("device");
     
     // device type
@@ -864,6 +816,7 @@ DeviceDescriptionWriter::device(Device& device)
         Poco::AutoPtr<Poco::XML::Text> pVal = m_pDoc->createTextNode(*((*it).second));
         pProp->appendChild(pVal);
         pDevice->appendChild(pProp);
+        Log::instance()->desc().debug(Poco::format("writer added property: %s = %s", (*it).first, *(*it).second));
     }
     
     Poco::AutoPtr<Poco::XML::Element> pServiceList = m_pDoc->createElement("serviceList");
@@ -871,10 +824,8 @@ DeviceDescriptionWriter::device(Device& device)
     // write Services
     for (Container<Service>::Iterator it = device.m_services.begin(); it != device.m_services.end(); ++it) {
         pServiceList->appendChild(service(*it));
-        std::clog << "added service: " << (*it)->getServiceType() << std::endl;
+        Log::instance()->desc().debug(Poco::format("writer added service: %s", (*it)->getServiceType()));
     }
-    
-    std::clog << "DeviceDescriptionWriter::device()finished" << std::endl;
     
     return pDevice;
 }
@@ -883,8 +834,6 @@ DeviceDescriptionWriter::device(Device& device)
 Poco::XML::Element*
 DeviceDescriptionWriter::service(Service* pService)
 {
-    std::clog << "DeviceDescriptionWriter::service()" << std::endl;
-    
     Poco::XML::Element* pServiceElement = m_pDoc->createElement("service");
     
     // serviceType
@@ -913,8 +862,6 @@ DeviceDescriptionWriter::service(Service* pService)
     pEvent->appendChild(pEventVal);
     pServiceElement->appendChild(pEvent);
     
-    std::clog << "DeviceDescriptionWriter::service()finished" << std::endl;
-    
     return pServiceElement;
 }
 
@@ -922,17 +869,14 @@ DeviceDescriptionWriter::service(Service* pService)
 std::string*
 DeviceDescriptionWriter::write()
 {
-    std::clog << "DeviceDescriptionWriter::write()" << std::endl;
-    
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
     
     std::stringstream ss;
     writer.writeNode(ss, m_pDoc);
-//     description = ss.str();
+    Log::instance()->desc().debug(Poco::format("rewrote description:\n*BEGIN*%s*END*", ss.str()));
     return new std::string(ss.str());
-    std::clog << "description:" << std::endl << ss.str() << std::endl;
 }
 
 
@@ -951,8 +895,6 @@ ActionRequestWriter::action(Action* action)
         Poco::AutoPtr<Poco::XML::Text> pArgumentValue = m_pDoc->createTextNode(action->getArgument<std::string>((*i)->getName()));
         pArgument->appendChild(pArgumentValue);
         pActionRequest->appendChild(pArgument);
-        
-        std::clog << "ActionRequestWriter called with arg: " << (*i)->getName() << ", val: " << action->getArgument<std::string>((*i)->getName()) << std::endl;
     }
     
     pBody->appendChild(pActionRequest);
@@ -966,28 +908,23 @@ ActionRequestWriter::write(std::string& actionMessage)
 {
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
-    writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
     
     std::stringstream ss;
     writer.writeNode(ss, m_pDoc);
     actionMessage = ss.str();
-    std::clog << "action request message():" << std::endl << ss.str() << std::endl << std::endl;
 }
 
 
 ActionResponseWriter::ActionResponseWriter(std::string& responseBody) :
 m_responseBody(&responseBody)
 {
-    std::clog << "ActionResponseWriter::ActionResponseWriter()" << std::endl;
 }
 
 
 void
 ActionResponseWriter::action(Action& action)
 {
-    std::clog << "ActionResponseWriter::action()" << std::endl;
-    
     Poco::AutoPtr<Poco::XML::Document> pDoc = new Poco::XML::Document;
     Poco::AutoPtr<Poco::XML::Element> pEnvelope = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Envelope");
     pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
@@ -997,7 +934,6 @@ ActionResponseWriter::action(Action& action)
     for(Action::ArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
         Poco::AutoPtr<Poco::XML::Element> pArgument = pDoc->createElement((*i)->getName());
         Poco::AutoPtr<Poco::XML::Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i)->getName()));
-        std::clog << "ActionResponseWriter returns arg: " << (*i)->getName() << ", val: " << action.getArgument<std::string>((*i)->getName()) << std::endl;
         pArgument->appendChild(pArgumentValue);
         pActionResponse->appendChild(pArgument);
     }
@@ -1008,13 +944,12 @@ ActionResponseWriter::action(Action& action)
     
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
-    writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
     
     std::stringstream ss;
     writer.writeNode(ss, pDoc);
     *m_responseBody = ss.str();
-    std::clog << "ResponseBody():" << std::endl << *m_responseBody << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("response body:\n%s", *m_responseBody));
 }
 
 
@@ -1027,8 +962,6 @@ Argument::getRelatedStateVarReference() const
 
 EventMessageWriter::EventMessageWriter()
 {
-    std::clog << "EventMessageWriter::EventMessageWriter()" << std::endl;
-    
     m_pDoc = new Poco::XML::Document;
     m_pPropertySet = m_pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "propertyset");
     m_pDoc->appendChild(m_pPropertySet);
@@ -1038,25 +971,20 @@ EventMessageWriter::EventMessageWriter()
 void
 EventMessageWriter::write(std::string& eventMessage)
 {
-    std::clog << "EventMessageWriter::write()" << std::endl;
-    
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
-    writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
     
     std::stringstream ss;
     writer.writeNode(ss, m_pDoc);
     eventMessage = ss.str();
-    std::clog << "event message():" << std::endl << ss.str() << std::endl;
+    Log::instance()->event().debug(Poco::format("event message:\n%s", ss.str()));
 }
 
 
 void
 EventMessageWriter::stateVar(const StateVar& stateVar)
 {
-    std::clog << "EventMessageWriter::stateVar()" << std::endl;
-    
     Poco::AutoPtr<Poco::XML::Element> pProperty = m_pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "property");
     Poco::AutoPtr<Poco::XML::Element> pStateVar = m_pDoc->createElement(stateVar.getName());
     Poco::AutoPtr<Poco::XML::Text> pStateVarValue = m_pDoc->createTextNode(stateVar.getValue());
@@ -1069,10 +997,11 @@ EventMessageWriter::stateVar(const StateVar& stateVar)
 Subscription::Subscription(std::string callbackUri) :
 m_deliveryAddress(callbackUri)
 {
-    std::clog << "Subscription::Subscription() uri: " << callbackUri << std::endl;
+    Log::instance()->event().debug(Poco::format("subscription uri: %s", callbackUri));
+    
     // TODO: implement timer stuff
     m_uuid = Poco::UUIDGenerator().createRandom();
-    std::clog << "SID: " << m_uuid.toString() << std::endl;
+    Log::instance()->event().debug(Poco::format("SID: %s", m_uuid.toString()));
     m_eventKey = 0;
     m_pSession = new Poco::Net::HTTPClientSession(m_deliveryAddress.getHost(), m_deliveryAddress.getPort());
 }
@@ -1091,12 +1020,11 @@ void
 Subscription::sendEventMessage(const std::string& eventMessage)
 {
     // TODO: queue the eventMessages for sending ...?
-    std::clog << "Subscription::sendEventMessage()" << std::endl;
-    std::string path = m_deliveryAddress.getPath();
-    if (path.substr(0, 1) == "/") {
-        path = path.substr(1);
-    }
-    Poco::Net::HTTPRequest request("NOTIFY", path, "HTTP/1.1");
+//     std::string path = m_deliveryAddress.getPath();
+//     if (path.substr(0, 1) == "/") {
+//         path = path.substr(1);
+//     }
+    Poco::Net::HTTPRequest request("NOTIFY", m_deliveryAddress.getPath(), "HTTP/1.1");
     request.set("HOST", m_deliveryAddress.getAuthority());
     request.setContentType("text/xml");
     request.set("NT", "upnp:event");
@@ -1107,9 +1035,9 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
     // set request body and send request
-    std::clog << "Subscription::sendEventMessage() send request to: " << getSession()->getHost() << ":" << getSession()->getPort() << "/" << request.getURI() << " ..." << std::endl;
-    std::clog << "Header:" << std::endl;
-    request.write(std::clog);
+    Log::instance()->event().debug(Poco::format("sending event message to: %s:%s/%s ...", getSession()->getHost(), getSession()->getPort(), request.getURI()));
+//     std::clog << "Header:" << std::endl;
+//     request.write(std::clog);
     
     std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
@@ -1117,25 +1045,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     // receive answer ...
     Poco::Net::HTTPResponse response;
     getSession()->receiveResponse(response);
-    int stat = response.getStatus();
-    if (stat == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-        std::clog << "Error: " << request.getURI() << " HTTP_NOT_FOUND 404" << std::endl;
-//         std::clog << "Trying: " << m_deliveryAddress.getPath().substr(1) << std::endl;
-//         request.setURI(m_deliveryAddress.getPath().substr(1));
-//         std::clog << "Subscription::sendEventMessage() send request to: " << getSession()->getHost() << ":" << getSession()->getPort() << request.getURI() << " ..." << std::endl;
-//         std::clog << "Header:" << std::endl;
-//         request.write(std::clog);
-//         
-//         std::ostream& ostr = getSession()->sendRequest(request);
-//         ostr << eventMessage;
-//         
-//         response.clear();
-//         getSession()->receiveResponse(response);
-    }
-    else if (stat == Poco::Net::HTTPResponse::HTTP_OK) {
-        std::clog << "Subscription::sendEventMessage() recieved HTTP_OK 200" << std::endl;
-    }
-    std::clog << "Subscription::sendEventMessage() finished" << std::endl;
+    Log::instance()->event().debug(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
 }
 
 
@@ -1195,8 +1105,6 @@ Service::initClient()
 void
 Service::sendAction(Action* pAction)
 {
-    std::clog << "*********************" << std::endl;
-    std::clog << "Service::sendAction()" << std::endl;
     std::string actionMessage;
     ActionRequestWriter requestWriter;
     requestWriter.action(pAction);
@@ -1211,53 +1119,35 @@ Service::sendAction(Action* pAction)
     request->set("SOAPACTION", "\"" + m_serviceType + "#" + pAction->getName() + "\"");
     request->setContentLength(actionMessage.size());
     // set request body and send request
-    std::clog << "Service::sendAction() send request to: " << baseUri.getAuthority() << request->getURI() << " ..." << std::endl;
-    std::clog << "Header:" << std::endl;
-    request->write(std::clog);
+    Log::instance()->ctrl().debug(Poco::format("*** sending action \"%s\" to %s%s ***", pAction->getName(), baseUri.getAuthority(), request->getURI()));
+//     std::clog << "Header:" << std::endl;
+//     request->write(std::clog);
     
     // FIXME: catch Poco::Net::ConnectionRefusedException
     std::ostream& ostr = m_pControlRequestSession->sendRequest(*request);
     ostr << actionMessage;
-    std::clog << "Action request sent" << std::endl;
-    
+    Log::instance()->ctrl().debug(Poco::format("action request sent:\n%s", actionMessage));
     // receive answer ...
     Poco::Net::HTTPResponse response;
     std::istream& rs = m_pControlRequestSession->receiveResponse(response);
-//     if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-//         std::cerr << "Error: " << m_controlPath << " HTTP_NOT_FOUND 404" << std::endl;
-//     }
-    std::clog << response.getStatus() << " " << response.getReason() << std::endl;
-    // FIXME: fix similar places in the code
-//     char* buf = 0;
-//     int bufsize = response.getContentLength();
-//     if (bufsize > 0) {
-//         buf = new char[bufsize];
-//         rs.read(buf, response.getContentLength());
-//         std::string responseBody = std::string(buf, bufsize);
-//     }
-//     else {
-//         std::cerr << "Error in Service: empty action response." << std::endl;
-//     }
+    Log::instance()->ctrl().debug(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
     std::string responseBody;
     Poco::StreamCopier::copyToString(rs, responseBody);
-    std::clog << "Service::sendAction() response received: " /*<< responseBody*/ << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("action response received:\n%s", responseBody));
     ActionResponseReader responseReader(responseBody, pAction);
     responseReader.action();
-    std::clog << "Service::sendAction() finished" << std::endl;
-    std::clog << "******************************" << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("*** action \"%s\" completed ***", pAction->getName()));
 }
 
 
 void
 Service::registerSubscription(Subscription* subscription)
 {
-    std::clog << "Service::registerSubscription()" << std::endl;
-    
     Poco::ScopedLock<Poco::FastMutex> lock(m_serviceLock);
     // TODO: only register a Subscription once from one distinct Controller
     //       note that Subscription has a new SID
     std::string sid = subscription->getUuid();
-    std::clog << "SID: " << sid << std::endl;
+    Log::instance()->event().debug(Poco::format("register subscription with SID: %s", sid));
     m_eventSubscriptions.append(sid, subscription);
 }
 
@@ -1265,10 +1155,10 @@ Service::registerSubscription(Subscription* subscription)
 void
 Service::unregisterSubscription(Subscription* subscription)
 {
-    std::clog << "Service::unregisterSubscription()" << std::endl;
-    
     Poco::ScopedLock<Poco::FastMutex> lock(m_serviceLock);
-    m_eventSubscriptions.remove(subscription->getUuid());
+    std::string sid = subscription->getUuid();
+    m_eventSubscriptions.remove(sid);
+    Log::instance()->event().debug(Poco::format("unregister subscription with SID: %s", sid));
     delete subscription;
 }
 
@@ -1276,8 +1166,6 @@ Service::unregisterSubscription(Subscription* subscription)
 void
 Service::sendEventMessage(StateVar& stateVar)
 {
-    std::clog << "Service::sendEventMessage()" << std::endl;
-    
     // TODO: send the messages asynchronous and don't block the Device main thread
     std::string eventMessage;
     EventMessageWriter messageWriter;
@@ -1293,8 +1181,6 @@ Service::sendEventMessage(StateVar& stateVar)
 void
 Service::sendInitialEventMessage(Subscription* pSubscription)
 {
-    std::clog << "Service::sendInitialEventMessage()" << std::endl;
-    
     std::string eventMessage;
     EventMessageWriter messageWriter;
     for (StateVarIterator i = beginEventedStateVar(); i != endEventedStateVar(); ++i) {
@@ -1302,6 +1188,7 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
     }
     messageWriter.write(eventMessage);
     pSubscription->sendEventMessage(eventMessage);
+    Log::instance()->event().debug(Poco::format("sending initial event message:\n%s", eventMessage));
 }
 
 
@@ -1350,9 +1237,7 @@ m_pHttpSocket(pHttpSocket)
 Poco::Net::HTTPRequestHandler*
 DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-    std::clog << "dispatch HTTP request: " << request.getURI() << std::endl;
-        // TODO: if no request is registered for the query, return a default request
-        // handler with error 404 or similar ...
+    Log::instance()->http().debug(Poco::format("dispatching request: %s", request.getURI()));
     Poco::Net::HTTPRequestHandler* res;
     std::map<std::string,UpnpRequestHandler*>::iterator i = m_requestHandlerMap.find(request.getURI());
     if (i != m_requestHandlerMap.end()) {
@@ -1367,7 +1252,6 @@ DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReq
 void
 DeviceRequestHandlerFactory::registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler)
 {
-//     std::clog << "register request handler: " << Uri << std::endl;
     m_requestHandlerMap[Uri] = requestHandler;
 }
 
@@ -1382,7 +1266,7 @@ RequestNotFoundRequestHandler::create()
 void
 RequestNotFoundRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    std::clog << "handle unknown request with HTTP 404 - not found error on request: " << request.getURI() << std::endl;
+    Log::instance()->http().debug(Poco::format("unknown request %s HTTP 404 - not found error", request.getURI()));
     response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
 }
 
@@ -1406,14 +1290,12 @@ DescriptionRequestHandler::create()
 void
 DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    std::clog << "handle description request: " << request.getURI() << std::endl;
-//         std::clog << "sending contents of length: " << m_description.size() << std::endl;
-//     response.setContentLength(m_description.size());
+    Log::instance()->desc().debug(Poco::format("description request: %s", request.getURI()));
     response.setContentLength(m_pDescription->size());
     response.setContentType("text/xml");
     std::ostream& ostr = response.send();
-//     ostr << m_description;
     ostr << *m_pDescription;
+//     Log::instance()->desc().debug(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
 }
 
 
@@ -1433,8 +1315,7 @@ ControlRequestHandler::create()
 void
 ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    std::clog << "***********************" << std::endl
-              << "handle control request: " << request.getURI() << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("*** action request: %s ***", request.getURI()));
     // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
     // otherwise it should return and an event should be sent on finishing the action request.
     int length = request.getContentLength();
@@ -1447,14 +1328,14 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     std::string::size_type hash = soapAction.find('#');
     std::string serviceType = soapAction.substr(0, hash);
     std::string actionName = soapAction.substr(hash+1);
-    std::clog << "SOAP request, service: " << serviceType << ", action: " << actionName << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("action received: \"%s\" (service type %s)", actionName, serviceType));
     
-    std::clog << "ControlRequestHandler for ServiceType: " << m_pService->getServiceType() << std::endl;
+//     std::clog << "ControlRequestHandler for ServiceType: " << m_pService->getServiceType() << std::endl;
     // TODO: make getAction() robust against wrong action names
     Action* pAction = m_pService->getAction(actionName);
-    std::clog << "getAction(): " << pAction->getName() << std::endl;
+//     std::clog << "getAction(): " << pAction->getName() << std::endl;
     pAction = pAction->clone();
-    std::clog << "cloned Action(): " << pAction->getName() << std::endl;
+//     std::clog << "cloned Action(): " << pAction->getName() << std::endl;
     // TODO: introduce ActionRequestReader::write(Action*) to get rid of confusing pAction stuff
     ActionRequestReader requestReader(requestBody, pAction);
     pAction = requestReader.action();
@@ -1471,8 +1352,8 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
-    std::clog << "finished control request: " << request.getURI() << std::endl
-              << "*************************" << std::endl;
+    Log::instance()->ctrl().debug(Poco::format("action response sent:\n%s", responseBody));
+    Log::instance()->ctrl().debug(Poco::format("*** action request: %s completed ***", request.getURI()));
 }
 
 
@@ -1486,11 +1367,12 @@ EventRequestHandler::create()
 void
 EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    std::clog << "handle event request: " << request.getMethod() << std::endl;
-    std::clog << "HOST: " << request.getHost() << std::endl;
-    std::clog << "CALLBACK: " << request.get("CALLBACK") << std::endl;
-    std::clog << "NT: " << request.get("NT") << std::endl;
-    std::clog << "TIMEOUT: " << request.get("TIMEOUT") << std::endl;
+    Log::instance()->event().debug(Poco::format("event request from: %s (%s)", request.getHost(), request.get("CALLBACK")));
+//     std::clog << "handle event request: " << request.getMethod() << std::endl;
+//     std::clog << "HOST: " << request.getHost() << std::endl;
+//     std::clog << "CALLBACK: " << request.get("CALLBACK") << std::endl;
+//     std::clog << "NT: " << request.get("NT") << std::endl;
+//     std::clog << "TIMEOUT: " << request.get("TIMEOUT") << std::endl;
     
     std::string sid;
     
@@ -1561,7 +1443,7 @@ HttpSocket::startServer()
         // set-up a server socket on an available port
 
     m_pHttpServer->start();
-    std::clog << "started HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+    Log::instance()->http().information(Poco::format("server started on: %s", m_httpServerAddress.toString()));
 }
 
 
@@ -1569,7 +1451,7 @@ void
 HttpSocket::stopServer()
 {
     m_pHttpServer->stop();
-    std::clog << "stopped HTTP server on: " << m_httpServerAddress.toString() << std::endl;
+    Log::instance()->http().information(Poco::format("server stopped on: %s", m_httpServerAddress.toString()));
 }
 
 
@@ -1592,7 +1474,7 @@ Device::~Device()
 void
 Device::addService(Service* pService)
 {
-    std::clog << "Device::addService(): " << pService->getServiceType() << std::endl;
+//     std::clog << "Device::addService(): " << pService->getServiceType() << std::endl;
     m_services.append(pService->getServiceType(), pService);
     m_pDeviceRoot->addServiceType(pService->getServiceType(), pService);
     pService->setDevice(this);
@@ -1619,7 +1501,6 @@ m_httpSocket(NetworkInterfaceManager::instance()->getValidInterfaceAddress())
 
 DeviceRoot::~DeviceRoot()
 {
-    std::clog << "DeviceRoot::~DeviceRoot()" << std::endl;
     stopSsdp();
     stopHttp();
     // TODO: free all Devices, Services, Actions, ...
@@ -1630,10 +1511,10 @@ DeviceRoot::~DeviceRoot()
 Service*
 DeviceRoot::getServiceType(const std::string& serviceType)
 {
-    std::clog << "DeviceRoot::getServiceType(): " << serviceType << std::endl;
+//     std::clog << "DeviceRoot::getServiceType(): " << serviceType << std::endl;
     std::map<std::string,Service*>::iterator i = m_serviceTypes.find(serviceType);
     if (i == m_serviceTypes.end()) {
-        std::clog << "could not find serviceType" << std::endl;
+        Log::instance()->upnp().error(Poco::format("unknown service type: %s", serviceType));
     }
     return m_serviceTypes[serviceType];
 }
@@ -1667,7 +1548,8 @@ DeviceRoot::print()
 void
 DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 {
-    std::clog << "DeviceRoot::initStateVars() serviceType: " << serviceType << " , pThis: " << pThis << std::endl;
+//     std::clog << "DeviceRoot::initStateVars() serviceType: " << serviceType << " , pThis: " << pThis << std::endl;
+    Log::instance()->upnp().debug(Poco::format("init state vars of service: %s", serviceType));
     m_pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
 }
 
@@ -1675,29 +1557,28 @@ DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 void
 DeviceRoot::initController()
 {
-    std::clog << "DeviceRoot::initController()" << std::endl;
+//     std::clog << "DeviceRoot::initController()" << std::endl;
     
-    std::clog << "DeviceRoot::initController() finished" << std::endl;
+//     std::clog << "DeviceRoot::initController() finished" << std::endl;
 }
 
 
 void
 DeviceRoot::initDevice()
 {
-    std::clog << "DeviceRoot::initDevice()" << std::endl;
     // TODO: setup network socket here and not in the ctor of HttpSocket
     m_descriptionUri = m_httpSocket.getServerUri() + "Description.xml";
     
     NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<DeviceRoot,NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
     
-    std::clog << "DeviceRoot::initDevice() network interface manager installed" << std::endl;
+    Log::instance()->upnp().debug("init device root: network interface manager installed");
     
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        std::clog << "setting random uuid for device" << std::endl;
+        Log::instance()->upnp().debug("init device root: setting random uuid for device");
         (*d)->setRandomUuid();
         // FIXME: this should override a base uri, if already present in the device description
-        (*d)->addProperty("URLBase", m_httpSocket.getServerUri());
+//         (*d)->addProperty("URLBase", m_httpSocket.getServerUri());
         
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
@@ -1711,9 +1592,10 @@ DeviceRoot::initDevice()
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
     m_pDeviceDescription = descriptionWriter.write();
-    std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
-    std::clog << "DeviceRoot::initDevice() device description rewritten" << std::endl;
-    std::clog << "DeviceRoot::initDevice() finished" << std::endl;
+    Log::instance()->upnp().debug("init device root finished");
+//     std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
+//     std::clog << "DeviceRoot::initDevice() device description rewritten" << std::endl;
+//     std::clog << "DeviceRoot::initDevice() finished" << std::endl;
 }
 
 
@@ -1726,14 +1608,14 @@ DeviceRoot::registerHttpRequestHandler(std::string path, UpnpRequestHandler* req
 
 DeviceRootImplAdapter::DeviceRootImplAdapter()
 {
-    std::clog << "DeviceRootImplAdapter::DeviceRootImplAdapter()" << std::endl;
+//     std::clog << "DeviceRootImplAdapter::DeviceRootImplAdapter()" << std::endl;
     // register the great action dispatcher
 };
 
 
 DeviceRootImplAdapter::~DeviceRootImplAdapter()
 {
-    std::clog << "DeviceRootImplAdapter::~DeviceRootImplAdapter()" << std::endl;
+//     std::clog << "DeviceRootImplAdapter::~DeviceRootImplAdapter()" << std::endl;
     delete m_pDeviceRoot;
 }
 
@@ -1741,7 +1623,7 @@ DeviceRootImplAdapter::~DeviceRootImplAdapter()
 void
 DeviceRootImplAdapter::start()
 {
-    std::clog << "DeviceRootImplAdapter::start()" << std::endl;
+//     std::clog << "DeviceRootImplAdapter::start()" << std::endl;
     m_pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
     
 //     m_pDeviceRoot->print();
@@ -1755,7 +1637,7 @@ DeviceRootImplAdapter::start()
 void
 DeviceRootImplAdapter::stop()
 {
-    std::clog << "DeviceRootImplAdapter::stop()" << std::endl;
+//     std::clog << "DeviceRootImplAdapter::stop()" << std::endl;
     m_pDeviceRoot->stopSsdp();
     m_pDeviceRoot->stopHttp();
 }
@@ -1810,7 +1692,7 @@ SsdpMessageSet::addMessage(SsdpMessage& message)
 void
 SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous)
 {
-    std::clog << "SsdpMessageSet::send()" << std::endl;
+//     std::clog << "SsdpMessageSet::send()" << std::endl;
 //     Poco::ScopedLock<Poco::FastMutex> lock(m_sendLock);
     // TODO: check if continuous Timer is already running and return
 //     if (m_sendTimer) {
@@ -1831,7 +1713,7 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous
         // start synchronously
         onTimer(m_sendTimer);
     }
-    std::clog << "SsdpMessageSet::send() finished" << std::endl;
+//     std::clog << "SsdpMessageSet::send() finished" << std::endl;
 }
 
 
@@ -1845,27 +1727,27 @@ SsdpMessageSet::stop()
 void
 SsdpMessageSet::onTimer(Poco::Timer& timer)
 {
-    std::clog << "SsdpMessageSet::onTimer()" << std::endl;
+//     std::clog << "SsdpMessageSet::onTimer()" << std::endl;
     int r = m_repeat;
     while (r--) {
-        std::clog << "#message sets left to send: " << r+1 << std::endl;
+        Log::instance()->ssdp().debug(Poco::format("#message sets left to send: %i", r+1));
+        
         for (std::vector<SsdpMessage*>::const_iterator i = m_ssdpMessages.begin(); i != m_ssdpMessages.end(); ++i) {
-//             std::clog << "sending message: " << (*i)->toString() << std::endl;
             m_socket->sendMessage(**i);
         }
     }
     if (m_continuous) {
-        std::clog << "SsdpMessageSet::onTimer() restarting timer" << std::endl;
+        Log::instance()->ssdp().debug("restarting timer");
         timer.restart(m_randomTimeGenerator.next(m_delay));
     }
-    std::clog << "SsdpMessageSet::onTimer() finished" << std::endl;
+//     std::clog << "SsdpMessageSet::onTimer() finished" << std::endl;
 }
 
 
 void
 DeviceRoot::startSsdp()
 {
-    std::clog << "DeviceRoot::startSsdp()" << std::endl;
+    Log::instance()->ssdp().information("starting SSDP ...");
     
     SsdpNotifyAliveWriter aliveWriter(m_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(m_ssdpNotifyByebyeMessages);
@@ -1893,14 +1775,15 @@ DeviceRoot::startSsdp()
     m_ssdpNotifyAliveMessages.send(m_ssdpSocket, 2, 100, false);
     // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
     m_ssdpNotifyAliveMessages.send(m_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
-    std::clog << "DeviceRoot::startSsdp() finished" << std::endl;
+//     std::clog << "DeviceRoot::startSsdp() finished" << std::endl;
+    Log::instance()->ssdp().information("SSDP started");
 }
 
 
 void
 DeviceRoot::stopSsdp()
 {
-    std::clog << "DeviceRoot::stopSsdp()" << std::endl;
+    Log::instance()->ssdp().information("stopping SSDP ...");
     m_ssdpNotifyAliveMessages.stop();
     m_ssdpNotifyByebyeMessages.send(m_ssdpSocket, 2, 0, false);
 }
@@ -1909,6 +1792,7 @@ DeviceRoot::stopSsdp()
 void
 DeviceRoot::startHttp()
 {
+    Log::instance()->http().information("starting HTTP services ...");
 //     m_descriptionUri = m_httpSocket.getServerUri() + "Description.xml";
     
     m_descriptionRequestHandler = new DescriptionRequestHandler(m_pDeviceDescription);
@@ -1924,10 +1808,12 @@ DeviceRoot::startHttp()
             registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
         }
     }
-    std::clog << "DeviceRoot::startHttp() initialized message sets, service request handlers and state variables" << std::endl;
-
+//     std::clog << "DeviceRoot::startHttp() initialized message sets, service request handlers and state variables" << std::endl;
+    Log::instance()->http().information("initialized message sets, service request handlers, and state variables");
+    
     m_httpSocket.startServer();
-    std::clog << "DeviceRoot::startHttp() server started" << std::endl;
+//     std::clog << "DeviceRoot::startHttp() server started" << std::endl;
+    Log::instance()->http().information("services started");
 }
 
 
@@ -1948,9 +1834,6 @@ DeviceRoot::sendMessage(SsdpMessage& message, const std::string& interface, cons
 void
 DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
 {
-//     std::clog << "root device gets SSDP message:" << std::endl;
-//     std::clog << pNf->toString();
-    
     if (pMessage->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
         SsdpMessage m;
         // TODO: use a skeleton to create response message
@@ -1959,7 +1842,7 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
         m.setDate();
         m.setHttpExtensionConfirmed();
         m.setLocation(m_descriptionUri);
-        m.setServer("Jamm/0.0.3");
+        m.setServer("Jamm/" + JAMM_VERSION);
         // ST field in response depends on ST field in M-SEARCH
         m.setSearchTarget("upnp:rootdevice");
         // same as USN in NOTIFY message
@@ -1980,7 +1863,7 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
 void
 DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
 {
-    std::clog << "DeviceRoot::handleNetworkInterfaceChangedNotification()" << std::endl;
+    Log::instance()->upnp().debug("device root receives network interface change");
     
     if (pNotification->m_added) {
         m_ssdpSocket.addInterface(pNotification->m_interfaceName);
@@ -1990,7 +1873,6 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotificati
         m_ssdpSocket.removeInterface(pNotification->m_interfaceName);
         // TODO: send bye-bye message set on this interface
     }
-    std::clog << "DeviceRoot::handleNetworkInterfaceChangedNotification() finished" << std::endl;
 }
 
 
@@ -2013,7 +1895,7 @@ m_ssdpSocket()
 void
 Controller::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
 {
-    std::clog << "Controller::handleNetworkInterfaceChangedNotification()" << std::endl;
+    Log::instance()->upnp().debug("controller receives network interface change");
     
     if (pNotification->m_added) {
         m_ssdpSocket.addInterface(pNotification->m_interfaceName);
@@ -2024,14 +1906,13 @@ Controller::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotificati
         m_ssdpSocket.removeInterface(pNotification->m_interfaceName);
         // TODO: unregister subscriptions for devices on this interface
     }
-    std::clog << "Controller::handleNetworkInterfaceChangedNotification() finished" << std::endl;
 }
 
 
 void
 Controller::start()
 {
-    std::clog << "Controller::start()" << std::endl;
+    Log::instance()->upnp().debug("starting controller ...");
     
     NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<Controller,NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
@@ -2039,7 +1920,7 @@ Controller::start()
     m_ssdpSocket.start();
     sendMSearch();
     
-    std::clog << "Controller::start() finished" << std::endl;
+    Log::instance()->upnp().debug("controller started");
 }
 
 
@@ -2066,32 +1947,12 @@ Controller::~Controller()
 void
 Controller::discoverDevice(const std::string& location)
 {
-//     Poco::Path path(location.getPath());
-//     std::clog << "Controller::discoverDevice() path: " << path.toString() << std::endl;
-//     std::clog << "Controller::discoverDevice() path depth: " << path.depth() << std::endl;
-//     
-//     std::string relPath = "";
-//     std::string relUri = path.toString();
-//     if (path.depth() > 0) {
-//         relPath = path.directory(path.depth() - 1) + "/";
-//         relUri = path.getFileName();
-//     }
-//     std::clog << "Controller::discoverDevice() relPath: " << relPath << std::endl;
-//     
-//     Poco::URI baseUri(location.getScheme() + "://" + location.getAuthority() + "/" + relPath);
-//     std::clog << "Controller::discoverDevice() baseUri: " << baseUri.toString() << std::endl;
-//     std::clog << "Controller::discoverDevice() relUri: " << relUri << std::endl;
-    
-//     UriDescriptionReader descriptionReader(baseUri, relUri);
-    
-    std::clog << "Controller::discoverDevice() LOCATION: " <<  location << std::endl;
+    Log::instance()->upnp().debug(Poco::format("controller discovers device location: %s", location));
     
     UriDescriptionReader descriptionReader;
     DeviceRoot* deviceRoot = descriptionReader.deviceRoot(location);
-//     deviceRoot->setBaseUri(baseUri);
     deviceRoot->setDescriptionUri(location);
     addDevice(deviceRoot);
-    std::clog << "Controller::discoverDevice() finished with LOCATION: " <<  location << std::endl;
 }
 
 
@@ -2104,21 +1965,19 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-//     std::clog << "Controller::handleSsdpMessage() with UUID: " << uuid << std::endl;
-//     std::clog << pMessage->toString();
+    Log::instance()->ssdp().debug(Poco::format("controller received message:\n%s", pMessage->toString()));
     
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
-//         std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY" << std::endl;
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
-            std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY_ALIVE" << std::endl;
+//             Log::instance()->ssdp().debug("identified alive message");
             if (pMessage->getNotificationType() == "upnp:rootdevice" && !m_devices.contains(uuid)) {
                 discoverDevice(pMessage->getLocation());
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
-            std::clog << "Controller::handleSsdpMessage() REQUEST_NOTIFY_BYEBYE" << std::endl;
+//             Log::instance()->ssdp().debug("identified byebye message");
             if (pMessage->getNotificationType() == "upnp:rootdevice") {
                 removeDevice(uuid);
             }
@@ -2126,13 +1985,12 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-        std::clog << "Controller::handleSsdpMessage() REQUEST_RESPONSE" << std::endl;
+//         Log::instance()->ssdp().debug("identified m-search response");
         if (!m_devices.contains(uuid)) {
             discoverDevice(pMessage->getLocation());
         }
         break;
     }
-//     std::clog << "Controller::handleSsdpMessage() finished" << std::endl;
 }
 
 
@@ -2142,6 +2000,7 @@ Controller::addDevice(DeviceRoot* pDeviceRoot)
     // TODO: handle "alive refreshments"
 //     std::clog << "Controller::addDevice()" << std::endl;
     std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
+    Log::instance()->upnp().debug(Poco::format("controller adds device: %s", uuid));
     if (!m_devices.contains(uuid)) {
         m_devices.append(uuid, pDeviceRoot);
         deviceAdded(pDeviceRoot);
@@ -2154,6 +2013,7 @@ Controller::removeDevice(const std::string& uuid)
 {
 //     std::clog << "Controller::removeDevice()" << std::endl;
     if (m_devices.contains(uuid)) {
+        Log::instance()->upnp().debug(Poco::format("controller removes device: %s", uuid));
         deviceRemoved(&m_devices.get(uuid));
         m_devices.remove(uuid);
     }
@@ -2191,7 +2051,7 @@ m_urn(urn)
 void
 SsdpNotifyAliveWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 {
-    std::clog << "SsdpNotifyAliveWriter::deviceRoot()" << std::endl;
+//     std::clog << "SsdpNotifyAliveWriter::deviceRoot()" << std::endl;
     // root device first message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m->setLocation(pDeviceRoot.getDescriptionUri());    // location of UPnP description of the root device
@@ -2204,7 +2064,7 @@ SsdpNotifyAliveWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 void
 SsdpNotifyAliveWriter::device(const Device& pDevice)
 {
-    std::clog << "SsdpNotifyAliveWriter::device(): " << pDevice.getUuid() << std::endl;
+//     std::clog << "SsdpNotifyAliveWriter::device(): " << pDevice.getUuid() << std::endl;
     // device first message (root device second message)
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m->setLocation(pDevice.getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
@@ -2221,7 +2081,7 @@ SsdpNotifyAliveWriter::device(const Device& pDevice)
 void
 SsdpNotifyAliveWriter::service(const Service& pService)
 {
-    std::clog << "SsdpNotifyAliveWriter::service()" << std::endl;
+//     std::clog << "SsdpNotifyAliveWriter::service()" << std::endl;
     // service first (and only) message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m->setLocation(pService.getDevice()->getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
@@ -2234,7 +2094,7 @@ SsdpNotifyAliveWriter::service(const Service& pService)
 void
 SsdpNotifyByebyeWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 {
-    std::clog << "SsdpNotifyByebyeWriter::deviceRoot()" << std::endl;
+//     std::clog << "SsdpNotifyByebyeWriter::deviceRoot()" << std::endl;
     // root device first message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType("upnp:rootdevice");  // once for root device
@@ -2246,7 +2106,7 @@ SsdpNotifyByebyeWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 void
 SsdpNotifyByebyeWriter::device(const Device& pDevice)
 {
-    std::clog << "SsdpNotifyByebyeWriter::device(): " << pDevice.getUuid() << std::endl;
+//     std::clog << "SsdpNotifyByebyeWriter::device(): " << pDevice.getUuid() << std::endl;
     // device first message (root device second message)
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType("uuid:" + pDevice.getUuid());
@@ -2262,7 +2122,7 @@ SsdpNotifyByebyeWriter::device(const Device& pDevice)
 void
 SsdpNotifyByebyeWriter::service(const Service& pService)
 {
-    std::clog << "SsdpNotifyByebyeWriter::service()" << std::endl;
+//     std::clog << "SsdpNotifyByebyeWriter::service()" << std::endl;
     // service first (and only) message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType(pService.getServiceType());
@@ -2288,7 +2148,7 @@ m_interface("*")
         requestMethod == REQUEST_NOTIFY_ALIVE ||
         requestMethod == REQUEST_NOTIFY_BYEBYE) {
             setHost();
-            setServer("Jamm/0.0.3");
+            setServer("Jamm/" + JAMM_VERSION);
             setCacheControl();
         }
     
@@ -2421,10 +2281,10 @@ SsdpMessage::getCacheControl()
         return Poco::NumberParser::parse(value.substr(value.find('=')+1));
     }
     catch (Poco::NotFoundException) {
-        std::clog << "missing CACHE-CONTROL in SSDP header" << std::endl;
+        Log::instance()->ssdp().error("missing CACHE-CONTROL in ssdp header");
     }
     catch (Poco::SyntaxException) {
-        std::clog << "wrong number format of CACHE-CONTROL in SSDP header" << std::endl;
+        Log::instance()->ssdp().error("wrong number format of CACHE-CONTROL in ssdp header");
     }
     return SSDP_CACHE_DURATION;  // if no valid number is given, return minimum required value
 }
@@ -2507,7 +2367,7 @@ SsdpMessage::getLocation()
         return m_messageHeader["LOCATION"];
     }
     catch (Poco::NotFoundException) {
-        std::clog << "Error in SsdpMessage::getLocation(): LOCATION field not found" << std::endl;
+        Log::instance()->ssdp().error("LOCATION field not found");
         return "";
     }
 }
@@ -2607,10 +2467,13 @@ SsdpMessage::getMaximumWaitTime()
         return Poco::NumberParser::parse(m_messageHeader["MX"]);
     }
     catch (Poco::NotFoundException) {
-        std::clog << "missing MX in SSDP header" << std::endl;
+//         std::clog << "missing MX in SSDP header" << std::endl;
+        Log::instance()->ssdp().error("missing MX in SSDP header");
+        
     }
     catch (Poco::SyntaxException) {
-        std::clog << "wrong number format of MX in SSDP header" << std::endl;
+//         std::clog << "wrong number format of MX in SSDP header" << std::endl;
+        Log::instance()->ssdp().error("wrong number format of MX in SSDP header");
     }
     return SSDP_MIN_WAIT_TIME;  // if no valid number is given, return minimum required value
 }
@@ -2634,7 +2497,8 @@ SsdpMessage::getDate()
         return Poco::DateTimeParser::parse(Poco::DateTimeFormat::HTTP_FORMAT, value, timeZoneDifferentail);
     }
     catch (Poco::SyntaxException) {
-        std::clog << "wrong date format of DATE in SSDP header" << std::endl;
+//         std::clog << "wrong date format of DATE in SSDP header" << std::endl;
+        Log::instance()->ssdp().error("wrong date format of DATE in SSDP header");
     }
 }
 
@@ -2661,18 +2525,19 @@ SsdpSocket::SsdpSocket()
 void
 SsdpSocket::addInterface(const std::string& name)
 {
-    std::clog << "SsdpSocket::addInterface() name: " << name << std::endl;
+    Log::instance()->ssdp().information(Poco::format("add interface: %s", name));
     
     SsdpNetworkInterface* pInterface = new SsdpNetworkInterface(name, this);
     m_interfaces[name] = pInterface;
     
-    std::clog << "SsdpSocket::addInterface() finished" << std::endl;
+//     std::clog << "SsdpSocket::addInterface() finished" << std::endl;
 }
 
 void
 SsdpSocket::removeInterface(const std::string& name)
 {
-    std::clog << "SsdpSocket::removeInterface() name: " << name << std::endl;
+//     std::clog << "SsdpSocket::removeInterface() name: " << name << std::endl;
+    Log::instance()->ssdp().information(Poco::format("remove interface: %s", name));
     
     SsdpNetworkInterface* pInterface = m_interfaces[name];
     delete pInterface;
@@ -2690,18 +2555,22 @@ SsdpSocket::setObserver(const Poco::AbstractObserver& observer)
 void
 SsdpSocket::start()
 {
-    std::clog << "SsdpSocket::start()" << std::endl;
+//     std::clog << "SsdpSocket::start()" << std::endl;
+    Log::instance()->ssdp().information("starting SSDP ...");
     
     m_listenerThread.start(m_reactor);
-    std::clog << "ssdp listener thread started" << std::endl;
+//     std::clog << "ssdp listener thread started" << std::endl;
+    Log::instance()->ssdp().information("SSDP listener thread started");
 }
 
 
 SsdpSocket::~SsdpSocket()
 {
-    std::clog << std::endl << "closing SSDP socket ..." << std::endl;
+//     std::clog << std::endl << "closing SSDP socket ..." << std::endl;
+    Log::instance()->ssdp().information("closing SSDP socket ...");
     m_reactor.stop();
     m_listenerThread.join();
+    Log::instance()->ssdp().information("done");
 }
 
 
@@ -2714,6 +2583,7 @@ SsdpSocket::sendMessage(SsdpMessage& message, const std::string& interface, cons
         if (interface == "*" || interface == (*it).first) {
             int bytesSent = (*it).second->m_pSsdpSenderSocket->sendTo(m.c_str(), m.length(), receiver);
 //             std::clog << "SSDP message sent to interface: " << (*it).first << " , address: " << receiver.toString() << std::endl << m;
+            Log::instance()->ssdp().debug(Poco::format("sending message to interface %s with address: %s", (*it).first, receiver.toString()));
         }
     }
 }
@@ -2724,33 +2594,35 @@ m_name(interfaceName),
 m_pSsdpSocket(pSsdpSocket),
 m_pBuffer(new char[BUFFER_SIZE])
 {
-    std::clog << "SsdpNetworkInterface::SsdpNetworkInterface() name: " << interfaceName << std::endl;
+//     std::clog << "SsdpNetworkInterface::SsdpNetworkInterface() name: " << interfaceName << std::endl;
+    Log::instance()->ssdp().information(Poco::format("setting up socket on interface %s", interfaceName));
+    
     m_pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface::forName(interfaceName));
     
-    std::clog << "setting up sender socket" << std::endl;
+//     std::clog << "setting up sender socket" << std::endl;
     // listen to UDP unicast and send out to multicast
     m_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
     m_pSsdpSenderSocket->setInterface(*m_pInterface);
     m_pSsdpSenderSocket->setLoopback(true);
     m_pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
     
-    std::clog << "setting up listener socket" << std::endl;
+//     std::clog << "setting up listener socket" << std::endl;
     // listen to UDP multicast
     m_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
     m_pSsdpListenerSocket->setInterface(*m_pInterface);
     m_pSsdpListenerSocket->setLoopback(true);
     m_pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     
-    std::clog << "adding event handlers" << std::endl;
+//     std::clog << "adding event handlers" << std::endl;
     m_pSsdpSocket->m_reactor.addEventHandler(*m_pSsdpSenderSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
     m_pSsdpSocket->m_reactor.addEventHandler(*m_pSsdpListenerSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
-    std::clog << "SsdpNetworkInterface::SsdpNetworkInterface() finished" << std::endl;
+//     std::clog << "SsdpNetworkInterface::SsdpNetworkInterface() finished" << std::endl;
 }
 
 
 SsdpNetworkInterface::~SsdpNetworkInterface()
 {
-    std::clog << "SsdpNetworkInterface::~SsdpNetworkInterface()" << std::endl;
+//     std::clog << "SsdpNetworkInterface::~SsdpNetworkInterface()" << std::endl;
     
     m_pSsdpListenerSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     
@@ -2767,14 +2639,13 @@ SsdpNetworkInterface::~SsdpNetworkInterface()
 void
 SsdpNetworkInterface::onReadable(Poco::Net::ReadableNotification* pNotification)
 {
-//     std::clog << "SsdpNetworkInterface::onReadable()" << std::endl;
-    
     Poco::Net::SocketAddress sender;
     Poco::Net::Socket* pSocket = &(pNotification->socket());
     Poco::Net::DatagramSocket* pDatagramSocket = static_cast<Poco::Net::DatagramSocket*>(pSocket);
     int n = pDatagramSocket->receiveFrom(m_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-//         std::clog << "SSDP message received on interface: " << m_name << ", from: " << sender.toString() << std::endl << std::string(m_pBuffer, n) << std::endl;
+        Log::instance()->ssdp().debug(Poco::format("received message on interface %s from: %s\n%s", m_name, sender.toString(), std::string(m_pBuffer, n)));
+        
         m_pSsdpSocket->m_notificationCenter.postNotification(new SsdpMessage(std::string(m_pBuffer, n), m_name, sender));
     }
     // FIXME: this results in a segfault

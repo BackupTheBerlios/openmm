@@ -111,7 +111,7 @@ typedef r8              number;
 typedef Poco::URI       uri;
 
 static const std::string    UPNP_VERSION        = "1.0";
-static const std::string    JAMM_VERSION        = "0.0.3";
+static const std::string    JAMM_VERSION        = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 
 class Device;
@@ -175,10 +175,10 @@ public:
     {
         try {
             m_pluginPath += Poco::Environment::get("JAMM_PLUGIN_PATH");
-            std::clog << "PluginLoader JAMM_PLUGIN_PATH is: " << m_pluginPath << std::endl;
+//             std::clog << "PluginLoader JAMM_PLUGIN_PATH is: " << m_pluginPath << std::endl;
         }
         catch (Poco::NotFoundException) {
-            std::clog << "PluginLoader: JAMM_PLUGIN_PATH not set, standard search path is: " << m_pluginPath << std::endl;
+//             std::clog << "PluginLoader: JAMM_PLUGIN_PATH not set, standard search path is: " << m_pluginPath << std::endl;
         }
         Poco::StringTokenizer pathSplitter(m_pluginPath, ":");
         Poco::StringTokenizer::Iterator it;
@@ -459,7 +459,7 @@ public:
 //             std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
             return res;
         } else {
-            std::cerr << "Container::getValue() could not find key: " << key << std::endl;
+//             std::cerr << "Container::getValue() could not find key: " << key << std::endl;
             // TODO: throw an exception
             return T();
         }
@@ -482,7 +482,7 @@ public:
             e->setValue(val);
         }
         else {
-            std::cerr << "Container::setValue() pointer to Variant is invalid" << std::endl;
+//             std::cerr << "Container::setValue() pointer to Variant is invalid" << std::endl;
         }
 //         std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
     }
@@ -666,7 +666,7 @@ public:
     Service* getService() const { return m_pService; }
     template<typename T> const T getArgument(const std::string& name)
     {
-        std::clog << "Action::getArgument() name: " << name << std::endl;
+//         std::clog << "Action::getArgument() name: " << name << std::endl;
         return m_arguments.getValue<T>(name);
     }
     
@@ -674,7 +674,7 @@ public:
     void setService(Service* pService) { m_pService = pService; }
     template<typename T> void setArgument(std::string name, const T& val)
     {
-        std::clog << "Action::setArgument() name: " << name << std::endl;
+//         std::clog << "Action::setArgument() name: " << name << std::endl;
         m_arguments.setValue(name, val);
     }
     
@@ -1001,7 +1001,7 @@ T
 Service::getStateVar(const std::string& key)
 {
     // TODO: lock the m_stateVariables map because different threads could access it
-    std::clog << "Service::getStateVar()" << std::endl;
+//     std::clog << "Service::getStateVar()" << std::endl;
     return m_stateVars.getValue<T>(key);
 }
 
@@ -1011,15 +1011,15 @@ void
 Service::setStateVar(std::string key, const T& val)
 {
     // TODO: lock the m_stateVariables map because different threads could access it
-    std::clog << "Service::setStateVar() name: " << key << std::endl;
+//     std::clog << "Service::setStateVar() name: " << key << std::endl;
     // FIXME: segfault here
-    std::clog << "service type: " << getServiceType() << std::endl;
+//     std::clog << "service type: " << getServiceType() << std::endl;
     m_stateVars.setValue(key, val);
     if (m_stateVars.get(key).getSendEvents()) {
-        std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
+//         std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
         sendEventMessage(m_stateVars.get(key));
     }
-    std::clog << "Service::setStateVar() finished" << std::endl;
+//     std::clog << "Service::setStateVar() finished" << std::endl;
 }
 
 
