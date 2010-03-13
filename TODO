@@ -1,5 +1,4 @@
 current FIXMES:
-// FIXME: [platinum] gives empty responses to action requests
 // FIXME: [mediatomb] sometimes doesn't response to M-SEARCHES ...?
 
 ------------------------------------------------------
@@ -14,7 +13,6 @@ current TODOS:
 // TODO: [jammgen, Upnp] the name ControllerImplAdapter may be misleading
 // TODO: [jammgen] MediaServer::m_pContentDirectoryImpl protected instead of private?
 
-
 // TODO: proper deep deletion of DeviceRoot in dtor (-> ~Container)
 // TODO: Variant: catch conversion errors with log message
 // NOTE: Embedded Devices:
@@ -23,16 +21,15 @@ current TODOS:
 // -> this way ControlURL of same Service can be the same for all embedded devices
 // -> albeit: BaseURL is device description (and thus DeviceRoot) related
 // -> so nope: ControlURLs of embedded devices of same type must differ, as they are relative to BaseURL
-// TODO: BaseURL is LOCATION in rootdevice SSDP message !!! All other URLs refer to this
 // TODO: Find a proper interface for the readers and writers
 // TODO: complete event messaging
 // TODO: OPTIONAL stuff: optional (not required) services and actions: configure them via ImplAdapter
 //       and rewrite description accordingly
 
-
+// TODO: Icon stuff
 // TODO: Remaining Event subscription stuff
 // TODO: Remaining SSDP M-Search requests
-// TODO: Device configuration
+// TODO: Finish device configuration
 // TODO: Error handling
 // TODO: Variable query (only for Device)
 // TODO: Service and Device version checking

@@ -115,6 +115,9 @@ protected:
             myMediaServer.setRoot(pWebRadio);
             
             myMediaServer.setFriendlyName("Web Radio");
+            Jamm::Icon* pIcon = new Jamm::Icon(22, 22, 8, "image/png");
+            pIcon->retrieve("file:/usr/lib/jamm/device.png");
+            myMediaServer.addIcon(pIcon);
             myMediaServer.start();
             waitForTerminationRequest();
             // myMediaServer.stop();

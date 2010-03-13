@@ -78,6 +78,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/MediaType.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeIterator.h>
@@ -210,6 +211,30 @@ public:
 private:
     Poco::ClassLoader<C>*    m_pPluginLoader;
     std::string              m_pluginPath;
+};
+
+
+class Icon {
+    friend class IconRequestHandler;
+    friend class DeviceRoot;
+    friend class Device;
+    friend class DeviceDescriptionWriter;
+    
+public:
+    Icon(int width, int height, int depth, const std::string& mime);
+    ~Icon();
+    
+//     const std::string& requestUri();
+    void retrieve(const std::string& uri);
+    
+private:
+    int                     m_width;
+    int                     m_height;
+    int                     m_depth;
+    Poco::Net::MediaType    m_mime;
+    void*                   m_pData;
+    std::size_t             m_size;
+    std::string             m_requestUri;
 };
 
 
@@ -827,6 +852,10 @@ public:
     PropertyIterator beginProperty() { return m_properties.begin(); }
     PropertyIterator endProperty() { return m_properties.end(); }
     
+    typedef std::vector<Icon*>::iterator IconIterator;
+    IconIterator beginIcon() { return m_iconList.begin(); }
+    IconIterator endIcon() { return m_iconList.end(); }
+    
     DeviceRoot* getDeviceRoot() const { return m_pDeviceRoot; }
     std::string getUuid() const { return m_uuid; }
     std::string getDeviceType() const { return m_deviceType; }
@@ -842,6 +871,7 @@ public:
     
     void addProperty(const std::string& name, const std::string& val) { m_properties.append(name, new std::string(val)); }
     void addService(Service* pService);
+    void addIcon(Icon* pIcon);
     
 private:
     DeviceRoot*                         m_pDeviceRoot;
@@ -849,6 +879,7 @@ private:
     std::string                         m_deviceType;
     Container<Service>                  m_services;
     Container<std::string>              m_properties;
+    std::vector<Icon*>                  m_iconList;
 };
 
 
@@ -874,18 +905,12 @@ public:
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
     Device* getRootDevice() const { return m_pRootDevice; }
     std::string* getDeviceDescription() const { return m_pDeviceDescription; }
-//     const Poco::URI& getBaseUri() const { return m_baseUri; }
-//     const Poco::URI& getDescriptionUri() const { return m_descriptionUri; }
     const std::string& getDescriptionUri() const { return m_descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     
     void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
     void setDeviceDescription(std::string& description) { m_pDeviceDescription = &description; }
-//     void setBaseUri() { m_baseUri = Poco::URI(m_httpSocket.getServerUri()); }
-//     void setBaseUri(const Poco::URI& baseUri) { m_baseUri = baseUri; }
-//     void setDescriptionUri(std::string descriptionPath) { m_descriptionUri = m_httpSocket.getServerUri() + descriptionPath; }
     void setDescriptionUri(const std::string uri) { m_descriptionUri = uri; }
-//     void addDevice(Device* pDevice) { m_devices.append(pDevice->getUuid(), pDevice); }
     void addDevice(Device* pDevice) { m_devices.append(pDevice); }
     void addServiceType(std::string serviceType, Service* pService) { m_serviceTypes[serviceType] = pService; }
     
@@ -946,6 +971,7 @@ public:
     void setUuid(std::string uuid, int deviceNumber = 0);
     void setRandomUuid(int deviceNumber = 0);
     void setFriendlyName(const std::string& friendlyName, int deviceNumber = 0);
+    void addIcon(Icon* pIcon, int deviceNumber = 0);
     
 protected:
     virtual void actionHandler(Action* action) = 0;

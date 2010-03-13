@@ -116,6 +116,10 @@ protected:
             Jamm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
             
             myMediaRenderer.setFullscreen();
+            Jamm::Icon* pIcon = new Jamm::Icon(22, 22, 8, "image/png");
+            pIcon->retrieve("file:/usr/lib/jamm/renderer.png");
+            myMediaRenderer.addIcon(pIcon);
+            
             myMediaRenderer.start();
             waitForTerminationRequest();
             // myMediaRenderer.stop();

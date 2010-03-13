@@ -266,6 +266,7 @@ public:
 private:
     Poco::XML::Element* device(Device& device);
     Poco::XML::Element* service(Service* pService);
+    Poco::XML::Element* icon(Icon* pIcon);
     Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
 };
 
@@ -431,6 +432,19 @@ public:
     
 private:
     Service*    m_pService;
+};
+
+
+class IconRequestHandler: public UpnpRequestHandler
+{
+public:
+    IconRequestHandler(Icon* pIcon) : m_pIcon(pIcon) {}
+    
+    IconRequestHandler* create();
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+    
+private:
+    Icon*    m_pIcon;
 };
 
 

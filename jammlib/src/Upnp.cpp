@@ -36,7 +36,7 @@ Log::Log()
     pFormatLogger->setChannel(new Poco::ConsoleChannel);
     pFormatLogger->open();
     m_pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    m_pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    m_pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     m_pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     m_pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     m_pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
@@ -185,6 +185,38 @@ FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 }
 
 
+Icon::Icon(int width, int height, int depth, const std::string& mime) :
+m_width(width),
+m_height(height),
+m_depth(depth),
+m_mime(mime)
+{
+}
+
+
+// const std::string&
+// Icon::requestUri()
+// {
+//     return m_requestUri;
+// }
+
+
+void
+Icon::retrieve(const std::string& uri)
+{
+    Poco::URI iconUri(uri);
+    
+    if (iconUri.getScheme() == "file") {
+        Log::instance()->upnp().debug(Poco::format("retrieving icon from: %s", iconUri.getPath()));
+        std::ifstream ifs(iconUri.getPath().c_str());
+        Poco::File f(iconUri.getPath());
+        m_pData = new char[f.getSize()];
+        ifs.read((char*)m_pData, f.getSize());
+        m_size = f.getSize();
+    }
+}
+
+
 NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
 m_interfaceName(interfaceName),
 m_added(added)
@@ -198,8 +230,6 @@ NetworkInterfaceManager* NetworkInterfaceManager::m_pInstance = 0;
 
 NetworkInterfaceManager::NetworkInterfaceManager()
 {
-//     std::clog << "NetworkInterfaceManager::NetworkInterfaceManager()" << std::endl;
-    
     m_loopbackProvided = false;
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
@@ -223,8 +253,6 @@ NetworkInterfaceManager::instance()
 void
 NetworkInterfaceManager::findValidIpAddress()
 {
-//     std::clog << "NetworkInterfaceManager::findValidIpAddress()" << std::endl;
-    
     bool validAddressFound = false;
     for (std::vector<std::string>::iterator it = m_interfaceList.begin(); it != m_interfaceList.end(); ++it) {
         Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName(*it).address();
@@ -254,8 +282,6 @@ NetworkInterfaceManager::findValidIpAddress()
 void
 NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObserver& observer)
 {
-//     std::clog << "NetworkInterfaceManager::registerInterfaceChangeHandler()" << std::endl;
-    
     m_notificationCenter.addObserver(observer);
     for (std::vector<std::string>::iterator it = m_interfaceList.begin(); it != m_interfaceList.end(); ++it) {
         Log::instance()->upnp().information(Poco::format("notify observer of new network interface: %s", (*it)));
@@ -267,8 +293,6 @@ NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObse
 void
 NetworkInterfaceManager::addInterface(const std::string& name)
 {
-//     std::clog << "NetworkInterfaceManager::addInterface() name: " << name << std::endl;
-    
     if (find(m_interfaceList.begin(), m_interfaceList.end(), name) == m_interfaceList.end()) {
         Log::instance()->upnp().information(Poco::format("adding network interface: %s", name));
         m_interfaceList.push_back(name);
@@ -372,17 +396,10 @@ StringDescriptionReader::deviceRoot(const std::string& deviceDescriptionKey)
 std::string&
 StringDescriptionReader::getDescription(const std::string& path)
 {
-//     std::clog << "StringDescriptionReader::getDescription()" << std::endl;
     std::string* res = (*m_pStringMap)[path];
     parseDescription(*res);
     return *res;
 }
-
-
-// DescriptionReader::DescriptionReader(std::string deviceDescriptionUri) :
-// m_deviceDescriptionUri(deviceDescriptionUri)
-// {
-// }
 
 
 DescriptionReader::DescriptionReader()
@@ -402,7 +419,6 @@ DescriptionReader::parseDescription(const std::string& description)
     Poco::XML::DOMParser parser;
     m_pDocStack.push(parser.parseString(description));
     return m_pDocStack.top()->documentElement()->firstChild();
-//     m_nodeStack.push(n);
 }
 
 
@@ -420,29 +436,21 @@ DescriptionReader::releaseDescriptionDocument()
 DeviceRoot*
 DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
 {
-//     std::clog << "DescriptionReader::deviceRoot()" << std::endl;
     DeviceRoot* pRes = new DeviceRoot();
-//     m_pDeviceRoot = pRes;
 //     pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
     // NOTE: a running HttpSocket is needed here, to set host and port of BaseUri and DescriptionUri
     //       that's why jammgen crashes without setting up a socket in HttpSocket::init()
-//     pRes->setBaseUri();
-//     pRes->setDescriptionUri(m_deviceDescriptionPath);
-//     Poco::XML::Node* pNode = m_nodeStack.top();
-//     std::clog << "top of stack: " << pNode << std::endl;
     
     while (pNode)
     {
 //         std::clog << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
-//             m_nodeStack.push(pNode->firstChild());
             Device* pDevice = device(pNode->firstChild(), pRes);
             pRes->addDevice(pDevice);
             pRes->setRootDevice(pDevice);
         }
         pNode = pNode->nextSibling();
     }
-//     m_nodeStack.pop();
     return pRes;
 }
 
@@ -450,7 +458,6 @@ DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
 Device*
 DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
 {
-//     std::clog << "DescriptionReader::device()" << std::endl;
     Device* pRes = new Device();
     pRes->setDeviceRoot(pDeviceRoot);
 
@@ -514,7 +521,6 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
 Service*
 DescriptionReader::service(Poco::XML::Node* pNode)
 {
-//     std::clog << "DescriptionReader::service()" << std::endl;
     Service* pRes = new Service();
     
     while (pNode)
@@ -578,7 +584,6 @@ DescriptionReader::service(Poco::XML::Node* pNode)
 Action*
 DescriptionReader::action(Poco::XML::Node* pNode)
 {
-//     std::clog << "DescriptionReader::action()" << std::endl;
     Action* pRes = new Action();
     
     while (pNode)
@@ -604,7 +609,6 @@ DescriptionReader::action(Poco::XML::Node* pNode)
 Argument*
 DescriptionReader::argument(Poco::XML::Node* pNode)
 {
-//     std::clog << "DescriptionReader::argument()" << std::endl;
     Argument* pRes = new Argument();
     
     while (pNode)
@@ -629,7 +633,6 @@ DescriptionReader::argument(Poco::XML::Node* pNode)
 StateVar*
 DescriptionReader::stateVar(Poco::XML::Node* pNode)
 {
-//     std::clog << "DescriptionReader::stateVar()" << std::endl;
     StateVar* pRes = new StateVar();
     
     while (pNode)
@@ -643,7 +646,7 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
-            Log::instance()->desc().debug(Poco::format("set default value for state variable to: %s", val));
+            Log::instance()->desc().debug(Poco::format("set default value for state variable \"%s\" to: %s", pRes->getName(), val));
             
             pRes->setValue(val);
         }
@@ -658,6 +661,7 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
     Log::instance()->ctrl().debug(Poco::format("action request:\n%s", requestBody));
     
     Poco::XML::DOMParser parser;
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
     m_pDoc = parser.parseString(requestBody);
     Poco::XML::NodeIterator it(m_pDoc, Poco::XML::NodeFilter::SHOW_ALL);
     m_nodeStack.push(it.nextNode());
@@ -819,9 +823,17 @@ DeviceDescriptionWriter::device(Device& device)
         Log::instance()->desc().debug(Poco::format("writer added property: %s = %s", (*it).first, *(*it).second));
     }
     
+    Poco::AutoPtr<Poco::XML::Element> pIconList = m_pDoc->createElement("iconList");
+    pDevice->appendChild(pIconList);
+    // Icons
+    for (Device::IconIterator it = device.beginIcon(); it != device.endIcon(); ++it) {
+        pIconList->appendChild(icon(*it));
+        Log::instance()->desc().debug(Poco::format("writer added icon: %s", (*it)->m_requestUri));
+    }
+    
     Poco::AutoPtr<Poco::XML::Element> pServiceList = m_pDoc->createElement("serviceList");
     pDevice->appendChild(pServiceList);
-    // write Services
+    // Services
     for (Container<Service>::Iterator it = device.m_services.begin(); it != device.m_services.end(); ++it) {
         pServiceList->appendChild(service(*it));
         Log::instance()->desc().debug(Poco::format("writer added service: %s", (*it)->getServiceType()));
@@ -863,6 +875,41 @@ DeviceDescriptionWriter::service(Service* pService)
     pServiceElement->appendChild(pEvent);
     
     return pServiceElement;
+}
+
+
+Poco::XML::Element*
+DeviceDescriptionWriter::icon(Icon* pIcon)
+{
+    Poco::XML::Element* pIconElement = m_pDoc->createElement("icon");
+    
+    // mimetype
+    Poco::AutoPtr<Poco::XML::Element> pMimetype = m_pDoc->createElement("mimetype");
+    Poco::AutoPtr<Poco::XML::Text> pMimetypeVal = m_pDoc->createTextNode(pIcon->m_mime.toString());
+    pMimetype->appendChild(pMimetypeVal);
+    pIconElement->appendChild(pMimetype);
+    // width
+    Poco::AutoPtr<Poco::XML::Element> pWidth = m_pDoc->createElement("width");
+    Poco::AutoPtr<Poco::XML::Text> pWidthVal = m_pDoc->createTextNode(Poco::NumberFormatter::format(pIcon->m_width));
+    pWidth->appendChild(pWidthVal);
+    pIconElement->appendChild(pWidth);
+    // height
+    Poco::AutoPtr<Poco::XML::Element> pHeight = m_pDoc->createElement("height");
+    Poco::AutoPtr<Poco::XML::Text> pHeightVal = m_pDoc->createTextNode(Poco::NumberFormatter::format(pIcon->m_height));
+    pHeight->appendChild(pHeightVal);
+    pIconElement->appendChild(pHeight);
+    // depth
+    Poco::AutoPtr<Poco::XML::Element> pDepth = m_pDoc->createElement("depth");
+    Poco::AutoPtr<Poco::XML::Text> pDepthVal = m_pDoc->createTextNode(Poco::NumberFormatter::format(pIcon->m_depth));
+    pDepth->appendChild(pDepthVal);
+    pIconElement->appendChild(pDepth);
+    // url
+    Poco::AutoPtr<Poco::XML::Element> pUrl = m_pDoc->createElement("url");
+    Poco::AutoPtr<Poco::XML::Text> pUrlVal = m_pDoc->createTextNode(pIcon->m_requestUri);
+    pUrl->appendChild(pUrlVal);
+    pIconElement->appendChild(pUrl);
+    
+    return pIconElement;
 }
 
 
@@ -1290,12 +1337,24 @@ DescriptionRequestHandler::create()
 void
 DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
+    std::ostringstream requestHeader;
+    request.write(requestHeader);
     Log::instance()->desc().debug(Poco::format("description request: %s", request.getURI()));
+    Log::instance()->desc().debug(Poco::format("description request header: \n%s", requestHeader.str()));
+    if (request.has("Accept-Language")) {
+        std::string lang = request.get("Accept-Language");
+        // TODO: set proper lang in description response
+        response.set("Content-Language", lang);
+    }
     response.setContentLength(m_pDescription->size());
     response.setContentType("text/xml");
+    response.setDate(Poco::Timestamp());
+    std::ostringstream responseHeader;
+    response.write(responseHeader);
+    Log::instance()->desc().debug(Poco::format("description response header: \n%s", responseHeader.str()));
+    
     std::ostream& ostr = response.send();
     ostr << *m_pDescription;
-//     Log::instance()->desc().debug(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
 }
 
 
@@ -1377,7 +1436,7 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     std::string sid;
     
     if (request.getMethod() == "SUBSCRIBE") {
-        Poco::Timestamp t;
+//         Poco::Timestamp t;
         if (request.has("SID")) {
             sid = request.get("SID");
             // renew subscription
@@ -1390,7 +1449,8 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
             m_pService->sendInitialEventMessage(pSubscription);
             m_pService->registerSubscription(pSubscription);
         }
-        response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
+//         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
+        response.setDate(Poco::Timestamp());
         response.set("SERVER", 
                      Poco::Environment::osName() + "/"
                      + Poco::Environment::osVersion() + ", "
@@ -1408,6 +1468,22 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     else if (request.getMethod() == "UNSUBSCRIBE") {
         m_pService->unregisterSubscription(m_pService->getSubscription(sid));
     }
+}
+
+
+IconRequestHandler*
+IconRequestHandler::create()
+{
+    return new IconRequestHandler(m_pIcon);
+}
+
+
+void
+IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+{
+    Log::instance()->upnp().debug(Poco::format("icon request from: %s", request.getHost()));
+    
+    response.sendBuffer(m_pIcon->m_pData, m_pIcon->m_size);
 }
 
 
@@ -1486,6 +1562,14 @@ Device::setRandomUuid()
 {
     Poco::UUIDGenerator uuidGenerator;
     m_uuid = uuidGenerator.createRandom().toString();
+}
+
+
+void
+Device::addIcon(Icon* pIcon)
+{
+    m_iconList.push_back(pIcon);
+    pIcon->m_requestUri = "/DeviceIcon" + Poco::NumberFormatter::format(m_iconList.size());
 }
 
 
@@ -1664,6 +1748,13 @@ DeviceRootImplAdapter::setFriendlyName(const std::string& friendlyName, int devi
 }
 
 
+void
+DeviceRootImplAdapter::addIcon(Icon* pIcon, int deviceNumber)
+{
+    m_pDeviceRoot->m_devices.get(deviceNumber).addIcon(pIcon);
+}
+
+
 SsdpMessageSet::SsdpMessageSet()
 {
     m_randomTimeGenerator.seed();
@@ -1800,6 +1891,9 @@ DeviceRoot::startHttp()
     registerHttpRequestHandler(descriptionUri.getPath(), m_descriptionRequestHandler);
 
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
+            registerHttpRequestHandler((*i)->m_requestUri, new IconRequestHandler(*i));
+        }
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
             // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)

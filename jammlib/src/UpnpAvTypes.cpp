@@ -99,6 +99,7 @@ void
 MediaObject::readMetaData(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
     Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
     readNode(pDidl);
