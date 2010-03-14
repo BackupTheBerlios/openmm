@@ -164,7 +164,7 @@ class PluginLoader
 public:
     PluginLoader() :
         m_pPluginLoader(new Poco::ClassLoader<C>),
-        m_pluginPath("/usr/lib/jamm:/usr/local/lib/jamm:")
+        m_pluginPath(":/usr/lib/jamm:/usr/local/lib/jamm")
     {}
     
     ~PluginLoader()
@@ -175,7 +175,7 @@ public:
     void loadPlugin(const std::string& name)
     {
         try {
-            m_pluginPath += Poco::Environment::get("JAMM_PLUGIN_PATH");
+            m_pluginPath = Poco::Environment::get("JAMM_PLUGIN_PATH") + m_pluginPath;
 //             std::clog << "PluginLoader JAMM_PLUGIN_PATH is: " << m_pluginPath << std::endl;
         }
         catch (Poco::NotFoundException) {
@@ -221,13 +221,12 @@ class Icon {
     friend class DeviceDescriptionWriter;
     
 public:
-    Icon(int width, int height, int depth, const std::string& mime);
+    Icon(int width, int height, int depth, const std::string& mime, const std::string& uri = "");
     ~Icon();
     
-//     const std::string& requestUri();
+private:
     void retrieve(const std::string& uri);
     
-private:
     int                     m_width;
     int                     m_height;
     int                     m_depth;
@@ -235,6 +234,7 @@ private:
     void*                   m_pData;
     std::size_t             m_size;
     std::string             m_requestUri;
+    std::string             m_iconPath;
 };
 
 

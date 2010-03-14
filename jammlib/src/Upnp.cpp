@@ -33,7 +33,12 @@ Log* Log::m_pInstance = 0;
 Log::Log()
 {
     Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    pFormatLogger->setChannel(new Poco::ConsoleChannel);
+    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
+    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+    Poco::FileChannel* pFileChannel = new Poco::FileChannel("jamm.log");
+    pSplitterChannel->addChannel(pConsoleChannel);
+    pSplitterChannel->addChannel(pFileChannel);
+    pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     m_pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     m_pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
@@ -185,20 +190,31 @@ FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 }
 
 
-Icon::Icon(int width, int height, int depth, const std::string& mime) :
+Icon::Icon(int width, int height, int depth, const std::string& mime, const std::string& uri) :
 m_width(width),
 m_height(height),
 m_depth(depth),
-m_mime(mime)
+m_mime(mime),
+m_pData(0),
+m_size(0),
+m_requestUri(""),
+m_iconPath(":/usr/lib/jamm:/usr/local/lib/jamm")
 {
+    try {
+        m_iconPath = Poco::Environment::get("JAMM_ICON_PATH") + m_iconPath;
+    }
+    catch (Poco::NotFoundException) {
+    }
+    
+    if (uri != "") {
+        try {
+            retrieve(uri);
+        }
+        catch (Poco::NotFoundException) {
+            Log::instance()->upnp().error(Poco::format("failed to retrieve icon from: %s", uri));
+        }
+    }
 }
-
-
-// const std::string&
-// Icon::requestUri()
-// {
-//     return m_requestUri;
-// }
 
 
 void
@@ -207,12 +223,41 @@ Icon::retrieve(const std::string& uri)
     Poco::URI iconUri(uri);
     
     if (iconUri.getScheme() == "file") {
-        Log::instance()->upnp().debug(Poco::format("retrieving icon from: %s", iconUri.getPath()));
-        std::ifstream ifs(iconUri.getPath().c_str());
         Poco::File f(iconUri.getPath());
+        if (!f.exists()) {
+            throw Poco::NotFoundException();
+        }
+        Log::instance()->upnp().debug(Poco::format("reading icon from file: %s", iconUri.getPath()));
+        std::ifstream ifs(iconUri.getPath().c_str());
         m_pData = new char[f.getSize()];
         ifs.read((char*)m_pData, f.getSize());
         m_size = f.getSize();
+
+    }
+    else if (iconUri.isRelative()) {
+        Poco::StringTokenizer pathSplitter(m_iconPath, ":");
+        Poco::StringTokenizer::Iterator it;
+        for (it = pathSplitter.begin(); it != pathSplitter.end(); ++it) {
+            if (*it == "") {
+                continue;
+            }
+            Poco::URI baseUri(*it + "/");
+            baseUri.resolve(iconUri);
+            Log::instance()->upnp().debug(Poco::format("try to read icon from file: %s", baseUri.getPath()));
+            Poco::File f(baseUri.getPath());
+            if (!f.exists()) {
+                continue;
+            }
+            Log::instance()->upnp().debug(Poco::format("reading icon from file: %s", baseUri.getPath()));
+            std::ifstream ifs(baseUri.getPath().c_str());
+            m_pData = new char[f.getSize()];
+            ifs.read((char*)m_pData, f.getSize());
+            m_size = f.getSize();
+            break;
+        }
+        if (it == pathSplitter.end()) {
+            throw Poco::NotFoundException();
+        }
     }
 }
 
@@ -323,17 +368,6 @@ NetworkInterfaceManager::getValidInterfaceAddress()
 }
 
 
-// UriDescriptionReader::UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath) :
-// DescriptionReader(deviceDescriptionPath),
-// m_uri(uri)
-// {
-// }
-
-// UriDescriptionReader::UriDescriptionReader(const std::string& deviceDescriptionUri)
-// {
-// }
-
-
 DeviceRoot*
 UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
 {
@@ -367,6 +401,9 @@ UriDescriptionReader::getDescription(const std::string& relativeUri)
         Poco::Net::HTTPResponse response;
         std::istream& rs = session.receiveResponse(response);
         Log::instance()->desc().information(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
+        std::stringstream header;
+        response.write(header);
+        Log::instance()->desc().debug(Poco::format("response header:\n%s", header.str()));
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
     }
@@ -417,7 +454,10 @@ Poco::XML::Node*
 DescriptionReader::parseDescription(const std::string& description)
 {
     Poco::XML::DOMParser parser;
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+    std::clog << "parsing description ..." << std::endl;
     m_pDocStack.push(parser.parseString(description));
+    std::clog << "parsing finished" << std::endl;
     return m_pDocStack.top()->documentElement()->firstChild();
 }
 
@@ -425,11 +465,10 @@ DescriptionReader::parseDescription(const std::string& description)
 void
 DescriptionReader::releaseDescriptionDocument()
 {
-/*    std::clog << "DescriptionReader::releaseDescriptionDocument()" << std::endl;
-    if (!m_pDocStack.empty()) {
-        m_pDocStack.top()->release();
-        m_pDocStack.pop();
-    }*/
+//     if (!m_pDocStack.empty()) {
+//         m_pDocStack.top()->release();
+//         m_pDocStack.pop();
+//     }
 }
 
 
@@ -437,13 +476,10 @@ DeviceRoot*
 DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
 {
     DeviceRoot* pRes = new DeviceRoot();
-//     pRes->setDeviceDescription(getDescription(m_deviceDescriptionPath));
     // NOTE: a running HttpSocket is needed here, to set host and port of BaseUri and DescriptionUri
     //       that's why jammgen crashes without setting up a socket in HttpSocket::init()
-    
     while (pNode)
     {
-//         std::clog << "node: " << pNode->nodeName() << std::endl;
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
             Device* pDevice = device(pNode->firstChild(), pRes);
             pRes->addDevice(pDevice);
@@ -827,8 +863,10 @@ DeviceDescriptionWriter::device(Device& device)
     pDevice->appendChild(pIconList);
     // Icons
     for (Device::IconIterator it = device.beginIcon(); it != device.endIcon(); ++it) {
-        pIconList->appendChild(icon(*it));
-        Log::instance()->desc().debug(Poco::format("writer added icon: %s", (*it)->m_requestUri));
+        if ((*it)->m_pData) {
+            pIconList->appendChild(icon(*it));
+            Log::instance()->desc().debug(Poco::format("writer added icon: %s", (*it)->m_requestUri));
+        }
     }
     
     Poco::AutoPtr<Poco::XML::Element> pServiceList = m_pDoc->createElement("serviceList");
@@ -1345,16 +1383,34 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
         std::string lang = request.get("Accept-Language");
         // TODO: set proper lang in description response
         response.set("Content-Language", lang);
+//         response.set("CONTENT-LANGUAGE", lang);
     }
     response.setContentLength(m_pDescription->size());
     response.setContentType("text/xml");
     response.setDate(Poco::Timestamp());
+//     response.setVersion("HTTP/1.1");
+//     response.set("CONTENT-LENGTH", Poco::NumberFormatter::format(m_pDescription->size()));
+//     response.set("CONTENT-TYPE", "text/xml; charset=UTF-8");
+//     response.set("DATE", Poco::DateTimeFormatter::format(Poco::Timestamp(), Poco::DateTimeFormat::HTTP_FORMAT));
+//     response.set("CONNECTION", "close");
+//     response.set("SERVER", "Linux/2.6.27-17-generic, UPnP/1.0, Jamm/0.1.0");
+//     response.set("LAST-MODIFIED", "Sun, 14 Mar 2010 11:30:22 GMT");
     std::ostringstream responseHeader;
     response.write(responseHeader);
     Log::instance()->desc().debug(Poco::format("description response header: \n%s", responseHeader.str()));
+    response.sendBuffer(m_pDescription->c_str(), m_pDescription->size());
+    if (response.sent()) {
+        Log::instance()->desc().debug("description (header) successfully sent");
+    }
     
-    std::ostream& ostr = response.send();
-    ostr << *m_pDescription;
+    /*
+    mediatomb needs this for SAMSUNGs:
+    <custom-http-headers> 
+    <!-- Samsung needs it --> 
+    <add header="transferMode.dlna.org: Streaming"/> 
+    <add header="contentFeatures.dlna.org: DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01500000000000000000000000000000"/> 
+    </custom-http-headers> 
+    */
 }
 
 
@@ -1676,10 +1732,9 @@ DeviceRoot::initDevice()
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
     m_pDeviceDescription = descriptionWriter.write();
+    
     Log::instance()->upnp().debug("init device root finished");
-//     std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
-//     std::clog << "DeviceRoot::initDevice() device description rewritten" << std::endl;
-//     std::clog << "DeviceRoot::initDevice() finished" << std::endl;
+    std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
 }
 
 

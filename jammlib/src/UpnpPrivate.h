@@ -31,6 +31,7 @@
 #include <Poco/FormattingChannel.h>
 #include <Poco/ConsoleChannel.h>
 #include <Poco/FileChannel.h>
+#include <Poco/SplitterChannel.h>
 #include <Poco/Message.h>
 
 #include "Upnp.h"
