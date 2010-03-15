@@ -22,6 +22,14 @@
 #ifndef JAMMUPNPAV_TYPES_H
 #define JAMMUPNPAV_TYPES_H
 
+#include <Poco/Format.h>
+#include <Poco/Logger.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/ConsoleChannel.h>
+#include <Poco/FileChannel.h>
+#include <Poco/SplitterChannel.h>
+
 #include "Upnp.h"
 
 // NOTE: for media object ids only use non-reserved characters for segments 
@@ -30,6 +38,21 @@
 
 namespace Jamm {
 namespace Av {
+
+class Log
+{
+public:
+    static Log* instance();
+    
+    Poco::Logger& upnpav();
+    
+private:
+    Log();
+    
+    static Log*     m_pInstance;
+    Poco::Logger*   m_pUpnpAvLogger;
+};
+
 
 class MediaServerController;
 
@@ -132,7 +155,7 @@ class MediaContainer : public MediaObject
 {
 public:
     MediaContainer();
-    MediaContainer(const std::string& title);
+    MediaContainer(const std::string& title, const std::string& subClass = "");
 };
 
 
@@ -140,7 +163,7 @@ class MediaItem : public MediaObject
 {
 public:
     MediaItem();
-    MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo = "", ui4 size = 0);
+    MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo = "", ui4 size = 0, const std::string& subClass = "");
 };
 
 

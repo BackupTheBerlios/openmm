@@ -20,43 +20,39 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/File.h>
 #include "Filesystem.h"
 
 Filesystem::Filesystem()
 {
     setTitle("Collection");
+    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container.musicContainer")));
     
-    appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad",
-                "http://streamer-dtc-aa04.somafm.com:80/stream/1018"));
-    appendChild("2", new Jamm::Av::MediaItem("SOMA FM - Indie Pop Rocks (Lush)",
-                "http://streamer-ntc-aa02.somafm.com:80/stream/1073"));
-    appendChild("3", new Jamm::Av::MediaItem("SOMA FM - Drone Zone",
-                "http://streamer-dtc-aa01.somafm.com:80/stream/1032"));
-    appendChild("4", new Jamm::Av::MediaItem("Digitally Imported - Chillout",
-                "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035"));
-    appendChild("5", new Jamm::Av::MediaItem("SWR DASDING",
-                "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3"));
-    appendChild("6", new Jamm::Av::MediaItem("SWR DASDING Lautstark",
-                "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3"));
-    appendChild("7", new Jamm::Av::MediaItem("SWR3",
-                "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3"));
-    appendChild("8", new Jamm::Av::MediaItem("MotorFM",
-                "http://www.motorfm.de/stream-berlin"));
-    appendChild("9", new Jamm::Av::MediaItem("Freies Radio Stuttgart",
-                "http://frs.kumbi.org:8000/frs_stereo.ogg"));
-    appendChild("10", new Jamm::Av::MediaItem("HoRadS",
-                "http://realserver3.hdm-stuttgart.de:8080/horads"));
+    m_pFileServer = new Jamm::HttpFileServer;
+    m_pFileServer->start();
+    m_serverPort = m_pFileServer->getPort();
+    m_serverAddress =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     
-    Jamm::Av::MediaContainer* pFavourites = new Jamm::Av::MediaContainer("Favourites");
-    appendChild("11", pFavourites);
-    pFavourites->appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad",
-                                             "http://streamer-dtc-aa04.somafm.com:80/stream/1018"));
-    pFavourites->appendChild("2", new Jamm::Av::MediaItem("SOMA FM - Indie Pop Rocks (Lush)",
-                                             "http://streamer-ntc-aa02.somafm.com:80/stream/1073"));
-    pFavourites->appendChild("3", new Jamm::Av::MediaItem("SOMA FM - Drone Zone",
-                                             "http://streamer-dtc-aa01.somafm.com:80/stream/1032"));
-    pFavourites->appendChild("4", new Jamm::Av::MediaItem("Digitally Imported - Chillout",
-                                             "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035"));
-    Jamm::Av::MediaContainer* pGoodies = new Jamm::Av::MediaContainer("Goodies");
-    appendChild("12", pGoodies);
+    std::string objectId("1");
+    std::string title("Kyuss - Hurricane");
+    std::string fileName("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
+    std::string resource = "http://" +
+        m_serverAddress + ":" +
+        Poco::NumberFormatter::format(m_serverPort) + "/" + objectId;
+    m_pFileServer->registerFile(objectId, fileName);
+    
+    Poco::File file(fileName);
+    Jamm::ui4 size = file.getSize();
+    std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=01700000000000000000000000000000";
+//     std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
+//     std::string subClass = "audioItem.audioBroadcast";
+    std::string subClass = "audioItem.musicTrack";
+    
+    appendChild(objectId, new Jamm::Av::MediaItem(title, resource, protInfoDlna, size, subClass));
+    
+
 };
+
+POCO_BEGIN_MANIFEST(Jamm::Av::MediaContainer)
+POCO_EXPORT_CLASS(Filesystem)
+POCO_END_MANIFEST

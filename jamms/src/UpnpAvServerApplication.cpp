@@ -102,19 +102,32 @@ protected:
                 objectLoader.loadPlugin("s-av-web");
             }
             catch(Poco::NotFoundException) {
-                std::cerr << "Error in UpnpAvServerApplication: could not find plugin for media container" << std::endl;
+                std::cerr << "Error in UpnpAvServerApplication: could not find web radio plugin for media container" << std::endl;
                 return 1;
             }
-            std::clog << "UpnpAvServerApplication: media container loaded successfully" << std::endl;
+            std::clog << "UpnpAvServerApplication: web radio media container loaded successfully" << std::endl;
             
+            Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader2;
+            try {
+                objectLoader2.loadPlugin("s-av-storage");
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error in UpnpAvServerApplication: could not find storage plugin for media container" << std::endl;
+                return 1;
+            }
+            std::clog << "UpnpAvServerApplication: storage media container loaded successfully" << std::endl;
             
             Jamm::Av::MediaContainer* pWebRadio;
             pWebRadio = objectLoader.create("WebRadio");
             
-            Jamm::Av::UpnpAvServer myMediaServer;
-            myMediaServer.setRoot(pWebRadio);
+            Jamm::Av::MediaContainer* pStorage;
+            pStorage = objectLoader2.create("Filesystem");
             
-            myMediaServer.setFriendlyName("Web Radio");
+            Jamm::Av::UpnpAvServer myMediaServer;
+            myMediaServer.setRoot(pStorage);
+            
+//             myMediaServer.setFriendlyName("Web Radio");
+            myMediaServer.setFriendlyName("Collection");
             Jamm::Icon* pIcon = new Jamm::Icon(22, 22, 8, "image/png", "device.png");
             myMediaServer.addIcon(pIcon);
             myMediaServer.start();

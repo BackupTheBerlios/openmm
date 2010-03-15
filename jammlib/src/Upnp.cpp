@@ -455,9 +455,7 @@ DescriptionReader::parseDescription(const std::string& description)
 {
     Poco::XML::DOMParser parser;
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
-    std::clog << "parsing description ..." << std::endl;
     m_pDocStack.push(parser.parseString(description));
-    std::clog << "parsing finished" << std::endl;
     return m_pDocStack.top()->documentElement()->firstChild();
 }
 
@@ -1733,8 +1731,7 @@ DeviceRoot::initDevice()
     descriptionWriter.deviceRoot(*this);
     m_pDeviceDescription = descriptionWriter.write();
     
-    Log::instance()->upnp().debug("init device root finished");
-    std::clog << "new device description: " << *m_pDeviceDescription << std::endl;
+    Log::instance()->upnp().debug(Poco::format("init device root finished, rewrote device description: \n*BEGIN*%s*END*", *m_pDeviceDescription));
 }
 
 

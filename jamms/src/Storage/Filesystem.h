@@ -23,12 +23,18 @@
 #ifndef Filesystem_INCLUDED
 #define Filesystem_INCLUDED
 
+#include <Poco/ClassLibrary.h>
 #include <Jamm/UpnpAvTypes.h>
 
 class Filesystem : public Jamm::Av::MediaContainer
 {
 public:
     Filesystem();
+    
+private:
+    Jamm::HttpFileServer*   m_pFileServer;
+    std::string             m_serverAddress;
+    int                     m_serverPort;
 };
 
 #endif

@@ -45,6 +45,41 @@
 using namespace Jamm;
 using namespace Jamm::Av;
 
+
+Log* Log::m_pInstance = 0;
+
+// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
+
+Log::Log()
+{
+    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
+    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
+    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+    Poco::FileChannel* pFileChannel = new Poco::FileChannel("jamm.log");
+    pSplitterChannel->addChannel(pConsoleChannel);
+    pSplitterChannel->addChannel(pFileChannel);
+    pFormatLogger->setChannel(pSplitterChannel);
+    pFormatLogger->open();
+    m_pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
+}
+
+
+Log*
+Log::instance()
+{
+    if (!m_pInstance) {
+        m_pInstance = new Log;
+    }
+    return m_pInstance;
+}
+
+
+Poco::Logger&
+Log::upnpav()
+{
+    return *m_pUpnpAvLogger;
+}
+
 r8
 AvTypeConverter::readDuration(const std::string& duration)
 {
@@ -109,8 +144,6 @@ MediaObject::readMetaData(const std::string& metaData)
 void
 MediaObject::readNode(Poco::XML::Node* pNode)
 {
-    std::clog << "MediaObject::readNode()" << std::endl;
-    
     Poco::XML::NamedNodeMap* attr = 0;
     if (pNode->hasAttributes()) {
         attr = pNode->attributes();
@@ -137,7 +170,7 @@ MediaObject::readNode(Poco::XML::Node* pNode)
         Poco::XML::Node* childNode = pNode->firstChild();
         while (childNode)
         {
-            std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
+//             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
             
             if (childNode->nodeName() == "res") {
                 Poco::XML::NamedNodeMap* attr = 0;
@@ -165,7 +198,6 @@ MediaObject::readNode(Poco::XML::Node* pNode)
             childNode = childNode->nextSibling();
         }
     }
-//     std::clog << std::endl;
 }
 
 
@@ -192,7 +224,6 @@ MediaObject::readChildren(const std::string& metaData)
 void
 MediaObject::writeMetaDataHeader()
 {
-    std::clog << "MediaObject::writeMetaDataHeader()" << std::endl;
     m_pDoc = new Poco::XML::Document;
     
     m_pDidl = m_pDoc->createElement("DIDL-Lite");
@@ -218,7 +249,6 @@ MediaObject::writeMetaDataHeader()
 
 void MediaObject::writeMetaDataClose(std::string& metaData)
 {
-    std::clog << "MediaObject::writeMetaDataClose()" << std::endl;
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
 //     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
@@ -232,22 +262,20 @@ void MediaObject::writeMetaDataClose(std::string& metaData)
 void
 MediaObject::writeMetaData(std::string& metaData)
 {
-    std::clog << "MediaObject::writeMetaData()" << std::endl;
     writeMetaDataHeader();
     writeMetaData(m_pDidl);
     writeMetaDataClose(metaData);
-    std::clog << "MediaObject::writeMetaData() finished" << std::endl;
 }
 
 
 void
 MediaObject::writeMetaData(Poco::XML::Element* pDidl)
 {
-    std::clog << "MediaObject::writeMetaData() title: " << getTitle() << std::endl;
+//     std::clog << "MediaObject::writeMetaData() title: " << getTitle() << std::endl;
     Poco::XML::Document* pDoc = pDidl->ownerDocument();
     Poco::AutoPtr<Poco::XML::Element> pObject;
     if (m_isContainer) {
-        std::clog << "MediaObject::writeMetaData() is container" << std::endl;
+//         std::clog << "MediaObject::writeMetaData() is container" << std::endl;
         pObject = pDoc->createElement("container");
         // childCount (Integer)
         Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
@@ -255,19 +283,19 @@ MediaObject::writeMetaData(Poco::XML::Element* pDidl)
         pObject->setAttributeNode(pChildCount);
     }
     else {
-        std::clog << "MediaObject::writeMetaData() is item" << std::endl;
+//         std::clog << "MediaObject::writeMetaData() is item" << std::endl;
         pObject = pDoc->createElement("item");
     }
     // write attributes:
     // id (String, required)
-    std::clog << "MediaObject::writeMetaData() attributes" << std::endl;
-    std::clog << "MediaObject::writeMetaData() id: " << getObjectId() << std::endl;
+//     std::clog << "MediaObject::writeMetaData() attributes" << std::endl;
+//     std::clog << "MediaObject::writeMetaData() id: " << getObjectId() << std::endl;
     pObject->setAttribute("id", getObjectId());
     // parentID (String, required)
-    std::clog << "MediaObject::writeMetaData() parentID: " << getParentId() << std::endl;
+//     std::clog << "MediaObject::writeMetaData() parentID: " << getParentId() << std::endl;
     pObject->setAttribute("parentID", getParentId());
     // restricted (Boolean, required)
-    std::clog << "MediaObject::writeMetaData() restricted: " << (m_restricted ? "1" : "0") << std::endl;
+//     std::clog << "MediaObject::writeMetaData() restricted: " << (m_restricted ? "1" : "0") << std::endl;
     pObject->setAttribute("restricted", (m_restricted ? "1" : "0"));
     
     // searchable (Boolean)
@@ -288,7 +316,7 @@ MediaObject::writeMetaData(Poco::XML::Element* pDidl)
     }
     
     // write elements
-    std::clog << "MediaObject::writeMetaData() property elements" << std::endl;
+//     std::clog << "MediaObject::writeMetaData() property elements" << std::endl;
     for (Container<Variant>::KeyIterator i = m_properties.beginKey(); i != m_properties.endKey(); ++i) {
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement((*i).first);
         std::string propVal;
@@ -313,7 +341,7 @@ MediaObject::writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& m
     
     ui4 c;
     for (c = 0; (c < requestedCount) && (c < m_children.size() - startingIndex); ++c) {
-        std::clog << "MediaObject::writeChildren() child title: " << m_children[startingIndex + c]->getTitle() << std::endl;
+//         std::clog << "MediaObject::writeChildren() child title: " << m_children[startingIndex + c]->getTitle() << std::endl;
         m_children[startingIndex + c]->writeMetaData(m_pDidl);
     }
     
@@ -325,9 +353,9 @@ MediaObject::writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& m
 std::string
 MediaObject::getProperty(const std::string& name)
 {
-    std::clog << "MediaObject::getProperty() name: " << name << std::endl;
-    std::clog << "MediaObject::getProperty() number of properties: " << m_properties.size() << std::endl;
-    std::clog << "MediaObject::getProperty() value: " << m_properties.getValue<std::string>(name) << std::endl;
+//     std::clog << "MediaObject::getProperty() name: " << name << std::endl;
+//     std::clog << "MediaObject::getProperty() number of properties: " << m_properties.size() << std::endl;
+//     std::clog << "MediaObject::getProperty() value: " << m_properties.getValue<std::string>(name) << std::endl;
     
     return m_properties.getValue<std::string>(name);
 }
@@ -406,15 +434,15 @@ MediaObject::appendChild(const std::string& objectId, MediaObject* pChild)
 MediaObject*
 MediaObject::getObject(const std::string& objectId)
 {
-    std::clog << "MediaObject::getObject() objectId: " << objectId << std::endl;
+//     std::clog << "MediaObject::getObject() objectId: " << objectId << std::endl;
     
     std::string::size_type slashPos = objectId.find('/');
     MediaObject* pChild;
     if (slashPos != std::string::npos) {
-        std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
+//         std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
         pChild = m_childrenMap[objectId.substr(0, slashPos)];
         if (pChild == NULL) {
-            std::cerr << "Error in MediaObject: child object not found" << std::endl;
+            Log::instance()->upnpav().error("child objectId of container, but no child container found");
             return NULL;
         }
         else {
@@ -422,10 +450,10 @@ MediaObject::getObject(const std::string& objectId)
         }
     }
     else {
-        std::clog << "item id: " << objectId << std::endl;
+//         std::clog << "item id: " << objectId << std::endl;
         pChild = m_childrenMap[objectId];
         if (pChild == NULL) {
-            std::cerr << "Error in MediaObject: child object not found" << std::endl;
+            Log::instance()->upnpav().error("no child item found");
             return NULL;
         }
         else {
@@ -471,9 +499,11 @@ MediaObject::setParentId(const std::string& parentId)
 void
 MediaObject::setTitle(const std::string& title)
 {
-    std::clog << "MediaObject::setTitle() title: " << title << std::endl;
+//     std::clog << "MediaObject::setTitle() title: " << title << std::endl;
+    Log::instance()->upnpav().debug(Poco::format("setting object title: %s", title));
+    
     m_properties.append("dc:title", new Jamm::Variant(title));
-    std::clog << "MediaObject::setTitle() finished" << std::endl;
+//     std::clog << "MediaObject::setTitle() finished" << std::endl;
 }
 
 
@@ -502,12 +532,12 @@ MediaObject()
 }
 
 
-MediaContainer::MediaContainer(const std::string& title) :
+MediaContainer::MediaContainer(const std::string& title, const std::string& subClass) :
 MediaObject()
 {
     m_isContainer = true;
     setTitle(title);
-    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container")));
+    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container" + (subClass == "" ? "" : "." + subClass))));
 }
 
 
@@ -517,10 +547,10 @@ MediaObject()
 }
 
 
-MediaItem::MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo, ui4 size) :
+MediaItem::MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo, ui4 size, const std::string& subClass) :
 MediaObject()
 {
     setTitle(title);
     addResource(uri, protInfo, size);
-    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.item")));
+    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.item" + (subClass == "" ? "" : "." + subClass))));
 }

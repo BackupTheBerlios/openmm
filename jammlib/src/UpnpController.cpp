@@ -44,7 +44,7 @@ m_pServerController(pServerController)
 
 UpnpController::~UpnpController()
 {
-    std::clog << "UpnpController::~UpnpController()";
+//     std::clog << "UpnpController::~UpnpController()";
 }
 
 
@@ -64,10 +64,11 @@ void
 UpnpController::deviceAdded(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    std::clog << "UpnpController::deviceAdded()" << std::endl;
-    std::clog << "uuid: " << pDevice->getUuid() << std::endl;
-    std::clog << "type: " << pDevice->getDeviceType() << std::endl;
-    std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
+    Log::instance()->upnpav().information(Poco::format("device added, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+//     std::clog << "UpnpController::deviceAdded()" << std::endl;
+//     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
+//     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
+//     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
     m_pUserInterface->beginAddDevice(m_devices.position(pDevice->getUuid()));
     m_devices.append(pDevice->getUuid(), pDevice);
@@ -79,10 +80,11 @@ void
 UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    std::clog << "UpnpController::deviceRemoved()" << std::endl;
-    std::clog << "uuid: " << pDevice->getUuid() << std::endl;
-    std::clog << "type: " << pDevice->getDeviceType() << std::endl;
-    std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
+    Log::instance()->upnpav().information(Poco::format("device removed, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+//     std::clog << "UpnpController::deviceRemoved()" << std::endl;
+//     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
+//     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
+//     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
     m_pUserInterface->beginRemoveDevice(m_devices.position(pDevice->getUuid()));
     m_devices.remove(pDevice);
@@ -116,10 +118,11 @@ void
 UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    std::clog << "UpnpAvController::deviceAdded()" << std::endl;
-    std::clog << "uuid: " << pDevice->getUuid() << std::endl;
-    std::clog << "type: " << pDevice->getDeviceType() << std::endl;
-    std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
+    Log::instance()->upnpav().information(Poco::format("device added, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+//     std::clog << "UpnpAvController::deviceAdded()" << std::endl;
+//     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
+//     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
+//     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         MediaRendererController* pRenderer = new MediaRendererController(
@@ -128,9 +131,9 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
             new ConnectionManagerControllerImpl,
             new AVTransportControllerImpl);
         m_pAvUserInterface->beginAddRenderer(m_renderers.size());
-        std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
         m_renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
-        std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
         m_pAvUserInterface->endAddRenderer();
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
@@ -140,9 +143,9 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
             new ConnectionManagerControllerImpl,
             new AVTransportControllerImpl));
         m_pAvUserInterface->beginAddServer(m_servers.size());
-        std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
         m_servers.append(pDevice->getUuid(), pServer);
-        std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
         m_pAvUserInterface->endAddServer();
     }
 }
@@ -152,25 +155,26 @@ void
 UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    std::clog << "UpnpAvController::deviceRemoved()" << std::endl;
-    std::clog << "uuid: " << pDevice->getUuid() << std::endl;
-    std::clog << "type: " << pDevice->getDeviceType() << std::endl;
-    std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
+    Log::instance()->upnpav().information(Poco::format("device removed, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+//     std::clog << "UpnpAvController::deviceRemoved()" << std::endl;
+//     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
+//     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
+//     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         // TODO: delete renderer controller
         m_pAvUserInterface->beginRemoveRenderer(m_renderers.position(pDevice->getUuid()));
-        std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << m_renderers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << m_renderers.size() << std::endl;
         m_renderers.remove(pDevice->getUuid());
-        std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << m_renderers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << m_renderers.size() << std::endl;
         m_pAvUserInterface->endRemoveRenderer();
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         // TODO: delete server controller
         m_pAvUserInterface->beginRemoveServer(m_servers.position(pDevice->getUuid()));
-        std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
         m_servers.remove(pDevice->getUuid());
-        std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
+//         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
         m_pAvUserInterface->endRemoveServer();
     }
 }
@@ -220,8 +224,6 @@ UpnpAvUserInterface::rendererSelected(RendererView* pRenderer)
     std::string sourceInfo;
     std::string sinkInfo;
     m_pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
-    std::clog << "UpnpAvUserInterface::rendererSelected() GetProtocolInfo:" << std::endl;
-    std::clog << "sourceInfo: " << sourceInfo << ", sinkInfo: " << sinkInfo << std::endl;
 }
 
 
