@@ -275,7 +275,7 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 void
 UpnpBrowserModel::beginAddServer(int position)
 {
-    std::clog << "UpnpBrowserModel::beginAddServer() at position: " << position << std::endl;
+//     std::clog << "UpnpBrowserModel::beginAddServer() at position: " << position << std::endl;
     
     beginInsertRows(QModelIndex(), position, position);
 }
@@ -284,7 +284,7 @@ UpnpBrowserModel::beginAddServer(int position)
 void
 UpnpBrowserModel::endAddServer()
 {
-    std::clog << "UpnpBrowserModel::endAddServer()" << std::endl;
+//     std::clog << "UpnpBrowserModel::endAddServer()" << std::endl;
     
     endInsertRows();
     emit layoutChanged();
@@ -293,7 +293,7 @@ UpnpBrowserModel::endAddServer()
 void
 UpnpBrowserModel::beginRemoveServer(int position)
 {
-    qDebug() << "UpnpBrowserModel::beginRemoveServer() at position: " << position;
+//     qDebug() << "UpnpBrowserModel::beginRemoveServer() at position: " << position;
     
     beginRemoveRows(QModelIndex(), position, position);
 }
@@ -302,7 +302,7 @@ UpnpBrowserModel::beginRemoveServer(int position)
 void
 UpnpBrowserModel::endRemoveServer()
 {
-    qDebug() << "UpnpBrowserModel::endRemoveServer()";
+//     qDebug() << "UpnpBrowserModel::endRemoveServer()";
     
     endRemoveRows();
     emit layoutChanged();

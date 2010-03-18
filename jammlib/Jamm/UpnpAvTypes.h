@@ -107,6 +107,7 @@ public:
     void setTitle(const std::string& title);
     void addResource(const std::string& uri, const std::string& protInfo = "", ui4 size = 0);
     Resource* getResource(int num = 0);
+    void setProperty(const std::string& name, const std::string& value);
     
     void appendChild(const std::string& objectId, MediaObject* pChild);
     MediaObject* getObject(const std::string& objectId);

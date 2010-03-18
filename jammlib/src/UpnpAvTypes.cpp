@@ -290,6 +290,7 @@ MediaObject::writeMetaData(Poco::XML::Element* pDidl)
     // id (String, required)
 //     std::clog << "MediaObject::writeMetaData() attributes" << std::endl;
 //     std::clog << "MediaObject::writeMetaData() id: " << getObjectId() << std::endl;
+    // FIXME: when writing meta data in SetAVTransportURI(), 0/ is prepended
     pObject->setAttribute("id", getObjectId());
     // parentID (String, required)
 //     std::clog << "MediaObject::writeMetaData() parentID: " << getParentId() << std::endl;
@@ -504,6 +505,13 @@ MediaObject::setTitle(const std::string& title)
     
     m_properties.append("dc:title", new Jamm::Variant(title));
 //     std::clog << "MediaObject::setTitle() finished" << std::endl;
+}
+
+
+void
+MediaObject::setProperty(const std::string& name, const std::string& value)
+{
+    m_properties.append(name, new Jamm::Variant(value));
 }
 
 

@@ -34,7 +34,7 @@ Filesystem::Filesystem()
     m_serverAddress =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     
     std::string objectId("1");
-    std::string title("Kyuss - Hurricane");
+    std::string title("Hurricane");
     std::string fileName("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
     std::string resource = "http://" +
         m_serverAddress + ":" +
@@ -43,12 +43,19 @@ Filesystem::Filesystem()
     
     Poco::File file(fileName);
     Jamm::ui4 size = file.getSize();
-    std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=01700000000000000000000000000000";
+    std::string protInfoDlna =
+        "http-get:*:audio/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=01700000000000000000000000000000";
+    std::string protInfoMiniDlna =
+        "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
 //     std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
 //     std::string subClass = "audioItem.audioBroadcast";
     std::string subClass = "audioItem.musicTrack";
     
-    appendChild(objectId, new Jamm::Av::MediaItem(title, resource, protInfoDlna, size, subClass));
+    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem(title, resource, protInfoMiniDlna, size, subClass);
+    pKyuss->setProperty("dc:creator", "Kyuss");
+    pKyuss->setProperty("dc:date", "2005-01-01");
+    pKyuss->setProperty("upnp:artist", "Kyuss");
+    appendChild(objectId, pKyuss);
     
 
 };

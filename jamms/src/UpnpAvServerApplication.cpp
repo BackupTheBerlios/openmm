@@ -83,7 +83,7 @@ protected:
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
         helpFormatter.setUsage("OPTIONS");
-        helpFormatter.setHeader("A UPnP Device that implements a UPnP-AV Media S.");
+        helpFormatter.setHeader("A UPnP Device that implements a UPnP-AV Media Server.");
         helpFormatter.format(std::cout);
     }
     

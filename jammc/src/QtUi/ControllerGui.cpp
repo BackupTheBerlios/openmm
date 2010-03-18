@@ -216,14 +216,14 @@ ControllerGui::setSliderMoved(int)
 void
 ControllerGui::browserItemActivated(const QModelIndex& index)
 {
-    std::clog << "ControllerGui::browserItemActivated()" << std::endl;
+//     std::clog << "ControllerGui::browserItemActivated()" << std::endl;
     Jamm::Av::MediaObject* object = static_cast<Jamm::Av::MediaObject*>(index.internalPointer());
     if (object == NULL) {
         return;
     }
-    std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
-    std::clog << "title: " << object->getTitle() << std::endl;
-    std::clog << "res: " << object->getProperty("res") << std::endl;
+//     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
+//     std::clog << "title: " << object->getTitle() << std::endl;
+//     std::clog << "res: " << object->getProperty("res") << std::endl;
     
     if (object->isContainer()) {
         new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
@@ -238,13 +238,13 @@ ControllerGui::browserItemActivated(const QModelIndex& index)
 void
 ControllerGui::browserItemSelected(const QModelIndex& index)
 {
-    std::clog << "ControllerGui::browserItemSelected()" << std::endl;
+//     std::clog << "ControllerGui::browserItemSelected()" << std::endl;
     Jamm::Av::MediaObject* object = static_cast<Jamm::Av::MediaObject*>(index.internalPointer());
     if (object == NULL) {
         return;
     }
-    std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
-    std::clog << "title: " << object->getTitle() << std::endl;
+//     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
+//     std::clog << "title: " << object->getTitle() << std::endl;
 
     if (object->isContainer()) {
         new CrumbButton(ui.m_browserView, index, ui.m_breadCrump);
@@ -263,7 +263,7 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
         return;
     }
     if (selected.empty()) {
-        std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
+//         std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
 //         m_pSelectedRenderer = NULL;
         return;
     }
@@ -278,7 +278,7 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
     rendererSelected(selectedRenderer);
 //     m_pSelectedRenderer = selectedRenderer;
     
-    std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
+//     std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
     
     setVolumeSlider(100, 50);
 }

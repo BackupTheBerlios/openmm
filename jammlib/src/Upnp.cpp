@@ -172,21 +172,85 @@ FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 {
     Log::instance()->http().debug(Poco::format("handle file request: %s", request.getURI()));
     
+    std::ostringstream requestHeader;
+    request.write(requestHeader);
+    Log::instance()->http().debug(Poco::format("request method: %s", request.getMethod()));
+    Log::instance()->http().debug(Poco::format("request header:\n%s", requestHeader.str()));
+
     std::string fileName = m_pFileServer->m_uriPathMap[request.getURI()];
-    Log::instance()->http().debug(Poco::format("opening file: %s", fileName));
-//     Poco::File inFile(fileName);
+    Poco::File inFile(fileName);
     
-    std::ifstream ifstr(fileName.c_str());
+    response.setContentLength(inFile.getSize());
+    response.setContentType("audio/mpeg");
+    response.set("transferMode.dlna.org", "Streaming");
+    response.set("Accept-Ranges", "bytes");
+    response.set("EXT", "");
+    response.set("realTimeInfo.dlna.org", "DLNA.ORG_TLAG=*");
+    response.set("contentFeatures.dlna.org", "DLNA.ORG_PN=MP3;DLNA.ORG_OP=01");
+    response.set("Server", "Debian/4.0 DLNADOC/1.50 UPnP/1.0 Jamm/0.1.0");
+    response.setDate(Poco::Timestamp());
     
-    response.setChunkedTransferEncoding(true);
-//     response.setContentLength(inFile.getSize());
-    response.setContentLength(Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH);
+    std::ostringstream responseHeader;
+    response.write(responseHeader);
+    Log::instance()->http().debug(Poco::format("response header:\n%s", responseHeader.str()));
+//     response.sendFile(fileName, "audio/mpeg");
+    
+    if (request.getMethod() == "GET") {
+        std::ifstream ifstr(fileName.c_str());
+        if (request.has("Range")) {
+            std::string rangeVal = request.get("Range");
+            std::string range = rangeVal.substr(rangeVal.find('=') + 1);
+            Log::instance()->http().debug(Poco::format("range: %s (%s)", rangeVal, range));
+            
+            std::string::size_type delim = range.find('-');
+            std::iostream::pos_type start = Poco::NumberParser::parse(range.substr(0, delim));
+//             std::iostream::pos_type end = Poco::NumberParser::parse(range.substr(delim + 1));
+            Log::instance()->http().debug(Poco::format("sending file : %s (start: %s)...", fileName, range.substr(0, delim)));
+//             Log::instance()->http().debug(Poco::format("sending file : %s (start: %s, end: %s)...", range.substr(0, delim), range.substr(delim + 1)));
+//             Log::instance()->http().debug(Poco::format("sending file : %s (start: %i, end: %i)...", start, end));
+            ifstr.seekg(start);
+        }
+        else {
+            Log::instance()->http().debug(Poco::format("sending file: %s ...", fileName));
+        }
+        std::ostream& ostr = response.send();
+        Poco::StreamCopier::copyStream(ifstr, ostr);
+        Log::instance()->http().debug("done.");
+    }
+    else if (request.getMethod() == "HEAD") {
+        response.send();
+    }
+    
+    if (response.sent()) {
+        Log::instance()->http().debug(Poco::format("handle file request finished: %s", request.getURI()));
+    }
+    
+    //     std::ifstream ifstr(fileName.c_str());
+    
+//     response.setChunkedTransferEncoding(true);
+//     response.setContentLength(Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH);
 //     response.setContentType(Poco::Net::MediaType::NO_CONTENT_TYPE);
-    response.setContentType("multipart/mixed");
+//     response.setContentType("multipart/mixed");
 //     response.setContentType("text/plain");
-    std::ostream& ostr = response.send();
-    Poco::StreamCopier::copyStream(ifstr, ostr);
-    Log::instance()->http().debug(Poco::format("handle file request: %s finished", request.getURI()));
+//     std::ostream& ostr = response.send();
+//     Poco::StreamCopier::copyStream(ifstr, ostr);
+//     response.sendFile(fileName, "multipart/mixed");
+    
+/*
+      HTTP/1.1 200 OK
+  Content-Type: audio/mpeg
+  Content-Length: 4321280
+  transferMode.dlna.org: Streaming
+  Accept-Ranges: bytes
+  Connection: close
+  Date: Wed, 17 Mar 2010 20:39:49 GMT
+  EXT:
+  realTimeInfo.dlna.org: DLNA.ORG_TLAG=*
+  contentFeatures.dlna.org: DLNA.ORG_PN=MP3;DLNA.ORG_OP=01
+  Server: Debian/4.0 DLNADOC/1.50 UPnP/1.0 MiniDLNA/1.0
+    
+*/
+    // HTTP/1.1 206 Partial Content
 }
 
 
@@ -1032,7 +1096,7 @@ ActionResponseWriter::action(Action& action)
     std::stringstream ss;
     writer.writeNode(ss, pDoc);
     *m_responseBody = ss.str();
-    Log::instance()->ctrl().debug(Poco::format("response body:\n%s", *m_responseBody));
+//     Log::instance()->ctrl().debug(Poco::format("response body:\n%s", *m_responseBody));
 }
 
 
@@ -1466,7 +1530,7 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     std::ostream& ostr = response.send();
     ostr << responseBody;
     Log::instance()->ctrl().debug(Poco::format("action response sent:\n%s", responseBody));
-    Log::instance()->ctrl().debug(Poco::format("*** action request: %s completed ***", request.getURI()));
+    Log::instance()->ctrl().debug(Poco::format("*** action request completed: %s ***", request.getURI()));
 }
 
 
