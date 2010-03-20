@@ -46,26 +46,26 @@ using namespace Jamm;
 using namespace Jamm::Av;
 
 
-Log* Log::m_pInstance = 0;
+Av::Log* Av::Log::m_pInstance = 0;
 
 // possible log levels: trace, debug, information, notice, warning, error, critical, fatal
 
-Log::Log()
+Av::Log::Log()
 {
     Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
     Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
     Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-    Poco::FileChannel* pFileChannel = new Poco::FileChannel("jamm.log");
+//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("jamm.log");
     pSplitterChannel->addChannel(pConsoleChannel);
-    pSplitterChannel->addChannel(pFileChannel);
+//     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     m_pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
 }
 
 
-Log*
-Log::instance()
+Av::Log*
+Av::Log::instance()
 {
     if (!m_pInstance) {
         m_pInstance = new Log;
@@ -75,7 +75,7 @@ Log::instance()
 
 
 Poco::Logger&
-Log::upnpav()
+Av::Log::upnpav()
 {
     return *m_pUpnpAvLogger;
 }

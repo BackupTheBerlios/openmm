@@ -23,17 +23,6 @@
 #ifndef JAMMUPNP_PRIVATE_H
 #define JAMMUPNP_PRIVATE_H
 
-#include <Poco/Net/MediaType.h>
-#include <Poco/File.h>
-#include <Poco/Format.h>
-#include <Poco/Logger.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/FormattingChannel.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/FileChannel.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/Message.h>
-
 #include "Upnp.h"
 
 namespace Jamm {
@@ -49,65 +38,6 @@ class ControlRequestHandler;
 class HttpSocket;
 class Entity;
 class EntityItem;
-
-
-class Log
-{
-public:
-    static Log* instance();
-    
-    Poco::Logger& upnp();
-    Poco::Logger& ssdp();
-    Poco::Logger& http();
-    Poco::Logger& desc();
-    Poco::Logger& ctrl();
-    Poco::Logger& event();
-    
-private:
-    Log();
-    
-    static Log*     m_pInstance;
-    Poco::Logger*   m_pUpnpLogger;
-    Poco::Logger*   m_pSsdpLogger;
-    Poco::Logger*   m_pHttpLogger;
-    Poco::Logger*   m_pDescriptionLogger;
-    Poco::Logger*   m_pControlLogger;
-    Poco::Logger*   m_pEventingLogger;
-};
-
-
-class FileRequestHandler : public Poco::Net::HTTPRequestHandler
-{
-public:
-    FileRequestHandler(HttpFileServer* pFileServer);
-    
-    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    
-//     DescriptionRequestHandler* create();
-private:
-    HttpFileServer*  m_pFileServer;
-    
-//     std::string*    m_pDescription;
-};
-
-
-class FileRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
-{
-public:
-//     FileRequestHandlerFactory(HttpSocket* pHttpSocket);
-    FileRequestHandlerFactory(HttpFileServer* pFileServer);
-    
-    
-    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
-    
-//     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
-    
-private:
-    HttpFileServer*  m_pFileServer;
-    
-//     std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
-//     HttpSocket*                               m_pHttpSocket;
-};
 
 
 class NetworkInterfaceNotification : public Poco::Notification

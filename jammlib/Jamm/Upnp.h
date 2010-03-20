@@ -58,6 +58,16 @@
 #include <Poco/String.h>
 #include <Poco/Environment.h>
 #include <Poco/Exception.h>
+#include <Poco/File.h>
+#include <Poco/Format.h>
+#include <Poco/Logger.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/ConsoleChannel.h>
+#include <Poco/FileChannel.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/Message.h>
+#include <Poco/Net/MediaType.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/MulticastSocket.h>
 #include <Poco/Net/SocketAddress.h>
@@ -137,24 +147,28 @@ class Subscription;
 class NetworkInterfaceNotification;
 
 
-class HttpFileServer
+class Log
 {
-    friend class FileRequestHandler;
-    
 public:
-    HttpFileServer();
-    ~HttpFileServer();
+    static Log* instance();
     
-    void start();
-    void stop();
-    Poco::UInt16 getPort() const;
-    
-    void registerFile(const std::string& uri, const std::string& path);
+    Poco::Logger& upnp();
+    Poco::Logger& ssdp();
+    Poco::Logger& http();
+    Poco::Logger& desc();
+    Poco::Logger& ctrl();
+    Poco::Logger& event();
     
 private:
-    Poco::Net::ServerSocket                     m_socket;
-    Poco::Net::HTTPServer*                      m_pHttpServer;
-    std::map<std::string,std::string>           m_uriPathMap;
+    Log();
+    
+    static Log*     m_pInstance;
+    Poco::Logger*   m_pUpnpLogger;
+    Poco::Logger*   m_pSsdpLogger;
+    Poco::Logger*   m_pHttpLogger;
+    Poco::Logger*   m_pDescriptionLogger;
+    Poco::Logger*   m_pControlLogger;
+    Poco::Logger*   m_pEventingLogger;
 };
 
 
@@ -176,10 +190,10 @@ public:
     {
         try {
             m_pluginPath = Poco::Environment::get("JAMM_PLUGIN_PATH") + m_pluginPath;
-//             std::clog << "PluginLoader JAMM_PLUGIN_PATH is: " << m_pluginPath << std::endl;
+            Log::instance()->upnp().debug(Poco::format("plugin loader JAMM_PLUGIN_PATH is: %s", m_pluginPath));
         }
         catch (Poco::NotFoundException) {
-//             std::clog << "PluginLoader: JAMM_PLUGIN_PATH not set, standard search path is: " << m_pluginPath << std::endl;
+            Log::instance()->upnp().debug(Poco::format("plugin loader JAMM_PLUGIN_PATH not set, standard search path is: %s", m_pluginPath));
         }
         Poco::StringTokenizer pathSplitter(m_pluginPath, ":");
         Poco::StringTokenizer::Iterator it;

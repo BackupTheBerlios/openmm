@@ -30,7 +30,6 @@ ${JAMMS_SRCS}
 )
 
 TARGET_LINK_LIBRARIES( jamms
-jamms-av-web
 ${LIB_JAMM}
 ${LIB_POCO_UTIL}
 )

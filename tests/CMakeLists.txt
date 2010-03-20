@@ -48,9 +48,9 @@ SET( JAMMTEST_MEDIAOBJECT_SRCS
 MediaObjectTest.cpp
 )
 
-SET( JAMMTEST_HTTPFILESERVER_SRCS
-HttpFileServerTest.cpp
-)
+# SET( JAMMTEST_HTTPFILESERVER_SRCS
+# HttpFileServerTest.cpp
+# )
 
 #list all source files here
 ADD_EXECUTABLE( ssdp_test
@@ -77,9 +77,9 @@ ADD_EXECUTABLE( media_object_test
 ${JAMMTEST_MEDIAOBJECT_SRCS}
 )
 
-ADD_EXECUTABLE( file_server_test
-${JAMMTEST_HTTPFILESERVER_SRCS}
-)
+# ADD_EXECUTABLE( file_server_test
+# ${JAMMTEST_HTTPFILESERVER_SRCS}
+# )
 
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( ssdp_test
@@ -111,7 +111,7 @@ TARGET_LINK_LIBRARIES( media_object_test
 ${LIB_JAMM}
 )
 
-TARGET_LINK_LIBRARIES( file_server_test
-${LIB_JAMM}
-${LIB_POCO_UTIL}
-)
+# TARGET_LINK_LIBRARIES( file_server_test
+# ${LIB_JAMM}
+# ${LIB_POCO_UTIL}
+# )

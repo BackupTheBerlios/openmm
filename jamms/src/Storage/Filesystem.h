@@ -25,6 +25,7 @@
 
 #include <Poco/ClassLibrary.h>
 #include <Jamm/UpnpAvTypes.h>
+#include <Jamm/UpnpAvServer.h>
 
 class Filesystem : public Jamm::Av::MediaContainer
 {
@@ -32,9 +33,9 @@ public:
     Filesystem();
     
 private:
-    Jamm::HttpFileServer*   m_pFileServer;
-    std::string             m_serverAddress;
-    int                     m_serverPort;
+    Jamm::Av::MediaItemServer*   m_pFileServer;
+    std::string                 m_serverAddress;
+    int                         m_serverPort;
 };
 
 #endif

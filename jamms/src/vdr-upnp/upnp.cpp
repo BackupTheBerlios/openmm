@@ -25,7 +25,7 @@
 
 #include "VdrMediaServer.h"
 
-static const char *VERSION        = "0.0.3";
+static const char *VERSION        = Jamm::JAMM_VERSION.c_str();
 static const char *DESCRIPTION    = "Expose VDR's capabilities to UPnP-AV";
 static const char *MAINMENUENTRY  = "UPnP";
 

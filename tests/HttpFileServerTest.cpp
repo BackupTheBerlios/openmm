@@ -27,6 +27,7 @@
 #include <Poco/Util/HelpFormatter.h>
 
 #include <Upnp.h>
+#include <UpnpAvServer.h>
 
 class HttpFileServerTest: public Poco::Util::ServerApplication
 {
@@ -89,11 +90,11 @@ protected:
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
             
-            Jamm::HttpFileServer fileServer;
+            Jamm::Av::HttpFileServer fileServer;
             fileServer.start();
             std::clog << "HttpFileServerTest::main() file server started on port: " << fileServer.getPort() << std::endl;
             
-            fileServer.registerFile("foo", "/home/jb/tmp/hal.log");
+//             fileServer.registerFile("foo", "/home/jb/tmp/hal.log");
             std::clog << "HttpFileServerTest::main() waiting for termination request" << std::endl;
             waitForTerminationRequest();
         }

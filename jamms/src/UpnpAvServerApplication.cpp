@@ -97,15 +97,18 @@ protected:
         {
             std::cerr << "UpnpAvServerApplication::main()" << std::endl;
             
-            Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader;
-            try {
-                objectLoader.loadPlugin("s-av-web");
-            }
-            catch(Poco::NotFoundException) {
-                std::cerr << "Error in UpnpAvServerApplication: could not find web radio plugin for media container" << std::endl;
-                return 1;
-            }
-            std::clog << "UpnpAvServerApplication: web radio media container loaded successfully" << std::endl;
+//             Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader;
+//             try {
+//                 objectLoader.loadPlugin("s-av-web");
+//             }
+//             catch(Poco::NotFoundException) {
+//                 std::cerr << "Error in UpnpAvServerApplication: could not find web radio plugin for media container" << std::endl;
+//                 return 1;
+//             }
+//             std::clog << "UpnpAvServerApplication: web radio media container loaded successfully" << std::endl;
+            
+//             Jamm::Av::MediaContainer* pWebRadio;
+//             pWebRadio = objectLoader.create("WebRadio");
             
             Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader2;
             try {
@@ -117,16 +120,12 @@ protected:
             }
             std::clog << "UpnpAvServerApplication: storage media container loaded successfully" << std::endl;
             
-            Jamm::Av::MediaContainer* pWebRadio;
-            pWebRadio = objectLoader.create("WebRadio");
-            
             Jamm::Av::MediaContainer* pStorage;
             pStorage = objectLoader2.create("Filesystem");
             
             Jamm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pStorage);
             
-//             myMediaServer.setFriendlyName("Web Radio");
             myMediaServer.setFriendlyName("Collection");
             Jamm::Icon* pIcon = new Jamm::Icon(22, 22, 8, "image/png", "device.png");
             myMediaServer.addIcon(pIcon);

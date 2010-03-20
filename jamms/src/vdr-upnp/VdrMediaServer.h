@@ -24,34 +24,24 @@
 #define VDRMEDIASERVER_H
 
 #include <Jamm/UpnpAvTypes.h>
-
-// #include <map>
-// #include <vector>
-// #include <algorithm>
-// #include <string>
-// #include <iostream>
-// #include <cstdio>
-// using namespace std;
+#include <Jamm/UpnpAvServer.h>
 
 /**
 	@author Jörg Bakker <joerg<at>hakker<dot>de>
 */
 
-// class MultiFileInputStream;
 
 class VdrChannels : public Jamm::Av::MediaContainer
 {
 public:
     VdrChannels();
-    // basic interface needed for browsing:
-    // getObject()
-    // writeMetaData()
-    // writeChildren()
-    // getChildCount()
     
 private:
-    std::string     m_streamDevAddress;
-    std::string     m_streamDevPort;
+    void startItemServer();
+    
+//     std::string                 m_streamDevAddress;
+//     std::string                 m_streamDevPort;
+    Jamm::Av::MediaItemServer*  m_pItemServer;
 };
 
 
@@ -62,11 +52,11 @@ public:
     
 private:
     void setupTree();
-    void startHttpServer();
+    void startItemServer();
     
-    std::string             m_serverAddress;
-    int                     m_serverPort;
-    Jamm::HttpFileServer*   m_pFileServer;
+//     std::string                 m_serverAddress;
+//     int                         m_serverPort;
+    Jamm::Av::MediaItemServer*  m_pItemServer;
 };
 
 

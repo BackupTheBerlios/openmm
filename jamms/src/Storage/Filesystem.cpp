@@ -26,38 +26,27 @@
 Filesystem::Filesystem()
 {
     setTitle("Collection");
-    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container.musicContainer")));
+    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container")));
     
-    m_pFileServer = new Jamm::HttpFileServer;
+    m_pFileServer = new Jamm::Av::MediaItemServer;
     m_pFileServer->start();
     m_serverPort = m_pFileServer->getPort();
     m_serverAddress =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     
-    std::string objectId("1");
-    std::string title("Hurricane");
-    std::string fileName("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
-    std::string resource = "http://" +
-        m_serverAddress + ":" +
-        Poco::NumberFormatter::format(m_serverPort) + "/" + objectId;
-    m_pFileServer->registerFile(objectId, fileName);
+    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem("Hurricane", 
+        "http://" + m_serverAddress + ":" + Poco::NumberFormatter::format(m_serverPort) + "/1",
+        "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01",
+        3895296, "audioItem.musicTrack");
+    appendChild("1", pKyuss);
+    m_pFileServer->registerMediaItem("1", pKyuss, "file:/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
     
-    Poco::File file(fileName);
-    Jamm::ui4 size = file.getSize();
-    std::string protInfoDlna =
-        "http-get:*:audio/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=01700000000000000000000000000000";
-    std::string protInfoMiniDlna =
-        "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
-//     std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
-//     std::string subClass = "audioItem.audioBroadcast";
-    std::string subClass = "audioItem.musicTrack";
     
-    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem(title, resource, protInfoMiniDlna, size, subClass);
-    pKyuss->setProperty("dc:creator", "Kyuss");
-    pKyuss->setProperty("dc:date", "2005-01-01");
-    pKyuss->setProperty("upnp:artist", "Kyuss");
-    appendChild(objectId, pKyuss);
-    
-
+    Jamm::Av::MediaItem* pRtl = new Jamm::Av::MediaItem("RTL", 
+        "http://" + m_serverAddress + ":" + Poco::NumberFormatter::format(m_serverPort) + "/2",
+        "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
+        0, "videoItem.movie");
+    appendChild("2", pRtl);
+    m_pFileServer->registerMediaItem("2", pRtl, "http://192.168.178.23:3000/TS/1");
 };
 
 POCO_BEGIN_MANIFEST(Jamm::Av::MediaContainer)
