@@ -37,10 +37,6 @@ public:
     VdrChannels();
     
 private:
-    void startItemServer();
-    
-//     std::string                 m_streamDevAddress;
-//     std::string                 m_streamDevPort;
     Jamm::Av::MediaItemServer*  m_pItemServer;
 };
 
@@ -51,41 +47,9 @@ public:
     VdrRecordings();
     
 private:
-    void setupTree();
-    void startItemServer();
-    
-//     std::string                 m_serverAddress;
-//     int                         m_serverPort;
     Jamm::Av::MediaItemServer*  m_pItemServer;
 };
 
-
-class VdrMediaTree : public Jamm::Av::MediaContainer
-{
-public:
-    VdrMediaTree();
-    ~VdrMediaTree();
-
-private:
-    VdrChannels*    m_pChannels;
-    VdrRecordings*  m_pRecordings;
-
-    
-//     virtual NPT_Result ProcessHttpRequest(NPT_HttpRequest&              request, 
-//                                           const NPT_HttpRequestContext& context,
-//                                           NPT_HttpResponse&             response);
-//     NPT_Result ProcessFileRequest(NPT_HttpRequest&              request, 
-//                                   const NPT_HttpRequestContext& context,
-//                                   NPT_HttpResponse&             response);
-//     NPT_Result ServeFile(NPT_HttpResponse& response,
-//                          NPT_String        file_path, 
-//                          NPT_Position      start,
-//                          NPT_Position      end,
-//                          bool              request_is_head);
-//     
-//     map<NPT_String, PLT_MediaItem*> m_itemCache;
-//     map<NPT_String, NPT_InputStreamReference> m_recCache;
-};
 
 
 // class MultiFileInputStream : public NPT_InputStream

@@ -26,45 +26,17 @@
 #include "VdrMediaServer.h"
 
 
-VdrMediaTree::VdrMediaTree()
+VdrChannels::VdrChannels() :
+MediaContainer("VDR Channels")
 {
-    setTitle("Digital TV");
-    
-    m_pChannels = new VdrChannels;
-    m_pChannels->setTitle("Live TV");
-    appendChild("chan", m_pChannels);
-    
-    m_pRecordings = new VdrRecordings;
-    m_pRecordings->setTitle("Recordings");
-    appendChild("rec", m_pRecordings);
-}
-
-
-VdrMediaTree::~VdrMediaTree()
-{
-    
-}
-
-
-void
-VdrChannels::startItemServer()
-{
-//     Jamm::Av::Log::instance()->upnpav().information("channel item server starting ...");
     m_pItemServer = new Jamm::Av::MediaItemServer;
     m_pItemServer->start();
-//     Jamm::Av::Log::instance()->upnpav().information(Poco::format("channel item server running on port: %i", m_pItemServer->getPort()));
-}
-
-
-VdrChannels::VdrChannels()
-// m_streamDevPort("3000")
-{
-    startItemServer();
+    
     std::string localIp =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     int localPort = m_pItemServer->getPort();
     
-    for (cChannel* pChan = Channels.First(); pChan != Channels.Last(); pChan = Channels.Next(pChan)) {
-        if (!pChan || pChan->Vpid() == 0 || pChan->GetChannelID().ToString() == "0-0-0-0") {
+    for (cChannel* pChan = Channels.First(); pChan; pChan = Channels.Next(pChan)) {
+        if (pChan->Vpid() == 0 || pChan->GetChannelID().ToString() == "0-0-0-0") {
             continue;
         }
         
@@ -73,9 +45,7 @@ VdrChannels::VdrChannels()
         
         Jamm::Av::MediaItem* pChanItem = new Jamm::Av::MediaItem(title,
             "http://" + localIp + ":" + Poco::NumberFormatter::format(localPort) + "/" + objectId,
-//             "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
-            "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL;DLNA.ORG_FLAGS=ED100000000000000000000000000000",
-//             "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL_XAC3;DLNA.ORG_FLAGS=ED100000000000000000000000000000",
+            "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
             0, "videoItem.movie");
         std::string resource = "http://" + localIp + ":3000/TS/" + objectId;
         m_pItemServer->registerMediaItem(objectId, pChanItem, resource);
@@ -85,25 +55,17 @@ VdrChannels::VdrChannels()
 }
 
 
-VdrRecordings::VdrRecordings()
+VdrRecordings::VdrRecordings() :
+MediaContainer("VDR Recordings")
 {
-    startItemServer();
-    setupTree();
-}
-
-
-void
-VdrRecordings::setupTree()
-{
+    m_pItemServer = new Jamm::Av::MediaItemServer;
+    m_pItemServer->start();
 //     Jamm::Av::Log::instance()->upnpav().debug(Poco::format("number of recordings: %i", Recordings.Count()));
     
     std::string localIp =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     int localPort = m_pItemServer->getPort();
     
-    for (cRecording* pRec = Recordings.First(); pRec/* != Recordings.Last()*/; pRec = Recordings.Next(pRec)) {
-        if (!pRec) {
-            continue;
-        }
+    for (cRecording* pRec = Recordings.First(); pRec; pRec = Recordings.Next(pRec)) {
         std::string objectId(pRec->Info()->ChannelID().ToString());
         objectId += "_" + Poco::NumberFormatter::format(pRec->start);
         std::string title(pRec->Name());
@@ -117,30 +79,7 @@ VdrRecordings::setupTree()
         
         appendChild(objectId, pRecItem);
     }
-    
-//     std::clog << "VdrRecordings::VdrRecordings() finished" << std::endl;
-    
-//         MultiFileInputStream* m = new MultiFileInputStream(rec->FileName() + string("/"));
-//         m_recCache.insert(make_pair(objectId, NPT_InputStreamReference(m)));
-    
-// //         resource.m_ProtocolInfo = "http-get:*:video/mpeg:*";
-//         resource.m_ProtocolInfo = "http-get:*:video/mpeg:DLNA.ORG_PS=1;DLNA.ORG_CI=0;DLNA.ORG_OP=01;DLNA.ORG_PN=MPEG_ES_PAL;DLNA.ORG_FLAGS=01700000000000000000000000000000";
-//         object->m_ObjectClass.type = "object.item.videoItem.movie";
 }
-
-
-void
-VdrRecordings::startItemServer()
-{
-//     Jamm::Av::Log::instance()->upnpav().information("recording item server starting ...");
-    m_pItemServer = new Jamm::Av::MediaItemServer;
-    m_pItemServer->start();
-//     Jamm::Av::Log::instance()->upnpav().information(Poco::format("recording item server running on port: %i", m_pItemServer->getPort()));
-}
-
-
-
-
 
 
 

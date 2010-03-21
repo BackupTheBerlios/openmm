@@ -27,15 +27,13 @@
 #include <Jamm/UpnpAvTypes.h>
 #include <Jamm/UpnpAvServer.h>
 
-class Filesystem : public Jamm::Av::MediaContainer
+class Filesystem : public Jamm::Av::MediaServerContainer
 {
 public:
     Filesystem();
     
-private:
-    Jamm::Av::MediaItemServer*   m_pFileServer;
-    std::string                 m_serverAddress;
-    int                         m_serverPort;
+// private:
+//     Jamm::Av::MediaItemServer*   m_pFileServer;
 };
 
 #endif

@@ -31,7 +31,8 @@ namespace Av {
 
 class MediaItemServer
 {
-    friend class FileRequestHandler;
+    friend class ItemRequestHandler;
+    friend class MediaServerContainer;
     
 public:
     MediaItemServer();
@@ -41,7 +42,6 @@ public:
     void stop();
     Poco::UInt16 getPort() const;
     
-//     void registerFile(const std::string& uri, const std::string& path);
     void registerMediaItem(const std::string& relObjectId, MediaItem* pMediaItem, const std::string& privateUri = "");
     
 private:
@@ -52,37 +52,43 @@ private:
 };
 
 
-class FileRequestHandler : public Poco::Net::HTTPRequestHandler
+class ItemRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    FileRequestHandler(MediaItemServer* pFileServer);
+    ItemRequestHandler(MediaItemServer* pItemServer);
     
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
-//     DescriptionRequestHandler* create();
 private:
-    MediaItemServer*  m_pFileServer;
-    
-//     std::string*    m_pDescription;
+    MediaItemServer*  m_pItemServer;
 };
 
 
-class FileRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
+class MediaServerContainer : public MediaContainer
 {
 public:
-//     FileRequestHandlerFactory(HttpSocket* pHttpSocket);
-    FileRequestHandlerFactory(MediaItemServer* pFileServer);
+    MediaServerContainer(const std::string& title, const std::string& subClass = "");
+    ~MediaServerContainer();
+    
+    void appendChild(const std::string& objectId, MediaItem* pMediaItem);
+    
+private:
+    MediaItemServer*    m_pItemServer;
+    int                 m_port;
+    std::string         m_address;
+};
+
+
+class ItemRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
+{
+public:
+    ItemRequestHandlerFactory(MediaItemServer* pItemServer);
     
     
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
     
-//     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
-    
 private:
-    MediaItemServer*  m_pFileServer;
-    
-//     std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
-//     HttpSocket*                               m_pHttpSocket;
+    MediaItemServer*  m_pItemServer;
 };
 
 

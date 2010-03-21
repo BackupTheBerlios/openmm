@@ -109,12 +109,12 @@ public:
     Resource* getResource(int num = 0);
     void setProperty(const std::string& name, const std::string& value);
     
-    void appendChild(const std::string& objectId, MediaObject* pChild);
-    MediaObject* getObject(const std::string& objectId);
+    virtual void appendChild(const std::string& objectId, MediaObject* pChild);
+    virtual MediaObject* getObject(const std::string& objectId);
+    
     void writeMetaData(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
     ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
-    
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
     
@@ -164,6 +164,10 @@ class MediaItem : public MediaObject
 {
 public:
     MediaItem();
+//     MediaItem(const std::string& title, const std::string& subClass = "", bool restricted = true);
+    
+    void addResource(const std::string& uri, const std::string& profile = "", ui4 size = 0);
+    
     MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo = "", ui4 size = 0, const std::string& subClass = "");
 };
 

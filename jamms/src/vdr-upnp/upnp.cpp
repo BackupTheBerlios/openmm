@@ -32,8 +32,8 @@ static const char *MAINMENUENTRY  = "UPnP";
 class cPluginUpnp : public cPlugin {
 private:
   // Add any member variables or functions you may need here.
-    Jamm::Av::UpnpAvServer*     m_pUpnpAvServer;
-    VdrMediaTree*               m_pVdrMediaTree;
+    Jamm::Av::UpnpAvServer*     m_pChannels;
+    Jamm::Av::UpnpAvServer*     m_pRecordings;
 
 public:
   cPluginUpnp(void);
@@ -68,8 +68,6 @@ cPluginUpnp::cPluginUpnp(void)
 cPluginUpnp::~cPluginUpnp()
 {
   // Clean up after yourself!
-//   delete m_vdrMediaServer;
-//   delete m_upnp;
 }
 
 const char *cPluginUpnp::CommandLineHelp(void)
@@ -87,24 +85,30 @@ bool cPluginUpnp::ProcessArgs(int /*argc*/, char */*argv*/[])
 bool cPluginUpnp::Initialize(void)
 {
     // Initialize any background activities the plugin shall perform.
-    m_pUpnpAvServer = new Jamm::Av::UpnpAvServer;
-    m_pVdrMediaTree = new VdrMediaTree;
-    m_pUpnpAvServer->setRoot(m_pVdrMediaTree);
-    m_pUpnpAvServer->setFriendlyName("Digital TV");
+    m_pChannels = new Jamm::Av::UpnpAvServer;
+    m_pChannels->setRoot(new VdrChannels);
+    m_pChannels->setFriendlyName("VDR Channels");
+    
+    m_pRecordings = new Jamm::Av::UpnpAvServer;
+    m_pRecordings->setRoot(new VdrRecordings);
+    m_pRecordings->setFriendlyName("VDR Recordings");
+    
     return true;
 }
 
 bool cPluginUpnp::Start(void)
 {
   // Start any background activities the plugin shall perform.
-  m_pUpnpAvServer->start();
-  return true;
+    m_pChannels->start();
+    m_pRecordings->start();
+    return true;
 }
 
 void cPluginUpnp::Stop(void)
 {
   // Stop any background activities the plugin shall perform.
-  m_pUpnpAvServer->stop();
+    m_pChannels->stop();
+    m_pRecordings->stop();
 }
 
 void cPluginUpnp::Housekeeping(void)

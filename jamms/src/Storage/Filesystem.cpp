@@ -23,30 +23,27 @@
 #include <Poco/File.h>
 #include "Filesystem.h"
 
-Filesystem::Filesystem()
+Filesystem::Filesystem() :
+MediaServerContainer("Collection")
 {
-    setTitle("Collection");
-    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container")));
-    
-    m_pFileServer = new Jamm::Av::MediaItemServer;
-    m_pFileServer->start();
-    m_serverPort = m_pFileServer->getPort();
-    m_serverAddress =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
-    
-    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem("Hurricane", 
-        "http://" + m_serverAddress + ":" + Poco::NumberFormatter::format(m_serverPort) + "/1",
-        "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01",
-        3895296, "audioItem.musicTrack");
+    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem("Hurricane", "audioItem.musicTrack");
+    pKyuss->addResource("file:/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", "audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01",
+        3895296);
     appendChild("1", pKyuss);
-    m_pFileServer->registerMediaItem("1", pKyuss, "file:/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
     
     
-    Jamm::Av::MediaItem* pRtl = new Jamm::Av::MediaItem("RTL", 
-        "http://" + m_serverAddress + ":" + Poco::NumberFormatter::format(m_serverPort) + "/2",
-        "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
-        0, "videoItem.movie");
-    appendChild("2", pRtl);
-    m_pFileServer->registerMediaItem("2", pRtl, "http://192.168.178.23:3000/TS/1");
+    
+//     m_pFileServer = new Jamm::Av::MediaItemServer;
+//     m_pFileServer->start();
+//     int localPort = m_pFileServer->getPort();
+//     std::string localAddress =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+
+//     Jamm::Av::MediaItem* pRtl = new Jamm::Av::MediaItem("RTL",
+// //         "http://" + localAddress + ":" + Poco::NumberFormatter::format(localPort) + "/2",
+//         "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
+//         0, "videoItem.movie");
+//     appendChild("2", pRtl, , "http://192.168.178.23:3000/TS/1");
+// //     m_pFileServer->registerMediaItem("2", pRtl, "http://192.168.178.23:3000/TS/1");
 };
 
 POCO_BEGIN_MANIFEST(Jamm::Av::MediaContainer)

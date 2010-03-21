@@ -555,10 +555,24 @@ MediaObject()
 }
 
 
+// MediaItem::MediaItem(const std::string& title, const std::string& subClass, bool restricted) :
+// MediaObject()
+// {
+//     setTitle(title);
+// }
+
+
 MediaItem::MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo, ui4 size, const std::string& subClass) :
 MediaObject()
 {
     setTitle(title);
     addResource(uri, protInfo, size);
     m_properties.append("upnp:class", new Jamm::Variant(std::string("object.item" + (subClass == "" ? "" : "." + subClass))));
+}
+
+
+void
+MediaItem::addResource(const std::string& uri, const std::string& profile, ui4 size)
+{
+    addResource(uri, "http-get:*:" + profile, size);
 }

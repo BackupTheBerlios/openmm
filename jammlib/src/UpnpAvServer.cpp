@@ -49,7 +49,7 @@ void
 MediaItemServer::start()
 {
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-    m_pHttpServer = new Poco::Net::HTTPServer(new FileRequestHandlerFactory(this), m_socket, pParams);
+    m_pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), m_socket, pParams);
     m_pHttpServer->start();
     Log::instance()->upnpav().information(Poco::format("media item server listening on: %s", m_socket.address().toString()));
 }
@@ -69,13 +69,6 @@ MediaItemServer::getPort() const
 }
 
 
-// void
-// MediaItemServer::registerFile(const std::string& uri, const std::string& path)
-// {
-//     m_uriPathMap["/" + uri] = path;
-// }
-
-
 void
 MediaItemServer::registerMediaItem(const std::string& relObjectId, MediaItem* pMediaItem, const std::string& privateUri)
 {
@@ -84,27 +77,54 @@ MediaItemServer::registerMediaItem(const std::string& relObjectId, MediaItem* pM
 }
 
 
-FileRequestHandlerFactory::FileRequestHandlerFactory(MediaItemServer* pFileServer) :
-m_pFileServer(pFileServer)
+MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass) :
+MediaContainer(title, subClass)
+{
+    m_pItemServer = new MediaItemServer;
+    m_pItemServer->start();
+    m_port = m_pItemServer->m_socket.address().port();
+    m_address =  Jamm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+}
+
+
+MediaServerContainer::~MediaServerContainer()
+{
+    m_pItemServer->stop();
+    delete m_pItemServer;
+}
+
+
+void
+MediaServerContainer::appendChild(const std::string& objectId, MediaItem* pMediaItem)
+{
+    MediaContainer::appendChild(objectId, pMediaItem);
+//     m_pItemServer->registerMediaItem(objectId, pMediaItem, privateUri);
+//     std::string pResource = std::string("http://") + localAddress + ":" + Poco::NumberFormatter::format(localPort) + "/" + objectId;
+//     pMediaItem->addResource(privateResource, pMediaItem);
+}
+
+
+ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaItemServer* pItemServer) :
+m_pItemServer(pItemServer)
 {
 }
 
 
 Poco::Net::HTTPRequestHandler*
-FileRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
+ItemRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-    return new FileRequestHandler(m_pFileServer);
+    return new ItemRequestHandler(m_pItemServer);
 }
 
 
-FileRequestHandler::FileRequestHandler(MediaItemServer* pFileServer) :
-m_pFileServer(pFileServer)
+ItemRequestHandler::ItemRequestHandler(MediaItemServer* pItemServer) :
+m_pItemServer(pItemServer)
 {
 }
 
 
 void
-FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
     Log::instance()->upnpav().debug(Poco::format("handle media item request: %s", request.getURI()));
     
@@ -113,10 +133,11 @@ FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     Log::instance()->upnpav().debug(Poco::format("request method: %s", request.getMethod()));
     Log::instance()->upnpav().debug(Poco::format("request header:\n%s", requestHeader.str()));
     
-    MediaItem* pItem = m_pFileServer->m_itemMap[request.getURI()];
+    MediaItem* pItem = m_pItemServer->m_itemMap[request.getURI()];
     Resource* pRes = pItem->getResource(0);
 //     Poco::URI resUri(pRes->m_uri);
-    Poco::URI resUri(m_pFileServer->m_privateUriMap[request.getURI()]);
+    std::string resPath = m_pItemServer->m_privateUriMap[request.getURI()];
+    Poco::URI resUri(resPath);
     std::string resProtInfo = pRes->m_protInfo;
     Poco::StringTokenizer prot(resProtInfo, ":");
     std::string mime = prot[2];
@@ -150,8 +171,8 @@ FileRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         Log::instance()->upnpav().debug(Poco::format("sending stream: %s ...", resUri.toString()));
         std::ostream& ostr = response.send();
         if (resUri.getScheme() == "file") {
-            Log::instance()->upnpav().debug(Poco::format("opening file: %s ...", resUri.getPath()));
-            std::ifstream istr(resUri.getPath().c_str());
+            Log::instance()->upnpav().debug(Poco::format("opening file: %s ...", resPath.substr(5)));
+            std::ifstream istr(resPath.substr(5).c_str());
             if (request.has("Range")) {
                 std::string rangeVal = request.get("Range");
                 std::string range = rangeVal.substr(rangeVal.find('=') + 1);
