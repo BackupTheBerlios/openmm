@@ -94,14 +94,26 @@ MediaServerContainer::~MediaServerContainer()
 }
 
 
-void
-MediaServerContainer::appendChild(const std::string& objectId, MediaItem* pMediaItem)
-{
-    MediaContainer::appendChild(objectId, pMediaItem);
-//     m_pItemServer->registerMediaItem(objectId, pMediaItem, privateUri);
-//     std::string pResource = std::string("http://") + localAddress + ":" + Poco::NumberFormatter::format(localPort) + "/" + objectId;
-//     pMediaItem->addResource(privateResource, pMediaItem);
-}
+// Resource*
+// MediaServerContainer::getResource(const std::string& objectId, const std::string& resourceId)
+// {
+// }
+
+
+// std::ostream&
+// MediaServerContainer::getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek)
+// {
+// }
+
+
+// void
+// MediaServerContainer::appendChild(const std::string& objectId, MediaItem* pMediaItem)
+// {
+//     MediaContainer::appendChild(objectId, pMediaItem);
+// //     m_pItemServer->registerMediaItem(objectId, pMediaItem, privateUri);
+// //     std::string pResource = std::string("http://") + localAddress + ":" + Poco::NumberFormatter::format(localPort) + "/" + objectId;
+// //     pMediaItem->addResource(privateResource, pMediaItem);
+// }
 
 
 ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaItemServer* pItemServer) :
@@ -188,8 +200,19 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             Poco::StreamCopier::copyStream(istr, ostr);
         }
         else if (resUri.getScheme() == "http") {
+            // FIXME: vdr streamdev-server does this frequently:
+//             21:19:16.627 arthur[3581,12] D UPNP.AV sending stream: http://192.168.178.23:3000/TS/S19.2E-1-1107-17500 ...
+//             21:19:16.628 arthur[3581,12] I UPNP.AV HTTP 409 Channel not available
+//             21:19:16.628 arthur[3581,12] D UPNP.AV proxy response header:
+//             HTTP/1.0 409 Channel not available
+//             (409 = HTTP_CONFLICT)
             Poco::Net::HTTPClientSession session(resUri.getHost(), resUri.getPort());
+            Poco::Timespan timeout = session.getTimeout();
+            Log::instance()->upnpav().debug(Poco::format("media item server proxy timeout is: %i.", timeout.seconds()));
             Poco::Net::HTTPRequest proxyRequest("GET", resUri.getPath());
+            if (request.has("Range")) {
+                proxyRequest.set("Range", request.get("Range"));
+            }
             session.sendRequest(proxyRequest);
             Poco::Net::HTTPResponse proxyResponse;
             std::istream& istr = session.receiveResponse(proxyResponse);
@@ -197,9 +220,6 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             std::stringstream header;
             proxyResponse.write(header);
             Log::instance()->upnpav().debug(Poco::format("proxy response header:\n%s", header.str()));
-            if (request.has("Range")) {
-                proxyRequest.set("Range", request.get("Range"));
-            }
             Poco::StreamCopier::copyStream(istr, ostr);
         }
         Log::instance()->upnpav().debug("stream sent.");

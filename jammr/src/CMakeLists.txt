@@ -18,15 +18,15 @@ PATHS ${CMAKE_LIBRARY_PATH}
 )
 
 if(TARGET jamm)
-SET(LIB_JAMM
-jamm
+SET(LIB_JAMM_AV
+jammav
 )
 INCLUDE_DIRECTORIES(
 ${jamm_SOURCE_DIR}/jammlib
 )
 else(TARGET jamm)
-FIND_LIBRARY(LIB_JAMM
-NAME jamm
+FIND_LIBRARY(LIB_JAMM_AV
+NAME jammav
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET jamm)
@@ -55,7 +55,7 @@ ${JAMMR_SRCS}
 
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( jammr
-${LIB_JAMM}
+${LIB_JAMM_AV}
 ${LIB_POCO_UTIL}
 )
 

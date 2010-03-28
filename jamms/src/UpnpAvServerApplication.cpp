@@ -40,7 +40,9 @@ using Poco::Util::HelpFormatter;
 class UpnpAvServerApplication: public Poco::Util::ServerApplication
 {
 public:
-    UpnpAvServerApplication(): _helpRequested(false)
+    UpnpAvServerApplication():
+        _helpRequested(false),
+        _containerPlugin("")
     {
     }
     
@@ -68,14 +70,23 @@ protected:
                            Option("help", "h", "display help information on command line arguments")
                            .required(false)
                            .repeatable(false));
+        options.addOption(
+                           Option("plugin", "s", "load container plugin")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("plugin name", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
     {
         ServerApplication::handleOption(name, value);
         
-        if (name == "help")
+        if (name == "help") {
             _helpRequested = true;
+        }
+        else if (name == "plugin") {
+            _containerPlugin = value;
+        }
     }
     
     void displayHelp()
@@ -95,38 +106,27 @@ protected:
         }
         else
         {
-            std::cerr << "UpnpAvServerApplication::main()" << std::endl;
+            if (_containerPlugin == "") {
+                _containerPlugin = "s-av-web";
+            }
             
-//             Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader;
-//             try {
-//                 objectLoader.loadPlugin("s-av-web");
-//             }
-//             catch(Poco::NotFoundException) {
-//                 std::cerr << "Error in UpnpAvServerApplication: could not find web radio plugin for media container" << std::endl;
-//                 return 1;
-//             }
-//             std::clog << "UpnpAvServerApplication: web radio media container loaded successfully" << std::endl;
-            
-//             Jamm::Av::MediaContainer* pWebRadio;
-//             pWebRadio = objectLoader.create("WebRadio");
-            
-            Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader2;
+            Jamm::PluginLoader<Jamm::Av::MediaContainer> objectLoader;
             try {
-                objectLoader2.loadPlugin("s-av-storage");
+                objectLoader.loadPlugin(_containerPlugin);
             }
             catch(Poco::NotFoundException) {
-                std::cerr << "Error in UpnpAvServerApplication: could not find storage plugin for media container" << std::endl;
+                std::cerr << "Error could not find server plugin: " << _containerPlugin << std::endl;
                 return 1;
             }
-            std::clog << "UpnpAvServerApplication: storage media container loaded successfully" << std::endl;
+            std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
             
-            Jamm::Av::MediaContainer* pStorage;
-            pStorage = objectLoader2.create("Filesystem");
+            Jamm::Av::MediaContainer* pContainerPlugin;
+            pContainerPlugin = objectLoader.create("MediaContainerPlugin");
             
             Jamm::Av::UpnpAvServer myMediaServer;
-            myMediaServer.setRoot(pStorage);
+            myMediaServer.setRoot(pContainerPlugin);
             
-            myMediaServer.setFriendlyName("Collection");
+            myMediaServer.setFriendlyName(pContainerPlugin->getTitle());
             Jamm::Icon* pIcon = new Jamm::Icon(22, 22, 8, "image/png", "device.png");
             myMediaServer.addIcon(pIcon);
             myMediaServer.start();
@@ -137,7 +137,8 @@ protected:
     }
     
 private:
-    bool _helpRequested;
+    bool            _helpRequested;
+    std::string     _containerPlugin;
 };
 
 

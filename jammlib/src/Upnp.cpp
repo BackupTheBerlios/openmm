@@ -1123,13 +1123,18 @@ Service::sendAction(Action* pAction)
     Log::instance()->ctrl().debug(Poco::format("action request sent:\n%s", actionMessage));
     // receive answer ...
     Poco::Net::HTTPResponse response;
-    std::istream& rs = m_pControlRequestSession->receiveResponse(response);
-    Log::instance()->ctrl().debug(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
-    std::string responseBody;
-    Poco::StreamCopier::copyToString(rs, responseBody);
-    Log::instance()->ctrl().debug(Poco::format("action response received:\n%s", responseBody));
-    ActionResponseReader responseReader(responseBody, pAction);
-    responseReader.action();
+    try {
+        std::istream& rs = m_pControlRequestSession->receiveResponse(response);
+        Log::instance()->ctrl().debug(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
+        std::string responseBody;
+        Poco::StreamCopier::copyToString(rs, responseBody);
+        Log::instance()->ctrl().debug(Poco::format("action response received:\n%s", responseBody));
+        ActionResponseReader responseReader(responseBody, pAction);
+        responseReader.action();
+    }
+    catch (Poco::Net::NoMessageException) {
+        Log::instance()->ctrl().error("no response to action request");
+    }
     Log::instance()->ctrl().debug(Poco::format("*** action \"%s\" completed ***", pAction->getName()));
 }
 

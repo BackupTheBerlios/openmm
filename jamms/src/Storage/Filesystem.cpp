@@ -23,15 +23,25 @@
 #include <Poco/File.h>
 #include "Filesystem.h"
 
-Filesystem::Filesystem() :
+MediaContainerPlugin::MediaContainerPlugin() :
 MediaServerContainer("Collection")
 {
-    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem("Hurricane", "audioItem.musicTrack");
-    pKyuss->addResource("file:/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", "audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01",
-        3895296);
-    appendChild("1", pKyuss);
+    // FileObjectSource::addAllFilesInDirectory("/home/jb/mp3/current/");
+    // FileObjectSource::setDirectory("/home/jb/mp3/current/");
     
+    // let FileObjectSource add an object:
+    // pKyuss = FileObjectSource::addFile("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
+    // und
+    // pStream = FileObjectSource::getStream(objectId, resourceId, seek)
     
+    Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem("o1", "Hurricane", "audioItem.musicTrack");
+    pKyuss->addResource("r1", "audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01", 3895296);
+    appendChild(pKyuss);
+    
+//     Jamm::Av::MediaItem* pKyuss = new Jamm::Av::MediaItem("Hurricane", "audioItem.musicTrack");
+//     pKyuss->addResource("file:/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", "audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01",
+//         3895296);
+//     appendChild("1", pKyuss);
     
 //     m_pFileServer = new Jamm::Av::MediaItemServer;
 //     m_pFileServer->start();
@@ -46,6 +56,21 @@ MediaServerContainer("Collection")
 // //     m_pFileServer->registerMediaItem("2", pRtl, "http://192.168.178.23:3000/TS/1");
 };
 
+
+// std::istream*
+// MediaContainerPlugin::getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek)
+// {
+//     std::ofstream* pStream;
+//     if (objectId == "o1" && resourceId == "r1") {
+//         pStream = new std::ifstream("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
+//         if (seek) {
+//             pStream->seekg(seek);
+//         }
+//     }
+//     return pStream;
+// }
+
+
 POCO_BEGIN_MANIFEST(Jamm::Av::MediaContainer)
-POCO_EXPORT_CLASS(Filesystem)
+POCO_EXPORT_CLASS(MediaContainerPlugin)
 POCO_END_MANIFEST

@@ -23,17 +23,14 @@
 
 #include "WebRadio.h"
 
-WebRadio::WebRadio()
+MediaContainerPlugin::MediaContainerPlugin() :
+MediaContainer("Web Radio", "musicContainer")
 {
-    setTitle("Web Radio");
-    m_properties.append("upnp:class", new Jamm::Variant(std::string("object.container.musicContainer")));
-    
     std::string protInfoAny = "http-get:*:*:*";
     std::string protInfoMp3 = "http-get:*:audio/mpeg:*";
     std::string protInfoDlna = "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_FLAGS=8D100000000000000000000000000000";
     
     std::string subClass = "audioItem.audioBroadcast";
-//     std::string subClass = "audioItem.musicTrack";
     
     appendChild("11", new Jamm::Av::MediaItem("SOMA FM - Groove Salad (any protocol)",
                                               "http://streamer-dtc-aa04.somafm.com:80/stream/1018", protInfoAny, 0, subClass));
@@ -60,21 +57,8 @@ WebRadio::WebRadio()
                                              "http://frs.kumbi.org:8000/frs_stereo.ogg"));
     appendChild("10", new Jamm::Av::MediaItem("HoRadS",
                                               "http://realserver3.hdm-stuttgart.de:8080/horads"));
-    
-//     Jamm::Av::MediaContainer* pFavourites = new Jamm::Av::MediaContainer("Favourites");
-//     appendChild("11", pFavourites);
-//     pFavourites->appendChild("1", new Jamm::Av::MediaItem("SOMA FM - Groove Salad",
-//                                              "http://streamer-dtc-aa04.somafm.com:80/stream/1018"));
-//     pFavourites->appendChild("2", new Jamm::Av::MediaItem("SOMA FM - Indie Pop Rocks (Lush)",
-//                                              "http://streamer-ntc-aa02.somafm.com:80/stream/1073"));
-//     pFavourites->appendChild("3", new Jamm::Av::MediaItem("SOMA FM - Drone Zone",
-//                                              "http://streamer-dtc-aa01.somafm.com:80/stream/1032"));
-//     pFavourites->appendChild("4", new Jamm::Av::MediaItem("Digitally Imported - Chillout",
-//                                              "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035"));
-//     Jamm::Av::MediaContainer* pGoodies = new Jamm::Av::MediaContainer("Goodies");
-//     appendChild("12", pGoodies);
 };
 
 POCO_BEGIN_MANIFEST(Jamm::Av::MediaContainer)
-POCO_EXPORT_CLASS(WebRadio)
+POCO_EXPORT_CLASS(MediaContainerPlugin)
 POCO_END_MANIFEST

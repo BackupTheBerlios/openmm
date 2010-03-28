@@ -17,13 +17,10 @@
 # endif(TARGET jamm)
 
 SET( JAMM_LIB_SRCS
-# debug.cpp
-# iodevice.cpp
-# sharedlibrary.cpp
-# signode.cpp
-# thread.cpp
-# UpnpAvToolkit.cpp
 Upnp.cpp
+)
+
+SET( JAMM_AV_LIB_SRCS
 UpnpController.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
@@ -33,6 +30,10 @@ UpnpAvServerImpl.cpp
 UpnpAvRenderer.cpp
 UpnpAvRendererImpl.cpp
 UpnpAvCtrlImpl.cpp
+)
+
+SET( JAMM_DVB_LIB_SRCS
+Dvb.cpp
 )
 
 FIND_LIBRARY(LIB_POCO_UTIL
@@ -59,25 +60,41 @@ INCLUDE_DIRECTORIES(
 ${jammlib_SOURCE_DIR}/Jamm
 )
 
-ADD_LIBRARY(jammlib
-STATIC
-${JAMM_LIB_SRCS}
-)
+# ADD_LIBRARY(jammlib
+# STATIC
+# ${JAMM_LIB_SRCS}
+# )
 
 ADD_LIBRARY(jamm
 SHARED
 ${JAMM_LIB_SRCS}
 )
 
+ADD_LIBRARY(jammav
+SHARED
+${JAMM_AV_LIB_SRCS}
+)
+
+ADD_LIBRARY(jammdvb
+SHARED
+${JAMM_DVB_LIB_SRCS}
+)
+
 TARGET_LINK_LIBRARIES( jamm
-# pthread
-# dl
 ${LIB_POCO_FOUNDATION}
 ${LIB_POCO_NET}
 ${LIB_POCO_XML}
 )
 
-INSTALL( TARGETS jamm
+TARGET_LINK_LIBRARIES( jammav
+jamm
+)
+
+TARGET_LINK_LIBRARIES( jammdvb
+jammav
+)
+
+INSTALL( TARGETS jamm jammav jammdvb
 LIBRARY DESTINATION lib
 )
 

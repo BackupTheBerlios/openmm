@@ -2,7 +2,7 @@
 |  Jamm - Just another multimedia ...                                       |
 |         ... set of applications and libraries based on the UPnP-AV specs  |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
+|  Copyright (C) 2009 - 2010                                                |
 |  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
 |                                                                           |
 |  This file is part of Jamm.                                               |
@@ -19,23 +19,37 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#ifndef JammDvb_INCLUDED
+#define JammDvb_INCLUDED
 
-#ifndef Filesystem_INCLUDED
-#define Filesystem_INCLUDED
+#include "UpnpAvTypes.h"
 
-#include <Poco/ClassLibrary.h>
-#include <Jamm/UpnpAvTypes.h>
-#include <Jamm/UpnpAvServer.h>
+namespace Dvb {
 
-class MediaContainerPlugin : public Jamm::Av::MediaServerContainer
+// NOTE: This API is linux specific
+
+class Channel : public Jamm::Av::MediaObject
+{
+};
+
+
+class DvbDevice
 {
 public:
-    MediaContainerPlugin();
+    static DvbDevice* instance();
     
-//     virtual std::istream* getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek);
     
-// private:
-//     Jamm::Av::MediaItemServer*   m_pFileServer;
+    
+    std::ostream& getTransportStream(Channel* pChannel);
+//     std::ostream& getPacketizedElementaryStream(Channel* pChannel);
+//     std::ostream& getProgramStream(Channel* pChannel);
+    
+private:
+    DvbDevice();
+    
+    static DvbDevice*     m_pInstance;
 };
+
+}  // namespace Dvb
 
 #endif

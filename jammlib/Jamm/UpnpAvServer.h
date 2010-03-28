@@ -29,6 +29,22 @@
 namespace Jamm {
 namespace Av {
 
+
+class MediaObjectSource
+{
+public:
+//     Resource* getResource(const std::string& objectId, const std::string& resourceId);
+    virtual MediaObject* getObject(const std::string& objectId) = 0;
+    virtual std::istream* getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek) = 0;
+    
+};
+
+
+class Transcoder
+{
+};
+
+
 class MediaItemServer
 {
     friend class ItemRequestHandler;
@@ -70,10 +86,15 @@ public:
     MediaServerContainer(const std::string& title, const std::string& subClass = "");
     ~MediaServerContainer();
     
-    void appendChild(const std::string& objectId, MediaItem* pMediaItem);
+    
+//     void appendChild(const std::string& objectId, MediaItem* pMediaItem);
     
 private:
     MediaItemServer*    m_pItemServer;
+    MediaObjectSource*  m_pObjectSource;
+    Transcoder*         m_pTranscoder;
+    
+    // TODO: this should be fetched from m_pItemServer
     int                 m_port;
     std::string         m_address;
 };

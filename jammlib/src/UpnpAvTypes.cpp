@@ -222,6 +222,20 @@ MediaObject::readChildren(const std::string& metaData)
 
 
 void
+MediaObject::setServerController(MediaServerController* m_pServer)
+{
+    m_server = m_pServer;
+}
+
+
+void
+MediaObject::setFetchedAllChildren(bool fetchedAllChildren)
+{
+    m_fetchedAllChildren = fetchedAllChildren;
+}
+
+
+void
 MediaObject::writeMetaDataHeader()
 {
     m_pDoc = new Poco::XML::Document;
@@ -362,12 +376,17 @@ MediaObject::getProperty(const std::string& name)
 }
 
 
-// FIXME: parent id should recurse all parents up to root
-// example: parentId("0/0/1") is "0" but should be "0/0"
+MediaObject*
+MediaObject::parent()
+{
+    return m_parent;
+}
+
+
 std::string
 MediaObject::getParentId()
 {
-    if (m_parent != NULL) {
+    if (m_parent) {
         return m_parent->getObjectId();
     }
     else {
@@ -386,6 +405,20 @@ MediaObject::getTitle()
 //         return "foo";
 //     }
     return res;
+}
+
+
+MediaObject::childIterator
+MediaObject::beginChildren()
+{
+    return m_children.begin();
+}
+
+
+MediaObject::childIterator
+MediaObject::endChildren()
+{
+    return m_children.end();
 }
 
 
@@ -413,6 +446,13 @@ MediaObject::fetchChildren()
 }
 
 
+bool
+MediaObject::fetchedAllChildren()
+{
+    return m_fetchedAllChildren;
+}
+
+
 void
 MediaObject::setIsContainer(bool isContainer)
 {
@@ -423,12 +463,32 @@ MediaObject::setIsContainer(bool isContainer)
 void
 MediaObject::appendChild(const std::string& objectId, MediaObject* pChild)
 {
+    std::clog << "MediaObject::appendChild() with objectId: " << objectId << std::endl;
+
     m_children.push_back(pChild);
     m_childrenMap[objectId] = pChild;
     m_childCount++;
     pChild->m_objectId = objectId;
     pChild->m_parentId = m_objectId;
     pChild->m_parent = this;
+    
+    std::clog << "MediaObject::appendChild() finished" << std::endl;
+}
+
+
+void
+MediaObject::appendChild(MediaObject* pChild)
+{
+    std::clog << "MediaObject::appendChild() with objectId: " << pChild->m_objectId << std::endl;
+    
+    m_children.push_back(pChild);
+    m_childrenMap[pChild->m_objectId] = pChild;
+    m_childCount++;
+//     pChild->m_objectId = objectId;
+    pChild->m_parentId = m_objectId;
+    pChild->m_parent = this;
+    
+    std::clog << "MediaObject::appendChild() finished" << std::endl;
 }
 
 
@@ -480,6 +540,27 @@ ui4
 MediaObject::getChildCount()
 {
     return m_childCount;
+}
+
+
+ui4
+MediaObject::childCount()
+{
+    return m_children.size();
+}
+
+
+MediaObject*
+MediaObject::getChild(ui4 num)
+{
+    return m_children[num];
+}
+
+
+std::string
+MediaObject::objectId()
+{
+    return m_objectId;
 }
 
 
@@ -571,8 +652,8 @@ MediaObject()
 }
 
 
-void
-MediaItem::addResource(const std::string& uri, const std::string& profile, ui4 size)
-{
-    addResource(uri, "http-get:*:" + profile, size);
-}
+// void
+// MediaItem::addResource(const std::string& uri, const std::string& profile, ui4 size)
+// {
+//     MediaObject::addResource(uri, "http-get:*:" + profile, size);
+// }

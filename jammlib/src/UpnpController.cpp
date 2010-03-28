@@ -30,15 +30,13 @@ ServerController::ServerController(MediaServerController* pServerController) :
 m_pServerController(pServerController)
 {
     m_pRoot = new Jamm::Av::MediaObject();
-    m_pRoot->m_objectId = "0";
-    m_pRoot->m_properties.append("dc:title",
-                                 new Variant(m_pServerController->getDevice()->getFriendlyName()));
-    m_pRoot->m_parent = NULL;
-    m_pRoot->m_server = m_pServerController;
-    m_pRoot->m_fetchedAllChildren = false;
+    m_pRoot->setObjectId("0");
+    m_pRoot->setTitle(m_pServerController->getDevice()->getFriendlyName());
+    m_pRoot->setServerController(m_pServerController);
+    m_pRoot->setFetchedAllChildren(false);
     // TODO: browse root object "0" here
     // TODO: this should depend on the browse result for root object "0"
-    m_pRoot->m_isContainer = true;
+    m_pRoot->setIsContainer(true);
 }
 
 
@@ -237,21 +235,23 @@ UpnpAvUserInterface::mediaObjectSelected(Jamm::Av::MediaObject* pObject)
 void
 UpnpAvUserInterface::playPressed()
 {
-    if (m_pSelectedRenderer == NULL || m_pSelectedObject == NULL) {
+    if (m_pSelectedRenderer == 0 || m_pSelectedObject == 0) {
         return;
     }
     Resource* pRes = m_pSelectedObject->getResource();
-    std::string metaData;
-    m_pSelectedObject->writeMetaData(metaData);
-    m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->m_uri, metaData);
-    m_pSelectedRenderer->AVTransport()->Play(0, "1");
+    if (pRes) {
+        std::string metaData;
+        m_pSelectedObject->writeMetaData(metaData);
+        m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->m_uri, metaData);
+        m_pSelectedRenderer->AVTransport()->Play(0, "1");
+    }
 }
 
 
 void
 UpnpAvUserInterface::stopPressed()
 {
-    if (m_pSelectedRenderer == NULL) {
+    if (m_pSelectedRenderer == 0) {
         return;
     }
     m_pSelectedRenderer->AVTransport()->Stop(0);
@@ -261,7 +261,7 @@ UpnpAvUserInterface::stopPressed()
 void
 UpnpAvUserInterface::pausePressed()
 {
-    if (m_pSelectedRenderer == NULL) {
+    if (m_pSelectedRenderer == 0) {
         return;
     }
     m_pSelectedRenderer->AVTransport()->Pause(0);
@@ -271,7 +271,7 @@ UpnpAvUserInterface::pausePressed()
 void
 UpnpAvUserInterface::positionMoved(int position)
 {
-    if (m_pSelectedRenderer == NULL) {
+    if (m_pSelectedRenderer == 0) {
         return;
     }
         // TODO: need to support UPnP time format in Variant
@@ -282,7 +282,7 @@ UpnpAvUserInterface::positionMoved(int position)
 void
 UpnpAvUserInterface::volumeChanged(int value)
 {
-    if (m_pSelectedRenderer == NULL) {
+    if (m_pSelectedRenderer == 0) {
         return;
     }
     m_pSelectedRenderer->RenderingControl()->SetVolume(0, "Master", value);

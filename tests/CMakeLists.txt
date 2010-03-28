@@ -15,6 +15,10 @@ SET(LIB_JAMM
 jamm
 )
 
+SET(LIB_JAMM_AV
+jammav
+)
+
 INCLUDE_DIRECTORIES(
 ${jamm_SOURCE_DIR}/jammlib/Jamm
 ${jamm_SOURCE_DIR}/jammlib/src
@@ -108,10 +112,10 @@ ${LIB_POCO_UTIL}
 )
 
 TARGET_LINK_LIBRARIES( media_object_test
-${LIB_JAMM}
+${LIB_JAMM_AV}
 )
 
 # TARGET_LINK_LIBRARIES( file_server_test
-# ${LIB_JAMM}
+# ${LIB_JAMM_AV}
 # ${LIB_POCO_UTIL}
 # )

@@ -81,25 +81,38 @@ public:
     // MediaObject* createObject(DatabasePointer)
     // and a MediaObjectReader ...
     
-    MediaObject();
     // NOTE: should be split into a Controller and Device part?
 //     MediaObject(const std::string& metaData);
 //     MediaObject(Poco::XML::Node* pNode);
     
+    MediaObject();
     
     // controller interface
+    typedef std::vector<MediaObject*>::iterator childIterator;
+    childIterator beginChildren();
+    childIterator endChildren();
     int fetchChildren();
+    bool fetchedAllChildren();
     bool isContainer() { return m_isContainer; }
     std::string getTitle();
     std::string getProperty(const std::string& name);
     std::string getParentId();
+    MediaObject* parent();
+    MediaObject* getChild(ui4 num);
     ui4 getChildCount();
+    ui4 childCount();
+    std::string objectId();
     void readChildren(const std::string& metaData);
     void readMetaData(const std::string& metaData);
     void readNode(Poco::XML::Node* pNode);
+    void setServerController(MediaServerController* m_pServer);
+    void setFetchedAllChildren(bool fetchedAllChildren);
     
-    MediaServerController*             m_server;
+private:
+    bool                                    m_fetchedAllChildren;
+    MediaServerController*                  m_server;
     
+public:
     // server interface
     void setParentId(const std::string& parentId);
     void setIsContainer(bool isContainer=true);
@@ -109,8 +122,9 @@ public:
     Resource* getResource(int num = 0);
     void setProperty(const std::string& name, const std::string& value);
     
-    virtual void appendChild(const std::string& objectId, MediaObject* pChild);
-    virtual MediaObject* getObject(const std::string& objectId);
+    void appendChild(const std::string& objectId, MediaObject* pChild);  // depricated
+    void appendChild(MediaObject* pChild);
+    MediaObject* getObject(const std::string& objectId);
     
     void writeMetaData(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
@@ -118,6 +132,7 @@ public:
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
     
+private:
     std::map<std::string,MediaObject*>      m_childrenMap;
     
     // TODO: this should be in a seperate class
@@ -125,21 +140,10 @@ public:
     Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
     Poco::AutoPtr<Poco::XML::Element>       m_pDidl;
 
+public:
 // common interface
     std::string getObjectId() const;
-    
-    MediaObject*                            m_parent;
-    std::vector<MediaObject*>               m_children;
-    std::string                             m_objectId;
-    std::string                             m_parentId;
-    bool                                    m_restricted;
-    unsigned int                            m_childCount;
-    bool                                    m_fetchedAllChildren;
-    Container<Variant>                      m_properties;
-    bool                                    m_isContainer;
-    std::vector<Resource*>                  m_resources;
-    
-    // object properties:
+        // object properties:
 //     const std::string& getId();
 //     void setId(const std::string& id);
 //     std::string getParentId();
@@ -149,6 +153,20 @@ public:
 //     void setRes(const std::string& id);
 //     std::string getClass();
 //     void setClass(const std::string& id);
+    
+protected:
+    MediaObject*                            m_parent;
+    std::string                             m_objectId;
+    std::string                             m_parentId;
+    bool                                    m_restricted;
+    unsigned int                            m_childCount;
+    Container<Variant>                      m_properties;
+//     std::multimap<std::string>              m_properties;
+    bool                                    m_isContainer;
+    std::vector<Resource*>                  m_resources;
+
+private:
+    std::vector<MediaObject*>               m_children;
 };
 
 
@@ -166,7 +184,7 @@ public:
     MediaItem();
 //     MediaItem(const std::string& title, const std::string& subClass = "", bool restricted = true);
     
-    void addResource(const std::string& uri, const std::string& profile = "", ui4 size = 0);
+//     void addResource(const std::string& uri, const std::string& profile = "", ui4 size = 0);
     
     MediaItem(const std::string& title, const std::string& uri, const std::string& protInfo = "", ui4 size = 0, const std::string& subClass = "");
 };

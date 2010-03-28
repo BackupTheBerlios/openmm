@@ -25,10 +25,10 @@
 
 #include <Jamm/UpnpAvTypes.h>
 
-class WebRadio : public Jamm::Av::MediaContainer
+class MediaContainerPlugin : public Jamm::Av::MediaContainer
 {
 public:
-    WebRadio();
+    MediaContainerPlugin();
 };
 
 #endif
