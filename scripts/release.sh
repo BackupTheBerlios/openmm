@@ -1,31 +1,31 @@
 #!/bin/sh
 
 RN="0.1.0"
-RN_DIR=${JAMM}/../jammarchive/release-${RN}
-SUB_PKGS="jammc jammr jamms jammlib"
+RN_DIR=${OMM}/../ommarchive/release-${RN}
+SUB_PKGS="ommc ommr omms ommlib"
 #SUB_SRVS="Web vdr-upnp"
 #SUB_UTIL="lsupnp"
 
-rm ${JAMM}/Doxyfile
-rm ${JAMM}/jamm.kdevelop.pcs
+rm ${OMM}/Doxyfile
+rm ${OMM}/omm.kdevelop.pcs
 
-cd ${JAMM}/..
-mkdir jammarchive/release-${RN}
-tar cvjf ${RN_DIR}/jamm-${RN}.tar.bz2 jamm
+cd ${OMM}/..
+mkdir ommarchive/release-${RN}
+tar cvjf ${RN_DIR}/omm-${RN}.tar.bz2 omm
 
-cd ${JAMM}
+cd ${OMM}
 for i in ${SUB_PKGS}
 do
   tar cvjf ${RN_DIR}/${i}-${RN}.tar.bz2 ${i}
 done
 
-#cd ${JAMM}/jamms
+#cd ${OMM}/omms
 #for i in ${SUB_SRVS}
 #do
 #  tar cvjf ${RN_DIR}/${i}-${RN}.tar.bz2 ${i}
 #done
 
-#cd ${JAMM}/utils
+#cd ${OMM}/utils
 #for i in ${SUB_UTIL}
 #do
 #  tar cvjf ${RN_DIR}/${i}-${RN}.tar.bz2 ${i}

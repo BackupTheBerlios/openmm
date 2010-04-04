@@ -1,24 +1,23 @@
 /***************************************************************************|
-|  Jamm - Just another multimedia ...                                       |
-|         ... set of applications and libraries based on the UPnP-AV specs  |
+|  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
-|  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
+|  Copyright (C) 2009, 2010                                                 |
+|  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
-|  This file is part of Jamm.                                               |
+|  This file is part of OMM.                                                |
 |                                                                           |
-|  Jamm is free software: you can redistribute it and/or modify             |
+|  OMM is free software: you can redistribute it and/or modify              |
 |  it under the terms of the GNU General Public License as published by     |
 |  the Free Software Foundation version 3 of the License.                   |
 |                                                                           |
-|  Jamm is distributed in the hope that it will be useful,                  |
+|  OMM is distributed in the hope that it will be useful,                   |
 |  but WITHOUT ANY WARRANTY; without even the implied warranty of           |
 |  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
 |  GNU General Public License for more details.                             |
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
 #include <fstream>
 
@@ -102,15 +101,15 @@ protected:
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
 /*            std::stringstream ss;
-            std::ifstream ifs("/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
+            std::ifstream ifs("/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
             StreamCopier::copyStream(ifs, ss);
             std::string s = ss.str();
             DeviceRoot* device = new DeviceRoot();
             device->init(s);*/
             
-            Jamm::UriDescriptionReader descriptionReader;
+            Omm::UriDescriptionReader descriptionReader;
             
-            Jamm::DeviceRoot* device = descriptionReader.deviceRoot("file:/home/jb/devel/cc/jamm/tests/xml/network-light-desc.xml");
+            Omm::DeviceRoot* device = descriptionReader.deviceRoot("file:/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
             
             waitForTerminationRequest();
         }

@@ -1,0 +1,41 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+PROJECT(ommgen)
+
+SET(CMAKE_LIBRARY_PATH
+${CMAKE_SYSTEM_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_UTIL
+NAME PocoUtil
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+
+INCLUDE_DIRECTORIES(
+${omm_SOURCE_DIR}/lib/Omm
+${omm_SOURCE_DIR}/lib/src
+)
+
+
+SET( OMMGEN_SRCS
+main.cpp
+ommgen.cpp
+)
+
+#list all source files here
+ADD_EXECUTABLE( ommgen
+${OMMGEN_SRCS}
+)
+
+#need to link to some other libraries ? just add them here
+TARGET_LINK_LIBRARIES( ommgen
+# ${LIB_OMM}
+omm
+${LIB_POCO_UTIL}
+)
+
+INSTALL( TARGETS ommgen
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+)

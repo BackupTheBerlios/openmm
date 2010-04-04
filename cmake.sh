@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SRCDIR=${PWD}
-BINDIR=../jammbin
+BINDIR=../ommbin
 CMAKE_CMD="cmake -DCMAKE_INSTALL_PREFIX=/usr"
 
 if [ ! -d $BINDIR ]

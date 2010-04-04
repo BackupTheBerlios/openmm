@@ -9,22 +9,22 @@ Contents
 
 1. Introduction
 
-Jamm is a set of applications and libraries for easily making your multimedia content available 
-to your local network. It aims to be compatible to the UPnP-AV V1.0 specification.
+Omm is a set of applications and libraries for easily making your multimedia content available 
+to your local network. It aims to be compatible to the UPnP V1.0 and UPnP-AV V1.0 specification.
 
-Jamm currently includes the following components:
+Omm currently includes the following components:
 
-JammC - a UPnP-AV Media Controller
-JammC (pronounced like "MC", the Master of Ceremony) is the "remote control" of your multimedia system.
+OmmC - a UPnP-AV Media Controller
+OmmC is the "remote control" of your multimedia system.
 It lets you select your media source (UPnP-AV Server), browse the content of the server, select a media object
 (song, video, tv-channel, ...), select a media output (UPnP-AV Renderer) and control the transport of the media
 from Server to Renderer (start, stop, seek, ...). 
 
-JammR - a UPnP-AV Media Renderer
-JammR (pronounced like "the one who jamms") is the "set-top box" for you TV. It renders the media streams
+OmmR - a UPnP-AV Media Renderer
+OmmR is the "set-top box" for you TV. It renders the media streams
 coming from the UPnP-AV Server to a screen and a sound system.
 
-JammS - a set of UPnP-AV Media Servers
+OmmS - a set of UPnP-AV Media Servers
 Currently only a plugin for VDR (Video Disc Recorder - http://www.cadsoft.de/vdr/) is available.
 It gives you access to digital television provided by VDR (DVB-S, DVB-C or DVB-T). The plugin
 exposes the TV channels, you can watch live-TV and the recordings. Seeking in recordings is
@@ -32,46 +32,53 @@ supported. For browsing the EPG or setting timers you need a web based interface
 For delivering other content, such as music and video files (mp3, avi, ...) you can use one
 of the UPnP-AV servers out there (see compatibility list below).
 
-JammLib
-Basic functionality used by the other Jamm components.
+libomm
+UPnP 1.0 implementation
 
-JammSession
-A set of images, ready to boot and to provide you with the capabilities of JammC, JammR and/or JammS.
+libommav
+UPnP AV 1.0 implementation
+
+OmmSession
+A set of images, ready to boot and to provide you with the capabilities of OmmC, OmmR and/or OmmS.
 
 -------------------------------------------------------------------------------------------------------
 
 2. Building from Source
 
-To build Jamm from source you need CMake as of version 2.6 or later. In the top-level directory
+To build Omm from source you need CMake as of version 2.6 or later. In the top-level directory
 just run:
 
-$ cmake .
+$ ./cmake
 $ make
 $ sudo make install
 
 and you should be done.
 
-Alternatively you can run ./cmake.sh in the top-level directory. This will create the directory
-../jammbin and does an out-of-tree build in it.
+Alternatively you can run
+
+$ ./cmake.sh install
+
+in the top-level directory. This will create the directory
+../ommbin and does an out-of-tree build in it.
 
 You can also build each sub-project seperately by changing into the sub-project's directory 
-(for example jamm/jammc/) and doing the (cmake; make; sudo make install) triple.
+(for example omm/controller/) and doing the (cmake; make; sudo make install) triple.
 
 -------------------------------------------------------------------------------------------------------
 
 3. Dependencies
 
-Currently, all Jamm components depend on the Platinum UPnP library 0.4.6 or later 
+Currently, all Omm components depend on the Platinum UPnP library 0.4.6 or later 
 (http://sourceforge.net/projects/platinum/). A tar-ball with a CMake build script is provided
-on Jamm's website for convenience. You can build a shared library called libplatinum-upnp.so with
-it, just as Jamm expects it to find on your system. Further dependencies are:
+on Omm's website for convenience. You can build a shared library called libplatinum-upnp.so with
+it, just as Omm expects it to find on your system. Further dependencies are:
 
-JammC: Qt 4.4.3 or later
-JammR: X with support for xvideo is currently recommended
-JammR VLC engine: libvlc (as of vlc 0.9.4 or later)
-JammR mplayer engine: mplayer at least 1.0 pre-something installed as a runtime dependency
-JammR xine engine: libxine 1.1.15 or later
-JammS-vdr: VDR 1.6.0 with streamdev-server plugin
+OmmC: Qt 4.4.3 or later
+OmmR: X with support for xvideo is currently recommended
+OmmR VLC engine: libvlc (as of vlc 0.9.4 or later)
+OmmR mplayer engine: mplayer at least 1.0 pre-something installed as a runtime dependency
+OmmR xine engine: libxine 1.1.15 or later
+OmmS-vdr: VDR 1.6.0 with streamdev-server plugin
 
 The mplayer engine has an incredible good seek performance on http streams, but has some flaws when
 it comes to controlling it via IPC.
@@ -80,7 +87,7 @@ VLC has a clean library design and an overall good performance, especially on mp
 That's nice for TV streaming. However, seeking and AV-Transport related control is not as fast as mplayer's.
 
 The xine engine is imcomplete and probably not working. Seeking on http streams is not implemented in
-libxine, so this should be done first do reactivate it for Jamm.
+libxine, so this should be done first do reactivate it for Omm.
 
 So, currently I recommend the VLC engine.
 
@@ -88,14 +95,14 @@ So, currently I recommend the VLC engine.
 
 4. Running the Applications
 
-This is pretty straight forward: just run jammc or jammr on a single or on several different machines.
+This is pretty straight forward: just run ommc or ommr on a single or on several different machines.
 No configuration is needed, in the first place. All UPnP-AV Servers and UPnP-AV Renderers announce
-themselves on the local network and then pop up in JammC. You can quit or start a second JammC while
-some media is rendered, so different instances of JammC can concurrently control one playing media.
-On the other hand, one instance of JammC can control different instances of JammR, for example one
+themselves on the local network and then pop up in OmmC. You can quit or start a second OmmC while
+some media is rendered, so different instances of OmmC can concurrently control one playing media.
+On the other hand, one instance of OmmC can control different instances of OmmR, for example one
 in the living-room and one in the kitchen. Your mileage may vary.
 
-JammS-vdr must be installed as a vdr-plugin, usually in /usr/lib/vdr/plugins. The streamdev-plugin must be
+OmmS-vdr must be installed as a vdr-plugin, usually in /usr/lib/vdr/plugins. The streamdev-plugin must be
 configured and working on the standard ports. Don't forget to add:
 
 streamdev-server.AllowSuspend = 1
@@ -107,8 +114,8 @@ to vdr's setup.conf, to enable changing of transponders on the stream's request.
 
 5. Compatibility
 
-Currently, only Mediatomb (http://mediatomb.cc) has been tested to work nicely with the Jamm applications. Please give
+Currently, only Mediatomb (http://mediatomb.cc) has been tested to work nicely with the Omm applications. Please give
 feedback, if you have tested others.
 
-I hope you enjoy Jamm as much as I enjoy hacking on it
+I hope you enjoy Omm as much as I enjoy hacking on it
 Joerg Bakker

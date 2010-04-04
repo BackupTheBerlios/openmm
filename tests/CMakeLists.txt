@@ -11,111 +11,111 @@ NAME PocoUtil
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
-SET(LIB_JAMM
-jamm
+SET(LIB_OMM
+omm
 )
 
-SET(LIB_JAMM_AV
-jammav
+SET(LIB_OMM_AV
+ommav
 )
 
 INCLUDE_DIRECTORIES(
-${jamm_SOURCE_DIR}/jammlib/Jamm
-${jamm_SOURCE_DIR}/jammlib/src
+${omm_SOURCE_DIR}/lib/Omm
+${omm_SOURCE_DIR}/lib/src
 )
 
-SET( JAMMTEST_SSDP_SRCS
+SET( OMMTEST_SSDP_SRCS
 ssdp.cpp
 )
 
-SET( JAMMTEST_DEVICE_SRCS
+SET( OMMTEST_DEVICE_SRCS
 device.cpp
 )
 
-# SET( JAMMTEST_NETWORK_LIGHT_SRCS
+# SET( OMMTEST_NETWORK_LIGHT_SRCS
 # network_light.cpp
 # network_light_implementation.cpp
 # network_light_application.cpp
 # )
 
-SET( JAMMTEST_JAMMLIGHT_CTRL_SRCS
-jammlight_ctrl.cpp
-jammlight_ctrl_impl.cpp
-jammlight_ctrl_appl.cpp
+SET( OMMTEST_OMMLIGHT_CTRL_SRCS
+netlight_ctrl.cpp
+netlight_ctrl_impl.cpp
+netlight_ctrl_appl.cpp
 )
 
-SET( JAMMTEST_CONTROLLER_SRCS
+SET( OMMTEST_CONTROLLER_SRCS
 controller.cpp
 )
 
-SET( JAMMTEST_MEDIAOBJECT_SRCS
+SET( OMMTEST_MEDIAOBJECT_SRCS
 MediaObjectTest.cpp
 )
 
-# SET( JAMMTEST_HTTPFILESERVER_SRCS
+# SET( OMMTEST_HTTPFILESERVER_SRCS
 # HttpFileServerTest.cpp
 # )
 
 #list all source files here
 ADD_EXECUTABLE( ssdp_test
-${JAMMTEST_SSDP_SRCS}
+${OMMTEST_SSDP_SRCS}
 )
 
 ADD_EXECUTABLE( device_test
-${JAMMTEST_DEVICE_SRCS}
+${OMMTEST_DEVICE_SRCS}
 )
 
 # ADD_EXECUTABLE( network_light
-# ${JAMMTEST_NETWORK_LIGHT_SRCS}
+# ${OMMTEST_NETWORK_LIGHT_SRCS}
 # )
 
-ADD_EXECUTABLE( jammlight_ctrl
-${JAMMTEST_JAMMLIGHT_CTRL_SRCS}
+ADD_EXECUTABLE( netlight_ctrl
+${OMMTEST_OMMLIGHT_CTRL_SRCS}
 )
 
 ADD_EXECUTABLE( controller_test
-${JAMMTEST_CONTROLLER_SRCS}
+${OMMTEST_CONTROLLER_SRCS}
 )
 
 ADD_EXECUTABLE( media_object_test
-${JAMMTEST_MEDIAOBJECT_SRCS}
+${OMMTEST_MEDIAOBJECT_SRCS}
 )
 
 # ADD_EXECUTABLE( file_server_test
-# ${JAMMTEST_HTTPFILESERVER_SRCS}
+# ${OMMTEST_HTTPFILESERVER_SRCS}
 # )
 
 #need to link to some other libraries ? just add them here
 TARGET_LINK_LIBRARIES( ssdp_test
-${LIB_JAMM}
+${LIB_OMM}
 ${LIB_POCO_UTIL}
 )
 
 TARGET_LINK_LIBRARIES( device_test
-${LIB_JAMM}
+${LIB_OMM}
 ${LIB_POCO_UTIL}
 )
 
 # TARGET_LINK_LIBRARIES( network_light
-# ${LIB_JAMM}
+# ${LIB_OMM}
 # ${LIB_POCO_UTIL}
 # )
 
-TARGET_LINK_LIBRARIES( jammlight_ctrl
-${LIB_JAMM}
+TARGET_LINK_LIBRARIES( netlight_ctrl
+${LIB_OMM}
 ${LIB_POCO_UTIL}
 )
 
 TARGET_LINK_LIBRARIES( controller_test
-${LIB_JAMM}
+${LIB_OMM}
 ${LIB_POCO_UTIL}
 )
 
 TARGET_LINK_LIBRARIES( media_object_test
-${LIB_JAMM_AV}
+${LIB_OMM_AV}
 )
 
 # TARGET_LINK_LIBRARIES( file_server_test
-# ${LIB_JAMM_AV}
+# ${LIB_OMM_AV}
 # ${LIB_POCO_UTIL}
 # )

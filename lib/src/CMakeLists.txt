@@ -1,0 +1,104 @@
+# SET(CMAKE_LIBRARY_PATH
+# ${CMAKE_SYSTEM_LIBRARY_PATH}
+# )
+# 
+# if(TARGET omm)
+# SET(LIB_OMM
+# omm
+# )
+# INCLUDE_DIRECTORIES(
+# ${omm_SOURCE_DIR}/ommlib
+# )
+# else(TARGET omm)
+# FIND_LIBRARY(LIB_OMM
+# NAME omm
+# PATHS ${CMAKE_LIBRARY_PATH}
+# )
+# endif(TARGET omm)
+
+SET( OMM_LIB_SRCS
+Upnp.cpp
+)
+
+SET( OMM_AV_LIB_SRCS
+UpnpController.cpp
+UpnpAvControllers.cpp
+UpnpAvDevices.cpp
+UpnpAvTypes.cpp
+UpnpAvServer.cpp
+UpnpAvServerImpl.cpp
+UpnpAvRenderer.cpp
+UpnpAvRendererImpl.cpp
+UpnpAvCtrlImpl.cpp
+)
+
+SET( OMM_DVB_LIB_SRCS
+Dvb.cpp
+)
+
+FIND_LIBRARY(LIB_POCO_UTIL
+NAME PocoUtil
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_FOUNDATION
+NAME PocoFoundation
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_NET
+NAME PocoNet
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_XML
+NAME PocoXML
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+INCLUDE_DIRECTORIES(
+${ommlib_SOURCE_DIR}/Omm
+)
+
+# ADD_LIBRARY(ommlib
+# STATIC
+# ${OMM_LIB_SRCS}
+# )
+
+ADD_LIBRARY(omm
+SHARED
+${OMM_LIB_SRCS}
+)
+
+ADD_LIBRARY(ommav
+SHARED
+${OMM_AV_LIB_SRCS}
+)
+
+ADD_LIBRARY(ommdvb
+SHARED
+${OMM_DVB_LIB_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( omm
+${LIB_POCO_FOUNDATION}
+${LIB_POCO_NET}
+${LIB_POCO_XML}
+)
+
+TARGET_LINK_LIBRARIES( ommav
+omm
+)
+
+TARGET_LINK_LIBRARIES( ommdvb
+ommav
+)
+
+INSTALL( TARGETS omm ommav ommdvb
+LIBRARY DESTINATION lib
+)
+
+INSTALL( DIRECTORY ${ommlib_SOURCE_DIR}/Omm
+DESTINATION include
+FILES_MATCHING PATTERN "*.h"
+)

@@ -1,24 +1,24 @@
 -------------------------------------------------------------------------------------------------------
-2010-02-28 Jamm 0.1.0
+2010-02-28 Omm 0.1.0
 Coldplug of network interfaces
 Plugin loader
 
 -------------------------------------------------------------------------------------------------------
-2010-02-22 Jamm 0.0.3
+2010-02-22 Omm 0.0.3
 
-libjamm has all the basic Upnp code, no dependency on libplatinum anymore
-jammc, jammr and jamms are ported to libjamm with almost all functionality as with libplatinum
+libomm has all the basic Upnp code, no dependency on libplatinum anymore
+ommc, ommr and omms are ported to libomm with almost all functionality as with libplatinum
 API is so much cleaner now
 user interface for controller is a plugin so only the plugin is linked to the gui toolkit
 
 -------------------------------------------------------------------------------------------------------
-2009-04-15  JammS
+2009-04-15  OmmS
 
 vdr-upnp 0.0.3
  cmake extracts API version from /usr/include/vdr and renames plugin .so file
 
 -------------------------------------------------------------------------------------------------------
-2009-04-15  JammS
+2009-04-15  OmmS
 
 vdr-upnp 0.0.2
  changed number of children in top level containers (Live-TV, Recordings) from 0 to 1 to satisfy xbmc
@@ -29,28 +29,28 @@ vdr-upnp 0.0.2
 initial version of lsupnp 0.0.1
 
 -------------------------------------------------------------------------------------------------------
-2009-04-15  Jamm 0.0.1
+2009-04-15  Omm 0.0.1
 Initial version with basic features (list incomplete):
 
-JammC:
+OmmC:
 device discovery: select UPnP server/renderer, dynamicely add/remove server/renderer
 browse: lazy browsing
 transport: start, stop, pause, seek, position-info thread
 render control: volume
 
-JammR:
+OmmR:
 engines: vlc, mplayer, xine
 state machine
 EOT detection
 seek in streams
 position-info thread
 
-JammS-vdr:
+OmmS-vdr:
 channel-list
 recording-list
 http server for recordings
 handle 2GiB sliced VDR-recordings
 seek in recordings
 
-JammSession:
+OmmSession:
 epia image with Xorg and openchrome driver

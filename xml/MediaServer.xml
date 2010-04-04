@@ -6,13 +6,13 @@
   </specVersion>
   <device>
     <deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>
-    <friendlyName>JammS</friendlyName>
+    <friendlyName>OmmS</friendlyName>
     <manufacturer>joerg at hakker dot de</manufacturer>
-    <manufacturerURL>http://hakker.de/jamm</manufacturerURL>
-    <modelName>Jamm Media Server</modelName>
+    <manufacturerURL>http://hakker.de/omm</manufacturerURL>
+    <modelName>Omm Media Server</modelName>
     <modelNumber>0.3</modelNumber>
-    <modelDescription>Jamm UPnP Suite's Media Server</modelDescription>
-    <modelURL>http://hakker.de/jamm</modelURL>
+    <modelDescription>Omm UPnP Suite's Media Server</modelDescription>
+    <modelURL>http://hakker.de/omm</modelURL>
     <UDN>uuid:56b0189c-549f-11dc-a7c7-001641597c50</UDN>
     <serviceList>
         <service>

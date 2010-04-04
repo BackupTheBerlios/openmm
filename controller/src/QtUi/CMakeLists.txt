@@ -1,0 +1,86 @@
+FIND_PACKAGE(Qt4)
+
+SET(CMAKE_LIBRARY_PATH
+${CMAKE_SYSTEM_LIBRARY_PATH}
+)
+
+if(TARGET omm)
+SET(LIB_OMM
+omm
+)
+INCLUDE_DIRECTORIES(
+${omm_SOURCE_DIR}/lib
+)
+else(TARGET omm)
+FIND_LIBRARY(LIB_OMM
+NAME omm
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+endif(TARGET omm)
+
+MESSAGE (STATUS "Use file: ${QT_USE_FILE}")
+
+INCLUDE(
+${QT_USE_FILE}
+)
+
+SET( OMMC_QTUI_SRCS
+ControllerGui.cpp
+# # modeltest.cpp
+UpnpBrowserModel.cpp
+UpnpRendererListModel.cpp
+)
+
+SET( OMMC_QTUI
+# settings.ui
+ControllerGui.ui
+)
+
+SET( OMMC_QTUI_MOC
+ControllerGui.h
+# modeltest.h
+UpnpBrowserModel.h
+UpnpRendererListModel.h
+)
+
+QT4_WRAP_UI(
+OMMC_QTUI_H ${OMMC_QTUI}
+)
+
+GET_FILENAME_COMPONENT(
+OMMC_QTUI_H_DIR ${OMMC_QTUI_H} PATH
+)
+
+MESSAGE( STATUS
+"Directory for OmmC Qt UI files: ${OMMC_QTUI_H_DIR}"
+)
+
+INCLUDE_DIRECTORIES(
+${OMMC_QTUI_H_DIR}
+)
+
+QT4_WRAP_CPP(
+OMMC_QTUI_MOC_CPP ${OMMC_QTUI_MOC}
+)
+
+ADD_LIBRARY( ommc-av-ui-qt
+SHARED
+${OMMC_QTUI_SRCS}
+${OMMC_QTUI}
+${OMMC_QTUI_MOC_CPP}
+)
+
+TARGET_LINK_LIBRARIES( ommc-av-ui-qt
+${LIB_OMM}
+${QT_LIBRARIES}
+)
+
+ADD_DEFINITIONS(
+# -D_REENTRANT -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT -DQT_NO_WARNING_OUTPUT -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DQT_SHARED
+)
+
+
+INSTALL( TARGETS ommc-av-ui-qt
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib/omm
+)

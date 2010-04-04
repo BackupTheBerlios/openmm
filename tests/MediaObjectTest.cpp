@@ -1,24 +1,23 @@
 /***************************************************************************|
-|  Jamm - Just another multimedia ...                                       |
-|         ... set of applications and libraries based on the UPnP-AV specs  |
+|  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
-|  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
+|  Copyright (C) 2009, 2010                                                 |
+|  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
-|  This file is part of Jamm.                                               |
+|  This file is part of OMM.                                                |
 |                                                                           |
-|  Jamm is free software: you can redistribute it and/or modify             |
+|  OMM is free software: you can redistribute it and/or modify              |
 |  it under the terms of the GNU General Public License as published by     |
 |  the Free Software Foundation version 3 of the License.                   |
 |                                                                           |
-|  Jamm is distributed in the hope that it will be useful,                  |
+|  OMM is distributed in the hope that it will be useful,                   |
 |  but WITHOUT ANY WARRANTY; without even the implied warranty of           |
 |  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
 |  GNU General Public License for more details.                             |
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 #include "UpnpAvTypes.h"
 #include "UpnpPrivate.h"
 
@@ -152,7 +151,7 @@ std::string arMediaTomb1_orig = "\
 
 int main(int argc, char** argv)
 {
-    Jamm::Av::MediaObject ex1Object;
+    Omm::Av::MediaObject ex1Object;
     std::clog << "Content Directory 1, 2.8.3.2." << std::endl << ex1 << std::endl << std::endl;
     ex1Object.readMetaData(ex1);
     std::clog << std::endl;
@@ -161,10 +160,10 @@ int main(int argc, char** argv)
     ex1Object.readChildren(ex2);
     std::clog << std::endl;
     
-    Jamm::Av::MediaObject ex3Object;
+    Omm::Av::MediaObject ex3Object;
     std::clog << "Content Directory 1, 2.8.3.5." << std::endl << ex1 << std::endl << std::endl;
     ex3Object.readChildren(ex3);
     
-    Jamm::ActionResponseReader ar(arMediaTomb1_orig, new Jamm::Action());
+    Omm::ActionResponseReader ar(arMediaTomb1_orig, new Omm::Action());
     ar.action();
 }
