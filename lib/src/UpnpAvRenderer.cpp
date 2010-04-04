@@ -29,16 +29,16 @@ UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
 MediaRenderer(new RenderingControlRendererImpl,
               new ConnectionManagerRendererImpl,
               new AVTransportRendererImpl),
-m_pEngine(engine)
+_pEngine(engine)
 {
-    static_cast<RenderingControlRendererImpl*>(m_pRenderingControlImpl)->m_pEngine = engine;
-    static_cast<ConnectionManagerRendererImpl*>(m_pConnectionManagerImpl)->m_pEngine = engine;
-    static_cast<AVTransportRendererImpl*>(m_pAVTransportImpl)->m_pEngine = engine;
+    static_cast<RenderingControlRendererImpl*>(_pRenderingControlImpl)->_pEngine = engine;
+    static_cast<ConnectionManagerRendererImpl*>(_pConnectionManagerImpl)->_pEngine = engine;
+    static_cast<AVTransportRendererImpl*>(_pAVTransportImpl)->_pEngine = engine;
 }
 
 
 void
 UpnpAvRenderer::setFullscreen(bool on)
 {
-    m_pEngine->setFullscreen(on);
+    _pEngine->setFullscreen(on);
 }

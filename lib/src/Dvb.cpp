@@ -22,7 +22,7 @@
 
 using namespace Dvb;
 
-DvbDevice* DvbDevice::m_pInstance = 0;
+DvbDevice* DvbDevice::_pInstance = 0;
 
 DvbDevice::DvbDevice()
 {
@@ -32,10 +32,10 @@ DvbDevice::DvbDevice()
 DvbDevice*
 DvbDevice::instance()
 {
-    if (!m_pInstance) {
-        m_pInstance = new DvbDevice;
+    if (!_pInstance) {
+        _pInstance = new DvbDevice;
     }
-    return m_pInstance;
+    return _pInstance;
 }
 
 

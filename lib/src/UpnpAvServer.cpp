@@ -29,7 +29,7 @@ using namespace Omm::Av;
 
 
 MediaItemServer::MediaItemServer() :
-m_socket(Poco::Net::ServerSocket(0))
+_socket(Poco::Net::ServerSocket(0))
 {
     
 }
@@ -38,8 +38,8 @@ m_socket(Poco::Net::ServerSocket(0))
 MediaItemServer::~MediaItemServer()
 {
     Log::instance()->upnpav().information("stopping media item server ...");
-    m_pHttpServer->stop();
-    delete m_pHttpServer;
+    _pHttpServer->stop();
+    delete _pHttpServer;
     Log::instance()->upnpav().information("done");
 }
 
@@ -48,48 +48,48 @@ void
 MediaItemServer::start()
 {
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-    m_pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), m_socket, pParams);
-    m_pHttpServer->start();
-    Log::instance()->upnpav().information(Poco::format("media item server listening on: %s", m_socket.address().toString()));
+    _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
+    _pHttpServer->start();
+    Log::instance()->upnpav().information(Poco::format("media item server listening on: %s", _socket.address().toString()));
 }
 
 
 void
 MediaItemServer::stop()
 {
-    m_pHttpServer->stop();
+    _pHttpServer->stop();
 }
 
 
 Poco::UInt16
 MediaItemServer::getPort() const
 {
-    return m_socket.address().port();
+    return _socket.address().port();
 }
 
 
 void
 MediaItemServer::registerMediaItem(const std::string& relObjectId, MediaItem* pMediaItem, const std::string& privateUri)
 {
-    m_itemMap["/" + relObjectId] = pMediaItem;
-    m_privateUriMap["/" + relObjectId] = privateUri;
+    _itemMap["/" + relObjectId] = pMediaItem;
+    _privateUriMap["/" + relObjectId] = privateUri;
 }
 
 
 MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass) :
 MediaContainer(title, subClass)
 {
-    m_pItemServer = new MediaItemServer;
-    m_pItemServer->start();
-    m_port = m_pItemServer->m_socket.address().port();
-    m_address =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+    _pItemServer = new MediaItemServer;
+    _pItemServer->start();
+    _port = _pItemServer->_socket.address().port();
+    _address =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
 }
 
 
 MediaServerContainer::~MediaServerContainer()
 {
-    m_pItemServer->stop();
-    delete m_pItemServer;
+    _pItemServer->stop();
+    delete _pItemServer;
 }
 
 
@@ -109,14 +109,14 @@ MediaServerContainer::~MediaServerContainer()
 // MediaServerContainer::appendChild(const std::string& objectId, MediaItem* pMediaItem)
 // {
 //     MediaContainer::appendChild(objectId, pMediaItem);
-// //     m_pItemServer->registerMediaItem(objectId, pMediaItem, privateUri);
+// //     _pItemServer->registerMediaItem(objectId, pMediaItem, privateUri);
 // //     std::string pResource = std::string("http://") + localAddress + ":" + Poco::NumberFormatter::format(localPort) + "/" + objectId;
 // //     pMediaItem->addResource(privateResource, pMediaItem);
 // }
 
 
 ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaItemServer* pItemServer) :
-m_pItemServer(pItemServer)
+_pItemServer(pItemServer)
 {
 }
 
@@ -124,12 +124,12 @@ m_pItemServer(pItemServer)
 Poco::Net::HTTPRequestHandler*
 ItemRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-    return new ItemRequestHandler(m_pItemServer);
+    return new ItemRequestHandler(_pItemServer);
 }
 
 
 ItemRequestHandler::ItemRequestHandler(MediaItemServer* pItemServer) :
-m_pItemServer(pItemServer)
+_pItemServer(pItemServer)
 {
 }
 
@@ -144,16 +144,16 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     Log::instance()->upnpav().debug(Poco::format("request method: %s", request.getMethod()));
     Log::instance()->upnpav().debug(Poco::format("request header:\n%s", requestHeader.str()));
     
-    MediaItem* pItem = m_pItemServer->m_itemMap[request.getURI()];
+    MediaItem* pItem = _pItemServer->_itemMap[request.getURI()];
     Resource* pRes = pItem->getResource(0);
-//     Poco::URI resUri(pRes->m_uri);
-    std::string resPath = m_pItemServer->m_privateUriMap[request.getURI()];
+//     Poco::URI resUri(pRes->_uri);
+    std::string resPath = _pItemServer->_privateUriMap[request.getURI()];
     Poco::URI resUri(resPath);
-    std::string resProtInfo = pRes->m_protInfo;
+    std::string resProtInfo = pRes->_protInfo;
     Poco::StringTokenizer prot(resProtInfo, ":");
     std::string mime = prot[2];
     std::string dlna = prot[3];
-    ui4 resSize = pRes->m_size;
+    ui4 resSize = pRes->_size;
     
     response.set("transferMode.dlna.org", "Streaming");
     response.set("EXT", "");
@@ -245,15 +245,15 @@ new AVTransportImplementation
 void
 UpnpAvServer::setRoot(MediaObject* pRoot)
 {
-    m_pRoot = pRoot;
-    static_cast<ContentDirectoryImplementation*>(m_pContentDirectoryImpl)->m_pRoot = m_pRoot;
-    m_pRoot->setObjectId("0");
-    m_pRoot->setParentId("-1");
+    _pRoot = pRoot;
+    static_cast<ContentDirectoryImplementation*>(_pContentDirectoryImpl)->_pRoot = _pRoot;
+    _pRoot->setObjectId("0");
+    _pRoot->setParentId("-1");
 }
 
 
 MediaObject*
 UpnpAvServer::getRoot()
 {
-    return m_pRoot;
+    return _pRoot;
 }

@@ -61,10 +61,10 @@ public:
     void registerMediaItem(const std::string& relObjectId, MediaItem* pMediaItem, const std::string& privateUri = "");
     
 private:
-    Poco::Net::ServerSocket                     m_socket;
-    Poco::Net::HTTPServer*                      m_pHttpServer;
-    std::map<std::string,std::string>           m_privateUriMap;
-    std::map<std::string,MediaItem*>            m_itemMap;
+    Poco::Net::ServerSocket                     _socket;
+    Poco::Net::HTTPServer*                      _pHttpServer;
+    std::map<std::string,std::string>           _privateUriMap;
+    std::map<std::string,MediaItem*>            _itemMap;
 };
 
 
@@ -76,7 +76,7 @@ public:
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-    MediaItemServer*  m_pItemServer;
+    MediaItemServer*  _pItemServer;
 };
 
 
@@ -90,13 +90,13 @@ public:
 //     void appendChild(const std::string& objectId, MediaItem* pMediaItem);
     
 private:
-    MediaItemServer*    m_pItemServer;
-    MediaObjectSource*  m_pObjectSource;
-    Transcoder*         m_pTranscoder;
+    MediaItemServer*    _pItemServer;
+    MediaObjectSource*  _pObjectSource;
+    Transcoder*         _pTranscoder;
     
-    // TODO: this should be fetched from m_pItemServer
-    int                 m_port;
-    std::string         m_address;
+    // TODO: this should be fetched from _pItemServer
+    int                 _port;
+    std::string         _address;
 };
 
 
@@ -109,7 +109,7 @@ public:
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
     
 private:
-    MediaItemServer*  m_pItemServer;
+    MediaItemServer*  _pItemServer;
 };
 
 
@@ -122,7 +122,7 @@ public:
     MediaObject* getRoot();
 
 private:
-    MediaObject* m_pRoot;
+    MediaObject* _pRoot;
 };
 
 } // namespace Av

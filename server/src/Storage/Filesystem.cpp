@@ -42,9 +42,9 @@ MediaServerContainer("Collection")
 //         3895296);
 //     appendChild("1", pKyuss);
     
-//     m_pFileServer = new Omm::Av::MediaItemServer;
-//     m_pFileServer->start();
-//     int localPort = m_pFileServer->getPort();
+//     _pFileServer = new Omm::Av::MediaItemServer;
+//     _pFileServer->start();
+//     int localPort = _pFileServer->getPort();
 //     std::string localAddress =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
 
 //     Omm::Av::MediaItem* pRtl = new Omm::Av::MediaItem("RTL",
@@ -52,7 +52,7 @@ MediaServerContainer("Collection")
 //         "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
 //         0, "videoItem.movie");
 //     appendChild("2", pRtl, , "http://192.168.178.23:3000/TS/1");
-// //     m_pFileServer->registerMediaItem("2", pRtl, "http://192.168.178.23:3000/TS/1");
+// //     _pFileServer->registerMediaItem("2", pRtl, "http://192.168.178.23:3000/TS/1");
 };
 
 

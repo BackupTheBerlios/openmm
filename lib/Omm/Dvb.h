@@ -47,7 +47,7 @@ public:
 private:
     DvbDevice();
     
-    static DvbDevice*     m_pInstance;
+    static DvbDevice*     _pInstance;
 };
 
 }  // namespace Dvb

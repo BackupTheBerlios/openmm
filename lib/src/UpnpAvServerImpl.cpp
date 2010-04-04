@@ -223,10 +223,10 @@ ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::s
 {
     MediaObject* object;
     if (ObjectID == "0") {
-        object = m_pRoot;
+        object = _pRoot;
     }
     else {
-        object = m_pRoot->getObject(ObjectID.substr(2));
+        object = _pRoot->getObject(ObjectID.substr(2));
     }
     
     if (BrowseFlag == "BrowseMetadata") {

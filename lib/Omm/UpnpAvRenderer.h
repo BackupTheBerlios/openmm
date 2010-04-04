@@ -90,7 +90,7 @@ public:
     void setFullscreen(bool on = true);
     
 private:
-    Engine*     m_pEngine;
+    Engine*     _pEngine;
 };
 
 } // namespace Av

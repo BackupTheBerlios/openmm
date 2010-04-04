@@ -51,7 +51,7 @@ protected:
 private:
     void _threadGetStatus(Omm::Action* pAction);
     
-    Omm::Service* m_pService;
+    Omm::Service* _pService;
 };
 
 
@@ -60,13 +60,13 @@ class DimmableLightController : public Omm::ControllerImplAdapter
 public:
     DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController);
     
-    SwitchPowerController* SwitchPower() { return m_pSwitchPowerController; }
+    SwitchPowerController* SwitchPower() { return _pSwitchPowerController; }
     
 private:
     virtual void eventHandler(Omm::StateVar* pStateVar);
     
-    Omm::Device* m_pDevice;
-    SwitchPowerController* m_pSwitchPowerController;
+    Omm::Device* _pDevice;
+    SwitchPowerController* _pSwitchPowerController;
 };
 
 #endif

@@ -53,7 +53,7 @@ protected:
 //     virtual void deviceAdded(Device* pDevice);
 //     virtual void deviceRemoved(Device* pDevice);
     
-    Container<Device>*    m_pDevices;
+    Container<Device>*    _pDevices;
 };
 
 
@@ -68,7 +68,7 @@ public:
 private:
     RendererView(MediaRendererController* rendererController);
     
-    MediaRendererController*    m_pRendererController;
+    MediaRendererController*    _pRendererController;
 };
 
 
@@ -108,10 +108,10 @@ public:
     void mediaObjectSelected(MediaObject* pObject);
     
 private:
-    Container<RendererView>*              m_pRenderers;
-    Container<ServerController>*          m_pServers;
-    MediaRendererController*              m_pSelectedRenderer;
-    MediaObject*                          m_pSelectedObject;
+    Container<RendererView>*              _pRenderers;
+    Container<ServerController>*          _pServers;
+    MediaRendererController*              _pSelectedRenderer;
+    MediaObject*                          _pSelectedObject;
 };
 
 // end: exposed interface to user interface
@@ -121,12 +121,12 @@ class ServerController
 public:
     ServerController(MediaServerController* pServerController);
     
-    MediaServerController* controller() { return m_pServerController; }
-    MediaObject* root() { return m_pRoot; }
+    MediaServerController* controller() { return _pServerController; }
+    MediaObject* root() { return _pRoot; }
     
 private:
-    MediaServerController*    m_pServerController;
-    MediaObject*              m_pRoot;
+    MediaServerController*    _pServerController;
+    MediaObject*              _pRoot;
 };
 
 // begin: exposed interface to controller application
@@ -136,7 +136,7 @@ class UpnpController : public Controller
 public:
     ~UpnpController();
     
-    void setUserInterface(UpnpUserInterface* pUserInterface) { m_pUserInterface = pUserInterface; }
+    void setUserInterface(UpnpUserInterface* pUserInterface) { _pUserInterface = pUserInterface; }
     
 //     void start();
     
@@ -145,8 +145,8 @@ protected:
     virtual void deviceRemoved(DeviceRoot* pDeviceRoot);
     
 private:
-    Container<Device>               m_devices;
-    UpnpUserInterface*              m_pUserInterface;
+    Container<Device>               _devices;
+    UpnpUserInterface*              _pUserInterface;
 };
 
 
@@ -159,9 +159,9 @@ private:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);
     virtual void deviceRemoved(DeviceRoot* pDeviceRoot);
     
-    Container<RendererView>               m_renderers;
-    Container<ServerController>           m_servers;
-    UpnpAvUserInterface*                  m_pAvUserInterface;
+    Container<RendererView>               _renderers;
+    Container<ServerController>           _servers;
+    UpnpAvUserInterface*                  _pAvUserInterface;
 };
 
 // end: exposed interface to controller application

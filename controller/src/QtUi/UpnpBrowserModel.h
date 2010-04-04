@@ -64,11 +64,11 @@ public:
     void endRemoveServer();
     
 private:
-//     Omm::Container<ServerController>*      m_pServers;
-    Omm::Av::UpnpAvUserInterface*          m_pUserInterface;
-    QTextCodec*                             m_charEncoding;
-    QFileIconProvider*                      m_iconProvider;
-//     bool                  m_lazyRowCount;
+//     Omm::Container<ServerController>*      _pServers;
+    Omm::Av::UpnpAvUserInterface*          _pUserInterface;
+    QTextCodec*                             _charEncoding;
+    QFileIconProvider*                      _iconProvider;
+//     bool                  _lazyRowCount;
 };
 
 #endif // UPNPBROWSERMODEL_H

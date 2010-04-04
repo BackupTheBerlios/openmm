@@ -42,9 +42,9 @@ public:
     CrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0);
     ~CrumbButton();
     
-    void setChild(CrumbButton* child) { m_child = child; }
+    void setChild(CrumbButton* child) { _child = child; }
     
-    static CrumbButton* m_lastCrumbButton;
+    static CrumbButton* _lastCrumbButton;
     
 private slots:
     void buttonPressed();
@@ -52,12 +52,12 @@ private slots:
 private:
     void deleteChildren();
     
-    QLayout*           m_parentLayout;
-    QHBoxLayout*       m_boxLayout;
-    QPushButton*       m_button;
-    QAbstractItemView* m_browserView;
-    const QModelIndex  m_index;
-    CrumbButton*       m_child;
+    QLayout*           _parentLayout;
+    QHBoxLayout*       _boxLayout;
+    QPushButton*       _button;
+    QAbstractItemView* _browserView;
+    const QModelIndex  _index;
+    CrumbButton*       _child;
 };
 
 
@@ -83,8 +83,8 @@ public:
 //     void setBrowserTreeItemModel(QAbstractItemModel* model);
 //     void setRendererListItemModel(QAbstractItemModel* model);
     
-//     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui.m_browserView->selectionModel(); }
-//     QItemSelectionModel *getRendererListSelectionModel() { return ui.m_rendererListView->selectionModel(); }
+//     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui._browserView->selectionModel(); }
+//     QItemSelectionModel *getRendererListSelectionModel() { return ui._rendererListView->selectionModel(); }
     
 
     
@@ -137,13 +137,13 @@ signals:
 private:
     
 //     void sliderChange(QAbstractSlider::SliderChange change);
-    UpnpBrowserModel*       m_pBrowserModel;
-    UpnpRendererListModel*  m_pRendererListModel;
+    UpnpBrowserModel*       _pBrowserModel;
+    UpnpRendererListModel*  _pRendererListModel;
     
-    QApplication            m_app;
-    QFrame                  m_widget;
+    QApplication            _app;
+    QFrame                  _widget;
     Ui::ControllerGui       ui;
-    bool                    m_sliderMoved;
+    bool                    _sliderMoved;
 };
 
 #endif //CONTROLLERGUI_H

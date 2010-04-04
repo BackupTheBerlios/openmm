@@ -26,16 +26,16 @@ using namespace Omm;
 using namespace Omm::Av;
 
 ServerController::ServerController(MediaServerController* pServerController) :
-m_pServerController(pServerController)
+_pServerController(pServerController)
 {
-    m_pRoot = new Omm::Av::MediaObject();
-    m_pRoot->setObjectId("0");
-    m_pRoot->setTitle(m_pServerController->getDevice()->getFriendlyName());
-    m_pRoot->setServerController(m_pServerController);
-    m_pRoot->setFetchedAllChildren(false);
+    _pRoot = new Omm::Av::MediaObject();
+    _pRoot->setObjectId("0");
+    _pRoot->setTitle(_pServerController->getDevice()->getFriendlyName());
+    _pRoot->setServerController(_pServerController);
+    _pRoot->setFetchedAllChildren(false);
     // TODO: browse root object "0" here
     // TODO: this should depend on the browse result for root object "0"
-    m_pRoot->setIsContainer(true);
+    _pRoot->setIsContainer(true);
 }
 
 
@@ -49,10 +49,10 @@ UpnpController::~UpnpController()
 // UpnpController::start()
 // {
 //     init();
-// //     JSignal::connectNodes(&m_pollPositionInfoTimer.fire, this);
+// //     JSignal::connectNodes(&_pollPositionInfoTimer.fire, this);
 //     
 //     // poll for current position every second
-// //     m_pollPositionInfoTimer.startTimer(1000);
+// //     _pollPositionInfoTimer.startTimer(1000);
 // }
 
 
@@ -67,9 +67,9 @@ UpnpController::deviceAdded(DeviceRoot* pDeviceRoot)
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
 //     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
-    m_pUserInterface->beginAddDevice(m_devices.position(pDevice->getUuid()));
-    m_devices.append(pDevice->getUuid(), pDevice);
-    m_pUserInterface->endAddDevice();
+    _pUserInterface->beginAddDevice(_devices.position(pDevice->getUuid()));
+    _devices.append(pDevice->getUuid(), pDevice);
+    _pUserInterface->endAddDevice();
 }
 
 
@@ -83,14 +83,14 @@ UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
 //     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
-    m_pUserInterface->beginRemoveDevice(m_devices.position(pDevice->getUuid()));
-    m_devices.remove(pDevice);
-    m_pUserInterface->endRemoveDevice();
+    _pUserInterface->beginRemoveDevice(_devices.position(pDevice->getUuid()));
+    _devices.remove(pDevice);
+    _pUserInterface->endRemoveDevice();
 }
 
 
 RendererView::RendererView(MediaRendererController* rendererController) :
-m_pRendererController(rendererController)
+_pRendererController(rendererController)
 {
 }
 
@@ -98,16 +98,16 @@ m_pRendererController(rendererController)
 const std::string&
 RendererView::getName()
 {
-    return m_pRendererController->getDevice()->getFriendlyName();
+    return _pRendererController->getDevice()->getFriendlyName();
 }
 
 
 void
 UpnpAvController::setUserInterface(UpnpAvUserInterface* pUserInterface)
 {
-    m_pAvUserInterface = pUserInterface;
-    m_pAvUserInterface->m_pRenderers = &m_renderers;
-    m_pAvUserInterface->m_pServers = &m_servers;
+    _pAvUserInterface = pUserInterface;
+    _pAvUserInterface->_pRenderers = &_renderers;
+    _pAvUserInterface->_pServers = &_servers;
 }
 
 
@@ -127,11 +127,11 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
             new RenderingControlControllerImpl,
             new ConnectionManagerControllerImpl,
             new AVTransportControllerImpl);
-        m_pAvUserInterface->beginAddRenderer(m_renderers.size());
-//         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
-        m_renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
-//         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << m_renderers.size() << std::endl;
-        m_pAvUserInterface->endAddRenderer();
+        _pAvUserInterface->beginAddRenderer(_renderers.size());
+//         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << _renderers.size() << std::endl;
+        _renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
+//         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << _renderers.size() << std::endl;
+        _pAvUserInterface->endAddRenderer();
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         ServerController* pServer = new ServerController(new Omm::Av::MediaServerController(
@@ -139,11 +139,11 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
             new ContentDirectoryControllerImpl,
             new ConnectionManagerControllerImpl,
             new AVTransportControllerImpl));
-        m_pAvUserInterface->beginAddServer(m_servers.size());
-//         std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
-        m_servers.append(pDevice->getUuid(), pServer);
-//         std::clog << "UpnpAvController::deviceAdded() number of servers: " << m_servers.size() << std::endl;
-        m_pAvUserInterface->endAddServer();
+        _pAvUserInterface->beginAddServer(_servers.size());
+//         std::clog << "UpnpAvController::deviceAdded() number of servers: " << _servers.size() << std::endl;
+        _servers.append(pDevice->getUuid(), pServer);
+//         std::clog << "UpnpAvController::deviceAdded() number of servers: " << _servers.size() << std::endl;
+        _pAvUserInterface->endAddServer();
     }
 }
 
@@ -160,28 +160,28 @@ UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         // TODO: delete renderer controller
-        m_pAvUserInterface->beginRemoveRenderer(m_renderers.position(pDevice->getUuid()));
-//         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << m_renderers.size() << std::endl;
-        m_renderers.remove(pDevice->getUuid());
-//         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << m_renderers.size() << std::endl;
-        m_pAvUserInterface->endRemoveRenderer();
+        _pAvUserInterface->beginRemoveRenderer(_renderers.position(pDevice->getUuid()));
+//         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << _renderers.size() << std::endl;
+        _renderers.remove(pDevice->getUuid());
+//         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << _renderers.size() << std::endl;
+        _pAvUserInterface->endRemoveRenderer();
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         // TODO: delete server controller
-        m_pAvUserInterface->beginRemoveServer(m_servers.position(pDevice->getUuid()));
-//         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
-        m_servers.remove(pDevice->getUuid());
-//         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << m_servers.size() << std::endl;
-        m_pAvUserInterface->endRemoveServer();
+        _pAvUserInterface->beginRemoveServer(_servers.position(pDevice->getUuid()));
+//         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << _servers.size() << std::endl;
+        _servers.remove(pDevice->getUuid());
+//         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << _servers.size() << std::endl;
+        _pAvUserInterface->endRemoveServer();
     }
 }
 
 
 UpnpAvUserInterface::UpnpAvUserInterface() :
-m_pRenderers(NULL),
-m_pServers(NULL),
-m_pSelectedRenderer(NULL),
-m_pSelectedObject(NULL)
+_pRenderers(NULL),
+_pServers(NULL),
+_pSelectedRenderer(NULL),
+_pSelectedObject(NULL)
 {
 }
 
@@ -189,60 +189,60 @@ m_pSelectedObject(NULL)
 int
 UpnpAvUserInterface::rendererCount()
 {
-    return m_pRenderers->size();
+    return _pRenderers->size();
 }
 
 
 RendererView*
 UpnpAvUserInterface::rendererView(int numRenderer)
 {
-    return &m_pRenderers->get(numRenderer);
+    return &_pRenderers->get(numRenderer);
 }
 
 
 int
 UpnpAvUserInterface::serverCount()
 {
-    return m_pServers->size();
+    return _pServers->size();
 }
 
 
 MediaObject*
 UpnpAvUserInterface::serverRootObject(int numServer)
 {
-    return m_pServers->get(numServer).root();
+    return _pServers->get(numServer).root();
 }
 
 
 void
 UpnpAvUserInterface::rendererSelected(RendererView* pRenderer)
 {
-    m_pSelectedRenderer = pRenderer->m_pRendererController;
+    _pSelectedRenderer = pRenderer->_pRendererController;
     std::string sourceInfo;
     std::string sinkInfo;
-    m_pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
+    _pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
 }
 
 
 void
 UpnpAvUserInterface::mediaObjectSelected(Omm::Av::MediaObject* pObject)
 {
-    m_pSelectedObject = pObject;
+    _pSelectedObject = pObject;
 }
 
 
 void
 UpnpAvUserInterface::playPressed()
 {
-    if (m_pSelectedRenderer == 0 || m_pSelectedObject == 0) {
+    if (_pSelectedRenderer == 0 || _pSelectedObject == 0) {
         return;
     }
-    Resource* pRes = m_pSelectedObject->getResource();
+    Resource* pRes = _pSelectedObject->getResource();
     if (pRes) {
         std::string metaData;
-        m_pSelectedObject->writeMetaData(metaData);
-        m_pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->m_uri, metaData);
-        m_pSelectedRenderer->AVTransport()->Play(0, "1");
+        _pSelectedObject->writeMetaData(metaData);
+        _pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->_uri, metaData);
+        _pSelectedRenderer->AVTransport()->Play(0, "1");
     }
 }
 
@@ -250,41 +250,41 @@ UpnpAvUserInterface::playPressed()
 void
 UpnpAvUserInterface::stopPressed()
 {
-    if (m_pSelectedRenderer == 0) {
+    if (_pSelectedRenderer == 0) {
         return;
     }
-    m_pSelectedRenderer->AVTransport()->Stop(0);
+    _pSelectedRenderer->AVTransport()->Stop(0);
 }
 
 
 void
 UpnpAvUserInterface::pausePressed()
 {
-    if (m_pSelectedRenderer == 0) {
+    if (_pSelectedRenderer == 0) {
         return;
     }
-    m_pSelectedRenderer->AVTransport()->Pause(0);
+    _pSelectedRenderer->AVTransport()->Pause(0);
 }
 
 
 void
 UpnpAvUserInterface::positionMoved(int position)
 {
-    if (m_pSelectedRenderer == 0) {
+    if (_pSelectedRenderer == 0) {
         return;
     }
         // TODO: need to support UPnP time format in Variant
-//     m_pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", );
+//     _pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", );
 }
 
 
 void
 UpnpAvUserInterface::volumeChanged(int value)
 {
-    if (m_pSelectedRenderer == 0) {
+    if (_pSelectedRenderer == 0) {
         return;
     }
-    m_pSelectedRenderer->RenderingControl()->SetVolume(0, "Master", value);
+    _pSelectedRenderer->RenderingControl()->SetVolume(0, "Master", value);
 }
 
 
@@ -293,13 +293,13 @@ UpnpAvUserInterface::volumeChanged(int value)
 // UpnpController::sliderMoved(int position)
 // {
 //     std::clog << "UpnpController::sliderMoved() to:" << position;
-//     if (m_curMediaRenderer.IsNull()) {
+//     if (_curMediaRenderer.IsNull()) {
 //         return;
 //     }
 //     
 //     NPT_String timestamp;
 //     PLT_Didl::FormatTimeStamp(timestamp, position);
-//     m_mediaController->Seek(m_curMediaRenderer, 0, "ABS_TIME", timestamp, NULL);
+//     _mediaController->Seek(_curMediaRenderer, 0, "ABS_TIME", timestamp, NULL);
 // }
 // 
 // 
@@ -321,8 +321,8 @@ UpnpAvUserInterface::volumeChanged(int value)
 // UpnpController::onSignalReceived()
 // {
 // //     std::clog << "UpnpController::pollPositionInfo()";
-//     if (!m_curMediaRenderer.IsNull()) {
-//         m_mediaController->GetPositionInfo(m_curMediaRenderer, 0, NULL);
+//     if (!_curMediaRenderer.IsNull()) {
+//         _mediaController->GetPositionInfo(_curMediaRenderer, 0, NULL);
 //     }
 // }
 

@@ -4,7 +4,7 @@
 using namespace Omm;
 using namespace Omm::Av;
 
-std::string MediaRenderer::m_deviceDescription =
+std::string MediaRenderer::_deviceDescription =
 "<?xml version=\"1.0\"?>\
 <root xmlns=\"urn:schemas-upnp-org:device-1-0\">\
 <specVersion>\
@@ -48,7 +48,7 @@ std::string MediaRenderer::m_deviceDescription =
 </root>\
 ";
 
-std::string AVTransport::m_description =
+std::string AVTransport::_description =
 "<?xml version=\"1.0\"?>\
 <scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">\
 <specVersion>\
@@ -586,7 +586,7 @@ std::string AVTransport::m_description =
 </scpd>\
 ";
 
-std::string ConnectionManager::m_description =
+std::string ConnectionManager::_description =
 "<?xml version=\"1.0\"?>\
 <scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">\
 <specVersion>\
@@ -731,7 +731,7 @@ std::string ConnectionManager::m_description =
 </scpd>\
 ";
 
-std::string RenderingControl::m_description =
+std::string RenderingControl::_description =
 "<?xml version=\"1.0\"?>\
 <scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">\
 <specVersion>\
@@ -1497,7 +1497,7 @@ std::string RenderingControl::m_description =
 ";
 
 
-std::string MediaServer::m_deviceDescription =
+std::string MediaServer::_deviceDescription =
 "<?xml version=\"1.0\"?>\
 <root xmlns=\"urn:schemas-upnp-org:device-1-0\">\
 <specVersion>\
@@ -1542,7 +1542,7 @@ std::string MediaServer::m_deviceDescription =
 </root>";
 
 
-std::string ContentDirectory::m_description =
+std::string ContentDirectory::_description =
 "<?xml version=\"1.0\"?>\
 <scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">\
 <specVersion>\

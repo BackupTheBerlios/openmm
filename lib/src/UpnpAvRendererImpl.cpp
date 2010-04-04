@@ -66,12 +66,12 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
         _setTransportState("STOPPED");
     }
 
-    std::cerr << "m_engine->setUri() uri: " << CurrentURI << std::endl;
-//     std::cerr << "renderer: " << m_pRenderer << std::endl;
-    std::cerr << "engine: " << m_pEngine << std::endl;
-    std::cerr << "id: " << m_pEngine->getEngineId() << std::endl;
-    m_pEngine->setUri(CurrentURI);
-    std::cerr << "m_engine->setUri() finished" << std::endl;
+    std::cerr << "_engine->setUri() uri: " << CurrentURI << std::endl;
+//     std::cerr << "renderer: " << _pRenderer << std::endl;
+    std::cerr << "engine: " << _pEngine << std::endl;
+    std::cerr << "id: " << _pEngine->getEngineId() << std::endl;
+    _pEngine->setUri(CurrentURI);
+    std::cerr << "_engine->setUri() finished" << std::endl;
     _setCurrentTrackURI(CurrentURI);
 /*
 2.2.16.CurrentTrackMetaData
@@ -88,7 +88,7 @@ implementation doesn’t support this feature then this state variable must be s
 //     PLT_MediaObjectListReference didl;
 //     PLT_Didl::FromDidl(currentUriMetaData, didl);
 //     item = (PLT_MediaItem*)(*didl->GetFirstItem());
-//     int meta_duration = item->m_Resources.GetFirstItem()->m_Duration;
+//     int meta_duration = item->_Resources.GetFirstItem()->_Duration;
 //     int duration = (meta_duration>0)?meta_duration:0;
 // //     MediaObject obj(CurrentURIMetaData);
 //     r8 duration;
@@ -169,7 +169,7 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
         // TODO: when in PAUSED_PLAYBACK we should actually stop (according to AVTransport 1.0 specs
         //       -> unfortunately mplayer has it's problems with stopping ...
         if (transportState != "STOPPED" && transportState != "PAUSED_PLAYBACK") {
-            m_pEngine->stop();
+            _pEngine->stop();
         }
         // TODO: check if engine really stopped (by return value)
         _setTransportState("STOPPED");
@@ -206,23 +206,23 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
             //       if no:  Action Stop behaves like Pause
             //       -> maybe it should be: STOPPED -> TRANSITIONING -> PAUSED_PLAYBACK
             //          contradicting AVTransport, 1.0, 2.4.12.3.
-            m_pEngine->load();
+            _pEngine->load();
         }
         else if (transportState == "PLAYING") {
-            if (_getCurrentTrackURI() != m_lastCurrentTrackUri) {
+            if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
                 std::string pos;
 //                 PLT_Didl::FormatTimeStamp(pos, 0);
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
-                m_pEngine->load();
+                _pEngine->load();
             }
         }
         else if (transportState == "PAUSED_PLAYBACK") {
-            m_pEngine->pause();
+            _pEngine->pause();
         }
         else if (transportState == "TRANSITIONING") {
             // TODO: can we set another speed after transitioning, than normal speed?
-            m_pEngine->setSpeed(1, 1);
+            _pEngine->setSpeed(1, 1);
             speed = "1";
         }
         // TODO: handle changes in speed
@@ -234,7 +234,7 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
         _setTransportState("PLAYING");
         _setTransportPlaySpeed(speed);
         
-        m_lastCurrentTrackUri = _getCurrentTrackURI();
+        _lastCurrentTrackUri = _getCurrentTrackURI();
     }
 }
 
@@ -246,7 +246,7 @@ AVTransportRendererImpl::Pause(const ui4& InstanceID)
     std::cerr << "AVTransportRendererImpl::Pause() enters in state: " << transportState << std::endl;
     
     if (transportState == "PLAYING" || transportState == "RECORDING") {
-        m_pEngine->pause();
+        _pEngine->pause();
         
         if (transportState == "PLAYING") {
             _setTransportState("PAUSED_PLAYBACK");
@@ -272,7 +272,7 @@ AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, co
         if (Unit == "ABS_TIME") {
 //             PLT_Didl::ParseTimeStamp(seekTarget, position);
         }
-        m_pEngine->seek(position);
+        _pEngine->seek(position);
         // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
         //       TransportState should be set to TRANSITIONING, but only while seeking.
         //       OnSeek() should return immediately! So we are not conform here.
@@ -304,7 +304,7 @@ AVTransportRendererImpl::Previous(const ui4& InstanceID)
 
 // ConnectionManagerRendererImpl::ConnectionManagerRendererImpl()
 // {
-//     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+//     _pRenderer = static_cast<MediaRendererImplementation*>(_pMediaRenderer);
 // }
 
 
@@ -358,7 +358,7 @@ ConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionID, 
 
 // RenderingControlRendererImpl::RenderingControlRendererImpl()
 // {
-//     m_pRenderer = static_cast<MediaRendererImplementation*>(m_pMediaRenderer);
+//     _pRenderer = static_cast<MediaRendererImplementation*>(_pMediaRenderer);
 // }
 
 
@@ -650,7 +650,7 @@ RenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string
 {
     std::cerr << "RenderingControlRendererImpl::SetVolume() channel: " << Channel << ", volume: " << DesiredVolume << std::endl;
     
-    m_pEngine->setVolume(0, DesiredVolume);
+    _pEngine->setVolume(0, DesiredVolume);
     
     _setVolume(DesiredVolume);
     std::cerr << "RenderingControlRendererImpl::SetVolume() finished" << std::endl;

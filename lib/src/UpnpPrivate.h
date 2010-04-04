@@ -44,8 +44,8 @@ class NetworkInterfaceNotification : public Poco::Notification
 public:
     NetworkInterfaceNotification(const std::string& interfaceName, bool added);
     
-    std::string     m_interfaceName;
-    bool            m_added;
+    std::string     _interfaceName;
+    bool            _added;
 };
 
 
@@ -65,12 +65,12 @@ public:
 //     NetworkInterfaceManager();
 //     void findValidIpAddress();
 //     
-//     static NetworkInterfaceManager*     m_pInstance;
-//     std::vector<std::string>            m_interfaceList;
-//     Poco::Net::IPAddress                m_validIpAddress;
-//     Poco::NotificationCenter            m_notificationCenter;
-//     bool                                m_loopbackProvided;
-//     Poco::Net::IPAddress                m_loopbackAddress;
+//     static NetworkInterfaceManager*     _pInstance;
+//     std::vector<std::string>            _interfaceList;
+//     Poco::Net::IPAddress                _validIpAddress;
+//     Poco::NotificationCenter            _notificationCenter;
+//     bool                                _loopbackProvided;
+//     Poco::Net::IPAddress                _loopbackAddress;
 // };
 
 
@@ -145,14 +145,14 @@ public:
 private:
     void initMessageMap();
     
-    TRequestMethod                          m_requestMethod;
-    TRequestMethod                          m_notificationSubtype;
-    std::map<std::string,std::string>       m_messageHeader;
-    std::string                             m_interface;
-    Poco::Net::SocketAddress                m_sender;
+    TRequestMethod                          _requestMethod;
+    TRequestMethod                          _notificationSubtype;
+    std::map<std::string,std::string>       _messageHeader;
+    std::string                             _interface;
+    Poco::Net::SocketAddress                _sender;
     
-    std::map<TRequestMethod,std::string>    m_messageMap;
-    std::map<std::string,TRequestMethod>    m_messageConstMap;
+    std::map<TRequestMethod,std::string>    _messageMap;
+    std::map<std::string,TRequestMethod>    _messageConstMap;
 };
 
 
@@ -164,10 +164,10 @@ public:
     Action* action();
     
 private:
-    // TODO: replace m_nodeStack by Node* in action()
-    std::stack<Poco::XML::Node*>            m_nodeStack;
-    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
-    Action*                                 m_pActionTemplate;
+    // TODO: replace _nodeStack by Node* in action()
+    std::stack<Poco::XML::Node*>            _nodeStack;
+    Poco::AutoPtr<Poco::XML::Document>      _pDoc;
+    Action*                                 _pActionTemplate;
 };
 
 
@@ -179,9 +179,9 @@ public:
     Action* action();
     
 private:
-    std::stack<Poco::XML::Node*>        m_nodeStack;
-    Poco::AutoPtr<Poco::XML::Document>  m_pDoc;
-    Action*                             m_pActionTemplate;
+    std::stack<Poco::XML::Node*>        _nodeStack;
+    Poco::AutoPtr<Poco::XML::Document>  _pDoc;
+    Action*                             _pActionTemplate;
 };
 
 
@@ -197,14 +197,14 @@ private:
     Poco::XML::Element* device(Device& device);
     Poco::XML::Element* service(Service* pService);
     Poco::XML::Element* icon(Icon* pIcon);
-    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
+    Poco::AutoPtr<Poco::XML::Document>   _pDoc;
 };
 
 
 class ServiceDescriptionWriter
 {
 public:
-    ServiceDescriptionWriter(std::string& description) : m_pDescription(&description), m_pDoc(new Poco::XML::Document) {}
+    ServiceDescriptionWriter(std::string& description) : _pDescription(&description), _pDoc(new Poco::XML::Document) {}
     
     void service(Service& service);
     
@@ -213,36 +213,36 @@ private:
     void action(Action& action);
     void argument(Argument& argument);
     
-    std::string*                            m_pDescription;
-    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
+    std::string*                            _pDescription;
+    Poco::AutoPtr<Poco::XML::Document>      _pDoc;
 };
 
 
 class SsdpNotifyAliveWriter
 {
 public:
-    SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
+    SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : _res(&generatedMessages) {}
     
     void deviceRoot(const DeviceRoot& pDeviceRoot);
     void device(const Device& pDevice);
     void service(const Service& pService);
 
 private:
-    SsdpMessageSet*            m_res;
+    SsdpMessageSet*            _res;
 };
 
 
 class SsdpNotifyByebyeWriter
 {
 public:
-    SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : m_res(&generatedMessages) {}
+    SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : _res(&generatedMessages) {}
     
     void deviceRoot(const DeviceRoot& pDeviceRoot);
     void device(const Device& pDevice);
     void service(const Service& pService);
     
 private:
-    SsdpMessageSet*            m_res;
+    SsdpMessageSet*            _res;
 };
 
 
@@ -253,7 +253,7 @@ public:
     // TODO: couldn't cope with the const argument stuff here ...
     void action(Action& action);
 private:
-    std::string*    m_responseBody;
+    std::string*    _responseBody;
 };
 
 
@@ -264,7 +264,7 @@ public:
     void write(std::string& actionMessage);
     
 private:
-    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
+    Poco::AutoPtr<Poco::XML::Document>   _pDoc;
 };
 
 
@@ -276,8 +276,8 @@ public:
     void stateVar(const StateVar& stateVar);
 
 private:
-    Poco::AutoPtr<Poco::XML::Document>   m_pDoc;
-    Poco::AutoPtr<Poco::XML::Element>    m_pPropertySet;
+    Poco::AutoPtr<Poco::XML::Document>   _pDoc;
+    Poco::AutoPtr<Poco::XML::Element>    _pPropertySet;
 };
 
 
@@ -314,7 +314,7 @@ public:
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-    std::string*    m_pDescription;
+    std::string*    _pDescription;
 };
 
 
@@ -327,8 +327,8 @@ public:
     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
     
 private:
-    std::map<std::string,UpnpRequestHandler*> m_requestHandlerMap;
-    HttpSocket*                               m_pHttpSocket;
+    std::map<std::string,UpnpRequestHandler*> _requestHandlerMap;
+    HttpSocket*                               _pHttpSocket;
 };
 
 
@@ -347,34 +347,34 @@ public:
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-//     DeviceRoot* m_deviceRoot;
-    Service*    m_pService;
+//     DeviceRoot* _deviceRoot;
+    Service*    _pService;
 };
 
 
 class EventRequestHandler: public UpnpRequestHandler
 {
 public:
-    EventRequestHandler(Service* pService) : m_pService(pService) {}
+    EventRequestHandler(Service* pService) : _pService(pService) {}
     
     EventRequestHandler* create();
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-    Service*    m_pService;
+    Service*    _pService;
 };
 
 
 class IconRequestHandler: public UpnpRequestHandler
 {
 public:
-    IconRequestHandler(Icon* pIcon) : m_pIcon(pIcon) {}
+    IconRequestHandler(Icon* pIcon) : _pIcon(pIcon) {}
     
     IconRequestHandler* create();
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-    Icon*    m_pIcon;
+    Icon*    _pIcon;
 };
 
 
@@ -383,9 +383,9 @@ class Subscription
 public:
     Subscription(std::string callbackUri);
     
-    std::string getUuid() { return m_uuid.toString(); }
+    std::string getUuid() { return _uuid.toString(); }
     
-    Poco::Net::HTTPClientSession* getSession() { return m_pSession; }
+    Poco::Net::HTTPClientSession* getSession() { return _pSession; }
     std::string getEventKey();
     
     void sendEventMessage(const std::string& eventMessage);
@@ -395,13 +395,13 @@ public:
 private:
 //     HTTPRequest* newRequest();
     
-    Poco::URI                       m_deliveryAddress;
-    Poco::Net::HTTPClientSession*   m_pSession;
-    Poco::UUID                      m_uuid;
-    Poco::UInt32                    m_eventKey;
-    std::string                     m_duration;
-    Poco::Timer                     m_timer;
-    Service*                        m_pService;
+    Poco::URI                       _deliveryAddress;
+    Poco::Net::HTTPClientSession*   _pSession;
+    Poco::UUID                      _uuid;
+    Poco::UInt32                    _eventKey;
+    std::string                     _duration;
+    Poco::Timer                     _timer;
+    Service*                        _pService;
 };
 
 } // namespace Omm

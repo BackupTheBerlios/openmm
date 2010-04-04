@@ -18,13 +18,13 @@
   <property name="currentIndex" >
    <number>0</number>
   </property>
-  <widget class="QWidget" name="m_controllerTab" >
+  <widget class="QWidget" name="_controllerTab" >
    <attribute name="title" >
     <string>Browser</string>
    </attribute>
    <layout class="QHBoxLayout" name="horizontalLayout_6" >
     <item>
-     <widget class="QWidget" native="1" name="m_browser" >
+     <widget class="QWidget" native="1" name="_browser" >
       <property name="sizePolicy" >
        <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
         <horstretch>1</horstretch>
@@ -33,7 +33,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7" >
        <item>
-        <widget class="QWidget" native="1" name="m_breadCrump" >
+        <widget class="QWidget" native="1" name="_breadCrump" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
            <horstretch>0</horstretch>
@@ -42,7 +42,7 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2" >
           <item>
-           <widget class="QPushButton" name="m_browserRootButton" >
+           <widget class="QPushButton" name="_browserRootButton" >
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
               <horstretch>0</horstretch>
@@ -74,7 +74,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTableView" name="m_browserView" >
+        <widget class="QTableView" name="_browserView" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
            <horstretch>2</horstretch>
@@ -87,7 +87,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QFrame" name="m_controllerGroup" >
+     <widget class="QFrame" name="_controllerGroup" >
       <property name="sizePolicy" >
        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
         <horstretch>0</horstretch>
@@ -108,7 +108,7 @@
            <item>
             <layout class="QGridLayout" name="gridLayout_2" >
              <item row="0" column="0" >
-              <widget class="QPushButton" name="m_skipBackwardButton" >
+              <widget class="QPushButton" name="_skipBackwardButton" >
                <property name="sizePolicy" >
                 <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
                  <horstretch>0</horstretch>
@@ -127,7 +127,7 @@
               </widget>
              </item>
              <item row="0" column="1" >
-              <widget class="QPushButton" name="m_skipForwardButton" >
+              <widget class="QPushButton" name="_skipForwardButton" >
                <property name="sizePolicy" >
                 <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
                  <horstretch>0</horstretch>
@@ -146,7 +146,7 @@
               </widget>
              </item>
              <item row="1" column="0" >
-              <widget class="QPushButton" name="m_seekBackwardButton" >
+              <widget class="QPushButton" name="_seekBackwardButton" >
                <property name="focusPolicy" >
                 <enum>Qt::NoFocus</enum>
                </property>
@@ -159,7 +159,7 @@
               </widget>
              </item>
              <item row="1" column="1" >
-              <widget class="QPushButton" name="m_seekForwardButton" >
+              <widget class="QPushButton" name="_seekForwardButton" >
                <property name="focusPolicy" >
                 <enum>Qt::NoFocus</enum>
                </property>
@@ -176,7 +176,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_6" >
              <item>
-              <widget class="QPushButton" name="m_playButton" >
+              <widget class="QPushButton" name="_playButton" >
                <property name="focusPolicy" >
                 <enum>Qt::NoFocus</enum>
                </property>
@@ -189,7 +189,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="m_stopButton" >
+              <widget class="QPushButton" name="_stopButton" >
                <property name="focusPolicy" >
                 <enum>Qt::NoFocus</enum>
                </property>
@@ -205,7 +205,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="m_pauseButton" >
+              <widget class="QPushButton" name="_pauseButton" >
                <property name="focusPolicy" >
                 <enum>Qt::NoFocus</enum>
                </property>
@@ -222,7 +222,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QSlider" name="m_volumeSlider" >
+          <widget class="QSlider" name="_volumeSlider" >
            <property name="focusPolicy" >
             <enum>Qt::NoFocus</enum>
            </property>
@@ -239,7 +239,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5" >
          <item>
-          <widget class="QSlider" name="m_seekSlider" >
+          <widget class="QSlider" name="_seekSlider" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
              <horstretch>1</horstretch>
@@ -273,7 +273,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QListView" name="m_rendererListView" >
+        <widget class="QListView" name="_rendererListView" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
            <horstretch>0</horstretch>
@@ -289,15 +289,15 @@
      </widget>
     </item>
    </layout>
-   <zorder>m_controllerGroup</zorder>
-   <zorder>m_browser</zorder>
+   <zorder>_controllerGroup</zorder>
+   <zorder>_browser</zorder>
   </widget>
-  <widget class="QWidget" name="m_renderControlTab" >
+  <widget class="QWidget" name="_renderControlTab" >
    <attribute name="title" >
     <string>RenderControl</string>
    </attribute>
   </widget>
-  <widget class="QWidget" name="m_settingsTab" >
+  <widget class="QWidget" name="_settingsTab" >
    <attribute name="title" >
     <string>Settings</string>
    </attribute>

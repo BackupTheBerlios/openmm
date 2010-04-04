@@ -26,13 +26,13 @@ SwitchPowerController::GetStatus(bool& ResultStatus)
 {
     // TOP
     // clone action
-    Omm::Action* pAction = m_pService->getAction("GetStatus")->clone();
+    Omm::Action* pAction = _pService->getAction("GetStatus")->clone();
     // set in arguments of action from method args
     // ...
     // BOTTOM
     // post action message via http-session
     // sendAction() blocks until answer is received and result is put into *pAction
-    m_pService->sendAction(pAction);
+    _pService->sendAction(pAction);
     // get out arguments and assign to method args
     ResultStatus = pAction->getArgument<bool>("ResultStatus");
     // ...
@@ -44,7 +44,7 @@ SwitchPowerController::_reqGetStatus()
 {
     // TOP
     // clone action
-    Omm::Action* pAction = m_pService->getAction("GetStatus")->clone();
+    Omm::Action* pAction = _pService->getAction("GetStatus")->clone();
     // set in arguments of action from method args
     // ...
     // BOTTOM
@@ -57,7 +57,7 @@ SwitchPowerController::_reqGetStatus()
 void
 SwitchPowerController::_threadGetStatus(Omm::Action* pAction)
 {
-    m_pService->sendAction(pAction);
+    _pService->sendAction(pAction);
     // get out arguments and assign to allocated variables
     bool ResultStatus = pAction->getArgument<bool>("ResultStatus");
     // ...
@@ -75,7 +75,7 @@ DimmableLightController::eventHandler(Omm::StateVar* pStateVar)
     if (pStateVar->getName() == "Status") {
         bool val;
         pStateVar->getValue(val);
-        m_pSwitchPowerController->_changedStatus(val);
+        _pSwitchPowerController->_changedStatus(val);
     }
     else {
     }
@@ -84,10 +84,10 @@ DimmableLightController::eventHandler(Omm::StateVar* pStateVar)
 
 DimmableLightController::DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController) :
 ControllerImplAdapter(pDevice),
-m_pDevice(pDevice),
-m_pSwitchPowerController(pSwitchPowerController)
+_pDevice(pDevice),
+_pSwitchPowerController(pSwitchPowerController)
 {
-    m_pSwitchPowerController->m_pService = m_pDevice->getService("urn:schemas-upnp-org:service:SwitchPower:1");
+    _pSwitchPowerController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:SwitchPower:1");
     
     init();
 }
@@ -96,5 +96,5 @@ m_pSwitchPowerController(pSwitchPowerController)
 bool
 SwitchPowerController::_getStatus()
 {
-    return m_pService->getStateVar<bool>("Status");
+    return _pService->getStateVar<bool>("Status");
 }

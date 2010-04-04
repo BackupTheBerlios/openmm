@@ -36,7 +36,7 @@ public:
     VdrChannels();
     
 private:
-    Omm::Av::MediaItemServer*  m_pItemServer;
+    Omm::Av::MediaItemServer*  _pItemServer;
 };
 
 
@@ -46,7 +46,7 @@ public:
     VdrRecordings();
     
 private:
-    Omm::Av::MediaItemServer*  m_pItemServer;
+    Omm::Av::MediaItemServer*  _pItemServer;
 };
 
 
@@ -66,9 +66,9 @@ private:
 //     virtual NPT_Result GetAvailable(NPT_LargeSize& available);
 //     
 // private:
-//     map<long long, FILE*>           m_streams;
-//     map<long long, FILE*>::iterator m_currentStream;
-//     long long                       m_totalSize;
+//     map<long long, FILE*>           _streams;
+//     map<long long, FILE*>::iterator _currentStream;
+//     long long                       _totalSize;
 // };
 
 #endif

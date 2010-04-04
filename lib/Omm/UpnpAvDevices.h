@@ -110,8 +110,8 @@ protected:
     std::string _getLastChange();
 
 private:
-    static std::string  m_description;
-    Service* m_pService;
+    static std::string  _description;
+    Service* _pService;
 };
 
 
@@ -136,8 +136,8 @@ protected:
     std::string _getCurrentConnectionIDs();
 
 private:
-    static std::string  m_description;
-    Service* m_pService;
+    static std::string  _description;
+    Service* _pService;
 };
 
 
@@ -173,8 +173,8 @@ protected:
     std::string _getContainerUpdateIDs();
 
 private:
-    static std::string  m_description;
-    Service* m_pService;
+    static std::string  _description;
+    Service* _pService;
 };
 
 
@@ -259,8 +259,8 @@ protected:
     bool _getLoudness();
 
 private:
-    static std::string  m_description;
-    Service* m_pService;
+    static std::string  _description;
+    Service* _pService;
 };
 
 
@@ -270,15 +270,15 @@ public:
     MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
 protected:
-    RenderingControl* m_pRenderingControlImpl;
-    ConnectionManager* m_pConnectionManagerImpl;
-    AVTransport* m_pAVTransportImpl;
+    RenderingControl* _pRenderingControlImpl;
+    ConnectionManager* _pConnectionManagerImpl;
+    AVTransport* _pAVTransportImpl;
 
 private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
-    static std::string m_deviceDescription;
+    static std::string _deviceDescription;
 };
 
 
@@ -288,15 +288,15 @@ public:
     MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
 protected:
-    ContentDirectory* m_pContentDirectoryImpl;
-    ConnectionManager* m_pConnectionManagerImpl;
-    AVTransport* m_pAVTransportImpl;
+    ContentDirectory* _pContentDirectoryImpl;
+    ConnectionManager* _pConnectionManagerImpl;
+    AVTransport* _pAVTransportImpl;
     
 private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
-    static std::string m_deviceDescription;
+    static std::string _deviceDescription;
 };
 
 } // namespace Av

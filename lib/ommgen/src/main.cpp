@@ -39,10 +39,10 @@ class OmmGenApplication : public Poco::Util::Application
 {
 public:
     OmmGenApplication() :
-        m_helpRequested(false),
-        m_description(""),
-        m_descriptionPath("./"),
-        m_outputPath("./")
+        _helpRequested(false),
+        _description(""),
+        _descriptionPath("./"),
+        _outputPath("./")
     {
     }
     
@@ -96,13 +96,13 @@ protected:
         std::cerr << "Application::handleOption() name: " << name << " , value: " << value << std::endl;
             
         if (name == "help") {
-            m_helpRequested = true;
+            _helpRequested = true;
         } else if (name == "description") {
-            m_description = value;
+            _description = value;
         } else if (name == "description-path") {
-            m_descriptionPath = value;
+            _descriptionPath = value;
         } else if (name == "output-path") {
-            m_outputPath = value;
+            _outputPath = value;
         }
     }
     
@@ -117,27 +117,27 @@ protected:
     
     int main(const std::vector<std::string>& args)
     {
-        if (m_helpRequested)
+        if (_helpRequested)
         {
             displayHelp();
         }
         else
         {
-//             Omm::UriDescriptionReader descriptionReader(Poco::URI("file:" + m_descriptionPath + "/"), m_description);
+//             Omm::UriDescriptionReader descriptionReader(Poco::URI("file:" + _descriptionPath + "/"), _description);
             Omm::UriDescriptionReader descriptionReader;
-            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + m_descriptionPath + "/" + m_description);
+            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + _descriptionPath + "/" + _description);
             
-            m_stubWriters.push_back(new DeviceH(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceCpp(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceImplH(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceDescH(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceCtrlImplH(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, m_outputPath));
-            m_stubWriters.push_back(new DeviceCtrlCpp(pDeviceRoot, m_outputPath));
+            _stubWriters.push_back(new DeviceH(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceCpp(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceImplH(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceDescH(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlImplH(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlCpp(pDeviceRoot, _outputPath));
             
-            for (std::vector<StubWriter*>::iterator i = m_stubWriters.begin(); i != m_stubWriters.end(); ++i) {
+            for (std::vector<StubWriter*>::iterator i = _stubWriters.begin(); i != _stubWriters.end(); ++i) {
                 (*i)->write();
             }
         }
@@ -145,11 +145,11 @@ protected:
     }
     
 private:
-    bool                        m_helpRequested;
-    std::string                 m_description;
-    std::string                 m_descriptionPath;
-    std::string                 m_outputPath;
-    std::vector<StubWriter*>    m_stubWriters;
+    bool                        _helpRequested;
+    std::string                 _description;
+    std::string                 _descriptionPath;
+    std::string                 _outputPath;
+    std::vector<StubWriter*>    _stubWriters;
 };
 
 

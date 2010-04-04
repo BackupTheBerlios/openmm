@@ -58,9 +58,9 @@ signals:
     void setCurrentIndex(const QModelIndex & index);
     
 private:
-//     Omm::Container<RendererView>*   m_pRenderers;
-    Omm::Av::UpnpAvUserInterface*   m_pUserInterface;
-    QTextCodec*                      m_charEncoding;
+//     Omm::Container<RendererView>*   _pRenderers;
+    Omm::Av::UpnpAvUserInterface*   _pUserInterface;
+    QTextCodec*                     _charEncoding;
 };
 
 #endif

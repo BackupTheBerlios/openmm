@@ -161,13 +161,13 @@ public:
 private:
     Log();
     
-    static Log*     m_pInstance;
-    Poco::Logger*   m_pUpnpLogger;
-    Poco::Logger*   m_pSsdpLogger;
-    Poco::Logger*   m_pHttpLogger;
-    Poco::Logger*   m_pDescriptionLogger;
-    Poco::Logger*   m_pControlLogger;
-    Poco::Logger*   m_pEventingLogger;
+    static Log*     _pInstance;
+    Poco::Logger*   _pUpnpLogger;
+    Poco::Logger*   _pSsdpLogger;
+    Poco::Logger*   _pHttpLogger;
+    Poco::Logger*   _pDescriptionLogger;
+    Poco::Logger*   _pControlLogger;
+    Poco::Logger*   _pEventingLogger;
 };
 
 
@@ -176,32 +176,32 @@ class PluginLoader
 {
 public:
     PluginLoader() :
-        m_pPluginLoader(new Poco::ClassLoader<C>),
-        m_pluginPath(":/usr/lib/omm:/usr/local/lib/omm")
+        _pPluginLoader(new Poco::ClassLoader<C>),
+        _pluginPath(":/usr/lib/omm:/usr/local/lib/omm")
     {}
     
     ~PluginLoader()
     {
-        delete m_pPluginLoader;
+        delete _pPluginLoader;
     }
     
     void loadPlugin(const std::string& name)
     {
         try {
-            m_pluginPath = Poco::Environment::get("OMM_PLUGIN_PATH") + m_pluginPath;
-            Log::instance()->upnp().debug(Poco::format("plugin loader OMM_PLUGIN_PATH is: %s", m_pluginPath));
+            _pluginPath = Poco::Environment::get("OMM_PLUGIN_PATH") + _pluginPath;
+            Log::instance()->upnp().debug(Poco::format("plugin loader OMM_PLUGIN_PATH is: %s", _pluginPath));
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->upnp().debug(Poco::format("plugin loader OMM_PLUGIN_PATH not set, standard search path is: %s", m_pluginPath));
+            Log::instance()->upnp().debug(Poco::format("plugin loader OMM_PLUGIN_PATH not set, standard search path is: %s", _pluginPath));
         }
-        Poco::StringTokenizer pathSplitter(m_pluginPath, ":");
+        Poco::StringTokenizer pathSplitter(_pluginPath, ":");
         Poco::StringTokenizer::Iterator it;
         for (it = pathSplitter.begin(); it != pathSplitter.end(); ++it) {
             if (*it == "") {
                 continue;
             }
             try {
-                m_pPluginLoader->loadLibrary((*it) + "/libomm" + name + ".so");
+                _pPluginLoader->loadLibrary((*it) + "/libomm" + name + ".so");
             }
             catch (Poco::NotFoundException) {
                 continue;
@@ -218,12 +218,12 @@ public:
     
     C* create(const std::string& className)
     {
-        return m_pPluginLoader->create(className);
+        return _pPluginLoader->create(className);
     }
     
 private:
-    Poco::ClassLoader<C>*    m_pPluginLoader;
-    std::string              m_pluginPath;
+    Poco::ClassLoader<C>*    _pPluginLoader;
+    std::string              _pluginPath;
 };
 
 
@@ -240,14 +240,14 @@ public:
 private:
     void retrieve(const std::string& uri);
     
-    int                     m_width;
-    int                     m_height;
-    int                     m_depth;
-    Poco::Net::MediaType    m_mime;
-    void*                   m_pData;
-    std::size_t             m_size;
-    std::string             m_requestUri;
-    std::string             m_iconPath;
+    int                     _width;
+    int                     _height;
+    int                     _depth;
+    Poco::Net::MediaType    _mime;
+    void*                   _pData;
+    std::size_t             _size;
+    std::string             _requestUri;
+    std::string             _iconPath;
 };
 
 
@@ -267,12 +267,12 @@ private:
     NetworkInterfaceManager();
     void findValidIpAddress();
     
-    static NetworkInterfaceManager*     m_pInstance;
-    std::vector<std::string>            m_interfaceList;
-    Poco::Net::IPAddress                m_validIpAddress;
-    Poco::NotificationCenter            m_notificationCenter;
-    bool                                m_loopbackProvided;
-    Poco::Net::IPAddress                m_loopbackAddress;
+    static NetworkInterfaceManager*     _pInstance;
+    std::vector<std::string>            _interfaceList;
+    Poco::Net::IPAddress                _validIpAddress;
+    Poco::NotificationCenter            _notificationCenter;
+    bool                                _loopbackProvided;
+    Poco::Net::IPAddress                _loopbackAddress;
 };
 
 
@@ -287,12 +287,12 @@ public:
 private:
     void onReadable(Poco::Net::ReadableNotification* pNotification);
     
-    std::string                     m_name;
-    SsdpSocket*                     m_pSsdpSocket;
-    Poco::Net::NetworkInterface*    m_pInterface;
-    Poco::Net::MulticastSocket*     m_pSsdpListenerSocket;
-    Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
-    char*                           m_pBuffer;
+    std::string                     _name;
+    SsdpSocket*                     _pSsdpSocket;
+    Poco::Net::NetworkInterface*    _pInterface;
+    Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
+    Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
+    char*                           _pBuffer;
     
     enum {
         BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
@@ -309,7 +309,7 @@ public:
     SsdpSocket();
     ~SsdpSocket();
     
-//     const Poco::Net::NetworkInterface& getInterface() { return m_interface; }
+//     const Poco::Net::NetworkInterface& getInterface() { return _interface; }
     void addInterface(const std::string& name);
     void removeInterface(const std::string& name);
     void setObserver(const Poco::AbstractObserver& observer);
@@ -320,14 +320,14 @@ public:
 private:
 //     void onUnicastReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
     
-//     Poco::Net::NetworkInterface     m_interface;
-//     Poco::Net::MulticastSocket*     m_pSsdpSocket;
-//     Poco::Net::MulticastSocket*     m_pSsdpSenderSocket;
+//     Poco::Net::NetworkInterface     _interface;
+//     Poco::Net::MulticastSocket*     _pSsdpSocket;
+//     Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
     
-    std::map<std::string,SsdpNetworkInterface*>     m_interfaces;
-    Poco::Net::SocketReactor                        m_reactor;
-    Poco::Thread                                    m_listenerThread;
-    Poco::NotificationCenter                        m_notificationCenter;
+    std::map<std::string,SsdpNetworkInterface*>     _interfaces;
+    Poco::Net::SocketReactor                        _reactor;
+    Poco::Thread                                    _listenerThread;
+    Poco::NotificationCenter                        _notificationCenter;
 };
 
 
@@ -344,78 +344,78 @@ public:
 private:
     void onTimer(Poco::Timer& timer);
     
-    Poco::Random                        m_randomTimeGenerator;
-    Poco::Timer                         m_sendTimer;
-    SsdpSocket*                         m_socket;
-    std::vector<SsdpMessage*>           m_ssdpMessages;
-    int                                 m_repeat;
-    long                                m_delay;
-    bool                                m_continuous;
+    Poco::Random                        _randomTimeGenerator;
+    Poco::Timer                         _sendTimer;
+    SsdpSocket*                         _socket;
+    std::vector<SsdpMessage*>           _ssdpMessages;
+    int                                 _repeat;
+    long                                _delay;
+    bool                                _continuous;
 };
 
 
 class Variant
 {
 public:
-    Variant() : m_val("") {}
-    Variant(const std::string& val) : m_val(val) {}
+    Variant() : _val("") {}
+    Variant(const std::string& val) : _val(val) {}
     
     // TODO: check if string formats are conform to specs (-> p. 33).
     void setValue(const std::string& val) {
 //         std::clog << "Variant::setValue(const std::string& val), val: " << val << std::endl;
-        m_val = val;
+        _val = val;
     }
-    void setValue(bool val) { m_val = val ? "1" : "0"; }
-    void setValue(ui1 val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(ui2 val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(ui4 val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(i1 val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(i2 val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(i4 val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(float val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(double val) { m_val = Poco::NumberFormatter::format(val); }
-    void setValue(Poco::URI val) { m_val = val.toString(); }
+    void setValue(bool val) { _val = val ? "1" : "0"; }
+    void setValue(ui1 val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(ui2 val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(ui4 val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(i1 val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(i2 val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(i4 val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(float val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(double val) { _val = Poco::NumberFormatter::format(val); }
+    void setValue(Poco::URI val) { _val = val.toString(); }
     
     const std::string& getValue() const {
-        return m_val; 
+        return _val; 
     }
     void getValue(std::string& val) { 
-        val = m_val; 
+        val = _val; 
     }
-    void getValue(bool& val) { val = (m_val == "1" || m_val == "true") ? true : false; }
-    void getValue(ui1& val) { val = Poco::NumberParser::parse(m_val); }
-    void getValue(ui2& val) { val = Poco::NumberParser::parse(m_val); }
+    void getValue(bool& val) { val = (_val == "1" || _val == "true") ? true : false; }
+    void getValue(ui1& val) { val = Poco::NumberParser::parse(_val); }
+    void getValue(ui2& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(ui4& val) { 
-        if (m_val == "") {
+        if (_val == "") {
             val = 0;
         }
         else {
-            val = Poco::NumberParser::parseUnsigned(m_val);
+            val = Poco::NumberParser::parseUnsigned(_val);
         }
     }
     void getValue(i1& val) { 
-        if (m_val == "") {
+        if (_val == "") {
             val = 0;
         }
         else {
-            val = Poco::NumberParser::parse(m_val);
+            val = Poco::NumberParser::parse(_val);
         }
     }
-    void getValue(i2& val) { val = Poco::NumberParser::parse(m_val); }
+    void getValue(i2& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(i4& val) {
-        if (m_val == "") {
+        if (_val == "") {
             val = 0;
         }
         else {
-            val = Poco::NumberParser::parse(m_val);
+            val = Poco::NumberParser::parse(_val);
         }
     }
-    void getValue(float& val) { val = Poco::NumberParser::parse(m_val); }
-    void getValue(double& val) { val = Poco::NumberParser::parse(m_val); }
-    void getValue(Poco::URI& val) { val = Poco::URI(m_val); }
+    void getValue(float& val) { val = Poco::NumberParser::parse(_val); }
+    void getValue(double& val) { val = Poco::NumberParser::parse(_val); }
+    void getValue(Poco::URI& val) { val = Poco::URI(_val); }
     
 private:
-    std::string     m_val;
+    std::string     _val;
 };
 
 
@@ -428,69 +428,69 @@ public:
     
     E& get(std::string key)
     {
-        return *m_pEntities.find(key)->second;
+        return *_pEntities.find(key)->second;
     }
     
     E& get(int index)
     {
-        return *m_keys[index];
+        return *_keys[index];
     }
     
-    // TODO: make shure that only one entry exists in m_pEntities and m_keys for key
+    // TODO: make shure that only one entry exists in _pEntities and _keys for key
     void append(std::string key, E* pEntity)
     {
-        m_pEntities[key] = pEntity;
-        m_keys.push_back(pEntity);
+        _pEntities[key] = pEntity;
+        _keys.push_back(pEntity);
     }
     
     void append(E* pEntity)
     {
-        m_keys.push_back(pEntity);
+        _keys.push_back(pEntity);
     }
     
     void remove(std::string key)
     {   
-        E* pEntity = m_pEntities.find(key)->second;
-        m_pEntities.erase(key);
-        m_keys.erase(find(m_keys.begin(), m_keys.end(), pEntity));
+        E* pEntity = _pEntities.find(key)->second;
+        _pEntities.erase(key);
+        _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
     }
     
     void remove(E* pEntity)
     {   
-        m_keys.erase(find(m_keys.begin(), m_keys.end(), pEntity));
+        _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
     }
     
     bool contains(const std::string& key)
     {
-        return m_pEntities.find(key) != m_pEntities.end();
+        return _pEntities.find(key) != _pEntities.end();
     }
     
     bool contains(E* pEntity)
     {
-        return find(m_keys.begin(), m_keys.end(), pEntity) != m_keys.end();
+        return find(_keys.begin(), _keys.end(), pEntity) != _keys.end();
     }
     
     int position(const std::string& key)
     {
-        E* pEntity = m_pEntities.find(key)->second;
-        return find(m_keys.begin(), m_keys.end(), pEntity) - m_keys.begin();
+        E* pEntity = _pEntities.find(key)->second;
+        return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
     }
     
     int position(E* pEntity)
     {
-        return find(m_keys.begin(), m_keys.end(), pEntity) - m_keys.begin();
+        return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
     }
     
     int size()
     {
-        return m_keys.size();
+        return _keys.size();
     }
     
     template<typename T> T getValue(const std::string& key)
     {
 //         std::clog << "Container::getValue() key: " << key << std::endl;
-        Variant* e = (*m_pEntities.find(key)).second;
-        // FIXME: is this a proper check for "key not found in m_pEntities"
+        Variant* e = (*_pEntities.find(key)).second;
+        // FIXME: is this a proper check for "key not found in _pEntities"
         if (e) {
             T res;
             e->getValue(res);
@@ -506,14 +506,14 @@ public:
     template<typename T> void setValue(const std::string& key, const T& val)
     {
 //         std::clog << "Container::setValue() key: " << key << std::endl;
-//         std::clog << "m_pEntities has: " << m_pEntities.size() << " entries" << std::endl;
-//         std::clog << "m_keys has: " << m_keys.size() << " entries" << std::endl;
-        if (m_pEntities.find(key) == m_pEntities.end()) {
+//         std::clog << "_pEntities has: " << _pEntities.size() << " entries" << std::endl;
+//         std::clog << "_keys has: " << _keys.size() << " entries" << std::endl;
+        if (_pEntities.find(key) == _pEntities.end()) {
 //             std::cerr << "Container::setValue() could not find key"<< std::endl;
             return;
         }
 //         std::clog << "Container::setValue() found key" << std::endl;
-        Variant* e = (*m_pEntities.find(key)).second;
+        Variant* e = (*_pEntities.find(key)).second;
 //         std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
         if (e) {
 //             std::clog << "Container::setValue() found key: " << key << std::endl;
@@ -527,27 +527,27 @@ public:
     
     Iterator begin()
     {
-        return m_keys.begin();
+        return _keys.begin();
     }
     
     Iterator end()
     {
-        return m_keys.end();
+        return _keys.end();
     }
     
     KeyIterator beginKey()
     {
-        return m_pEntities.begin();
+        return _pEntities.begin();
     }
         
     KeyIterator endKey()
     {
-        return m_pEntities.end();
+        return _pEntities.end();
     }
     
 private:
-    std::map<std::string,E*>    m_pEntities;
-    std::vector<E*>             m_keys;
+    std::map<std::string,E*>    _pEntities;
+    std::vector<E*>             _keys;
 };
 
 
@@ -575,12 +575,12 @@ protected:
     StateVar* stateVar(Poco::XML::Node* pNode);
     
     
-//     Poco::URI                           m_deviceDescriptionUri;  // this is the base URI
-//     std::string                         m_deviceDescriptionPath;
-    // TODO: replace m_nodeStack by argument Node* in the factory methods
-//     std::stack<Poco::XML::Node*>        m_nodeStack;
-    std::stack<Poco::XML::Document*>    m_pDocStack;
-//     DeviceRoot*                         m_pDeviceRoot;
+//     Poco::URI                           _deviceDescriptionUri;  // this is the base URI
+//     std::string                         _deviceDescriptionPath;
+    // TODO: replace _nodeStack by argument Node* in the factory methods
+//     std::stack<Poco::XML::Node*>        _nodeStack;
+    std::stack<Poco::XML::Document*>    _pDocStack;
+//     DeviceRoot*                         _pDeviceRoot;
 };
 
 
@@ -595,8 +595,8 @@ public:
 private:
     virtual std::string& getDescription(const std::string& relativeUri);
     
-    std::string   m_deviceDescriptionUri; // this is the base URI
-//     Poco::URI m_uri;
+    std::string   _deviceDescriptionUri; // this is the base URI
+//     Poco::URI _uri;
 };
 
 
@@ -610,7 +610,7 @@ public:
 private:
     virtual std::string& getDescription(const std::string& descriptionKey);
     
-    std::map<std::string,std::string*>*  m_pStringMap;
+    std::map<std::string,std::string*>*  _pStringMap;
 };
 
 
@@ -623,18 +623,18 @@ public:
     HttpSocket(Poco::Net::IPAddress address);
     ~HttpSocket();
     
-    std::string getServerUri() { return "http://" + m_httpServerAddress.toString() + "/"; }
+    std::string getServerUri() { return "http://" + _httpServerAddress.toString() + "/"; }
     void init();
     void startServer();
     void stopServer();
     
 private:
-//     Poco::Net::NetworkInterface           m_interface;
-    Poco::Net::IPAddress                  m_address;
-    Poco::Net::SocketAddress              m_httpServerAddress;
-    DeviceRequestHandlerFactory*          m_pDeviceRequestHandlerFactory;
-    Poco::NotificationCenter              m_notificationCenter;
-    Poco::Net::HTTPServer*                m_pHttpServer;
+//     Poco::Net::NetworkInterface           _interface;
+    Poco::Net::IPAddress                  _address;
+    Poco::Net::SocketAddress              _httpServerAddress;
+    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
+    Poco::NotificationCenter              _notificationCenter;
+    Poco::Net::HTTPServer*                _pHttpServer;
 };
 
 
@@ -644,19 +644,19 @@ public:
     StateVar() : Variant() {}
     template<typename T> StateVar(const T& val) : Variant(val) {}
     
-    std::string getName() const { return m_name; }
-    const std::string& getType() const { return m_type; }
-    void setName(std::string name) { m_name = name; }
-    void setType(std::string type) { m_type = type; }
-    void setDefaultValue(std::string defaultValue) { m_defaultValue = defaultValue; }
-    void setSendEvents(std::string sendEvents) { m_sendEvents = (sendEvents=="yes") ? true : false; }
-    bool getSendEvents() const { return m_sendEvents; }
+    std::string getName() const { return _name; }
+    const std::string& getType() const { return _type; }
+    void setName(std::string name) { _name = name; }
+    void setType(std::string type) { _type = type; }
+    void setDefaultValue(std::string defaultValue) { _defaultValue = defaultValue; }
+    void setSendEvents(std::string sendEvents) { _sendEvents = (sendEvents=="yes") ? true : false; }
+    bool getSendEvents() const { return _sendEvents; }
     
 private:
-    std::string     m_name;
-    std::string     m_type;
-    std::string     m_defaultValue;
-    bool            m_sendEvents;
+    std::string     _name;
+    std::string     _type;
+    std::string     _defaultValue;
+    bool            _sendEvents;
 };
 
 
@@ -666,22 +666,22 @@ public:
     Argument() : Variant() {}
     template<typename T> Argument(const T& val) : Variant(val) {}
     
-    std::string getName() const { return m_name; }
-    std::string getDirection() const { return m_in ? "in" : "out"; }
-    const std::string& getRelatedStateVarName() const { return m_relatedStateVar; }
+    std::string getName() const { return _name; }
+    std::string getDirection() const { return _in ? "in" : "out"; }
+    const std::string& getRelatedStateVarName() const { return _relatedStateVar; }
     StateVar* getRelatedStateVarReference() const;
-    Action* getAction() const { return m_pAction; }
+    Action* getAction() const { return _pAction; }
     
-    void setName(std::string name) { m_name = name; }
-    void setDirection(std::string direction) { m_in = (direction == "in") ? true : false; }
-    void setRelatedStateVar(std::string relatedStateVar) { m_relatedStateVar = relatedStateVar; }
-    void setAction(Action* pAction) { m_pAction = pAction; }
+    void setName(std::string name) { _name = name; }
+    void setDirection(std::string direction) { _in = (direction == "in") ? true : false; }
+    void setRelatedStateVar(std::string relatedStateVar) { _relatedStateVar = relatedStateVar; }
+    void setAction(Action* pAction) { _pAction = pAction; }
     
 private:
-    std::string     m_name;
-    std::string     m_relatedStateVar;
-    bool            m_in;
-    Action*         m_pAction;
+    std::string     _name;
+    std::string     _relatedStateVar;
+    bool            _in;
+    Action*         _pAction;
 };
 
 
@@ -693,38 +693,38 @@ public:
     Action* clone();
     
     typedef Container<Argument>::Iterator ArgumentIterator;
-    ArgumentIterator beginArgument() { return m_arguments.begin(); }
-    ArgumentIterator endArgument() { return m_arguments.end(); }
-    ArgumentIterator beginInArgument() { return m_inArguments.begin(); }
-    ArgumentIterator endInArgument() { return m_inArguments.end(); }
-    ArgumentIterator beginOutArgument() { return m_outArguments.begin(); }
-    ArgumentIterator endOutArgument() { return m_outArguments.end(); }
+    ArgumentIterator beginArgument() { return _arguments.begin(); }
+    ArgumentIterator endArgument() { return _arguments.end(); }
+    ArgumentIterator beginInArgument() { return _inArguments.begin(); }
+    ArgumentIterator endInArgument() { return _inArguments.end(); }
+    ArgumentIterator beginOutArgument() { return _outArguments.begin(); }
+    ArgumentIterator endOutArgument() { return _outArguments.end(); }
     
-    std::string getName() const { return m_actionName; }
-    Service* getService() const { return m_pService; }
+    std::string getName() const { return _actionName; }
+    Service* getService() const { return _pService; }
     template<typename T> const T getArgument(const std::string& name)
     {
 //         std::clog << "Action::getArgument() name: " << name << std::endl;
-        return m_arguments.getValue<T>(name);
+        return _arguments.getValue<T>(name);
     }
     
-    void setName(std::string name) { m_actionName = name; }
-    void setService(Service* pService) { m_pService = pService; }
+    void setName(std::string name) { _actionName = name; }
+    void setService(Service* pService) { _pService = pService; }
     template<typename T> void setArgument(std::string name, const T& val)
     {
 //         std::clog << "Action::setArgument() name: " << name << std::endl;
-        m_arguments.setValue(name, val);
+        _arguments.setValue(name, val);
     }
     
     void appendArgument(Argument* pArgument);
 
 private:
-    std::string                         m_actionName;
-    Service*                            m_pService;
+    std::string                         _actionName;
+    Service*                            _pService;
     
-    Container<Argument>                 m_arguments;
-    Container<Argument>                 m_inArguments;
-    Container<Argument>                 m_outArguments;
+    Container<Argument>                 _arguments;
+    Container<Argument>                 _inArguments;
+    Container<Argument>                 _outArguments;
 };
 
 
@@ -735,15 +735,15 @@ public:
     typedef void (ServiceClass::*Callback)(Action* pAction);
     
     ActionThread(ServiceClass* pObject, Callback method, Action* arg):
-        m_pObject(pObject),
-        m_method(method),
-        m_arg(arg)
+        _pObject(pObject),
+        _method(method),
+        _arg(arg)
     {
     }
     
     void run()
     {
-        (m_pObject->*m_method)(m_arg);
+        (_pObject->*_method)(_arg);
     }
     
     void start()
@@ -753,9 +753,9 @@ public:
     }
     
 private:
-    ServiceClass*   m_pObject;
-    Callback        m_method;
-    Action*         m_arg;
+    ServiceClass*   _pObject;
+    Callback        _method;
+    Action*         _arg;
 };
 
 
@@ -764,28 +764,28 @@ public:
     Service() {}
     ~Service();
     
-    std::string getServiceType() const { return m_serviceType; }
-    std::string getServiceId() const { return m_serviceId; }
-    std::string getDescriptionPath() const { return m_descriptionPath; }
-    std::string* getDescription() const { return m_pDescription; }
-    std::string getControlPath() const { return m_controlPath; }
-    std::string getEventPath() const { return m_eventPath; }
-    DescriptionRequestHandler* getDescriptionRequestHandler() const { return m_pDescriptionRequestHandler; }
-    ControlRequestHandler* getControlRequestHandler() const { return m_controlRequestHandler; }
-    Device* getDevice() const { return m_pDevice; }
-    Action* getAction(const std::string& actionName) { return &m_actions.get(actionName); }
-    Subscription* getSubscription(const std::string& sid) { return &m_eventSubscriptions.get(sid); }
-    StateVar* getStateVarReference(const std::string& key) { return &m_stateVars.get(key); }
+    std::string getServiceType() const { return _serviceType; }
+    std::string getServiceId() const { return _serviceId; }
+    std::string getDescriptionPath() const { return _descriptionPath; }
+    std::string* getDescription() const { return _pDescription; }
+    std::string getControlPath() const { return _controlPath; }
+    std::string getEventPath() const { return _eventPath; }
+    DescriptionRequestHandler* getDescriptionRequestHandler() const { return _pDescriptionRequestHandler; }
+    ControlRequestHandler* getControlRequestHandler() const { return _controlRequestHandler; }
+    Device* getDevice() const { return _pDevice; }
+    Action* getAction(const std::string& actionName) { return &_actions.get(actionName); }
+    Subscription* getSubscription(const std::string& sid) { return &_eventSubscriptions.get(sid); }
+    StateVar* getStateVarReference(const std::string& key) { return &_stateVars.get(key); }
     template<typename T> T getStateVar(const std::string& key);
     
-    void setServiceType(std::string serviceType) { m_serviceType = serviceType; }
-    void setServiceId(std::string serviceId) { m_serviceId = serviceId; }
-    void setDescriptionPath(std::string descriptionPath) { m_descriptionPath = descriptionPath; }
-    void setDescription(std::string& description) { m_pDescription = &description; }
+    void setServiceType(std::string serviceType) { _serviceType = serviceType; }
+    void setServiceId(std::string serviceId) { _serviceId = serviceId; }
+    void setDescriptionPath(std::string descriptionPath) { _descriptionPath = descriptionPath; }
+    void setDescription(std::string& description) { _pDescription = &description; }
     void setDescriptionRequestHandler();
-    void setControlPath(std::string controlPath) { m_controlPath = controlPath; }
-    void setEventPath(std::string eventPath) { m_eventPath = eventPath; }
-    void setDevice(Device* pDevice) { m_pDevice = pDevice; }
+    void setControlPath(std::string controlPath) { _controlPath = controlPath; }
+    void setEventPath(std::string eventPath) { _eventPath = eventPath; }
+    void setDevice(Device* pDevice) { _pDevice = pDevice; }
     template<typename T> void setStateVar(std::string key, const T& val);
     
     void addAction(Action* pAction);
@@ -795,18 +795,18 @@ public:
     void sendAction(Action* pAction);
     
     typedef Container<StateVar>::Iterator StateVarIterator;
-    StateVarIterator beginStateVar() { return m_stateVars.begin(); }
-    StateVarIterator endStateVar() { return m_stateVars.end(); }
-    StateVarIterator beginEventedStateVar() { return m_eventedStateVars.begin(); }
-    StateVarIterator endEventedStateVar() { return m_eventedStateVars.end(); }
+    StateVarIterator beginStateVar() { return _stateVars.begin(); }
+    StateVarIterator endStateVar() { return _stateVars.end(); }
+    StateVarIterator beginEventedStateVar() { return _eventedStateVars.begin(); }
+    StateVarIterator endEventedStateVar() { return _eventedStateVars.end(); }
     
     typedef Container<Action>::Iterator ActionIterator;
-    ActionIterator beginAction() { return m_actions.begin(); }
-    ActionIterator endAction() { return m_actions.end(); }
+    ActionIterator beginAction() { return _actions.begin(); }
+    ActionIterator endAction() { return _actions.end(); }
     
     typedef Container<Subscription>::Iterator SubscriptionIterator;
-    SubscriptionIterator beginEventSubscription() { return m_eventSubscriptions.begin(); }
-    SubscriptionIterator endEventSubscription() { return m_eventSubscriptions.end(); }
+    SubscriptionIterator beginEventSubscription() { return _eventSubscriptions.begin(); }
+    SubscriptionIterator endEventSubscription() { return _eventSubscriptions.end(); }
     
     void registerSubscription(Subscription* subscription);
     void unregisterSubscription(Subscription* subscription);
@@ -817,35 +817,35 @@ public:
     void sendInitialEventMessage(Subscription* pSubscription);
     
 private:
-    Device*                                 m_pDevice;
-    std::string                             m_vendorDomain;
-    std::string                             m_serviceType;
-    std::string                             m_serviceId;
-    std::string                             m_serviceVersion;
-    std::string*                            m_pDescription;
-    std::string                             m_descriptionPath;
-    DescriptionRequestHandler*              m_pDescriptionRequestHandler;
-    std::string                             m_controlPath;
-    ControlRequestHandler*                  m_controlRequestHandler;
-    Poco::Net::HTTPClientSession*                m_pControlRequestSession;
-    std::string                             m_eventPath;
-    Container<Action>                       m_actions;
-    Container<StateVar>                     m_stateVars;
-    Container<StateVar>                     m_eventedStateVars;
-    Container<Subscription>                 m_eventSubscriptions;
+    Device*                                 _pDevice;
+    std::string                             _vendorDomain;
+    std::string                             _serviceType;
+    std::string                             _serviceId;
+    std::string                             _serviceVersion;
+    std::string*                            _pDescription;
+    std::string                             _descriptionPath;
+    DescriptionRequestHandler*              _pDescriptionRequestHandler;
+    std::string                             _controlPath;
+    ControlRequestHandler*                  _controlRequestHandler;
+    Poco::Net::HTTPClientSession*                _pControlRequestSession;
+    std::string                             _eventPath;
+    Container<Action>                       _actions;
+    Container<StateVar>                     _stateVars;
+    Container<StateVar>                     _eventedStateVars;
+    Container<Subscription>                 _eventSubscriptions;
     
-    Poco::FastMutex                         m_serviceLock;
+    Poco::FastMutex                         _serviceLock;
 };
 
 
 // TODO: finish Device Property stuff ...
 // class Property
 // {
-//     std::string getValue() { return m_value; }
-//     void setValue(const std::string& val) { m_value = val; }
+//     std::string getValue() { return _value; }
+//     void setValue(const std::string& val) { _value = val; }
 //     
 // private:
-//     std::string     m_value;
+//     std::string     _value;
 // };
 
 
@@ -858,41 +858,41 @@ public:
     ~Device();
     
     typedef Container<Service>::Iterator ServiceIterator;
-    ServiceIterator beginService() { return m_services.begin(); }
-    ServiceIterator endService() { return m_services.end(); }
+    ServiceIterator beginService() { return _services.begin(); }
+    ServiceIterator endService() { return _services.end(); }
     
     typedef Container<std::string>::Iterator PropertyIterator;
-    PropertyIterator beginProperty() { return m_properties.begin(); }
-    PropertyIterator endProperty() { return m_properties.end(); }
+    PropertyIterator beginProperty() { return _properties.begin(); }
+    PropertyIterator endProperty() { return _properties.end(); }
     
     typedef std::vector<Icon*>::iterator IconIterator;
-    IconIterator beginIcon() { return m_iconList.begin(); }
-    IconIterator endIcon() { return m_iconList.end(); }
+    IconIterator beginIcon() { return _iconList.begin(); }
+    IconIterator endIcon() { return _iconList.end(); }
     
-    DeviceRoot* getDeviceRoot() const { return m_pDeviceRoot; }
-    std::string getUuid() const { return m_uuid; }
-    std::string getDeviceType() const { return m_deviceType; }
+    DeviceRoot* getDeviceRoot() const { return _pDeviceRoot; }
+    std::string getUuid() const { return _uuid; }
+    std::string getDeviceType() const { return _deviceType; }
     const std::string& getFriendlyName() { return getProperty("friendlyName"); }
-    Service* getService(std::string serviceType) { return &m_services.get(serviceType); }
-    const std::string& getProperty(const std::string& name) { return m_properties.get(name); }
+    Service* getService(std::string serviceType) { return &_services.get(serviceType); }
+    const std::string& getProperty(const std::string& name) { return _properties.get(name); }
     
-    void setDeviceRoot(DeviceRoot* pDeviceRoot) { m_pDeviceRoot = pDeviceRoot; }
-    void setUuid(std::string uuid) { m_uuid = uuid; }
+    void setDeviceRoot(DeviceRoot* pDeviceRoot) { _pDeviceRoot = pDeviceRoot; }
+    void setUuid(std::string uuid) { _uuid = uuid; }
     void setRandomUuid();
-    void setDeviceType(std::string deviceType) { m_deviceType = deviceType; }
-    void setProperty(const std::string& name, const std::string& val) { m_properties.get(name) = val; }
+    void setDeviceType(std::string deviceType) { _deviceType = deviceType; }
+    void setProperty(const std::string& name, const std::string& val) { _properties.get(name) = val; }
     
-    void addProperty(const std::string& name, const std::string& val) { m_properties.append(name, new std::string(val)); }
+    void addProperty(const std::string& name, const std::string& val) { _properties.append(name, new std::string(val)); }
     void addService(Service* pService);
     void addIcon(Icon* pIcon);
     
 private:
-    DeviceRoot*                         m_pDeviceRoot;
-    std::string                         m_uuid;
-    std::string                         m_deviceType;
-    Container<Service>                  m_services;
-    Container<std::string>              m_properties;
-    std::vector<Icon*>                  m_iconList;
+    DeviceRoot*                         _pDeviceRoot;
+    std::string                         _uuid;
+    std::string                         _deviceType;
+    Container<Service>                  _services;
+    Container<std::string>              _properties;
+    std::vector<Icon*>                  _iconList;
 };
 
 
@@ -907,25 +907,25 @@ public:
     ~DeviceRoot();
     
     typedef Container<Device>::Iterator DeviceIterator;
-    DeviceIterator beginDevice() { return m_devices.begin(); }
-    DeviceIterator endDevice() { return m_devices.end(); }
+    DeviceIterator beginDevice() { return _devices.begin(); }
+    DeviceIterator endDevice() { return _devices.end(); }
     
     typedef std::map<std::string,Service*>::iterator ServiceTypeIterator;
-    ServiceTypeIterator beginServiceType() { return m_serviceTypes.begin(); }
-    ServiceTypeIterator endServiceType() { return m_serviceTypes.end(); }
+    ServiceTypeIterator beginServiceType() { return _serviceTypes.begin(); }
+    ServiceTypeIterator endServiceType() { return _serviceTypes.end(); }
     
     
-    /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &m_devices.get(uuid); }
-    Device* getRootDevice() const { return m_pRootDevice; }
-    std::string* getDeviceDescription() const { return m_pDeviceDescription; }
-    const std::string& getDescriptionUri() const { return m_descriptionUri; }
+    /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &_devices.get(uuid); }
+    Device* getRootDevice() const { return _pRootDevice; }
+    std::string* getDeviceDescription() const { return _pDeviceDescription; }
+    const std::string& getDescriptionUri() const { return _descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
     
-    void setRootDevice(Device* pDevice) { m_pRootDevice = pDevice; }
-    void setDeviceDescription(std::string& description) { m_pDeviceDescription = &description; }
-    void setDescriptionUri(const std::string uri) { m_descriptionUri = uri; }
-    void addDevice(Device* pDevice) { m_devices.append(pDevice); }
-    void addServiceType(std::string serviceType, Service* pService) { m_serviceTypes[serviceType] = pService; }
+    void setRootDevice(Device* pDevice) { _pRootDevice = pDevice; }
+    void setDeviceDescription(std::string& description) { _pDeviceDescription = &description; }
+    void setDescriptionUri(const std::string uri) { _descriptionUri = uri; }
+    void addDevice(Device* pDevice) { _devices.append(pDevice); }
+    void addServiceType(std::string serviceType, Service* pService) { _serviceTypes[serviceType] = pService; }
     
     void print();
     
@@ -938,7 +938,7 @@ public:
     
     void registerActionHandler(const Poco::AbstractObserver& observer)
     {
-        m_httpSocket.m_notificationCenter.addObserver(observer);
+        _httpSocket._notificationCenter.addObserver(observer);
     }
     
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
@@ -947,26 +947,26 @@ public:
     void handleSsdpMessage(SsdpMessage* pNf);
     void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
         
-    void postAction(Action* pAction) { m_httpSocket.m_notificationCenter.postNotification(pAction); }
+    void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
-    void setImplAdapter(DeviceRootImplAdapter* implAdapter) { m_pDeviceRootImplAdapter = implAdapter; }
+    void setImplAdapter(DeviceRootImplAdapter* implAdapter) { _pDeviceRootImplAdapter = implAdapter; }
     void initStateVars(const std::string& serviceType, Service* pThis);
 
     
 private:
-//     Poco::URI                       m_baseUri;              // base URI for control URI and event URI
-//     Poco::URI                       m_descriptionUri;       // for controller to download description
-    std::string                     m_descriptionUri;
-    std::string*                    m_pDeviceDescription;
-    Container<Device>               m_devices;
-    Device*                         m_pRootDevice;
-    std::map<std::string,Service*>  m_serviceTypes;
-    SsdpSocket                      m_ssdpSocket;
-    SsdpMessageSet                  m_ssdpNotifyAliveMessages;
-    SsdpMessageSet                  m_ssdpNotifyByebyeMessages;
-    HttpSocket                      m_httpSocket;
-    DescriptionRequestHandler*      m_descriptionRequestHandler;
-    DeviceRootImplAdapter*          m_pDeviceRootImplAdapter;
+//     Poco::URI                       _baseUri;              // base URI for control URI and event URI
+//     Poco::URI                       _descriptionUri;       // for controller to download description
+    std::string                     _descriptionUri;
+    std::string*                    _pDeviceDescription;
+    Container<Device>               _devices;
+    Device*                         _pRootDevice;
+    std::map<std::string,Service*>  _serviceTypes;
+    SsdpSocket                      _ssdpSocket;
+    SsdpMessageSet                  _ssdpNotifyAliveMessages;
+    SsdpMessageSet                  _ssdpNotifyByebyeMessages;
+    HttpSocket                      _httpSocket;
+    DescriptionRequestHandler*      _descriptionRequestHandler;
+    DeviceRootImplAdapter*          _pDeviceRootImplAdapter;
 };
 
 
@@ -990,9 +990,9 @@ protected:
     virtual void actionHandler(Action* action) = 0;
     virtual void initStateVars(const std::string& serviceType, Service* pThis) = 0;
     
-    std::map<std::string,std::string*>  m_descriptions;
-    // m_deviceRoot is the link into the "dynamic-string-world".
-    DeviceRoot*                         m_pDeviceRoot;
+    std::map<std::string,std::string*>  _descriptions;
+    // _deviceRoot is the link into the "dynamic-string-world".
+    DeviceRoot*                         _pDeviceRoot;
 };
 
 
@@ -1014,24 +1014,24 @@ private:
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);
     
-    SsdpSocket              m_ssdpSocket;
-    Container<DeviceRoot>   m_devices;
-//     Poco::FastMutex     m_controllerLock;
+    SsdpSocket              _ssdpSocket;
+    Container<DeviceRoot>   _devices;
+//     Poco::FastMutex     _controllerLock;
 };
 
 
 class ControllerImplAdapter
 {
 public:
-    Device* getDevice() const { return m_pDevice; }
+    Device* getDevice() const { return _pDevice; }
 
 protected:
-    ControllerImplAdapter(Device* pDevice) : m_pDevice(pDevice) {}
+    ControllerImplAdapter(Device* pDevice) : _pDevice(pDevice) {}
     
     virtual void eventHandler(StateVar* stateVar) = 0;
     void init();
     
-    Device*         m_pDevice;
+    Device*         _pDevice;
 };
 
 
@@ -1039,9 +1039,9 @@ template<typename T>
 T
 Service::getStateVar(const std::string& key)
 {
-    // TODO: lock the m_stateVariables map because different threads could access it
+    // TODO: lock the _stateVariables map because different threads could access it
 //     std::clog << "Service::getStateVar()" << std::endl;
-    return m_stateVars.getValue<T>(key);
+    return _stateVars.getValue<T>(key);
 }
 
 
@@ -1049,14 +1049,14 @@ template<typename T>
 void
 Service::setStateVar(std::string key, const T& val)
 {
-    // TODO: lock the m_stateVariables map because different threads could access it
+    // TODO: lock the _stateVariables map because different threads could access it
 //     std::clog << "Service::setStateVar() name: " << key << std::endl;
     // FIXME: segfault here
 //     std::clog << "service type: " << getServiceType() << std::endl;
-    m_stateVars.setValue(key, val);
-    if (m_stateVars.get(key).getSendEvents()) {
+    _stateVars.setValue(key, val);
+    if (_stateVars.get(key).getSendEvents()) {
 //         std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
-        sendEventMessage(m_stateVars.get(key));
+        sendEventMessage(_stateVars.get(key));
     }
 //     std::clog << "Service::setStateVar() finished" << std::endl;
 }
@@ -1067,18 +1067,18 @@ class Urn
 public:
     Urn(const std::string& urn);
     
-    const std::string& getUrn() { return m_urn; }
-    const std::string& getDomainName() { return m_domainName; }
-    const std::string& getType() { return m_type; }
-    const std::string& getTypeName() { return m_typeName; }
-    const std::string& getVersion() { return m_version; }
+    const std::string& getUrn() { return _urn; }
+    const std::string& getDomainName() { return _domainName; }
+    const std::string& getType() { return _type; }
+    const std::string& getTypeName() { return _typeName; }
+    const std::string& getVersion() { return _version; }
     
 private:
-    std::string     m_urn;
-    std::string     m_domainName;
-    std::string     m_type;
-    std::string     m_typeName;
-    std::string     m_version;
+    std::string     _urn;
+    std::string     _domainName;
+    std::string     _type;
+    std::string     _typeName;
+    std::string     _version;
 };
 
 } // namespace Omm

@@ -60,10 +60,10 @@ protected:
     std::string indent(int level);
     std::string firstLetterToLower(const std::string& s);
     
-    DeviceRoot*                         m_pDeviceRoot;
-    std::string                         m_outputPath;
-    std::string                         m_deviceName;
-    std::map<std::string,std::string>   m_typeMapper;
+    DeviceRoot*                         _pDeviceRoot;
+    std::string                         _outputPath;
+    std::string                         _deviceName;
+    std::map<std::string,std::string>   _typeMapper;
 };
 
 
@@ -83,8 +83,8 @@ private:
     virtual void argument(const Argument& argument, bool lastArgument = false);
     virtual void stateVar(const StateVar& stateVar);
     
-    std::ofstream               m_out;
-    std::vector<std::string>    m_serviceNames;
+    std::ofstream               _out;
+    std::vector<std::string>    _serviceNames;
 };
 
 
@@ -105,16 +105,16 @@ private:
     virtual void argument(const Argument& argument, bool lastArgument = false);
     virtual void stateVar(const StateVar& stateVar);
     
-    std::ofstream               m_out;
-    std::vector<std::string>    m_serviceNames;
-    std::vector<std::string>    m_servicePaths;
-    std::string                 m_currentService;
-    std::string                 m_currentOutArgs;
-    std::stringstream           m_currentOutArgSetter;
-    std::stringstream           m_getSet;
-    std::stringstream           m_stateVarInitializer;
-    bool                        m_firstService;
-    bool                        m_firstAction;
+    std::ofstream               _out;
+    std::vector<std::string>    _serviceNames;
+    std::vector<std::string>    _servicePaths;
+    std::string                 _currentService;
+    std::string                 _currentOutArgs;
+    std::stringstream           _currentOutArgSetter;
+    std::stringstream           _getSet;
+    std::stringstream           _stateVarInitializer;
+    bool                        _firstService;
+    bool                        _firstAction;
 };
 
 
@@ -132,7 +132,7 @@ private:
     virtual void actionEnd(const Action& action);
     virtual void argument(const Argument& argument, bool lastArgument = false);
     
-    std::ofstream       m_out;
+    std::ofstream       _out;
 };
 
 
@@ -148,8 +148,8 @@ private:
     virtual void actionEnd(const Action& action);
     virtual void argument(const Argument& argument, bool lastArgument = false);
     
-    std::ofstream       m_out;
-    std::string         m_serviceName;
+    std::ofstream       _out;
+    std::string         _serviceName;
 };
 
 
@@ -165,8 +165,8 @@ private:
     virtual void deviceRootEnd(const DeviceRoot& deviceRoot);
     virtual void serviceType(const Service& service);
     
-    std::ofstream       m_out;
-//     std::ostream*       m_out;
+    std::ofstream       _out;
+//     std::ostream*       _out;
 };
 
 
@@ -185,9 +185,9 @@ private:
     virtual void argument(const Argument& argument, bool lastArgument = false);
     virtual void stateVar(const StateVar& stateVar);
     
-    std::ofstream       m_out;
-//     std::ostream*       m_out;
-    std::stringstream   m_eventedStateVars;
+    std::ofstream       _out;
+//     std::ostream*       _out;
+    std::stringstream   _eventedStateVars;
 };
 
 
@@ -204,9 +204,9 @@ private:
     virtual void argument(const Argument& argument, bool lastArgument = false);
     virtual void stateVar(const StateVar& stateVar);
     
-    std::ofstream       m_out;
-//     std::ostream*       m_out;
-    std::string         m_serviceName;
+    std::ofstream       _out;
+//     std::ostream*       _out;
+    std::string         _serviceName;
 };
 
 
@@ -225,15 +225,15 @@ private:
     virtual void argument(const Argument& argument, bool lastArgument = false);
     virtual void stateVar(const StateVar& stateVar);
     
-    std::ofstream               m_out;
-    std::stringstream           m_reqAction;
-    std::stringstream           m_ansAction;
-    std::stringstream           m_threadAction;
-    std::stringstream           m_reqActionArgs;
-    std::stringstream           m_ansActionArgs;
-    std::stringstream           m_getEventedStateVars;
-    std::stringstream           m_changeEventedStateVars;
-    std::vector<std::string>    m_serviceNames;
+    std::ofstream               _out;
+    std::stringstream           _reqAction;
+    std::stringstream           _ansAction;
+    std::stringstream           _threadAction;
+    std::stringstream           _reqActionArgs;
+    std::stringstream           _ansActionArgs;
+    std::stringstream           _getEventedStateVars;
+    std::stringstream           _changeEventedStateVars;
+    std::vector<std::string>    _serviceNames;
 };
 
 
@@ -252,24 +252,24 @@ private:
     virtual void argument(const Argument& argument, bool lastArgument = false);
     virtual void stateVar(const StateVar& stateVar);
     
-    std::ofstream               m_out;
-    std::stringstream           m_reqAction;
-    std::stringstream           m_ansAction;
-    std::stringstream           m_threadAction;
-    std::stringstream           m_reqActionArgs;
-//     std::stringstream           m_ansActionArgs;
-    std::stringstream           m_getEventedStateVars;
-    std::stringstream           m_changeEventedStateVars;
-    std::stringstream           m_inArgSetter;
-    std::stringstream           m_inArgGetter;
-    std::stringstream           m_outArgGetter;
-    std::stringstream           m_outArgGetterLocal;
-    std::stringstream           m_allArgsCall;
-    std::stringstream           m_eventDispatcher;
-    std::vector<std::string>    m_serviceTypes;
-    std::vector<std::string>    m_serviceNames;
-    std::string                 m_currentService;
-    bool                        m_firstStateVar;
+    std::ofstream               _out;
+    std::stringstream           _reqAction;
+    std::stringstream           _ansAction;
+    std::stringstream           _threadAction;
+    std::stringstream           _reqActionArgs;
+//     std::stringstream           _ansActionArgs;
+    std::stringstream           _getEventedStateVars;
+    std::stringstream           _changeEventedStateVars;
+    std::stringstream           _inArgSetter;
+    std::stringstream           _inArgGetter;
+    std::stringstream           _outArgGetter;
+    std::stringstream           _outArgGetterLocal;
+    std::stringstream           _allArgsCall;
+    std::stringstream           _eventDispatcher;
+    std::vector<std::string>    _serviceTypes;
+    std::vector<std::string>    _serviceNames;
+    std::string                 _currentService;
+    bool                        _firstStateVar;
 };
 
 #endif

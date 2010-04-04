@@ -28,11 +28,11 @@
 VdrChannels::VdrChannels() :
 MediaContainer("VDR Channels")
 {
-    m_pItemServer = new Omm::Av::MediaItemServer;
-    m_pItemServer->start();
+    _pItemServer = new Omm::Av::MediaItemServer;
+    _pItemServer->start();
     
     std::string localIp =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
-    int localPort = m_pItemServer->getPort();
+    int localPort = _pItemServer->getPort();
     
     for (cChannel* pChan = Channels.First(); pChan; pChan = Channels.Next(pChan)) {
         if (pChan->Vpid() == 0 || pChan->GetChannelID().ToString() == "0-0-0-0") {
@@ -47,7 +47,7 @@ MediaContainer("VDR Channels")
             "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
             0, "videoItem.movie");
         std::string resource = "http://" + localIp + ":3000/TS/" + objectId;
-        m_pItemServer->registerMediaItem(objectId, pChanItem, resource);
+        _pItemServer->registerMediaItem(objectId, pChanItem, resource);
         
         appendChild(objectId, pChanItem);
     }
@@ -57,12 +57,12 @@ MediaContainer("VDR Channels")
 VdrRecordings::VdrRecordings() :
 MediaContainer("VDR Recordings")
 {
-    m_pItemServer = new Omm::Av::MediaItemServer;
-    m_pItemServer->start();
+    _pItemServer = new Omm::Av::MediaItemServer;
+    _pItemServer->start();
 //     Omm::Av::Log::instance()->upnpav().debug(Poco::format("number of recordings: %i", Recordings.Count()));
     
     std::string localIp =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
-    int localPort = m_pItemServer->getPort();
+    int localPort = _pItemServer->getPort();
     
     for (cRecording* pRec = Recordings.First(); pRec; pRec = Recordings.Next(pRec)) {
         std::string objectId(pRec->Info()->ChannelID().ToString());
@@ -74,7 +74,7 @@ MediaContainer("VDR Recordings")
             "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
             0, "videoItem.movie");
         std::string resource = std::string("file:") + pRec->FileName() + "/001.vdr";
-        m_pItemServer->registerMediaItem(objectId, pRecItem, resource);
+        _pItemServer->registerMediaItem(objectId, pRecItem, resource);
         
         appendChild(objectId, pRecItem);
     }
@@ -171,8 +171,8 @@ MediaContainer("VDR Recordings")
 //     
 //     if (file_path.EndsWith("/")) {
 //         cerr << "VdrMediaTree::ServeFile() multistream: " << (const char*)file_path << endl;
-//         map<NPT_String, NPT_InputStreamReference>::iterator i = m_recCache.find((const char*)file_path);
-//         if (i != m_recCache.end()) {
+//         map<NPT_String, NPT_InputStreamReference>::iterator i = _recCache.find((const char*)file_path);
+//         if (i != _recCache.end()) {
 //             stream = (*i).second;
 //         }
 //         else {
@@ -247,10 +247,10 @@ MediaContainer("VDR Recordings")
 // 
 // 
 // MultiFileInputStream::MultiFileInputStream(string path)
-// : m_totalSize(0)
+// : _totalSize(0)
 // {
 //     cerr << "MultiFileInputStream::MultiFileInputStream()" << endl;
-//     // TODO: open files later, when they are accessed and store filename in m_streams
+//     // TODO: open files later, when they are accessed and store filename in _streams
 //     DIR* dir;
 //     struct dirent* dirent;
 //     dir = opendir(path.c_str());
@@ -279,12 +279,12 @@ MediaContainer("VDR Recordings")
 //             if (ferror(s)) {
 //                 perror("MultiFileInputStream::MultiFileInputStream() opening file");
 //             }
-//             m_totalSize += statval.st_size;
-//             m_streams.insert(make_pair(m_totalSize, s));
+//             _totalSize += statval.st_size;
+//             _streams.insert(make_pair(_totalSize, s));
 //             cerr << "MultiFileInputStream::MultiFileInputStream() file: " << path + fname << ", size: " << statval.st_size << endl;
 //         }
 //     }
-//     m_currentStream = m_streams.begin();
+//     _currentStream = _streams.begin();
 // }
 // 
 // 
@@ -292,10 +292,10 @@ MediaContainer("VDR Recordings")
 // {
 //     cerr << "MultiFileInputStream::~MultiFileInputStream()" << endl;
 //     // close all files
-//    for (map<long long, FILE*>::iterator i = m_streams.begin(); i != m_streams.end(); ++i) {
+//    for (map<long long, FILE*>::iterator i = _streams.begin(); i != _streams.end(); ++i) {
 //        fclose((*i).second);
 //     }
-//     m_streams.clear();
+//     _streams.clear();
 // }
 // 
 // 
@@ -307,14 +307,14 @@ MediaContainer("VDR Recordings")
 //     // obviously, if *bytes_read < bytes_to_read, same 4k packet is read again (from same offset with a seek?)
 //     NPT_Size bytes_read_attempt = 0;
 //     do {
-//         FILE* s = (*m_currentStream).second;
+//         FILE* s = (*_currentStream).second;
 //         bytes_read_attempt = fread((char*)buffer + bytes_read_attempt, 1, bytes_to_read, s);
 //         *bytes_read += bytes_read_attempt;
 //         bytes_to_read -= bytes_read_attempt;
 //         if (feof(s)) {
-//             m_currentStream++;
-//             rewind((*m_currentStream).second);
-//             cerr << "****** MultiFileInputStream::Read() switch to next FILE: " << (*m_currentStream).second << " ******" << endl;
+//             _currentStream++;
+//             rewind((*_currentStream).second);
+//             cerr << "****** MultiFileInputStream::Read() switch to next FILE: " << (*_currentStream).second << " ******" << endl;
 //         }
 //         if (ferror(s)) {
 //             perror("MultiFileInputStream::Read error");
@@ -326,20 +326,20 @@ MediaContainer("VDR Recordings")
 // }
 // 
 // 
-// // Possible implementation with m_streams.upper_bound ...
+// // Possible implementation with _streams.upper_bound ...
 // // NPT_Result
 // // MultiFileInputStream::Seek(NPT_Position offset)
 // // {
 // //     cerr << "MultiFileInputStream::Seek() to offset: " << offset << endl;
-// //     map<long long, FILE*>::iterator i = m_streams.begin();
-// //     i = m_streams.upper_bound(offset);
-// //     long long startOffset = (i == m_streams.begin()) ? 0 : (*(--i)).first;
+// //     map<long long, FILE*>::iterator i = _streams.begin();
+// //     i = _streams.upper_bound(offset);
+// //     long long startOffset = (i == _streams.begin()) ? 0 : (*(--i)).first;
 // //     if (fseek((*i).second, offset - startOffset, SEEK_SET)) {
 // //         perror("MultiFileInputStream::Seek()");
 // //         return NPT_FAILURE;
 // //     }
 // //     else {
-// //         m_currentStream = i;
+// //         _currentStream = i;
 // //         return NPT_SUCCESS;
 // //     }
 // // }
@@ -349,10 +349,10 @@ MediaContainer("VDR Recordings")
 // MultiFileInputStream::Seek(NPT_Position offset)
 // {
 //     cerr << "MultiFileInputStream::Seek() to offset: " << offset << endl;
-//     map<long long, FILE*>::iterator i = m_streams.begin();
+//     map<long long, FILE*>::iterator i = _streams.begin();
 //     int counter = 0;
 //     long long startOffset = 0;
-//     while (i != m_streams.end() && (*i).first < offset) {
+//     while (i != _streams.end() && (*i).first < offset) {
 //         cerr << "MultiFileInputStream::Seek() counter: " << counter << ", start: " << startOffset << ", end: " << (*i).first << endl;
 //         startOffset = (*i).first;
 //         ++i;
@@ -364,7 +364,7 @@ MediaContainer("VDR Recordings")
 //     }
 //     else {
 //         cerr << "MultiFileInputStream::Seek() currentStream: " << counter << endl;
-//         m_currentStream = i;
+//         _currentStream = i;
 //         return NPT_SUCCESS;
 //     }
 // }
@@ -374,12 +374,12 @@ MediaContainer("VDR Recordings")
 // MultiFileInputStream::Tell(NPT_Position& offset)
 // {
 //     cerr << "MultiFileInputStream::Tell()" << endl;
-//     long curOffset = ftell((*m_currentStream).second);
+//     long curOffset = ftell((*_currentStream).second);
 //     if (curOffset == -1) {
 //         perror("MultiFileInputStream::Tell()");
 //         return NPT_FAILURE;
 //     }
-//     offset = curOffset + (*m_currentStream).first;
+//     offset = curOffset + (*_currentStream).first;
 //     return NPT_SUCCESS;
 // }
 // 
@@ -387,8 +387,8 @@ MediaContainer("VDR Recordings")
 // NPT_Result
 // MultiFileInputStream::GetSize(NPT_LargeSize& size)
 // {
-//     cerr << "MultiFileInputStream::GetSize(): " << m_totalSize << endl;
-//     size = m_totalSize;
+//     cerr << "MultiFileInputStream::GetSize(): " << _totalSize << endl;
+//     size = _totalSize;
 //     return NPT_SUCCESS;
 // }
 // 
@@ -398,6 +398,6 @@ MediaContainer("VDR Recordings")
 // {
 //     cerr << "MultiFileInputStream::GetAvailable()" << endl;
 //     NPT_Result res = Tell(available);
-//     available = m_totalSize - available;
+//     available = _totalSize - available;
 //     return res;
 // }

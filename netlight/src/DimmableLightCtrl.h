@@ -58,7 +58,7 @@ private:
     void _threadGetLoadLevelTarget(Omm::Action* pAction);
     void _threadGetLoadLevelStatus(Omm::Action* pAction);
 
-    Omm::Service* m_pService;
+    Omm::Service* _pService;
 };
 
 class SwitchPowerController
@@ -88,7 +88,7 @@ private:
     void _threadGetTarget(Omm::Action* pAction);
     void _threadGetStatus(Omm::Action* pAction);
 
-    Omm::Service* m_pService;
+    Omm::Service* _pService;
 };
 
 
@@ -97,15 +97,15 @@ class DimmableLightController : public Omm::ControllerImplAdapter
 public:
     DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController, DimmingController* pDimmingController);
 
-    SwitchPowerController* SwitchPower() { return m_pSwitchPowerController; }
-    DimmingController* Dimming() { return m_pDimmingController; }
+    SwitchPowerController* SwitchPower() { return _pSwitchPowerController; }
+    DimmingController* Dimming() { return _pDimmingController; }
 
 private:
     virtual void eventHandler(Omm::StateVar* pStateVar);
 
-    Omm::Device* m_pDevice;
-    SwitchPowerController* m_pSwitchPowerController;
-    DimmingController* m_pDimmingController;
+    Omm::Device* _pDevice;
+    SwitchPowerController* _pSwitchPowerController;
+    DimmingController* _pDimmingController;
 };
 
 #endif

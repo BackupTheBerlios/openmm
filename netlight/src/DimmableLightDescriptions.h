@@ -28,7 +28,7 @@
 #ifndef DIMMABLELIGHT_DESCRIPTIONS_H
 #define DIMMABLELIGHT_DESCRIPTIONS_H
 
-std::string DimmableLight::m_deviceDescription =
+std::string DimmableLight::_deviceDescription =
 "<?xml version=\"1.0\"?>\
 <root xmlns=\"urn:schemas-upnp-org:device-1-0\">\
 <specVersion>\
@@ -68,7 +68,7 @@ std::string DimmableLight::m_deviceDescription =
 \
 ";
 
-std::string Dimming::m_description =
+std::string Dimming::_description =
 "<?xml version=\"1.0\"?>\
 <scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">\
 <specVersion>\
@@ -141,7 +141,7 @@ std::string Dimming::m_description =
 \
 ";
 
-std::string SwitchPower::m_description =
+std::string SwitchPower::_description =
 "<?xml version=\"1.0\"?>\
 <scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">\
 <specVersion>\

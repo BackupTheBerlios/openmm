@@ -68,7 +68,7 @@ public:
         string answer(int timeout, string searchKey="ANS_")
     
         wait timeout milli_seconds for an answer while polling for any mplayer
-        output every m_answerPollIntervall milli_seconds
+        output every _answerPollIntervall milli_seconds
     */
     enum mplayerError {Found=0, Timeout=1, EndOfTrack=2};
     int answer(string& ans, int timeout, string searchKey="ANS_");
@@ -76,12 +76,12 @@ public:
 private:
     virtual void run();
     
-    string      m_mplayerBin;
-    string      m_mplayerOptions;
-    string      m_mplayerFifoIn;
-    string      m_mplayerFifoOut;
-    fstream     m_mplayerFifoStreamIn;
-    JIoDevice   m_mplayerFifoStreamOut;
+    string      _mplayerBin;
+    string      _mplayerOptions;
+    string      _mplayerFifoIn;
+    string      _mplayerFifoOut;
+    fstream     _mplayerFifoStreamIn;
+    JIoDevice   _mplayerFifoStreamOut;
 };
 
 
@@ -126,9 +126,9 @@ public:
     
     
 private:
-    string          m_uri;
-    MplayerThread   m_mplayerThread;
-    JMutex*         m_mplayerMutex;
+    string          _uri;
+    MplayerThread   _mplayerThread;
+    JMutex*         _mplayerMutex;
 };
 
 #endif

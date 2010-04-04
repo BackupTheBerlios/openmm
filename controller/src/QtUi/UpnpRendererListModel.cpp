@@ -26,10 +26,10 @@
 
 UpnpRendererListModel::UpnpRendererListModel(Omm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
-// m_pRenderers(pRenderers)
-m_pUserInterface(pUserInterface)
+// _pRenderers(pRenderers)
+_pUserInterface(pUserInterface)
 {
-    m_charEncoding = QTextCodec::codecForName("UTF-8");
+    _charEncoding = QTextCodec::codecForName("UTF-8");
 }
 
 
@@ -86,9 +86,9 @@ UpnpRendererListModel::index(int row, int column,
                         const QModelIndex &/*parent*/) const
 {
 //     qDebug() << "UpnpRendererListModel::index()";
-//     return createIndex(row, column, m_rendererList.at(row));
-//     return createIndex(row, column, &m_pRenderers->get(row));
-    return createIndex(row, column, m_pUserInterface->rendererView(row));
+//     return createIndex(row, column, _rendererList.at(row));
+//     return createIndex(row, column, &_pRenderers->get(row));
+    return createIndex(row, column, _pUserInterface->rendererView(row));
 }
 
 
@@ -104,9 +104,9 @@ UpnpRendererListModel::rowCount(const QModelIndex &/*parent*/) const
 {
 //     qDebug() << "UpnpRendererListModel::rowCount()";
     
-//     return m_rendererList.size();
-//     return m_pRenderers->size();
-    return m_pUserInterface->rendererCount();
+//     return _rendererList.size();
+//     return _pRenderers->size();
+    return _pUserInterface->rendererCount();
 }
 
 

@@ -65,12 +65,12 @@ private:
 
     void initOSD();
 
-    xine_t              *m_xineEngine;
-    xine_audio_port_t   *m_audioDriver;
-    xine_video_port_t   *m_videoDriver;
-    xine_stream_t       *m_xineStream;
-    char                *m_audioDriverName;
-    int                  m_audioDeviceNum;
+    xine_t              *_xineEngine;
+    xine_audio_port_t   *_audioDriver;
+    xine_video_port_t   *_videoDriver;
+    xine_strea_t       *_xineStream;
+    char                *_audioDriverName;
+    int                  _audioDeviceNum;
 
 #ifndef QWS
     Display*             x11Display;
@@ -78,22 +78,22 @@ private:
     Window               x11Window;
 #endif
 
-    string               m_mrl;
+    string               _mrl;
     int                  fullscreen;
     static int           videoFrameWidth;
     static int           videoFrameHeight;
-    static int           m_globX, m_globY;
-    static double        m_pixel_aspect;
+    static int           _globX, _globY;
+    static double        _pixel_aspect;
     double               res_v, res_h;
 
     xine_event_queue_t  *eventQueue;
 
-    bool                 m_pause;
-    int                  m_posStream;
-    int                  m_posTime;
-    int                  m_lengthStream;
-    int                  m_currentZoom;
-    int                  m_seekOff;
+    bool                 _pause;
+    int                  _posStream;
+    int                  _posTime;
+    int                  _lengthStream;
+    int                  _currentZoom;
+    int                  _seekOff;
 };
 
 #endif

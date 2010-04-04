@@ -79,7 +79,7 @@ private:
 
     virtual void initStateVars();
     
-    MediaObject* m_pRoot;
+    MediaObject* _pRoot;
 };
 
 } // namespace Av

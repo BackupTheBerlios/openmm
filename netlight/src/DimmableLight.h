@@ -53,8 +53,8 @@ protected:
     Omm::ui1 _getLoadLevelStatus();
 
 private:
-    static std::string  m_description;
-    Service* m_pService;
+    static std::string  _description;
+    Service* _pService;
 };
 
 
@@ -75,8 +75,8 @@ protected:
     bool _getStatus();
 
 private:
-    static std::string  m_description;
-    Service* m_pService;
+    static std::string  _description;
+    Service* _pService;
 };
 
 
@@ -90,9 +90,9 @@ private:
     virtual void actionHandler(Action* action);
     virtual void initStateVars(const std::string& serviceType, Service* pThis);
 
-    static std::string m_deviceDescription;
-    SwitchPower* m_pSwitchPowerImpl;
-    Dimming* m_pDimmingImpl;
+    static std::string _deviceDescription;
+    SwitchPower* _pSwitchPowerImpl;
+    Dimming* _pDimmingImpl;
 };
 
 #endif

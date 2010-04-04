@@ -94,7 +94,7 @@ private:
     void _threadNext(Action* pAction);
     void _threadPrevious(Action* pAction);
 
-    Service* m_pService;
+    Service* _pService;
 };
 
 
@@ -134,7 +134,7 @@ private:
     void _threadGetCurrentConnectionIDs(Action* pAction);
     void _threadGetCurrentConnectionInfo(Action* pAction);
 
-    Service* m_pService;
+    Service* _pService;
 };
 
 
@@ -205,7 +205,7 @@ private:
     void _threadDeleteResource(Action* pAction);
     void _threadCreateReference(Action* pAction);
 
-    Service* m_pService;
+    Service* _pService;
 };
 
 
@@ -364,7 +364,7 @@ private:
     void _threadGetLoudness(Action* pAction);
     void _threadSetLoudness(Action* pAction);
 
-    Service* m_pService;
+    Service* _pService;
 };
 
 
@@ -373,17 +373,17 @@ class MediaRendererController : public ControllerImplAdapter
 public:
     MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
 
-    RenderingControlController* RenderingControl() { return m_pRenderingControlController; }
-    ConnectionManagerController* ConnectionManager() { return m_pConnectionManagerController; }
-    AVTransportController* AVTransport() { return m_pAVTransportController; }
+    RenderingControlController* RenderingControl() { return _pRenderingControlController; }
+    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
+    AVTransportController* AVTransport() { return _pAVTransportController; }
 
 private:
     virtual void eventHandler(StateVar* pStateVar);
 
-//     Device* m_pDevice;
-    RenderingControlController* m_pRenderingControlController;
-    ConnectionManagerController* m_pConnectionManagerController;
-    AVTransportController* m_pAVTransportController;
+//     Device* _pDevice;
+    RenderingControlController* _pRenderingControlController;
+    ConnectionManagerController* _pConnectionManagerController;
+    AVTransportController* _pAVTransportController;
 };
 
 
@@ -392,17 +392,17 @@ class MediaServerController : public ControllerImplAdapter
 public:
     MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
 
-    ContentDirectoryController* ContentDirectory() { return m_pContentDirectoryController; }
-    ConnectionManagerController* ConnectionManager() { return m_pConnectionManagerController; }
-    AVTransportController* AVTransport() { return m_pAVTransportController; }
+    ContentDirectoryController* ContentDirectory() { return _pContentDirectoryController; }
+    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
+    AVTransportController* AVTransport() { return _pAVTransportController; }
 
 private:
     virtual void eventHandler(StateVar* pStateVar);
 
-//     Device* m_pDevice;
-    ContentDirectoryController* m_pContentDirectoryController;
-    ConnectionManagerController* m_pConnectionManagerController;
-    AVTransportController* m_pAVTransportController;
+//     Device* _pDevice;
+    ContentDirectoryController* _pContentDirectoryController;
+    ConnectionManagerController* _pConnectionManagerController;
+    AVTransportController* _pAVTransportController;
 };
 
 } // namespace Av

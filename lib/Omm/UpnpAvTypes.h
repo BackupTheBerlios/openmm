@@ -49,8 +49,8 @@ public:
 private:
     Log();
     
-    static Log*     m_pInstance;
-    Poco::Logger*   m_pUpnpAvLogger;
+    static Log*     _pInstance;
+    Poco::Logger*   _pUpnpAvLogger;
 };
 
 
@@ -67,9 +67,9 @@ public:
 class Resource
 {
 public:
-    std::string     m_uri;
-    std::string     m_protInfo;
-    ui4             m_size;
+    std::string     _uri;
+    std::string     _protInfo;
+    ui4             _size;
 };
 
 
@@ -93,7 +93,7 @@ public:
     childIterator endChildren();
     int fetchChildren();
     bool fetchedAllChildren();
-    bool isContainer() { return m_isContainer; }
+    bool isContainer() { return _isContainer; }
     std::string getTitle();
     std::string getProperty(const std::string& name);
     std::string getParentId();
@@ -105,12 +105,12 @@ public:
     void readChildren(const std::string& metaData);
     void readMetaData(const std::string& metaData);
     void readNode(Poco::XML::Node* pNode);
-    void setServerController(MediaServerController* m_pServer);
+    void setServerController(MediaServerController* _pServer);
     void setFetchedAllChildren(bool fetchedAllChildren);
     
 private:
-    bool                                    m_fetchedAllChildren;
-    MediaServerController*                  m_server;
+    bool                                    _fetchedAllChildren;
+    MediaServerController*                  _server;
     
 public:
     // server interface
@@ -133,12 +133,12 @@ public:
     void writeMetaDataClose(std::string& metaData);
     
 private:
-    std::map<std::string,MediaObject*>      m_childrenMap;
+    std::map<std::string,MediaObject*>      _childrenMap;
     
     // TODO: this should be in a seperate class
     //       (sometimes the XML fragement can be fetched from cache)
-    Poco::AutoPtr<Poco::XML::Document>      m_pDoc;
-    Poco::AutoPtr<Poco::XML::Element>       m_pDidl;
+    Poco::AutoPtr<Poco::XML::Document>      _pDoc;
+    Poco::AutoPtr<Poco::XML::Element>       _pDidl;
 
 public:
 // common interface
@@ -155,18 +155,18 @@ public:
 //     void setClass(const std::string& id);
     
 protected:
-    MediaObject*                            m_parent;
-    std::string                             m_objectId;
-    std::string                             m_parentId;
-    bool                                    m_restricted;
-    unsigned int                            m_childCount;
-    Container<Variant>                      m_properties;
-//     std::multimap<std::string>              m_properties;
-    bool                                    m_isContainer;
-    std::vector<Resource*>                  m_resources;
+    MediaObject*                            _parent;
+    std::string                             _objectId;
+    std::string                             _parentId;
+    bool                                    _restricted;
+    unsigned int                            _childCount;
+    Container<Variant>                      _properties;
+//     std::multimap<std::string>              _properties;
+    bool                                    _isContainer;
+    std::vector<Resource*>                  _resources;
 
 private:
-    std::vector<MediaObject*>               m_children;
+    std::vector<MediaObject*>               _children;
 };
 
 

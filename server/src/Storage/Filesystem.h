@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Filesystem_INCLUDED
-#define Filesystem_INCLUDED
+#ifndef Filesyste_INCLUDED
+#define Filesyste_INCLUDED
 
 #include <Poco/ClassLibrary.h>
 #include <Omm/UpnpAvTypes.h>
@@ -34,7 +34,7 @@ public:
 //     virtual std::istream* getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek);
     
 // private:
-//     Omm::Av::MediaItemServer*   m_pFileServer;
+//     Omm::Av::MediaItemServer*   _pFileServer;
 };
 
 #endif

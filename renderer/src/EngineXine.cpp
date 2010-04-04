@@ -35,20 +35,20 @@ PropertyChangeMask | PointerMotionMask)
 
 #define PROP_MWM_HINTS_ELEMENTS 5
 
-int EngineXine::m_globX = 0;
-int EngineXine::m_globY = 0;
+int EngineXine::_globX = 0;
+int EngineXine::_globY = 0;
 int EngineXine::videoFrameWidth = 320;
 int EngineXine::videoFrameHeight = 200;
-double EngineXine::m_pixel_aspect = 0.0;
+double EngineXine::_pixel_aspect = 0.0;
 
 
 EngineXine::EngineXine()
- : m_pause(false),
-   m_currentZoom(100),
-   m_audioDeviceNum(0),
-   m_seekOff(50),
-   m_posTime(0),
-   m_lengthStream(0)
+ : _pause(false),
+   _currentZoom(100),
+   _audioDeviceNum(0),
+   _seekOff(50),
+   _posTime(0),
+   _lengthStream(0)
 {
     TRACE("EngineXine::EngineXine()");
     init();
@@ -66,21 +66,21 @@ EngineXine::init()
 {
     TRACE("EngineXine::init()");
 
-    m_xineEngine = xine_new();
+    _xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
 //     char* configFile = "/etc/omm/xineconfig";
 /*    struct stat s;
     if (stat(configFile, &s) == 0)
     {
         TRACE("MediaPlayer::init() loading config file: %s", configFile);
-        xine_config_load(m_xineEngine, configFile);
+        xine_config_load(_xineEngine, configFile);
     }
     else {
         TRACE("MediaPlayer::initStream() no config file loaded: %s", strerror(errno));
     }*/
-    xine_init(m_xineEngine);
+    xine_init(_xineEngine);
 
-    m_pixel_aspect = 1.0;
+    _pixel_aspect = 1.0;
 #ifdef __FRAMEBUFFER___
 //    char* videoDriverName = "fb";
 //    char* videoDriverName = "vidixfb";
@@ -92,7 +92,7 @@ EngineXine::init()
     XInitThreads ();
     x11Display = XOpenDisplay(NULL);
     x11Screen = DefaultScreen(x11Display);
-//     x11Window = m_parent->windowId();
+//     x11Window = _parent->windowId();
     initWindow();
 
     char* videoDriverName = "xv";
@@ -105,13 +105,13 @@ EngineXine::init()
 #endif
 
     visual.frame_output_cb = FrameOutputCallback;
-//     visual.user_data = (void*)m_parent;
+//     visual.user_data = (void*)_parent;
 
-    m_videoDriver = xine_open_video_driver(m_xineEngine,
+    _videoDriver = xine_open_video_driver(_xineEngine,
         videoDriverName,  visualType,
         (void *) &(visual));
 
-    if (!m_videoDriver)
+    if (!_videoDriver)
     {
         TRACE("EngineXine::init() can't init Video Driver! (%s)", videoDriverName);
     }
@@ -130,11 +130,11 @@ EngineXine::init()
     xine_config_update_entry(xineEngine, &entry);*/
 //     char* audioDriverName = "auto";
 //     char* audioDriverName = "oss";
-    m_audioDriverName = "alsa";
-    m_audioDriver = xine_open_audio_driver(m_xineEngine, m_audioDriverName, NULL);
+    _audioDriverName = "alsa";
+    _audioDriver = xine_open_audio_driver(_xineEngine, _audioDriverName, NULL);
 
     TRACE("EngineXine::initStream() creating new xine stream.");
-    m_xineStream = xine_stream_new(m_xineEngine, m_audioDriver, m_videoDriver);
+    _xineStream = xine_strea_new(_xineEngine, _audioDriver, _videoDriver);
 }
 
 
@@ -142,11 +142,11 @@ void
 EngineXine::close()
 {
     TRACE("EngineXine::close()");
-    xine_close(m_xineStream);
-    xine_dispose(m_xineStream);
-    xine_close_audio_driver(m_xineEngine, m_audioDriver);
-    xine_close_video_driver(m_xineEngine, m_videoDriver);
-    xine_exit(m_xineEngine);
+    xine_close(_xineStream);
+    xine_dispose(_xineStream);
+    xine_close_audio_driver(_xineEngine, _audioDriver);
+    xine_close_video_driver(_xineEngine, _videoDriver);
+    xine_exit(_xineEngine);
 #ifndef QWS
     if (x11Display)
         XCloseDisplay(x11Display);
@@ -167,7 +167,7 @@ EngineXine::initWindow()
     XLockDisplay(x11Display);
     fullscreen = 0;
     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
-                                    m_globX, m_globY, videoFrameWidth, videoFrameHeight, 1, 0, 0);
+                                    _globX, _globY, videoFrameWidth, videoFrameHeight, 1, 0, 0);
     
     XSelectInput(x11Display, x11Window, INPUT_MOTION);
     
@@ -192,9 +192,9 @@ EngineXine::FrameOutputCallback(void* p, int video_width, int video_height, doub
     *dest_width = videoFrameWidth;
     *dest_height = videoFrameHeight;
     *dest_aspect = 1.0;
-    //*dest_aspect = m_pixel_aspect;
-    //*win_x = m_globX;
-    //*win_y = m_globY;
+    //*dest_aspect = _pixel_aspect;
+    //*win_x = _globX;
+    //*win_y = _globY;
 }
 
 
@@ -202,19 +202,19 @@ void
 EngineXine::setMrl(string mrl)
 {
     TRACE("EngineXine::setMrl() to: %s", mrl.c_str());
-    m_mrl = mrl;
+    _mrl = mrl;
 }
 
 
 void
 EngineXine::play()
 {
-    TRACE("EngineXine::play() mrl: %s", m_mrl.c_str());
-    xine_open(m_xineStream, m_mrl.c_str());
+    TRACE("EngineXine::play() mrl: %s", _mrl.c_str());
+    xine_open(_xineStream, _mrl.c_str());
     if (!isSeekable()) {
         TRACE("EngineXine::play() WARNING: stream is not seekable!");
     }
-    xine_play(m_xineStream, 0, 0);
+    xine_play(_xineStream, 0, 0);
 }
 
 
@@ -222,8 +222,8 @@ void
 EngineXine::stop()
 {
     TRACE("EngineXine::stop()");
-    xine_stop(m_xineStream);
-    xine_close(m_xineStream);
+    xine_stop(_xineStream);
+    xine_close(_xineStream);
 }
 
 
@@ -244,15 +244,15 @@ EngineXine::previous()
 void
 EngineXine::pause()
 {
-    if (m_pause) {
+    if (_pause) {
         TRACE("EngineXine::pauseStream() setting speed to normal");
-        xine_set_param(m_xineStream, XINE_PARAM_SPEED, XINE_SPEED_NORMAL);
+        xine_set_param(_xineStream, XINE_PARAM_SPEED, XINE_SPEED_NORMAL);
     }
     else {
         TRACE("EngineXine::pauseStream() setting speed to pause");
-        xine_set_param(m_xineStream, XINE_PARAM_SPEED, XINE_SPEED_PAUSE);
+        xine_set_param(_xineStream, XINE_PARAM_SPEED, XINE_SPEED_PAUSE);
     }
-    m_pause = !m_pause;
+    _pause = !_pause;
 }
 
 
@@ -260,23 +260,23 @@ void
 EngineXine::seek(long seekval)
 {
     TRACE("EngineXine::seek() to position in millisec: %i", seekval);
-    xine_play(m_xineStream, seekval, 0);
+    xine_play(_xineStream, seekval, 0);
 }
 
 
 bool
 EngineXine::isSeekable()
 {
-    return (bool)xine_get_stream_info(m_xineStream, XINE_STREAM_INFO_SEEKABLE);
+    return (bool)xine_get_strea_info(_xineStream, XINE_STREAM_INFO_SEEKABLE);
 }
 
 
 void
 EngineXine::savePosition()
 {
-    if (xine_get_pos_length(m_xineStream, &m_posStream, &m_posTime, &m_lengthStream) == 0) {
+    if (xine_get_pos_length(_xineStream, &_posStream, &_posTime, &_lengthStream) == 0) {
         TRACE("EngineXine::savePosition() could not get position");
     }
-    TRACE("EngineXine::savePosition() at m_posStream: %i, m_posTime: %i, m_lengthStream: %i", 
-            m_posStream, m_posTime, m_lengthStream);
+    TRACE("EngineXine::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i", 
+            _posStream, _posTime, _lengthStream);
 }

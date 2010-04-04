@@ -36,40 +36,40 @@ DimmableLight::actionHandler(Action* pAction)
 {
     // the great action dispatcher
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:Dimming:1") {
-        m_pDimmingImpl->m_pService = pAction->getService();
+        _pDimmingImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "SetLoadLevelTarget") {
             Omm::ui1 newLoadlevelTarget = pAction->getArgument<Omm::ui1>("newLoadlevelTarget");
-            m_pDimmingImpl->SetLoadLevelTarget(newLoadlevelTarget);
+            _pDimmingImpl->SetLoadLevelTarget(newLoadlevelTarget);
         }
         else if (actionName == "GetLoadLevelTarget") {
             Omm::ui1 retLoadlevelTarget;
-            m_pDimmingImpl->GetLoadLevelTarget(retLoadlevelTarget);
+            _pDimmingImpl->GetLoadLevelTarget(retLoadlevelTarget);
             pAction->setArgument<Omm::ui1>("retLoadlevelTarget", retLoadlevelTarget);
         }
         else if (actionName == "GetLoadLevelStatus") {
             Omm::ui1 retLoadlevelStatus;
-            m_pDimmingImpl->GetLoadLevelStatus(retLoadlevelStatus);
+            _pDimmingImpl->GetLoadLevelStatus(retLoadlevelStatus);
             pAction->setArgument<Omm::ui1>("retLoadlevelStatus", retLoadlevelStatus);
         }
     }
     else if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:SwitchPower:1") {
-        m_pSwitchPowerImpl->m_pService = pAction->getService();
+        _pSwitchPowerImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "SetTarget") {
             bool NewTargetValue = pAction->getArgument<bool>("NewTargetValue");
-            m_pSwitchPowerImpl->SetTarget(NewTargetValue);
+            _pSwitchPowerImpl->SetTarget(NewTargetValue);
         }
         else if (actionName == "GetTarget") {
             bool RetTargetValue;
-            m_pSwitchPowerImpl->GetTarget(RetTargetValue);
+            _pSwitchPowerImpl->GetTarget(RetTargetValue);
             pAction->setArgument<bool>("RetTargetValue", RetTargetValue);
         }
         else if (actionName == "GetStatus") {
             bool ResultStatus;
-            m_pSwitchPowerImpl->GetStatus(ResultStatus);
+            _pSwitchPowerImpl->GetStatus(ResultStatus);
             pAction->setArgument<bool>("ResultStatus", ResultStatus);
         }
     }
@@ -80,77 +80,77 @@ void
 DimmableLight::initStateVars(const std::string& serviceType, Service* pThis)
 {
     if (serviceType == "urn:schemas-upnp-org:service:Dimming:1") {
-        m_pDimmingImpl->m_pService = pThis;
-        m_pDimmingImpl->initStateVars();
+        _pDimmingImpl->_pService = pThis;
+        _pDimmingImpl->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:SwitchPower:1") {
-        m_pSwitchPowerImpl->m_pService = pThis;
-        m_pSwitchPowerImpl->initStateVars();
+        _pSwitchPowerImpl->_pService = pThis;
+        _pSwitchPowerImpl->initStateVars();
     }
 }
 
 
 DimmableLight::DimmableLight(SwitchPower* pSwitchPowerImpl, Dimming* pDimmingImpl) :
 DeviceRootImplAdapter(),
-m_pSwitchPowerImpl(pSwitchPowerImpl), 
-m_pDimmingImpl(pDimmingImpl)
+_pSwitchPowerImpl(pSwitchPowerImpl), 
+_pDimmingImpl(pDimmingImpl)
 {
-    m_descriptions["/network-light-desc.xml"] = &DimmableLight::m_deviceDescription;
-    m_descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::m_description;
-    m_descriptions["/Dimming-scpd.xml"] = &Dimming::m_description;
+    _descriptions["/network-light-desc.xml"] = &DimmableLight::_deviceDescription;
+    _descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::_description;
+    _descriptions["/Dimming-scpd.xml"] = &Dimming::_description;
 
-    Omm::StringDescriptionReader descriptionReader(m_descriptions);
-    m_pDeviceRoot = descriptionReader.deviceRoot("/network-light-desc.xml");
-    m_pDeviceRoot->setImplAdapter(this);
+    Omm::StringDescriptionReader descriptionReader(_descriptions);
+    _pDeviceRoot = descriptionReader.deviceRoot("/network-light-desc.xml");
+    _pDeviceRoot->setImplAdapter(this);
 }
 
 
 void
 Dimming::_setLoadLevelTarget(const Omm::ui1& val)
 {
-    m_pService->setStateVar<Omm::ui1>("LoadLevelTarget", val);
+    _pService->setStateVar<Omm::ui1>("LoadLevelTarget", val);
 }
 
 Omm::ui1
 Dimming::_getLoadLevelTarget()
 {
-    return m_pService->getStateVar<Omm::ui1>("LoadLevelTarget");
+    return _pService->getStateVar<Omm::ui1>("LoadLevelTarget");
 }
 
 void
 Dimming::_setLoadLevelStatus(const Omm::ui1& val)
 {
-    m_pService->setStateVar<Omm::ui1>("LoadLevelStatus", val);
+    _pService->setStateVar<Omm::ui1>("LoadLevelStatus", val);
 }
 
 Omm::ui1
 Dimming::_getLoadLevelStatus()
 {
-    return m_pService->getStateVar<Omm::ui1>("LoadLevelStatus");
+    return _pService->getStateVar<Omm::ui1>("LoadLevelStatus");
 }
 
 void
 SwitchPower::_setTarget(const bool& val)
 {
-    m_pService->setStateVar<bool>("Target", val);
+    _pService->setStateVar<bool>("Target", val);
 }
 
 bool
 SwitchPower::_getTarget()
 {
-    return m_pService->getStateVar<bool>("Target");
+    return _pService->getStateVar<bool>("Target");
 }
 
 void
 SwitchPower::_setStatus(const bool& val)
 {
-    m_pService->setStateVar<bool>("Status", val);
+    _pService->setStateVar<bool>("Status", val);
 }
 
 bool
 SwitchPower::_getStatus()
 {
-    return m_pService->getStateVar<bool>("Status");
+    return _pService->getStateVar<bool>("Status");
 }
 
 

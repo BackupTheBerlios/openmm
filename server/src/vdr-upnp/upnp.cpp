@@ -31,8 +31,8 @@ static const char *MAINMENUENTRY  = "UPnP";
 class cPluginUpnp : public cPlugin {
 private:
   // Add any member variables or functions you may need here.
-    Omm::Av::UpnpAvServer*     m_pChannels;
-    Omm::Av::UpnpAvServer*     m_pRecordings;
+    Omm::Av::UpnpAvServer*     _pChannels;
+    Omm::Av::UpnpAvServer*     _pRecordings;
 
 public:
   cPluginUpnp(void);
@@ -84,13 +84,13 @@ bool cPluginUpnp::ProcessArgs(int /*argc*/, char */*argv*/[])
 bool cPluginUpnp::Initialize(void)
 {
     // Initialize any background activities the plugin shall perform.
-    m_pChannels = new Omm::Av::UpnpAvServer;
-    m_pChannels->setRoot(new VdrChannels);
-    m_pChannels->setFriendlyName("VDR Channels");
+    _pChannels = new Omm::Av::UpnpAvServer;
+    _pChannels->setRoot(new VdrChannels);
+    _pChannels->setFriendlyName("VDR Channels");
     
-    m_pRecordings = new Omm::Av::UpnpAvServer;
-    m_pRecordings->setRoot(new VdrRecordings);
-    m_pRecordings->setFriendlyName("VDR Recordings");
+    _pRecordings = new Omm::Av::UpnpAvServer;
+    _pRecordings->setRoot(new VdrRecordings);
+    _pRecordings->setFriendlyName("VDR Recordings");
     
     return true;
 }
@@ -98,16 +98,16 @@ bool cPluginUpnp::Initialize(void)
 bool cPluginUpnp::Start(void)
 {
   // Start any background activities the plugin shall perform.
-    m_pChannels->start();
-    m_pRecordings->start();
+    _pChannels->start();
+    _pRecordings->start();
     return true;
 }
 
 void cPluginUpnp::Stop(void)
 {
   // Stop any background activities the plugin shall perform.
-    m_pChannels->stop();
-    m_pRecordings->stop();
+    _pChannels->stop();
+    _pRecordings->stop();
 }
 
 void cPluginUpnp::Housekeeping(void)

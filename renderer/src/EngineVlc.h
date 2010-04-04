@@ -38,12 +38,12 @@ public:
     
     virtual void setFullscreen(bool on = true);
     
-    std::string getEngineId() { return m_engineId; }
+    std::string getEngineId() { return _engineId; }
     
     /*
       AVTransport
     */
-    virtual void setUri(std::string uri) { m_uri = uri; }
+    virtual void setUri(std::string uri) { _uri = uri; }
     virtual void load();
     
     /**
@@ -74,15 +74,15 @@ private:
     int openXWindow();
     void closeXWindow();
     
-    libvlc_exception_t      m_exception;
-    libvlc_instance_t*      m_vlcInstance;
-    libvlc_media_player_t*  m_vlcPlayer;
-    std::string             m_uri;
-    long long               m_startTime;
-    float                   m_length; // length of media in seconds
-    bool                    m_fullscreen;
+    libvlc_exception_t      _exception;
+    libvlc_instance_t*      _vlcInstance;
+    libvlc_media_player_t*  _vlcPlayer;
+    std::string             _uri;
+    long long               _startTime;
+    float                   _length; // length of media in seconds
+    bool                    _fullscreen;
     
-    std::string             m_engineId;
+    std::string             _engineId;
 };
 
 

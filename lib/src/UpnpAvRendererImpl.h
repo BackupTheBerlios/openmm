@@ -50,8 +50,8 @@ private:
 
     virtual void initStateVars();
 
-    Engine* m_pEngine;
-    std::string                     m_lastCurrentTrackUri;
+    Engine* _pEngine;
+    std::string                     _lastCurrentTrackUri;
 };
 
 class ConnectionManagerRendererImpl : public ConnectionManager
@@ -66,7 +66,7 @@ private:
 
     virtual void initStateVars();
 
-    Engine* m_pEngine;
+    Engine* _pEngine;
 };
 
 class RenderingControlRendererImpl : public RenderingControl
@@ -112,7 +112,7 @@ private:
 
     virtual void initStateVars();
 
-    Engine* m_pEngine;
+    Engine* _pEngine;
 };
 
 
