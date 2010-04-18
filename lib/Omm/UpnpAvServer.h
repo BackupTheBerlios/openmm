@@ -29,19 +29,114 @@
 namespace Omm {
 namespace Av {
 
-
-class MediaObjectSource
-{
-public:
-//     Resource* getResource(const std::string& objectId, const std::string& resourceId);
-    virtual MediaObject* getObject(const std::string& objectId) = 0;
-    virtual std::istream* getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek) = 0;
-    
-};
+class MediaItemServer;
+class MediaServerContainer;
 
 
 class Transcoder
 {
+};
+
+
+class Tagger
+{
+};
+
+
+class ServerResource : public Resource
+{
+public:
+    ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size);
+    
+    const std::string& getResourceId();
+    virtual bool isSeekable() { return false; }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) { }
+    
+private:
+    std::string     _resourceId;
+};
+
+
+class FileResource : public ServerResource
+{
+public:
+    FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri);
+    
+    virtual bool isSeekable() { return true; }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+    
+private:
+    std::string         _privateUri;
+};
+
+
+class WebResource : public ServerResource
+{
+public:
+    WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri);
+    
+    virtual bool isSeekable() { return false; }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+    
+private:
+    std::string         _privateUri;
+};
+
+
+
+class ServerObject : public MediaObject
+{
+public:
+    ServerObject();
+    
+    void addResource(ServerResource* pResource);
+    ServerResource* getResource(const std::string& resourceId);
+    
+    virtual void appendChild(ServerObject* pChild);
+    ServerObject* getObject(const std::string& objectId);
+    
+private:
+    std::map<std::string,ServerObject*>         _childrenMap;
+    std::map<std::string,ServerResource*>       _resourceMap;
+};
+
+
+class MediaItem : public ServerObject
+{
+public:
+    MediaItem();
+    MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass);
+};
+
+
+class MediaContainer : public ServerObject
+{
+public:
+    MediaContainer();
+    MediaContainer(const std::string& title, const std::string& subClass = "");
+};
+
+
+class MediaServerContainer : public MediaContainer
+{
+    friend class MediaItemServer;
+    friend class ItemRequestHandler;
+    
+public:
+    MediaServerContainer(const std::string& title, const std::string& subClass = "");
+    ~MediaServerContainer();
+    
+    virtual void appendChild(ServerObject* pChild);
+    
+    std::string getServerAddress();
+    
+private:
+    MediaItemServer*    _pItemServer;
+    Transcoder*         _pTranscoder;
+    
+    // TODO: this should be fetched from _pItemServer
+    int                 _port;
+    std::string         _address;
 };
 
 
@@ -58,13 +153,10 @@ public:
     void stop();
     Poco::UInt16 getPort() const;
     
-    void registerMediaItem(const std::string& relObjectId, MediaItem* pMediaItem, const std::string& privateUri = "");
-    
 private:
+    MediaServerContainer*                       _pServerContainer;
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
-    std::map<std::string,std::string>           _privateUriMap;
-    std::map<std::string,MediaItem*>            _itemMap;
 };
 
 
@@ -77,26 +169,6 @@ public:
     
 private:
     MediaItemServer*  _pItemServer;
-};
-
-
-class MediaServerContainer : public MediaContainer
-{
-public:
-    MediaServerContainer(const std::string& title, const std::string& subClass = "");
-    ~MediaServerContainer();
-    
-    
-//     void appendChild(const std::string& objectId, MediaItem* pMediaItem);
-    
-private:
-    MediaItemServer*    _pItemServer;
-    MediaObjectSource*  _pObjectSource;
-    Transcoder*         _pTranscoder;
-    
-    // TODO: this should be fetched from _pItemServer
-    int                 _port;
-    std::string         _address;
 };
 
 
@@ -118,11 +190,11 @@ class UpnpAvServer : public MediaServer
 public:
     UpnpAvServer();
 
-    void setRoot(MediaObject* pRoot);
-    MediaObject* getRoot();
+    void setRoot(ServerObject* pRoot);
+    ServerObject* getRoot();
 
 private:
-    MediaObject* _pRoot;
+    ServerObject* _pRoot;
 };
 
 } // namespace Av

@@ -3,15 +3,15 @@ ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
 
 if(TARGET omm)
-SET(LIB_OMM
-omm
+SET(LIB_OMM_AV
+ommav
 )
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
 else(TARGET omm)
-FIND_LIBRARY(LIB_OMM
-NAME omm
+FIND_LIBRARY(LIB_OMM_AV
+NAME ommav
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET omm)
@@ -21,16 +21,31 @@ SET( OMMS_WEB_SRCS
 WebRadio.cpp
 )
 
+SET( OMMS_WEBSIMPLE_SRCS
+WebRadioSimple.cpp
+)
+
+
 ADD_LIBRARY( omms-av-web
 SHARED
 ${OMMS_WEB_SRCS}
 )
 
+ADD_LIBRARY( omms-av-websimple
+SHARED
+${OMMS_WEBSIMPLE_SRCS}
+)
+
 TARGET_LINK_LIBRARIES( omms-av-web
-${LIB_OMM}
+${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS omms-av-web
+TARGET_LINK_LIBRARIES( omms-av-websimple
+${LIB_OMM_AV}
+${LIB_POCO_UTIL}
+)
+
+INSTALL( TARGETS omms-av-web omms-av-websimple
 LIBRARY DESTINATION lib/omm
 )

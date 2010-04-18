@@ -1645,8 +1645,6 @@ DeviceRoot::initDevice()
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
     _pDeviceDescription = descriptionWriter.write();
-    
-    Log::instance()->upnp().debug(Poco::format("init device root finished, rewrote device description: \n*BEGIN*%s*END*", *_pDeviceDescription));
 }
 
 

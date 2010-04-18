@@ -26,49 +26,22 @@
 #include <Omm/UpnpAvServer.h>
 
 /**
-	@author Jörg Bakker <joerg<at>hakker<dot>de>
+	@author Jörg Bakker <joerg<at>open-multimedia<dot>org>
 */
 
 
-class VdrChannels : public Omm::Av::MediaContainer
+class VdrChannels : public Omm::Av::MediaServerContainer
 {
 public:
     VdrChannels();
-    
-private:
-    Omm::Av::MediaItemServer*  _pItemServer;
 };
 
 
-class VdrRecordings : public Omm::Av::MediaContainer
+class VdrRecordings : public Omm::Av::MediaServerContainer
 {
 public:
     VdrRecordings();
-    
-private:
-    Omm::Av::MediaItemServer*  _pItemServer;
 };
 
-
-
-// class MultiFileInputStream : public NPT_InputStream
-// {
-// public:
-//     MultiFileInputStream(string path);
-//     virtual ~MultiFileInputStream();
-//     
-//     virtual NPT_Result Read(void*     buffer, 
-//                             NPT_Size  bytes_to_read, 
-//                             NPT_Size* bytes_read = NULL);
-//     virtual NPT_Result Seek(NPT_Position offset);
-//     virtual NPT_Result Tell(NPT_Position& offset);
-//     virtual NPT_Result GetSize(NPT_LargeSize& size);
-//     virtual NPT_Result GetAvailable(NPT_LargeSize& available);
-//     
-// private:
-//     map<long long, FILE*>           _streams;
-//     map<long long, FILE*>::iterator _currentStream;
-//     long long                       _totalSize;
-// };
 
 #endif

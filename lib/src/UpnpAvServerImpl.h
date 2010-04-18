@@ -24,7 +24,9 @@
 
 #include "Upnp.h"
 #include "UpnpAvTypes.h"
+#include "UpnpAvServer.h"
 #include "UpnpAvDevices.h"
+
 
 namespace Omm {
 namespace Av {
@@ -79,7 +81,7 @@ private:
 
     virtual void initStateVars();
     
-    MediaObject* _pRoot;
+    ServerObject* _pRoot;
 };
 
 } // namespace Av

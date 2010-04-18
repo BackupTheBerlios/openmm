@@ -72,8 +72,43 @@ private:
 };
 
 
-class MediaObjectView
+class ControllerObject : public MediaObject
 {
+public:
+    // NOTE: instead of this ctor make a MediaObjectWriter
+    // MediaObject* createObject(const std::string&)
+    // MediaObject* createObject(DatabasePointer)
+    // and a MediaObjectReader ...
+    
+    // NOTE: should be split into a Controller and Device part?
+//     MediaObject(const std::string& metaData);
+//     MediaObject(Poco::XML::Node* pNode);
+    
+    ControllerObject();
+    
+    // controller interface
+    virtual void addResource(Resource* pResource);
+    
+    void readChildren(const std::string& metaData);
+    void readMetaData(const std::string& metaData);
+    void readNode(Poco::XML::Node* pNode);
+    
+    int fetchChildren();
+    bool fetchedAllChildren();
+    ui4 childCount();
+    ControllerObject* parent();
+    
+    std::string getProperty(const std::string& name);
+    Resource* getResource(int num = 0);
+    
+
+    void setServerController(MediaServerController* _pServer);
+    void setFetchedAllChildren(bool fetchedAllChildren);
+    
+private:
+    unsigned int                            _childCount;
+    bool                                    _fetchedAllChildren;
+    MediaServerController*                  _server;
 };
 
 
@@ -96,7 +131,7 @@ public:
     int rendererCount();
     RendererView* rendererView(int numRenderer);
     int serverCount();
-    MediaObject* serverRootObject(int numServer);
+    ControllerObject* serverRootObject(int numServer);
     
     void playPressed();
     void stopPressed();
@@ -105,13 +140,13 @@ public:
     void volumeChanged(int value);
     
     void rendererSelected(RendererView* pRenderer);
-    void mediaObjectSelected(MediaObject* pObject);
+    void mediaObjectSelected(ControllerObject* pObject);
     
 private:
     Container<RendererView>*              _pRenderers;
     Container<ServerController>*          _pServers;
     MediaRendererController*              _pSelectedRenderer;
-    MediaObject*                          _pSelectedObject;
+    ControllerObject*                     _pSelectedObject;
 };
 
 // end: exposed interface to user interface
@@ -122,11 +157,11 @@ public:
     ServerController(MediaServerController* pServerController);
     
     MediaServerController* controller() { return _pServerController; }
-    MediaObject* root() { return _pRoot; }
+    ControllerObject* root() { return _pRoot; }
     
 private:
     MediaServerController*    _pServerController;
-    MediaObject*              _pRoot;
+    ControllerObject*         _pRoot;
 };
 
 // begin: exposed interface to controller application

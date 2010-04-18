@@ -15,15 +15,15 @@ ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
 
 if(TARGET omm)
-SET(LIB_OMM
-omm
+SET(LIB_OMM_AV
+ommav
 )
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
 else(TARGET omm)
-FIND_LIBRARY(LIB_OMM
-NAME omm
+FIND_LIBRARY(LIB_OMM_AV
+NAME ommav
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET omm)
@@ -40,7 +40,7 @@ ADD_LIBRARY( vdr-upnp
 )
 
 TARGET_LINK_LIBRARIES( vdr-upnp
-${LIB_OMM}
+${LIB_OMM_AV}
 )
 
 # find API Version of vdr from it's headers in /usr/include/vdr

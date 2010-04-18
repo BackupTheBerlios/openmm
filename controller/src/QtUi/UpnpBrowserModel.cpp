@@ -37,10 +37,10 @@ UpnpBrowserModel::~UpnpBrowserModel()
 }
 
 
-Omm::Av::MediaObject*
+Omm::Av::ControllerObject*
 UpnpBrowserModel::getObject(const QModelIndex &index) const
 {
-    return index.isValid() ? static_cast<Omm::Av::MediaObject*>(index.internalPointer()) : NULL;
+    return index.isValid() ? static_cast<Omm::Av::ControllerObject*>(index.internalPointer()) : NULL;
 }
 
 
@@ -49,7 +49,7 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
     
-    Omm::Av::MediaObject* object = getObject(parent);
+    Omm::Av::ControllerObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->_objectId.c_str() << "return rows:" << object->_children.size();
     if (object == 0) {
 //         std::clog << "UpnpBrowserModel::rowCount() number of servers: " << _pServers->size() << std::endl;
@@ -57,9 +57,9 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
         return _pUserInterface->serverCount();
     }
     
-//     std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->_children.size() << std::endl;
+//     std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->getChildCount() << std::endl;
 //     return object->_children.size();
-    return object->childCount();
+    return object->getChildCount();
 }
 
 
@@ -75,7 +75,7 @@ UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
     
-    Omm::Av::MediaObject* object = getObject(parent);
+    Omm::Av::ControllerObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->_objectId.c_str();
     if (object == 0) {
 //         std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((_pServers->size() > 0) ? "yes" : "nope") << std::endl;
@@ -95,7 +95,7 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
     
-    Omm::Av::MediaObject* object = getObject(parent);
+    Omm::Av::ControllerObject* object = getObject(parent);
     if (object == 0) {
         return false;
     }
@@ -110,7 +110,7 @@ UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 {
 //     std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
     
-    Omm::Av::MediaObject* object = getObject(parent);
+    Omm::Av::ControllerObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->_objectId.c_str();
     if (object == NULL) {
         return;
@@ -134,7 +134,7 @@ UpnpBrowserModel::data(const QModelIndex &index, int role) const
 /*    if (role != Qt::DisplayRole) {
         return QVariant();
     }*/
-    Omm::Av::MediaObject* object = getObject(index);
+    Omm::Av::ControllerObject* object = getObject(index);
 //     std::string label = object->_objectId + ": " + object->getTitle();
     std::string label = object->objectId() + ": " + object->getTitle();
     
@@ -170,13 +170,13 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
-    Omm::Av::MediaObject* object = getObject(index);
+    Omm::Av::ControllerObject* object = getObject(index);
 //     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->_objectId.c_str();
 //     if (object->_parent == NULL) {
     if (object->parent() == 0) {
             return QModelIndex();
     }
-    Omm::Av::MediaObject* grandp = object->parent()->parent();
+    Omm::Av::ControllerObject* grandp = object->parent()->parent();
     if (grandp == 0) {
         int i = 0;
         while (i < _pUserInterface->serverCount() && _pUserInterface->serverRootObject(i) != object->parent()) {
@@ -196,7 +196,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
 //     std::vector<Omm::Av::MediaObject*>::iterator row;
-    Omm::Av::MediaObject::childIterator row;
+    Omm::Av::ControllerObject::ChildIterator row;
     row = find(grandp->beginChildren(), grandp->endChildren(), object->parent());
     if (row != grandp->endChildren()) {
 //         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->_children.begin());
@@ -213,7 +213,7 @@ UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
-    Omm::Av::MediaObject* object = getObject(parent);
+    Omm::Av::ControllerObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->_objectId.c_str() << "row:" << row;
     if (object == NULL) {
 //         return createIndex(row, 0, (void*)(_pServers->get(row).root()));
@@ -266,7 +266,7 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QIcon();
-    Omm::Av::MediaObject* object = getObject(index);
+    Omm::Av::ControllerObject* object = getObject(index);
     if (object == NULL) {
         return QIcon();
     }

@@ -1,17 +1,16 @@
 /***************************************************************************|
-|  Omm - Just another multimedia ...                                       |
-|         ... set of applications and libraries based on the UPnP-AV specs  |
+|  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009                                                       |
-|  Jörg Bakker (joerg'at'hakker'dot'de)                                     |
+|  Copyright (C) 2009, 2010                                                 |
+|  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
-|  This file is part of Omm.                                               |
+|  This file is part of OMM.                                                |
 |                                                                           |
-|  Omm is free software: you can redistribute it and/or modify             |
+|  OMM is free software: you can redistribute it and/or modify              |
 |  it under the terms of the GNU General Public License as published by     |
 |  the Free Software Foundation version 3 of the License.                   |
 |                                                                           |
-|  Omm is distributed in the hope that it will be useful,                  |
+|  OMM is distributed in the hope that it will be useful,                   |
 |  but WITHOUT ANY WARRANTY; without even the implied warranty of           |
 |  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
 |  GNU General Public License for more details.                             |

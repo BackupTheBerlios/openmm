@@ -22,7 +22,6 @@
 #ifndef Filesyste_INCLUDED
 #define Filesyste_INCLUDED
 
-#include <Poco/ClassLibrary.h>
 #include <Omm/UpnpAvTypes.h>
 #include <Omm/UpnpAvServer.h>
 
@@ -30,11 +29,6 @@ class MediaContainerPlugin : public Omm::Av::MediaServerContainer
 {
 public:
     MediaContainerPlugin();
-    
-//     virtual std::istream* getStream(const std::string& objectId, const std::string& resourceId, std::iostream::pos_type seek);
-    
-// private:
-//     Omm::Av::MediaItemServer*   _pFileServer;
 };
 
 #endif

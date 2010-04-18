@@ -25,10 +25,202 @@
 using namespace Omm;
 using namespace Omm::Av;
 
+
+
+ControllerObject::ControllerObject() :
+Omm::Av::MediaObject(),
+_childCount(0),
+_fetchedAllChildren(false)
+{
+}
+
+
+void
+ControllerObject::addResource(Resource* pResource)
+{
+//     std::clog << "ControllerObject::addResource() with uri: " << pResource->getUri() << std::endl;
+    _resources.push_back(pResource);
+}
+
+
+void
+ControllerObject::readChildren(const std::string& metaData)
+{
+    Poco::XML::DOMParser parser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
+    while (pObjectNode)
+    {
+        if (pObjectNode->hasChildNodes()) {
+            ControllerObject* pObject = new ControllerObject;
+            pObject->readNode(pObjectNode);
+            pObject->_parent = this;
+            pObject->_server = _server;
+            _children.push_back(pObject);
+        }
+        pObjectNode = pObjectNode->nextSibling();
+    }
+}
+
+
+void
+ControllerObject::readMetaData(const std::string& metaData)
+{
+    Poco::XML::DOMParser parser;
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
+    readNode(pDidl);
+}
+
+
+void
+ControllerObject::readNode(Poco::XML::Node* pNode)
+{
+    Poco::XML::NamedNodeMap* attr = 0;
+    if (pNode->hasAttributes()) {
+        attr = pNode->attributes();
+        _objectId = attr->getNamedItem("id")->nodeValue();
+//         _parentId = attr->getNamedItem("parentID")->nodeValue();
+        
+    }
+    if (pNode->nodeName() == "container") {
+        _isContainer = true;
+        if (attr != 0) {
+            _childCount = Poco::NumberParser::parse(attr->getNamedItem("childCount")->nodeValue());
+        }
+    }
+    if (attr != 0) {
+        attr->release();
+    }
+    
+//     std::clog << "isContainer: " << (_isContainer ? "1" : "0") << std::endl;
+//     std::clog << "id: " << _objectId << std::endl;
+// //     std::clog << "parentId: " << _parentId << std::endl;
+//     std::clog << "childCount: " << _childCount << std::endl;
+    
+    if (pNode->hasChildNodes()) {
+        Poco::XML::Node* childNode = pNode->firstChild();
+        while (childNode)
+        {
+//             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
+            
+            if (childNode->nodeName() == "res") {
+                Poco::XML::NamedNodeMap* attr = 0;
+                std::string protInfo = "";
+                ui4 size = 0;
+                if (childNode->hasAttributes()) {
+                    attr = childNode->attributes();
+                    Poco::XML::Node* attrNode = attr->getNamedItem("protocolInfo");
+                    if (attrNode) {
+                        protInfo = attrNode->nodeValue();
+                    }
+                    attrNode = attr->getNamedItem("size");
+                    if (attrNode) {
+                        size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
+                    }
+                }
+                addResource(new Resource(childNode->innerText(), protInfo, size));
+//                 addResource(childNode->innerText(), protInfo, size);
+                if (attr != 0) {
+                    attr->release();
+                }
+            }
+            else {
+//                 _properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
+                _properties[childNode->nodeName()] =  childNode->innerText();
+            }
+            childNode = childNode->nextSibling();
+        }
+    }
+}
+
+
+int
+ControllerObject::fetchChildren()
+{
+    // TODO: browse meta data for the root object with id "0"
+//     std::clog << "MediaObject::fetchChildren() objectId: " << _objectId << std::endl;
+    if (_server && !_fetchedAllChildren) {
+        std::string result;
+        Omm::ui4 numberReturned;
+        Omm::ui4 totalMatches;
+        Omm::ui4 updateId;
+        _server->ContentDirectory()->Browse(_objectId, "BrowseDirectChildren", "*", _children.size(), 10, "", result, numberReturned, totalMatches, updateId);
+        readChildren(result);
+//         UpnpBrowseResult res = _server->browseChildren(this, _children.size(), UpnpServer::_sliceSize);
+        // _totalMatches is the number of items in the browse result, that matches
+        // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
+        if (_children.size() >= totalMatches) {
+            _fetchedAllChildren = true;
+        }
+        _childCount = totalMatches;
+    }
+    return _childCount;
+}
+
+
+bool
+ControllerObject::fetchedAllChildren()
+{
+    return _fetchedAllChildren;
+}
+
+
+ControllerObject*
+ControllerObject::parent()
+{
+    return static_cast<ControllerObject*>(_parent);
+}
+
+
+std::string
+ControllerObject::getProperty(const std::string& name)
+{
+//     std::clog << "MediaObject::getProperty() name: " << name << std::endl;
+//     std::clog << "MediaObject::getProperty() number of properties: " << _properties.size() << std::endl;
+//     std::clog << "MediaObject::getProperty() value: " << _properties[name] << std::endl;
+    
+//     return _properties.getValue<std::string>(name);
+    return _properties[name];
+}
+
+
+
+Resource*
+ControllerObject::getResource(int num)
+{
+//     std::clog << "ControllerObject::getResource() number: " << num << std::endl;
+//     std::clog << "ControllerObject::getResource() with uri: " << _resources[num]->getUri() << std::endl;
+    return _resources[num];
+}
+
+
+ui4
+ControllerObject::childCount()
+{
+    return _childCount;
+}
+
+
+void
+ControllerObject::setFetchedAllChildren(bool fetchedAllChildren)
+{
+    _fetchedAllChildren = fetchedAllChildren;
+}
+
+
+void
+ControllerObject::setServerController(MediaServerController* _pServer)
+{
+    _server = _pServer;
+}
+
+
 ServerController::ServerController(MediaServerController* pServerController) :
 _pServerController(pServerController)
 {
-    _pRoot = new Omm::Av::MediaObject();
+    _pRoot = new ControllerObject();
     _pRoot->setObjectId("0");
     _pRoot->setTitle(_pServerController->getDevice()->getFriendlyName());
     _pRoot->setServerController(_pServerController);
@@ -207,7 +399,7 @@ UpnpAvUserInterface::serverCount()
 }
 
 
-MediaObject*
+ControllerObject*
 UpnpAvUserInterface::serverRootObject(int numServer)
 {
     return _pServers->get(numServer).root();
@@ -225,7 +417,7 @@ UpnpAvUserInterface::rendererSelected(RendererView* pRenderer)
 
 
 void
-UpnpAvUserInterface::mediaObjectSelected(Omm::Av::MediaObject* pObject)
+UpnpAvUserInterface::mediaObjectSelected(ControllerObject* pObject)
 {
     _pSelectedObject = pObject;
 }
@@ -237,11 +429,14 @@ UpnpAvUserInterface::playPressed()
     if (_pSelectedRenderer == 0 || _pSelectedObject == 0) {
         return;
     }
+//     std::clog << "UpnpAvUserInterface::playPressed() _pSelectedObject: " << _pSelectedObject << std::endl;
     Resource* pRes = _pSelectedObject->getResource();
     if (pRes) {
         std::string metaData;
-        _pSelectedObject->writeMetaData(metaData);
-        _pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->_uri, metaData);
+        Omm::Av::MediaObjectWriter writer(_pSelectedObject);
+        writer.write(metaData);
+//         _pSelectedObject->writeMetaData(metaData);
+        _pSelectedRenderer->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
         _pSelectedRenderer->AVTransport()->Play(0, "1");
     }
 }

@@ -54,7 +54,7 @@ public:
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
     
-    Omm::Av::MediaObject* getObject(const QModelIndex &index) const;
+    Omm::Av::ControllerObject* getObject(const QModelIndex &index) const;
     
     QIcon icon(const QModelIndex &index) const;
     

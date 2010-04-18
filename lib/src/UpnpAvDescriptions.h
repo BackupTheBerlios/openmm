@@ -14,12 +14,12 @@ std::string MediaRenderer::_deviceDescription =
 <device>\
 <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>\
 <friendlyName>OmmR</friendlyName>\
-<manufacturer>joerg at hakker dot de</manufacturer>\
-<manufacturerURL>http://hakker.de/omm</manufacturerURL>\
+<manufacturer>joerg at open-multimedia dot org</manufacturer>\
+<manufacturerURL>http://open-multimedia.org</manufacturerURL>\
 <modelName>Omm Media Renderer</modelName>\
 <modelNumber>0.3</modelNumber>\
 <modelDescription>Omm UPnP Suite's Media Renderer</modelDescription>\
-<modelURL>http://hakker.de/omm</modelURL>\
+<modelURL>http://open-multimedia.org</modelURL>\
 <UDN>uuid:23b0189c-549f-11dc-a7c7-001641597c49</UDN>\
 <serviceList>\
 <service>\
@@ -1497,6 +1497,9 @@ std::string RenderingControl::_description =
 ";
 
 
+// FIXME: respect attributes (with namespace) when rewriting device description
+// <dlna:X_DLNADOC xmlns:dlna=\"urn:schemas-dlna-org:device-1-0\">DMS-1.50</dlna:X_DLNADOC>
+
 std::string MediaServer::_deviceDescription =
 "<?xml version=\"1.0\"?>\
 <root xmlns=\"urn:schemas-upnp-org:device-1-0\">\
@@ -1507,12 +1510,12 @@ std::string MediaServer::_deviceDescription =
 <device>\
 <deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>\
 <friendlyName>OmmS</friendlyName>\
-<manufacturer>joerg at hakker dot de</manufacturer>\
-<manufacturerURL>http://hakker.de/omm</manufacturerURL>\
+<manufacturer>jb at open-multimedia dot org</manufacturer>\
+<manufacturerURL>http://open-multimedia.org</manufacturerURL>\
 <modelName>Omm Media Server</modelName>\
 <modelNumber>0.3</modelNumber>\
 <modelDescription>Omm UPnP Suite's Media Server</modelDescription>\
-<modelURL>http://hakker.de/omm</modelURL>\
+<modelURL>http://open-multimedia.org</modelURL>\
 <UDN>uuid:56b0189c-549f-11dc-a7c7-001641597c50</UDN>\
 <serviceList>\
 <service>\

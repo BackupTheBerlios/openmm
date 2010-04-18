@@ -216,13 +216,12 @@ void
 ControllerGui::browserItemActivated(const QModelIndex& index)
 {
 //     std::clog << "ControllerGui::browserItemActivated()" << std::endl;
-    Omm::Av::MediaObject* object = static_cast<Omm::Av::MediaObject*>(index.internalPointer());
+    Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
     if (object == NULL) {
         return;
     }
 //     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
 //     std::clog << "title: " << object->getTitle() << std::endl;
-//     std::clog << "res: " << object->getProperty("res") << std::endl;
     
     if (object->isContainer()) {
         new CrumbButton(ui._browserView, index, ui._breadCrump);
@@ -238,7 +237,7 @@ void
 ControllerGui::browserItemSelected(const QModelIndex& index)
 {
 //     std::clog << "ControllerGui::browserItemSelected()" << std::endl;
-    Omm::Av::MediaObject* object = static_cast<Omm::Av::MediaObject*>(index.internalPointer());
+    Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
     if (object == NULL) {
         return;
     }
