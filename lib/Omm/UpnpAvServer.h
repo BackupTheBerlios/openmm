@@ -50,7 +50,7 @@ public:
     
     const std::string& getResourceId();
     virtual bool isSeekable() { return false; }
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) { }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) { return 0; }
     
 private:
     std::string     _resourceId;

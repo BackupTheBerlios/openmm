@@ -22,7 +22,6 @@
 #ifndef VDRMEDIASERVER_H
 #define VDRMEDIASERVER_H
 
-#include <Omm/UpnpAvTypes.h>
 #include <Omm/UpnpAvServer.h>
 
 /**

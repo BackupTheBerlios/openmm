@@ -1,7 +1,7 @@
 # TODO: do a proper search for libxine (FIND_PACKAGE?)
-##FIND_LIBRARY( XINE_LIB
-##xine
-##)
+# # FIND_LIBRARY( XINE_LIB
+# # xine
+# # )
 
 SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
@@ -32,9 +32,6 @@ PATHS ${CMAKE_LIBRARY_PATH}
 endif(TARGET omm)
 
 SET( OMMR_SRCS
-#EngineMplayer.cpp
-#EngineXine.cpp
-EngineVlc.cpp
 MediaRendererApplication.cpp
 )
 
@@ -43,10 +40,10 @@ MediaRendererApplication.cpp
 
 #EXECUTE_PROCESS(COMMAND /usr/bin/xine-config --libs OUTPUT_VARIABLE XINE_LIBRARIES)
 #SET(XINE_LIBRARIES -L/usr/lib -lxine -lz -lnsl -lpthread -lrt)
-##EXEC_PROGRAM( /usr/bin/xine-config
-##ARGS --libs
-##OUTPUT_VARIABLE XINE_LIBRARIES
-##)
+EXEC_PROGRAM( /usr/bin/xine-config
+ARGS --libs
+OUTPUT_VARIABLE XINE_LIBRARIES
+)
 
 #list all source files here
 ADD_EXECUTABLE( ommr
@@ -70,15 +67,41 @@ ADD_DEFINITIONS(
 -D__X11__
 )
 
-TARGET_LINK_LIBRARIES( ommr
-# ${XINE_LIBRARIES}
-${LIB_VLC}
-X11
-pthread
-dl
+SET( OMMR_VLC_SRCS
+EngineVlc.cpp
 )
 
-INSTALL( TARGETS ommr
+ADD_LIBRARY( ommr-av-vlc
+SHARED
+${OMMR_VLC_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( ommr-av-vlc
+${LIB_VLC}
+${LIB_OMM_AV}
+${LIB_POCO_UTIL}
+X11
+)
+
+SET( OMMR_XINE_SRCS
+EngineXine.cpp
+)
+
+ADD_LIBRARY( ommr-av-xine
+SHARED
+${OMMR_XINE_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( ommr-av-xine
+${XINE_LIBRARIES}
+${LIB_OMM_AV}
+${LIB_POCO_UTIL}
+X11
+# pthread
+# dl
+)
+
+INSTALL( TARGETS ommr ommr-av-xine ommr-av-vlc
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

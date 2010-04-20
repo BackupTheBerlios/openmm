@@ -30,7 +30,9 @@
 #include <sstream>
 
 #include <Omm/UpnpAvRenderer.h>
-#include "EngineVlc.h"
+// #include "EngineVlc.h"
+// #include "EngineXine.h"
+
 
 using Poco::UInt8;
 using Poco::StreamCopier;
@@ -45,7 +47,9 @@ using std::stringstream;
 class MediaRendererApplication: public Poco::Util::ServerApplication
 {
 public:
-    MediaRendererApplication(): _helpRequested(false)
+    MediaRendererApplication():
+        _helpRequested(false),
+        _enginePlugin("")
     {
     }
     
@@ -73,14 +77,23 @@ protected:
                            Option("help", "h", "display help information on command line arguments")
                            .required(false)
                            .repeatable(false));
+        options.addOption(
+                           Option("plugin", "r", "load engine plugin")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("plugin name", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
     {
         ServerApplication::handleOption(name, value);
         
-        if (name == "help")
+        if (name == "help") {
             _helpRequested = true;
+        }
+        else if (name == "plugin") {
+            _enginePlugin = value;
+        }
     }
     
     void displayHelp()
@@ -100,19 +113,41 @@ protected:
         }
         else
         {
-            std::cerr << "MediaRendererApplication::main()" << std::endl;
+            if (_enginePlugin == "") {
+                _enginePlugin = "r-av-vlc";
+            }
+            
+            
+            Omm::PluginLoader<Omm::Av::Engine> objectLoader;
+            try {
+                objectLoader.loadPlugin(_enginePlugin);
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error could not find engine plugin: " << _enginePlugin << std::endl;
+                return 1;
+            }
+            std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
+            
+            Omm::Av::Engine* pEnginePlugin;
+            pEnginePlugin = objectLoader.create("EnginePlugin");
+            
+            Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
+            
+            
+//             std::cerr << "MediaRendererApplication::main()" << std::endl;
 //             char* argv[args.size()] = new char*[args.size()];
 //             for (int i = 0; i < args.size(); ++i) {
 //                 argv[i] = args[i].c_str();
 //             }
-            char* argv[1] = {"ommr"};
+// //             char* argv[1] = {"ommr"};
 //             char** argv
             // TODO: change Engine ctor with arg as std::vector<std::string>
-            Omm::Av::Engine* pEngine = new EngineVlc(1, argv);
-            std::cerr << "MediaRendererApplication::main() pEngine: " << pEngine << std::endl;
-            std::cerr << "MediaRendererApplication::main() engine id: " << pEngine->getEngineId() << std::endl;
+//             Omm::Av::Engine* pEngine = new EngineVlc(1, argv);
+// //             Omm::Av::Engine* pEngine = new EngineXine;
+//             std::cerr << "MediaRendererApplication::main() pEngine: " << pEngine << std::endl;
+//             std::cerr << "MediaRendererApplication::main() engine id: " << pEngine->getEngineId() << std::endl;
             
-            Omm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
+// //             Omm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
             
             myMediaRenderer.setFullscreen();
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
@@ -126,7 +161,8 @@ protected:
     }
     
 private:
-    bool _helpRequested;
+    bool            _helpRequested;
+    std::string     _enginePlugin;
 };
 
 

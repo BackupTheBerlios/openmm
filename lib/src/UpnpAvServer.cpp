@@ -176,6 +176,8 @@ MediaServerContainer::appendChild(ServerObject* pChild)
 {
     ServerObject::appendChild(pChild);
     
+    // FIXME: writing the public uri should be moved somewhere else, probably into the XML writer of ServerObject
+    // then appendChild() can be removed from MediaServerContainer
     for (MediaObject::ResourceIterator it = pChild->beginResource(); it != pChild->endResource(); ++it) {
         (*it)->setUri(getServerAddress() + "/" + (*it)->getUri());
     }

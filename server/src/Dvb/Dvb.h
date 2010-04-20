@@ -19,72 +19,67 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ENGINEVLC_H
-#define ENGINEVLC_H
+#ifndef OmmDvb_INCLUDED
+#define OmmDvb_INCLUDED
 
-#include <Omm/UpnpAvRenderer.h>
+#include <Omm/UpnpAvServer.h>
 
-#ifdef __X11__
-#include <X11/Xlib.h>
-#endif
-#include <vlc/vlc.h>
+// DVB includes:
+// #include <linux/dvb/dmx.h>
+// #include <linux/dvb/frontend.h>
 
+// #include "mumudvb/tune.h"
 
-class EnginePlugin : public Omm::Av::Engine
+class DvbDevice;
+class DvbChannel;
+
+class MediaContainerPlugin : public Omm::Av::MediaServerContainer
 {
 public:
-//     EnginePlugin(int argc, char **argv);
-    EnginePlugin();
-    ~EnginePlugin();
-    
-    virtual void setFullscreen(bool on = true);
-    
-    std::string getEngineId() { return _engineId; }
-    
-    /*
-      AVTransport
-    */
-    virtual void setUri(std::string uri) { _uri = uri; }
-    virtual void load();
-    
-    /**
-        void setSpeed(int nom, int denom)
-        set speed to nom/denom
-    */
-    virtual void setSpeed(int nom, int denom);
-    /**
-        void pause()
-        toggle pause
-    */
-    virtual void pause();
-    virtual void stop();
-    virtual void seek(int seconds);
-    virtual void next();
-    virtual void previous();
-    virtual void getPosition(float &seconds);
-    virtual void getLength(float &seconds);
-    
-    /*
-      Rendering Control
-    */
-    virtual void setVolume(int channel, float vol);
-    virtual void getVolume(int channel, float &vol);
-    
-private:
-    void handleException();
-    int openXWindow();
-    void closeXWindow();
-    
-    libvlc_exception_t      _exception;
-    libvlc_instance_t*      _vlcInstance;
-    libvlc_media_player_t*  _vlcPlayer;
-    std::string             _uri;
-    long long               _startTime;
-    float                   _length; // length of media in seconds
-    bool                    _fullscreen;
-    
-    std::string             _engineId;
+    MediaContainerPlugin();
 };
 
+
+class DvbResource : public Omm::Av::ServerResource
+{
+public:
+    DvbResource(const std::string& resourceId, const std::string& protInfo, DvbChannel* pChannel);
+    
+    virtual bool isSeekable() { return false; }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+    
+private:
+    DvbChannel*         _pChannel;
+};
+
+
+// NOTE: The following API is linux specific
+class DvbChannel
+{
+public:
+    DvbChannel(const std::string& mumuParams);
+    
+private:
+//     tuning_parameters_t    _tuningParams;
+};
+
+
+class DvbDevice
+{
+public:
+    static DvbDevice* instance();
+    
+    void tune(DvbChannel* pChannel);
+    std::istream& getTransportStream(DvbChannel* pChannel);
+//     std::ostream& getPacketizedElementaryStream(Channel* pChannel);
+//     std::ostream& getProgramStream(Channel* pChannel);
+    
+    
+private:
+    DvbDevice();
+    
+    static DvbDevice*     _pInstance;
+    std::ifstream         _dvbAdapter;
+};
 
 #endif

@@ -20,7 +20,6 @@
  ***************************************************************************/
 
 #include <vdr/plugin.h>
-#include <Omm/UpnpAvServer.h>
 
 #include "VdrMediaServer.h"
 

@@ -19,10 +19,9 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Filesyste_INCLUDED
-#define Filesyste_INCLUDED
+#ifndef Filesystem_INCLUDED
+#define Filesystem_INCLUDED
 
-#include <Omm/UpnpAvTypes.h>
 #include <Omm/UpnpAvServer.h>
 
 class MediaContainerPlugin : public Omm::Av::MediaServerContainer

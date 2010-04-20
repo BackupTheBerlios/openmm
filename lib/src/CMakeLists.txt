@@ -32,10 +32,6 @@ UpnpAvRendererImpl.cpp
 UpnpAvCtrlImpl.cpp
 )
 
-SET( OMM_DVB_LIB_SRCS
-Dvb.cpp
-)
-
 FIND_LIBRARY(LIB_POCO_UTIL
 NAME PocoUtil
 PATHS ${CMAKE_LIBRARY_PATH}
@@ -75,11 +71,6 @@ SHARED
 ${OMM_AV_LIB_SRCS}
 )
 
-ADD_LIBRARY(ommdvb
-SHARED
-${OMM_DVB_LIB_SRCS}
-)
-
 TARGET_LINK_LIBRARIES( omm
 ${LIB_POCO_FOUNDATION}
 ${LIB_POCO_NET}
@@ -90,11 +81,7 @@ TARGET_LINK_LIBRARIES( ommav
 omm
 )
 
-TARGET_LINK_LIBRARIES( ommdvb
-ommav
-)
-
-INSTALL( TARGETS omm ommav ommdvb
+INSTALL( TARGETS omm ommav
 LIBRARY DESTINATION lib
 )
 

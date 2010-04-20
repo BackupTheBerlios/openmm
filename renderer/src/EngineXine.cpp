@@ -18,9 +18,8 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-
-#include "enginexine.h"
-#include "debug.h"
+#include <Poco/ClassLibrary.h>
+#include "EngineXine.h"
 
 #include <sys/stat.h>
 #include <cerrno>
@@ -35,14 +34,14 @@ PropertyChangeMask | PointerMotionMask)
 
 #define PROP_MWM_HINTS_ELEMENTS 5
 
-int EngineXine::_globX = 0;
-int EngineXine::_globY = 0;
-int EngineXine::videoFrameWidth = 320;
-int EngineXine::videoFrameHeight = 200;
-double EngineXine::_pixel_aspect = 0.0;
+int EnginePlugin::_globX = 0;
+int EnginePlugin::_globY = 0;
+int EnginePlugin::videoFrameWidth = 320;
+int EnginePlugin::videoFrameHeight = 200;
+double EnginePlugin::_pixel_aspect = 0.0;
 
 
-EngineXine::EngineXine()
+EnginePlugin::EnginePlugin()
  : _pause(false),
    _currentZoom(100),
    _audioDeviceNum(0),
@@ -50,21 +49,21 @@ EngineXine::EngineXine()
    _posTime(0),
    _lengthStream(0)
 {
-    TRACE("EngineXine::EngineXine()");
+//     TRACE("EnginePlugin::EnginePlugin()");
     init();
 }
 
 
-EngineXine::~EngineXine()
+EnginePlugin::~EnginePlugin()
 {
     close();
 }
 
 
 void
-EngineXine::init()
+EnginePlugin::init()
 {
-    TRACE("EngineXine::init()");
+//     TRACE("EnginePlugin::init()");
 
     _xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
@@ -113,7 +112,7 @@ EngineXine::init()
 
     if (!_videoDriver)
     {
-        TRACE("EngineXine::init() can't init Video Driver! (%s)", videoDriverName);
+//         TRACE("EnginePlugin::init() can't init Video Driver! (%s)", videoDriverName);
     }
 
 /*
@@ -133,15 +132,15 @@ EngineXine::init()
     _audioDriverName = "alsa";
     _audioDriver = xine_open_audio_driver(_xineEngine, _audioDriverName, NULL);
 
-    TRACE("EngineXine::initStream() creating new xine stream.");
-    _xineStream = xine_strea_new(_xineEngine, _audioDriver, _videoDriver);
+//     TRACE("EnginePlugin::initStream() creating new xine stream.");
+    _xineStream = xine_stream_new(_xineEngine, _audioDriver, _videoDriver);
 }
 
 
 void
-EngineXine::close()
+EnginePlugin::close()
 {
-    TRACE("EngineXine::close()");
+//     TRACE("EnginePlugin::close()");
     xine_close(_xineStream);
     xine_dispose(_xineStream);
     xine_close_audio_driver(_xineEngine, _audioDriver);
@@ -156,12 +155,12 @@ EngineXine::close()
 
 
 void
-EngineXine::initWindow()
+EnginePlugin::initWindow()
 {
     int xpos    = 0;
     int ypos    = 0;
-    int width   = 320;
-    int height  = 200;
+    videoFrameWidth   = DisplayWidth(x11Display, x11Screen);
+    videoFrameHeight  = DisplayHeight(x11Display, x11Screen);
     
       /* some initalization for the X11 Window we will be showing video in */
     XLockDisplay(x11Display);
@@ -181,7 +180,7 @@ EngineXine::initWindow()
 
 
 void
-EngineXine::FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
+EnginePlugin::FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
                           int* dest_x, int* dest_y, int* dest_width, int* dest_height,
                           double* dest_aspect, int* win_x, int* win_y)
 {
@@ -199,57 +198,64 @@ EngineXine::FrameOutputCallback(void* p, int video_width, int video_height, doub
 
 
 void
-EngineXine::setMrl(string mrl)
+EnginePlugin::setFullscreen(bool on)
 {
-    TRACE("EngineXine::setMrl() to: %s", mrl.c_str());
+    _fullscreen = on;
+}
+
+
+void
+EnginePlugin::setUri(string mrl)
+{
+//     TRACE("EnginePlugin::setMrl() to: %s", mrl.c_str());
     _mrl = mrl;
 }
 
 
 void
-EngineXine::play()
+EnginePlugin::load()
 {
-    TRACE("EngineXine::play() mrl: %s", _mrl.c_str());
+//     TRACE("EnginePlugin::play() mrl: %s", _mrl.c_str());
     xine_open(_xineStream, _mrl.c_str());
     if (!isSeekable()) {
-        TRACE("EngineXine::play() WARNING: stream is not seekable!");
+//         TRACE("EnginePlugin::play() WARNING: stream is not seekable!");
     }
     xine_play(_xineStream, 0, 0);
 }
 
 
 void
-EngineXine::stop()
+EnginePlugin::stop()
 {
-    TRACE("EngineXine::stop()");
+//     TRACE("EnginePlugin::stop()");
     xine_stop(_xineStream);
     xine_close(_xineStream);
 }
 
 
 void
-EngineXine::next()
+EnginePlugin::next()
 {
-    TRACE("EngineXine::next()");
+//     TRACE("EnginePlugin::next()");
 }
 
 
 void
-EngineXine::previous()
+EnginePlugin::previous()
 {
-    TRACE("EngineXine::previous()");
+//     TRACE("EnginePlugin::previous()");
 }
 
 
 void
-EngineXine::pause()
+EnginePlugin::pause()
 {
     if (_pause) {
-        TRACE("EngineXine::pauseStream() setting speed to normal");
+//         TRACE("EnginePlugin::pauseStream() setting speed to normal");
         xine_set_param(_xineStream, XINE_PARAM_SPEED, XINE_SPEED_NORMAL);
     }
     else {
-        TRACE("EngineXine::pauseStream() setting speed to pause");
+//         TRACE("EnginePlugin::pauseStream() setting speed to pause");
         xine_set_param(_xineStream, XINE_PARAM_SPEED, XINE_SPEED_PAUSE);
     }
     _pause = !_pause;
@@ -257,26 +263,60 @@ EngineXine::pause()
 
 
 void
-EngineXine::seek(long seekval)
+EnginePlugin::seek(int seconds)
 {
-    TRACE("EngineXine::seek() to position in millisec: %i", seekval);
-    xine_play(_xineStream, seekval, 0);
+//     TRACE("EnginePlugin::seek() to position in millisec: %i", seekval);
+    xine_play(_xineStream, seconds, 0);
 }
 
 
 bool
-EngineXine::isSeekable()
+EnginePlugin::isSeekable()
 {
-    return (bool)xine_get_strea_info(_xineStream, XINE_STREAM_INFO_SEEKABLE);
+    return (bool)xine_get_stream_info(_xineStream, XINE_STREAM_INFO_SEEKABLE);
 }
 
 
 void
-EngineXine::savePosition()
+EnginePlugin::savePosition()
 {
     if (xine_get_pos_length(_xineStream, &_posStream, &_posTime, &_lengthStream) == 0) {
-        TRACE("EngineXine::savePosition() could not get position");
+//         TRACE("EnginePlugin::savePosition() could not get position");
     }
-    TRACE("EngineXine::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i", 
-            _posStream, _posTime, _lengthStream);
+//     TRACE("EnginePlugin::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i", 
+//             _posStream, _posTime, _lengthStream);
 }
+
+
+void
+EnginePlugin::setSpeed(int nom, int denom)
+{
+}
+
+
+void
+EnginePlugin::getPosition(float &seconds)
+{
+}
+
+
+void
+EnginePlugin::getLength(float &seconds)
+{
+}
+
+
+void
+EnginePlugin::setVolume(int channel, float vol)
+{
+}
+
+
+void
+EnginePlugin::getVolume(int channel, float &vol)
+{
+}
+
+POCO_BEGIN_MANIFEST(Omm::Av::Engine)
+POCO_EXPORT_CLASS(EnginePlugin)
+POCO_END_MANIFEST

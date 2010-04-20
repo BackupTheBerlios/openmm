@@ -85,15 +85,9 @@ private:
 };
 
 
-// class ControllerResource : public Resource
-// {
-// public:
-//     ControllerResource(const std::string& uri, const std::string& protInfo, ui4 size);
-// };
 class MediaObject
 {
 public:
-// common interface
     MediaObject();
     
     typedef std::map<std::string,std::string>::iterator PropertyIterator;
@@ -114,15 +108,12 @@ public:
     ui4 getChildCount();
     MediaObject* getChild(ui4 num);
     std::string getParentId();
-//     Resource* getResource(int num);
     
     std::string objectId();
     std::string getTitle();
     bool isContainer();
     bool isRestricted();
     
-    
-//     void setParentId(const std::string& parentId);
     void setIsContainer(bool isContainer=true);
     void setObjectId(const std::string& objectId);
     void setTitle(const std::string& title);
@@ -139,10 +130,6 @@ protected:
     std::vector<MediaObject*>               _children;
     // is Item:
     std::vector<Resource*>                  _resources;
-
-//     std::string                             _parentId;
-//     std::multimap<std::string>              _properties;
-//     Container<Variant>                      _properties;
 };
 
 

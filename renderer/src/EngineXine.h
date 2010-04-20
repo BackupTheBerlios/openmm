@@ -22,7 +22,7 @@
 #ifndef ENGINEXINE_H
 #define ENGINEXINE_H
 
-#include "Engine.h"
+#include <Omm/UpnpAvRenderer.h>
 
 #ifdef __X11__
 #include <X11/Xlib.h>
@@ -33,24 +33,38 @@
 /**
 @author Jörg Bakker
 */
-class EngineXine : public Engine
+class EnginePlugin : public Omm::Av::Engine
 {
 public:
-    EngineXine();
-    ~EngineXine();
+    EnginePlugin();
+    ~EnginePlugin();
     
     // virtual void setVideoDriver(string);
     // virtual void setAudioDriver(string);
     // virtual void setFullscreen(bool on);
     // virtual vector<string> getAudioAdapters();
     // virtual void setAudioAdapter(string);
-    virtual void setMrl(string mrl);
-    virtual void play();
+    
+    virtual void setFullscreen(bool on = true);
+    std::string getEngineId() { return _engineId; }
+    
+    virtual void setUri(std::string mrl);
+    virtual void load();
     virtual void pause();
     virtual void stop();
-    virtual void seek(long seekval);
+    virtual void seek(int seconds);
     virtual void next();
     virtual void previous();
+    
+    virtual void setSpeed(int nom, int denom);
+    virtual void getPosition(float &seconds);
+    virtual void getLength(float &seconds);
+    
+    /*
+      Rendering Control
+    */
+    virtual void setVolume(int channel, float vol);
+    virtual void getVolume(int channel, float &vol);
 
 private:
     void init();
@@ -68,7 +82,7 @@ private:
     xine_t              *_xineEngine;
     xine_audio_port_t   *_audioDriver;
     xine_video_port_t   *_videoDriver;
-    xine_strea_t       *_xineStream;
+    xine_stream_t       *_xineStream;
     char                *_audioDriverName;
     int                  _audioDeviceNum;
 
@@ -78,7 +92,7 @@ private:
     Window               x11Window;
 #endif
 
-    string               _mrl;
+    std::string          _mrl;
     int                  fullscreen;
     static int           videoFrameWidth;
     static int           videoFrameHeight;
@@ -94,6 +108,9 @@ private:
     int                  _lengthStream;
     int                  _currentZoom;
     int                  _seekOff;
+    
+    bool                 _fullscreen;
+    std::string          _engineId;
 };
 
 #endif

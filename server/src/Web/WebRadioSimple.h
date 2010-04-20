@@ -22,7 +22,6 @@
 #ifndef WebRadio_INCLUDED
 #define WebRadio_INCLUDED
 
-#include <Omm/UpnpAvTypes.h>
 #include <Omm/UpnpAvServer.h>
 
 class MediaContainerPlugin : public Omm::Av::MediaObject
