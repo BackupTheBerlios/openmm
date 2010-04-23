@@ -101,7 +101,10 @@ X11
 # dl
 )
 
-INSTALL( TARGETS ommr ommr-av-xine ommr-av-vlc
+INSTALL( TARGETS ommr
 RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib
+)
+
+INSTALL( TARGETS ommr-av-xine ommr-av-vlc
+LIBRARY DESTINATION lib/omm
 )

@@ -27,7 +27,7 @@
 #include <Poco/StreamCopier.h>
 
 #include <Omm/UpnpAvServer.h>
-
+#include "Dvb/Dvb.h"
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -121,6 +121,8 @@ protected:
             
             Omm::Av::MediaContainer* pContainerPlugin;
             pContainerPlugin = objectLoader.create("MediaContainerPlugin");
+            
+//             Omm::Av::MediaContainer* pContainerPlugin = new MediaContainerPlugin;
             
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);

@@ -22,13 +22,14 @@
 #ifndef OmmDvb_INCLUDED
 #define OmmDvb_INCLUDED
 
+#include <Poco/Thread.h>
+#include <Poco/Mutex.h>
+
 #include <Omm/UpnpAvServer.h>
 
-// DVB includes:
-// #include <linux/dvb/dmx.h>
-// #include <linux/dvb/frontend.h>
-
-// #include "mumudvb/tune.h"
+extern "C" {
+#include "szap.h"
+}
 
 class DvbDevice;
 class DvbChannel;
@@ -56,21 +57,47 @@ private:
 // NOTE: The following API is linux specific
 class DvbChannel
 {
+    friend class DvbDevice;
+    friend class TuningThread;
+    
 public:
-    DvbChannel(const std::string& mumuParams);
+    DvbChannel(unsigned int sat_no, unsigned int freq, unsigned int pol, unsigned int symbol_rate, unsigned int vpid, unsigned int apid, int sid);
+    
     
 private:
-//     tuning_parameters_t    _tuningParams;
+    unsigned int _sat_no;
+    unsigned int _freq;
+    unsigned int _pol;
+    unsigned int _symbol_rate;
+    unsigned int _vpid;
+    unsigned int _apid;
+    int _sid;
+};
+
+
+class TuningThread : public Poco::Runnable
+{
+public:
+    TuningThread(DvbChannel* pChannel);
+    
+    void run();
+    void stop();
+    
+private:
+    DvbChannel*         _pChannel;
 };
 
 
 class DvbDevice
 {
+    friend class TuningThread;
+    
 public:
     static DvbDevice* instance();
     
     void tune(DvbChannel* pChannel);
-    std::istream& getTransportStream(DvbChannel* pChannel);
+    void stopTune();
+//     std::istream& getTransportStream(DvbChannel* pChannel);
 //     std::ostream& getPacketizedElementaryStream(Channel* pChannel);
 //     std::ostream& getProgramStream(Channel* pChannel);
     
@@ -79,7 +106,11 @@ private:
     DvbDevice();
     
     static DvbDevice*     _pInstance;
-    std::ifstream         _dvbAdapter;
+    Poco::Thread          _t;
+    TuningThread*         _pt;
+    Poco::FastMutex       _tuneLock;
+//     int                   _frontend;
+//     std::ifstream         _dvbAdapter;
 };
 
 #endif

@@ -177,7 +177,7 @@ class PluginLoader
 public:
     PluginLoader() :
         _pPluginLoader(new Poco::ClassLoader<C>),
-        _pluginPath(":/usr/lib/omm:/usr/local/lib/omm")
+        _pluginPath(":/usr/local/lib/omm:/usr/lib/omm")
     {}
     
     ~PluginLoader()
