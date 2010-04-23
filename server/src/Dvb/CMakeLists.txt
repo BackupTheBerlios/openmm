@@ -19,8 +19,6 @@ endif(TARGET omm)
 
 SET( OMMS_DVB_SRCS
 Dvb.cpp
-lnb.c
-szap.c
 )
 
 ADD_LIBRARY( omms-av-dvb

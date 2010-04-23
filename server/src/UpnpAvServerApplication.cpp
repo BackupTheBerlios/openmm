@@ -122,8 +122,6 @@ protected:
             Omm::Av::MediaContainer* pContainerPlugin;
             pContainerPlugin = objectLoader.create("MediaContainerPlugin");
             
-//             Omm::Av::MediaContainer* pContainerPlugin = new MediaContainerPlugin;
-            
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);
             

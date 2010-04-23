@@ -25,6 +25,10 @@
 #include <Poco/Thread.h>
 #include <Poco/Mutex.h>
 
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/audio.h>
+
 #include <Omm/UpnpAvServer.h>
 
 extern "C" {
@@ -33,6 +37,22 @@ extern "C" {
 
 class DvbDevice;
 class DvbChannel;
+
+
+class Log
+{
+public:
+    static Log* instance();
+    
+    Poco::Logger& dvb();
+    
+private:
+    Log();
+    
+    static Log*     _pInstance;
+    Poco::Logger*   _pDvbLogger;
+};
+
 
 class MediaContainerPlugin : public Omm::Av::MediaServerContainer
 {
@@ -54,49 +74,186 @@ private:
 };
 
 
-// NOTE: The following API is linux specific
 class DvbChannel
 {
     friend class DvbDevice;
-    friend class TuningThread;
+    friend class DvbFrontend;
+    friend class SignalCheckThread;
     
 public:
-    DvbChannel(unsigned int sat_no, unsigned int freq, unsigned int pol, unsigned int symbol_rate, unsigned int vpid, unsigned int apid, int sid);
+    typedef enum {HORIZ = 0, VERT = 1} Polarization;
+    
+    DvbChannel(unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int apid, int sid);
     
     
 private:
-    unsigned int _sat_no;
+    unsigned int _satNum;
     unsigned int _freq;
-    unsigned int _pol;
-    unsigned int _symbol_rate;
+    Polarization _pol;
+    unsigned int _symbolRate;
     unsigned int _vpid;
     unsigned int _apid;
     int _sid;
 };
 
 
-class TuningThread : public Poco::Runnable
+// NOTE: The following API is linux specific
+
+class DvbLnb;
+class DvbFrontend;
+class DvbDemux;
+class DvbDvr;
+
+class DvbAdapter
+{
+    friend class DvbDevice;
+    friend class DvbFrontend;
+    friend class DvbDemux;
+    friend class DvbDvr;
+    
+public:
+    DvbAdapter(int num);
+    ~DvbAdapter();
+    
+    void openAdapter();
+    void getDeviceInfo();  // TODO: implement DvbAdapter::getDeviceInfo()
+    
+    
+private:
+    int             _num;
+    std::string     _deviceName;
+    DvbLnb*         _pLnb;
+    DvbFrontend*    _pFrontend;
+    DvbDemux*       _pDemux;
+    DvbDvr*         _pDvr;
+    bool            _recPsi;
+};
+
+
+class DvbLnb
+{
+    friend class DvbAdapter;
+    friend class DvbFrontend;
+    
+public:
+    DvbLnb(const std::string& desc, unsigned long lowVal, unsigned long highVal, unsigned long switchVal);
+    
+    bool isHiBand(unsigned int freq, unsigned int& ifreq);
+    
+private:
+    std::string         _desc;
+    unsigned long	_lowVal;
+    unsigned long	_highVal;	// zero indicates no hiband
+    unsigned long	_switchVal;	// zero indicates no hiband
+};
+
+
+class SignalCheckThread : public Poco::Runnable
 {
 public:
-    TuningThread(DvbChannel* pChannel);
+    SignalCheckThread(DvbFrontend* pFrontend);
     
     void run();
     void stop();
     
 private:
-    DvbChannel*         _pChannel;
+//     DvbChannel*         _pChannel;
+    DvbFrontend*        _pFrontend;
+    bool                _stop;
+};
+
+
+class DvbFrontend
+{
+    friend class DvbAdapter;
+    friend class SignalCheckThread;
+    
+public:
+    DvbFrontend(DvbAdapter* pAdapter, int num);
+    ~DvbFrontend();
+    
+    void openFrontend();
+    bool tune(DvbChannel* pChannel);
+    void stopTune();
+    
+private:
+    void diseqc(unsigned int satNum, DvbChannel::Polarization pol, bool hiBand);
+    bool tuneFrontend(unsigned int freq, unsigned int symbolRate);
+    void checkFrontend();
+    
+    DvbAdapter*                 _pAdapter;
+    std::string                 _deviceName;
+    int                         _num;
+    int                         _fileDesc;
+    struct dvb_frontend_info    _feInfo;
+    
+    Poco::Thread                    _t;
+    SignalCheckThread*                   _pt;
+    Poco::FastMutex                 _tuneLock;
+};
+
+
+class DvbDemux
+{
+    friend class DvbAdapter;
+    
+public:
+    DvbDemux(DvbAdapter* pAdapter, int num);
+    ~DvbDemux();
+    
+    void openDemux();
+    
+    unsigned int getPmtPid(int sid);
+    
+    bool setVideoPid(unsigned int pid);
+    bool setAudioPid(unsigned int pid);
+    bool setPatPid(unsigned int pid);
+    bool setPmtPid(unsigned int pid);
+    
+private:
+    bool setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType);
+    
+    DvbAdapter*                 _pAdapter;
+    std::string                 _deviceName;
+    int                         _num;
+    int                         _fileDescVideo;
+    int                         _fileDescAudio;
+    int                         _fileDescPat;
+    int                         _fileDescPmt;
+};
+
+
+class DvbDvr
+{
+    friend class DvbAdapter;
+    
+public:
+    DvbDvr(DvbAdapter* pAdapter, int num);
+    ~DvbDvr();
+    
+    void openDvr();
+    
+private:
+    DvbAdapter*                 _pAdapter;
+    std::string                 _deviceName;
+    int                         _num;
+    std::ifstream               _dvrStream;
 };
 
 
 class DvbDevice
 {
-    friend class TuningThread;
+    friend class DvbAdapter;
+    friend class SignalCheckThread;
     
 public:
     static DvbDevice* instance();
     
+    void addAdapter(DvbAdapter* pAdapter);
+    
     void tune(DvbChannel* pChannel);
     void stopTune();
+    
 //     std::istream& getTransportStream(DvbChannel* pChannel);
 //     std::ostream& getPacketizedElementaryStream(Channel* pChannel);
 //     std::ostream& getProgramStream(Channel* pChannel);
@@ -104,13 +261,12 @@ public:
     
 private:
     DvbDevice();
+    ~DvbDevice();
     
-    static DvbDevice*     _pInstance;
-    Poco::Thread          _t;
-    TuningThread*         _pt;
-    Poco::FastMutex       _tuneLock;
-//     int                   _frontend;
-//     std::ifstream         _dvbAdapter;
+    static DvbDevice*               _pInstance;
+    
+    std::map<std::string,DvbLnb*>   _lnbs;  // possible LNB types
+    std::vector<DvbAdapter*>        _adapters;
 };
 
 #endif

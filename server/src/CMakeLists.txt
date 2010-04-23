@@ -33,7 +33,6 @@ ${OMMS_SRCS}
 TARGET_LINK_LIBRARIES( omms
 ${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
-# omms-av-dvb
 )
 
 INSTALL( TARGETS omms
