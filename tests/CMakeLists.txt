@@ -19,6 +19,10 @@ SET(LIB_OMM_AV
 ommav
 )
 
+SET(LIB_OMM_AV_STREAM
+ommavstream
+)
+
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib/Omm
 ${omm_SOURCE_DIR}/lib/src
@@ -52,70 +56,82 @@ SET( OMMTEST_MEDIAOBJECT_SRCS
 MediaObjectTest.cpp
 )
 
+SET( OMMTEST_AV_STREAM_PLAY_SRCS
+AvStreamPlay.cpp
+)
+
 # SET( OMMTEST_HTTPFILESERVER_SRCS
 # HttpFileServerTest.cpp
 # )
 
 #list all source files here
-ADD_EXECUTABLE( ssdp_test
-${OMMTEST_SSDP_SRCS}
-)
-
-ADD_EXECUTABLE( device_test
-${OMMTEST_DEVICE_SRCS}
-)
+# ADD_EXECUTABLE( ssdp_test
+# ${OMMTEST_SSDP_SRCS}
+# )
+# 
+# ADD_EXECUTABLE( device_test
+# ${OMMTEST_DEVICE_SRCS}
+# )
 
 # ADD_EXECUTABLE( network_light
 # ${OMMTEST_NETWORK_LIGHT_SRCS}
 # )
 
-ADD_EXECUTABLE( netlight_ctrl
-${OMMTEST_OMMLIGHT_CTRL_SRCS}
-)
-
-ADD_EXECUTABLE( controller_test
-${OMMTEST_CONTROLLER_SRCS}
-)
-
-ADD_EXECUTABLE( media_object_test
-${OMMTEST_MEDIAOBJECT_SRCS}
-)
+# ADD_EXECUTABLE( netlight_ctrl
+# ${OMMTEST_OMMLIGHT_CTRL_SRCS}
+# )
+# 
+# ADD_EXECUTABLE( controller_test
+# ${OMMTEST_CONTROLLER_SRCS}
+# )
+# 
+# ADD_EXECUTABLE( media_object_test
+# ${OMMTEST_MEDIAOBJECT_SRCS}
+# )
 
 # ADD_EXECUTABLE( file_server_test
 # ${OMMTEST_HTTPFILESERVER_SRCS}
 # )
 
-#need to link to some other libraries ? just add them here
-TARGET_LINK_LIBRARIES( ssdp_test
-${LIB_OMM}
-${LIB_POCO_UTIL}
+ADD_EXECUTABLE( avstreamplay
+${OMMTEST_AV_STREAM_PLAY_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( device_test
-${LIB_OMM}
-${LIB_POCO_UTIL}
-)
+# TARGET_LINK_LIBRARIES( ssdp_test
+# ${LIB_OMM}
+# ${LIB_POCO_UTIL}
+# )
+# 
+# TARGET_LINK_LIBRARIES( device_test
+# ${LIB_OMM}
+# ${LIB_POCO_UTIL}
+# )
 
 # TARGET_LINK_LIBRARIES( network_light
 # ${LIB_OMM}
 # ${LIB_POCO_UTIL}
 # )
 
-TARGET_LINK_LIBRARIES( netlight_ctrl
-${LIB_OMM}
-${LIB_POCO_UTIL}
-)
-
-TARGET_LINK_LIBRARIES( controller_test
-${LIB_OMM}
-${LIB_POCO_UTIL}
-)
-
-TARGET_LINK_LIBRARIES( media_object_test
-${LIB_OMM_AV}
-)
+# TARGET_LINK_LIBRARIES( netlight_ctrl
+# ${LIB_OMM}
+# ${LIB_POCO_UTIL}
+# )
+# 
+# TARGET_LINK_LIBRARIES( controller_test
+# ${LIB_OMM}
+# ${LIB_POCO_UTIL}
+# )
+# 
+# TARGET_LINK_LIBRARIES( media_object_test
+# ${LIB_OMM_AV}
+# )
 
 # TARGET_LINK_LIBRARIES( file_server_test
 # ${LIB_OMM_AV}
 # ${LIB_POCO_UTIL}
 # )
+
+TARGET_LINK_LIBRARIES( avstreamplay
+${LIB_OMM_AV_STREAM}
+${LIB_POCO_UTIL}
+)

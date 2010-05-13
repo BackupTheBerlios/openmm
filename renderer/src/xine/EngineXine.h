@@ -30,9 +30,7 @@
 #include <xine.h>
 #include <xine/xineutils.h>
 
-/**
-@author Jörg Bakker
-*/
+
 class EnginePlugin : public Omm::Av::Engine
 {
 public:

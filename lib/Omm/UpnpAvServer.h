@@ -22,6 +22,8 @@
 #ifndef OMMUPNPAV_SERVER_H
 #define OMMUPNPAV_SERVER_H
 
+
+#include "AvStream.h"
 #include "UpnpAvTypes.h"
 #include "UpnpAvDevices.h"
 
@@ -31,16 +33,6 @@ namespace Av {
 
 class MediaItemServer;
 class MediaServerContainer;
-
-
-class Transcoder
-{
-};
-
-
-class Tagger
-{
-};
 
 
 class ServerResource : public Resource

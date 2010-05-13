@@ -31,10 +31,6 @@
 
 #include <Omm/UpnpAvServer.h>
 
-extern "C" {
-#include "szap.h"
-}
-
 class DvbDevice;
 class DvbChannel;
 
