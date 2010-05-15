@@ -21,22 +21,49 @@
 #ifndef QtSink_INCLUDED
 #define QtSink_INCLUDED
 
+#include <QtGui>
+
 #include <Omm/AvStream.h>
 
-class SinkPlugin : public Omm::Av::Sink {
+class VideoWidget : public QWidget
+{
+    Q_OBJECT
+    friend class SinkPlugin;
+    
+public:
+        
+
+private:
+    void paintEvent(QPaintEvent *event);
+    
+    QImage                  _image;
+};
+
+
+class SinkPlugin : public QObject, public Omm::Av::Sink
+{
+    Q_OBJECT
+        
 public:
     SinkPlugin();
-    ~SinkPlugin();
-    void open();
-    void close();
+    virtual ~SinkPlugin();
+    virtual void open();
+    virtual void close();
     // Writes blocking
-    void writeFrame(Omm::Av::Frame *pFrame);
-//     void pause();
-//     void resume();
-//     int latency();
+    virtual void writeFrame(Omm::Av::Frame *pFrame);
+//     virtual void pause();
+//     virtual void resume();
+//     virtual int latency();
+    virtual int eventLoop();
+    
+signals:
+    void doUpdate();
     
 private:
-
+    void showWindow();
+    
+    QApplication            _app;
+    VideoWidget             _widget;
 };
 
 #endif

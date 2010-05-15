@@ -22,6 +22,7 @@
 #define __STDC_FORMAT_MACROS
 
 // #include <Poco/Thread.h>
+// #include"/home/jb/work/ffmpeg-0.5.1/libswscale/swscale_internal.h"
 
 #include "AvStream.h"
 
@@ -229,8 +230,11 @@ _pAvFrame(0)
 {
     _pAvFrame = new AVFrame;
     *_pAvFrame = *pAvFrame;
+//     _pAvFrame = pAvFrame;
     
     _data = (char*)pAvFrame->data[0];
+//     _data = (char*)pAvFrame->base;
+    // FIXME: total size of frame is greater than linesize ...
     _size = pAvFrame->linesize[0];
 }
 
@@ -266,19 +270,25 @@ Frame::size()
 }
 
 
-// Frame*
-// Frame::shallowCopy()
-// {
-//     Frame* res = new Frame;
-//     res->_data = _data;
-//     res->_size = _size;
-//     res->_pStream = _pStream;
-//     if (_pAvPacket) {
-//         res->_pAvPacket = new AVPacket;
-//         *res->_pAvPacket = *_pAvPacket;
-//     }
-//     return res;
-// }
+char*
+Frame::planeData(int plane)
+{
+    return (char*)_pAvFrame->data[plane];
+}
+
+
+int
+Frame::planeSize(int plane)
+{
+    return _pAvFrame->linesize[plane];
+}
+
+
+Stream*
+Frame::getStream()
+{
+    return _pStream;
+}
 
 
 Frame*
@@ -298,8 +308,6 @@ Frame::convertRgb()
 {
     std::clog << "convert video frame to RGB ... " << std::endl;
     
-//     frame->reserveSpace(d->video_config);
-
     bool interlaced = false;
     if (_pAvFrame->interlaced_frame) {
         std::clog << "interlaced_frame" << std::endl;
@@ -310,58 +318,140 @@ Frame::convertRgb()
         std::clog << "non interlaced_frame" << std::endl;
     }
     
-    int width = _pStream->_pAvCodecContext->width;
-    int height = _pStream->_pAvCodecContext->height;
+    int width = _pStream->width();
+    int height = _pStream->height();
     std::clog << "width: " <<  width << " height: " << height << std::endl;
     std::clog << "_pAvFrame->linesize[0]: " << _pAvFrame->linesize[0] << std::endl;
-    PixelFormat pix_fmt = _pStream->_pAvCodecContext->pix_fmt;
-    std::clog << "source pix_fmt: " << pix_fmt << " dest pix_fmt: " << PIX_FMT_RGB32 << std::endl;
+    PixelFormat pixelFormat = _pStream->_pAvCodecContext->pix_fmt;
+    // source      pix_fmt == 0 is: PIX_FMT_YUV420P - planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+    // destination pix_fmt == 6 is: PIX_FMT_RGB32 - packed RGB 8:8:8, 32bpp, (msb)8A 8R 8G 8B(lsb), in CPU endianness
+    std::clog << "source pixelFormat: " << pixelFormat << " dest pixelFormat: " << PIX_FMT_RGB32 << std::endl;
+//     std::clog << "source pixelFormat: " << sws_format_name(pixelFormat) << " dest pixelFormat: " << sws_format_name(PIX_FMT_RGB32) << std::endl;
     
-    // convert pixel format from 0 -> 6
-//     if (pixelFormat(color_format) != codecContext->pix_fmt)
-    {
-        int sws_flags = SWS_BICUBIC;
-        
-        struct SwsContext *img_convert_ctx = 0;
-        img_convert_ctx = sws_getCachedContext(img_convert_ctx,
-                                               width, height,
-                                               pix_fmt,
-                                               width, height,
-                                               PIX_FMT_RGB32, sws_flags, NULL, NULL, NULL);
+    int scaleAlgo = SWS_BICUBIC;
+    struct SwsContext *pImgConvertContext = 0;
+    
+    pImgConvertContext = sws_getCachedContext(pImgConvertContext,
+                                        width, height,
+                                        pixelFormat,
+                                        width, height,
+                                        PIX_FMT_RGB32, scaleAlgo, NULL, NULL, NULL);
 
-        if (img_convert_ctx == 0) {
-            std::cerr << "error: cannot initialize image conversion context" << std::endl;
-            return 0;
+    if (pImgConvertContext == 0) {
+        std::cerr << "error: cannot initialize image conversion context" << std::endl;
+        return 0;
+    }
+    else {
+        std::clog << "image conversion context set up." << std::endl;
+    }
+    
+    // make a copy of frame into pFrameRGB
+    // avpicture_alloc(AVPicture *picture, int pixelFormat, int width, int height);
+//     AVFrame* pFrameRGB = avcodec_alloc_frame();
+//     uint8_t* buffer = _pAvFrame->data[0];
+//     avpicture_fill((AVPicture *)pFrameRGB, buffer, pixelFormat, width, height);
+    
+    
+//     Frame* res = new Frame(_pAvFrame);
+//     AVFrame resAvFrame;
+//     Frame* res = new Frame(&resAvFrame);
+//     res->_pStream = _pStream;
+//     AVFrame* pFrameRGB = res->_pAvFrame;
+    // FIXME: linesize could be negative
+    AVFrame* pFrameRGB = new AVFrame;
+//     int RGBpitch0 = 720;
+//     int RGBpitch1 = 360;
+//     int RGBpitch0 = 360;
+//     int RGBpitch0 = 0;
+    long pixels = width * height;
+//     pFrameRGB->linesize[0] = 720;
+//     pFrameRGB->linesize[1] = 360;
+//     pFrameRGB->linesize[2] = 360;
+//     pFrameRGB->linesize[3] = 0;
+//     pFrameRGB->data[0] = new uint8_t[pFrameRGB->linesize[0] * height];
+//     pFrameRGB->data[1] = new uint8_t[pFrameRGB->linesize[1] * height];
+//     pFrameRGB->data[2] = new uint8_t[pFrameRGB->linesize[2] * height];
+//     pFrameRGB->data[3] = new uint8_t[pFrameRGB->linesize[3] * height];
+//     pFrameRGB->data[0] = new uint8_t[pixels];
+//     pFrameRGB->data[1] = new uint8_t[pixels];
+//     pFrameRGB->data[2] = new uint8_t[pixels];
+//     pFrameRGB->data[3] = new uint8_t[pixels];
+    
+    pFrameRGB->linesize[0] = 720;
+    pFrameRGB->linesize[1] = 720;
+    pFrameRGB->linesize[2] = 720;
+    pFrameRGB->linesize[3] = 720;
+    pFrameRGB->data[0] = new uint8_t[pixels * 4];
+    pFrameRGB->data[1] = pFrameRGB->data[0] + pixels;
+    pFrameRGB->data[2] = pFrameRGB->data[0] + 720 + 360;
+    pFrameRGB->data[3] = pFrameRGB->data[0] + 2 * pixels;
+    
+    
+    std::clog << " _pAvFrame->linesize[0..2]: " << _pAvFrame->linesize[0] << ", " << _pAvFrame->linesize[1] << ", " << _pAvFrame->linesize[2] << std::endl;
+    std::clog << " _pAvFrame->data: " << (int)_pAvFrame->data << " _pAvFrame->base: " << (int)_pAvFrame->base << std::endl;
+    std::clog << " _pAvFrame->data[0..2]: " << (unsigned int)_pAvFrame->data[0] << ", " << (unsigned int)_pAvFrame->data[1] << ", " << (unsigned int)_pAvFrame->data[2] << std::endl;
+    
+    std::clog << "sws_scale ..." << std::endl;
+    int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
+                                    0, height, pFrameRGB->data, pFrameRGB->linesize);
+    
+    std::clog << "height of output slize: " << outSlizeHeight << std::endl;
+    std::clog << " pFrameRGB->linesize[0..2]: " << pFrameRGB->linesize[0] << ", " << pFrameRGB->linesize[1] << ", " << pFrameRGB->linesize[2] << std::endl;
+    std::clog << " pFrameRGB->data: " << (int)pFrameRGB->data << " pFrameRGB->base: " << (int)pFrameRGB->base << std::endl;
+    std::clog << " pFrameRGB->data[0..2]: " << (unsigned int)pFrameRGB->data[0] << ", " << (unsigned int)pFrameRGB->data[1] << ", " << (unsigned int)pFrameRGB->data[2] << std::endl;
+    
+//     Frame* res = new Frame(pFrameRGB);
+    
+    char* rgbBuffer = new char[pixels * 4];
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            for (int plane = 0; plane < 3; plane++) {
+                rgbBuffer[row * width * 3 + col * 3 + plane] = pFrameRGB->data[plane][row * width + col];
+            }
         }
-        else {
-            std::clog << "image conversion context set up." << std::endl;
-        }
-        
-        // make a copy of frame into pFrameRGB
-//         avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height);
-        AVFrame* pFrameRGB = avcodec_alloc_frame();
-        uint8_t* buffer = _pAvFrame->data[0];
-        avpicture_fill((AVPicture *)pFrameRGB, buffer, pix_fmt, width, height);
-        
-        std::clog << "sws_scale ..." << std::endl;
-        int out_slize_height = sws_scale(img_convert_ctx, _pAvFrame->data, _pAvFrame->linesize,
-                                         0, height, pFrameRGB->data, pFrameRGB->linesize);
-        
-        std::clog << "height of output slize: " << out_slize_height << std::endl;
-        std::clog << " pFrameRGB->linesize[0]: " << pFrameRGB->linesize[0] << std::endl;
-        
-        Frame* res = new Frame(pFrameRGB);
-        
-        return res;
-        
-//         free ( pFrameRGB );
-        
-//         if (pFrame != d->frame)
-//             avpicture_free((AVPicture*)pFrame);
-    } /*else {
-        // copy data
-        memcpy(frame->data, d->frame->data[0], avpicture_get_size(codecContext->pix_fmt, codecContext->width, codecContext->height));
-    }*/
+    }
+    delete pFrameRGB->data[0];
+//     delete pFrameRGB;
+    Frame* res = new Frame(rgbBuffer, pixels * 4);
+    
+    res->_pStream = _pStream;
+    delete pFrameRGB;
+    
+    return res;
+}
+
+
+void
+Frame::write(Overlay* overlay)
+{
+    std::clog << "convert video frame to YUV ... " << std::endl;
+    
+    int width = _pStream->width();
+    int height = _pStream->height();
+    std::clog << "width: " <<  width << " height: " << height << std::endl;
+    PixelFormat pixelFormat = _pStream->_pAvCodecContext->pix_fmt;
+    std::clog << "source pixelFormat: " << pixelFormat << " dest pixelFormat: " << PIX_FMT_YUV420P << std::endl;
+    
+    int scaleAlgo = SWS_BICUBIC;
+    struct SwsContext *pImgConvertContext = 0;
+    
+    pImgConvertContext = sws_getCachedContext(pImgConvertContext,
+                                              width, height,
+                                              pixelFormat,
+                                              width, height,
+                                              PIX_FMT_YUV420P, scaleAlgo, NULL, NULL, NULL);
+    
+    if (pImgConvertContext == 0) {
+        std::cerr << "error: cannot initialize image conversion context" << std::endl;
+        return;
+    }
+    else {
+        std::clog << "image conversion context set up." << std::endl;
+    }
+    
+    std::clog << "sws_scale ..." << std::endl;
+    int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
+                                   0, height, overlay->_data, overlay->_pitch);
 }
 
 
@@ -449,14 +539,24 @@ Stream::isVideo()
 int
 Stream::width()
 {
-    return _pAvCodecContext->width;
+    if (_pAvCodecContext) {
+        return _pAvCodecContext->width;
+    }
+    else {
+        return 0;
+    }
 }
 
 
 int
 Stream::height()
 {
-    return _pAvCodecContext->height;
+    if (_pAvCodecContext) {
+        return _pAvCodecContext->height;
+    }
+    else {
+        return 0;
+    }
 }
 
 
@@ -501,22 +601,31 @@ Stream::decodeVideoFrame(Frame* pFrame)
         return 0;
     }
     
+    Frame* pOutFrame;
     AVFrame outPic;
-    
     // TODO: FF_INPUT_BUFFER_PADDING_SIZE
-    int outPicSize;
+    int decodeSuccess;
+    std::clog << "size: " << pFrame->size() << std::endl;
+    
     int bytesConsumed = avcodec_decode_video(_pAvStream->codec,
-                                             &outPic, &outPicSize,
+                                             &outPic, &decodeSuccess,
                                             (const uint8_t*)pFrame->data(), pFrame->size());
-    std::clog << " bytesConsumed: " << bytesConsumed << " decoded size: " << outPicSize << std::endl;
-    std::clog << "outPic.linesize[0]: " << outPic.linesize[0] << std::endl;
-    Frame* pOutFrame = new Frame(&outPic);
-    pOutFrame->_pStream = this;
+    
+    std::clog << "bytesConsumed: " << bytesConsumed << " decode success: " << decodeSuccess << std::endl;
+    std::clog << "outPic.linesize[0..2]: " << outPic.linesize[0] << ", " << outPic.linesize[1] << ", " << outPic.linesize[2] << std::endl;
     
     if (bytesConsumed <= 0) {
-        std::cerr << "error: skipped frame" << std::endl;
-        pOutFrame->_size = 0;
+        std::cerr << ">>>>>>> skipping frame while decoding" << std::endl;
+        return 0;
     }
+    if (decodeSuccess <= 0) {
+        std::cerr << ">>>>>>> skipping frame while decoding" << std::endl;
+        return 0;
+    }
+    
+    pOutFrame = new Frame(&outPic);
+    pOutFrame->_pStream = this;
+    
     return pOutFrame;
 }
 

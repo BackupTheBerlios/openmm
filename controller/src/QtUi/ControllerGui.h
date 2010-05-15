@@ -23,7 +23,6 @@
 #define CONTROLLERGUI_H
 
 #include <QtGui>
-#include <Poco/ClassLibrary.h>
 
 #include "UpnpBrowserModel.h"
 #include "UpnpRendererListModel.h"

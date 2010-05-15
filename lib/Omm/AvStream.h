@@ -55,6 +55,7 @@ namespace Av {
 
 class Meta;
 class Stream;
+class Overlay;
 class Sink;
 
 
@@ -100,10 +101,14 @@ public:
     char* data();
     int size();
     
-//     Frame* shallowCopy();
+    char* planeData(int plane);
+    int planeSize(int plane);
+    
+    Stream* getStream();
     
     Frame* decode();
     Frame* convertRgb();
+    void write(Overlay* overlay);
     
 private:
     char*       _data;
@@ -202,6 +207,14 @@ private:
     int                 _tagBufferSize;
     int                 _IoBufferSize;
     unsigned char*      _pIoBuffer;
+};
+
+
+class Overlay
+{
+public:
+    uint8_t* _data[4];
+    int      _pitch[4];
 };
 
 

@@ -23,6 +23,7 @@
 
 #include <Poco/ClassLoader.h>
 #include <Poco/Exception.h>
+
 #include <AvStream.h>
 
 
@@ -35,10 +36,30 @@ public:
         int i;
         
         set(istr);
+        
+        //////////// open and attach video Sink ////////////
+        Poco::ClassLoader<Omm::Av::Sink> sinkPluginLoader;
+//         std::string sinkName = "qt";
+        std::string sinkName = "sdl";
+        try {
+            sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/SdlSink/libommavr-" + sinkName + "sink.so");
+        }
+        catch (Poco::NotFoundException) {
+            std::cerr << "error: could not find " << sinkName << " video sink plugin." << std::endl;
+            return;
+        }
+        catch (Poco::LibraryLoadException) {
+            std::cerr << "error: could not load " << sinkName << " video sink plugin." << std::endl;
+            return;
+        }
+        Omm::Av::Sink* videoSink = sinkPluginLoader.create("SinkPlugin");
+        videoSink->open();
+//         pVideoStream->attachSink(videoSink);
+        
+        //////////// read frames from input and demux them into single Streams ////////////
         demux();
         
         //////////// decode video frames ////////////
-        
         videoStream()->open();
         
         i = 0;
@@ -51,13 +72,17 @@ public:
         
         
         //////////// convert video frame ////////////
-        
-        Omm::Av::Frame* pPicture;
-        if (decodedVideoFrames.back()) {
-            pPicture = decodedVideoFrames.back()->convertRgb();
-        }
+//         Omm::Av::Frame* pPicture;
+//         if (decodedVideoFrames[100]) {
+// //             pPicture = decodedVideoFrames[100]->convertRgb();
+//             pPicture = decodedVideoFrames[100]->convertYuv();
+//         }
 //     std::ofstream picture("frame.bmp");
 //     picture.write(pPicture->data(), 3 * _pVideoStream->width() * _pVideoStream->height());
+        
+        //////////// write decoded video frames to video Sink ////////////
+        videoSink->writeFrame(decodedVideoFrames[100]);
+        videoSink->eventLoop();
         
         //////////// deallocate meta data and packet queues ////////////
         reset();

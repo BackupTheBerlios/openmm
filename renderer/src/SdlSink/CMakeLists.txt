@@ -1,0 +1,33 @@
+FIND_PACKAGE(SDL)
+# FIND_PACKAGE(SDL_image)
+
+SET(CMAKE_LIBRARY_PATH
+${CMAKE_SYSTEM_LIBRARY_PATH}
+)
+
+if(TARGET omm)
+INCLUDE_DIRECTORIES(
+${omm_SOURCE_DIR}/lib
+)
+endif(TARGET omm)
+
+SET( OMM_AV_STREAM_SDLSINK_SRCS
+SdlSink.cpp
+)
+
+ADD_LIBRARY( ommavr-sdlsink
+SHARED
+${OMM_AV_STREAM_SDLSINK_SRCS}
+)
+
+
+TARGET_LINK_LIBRARIES( ommavr-sdlsink
+${SDL_LIBRARY}
+# ${SDLIMAGE_LIBRARY} # if using SDL_image, obviously
+# SDLmain # Sadly not included in SDL_LIBRARY variable
+)
+
+INSTALL( TARGETS ommavr-sdlsink
+LIBRARY DESTINATION lib
+)
+

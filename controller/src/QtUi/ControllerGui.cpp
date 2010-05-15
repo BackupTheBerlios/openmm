@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <QtDebug>
+#include <Poco/ClassLibrary.h>
+
 #include <Omm/UpnpController.h>
 
 #include "ControllerGui.h"

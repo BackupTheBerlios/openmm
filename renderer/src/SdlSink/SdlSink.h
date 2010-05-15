@@ -18,42 +18,32 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef AlsaSink_INCLUDED
-#define AlsaSink_INCLUDED
+#ifndef SdlSink_INCLUDED
+#define SdlSink_INCLUDED
+
+#include <SDL/SDL.h>
 
 #include <Omm/AvStream.h>
 
-#include <alsa/asoundlib.h>
-#include <alsa/pcm.h>
 
-class SinkPlugin : public Omm::Av::Sink {
+class SinkPlugin : public Omm::Av::Sink
+{
 public:
     SinkPlugin();
     virtual ~SinkPlugin();
     virtual void open();
-    void open(const std::string& device);
     virtual void close();
     // Writes blocking
     virtual void writeFrame(Omm::Av::Frame *pFrame);
 //     virtual void pause();
 //     virtual void resume();
 //     virtual int latency();
-//     virtual int eventLoop();
+    virtual int eventLoop();
     
 private:
-    void         initDevice();
-    
-    snd_pcm_t* pcm_playback;
-    snd_pcm_hw_params_t *hw;
-    std::string device;
-    snd_pcm_format_t format;
-    unsigned int rate;
-    int channels;
-    int periods;       // Number of periods
-    snd_pcm_uframes_t periodsize; // Periodsize (bytes)
-    char* buffer;
-    char* bufferPos;
-    snd_pcm_uframes_t frames;
+    SDL_Surface*            _pSdlScreen;
+    SDL_Overlay*            _pSdlOverlay;
+    Omm::Av::Overlay*       _pOverlay;
 };
 
 #endif
