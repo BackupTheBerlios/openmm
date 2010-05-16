@@ -153,7 +153,7 @@ AvStream::demux()
         std::clog << "reading packet #" << ++i << ", size: " << packet.size;
         std::clog << ", pos: " << packet.pos << std::endl;
         
-        _streams[packet.stream_index]->put(new Frame(&packet));
+        _streams[packet.stream_index]->put(new Frame(_streams[packet.stream_index], &packet));
         
         av_free_packet(&packet);  // seems like the counterpart of av_init_packet()
     }
@@ -180,28 +180,57 @@ AvStream::videoStream()
 // }
 
 
-Frame::Frame() :
+Frame::Frame(const Frame& frame) :
+_size(frame._size),
+_pStream(frame._pStream)
+{
+    if (frame._pAvFrame) {
+        uint8_t* buffer = (uint8_t*)av_malloc(_size);
+        _pAvFrame = avcodec_alloc_frame();
+        avpicture_fill((AVPicture*)_pAvFrame, buffer, _pStream->pixelFormat(), _pStream->width(), _pStream->height());
+        
+        for (int plane = 0; plane < 4; plane++) {
+            memcpy(_pAvFrame->data[plane], frame._pAvFrame->data[plane], _pStream->height() * frame._pAvFrame->linesize[plane]);
+        }
+        _data = (char*)_pAvFrame->data[0];
+    }
+    else if (frame._pAvPacket) {
+        // TODO: copy ctor for AVPacket
+    }
+    else {
+        // TODO: only _data needs to be copied
+    }
+}
+
+
+Frame::Frame(Stream* pStream) :
 _data(0),
+_size(0),
 _pAvPacket(0),
-_pAvFrame(0)
+_pAvFrame(0),
+_pStream(pStream)
 {
 }
 
 
-Frame::Frame(int dataSize) :
+Frame::Frame(Stream* pStream, int dataSize) :
 _data(0),
+_size(0),
 _pAvPacket(0),
-_pAvFrame(0)
+_pAvFrame(0),
+_pStream(pStream)
 {
     _data = new char[dataSize];
     _size = dataSize;
 }
 
 
-Frame::Frame(char* data, int dataSize) :
+Frame::Frame(Stream* pStream, char* data, int dataSize) :
 _data(0),
+_size(0),
 _pAvPacket(0),
-_pAvFrame(0)
+_pAvFrame(0),
+_pStream(pStream)
 {
     _data = new char[dataSize];
     _size = dataSize;
@@ -209,10 +238,12 @@ _pAvFrame(0)
 }
 
 
-Frame::Frame(AVPacket* pAvPacket) :
+Frame::Frame(Stream* pStream, AVPacket* pAvPacket) :
 _data(0),
+_size(0),
 _pAvPacket(0),
-_pAvFrame(0)
+_pAvFrame(0),
+_pStream(pStream)
 {
     _pAvPacket = new AVPacket;
     *_pAvPacket = *pAvPacket;
@@ -225,19 +256,23 @@ _pAvFrame(0)
 }
 
 
-Frame::Frame(AVFrame* pAvFrame) :
+Frame::Frame(Stream* pStream, AVFrame* pAvFrame) :
 _data(0),
+_size(0),
 _pAvPacket(0),
-_pAvFrame(0)
+_pAvFrame(pAvFrame),
+_pStream(pStream)
 {
+    // NOTE: if we don't copy the frame data after decoding a frame,
+    // it is deleted / overriden by libavcodec (for example: only the last three frames of 
+    // the stream are stored)
+    
+    // NOTE: why these two lines are needed, dunno exactly ...
     _pAvFrame = new AVFrame;
     *_pAvFrame = *pAvFrame;
-//     _pAvFrame = pAvFrame;
     
-    _data = (char*)pAvFrame->data[0];
-//     _data = (char*)pAvFrame->base;
-    // FIXME: total size of frame is greater than linesize ...
-    _size = pAvFrame->linesize[0];
+    _size = _pStream->pictureSize();
+    _data = (char*)_pAvFrame->data[0];
 }
 
 
@@ -329,19 +364,6 @@ Frame::decode()
 
 
 Frame*
-Frame::allocate(PixelFormat targetFormat)
-{
-    // Determine required buffer size and allocate buffer
-    int numBytes = avpicture_get_size(targetFormat, _pStream->width(), _pStream->height());
-    uint8_t* buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
-    AVFrame* pOutFrame = avcodec_alloc_frame();
-    avpicture_fill((AVPicture *)pOutFrame, buffer, targetFormat, _pStream->width(), _pStream->height());
-    
-    return new Frame(pOutFrame);
-}
-
-
-Frame*
 Frame::convert(PixelFormat targetFormat)
 {
     _pStream->printInfo();
@@ -366,7 +388,8 @@ Frame::convert(PixelFormat targetFormat)
         std::clog << "image conversion context set up." << std::endl;
     }
     
-    Frame* pOutFrame = allocate(targetFormat);
+    // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
+    Frame* pOutFrame = _pStream->allocateVideoFrame(targetFormat);
     
     printInfo();
     std::clog << "sws_scale ..." << std::endl;
@@ -498,6 +521,19 @@ Stream::get()
 }
 
 
+Frame*
+Stream::allocateVideoFrame(PixelFormat targetFormat)
+{
+    // Determine required buffer size and allocate buffer
+    int numBytes = avpicture_get_size(targetFormat, width(), height());
+    uint8_t* buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+    AVFrame* pOutFrame = avcodec_alloc_frame();
+    avpicture_fill((AVPicture *)pOutFrame, buffer, targetFormat, width(), height());
+    
+    return new Frame(this, pOutFrame);
+}
+
+
 bool
 Stream::isAudio()
 {
@@ -544,6 +580,20 @@ Stream::height()
 }
 
 
+PixelFormat
+Stream::pixelFormat()
+{
+    return _pAvCodecContext->pix_fmt;
+}
+
+
+int
+Stream::pictureSize()
+{
+    return avpicture_get_size(pixelFormat(), width(), height());
+}
+
+
 Frame*
 Stream::decodeAudioFrame(Frame* pFrame)
 {
@@ -551,9 +601,9 @@ Stream::decodeAudioFrame(Frame* pFrame)
         return 0;
     }
     const int outBufferSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
-    Frame* pOutFrame = new Frame(outBufferSize);
+    Frame* pOutFrame = new Frame(this, outBufferSize);
     pOutFrame->_data[outBufferSize-1] = 0;
-    pOutFrame->_pStream = this;
+//     pOutFrame->_pStream = this;
     
     uint8_t* inBuffer = (uint8_t*) pFrame->data();
     int inBufferSize = pFrame->size();
@@ -607,8 +657,8 @@ Stream::decodeVideoFrame(Frame* pFrame)
         return 0;
     }
     
-    pOutFrame = new Frame(&outPic);
-    pOutFrame->_pStream = this;
+    pOutFrame = new Frame(this, &outPic);
+//     pOutFrame->_pStream = this;
     
     return pOutFrame;
 }

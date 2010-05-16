@@ -41,8 +41,8 @@ public:
         
         //////////// open and attach video Sink ////////////
         Poco::ClassLoader<Omm::Av::Sink> sinkPluginLoader;
-        std::string sinkName = "QtSink/libommavr-qtsink.so";
-//         std::string sinkName = "SdlSink/libommavr-sdlsink.so";
+//         std::string sinkName = "QtSink/libommavr-qtsink.so";
+        std::string sinkName = "SdlSink/libommavr-sdlsink.so";
         try {
             sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/" + sinkName);
         }
@@ -71,7 +71,8 @@ public:
             std::clog << "decode video frame #" << ++i << " ";
             Omm::Av::Frame* pFrameDecoded = pFrame->decode();
             if (pFrameDecoded) {
-                decodedVideoFrames.push_back(pFrameDecoded);
+//                 decodedVideoFrames.push_back(pFrameDecoded);
+                videoSink->writeFrame(pFrameDecoded);
             }
         }
         
@@ -84,7 +85,7 @@ public:
 // //             delete *it;
 //         }
         
-        videoSink->writeFrame(decodedVideoFrames[100]);
+//         videoSink->writeFrame(decodedVideoFrames[100]);
         videoSink->eventLoop();
         
         //////////// deallocate meta data and packet queues ////////////
@@ -118,16 +119,19 @@ public:
             std::clog << "decode video frame #" << ++i << " ";
             Omm::Av::Frame* pFrameDecoded = pFrame->decode();
             if (pFrameDecoded) {
-                decodedVideoFrames.push_back(pFrameDecoded);
+                pFrameDecoded->writePpm("frame" + Poco::NumberFormatter::format0(i, 3) + ".ppm");
+                // make a copy of decoded frame
+//                 Omm::Av::Frame* pFrameDecodedCopy = new Omm::Av::Frame(*pFrameDecoded);
+//                 decodedVideoFrames.push_back(pFrameDecodedCopy);
             }
         }
         
         //////////// write decoded video frames to file ////////////
-        i = 0;
-        for(std::vector<Omm::Av::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
-            std::clog << "write frame #" << ++i << " ";
-            (*it)->writePpm("frame" + Poco::NumberFormatter::format0(i, 3) + ".ppm");
-        }
+//         i = 0;
+//         for(std::vector<Omm::Av::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
+//             std::clog << "write frame #" << ++i << " ";
+//             (*it)->writePpm("frame" + Poco::NumberFormatter::format0(i, 3) + ".ppm");
+//         }
         
         //////////// deallocate meta data and packet queues ////////////
         reset();
@@ -249,7 +253,7 @@ public:
         char buffer[periodsize];
         std::ifstream infile("audio.out");
         while (infile.read((char*)buffer, periodsize)) {
-            Omm::Av::Frame frame(buffer, periodsize);
+            Omm::Av::Frame frame(audioStream(), buffer, periodsize);
             std::clog << "write frame #" << ++i << " ";
             audioSink->writeFrame(&frame);
         }

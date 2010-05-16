@@ -90,11 +90,12 @@ class Frame
     friend class Stream;
     
 public:
-    Frame();
-    Frame(int dataSize);
-    Frame(char* data, int dataSize);
-    Frame(AVPacket* pAvPacket);
-    Frame(AVFrame* pAvFrame);
+    Frame(const Frame& frame);
+    Frame(Stream* pStream);
+    Frame(Stream* pStream, int dataSize);
+    Frame(Stream* pStream, char* data, int dataSize);
+    Frame(Stream* pStream, AVPacket* pAvPacket);
+    Frame(Stream* pStream, AVFrame* pAvFrame);
     ~Frame();
     
     char* data();
@@ -108,8 +109,8 @@ public:
     Stream* getStream();
     
     Frame* decode();
-    Frame* allocate(PixelFormat targetFormat);
     Frame* convert(PixelFormat targetFormat);
+    
     void writePpm(const std::string& fileName);
     void write(Overlay* overlay);
     
@@ -131,6 +132,8 @@ public:
     void open();
     void close();
     
+    Frame* allocateVideoFrame(PixelFormat targetFormat);
+    
     void put(Frame* frame);
     Frame* get();
     
@@ -142,9 +145,14 @@ public:
     int width();
     int height();
     
+    // audio parameters
     int sampleWidth();
     unsigned int sampleRate();
     int channels();
+    
+    // video parameters
+    PixelFormat pixelFormat();
+    int pictureSize();
     
     void attachSink(Sink* pSink);
     
