@@ -25,7 +25,7 @@
 #include <Omm/UpnpAvServer.h>
 
 /**
-	@author Jörg Bakker <joerg<at>open-multimedia<dot>org>
+	@author Jörg Bakker <jb<at>open-multimedia<dot>org>
 */
 
 

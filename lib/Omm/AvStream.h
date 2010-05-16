@@ -29,7 +29,6 @@
 
 
 extern "C" {
-// #define FFMPEG_VERSION "UNKNOWN"
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavdevice/avdevice.h>
@@ -104,10 +103,14 @@ public:
     char* planeData(int plane);
     int planeSize(int plane);
     
+    void printInfo();
+    
     Stream* getStream();
     
     Frame* decode();
-    Frame* convertRgb();
+    Frame* allocate(PixelFormat targetFormat);
+    Frame* convert(PixelFormat targetFormat);
+    void writePpm(const std::string& fileName);
     void write(Overlay* overlay);
     
 private:
@@ -117,23 +120,6 @@ private:
     AVFrame*    _pAvFrame;
     Stream*     _pStream;
 };
-
-
-// class VideoFrame
-// {
-//     friend class Stream;
-//     
-// public:
-//     VideoFrame();
-//     VideoFrame(AVFrame* pAvFrame);
-//     ~VideoFrame();
-//     
-// private:
-//     char*       _data[4];
-//     int         _lineSize[4];
-//     AVFrame*    _pAvFrame;
-//     Stream*     _pStream;
-// };
 
 
 class Stream
@@ -150,6 +136,8 @@ public:
     
     bool isAudio();
     bool isVideo();
+    
+    void printInfo();
     
     int width();
     int height();
@@ -238,39 +226,6 @@ public:
 protected:
     Stream*     _pStream;
 };
-
-
-// #include <alsa/asoundlib.h>
-// #include <alsa/pcm.h>
-// 
-// class AlsaSink : public Sink {
-// public:
-//     AlsaSink();
-//     ~AlsaSink();
-//     void open();
-//     void open(const std::string& device);
-//     void close();
-//     // Writes blocking
-//     void writeFrame(Frame *pFrame);
-// //     void pause();
-// //     void resume();
-// //     int latency();
-//     
-// private:
-//     void         initDevice();
-//     
-//     snd_pcm_t* pcm_playback;
-//     snd_pcm_hw_params_t *hw;
-//     std::string device;
-//     snd_pcm_format_t format;
-//     unsigned int rate;
-//     int channels;
-//     int periods;       // Number of periods
-//     snd_pcm_uframes_t periodsize; // Periodsize (bytes)
-//     char* buffer;
-//     char* bufferPos;
-//     snd_pcm_uframes_t frames;
-// };
 
 
 class Scanner

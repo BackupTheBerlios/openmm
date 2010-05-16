@@ -98,25 +98,6 @@ SinkPlugin::eventLoop()
 }
 
 
-// void SinkPlugin::pause()
-// {
-// }
-// 
-
-// void SinkPlugin::resume()
-// {
-// }
-
-
-// static int resume(snd_pcm_t *pcm)
-// {
-// }
-
-
-// int SinkPlugin::latency()
-// {
-// }
-
 
 POCO_BEGIN_MANIFEST(Omm::Av::Sink)
 POCO_EXPORT_CLASS(SinkPlugin)

@@ -24,6 +24,8 @@
 // #include <Poco/Thread.h>
 // #include"/home/jb/work/ffmpeg-0.5.1/libswscale/swscale_internal.h"
 
+#include <fstream>
+
 #include "AvStream.h"
 
 using namespace Omm;
@@ -284,6 +286,29 @@ Frame::planeSize(int plane)
 }
 
 
+void
+Frame::printInfo()
+{
+    std::clog << "frame info:" << std::endl;
+    std::clog << " _pAvFrame->linesize[0..2]: " 
+        << _pAvFrame->linesize[0] 
+        << ", " << _pAvFrame->linesize[1] 
+        << ", " << _pAvFrame->linesize[2] 
+        << std::endl;
+    
+    std::clog << " _pAvFrame->data: " 
+        << (int)_pAvFrame->data 
+        << " _pAvFrame->base: " 
+        << (int)_pAvFrame->base << std::endl;
+    
+    std::clog << " _pAvFrame->data[0..2]: " 
+        << (unsigned int)_pAvFrame->data[0] 
+        << ", " << (unsigned int)_pAvFrame->data[1] 
+        << ", " << (unsigned int)_pAvFrame->data[2] 
+        << std::endl;
+}
+
+
 Stream*
 Frame::getStream()
 {
@@ -304,39 +329,35 @@ Frame::decode()
 
 
 Frame*
-Frame::convertRgb()
+Frame::allocate(PixelFormat targetFormat)
 {
-    std::clog << "convert video frame to RGB ... " << std::endl;
+    // Determine required buffer size and allocate buffer
+    int numBytes = avpicture_get_size(targetFormat, _pStream->width(), _pStream->height());
+    uint8_t* buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+    AVFrame* pOutFrame = avcodec_alloc_frame();
+    avpicture_fill((AVPicture *)pOutFrame, buffer, targetFormat, _pStream->width(), _pStream->height());
     
-    bool interlaced = false;
-    if (_pAvFrame->interlaced_frame) {
-        std::clog << "interlaced_frame" << std::endl;
-        interlaced = true;
-    }
-    else {
-        interlaced = false;
-        std::clog << "non interlaced_frame" << std::endl;
-    }
-    
+    return new Frame(pOutFrame);
+}
+
+
+Frame*
+Frame::convert(PixelFormat targetFormat)
+{
+    _pStream->printInfo();
     int width = _pStream->width();
     int height = _pStream->height();
-    std::clog << "width: " <<  width << " height: " << height << std::endl;
-    std::clog << "_pAvFrame->linesize[0]: " << _pAvFrame->linesize[0] << std::endl;
-    PixelFormat pixelFormat = _pStream->_pAvCodecContext->pix_fmt;
-    // source      pix_fmt == 0 is: PIX_FMT_YUV420P - planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
-    // destination pix_fmt == 6 is: PIX_FMT_RGB32 - packed RGB 8:8:8, 32bpp, (msb)8A 8R 8G 8B(lsb), in CPU endianness
-    std::clog << "source pixelFormat: " << pixelFormat << " dest pixelFormat: " << PIX_FMT_RGB32 << std::endl;
-//     std::clog << "source pixelFormat: " << sws_format_name(pixelFormat) << " dest pixelFormat: " << sws_format_name(PIX_FMT_RGB32) << std::endl;
+    PixelFormat inPixFormat = _pStream->_pAvCodecContext->pix_fmt;
+    std::clog << "source pixelFormat: " << inPixFormat << " target pixelFormat: " << targetFormat << std::endl;
     
     int scaleAlgo = SWS_BICUBIC;
     struct SwsContext *pImgConvertContext = 0;
     
     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
-                                        width, height,
-                                        pixelFormat,
-                                        width, height,
-                                        PIX_FMT_RGB32, scaleAlgo, NULL, NULL, NULL);
-
+                                              width, height, inPixFormat,
+                                              width, height, targetFormat,
+                                              scaleAlgo, NULL, NULL, NULL);
+    
     if (pImgConvertContext == 0) {
         std::cerr << "error: cannot initialize image conversion context" << std::endl;
         return 0;
@@ -345,79 +366,34 @@ Frame::convertRgb()
         std::clog << "image conversion context set up." << std::endl;
     }
     
-    // make a copy of frame into pFrameRGB
-    // avpicture_alloc(AVPicture *picture, int pixelFormat, int width, int height);
-//     AVFrame* pFrameRGB = avcodec_alloc_frame();
-//     uint8_t* buffer = _pAvFrame->data[0];
-//     avpicture_fill((AVPicture *)pFrameRGB, buffer, pixelFormat, width, height);
+    Frame* pOutFrame = allocate(targetFormat);
     
-    
-//     Frame* res = new Frame(_pAvFrame);
-//     AVFrame resAvFrame;
-//     Frame* res = new Frame(&resAvFrame);
-//     res->_pStream = _pStream;
-//     AVFrame* pFrameRGB = res->_pAvFrame;
-    // FIXME: linesize could be negative
-    AVFrame* pFrameRGB = new AVFrame;
-//     int RGBpitch0 = 720;
-//     int RGBpitch1 = 360;
-//     int RGBpitch0 = 360;
-//     int RGBpitch0 = 0;
-    long pixels = width * height;
-//     pFrameRGB->linesize[0] = 720;
-//     pFrameRGB->linesize[1] = 360;
-//     pFrameRGB->linesize[2] = 360;
-//     pFrameRGB->linesize[3] = 0;
-//     pFrameRGB->data[0] = new uint8_t[pFrameRGB->linesize[0] * height];
-//     pFrameRGB->data[1] = new uint8_t[pFrameRGB->linesize[1] * height];
-//     pFrameRGB->data[2] = new uint8_t[pFrameRGB->linesize[2] * height];
-//     pFrameRGB->data[3] = new uint8_t[pFrameRGB->linesize[3] * height];
-//     pFrameRGB->data[0] = new uint8_t[pixels];
-//     pFrameRGB->data[1] = new uint8_t[pixels];
-//     pFrameRGB->data[2] = new uint8_t[pixels];
-//     pFrameRGB->data[3] = new uint8_t[pixels];
-    
-    pFrameRGB->linesize[0] = 720;
-    pFrameRGB->linesize[1] = 720;
-    pFrameRGB->linesize[2] = 720;
-    pFrameRGB->linesize[3] = 720;
-    pFrameRGB->data[0] = new uint8_t[pixels * 4];
-    pFrameRGB->data[1] = pFrameRGB->data[0] + pixels;
-    pFrameRGB->data[2] = pFrameRGB->data[0] + 720 + 360;
-    pFrameRGB->data[3] = pFrameRGB->data[0] + 2 * pixels;
-    
-    
-    std::clog << " _pAvFrame->linesize[0..2]: " << _pAvFrame->linesize[0] << ", " << _pAvFrame->linesize[1] << ", " << _pAvFrame->linesize[2] << std::endl;
-    std::clog << " _pAvFrame->data: " << (int)_pAvFrame->data << " _pAvFrame->base: " << (int)_pAvFrame->base << std::endl;
-    std::clog << " _pAvFrame->data[0..2]: " << (unsigned int)_pAvFrame->data[0] << ", " << (unsigned int)_pAvFrame->data[1] << ", " << (unsigned int)_pAvFrame->data[2] << std::endl;
-    
+    printInfo();
     std::clog << "sws_scale ..." << std::endl;
-    int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
-                                    0, height, pFrameRGB->data, pFrameRGB->linesize);
+    int outSlizeHeight = sws_scale(pImgConvertContext,
+                                   _pAvFrame->data, _pAvFrame->linesize,
+                                   0, height,
+                                   pOutFrame->_pAvFrame->data, pOutFrame->_pAvFrame->linesize);
     
     std::clog << "height of output slize: " << outSlizeHeight << std::endl;
-    std::clog << " pFrameRGB->linesize[0..2]: " << pFrameRGB->linesize[0] << ", " << pFrameRGB->linesize[1] << ", " << pFrameRGB->linesize[2] << std::endl;
-    std::clog << " pFrameRGB->data: " << (int)pFrameRGB->data << " pFrameRGB->base: " << (int)pFrameRGB->base << std::endl;
-    std::clog << " pFrameRGB->data[0..2]: " << (unsigned int)pFrameRGB->data[0] << ", " << (unsigned int)pFrameRGB->data[1] << ", " << (unsigned int)pFrameRGB->data[2] << std::endl;
+    pOutFrame->printInfo();
     
-//     Frame* res = new Frame(pFrameRGB);
+    return pOutFrame;
+}
+
+
+void
+Frame::writePpm(const std::string& fileName)
+{
+    std::clog << "write video frame to PPM file name: " << fileName << std::endl;
     
-    char* rgbBuffer = new char[pixels * 4];
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
-            for (int plane = 0; plane < 3; plane++) {
-                rgbBuffer[row * width * 3 + col * 3 + plane] = pFrameRGB->data[plane][row * width + col];
-            }
-        }
-    }
-    delete pFrameRGB->data[0];
-//     delete pFrameRGB;
-    Frame* res = new Frame(rgbBuffer, pixels * 4);
+    Frame* pRes = convert(PIX_FMT_RGB24);
     
-    res->_pStream = _pStream;
-    delete pFrameRGB;
-    
-    return res;
+    std::ofstream ppmFile(fileName.c_str());
+    // write PPM header
+    ppmFile << "P6\n" << _pStream->width() << " " << _pStream->height() << "\n" << 255 << "\n";
+    // write RGB pixel data
+    ppmFile.write((const char*)pRes->_pAvFrame->data[0], _pStream->width() * _pStream->height() * 3);
 }
 
 
@@ -533,6 +509,14 @@ bool
 Stream::isVideo()
 {
     return _pAvStream->codec->codec_type == CODEC_TYPE_VIDEO;
+}
+
+
+void
+Stream::printInfo()
+{
+    std::clog << "stream info:" << std::endl;
+    std::clog << "width: " <<  width() << " height: " << height() << std::endl;
 }
 
 
@@ -922,169 +906,3 @@ Tagger::tag(std::istream& istr)
     return pMeta;
 }
 
-
-/*
-AlsaSink::AlsaSink() :
-pcm_playback(0),
-device("default"),
-format(SND_PCM_FORMAT_S16),
-rate(44100),
-channels(2),
-periods(2),
-periodsize(8192),
-buffer(new char[periodsize]),
-bufferPos(buffer),
-frames(periodsize >> 2)
-{
-}
-
-
-AlsaSink::~AlsaSink()
-{
-    delete buffer;
-}
-
-
-void
-AlsaSink::open()
-{
-    open("default");
-}
-
-
-void
-AlsaSink::open(const std::string& device)
-{
-    std::clog << "AlsaSink::open() device: " << device << std::endl;
-    
-    int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
-    if (err < 0) {
-        std::cerr << "error: could not open alsa device: " << device << std::endl;
-        return;
-    }
-    
-    initDevice();
-}
-
-
-void
-AlsaSink::close()
-{
-    std::clog << "AlsaSink::close()" << std::endl;
-    
-    if (pcm_playback) {
-        snd_pcm_drop(pcm_playback);
-        snd_pcm_close(pcm_playback);
-    }
-}
-
-
-void
-AlsaSink::initDevice()
-{
-    std::clog << "AlsaSink::initDevice()" << std::endl;
-    
-    snd_pcm_hw_params_alloca(&hw);
-    if (snd_pcm_hw_params_any(pcm_playback, hw) < 0) {
-        std::cerr << "error: can not configure PCM device." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_access(pcm_playback, hw, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
-        std::cerr << "error: setting PCM device access." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_format(pcm_playback, hw, format) < 0) {
-        std::cerr << "error: setting PCM device format." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_rate_near(pcm_playback, hw, &rate, 0) < 0) {
-        std::cerr << "error: setting PCM device rate." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_channels(pcm_playback, hw, channels) < 0) {
-        std::cerr << "error: setting PCM device channels." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_periods(pcm_playback, hw, periods, 0) < 0) {
-        std::cerr << "error: setting PCM device periods." << std::endl;
-        return;
-    }
-    // Set buffer size (in frames). The resulting latency is given by
-    // latency = periodsize * periods / (rate * bytes_per_frame)
-    snd_pcm_uframes_t bufferSize = (periodsize * periods) >> 2;
-    if (int ret = snd_pcm_hw_params_set_buffer_size(pcm_playback, hw, bufferSize)) {
-        std::clog << "setting up PCM device buffer to size: " << bufferSize << " returns: " << ret << std::endl;
-    }
-    if (snd_pcm_hw_params(pcm_playback, hw) < 0) {
-        std::cerr << "error initializing alsa device." << std::endl;
-        return;
-    }
-}
-
-
-void
-AlsaSink::writeFrame(Frame* pFrame)
-{
-    std::clog << "size: " << pFrame->size() << std::endl;
-    if (!pFrame) {
-        std::cerr << "error: no frame to write" << std::endl;
-        return;
-    }
-    
-    int framesWritten;
-    while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
-        snd_pcm_prepare(pcm_playback);
-        std::cerr << "<<<<<<<<<<<<<<< buffer underrun >>>>>>>>>>>>>>>" << std::endl;
-    }
-    std::clog << "frames written: " << framesWritten << std::endl;
-}
-
-
-// void AlsaSink::pause()
-// {
-//     if (d->error) return;
-//     
-//     if (d->can_pause) {
-//         snd_pcm_pause(d->pcm_playback, 1);
-//     }
-//     
-// }
-// 
-// // Do not confuse this with snd_pcm_resume which is used to resume from a suspend
-// void AlsaSink::resume()
-// {
-//     if (d->error) return;
-//     
-//     if (snd_pcm_state( d->pcm_playback ) == SND_PCM_STATE_PAUSED)
-//         snd_pcm_pause(d->pcm_playback, 0);
-// }
-
-// static int resume(snd_pcm_t *pcm)
-// {
-//     int res;
-//     while ((res = snd_pcm_resume(pcm)) == -EAGAIN)
-//         sleep(1);
-//     if (! res)
-//         return 0;
-//     return snd_pcm_prepare(pcm);
-// }
-
-
-// int AlsaSink::latency()
-// {
-//     if (d->error || !d->initialized || d->config.sample_rate == 0) return 0;
-//     
-//     snd_pcm_sframes_t frames;
-//     
-//     snd_pcm_delay(d->pcm_playback, &frames);
-//     
-//     if (snd_pcm_state( d->pcm_playback ) != SND_PCM_STATE_RUNNING)
-//         return 0;
-//     
-//     // delay in ms after normal rounding
-//     int sample_rate = d->config.sample_rate;
-//     long div = (frames / sample_rate) * 1000;
-//     long rem = (frames % sample_rate) * 1000;
-//     
-//     return div + rem / sample_rate;
-// }*/

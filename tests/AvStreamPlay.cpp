@@ -23,6 +23,8 @@
 
 #include <Poco/ClassLoader.h>
 #include <Poco/Exception.h>
+#include <Poco/Thread.h>
+#include <Poco/NumberFormatter.h>
 
 #include <AvStream.h>
 
@@ -39,10 +41,10 @@ public:
         
         //////////// open and attach video Sink ////////////
         Poco::ClassLoader<Omm::Av::Sink> sinkPluginLoader;
-//         std::string sinkName = "qt";
-        std::string sinkName = "sdl";
+        std::string sinkName = "QtSink/libommavr-qtsink.so";
+//         std::string sinkName = "SdlSink/libommavr-sdlsink.so";
         try {
-            sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/SdlSink/libommavr-" + sinkName + "sink.so");
+            sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/" + sinkName);
         }
         catch (Poco::NotFoundException) {
             std::cerr << "error: could not find " << sinkName << " video sink plugin." << std::endl;
@@ -67,20 +69,21 @@ public:
         std::vector<Omm::Av::Frame*> decodedVideoFrames;
         while (pFrame = videoStream()->get()) {
             std::clog << "decode video frame #" << ++i << " ";
-            decodedVideoFrames.push_back(pFrame->decode());
+            Omm::Av::Frame* pFrameDecoded = pFrame->decode();
+            if (pFrameDecoded) {
+                decodedVideoFrames.push_back(pFrameDecoded);
+            }
         }
         
-        
-        //////////// convert video frame ////////////
-//         Omm::Av::Frame* pPicture;
-//         if (decodedVideoFrames[100]) {
-// //             pPicture = decodedVideoFrames[100]->convertRgb();
-//             pPicture = decodedVideoFrames[100]->convertYuv();
-//         }
-//     std::ofstream picture("frame.bmp");
-//     picture.write(pPicture->data(), 3 * _pVideoStream->width() * _pVideoStream->height());
-        
         //////////// write decoded video frames to video Sink ////////////
+//         i = 0;
+//         for(std::vector<Omm::Av::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
+//             std::clog << "write frame #" << ++i << " ";
+//             videoSink->writeFrame(*it);
+//             Poco::Thread::sleep(40);
+// //             delete *it;
+//         }
+        
         videoSink->writeFrame(decodedVideoFrames[100]);
         videoSink->eventLoop();
         
@@ -88,6 +91,48 @@ public:
         reset();
         
         std::clog << "VideoPlayer::stream() finished." << std::endl;
+    }
+};
+
+
+class VideoFrameWriter : public Omm::Av::AvStream
+{
+public:
+    void stream(std::istream& istr)
+    {
+        std::clog << "VideoFrameWriter::stream()" << std::endl;
+        int i;
+        
+        set(istr);
+        
+        //////////// read frames from input and demux them into single Streams ////////////
+        demux();
+        
+        //////////// decode video frames ////////////
+        videoStream()->open();
+        
+        i = 0;
+        Omm::Av::Frame* pFrame;
+        std::vector<Omm::Av::Frame*> decodedVideoFrames;
+        while (pFrame = videoStream()->get()) {
+            std::clog << "decode video frame #" << ++i << " ";
+            Omm::Av::Frame* pFrameDecoded = pFrame->decode();
+            if (pFrameDecoded) {
+                decodedVideoFrames.push_back(pFrameDecoded);
+            }
+        }
+        
+        //////////// write decoded video frames to file ////////////
+        i = 0;
+        for(std::vector<Omm::Av::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
+            std::clog << "write frame #" << ++i << " ";
+            (*it)->writePpm("frame" + Poco::NumberFormatter::format0(i, 3) + ".ppm");
+        }
+        
+        //////////// deallocate meta data and packet queues ////////////
+        reset();
+        
+        std::clog << "VideoFrameWriter::stream() finished." << std::endl;
     }
 };
 
@@ -232,6 +277,7 @@ int main(int argc, char** argv)
     
 //     AudioPlayerSyncMemory player;
 //     AudioPlayerSyncFile player;
+//     VideoFrameWriter player;
     VideoPlayer player;
     
     player.stream(istr);

@@ -14,10 +14,10 @@ std::string MediaRenderer::_deviceDescription =
 <device>\
 <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>\
 <friendlyName>OmmR</friendlyName>\
-<manufacturer>joerg at open-multimedia dot org</manufacturer>\
+<manufacturer>jb at open-multimedia dot org</manufacturer>\
 <manufacturerURL>http://open-multimedia.org</manufacturerURL>\
 <modelName>Omm Media Renderer</modelName>\
-<modelNumber>0.3</modelNumber>\
+<modelNumber></modelNumber>\
 <modelDescription>Omm UPnP Suite's Media Renderer</modelDescription>\
 <modelURL>http://open-multimedia.org</modelURL>\
 <UDN>uuid:23b0189c-549f-11dc-a7c7-001641597c49</UDN>\
@@ -1513,7 +1513,7 @@ std::string MediaServer::_deviceDescription =
 <manufacturer>jb at open-multimedia dot org</manufacturer>\
 <manufacturerURL>http://open-multimedia.org</manufacturerURL>\
 <modelName>Omm Media Server</modelName>\
-<modelNumber>0.3</modelNumber>\
+<modelNumber></modelNumber>\
 <modelDescription>Omm UPnP Suite's Media Server</modelDescription>\
 <modelURL>http://open-multimedia.org</modelURL>\
 <UDN>uuid:56b0189c-549f-11dc-a7c7-001641597c50</UDN>\

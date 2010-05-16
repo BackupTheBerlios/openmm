@@ -49,11 +49,7 @@ public:
     virtual ~SinkPlugin();
     virtual void open();
     virtual void close();
-    // Writes blocking
     virtual void writeFrame(Omm::Av::Frame *pFrame);
-//     virtual void pause();
-//     virtual void resume();
-//     virtual int latency();
     virtual int eventLoop();
     
 signals:

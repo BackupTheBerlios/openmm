@@ -30,8 +30,6 @@
 #include <sstream>
 
 #include <Omm/UpnpAvRenderer.h>
-// #include "EngineVlc.h"
-// #include "EngineXine.h"
 
 
 using Poco::UInt8;
@@ -114,7 +112,7 @@ protected:
         else
         {
             if (_enginePlugin == "") {
-                _enginePlugin = "r-av-vlc";
+                _enginePlugin = "avr-vlc";
             }
             
             
