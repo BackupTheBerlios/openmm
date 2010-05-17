@@ -28,7 +28,7 @@
 class VideoWidget : public QWidget
 {
     Q_OBJECT
-    friend class SinkPlugin;
+    friend class QtSinkPlugin;
     
 public:
         
@@ -40,13 +40,13 @@ private:
 };
 
 
-class SinkPlugin : public QObject, public Omm::Av::Sink
+class QtSinkPlugin : public QObject, public Omm::Av::Sink
 {
     Q_OBJECT
         
 public:
-    SinkPlugin();
-    virtual ~SinkPlugin();
+    QtSinkPlugin();
+    virtual ~QtSinkPlugin();
     virtual void open();
     virtual void close();
     virtual void writeFrame(Omm::Av::Frame *pFrame);

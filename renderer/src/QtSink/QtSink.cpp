@@ -23,20 +23,20 @@
 #include "QtSink.h"
 
 
-SinkPlugin::SinkPlugin() :
+QtSinkPlugin::QtSinkPlugin() :
 _app(0, 0),
 _widget()
 {
 }
 
 
-SinkPlugin::~SinkPlugin()
+QtSinkPlugin::~QtSinkPlugin()
 {
 }
 
 
 void
-SinkPlugin::open()
+QtSinkPlugin::open()
 {
     connect(this, SIGNAL(doUpdate()), &_widget, SLOT(update()));
     
@@ -47,15 +47,15 @@ SinkPlugin::open()
 
 
 void
-SinkPlugin::close()
+QtSinkPlugin::close()
 {
-    std::clog << "SinkPlugin::close()" << std::endl;
+    std::clog << "QtSinkPlugin::close()" << std::endl;
     
 }
 
 
 void
-SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+QtSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 {
     int width = pFrame->getStream()->width();
     int height = pFrame->getStream()->height();
@@ -68,7 +68,7 @@ SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 
 
 void
-SinkPlugin::showWindow()
+QtSinkPlugin::showWindow()
 {
     std::clog << "showWindow()" << std::endl;
     
@@ -77,7 +77,7 @@ SinkPlugin::showWindow()
 
 
 int
-SinkPlugin::eventLoop()
+QtSinkPlugin::eventLoop()
 {
     std::clog << "event loop ..." << std::endl;
     
@@ -101,5 +101,5 @@ VideoWidget::paintEvent(QPaintEvent *event)
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::Sink)
-POCO_EXPORT_CLASS(SinkPlugin)
+POCO_EXPORT_CLASS(QtSinkPlugin)
 POCO_END_MANIFEST

@@ -21,8 +21,9 @@
 #define __STDC_CONSTANT_MACROS
 #define __STDC_FORMAT_MACROS
 
-// #include <Poco/Thread.h>
-// #include"/home/jb/work/ffmpeg-0.5.1/libswscale/swscale_internal.h"
+#include <Poco/Thread.h>
+#include <Poco/NumberFormatter.h>
+#include <Poco/ClassLoader.h>
 
 #include <fstream>
 
@@ -150,8 +151,20 @@ AvStream::demux()
             }
             break;
         }
-        std::clog << "reading packet #" << ++i << ", size: " << packet.size;
-        std::clog << ", pos: " << packet.pos << std::endl;
+        std::clog << "reading packet #" << Poco::NumberFormatter::format0(++i, 3);
+        std::clog << " type: " /*<< (_streams[packet.stream_index]->isAudio() ? "audio" : "video")*/;
+        if (_streams[packet.stream_index]->isAudio()) {
+            std::clog << "audio";
+        }
+        else if (_streams[packet.stream_index]->isVideo()) {
+            std::clog << "video";
+        }
+        else {
+            std::clog << "other";
+        }
+        std::clog << " pts: " << packet.pts << " dts: " << packet.dts;
+        std::clog << " size: " << packet.size /*<< " pos: " << packet.pos*/;
+        std::clog << std::endl;
         
         _streams[packet.stream_index]->put(new Frame(_streams[packet.stream_index], &packet));
         
@@ -178,6 +191,21 @@ AvStream::videoStream()
 // AvStream::stop()
 // {
 // }
+
+
+Demuxer::Demuxer(AvStream* pAvStream) :
+_pAvStream(pAvStream)
+{
+}
+
+
+void
+Demuxer::run()
+{
+    std::clog << "demuxing ..." << std::endl;
+    _pAvStream->demux();
+    std::clog << "demuxing finished." << std::endl;
+}
 
 
 Frame::Frame(const Frame& frame) :
@@ -252,7 +280,7 @@ _pStream(pStream)
     memcpy(_data, pAvPacket->data, pAvPacket->size);
     av_free(_pAvPacket);
     
-    std::clog << "new frame of size: " << _pAvPacket->size << std::endl;
+//     std::clog << "new frame of size: " << _pAvPacket->size << std::endl;
 }
 
 
@@ -499,8 +527,51 @@ Stream::close()
 
 
 void
+Stream::run()
+{
+    std::clog << "streaming ";
+    if (isAudio()) {
+        std::clog << "audio ...";
+    }
+    else if (isVideo()) {
+        std::clog << "video ...";
+    }
+    else {
+        std::clog << "nothing.";
+        return;
+    }
+    std::clog << std::endl;
+    
+    int frameCount = 0;
+    int maxWaitDemux = 5;
+    int waitDemux = maxWaitDemux;
+    Frame* pFrame;
+    while (true) {
+        if (pFrame = get()) {
+            waitDemux = maxWaitDemux;
+            std::clog << "decode frame #" << Poco::NumberFormatter::format0(++frameCount, 3) << " ";
+            Frame* pFrameDecoded = pFrame->decode();
+            if (pFrameDecoded) {
+                _pSink->writeFrame(pFrameDecoded);
+            }
+        }
+        else {
+            Poco::Thread::sleep(10);
+            if (--waitDemux <= 0) {
+                std::clog << "stream stopped waiting for packages from demuxer." << std::endl;
+                break;
+            }
+        }
+    }
+    std::clog << "stream finished." << std::endl;
+}
+
+
+void
 Stream::put(Frame* pFrame)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_packetQueueLock);
+    
     pFrame->_pStream = this;
     _packetQueue.push(pFrame);
 }
@@ -509,6 +580,8 @@ Stream::put(Frame* pFrame)
 Frame*
 Stream::get()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_packetQueueLock);
+    
     Frame* ret;
     
     if (_packetQueue.empty()) {
@@ -639,13 +712,13 @@ Stream::decodeVideoFrame(Frame* pFrame)
     AVFrame outPic;
     // TODO: FF_INPUT_BUFFER_PADDING_SIZE
     int decodeSuccess;
-    std::clog << "size: " << pFrame->size() << std::endl;
+//     std::clog << "size: " << pFrame->size() << std::endl;
     
     int bytesConsumed = avcodec_decode_video(_pAvStream->codec,
                                              &outPic, &decodeSuccess,
                                             (const uint8_t*)pFrame->data(), pFrame->size());
     
-    std::clog << "bytesConsumed: " << bytesConsumed << " decode success: " << decodeSuccess << std::endl;
+    std::clog << "bytesConsumed: " << bytesConsumed << " decode success: " << decodeSuccess /*<< std::endl*/;
     std::clog << "outPic.linesize[0..2]: " << outPic.linesize[0] << ", " << outPic.linesize[1] << ", " << outPic.linesize[2] << std::endl;
     
     if (bytesConsumed <= 0) {
@@ -956,3 +1029,35 @@ Tagger::tag(std::istream& istr)
     return pMeta;
 }
 
+
+Sink*
+Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
+{
+    Poco::ClassLoader<Sink> sinkPluginLoader;
+    if (sinkPluginLoader.isLibraryLoaded(libraryPath)) {
+        std::cerr << "error: library " << libraryPath << " already loaded" << std::endl;
+        return 0;
+    }
+    try {
+        sinkPluginLoader.loadLibrary(libraryPath);
+    }
+    catch (Poco::NotFoundException) {
+        std::cerr << "error: could not find " << libraryPath << " sink plugin." << std::endl;
+        return 0;
+    }
+    catch (Poco::LibraryLoadException) {
+        std::cerr << "error: could not load " << libraryPath << " sink plugin." << std::endl;
+        return 0;
+    }
+    std::clog << "sink plugin successfully loaded." << std::endl;
+    
+    Omm::Av::Sink* res;
+    try {
+        res = sinkPluginLoader.create(className);
+    }
+    catch (Poco::NotFoundException) {
+        std::cerr << "error: could not create instance of sink plugin." << std::endl;
+        return 0;
+    }
+    return res;
+}

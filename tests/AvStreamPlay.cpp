@@ -21,12 +21,63 @@
 #include <iostream>
 #include <fstream>
 
-#include <Poco/ClassLoader.h>
 #include <Poco/Exception.h>
 #include <Poco/Thread.h>
 #include <Poco/NumberFormatter.h>
 
 #include <AvStream.h>
+
+
+class AvPlayer : public Omm::Av::AvStream
+{
+public:
+    void stream(std::istream& istr)
+    {
+        std::clog << "AvPlayer::stream()" << std::endl;
+        int i;
+        
+        set(istr);
+        
+        //////////// open and attach audio Sink ////////////
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
+        Omm::Av::Sink* audioSink = Omm::Av::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        audioSink->open();
+        
+        //////////// open and attach video Sink ////////////
+//         Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
+        Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
+        videoSink->open();
+        
+        //////////// open audio and video stream ////////////
+        audioStream()->open();
+        audioStream()->attachSink(audioSink);
+        
+        videoStream()->open();
+        videoStream()->attachSink(videoSink);
+        
+        //////////// start demuxer thread ////////////
+        Omm::Av::Demuxer* pDemuxer = new Omm::Av::Demuxer(this);
+        Poco::Thread demuxThread;
+        demuxThread.start(*pDemuxer);
+        
+        //////////// decode and render audio and video frames ////////////
+        Poco::Thread audioThread;
+        audioThread.start(*audioStream());
+        
+        Poco::Thread videoThread;
+        videoThread.start(*videoStream());
+        
+        videoSink->eventLoop();
+        demuxThread.tryJoin(10000);
+        videoThread.tryJoin(10000);
+        audioThread.tryJoin(10000);
+        
+        //////////// deallocate meta data and packet queues ////////////
+        reset();
+        
+        std::clog << "AvPlayer::stream() finished." << std::endl;
+    }
+};
 
 
 class VideoPlayer : public Omm::Av::AvStream
@@ -39,24 +90,12 @@ public:
         
         set(istr);
         
-        //////////// open and attach video Sink ////////////
-        Poco::ClassLoader<Omm::Av::Sink> sinkPluginLoader;
-//         std::string sinkName = "QtSink/libommavr-qtsink.so";
-        std::string sinkName = "SdlSink/libommavr-sdlsink.so";
-        try {
-            sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/" + sinkName);
-        }
-        catch (Poco::NotFoundException) {
-            std::cerr << "error: could not find " << sinkName << " video sink plugin." << std::endl;
-            return;
-        }
-        catch (Poco::LibraryLoadException) {
-            std::cerr << "error: could not load " << sinkName << " video sink plugin." << std::endl;
-            return;
-        }
-        Omm::Av::Sink* videoSink = sinkPluginLoader.create("SinkPlugin");
+        //////////// open video Sink ////////////
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
+//         Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
+        Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
+        
         videoSink->open();
-//         pVideoStream->attachSink(videoSink);
         
         //////////// read frames from input and demux them into single Streams ////////////
         demux();
@@ -151,22 +190,11 @@ public:
         
         set(istr);
         
-        //////////// open and attach audio Sink ////////////
-        Poco::ClassLoader<Omm::Av::Sink> sinkPluginLoader;
-        try {
-            sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/AlsaSink/libommavr-alsasink.so");
-        }
-        catch (Poco::NotFoundException) {
-            std::cerr << "error: could not find alsa sink plugin." << std::endl;
-            return;
-        }
-        catch (Poco::LibraryLoadException) {
-            std::cerr << "error: could not load alsa sink plugin." << std::endl;
-            return;
-        }
-        Omm::Av::Sink* audioSink = sinkPluginLoader.create("SinkPlugin");
+        //////////// open audio Sink ////////////
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
+        Omm::Av::Sink* audioSink = Omm::Av::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        
         audioSink->open();
-//         pAudioStream->attachSink(audioSink);
         
         //////////// read frames from input and demux them into single Streams ////////////
         demux();
@@ -213,22 +241,11 @@ public:
         
         set(istr);
         
-        //////////// open and attach audio Sink ////////////
-        Poco::ClassLoader<Omm::Av::Sink> sinkPluginLoader;
-        try {
-            sinkPluginLoader.loadLibrary("/home/jb/devel/cc/ommbin/renderer/src/AlsaSink/libommavr-alsasink.so");
-        }
-        catch (Poco::NotFoundException) {
-            std::cerr << "error: could not find alsa sink plugin." << std::endl;
-            return;
-        }
-        catch (Poco::LibraryLoadException) {
-            std::cerr << "error: could not load alsa sink plugin." << std::endl;
-            return;
-        }
-        Omm::Av::Sink* audioSink = sinkPluginLoader.create("SinkPlugin");
+        //////////// open audio Sink ////////////
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
+        Omm::Av::Sink* audioSink = Omm::Av::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        
         audioSink->open();
-//         pAudioStream->attachSink(audioSink);
         
         //////////// read frames from input and demux them into single Streams ////////////
         demux();
@@ -282,7 +299,8 @@ int main(int argc, char** argv)
 //     AudioPlayerSyncMemory player;
 //     AudioPlayerSyncFile player;
 //     VideoFrameWriter player;
-    VideoPlayer player;
+//     VideoPlayer player;
+    AvPlayer player;
     
     player.stream(istr);
 }

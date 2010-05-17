@@ -183,9 +183,9 @@ private:
     int                         _fileDesc;
     struct dvb_frontend_info    _feInfo;
     
-    Poco::Thread                    _t;
-    SignalCheckThread*                   _pt;
-    Poco::FastMutex                 _tuneLock;
+    Poco::Thread                _t;
+    SignalCheckThread*          _pt;
+    Poco::FastMutex             _tuneLock;
 };
 
 

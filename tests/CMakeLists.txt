@@ -24,6 +24,7 @@ ommavstream
 )
 
 INCLUDE_DIRECTORIES(
+${omm_SOURCE_DIR}/lib
 ${omm_SOURCE_DIR}/lib/Omm
 ${omm_SOURCE_DIR}/lib/src
 )

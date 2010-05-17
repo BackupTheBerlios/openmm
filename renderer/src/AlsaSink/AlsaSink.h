@@ -26,10 +26,10 @@
 #include <alsa/asoundlib.h>
 #include <alsa/pcm.h>
 
-class SinkPlugin : public Omm::Av::Sink {
+class AlsaSinkPlugin : public Omm::Av::Sink {
 public:
-    SinkPlugin();
-    virtual ~SinkPlugin();
+    AlsaSinkPlugin();
+    virtual ~AlsaSinkPlugin();
     virtual void open();
     void open(const std::string& device);
     virtual void close();
@@ -41,7 +41,7 @@ public:
 //     virtual int eventLoop();
     
 private:
-    void         initDevice();
+    void initDevice();
     
     snd_pcm_t* pcm_playback;
     snd_pcm_hw_params_t *hw;

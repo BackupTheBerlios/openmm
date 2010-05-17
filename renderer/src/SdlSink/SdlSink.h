@@ -26,11 +26,11 @@
 #include <Omm/AvStream.h>
 
 
-class SinkPlugin : public Omm::Av::Sink
+class SdlSinkPlugin : public Omm::Av::Sink
 {
 public:
-    SinkPlugin();
-    virtual ~SinkPlugin();
+    SdlSinkPlugin();
+    virtual ~SdlSinkPlugin();
     virtual void open();
     virtual void close();
     virtual void writeFrame(Omm::Av::Frame *pFrame);

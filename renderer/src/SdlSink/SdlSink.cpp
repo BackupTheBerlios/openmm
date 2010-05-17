@@ -24,21 +24,23 @@
 #include "SdlSink.h"
 
 
-SinkPlugin::SinkPlugin() :
+SdlSinkPlugin::SdlSinkPlugin() :
 _pOverlay(new Omm::Av::Overlay)
 {
 }
 
 
-SinkPlugin::~SinkPlugin()
+SdlSinkPlugin::~SdlSinkPlugin()
 {
     delete _pOverlay;
 }
 
 
 void
-SinkPlugin::open()
+SdlSinkPlugin::open()
 {
+    std::clog << "Opening SDL video sink ..." << std::endl;
+    
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
         std::cerr << "error: initializing SDL: " << SDL_GetError() << std::endl;
         return;
@@ -58,19 +60,21 @@ SinkPlugin::open()
     _pOverlay->_pitch[0] = _pSdlOverlay->pitches[0];
     _pOverlay->_pitch[1] = _pSdlOverlay->pitches[2];
     _pOverlay->_pitch[2] = _pSdlOverlay->pitches[1];
+
+    std::clog << "SDL video sink opened." << std::endl;
 }
 
 
 void
-SinkPlugin::close()
+SdlSinkPlugin::close()
 {
-    std::clog << "SinkPlugin::close()" << std::endl;
+    std::clog << "SdlSinkPlugin::close()" << std::endl;
     
 }
 
 
 void
-SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+SdlSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 {
     int width = pFrame->getStream()->width();
     int height = pFrame->getStream()->height();
@@ -90,15 +94,15 @@ SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 
 
 int
-SinkPlugin::eventLoop()
+SdlSinkPlugin::eventLoop()
 {
     std::clog << "event loop ..." << std::endl;
-    Poco::Thread::sleep(5000);
+    Poco::Thread::sleep(10000);
     
 }
 
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::Sink)
-POCO_EXPORT_CLASS(SinkPlugin)
+POCO_EXPORT_CLASS(SdlSinkPlugin)
 POCO_END_MANIFEST

@@ -23,7 +23,7 @@
 #include "AlsaSink.h"
 
 
-SinkPlugin::SinkPlugin() :
+AlsaSinkPlugin::AlsaSinkPlugin() :
 pcm_playback(0),
 device("default"),
 format(SND_PCM_FORMAT_S16),
@@ -38,23 +38,23 @@ frames(periodsize >> 2)
 }
 
 
-SinkPlugin::~SinkPlugin()
+AlsaSinkPlugin::~AlsaSinkPlugin()
 {
     delete buffer;
 }
 
 
 void
-SinkPlugin::open()
+AlsaSinkPlugin::open()
 {
     open("default");
 }
 
 
 void
-SinkPlugin::open(const std::string& device)
+AlsaSinkPlugin::open(const std::string& device)
 {
-    std::clog << "SinkPlugin::open() device: " << device << std::endl;
+    std::clog << "Opening ALSA audio sink with device: " << device << std::endl;
     
     int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (err < 0) {
@@ -63,13 +63,15 @@ SinkPlugin::open(const std::string& device)
     }
     
     initDevice();
+    
+    std::clog << "ALSA audio sink opened." << std::endl;
 }
 
 
 void
-SinkPlugin::close()
+AlsaSinkPlugin::close()
 {
-    std::clog << "SinkPlugin::close()" << std::endl;
+    std::clog << "AlsaSinkPlugin::close()" << std::endl;
     
     if (pcm_playback) {
         snd_pcm_drop(pcm_playback);
@@ -79,9 +81,9 @@ SinkPlugin::close()
 
 
 void
-SinkPlugin::initDevice()
+AlsaSinkPlugin::initDevice()
 {
-    std::clog << "SinkPlugin::initDevice()" << std::endl;
+    std::clog << "AlsaSinkPlugin::initDevice()" << std::endl;
     
     snd_pcm_hw_params_alloca(&hw);
     if (snd_pcm_hw_params_any(pcm_playback, hw) < 0) {
@@ -122,9 +124,9 @@ SinkPlugin::initDevice()
 
 
 void
-SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+AlsaSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 {
-    std::clog << "size: " << pFrame->size() << std::endl;
+//     std::clog << "size: " << pFrame->size() << std::endl;
     if (!pFrame) {
         std::cerr << "error: no frame to write" << std::endl;
         return;
@@ -135,11 +137,11 @@ SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
         snd_pcm_prepare(pcm_playback);
         std::cerr << "<<<<<<<<<<<<<<< buffer underrun >>>>>>>>>>>>>>>" << std::endl;
     }
-    std::clog << "frames written: " << framesWritten << std::endl;
+//     std::clog << "frames written: " << framesWritten << std::endl;
 }
 
 
-// void SinkPlugin::pause()
+// void AlsaSinkPlugin::pause()
 // {
 //     if (d->error) return;
 //     
@@ -150,7 +152,7 @@ SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 // }
 // 
 // // Do not confuse this with snd_pcm_resume which is used to resume from a suspend
-// void SinkPlugin::resume()
+// void AlsaSinkPlugin::resume()
 // {
 //     if (d->error) return;
 //     
@@ -169,7 +171,7 @@ SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 // }
 
 
-// int SinkPlugin::latency()
+// int AlsaSinkPlugin::latency()
 // {
 //     if (d->error || !d->initialized || d->config.sample_rate == 0) return 0;
 //     
@@ -189,5 +191,5 @@ SinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 // }
 
 POCO_BEGIN_MANIFEST(Omm::Av::Sink)
-POCO_EXPORT_CLASS(SinkPlugin)
+POCO_EXPORT_CLASS(AlsaSinkPlugin)
 POCO_END_MANIFEST

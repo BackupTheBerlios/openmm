@@ -27,6 +27,8 @@
 #include <vector>
 #include <queue>
 
+#include <Poco/Runnable.h>
+#include <Poco/Mutex.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -85,6 +87,18 @@ private:
 };
 
 
+class Demuxer : public Poco::Runnable
+{
+public:
+    Demuxer(AvStream* pAvStream);
+    
+private:
+    virtual void run();
+    
+    AvStream*       _pAvStream;
+};
+
+
 class Frame
 {
     friend class Stream;
@@ -123,7 +137,7 @@ private:
 };
 
 
-class Stream
+class Stream : public Poco::Runnable
 {
     friend class AvStream;
     friend class Frame;
@@ -160,11 +174,15 @@ private:
     Frame* decodeAudioFrame(Frame* pFrame);
     Frame* decodeVideoFrame(Frame* pFrame);
     
+    virtual void run();
+    
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
+    
     Sink*                   _pSink;
     std::queue<Frame*>      _packetQueue;
+    Poco::FastMutex         _packetQueueLock;
 };
 
 
@@ -219,6 +237,8 @@ class Sink {
     
 public:
     virtual ~Sink() {}
+    static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
+    
     virtual void writeFrame(Frame* pFrame) = 0;
     virtual void open() = 0;
     virtual void close() = 0;
