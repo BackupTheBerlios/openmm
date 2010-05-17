@@ -22,6 +22,7 @@
 #define SdlSink_INCLUDED
 
 #include <SDL/SDL.h>
+#include <Poco/Semaphore.h>
 
 #include <Omm/AvStream.h>
 
@@ -31,15 +32,23 @@ class SdlSinkPlugin : public Omm::Av::Sink
 public:
     SdlSinkPlugin();
     virtual ~SdlSinkPlugin();
+    
     virtual void open();
     virtual void close();
+    
+    virtual void present(Poco::Timer& timer);
+    
     virtual void writeFrame(Omm::Av::Frame *pFrame);
     virtual int eventLoop();
     
 private:
     SDL_Surface*            _pSdlScreen;
     SDL_Overlay*            _pSdlOverlay;
+    
     Omm::Av::Overlay*       _pOverlay;
+    Omm::Av::Frame*         _pCurrentFrame;
+    
+    Poco::Semaphore         _presentationSemaphore;
 };
 
 #endif

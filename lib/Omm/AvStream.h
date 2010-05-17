@@ -29,6 +29,7 @@
 
 #include <Poco/Runnable.h>
 #include <Poco/Mutex.h>
+#include <Poco/Timer.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -242,6 +243,9 @@ public:
     virtual void writeFrame(Frame* pFrame) = 0;
     virtual void open() = 0;
     virtual void close() = 0;
+    
+    virtual void present(Poco::Timer& timer) {}
+    
     virtual void pause() {}
     virtual void resume() {}
     
@@ -253,6 +257,20 @@ public:
     
 protected:
     Stream*     _pStream;
+};
+
+
+class PresentationTimer
+{
+public:
+    PresentationTimer(Sink* pSink);
+    
+    void start();
+    void stop();
+    
+private:
+    Poco::Timer                 _timer;
+    Sink*                       _pSink;
 };
 
 

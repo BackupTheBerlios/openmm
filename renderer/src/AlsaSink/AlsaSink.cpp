@@ -126,7 +126,7 @@ AlsaSinkPlugin::initDevice()
 void
 AlsaSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 {
-//     std::clog << "size: " << pFrame->size() << std::endl;
+    std::clog << "Alsa audio Sink::writeFrame()" << std::endl;
     if (!pFrame) {
         std::cerr << "error: no frame to write" << std::endl;
         return;

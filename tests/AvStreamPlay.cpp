@@ -58,16 +58,26 @@ public:
         //////////// start demuxer thread ////////////
         Omm::Av::Demuxer* pDemuxer = new Omm::Av::Demuxer(this);
         Poco::Thread demuxThread;
+        demuxThread.setName("demux thread");
         demuxThread.start(*pDemuxer);
         
         //////////// decode and render audio and video frames ////////////
         Poco::Thread audioThread;
+        audioThread.setName("audio thread");
         audioThread.start(*audioStream());
         
         Poco::Thread videoThread;
+        videoThread.setName("video thread");
         videoThread.start(*videoStream());
         
+        //////////// start video presentation timer ////////////
+        Omm::Av::PresentationTimer videoTimer(videoSink);
+        videoTimer.start();
+        
+        //////////// wait for events ////////////
         videoSink->eventLoop();
+        videoTimer.stop();
+        
         demuxThread.tryJoin(10000);
         videoThread.tryJoin(10000);
         audioThread.tryJoin(10000);

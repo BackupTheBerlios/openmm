@@ -426,7 +426,7 @@ Frame::convert(PixelFormat targetFormat)
                                    0, height,
                                    pOutFrame->_pAvFrame->data, pOutFrame->_pAvFrame->linesize);
     
-    std::clog << "height of output slize: " << outSlizeHeight << std::endl;
+    std::clog << "done." << std::endl;
     pOutFrame->printInfo();
     
     return pOutFrame;
@@ -479,6 +479,7 @@ Frame::write(Overlay* overlay)
     std::clog << "sws_scale ..." << std::endl;
     int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
                                    0, height, overlay->_data, overlay->_pitch);
+    std::clog << "done." << std::endl;
 }
 
 
@@ -1061,3 +1062,27 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
     }
     return res;
 }
+
+
+PresentationTimer::PresentationTimer(Sink* pSink) :
+_timer(0, 40),
+_pSink(pSink)
+{
+}
+
+
+void
+PresentationTimer::start()
+{
+    std::clog << "starting presentation timer ..." << std::endl;
+    
+    _timer.start(Poco::TimerCallback<Sink>(*_pSink, &Sink::present));
+}
+
+
+void
+PresentationTimer::stop()
+{
+    _timer.stop();
+}
+
