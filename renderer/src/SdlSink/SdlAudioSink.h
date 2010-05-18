@@ -18,39 +18,42 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef SdlSink_INCLUDED
-#define SdlSink_INCLUDED
-
-#include <SDL/SDL.h>
-#include <Poco/Mutex.h>
-#include <Poco/Semaphore.h>
+#ifndef AlsaSink_INCLUDED
+#define AlsaSink_INCLUDED
 
 #include <Omm/AvStream.h>
 
+#include <alsa/asoundlib.h>
+#include <alsa/pcm.h>
 
-class SdlSinkPlugin : public Omm::Av::Sink
-{
+class AlsaSinkPlugin : public Omm::Av::Sink {
 public:
-    SdlSinkPlugin();
-    virtual ~SdlSinkPlugin();
-    
+    AlsaSinkPlugin();
+    virtual ~AlsaSinkPlugin();
     virtual void open();
+    void open(const std::string& device);
     virtual void close();
-    
-    virtual void present(Poco::Timer& timer);
-    
+    // Writes blocking
     virtual void writeFrame(Omm::Av::Frame *pFrame);
-    virtual int eventLoop();
+//     virtual void pause();
+//     virtual void resume();
+//     virtual int latency();
+//     virtual int eventLoop();
     
 private:
-    SDL_Surface*            _pSdlScreen;
-    SDL_Overlay*            _pSdlOverlay;
+    void initDevice();
     
-    Omm::Av::Overlay*       _pOverlay;
-    Omm::Av::Frame*         _pCurrentFrame;
-    
-    Poco::Semaphore         _presentationSemaphore;
-    Poco::FastMutex         _frameQueueLock;
+    snd_pcm_t* pcm_playback;
+    snd_pcm_hw_params_t *hw;
+    std::string device;
+    snd_pcm_format_t format;
+    unsigned int rate;
+    int channels;
+    int periods;       // Number of periods
+    snd_pcm_uframes_t periodsize; // Periodsize (bytes)
+    char* buffer;
+    char* bufferPos;
+    snd_pcm_uframes_t frames;
 };
 
 #endif

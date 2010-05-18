@@ -56,31 +56,39 @@ public:
         videoStream()->attachSink(videoSink);
         
         //////////// start demuxer thread ////////////
+        std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         Omm::Av::Demuxer* pDemuxer = new Omm::Av::Demuxer(this);
         Poco::Thread demuxThread;
         demuxThread.setName("demux thread");
+        std::clog << "demux thread ..." << std::endl;
         demuxThread.start(*pDemuxer);
         
         //////////// decode and render audio and video frames ////////////
         Poco::Thread audioThread;
         audioThread.setName("audio thread");
+        std::clog << "audio thread ..." << std::endl;
         audioThread.start(*audioStream());
         
         Poco::Thread videoThread;
         videoThread.setName("video thread");
+        std::clog << "video thread ..." << std::endl;
         videoThread.start(*videoStream());
         
         //////////// start video presentation timer ////////////
-        Omm::Av::PresentationTimer videoTimer(videoSink);
-        videoTimer.start();
+//         Omm::Av::PresentationTimer videoTimer(videoSink);
+//         std::clog << "presentation thread ..." << std::endl;
+//         videoTimer.start();
         
         //////////// wait for events ////////////
         videoSink->eventLoop();
-        videoTimer.stop();
         
-        demuxThread.tryJoin(10000);
-        videoThread.tryJoin(10000);
-        audioThread.tryJoin(10000);
+        demuxThread.join();
+        audioThread.join();
+        videoThread.join();
+        
+//         videoTimer.stop();
+        
+        std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
         
         //////////// deallocate meta data and packet queues ////////////
         reset();

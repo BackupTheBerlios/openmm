@@ -1,5 +1,4 @@
 FIND_PACKAGE(SDL)
-# FIND_PACKAGE(SDL_image)
 
 SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
@@ -15,19 +14,29 @@ SET( OMM_AV_STREAM_SDLSINK_SRCS
 SdlSink.cpp
 )
 
+SET( OMM_AV_STREAM_SDL_AUDIOSINK_SRCS
+SdlAudioSink.cpp
+)
+
 ADD_LIBRARY( ommavr-sdlsink
 SHARED
 ${OMM_AV_STREAM_SDLSINK_SRCS}
 )
 
+ADD_LIBRARY( ommavr-audiosink-sdl
+SHARED
+${OMM_AV_STREAM_SDLSINK_SRCS}
+)
 
 TARGET_LINK_LIBRARIES( ommavr-sdlsink
 ${SDL_LIBRARY}
-# ${SDLIMAGE_LIBRARY} # if using SDL_image, obviously
-# SDLmain # Sadly not included in SDL_LIBRARY variable
 )
 
-INSTALL( TARGETS ommavr-sdlsink
+TARGET_LINK_LIBRARIES( ommavr-audiosink-sdl
+${SDL_LIBRARY}
+)
+
+INSTALL( TARGETS ommavr-sdlsink ommavr-audiosink-sdl
 LIBRARY DESTINATION lib
 )
 

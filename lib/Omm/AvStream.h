@@ -28,6 +28,7 @@
 #include <queue>
 
 #include <Poco/Runnable.h>
+#include <Poco/Semaphore.h>
 #include <Poco/Mutex.h>
 #include <Poco/Timer.h>
 
@@ -130,11 +131,12 @@ public:
     void write(Overlay* overlay);
     
 private:
-    char*       _data;
-    int         _size;
-    AVPacket*   _pAvPacket;
-    AVFrame*    _pAvFrame;
-    Stream*     _pStream;
+    char*               _data;
+    int                 _size;
+    AVPacket*           _pAvPacket;
+    AVFrame*            _pAvFrame;
+    Stream*             _pStream;
+//     Poco::FastMutex     _frameLock;
 };
 
 
@@ -144,6 +146,8 @@ class Stream : public Poco::Runnable
     friend class Frame;
     
 public:
+    Stream();
+    
     void open();
     void close();
     
@@ -156,6 +160,7 @@ public:
     bool isVideo();
     
     void printInfo();
+    std::string name();
     
     int width();
     int height();
@@ -177,13 +182,18 @@ private:
     
     virtual void run();
     
+    std::string             _name;
+    
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
     
     Sink*                   _pSink;
     std::queue<Frame*>      _packetQueue;
+    Poco::Semaphore         _packetQueuePutSemaphore;
+    Poco::Semaphore         _packetQueueGetSemaphore;
     Poco::FastMutex         _packetQueueLock;
+//     Poco::FastMutex         _streamLock;
 };
 
 
