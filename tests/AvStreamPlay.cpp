@@ -75,9 +75,9 @@ public:
         videoThread.start(*videoStream());
         
         //////////// start video presentation timer ////////////
-//         Omm::Av::PresentationTimer videoTimer(videoSink);
-//         std::clog << "presentation thread ..." << std::endl;
-//         videoTimer.start();
+        Omm::Av::PresentationTimer videoTimer(videoSink);
+        std::clog << "presentation thread ..." << std::endl;
+        videoTimer.start();
         
         //////////// wait for events ////////////
         videoSink->eventLoop();
@@ -86,7 +86,7 @@ public:
         audioThread.join();
         videoThread.join();
         
-//         videoTimer.stop();
+        videoTimer.stop();
         
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
         

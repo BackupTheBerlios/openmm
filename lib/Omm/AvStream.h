@@ -153,7 +153,7 @@ public:
     
     Frame* allocateVideoFrame(PixelFormat targetFormat);
     
-    void put(Frame* frame);
+    bool put(Frame* frame);
     Frame* get();
     
     bool isAudio();
@@ -189,11 +189,11 @@ private:
     AVCodec*                _pAvCodec;
     
     Sink*                   _pSink;
+    
     std::queue<Frame*>      _packetQueue;
     Poco::Semaphore         _packetQueuePutSemaphore;
     Poco::Semaphore         _packetQueueGetSemaphore;
     Poco::FastMutex         _packetQueueLock;
-//     Poco::FastMutex         _streamLock;
 };
 
 

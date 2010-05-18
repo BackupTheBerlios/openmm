@@ -50,7 +50,7 @@ private:
     Omm::Av::Frame*         _pCurrentFrame;
     
     Poco::Semaphore         _presentationSemaphore;
-    Poco::FastMutex         _frameQueueLock;
+    Poco::FastMutex         _presentationLock;
 };
 
 #endif

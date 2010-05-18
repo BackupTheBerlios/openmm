@@ -80,34 +80,37 @@ SdlSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
     std::clog << "WAIT presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
     _presentationSemaphore.wait();
     
-    _frameQueueLock.lock();
-//     std::clog << "LOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
-    
+    _presentationLock.lock();
+    std::clog << "LOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
+//     
     std::clog << "SDL video Sink::writeFrame()" << std::endl;
     _pCurrentFrame = pFrame;
     pFrame->write(_pOverlay);
-    
-    _frameQueueLock.unlock();
-//     std::clog << "UNLOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
+//     
+    _presentationLock.unlock();
+    std::clog << "UNLOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
 }
 
 
 void
 SdlSinkPlugin::present(Poco::Timer& timer)
 {
-    _frameQueueLock.lock();
-//     std::clog << "LOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
+    _presentationLock.lock();
+    std::clog << "LOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
     
     SDL_Rect rect;
     rect.x = 0;
     rect.y = 0;
-    rect.w = _pCurrentFrame->getStream()->width();
-    rect.h = _pCurrentFrame->getStream()->height();
+    rect.w = 720;
+    rect.h = 576;
+    // FIXME: lock access to Stream::height() and Stream::width()
+//     rect.w = _pCurrentFrame->getStream()->width();
+//     rect.h = _pCurrentFrame->getStream()->height();
     std::clog << "SDL video Sink::present() frame width: " << rect.w << " height: " << rect.h << std::endl;
     SDL_DisplayYUVOverlay(_pSdlOverlay, &rect);
     
-    _frameQueueLock.unlock();
-//     std::clog << "UNLOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
+    _presentationLock.unlock();
+    std::clog << "UNLOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
     
     std::clog << "SET presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
     _presentationSemaphore.set();

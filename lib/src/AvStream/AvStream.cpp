@@ -159,8 +159,10 @@ AvStream::demux()
         std::clog << " size: " << packet.size /*<< " pos: " << packet.pos*/;
         std::clog << std::endl;
         
-        _streams[packet.stream_index]->put(new Frame(_streams[packet.stream_index], &packet));
-        
+        if (!_streams[packet.stream_index]->put(new Frame(_streams[packet.stream_index], &packet))) {
+            std::cerr << "error: demux stream queue blocked" << std::endl;
+            break;
+        }
         av_free_packet(&packet);  // seems like the counterpart of av_init_packet()
     }
 }
@@ -484,8 +486,8 @@ _pAvStream(0),
 _pAvCodecContext(0),
 _pAvCodec(0),
 _pSink(0),
-// _packetQueuePutSemaphore(1, 20),
-_packetQueuePutSemaphore(1, 10),
+_packetQueuePutSemaphore(1, 20),
+// _packetQueuePutSemaphore(1, 10),
 // _packetQueuePutSemaphore(1, 1),
 _packetQueueGetSemaphore(0, 1)
 {
@@ -540,7 +542,6 @@ void
 Stream::run()
 {
     int frameCount = 0;
-//     Frame* pFrame;
     
     // get() blocks until a frame is available in the stream packet queue, timing out in OMM_PACKET_QUEUE_TIMEOUT milisec
     while (Frame* pFrame = get()) {
@@ -548,8 +549,6 @@ Stream::run()
         Frame* pFrameDecoded = pFrame->decode();
         if (pFrameDecoded) {
             _pSink->writeFrame(pFrameDecoded);
-            Poco::Timer fooTimmer;
-            _pSink->present(fooTimmer);
         }
     }
     std::clog << "stream finished." << std::endl;
@@ -557,13 +556,13 @@ Stream::run()
 
 #define OMM_PACKET_QUEUE_TIMEOUT 500
 
-void
+bool
 Stream::put(Frame* pFrame)
 {
     std::clog << "WAIT " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
     if (!_packetQueuePutSemaphore.tryWait(OMM_PACKET_QUEUE_TIMEOUT)) {
         std::cerr << name() << " packet queue PUT timed out" << std::endl;
-        return;
+        return false;
     }
     
     _packetQueueLock.lock();
@@ -578,6 +577,7 @@ Stream::put(Frame* pFrame)
     
     std::clog << "SET " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
     _packetQueueGetSemaphore.set();
+    return true;
 }
 
 
@@ -622,8 +622,6 @@ Stream::allocateVideoFrame(PixelFormat targetFormat)
 bool
 Stream::isAudio()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     return _pAvStream->codec->codec_type == CODEC_TYPE_AUDIO;
 }
 
@@ -631,8 +629,6 @@ Stream::isAudio()
 bool
 Stream::isVideo()
 {   
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     return _pAvStream->codec->codec_type == CODEC_TYPE_VIDEO;
 }
 
@@ -640,8 +636,6 @@ Stream::isVideo()
 void
 Stream::printInfo()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     std::clog << "stream info:" << std::endl;
     std::clog << "width: " <<  width() << " height: " << height() << std::endl;
 }
@@ -657,8 +651,6 @@ Stream::name()
 int
 Stream::width()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     if (_pAvCodecContext) {
         return _pAvCodecContext->width;
     }
@@ -671,8 +663,6 @@ Stream::width()
 int
 Stream::height()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     if (_pAvCodecContext) {
         return _pAvCodecContext->height;
     }
@@ -685,8 +675,6 @@ Stream::height()
 PixelFormat
 Stream::pixelFormat()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     return _pAvCodecContext->pix_fmt;
 }
 
@@ -694,8 +682,6 @@ Stream::pixelFormat()
 int
 Stream::pictureSize()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     return avpicture_get_size(pixelFormat(), width(), height());
 }
 
@@ -773,8 +759,6 @@ Stream::decodeVideoFrame(Frame* pFrame)
 void
 Stream::attachSink(Sink* pSink)
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_streamLock);
-    
     _pSink = pSink;
     pSink->_pStream = this;
 }
