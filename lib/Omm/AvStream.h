@@ -27,6 +27,7 @@
 #include <vector>
 #include <queue>
 
+#include <Poco/Logger.h>
 #include <Poco/Runnable.h>
 #include <Poco/Semaphore.h>
 #include <Poco/Mutex.h>
@@ -61,6 +62,21 @@ class Stream;
 class Overlay;
 class Sink;
 class PresentationTimer;
+
+
+class Log
+{
+public:
+    static Log* instance();
+    
+    Poco::Logger& avstream();
+    
+private:
+    Log();
+    
+    static Log*     _pInstance;
+    Poco::Logger*   _pAvStreamLogger;
+};
 
 
 class AvStream

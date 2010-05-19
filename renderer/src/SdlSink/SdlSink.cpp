@@ -20,6 +20,8 @@
 ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 #include <Poco/Thread.h>
+#include <Poco/Format.h>
+#include <Poco/NumberFormatter.h>
 
 #include "SdlSink.h"
 
@@ -40,16 +42,16 @@ SdlSinkPlugin::~SdlSinkPlugin()
 void
 SdlSinkPlugin::open()
 {
-    std::clog << "Opening SDL video sink ..." << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("opening SDL video sink ...");
     
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-        std::cerr << "error: initializing SDL: " << SDL_GetError() << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("failed to init SDL:  %s", std::string(SDL_GetError())));
         return;
     }
     
     _pSdlScreen = SDL_SetVideoMode(720, 576, 0, SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_HWACCEL);
     if (_pSdlScreen == 0) {
-        std::cerr << "error: could not open SDL window" << SDL_GetError() << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open SDL window: %s", std::string(SDL_GetError())));
         return;
     }
 
@@ -62,22 +64,21 @@ SdlSinkPlugin::open()
     _pOverlay->_pitch[1] = _pSdlOverlay->pitches[2];
     _pOverlay->_pitch[2] = _pSdlOverlay->pitches[1];
 
-    std::clog << "SDL video sink opened." << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opened.");
 }
 
 
 void
 SdlSinkPlugin::close()
 {
-    std::clog << "SdlSinkPlugin::close()" << std::endl;
-    
+    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink closed.");
 }
 
 
 void
 SdlSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
 {
-    std::clog << "SDL video Sink::writeFrame()" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("write frame to SDL video overlay");
     _pCurrentFrame = pFrame;
     pFrame->write(_pOverlay);
 }
@@ -94,7 +95,10 @@ SdlSinkPlugin::presentFrame()
     // FIXME: lock access to Stream::height() and Stream::width()
 //     rect.w = _pCurrentFrame->getStream()->width();
 //     rect.h = _pCurrentFrame->getStream()->height();
-    std::clog << "SDL video Sink::present() frame width: " << rect.w << " height: " << rect.h << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("SDL video Sink::present() frame width: %s, height: %s",
+        Poco::NumberFormatter::format(rect.w),
+        Poco::NumberFormatter::format(rect.h)));
+    
     SDL_DisplayYUVOverlay(_pSdlOverlay, &rect);
 }
 
@@ -102,7 +106,7 @@ SdlSinkPlugin::presentFrame()
 int
 SdlSinkPlugin::eventLoop()
 {
-    std::clog << "event loop ..." << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
 //     Poco::Thread::sleep(10000);
     
 }

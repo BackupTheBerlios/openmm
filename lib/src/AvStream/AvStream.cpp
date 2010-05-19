@@ -24,6 +24,11 @@
 #include <Poco/Thread.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/ClassLoader.h>
+#include <Poco/Format.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/ConsoleChannel.h>
 
 #include <fstream>
 
@@ -59,14 +64,49 @@ static void print_all_lib_versions(FILE* outstream, int indent)
 
 void show_banner(void)
 {
-    fprintf(stderr, "libommavstream Copyright (c) 2010 Joerg Bakker.\n");
-    print_all_lib_versions(stderr, 1);
-    fprintf(stderr, "  built on " __DATE__ " " __TIME__);
+    std::cout <<  "libommavstream Copyright (c) 2010 Joerg Bakker." << std::endl;
+    print_all_lib_versions(stdout, 1);
+    std::cout << "  built on " __DATE__ " " __TIME__ ;
 #ifdef __GNUC__
-    fprintf(stderr, ", gcc: " __VERSION__ "\n");
+    std::cout << ", gcc: " __VERSION__  << std::endl;
 #else
-    fprintf(stderr, ", using a non-gcc compiler\n");
+    std::cout << ", using a non-gcc compiler" << std::endl;
 #endif
+}
+
+
+Log* Log::_pInstance = 0;
+
+// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
+
+Log::Log()
+{
+    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
+    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
+    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+    pSplitterChannel->addChannel(pConsoleChannel);
+//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("ommavstream.log");
+//     pSplitterChannel->addChannel(pFileChannel);
+    pFormatLogger->setChannel(pSplitterChannel);
+    pFormatLogger->open();
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
+}
+
+
+Log*
+Log::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Log;
+    }
+    return _pInstance;
+}
+
+
+Poco::Logger&
+Log::avstream()
+{
+    return *_pAvStreamLogger;
 }
 
 
@@ -100,7 +140,7 @@ void
 ::AvStream::init(StreamType streamType)
 {
     if (_pMeta == 0) {
-        std::cerr << "error init stream: input iostream not set." << std::endl;
+        Log::instance()->avstream().error("init stream: input iostream not set.");
         return;
     }
     
@@ -119,12 +159,12 @@ void
         
         //////////// find first audio and video stream ////////////
         if (!_pAudioStream && _streams.back()->isAudio()) {
-            std::clog << "found audio stream #" << streamNr << std::endl;
+            Log::instance()->avstream().information(Poco::format("found audio stream #%s", Poco::NumberFormatter::format(streamNr)));
             _pAudioStream = _streams.back();
             _pAudioStream->_name = "audio";
         }
         if (!_pVideoStream && _streams.back()->isVideo()) {
-            std::clog << "found video stream #" << streamNr << std::endl;
+            Log::instance()->avstream().information(Poco::format("found video stream #%s", Poco::NumberFormatter::format(streamNr)));
             _pVideoStream = _streams.back();
             _pVideoStream->_name = "video";
         }
@@ -156,20 +196,21 @@ void
         av_init_packet(&packet);
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
         if (ret < 0) {
-            std::clog << "av_read_frame() returns: " << ret << std::endl;
+            Log::instance()->avstream().debug(Poco::format("av_read_frame() returns: %s", Poco::NumberFormatter::format(ret)));
             if (ret == AVERROR_EOF) {
-                std::clog << "eof reached." << std::endl;
+                Log::instance()->avstream().debug("eof reached.");
             }
             break;
         }
-        std::clog << "reading packet #" << Poco::NumberFormatter::format0(++i, 3);
-        std::clog << " type: " << _streams[packet.stream_index]->name();
-        std::clog << " pts: " << packet.pts << " dts: " << packet.dts;
-        std::clog << " size: " << packet.size /*<< " pos: " << packet.pos*/;
-        std::clog << std::endl;
+        Log::instance()->avstream().debug(Poco::format("reading packet #%s, type: %s, pts: %s, size: %s",
+            Poco::NumberFormatter::format0(++i, 3),
+            _streams[packet.stream_index]->name(),
+            Poco::NumberFormatter::format(packet.pts),
+            Poco::NumberFormatter::format(packet.size)
+            ));
         
         if (!_streams[packet.stream_index]->put(new Frame(_streams[packet.stream_index], &packet))) {
-            std::cerr << "error: demux " << _streams[packet.stream_index]->name() << " stream queue blocked, discarding packet" << std::endl;
+            Log::instance()->avstream().error(Poco::format("demux %s stream queue blocked, discarding packet", _streams[packet.stream_index]->name()));
         }
         av_free_packet(&packet);  // seems like the counterpart of av_init_packet()
     }
@@ -205,9 +246,9 @@ _pAvStream(pAvStream)
 void
 Demuxer::run()
 {
-    std::clog << "demuxing ..." << std::endl;
+    Log::instance()->avstream().debug("demuxing ...");
     _pAvStream->demux();
-    std::clog << "demuxing finished." << std::endl;
+    Log::instance()->avstream().debug("demuxing finished.");
 }
 
 
@@ -355,23 +396,17 @@ Frame::planeSize(int plane)
 void
 Frame::printInfo()
 {
-    std::clog << "frame info:" << std::endl;
-    std::clog << " _pAvFrame->linesize[0..2]: " 
-        << _pAvFrame->linesize[0] 
-        << ", " << _pAvFrame->linesize[1] 
-        << ", " << _pAvFrame->linesize[2] 
-        << std::endl;
+    Log::instance()->avstream().debug(Poco::format("frame linesize[0..2]: %s, %s, %s",
+        Poco::NumberFormatter::format(_pAvFrame->linesize[0]),
+        Poco::NumberFormatter::format(_pAvFrame->linesize[1]),
+        Poco::NumberFormatter::format(_pAvFrame->linesize[2]))
+        );
     
-    std::clog << " _pAvFrame->data: " 
-        << (int)_pAvFrame->data 
-        << " _pAvFrame->base: " 
-        << (int)_pAvFrame->base << std::endl;
-    
-    std::clog << " _pAvFrame->data[0..2]: " 
-        << (unsigned int)_pAvFrame->data[0] 
-        << ", " << (unsigned int)_pAvFrame->data[1] 
-        << ", " << (unsigned int)_pAvFrame->data[2] 
-        << std::endl;
+    Log::instance()->avstream().debug(Poco::format("frame data[0..2]: %s, %s, %s",
+        Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[0]),
+        Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[1]),
+        Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[2]))
+        );
 }
 
 
@@ -403,7 +438,10 @@ Frame::convert(PixelFormat targetFormat)
     int width = _pStream->width();
     int height = _pStream->height();
     PixelFormat inPixFormat = _pStream->_pAvCodecContext->pix_fmt;
-    std::clog << "source pixelFormat: " << inPixFormat << " target pixelFormat: " << targetFormat << std::endl;
+    
+    Log::instance()->avstream().debug(Poco::format("source pixelFormat: %s, target pixelFormat: %s",
+        Poco::NumberFormatter::format(inPixFormat),
+        Poco::NumberFormatter::format(targetFormat)));
     
     int scaleAlgo = SWS_BICUBIC;
     struct SwsContext *pImgConvertContext = 0;
@@ -414,24 +452,24 @@ Frame::convert(PixelFormat targetFormat)
                                               scaleAlgo, NULL, NULL, NULL);
     
     if (pImgConvertContext == 0) {
-        std::cerr << "error: cannot initialize image conversion context" << std::endl;
+        Log::instance()->avstream().error("cannot initialize image conversion context");
         return 0;
     }
     else {
-        std::clog << "image conversion context set up." << std::endl;
+        Log::instance()->avstream().debug("image conversion context set up.");
     }
     
     // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
     Frame* pOutFrame = _pStream->allocateVideoFrame(targetFormat);
     
     printInfo();
-    std::clog << "sws_scale ..." << std::endl;
+    Log::instance()->avstream().debug("sws_scale ...");
     int outSlizeHeight = sws_scale(pImgConvertContext,
                                    _pAvFrame->data, _pAvFrame->linesize,
                                    0, height,
                                    pOutFrame->_pAvFrame->data, pOutFrame->_pAvFrame->linesize);
     
-    std::clog << "done." << std::endl;
+    Log::instance()->avstream().debug("done");
     pOutFrame->printInfo();
     
     return pOutFrame;
@@ -441,7 +479,7 @@ Frame::convert(PixelFormat targetFormat)
 void
 Frame::writePpm(const std::string& fileName)
 {
-    std::clog << "write video frame to PPM file name: " << fileName << std::endl;
+    Log::instance()->avstream().debug(Poco::format("write video frame to PPM file name: %s", fileName));
     
     Frame* pRes = convert(PIX_FMT_RGB24);
     
@@ -456,13 +494,15 @@ Frame::writePpm(const std::string& fileName)
 void
 Frame::write(Overlay* overlay)
 {
-    std::clog << "convert video frame to YUV ... " << std::endl;
+    Log::instance()->avstream().debug("convert video frame to YUV ... ");
     
     int width = _pStream->width();
     int height = _pStream->height();
-    std::clog << "width: " <<  width << " height: " << height << std::endl;
+    Log::instance()->avstream().debug(Poco::format("widht: %s, height: %s", width, height));
     PixelFormat pixelFormat = _pStream->_pAvCodecContext->pix_fmt;
-    std::clog << "source pixelFormat: " << pixelFormat << " dest pixelFormat: " << PIX_FMT_YUV420P << std::endl;
+    Log::instance()->avstream().debug(Poco::format("source pixelFormat: %s, target pixelFormat: %s",
+        Poco::NumberFormatter::format(pixelFormat),
+        Poco::NumberFormatter::format(PIX_FMT_YUV420P)));
     
     int scaleAlgo = SWS_BICUBIC;
     struct SwsContext *pImgConvertContext = 0;
@@ -474,17 +514,17 @@ Frame::write(Overlay* overlay)
                                               PIX_FMT_YUV420P, scaleAlgo, NULL, NULL, NULL);
     
     if (pImgConvertContext == 0) {
-        std::cerr << "error: cannot initialize image conversion context" << std::endl;
+        Log::instance()->avstream().error("cannot initialize image conversion context");
         return;
     }
     else {
-        std::clog << "image conversion context set up." << std::endl;
+        Log::instance()->avstream().debug("image conversion context set up.");
     }
     
-    std::clog << "sws_scale ..." << std::endl;
+    Log::instance()->avstream().debug("sws_scale ...");
     int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
                                    0, height, overlay->_data, overlay->_pitch);
-    std::clog << "done." << std::endl;
+    Log::instance()->avstream().debug("done.");
 }
 
 
@@ -501,16 +541,18 @@ _pSink(0)
 void
 Stream::open()
 {
-    std::clog << "opening stream ..." << std::endl;
+    Log::instance()->avstream().debug("opening stream ...");
+    
     _pAvCodecContext = _pAvStream->codec;
     
     //////////// find decoders for audio and video stream ////////////
+    Log::instance()->avstream().debug(Poco::format("searching codec with codec id: %s",
+        Poco::NumberFormatter::format(_pAvStream->codec->codec_id)));
     
-    std::clog << "searching codec with codec_id: " << _pAvStream->codec->codec_id << std::endl;
     _pAvCodec = avcodec_find_decoder(_pAvStream->codec->codec_id);
     
     if(_pAvCodec == 0) {
-        std::cerr << "error: could not find decoder" << std::endl;
+        Log::instance()->avstream().error("could not find decoder");
         return;
     }
     
@@ -521,13 +563,14 @@ Stream::open()
 //         }
     
     if(avcodec_open(_pAvStream->codec, _pAvCodec) < 0) {
-        std::cerr << "error: could not open decoder" << std::endl;
+        Log::instance()->avstream().error("could not open decoder");
         return;
     }
-    std::clog << "found codec: " << _pAvCodec->name << " (" << _pAvCodec->long_name << ")" << std::endl;
-    std::clog << "start_time: " << _pAvStream->start_time << std::endl;
-    std::clog << "duration: " << _pAvStream->duration << std::endl;
-    std::clog << "number of frames (nb_frames): " << _pAvStream->nb_frames << std::endl;
+    Log::instance()->avstream().information(Poco::format("found codec: %s (%s)", std::string(_pAvCodec->name), std::string(_pAvCodec->name)));
+    Log::instance()->avstream().information(Poco::format("start time: %s, duration: %s",
+        Poco::NumberFormatter::format(_pAvStream->start_time),
+        Poco::NumberFormatter::format(_pAvStream->duration)
+        ));
     
 //     if(_pVideoCodec->frame_rate > 1000 && _pVideoCodec->frame_rate_base == 1) {
 //         _pVideoCodec->frame_rate_base = 1000;
@@ -538,7 +581,7 @@ Stream::open()
 void
 Stream::close()
 {
-    std::clog << "closing stream." << std::endl;
+    Log::instance()->avstream().debug("closing stream.");
 }
 
 
@@ -550,10 +593,11 @@ Stream::run()
     // get() blocks until a frame is available in the stream packet queue, timing out in OMM_PACKET_QUEUE_TIMEOUT milisec
     while (Frame* pFrame = get()) {
         if (!_pSink) {
-            std::clog << name() << " stream has no sink, discarding packet." << std::endl;
+            Log::instance()->avstream().error("stream has no sink, discarding packet.");
             continue;
         }
-        std::clog << "decode " << name() << " frame #" << Poco::NumberFormatter::format0(++frameCount, 3) << " ";
+        Log::instance()->avstream().debug(Poco::format("decode %s frame #%s", name(), Poco::NumberFormatter::format0(++frameCount, 3)));
+        
         Frame* pFrameDecoded = pFrame->decode();
         if (pFrameDecoded) {
             if (_streamType == AvStream::SyncStreamT) {
@@ -565,7 +609,7 @@ Stream::run()
             }
         }
     }
-    std::clog << "stream finished." << std::endl;
+    Log::instance()->avstream().debug("stream finished.");
 }
 
 
@@ -599,8 +643,9 @@ Stream::isVideo()
 void
 Stream::printInfo()
 {
-    std::clog << "stream info:" << std::endl;
-    std::clog << "width: " <<  width() << " height: " << height() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("stream width: %s, height: %s",
+        Poco::NumberFormatter::format(width()),
+        Poco::NumberFormatter::format(height())));
 }
 
 
@@ -667,13 +712,18 @@ Stream::decodeAudioFrame(Frame* pFrame)
                                                   (int16_t*)pOutFrame->_data, &pOutFrame->_size, 
                                                   inBuffer, inBufferSize);
         
-        std::clog << "inBufferSize: " << inBufferSize << " bytesConsumed: " << bytesConsumed << " decoded size: " << pOutFrame->_size << std::endl;
+        Log::instance()->avstream().debug(Poco::format("decode audio frame size: %s, bytes consumed: %s, decoded size: %s",
+            Poco::NumberFormatter::format(inBufferSize),
+            Poco::NumberFormatter::format(bytesConsumed),
+            Poco::NumberFormatter::format(pOutFrame->_size)
+            ));
+        
         if (pOutFrame->_size == 0) {
-            std::cerr << "error: no frame could be decompressed" << std::endl;
+            Log::instance()->avstream().error("audio frame could not be decompressed");
             pOutFrame->_size = 0;
         }
         if (bytesConsumed < 0) {
-            std::cerr << "error: skipped frame" << std::endl;
+            Log::instance()->avstream().error("decode audio skipped frame");
             pOutFrame->_size = 0;
         }
         inBuffer += bytesConsumed;
@@ -700,8 +750,13 @@ Stream::decodeVideoFrame(Frame* pFrame)
                                              &outPic, &decodeSuccess,
                                             (const uint8_t*)pFrame->data(), pFrame->size());
     
-    std::clog << "decode " << (decodeSuccess ? "success" : "failed") << ", bytes consumed: " << bytesConsumed
-              << " linesize[0..2]: " << outPic.linesize[0] << ", " << outPic.linesize[1] << ", " << outPic.linesize[2] << std::endl;
+    Log::instance()->avstream().debug(Poco::format("decode video %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
+        (decodeSuccess ? "success" : "failed"),
+        Poco::NumberFormatter::format(bytesConsumed),
+        Poco::NumberFormatter::format(outPic.linesize[0]),
+        Poco::NumberFormatter::format(outPic.linesize[1]),
+        Poco::NumberFormatter::format(outPic.linesize[2])
+        ));
     
     if (bytesConsumed <= 0) {
 //         std::cerr << ">>>>>>> skipping frame while decoding" << std::endl;
@@ -730,7 +785,9 @@ Stream::attachSink(Sink* pSink)
 int
 Stream::sampleWidth()
 {
-    std::clog << "stream sample_fmt: " << (int)_pAvStream->codec->sample_fmt << std::endl;
+    Log::instance()->avstream().debug(Poco::format("stream sample format: %s",
+        Poco::NumberFormatter::format((int)_pAvStream->codec->sample_fmt)));
+        
     // avcodec.h says sample_fmt is not used (always S16?)
     switch(_pAvStream->codec->sample_fmt) {
     case SAMPLE_FMT_U8:
@@ -754,7 +811,8 @@ Stream::sampleWidth()
 unsigned int
 Stream::sampleRate()
 {
-    std::clog << "stream sample_rate: " << (int)_pAvStream->codec->sample_rate << std::endl;
+    Log::instance()->avstream().debug(Poco::format("stream sample rate: %s",
+        Poco::NumberFormatter::format((int)_pAvStream->codec->sample_rate)));
     
     return _pAvStream->codec->sample_rate;
 }
@@ -763,7 +821,8 @@ Stream::sampleRate()
 int
 Stream::channels()
 {
-    std::clog << "stream channels: " << (int)_pAvStream->codec->channels << std::endl;
+    Log::instance()->avstream().debug(Poco::format("stream channels: %s",
+        Poco::NumberFormatter::format((int)_pAvStream->codec->channels)));
     
     return _pAvStream->codec->channels;
 }
@@ -781,7 +840,8 @@ SyncStream::put(Frame* pFrame)
     pFrame->_pStream = this;
     
     _packetQueue.push(pFrame);
-    std::clog << name() << " packet queue size: " << _packetQueue.size() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("packet queue size: %s",
+        Poco::NumberFormatter::format(_packetQueue.size())));
     
     return true;
 }
@@ -820,19 +880,20 @@ _packetQueueGetSemaphore(0, OMM_PACKET_QUEUE_SIZE)
 bool
 AsyncStream::put(Frame* pFrame)
 {
-    std::clog << "WAIT " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("WAIT %s packet queue PUT semaphore in %s", name(), Poco::Thread::current()->name()));
+    
     if (!_packetQueuePutSemaphore.tryWait(OMM_PACKET_QUEUE_PUT_TIMEOUT)) {
-        std::cerr << name() << " packet queue PUT timed out" << std::endl;
+        Log::instance()->avstream().error(Poco::format("%s packet queue PUT timed out", name()));
         return false;
     }
     
     _packetQueueLock.lock();
     pFrame->_pStream = this;
     _packetQueue.push(pFrame);
-    std::clog << name() << " packet queue size: " << _packetQueue.size() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("%s packet queue size: %s", name(), Poco::NumberFormatter::format(_packetQueue.size())));
     _packetQueueLock.unlock();
     
-    std::clog << "SET " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("SET %s packet queue GET semaphore in %s", name(), Poco::Thread::current()->name()));
     _packetQueueGetSemaphore.set();
     return true;
 }
@@ -841,9 +902,9 @@ AsyncStream::put(Frame* pFrame)
 Frame*
 AsyncStream::get()
 {
-    std::clog << "WAIT " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("WAIT %s packet queue GET semaphore in %s", name(), Poco::Thread::current()->name()));
     if (!_packetQueueGetSemaphore.tryWait(OMM_PACKET_QUEUE_GET_TIMEOUT)) {
-        std::cerr << name() << " packet queue GET timed out" << std::endl;
+        Log::instance()->avstream().error(Poco::format("%s packet queue GET timed out", name()));
         return 0;
     }
     
@@ -852,7 +913,7 @@ AsyncStream::get()
     _packetQueue.pop();
     _packetQueueLock.unlock();
     
-    std::clog << "SET " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("SET %s packet queue PUT semaphore in %s", name(), Poco::Thread::current()->name()));
     _packetQueuePutSemaphore.set();
     
     return ret;
@@ -928,7 +989,8 @@ Tagger::probeInputFormat(std::istream& istr)
     
     AVProbeData probeData;
     probeData.filename = "";
-    std::clog << "probing stream ..." << std::endl;
+    Log::instance()->avstream().debug("probing stream ...");
+    
     probeData.buf_size = _tagBufferSize;
     unsigned char buffer[_tagBufferSize];
     probeData.buf = (unsigned char*)&buffer;
@@ -940,14 +1002,14 @@ Tagger::probeInputFormat(std::istream& istr)
 //     istr.seekg(0);
     std::clog << "done." << std::endl;
     
-    std::clog << "detecting format ..." << std::endl;
+    Log::instance()->avstream().debug("detecting format ...");
     // initialize _pInputFormat
     pInputFormat = av_probe_input_format(&probeData, 1 /*int is_opened*/);
     if (pInputFormat) {
-        std::clog << "detected format: " << pInputFormat->name << " (" << pInputFormat->long_name << ")" << std::endl;
+        Log::instance()->avstream().information(Poco::format("AV stream format: %s (%s)", pInputFormat->name, pInputFormat->long_name));
     }
     else {
-        std::cerr << "container format unknown" << std::endl;
+        Log::instance()->avstream().error("AV stream format unknown");
         return 0;
     }
     
@@ -979,67 +1041,70 @@ static long totalReadCount = 0;
 
 static int IORead( void *opaque, uint8_t *buf, int buf_size )
 {
-    std::clog << "IORead()" << std::endl;
+    Log::instance()->avstream().debug("IORead()");
     
     URLContext* pUrlContext = (URLContext*)opaque;
-    std::clog << "IORead() pUrlContext pointer: " << pUrlContext << std::endl;
-    std::clog << "IORead() URLProtocol name: " << pUrlContext->prot->name << std::endl;
+    Log::instance()->avstream().debug(Poco::format("IORead() pUrlContext pointer: %s", Poco::NumberFormatter::format(pUrlContext)));
+    Log::instance()->avstream().debug(Poco::format("IORead() URLProtocol name: %s", pUrlContext->prot->name));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
     std::clog << "IORead() pInputStream pointer: " << pInputStream << std::endl;
     if (!pInputStream) {
-        std::cerr << "IORead failed, std::istream not set" << std::endl;
+        Log::instance()->avstream().error("IORead failed, std::istream not set");
         return -1;
     }
     
     int bytes = pInputStream->readsome((char*)buf, buf_size);
     if (!pInputStream->good()) {
-        std::cerr << "IORead failed to read from std::istream" << std::endl;
+        Log::instance()->avstream().error("IORead failed to read from std::istream");
         return -1;
     }
     
     totalRead += bytes;
     totalReadCount++;
-    std::clog << "IORead() bytes read: " << bytes << " total: " << totalRead << " read ops: " << totalReadCount << std::endl;
+    Log::instance()->avstream().debug(Poco::format("IORead() bytes read: %s, total: %s, read ops: %s",
+        Poco::NumberFormatter::format(bytes),
+        Poco::NumberFormatter::format(totalRead),
+        Poco::NumberFormatter::format(totalReadCount)
+        ));
     return bytes;
-    
-    std::clog << "IORead() finished" << std::endl;
 }
 
 
 static int64_t IOSeek( void *opaque, int64_t offset, int whence )
 {
-    std::clog << "IOSeek() offset: " << offset << std::endl;
+    Log::instance()->avstream().debug(Poco::format("IOSeek() offset: %s", Poco::NumberFormatter::format(offset)));
     
     URLContext* pUrlContext = (URLContext*)opaque;
-    std::clog << "IOSeek() pUrlContext pointer: " << pUrlContext << std::endl;
-    std::clog << "IOSeek() URLProtocol name: " << pUrlContext->prot->name << std::endl;
+    Log::instance()->avstream().debug(Poco::format("IOSeek() pUrlContext pointer: %s", Poco::NumberFormatter::format(pUrlContext)));
+    Log::instance()->avstream().debug(Poco::format("IOSeek() URLProtocol name: %s", pUrlContext->prot->name));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
     std::clog << "IOSeek() pInputStream pointer: " << pInputStream << std::endl;
     if (!pInputStream) {
-        std::cerr << "IOSeek failed, std::istream not set" << std::endl;
+        Log::instance()->avstream().error("IOSeek failed, std::istream not set");
         return 0;
     }
     
     pInputStream->seekg(offset);
     if (!pInputStream->good()) {
-        std::cerr << "IOSeek failed to seek std::istream" << std::endl;
+        Log::instance()->avstream().error("IOSeek failed to read from std::istream");
         return 0;
     }
     totalRead = offset;
-    
-    std::clog << "IOSeek() finished" << std::endl;
+    return totalRead;
 }
 
 
 ByteIOContext*
 Tagger::initIo(std::istream& istr)
 {
+    static char streamName[] = "std::istream";
+    
     URLContext* pUrlContext = new URLContext;
     pUrlContext->is_streamed = 1;
     pUrlContext->priv_data = 0;
-    pUrlContext->filename = "std::istream";
+    pUrlContext->filename = streamName;
     pUrlContext->prot = new URLProtocol;
     pUrlContext->prot->name = "OMM avio wrapper for std::iostream";
     pUrlContext->prot->next = 0;
@@ -1077,13 +1142,13 @@ Tagger::tag(std::istream& istr)
 //     error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", 0, 0, 0);
 //     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
     if (error) {
-        std::cerr << "av_open_input_stream() failed" << std::endl;
+        Log::instance()->avstream().error("av_open_input_stream() failed");
         return 0;
     }
     
     error = av_find_stream_info(pMeta->_pFormatContext);
     if (error) {
-        std::cerr << "av_find_stream_info() failed, could not find codec parameters" << std::endl;
+        Log::instance()->avstream().error("av_find_stream_info() failed, could not find codec parameters");
         return 0;
     }
     
@@ -1095,8 +1160,6 @@ Tagger::tag(std::istream& istr)
 //     else {
 //         std::clog << "frame reading is set to BLOCK" << std::endl;
 //     }
-    
-    std::clog << "Tagger::tag() finished" << std::endl;
     
     return pMeta;
 }
@@ -1114,28 +1177,28 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 {
     Poco::ClassLoader<Sink> sinkPluginLoader;
     if (sinkPluginLoader.isLibraryLoaded(libraryPath)) {
-        std::cerr << "error: library " << libraryPath << " already loaded" << std::endl;
+        Log::instance()->avstream().error(Poco::format("library %s already loaded", libraryPath));
         return 0;
     }
     try {
         sinkPluginLoader.loadLibrary(libraryPath);
     }
     catch (Poco::NotFoundException) {
-        std::cerr << "error: could not find " << libraryPath << " sink plugin." << std::endl;
+        Log::instance()->avstream().error(Poco::format("could not find  %s sink plugin.", libraryPath));
         return 0;
     }
     catch (Poco::LibraryLoadException) {
-        std::cerr << "error: could not load " << libraryPath << " sink plugin." << std::endl;
+        Log::instance()->avstream().error(Poco::format("could not load  %s sink plugin.", libraryPath));
         return 0;
     }
-    std::clog << "sink plugin successfully loaded." << std::endl;
+    Log::instance()->avstream().debug("sink plugin successfully loaded.");
     
     Sink* res;
     try {
         res = sinkPluginLoader.create(className);
     }
     catch (Poco::NotFoundException) {
-        std::cerr << "error: could not create instance of sink plugin." << std::endl;
+        Log::instance()->avstream().error("could not create instance of sink plugin.");
         return 0;
     }
     return res;
@@ -1145,9 +1208,9 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 void
 Sink::writeFrameQueued(Frame *pFrame)
 {
-    std::clog << "WAIT presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("WAIT presentation semaphore in %s", Poco::Thread::current()->name()));
     if (!_presentationSemaphore.tryWait(OMM_FRAME_PRESENTATION_TIMEOUT)) {
-        std::cerr << "timeout while writing frame to sink, discarding frame" << std::endl;
+        Log::instance()->avstream().error("timeout while writing frame to sink, discarding frame");
         return;
     }
     
@@ -1170,7 +1233,7 @@ Sink::presentFrameQueued()
     presentFrame();
     _presentationLock.unlock();
     
-    std::clog << "SET presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
+    Log::instance()->avstream().debug(Poco::format("SET presentation semaphore in %s", Poco::Thread::current()->name()));
     _presentationSemaphore.set();
 }
 
@@ -1208,7 +1271,7 @@ Clock::attachSink(Sink* pSink)
 void
 Clock::notify()
 {
-    std::clog << "CLOCK notification triggered" << std::endl;
+    Log::instance()->avstream().debug("CLOCK notification triggered");
     if (_pSink) {
         _pSink->presentFrameQueued();
     }
@@ -1225,7 +1288,7 @@ Clock::notifyTimed(Poco::Timer& timer)
 void
 Clock::start(long millisec)
 {
-    std::clog << "starting clock ..." << std::endl;
+    Log::instance()->avstream().debug("starting clock ...");
     
     _timer.setPeriodicInterval(millisec);
     _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::notifyTimed));
@@ -1235,7 +1298,7 @@ Clock::start(long millisec)
 void
 Clock::stop()
 {
-    std::clog << "clock stopped." << std::endl;
+    Log::instance()->avstream().debug("clock stopped.");
     
     _timer.stop();
 }
@@ -1244,7 +1307,9 @@ Clock::stop()
 void
 Clock::trigger(long millisecPassed)
 {
-    std::clog << "CLOCK trigger time passed: " << millisecPassed << " time left: " << _timeLeftSink << std::endl;
+    Log::instance()->avstream().debug(Poco::format("CLOCK trigger time passed: %s, time left: %s",
+        Poco::NumberFormatter::format(millisecPassed), Poco::NumberFormatter::format(_timeLeftSink)));
+    
     _timeLeftSink -= millisecPassed;
     if (_timeLeftSink <= 0) {
         _timeLeftSink += _frameBaseSink;

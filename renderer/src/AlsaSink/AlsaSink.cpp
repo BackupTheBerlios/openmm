@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 #include <Poco/ClassLibrary.h>
+#include <Poco/Format.h>
+#include <Poco/NumberFormatter.h>
 
 #include "AlsaSink.h"
 
@@ -55,70 +57,71 @@ AlsaSinkPlugin::open()
 void
 AlsaSinkPlugin::open(const std::string& device)
 {
-    std::clog << "Opening ALSA audio sink with device: " << device << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("opening ALSA audio sink with device: %s", device));
     
     int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (err < 0) {
-        std::cerr << "error: could not open alsa device: " << device << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open alsa device: %s", device));
         return;
     }
     
     initDevice();
     
-    std::clog << "ALSA audio sink opened." << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("ALSA audio sink opened.");
 }
 
 
 void
 AlsaSinkPlugin::close()
 {
-    std::clog << "AlsaSinkPlugin::close()" << std::endl;
-    
     if (pcm_playback) {
         snd_pcm_drop(pcm_playback);
         snd_pcm_close(pcm_playback);
     }
+    
+    Omm::AvStream::Log::instance()->avstream().debug("ALSA audio sink closed.");
 }
 
 
 void
 AlsaSinkPlugin::initDevice()
 {
-    std::clog << "AlsaSinkPlugin::initDevice()" << std::endl;
-    
     snd_pcm_hw_params_alloca(&hw);
     if (snd_pcm_hw_params_any(pcm_playback, hw) < 0) {
-        std::cerr << "error: can not configure PCM device." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("can not configure PCM device.");
         return;
     }
     if (snd_pcm_hw_params_set_access(pcm_playback, hw, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
-        std::cerr << "error: setting PCM device access." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device access.");
         return;
     }
     if (snd_pcm_hw_params_set_format(pcm_playback, hw, format) < 0) {
-        std::cerr << "error: setting PCM device format." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device format.");
         return;
     }
     if (snd_pcm_hw_params_set_rate_near(pcm_playback, hw, &rate, 0) < 0) {
-        std::cerr << "error: setting PCM device rate." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate.");
         return;
     }
     if (snd_pcm_hw_params_set_channels(pcm_playback, hw, channels) < 0) {
-        std::cerr << "error: setting PCM device channels." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels.");
         return;
     }
     if (snd_pcm_hw_params_set_periods(pcm_playback, hw, periods, 0) < 0) {
-        std::cerr << "error: setting PCM device periods." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device periods.");
         return;
     }
     // Set buffer size (in frames). The resulting latency is given by
     // latency = periodsize * periods / (rate * bytes_per_frame)
     snd_pcm_uframes_t bufferSize = (periodsize * periods) >> 2;
     if (int ret = snd_pcm_hw_params_set_buffer_size(pcm_playback, hw, bufferSize)) {
-        std::clog << "setting up PCM device buffer to size: " << bufferSize << " returns: " << ret << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("setting up PCM device buffer to size: %s returns: %s",
+            Poco::NumberFormatter::format(bufferSize),
+            Poco::NumberFormatter::format(ret)
+            ));
     }
     if (snd_pcm_hw_params(pcm_playback, hw) < 0) {
-        std::cerr << "error initializing alsa device." << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("initializing alsa device.");
         return;
     }
 }
@@ -127,16 +130,16 @@ AlsaSinkPlugin::initDevice()
 void
 AlsaSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
 {
-    std::clog << "Alsa audio Sink::writeFrame()" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("write frame to ALSA PCM device");
     if (!pFrame) {
-        std::cerr << "error: no frame to write" << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("no frame to write");
         return;
     }
     
     int framesWritten;
     while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
         snd_pcm_prepare(pcm_playback);
-        std::cerr << "<<<<<<<<<<<<<<< buffer underrun >>>>>>>>>>>>>>>" << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("<<<<<<<<<<<<<<< audio device buffer underrun >>>>>>>>>>>>>>>");
     }
 //     std::clog << "frames written: " << framesWritten << std::endl;
 }
