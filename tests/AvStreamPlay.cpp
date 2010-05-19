@@ -28,24 +28,24 @@
 #include <AvStream.h>
 
 
-class AvPlayer : public Omm::Av::AvStream
+class AvPlayer : public Omm::AvStream::AvStream
 {
 public:
     void stream(std::istream& istr)
     {
         std::clog << "AvPlayer::stream()" << std::endl;
-        int i;
         
         set(istr);
+        init();
         
         //////////// open and attach audio Sink ////////////
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
-        Omm::Av::Sink* audioSink = Omm::Av::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
         audioSink->open();
         
         //////////// open and attach video Sink ////////////
-//         Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
-        Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
+//         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
+        Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
         videoSink->open();
         
         //////////// open audio and video stream ////////////
@@ -57,7 +57,7 @@ public:
         
         //////////// start demuxer thread ////////////
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
-        Omm::Av::Demuxer* pDemuxer = new Omm::Av::Demuxer(this);
+        Omm::AvStream::Demuxer* pDemuxer = new Omm::AvStream::Demuxer(this);
         Poco::Thread demuxThread;
         demuxThread.setName("demux thread");
         std::clog << "demux thread ..." << std::endl;
@@ -75,9 +75,9 @@ public:
         videoThread.start(*videoStream());
         
         //////////// start video presentation timer ////////////
-        Omm::Av::PresentationTimer videoTimer(videoSink);
-        std::clog << "presentation thread ..." << std::endl;
-        videoTimer.start();
+        Omm::AvStream::Clock::instance()->attachSink(videoSink);
+        std::clog << "clock thread ..." << std::endl;
+        Omm::AvStream::Clock::instance()->start(40);
         
         //////////// wait for events ////////////
         videoSink->eventLoop();
@@ -86,7 +86,7 @@ public:
         audioThread.join();
         videoThread.join();
         
-        videoTimer.stop();
+        Omm::AvStream::Clock::instance()->stop();
         
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
         
@@ -98,7 +98,62 @@ public:
 };
 
 
-class VideoPlayer : public Omm::Av::AvStream
+class AudioPlayer : public Omm::AvStream::AvStream
+{
+public:
+    void stream(std::istream& istr)
+    {
+        std::clog << "AudioPlayer::stream()" << std::endl;
+        
+        set(istr);
+        init();
+        
+        //////////// open audio Sink ////////////
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
+//         Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so", "AudioSinkPlugin");
+        Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        
+        audioSink->open();
+        
+        //////////// read frames from input and demux them into single Streams ////////////
+        audioStream()->open();
+        audioStream()->attachSink(audioSink);
+        
+        //////////// start demuxer thread ////////////
+        std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
+        Omm::AvStream::Demuxer* pDemuxer = new Omm::AvStream::Demuxer(this);
+        Poco::Thread demuxThread;
+        demuxThread.setName("demux thread");
+        std::clog << "demux thread ..." << std::endl;
+        demuxThread.start(*pDemuxer);
+        
+        //////////// decode and render audio and video frames ////////////
+        Poco::Thread audioThread;
+        audioThread.setName("audio thread");
+        std::clog << "audio thread ..." << std::endl;
+        audioThread.start(*audioStream());
+        
+        Poco::Thread videoThread;
+        videoThread.setName("video thread");
+        std::clog << "video thread ..." << std::endl;
+        videoThread.start(*videoStream());
+        
+        //////////// wait for events ////////////
+        demuxThread.join();
+        audioThread.join();
+        videoThread.join();
+        
+        std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
+        
+        //////////// deallocate meta data and packet queues ////////////
+        reset();
+        
+        std::clog << "AudioPlayer::stream() finished." << std::endl;
+    }
+};
+
+
+class VideoPlayer : public Omm::AvStream::AvStream
 {
 public:
     void stream(std::istream& istr)
@@ -107,11 +162,12 @@ public:
         int i;
         
         set(istr);
+        init(Omm::AvStream::AvStream::SyncStreamT);
         
         //////////// open video Sink ////////////
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
-//         Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
-        Omm::Av::Sink* videoSink = Omm::Av::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
+//         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
+        Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
         
         videoSink->open();
         
@@ -122,11 +178,11 @@ public:
         videoStream()->open();
         
         i = 0;
-        Omm::Av::Frame* pFrame;
-        std::vector<Omm::Av::Frame*> decodedVideoFrames;
+        Omm::AvStream::Frame* pFrame;
+        std::vector<Omm::AvStream::Frame*> decodedVideoFrames;
         while (pFrame = videoStream()->get()) {
             std::clog << "decode video frame #" << ++i << " ";
-            Omm::Av::Frame* pFrameDecoded = pFrame->decode();
+            Omm::AvStream::Frame* pFrameDecoded = pFrame->decode();
             if (pFrameDecoded) {
 //                 decodedVideoFrames.push_back(pFrameDecoded);
                 videoSink->writeFrame(pFrameDecoded);
@@ -135,7 +191,7 @@ public:
         
         //////////// write decoded video frames to video Sink ////////////
 //         i = 0;
-//         for(std::vector<Omm::Av::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
+//         for(std::vector<Omm::AvStream::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
 //             std::clog << "write frame #" << ++i << " ";
 //             videoSink->writeFrame(*it);
 //             Poco::Thread::sleep(40);
@@ -153,7 +209,7 @@ public:
 };
 
 
-class VideoFrameWriter : public Omm::Av::AvStream
+class VideoFrameWriter : public Omm::AvStream::AvStream
 {
 public:
     void stream(std::istream& istr)
@@ -162,6 +218,7 @@ public:
         int i;
         
         set(istr);
+        init(Omm::AvStream::AvStream::SyncStreamT);
         
         //////////// read frames from input and demux them into single Streams ////////////
         demux();
@@ -170,22 +227,22 @@ public:
         videoStream()->open();
         
         i = 0;
-        Omm::Av::Frame* pFrame;
-        std::vector<Omm::Av::Frame*> decodedVideoFrames;
+        Omm::AvStream::Frame* pFrame;
+        std::vector<Omm::AvStream::Frame*> decodedVideoFrames;
         while (pFrame = videoStream()->get()) {
             std::clog << "decode video frame #" << ++i << " ";
-            Omm::Av::Frame* pFrameDecoded = pFrame->decode();
+            Omm::AvStream::Frame* pFrameDecoded = pFrame->decode();
             if (pFrameDecoded) {
                 pFrameDecoded->writePpm("frame" + Poco::NumberFormatter::format0(i, 3) + ".ppm");
                 // make a copy of decoded frame
-//                 Omm::Av::Frame* pFrameDecodedCopy = new Omm::Av::Frame(*pFrameDecoded);
+//                 Omm::AvStream::Frame* pFrameDecodedCopy = new Omm::AvStream::Frame(*pFrameDecoded);
 //                 decodedVideoFrames.push_back(pFrameDecodedCopy);
             }
         }
         
         //////////// write decoded video frames to file ////////////
 //         i = 0;
-//         for(std::vector<Omm::Av::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
+//         for(std::vector<Omm::AvStream::Frame*>::iterator it = decodedVideoFrames.begin(); it != decodedVideoFrames.end(); ++it) {
 //             std::clog << "write frame #" << ++i << " ";
 //             (*it)->writePpm("frame" + Poco::NumberFormatter::format0(i, 3) + ".ppm");
 //         }
@@ -198,7 +255,7 @@ public:
 };
 
 
-class AudioPlayerSyncMemory : public Omm::Av::AvStream
+class AudioPlayerSyncMemory : public Omm::AvStream::AvStream
 {
 public:
     void stream(std::istream& istr)
@@ -207,10 +264,11 @@ public:
         int i;
         
         set(istr);
+        init(Omm::AvStream::AvStream::SyncStreamT);
         
         //////////// open audio Sink ////////////
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
-        Omm::Av::Sink* audioSink = Omm::Av::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
         
         audioSink->open();
         
@@ -221,8 +279,8 @@ public:
         audioStream()->open();
         
         i = 0;
-        Omm::Av::Frame* pFrame;
-        std::vector<Omm::Av::Frame*> decodedAudioFrames;
+        Omm::AvStream::Frame* pFrame;
+        std::vector<Omm::AvStream::Frame*> decodedAudioFrames;
         while (pFrame = audioStream()->get()) {
             std::clog << "decode audio frame #" << ++i << " ";
             decodedAudioFrames.push_back(pFrame->decode());
@@ -230,7 +288,7 @@ public:
         
         //////////// write decoded audio frames to audio Sink ////////////
         i = 0;
-        for(std::vector<Omm::Av::Frame*>::iterator it = decodedAudioFrames.begin(); it != decodedAudioFrames.end(); ++it) {
+        for(std::vector<Omm::AvStream::Frame*>::iterator it = decodedAudioFrames.begin(); it != decodedAudioFrames.end(); ++it) {
             std::clog << "write frame #" << ++i << " ";
             audioSink->writeFrame(*it);
             delete *it;
@@ -249,7 +307,7 @@ public:
 };
 
 
-class AudioPlayerSyncFile : public Omm::Av::AvStream
+class AudioPlayerSyncFile : public Omm::AvStream::AvStream
 {
 public:
     void stream(std::istream& istr)
@@ -258,10 +316,11 @@ public:
         int i;
         
         set(istr);
+        init(Omm::AvStream::AvStream::SyncStreamT);
         
         //////////// open audio Sink ////////////
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
-        Omm::Av::Sink* audioSink = Omm::Av::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
+        Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
         
         audioSink->open();
         
@@ -272,11 +331,11 @@ public:
         audioStream()->open();
         
         i = 0;
-        Omm::Av::Frame* pFrame;
+        Omm::AvStream::Frame* pFrame;
         std::ofstream outfile("audio.out");
         while (pFrame = audioStream()->get()) {
             std::clog << "decode frame #" << ++i << " ";
-            Omm::Av::Frame* pFrameDecoded = pFrame->decode();
+            Omm::AvStream::Frame* pFrameDecoded = pFrame->decode();
             outfile.write((const char*)pFrameDecoded->data(), pFrameDecoded->size());
             delete pFrameDecoded;
         }
@@ -288,7 +347,7 @@ public:
         char buffer[periodsize];
         std::ifstream infile("audio.out");
         while (infile.read((char*)buffer, periodsize)) {
-            Omm::Av::Frame frame(audioStream(), buffer, periodsize);
+            Omm::AvStream::Frame frame(audioStream(), buffer, periodsize);
             std::clog << "write frame #" << ++i << " ";
             audioSink->writeFrame(&frame);
         }
@@ -318,6 +377,7 @@ int main(int argc, char** argv)
 //     AudioPlayerSyncFile player;
 //     VideoFrameWriter player;
 //     VideoPlayer player;
+//     AudioPlayer player;
     AvPlayer player;
     
     player.stream(istr);

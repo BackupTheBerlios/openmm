@@ -21,15 +21,15 @@
 #ifndef AlsaSink_INCLUDED
 #define AlsaSink_INCLUDED
 
+#include <SDL/SDL.h>
+
 #include <Omm/AvStream.h>
 
-#include <alsa/asoundlib.h>
-#include <alsa/pcm.h>
 
-class AlsaSinkPlugin : public Omm::Av::Sink {
+class AudioSinkPlugin : public Omm::Av::Sink {
 public:
-    AlsaSinkPlugin();
-    virtual ~AlsaSinkPlugin();
+    AudioSinkPlugin();
+    virtual ~AudioSinkPlugin();
     virtual void open();
     void open(const std::string& device);
     virtual void close();
@@ -43,17 +43,17 @@ public:
 private:
     void initDevice();
     
-    snd_pcm_t* pcm_playback;
-    snd_pcm_hw_params_t *hw;
-    std::string device;
-    snd_pcm_format_t format;
-    unsigned int rate;
-    int channels;
-    int periods;       // Number of periods
-    snd_pcm_uframes_t periodsize; // Periodsize (bytes)
-    char* buffer;
-    char* bufferPos;
-    snd_pcm_uframes_t frames;
+//     snd_pcm_t* pcm_playback;
+//     snd_pcm_hw_params_t *hw;
+//     std::string device;
+//     snd_pcm_format_t format;
+//     unsigned int rate;
+//     int channels;
+//     int periods;       // Number of periods
+//     snd_pcm_uframes_t periodsize; // Periodsize (bytes)
+//     char* buffer;
+//     char* bufferPos;
+//     snd_pcm_uframes_t frames;
 };
 
 #endif

@@ -24,6 +24,7 @@
 
 
 AlsaSinkPlugin::AlsaSinkPlugin() :
+Sink(true),
 pcm_playback(0),
 device("default"),
 format(SND_PCM_FORMAT_S16),
@@ -124,7 +125,7 @@ AlsaSinkPlugin::initDevice()
 
 
 void
-AlsaSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+AlsaSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
 {
     std::clog << "Alsa audio Sink::writeFrame()" << std::endl;
     if (!pFrame) {
@@ -190,6 +191,6 @@ AlsaSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 //     return div + rem / sample_rate;
 // }
 
-POCO_BEGIN_MANIFEST(Omm::Av::Sink)
+POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
 POCO_EXPORT_CLASS(AlsaSinkPlugin)
 POCO_END_MANIFEST

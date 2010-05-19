@@ -20,10 +20,10 @@
 ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
-#include "AlsaSink.h"
+#include "SdlAudioSink.h"
 
 
-AlsaSinkPlugin::AlsaSinkPlugin() :
+AudioSinkPlugin::AudioSinkPlugin() /*:
 pcm_playback(0),
 device("default"),
 format(SND_PCM_FORMAT_S16),
@@ -33,163 +33,80 @@ periods(2),
 periodsize(8192),
 buffer(new char[periodsize]),
 bufferPos(buffer),
-frames(periodsize >> 2)
+frames(periodsize >> 2)*/
 {
 }
 
 
-AlsaSinkPlugin::~AlsaSinkPlugin()
+AudioSinkPlugin::~AudioSinkPlugin()
 {
     delete buffer;
 }
 
 
 void
-AlsaSinkPlugin::open()
+AudioSinkPlugin::open()
 {
     open("default");
 }
 
 
 void
-AlsaSinkPlugin::open(const std::string& device)
+AudioSinkPlugin::open(const std::string& device)
 {
-    std::clog << "Opening ALSA audio sink with device: " << device << std::endl;
+    std::clog << "Opening SDL audio sink with device: " << device << std::endl;
     
-    int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
-    if (err < 0) {
-        std::cerr << "error: could not open alsa device: " << device << std::endl;
-        return;
-    }
+//     int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
+//     if (err < 0) {
+//         std::cerr << "error: could not open alsa device: " << device << std::endl;
+//         return;
+//     }
     
     initDevice();
     
-    std::clog << "ALSA audio sink opened." << std::endl;
+    std::clog << "SDL audio sink opened." << std::endl;
 }
 
 
 void
-AlsaSinkPlugin::close()
+AudioSinkPlugin::close()
 {
-    std::clog << "AlsaSinkPlugin::close()" << std::endl;
+    std::clog << "AudioSinkPlugin::close()" << std::endl;
     
-    if (pcm_playback) {
-        snd_pcm_drop(pcm_playback);
-        snd_pcm_close(pcm_playback);
-    }
+//     if (pcm_playback) {
+//         snd_pcm_drop(pcm_playback);
+//         snd_pcm_close(pcm_playback);
+//     }
 }
 
 
 void
-AlsaSinkPlugin::initDevice()
+AudioSinkPlugin::initDevice()
 {
-    std::clog << "AlsaSinkPlugin::initDevice()" << std::endl;
+    std::clog << "AudioSinkPlugin::initDevice()" << std::endl;
     
-    snd_pcm_hw_params_alloca(&hw);
-    if (snd_pcm_hw_params_any(pcm_playback, hw) < 0) {
-        std::cerr << "error: can not configure PCM device." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_access(pcm_playback, hw, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
-        std::cerr << "error: setting PCM device access." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_format(pcm_playback, hw, format) < 0) {
-        std::cerr << "error: setting PCM device format." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_rate_near(pcm_playback, hw, &rate, 0) < 0) {
-        std::cerr << "error: setting PCM device rate." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_channels(pcm_playback, hw, channels) < 0) {
-        std::cerr << "error: setting PCM device channels." << std::endl;
-        return;
-    }
-    if (snd_pcm_hw_params_set_periods(pcm_playback, hw, periods, 0) < 0) {
-        std::cerr << "error: setting PCM device periods." << std::endl;
-        return;
-    }
-    // Set buffer size (in frames). The resulting latency is given by
-    // latency = periodsize * periods / (rate * bytes_per_frame)
-    snd_pcm_uframes_t bufferSize = (periodsize * periods) >> 2;
-    if (int ret = snd_pcm_hw_params_set_buffer_size(pcm_playback, hw, bufferSize)) {
-        std::clog << "setting up PCM device buffer to size: " << bufferSize << " returns: " << ret << std::endl;
-    }
-    if (snd_pcm_hw_params(pcm_playback, hw) < 0) {
-        std::cerr << "error initializing alsa device." << std::endl;
-        return;
-    }
+
 }
 
 
 void
-AlsaSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+AudioSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
 {
     std::clog << "Alsa audio Sink::writeFrame()" << std::endl;
-    if (!pFrame) {
-        std::cerr << "error: no frame to write" << std::endl;
-        return;
-    }
-    
-    int framesWritten;
-    while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
-        snd_pcm_prepare(pcm_playback);
-        std::cerr << "<<<<<<<<<<<<<<< buffer underrun >>>>>>>>>>>>>>>" << std::endl;
-    }
+//     if (!pFrame) {
+//         std::cerr << "error: no frame to write" << std::endl;
+//         return;
+//     }
+//     
+//     int framesWritten;
+//     while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
+//         snd_pcm_prepare(pcm_playback);
+//         std::cerr << "<<<<<<<<<<<<<<< buffer underrun >>>>>>>>>>>>>>>" << std::endl;
+//     }
 //     std::clog << "frames written: " << framesWritten << std::endl;
 }
 
 
-// void AlsaSinkPlugin::pause()
-// {
-//     if (d->error) return;
-//     
-//     if (d->can_pause) {
-//         snd_pcm_pause(d->pcm_playback, 1);
-//     }
-//     
-// }
-// 
-// // Do not confuse this with snd_pcm_resume which is used to resume from a suspend
-// void AlsaSinkPlugin::resume()
-// {
-//     if (d->error) return;
-//     
-//     if (snd_pcm_state( d->pcm_playback ) == SND_PCM_STATE_PAUSED)
-//         snd_pcm_pause(d->pcm_playback, 0);
-// }
-
-// static int resume(snd_pcm_t *pcm)
-// {
-//     int res;
-//     while ((res = snd_pcm_resume(pcm)) == -EAGAIN)
-//         sleep(1);
-//     if (! res)
-//         return 0;
-//     return snd_pcm_prepare(pcm);
-// }
-
-
-// int AlsaSinkPlugin::latency()
-// {
-//     if (d->error || !d->initialized || d->config.sample_rate == 0) return 0;
-//     
-//     snd_pcm_sframes_t frames;
-//     
-//     snd_pcm_delay(d->pcm_playback, &frames);
-//     
-//     if (snd_pcm_state( d->pcm_playback ) != SND_PCM_STATE_RUNNING)
-//         return 0;
-//     
-//     // delay in ms after normal rounding
-//     int sample_rate = d->config.sample_rate;
-//     long div = (frames / sample_rate) * 1000;
-//     long rem = (frames % sample_rate) * 1000;
-//     
-//     return div + rem / sample_rate;
-// }
-
 POCO_BEGIN_MANIFEST(Omm::Av::Sink)
-POCO_EXPORT_CLASS(AlsaSinkPlugin)
+POCO_EXPORT_CLASS(AudioSinkPlugin)
 POCO_END_MANIFEST

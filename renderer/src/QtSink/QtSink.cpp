@@ -24,6 +24,7 @@
 
 
 QtSinkPlugin::QtSinkPlugin() :
+Sink(),
 _app(0, 0),
 _widget()
 {
@@ -55,13 +56,13 @@ QtSinkPlugin::close()
 
 
 void
-QtSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+QtSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
 {
     int width = pFrame->getStream()->width();
     int height = pFrame->getStream()->height();
     
     std::clog << "allocate QImage width: " << width << " height: " << height << std::endl;
-    Omm::Av::Frame* pConvertedFrame = pFrame->convert(PIX_FMT_RGB24);
+    Omm::AvStream::Frame* pConvertedFrame = pFrame->convert(PIX_FMT_RGB24);
     _widget._image = QImage((uchar*)pConvertedFrame->planeData(0), width, height, QImage::Format_RGB888);
     _widget.repaint();
 }
@@ -100,6 +101,6 @@ VideoWidget::paintEvent(QPaintEvent *event)
 }
 
 
-POCO_BEGIN_MANIFEST(Omm::Av::Sink)
+POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
 POCO_EXPORT_CLASS(QtSinkPlugin)
 POCO_END_MANIFEST

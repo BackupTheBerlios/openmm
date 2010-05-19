@@ -28,7 +28,7 @@
 #include <Omm/AvStream.h>
 
 
-class SdlSinkPlugin : public Omm::Av::Sink
+class SdlSinkPlugin : public Omm::AvStream::Sink
 {
 public:
     SdlSinkPlugin();
@@ -37,20 +37,17 @@ public:
     virtual void open();
     virtual void close();
     
-    virtual void present(Poco::Timer& timer);
+    virtual void writeFrame(Omm::AvStream::Frame *pFrame);
+    virtual void presentFrame();
     
-    virtual void writeFrame(Omm::Av::Frame *pFrame);
     virtual int eventLoop();
     
 private:
     SDL_Surface*            _pSdlScreen;
     SDL_Overlay*            _pSdlOverlay;
     
-    Omm::Av::Overlay*       _pOverlay;
-    Omm::Av::Frame*         _pCurrentFrame;
-    
-    Poco::Semaphore         _presentationSemaphore;
-    Poco::FastMutex         _presentationLock;
+    Omm::AvStream::Overlay*       _pOverlay;
+    Omm::AvStream::Frame*         _pCurrentFrame;
 };
 
 #endif

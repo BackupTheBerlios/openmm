@@ -25,8 +25,8 @@
 
 
 SdlSinkPlugin::SdlSinkPlugin() :
-_pOverlay(new Omm::Av::Overlay),
-_presentationSemaphore(1, 1)
+Sink(),
+_pOverlay(new Omm::AvStream::Overlay)
 {
 }
 
@@ -75,29 +75,17 @@ SdlSinkPlugin::close()
 
 
 void
-SdlSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
+SdlSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
 {
-    std::clog << "WAIT presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
-    _presentationSemaphore.wait();
-    
-    _presentationLock.lock();
-    std::clog << "LOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
-//     
     std::clog << "SDL video Sink::writeFrame()" << std::endl;
     _pCurrentFrame = pFrame;
     pFrame->write(_pOverlay);
-//     
-    _presentationLock.unlock();
-    std::clog << "UNLOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
 }
 
 
 void
-SdlSinkPlugin::present(Poco::Timer& timer)
+SdlSinkPlugin::presentFrame()
 {
-    _presentationLock.lock();
-    std::clog << "LOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
-    
     SDL_Rect rect;
     rect.x = 0;
     rect.y = 0;
@@ -108,12 +96,6 @@ SdlSinkPlugin::present(Poco::Timer& timer)
 //     rect.h = _pCurrentFrame->getStream()->height();
     std::clog << "SDL video Sink::present() frame width: " << rect.w << " height: " << rect.h << std::endl;
     SDL_DisplayYUVOverlay(_pSdlOverlay, &rect);
-    
-    _presentationLock.unlock();
-    std::clog << "UNLOCKED video frame queue in " << Poco::Thread::current()->name() << std::endl;
-    
-    std::clog << "SET presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
-    _presentationSemaphore.set();
 }
 
 
@@ -127,6 +109,6 @@ SdlSinkPlugin::eventLoop()
 
 
 
-POCO_BEGIN_MANIFEST(Omm::Av::Sink)
+POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
 POCO_EXPORT_CLASS(SdlSinkPlugin)
 POCO_END_MANIFEST

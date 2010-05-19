@@ -40,16 +40,20 @@ private:
 };
 
 
-class QtSinkPlugin : public QObject, public Omm::Av::Sink
+class QtSinkPlugin : public QObject, public Omm::AvStream::Sink
 {
     Q_OBJECT
         
 public:
     QtSinkPlugin();
     virtual ~QtSinkPlugin();
+    
     virtual void open();
     virtual void close();
-    virtual void writeFrame(Omm::Av::Frame *pFrame);
+    
+    virtual void writeFrame(Omm::AvStream::Frame *pFrame);
+    virtual void presentFrame() {}
+    
     virtual int eventLoop();
     
 signals:

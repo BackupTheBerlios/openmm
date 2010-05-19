@@ -30,7 +30,7 @@
 #include "AvStream.h"
 
 using namespace Omm;
-using namespace Omm::Av;
+using namespace Omm::AvStream;
 
 
 #define PRINT_LIB_VERSION(outstream,libname,LIBNAME,indent) \
@@ -70,7 +70,7 @@ void show_banner(void)
 }
 
 
-AvStream::AvStream() :
+::AvStream::AvStream() :
 _pMeta(0),
 _pAudioStream(0),
 _pVideoStream(0)
@@ -81,32 +81,41 @@ _pVideoStream(0)
 }
 
 
-AvStream::~AvStream()
+::AvStream::~AvStream()
 {
 
 }
 
 
 void
-AvStream::set(std::istream& istr)
+::AvStream::set(std::istream& istr)
 {
     Tagger tagger;
     _pMeta = tagger.tag(istr);
     _pMeta->print();
-    
-    init();
 }
 
 
 void
-AvStream::init()
+::AvStream::init(StreamType streamType)
 {
+    if (_pMeta == 0) {
+        std::cerr << "error init stream: input iostream not set." << std::endl;
+        return;
+    }
+    
     AVFormatContext* pFormatContext = _pMeta->_pFormatContext;
     
     for(int streamNr = 0; streamNr < pFormatContext->nb_streams; streamNr++) {
         //////////// allocate packet queues ////////////
-        _streams.push_back(new Stream);
+        if (streamType == SyncStreamT) {
+            _streams.push_back(new SyncStream);
+        }
+        else if (streamType == AsyncStreamT) {
+            _streams.push_back(new AsyncStream);
+        }
         _streams.back()->_pAvStream = pFormatContext->streams[streamNr];
+        _streams.back()->_streamType = streamType;
         
         //////////// find first audio and video stream ////////////
         if (!_pAudioStream && _streams.back()->isAudio()) {
@@ -124,7 +133,7 @@ AvStream::init()
 
 
 void
-AvStream::reset()
+::AvStream::reset()
 {
     if (_pMeta) {
         delete _pMeta;
@@ -138,7 +147,7 @@ AvStream::reset()
 
 
 void
-AvStream::demux()
+::AvStream::demux()
 {
     // TODO: save copying of AVPacket packet into Frame and read it directly into frame with av_read_frame()
     int i = 0;
@@ -160,8 +169,7 @@ AvStream::demux()
         std::clog << std::endl;
         
         if (!_streams[packet.stream_index]->put(new Frame(_streams[packet.stream_index], &packet))) {
-            std::cerr << "error: demux stream queue blocked" << std::endl;
-            break;
+            std::cerr << "error: demux " << _streams[packet.stream_index]->name() << " stream queue blocked, discarding packet" << std::endl;
         }
         av_free_packet(&packet);  // seems like the counterpart of av_init_packet()
     }
@@ -169,14 +177,14 @@ AvStream::demux()
 
 
 Stream*
-AvStream::audioStream()
+::AvStream::audioStream()
 {
     return _pAudioStream;
 }
 
 
 Stream*
-AvStream::videoStream()
+::AvStream::videoStream()
 {
     return _pVideoStream;
 }
@@ -485,11 +493,7 @@ _name("other"),
 _pAvStream(0),
 _pAvCodecContext(0),
 _pAvCodec(0),
-_pSink(0),
-_packetQueuePutSemaphore(1, 20),
-// _packetQueuePutSemaphore(1, 10),
-// _packetQueuePutSemaphore(1, 1),
-_packetQueueGetSemaphore(0, 1)
+_pSink(0)
 {
 }
 
@@ -545,64 +549,23 @@ Stream::run()
     
     // get() blocks until a frame is available in the stream packet queue, timing out in OMM_PACKET_QUEUE_TIMEOUT milisec
     while (Frame* pFrame = get()) {
+        if (!_pSink) {
+            std::clog << name() << " stream has no sink, discarding packet." << std::endl;
+            continue;
+        }
         std::clog << "decode " << name() << " frame #" << Poco::NumberFormatter::format0(++frameCount, 3) << " ";
         Frame* pFrameDecoded = pFrame->decode();
         if (pFrameDecoded) {
-            _pSink->writeFrame(pFrameDecoded);
+            if (_streamType == AvStream::SyncStreamT) {
+                _pSink->writeFrame(pFrameDecoded);
+                _pSink->presentFrame();
+            }
+            else if (_streamType == AvStream::AsyncStreamT) {
+                _pSink->writeFrameQueued(pFrameDecoded);
+            }
         }
     }
     std::clog << "stream finished." << std::endl;
-}
-
-#define OMM_PACKET_QUEUE_TIMEOUT 500
-
-bool
-Stream::put(Frame* pFrame)
-{
-    std::clog << "WAIT " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
-    if (!_packetQueuePutSemaphore.tryWait(OMM_PACKET_QUEUE_TIMEOUT)) {
-        std::cerr << name() << " packet queue PUT timed out" << std::endl;
-        return false;
-    }
-    
-    _packetQueueLock.lock();
-//     std::clog << "LOCKED " << name() << " packet queue in " << Poco::Thread::current()->name() << std::endl;
-    pFrame->_pStream = this;
-    
-    _packetQueue.push(pFrame);
-    
-    _packetQueueLock.unlock();
-//     std::clog << "UNLOCKED " << name() << " packet queue in " << Poco::Thread::current()->name() << std::endl;
-    
-    
-    std::clog << "SET " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
-    _packetQueueGetSemaphore.set();
-    return true;
-}
-
-
-Frame*
-Stream::get()
-{
-    std::clog << "WAIT " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
-    if (!_packetQueueGetSemaphore.tryWait(OMM_PACKET_QUEUE_TIMEOUT)) {
-        std::cerr << name() << " packet queue GET timed out" << std::endl;
-        return 0;
-    }
-    
-    _packetQueueLock.lock();
-//     std::clog << "LOCKED " << name() << " packet queue in " << Poco::Thread::current()->name() << std::endl;
-    
-    Frame* ret = _packetQueue.front();
-    _packetQueue.pop();
-    
-    _packetQueueLock.unlock();
-//     std::clog << "UNLOCKED " << name() << " packet queue in " << Poco::Thread::current()->name() << std::endl;
-    
-    std::clog << "SET " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
-    _packetQueuePutSemaphore.set();
-    
-    return ret;
 }
 
 
@@ -803,6 +766,96 @@ Stream::channels()
     std::clog << "stream channels: " << (int)_pAvStream->codec->channels << std::endl;
     
     return _pAvStream->codec->channels;
+}
+
+
+SyncStream::SyncStream() :
+Stream()
+{
+}
+
+
+bool
+SyncStream::put(Frame* pFrame)
+{
+    pFrame->_pStream = this;
+    
+    _packetQueue.push(pFrame);
+    std::clog << name() << " packet queue size: " << _packetQueue.size() << std::endl;
+    
+    return true;
+}
+
+
+Frame*
+SyncStream::get()
+{
+    Frame* ret = _packetQueue.front();
+    _packetQueue.pop();
+    
+    return ret;
+}
+
+
+#define OMM_PACKET_QUEUE_SIZE 20
+
+// demuxer waits OMM_PACKET_QUEUE_PUT_TIMEOUT ms for data fetched by each stream
+#define OMM_PACKET_QUEUE_PUT_TIMEOUT    50
+
+// each stream waits OMM_PACKET_QUEUE_GET_TIMEOUT ms for data coming from the demuxer
+#define OMM_PACKET_QUEUE_GET_TIMEOUT    500
+
+// each stream waits OMM_FRAME_PRESENTATION_TIMEOUT ms for data to be fully written to the sink
+// note: when blocked writing to the sink (e.g. audio sink), this is the maximum duration for one frame to be played
+#define OMM_FRAME_PRESENTATION_TIMEOUT  50
+
+AsyncStream::AsyncStream() :
+Stream(),
+_packetQueuePutSemaphore(OMM_PACKET_QUEUE_SIZE, OMM_PACKET_QUEUE_SIZE),
+_packetQueueGetSemaphore(0, OMM_PACKET_QUEUE_SIZE)
+{
+}
+
+
+bool
+AsyncStream::put(Frame* pFrame)
+{
+    std::clog << "WAIT " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
+    if (!_packetQueuePutSemaphore.tryWait(OMM_PACKET_QUEUE_PUT_TIMEOUT)) {
+        std::cerr << name() << " packet queue PUT timed out" << std::endl;
+        return false;
+    }
+    
+    _packetQueueLock.lock();
+    pFrame->_pStream = this;
+    _packetQueue.push(pFrame);
+    std::clog << name() << " packet queue size: " << _packetQueue.size() << std::endl;
+    _packetQueueLock.unlock();
+    
+    std::clog << "SET " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
+    _packetQueueGetSemaphore.set();
+    return true;
+}
+
+
+Frame*
+AsyncStream::get()
+{
+    std::clog << "WAIT " << name() << " packet queue GET semaphore in " << Poco::Thread::current()->name() << std::endl;
+    if (!_packetQueueGetSemaphore.tryWait(OMM_PACKET_QUEUE_GET_TIMEOUT)) {
+        std::cerr << name() << " packet queue GET timed out" << std::endl;
+        return 0;
+    }
+    
+    _packetQueueLock.lock();
+    Frame* ret = _packetQueue.front();
+    _packetQueue.pop();
+    _packetQueueLock.unlock();
+    
+    std::clog << "SET " << name() << " packet queue PUT semaphore in " << Poco::Thread::current()->name() << std::endl;
+    _packetQueuePutSemaphore.set();
+    
+    return ret;
 }
 
 
@@ -1049,6 +1102,13 @@ Tagger::tag(std::istream& istr)
 }
 
 
+Sink::Sink(bool triggerClock) :
+_presentationSemaphore(1, 1),
+_triggerClock(triggerClock)
+{
+}
+
+
 Sink*
 Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 {
@@ -1070,7 +1130,7 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
     }
     std::clog << "sink plugin successfully loaded." << std::endl;
     
-    Omm::Av::Sink* res;
+    Sink* res;
     try {
         res = sinkPluginLoader.create(className);
     }
@@ -1082,25 +1142,112 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 }
 
 
-PresentationTimer::PresentationTimer(Sink* pSink) :
-_timer(0, 40),
-_pSink(pSink)
-{
-}
-
-
 void
-PresentationTimer::start()
+Sink::writeFrameQueued(Frame *pFrame)
 {
-    std::clog << "starting presentation timer ..." << std::endl;
+    std::clog << "WAIT presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
+    if (!_presentationSemaphore.tryWait(OMM_FRAME_PRESENTATION_TIMEOUT)) {
+        std::cerr << "timeout while writing frame to sink, discarding frame" << std::endl;
+        return;
+    }
     
-    _timer.start(Poco::TimerCallback<Sink>(*_pSink, &Sink::present));
+    _presentationLock.lock();
+    writeFrame(pFrame);
+    _presentationLock.unlock();
+    
+    if (_triggerClock) {
+        // TODO: calculate trigger value according to pcm buffer length, sample rate and number of channels.
+        Clock::instance()->trigger(40);
+        presentFrameQueued();
+    }
 }
 
 
 void
-PresentationTimer::stop()
+Sink::presentFrameQueued()
 {
+    _presentationLock.lock();
+    presentFrame();
+    _presentationLock.unlock();
+    
+    std::clog << "SET presentation semaphore in " << Poco::Thread::current()->name() << std::endl;
+    _presentationSemaphore.set();
+}
+
+
+Clock* Clock::_pInstance = 0;
+
+Clock::Clock() :
+_pSink(0),
+_frameBaseSink(0),
+_timeLeftSink(0)
+{
+}
+
+
+Clock*
+Clock::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Clock;
+    }
+    return _pInstance;
+}
+
+
+void
+Clock::attachSink(Sink* pSink)
+{
+    _pSink = pSink;
+    _frameBaseSink = 40;
+//     _frameBaseSink = pSink->frameRate();
+    _timeLeftSink = _frameBaseSink;
+}
+
+
+void
+Clock::notify()
+{
+    std::clog << "CLOCK notification triggered" << std::endl;
+    if (_pSink) {
+        _pSink->presentFrameQueued();
+    }
+}
+
+
+void
+Clock::notifyTimed(Poco::Timer& timer)
+{
+    notify();
+}
+
+
+void
+Clock::start(long millisec)
+{
+    std::clog << "starting clock ..." << std::endl;
+    
+    _timer.setPeriodicInterval(millisec);
+    _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::notifyTimed));
+}
+
+
+void
+Clock::stop()
+{
+    std::clog << "clock stopped." << std::endl;
+    
     _timer.stop();
 }
 
+
+void
+Clock::trigger(long millisecPassed)
+{
+    std::clog << "CLOCK trigger time passed: " << millisecPassed << " time left: " << _timeLeftSink << std::endl;
+    _timeLeftSink -= millisecPassed;
+    if (_timeLeftSink <= 0) {
+        _timeLeftSink += _frameBaseSink;
+//         notify();
+    }
+}

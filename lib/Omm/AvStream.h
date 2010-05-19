@@ -54,23 +54,28 @@ struct AVStream;
 }
 
 namespace Omm {
-namespace Av {
+namespace AvStream {
 
 class Meta;
 class Stream;
 class Overlay;
 class Sink;
+class PresentationTimer;
 
 
 class AvStream
 {
 public:
+    
+    enum StreamType { SyncStreamT, AsyncStreamT };
+    
     AvStream();
     ~AvStream();
     
     void set(std::istream& istr);
     void reset();
     
+    void init(StreamType streamType = AsyncStreamT);
     void demux();
     
     Stream* audioStream();
@@ -79,13 +84,10 @@ public:
 //     void stop();
     
 private:
-    void init();
-    
     Meta*                       _pMeta;
     std::vector<Stream*>        _streams;
     Stream*                     _pAudioStream;
     Stream*                     _pVideoStream;
-    
 };
 
 
@@ -104,6 +106,8 @@ private:
 class Frame
 {
     friend class Stream;
+    friend class SyncStream;
+    friend class AsyncStream;
     
 public:
     Frame(const Frame& frame);
@@ -153,8 +157,10 @@ public:
     
     Frame* allocateVideoFrame(PixelFormat targetFormat);
     
-    bool put(Frame* frame);
-    Frame* get();
+    virtual bool put(Frame* frame) {}
+    virtual Frame* get() {}
+    
+    void attachSink(Sink* pSink);
     
     bool isAudio();
     bool isVideo();
@@ -174,15 +180,14 @@ public:
     PixelFormat pixelFormat();
     int pictureSize();
     
-    void attachSink(Sink* pSink);
-    
-private:
+protected:
     Frame* decodeAudioFrame(Frame* pFrame);
     Frame* decodeVideoFrame(Frame* pFrame);
     
     virtual void run();
     
     std::string             _name;
+    AvStream::StreamType    _streamType;
     
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
@@ -191,6 +196,29 @@ private:
     Sink*                   _pSink;
     
     std::queue<Frame*>      _packetQueue;
+};
+
+
+class SyncStream : public Stream
+{
+public:
+    SyncStream();
+    
+    virtual bool put(Frame* frame);
+    virtual Frame* get();
+    
+};
+
+
+class AsyncStream : public Stream
+{
+public:
+    AsyncStream();
+    
+    virtual bool put(Frame* frame);
+    virtual Frame* get();
+    
+private:
     Poco::Semaphore         _packetQueuePutSemaphore;
     Poco::Semaphore         _packetQueueGetSemaphore;
     Poco::FastMutex         _packetQueueLock;
@@ -245,42 +273,71 @@ public:
 
 class Sink {
     friend class Stream;
+    friend class SyncStream;
+    friend class AsyncStream;
+    friend class Clock;
     
 public:
+    Sink(bool triggerClock = false);
     virtual ~Sink() {}
+    
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
     
-    virtual void writeFrame(Frame* pFrame) = 0;
     virtual void open() = 0;
     virtual void close() = 0;
     
-    virtual void present(Poco::Timer& timer) {}
+    // write frame into presentation buffer (video overlay or audio dsp buffer)
+    virtual void writeFrame(Frame* pFrame) = 0;
+    // show the content of presentation buffer
+    virtual void presentFrame() = 0;
     
     virtual void pause() {}
     virtual void resume() {}
     
-    virtual int latency() { return 0; }
+//     virtual int latency() { return 0; }
     virtual int eventLoop() { return 0; }
-    
-//     virtual void initGui() = 0;
-//     virtual void showMainWindow() = 0;
     
 protected:
     Stream*     _pStream;
+    
+private:
+    virtual void writeFrameQueued(Frame *pFrame);
+    virtual void presentFrameQueued();
+    
+    Poco::Semaphore         _presentationSemaphore;
+    Poco::FastMutex         _presentationLock;
+    
+    bool                    _triggerClock;
 };
 
 
-class PresentationTimer
+class Clock
 {
 public:
-    PresentationTimer(Sink* pSink);
+    static Clock* instance();
     
-    void start();
+    void attachSink(Sink* pSink);
+    
+    // start automatic triggering with a timer, trigger intervall millisec milliseconds.
+    void start(long millisec);
     void stop();
     
+    // trigger the clock external manually
+    void trigger(long millisecPassed);
+    
 private:
+    Clock();
+    
+    void notify();
+    void notifyTimed(Poco::Timer& timer);
+    
+    static Clock*               _pInstance;
+    
     Poco::Timer                 _timer;
+    
     Sink*                       _pSink;
+    long                        _frameBaseSink;
+    long                        _timeLeftSink;
 };
 
 
@@ -295,7 +352,7 @@ class Transcoder
 
 
 
-} // namespace Av
+} // namespace AvStream
 } // namespace Omm
 
 #endif

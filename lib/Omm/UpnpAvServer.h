@@ -123,8 +123,8 @@ public:
     std::string getServerAddress();
     
 private:
-    MediaItemServer*    _pItemServer;
-    Transcoder*         _pTranscoder;
+    MediaItemServer*        _pItemServer;
+    AvStream::Transcoder*   _pTranscoder;
     
     // TODO: this should be fetched from _pItemServer
     int                 _port;

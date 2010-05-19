@@ -23,7 +23,7 @@ SHARED
 ${OMM_AV_STREAM_SDLSINK_SRCS}
 )
 
-ADD_LIBRARY( ommavr-audiosink-sdl
+ADD_LIBRARY( omm-audiosink-sdl
 SHARED
 ${OMM_AV_STREAM_SDLSINK_SRCS}
 )
@@ -32,11 +32,11 @@ TARGET_LINK_LIBRARIES( ommavr-sdlsink
 ${SDL_LIBRARY}
 )
 
-TARGET_LINK_LIBRARIES( ommavr-audiosink-sdl
+TARGET_LINK_LIBRARIES( omm-audiosink-sdl
 ${SDL_LIBRARY}
 )
 
-INSTALL( TARGETS ommavr-sdlsink ommavr-audiosink-sdl
+INSTALL( TARGETS ommavr-sdlsink omm-audiosink-sdl
 LIBRARY DESTINATION lib
 )
 

@@ -26,7 +26,7 @@
 #include <alsa/asoundlib.h>
 #include <alsa/pcm.h>
 
-class AlsaSinkPlugin : public Omm::Av::Sink {
+class AlsaSinkPlugin : public Omm::AvStream::Sink {
 public:
     AlsaSinkPlugin();
     virtual ~AlsaSinkPlugin();
@@ -34,7 +34,8 @@ public:
     void open(const std::string& device);
     virtual void close();
     // Writes blocking
-    virtual void writeFrame(Omm::Av::Frame *pFrame);
+    virtual void writeFrame(Omm::AvStream::Frame *pFrame);
+    virtual void presentFrame() {}
 //     virtual void pause();
 //     virtual void resume();
 //     virtual int latency();
