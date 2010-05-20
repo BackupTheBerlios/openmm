@@ -60,7 +60,11 @@ namespace Omm {
 namespace AvStream {
 
 class Meta;
+class Node;
+class Frame;
 class Stream;
+class StreamInfo;
+class StreamQueue;
 class Overlay;
 class Sink;
 class PresentationTimer;
@@ -156,43 +160,138 @@ private:
 };
 
 
-class AvStream
+class StreamQueue : public Queue<Frame*>
 {
 public:
+    StreamQueue(Node* pNode, int size = 20, int putTimeout = 100, int getTimeout = 500);
     
-    enum StreamType { SyncStreamT, AsyncStreamT };
+    Node* node();
     
-    AvStream();
-    ~AvStream();
+private:
+    Node*       _pNode;
+};
+
+
+class StreamInfo
+{
+    friend class Stream;
+    friend class Demuxer;
+    friend class Frame;
+    
+public:
+    StreamInfo();
+    
+    bool isAudio();
+    bool isVideo();
+    
+    void findCodec();
+    
+    void printInfo();
+    
+    int width();
+    int height();
+    
+    // audio parameters
+    int sampleWidth();
+    unsigned int sampleRate();
+    int channels();
+    
+    // video parameters
+    PixelFormat pixelFormat();
+    int pictureSize();
+    
+private:
+    AVStream*               _pAvStream;
+    AVCodecContext*         _pAvCodecContext;
+    AVCodec*                _pAvCodec;
+};
+
+
+class Stream
+{
+    friend class Demuxer;
+    friend class Frame;
+    
+public:
+    
+    Stream(const std::string name = "avstream");
+    ~Stream();
+    
+    std::string name();
+    
+    StreamInfo* getInfo();
+    StreamQueue* getQueue();
+    void setInfo(StreamInfo* pInfo);
+    void setQueue(StreamQueue* pQueue);
+    
+    Frame* allocateVideoFrame(PixelFormat targetFormat);
+    Frame* decodeAudioFrame(Frame* pFrame);
+    Frame* decodeVideoFrame(Frame* pFrame);
+    
+private:
+    std::string         _name;
+//     Node*               _pNode;
+    StreamInfo*         _pStreamInfo;
+    StreamQueue*        _pStreamQueue;
+};
+
+
+class Node : Poco::Runnable
+{
+public:
+    Node(const std::string& name = "avstream node");
+    
+    void setName(const std::string& name);
+    
+    void start();
+    void stop();
+    
+    void attach(Node* node, int outStreamNumber = 0, int inStreamNumber = 0);
+    void detach(int outStreamNumber = 0);
+    
+protected:
+    virtual void init() {}
+    virtual void run() {}
+    
+    std::string                     _name;
+    std::vector<Stream*>            _inStreams;
+    std::vector<Stream*>            _outStreams;
+    Poco::Thread                    _thread;
+    Poco::FastMutex                 _lock;
+    bool                            _quit;
+};
+
+
+class Demuxer : public Node
+{
+public:
+    Demuxer();
     
     void set(std::istream& istr);
     void reset();
     
-    void init(StreamType streamType = AsyncStreamT);
-    void demux();
-    
-    Stream* audioStream();
-    Stream* videoStream();
-    
-//     void stop();
+    int firstAudioStream();
+    int firstVideoStream();
     
 private:
-    Meta*                       _pMeta;
-    std::vector<Stream*>        _streams;
-    Stream*                     _pAudioStream;
-    Stream*                     _pVideoStream;
+    void init();
+    
+    virtual void run();
+    
+    Meta*       _pMeta;
+    int         _firstAudioStream;
+    int         _firstVideoStream;
 };
 
 
-class Demuxer : public Poco::Runnable
+class Decoder : public Node
 {
 public:
-    Demuxer(AvStream* pAvStream);
+    Decoder();
     
 private:
+    virtual void init();
     virtual void run();
-    
-    AvStream*       _pAvStream;
 };
 
 
@@ -237,99 +336,10 @@ private:
 };
 
 
-class Stream : public Poco::Runnable
-{
-    friend class AvStream;
-    friend class Frame;
-    
-public:
-    Stream(int size = 20, int putTimout = 40, int getTimeout = 500);
-    
-    void open();
-    void close();
-    
-    Frame* allocateVideoFrame(PixelFormat targetFormat);
-    
-    virtual bool put(Frame* frame) {}
-    virtual Frame* get() {}
-    
-    void attachSink(Sink* pSink);
-    
-    bool isAudio();
-    bool isVideo();
-    
-    void printInfo();
-    std::string name();
-    
-    int width();
-    int height();
-    
-    // audio parameters
-    int sampleWidth();
-    unsigned int sampleRate();
-    int channels();
-    
-    // video parameters
-    PixelFormat pixelFormat();
-    int pictureSize();
-    
-protected:
-    Frame* decodeAudioFrame(Frame* pFrame);
-    Frame* decodeVideoFrame(Frame* pFrame);
-    
-    virtual void run();
-    
-    std::string             _name;
-    AvStream::StreamType    _streamType;
-    
-    AVStream*               _pAvStream;
-    AVCodecContext*         _pAvCodecContext;
-    AVCodec*                _pAvCodec;
-    
-    Queue<Frame*>           _packetQueue;
-    Sink*                   _pSink;
-    
-//     std::queue<Frame*>      _packetQueue;
-};
-
-
-class SyncStream : public Stream
-{
-public:
-    SyncStream();
-    
-    virtual bool put(Frame* frame);
-    virtual Frame* get();
-    
-};
-
-
-class AsyncStream : public Stream
-{
-public:
-    AsyncStream();
-    
-    virtual bool put(Frame* frame);
-    virtual Frame* get();
-    
-// private:
-//     const int               _packetQueueSize;
-//     // demuxer waits _packetQueuePutTimeout ms for data fetched by each stream
-//     const int               _packetQueuePutTimeout;
-//     // each stream waits _packetQueueGetTimeout ms for data coming from the demuxer
-//     const int               _packetQueueGetTimeout;
-//     
-//     Poco::Semaphore         _packetQueuePutSemaphore;
-//     Poco::Semaphore         _packetQueueGetSemaphore;
-//     Poco::FastMutex         _packetQueueLock;
-};
-
-
 class Meta
 {
     friend class Tagger;
-    friend class AvStream;
-    friend class Visual;
+    friend class Demuxer;
     
 public:
     Meta();
@@ -371,7 +381,8 @@ public:
 };
 
 
-class Sink {
+class Sink : public Node
+{
     friend class Stream;
     friend class SyncStream;
     friend class AsyncStream;
