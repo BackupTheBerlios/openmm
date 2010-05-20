@@ -57,27 +57,25 @@ public:
         
         //////////// start demuxer thread ////////////
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
+        
         Omm::AvStream::Demuxer* pDemuxer = new Omm::AvStream::Demuxer(this);
         Poco::Thread demuxThread;
-        demuxThread.setName("demux thread");
-        std::clog << "demux thread ..." << std::endl;
+        demuxThread.setName("demux");
         demuxThread.start(*pDemuxer);
         
         //////////// decode and render audio and video frames ////////////
         Poco::Thread audioThread;
-        audioThread.setName("audio thread");
-        std::clog << "audio thread ..." << std::endl;
+        audioThread.setName("audio");
         audioThread.start(*audioStream());
         
         Poco::Thread videoThread;
-        videoThread.setName("video thread");
-        std::clog << "video thread ..." << std::endl;
+        videoThread.setName("video");
         videoThread.start(*videoStream());
         
         //////////// start video presentation timer ////////////
         Omm::AvStream::Clock::instance()->attachSink(videoSink);
-        std::clog << "clock thread ..." << std::endl;
-        Omm::AvStream::Clock::instance()->start(40);
+//         std::clog << "clock thread ..." << std::endl;
+//         Omm::AvStream::Clock::instance()->start(40);
         
         //////////// wait for events ////////////
         videoSink->eventLoop();

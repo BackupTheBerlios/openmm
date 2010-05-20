@@ -28,6 +28,8 @@
 #include <queue>
 
 #include <Poco/Logger.h>
+#include <Poco/Format.h>
+#include <Poco/NumberFormatter.h>
 #include <Poco/Runnable.h>
 #include <Poco/Semaphore.h>
 #include <Poco/Mutex.h>
@@ -76,6 +78,81 @@ private:
     
     static Log*     _pInstance;
     Poco::Logger*   _pAvStreamLogger;
+};
+
+
+template<typename T>
+class Queue
+{
+public:
+    Queue(int size, int putTimeout, int getTimeout) :
+        _size(size),
+        _putTimeout(putTimeout),
+        _getTimeout(getTimeout),
+        _putSemaphore(size, size),
+        _getSemaphore(0, size)
+    {
+    }
+    
+    
+    bool put(T element)
+    {
+        Log::instance()->avstream().debug(Poco::format("queue put waiting in thread %s ...",
+            Poco::Thread::current()->name()));
+        
+        if (!_putSemaphore.tryWait(_putTimeout)) {
+            Log::instance()->avstream().error(Poco::format("queue put timed out in thread %s.",
+                Poco::Thread::current()->name()));
+            return false;
+        }
+        
+        _lock.lock();
+        _queue.push(element);
+        _lock.unlock();
+        
+        _getSemaphore.set();
+        
+        Log::instance()->avstream().debug(Poco::format("queue put success in thread %s, size: %s",
+            Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
+        return true;
+    }
+    
+    
+    T get()
+    {
+        Log::instance()->avstream().debug(Poco::format("queue get waiting in thread %s ...",
+            Poco::Thread::current()->name()));
+        
+        if (!_getSemaphore.tryWait(_getTimeout)) {
+            Log::instance()->avstream().error(Poco::format("queue get timed out in thread %s.",
+                Poco::Thread::current()->name()));
+            return false;
+        }
+        
+        _lock.lock();
+        T ret = _queue.front();
+        _queue.pop();
+        _lock.unlock();
+        
+        _putSemaphore.set();
+        
+        Log::instance()->avstream().debug(Poco::format("queue get success in thread %s, size: %s",
+            Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
+        return ret;
+    }
+    
+private:
+    std::queue<T>           _queue;
+    
+    int                     _size;
+    // wait _packetQueuePutTimeout ms for data to be put into the queue
+    int                     _putTimeout;
+    // wait _packetQueueGetTimeout ms for data to be fetched from the queue
+    int                     _getTimeout;
+    
+    Poco::Semaphore         _putSemaphore;
+    Poco::Semaphore         _getSemaphore;
+    Poco::FastMutex         _lock;
 };
 
 
@@ -166,7 +243,7 @@ class Stream : public Poco::Runnable
     friend class Frame;
     
 public:
-    Stream();
+    Stream(int size = 20, int putTimout = 40, int getTimeout = 500);
     
     void open();
     void close();
@@ -209,9 +286,10 @@ protected:
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
     
+    Queue<Frame*>           _packetQueue;
     Sink*                   _pSink;
     
-    std::queue<Frame*>      _packetQueue;
+//     std::queue<Frame*>      _packetQueue;
 };
 
 
@@ -234,10 +312,16 @@ public:
     virtual bool put(Frame* frame);
     virtual Frame* get();
     
-private:
-    Poco::Semaphore         _packetQueuePutSemaphore;
-    Poco::Semaphore         _packetQueueGetSemaphore;
-    Poco::FastMutex         _packetQueueLock;
+// private:
+//     const int               _packetQueueSize;
+//     // demuxer waits _packetQueuePutTimeout ms for data fetched by each stream
+//     const int               _packetQueuePutTimeout;
+//     // each stream waits _packetQueueGetTimeout ms for data coming from the demuxer
+//     const int               _packetQueueGetTimeout;
+//     
+//     Poco::Semaphore         _packetQueuePutSemaphore;
+//     Poco::Semaphore         _packetQueueGetSemaphore;
+//     Poco::FastMutex         _packetQueueLock;
 };
 
 
@@ -320,6 +404,9 @@ private:
     virtual void writeFrameQueued(Frame *pFrame);
     virtual void presentFrameQueued();
     
+    // each stream waits OMM_FRAME_PRESENTATION_TIMEOUT ms for data to be fully written to the sink
+    // note: when blocked writing to the sink (e.g. audio sink), this is the maximum duration for one frame to be played
+    const int               _presesentationTimeout;
     Poco::Semaphore         _presentationSemaphore;
     Poco::FastMutex         _presentationLock;
     
@@ -327,7 +414,7 @@ private:
 };
 
 
-class Clock
+class Clock : public Poco::Runnable
 {
 public:
     static Clock* instance();
@@ -344,16 +431,22 @@ public:
 private:
     Clock();
     
+    void run();
+    
     void notify();
     void notifyTimed(Poco::Timer& timer);
     
-    static Clock*               _pInstance;
+    static Clock*           _pInstance;
     
-    Poco::Timer                 _timer;
+    Poco::Timer             _timer;
+    Poco::Thread            _notifyThread;
     
-    Sink*                       _pSink;
-    long                        _frameBaseSink;
-    long                        _timeLeftSink;
+    Sink*                   _pSink;
+    long                    _frameBaseSink;
+    long                    _timeLeftSink;
+    
+    Poco::Semaphore         _notifySemaphore;
+    Poco::FastMutex         _clockLock;
 };
 
 

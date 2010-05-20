@@ -22,9 +22,7 @@
 #define __STDC_FORMAT_MACROS
 
 #include <Poco/Thread.h>
-#include <Poco/NumberFormatter.h>
 #include <Poco/ClassLoader.h>
-#include <Poco/Format.h>
 #include <Poco/FormattingChannel.h>
 #include <Poco/PatternFormatter.h>
 #include <Poco/SplitterChannel.h>
@@ -90,6 +88,7 @@ Log::Log()
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -189,6 +188,8 @@ void
 void
 ::AvStream::demux()
 {
+    Log::instance()->avstream().debug("starting demuxer ...");
+    
     // TODO: save copying of AVPacket packet into Frame and read it directly into frame with av_read_frame()
     int i = 0;
     AVPacket packet;
@@ -246,7 +247,6 @@ _pAvStream(pAvStream)
 void
 Demuxer::run()
 {
-    Log::instance()->avstream().debug("demuxing ...");
     _pAvStream->demux();
     Log::instance()->avstream().debug("demuxing finished.");
 }
@@ -528,11 +528,12 @@ Frame::write(Overlay* overlay)
 }
 
 
-Stream::Stream() :
+Stream::Stream(int size, int putTimout, int getTimeout) :
 _name("other"),
 _pAvStream(0),
 _pAvCodecContext(0),
 _pAvCodec(0),
+_packetQueue(size, putTimout, getTimeout),
 _pSink(0)
 {
 }
@@ -588,6 +589,8 @@ Stream::close()
 void
 Stream::run()
 {
+    Log::instance()->avstream().debug(Poco::format("starting %s stream ...", name()));
+    
     int frameCount = 0;
     
     // get() blocks until a frame is available in the stream packet queue, timing out in OMM_PACKET_QUEUE_TIMEOUT milisec
@@ -838,41 +841,19 @@ bool
 SyncStream::put(Frame* pFrame)
 {
     pFrame->_pStream = this;
-    
-    _packetQueue.push(pFrame);
-    Log::instance()->avstream().debug(Poco::format("packet queue size: %s",
-        Poco::NumberFormatter::format(_packetQueue.size())));
-    
-    return true;
+    return _packetQueue.put(pFrame);
 }
 
 
 Frame*
 SyncStream::get()
 {
-    Frame* ret = _packetQueue.front();
-    _packetQueue.pop();
-    
-    return ret;
+    return _packetQueue.get();
 }
 
 
-#define OMM_PACKET_QUEUE_SIZE 20
-
-// demuxer waits OMM_PACKET_QUEUE_PUT_TIMEOUT ms for data fetched by each stream
-#define OMM_PACKET_QUEUE_PUT_TIMEOUT    50
-
-// each stream waits OMM_PACKET_QUEUE_GET_TIMEOUT ms for data coming from the demuxer
-#define OMM_PACKET_QUEUE_GET_TIMEOUT    500
-
-// each stream waits OMM_FRAME_PRESENTATION_TIMEOUT ms for data to be fully written to the sink
-// note: when blocked writing to the sink (e.g. audio sink), this is the maximum duration for one frame to be played
-#define OMM_FRAME_PRESENTATION_TIMEOUT  50
-
 AsyncStream::AsyncStream() :
-Stream(),
-_packetQueuePutSemaphore(OMM_PACKET_QUEUE_SIZE, OMM_PACKET_QUEUE_SIZE),
-_packetQueueGetSemaphore(0, OMM_PACKET_QUEUE_SIZE)
+Stream()
 {
 }
 
@@ -880,44 +861,70 @@ _packetQueueGetSemaphore(0, OMM_PACKET_QUEUE_SIZE)
 bool
 AsyncStream::put(Frame* pFrame)
 {
-    Log::instance()->avstream().debug(Poco::format("WAIT %s packet queue PUT semaphore in %s", name(), Poco::Thread::current()->name()));
-    
-    if (!_packetQueuePutSemaphore.tryWait(OMM_PACKET_QUEUE_PUT_TIMEOUT)) {
-        Log::instance()->avstream().error(Poco::format("%s packet queue PUT timed out", name()));
-        return false;
-    }
-    
-    _packetQueueLock.lock();
     pFrame->_pStream = this;
-    _packetQueue.push(pFrame);
-    Log::instance()->avstream().debug(Poco::format("%s packet queue size: %s", name(), Poco::NumberFormatter::format(_packetQueue.size())));
-    _packetQueueLock.unlock();
-    
-    Log::instance()->avstream().debug(Poco::format("SET %s packet queue GET semaphore in %s", name(), Poco::Thread::current()->name()));
-    _packetQueueGetSemaphore.set();
-    return true;
+    return _packetQueue.put(pFrame);
 }
 
 
 Frame*
 AsyncStream::get()
 {
-    Log::instance()->avstream().debug(Poco::format("WAIT %s packet queue GET semaphore in %s", name(), Poco::Thread::current()->name()));
-    if (!_packetQueueGetSemaphore.tryWait(OMM_PACKET_QUEUE_GET_TIMEOUT)) {
-        Log::instance()->avstream().error(Poco::format("%s packet queue GET timed out", name()));
-        return 0;
-    }
-    
-    _packetQueueLock.lock();
-    Frame* ret = _packetQueue.front();
-    _packetQueue.pop();
-    _packetQueueLock.unlock();
-    
-    Log::instance()->avstream().debug(Poco::format("SET %s packet queue PUT semaphore in %s", name(), Poco::Thread::current()->name()));
-    _packetQueuePutSemaphore.set();
-    
-    return ret;
+    return _packetQueue.get();
 }
+
+
+// AsyncStream::AsyncStream() :
+// Stream(),
+// _packetQueueSize(20),
+// _packetQueuePutTimeout(40),
+// _packetQueueGetTimeout(500),
+// _packetQueuePutSemaphore(_packetQueueSize, _packetQueueSize),
+// _packetQueueGetSemaphore(0, _packetQueueSize)
+// {
+// }
+
+
+// bool
+// AsyncStream::put(Frame* pFrame)
+// {
+//     Log::instance()->avstream().trace(Poco::format("WAIT %s packet queue PUT semaphore in %s", name(), Poco::Thread::current()->name()));
+//     
+//     if (!_packetQueuePutSemaphore.tryWait(_packetQueuePutTimeout)) {
+//         Log::instance()->avstream().error(Poco::format("%s packet queue PUT timed out", name()));
+//         return false;
+//     }
+//     
+//     _packetQueueLock.lock();
+//     pFrame->_pStream = this;
+//     _packetQueue.push(pFrame);
+//     Log::instance()->avstream().debug(Poco::format("%s packet queue size: %s", name(), Poco::NumberFormatter::format(_packetQueue.size())));
+//     _packetQueueLock.unlock();
+//     
+//     Log::instance()->avstream().trace(Poco::format("SET %s packet queue GET semaphore in %s", name(), Poco::Thread::current()->name()));
+//     _packetQueueGetSemaphore.set();
+//     return true;
+// }
+// 
+// 
+// Frame*
+// AsyncStream::get()
+// {
+//     Log::instance()->avstream().trace(Poco::format("WAIT %s packet queue GET semaphore in %s", name(), Poco::Thread::current()->name()));
+//     if (!_packetQueueGetSemaphore.tryWait(_packetQueueGetTimeout)) {
+//         Log::instance()->avstream().error(Poco::format("%s packet queue GET timed out", name()));
+//         return 0;
+//     }
+//     
+//     _packetQueueLock.lock();
+//     Frame* ret = _packetQueue.front();
+//     _packetQueue.pop();
+//     _packetQueueLock.unlock();
+//     
+//     Log::instance()->avstream().trace(Poco::format("SET %s packet queue PUT semaphore in %s", name(), Poco::Thread::current()->name()));
+//     _packetQueuePutSemaphore.set();
+//     
+//     return ret;
+// }
 
 
 Meta::Meta() :
@@ -1166,6 +1173,7 @@ Tagger::tag(std::istream& istr)
 
 
 Sink::Sink(bool triggerClock) :
+_presesentationTimeout(50),
 _presentationSemaphore(1, 1),
 _triggerClock(triggerClock)
 {
@@ -1208,10 +1216,13 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 void
 Sink::writeFrameQueued(Frame *pFrame)
 {
-    Log::instance()->avstream().debug(Poco::format("WAIT presentation semaphore in %s", Poco::Thread::current()->name()));
-    if (!_presentationSemaphore.tryWait(OMM_FRAME_PRESENTATION_TIMEOUT)) {
-        Log::instance()->avstream().error("timeout while writing frame to sink, discarding frame");
-        return;
+    if (!_triggerClock) {
+        Log::instance()->avstream().debug(Poco::format("SINK presentation semaphore in %s wait ...", Poco::Thread::current()->name()));
+        if (!_presentationSemaphore.tryWait(_presesentationTimeout)) {
+            Log::instance()->avstream().error("timeout while writing frame to sink, discarding frame");
+            return;
+        }
+        Log::instance()->avstream().debug(Poco::format("SINK presentation semaphore in %s go!", Poco::Thread::current()->name()));
     }
     
     _presentationLock.lock();
@@ -1219,9 +1230,10 @@ Sink::writeFrameQueued(Frame *pFrame)
     _presentationLock.unlock();
     
     if (_triggerClock) {
-        // TODO: calculate trigger value according to pcm buffer length, sample rate and number of channels.
-        Clock::instance()->trigger(40);
-        presentFrameQueued();
+        Log::instance()->avstream().debug(Poco::format("SINK in %s triggers clock", Poco::Thread::current()->name()));
+        // TODO: calculate trigger value according to audio pcm buffer length, sample rate and number of channels.
+        Clock::instance()->trigger(25);
+//         presentFrameQueued();
     }
 }
 
@@ -1229,12 +1241,13 @@ Sink::writeFrameQueued(Frame *pFrame)
 void
 Sink::presentFrameQueued()
 {
+    // TODO: handle repeated frames
     _presentationLock.lock();
     presentFrame();
     _presentationLock.unlock();
     
-    Log::instance()->avstream().debug(Poco::format("SET presentation semaphore in %s", Poco::Thread::current()->name()));
     _presentationSemaphore.set();
+    Log::instance()->avstream().debug(Poco::format("SINK presentation semaphore in %s just set", Poco::Thread::current()->name()));
 }
 
 
@@ -1243,8 +1256,10 @@ Clock* Clock::_pInstance = 0;
 Clock::Clock() :
 _pSink(0),
 _frameBaseSink(0),
-_timeLeftSink(0)
+_timeLeftSink(0),
+_notifySemaphore(0, 1)
 {
+    start(0);
 }
 
 
@@ -1262,6 +1277,7 @@ void
 Clock::attachSink(Sink* pSink)
 {
     _pSink = pSink;
+    // TODO: calculate _frameBase according to frame rate of video stream that is streamed to sink.
     _frameBaseSink = 40;
 //     _frameBaseSink = pSink->frameRate();
     _timeLeftSink = _frameBaseSink;
@@ -1275,6 +1291,7 @@ Clock::notify()
     if (_pSink) {
         _pSink->presentFrameQueued();
     }
+    Log::instance()->avstream().debug("CLOCK notification finished.");
 }
 
 
@@ -1286,21 +1303,33 @@ Clock::notifyTimed(Poco::Timer& timer)
 
 
 void
+Clock::run()
+{
+    while (true) {
+        Log::instance()->avstream().debug("CLOCK semaphore waiting ...");
+        _notifySemaphore.wait();
+        Log::instance()->avstream().debug("CLOCK semaphore go!");
+        notify();
+    }
+}
+
+
+void
 Clock::start(long millisec)
 {
     Log::instance()->avstream().debug("starting clock ...");
-    
-    _timer.setPeriodicInterval(millisec);
-    _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::notifyTimed));
+//     _timer.setPeriodicInterval(millisec);
+//     _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::notifyTimed));
+    _notifyThread.start(*this);
 }
 
 
 void
 Clock::stop()
 {
+//     _timer.stop();
+    _notifyThread.tryJoin(0);
     Log::instance()->avstream().debug("clock stopped.");
-    
-    _timer.stop();
 }
 
 
@@ -1310,9 +1339,14 @@ Clock::trigger(long millisecPassed)
     Log::instance()->avstream().debug(Poco::format("CLOCK trigger time passed: %s, time left: %s",
         Poco::NumberFormatter::format(millisecPassed), Poco::NumberFormatter::format(_timeLeftSink)));
     
+    _clockLock.lock();
     _timeLeftSink -= millisecPassed;
     if (_timeLeftSink <= 0) {
         _timeLeftSink += _frameBaseSink;
-//         notify();
+        _notifySemaphore.set();
+        Log::instance()->avstream().debug("CLOCK semaphore just set");
     }
+    _clockLock.unlock();
+    
+    Log::instance()->avstream().debug("CLOCK trigger finished");
 }

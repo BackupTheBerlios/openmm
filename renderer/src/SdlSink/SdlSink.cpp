@@ -27,7 +27,7 @@
 
 
 SdlSinkPlugin::SdlSinkPlugin() :
-Sink(),
+Sink(false),
 _pOverlay(new Omm::AvStream::Overlay)
 {
 }
