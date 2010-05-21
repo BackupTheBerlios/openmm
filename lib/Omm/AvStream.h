@@ -105,7 +105,7 @@ public:
             Poco::Thread::current()->name()));
         
         if (!_putSemaphore.tryWait(_putTimeout)) {
-            Log::instance()->avstream().error(Poco::format("queue put timed out in thread %s.",
+            Log::instance()->avstream().warning(Poco::format("queue put timed out in thread %s.",
                 Poco::Thread::current()->name()));
             return false;
         }
@@ -128,7 +128,7 @@ public:
             Poco::Thread::current()->name()));
         
         if (!_getSemaphore.tryWait(_getTimeout)) {
-            Log::instance()->avstream().error(Poco::format("queue get timed out in thread %s.",
+            Log::instance()->avstream().warning(Poco::format("queue get timed out in thread %s.",
                 Poco::Thread::current()->name()));
             return false;
         }
@@ -165,7 +165,7 @@ class StreamQueue : public Queue<Frame*>
 public:
     StreamQueue(Node* pNode, int size = 20, int putTimeout = 100, int getTimeout = 500);
     
-    Node* node();
+    Node* getNode();
     
 private:
     Node*       _pNode;
@@ -201,6 +201,7 @@ public:
     int pictureSize();
     
 private:
+    std::string             _streamName;
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
@@ -217,15 +218,18 @@ public:
     Stream(const std::string name = "avstream");
     ~Stream();
     
-    std::string name();
+    Frame* get();
+    bool put(Frame* pFrame);
     
     // TODO: extend this to handle more than one queue (tee stream)
     // getQueue(int queueNumber = 0)
     // addQueue(StreamQueue* pQueue, int queueNumber = 0)
     // removeQueue(int queueNumber = 0)
     // _pStreamQueue -> std::vector<StreamQueue*>
+    std::string getName();
     StreamInfo* getInfo();
     StreamQueue* getQueue();
+    void setName(const std::string& name);
     void setInfo(StreamInfo* pInfo);
     void setQueue(StreamQueue* pQueue);
     
@@ -234,7 +238,6 @@ public:
     Frame* decodeVideoFrame(Frame* pFrame);
     
 private:
-    std::string         _name;
     StreamInfo*         _pStreamInfo;
     StreamQueue*        _pStreamQueue;
 };
@@ -324,6 +327,7 @@ public:
     
     Stream* getStream();
     
+    // TODO: Frame::decode() asks Stream to decode the Frame, ..., is there a better way?
     Frame* decode();
     Frame* convert(PixelFormat targetFormat);
     
@@ -335,6 +339,7 @@ private:
     int                 _size;
     AVPacket*           _pAvPacket;
     AVFrame*            _pAvFrame;
+    
     Stream*             _pStream;
 //     Poco::FastMutex     _frameLock;
 };
@@ -388,44 +393,56 @@ public:
 class Sink : public Node
 {
     friend class Stream;
-    friend class SyncStream;
-    friend class AsyncStream;
     friend class Clock;
     
 public:
-    Sink(bool triggerClock = false);
+//     Sink(bool triggerClock = false);
+    Sink(const std::string& name = "sink");
     virtual ~Sink() {}
     
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
     
-    virtual void open() = 0;
-    virtual void close() = 0;
+//     virtual void open() = 0;
+//     virtual void close() = 0;
     
     // write frame into presentation buffer (video overlay or audio dsp buffer)
-    virtual void writeFrame(Frame* pFrame) = 0;
+//     virtual void writeFrame(Frame* pFrame) = 0;
     // show the content of presentation buffer
-    virtual void presentFrame() = 0;
+//     virtual void presentFrame() = 0;
     
-    virtual void pause() {}
-    virtual void resume() {}
+//     virtual void pause() {}
+//     virtual void resume() {}
     
 //     virtual int latency() { return 0; }
     virtual int eventLoop() { return 0; }
     
-protected:
-    Stream*     _pStream;
+// protected:
+//     Stream*     _pStream;
     
-private:
-    virtual void writeFrameQueued(Frame *pFrame);
-    virtual void presentFrameQueued();
+// private:
+//     virtual void writeFrameQueued(Frame *pFrame);
+//     virtual void presentFrameQueued();
     
     // each stream waits OMM_FRAME_PRESENTATION_TIMEOUT ms for data to be fully written to the sink
     // note: when blocked writing to the sink (e.g. audio sink), this is the maximum duration for one frame to be played
-    const int               _presesentationTimeout;
-    Poco::Semaphore         _presentationSemaphore;
-    Poco::FastMutex         _presentationLock;
+//     const int               _presesentationTimeout;
+//     Poco::Semaphore         _presentationSemaphore;
+//     Poco::FastMutex         _presentationLock;
     
-    bool                    _triggerClock;
+//     bool                    _triggerClock;
+};
+
+
+class AudioSink : public Sink
+{
+    AudioSink(const std::string& name = "audio sink");
+};
+
+
+class VideoSink : public Sink
+{
+public:
+    VideoSink(const std::string& name = "video sink");
 };
 
 

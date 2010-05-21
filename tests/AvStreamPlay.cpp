@@ -46,15 +46,17 @@ public:
         demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
         demuxer.attach(&videoDecoder, demuxer.firstVideoStream());
         
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
         //////////// open and attach audio Sink ////////////
-//         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
 //         Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
 //         audioSink->open();
         
-        //////////// open and attach video Sink ////////////
+        //////////// load and attach video Sink ////////////
 //         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
 //         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
 //         videoSink->open();
+        Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so", "PpmVideoSink");
+        videoDecoder.attach(pVideoSink);
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         
