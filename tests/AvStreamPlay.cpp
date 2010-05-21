@@ -60,6 +60,7 @@ public:
         
         demuxer.start();
         
+        Poco::Thread::sleep(2000);
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
         
         //////////// deallocate meta data and packet queues ////////////

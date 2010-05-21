@@ -219,6 +219,11 @@ public:
     
     std::string name();
     
+    // TODO: extend this to handle more than one queue (tee stream)
+    // getQueue(int queueNumber = 0)
+    // addQueue(StreamQueue* pQueue, int queueNumber = 0)
+    // removeQueue(int queueNumber = 0)
+    // _pStreamQueue -> std::vector<StreamQueue*>
     StreamInfo* getInfo();
     StreamQueue* getQueue();
     void setInfo(StreamInfo* pInfo);
@@ -230,7 +235,6 @@ public:
     
 private:
     std::string         _name;
-//     Node*               _pNode;
     StreamInfo*         _pStreamInfo;
     StreamQueue*        _pStreamQueue;
 };
