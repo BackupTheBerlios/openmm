@@ -41,27 +41,32 @@ public:
         
         //////////// setup engine stream graph ////////////
         Omm::AvStream::Decoder audioDecoder;
-        Omm::AvStream::Decoder videoDecoder;
+        if (demuxer.firstAudioStream() >= 0) {
+            demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
+        }
         
-//         demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
-        demuxer.attach(&videoDecoder, demuxer.firstVideoStream());
+//         Omm::AvStream::Decoder videoDecoder;
+//         if (demuxer.firstVideoStream() >= 0) {
+//             demuxer.attach(&videoDecoder, demuxer.firstVideoStream());
+//         }
         
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
-        //////////// open and attach audio Sink ////////////
+        //////////// load and attach audio Sink ////////////
 //         Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
-//         audioSink->open();
+        Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so", "PcmAudioSink");
+        audioDecoder.attach(pAudioSink);
         
         //////////// load and attach video Sink ////////////
 //         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
 //         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
-//         videoSink->open();
-        Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so", "PpmVideoSink");
-        videoDecoder.attach(pVideoSink);
+
+//         Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so", "PpmVideoSink");
+//         videoDecoder.attach(pVideoSink);
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
-        Poco::Thread::sleep(2000);
+        Poco::Thread::sleep(1000);
         demuxer.stop();
         
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;

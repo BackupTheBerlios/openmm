@@ -18,23 +18,27 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef PpmVideoSink_INCLUDED
-#define PpmVideoSink_INCLUDED
+#ifndef PcmAudioSink_INCLUDED
+#define PcmAudioSink_INCLUDED
+
+#include <fstream>
 
 #include <Omm/AvStream.h>
 
 
-class PpmVideoSink : public Omm::AvStream::Sink
+class PcmAudioSink : public Omm::AvStream::Sink
 {
 public:
-    PpmVideoSink();
-    virtual ~PpmVideoSink();
+    PcmAudioSink();
+    virtual ~PcmAudioSink();
     
     virtual int eventLoop();
     
 private:
     virtual bool init();
     virtual void run();
+
+    std::ofstream _pcmStream;
 };
 
 #endif

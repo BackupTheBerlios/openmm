@@ -184,7 +184,7 @@ public:
     bool isAudio();
     bool isVideo();
     
-    void findCodec();
+    bool findCodec();
     
     void printInfo();
     
@@ -268,7 +268,7 @@ public:
     Node* getDownstreamNode(int outStreamNumber = 0);
     
 protected:
-    virtual void init() {}
+    virtual bool init() {}
     virtual void run() {}
     
     std::string                     _name;
@@ -292,7 +292,7 @@ public:
     int firstVideoStream();
     
 private:
-    void init();
+    bool init();
     
     virtual void run();
     
@@ -308,7 +308,7 @@ public:
     Decoder();
     
 private:
-    virtual void init();
+    virtual bool init();
     virtual void run();
 };
 

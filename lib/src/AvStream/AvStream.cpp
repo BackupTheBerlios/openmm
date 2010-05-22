@@ -134,24 +134,25 @@ _pAvCodec(0)
 }
 
 
-void
+bool
 StreamInfo::findCodec()
 {
     if (!_pAvStream || !_pAvStream->codec) {
         Log::instance()->avstream().error(Poco::format("missing stream info in %s while trying to find decoder", _streamName));
-        return;
+        return false;
     }
     _pAvCodecContext = _pAvStream->codec;
     
     //////////// find decoders for audio and video stream ////////////
     Log::instance()->avstream().debug(Poco::format("searching codec with codec id: %s",
-        Poco::NumberFormatter::format(_pAvStream->codec->codec_id)));
+        Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
     
-    _pAvCodec = avcodec_find_decoder(_pAvStream->codec->codec_id);
+    Log::instance()->avstream().trace("ffmpeg::avcodec_find_decoder() ...");
+    _pAvCodec = avcodec_find_decoder(_pAvCodecContext->codec_id);
     
     if(!_pAvCodec) {
         Log::instance()->avstream().error("could not find decoder");
-        return;
+        return false;
     }
     
     // Inform the codec that we can handle truncated bitstreams -- i.e.,
@@ -160,15 +161,18 @@ StreamInfo::findCodec()
 //             _pMeta->_pVideoCodecContext->flags |= CODEC_FLAG_TRUNCATED;
 //         }
     
-    if(avcodec_open(_pAvStream->codec, _pAvCodec) < 0) {
+    Log::instance()->avstream().trace("ffmpeg::avcodec_open() ...");
+    if(avcodec_open(_pAvCodecContext, _pAvCodec) < 0) {
         Log::instance()->avstream().error("could not open decoder");
-        return;
+        return false;
     }
     Log::instance()->avstream().information(Poco::format("found codec: %s (%s)", std::string(_pAvCodec->name), std::string(_pAvCodec->name)));
     Log::instance()->avstream().information(Poco::format("start time: %s, duration: %s",
         Poco::NumberFormatter::format(_pAvStream->start_time),
-        Poco::NumberFormatter::format(_pAvStream->duration)
-        ));
+        Poco::NumberFormatter::format(_pAvStream->duration)));
+    
+    return true;
+    
     
 //     if(_pVideoCodec->frame_rate > 1000 && _pVideoCodec->frame_rate_base == 1) {
 //         _pVideoCodec->frame_rate_base = 1000;
@@ -400,9 +404,13 @@ Frame*
 Stream::allocateVideoFrame(PixelFormat targetFormat)
 {
     // Determine required buffer size and allocate buffer
+    Log::instance()->avstream().trace("ffmpeg::avpicture_get_size() ...");
     int numBytes = avpicture_get_size(targetFormat, _pStreamInfo->width(), _pStreamInfo->height());
+    Log::instance()->avstream().trace("ffmpeg::av_malloc() ...");
     uint8_t* buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+    Log::instance()->avstream().trace("ffmpeg::avcodec_alloc_frame() ...");
     AVFrame* pOutFrame = avcodec_alloc_frame();
+    Log::instance()->avstream().trace("ffmpeg::avpicture_fill() ...");
     avpicture_fill((AVPicture *)pOutFrame, buffer, targetFormat, _pStreamInfo->width(), _pStreamInfo->height());
     
     return new Frame(this, pOutFrame);
@@ -441,7 +449,7 @@ Stream::decodeAudioFrame(Frame* pFrame)
     // TODO: does this while loop work for uncompressed packets ?
     // (it's only needed for e.g. .wav, where on packet contains multiple uncompressed frames
     while(inBufferSize > 0) {
-        Log::instance()->avstream().debug("ffmpeg::avcodec_decode_audio2() ...");
+        Log::instance()->avstream().trace("ffmpeg::avcodec_decode_audio2() ...");
         int bytesConsumed = avcodec_decode_audio2(_pStreamInfo->_pAvStream->codec,
             (int16_t*)pOutFrame->_data, &pOutFrame->_size, 
             inBuffer, inBufferSize);
@@ -466,13 +474,20 @@ Stream::decodeAudioFrame(Frame* pFrame)
 Frame*
 Stream::decodeVideoFrame(Frame* pFrame)
 {
+    uint8_t* paddedBuffer = (uint8_t*)pFrame->data();
+    unsigned int paddedBufferSize = pFrame->size();
+    Log::instance()->avstream().trace("ffmpeg::av_fast_realloc() ...");
+    av_fast_realloc(paddedBuffer, &paddedBufferSize, pFrame->size() + FF_INPUT_BUFFER_PADDING_SIZE);
+    Log::instance()->avstream().trace(Poco::format("ffmpeg::av_fast_realloc() buffer size old: %s, new: %s",
+        Poco::NumberFormatter::format(pFrame->size()),
+        Poco::NumberFormatter::format(paddedBufferSize)));
+    
     AVFrame outPic;
-    // TODO: FF_INPUT_BUFFER_PADDING_SIZE
     int decodeSuccess;
-    Log::instance()->avstream().debug("ffmpeg::avcodec_decode_video() ...");
+    Log::instance()->avstream().trace("ffmpeg::avcodec_decode_video() ...");
     int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvStream->codec,
                                              &outPic, &decodeSuccess,
-                                             (const uint8_t*)pFrame->data(), pFrame->size());
+                                             paddedBuffer, paddedBufferSize);
     
     Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_video() %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
         (decodeSuccess ? "success" : "failed"),
@@ -518,19 +533,19 @@ Node::setName(const std::string& name)
 void
 Node::start()
 {
-    Log::instance()->avstream().debug(Poco::format("starting node %s ...", _name));
+    Log::instance()->avstream().debug(Poco::format("starting node %s ...", getName()));
 
     // first start all nodes downstream, so they can begin sucking frames ...
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
         if (!(*it)) {
-            Log::instance()->avstream().error(Poco::format("node %s [%s] could not start downstream node, no stream attached",
+            Log::instance()->avstream().debug(Poco::format("node %s [%s] could not start downstream node, no stream attached",
                 getName(), Poco::NumberFormatter::format(outStreamNumber)));
             continue;
         }
         Node* downstreamNode = getDownstreamNode(outStreamNumber);
         if (!downstreamNode) {
-            Log::instance()->avstream().error(Poco::format("node %s [%s] could not start downstream node, no node attached",
+            Log::instance()->avstream().debug(Poco::format("node %s [%s] could not start downstream node, no node attached",
                 getName(), Poco::NumberFormatter::format(outStreamNumber)));
             continue;
         }
@@ -547,7 +562,7 @@ Node::start()
 void
 Node::stop()
 {
-    Log::instance()->avstream().debug(Poco::format("stopping node %s ...", _name));
+    Log::instance()->avstream().debug(Poco::format("stopping node %s ...", getName()));
     // first stop this node by setting the _quit flag ...
     _lock.lock();
     _quit = true;
@@ -556,13 +571,13 @@ Node::stop()
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
         if (!(*it)) {
-            Log::instance()->avstream().error(Poco::format("node %s [%s] could not stop downstream node, no stream attached",
+            Log::instance()->avstream().debug(Poco::format("node %s [%s] could not stop downstream node, no stream attached",
                 getName(), Poco::NumberFormatter::format(outStreamNumber)));
             continue;
         }
         Node* downstreamNode = getDownstreamNode(outStreamNumber);
         if (!downstreamNode) {
-            Log::instance()->avstream().error(Poco::format("node %s [%s] could not stop downstream node, no node attached",
+            Log::instance()->avstream().debug(Poco::format("node %s [%s] could not stop downstream node, no node attached",
                 getName(), Poco::NumberFormatter::format(outStreamNumber)));
             continue;
         }
@@ -575,26 +590,31 @@ void
 Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
 {
     if (!node) {
-        Log::instance()->avstream().warning(Poco::format("node %s: could not attach null node", _name));
+        Log::instance()->avstream().warning(Poco::format("node %s: could not attach null node", getName()));
         return;
     }
     Poco::ScopedLock<Poco::FastMutex>lock(_lock);
     
     // entwine StreamInfo and StreamQueue of inStream and outStream
+    // TODO: improve warning messages
     if (!_outStreams[outStreamNumber]) {
-        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., output stream invalid", _name));
+        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., output stream invalid",
+            getName()));
         return;
     }
     if (!_outStreams[outStreamNumber]->getInfo()) {
-        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., output stream has no info", _name));
+        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., output stream has no info",
+            getName()));
         return;
     }
     if (!node->_inStreams[inStreamNumber]) {
-        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., other's node input stream invalid", _name));
+        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., downstream node input stream invalid",
+            getName()));
         return;
     }
     if (!node->_inStreams[inStreamNumber]->getQueue()) {
-        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., other's node input stream has no info", _name));
+        Log::instance()->avstream().warning(Poco::format("node %s: could not attach ..., downstream node input stream has no queue",
+            getName()));
         return;
     }
     
@@ -602,14 +622,20 @@ Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
     node->_inStreams[inStreamNumber]->setInfo(_outStreams[outStreamNumber]->getInfo());
     
     Log::instance()->avstream().debug(Poco::format("node %s [%s] attached node %s [%s]",
-        _name,
+        getName(),
         Poco::NumberFormatter::format(outStreamNumber),
-        node->_name,
-        Poco::NumberFormatter::format(inStreamNumber)
-        ));
+        node->getName(),
+        Poco::NumberFormatter::format(inStreamNumber)));
     
-    Log::instance()->avstream().debug(Poco::format("calling init() of %s", node->_name));
-    node->init();
+    Log::instance()->avstream().debug(Poco::format("calling init() of %s", node->getName()));
+    bool initSuccess = node->init();
+    if (initSuccess) {
+        Log::instance()->avstream().debug(Poco::format("%s init success.", node->getName()));
+    }
+    else {
+        Log::instance()->avstream().warning(Poco::format("%s init failed, start of node canceled.", node->getName()));
+        _quit = true;
+    }
 }
 
 
@@ -624,7 +650,7 @@ Node::detach(int outStreamNumber)
     Log::instance()->avstream().debug(Poco::format("node %s [%s] detached node %s",
         _name,
         Poco::NumberFormatter::format(outStreamNumber),
-        _outStreams[outStreamNumber]->getQueue()->getNode()->_name
+        _outStreams[outStreamNumber]->getQueue()->getNode()->getName()
         ));
     
     Poco::ScopedLock<Poco::FastMutex>lock(_lock);
@@ -844,30 +870,30 @@ Frame::convert(PixelFormat targetFormat)
     int scaleAlgo = SWS_BICUBIC;
     struct SwsContext *pImgConvertContext = 0;
     
+    Log::instance()->avstream().trace("ffmpeg::sws_getCachedContext() ...");
     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
                                               width, height, inPixFormat,
                                               width, height, targetFormat,
                                               scaleAlgo, NULL, NULL, NULL);
     
     if (pImgConvertContext == 0) {
-        Log::instance()->avstream().error("cannot initialize image conversion context");
+        Log::instance()->avstream().warning("cannot initialize image conversion context");
         return 0;
     }
     else {
-        Log::instance()->avstream().debug("image conversion context set up.");
+        Log::instance()->avstream().debug("success: image conversion context set up.");
     }
     
     // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
     Frame* pOutFrame = _pStream->allocateVideoFrame(targetFormat);
     
     printInfo();
-    Log::instance()->avstream().debug("sws_scale ...");
+    Log::instance()->avstream().trace("ffmpeg::sws_scale() ...");
     int outSlizeHeight = sws_scale(pImgConvertContext,
                                    _pAvFrame->data, _pAvFrame->linesize,
                                    0, height,
                                    pOutFrame->_pAvFrame->data, pOutFrame->_pAvFrame->linesize);
     
-    Log::instance()->avstream().debug("done");
     pOutFrame->printInfo();
     
     return pOutFrame;
@@ -905,6 +931,7 @@ Frame::write(Overlay* overlay)
     int scaleAlgo = SWS_BICUBIC;
     struct SwsContext *pImgConvertContext = 0;
     
+    Log::instance()->avstream().trace("ffmpeg::sws_getCachedContext() ...");
     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
                                               width, height,
                                               pixelFormat,
@@ -919,10 +946,10 @@ Frame::write(Overlay* overlay)
         Log::instance()->avstream().debug("image conversion context set up.");
     }
     
-    Log::instance()->avstream().debug("sws_scale ...");
+    Log::instance()->avstream().trace("ffmpeg::sws_scale() ...");
     int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
                                    0, height, overlay->_data, overlay->_pitch);
-    Log::instance()->avstream().debug("done.");
+    Log::instance()->avstream().debug("ffmpeg::sws_scale() frame written to overlay.");
 }
 
 
@@ -933,6 +960,7 @@ _firstAudioStream(-1),
 _firstVideoStream(-1)
 {
     // Initialize libavformat and register all the muxers, demuxers and protocols
+    Log::instance()->avstream().trace("ffmpeg::av_register_all() ...");
     av_register_all();
 }
 
@@ -943,14 +971,20 @@ Demuxer::set(std::istream& istr)
     Tagger tagger;
     _pMeta = tagger.tag(istr);
     if (!_pMeta) {
-        throw Poco::Exception("demuxer could not tag input stream.");
+        Log::instance()->avstream().warning("demuxer could not tag input stream, giving up.");
+        _quit = true;
     }
-    _pMeta->print();
-    init();
+    else {
+        _pMeta->print();
+        if (!init()) {
+            Log::instance()->avstream().warning("demuxer init failed, giving up.");
+            _quit = true;
+        }
+    }
 }
 
 
-void
+bool
 Demuxer::init()
 {
     AVFormatContext* pFormatContext = _pMeta->_pFormatContext;
@@ -958,22 +992,25 @@ Demuxer::init()
     int videoStreamCount = 0;
     for(int streamNr = 0; streamNr < pFormatContext->nb_streams; streamNr++) {
         //////////// allocate streams ////////////
-        _outStreams.push_back(new Stream(this));
-        _outStreams.back()->_pStreamQueue = 0;
-        _outStreams.back()->_pStreamInfo = new StreamInfo;
-        _outStreams.back()->_pStreamInfo->_pAvStream = pFormatContext->streams[streamNr];
+        Stream* pStream = new Stream(this);
+        _outStreams.push_back(pStream);
+        
+        StreamInfo* pStreamInfo = new StreamInfo;
+        pStreamInfo->_pAvStream = pFormatContext->streams[streamNr];
+        pStream->setInfo(pStreamInfo);
+        pStream->setQueue(0);
         
         //////////// find first audio and video stream ////////////
-        if (_outStreams.back()->_pStreamInfo->isAudio()) {
+        if (pStream->getInfo()->isAudio()) {
             Log::instance()->avstream().information(Poco::format("found audio stream #%s", Poco::NumberFormatter::format(streamNr)));
-            _outStreams.back()->setName("audio" + Poco::NumberFormatter::format(audioStreamCount++));
+            pStream->setName("audio" + Poco::NumberFormatter::format(audioStreamCount++));
             if (_firstAudioStream < 0) {
                 _firstAudioStream = streamNr;
             }
         }
-        else if (_outStreams.back()->_pStreamInfo->isVideo()) {
+        else if (pStream->getInfo()->isVideo()) {
             Log::instance()->avstream().information(Poco::format("found video stream #%s", Poco::NumberFormatter::format(streamNr)));
-            _outStreams.back()->setName("video" + Poco::NumberFormatter::format(videoStreamCount++));
+            pStream->setName("video" + Poco::NumberFormatter::format(videoStreamCount++));
             if (_firstVideoStream < 0) {
                 _firstVideoStream = streamNr;
             }
@@ -982,6 +1019,7 @@ Demuxer::init()
             Log::instance()->avstream().information(Poco::format("found unknown stream #%s", Poco::NumberFormatter::format(streamNr)));
         }
     }
+    return true;
 }
 
 
@@ -1006,32 +1044,34 @@ Demuxer::run()
     // TODO: save copying of AVPacket packet into Frame and read it directly into frame with av_read_frame()
     int i = 0;
     AVPacket packet;
-    while (true) {
+    while (!_quit) {
+        Log::instance()->avstream().trace("ffmpeg::av_init_packet() ...");
         av_init_packet(&packet);
+        Log::instance()->avstream().trace("ffmpeg::av_read_frame() ...");
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
         if (ret < 0) {
-            Log::instance()->avstream().debug(Poco::format("av_read_frame() returns: %s", Poco::NumberFormatter::format(ret)));
-            if (ret == AVERROR_EOF) {
-                Log::instance()->avstream().debug("eof reached.");
-            }
-            break;
+            Log::instance()->avstream().debug(Poco::format("ffmpeg::av_read_frame() returns: %s (%s)",
+                Poco::NumberFormatter::format(ret),
+                (ret == AVERROR_EOF ? "eof reached." : ".")));
+            return;
         }
-        Log::instance()->avstream().debug(Poco::format("reading packet #%s, type: %s, pts: %s, size: %s",
+        Log::instance()->avstream().debug(Poco::format("ffmpeg::av_read_frame() returns packet #%s, type: %s, pts: %s, size: %s",
             Poco::NumberFormatter::format0(++i, 3),
             _outStreams[packet.stream_index]->getName(),
             Poco::NumberFormatter::format(packet.pts),
-            Poco::NumberFormatter::format(packet.size)
-            ));
+            Poco::NumberFormatter::format(packet.size)));
         
-        // create a new frame out of the AVPacket just read and pass a reference 
-        // to the stream to where the frame belongs (decoding context)
+        // create a new frame out of the AVPacket that we extracted from the stream
+        // create means: make a copy of the data buffer
+        // pass a reference to the stream to where this frame belongs (for further use of the codec context when decoding)
         if (!_outStreams[packet.stream_index]) {
-            Log::instance()->avstream().error(Poco::format("%s stream %s not connected, discarding packet", _name, Poco::NumberFormatter::format(packet.stream_index)));
+            Log::instance()->avstream().error(Poco::format("%s stream %s not connected, discarding packet", getName(), Poco::NumberFormatter::format(packet.stream_index)));
         }
         Frame* pFrame = new Frame(_outStreams[packet.stream_index], &packet);
         // try to put the frame in the queue
         _outStreams[packet.stream_index]->putFrame(pFrame);
-        av_free_packet(&packet);  // seems like the counterpart of av_init_packet()
+        Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
+        av_free_packet(&packet);
     }
 }
 
@@ -1055,24 +1095,28 @@ Node("decoder")
 {
     // decoder has one input stream
     _inStreams.push_back(new Stream(this));
-    _inStreams.back()->setInfo(0);
-    _inStreams.back()->setQueue(new StreamQueue(this));
+    _inStreams[0]->setInfo(0);
+    _inStreams[0]->setQueue(new StreamQueue(this));
     
     // and one output stream
     _outStreams.push_back(new Stream(this));
-    _outStreams.back()->setInfo(0);
-    _outStreams.back()->setQueue(0);
+    _outStreams[0]->setInfo(0);
+    _outStreams[0]->setQueue(0);
 }
 
 
-void
+bool
 Decoder::init()
 {
     // init() is called on attach() so _inStreams[0]->_pStreamInfo should be available
     if (!_inStreams[0]->getInfo()) {
-        throw Poco::Exception("decoder init failed, input stream info not allocated");
+        Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
     }
-    _inStreams[0]->getInfo()->findCodec();
+    if (!_inStreams[0]->getInfo()->findCodec()) {
+        Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
+        return false;
+    }
     if (_inStreams[0]->getInfo()->isAudio()) {
         setName("audio decoder");
     }
@@ -1081,6 +1125,7 @@ Decoder::init()
     }
     // output stream has same parameters after decoding as before decoding (NOTE: check, if that's right)
     _outStreams[0]->setInfo(_inStreams[0]->getInfo());
+    return true;
 }
 
 
@@ -1090,13 +1135,13 @@ Decoder::run()
     int frameCount = 0;
     Frame* pFrame;
     if (!_inStreams[0]) {
-        Log::instance()->avstream().warning(Poco::format("no in stream attached to %s, stopping.", _name));
+        Log::instance()->avstream().warning(Poco::format("no in stream attached to %s, stopping.", getName()));
         return;
     }
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
         if (!_outStreams[0]) {
-            Log::instance()->avstream().warning(Poco::format("no out stream attached to %s, discarding packet.", _name));
+            Log::instance()->avstream().warning(Poco::format("no out stream attached to %s, discarding packet.", getName()));
             continue;
         }
         Log::instance()->avstream().debug(Poco::format("decode %s frame #%s", _inStreams[0]->getName(), Poco::NumberFormatter::format0(++frameCount, 3)));
@@ -1126,6 +1171,7 @@ Meta::~Meta()
 //     }
     if (_pFormatContext) {
 //         std::clog << "Meta::_pFormatContext: " << _pFormatContext << std::endl;
+        Log::instance()->avstream().trace("ffmpeg::av_close_input_stream() ...");
         av_close_input_stream(_pFormatContext);
     }
 }
@@ -1144,6 +1190,7 @@ Meta::print()
     dump_format(_pFormatContext, 0, _pFormatContext->filename, 0);
     
     AVMetadataTag* tag = 0;
+    Log::instance()->avstream().trace("ffmpeg::av_metadata_get() ...");
     while ((tag = av_metadata_get(_pFormatContext->metadata, "", tag, AV_METADATA_IGNORE_SUFFIX))) {
         std::clog << tag->key << ", " << tag->value << std::endl;
     }
@@ -1192,6 +1239,7 @@ Tagger::probeInputFormat(std::istream& istr)
     
     Log::instance()->avstream().debug("detecting format ...");
     // initialize _pInputFormat
+    Log::instance()->avstream().trace("ffmpeg::av_probe_input_format() ...");
     pInputFormat = av_probe_input_format(&probeData, 1 /*int is_opened*/);
     if (pInputFormat) {
         Log::instance()->avstream().information(Poco::format("AV stream format: %s (%s)", pInputFormat->name, pInputFormat->long_name));
@@ -1304,6 +1352,7 @@ Tagger::initIo(std::istream& istr)
     pUrlContext->priv_data = &istr;
     
     // TODO: maybe IOSeek = 0 stops libavformat from doing seek operations
+    Log::instance()->avstream().trace("ffmpeg::av_alloc_put_byte() ...");
     ByteIOContext* pIoContext = av_alloc_put_byte(_pIoBuffer, _IoBufferSize, 0, pUrlContext, IORead, 0, IOSeek);
     pIoContext->is_streamed = 1;
     pIoContext->max_packet_size = _IoBufferSize;
@@ -1325,15 +1374,17 @@ Tagger::tag(std::istream& istr)
     
 //     pMeta->_pIoContext = initIo(istr);
 //     pMeta->_pInputFormat = probeInputFormat(istr);
-    
+    Log::instance()->avstream().trace("ffmpeg::av_open_input_file() ...");
     error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/tmp/omm/o1$r1", 0, 0, 0);
 //     error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", 0, 0, 0);
+//     Log::instance()->avstream().trace("ffmpeg::av_open_input_stream() ...");
 //     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
     if (error) {
         Log::instance()->avstream().error("av_open_input_stream() failed");
         return 0;
     }
     
+    Log::instance()->avstream().trace("ffmpeg::av_find_stream_info() ...");
     error = av_find_stream_info(pMeta->_pFormatContext);
     if (error) {
         Log::instance()->avstream().error("av_find_stream_info() failed, could not find codec parameters");

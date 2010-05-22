@@ -23,13 +23,13 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
-#include "PpmVideoSink.h"
+#include "PcmAudioSink.h"
 
 
-PpmVideoSink::PpmVideoSink() :
-Sink("ppm video sink")
+PcmAudioSink::PcmAudioSink() :
+Sink("pcm audio sink")
 {
-    // video sink has one input stream
+    // audio sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams.back()->setInfo(0);
     _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
@@ -38,46 +38,45 @@ Sink("ppm video sink")
 }
 
 
-PpmVideoSink::~PpmVideoSink()
+PcmAudioSink::~PcmAudioSink()
 {
 }
 
 
 
 bool
-PpmVideoSink::init()
+PcmAudioSink::init()
 {
     if (!_inStreams[0]->getInfo()) {
         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
         return false;
     }
+    _pcmStream.open(std::string(_inStreams[0]->getName() + ".pcm").c_str());
     return true;
 }
 
 
 void
-PpmVideoSink::run()
+PcmAudioSink::run()
 {
     int frameCount = 0;
-    // TODO: Node::run(), this loop is the same for all nodes
     Omm::AvStream::Frame* pFrame;
     if (!_inStreams[0]) {
-        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
+        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
         return;
     }
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        std::string filename(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
-        std::clog << "writing frame to file " << filename;
-        pFrame->writePpm(filename);
+        std::clog << "writing frame to file " << _inStreams[0]->getName() << ".pcm";
+        _pcmStream.write(pFrame->data(), pFrame->size());
     }
     
-    Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
+    Omm::AvStream::Log::instance()->avstream().debug("audio sink finished.");
 }
 
 
 int
-PpmVideoSink::eventLoop()
+PcmAudioSink::eventLoop()
 {
     Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
 //     Poco::Thread::sleep(10000);
@@ -87,5 +86,5 @@ PpmVideoSink::eventLoop()
 
 
 POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
-POCO_EXPORT_CLASS(PpmVideoSink)
+POCO_EXPORT_CLASS(PcmAudioSink)
 POCO_END_MANIFEST
