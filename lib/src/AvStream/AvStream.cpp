@@ -166,11 +166,14 @@ StreamInfo::findCodec()
         Log::instance()->avstream().error("could not open decoder");
         return false;
     }
-    Log::instance()->avstream().information(Poco::format("found codec: %s (%s)", std::string(_pAvCodec->name), std::string(_pAvCodec->name)));
+    Log::instance()->avstream().information(Poco::format("found codec: %s (%s)",
+        std::string(_pAvCodec->name), std::string(_pAvCodec->long_name)));
     Log::instance()->avstream().information(Poco::format("start time: %s, duration: %s",
         Poco::NumberFormatter::format(_pAvStream->start_time),
         Poco::NumberFormatter::format(_pAvStream->duration)));
     
+//     Log::instance()->avstream().trace(Poco::format("_pStreamInfo->_pAvCodecContext->codec_id %s",
+//         Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
     return true;
     
     
@@ -444,7 +447,7 @@ Stream::decodeAudioFrame(Frame* pFrame)
     Frame* pOutFrame = new Frame(this, outBufferSize);
     pOutFrame->_data[outBufferSize-1] = 0;
     
-    uint8_t* inBuffer = (uint8_t*) pFrame->data();
+    uint8_t* inBuffer = (uint8_t*)pFrame->data();
     int inBufferSize = pFrame->size();
     // TODO: does this while loop work for uncompressed packets ?
     // (it's only needed for e.g. .wav, where on packet contains multiple uncompressed frames
@@ -476,26 +479,29 @@ Stream::decodeVideoFrame(Frame* pFrame)
 {
     uint8_t* paddedBuffer = (uint8_t*)pFrame->data();
     unsigned int paddedBufferSize = pFrame->size();
-    Log::instance()->avstream().trace("ffmpeg::av_fast_realloc() ...");
-    av_fast_realloc(paddedBuffer, &paddedBufferSize, pFrame->size() + FF_INPUT_BUFFER_PADDING_SIZE);
-    Log::instance()->avstream().trace(Poco::format("ffmpeg::av_fast_realloc() buffer size old: %s, new: %s",
-        Poco::NumberFormatter::format(pFrame->size()),
-        Poco::NumberFormatter::format(paddedBufferSize)));
+    // FIXME: provide the padded buffer in Frame::Frame(AVPacket)
+//     Log::instance()->avstream().trace("ffmpeg::av_fast_realloc() ...");
+//     av_fast_realloc(paddedBuffer, &paddedBufferSize, pFrame->size() + FF_INPUT_BUFFER_PADDING_SIZE);
+//     Log::instance()->avstream().trace(Poco::format("ffmpeg::av_fast_realloc() buffer size old: %s, new: %s",
+//         Poco::NumberFormatter::format(pFrame->size()),
+//         Poco::NumberFormatter::format(paddedBufferSize)));
     
     AVFrame outPic;
     int decodeSuccess;
     Log::instance()->avstream().trace("ffmpeg::avcodec_decode_video() ...");
-    int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvStream->codec,
+    int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvCodecContext,
                                              &outPic, &decodeSuccess,
                                              paddedBuffer, paddedBufferSize);
+    Log::instance()->avstream().trace("ffmpeg::avcodec_decode_video() finished.");
     
-    Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_video() %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
-        (decodeSuccess ? "success" : "failed"),
-        Poco::NumberFormatter::format(bytesConsumed),
-        Poco::NumberFormatter::format(outPic.linesize[0]),
-        Poco::NumberFormatter::format(outPic.linesize[1]),
-        Poco::NumberFormatter::format(outPic.linesize[2])
-        ));
+    // FIXME: this segfaults
+//     Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_video() %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
+//         (decodeSuccess ? "success" : "failed"),
+//         Poco::NumberFormatter::format(bytesConsumed),
+//         Poco::NumberFormatter::format(outPic.linesize[0]),
+//         Poco::NumberFormatter::format(outPic.linesize[1]),
+//         Poco::NumberFormatter::format(outPic.linesize[2])
+//         ));
     
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
         Log::instance()->avstream().warning(Poco::format("decoding video frame in stream %s failed, discarding frame.", getName()));

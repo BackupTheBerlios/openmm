@@ -51,7 +51,11 @@ PcmAudioSink::init()
         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
         return false;
     }
-    _pcmStream.open(std::string(_inStreams[0]->getName() + ".pcm").c_str());
+    std::string fileName(_inStreams[0]->getName() + ".pcm");
+    _pcmStream.open(fileName.c_str());
+    Omm::AvStream::Log::instance()->avstream().information(Poco::format("%s writing PCM sample data to file %s",
+        getName(),
+        fileName));
     return true;
 }
 
@@ -65,9 +69,7 @@ PcmAudioSink::run()
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
         return;
     }
-    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
-    {
-        std::clog << "writing frame to file " << _inStreams[0]->getName() << ".pcm";
+    while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
         _pcmStream.write(pFrame->data(), pFrame->size());
     }
     
