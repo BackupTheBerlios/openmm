@@ -88,7 +88,8 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
@@ -125,6 +126,7 @@ StreamQueue::getNode()
 
 
 StreamInfo::StreamInfo() :
+_streamName("avstream"),
 _pAvStream(0),
 _pAvCodecContext(0),
 _pAvCodec(0)
@@ -135,6 +137,10 @@ _pAvCodec(0)
 void
 StreamInfo::findCodec()
 {
+    if (!_pAvStream || !_pAvStream->codec) {
+        Log::instance()->avstream().error(Poco::format("missing stream info in %s while trying to find decoder", _streamName));
+        return;
+    }
     _pAvCodecContext = _pAvStream->codec;
     
     //////////// find decoders for audio and video stream ////////////
@@ -143,7 +149,7 @@ StreamInfo::findCodec()
     
     _pAvCodec = avcodec_find_decoder(_pAvStream->codec->codec_id);
     
-    if(_pAvCodec == 0) {
+    if(!_pAvCodec) {
         Log::instance()->avstream().error("could not find decoder");
         return;
     }
@@ -277,7 +283,8 @@ StreamInfo::channels()
 }
 
 
-Stream::Stream(const std::string name) :
+Stream::Stream(Node* pNode, const std::string name) :
+_pNode(pNode),
 _pStreamInfo(new StreamInfo),
 _pStreamQueue(0)
 {
@@ -293,27 +300,38 @@ Stream::~Stream()
 
 
 Frame*
-Stream::get()
+Stream::getFrame()
 {
-    if (_pStreamQueue) {
-        return _pStreamQueue->get();
+    if (!_pStreamQueue) {
+        Log::instance()->avstream().warning(Poco::format("node %s [%s] get frame no queue attached, ignoring",
+            getNode()->getName(), getName()));
+        return 0;
     }
     else {
-        Log::instance()->avstream().warning(Poco::format("stream %s get failed, no queue attached ", getName()));
+        Frame* ret = _pStreamQueue->get();
+        if (!ret) {
+            Log::instance()->avstream().warning(Poco::format("node %s [%s] get frame timeout, queue starved.",
+                getNode()->getName(), getName()));
+        }
+        return ret;
     }
 }
 
 
-bool
-Stream::put(Frame* pFrame)
+void
+Stream::putFrame(Frame* pFrame)
 {
-    if (_pStreamQueue && pFrame) {
-        pFrame->_pStream = this;
-        return _pStreamQueue->put(pFrame);
+    if (!_pStreamQueue || !pFrame) {
+        Log::instance()->avstream().warning(Poco::format("node %s [%s] put frame no queue attached or null frame, discarding frame",
+            getNode()->getName(), getName()));
     }
     else {
-        Log::instance()->avstream().warning(Poco::format("stream %s put failed, no queue attached or null frame", getName()));
-        return false;
+        pFrame->_pStream = this;
+        bool success = _pStreamQueue->put(pFrame);
+        if (!success) {
+            Log::instance()->avstream().warning(Poco::format("node %s [%s] put frame timeout, queue blocked.", getNode()->getName(),
+                getName()));
+        }
     }
 }
 
@@ -343,6 +361,13 @@ void
 Stream::setQueue(StreamQueue* pQueue)
 {
     _pStreamQueue = pQueue;
+}
+
+
+Node*
+Stream::getNode()
+{
+    return _pNode;
 }
 
 
@@ -385,35 +410,51 @@ Stream::allocateVideoFrame(PixelFormat targetFormat)
 
 
 Frame*
-Stream::decodeAudioFrame(Frame* pFrame)
+Stream::decodeFrame(Frame* pFrame)
 {
-    if (!pFrame) {
+    if (!pFrame || !pFrame->data()) {
+        Log::instance()->avstream().warning(Poco::format("input frame broken while decoding stream %s, discarding frame.", getName()));
         return 0;
     }
+    if (!_pStreamInfo || !_pStreamInfo->_pAvStream || !_pStreamInfo->_pAvStream->codec) {
+        Log::instance()->avstream().warning(Poco::format("missing stream info while decoding stream %s, discarding frame.", getName()));
+        return 0;
+    }
+    if (_pStreamInfo->isAudio()) {
+        return decodeAudioFrame(pFrame);
+    }
+    else if (_pStreamInfo->isVideo()) {
+        return decodeVideoFrame(pFrame);
+    }
+}
+
+
+Frame*
+Stream::decodeAudioFrame(Frame* pFrame)
+{
     const int outBufferSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
     Frame* pOutFrame = new Frame(this, outBufferSize);
     pOutFrame->_data[outBufferSize-1] = 0;
     
     uint8_t* inBuffer = (uint8_t*) pFrame->data();
     int inBufferSize = pFrame->size();
+    // TODO: does this while loop work for uncompressed packets ?
+    // (it's only needed for e.g. .wav, where on packet contains multiple uncompressed frames
     while(inBufferSize > 0) {
+        Log::instance()->avstream().debug("ffmpeg::avcodec_decode_audio2() ...");
         int bytesConsumed = avcodec_decode_audio2(_pStreamInfo->_pAvStream->codec,
             (int16_t*)pOutFrame->_data, &pOutFrame->_size, 
             inBuffer, inBufferSize);
         
-        Log::instance()->avstream().debug(Poco::format("decode audio frame size: %s, bytes consumed: %s, decoded size: %s",
+        Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_audio2() frame size: %s, bytes consumed: %s, decoded size: %s",
             Poco::NumberFormatter::format(inBufferSize),
             Poco::NumberFormatter::format(bytesConsumed),
             Poco::NumberFormatter::format(pOutFrame->_size)
             ));
         
-        if (pOutFrame->_size == 0) {
-            Log::instance()->avstream().error("audio frame could not be decompressed");
-            pOutFrame->_size = 0;
-        }
-        if (bytesConsumed < 0) {
-            Log::instance()->avstream().error("decode audio skipped frame");
-            pOutFrame->_size = 0;
+        if (bytesConsumed < 0 || pOutFrame->_size == 0) {
+            Log::instance()->avstream().warning(Poco::format("decoding audio frame in stream %s failed, discarding frame.", getName()));
+            return 0;
         }
         inBuffer += bytesConsumed;
         inBufferSize -= bytesConsumed;
@@ -425,21 +466,15 @@ Stream::decodeAudioFrame(Frame* pFrame)
 Frame*
 Stream::decodeVideoFrame(Frame* pFrame)
 {
-    std::clog << "Stream::decodeVideoFrame() ..." << std::endl;
-    
-    if (!pFrame) {
-        return 0;
-    }
-    
     AVFrame outPic;
     // TODO: FF_INPUT_BUFFER_PADDING_SIZE
     int decodeSuccess;
-    
+    Log::instance()->avstream().debug("ffmpeg::avcodec_decode_video() ...");
     int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvStream->codec,
                                              &outPic, &decodeSuccess,
                                              (const uint8_t*)pFrame->data(), pFrame->size());
     
-    Log::instance()->avstream().debug(Poco::format("decode video %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
+    Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_video() %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
         (decodeSuccess ? "success" : "failed"),
         Poco::NumberFormatter::format(bytesConsumed),
         Poco::NumberFormatter::format(outPic.linesize[0]),
@@ -447,18 +482,12 @@ Stream::decodeVideoFrame(Frame* pFrame)
         Poco::NumberFormatter::format(outPic.linesize[2])
         ));
     
-    if (bytesConsumed <= 0) {
-//         std::cerr << ">>>>>>> skipping frame while decoding" << std::endl;
-        return 0;
-    }
-    if (decodeSuccess <= 0) {
-//         std::cerr << ">>>>>>> skipping frame while decoding" << std::endl;
+    if (decodeSuccess <= 0 || bytesConsumed <= 0) {
+        Log::instance()->avstream().warning(Poco::format("decoding video frame in stream %s failed, discarding frame.", getName()));
         return 0;
     }
     
     Frame* pOutFrame = new Frame(this, &outPic);
-    
-    std::clog << "Stream::decodeVideoFrame() finished." << std::endl;
     return pOutFrame;
 }
 
@@ -471,6 +500,13 @@ _quit(false)
 }
 
 
+std::string
+Node::getName()
+{
+    return _name;
+}
+
+
 void
 Node::setName(const std::string& name)
 {
@@ -478,22 +514,30 @@ Node::setName(const std::string& name)
     _thread.setName(name);
 }
 
+
 void
 Node::start()
 {
     Log::instance()->avstream().debug(Poco::format("starting node %s ...", _name));
 
     // first start all nodes downstream, so they can begin sucking frames ...
-    int streamNumber = 0;
-    for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++streamNumber) {
-        if (!(*it) || !(*it)->getQueue() || !(*it)->getQueue()->getNode()) {
-            Log::instance()->avstream().warning(Poco::format("no node attached to output stream %s of node %s, skippin start of downstream node.", Poco::NumberFormatter::format(streamNumber), _name));
+    int outStreamNumber = 0;
+    for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
+        if (!(*it)) {
+            Log::instance()->avstream().error(Poco::format("node %s [%s] could not start downstream node, no stream attached",
+                getName(), Poco::NumberFormatter::format(outStreamNumber)));
             continue;
         }
-        (*it)->getQueue()->getNode()->start();
+        Node* downstreamNode = getDownstreamNode(outStreamNumber);
+        if (!downstreamNode) {
+            Log::instance()->avstream().error(Poco::format("node %s [%s] could not start downstream node, no node attached",
+                getName(), Poco::NumberFormatter::format(outStreamNumber)));
+            continue;
+        }
+        downstreamNode->start();
     }
-    // then start this node. I this node started first, all frames processed before downstream nodes
-    // are started would be discarded.
+    // then start this node. If this node would be started before the downstream node,
+    // all frames processed in this node would be discarded before the downstream nodes could process them.
     if (!_thread.isRunning()) {
         _thread.start(*this);
     }
@@ -509,8 +553,20 @@ Node::stop()
     _quit = true;
     _lock.unlock();
     // then stop all nodes downstream
-    for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
-        (*it)->getQueue()->getNode()->stop();
+    int outStreamNumber = 0;
+    for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
+        if (!(*it)) {
+            Log::instance()->avstream().error(Poco::format("node %s [%s] could not stop downstream node, no stream attached",
+                getName(), Poco::NumberFormatter::format(outStreamNumber)));
+            continue;
+        }
+        Node* downstreamNode = getDownstreamNode(outStreamNumber);
+        if (!downstreamNode) {
+            Log::instance()->avstream().error(Poco::format("node %s [%s] could not stop downstream node, no node attached",
+                getName(), Poco::NumberFormatter::format(outStreamNumber)));
+            continue;
+        }
+        downstreamNode->stop();
     }
 }
 
@@ -560,6 +616,11 @@ Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
 void
 Node::detach(int outStreamNumber)
 {
+    if (outStreamNumber >= _outStreams.size()) {
+        Log::instance()->avstream().error(Poco::format("node %s [%s] could not detach node, stream number to high",
+            getName(), Poco::NumberFormatter::format(outStreamNumber)));
+        return;
+    }
     Log::instance()->avstream().debug(Poco::format("node %s [%s] detached node %s",
         _name,
         Poco::NumberFormatter::format(outStreamNumber),
@@ -573,6 +634,22 @@ Node::detach(int outStreamNumber)
     _outStreams[outStreamNumber]->setQueue(0);
 }
 
+
+Node*
+Node::getDownstreamNode(int outStreamNumber)
+{
+    if (outStreamNumber >= _outStreams.size()) {
+        Log::instance()->avstream().error(Poco::format("node %s [%s] could not get downstream node, stream number to high",
+            getName(), Poco::NumberFormatter::format(outStreamNumber)));
+        return 0;
+    }
+    Stream* outStream = _outStreams[outStreamNumber];
+    if (!outStream || !outStream->getQueue()) {
+        Log::instance()->avstream().warning(Poco::format("node %s [%s] could not get downstream node, no node attached to output stream.",         getName(), Poco::NumberFormatter::format(outStreamNumber)));
+        return 0;
+    }
+    return outStream->getQueue()->getNode();
+}
 
 
 // Frame::Frame(const Frame& frame) :
@@ -748,17 +825,7 @@ Frame::getStream()
 Frame*
 Frame::decode()
 {
-    std::clog << "Frame::decode() ..." << std::endl;
-    std::clog << "_pStream: " << _pStream << std::endl;
-    std::clog << "_pStream>_pStreamInfo: " << _pStream->_pStreamInfo << std::endl;
-    
-    if (_pStream->_pStreamInfo->isAudio()) {
-        return _pStream->decodeAudioFrame(this);
-    }
-    else if (_pStream->_pStreamInfo->isVideo()) {
-        return _pStream->decodeVideoFrame(this);
-    }
-    std::clog << "Frame::decode() finished." << std::endl;
+    _pStream->decodeFrame(this);
 }
 
 
@@ -891,7 +958,7 @@ Demuxer::init()
     int videoStreamCount = 0;
     for(int streamNr = 0; streamNr < pFormatContext->nb_streams; streamNr++) {
         //////////// allocate streams ////////////
-        _outStreams.push_back(new Stream);
+        _outStreams.push_back(new Stream(this));
         _outStreams.back()->_pStreamQueue = 0;
         _outStreams.back()->_pStreamInfo = new StreamInfo;
         _outStreams.back()->_pStreamInfo->_pAvStream = pFormatContext->streams[streamNr];
@@ -956,19 +1023,14 @@ Demuxer::run()
             Poco::NumberFormatter::format(packet.size)
             ));
         
-        // see, if a queue of a node downstreams is connected
-        if (_outStreams[packet.stream_index]->getQueue()) {
-            // try to put the frame in the queue
-            // FIXME: is argument _outStreams[packet.stream_index] in Frame() really necessary?
-            // FIXME: replace all getQueue()->put() with put() and all getQueue()->get() with get() (Frame::_pStream needs this)
-            // FIXME: those errors and log messages should go into Stream::put()
-            if (!_outStreams[packet.stream_index]->put(new Frame(_outStreams[packet.stream_index], &packet))) {
-                Log::instance()->avstream().error(Poco::format("demux %s stream queue blocked, discarding packet", _outStreams[packet.stream_index]->getName()));
-            }
+        // create a new frame out of the AVPacket just read and pass a reference 
+        // to the stream to where the frame belongs (decoding context)
+        if (!_outStreams[packet.stream_index]) {
+            Log::instance()->avstream().error(Poco::format("%s stream %s not connected, discarding packet", _name, Poco::NumberFormatter::format(packet.stream_index)));
         }
-        else {
-            Log::instance()->avstream().warning(Poco::format("no node attached to demuxer out stream %s, discarding packet", Poco::NumberFormatter::format(packet.stream_index)));
-        }
+        Frame* pFrame = new Frame(_outStreams[packet.stream_index], &packet);
+        // try to put the frame in the queue
+        _outStreams[packet.stream_index]->putFrame(pFrame);
         av_free_packet(&packet);  // seems like the counterpart of av_init_packet()
     }
 }
@@ -992,12 +1054,12 @@ Decoder::Decoder() :
 Node("decoder")
 {
     // decoder has one input stream
-    _inStreams.push_back(new Stream);
+    _inStreams.push_back(new Stream(this));
     _inStreams.back()->setInfo(0);
     _inStreams.back()->setQueue(new StreamQueue(this));
     
     // and one output stream
-    _outStreams.push_back(new Stream);
+    _outStreams.push_back(new Stream(this));
     _outStreams.back()->setInfo(0);
     _outStreams.back()->setQueue(0);
 }
@@ -1006,9 +1068,9 @@ Node("decoder")
 void
 Decoder::init()
 {
-    // init() is called on attach() so _inStreams[0]->_pStreamInfo is available
+    // init() is called on attach() so _inStreams[0]->_pStreamInfo should be available
     if (!_inStreams[0]->getInfo()) {
-        throw Poco::Exception("decoder init failed, missing input stream info");
+        throw Poco::Exception("decoder init failed, input stream info not allocated");
     }
     _inStreams[0]->getInfo()->findCodec();
     if (_inStreams[0]->getInfo()->isAudio()) {
@@ -1026,29 +1088,21 @@ void
 Decoder::run()
 {
     int frameCount = 0;
-    // TODO: Node::run(), this loop is the same for all nodes
     Frame* pFrame;
-    if (!_inStreams[0] || !_inStreams[0]->getQueue()) {
+    if (!_inStreams[0]) {
         Log::instance()->avstream().warning(Poco::format("no in stream attached to %s, stopping.", _name));
         return;
     }
-//     StreamQueue* inQueue = _inStreams[0]->getQueue();
-//     while (!_quit && (pFrame = inQueue->get()))
-    while (!_quit && (pFrame = _inStreams[0]->get()))
+    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        if (!_outStreams[0] || !_outStreams[0]->getQueue()) {
+        if (!_outStreams[0]) {
             Log::instance()->avstream().warning(Poco::format("no out stream attached to %s, discarding packet.", _name));
             continue;
         }
         Log::instance()->avstream().debug(Poco::format("decode %s frame #%s", _inStreams[0]->getName(), Poco::NumberFormatter::format0(++frameCount, 3)));
         
-        std::clog << "start decoding ..." << std::endl;
         Frame* pFrameDecoded = pFrame->decode();
-        std::clog << "decoding done." << std::endl;
-        if (pFrameDecoded) {
-//             _outStreams[0]->getQueue()->put(pFrameDecoded);
-            _outStreams[0]->put(pFrameDecoded);
-        }
+        _outStreams[0]->putFrame(pFrameDecoded);
     }
     Log::instance()->avstream().debug("decoder finished.");
 }

@@ -101,7 +101,7 @@ public:
     
     bool put(T element)
     {
-        Log::instance()->avstream().debug(Poco::format("queue put waiting in thread %s ...",
+        Log::instance()->avstream().trace(Poco::format("queue put waiting in thread %s ...",
             Poco::Thread::current()->name()));
         
         if (!_putSemaphore.tryWait(_putTimeout)) {
@@ -116,7 +116,7 @@ public:
         
         _getSemaphore.set();
         
-        Log::instance()->avstream().debug(Poco::format("queue put success in thread %s, size: %s",
+        Log::instance()->avstream().trace(Poco::format("queue put success in thread %s, size: %s",
             Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return true;
     }
@@ -124,7 +124,7 @@ public:
     
     T get()
     {
-        Log::instance()->avstream().debug(Poco::format("queue get waiting in thread %s ...",
+        Log::instance()->avstream().trace(Poco::format("queue get waiting in thread %s ...",
             Poco::Thread::current()->name()));
         
         if (!_getSemaphore.tryWait(_getTimeout)) {
@@ -140,7 +140,7 @@ public:
         
         _putSemaphore.set();
         
-        Log::instance()->avstream().debug(Poco::format("queue get success in thread %s, size: %s",
+        Log::instance()->avstream().trace(Poco::format("queue get success in thread %s, size: %s",
             Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return ret;
     }
@@ -214,12 +214,14 @@ class Stream
     friend class Frame;
     
 public:
-    
-    Stream(const std::string name = "avstream");
+    // TODO: in and out stream ctors (only in streams allocate a queue)
+    Stream(Node* node, const std::string name = "avstream");
     ~Stream();
     
-    Frame* get();
-    bool put(Frame* pFrame);
+    Frame* getFrame();
+    void putFrame(Frame* pFrame);
+    
+    Node* getNode();
     
     // TODO: extend this to handle more than one queue (tee stream)
     // getQueue(int queueNumber = 0)
@@ -234,11 +236,17 @@ public:
     void setQueue(StreamQueue* pQueue);
     
     Frame* allocateVideoFrame(PixelFormat targetFormat);
+    Frame* decodeFrame(Frame* pFrame);
+    
+private:
     Frame* decodeAudioFrame(Frame* pFrame);
     Frame* decodeVideoFrame(Frame* pFrame);
     
-private:
+    // _pNode of a Stream and of a StreamQueue can differ, as StreamQueue is shared between in and out streams
+    Node*               _pNode;
+    // _pStreamInfo and _pStreamQueue can be shared between in and out streams or are 0 if not attached
     StreamInfo*         _pStreamInfo;
+    // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
 };
 
@@ -248,6 +256,7 @@ class Node : Poco::Runnable
 public:
     Node(const std::string& name = "avstream node");
     
+    std::string getName();
     void setName(const std::string& name);
     
     void start();
@@ -255,6 +264,8 @@ public:
     
     void attach(Node* node, int outStreamNumber = 0, int inStreamNumber = 0);
     void detach(int outStreamNumber = 0);
+    
+    Node* getDownstreamNode(int outStreamNumber = 0);
     
 protected:
     virtual void init() {}
@@ -305,8 +316,6 @@ private:
 class Frame
 {
     friend class Stream;
-    friend class SyncStream;
-    friend class AsyncStream;
     
 public:
     Frame(const Frame& frame);
@@ -327,7 +336,6 @@ public:
     
     Stream* getStream();
     
-    // TODO: Frame::decode() asks Stream to decode the Frame, ..., is there a better way?
     Frame* decode();
     Frame* convert(PixelFormat targetFormat);
     
@@ -335,13 +343,17 @@ public:
     void write(Overlay* overlay);
     
 private:
+    // Frame must be a dynamic structure with three different "faces", determined at runtime.
+    // face 1: simple buffer
     char*               _data;
     int                 _size;
+    // face 2: packet coming from the demuxer
     AVPacket*           _pAvPacket;
+    // face 3: decoded frame
     AVFrame*            _pAvFrame;
     
+    // reference to the stream this frame is contained in
     Stream*             _pStream;
-//     Poco::FastMutex     _frameLock;
 };
 
 
@@ -396,40 +408,11 @@ class Sink : public Node
     friend class Clock;
     
 public:
-//     Sink(bool triggerClock = false);
     Sink(const std::string& name = "sink");
     virtual ~Sink() {}
     
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
-    
-//     virtual void open() = 0;
-//     virtual void close() = 0;
-    
-    // write frame into presentation buffer (video overlay or audio dsp buffer)
-//     virtual void writeFrame(Frame* pFrame) = 0;
-    // show the content of presentation buffer
-//     virtual void presentFrame() = 0;
-    
-//     virtual void pause() {}
-//     virtual void resume() {}
-    
-//     virtual int latency() { return 0; }
     virtual int eventLoop() { return 0; }
-    
-// protected:
-//     Stream*     _pStream;
-    
-// private:
-//     virtual void writeFrameQueued(Frame *pFrame);
-//     virtual void presentFrameQueued();
-    
-    // each stream waits OMM_FRAME_PRESENTATION_TIMEOUT ms for data to be fully written to the sink
-    // note: when blocked writing to the sink (e.g. audio sink), this is the maximum duration for one frame to be played
-//     const int               _presesentationTimeout;
-//     Poco::Semaphore         _presentationSemaphore;
-//     Poco::FastMutex         _presentationLock;
-    
-//     bool                    _triggerClock;
 };
 
 

@@ -43,7 +43,7 @@ public:
         Omm::AvStream::Decoder audioDecoder;
         Omm::AvStream::Decoder videoDecoder;
         
-        demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
+//         demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
         demuxer.attach(&videoDecoder, demuxer.firstVideoStream());
         
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
@@ -61,8 +61,9 @@ public:
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
-        
         Poco::Thread::sleep(2000);
+        demuxer.stop();
+        
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
         
         //////////// deallocate meta data and packet queues ////////////

@@ -30,7 +30,7 @@ PpmVideoSink::PpmVideoSink() :
 Sink("ppm video sink")
 {
     // video sink has one input stream
-    _inStreams.push_back(new Omm::AvStream::Stream);
+    _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams.back()->setInfo(0);
     _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
     
@@ -59,13 +59,11 @@ PpmVideoSink::run()
     int frameCount = 0;
     // TODO: Node::run(), this loop is the same for all nodes
     Omm::AvStream::Frame* pFrame;
-    if (!_inStreams[0] || !_inStreams[0]->getQueue()) {
+    if (!_inStreams[0]) {
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
         return;
     }
-//     Omm::AvStream::StreamQueue* inQueue = _inStreams[0]->getQueue();
-//     while (!_quit && (pFrame = inQueue->get()))
-    while (!_quit && (pFrame = _inStreams[0]->get()))
+    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
         std::string filename(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
         std::clog << "writing frame to file " << filename;
