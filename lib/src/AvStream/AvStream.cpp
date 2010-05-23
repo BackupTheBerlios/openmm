@@ -412,11 +412,11 @@ Stream::allocateVideoFrame(PixelFormat targetFormat)
     Log::instance()->avstream().trace("ffmpeg::av_malloc() ...");
     uint8_t* buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
     Log::instance()->avstream().trace("ffmpeg::avcodec_alloc_frame() ...");
-    AVFrame* pOutFrame = avcodec_alloc_frame();
+    AVFrame* pRes = avcodec_alloc_frame();
     Log::instance()->avstream().trace("ffmpeg::avpicture_fill() ...");
-    avpicture_fill((AVPicture *)pOutFrame, buffer, targetFormat, _pStreamInfo->width(), _pStreamInfo->height());
+    avpicture_fill((AVPicture *)pRes, buffer, targetFormat, getInfo()->width(), getInfo()->height());
     
-    return new Frame(this, pOutFrame);
+    return new Frame(this, pRes);
 }
 
 
@@ -477,9 +477,6 @@ Stream::decodeAudioFrame(Frame* pFrame)
 Frame*
 Stream::decodeVideoFrame(Frame* pFrame)
 {
-    uint8_t* paddedBuffer = (uint8_t*)pFrame->data();
-    unsigned int paddedBufferSize = pFrame->size();
-    
     AVFrame outPic;
     int decodeSuccess;
     Log::instance()->avstream().trace("ffmpeg::avcodec_decode_video() ...");
@@ -765,7 +762,8 @@ _pStream(pStream)
 // _pAvFrame(0),
 // _pStream(pStream)
 // {
-//     // NOTE: without copying the packets, the resulting decoded frames are somewhat garbled
+//     // NOTE: without copying the payload of the packets, the resulting decoded frames are somewhat garbled
+//     // ... still don't completely understand ffmpeg's memory management ...
 //     _pAvPacket = new AVPacket;
 //     *_pAvPacket = *pAvPacket;
 //     _data = (char*)_pAvPacket->data;
@@ -859,14 +857,21 @@ AVFrame*
 Frame::copyFrame(AVFrame* pAvFrame)
 {
     // allocate AVFrame in the format of this stream
-    AVFrame* pRes = allocateFrame(_pStream->_pStreamInfo->pixelFormat());
+    AVFrame* pRes = allocateFrame(_pStream->getInfo()->pixelFormat());
+    
     // copy payload
-    for (int planes = 0; planes < 4; planes++) {
-        if (pRes->linesize[planes] != pAvFrame->linesize[planes]) {
-            Log::instance()->avstream().error("copy AVFrame failed, format missmatch linesizes of source and target don't fit");
-        }
-        memcpy(pRes->data[planes], pAvFrame->data[planes], pAvFrame->linesize[planes]);
-    }
+//     for (int planes = 0; planes < 4; planes++) {
+//         if (pRes->linesize[planes] != pAvFrame->linesize[planes]) {
+//             Log::instance()->avstream().error("copy AVFrame failed, format missmatch linesizes of source and target don't fit");
+//         }
+//         memcpy(pRes->data[planes], pAvFrame->data[planes], pAvFrame->linesize[planes]);
+//     }
+    
+    // copy payload
+    av_picture_copy((AVPicture*)pRes, (AVPicture*) pAvFrame,
+                    _pStream->getInfo()->pixelFormat(),
+                    _pStream->getInfo()->width(),
+                    _pStream->getInfo()->height());
     
     return pRes;
 }
@@ -939,12 +944,18 @@ Frame::decode()
 
 
 Frame*
-Frame::convert(PixelFormat targetFormat)
+Frame::convert(PixelFormat targetFormat, int targetWidth, int targetHeight)
 {
-    _pStream->_pStreamInfo->printInfo();
-    int width = _pStream->_pStreamInfo->width();
-    int height = _pStream->_pStreamInfo->height();
-    PixelFormat inPixFormat = _pStream->_pStreamInfo->pixelFormat();
+    _pStream->getInfo()->printInfo();
+    int width = _pStream->getInfo()->width();
+    int height = _pStream->getInfo()->height();
+    if (targetWidth == -1) {
+        targetWidth = width;
+    }
+    if (targetHeight == -1) {
+        targetHeight = height;
+    }
+    PixelFormat inPixFormat = _pStream->getInfo()->pixelFormat();
     
     Log::instance()->avstream().debug(Poco::format("source pixelFormat: %s, target pixelFormat: %s",
         Poco::NumberFormatter::format(inPixFormat),
@@ -968,18 +979,18 @@ Frame::convert(PixelFormat targetFormat)
     }
     
     // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
-    Frame* pOutFrame = _pStream->allocateVideoFrame(targetFormat);
+    Frame* pRes = _pStream->allocateVideoFrame(targetFormat);
     
     printInfo();
     Log::instance()->avstream().trace("ffmpeg::sws_scale() ...");
     int outSlizeHeight = sws_scale(pImgConvertContext,
                                    _pAvFrame->data, _pAvFrame->linesize,
                                    0, height,
-                                   pOutFrame->_pAvFrame->data, pOutFrame->_pAvFrame->linesize);
+                                   pRes->_pAvFrame->data, pRes->_pAvFrame->linesize);
     
-    pOutFrame->printInfo();
+    pRes->printInfo();
     
-    return pOutFrame;
+    return pRes;
 }
 
 

@@ -341,7 +341,9 @@ public:
     Stream* getStream();
     
     Frame* decode();
-    Frame* convert(PixelFormat targetFormat);
+    
+    // width and height = -1 means, leave the size of the frame as it is
+    Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
     
     void writePpm(const std::string& fileName);
     void write(Overlay* overlay);

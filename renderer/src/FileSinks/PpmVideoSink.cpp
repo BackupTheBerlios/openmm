@@ -36,7 +36,7 @@ Sink("ppm video sink")
     // 1. decoded video frames take up quit some memory
     // 2. there is a memory management issue with ffmpeg, haven't been able to store
     //    decoded video frames, yet.
-    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this, 20));
+    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
     
     // and no output stream
 }
@@ -72,7 +72,13 @@ PpmVideoSink::run()
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
         std::string fileName(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
-        pFrame->writePpm(fileName);
+        Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+        if (!pDecodedFrame) {
+            Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding packet", getName()));
+        }
+        else {
+            pDecodedFrame->writePpm(fileName);
+        }
     }
     
     Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
