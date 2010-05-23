@@ -32,7 +32,11 @@ Sink("ppm video sink")
     // video sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams.back()->setInfo(0);
-    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
+    // NOTE: stream queue for decoded video frames has size one. Reasons:
+    // 1. decoded video frames take up quit some memory
+    // 2. there is a memory management issue with ffmpeg, haven't been able to store
+    //    decoded video frames, yet.
+    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this, 20));
     
     // and no output stream
 }
@@ -67,9 +71,8 @@ PpmVideoSink::run()
     }
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        std::string filename(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
-        std::clog << "writing frame to file " << filename;
-        pFrame->writePpm(filename);
+        std::string fileName(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
+        pFrame->writePpm(fileName);
     }
     
     Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");

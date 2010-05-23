@@ -163,7 +163,7 @@ private:
 class StreamQueue : public Queue<Frame*>
 {
 public:
-    StreamQueue(Node* pNode, int size = 20, int putTimeout = 100, int getTimeout = 500);
+    StreamQueue(Node* pNode, int size = 20, int putTimeout = 250, int getTimeout = 500);
     
     Node* getNode();
     
@@ -328,6 +328,7 @@ public:
     
     char* data();
     int size();
+    int paddedSize();
     
     char* planeData(int plane);
     int planeSize(int plane);
@@ -347,6 +348,7 @@ private:
     // face 1: simple buffer
     char*               _data;
     int                 _size;
+    int                 _paddedSize;
     // face 2: packet coming from the demuxer
     AVPacket*           _pAvPacket;
     // face 3: decoded frame

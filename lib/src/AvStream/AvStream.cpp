@@ -479,29 +479,21 @@ Stream::decodeVideoFrame(Frame* pFrame)
 {
     uint8_t* paddedBuffer = (uint8_t*)pFrame->data();
     unsigned int paddedBufferSize = pFrame->size();
-    // FIXME: provide the padded buffer in Frame::Frame(AVPacket)
-//     Log::instance()->avstream().trace("ffmpeg::av_fast_realloc() ...");
-//     av_fast_realloc(paddedBuffer, &paddedBufferSize, pFrame->size() + FF_INPUT_BUFFER_PADDING_SIZE);
-//     Log::instance()->avstream().trace(Poco::format("ffmpeg::av_fast_realloc() buffer size old: %s, new: %s",
-//         Poco::NumberFormatter::format(pFrame->size()),
-//         Poco::NumberFormatter::format(paddedBufferSize)));
     
     AVFrame outPic;
     int decodeSuccess;
     Log::instance()->avstream().trace("ffmpeg::avcodec_decode_video() ...");
     int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvCodecContext,
                                              &outPic, &decodeSuccess,
-                                             paddedBuffer, paddedBufferSize);
-    Log::instance()->avstream().trace("ffmpeg::avcodec_decode_video() finished.");
-    
-    // FIXME: this segfaults
-//     Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_video() %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
-//         (decodeSuccess ? "success" : "failed"),
-//         Poco::NumberFormatter::format(bytesConsumed),
-//         Poco::NumberFormatter::format(outPic.linesize[0]),
-//         Poco::NumberFormatter::format(outPic.linesize[1]),
-//         Poco::NumberFormatter::format(outPic.linesize[2])
-//         ));
+                                             (uint8_t*)pFrame->data(), pFrame->paddedSize());
+    std::string success(decodeSuccess ? "success" : "failed");
+    Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_video() %s, bytes consumed: %s, linesize[0..2]: %s, %s, %s",
+        success,
+        Poco::NumberFormatter::format(bytesConsumed),
+        Poco::NumberFormatter::format(outPic.linesize[0]),
+        Poco::NumberFormatter::format(outPic.linesize[1]),
+        Poco::NumberFormatter::format(outPic.linesize[2])
+        ));
     
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
         Log::instance()->avstream().warning(Poco::format("decoding video frame in stream %s failed, discarding frame.", getName()));
@@ -756,12 +748,13 @@ _pStream(pStream)
 {
     _pAvPacket = new AVPacket;
     *_pAvPacket = *pAvPacket;
-    _data = new char[pAvPacket->size];
+    // make all packets a bit larger, not only the video packets
+    // this doesn't hurt, they will be deleted immediately
+    _data = new char[pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE];
     _size = pAvPacket->size;
+    _paddedSize = pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE;
     memcpy(_data, pAvPacket->data, pAvPacket->size);
     av_free(_pAvPacket);
-    
-//     std::clog << "new frame of size: " << _pAvPacket->size << std::endl;
 }
 
 
@@ -813,6 +806,13 @@ int
 Frame::size()
 {
     return _size;
+}
+
+
+int
+Frame::paddedSize()
+{
+    return _paddedSize;
 }
 
 
