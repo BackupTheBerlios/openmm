@@ -322,7 +322,10 @@ public:
     Frame(Stream* pStream);
     Frame(Stream* pStream, int dataSize);
     Frame(Stream* pStream, char* data, int dataSize);
+    
+    // copies *pAvPacket (and it's payload) into Frame and deletes *pAvPacket (and it's payload)
     Frame(Stream* pStream, AVPacket* pAvPacket);
+    // copies *pAvFrame (and it's payload) into Frame and deletes *pAvFrame (and it's payload)
     Frame(Stream* pStream, AVFrame* pAvFrame);
     ~Frame();
     
@@ -344,6 +347,8 @@ public:
     void write(Overlay* overlay);
     
 private:
+    AVPacket* copyPacket(AVPacket* pAvPacket, int padSize);
+    
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // face 1: simple buffer
     char*               _data;

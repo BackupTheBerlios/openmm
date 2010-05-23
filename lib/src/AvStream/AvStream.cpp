@@ -492,8 +492,7 @@ Stream::decodeVideoFrame(Frame* pFrame)
         Poco::NumberFormatter::format(bytesConsumed),
         Poco::NumberFormatter::format(outPic.linesize[0]),
         Poco::NumberFormatter::format(outPic.linesize[1]),
-        Poco::NumberFormatter::format(outPic.linesize[2])
-        ));
+        Poco::NumberFormatter::format(outPic.linesize[2])));
     
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
         Log::instance()->avstream().warning(Poco::format("decoding video frame in stream %s failed, discarding frame.", getName()));
@@ -746,15 +745,14 @@ _pAvPacket(0),
 _pAvFrame(0),
 _pStream(pStream)
 {
-    _pAvPacket = new AVPacket;
-    *_pAvPacket = *pAvPacket;
     // make all packets a bit larger, not only the video packets
-    // this doesn't hurt, they will be deleted immediately
-    _data = new char[pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE];
-    _size = pAvPacket->size;
-    _paddedSize = pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE;
-    memcpy(_data, pAvPacket->data, pAvPacket->size);
-    av_free(_pAvPacket);
+    // this doesn't hurt, as they will be deleted shortly after
+    _pAvPacket = copyPacket(pAvPacket, FF_INPUT_BUFFER_PADDING_SIZE);
+    _data = (char*)_pAvPacket->data;
+    _size = _pAvPacket->size;
+    _paddedSize = _pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE;
+    Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
+    av_free_packet(pAvPacket);
 }
 
 
@@ -762,9 +760,12 @@ Frame::Frame(Stream* pStream, AVFrame* pAvFrame) :
 _data(0),
 _size(0),
 _pAvPacket(0),
-_pAvFrame(pAvFrame),
+_pAvFrame(0),
 _pStream(pStream)
 {
+    // NOTE: seems like ffmpeg holds one GOP in memory.
+    // the pointers to the picture data are copied in struc AVFrame into AvStream::Frame
+    
     // NOTE: if we don't copy the frame data after decoding a frame,
     // it is deleted / overriden by libavcodec (for example: only the last three frames of 
     // the stream are stored)
@@ -773,8 +774,13 @@ _pStream(pStream)
     _pAvFrame = new AVFrame;
     *_pAvFrame = *pAvFrame;
     
+    // NOTE: this only points to the correct data in planeless picture formats
     _size = _pStream->_pStreamInfo->pictureSize();
     _data = (char*)_pAvFrame->data[0];
+    
+    // FIXME: need to copy the data, too.
+    
+    // FIXME: then free pAvFrame
 }
 
 
@@ -792,6 +798,22 @@ Frame::~Frame()
         delete _pAvFrame;
         _pAvFrame = 0;
     }
+}
+
+
+AVPacket*
+Frame::copyPacket(AVPacket* pAvPacket, int padSize)
+{
+    // allocate AVPacket struc
+    AVPacket* pRes = new AVPacket;
+    // copy fields of AVPacket struc
+    *pRes = *pAvPacket;
+    // allocate payload
+    pRes->data = new uint8_t[pAvPacket->size + padSize];
+    // copy payload
+    memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
+    
+    return pRes;
 }
 
 
@@ -1076,8 +1098,8 @@ Demuxer::run()
         Frame* pFrame = new Frame(_outStreams[packet.stream_index], &packet);
         // try to put the frame in the queue
         _outStreams[packet.stream_index]->putFrame(pFrame);
-        Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
-        av_free_packet(&packet);
+//         Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
+//         av_free_packet(&packet);
     }
 }
 
