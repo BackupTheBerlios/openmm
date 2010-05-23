@@ -10,33 +10,33 @@ ${omm_SOURCE_DIR}/lib
 )
 endif(TARGET omm)
 
-SET( OMM_AV_STREAM_SDLSINK_SRCS
-SdlSink.cpp
+SET( OMM_AVSTREAM_SDL_VIDEOSINK_SRCS
+SdlVideoSink.cpp
 )
 
-SET( OMM_AV_STREAM_SDL_AUDIOSINK_SRCS
+SET( OMM_AVSTREAM_SDL_AUDIOSINK_SRCS
 SdlAudioSink.cpp
 )
 
-ADD_LIBRARY( ommavr-sdlsink
+ADD_LIBRARY( omm-videosink-sdl
 SHARED
-${OMM_AV_STREAM_SDLSINK_SRCS}
+${OMM_AVSTREAM_SDL_VIDEOSINK_SRCS}
 )
 
-ADD_LIBRARY( omm-audiosink-sdl
-SHARED
-${OMM_AV_STREAM_SDLSINK_SRCS}
-)
+# ADD_LIBRARY( omm-audiosink-sdl
+# SHARED
+# ${OMM_AVSTREAM_SDL_AUDIOSINK_SRCS}
+# )
 
-TARGET_LINK_LIBRARIES( ommavr-sdlsink
+TARGET_LINK_LIBRARIES( omm-videosink-sdl
 ${SDL_LIBRARY}
 )
 
-TARGET_LINK_LIBRARIES( omm-audiosink-sdl
-${SDL_LIBRARY}
-)
+# TARGET_LINK_LIBRARIES( omm-audiosink-sdl
+# ${SDL_LIBRARY}
+# )
 
-INSTALL( TARGETS ommavr-sdlsink omm-audiosink-sdl
+INSTALL( TARGETS omm-videosink-sdl
 LIBRARY DESTINATION lib
 )
 

@@ -23,38 +23,57 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
-#include "SdlSink.h"
+#include "SdlVideoSink.h"
 
 
-SdlSinkPlugin::SdlSinkPlugin() :
-Sink(false),
+SdlVideoSink::SdlVideoSink() :
+Sink("sdl video sink"),
 _pOverlay(new Omm::AvStream::Overlay)
 {
+    // video sink has one input stream
+    _inStreams.push_back(new Omm::AvStream::Stream(this));
+    _inStreams.back()->setInfo(0);
+    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
+    
+    // and no output stream
 }
 
 
-SdlSinkPlugin::~SdlSinkPlugin()
+SdlVideoSink::~SdlVideoSink()
 {
     delete _pOverlay;
 }
 
 
-void
-SdlSinkPlugin::open()
+bool
+SdlVideoSink::init()
 {
     Omm::AvStream::Log::instance()->avstream().debug("opening SDL video sink ...");
     
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("failed to init SDL:  %s", std::string(SDL_GetError())));
-        return;
+        return false;
     }
     
     _pSdlScreen = SDL_SetVideoMode(720, 576, 0, SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_HWACCEL);
     if (_pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open SDL window: %s", std::string(SDL_GetError())));
-        return;
+        return false;
     }
-
+    
+    if (!_inStreams[0]->getInfo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->findCodec()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->isVideo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a video stream", getName()));
+        return false;
+    }
+    
     _pSdlOverlay = SDL_CreateYUVOverlay(720, 576, SDL_YV12_OVERLAY, _pSdlScreen);
     _pOverlay->_data[0] = _pSdlOverlay->pixels[0];
     _pOverlay->_data[1] = _pSdlOverlay->pixels[2];
@@ -65,27 +84,57 @@ SdlSinkPlugin::open()
     _pOverlay->_pitch[2] = _pSdlOverlay->pitches[1];
 
     Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opened.");
+    return true;
 }
 
 
 void
-SdlSinkPlugin::close()
+SdlVideoSink::run()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink closed.");
+    if (!_inStreams[0]) {
+        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
+        return;
+    }
+    
+    int frameCount = 0;
+    Omm::AvStream::Frame* pFrame;
+    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
+    {
+        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s processing frame #%s",
+            getName(), Poco::NumberFormatter::format0(++frameCount, 3)));
+        
+        Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+        if (!pDecodedFrame) {
+            Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding packet", getName()));
+        }
+        else {
+            pDecodedFrame->write(_pOverlay);
+        }
+        presentFrame();
+    }
+
+    Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
 }
 
 
-void
-SdlSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
-{
-    Omm::AvStream::Log::instance()->avstream().debug("write frame to SDL video overlay");
-    _pCurrentFrame = pFrame;
-    pFrame->write(_pOverlay);
-}
+// void
+// SdlSinkPlugin::close()
+// {
+//     Omm::AvStream::Log::instance()->avstream().debug("SDL video sink closed.");
+// }
+
+
+// void
+// SdlVideoSink::writeFrame(Omm::AvStream::Frame* pFrame)
+// {
+//     Omm::AvStream::Log::instance()->avstream().debug("write frame to SDL video overlay");
+//     _pCurrentFrame = pFrame;
+//     pFrame->write(_pOverlay);
+// }
 
 
 void
-SdlSinkPlugin::presentFrame()
+SdlVideoSink::presentFrame()
 {
     SDL_Rect rect;
     rect.x = 0;
@@ -104,7 +153,7 @@ SdlSinkPlugin::presentFrame()
 
 
 int
-SdlSinkPlugin::eventLoop()
+SdlVideoSink::eventLoop()
 {
     Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
 //     Poco::Thread::sleep(10000);
@@ -114,5 +163,5 @@ SdlSinkPlugin::eventLoop()
 
 
 POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
-POCO_EXPORT_CLASS(SdlSinkPlugin)
+POCO_EXPORT_CLASS(SdlVideoSink)
 POCO_END_MANIFEST

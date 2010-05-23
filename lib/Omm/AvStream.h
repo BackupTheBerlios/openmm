@@ -163,7 +163,7 @@ private:
 class StreamQueue : public Queue<Frame*>
 {
 public:
-    StreamQueue(Node* pNode, int size = 20, int putTimeout = 250, int getTimeout = 500);
+    StreamQueue(Node* pNode, int size = 20, int putTimeout = 500, int getTimeout = 500);
     
     Node* getNode();
     
@@ -172,6 +172,7 @@ private:
 };
 
 
+// FIXME: access to StreamInfo may be locked here and there
 class StreamInfo
 {
     friend class Stream;
@@ -270,6 +271,9 @@ public:
 protected:
     virtual bool init() {}
     virtual void run() {}
+    
+//     void setStop(bool stop);
+//     bool doStop();
     
     std::string                     _name;
     std::vector<Stream*>            _inStreams;

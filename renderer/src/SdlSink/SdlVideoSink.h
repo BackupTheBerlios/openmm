@@ -18,36 +18,37 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef SdlSink_INCLUDED
-#define SdlSink_INCLUDED
+#ifndef SdlVideoSink_INCLUDED
+#define SdlVideoSink_INCLUDED
 
 #include <SDL/SDL.h>
-#include <Poco/Mutex.h>
-#include <Poco/Semaphore.h>
 
 #include <Omm/AvStream.h>
 
 
-class SdlSinkPlugin : public Omm::AvStream::Sink
+class SdlVideoSink : public Omm::AvStream::Sink
 {
 public:
-    SdlSinkPlugin();
-    virtual ~SdlSinkPlugin();
+    SdlVideoSink();
+    virtual ~SdlVideoSink();
     
-    virtual void open();
-    virtual void close();
+//     virtual void open();
+//     virtual void close();
     
-    virtual void writeFrame(Omm::AvStream::Frame *pFrame);
-    virtual void presentFrame();
+//     virtual void writeFrame(Omm::AvStream::Frame *pFrame);
     
     virtual int eventLoop();
     
 private:
-    SDL_Surface*            _pSdlScreen;
-    SDL_Overlay*            _pSdlOverlay;
+    virtual bool init();
+    virtual void run();
+    
+    virtual void presentFrame();
+    
+    SDL_Surface*                  _pSdlScreen;
+    SDL_Overlay*                  _pSdlOverlay;
     
     Omm::AvStream::Overlay*       _pOverlay;
-    Omm::AvStream::Frame*         _pCurrentFrame;
 };
 
 #endif
