@@ -23,90 +23,104 @@
 #include "SdlAudioSink.h"
 
 
-AudioSinkPlugin::AudioSinkPlugin() /*:
-pcm_playback(0),
-device("default"),
-format(SND_PCM_FORMAT_S16),
-rate(44100),
-channels(2),
-periods(2),
-periodsize(8192),
-buffer(new char[periodsize]),
-bufferPos(buffer),
-frames(periodsize >> 2)*/
+SdlAudioSink::SdlAudioSink() :
+Sink("sdl audio sink"),
+_frameCount(0)
+{
+    // audio sink has one input stream
+    _inStreams.push_back(new Omm::AvStream::Stream(this));
+    _inStreams[0]->setInfo(0);
+    _inStreams[0]->setQueue(new Omm::AvStream::StreamQueue(this));
+    
+    // and no output stream
+}
+
+
+SdlAudioSink::~SdlAudioSink()
 {
 }
 
 
-AudioSinkPlugin::~AudioSinkPlugin()
+void audioCallback(void* sinkNode, uint8_t* sdlBuffer, int sdlBufferSize)
 {
-    delete buffer;
+    Omm::AvStream::Log::instance()->avstream().debug("sdl audio sink, audioCallback");
+    
+    Omm::AvStream::Sink* pSdlAudioSink = (Omm::AvStream::Sink*)sinkNode;
+    Omm::AvStream::Frame* pFrame;
+    if (!pSdlAudioSink->doStop() && (pFrame = pSdlAudioSink->getInStream(0)->getFrame()))
+    {
+        Omm::AvStream::Log::instance()->avstream().debug("sdl audio sink, audioCallback processing frame");
+        
+//         pFrame->data();
+//         pFrame->size();
+//         uint8_t buffer[];
+        int bufferSize = (pFrame->size() > sdlBufferSize ? sdlBufferSize : pFrame->size());
+        memcpy(sdlBuffer, (uint8_t*)pFrame->data(), bufferSize);
+    }
+    else {
+        // How to stop that? Or better generate silence?
+    }
+}
+
+
+bool
+SdlAudioSink::init()
+{
+    Omm::AvStream::Log::instance()->avstream().debug("opening SDL audio sink ...");
+    
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0 ) {
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("failed to init SDL:  %s", std::string(SDL_GetError())));
+        return false;
+    }
+    
+    
+    // audio device parameters
+    _deviceParamsWanted.freq = _inStreams[0]->getInfo()->sampleRate();
+    _deviceParamsWanted.format = AUDIO_S16SYS;
+    _deviceParamsWanted.channels = _inStreams[0]->getInfo()->channels();
+    _deviceParamsWanted.silence = 0;
+    _deviceParamsWanted.samples = 1024;
+    _deviceParamsWanted.callback = audioCallback;
+    _deviceParamsWanted.userdata = this;
+    
+    if(SDL_OpenAudio(&_deviceParamsWanted, &_deviceParams) < 0) {
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open SDL audio device: %s", std::string(SDL_GetError())));
+        return false;
+    }
+    
+    if (!_inStreams[0]->getInfo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->isAudio()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a audio stream", getName()));
+        return false;
+    }
+
+    
+    Omm::AvStream::Log::instance()->avstream().debug("SDL audio sink opened.");
+    return true;
 }
 
 
 void
-AudioSinkPlugin::open()
+SdlAudioSink::run()
 {
-    open("default");
+    if (!_inStreams[0]->getQueue()) {
+        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
+        return;
+    }
+    
+    SDL_PauseAudio(0);
+    
+    // TODO: do we need to block here? I think, no ...
+    Poco::Thread::sleep(5000);
+    
+    Omm::AvStream::Log::instance()->avstream().debug("sdl audio sink finished.");
 }
 
 
-void
-AudioSinkPlugin::open(const std::string& device)
-{
-    std::clog << "Opening SDL audio sink with device: " << device << std::endl;
-    
-//     int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
-//     if (err < 0) {
-//         std::cerr << "error: could not open alsa device: " << device << std::endl;
-//         return;
-//     }
-    
-    initDevice();
-    
-    std::clog << "SDL audio sink opened." << std::endl;
-}
 
-
-void
-AudioSinkPlugin::close()
-{
-    std::clog << "AudioSinkPlugin::close()" << std::endl;
-    
-//     if (pcm_playback) {
-//         snd_pcm_drop(pcm_playback);
-//         snd_pcm_close(pcm_playback);
-//     }
-}
-
-
-void
-AudioSinkPlugin::initDevice()
-{
-    std::clog << "AudioSinkPlugin::initDevice()" << std::endl;
-    
-
-}
-
-
-void
-AudioSinkPlugin::writeFrame(Omm::Av::Frame* pFrame)
-{
-    std::clog << "Alsa audio Sink::writeFrame()" << std::endl;
-//     if (!pFrame) {
-//         std::cerr << "error: no frame to write" << std::endl;
-//         return;
-//     }
-//     
-//     int framesWritten;
-//     while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
-//         snd_pcm_prepare(pcm_playback);
-//         std::cerr << "<<<<<<<<<<<<<<< buffer underrun >>>>>>>>>>>>>>>" << std::endl;
-//     }
-//     std::clog << "frames written: " << framesWritten << std::endl;
-}
-
-
-POCO_BEGIN_MANIFEST(Omm::Av::Sink)
-POCO_EXPORT_CLASS(AudioSinkPlugin)
+POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
+POCO_EXPORT_CLASS(SdlAudioSink)
 POCO_END_MANIFEST

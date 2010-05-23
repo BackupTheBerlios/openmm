@@ -91,7 +91,7 @@ SdlVideoSink::init()
 void
 SdlVideoSink::run()
 {
-    if (!_inStreams[0]) {
+    if (!_inStreams[0]->getQueue()) {
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
         return;
     }

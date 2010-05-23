@@ -268,12 +268,16 @@ public:
     
     Node* getDownstreamNode(int outStreamNumber = 0);
     
+    // needed by C callback functions (see SdlAudioSink)
+    bool doStop();
+    Stream* getInStream(int inStreamNumber);
+    
 protected:
     virtual bool init() {}
     virtual void run() {}
     
 //     void setStop(bool stop);
-//     bool doStop();
+
     
     std::string                     _name;
     std::vector<Stream*>            _inStreams;

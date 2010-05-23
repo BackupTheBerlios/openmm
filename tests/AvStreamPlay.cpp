@@ -47,19 +47,22 @@ public:
         
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
         //////////// load and attach audio Sink ////////////
-//         Omm::AvStream::Sink* audioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libommavr-alsasink.so", "AlsaSinkPlugin");
-        Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
-            "PcmAudioSink");
+        Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libomm-audiosink-alsa.so",
+            "AlsaAudioSink");
+//         Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
+//             "PcmAudioSink");
+//         Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so",
+//             "SdlAudioSink");
         audioDecoder.attach(pAudioSink);
         
         //////////// load and attach video Sink ////////////
-        if (demuxer.firstVideoStream() >= 0) {
-//             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
-//                 "PpmVideoSink");
-            Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
-                "SdlVideoSink");
-            demuxer.attach(pVideoSink, demuxer.firstVideoStream());
-        }
+//         if (demuxer.firstVideoStream() >= 0) {
+// //             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
+// //                 "PpmVideoSink");
+//             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
+//                 "SdlVideoSink");
+//             demuxer.attach(pVideoSink, demuxer.firstVideoStream());
+//         }
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         

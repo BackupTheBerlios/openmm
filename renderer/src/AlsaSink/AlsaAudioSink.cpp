@@ -22,11 +22,11 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
-#include "AlsaSink.h"
+#include "AlsaAudioSink.h"
 
 
-AlsaSinkPlugin::AlsaSinkPlugin() :
-Sink(true),
+AlsaAudioSink::AlsaAudioSink() :
+Sink("alsa audio sink"),
 pcm_playback(0),
 device("default"),
 format(SND_PCM_FORMAT_S16),
@@ -34,45 +34,47 @@ rate(44100),
 channels(2),
 periods(2),
 periodsize(8192),
-buffer(new char[periodsize]),
-bufferPos(buffer),
 frames(periodsize >> 2)
 {
+    // audio sink has one input stream
+    _inStreams.push_back(new Omm::AvStream::Stream(this));
+    _inStreams[0]->setInfo(0);
+    _inStreams[0]->setQueue(new Omm::AvStream::StreamQueue(this));
+    
+    // and no output stream
 }
 
 
-AlsaSinkPlugin::~AlsaSinkPlugin()
+AlsaAudioSink::~AlsaAudioSink()
 {
-    delete buffer;
 }
 
 
-void
-AlsaSinkPlugin::open()
+bool
+AlsaAudioSink::open()
 {
-    open("default");
+    return open("default");
 }
 
 
-void
-AlsaSinkPlugin::open(const std::string& device)
+bool
+AlsaAudioSink::open(const std::string& device)
 {
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("opening ALSA audio sink with device: %s", device));
     
     int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (err < 0) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open alsa device: %s", device));
-        return;
+        return false;
     }
     
-    initDevice();
-    
     Omm::AvStream::Log::instance()->avstream().debug("ALSA audio sink opened.");
+    return true;
 }
 
 
 void
-AlsaSinkPlugin::close()
+AlsaAudioSink::close()
 {
     if (pcm_playback) {
         snd_pcm_drop(pcm_playback);
@@ -83,33 +85,37 @@ AlsaSinkPlugin::close()
 }
 
 
-void
-AlsaSinkPlugin::initDevice()
+bool
+AlsaAudioSink::init()
 {
+    if (!open()) {
+        Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
+        return false;
+    }
     snd_pcm_hw_params_alloca(&hw);
     if (snd_pcm_hw_params_any(pcm_playback, hw) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("can not configure PCM device.");
-        return;
+        return false;
     }
     if (snd_pcm_hw_params_set_access(pcm_playback, hw, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device access.");
-        return;
+        return false;
     }
     if (snd_pcm_hw_params_set_format(pcm_playback, hw, format) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device format.");
-        return;
+        return false;
     }
     if (snd_pcm_hw_params_set_rate_near(pcm_playback, hw, &rate, 0) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate.");
-        return;
+        return false;
     }
     if (snd_pcm_hw_params_set_channels(pcm_playback, hw, channels) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels.");
-        return;
+        return false;
     }
     if (snd_pcm_hw_params_set_periods(pcm_playback, hw, periods, 0) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device periods.");
-        return;
+        return false;
     }
     // Set buffer size (in frames). The resulting latency is given by
     // latency = periodsize * periods / (rate * bytes_per_frame)
@@ -122,13 +128,46 @@ AlsaSinkPlugin::initDevice()
     }
     if (snd_pcm_hw_params(pcm_playback, hw) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("initializing alsa device.");
-        return;
+        return false;
     }
+    
+    if (!_inStreams[0]->getInfo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->isAudio()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a audio stream", getName()));
+        return false;
+    }
+    
+    return true;
 }
 
 
 void
-AlsaSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
+AlsaAudioSink::run()
+{
+    if (!_inStreams[0]->getQueue()) {
+        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
+        return;
+    }
+    
+    int frameCount = 0;
+    Omm::AvStream::Frame* pFrame;
+    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
+    {
+        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s processing frame #%s",
+            getName(), Poco::NumberFormatter::format0(++frameCount, 3)));
+        
+        writeFrame(pFrame);
+    }
+    
+    close();
+    Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
+}
+
+void
+AlsaAudioSink::writeFrame(Omm::AvStream::Frame* pFrame)
 {
     Omm::AvStream::Log::instance()->avstream().debug("write frame to ALSA PCM device");
     if (!pFrame) {
@@ -145,55 +184,6 @@ AlsaSinkPlugin::writeFrame(Omm::AvStream::Frame* pFrame)
 }
 
 
-// void AlsaSinkPlugin::pause()
-// {
-//     if (d->error) return;
-//     
-//     if (d->can_pause) {
-//         snd_pcm_pause(d->pcm_playback, 1);
-//     }
-//     
-// }
-// 
-// // Do not confuse this with snd_pcm_resume which is used to resume from a suspend
-// void AlsaSinkPlugin::resume()
-// {
-//     if (d->error) return;
-//     
-//     if (snd_pcm_state( d->pcm_playback ) == SND_PCM_STATE_PAUSED)
-//         snd_pcm_pause(d->pcm_playback, 0);
-// }
-
-// static int resume(snd_pcm_t *pcm)
-// {
-//     int res;
-//     while ((res = snd_pcm_resume(pcm)) == -EAGAIN)
-//         sleep(1);
-//     if (! res)
-//         return 0;
-//     return snd_pcm_prepare(pcm);
-// }
-
-
-// int AlsaSinkPlugin::latency()
-// {
-//     if (d->error || !d->initialized || d->config.sample_rate == 0) return 0;
-//     
-//     snd_pcm_sframes_t frames;
-//     
-//     snd_pcm_delay(d->pcm_playback, &frames);
-//     
-//     if (snd_pcm_state( d->pcm_playback ) != SND_PCM_STATE_RUNNING)
-//         return 0;
-//     
-//     // delay in ms after normal rounding
-//     int sample_rate = d->config.sample_rate;
-//     long div = (frames / sample_rate) * 1000;
-//     long rem = (frames % sample_rate) * 1000;
-//     
-//     return div + rem / sample_rate;
-// }
-
 POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
-POCO_EXPORT_CLASS(AlsaSinkPlugin)
+POCO_EXPORT_CLASS(AlsaAudioSink)
 POCO_END_MANIFEST

@@ -8,13 +8,13 @@ ${omm_SOURCE_DIR}/lib
 )
 endif(TARGET omm)
 
-SET( OMM_AV_STREAM_ALSASINK_SRCS
-AlsaSink.cpp
+SET( OMM_AVSTREAM_ALSASINK_SRCS
+AlsaAudioSink.cpp
 )
 
-ADD_LIBRARY( ommavr-alsasink
+ADD_LIBRARY( omm-audiosink-alsa
 SHARED
-${OMM_AV_STREAM_ALSASINK_SRCS}
+${OMM_AVSTREAM_ALSASINK_SRCS}
 )
 
 FIND_LIBRARY(LIB_ASOUND
@@ -22,11 +22,11 @@ NAME asound
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
-TARGET_LINK_LIBRARIES( ommavr-alsasink
+TARGET_LINK_LIBRARIES( omm-audiosink-alsa
 ${LIB_ASOUND}
 )
 
-INSTALL( TARGETS ommavr-alsasink
+INSTALL( TARGETS omm-audiosink-alsa
 LIBRARY DESTINATION lib
 )
 

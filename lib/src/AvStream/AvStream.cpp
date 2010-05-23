@@ -681,13 +681,19 @@ Node::getDownstreamNode(int outStreamNumber)
 // }
 // 
 // 
-// bool
-// Node::doStop()
-// {
+bool
+Node::doStop()
+{
 //     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-//     return _quit;
-// }
+    return _quit;
+}
 
+
+Stream*
+Node::getInStream(int inStreamNumber)
+{
+    return _inStreams[inStreamNumber];
+}
 
 
 // Frame::Frame(const Frame& frame) :

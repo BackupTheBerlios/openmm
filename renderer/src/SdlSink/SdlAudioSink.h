@@ -18,42 +18,30 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef AlsaSink_INCLUDED
-#define AlsaSink_INCLUDED
+#ifndef SdlAudioSink_INCLUDED
+#define SdlAudioSink_INCLUDED
 
 #include <SDL/SDL.h>
 
 #include <Omm/AvStream.h>
 
 
-class AudioSinkPlugin : public Omm::Av::Sink {
+class SdlAudioSink : public Omm::AvStream::Sink
+{
 public:
-    AudioSinkPlugin();
-    virtual ~AudioSinkPlugin();
-    virtual void open();
-    void open(const std::string& device);
-    virtual void close();
-    // Writes blocking
-    virtual void writeFrame(Omm::Av::Frame *pFrame);
-//     virtual void pause();
-//     virtual void resume();
-//     virtual int latency();
+    SdlAudioSink();
+    virtual ~SdlAudioSink();
+
 //     virtual int eventLoop();
     
 private:
-    void initDevice();
+    virtual bool init();
+    virtual void run();
     
-//     snd_pcm_t* pcm_playback;
-//     snd_pcm_hw_params_t *hw;
-//     std::string device;
-//     snd_pcm_format_t format;
-//     unsigned int rate;
-//     int channels;
-//     int periods;       // Number of periods
-//     snd_pcm_uframes_t periodsize; // Periodsize (bytes)
-//     char* buffer;
-//     char* bufferPos;
-//     snd_pcm_uframes_t frames;
+    SDL_AudioSpec       _deviceParamsWanted;
+    SDL_AudioSpec       _deviceParams;
+    
+    int                 _frameCount;
 };
 
 #endif
