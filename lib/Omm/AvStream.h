@@ -346,9 +346,11 @@ public:
     void writePpm(const std::string& fileName);
     void write(Overlay* overlay);
     
-private:
     AVPacket* copyPacket(AVPacket* pAvPacket, int padSize);
+    AVFrame* allocateFrame(PixelFormat format);
+    AVFrame* copyFrame(AVFrame* pAvFrame);
     
+private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // face 1: simple buffer
     char*               _data;

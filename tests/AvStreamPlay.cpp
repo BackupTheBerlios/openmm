@@ -45,10 +45,10 @@ public:
             demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
         }
         
-        Omm::AvStream::Decoder videoDecoder;
-        if (demuxer.firstVideoStream() >= 0) {
-            demuxer.attach(&videoDecoder, demuxer.firstVideoStream());
-        }
+//         Omm::AvStream::Decoder videoDecoder;
+//         if (demuxer.firstVideoStream() >= 0) {
+//             demuxer.attach(&videoDecoder, demuxer.firstVideoStream());
+//         }
         
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
         //////////// load and attach audio Sink ////////////
@@ -60,8 +60,8 @@ public:
 //         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "QtSink/libommavr-qtsink.so", "QtSinkPlugin");
 //         Omm::AvStream::Sink* videoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libommavr-sdlsink.so", "SdlSinkPlugin");
 
-        Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so", "PpmVideoSink");
-        videoDecoder.attach(pVideoSink);
+//         Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so", "PpmVideoSink");
+//         videoDecoder.attach(pVideoSink);
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         

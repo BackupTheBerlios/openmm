@@ -745,7 +745,9 @@ _pAvPacket(0),
 _pAvFrame(0),
 _pStream(pStream)
 {
-    // make all packets a bit larger, not only the video packets
+    // NOTE: seems like we need to copy and free the demuxed packets.
+    // copying the reference to the data results in garbled decoded frames
+    // NOTE: make all packets a bit larger, not only the video packets
     // this doesn't hurt, as they will be deleted shortly after
     _pAvPacket = copyPacket(pAvPacket, FF_INPUT_BUFFER_PADDING_SIZE);
     _data = (char*)_pAvPacket->data;
@@ -754,6 +756,22 @@ _pStream(pStream)
     Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
     av_free_packet(pAvPacket);
 }
+
+
+// Frame::Frame(Stream* pStream, AVPacket* pAvPacket) :
+// _data(0),
+// _size(0),
+// _pAvPacket(0),
+// _pAvFrame(0),
+// _pStream(pStream)
+// {
+//     // NOTE: without copying the packets, the resulting decoded frames are somewhat garbled
+//     _pAvPacket = new AVPacket;
+//     *_pAvPacket = *pAvPacket;
+//     _data = (char*)_pAvPacket->data;
+//     _size = _pAvPacket->size;
+//     _paddedSize = _pAvPacket->size;
+// }
 
 
 Frame::Frame(Stream* pStream, AVFrame* pAvFrame) :
@@ -773,6 +791,7 @@ _pStream(pStream)
     // NOTE: why these two lines are needed, dunno exactly ...
     _pAvFrame = new AVFrame;
     *_pAvFrame = *pAvFrame;
+//     _pAvFrame = copyFrame(pAvFrame);
     
     // NOTE: this only points to the correct data in planeless picture formats
     _size = _pStream->_pStreamInfo->pictureSize();
@@ -812,6 +831,42 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
     pRes->data = new uint8_t[pAvPacket->size + padSize];
     // copy payload
     memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
+    
+    return pRes;
+}
+
+
+AVFrame*
+Frame::allocateFrame(PixelFormat format)
+{
+    AVFrame* pRes = avcodec_alloc_frame();
+    Log::instance()->avstream().trace("ffmpeg::avpicture_fill() ...");
+    
+    // use int avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height) instead of avpicture_fill?
+    uint8_t* buffer = (uint8_t *)av_malloc(_pStream->_pStreamInfo->pictureSize());
+    Log::instance()->avstream().trace("ffmpeg::avcodec_alloc_frame() ...");
+    avpicture_fill((AVPicture *)pRes,
+                   buffer,
+                   format,
+                   _pStream->_pStreamInfo->width(),
+                   _pStream->_pStreamInfo->height());
+    
+    return pRes;
+}
+
+
+AVFrame*
+Frame::copyFrame(AVFrame* pAvFrame)
+{
+    // allocate AVFrame in the format of this stream
+    AVFrame* pRes = allocateFrame(_pStream->_pStreamInfo->pixelFormat());
+    // copy payload
+    for (int planes = 0; planes < 4; planes++) {
+        if (pRes->linesize[planes] != pAvFrame->linesize[planes]) {
+            Log::instance()->avstream().error("copy AVFrame failed, format missmatch linesizes of source and target don't fit");
+        }
+        memcpy(pRes->data[planes], pAvFrame->data[planes], pAvFrame->linesize[planes]);
+    }
     
     return pRes;
 }
@@ -1081,7 +1136,7 @@ Demuxer::run()
             Log::instance()->avstream().debug(Poco::format("ffmpeg::av_read_frame() returns: %s (%s)",
                 Poco::NumberFormatter::format(ret),
                 (ret == AVERROR_EOF ? "eof reached." : ".")));
-            return;
+            break;
         }
         Log::instance()->avstream().debug(Poco::format("ffmpeg::av_read_frame() returns packet #%s, type: %s, pts: %s, size: %s",
             Poco::NumberFormatter::format0(++i, 3),
@@ -1089,17 +1144,18 @@ Demuxer::run()
             Poco::NumberFormatter::format(packet.pts),
             Poco::NumberFormatter::format(packet.size)));
         
-        // create a new frame out of the AVPacket that we extracted from the stream
-        // create means: make a copy of the data buffer
-        // pass a reference to the stream to where this frame belongs (for further use of the codec context when decoding)
-        if (!_outStreams[packet.stream_index]) {
-            Log::instance()->avstream().error(Poco::format("%s stream %s not connected, discarding packet", getName(), Poco::NumberFormatter::format(packet.stream_index)));
+        if (!_outStreams[packet.stream_index]->getQueue()) {
+            Log::instance()->avstream().warning(Poco::format("%s stream %s not connected, discarding packet",
+                getName(), Poco::NumberFormatter::format(packet.stream_index)));
+            av_free_packet(&packet);
+            continue;
         }
+        // pass a reference to the stream to where this frame belongs (for further use of the codec context when decoding)
+        // create a new frame out of the AVPacket that we extracted from the stream
+        // create means: make a copy of the data buffer and delete the packet
         Frame* pFrame = new Frame(_outStreams[packet.stream_index], &packet);
         // try to put the frame in the queue
         _outStreams[packet.stream_index]->putFrame(pFrame);
-//         Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
-//         av_free_packet(&packet);
     }
 }
 
