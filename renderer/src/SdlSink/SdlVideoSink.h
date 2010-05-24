@@ -32,18 +32,14 @@ public:
     SdlVideoSink();
     virtual ~SdlVideoSink();
     
-//     virtual void open();
-//     virtual void close();
-    
-//     virtual void writeFrame(Omm::AvStream::Frame *pFrame);
-    
     virtual int eventLoop();
     
 private:
     virtual bool init();
     virtual void run();
+    virtual void onTick();
     
-    virtual void presentFrame();
+    void displayFrame();
     
     SDL_Surface*                  _pSdlScreen;
     SDL_Overlay*                  _pSdlOverlay;

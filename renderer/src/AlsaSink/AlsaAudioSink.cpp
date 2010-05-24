@@ -60,15 +60,15 @@ AlsaAudioSink::open()
 bool
 AlsaAudioSink::open(const std::string& device)
 {
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("opening ALSA audio sink with device: %s", device));
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opening with device: %s", getName(), device));
     
     int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (err < 0) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open alsa device: %s", device));
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s could not open device: %s", getName(), device));
         return false;
     }
     
-    Omm::AvStream::Log::instance()->avstream().debug("ALSA audio sink opened.");
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opened.", getName()));
     return true;
 }
 
@@ -81,7 +81,7 @@ AlsaAudioSink::close()
         snd_pcm_close(pcm_playback);
     }
     
-    Omm::AvStream::Log::instance()->avstream().debug("ALSA audio sink closed.");
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
 }
 
 
@@ -127,7 +127,7 @@ AlsaAudioSink::init()
             ));
     }
     if (snd_pcm_hw_params(pcm_playback, hw) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("initializing alsa device.");
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s initializing device.", getName()));
         return false;
     }
     
@@ -171,14 +171,14 @@ AlsaAudioSink::writeFrame(Omm::AvStream::Frame* pFrame)
 {
     Omm::AvStream::Log::instance()->avstream().debug("write frame to ALSA PCM device");
     if (!pFrame) {
-        Omm::AvStream::Log::instance()->avstream().error("no frame to write");
+        Omm::AvStream::Log::instance()->avstream().warning("no frame to write");
         return;
     }
     
     int framesWritten;
     while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
         snd_pcm_prepare(pcm_playback);
-        Omm::AvStream::Log::instance()->avstream().error("<<<<<<<<<<<<<<< audio device buffer underrun >>>>>>>>>>>>>>>");
+        Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< audio device buffer underrun >>>>>>>>>>>>>>>");
     }
 //     std::clog << "frames written: " << framesWritten << std::endl;
 }

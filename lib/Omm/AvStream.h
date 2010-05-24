@@ -130,6 +130,9 @@ public:
         if (!_getSemaphore.tryWait(_getTimeout)) {
             Log::instance()->avstream().warning(Poco::format("queue get timed out in thread %s.",
                 Poco::Thread::current()->name()));
+            // FIXME: Queue::get() what to return if timed out ...? 
+            // -> throw an exception ... use Poco::Semaphore::tryWait() with exception ...
+            // -> bool get(T& element)
             return false;
         }
         
@@ -432,6 +435,20 @@ public:
     
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
     virtual int eventLoop() { return 0; }
+    
+    void triggerTimer();
+    
+protected:
+    virtual void onTick() {}
+    
+    void startTimer();
+    void stopTimer();
+    
+private:
+    void timerThread();
+    
+    Queue<bool>      _timerQueue;
+    Poco::Thread     _timerThread;
 };
 
 
@@ -453,34 +470,48 @@ class Clock : public Poco::Runnable
 public:
     static Clock* instance();
     
-    void attachSink(Sink* pSink);
+    // attachSink()
+    // pSink: pointer to sink, that receives the timing signals
+    // frameBase: time in millisec between each signal
+    void attachSink(Sink* pSink, int frameBase);
     
-    // start automatic triggering with a timer, trigger intervall millisec milliseconds.
-    void start(long millisec);
+    // start()
+    // start automatic triggering with a timer
+    // interval: trigger intervall in millisec.
+    // interval = 0 means no internal clock, only external triggers
+    void start(long interval = 0);
     void stop();
     
-    // trigger the clock external manually
-    void trigger(long millisecPassed);
+    // sync()
+    // sync the clock with an external time source
+    // last: time in millisec passed since last sync
+    void sync(long last);
     
 private:
     Clock();
     
-    void run();
+    virtual void run();
+    // syncClock()
+    // last: time in millisec passed since last sync
+    // NOTE: this shoud be smaller than the smallest frameBase
+    // because in the current implementation this is the clock ticking interval
+    void syncClock(long last);
+    // internal clock with clock ticking interval _timerInterval
+    void syncTimed(Poco::Timer& timer);
     
     void notify();
-    void notifyTimed(Poco::Timer& timer);
     
     static Clock*           _pInstance;
     
     Poco::Timer             _timer;
-    Poco::Thread            _notifyThread;
+    long                    _timerInterval;
     
     Sink*                   _pSink;
     long                    _frameBaseSink;
     long                    _timeLeftSink;
     
-    Poco::Semaphore         _notifySemaphore;
-    Poco::FastMutex         _clockLock;
+    Queue<int>              _syncQueue;
+    Poco::Thread            _syncThread;
 };
 
 

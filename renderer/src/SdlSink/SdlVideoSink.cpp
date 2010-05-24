@@ -83,7 +83,7 @@ SdlVideoSink::init()
     _pOverlay->_pitch[1] = _pSdlOverlay->pitches[2];
     _pOverlay->_pitch[2] = _pSdlOverlay->pitches[1];
 
-    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opened.");
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opened.", getName()));
     return true;
 }
 
@@ -95,6 +95,9 @@ SdlVideoSink::run()
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
         return;
     }
+    
+    Omm::AvStream::Clock::instance()->attachSink(this, 40);
+    startTimer();
     
     int frameCount = 0;
     Omm::AvStream::Frame* pFrame;
@@ -110,31 +113,24 @@ SdlVideoSink::run()
         else {
             pDecodedFrame->write(_pOverlay);
         }
-        presentFrame();
     }
 
-    Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
+    stopTimer();
+    
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s finished.", getName()));
 }
 
 
-// void
-// SdlSinkPlugin::close()
-// {
-//     Omm::AvStream::Log::instance()->avstream().debug("SDL video sink closed.");
-// }
-
-
-// void
-// SdlVideoSink::writeFrame(Omm::AvStream::Frame* pFrame)
-// {
-//     Omm::AvStream::Log::instance()->avstream().debug("write frame to SDL video overlay");
-//     _pCurrentFrame = pFrame;
-//     pFrame->write(_pOverlay);
-// }
+void
+SdlVideoSink::onTick()
+{
+    Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s on tick.", getName()));
+    displayFrame();
+}
 
 
 void
-SdlVideoSink::presentFrame()
+SdlVideoSink::displayFrame()
 {
     SDL_Rect rect;
     rect.x = 0;
@@ -144,7 +140,8 @@ SdlVideoSink::presentFrame()
     // FIXME: lock access to Stream::height() and Stream::width()
 //     rect.w = _pCurrentFrame->getStream()->width();
 //     rect.h = _pCurrentFrame->getStream()->height();
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("SDL video Sink::present() frame width: %s, height: %s",
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame width: %s, height: %s",
+        getName(),
         Poco::NumberFormatter::format(rect.w),
         Poco::NumberFormatter::format(rect.h)));
     

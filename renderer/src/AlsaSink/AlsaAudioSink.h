@@ -26,7 +26,8 @@
 #include <alsa/asoundlib.h>
 #include <alsa/pcm.h>
 
-class AlsaAudioSink : public Omm::AvStream::Sink {
+class AlsaAudioSink : public Omm::AvStream::Sink
+{
 public:
     AlsaAudioSink();
     virtual ~AlsaAudioSink();

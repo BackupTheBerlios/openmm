@@ -28,7 +28,7 @@
 #include <AvStream.h>
 
 
-class AvPlayer /*: public Omm::AvStream::AvStream*/
+class AvPlayer
 {
 public:
     void play(std::istream& istr)
@@ -56,18 +56,20 @@ public:
         audioDecoder.attach(pAudioSink);
         
         //////////// load and attach video Sink ////////////
-//         if (demuxer.firstVideoStream() >= 0) {
-// //             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
-// //                 "PpmVideoSink");
-//             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
-//                 "SdlVideoSink");
-//             demuxer.attach(pVideoSink, demuxer.firstVideoStream());
-//         }
+        if (demuxer.firstVideoStream() >= 0) {
+//             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
+//                 "PpmVideoSink");
+            Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
+                "SdlVideoSink");
+            demuxer.attach(pVideoSink, demuxer.firstVideoStream());
+        }
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
-        Poco::Thread::sleep(5000);
+        Omm::AvStream::Clock::instance()->start(10);
+        Poco::Thread::sleep(10000);
+        Omm::AvStream::Clock::instance()->stop();
         demuxer.stop();
         
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;

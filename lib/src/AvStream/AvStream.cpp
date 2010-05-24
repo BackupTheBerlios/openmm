@@ -23,6 +23,7 @@
 
 #include <Poco/Exception.h>
 #include <Poco/Thread.h>
+#include <Poco/RunnableAdapter.h>
 #include <Poco/ClassLoader.h>
 #include <Poco/FormattingChannel.h>
 #include <Poco/PatternFormatter.h>
@@ -577,6 +578,8 @@ Node::stop()
         }
         downstreamNode->stop();
     }
+    
+    // TODO: join all downstream threads after setting _quit in all nodes. Otherwise they would be shut down brutally.
 }
 
 
@@ -1562,11 +1565,10 @@ Tagger::tag(std::istream& istr)
 
 
 Sink::Sink(const std::string& name) :
-Node(name)
-// _presesentationTimeout(50),
-// _presentationSemaphore(1, 1),
-// _triggerClock(triggerClock)
+Node(name),
+_timerQueue(1, 100, 100)
 {
+    _timerThread.setName(Poco::format("%s timer", getName()));
 }
 
 
@@ -1603,53 +1605,57 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 }
 
 
-// void
-// Sink::writeFrameQueued(Frame *pFrame)
-// {
-//     if (!_triggerClock) {
-//         Log::instance()->avstream().debug(Poco::format("SINK presentation semaphore in %s wait ...", Poco::Thread::current()->name()));
-//         if (!_presentationSemaphore.tryWait(_presesentationTimeout)) {
-//             Log::instance()->avstream().error("timeout while writing frame to sink, discarding frame");
-//             return;
-//         }
-//         Log::instance()->avstream().debug(Poco::format("SINK presentation semaphore in %s go!", Poco::Thread::current()->name()));
-//     }
-//     
-//     _presentationLock.lock();
-//     writeFrame(pFrame);
-//     _presentationLock.unlock();
-//     
-//     if (_triggerClock) {
-//         Log::instance()->avstream().debug(Poco::format("SINK in %s triggers clock", Poco::Thread::current()->name()));
-//         // TODO: calculate trigger value according to audio pcm buffer length, sample rate and number of channels.
-//         Clock::instance()->trigger(25);
-// //         presentFrameQueued();
-//     }
-// }
+void
+Sink::startTimer()
+{
+    Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
+    
+    Poco::RunnableAdapter<Sink> ra(*this, &Sink::timerThread);
+    _timerThread.start(ra);
+}
 
 
-// void
-// Sink::presentFrameQueued()
-// {
-//     // TODO: handle repeated frames
-//     _presentationLock.lock();
-//     presentFrame();
-//     _presentationLock.unlock();
-//     
-//     _presentationSemaphore.set();
-//     Log::instance()->avstream().debug(Poco::format("SINK presentation semaphore in %s just set", Poco::Thread::current()->name()));
-// }
+void
+Sink::stopTimer()
+{
+    Log::instance()->avstream().debug(Poco::format("%s stopping timer thread ...", getName()));
+    
+    _timerQueue.put(false);
+}
+
+
+void
+Sink::triggerTimer()
+{
+    Log::instance()->avstream().debug(Poco::format("%s trigger timer", getName()));
+    
+    _timerQueue.put(true);
+}
+
+
+void
+Sink::timerThread()
+{
+    // TODO: what if get() in Sink::timerThread() times out ...
+    // what is returned?
+    // is onTick() executed?
+    while(_timerQueue.get()) {
+        onTick();
+    }
+    Log::instance()->avstream().debug(Poco::format("%s timer thread finished.", getName()));
+}
+
 
 
 Clock* Clock::_pInstance = 0;
 
 Clock::Clock() :
+_timerInterval(0),
 _pSink(0),
 _frameBaseSink(0),
 _timeLeftSink(0),
-_notifySemaphore(0, 1)
+_syncQueue(1, 100, 100)
 {
-    start(0);
 }
 
 
@@ -1664,13 +1670,14 @@ Clock::instance()
 
 
 void
-Clock::attachSink(Sink* pSink)
+Clock::attachSink(Sink* pSink, int frameBase)
 {
     _pSink = pSink;
-    // TODO: calculate _frameBase according to frame rate of video stream that is streamed to sink.
-    _frameBaseSink = 40;
-//     _frameBaseSink = pSink->frameRate();
-    _timeLeftSink = _frameBaseSink;
+    _frameBaseSink = frameBase;
+    _timeLeftSink = frameBase;
+    
+    Log::instance()->avstream().debug(Poco::format("CLOCK attached %s with frame base: %s",
+        pSink->getName(), Poco::NumberFormatter::format(frameBase)));
 }
 
 
@@ -1679,64 +1686,78 @@ Clock::notify()
 {
     Log::instance()->avstream().debug("CLOCK notification triggered");
     if (_pSink) {
-//         _pSink->presentFrameQueued();
+        _pSink->triggerTimer();
     }
     Log::instance()->avstream().debug("CLOCK notification finished.");
 }
 
 
 void
-Clock::notifyTimed(Poco::Timer& timer)
+Clock::sync(long last)
 {
-    notify();
+    if (_syncThread.isRunning()) {
+        Log::instance()->avstream().debug("CLOCK internal sync timer already running, external sync not possible.");
+    }
+    else {
+        syncClock(last);
+    }
+}
+
+
+void
+Clock::syncTimed(Poco::Timer& timer)
+{
+    syncClock(_timerInterval);
 }
 
 
 void
 Clock::run()
 {
-    while (true) {
-        Log::instance()->avstream().debug("CLOCK semaphore waiting ...");
-        _notifySemaphore.wait();
-        Log::instance()->avstream().debug("CLOCK semaphore go!");
-        notify();
+    Log::instance()->avstream().debug("CLOCK sync thread started ...");
+    
+    while (long last = _syncQueue.get()) {
+        syncClock(last);
     }
+    
+    Log::instance()->avstream().debug("CLOCK sync thread finished.");
 }
 
 
 void
-Clock::start(long millisec)
+Clock::start(long interval)
 {
+    _timerInterval = interval;
     Log::instance()->avstream().debug("starting clock ...");
-//     _timer.setPeriodicInterval(millisec);
-//     _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::notifyTimed));
-    _notifyThread.start(*this);
+    if (_timerInterval) {
+        Log::instance()->avstream().debug("CLOCK starting internal sync clock ...");
+        
+        _timer.setPeriodicInterval(interval);
+        _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::syncTimed));
+    }
+    _syncThread.start(*this);
 }
 
 
 void
 Clock::stop()
 {
-//     _timer.stop();
-    _notifyThread.tryJoin(0);
+    _timer.stop();
+    _syncQueue.put(0);
     Log::instance()->avstream().debug("clock stopped.");
 }
 
 
 void
-Clock::trigger(long millisecPassed)
+Clock::syncClock(long last)
 {
-    Log::instance()->avstream().debug(Poco::format("CLOCK trigger time passed: %s, time left: %s",
-        Poco::NumberFormatter::format(millisecPassed), Poco::NumberFormatter::format(_timeLeftSink)));
+    _timeLeftSink -= last;
     
-    _clockLock.lock();
-    _timeLeftSink -= millisecPassed;
+    Log::instance()->avstream().debug(Poco::format("CLOCK last sync time: %s, time left next trigger: %s",
+        Poco::NumberFormatter::format(last), Poco::NumberFormatter::format(_timeLeftSink)));
+    
     if (_timeLeftSink <= 0) {
         _timeLeftSink += _frameBaseSink;
-        _notifySemaphore.set();
-        Log::instance()->avstream().debug("CLOCK semaphore just set");
+        notify();
     }
-    _clockLock.unlock();
-    
-    Log::instance()->avstream().debug("CLOCK trigger finished");
 }
