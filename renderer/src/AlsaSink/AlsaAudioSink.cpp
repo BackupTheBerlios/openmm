@@ -152,12 +152,11 @@ AlsaAudioSink::run()
         return;
     }
     
-    int frameCount = 0;
     Omm::AvStream::Frame* pFrame;
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s processing frame #%s",
-            getName(), Poco::NumberFormatter::format0(++frameCount, 3)));
+        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s processing frame %s",
+            getName(), pFrame->getName()));
         
         writeFrame(pFrame);
     }
@@ -169,7 +168,7 @@ AlsaAudioSink::run()
 void
 AlsaAudioSink::writeFrame(Omm::AvStream::Frame* pFrame)
 {
-    Omm::AvStream::Log::instance()->avstream().debug("write frame to ALSA PCM device");
+//     Omm::AvStream::Log::instance()->avstream().debug("write frame to ALSA PCM device");
     if (!pFrame) {
         Omm::AvStream::Log::instance()->avstream().warning("no frame to write");
         return;

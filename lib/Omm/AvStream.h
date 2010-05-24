@@ -89,7 +89,8 @@ template<typename T>
 class Queue
 {
 public:
-    Queue(int size, int putTimeout, int getTimeout) :
+    Queue(const std::string& name, int size, int putTimeout, int getTimeout) :
+        _name(name),
         _size(size),
         _putTimeout(putTimeout),
         _getTimeout(getTimeout),
@@ -101,12 +102,12 @@ public:
     
     bool put(T element)
     {
-        Log::instance()->avstream().trace(Poco::format("queue put waiting in thread %s ...",
-            Poco::Thread::current()->name()));
+        Log::instance()->avstream().trace(Poco::format("%s queue put waiting in thread %s ...",
+            getName(), Poco::Thread::current()->name()));
         
         if (!_putSemaphore.tryWait(_putTimeout)) {
-            Log::instance()->avstream().warning(Poco::format("queue put timed out in thread %s.",
-                Poco::Thread::current()->name()));
+            Log::instance()->avstream().warning(Poco::format("%s queue put timed out in thread %s.",
+                getName(), Poco::Thread::current()->name()));
             return false;
         }
         
@@ -116,20 +117,20 @@ public:
         
         _getSemaphore.set();
         
-        Log::instance()->avstream().trace(Poco::format("queue put success in thread %s, size: %s",
-            Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
+        Log::instance()->avstream().trace(Poco::format("%s queue put success in thread %s, size: %s",
+            getName(), Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return true;
     }
     
     
     T get()
     {
-        Log::instance()->avstream().trace(Poco::format("queue get waiting in thread %s ...",
-            Poco::Thread::current()->name()));
+        Log::instance()->avstream().trace(Poco::format("%s queue get waiting in thread %s ...",
+            getName(), Poco::Thread::current()->name()));
         
         if (!_getSemaphore.tryWait(_getTimeout)) {
-            Log::instance()->avstream().warning(Poco::format("queue get timed out in thread %s.",
-                Poco::Thread::current()->name()));
+            Log::instance()->avstream().warning(Poco::format("%s queue get timed out in thread %s.",
+                getName(), Poco::Thread::current()->name()));
             // FIXME: Queue::get() what to return if timed out ...? 
             // -> throw an exception ... use Poco::Semaphore::tryWait() with exception ...
             // -> bool get(T& element)
@@ -143,14 +144,19 @@ public:
         
         _putSemaphore.set();
         
-        Log::instance()->avstream().trace(Poco::format("queue get success in thread %s, size: %s",
-            Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
+        Log::instance()->avstream().trace(Poco::format("%s queue get success in thread %s, size: %s",
+            getName(), Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return ret;
     }
     
-private:
-    std::queue<T>           _queue;
+    std::string getName()
+    {
+        return _name;
+    }
     
+private:
+    std::string             _name;
+    std::queue<T>           _queue;
     int                     _size;
     // wait _packetQueuePutTimeout ms for data to be put into the queue
     int                     _putTimeout;
@@ -204,11 +210,14 @@ public:
     PixelFormat pixelFormat();
     int pictureSize();
     
+    int64_t newFrameNumber();
+    
 private:
     std::string             _streamName;
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
+    int64_t               _newFrameNumber;
 };
 
 
@@ -329,15 +338,15 @@ class Frame
     friend class Stream;
     
 public:
-    Frame(const Frame& frame);
-    Frame(Stream* pStream);
-    Frame(Stream* pStream, int dataSize);
-    Frame(Stream* pStream, char* data, int dataSize);
+    Frame(int64_t number, const Frame& frame);
+    Frame(int64_t number, Stream* pStream);
+    Frame(int64_t number, Stream* pStream, int dataSize);
+    Frame(int64_t number, Stream* pStream, char* data, int dataSize);
     
     // copies *pAvPacket (and it's payload) into Frame and deletes *pAvPacket (and it's payload)
-    Frame(Stream* pStream, AVPacket* pAvPacket);
+    Frame(int64_t number, Stream* pStream, AVPacket* pAvPacket);
     // copies *pAvFrame (and it's payload) into Frame and deletes *pAvFrame (and it's payload)
-    Frame(Stream* pStream, AVFrame* pAvFrame);
+    Frame(int64_t number, Stream* pStream, AVFrame* pAvFrame);
     ~Frame();
     
     char* data();
@@ -348,6 +357,10 @@ public:
     int planeSize(int plane);
     
     void printInfo();
+    std::string getName();
+    int64_t getNumber();
+    int64_t getPts();
+    void setPts(int64_t pts);
     
     Stream* getStream();
     
@@ -366,6 +379,8 @@ public:
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // face 1: simple buffer
+    int64_t             _number;
+    int64_t             _pts;
     char*               _data;
     int                 _size;
     int                 _paddedSize;

@@ -99,16 +99,17 @@ SdlVideoSink::run()
     Omm::AvStream::Clock::instance()->attachSink(this, 40);
     startTimer();
     
-    int frameCount = 0;
     Omm::AvStream::Frame* pFrame;
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s processing frame #%s",
-            getName(), Poco::NumberFormatter::format0(++frameCount, 3)));
+        _pCurrentFrame = pFrame;
+        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s decoding frame %s",
+            getName(), pFrame->getName()));
         
         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
         if (!pDecodedFrame) {
-            Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding packet", getName()));
+            Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding frame %s",
+                getName(), pFrame->getName()));
         }
         else {
             pDecodedFrame->write(_pOverlay);
@@ -140,8 +141,9 @@ SdlVideoSink::displayFrame()
     // FIXME: lock access to Stream::height() and Stream::width()
 //     rect.w = _pCurrentFrame->getStream()->width();
 //     rect.h = _pCurrentFrame->getStream()->height();
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame width: %s, height: %s",
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s width: %s, height: %s",
         getName(),
+        _pCurrentFrame->getName(),
         Poco::NumberFormatter::format(rect.w),
         Poco::NumberFormatter::format(rect.h)));
     

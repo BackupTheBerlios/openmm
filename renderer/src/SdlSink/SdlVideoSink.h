@@ -45,6 +45,7 @@ private:
     SDL_Overlay*                  _pSdlOverlay;
     
     Omm::AvStream::Overlay*       _pOverlay;
+    Omm::AvStream::Frame*         _pCurrentFrame;
 };
 
 #endif
