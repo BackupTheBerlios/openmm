@@ -149,6 +149,7 @@ public:
         return ret;
     }
     
+    
     std::string getName()
     {
         return _name;
@@ -434,8 +435,17 @@ private:
 class Overlay
 {
 public:
-    uint8_t* _data[4];
-    int      _pitch[4];
+    Overlay(Sink* pSink);
+    
+    int getWidth();
+    int getHeight();
+    PixelFormat getFormat();
+    
+    uint8_t*        _data[4];
+    int             _pitch[4];
+    
+    Sink*           _pSink;
+    Frame*          _pFrame;
 };
 
 
@@ -445,7 +455,9 @@ class Sink : public Node
     friend class Clock;
     
 public:
-    Sink(const std::string& name = "sink");
+    Sink(const std::string& name = "sink",
+         int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
+         int overlayCount = 0);
     virtual ~Sink() {}
     
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
@@ -453,17 +465,31 @@ public:
     
     void triggerTimer();
     
+    int getWidth();
+    int getHeight();
+    PixelFormat getFormat();
+    
 protected:
     virtual void onTick() {}
     
     void startTimer();
     void stopTimer();
     
+    int                     _overlayCount;
+    std::vector<Overlay*>   _overlayVector;
+    Queue<Overlay*>         _overlayQueue;
+    
 private:
     void timerThread();
     
-    Queue<bool>      _timerQueue;
-    Poco::Thread     _timerThread;
+    Queue<bool>             _timerQueue;
+    Poco::Thread            _timerThread;
+    
+    int                     _width;
+    int                     _height;
+    PixelFormat             _pixelFormat;
+    
+    Poco::FastMutex         _sinkLock;
 };
 
 

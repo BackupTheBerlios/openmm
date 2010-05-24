@@ -1099,30 +1099,30 @@ Frame::writePpm(const std::string& fileName)
 
 
 void
-Frame::write(Overlay* overlay)
+Frame::write(Overlay* pOverlay)
 {
     Log::instance()->avstream().debug("convert video frame to YUV ... ");
     
-    
-    
     _pStream->getInfo()->printInfo();
-    int width = _pStream->getInfo()->width();
-    int height = _pStream->getInfo()->height();
-
-    PixelFormat inPixFormat = _pStream->getInfo()->pixelFormat();
-    PixelFormat targetFormat = PIX_FMT_YUV420P;
+    int streamWidth = _pStream->getInfo()->width();
+    int streamHeight = _pStream->getInfo()->height();
+    PixelFormat streamPixelFormat = _pStream->getInfo()->pixelFormat();
     
-    Log::instance()->avstream().debug(Poco::format("source pixelFormat: %s, target pixelFormat: %s",
-        Poco::NumberFormatter::format(inPixFormat),
-        Poco::NumberFormatter::format(targetFormat)));
+    int targetWidth = pOverlay->getWidth();
+    int targetHeight = pOverlay->getHeight();
+    PixelFormat targetPixelFormat = pOverlay->getFormat();
+    
+    Log::instance()->avstream().debug(Poco::format("stream pixelFormat: %s, target pixelFormat: %s",
+        Poco::NumberFormatter::format(streamPixelFormat),
+        Poco::NumberFormatter::format(targetPixelFormat)));
     
     int scaleAlgo = SWS_BICUBIC;
     struct SwsContext *pImgConvertContext = 0;
     
     Log::instance()->avstream().trace("ffmpeg::sws_getCachedContext() ...");
     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
-                                              width, height, inPixFormat,
-                                              width, height, targetFormat,
+                                              streamWidth, streamHeight, streamPixelFormat,
+                                              targetWidth, targetHeight, targetPixelFormat,
                                               scaleAlgo, NULL, NULL, NULL);
     
     if (pImgConvertContext == 0) {
@@ -1137,40 +1137,9 @@ Frame::write(Overlay* overlay)
     Log::instance()->avstream().trace("ffmpeg::sws_scale() ...");
     int outSlizeHeight = sws_scale(pImgConvertContext,
                                    _pAvFrame->data, _pAvFrame->linesize,
-                                   0, height,
-                                   overlay->_data, overlay->_pitch);
+                                   0, streamHeight,
+                                   pOverlay->_data, pOverlay->_pitch);
     Log::instance()->avstream().debug("ffmpeg::sws_scale() frame written to overlay.");
-    
-//     int width = _pStream->_pStreamInfo->width();
-//     int height = _pStream->_pStreamInfo->height();
-//     Log::instance()->avstream().debug(Poco::format("width: %s, height: %s", width, height));
-//     PixelFormat pixelFormat = _pStream->_pStreamInfo->pixelFormat();
-//     Log::instance()->avstream().debug(Poco::format("source pixelFormat: %s, target pixelFormat: %s",
-//         Poco::NumberFormatter::format(pixelFormat),
-//         Poco::NumberFormatter::format(PIX_FMT_YUV420P)));
-//     
-//     int scaleAlgo = SWS_BICUBIC;
-//     struct SwsContext *pImgConvertContext = 0;
-//     
-//     Log::instance()->avstream().trace("ffmpeg::sws_getCachedContext() ...");
-//     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
-//                                               width, height,
-//                                               pixelFormat,
-//                                               width, height,
-//                                               PIX_FMT_YUV420P, scaleAlgo, NULL, NULL, NULL);
-//     
-//     if (pImgConvertContext == 0) {
-//         Log::instance()->avstream().error("cannot initialize image conversion context");
-//         return;
-//     }
-//     else {
-//         Log::instance()->avstream().debug("image conversion context set up.");
-//     }
-//     
-//     Log::instance()->avstream().trace("ffmpeg::sws_scale() ...");
-//     int outSlizeHeight = sws_scale(pImgConvertContext, _pAvFrame->data, _pAvFrame->linesize,
-//                                    0, height, overlay->_data, overlay->_pitch);
-//     Log::instance()->avstream().debug("ffmpeg::sws_scale() frame written to overlay.");
 }
 
 
@@ -1628,10 +1597,43 @@ Tagger::tag(std::istream& istr)
 }
 
 
-Sink::Sink(const std::string& name) :
+Overlay::Overlay(Sink* pSink) :
+_pSink(pSink),
+_pFrame(0)
+{
+}
+
+
+int
+Overlay::getWidth()
+{
+    return _pSink->getWidth();
+}
+
+
+int
+Overlay::getHeight()
+{
+    return _pSink->getHeight();
+}
+
+
+PixelFormat
+Overlay::getFormat()
+{
+    return _pSink->getFormat();
+}
+
+
+Sink::Sink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
 Node(name),
+_overlayCount(overlayCount),
+_overlayVector(overlayCount),
+_overlayQueue(name + " overlay", overlayCount, 500, 500),
 _timerQueue(name + " timer", 1, 100, 100)
 {
+    std::clog << "Sink()" << std::endl;
+    
     _timerThread.setName(Poco::format("%s timer", getName()));
 }
 
@@ -1709,6 +1711,29 @@ Sink::timerThread()
     Log::instance()->avstream().debug(Poco::format("%s timer thread finished.", getName()));
 }
 
+
+int
+Sink::getWidth()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
+    return _width;
+}
+
+
+int
+Sink::getHeight()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
+    return _height;
+}
+
+
+PixelFormat
+Sink::getFormat()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
+    return _pixelFormat;
+}
 
 
 Clock* Clock::_pInstance = 0;

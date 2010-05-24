@@ -26,6 +26,15 @@
 #include <Omm/AvStream.h>
 
 
+class SdlOverlay : public Omm::AvStream::Overlay
+{
+public:
+    SdlOverlay(Omm::AvStream::Sink* pSink);
+    
+    SDL_Overlay*    _pSDLOverlay;
+};
+
+
 class SdlVideoSink : public Omm::AvStream::Sink
 {
 public:
@@ -39,13 +48,9 @@ private:
     virtual void run();
     virtual void onTick();
     
-    void displayFrame();
+    void displayFrame(SdlOverlay* pOverlay);
     
-    SDL_Surface*                  _pSdlScreen;
-    SDL_Overlay*                  _pSdlOverlay;
-    
-    Omm::AvStream::Overlay*       _pOverlay;
-    Omm::AvStream::Frame*         _pCurrentFrame;
+    int     _writeOverlayNumber;
 };
 
 #endif

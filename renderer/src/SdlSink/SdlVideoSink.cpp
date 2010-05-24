@@ -26,10 +26,19 @@
 #include "SdlVideoSink.h"
 
 
-SdlVideoSink::SdlVideoSink() :
-Sink("sdl video sink"),
-_pOverlay(new Omm::AvStream::Overlay)
+SdlOverlay::SdlOverlay(Omm::AvStream::Sink* pSink) :
+Overlay(pSink)
 {
+}
+
+
+SdlVideoSink::SdlVideoSink() :
+// reserve 5 overlays for SdlVideoSink
+Sink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 5),
+_writeOverlayNumber(0)
+{
+    std::clog << "SdlVideoSink()" << std::endl;
+    
     // video sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams.back()->setInfo(0);
@@ -41,7 +50,6 @@ _pOverlay(new Omm::AvStream::Overlay)
 
 SdlVideoSink::~SdlVideoSink()
 {
-    delete _pOverlay;
 }
 
 
@@ -55,8 +63,9 @@ SdlVideoSink::init()
         return false;
     }
     
-    _pSdlScreen = SDL_SetVideoMode(720, 576, 0, SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_HWACCEL);
-    if (_pSdlScreen == 0) {
+    SDL_Surface* pSdlScreen = SDL_SetVideoMode(getWidth(), getHeight(), 0, SDL_HWSURFACE | SDL_RESIZABLE | SDL_ASYNCBLIT | SDL_HWACCEL);
+    
+    if (pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open SDL window: %s", std::string(SDL_GetError())));
         return false;
     }
@@ -74,14 +83,24 @@ SdlVideoSink::init()
         return false;
     }
     
-    _pSdlOverlay = SDL_CreateYUVOverlay(720, 576, SDL_YV12_OVERLAY, _pSdlScreen);
-    _pOverlay->_data[0] = _pSdlOverlay->pixels[0];
-    _pOverlay->_data[1] = _pSdlOverlay->pixels[2];
-    _pOverlay->_data[2] = _pSdlOverlay->pixels[1];
-    
-    _pOverlay->_pitch[0] = _pSdlOverlay->pitches[0];
-    _pOverlay->_pitch[1] = _pSdlOverlay->pitches[2];
-    _pOverlay->_pitch[2] = _pSdlOverlay->pitches[1];
+    for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
+        // SDL_YV12_OVERLAY corresponds to ffmpeg::PixelFormat == PIX_FMT_YUV420P
+        // TODO: catch, if SDL_Overlay could not be created (video card has to few memory)
+        SDL_Overlay* pSDLOverlay = SDL_CreateYUVOverlay(getWidth(), getHeight(), SDL_YV12_OVERLAY, pSdlScreen);
+        SdlOverlay* pOverlay = new SdlOverlay(this);
+        
+        pOverlay->_pSDLOverlay = pSDLOverlay;
+        
+        pOverlay->_data[0] = pSDLOverlay->pixels[0];
+        pOverlay->_data[1] = pSDLOverlay->pixels[2];
+        pOverlay->_data[2] = pSDLOverlay->pixels[1];
+        
+        pOverlay->_pitch[0] = pSDLOverlay->pitches[0];
+        pOverlay->_pitch[1] = pSDLOverlay->pitches[2];
+        pOverlay->_pitch[2] = pSDLOverlay->pitches[1];
+        
+        _overlayVector[numOverlay] = pOverlay;
+    }
 
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opened.", getName()));
     return true;
@@ -102,7 +121,6 @@ SdlVideoSink::run()
     Omm::AvStream::Frame* pFrame;
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        _pCurrentFrame = pFrame;
         Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s decoding frame %s",
             getName(), pFrame->getName()));
         
@@ -112,7 +130,16 @@ SdlVideoSink::run()
                 getName(), pFrame->getName()));
         }
         else {
-            pDecodedFrame->write(_pOverlay);
+            SdlOverlay* pWriteOverlay = static_cast<SdlOverlay*>(_overlayVector[_writeOverlayNumber]);
+            pDecodedFrame->write(pWriteOverlay);
+            pWriteOverlay->_pFrame = pDecodedFrame;
+            
+            _overlayQueue.put(pWriteOverlay);
+            // increment modulo _overlayCount
+            _writeOverlayNumber++;
+            if (_writeOverlayNumber >= _overlayCount) {
+                _writeOverlayNumber = 0;
+            }
         }
     }
 
@@ -126,28 +153,31 @@ void
 SdlVideoSink::onTick()
 {
     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s on tick.", getName()));
-    displayFrame();
+    
+    Omm::AvStream::Overlay* pOverlay = _overlayQueue.get();
+    if (pOverlay) {
+        SdlOverlay* pSdlOverlay = static_cast<SdlOverlay*>(pOverlay);
+        displayFrame(pSdlOverlay);
+    }
 }
 
 
 void
-SdlVideoSink::displayFrame()
+SdlVideoSink::displayFrame(SdlOverlay* pOverlay)
 {
     SDL_Rect rect;
     rect.x = 0;
     rect.y = 0;
-    rect.w = 720;
-    rect.h = 576;
-    // FIXME: lock access to Stream::height() and Stream::width()
-//     rect.w = _pCurrentFrame->getStream()->width();
-//     rect.h = _pCurrentFrame->getStream()->height();
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s width: %s, height: %s",
+    rect.w = getWidth();
+    rect.h = getHeight();
+    
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s, width: %s, height: %s",
         getName(),
-        _pCurrentFrame->getName(),
+        pOverlay->_pFrame->getName(),
         Poco::NumberFormatter::format(rect.w),
         Poco::NumberFormatter::format(rect.h)));
     
-    SDL_DisplayYUVOverlay(_pSdlOverlay, &rect);
+    SDL_DisplayYUVOverlay(pOverlay->_pSDLOverlay, &rect);
 }
 
 
