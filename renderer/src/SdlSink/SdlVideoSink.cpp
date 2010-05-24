@@ -37,7 +37,7 @@ SdlVideoSink::SdlVideoSink() :
 Sink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 5),
 _writeOverlayNumber(0)
 {
-    std::clog << "SdlVideoSink()" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("SdlVideoSink().");
     
     // video sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
@@ -99,7 +99,8 @@ SdlVideoSink::init()
         pOverlay->_pitch[1] = pSDLOverlay->pitches[2];
         pOverlay->_pitch[2] = pSDLOverlay->pitches[1];
         
-        _overlayVector[numOverlay] = pOverlay;
+        _overlayVector.push_back(pOverlay);
+//         _overlayVector[numOverlay] = pOverlay;
     }
 
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opened.", getName()));

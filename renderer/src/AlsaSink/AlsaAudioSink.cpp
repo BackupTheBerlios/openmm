@@ -36,6 +36,8 @@ periods(2),
 periodsize(8192),
 frames(periodsize >> 2)
 {
+    Omm::AvStream::Log::instance()->avstream().debug("AlsaAudioSink().");
+    
     // audio sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams[0]->setInfo(0);

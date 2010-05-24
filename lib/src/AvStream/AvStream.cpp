@@ -1628,11 +1628,14 @@ Overlay::getFormat()
 Sink::Sink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
 Node(name),
 _overlayCount(overlayCount),
-_overlayVector(overlayCount),
+// _overlayVector(overlayCount),
 _overlayQueue(name + " overlay", overlayCount, 500, 500),
-_timerQueue(name + " timer", 1, 100, 100)
+_timerQueue(name + " timer", 1, 100, 100),
+_width(width),
+_height(height),
+_pixelFormat(pixelFormat)
 {
-    std::clog << "Sink()" << std::endl;
+    Log::instance()->avstream().debug("Sink().");
     
     _timerThread.setName(Poco::format("%s timer", getName()));
 }
@@ -1657,17 +1660,20 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
         Log::instance()->avstream().error(Poco::format("could not load  %s sink plugin.", libraryPath));
         return 0;
     }
-    Log::instance()->avstream().debug("sink plugin successfully loaded.");
+    Log::instance()->avstream().debug(Poco::format("%s plugin successfully loaded.", libraryPath));
     
-    Sink* res;
+    Log::instance()->avstream().debug(Poco::format("%s plugin to be allocated ...", className));
+    Sink* pRes;
     try {
-        res = sinkPluginLoader.create(className);
+        pRes = sinkPluginLoader.create(className);
     }
     catch (Poco::NotFoundException) {
-        Log::instance()->avstream().error("could not create instance of sink plugin.");
+        Log::instance()->avstream().error(Poco::format("%s could not create instance of plugin.", className));
         return 0;
     }
-    return res;
+    
+    Log::instance()->avstream().debug(Poco::format("%s plugin successfully allocated.", className));
+    return pRes;
 }
 
 

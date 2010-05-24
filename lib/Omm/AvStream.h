@@ -457,7 +457,7 @@ class Sink : public Node
 public:
     Sink(const std::string& name = "sink",
          int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
-         int overlayCount = 0);
+         int overlayCount = 1);
     virtual ~Sink() {}
     
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
