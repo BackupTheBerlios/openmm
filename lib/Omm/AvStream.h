@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <deque>
 
 #include <Poco/Logger.h>
 #include <Poco/Format.h>
@@ -105,11 +106,12 @@ public:
         Log::instance()->avstream().trace(Poco::format("%s queue put waiting in thread %s ...",
             getName(), Poco::Thread::current()->name()));
         
-        if (!_putSemaphore.tryWait(_putTimeout)) {
-            Log::instance()->avstream().warning(Poco::format("%s queue put timed out in thread %s.",
-                getName(), Poco::Thread::current()->name()));
-            return false;
-        }
+//         if (!_putSemaphore.tryWait(_putTimeout)) {
+//             Log::instance()->avstream().warning(Poco::format("%s queue put timed out in thread %s.",
+//                 getName(), Poco::Thread::current()->name()));
+//             return false;
+//         }
+        _putSemaphore.wait();
         
         _lock.lock();
         _queue.push(element);
@@ -128,15 +130,17 @@ public:
         Log::instance()->avstream().trace(Poco::format("%s queue get waiting in thread %s ...",
             getName(), Poco::Thread::current()->name()));
         
-        if (!_getSemaphore.tryWait(_getTimeout)) {
-            Log::instance()->avstream().warning(Poco::format("%s queue get timed out in thread %s.",
-                getName(), Poco::Thread::current()->name()));
-            // FIXME: Queue::get() what to return if timed out ...? 
-            // -> throw an exception ... use Poco::Semaphore::tryWait() with exception ...
-            // -> bool get(T& element)
-            return false;
-        }
+//         if (!_getSemaphore.tryWait(_getTimeout)) {
+//             Log::instance()->avstream().warning(Poco::format("%s queue get timed out in thread %s.",
+//                 getName(), Poco::Thread::current()->name()));
+//             // FIXME: Queue::get() what to return if timed out ...? 
+//             // -> throw an exception ... use Poco::Semaphore::tryWait() with exception ...
+//             // -> bool get(T& element)
+//             return false;
+//         }
         
+        _getSemaphore.wait();
+            
         _lock.lock();
         T ret = _queue.front();
         _queue.pop();
@@ -147,6 +151,12 @@ public:
         Log::instance()->avstream().trace(Poco::format("%s queue get success in thread %s, size: %s",
             getName(), Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return ret;
+    }
+    
+    
+    T front()
+    {
+        return _queue.front();
     }
     
     
@@ -287,6 +297,7 @@ public:
     
 protected:
     virtual bool init() {}
+//     virtual bool prepareStart();
     virtual void run() {}
     
 //     void setStop(bool stop);
@@ -321,6 +332,60 @@ private:
     int         _firstAudioStream;
     int         _firstVideoStream;
 };
+
+
+// class Monotonizer : public Node
+// {
+//     /*
+//     You should uses the timestamps given by the demuxer. Unless the encoder
+// does B-frames this should work well enough (if not you'll have to
+// reorder the demuxed timestamps in the same fashion as the encoder did).
+// coded_frame->pts contains synthetic values.
+// What you should do is rescale from the input stream's time base to the
+// output stream's time base. Something like:
+//     
+// pkt.pts = av_rescale_q(inpkt.pts, inctx->streams[0]->time_base,
+// ctx->streams[0]->time_base);
+//     
+// In the case of flv -> flv the time bases are probably the same (1 kHz),
+// but it's a good idea to do this anyway.
+//     
+// The reason for this is that flv has variable frame rate. I've had files
+// with initial time stamps like 0, 333, 666, 1000, 1033, 1066, 1100..
+//     */
+//     
+//     /*
+//     Seven Symptoms of Sick Streams
+//     
+//     pts related (all corrected in synchronizer):
+//     1. pts number overflow
+//     -> set flag Frame::numberOverflow = true
+//     2. pts cicle (pts systematic not monotone)
+//     -> reorder pts
+//     3. pts sprite (pts local not monotone)
+//     -> "tear" sprite pts linear
+//     4. packet shift
+//     -> discard packets until max_of_streams(pts first packet of stream)
+//     5. packet loss (pts not linear)
+//     -> inject blank frame (set Frame::_display = false)
+//     
+//     not pts related:
+//     6. decoding error
+//     -> set flag Frame::_display = false
+//     7. clock drift
+//     -> correct drift or one clock source (watch for cumulating drift when using timers)
+//     
+//     */
+//     
+// public:
+//     Monotonizer();
+//     
+// private:
+//     virtual bool init();
+//     virtual void run();
+//     
+//     std::deque<Frame*>      _frameWindow;
+// };
 
 
 class Decoder : public Node
@@ -463,14 +528,18 @@ public:
     static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
     virtual int eventLoop() { return 0; }
     
-    void triggerTimer();
+    void currentTime(int64_t time);
+    void startPresentation();
+    void stopPresentation();
     
     int getWidth();
     int getHeight();
     PixelFormat getFormat();
     
 protected:
-    virtual void onTick() {}
+    virtual void onTick(int64_t time) {}
+    virtual void beforeTimerStart() {}
+    virtual void afterTimerStart() {}
     
     void startTimer();
     void stopTimer();
@@ -482,8 +551,10 @@ protected:
 private:
     void timerThread();
     
-    Queue<bool>             _timerQueue;
+    Queue<int64_t>          _timerQueue;
     Poco::Thread            _timerThread;
+    bool                    _timerQuit;
+    int64_t                 _currentTime;
     
     int                     _width;
     int                     _height;
@@ -506,53 +577,39 @@ public:
 };
 
 
-class Clock : public Poco::Runnable
+class Clock
 {
 public:
     static Clock* instance();
     
     // attachSink()
     // pSink: pointer to sink, that receives the timing signals
-    // frameBase: time in millisec between each signal
-    void attachSink(Sink* pSink, int frameBase);
-    
-    // start()
-    // start automatic triggering with a timer
-    // interval: trigger intervall in millisec.
-    // interval = 0 means no internal clock, only external triggers
-    void start(long interval = 0);
+    void attachSink(Sink* pSink);
+    // setTime()
+    // sets clock's current stream time to currentTime
+    void setTime(int64_t currentTime);
+    // start clock
+    void start();
     void stop();
-    
-    // sync()
-    // sync the clock with an external time source
-    // last: time in millisec passed since last sync
-    void sync(long last);
     
 private:
     Clock();
     
-    virtual void run();
-    // syncClock()
-    // last: time in millisec passed since last sync
-    // NOTE: this shoud be smaller than the smallest frameBase
-    // because in the current implementation this is the clock ticking interval
-    void syncClock(long last);
-    // internal clock with clock ticking interval _timerInterval
-    void syncTimed(Poco::Timer& timer);
-    
-    void notify();
+    void clockTick(Poco::Timer& timer);
     
     static Clock*           _pInstance;
+    // TODO: should Clock be able to sync more than one stream?
+    // -> store a stream time for each stream
+    int64_t                 _streamTime;  // stream current time in stream time base units [sec]
+    double                  _streamBase;  // stream refresh rate in kHz ( = 1 / (time base * 1000))
     
-    Poco::Timer             _timer;
-    long                    _timerInterval;
+    Poco::Timer             _clockTimer;
+    long                    _clockTick;
+    long                    _clockTickStreamBase;
     
-    Sink*                   _pSink;
-    long                    _frameBaseSink;
-    long                    _timeLeftSink;
+    std::vector<Sink*>      _sinkVec;
     
-    Queue<int>              _syncQueue;
-    Poco::Thread            _syncThread;
+    Poco::FastMutex         _clockLock;
 };
 
 

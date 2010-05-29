@@ -175,6 +175,34 @@ StreamInfo::findCodec()
         Poco::NumberFormatter::format(_pAvStream->start_time),
         Poco::NumberFormatter::format(_pAvStream->duration)));
     
+    // time_base: fundamental unit of time (in seconds) in terms of which frame timestamps are represented. 
+    // This is the fundamental unit of time (in seconds) in terms
+    // of which frame timestamps are represented. For fixed-fps content,
+    // time base should be 1/framerate and timestamp increments should be 1.
+    Log::instance()->avstream().information(Poco::format("time base numerator: %s, denominator: %s",
+        Poco::NumberFormatter::format(_pAvStream->time_base.num),
+        Poco::NumberFormatter::format(_pAvStream->time_base.den)));
+    
+    // r_frame_rate: Real base framerate of the stream. 
+    Log::instance()->avstream().information(Poco::format("base frame rate numerator: %s, denominator: %s",
+        Poco::NumberFormatter::format(_pAvStream->r_frame_rate.num),
+        Poco::NumberFormatter::format(_pAvStream->r_frame_rate.den)));
+    
+//     Log::instance()->avstream().information(Poco::format("average frame rate numerator: %s, denominator: %s",
+//         Poco::NumberFormatter::format(_pAvStream->avg_frame_rate.num),
+//         Poco::NumberFormatter::format(_pAvStream->avg_frame_rate.den)));
+    
+    // reference dts (for timestamp generation): Timestamp corresponding to the last dts sync point
+    // Initialized when AVCodecParserContext.dts_sync_point >= 0 and
+    // a DTS is received from the underlying container. Otherwise set to
+    // AV_NOPTS_VALUE by default.
+    Log::instance()->avstream().information(Poco::format("first dts: %s, current dts: %s, reference dts: %s, last IP pts: %s, last IP duration: %s",
+        Poco::NumberFormatter::format(_pAvStream->first_dts),
+        Poco::NumberFormatter::format(_pAvStream->cur_dts),
+        Poco::NumberFormatter::format(_pAvStream->reference_dts),
+        Poco::NumberFormatter::format(_pAvStream->last_IP_pts),
+        Poco::NumberFormatter::format(_pAvStream->last_IP_duration)));
+    
 //     Log::instance()->avstream().trace(Poco::format("_pStreamInfo->_pAvCodecContext->codec_id %s",
 //         Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
     return true;
@@ -544,6 +572,13 @@ Node::setName(const std::string& name)
     _name = name;
     _thread.setName(name);
 }
+
+
+// bool
+// Node::prepareStart()
+// {
+//     return true;
+// }
 
 
 void
@@ -994,6 +1029,7 @@ Frame::getName()
         + _pStream->getName() + "] "
         + "#" + Poco::NumberFormatter::format(_number) + ", pts: "
         + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(_pts));
+//         + ", duration: " + Poco::NumberFormatter::format(_duration);
 }
 
 
@@ -1028,7 +1064,11 @@ Frame::getStream()
 Frame*
 Frame::decode()
 {
-    _pStream->decodeFrame(this);
+    Frame* pRes = _pStream->decodeFrame(this);
+    if (pRes) {
+        pRes->setPts(getPts());
+    }
+    return pRes;
 }
 
 
@@ -1233,7 +1273,11 @@ Demuxer::run()
 {
     // TODO: save copying of AVPacket packet into Frame and read it directly into frame with av_read_frame()
     // TODO: introduce Frame::readFrame(Meta* pMeta) and while(pFrame* = readFrame(_pMeta))
-    int64_t i = 0;
+    int64_t frameNumber = 0;
+    
+    std::vector<int64_t> lastPtsVec(_outStreams.size(), AV_NOPTS_VALUE);
+    std::vector<int> lastDurationVec(_outStreams.size(), 0);
+    
     AVPacket packet;
     while (!_quit) {
         Log::instance()->avstream().trace("ffmpeg::av_init_packet() ...");
@@ -1246,11 +1290,13 @@ Demuxer::run()
                 (ret == AVERROR_EOF ? "eof reached." : ".")));
             break;
         }
-//         Log::instance()->avstream().debug(Poco::format("ffmpeg::av_read_frame() returns packet #%s, type: %s, pts: %s, size: %s",
-//             Poco::NumberFormatter::format0(++i, 8),
-//             _outStreams[packet.stream_index]->getName(),
-//             Poco::NumberFormatter::format(packet.pts),
-//             Poco::NumberFormatter::format(packet.size)));
+        frameNumber++;
+        Log::instance()->avstream().debug(Poco::format("ffmpeg::av_read_frame() returns packet #%s, type: %s, pts: %s, size: %s, duration: %s",
+            Poco::NumberFormatter::format0(frameNumber, 8),
+            _outStreams[packet.stream_index]->getName(),
+            Poco::NumberFormatter::format(packet.pts),
+            Poco::NumberFormatter::format(packet.size),
+            Poco::NumberFormatter::format(packet.duration)));
         
         if (!_outStreams[packet.stream_index]->getQueue()) {
             Log::instance()->avstream().warning(Poco::format("%s stream %s not connected, discarding packet",
@@ -1261,9 +1307,51 @@ Demuxer::run()
         // pass a reference to the stream to where this frame belongs (for further use of the codec context when decoding)
         // create a new frame out of the AVPacket that we extracted from the stream
         // create means: make a copy of the data buffer and delete the packet
-        Frame* pFrame = new Frame(++i, _outStreams[packet.stream_index], &packet);
-        pFrame->setPts(packet.pts);
-        // try to put the frame in the queue
+        Frame* pFrame = new Frame(frameNumber, _outStreams[packet.stream_index], &packet);
+        
+        // try to correct wrong packet.pts
+        // this relies on a correct packet.duration (one of them must be right, otherwise we are lost)
+        int64_t currentPts;
+        int64_t lastPts = lastPtsVec[packet.stream_index];
+        int lastDuration = lastDurationVec[packet.stream_index];
+        if (lastPts != AV_NOPTS_VALUE && packet.pts != AV_NOPTS_VALUE) {
+            if (lastDuration > 0 && packet.pts != lastPts + lastDuration) {
+                currentPts = lastPts + lastDuration;
+                Log::instance()->avstream().warning(Poco::format("%s corrects pts of frame #%s: %s -> %s",
+                    getName(),
+                    Poco::NumberFormatter::format(frameNumber),
+                    Poco::NumberFormatter::format(packet.pts),
+                    Poco::NumberFormatter::format(currentPts)));
+            }
+            else {
+                currentPts = packet.pts;
+            }
+            
+        }
+        else if (lastPts == AV_NOPTS_VALUE && packet.pts != AV_NOPTS_VALUE) {
+            currentPts = packet.pts;
+        }
+        else if (packet.pts == AV_NOPTS_VALUE && lastPts != AV_NOPTS_VALUE) {
+            if (lastDuration > 0) {
+                currentPts = lastPts + lastDuration;
+                Log::instance()->avstream().warning(Poco::format("%s corrects pts of frame #%s: %s -> %s",
+                    getName(),
+                    Poco::NumberFormatter::format(frameNumber),
+                    Poco::NumberFormatter::format(packet.pts),
+                    Poco::NumberFormatter::format(currentPts)));
+            }
+            else {
+                currentPts = packet.pts;
+            }
+        }
+        else { // lastPts && packet.pts == AV_NOPTS_VALUE
+            currentPts = packet.pts;
+        }
+        
+        pFrame->setPts(currentPts);
+        lastPtsVec[packet.stream_index] = currentPts;
+        lastDurationVec[packet.stream_index] = packet.duration;
+        
         _outStreams[packet.stream_index]->putFrame(pFrame);
     }
 }
@@ -1281,6 +1369,69 @@ Demuxer::firstVideoStream()
 {
     return _firstVideoStream;
 }
+
+
+// Monotonizer::Monotonizer() :
+// Node("monotonizer")
+// {
+//     // pts cleaner has one input stream
+//     _inStreams.push_back(new Stream(this));
+//     _inStreams[0]->setInfo(0);
+//     _inStreams[0]->setQueue(new StreamQueue(this));
+//     
+//     // and one output stream
+//     _outStreams.push_back(new Stream(this));
+//     _outStreams[0]->setInfo(0);
+//     _outStreams[0]->setQueue(0);
+// }
+// 
+// 
+// bool
+// Monotonizer::init()
+// {
+//     // init() is called on attach() so _inStreams[0]->_pStreamInfo should be available
+//     if (!_inStreams[0]->getInfo()) {
+//         Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+//         return false;
+//     }
+//     // output stream has same parameters after decoding as before decoding (NOTE: check, if that's right)
+//     _outStreams[0]->setInfo(_inStreams[0]->getInfo());
+//     return true;
+// }
+// 
+// 
+// void
+// Monotonizer::run()
+// {
+//     bool isMonoton = true;
+//     int deltaPts = 0;
+//     Frame* pFrame;
+//     
+//     if (!_inStreams[0]) {
+//         Log::instance()->avstream().warning(Poco::format("%s no in stream attached, stopping.", getName()));
+//         return;
+//     }
+//     while (!_quit && ((pFrame = _inStreams[0]->getFrame()) || (_frameWindow.size() > 0)))
+//     {
+//         if (!_outStreams[0]) {
+//             Log::instance()->avstream().warning(Poco::format("%s no out stream attached, discarding packet.", getName()));
+//             continue;
+//         }
+//         _frameWindow.push_front(pFrame);
+//         
+//         Log::instance()->avstream().debug(Poco::format("%s inspecting frame %s, frame window size: %s",
+//             getName(), pFrame->getName(), Poco::NumberFormatter::format(_frameWindow.size())));
+//         
+// //         if (_frameWindow.
+//         
+//         
+//         if (isMonoton) {
+//             _outStreams[0]->putFrame(_frameWindow.back());
+//             _frameWindow.pop_back();
+//         }
+//     }
+//     Log::instance()->avstream().warning(Poco::format("%s finished.", getName()));
+// }
 
 
 Decoder::Decoder() :
@@ -1628,16 +1779,15 @@ Overlay::getFormat()
 Sink::Sink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
 Node(name),
 _overlayCount(overlayCount),
-// _overlayVector(overlayCount),
+_overlayVector(overlayCount),
 _overlayQueue(name + " overlay", overlayCount, 500, 500),
 _timerQueue(name + " timer", 1, 100, 100),
+_timerThread(name + " timer thread"),
+_timerQuit(false),
 _width(width),
 _height(height),
 _pixelFormat(pixelFormat)
 {
-    Log::instance()->avstream().debug("Sink().");
-    
-    _timerThread.setName(Poco::format("%s timer", getName()));
 }
 
 
@@ -1671,7 +1821,6 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
         Log::instance()->avstream().error(Poco::format("%s could not create instance of plugin.", className));
         return 0;
     }
-    
     Log::instance()->avstream().debug(Poco::format("%s plugin successfully allocated.", className));
     return pRes;
 }
@@ -1682,8 +1831,12 @@ Sink::startTimer()
 {
     Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
     
+    beforeTimerStart();
+    
     Poco::RunnableAdapter<Sink> ra(*this, &Sink::timerThread);
     _timerThread.start(ra);
+    
+    afterTimerStart();
 }
 
 
@@ -1692,16 +1845,16 @@ Sink::stopTimer()
 {
     Log::instance()->avstream().debug(Poco::format("%s stopping timer thread ...", getName()));
     
-    _timerQueue.put(false);
+    _timerQuit = true;
 }
 
 
 void
-Sink::triggerTimer()
+Sink::currentTime(int64_t time)
 {
-    Log::instance()->avstream().debug(Poco::format("%s trigger timer", getName()));
+    Log::instance()->avstream().trace(Poco::format("%s current time: %s", getName(), Poco::NumberFormatter::format(time)));
     
-    _timerQueue.put(true);
+    _timerQueue.put(time);
 }
 
 
@@ -1711,8 +1864,10 @@ Sink::timerThread()
     // TODO: what if get() in Sink::timerThread() times out ...
     // what is returned?
     // is onTick() executed?
-    while(_timerQueue.get()) {
-        onTick();
+    while(!_timerQuit) {
+        int64_t time = _timerQueue.get();
+        Log::instance()->avstream().trace(Poco::format("%s on tick time: %s", getName(), Poco::NumberFormatter::format(time)));
+        onTick(time);
     }
     Log::instance()->avstream().debug(Poco::format("%s timer thread finished.", getName()));
 }
@@ -1745,11 +1900,10 @@ Sink::getFormat()
 Clock* Clock::_pInstance = 0;
 
 Clock::Clock() :
-_timerInterval(0),
-_pSink(0),
-_frameBaseSink(0),
-_timeLeftSink(0),
-_syncQueue("clock sync", 1, 100, 100)
+_streamTime(AV_NOPTS_VALUE),
+_clockTick(8),
+_streamBase(90.0), // TODO: set _streamBase while loading the stream
+_clockTickStreamBase(_clockTick * _streamBase)
 {
 }
 
@@ -1765,94 +1919,68 @@ Clock::instance()
 
 
 void
-Clock::attachSink(Sink* pSink, int frameBase)
+Clock::attachSink(Sink* pSink)
 {
-    _pSink = pSink;
-    _frameBaseSink = frameBase;
-    _timeLeftSink = frameBase;
+    _sinkVec.push_back(pSink);
     
-    Log::instance()->avstream().debug(Poco::format("CLOCK attached %s with frame base: %s",
-        pSink->getName(), Poco::NumberFormatter::format(frameBase)));
+    Log::instance()->avstream().debug(Poco::format("CLOCK attached %s",
+        pSink->getName()));
 }
 
 
 void
-Clock::notify()
+Clock::setTime(int64_t currentTime)
 {
-    Log::instance()->avstream().debug("CLOCK notification triggered");
-    if (_pSink) {
-        _pSink->triggerTimer();
-    }
-    Log::instance()->avstream().debug("CLOCK notification finished.");
-}
-
-
-void
-Clock::sync(long last)
-{
-    if (_syncThread.isRunning()) {
-        Log::instance()->avstream().debug("CLOCK internal sync timer already running, external sync not possible.");
-    }
-    else {
-        syncClock(last);
-    }
-}
-
-
-void
-Clock::syncTimed(Poco::Timer& timer)
-{
-    syncClock(_timerInterval);
-}
-
-
-void
-Clock::run()
-{
-    Log::instance()->avstream().debug("CLOCK sync thread started ...");
+    Log::instance()->avstream().debug(Poco::format("CLOCK set stream time to: %s.", Poco::NumberFormatter::format(currentTime)));
     
-    while (long last = _syncQueue.get()) {
-        syncClock(last);
+    _clockLock.lock();
+    for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
+        (*it)->currentTime(currentTime);
     }
-    
-    Log::instance()->avstream().debug("CLOCK sync thread finished.");
+    _streamTime = currentTime;
+    _clockLock.unlock();
 }
 
 
 void
-Clock::start(long interval)
+Clock::clockTick(Poco::Timer& timer)
 {
-    _timerInterval = interval;
-    Log::instance()->avstream().debug("starting clock ...");
-    if (_timerInterval) {
-        Log::instance()->avstream().debug("CLOCK starting internal sync clock ...");
+    
+    // _streamTime and _clockTickStreamBase is in time base units, clock tick is in ms
+    _clockLock.lock();
+    if (_streamTime != AV_NOPTS_VALUE) {
+        Log::instance()->avstream().debug("CLOCK TICK.");
         
-        _timer.setPeriodicInterval(interval);
-        _timer.start(Poco::TimerCallback<Clock>(*this, &Clock::syncTimed));
+        _streamTime += _clockTickStreamBase;
+    
+        for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
+            (*it)->currentTime(_streamTime);
+        }
     }
-    _syncThread.start(*this);
+    _clockLock.unlock();
+}
+
+
+void
+Clock::start()
+{
+    Log::instance()->avstream().debug("CLOCK starting ...");
+    
+    for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
+        (*it)->startTimer();
+    }
+    _clockTimer.setPeriodicInterval(_clockTick);
+    _clockTimer.start(Poco::TimerCallback<Clock>(*this, &Clock::clockTick));
 }
 
 
 void
 Clock::stop()
 {
-    _timer.stop();
-    _syncQueue.put(0);
-    Log::instance()->avstream().debug("clock stopped.");
-}
-
-
-void
-Clock::syncClock(long last)
-{
-    _timeLeftSink -= last;
-    
-    Log::instance()->avstream().debug(Poco::format("CLOCK last sync time: %s, time left next trigger: %s",
-        Poco::NumberFormatter::format(last), Poco::NumberFormatter::format(_timeLeftSink)));
-    
-    if (_timeLeftSink <= 0) {
-        _timeLeftSink += _frameBaseSink;
-        notify();
+    _clockTimer.stop();
+    for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
+        (*it)->stopTimer();
     }
+    Log::instance()->avstream().debug("CLOCK stopped.");
 }
+

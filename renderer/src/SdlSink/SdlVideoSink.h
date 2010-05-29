@@ -45,12 +45,15 @@ public:
     
 private:
     virtual bool init();
+//     virtual bool prepareStart();
     virtual void run();
-    virtual void onTick();
+    virtual void onTick(int64_t time);
     
+    void putFrameInOverlay(Omm::AvStream::Frame* pDecodedFrame);
     void displayFrame(SdlOverlay* pOverlay);
     
     int     _writeOverlayNumber;
+    bool    _firstDecodeSuccess;
 };
 
 #endif

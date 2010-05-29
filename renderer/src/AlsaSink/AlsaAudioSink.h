@@ -21,6 +21,8 @@
 #ifndef AlsaAudioSink_INCLUDED
 #define AlsaAudioSink_INCLUDED
 
+#include <Poco/Thread.h>
+
 #include <Omm/AvStream.h>
 
 #include <alsa/asoundlib.h>
@@ -35,13 +37,17 @@ public:
 private:
     virtual bool init();
     virtual void run();
+    virtual void onTick(int64_t time);
+    virtual void afterTimerStart();
     
-    virtual bool open();
+    bool open();
     bool open(const std::string& device);
-    virtual void close();
+    void close();
     
-    // Writes blocking
-    virtual void writeFrame(Omm::AvStream::Frame *pFrame);
+    void writeThread();
+    void writeFrame(Omm::AvStream::Frame *pFrame);
+    
+    Poco::Thread            _writeThread;
 
     snd_pcm_t*              pcm_playback;
     snd_pcm_hw_params_t     *hw;

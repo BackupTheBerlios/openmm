@@ -21,12 +21,14 @@
 #include <Poco/ClassLibrary.h>
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
+#include <Poco/RunnableAdapter.h>
 
 #include "AlsaAudioSink.h"
 
 
 AlsaAudioSink::AlsaAudioSink() :
 Sink("alsa audio sink"),
+_writeThread(getName() + " write thread"),
 pcm_playback(0),
 device("default"),
 format(SND_PCM_FORMAT_S16),
@@ -36,8 +38,6 @@ periods(2),
 periodsize(8192),
 frames(periodsize >> 2)
 {
-    Omm::AvStream::Log::instance()->avstream().debug("AlsaAudioSink().");
-    
     // audio sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams[0]->setInfo(0);
@@ -151,21 +151,56 @@ AlsaAudioSink::run()
 {
     if (!_inStreams[0]->getQueue()) {
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
-        return;
     }
-    
+}
+
+
+// void
+// AlsaAudioSink::beforeTimerStart()
+// {
+//     onTick();
+// }
+
+
+void
+AlsaAudioSink::onTick(int64_t time)
+{
+    while (_inStreams[0]->getQueue()->front()->getPts() < time) {
+        Omm::AvStream::Frame* pFrame = _inStreams[0]->getQueue()->get();
+        
+        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s stream time: %s, frame %s too old, discarding frame.",
+            getName(),
+            Poco::NumberFormatter::format(time),
+            pFrame->getName()));
+    }
+}
+
+
+void
+AlsaAudioSink::afterTimerStart()
+{
+    Poco::RunnableAdapter<AlsaAudioSink> ra(*this, &AlsaAudioSink::writeThread);
+    _writeThread.start(ra);
+}
+
+
+void
+AlsaAudioSink::writeThread()
+{
     Omm::AvStream::Frame* pFrame;
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
-        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s processing frame %s",
-            getName(), pFrame->getName()));
+        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s writing frame %s pts: %s.",
+            getName(),
+            pFrame->getName(),
+            Poco::NumberFormatter::format(pFrame->getPts())));
         
         writeFrame(pFrame);
     }
-    
     close();
-    Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s sink stopped.", getName()));
 }
+
 
 void
 AlsaAudioSink::writeFrame(Omm::AvStream::Frame* pFrame)
