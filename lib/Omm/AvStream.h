@@ -156,6 +156,7 @@ public:
     
     T front()
     {
+        Poco::ScopedLock<Poco::FastMutex> lock(_lock);
         return _queue.front();
     }
     
@@ -548,12 +549,13 @@ protected:
     std::vector<Overlay*>   _overlayVector;
     Queue<Overlay*>         _overlayQueue;
     
+    bool                    _timerQuit;
+    
 private:
     void timerThread();
     
     Queue<int64_t>          _timerQueue;
     Poco::Thread            _timerThread;
-    bool                    _timerQuit;
     int64_t                 _currentTime;
     
     int                     _width;

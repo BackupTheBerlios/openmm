@@ -42,7 +42,7 @@ public:
         //////////// setup engine stream graph ////////////
         Omm::AvStream::Decoder audioDecoder;
         if (demuxer.firstAudioStream() >= 0) {
-//             demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
+            demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
         }
         
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
@@ -66,14 +66,14 @@ public:
         }
         
         
-//         Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
+        Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
         Omm::AvStream::Clock::instance()->attachSink(pVideoSink);
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
         Omm::AvStream::Clock::instance()->start();
-        Poco::Thread::sleep(10000);
+        Poco::Thread::sleep(5000);
         Omm::AvStream::Clock::instance()->stop();
         demuxer.stop();
         

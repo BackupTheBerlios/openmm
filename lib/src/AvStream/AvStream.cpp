@@ -1845,6 +1845,9 @@ Sink::stopTimer()
 {
     Log::instance()->avstream().debug(Poco::format("%s stopping timer thread ...", getName()));
     
+    // FIXME: this doesn't really work, for example:
+    // alsa audio sink write thread waits for frame from queue, then _timerQuit is set to false
+    // -> write thread keeps waiting ...
     _timerQuit = true;
 }
 
@@ -1901,7 +1904,7 @@ Clock* Clock::_pInstance = 0;
 
 Clock::Clock() :
 _streamTime(AV_NOPTS_VALUE),
-_clockTick(8),
+_clockTick(20),
 _streamBase(90.0), // TODO: set _streamBase while loading the stream
 _clockTickStreamBase(_clockTick * _streamBase)
 {

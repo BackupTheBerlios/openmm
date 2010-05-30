@@ -49,7 +49,7 @@ private:
     virtual void run();
     virtual void onTick(int64_t time);
     
-    void putFrameInOverlay(Omm::AvStream::Frame* pDecodedFrame);
+    void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
     void displayFrame(SdlOverlay* pOverlay);
     
     int     _writeOverlayNumber;

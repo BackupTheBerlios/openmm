@@ -155,20 +155,13 @@ AlsaAudioSink::run()
 }
 
 
-// void
-// AlsaAudioSink::beforeTimerStart()
-// {
-//     onTick();
-// }
-
-
 void
 AlsaAudioSink::onTick(int64_t time)
 {
     while (_inStreams[0]->getQueue()->front()->getPts() < time) {
         Omm::AvStream::Frame* pFrame = _inStreams[0]->getQueue()->get();
         
-        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s stream time: %s, frame %s too old, discarding frame.",
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s stream time: %s, frame %s too old, discarding frame.",
             getName(),
             Poco::NumberFormatter::format(time),
             pFrame->getName()));
@@ -188,7 +181,7 @@ void
 AlsaAudioSink::writeThread()
 {
     Omm::AvStream::Frame* pFrame;
-    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
+    while (!_timerQuit && (pFrame = _inStreams[0]->getFrame()))
     {
         Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s writing frame %s pts: %s.",
             getName(),
