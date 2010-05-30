@@ -90,7 +90,8 @@ Log::Log()
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
@@ -1219,6 +1220,25 @@ _firstVideoStream(-1)
 
 
 void
+Demuxer::set(const std::string& uri)
+{
+    Tagger tagger;
+    _pMeta = tagger.tag(uri);
+    if (!_pMeta) {
+        Log::instance()->avstream().warning(Poco::format("demuxer could not tag input stream with uri %s, giving up.", uri));
+        _quit = true;
+    }
+    else {
+        _pMeta->print();
+        if (!init()) {
+            Log::instance()->avstream().warning("demuxer init failed, giving up.");
+            _quit = true;
+        }
+    }
+}
+
+
+void
 Demuxer::set(std::istream& istr)
 {
     Tagger tagger;
@@ -1580,7 +1600,8 @@ Tagger::probeInputFormat(std::istream& istr)
     Log::instance()->avstream().trace("ffmpeg::av_probe_input_format() ...");
     pInputFormat = av_probe_input_format(&probeData, 1 /*int is_opened*/);
     if (pInputFormat) {
-        Log::instance()->avstream().information(Poco::format("AV stream format: %s (%s)", pInputFormat->name, pInputFormat->long_name));
+        Log::instance()->avstream().information(Poco::format("AV stream format: %s (%s)",
+            std::string(pInputFormat->name), std::string(pInputFormat->long_name)));
     }
     else {
         Log::instance()->avstream().error("AV stream format unknown");
@@ -1615,14 +1636,14 @@ static long totalReadCount = 0;
 
 static int IORead( void *opaque, uint8_t *buf, int buf_size )
 {
-    Log::instance()->avstream().debug("IORead()");
+    Log::instance()->avstream().trace("IORead()");
     
     URLContext* pUrlContext = (URLContext*)opaque;
-    Log::instance()->avstream().debug(Poco::format("IORead() pUrlContext pointer: %s", Poco::NumberFormatter::format(pUrlContext)));
-    Log::instance()->avstream().debug(Poco::format("IORead() URLProtocol name: %s", pUrlContext->prot->name));
+    Log::instance()->avstream().trace(Poco::format("IORead() pUrlContext pointer: %s", Poco::NumberFormatter::format(pUrlContext)));
+    Log::instance()->avstream().trace(Poco::format("IORead() URLProtocol name: %s", std::string(pUrlContext->prot->name)));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
-    std::clog << "IORead() pInputStream pointer: " << pInputStream << std::endl;
+//     std::clog << "IORead() pInputStream pointer: " << pInputStream << std::endl;
     if (!pInputStream) {
         Log::instance()->avstream().error("IORead failed, std::istream not set");
         return -1;
@@ -1636,7 +1657,7 @@ static int IORead( void *opaque, uint8_t *buf, int buf_size )
     
     totalRead += bytes;
     totalReadCount++;
-    Log::instance()->avstream().debug(Poco::format("IORead() bytes read: %s, total: %s, read ops: %s",
+    Log::instance()->avstream().trace(Poco::format("IORead() bytes read: %s, total: %s, read ops: %s",
         Poco::NumberFormatter::format(bytes),
         Poco::NumberFormatter::format(totalRead),
         Poco::NumberFormatter::format(totalReadCount)
@@ -1647,14 +1668,14 @@ static int IORead( void *opaque, uint8_t *buf, int buf_size )
 
 static int64_t IOSeek( void *opaque, int64_t offset, int whence )
 {
-    Log::instance()->avstream().debug(Poco::format("IOSeek() offset: %s", Poco::NumberFormatter::format(offset)));
+    Log::instance()->avstream().trace(Poco::format("IOSeek() offset: %s", Poco::NumberFormatter::format(offset)));
     
     URLContext* pUrlContext = (URLContext*)opaque;
-    Log::instance()->avstream().debug(Poco::format("IOSeek() pUrlContext pointer: %s", Poco::NumberFormatter::format(pUrlContext)));
-    Log::instance()->avstream().debug(Poco::format("IOSeek() URLProtocol name: %s", pUrlContext->prot->name));
+    Log::instance()->avstream().trace(Poco::format("IOSeek() pUrlContext pointer: %s", Poco::NumberFormatter::format(pUrlContext)));
+    Log::instance()->avstream().trace(Poco::format("IOSeek() URLProtocol name: %s", std::string(pUrlContext->prot->name)));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
-    std::clog << "IOSeek() pInputStream pointer: " << pInputStream << std::endl;
+//     std::clog << "IOSeek() pInputStream pointer: " << pInputStream << std::endl;
     if (!pInputStream) {
         Log::instance()->avstream().error("IOSeek failed, std::istream not set");
         return 0;
@@ -1700,6 +1721,30 @@ Tagger::initIo(std::istream& istr)
 
 
 Meta*
+Tagger::tag(const std::string& uri)
+{
+    Meta* pMeta = new Meta;
+    int error;
+    
+    Log::instance()->avstream().trace("ffmpeg::av_open_input_file() ...");
+    error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, 0);
+    if (error) {
+        Log::instance()->avstream().error("av_open_input_stream() failed");
+        return 0;
+    }
+    
+    Log::instance()->avstream().trace("ffmpeg::av_find_stream_info() ...");
+    error = av_find_stream_info(pMeta->_pFormatContext);
+    if (error) {
+        Log::instance()->avstream().error("av_find_stream_info() failed, could not find codec parameters");
+        return 0;
+    }
+    
+    return pMeta;
+}
+
+
+Meta*
 Tagger::tag(std::istream& istr)
 {
 //     std::clog << "Tagger::tag()" << std::endl;
@@ -1713,8 +1758,9 @@ Tagger::tag(std::istream& istr)
 //     pMeta->_pIoContext = initIo(istr);
 //     pMeta->_pInputFormat = probeInputFormat(istr);
     Log::instance()->avstream().trace("ffmpeg::av_open_input_file() ...");
-    error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/tmp/omm/o1$r1", 0, 0, 0);
-//     error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", 0, 0, 0);
+//     error = av_open_input_file(&pMeta->_pFormatContext, "http://streamer-dtc-aa04.somafm.com:80/stream/1018", 0, 0, 0);
+//     error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/tmp/omm/o1$r1", 0, 0, 0);
+    error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", 0, 0, 0);
 //     Log::instance()->avstream().trace("ffmpeg::av_open_input_stream() ...");
 //     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
     if (error) {

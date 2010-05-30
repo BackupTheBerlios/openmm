@@ -305,6 +305,7 @@ class Demuxer : public Node
 public:
     Demuxer();
     
+    void set(const std::string& uri);
     void set(std::istream& istr);
     void reset();
     
@@ -419,6 +420,7 @@ public:
     Tagger();
     ~Tagger();
     
+    Meta* tag(const std::string& uri);
     // TODO: istr is currently ignored (hardcoded av_open_input_file())
     Meta* tag(std::istream& istr);
     

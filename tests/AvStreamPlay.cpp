@@ -24,56 +24,63 @@
 #include <Poco/Exception.h>
 #include <Poco/Thread.h>
 #include <Poco/NumberFormatter.h>
+#include <Poco/Util/ServerApplication.h>
+#include <Poco/Util/Option.h>
+#include <Poco/Util/OptionSet.h>
+#include <Poco/Util/HelpFormatter.h>
 
 #include <AvStream.h>
 
 
-class AvPlayer
+class AvPlayer : public Poco::Util::ServerApplication
 {
 public:
-    void play(std::istream& istr)
+    void play(const std::string& uri)
     {
-        std::clog << "AvPlayer starts playing ..." << std::endl;
+        std::clog << "AvPlayer starts playing " << uri << " ..." << std::endl;
         
         Omm::AvStream::Demuxer demuxer;
         
-        demuxer.set(istr);
+        demuxer.set(uri);
         
+        if (demuxer.firstAudioStream() < 0 && demuxer.firstVideoStream() < 0) {
+            std::clog << "no audio or video stream found, exiting" << std::endl;
+            return;
+        }
+            
         //////////// setup engine stream graph ////////////
+        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
+        
         Omm::AvStream::Decoder audioDecoder;
         if (demuxer.firstAudioStream() >= 0) {
             demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
-        }
         
-        std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
         //////////// load and attach audio Sink ////////////
-        Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libomm-audiosink-alsa.so",
-            "AlsaAudioSink");
+            Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libomm-audiosink-alsa.so",
+                "AlsaAudioSink");
 //         Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
 //             "PcmAudioSink");
 //         Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so",
 //             "SdlAudioSink");
-        audioDecoder.attach(pAudioSink);
+            audioDecoder.attach(pAudioSink);
+            Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
+        }
         
         //////////// attach monotonizer and load and attach video sink ////////////
-        Omm::AvStream::Sink* pVideoSink;
         if (demuxer.firstVideoStream() >= 0) {
 //             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
 //                 "PpmVideoSink");
-            pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
+            Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
                 "SdlVideoSink");
             demuxer.attach(pVideoSink);
+            Omm::AvStream::Clock::instance()->attachSink(pVideoSink);
         }
-        
-        
-        Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
-        Omm::AvStream::Clock::instance()->attachSink(pVideoSink);
         
         std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
         Omm::AvStream::Clock::instance()->start();
-        Poco::Thread::sleep(9000);
+        waitForTerminationRequest();
         Omm::AvStream::Clock::instance()->stop();
         demuxer.stop();
         
@@ -92,10 +99,11 @@ int main(int argc, char** argv)
 //     std::ifstream istr("/home/jb/tmp/omm/o1$r1");  // mpgts with 522 frames
     
     // mp3 with 6210 frames of size 627 (= 3893670 bytes, actual size is 3895296 bytes) 118.875 buffers of size 32768
-    std::ifstream istr("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");  // 2048 probe data + 3893248 read later = 3895296 bytes
+//     std::ifstream istr("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");  // 2048 probe data + 3893248 read later = 3895296 bytes
     
     AvPlayer player;
     
-    player.play(istr);
+//     player.play("/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3");
+    player.play(std::string(argv[1]));
 }
 

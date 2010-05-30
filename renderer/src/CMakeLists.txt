@@ -34,15 +34,15 @@ SET( OMMR_SRCS
 MediaRendererApplication.cpp
 )
 
-ADD_EXECUTABLE( ommr
+ADD_EXECUTABLE( ommrender
 ${OMMR_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( ommr
+TARGET_LINK_LIBRARIES( ommrender
 ${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS ommr
+INSTALL( TARGETS ommrender
 RUNTIME DESTINATION bin
 )

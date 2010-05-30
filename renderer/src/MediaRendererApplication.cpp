@@ -42,7 +42,7 @@ using Poco::Util::HelpFormatter;
 using std::stringstream;
 
 
-class MediaRendererApplication: public Poco::Util::ServerApplication
+class MediaRendererApplication : public Poco::Util::ServerApplication
 {
 public:
     MediaRendererApplication():
