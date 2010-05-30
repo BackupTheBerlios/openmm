@@ -107,6 +107,7 @@ SdlVideoSink::init()
 }
 
 
+// TODO: put SdlVideoSink::putFrameInOverlayQueue() in VideoSink
 void
 SdlVideoSink::putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame)
 {
@@ -124,6 +125,7 @@ SdlVideoSink::putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame)
 }
 
 
+// TODO: put most of SdlVideoSink::run() in Sink
 void
 SdlVideoSink::run()
 {
@@ -154,6 +156,7 @@ SdlVideoSink::run()
 }
 
 
+// TODO: put SdlVideoSink::onTick() in VideoSink
 void
 SdlVideoSink::onTick(int64_t time)
 {

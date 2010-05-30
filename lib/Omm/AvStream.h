@@ -106,11 +106,6 @@ public:
         Log::instance()->avstream().trace(Poco::format("%s queue put waiting in thread %s ...",
             getName(), Poco::Thread::current()->name()));
         
-//         if (!_putSemaphore.tryWait(_putTimeout)) {
-//             Log::instance()->avstream().warning(Poco::format("%s queue put timed out in thread %s.",
-//                 getName(), Poco::Thread::current()->name()));
-//             return false;
-//         }
         _putSemaphore.wait();
         
         _lock.lock();
@@ -129,15 +124,6 @@ public:
     {
         Log::instance()->avstream().trace(Poco::format("%s queue get waiting in thread %s ...",
             getName(), Poco::Thread::current()->name()));
-        
-//         if (!_getSemaphore.tryWait(_getTimeout)) {
-//             Log::instance()->avstream().warning(Poco::format("%s queue get timed out in thread %s.",
-//                 getName(), Poco::Thread::current()->name()));
-//             // FIXME: Queue::get() what to return if timed out ...? 
-//             // -> throw an exception ... use Poco::Semaphore::tryWait() with exception ...
-//             // -> bool get(T& element)
-//             return false;
-//         }
         
         _getSemaphore.wait();
             
@@ -243,6 +229,7 @@ public:
     Stream(Node* node, const std::string name = "avstream");
     ~Stream();
     
+    Frame* firstFrame();
     Frame* getFrame();
     void putFrame(Frame* pFrame);
     
@@ -325,68 +312,15 @@ public:
     int firstVideoStream();
     
 private:
-    bool init();
-    
+    virtual bool init();
     virtual void run();
+    
+    int64_t correctPts(int64_t pts, int64_t lastPts, int lastDuration);
     
     Meta*       _pMeta;
     int         _firstAudioStream;
     int         _firstVideoStream;
 };
-
-
-// class Monotonizer : public Node
-// {
-//     /*
-//     You should uses the timestamps given by the demuxer. Unless the encoder
-// does B-frames this should work well enough (if not you'll have to
-// reorder the demuxed timestamps in the same fashion as the encoder did).
-// coded_frame->pts contains synthetic values.
-// What you should do is rescale from the input stream's time base to the
-// output stream's time base. Something like:
-//     
-// pkt.pts = av_rescale_q(inpkt.pts, inctx->streams[0]->time_base,
-// ctx->streams[0]->time_base);
-//     
-// In the case of flv -> flv the time bases are probably the same (1 kHz),
-// but it's a good idea to do this anyway.
-//     
-// The reason for this is that flv has variable frame rate. I've had files
-// with initial time stamps like 0, 333, 666, 1000, 1033, 1066, 1100..
-//     */
-//     
-//     /*
-//     Seven Symptoms of Sick Streams
-//     
-//     pts related (all corrected in synchronizer):
-//     1. pts number overflow
-//     -> set flag Frame::numberOverflow = true
-//     2. pts cicle (pts systematic not monotone)
-//     -> reorder pts
-//     3. pts sprite (pts local not monotone)
-//     -> "tear" sprite pts linear
-//     4. packet shift
-//     -> discard packets until max_of_streams(pts first packet of stream)
-//     5. packet loss (pts not linear)
-//     -> inject blank frame (set Frame::_display = false)
-//     
-//     not pts related:
-//     6. decoding error
-//     -> set flag Frame::_display = false
-//     7. clock drift
-//     -> correct drift or one clock source (watch for cumulating drift when using timers)
-//     
-//     */
-//     
-// public:
-//     Monotonizer();
-//     
-// private:
-//     virtual bool init();
-//     virtual void run();
-//     
-//     std::deque<Frame*>      _frameWindow;
-// };
 
 
 class Decoder : public Node
@@ -561,7 +495,6 @@ private:
     int                     _width;
     int                     _height;
     PixelFormat             _pixelFormat;
-    
     Poco::FastMutex         _sinkLock;
 };
 

@@ -73,7 +73,7 @@ public:
         
         demuxer.start();
         Omm::AvStream::Clock::instance()->start();
-        Poco::Thread::sleep(5000);
+        Poco::Thread::sleep(9000);
         Omm::AvStream::Clock::instance()->stop();
         demuxer.stop();
         

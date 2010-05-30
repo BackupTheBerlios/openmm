@@ -89,8 +89,8 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
@@ -345,6 +345,29 @@ Stream::~Stream()
 
 
 Frame*
+Stream::firstFrame()
+{
+    if (!_pStreamQueue) {
+        Log::instance()->avstream().warning(Poco::format("node %s [%s] get frame no queue attached, ignoring",
+            getNode()->getName(), getName()));
+        return 0;
+    }
+    else {
+        Frame* pRes = _pStreamQueue->front();
+        if (!pRes) {
+            Log::instance()->avstream().warning(Poco::format("node %s [%s] first frame is null frame.",
+                getNode()->getName(), getName()));
+        }
+        else {
+            Log::instance()->avstream().trace(Poco::format("node %s [%s] first frame %s.",
+                getNode()->getName(), getName(), pRes->getName()));
+        }
+        return pRes;
+    }
+}
+
+
+Frame*
 Stream::getFrame()
 {
     if (!_pStreamQueue) {
@@ -355,7 +378,7 @@ Stream::getFrame()
     else {
         Frame* pRes = _pStreamQueue->get();
         if (!pRes) {
-            Log::instance()->avstream().warning(Poco::format("node %s [%s] get frame timeout, queue starved.",
+            Log::instance()->avstream().warning(Poco::format("node %s [%s] get frame returns null frame.",
                 getNode()->getName(), getName()));
         }
         else {
@@ -382,7 +405,7 @@ Stream::putFrame(Frame* pFrame)
         pFrame->_pStream = this;
         bool success = _pStreamQueue->put(pFrame);
         if (!success) {
-            Log::instance()->avstream().warning(Poco::format("node %s [%s] put frame %s timeout, queue blocked.",
+            Log::instance()->avstream().warning(Poco::format("node %s [%s] put frame %s failed, queue blocked.",
                 getNode()->getName(), getName(), pFrame->getName()));
         }
         else {
@@ -1310,44 +1333,16 @@ Demuxer::run()
         Frame* pFrame = new Frame(frameNumber, _outStreams[packet.stream_index], &packet);
         
         // try to correct wrong packet.pts
-        // this relies on a correct packet.duration (one of them must be right, otherwise we are lost)
-        int64_t currentPts;
-        int64_t lastPts = lastPtsVec[packet.stream_index];
-        int lastDuration = lastDurationVec[packet.stream_index];
-        if (lastPts != AV_NOPTS_VALUE && packet.pts != AV_NOPTS_VALUE) {
-            if (lastDuration > 0 && packet.pts != lastPts + lastDuration) {
-                currentPts = lastPts + lastDuration;
-                Log::instance()->avstream().warning(Poco::format("%s corrects pts of frame #%s: %s -> %s",
-                    getName(),
-                    Poco::NumberFormatter::format(frameNumber),
-                    Poco::NumberFormatter::format(packet.pts),
-                    Poco::NumberFormatter::format(currentPts)));
-            }
-            else {
-                currentPts = packet.pts;
-            }
-            
+        // this relies on a correct packet.duration
+        // (pts or duration, one of them must be right, otherwise we are lost, especially with variable frame rate)
+        int64_t currentPts = correctPts(packet.pts, lastPtsVec[packet.stream_index], lastDurationVec[packet.stream_index]);
+        if (currentPts != packet.pts) {
+            Log::instance()->avstream().warning(Poco::format("%s corrects pts of frame %s: %s -> %s",
+                getName(),
+                pFrame->getName(),
+                Poco::NumberFormatter::format(packet.pts),
+                Poco::NumberFormatter::format(currentPts)));
         }
-        else if (lastPts == AV_NOPTS_VALUE && packet.pts != AV_NOPTS_VALUE) {
-            currentPts = packet.pts;
-        }
-        else if (packet.pts == AV_NOPTS_VALUE && lastPts != AV_NOPTS_VALUE) {
-            if (lastDuration > 0) {
-                currentPts = lastPts + lastDuration;
-                Log::instance()->avstream().warning(Poco::format("%s corrects pts of frame #%s: %s -> %s",
-                    getName(),
-                    Poco::NumberFormatter::format(frameNumber),
-                    Poco::NumberFormatter::format(packet.pts),
-                    Poco::NumberFormatter::format(currentPts)));
-            }
-            else {
-                currentPts = packet.pts;
-            }
-        }
-        else { // lastPts && packet.pts == AV_NOPTS_VALUE
-            currentPts = packet.pts;
-        }
-        
         pFrame->setPts(currentPts);
         lastPtsVec[packet.stream_index] = currentPts;
         lastDurationVec[packet.stream_index] = packet.duration;
@@ -1371,67 +1366,66 @@ Demuxer::firstVideoStream()
 }
 
 
-// Monotonizer::Monotonizer() :
-// Node("monotonizer")
-// {
-//     // pts cleaner has one input stream
-//     _inStreams.push_back(new Stream(this));
-//     _inStreams[0]->setInfo(0);
-//     _inStreams[0]->setQueue(new StreamQueue(this));
-//     
-//     // and one output stream
-//     _outStreams.push_back(new Stream(this));
-//     _outStreams[0]->setInfo(0);
-//     _outStreams[0]->setQueue(0);
-// }
-// 
-// 
-// bool
-// Monotonizer::init()
-// {
-//     // init() is called on attach() so _inStreams[0]->_pStreamInfo should be available
-//     if (!_inStreams[0]->getInfo()) {
-//         Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
-//         return false;
-//     }
-//     // output stream has same parameters after decoding as before decoding (NOTE: check, if that's right)
-//     _outStreams[0]->setInfo(_inStreams[0]->getInfo());
-//     return true;
-// }
-// 
-// 
-// void
-// Monotonizer::run()
-// {
-//     bool isMonoton = true;
-//     int deltaPts = 0;
-//     Frame* pFrame;
-//     
-//     if (!_inStreams[0]) {
-//         Log::instance()->avstream().warning(Poco::format("%s no in stream attached, stopping.", getName()));
-//         return;
-//     }
-//     while (!_quit && ((pFrame = _inStreams[0]->getFrame()) || (_frameWindow.size() > 0)))
-//     {
-//         if (!_outStreams[0]) {
-//             Log::instance()->avstream().warning(Poco::format("%s no out stream attached, discarding packet.", getName()));
-//             continue;
-//         }
-//         _frameWindow.push_front(pFrame);
-//         
-//         Log::instance()->avstream().debug(Poco::format("%s inspecting frame %s, frame window size: %s",
-//             getName(), pFrame->getName(), Poco::NumberFormatter::format(_frameWindow.size())));
-//         
-// //         if (_frameWindow.
-//         
-//         
-//         if (isMonoton) {
-//             _outStreams[0]->putFrame(_frameWindow.back());
-//             _frameWindow.pop_back();
-//         }
-//     }
-//     Log::instance()->avstream().warning(Poco::format("%s finished.", getName()));
-// }
+int64_t
+Demuxer::correctPts(int64_t pts, int64_t lastPts, int lastDuration)
+{
+    // OK, this is the place for black magic. 
+    // Everything would be fine, if pts and duration
+    // would be in perfect harmony and pts would always be monotone ...
+    // but this isn't the case, and we rely on two assumptions here:
+    // 1. all frames are in correct order
+    // 2. duration of frames is correct
+    // 
+    //     In general, there seem to be "seven symptoms of sick streams"
+    //     
+    //     pts related (all corrected in synchronizer):
+    //     1. pts number overflow
+    //     -> set flag Frame::numberOverflow = true
+    //     2. pts cicle (pts systematic not monotone)
+    //     -> reorder pts
+    //     3. pts sprite (pts local not monotone)
+    //     -> "tear" sprite pts linear
+    //     4. packet shift
+    //     -> discard packets until max_of_streams(pts first packet of stream)
+    //     5. packet loss (pts not linear)
+    //     -> inject blank frame (set Frame::_display = false)
+    //     
+    //     not pts related:
+    //     6. decoding error
+    //     -> set flag Frame::_display = false
+    //     7. clock drift
+    //     -> correct drift or one clock source (watch for cumulating drift when using timers)
+    //     
+    
+    int64_t correctedPts;
+    
+    if (lastPts != AV_NOPTS_VALUE && pts != AV_NOPTS_VALUE) {
+        if (lastDuration > 0 && pts != lastPts + lastDuration) {
+            correctedPts = lastPts + lastDuration;
+        }
+        else {
+            correctedPts = pts;
+        }
+        
+    }
+    else if (lastPts == AV_NOPTS_VALUE && pts != AV_NOPTS_VALUE) {
+        correctedPts = pts;
+    }
+    else if (pts == AV_NOPTS_VALUE && lastPts != AV_NOPTS_VALUE) {
+        if (lastDuration > 0) {
+            correctedPts = lastPts + lastDuration;
+        }
+        else {
+            correctedPts = pts;
+        }
+    }
+    else { // lastPts && packet.pts == AV_NOPTS_VALUE
+        correctedPts = pts;
+    }
+    
+    return correctedPts;
+}
+
 
 
 Decoder::Decoder() :

@@ -48,6 +48,7 @@ private:
     void writeFrame(Omm::AvStream::Frame *pFrame);
     
     Poco::Thread            _writeThread;
+    Poco::FastMutex         _audioSinkLock;
 
     snd_pcm_t*              pcm_playback;
     snd_pcm_hw_params_t     *hw;
