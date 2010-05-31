@@ -135,4 +135,5 @@ ${OMMTEST_AV_STREAM_PLAY_SRCS}
 TARGET_LINK_LIBRARIES( avstreamplay
 ${LIB_OMM_AV_STREAM}
 ${LIB_POCO_UTIL}
+# /home/jb/devel/cc/ommbin/renderer/src/FileSinks/libomm-videosink-ppm.so
 )

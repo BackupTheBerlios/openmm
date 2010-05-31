@@ -30,6 +30,7 @@
 #include <Poco/Util/HelpFormatter.h>
 
 #include <AvStream.h>
+#include "/home/jb/devel/cc/omm/renderer/src/FileSinks/PpmVideoSink.h"
 
 
 class AvPlayer : public Poco::Util::ServerApplication
@@ -68,11 +69,13 @@ public:
         
         //////////// attach monotonizer and load and attach video sink ////////////
         if (demuxer.firstVideoStream() >= 0) {
+            // FIXME: PpmVideoSink crashes while being allocated
+//             Omm::AvStream::Sink* pVideoSink = new PpmVideoSink;
 //             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
 //                 "PpmVideoSink");
             Omm::AvStream::Sink* pVideoSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
                 "SdlVideoSink");
-            demuxer.attach(pVideoSink);
+            demuxer.attach(pVideoSink, demuxer.firstVideoStream());
             Omm::AvStream::Clock::instance()->attachSink(pVideoSink);
         }
         

@@ -140,9 +140,18 @@ public:
     }
     
     
+    std::string::size_type size() const
+    {
+        return _queue.size();
+    }
+    
+    
     T front()
     {
         Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+        if (_queue.size() == 0) {
+            return T();
+        }
         return _queue.front();
     }
     

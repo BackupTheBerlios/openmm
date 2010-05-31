@@ -161,23 +161,18 @@ void
 SdlVideoSink::onTick(int64_t time)
 {
     Omm::AvStream::Overlay* pOverlay = _overlayQueue.front();
-//     Omm::AvStream::Overlay* pOverlay = _overlayQueue.get();
-    
     
     if (!pOverlay) {
         Omm::AvStream::Log::instance()->avstream().warning("null video frame in overlay queue, ignoring");
         return;
     }
     
-//     pOverlay = _overlayQueue.get();
-//     SdlOverlay* pSdlOverlay = static_cast<SdlOverlay*>(pOverlay);
-//     displayFrame(pSdlOverlay);
-    
     if (pOverlay->_pFrame->getPts() <= time) {
         pOverlay = _overlayQueue.get();
-        SdlOverlay* pSdlOverlay = static_cast<SdlOverlay*>(pOverlay);
-        
-        displayFrame(pSdlOverlay);
+        if (pOverlay) {
+            SdlOverlay* pSdlOverlay = static_cast<SdlOverlay*>(pOverlay);
+            displayFrame(pSdlOverlay);
+        }
     }
     
 //     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s stream time: %s, frame %s pts: %s.",

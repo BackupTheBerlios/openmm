@@ -45,7 +45,6 @@ public:
     
 private:
     virtual bool init();
-//     virtual bool prepareStart();
     virtual void run();
     virtual void onTick(int64_t time);
     

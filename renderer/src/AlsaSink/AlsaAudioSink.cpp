@@ -158,14 +158,23 @@ AlsaAudioSink::run()
 void
 AlsaAudioSink::onTick(int64_t time)
 {
-    while (!_timerQuit && _inStreams[0]->firstFrame() && (_inStreams[0]->firstFrame()->getPts() < time)) {
+    while (!_timerQuit) {
 //         Poco::ScopedLock<Poco::FastMutex> lock(_audioSinkLock);
-        Omm::AvStream::Frame* pFrame = _inStreams[0]->getFrame();
         
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s stream time: %s, frame %s too old, discarding frame.",
-            getName(),
-            Poco::NumberFormatter::format(time),
-            pFrame->getName()));
+        Omm::AvStream::Frame* pFrame = _inStreams[0]->firstFrame();
+        if (pFrame && pFrame->getPts() < time) {
+            pFrame = _inStreams[0]->getFrame();
+            
+            if (pFrame) {
+                Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s stream time: %s, frame %s too old, discarding frame.",
+                    getName(),
+                    Poco::NumberFormatter::format(time),
+                    pFrame->getName()));
+            }
+        }
+        else {
+            break;
+        }
     }
 }
 
@@ -181,17 +190,18 @@ AlsaAudioSink::afterTimerStart()
 void
 AlsaAudioSink::writeThread()
 {
-    Omm::AvStream::Frame* pFrame;
-    while (!_timerQuit && (pFrame = _inStreams[0]->getFrame()))
+    while (!_timerQuit)
     {
 //         Poco::ScopedLock<Poco::FastMutex> lock(_audioSinkLock);
         
-        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s writing frame %s pts: %s.",
-            getName(),
-            pFrame->getName(),
-            Poco::NumberFormatter::format(pFrame->getPts())));
-        
-        writeFrame(pFrame);
+        Omm::AvStream::Frame* pFrame = _inStreams[0]->getFrame();
+        if (pFrame) {
+            Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s writing frame %s",
+                getName(),
+                pFrame->getName()));
+            
+            writeFrame(pFrame);
+        }
     }
     close();
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s sink stopped.", getName()));

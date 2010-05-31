@@ -155,19 +155,21 @@ StreamInfo::findCodec()
     _pAvCodec = avcodec_find_decoder(_pAvCodecContext->codec_id);
     
     if(!_pAvCodec) {
-        Log::instance()->avstream().error("could not find decoder");
+        Log::instance()->avstream().error(Poco::format("could not find decoder for codec id: %s",
+            Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
         return false;
     }
     
     // Inform the codec that we can handle truncated bitstreams -- i.e.,
     // bitstreams where frame boundaries can fall in the middle of packets
-//         if(_pVideoCodec->capabilities & CODEC_CAP_TRUNCATED) {
-//             _pMeta->_pVideoCodecContext->flags |= CODEC_FLAG_TRUNCATED;
-//         }
+//     if(_pAvCodec->capabilities & CODEC_CAP_TRUNCATED) {
+//         _pAvCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+//     }
     
     Log::instance()->avstream().trace("ffmpeg::avcodec_open() ...");
     if(avcodec_open(_pAvCodecContext, _pAvCodec) < 0) {
-        Log::instance()->avstream().error("could not open decoder");
+        Log::instance()->avstream().error(Poco::format("could not open decoder for codec id: %s",
+            Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
         return false;
     }
     Log::instance()->avstream().information(Poco::format("found codec: %s (%s)",
@@ -1351,13 +1353,14 @@ Demuxer::run()
         // create a new frame out of the AVPacket that we extracted from the stream
         // create means: make a copy of the data buffer and delete the packet
         Frame* pFrame = new Frame(frameNumber, _outStreams[packet.stream_index], &packet);
+        pFrame->setPts(packet.pts);
         
         // try to correct wrong packet.pts
         // this relies on a correct packet.duration
         // (pts or duration, one of them must be right, otherwise we are lost, especially with variable frame rate)
         int64_t currentPts = correctPts(packet.pts, lastPtsVec[packet.stream_index], lastDurationVec[packet.stream_index]);
         if (currentPts != packet.pts) {
-            Log::instance()->avstream().warning(Poco::format("%s corrects pts of frame %s: %s -> %s",
+            Log::instance()->avstream().warning(Poco::format("%s frame %s, correct pts %s -> %s",
                 getName(),
                 pFrame->getName(),
                 Poco::NumberFormatter::format(packet.pts),
@@ -1369,6 +1372,9 @@ Demuxer::run()
         
         _outStreams[packet.stream_index]->putFrame(pFrame);
     }
+    // if no frames could be read from input stream, stop all nodes
+    stop();
+    // TODO: clock should be stopped, too (if connected to a sink node)
 }
 
 
@@ -1521,25 +1527,11 @@ _pInputFormat(0)
 
 Meta::~Meta()
 {
-//     if (_pAudioCodecContext) {
-//         avcodec_close(_pAudioCodecContext);
-//     }
-//     if (_pVideoCodecContext) {
-//         avcodec_close(_pVideoCodecContext);
-//     }
     if (_pFormatContext) {
-//         std::clog << "Meta::_pFormatContext: " << _pFormatContext << std::endl;
         Log::instance()->avstream().trace("ffmpeg::av_close_input_stream() ...");
         av_close_input_stream(_pFormatContext);
     }
 }
-
-
-// AVCodecContext*
-// Meta::getAudioCodecContext()
-// {
-//     return _pAudioCodecContext;
-// }
 
 
 void
@@ -1643,7 +1635,6 @@ static int IORead( void *opaque, uint8_t *buf, int buf_size )
     Log::instance()->avstream().trace(Poco::format("IORead() URLProtocol name: %s", std::string(pUrlContext->prot->name)));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
-//     std::clog << "IORead() pInputStream pointer: " << pInputStream << std::endl;
     if (!pInputStream) {
         Log::instance()->avstream().error("IORead failed, std::istream not set");
         return -1;
@@ -1675,7 +1666,6 @@ static int64_t IOSeek( void *opaque, int64_t offset, int whence )
     Log::instance()->avstream().trace(Poco::format("IOSeek() URLProtocol name: %s", std::string(pUrlContext->prot->name)));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
-//     std::clog << "IOSeek() pInputStream pointer: " << pInputStream << std::endl;
     if (!pInputStream) {
         Log::instance()->avstream().error("IOSeek failed, std::istream not set");
         return 0;
@@ -1747,22 +1737,13 @@ Tagger::tag(const std::string& uri)
 Meta*
 Tagger::tag(std::istream& istr)
 {
-//     std::clog << "Tagger::tag()" << std::endl;
-//     std::clog << "sizeof(AVFormatContext): " << sizeof(AVFormatContext) << std::endl;  // should be 3960, see -malign-double
-//     std::clog << "sizeof(AVCodecContext): " << sizeof(AVCodecContext) << std::endl;
-    
-    
     Meta* pMeta = new Meta;
     int error;
     
-//     pMeta->_pIoContext = initIo(istr);
-//     pMeta->_pInputFormat = probeInputFormat(istr);
-    Log::instance()->avstream().trace("ffmpeg::av_open_input_file() ...");
-//     error = av_open_input_file(&pMeta->_pFormatContext, "http://streamer-dtc-aa04.somafm.com:80/stream/1018", 0, 0, 0);
-//     error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/tmp/omm/o1$r1", 0, 0, 0);
-    error = av_open_input_file(&pMeta->_pFormatContext, "/home/jb/mp3/current/04_-_Kyuss_-_Hurricane.mp3", 0, 0, 0);
-//     Log::instance()->avstream().trace("ffmpeg::av_open_input_stream() ...");
-//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
+    pMeta->_pIoContext = initIo(istr);
+    pMeta->_pInputFormat = probeInputFormat(istr);
+    Log::instance()->avstream().trace("ffmpeg::av_open_input_stream() ...");
+    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
     if (error) {
         Log::instance()->avstream().error("av_open_input_stream() failed");
         return 0;
