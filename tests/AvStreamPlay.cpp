@@ -61,12 +61,12 @@ public:
             demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
         
         //////////// load and attach audio Sink ////////////
-//             Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "AlsaSink/libomm-audiosink-alsa.so",
-//                 "AlsaAudioSink");
-//              Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
+            Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "AlsaSink/libomm-audiosink-alsa.so",
+                "AlsaAudioSink");
+//              Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
 //                  "PcmAudioSink");
-            Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so",
-                 "SdlAudioSink");
+//             Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so",
+//                  "SdlAudioSink");
             audioDecoder.attach(pAudioSink);
             Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
             

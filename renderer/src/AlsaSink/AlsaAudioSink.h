@@ -28,17 +28,22 @@
 #include <alsa/asoundlib.h>
 #include <alsa/pcm.h>
 
-class AlsaAudioSink : public Omm::AvStream::Sink
+class AlsaAudioSink : public Omm::AvStream::AudioSink
 {
 public:
     AlsaAudioSink();
     virtual ~AlsaAudioSink();
 
 private:
-    virtual bool init();
-    virtual void run();
-    virtual void onTick(int64_t time);
-    virtual void afterTimerStart();
+    virtual bool initAudio();
+    virtual void startAudio();
+    virtual void stopAudio();
+    
+    
+//     virtual bool init();
+//     virtual void run();
+//     virtual void onTick(int64_t time);
+//     virtual void afterTimerStart();
     
     bool open();
     bool open(const std::string& device);
@@ -48,7 +53,8 @@ private:
     void writeFrame(Omm::AvStream::Frame *pFrame);
     
     Poco::Thread            _writeThread;
-
+    bool                    _quitWriteThread;
+    
     snd_pcm_t*              _pcmPlayback;
     snd_pcm_hw_params_t*    _hwParams;
     std::string             _device;
@@ -58,6 +64,8 @@ private:
     int                     _periods;       // number of periods
     snd_pcm_uframes_t       _periodSize;    // periodsize (bytes)
     snd_pcm_uframes_t       _frames;
+    snd_pcm_uframes_t       _bufferSize;
+    char*                   _buffer;
 };
 
 #endif
