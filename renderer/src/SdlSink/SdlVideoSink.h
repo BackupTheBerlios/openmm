@@ -29,13 +29,13 @@
 class SdlOverlay : public Omm::AvStream::Overlay
 {
 public:
-    SdlOverlay(Omm::AvStream::Sink* pSink);
+    SdlOverlay(Omm::AvStream::VideoSink* pVideoSink);
     
     SDL_Overlay*    _pSDLOverlay;
 };
 
 
-class SdlVideoSink : public Omm::AvStream::Sink
+class SdlVideoSink : public Omm::AvStream::VideoSink
 {
 public:
     SdlVideoSink();
@@ -44,15 +44,16 @@ public:
     virtual int eventLoop();
     
 private:
-    virtual bool init();
-    virtual void run();
-    virtual void onTick(int64_t time);
+    virtual bool initDevice();
+    virtual void displayFrame(SdlOverlay* pOverlay);
     
-    void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
-    void displayFrame(SdlOverlay* pOverlay);
+//     virtual bool init();
+//     virtual void run();
+//     virtual void onTick(int64_t time);
+//     
+//     void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
     
-    int     _writeOverlayNumber;
-    bool    _firstDecodeSuccess;
+
 };
 
 #endif

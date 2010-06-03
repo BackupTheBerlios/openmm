@@ -35,15 +35,9 @@ public:
     virtual ~AlsaAudioSink();
 
 private:
-    virtual bool initAudio();
-    virtual void startAudio();
-    virtual void stopAudio();
-    
-    
-//     virtual bool init();
-//     virtual void run();
-//     virtual void onTick(int64_t time);
-//     virtual void afterTimerStart();
+    virtual bool initDevice();
+    virtual void startPresentation();
+    virtual void stopPresentation();
     
     bool open();
     bool open(const std::string& device);

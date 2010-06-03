@@ -56,7 +56,7 @@ void audioCallback(void* pThis, uint8_t* sdlBuffer, int sdlBufferSize)
 
 
 bool
-SdlAudioSink::initAudio()
+SdlAudioSink::initDevice()
 {
     Omm::AvStream::Log::instance()->avstream().debug("opening SDL audio sink ...");
     
@@ -86,14 +86,14 @@ SdlAudioSink::initAudio()
 
 
 void
-SdlAudioSink::startAudio()
+SdlAudioSink::startPresentation()
 {
     SDL_PauseAudio(0);
 }
 
 
 void
-SdlAudioSink::stopAudio()
+SdlAudioSink::stopPresentation()
 {
     SDL_PauseAudio(1);
 }

@@ -475,23 +475,6 @@ private:
 };
 
 
-class Overlay
-{
-public:
-    Overlay(Sink* pSink);
-    
-    int getWidth();
-    int getHeight();
-    PixelFormat getFormat();
-    
-    uint8_t*        _data[4];
-    int             _pitch[4];
-    
-    Sink*           _pSink;
-    Frame*          _pFrame;
-};
-
-
 /*
 sinks in warmup phase:
 1. audio and video set start time to first succesfully decoded frame
@@ -507,51 +490,21 @@ sinks in running phase:
 
 class Sink : public Node
 {
-    friend class Stream;
+//     friend class Stream;
     friend class Clock;
     
 public:
-    Sink(const std::string& name = "sink",
-         int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
-         int overlayCount = 1);
+    Sink(const std::string& name = "sink");
     virtual ~Sink() {}
     
-    static Sink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
-    virtual int eventLoop() { return 0; }
-    
-    void currentTime(int64_t time);
-    void startPresentation();
-    void stopPresentation();
-    
-    int getWidth();
-    int getHeight();
-    PixelFormat getFormat();
+    virtual void startPresentation() {}
+    virtual void stopPresentation() {}
     
 protected:
-    virtual void onTick(int64_t time) {}
-    virtual void beforeTimerStart() {}
-    virtual void afterTimerStart() {}
-    
-    void startTimer();
-    void stopTimer();
-    
-    int                     _overlayCount;
-    std::vector<Overlay*>   _overlayVector;
-    Queue<Overlay*>         _overlayQueue;
-    
-    bool                    _timerQuit;
+    virtual bool initDevice() {}
     
 private:
-    void timerThread();
-    
-    Queue<int64_t>          _timerQueue;
-    Poco::Thread            _timerThread;
     int64_t                 _currentTime;
-    
-    int                     _width;
-    int                     _height;
-    PixelFormat             _pixelFormat;
-    Poco::FastMutex         _sinkLock;
 };
 
 
@@ -566,12 +519,8 @@ public:
     bool audioAvailable();
     int audioRead(char* buffer, int size);
     void initSilence(char* buffer, int size);
-    
+
 protected:
-    virtual bool initAudio() {}
-    virtual void startAudio() {}
-    virtual void stopAudio() {}
-    
     int channels();
     unsigned int sampleRate();
     int silence();
@@ -579,16 +528,81 @@ protected:
 private:
     virtual bool init();
     virtual void run();
-    virtual void afterTimerStart();
     
     Omm::AvStream::ByteQueue    _byteQueue;
 };
 
 
+class Overlay;
+
 class VideoSink : public Sink
 {
 public:
-    VideoSink(const std::string& name = "video sink");
+    VideoSink(const std::string& name = "video sink",
+         int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
+         int overlayCount = 5);
+    
+    static VideoSink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
+    virtual int eventLoop() { return 0; }
+    
+    void currentTime(int64_t time);
+    virtual void startPresentation();
+    virtual void stopPresentation();
+    
+    int getWidth();
+    int getHeight();
+    PixelFormat getFormat();
+    
+protected:
+    virtual void displayFrame(Overlay* pOverlay) {}
+    
+//     virtual void onTick(int64_t time) {}
+//     virtual void beforeTimerStart() {}
+//     virtual void afterTimerStart() {}
+    
+//     void startTimer();
+//     void stopTimer();
+    
+    int                     _overlayCount;
+    std::vector<Overlay*>   _overlayVector;
+    Queue<Overlay*>         _overlayQueue;
+    
+    bool                    _timerQuit;
+    
+private:
+    virtual bool init();
+    virtual void run();
+
+    void onTick(int64_t time);
+    void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
+    void timerThread();
+    
+    Queue<int64_t>          _timerQueue;
+    Poco::Thread            _timerThread;
+    Poco::FastMutex         _sinkLock;
+    
+    int                     _width;
+    int                     _height;
+    PixelFormat             _pixelFormat;
+    int                     _writeOverlayNumber;
+    bool                    _firstDecodeSuccess;
+};
+
+
+class Overlay
+{
+public:
+    Overlay(VideoSink* pVideoSink);
+    
+    int getWidth();
+    int getHeight();
+    PixelFormat getFormat();
+    
+    uint8_t*        _data[4];
+    int             _pitch[4];
+    
+    VideoSink*      _pVideoSink;
+    Frame*          _pFrame;
 };
 
 
@@ -599,7 +613,9 @@ public:
     
     // attachSink()
     // pSink: pointer to sink, that receives the timing signals
-    void attachSink(Sink* pSink);
+    void attachAudioSink(AudioSink* pAudioSink);
+    void attachVideoSink(VideoSink* pVideoSink);
+    
     // setTime()
     // sets clock's current stream time to currentTime
     void setTime(int64_t currentTime);
@@ -622,7 +638,8 @@ private:
     long                    _clockTick;
     long                    _clockTickStreamBase;
     
-    std::vector<Sink*>      _sinkVec;
+    std::vector<AudioSink*> _audioSinkVec;
+    std::vector<VideoSink*> _videoSinkVec;
     
     Poco::FastMutex         _clockLock;
 };

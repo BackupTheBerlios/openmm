@@ -1977,36 +1977,20 @@ Tagger::tag(std::istream& istr)
 }
 
 
-Overlay::Overlay(Sink* pSink) :
-_pSink(pSink),
-_pFrame(0)
+Sink::Sink(const std::string& name) :
+Node(name)
 {
+    // sink has one input stream
+    _inStreams.push_back(new Omm::AvStream::Stream(this));
+    _inStreams[0]->setInfo(0);
+    _inStreams[0]->setQueue(new Omm::AvStream::StreamQueue(this));
+    
+    // and no output stream
 }
 
 
-int
-Overlay::getWidth()
-{
-    return _pSink->getWidth();
-}
-
-
-int
-Overlay::getHeight()
-{
-    return _pSink->getHeight();
-}
-
-
-PixelFormat
-Overlay::getFormat()
-{
-    return _pSink->getFormat();
-}
-
-
-Sink::Sink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
-Node(name),
+VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
+Sink(name),
 _overlayCount(overlayCount),
 _overlayVector(overlayCount),
 _overlayQueue(name + " overlay", overlayCount, 500, 500),
@@ -2015,15 +1999,17 @@ _timerThread(name + " timer thread"),
 _timerQuit(false),
 _width(width),
 _height(height),
-_pixelFormat(pixelFormat)
+_pixelFormat(pixelFormat),
+_writeOverlayNumber(0),
+_firstDecodeSuccess(false)
 {
 }
 
 
-Sink*
-Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
+VideoSink*
+VideoSink::loadPlugin(const std::string& libraryPath, const std::string& className)
 {
-    Poco::ClassLoader<Sink> sinkPluginLoader;
+    Poco::ClassLoader<VideoSink> sinkPluginLoader;
     if (sinkPluginLoader.isLibraryLoaded(libraryPath)) {
         Log::instance()->avstream().error(Poco::format("library %s already loaded", libraryPath));
         return 0;
@@ -2042,7 +2028,7 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
     Log::instance()->avstream().debug(Poco::format("%s plugin successfully loaded.", libraryPath));
     
     Log::instance()->avstream().debug(Poco::format("%s plugin to be allocated ...", className));
-    Sink* pRes;
+    VideoSink* pRes;
     try {
         pRes = sinkPluginLoader.create(className);
     }
@@ -2055,22 +2041,42 @@ Sink::loadPlugin(const std::string& libraryPath, const std::string& className)
 }
 
 
-void
-Sink::startTimer()
+bool
+VideoSink::init()
 {
-    Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
+    if (!_inStreams[0]->getInfo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->findCodec()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->isVideo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a video stream", getName()));
+        return false;
+    }
     
-    beforeTimerStart();
-    
-    Poco::RunnableAdapter<Sink> ra(*this, &Sink::timerThread);
-    _timerThread.start(ra);
-    
-    afterTimerStart();
+    return initDevice();
 }
 
 
 void
-Sink::stopTimer()
+VideoSink::startPresentation()
+{
+    Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
+    
+//     beforeTimerStart();
+    
+    Poco::RunnableAdapter<VideoSink> ra(*this, &VideoSink::timerThread);
+    _timerThread.start(ra);
+    
+//     afterTimerStart();
+}
+
+
+void
+VideoSink::stopPresentation()
 {
     Log::instance()->avstream().debug(Poco::format("%s stopping timer thread ...", getName()));
     
@@ -2082,7 +2088,7 @@ Sink::stopTimer()
 
 
 void
-Sink::currentTime(int64_t time)
+VideoSink::currentTime(int64_t time)
 {
     Log::instance()->avstream().trace(Poco::format("%s current time: %s", getName(), Poco::NumberFormatter::format(time)));
     
@@ -2091,7 +2097,7 @@ Sink::currentTime(int64_t time)
 
 
 void
-Sink::timerThread()
+VideoSink::timerThread()
 {
     // TODO: what if get() in Sink::timerThread() times out ...
     // what is returned?
@@ -2106,7 +2112,7 @@ Sink::timerThread()
 
 
 int
-Sink::getWidth()
+VideoSink::getWidth()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
     return _width;
@@ -2114,7 +2120,7 @@ Sink::getWidth()
 
 
 int
-Sink::getHeight()
+VideoSink::getHeight()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
     return _height;
@@ -2122,10 +2128,85 @@ Sink::getHeight()
 
 
 PixelFormat
-Sink::getFormat()
+VideoSink::getFormat()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
     return _pixelFormat;
+}
+
+
+void
+VideoSink::putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame)
+{
+    Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
+    pDecodedFrame->write(pWriteOverlay);
+    pWriteOverlay->_pFrame = pDecodedFrame;
+    
+    _overlayQueue.put(pWriteOverlay);
+    
+    // increment modulo _overlayCount
+    _writeOverlayNumber++;
+    if (_writeOverlayNumber >= _overlayCount) {
+        _writeOverlayNumber = 0;
+    }
+}
+
+
+void
+VideoSink::run()
+{
+    if (!_inStreams[0]->getQueue()) {
+        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
+        return;
+    }
+    Omm::AvStream::Frame* pFrame;
+    while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
+        
+        Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+        if (!pDecodedFrame) {
+            Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding frame %s",
+                getName(), pFrame->getName()));
+        }
+        else {
+            if (!_firstDecodeSuccess) {
+                _firstDecodeSuccess = true;
+                // setting stream time in clock to time of first video frame that could be decoded
+                // this means, that playback starts at the first decoded video frame
+                Omm::AvStream::Clock::instance()->setTime(pFrame->getPts());
+            }
+            putFrameInOverlayQueue(pDecodedFrame);
+        }
+    }
+    
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s finished.", getName()));
+}
+
+
+void
+VideoSink::onTick(int64_t time)
+{
+    Overlay* pOverlay = _overlayQueue.front();
+    
+    if (!pOverlay) {
+        Omm::AvStream::Log::instance()->avstream().warning("null video frame in overlay queue, ignoring");
+        return;
+    }
+    
+    if (pOverlay->_pFrame->getPts() <= time) {
+        pOverlay = _overlayQueue.get();
+        if (pOverlay) {
+//             Overlay* pOverlay = static_cast<SdlOverlay*>(pOverlay);
+            displayFrame(pOverlay);
+        }
+    }
+    
+//     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s stream time: %s, frame %s pts: %s.",
+//         getName(),
+//         Poco::NumberFormatter::format(time),
+//         pOverlay->_pFrame->getName(),
+//         Poco::NumberFormatter::format(pOverlay->_pFrame->getPts())));
+    
+    
 }
 
 
@@ -2134,12 +2215,6 @@ Sink(name),
 // allocate byte queue for 20k s16-2chan-samples
 _byteQueue(20 * 1024 * 2 * 2)
 {
-    // audio sink has one input stream
-    _inStreams.push_back(new Omm::AvStream::Stream(this));
-    _inStreams[0]->setInfo(0);
-    _inStreams[0]->setQueue(new Omm::AvStream::StreamQueue(this));
-    
-    // and no output stream
 }
 
 
@@ -2195,7 +2270,7 @@ AudioSink::init()
         return false;
     }
     
-    return initAudio();
+    return initDevice();
 }
 
 
@@ -2214,11 +2289,11 @@ AudioSink::run()
 }
 
 
-void
-AudioSink::afterTimerStart()
-{
-    startAudio();
-}
+// void
+// AudioSink::afterTimerStart()
+// {
+//     startAudio();
+// }
 
 
 int
@@ -2263,10 +2338,54 @@ AudioSink::initSilence(char* buffer, int size)
 }
 
 
-VideoSink::VideoSink(const std::string& name) :
-Sink(name)
+// bool
+// VideoSink::init()
+// {
+//     if (!_inStreams[0]->getInfo()) {
+//         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+//         return false;
+//     }
+//     if (!_inStreams[0]->getInfo()->isVideo()) {
+//         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not an video stream", getName()));
+//         return false;
+//     }
+//     
+//     return initDevice();
+// }
+
+
+Overlay::Overlay(VideoSink* pVideoSink) :
+_pVideoSink(pVideoSink),
+_pFrame(0)
 {
 }
+
+
+int
+Overlay::getWidth()
+{
+    return _pVideoSink->getWidth();
+}
+
+
+int
+Overlay::getHeight()
+{
+    return _pVideoSink->getHeight();
+}
+
+
+PixelFormat
+Overlay::getFormat()
+{
+    return _pVideoSink->getFormat();
+}
+
+
+// VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
+// Sink(name)
+// {
+// }
 
 
 Clock* Clock::_pInstance = 0;
@@ -2291,12 +2410,22 @@ Clock::instance()
 
 
 void
-Clock::attachSink(Sink* pSink)
+Clock::attachAudioSink(AudioSink* pAudioSink)
 {
-    _sinkVec.push_back(pSink);
+    _audioSinkVec.push_back(pAudioSink);
     
     Log::instance()->avstream().debug(Poco::format("CLOCK attached %s",
-        pSink->getName()));
+        pAudioSink->getName()));
+}
+
+
+void
+Clock::attachVideoSink(VideoSink* pVideoSink)
+{
+    _videoSinkVec.push_back(pVideoSink);
+    
+    Log::instance()->avstream().debug(Poco::format("CLOCK attached %s",
+        pVideoSink->getName()));
 }
 
 
@@ -2306,7 +2435,7 @@ Clock::setTime(int64_t currentTime)
     Log::instance()->avstream().debug(Poco::format("CLOCK set stream time to: %s.", Poco::NumberFormatter::format(currentTime)));
     
     _clockLock.lock();
-    for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
+    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->currentTime(currentTime);
     }
     _streamTime = currentTime;
@@ -2325,7 +2454,7 @@ Clock::clockTick(Poco::Timer& timer)
         
         _streamTime += _clockTickStreamBase;
     
-        for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
+        for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
             (*it)->currentTime(_streamTime);
         }
     }
@@ -2338,8 +2467,11 @@ Clock::start()
 {
     Log::instance()->avstream().debug("CLOCK starting ...");
     
-    for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
-        (*it)->startTimer();
+    for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
+        (*it)->startPresentation();
+    }
+    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
+        (*it)->startPresentation();
     }
     _clockTimer.setPeriodicInterval(_clockTick);
     _clockTimer.start(Poco::TimerCallback<Clock>(*this, &Clock::clockTick));
@@ -2350,8 +2482,11 @@ void
 Clock::stop()
 {
     _clockTimer.stop();
-    for (std::vector<Sink*>::iterator it = _sinkVec.begin(); it != _sinkVec.end(); ++it) {
-        (*it)->stopTimer();
+    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
+        (*it)->stopPresentation();
+    }
+    for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
+        (*it)->stopPresentation();
     }
     Log::instance()->avstream().debug("CLOCK stopped.");
 }

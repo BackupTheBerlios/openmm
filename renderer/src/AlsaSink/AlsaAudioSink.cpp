@@ -86,7 +86,7 @@ AlsaAudioSink::close()
 
 
 bool
-AlsaAudioSink::initAudio()
+AlsaAudioSink::initDevice()
 {
     if (!open()) {
         Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
@@ -152,7 +152,7 @@ AlsaAudioSink::initAudio()
 
 
 void
-AlsaAudioSink::startAudio()
+AlsaAudioSink::startPresentation()
 {
     Poco::RunnableAdapter<AlsaAudioSink> ra(*this, &AlsaAudioSink::writeThread);
     _writeThread.start(ra);
@@ -160,7 +160,7 @@ AlsaAudioSink::startAudio()
 
 
 void
-AlsaAudioSink::stopAudio()
+AlsaAudioSink::stopPresentation()
 {
     _quitWriteThread = true;
 }

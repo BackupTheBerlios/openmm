@@ -33,9 +33,9 @@ public:
     virtual ~SdlAudioSink();
 
 private:
-    virtual bool initAudio();
-    virtual void startAudio();
-    virtual void stopAudio();
+    virtual bool initDevice();
+    virtual void startPresentation();
+    virtual void stopPresentation();
 };
 
 #endif
