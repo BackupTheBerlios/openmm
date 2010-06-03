@@ -26,23 +26,16 @@
 #include <Omm/AvStream.h>
 
 
-class SdlAudioSink : public Omm::AvStream::Sink
+class SdlAudioSink : public Omm::AvStream::AudioSink
 {
 public:
     SdlAudioSink();
     virtual ~SdlAudioSink();
 
 private:
-    virtual bool init();
-    virtual void run();
-    virtual void onTick(int64_t time);
-    virtual void afterTimerStart();
-    
-    SDL_AudioSpec               _deviceParamsWanted;
-    SDL_AudioSpec               _deviceParams;
-    
-//     Omm::AvStream::ByteQueue* _pByteQueue;
-    Omm::AvStream::ByteQueue    _byteQueue;
+    virtual bool initAudio();
+    virtual void startAudio();
+    virtual void stopAudio();
 };
 
 #endif

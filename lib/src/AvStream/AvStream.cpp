@@ -89,9 +89,9 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
@@ -117,9 +117,7 @@ ByteQueue::ByteQueue(int size) :
 _size(size),
 _level(0),
 _writeSemaphore(1, 1),
-// _writeSemaphoreSet(true),
 _readSemaphore(0, 1)
-// _readSemaphoreSet(false)
 {
 //     _bytestream.open("bytestream");
 }
@@ -235,15 +233,12 @@ int
 ByteQueue::readSome(char* buffer, int num)
 {
     // block byte queue for further reading
-    Log::instance()->avstream().trace("byte queue readSome() read semaphore wait ...");
-//     _readSemaphoreSet = false;
     _readSemaphore.wait();
-    Log::instance()->avstream().trace("byte queue readSome() read semaphore success.");
     
     _lock.lock();
     
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() trying to read %s bytes, level: %s",
-        Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
+//     Log::instance()->avstream().trace(Poco::format("byte queue readSome() trying to read %s bytes, level: %s",
+//         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
     
     int bytesRead = (_level < num) ? _level : num;
     _bytestream.read(buffer, bytesRead);
@@ -253,32 +248,23 @@ ByteQueue::readSome(char* buffer, int num)
         Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
     
     // queue is not empty, we can go on reading
-    if (_level > 0/* && !_readSemaphoreSet*/) {
-        Log::instance()->avstream().trace("byte queue readSome() trying to set read semaphore ...");
+    if (_level > 0) {
         try {
             _readSemaphore.set();
         }
         catch (Poco::SystemException) {
         }
-//         _readSemaphoreSet = true;
-        Log::instance()->avstream().trace("byte queue readSome() read semaphore set");
     }
     
     _lock.unlock();
     // we've read some bytes, so we can put something in, again
-    if (num > 0 /*&& !_writeSemaphoreSet*/) {
-        Log::instance()->avstream().trace("byte queue readSome() trying to set write semaphore ...");
+    if (num > 0) {
         try {
             _writeSemaphore.set();
         }
         catch (Poco::SystemException) {
         }
-//         _writeSemaphoreSet = true;
-        Log::instance()->avstream().trace("byte queue readSome() write semaphore set");
     }  
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() returns: %s",
-        Poco::NumberFormatter::format(bytesRead)));
     
     return bytesRead;
 }
@@ -288,14 +274,11 @@ int
 ByteQueue::writeSome(char* buffer, int num)
 {
     // block byte queue for further writing
-    Log::instance()->avstream().trace("byte queue writeSome() write semaphore wait ...");
-//     _writeSemaphoreSet = false;
     _writeSemaphore.wait();
-    Log::instance()->avstream().trace("byte queue writeSome() write semaphore success.");
     _lock.lock();
     
-    Log::instance()->avstream().trace(Poco::format("byte queue writeSome() trying to write %s bytes, level: %s",
-        Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
+//     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() trying to write %s bytes, level: %s",
+//         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
     
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
     _bytestream.write(buffer, bytesWritten);
@@ -305,32 +288,23 @@ ByteQueue::writeSome(char* buffer, int num)
         Poco::NumberFormatter::format(bytesWritten), Poco::NumberFormatter::format(_level)));
     
     // queue is not full, we can go on writing
-    if (_level < _size/* && !_writeSemaphoreSet*/) {
-        Log::instance()->avstream().trace("byte queue writeSome() trying to set write semaphore ...");
+    if (_level < _size) {
         try {
             _writeSemaphore.set();
         }
         catch (Poco::SystemException) {
         }
-//         _writeSemaphoreSet = true;
-        Log::instance()->avstream().trace("byte queue writeSome() write semaphore set");
     }
     
     _lock.unlock();
     // we've written some bytes, so we can get something out, again
-    if (num > 0/* && !_readSemaphoreSet*/) {
-        Log::instance()->avstream().trace("byte queue writeSome() trying to set read semaphore ...");
+    if (num > 0) {
         try {
             _readSemaphore.set();
         }
         catch (Poco::SystemException) {
         }
-//         _readSemaphoreSet = true;
-        Log::instance()->avstream().trace("byte queue writeSome() read semaphore set");
     }  
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue writeSome() returns: %s",
-        Poco::NumberFormatter::format(bytesWritten)));
     
     return bytesWritten;
 }
@@ -2152,6 +2126,146 @@ Sink::getFormat()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
     return _pixelFormat;
+}
+
+
+AudioSink::AudioSink(const std::string& name) :
+Sink(name),
+// allocate byte queue for 20k s16-2chan-samples
+_byteQueue(20 * 1024 * 2 * 2)
+{
+    // audio sink has one input stream
+    _inStreams.push_back(new Omm::AvStream::Stream(this));
+    _inStreams[0]->setInfo(0);
+    _inStreams[0]->setQueue(new Omm::AvStream::StreamQueue(this));
+    
+    // and no output stream
+}
+
+
+AudioSink::~AudioSink()
+{
+}
+
+
+AudioSink*
+AudioSink::loadPlugin(const std::string& libraryPath, const std::string& className)
+{
+    Poco::ClassLoader<AudioSink> sinkPluginLoader;
+    if (sinkPluginLoader.isLibraryLoaded(libraryPath)) {
+        Log::instance()->avstream().error(Poco::format("library %s already loaded", libraryPath));
+        return 0;
+    }
+    try {
+        sinkPluginLoader.loadLibrary(libraryPath);
+    }
+    catch (Poco::NotFoundException) {
+        Log::instance()->avstream().error(Poco::format("could not find  %s sink plugin.", libraryPath));
+        return 0;
+    }
+    catch (Poco::LibraryLoadException) {
+        Log::instance()->avstream().error(Poco::format("could not load  %s sink plugin.", libraryPath));
+        return 0;
+    }
+    Log::instance()->avstream().debug(Poco::format("%s plugin successfully loaded.", libraryPath));
+    
+    Log::instance()->avstream().debug(Poco::format("%s plugin to be allocated ...", className));
+    AudioSink* pRes;
+    try {
+        pRes = sinkPluginLoader.create(className);
+    }
+    catch (Poco::NotFoundException) {
+        Log::instance()->avstream().error(Poco::format("%s could not create instance of plugin.", className));
+        return 0;
+    }
+    Log::instance()->avstream().debug(Poco::format("%s plugin successfully allocated.", className));
+    return pRes;
+}
+
+
+bool
+AudioSink::init()
+{
+    if (!_inStreams[0]->getInfo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->isAudio()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not an audio stream", getName()));
+        return false;
+    }
+    
+    return initAudio();
+}
+
+
+void
+AudioSink::run()
+{
+    if (!_inStreams[0]->getQueue()) {
+        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
+        return;
+    }
+    Omm::AvStream::Frame* pFrame;
+    while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
+        _byteQueue.write(pFrame->data(), pFrame->size());
+    }
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s finished.", getName()));
+}
+
+
+void
+AudioSink::afterTimerStart()
+{
+    startAudio();
+}
+
+
+int
+AudioSink::channels()
+{
+    return _inStreams[0]->getInfo()->channels();
+}
+
+
+unsigned int
+AudioSink::sampleRate()
+{
+    return _inStreams[0]->getInfo()->sampleRate();
+}
+
+
+int
+AudioSink::silence()
+{
+    return 0;
+}
+
+
+bool
+AudioSink::audioAvailable()
+{
+    return _byteQueue.level();
+}
+
+
+int
+AudioSink::audioRead(char* buffer, int size)
+{
+    return _byteQueue.readSome(buffer, size);
+}
+
+
+void
+AudioSink::initSilence(char* buffer, int size)
+{
+    memset(buffer, silence(), size);
+}
+
+
+VideoSink::VideoSink(const std::string& name) :
+Sink(name)
+{
 }
 
 

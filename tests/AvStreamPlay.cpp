@@ -31,7 +31,7 @@
 
 #include <AvStream.h>
 // #include "/home/jb/devel/cc/omm/renderer/src/FileSinks/PpmVideoSink.h"
-#include "/home/jb/devel/cc/omm/renderer/src/SdlSink/SdlAudioSink.h"
+// #include "/home/jb/devel/cc/omm/renderer/src/SdlSink/SdlAudioSink.h"
 
 
 
@@ -55,7 +55,7 @@ public:
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
         
         Omm::AvStream::Decoder audioDecoder;
-        SdlAudioSink audioSink;
+//         SdlAudioSink audioSink;
         
         if (demuxer.firstAudioStream() >= 0) {
             demuxer.attach(&audioDecoder, demuxer.firstAudioStream());
@@ -65,13 +65,13 @@ public:
 //                 "AlsaAudioSink");
 //              Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
 //                  "PcmAudioSink");
-//             Omm::AvStream::Sink* pAudioSink = Omm::AvStream::Sink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so",
-//                  "SdlAudioSink");
-//             audioDecoder.attach(pAudioSink);
-//             Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
+            Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "SdlSink/libomm-audiosink-sdl.so",
+                 "SdlAudioSink");
+            audioDecoder.attach(pAudioSink);
+            Omm::AvStream::Clock::instance()->attachSink(pAudioSink);
             
-            audioDecoder.attach(&audioSink);
-            Omm::AvStream::Clock::instance()->attachSink(&audioSink);
+//             audioDecoder.attach(&audioSink);
+//             Omm::AvStream::Clock::instance()->attachSink(&audioSink);
         }
         
         //////////// load and attach video sink ////////////

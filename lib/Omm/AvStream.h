@@ -125,9 +125,7 @@ private:
     int                     _size;
     int                     _level;
     Poco::Semaphore         _writeSemaphore;
-//     bool                    _writeSemaphoreSet; // workaround
     Poco::Semaphore         _readSemaphore;
-//     bool                    _readSemaphoreSet; // workaround
     Poco::FastMutex         _lock;
     Poco::RWLock            _writeLock;
     Poco::RWLock            _readLock;
@@ -559,7 +557,31 @@ private:
 
 class AudioSink : public Sink
 {
+public:
     AudioSink(const std::string& name = "audio sink");
+    virtual ~AudioSink();
+    
+    static AudioSink* loadPlugin(const std::string& libraryPath, const std::string& className = "AudioSinkPlugin");
+    
+    bool audioAvailable();
+    int audioRead(char* buffer, int size);
+    void initSilence(char* buffer, int size);
+    
+protected:
+    virtual bool initAudio() {}
+    virtual void startAudio() {}
+    virtual void stopAudio() {}
+    
+    int channels();
+    unsigned int sampleRate();
+    int silence();
+    
+private:
+    virtual bool init();
+    virtual void run();
+    virtual void afterTimerStart();
+    
+    Omm::AvStream::ByteQueue    _byteQueue;
 };
 
 

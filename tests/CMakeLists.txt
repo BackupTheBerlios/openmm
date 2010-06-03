@@ -140,5 +140,5 @@ ADD_DEFINITIONS(
 TARGET_LINK_LIBRARIES( avstreamplay
 ${LIB_OMM_AV_STREAM}
 ${LIB_POCO_UTIL}
-/home/jb/devel/cc/ommbin/renderer/src/SdlSink/libomm-audiosink-sdl.so
+# /home/jb/devel/cc/ommbin/renderer/src/SdlSink/libomm-audiosink-sdl.so
 )
