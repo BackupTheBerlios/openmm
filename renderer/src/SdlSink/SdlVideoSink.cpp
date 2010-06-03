@@ -36,12 +36,6 @@ SdlVideoSink::SdlVideoSink() :
 // reserve 5 overlays for SdlVideoSink
 VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 5)
 {
-//     // video sink has one input stream
-//     _inStreams.push_back(new Omm::AvStream::Stream(this));
-//     _inStreams.back()->setInfo(0);
-//     _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
-//     
-//     // and no output stream
 }
 
 
@@ -67,19 +61,6 @@ SdlVideoSink::initDevice()
         return false;
     }
     
-//     if (!_inStreams[0]->getInfo()) {
-//         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
-//         return false;
-//     }
-//     if (!_inStreams[0]->getInfo()->findCodec()) {
-//         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
-//         return false;
-//     }
-//     if (!_inStreams[0]->getInfo()->isVideo()) {
-//         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a video stream", getName()));
-//         return false;
-//     }
-    
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
         // SDL_YV12_OVERLAY corresponds to ffmpeg::PixelFormat == PIX_FMT_YUV420P
         // TODO: catch, if SDL_Overlay could not be created (video card has to few memory)
@@ -96,7 +77,6 @@ SdlVideoSink::initDevice()
         pOverlay->_pitch[1] = pSDLOverlay->pitches[2];
         pOverlay->_pitch[2] = pSDLOverlay->pitches[1];
         
-//         _overlayVector.push_back(pOverlay);
         _overlayVector[numOverlay] = pOverlay;
     }
 
@@ -105,86 +85,8 @@ SdlVideoSink::initDevice()
 }
 
 
-// // TODO: put SdlVideoSink::putFrameInOverlayQueue() in VideoSink
-// void
-// SdlVideoSink::putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame)
-// {
-//     SdlOverlay* pWriteOverlay = static_cast<SdlOverlay*>(_overlayVector[_writeOverlayNumber]);
-//     pDecodedFrame->write(pWriteOverlay);
-//     pWriteOverlay->_pFrame = pDecodedFrame;
-//     
-//     _overlayQueue.put(pWriteOverlay);
-//     
-//     // increment modulo _overlayCount
-//     _writeOverlayNumber++;
-//     if (_writeOverlayNumber >= _overlayCount) {
-//         _writeOverlayNumber = 0;
-//     }
-// }
-// 
-// 
-// // TODO: put most of SdlVideoSink::run() in Sink
-// void
-// SdlVideoSink::run()
-// {
-//     if (!_inStreams[0]->getQueue()) {
-//         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
-//         return;
-//     }
-//     Omm::AvStream::Frame* pFrame;
-//     while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
-//         
-//         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
-//         if (!pDecodedFrame) {
-//             Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding frame %s",
-//                 getName(), pFrame->getName()));
-//         }
-//         else {
-//             if (!_firstDecodeSuccess) {
-//                 _firstDecodeSuccess = true;
-//                 // setting stream time in clock to time of first video frame that could be decoded
-//                 // this means, that playback starts at the first decoded video frame
-//                 Omm::AvStream::Clock::instance()->setTime(pFrame->getPts());
-//             }
-//             putFrameInOverlayQueue(pDecodedFrame);
-//         }
-//     }
-// 
-//     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s finished.", getName()));
-// }
-// 
-// 
-// // TODO: put SdlVideoSink::onTick() in VideoSink
-// void
-// SdlVideoSink::onTick(int64_t time)
-// {
-//     Omm::AvStream::Overlay* pOverlay = _overlayQueue.front();
-//     
-//     if (!pOverlay) {
-//         Omm::AvStream::Log::instance()->avstream().warning("null video frame in overlay queue, ignoring");
-//         return;
-//     }
-//     
-//     if (pOverlay->_pFrame->getPts() <= time) {
-//         pOverlay = _overlayQueue.get();
-//         if (pOverlay) {
-//             SdlOverlay* pSdlOverlay = static_cast<SdlOverlay*>(pOverlay);
-//             displayFrame(pSdlOverlay);
-//         }
-//     }
-//     
-// //     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s stream time: %s, frame %s pts: %s.",
-// //         getName(),
-// //         Poco::NumberFormatter::format(time),
-// //         pOverlay->_pFrame->getName(),
-// //         Poco::NumberFormatter::format(pOverlay->_pFrame->getPts())));
-//     
-// 
-// }
-
-
 void
-SdlVideoSink::displayFrame(SdlOverlay* pOverlay)
+SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
     SDL_Rect rect;
     rect.x = 0;
@@ -198,7 +100,7 @@ SdlVideoSink::displayFrame(SdlOverlay* pOverlay)
         Poco::NumberFormatter::format(rect.w),
         Poco::NumberFormatter::format(rect.h)));
     
-    SDL_DisplayYUVOverlay(pOverlay->_pSDLOverlay, &rect);
+    SDL_DisplayYUVOverlay(static_cast<SdlOverlay*>(pOverlay)->_pSDLOverlay, &rect);
 }
 
 

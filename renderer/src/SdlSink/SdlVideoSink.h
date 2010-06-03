@@ -45,15 +45,7 @@ public:
     
 private:
     virtual bool initDevice();
-    virtual void displayFrame(SdlOverlay* pOverlay);
-    
-//     virtual bool init();
-//     virtual void run();
-//     virtual void onTick(int64_t time);
-//     
-//     void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
-    
-
+    virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);
 };
 
 #endif

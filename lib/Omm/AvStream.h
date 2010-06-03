@@ -490,9 +490,6 @@ sinks in running phase:
 
 class Sink : public Node
 {
-//     friend class Stream;
-    friend class Clock;
-    
 public:
     Sink(const std::string& name = "sink");
     virtual ~Sink() {}
@@ -502,9 +499,6 @@ public:
     
 protected:
     virtual bool initDevice() {}
-    
-private:
-    int64_t                 _currentTime;
 };
 
 
@@ -555,13 +549,6 @@ public:
     
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
-    
-//     virtual void onTick(int64_t time) {}
-//     virtual void beforeTimerStart() {}
-//     virtual void afterTimerStart() {}
-    
-//     void startTimer();
-//     void stopTimer();
     
     int                     _overlayCount;
     std::vector<Overlay*>   _overlayVector;
