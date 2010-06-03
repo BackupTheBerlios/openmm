@@ -18,6 +18,10 @@ SET( OMM_AVSTREAM_SDL_AUDIOSINK_SRCS
 SdlAudioSink.cpp
 )
 
+ADD_DEFINITIONS(
+-malign-double
+)
+
 ADD_LIBRARY( omm-videosink-sdl
 SHARED
 ${OMM_AVSTREAM_SDL_VIDEOSINK_SRCS}

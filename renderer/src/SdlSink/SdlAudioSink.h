@@ -32,16 +32,17 @@ public:
     SdlAudioSink();
     virtual ~SdlAudioSink();
 
-//     virtual int eventLoop();
-    
 private:
     virtual bool init();
     virtual void run();
+    virtual void onTick(int64_t time);
+    virtual void afterTimerStart();
     
-    SDL_AudioSpec       _deviceParamsWanted;
-    SDL_AudioSpec       _deviceParams;
+    SDL_AudioSpec               _deviceParamsWanted;
+    SDL_AudioSpec               _deviceParams;
     
-    int                 _frameCount;
+//     Omm::AvStream::ByteQueue* _pByteQueue;
+    Omm::AvStream::ByteQueue    _byteQueue;
 };
 
 #endif

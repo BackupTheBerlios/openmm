@@ -29,14 +29,14 @@
 AlsaAudioSink::AlsaAudioSink() :
 Sink("alsa audio sink"),
 _writeThread(getName() + " write thread"),
-pcm_playback(0),
-device("default"),
-format(SND_PCM_FORMAT_S16),
-rate(44100),
-channels(2),
-periods(2),
-periodsize(8192),
-frames(periodsize >> 2)
+_pcmPlayback(0),
+_device("default"),
+_format(SND_PCM_FORMAT_S16),
+_rate(44100),
+_channels(2),
+_periods(2),
+_periodSize(8192),
+_frames(_periodSize >> 2)
 {
     // audio sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
@@ -60,13 +60,13 @@ AlsaAudioSink::open()
 
 
 bool
-AlsaAudioSink::open(const std::string& device)
+AlsaAudioSink::open(const std::string& _device)
 {
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opening with device: %s", getName(), device));
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opening with device: %s", getName(), _device));
     
-    int err = snd_pcm_open(&pcm_playback, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
+    int err = snd_pcm_open(&_pcmPlayback, _device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (err < 0) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s could not open device: %s", getName(), device));
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s could not open device: %s", getName(), _device));
         return false;
     }
     
@@ -78,9 +78,9 @@ AlsaAudioSink::open(const std::string& device)
 void
 AlsaAudioSink::close()
 {
-    if (pcm_playback) {
-        snd_pcm_drop(pcm_playback);
-        snd_pcm_close(pcm_playback);
+    if (_pcmPlayback) {
+        snd_pcm_drop(_pcmPlayback);
+        snd_pcm_close(_pcmPlayback);
     }
     
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
@@ -94,41 +94,49 @@ AlsaAudioSink::init()
         Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
         return false;
     }
-    snd_pcm_hw_params_alloca(&hw);
-    if (snd_pcm_hw_params_any(pcm_playback, hw) < 0) {
+    snd_pcm_hw_params_alloca(&_hwParams);
+    if (snd_pcm_hw_params_any(_pcmPlayback, _hwParams) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("can not configure PCM device.");
         return false;
     }
-    if (snd_pcm_hw_params_set_access(pcm_playback, hw, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
+    if (snd_pcm_hw_params_set_access(_pcmPlayback, _hwParams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device access.");
         return false;
     }
-    if (snd_pcm_hw_params_set_format(pcm_playback, hw, format) < 0) {
+    if (snd_pcm_hw_params_set_format(_pcmPlayback, _hwParams, _format) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device format.");
         return false;
     }
-    if (snd_pcm_hw_params_set_rate_near(pcm_playback, hw, &rate, 0) < 0) {
+    if (snd_pcm_hw_params_set_rate_near(_pcmPlayback, _hwParams, &_rate, 0) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate.");
         return false;
     }
-    if (snd_pcm_hw_params_set_channels(pcm_playback, hw, channels) < 0) {
+    if (snd_pcm_hw_params_set_channels(_pcmPlayback, _hwParams, _channels) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels.");
         return false;
     }
-    if (snd_pcm_hw_params_set_periods(pcm_playback, hw, periods, 0) < 0) {
+    if (snd_pcm_hw_params_set_periods(_pcmPlayback, _hwParams, _periods, 0) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device periods.");
         return false;
     }
     // Set buffer size (in frames). The resulting latency is given by
-    // latency = periodsize * periods / (rate * bytes_per_frame)
-    snd_pcm_uframes_t bufferSize = (periodsize * periods) >> 2;
-    if (int ret = snd_pcm_hw_params_set_buffer_size(pcm_playback, hw, bufferSize)) {
+    // latency = periodSize * periods / (rate * bytes_per_frame)
+    snd_pcm_uframes_t bufferSize = (_periodSize * _periods) >> 2;
+    if (int ret = snd_pcm_hw_params_set_buffer_size_near(_pcmPlayback, _hwParams, &bufferSize)) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("setting up PCM device buffer to size: %s returns: %s",
             Poco::NumberFormatter::format(bufferSize),
             Poco::NumberFormatter::format(ret)
             ));
+        return false;
     }
-    if (snd_pcm_hw_params(pcm_playback, hw) < 0) {
+    if (int ret = snd_pcm_hw_params_set_period_size_near(_pcmPlayback, _hwParams, &_periodSize, 0)) {
+        Omm::AvStream::Log::instance()->avstream().error(Poco::format("setting up PCM device period to size: %s returns: %s",
+            Poco::NumberFormatter::format(bufferSize),
+            Poco::NumberFormatter::format(ret)
+            ));
+        return false;
+    }
+    if (snd_pcm_hw_params(_pcmPlayback, _hwParams) < 0) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s initializing device.", getName()));
         return false;
     }
@@ -159,8 +167,6 @@ void
 AlsaAudioSink::onTick(int64_t time)
 {
     while (!_timerQuit) {
-//         Poco::ScopedLock<Poco::FastMutex> lock(_audioSinkLock);
-        
         Omm::AvStream::Frame* pFrame = _inStreams[0]->firstFrame();
         if (pFrame && pFrame->getPts() < time) {
             pFrame = _inStreams[0]->getFrame();
@@ -192,8 +198,6 @@ AlsaAudioSink::writeThread()
 {
     while (!_timerQuit)
     {
-//         Poco::ScopedLock<Poco::FastMutex> lock(_audioSinkLock);
-        
         Omm::AvStream::Frame* pFrame = _inStreams[0]->getFrame();
         if (pFrame) {
             Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s writing frame %s",
@@ -208,6 +212,8 @@ AlsaAudioSink::writeThread()
 }
 
 
+// TODO: implement asynchonous playback: http://alsa.opensrc.org/index.php/HowTo_Asynchronous_Playback
+// FIXME: alsa device buffer underruns (try some simple test app and find out the difference)
 void
 AlsaAudioSink::writeFrame(Omm::AvStream::Frame* pFrame)
 {
@@ -217,12 +223,13 @@ AlsaAudioSink::writeFrame(Omm::AvStream::Frame* pFrame)
         return;
     }
     
-    int framesWritten;
-    while ((framesWritten = snd_pcm_writei(pcm_playback, pFrame->data(), pFrame->size() >> 2)) < 0) {
-        snd_pcm_prepare(pcm_playback);
+    int samplesWritten;
+    while ((samplesWritten = snd_pcm_writei(_pcmPlayback, pFrame->data(), pFrame->size() >> 2)) < 0) {
+        snd_pcm_prepare(_pcmPlayback);
         Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< audio device buffer underrun >>>>>>>>>>>>>>>");
     }
-//     std::clog << "frames written: " << framesWritten << std::endl;
+    Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s, frame %s, samples written to device: %s.",
+        getName(), pFrame->getName(), Poco::NumberFormatter::format(samplesWritten)));
 }
 
 

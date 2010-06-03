@@ -48,17 +48,16 @@ private:
     void writeFrame(Omm::AvStream::Frame *pFrame);
     
     Poco::Thread            _writeThread;
-    Poco::FastMutex         _audioSinkLock;
 
-    snd_pcm_t*              pcm_playback;
-    snd_pcm_hw_params_t     *hw;
-    std::string             device;
-    snd_pcm_format_t        format;
-    unsigned int            rate;
-    int                     channels;
-    int                     periods;       // number of periods
-    snd_pcm_uframes_t       periodsize;    // periodsize (bytes)
-    snd_pcm_uframes_t       frames;
+    snd_pcm_t*              _pcmPlayback;
+    snd_pcm_hw_params_t*    _hwParams;
+    std::string             _device;
+    snd_pcm_format_t        _format;
+    unsigned int            _rate;
+    int                     _channels;
+    int                     _periods;       // number of periods
+    snd_pcm_uframes_t       _periodSize;    // periodsize (bytes)
+    snd_pcm_uframes_t       _frames;
 };
 
 #endif

@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include <deque>
+#include <sstream>
 
 #include <Poco/Logger.h>
 #include <Poco/Format.h>
@@ -34,7 +34,11 @@
 #include <Poco/Runnable.h>
 #include <Poco/Semaphore.h>
 #include <Poco/Mutex.h>
+#include <Poco/RWLock.h>
 #include <Poco/Timer.h>
+
+// FIXME: make clear if you need to set -malign-double when linking with libommavstream and ffmpeg is compiled with -malign-double
+// FIXME: find a build check for ffmpeg, if it is compiled with -malign-double
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -86,6 +90,51 @@ private:
 };
 
 
+/**
+class ByteQueue - a blocking byte stream with a fixed size
+**/
+class ByteQueue
+{
+public:
+    ByteQueue(int size);
+    
+    /**
+    read() and write() block until num bytes have been read or written
+    **/
+    void read(char* buffer, int num);
+    void write(char* buffer, int num);
+    
+    /**
+    readSome() and writeSome() read upto num bytes, return the number of bytes read
+    and block if queue is empty / full
+    **/
+    int readSome(char* buffer, int num);
+    int writeSome(char* buffer, int num);
+    
+    int level();
+    
+private:
+//     int readSomeSemaphore(char* buffer, int num);
+//     int writeSomeSemaphore(char* buffer, int num);
+    int readSomeRwLock(char* buffer, int num);
+    int writeSomeRwLock(char* buffer, int num);
+    
+    
+//     std::fstream            _bytestream;
+    std::stringstream       _bytestream;
+    int                     _size;
+    int                     _level;
+    Poco::Semaphore         _writeSemaphore;
+//     bool                    _writeSemaphoreSet; // workaround
+    Poco::Semaphore         _readSemaphore;
+//     bool                    _readSemaphoreSet; // workaround
+    Poco::FastMutex         _lock;
+    Poco::RWLock            _writeLock;
+    Poco::RWLock            _readLock;
+};
+
+
+// TODO: get rid of timeouts and return value of put()
 template<typename T>
 class Queue
 {
@@ -103,46 +152,28 @@ public:
     
     bool put(T element)
     {
-        Log::instance()->avstream().trace(Poco::format("%s queue put waiting in thread %s ...",
-            getName(), Poco::Thread::current()->name()));
-        
         _putSemaphore.wait();
-        
         _lock.lock();
+        
         _queue.push(element);
+        
         _lock.unlock();
-        
         _getSemaphore.set();
-        
-        Log::instance()->avstream().trace(Poco::format("%s queue put success in thread %s, size: %s",
-            getName(), Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return true;
     }
     
     
     T get()
     {
-        Log::instance()->avstream().trace(Poco::format("%s queue get waiting in thread %s ...",
-            getName(), Poco::Thread::current()->name()));
-        
         _getSemaphore.wait();
-            
         _lock.lock();
+        
         T ret = _queue.front();
         _queue.pop();
+        
         _lock.unlock();
-        
         _putSemaphore.set();
-        
-        Log::instance()->avstream().trace(Poco::format("%s queue get success in thread %s, size: %s",
-            getName(), Poco::Thread::current()->name(), Poco::NumberFormatter::format(_queue.size())));
         return ret;
-    }
-    
-    
-    std::string::size_type size() const
-    {
-        return _queue.size();
     }
     
     
@@ -153,6 +184,12 @@ public:
             return T();
         }
         return _queue.front();
+    }
+    
+    
+    int count()
+    {
+        return _queue.size();
     }
     
     
@@ -293,12 +330,9 @@ public:
     Stream* getInStream(int inStreamNumber);
     
 protected:
-    virtual bool init() {}
-//     virtual bool prepareStart();
+    virtual bool init() { return true; }
     virtual void run() {}
     
-//     void setStop(bool stop);
-
     
     std::string                     _name;
     std::vector<Stream*>            _inStreams;
@@ -459,6 +493,19 @@ public:
     Frame*          _pFrame;
 };
 
+
+/*
+sinks in warmup phase:
+1. audio and video set start time to first succesfully decoded frame
+2. clock waits until all registered sinks set their start time
+3. clock decides wether to start with min(start times) or max(start times)
+-> min(start times): set clock
+-> max(start times): tell all sinks to discard old frames and set clock
+
+sinks in running phase:
+1. don't start before warmup phase is finished
+...
+*/
 
 class Sink : public Node
 {

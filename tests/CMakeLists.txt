@@ -94,9 +94,6 @@ AvStreamPlay.cpp
 # ${OMMTEST_HTTPFILESERVER_SRCS}
 # )
 
-ADD_EXECUTABLE( avstreamplay
-${OMMTEST_AV_STREAM_PLAY_SRCS}
-)
 
 # TARGET_LINK_LIBRARIES( ssdp_test
 # ${LIB_OMM}
@@ -132,8 +129,16 @@ ${OMMTEST_AV_STREAM_PLAY_SRCS}
 # ${LIB_POCO_UTIL}
 # )
 
+ADD_EXECUTABLE( avstreamplay
+${OMMTEST_AV_STREAM_PLAY_SRCS}
+)
+
+ADD_DEFINITIONS(
+-malign-double
+)
+
 TARGET_LINK_LIBRARIES( avstreamplay
 ${LIB_OMM_AV_STREAM}
 ${LIB_POCO_UTIL}
-# /home/jb/devel/cc/ommbin/renderer/src/FileSinks/libomm-videosink-ppm.so
+/home/jb/devel/cc/ommbin/renderer/src/SdlSink/libomm-audiosink-sdl.so
 )
