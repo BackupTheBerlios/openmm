@@ -137,11 +137,11 @@ template<typename T>
 class Queue
 {
 public:
-    Queue(const std::string& name, int size, int putTimeout, int getTimeout) :
+    Queue(const std::string& name, int size/*, int putTimeout, int getTimeout*/) :
         _name(name),
         _size(size),
-        _putTimeout(putTimeout),
-        _getTimeout(getTimeout),
+//         _putTimeout(putTimeout),
+//         _getTimeout(getTimeout),
         _putSemaphore(size, size),
         _getSemaphore(0, size)
     {
@@ -201,9 +201,9 @@ private:
     std::queue<T>           _queue;
     int                     _size;
     // wait _packetQueuePutTimeout ms for data to be put into the queue
-    int                     _putTimeout;
+//     int                     _putTimeout;
     // wait _packetQueueGetTimeout ms for data to be fetched from the queue
-    int                     _getTimeout;
+//     int                     _getTimeout;
     
     Poco::Semaphore         _putSemaphore;
     Poco::Semaphore         _getSemaphore;
@@ -214,7 +214,7 @@ private:
 class StreamQueue : public Queue<Frame*>
 {
 public:
-    StreamQueue(Node* pNode, int size = 20, int putTimeout = 500, int getTimeout = 500);
+    StreamQueue(Node* pNode, int size = 100/*, int putTimeout = 500, int getTimeout = 500*/);
     
     Node* getNode();
     
@@ -259,7 +259,7 @@ private:
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
-    int64_t               _newFrameNumber;
+    int64_t                 _newFrameNumber;
 };
 
 
@@ -490,6 +490,8 @@ sinks in running phase:
 
 class Sink : public Node
 {
+    friend class Clock;
+    
 public:
     Sink(const std::string& name = "sink");
     virtual ~Sink() {}
@@ -504,6 +506,7 @@ protected:
 
     Queue<int64_t>          _timeQueue;
     bool                    _firstDecodeSuccess;
+    int64_t                 _startTime;
     
 private:
     virtual bool init();
@@ -519,6 +522,9 @@ public:
     
     static AudioSink* loadPlugin(const std::string& libraryPath, const std::string& className = "AudioSinkPlugin");
     
+    void setStartTime(int64_t startTime);
+    
+    // methods for the audio driver (public, so it can be called form C callbacks)
     bool audioAvailable();
     int audioRead(char* buffer, int size);
     void audioReadBlocking(char* buffer, int size);
@@ -532,7 +538,6 @@ protected:
 private:
     virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
-//     virtual void run();
     
     Omm::AvStream::ByteQueue    _byteQueue;
 };
@@ -549,6 +554,8 @@ public:
     
     static VideoSink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
     virtual int eventLoop() { return 0; }
+    
+    void setStartTime(int64_t startTime);
     
     void currentTime(int64_t time);
     virtual void startPresentation();
@@ -606,14 +613,19 @@ class Clock
 public:
     static Clock* instance();
     
-    // attachSink()
-    // pSink: pointer to sink, that receives the timing signals
+    /** attachAudioSink() / attachVideoSink()
+        pSink: pointer to sink, that receives the timing signals
+    **/
     void attachAudioSink(AudioSink* pAudioSink);
     void attachVideoSink(VideoSink* pVideoSink);
     
-    // setTime()
-    // sets clock's current stream time to currentTime
+    void setStartTime(bool toFirstFrame = false);
+    
+    /** setTime()
+        sets clock's current stream time to currentTime and notifies sinks
+    **/
     void setTime(int64_t currentTime);
+    
     // start clock
     void start();
     void stop();

@@ -79,15 +79,23 @@ public:
             Omm::AvStream::Clock::instance()->attachVideoSink(pVideoSink);
         }
         
-        std::clog << "<<<<<<<<<<<< ENGINE STARTS ... >>>>>>>>>>>>" << std::endl;
+        
+        std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
+        Omm::AvStream::Clock::instance()->setStartTime();
+
+//         std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
+        
 //         Omm::AvStream::Clock::instance()->start();
         waitForTerminationRequest();
 //         Omm::AvStream::Clock::instance()->stop();
+        
+//         std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
+        
         demuxer.stop();
         
-        std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
+        std::clog << "<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>" << std::endl;
         
         ////////// deallocate meta data and packet queues ////////////
         demuxer.reset();
