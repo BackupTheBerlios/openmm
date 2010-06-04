@@ -44,7 +44,6 @@ private:
     void close();
     
     void writeThread();
-    void writeFrame(Omm::AvStream::Frame *pFrame);
     
     Poco::Thread                            _writeThread;
     Poco::RunnableAdapter<AlsaAudioSink>    _writeThreadRunnable;

@@ -740,11 +740,13 @@ Stream::decodeAudioFrame(Frame* pFrame)
         
         if (bytesConsumed < 0 || pOutFrame->_size == 0) {
             Log::instance()->avstream().warning(Poco::format("decoding audio frame in stream %s failed, discarding frame.", getName()));
+            delete pFrame;
             return 0;
         }
         inBuffer += bytesConsumed;
         inBufferSize -= bytesConsumed;
     }
+    delete pFrame;
     return pOutFrame;
 }
 
@@ -768,10 +770,15 @@ Stream::decodeVideoFrame(Frame* pFrame)
     
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
         Log::instance()->avstream().warning(Poco::format("decoding video frame in stream %s failed, discarding frame.", getName()));
+        // FIXME: when decoding of video failes, original frame is deleted? 
+        // segfault here when doing a delete pFrame
+//         delete pFrame;
         return 0;
     }
     
     Frame* pOutFrame = new Frame(pFrame->getNumber(), this, &outPic);
+    // FIXME: this makes no different in memory consumption
+//     delete pFrame;
     return pOutFrame;
 }
 
@@ -1114,17 +1121,22 @@ _pStream(pStream)
 
 Frame::~Frame()
 {
-    if (_data) {
-        delete _data;
-        _data = 0;
-    }
+    // NOTE: _data points to _pAvPacket->data or _pAvFrame->data[0], so we need to free only one of them
+    
     if (_pAvPacket) {
-        delete _pAvPacket;
+        Log::instance()->avstream().trace(Poco::format("%s dtor, ffmpeg::av_free_packet() ...", getName()));
+        av_free_packet(_pAvPacket);
         _pAvPacket = 0;
     }
-    if (_pAvFrame) {
-        delete _pAvFrame;
+    else if (_pAvFrame) {
+        Log::instance()->avstream().trace(Poco::format("%s dtor, ffmpeg::av_free() ...", getName()));
+        av_free(_pAvFrame);
         _pAvFrame = 0;
+    }
+    else if (_data) {
+        Log::instance()->avstream().trace(Poco::format("%s dtor, delete _data ...", getName()));
+        delete _data;
+        _data = 0;
     }
 }
 
@@ -1540,6 +1552,7 @@ Demuxer::run()
         if (!_outStreams[packet.stream_index]->getQueue()) {
             Log::instance()->avstream().warning(Poco::format("%s stream %s not connected, discarding packet",
                 getName(), Poco::NumberFormatter::format(packet.stream_index)));
+            Log::instance()->avstream().trace("ffmpeg::av_free_packet() ...");
             av_free_packet(&packet);
             continue;
         }
@@ -2021,6 +2034,9 @@ Sink::run()
                     getName(), Poco::NumberFormatter::format(_startTime)));
             }
             writeDecodedFrame(pDecodedFrame);
+            // FIXME: this segfaults with video, but without leads to more memory consumption
+//             delete pDecodedFrame;
+            pDecodedFrame = 0;
         }
     }
     

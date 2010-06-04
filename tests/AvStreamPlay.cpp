@@ -54,9 +54,8 @@ public:
         //////////// setup engine stream graph ////////////
         std::string basePluginDir("/home/jb/devel/cc/ommbin/renderer/src/");
         
-        if (demuxer.firstAudioStream() >= 0) {
-        
         //////////// load and attach audio Sink ////////////
+        if (demuxer.firstAudioStream() >= 0) {
             Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "AlsaSink/libomm-audiosink-alsa.so",
                 "AlsaAudioSink");
 //              Omm::AvStream::AudioSink* pAudioSink = Omm::AvStream::AudioSink::loadPlugin(basePluginDir + "FileSinks/libomm-audiosink-pcm.so",
