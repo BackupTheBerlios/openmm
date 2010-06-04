@@ -495,6 +495,8 @@ public:
     virtual void startPresentation() {}
     virtual void stopPresentation() {}
     
+    void currentTime(int64_t time);
+
 protected:
     virtual bool checkInStream() {}
     virtual bool initDevice() {}
@@ -553,7 +555,6 @@ public:
     
     void setStartTime(int64_t startTime);
     
-    void currentTime(int64_t time);
     virtual void startPresentation();
     virtual void stopPresentation();
     

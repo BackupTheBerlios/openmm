@@ -150,17 +150,8 @@ ByteQueue::readSome(char* buffer, int num)
     _readSemaphore.wait();
     _lock.lock();
     
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() trying to read %s bytes, level: %s",
-        Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
-    
     int bytesRead = (_level < num) ? _level : num;
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() reading %s bytes, level: %s",
-        Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
-    // FIXME: sometimes segfaulting here
     _bytestream.read(buffer, bytesRead);
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() setting level: %s",
-        Poco::NumberFormatter::format(_level - bytesRead)));
     _level -= bytesRead;
     
     Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
@@ -194,9 +185,6 @@ ByteQueue::writeSome(char* buffer, int num)
     // block byte queue for further writing
     _writeSemaphore.wait();
     _lock.lock();
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue writeSome() trying to write %s bytes, level: %s",
-        Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
     
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
     _bytestream.write(buffer, bytesWritten);
@@ -2042,6 +2030,15 @@ Sink::run()
 }
 
 
+void
+Sink::currentTime(int64_t time)
+{
+    Log::instance()->avstream().trace(Poco::format("%s current time: %s", getName(), Poco::NumberFormatter::format(time)));
+    
+    _timeQueue.put(time);
+}
+
+
 AudioSink::AudioSink(const std::string& name) :
 Sink(name),
 // allocate byte queue for 20k s16-2chan-samples
@@ -2254,12 +2251,8 @@ VideoSink::startPresentation()
 {
     Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
     
-//     beforeTimerStart();
-    
     Poco::RunnableAdapter<VideoSink> ra(*this, &VideoSink::timerThread);
     _timerThread.start(ra);
-    
-//     afterTimerStart();
 }
 
 
@@ -2276,20 +2269,8 @@ VideoSink::stopPresentation()
 
 
 void
-VideoSink::currentTime(int64_t time)
-{
-    Log::instance()->avstream().trace(Poco::format("%s current time: %s", getName(), Poco::NumberFormatter::format(time)));
-    
-    _timeQueue.put(time);
-}
-
-
-void
 VideoSink::timerThread()
 {
-    // TODO: what if get() in Sink::timerThread() times out ...
-    // what is returned?
-    // is onTick() executed?
     while(!_timerQuit) {
         int64_t time = _timeQueue.get();
         Log::instance()->avstream().trace(Poco::format("%s on tick time: %s", getName(), Poco::NumberFormatter::format(time)));
@@ -2481,6 +2462,8 @@ Clock::setStartTime(bool toFirstFrame)
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->setStartTime(startTime);
     }
+    _streamTime = startTime;
+//     setTime(startTime);
     
     Log::instance()->avstream().debug("CLOCK start time set.");
 }
@@ -2492,6 +2475,9 @@ Clock::setTime(int64_t currentTime)
     Log::instance()->avstream().debug(Poco::format("CLOCK set stream time to: %s.", Poco::NumberFormatter::format(currentTime)));
     
     _clockLock.lock();
+//     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
+//         (*it)->currentTime(currentTime);
+//     }
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->currentTime(currentTime);
     }

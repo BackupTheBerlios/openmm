@@ -85,13 +85,13 @@ public:
         demuxer.start();
         Omm::AvStream::Clock::instance()->setStartTime();
 
-//         std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
+        std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
         
-//         Omm::AvStream::Clock::instance()->start();
+        Omm::AvStream::Clock::instance()->start();
         waitForTerminationRequest();
-//         Omm::AvStream::Clock::instance()->stop();
+        Omm::AvStream::Clock::instance()->stop();
         
-//         std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
+        std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
         
         demuxer.stop();
         
