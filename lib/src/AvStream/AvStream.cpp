@@ -128,8 +128,7 @@ ByteQueue::read(char* buffer, int num)
 {
     int bytesRead = 0;
     while (bytesRead < num) {
-        bytesRead += readSome(buffer, num - bytesRead);
-        buffer += bytesRead;
+        bytesRead += readSome(buffer + bytesRead, num - bytesRead);
     }
 }
 
@@ -139,27 +138,29 @@ ByteQueue::write(char* buffer, int num)
 {
     int bytesWritten = 0;
     while (bytesWritten < num) {
-        bytesWritten += writeSome(buffer, num - bytesWritten);
-        buffer += bytesWritten;
+        bytesWritten += writeSome(buffer + bytesWritten, num - bytesWritten);
     }
 }
 
 
 int
-ByteQueue::readSomeRwLock(char* buffer, int num)
+ByteQueue::readSome(char* buffer, int num)
 {
     // block byte queue for further reading
-    Log::instance()->avstream().trace("byte queue readSome() read lock wait ...");
-    _readLock.writeLock();
-    Log::instance()->avstream().trace("byte queue readSome() read lock success.");
-    
+    _readSemaphore.wait();
     _lock.lock();
     
     Log::instance()->avstream().trace(Poco::format("byte queue readSome() trying to read %s bytes, level: %s",
         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
     
     int bytesRead = (_level < num) ? _level : num;
+    Log::instance()->avstream().trace(Poco::format("byte queue readSome() reading %s bytes, level: %s",
+        Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
+    // FIXME: sometimes segfaulting here
     _bytestream.read(buffer, bytesRead);
+    
+    Log::instance()->avstream().trace(Poco::format("byte queue readSome() setting level: %s",
+        Poco::NumberFormatter::format(_level - bytesRead)));
     _level -= bytesRead;
     
     Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
@@ -167,34 +168,31 @@ ByteQueue::readSomeRwLock(char* buffer, int num)
     
     // queue is not empty, we can go on reading
     if (_level > 0) {
-        Log::instance()->avstream().trace("byte queue readSome() trying to unlock read lock ...");
-        _readLock.unlock();
-        Log::instance()->avstream().trace("byte queue readSome() read lock unlocked");
+        try {
+            _readSemaphore.set();
+        }
+        catch (Poco::SystemException) {
+        }
+    }
+    // we've read some bytes, so we can put something in, again
+    if (num > 0) {
+        try {
+            _writeSemaphore.set();
+        }
+        catch (Poco::SystemException) {
+        }
     }
     
     _lock.unlock();
-    // we've read some bytes, so we can put something in, again
-    if (num > 0) {
-        Log::instance()->avstream().trace("byte queue readSome() trying to unlock write lock ...");
-        _writeLock.unlock();
-        Log::instance()->avstream().trace("byte queue readSome() write lock unlocked");
-    }  
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() returns: %s",
-        Poco::NumberFormatter::format(bytesRead)));
-    
     return bytesRead;
 }
 
 
 int
-ByteQueue::writeSomeRwLock(char* buffer, int num)
+ByteQueue::writeSome(char* buffer, int num)
 {
     // block byte queue for further writing
-    Log::instance()->avstream().trace("byte queue writeSome() write lock wait ...");
-    _writeLock.writeLock();
-    Log::instance()->avstream().trace("byte queue writeSome() write lock success.");
-    
+    _writeSemaphore.wait();
     _lock.lock();
     
     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() trying to write %s bytes, level: %s",
@@ -209,94 +207,12 @@ ByteQueue::writeSomeRwLock(char* buffer, int num)
     
     // queue is not full, we can go on writing
     if (_level < _size) {
-        Log::instance()->avstream().trace("byte queue writeSome() trying to unlock write lock ...");
-        _writeLock.unlock();
-        Log::instance()->avstream().trace("byte queue writeSome() write lock unlocked");
-    }
-    
-    _lock.unlock();
-    // we've written some bytes, so we can get something out, again
-    if (num > 0/* && !_readSemaphoreSet*/) {
-        Log::instance()->avstream().trace("byte queue writeSome() trying to unlock read lock ...");
-        _readLock.unlock();
-        Log::instance()->avstream().trace("byte queue writeSome() read lock unlocked");
-    }  
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue writeSome() returns: %s",
-        Poco::NumberFormatter::format(bytesWritten)));
-    
-    return bytesWritten;
-}
-
-
-int
-ByteQueue::readSome(char* buffer, int num)
-{
-    // block byte queue for further reading
-    _readSemaphore.wait();
-    
-    _lock.lock();
-    
-//     Log::instance()->avstream().trace(Poco::format("byte queue readSome() trying to read %s bytes, level: %s",
-//         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
-    
-    int bytesRead = (_level < num) ? _level : num;
-    _bytestream.read(buffer, bytesRead);
-    _level -= bytesRead;
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
-        Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
-    
-    // queue is not empty, we can go on reading
-    if (_level > 0) {
-        try {
-            _readSemaphore.set();
-        }
-        catch (Poco::SystemException) {
-        }
-    }
-    
-    _lock.unlock();
-    // we've read some bytes, so we can put something in, again
-    if (num > 0) {
-        try {
-            _writeSemaphore.set();
-        }
-        catch (Poco::SystemException) {
-        }
-    }  
-    
-    return bytesRead;
-}
-
-
-int
-ByteQueue::writeSome(char* buffer, int num)
-{
-    // block byte queue for further writing
-    _writeSemaphore.wait();
-    _lock.lock();
-    
-//     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() trying to write %s bytes, level: %s",
-//         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
-    
-    int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
-    _bytestream.write(buffer, bytesWritten);
-    _level += bytesWritten;
-    
-    Log::instance()->avstream().trace(Poco::format("byte queue writeSome() wrote %s bytes, level: %s",
-        Poco::NumberFormatter::format(bytesWritten), Poco::NumberFormatter::format(_level)));
-    
-    // queue is not full, we can go on writing
-    if (_level < _size) {
         try {
             _writeSemaphore.set();
         }
         catch (Poco::SystemException) {
         }
     }
-    
-    _lock.unlock();
     // we've written some bytes, so we can get something out, again
     if (num > 0) {
         try {
@@ -304,8 +220,9 @@ ByteQueue::writeSome(char* buffer, int num)
         }
         catch (Poco::SystemException) {
         }
-    }  
+    }
     
+    _lock.unlock();
     return bytesWritten;
 }
 
@@ -318,9 +235,93 @@ ByteQueue::level()
 }
 
 
+// int
+// ByteQueue::readSomeRwLock(char* buffer, int num)
+// {
+//     // block byte queue for further reading
+//     Log::instance()->avstream().trace("byte queue readSome() read lock wait ...");
+//     _readLock.writeLock();
+//     Log::instance()->avstream().trace("byte queue readSome() read lock success.");
+//     
+//     _lock.lock();
+//     
+//     Log::instance()->avstream().trace(Poco::format("byte queue readSome() trying to read %s bytes, level: %s",
+//         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
+//     
+//     int bytesRead = (_level < num) ? _level : num;
+//     _bytestream.read(buffer, bytesRead);
+//     _level -= bytesRead;
+//     
+//     Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
+//         Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
+//     
+//     // queue is not empty, we can go on reading
+//     if (_level > 0) {
+//         Log::instance()->avstream().trace("byte queue readSome() trying to unlock read lock ...");
+//         _readLock.unlock();
+//         Log::instance()->avstream().trace("byte queue readSome() read lock unlocked");
+//     }
+//     
+//     _lock.unlock();
+//     // we've read some bytes, so we can put something in, again
+//     if (num > 0) {
+//         Log::instance()->avstream().trace("byte queue readSome() trying to unlock write lock ...");
+//         _writeLock.unlock();
+//         Log::instance()->avstream().trace("byte queue readSome() write lock unlocked");
+//     }  
+//     
+//     Log::instance()->avstream().trace(Poco::format("byte queue readSome() returns: %s",
+//         Poco::NumberFormatter::format(bytesRead)));
+//     
+//     return bytesRead;
+// }
+// 
+// 
+// int
+// ByteQueue::writeSomeRwLock(char* buffer, int num)
+// {
+//     // block byte queue for further writing
+//     Log::instance()->avstream().trace("byte queue writeSome() write lock wait ...");
+//     _writeLock.writeLock();
+//     Log::instance()->avstream().trace("byte queue writeSome() write lock success.");
+//     
+//     _lock.lock();
+//     
+//     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() trying to write %s bytes, level: %s",
+//         Poco::NumberFormatter::format(num), Poco::NumberFormatter::format(_level)));
+//     
+//     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
+//     _bytestream.write(buffer, bytesWritten);
+//     _level += bytesWritten;
+//     
+//     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() wrote %s bytes, level: %s",
+//         Poco::NumberFormatter::format(bytesWritten), Poco::NumberFormatter::format(_level)));
+//     
+//     // queue is not full, we can go on writing
+//     if (_level < _size) {
+//         Log::instance()->avstream().trace("byte queue writeSome() trying to unlock write lock ...");
+//         _writeLock.unlock();
+//         Log::instance()->avstream().trace("byte queue writeSome() write lock unlocked");
+//     }
+//     
+//     _lock.unlock();
+//     // we've written some bytes, so we can get something out, again
+//     if (num > 0/* && !_readSemaphoreSet*/) {
+//         Log::instance()->avstream().trace("byte queue writeSome() trying to unlock read lock ...");
+//         _readLock.unlock();
+//         Log::instance()->avstream().trace("byte queue writeSome() read lock unlocked");
+//     }  
+//     
+//     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() returns: %s",
+//         Poco::NumberFormatter::format(bytesWritten)));
+//     
+//     return bytesWritten;
+// }
+
+
 // TODO: queue name should contain the stream name, too.
-StreamQueue::StreamQueue(Node* pNode, int size/*, int putTimeout, int getTimeout*/) :
-Queue<Frame*>(pNode->getName() + " stream", size/*, putTimeout, getTimeout*/),
+StreamQueue::StreamQueue(Node* pNode, int size) :
+Queue<Frame*>(pNode->getName() + " stream", size),
 _pNode(pNode)
 {
 }
@@ -612,16 +613,19 @@ Stream::putFrame(Frame* pFrame)
     }
     else {
         pFrame->_pStream = this;
-        bool success = _pStreamQueue->put(pFrame);
-        if (!success) {
-            Log::instance()->avstream().warning(Poco::format("%s [%s] put frame %s failed, queue blocked.",
-                getNode()->getName(), getName(), pFrame->getName()));
-        }
-        else {
-            Log::instance()->avstream().trace(Poco::format("%s [%s] put frame %s, queue size: %s",
-                getNode()->getName(), getName(), pFrame->getName(),
-                Poco::NumberFormatter::format(_pStreamQueue->count())));
-        }
+        _pStreamQueue->put(pFrame);
+        Log::instance()->avstream().trace(Poco::format("%s [%s] put frame %s, queue size: %s",
+            getNode()->getName(), getName(), pFrame->getName(),
+            Poco::NumberFormatter::format(_pStreamQueue->count())));
+//         if (!success) {
+//             Log::instance()->avstream().warning(Poco::format("%s [%s] put frame %s failed, queue blocked.",
+//                 getNode()->getName(), getName(), pFrame->getName()));
+//         }
+//         else {
+//             Log::instance()->avstream().trace(Poco::format("%s [%s] put frame %s, queue size: %s",
+//                 getNode()->getName(), getName(), pFrame->getName(),
+//                 Poco::NumberFormatter::format(_pStreamQueue->count())));
+//         }
     }
 }
 
@@ -2167,10 +2171,11 @@ AudioSink::setStartTime(int64_t startTime)
     else {
         // TODO: don't hardcode time base and sample size
         int64_t discardSize = (startTime - _startTime) * (sampleRate() / 90000.0) * channels() * 2; // s16 sample = 2 bytes
+        char discardBuffer[discardSize];
+        
         Log::instance()->avstream().debug(Poco::format("%s start time is earlier than CLOCK start time, discarding %s bytes.",
             getName(), Poco::NumberFormatter::format(discardSize)));
         
-        char discardBuffer[discardSize];
         audioReadBlocking(discardBuffer, discardSize);
     }
 }
@@ -2180,7 +2185,7 @@ VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat
 Sink(name),
 _overlayCount(overlayCount),
 _overlayVector(overlayCount),
-_overlayQueue(name + " overlay", overlayCount/*, 500, 500*/),
+_overlayQueue(name + " overlay", overlayCount),
 _timerThread(name + " timer thread"),
 _timerQuit(false),
 _width(width),

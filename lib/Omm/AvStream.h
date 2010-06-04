@@ -116,39 +116,39 @@ public:
 private:
 //     int readSomeSemaphore(char* buffer, int num);
 //     int writeSomeSemaphore(char* buffer, int num);
-    int readSomeRwLock(char* buffer, int num);
-    int writeSomeRwLock(char* buffer, int num);
+//     int readSomeRwLock(char* buffer, int num);
+//     int writeSomeRwLock(char* buffer, int num);
     
     
 //     std::fstream            _bytestream;
     std::stringstream       _bytestream;
     int                     _size;
-    int                     _level;
+    volatile int            _level;
     Poco::Semaphore         _writeSemaphore;
     Poco::Semaphore         _readSemaphore;
     Poco::FastMutex         _lock;
-    Poco::RWLock            _writeLock;
-    Poco::RWLock            _readLock;
+//     Poco::RWLock            _writeLock;
+//     Poco::RWLock            _readLock;
 };
 
 
-// TODO: get rid of timeouts and return value of put()
 template<typename T>
 class Queue
 {
 public:
-    Queue(const std::string& name, int size/*, int putTimeout, int getTimeout*/) :
+    Queue(const std::string& name, int size) :
         _name(name),
         _size(size),
-//         _putTimeout(putTimeout),
-//         _getTimeout(getTimeout),
         _putSemaphore(size, size),
         _getSemaphore(0, size)
+        // FIXME: this should also work, but crashes when allocating sink plugin
+//         _putSemaphore(size),
+//         _getSemaphore(0)
     {
     }
     
     
-    bool put(T element)
+    void put(T element)
     {
         _putSemaphore.wait();
         _lock.lock();
@@ -157,7 +157,6 @@ public:
         
         _lock.unlock();
         _getSemaphore.set();
-        return true;
     }
     
     
@@ -187,6 +186,7 @@ public:
     
     int count()
     {
+        Poco::ScopedLock<Poco::FastMutex> lock(_lock);
         return _queue.size();
     }
     
@@ -200,10 +200,6 @@ private:
     std::string             _name;
     std::queue<T>           _queue;
     int                     _size;
-    // wait _packetQueuePutTimeout ms for data to be put into the queue
-//     int                     _putTimeout;
-    // wait _packetQueueGetTimeout ms for data to be fetched from the queue
-//     int                     _getTimeout;
     
     Poco::Semaphore         _putSemaphore;
     Poco::Semaphore         _getSemaphore;
@@ -214,7 +210,7 @@ private:
 class StreamQueue : public Queue<Frame*>
 {
 public:
-    StreamQueue(Node* pNode, int size = 100/*, int putTimeout = 500, int getTimeout = 500*/);
+    StreamQueue(Node* pNode, int size = 100);
     
     Node* getNode();
     
