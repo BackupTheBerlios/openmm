@@ -8,6 +8,10 @@ ${omm_SOURCE_DIR}/lib
 )
 endif(TARGET omm)
 
+ADD_DEFINITIONS(
+-malign-double
+)
+
 SET( OMM_AVSTREAM_ALSASINK_SRCS
 AlsaAudioSink.cpp
 )

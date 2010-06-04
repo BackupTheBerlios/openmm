@@ -1978,7 +1978,9 @@ Tagger::tag(std::istream& istr)
 
 
 Sink::Sink(const std::string& name) :
-Node(name)
+Node(name),
+_timeQueue(name + " timer", 10, 100, 100),
+_firstDecodeSuccess(false)
 {
     // sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
@@ -1994,14 +1996,12 @@ Sink(name),
 _overlayCount(overlayCount),
 _overlayVector(overlayCount),
 _overlayQueue(name + " overlay", overlayCount, 500, 500),
-_timerQueue(name + " timer", 1, 100, 100),
 _timerThread(name + " timer thread"),
 _timerQuit(false),
 _width(width),
 _height(height),
 _pixelFormat(pixelFormat),
-_writeOverlayNumber(0),
-_firstDecodeSuccess(false)
+_writeOverlayNumber(0)
 {
 }
 
@@ -2092,7 +2092,7 @@ VideoSink::currentTime(int64_t time)
 {
     Log::instance()->avstream().trace(Poco::format("%s current time: %s", getName(), Poco::NumberFormatter::format(time)));
     
-    _timerQueue.put(time);
+    _timeQueue.put(time);
 }
 
 
@@ -2103,7 +2103,7 @@ VideoSink::timerThread()
     // what is returned?
     // is onTick() executed?
     while(!_timerQuit) {
-        int64_t time = _timerQueue.get();
+        int64_t time = _timeQueue.get();
         Log::instance()->avstream().trace(Poco::format("%s on tick time: %s", getName(), Poco::NumberFormatter::format(time)));
         onTick(time);
     }
@@ -2136,7 +2136,7 @@ VideoSink::getFormat()
 
 
 void
-VideoSink::putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame)
+VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
 {
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
     pDecodedFrame->write(pWriteOverlay);
@@ -2153,7 +2153,7 @@ VideoSink::putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame)
 
 
 void
-VideoSink::run()
+Sink::run()
 {
     if (!_inStreams[0]->getQueue()) {
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
@@ -2170,11 +2170,10 @@ VideoSink::run()
         else {
             if (!_firstDecodeSuccess) {
                 _firstDecodeSuccess = true;
-                // setting stream time in clock to time of first video frame that could be decoded
-                // this means, that playback starts at the first decoded video frame
-                Omm::AvStream::Clock::instance()->setTime(pFrame->getPts());
+                _timeQueue.put(pFrame->getPts());
             }
-            putFrameInOverlayQueue(pDecodedFrame);
+            writeDecodedFrame(pDecodedFrame);
+//             putFrameInOverlayQueue(pDecodedFrame);
         }
     }
     
@@ -2265,6 +2264,10 @@ AudioSink::init()
         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
         return false;
     }
+    if (!_inStreams[0]->getInfo()->findCodec()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
+        return false;
+    }
     if (!_inStreams[0]->getInfo()->isAudio()) {
         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not an audio stream", getName()));
         return false;
@@ -2274,26 +2277,38 @@ AudioSink::init()
 }
 
 
-void
-AudioSink::run()
-{
-    if (!_inStreams[0]->getQueue()) {
-        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
-        return;
-    }
-    Omm::AvStream::Frame* pFrame;
-    while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
-        _byteQueue.write(pFrame->data(), pFrame->size());
-    }
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s finished.", getName()));
-}
-
-
 // void
-// AudioSink::afterTimerStart()
+// AudioSink::run()
 // {
-//     startAudio();
+//     if (!_inStreams[0]->getQueue()) {
+//         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
+//         return;
+//     }
+//     Omm::AvStream::Frame* pFrame;
+//     while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
+//         
+//         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+//         if (!pDecodedFrame) {
+//             Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding frame %s",
+//                 getName(), pFrame->getName()));
+//         }
+//         else {
+//             if (!_firstDecodeSuccess) {
+//                 _firstDecodeSuccess = true;
+//                 _timeQueue.put(pFrame->getPts());
+//             }
+//             _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
+//         }
+//     }
+//     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s finished.", getName()));
 // }
+
+
+void
+AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
+{
+    _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
+}
 
 
 int
@@ -2328,6 +2343,13 @@ int
 AudioSink::audioRead(char* buffer, int size)
 {
     return _byteQueue.readSome(buffer, size);
+}
+
+
+void
+AudioSink::audioReadBlocking(char* buffer, int size)
+{
+    _byteQueue.read(buffer, size);
 }
 
 

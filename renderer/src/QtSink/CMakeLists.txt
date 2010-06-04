@@ -14,6 +14,10 @@ ${omm_SOURCE_DIR}/lib
 )
 endif(TARGET omm)
 
+ADD_DEFINITIONS(
+-malign-double
+)
+
 SET( OMM_AV_STREAM_QTSINK_SRCS
 QtSink.cpp
 )

@@ -499,6 +499,13 @@ public:
     
 protected:
     virtual bool initDevice() {}
+    virtual void writeDecodedFrame(Frame* pDecodedFrame) {}
+
+    Queue<int64_t>          _timeQueue;
+    bool                    _firstDecodeSuccess;
+    
+private:
+    virtual void run();
 };
 
 
@@ -512,6 +519,7 @@ public:
     
     bool audioAvailable();
     int audioRead(char* buffer, int size);
+    void audioReadBlocking(char* buffer, int size);
     void initSilence(char* buffer, int size);
 
 protected:
@@ -521,7 +529,8 @@ protected:
     
 private:
     virtual bool init();
-    virtual void run();
+    virtual void writeDecodedFrame(Frame* pDecodedFrame);
+//     virtual void run();
     
     Omm::AvStream::ByteQueue    _byteQueue;
 };
@@ -550,29 +559,28 @@ public:
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
     
-    int                     _overlayCount;
-    std::vector<Overlay*>   _overlayVector;
-    Queue<Overlay*>         _overlayQueue;
+    int                         _overlayCount;
+    std::vector<Overlay*>       _overlayVector;
+    Queue<Overlay*>             _overlayQueue;
     
-    bool                    _timerQuit;
+    bool                        _timerQuit;
     
 private:
     virtual bool init();
-    virtual void run();
+//     virtual void run();
 
     void onTick(int64_t time);
-    void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
+    virtual void writeDecodedFrame(Frame* pDecodedFrame);
+//     void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
     void timerThread();
     
-    Queue<int64_t>          _timerQueue;
-    Poco::Thread            _timerThread;
-    Poco::FastMutex         _sinkLock;
+    Poco::Thread                _timerThread;
+    Poco::FastMutex             _sinkLock;
     
-    int                     _width;
-    int                     _height;
-    PixelFormat             _pixelFormat;
-    int                     _writeOverlayNumber;
-    bool                    _firstDecodeSuccess;
+    int                         _width;
+    int                         _height;
+    PixelFormat                 _pixelFormat;
+    int                         _writeOverlayNumber;
 };
 
 

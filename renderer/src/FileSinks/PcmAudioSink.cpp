@@ -27,30 +27,22 @@
 
 
 PcmAudioSink::PcmAudioSink() :
-Sink("pcm audio sink")
+AudioSink("pcm audio sink"),
+_bufferSize(4 * 1024),
+_buffer(new char[_bufferSize])
 {
-    // audio sink has one input stream
-    _inStreams.push_back(new Omm::AvStream::Stream(this));
-    _inStreams.back()->setInfo(0);
-    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
-    
-    // and no output stream
 }
 
 
 PcmAudioSink::~PcmAudioSink()
 {
+    delete _buffer;
 }
 
 
-
 bool
-PcmAudioSink::init()
+PcmAudioSink::initDevice()
 {
-    if (!_inStreams[0]->getInfo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
-        return false;
-    }
     std::string fileName(_inStreams[0]->getName() + ".pcm");
     _pcmStream.open(fileName.c_str());
     Omm::AvStream::Log::instance()->avstream().information(Poco::format("%s writing PCM sample data to file %s",
@@ -61,32 +53,21 @@ PcmAudioSink::init()
 
 
 void
-PcmAudioSink::run()
+PcmAudioSink::startPresentation()
 {
     int frameCount = 0;
     Omm::AvStream::Frame* pFrame;
-    if (!_inStreams[0]) {
-        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to audio sink, stopping.");
-        return;
-    }
-    while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
-        _pcmStream.write(pFrame->data(), pFrame->size());
+    
+    while(true) {
+        audioReadBlocking(_buffer, _bufferSize);
+        _pcmStream.write(_buffer, _bufferSize);
     }
     
     Omm::AvStream::Log::instance()->avstream().debug("audio sink finished.");
 }
 
 
-int
-PcmAudioSink::eventLoop()
-{
-    Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
-//     Poco::Thread::sleep(10000);
-    
-}
 
-
-
-POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
+POCO_BEGIN_MANIFEST(Omm::AvStream::AudioSink)
 POCO_EXPORT_CLASS(PcmAudioSink)
 POCO_END_MANIFEST

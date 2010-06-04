@@ -26,19 +26,25 @@
 #include <Omm/AvStream.h>
 
 
-class PcmAudioSink : public Omm::AvStream::Sink
+class PcmAudioSink : public Omm::AvStream::AudioSink
 {
 public:
     PcmAudioSink();
     virtual ~PcmAudioSink();
     
-    virtual int eventLoop();
+//     virtual int eventLoop();
     
 private:
-    virtual bool init();
-    virtual void run();
+    virtual bool initDevice();
+    virtual void startPresentation();
+//     virtual void stopPresentation();
+    
+//     virtual bool init();
+//     virtual void run();
 
-    std::ofstream _pcmStream;
+    std::ofstream           _pcmStream;
+    int                     _bufferSize;
+    char*                   _buffer;
 };
 
 #endif
