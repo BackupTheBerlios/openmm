@@ -31,6 +31,6 @@ ${LIB_ASOUND}
 )
 
 INSTALL( TARGETS omm-audiosink-alsa
-LIBRARY DESTINATION lib
+LIBRARY DESTINATION lib/omm
 )
 

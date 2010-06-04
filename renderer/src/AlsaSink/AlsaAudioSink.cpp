@@ -157,7 +157,6 @@ AlsaAudioSink::startPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s starting write thread ...", getName()));
     
-//     Poco::RunnableAdapter<AlsaAudioSink> ra(*this, &AlsaAudioSink::writeThread);
     _writeThread.start(_writeThreadRunnable);
 }
 

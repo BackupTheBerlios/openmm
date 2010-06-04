@@ -44,10 +44,10 @@
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
-#include <libavdevice/avdevice.h>
 #include <libswscale/swscale.h>
-#include <libavfilter/avfilter.h>
-#include <libpostproc/postprocess.h>
+// #include <libavfilter/avfilter.h>
+// #include <libavdevice/avdevice.h>
+// #include <libpostproc/postprocess.h>
 
 //Forward declaration of ffmpeg structs
 struct AVInputFormat;
@@ -579,14 +579,14 @@ private:
     void onTick(int64_t time);
     void timerThread();
     
-    Poco::Thread                _timerThread;
-    Poco::RunnableAdapter<VideoSink> _timerThreadRunnable;
-    Poco::FastMutex             _sinkLock;
+    Poco::Thread                        _timerThread;
+    Poco::RunnableAdapter<VideoSink>    _timerThreadRunnable;
+    Poco::FastMutex                     _sinkLock;
     
-    int                         _width;
-    int                         _height;
-    PixelFormat                 _pixelFormat;
-    int                         _writeOverlayNumber;
+    int                                 _width;
+    int                                 _height;
+    PixelFormat                         _pixelFormat;
+    int                                 _writeOverlayNumber;
 };
 
 

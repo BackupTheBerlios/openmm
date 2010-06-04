@@ -31,6 +31,6 @@ ${OMM_AV_STREAM_PCM_AUDIOSINK_SRCS}
 )
 
 INSTALL( TARGETS omm-videosink-ppm omm-audiosink-pcm
-LIBRARY DESTINATION lib
+LIBRARY DESTINATION lib/omm
 )
 

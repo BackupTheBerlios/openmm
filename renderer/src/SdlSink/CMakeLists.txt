@@ -41,6 +41,6 @@ ${SDL_LIBRARY}
 )
 
 INSTALL( TARGETS omm-videosink-sdl
-LIBRARY DESTINATION lib
+LIBRARY DESTINATION lib/omm
 )
 

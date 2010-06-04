@@ -1599,15 +1599,17 @@ Demuxer::correctPts(int64_t pts, int64_t lastPts, int lastDuration)
     //     In general, there seem to be "seven symptoms of sick streams"
     //     
     //     pts related (all corrected in synchronizer):
-    //     1. pts number overflow
-    //     -> set flag Frame::numberOverflow = true
+    //     1a. pts number overflow
+    //     ->  set flag Frame::numberOverflow = true
+    //     1b. pts jump in one stream, and not the other
+    //     ->  ignore and discard/inject frames as appropriate
     //     2. pts cicle (pts systematic not monotone)
     //     -> reorder pts
     //     3. pts sprite (pts local not monotone)
     //     -> "tear" sprite pts linear
     //     4. packet shift
     //     -> discard packets until max_of_streams(pts first packet of stream)
-    //     5. packet loss (pts not linear)
+    //     5. packet loss (pts not linear) (-> 1b pts jump)
     //     -> inject blank frame (set Frame::_display = false)
     //     
     //     not pts related:
@@ -2250,9 +2252,6 @@ VideoSink::startPresentation()
 {
     Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
     
-    // FIXME: sometime segfault after this point ...
-//     Poco::RunnableAdapter<VideoSink> ra(*this, &VideoSink::timerThread);
-    
     _timerThread.start(_timerThreadRunnable);
 }
 
@@ -2262,9 +2261,6 @@ VideoSink::stopPresentation()
 {
     Log::instance()->avstream().debug(Poco::format("%s stopping timer thread ...", getName()));
     
-    // FIXME: this doesn't really work, for example:
-    // alsa audio sink write thread waits for frame from queue, then _timerQuit is set to false
-    // -> write thread keeps waiting ...
     _timerQuit = true;
 }
 
@@ -2275,7 +2271,6 @@ VideoSink::timerThread()
     Log::instance()->avstream().debug(Poco::format("%s timer thread started.", getName()));
 
     while(!_timerQuit) {
-//     while(true) {
         int64_t time = _timeQueue.get();
         Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
             getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
