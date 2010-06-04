@@ -47,6 +47,8 @@ private:
     void writeFrame(Omm::AvStream::Frame *pFrame);
     
     Poco::Thread            _writeThread;
+    Poco::RunnableAdapter<AlsaAudioSink> _writeThreadRunnable;
+    
     bool                    _quitWriteThread;
     
     snd_pcm_t*              _pcmPlayback;

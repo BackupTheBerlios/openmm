@@ -23,7 +23,6 @@
 
 #include <Poco/Exception.h>
 #include <Poco/Thread.h>
-#include <Poco/RunnableAdapter.h>
 #include <Poco/ClassLoader.h>
 #include <Poco/FormattingChannel.h>
 #include <Poco/PatternFormatter.h>
@@ -800,17 +799,10 @@ Node::setName(const std::string& name)
 }
 
 
-// bool
-// Node::prepareStart()
-// {
-//     return true;
-// }
-
-
 void
 Node::start()
 {
-    Log::instance()->avstream().debug(Poco::format("starting %s ...", getName()));
+    Log::instance()->avstream().debug(Poco::format("%s starting run thread ...", getName()));
 
     // first start all nodes downstream, so they can begin sucking frames ...
     int outStreamNumber = 0;
@@ -1516,6 +1508,8 @@ Demuxer::reset()
 void
 Demuxer::run()
 {
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s run thread started.", getName()));
+    
     // TODO: save copying of AVPacket packet into Frame and read it directly into frame with av_read_frame()
     // TODO: introduce Frame::readFrame(Meta* pMeta) and while(pFrame* = readFrame(_pMeta))
     int64_t frameNumber = 0;
@@ -2002,6 +1996,8 @@ Sink::init()
 void
 Sink::run()
 {
+    Log::instance()->avstream().debug(Poco::format("%s run thread started.", getName()));
+    
     if (!_inStreams[0]->getQueue()) {
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
         return;
@@ -2186,6 +2182,7 @@ _overlayCount(overlayCount),
 _overlayVector(overlayCount),
 _overlayQueue(name + " overlay", overlayCount),
 _timerThread(name + " timer thread"),
+_timerThreadRunnable(*this, &VideoSink::timerThread),
 _timerQuit(false),
 _width(width),
 _height(height),
@@ -2253,8 +2250,10 @@ VideoSink::startPresentation()
 {
     Log::instance()->avstream().debug(Poco::format("%s starting timer thread ...", getName()));
     
-    Poco::RunnableAdapter<VideoSink> ra(*this, &VideoSink::timerThread);
-    _timerThread.start(ra);
+    // FIXME: sometime segfault after this point ...
+//     Poco::RunnableAdapter<VideoSink> ra(*this, &VideoSink::timerThread);
+    
+    _timerThread.start(_timerThreadRunnable);
 }
 
 
@@ -2273,9 +2272,13 @@ VideoSink::stopPresentation()
 void
 VideoSink::timerThread()
 {
+    Log::instance()->avstream().debug(Poco::format("%s timer thread started.", getName()));
+
     while(!_timerQuit) {
+//     while(true) {
         int64_t time = _timeQueue.get();
-        Log::instance()->avstream().trace(Poco::format("%s on tick time: %s", getName(), Poco::NumberFormatter::format(time)));
+        Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
+            getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
         onTick(time);
     }
     Log::instance()->avstream().debug(Poco::format("%s timer thread finished.", getName()));

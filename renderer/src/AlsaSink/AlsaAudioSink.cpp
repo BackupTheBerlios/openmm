@@ -29,6 +29,7 @@
 AlsaAudioSink::AlsaAudioSink() :
 AudioSink("alsa audio sink"),
 _writeThread(getName() + " write thread"),
+_writeThreadRunnable(*this, &AlsaAudioSink::writeThread),
 _quitWriteThread(false),
 _pcmPlayback(0),
 _device("default"),
@@ -154,8 +155,10 @@ AlsaAudioSink::initDevice()
 void
 AlsaAudioSink::startPresentation()
 {
-    Poco::RunnableAdapter<AlsaAudioSink> ra(*this, &AlsaAudioSink::writeThread);
-    _writeThread.start(ra);
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s starting write thread ...", getName()));
+    
+//     Poco::RunnableAdapter<AlsaAudioSink> ra(*this, &AlsaAudioSink::writeThread);
+    _writeThread.start(_writeThreadRunnable);
 }
 
 
@@ -172,6 +175,8 @@ AlsaAudioSink::stopPresentation()
 void
 AlsaAudioSink::writeThread()
 {
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s write thread started.", getName()));
+    
     while(!_quitWriteThread) {
         initSilence(_buffer, _bufferSize);
         

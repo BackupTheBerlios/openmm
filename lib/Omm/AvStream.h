@@ -32,6 +32,7 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/Runnable.h>
+#include <Poco/RunnableAdapter.h>
 #include <Poco/Semaphore.h>
 #include <Poco/Mutex.h>
 #include <Poco/RWLock.h>
@@ -579,6 +580,7 @@ private:
     void timerThread();
     
     Poco::Thread                _timerThread;
+    Poco::RunnableAdapter<VideoSink> _timerThreadRunnable;
     Poco::FastMutex             _sinkLock;
     
     int                         _width;
