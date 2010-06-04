@@ -498,6 +498,7 @@ public:
     virtual void stopPresentation() {}
     
 protected:
+    virtual bool checkInStream() {}
     virtual bool initDevice() {}
     virtual void writeDecodedFrame(Frame* pDecodedFrame) {}
 
@@ -505,6 +506,7 @@ protected:
     bool                    _firstDecodeSuccess;
     
 private:
+    virtual bool init();
     virtual void run();
 };
 
@@ -528,7 +530,7 @@ protected:
     int silence();
     
 private:
-    virtual bool init();
+    virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
 //     virtual void run();
     
@@ -566,12 +568,10 @@ protected:
     bool                        _timerQuit;
     
 private:
-    virtual bool init();
-//     virtual void run();
-
-    void onTick(int64_t time);
+    virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
-//     void putFrameInOverlayQueue(Omm::AvStream::Frame* pDecodedFrame);
+    
+    void onTick(int64_t time);
     void timerThread();
     
     Poco::Thread                _timerThread;

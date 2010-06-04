@@ -2042,22 +2042,14 @@ VideoSink::loadPlugin(const std::string& libraryPath, const std::string& classNa
 
 
 bool
-VideoSink::init()
+VideoSink::checkInStream()
 {
-    if (!_inStreams[0]->getInfo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
-        return false;
-    }
-    if (!_inStreams[0]->getInfo()->findCodec()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
-        return false;
-    }
     if (!_inStreams[0]->getInfo()->isVideo()) {
         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a video stream", getName()));
         return false;
     }
     
-    return initDevice();
+    return true;
 }
 
 
@@ -2149,6 +2141,22 @@ VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
     if (_writeOverlayNumber >= _overlayCount) {
         _writeOverlayNumber = 0;
     }
+}
+
+
+bool
+Sink::init()
+{
+    if (!_inStreams[0]->getInfo()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
+        return false;
+    }
+    if (!_inStreams[0]->getInfo()->findCodec()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
+        return false;
+    }
+    
+    return checkInStream() && initDevice();
 }
 
 
@@ -2258,22 +2266,14 @@ AudioSink::loadPlugin(const std::string& libraryPath, const std::string& classNa
 
 
 bool
-AudioSink::init()
+AudioSink::checkInStream()
 {
-    if (!_inStreams[0]->getInfo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
-        return false;
-    }
-    if (!_inStreams[0]->getInfo()->findCodec()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
-        return false;
-    }
     if (!_inStreams[0]->getInfo()->isAudio()) {
         Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not an audio stream", getName()));
         return false;
     }
     
-    return initDevice();
+    return true;    
 }
 
 

@@ -83,9 +83,9 @@ public:
         
         demuxer.start();
 //         Omm::AvStream::Clock::instance()->start();
-//         waitForTerminationRequest();
+        waitForTerminationRequest();
 //         Omm::AvStream::Clock::instance()->stop();
-//         demuxer.stop();
+        demuxer.stop();
         
         std::clog << "<<<<<<<<<<<< ENGINE STOPPED. >>>>>>>>>>>>" << std::endl;
         
