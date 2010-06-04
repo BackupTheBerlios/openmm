@@ -2168,6 +2168,8 @@ AudioSink::setStartTime(int64_t startTime)
     else {
         // TODO: don't hardcode time base and sample size
         int64_t discardSize = (startTime - _startTime) * (sampleRate() / 90000.0) * channels() * 2; // s16 sample = 2 bytes
+        // round discardSize to a multiple of sample size
+        discardSize = (discardSize >> 2) << 2;
         char discardBuffer[discardSize];
         
         Log::instance()->avstream().debug(Poco::format("%s start time is earlier than CLOCK start time, discarding %s bytes.",
@@ -2463,7 +2465,6 @@ Clock::setStartTime(bool toFirstFrame)
         (*it)->setStartTime(startTime);
     }
     _streamTime = startTime;
-//     setTime(startTime);
     
     Log::instance()->avstream().debug("CLOCK start time set.");
 }
