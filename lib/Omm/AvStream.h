@@ -91,6 +91,29 @@ private:
 };
 
 
+class RingBuffer
+{
+public:
+    RingBuffer(int size);
+    ~RingBuffer();
+    
+    /**
+    NOTE: this is no generic implemenation of a ring buffer:
+    1. read() and write() don't check if num > size
+    2. it is not thread safe
+    this is all done in the customer ByteQueue
+    **/
+    void read(char* buffer, int num);
+    void write(const char* buffer, int num);
+    
+private:
+    char*                   _ringBuffer;
+    char*                   _readPos;
+    char*                   _writePos;
+    int                     _size;
+};
+
+
 /**
 class ByteQueue - a blocking byte stream with a fixed size
 **/
@@ -121,9 +144,7 @@ private:
 //     int writeSomeRwLock(char* buffer, int num);
     
     
-//     std::fstream            _bytestream;
-    std::stringstream       _bytestream;
-//     RingBuffer              _ringBuffer;
+    RingBuffer              _ringBuffer;
     int                     _size;
     volatile int            _level;
     // FIXME: this should also work with a readLock and a writeLock and a condition

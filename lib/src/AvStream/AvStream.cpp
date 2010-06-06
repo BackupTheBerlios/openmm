@@ -112,14 +112,64 @@ Log::avstream()
 }
 
 
+RingBuffer::RingBuffer(int size) :
+_ringBuffer(new char[size]),
+_readPos(_ringBuffer),
+_writePos(_ringBuffer),
+_size(size)
+{
+}
+
+
+RingBuffer::~RingBuffer()
+{
+    delete _ringBuffer;
+}
+
+
+void
+RingBuffer::read(char* buffer, int num)
+{
+    int relReadPos = _readPos - _ringBuffer;
+    if (relReadPos + num >= _size) {
+        int firstHalf = _size - relReadPos;
+        int secondHalf = num - firstHalf;
+        memcpy(buffer, _readPos, firstHalf);
+        memcpy(buffer + firstHalf, _ringBuffer, secondHalf);
+        _readPos = _ringBuffer + secondHalf;
+    }
+    else {
+        memcpy(buffer, _readPos, num);
+        _readPos += num;
+    }
+}
+
+
+void
+RingBuffer::write(const char* buffer, int num)
+{
+    int relWritePos = _writePos - _ringBuffer;
+    if (relWritePos + num >= _size) {
+        int firstHalf = _size - relWritePos;
+        int secondHalf = num - firstHalf;
+        memcpy(_writePos, buffer, firstHalf);
+        memcpy(_ringBuffer, buffer + firstHalf, secondHalf);
+        _writePos = _ringBuffer + secondHalf;
+    }
+    else {
+        memcpy(_writePos, buffer, num);
+        _writePos += num;
+    }
+}
+
+
 ByteQueue::ByteQueue(int size) :
-// _ringBuffer(size),
+_ringBuffer(size),
 _size(size),
 _level(0),
 _writeSemaphore(1, 1),
 _readSemaphore(0, 1)
 {
-//     _bytestream.open("bytestream");
 }
 
 
@@ -151,8 +201,7 @@ ByteQueue::readSome(char* buffer, int num)
     _lock.lock();
     
     int bytesRead = (_level < num) ? _level : num;
-    _bytestream.read(buffer, bytesRead);
-//     _ringBuffer.read(buffer, bytesRead);
+    _ringBuffer.read(buffer, bytesRead);
     _level -= bytesRead;
     
     Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
@@ -189,8 +238,7 @@ ByteQueue::writeSome(const char* buffer, int num)
     _lock.lock();
     
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
-    _bytestream.write(buffer, bytesWritten);
-//     _ringBuffer.write(buffer, bytesWritten);
+    _ringBuffer.write(buffer, bytesWritten);
     _level += bytesWritten;
     
     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() wrote %s bytes, level: %s",
