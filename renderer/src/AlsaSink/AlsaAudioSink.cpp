@@ -174,7 +174,8 @@ AlsaAudioSink::stopPresentation()
 void
 AlsaAudioSink::writeThread()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s write thread started.", getName()));
+//     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s write thread started.", getName()));
+    Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread started.");
     
     while(!_quitWriteThread) {
         initSilence(_buffer, _bufferSize);
@@ -183,8 +184,10 @@ AlsaAudioSink::writeThread()
         if (audioAvailable()) {
             bytesRead = audioRead(_buffer, _bufferSize);
         }
-        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s write thread, bytes read: %s",
-            getName(),
+//         Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s write thread, bytes read: %s",
+//             getName(),
+//             Poco::NumberFormatter::format(bytesRead)));
+        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("alsa audio sink write thread, bytes read: %s",
             Poco::NumberFormatter::format(bytesRead)));
         
         int samplesWritten = 0;
@@ -194,8 +197,10 @@ AlsaAudioSink::writeThread()
                 Poco::format("<<<<<<<<<<<<<<< %s buffer underrun >>>>>>>>>>>>>>>", getName())
                 );
         }
-        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s write thread, bytes written: %s",
-            getName(),
+//         Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s write thread, bytes written: %s",
+//             getName(),
+//             Poco::NumberFormatter::format(samplesWritten << 2)));
+        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("alsa audio thread write thread, bytes written: %s",
             Poco::NumberFormatter::format(samplesWritten << 2)));
     }
 }

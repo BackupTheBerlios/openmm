@@ -113,6 +113,7 @@ Log::avstream()
 
 
 ByteQueue::ByteQueue(int size) :
+// _ringBuffer(size),
 _size(size),
 _level(0),
 _writeSemaphore(1, 1),
@@ -133,7 +134,7 @@ ByteQueue::read(char* buffer, int num)
 
 
 void
-ByteQueue::write(char* buffer, int num)
+ByteQueue::write(const char* buffer, int num)
 {
     int bytesWritten = 0;
     while (bytesWritten < num) {
@@ -151,11 +152,13 @@ ByteQueue::readSome(char* buffer, int num)
     
     int bytesRead = (_level < num) ? _level : num;
     _bytestream.read(buffer, bytesRead);
+//     _ringBuffer.read(buffer, bytesRead);
     _level -= bytesRead;
     
     Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
         Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
     
+    // FIXME: use tryWait() instead of try() to check if the semaphore is set or not.
     // queue is not empty, we can go on reading
     if (_level > 0) {
         try {
@@ -179,7 +182,7 @@ ByteQueue::readSome(char* buffer, int num)
 
 
 int
-ByteQueue::writeSome(char* buffer, int num)
+ByteQueue::writeSome(const char* buffer, int num)
 {
     // block byte queue for further writing
     _writeSemaphore.wait();
@@ -187,6 +190,7 @@ ByteQueue::writeSome(char* buffer, int num)
     
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
     _bytestream.write(buffer, bytesWritten);
+//     _ringBuffer.write(buffer, bytesWritten);
     _level += bytesWritten;
     
     Log::instance()->avstream().trace(Poco::format("byte queue writeSome() wrote %s bytes, level: %s",
@@ -600,19 +604,10 @@ Stream::putFrame(Frame* pFrame)
     }
     else {
         pFrame->_pStream = this;
-        _pStreamQueue->put(pFrame);
         Log::instance()->avstream().trace(Poco::format("%s [%s] put frame %s, queue size: %s",
             getNode()->getName(), getName(), pFrame->getName(),
             Poco::NumberFormatter::format(_pStreamQueue->count())));
-//         if (!success) {
-//             Log::instance()->avstream().warning(Poco::format("%s [%s] put frame %s failed, queue blocked.",
-//                 getNode()->getName(), getName(), pFrame->getName()));
-//         }
-//         else {
-//             Log::instance()->avstream().trace(Poco::format("%s [%s] put frame %s, queue size: %s",
-//                 getNode()->getName(), getName(), pFrame->getName(),
-//                 Poco::NumberFormatter::format(_pStreamQueue->count())));
-//         }
+        _pStreamQueue->put(pFrame);
     }
 }
 
@@ -655,6 +650,8 @@ Stream::getNode()
 std::string
 Stream::getName()
 {
+    Log::instance()->avstream().debug("Stream::getName()");
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
     if (_pStreamInfo) {
         return _pStreamInfo->_streamName;
     }
@@ -721,6 +718,9 @@ Stream::decodeAudioFrame(Frame* pFrame)
     const int outBufferSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
     Frame* pOutFrame = new Frame(pFrame->getNumber(), this, outBufferSize);
     pOutFrame->_data[outBufferSize-1] = 0;
+    Log::instance()->avstream().debug(Poco::format("decode audio frame alloc size: %s",
+        Poco::NumberFormatter::format(outBufferSize)
+        ));
     
     uint8_t* inBuffer = (uint8_t*)pFrame->data();
     int inBufferSize = pFrame->size();
@@ -729,8 +729,10 @@ Stream::decodeAudioFrame(Frame* pFrame)
     while(inBufferSize > 0) {
         Log::instance()->avstream().trace("ffmpeg::avcodec_decode_audio2() ...");
         int bytesConsumed = avcodec_decode_audio2(_pStreamInfo->_pAvStream->codec,
-            (int16_t*)pOutFrame->_data, &pOutFrame->_size, 
+            (int16_t*)pOutFrame->_data, &pOutFrame->_size,
             inBuffer, inBufferSize);
+        // TODO: decoded frame got new size after avcodec_decode_audio2(). Is buffer also resized?
+//         pOutFrame->_size = outBufferSize;
         
         Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_audio2() frame size: %s, bytes consumed: %s, decoded size: %s",
             Poco::NumberFormatter::format(inBufferSize),
@@ -794,6 +796,8 @@ _quit(false)
 std::string
 Node::getName()
 {
+//     Log::instance()->avstream().debug("Node::getName()");
+    Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
     return _name;
 }
 
@@ -801,6 +805,7 @@ Node::getName()
 void
 Node::setName(const std::string& name)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
     _name = name;
     _thread.setName(name);
 }
@@ -840,9 +845,9 @@ Node::stop()
 {
     Log::instance()->avstream().debug(Poco::format("stopping %s ...", getName()));
     // first stop this node by setting the _quit flag ...
-    _lock.lock();
+    _quitLock.lock();
     _quit = true;
-    _lock.unlock();
+    _quitLock.unlock();
     // then stop all nodes downstream
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
@@ -871,7 +876,6 @@ Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
         Log::instance()->avstream().warning(Poco::format("%s: could not attach null node", getName()));
         return;
     }
-    Poco::ScopedLock<Poco::FastMutex>lock(_lock);
     
     // entwine StreamInfo and StreamQueue of inStream and outStream
     // TODO: improve warning messages
@@ -931,7 +935,6 @@ Node::detach(int outStreamNumber)
         _outStreams[outStreamNumber]->getQueue()->getNode()->getName()
         ));
     
-    Poco::ScopedLock<Poco::FastMutex>lock(_lock);
     // lazy strategie: only set queue of outStream to 0, so no frames are put into the queue anymore
     // the attached node empties the queue with a valid stream context (StreamInfo) and blocks
     // without being connected to anything
@@ -942,6 +945,8 @@ Node::detach(int outStreamNumber)
 Node*
 Node::getDownstreamNode(int outStreamNumber)
 {
+//     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    
     if (outStreamNumber >= _outStreams.size()) {
         Log::instance()->avstream().error(Poco::format("%s [%s] could not get downstream node, stream number to high",
             getName(), Poco::NumberFormatter::format(outStreamNumber)));
@@ -976,7 +981,16 @@ Node::doStop()
 Stream*
 Node::getInStream(int inStreamNumber)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_inStreamsLock);
     return _inStreams[inStreamNumber];
+}
+
+
+Stream*
+Node::getOutStream(int outStreamNumber)
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_outStreamsLock);
+    return _inStreams[outStreamNumber];
 }
 
 
@@ -1029,24 +1043,28 @@ _pAvPacket(0),
 _pAvFrame(0),
 _pStream(pStream)
 {
+    Log::instance()->avstream().trace(Poco::format("alloc %s, size %s", getName(), Poco::NumberFormatter::format(dataSize)));
+    
     _data = new char[dataSize];
     _size = dataSize;
 }
 
 
-Frame::Frame(int64_t number, Stream* pStream, char* data, int dataSize) :
-_number(number),
-_pts(AV_NOPTS_VALUE),
-_data(0),
-_size(0),
-_pAvPacket(0),
-_pAvFrame(0),
-_pStream(pStream)
-{
-    _data = new char[dataSize];
-    _size = dataSize;
-    memcpy(_data, data, dataSize);
-}
+// Frame::Frame(int64_t number, Stream* pStream, char* data, int dataSize) :
+// _number(number),
+// _pts(AV_NOPTS_VALUE),
+// _data(0),
+// _size(0),
+// _pAvPacket(0),
+// _pAvFrame(0),
+// _pStream(pStream)
+// {
+//     Log::instance()->avstream().trace(Poco::format("alloc %s, size %s", getName(), Poco::NumberFormatter::format(dataSize)));
+//     
+//     _data = new char[dataSize];
+//     _size = dataSize;
+//     memcpy(_data, data, dataSize);
+// }
 
 
 Frame::Frame(int64_t number, Stream* pStream, AVPacket* pAvPacket) :
@@ -1124,17 +1142,19 @@ Frame::~Frame()
     // NOTE: _data points to _pAvPacket->data or _pAvFrame->data[0], so we need to free only one of them
     
     if (_pAvPacket) {
-        Log::instance()->avstream().trace(Poco::format("%s dtor, ffmpeg::av_free_packet() ...", getName()));
+        Log::instance()->avstream().trace(Poco::format("delete %s dtor, ffmpeg::av_free_packet() ...", getName()));
         av_free_packet(_pAvPacket);
+        delete _pAvPacket;
         _pAvPacket = 0;
     }
     else if (_pAvFrame) {
-        Log::instance()->avstream().trace(Poco::format("%s dtor, ffmpeg::av_free() ...", getName()));
+        Log::instance()->avstream().trace(Poco::format("delete %s dtor, ffmpeg::av_free()", getName()));
         av_free(_pAvFrame);
+        delete _pAvFrame;
         _pAvFrame = 0;
     }
     else if (_data) {
-        Log::instance()->avstream().trace(Poco::format("%s dtor, delete _data ...", getName()));
+        Log::instance()->avstream().trace(Poco::format("delete %s dtor _data, size %s", getName(), Poco::NumberFormatter::format(_size)));
         delete _data;
         _data = 0;
     }
@@ -1149,6 +1169,7 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
     // copy fields of AVPacket struc
     *pRes = *pAvPacket;
     // allocate payload
+    Log::instance()->avstream().trace(Poco::format("alloc %s, size %s", getName(), Poco::NumberFormatter::format(pAvPacket->size + padSize)));
     pRes->data = new uint8_t[pAvPacket->size + padSize];
     // copy payload
     memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
@@ -1160,12 +1181,13 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
 AVFrame*
 Frame::allocateFrame(PixelFormat format)
 {
+    Log::instance()->avstream().trace("ffmpeg::avcodec_alloc_frame() ...");
     AVFrame* pRes = avcodec_alloc_frame();
-    Log::instance()->avstream().trace("ffmpeg::avpicture_fill() ...");
     
     // use int avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height) instead of avpicture_fill?
+    Log::instance()->avstream().trace(Poco::format("alloc %s, size %s", getName(), Poco::NumberFormatter::format(_pStream->_pStreamInfo->pictureSize())));
     uint8_t* buffer = (uint8_t *)av_malloc(_pStream->_pStreamInfo->pictureSize());
-    Log::instance()->avstream().trace("ffmpeg::avcodec_alloc_frame() ...");
+    Log::instance()->avstream().trace("ffmpeg::avpicture_fill() ...");
     avpicture_fill((AVPicture *)pRes,
                    buffer,
                    format,
@@ -1200,16 +1222,18 @@ Frame::copyFrame(AVFrame* pAvFrame)
 }
 
 
-char*
+const char*
 Frame::data()
 {
     return _data;
 }
 
 
-int
+const int
 Frame::size()
 {
+//     Log::instance()->avstream().debug("Frame::size()");
+    Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
     return _size;
 }
 
@@ -1217,6 +1241,8 @@ Frame::size()
 int
 Frame::paddedSize()
 {
+//     Log::instance()->avstream().debug("Frame::paddedSize()");
+    Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
     return _paddedSize;
 }
 
@@ -1255,24 +1281,30 @@ Frame::printInfo()
 std::string
 Frame::getName()
 {
+    Log::instance()->avstream().debug("Frame::getName()");
+//     Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
     return "["
         + _pStream->getName() + "] "
-        + "#" + Poco::NumberFormatter::format(_number) + ", pts: "
-        + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(_pts));
+        + "#" + Poco::NumberFormatter::format(getNumber()) + ", pts: "
+        + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
 //         + ", duration: " + Poco::NumberFormatter::format(_duration);
 }
 
 
-int64_t
+const int64_t
 Frame::getNumber()
 {
+    Log::instance()->avstream().debug("Frame::getNumber()");
+    Poco::ScopedLock<Poco::FastMutex> lock(_numberLock);
     return _number;
 }
 
 
-int64_t
+const int64_t
 Frame::getPts()
 {
+    Log::instance()->avstream().debug("Frame::getPts()");
+//     Poco::ScopedLock<Poco::FastMutex> lock(_ptsLock);
     return _pts;
 }
 
@@ -1280,11 +1312,13 @@ Frame::getPts()
 void
 Frame::setPts(int64_t pts)
 {
+    Log::instance()->avstream().debug("Frame::setPts()");
+//     Poco::ScopedLock<Poco::FastMutex> lock(_ptsLock);
     _pts = pts;
 }
 
 
-Stream*
+const Stream*
 Frame::getStream()
 {
     return _pStream;
@@ -1980,7 +2014,7 @@ Tagger::tag(std::istream& istr)
 
 Sink::Sink(const std::string& name) :
 Node(name),
-_timeQueue(name + " timer", 10/*, 100, 100*/),
+_timeQueue(name + " timer", 10),
 _firstDecodeSuccess(false)
 {
     // sink has one input stream
@@ -2034,7 +2068,8 @@ Sink::run()
                     getName(), Poco::NumberFormatter::format(_startTime)));
             }
             writeDecodedFrame(pDecodedFrame);
-            // FIXME: this segfaults with video, but without leads to more memory consumption
+            // FIXME: this segfaults with video (and with audio not running in valgrind or similar),
+            // but without leads to more memory consumption
 //             delete pDecodedFrame;
             pDecodedFrame = 0;
         }
@@ -2175,11 +2210,11 @@ AudioSink::setStartTime(int64_t startTime)
     Log::instance()->avstream().debug(Poco::format("%s audio start time: %s, clock start time: %s.",
         getName(), Poco::NumberFormatter::format(_startTime), Poco::NumberFormatter::format(startTime)));
     
-    if (startTime <= _startTime) {
+    if (startTime < _startTime) {
         // TODO: insert silence until _startTime ...?
         Log::instance()->avstream().warning(Poco::format("%s start time is later than CLOCK start time, should insert silence.", getName()));
     }
-    else {
+    else if (startTime > _startTime) {
         // TODO: don't hardcode time base and sample size
         int64_t discardSize = (startTime - _startTime) * (sampleRate() / 90000.0) * channels() * 2; // s16 sample = 2 bytes
         // round discardSize to a multiple of sample size

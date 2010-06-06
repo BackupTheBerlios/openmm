@@ -103,14 +103,14 @@ public:
     read() and write() block until num bytes have been read or written
     **/
     void read(char* buffer, int num);
-    void write(char* buffer, int num);
+    void write(const char* buffer, int num);
     
     /**
     readSome() and writeSome() read upto num bytes, return the number of bytes read
     and block if queue is empty / full
     **/
     int readSome(char* buffer, int num);
-    int writeSome(char* buffer, int num);
+    int writeSome(const char* buffer, int num);
     
     int level();
     
@@ -123,8 +123,11 @@ private:
     
 //     std::fstream            _bytestream;
     std::stringstream       _bytestream;
+//     RingBuffer              _ringBuffer;
     int                     _size;
     volatile int            _level;
+    // FIXME: this should also work with a readLock and a writeLock and a condition
+    // Poco::FastMutex, Poco::Condition
     Poco::Semaphore         _writeSemaphore;
     Poco::Semaphore         _readSemaphore;
     Poco::FastMutex         _lock;
@@ -151,33 +154,42 @@ public:
     
     void put(T element)
     {
+//         Log::instance()->avstream().debug("Queue::put() wait ...");
         _putSemaphore.wait();
-        _lock.lock();
+//         Log::instance()->avstream().debug("Queue::put()");
+        _queueLock.lock();
         
         _queue.push(element);
         
-        _lock.unlock();
+        _queueLock.unlock();
         _getSemaphore.set();
+//         Log::instance()->avstream().debug("Queue::put() finished");
     }
     
     
     T get()
     {
+//         Log::instance()->avstream().debug("Queue::get() wait ...");
         _getSemaphore.wait();
-        _lock.lock();
+//         Log::instance()->avstream().debug("Queue::get()");
+        _queueLock.lock();
         
         T ret = _queue.front();
         _queue.pop();
         
-        _lock.unlock();
+        _queueLock.unlock();
         _putSemaphore.set();
+//         Log::instance()->avstream().debug("Queue::put() returning");
+        
         return ret;
     }
     
     
     T front()
     {
-        Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+//         Log::instance()->avstream().debug("Queue::front()");
+        Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
+        Poco::ScopedLock<Poco::FastMutex> sizeLock(_sizeLock);
         if (_queue.size() == 0) {
             return T();
         }
@@ -185,26 +197,31 @@ public:
     }
     
     
-    int count()
+    const int count()
     {
-        Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+//         Log::instance()->avstream().debug("Queue::count()");
+        Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
         return _queue.size();
     }
     
     
-    std::string getName()
+    const std::string& getName()
     {
+//         Log::instance()->avstream().debug("Queue::getName()");
+        Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
         return _name;
     }
     
 private:
     std::string             _name;
+    Poco::FastMutex         _nameLock;
     std::queue<T>           _queue;
+    Poco::FastMutex         _queueLock;
     int                     _size;
+    Poco::FastMutex         _sizeLock;
     
     Poco::Semaphore         _putSemaphore;
     Poco::Semaphore         _getSemaphore;
-    Poco::FastMutex         _lock;
 };
 
 
@@ -301,6 +318,7 @@ private:
     StreamInfo*         _pStreamInfo;
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
+    Poco::FastMutex     _lock;
 };
 
 
@@ -320,9 +338,10 @@ public:
     
     Node* getDownstreamNode(int outStreamNumber = 0);
     
-    // needed by C callback functions (see SdlAudioSink)
     bool doStop();
+    
     Stream* getInStream(int inStreamNumber);
+    Stream* getOutStream(int outStreamNumber);
     
 protected:
     virtual bool init() { return true; }
@@ -330,11 +349,14 @@ protected:
     
     
     std::string                     _name;
+    Poco::FastMutex                 _nameLock;
     std::vector<Stream*>            _inStreams;
+    Poco::FastMutex                 _inStreamsLock;
     std::vector<Stream*>            _outStreams;
-    Poco::Thread                    _thread;
-    Poco::FastMutex                 _lock;
+    Poco::FastMutex                 _outStreamsLock;
     bool                            _quit;
+    Poco::FastMutex                 _quitLock;
+    Poco::Thread                    _thread;
 };
 
 
@@ -373,15 +395,22 @@ private:
 };
 
 
+// class FrameInfo
+// {
+// public:
+//     
+// };
+
+
 class Frame
 {
     friend class Stream;
     
 public:
-    Frame(int64_t number, const Frame& frame);
+//     Frame(int64_t number, const Frame& frame);
     Frame(int64_t number, Stream* pStream);
     Frame(int64_t number, Stream* pStream, int dataSize);
-    Frame(int64_t number, Stream* pStream, char* data, int dataSize);
+//     Frame(int64_t number, Stream* pStream, char* data, int dataSize);
     
     // copies *pAvPacket (and it's payload) into Frame and deletes *pAvPacket (and it's payload)
     Frame(int64_t number, Stream* pStream, AVPacket* pAvPacket);
@@ -389,8 +418,8 @@ public:
     Frame(int64_t number, Stream* pStream, AVFrame* pAvFrame);
     ~Frame();
     
-    char* data();
-    int size();
+    const char* data();
+    const int size();
     int paddedSize();
     
     char* planeData(int plane);
@@ -398,11 +427,11 @@ public:
     
     void printInfo();
     std::string getName();
-    int64_t getNumber();
-    int64_t getPts();
+    const int64_t getNumber();
+    const int64_t getPts();
     void setPts(int64_t pts);
     
-    Stream* getStream();
+    const Stream* getStream();
     
     Frame* decode();
     
@@ -420,9 +449,12 @@ private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // face 1: simple buffer
     int64_t             _number;
+    Poco::FastMutex     _numberLock;
     int64_t             _pts;
+    Poco::FastMutex     _ptsLock;
     char*               _data;
     int                 _size;
+    Poco::FastMutex     _sizeLock;
     int                 _paddedSize;
     // face 2: packet coming from the demuxer
     AVPacket*           _pAvPacket;
@@ -431,6 +463,7 @@ private:
     
     // reference to the stream this frame is contained in
     Stream*             _pStream;
+    Poco::FastMutex     _nameLock;
 };
 
 

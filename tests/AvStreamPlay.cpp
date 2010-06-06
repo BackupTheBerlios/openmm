@@ -67,16 +67,16 @@ public:
         }
         
         //////////// load and attach video sink ////////////
-        if (demuxer.firstVideoStream() >= 0) {
-            // FIXME: PpmVideoSink crashes while being allocated, when audio sink is loaded, too
-            // => fix plugin loader
-//             Omm::AvStream::VideoSink* pVideoSink = Omm::AvStream::VideoSink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
-//                 "PpmVideoSink");
-            Omm::AvStream::VideoSink* pVideoSink = Omm::AvStream::VideoSink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
-                "SdlVideoSink");
-            demuxer.attach(pVideoSink, demuxer.firstVideoStream());
-            Omm::AvStream::Clock::instance()->attachVideoSink(pVideoSink);
-        }
+//         if (demuxer.firstVideoStream() >= 0) {
+//             // FIXME: PpmVideoSink crashes while being allocated, when audio sink is loaded, too
+//             // => fix plugin loader
+// //             Omm::AvStream::VideoSink* pVideoSink = Omm::AvStream::VideoSink::loadPlugin(basePluginDir + "FileSinks/libomm-videosink-ppm.so",
+// //                 "PpmVideoSink");
+//             Omm::AvStream::VideoSink* pVideoSink = Omm::AvStream::VideoSink::loadPlugin(basePluginDir + "SdlSink/libomm-videosink-sdl.so",
+//                 "SdlVideoSink");
+//             demuxer.attach(pVideoSink, demuxer.firstVideoStream());
+//             Omm::AvStream::Clock::instance()->attachVideoSink(pVideoSink);
+//         }
         
         
         std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
@@ -85,7 +85,7 @@ public:
         Omm::AvStream::Clock::instance()->setStartTime();
 
         std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
-        
+
         Omm::AvStream::Clock::instance()->start();
         waitForTerminationRequest();
         Omm::AvStream::Clock::instance()->stop();
