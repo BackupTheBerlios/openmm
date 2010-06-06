@@ -94,11 +94,14 @@ SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
     rect.w = getWidth();
     rect.h = getHeight();
     
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s, width: %s, height: %s",
-        getName(),
-        pOverlay->_pFrame->getName(),
-        Poco::NumberFormatter::format(rect.w),
-        Poco::NumberFormatter::format(rect.h)));
+//     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s, width: %s, height: %s",
+//         getName(),
+//         pOverlay->_pFrame->getName(),
+//         Poco::NumberFormatter::format(rect.w),
+//         Poco::NumberFormatter::format(rect.h)));
+        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("sdl video sink display frame %s",
+            pOverlay->_pFrame->getName()));
+//     Omm::AvStream::Log::instance()->avstream().debug("sdl video sink display frame");
     
     SDL_DisplayYUVOverlay(static_cast<SdlOverlay*>(pOverlay)->_pSDLOverlay, &rect);
 }

@@ -699,7 +699,7 @@ Stream::getNode()
 std::string
 Stream::getName()
 {
-    Log::instance()->avstream().debug("Stream::getName()");
+//     Log::instance()->avstream().debug("Stream::getName()");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
     if (_pStreamInfo) {
         return _pStreamInfo->_streamName;
@@ -786,10 +786,10 @@ Stream::decodeAudioFrame(Frame* pFrame)
         Log::instance()->avstream().debug(Poco::format("ffmpeg::avcodec_decode_audio2() frame size: %s, bytes consumed: %s, decoded size: %s",
             Poco::NumberFormatter::format(inBufferSize),
             Poco::NumberFormatter::format(bytesConsumed),
-            Poco::NumberFormatter::format(pOutFrame->_size)
+            Poco::NumberFormatter::format(pOutFrame->size())
             ));
         
-        if (bytesConsumed < 0 || pOutFrame->_size == 0) {
+        if (bytesConsumed < 0 || pOutFrame->size() == 0) {
             Log::instance()->avstream().warning(Poco::format("decoding audio frame in stream %s failed, discarding frame.", getName()));
             delete pFrame;
             return 0;
@@ -1197,13 +1197,13 @@ Frame::~Frame()
         _pAvPacket = 0;
     }
     else if (_pAvFrame) {
-        Log::instance()->avstream().trace(Poco::format("delete %s dtor, ffmpeg::av_free()", getName()));
-        av_free(_pAvFrame);
-        delete _pAvFrame;
-        _pAvFrame = 0;
+//         Log::instance()->avstream().trace(Poco::format("delete %s dtor, ffmpeg::av_free()", getName()));
+//         av_free(_pAvFrame);
+//         delete _pAvFrame;
+//         _pAvFrame = 0;
     }
     else if (_data) {
-        Log::instance()->avstream().trace(Poco::format("delete %s dtor _data, size %s", getName(), Poco::NumberFormatter::format(_size)));
+        Log::instance()->avstream().trace(Poco::format("delete %s dtor _data, size %s", getName(), Poco::NumberFormatter::format(size())));
         delete _data;
         _data = 0;
     }
@@ -1220,6 +1220,7 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
     // allocate payload
     Log::instance()->avstream().trace(Poco::format("alloc %s, size %s", getName(), Poco::NumberFormatter::format(pAvPacket->size + padSize)));
     pRes->data = new uint8_t[pAvPacket->size + padSize];
+//     pRes->size = pAvPacket->size + padSize;
     // copy payload
     memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
     
@@ -1282,7 +1283,7 @@ const int
 Frame::size()
 {
 //     Log::instance()->avstream().debug("Frame::size()");
-    Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+//     Poco::ScopedLock<Poco::Mutex> lock(_sizeLock);
     return _size;
 }
 
@@ -1291,7 +1292,7 @@ int
 Frame::paddedSize()
 {
 //     Log::instance()->avstream().debug("Frame::paddedSize()");
-    Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+//     Poco::ScopedLock<Poco::Mutex> lock(_sizeLock);
     return _paddedSize;
 }
 
@@ -1330,21 +1331,24 @@ Frame::printInfo()
 std::string
 Frame::getName()
 {
-    Log::instance()->avstream().debug("Frame::getName()");
+//     Log::instance()->avstream().debug("Frame::getName()");
 //     Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
-    return "["
-        + _pStream->getName() + "] "
-        + "#" + Poco::NumberFormatter::format(getNumber()) + ", pts: "
-        + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
+//     return "pts: "
+//         + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
+//     return "["
+//         + _pStream->getName() + "] "
+//         + "#" + Poco::NumberFormatter::format(getNumber()) + ", pts: "
+//         + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
 //         + ", duration: " + Poco::NumberFormatter::format(_duration);
+    return "";
 }
 
 
 const int64_t
 Frame::getNumber()
 {
-    Log::instance()->avstream().debug("Frame::getNumber()");
-    Poco::ScopedLock<Poco::FastMutex> lock(_numberLock);
+//     Log::instance()->avstream().debug("Frame::getNumber()");
+//     Poco::ScopedLock<Poco::Mutex> lock(_numberLock);
     return _number;
 }
 
@@ -1352,8 +1356,8 @@ Frame::getNumber()
 const int64_t
 Frame::getPts()
 {
-    Log::instance()->avstream().debug("Frame::getPts()");
-//     Poco::ScopedLock<Poco::FastMutex> lock(_ptsLock);
+//     Log::instance()->avstream().debug("Frame::getPts()");
+//     Poco::ScopedLock<Poco::Mutex> lock(_ptsLock);
     return _pts;
 }
 
@@ -1361,8 +1365,8 @@ Frame::getPts()
 void
 Frame::setPts(int64_t pts)
 {
-    Log::instance()->avstream().debug("Frame::setPts()");
-//     Poco::ScopedLock<Poco::FastMutex> lock(_ptsLock);
+//     Log::instance()->avstream().debug("Frame::setPts()");
+//     Poco::ScopedLock<Poco::Mutex> lock(_ptsLock);
     _pts = pts;
 }
 
@@ -2372,8 +2376,10 @@ VideoSink::timerThread()
 
     while(!_timerQuit) {
         int64_t time = _timeQueue.get();
-        Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
-            getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
+//         Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
+//             getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
+        Log::instance()->avstream().trace(Poco::format("video sink timer thread on tick time: %s",
+            Poco::NumberFormatter::format(time)));
         onTick(time);
     }
     Log::instance()->avstream().debug(Poco::format("%s timer thread finished.", getName()));
@@ -2429,6 +2435,11 @@ VideoSink::onTick(int64_t time)
     if (!pOverlay) {
         Omm::AvStream::Log::instance()->avstream().warning("null video frame in overlay queue, ignoring");
         return;
+    }
+    
+    if (pOverlay->_pFrame->getPts() < time) {
+        Log::instance()->avstream().trace(Poco::format("video sink timer thread frame a bit old, time: %s, frame pts: %s",
+            Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(pOverlay->_pFrame->getPts())));
     }
     
     if (pOverlay->_pFrame->getPts() <= time) {

@@ -469,12 +469,12 @@ private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // face 1: simple buffer
     int64_t             _number;
-    Poco::FastMutex     _numberLock;
+    Poco::Mutex     _numberLock;
     int64_t             _pts;
-    Poco::FastMutex     _ptsLock;
+    Poco::Mutex     _ptsLock;
     char*               _data;
     int                 _size;
-    Poco::FastMutex     _sizeLock;
+    Poco::Mutex     _sizeLock;
     int                 _paddedSize;
     // face 2: packet coming from the demuxer
     AVPacket*           _pAvPacket;
