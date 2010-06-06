@@ -209,7 +209,11 @@ ByteQueue::readSome(char* buffer, int num)
     
     // queue is not empty, we can go on reading
     if (_level > 0) {
-        _readSemaphore.set();
+        try {
+            _readSemaphore.set();
+        }
+        catch (Poco::SystemException) {
+        }
     }
     // we've read some bytes, so we can put something in, again
     if (num > 0) {
@@ -242,7 +246,11 @@ ByteQueue::writeSome(const char* buffer, int num)
     
     // queue is not full, we can go on writing
     if (_level < _size) {
-        _writeSemaphore.set();
+        try {
+            _writeSemaphore.set();
+        }
+        catch (Poco::SystemException) {
+        }
     }
     // we've written some bytes, so we can get something out, again
     if (num > 0) {
@@ -2111,7 +2119,7 @@ Sink::run()
             writeDecodedFrame(pDecodedFrame);
             // FIXME: this segfaults with video (and with audio not running in valgrind or similar),
             // but without leads to more memory consumption
-//             delete pDecodedFrame;
+            delete pDecodedFrame;
             pDecodedFrame = 0;
         }
     }
