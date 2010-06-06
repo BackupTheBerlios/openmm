@@ -26,7 +26,6 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include <sstream>
 
 #include <Poco/Logger.h>
 #include <Poco/Format.h>
@@ -147,7 +146,7 @@ private:
     RingBuffer              _ringBuffer;
     int                     _size;
     volatile int            _level;
-    // FIXME: this should also work with a readLock and a writeLock and a condition
+    // TODO: this should also work with a read lock and a write lock and a condition. Use:
     // Poco::FastMutex, Poco::Condition
     Poco::Semaphore         _writeSemaphore;
     Poco::Semaphore         _readSemaphore;

@@ -207,17 +207,13 @@ ByteQueue::readSome(char* buffer, int num)
     Log::instance()->avstream().trace(Poco::format("byte queue readSome() read %s bytes, level: %s",
         Poco::NumberFormatter::format(bytesRead), Poco::NumberFormatter::format(_level)));
     
-    // FIXME: use tryWait() instead of try() to check if the semaphore is set or not.
     // queue is not empty, we can go on reading
     if (_level > 0) {
-        try {
-            _readSemaphore.set();
-        }
-        catch (Poco::SystemException) {
-        }
+        _readSemaphore.set();
     }
     // we've read some bytes, so we can put something in, again
     if (num > 0) {
+        // check if the semaphore is already set
         try {
             _writeSemaphore.set();
         }
@@ -246,14 +242,11 @@ ByteQueue::writeSome(const char* buffer, int num)
     
     // queue is not full, we can go on writing
     if (_level < _size) {
-        try {
-            _writeSemaphore.set();
-        }
-        catch (Poco::SystemException) {
-        }
+        _writeSemaphore.set();
     }
     // we've written some bytes, so we can get something out, again
     if (num > 0) {
+        // check if the semaphore is already set
         try {
             _readSemaphore.set();
         }
