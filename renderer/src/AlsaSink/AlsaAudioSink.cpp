@@ -184,6 +184,10 @@ AlsaAudioSink::writeThread()
         if (audioAvailable()) {
             bytesRead = audioRead(_buffer, _bufferSize);
         }
+        // nothing comes out of the ring buffer, we play silence
+        if (!bytesRead) {
+            bytesRead = _bufferSize;
+        }
 //         Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s write thread, bytes read: %s",
 //             getName(),
 //             Poco::NumberFormatter::format(bytesRead)));

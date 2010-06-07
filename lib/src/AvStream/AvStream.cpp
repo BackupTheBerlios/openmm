@@ -1654,11 +1654,12 @@ Demuxer::run()
         // (pts or duration, one of them must be right, otherwise we are lost, especially with variable frame rate)
         int64_t currentPts = correctPts(packet.pts, lastPtsVec[packet.stream_index], lastDurationVec[packet.stream_index]);
         if (currentPts != packet.pts) {
-            Log::instance()->avstream().warning(Poco::format("%s frame %s, correct pts %s -> %s",
+            Log::instance()->avstream().warning(Poco::format("%s frame %s, correct pts %s -> %s, delta: %s",
                 getName(),
                 pFrame->getName(),
                 Poco::NumberFormatter::format(packet.pts),
-                Poco::NumberFormatter::format(currentPts)));
+                Poco::NumberFormatter::format(currentPts),
+                Poco::NumberFormatter::format(currentPts - packet.pts)));
         }
         pFrame->setPts(currentPts);
         lastPtsVec[packet.stream_index] = currentPts;
@@ -2437,9 +2438,12 @@ VideoSink::onTick(int64_t time)
         return;
     }
     
-    if (pOverlay->_pFrame->getPts() < time) {
-        Log::instance()->avstream().trace(Poco::format("video sink timer thread frame a bit old, time: %s, frame pts: %s",
-            Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(pOverlay->_pFrame->getPts())));
+    int64_t framePts = pOverlay->_pFrame->getPts();
+    if (framePts < time) {
+        Log::instance()->avstream().trace(Poco::format("video sink timer thread frame a bit old, time: %s, frame pts: %s, delta: %s",
+            Poco::NumberFormatter::format(time),
+            Poco::NumberFormatter::format(framePts),
+            Poco::NumberFormatter::format(time - framePts)));
     }
     
     if (pOverlay->_pFrame->getPts() <= time) {

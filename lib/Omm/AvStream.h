@@ -148,6 +148,7 @@ private:
     volatile int            _level;
     // TODO: this should also work with a read lock and a write lock and a condition. Use:
     // Poco::FastMutex, Poco::Condition
+    // TODO: alternatively use a Poco::SharedObject
     Poco::Semaphore         _writeSemaphore;
     Poco::Semaphore         _readSemaphore;
     Poco::FastMutex         _lock;
