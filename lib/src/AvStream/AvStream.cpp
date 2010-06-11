@@ -2240,14 +2240,19 @@ AudioSink::audioAvailable()
 int
 AudioSink::audioRead(char* buffer, int size)
 {
-    return _byteQueue.readSome(buffer, size);
+    Clock::instance()->setTime(_audioTime);
+    int bytesRead = _byteQueue.readSome(buffer, size);
+    _audioTime += audioLength(bytesRead);
+    return bytesRead;
 }
 
 
 void
 AudioSink::audioReadBlocking(char* buffer, int size)
 {
+    Clock::instance()->setTime(_audioTime);
     _byteQueue.read(buffer, size);
+    _audioTime += audioLength(size);
 }
 
 
@@ -2280,6 +2285,14 @@ AudioSink::setStartTime(int64_t startTime)
         
         audioReadBlocking(discardBuffer, discardSize);
     }
+    _audioTime = startTime;
+}
+
+
+int64_t
+AudioSink::audioLength(int64_t bytes)
+{
+    return bytes * 90000.0 / (sampleRate() * channels() * 2);
 }
 
 
@@ -2578,11 +2591,16 @@ Clock::setStartTime(bool toFirstFrame)
         (*it)->setStartTime(startTime);
     }
     _streamTime = startTime;
+    _systemTime.update();
     
     Log::instance()->avstream().debug("CLOCK start time set.");
 }
 
 
+// TODO: setTime() is currently not used. Simply set _streamTime and _lastTickTime to currentTime.
+// Don't inform anyone (it will be done at next clock tick).
+// setTime() should be called by audio sink, where the samples written to pcm are counted, calculated to base time
+// and frequently setTime is called (especially at a pts jump).
 void
 Clock::setTime(int64_t currentTime)
 {
@@ -2592,10 +2610,11 @@ Clock::setTime(int64_t currentTime)
 //     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
 //         (*it)->currentTime(currentTime);
 //     }
-    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
-        (*it)->currentTime(currentTime);
-    }
+//     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
+//         (*it)->currentTime(currentTime);
+//     }
     _streamTime = currentTime;
+    _systemTime.update();
     _clockLock.unlock();
 }
 
@@ -2603,14 +2622,20 @@ Clock::setTime(int64_t currentTime)
 void
 Clock::clockTick(Poco::Timer& timer)
 {
-    
+    // TODO: get system time and calculate elapsed time since last tick (_lastTickTime) in time base units. Add this to _streamTime.
     // _streamTime and _clockTickStreamBase is in time base units, clock tick is in ms
     _clockLock.lock();
     if (_streamTime != AV_NOPTS_VALUE) {
-        Log::instance()->avstream().debug("CLOCK TICK.");
+//         Log::instance()->avstream().debug("CLOCK TICK.");
         
-        _streamTime += _clockTickStreamBase;
-    
+//         _streamTime += _clockTickStreamBase;
+        int64_t lastTick = _streamTime;
+        _streamTime += _systemTime.elapsed() * 9.0 / 100.0;
+        _systemTime.update();
+
+        Log::instance()->avstream().debug(Poco::format("CLOCK TICK %s, since last tick: %s",
+            Poco::NumberFormatter::format(_streamTime), Poco::NumberFormatter::format(_streamTime - lastTick)));
+        
         for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
             (*it)->currentTime(_streamTime);
         }

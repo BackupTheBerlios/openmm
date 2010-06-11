@@ -36,6 +36,7 @@
 #include <Poco/Mutex.h>
 #include <Poco/RWLock.h>
 #include <Poco/Timer.h>
+#include <Poco/DateTime.h>
 
 // FIXME: make clear if you need to set -malign-double when linking with libommavstream and ffmpeg is compiled with -malign-double
 // FIXME: find a build check for ffmpeg, if it is compiled with -malign-double
@@ -591,8 +592,10 @@ protected:
 private:
     virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
+    int64_t audioLength(int64_t bytes);
     
     Omm::AvStream::ByteQueue    _byteQueue;
+    int64_t                     _audioTime;
 };
 
 
@@ -693,6 +696,7 @@ private:
     // -> store a stream time for each stream
     int64_t                 _streamTime;  // stream current time in stream time base units [sec]
     double                  _streamBase;  // stream refresh rate in kHz ( = 1 / (time base * 1000))
+    Poco::Timestamp         _systemTime;
     
     Poco::Timer             _clockTimer;
     long                    _clockTick;
