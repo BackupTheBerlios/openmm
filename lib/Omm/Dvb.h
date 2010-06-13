@@ -54,8 +54,6 @@ private:
 };
 
 
-
-
 class DvbChannel
 {
     friend class DvbDevice;
