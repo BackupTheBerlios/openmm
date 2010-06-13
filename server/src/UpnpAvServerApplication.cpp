@@ -119,7 +119,7 @@ protected:
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
             
             Omm::Av::MediaContainer* pContainerPlugin;
-            pContainerPlugin = objectLoader.create("MediaContainerPlugin");
+            pContainerPlugin = objectLoader.create("DvbServer");
             
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);

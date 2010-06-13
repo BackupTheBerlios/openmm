@@ -113,10 +113,9 @@ WebResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 }
 
 
-MediaItemServer::MediaItemServer() :
-_socket(Poco::Net::ServerSocket(0))
+MediaItemServer::MediaItemServer(int port) :
+_socket(Poco::Net::ServerSocket(port))
 {
-    
 }
 
 
@@ -153,10 +152,10 @@ MediaItemServer::getPort() const
 }
 
 
-MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass) :
+MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass, int port) :
 MediaContainer(title, subClass)
 {
-    _pItemServer = new MediaItemServer;
+    _pItemServer = new MediaItemServer(port);
     _pItemServer->_pServerContainer = this;
     _pItemServer->start();
     _port = _pItemServer->_socket.address().port();

@@ -23,7 +23,7 @@
 #include "DvbServer.h"
 
 DvbServer::DvbServer() :
-MediaServerContainer("Digital TV")
+MediaServerContainer("Digital TV", "", 8888)
 {
     Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
     Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);

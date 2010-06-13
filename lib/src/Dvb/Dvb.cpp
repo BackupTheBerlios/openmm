@@ -24,6 +24,7 @@
 #include <Poco/SplitterChannel.h>
 #include <Poco/ConsoleChannel.h>
 
+#include <stdint.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 

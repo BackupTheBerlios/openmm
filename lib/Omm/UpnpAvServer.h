@@ -115,7 +115,7 @@ class MediaServerContainer : public MediaContainer
     friend class ItemRequestHandler;
     
 public:
-    MediaServerContainer(const std::string& title, const std::string& subClass = "");
+    MediaServerContainer(const std::string& title, const std::string& subClass = "", int port = 0);
     ~MediaServerContainer();
     
     virtual void appendChild(ServerObject* pChild);
@@ -138,7 +138,7 @@ class MediaItemServer
     friend class MediaServerContainer;
     
 public:
-    MediaItemServer();
+    MediaItemServer(int port = 0);
     ~MediaItemServer();
     
     void start();
