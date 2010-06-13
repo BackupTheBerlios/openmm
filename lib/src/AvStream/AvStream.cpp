@@ -577,6 +577,72 @@ StreamInfo::newFrameNumber()
 }
 
 
+StreamInfo*
+StreamInfo::cloneOutStreamInfo(Meta* pMeta, int outStreamNumber)
+{
+    StreamInfo* pRes = new StreamInfo;
+    
+    Log::instance()->avstream().debug("ffmpeg::av_new_stream()");
+    pRes->_pAvStream = av_new_stream(pMeta->_pFormatContext, outStreamNumber);
+    if(!pRes->_pAvStream) {
+        Log::instance()->avstream().error("could not allocate stream");
+        return pRes;
+    }
+    pRes->_pAvCodecContext = pRes->_pAvStream->codec;
+    if(!pRes->_pAvCodecContext) {
+        Log::instance()->avstream().error("could not allocate codec context");
+        return pRes;
+    }
+    pRes->_pAvCodecContext->codec_id = _pAvCodecContext->codec_id;
+    pRes->_pAvCodecContext->codec_type = _pAvCodecContext->codec_type;
+    pRes->_pAvCodecContext->bit_rate = _pAvCodecContext->bit_rate;
+    if (isAudio()) {
+        pRes->_pAvCodecContext->sample_rate = _pAvCodecContext->sample_rate;
+        pRes->_pAvCodecContext->channels = _pAvCodecContext->channels;
+    }
+    else if (isVideo()) {
+        pRes->_pAvCodecContext->width = _pAvCodecContext->width;
+        pRes->_pAvCodecContext->height = _pAvCodecContext->height;
+        pRes->_pAvCodecContext->time_base = _pAvCodecContext->time_base;
+//         pRes->_pAvCodecContext->gop_size = _pAvCodecContext->gop_size;
+        pRes->_pAvCodecContext->pix_fmt = _pAvCodecContext->pix_fmt;
+//         pRes->_pAvCodecContext->max_b_frames = _pAvCodecContext->max_b_frames;
+//         pRes->_pAvCodecContext->mb_decision = _pAvCodecContext->mb_decision;
+        pRes->_pAvCodecContext->flags = _pAvCodecContext->flags;
+        pRes->_pAvCodecContext->sample_aspect_ratio = _pAvCodecContext->sample_aspect_ratio;
+    }
+    return pRes;
+}
+
+
+bool
+StreamInfo::findEncoder()
+{
+    Log::instance()->avstream().debug(Poco::format("searching encoder with codec id: %s",
+        Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
+    
+    Log::instance()->avstream().trace("ffmpeg::avcodec_find_encoder() ...");
+    _pAvCodec = avcodec_find_encoder(_pAvCodecContext->codec_id);
+    
+    if(!_pAvCodec) {
+        Log::instance()->avstream().error(Poco::format("could not find encoder for codec id: %s",
+            Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
+        return false;
+    }
+    
+    Log::instance()->avstream().trace("ffmpeg::avcodec_open() ...");
+    if(avcodec_open(_pAvCodecContext, _pAvCodec) < 0) {
+        Log::instance()->avstream().error(Poco::format("could not open encoder for codec id: %s",
+            Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
+        return false;
+    }
+    Log::instance()->avstream().information(Poco::format("found encoder: %s (%s)",
+        std::string(_pAvCodec->name), std::string(_pAvCodec->long_name)));
+    
+    return true;
+}
+
+
 Stream::Stream(Node* pNode, const std::string name) :
 _pNode(pNode),
 _pStreamInfo(new StreamInfo),
@@ -1210,6 +1276,20 @@ Frame::~Frame()
 }
 
 
+// AVPacket*
+// Frame::copyPacket(AVPacket* pAvPacket, int padSize)
+// {
+//     av_dup_packet(pAvPacket);
+//     
+//     // allocate AVPacket struc
+//     AVPacket* pRes = new AVPacket;
+//     // copy fields of AVPacket struc
+//     *pRes = *pAvPacket;
+//     
+//     return pRes;
+// }
+
+
 AVPacket*
 Frame::copyPacket(AVPacket* pAvPacket, int padSize)
 {
@@ -1332,15 +1412,15 @@ std::string
 Frame::getName()
 {
 //     Log::instance()->avstream().debug("Frame::getName()");
-//     Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
+    Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
 //     return "pts: "
 //         + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
-//     return "["
-//         + _pStream->getName() + "] "
-//         + "#" + Poco::NumberFormatter::format(getNumber()) + ", pts: "
-//         + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
+    return "["
+        + _pStream->getName() + "] "
+        + "#" + Poco::NumberFormatter::format(getNumber()) + ", pts: "
+        + (_pts == AV_NOPTS_VALUE ? "AV_NOPTS_VALUE" : Poco::NumberFormatter::format(getPts()));
 //         + ", duration: " + Poco::NumberFormatter::format(_duration);
-    return "";
+//     return "";
 }
 
 
@@ -1750,6 +1830,149 @@ Demuxer::correctPts(int64_t pts, int64_t lastPts, int lastDuration)
 }
 
 
+Muxer::Muxer() :
+Node("muxer"),
+_pMeta(new Meta),
+_uri("mux.ts")
+{
+    // muxer has two input streams
+    _inStreams.push_back(new Stream(this));
+    _inStreams[0]->setInfo(0);
+    _inStreams[0]->setQueue(new StreamQueue(this));
+    
+    _inStreams.push_back(new Stream(this));
+    _inStreams[1]->setInfo(0);
+    _inStreams[1]->setQueue(new StreamQueue(this));
+    
+    // and no output stream
+    
+    Omm::AvStream::Log::instance()->avstream().debug("ffmpeg::avformat_alloc_context()");
+    _pMeta->_pFormatContext = avformat_alloc_context();
+}
+
+
+Muxer::~Muxer()
+{
+    delete _pMeta;
+}
+
+
+void
+Muxer::set(const std::string& uri, const std::string& format)
+{
+    _uri = uri;
+    Omm::AvStream::Log::instance()->avstream().debug("ffmpeg::guess_format()");
+    _pMeta->_pFormatContext->oformat = guess_format(format.c_str(), NULL, NULL);
+    // TODO: check for max uri length supported by ffmpeg (currently 1024 ...?)
+    _uri.copy(_pMeta->_pFormatContext->filename, _uri.size());
+    _pMeta->_pFormatContext->filename[_uri.size()] = '\0';
+    
+    if (av_set_parameters(_pMeta->_pFormatContext, 0) < 0) {
+        Omm::AvStream::Log::instance()->avstream().error("invalid output format parameters");
+        return;
+    }
+}
+
+
+void
+Muxer::set(std::ostream& ostr, const std::string& format)
+{
+    // TODO: implement Muxer::set() for std::ostream
+}
+
+
+void
+Muxer::reset()
+{
+    if (_pMeta) {
+        delete _pMeta;
+    }
+    _pMeta = 0;
+}
+
+
+bool
+Muxer::prepareOutStream(int streamNumber)
+{
+    if (!_inStreams[streamNumber]->getInfo()->findCodec()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
+        return false;
+    }
+    
+    _inStreams[streamNumber]->setInfo(_inStreams[streamNumber]->getInfo()->cloneOutStreamInfo(_pMeta, streamNumber));
+    
+    if (!_inStreams[streamNumber]->getInfo()->findEncoder()) {
+        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find encoder", getName()));
+        return false;
+    }
+    return true;
+}
+
+
+bool
+Muxer::init()
+{
+    if (!_inStreams[0]->getInfo() && !_inStreams[1]->getInfo()) {
+        Log::instance()->avstream().warning(Poco::format("%s init failed, two input streams must be connected", getName()));
+        return false;
+    }
+    
+    if (_inStreams[0]->getInfo() && _inStreams[1]->getInfo()) {
+        if (!prepareOutStream(0)) {
+            return false;
+        }
+        if (!prepareOutStream(1)) {
+            return false;
+        }
+        
+        _pMeta->print(true);
+        
+        Omm::AvStream::Log::instance()->avstream().debug("ffmpeg::url_fopen()");
+        url_fopen(&_pMeta->_pFormatContext->pb, _uri.c_str(), URL_WRONLY);
+        
+        Omm::AvStream::Log::instance()->avstream().debug("ffmpeg::av_write_header()");
+        av_write_header(_pMeta->_pFormatContext);
+    }
+    
+    return true;
+}
+
+
+void
+Muxer::run()
+{
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s run thread started.", getName()));
+    
+    while (!_quit) {
+        // FIXME: handle packet number wrap in muxer
+        Frame* pFirstStreamFrame = _inStreams[0]->getFrame();
+        Frame* pSecondStreamFrame = _inStreams[1]->getFrame();
+        
+        while (pSecondStreamFrame->getNumber() < pFirstStreamFrame->getNumber())
+        {
+            // FIXME: segfault (floating point exception) in av_write_frame()
+            Log::instance()->avstream().debug(Poco::format("%s write frame %s", getName(), pSecondStreamFrame->getName()));
+            pSecondStreamFrame->_pAvPacket->stream_index = 1;
+            Log::instance()->avstream().trace("ffmpeg::av_write_frame() ...");
+            av_write_frame(_pMeta->_pFormatContext, pSecondStreamFrame->_pAvPacket);
+//             delete pSecondStreamFrame;
+            pSecondStreamFrame = _inStreams[1]->getFrame();
+        }
+        
+        while (pFirstStreamFrame->getNumber() < pSecondStreamFrame->getNumber())
+        {
+            Log::instance()->avstream().debug(Poco::format("%s write frame %s", getName(), pFirstStreamFrame->getName()));
+            pFirstStreamFrame->_pAvPacket->stream_index = 0;
+            Log::instance()->avstream().trace("ffmpeg::av_write_frame() ...");
+            av_write_frame(_pMeta->_pFormatContext, pFirstStreamFrame->_pAvPacket);
+//             delete pFirstStreamFrame;
+            pFirstStreamFrame = _inStreams[0]->getFrame();
+        }
+    }
+    Log::instance()->avstream().trace("ffmpeg::av_write_trailer() ...");
+    av_write_trailer(_pMeta->_pFormatContext);
+}
+
 
 Decoder::Decoder() :
 Node("decoder")
@@ -1832,16 +2055,24 @@ Meta::~Meta()
 
 
 void
-Meta::print()
+Meta::print(bool isOutFormat)
 {
-    dump_format(_pFormatContext, 0, _pFormatContext->filename, 0);
-    
-    AVMetadataTag* tag = 0;
-    Log::instance()->avstream().trace("ffmpeg::av_metadata_get() ...");
-    while ((tag = av_metadata_get(_pFormatContext->metadata, "", tag, AV_METADATA_IGNORE_SUFFIX))) {
-        std::clog << tag->key << ", " << tag->value << std::endl;
+    Log::instance()->avstream().trace("ffmpeg::dump_format() ...");
+    if (isOutFormat) {
+        dump_format(_pFormatContext, 0, _pFormatContext->filename, 1);
+    }
+    else {
+        dump_format(_pFormatContext, 0, _pFormatContext->filename, 0);
+        
+        AVMetadataTag* tag = 0;
+        Log::instance()->avstream().trace("ffmpeg::av_metadata_get() ...");
+        while ((tag = av_metadata_get(_pFormatContext->metadata, "", tag, AV_METADATA_IGNORE_SUFFIX))) {
+            std::clog << tag->key << ", " << tag->value << std::endl;
+        }
     }
 }
+
+
 
 // FIXME: for correct buffer sizes see libavformat/utils.c: av_open_input_file()
 Tagger::Tagger() :

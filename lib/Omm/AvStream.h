@@ -264,6 +264,7 @@ class StreamInfo
 {
     friend class Stream;
     friend class Demuxer;
+    friend class Muxer;
     friend class Frame;
     
 public:
@@ -273,6 +274,7 @@ public:
     bool isVideo();
     
     bool findCodec();
+    bool findEncoder();
     
     void printInfo();
     
@@ -289,6 +291,8 @@ public:
     int pictureSize();
     
     int64_t newFrameNumber();
+    
+    StreamInfo* cloneOutStreamInfo(Meta* pMeta, int outStreamNumber);
     
 private:
     std::string             _streamName;
@@ -406,6 +410,32 @@ private:
 };
 
 
+/**
+    @class Muxer
+    mux one audio and one video stream
+    container format is the same as input stream
+*/
+class Muxer : public Node
+{
+public:
+    Muxer();
+    ~Muxer();
+    
+    void set(const std::string& uri = "mux.ts", const std::string& format = "mpegts");
+    void set(std::ostream& ostr, const std::string& format = "mpegts");
+    void reset();
+    
+private:
+    virtual bool init();
+    virtual void run();
+    
+    bool prepareOutStream(int streamNumber);
+    
+    Meta*           _pMeta;
+    std::string     _uri;
+};
+
+
 class Decoder : public Node
 {
 public:
@@ -427,6 +457,7 @@ private:
 class Frame
 {
     friend class Stream;
+    friend class Muxer;
     
 public:
 //     Frame(int64_t number, const Frame& frame);
@@ -471,12 +502,12 @@ private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // face 1: simple buffer
     int64_t             _number;
-    Poco::Mutex     _numberLock;
+    Poco::Mutex         _numberLock;
     int64_t             _pts;
-    Poco::Mutex     _ptsLock;
+    Poco::Mutex         _ptsLock;
     char*               _data;
     int                 _size;
-    Poco::Mutex     _sizeLock;
+    Poco::Mutex         _sizeLock;
     int                 _paddedSize;
     // face 2: packet coming from the demuxer
     AVPacket*           _pAvPacket;
@@ -492,13 +523,15 @@ private:
 class Meta
 {
     friend class Tagger;
+    friend class StreamInfo;
     friend class Demuxer;
+    friend class Muxer;
     
 public:
     Meta();
     ~Meta();
     
-    void print();
+    void print(bool isOutFormat = false);
     
 private:
     AVFormatContext*    _pFormatContext; // contains pointers to ByteIOContext, AVInputFormat, codec ids, array of streams with AVCodecContext

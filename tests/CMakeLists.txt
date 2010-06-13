@@ -57,10 +57,6 @@ SET( OMMTEST_MEDIAOBJECT_SRCS
 MediaObjectTest.cpp
 )
 
-SET( OMMTEST_AV_STREAM_PLAY_SRCS
-AvStreamPlay.cpp
-)
-
 # SET( OMMTEST_HTTPFILESERVER_SRCS
 # HttpFileServerTest.cpp
 # )
@@ -129,6 +125,10 @@ AvStreamPlay.cpp
 # ${LIB_POCO_UTIL}
 # )
 
+SET( OMMTEST_AV_STREAM_PLAY_SRCS
+AvStreamPlay.cpp
+)
+
 ADD_EXECUTABLE( avstreamplay
 ${OMMTEST_AV_STREAM_PLAY_SRCS}
 )
@@ -140,5 +140,17 @@ ADD_DEFINITIONS(
 TARGET_LINK_LIBRARIES( avstreamplay
 ${LIB_OMM_AV_STREAM}
 ${LIB_POCO_UTIL}
-# /home/jb/devel/cc/ommbin/renderer/src/SdlSink/libomm-audiosink-sdl.so
+)
+
+SET( OMMTEST_AV_MUX_SRCS
+AvMux.cpp
+)
+
+ADD_EXECUTABLE( avmux
+${OMMTEST_AV_MUX_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( avmux
+${LIB_OMM_AV_STREAM}
+# ${LIB_POCO_UTIL}
 )
