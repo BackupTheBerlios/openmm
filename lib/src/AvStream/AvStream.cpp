@@ -593,23 +593,27 @@ StreamInfo::cloneOutStreamInfo(Meta* pMeta, int outStreamNumber)
         Log::instance()->avstream().error("could not allocate codec context");
         return pRes;
     }
+//     pRes->_pAvStream->r_frame_rate = _pAvStream->r_frame_rate;
+//     pRes->_pAvStream->time_base = _pAvStream->time_base;
+    
     pRes->_pAvCodecContext->codec_id = _pAvCodecContext->codec_id;
     pRes->_pAvCodecContext->codec_type = _pAvCodecContext->codec_type;
-    pRes->_pAvCodecContext->bit_rate = _pAvCodecContext->bit_rate;
+//     pRes->_pAvCodecContext->bit_rate = _pAvCodecContext->bit_rate;
     if (isAudio()) {
         pRes->_pAvCodecContext->sample_rate = _pAvCodecContext->sample_rate;
         pRes->_pAvCodecContext->channels = _pAvCodecContext->channels;
     }
     else if (isVideo()) {
+        pRes->_pAvCodecContext->time_base = _pAvCodecContext->time_base;
+        pRes->_pAvCodecContext->pix_fmt = _pAvCodecContext->pix_fmt;
         pRes->_pAvCodecContext->width = _pAvCodecContext->width;
         pRes->_pAvCodecContext->height = _pAvCodecContext->height;
-        pRes->_pAvCodecContext->time_base = _pAvCodecContext->time_base;
 //         pRes->_pAvCodecContext->gop_size = _pAvCodecContext->gop_size;
-        pRes->_pAvCodecContext->pix_fmt = _pAvCodecContext->pix_fmt;
+//         pRes->_pAvCodecContext->me_method = _pAvCodecContext->me_method;
 //         pRes->_pAvCodecContext->max_b_frames = _pAvCodecContext->max_b_frames;
 //         pRes->_pAvCodecContext->mb_decision = _pAvCodecContext->mb_decision;
-        pRes->_pAvCodecContext->flags = _pAvCodecContext->flags;
-        pRes->_pAvCodecContext->sample_aspect_ratio = _pAvCodecContext->sample_aspect_ratio;
+//         pRes->_pAvCodecContext->flags = _pAvCodecContext->flags;
+//         pRes->_pAvCodecContext->sample_aspect_ratio = _pAvCodecContext->sample_aspect_ratio;
     }
     return pRes;
 }
