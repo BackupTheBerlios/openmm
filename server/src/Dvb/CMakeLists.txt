@@ -6,6 +6,9 @@ if(TARGET omm)
 SET(LIB_OMM_AV
 ommav
 )
+SET(LIB_OMM_DVB
+ommdvb
+)
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
@@ -14,23 +17,28 @@ FIND_LIBRARY(LIB_OMM_AV
 NAME ommav
 PATHS ${CMAKE_LIBRARY_PATH}
 )
+FIND_LIBRARY(LIB_OMM_DVB
+NAME ommdvb
+PATHS ${CMAKE_LIBRARY_PATH}
+)
 endif(TARGET omm)
 
 
 SET( OMMS_DVB_SRCS
-Dvb.cpp
+DvbServer.cpp
 )
 
-ADD_LIBRARY( omms-av-dvb
+ADD_LIBRARY( omm-server-dvb
 SHARED
 ${OMMS_DVB_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( omms-av-dvb
+TARGET_LINK_LIBRARIES( omm-server-dvb
 ${LIB_OMM_AV}
-${LIB_POCO_UTIL}
+${LIB_OMM_DVB}
+# ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS omms-av-dvb
+INSTALL( TARGETS omm-server-dvb
 LIBRARY DESTINATION lib/omm
 )

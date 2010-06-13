@@ -24,10 +24,9 @@
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
-#include <Poco/StreamCopier.h>
+// #include <Poco/StreamCopier.h>
 
 #include <Omm/UpnpAvServer.h>
-#include "Dvb/Dvb.h"
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;

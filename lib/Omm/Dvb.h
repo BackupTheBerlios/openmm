@@ -19,21 +19,25 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef OmmDvb_INCLUDED
-#define OmmDvb_INCLUDED
+#ifndef Dvb_INCLUDED
+#define Dvb_INCLUDED
 
 #include <Poco/Thread.h>
 #include <Poco/Mutex.h>
+#include <Poco/Logger.h>
+#include <Poco/Format.h>
+#include <Poco/NumberFormatter.h>
+
+#include <fstream>
 
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/audio.h>
 
-#include <Omm/UpnpAvServer.h>
+namespace Omm {
+namespace Dvb {
 
 class DvbDevice;
-class DvbChannel;
-
 
 class Log
 {
@@ -50,24 +54,6 @@ private:
 };
 
 
-class MediaContainerPlugin : public Omm::Av::MediaServerContainer
-{
-public:
-    MediaContainerPlugin();
-};
-
-
-class DvbResource : public Omm::Av::ServerResource
-{
-public:
-    DvbResource(const std::string& resourceId, const std::string& protInfo, DvbChannel* pChannel);
-    
-    virtual bool isSeekable() { return false; }
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
-    
-private:
-    DvbChannel*         _pChannel;
-};
 
 
 class DvbChannel
@@ -264,5 +250,8 @@ private:
     std::map<std::string,DvbLnb*>   _lnbs;  // possible LNB types
     std::vector<DvbAdapter*>        _adapters;
 };
+
+}  // namespace Omm
+}  // namespace Dvb
 
 #endif

@@ -18,13 +18,19 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#include <Poco/ClassLibrary.h>
 #include <Poco/File.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/ConsoleChannel.h>
 
 #include <fcntl.h>
+#include <sys/ioctl.h>
 
 #include "Dvb.h"
 
+using namespace Omm;
+using namespace Omm::Dvb;
 
 Log* Log::_pInstance = 0;
 
@@ -60,84 +66,6 @@ Log::dvb()
     return *_pDvbLogger;
 }
 
-
-MediaContainerPlugin::MediaContainerPlugin() :
-MediaServerContainer("Digital TV")
-{
-    DvbAdapter* pAdapter = new DvbAdapter(0);
-    DvbDevice::instance()->addAdapter(pAdapter);
-    
-    Omm::Av::MediaItem* pRtl = new Omm::Av::MediaItem("o1", "RTL", "videoItem.movie");
-    DvbChannel* pRtlChannel = new DvbChannel(0, 12188000, DvbChannel::HORIZ, 27500000, 163, 104, 12003);
-    pRtl->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pRtlChannel));
-    appendChild(pRtl);
-    
-    Omm::Av::MediaItem* pRtl2 = new Omm::Av::MediaItem("o2", "RTL2", "videoItem.movie");
-    DvbChannel* pRtl2Channel = new DvbChannel(0, 12188000, DvbChannel::HORIZ, 27500000, 166, 128, 12020);
-    pRtl2->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pRtl2Channel));
-    appendChild(pRtl2);
-    
-    Omm::Av::MediaItem* pVox = new Omm::Av::MediaItem("o3", "VOX", "videoItem.movie");
-    DvbChannel* pVoxChannel = new DvbChannel(0, 12188000, DvbChannel::HORIZ, 27500000, 167, 136, 12060);
-    pVox->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pVoxChannel));
-    appendChild(pVox);
-    
-    Omm::Av::MediaItem* pPro7 = new Omm::Av::MediaItem("o4", "Pro7", "videoItem.movie");
-    DvbChannel* pPro7Channel = new DvbChannel(0, 12544000, DvbChannel::HORIZ, 22000000, 511, 512, 17501);
-    pPro7->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pPro7Channel));
-    appendChild(pPro7);
-    
-    Omm::Av::MediaItem* pSat1 = new Omm::Av::MediaItem("o5", "Sat1", "videoItem.movie");
-    DvbChannel* pSat1Channel = new DvbChannel(0, 12544000, DvbChannel::HORIZ, 22000000, 255, 256, 17500);
-    pSat1->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pSat1Channel));
-    appendChild(pSat1);
-    
-    Omm::Av::MediaItem* pKabel1 = new Omm::Av::MediaItem("o6", "Kabel1", "videoItem.movie");
-    DvbChannel* pKabel1Channel = new DvbChannel(0, 12544000, DvbChannel::HORIZ, 22000000, 767, 768, 17502);
-    pKabel1->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pKabel1Channel));
-    appendChild(pKabel1);
-    
-    Omm::Av::MediaItem* pArd = new Omm::Av::MediaItem("o7", "ARD", "videoItem.movie");
-    DvbChannel* pArdChannel = new DvbChannel(0, 11837000, DvbChannel::HORIZ, 27500000, 101, 102, 28106);
-    pArd->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pArdChannel));
-    appendChild(pArd);
-    
-    Omm::Av::MediaItem* pZdf = new Omm::Av::MediaItem("o8", "ZDF", "videoItem.movie");
-    DvbChannel* pZdfChannel = new DvbChannel(0, 11954000, DvbChannel::HORIZ, 27500000, 110, 120, 28006);
-    pZdf->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pZdfChannel));
-    appendChild(pZdf);
-    
-    Omm::Av::MediaItem* p3Sat = new Omm::Av::MediaItem("o9", "3Sat", "videoItem.movie");
-    DvbChannel* p3SatChannel = new DvbChannel(0, 11954000, DvbChannel::HORIZ, 27500000, 210, 220, 28007);
-    p3Sat->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", p3SatChannel));
-    appendChild(p3Sat);
-    
-    Omm::Av::MediaItem* pZdfInfo = new Omm::Av::MediaItem("o10", "ZDF Info", "videoItem.movie");
-    DvbChannel* pZdfInfoChannel = new DvbChannel(0, 11954000, DvbChannel::HORIZ, 27500000, 610, 620, 28011);
-    pZdfInfo->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pZdfInfoChannel));
-    appendChild(pZdfInfo);
-};
-
-
-DvbResource::DvbResource(const std::string& resourceId, const std::string& protInfo, DvbChannel* pChannel) :
-ServerResource(resourceId, protInfo, 0),
-_pChannel(pChannel)
-{
-}
-
-
-std::streamsize
-DvbResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
-{
-    DvbDevice::instance()->tune(_pChannel);
-
-    Log::instance()->dvb().debug("reading from dvr device ...");
-    std::ifstream istr("/dev/dvb/adapter0/dvr0");
-//     std::istream& istr = DvbDevice::instance()->getTransportStream(_pChannel);
-    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
-    DvbDevice::instance()->stopTune();
-    return bytes;
-}
 
 
 DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int apid, int sid) :
@@ -666,8 +594,3 @@ DvbDevice::stopTune()
     _adapters[0]->_pFrontend->stopTune();
     Log::instance()->dvb().debug("stopped tuning.");
 }
-
-
-POCO_BEGIN_MANIFEST(Omm::Av::MediaContainer)
-POCO_EXPORT_CLASS(MediaContainerPlugin)
-POCO_END_MANIFEST
