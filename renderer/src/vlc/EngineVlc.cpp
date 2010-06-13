@@ -22,8 +22,8 @@
 #include "EngineVlc.h"
 
 
-// EnginePlugin::EnginePlugin(int argc, char **argv) :
-EnginePlugin::EnginePlugin() :
+// EnginePlugin::VlcEngine(int argc, char **argv) :
+VlcEngine::VlcEngine() :
 _fullscreen(true)
 {
     int argc = 1;
@@ -46,7 +46,7 @@ _fullscreen(true)
 }
 
 
-EnginePlugin::~EnginePlugin()
+VlcEngine::~VlcEngine()
 {
     libvlc_release(_vlcInstance);
     closeXWindow();
@@ -54,14 +54,14 @@ EnginePlugin::~EnginePlugin()
 
 
 void
-EnginePlugin::setFullscreen(bool on)
+VlcEngine::setFullscreen(bool on)
 {
     _fullscreen = on;
 }
 
 
 int
-EnginePlugin::openXWindow()
+VlcEngine::openXWindow()
 {
     Display*    xDisplay;
     int         xScreen;
@@ -98,7 +98,7 @@ EnginePlugin::openXWindow()
 
 
 void
-EnginePlugin::closeXWindow()
+VlcEngine::closeXWindow()
 {
 /*    if (xDisplay)
         XCloseDisplay(xDisplay);
@@ -107,7 +107,7 @@ EnginePlugin::closeXWindow()
 
 
 void
-EnginePlugin::load()
+VlcEngine::load()
 {
     _startTime = 0;
     _length = 0.0;
@@ -137,22 +137,22 @@ EnginePlugin::load()
         trackCount = libvlc_audio_get_track_count(_vlcPlayer, &_exception);
         handleException();
     } while(state == libvlc_Playing && !hasVideo && !trackCount);
-//     TRACE("EnginePlugin::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
+//     TRACE("VlcEngine::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
 
     _length = (libvlc_media_player_get_length(_vlcPlayer, &_exception) - _startTime) / 1000.0;
     libvlc_time_t d = libvlc_media_get_duration(media, &_exception);
-//     TRACE("EnginePlugin::load() _length: %f, duration: %lli", _length, d);
+//     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
     
     _startTime = libvlc_media_player_get_time(_vlcPlayer, &_exception);
     handleException();
-//     TRACE("EnginePlugin::load() _startTime [ms]: %lli", _startTime);
+//     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
 
     if(!libvlc_media_player_is_seekable(_vlcPlayer, &_exception)) {
-//         TRACE("EnginePlugin::load() media is not seekable");
+//         TRACE("VlcEngine::load() media is not seekable");
     }
     handleException();
     if(!libvlc_media_player_can_pause(_vlcPlayer, &_exception)) {
-//         TRACE("EnginePlugin::load() pause not possible on media");
+//         TRACE("VlcEngine::load() pause not possible on media");
     }
     handleException();
     
@@ -161,7 +161,7 @@ EnginePlugin::load()
     handleException();
     int videoHeight = libvlc_video_get_height(_vlcPlayer, &_exception);
     handleException();
-//     TRACE("EnginePlugin::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
+//     TRACE("VlcEngine::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
 /*    libvlc_video_resize(_vlcPlayer, videoWidth, videoHeight, &_exception);
     handleException();*/
     
@@ -172,13 +172,13 @@ EnginePlugin::load()
 
 
 void
-EnginePlugin::setSpeed(int nom, int denom)
+VlcEngine::setSpeed(int nom, int denom)
 {
 }
 
 
 void
-EnginePlugin::pause()
+VlcEngine::pause()
 {
     libvlc_media_player_pause(_vlcPlayer, &_exception);
     handleException();
@@ -186,7 +186,7 @@ EnginePlugin::pause()
 
 
 void
-EnginePlugin::stop()
+VlcEngine::stop()
 {
     libvlc_media_player_stop(_vlcPlayer, &_exception);
     handleException();
@@ -194,7 +194,7 @@ EnginePlugin::stop()
 
 
 void
-EnginePlugin::seek(int seconds)
+VlcEngine::seek(int seconds)
 {
 //     libvlc_media_player_set_time(_vlcPlayer, 78232 * 1000, &_exception);
     if (_length > 0.0) {
@@ -211,19 +211,19 @@ EnginePlugin::seek(int seconds)
 
 
 void
-EnginePlugin::next()
+VlcEngine::next()
 {
 }
 
 
 void
-EnginePlugin::previous()
+VlcEngine::previous()
 {
 }
 
 
 void
-EnginePlugin::getPosition(float &seconds)
+VlcEngine::getPosition(float &seconds)
 {
     // TODO: emit a real signal at end of track, don't poll it
     libvlc_state_t state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
@@ -241,18 +241,18 @@ EnginePlugin::getPosition(float &seconds)
         seconds = (libvlc_media_player_get_time(_vlcPlayer, &_exception) - _startTime) / 1000.0;
     }
     handleException();
-//     TRACE("EnginePlugin::getPosition() seconds: %f", seconds);
+//     TRACE("VlcEngine::getPosition() seconds: %f", seconds);
 }
 
 
 void
-EnginePlugin::getLength(float &seconds)
+VlcEngine::getLength(float &seconds)
 {
     // libvlc_media_player_get_length() sometimes fetches the last position of the stream, and not the length
     _length = (libvlc_media_player_get_length(_vlcPlayer, &_exception) - _startTime) / 1000.0;
     handleException();
     seconds = _length;
-//     TRACE("EnginePlugin::getLength() seconds: %f", seconds);
+//     TRACE("VlcEngine::getLength() seconds: %f", seconds);
     
     /* use instead?:
     libvlc_time_t
@@ -263,12 +263,12 @@ EnginePlugin::getLength(float &seconds)
 /*    seconds = libvlc_media_player_get_length(_vlcPlayer, &_exception) / 1000.0;
     handleException();
     seconds = 100.0;
-    TRACE("EnginePlugin::getLength() seconds: %f", seconds);*/
+    TRACE("VlcEngine::getLength() seconds: %f", seconds);*/
 }
 
 
 void
-EnginePlugin::setVolume(int channel, float vol)
+VlcEngine::setVolume(int channel, float vol)
 {
     libvlc_audio_set_volume(_vlcInstance, vol, &_exception);
     handleException();
@@ -276,7 +276,7 @@ EnginePlugin::setVolume(int channel, float vol)
 
 
 void
-EnginePlugin::getVolume(int channel, float &vol)
+VlcEngine::getVolume(int channel, float &vol)
 {
     vol = libvlc_audio_get_volume(_vlcInstance, &_exception);
     handleException();
@@ -284,14 +284,14 @@ EnginePlugin::getVolume(int channel, float &vol)
 
 
 void
-EnginePlugin::handleException()
+VlcEngine::handleException()
 {
     if (libvlc_exception_raised(&_exception)) {
-        std::cerr << "Error in EnginePlugin: " << libvlc_exception_get_message(&_exception) << std::endl;
+        std::cerr << "Error in VlcEngine: " << libvlc_exception_get_message(&_exception) << std::endl;
     }
     libvlc_exception_init(&_exception);
 }
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
-POCO_EXPORT_CLASS(EnginePlugin)
+POCO_EXPORT_CLASS(VlcEngine)
 POCO_END_MANIFEST

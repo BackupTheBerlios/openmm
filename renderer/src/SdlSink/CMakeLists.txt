@@ -22,25 +22,25 @@ ADD_DEFINITIONS(
 -malign-double
 )
 
-ADD_LIBRARY( omm-videosink-sdl
+ADD_LIBRARY( ommvideosink-sdl
 SHARED
 ${OMM_AVSTREAM_SDL_VIDEOSINK_SRCS}
 )
 
-ADD_LIBRARY( omm-audiosink-sdl
+ADD_LIBRARY( ommaudiosink-sdl
 SHARED
 ${OMM_AVSTREAM_SDL_AUDIOSINK_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( omm-videosink-sdl
+TARGET_LINK_LIBRARIES( ommvideosink-sdl
 ${SDL_LIBRARY}
 )
 
-TARGET_LINK_LIBRARIES( omm-audiosink-sdl
+TARGET_LINK_LIBRARIES( ommaudiosink-sdl
 ${SDL_LIBRARY}
 )
 
-INSTALL( TARGETS omm-videosink-sdl
+INSTALL( TARGETS ommvideosink-sdl
 LIBRARY DESTINATION lib/omm
 )
 

@@ -22,7 +22,7 @@
 #include <Poco/File.h>
 #include "Filesystem.h"
 
-MediaContainerPlugin::MediaContainerPlugin() :
+FileServer::FileServer() :
 MediaServerContainer("Collection")
 {
     Omm::Av::MediaItem* pKyuss = new Omm::Av::MediaItem("o1", "Hurricane", "audioItem.musicTrack");
@@ -41,5 +41,5 @@ MediaServerContainer("Collection")
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::MediaContainer)
-POCO_EXPORT_CLASS(MediaContainerPlugin)
+POCO_EXPORT_CLASS(FileServer)
 POCO_END_MANIFEST

@@ -16,7 +16,7 @@ SET( OMM_AVSTREAM_ALSASINK_SRCS
 AlsaAudioSink.cpp
 )
 
-ADD_LIBRARY( omm-audiosink-alsa
+ADD_LIBRARY( ommaudiosink-alsa
 SHARED
 ${OMM_AVSTREAM_ALSASINK_SRCS}
 )
@@ -26,11 +26,11 @@ NAME asound
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
-TARGET_LINK_LIBRARIES( omm-audiosink-alsa
+TARGET_LINK_LIBRARIES( ommaudiosink-alsa
 ${LIB_ASOUND}
 )
 
-INSTALL( TARGETS omm-audiosink-alsa
+INSTALL( TARGETS ommaudiosink-alsa
 LIBRARY DESTINATION lib/omm
 )
 

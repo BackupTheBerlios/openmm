@@ -111,14 +111,14 @@ CrumbButton::~CrumbButton()
 }
 
 
-ControllerGui::ControllerGui() :
+QtAvInterface::QtAvInterface() :
 _app(0, 0),
 _widget(),
 _sliderMoved(false)
 {
 }
 
-ControllerGui::ControllerGui(int argc, char** argv) :
+QtAvInterface::QtAvInterface(int argc, char** argv) :
 _app(argc, argv),
 _widget(),
 _sliderMoved(false)
@@ -127,7 +127,7 @@ _sliderMoved(false)
 
 
 void
-ControllerGui::initGui()
+QtAvInterface::initGui()
 {
     ui.setupUi(&_widget);
     ui._playButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPlay));
@@ -185,20 +185,20 @@ ControllerGui::initGui()
 
 
 int
-ControllerGui::eventLoop()
+QtAvInterface::eventLoop()
 {
     return _app.exec();
 }
 
 
 void
-ControllerGui::showMainWindow()
+QtAvInterface::showMainWindow()
 {
     _widget.show();
 }
 
 void
-ControllerGui::checkSliderMoved(int value)
+QtAvInterface::checkSliderMoved(int value)
 {
     if (_sliderMoved) {
         _sliderMoved = false;
@@ -208,16 +208,16 @@ ControllerGui::checkSliderMoved(int value)
 
 
 void
-ControllerGui::setSliderMoved(int)
+QtAvInterface::setSliderMoved(int)
 {
     _sliderMoved = true;
 }
 
 
 void
-ControllerGui::browserItemActivated(const QModelIndex& index)
+QtAvInterface::browserItemActivated(const QModelIndex& index)
 {
-//     std::clog << "ControllerGui::browserItemActivated()" << std::endl;
+//     std::clog << "QtAvInterface::browserItemActivated()" << std::endl;
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
     if (object == NULL) {
         return;
@@ -236,9 +236,9 @@ ControllerGui::browserItemActivated(const QModelIndex& index)
 
 
 void
-ControllerGui::browserItemSelected(const QModelIndex& index)
+QtAvInterface::browserItemSelected(const QModelIndex& index)
 {
-//     std::clog << "ControllerGui::browserItemSelected()" << std::endl;
+//     std::clog << "QtAvInterface::browserItemSelected()" << std::endl;
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
     if (object == NULL) {
         return;
@@ -256,7 +256,7 @@ ControllerGui::browserItemSelected(const QModelIndex& index)
 
 
 void
-ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
+QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
                                          const QItemSelection& /*deselected*/)
 {
     if (selected.count() > 1) {
@@ -285,145 +285,145 @@ ControllerGui::rendererSelectionChanged(const QItemSelection& selected,
 
 
 void
-ControllerGui::setSlider(int max, int val)
+QtAvInterface::setSlider(int max, int val)
 {
     // don't set slider position when user drags the slider
     if (ui._seekSlider->isSliderDown()) {
         return;
     }
-//     qDebug() << "ControllerGui::setSlider() to:" << max << val;
+//     qDebug() << "QtAvInterface::setSlider() to:" << max << val;
     ui._seekSlider->setRange(0, max>=0?max:0);
     ui._seekSlider->setSliderPosition(val);
 }
 
 
 void
-ControllerGui::setVolumeSlider(int max, int val)
+QtAvInterface::setVolumeSlider(int max, int val)
 {
     // don't set slider position when user drags the slider
     if (ui._volumeSlider->isSliderDown()) {
         return;
     }
-//     qDebug() << "ControllerGui::setSlider() to:" << max << val;
+//     qDebug() << "QtAvInterface::setSlider() to:" << max << val;
     ui._volumeSlider->setRange(0, max>=0?max:0);
     ui._volumeSlider->setSliderPosition(val);
 }
 
 
 void
-ControllerGui::playButtonPressed()
+QtAvInterface::playButtonPressed()
 {
     playPressed();
 }
 
 
 void
-ControllerGui::stopButtonPressed()
+QtAvInterface::stopButtonPressed()
 {
     stopPressed();
 }
 
 
 void
-ControllerGui::pauseButtonPressed()
+QtAvInterface::pauseButtonPressed()
 {
     pausePressed();
 }
 
 
 void
-ControllerGui::positionSliderMoved(int position)
+QtAvInterface::positionSliderMoved(int position)
 {
     positionMoved(position);
 }
 
 
 void
-ControllerGui::volumeSliderMoved(int value)
+QtAvInterface::volumeSliderMoved(int value)
 {
     volumeChanged(value);
 }
 
 
 void
-ControllerGui::beginAddRenderer(int position)
+QtAvInterface::beginAddRenderer(int position)
 {
     _pRendererListModel->beginAddRenderer(position);
 }
 
 
 void
-ControllerGui::beginAddServer(int position)
+QtAvInterface::beginAddServer(int position)
 {
     _pBrowserModel->beginAddServer(position);
 }
 
 
 void
-ControllerGui::beginRemoveRenderer(int position)
+QtAvInterface::beginRemoveRenderer(int position)
 {
     _pRendererListModel->beginRemoveRenderer(position);
 }
 
 
 void
-ControllerGui::beginRemoveServer(int position)
+QtAvInterface::beginRemoveServer(int position)
 {
     _pBrowserModel->beginRemoveServer(position);
 }
 
 
 void
-ControllerGui::endAddRenderer()
+QtAvInterface::endAddRenderer()
 {
     _pRendererListModel->endAddRenderer();
 }
 
 
 void
-ControllerGui::endAddServer()
+QtAvInterface::endAddServer()
 {
     _pBrowserModel->endAddServer();
 }
 
 
 void
-ControllerGui::endRemoveRenderer()
+QtAvInterface::endRemoveRenderer()
 {
     _pRendererListModel->endRemoveRenderer();
 }
 
 
 void
-ControllerGui::endRemoveServer()
+QtAvInterface::endRemoveServer()
 {
     _pBrowserModel->endRemoveServer();
 }
 
 
 void
-ControllerGui::beginAddDevice(int position)
+QtAvInterface::beginAddDevice(int position)
 {
 }
 
 
 void
-ControllerGui::beginRemoveDevice(int position)
+QtAvInterface::beginRemoveDevice(int position)
 {
 }
 
 
 void
-ControllerGui::endAddDevice()
+QtAvInterface::endAddDevice()
 {
 }
 
 
 void
-ControllerGui::endRemoveDevice()
+QtAvInterface::endRemoveDevice()
 {
 }
 
 POCO_BEGIN_MANIFEST(Omm::Av::UpnpAvUserInterface)
-POCO_EXPORT_CLASS(ControllerGui)
+POCO_EXPORT_CLASS(QtAvInterface)
 POCO_END_MANIFEST

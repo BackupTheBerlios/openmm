@@ -15,6 +15,10 @@ SET(LIB_OMM
 omm
 )
 
+SET(LIB_OMM_UTIL
+ommutil
+)
+
 SET(LIB_OMM_AV
 ommav
 )
@@ -139,6 +143,7 @@ ADD_DEFINITIONS(
 
 TARGET_LINK_LIBRARIES( avstreamplay
 ${LIB_OMM_AV_STREAM}
+${LIB_OMM_UTIL}
 ${LIB_POCO_UTIL}
 )
 

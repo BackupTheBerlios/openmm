@@ -35,18 +35,18 @@ SET( OMMR_VLC_SRCS
 EngineVlc.cpp
 )
 
-ADD_LIBRARY( ommavr-vlc
+ADD_LIBRARY( ommengine-vlc
 SHARED
 ${OMMR_VLC_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( ommavr-vlc
+TARGET_LINK_LIBRARIES( ommengine-vlc
 ${LIB_VLC}
 # ${LIB_OMM_AV}
 # ${LIB_POCO_UTIL}
 X11
 )
 
-INSTALL( TARGETS ommavr-vlc
+INSTALL( TARGETS ommengine-vlc
 LIBRARY DESTINATION lib/omm
 )

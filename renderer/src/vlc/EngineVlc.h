@@ -30,12 +30,12 @@
 #include <vlc/vlc.h>
 
 
-class EnginePlugin : public Omm::Av::Engine
+class VlcEngine : public Omm::Av::Engine
 {
 public:
-//     EnginePlugin(int argc, char **argv);
-    EnginePlugin();
-    ~EnginePlugin();
+//     VlcEngine(int argc, char **argv);
+    VlcEngine();
+    ~VlcEngine();
     
     virtual void setFullscreen(bool on = true);
     

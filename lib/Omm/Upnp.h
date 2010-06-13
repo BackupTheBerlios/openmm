@@ -171,62 +171,6 @@ private:
 };
 
 
-template<class C>
-class PluginLoader
-{
-public:
-    PluginLoader() :
-        _pPluginLoader(new Poco::ClassLoader<C>),
-        _pluginPath(":/usr/local/lib/omm:/usr/lib/omm")
-    {}
-    
-    ~PluginLoader()
-    {
-        delete _pPluginLoader;
-    }
-    
-    void loadPlugin(const std::string& name)
-    {
-        try {
-            _pluginPath = Poco::Environment::get("OMM_PLUGIN_PATH") + _pluginPath;
-            Log::instance()->upnp().debug(Poco::format("plugin loader OMM_PLUGIN_PATH is: %s", _pluginPath));
-        }
-        catch (Poco::NotFoundException) {
-            Log::instance()->upnp().debug(Poco::format("plugin loader OMM_PLUGIN_PATH not set, standard search path is: %s", _pluginPath));
-        }
-        Poco::StringTokenizer pathSplitter(_pluginPath, ":");
-        Poco::StringTokenizer::Iterator it;
-        for (it = pathSplitter.begin(); it != pathSplitter.end(); ++it) {
-            if (*it == "") {
-                continue;
-            }
-            try {
-                _pPluginLoader->loadLibrary((*it) + "/libomm" + name + ".so");
-            }
-            catch (Poco::NotFoundException) {
-                continue;
-            }
-            catch (Poco::LibraryLoadException) {
-                continue;
-            }
-            break;
-        }
-        if (it == pathSplitter.end()) {
-            throw Poco::NotFoundException();
-        }
-    }
-    
-    C* create(const std::string& className)
-    {
-        return _pPluginLoader->create(className);
-    }
-    
-private:
-    Poco::ClassLoader<C>*    _pPluginLoader;
-    std::string              _pluginPath;
-};
-
-
 class Icon {
     friend class IconRequestHandler;
     friend class DeviceRoot;

@@ -28,17 +28,17 @@ SET( OMMS_DVB_SRCS
 DvbServer.cpp
 )
 
-ADD_LIBRARY( omm-server-dvb
+ADD_LIBRARY( ommserver-dvb
 SHARED
 ${OMMS_DVB_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( omm-server-dvb
+TARGET_LINK_LIBRARIES( ommserver-dvb
 ${LIB_OMM_AV}
 ${LIB_OMM_DVB}
 # ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS omm-server-dvb
+INSTALL( TARGETS ommserver-dvb
 LIBRARY DESTINATION lib/omm
 )

@@ -24,10 +24,10 @@
 
 #include <Omm/UpnpAvServer.h>
 
-class MediaContainerPlugin : public Omm::Av::MediaServerContainer
+class FileServer : public Omm::Av::MediaServerContainer
 {
 public:
-    MediaContainerPlugin();
+    FileServer();
 };
 
 #endif

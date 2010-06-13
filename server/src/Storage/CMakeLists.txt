@@ -21,16 +21,16 @@ SET( OMMS_STORAGE_SRCS
 Filesystem.cpp
 )
 
-ADD_LIBRARY( omms-av-storage
+ADD_LIBRARY( ommserver-file
 SHARED
 ${OMMS_STORAGE_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( omms-av-storage
+TARGET_LINK_LIBRARIES( ommserver-file
 ${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
 )
 
-INSTALL( TARGETS omms-av-storage
+INSTALL( TARGETS ommserver-file
 LIBRARY DESTINATION lib/omm
 )

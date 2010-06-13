@@ -34,14 +34,14 @@ PropertyChangeMask | PointerMotionMask)
 
 #define PROP_MWM_HINTS_ELEMENTS 5
 
-int EnginePlugin::_globX = 0;
-int EnginePlugin::_globY = 0;
-int EnginePlugin::videoFrameWidth = 320;
-int EnginePlugin::videoFrameHeight = 200;
-double EnginePlugin::_pixel_aspect = 0.0;
+int XineEngine::_globX = 0;
+int XineEngine::_globY = 0;
+int XineEngine::videoFrameWidth = 320;
+int XineEngine::videoFrameHeight = 200;
+double XineEngine::_pixel_aspect = 0.0;
 
 
-EnginePlugin::EnginePlugin()
+XineEngine::XineEngine()
  : _pause(false),
    _currentZoom(100),
    _audioDeviceNum(0),
@@ -49,21 +49,21 @@ EnginePlugin::EnginePlugin()
    _posTime(0),
    _lengthStream(0)
 {
-//     TRACE("EnginePlugin::EnginePlugin()");
+//     TRACE("XineEngine::XineEngine()");
     init();
 }
 
 
-EnginePlugin::~EnginePlugin()
+XineEngine::~XineEngine()
 {
     close();
 }
 
 
 void
-EnginePlugin::init()
+XineEngine::init()
 {
-//     TRACE("EnginePlugin::init()");
+//     TRACE("XineEngine::init()");
 
     _xineEngine = xine_new();
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
@@ -112,7 +112,7 @@ EnginePlugin::init()
 
     if (!_videoDriver)
     {
-//         TRACE("EnginePlugin::init() can't init Video Driver! (%s)", videoDriverName);
+//         TRACE("XineEngine::init() can't init Video Driver! (%s)", videoDriverName);
     }
 
 /*
@@ -132,15 +132,15 @@ EnginePlugin::init()
     _audioDriverName = "alsa";
     _audioDriver = xine_open_audio_driver(_xineEngine, _audioDriverName, NULL);
 
-//     TRACE("EnginePlugin::initStream() creating new xine stream.");
+//     TRACE("XineEngine::initStream() creating new xine stream.");
     _xineStream = xine_stream_new(_xineEngine, _audioDriver, _videoDriver);
 }
 
 
 void
-EnginePlugin::close()
+XineEngine::close()
 {
-//     TRACE("EnginePlugin::close()");
+//     TRACE("XineEngine::close()");
     xine_close(_xineStream);
     xine_dispose(_xineStream);
     xine_close_audio_driver(_xineEngine, _audioDriver);
@@ -155,7 +155,7 @@ EnginePlugin::close()
 
 
 void
-EnginePlugin::initWindow()
+XineEngine::initWindow()
 {
     int xpos    = 0;
     int ypos    = 0;
@@ -180,7 +180,7 @@ EnginePlugin::initWindow()
 
 
 void
-EnginePlugin::FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
+XineEngine::FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
                           int* dest_x, int* dest_y, int* dest_width, int* dest_height,
                           double* dest_aspect, int* win_x, int* win_y)
 {
@@ -198,64 +198,64 @@ EnginePlugin::FrameOutputCallback(void* p, int video_width, int video_height, do
 
 
 void
-EnginePlugin::setFullscreen(bool on)
+XineEngine::setFullscreen(bool on)
 {
     _fullscreen = on;
 }
 
 
 void
-EnginePlugin::setUri(string mrl)
+XineEngine::setUri(string mrl)
 {
-//     TRACE("EnginePlugin::setMrl() to: %s", mrl.c_str());
+//     TRACE("XineEngine::setMrl() to: %s", mrl.c_str());
     _mrl = mrl;
 }
 
 
 void
-EnginePlugin::load()
+XineEngine::load()
 {
-//     TRACE("EnginePlugin::play() mrl: %s", _mrl.c_str());
+//     TRACE("XineEngine::play() mrl: %s", _mrl.c_str());
     xine_open(_xineStream, _mrl.c_str());
     if (!isSeekable()) {
-//         TRACE("EnginePlugin::play() WARNING: stream is not seekable!");
+//         TRACE("XineEngine::play() WARNING: stream is not seekable!");
     }
     xine_play(_xineStream, 0, 0);
 }
 
 
 void
-EnginePlugin::stop()
+XineEngine::stop()
 {
-//     TRACE("EnginePlugin::stop()");
+//     TRACE("XineEngine::stop()");
     xine_stop(_xineStream);
     xine_close(_xineStream);
 }
 
 
 void
-EnginePlugin::next()
+XineEngine::next()
 {
-//     TRACE("EnginePlugin::next()");
+//     TRACE("XineEngine::next()");
 }
 
 
 void
-EnginePlugin::previous()
+XineEngine::previous()
 {
-//     TRACE("EnginePlugin::previous()");
+//     TRACE("XineEngine::previous()");
 }
 
 
 void
-EnginePlugin::pause()
+XineEngine::pause()
 {
     if (_pause) {
-//         TRACE("EnginePlugin::pauseStream() setting speed to normal");
+//         TRACE("XineEngine::pauseStream() setting speed to normal");
         xine_set_param(_xineStream, XINE_PARAM_SPEED, XINE_SPEED_NORMAL);
     }
     else {
-//         TRACE("EnginePlugin::pauseStream() setting speed to pause");
+//         TRACE("XineEngine::pauseStream() setting speed to pause");
         xine_set_param(_xineStream, XINE_PARAM_SPEED, XINE_SPEED_PAUSE);
     }
     _pause = !_pause;
@@ -263,60 +263,60 @@ EnginePlugin::pause()
 
 
 void
-EnginePlugin::seek(int seconds)
+XineEngine::seek(int seconds)
 {
-//     TRACE("EnginePlugin::seek() to position in millisec: %i", seekval);
+//     TRACE("XineEngine::seek() to position in millisec: %i", seekval);
     xine_play(_xineStream, seconds, 0);
 }
 
 
 bool
-EnginePlugin::isSeekable()
+XineEngine::isSeekable()
 {
     return (bool)xine_get_stream_info(_xineStream, XINE_STREAM_INFO_SEEKABLE);
 }
 
 
 void
-EnginePlugin::savePosition()
+XineEngine::savePosition()
 {
     if (xine_get_pos_length(_xineStream, &_posStream, &_posTime, &_lengthStream) == 0) {
-//         TRACE("EnginePlugin::savePosition() could not get position");
+//         TRACE("XineEngine::savePosition() could not get position");
     }
-//     TRACE("EnginePlugin::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i", 
+//     TRACE("XineEngine::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i", 
 //             _posStream, _posTime, _lengthStream);
 }
 
 
 void
-EnginePlugin::setSpeed(int nom, int denom)
+XineEngine::setSpeed(int nom, int denom)
 {
 }
 
 
 void
-EnginePlugin::getPosition(float &seconds)
+XineEngine::getPosition(float &seconds)
 {
 }
 
 
 void
-EnginePlugin::getLength(float &seconds)
+XineEngine::getLength(float &seconds)
 {
 }
 
 
 void
-EnginePlugin::setVolume(int channel, float vol)
+XineEngine::setVolume(int channel, float vol)
 {
 }
 
 
 void
-EnginePlugin::getVolume(int channel, float &vol)
+XineEngine::getVolume(int channel, float &vol)
 {
 }
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
-POCO_EXPORT_CLASS(EnginePlugin)
+POCO_EXPORT_CLASS(XineEngine)
 POCO_END_MANIFEST

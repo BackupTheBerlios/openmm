@@ -22,7 +22,7 @@
 
 #include "WebRadio.h"
 
-MediaContainerPlugin::MediaContainerPlugin() :
+WebradioServer::WebradioServer() :
 MediaServerContainer("Web Radio", "musicContainer")
 {
     std::string protInfoDlna = "audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
@@ -70,5 +70,5 @@ MediaServerContainer("Web Radio", "musicContainer")
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::MediaContainer)
-POCO_EXPORT_CLASS(MediaContainerPlugin)
+POCO_EXPORT_CLASS(WebradioServer)
 POCO_END_MANIFEST

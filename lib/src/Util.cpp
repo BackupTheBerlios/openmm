@@ -44,7 +44,7 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
-    _pUtilLogger = &Poco::Logger::create("DVB", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, Poco::Message::PRIO_DEBUG);
 }
 
 

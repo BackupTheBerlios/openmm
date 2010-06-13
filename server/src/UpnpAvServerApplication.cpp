@@ -24,9 +24,9 @@
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
-// #include <Poco/StreamCopier.h>
 
 #include <Omm/UpnpAvServer.h>
+#include <Omm/Util.h>
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
@@ -69,7 +69,7 @@ protected:
                            .required(false)
                            .repeatable(false));
         options.addOption(
-                           Option("plugin", "s", "load container plugin")
+                           Option("plugin", "p", "load plugin")
                            .required(false)
                            .repeatable(false)
                            .argument("plugin name", true));
@@ -105,21 +105,19 @@ protected:
         else
         {
             if (_containerPlugin == "") {
-                _containerPlugin = "s-av-web";
+                _containerPlugin = "server-webradio";
             }
             
-            Omm::PluginLoader<Omm::Av::MediaContainer> objectLoader;
+            Omm::Util::PluginLoader<Omm::Av::MediaContainer> pluginLoader;
+            Omm::Av::MediaContainer* pContainerPlugin;
             try {
-                objectLoader.loadPlugin(_containerPlugin);
+                pContainerPlugin = pluginLoader.load(_containerPlugin);
             }
             catch(Poco::NotFoundException) {
                 std::cerr << "Error could not find server plugin: " << _containerPlugin << std::endl;
                 return 1;
             }
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
-            
-            Omm::Av::MediaContainer* pContainerPlugin;
-            pContainerPlugin = objectLoader.create("DvbServer");
             
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);

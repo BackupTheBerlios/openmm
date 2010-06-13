@@ -45,18 +45,18 @@ SET( OMMR_XINE_SRCS
 EngineXine.cpp
 )
 
-ADD_LIBRARY( ommavr-xine
+ADD_LIBRARY( ommengine-xine
 SHARED
 ${OMMR_XINE_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( ommavr-xine
+TARGET_LINK_LIBRARIES( ommengine-xine
 ${XINE_LIBRARIES}
 ${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
 X11
 )
 
-INSTALL( TARGETS ommavr-xine
+INSTALL( TARGETS ommengine-xine
 LIBRARY DESTINATION lib/omm
 )

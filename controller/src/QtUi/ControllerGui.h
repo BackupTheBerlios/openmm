@@ -60,7 +60,7 @@ private:
 };
 
 
-class ControllerGui : public QObject, public Omm::Av::UpnpAvUserInterface
+class QtAvInterface : public QObject, public Omm::Av::UpnpAvUserInterface
 {
     Q_OBJECT
 
@@ -68,8 +68,8 @@ class ControllerGui : public QObject, public Omm::Av::UpnpAvUserInterface
     friend class UpnpBrowserModel;
     
 public:
-    ControllerGui();
-    ControllerGui(int argc, char** argv);
+    QtAvInterface();
+    QtAvInterface(int argc, char** argv);
     
     virtual int eventLoop();
     

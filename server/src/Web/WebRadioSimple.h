@@ -24,10 +24,10 @@
 
 #include <Omm/UpnpAvServer.h>
 
-class MediaContainerPlugin : public Omm::Av::MediaObject
+class Webradiosimple : public Omm::Av::MediaObject
 {
 public:
-    MediaContainerPlugin();
+    Webradiosimple();
 };
 
 #endif

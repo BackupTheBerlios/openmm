@@ -30,6 +30,7 @@
 #include <sstream>
 
 #include <Omm/UpnpAvRenderer.h>
+#include <Omm/Util.h>
 
 
 using Poco::UInt8;
@@ -112,22 +113,19 @@ protected:
         else
         {
             if (_enginePlugin == "") {
-                _enginePlugin = "avr-vlc";
+                _enginePlugin = "engine-vlc";
             }
             
-            
-            Omm::PluginLoader<Omm::Av::Engine> objectLoader;
+            Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
+            Omm::Av::Engine* pEnginePlugin;
             try {
-                objectLoader.loadPlugin(_enginePlugin);
+                pEnginePlugin = pluginLoader.load(_enginePlugin);
             }
             catch(Poco::NotFoundException) {
-                std::cerr << "Error could not find engine plugin: " << _enginePlugin << std::endl;
+                std::cerr << "Error could not find server plugin: " << _enginePlugin << std::endl;
                 return 1;
             }
-            std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
-            
-            Omm::Av::Engine* pEnginePlugin;
-            pEnginePlugin = objectLoader.create("EnginePlugin");
+            std::clog << "container plugin: " << _enginePlugin << " loaded successfully" << std::endl;
             
             Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
             

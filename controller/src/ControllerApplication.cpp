@@ -21,23 +21,22 @@
 
 #include <Poco/Exception.h>
 #include <Omm/UpnpController.h>
+#include <Omm/Util.h>
 
 int main(int argc, char** argv)
 {
-    Omm::PluginLoader<Omm::Av::UpnpAvUserInterface> guiLoader;
+    Omm::Util::PluginLoader<Omm::Av::UpnpAvUserInterface> pluginLoader;
+    Omm::Av::UpnpAvUserInterface* pUserInterface;
     try {
-        guiLoader.loadPlugin("c-av-ui-qt");
+        pUserInterface = pluginLoader.load("avinterface-qt", "AvInterface");
     }
     catch(Poco::NotFoundException) {
         std::cerr << "Error in ControllerApplication: could not find plugin for user interface" << std::endl;
         return 1;
     }
-    std::clog << "ControllerApplication: user interface loaded successfully" << std::endl;
     
-    Omm::Av::UpnpAvUserInterface* pUserInterface;
     Omm::Av::UpnpAvController controller;
     
-    pUserInterface = guiLoader.create("ControllerGui");
     controller.setUserInterface(pUserInterface);
     pUserInterface->initGui();
     pUserInterface->showMainWindow();

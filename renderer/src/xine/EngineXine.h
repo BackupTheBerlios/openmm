@@ -31,11 +31,11 @@
 #include <xine/xineutils.h>
 
 
-class EnginePlugin : public Omm::Av::Engine
+class XineEngine : public Omm::Av::Engine
 {
 public:
-    EnginePlugin();
-    ~EnginePlugin();
+    XineEngine();
+    ~XineEngine();
     
     // virtual void setVideoDriver(string);
     // virtual void setAudioDriver(string);

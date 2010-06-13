@@ -22,7 +22,7 @@
 
 #include "WebRadioSimple.h"
 
-MediaContainerPlugin::MediaContainerPlugin()
+Webradiosimple::Webradiosimple()
 // MediaContainer("Web Radio", "musicContainer")
 {
     setTitle("Simple Web Radio");
@@ -74,5 +74,5 @@ MediaContainerPlugin::MediaContainerPlugin()
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::MediaObject)
-POCO_EXPORT_CLASS(MediaContainerPlugin)
+POCO_EXPORT_CLASS(Webradiosimple)
 POCO_END_MANIFEST

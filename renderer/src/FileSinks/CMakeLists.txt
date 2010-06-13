@@ -16,7 +16,7 @@ SET( OMM_AV_STREAM_PPM_VIDEOSINK_SRCS
 PpmVideoSink.cpp
 )
 
-ADD_LIBRARY( omm-videosink-ppm
+ADD_LIBRARY( ommvideosink-ppm
 SHARED
 ${OMM_AV_STREAM_PPM_VIDEOSINK_SRCS}
 )
@@ -25,12 +25,12 @@ SET( OMM_AV_STREAM_PCM_AUDIOSINK_SRCS
 PcmAudioSink.cpp
 )
 
-ADD_LIBRARY( omm-audiosink-pcm
+ADD_LIBRARY( ommaudiosink-pcm
 SHARED
 ${OMM_AV_STREAM_PCM_AUDIOSINK_SRCS}
 )
 
-INSTALL( TARGETS omm-videosink-ppm omm-audiosink-pcm
+INSTALL( TARGETS ommvideosink-ppm ommaudiosink-pcm
 LIBRARY DESTINATION lib/omm
 )
 
