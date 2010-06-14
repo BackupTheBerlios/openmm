@@ -39,12 +39,12 @@ public:
     
     virtual void setFullscreen(bool on = true);
     
-    std::string getEngineId() { return _engineId; }
+    std::string getEngineId();
     
     /*
       AVTransport
     */
-    virtual void setUri(std::string uri) { _uri = uri; }
+    virtual void setUri(std::string uri);
     virtual void load();
     
     /**

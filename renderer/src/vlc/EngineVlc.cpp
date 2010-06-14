@@ -26,8 +26,10 @@
 VlcEngine::VlcEngine() :
 _fullscreen(true)
 {
-    int argc = 1;
-    char* argv[1] = {"ommr"};
+//     int argc = 1;
+//     char* argv[1] = {"ommr"};
+    int argc = 2;
+    char* argv[2] = {"ommr", "--codec=avcodec"};
     libvlc_exception_init(&_exception);
     _vlcInstance = libvlc_new(argc, argv, &_exception);
     handleException();
@@ -50,6 +52,20 @@ VlcEngine::~VlcEngine()
 {
     libvlc_release(_vlcInstance);
     closeXWindow();
+}
+
+
+std::string
+VlcEngine::getEngineId()
+{
+    return _engineId;
+}
+
+
+void
+VlcEngine::setUri(std::string uri)
+{
+    _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
 }
 
 
@@ -116,7 +132,7 @@ VlcEngine::load()
     handleException();
     libvlc_media_player_set_media(_vlcPlayer, media, &_exception);
     handleException();
-    libvlc_media_release(media);    
+    libvlc_media_release(media);
     libvlc_media_player_play(_vlcPlayer, &_exception);
     handleException();
 
