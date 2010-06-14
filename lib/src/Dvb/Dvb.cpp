@@ -231,9 +231,7 @@ DvbFrontend::tune(DvbChannel* pChannel)
         }
     }
     
-    _pt = new SignalCheckThread(this);
-    _t.start(*_pt);
-    
+    Log::instance()->dvb().debug("frontend tuning success.");
     return success;
 }
 

@@ -96,7 +96,6 @@ DvbResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
     std::ifstream istr("/dev/dvb/adapter0/dvr0");
 //     std::istream& istr = DvbDevice::instance()->getTransportStream(_pChannel);
     std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
-    Omm::Dvb::DvbDevice::instance()->stopTune();
     return bytes;
 }
 

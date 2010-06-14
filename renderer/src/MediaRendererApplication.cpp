@@ -77,7 +77,7 @@ protected:
                            .required(false)
                            .repeatable(false));
         options.addOption(
-                           Option("plugin", "r", "load engine plugin")
+                           Option("plugin", "p", "load plugin")
                            .required(false)
                            .repeatable(false)
                            .argument("plugin name", true));
