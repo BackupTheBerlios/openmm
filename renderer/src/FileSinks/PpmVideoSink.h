@@ -24,7 +24,7 @@
 #include <Omm/AvStream.h>
 
 
-class PpmVideoSink : public Omm::AvStream::Sink
+class PpmVideoSink : public Omm::AvStream::VideoSink
 {
 public:
     PpmVideoSink();

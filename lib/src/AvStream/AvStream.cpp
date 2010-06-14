@@ -1259,9 +1259,9 @@ _pStream(pStream)
 Frame::~Frame()
 {
     // NOTE: _data points to _pAvPacket->data or _pAvFrame->data[0], so we need to free only one of them
-    
+    // NOTE: logging with Frame::getName() leads to segfaults
     if (_pAvPacket) {
-        Log::instance()->avstream().trace(Poco::format("delete %s dtor, ffmpeg::av_free_packet() ...", getName()));
+//         Log::instance()->avstream().trace(Poco::format("delete %s dtor, ffmpeg::av_free_packet() ...", getName()));
         av_free_packet(_pAvPacket);
         delete _pAvPacket;
         _pAvPacket = 0;
@@ -1273,7 +1273,7 @@ Frame::~Frame()
 //         _pAvFrame = 0;
     }
     else if (_data) {
-        Log::instance()->avstream().trace(Poco::format("delete %s dtor _data, size %s", getName(), Poco::NumberFormatter::format(size())));
+//         Log::instance()->avstream().trace(Poco::format("delete %s dtor _data, size %s", getName(), Poco::NumberFormatter::format(size())));
         delete _data;
         _data = 0;
     }
@@ -2390,41 +2390,6 @@ AudioSink::~AudioSink()
 }
 
 
-AudioSink*
-AudioSink::loadPlugin(const std::string& libraryPath, const std::string& className)
-{
-    Poco::ClassLoader<AudioSink> sinkPluginLoader;
-    if (sinkPluginLoader.isLibraryLoaded(libraryPath)) {
-        Log::instance()->avstream().error(Poco::format("library %s already loaded", libraryPath));
-        return 0;
-    }
-    try {
-        sinkPluginLoader.loadLibrary(libraryPath);
-    }
-    catch (Poco::NotFoundException) {
-        Log::instance()->avstream().error(Poco::format("could not find  %s sink plugin.", libraryPath));
-        return 0;
-    }
-    catch (Poco::LibraryLoadException) {
-        Log::instance()->avstream().error(Poco::format("could not load  %s sink plugin.", libraryPath));
-        return 0;
-    }
-    Log::instance()->avstream().debug(Poco::format("%s plugin successfully loaded.", libraryPath));
-    
-    Log::instance()->avstream().debug(Poco::format("%s plugin to be allocated ...", className));
-    AudioSink* pRes;
-    try {
-        pRes = sinkPluginLoader.create(className);
-    }
-    catch (Poco::NotFoundException) {
-        Log::instance()->avstream().error(Poco::format("%s could not create instance of plugin.", className));
-        return 0;
-    }
-    Log::instance()->avstream().debug(Poco::format("%s plugin successfully allocated.", className));
-    return pRes;
-}
-
-
 bool
 AudioSink::checkInStream()
 {
@@ -2544,41 +2509,6 @@ _height(height),
 _pixelFormat(pixelFormat),
 _writeOverlayNumber(0)
 {
-}
-
-
-VideoSink*
-VideoSink::loadPlugin(const std::string& libraryPath, const std::string& className)
-{
-    Poco::ClassLoader<VideoSink> sinkPluginLoader;
-    if (sinkPluginLoader.isLibraryLoaded(libraryPath)) {
-        Log::instance()->avstream().error(Poco::format("library %s already loaded", libraryPath));
-        return 0;
-    }
-    try {
-        sinkPluginLoader.loadLibrary(libraryPath);
-    }
-    catch (Poco::NotFoundException) {
-        Log::instance()->avstream().error(Poco::format("could not find  %s sink plugin.", libraryPath));
-        return 0;
-    }
-    catch (Poco::LibraryLoadException) {
-        Log::instance()->avstream().error(Poco::format("could not load  %s sink plugin.", libraryPath));
-        return 0;
-    }
-    Log::instance()->avstream().debug(Poco::format("%s plugin successfully loaded.", libraryPath));
-    
-    Log::instance()->avstream().debug(Poco::format("%s plugin to be allocated ...", className));
-    VideoSink* pRes;
-    try {
-        pRes = sinkPluginLoader.create(className);
-    }
-    catch (Poco::NotFoundException) {
-        Log::instance()->avstream().error(Poco::format("%s could not create instance of plugin.", className));
-        return 0;
-    }
-    Log::instance()->avstream().debug(Poco::format("%s plugin successfully allocated.", className));
-    return pRes;
 }
 
 

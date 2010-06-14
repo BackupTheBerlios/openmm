@@ -32,15 +32,9 @@ public:
     PcmAudioSink();
     virtual ~PcmAudioSink();
     
-//     virtual int eventLoop();
-    
 private:
     virtual bool initDevice();
     virtual void startPresentation();
-//     virtual void stopPresentation();
-    
-//     virtual bool init();
-//     virtual void run();
 
     std::ofstream           _pcmStream;
     int                     _bufferSize;

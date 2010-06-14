@@ -65,6 +65,8 @@ public:
     
     C* load(const std::string& objectName, const std::string& className = "", const std::string& prefixName = "")
     {
+        Log::instance()->util().information(Poco::format("plugin loader trying to load %s", objectName));
+        
         loadPlugin(objectName);
         Poco::StringTokenizer nameSplitter(objectName, "-");
         
@@ -87,6 +89,7 @@ public:
                 throw Poco::NotFoundException();
             }
         }
+        Log::instance()->util().information(Poco::format("plugin loader successfully loaded %s", objectName));
         
         return create(classPrefix, classBase);
     }

@@ -27,7 +27,7 @@
 
 
 PpmVideoSink::PpmVideoSink() :
-Sink("ppm video sink")
+VideoSink("ppm video sink")
 {
     // video sink has one input stream
     _inStreams.push_back(new Omm::AvStream::Stream(this));
@@ -100,6 +100,6 @@ PpmVideoSink::eventLoop()
 
 
 
-POCO_BEGIN_MANIFEST(Omm::AvStream::Sink)
+POCO_BEGIN_MANIFEST(Omm::AvStream::VideoSink)
 POCO_EXPORT_CLASS(PpmVideoSink)
 POCO_END_MANIFEST

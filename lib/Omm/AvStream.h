@@ -607,8 +607,6 @@ public:
     AudioSink(const std::string& name = "audio sink");
     virtual ~AudioSink();
     
-    static AudioSink* loadPlugin(const std::string& libraryPath, const std::string& className = "AudioSinkPlugin");
-    
     void setStartTime(int64_t startTime);
     
     // methods for the audio driver (public, so it can be called form C callbacks)
@@ -641,7 +639,6 @@ public:
          int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
          int overlayCount = 5);
     
-    static VideoSink* loadPlugin(const std::string& libraryPath, const std::string& className = "SinkPlugin");
     virtual int eventLoop() { return 0; }
     
     void setStartTime(int64_t startTime);
