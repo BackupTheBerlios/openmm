@@ -113,7 +113,11 @@ private:
                 continue;
             }
             try {
+#ifdef __DARWIN__
+                _pPluginLoader->loadLibrary((*it) + "/libomm" + name + ".dylib");
+#else
                 _pPluginLoader->loadLibrary((*it) + "/libomm" + name + ".so");
+#endif
             }
             catch (Poco::NotFoundException) {
                 continue;

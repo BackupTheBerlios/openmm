@@ -68,7 +68,7 @@ class QtAvInterface : public QObject, public Omm::Av::UpnpAvUserInterface
     friend class UpnpBrowserModel;
     
 public:
-    QtAvInterface();
+    QtAvInterface(int argc = 0);
     QtAvInterface(int argc, char** argv);
     
     virtual int eventLoop();

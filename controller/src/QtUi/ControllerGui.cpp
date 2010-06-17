@@ -111,8 +111,8 @@ CrumbButton::~CrumbButton()
 }
 
 
-QtAvInterface::QtAvInterface() :
-_app(0, 0),
+QtAvInterface::QtAvInterface(int argc) :
+_app(argc, (char**)0),
 _widget(),
 _sliderMoved(false)
 {

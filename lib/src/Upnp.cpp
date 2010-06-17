@@ -40,7 +40,7 @@ Log::Log()
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
@@ -188,8 +188,12 @@ NetworkInterfaceManager::NetworkInterfaceManager()
     _loopbackProvided = false;
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
-        Log::instance()->upnp().information(Poco::format("found network interface: %s", (*it).name()));
-        _interfaceList.push_back((*it).name());
+		Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName((*it).name()).address();
+		// FIXME: workaround for MacOS, isLoopback() doesn't work?
+		if (!address.isLoopback() && (*it).name() != "lo0") {
+			Log::instance()->upnp().information(Poco::format("found network interface: %s", (*it).name()));
+			_interfaceList.push_back((*it).name());
+		}	
     }
     findValidIpAddress();
 }
@@ -2653,29 +2657,39 @@ _name(interfaceName),
 _pSsdpSocket(pSsdpSocket),
 _pBuffer(new char[BUFFER_SIZE])
 {
-//     std::clog << "SsdpNetworkInterface::SsdpNetworkInterface() name: " << interfaceName << std::endl;
     Log::instance()->ssdp().information(Poco::format("setting up socket on interface %s", interfaceName));
     
     _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface::forName(interfaceName));
     
-//     std::clog << "setting up sender socket" << std::endl;
     // listen to UDP unicast and send out to multicast
-    _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
+//	Poco::Net::IPAddress ip(Poco::Net::IPAddress::IPv6);
+	Poco::Net::IPAddress ip;
+	Poco::Net::SocketAddress adr(ip, 0);
+//	Poco::Net::SocketAddress adr("0.0.0.0", 0);
+    _pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
+// FIXME: workaround: on MacOS Poco::Net::MulticastSocket raises InvalidArgumentException
+#ifdef __DARWIN__
+    _pSsdpSenderSocket->setInterface(Poco::Net::NetworkInterface());
+#else
     _pSsdpSenderSocket->setInterface(*_pInterface);
+#endif
     _pSsdpSenderSocket->setLoopback(true);
     _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
     
 //     std::clog << "setting up listener socket" << std::endl;
     // listen to UDP multicast
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
+#ifdef __DARWIN__
+    _pSsdpListenerSocket->setInterface(Poco::Net::NetworkInterface());
+#else
     _pSsdpListenerSocket->setInterface(*_pInterface);
+#endif
     _pSsdpListenerSocket->setLoopback(true);
     _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     
 //     std::clog << "adding event handlers" << std::endl;
     _pSsdpSocket->_reactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
     _pSsdpSocket->_reactor.addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
-//     std::clog << "SsdpNetworkInterface::SsdpNetworkInterface() finished" << std::endl;
 }
 
 
