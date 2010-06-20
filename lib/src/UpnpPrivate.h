@@ -22,6 +22,9 @@
 #ifndef OMMUPNP_PRIVATE_H
 #define OMMUPNP_PRIVATE_H
 
+#include <Poco/UUID.h>
+#include <Poco/UUIDGenerator.h>
+
 #include "Upnp.h"
 
 namespace Omm {

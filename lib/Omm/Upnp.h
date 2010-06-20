@@ -42,8 +42,6 @@
 #include <Poco/NotificationQueue.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/URI.h>
-#include <Poco/UUID.h>
-#include <Poco/UUIDGenerator.h>
 #include <Poco/Timestamp.h>
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>

@@ -1976,9 +1976,13 @@ void
 Controller::start()
 {
     Log::instance()->upnp().debug("starting controller ...");
-    
+
+#ifdef __DARWIN__
+    _ssdpSocket.addInterface("default");
+#else
     NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<Controller,NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
+#endif
     
     _ssdpSocket.start();
     sendMSearch();
@@ -2659,31 +2663,25 @@ _pBuffer(new char[BUFFER_SIZE])
 {
     Log::instance()->ssdp().information(Poco::format("setting up socket on interface %s", interfaceName));
     
-    _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface::forName(interfaceName));
-    
+    if (interfaceName == "default") {
+        _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface());
+    }
+    else {
+        _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface::forName(interfaceName));
+    }
+
     // listen to UDP unicast and send out to multicast
-//	Poco::Net::IPAddress ip(Poco::Net::IPAddress::IPv6);
-	Poco::Net::IPAddress ip;
-	Poco::Net::SocketAddress adr(ip, 0);
-//	Poco::Net::SocketAddress adr("0.0.0.0", 0);
+    Poco::Net::IPAddress ip;
+    Poco::Net::SocketAddress adr(ip, 0);
     _pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
-// FIXME: workaround: on MacOS Poco::Net::MulticastSocket raises InvalidArgumentException
-#ifdef __DARWIN__
-    _pSsdpSenderSocket->setInterface(Poco::Net::NetworkInterface());
-#else
     _pSsdpSenderSocket->setInterface(*_pInterface);
-#endif
     _pSsdpSenderSocket->setLoopback(true);
     _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
     
 //     std::clog << "setting up listener socket" << std::endl;
     // listen to UDP multicast
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
-#ifdef __DARWIN__
-    _pSsdpListenerSocket->setInterface(Poco::Net::NetworkInterface());
-#else
     _pSsdpListenerSocket->setInterface(*_pInterface);
-#endif
     _pSsdpListenerSocket->setLoopback(true);
     _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     
