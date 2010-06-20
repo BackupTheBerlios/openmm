@@ -24,7 +24,7 @@
 #include <Poco/SplitterChannel.h>
 #include <Poco/ConsoleChannel.h>
 
-#include <Util.h>
+#include "Util.h"
 
 using namespace Omm;
 using namespace Omm::Util;
@@ -64,3 +64,75 @@ Log::util()
     return *_pUtilLogger;
 }
 
+
+std::string
+Omm::Util::format(const std::string& fmt, const std::string& str1)
+{
+    std::string::size_type pos = fmt.find("%s");
+    if (pos != std::string::npos) {
+        return fmt.substr(0, pos) + str1 + fmt.substr(pos + 2);
+    }
+    return fmt;
+}
+
+
+std::string
+Omm::Util::format(const std::string& fmt, const std::string& str1, const std::string& str2)
+{
+    std::string res;
+    std::string::size_type pos = fmt.find("%s");
+    if (pos != std::string::npos) {
+        res = fmt.substr(0, pos) + str1;
+    }
+    else {
+        return fmt;
+    }
+    std::string::size_type lastPos = pos + 2;
+    pos = fmt.find("%s", lastPos);
+    if (pos != std::string::npos) {
+        return res + fmt.substr(lastPos, pos - lastPos) + str2 + fmt.substr(pos + 2);
+    }
+    return res;
+}
+
+
+std::string
+Omm::Util::format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3)
+{
+    std::string res;
+    std::string::size_type pos = fmt.find("%s");
+    if (pos != std::string::npos) {
+        res = fmt.substr(0, pos) + str1;
+    }
+    else {
+        return fmt;
+    }
+    std::string::size_type lastPos = pos + 2;
+    pos = fmt.find("%s", lastPos);
+    if (pos != std::string::npos) {
+        res += fmt.substr(lastPos, pos - lastPos) + str2 + fmt.substr(pos + 2);
+    }
+    else {
+        return res;
+    }
+    lastPos = pos + 2;
+    pos = fmt.find("%s", lastPos);
+    if (pos != std::string::npos) {
+        return res + fmt.substr(lastPos, pos - lastPos) + str3 + fmt.substr(pos + 2);
+    }
+    return res;
+}
+
+
+std::string
+Omm::Util::format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3, const std::string& str4)
+{
+    return "not implemented";
+}
+
+
+std::string
+Omm::Util::format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3, const std::string& str4, const std::string& str5)
+{
+    return "not implemented";
+}

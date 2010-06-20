@@ -47,6 +47,14 @@ private:
 };
 
 
+// TODO: replace format with string op + in Upnp.cpp to get rid of libomm dependency on libommutil
+std::string format(const std::string& fmt, const std::string& str1);
+std::string format(const std::string& fmt, const std::string& str1, const std::string& str2);
+std::string format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3);
+std::string format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3, const std::string& str4);
+std::string format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3, const std::string& str4, const std::string& str5);
+
+
 template<class C>
     class PluginLoader
 {
@@ -65,7 +73,7 @@ public:
     
     C* load(const std::string& objectName, const std::string& className = "", const std::string& prefixName = "")
     {
-        Log::instance()->util().information(Poco::format("plugin loader trying to load %s", objectName));
+        Log::instance()->util().information("plugin loader trying to load %s" + objectName);
         
         loadPlugin(objectName);
         Poco::StringTokenizer nameSplitter(objectName, "-");
@@ -75,7 +83,7 @@ public:
             classBase = nameSplitter[0];
         }
         else if (Poco::icompare(className, nameSplitter[0])) {
-            Log::instance()->util().error(Poco::format("wrong plugin library base class: %s", className));
+            Log::instance()->util().error("wrong plugin library base class: %s" + className);
             throw Poco::NotFoundException();
         }
         
@@ -85,11 +93,11 @@ public:
                 classPrefix = nameSplitter[1];
             }
             catch (Poco::RangeException) {
-                Log::instance()->util().error(Poco::format("wrong plugin library name: %s", objectName));
+                Log::instance()->util().error("wrong plugin library name: %s" + objectName);
                 throw Poco::NotFoundException();
             }
         }
-        Log::instance()->util().information(Poco::format("plugin loader successfully loaded %s", objectName));
+        Log::instance()->util().information("plugin loader successfully loaded " + objectName);
         
         return create(classPrefix, classBase);
     }
@@ -101,10 +109,10 @@ private:
     {
         try {
             _pluginPath = Poco::Environment::get("OMM_PLUGIN_PATH") + _pluginPath;
-            Log::instance()->util().debug(Poco::format("plugin loader OMM_PLUGIN_PATH is: %s", _pluginPath));
+            Log::instance()->util().debug("plugin loader OMM_PLUGIN_PATH is: " + _pluginPath);
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->util().debug(Poco::format("plugin loader OMM_PLUGIN_PATH not set, standard search path is: %s", _pluginPath));
+            Log::instance()->util().debug("plugin loader OMM_PLUGIN_PATH not set, standard search path is: " + _pluginPath);
         }
         Poco::StringTokenizer pathSplitter(_pluginPath, ":");
         Poco::StringTokenizer::Iterator it;
@@ -141,7 +149,7 @@ private:
             pRes = _pPluginLoader->create(className);
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->util().error(Poco::format("could not create object of class %s", className));
+            Log::instance()->util().error("could not create object of class " + className);
             throw Poco::NotFoundException();
         }
         return pRes;
@@ -157,6 +165,7 @@ private:
     Poco::ClassLoader<C>*    _pPluginLoader;
     std::string              _pluginPath;
 };
+
 
 }  // namespace Omm
 }  // namespace Util

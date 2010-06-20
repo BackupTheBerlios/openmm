@@ -38,6 +38,7 @@
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
 
+#include "Util.h"
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"
 
@@ -384,7 +385,7 @@ void
 MediaObject::setTitle(const std::string& title)
 {
 //     std::clog << "MediaObject::setTitle() title: " << title << std::endl;
-    Log::instance()->upnpav().debug(Poco::format("setting object title: %s", title));
+    Log::instance()->upnpav().debug(Omm::Util::format("setting object title: %s", title));
     
 //     _properties.append("dc:title", new Omm::Variant(title));
     _properties["dc:title"] = title;

@@ -21,6 +21,7 @@
 
 #include <Poco/File.h>
 
+#include "Util.h"
 #include "UpnpAvServer.h"
 #include "UpnpAvServerImpl.h"
 
@@ -86,13 +87,13 @@ WebResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
     session.setKeepAlive(true);
     session.setKeepAliveTimeout(Poco::Timespan(3, 0));
     Poco::Timespan timeout = session.getKeepAliveTimeout();
-    Log::instance()->upnpav().debug(Poco::format("web resource server proxy timeout is: %i sec", timeout.seconds()));
+    Log::instance()->upnpav().debug(Omm::Util::format("web resource server proxy timeout is: %s sec", Poco::NumberFormatter::format(timeout.seconds())));
     Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
     proxyRequest.setKeepAlive(true);
     session.sendRequest(proxyRequest);
     std::stringstream requestHeader;
     proxyRequest.write(requestHeader);
-    Log::instance()->upnpav().debug(Poco::format("proxy request header:\n%s", requestHeader.str()));
+    Log::instance()->upnpav().debug(Omm::Util::format("proxy request header:\n%s", requestHeader.str()));
     
     Poco::Net::HTTPResponse proxyResponse;
     std::istream& istr = session.receiveResponse(proxyResponse);
@@ -104,10 +105,10 @@ WebResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
         Log::instance()->upnpav().debug("success reading data from web resource");
     }
     
-    Log::instance()->upnpav().information(Poco::format("HTTP %s %s", Poco::NumberFormatter::format(proxyResponse.getStatus()), proxyResponse.getReason()));
+    Log::instance()->upnpav().information(Omm::Util::format("HTTP %s %s", Poco::NumberFormatter::format(proxyResponse.getStatus()), proxyResponse.getReason()));
     std::stringstream responseHeader;
     proxyResponse.write(responseHeader);
-    Log::instance()->upnpav().debug(Poco::format("proxy response header:\n%s", responseHeader.str()));
+    Log::instance()->upnpav().debug(Omm::Util::format("proxy response header:\n%s", responseHeader.str()));
     
     return Poco::StreamCopier::copyStream(istr, ostr);
 }
@@ -134,7 +135,7 @@ MediaItemServer::start()
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
     _pHttpServer->start();
-    Log::instance()->upnpav().information(Poco::format("media item server listening on: %s", _socket.address().toString()));
+    Log::instance()->upnpav().information(Omm::Util::format("media item server listening on: %s", _socket.address().toString()));
 }
 
 
@@ -304,28 +305,28 @@ _pItemServer(pItemServer)
 void
 ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->upnpav().debug(Poco::format("handle media item request: %s", request.getURI()));
+    Log::instance()->upnpav().debug(Omm::Util::format("handle media item request: %s", request.getURI()));
     
     std::ostringstream requestHeader;
     request.write(requestHeader);
-    Log::instance()->upnpav().debug(Poco::format("request method: %s", request.getMethod()));
-    Log::instance()->upnpav().debug(Poco::format("request header:\n%s", requestHeader.str()));
+    Log::instance()->upnpav().debug(Omm::Util::format("request method: %s", request.getMethod()));
+    Log::instance()->upnpav().debug(Omm::Util::format("request header:\n%s", requestHeader.str()));
     
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
     std::string resourceId = uri[1];
-    Log::instance()->upnpav().debug(Poco::format("objectId: %s, resourceId: %s", objectId, resourceId));
+    Log::instance()->upnpav().debug(Omm::Util::format("objectId: %s, resourceId: %s", objectId, resourceId));
     
     // TODO: check if pItem really is a MediaItem and not a MediaContainer?
     ServerObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
     ServerResource* pResource = pItem->getResource(resourceId);
 
     std::string resProtInfo = pResource->getProtInfo();
-    Log::instance()->upnpav().debug(Poco::format("protInfo: %s", resProtInfo));
+    Log::instance()->upnpav().debug(Omm::Util::format("protInfo: %s", resProtInfo));
     Poco::StringTokenizer prot(resProtInfo, ":");
     std::string mime = prot[2];
     std::string dlna = prot[3];
-    Log::instance()->upnpav().debug(Poco::format("protInfo mime: %s, dlna: %s", mime, dlna));
+    Log::instance()->upnpav().debug(Omm::Util::format("protInfo mime: %s, dlna: %s", mime, dlna));
     ui4 resSize = pResource->getSize();
     
     response.setContentType(mime);
@@ -351,7 +352,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     
     std::ostringstream responseHeader;
     response.write(responseHeader);
-    Log::instance()->upnpav().debug(Poco::format("response header:\n%s", responseHeader.str()));
+    Log::instance()->upnpav().debug(Omm::Util::format("response header:\n%s", responseHeader.str()));
 
     if (request.getMethod() == "GET") {
         Log::instance()->upnpav().debug("sending stream ...");
@@ -363,17 +364,17 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             
             std::string::size_type delim = range.find('-');
             start = Poco::NumberParser::parse(range.substr(0, delim));
-            Log::instance()->upnpav().debug(Poco::format("range: %s (start: %s)", range, Poco::NumberFormatter::format(start)));
+            Log::instance()->upnpav().debug(Omm::Util::format("range: %s (start: %s)", range, Poco::NumberFormatter::format(start)));
         }
         std::streamsize numBytes = pResource->stream(ostr, start);
-        Log::instance()->upnpav().debug(Poco::format("stream sent (%s bytes transfered).", Poco::NumberFormatter::format(numBytes)));
+        Log::instance()->upnpav().debug(Omm::Util::format("stream sent (%s bytes transfered).", Poco::NumberFormatter::format(numBytes)));
     }
     else if (request.getMethod() == "HEAD") {
         response.send();
     }
     
     if (response.sent()) {
-        Log::instance()->upnpav().debug(Poco::format("media item request finished: %s", request.getURI()));
+        Log::instance()->upnpav().debug(Omm::Util::format("media item request finished: %s", request.getURI()));
     }
 }
 
