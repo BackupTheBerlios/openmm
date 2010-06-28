@@ -374,55 +374,32 @@ QtAvInterface::beginRemoveServer(int position)
 
 
 void
-QtAvInterface::endAddRenderer()
+QtAvInterface::endAddRenderer(int position)
 {
     _pRendererListModel->endAddRenderer();
 }
 
 
 void
-QtAvInterface::endAddServer()
+QtAvInterface::endAddServer(int position)
 {
     _pBrowserModel->endAddServer();
 }
 
 
 void
-QtAvInterface::endRemoveRenderer()
+QtAvInterface::endRemoveRenderer(int position)
 {
     _pRendererListModel->endRemoveRenderer();
 }
 
 
 void
-QtAvInterface::endRemoveServer()
+QtAvInterface::endRemoveServer(int position)
 {
     _pBrowserModel->endRemoveServer();
 }
 
-
-void
-QtAvInterface::beginAddDevice(int position)
-{
-}
-
-
-void
-QtAvInterface::beginRemoveDevice(int position)
-{
-}
-
-
-void
-QtAvInterface::endAddDevice()
-{
-}
-
-
-void
-QtAvInterface::endRemoveDevice()
-{
-}
 
 POCO_BEGIN_MANIFEST(Omm::Av::UpnpAvUserInterface)
 POCO_EXPORT_CLASS(QtAvInterface)

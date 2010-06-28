@@ -120,15 +120,10 @@ private slots:
     virtual void beginAddServer(int position);
     virtual void beginRemoveRenderer(int position);
     virtual void beginRemoveServer(int position);
-    virtual void endAddRenderer();
-    virtual void endAddServer();
-    virtual void endRemoveRenderer();
-    virtual void endRemoveServer();
-    
-    virtual void beginAddDevice(int position);
-    virtual void beginRemoveDevice(int position);
-    virtual void endAddDevice();
-    virtual void endRemoveDevice();
+    virtual void endAddRenderer(int position);
+    virtual void endAddServer(int position);
+    virtual void endRemoveRenderer(int position);
+    virtual void endRemoveServer(int position);
     
 signals:
     void sliderMoved(int value);

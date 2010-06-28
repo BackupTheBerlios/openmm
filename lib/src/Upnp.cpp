@@ -19,7 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "Util.h"
+//#include "Util.h"
 #include "Upnp.h"
 #include "UpnpPrivate.h"
 
@@ -40,7 +40,7 @@ Log::Log()
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
@@ -121,7 +121,7 @@ _iconPath(":/usr/lib/omm:/usr/local/lib/omm")
             retrieve(uri);
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->upnp().error(Omm::Util::format("failed to retrieve icon from: %s", uri));
+            Log::instance()->upnp().error("failed to retrieve icon from: " + uri);
         }
     }
 }
@@ -137,7 +137,7 @@ Icon::retrieve(const std::string& uri)
         if (!f.exists()) {
             throw Poco::NotFoundException();
         }
-        Log::instance()->upnp().debug(Omm::Util::format("reading icon from file: %s", iconUri.getPath()));
+        Log::instance()->upnp().debug("reading icon from file: " + iconUri.getPath());
         std::ifstream ifs(iconUri.getPath().c_str());
         _pData = new char[f.getSize()];
         ifs.read((char*)_pData, f.getSize());
@@ -153,12 +153,12 @@ Icon::retrieve(const std::string& uri)
             }
             Poco::URI baseUri(*it + "/");
             baseUri.resolve(iconUri);
-            Log::instance()->upnp().debug(Omm::Util::format("try to read icon from file: %s", baseUri.getPath()));
+            Log::instance()->upnp().debug("try to read icon from file: " + baseUri.getPath());
             Poco::File f(baseUri.getPath());
             if (!f.exists()) {
                 continue;
             }
-            Log::instance()->upnp().debug(Omm::Util::format("reading icon from file: %s", baseUri.getPath()));
+            Log::instance()->upnp().debug("reading icon from file: " + baseUri.getPath());
             std::ifstream ifs(baseUri.getPath().c_str());
             _pData = new char[f.getSize()];
             ifs.read((char*)_pData, f.getSize());
@@ -191,7 +191,7 @@ NetworkInterfaceManager::NetworkInterfaceManager()
 		Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName((*it).name()).address();
 		// FIXME: workaround for MacOS, isLoopback() doesn't work?
 		if (!address.isLoopback() && (*it).name() != "lo0") {
-			Log::instance()->upnp().information(Omm::Util::format("found network interface: %s", (*it).name()));
+			Log::instance()->upnp().information("found network interface: " + (*it).name());
 			_interfaceList.push_back((*it).name());
 		}	
     }
@@ -233,7 +233,7 @@ NetworkInterfaceManager::findValidIpAddress()
         // TODO: bail out of application
     }
     else {
-        Log::instance()->upnp().information(Omm::Util::format("found valid IP address: %s", _validIpAddress.toString()));
+        Log::instance()->upnp().information("found valid IP address: " + _validIpAddress.toString());
     }
 }
 
@@ -243,7 +243,7 @@ NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObse
 {
     _notificationCenter.addObserver(observer);
     for (std::vector<std::string>::iterator it = _interfaceList.begin(); it != _interfaceList.end(); ++it) {
-        Log::instance()->upnp().information(Omm::Util::format("notify observer of new network interface: %s", (*it)));
+        Log::instance()->upnp().information("notify observer of new network interface: " + (*it));
         observer.notify(new NetworkInterfaceNotification((*it), true));
     }
 }
@@ -253,12 +253,12 @@ void
 NetworkInterfaceManager::addInterface(const std::string& name)
 {
     if (find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end()) {
-        Log::instance()->upnp().information(Omm::Util::format("adding network interface: %s", name));
+        Log::instance()->upnp().information("adding network interface: " + name);
         _interfaceList.push_back(name);
         _notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
     }
     else {
-        Log::instance()->upnp().information(Omm::Util::format("added network interface already known: %s", name));
+        Log::instance()->upnp().information("added network interface already known: " + name);
     }
 }
 
@@ -266,7 +266,7 @@ NetworkInterfaceManager::addInterface(const std::string& name)
 void
 NetworkInterfaceManager::removeInterface(const std::string& name)
 {
-    Log::instance()->upnp().information(Omm::Util::format("removing network interface: %s", name));
+    Log::instance()->upnp().information("removing network interface: " + name);
     
     _interfaceList.erase(find(_interfaceList.begin(), _interfaceList.end(), name));
     _notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
@@ -295,29 +295,29 @@ UriDescriptionReader::getDescription(const std::string& relativeUri)
 {
     Poco::URI targetUri(_deviceDescriptionUri);
     targetUri.resolve(relativeUri);
-    Log::instance()->desc().information(Omm::Util::format("retrieving device description from: %s", targetUri.toString()));
+    Log::instance()->desc().information("retrieving device description from: " + targetUri.toString());
     
     std::string* res;
     
     if (targetUri.getScheme() == "file") {
-        Log::instance()->desc().information(Omm::Util::format("reading description from file: %s", targetUri.getPath()));
+        Log::instance()->desc().information("reading description from file: " + targetUri.getPath());
         std::ifstream ifs(targetUri.getPath().c_str());
         std::stringstream ss;
         Poco::StreamCopier::copyStream(ifs, ss);
         res = new std::string(ss.str());
     }
     else if (targetUri.getScheme() == "http") {
-        Log::instance()->desc().information(Omm::Util::format("downloading description from: %s", targetUri.getPath()));
+        Log::instance()->desc().information("downloading description from: " + targetUri.getPath());
         Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
         Poco::Net::HTTPRequest request("GET", targetUri.getPath());
         session.sendRequest(request);
         
         Poco::Net::HTTPResponse response;
         std::istream& rs = session.receiveResponse(response);
-        Log::instance()->desc().information(Omm::Util::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
+        Log::instance()->desc().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream header;
         response.write(header);
-        Log::instance()->desc().debug(Omm::Util::format("response header:\n%s", header.str()));
+        Log::instance()->desc().debug("response header:\n" + header.str());
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
     }
@@ -326,7 +326,7 @@ UriDescriptionReader::getDescription(const std::string& relativeUri)
         res = new std::string;
         return *res;
     }
-    Log::instance()->desc().debug(Omm::Util::format("retrieved description:\n*BEGIN*%s*END*", *res));
+    Log::instance()->desc().debug("retrieved description:\n*BEGIN*" + *res + "*END*");
     return *res;
 }
 
@@ -594,7 +594,7 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
-            Log::instance()->desc().debug(Omm::Util::format("set default value for state variable \"%s\" to: %s", pRes->getName(), val));
+            Log::instance()->desc().debug("set default value for state variable \"" + pRes->getName() + "\" to: " + val);
             
             pRes->setValue(val);
         }
@@ -606,7 +606,7 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
 
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : _pActionTemplate(pActionTemplate)
 {
-    Log::instance()->ctrl().debug(Omm::Util::format("action request:\n%s", requestBody));
+    Log::instance()->ctrl().debug("action request:\n" + requestBody);
     
     Poco::XML::DOMParser parser;
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
@@ -693,7 +693,7 @@ ActionResponseReader::action()
             Poco::XML::Node* pArgument = pAction->firstChild();
             
             while (pArgument) {
-                Log::instance()->ctrl().debug(Omm::Util::format("action response arg: %s = %s", pArgument->nodeName(), pArgument->innerText()));
+                Log::instance()->ctrl().debug("action response arg: " + pArgument->nodeName() + " = " + pArgument->innerText());
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
                 pArgument = pArgument->nextSibling();
             }
@@ -768,7 +768,7 @@ DeviceDescriptionWriter::device(Device& device)
         Poco::AutoPtr<Poco::XML::Text> pVal = _pDoc->createTextNode(*((*it).second));
         pProp->appendChild(pVal);
         pDevice->appendChild(pProp);
-        Log::instance()->desc().debug(Omm::Util::format("writer added property: %s = %s", (*it).first, *(*it).second));
+        Log::instance()->desc().debug("writer added property: " + (*it).first + " = " + *(*it).second);
     }
     
     Poco::AutoPtr<Poco::XML::Element> pIconList = _pDoc->createElement("iconList");
@@ -777,7 +777,7 @@ DeviceDescriptionWriter::device(Device& device)
     for (Device::IconIterator it = device.beginIcon(); it != device.endIcon(); ++it) {
         if ((*it)->_pData) {
             pIconList->appendChild(icon(*it));
-            Log::instance()->desc().debug(Omm::Util::format("writer added icon: %s", (*it)->_requestUri));
+            Log::instance()->desc().debug("writer added icon: " + (*it)->_requestUri);
         }
     }
     
@@ -786,7 +786,7 @@ DeviceDescriptionWriter::device(Device& device)
     // Services
     for (Container<Service>::Iterator it = device._services.begin(); it != device._services.end(); ++it) {
         pServiceList->appendChild(service(*it));
-        Log::instance()->desc().debug(Omm::Util::format("writer added service: %s", (*it)->getServiceType()));
+        Log::instance()->desc().debug("writer added service: " + (*it)->getServiceType());
     }
     
     return pDevice;
@@ -872,7 +872,7 @@ DeviceDescriptionWriter::write()
     
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug(Omm::Util::format("rewrote description:\n*BEGIN*%s*END*", ss.str()));
+    Log::instance()->desc().debug("rewrote description:\n*BEGIN*" + ss.str() + "*END*");
     return new std::string(ss.str());
 }
 
@@ -975,7 +975,7 @@ EventMessageWriter::write(std::string& eventMessage)
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     eventMessage = ss.str();
-    Log::instance()->event().debug(Omm::Util::format("event message:\n%s", ss.str()));
+    Log::instance()->event().debug("event message:\n" + ss.str());
 }
 
 
@@ -994,11 +994,11 @@ EventMessageWriter::stateVar(const StateVar& stateVar)
 Subscription::Subscription(std::string callbackUri) :
 _deliveryAddress(callbackUri)
 {
-    Log::instance()->event().debug(Omm::Util::format("subscription uri: %s", callbackUri));
+    Log::instance()->event().debug("subscription uri: " + callbackUri);
     
     // TODO: implement timer stuff
     _uuid = Poco::UUIDGenerator().createRandom();
-    Log::instance()->event().debug(Omm::Util::format("SID: %s", _uuid.toString()));
+    Log::instance()->event().debug("SID: " + _uuid.toString());
     _eventKey = 0;
     _pSession = new Poco::Net::HTTPClientSession(_deliveryAddress.getHost(), _deliveryAddress.getPort());
 }
@@ -1032,7 +1032,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
     // set request body and send request
-    Log::instance()->event().debug(Omm::Util::format("sending event message to: %s:%s/%s ...", getSession()->getHost(), Poco::NumberFormatter::format(getSession()->getPort()), request.getURI()));
+    Log::instance()->event().debug("sending event message to: " + getSession()->getHost() + ":" + Poco::NumberFormatter::format(getSession()->getPort()) + "/" + request.getURI() + " ...");
 //     std::clog << "Header:" << std::endl;
 //     request.write(std::clog);
     
@@ -1042,7 +1042,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     // receive answer ...
     Poco::Net::HTTPResponse response;
     getSession()->receiveResponse(response);
-    Log::instance()->event().debug(Omm::Util::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
+    Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
 }
 
 
@@ -1116,29 +1116,29 @@ Service::sendAction(Action* pAction)
     request->set("SOAPACTION", "\"" + _serviceType + "#" + pAction->getName() + "\"");
     request->setContentLength(actionMessage.size());
     // set request body and send request
-    Log::instance()->ctrl().debug(Omm::Util::format("*** sending action \"%s\" to %s%s ***", pAction->getName(), baseUri.getAuthority(), request->getURI()));
+    Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request->getURI() + " ***");
 //     std::clog << "Header:" << std::endl;
 //     request->write(std::clog);
     
     // FIXME: catch Poco::Net::ConnectionRefusedException
     std::ostream& ostr = _pControlRequestSession->sendRequest(*request);
     ostr << actionMessage;
-    Log::instance()->ctrl().debug(Omm::Util::format("action request sent:\n%s", actionMessage));
+    Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
     // receive answer ...
     Poco::Net::HTTPResponse response;
     try {
         std::istream& rs = _pControlRequestSession->receiveResponse(response);
-        Log::instance()->ctrl().debug(Omm::Util::format("HTTP %s %s", Poco::NumberFormatter::format(response.getStatus()), response.getReason()));
+        Log::instance()->ctrl().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::string responseBody;
         Poco::StreamCopier::copyToString(rs, responseBody);
-        Log::instance()->ctrl().debug(Omm::Util::format("action response received:\n%s", responseBody));
+        Log::instance()->ctrl().debug("action response received:\n" + responseBody);
         ActionResponseReader responseReader(responseBody, pAction);
         responseReader.action();
     }
     catch (Poco::Net::NoMessageException) {
         Log::instance()->ctrl().error("no response to action request");
     }
-    Log::instance()->ctrl().debug(Omm::Util::format("*** action \"%s\" completed ***", pAction->getName()));
+    Log::instance()->ctrl().debug("*** action \"" + pAction->getName() + "\" completed ***");
 }
 
 
@@ -1149,7 +1149,7 @@ Service::registerSubscription(Subscription* subscription)
     // TODO: only register a Subscription once from one distinct Controller
     //       note that Subscription has a new SID
     std::string sid = subscription->getUuid();
-    Log::instance()->event().debug(Omm::Util::format("register subscription with SID: %s", sid));
+    Log::instance()->event().debug("register subscription with SID: " + sid);
     _eventSubscriptions.append(sid, subscription);
 }
 
@@ -1160,7 +1160,7 @@ Service::unregisterSubscription(Subscription* subscription)
     Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
     std::string sid = subscription->getUuid();
     _eventSubscriptions.remove(sid);
-    Log::instance()->event().debug(Omm::Util::format("unregister subscription with SID: %s", sid));
+    Log::instance()->event().debug("unregister subscription with SID: " + sid);
     delete subscription;
 }
 
@@ -1190,7 +1190,7 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
     }
     messageWriter.write(eventMessage);
     pSubscription->sendEventMessage(eventMessage);
-    Log::instance()->event().debug(Omm::Util::format("sending initial event message:\n%s", eventMessage));
+    Log::instance()->event().debug("sending initial event message:\n" + eventMessage);
 }
 
 
@@ -1239,7 +1239,7 @@ _pHttpSocket(pHttpSocket)
 Poco::Net::HTTPRequestHandler*
 DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-    Log::instance()->http().debug(Omm::Util::format("dispatching request: %s", request.getURI()));
+    Log::instance()->http().debug("dispatching request: " + request.getURI());
     Poco::Net::HTTPRequestHandler* res;
     std::map<std::string,UpnpRequestHandler*>::iterator i = _requestHandlerMap.find(request.getURI());
     if (i != _requestHandlerMap.end()) {
@@ -1268,7 +1268,7 @@ RequestNotFoundRequestHandler::create()
 void
 RequestNotFoundRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->http().debug(Omm::Util::format("unknown request %s HTTP 404 - not found error", request.getURI()));
+    Log::instance()->http().debug("unknown request " + request.getURI() + " HTTP 404 - not found error");
     response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
 }
 
@@ -1294,8 +1294,8 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
 {
     std::ostringstream requestHeader;
     request.write(requestHeader);
-    Log::instance()->desc().debug(Omm::Util::format("description request: %s", request.getURI()));
-    Log::instance()->desc().debug(Omm::Util::format("description request header: \n%s", requestHeader.str()));
+    Log::instance()->desc().debug("description request: " + request.getURI());
+    Log::instance()->desc().debug("description request header: \n" + requestHeader.str());
     if (request.has("Accept-Language")) {
         std::string lang = request.get("Accept-Language");
         // TODO: set proper lang in description response
@@ -1314,7 +1314,7 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
 //     response.set("LAST-MODIFIED", "Sun, 14 Mar 2010 11:30:22 GMT");
     std::ostringstream responseHeader;
     response.write(responseHeader);
-    Log::instance()->desc().debug(Omm::Util::format("description response header: \n%s", responseHeader.str()));
+    Log::instance()->desc().debug("description response header: \n" + responseHeader.str());
     response.sendBuffer(_pDescription->c_str(), _pDescription->size());
     if (response.sent()) {
         Log::instance()->desc().debug("description (header) successfully sent");
@@ -1347,7 +1347,7 @@ ControlRequestHandler::create()
 void
 ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->ctrl().debug(Omm::Util::format("*** action request: %s ***", request.getURI()));
+    Log::instance()->ctrl().debug("*** action request: " + request.getURI() + " ***");
     // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
     // otherwise it should return and an event should be sent on finishing the action request.
     int length = request.getContentLength();
@@ -1360,7 +1360,7 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     std::string::size_type hash = soapAction.find('#');
     std::string serviceType = soapAction.substr(0, hash);
     std::string actionName = soapAction.substr(hash+1);
-    Log::instance()->ctrl().debug(Omm::Util::format("action received: \"%s\" (service type %s)", actionName, serviceType));
+    Log::instance()->ctrl().debug("action received: \"" + actionName + "\" (service type " + serviceType + ")");
     
 //     std::clog << "ControlRequestHandler for ServiceType: " << _pService->getServiceType() << std::endl;
     // TODO: make getAction() robust against wrong action names
@@ -1384,8 +1384,8 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
-    Log::instance()->ctrl().debug(Omm::Util::format("action response sent:\n%s", responseBody));
-    Log::instance()->ctrl().debug(Omm::Util::format("*** action request completed: %s ***", request.getURI()));
+    Log::instance()->ctrl().debug("action response sent:\n" + responseBody);
+    Log::instance()->ctrl().debug("*** action request completed: " + request.getURI() + " ***");
 }
 
 
@@ -1399,7 +1399,7 @@ EventRequestHandler::create()
 void
 EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->event().debug(Omm::Util::format("event request from: %s (%s)", request.getHost(), request.get("CALLBACK")));
+    Log::instance()->event().debug("event request from: " + request.getHost() + " (" + request.get("CALLBACK") + ")");
 //     std::clog << "handle event request: " << request.getMethod() << std::endl;
 //     std::clog << "HOST: " << request.getHost() << std::endl;
 //     std::clog << "CALLBACK: " << request.get("CALLBACK") << std::endl;
@@ -1454,7 +1454,7 @@ IconRequestHandler::create()
 void
 IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->upnp().debug(Omm::Util::format("icon request from: %s", request.getHost()));
+    Log::instance()->upnp().debug("icon request from: " + request.getHost());
     
     response.sendBuffer(_pIcon->_pData, _pIcon->_size);
 }
@@ -1492,7 +1492,7 @@ HttpSocket::startServer()
         // set-up a server socket on an available port
 
     _pHttpServer->start();
-    Log::instance()->http().information(Omm::Util::format("server started on: %s", _httpServerAddress.toString()));
+    Log::instance()->http().information("server started on: " + _httpServerAddress.toString());
 }
 
 
@@ -1500,7 +1500,7 @@ void
 HttpSocket::stopServer()
 {
     _pHttpServer->stop();
-    Log::instance()->http().information(Omm::Util::format("server stopped on: %s", _httpServerAddress.toString()));
+    Log::instance()->http().information("server stopped on: " + _httpServerAddress.toString());
 }
 
 
@@ -1571,7 +1571,7 @@ DeviceRoot::getServiceType(const std::string& serviceType)
 //     std::clog << "DeviceRoot::getServiceType(): " << serviceType << std::endl;
     std::map<std::string,Service*>::iterator i = _serviceTypes.find(serviceType);
     if (i == _serviceTypes.end()) {
-        Log::instance()->upnp().error(Omm::Util::format("unknown service type: %s", serviceType));
+        Log::instance()->upnp().error("unknown service type: " + serviceType);
     }
     return _serviceTypes[serviceType];
 }
@@ -1606,7 +1606,7 @@ void
 DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 {
 //     std::clog << "DeviceRoot::initStateVars() serviceType: " << serviceType << " , pThis: " << pThis << std::endl;
-    Log::instance()->upnp().debug(Omm::Util::format("init state vars of service: %s", serviceType));
+    Log::instance()->upnp().debug("init state vars of service: " + serviceType);
     _pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
 }
 
@@ -1790,7 +1790,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
 //     std::clog << "SsdpMessageSet::onTimer()" << std::endl;
     int r = _repeat;
     while (r--) {
-        Log::instance()->ssdp().debug(Omm::Util::format("#message sets left to send: %s", Poco::NumberFormatter::format(r+1)));
+        Log::instance()->ssdp().debug("#message sets left to send: " + Poco::NumberFormatter::format(r+1));
         
         for (std::vector<SsdpMessage*>::const_iterator i = _ssdpMessages.begin(); i != _ssdpMessages.end(); ++i) {
             _socket->sendMessage(**i);
@@ -2014,7 +2014,7 @@ Controller::~Controller()
 void
 Controller::discoverDevice(const std::string& location)
 {
-    Log::instance()->upnp().debug(Omm::Util::format("controller discovers device location: %s", location));
+    Log::instance()->upnp().debug("controller discovers device location: " + location);
     
     UriDescriptionReader descriptionReader;
     DeviceRoot* deviceRoot = descriptionReader.deviceRoot(location);
@@ -2032,7 +2032,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-    Log::instance()->ssdp().debug(Omm::Util::format("controller received message:\n%s", pMessage->toString()));
+    Log::instance()->ssdp().debug("controller received message:\n" + pMessage->toString());
     
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
@@ -2067,7 +2067,7 @@ Controller::addDevice(DeviceRoot* pDeviceRoot)
     // TODO: handle "alive refreshments"
 //     std::clog << "Controller::addDevice()" << std::endl;
     std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
-    Log::instance()->upnp().debug(Omm::Util::format("controller adds device: %s", uuid));
+    Log::instance()->upnp().debug("controller adds device: " + uuid);
     if (!_devices.contains(uuid)) {
         _devices.append(uuid, pDeviceRoot);
         deviceAdded(pDeviceRoot);
@@ -2080,7 +2080,7 @@ Controller::removeDevice(const std::string& uuid)
 {
 //     std::clog << "Controller::removeDevice()" << std::endl;
     if (_devices.contains(uuid)) {
-        Log::instance()->upnp().debug(Omm::Util::format("controller removes device: %s", uuid));
+        Log::instance()->upnp().debug("controller removes device: " + uuid);
         deviceRemoved(&_devices.get(uuid));
         _devices.remove(uuid);
     }
@@ -2592,7 +2592,7 @@ SsdpSocket::SsdpSocket()
 void
 SsdpSocket::addInterface(const std::string& name)
 {
-    Log::instance()->ssdp().information(Omm::Util::format("add interface: %s", name));
+    Log::instance()->ssdp().information("add interface: " + name);
     
     SsdpNetworkInterface* pInterface = new SsdpNetworkInterface(name, this);
     _interfaces[name] = pInterface;
@@ -2604,7 +2604,7 @@ void
 SsdpSocket::removeInterface(const std::string& name)
 {
 //     std::clog << "SsdpSocket::removeInterface() name: " << name << std::endl;
-    Log::instance()->ssdp().information(Omm::Util::format("remove interface: %s", name));
+    Log::instance()->ssdp().information("remove interface: " + name);
     
     SsdpNetworkInterface* pInterface = _interfaces[name];
     delete pInterface;
@@ -2650,7 +2650,7 @@ SsdpSocket::sendMessage(SsdpMessage& message, const std::string& interface, cons
         if (interface == "*" || interface == (*it).first) {
             int bytesSent = (*it).second->_pSsdpSenderSocket->sendTo(m.c_str(), m.length(), receiver);
 //             std::clog << "SSDP message sent to interface: " << (*it).first << " , address: " << receiver.toString() << std::endl << m;
-            Log::instance()->ssdp().debug(Omm::Util::format("sending message to interface %s with address: %s", (*it).first, receiver.toString()));
+            Log::instance()->ssdp().debug("sending message to interface " + (*it).first + " with address: " + receiver.toString());
         }
     }
 }
@@ -2661,7 +2661,7 @@ _name(interfaceName),
 _pSsdpSocket(pSsdpSocket),
 _pBuffer(new char[BUFFER_SIZE])
 {
-    Log::instance()->ssdp().information(Omm::Util::format("setting up socket on interface %s", interfaceName));
+    Log::instance()->ssdp().information("setting up socket on interface " + interfaceName);
     
     if (interfaceName == "default") {
         _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface());

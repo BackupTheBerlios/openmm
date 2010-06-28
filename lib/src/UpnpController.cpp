@@ -262,7 +262,7 @@ UpnpController::deviceAdded(DeviceRoot* pDeviceRoot)
     
     _pUserInterface->beginAddDevice(_devices.position(pDevice->getUuid()));
     _devices.append(pDevice->getUuid(), pDevice);
-    _pUserInterface->endAddDevice();
+    _pUserInterface->endAddDevice(_devices.position(pDevice->getUuid()));
 }
 
 
@@ -278,7 +278,7 @@ UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
     
     _pUserInterface->beginRemoveDevice(_devices.position(pDevice->getUuid()));
     _devices.remove(pDevice);
-    _pUserInterface->endRemoveDevice();
+    _pUserInterface->endRemoveDevice(_devices.position(pDevice->getUuid()));
 }
 
 
@@ -324,7 +324,7 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
 //         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << _renderers.size() << std::endl;
         _renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
 //         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << _renderers.size() << std::endl;
-        _pAvUserInterface->endAddRenderer();
+        _pAvUserInterface->endAddRenderer(_renderers.size() - 1);
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         ServerController* pServer = new ServerController(new Omm::Av::MediaServerController(
@@ -336,7 +336,7 @@ UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
 //         std::clog << "UpnpAvController::deviceAdded() number of servers: " << _servers.size() << std::endl;
         _servers.append(pDevice->getUuid(), pServer);
 //         std::clog << "UpnpAvController::deviceAdded() number of servers: " << _servers.size() << std::endl;
-        _pAvUserInterface->endAddServer();
+        _pAvUserInterface->endAddServer(_servers.size() - 1);
     }
 }
 
@@ -357,7 +357,7 @@ UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 //         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << _renderers.size() << std::endl;
         _renderers.remove(pDevice->getUuid());
 //         std::clog << "UpnpAvController::deviceRemoved() number of renderers: " << _renderers.size() << std::endl;
-        _pAvUserInterface->endRemoveRenderer();
+        _pAvUserInterface->endRemoveRenderer(_renderers.position(pDevice->getUuid()));
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         // TODO: delete server controller
@@ -365,7 +365,7 @@ UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 //         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << _servers.size() << std::endl;
         _servers.remove(pDevice->getUuid());
 //         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << _servers.size() << std::endl;
-        _pAvUserInterface->endRemoveServer();
+        _pAvUserInterface->endRemoveServer(_servers.position(pDevice->getUuid()));
     }
 }
 

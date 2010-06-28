@@ -45,10 +45,10 @@ public:
     virtual void showMainWindow() = 0;
     
 protected:
-    virtual void beginAddDevice(int position) = 0;
-    virtual void beginRemoveDevice(int position) = 0;
-    virtual void endAddDevice() = 0;
-    virtual void endRemoveDevice() = 0;
+    virtual void beginAddDevice(int position) {}
+    virtual void beginRemoveDevice(int position) {}
+    virtual void endAddDevice(int position) {}
+    virtual void endRemoveDevice(int position) {}
     
 //     virtual void deviceAdded(Device* pDevice);
 //     virtual void deviceRemoved(Device* pDevice);
@@ -119,14 +119,19 @@ class UpnpAvUserInterface : public UpnpUserInterface
 public:
     UpnpAvUserInterface();
     
-    virtual void beginAddRenderer(int position) = 0;
-    virtual void beginAddServer(int position) = 0;
-    virtual void beginRemoveRenderer(int position) = 0;
-    virtual void beginRemoveServer(int position) = 0;
-    virtual void endAddRenderer() = 0;
-    virtual void endAddServer() = 0;
-    virtual void endRemoveRenderer() = 0;
-    virtual void endRemoveServer() = 0;
+    // TODO: alle device add/remove callbacks should be run in the main thread where the event loop lives
+    // this avoids complications when implementing thread safety in the target GUI toolkit
+    // Poco::NotificationCenter doesn't help here, cause notifications are delivered in the thread in which
+    // they are posted ... after thinking a bit about it, it seems to be impossible, as the method call has
+    // to be queued in the event loop, and this is responsibility of the GUI main thread's event loop.
+    virtual void beginAddRenderer(int position) {}
+    virtual void beginAddServer(int position) {}
+    virtual void beginRemoveRenderer(int position) {}
+    virtual void beginRemoveServer(int position) {}
+    virtual void endAddRenderer(int position) {}
+    virtual void endAddServer(int position) {}
+    virtual void endRemoveRenderer(int position) {}
+    virtual void endRemoveServer(int position) {}
     
     int rendererCount();
     RendererView* rendererView(int numRenderer);
