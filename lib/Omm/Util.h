@@ -47,14 +47,6 @@ private:
 };
 
 
-// TODO: replace format with string op + in Upnp.cpp to get rid of libomm dependency on libommutil
-std::string format(const std::string& fmt, const std::string& str1);
-std::string format(const std::string& fmt, const std::string& str1, const std::string& str2);
-std::string format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3);
-std::string format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3, const std::string& str4);
-std::string format(const std::string& fmt, const std::string& str1, const std::string& str2, const std::string& str3, const std::string& str4, const std::string& str5);
-
-
 template<class C>
     class PluginLoader
 {

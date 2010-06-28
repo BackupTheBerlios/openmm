@@ -19,7 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "Util.h"
 #include "UpnpController.h"
 #include "UpnpAvCtrlImpl.h"
 
@@ -254,7 +253,7 @@ void
 UpnpController::deviceAdded(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    Log::instance()->upnpav().information(Omm::Util::format("device added, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+    Log::instance()->upnpav().information("device added, friendly name: " + pDevice->getFriendlyName() + " ,uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpController::deviceAdded()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
@@ -270,7 +269,7 @@ void
 UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    Log::instance()->upnpav().information(Omm::Util::format("device removed, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+    Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + " ,uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpController::deviceRemoved()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
@@ -308,7 +307,7 @@ void
 UpnpAvController::deviceAdded(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    Log::instance()->upnpav().information(Omm::Util::format("device added, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+    Log::instance()->upnpav().information("device added, friendly name: " + pDevice->getFriendlyName() + " ,uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpAvController::deviceAdded()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
@@ -345,7 +344,7 @@ void
 UpnpAvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 {
     Device* pDevice = pDeviceRoot->getRootDevice();
-    Log::instance()->upnpav().information(Omm::Util::format("device removed, friendly name: %s ,uuid: %s", pDevice->getFriendlyName(), pDevice->getUuid()));
+    Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + " ,uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpAvController::deviceRemoved()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
