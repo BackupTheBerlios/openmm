@@ -28,7 +28,6 @@
 #include <queue>
 
 #include <Poco/Logger.h>
-#include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/Runnable.h>
 #include <Poco/RunnableAdapter.h>

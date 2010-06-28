@@ -19,7 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-//#include "Util.h"
 #include "Upnp.h"
 #include "UpnpPrivate.h"
 

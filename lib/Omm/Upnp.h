@@ -56,7 +56,6 @@
 #include <Poco/Environment.h>
 #include <Poco/Exception.h>
 #include <Poco/File.h>
-#include <Poco/Format.h>
 #include <Poco/Logger.h>
 #include <Poco/PatternFormatter.h>
 #include <Poco/FormattingChannel.h>
