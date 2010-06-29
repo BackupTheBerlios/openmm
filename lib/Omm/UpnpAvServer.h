@@ -189,6 +189,49 @@ private:
     ServerObject* _pRoot;
 };
 
+
+class AbstractDataModel
+{
+public:
+    // ------- mandatory interface to be implemented --------
+    // deliver meta data for controller
+    virtual ServerObject* getObject(const std::string& id) = 0;
+    // count = 0 means fetch all children
+    virtual std::vector<ServerObject*> getChildren(const std::string& id, ui4 start = 0, ui4 count = 0) = 0;
+    
+    // deliver media stream for renderer
+    virtual void stream(const std::string& id, const std::string& res, std::ostream& stream) = 0;
+    
+    // ------- optional interface to be implemented --------
+    // scan control
+    virtual void startScan() {}
+    virtual void stopScan() {}
+    
+    // cache control (size == 0 means unlimited cache size)
+    virtual void activateCache(bool = true, ui4 size = 0) {}
+    
+    // filter
+    virtual void filter(std::vector<std::string> properties) {};
+    
+    // sort
+    virtual void sort(const std::string& property) {};
+    
+    // search for metadata
+    // count = 0 means return all found objects
+    virtual std::vector<ServerObject*> search(const std::string& name, const std::vector<std::string>& properties, ui4 start = 0, ui4 count = 0) {};
+    
+    // ------- callbacks  --------
+    // update notification events are moderated by the server and not the data model
+    // if no objectsHaveChanged notification appeared inbetween update events, only a system update event is triggered
+    // also, changes on the same object inbetween events are handled by the server
+    //
+    // system data update notifications
+    virtual void hasChanged() {}
+    // container based update notifications
+    virtual  std::vector<ServerObject*> objectsHaveChanged() {}
+};
+
+
 } // namespace Av
 } // namespace Omm
 

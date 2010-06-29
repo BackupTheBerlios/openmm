@@ -29,8 +29,7 @@
 #include <QTextCodec>
 #include <QFileIconProvider>
 
-#include <Omm/UpnpAvTypes.h>
-#include <Omm/UpnpController.h>
+#include <Omm/UpnpAvController.h>
 
 
 class UpnpBrowserModel : public QAbstractItemModel

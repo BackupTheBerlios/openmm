@@ -11,6 +11,7 @@ Upnp.cpp
 
 SET( OMM_AV_LIB_SRCS
 UpnpController.cpp
+UpnpAvController.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
 UpnpAvTypes.cpp

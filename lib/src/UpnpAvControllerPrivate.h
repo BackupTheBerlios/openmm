@@ -18,50 +18,28 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#ifndef defined_UpnpAvControllerPrivate
+#define defined_UpnpAvControllerPrivate
 
-#ifndef UPNPRENDERERLISTMODEL_H
-#define UPNPRENDERERLISTMODEL_H
+#include "UpnpAvController.h"
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QList>
-#include <QTextCodec>
+namespace Omm {
+namespace Av {
 
-#include <Omm/UpnpAvController.h>
-
-class UpnpRendererListModel : public QAbstractItemModel
+class ServerController
 {
-    Q_OBJECT
-        
 public:
-//     UpnpRendererListModel(Omm::Container<RendererView>* pRenderers, QObject *parent = 0);
-    UpnpRendererListModel(Omm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
-    ~UpnpRendererListModel();
+    ServerController(MediaServerController* pServerController);
     
-    QVariant data(const QModelIndex &index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column,
-                      const QModelIndex &parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    
-    void beginAddRenderer(int position);
-    void beginRemoveRenderer(int position);
-    void endAddRenderer();
-    void endRemoveRenderer();
-    
-signals:
-    void setCurrentIndex(const QModelIndex & index);
+    MediaServerController* controller() { return _pServerController; }
+    ControllerObject* root() { return _pRoot; }
     
 private:
-//     Omm::Container<RendererView>*   _pRenderers;
-    Omm::Av::UpnpAvUserInterface*   _pUserInterface;
-    QTextCodec*                     _charEncoding;
+    MediaServerController*    _pServerController;
+    ControllerObject*         _pRoot;
 };
 
-#endif
+} // namespace Av
+} // namespace Omm
 
+#endif

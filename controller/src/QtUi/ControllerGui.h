@@ -24,6 +24,8 @@
 
 #include <QtGui>
 
+#include <Omm/UpnpAvController.h>
+
 #include "UpnpBrowserModel.h"
 #include "UpnpRendererListModel.h"
 #include "ui_ControllerGui.h"

@@ -20,7 +20,8 @@
  ***************************************************************************/
 
 #include <Poco/Exception.h>
-#include <Omm/UpnpController.h>
+
+#include <Omm/UpnpAvController.h>
 #include <Omm/Util.h>
 
 int main(int argc, char** argv)
