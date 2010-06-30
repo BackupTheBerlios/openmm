@@ -22,8 +22,8 @@
 #include "UpnpAvRenderer.h"
 #include "UpnpAvRendererImpl.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
 MediaRenderer(new RenderingControlRendererImpl,
@@ -42,3 +42,6 @@ UpnpAvRenderer::setFullscreen(bool on)
 {
     _pEngine->setFullscreen(on);
 }
+
+} // namespace Av
+} // namespace Omm

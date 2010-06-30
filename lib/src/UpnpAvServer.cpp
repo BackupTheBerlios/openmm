@@ -24,8 +24,8 @@
 #include "UpnpAvServer.h"
 #include "UpnpAvServerImpl.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 
 ServerResource::ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size) :
@@ -252,6 +252,14 @@ ServerObject::getResource(const std::string& resourceId)
 }
 
 
+// ui4
+// ServerObject::getChildCount()
+// {
+//     return _children.size();
+// }
+
+
+
 MediaContainer::MediaContainer() :
 ServerObject()
 {
@@ -401,3 +409,6 @@ UpnpAvServer::getRoot()
 {
     return _pRoot;
 }
+
+} // namespace Av
+} // namespace Omm

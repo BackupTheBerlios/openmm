@@ -21,8 +21,8 @@
 
 #include "UpnpAvCtrlImpl.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 void
 AVTransportControllerImpl::_ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
@@ -661,4 +661,6 @@ ContentDirectoryControllerImpl::_changedContainerUpdateIDs(const std::string& va
 // end of your own code
 }
 
+} // namespace Av
+} // namespace Omm
 

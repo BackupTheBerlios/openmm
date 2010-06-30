@@ -18,8 +18,8 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef defined_UpnpAvController
-#define defined_UpnpAvController
+#ifndef UpnpAvController_INCLUDED
+#define UpnpAvController_INCLUDED
 
 #include "UpnpController.h"
 #include "UpnpAvTypes.h"
@@ -49,17 +49,9 @@ private:
 class ControllerObject : public MediaObject
 {
     friend class ServerController;
+    friend class UpnpAvUserInterface;
     
 public:
-    // NOTE: instead of this ctor make a MediaObjectWriter
-    // MediaObject* createObject(const std::string&)
-    // MediaObject* createObject(DatabasePointer)
-    // and a MediaObjectReader ...
-    
-    // NOTE: should be split into a Controller and Device part?
-//     MediaObject(const std::string& metaData);
-//     MediaObject(Poco::XML::Node* pNode);
-    
     ControllerObject();
     
     void setServerController(MediaServerController* _pServer);
@@ -70,9 +62,9 @@ public:
     ControllerObject* parent();
     
     std::string getProperty(const std::string& name);
-    Resource* getResource(int num = 0);
     
 private:
+    Resource* getResource(int num = 0);
     virtual void addResource(Resource* pResource);
     void setFetchedAllChildren(bool fetchedAllChildren);
     

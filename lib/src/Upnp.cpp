@@ -22,7 +22,7 @@
 #include "Upnp.h"
 #include "UpnpPrivate.h"
 
-using namespace Omm;
+namespace Omm {
 
 Log* Log::_pInstance = 0;
 
@@ -2722,3 +2722,6 @@ SsdpNetworkInterface::onReadable(Poco::Net::ReadableNotification* pNotification)
     // FIXME: this results in a segfault
 //     delete pNotification;
 }
+
+
+} // namespace Omm

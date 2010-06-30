@@ -26,8 +26,8 @@
 
 #include "Util.h"
 
-using namespace Omm;
-using namespace Omm::Util;
+namespace Omm {
+namespace Util {
 
 
 Log* Log::_pInstance = 0;
@@ -63,3 +63,7 @@ Log::util()
 {
     return *_pUtilLogger;
 }
+
+
+} // namespace Util
+} // namespace Omm

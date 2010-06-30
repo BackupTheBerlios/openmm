@@ -87,6 +87,8 @@ private:
 
 class MediaObject
 {
+    friend class MediaObjectWriter;
+    
 public:
     MediaObject();
     
@@ -105,9 +107,9 @@ public:
     void appendChild(MediaObject* pChild);
     void addResource(Resource* pResource);
     virtual std::string getObjectId() const;
-    ui4 getChildCount();
     MediaObject* getChild(ui4 num);
     std::string getParentId();
+    ui4 getChildCount();
     
     std::string objectId();
     std::string getTitle();
@@ -120,6 +122,7 @@ public:
     void setProperty(const std::string& name, const std::string& value);
     
 protected:
+    
     std::string                             _objectId;
     bool                                    _restricted;
     std::map<std::string,std::string>       _properties;
@@ -148,6 +151,92 @@ private:
     void writeMetaData(Poco::XML::Element* pDidl);
     
     MediaObject*                            _pMediaObject;
+    Poco::AutoPtr<Poco::XML::Document>      _pDoc;
+    Poco::AutoPtr<Poco::XML::Element>       _pDidl;
+};
+
+
+class AbstractResource
+{
+public:
+    virtual ~AbstractResource();
+    
+    virtual void setUri(const std::string& uri) = 0;
+    virtual void setProtInfo(const std::string& protInfo) = 0;
+    virtual void setSize(ui4 size) = 0;
+    
+    virtual std::string getUri() = 0;
+    virtual std::string getProtInfo() = 0;
+    virtual ui4 getSize() = 0;
+};
+
+
+class AbstractMediaObject
+{
+public:
+    virtual ~AbstractMediaObject();
+    
+    virtual AbstractMediaObject* createObject() = 0;
+    virtual AbstractResource* createResource() = 0;
+    
+    virtual void setObjectId(const std::string& objectId) = 0;
+    virtual void setParentObjectId(const std::string& objectId) = 0;
+    virtual void appendChild(AbstractMediaObject* pChild) = 0;
+    virtual void setIsContainer(bool isContainer) = 0;
+    virtual void setIsRestricted(bool isRestricted) = 0;
+    virtual void setChildCount(ui4 childCount) = 0;
+    virtual void setProperty(const std::string& property, const std::string& value) = 0;
+    virtual void addResource(AbstractResource* pResource) = 0;
+    
+    virtual std::string getObjectId() = 0;
+    virtual std::string getParentObjectId() = 0;
+    virtual ui4 getChildCount() = 0;
+    virtual int getPropertyCount() = 0;
+    virtual int getResourceCount() = 0;
+    virtual bool isContainer() = 0;
+    virtual bool isRestricted() = 0;
+    virtual AbstractMediaObject* getParent() = 0;
+    virtual AbstractMediaObject* getChild(ui4 numChild) = 0;
+    virtual AbstractMediaObject* getObject(const std::string& objectId) = 0;
+    // TODO: handle multiple occurence properties
+    virtual std::string getPropertyName(int numProperty) = 0;
+    virtual std::string getProperty(const std::string& property) = 0;
+    virtual AbstractResource* getResource(int numResource) = 0;
+    virtual AbstractResource* getResource(const std::string& resourceId) = 0;
+    
+    std::string getTitle();
+};
+
+
+class MediaObjectReader
+{
+public:
+    MediaObjectReader(AbstractMediaObject* pMediaObject);
+    
+    void read(const std::string& metaData);
+    void readChildren(const std::string& metaData);
+    
+private:
+    void readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode);
+    
+    AbstractMediaObject*                    _pMediaObject;
+};
+
+
+class MediaObjectWriter2
+{
+public:
+    MediaObjectWriter2(AbstractMediaObject* pMediaObject);
+    
+    void write(std::string& metaData);
+    ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
+    
+private:
+    void writeMetaDataHeader();
+    void writeMetaDataClose(std::string& metaData);
+    void writeMetaData(Poco::XML::Element* pDidl);
+    
+    AbstractMediaObject*                    _pMediaObject;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;
 };

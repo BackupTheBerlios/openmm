@@ -75,7 +75,6 @@ private:
 };
 
 
-
 class ServerObject : public MediaObject
 {
 public:
@@ -85,7 +84,19 @@ public:
     ServerResource* getResource(const std::string& resourceId);
     
     virtual void appendChild(ServerObject* pChild);
+    
+    // --------- interface to ContentDirectoryImplementation::Browse() ----------
     ServerObject* getObject(const std::string& objectId);
+    //ui4 getChildCount();  // for total matches in browse answer
+    
+    // --------- interface to MediaObjectWriter ----------
+    //MediaObject* getChild(ui4 num);
+    //bool isContainer();
+    //virtual std::string getObjectId() const;
+    //std::string getParentId();
+    //bool isRestricted();
+    //typedef std::vector<Resource*>::iterator ResourceIterator;
+    //typedef std::map<std::string,std::string>::iterator PropertyIterator;
     
 private:
     std::map<std::string,ServerObject*>         _childrenMap;

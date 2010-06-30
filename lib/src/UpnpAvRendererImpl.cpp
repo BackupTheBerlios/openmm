@@ -20,8 +20,8 @@
  ***************************************************************************/
 #include "UpnpAvRendererImpl.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 void
 AVTransportRendererImpl::initStateVars()
@@ -699,3 +699,5 @@ RenderingControlRendererImpl::SetLoudness(const ui4& InstanceID, const std::stri
 // end of your own code
 }
 
+} // namespace Av
+} // namespace Omm

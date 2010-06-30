@@ -21,8 +21,8 @@
 
 #include "UpnpAvControllers.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 void
 AVTransportController::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
@@ -2027,3 +2027,5 @@ _pAVTransportController(pAVTransportController)
     init();
 }
 
+} // namespace Av
+} // namespace Omm

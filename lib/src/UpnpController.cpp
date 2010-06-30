@@ -21,8 +21,8 @@
 
 #include "UpnpController.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 
 UpnpController::~UpnpController()
@@ -76,3 +76,5 @@ UpnpController::deviceRemoved(DeviceRoot* pDeviceRoot)
 
 
 
+} // namespace Av
+} // namespace Omm

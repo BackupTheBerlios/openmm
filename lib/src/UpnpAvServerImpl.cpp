@@ -20,8 +20,8 @@
  ***************************************************************************/
 #include "UpnpAvServerImpl.h"
 
-using namespace Omm;
-using namespace Omm::Av;
+namespace Omm {
+namespace Av {
 
 void
 AVTransportImplementation::initStateVars()
@@ -316,3 +316,5 @@ ContentDirectoryImplementation::CreateReference(const std::string& ContainerID, 
 }
 
 
+} // namespace Av
+} // namespace Omm
