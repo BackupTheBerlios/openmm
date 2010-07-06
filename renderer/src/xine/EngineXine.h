@@ -24,11 +24,32 @@
 
 #include <Omm/UpnpAvRenderer.h>
 
-#ifdef __X11__
-#include <X11/Xlib.h>
-#endif
+// #ifdef __X11__
+// #include <X11/Xlib.h>
+// #endif
 #include <xine.h>
 #include <xine/xineutils.h>
+
+
+class XineVideo
+{
+public:
+    virtual int displayWidth() = 0;
+    virtual int displayHeight() = 0;
+    virtual std::string driverName() = 0;
+    virtual int visualType() = 0;
+    virtual void* visual() = 0;
+//     virtual xine_video_port_t* videoDriver() = 0;
+    
+    virtual void initVisual() = 0;
+    virtual void closeVisual() = 0;
+
+};
+
+
+class XineAudio
+{
+};
 
 
 class XineEngine : public Omm::Av::Engine
@@ -63,40 +84,52 @@ public:
     */
     virtual void setVolume(int channel, float vol);
     virtual void getVolume(int channel, float &vol);
-
-private:
-    void init();
-    void close();
-    void initWindow();
-    bool isSeekable();
-    void savePosition();
-
+    
+protected:
+    
+//     void initWindow();
+    
     static void FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
                           int* dest_x, int* dest_y, int* dest_width, int* dest_height,
                           double* dest_aspect, int* win_x, int* win_y);
-
-    void initOSD();
-
-    xine_t              *_xineEngine;
-    xine_audio_port_t   *_audioDriver;
+    
+    int 		visualType;
+    char* 		videoDriverName;
     xine_video_port_t   *_videoDriver;
-    xine_stream_t       *_xineStream;
-    char                *_audioDriverName;
-    int                  _audioDeviceNum;
-
-#ifndef QWS
-    Display*             x11Display;
-    int                  x11Screen;
-    Window               x11Window;
-#endif
-
-    std::string          _mrl;
-    int                  fullscreen;
+    xine_t              *_xineEngine;
     static int           videoFrameWidth;
     static int           videoFrameHeight;
     static int           _globX, _globY;
     static double        _pixel_aspect;
     double               res_v, res_h;
+    int                  fullscreen;
+
+private:
+    void init();
+    void close();
+    
+    bool isSeekable();
+    void savePosition();
+
+
+
+    void initOSD();
+    
+    xine_audio_port_t   *_audioDriver;
+    xine_stream_t       *_xineStream;
+    char                *_audioDriverName;
+    int                  _audioDeviceNum;
+
+    XineVideo*		_pVideo;
+    
+// #ifndef QWS
+//     Display*             x11Display;
+//     int                  x11Screen;
+//     Window               x11Window;
+// #endif
+
+    std::string          _mrl;
+
 
     xine_event_queue_t  *eventQueue;
 

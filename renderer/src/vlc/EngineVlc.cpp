@@ -30,6 +30,8 @@ _fullscreen(true)
 //     char* argv[1] = {"ommr"};
     int argc = 2;
     char* argv[2] = {"ommr", "--codec=avcodec"};
+//     int argc = 3;
+//     char* argv[3] = {"ommr", "--codec=avcodec",  "--vout fb"};
     libvlc_exception_init(&_exception);
     _vlcInstance = libvlc_new(argc, argv, &_exception);
     handleException();

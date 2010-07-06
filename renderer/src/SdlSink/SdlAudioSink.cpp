@@ -42,15 +42,14 @@ void audioCallback(void* pThis, uint8_t* sdlBuffer, int sdlBufferSize)
         return;
     }
     
-    Omm::AvStream::Log::instance()->avstream().trace(Poco::format("sdl audio sink, audio callback, sdl buffer size: %s",
-        Poco::NumberFormatter::format(sdlBufferSize)));
+    Omm::AvStream::Log::instance()->avstream().trace("sdl audio sink, audio callback, sdl buffer size: " + Poco::NumberFormatter::format(sdlBufferSize));
     
     pSdlAudioSink->initSilence((char*)sdlBuffer, sdlBufferSize);
     // if no samples are available, don't block and leave the silence in the pcm buffer
     if (pSdlAudioSink->audioAvailable()) {
         int bytesRead = pSdlAudioSink->audioRead((char*)sdlBuffer, sdlBufferSize);
-        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("sdl audio sink, audio callback, bytes read: %s",
-            Poco::NumberFormatter::format(bytesRead)));
+        Omm::AvStream::Log::instance()->avstream().trace("sdl audio sink, audio callback, bytes read: " +
+            Poco::NumberFormatter::format(bytesRead));
     }
 }
 
@@ -61,7 +60,7 @@ SdlAudioSink::initDevice()
     Omm::AvStream::Log::instance()->avstream().debug("opening SDL audio sink ...");
     
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0 ) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("failed to init SDL:  %s", std::string(SDL_GetError())));
+        Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
         return false;
     }
     
@@ -76,7 +75,7 @@ SdlAudioSink::initDevice()
     deviceParamsWanted.userdata = this;
     
     if(SDL_OpenAudio(&deviceParamsWanted, &deviceParams) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open SDL audio device: %s", std::string(SDL_GetError())));
+        Omm::AvStream::Log::instance()->avstream().error("could not open SDL audio device: " + std::string(SDL_GetError()));
         return false;
     }
     

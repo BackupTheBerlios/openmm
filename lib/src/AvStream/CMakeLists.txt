@@ -26,7 +26,7 @@ AvStream.cpp
 )
 
 INCLUDE_DIRECTORIES(
-/usr/local/include
+#/usr/local/include
 # /home/jb/work/ffmpeg-0.5.1/
 # /home/jb/work/ffmpeg-0.5.1-bin/
 # /usr/include/SDL
@@ -56,17 +56,17 @@ PATHS ${CMAKE_LIBRARY_PATH}
 
 FIND_LIBRARY(LIB_AV_FORMAT
 NAME avformat
-PATHS ${LIB_AV_PATH}
+PATHS ${CMAKE_LIBRARY_PATH} #${LIB_AV_PATH}
 )
 
 FIND_LIBRARY(LIB_AV_CODEC
 NAME avcodec
-PATHS ${LIB_AV_PATH}
+PATHS ${CMAKE_LIBRARY_PATH} #${LIB_AV_PATH}
 )
 
 FIND_LIBRARY(LIB_AV_SWSCALE
 NAME swscale
-PATHS ${LIB_AV_PATH}
+PATHS ${CMAKE_LIBRARY_PATH} #${LIB_AV_PATH}
 )
 # 
 # FIND_LIBRARY(LIB_AV_FILTER
@@ -92,9 +92,9 @@ PATHS ${LIB_AV_PATH}
 TARGET_LINK_LIBRARIES( ommavstream
 ${LIB_POCO_FOUNDATION}
 # ${LIB_POCO_UTIL}
-${LIB_AV_FORMAT}
-${LIB_AV_CODEC}
-${LIB_AV_SWSCALE}
+# # ${LIB_AV_FORMAT}
+# # ${LIB_AV_CODEC}
+# # ${LIB_AV_SWSCALE}
 # ${LIB_AV_DEVICE}
 # ${LIB_AV_FILTER}
 # ${LIB_AV_UTIL}
@@ -109,6 +109,9 @@ ${LIB_AV_SWSCALE}
 # /usr/local/lib/libavdevice.so
 # /usr/local/lib/libavfilter.so
 # /usr/local/lib/libpostproc.so
+/usr/lib/libavformat.so
+/usr/lib/libavcodec.so
+/usr/lib/libswscale.so
 )
 
 INSTALL( TARGETS ommavstream

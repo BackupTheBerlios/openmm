@@ -26,10 +26,10 @@ endif(TARGET omm)
 
 #EXECUTE_PROCESS(COMMAND /usr/bin/xine-config --libs OUTPUT_VARIABLE XINE_LIBRARIES)
 #SET(XINE_LIBRARIES -L/usr/lib -lxine -lz -lnsl -lpthread -lrt)
-EXEC_PROGRAM( /usr/bin/xine-config
-ARGS --libs
-OUTPUT_VARIABLE XINE_LIBRARIES
-)
+# EXEC_PROGRAM( /usr/bin/xine-config
+# ARGS --libs
+# OUTPUT_VARIABLE XINE_LIBRARIES
+# )
 
 # without X11 libraries, omm can't load the xine-plugin (when running under X11)
 # so we explicitely link the plugin against X11.
@@ -38,30 +38,21 @@ OUTPUT_VARIABLE XINE_LIBRARIES
 # TODO: generate two shared objects: one for X11, one for framebuffer.
 
 
-SET( OMMR_XINE_SRCS
-EngineXine.cpp
+SET( OMMR_XINEX11_SRCS
+X11VideoXine.cpp
 )
 
 
-# ADD_DEFINITIONS(
-# -D__X11__
-# )
-
-ADD_LIBRARY( ommengine-xine
+ADD_LIBRARY( ommxinevideo-x11
 SHARED
-${OMMR_XINE_SRCS}
+${OMMR_XINEX11_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( ommengine-xine
-${XINE_LIBRARIES}
-${LIB_OMM_AV}
-${LIB_POCO_UTIL}
-# X11
+TARGET_LINK_LIBRARIES( ommxinevideo-x11
+ommengine-xine
+X11
 )
 
-ADD_SUBDIRECTORY(VideoFb)
-ADD_SUBDIRECTORY(VideoX11)
-
-# INSTALL( TARGETS ommengine-xine ommengine-xinefb
-# LIBRARY DESTINATION lib/omm
-# )
+INSTALL( TARGETS ommxinevideo-x11
+LIBRARY DESTINATION lib/omm
+)

@@ -1353,7 +1353,7 @@ Frame::printInfo()
     Log::instance()->avstream().debug("frame linesize[0..2]: " + Poco::NumberFormatter::format(_pAvFrame->linesize[0]) + ", " + Poco::NumberFormatter::format(_pAvFrame->linesize[1]) + ", "+
         Poco::NumberFormatter::format(_pAvFrame->linesize[2]));
     
-    Log::instance()->avstream().debug("frame data[0..2]: " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[0]) + ", " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[1]) + ", " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[2]));
+//    Log::instance()->avstream().debug("frame data[0..2]: " + Poco::NumberFormatter::format((void*)_pAvFrame->data[0]) + ", " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[1]) + ", " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[2]));
 }
 
 
@@ -2650,8 +2650,7 @@ Clock::setStartTime(bool toFirstFrame)
     
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         int64_t time = (*it)->_timeQueue.get();
-        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " +
-            , (*it)->getName());
+        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
         // if startTime is not yet in initialized with a valid pts, take the first audio pts
         if (startTime == AV_NOPTS_VALUE) {
             startTime = time;
@@ -2665,8 +2664,7 @@ Clock::setStartTime(bool toFirstFrame)
     }
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         int64_t time = (*it)->_timeQueue.get();
-        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from ",
-             + (*it)->getName());
+        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
         if (toFirstFrame) {
             startTime = std::min(time, startTime);
         }

@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <cstring>
 
 #include "Dvb.h"
 

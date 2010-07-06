@@ -10,7 +10,8 @@ then
 fi
 cd $BINDIR
 
-${CMAKE_CMD} -G KDevelop3 ${SRCDIR}
+#${CMAKE_CMD} -G KDevelop3 ${SRCDIR}
+${CMAKE_CMD} ${SRCDIR}
 make
 
 if [ "$1" = "install" ]

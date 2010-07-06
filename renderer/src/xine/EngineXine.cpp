@@ -18,7 +18,7 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#include <Poco/ClassLibrary.h>
+// #include <Poco/ClassLibrary.h>
 #include "EngineXine.h"
 
 #include <sys/stat.h>
@@ -26,13 +26,13 @@
 #include <string>
 using namespace std;
 
-#define MWM_HINTS_DECORATIONS   (1L << 1)
-#define PROP_MWM_HINTS_ELEMENTS 5
-#define INPUT_MOTION (ExposureMask | ButtonPressMask | KeyPressMask | \
-ButtonMotionMask | StructureNotifyMask |        \
-PropertyChangeMask | PointerMotionMask)
-
-#define PROP_MWM_HINTS_ELEMENTS 5
+// #define MWM_HINTS_DECORATIONS   (1L << 1)
+// #define PROP_MWM_HINTS_ELEMENTS 5
+// #define INPUT_MOTION (ExposureMask | ButtonPressMask | KeyPressMask | \
+// ButtonMotionMask | StructureNotifyMask |        \
+// PropertyChangeMask | PointerMotionMask)
+// 
+// #define PROP_MWM_HINTS_ELEMENTS 5
 
 int XineEngine::_globX = 0;
 int XineEngine::_globY = 0;
@@ -80,40 +80,55 @@ XineEngine::init()
     xine_init(_xineEngine);
 
     _pixel_aspect = 1.0;
-#ifdef __FRAMEBUFFER___
-//    char* videoDriverName = "fb";
-//    char* videoDriverName = "vidixfb";
-    char* videoDriverName = "directfb";
-//    int visualType = XINE_VISUAL_TYPE_FB;
-    int visualType = XINE_VISUAL_TYPE_DFB;
-    fb_visual_t visual;
-#elif __X11__
-    XInitThreads ();
-    x11Display = XOpenDisplay(NULL);
-    x11Screen = DefaultScreen(x11Display);
-//     x11Window = _parent->windowId();
-    initWindow();
+// #ifdef __FRAMEBUFFER__
+// //    char* videoDriverName = "fb";
+// //    char* videoDriverName = "vidixfb";
+//     char* videoDriverName = "directfb";
+// //    int visualType = XINE_VISUAL_TYPE_FB;
+//     int visualType = XINE_VISUAL_TYPE_DFB;
+//     fb_visual_t visual;
+// #elif __X11__
+//     XInitThreads ();
+//     x11Display = XOpenDisplay(NULL);
+//     x11Screen = DefaultScreen(x11Display);
+// //     x11Window = _parent->windowId();
+//     initWindow();
+// 
+//     char* videoDriverName = "xv";
+//     int visualType = XINE_VISUAL_TYPE_X11;
+//     x11_visual_t visual;
+//     visual.display = x11Display;
+//     visual.screen = x11Screen;
+//     visual.d = x11Window;
+//     //visual.dest_size_cb = DestSizeCallback;
+// #endif
 
-    char* videoDriverName = "xv";
-    int visualType = XINE_VISUAL_TYPE_X11;
-    x11_visual_t visual;
-    visual.display = x11Display;
-    visual.screen = x11Screen;
-    visual.d = x11Window;
-    //visual.dest_size_cb = DestSizeCallback;
-#endif
+    _pVideo->initVisual();
+    videoFrameWidth = _pVideo->displayWidth();
+    videoFrameHeight = _pVideo->displayHeight();
 
-    visual.frame_output_cb = FrameOutputCallback;
+    
+    switch (_pVideo->visualType()) {
+	case XINE_VISUAL_TYPE_X11:
+	    x11_visual_t* v = (x11_visual_t*)(_pVideo->visual());
+	    v->frame_output_cb = FrameOutputCallback;
+	    break;
+    }
+//     visual.frame_output_cb = FrameOutputCallback;
 //     visual.user_data = (void*)_parent;
 
     _videoDriver = xine_open_video_driver(_xineEngine,
-        videoDriverName,  visualType,
-        (void *) &(visual));
+        _pVideo->driverName().c_str(),  _pVideo->visualType(),
+        _pVideo->visual());
 
-    if (!_videoDriver)
-    {
+//     _videoDriver = xine_open_video_driver(_xineEngine,
+//         videoDriverName,  visualType,
+//         (void *) &(visual));
+
+//     if (!_videoDriver)
+//     {
 //         TRACE("XineEngine::init() can't init Video Driver! (%s)", videoDriverName);
-    }
+//     }
 
 /*
     set audio device for ALSA through config option: audio.device.alsa_front_device  (for stereo device)
@@ -146,37 +161,41 @@ XineEngine::close()
     xine_close_audio_driver(_xineEngine, _audioDriver);
     xine_close_video_driver(_xineEngine, _videoDriver);
     xine_exit(_xineEngine);
-#ifndef QWS
-    if (x11Display)
-        XCloseDisplay(x11Display);
-    x11Display = NULL;
-#endif
+    
+    _pVideo->closeVisual();
+// #ifndef __FRAMEBUFFER__
+//     if (x11Display)
+//         XCloseDisplay(x11Display);
+//     x11Display = NULL;
+// #endif
 }
 
 
-void
-XineEngine::initWindow()
-{
-    int xpos    = 0;
-    int ypos    = 0;
-    videoFrameWidth   = DisplayWidth(x11Display, x11Screen);
-    videoFrameHeight  = DisplayHeight(x11Display, x11Screen);
-    
-      /* some initalization for the X11 Window we will be showing video in */
-    XLockDisplay(x11Display);
-    fullscreen = 0;
-    x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
-                                    _globX, _globY, videoFrameWidth, videoFrameHeight, 1, 0, 0);
-    
-    XSelectInput(x11Display, x11Window, INPUT_MOTION);
-    
-    XMapRaised(x11Display, x11Window);
-    
-    res_h = (DisplayWidth(x11Display, x11Screen) * 1000 / DisplayWidthMM(x11Display, x11Screen));
-    res_v = (DisplayHeight(x11Display, x11Screen) * 1000 / DisplayHeightMM(x11Display, x11Screen));
-    XSync(x11Display, False);
-    XUnlockDisplay(x11Display);
-}
+// void
+// XineEngine::initWindow()
+// {
+// #ifndef __FRAMEBUFFER__
+//     int xpos    = 0;
+//     int ypos    = 0;
+//     videoFrameWidth   = DisplayWidth(x11Display, x11Screen);
+//     videoFrameHeight  = DisplayHeight(x11Display, x11Screen);
+//     
+//       /* some initalization for the X11 Window we will be showing video in */
+//     XLockDisplay(x11Display);
+//     fullscreen = 0;
+//     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
+//                                     _globX, _globY, videoFrameWidth, videoFrameHeight, 1, 0, 0);
+//     
+//     XSelectInput(x11Display, x11Window, INPUT_MOTION);
+//     
+//     XMapRaised(x11Display, x11Window);
+//     
+//     res_h = (DisplayWidth(x11Display, x11Screen) * 1000 / DisplayWidthMM(x11Display, x11Screen));
+//     res_v = (DisplayHeight(x11Display, x11Screen) * 1000 / DisplayHeightMM(x11Display, x11Screen));
+//     XSync(x11Display, False);
+//     XUnlockDisplay(x11Display);
+// #endif
+// }
 
 
 void
@@ -317,6 +336,6 @@ XineEngine::getVolume(int channel, float &vol)
 {
 }
 
-POCO_BEGIN_MANIFEST(Omm::Av::Engine)
-POCO_EXPORT_CLASS(XineEngine)
-POCO_END_MANIFEST
+// POCO_BEGIN_MANIFEST(Omm::Av::Engine)
+// POCO_EXPORT_CLASS(XineEngine)
+// POCO_END_MANIFEST

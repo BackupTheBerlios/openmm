@@ -113,7 +113,7 @@ protected:
         else
         {
             if (_enginePlugin == "") {
-                _enginePlugin = "engine-vlc";
+                _enginePlugin = "engine-xine";
             }
             
             Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
@@ -122,10 +122,10 @@ protected:
                 pEnginePlugin = pluginLoader.load(_enginePlugin);
             }
             catch(Poco::NotFoundException) {
-                std::cerr << "Error could not find server plugin: " << _enginePlugin << std::endl;
+                std::cerr << "Error could not find engine plugin: " << _enginePlugin << std::endl;
                 return 1;
             }
-            std::clog << "container plugin: " << _enginePlugin << " loaded successfully" << std::endl;
+            std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
             
             Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
             
