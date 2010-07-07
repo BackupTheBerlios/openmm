@@ -18,21 +18,16 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-// #include <Poco/ClassLibrary.h>
+#include <Poco/ClassLibrary.h>
+
 #include "EngineXine.h"
+
+#include "Omm/Util.h"
 
 #include <sys/stat.h>
 #include <cerrno>
 #include <string>
 using namespace std;
-
-// #define MWM_HINTS_DECORATIONS   (1L << 1)
-// #define PROP_MWM_HINTS_ELEMENTS 5
-// #define INPUT_MOTION (ExposureMask | ButtonPressMask | KeyPressMask | \
-// ButtonMotionMask | StructureNotifyMask |        \
-// PropertyChangeMask | PointerMotionMask)
-// 
-// #define PROP_MWM_HINTS_ELEMENTS 5
 
 int XineEngine::_globX = 0;
 int XineEngine::_globY = 0;
@@ -49,7 +44,6 @@ XineEngine::XineEngine()
    _posTime(0),
    _lengthStream(0)
 {
-//     TRACE("XineEngine::XineEngine()");
     init();
 }
 
@@ -57,6 +51,7 @@ XineEngine::XineEngine()
 XineEngine::~XineEngine()
 {
     close();
+    delete _pVideo;
 }
 
 
@@ -66,6 +61,20 @@ XineEngine::init()
 //     TRACE("XineEngine::init()");
 
     _xineEngine = xine_new();
+    
+    Omm::Util::PluginLoader<XineVideo> pluginLoader;
+    std::string videoPlugin("xinevideo-x11");
+//     std::string videoPlugin("xinevideo-fb");
+    
+    try {
+	_pVideo = pluginLoader.load(videoPlugin, "XineVideo");
+    }
+    catch(Poco::NotFoundException) {
+	std::cerr << "Error could not find xine video plugin: " << videoPlugin << std::endl;
+	return;
+    }
+    std::clog << "xine video plugin: " << videoPlugin << " loaded successfully" << std::endl;
+    
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
 //     char* configFile = "/etc/omm/xineconfig";
 /*    struct stat s;
@@ -114,21 +123,15 @@ XineEngine::init()
 	    v->frame_output_cb = FrameOutputCallback;
 	    break;
     }
-//     visual.frame_output_cb = FrameOutputCallback;
-//     visual.user_data = (void*)_parent;
 
     _videoDriver = xine_open_video_driver(_xineEngine,
         _pVideo->driverName().c_str(),  _pVideo->visualType(),
         _pVideo->visual());
 
-//     _videoDriver = xine_open_video_driver(_xineEngine,
-//         videoDriverName,  visualType,
-//         (void *) &(visual));
-
-//     if (!_videoDriver)
-//     {
-//         TRACE("XineEngine::init() can't init Video Driver! (%s)", videoDriverName);
-//     }
+    if (!_videoDriver)
+    {
+        std::cerr << "XineEngine::init() can't init video driver " << _pVideo->driverName() << std::endl;
+    }
 
 /*
     set audio device for ALSA through config option: audio.device.alsa_front_device  (for stereo device)
@@ -144,10 +147,14 @@ XineEngine::init()
     xine_config_update_entry(xineEngine, &entry);*/
 //     char* audioDriverName = "auto";
 //     char* audioDriverName = "oss";
-    _audioDriverName = "alsa";
-    _audioDriver = xine_open_audio_driver(_xineEngine, _audioDriverName, NULL);
+    std::string _audioDriverName("alsa");
+    _audioDriver = xine_open_audio_driver(_xineEngine, _audioDriverName.c_str(), NULL);
 
-//     TRACE("XineEngine::initStream() creating new xine stream.");
+    if (!_audioDriver)
+    {
+        std::cerr << "XineEngine::init() can't init audio driver " << _audioDriverName << std::endl;
+    }
+    
     _xineStream = xine_stream_new(_xineEngine, _audioDriver, _videoDriver);
 }
 
@@ -155,7 +162,6 @@ XineEngine::init()
 void
 XineEngine::close()
 {
-//     TRACE("XineEngine::close()");
     xine_close(_xineStream);
     xine_dispose(_xineStream);
     xine_close_audio_driver(_xineEngine, _audioDriver);
@@ -163,39 +169,7 @@ XineEngine::close()
     xine_exit(_xineEngine);
     
     _pVideo->closeVisual();
-// #ifndef __FRAMEBUFFER__
-//     if (x11Display)
-//         XCloseDisplay(x11Display);
-//     x11Display = NULL;
-// #endif
 }
-
-
-// void
-// XineEngine::initWindow()
-// {
-// #ifndef __FRAMEBUFFER__
-//     int xpos    = 0;
-//     int ypos    = 0;
-//     videoFrameWidth   = DisplayWidth(x11Display, x11Screen);
-//     videoFrameHeight  = DisplayHeight(x11Display, x11Screen);
-//     
-//       /* some initalization for the X11 Window we will be showing video in */
-//     XLockDisplay(x11Display);
-//     fullscreen = 0;
-//     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
-//                                     _globX, _globY, videoFrameWidth, videoFrameHeight, 1, 0, 0);
-//     
-//     XSelectInput(x11Display, x11Window, INPUT_MOTION);
-//     
-//     XMapRaised(x11Display, x11Window);
-//     
-//     res_h = (DisplayWidth(x11Display, x11Screen) * 1000 / DisplayWidthMM(x11Display, x11Screen));
-//     res_v = (DisplayHeight(x11Display, x11Screen) * 1000 / DisplayHeightMM(x11Display, x11Screen));
-//     XSync(x11Display, False);
-//     XUnlockDisplay(x11Display);
-// #endif
-// }
 
 
 void
@@ -226,7 +200,6 @@ XineEngine::setFullscreen(bool on)
 void
 XineEngine::setUri(string mrl)
 {
-//     TRACE("XineEngine::setMrl() to: %s", mrl.c_str());
     _mrl = mrl;
 }
 
@@ -234,7 +207,6 @@ XineEngine::setUri(string mrl)
 void
 XineEngine::load()
 {
-//     TRACE("XineEngine::play() mrl: %s", _mrl.c_str());
     xine_open(_xineStream, _mrl.c_str());
     if (!isSeekable()) {
 //         TRACE("XineEngine::play() WARNING: stream is not seekable!");
@@ -336,6 +308,6 @@ XineEngine::getVolume(int channel, float &vol)
 {
 }
 
-// POCO_BEGIN_MANIFEST(Omm::Av::Engine)
-// POCO_EXPORT_CLASS(XineEngine)
-// POCO_END_MANIFEST
+POCO_BEGIN_MANIFEST(Omm::Av::Engine)
+POCO_EXPORT_CLASS(XineEngine)
+POCO_END_MANIFEST

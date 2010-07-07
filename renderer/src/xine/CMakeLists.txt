@@ -42,11 +42,6 @@ SET( OMMR_XINE_SRCS
 EngineXine.cpp
 )
 
-
-# ADD_DEFINITIONS(
-# -D__X11__
-# )
-
 ADD_LIBRARY( ommengine-xine
 SHARED
 ${OMMR_XINE_SRCS}
@@ -56,12 +51,11 @@ TARGET_LINK_LIBRARIES( ommengine-xine
 ${XINE_LIBRARIES}
 ${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
-# X11
 )
 
 ADD_SUBDIRECTORY(VideoFb)
 ADD_SUBDIRECTORY(VideoX11)
 
-# INSTALL( TARGETS ommengine-xine ommengine-xinefb
-# LIBRARY DESTINATION lib/omm
-# )
+INSTALL( TARGETS ommengine-xine
+LIBRARY DESTINATION lib/omm
+)

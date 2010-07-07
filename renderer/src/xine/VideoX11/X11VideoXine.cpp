@@ -31,7 +31,7 @@ PropertyChangeMask | PointerMotionMask)
 
 
 X11XineVideo::X11XineVideo() :
-pVisual(new x11_visual_t)
+        _pVisual(new x11_visual_t)
 {
     XInitThreads ();
     x11Display = XOpenDisplay(NULL);
@@ -53,13 +53,6 @@ X11XineVideo::displayHeight()
 }
 
 
-// xine_video_port_t*
-// X11XineVideo::videoDriver()
-// {
-//     return _pVideoDriver;
-// }
-
-
 std::string
 X11XineVideo::driverName()
 {
@@ -77,7 +70,7 @@ X11XineVideo::visualType()
 void*
 X11XineVideo::visual()
 {
-    return pVisual;
+    return _pVisual;
 }
 
 
@@ -96,23 +89,12 @@ X11XineVideo::initVisual()
     
     XMapRaised(x11Display, x11Window);
     
-//     res_h = (displayWidth() * 1000 / DisplayWidthMM(x11Display, x11Screen));
-//     res_v = (displayHeight() * 1000 / DisplayHeightMM(x11Display, x11Screen));
     XSync(x11Display, False);
     XUnlockDisplay(x11Display);
 
-//     std::string videoDriverName("xv");
-//     int visualType = XINE_VISUAL_TYPE_X11;
-    
-    pVisual->display = x11Display;
-    pVisual->screen = x11Screen;
-    pVisual->d = x11Window;
-//     pVisual->frame_output_cb = FrameOutputCallback;
-//     _pVideoDriver = xine_open_video_driver(_xineEngine,
-// 	videoDriverName.c_str(),  visualType,
-// 	(void *) &(visual));
-    
-
+    _pVisual->display = x11Display;
+    _pVisual->screen = x11Screen;
+    _pVisual->d = x11Window;
 }
 
 

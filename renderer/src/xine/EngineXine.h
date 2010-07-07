@@ -24,9 +24,6 @@
 
 #include <Omm/UpnpAvRenderer.h>
 
-// #ifdef __X11__
-// #include <X11/Xlib.h>
-// #endif
 #include <xine.h>
 #include <xine/xineutils.h>
 
@@ -39,7 +36,6 @@ public:
     virtual std::string driverName() = 0;
     virtual int visualType() = 0;
     virtual void* visual() = 0;
-//     virtual xine_video_port_t* videoDriver() = 0;
     
     virtual void initVisual() = 0;
     virtual void closeVisual() = 0;
@@ -87,14 +83,10 @@ public:
     
 protected:
     
-//     void initWindow();
-    
     static void FrameOutputCallback(void* p, int video_width, int video_height, double video_aspect,
                           int* dest_x, int* dest_y, int* dest_width, int* dest_height,
                           double* dest_aspect, int* win_x, int* win_y);
     
-    int 		visualType;
-    char* 		videoDriverName;
     xine_video_port_t   *_videoDriver;
     xine_t              *_xineEngine;
     static int           videoFrameWidth;
@@ -121,15 +113,8 @@ private:
     int                  _audioDeviceNum;
 
     XineVideo*		_pVideo;
-    
-// #ifndef QWS
-//     Display*             x11Display;
-//     int                  x11Screen;
-//     Window               x11Window;
-// #endif
 
     std::string          _mrl;
-
 
     xine_event_queue_t  *eventQueue;
 

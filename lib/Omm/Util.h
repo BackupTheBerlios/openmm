@@ -65,7 +65,7 @@ public:
     
     C* load(const std::string& objectName, const std::string& className = "", const std::string& prefixName = "")
     {
-        Log::instance()->util().information("plugin loader trying to load %s" + objectName);
+        Log::instance()->util().information("plugin loader trying to load " + objectName);
         
         loadPlugin(objectName);
         Poco::StringTokenizer nameSplitter(objectName, "-");
@@ -75,7 +75,7 @@ public:
             classBase = nameSplitter[0];
         }
         else if (Poco::icompare(className, nameSplitter[0])) {
-            Log::instance()->util().error("wrong plugin library base class: %s" + className);
+            Log::instance()->util().error("wrong plugin library base class: " + className);
             throw Poco::NotFoundException();
         }
         
@@ -85,7 +85,7 @@ public:
                 classPrefix = nameSplitter[1];
             }
             catch (Poco::RangeException) {
-                Log::instance()->util().error("wrong plugin library name: %s" + objectName);
+                Log::instance()->util().error("wrong plugin library name: " + objectName);
                 throw Poco::NotFoundException();
             }
         }

@@ -25,14 +25,23 @@
 #include "../EngineXine.h"
 
 
-class XineEngineFb : public XineEngine
+class FbXineVideo : public XineVideo
 {
+public:
+    FbXineVideo();
+    
+    virtual int displayWidth();
+    virtual int displayHeight();
+    virtual std::string driverName();
+    virtual int visualType();
+    virtual void* visual();
+
 
 private:
     virtual void initVisual();
     virtual void closeVisual();
 
-    fb_visual_t visual;
+    fb_visual_t* _pVisual;
 };
 
 #endif

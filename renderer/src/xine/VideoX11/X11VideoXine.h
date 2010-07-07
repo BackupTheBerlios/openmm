@@ -47,8 +47,7 @@ private:
     int                  x11Screen;
     Window               x11Window;
     
-    x11_visual_t* 	 pVisual;
-//     xine_video_port_t*	 _pVideoDriver;
+    x11_visual_t* 	 _pVisual;
 };
 
 #endif

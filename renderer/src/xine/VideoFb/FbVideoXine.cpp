@@ -21,29 +21,69 @@
 #include <Poco/ClassLibrary.h>
 #include "FbVideoXine.h"
 
+FbXineVideo::FbXineVideo() :
+        _pVisual(new fb_visual_t)
+{
+}
+
+
+int
+FbXineVideo::displayWidth()
+{
+    return 0;
+}
+
+
+int
+FbXineVideo::displayHeight()
+{
+    return 0;
+}
+
+
+std::string
+FbXineVideo::driverName()
+{
+    return std::string("directfb");
+}
+
+
+int
+FbXineVideo::visualType()
+{
+    return XINE_VISUAL_TYPE_DFB;
+}
+
+
+void*
+FbXineVideo::visual()
+{
+    return 0;
+//     return _pVisual;
+}
+
+
+
+
 
 void
-XineEngineFb::initVisual()
+FbXineVideo::initVisual()
 {
 //    char* videoDriverName = "fb";
 //    char* videoDriverName = "vidixfb";
-    videoDriverName = "directfb";
+//     videoDriverName = "directfb";
 //    int visualType = XINE_VISUAL_TYPE_FB;
-    visualType = XINE_VISUAL_TYPE_DFB;
-    visual.frame_output_cb = FrameOutputCallback;
-    _videoDriver = xine_open_video_driver(_xineEngine,
-	videoDriverName,  visualType,
-	(void *) &(visual));
+//     visualType = XINE_VISUAL_TYPE_DFB;
 }
 
 
 void
-XineEngineFb::closeVisual()
+FbXineVideo::closeVisual()
 {
 
 }
 
 
-POCO_BEGIN_MANIFEST(Omm::Av::Engine)
-POCO_EXPORT_CLASS(XineEngineFb)
+POCO_BEGIN_MANIFEST(XineVideo)
+POCO_EXPORT_CLASS(FbXineVideo)
 POCO_END_MANIFEST
