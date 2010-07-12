@@ -300,12 +300,14 @@ XineEngine::getLength(float &seconds)
 void
 XineEngine::setVolume(int channel, float vol)
 {
+    xine_set_param(_xineStream, XINE_PARAM_AUDIO_VOLUME, vol);
 }
 
 
 void
 XineEngine::getVolume(int channel, float &vol)
 {
+    vol = xine_get_param(_xineStream, XINE_PARAM_AUDIO_VOLUME);
 }
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)

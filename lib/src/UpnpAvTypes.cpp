@@ -570,6 +570,55 @@ AbstractMediaObject::getTitle()
 }
 
 
+AbstractMediaObject*
+AbstractMediaObject::getObject(const std::string& objectId)
+{
+    std::string::size_type slashPos = objectId.find('/');
+    AbstractMediaObject* pChild;
+    if (slashPos != std::string::npos) {
+        pChild = getChild(objectId.substr(0, slashPos));
+        if (pChild == 0) {
+            Log::instance()->upnpav().error("child objectId of container, but no child container found");
+            return 0;
+        }
+        else {
+            return pChild->getObject(objectId.substr(slashPos + 1));
+        }
+    }
+    else {
+        pChild = getChild(objectId);
+        if (pChild == 0) {
+            Log::instance()->upnpav().error("no child item found");
+            return 0;
+        }
+        else {
+            return pChild;
+        }
+    }
+}
+
+
+bool
+AbstractMediaObject::fetchedAllChildren()
+{
+    return getChildCount() >= getTotalChildCount();
+}
+
+
+std::string
+AbstractMediaObject::getParentObjectId()
+{
+    return getParent()->getObjectId();
+}
+
+
+ui4
+AbstractMediaObject::getTotalChildCount()
+{
+    return getChildCount();
+}
+
+
 MediaObjectReader::MediaObjectReader(AbstractMediaObject* pMediaObject) :
 _pMediaObject(pMediaObject)
 {
@@ -776,7 +825,107 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     // class (String, upnp)
 }
 
+
+void
+MemoryMediaObject::setParent(AbstractMediaObject* pParent)
+{
+    _parent = pParent;
+}
+
+
+void
+MemoryMediaObject::appendChild(AbstractMediaObject* pChild)
+{
+    _childVec.push_back(pChild);
+    _childMap[pChild->getObjectId()] = pChild;
+    pChild->setParent(this);
+
+}
+
+
+void
+MemoryMediaObject::addResource(AbstractResource* pResource)
+{
+    _resourceMap[pResource->getId()] = pResource;
+}
+
+
+AbstractMediaObject*
+MemoryMediaObject::getChild(const std::string& objectId)
+{
+    return _childMap[objectId];
+}
+
+
+ui4
+MemoryMediaObject::getChildCount()
+{
+    return _childVec.size();
+}
+
+
+bool
+MemoryMediaObject::isContainer()
+{
+    return _isContainer;
+}
+
+
+AbstractMediaObject*
+MemoryMediaObject::getChild(ui4 numChild)
+{
+    return _childVec[numChild];
+}
+
+
+std::string
+MemoryMediaObject::getObjectId()
+{
+    return _propertyMap["id"];
+}
+
+
+int
+MemoryMediaObject::getPropertyCount()
+{
+    return _propertyMap.size();
+}
+
+
+int
+MemoryMediaObject::getResourceCount()
+{
+    return _resourceMap.size();
+}
+
+
+bool
+MemoryMediaObject::isRestricted()
+{
+    return _restricted;
+}
+
+
+std::string
+MemoryMediaObject::getPropertyName(int numProperty)
+{
+    std::map<std::string,std::string>::iterator it = _propertyMap.begin()++;
+//     _propertyMap.begin() += numProperty;
+//     return *(_propertyMap.begin() + numProperty).first;
+}
+
+
+std::string
+MemoryMediaObject::getProperty(const std::string& property)
+{
+}
+
+
+AbstractResource*
+MemoryMediaObject::getResource(int numResource)
+{
+}
+
+
 } // namespace Av
 } // namespace Omm
-
-

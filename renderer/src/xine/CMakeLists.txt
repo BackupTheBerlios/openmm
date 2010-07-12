@@ -31,13 +31,6 @@ ARGS --libs
 OUTPUT_VARIABLE XINE_LIBRARIES
 )
 
-# without X11 libraries, omm can't load the xine-plugin (when running under X11)
-# so we explicitely link the plugin against X11.
-# this is due to the X11 calls when compiling the module with X11 support.
-# for the frambuffer version, this can be left out.
-# TODO: generate two shared objects: one for X11, one for framebuffer.
-
-
 SET( OMMR_XINE_SRCS
 EngineXine.cpp
 )

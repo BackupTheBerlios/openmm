@@ -213,9 +213,9 @@ ServerObject::getObject(const std::string& objectId)
     if (slashPos != std::string::npos) {
 //         std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
         pChild = _childrenMap[objectId.substr(0, slashPos)];
-        if (pChild == NULL) {
+        if (pChild == 0) {
             Log::instance()->upnpav().error("child objectId of container, but no child container found");
-            return NULL;
+            return 0;
         }
         else {
             return pChild->getObject(objectId.substr(slashPos + 1));
@@ -224,9 +224,9 @@ ServerObject::getObject(const std::string& objectId)
     else {
 //         std::clog << "item id: " << objectId << std::endl;
         pChild = _childrenMap[objectId];
-        if (pChild == NULL) {
+        if (pChild == 0) {
             Log::instance()->upnpav().error("no child item found");
-            return NULL;
+            return 0;
         }
         else {
             return pChild;
@@ -257,7 +257,6 @@ ServerObject::getResource(const std::string& resourceId)
 // {
 //     return _children.size();
 // }
-
 
 
 MediaContainer::MediaContainer() :
