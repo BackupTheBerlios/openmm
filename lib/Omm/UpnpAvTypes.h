@@ -159,38 +159,32 @@ private:
 class AbstractProperty
 {
 public:
+    virtual void setName(const std::string& name) {}
+    virtual void setValue(const std::string& value) {}
+    virtual void setAttribute(const std::string& name, const std::string& value) {}
+    
+    virtual std::string getName() = 0;
+    virtual std::string getValue() = 0;
+    virtual std::string getAttribute(const std::string& name) { return ""; }
+    virtual std::string getAttribute(int index) { return ""; }
+    virtual int getAttributeCount() { return 0; }
 };
 
 
 class AbstractResource : public AbstractProperty
 {
 public:
+    AbstractResource(const std::string& uri, const std::string& protInfo, ui4 size);
     virtual ~AbstractResource();
     
-    virtual void setUri(const std::string& uri) = 0;
-    virtual void setProtInfo(const std::string& protInfo) = 0;
-    virtual void setSize(ui4 size) = 0;
+    void setUri(const std::string& uri);
+    void setProtInfo(const std::string& protInfo);
+    void setSize(ui4 size);
     
-    virtual std::string getId() = 0;
-    virtual std::string getUri() = 0;                           // server object, write meta data
-    virtual std::string getProtInfo() = 0;                      // server object, write meta data
-    virtual ui4 getSize() = 0;                                  // server object, write meta data
+    std::string getUri();                           // server object, write meta data
+    std::string getProtInfo();                      // server object, write meta data
+    ui4 getSize();                                  // server object, write meta data
 };
-
-
-
-// class AbstractReadableMediaObject : AbstractMediaObject
-// {
-//     public:
-// 
-// };
-// 
-// 
-// class AbstractWriteableMediaObject : AbstractMediaObject
-// {
-//     public:
-//  
-// };
 
 
 class AbstractMediaObject
@@ -199,6 +193,7 @@ public:
     virtual ~AbstractMediaObject() {};
     
     virtual AbstractMediaObject* createObject() {};
+    virtual AbstractProperty* createProperty() {};
     virtual AbstractResource* createResource() {};
     
     /*------------- write interface -------------*/
@@ -210,15 +205,19 @@ public:
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
     virtual void setIsRestricted(bool isRestricted) {}                                          // controller object, read from xml into memory
     virtual void setChildCount(ui4 childCount) {}                                               // controller object, read from xml into memory
-    virtual void setProperty(const std::string& property, const std::string& value) {}          // controller object, read from xml into memory
-    virtual void addResource(AbstractResource* pResource) {}                                    // controller object, read from xml into memory
+//     virtual void setProperty(const std::string& property, const std::string& value) {}          // controller object, read from xml into memory
+//     virtual void addResource(AbstractResource* pResource) {}                                    // controller object, read from xml into memory
+    
+    virtual void addProperty(AbstractProperty* pProperty) {}
+    void addResource(AbstractResource* pResource);
     
     /*------------- read interface --------------*/
     virtual AbstractMediaObject* getChild(const std::string& objectId) { return 0; }
     virtual ui4 getTotalChildCount();
     
     virtual AbstractMediaObject* getParent() { return 0; }                                      // controller object, browse
-    virtual AbstractResource* getResource(const std::string& resourceId) { return 0; }          // controller object, transport
+    virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
+    virtual AbstractResource* getResource(const std::string& resourceId);                       // controller object, transport
     
     std::string getTitle();                                                                     // controller object, browse
     
@@ -238,19 +237,21 @@ public:
     
     virtual bool isRestricted() = 0;                                                            // server object, write meta data
 
-// begin depricated property API
-    virtual int getPropertyCount() = 0;                                                         // server object, write meta data
-    virtual int getResourceCount() = 0;                                                         // server object, write meta data
-    virtual std::string getPropertyName(int numProperty) = 0;                                   // server object, write meta data
-    virtual std::string getProperty(const std::string& property) = 0;                           // server object, write meta data
-    virtual AbstractResource* getResource(int numResource) = 0;                                 // server object, write meta data
-// end depricated property API
+    virtual AbstractProperty* getProperty(int index) = 0;
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;             // server object, write meta data
+    virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) = 0;  // server object, write meta data
+    virtual int getPropertyCount(const std::string& name = "") = 0;
+    int getResourceCount();
+
     
-// begin new property API
-// //     virtual AbstractProperty* getProperty(const std::string& name) = 0;                         // server object, write meta data
-    virtual AbstractProperty* getFirstProperty() = 0;                                           // server object, write meta data
-    virtual AbstractProperty* getNextProperty(AbstractProperty*) = 0;                           // server object, write meta data
-// end new property API
+    //     virtual int getPropertyCount() = 0;                                                         // server object, write meta data
+//     virtual int getResourceCount() = 0;                                                         // server object, write meta data
+//     virtual std::string getPropertyName(int numProperty) = 0;                                   // server object, write meta data
+//     virtual std::string getProperty(const std::string& property) = 0;                           // server object, write meta data
+//     virtual AbstractResource* getResource(int numResource) = 0;                                 // server object, write meta data
+    
+//     virtual AbstractProperty* getFirstProperty() = 0;                                           // server object, write meta data
+//     virtual AbstractProperty* getNextProperty(AbstractProperty*) = 0;                           // server object, write meta data
 };
 
 
@@ -261,7 +262,8 @@ public:
     virtual void setParent(AbstractMediaObject* pParent);
 
     virtual void appendChild(AbstractMediaObject* pChild);                      // controller object, read from xml into memory
-    virtual void addResource(AbstractResource* pResource);                      // controller object, read from xml into memory
+    virtual void addResource(AbstractResource
+* pResource);                      // controller object, read from xml into memory
 
     /*------------- read interface --------------*/
     virtual AbstractMediaObject* getChild(const std::string& objectId);
@@ -275,21 +277,24 @@ public:
                                                                                 // controller object, browse
 
     virtual std::string getObjectId();                                          // server object, write meta data
-    virtual int getPropertyCount();                                             // server object, write meta data
+//     virtual int getPropertyCount();                                             // server object, write meta data
     virtual int getResourceCount();                                             // server object, write meta data
     virtual bool isRestricted();                                                // server object, write meta data
-    virtual std::string getPropertyName(int numProperty);                       // server object, write meta data
-    virtual std::string getProperty(const std::string& property);               // server object, write meta data
-    virtual AbstractResource* getResource(int numResource);                     // server object, write meta data
+//     virtual std::string getPropertyName(int numProperty);                       // server object, write meta data
+//     virtual std::string getProperty(const std::string& property);               // server object, write meta data
+    virtual AbstractResource
+* getResource(int numResource);                     // server object, write meta data
     
 private:
+    std::string                                         _id;
     bool                                                _restricted;
     bool                                                _isContainer;
     AbstractMediaObject*                                _parent;
     std::vector<AbstractMediaObject*>                   _childVec;
     std::map<std::string,AbstractMediaObject*>          _childMap;
     std::map<std::string,std::string>                   _propertyMap;
-    std::map<std::string,AbstractResource*>             _resourceMap;
+    std::map<std::string,AbstractResource
+*>                    _resourceMap;
 };
 
 

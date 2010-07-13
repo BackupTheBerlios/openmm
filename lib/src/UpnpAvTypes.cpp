@@ -169,6 +169,57 @@ Resource::setProtInfo(const std::string& protInfo)
 }
 
 
+AbstractResource::AbstractResource(const std::string& uri, const std::string& protInfo, ui4 size)
+{
+    setName("res");
+    setUri(uri);
+    setProtInfo(protInfo);
+    setSize(size);
+}
+
+
+std::string
+AbstractResource::getUri()
+{
+    return getValue();
+}
+
+
+std::string
+AbstractResource::getProtInfo()
+{
+    return getAttribute("protocolInfo");
+}
+
+
+ui4
+AbstractResource::getSize()
+{
+    return Poco::NumberParser::parseUnsigned64(getAttribute("size"));
+}
+
+
+void
+AbstractResource::setUri(const std::string& uri)
+{
+    setValue(uri);
+}
+
+
+void
+AbstractResource::setProtInfo(const std::string& protInfo)
+{
+    setAttribute("protocolInfo", protInfo);
+}
+
+
+void
+AbstractResource::setSize(ui4 size)
+{
+    setAttribute("size", Poco::NumberFormatter::format(size));
+}
+
+
 MediaObject::MediaObject() :
 _parent(0),
 _isContainer(false),
@@ -566,7 +617,7 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl)
 std::string
 AbstractMediaObject::getTitle()
 {
-    return getProperty("dc:title");
+    return getProperty("dc:title")->getValue();
 }
 
 
@@ -616,6 +667,34 @@ ui4
 AbstractMediaObject::getTotalChildCount()
 {
     return getChildCount();
+}
+
+
+AbstractResource*
+AbstractMediaObject::getResource(int index)
+{
+    return static_cast<AbstractResource*>(getProperty("res", index));
+}
+
+
+AbstractResource*
+AbstractMediaObject::getResource(const std::string& resourceId)
+{
+    return static_cast<AbstractResource*>(getProperty("res", resourceId));
+}
+
+
+void
+AbstractMediaObject::addResource(AbstractResource* pResource)
+{
+    addProperty(pResource);
+}
+
+
+int
+AbstractMediaObject::getResourceCount()
+{
+    return getPropertyCount("res");
 }
 
 
@@ -701,7 +780,11 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                 }
             }
             else {
-                pObject->setProperty(childNode->nodeName(), childNode->innerText());
+                AbstractProperty* pProp = pObject->createProperty();
+                pProp->setName(childNode->nodeName());
+                pProp->setValue(childNode->innerText());
+                pObject->addProperty(pProp);
+//                 pObject->addProperty(childNode->nodeName(), childNode->innerText());
             }
             childNode = childNode->nextSibling();
         }
@@ -811,8 +894,9 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     
     // write properties
     for (int propNum = 0; propNum < _pMediaObject->getPropertyCount(); ++propNum) {
-        std::string name = _pMediaObject->getPropertyName(propNum);
-        std::string value = _pMediaObject->getProperty(name);
+        AbstractProperty* pProp = _pMediaObject->getProperty(propNum);
+        std::string name = pProp->getName();
+        std::string value = pProp->getValue();
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement(name);
         Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(value);
         pProperty->appendChild(pPropertyValue);
@@ -846,7 +930,7 @@ MemoryMediaObject::appendChild(AbstractMediaObject* pChild)
 void
 MemoryMediaObject::addResource(AbstractResource* pResource)
 {
-    _resourceMap[pResource->getId()] = pResource;
+    _resourceMap[pResource->getValue()] = pResource;
 }
 
 
@@ -881,15 +965,15 @@ MemoryMediaObject::getChild(ui4 numChild)
 std::string
 MemoryMediaObject::getObjectId()
 {
-    return _propertyMap["id"];
+    return _id;
 }
 
 
-int
-MemoryMediaObject::getPropertyCount()
-{
-    return _propertyMap.size();
-}
+// int
+// MemoryMediaObject::getPropertyCount()
+// {
+//     return _propertyMap.size();
+// }
 
 
 int
@@ -906,21 +990,21 @@ MemoryMediaObject::isRestricted()
 }
 
 
-std::string
-MemoryMediaObject::getPropertyName(int numProperty)
-{
-    std::map<std::string,std::string>::iterator it = _propertyMap.begin()++;
-//     _propertyMap.begin() += numProperty;
-//     return *(_propertyMap.begin() + numProperty).first;
-}
-
-
-std::string
-MemoryMediaObject::getProperty(const std::string& property)
-{
-}
-
-
+// std::string
+// MemoryMediaObject::getPropertyName(int numProperty)
+// {
+//     std::map<std::string,std::string>::iterator it = _propertyMap.begin()++;
+// //     _propertyMap.begin() += numProperty;
+// //     return *(_propertyMap.begin() + numProperty).first;
+// }
+// 
+// 
+// std::string
+// MemoryMediaObject::getProperty(const std::string& property)
+// {
+// }
+// 
+// 
 AbstractResource*
 MemoryMediaObject::getResource(int numResource)
 {
