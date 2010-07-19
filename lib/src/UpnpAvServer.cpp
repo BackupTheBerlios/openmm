@@ -170,17 +170,17 @@ MediaServerContainer::~MediaServerContainer()
 }
 
 
-void
-MediaServerContainer::appendChild(ServerObject* pChild)
-{
-    ServerObject::appendChild(pChild);
-    
-    // FIXME: writing the public uri should be moved somewhere else, probably into the XML writer of ServerObject
-    // then appendChild() can be removed from MediaServerContainer
-    for (MediaObject::ResourceIterator it = pChild->beginResource(); it != pChild->endResource(); ++it) {
-        (*it)->setUri(getServerAddress() + "/" + (*it)->getUri());
-    }
-}
+// void
+// MediaServerContainer::appendChild(ServerObject* pChild)
+// {
+//     ServerObject::appendChild(pChild);
+//     
+//     // FIXME: writing the public uri should be moved somewhere else, probably into the XML writer of ServerObject
+//     // then appendChild() can be removed from MediaServerContainer
+//     for (MediaObject::ResourceIterator it = pChild->beginResource(); it != pChild->endResource(); ++it) {
+//         (*it)->setUri(getServerAddress() + "/" + (*it)->getUri());
+//     }
+// }
 
 
 std::string
@@ -190,66 +190,67 @@ MediaServerContainer::getServerAddress()
 }
 
 
-ServerObject::ServerObject() :
-MediaObject()
+ServerObject::ServerObject() //:
+// MediaObject()
 {
 }
 
 
-void
-ServerObject::appendChild(ServerObject* pChild)
-{
-    MediaObject::appendChild(pChild);
-    _childrenMap[pChild->_objectId] = pChild;
-}
+// void
+// ServerObject::appendChild(ServerObject* pChild)
+// {
+//     MediaObject::appendChild(pChild);
+//     _childrenMap[pChild->_objectId] = pChild;
+// }
 
 
-ServerObject*
-ServerObject::getObject(const std::string& objectId)
-{
-//     std::clog << "ServerObject::getObject() objectId: " << objectId << std::endl;
-    std::string::size_type slashPos = objectId.find('/');
-    ServerObject* pChild;
-    if (slashPos != std::string::npos) {
-//         std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
-        pChild = _childrenMap[objectId.substr(0, slashPos)];
-        if (pChild == 0) {
-            Log::instance()->upnpav().error("child objectId of container, but no child container found");
-            return 0;
-        }
-        else {
-            return pChild->getObject(objectId.substr(slashPos + 1));
-        }
-    }
-    else {
-//         std::clog << "item id: " << objectId << std::endl;
-        pChild = _childrenMap[objectId];
-        if (pChild == 0) {
-            Log::instance()->upnpav().error("no child item found");
-            return 0;
-        }
-        else {
-            return pChild;
-        }
-    }
-}
+// ServerObject*
+// ServerObject::getObject(const std::string& objectId)
+// {
+// //     std::clog << "ServerObject::getObject() objectId: " << objectId << std::endl;
+//     std::string::size_type slashPos = objectId.find('/');
+//     ServerObject* pChild;
+//     if (slashPos != std::string::npos) {
+// //         std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
+//         pChild = _childrenMap[objectId.substr(0, slashPos)];
+//         if (pChild == 0) {
+//             Log::instance()->upnpav().error("child objectId of container, but no child container found");
+//             return 0;
+//         }
+//         else {
+//             return pChild->getObject(objectId.substr(slashPos + 1));
+//         }
+//     }
+//     else {
+// //         std::clog << "item id: " << objectId << std::endl;
+//         pChild = _childrenMap[objectId];
+//         if (pChild == 0) {
+//             Log::instance()->upnpav().error("no child item found");
+//             return 0;
+//         }
+//         else {
+//             return pChild;
+//         }
+//     }
+// }
 
 
-void
-ServerObject::addResource(ServerResource* pResource)
-{
-    MediaObject::addResource(pResource);
-    _resourceMap[pResource->getResourceId()] = pResource;
-    pResource->setUri(_objectId + "$" + pResource->getResourceId());
-    pResource->setProtInfo("http-get:*:" + pResource->getProtInfo());
-}
+// void
+// ServerObject::addResource(ServerResource* pResource)
+// {
+//     MediaObject::addResource(pResource);
+//     _resourceMap[pResource->getResourceId()] = pResource;
+//     pResource->setUri(_objectId + "$" + pResource->getResourceId());
+//     pResource->setProtInfo("http-get:*:" + pResource->getProtInfo());
+// }
 
 
-ServerResource*
-ServerObject::getResource(const std::string& resourceId)
-{
-    return _resourceMap[resourceId];
-}
+// ServerResource*
+// AbstractResource*
+// ServerObject::getResource(const std::string& resourceId)
+// {
+//     return _resourceMap[resourceId];
+// }
 
 
 // ui4
@@ -259,19 +260,18 @@ ServerObject::getResource(const std::string& resourceId)
 // }
 
 
-MediaContainer::MediaContainer() :
-ServerObject()
-{
-    _isContainer = true;
-}
+// MediaContainer::MediaContainer() :
+// ServerObject()
+// {
+//     _isContainer = true;
+// }
 
 
 MediaContainer::MediaContainer(const std::string& title, const std::string& subClass) :
 ServerObject()
 {
-    _isContainer = true;
     setTitle(title);
-    _properties["upnp:class"] = std::string("object.container" + (subClass == "" ? "" : "." + subClass));
+    setClass(std::string("object.container" + (subClass == "" ? "" : "." + subClass)));
 }
 
 
@@ -283,9 +283,9 @@ ServerObject()
 
 MediaItem::MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass)
 {
-    _objectId = objectId;
+    setObjectNumber(objectId);
     setTitle(title);
-    _properties["upnp:class"] = std::string("object.item" + (subClass == "" ? "" : "." + subClass));
+    setClass(std::string("object.item" + (subClass == "" ? "" : "." + subClass)));
 }
 
 
@@ -324,8 +324,10 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + resourceId);
     
     // TODO: check if pItem really is a MediaItem and not a MediaContainer?
-    ServerObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
-    ServerResource* pResource = pItem->getResource(resourceId);
+//     ServerObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
+    AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
+//     ServerResource* pResource = pItem->getResource(resourceId);
+    AbstractResource* pResource = pItem->getResource(resourceId);
 
     std::string resProtInfo = pResource->getProtInfo();
     Log::instance()->upnpav().debug("protInfo: " + resProtInfo);
@@ -395,15 +397,17 @@ new AVTransportImplementation
 }
 
 void
-UpnpAvServer::setRoot(ServerObject* pRoot)
+// UpnpAvServer::setRoot(ServerObject* pRoot)
+UpnpAvServer::setRoot(AbstractMediaObject* pRoot)
 {
     _pRoot = pRoot;
     static_cast<ContentDirectoryImplementation*>(_pContentDirectoryImpl)->_pRoot = _pRoot;
-    _pRoot->setObjectId("0");
+// //     _pRoot->setObjectId("0");
 }
 
 
-ServerObject*
+// ServerObject*
+AbstractMediaObject*
 UpnpAvServer::getRoot()
 {
     return _pRoot;

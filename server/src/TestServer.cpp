@@ -20,51 +20,49 @@
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
-#include "WebRadioSimple.h"
+#include "TestServer.h"
 
-WebradiosimpleServer::WebradiosimpleServer()
-// MediaContainer("Web Radio", "musicContainer")
+TestServer::TestServer() //:
+// AbstractMediaObject(new MemoryObjectImpl)    // could also use convenience class MemoryContainer
 {
-    setTitle("Simple Web Radio");
-    setIsContainer(true);
-    setObjectId("0");
+    setTitle("Test Server");
+    setIsContainer(true);    // could also use convenience class MemoryContainer
     
+    /*----------- media object with meta data completely hold in memory, streaming directly from internet ------------*/
     std::string protInfoMp3 = "http-get:*:audio/mpeg:*";
     std::string subClass = "audioItem.audioBroadcast";
     
-    
-    /*----------- media object with meta data completely hold in memory, streaming directly from internet ------------*/
-    
-    Omm::Av::AbstractMediaObject* pGrooveSalad = new Omm::Av::MemoryMediaObject;
+    Omm::Av::AbstractMediaObject* pGrooveSalad = createChildObject();
     pGrooveSalad->setIsContainer(false);
-    pGrooveSalad->setObjectId("1");
     pGrooveSalad->setTitle("SOMA FM - Groove Salad (mp3)");
     
     Omm::Av::AbstractResource* pGrooveSaladRes = pGrooveSalad->createResource();
     pGrooveSaladRes->setProtInfo(protInfoMp3);
     pGrooveSaladRes->setSize(0);
     pGrooveSaladRes->setUri("http://streamer-dtc-aa04.somafm.com:80/stream/1018");
-    pGrooveSalad->addResource(pGrooveSaladRes);
-    appendChild(pGrooveSalad);
     
-    
-    /*----------- media object with meta data completely hold in memory, streaming through local proxy ------------*/
-
-    Omm::Av::AbstractMediaObject* pLush = new Omm::Av::StreamingMemoryMediaObject;
-//     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject<MemoryObject,MemoryProperty,WebResource>;
-//     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject(new MemoryObject, new MemoryProperty, new WebResource);
-    Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject(new FileDirectory("/base/path"), new MemoryProperty, new FileResource("/base/path");
+    Omm::Av::AbstractMediaObject* pLush = createChildObject();
     pLush->setIsContainer(false);
-    pLush->setObjectId("2");
     pLush->setTitle("SOMA FM - Lush (mp3)");
-
+    
     Omm::Av::AbstractResource* pLushRes = pLush->createResource();
     pLushRes->setProtInfo(protInfoMp3);
     pLushRes->setSize(0);
-    pLush->addResource(pLushRes);
-    appendChild(pLush);
+    pLushRes->setUri("http://streamer-ntc-aa02.somafm.com:80/stream/1073");
+    
+    /*----------- media object with meta data completely hold in memory, streaming through local proxy ------------*/
+// //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::StreamingMemoryMediaObject;
+// //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject<MemoryObject,MemoryProperty,WebResource>;
+// //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject(new MemoryObject, new MemoryProperty, new WebResource);
+//     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject(new FileDirectory("/base/path"), new MemoryProperty, new FileResource("/base/path");
+
+    Omm::Av::AbstractMediaObject* pVideos = new Omm::Av::FileMediaContainer("/home/jb/Videos", "Videos");
+    appendChild(pVideos);
+
+//     Omm::Av::AbstractMediaObject* pMp3s = new Omm::Av::CachedDirectoryContainer("/home/jb/mp3");
+//     appendChild(pMp3s);
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
-POCO_EXPORT_CLASS(WebradiosimpleServer)
+POCO_EXPORT_CLASS(TestServer)
 POCO_END_MANIFEST

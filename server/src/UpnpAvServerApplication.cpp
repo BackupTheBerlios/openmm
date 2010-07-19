@@ -105,11 +105,16 @@ protected:
         else
         {
             if (_containerPlugin == "") {
-                _containerPlugin = "server-webradio";
+//                 _containerPlugin = "server-webradio";
+//                 _containerPlugin = "server-webradiosimple";
+//                 _containerPlugin = "server-storage";
+                _containerPlugin = "server-test";
             }
             
-            Omm::Util::PluginLoader<Omm::Av::MediaContainer> pluginLoader;
-            Omm::Av::MediaContainer* pContainerPlugin;
+//             Omm::Util::PluginLoader<Omm::Av::MediaContainer> pluginLoader;
+            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
+//             Omm::Av::MediaContainer* pContainerPlugin;
+            Omm::Av::AbstractMediaObject* pContainerPlugin;
             try {
                 pContainerPlugin = pluginLoader.load(_containerPlugin);
             }

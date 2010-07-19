@@ -75,18 +75,37 @@ private:
 };
 
 
-class ServerObject : public MediaObject
+class ServerObject : public AbstractMediaObject
 {
 public:
     ServerObject();
     
-    void addResource(ServerResource* pResource);
-    ServerResource* getResource(const std::string& resourceId);
+    virtual AbstractMediaObject* getChild(const std::string& objectId) { return 0; }
+    virtual AbstractMediaObject* getObject(const std::string& objectId) { return 0; }        // server object, cds browse
+
+    virtual ui4 getChildCount() { return 0; }                                                // server object, cds browse / write meta data
+                                                                                // controller object, browse
+    virtual bool isContainer() { return false; }                                                 // server object, write meta data
+                                                                                // controller object, browse
+    virtual AbstractMediaObject* getChild(ui4 numChild) { return 0; }                        // server object, write meta data
+                                                                                // controller object, browse
+
+    virtual std::string getObjectId() { return ""; }                                          // server object, write meta data
+    virtual bool isRestricted() { return false; }                                                // server object, write meta data
+    virtual int getPropertyCount(const std::string& name = "") { return 0; }
+    virtual AbstractProperty* getProperty(int index) { return 0; }
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) { return 0; }             // server object, write meta data
+    virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) { return 0; }  // server object, write meta data
     
-    virtual void appendChild(ServerObject* pChild);
+    
+//     void addResource(ServerResource* pResource);
+//     AbstractResource* getResource(const std::string& resourceId);
+//     ServerResource* getResource(const std::string& resourceId);
+    
+//     virtual void appendChild(ServerObject* pChild);
     
     // --------- interface to ContentDirectoryImplementation::Browse() ----------
-    ServerObject* getObject(const std::string& objectId);
+//    ServerObject* getObject(const std::string& objectId);
     //ui4 getChildCount();  // for total matches in browse answer
     
     // --------- interface to MediaObjectWriter ----------
@@ -115,7 +134,7 @@ public:
 class MediaContainer : public ServerObject
 {
 public:
-    MediaContainer();
+//     MediaContainer();
     MediaContainer(const std::string& title, const std::string& subClass = "");
 };
 
@@ -129,7 +148,7 @@ public:
     MediaServerContainer(const std::string& title, const std::string& subClass = "", int port = 0);
     ~MediaServerContainer();
     
-    virtual void appendChild(ServerObject* pChild);
+//     virtual void appendChild(ServerObject* pChild);
     
     std::string getServerAddress();
     
@@ -188,16 +207,31 @@ private:
 };
 
 
+/**
+class UpnpAvServer
+used by ServerApplication
+provides a meta data server that can be browsed by CDS implementation through root media object
+*/
 class UpnpAvServer : public MediaServer
 {
 public:
     UpnpAvServer();
 
-    void setRoot(ServerObject* pRoot);
-    ServerObject* getRoot();
+//     void setRoot(ServerObject* pRoot);
+//     ServerObject* getRoot();
+    void setRoot(AbstractMediaObject* pRoot);
+    AbstractMediaObject* getRoot();
 
 private:
-    ServerObject* _pRoot;
+//     ServerObject* _pRoot;
+    AbstractMediaObject* _pRoot;
+};
+
+
+
+
+class StreamingMediaObject : AbstractMediaObject
+{
 };
 
 

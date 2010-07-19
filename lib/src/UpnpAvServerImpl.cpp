@@ -221,7 +221,7 @@ ContentDirectoryImplementation::GetSystemUpdateID(ui4& Id)
 void
 ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
-    ServerObject* object;
+    AbstractMediaObject* object;
     if (ObjectID == "0") {
         object = _pRoot;
     }
@@ -229,15 +229,16 @@ ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::s
         object = _pRoot->getObject(ObjectID.substr(2));
     }
     
-    MediaObjectWriter writer(object);
+    MediaObjectWriter2 writer(object);
     if (BrowseFlag == "BrowseMetadata") {
         writer.write(Result);
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
         NumberReturned = writer.writeChildren(StartingIndex, RequestedCount, Result);
-        TotalMatches = object->getChildCount();
+        TotalMatches = object->getTotalChildCount();
     }
     else {
+        // TODO: use a logger or throw an exception
         std::cerr << "Error in Browse: unkown BrowseFlag" << std::endl;
     }
     UpdateID = 0;

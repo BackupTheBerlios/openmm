@@ -19,15 +19,16 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef WebRadio_INCLUDED
-#define WebRadio_INCLUDED
+#ifndef TestServer_INCLUDED
+#define TestServer_INCLUDED
 
 #include <Omm/UpnpAvServer.h>
 
-class WebradiosimpleServer : public Omm::Av::MemoryMediaObject
+class TestServer : public Omm::Av::MemoryMediaObject
+// class TestServer : public Omm::Av::AbstractMediaObject    // could also use convenience class MemoryContainer
 {
 public:
-    WebradiosimpleServer();
+    TestServer();
 };
 
 #endif

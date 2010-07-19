@@ -81,7 +81,8 @@ private:
 
     virtual void initStateVars();
     
-    ServerObject* _pRoot;
+//     ServerObject* _pRoot;
+    AbstractMediaObject* _pRoot;
 };
 
 } // namespace Av

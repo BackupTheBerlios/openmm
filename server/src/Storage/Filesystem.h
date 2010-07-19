@@ -28,6 +28,23 @@ class FileServer : public Omm::Av::MediaServerContainer
 {
 public:
     FileServer();
+    
+    virtual AbstractMediaObject* getChild(const std::string& objectId) { return 0; }
+    virtual AbstractMediaObject* getObject(const std::string& objectId) { return 0; }        // server object, cds browse
+
+    virtual ui4 getChildCount() { return 0; }                                                // server object, cds browse / write meta data
+                                                                                // controller object, browse
+    virtual bool isContainer() { return true; }                                                 // server object, write meta data
+                                                                                // controller object, browse
+    virtual AbstractMediaObject* getChild(ui4 numChild) { return 0; }                        // server object, write meta data
+                                                                                // controller object, browse
+
+    virtual std::string getObjectId() { return ""; }                                          // server object, write meta data
+    virtual bool isRestricted() { return false; }                                                // server object, write meta data
+    virtual int getPropertyCount(const std::string& name = "") { return 0; }
+    virtual AbstractProperty* getProperty(int index) { return 0; }
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) { return 0; }             // server object, write meta data
+    virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) { return 0; }  // server object, write meta data
 };
 
 #endif
