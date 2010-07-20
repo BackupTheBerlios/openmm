@@ -111,9 +111,7 @@ protected:
                 _containerPlugin = "server-test";
             }
             
-//             Omm::Util::PluginLoader<Omm::Av::MediaContainer> pluginLoader;
             Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
-//             Omm::Av::MediaContainer* pContainerPlugin;
             Omm::Av::AbstractMediaObject* pContainerPlugin;
             try {
                 pContainerPlugin = pluginLoader.load(_containerPlugin);

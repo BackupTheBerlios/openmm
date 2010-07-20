@@ -42,25 +42,25 @@ ServerResource::getResourceId()
 }
 
 
-FileResource::FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri) :
-ServerResource(resourceId, protInfo, size),
-_privateUri(privateUri)
-{
-}
-
-
-std::streamsize
-FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
-{
-//     std::string path = _pFileObjectSource->_basePath + "/" + _privateUri;
-    std::string path = _privateUri;
-    
-    std::ifstream istr(path.c_str());
-    if (seek > 0) {
-        istr.seekg(seek);
-    }
-    return Poco::StreamCopier::copyStream(istr, ostr);
-}
+// FileResource::FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri) :
+// ServerResource(resourceId, protInfo, size),
+// _privateUri(privateUri)
+// {
+// }
+// 
+// 
+// std::streamsize
+// FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+// {
+// //     std::string path = _pFileObjectSource->_basePath + "/" + _privateUri;
+//     std::string path = _privateUri;
+//     
+//     std::ifstream istr(path.c_str());
+//     if (seek > 0) {
+//         istr.seekg(seek);
+//     }
+//     return Poco::StreamCopier::copyStream(istr, ostr);
+// }
 
 
 WebResource::WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri) :
@@ -152,48 +152,48 @@ MediaItemServer::getPort() const
 }
 
 
-MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass, int port) :
-MediaContainer(title, subClass)
-{
-    _pItemServer = new MediaItemServer(port);
-    _pItemServer->_pServerContainer = this;
-    _pItemServer->start();
-    _port = _pItemServer->_socket.address().port();
-    _address =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
-}
-
-
-MediaServerContainer::~MediaServerContainer()
-{
-    _pItemServer->stop();
-    delete _pItemServer;
-}
-
-
-// void
-// MediaServerContainer::appendChild(ServerObject* pChild)
+// MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass, int port) :
+// MediaContainer(title, subClass)
 // {
-//     ServerObject::appendChild(pChild);
-//     
-//     // FIXME: writing the public uri should be moved somewhere else, probably into the XML writer of ServerObject
-//     // then appendChild() can be removed from MediaServerContainer
-//     for (MediaObject::ResourceIterator it = pChild->beginResource(); it != pChild->endResource(); ++it) {
-//         (*it)->setUri(getServerAddress() + "/" + (*it)->getUri());
-//     }
+//     _pItemServer = new MediaItemServer(port);
+//     _pItemServer->_pServerContainer = this;
+//     _pItemServer->start();
+//     _port = _pItemServer->_socket.address().port();
+//     _address =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+// }
+// 
+// 
+// MediaServerContainer::~MediaServerContainer()
+// {
+//     _pItemServer->stop();
+//     delete _pItemServer;
+// }
+// 
+// 
+// // void
+// // MediaServerContainer::appendChild(ServerObject* pChild)
+// // {
+// //     ServerObject::appendChild(pChild);
+// //     
+// //     // FIXME: writing the public uri should be moved somewhere else, probably into the XML writer of ServerObject
+// //     // then appendChild() can be removed from MediaServerContainer
+// //     for (MediaObject::ResourceIterator it = pChild->beginResource(); it != pChild->endResource(); ++it) {
+// //         (*it)->setUri(getServerAddress() + "/" + (*it)->getUri());
+// //     }
+// // }
+// 
+// 
+// std::string
+// MediaServerContainer::getServerAddress()
+// {
+//     return "http://" + _address + ":" + Poco::NumberFormatter::format(_port);
 // }
 
 
-std::string
-MediaServerContainer::getServerAddress()
-{
-    return "http://" + _address + ":" + Poco::NumberFormatter::format(_port);
-}
-
-
-ServerObject::ServerObject() //:
-// MediaObject()
-{
-}
+// ServerObject::ServerObject() //:
+// // MediaObject()
+// {
+// }
 
 
 // void
@@ -267,26 +267,26 @@ ServerObject::ServerObject() //:
 // }
 
 
-MediaContainer::MediaContainer(const std::string& title, const std::string& subClass) :
-ServerObject()
-{
-    setTitle(title);
-    setClass(std::string("object.container" + (subClass == "" ? "" : "." + subClass)));
-}
-
-
-MediaItem::MediaItem() :
-ServerObject()
-{
-}
-
-
-MediaItem::MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass)
-{
-    setObjectNumber(objectId);
-    setTitle(title);
-    setClass(std::string("object.item" + (subClass == "" ? "" : "." + subClass)));
-}
+// MediaContainer::MediaContainer(const std::string& title, const std::string& subClass) :
+// ServerObject()
+// {
+//     setTitle(title);
+//     setClass(std::string("object.container" + (subClass == "" ? "" : "." + subClass)));
+// }
+// 
+// 
+// MediaItem::MediaItem() :
+// ServerObject()
+// {
+// }
+// 
+// 
+// MediaItem::MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass)
+// {
+//     setObjectNumber(objectId);
+//     setTitle(title);
+//     setClass(std::string("object.item" + (subClass == "" ? "" : "." + subClass)));
+// }
 
 
 ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaItemServer* pItemServer) :
@@ -412,6 +412,32 @@ UpnpAvServer::getRoot()
 {
     return _pRoot;
 }
+
+
+StreamingMediaObject::StreamingMediaObject(int port)
+{
+    _pItemServer = new MediaItemServer(port);
+    _pItemServer->_pServerContainer = this;
+    _pItemServer->start();
+}
+
+
+StreamingMediaObject::~StreamingMediaObject()
+{
+    _pItemServer->stop();
+    delete _pItemServer;
+}
+
+
+std::string
+StreamingMediaObject::getServerAddress()
+{
+    std::string address = Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
+    int port = _pItemServer->_socket.address().port();
+    return "http://" + address + ":" + Poco::NumberFormatter::format(port);
+}
+
+
 
 } // namespace Av
 } // namespace Omm

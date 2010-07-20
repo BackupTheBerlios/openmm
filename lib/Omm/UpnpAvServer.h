@@ -32,7 +32,7 @@ namespace Omm {
 namespace Av {
 
 class MediaItemServer;
-class MediaServerContainer;
+class StreamingMediaObject;
 
 
 class ServerResource : public Resource
@@ -49,17 +49,17 @@ private:
 };
 
 
-class FileResource : public ServerResource
-{
-public:
-    FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri);
-    
-    virtual bool isSeekable() { return true; }
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
-    
-private:
-    std::string         _privateUri;
-};
+// class FileResource : public ServerResource
+// {
+// public:
+//     FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri);
+//     
+//     virtual bool isSeekable() { return true; }
+//     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+//     
+// private:
+//     std::string         _privateUri;
+// };
 
 
 class WebResource : public ServerResource
@@ -75,97 +75,10 @@ private:
 };
 
 
-class ServerObject : public AbstractMediaObject
-{
-public:
-    ServerObject();
-    
-    virtual AbstractMediaObject* getChild(const std::string& objectId) { return 0; }
-    virtual AbstractMediaObject* getObject(const std::string& objectId) { return 0; }        // server object, cds browse
-
-    virtual ui4 getChildCount() { return 0; }                                                // server object, cds browse / write meta data
-                                                                                // controller object, browse
-    virtual bool isContainer() { return false; }                                                 // server object, write meta data
-                                                                                // controller object, browse
-    virtual AbstractMediaObject* getChild(ui4 numChild) { return 0; }                        // server object, write meta data
-                                                                                // controller object, browse
-
-    virtual std::string getObjectId() { return ""; }                                          // server object, write meta data
-    virtual bool isRestricted() { return false; }                                                // server object, write meta data
-    virtual int getPropertyCount(const std::string& name = "") { return 0; }
-    virtual AbstractProperty* getProperty(int index) { return 0; }
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) { return 0; }             // server object, write meta data
-    virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) { return 0; }  // server object, write meta data
-    
-    
-//     void addResource(ServerResource* pResource);
-//     AbstractResource* getResource(const std::string& resourceId);
-//     ServerResource* getResource(const std::string& resourceId);
-    
-//     virtual void appendChild(ServerObject* pChild);
-    
-    // --------- interface to ContentDirectoryImplementation::Browse() ----------
-//    ServerObject* getObject(const std::string& objectId);
-    //ui4 getChildCount();  // for total matches in browse answer
-    
-    // --------- interface to MediaObjectWriter ----------
-    //MediaObject* getChild(ui4 num);
-    //bool isContainer();
-    //virtual std::string getObjectId() const;
-    //std::string getParentId();
-    //bool isRestricted();
-    //typedef std::vector<Resource*>::iterator ResourceIterator;
-    //typedef std::map<std::string,std::string>::iterator PropertyIterator;
-    
-private:
-    std::map<std::string,ServerObject*>         _childrenMap;
-    std::map<std::string,ServerResource*>       _resourceMap;
-};
-
-
-class MediaItem : public ServerObject
-{
-public:
-    MediaItem();
-    MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass);
-};
-
-
-class MediaContainer : public ServerObject
-{
-public:
-//     MediaContainer();
-    MediaContainer(const std::string& title, const std::string& subClass = "");
-};
-
-
-class MediaServerContainer : public MediaContainer
-{
-    friend class MediaItemServer;
-    friend class ItemRequestHandler;
-    
-public:
-    MediaServerContainer(const std::string& title, const std::string& subClass = "", int port = 0);
-    ~MediaServerContainer();
-    
-//     virtual void appendChild(ServerObject* pChild);
-    
-    std::string getServerAddress();
-    
-private:
-    MediaItemServer*        _pItemServer;
-//     AvStream::Transcoder*   _pTranscoder;
-    
-    // TODO: this should be fetched from _pItemServer
-    int                 _port;
-    std::string         _address;
-};
-
-
 class MediaItemServer
 {
     friend class ItemRequestHandler;
-    friend class MediaServerContainer;
+    friend class StreamingMediaObject;
     
 public:
     MediaItemServer(int port = 0);
@@ -176,7 +89,7 @@ public:
     Poco::UInt16 getPort() const;
     
 private:
-    MediaServerContainer*                       _pServerContainer;
+    StreamingMediaObject*                       _pServerContainer;
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
 };
@@ -228,13 +141,23 @@ private:
 };
 
 
-
-
-class StreamingMediaObject : AbstractMediaObject
+class StreamingMediaObject : public AbstractMediaObject
 {
+    friend class MediaItemServer;
+    friend class ItemRequestHandler;
+    
+public:
+    StreamingMediaObject(int port = 0);
+    ~StreamingMediaObject();
+    
+    std::string getServerAddress();
+    
+private:
+    MediaItemServer*        _pItemServer;
+//     AvStream::Transcoder*   _pTranscoder;
 };
 
-
+/*
 class AbstractDataModel
 {
 public:
@@ -275,6 +198,98 @@ public:
     // container based update notifications
     virtual  std::vector<ServerObject*> objectsHaveChanged() {}
 };
+*/
+
+
+
+/*------------------------ depricated classes ---------------------------*/
+
+
+// class ServerObject : public AbstractMediaObject
+// {
+// public:
+//     ServerObject();
+//     
+//     virtual AbstractMediaObject* getChild(const std::string& objectId) { return 0; }
+//     virtual AbstractMediaObject* getObject(const std::string& objectId) { return 0; }        // server object, cds browse
+// 
+//     virtual ui4 getChildCount() { return 0; }                                                // server object, cds browse / write meta data
+//                                                                                 // controller object, browse
+//     virtual bool isContainer() { return false; }                                                 // server object, write meta data
+//                                                                                 // controller object, browse
+//     virtual AbstractMediaObject* getChild(ui4 numChild) { return 0; }                        // server object, write meta data
+//                                                                                 // controller object, browse
+// 
+//     virtual std::string getObjectId() { return ""; }                                          // server object, write meta data
+//     virtual bool isRestricted() { return false; }                                                // server object, write meta data
+//     virtual int getPropertyCount(const std::string& name = "") { return 0; }
+//     virtual AbstractProperty* getProperty(int index) { return 0; }
+//     virtual AbstractProperty* getProperty(const std::string& name, int index = 0) { return 0; }             // server object, write meta data
+//     virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) { return 0; }  // server object, write meta data
+    
+    
+//     void addResource(ServerResource* pResource);
+//     AbstractResource* getResource(const std::string& resourceId);
+//     ServerResource* getResource(const std::string& resourceId);
+    
+//     virtual void appendChild(ServerObject* pChild);
+    
+    // --------- interface to ContentDirectoryImplementation::Browse() ----------
+//    ServerObject* getObject(const std::string& objectId);
+    //ui4 getChildCount();  // for total matches in browse answer
+    
+    // --------- interface to MediaObjectWriter ----------
+    //MediaObject* getChild(ui4 num);
+    //bool isContainer();
+    //virtual std::string getObjectId() const;
+    //std::string getParentId();
+    //bool isRestricted();
+    //typedef std::vector<Resource*>::iterator ResourceIterator;
+    //typedef std::map<std::string,std::string>::iterator PropertyIterator;
+    
+// private:
+//     std::map<std::string,ServerObject*>         _childrenMap;
+//     std::map<std::string,ServerResource*>       _resourceMap;
+// };
+
+
+// class MediaItem : public ServerObject
+// {
+// public:
+//     MediaItem();
+//     MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass);
+// };
+// 
+// 
+// class MediaContainer : public ServerObject
+// {
+// public:
+// //     MediaContainer();
+//     MediaContainer(const std::string& title, const std::string& subClass = "");
+// };
+
+
+// class MediaServerContainer : public MediaContainer
+// {
+//     friend class MediaItemServer;
+//     friend class ItemRequestHandler;
+//     
+// public:
+//     MediaServerContainer(const std::string& title, const std::string& subClass = "", int port = 0);
+//     ~MediaServerContainer();
+//     
+// //     virtual void appendChild(ServerObject* pChild);
+//     
+//     std::string getServerAddress();
+//     
+// private:
+//     MediaItemServer*        _pItemServer;
+// //     AvStream::Transcoder*   _pTranscoder;
+//     
+//     // TODO: this should be fetched from _pItemServer
+//     int                 _port;
+//     std::string         _address;
+// };
 
 
 } // namespace Av

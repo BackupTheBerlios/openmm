@@ -24,27 +24,32 @@
 
 #include <Omm/UpnpAvServer.h>
 
-class FileServer : public Omm::Av::MediaServerContainer
+class FileMediaItem;
+
+class FileServer : public Omm::Av::StreamingMediaObject
 {
 public:
     FileServer();
+    virtual ~FileServer();
     
-    virtual AbstractMediaObject* getChild(const std::string& objectId) { return 0; }
-    virtual AbstractMediaObject* getObject(const std::string& objectId) { return 0; }        // server object, cds browse
-
-    virtual ui4 getChildCount() { return 0; }                                                // server object, cds browse / write meta data
-                                                                                // controller object, browse
-    virtual bool isContainer() { return true; }                                                 // server object, write meta data
-                                                                                // controller object, browse
-    virtual AbstractMediaObject* getChild(ui4 numChild) { return 0; }                        // server object, write meta data
-                                                                                // controller object, browse
-
-    virtual std::string getObjectId() { return ""; }                                          // server object, write meta data
-    virtual bool isRestricted() { return false; }                                                // server object, write meta data
-    virtual int getPropertyCount(const std::string& name = "") { return 0; }
-    virtual AbstractProperty* getProperty(int index) { return 0; }
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) { return 0; }             // server object, write meta data
-    virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) { return 0; }  // server object, write meta data
+    virtual Omm::ui4 getChildCount();
+    virtual bool isContainer();
+    virtual AbstractMediaObject* getChild(Omm::ui4 numChild);
+    virtual int getPropertyCount(const std::string& name = "");
+    virtual Omm::Av::AbstractProperty* getProperty(int index);
+    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
+    virtual void addProperty(Omm::Av::AbstractProperty* pProperty);
+    virtual Omm::Av::AbstractProperty* createProperty();
+    
+    virtual void setOption(const std::string& key, const std::string& value);
+    
+private:
+    void setBasePath(const std::string& basePath);
+    
+    std::vector<std::string>             _fileNames;
+    
+    Omm::Av::AbstractProperty*           _pTitleProp;
+    FileMediaItem*                       _pChild;
 };
 
 #endif

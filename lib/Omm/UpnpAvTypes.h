@@ -31,6 +31,7 @@
 #include <Poco/SplitterChannel.h>
 
 #include "Upnp.h"
+#include "Util.h"
 
 // NOTE: for media object ids only use non-reserved characters for segments 
 // (according to RFC 3986), because object ids may be used in resource URIs.
@@ -211,7 +212,7 @@ public:
 };
 
 
-class AbstractMediaObject
+class AbstractMediaObject : public Util::ConfigurablePlugin
 {
 public:
     AbstractMediaObject();
@@ -274,6 +275,8 @@ public:
     virtual AbstractResource* getResource(const std::string& resourceId);                       // controller object, transport
 
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
+void setBasePath(std::string arg1);
+
 
 private:
     void setUniqueProperty(const std::string& name, const std::string& value);
@@ -390,34 +393,6 @@ class MemoryResource : public AbstractResource
 {
 public:
     MemoryResource();
-};
-
-
-/*---------------- file server ------------------------*/
-
-class FileMediaContainer : public AbstractMediaObject
-{
-public:
-    FileMediaContainer(const std::string& basePath = "/", const std::string& title = "All Local Media");
-    virtual ~FileMediaContainer();
-    
-    virtual ui4 getChildCount();                                                            // server object, cds browse / write meta data
-                                                                                                // controller object, browse
-    virtual bool isContainer();                                                             // server object, write meta data
-                                                                                                // controller object, browse
-    virtual AbstractMediaObject* getChild(ui4 numChild);                                    // server object, write meta data
-                                                                                                // controller object, browse
-    virtual bool isRestricted();                                                            // server object, write meta data
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual AbstractProperty* getProperty(int index);
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);             // server object, write meta data
-    
-private:
-    std::string                 _basePath;
-    std::vector<std::string>    _fileNames;
-    
-    MemoryProperty*             _pProp;
-    AbstractMediaObject*        _pChild;
 };
 
 

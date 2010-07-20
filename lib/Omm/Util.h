@@ -159,6 +159,17 @@ private:
 };
 
 
+/**
+class ConfigurablePlugin
+interface for plugins, that can be parametrized with options
+*/
+
+class ConfigurablePlugin
+{
+public:
+    virtual void setOption(const std::string& key, const std::string& value) {}
+};
+
 }  // namespace Omm
 }  // namespace Util
 

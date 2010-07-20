@@ -20,6 +20,8 @@
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
+#include <Omm/Util.h>
+
 #include "TestServer.h"
 
 TestServer::TestServer() //:
@@ -56,11 +58,22 @@ TestServer::TestServer() //:
 // //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject(new MemoryObject, new MemoryProperty, new WebResource);
 //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject(new FileDirectory("/base/path"), new MemoryProperty, new FileResource("/base/path");
 
-    Omm::Av::AbstractMediaObject* pVideos = new Omm::Av::FileMediaContainer("/home/jb/Videos", "Videos");
-    appendChild(pVideos);
+    /*----------- media object with meta data dynamically loaded for each media item, streaming through local proxy ------------*/
+    std::string pluginName("server-file");
+    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
+    Omm::Av::AbstractMediaObject* pVideos;
+    try {
+        pVideos = pluginLoader.load(pluginName);
+    }
+    catch(Poco::NotFoundException) {
+        std::cerr << "Error could not find server plugin: " << pluginName << std::endl;
+        return;
+    }
+    std::clog << "container plugin: " << pluginName << " loaded successfully" << std::endl;
 
-//     Omm::Av::AbstractMediaObject* pMp3s = new Omm::Av::CachedDirectoryContainer("/home/jb/mp3");
-//     appendChild(pMp3s);
+    pVideos->setTitle("Videos");
+    pVideos->setOption("basePath", "/home/jb/Videos");
+    appendChild(pVideos);
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
