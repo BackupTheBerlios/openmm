@@ -47,6 +47,7 @@ public:
     void start();
     void stop();
     Poco::UInt16 getPort() const;
+    std::string getProtocol();
     
 private:
     StreamingMediaObject*                       _pServerContainer;
@@ -100,11 +101,22 @@ private:
 
 class StreamingResource : public AbstractResource
 {
+    friend class ItemRequestHandler;
+    
 public:
     StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem);
     
     virtual std::string getValue();
+    virtual std::string getAttributeName(int index);
+    virtual std::string getAttributeValue(int index);
+    virtual std::string getAttributeValue(const std::string& name);
+    virtual int getAttributeCount();
 
+protected:
+    virtual std::string getMime() { return "*"; }
+    virtual std::string getDlna() { return "*"; }
+    virtual ui4 getSize() { return 0; }
+    
     virtual bool isSeekable() = 0;
     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) = 0;
     
@@ -122,10 +134,7 @@ protected:
 class StreamingMediaItem : public MemoryMediaObject
 {
 public:
-    StreamingMediaItem(StreamingMediaObject* pServer)
-    {
-        _pServer = pServer;
-    }
+    StreamingMediaItem(StreamingMediaObject* pServer);
     
 private:
     StreamingMediaObject*       _pServer;
@@ -135,19 +144,19 @@ private:
 class StreamingMediaObject : public AbstractMediaObject
 {
     friend class ItemRequestHandler;
+    friend class StreamingResource;
     
 public:
     StreamingMediaObject(int port = 0);
     ~StreamingMediaObject();
     
-    virtual AbstractMediaObject* createChildObject()
-    {
-        return new StreamingMediaItem(this);
-    }
-    
-    std::string getServerAddress();
+    virtual AbstractMediaObject* createChildObject();
+
     
 private:
+    std::string getServerAddress();
+    std::string getServerProtocol();
+
     MediaItemServer*        _pItemServer;
 //     AvStream::Transcoder*   _pTranscoder;
 };

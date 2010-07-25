@@ -60,20 +60,38 @@ TestServer::TestServer() //:
 
     /*----------- media object with meta data dynamically loaded for each media item, streaming through local proxy ------------*/
     std::string pluginName("server-file");
-    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
+    
+    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> videoFileServerLoader;
     Omm::Av::AbstractMediaObject* pVideos;
     try {
-        pVideos = pluginLoader.load(pluginName);
+        pVideos = videoFileServerLoader.load(pluginName);
     }
     catch(Poco::NotFoundException) {
         std::cerr << "Error could not find server plugin: " << pluginName << std::endl;
         return;
     }
-    std::clog << "container plugin: " << pluginName << " loaded successfully" << std::endl;
+    std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
 
     pVideos->setTitle("Videos");
     pVideos->setOption("basePath", "/home/jb/Videos");
     appendChild(pVideos);
+    
+    
+    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> mp3FileServerLoader;
+    Omm::Av::AbstractMediaObject* pMusic;
+    try {
+        pMusic = mp3FileServerLoader.load(pluginName);
+    }
+    catch(Poco::NotFoundException) {
+        std::cerr << "Error could not find server plugin: " << pluginName << std::endl;
+        return;
+    }
+    std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
+
+    pMusic->setTitle("Music");
+    pMusic->setOption("basePath", "/home/jb/mp3/current");
+    appendChild(pMusic);
+    
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)

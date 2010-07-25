@@ -135,14 +135,14 @@ AbstractResource::getUri()
 std::string
 AbstractResource::getProtInfo()
 {
-    return getAttribute("protocolInfo");
+    return getAttributeValue("protocolInfo");
 }
 
 
 ui4
 AbstractResource::getSize()
 {
-    return Poco::NumberParser::parseUnsigned(getAttribute("size"));
+    return Poco::NumberParser::parseUnsigned(getAttributeValue("size"));
 }
 
 
@@ -209,16 +209,23 @@ AbstractProperty::getValue()
 
 
 std::string
-AbstractProperty::getAttribute(const std::string& name)
+AbstractProperty::getAttributeName(int index)
 {
-    return _pPropertyImpl->getAttribute(name);
+    return _pPropertyImpl->getAttributeName(index);
 }
 
 
 std::string
-AbstractProperty::getAttribute(int index)
+AbstractProperty::getAttributeValue(int index)
 {
-    return _pPropertyImpl->getAttribute(index);
+    return _pPropertyImpl->getAttributeValue(index);
+}
+
+
+std::string
+AbstractProperty::getAttributeValue(const std::string& name)
+{
+    return _pPropertyImpl->getAttributeValue(name);
 }
 
 
@@ -499,17 +506,31 @@ MemoryPropertyImpl::getValue()
 
 
 std::string
-MemoryPropertyImpl::getAttribute(const std::string& name)
+MemoryPropertyImpl::getAttributeName(int index)
 {
-    return _attrMap[name];
+    int i = 0;
+    std::map<std::string,std::string>::iterator it;
+    for (it = _attrMap.begin(); (it != _attrMap.end()) && (i < index); ++it, ++i) {
+    }
+    return (*it).first;
 }
 
 
 std::string
-MemoryPropertyImpl::getAttribute(int index)
+MemoryPropertyImpl::getAttributeValue(int index)
 {
-    // TODO: implement MemoryPropertyImpl::getAttribute(int index)
-    return "";
+    int i = 0;
+    std::map<std::string,std::string>::iterator it;
+    for (it = _attrMap.begin(); (it != _attrMap.end()) && (i < index); ++it, ++i) {
+    }
+    return (*it).second;
+}
+
+
+std::string
+MemoryPropertyImpl::getAttributeValue(const std::string& name)
+{
+    return _attrMap[name];
 }
 
 
@@ -895,7 +916,6 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     // refID (String)
     
     // properties
-    // TODO: property attributes should be written.
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() writing properties ...");
     // write properties
     int propCount = _pMediaObject->getPropertyCount();
@@ -907,6 +927,13 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement(name);
         Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(value);
         pProperty->appendChild(pPropertyValue);
+        
+        // write property attributes
+        int attrCount = pProp->getAttributeCount();
+        for (int attrNum = 0; attrNum < attrCount; ++attrNum) {
+            pProperty->setAttribute(pProp->getAttributeName(attrNum), pProp->getAttributeValue(attrNum));
+        }
+        
         pObject->appendChild(pProperty);
     }
     

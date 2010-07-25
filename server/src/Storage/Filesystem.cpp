@@ -23,12 +23,12 @@
 #include "Filesystem.h"
 
 
-class FileResource : public Omm::Av::StreamingResource
+class FileItemResource : public Omm::Av::StreamingResource
 {
     friend class FileServer;
     
 public:
-    FileResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    FileItemResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem);
     
     virtual bool isSeekable();
     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
@@ -36,7 +36,7 @@ public:
     void setPath(const std::string& path);
     
 private:
-    std::string                         _path;
+    std::string         _path;
 };
 
 
@@ -47,27 +47,7 @@ public:
 };
 
 
-class FileMediaItem : public Omm::Av::StreamingMediaItem
-{
-    friend class FileServer;
-    
-public:
-    FileMediaItem(FileServer* pServer);
-    virtual ~FileMediaItem();
-    
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual Omm::Av::AbstractProperty* getProperty(int index);
-    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
-
-    void setPath(const std::string& path);
-
-private:
-    FileItemProperty*                   _pTitleProp;
-    FileResource*                       _pResource;
-};
-
-
-class FilePropertyImpl : public Omm::Av::PropertyImpl
+class FileItemPropertyImpl : public Omm::Av::PropertyImpl
 {
 public:
     virtual void setName(const std::string& name);
@@ -81,21 +61,41 @@ private:
 };
 
 
-FileResource::FileResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+class FileItem : public Omm::Av::StreamingMediaItem
+{
+    friend class FileServer;
+    
+public:
+    FileItem(FileServer* pServer);
+    virtual ~FileItem();
+    
+    virtual int getPropertyCount(const std::string& name = "");
+    virtual Omm::Av::AbstractProperty* getProperty(int index);
+    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
+
+    void setPath(const std::string& path);
+
+private:
+    FileItemProperty*                   _pTitleProp;
+    FileItemResource*                   _pResource;
+};
+
+
+FileItemResource::FileItemResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
 StreamingResource(new Omm::Av::MemoryPropertyImpl, pServer, pItem)
 {
 }
 
 
 bool
-FileResource::isSeekable()
+FileItemResource::isSeekable()
 {
     return true;
 }
 
 
 std::streamsize
-FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+FileItemResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 {
     std::clog << "FileResource::stream(), relative path: " << _path << ", _pServer: " << _pServer << std::endl;
     std::string path = static_cast<FileServer*>(_pServer)->_basePath + "/" + _path;
@@ -110,30 +110,30 @@ FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 
 
 void
-FileResource::setPath(const std::string& path)
+FileItemResource::setPath(const std::string& path)
 {
     _path = path;
-    setProtInfo("http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01");
-    setSize(0);
+    // TODO: Tagger should determine the proper attributes ProtInfo:Mime:DLNA, and Size
+    // then implement FileItemResource::getMime(), FileItemResource::getDlna and FileItemResource::getSize()
 }
 
 
 void
-FilePropertyImpl::setName(const std::string& name)
+FileItemPropertyImpl::setName(const std::string& name)
 {
     _name = name;
 }
 
 
 void
-FilePropertyImpl::setValue(const std::string& value)
+FileItemPropertyImpl::setValue(const std::string& value)
 {
     _value = value;
 }
 
 
 std::string
-FilePropertyImpl::getName()
+FileItemPropertyImpl::getName()
 {
     std::clog << "FilePropertyImpl::getName() returns: " << _name << std::endl;
 
@@ -142,7 +142,7 @@ FilePropertyImpl::getName()
 
 
 std::string
-FilePropertyImpl::getValue()
+FileItemPropertyImpl::getValue()
 {
     std::clog << "FilePropertyImpl::getValue() returns: " << _value << std::endl;
 
@@ -153,29 +153,29 @@ FilePropertyImpl::getValue()
 
 
 FileItemProperty::FileItemProperty() :
-AbstractProperty(new FilePropertyImpl)
+AbstractProperty(new FileItemPropertyImpl)
 {
 }
 
 
-FileMediaItem::FileMediaItem(FileServer* pServer) :
+FileItem::FileItem(FileServer* pServer) :
 StreamingMediaItem(pServer),
 _pTitleProp(new FileItemProperty),
-_pResource(new FileResource(pServer, this))
+_pResource(new FileItemResource(pServer, this))
 {
     std::clog << "FileMediaItem::FileMediaItem(pServer), pServer: " << pServer << std::endl;
     _pTitleProp->setName("dc:title");
 }
 
 
-FileMediaItem::~FileMediaItem()
+FileItem::~FileItem()
 {
     delete _pTitleProp;
 }
 
 
 int
-FileMediaItem::getPropertyCount(const std::string& name)
+FileItem::getPropertyCount(const std::string& name)
 {
     std::clog << "FileMediaItem::getPropertyCount(name), name: " << name << std::endl;
     
@@ -192,7 +192,7 @@ FileMediaItem::getPropertyCount(const std::string& name)
 
 
 Omm::Av::AbstractProperty*
-FileMediaItem::getProperty(int index)
+FileItem::getProperty(int index)
 {
     std::clog << "FileMediaItem::getProperty(index), index: " << index << std::endl;
     
@@ -206,7 +206,7 @@ FileMediaItem::getProperty(int index)
 
 
 Omm::Av::AbstractProperty*
-FileMediaItem::getProperty(const std::string& name, int index)
+FileItem::getProperty(const std::string& name, int index)
 {
     std::clog << "FileMediaItem::getProperty(name, index), name: " << name << ", index: " << index << std::endl;
 
@@ -223,7 +223,7 @@ FileMediaItem::getProperty(const std::string& name, int index)
 
 
 void
-FileMediaItem::setPath(const std::string& path)
+FileItem::setPath(const std::string& path)
 {
     _pTitleProp->setValue(path);
     _pResource->setPath(path);
@@ -231,8 +231,8 @@ FileMediaItem::setPath(const std::string& path)
 
 
 FileServer::FileServer() :
-Omm::Av::StreamingMediaObject(9999),
-_pChild(static_cast<FileMediaItem*>(createChildObject()))
+// Omm::Av::StreamingMediaObject(9999),
+_pChild(static_cast<FileItem*>(createChildObject()))
 {
 }
 
@@ -327,7 +327,7 @@ FileServer::createChildObject()
 {
     std::clog << "FileServer::createChildObject()" << std::endl;
     
-    FileMediaItem* pRes = new FileMediaItem(this);
+    FileItem* pRes = new FileItem(this);
     pRes->setParent(this);
 
     return pRes;

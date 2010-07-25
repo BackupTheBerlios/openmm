@@ -28,62 +28,6 @@ namespace Omm {
 namespace Av {
 
 
-ServerResource::ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size) :
-Resource("", protInfo, size),
-_resourceId(resourceId)
-{
-}
-
-
-const std::string&
-ServerResource::getResourceId()
-{
-    return _resourceId;
-}
-
-
-WebResource::WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri) :
-ServerResource(resourceId, protInfo, 0),
-_privateUri(privateUri)
-{
-}
-
-
-std::streamsize
-WebResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
-{
-    Poco::URI uri(_privateUri);
-    Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-    session.setKeepAlive(true);
-    session.setKeepAliveTimeout(Poco::Timespan(3, 0));
-    Poco::Timespan timeout = session.getKeepAliveTimeout();
-    Log::instance()->upnpav().debug("web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds() + "sec"));
-    Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
-    proxyRequest.setKeepAlive(true);
-    session.sendRequest(proxyRequest);
-    std::stringstream requestHeader;
-    proxyRequest.write(requestHeader);
-    Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
-    
-    Poco::Net::HTTPResponse proxyResponse;
-    std::istream& istr = session.receiveResponse(proxyResponse);
-    
-    if (istr.peek() == EOF) {
-        Log::instance()->upnpav().error("error reading data from web resource");
-    }
-    else {
-        Log::instance()->upnpav().debug("success reading data from web resource");
-    }
-    
-    Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(proxyResponse.getStatus()) + " " + proxyResponse.getReason());
-    std::stringstream responseHeader;
-    proxyResponse.write(responseHeader);
-    Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
-    
-    return Poco::StreamCopier::copyStream(istr, ostr);
-}
-
-
 MediaItemServer::MediaItemServer(int port) :
 _socket(Poco::Net::ServerSocket(port))
 {
@@ -120,6 +64,13 @@ Poco::UInt16
 MediaItemServer::getPort() const
 {
     return _socket.address().port();
+}
+
+
+std::string
+MediaItemServer::getProtocol()
+{
+    return "http-get:*";
 }
 
 
@@ -163,8 +114,14 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     std::string resProtInfo = pResource->getProtInfo();
     Log::instance()->upnpav().debug("protInfo: " + resProtInfo);
     Poco::StringTokenizer prot(resProtInfo, ":");
-    std::string mime = prot[2];
-    std::string dlna = prot[3];
+    std::string mime = "*";
+    if (prot.count() >= 3) {
+        mime = prot[2];
+    }
+    std::string dlna = "*";
+    if (prot.count() >= 4) {
+        dlna = prot[3];
+    }
     Log::instance()->upnpav().debug("protInfo mime: " + mime + ", dlna: " + dlna);
     ui4 resSize = pResource->getSize();
     
@@ -265,6 +222,56 @@ StreamingResource::getValue()
 }
 
 
+std::string
+StreamingResource::getAttributeName(int index)
+{
+    if (index == 0) {
+        return "protocolInfo";
+    }
+    else if (index == 1) {
+        return "size";
+    }
+}
+
+
+std::string
+StreamingResource::getAttributeValue(int index)
+{
+    if (index == 0) {
+        return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
+    }
+    else if (index == 1) {
+        return Poco::NumberFormatter::format(getSize());
+    }
+}
+
+
+std::string
+StreamingResource::getAttributeValue(const std::string& name)
+{
+    if (name == "protocolInfo") {
+        return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
+    }
+    else if (name == "size") {
+        return Poco::NumberFormatter::format(getSize());
+    }
+}
+
+
+int
+StreamingResource::getAttributeCount()
+{
+    // protocolInfo and size
+    return 2;
+}
+
+
+StreamingMediaItem::StreamingMediaItem(StreamingMediaObject* pServer)
+{
+    _pServer = pServer;
+}
+
+
 StreamingMediaObject::StreamingMediaObject(int port)
 {
     std::clog << "StreamingMediaObject::StreamingMediaObject(port), port: " << port << std::endl;
@@ -282,6 +289,13 @@ StreamingMediaObject::~StreamingMediaObject()
 }
 
 
+AbstractMediaObject*
+StreamingMediaObject::createChildObject()
+{
+    return new StreamingMediaItem(this);
+}
+
+
 std::string
 StreamingMediaObject::getServerAddress()
 {
@@ -292,6 +306,71 @@ StreamingMediaObject::getServerAddress()
     return "http://" + address + ":" + Poco::NumberFormatter::format(port);
 }
 
+
+std::string
+StreamingMediaObject::getServerProtocol()
+{
+    return _pItemServer->getProtocol();
+}
+
+
+
+/*------------------------ depricated classes ---------------------------*/
+
+ServerResource::ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size) :
+Resource("", protInfo, size),
+_resourceId(resourceId)
+{
+}
+
+
+const std::string&
+ServerResource::getResourceId()
+{
+    return _resourceId;
+}
+
+
+WebResource::WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri) :
+ServerResource(resourceId, protInfo, 0),
+_privateUri(privateUri)
+{
+}
+
+
+std::streamsize
+WebResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+{
+    Poco::URI uri(_privateUri);
+    Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
+    session.setKeepAlive(true);
+    session.setKeepAliveTimeout(Poco::Timespan(3, 0));
+    Poco::Timespan timeout = session.getKeepAliveTimeout();
+    Log::instance()->upnpav().debug("web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds() + "sec"));
+    Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
+    proxyRequest.setKeepAlive(true);
+    session.sendRequest(proxyRequest);
+    std::stringstream requestHeader;
+    proxyRequest.write(requestHeader);
+    Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
+    
+    Poco::Net::HTTPResponse proxyResponse;
+    std::istream& istr = session.receiveResponse(proxyResponse);
+    
+    if (istr.peek() == EOF) {
+        Log::instance()->upnpav().error("error reading data from web resource");
+    }
+    else {
+        Log::instance()->upnpav().debug("success reading data from web resource");
+    }
+    
+    Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(proxyResponse.getStatus()) + " " + proxyResponse.getReason());
+    std::stringstream responseHeader;
+    proxyResponse.write(responseHeader);
+    Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
+    
+    return Poco::StreamCopier::copyStream(istr, ostr);
+}
 
 
 } // namespace Av

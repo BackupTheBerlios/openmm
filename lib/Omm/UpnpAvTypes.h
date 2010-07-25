@@ -74,8 +74,9 @@ public:
     
     virtual std::string getName() = 0;
     virtual std::string getValue() = 0;
-    virtual std::string getAttribute(const std::string& name) { return ""; }
-    virtual std::string getAttribute(int index) { return ""; }
+    virtual std::string getAttributeName(int index) { return ""; }
+    virtual std::string getAttributeValue(int index) { return ""; }
+    virtual std::string getAttributeValue(const std::string& name) { return ""; }
     virtual int getAttributeCount() { return 0; }
 };
 
@@ -91,8 +92,9 @@ public:
     
     virtual std::string getName();
     virtual std::string getValue();
-    virtual std::string getAttribute(const std::string& name);
-    virtual std::string getAttribute(int index);
+    virtual std::string getAttributeName(int index);
+    virtual std::string getAttributeValue(int index);
+    virtual std::string getAttributeValue(const std::string& name);
     virtual int getAttributeCount();
     
 private:
@@ -113,9 +115,9 @@ public:
     void setSize(ui4 size);
     
     virtual std::string getName() { return "res"; }
-    std::string getUri();                           // server object, write meta data
-    std::string getProtInfo();                      // server object, write meta data
-    ui4 getSize();                                  // server object, write meta data
+    std::string getUri();
+    std::string getProtInfo();
+    ui4 getSize();
 };
 
 
@@ -196,8 +198,9 @@ public:
     
     virtual std::string getName();
     virtual std::string getValue();
-    virtual std::string getAttribute(const std::string& name);
-    virtual std::string getAttribute(int index);
+    virtual std::string getAttributeName(int index);
+    virtual std::string getAttributeValue(int index);
+    virtual std::string getAttributeValue(const std::string& name);
     virtual int getAttributeCount();
     
 private:

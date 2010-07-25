@@ -24,11 +24,11 @@
 
 #include <Omm/UpnpAvServer.h>
 
-class FileMediaItem;
+class FileItem;
 
 class FileServer : public Omm::Av::StreamingMediaObject
 {
-    friend class FileResource;
+    friend class FileItemResource;
     
 public:
     FileServer();
@@ -53,7 +53,7 @@ private:
     std::vector<std::string>             _fileNames;
     
     Omm::Av::AbstractProperty*           _pTitleProp;
-    FileMediaItem*                       _pChild;
+    FileItem*                            _pChild;
 };
 
 #endif
