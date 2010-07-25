@@ -130,25 +130,73 @@ class UpnpAvServer : public MediaServer
 public:
     UpnpAvServer();
 
-//     void setRoot(ServerObject* pRoot);
-//     ServerObject* getRoot();
     void setRoot(AbstractMediaObject* pRoot);
     AbstractMediaObject* getRoot();
 
 private:
-//     ServerObject* _pRoot;
     AbstractMediaObject* _pRoot;
+};
+
+
+// class StreamingResourceImpl : public PropertyImpl
+// {
+// public:
+//     StreamingResourceImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem);
+// 
+//     virtual std::string getValue();
+// 
+// private:
+//     StreamingMediaObject*       _pServer;
+//     AbstractMediaObject*        _pItem;
+// };
+
+
+class StreamingResource : public AbstractResource
+{
+public:
+    StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem);
+    
+    virtual std::string getValue();
+
+    virtual bool isSeekable() = 0;
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) = 0;
+    
+protected:
+    StreamingMediaObject*       _pServer;
+    AbstractMediaObject*        _pItem;
+    int                         _id;
+};
+
+
+// TODO: this should be a ServerObject (automatic id assignment) with
+// arbitrary implementation for accessing properties (see next todo brigde pattern)
+// TODO: use bridge pattern for AbstractMediaObject, similar to AbstractProperty
+// class StreamingMediaItem : public AbstractMediaObject
+class StreamingMediaItem : public MemoryMediaObject
+{
+public:
+    StreamingMediaItem(StreamingMediaObject* pServer)
+    {
+        _pServer = pServer;
+    }
+    
+private:
+    StreamingMediaObject*       _pServer;
 };
 
 
 class StreamingMediaObject : public AbstractMediaObject
 {
-    friend class MediaItemServer;
     friend class ItemRequestHandler;
     
 public:
     StreamingMediaObject(int port = 0);
     ~StreamingMediaObject();
+    
+    virtual AbstractMediaObject* createChildObject()
+    {
+        return new StreamingMediaItem(this);
+    }
     
     std::string getServerAddress();
     

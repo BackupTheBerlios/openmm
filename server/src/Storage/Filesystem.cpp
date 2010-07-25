@@ -23,53 +23,71 @@
 #include "Filesystem.h"
 
 
-class FileResource : public Omm::Av::MemoryResource
+class FileResource : public Omm::Av::StreamingResource
 {
+    friend class FileServer;
+    
 public:
+    FileResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    
     virtual bool isSeekable();
     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
     
-    void setBasePath(const std::string& path);
+//     void setBasePath(const std::string& path);
     void setPath(const std::string& path);
     
 private:
-    std::string         _basePath;
-    std::string         _path;
+//     Omm::Av::StreamingMediaObject*      _pStreamingObject;
+//     FileServer*                         _pServer;
+//     FileResourceImpl*                   _pResourceImpl;
+//     std::string                         _basePath;
+    std::string                         _path;
 };
 
 
-bool
-FileResource::isSeekable()
+class FileItemProperty : public Omm::Av::AbstractProperty
 {
-    return true;
-}
+public:
+    FileItemProperty();
+};
 
 
-std::streamsize
-FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+class FileMediaItem : public Omm::Av::StreamingMediaItem
 {
-    std::string path = _basePath + "/" + _path;
+    friend class FileServer;
     
-    std::ifstream istr(path.c_str());
-    if (seek > 0) {
-        istr.seekg(seek);
-    }
-    return Poco::StreamCopier::copyStream(istr, ostr);
-}
+public:
+    FileMediaItem(FileServer* pServer);
+    virtual ~FileMediaItem();
+    
+    virtual int getPropertyCount(const std::string& name = "");
+    virtual Omm::Av::AbstractProperty* getProperty(int index);
+    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
+//     virtual AbstractProperty* getProperty(const std::string& name, const std::string& value);  // server object, write meta data
+
+    void setPath(const std::string& path);
+//     void setBasePath(const std::string& basePath);
+
+private:
+//     Omm::Av::StreamingMediaObject*      _pStreamingObject;
+    FileItemProperty*                   _pTitleProp;
+    FileResource*                       _pResource;
+//     Omm::Av::AbstractResource*          _pResource;
+};
 
 
-void
-FileResource::setBasePath(const std::string& path)
-{
-    _basePath = path;
-}
-
-
-void
-FileResource::setPath(const std::string& path)
-{
-    _path = path;
-}
+// class FileResourceImpl : public Omm::Av::ResourceImpl
+// {
+//     friend class FileResource;
+//     
+// public:
+// //     virtual std::string getName();
+//     virtual std::string getValue();
+//     
+// private:
+//     FileMediaItem* _pItem;
+//     FileServer*    _pServer;
+// };
 
 
 class FilePropertyImpl : public Omm::Av::PropertyImpl
@@ -84,6 +102,71 @@ private:
     std::string         _name;
     std::string         _value;
 };
+
+
+// std::string
+// FileResourceImpl::getName()
+// {
+//     std::clog << "FileResource::getName()" << std::endl;
+//     
+//     return "res";
+// }
+
+
+// std::string
+// FileResourceImpl::getValue()
+// {
+//     std::clog << "FileResource::getValue()" << std::endl;
+//     
+//     std::string serverAddress = _pServer->getServerAddress();
+//     std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
+// //     std::string resourceId = Poco::NumberFormatter::format(getResourceNumber());
+//     return serverAddress + "/" + relativeObjectId + "$" /*+ resourceId*/;
+//     
+// //     return _pServer->getServerAddress() + "/" + _pItem->getObjectId();
+// }
+
+
+FileResource::FileResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+StreamingResource(new Omm::Av::MemoryPropertyImpl, pServer, pItem)
+// _pResourceImpl(new FileResourceImpl),
+// AbstractResource(new FileResourceImpl)
+{
+    std::clog << "FileResource::FileResource(pServer, pItem), pServer: " << pServer << ", pItem: " << pItem << std::endl;
+
+//     static_cast<FileResourceImpl*>(_pPropertyImpl)->_pServer = _pStreamingObject;
+}
+
+
+bool
+FileResource::isSeekable()
+{
+    return true;
+}
+
+
+std::streamsize
+FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+{
+    std::clog << "FileResource::stream(), relative path: " << _path << ", _pServer: " << _pServer << std::endl;
+    std::string path = static_cast<FileServer*>(_pServer)->_basePath + "/" + _path;
+    std::clog << "FileResource::stream(), absolute path: " << path << std::endl;
+    
+    std::ifstream istr(path.c_str());
+    if (seek > 0) {
+        istr.seekg(seek);
+    }
+    return Poco::StreamCopier::copyStream(istr, ostr);
+}
+
+
+void
+FileResource::setPath(const std::string& path)
+{
+    _path = path;
+    setProtInfo("http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01");
+    setSize(0);
+}
 
 
 void
@@ -103,6 +186,8 @@ FilePropertyImpl::setValue(const std::string& value)
 std::string
 FilePropertyImpl::getName()
 {
+    std::clog << "FilePropertyImpl::getName() returns: " << _name << std::endl;
+
     return _name;
 }
 
@@ -110,20 +195,12 @@ FilePropertyImpl::getName()
 std::string
 FilePropertyImpl::getValue()
 {
+    std::clog << "FilePropertyImpl::getValue() returns: " << _value << std::endl;
+
     if (_name == "dc:title") {
         return _value;
     }
-    else if (_name == "res") {
-        return "";
-    }
 }
-
-
-class FileItemProperty : public Omm::Av::AbstractProperty
-{
-public:
-    FileItemProperty();
-};
 
 
 FileItemProperty::FileItemProperty() :
@@ -132,32 +209,15 @@ AbstractProperty(new FilePropertyImpl)
 }
 
 
-class FileMediaItem : public Omm::Av::AbstractMediaObject
-{
-public:
-    FileMediaItem();
-    virtual ~FileMediaItem();
-    
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual Omm::Av::AbstractProperty* getProperty(int index);
-    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
-//     virtual AbstractProperty* getProperty(const std::string& name, const std::string& value);  // server object, write meta data
-
-    void setBasePath(const std::string& basePath);
-
-private:
-    FileItemProperty*           _pTitleProp;
-    FileResource*               _pResource;
-};
-
-
-FileMediaItem::FileMediaItem() :
+FileMediaItem::FileMediaItem(FileServer* pServer) :
+StreamingMediaItem(pServer),
 _pTitleProp(new FileItemProperty),
-_pResource(new FileResource)
+_pResource(new FileResource(pServer, this))
+// _pResource(_pStreamingObject->createResource())
 
 {
+    std::clog << "FileMediaItem::FileMediaItem(pServer), pServer: " << pServer << std::endl;
     _pTitleProp->setName("dc:title");
-    _pTitleProp->setValue("video.mpg");
 }
 
 
@@ -170,7 +230,10 @@ FileMediaItem::~FileMediaItem()
 int
 FileMediaItem::getPropertyCount(const std::string& name)
 {
+    std::clog << "FileMediaItem::getPropertyCount(name), name: " << name << std::endl;
+    
     if (name == "") {
+//         return 1;
         return 2;
     }
     else if (name == "dc:title" || name == "res") {
@@ -185,6 +248,8 @@ FileMediaItem::getPropertyCount(const std::string& name)
 Omm::Av::AbstractProperty*
 FileMediaItem::getProperty(int index)
 {
+    std::clog << "FileMediaItem::getProperty(index), index: " << index << std::endl;
+    
     if (index == 0) {
         return _pTitleProp;
     }
@@ -197,6 +262,8 @@ FileMediaItem::getProperty(int index)
 Omm::Av::AbstractProperty*
 FileMediaItem::getProperty(const std::string& name, int index)
 {
+    std::clog << "FileMediaItem::getProperty(name, index), name: " << name << ", index: " << index << std::endl;
+
     if (name == "dc:title") {
         return _pTitleProp;
     }
@@ -210,17 +277,24 @@ FileMediaItem::getProperty(const std::string& name, int index)
 
 
 void
-FileMediaItem::setBasePath(const std::string& basePath)
+FileMediaItem::setPath(const std::string& path)
 {
-    _pResource->setBasePath(basePath);
+    _pTitleProp->setValue(path);
+    _pResource->setPath(path);
 }
+
+
+// void
+// FileMediaItem::setBasePath(const std::string& basePath)
+// {
+//     _pResource->setBasePath(basePath);
+// }
 
 
 FileServer::FileServer() :
 Omm::Av::StreamingMediaObject(9999),
-_pChild(new FileMediaItem)
+_pChild(static_cast<FileMediaItem*>(createChildObject()))
 {
-    _pChild->setParent(this);
 }
 
 
@@ -257,8 +331,10 @@ FileServer::isContainer()
 Omm::Av::AbstractMediaObject*
 FileServer::getChild(Omm::ui4 numChild)
 {
-    _pChild->getProperty(0)->setValue(_fileNames[numChild]);
+//     _pChild->getProperty(0)->setValue(_fileNames[numChild]);
     _pChild->setObjectNumber(numChild);
+    _pChild->setPath(_fileNames[numChild]);
+//     _pChild->getResource(0)->setPath(_fileNames[numChild]);
     return _pChild;
 }
 
@@ -309,10 +385,25 @@ FileServer::createProperty()
 }
 
 
+Omm::Av::AbstractMediaObject*
+FileServer::createChildObject()
+{
+    std::clog << "FileServer::createChildObject()" << std::endl;
+    
+    FileMediaItem* pRes = new FileMediaItem(this);
+// //     pRes->_pStreamingObject = this;
+    pRes->setParent(this);
+//     pRes->_pResource->_pServer = this;
+//     pRes->_pResource->setUri(getServerAddress());
+
+    return pRes;
+}
+
+
 void
 FileServer::setBasePath(const std::string& basePath)
 {
-    _pChild->setBasePath(basePath);
+    _basePath = basePath;
     Poco::File baseDir(basePath);
     baseDir.list(_fileNames);
 }

@@ -56,6 +56,10 @@ MediaServerContainer("Web Radio", "musicContainer")
     pStation07->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://realserver3.hdm-stuttgart.de:8080/horads"));
     appendChild(pStation07);
     
+    // http://voxsc1.somafm.com:8090 (SOMA FM - Indie Pop Rocks)
+    // http://207.200.96.225:8020/ (Blue Mars)
+    // http://scfire-ntc-aa07.stream.aol.com:80/stream/1048 (Radio Paradise)
+    
 //     Omm::Av::MediaItem* pStation08 = new Omm::Av::MediaItem("08", "SWR DASDING", subClass);
 //     pStation08->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3"));
 //     appendChild(pStation08);

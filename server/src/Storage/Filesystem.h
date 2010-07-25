@@ -28,28 +28,33 @@ class FileMediaItem;
 
 class FileServer : public Omm::Av::StreamingMediaObject
 {
+    friend class FileResource;
+    
 public:
     FileServer();
     virtual ~FileServer();
     
     virtual Omm::ui4 getChildCount();
     virtual bool isContainer();
-    virtual AbstractMediaObject* getChild(Omm::ui4 numChild);
+    virtual Omm::Av::AbstractMediaObject* getChild(Omm::ui4 numChild);
     virtual int getPropertyCount(const std::string& name = "");
     virtual Omm::Av::AbstractProperty* getProperty(int index);
     virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
     virtual void addProperty(Omm::Av::AbstractProperty* pProperty);
     virtual Omm::Av::AbstractProperty* createProperty();
+    virtual Omm::Av::AbstractMediaObject* createChildObject();
     
     virtual void setOption(const std::string& key, const std::string& value);
     
 private:
     void setBasePath(const std::string& basePath);
     
+    std::string                          _basePath;
     std::vector<std::string>             _fileNames;
     
     Omm::Av::AbstractProperty*           _pTitleProp;
     FileMediaItem*                       _pChild;
+//     Omm::Av::AbstractMediaObject*        _pChild;
 };
 
 #endif

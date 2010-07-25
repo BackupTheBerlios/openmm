@@ -320,14 +320,16 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
-    std::string resourceId = uri[1];
-    Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + resourceId);
+    int resourceId = Poco::NumberParser::parse(uri[1]);
+//     std::string resourceId = uri[1];
+    Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
     
     // TODO: check if pItem really is a MediaItem and not a MediaContainer?
 //     ServerObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
     AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
 //     ServerResource* pResource = pItem->getResource(resourceId);
-    AbstractResource* pResource = pItem->getResource(resourceId);
+//     StreamingResource* pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
+    StreamingResource* pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
 
     std::string resProtInfo = pResource->getProtInfo();
     Log::instance()->upnpav().debug("protInfo: " + resProtInfo);
@@ -414,8 +416,56 @@ UpnpAvServer::getRoot()
 }
 
 
+
+// StreamingResourceImpl::StreamingResourceImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
+// _pServer(pServer),
+// _pItem(pItem)
+// {
+//     std::clog << "StreamingResourceImpl::StreamingResourceImpl(pServer, pItem), pServer: " << pServer << ", pItem: " << pItem << std::endl;
+// }
+// 
+// 
+// std::string
+// StreamingResourceImpl::getValue()
+// {
+//     std::clog << "StreamingResourceImpl::getValue()" << std::endl;
+//     
+//     std::string serverAddress = _pServer->getServerAddress();
+//     std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
+// //     std::string resourceId = Poco::NumberFormatter::format(getResourceNumber());
+//     return serverAddress + "/" + relativeObjectId + "$" /*+ resourceId*/;
+//     
+// //     return _pServer->getServerAddress() + "/" + _pItem->getObjectId();
+// }
+
+
+StreamingResource::StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
+// AbstractResource(new StreamingResourceImpl(pServer, pItem)),
+AbstractResource(pPropertyImpl),
+_pServer(pServer),
+_pItem(pItem),
+_id(0)
+{
+    std::clog << "StreamingResource::StreamingResource(pServer, pItem), pServer: " << pServer << ", pItem: " << pItem << std::endl;
+}
+
+
+std::string
+StreamingResource::getValue()
+{
+    std::clog << "StreamingResourceImpl::getValue()" << std::endl;
+    
+    std::string serverAddress = _pServer->getServerAddress();
+    std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
+    std::string resourceId = Poco::NumberFormatter::format(_id);
+    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+}
+
+
 StreamingMediaObject::StreamingMediaObject(int port)
 {
+    std::clog << "StreamingMediaObject::StreamingMediaObject(port), port: " << port << std::endl;
+    
     _pItemServer = new MediaItemServer(port);
     _pItemServer->_pServerContainer = this;
     _pItemServer->start();
@@ -432,6 +482,8 @@ StreamingMediaObject::~StreamingMediaObject()
 std::string
 StreamingMediaObject::getServerAddress()
 {
+    std::clog << "StreamingMediaObject::getServerAddress()" << std::endl;
+    
     std::string address = Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     int port = _pItemServer->_socket.address().port();
     return "http://" + address + ":" + Poco::NumberFormatter::format(port);

@@ -169,20 +169,17 @@ Resource::setProtInfo(const std::string& protInfo)
 }
 
 
-// AbstractResource::AbstractResource(const std::string& uri, const std::string& protInfo, ui4 size)
-// {
-//     setName("res");
-//     setUri(uri);
-//     setProtInfo(protInfo);
-//     setSize(size);
-// }
-
-
 AbstractResource::AbstractResource(PropertyImpl* pPropertyImpl) :
 AbstractProperty(pPropertyImpl)
 {
-    setName("res");
 }
+
+
+// std::string
+// ResourceImpl::getName()
+// {
+//     return "res";
+// }
 
 
 std::string
@@ -897,13 +894,13 @@ AbstractMediaObject::getResource(int index)
 }
 
 
-AbstractResource*
-AbstractMediaObject::getResource(const std::string& resourceId)
-{
-    Log::instance()->upnpav().debug("AbstractMediaObject::getResource() resouceId: " + resourceId);
-    
-    return static_cast<AbstractResource*>(getProperty("res", resourceId));
-}
+// AbstractResource*
+// AbstractMediaObject::getResource(const std::string& resourceId)
+// {
+//     Log::instance()->upnpav().debug("AbstractMediaObject::getResource() resouceId: " + resourceId);
+//     
+//     return static_cast<AbstractResource*>(getProperty("res", resourceId));
+// }
 
 
 void
@@ -1162,18 +1159,18 @@ MemoryMediaObject::getProperty(const std::string& name, int index)
 }
 
 
-AbstractProperty*
-MemoryMediaObject::getProperty(const std::string& name, const std::string& value)
-{
-    Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() name: " + name + ", value: " + value);
-    
-    std::pair<PropertyIterator,PropertyIterator> range = _propertyMap.equal_range(name);
-    for (PropertyIterator it = range.first; it != range.second; ++it) {
-        if ((*it).second->getValue() == value) {
-            return (*it).second;
-        }
-    }
-}
+// AbstractProperty*
+// MemoryMediaObject::getProperty(const std::string& name, const std::string& value)
+// {
+//     Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() name: " + name + ", value: " + value);
+//     
+//     std::pair<PropertyIterator,PropertyIterator> range = _propertyMap.equal_range(name);
+//     for (PropertyIterator it = range.first; it != range.second; ++it) {
+//         if ((*it).second->getValue() == value) {
+//             return (*it).second;
+//         }
+//     }
+// }
 
 
 MediaObjectReader::MediaObjectReader(AbstractMediaObject* pMediaObject) :
@@ -1234,6 +1231,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
         Poco::XML::Node* childNode = pNode->firstChild();
         while (childNode)
         {
+            // TODO: special treatment of resources shouldn't be necessary
             if (childNode->nodeName() == "res") {
                 Poco::XML::NamedNodeMap* attr = 0;
                 std::string protInfo = "";
@@ -1369,26 +1367,13 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     // searchable (Boolean)
     // refID (String)
     
-    // FIXME: resources are ordinary properties.
     // FIXME: property attributes should be written.
-    // resources
-//     for (int resNum = 0; resNum < _pMediaObject->getResourceCount(); ++resNum) {
-//         AbstractResource* pRes = _pMediaObject->getResource(resNum);
-//         Poco::AutoPtr<Poco::XML::Element> pResource = pDoc->createElement("res");
-//         Poco::AutoPtr<Poco::XML::Text> pUri = pDoc->createTextNode(pRes->getUri());
-//         if (pRes->getProtInfo() != "") {
-//             pResource->setAttribute("protocolInfo", pRes->getProtInfo());
-//         }
-//         if (pRes->getSize() > 0) {
-//             pResource->setAttribute("size", Poco::NumberFormatter::format(pRes->getSize()));
-//         }
-//         pResource->appendChild(pUri);
-//         pObject->appendChild(pResource);
-//     }
+    // properties
     
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() writing properties ...");
     // write properties
-    for (int propNum = 0; propNum < _pMediaObject->getPropertyCount(); ++propNum) {
+    int propCount = _pMediaObject->getPropertyCount();
+    for (int propNum = 0; propNum < propCount; ++propNum) {
         AbstractProperty* pProp = _pMediaObject->getProperty(propNum);
         std::string name = pProp->getName();
         std::string value = pProp->getValue();
