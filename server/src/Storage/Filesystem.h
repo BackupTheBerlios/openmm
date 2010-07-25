@@ -22,6 +22,8 @@
 #ifndef Filesystem_INCLUDED
 #define Filesystem_INCLUDED
 
+#include <Poco/File.h>
+
 #include <Omm/UpnpAvServer.h>
 
 class FileItem;
@@ -48,9 +50,12 @@ public:
     
 private:
     void setBasePath(const std::string& basePath);
+    void scanDirectory(Poco::File& directory);
+    Poco::File& getFileReference(Omm::ui4 childNum);
     
     std::string                          _basePath;
     std::vector<std::string>             _fileNames;
+    std::vector<Poco::File>              _files;
     
     Omm::Av::AbstractProperty*           _pTitleProp;
     FileItem*                            _pChild;

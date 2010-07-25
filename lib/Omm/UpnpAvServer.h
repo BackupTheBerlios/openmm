@@ -113,9 +113,9 @@ public:
     virtual int getAttributeCount();
 
 protected:
+    virtual ui4 getSize() { return 0; }
     virtual std::string getMime() { return "*"; }
     virtual std::string getDlna() { return "*"; }
-    virtual ui4 getSize() { return 0; }
     
     virtual bool isSeekable() = 0;
     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) = 0;
@@ -151,7 +151,6 @@ public:
     ~StreamingMediaObject();
     
     virtual AbstractMediaObject* createChildObject();
-
     
 private:
     std::string getServerAddress();
@@ -160,6 +159,21 @@ private:
     MediaItemServer*        _pItemServer;
 //     AvStream::Transcoder*   _pTranscoder;
 };
+
+
+class TorchMediaObject : public StreamingMediaObject
+{
+};
+
+
+template<typename KeyType>
+class AbstractDataModel
+{
+public:
+    std::string getTitle(const KeyType& key) = 0;
+};
+
+
 
 /*
 class AbstractDataModel

@@ -19,7 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
-#include <Poco/File.h>
+#include <Poco/DirectoryIterator.h>
 #include "Filesystem.h"
 
 
@@ -29,6 +29,10 @@ class FileItemResource : public Omm::Av::StreamingResource
     
 public:
     FileItemResource(FileServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    
+    virtual Omm::ui4 getSize();
+    virtual std::string getMime();
+    virtual std::string getDlna();
     
     virtual bool isSeekable();
     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
@@ -113,8 +117,29 @@ void
 FileItemResource::setPath(const std::string& path)
 {
     _path = path;
-    // TODO: Tagger should determine the proper attributes ProtInfo:Mime:DLNA, and Size
-    // then implement FileItemResource::getMime(), FileItemResource::getDlna and FileItemResource::getSize()
+}
+
+
+Omm::ui4
+FileItemResource::getSize()
+{
+    return static_cast<FileServer*>(_pServer)->getFileReference(_pItem->getObjectNumber()).getSize();
+}
+
+
+std::string
+FileItemResource::getMime()
+{
+    // TODO: Tagger should determine the mime type
+    return "*";
+}
+
+
+std::string
+FileItemResource::getDlna()
+{
+    // TODO: Tagger should determine the dlna string
+    return "*";
 }
 
 
@@ -256,7 +281,8 @@ FileServer::setOption(const std::string& key, const std::string& value)
 Omm::ui4
 FileServer::getChildCount()
 {
-    return _fileNames.size();
+//     return _fileNames.size();
+    return _files.size();
 }
 
 
@@ -271,7 +297,8 @@ Omm::Av::AbstractMediaObject*
 FileServer::getChild(Omm::ui4 numChild)
 {
     _pChild->setObjectNumber(numChild);
-    _pChild->setPath(_fileNames[numChild]);
+//     _pChild->setPath(_fileNames[numChild]);
+    _pChild->setPath(_files[numChild].path().substr(_basePath.length()+1));
     return _pChild;
 }
 
@@ -339,8 +366,38 @@ FileServer::setBasePath(const std::string& basePath)
 {
     _basePath = basePath;
     Poco::File baseDir(basePath);
-    baseDir.list(_fileNames);
+//     baseDir.list(_fileNames);
+//     baseDir.list(_files);
+    scanDirectory(baseDir);
+
 }
+
+
+void
+FileServer::scanDirectory(Poco::File& directory)
+{
+    Poco::DirectoryIterator dir(directory);
+    Poco::DirectoryIterator end;
+    while(dir != end) {
+        if (dir->isFile()) {
+//             std::clog << "FileServer::setBasePath() adding file: " << dir.name() << std::endl;
+            _files.push_back(*dir);
+        }
+        else if (dir->isDirectory()) {
+//             std::clog << "FileServer::setBasePath() adding directory: " << dir.name() << std::endl;
+            scanDirectory(*dir);
+        }
+        ++dir;
+    }
+}
+
+
+Poco::File&
+FileServer::getFileReference(Omm::ui4 childNum)
+{
+    return _files[childNum];
+}
+
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)

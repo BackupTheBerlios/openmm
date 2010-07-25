@@ -115,9 +115,9 @@ public:
     void setSize(ui4 size);
     
     virtual std::string getName() { return "res"; }
-    std::string getUri();
-    std::string getProtInfo();
-    ui4 getSize();
+    virtual std::string getUri();
+    virtual std::string getProtInfo();
+    virtual ui4 getSize();
 };
 
 
@@ -178,7 +178,7 @@ public:
     // TODO: title and class are mandatory properties
     virtual int getPropertyCount(const std::string& name = "") = 0;
     virtual AbstractProperty* getProperty(int index) = 0;
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;             // server object, write meta data
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;          // server object, write meta data
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
 
 private:
@@ -223,8 +223,8 @@ public:
     
     virtual void setIsContainer(bool isContainer);
 
-    virtual void appendChildImpl(AbstractMediaObject* pChild);                      // controller object, read from xml into memory
-    void addProperty(AbstractProperty* pProperty);                      // controller object, read from xml into memory
+    virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
+    void addProperty(AbstractProperty* pProperty);                              // controller object, read from xml into memory
 
     /*------------- read interface --------------*/
     virtual ui4 getChildCount();                                                // server object, cds browse / write meta data

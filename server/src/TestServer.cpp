@@ -89,7 +89,8 @@ TestServer::TestServer() //:
     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
 
     pMusic->setTitle("Music");
-    pMusic->setOption("basePath", "/home/jb/mp3/current");
+//     pMusic->setOption("basePath", "/home/jb/mp3/current");
+    pMusic->setOption("basePath", "/media/mydata/mp3");
     appendChild(pMusic);
     
 };
