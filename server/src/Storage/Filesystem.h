@@ -54,7 +54,6 @@ private:
     
     Omm::Av::AbstractProperty*           _pTitleProp;
     FileMediaItem*                       _pChild;
-//     Omm::Av::AbstractMediaObject*        _pChild;
 };
 
 #endif

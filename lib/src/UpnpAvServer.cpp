@@ -42,40 +42,11 @@ ServerResource::getResourceId()
 }
 
 
-// FileResource::FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri) :
-// ServerResource(resourceId, protInfo, size),
-// _privateUri(privateUri)
-// {
-// }
-// 
-// 
-// std::streamsize
-// FileResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
-// {
-// //     std::string path = _pFileObjectSource->_basePath + "/" + _privateUri;
-//     std::string path = _privateUri;
-//     
-//     std::ifstream istr(path.c_str());
-//     if (seek > 0) {
-//         istr.seekg(seek);
-//     }
-//     return Poco::StreamCopier::copyStream(istr, ostr);
-// }
-
-
 WebResource::WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri) :
 ServerResource(resourceId, protInfo, 0),
 _privateUri(privateUri)
 {
 }
-
-
-// FIXME: vdr streamdev-server does this frequently:
-// 21:19:16.627 arthur[3581,12] D UPNP.AV sending stream: http://192.168.178.23:3000/TS/S19.2E-1-1107-17500 ...
-// 21:19:16.628 arthur[3581,12] I UPNP.AV HTTP 409 Channel not available
-// 21:19:16.628 arthur[3581,12] D UPNP.AV proxy response header:
-// HTTP/1.0 409 Channel not available
-// (409 = HTTP_CONFLICT)
 
 
 std::streamsize
@@ -152,143 +123,6 @@ MediaItemServer::getPort() const
 }
 
 
-// MediaServerContainer::MediaServerContainer(const std::string& title, const std::string& subClass, int port) :
-// MediaContainer(title, subClass)
-// {
-//     _pItemServer = new MediaItemServer(port);
-//     _pItemServer->_pServerContainer = this;
-//     _pItemServer->start();
-//     _port = _pItemServer->_socket.address().port();
-//     _address =  Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
-// }
-// 
-// 
-// MediaServerContainer::~MediaServerContainer()
-// {
-//     _pItemServer->stop();
-//     delete _pItemServer;
-// }
-// 
-// 
-// // void
-// // MediaServerContainer::appendChild(ServerObject* pChild)
-// // {
-// //     ServerObject::appendChild(pChild);
-// //     
-// //     // FIXME: writing the public uri should be moved somewhere else, probably into the XML writer of ServerObject
-// //     // then appendChild() can be removed from MediaServerContainer
-// //     for (MediaObject::ResourceIterator it = pChild->beginResource(); it != pChild->endResource(); ++it) {
-// //         (*it)->setUri(getServerAddress() + "/" + (*it)->getUri());
-// //     }
-// // }
-// 
-// 
-// std::string
-// MediaServerContainer::getServerAddress()
-// {
-//     return "http://" + _address + ":" + Poco::NumberFormatter::format(_port);
-// }
-
-
-// ServerObject::ServerObject() //:
-// // MediaObject()
-// {
-// }
-
-
-// void
-// ServerObject::appendChild(ServerObject* pChild)
-// {
-//     MediaObject::appendChild(pChild);
-//     _childrenMap[pChild->_objectId] = pChild;
-// }
-
-
-// ServerObject*
-// ServerObject::getObject(const std::string& objectId)
-// {
-// //     std::clog << "ServerObject::getObject() objectId: " << objectId << std::endl;
-//     std::string::size_type slashPos = objectId.find('/');
-//     ServerObject* pChild;
-//     if (slashPos != std::string::npos) {
-// //         std::clog << "container id: " << objectId.substr(0, slashPos - 1) << std::endl;
-//         pChild = _childrenMap[objectId.substr(0, slashPos)];
-//         if (pChild == 0) {
-//             Log::instance()->upnpav().error("child objectId of container, but no child container found");
-//             return 0;
-//         }
-//         else {
-//             return pChild->getObject(objectId.substr(slashPos + 1));
-//         }
-//     }
-//     else {
-// //         std::clog << "item id: " << objectId << std::endl;
-//         pChild = _childrenMap[objectId];
-//         if (pChild == 0) {
-//             Log::instance()->upnpav().error("no child item found");
-//             return 0;
-//         }
-//         else {
-//             return pChild;
-//         }
-//     }
-// }
-
-
-// void
-// ServerObject::addResource(ServerResource* pResource)
-// {
-//     MediaObject::addResource(pResource);
-//     _resourceMap[pResource->getResourceId()] = pResource;
-//     pResource->setUri(_objectId + "$" + pResource->getResourceId());
-//     pResource->setProtInfo("http-get:*:" + pResource->getProtInfo());
-// }
-
-
-// ServerResource*
-// AbstractResource*
-// ServerObject::getResource(const std::string& resourceId)
-// {
-//     return _resourceMap[resourceId];
-// }
-
-
-// ui4
-// ServerObject::getChildCount()
-// {
-//     return _children.size();
-// }
-
-
-// MediaContainer::MediaContainer() :
-// ServerObject()
-// {
-//     _isContainer = true;
-// }
-
-
-// MediaContainer::MediaContainer(const std::string& title, const std::string& subClass) :
-// ServerObject()
-// {
-//     setTitle(title);
-//     setClass(std::string("object.container" + (subClass == "" ? "" : "." + subClass)));
-// }
-// 
-// 
-// MediaItem::MediaItem() :
-// ServerObject()
-// {
-// }
-// 
-// 
-// MediaItem::MediaItem(const std::string& objectId, const std::string& title, const std::string& subClass)
-// {
-//     setObjectNumber(objectId);
-//     setTitle(title);
-//     setClass(std::string("object.item" + (subClass == "" ? "" : "." + subClass)));
-// }
-
-
 ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaItemServer* pItemServer) :
 _pItemServer(pItemServer)
 {
@@ -321,14 +155,9 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
     int resourceId = Poco::NumberParser::parse(uri[1]);
-//     std::string resourceId = uri[1];
     Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
     
-    // TODO: check if pItem really is a MediaItem and not a MediaContainer?
-//     ServerObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
     AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
-//     ServerResource* pResource = pItem->getResource(resourceId);
-//     StreamingResource* pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
     StreamingResource* pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
 
     std::string resProtInfo = pResource->getProtInfo();
@@ -399,16 +228,14 @@ new AVTransportImplementation
 }
 
 void
-// UpnpAvServer::setRoot(ServerObject* pRoot)
 UpnpAvServer::setRoot(AbstractMediaObject* pRoot)
 {
     _pRoot = pRoot;
     static_cast<ContentDirectoryImplementation*>(_pContentDirectoryImpl)->_pRoot = _pRoot;
-// //     _pRoot->setObjectId("0");
+//     _pRoot->setObjectId("0");
 }
 
 
-// ServerObject*
 AbstractMediaObject*
 UpnpAvServer::getRoot()
 {
@@ -416,31 +243,7 @@ UpnpAvServer::getRoot()
 }
 
 
-
-// StreamingResourceImpl::StreamingResourceImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
-// _pServer(pServer),
-// _pItem(pItem)
-// {
-//     std::clog << "StreamingResourceImpl::StreamingResourceImpl(pServer, pItem), pServer: " << pServer << ", pItem: " << pItem << std::endl;
-// }
-// 
-// 
-// std::string
-// StreamingResourceImpl::getValue()
-// {
-//     std::clog << "StreamingResourceImpl::getValue()" << std::endl;
-//     
-//     std::string serverAddress = _pServer->getServerAddress();
-//     std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
-// //     std::string resourceId = Poco::NumberFormatter::format(getResourceNumber());
-//     return serverAddress + "/" + relativeObjectId + "$" /*+ resourceId*/;
-//     
-// //     return _pServer->getServerAddress() + "/" + _pItem->getObjectId();
-// }
-
-
 StreamingResource::StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
-// AbstractResource(new StreamingResourceImpl(pServer, pItem)),
 AbstractResource(pPropertyImpl),
 _pServer(pServer),
 _pItem(pItem),

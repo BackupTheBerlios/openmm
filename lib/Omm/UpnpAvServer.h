@@ -35,46 +35,6 @@ class MediaItemServer;
 class StreamingMediaObject;
 
 
-class ServerResource : public Resource
-{
-public:
-    ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size);
-    
-    const std::string& getResourceId();
-    virtual bool isSeekable() { return false; }
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) { return 0; }
-    
-private:
-    std::string     _resourceId;
-};
-
-
-// class FileResource : public ServerResource
-// {
-// public:
-//     FileResource(const std::string& resourceId, const std::string& protInfo, ui4 size, const std::string& privateUri);
-//     
-//     virtual bool isSeekable() { return true; }
-//     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
-//     
-// private:
-//     std::string         _privateUri;
-// };
-
-
-class WebResource : public ServerResource
-{
-public:
-    WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri);
-    
-    virtual bool isSeekable() { return false; }
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
-    
-private:
-    std::string         _privateUri;
-};
-
-
 class MediaItemServer
 {
     friend class ItemRequestHandler;
@@ -138,19 +98,6 @@ private:
 };
 
 
-// class StreamingResourceImpl : public PropertyImpl
-// {
-// public:
-//     StreamingResourceImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem);
-// 
-//     virtual std::string getValue();
-// 
-// private:
-//     StreamingMediaObject*       _pServer;
-//     AbstractMediaObject*        _pItem;
-// };
-
-
 class StreamingResource : public AbstractResource
 {
 public:
@@ -170,7 +117,7 @@ protected:
 
 // TODO: this should be a ServerObject (automatic id assignment) with
 // arbitrary implementation for accessing properties (see next todo brigde pattern)
-// TODO: use bridge pattern for AbstractMediaObject, similar to AbstractProperty
+// TODO: use bridge pattern for AbstractMediaObject, similar to AbstractProperty (really do so?)
 // class StreamingMediaItem : public AbstractMediaObject
 class StreamingMediaItem : public MemoryMediaObject
 {
@@ -251,6 +198,32 @@ public:
 
 
 /*------------------------ depricated classes ---------------------------*/
+
+class ServerResource : public Resource
+{
+public:
+    ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size);
+    
+    const std::string& getResourceId();
+    virtual bool isSeekable() { return false; }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek) { return 0; }
+    
+private:
+    std::string     _resourceId;
+};
+
+
+class WebResource : public ServerResource
+{
+public:
+    WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri);
+    
+    virtual bool isSeekable() { return false; }
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+    
+private:
+    std::string         _privateUri;
+};
 
 
 // class ServerObject : public AbstractMediaObject

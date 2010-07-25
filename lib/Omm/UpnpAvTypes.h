@@ -100,14 +100,6 @@ private:
 };
 
 
-// class ResourceImpl : public PropertyImpl
-// {
-// public:
-//     virtual std::string getName();
-// 
-// };
-
-
 class AbstractResource : public AbstractProperty
 {
 public:
@@ -141,16 +133,16 @@ public:
     void setTitle(const std::string& title);
     void setClass(const std::string& subclass);
     
-    void setObjectNumber(const std::string& objectId);                                            // controller object, read from xml into memory
+    void setObjectNumber(const std::string& objectId);                                          // controller object, read from xml into memory
     void setParentObjectId(const std::string& objectId);                                        // controller object, read from xml into memory
-    void setObjectNumber(ui4 id);                                                         // controller object, read from xml into memory
+    void setObjectNumber(ui4 id);                                                               // controller object, read from xml into memory
     void setParent(AbstractMediaObject* pParent);
-    void appendChild(AbstractMediaObject* pChild);                                    // controller object, read from xml into memory
+    void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
     void addResource(AbstractResource* pResource);                                              // controller object, read from xml into memory
 
     virtual void appendChildImpl(AbstractMediaObject* pChild) {}
     // TODO: is this setTotalChildCount() ?
-    virtual void setTotalChildCount(ui4 childCount) {}                                               // controller object, read from xml into memory
+    virtual void setTotalChildCount(ui4 childCount) {}                                          // controller object, read from xml into memory
 
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
     virtual void setIsRestricted(bool isRestricted) {}                                          // controller object, read from xml into memory
@@ -185,14 +177,7 @@ public:
     virtual int getPropertyCount(const std::string& name = "") = 0;
     virtual AbstractProperty* getProperty(int index) = 0;
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;             // server object, write meta data
-    
-    // TODO: next two methods should be generically implemented, resources aren't accessed by their value ...
-//     virtual AbstractProperty* getProperty(const std::string& name, const std::string& value) { return 0; }  // server object, write meta data
-//     virtual AbstractResource* getResource(const std::string& resourceId);                       // controller object, transport
-
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
-//     void setBasePath(std::string arg1);
-
 
 private:
     // TODO: put these private members in MediaObject (aka ServerObject)
@@ -249,7 +234,6 @@ public:
     virtual int getPropertyCount(const std::string& name = "");
     virtual AbstractProperty* getProperty(int index);
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0);             // server object, write meta data
-//     virtual AbstractProperty* getProperty(const std::string& name, const std::string& value);  // server object, write meta data
     
 private:
     typedef std::multimap<std::string,AbstractProperty*>::iterator      PropertyIterator;
