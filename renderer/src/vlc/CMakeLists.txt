@@ -2,6 +2,13 @@ SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
 
+FIND_LIBRARY(LIB_VLC
+NAME vlc
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+if(LIB_VLC)
+
 if(TARGET omm)
 SET(LIB_OMM_AV
 ommav
@@ -15,11 +22,6 @@ NAME ommav
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET omm)
-
-FIND_LIBRARY(LIB_VLC
-NAME vlc
-PATHS ${CMAKE_LIBRARY_PATH}
-)
 
 # without X11 libraries, omm can't load the engine plugin (when running under X11)
 # so we explicitely link the plugin against X11.
@@ -50,3 +52,5 @@ X11
 INSTALL( TARGETS ommengine-vlc
 LIBRARY DESTINATION lib/omm
 )
+
+endif(LIB_VLC)

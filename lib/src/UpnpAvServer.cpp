@@ -97,7 +97,7 @@ void
 ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
     Log::instance()->upnpav().debug("handle media item request: " + request.getURI());
-    
+
     std::ostringstream requestHeader;
     request.write(requestHeader);
     Log::instance()->upnpav().debug("request method: " + request.getMethod());
@@ -160,7 +160,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             
             std::string::size_type delim = range.find('-');
             start = Poco::NumberParser::parse(range.substr(0, delim));
-            Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format(start) + ")");
+            Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long unsigned int)start) + ")");
         }
         std::streamsize numBytes = pResource->stream(ostr, start);
         Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
