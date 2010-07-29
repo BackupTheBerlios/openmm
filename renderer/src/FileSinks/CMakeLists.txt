@@ -1,12 +1,7 @@
-SET(CMAKE_LIBRARY_PATH
-${CMAKE_SYSTEM_LIBRARY_PATH}
-)
-
-if(TARGET omm)
+if(TARGET ommavstream)
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
-endif(TARGET omm)
 
 ADD_DEFINITIONS(
 -malign-double
@@ -34,3 +29,6 @@ INSTALL( TARGETS ommvideosink-ppm ommaudiosink-pcm
 LIBRARY DESTINATION lib/omm
 )
 
+else(TARGET ommavstream)
+message(STATUS "libommavstream not found")
+endif(TARGET ommavstream)

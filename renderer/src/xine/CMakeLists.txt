@@ -1,11 +1,14 @@
-# TODO: do a proper search for libxine (FIND_PACKAGE?)
-# # FIND_LIBRARY( XINE_LIB
-# # xine
-# # )
-
-SET(CMAKE_LIBRARY_PATH
-${CMAKE_SYSTEM_LIBRARY_PATH}
+FIND_LIBRARY(XINE_LIBRARIES
+NAME xine
+PATHS ${CMAKE_LIBRARY_PATH}
 )
+
+if(XINE_LIBRARIES)
+message(STATUS "Xine libs found in " ${XINE_LIBRARIES})
+INCLUDE_DIRECTORIES(
+${POCO_INCLUDE_DIR}
+)
+
 
 if(TARGET omm)
 SET(LIB_OMM_AV
@@ -52,3 +55,8 @@ ADD_SUBDIRECTORY(VideoX11)
 INSTALL( TARGETS ommengine-xine
 LIBRARY DESTINATION lib/omm
 )
+
+else(XINE_LIBRARIES)
+message(STATUS "Xine libs not found")
+endif(XINE_LIBRARIES)
+
