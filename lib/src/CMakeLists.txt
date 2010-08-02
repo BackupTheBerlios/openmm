@@ -66,28 +66,13 @@ SHARED
 ${OMM_LIB_SRCS}
 )
 
-ADD_LIBRARY(omm-static
-STATIC
-${OMM_LIB_SRCS}
-)
-
 ADD_LIBRARY(ommav
 SHARED
 ${OMM_AV_LIB_SRCS}
 )
 
-ADD_LIBRARY(ommav-static
-STATIC
-${OMM_AV_LIB_SRCS}
-)
-
 ADD_LIBRARY(ommutil
 SHARED
-${OMM_UTIL_LIB_SRCS}
-)
-
-ADD_LIBRARY(ommutil-static
-STATIC
 ${OMM_UTIL_LIB_SRCS}
 )
 
@@ -97,17 +82,7 @@ ${LIB_POCO_NET}
 ${LIB_POCO_XML}
 )
 
-TARGET_LINK_LIBRARIES( omm-static
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_NET}
-${LIB_POCO_XML}
-)
-
 TARGET_LINK_LIBRARIES( ommav
-omm
-)
-
-TARGET_LINK_LIBRARIES( ommav-static
 omm
 )
 
@@ -115,11 +90,7 @@ TARGET_LINK_LIBRARIES( ommutil
 ${LIB_POCO_FOUNDATION}
 )
 
-TARGET_LINK_LIBRARIES( ommutil-static
-${LIB_POCO_FOUNDATION}
-)
-
-INSTALL( TARGETS omm omm-static ommav ommav-static ommutil ommutil-static
+INSTALL( TARGETS omm ommav ommutil
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
