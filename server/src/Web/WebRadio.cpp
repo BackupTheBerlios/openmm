@@ -22,57 +22,165 @@
 
 #include "WebRadio.h"
 
-WebradioServer::WebradioServer() :
-MediaServerContainer("Web Radio", "musicContainer")
+
+class WebradioDataModel : public Omm::Av::AbstractDataModel
 {
-    std::string protInfoDlna = "audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
-    std::string subClass = "audioItem.audioBroadcast";
+public:
+    WebradioDataModel(const std::string& stationConfig);
     
-    Omm::Av::MediaItem* pStation01 = new Omm::Av::MediaItem("01", "SOMA FM - Groove Salad", subClass);
-    pStation01->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://streamer-dtc-aa04.somafm.com:80/stream/1018"));
-    appendChild(pStation01);
+    virtual Omm::ui4 getChildCount();
+    virtual std::string getTitle(Omm::ui4 index);
     
-    Omm::Av::MediaItem* pStation02 = new Omm::Av::MediaItem("02", "SOMA FM - Indie Pop Rocks (Lush)", subClass);
-    pStation02->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://streamer-ntc-aa02.somafm.com:80/stream/1073"));
-    appendChild(pStation02);
+    virtual Omm::ui4 getSize(Omm::ui4 index);
+    virtual std::string getMime(Omm::ui4 index);
+    virtual std::string getDlna(Omm::ui4 index);
+    virtual bool isSeekable(Omm::ui4 index);
+    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek);
+
+private:
+    void scanStationConfig(const std::string& stationConfig);
     
-    Omm::Av::MediaItem* pStation03 = new Omm::Av::MediaItem("03", "SOMA FM - Drone Zone", subClass);
-    pStation03->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://streamer-dtc-aa01.somafm.com:80/stream/1032"));
-    appendChild(pStation03);
-    
-    Omm::Av::MediaItem* pStation04 = new Omm::Av::MediaItem("04", "Digitally Imported - Chillout", subClass);
-    pStation04->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://scfire-ntc-aa01.stream.aol.com:80/stream/1035"));
-    appendChild(pStation04);
-    
-    Omm::Av::MediaItem* pStation05 = new Omm::Av::MediaItem("05", "MotorFM", subClass);
-    pStation05->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://dude.mp3streams.net/motorfm"));
-    appendChild(pStation05);
-    
-    Omm::Av::MediaItem* pStation06 = new Omm::Av::MediaItem("06", "Freies Radio Stuttgart", subClass);
-    pStation06->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://frs.kumbi.org:8000/frs_stereo.ogg"));
-    appendChild(pStation06);
-    
-    Omm::Av::MediaItem* pStation07 = new Omm::Av::MediaItem("07", "HoRadS", subClass);
-    pStation07->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://realserver3.hdm-stuttgart.de:8080/horads"));
-    appendChild(pStation07);
-    
-    // http://voxsc1.somafm.com:8090 (SOMA FM - Indie Pop Rocks)
-    // http://207.200.96.225:8020/ (Blue Mars)
-    // http://scfire-ntc-aa07.stream.aol.com:80/stream/1048 (Radio Paradise)
-    
-//     Omm::Av::MediaItem* pStation08 = new Omm::Av::MediaItem("08", "SWR DASDING", subClass);
-//     pStation08->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdinglive/livestream.mp3"));
-//     appendChild(pStation08);
-//     
-//     Omm::Av::MediaItem* pStation09 = new Omm::Av::MediaItem("09", "SWR DASDING Lautstark", subClass);
-//     pStation09->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://edge.live.mp3.mdn.newmedia.nacamar.net:80/swrdasdingraka01/livestream.mp3"));
-//     appendChild(pStation09);
-    
-//     Omm::Av::MediaItem* pStation10 = new Omm::Av::MediaItem("10", "SWR3", subClass);
-//     pStation10->addResource(new Omm::Av::WebResource("r1", protInfoDlna, "http://edge.live.mp3.mdn.newmedia.nacamar.net/swr3live/livestream.mp3"));
-//     appendChild(pStation10);
+    std::vector<std::string>             _stationNames;
+    std::vector<std::string>             _stationUris;
 };
 
-POCO_BEGIN_MANIFEST(Omm::Av::MediaContainer)
+
+WebradioDataModel::WebradioDataModel(const std::string& stationConfig)
+{
+    scanStationConfig(stationConfig);
+}
+
+
+Omm::ui4
+WebradioDataModel::getChildCount()
+{
+    return _stationNames.size();
+}
+
+
+std::string
+WebradioDataModel::getTitle(Omm::ui4 index)
+{
+    return _stationNames[index];
+}
+
+
+bool
+WebradioDataModel::isSeekable(Omm::ui4 index)
+{
+    return false;
+}
+
+
+std::streamsize
+WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek)
+{
+    Poco::URI uri(_stationUris[index]);
+    Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
+    session.setKeepAlive(true);
+    session.setKeepAliveTimeout(Poco::Timespan(3, 0));
+    Poco::Timespan timeout = session.getKeepAliveTimeout();
+    Omm::Av::Log::instance()->upnpav().debug("web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds() + "sec"));
+    Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
+    proxyRequest.setKeepAlive(true);
+    session.sendRequest(proxyRequest);
+    std::stringstream requestHeader;
+    proxyRequest.write(requestHeader);
+    Omm::Av::Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
+    
+    Poco::Net::HTTPResponse proxyResponse;
+    std::istream& istr = session.receiveResponse(proxyResponse);
+    
+    if (istr.peek() == EOF) {
+        Omm::Av::Log::instance()->upnpav().error("error reading data from web resource");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("success reading data from web resource");
+    }
+    
+    Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(proxyResponse.getStatus()) + " " + proxyResponse.getReason());
+    std::stringstream responseHeader;
+    proxyResponse.write(responseHeader);
+    Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
+    
+    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
+    return bytes;
+}
+
+
+Omm::ui4
+WebradioDataModel::getSize(Omm::ui4 index)
+{
+    return 0;
+}
+
+
+std::string
+WebradioDataModel::getMime(Omm::ui4 index)
+{
+    return "audio/mpeg";
+}
+
+
+std::string
+WebradioDataModel::getDlna(Omm::ui4 index)
+{
+    return "DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
+}
+
+
+void
+WebradioDataModel::scanStationConfig(const std::string& stationConfig)
+{
+    Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file ...");
+    Poco::XML::DOMParser parser;
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+    Poco::XML::Document* pDoc = parser.parse(stationConfig);
+    
+    Poco::XML::Node* pStationList = pDoc->firstChild();
+    if (pStationList->nodeName() != "stationlist") {
+        Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, wrong file format");
+        return;
+    }
+    if (pStationList->hasChildNodes()) {
+        Poco::XML::Node* pStation = pStationList->firstChild();
+        std::clog << "stationlist first child: " << pStation->nodeName() << std::endl;
+        while (pStation) {
+            if (pStation->nodeName() != "station") {
+                Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, no station found.");
+                return;
+            }
+            Poco::XML::Node* pProp = pStation->firstChild();
+            while (pProp) {
+                if (pProp->nodeName() == "name") {
+                    _stationNames.push_back(pProp->innerText());
+                    Omm::Av::Log::instance()->upnpav().debug("added web radio station with name: " + pProp->innerText());
+                }
+                else if (pProp->nodeName() == "uri") {
+                    _stationUris.push_back(pProp->innerText());
+                    Omm::Av::Log::instance()->upnpav().debug("added web radio station with uri: " + pProp->innerText());
+                }
+                else {
+                    Omm::Av::Log::instance()->upnpav().warning("webradio station entry in config file has properties");
+                }
+                pProp = pProp->nextSibling();
+            }
+            pStation = pStation->nextSibling();
+        }
+    }
+    Omm::Av::Log::instance()->upnpav().debug("web radio, finished scanning station config file.");
+}
+
+
+void
+WebradioServer::setOption(const std::string& key, const std::string& value)
+{
+    if (key == "basePath") {
+        setDataModel(new WebradioDataModel(value));
+    }
+}
+
+
+POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
 POCO_EXPORT_CLASS(WebradioServer)
 POCO_END_MANIFEST

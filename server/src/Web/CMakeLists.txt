@@ -21,32 +21,32 @@ SET( OMMS_WEB_SRCS
 WebRadio.cpp
 )
 
-SET( OMMS_WEBSIMPLE_SRCS
-WebRadioSimple.cpp
-)
-
-
-# ADD_LIBRARY( ommserver-webradio
-# SHARED
-# ${OMMS_WEB_SRCS}
-# )
-
-ADD_LIBRARY( ommserver-webradiosimple
+ADD_LIBRARY( ommserver-webradio
 SHARED
-${OMMS_WEBSIMPLE_SRCS}
+${OMMS_WEB_SRCS}
 )
 
-# TARGET_LINK_LIBRARIES( ommserver-webradio
-# ${LIB_OMM_AV}
-# ${LIB_POCO_UTIL}
-# )
-
-TARGET_LINK_LIBRARIES( ommserver-webradiosimple
+TARGET_LINK_LIBRARIES( ommserver-webradio
 ${LIB_OMM_AV}
 ${LIB_POCO_UTIL}
 )
 
+
+# SET( OMMS_WEBSIMPLE_SRCS
+# WebRadioSimple.cpp
+# )
+
+# ADD_LIBRARY( ommserver-webradiosimple
+# SHARED
+# ${OMMS_WEBSIMPLE_SRCS}
+# )
+
+# TARGET_LINK_LIBRARIES( ommserver-webradiosimple
+# ${LIB_OMM_AV}
+# ${LIB_POCO_UTIL}
+# )
+
 # INSTALL( TARGETS ommserver-webradio ommserver-webradiosimple
-INSTALL( TARGETS ommserver-webradiosimple
+INSTALL( TARGETS ommserver-webradio
 LIBRARY DESTINATION lib/omm
 )

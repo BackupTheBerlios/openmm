@@ -23,7 +23,6 @@
 #include "DvbServer.h"
 
 
-
 class DvbDataModel : public Omm::Av::AbstractDataModel
 {
 public:
@@ -49,6 +48,8 @@ private:
 DvbDataModel::DvbDataModel(const std::string& channelConfig)
 {
     scanChannelConfig(channelConfig);
+    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
+    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
 }
 
 
@@ -135,8 +136,6 @@ DvbServer::setOption(const std::string& key, const std::string& value)
     if (key == "basePath") {
         setDataModel(new DvbDataModel(value));
     }
-    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
-    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
 }
 
 

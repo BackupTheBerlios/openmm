@@ -24,10 +24,12 @@
 
 #include <Omm/UpnpAvServer.h>
 
-class WebradioServer : public Omm::Av::MediaServerContainer
+
+class WebradioServer : public Omm::Av::TorchServer
 {
 public:
-    WebradioServer();
+    virtual void setOption(const std::string& key, const std::string& value);
 };
+
 
 #endif

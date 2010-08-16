@@ -130,6 +130,10 @@ protected:
                     pContainerPlugin->setTitle("Collection");
                     pContainerPlugin->setOption("basePath", "/home/jb/mp3");
             }
+            else if (_containerPlugin == "server-webradio") {
+                    pContainerPlugin->setTitle("Web Radio");
+                    pContainerPlugin->setOption("basePath", "/home/jb/.omm/webradio.conf");
+            }
             
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);
