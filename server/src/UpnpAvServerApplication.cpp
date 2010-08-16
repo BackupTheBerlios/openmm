@@ -122,6 +122,15 @@ protected:
             }
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
             
+            if (_containerPlugin == "server-dvb") {
+                    pContainerPlugin->setTitle("Digital TV");
+                    pContainerPlugin->setOption("basePath", "/home/jb/.omm/channels.conf");
+            }
+            else if (_containerPlugin == "server-file") {
+                    pContainerPlugin->setTitle("Collection");
+                    pContainerPlugin->setOption("basePath", "/home/jb/mp3");
+            }
+            
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);
             

@@ -19,77 +19,106 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
+#include <Poco/DirectoryIterator.h>
 
 #include "DvbServer.h"
 
-DvbServer::DvbServer() :
-MediaServerContainer("Digital TV", "", 8888)
+
+class DvbItemResource : public Omm::Av::StreamingResource
 {
-    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
-    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
+    friend class DvbServer;
+    friend class DvbItem;
     
-    Omm::Av::MediaItem* pRtl = new Omm::Av::MediaItem("o1", "RTL", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pRtlChannel = new Omm::Dvb::DvbChannel(0, 12188000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 163, 104, 12003);
-    pRtl->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pRtlChannel));
-    appendChild(pRtl);
+public:
+    DvbItemResource(DvbServer* pServer, Omm::Av::AbstractMediaObject* pItem);
     
-    Omm::Av::MediaItem* pRtl2 = new Omm::Av::MediaItem("o2", "RTL2", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pRtl2Channel = new Omm::Dvb::DvbChannel(0, 12188000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 166, 128, 12020);
-    pRtl2->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pRtl2Channel));
-    appendChild(pRtl2);
+    virtual Omm::ui4 getSize();
+    virtual std::string getMime();
+    virtual std::string getDlna();
     
-    Omm::Av::MediaItem* pVox = new Omm::Av::MediaItem("o3", "VOX", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pVoxChannel = new Omm::Dvb::DvbChannel(0, 12188000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 167, 136, 12060);
-    pVox->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pVoxChannel));
-    appendChild(pVox);
+    virtual bool isSeekable();
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
     
-    Omm::Av::MediaItem* pPro7 = new Omm::Av::MediaItem("o4", "Pro7", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pPro7Channel = new Omm::Dvb::DvbChannel(0, 12544000, Omm::Dvb::DvbChannel::HORIZ, 22000000, 511, 512, 17501);
-    pPro7->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pPro7Channel));
-    appendChild(pPro7);
+    void setPath(const std::string& path);
     
-    Omm::Av::MediaItem* pSat1 = new Omm::Av::MediaItem("o5", "Sat1", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pSat1Channel = new Omm::Dvb::DvbChannel(0, 12544000, Omm::Dvb::DvbChannel::HORIZ, 22000000, 255, 256, 17500);
-    pSat1->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pSat1Channel));
-    appendChild(pSat1);
+private:
+    std::string         _path;
+    std::string                 _channelName;
+    Omm::Dvb::DvbChannel*       _pChannel;
+
     
-    Omm::Av::MediaItem* pKabel1 = new Omm::Av::MediaItem("o6", "Kabel1", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pKabel1Channel = new Omm::Dvb::DvbChannel(0, 12544000, Omm::Dvb::DvbChannel::HORIZ, 22000000, 767, 768, 17502);
-    pKabel1->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pKabel1Channel));
-    appendChild(pKabel1);
-    
-    Omm::Av::MediaItem* pArd = new Omm::Av::MediaItem("o7", "ARD", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pArdChannel = new Omm::Dvb::DvbChannel(0, 11837000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 101, 102, 28106);
-    pArd->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pArdChannel));
-    appendChild(pArd);
-    
-    Omm::Av::MediaItem* pZdf = new Omm::Av::MediaItem("o8", "ZDF", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pZdfChannel = new Omm::Dvb::DvbChannel(0, 11954000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 110, 120, 28006);
-    pZdf->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pZdfChannel));
-    appendChild(pZdf);
-    
-    Omm::Av::MediaItem* p3Sat = new Omm::Av::MediaItem("o9", "3Sat", "videoItem.movie");
-    Omm::Dvb::DvbChannel* p3SatChannel = new Omm::Dvb::DvbChannel(0, 11954000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 210, 220, 28007);
-    p3Sat->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", p3SatChannel));
-    appendChild(p3Sat);
-    
-    Omm::Av::MediaItem* pZdfInfo = new Omm::Av::MediaItem("o10", "ZDF Info", "videoItem.movie");
-    Omm::Dvb::DvbChannel* pZdfInfoChannel = new Omm::Dvb::DvbChannel(0, 11954000, Omm::Dvb::DvbChannel::HORIZ, 27500000, 610, 620, 28011);
-    pZdfInfo->addResource(new DvbResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pZdfInfoChannel));
-    appendChild(pZdfInfo);
 };
 
 
-DvbResource::DvbResource(const std::string& resourceId, const std::string& protInfo, Omm::Dvb::DvbChannel* pChannel) :
-ServerResource(resourceId, protInfo, 0),
-_pChannel(pChannel)
+class DvbItemProperty : public Omm::Av::AbstractProperty
+{
+public:
+    DvbItemProperty();
+};
+
+
+class DvbItemPropertyImpl : public Omm::Av::PropertyImpl
+{
+public:
+    virtual void setName(const std::string& name);
+    virtual void setValue(const std::string& value);
+    virtual std::string getName();
+    virtual std::string getValue();
+    
+private:
+    std::string         _name;
+    std::string         _value;
+};
+
+
+class DvbItem : public Omm::Av::StreamingMediaItem
+{
+    friend class DvbServer;
+    
+public:
+    DvbItem(DvbServer* pServer);
+    virtual ~DvbItem();
+    
+    virtual int getPropertyCount(const std::string& name = "");
+    virtual Omm::Av::AbstractProperty* getProperty(int index);
+    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
+
+    void setPath(const std::string& path);
+    void setChannel(const std::string& channelName, Omm::Dvb::DvbChannel* pChannel);
+
+private:
+    DvbItemProperty*                   _pTitleProp;
+    DvbItemResource*                   _pResource;
+};
+
+
+DvbItemResource::DvbItemResource(DvbServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+StreamingResource(new Omm::Av::MemoryPropertyImpl, pServer, pItem)
 {
 }
 
 
-std::streamsize
-DvbResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+bool
+DvbItemResource::isSeekable()
 {
+    return false;
+}
+
+
+std::streamsize
+DvbItemResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+{
+//     std::clog << "DvbResource::stream(), relative path: " << _path << ", _pServer: " << _pServer << std::endl;
+//     std::string path = static_cast<DvbServer*>(_pServer)->_basePath + "/" + _path;
+//     std::clog << "DvbResource::stream(), absolute path: " << path << std::endl;
+//     
+//     std::ifstream istr(path.c_str());
+//     if (seek > 0) {
+//         istr.seekg(seek);
+//     }
+//     return Poco::StreamCopier::copyStream(istr, ostr);
+    
+    
     Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
     
     Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
@@ -100,6 +129,324 @@ DvbResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 }
 
 
-POCO_BEGIN_MANIFEST(Omm::Av::MediaContainer)
+void
+DvbItemResource::setPath(const std::string& path)
+{
+    _path = path;
+}
+
+
+Omm::ui4
+DvbItemResource::getSize()
+{
+    return 0;
+}
+
+
+std::string
+DvbItemResource::getMime()
+{
+    return "video/mpeg";
+}
+
+
+std::string
+DvbItemResource::getDlna()
+{
+    return "DLNA.ORG_PN=MPEG_PS_PAL";
+}
+
+
+void
+DvbItemPropertyImpl::setName(const std::string& name)
+{
+    _name = name;
+}
+
+
+void
+DvbItemPropertyImpl::setValue(const std::string& value)
+{
+    _value = value;
+}
+
+
+std::string
+DvbItemPropertyImpl::getName()
+{
+    std::clog << "DvbPropertyImpl::getName() returns: " << _name << std::endl;
+
+    return _name;
+}
+
+
+std::string
+DvbItemPropertyImpl::getValue()
+{
+    std::clog << "DvbPropertyImpl::getValue() returns: " << _value << std::endl;
+
+    if (_name == "dc:title") {
+        return _value;
+    }
+}
+
+
+DvbItemProperty::DvbItemProperty() :
+AbstractProperty(new DvbItemPropertyImpl)
+{
+}
+
+
+DvbItem::DvbItem(DvbServer* pServer) :
+StreamingMediaItem(pServer),
+_pTitleProp(new DvbItemProperty),
+_pResource(new DvbItemResource(pServer, this))
+{
+    std::clog << "DvbMediaItem::DvbMediaItem(pServer), pServer: " << pServer << std::endl;
+    _pTitleProp->setName("dc:title");
+}
+
+
+DvbItem::~DvbItem()
+{
+    delete _pTitleProp;
+}
+
+
+int
+DvbItem::getPropertyCount(const std::string& name)
+{
+    std::clog << "DvbMediaItem::getPropertyCount(name), name: " << name << std::endl;
+    
+    if (name == "") {
+        return 2;
+    }
+    else if (name == "dc:title" || name == "res") {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+Omm::Av::AbstractProperty*
+DvbItem::getProperty(int index)
+{
+    std::clog << "DvbMediaItem::getProperty(index), index: " << index << std::endl;
+    
+    if (index == 0) {
+        return _pTitleProp;
+    }
+    else if (index == 1) {
+        return _pResource;
+    }
+}
+
+
+Omm::Av::AbstractProperty*
+DvbItem::getProperty(const std::string& name, int index)
+{
+    std::clog << "DvbMediaItem::getProperty(name, index), name: " << name << ", index: " << index << std::endl;
+
+    if (name == "dc:title") {
+        return _pTitleProp;
+    }
+    else if (name == "res") {
+        return _pResource;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+DvbItem::setPath(const std::string& path)
+{
+    _pTitleProp->setValue(path);
+    _pResource->setPath(path);
+}
+
+
+void
+DvbItem::setChannel(const std::string& channelName, Omm::Dvb::DvbChannel* pChannel)
+{
+    _pTitleProp->setValue(channelName);
+    _pResource->_pChannel = pChannel;
+}
+
+
+DvbServer::DvbServer() :
+// Omm::Av::StreamingMediaObject(9999),
+_pChild(static_cast<DvbItem*>(createChildObject()))
+{
+    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
+    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
+}
+
+
+DvbServer::~DvbServer()
+{
+    delete _pTitleProp;
+    delete _pChild;
+}
+
+
+void
+DvbServer::setOption(const std::string& key, const std::string& value)
+{
+    if (key == "basePath") {
+        setBasePath(value);
+    }
+}
+
+
+Omm::ui4
+DvbServer::getChildCount()
+{
+    return _channelNames.size();
+}
+
+
+bool
+DvbServer::isContainer()
+{
+    return true;
+}
+
+
+Omm::Av::AbstractMediaObject*
+DvbServer::getChild(Omm::ui4 numChild)
+{
+    _pChild->setObjectNumber(numChild);
+//    _pChild->setPath(_files[numChild].path().substr(_basePath.length()+1));
+    _pChild->setChannel(_channelNames[numChild], _channels[numChild]);
+    return _pChild;
+}
+
+
+int
+DvbServer::getPropertyCount(const std::string& name)
+{
+    // only one property overall and one title property in particular
+    if (name == "" || name == "dc:title") {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+Omm::Av::AbstractProperty*
+DvbServer::getProperty(int index)
+{
+    return _pTitleProp;
+}
+
+
+Omm::Av::AbstractProperty*
+DvbServer::getProperty(const std::string& name, int index)
+{
+    if (name == "dc:title") {
+        return _pTitleProp;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+DvbServer::addProperty(Omm::Av::AbstractProperty* pProperty)
+{
+    _pTitleProp = pProperty;
+}
+
+
+Omm::Av::AbstractProperty*
+DvbServer::createProperty()
+{
+    return new Omm::Av::MemoryProperty;
+}
+
+
+Omm::Av::AbstractMediaObject*
+DvbServer::createChildObject()
+{
+    std::clog << "DvbServer::createChildObject()" << std::endl;
+    
+    DvbItem* pRes = new DvbItem(this);
+    pRes->setParent(this);
+
+    return pRes;
+}
+
+
+void
+DvbServer::setBasePath(const std::string& channelFileName)
+{
+//     _basePath = basePath;
+//     Poco::File baseDir(basePath);
+//     scanDirectory(baseDir);
+
+//    _channelConfigFile = channelFileName;
+    scanChannelConfig(channelFileName);
+}
+
+
+void
+DvbServer::scanDirectory(Poco::File& directory)
+{
+    Poco::DirectoryIterator dir(directory);
+    Poco::DirectoryIterator end;
+    while(dir != end) {
+        if (dir->isFile()) {
+//             std::clog << "DvbServer::setBasePath() adding file: " << dir.name() << std::endl;
+            _files.push_back(*dir);
+        }
+        else if (dir->isDirectory()) {
+//             std::clog << "DvbServer::setBasePath() adding directory: " << dir.name() << std::endl;
+            scanDirectory(*dir);
+        }
+        ++dir;
+    }
+}
+
+
+void
+DvbServer::scanChannelConfig(const std::string& channelConfig)
+{
+    std::ifstream channels(channelConfig.c_str());
+    std::string line;
+    while (getline(channels, line)) {
+        Poco::StringTokenizer channelParams(line, ":");
+        Poco::StringTokenizer channelName(channelParams[0], ";");
+        _channelNames.push_back(channelName[0]);
+        unsigned int freq = Poco::NumberParser::parseUnsigned(channelParams[1]) * 1000;
+        Omm::Dvb::DvbChannel::Polarization pol = (channelParams[2][0] == 'h') ? Omm::Dvb::DvbChannel::HORIZ : Omm::Dvb::DvbChannel::VERT;
+        unsigned int symbolRate = Poco::NumberParser::parseUnsigned(channelParams[4]) * 1000;
+        Poco::StringTokenizer videoPid(channelParams[5], "+");
+        unsigned int vpid = Poco::NumberParser::parseUnsigned(videoPid[0]);
+        Poco::StringTokenizer audioChannel(channelParams[6], ";");
+        Poco::StringTokenizer audioPid(audioChannel[0], "=");
+        unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
+        int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
+        _channels.push_back(new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, apid, sid));
+    }
+    
+}
+
+
+// Poco::File&
+// DvbServer::getFileReference(Omm::ui4 childNum)
+// {
+//     return _files[childNum];
+// }
+
+
+
+POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
 POCO_EXPORT_CLASS(DvbServer)
 POCO_END_MANIFEST

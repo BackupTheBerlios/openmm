@@ -23,42 +23,13 @@
 #define Filesystem_INCLUDED
 
 #include <Poco/File.h>
-
 #include <Omm/UpnpAvServer.h>
 
-class FileItem;
 
-class FileServer : public Omm::Av::StreamingMediaObject
+class FileServer : public Omm::Av::TorchServer
 {
-    friend class FileItemResource;
-    
 public:
-    FileServer();
-    virtual ~FileServer();
-    
-    virtual Omm::ui4 getChildCount();
-    virtual bool isContainer();
-    virtual Omm::Av::AbstractMediaObject* getChild(Omm::ui4 numChild);
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual Omm::Av::AbstractProperty* getProperty(int index);
-    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
-    virtual void addProperty(Omm::Av::AbstractProperty* pProperty);
-    virtual Omm::Av::AbstractProperty* createProperty();
-    virtual Omm::Av::AbstractMediaObject* createChildObject();
-    
     virtual void setOption(const std::string& key, const std::string& value);
-    
-private:
-    void setBasePath(const std::string& basePath);
-    void scanDirectory(Poco::File& directory);
-    Poco::File& getFileReference(Omm::ui4 childNum);
-    
-    std::string                          _basePath;
-    std::vector<std::string>             _fileNames;
-    std::vector<Poco::File>              _files;
-    
-    Omm::Av::AbstractProperty*           _pTitleProp;
-    FileItem*                            _pChild;
 };
 
 #endif

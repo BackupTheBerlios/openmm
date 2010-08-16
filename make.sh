@@ -1,7 +1,7 @@
 #!/bin/sh
 
 VERBOSE=
-CMAKE_PREFIX_PATH=
+CMAKE_PREFIX_PATH=/usr
 TOOLCHAIN=
 BINDIR=../`basename ${PWD}`bin
 CMAKE_CMD=cmake

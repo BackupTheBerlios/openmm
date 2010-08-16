@@ -22,6 +22,7 @@
 #include <Poco/File.h>
 
 #include "UpnpAvServer.h"
+#include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"
 
 namespace Omm {
@@ -299,7 +300,7 @@ StreamingMediaObject::createChildObject()
 std::string
 StreamingMediaObject::getServerAddress()
 {
-    std::clog << "StreamingMediaObject::getServerAddress()" << std::endl;
+//     std::clog << "StreamingMediaObject::getServerAddress()" << std::endl;
     
     std::string address = Omm::NetworkInterfaceManager::instance()->getValidInterfaceAddress().toString();
     int port = _pItemServer->_socket.address().port();
@@ -314,62 +315,278 @@ StreamingMediaObject::getServerProtocol()
 }
 
 
+TorchServer::TorchServer() :
+_pChild(new TorchItem(this))
+{
+    _pChild->setParent(this);
+}
 
-/*------------------------ depricated classes ---------------------------*/
 
-ServerResource::ServerResource(const std::string& resourceId, const std::string& protInfo, ui4 size) :
-Resource("", protInfo, size),
-_resourceId(resourceId)
+TorchServer::~TorchServer()
+{
+    delete _pDataModel;
+    delete _pTitleProp;
+    delete _pChild;
+}
+
+
+void
+TorchServer::setDataModel(AbstractDataModel* pDataModel)
+{
+    _pDataModel = pDataModel;
+}
+
+
+Omm::Av::AbstractMediaObject*
+TorchServer::getChild(Omm::ui4 numChild)
+{
+    std::clog << "TorchServer::getChild()" << std::endl;
+    
+    _pChild->setObjectNumber(numChild);
+    // FIXME: title property of child item should get it's title based on item's object number
+    static_cast<TorchItem*>(_pChild)->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
+    
+    return _pChild;
+}
+
+
+Omm::ui4
+TorchServer::getChildCount()
+{
+    if (_pDataModel) {
+        return _pDataModel->getChildCount();
+    }
+    else {
+        return 0;
+    }
+}
+
+
+bool
+TorchServer::isContainer()
+{
+    return true;
+}
+
+
+int
+TorchServer::getPropertyCount(const std::string& name)
+{
+    // only one property overall and one title property in particular
+    if (name == "" || name == "dc:title") {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+Omm::Av::AbstractProperty*
+TorchServer::getProperty(int index)
+{
+    return _pTitleProp;
+}
+
+
+Omm::Av::AbstractProperty*
+TorchServer::getProperty(const std::string& name, int index)
+{
+    if (name == "dc:title") {
+        return _pTitleProp;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+TorchServer::addProperty(Omm::Av::AbstractProperty* pProperty)
+{
+    _pTitleProp = pProperty;
+}
+
+
+Omm::Av::AbstractProperty*
+TorchServer::createProperty()
+{
+    return new Omm::Av::MemoryProperty;
+}
+
+
+TorchItemResource::TorchItemResource(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+StreamingResource(new MemoryPropertyImpl, pServer, pItem)
 {
 }
 
 
-const std::string&
-ServerResource::getResourceId()
+bool
+TorchItemResource::isSeekable()
 {
-    return _resourceId;
-}
-
-
-WebResource::WebResource(const std::string& resourceId, const std::string& protInfo, const std::string& privateUri) :
-ServerResource(resourceId, protInfo, 0),
-_privateUri(privateUri)
-{
+    AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
+    if (pDataModel) {
+        return pDataModel->isSeekable(_pItem->getObjectNumber());
+    }
+    else {
+        return false;
+    }
 }
 
 
 std::streamsize
-WebResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+TorchItemResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 {
-    Poco::URI uri(_privateUri);
-    Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-    session.setKeepAlive(true);
-    session.setKeepAliveTimeout(Poco::Timespan(3, 0));
-    Poco::Timespan timeout = session.getKeepAliveTimeout();
-    Log::instance()->upnpav().debug("web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds() + "sec"));
-    Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
-    proxyRequest.setKeepAlive(true);
-    session.sendRequest(proxyRequest);
-    std::stringstream requestHeader;
-    proxyRequest.write(requestHeader);
-    Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
-    
-    Poco::Net::HTTPResponse proxyResponse;
-    std::istream& istr = session.receiveResponse(proxyResponse);
-    
-    if (istr.peek() == EOF) {
-        Log::instance()->upnpav().error("error reading data from web resource");
+    AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
+    if (pDataModel) {
+        return pDataModel->stream(_pItem->getObjectNumber(), ostr, seek);
     }
     else {
-        Log::instance()->upnpav().debug("success reading data from web resource");
+        return 0;
     }
+}
+
+
+Omm::ui4
+TorchItemResource::getSize()
+{
+    AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
+    if (pDataModel) {
+        return pDataModel->getSize(_pItem->getObjectNumber());
+    }
+    else {
+        return 0;
+    }
+}
+
+
+std::string
+TorchItemResource::getMime()
+{
+    AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
+    if (pDataModel) {
+        return pDataModel->getMime(_pItem->getObjectNumber());
+    }
+    else {
+        return "*";
+    }
+}
+
+
+std::string
+TorchItemResource::getDlna()
+{
+    AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
+    if (pDataModel) {
+        return pDataModel->getDlna(_pItem->getObjectNumber());
+    }
+    else {
+        return "*";
+    }
+}
+
+
+void
+TorchItemPropertyImpl::setName(const std::string& name)
+{
+    _name = name;
+}
+
+
+void
+TorchItemPropertyImpl::setValue(const std::string& value)
+{
+    _value = value;
+}
+
+
+std::string
+TorchItemPropertyImpl::getName()
+{
+    std::clog << "TorchItemPropertyImpl::getName() returns: " << _name << std::endl;
+
+    return _name;
+}
+
+
+std::string
+TorchItemPropertyImpl::getValue()
+{
+    std::clog << "TorchItemPropertyImpl::getValue() returns: " << _value << std::endl;
+
+    if (_name == "dc:title") {
+        return _value;
+    }
+}
+
+
+TorchItemProperty::TorchItemProperty() :
+AbstractProperty(new TorchItemPropertyImpl)
+{
+}
+
+
+TorchItem::TorchItem(TorchServer* pServer) :
+StreamingMediaItem(pServer),
+_pTitleProp(new TorchItemProperty),
+_pResource(new TorchItemResource(pServer, this))
+{
+    std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
+    _pTitleProp->setName("dc:title");
+}
+
+
+TorchItem::~TorchItem()
+{
+    delete _pTitleProp;
+}
+
+
+int
+TorchItem::getPropertyCount(const std::string& name)
+{
+    std::clog << "TorchItem::getPropertyCount(name), name: " << name << std::endl;
     
-    Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(proxyResponse.getStatus()) + " " + proxyResponse.getReason());
-    std::stringstream responseHeader;
-    proxyResponse.write(responseHeader);
-    Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
+    if (name == "") {
+        return 2;
+    }
+    else if (name == "dc:title" || name == "res") {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+Omm::Av::AbstractProperty*
+TorchItem::getProperty(int index)
+{
+    std::clog << "TorchItem::getProperty(index), index: " << index << std::endl;
     
-    return Poco::StreamCopier::copyStream(istr, ostr);
+    if (index == 0) {
+        return _pTitleProp;
+    }
+    else if (index == 1) {
+        return _pResource;
+    }
+}
+
+
+Omm::Av::AbstractProperty*
+TorchItem::getProperty(const std::string& name, int index)
+{
+    std::clog << "TorchItem::getProperty(name, index), name: " << name << ", index: " << index << std::endl;
+
+    if (name == "dc:title") {
+        return _pTitleProp;
+    }
+    else if (name == "res") {
+        return _pResource;
+    }
+    else {
+        return 0;
+    }
 }
 
 

@@ -19,52 +19,69 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Filesystem_INCLUDED
-#define Filesystem_INCLUDED
+#ifndef UpnpAvServerPrivate_INCLUDED
+#define UpnpAvServerPrivate_INCLUDED
 
-#include <Poco/File.h>
+#include "UpnpAvServer.h"
 
-#include <Omm/UpnpAvServer.h>
-#include <Omm/Dvb.h>
 
-class DvbItem;
+namespace Omm {
+namespace Av {
 
-class DvbServer : public Omm::Av::StreamingMediaObject
+
+class TorchItemProperty : public Omm::Av::AbstractProperty
 {
-    friend class DvbItemResource;
+public:
+    TorchItemProperty();
+};
+
+
+class TorchItemPropertyImpl : public Omm::Av::PropertyImpl
+{
+public:
+    virtual void setName(const std::string& name);
+    virtual void setValue(const std::string& value);
+    virtual std::string getName();
+    virtual std::string getValue();
+    
+private:
+    std::string         _name;
+    std::string         _value;
+};
+
+
+class TorchItemResource : public Omm::Av::StreamingResource
+{
+public:
+    TorchItemResource(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    
+    virtual Omm::ui4 getSize();
+    virtual std::string getMime();
+    virtual std::string getDlna();
+    
+    virtual bool isSeekable();
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+};
+
+
+class TorchItem : public Omm::Av::StreamingMediaItem
+{
+    friend class TorchServer;
     
 public:
-    DvbServer();
-    virtual ~DvbServer();
+    TorchItem(TorchServer* pServer);
+    virtual ~TorchItem();
     
-    virtual Omm::ui4 getChildCount();
-    virtual bool isContainer();
-    virtual Omm::Av::AbstractMediaObject* getChild(Omm::ui4 numChild);
     virtual int getPropertyCount(const std::string& name = "");
     virtual Omm::Av::AbstractProperty* getProperty(int index);
     virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
-    virtual void addProperty(Omm::Av::AbstractProperty* pProperty);
-    virtual Omm::Av::AbstractProperty* createProperty();
-    virtual Omm::Av::AbstractMediaObject* createChildObject();
-    
-    virtual void setOption(const std::string& key, const std::string& value);
-    
+
 private:
-    void setBasePath(const std::string& basePath);
-    void scanDirectory(Poco::File& directory);
-    void scanChannelConfig(const std::string& channelConfig);
-//     Poco::File& getFileReference(Omm::ui4 childNum);
-    
-    std::string                          _basePath;
-    std::vector<std::string>             _fileNames;
-    std::vector<Poco::File>              _files;
-    
-//    std::string                          _channelConfigFile;
-    std::vector<std::string>             _channelNames;
-    std::vector<Omm::Dvb::DvbChannel*>   _channels;
-    
-    Omm::Av::AbstractProperty*           _pTitleProp;
-    DvbItem*                             _pChild;
+    TorchItemProperty*                   _pTitleProp;
+    TorchItemResource*                   _pResource;
 };
+
+} // namespace Av
+} // namespace Omm
 
 #endif

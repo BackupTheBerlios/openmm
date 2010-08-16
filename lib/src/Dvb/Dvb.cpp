@@ -584,6 +584,14 @@ void
 DvbDevice::tune(DvbChannel* pChannel)
 {
     Log::instance()->dvb().debug("start tuning ...");
+    if (_adapters.size() == 0) {
+        Log::instance()->dvb().error("no adapter found, tuning aborted.");
+        return;
+    }
+    if (!_adapters[0]->_pFrontend) {
+        Log::instance()->dvb().error("no frontend found, tuning aborted.");
+        return;
+    }
     _adapters[0]->_pFrontend->tune(pChannel);
 }
 
