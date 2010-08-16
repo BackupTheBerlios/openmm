@@ -22,7 +22,6 @@
 #ifndef Filesystem_INCLUDED
 #define Filesystem_INCLUDED
 
-#include <Poco/File.h>
 #include <Omm/UpnpAvServer.h>
 
 

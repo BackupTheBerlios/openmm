@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
+#include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
 #include "Filesystem.h"
 
@@ -38,7 +39,7 @@ public:
     virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek);
 
 private:
-    void setBasePath(const std::string& basePath);
+//     void setBasePath(const std::string& basePath);
     void scanDirectory(Poco::File& directory);
     
     std::vector<Poco::File>              _files;

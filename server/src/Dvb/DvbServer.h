@@ -19,52 +19,17 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Filesystem_INCLUDED
-#define Filesystem_INCLUDED
-
-#include <Poco/File.h>
+#ifndef DvbServer_INCLUDED
+#define DvbServer_INCLUDED
 
 #include <Omm/UpnpAvServer.h>
 #include <Omm/Dvb.h>
 
-class DvbItem;
 
-class DvbServer : public Omm::Av::StreamingMediaObject
+class DvbServer : public Omm::Av::TorchServer
 {
-    friend class DvbItemResource;
-    
-public:
-    DvbServer();
-    virtual ~DvbServer();
-    
-    virtual Omm::ui4 getChildCount();
-    virtual bool isContainer();
-    virtual Omm::Av::AbstractMediaObject* getChild(Omm::ui4 numChild);
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual Omm::Av::AbstractProperty* getProperty(int index);
-    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
-    virtual void addProperty(Omm::Av::AbstractProperty* pProperty);
-    virtual Omm::Av::AbstractProperty* createProperty();
-    virtual Omm::Av::AbstractMediaObject* createChildObject();
-    
     virtual void setOption(const std::string& key, const std::string& value);
-    
-private:
-    void setBasePath(const std::string& basePath);
-    void scanDirectory(Poco::File& directory);
-    void scanChannelConfig(const std::string& channelConfig);
-//     Poco::File& getFileReference(Omm::ui4 childNum);
-    
-    std::string                          _basePath;
-    std::vector<std::string>             _fileNames;
-    std::vector<Poco::File>              _files;
-    
-//    std::string                          _channelConfigFile;
-    std::vector<std::string>             _channelNames;
-    std::vector<Omm::Dvb::DvbChannel*>   _channels;
-    
-    Omm::Av::AbstractProperty*           _pTitleProp;
-    DvbItem*                             _pChild;
 };
+
 
 #endif
