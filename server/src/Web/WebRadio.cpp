@@ -76,11 +76,12 @@ std::streamsize
 WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek)
 {
     Poco::URI uri(_stationUris[index]);
+    
     Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
     session.setKeepAlive(true);
     session.setKeepAliveTimeout(Poco::Timespan(3, 0));
     Poco::Timespan timeout = session.getKeepAliveTimeout();
-    Omm::Av::Log::instance()->upnpav().debug("web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds() + "sec"));
+    Omm::Av::Log::instance()->upnpav().debug("web radio, web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds()) + "sec");
     Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
     proxyRequest.setKeepAlive(true);
     session.sendRequest(proxyRequest);
@@ -92,10 +93,10 @@ WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos
     std::istream& istr = session.receiveResponse(proxyResponse);
     
     if (istr.peek() == EOF) {
-        Omm::Av::Log::instance()->upnpav().error("error reading data from web resource");
+        Omm::Av::Log::instance()->upnpav().error("error web radio reading data from web resource");
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("success reading data from web resource");
+        Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from web resource");
     }
     
     Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(proxyResponse.getStatus()) + " " + proxyResponse.getReason());
@@ -103,8 +104,64 @@ WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos
     proxyResponse.write(responseHeader);
     Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
     
-    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
-    return bytes;
+    std::streamsize bytes;
+    if (proxyResponse.getContentType() == "audio/mpeg" || proxyResponse.getContentType() == "application/ogg") {
+        Omm::Av::Log::instance()->upnpav().debug("web radio detected audio content, streaming directly ...");
+        bytes = Poco::StreamCopier::copyStream(istr, ostr);
+        return bytes;
+    }
+    else {
+        std::vector<std::string> uris;
+        
+        // look for streamable URIs in the downloaded playlist
+        Omm::Av::Log::instance()->upnpav().debug("web radio detected playlist, analyzing ...");
+        std::string line;
+        while (getline(istr, line)) {
+            Omm::Av::Log::instance()->upnpav().debug(line);
+            std::string::size_type uriPos = line.find("http://");
+            if (uriPos != std::string::npos) {
+                std::string uri = Poco::trim(line.substr(uriPos));
+                Omm::Av::Log::instance()->upnpav().debug("web radio found stream uri: " + uri);
+                uris.push_back(uri);
+            }
+        }
+        // try to stream one of the URIs in the downloaded playlist
+        for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
+            Poco::URI streamUri(*it);
+
+            Poco::Net::HTTPClientSession session(streamUri.getHost(), streamUri.getPort());
+            session.setKeepAlive(true);
+            session.setKeepAliveTimeout(Poco::Timespan(3, 0));
+            Poco::Timespan timeout = session.getKeepAliveTimeout();
+            Omm::Av::Log::instance()->upnpav().debug("web radio, web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds()) + "sec");
+            Poco::Net::HTTPRequest request("GET", streamUri.getPath());
+            request.setKeepAlive(true);
+            session.sendRequest(request);
+            std::stringstream requestHeader;
+            request.write(requestHeader);
+            Omm::Av::Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
+            
+            Poco::Net::HTTPResponse response;
+            std::istream& istr = session.receiveResponse(response);
+            
+            if (istr.peek() == EOF) {
+                Omm::Av::Log::instance()->upnpav().error("web radio failed reading data from stream uri: " + *it);
+                continue;
+            }
+            else {
+                Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from stream uri: " + *it);
+            }
+            
+            Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+            std::stringstream responseHeader;
+            response.write(responseHeader);
+            Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
+            Omm::Av::Log::instance()->upnpav().debug("web radio streaming uri ...");
+            bytes = Poco::StreamCopier::copyStream(istr, ostr);
+            Omm::Av::Log::instance()->upnpav().debug("web radio streaming uri finished.");
+            return bytes;
+        }
+    }
 }
 
 
@@ -161,7 +218,7 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
                     Omm::Av::Log::instance()->upnpav().debug("added web radio station with uri: " + pProp->innerText());
                 }
                 else {
-                    Omm::Av::Log::instance()->upnpav().warning("webradio station entry in config file has properties");
+                    Omm::Av::Log::instance()->upnpav().warning("webradio station entry in config file has unknown property");
                 }
                 pProp = pProp->nextSibling();
             }
