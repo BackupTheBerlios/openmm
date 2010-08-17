@@ -78,12 +78,7 @@ WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos
     Poco::URI uri(_stationUris[index]);
     
     Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-    session.setKeepAlive(true);
-    session.setKeepAliveTimeout(Poco::Timespan(3, 0));
-    Poco::Timespan timeout = session.getKeepAliveTimeout();
-    Omm::Av::Log::instance()->upnpav().debug("web radio, web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds()) + "sec");
     Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
-    proxyRequest.setKeepAlive(true);
     session.sendRequest(proxyRequest);
     std::stringstream requestHeader;
     proxyRequest.write(requestHeader);
@@ -120,7 +115,7 @@ WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos
             Omm::Av::Log::instance()->upnpav().debug(line);
             std::string::size_type uriPos = line.find("http://");
             if (uriPos != std::string::npos) {
-                std::string uri = Poco::trim(line.substr(uriPos));
+                std::string uri = Poco::trimRight(line.substr(uriPos));
                 Omm::Av::Log::instance()->upnpav().debug("web radio found stream uri: " + uri);
                 uris.push_back(uri);
             }
@@ -130,12 +125,11 @@ WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos
             Poco::URI streamUri(*it);
 
             Poco::Net::HTTPClientSession session(streamUri.getHost(), streamUri.getPort());
-            session.setKeepAlive(true);
-            session.setKeepAliveTimeout(Poco::Timespan(3, 0));
-            Poco::Timespan timeout = session.getKeepAliveTimeout();
-            Omm::Av::Log::instance()->upnpav().debug("web radio, web resource server proxy timeout is: " + Poco::NumberFormatter::format(timeout.seconds()) + "sec");
-            Poco::Net::HTTPRequest request("GET", streamUri.getPath());
-            request.setKeepAlive(true);
+            std::string path = streamUri.getPath();
+            if (path == "") {
+                path = "/";
+            }
+            Poco::Net::HTTPRequest request("GET", path);
             session.sendRequest(request);
             std::stringstream requestHeader;
             request.write(requestHeader);

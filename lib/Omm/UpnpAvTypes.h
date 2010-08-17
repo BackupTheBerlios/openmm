@@ -275,6 +275,7 @@ private:
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
+    void replaceNonUtf8(std::string& str);
     
     AbstractMediaObject*                    _pMediaObject;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;

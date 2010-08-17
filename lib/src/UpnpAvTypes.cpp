@@ -41,6 +41,9 @@
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"
 
+#include "utf8.h"
+
+
 namespace Omm {
 namespace Av {
 
@@ -878,6 +881,7 @@ MediaObjectWriter2::writeMetaDataClose(std::string& metaData)
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     std::stringstream ss;
+    // FIXME: non UTF-8 characters cause the DOM writer to stop and leave an unfinished XML fragment.
     writer.writeNode(ss, _pDoc);
     metaData = ss.str();
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaDataClose() returns: \n" + metaData);
@@ -923,6 +927,7 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
         AbstractProperty* pProp = _pMediaObject->getProperty(propNum);
         std::string name = pProp->getName();
         std::string value = pProp->getValue();
+        replaceNonUtf8(value);
         Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() property: " + name + ", " + value);
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement(name);
         Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(value);
@@ -943,6 +948,15 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     // class (String, upnp)
     
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() finished.");
+}
+
+
+void
+MediaObjectWriter2::replaceNonUtf8(std::string& str)
+{
+    std::string temp;
+    utf8::replace_invalid(str.begin(), str.end(), std::back_inserter(temp));
+    str = temp;
 }
 
 

@@ -114,13 +114,19 @@ FileDataModel::scanDirectory(Poco::File& directory)
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
     while(dir != end) {
-        if (dir->isFile()) {
-//             std::clog << "FileServer::setBasePath() adding file: " << dir.name() << std::endl;
-            _files.push_back(*dir);
+//         if (dir->isFile() && dir->exists() && dir->canRead() && !dir->isLink()) {
+        try {
+            if (dir->isFile()) {
+    //             std::clog << "FileServer::setBasePath() adding file: " << dir.name() << std::endl;
+                _files.push_back(*dir);
+            }
+            else if (dir->isDirectory()) {
+    //             std::clog << "FileServer::setBasePath() adding directory: " << dir.name() << std::endl;
+                scanDirectory(*dir);
+            }
         }
-        else if (dir->isDirectory()) {
-//             std::clog << "FileServer::setBasePath() adding directory: " << dir.name() << std::endl;
-            scanDirectory(*dir);
+        catch(...) {
+            Omm::Av::Log::instance()->upnpav().warning("some file not found, ignoring.");
         }
         ++dir;
     }
