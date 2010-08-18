@@ -40,7 +40,8 @@ class UpnpAvServerApplication: public Poco::Util::ServerApplication
 public:
     UpnpAvServerApplication():
         _helpRequested(false),
-        _containerPlugin("")
+        _containerPlugin(""),
+        _pluginOption("")
     {
     }
     
@@ -73,6 +74,11 @@ protected:
                            .required(false)
                            .repeatable(false)
                            .argument("plugin name", true));
+        options.addOption(
+                           Option("option", "o", "option passed to plugin")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("plugin option", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
@@ -84,6 +90,9 @@ protected:
         }
         else if (name == "plugin") {
             _containerPlugin = value;
+        }
+        else if (name == "option") {
+            _pluginOption = value;
         }
     }
     
@@ -124,15 +133,24 @@ protected:
             
             if (_containerPlugin == "server-dvb") {
                     pContainerPlugin->setTitle("Digital TV");
-                    pContainerPlugin->setOption("basePath", "/home/jb/.omm/channels.conf");
+                    if (_pluginOption == "") {
+                        pContainerPlugin->setOption("basePath", "/home/jb/.omm/channels.conf");
+                    }
             }
             else if (_containerPlugin == "server-file") {
                     pContainerPlugin->setTitle("Collection");
-                    pContainerPlugin->setOption("basePath", "/home/jb/mp3");
+                    if (_pluginOption == "") {
+                        pContainerPlugin->setOption("basePath", "/home/jb/mp3");
+                    }
             }
             else if (_containerPlugin == "server-webradio") {
                     pContainerPlugin->setTitle("Web Radio");
-                    pContainerPlugin->setOption("basePath", "/home/jb/.omm/webradio.conf");
+                    if (_pluginOption == "") {
+                        pContainerPlugin->setOption("basePath", "/home/jb/.omm/webradio.conf");
+                    }
+            }
+            if (_pluginOption != "") {
+                pContainerPlugin->setOption("basePath", _pluginOption);
             }
             
             Omm::Av::UpnpAvServer myMediaServer;
@@ -151,6 +169,7 @@ protected:
 private:
     bool            _helpRequested;
     std::string     _containerPlugin;
+    std::string     _pluginOption;
 };
 
 

@@ -1649,7 +1649,7 @@ Demuxer::run()
         Log::instance()->avstream().trace("ffmpeg::av_read_frame() ...");
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
         if (ret < 0) {
-            Log::instance()->avstream().debug("ffmpeg::av_read_frame() returns: " + Poco::NumberFormatter::format(ret) + " (" + (ret == AVERROR_EOF ? "eof reached." : ".") + ")");
+            Log::instance()->avstream().error("ffmpeg::av_read_frame() returns: " + Poco::NumberFormatter::format(ret) + " (" + errorMessage(ret) + ")");
             break;
         }
         frameNumber++;
@@ -1687,8 +1687,9 @@ Demuxer::run()
         _outStreams[packet.stream_index]->putFrame(pFrame);
     }
     // if no frames could be read from input stream, stop all nodes
-    stop();
+    //stop();
     // TODO: clock should be stopped, too (if connected to a sink node)
+    // and it's connected timer threads in the sink nodes.
 }
 
 
@@ -1766,6 +1767,43 @@ Demuxer::correctPts(int64_t pts, int64_t lastPts, int lastDuration)
     }
     
     return correctedPts;
+}
+
+
+std::string
+Demuxer::errorMessage(int errorCode)
+{
+    std::string errMsg;
+    switch (errorCode) {
+//         case AVERROR_UNKNOWN:
+//             errMsg = "unknown error";
+//             break;
+        case AVERROR_IO:
+            errMsg = "I/O error";
+            break;
+        case AVERROR_NUMEXPECTED:
+            errMsg = "Number syntax expected in filename";
+            break;
+        case AVERROR_INVALIDDATA:
+            errMsg = "invalid data found";
+            break;
+        case AVERROR_NOMEM:
+            errMsg = "not enough memory";
+            break;
+        case AVERROR_NOFMT:
+            errMsg = "unknown format";
+            break;
+        case AVERROR_NOTSUPP:
+            errMsg = "Operation not supported";
+            break;
+        case AVERROR_NOENT:
+            errMsg = "No such file or directory";
+            break;
+        case AVERROR_EOF:
+            errMsg = "End of file";
+            break;
+    }
+    return errMsg;
 }
 
 
@@ -2303,7 +2341,7 @@ Sink::run()
 void
 Sink::currentTime(int64_t time)
 {
-    Log::instance()->avstream().trace(getName() + " current time: " + Poco::NumberFormatter::format(time));
+    Log::instance()->avstream().trace(getName() + " received current time: " + Poco::NumberFormatter::format(time));
     
     _timeQueue.put(time);
 }
@@ -2481,9 +2519,10 @@ VideoSink::stopPresentation()
 void
 VideoSink::timerThread()
 {
-    Log::instance()->avstream().debug(getName() + "%s timer thread started.");
+    Log::instance()->avstream().debug(getName() + " timer thread started.");
 
     while(!_timerQuit) {
+        Log::instance()->avstream().trace("video sink getting time ...");
         int64_t time = _timeQueue.get();
 //         Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
 //             getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
@@ -2547,10 +2586,14 @@ VideoSink::onTick(int64_t time)
     }
     
     int64_t framePts = pOverlay->_pFrame->getPts();
-    if (framePts < time) {
-        Log::instance()->avstream().trace("video sink timer thread frame too old, time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts));
-    }
-    
+    Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts));
+//     if (framePts < time) {
+// //         Log::instance()->avstream().trace("video sink timer thread frame too old, time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts) + " discarding frame.");
+// //         _overlayQueue.get();
+//     }
+
+    // wait until the frame in the overlay queue is not newer than current clock time
+    // then fetch it from the overlay queue and display it.
     if (pOverlay->_pFrame->getPts() <= time) {
         pOverlay = _overlayQueue.get();
         if (pOverlay) {

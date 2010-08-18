@@ -50,14 +50,14 @@ SdlVideoSink::initDevice()
     Omm::AvStream::Log::instance()->avstream().debug("opening SDL video sink ...");
     
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("failed to init SDL:  %s", std::string(SDL_GetError())));
+        Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
         return false;
     }
     
     SDL_Surface* pSdlScreen = SDL_SetVideoMode(getWidth(), getHeight(), 0, SDL_HWSURFACE | SDL_RESIZABLE | SDL_ASYNCBLIT | SDL_HWACCEL);
     
     if (pSdlScreen == 0) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("could not open SDL window: %s", std::string(SDL_GetError())));
+        Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
         return false;
     }
     
@@ -80,7 +80,7 @@ SdlVideoSink::initDevice()
         _overlayVector[numOverlay] = pOverlay;
     }
 
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opened.", getName()));
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " opened.");
     return true;
 }
 
@@ -99,8 +99,8 @@ SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 //         pOverlay->_pFrame->getName(),
 //         Poco::NumberFormatter::format(rect.w),
 //         Poco::NumberFormatter::format(rect.h)));
-        Omm::AvStream::Log::instance()->avstream().debug(Poco::format("sdl video sink display frame %s",
-            pOverlay->_pFrame->getName()));
+        Omm::AvStream::Log::instance()->avstream().debug("sdl video sink display frame " +
+            pOverlay->_pFrame->getName());
 //     Omm::AvStream::Log::instance()->avstream().debug("sdl video sink display frame");
     
     SDL_DisplayYUVOverlay(static_cast<SdlOverlay*>(pOverlay)->_pSDLOverlay, &rect);

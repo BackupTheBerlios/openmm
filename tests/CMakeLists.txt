@@ -138,7 +138,7 @@ ${OMMTEST_AV_STREAM_PLAY_SRCS}
 )
 
 ADD_DEFINITIONS(
--malign-double
+##-malign-double
 )
 
 TARGET_LINK_LIBRARIES( avstreamplay

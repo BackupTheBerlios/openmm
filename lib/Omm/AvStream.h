@@ -402,6 +402,7 @@ private:
     virtual void run();
     
     int64_t correctPts(int64_t pts, int64_t lastPts, int lastDuration);
+    std::string errorMessage(int errorCode);
     
     Meta*       _pMeta;
     int         _firstAudioStream;

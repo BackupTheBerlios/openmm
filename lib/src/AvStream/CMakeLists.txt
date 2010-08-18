@@ -3,7 +3,7 @@
 #)
 
 FIND_PATH(FFMPEG_INCLUDE_DIR
-avformat/avformat.h
+libavformat/avformat.h
 PATHS ${CMAKE_INCLUDE_PATH}
 )
 
@@ -65,7 +65,7 @@ ${ommlib_SOURCE_DIR}/Omm
 
 ADD_DEFINITIONS(
 ## it took me 1.5 days to find out that av_metadata_get() segfaults without being compiled with -malign-double ##
--malign-double
+##-malign-double
 # -malign-double
 # -mno-align-double
 # Control whether GCC aligns "double", "long double", and "long long" variables on a two word boundary or a one word boundary.  Aligning

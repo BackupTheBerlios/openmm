@@ -114,10 +114,10 @@ AlsaAudioSink::initDevice()
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels.");
         return false;
     }
-    if (snd_pcm_hw_params_set_periods(_pcmPlayback, _hwParams, _periods, 0) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device periods.");
-        return false;
-    }
+//     if (snd_pcm_hw_params_set_periods(_pcmPlayback, _hwParams, _periods, 0) < 0) {
+//         Omm::AvStream::Log::instance()->avstream().error("setting PCM device periods.");
+//         return false;
+//     }
     // Set buffer size (in frames). The resulting latency is given by
     // latency = periodSize * periods / (rate * bytes_per_frame)
     snd_pcm_uframes_t bufferSize = (_periodSize * _periods) >> 2;
