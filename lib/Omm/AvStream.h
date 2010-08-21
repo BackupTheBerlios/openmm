@@ -81,12 +81,14 @@ public:
     static Log* instance();
     
     Poco::Logger& avstream();
+    Poco::Logger& ffmpeg();
     
 private:
     Log();
     
     static Log*     _pInstance;
     Poco::Logger*   _pAvStreamLogger;
+    Poco::Logger*   _pFfmpegLogger;
 };
 
 

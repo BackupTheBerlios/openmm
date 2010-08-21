@@ -45,9 +45,8 @@ PcmAudioSink::initDevice()
 {
     std::string fileName(_inStreams[0]->getName() + ".pcm");
     _pcmStream.open(fileName.c_str());
-    Omm::AvStream::Log::instance()->avstream().information(Poco::format("%s writing PCM sample data to file %s",
-        getName(),
-        fileName));
+    Omm::AvStream::Log::instance()->avstream().information(getName() + " writing PCM sample data to file " +
+        fileName);
     return true;
 }
 
