@@ -3,9 +3,9 @@ INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
 
-ADD_DEFINITIONS(
--malign-double
-)
+# ADD_DEFINITIONS(
+# -malign-double
+# )
 
 SET( OMM_AV_STREAM_PPM_VIDEOSINK_SRCS
 PpmVideoSink.cpp

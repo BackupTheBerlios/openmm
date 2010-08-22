@@ -332,7 +332,7 @@ public:
     void setInfo(StreamInfo* pInfo);
     void setQueue(StreamQueue* pQueue);
     
-    Frame* allocateVideoFrame(PixelFormat targetFormat);
+//     Frame* allocateVideoFrame(PixelFormat targetFormat);
     Frame* decodeFrame(Frame* pFrame);
     
 private:
@@ -346,6 +346,10 @@ private:
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
     Poco::FastMutex     _lock;
+    
+    Frame*              _pDecodedVideoFrame;
+    int                 _maxDecodedAudioFrameSize;
+    Frame*              _pDecodedAudioFrame;
 };
 
 
@@ -477,43 +481,44 @@ public:
     const int size();
     int paddedSize();
     
-    char* planeData(int plane);
-    int planeSize(int plane);
+//     char* planeData(int plane);
+//     int planeSize(int plane);
     
     void printInfo();
     std::string getName();
     const int64_t getNumber();
+    void setNumber(int64_t frameNumber);
     const int64_t getPts();
     void setPts(int64_t pts);
     
     const Stream* getStream();
     
-    Frame* decode();
+//     Frame* decode();
     
     // width and height = -1 means, leave the size of the frame as it is
-    Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
+//     Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
     
-    void writePpm(const std::string& fileName);
+//     void writePpm(const std::string& fileName);
     void write(Overlay* overlay);
     
     AVPacket* copyPacket(AVPacket* pAvPacket, int padSize);
-    AVFrame* allocateFrame(PixelFormat format);
-    AVFrame* copyFrame(AVFrame* pAvFrame);
+//     AVFrame* allocateFrame(PixelFormat format);
+//     AVFrame* copyFrame(AVFrame* pAvFrame);
     
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
-    // face 1: simple buffer
     int64_t             _number;
     Poco::Mutex         _numberLock;
     int64_t             _pts;
     Poco::Mutex         _ptsLock;
+    // face 1: audio/video packet coming from the demuxer
+    AVPacket*           _pAvPacket;
+    // face 2: buffer for decoded audio data
     char*               _data;
     int                 _size;
     Poco::Mutex         _sizeLock;
     int                 _paddedSize;
-    // face 2: packet coming from the demuxer
-    AVPacket*           _pAvPacket;
-    // face 3: decoded frame
+    // face 3: decoded video frame
     AVFrame*            _pAvFrame;
     
     // reference to the stream this frame is contained in
@@ -692,7 +697,8 @@ public:
     int             _pitch[4];
     
     VideoSink*      _pVideoSink;
-    Frame*          _pFrame;
+//     Frame*          _pFrame;
+    int64_t         _pts;
 };
 
 

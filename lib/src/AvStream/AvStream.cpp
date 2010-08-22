@@ -92,7 +92,8 @@ Log::Log()
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
+//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
+    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -645,7 +646,17 @@ _pNode(pNode),
 _pStreamInfo(new StreamInfo),
 _pStreamQueue(0)
 {
+    Log::instance()->avstream().trace("allocating new stream ...");
     setName(name);
+    // FIXME: the buffers for decoded frames are allocated even for outstreams
+    // and video buffers are allocated for audio streams (and vice versa).
+    Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
+    _pDecodedVideoFrame = new Frame(0, this, avcodec_alloc_frame());
+    std::clog << "stream ctor, decoded frame pointer: " << _pDecodedVideoFrame << std::endl;
+    _maxDecodedAudioFrameSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
+    _pDecodedAudioFrame = new Frame(0, this, _maxDecodedAudioFrameSize);
+    _pDecodedAudioFrame->_data[_maxDecodedAudioFrameSize - 1] = 0;
+    Log::instance()->avstream().trace("new stream allocated.");
 }
 
 
@@ -653,6 +664,10 @@ Stream::~Stream()
 {
     // StreamInfo and StreamQueue belong to the nodes that are connected
     // so they are not deleted here
+    
+    // TODO: free _pOutAvFrame;
+    delete _pDecodedVideoFrame;
+    delete _pDecodedAudioFrame;
 }
 
 
@@ -777,21 +792,21 @@ Stream::setName(const std::string& name)
 }
 
 
-Frame*
-Stream::allocateVideoFrame(PixelFormat targetFormat)
-{
-    // Determine required buffer size and allocate buffer
-    Log::instance()->ffmpeg().trace("ffmpeg::avpicture_get_size() ...");
-    int numBytes = avpicture_get_size(targetFormat, getInfo()->width(), getInfo()->height());
-    Log::instance()->ffmpeg().trace("ffmpeg::av_malloc() ...");
-    uint8_t* buffer = (uint8_t *)av_malloc(numBytes);
-    Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
-    AVFrame* pRes = avcodec_alloc_frame();
-    Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
-    avpicture_fill((AVPicture *)pRes, buffer, targetFormat, getInfo()->width(), getInfo()->height());
-    
-    return new Frame(getInfo()->newFrameNumber(), this, pRes);
-}
+// Frame*
+// Stream::allocateVideoFrame(PixelFormat targetFormat)
+// {
+//     // Determine required buffer size and allocate buffer
+//     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_get_size() ...");
+//     int numBytes = avpicture_get_size(targetFormat, getInfo()->width(), getInfo()->height());
+//     Log::instance()->ffmpeg().trace("ffmpeg::av_malloc() ...");
+//     uint8_t* buffer = (uint8_t *)av_malloc(numBytes);
+//     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
+//     AVFrame* pRes = avcodec_alloc_frame();
+//     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
+//     avpicture_fill((AVPicture *)pRes, buffer, targetFormat, getInfo()->width(), getInfo()->height());
+//     
+//     return new Frame(getInfo()->newFrameNumber(), this, pRes);
+// }
 
 
 Frame*
@@ -805,25 +820,36 @@ Stream::decodeFrame(Frame* pFrame)
         Log::instance()->avstream().warning("missing stream info while decoding stream " + getName() + ", discarding frame.");
         return 0;
     }
+    
+    Frame* pDecodedFrame = 0;
     if (_pStreamInfo->isAudio()) {
-        return decodeAudioFrame(pFrame);
+        pDecodedFrame = decodeAudioFrame(pFrame);
     }
     else if (_pStreamInfo->isVideo()) {
-        return decodeVideoFrame(pFrame);
+        pDecodedFrame = decodeVideoFrame(pFrame);
     }
-    return 0;
+    if (pDecodedFrame) {
+        pDecodedFrame->setNumber(pFrame->getNumber());
+        pDecodedFrame->setPts(pFrame->getPts());
+    }
+    // packet is decoded and not needed anymore, we can free it.
+    delete pFrame;
+    // and return the decoded frame (which always points to the allocated audio/video buffer provided by the stream).
+    return pDecodedFrame;
 }
 
 
 Frame*
 Stream::decodeAudioFrame(Frame* pFrame)
 {
-    const int outBufferSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
-    Frame* pOutFrame = new Frame(pFrame->getNumber(), this, outBufferSize);
-    pOutFrame->_data[outBufferSize-1] = 0;
-    Log::instance()->avstream().debug("decode audio frame alloc size: " +
-        Poco::NumberFormatter::format(outBufferSize)
-        );
+//     const int outBufferSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
+//     Frame* pOutFrame = new Frame(pFrame->getNumber(), this, outBufferSize);
+//     pOutFrame->_data[outBufferSize-1] = 0;
+//     Log::instance()->avstream().debug("decode audio frame alloc size: " +
+//         Poco::NumberFormatter::format(outBufferSize)
+//         );
+//     _pDecodedAudioFrame->_number = pFrame->getNumber();
+    _pDecodedAudioFrame->_size = _maxDecodedAudioFrameSize;
     
     uint8_t* inBuffer = (uint8_t*)pFrame->data();
     int inBufferSize = pFrame->size();
@@ -832,16 +858,16 @@ Stream::decodeAudioFrame(Frame* pFrame)
     while(inBufferSize > 0) {
         Log::instance()->ffmpeg().trace("ffmpeg::avcodec_decode_audio2() ...");
         int bytesConsumed = avcodec_decode_audio2(_pStreamInfo->_pAvStream->codec,
-            (int16_t*)pOutFrame->_data, &pOutFrame->_size,
+            (int16_t*)_pDecodedAudioFrame->_data, &_pDecodedAudioFrame->_size,
             inBuffer, inBufferSize);
         // TODO: decoded frame got new size after avcodec_decode_audio2(). Is buffer also resized?
 //         pOutFrame->_size = outBufferSize;
         
         Log::instance()->ffmpeg().debug("ffmpeg::avcodec_decode_audio2() frame size: " + Poco::NumberFormatter::format(inBufferSize) + ", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", decoded size: " +
-            Poco::NumberFormatter::format(pOutFrame->size())
+            Poco::NumberFormatter::format(_pDecodedAudioFrame->size())
             );
         
-        if (bytesConsumed < 0 || pOutFrame->size() == 0) {
+        if (bytesConsumed < 0 || _pDecodedAudioFrame->size() == 0) {
             Log::instance()->avstream().warning("decoding audio frame in stream " + getName() + " failed, discarding frame.");
             delete pFrame;
             return 0;
@@ -849,23 +875,24 @@ Stream::decodeAudioFrame(Frame* pFrame)
         inBuffer += bytesConsumed;
         inBufferSize -= bytesConsumed;
     }
-    delete pFrame;
-    return pOutFrame;
+//     delete pFrame;
+    return _pDecodedAudioFrame;
 }
 
 
 Frame*
 Stream::decodeVideoFrame(Frame* pFrame)
 {
-    AVFrame outPic;
+//     _pDecodedVideoFrame->_number = pFrame->getNumber();
+
     int decodeSuccess;
+    AVFrame* pDecodedAvFrame = _pDecodedVideoFrame->_pAvFrame;
     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_decode_video() ...");
     int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvCodecContext,
-                                             &outPic, &decodeSuccess,
+                                             pDecodedAvFrame, &decodeSuccess,
                                              (uint8_t*)pFrame->data(), pFrame->paddedSize());
     std::string success(decodeSuccess ? "success" : "failed");
-    Log::instance()->ffmpeg().debug("ffmpeg::avcodec_decode_video() " + success +", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", linesize[0..2]: " + Poco::NumberFormatter::format(outPic.linesize[0]) + "," + Poco::NumberFormatter::format(outPic.linesize[1]) + ", " +
-        Poco::NumberFormatter::format(outPic.linesize[2]));
+    Log::instance()->ffmpeg().debug("ffmpeg::avcodec_decode_video() " + success +", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", linesize[0..2]: " + Poco::NumberFormatter::format(pDecodedAvFrame->linesize[0]) + "," + Poco::NumberFormatter::format(pDecodedAvFrame->linesize[1]) + "," + Poco::NumberFormatter::format(pDecodedAvFrame->linesize[2]));
     
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
         Log::instance()->avstream().warning("decoding video frame in stream " + getName() +" failed, discarding frame.");
@@ -875,10 +902,11 @@ Stream::decodeVideoFrame(Frame* pFrame)
         return 0;
     }
     
-    Frame* pOutFrame = new Frame(pFrame->getNumber(), this, &outPic);
+//     Frame* pOutFrame = new Frame(pFrame->getNumber(), this, &_outPic);
+    
     // FIXME: this makes no different in memory consumption
 //     delete pFrame;
-    return pOutFrame;
+    return _pDecodedVideoFrame;
 }
 
 
@@ -1161,10 +1189,12 @@ _pStream(pStream)
     // this doesn't hurt, as they will be deleted shortly after
     _pAvPacket = copyPacket(pAvPacket, FF_INPUT_BUFFER_PADDING_SIZE);
     _data = (char*)_pAvPacket->data;
-    _size = _pAvPacket->size;
-    _paddedSize = _pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE;
-    Log::instance()->ffmpeg().trace("ffmpeg::av_free_packet() ...");
-    av_free_packet(pAvPacket);
+//     _size = _pAvPacket->size;
+//     _paddedSize = _pAvPacket->size + FF_INPUT_BUFFER_PADDING_SIZE;
+    _size = pAvPacket->size;
+    _paddedSize = _pAvPacket->size;
+//    Log::instance()->ffmpeg().trace("ffmpeg::av_free_packet() ...");
+//    av_free_packet(pAvPacket);
 }
 
 
@@ -1191,7 +1221,7 @@ _pts(AV_NOPTS_VALUE),
 _data(0),
 _size(0),
 _pAvPacket(0),
-_pAvFrame(0),
+_pAvFrame(pAvFrame),
 _pStream(pStream)
 {
     // NOTE: seems like ffmpeg holds one GOP in memory.
@@ -1202,13 +1232,13 @@ _pStream(pStream)
     // the stream are stored)
     
     // NOTE: why these two lines are needed, dunno exactly ...
-    _pAvFrame = new AVFrame;
-    *_pAvFrame = *pAvFrame;
+//    _pAvFrame = new AVFrame;
+//    *_pAvFrame = *pAvFrame;
 //     _pAvFrame = copyFrame(pAvFrame);
     
     // NOTE: this only points to the correct data in planeless picture formats
-    _size = _pStream->_pStreamInfo->pictureSize();
-    _data = (char*)_pAvFrame->data[0];
+//     _size = _pStream->_pStreamInfo->pictureSize();
+//     _data = (char*)_pAvFrame->data[0];
     
     // FIXME: need to copy the data, too.
     
@@ -1218,25 +1248,36 @@ _pStream(pStream)
 
 Frame::~Frame()
 {
+    Log::instance()->avstream().trace("Frame dtor ...");
     // NOTE: _data points to _pAvPacket->data or _pAvFrame->data[0], so we need to free only one of them
     // NOTE: logging with Frame::getName() leads to segfaults
     if (_pAvPacket) {
-//         Log::instance()->ffmpeg().trace(Poco::format("delete %s dtor, ffmpeg::av_free_packet() ...", getName()));
+       // called for non-decoded packets
+        Log::instance()->ffmpeg().trace("delete " + getName() + " dtor, ffmpeg::av_free_packet() ...");
         av_free_packet(_pAvPacket);
-        delete _pAvPacket;
+        Log::instance()->ffmpeg().trace("delete " + getName() + " dtor, ffmpeg::av_free() ...");
+        av_free(_pAvPacket);
+//         delete _pAvPacket->data;
+//         delete _pAvPacket;
         _pAvPacket = 0;
+        _data = 0;
+        _size = 0;
     }
-    else if (_pAvFrame) {
-//         Log::instance()->ffmpeg().trace(Poco::format("delete %s dtor, ffmpeg::av_free()", getName()));
+//     else if (_pAvFrame) {
+        // called for decoded video frames
+//         Log::instance()->ffmpeg().trace("video frame dtor, delete _pAvFrame");
 //         av_free(_pAvFrame);
+//         av_free_packet((AVPacket*)_pAvFrame); // crashes
 //         delete _pAvFrame;
 //         _pAvFrame = 0;
-    }
-    else if (_data) {
-//         Log::instance()->avstream().trace(Poco::format("delete %s dtor _data, size %s", getName(), Poco::NumberFormatter::format(size())));
-        delete _data;
-        _data = 0;
-    }
+//     }
+//     else if (_data) {
+//         // called for decoded audio frames
+//         Log::instance()->avstream().trace("audio frame dtor, delete _data, size " + Poco::NumberFormatter::format(size()));
+//         delete _data;
+//         _data = 0;
+//     }
+    Log::instance()->avstream().trace("Frame dtor finished.");
 }
 
 
@@ -1257,6 +1298,29 @@ Frame::~Frame()
 AVPacket*
 Frame::copyPacket(AVPacket* pAvPacket, int padSize)
 {
+    Log::instance()->ffmpeg().trace("av_dup_packet()");
+    if (av_dup_packet(pAvPacket) < 0) {
+        Log::instance()->ffmpeg().warning("av_dup_packet() failed");
+    }
+    // allocate AVPacket struc
+    Log::instance()->ffmpeg().trace("av_malloc()");
+    AVPacket* pRes = (AVPacket*)av_malloc(sizeof(AVPacket));
+    // copy fields of AVPacket struc
+    *pRes = *pAvPacket;
+    // allocate payload
+//     Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(pAvPacket->size + padSize));
+//     pRes->data = new uint8_t[pAvPacket->size + padSize];
+//     pRes->size = pAvPacket->size + padSize;
+    // copy payload
+//     memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
+    
+    return pRes;
+}
+
+/*
+AVPacket*
+Frame::copyPacket0(AVPacket* pAvPacket, int padSize)
+{
     // allocate AVPacket struc
     AVPacket* pRes = new AVPacket;
     // copy fields of AVPacket struc
@@ -1264,7 +1328,7 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
     // allocate payload
     Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(pAvPacket->size + padSize));
     pRes->data = new uint8_t[pAvPacket->size + padSize];
-//     pRes->size = pAvPacket->size + padSize;
+    pRes->size = pAvPacket->size + padSize;
     // copy payload
     memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
     
@@ -1272,48 +1336,67 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
 }
 
 
-AVFrame*
-Frame::allocateFrame(PixelFormat format)
+AVPacket*
+Frame::copyPacket1(AVPacket* pAvPacket, int padSize)
 {
-    Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
-    AVFrame* pRes = avcodec_alloc_frame();
-    
-    // use int avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height) instead of avpicture_fill?
-    Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(_pStream->_pStreamInfo->pictureSize()));
-    uint8_t* buffer = (uint8_t *)av_malloc(_pStream->_pStreamInfo->pictureSize());
-    Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
-    avpicture_fill((AVPicture *)pRes,
-                   buffer,
-                   format,
-                   _pStream->_pStreamInfo->width(),
-                   _pStream->_pStreamInfo->height());
+    // allocate AVPacket struc
+    AVPacket* pRes;
+    av_new_packet(pRes, pAvPacket->size + padSize)
+    // copy fields of AVPacket struc
+    *pRes = *pAvPacket;
+    // allocate payload
+    Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(pAvPacket->size + padSize));
+    pRes->data = new uint8_t[pAvPacket->size + padSize];
+    pRes->size = pAvPacket->size + padSize;
+    // copy payload
+    memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
     
     return pRes;
 }
+*/
+
+// AVFrame*
+// Frame::allocateFrame(PixelFormat format)
+// {
+//     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
+//     AVFrame* pRes = avcodec_alloc_frame();
+//     
+//     // use int avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height) instead of avpicture_fill?
+//     Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(_pStream->_pStreamInfo->pictureSize()));
+//     uint8_t* buffer = (uint8_t *)av_malloc(_pStream->_pStreamInfo->pictureSize());
+//     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
+//     avpicture_fill((AVPicture *)pRes,
+//                    buffer,
+//                    format,
+//                    _pStream->_pStreamInfo->width(),
+//                    _pStream->_pStreamInfo->height());
+//     
+//     return pRes;
+// }
 
 
-AVFrame*
-Frame::copyFrame(AVFrame* pAvFrame)
-{
-    // allocate AVFrame in the format of this stream
-    AVFrame* pRes = allocateFrame(_pStream->getInfo()->pixelFormat());
-    
-    // copy payload
-//     for (int planes = 0; planes < 4; planes++) {
-//         if (pRes->linesize[planes] != pAvFrame->linesize[planes]) {
-//             Log::instance()->avstream().error("copy AVFrame failed, format missmatch linesizes of source and target don't fit");
-//         }
-//         memcpy(pRes->data[planes], pAvFrame->data[planes], pAvFrame->linesize[planes]);
-//     }
-    
-    // copy payload
-    av_picture_copy((AVPicture*)pRes, (AVPicture*) pAvFrame,
-                    _pStream->getInfo()->pixelFormat(),
-                    _pStream->getInfo()->width(),
-                    _pStream->getInfo()->height());
-    
-    return pRes;
-}
+// AVFrame*
+// Frame::copyFrame(AVFrame* pAvFrame)
+// {
+//     // allocate AVFrame in the format of this stream
+//     AVFrame* pRes = allocateFrame(_pStream->getInfo()->pixelFormat());
+//     
+//     // copy payload
+// //     for (int planes = 0; planes < 4; planes++) {
+// //         if (pRes->linesize[planes] != pAvFrame->linesize[planes]) {
+// //             Log::instance()->avstream().error("copy AVFrame failed, format missmatch linesizes of source and target don't fit");
+// //         }
+// //         memcpy(pRes->data[planes], pAvFrame->data[planes], pAvFrame->linesize[planes]);
+// //     }
+//     
+//     // copy payload
+//     av_picture_copy((AVPicture*)pRes, (AVPicture*) pAvFrame,
+//                     _pStream->getInfo()->pixelFormat(),
+//                     _pStream->getInfo()->width(),
+//                     _pStream->getInfo()->height());
+//     
+//     return pRes;
+// }
 
 
 const char*
@@ -1341,18 +1424,18 @@ Frame::paddedSize()
 }
 
 
-char*
-Frame::planeData(int plane)
-{
-    return (char*)_pAvFrame->data[plane];
-}
-
-
-int
-Frame::planeSize(int plane)
-{
-    return _pAvFrame->linesize[plane];
-}
+// char*
+// Frame::planeData(int plane)
+// {
+//     return (char*)_pAvFrame->data[plane];
+// }
+// 
+// 
+// int
+// Frame::planeSize(int plane)
+// {
+//     return _pAvFrame->linesize[plane];
+// }
 
 
 void
@@ -1390,6 +1473,15 @@ Frame::getNumber()
 }
 
 
+void
+Frame::setNumber(int64_t frameNumber)
+{
+//     Log::instance()->avstream().debug("Frame::setNumber()");
+//     Poco::ScopedLock<Poco::Mutex> lock(_numberLock);
+    _number = frameNumber;
+}
+
+
 const int64_t
 Frame::getPts()
 {
@@ -1415,79 +1507,79 @@ Frame::getStream()
 }
 
 
-Frame*
-Frame::decode()
-{
-    Frame* pRes = _pStream->decodeFrame(this);
-    if (pRes) {
-        pRes->setPts(getPts());
-    }
-    return pRes;
-}
+// Frame*
+// Frame::decode()
+// {
+//     Frame* pRes = _pStream->decodeFrame(this);
+//     if (pRes) {
+//         pRes->setPts(getPts());
+//     }
+//     return pRes;
+// }
 
 
-Frame*
-Frame::convert(PixelFormat targetFormat, int targetWidth, int targetHeight)
-{
-    _pStream->getInfo()->printInfo();
-    int width = _pStream->getInfo()->width();
-    int height = _pStream->getInfo()->height();
-    if (targetWidth == -1) {
-        targetWidth = width;
-    }
-    if (targetHeight == -1) {
-        targetHeight = height;
-    }
-    PixelFormat inPixFormat = _pStream->getInfo()->pixelFormat();
-    
-    Log::instance()->avstream().debug("source pixelFormat: " + Poco::NumberFormatter::format(inPixFormat) + ", target pixelFormat: " + Poco::NumberFormatter::format(targetFormat));
-    
-    int scaleAlgo = SWS_BICUBIC;
-    struct SwsContext *pImgConvertContext = 0;
-    
-    Log::instance()->ffmpeg().trace("ffmpeg::sws_getCachedContext() ...");
-    pImgConvertContext = sws_getCachedContext(pImgConvertContext,
-                                              width, height, inPixFormat,
-                                              width, height, targetFormat,
-                                              scaleAlgo, NULL, NULL, NULL);
-    
-    if (pImgConvertContext == 0) {
-        Log::instance()->avstream().warning("cannot initialize image conversion context");
-        return 0;
-    }
-    else {
-        Log::instance()->avstream().debug("success: image conversion context set up.");
-    }
-    
-    // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
-    Frame* pRes = _pStream->allocateVideoFrame(targetFormat);
-    
-    printInfo();
-    Log::instance()->ffmpeg().trace("ffmpeg::sws_scale() ...");
-    sws_scale(pImgConvertContext,
-              _pAvFrame->data, _pAvFrame->linesize,
-              0, height,
-              pRes->_pAvFrame->data, pRes->_pAvFrame->linesize);
-    
-    pRes->printInfo();
-    
-    return pRes;
-}
+// Frame*
+// Frame::convert(PixelFormat targetFormat, int targetWidth, int targetHeight)
+// {
+//     _pStream->getInfo()->printInfo();
+//     int width = _pStream->getInfo()->width();
+//     int height = _pStream->getInfo()->height();
+//     if (targetWidth == -1) {
+//         targetWidth = width;
+//     }
+//     if (targetHeight == -1) {
+//         targetHeight = height;
+//     }
+//     PixelFormat inPixFormat = _pStream->getInfo()->pixelFormat();
+//     
+//     Log::instance()->avstream().debug("source pixelFormat: " + Poco::NumberFormatter::format(inPixFormat) + ", target pixelFormat: " + Poco::NumberFormatter::format(targetFormat));
+//     
+//     int scaleAlgo = SWS_BICUBIC;
+//     struct SwsContext *pImgConvertContext = 0;
+//     
+//     Log::instance()->ffmpeg().trace("ffmpeg::sws_getCachedContext() ...");
+//     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
+//                                               width, height, inPixFormat,
+//                                               width, height, targetFormat,
+//                                               scaleAlgo, NULL, NULL, NULL);
+//     
+//     if (pImgConvertContext == 0) {
+//         Log::instance()->avstream().warning("cannot initialize image conversion context");
+//         return 0;
+//     }
+//     else {
+//         Log::instance()->avstream().debug("success: image conversion context set up.");
+//     }
+//     
+//     // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
+//     Frame* pRes = _pStream->allocateVideoFrame(targetFormat);
+//     
+//     printInfo();
+//     Log::instance()->ffmpeg().trace("ffmpeg::sws_scale() ...");
+//     sws_scale(pImgConvertContext,
+//               _pAvFrame->data, _pAvFrame->linesize,
+//               0, height,
+//               pRes->_pAvFrame->data, pRes->_pAvFrame->linesize);
+//     
+//     pRes->printInfo();
+//     
+//     return pRes;
+// }
 
 
-void
-Frame::writePpm(const std::string& fileName)
-{
-    Log::instance()->avstream().debug("write video frame to PPM file name: " + fileName);
-    
-    Frame* pRes = convert(PIX_FMT_RGB24);
-    
-    std::ofstream ppmFile(fileName.c_str());
-    // write PPM header
-    ppmFile << "P6\n" << _pStream->_pStreamInfo->width() << " " << _pStream->_pStreamInfo->height() << "\n" << 255 << "\n";
-    // write RGB pixel data
-    ppmFile.write((const char*)pRes->_pAvFrame->data[0], _pStream->_pStreamInfo->width() * _pStream->_pStreamInfo->height() * 3);
-}
+// void
+// Frame::writePpm(const std::string& fileName)
+// {
+//     Log::instance()->avstream().debug("write video frame to PPM file name: " + fileName);
+//     
+//     Frame* pRes = convert(PIX_FMT_RGB24);
+//     
+//     std::ofstream ppmFile(fileName.c_str());
+//     // write PPM header
+//     ppmFile << "P6\n" << _pStream->_pStreamInfo->width() << " " << _pStream->_pStreamInfo->height() << "\n" << 255 << "\n";
+//     // write RGB pixel data
+//     ppmFile.write((const char*)pRes->_pAvFrame->data[0], _pStream->_pStreamInfo->width() * _pStream->_pStreamInfo->height() * 3);
+// }
 
 
 void
@@ -1651,9 +1743,12 @@ Demuxer::run()
     std::vector<int> lastDurationVec(_outStreams.size(), 0);
     
     AVPacket packet;
+    Log::instance()->ffmpeg().trace("ffmpeg::av_init_packet() ...");
+    av_init_packet(&packet);
+    
     while (!_quit) {
-        Log::instance()->ffmpeg().trace("ffmpeg::av_init_packet() ...");
-        av_init_packet(&packet);
+//         Log::instance()->ffmpeg().trace("ffmpeg::av_init_packet() ...");
+//         av_init_packet(&packet);
         Log::instance()->ffmpeg().trace("ffmpeg::av_read_frame() ...");
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
         if (ret < 0) {
@@ -2015,7 +2110,8 @@ Decoder::run()
         Log::instance()->avstream().debug(getName() + " decode frame " +
             pFrame->getName());
         
-        Frame* pFrameDecoded = pFrame->decode();
+//         Frame* pFrameDecoded = pFrame->decode();
+        Frame* pFrameDecoded = _inStreams[0]->decodeFrame(pFrame);
         _outStreams[0]->putFrame(pFrameDecoded);
     }
     Log::instance()->avstream().warning(getName() + " finished.");
@@ -2321,24 +2417,30 @@ Sink::run()
     Omm::AvStream::Frame* pFrame;
     while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
         
-        Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+//         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+        Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
+        // FIXME: this crashes the video sink, but not the audio sink.
+//         delete pFrame;
         if (!pDecodedFrame) {
-            Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame " +
-                pFrame->getName());
+            Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
         }
         else {
             if (!_firstDecodeSuccess) {
                 _firstDecodeSuccess = true;
-                _startTime = pFrame->getPts();
+                _startTime = pDecodedFrame->getPts();
                 _timeQueue.put(_startTime);
                 Omm::AvStream::Log::instance()->avstream().debug(getName() + " start time is " +
                     Poco::NumberFormatter::format(_startTime));
             }
+//             pDecodedFrame->setNumber(pFrame->getNumber());
+//             pDecodedFrame->setPts(pFrame->getPts());
+            // FIXME: !!!! this makes no difference in memory consumption !!!!
+//             delete pFrame;
             writeDecodedFrame(pDecodedFrame);
             // FIXME: this segfaults with video (and with audio not running in valgrind or similar),
             // but without leads to more memory consumption
-            delete pDecodedFrame;
-            pDecodedFrame = 0;
+//             delete pDecodedFrame;
+//             pDecodedFrame = 0;
         }
     }
     
@@ -2383,7 +2485,9 @@ AudioSink::checkInStream()
 void
 AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
 {
+    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame to byte queue ...");
     _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
+//     delete pDecodedFrame;
 }
 
 
@@ -2569,9 +2673,12 @@ VideoSink::getFormat()
 void
 VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
 {
+    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded video frame to overlay ...");
+    
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
     pDecodedFrame->write(pWriteOverlay);
-    pWriteOverlay->_pFrame = pDecodedFrame;
+//     pWriteOverlay->_pFrame = pDecodedFrame;
+    pWriteOverlay->_pts = pDecodedFrame->getPts();
     
     _overlayQueue.put(pWriteOverlay);
     
@@ -2593,8 +2700,10 @@ VideoSink::onTick(int64_t time)
         return;
     }
     
-    int64_t framePts = pOverlay->_pFrame->getPts();
+//     int64_t framePts = pOverlay->_pFrame->getPts();
+    int64_t framePts = pOverlay->_pts;
     Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts));
+//     std::clog << "video sink timer thread, overlay frame pointer: " << pOverlay->_pFrame << std::endl;
 //     if (framePts < time) {
 // //         Log::instance()->avstream().trace("video sink timer thread frame too old, time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts) + " discarding frame.");
 // //         _overlayQueue.get();
@@ -2602,7 +2711,7 @@ VideoSink::onTick(int64_t time)
 
     // wait until the frame in the overlay queue is not newer than current clock time
     // then fetch it from the overlay queue and display it.
-    if (pOverlay->_pFrame->getPts() <= time) {
+    if (pOverlay->_pts <= time) {
         pOverlay = _overlayQueue.get();
         if (pOverlay) {
             displayFrame(pOverlay);
@@ -2614,14 +2723,13 @@ VideoSink::onTick(int64_t time)
 //         Poco::NumberFormatter::format(time),
 //         pOverlay->_pFrame->getName(),
 //         Poco::NumberFormatter::format(pOverlay->_pFrame->getPts())));
-    
-    
 }
 
 
 Overlay::Overlay(VideoSink* pVideoSink) :
 _pVideoSink(pVideoSink),
-_pFrame(0)
+_pts(AV_NOPTS_VALUE)
+// _pFrame(0)
 {
 }
 

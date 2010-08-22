@@ -77,7 +77,8 @@ PpmVideoSink::run()
     while (!_quit && (pFrame = _inStreams[0]->getFrame()))
     {
         std::string fileName(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
-        Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+//         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+        Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding packet", getName()));
         }
