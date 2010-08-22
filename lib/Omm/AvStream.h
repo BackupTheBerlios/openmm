@@ -350,6 +350,7 @@ private:
     Frame*              _pDecodedVideoFrame;
     int                 _maxDecodedAudioFrameSize;
     Frame*              _pDecodedAudioFrame;
+    struct SwsContext*  _pImgConvertContext;
 };
 
 

@@ -88,12 +88,12 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
-//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
-    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
+//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -644,7 +644,8 @@ StreamInfo::findEncoder()
 Stream::Stream(Node* pNode, const std::string name) :
 _pNode(pNode),
 _pStreamInfo(new StreamInfo),
-_pStreamQueue(0)
+_pStreamQueue(0),
+_pImgConvertContext(0)
 {
     Log::instance()->avstream().trace("allocating new stream ...");
     setName(name);
@@ -652,7 +653,7 @@ _pStreamQueue(0)
     // and video buffers are allocated for audio streams (and vice versa).
     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
     _pDecodedVideoFrame = new Frame(0, this, avcodec_alloc_frame());
-    std::clog << "stream ctor, decoded frame pointer: " << _pDecodedVideoFrame << std::endl;
+//     std::clog << "stream ctor, decoded frame pointer: " << _pDecodedVideoFrame << std::endl;
     _maxDecodedAudioFrameSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
     _pDecodedAudioFrame = new Frame(0, this, _maxDecodedAudioFrameSize);
     _pDecodedAudioFrame->_data[_maxDecodedAudioFrameSize - 1] = 0;
@@ -665,7 +666,6 @@ Stream::~Stream()
     // StreamInfo and StreamQueue belong to the nodes that are connected
     // so they are not deleted here
     
-    // TODO: free _pOutAvFrame;
     delete _pDecodedVideoFrame;
     delete _pDecodedAudioFrame;
 }
@@ -886,12 +886,14 @@ Stream::decodeVideoFrame(Frame* pFrame)
 //     _pDecodedVideoFrame->_number = pFrame->getNumber();
 
     int decodeSuccess;
-    AVFrame* pDecodedAvFrame = _pDecodedVideoFrame->_pAvFrame;
     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_decode_video() ...");
     int bytesConsumed = avcodec_decode_video(_pStreamInfo->_pAvCodecContext,
-                                             pDecodedAvFrame, &decodeSuccess,
+                                             _pDecodedVideoFrame->_pAvFrame, &decodeSuccess,
                                              (uint8_t*)pFrame->data(), pFrame->paddedSize());
+//                                             (uint8_t*)pFrame->data(), pFrame->size());
+
     std::string success(decodeSuccess ? "success" : "failed");
+    AVFrame* pDecodedAvFrame = _pDecodedVideoFrame->_pAvFrame;
     Log::instance()->ffmpeg().debug("ffmpeg::avcodec_decode_video() " + success +", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", linesize[0..2]: " + Poco::NumberFormatter::format(pDecodedAvFrame->linesize[0]) + "," + Poco::NumberFormatter::format(pDecodedAvFrame->linesize[1]) + "," + Poco::NumberFormatter::format(pDecodedAvFrame->linesize[2]));
     
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
@@ -1263,20 +1265,19 @@ Frame::~Frame()
         _data = 0;
         _size = 0;
     }
-//     else if (_pAvFrame) {
-        // called for decoded video frames
-//         Log::instance()->ffmpeg().trace("video frame dtor, delete _pAvFrame");
-//         av_free(_pAvFrame);
-//         av_free_packet((AVPacket*)_pAvFrame); // crashes
-//         delete _pAvFrame;
-//         _pAvFrame = 0;
-//     }
-//     else if (_data) {
-//         // called for decoded audio frames
-//         Log::instance()->avstream().trace("audio frame dtor, delete _data, size " + Poco::NumberFormatter::format(size()));
-//         delete _data;
-//         _data = 0;
-//     }
+    else if (_pAvFrame) {
+        // called for Stream::_pDecodedVideoFrame
+        Log::instance()->ffmpeg().trace("video frame dtor, delete _pAvFrame");
+        av_free(_pAvFrame);
+        _pAvFrame = 0;
+    }
+    else if (_data) {
+        // called for Stream::_pDecodedAudioFrame
+        Log::instance()->avstream().trace("audio frame dtor, delete _data, size " + Poco::NumberFormatter::format(size()));
+        delete _data;
+        _data = 0;
+        _size = 0;
+    }
     Log::instance()->avstream().trace("Frame dtor finished.");
 }
 
@@ -1599,16 +1600,16 @@ Frame::write(Overlay* pOverlay)
     Log::instance()->avstream().debug("stream pixelFormat: " + Poco::NumberFormatter::format(streamPixelFormat) + ", target pixelFormat: " +
         Poco::NumberFormatter::format(targetPixelFormat));
     
+//     uint16_t scaleAlgo = SWS_BICUBIC;
     int scaleAlgo = SWS_BICUBIC;
-    struct SwsContext *pImgConvertContext = 0;
     
     Log::instance()->ffmpeg().trace("ffmpeg::sws_getCachedContext() ...");
-    pImgConvertContext = sws_getCachedContext(pImgConvertContext,
+    _pStream->_pImgConvertContext = sws_getCachedContext(_pStream->_pImgConvertContext,
                                               streamWidth, streamHeight, streamPixelFormat,
                                               targetWidth, targetHeight, targetPixelFormat,
                                               scaleAlgo, NULL, NULL, NULL);
     
-    if (pImgConvertContext == 0) {
+    if (_pStream->_pImgConvertContext == 0) {
         Log::instance()->avstream().warning("cannot initialize image conversion context");
         return;
     }
@@ -1618,7 +1619,7 @@ Frame::write(Overlay* pOverlay)
     
     printInfo();
     Log::instance()->ffmpeg().trace("ffmpeg::sws_scale() ...");
-    int outSlizeHeight = sws_scale(pImgConvertContext,
+    int outSlizeHeight = sws_scale(_pStream->_pImgConvertContext,
                                    _pAvFrame->data, _pAvFrame->linesize,
                                    0, streamHeight,
                                    pOverlay->_data, pOverlay->_pitch);
@@ -2419,8 +2420,6 @@ Sink::run()
         
 //         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
-        // FIXME: this crashes the video sink, but not the audio sink.
-//         delete pFrame;
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
         }
@@ -2434,13 +2433,7 @@ Sink::run()
             }
 //             pDecodedFrame->setNumber(pFrame->getNumber());
 //             pDecodedFrame->setPts(pFrame->getPts());
-            // FIXME: !!!! this makes no difference in memory consumption !!!!
-//             delete pFrame;
             writeDecodedFrame(pDecodedFrame);
-            // FIXME: this segfaults with video (and with audio not running in valgrind or similar),
-            // but without leads to more memory consumption
-//             delete pDecodedFrame;
-//             pDecodedFrame = 0;
         }
     }
     
