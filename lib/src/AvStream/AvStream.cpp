@@ -1250,7 +1250,6 @@ _pStream(pStream)
 
 Frame::~Frame()
 {
-    Log::instance()->avstream().trace("Frame dtor ...");
     // NOTE: _data points to _pAvPacket->data or _pAvFrame->data[0], so we need to free only one of them
     // NOTE: logging with Frame::getName() leads to segfaults
     if (_pAvPacket) {
@@ -1278,7 +1277,6 @@ Frame::~Frame()
         _data = 0;
         _size = 0;
     }
-    Log::instance()->avstream().trace("Frame dtor finished.");
 }
 
 
@@ -2210,8 +2208,8 @@ Tagger::probeInputFormat(std::istream& istr)
     }
     
     // TODO: reset the stream after probing
-//     // Seek back to 0
-//     // copied from url_fseek
+    // Seek back to 0
+    // copied from url_fseek
 //     long offset1 = 0 - (_pIoContext->pos - (_pIoContext->buf_end - _pIoContext->buffer));
 //     if (offset1 >= 0 && offset1 <= (_pIoContext->buf_end - _pIoContext->buffer)) {
 //             /* can do the seek inside the buffer */
@@ -2226,7 +2224,7 @@ Tagger::probeInputFormat(std::istream& istr)
 //         }
 //     }
     
-//     pInputFormat->flags |= AVFMT_NOFILE;
+    pInputFormat->flags |= AVFMT_NOFILE;
     
     return pInputFormat;
 }
@@ -2237,11 +2235,11 @@ static long totalReadCount = 0;
 
 static int IORead( void *opaque, uint8_t *buf, int buf_size )
 {
-    Log::instance()->avstream().trace("IORead()");
+//     Log::instance()->avstream().trace("IORead()");
     
     URLContext* pUrlContext = (URLContext*)opaque;
-    Log::instance()->avstream().trace("IORead() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
-    Log::instance()->avstream().trace("IORead() URLProtocol name: " + std::string(pUrlContext->prot->name));
+//     Log::instance()->avstream().trace("IORead() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
+//     Log::instance()->avstream().trace("IORead() URLProtocol name: " + std::string(pUrlContext->prot->name));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
     if (!pInputStream) {
@@ -2304,12 +2302,14 @@ Tagger::initIo(std::istream& istr)
     pUrlContext->prot->url_read = (int (*) (URLContext *, unsigned char *, int))IORead;
     pUrlContext->prot->url_write = 0;
     pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))IOSeek;
+//     pUrlContext->prot->url_seek = 0;
     pUrlContext->prot->url_close = 0;
     pUrlContext->priv_data = &istr;
     
     // TODO: maybe IOSeek = 0 stops libavformat from doing seek operations
     Log::instance()->ffmpeg().trace("ffmpeg::av_alloc_put_byte() ...");
     ByteIOContext* pIoContext = av_alloc_put_byte(_pIoBuffer, _IoBufferSize, 0, pUrlContext, IORead, 0, IOSeek);
+//     ByteIOContext* pIoContext = av_alloc_put_byte(_pIoBuffer, _IoBufferSize, 0, pUrlContext, IORead, 0, 0);
     pIoContext->is_streamed = 1;
     pIoContext->max_packet_size = _IoBufferSize;
     
