@@ -40,12 +40,12 @@ public:
     {
         std::clog << "AvPlayer starts playing " << uri << " ..." << std::endl;
         
-        std::ifstream fileStream(uri.c_str());
+//         std::ifstream fileStream(uri.c_str());
         
         Omm::AvStream::Demuxer demuxer;
         
-//         demuxer.set(uri);
-        demuxer.set(fileStream);
+        demuxer.set(uri);
+//         demuxer.set(fileStream);
         
         if (demuxer.firstAudioStream() < 0 && demuxer.firstVideoStream() < 0) {
             std::clog << "no audio or video stream found, exiting" << std::endl;

@@ -2118,7 +2118,7 @@ Decoder::run()
 
 
 Meta::Meta() :
-_pFormatContext(0),
+_pFormatContext(avformat_alloc_context()),
 _pIoContext(0),
 _pInputFormat(0)
 {
@@ -2323,8 +2323,17 @@ Tagger::tag(const std::string& uri)
     Meta* pMeta = new Meta;
     int error;
     
+    AVFormatParameters avFormatParameters;
+    memset(&avFormatParameters, 0, sizeof(avFormatParameters));
+    avFormatParameters.prealloced_context = 1;
+    avFormatParameters.time_base= (AVRational){1, 25};
+    avFormatParameters.pix_fmt = PIX_FMT_NONE;
+    pMeta->_pFormatContext->probesize = 20;
+    pMeta->_pFormatContext->max_analyze_duration = 200000;
+    
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
-    error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, 0);
+    error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
+//     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, 0);
     if (error) {
         Log::instance()->avstream().error("av_open_input_stream() failed");
         return 0;
@@ -2349,12 +2358,25 @@ Tagger::tag(std::istream& istr)
     
     pMeta->_pIoContext = initIo(istr);
     pMeta->_pInputFormat = probeInputFormat(istr);
+
+    AVFormatParameters avFormatParameters;
+    memset(&avFormatParameters, 0, sizeof(avFormatParameters));
+    avFormatParameters.prealloced_context = 1;
+    avFormatParameters.time_base= (AVRational){1, 25};
+    avFormatParameters.pix_fmt = PIX_FMT_NONE;
+    pMeta->_pFormatContext->probesize = 200;
+    pMeta->_pFormatContext->max_analyze_duration = 200000;
+
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
-    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
+    // FIXME: av_open_input_stream needs to read several megabytes of a TS.
+    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
+//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
     if (error) {
         Log::instance()->avstream().error("av_open_input_stream() failed");
         return 0;
     }
+    Log::instance()->ffmpeg().trace("probesize: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->probesize) +
+    ", max_analyze_duration: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->max_analyze_duration));
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_find_stream_info() ...");
     error = av_find_stream_info(pMeta->_pFormatContext);
