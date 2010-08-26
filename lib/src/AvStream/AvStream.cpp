@@ -1611,8 +1611,11 @@ Frame::write(Overlay* pOverlay)
     int streamHeight = _pStream->getInfo()->height();
     PixelFormat streamPixelFormat = _pStream->getInfo()->pixelFormat();
     
-    int targetWidth = pOverlay->getWidth();
-    int targetHeight = pOverlay->getHeight();
+//     int targetWidth = pOverlay->getWidth();
+//     int targetHeight = pOverlay->getHeight();
+    int targetWidth = _pStream->getInfo()->width();
+    int targetHeight = _pStream->getInfo()->height();
+
     PixelFormat targetPixelFormat = pOverlay->getFormat();
     
     Log::instance()->avstream().debug("stream pixelFormat: " + Poco::NumberFormatter::format(streamPixelFormat) + ", target pixelFormat: " +
@@ -2704,6 +2707,7 @@ VideoSink::getFormat()
 int
 VideoSink::displayWidth()
 {
+//     return 0;
     return _width;
 }
 
@@ -2711,6 +2715,7 @@ VideoSink::displayWidth()
 int
 VideoSink::displayHeight()
 {
+//     return 0;
     return _height;
 }
 
