@@ -54,9 +54,14 @@ SdlVideoSink::initDevice()
         return false;
     }
     
-    SDL_Surface* pSdlScreen = SDL_SetVideoMode(getWidth(), getHeight(), 0, SDL_HWSURFACE | SDL_RESIZABLE | SDL_ASYNCBLIT | SDL_HWACCEL);
+    int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_ASYNCBLIT | SDL_HWACCEL;
+    if (_fullScreen) {
+        flags |= SDL_FULLSCREEN;
+    }
     
-    if (pSdlScreen == 0) {
+    _pSdlScreen = SDL_SetVideoMode(getWidth(), getHeight(), 0, flags);
+    
+    if (_pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
         return false;
     }
@@ -64,7 +69,7 @@ SdlVideoSink::initDevice()
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
         // SDL_YV12_OVERLAY corresponds to ffmpeg::PixelFormat == PIX_FMT_YUV420P
         // TODO: catch, if SDL_Overlay could not be created (video card has to few memory)
-        SDL_Overlay* pSDLOverlay = SDL_CreateYUVOverlay(getWidth(), getHeight(), SDL_YV12_OVERLAY, pSdlScreen);
+        SDL_Overlay* pSDLOverlay = SDL_CreateYUVOverlay(getWidth(), getHeight(), SDL_YV12_OVERLAY, _pSdlScreen);
         SdlOverlay* pOverlay = new SdlOverlay(this);
         
         pOverlay->_pSDLOverlay = pSDLOverlay;
@@ -88,11 +93,13 @@ SdlVideoSink::initDevice()
 void
 SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
+    int x, y, w, h;
+    displayRect(x, y, w, h);
     SDL_Rect rect;
-    rect.x = 0;
-    rect.y = 0;
-    rect.w = getWidth();
-    rect.h = getHeight();
+    rect.x = x;
+    rect.y = y;
+    rect.w = w;
+    rect.h = h;
     
 //     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s, width: %s, height: %s",
 //         getName(),
@@ -108,13 +115,26 @@ SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 
 
 int
+SdlVideoSink::displayWidth()
+{
+    return _pSdlScreen->w;
+}
+
+
+int
+SdlVideoSink::displayHeight()
+{
+    return _pSdlScreen->h;
+}
+
+
+int
 SdlVideoSink::eventLoop()
 {
     Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
 //     Poco::Thread::sleep(10000);
     
 }
-
 
 
 POCO_BEGIN_MANIFEST(Omm::AvStream::VideoSink)

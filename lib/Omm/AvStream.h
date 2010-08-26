@@ -281,6 +281,7 @@ public:
     
     int width();
     int height();
+    float aspectRatio();
     
     // audio parameters
     int sampleWidth();
@@ -658,6 +659,11 @@ public:
     int getHeight();
     PixelFormat getFormat();
     
+    virtual int displayWidth();
+    virtual int displayHeight();
+    
+    void displayRect(int& x, int& y, int& w, int& h);
+    
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
     
@@ -666,6 +672,7 @@ protected:
     Queue<Overlay*>             _overlayQueue;
     
     bool                        _timerQuit;
+    bool                        _fullScreen;
     
 private:
     virtual bool checkInStream();

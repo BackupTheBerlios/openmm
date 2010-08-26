@@ -505,6 +505,26 @@ StreamInfo::height()
 }
 
 
+float
+StreamInfo::aspectRatio()
+{
+    float aspectRatio;
+    if (_pAvStream->sample_aspect_ratio.num) {
+        aspectRatio = av_q2d(_pAvStream->sample_aspect_ratio);
+    }
+    else if (_pAvCodecContext && _pAvCodecContext->sample_aspect_ratio.num) {
+        aspectRatio = av_q2d(_pAvCodecContext->sample_aspect_ratio);
+    }
+    else {
+        aspectRatio = 1.0;
+    }
+    if (aspectRatio < 0.0) {
+        aspectRatio = 1.0;
+    }
+    return aspectRatio;
+}
+
+
 PixelFormat
 StreamInfo::pixelFormat()
 {
@@ -1598,7 +1618,6 @@ Frame::write(Overlay* pOverlay)
     Log::instance()->avstream().debug("stream pixelFormat: " + Poco::NumberFormatter::format(streamPixelFormat) + ", target pixelFormat: " +
         Poco::NumberFormatter::format(targetPixelFormat));
     
-//     uint16_t scaleAlgo = SWS_BICUBIC;
     int scaleAlgo = SWS_BICUBIC;
     
     Log::instance()->ffmpeg().trace("ffmpeg::sws_getCachedContext() ...");
@@ -2326,10 +2345,8 @@ Tagger::tag(const std::string& uri)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    avFormatParameters.time_base= (AVRational){1, 25};
-    avFormatParameters.pix_fmt = PIX_FMT_NONE;
-    pMeta->_pFormatContext->probesize = 20;
-    pMeta->_pFormatContext->max_analyze_duration = 200000;
+    pMeta->_pFormatContext->probesize = 200;
+    pMeta->_pFormatContext->max_analyze_duration = 500000;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
@@ -2362,10 +2379,8 @@ Tagger::tag(std::istream& istr)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    avFormatParameters.time_base= (AVRational){1, 25};
-    avFormatParameters.pix_fmt = PIX_FMT_NONE;
     pMeta->_pFormatContext->probesize = 200;
-    pMeta->_pFormatContext->max_analyze_duration = 200000;
+    pMeta->_pFormatContext->max_analyze_duration = 500000;
 
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
     // FIXME: av_open_input_stream needs to read several megabytes of a TS.
@@ -2599,6 +2614,7 @@ _overlayQueue(name + " overlay", overlayCount),
 _timerThread(name + " timer thread"),
 _timerThreadRunnable(*this, &VideoSink::timerThread),
 _timerQuit(false),
+_fullScreen(false),
 _width(width),
 _height(height),
 _pixelFormat(pixelFormat),
@@ -2682,6 +2698,35 @@ VideoSink::getFormat()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_sinkLock);
     return _pixelFormat;
+}
+
+
+int
+VideoSink::displayWidth()
+{
+    return _width;
+}
+
+
+int
+VideoSink::displayHeight()
+{
+    return _height;
+}
+
+
+void
+VideoSink::displayRect(int& x, int& y, int& w, int& h)
+{
+    float ar = getInStream(0)->getInfo()->aspectRatio() * (float)getInStream(0)->getInfo()->width()/getInStream(0)->getInfo()->height();
+    h = displayHeight();
+    w = ((int)rint(h * ar)) & ~1;
+    if (w > displayWidth()) {
+        w = displayWidth();
+        h = ((int)rint(w / ar)) & ~1;
+    }
+    x = (displayWidth() - w) / 2;
+    y = (displayHeight() - h) / 2;
 }
 
 

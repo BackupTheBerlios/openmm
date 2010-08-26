@@ -46,6 +46,11 @@ public:
 private:
     virtual bool initDevice();
     virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);
+    
+    virtual int displayWidth();
+    virtual int displayHeight();
+    
+    SDL_Surface* _pSdlScreen;
 };
 
 #endif
