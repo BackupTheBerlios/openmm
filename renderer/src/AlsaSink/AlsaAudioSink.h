@@ -36,6 +36,7 @@ public:
 
 private:
     virtual bool initDevice();
+    virtual bool closeDevice();
     virtual void startPresentation();
     virtual void stopPresentation();
     

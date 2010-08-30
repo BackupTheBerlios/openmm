@@ -172,6 +172,14 @@ RingBuffer::write(const char* buffer, int num)
 }
 
 
+void
+RingBuffer::clear()
+{
+    _readPos = _ringBuffer;
+    _writePos = _ringBuffer;
+}
+
+
 ByteQueue::ByteQueue(int size) :
 _ringBuffer(size),
 _size(size),
@@ -279,6 +287,14 @@ ByteQueue::level()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
     return _level;
+}
+
+
+void
+ByteQueue::clear()
+{
+    _level = 0;
+    _ringBuffer.clear();
 }
 
 
@@ -714,16 +730,20 @@ Stream::firstFrame()
 Frame*
 Stream::getFrame()
 {
+//     Log::instance()->avstream().trace("getFrame()");
     if (!_pStreamQueue) {
+        Log::instance()->avstream().trace("getFrame() no stream queue");
         Log::instance()->avstream().warning(getNode()->getName() + " [" + getName() + "] get frame no queue attached, ignoring");
         return 0;
     }
     else {
         Frame* pRes = _pStreamQueue->get();
         if (!pRes) {
+            Log::instance()->avstream().trace("getFrame() null frame");
             Log::instance()->avstream().warning(getNode()->getName() + " [" + getName() + "] get frame returns null frame.");
         }
         else {
+//             Log::instance()->avstream().trace("getFrame() success");
             Log::instance()->avstream().trace(getNode()->getName() + " [" + getName() + "] get frame " + pRes->getName() + ", queue size: " +
                 Poco::NumberFormatter::format(_pStreamQueue->count()));
         }
@@ -919,15 +939,8 @@ Stream::decodeVideoFrame(Frame* pFrame)
     if (decodeSuccess <= 0 || bytesConsumed <= 0) {
         Log::instance()->avstream().warning("decoding video frame in stream " + getName() +" failed, discarding frame.");
         // FIXME: when decoding of video failes, original frame is deleted? 
-        // segfault here when doing a delete pFrame
-//         delete pFrame;
         return 0;
     }
-    
-//     Frame* pOutFrame = new Frame(pFrame->getNumber(), this, &_outPic);
-    
-    // FIXME: this makes no different in memory consumption
-//     delete pFrame;
     return _pDecodedVideoFrame;
 }
 
@@ -988,11 +1001,26 @@ Node::start()
 void
 Node::stop()
 {
-    Log::instance()->avstream().debug("stopping " + getName() + " ...");
+    Log::instance()->avstream().debug(getName() + " stopping run thread ...");
+    
     // first stop this node by setting the _quit flag ...
     _quitLock.lock();
     _quit = true;
     _quitLock.unlock();
+    Log::instance()->avstream().debug(getName() + " trying to join run thread ...");
+    try {
+        // wait for run thread loop to finish
+        // FIXME: what, if the thread finishes after _thread.isRunning() and _thread.join()
+        if (_thread.isRunning()) {
+            _thread.join(500);
+        }
+    }
+    catch(...) {
+        Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown run thread");
+    }
+    _quit = false;
+    Log::instance()->avstream().debug(getName() + " run thread stopped.");
+    
     // then stop all nodes downstream
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
@@ -1007,8 +1035,6 @@ Node::stop()
         }
         downstreamNode->stop();
     }
-    
-    // TODO: join all downstream threads after setting _quit in all nodes. Otherwise they would be shut down brutally.
 }
 
 
@@ -1120,6 +1146,24 @@ Node::getOutStream(int outStreamNumber)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_outStreamsLock);
     return _inStreams[outStreamNumber];
+}
+
+
+void
+Node::reset()
+{
+    _quit = false;
+    for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
+//         while ((*it)->getQueue()->count()) {
+//             delete (*it)->getQueue()->get();
+//         }
+        (*it)->getQueue()->clear();
+    }
+//     _inStreams.clear();
+//     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
+//         delete *it;
+//     }
+//     _outStreams.clear();
 }
 
 
@@ -1662,6 +1706,11 @@ _firstVideoStream(-1)
 void
 Demuxer::set(const std::string& uri)
 {
+//     // clean up from last set()
+//     if (_pMeta) {
+//         delete _pMeta;
+//     }
+    // analyze the data and init the demuxer streams
     Tagger tagger;
     _pMeta = tagger.tag(uri);
     if (!_pMeta) {
@@ -1681,6 +1730,11 @@ Demuxer::set(const std::string& uri)
 void
 Demuxer::set(std::istream& istr)
 {
+//     // clean up from last set()
+//     if (_pMeta) {
+//         delete _pMeta;
+//     }
+    // analyze the data and init the demuxer streams
     Tagger tagger;
     _pMeta = tagger.tag(istr);
     if (!_pMeta) {
@@ -1700,6 +1754,15 @@ Demuxer::set(std::istream& istr)
 bool
 Demuxer::init()
 {
+//     // clean up from last init()
+//     for(std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
+//         delete *it;
+//     }
+//     _outStreams.clear();
+//     _firstAudioStream = -1;
+//     _firstVideoStream = -1;
+    
+    // init the demuxer streams
     AVFormatContext* pFormatContext = _pMeta->_pFormatContext;
     int audioStreamCount = 0;
     int videoStreamCount = 0;
@@ -1739,6 +1802,7 @@ Demuxer::init()
 void
 Demuxer::reset()
 {
+    Log::instance()->avstream().debug("demuxer reset ...");
     if (_pMeta) {
         delete _pMeta;
     }
@@ -1748,6 +1812,10 @@ Demuxer::reset()
         delete *it;
     }
     _outStreams.clear();
+    _firstAudioStream = -1;
+    _firstVideoStream = -1;
+    Node::reset();
+    Log::instance()->avstream().debug("demuxer reset finished.");
 }
 
 
@@ -1756,7 +1824,6 @@ Demuxer::run()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread started.");
     
-    // TODO: save copying of AVPacket packet into Frame and read it directly into frame with av_read_frame()
     // TODO: introduce Frame::readFrame(Meta* pMeta) and while(pFrame* = readFrame(_pMeta))
     int64_t frameNumber = 0;
     
@@ -1768,8 +1835,6 @@ Demuxer::run()
     av_init_packet(&packet);
     
     while (!_quit) {
-//         Log::instance()->ffmpeg().trace("ffmpeg::av_init_packet() ...");
-//         av_init_packet(&packet);
         Log::instance()->ffmpeg().trace("ffmpeg::av_read_frame() ...");
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
         if (ret < 0) {
@@ -1814,6 +1879,7 @@ Demuxer::run()
     //stop();
     // TODO: clock should be stopped, too (if connected to a sink node)
     // and it's connected timer threads in the sink nodes.
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
 }
 
 
@@ -2150,8 +2216,11 @@ _pInputFormat(0)
 Meta::~Meta()
 {
     if (_pFormatContext) {
-        Log::instance()->ffmpeg().trace("ffmpeg::av_close_input_stream() ...");
-        av_close_input_stream(_pFormatContext);
+        // FIXME: av_close_input_file() or av_close_input_stream() depends on which tag() was used
+        Log::instance()->ffmpeg().trace("ffmpeg::av_close_input_file() ...");
+        av_close_input_file(_pFormatContext);
+//         Log::instance()->ffmpeg().trace("ffmpeg::av_close_input_stream() ...");
+//         av_close_input_stream(_pFormatContext);
     }
 }
 
@@ -2348,7 +2417,7 @@ Tagger::tag(const std::string& uri)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 200;
+    pMeta->_pFormatContext->probesize = 2000;
     pMeta->_pFormatContext->max_analyze_duration = 500000;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
@@ -2382,7 +2451,7 @@ Tagger::tag(std::istream& istr)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 200;
+    pMeta->_pFormatContext->probesize = 2000;
     pMeta->_pFormatContext->max_analyze_duration = 500000;
 
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
@@ -2456,9 +2525,9 @@ Sink::run()
         return;
     }
     Omm::AvStream::Frame* pFrame;
+    Log::instance()->avstream().debug(getName() + " run thread looping ...");
     while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
-        
-//         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
+//         Log::instance()->avstream().debug("sink got frame.");
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
@@ -2471,13 +2540,21 @@ Sink::run()
                 Omm::AvStream::Log::instance()->avstream().debug(getName() + " start time is " +
                     Poco::NumberFormatter::format(_startTime));
             }
-//             pDecodedFrame->setNumber(pFrame->getNumber());
-//             pDecodedFrame->setPts(pFrame->getPts());
             writeDecodedFrame(pDecodedFrame);
         }
     }
-    
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " finished.");
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
+}
+
+
+void
+Sink::reset()
+{
+    closeDevice();
+    _firstDecodeSuccess = false;
+    _startTime = AV_NOPTS_VALUE;
+    _timeQueue.clear();
+    Node::reset();
 }
 
 
@@ -2579,6 +2656,15 @@ AudioSink::initSilence(char* buffer, int size)
 
 
 void
+AudioSink::reset()
+{
+    _audioTime = AV_NOPTS_VALUE;
+    _byteQueue.clear();
+    Sink::reset();
+}
+
+
+void
 AudioSink::setStartTime(int64_t startTime)
 {
     Log::instance()->avstream().debug(getName() + " audio start time: " + Poco::NumberFormatter::format(_startTime) + ", clock start time: " + Poco::NumberFormatter::format(startTime) + ".");
@@ -2658,7 +2744,21 @@ VideoSink::stopPresentation()
 {
     Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
     
+    // FIXME: possible race conditions with the thread loops and the _quit flags
     _timerQuit = true;
+    Log::instance()->avstream().debug(getName() + " trying to join timer thread ...");
+    try {
+        // wait for run thread loop to finish
+        // FIXME: what, if the thread finishes after _thread.isRunning() and _thread.join()
+        if (_timerThread.isRunning()) {
+            _timerThread.join(500);
+        }
+    }
+    catch(...) {
+        Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown timer thread");
+    }
+    _timerQuit = false;
+    Log::instance()->avstream().debug(getName() + " timer thread stopped.");
 }
 
 
@@ -2732,6 +2832,16 @@ VideoSink::displayRect(int& x, int& y, int& w, int& h)
     }
     x = (displayWidth() - w) / 2;
     y = (displayHeight() - h) / 2;
+}
+
+
+void
+VideoSink::reset()
+{
+    _overlayQueue.clear();
+    _writeOverlayNumber = 0;
+    _timerQuit = false;
+    Sink::reset();
 }
 
 
@@ -2962,29 +3072,47 @@ Clock::clockTick(Poco::Timer& timer)
 void
 Clock::start()
 {
-    Log::instance()->avstream().debug("CLOCK starting ...");
-    
+    Log::instance()->avstream().debug("CLOCK starting audio presentation ...");
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->startPresentation();
     }
+    // FIXME: segfault here when engine is restarted on live TV
+    Log::instance()->avstream().debug("CLOCK audio presentation started.");
+    Log::instance()->avstream().debug("CLOCK starting video presentation ...");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->startPresentation();
     }
+    Log::instance()->avstream().debug("CLOCK video presentation started.");
+    Log::instance()->avstream().debug("CLOCK start ticking ...");
     _clockTimer.setPeriodicInterval(_clockTick);
     _clockTimer.start(Poco::TimerCallback<Clock>(*this, &Clock::clockTick));
+    Log::instance()->avstream().debug("CLOCK started.");
 }
 
 
 void
 Clock::stop()
 {
-    _clockTimer.stop();
-    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
-        (*it)->stopPresentation();
-    }
+    Log::instance()->avstream().debug("CLOCK stopping audio presentation ...");
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->stopPresentation();
     }
+    Log::instance()->avstream().debug("CLOCK audio presentation stopped.");
+    Log::instance()->avstream().debug("CLOCK stopping video presentation ...");
+    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
+        (*it)->stopPresentation();
+    }
+    Log::instance()->avstream().debug("CLOCK video presentation stopped.");
+    Log::instance()->avstream().debug("CLOCK stop ticking ...");
+    _clockTimer.stop();
     Log::instance()->avstream().debug("CLOCK stopped.");
 }
 
+
+void
+Clock::reset()
+{
+    _audioSinkVec.clear();
+    _videoSinkVec.clear();
+    _streamTime = AV_NOPTS_VALUE;
+}

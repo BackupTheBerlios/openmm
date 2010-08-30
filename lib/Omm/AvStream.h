@@ -107,6 +107,8 @@ public:
     void read(char* buffer, int num);
     void write(const char* buffer, int num);
     
+    void clear();
+    
 private:
     char*                   _ringBuffer;
     char*                   _readPos;
@@ -137,6 +139,7 @@ public:
     int writeSome(const char* buffer, int num);
     
     int level();
+    void clear();
     
 private:
 //     int readSomeSemaphore(char* buffer, int num);
@@ -202,7 +205,7 @@ public:
         
         _queueLock.unlock();
         _putSemaphore.set();
-//         Log::instance()->avstream().debug("Queue::put() returning");
+//         Log::instance()->avstream().debug("Queue::get() returning");
         
         return ret;
     }
@@ -233,6 +236,14 @@ public:
 //         Log::instance()->avstream().debug("Queue::getName()");
         Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
         return _name;
+    }
+    
+    
+    void clear()
+    {
+        while (_queue.size()) {
+            get();
+        }
     }
     
 private:
@@ -380,6 +391,7 @@ protected:
     virtual bool init() { return true; }
     virtual void run() {}
     
+    void reset();
     
     std::string                     _name;
     Poco::FastMutex                 _nameLock;
@@ -598,7 +610,10 @@ public:
 protected:
     virtual bool checkInStream() {}
     virtual bool initDevice() {}
+    virtual bool closeDevice() {}
     virtual void writeDecodedFrame(Frame* pDecodedFrame) {}
+    
+    void reset();
 
     Queue<int64_t>          _timeQueue;
     bool                    _firstDecodeSuccess;
@@ -623,6 +638,8 @@ public:
     int audioRead(char* buffer, int size);
     void audioReadBlocking(char* buffer, int size);
     void initSilence(char* buffer, int size);
+    
+    void reset();
 
 protected:
     int channels();
@@ -663,6 +680,8 @@ public:
     virtual int displayHeight();
     
     void displayRect(int& x, int& y, int& w, int& h);
+    
+    void reset();
     
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
@@ -731,6 +750,7 @@ public:
     // start clock
     void start();
     void stop();
+    void reset();
     
 private:
     Clock();

@@ -638,7 +638,7 @@ ActionRequestReader::action()
             }
         }
         else {
-            Log::instance()->ctrl().error("action without arguments");
+            Log::instance()->ctrl().debug("action without arguments");
         }
     }
     else {
@@ -650,13 +650,15 @@ ActionRequestReader::action()
 
 
 ActionResponseReader::ActionResponseReader(const std::string& responseBody, Action* pActionTemplate) :
-_pActionTemplate(pActionTemplate)
+_pActionTemplate(pActionTemplate),
+_pDoc(0)
 {
 //     Log::instance()->ctrl().debug(Omm::Util::format("action response:\n%s", responseBody));
     Poco::XML::DOMParser parser;
     // TODO: set encoding with parser.setEncoding();
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+    // FIXME: shouldn't throw exception in ctor, put it in a method (e.g. read())
     try {
         _pDoc = parser.parseString(responseBody);
     }
@@ -677,6 +679,10 @@ _pActionTemplate(pActionTemplate)
 Action*
 ActionResponseReader::action()
 {
+    // FIXME: action shouldn't be called, when _pDoc is 0 (see ctor of ActionResponseReader)
+    if (!_pDoc) {
+        return 0;
+    }
     // TODO: same code as in ActionRequestReader
     Action* pRes = _pActionTemplate;
     Poco::XML::Node* pNode = _nodeStack.top();
@@ -698,7 +704,7 @@ ActionResponseReader::action()
             }
         }
         else {
-            Log::instance()->ctrl().error("action without arguments");
+            Log::instance()->ctrl().debug("action without arguments");
         }
     }
     else {
@@ -1119,10 +1125,17 @@ Service::sendAction(Action* pAction)
 //     std::clog << "Header:" << std::endl;
 //     request->write(std::clog);
     
-    // FIXME: catch Poco::Net::ConnectionRefusedException
-    std::ostream& ostr = _pControlRequestSession->sendRequest(*request);
-    ostr << actionMessage;
-    Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
+    try {
+        std::ostream& ostr = _pControlRequestSession->sendRequest(*request);
+        ostr << actionMessage;
+        Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
+    }
+    catch(Poco::Net::ConnectionRefusedException) {
+        Log::instance()->ctrl().error("sending of action request failed, connection refused");
+    }
+    catch (...) {
+        Log::instance()->ctrl().error("sending of action request failed for some reason");
+    }
     // receive answer ...
     Poco::Net::HTTPResponse response;
     try {
@@ -1136,6 +1149,9 @@ Service::sendAction(Action* pAction)
     }
     catch (Poco::Net::NoMessageException) {
         Log::instance()->ctrl().error("no response to action request");
+    }
+    catch (...) {
+        Log::instance()->ctrl().error("no response to action request received for some reason");
     }
     Log::instance()->ctrl().debug("*** action \"" + pAction->getName() + "\" completed ***");
 }

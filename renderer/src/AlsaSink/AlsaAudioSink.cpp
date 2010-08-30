@@ -145,7 +145,7 @@ AlsaAudioSink::initDevice()
         return false;
     }
     if (snd_pcm_hw_params(_pcmPlayback, _hwParams) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s initializing device.", getName()));
+        Omm::AvStream::Log::instance()->avstream().error(getName() + " initializing device.");
         return false;
     }
     
@@ -153,10 +153,18 @@ AlsaAudioSink::initDevice()
 }
 
 
+bool
+AlsaAudioSink::closeDevice()
+{
+    close();
+    return true;
+}
+
+
 void
 AlsaAudioSink::startPresentation()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s starting write thread ...", getName()));
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " starting write thread ...");
     
     _writeThread.start(_writeThreadRunnable);
 }
@@ -165,7 +173,19 @@ AlsaAudioSink::startPresentation()
 void
 AlsaAudioSink::stopPresentation()
 {
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
     _quitWriteThread = true;
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " trying to join write thread ...");
+    try {
+        if (_writeThread.isRunning()) {
+            _writeThread.join(500);
+        }
+    }
+    catch(...) {
+        Omm::AvStream::Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown alsa audio write thread");
+    }
+    _quitWriteThread = false;
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " write thread stopped.");
 }
 
 
@@ -182,12 +202,10 @@ AlsaAudioSink::writeThread()
         int samplesWritten = 0;
         while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> 2)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
-            Omm::AvStream::Log::instance()->avstream().warning(
-                Poco::format("<<<<<<<<<<<<<<< %s buffer underrun >>>>>>>>>>>>>>>", getName())
-                );
+            Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
         }
-        Omm::AvStream::Log::instance()->avstream().trace(Poco::format("alsa audio thread write thread, samples written: %s",
-            Poco::NumberFormatter::format(samplesWritten << 2)));
+        Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, samples written: " +
+            Poco::NumberFormatter::format(samplesWritten << 2));
     }
 }
 
