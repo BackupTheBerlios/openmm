@@ -32,7 +32,7 @@
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/Util.h>
 
-#include "AvStreamEngine.h"
+// #include "AvStreamEngine.h"
 
 
 using Poco::UInt8;
@@ -118,21 +118,22 @@ protected:
                 _enginePlugin = "engine-avstream";
             }
             
-//             Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
-            Omm::Av::Engine* pEnginePlugin = new AvStreamEngine;
-//             try {
-//                 if (_enginePlugin == "engine-avstream") {
-//                     pEnginePlugin = pluginLoader.load(_enginePlugin, "AvStream");
-//                 }
-//                 else {
-//                     pEnginePlugin = pluginLoader.load(_enginePlugin);
-//                 }
-//             }
-//             catch(Poco::NotFoundException) {
-//                 std::cerr << "Error could not find engine plugin: " << _enginePlugin << std::endl;
-//                 return 1;
-//             }
-//             std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
+            Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
+            Omm::Av::Engine* pEnginePlugin;
+//             Omm::Av::Engine* pEnginePlugin = new AvStreamEngine;
+            try {
+                if (_enginePlugin == "engine-avstream") {
+                    pEnginePlugin = pluginLoader.load(_enginePlugin, "Engine", "AvStream");
+                }
+                else {
+                    pEnginePlugin = pluginLoader.load(_enginePlugin);
+                }
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error could not find engine plugin: " << _enginePlugin << std::endl;
+                return 1;
+            }
+            std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
             
             Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
             
