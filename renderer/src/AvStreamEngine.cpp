@@ -31,8 +31,26 @@
 
 AvStreamEngine::AvStreamEngine() :
 _fullscreen(true),
-_engineId("OMM AvStream engine " + Omm::OMM_VERSION)
+_engineId("OMM AvStream engine " + Omm::OMM_VERSION),
+_isPlaying(false),
+_pDemuxer(0),
+_pAudioSink(0),
+_pVideoSink(0)
 {
+
+}
+
+
+AvStreamEngine::~AvStreamEngine()
+{
+}
+
+
+void
+AvStreamEngine::createPlayer()
+{
+    _pDemuxer = new Omm::AvStream::Demuxer;
+    
     std::string audioPlugin("audiosink-alsa");
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
     try {
@@ -54,8 +72,15 @@ _engineId("OMM AvStream engine " + Omm::OMM_VERSION)
 }
 
 
-AvStreamEngine::~AvStreamEngine()
+void
+AvStreamEngine::destructPlayer()
 {
+    delete _pDemuxer;
+    _pDemuxer = 0;
+    delete _pAudioSink;
+    _pAudioSink = 0;
+    delete _pVideoSink;
+    _pVideoSink = 0;
 }
 
 
@@ -68,23 +93,29 @@ AvStreamEngine::setFullscreen(bool on)
 void
 AvStreamEngine::setUri(std::string mrl)
 {
-    std::clog << "<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>" << std::endl;
-    _demuxer.set(mrl);
+    if (_isPlaying) {
+        stop();
+    }
     
-    if (_demuxer.firstAudioStream() < 0 && _demuxer.firstVideoStream() < 0) {
+    createPlayer();
+    
+    std::clog << "<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>" << std::endl;
+    _pDemuxer->set(mrl);
+    
+    if (_pDemuxer->firstAudioStream() < 0 && _pDemuxer->firstVideoStream() < 0) {
         std::clog << "no audio or video stream found, exiting" << std::endl;
         return;
     }
         
     //////////// load and attach audio Sink ////////////
-    if (_demuxer.firstAudioStream() >= 0) {
-        _demuxer.attach(_pAudioSink, _demuxer.firstAudioStream());
+    if (_pDemuxer->firstAudioStream() >= 0) {
+        _pDemuxer->attach(_pAudioSink, _pDemuxer->firstAudioStream());
         Omm::AvStream::Clock::instance()->attachAudioSink(_pAudioSink);
     }
     
     //////////// load and attach video sink ////////////
-    if (_demuxer.firstVideoStream() >= 0) {
-        _demuxer.attach(_pVideoSink, _demuxer.firstVideoStream());
+    if (_pDemuxer->firstVideoStream() >= 0) {
+        _pDemuxer->attach(_pVideoSink, _pDemuxer->firstVideoStream());
         Omm::AvStream::Clock::instance()->attachVideoSink(_pVideoSink);
     }
 }
@@ -95,40 +126,43 @@ AvStreamEngine::load()
 {
     std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
     
-    _demuxer.start();
-    Omm::AvStream::Clock::instance()->setStartTime();
+    _pDemuxer->start();
+    Omm::AvStream::Clock::instance()->setStartTime(true);
 
     std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
 
     Omm::AvStream::Clock::instance()->start();
+    _isPlaying = true;
 }
 
 
 void
 AvStreamEngine::stop()
 {
-    
     std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
     
-    _demuxer.stop();
+    _pDemuxer->stop();
     Omm::AvStream::Clock::instance()->stop();
     
     std::clog << "<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>" << std::endl;
     
     ////////// deallocate meta data and packet queues ////////////
-    if (_demuxer.firstAudioStream() >= 0) {
-        _demuxer.detach(_demuxer.firstAudioStream());
+    if (_pDemuxer->firstAudioStream() >= 0) {
+        _pDemuxer->detach(_pDemuxer->firstAudioStream());
     }
-    if (_demuxer.firstVideoStream() >= 0) {
-        _demuxer.detach(_demuxer.firstVideoStream());
+    if (_pDemuxer->firstVideoStream() >= 0) {
+        _pDemuxer->detach(_pDemuxer->firstVideoStream());
     }
     
     std::clog << "<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>" << std::endl;
     
-    _demuxer.reset();
+    _pDemuxer->reset();
     _pAudioSink->reset();
     _pVideoSink->reset();
     Omm::AvStream::Clock::instance()->reset();
+    
+    destructPlayer();
+    _isPlaying = false;
 }
 
 

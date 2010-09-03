@@ -213,8 +213,10 @@ ByteQueue::write(const char* buffer, int num)
 int
 ByteQueue::readSome(char* buffer, int num)
 {
+    Log::instance()->avstream().trace("byte queue readSome() try to read " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     // block byte queue for further reading
     _readSemaphore.wait();
+    Log::instance()->avstream().trace("byte queue readSome() wait over, now reading " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     _lock.lock();
     
     int bytesRead = (_level < num) ? _level : num;
@@ -271,9 +273,11 @@ ByteQueue::writeSome(const char* buffer, int num)
     if (num > 0) {
         // check if the semaphore is already set
         try {
+            Log::instance()->avstream().trace("byte queue writeSome() set read semaphore with " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
             _readSemaphore.set();
         }
         catch (Poco::SystemException) {
+            Log::instance()->avstream().trace("byte queue writeSome() could not set read semaphore " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
         }
     }
     
@@ -2570,7 +2574,8 @@ Sink::currentTime(int64_t time)
 AudioSink::AudioSink(const std::string& name) :
 Sink(name),
 // allocate byte queue for 20k s16-2chan-samples
-_byteQueue(20 * 1024 * 2 * 2)
+_byteQueue(20 * 1024 * 2 * 2),
+_volume(1.0)
 {
 }
 
@@ -2656,6 +2661,15 @@ AudioSink::initSilence(char* buffer, int size)
 
 
 void
+AudioSink::setVolume(char* buffer, int size)
+{
+    for (int i = 0; i < size; i += 2) {
+        buffer[i] = _volume * (int_fast16_t)buffer[i];
+    }
+}
+
+
+void
 AudioSink::reset()
 {
     _audioTime = AV_NOPTS_VALUE;
@@ -2665,7 +2679,7 @@ AudioSink::reset()
 
 
 void
-AudioSink::setStartTime(int64_t startTime)
+AudioSink::setStartTime(int64_t startTime, bool toFirstFrame)
 {
     Log::instance()->avstream().debug(getName() + " audio start time: " + Poco::NumberFormatter::format(_startTime) + ", clock start time: " + Poco::NumberFormatter::format(startTime) + ".");
     
@@ -2673,7 +2687,7 @@ AudioSink::setStartTime(int64_t startTime)
         // TODO: insert silence until _startTime ...?
         Log::instance()->avstream().warning(getName() + " start time is later than CLOCK start time, should insert silence.");
     }
-    else if (startTime > _startTime) {
+    else if (startTime > _startTime && toFirstFrame) {
         // TODO: don't hardcode time base and sample size
         int64_t discardSize = (startTime - _startTime) * (sampleRate() / 90000.0) * channels() * 2; // s16 sample = 2 bytes
         // round discardSize to a multiple of sample size
@@ -2681,7 +2695,8 @@ AudioSink::setStartTime(int64_t startTime)
         char discardBuffer[discardSize];
         
         Log::instance()->avstream().debug(getName() + " start time is earlier than CLOCK start time, discarding " + Poco::NumberFormatter::format(discardSize) + " bytes.");
-        
+        // FIXME: starting to first video frame doesn't work, because discarding audio with audioReadBlocking()
+        // stops at reading the ByteQueue at level = 0, then the audio packet queue runs full and engine is blocked
         audioReadBlocking(discardBuffer, discardSize);
     }
     _audioTime = startTime;
@@ -3009,7 +3024,7 @@ Clock::setStartTime(bool toFirstFrame)
     Log::instance()->avstream().debug("CLOCK setting start time to: " + Poco::NumberFormatter::format(startTime));
     
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
-        (*it)->setStartTime(startTime);
+        (*it)->setStartTime(startTime, toFirstFrame);
     }
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->setStartTime(startTime);

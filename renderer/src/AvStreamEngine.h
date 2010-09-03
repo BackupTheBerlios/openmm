@@ -64,11 +64,15 @@ protected:
 private:
     bool isSeekable();
     void savePosition();
+    
+    void createPlayer();
+    void destructPlayer();
 
     bool                        _fullscreen;
     std::string                 _engineId;
-    
-    Omm::AvStream::Demuxer      _demuxer;
+    bool                        _isPlaying;
+//     Omm::AvStream::Demuxer      _demuxer;
+    Omm::AvStream::Demuxer*     _pDemuxer;
     Omm::AvStream::AudioSink*   _pAudioSink;
     Omm::AvStream::VideoSink*   _pVideoSink;
 };

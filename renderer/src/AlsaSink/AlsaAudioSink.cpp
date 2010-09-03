@@ -107,10 +107,12 @@ AlsaAudioSink::initDevice()
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device format.");
         return false;
     }
+    _rate = getInStream(0)->getInfo()->sampleRate();
     if (snd_pcm_hw_params_set_rate_near(_pcmPlayback, _hwParams, &_rate, 0) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate.");
         return false;
     }
+    _channels = getInStream(0)->getInfo()->channels();
     if (snd_pcm_hw_params_set_channels(_pcmPlayback, _hwParams, _channels) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels.");
         return false;

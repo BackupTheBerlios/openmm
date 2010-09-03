@@ -631,13 +631,14 @@ public:
     AudioSink(const std::string& name = "audio sink");
     virtual ~AudioSink();
     
-    void setStartTime(int64_t startTime);
+    void setStartTime(int64_t startTime, bool toFirstFrame);
     
     // methods for the audio driver (public, so it can be called form C callbacks)
     bool audioAvailable();
     int audioRead(char* buffer, int size);
     void audioReadBlocking(char* buffer, int size);
     void initSilence(char* buffer, int size);
+    void setVolume(char* buffer, int size);
     
     void reset();
 
@@ -653,6 +654,7 @@ private:
     
     Omm::AvStream::ByteQueue    _byteQueue;
     int64_t                     _audioTime;
+    float                       _volume;
 };
 
 
