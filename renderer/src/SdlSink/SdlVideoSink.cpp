@@ -34,8 +34,8 @@ Overlay(pVideoSink)
 
 SdlVideoSink::SdlVideoSink() :
 // reserve 5 overlays for SdlVideoSink
-VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 5)
-// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 5)
+// VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 5)
+VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 5)
 {
 }
 
@@ -55,7 +55,7 @@ SdlVideoSink::initDevice()
         return false;
     }
     
-    int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_ASYNCBLIT | SDL_HWACCEL;
+    int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
     if (_fullScreen) {
         flags |= SDL_FULLSCREEN;
     }

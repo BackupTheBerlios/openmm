@@ -72,6 +72,7 @@ private:
     std::string                 _engineId;
     bool                        _isPlaying;
 //     Omm::AvStream::Demuxer      _demuxer;
+    Omm::AvStream::Clock*       _pClock;
     Omm::AvStream::Demuxer*     _pDemuxer;
     Omm::AvStream::AudioSink*   _pAudioSink;
     Omm::AvStream::VideoSink*   _pVideoSink;

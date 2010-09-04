@@ -42,6 +42,7 @@ public:
         
 //         std::ifstream fileStream(uri.c_str());
         
+        Omm::AvStream::Clock clock;
         Omm::AvStream::Demuxer demuxer;
         
         demuxer.set(uri);
@@ -59,7 +60,7 @@ public:
 //             Omm::AvStream::AudioSink* pAudioSink = audioPluginLoader.load("audiosink-sdl", "AudioSink");
             Omm::AvStream::AudioSink* pAudioSink = audioPluginLoader.load("audiosink-alsa", "AudioSink");
             demuxer.attach(pAudioSink, demuxer.firstAudioStream());
-            Omm::AvStream::Clock::instance()->attachAudioSink(pAudioSink);
+            clock.attachAudioSink(pAudioSink);
         }
         
         //////////// load and attach video sink ////////////
@@ -69,19 +70,19 @@ public:
 //             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-qt", "VideoSink");
             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-sdl", "VideoSink");
             demuxer.attach(pVideoSink, demuxer.firstVideoStream());
-            Omm::AvStream::Clock::instance()->attachVideoSink(pVideoSink);
+            clock.attachVideoSink(pVideoSink);
         }
         
         std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
-        Omm::AvStream::Clock::instance()->setStartTime();
+        clock.setStartTime();
 
         std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
 
-        Omm::AvStream::Clock::instance()->start();
+        clock.start();
         waitForTerminationRequest();
-        Omm::AvStream::Clock::instance()->stop();
+        clock.stop();
         
         std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
         

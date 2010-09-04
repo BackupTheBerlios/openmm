@@ -73,6 +73,7 @@ class StreamQueue;
 class Overlay;
 class Sink;
 class PresentationTimer;
+class Clock;
 
 
 class Log
@@ -627,6 +628,8 @@ private:
 
 class AudioSink : public Sink
 {
+    friend class Clock;
+    
 public:
     AudioSink(const std::string& name = "audio sink");
     virtual ~AudioSink();
@@ -652,9 +655,10 @@ private:
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
     int64_t audioLength(int64_t bytes);
     
-    Omm::AvStream::ByteQueue    _byteQueue;
+    ByteQueue                   _byteQueue;
     int64_t                     _audioTime;
     float                       _volume;
+    Clock*                      _pClock;
 };
 
 
@@ -734,7 +738,8 @@ public:
 class Clock
 {
 public:
-    static Clock* instance();
+    Clock();
+//     static Clock* instance();
     
     /** attachAudioSink() / attachVideoSink()
         pSink: pointer to sink, that receives the timing signals
@@ -755,8 +760,6 @@ public:
     void reset();
     
 private:
-    Clock();
-    
     void clockTick(Poco::Timer& timer);
     
     static Clock*           _pInstance;

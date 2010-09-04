@@ -25,7 +25,7 @@ SdlAudioSink.cpp
 )
 
 ADD_DEFINITIONS(
--malign-double
+# -malign-double
 )
 
 ADD_LIBRARY( ommvideosink-sdl

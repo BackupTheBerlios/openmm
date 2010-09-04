@@ -2421,8 +2421,8 @@ Tagger::tag(const std::string& uri)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 2000;
-    pMeta->_pFormatContext->max_analyze_duration = 500000;
+    pMeta->_pFormatContext->probesize = 5000;
+    pMeta->_pFormatContext->max_analyze_duration = 1000000;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
@@ -2575,7 +2575,8 @@ AudioSink::AudioSink(const std::string& name) :
 Sink(name),
 // allocate byte queue for 20k s16-2chan-samples
 _byteQueue(20 * 1024 * 2 * 2),
-_volume(1.0)
+_volume(1.0),
+_pClock(0)
 {
 }
 
@@ -2637,7 +2638,8 @@ AudioSink::audioAvailable()
 int
 AudioSink::audioRead(char* buffer, int size)
 {
-    Clock::instance()->setTime(_audioTime);
+//     Clock::instance()->setTime(_audioTime);
+    _pClock->setTime(_audioTime);
     int bytesRead = _byteQueue.readSome(buffer, size);
     _audioTime += audioLength(bytesRead);
     return bytesRead;
@@ -2647,7 +2649,8 @@ AudioSink::audioRead(char* buffer, int size)
 void
 AudioSink::audioReadBlocking(char* buffer, int size)
 {
-    Clock::instance()->setTime(_audioTime);
+//     Clock::instance()->setTime(_audioTime);
+    _pClock->setTime(_audioTime);
     _byteQueue.read(buffer, size);
     _audioTime += audioLength(size);
 }
@@ -2856,6 +2859,13 @@ VideoSink::reset()
     _overlayQueue.clear();
     _writeOverlayNumber = 0;
     _timerQuit = false;
+//     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
+//         while ((*it)->getQueue()->count()) {
+//             Frame* pFrame = (*it)->getQueue()->get();
+//             delete pFrame;
+//         }
+// //         (*it)->getQueue()->clear();
+//     }
     Sink::reset();
 }
 
@@ -2962,20 +2972,21 @@ _clockTickStreamBase(_clockTick * _streamBase)
 }
 
 
-Clock*
-Clock::instance()
-{
-    if (!_pInstance) {
-        _pInstance = new Clock;
-    }
-    return _pInstance;
-}
+// Clock*
+// Clock::instance()
+// {
+//     if (!_pInstance) {
+//         _pInstance = new Clock;
+//     }
+//     return _pInstance;
+// }
 
 
 void
 Clock::attachAudioSink(AudioSink* pAudioSink)
 {
     _audioSinkVec.push_back(pAudioSink);
+    pAudioSink->_pClock = this,
     
     Log::instance()->avstream().debug("CLOCK attached " +
         pAudioSink->getName());
@@ -3119,7 +3130,8 @@ Clock::stop()
     }
     Log::instance()->avstream().debug("CLOCK video presentation stopped.");
     Log::instance()->avstream().debug("CLOCK stop ticking ...");
-    _clockTimer.stop();
+//     _clockTimer.stop();
+    _clockTimer.restart(0);
     Log::instance()->avstream().debug("CLOCK stopped.");
 }
 

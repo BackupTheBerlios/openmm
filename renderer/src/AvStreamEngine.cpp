@@ -33,6 +33,7 @@ AvStreamEngine::AvStreamEngine() :
 _fullscreen(true),
 _engineId("OMM AvStream engine " + Omm::OMM_VERSION),
 _isPlaying(false),
+_pClock(0),
 _pDemuxer(0),
 _pAudioSink(0),
 _pVideoSink(0)
@@ -49,6 +50,7 @@ AvStreamEngine::~AvStreamEngine()
 void
 AvStreamEngine::createPlayer()
 {
+    _pClock = new Omm::AvStream::Clock;
     _pDemuxer = new Omm::AvStream::Demuxer;
     
     std::string audioPlugin("audiosink-alsa");
@@ -75,6 +77,8 @@ AvStreamEngine::createPlayer()
 void
 AvStreamEngine::destructPlayer()
 {
+    delete _pClock;
+    _pClock = 0;
     delete _pDemuxer;
     _pDemuxer = 0;
     delete _pAudioSink;
@@ -110,13 +114,13 @@ AvStreamEngine::setUri(std::string mrl)
     //////////// load and attach audio Sink ////////////
     if (_pDemuxer->firstAudioStream() >= 0) {
         _pDemuxer->attach(_pAudioSink, _pDemuxer->firstAudioStream());
-        Omm::AvStream::Clock::instance()->attachAudioSink(_pAudioSink);
+        _pClock->attachAudioSink(_pAudioSink);
     }
     
     //////////// load and attach video sink ////////////
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pDemuxer->attach(_pVideoSink, _pDemuxer->firstVideoStream());
-        Omm::AvStream::Clock::instance()->attachVideoSink(_pVideoSink);
+        _pClock->attachVideoSink(_pVideoSink);
     }
 }
 
@@ -127,11 +131,11 @@ AvStreamEngine::load()
     std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
     
     _pDemuxer->start();
-    Omm::AvStream::Clock::instance()->setStartTime(true);
+    _pClock->setStartTime(true);
 
     std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
 
-    Omm::AvStream::Clock::instance()->start();
+    _pClock->start();
     _isPlaying = true;
 }
 
@@ -142,7 +146,7 @@ AvStreamEngine::stop()
     std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
     
     _pDemuxer->stop();
-    Omm::AvStream::Clock::instance()->stop();
+    _pClock->stop();
     
     std::clog << "<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>" << std::endl;
     
@@ -159,7 +163,7 @@ AvStreamEngine::stop()
     _pDemuxer->reset();
     _pAudioSink->reset();
     _pVideoSink->reset();
-    Omm::AvStream::Clock::instance()->reset();
+    _pClock->reset();
     
     destructPlayer();
     _isPlaying = false;

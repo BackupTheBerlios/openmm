@@ -120,7 +120,6 @@ protected:
             
             Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
             Omm::Av::Engine* pEnginePlugin;
-//             Omm::Av::Engine* pEnginePlugin = new AvStreamEngine;
             try {
                 if (_enginePlugin == "engine-avstream") {
                     pEnginePlugin = pluginLoader.load(_enginePlugin, "Engine", "AvStream");

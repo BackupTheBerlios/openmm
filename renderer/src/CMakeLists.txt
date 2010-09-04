@@ -68,7 +68,6 @@ ${LIB_OMM_AVSTREAM}
 )
 
 TARGET_LINK_LIBRARIES( ommrender
-ommengine-avstream
 ${LIB_OMM_AV}
 ${LIB_OMM_UTIL}
 ${LIB_POCO_UTIL}
