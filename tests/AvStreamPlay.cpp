@@ -66,6 +66,7 @@ public:
         //////////// load and attach video sink ////////////
         if (demuxer.firstVideoStream() >= 0) {
             Omm::Util::PluginLoader<Omm::AvStream::VideoSink> videoPluginLoader;
+//             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-ppmold", "VideoSink");
 //             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-ppm", "VideoSink");
 //             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-qt", "VideoSink");
             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-sdl", "VideoSink");

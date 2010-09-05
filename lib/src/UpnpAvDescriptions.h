@@ -13,7 +13,7 @@ std::string MediaRenderer::_deviceDescription =
 </specVersion>\
 <device>\
 <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>\
-<friendlyName>OmmR</friendlyName>\
+<friendlyName>OMM Renderer</friendlyName>\
 <manufacturer>jb at open-multimedia dot org</manufacturer>\
 <manufacturerURL>http://open-multimedia.org</manufacturerURL>\
 <modelName>Omm Media Renderer</modelName>\

@@ -54,6 +54,7 @@ AvStreamEngine::createPlayer()
     _pDemuxer = new Omm::AvStream::Demuxer;
     
     std::string audioPlugin("audiosink-alsa");
+//     std::string audioPlugin("audiosink-sdl");
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
     try {
         _pAudioSink = audioPluginLoader.load(audioPlugin, "AudioSink");
@@ -231,6 +232,8 @@ AvStreamEngine::getLength(float &seconds)
 void
 AvStreamEngine::setVolume(int channel, float vol)
 {
+    _pAudioSink->setVolume(vol);
+//     _pAudioSink->setVolume(channel, vol);
 }
 
 

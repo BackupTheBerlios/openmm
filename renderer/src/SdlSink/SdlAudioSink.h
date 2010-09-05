@@ -21,8 +21,6 @@
 #ifndef SdlAudioSink_INCLUDED
 #define SdlAudioSink_INCLUDED
 
-#include <SDL/SDL.h>
-
 #include <Omm/AvStream.h>
 
 
@@ -34,8 +32,10 @@ public:
 
 private:
     virtual bool initDevice();
+    virtual bool closeDevice();
     virtual void startPresentation();
     virtual void stopPresentation();
+    virtual void setVolume(int channel, float vol);
 };
 
 #endif

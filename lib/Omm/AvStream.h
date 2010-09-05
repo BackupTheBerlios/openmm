@@ -345,7 +345,7 @@ public:
     void setInfo(StreamInfo* pInfo);
     void setQueue(StreamQueue* pQueue);
     
-//     Frame* allocateVideoFrame(PixelFormat targetFormat);
+    Frame* allocateVideoFrame(PixelFormat targetFormat);
     Frame* decodeFrame(Frame* pFrame);
     
 private:
@@ -496,8 +496,8 @@ public:
     const int size();
     int paddedSize();
     
-//     char* planeData(int plane);
-//     int planeSize(int plane);
+    char* planeData(int plane);
+    int planeSize(int plane);
     
     void printInfo();
     std::string getName();
@@ -511,9 +511,9 @@ public:
 //     Frame* decode();
     
     // width and height = -1 means, leave the size of the frame as it is
-//     Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
+    Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
     
-//     void writePpm(const std::string& fileName);
+    void writePpm(const std::string& fileName);
     void write(Overlay* overlay);
     
     AVPacket* copyPacket(AVPacket* pAvPacket, int padSize);
@@ -641,7 +641,8 @@ public:
     int audioRead(char* buffer, int size);
     void audioReadBlocking(char* buffer, int size);
     void initSilence(char* buffer, int size);
-    void setVolume(char* buffer, int size);
+    void setVolume(float vol);
+    virtual void setVolume(int channel, float vol) {}
     
     void reset();
 
@@ -653,6 +654,7 @@ protected:
 private:
     virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
+    void setVolume(char* buffer, int size);
     int64_t audioLength(int64_t bytes);
     
     ByteQueue                   _byteQueue;
@@ -698,6 +700,9 @@ protected:
     
     bool                        _timerQuit;
     bool                        _fullScreen;
+    int                         _width;
+    int                         _height;
+    PixelFormat                 _pixelFormat;
     
 private:
     virtual bool checkInStream();
@@ -710,9 +715,6 @@ private:
     Poco::RunnableAdapter<VideoSink>    _timerThreadRunnable;
     Poco::FastMutex                     _sinkLock;
     
-    int                                 _width;
-    int                                 _height;
-    PixelFormat                         _pixelFormat;
     int                                 _writeOverlayNumber;
 };
 

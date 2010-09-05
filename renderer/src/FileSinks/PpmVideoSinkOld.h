@@ -24,26 +24,18 @@
 #include <Omm/AvStream.h>
 
 
-class PpmOverlay : public Omm::AvStream::Overlay
+class PpmoldVideoSink : public Omm::AvStream::VideoSink
 {
 public:
-    PpmOverlay(Omm::AvStream::VideoSink* pVideoSink);
+    PpmoldVideoSink();
+    virtual ~PpmoldVideoSink();
     
-    Omm::AvStream::Frame*    _pFrame;
-};
-
-
-class PpmVideoSink : public Omm::AvStream::VideoSink
-{
-public:
-    PpmVideoSink();
-    virtual ~PpmVideoSink();
+    virtual int eventLoop();
     
 private:
-    virtual bool initDevice();
-    virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);
-    
-    int _frameCount;
+    virtual bool init();
+    virtual void run();
+    virtual void onTick(int64_t time) {}
 };
 
 #endif

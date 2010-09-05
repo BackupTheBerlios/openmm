@@ -26,15 +26,17 @@
 #include "PpmVideoSink.h"
 
 
-PpmVideoSink::PpmVideoSink() :
-VideoSink("ppm video sink")
+PpmOverlay::PpmOverlay(Omm::AvStream::VideoSink* pVideoSink) :
+Overlay(pVideoSink)
 {
-    // video sink has one input stream
-    _inStreams.push_back(new Omm::AvStream::Stream(this));
-    _inStreams.back()->setInfo(0);
-    _inStreams.back()->setQueue(new Omm::AvStream::StreamQueue(this));
-    
-    // and no output stream
+}
+
+
+PpmVideoSink::PpmVideoSink() :
+// ppm file sink size doesn't matter, all frames are written out unscaled
+VideoSink("ppm video sink", 0, 0, PIX_FMT_RGB24, 5),
+_frameCount(0)
+{
 }
 
 
@@ -43,60 +45,49 @@ PpmVideoSink::~PpmVideoSink()
 }
 
 
-
 bool
-PpmVideoSink::init()
+PpmVideoSink::initDevice()
 {
-    // init() is called on attach() so _inStreams[0]->_pStreamInfo should be available
-    if (!_inStreams[0]->getInfo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream info not allocated", getName()));
-        return false;
+    Omm::AvStream::Log::instance()->avstream().debug("opening ppm video sink ...");
+    
+    for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
+        Omm::AvStream::Frame* pFrame = getInStream(0)->allocateVideoFrame(_pixelFormat);
+        
+        PpmOverlay* pOverlay = new PpmOverlay(this);
+        
+        pOverlay->_pFrame = pFrame;
+        
+        pOverlay->_data[0] = (uint8_t*)pFrame->planeData(0);
+        pOverlay->_data[1] = (uint8_t*)pFrame->planeData(1);
+        pOverlay->_data[2] = (uint8_t*)pFrame->planeData(2);
+        
+        pOverlay->_pitch[0] = pFrame->planeSize(0);
+        pOverlay->_pitch[1] = pFrame->planeSize(1);
+        pOverlay->_pitch[2] = pFrame->planeSize(2);
+        
+        _overlayVector[numOverlay] = pOverlay;
     }
-    if (!_inStreams[0]->getInfo()->findCodec()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, could not find codec", getName()));
-        return false;
-    }
-    if (!_inStreams[0]->getInfo()->isVideo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s init failed, input stream is not a video stream", getName()));
-        return false;
-    }
+
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " opened.");
     return true;
 }
 
 
 void
-PpmVideoSink::run()
+PpmVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
-    if (!_inStreams[0]) {
-        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
-        return;
-    }
+    std::string fileName(getInStream(0)->getName() + "_" + Poco::NumberFormatter::format0(++_frameCount, 3) + ".ppm");
     
-    int frameCount = 0;
-    Omm::AvStream::Frame* pFrame;
-    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
-    {
-        std::string fileName(_inStreams[0]->getName() + "_" + Poco::NumberFormatter::format0(++frameCount, 3) + ".ppm");
-//         Omm::AvStream::Frame* pDecodedFrame = pFrame->decode();
-        Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
-        if (!pDecodedFrame) {
-            Omm::AvStream::Log::instance()->avstream().warning(Poco::format("%s decoding failed, discarding packet", getName()));
-        }
-        else {
-            pDecodedFrame->writePpm(fileName);
-        }
-    }
+    // normally, VideoSink implementation is responsible for scaling the video (hw-accelerated)
+    // however, the ppm file sink only writes the stream in original size into files.
+//     int x, y, w, h;
+//     displayRect(x, y, w, h);
     
-    Omm::AvStream::Log::instance()->avstream().debug("video sink finished.");
-}
-
-
-int
-PpmVideoSink::eventLoop()
-{
-    Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
-//     Poco::Thread::sleep(10000);
-    
+    std::ofstream ppmFile(fileName.c_str());
+    // write PPM header
+    ppmFile << "P6\n" << getInStream(0)->getInfo()->width() << " " << getInStream(0)->getInfo()->height() << "\n" << 255 << "\n";
+    // write RGB pixel data
+    ppmFile.write(static_cast<PpmOverlay*>(pOverlay)->_pFrame->planeData(0), getInStream(0)->getInfo()->width() * getInStream(0)->getInfo()->height() * 3);
 }
 
 

@@ -41,8 +41,6 @@ public:
     SdlVideoSink();
     virtual ~SdlVideoSink();
     
-    virtual int eventLoop();
-    
 private:
     virtual bool initDevice();
     virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);

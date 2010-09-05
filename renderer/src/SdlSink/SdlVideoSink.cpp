@@ -34,8 +34,8 @@ Overlay(pVideoSink)
 
 SdlVideoSink::SdlVideoSink() :
 // reserve 5 overlays for SdlVideoSink
-// VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 5)
-VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 5)
+VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 10)
+// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 5)
 {
 }
 
@@ -138,14 +138,6 @@ SdlVideoSink::displayHeight()
     return _pSdlScreen->h;
 }
 
-
-int
-SdlVideoSink::eventLoop()
-{
-    Omm::AvStream::Log::instance()->avstream().debug("event loop ...");
-//     Poco::Thread::sleep(10000);
-    
-}
 
 
 POCO_BEGIN_MANIFEST(Omm::AvStream::VideoSink)

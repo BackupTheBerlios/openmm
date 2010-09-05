@@ -836,21 +836,21 @@ Stream::setName(const std::string& name)
 }
 
 
-// Frame*
-// Stream::allocateVideoFrame(PixelFormat targetFormat)
-// {
-//     // Determine required buffer size and allocate buffer
-//     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_get_size() ...");
-//     int numBytes = avpicture_get_size(targetFormat, getInfo()->width(), getInfo()->height());
-//     Log::instance()->ffmpeg().trace("ffmpeg::av_malloc() ...");
-//     uint8_t* buffer = (uint8_t *)av_malloc(numBytes);
-//     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
-//     AVFrame* pRes = avcodec_alloc_frame();
-//     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
-//     avpicture_fill((AVPicture *)pRes, buffer, targetFormat, getInfo()->width(), getInfo()->height());
-//     
-//     return new Frame(getInfo()->newFrameNumber(), this, pRes);
-// }
+Frame*
+Stream::allocateVideoFrame(PixelFormat targetFormat)
+{
+    // Determine required buffer size and allocate buffer
+    Log::instance()->ffmpeg().trace("ffmpeg::avpicture_get_size() ...");
+    int numBytes = avpicture_get_size(targetFormat, getInfo()->width(), getInfo()->height());
+    Log::instance()->ffmpeg().trace("ffmpeg::av_malloc() ...");
+    uint8_t* buffer = (uint8_t *)av_malloc(numBytes);
+    Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
+    AVFrame* pRes = avcodec_alloc_frame();
+    Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
+    avpicture_fill((AVPicture *)pRes, buffer, targetFormat, getInfo()->width(), getInfo()->height());
+    
+    return new Frame(getInfo()->newFrameNumber(), this, pRes);
+}
 
 
 Frame*
@@ -1491,18 +1491,18 @@ Frame::paddedSize()
 }
 
 
-// char*
-// Frame::planeData(int plane)
-// {
-//     return (char*)_pAvFrame->data[plane];
-// }
-// 
-// 
-// int
-// Frame::planeSize(int plane)
-// {
-//     return _pAvFrame->linesize[plane];
-// }
+char*
+Frame::planeData(int plane)
+{
+    return (char*)_pAvFrame->data[plane];
+}
+
+
+int
+Frame::planeSize(int plane)
+{
+    return _pAvFrame->linesize[plane];
+}
 
 
 void
@@ -1585,74 +1585,74 @@ Frame::getStream()
 // }
 
 
-// Frame*
-// Frame::convert(PixelFormat targetFormat, int targetWidth, int targetHeight)
-// {
-//     _pStream->getInfo()->printInfo();
-//     int width = _pStream->getInfo()->width();
-//     int height = _pStream->getInfo()->height();
-//     if (targetWidth == -1) {
-//         targetWidth = width;
-//     }
-//     if (targetHeight == -1) {
-//         targetHeight = height;
-//     }
-//     PixelFormat inPixFormat = _pStream->getInfo()->pixelFormat();
-//     
-//     Log::instance()->avstream().debug("source pixelFormat: " + Poco::NumberFormatter::format(inPixFormat) + ", target pixelFormat: " + Poco::NumberFormatter::format(targetFormat));
-//     
-//     int scaleAlgo = SWS_BICUBIC;
+Frame*
+Frame::convert(PixelFormat targetFormat, int targetWidth, int targetHeight)
+{
+    _pStream->getInfo()->printInfo();
+    int width = _pStream->getInfo()->width();
+    int height = _pStream->getInfo()->height();
+    if (targetWidth == -1) {
+        targetWidth = width;
+    }
+    if (targetHeight == -1) {
+        targetHeight = height;
+    }
+    PixelFormat inPixFormat = _pStream->getInfo()->pixelFormat();
+    
+    Log::instance()->avstream().debug("source pixelFormat: " + Poco::NumberFormatter::format(inPixFormat) + ", target pixelFormat: " + Poco::NumberFormatter::format(targetFormat));
+    
+    int scaleAlgo = SWS_BICUBIC;
 //     struct SwsContext *pImgConvertContext = 0;
-//     
-//     Log::instance()->ffmpeg().trace("ffmpeg::sws_getCachedContext() ...");
-//     pImgConvertContext = sws_getCachedContext(pImgConvertContext,
-//                                               width, height, inPixFormat,
-//                                               width, height, targetFormat,
-//                                               scaleAlgo, NULL, NULL, NULL);
-//     
-//     if (pImgConvertContext == 0) {
-//         Log::instance()->avstream().warning("cannot initialize image conversion context");
-//         return 0;
-//     }
-//     else {
-//         Log::instance()->avstream().debug("success: image conversion context set up.");
-//     }
-//     
-//     // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
-//     Frame* pRes = _pStream->allocateVideoFrame(targetFormat);
-//     
-//     printInfo();
-//     Log::instance()->ffmpeg().trace("ffmpeg::sws_scale() ...");
-//     sws_scale(pImgConvertContext,
-//               _pAvFrame->data, _pAvFrame->linesize,
-//               0, height,
-//               pRes->_pAvFrame->data, pRes->_pAvFrame->linesize);
-//     
-//     pRes->printInfo();
-//     
-//     return pRes;
-// }
+    
+    Log::instance()->ffmpeg().trace("ffmpeg::sws_getCachedContext() ...");
+    _pStream->_pImgConvertContext = sws_getCachedContext(_pStream->_pImgConvertContext,
+                                              width, height, inPixFormat,
+                                              width, height, targetFormat,
+                                              scaleAlgo, NULL, NULL, NULL);
+    
+    if (_pStream->_pImgConvertContext == 0) {
+        Log::instance()->avstream().warning("cannot initialize image conversion context");
+        return 0;
+    }
+    else {
+        Log::instance()->avstream().debug("success: image conversion context set up.");
+    }
+    
+    // FIXME: _pStream->pCodecContext is wrong with pOutFrame, because e.g. pix_fmt changed
+    Frame* pRes = _pStream->allocateVideoFrame(targetFormat);
+    
+    printInfo();
+    Log::instance()->ffmpeg().trace("ffmpeg::sws_scale() ...");
+    sws_scale(_pStream->_pImgConvertContext,
+              _pAvFrame->data, _pAvFrame->linesize,
+              0, height,
+              pRes->_pAvFrame->data, pRes->_pAvFrame->linesize);
+    
+    pRes->printInfo();
+    
+    return pRes;
+}
 
 
-// void
-// Frame::writePpm(const std::string& fileName)
-// {
-//     Log::instance()->avstream().debug("write video frame to PPM file name: " + fileName);
-//     
-//     Frame* pRes = convert(PIX_FMT_RGB24);
-//     
-//     std::ofstream ppmFile(fileName.c_str());
-//     // write PPM header
-//     ppmFile << "P6\n" << _pStream->_pStreamInfo->width() << " " << _pStream->_pStreamInfo->height() << "\n" << 255 << "\n";
-//     // write RGB pixel data
-//     ppmFile.write((const char*)pRes->_pAvFrame->data[0], _pStream->_pStreamInfo->width() * _pStream->_pStreamInfo->height() * 3);
-// }
+void
+Frame::writePpm(const std::string& fileName)
+{
+    Log::instance()->avstream().debug("write video frame to PPM file name: " + fileName);
+    
+    Frame* pRes = convert(PIX_FMT_RGB24);
+    
+    std::ofstream ppmFile(fileName.c_str());
+    // write PPM header
+    ppmFile << "P6\n" << _pStream->_pStreamInfo->width() << " " << _pStream->_pStreamInfo->height() << "\n" << 255 << "\n";
+    // write RGB pixel data
+    ppmFile.write((const char*)pRes->_pAvFrame->data[0], _pStream->_pStreamInfo->width() * _pStream->_pStreamInfo->height() * 3);
+}
 
 
 void
 Frame::write(Overlay* pOverlay)
 {
-    Log::instance()->avstream().debug("convert video frame to YUV ... ");
+    Log::instance()->avstream().debug("convert video frame to overlay pixel format ... ");
     
     _pStream->getInfo()->printInfo();
     int streamWidth = _pStream->getInfo()->width();
@@ -2531,7 +2531,6 @@ Sink::run()
     Omm::AvStream::Frame* pFrame;
     Log::instance()->avstream().debug(getName() + " run thread looping ...");
     while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
-//         Log::instance()->avstream().debug("sink got frame.");
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
@@ -2603,7 +2602,6 @@ AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
 {
     Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame to byte queue ...");
     _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
-//     delete pDecodedFrame;
 }
 
 
@@ -2638,10 +2636,10 @@ AudioSink::audioAvailable()
 int
 AudioSink::audioRead(char* buffer, int size)
 {
-//     Clock::instance()->setTime(_audioTime);
     _pClock->setTime(_audioTime);
     int bytesRead = _byteQueue.readSome(buffer, size);
     _audioTime += audioLength(bytesRead);
+//     setVolume(buffer, size);
     return bytesRead;
 }
 
@@ -2649,10 +2647,10 @@ AudioSink::audioRead(char* buffer, int size)
 void
 AudioSink::audioReadBlocking(char* buffer, int size)
 {
-//     Clock::instance()->setTime(_audioTime);
     _pClock->setTime(_audioTime);
     _byteQueue.read(buffer, size);
     _audioTime += audioLength(size);
+//     setVolume(buffer, size);
 }
 
 
@@ -2664,10 +2662,20 @@ AudioSink::initSilence(char* buffer, int size)
 
 
 void
+AudioSink::setVolume(float vol)
+{
+    _volume = vol / 100.0;
+    Log::instance()->avstream().debug("audio sink set volume to: " + Poco::NumberFormatter::format(_volume));
+}
+
+
+void
 AudioSink::setVolume(char* buffer, int size)
 {
+//     Log::instance()->avstream().debug("audio sink set volume buffer");
     for (int i = 0; i < size; i += 2) {
-        buffer[i] = _volume * (int_fast16_t)buffer[i];
+        int_fast16_t sample = buffer[i];
+        buffer[i] = _volume * (float)sample;
     }
 }
 
@@ -2717,7 +2725,7 @@ VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat
 Sink(name),
 _overlayCount(overlayCount),
 _overlayVector(overlayCount),
-_overlayQueue(name + " overlay", overlayCount),
+_overlayQueue(name + " overlay", overlayCount - 2),
 _timerThread(name + " timer thread"),
 _timerThreadRunnable(*this, &VideoSink::timerThread),
 _timerQuit(false),
@@ -2873,20 +2881,16 @@ VideoSink::reset()
 void
 VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
 {
-    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded video frame to overlay ...");
-    
+//     Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded video frame to overlay ...");
+    Log::instance()->avstream().trace("video sink run thread, writing frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()) + " ...");
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
+    // FIXME: now timer thread can get the overlay pointer out of the _overlayQueue, and may not been completely written to the overlay
     pDecodedFrame->write(pWriteOverlay);
-//     pWriteOverlay->_pFrame = pDecodedFrame;
     pWriteOverlay->_pts = pDecodedFrame->getPts();
-    
+    Log::instance()->avstream().trace("video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()));
     _overlayQueue.put(pWriteOverlay);
-    
     // increment modulo _overlayCount
-    _writeOverlayNumber++;
-    if (_writeOverlayNumber >= _overlayCount) {
-        _writeOverlayNumber = 0;
-    }
+    _writeOverlayNumber = (_writeOverlayNumber + 1) % _overlayCount;
 }
 
 
@@ -2900,14 +2904,8 @@ VideoSink::onTick(int64_t time)
         return;
     }
     
-//     int64_t framePts = pOverlay->_pFrame->getPts();
     int64_t framePts = pOverlay->_pts;
-    Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts));
-//     std::clog << "video sink timer thread, overlay frame pointer: " << pOverlay->_pFrame << std::endl;
-//     if (framePts < time) {
-// //         Log::instance()->avstream().trace("video sink timer thread frame too old, time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(time - framePts) + " discarding frame.");
-// //         _overlayQueue.get();
-//     }
+    Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(framePts - time));
 
     // wait until the frame in the overlay queue is not newer than current clock time
     // then fetch it from the overlay queue and display it.
@@ -2917,19 +2915,12 @@ VideoSink::onTick(int64_t time)
             displayFrame(pOverlay);
         }
     }
-    
-//     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("%s stream time: %s, frame %s pts: %s.",
-//         getName(),
-//         Poco::NumberFormatter::format(time),
-//         pOverlay->_pFrame->getName(),
-//         Poco::NumberFormatter::format(pOverlay->_pFrame->getPts())));
 }
 
 
 Overlay::Overlay(VideoSink* pVideoSink) :
 _pVideoSink(pVideoSink),
 _pts(AV_NOPTS_VALUE)
-// _pFrame(0)
 {
 }
 

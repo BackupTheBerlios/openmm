@@ -20,6 +20,9 @@
 ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
+#include <SDL/SDL.h>
+// #include "SDL_mixer.h"
+
 #include "SdlAudioSink.h"
 
 
@@ -84,6 +87,14 @@ SdlAudioSink::initDevice()
 }
 
 
+bool
+SdlAudioSink::closeDevice()
+{
+    SDL_CloseAudio();
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " closed.");
+}
+
+
 void
 SdlAudioSink::startPresentation()
 {
@@ -96,6 +107,14 @@ SdlAudioSink::stopPresentation()
 {
     SDL_PauseAudio(1);
 }
+
+
+void
+SdlAudioSink::setVolume(int channel, float vol)
+{
+//     Mix_Volume();
+}
+
 
 
 POCO_BEGIN_MANIFEST(Omm::AvStream::AudioSink)
