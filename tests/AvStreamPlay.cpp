@@ -77,7 +77,7 @@ public:
         std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
         
         demuxer.start();
-        clock.setStartTime();
+        clock.setStartTime(true);
 
         std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
 

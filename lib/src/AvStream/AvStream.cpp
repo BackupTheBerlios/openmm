@@ -92,8 +92,8 @@ Log::Log()
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
-//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
+//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
+    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -2639,7 +2639,7 @@ AudioSink::audioRead(char* buffer, int size)
     _pClock->setTime(_audioTime);
     int bytesRead = _byteQueue.readSome(buffer, size);
     _audioTime += audioLength(bytesRead);
-//     setVolume(buffer, size);
+    setVolume(buffer, size);
     return bytesRead;
 }
 
@@ -2650,7 +2650,7 @@ AudioSink::audioReadBlocking(char* buffer, int size)
     _pClock->setTime(_audioTime);
     _byteQueue.read(buffer, size);
     _audioTime += audioLength(size);
-//     setVolume(buffer, size);
+    setVolume(buffer, size);
 }
 
 
@@ -2664,19 +2664,22 @@ AudioSink::initSilence(char* buffer, int size)
 void
 AudioSink::setVolume(float vol)
 {
+    _volumeLock.lock();
     _volume = vol / 100.0;
-    Log::instance()->avstream().debug("audio sink set volume to: " + Poco::NumberFormatter::format(_volume));
+    _volumeLock.unlock();
 }
 
 
 void
 AudioSink::setVolume(char* buffer, int size)
 {
-//     Log::instance()->avstream().debug("audio sink set volume buffer");
-    for (int i = 0; i < size; i += 2) {
-        int_fast16_t sample = buffer[i];
-        buffer[i] = _volume * (float)sample;
+    int16_t* buf = (int16_t*) buffer;
+    int s = size >> 1;
+    _volumeLock.lock();
+    for (int i = 0; i < s; i++) {
+        buf[i] = _volume * buf[i];
     }
+    _volumeLock.unlock();
 }
 
 
@@ -2946,12 +2949,6 @@ Overlay::getFormat()
 }
 
 
-// VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
-// Sink(name)
-// {
-// }
-
-
 Clock* Clock::_pInstance = 0;
 
 Clock::Clock() :
@@ -2961,16 +2958,6 @@ _streamBase(90.0), // TODO: set _streamBase while loading the stream
 _clockTickStreamBase(_clockTick * _streamBase)
 {
 }
-
-
-// Clock*
-// Clock::instance()
-// {
-//     if (!_pInstance) {
-//         _pInstance = new Clock;
-//     }
-//     return _pInstance;
-// }
 
 
 void
@@ -3038,39 +3025,29 @@ Clock::setStartTime(bool toFirstFrame)
 }
 
 
-// TODO: setTime() is currently not used. Simply set _streamTime and _lastTickTime to currentTime.
-// Don't inform anyone (it will be done at next clock tick).
-// setTime() should be called by audio sink, where the samples written to pcm are counted, calculated to base time
+
+// setTime() is called by audio sink, where the samples written to pcm are counted, calculated to base time
 // and frequently setTime is called (especially at a pts jump).
 void
 Clock::setTime(int64_t currentTime)
 {
     Log::instance()->avstream().debug("CLOCK set stream time to: " + Poco::NumberFormatter::format(currentTime));
-    Poco::ScopedLock<Poco::FastMutex> lock(_clockLock);
-//     _clockLock.lock();
-//     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
-//         (*it)->currentTime(currentTime);
-//     }
-//     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
-//         (*it)->currentTime(currentTime);
-//     }
+//     Poco::ScopedLock<Poco::FastMutex> lock(_clockLock);
+    _clockLock.lock();
     _streamTime = currentTime;
     _systemTime.update();
-//     _clockLock.unlock();
+    _clockLock.unlock();
 }
 
 
 void
 Clock::clockTick(Poco::Timer& timer)
 {
-    // TODO: get system time and calculate elapsed time since last tick (_lastTickTime) in time base units. Add this to _streamTime.
+    // get system time and calculate elapsed time since last tick (_lastTickTime) in time base units. Add this to _streamTime.
     // _streamTime and _clockTickStreamBase is in time base units, clock tick is in ms
-    Poco::ScopedLock<Poco::FastMutex> lock(_clockLock);
-//     _clockLock.lock();
+//     Poco::ScopedLock<Poco::FastMutex> lock(_clockLock);
+    _clockLock.lock();
     if (_streamTime != AV_NOPTS_VALUE) {
-//         Log::instance()->avstream().debug("CLOCK TICK.");
-        
-//         _streamTime += _clockTickStreamBase;
         int64_t lastTick = _streamTime;
         _streamTime += _systemTime.elapsed() * 9.0 / 100.0;
         _systemTime.update();
@@ -3082,7 +3059,7 @@ Clock::clockTick(Poco::Timer& timer)
             (*it)->currentTime(_streamTime);
         }
     }
-//     _clockLock.unlock();
+    _clockLock.unlock();
 }
 
 
@@ -3093,7 +3070,6 @@ Clock::start()
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->startPresentation();
     }
-    // FIXME: segfault here when engine is restarted on live TV
     Log::instance()->avstream().debug("CLOCK audio presentation started.");
     Log::instance()->avstream().debug("CLOCK starting video presentation ...");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {

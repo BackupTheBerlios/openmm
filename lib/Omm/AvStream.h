@@ -660,6 +660,7 @@ private:
     ByteQueue                   _byteQueue;
     int64_t                     _audioTime;
     float                       _volume;
+    Poco::FastMutex             _volumeLock;
     Clock*                      _pClock;
 };
 
@@ -749,7 +750,7 @@ public:
     void attachAudioSink(AudioSink* pAudioSink);
     void attachVideoSink(VideoSink* pVideoSink);
     
-    void setStartTime(bool toFirstFrame = false);
+    void setStartTime(bool toFirstFrame = true);
     
     /** setTime()
         sets clock's current stream time to currentTime and notifies sinks
