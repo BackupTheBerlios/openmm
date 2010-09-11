@@ -92,8 +92,8 @@ Log::Log()
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
-//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
-    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_TRACE);
+//     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pFormatLogger, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -411,6 +411,15 @@ _newFrameNumber(0)
 }
 
 
+StreamInfo::~StreamInfo()
+{
+    if (_pAvCodecContext) {
+        Log::instance()->ffmpeg().trace("ffmpeg::avcodec_flush_buffers() ...");
+        avcodec_flush_buffers(_pAvCodecContext);
+    }
+}
+
+
 bool
 StreamInfo::findCodec()
 {
@@ -703,9 +712,9 @@ _pImgConvertContext(0)
 
 Stream::~Stream()
 {
-    // StreamInfo and StreamQueue belong to the nodes that are connected
+    // StreamQueue belongs to the nodes that are connected downstream
     // so they are not deleted here
-    
+    delete _pStreamInfo;
     delete _pDecodedVideoFrame;
     delete _pDecodedAudioFrame;
 }
@@ -1156,13 +1165,20 @@ Node::getOutStream(int outStreamNumber)
 void
 Node::reset()
 {
+    Omm::AvStream::Log::instance()->avstream().debug("node reset ...");
     _quit = false;
     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
-//         while ((*it)->getQueue()->count()) {
-//             delete (*it)->getQueue()->get();
-//         }
-        (*it)->getQueue()->clear();
+        Queue<Frame*>* pQueue = (*it)->getQueue();
+        if (pQueue) {
+            while (pQueue->count()) {
+                Frame* pFrame = pQueue->get();
+                if (pFrame) {
+                    delete pFrame;
+                }
+            }
+        }
     }
+    Omm::AvStream::Log::instance()->avstream().debug("node reset finished.");
 //     _inStreams.clear();
 //     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
 //         delete *it;
@@ -1294,40 +1310,18 @@ _pAvPacket(0),
 _pAvFrame(pAvFrame),
 _pStream(pStream)
 {
-    // NOTE: seems like ffmpeg holds one GOP in memory.
-    // the pointers to the picture data are copied in struc AVFrame into AvStream::Frame
-    
-    // NOTE: if we don't copy the frame data after decoding a frame,
-    // it is deleted / overriden by libavcodec (for example: only the last three frames of 
-    // the stream are stored)
-    
-    // NOTE: why these two lines are needed, dunno exactly ...
-//    _pAvFrame = new AVFrame;
-//    *_pAvFrame = *pAvFrame;
-//     _pAvFrame = copyFrame(pAvFrame);
-    
-    // NOTE: this only points to the correct data in planeless picture formats
-//     _size = _pStream->_pStreamInfo->pictureSize();
-//     _data = (char*)_pAvFrame->data[0];
-    
-    // FIXME: need to copy the data, too.
-    
-    // FIXME: then free pAvFrame
 }
 
 
 Frame::~Frame()
 {
-    // NOTE: _data points to _pAvPacket->data or _pAvFrame->data[0], so we need to free only one of them
-    // NOTE: logging with Frame::getName() leads to segfaults
+    Log::instance()->avstream().trace("frame dtor ...");
     if (_pAvPacket) {
        // called for non-decoded packets
         Log::instance()->ffmpeg().trace("delete " + getName() + " dtor, ffmpeg::av_free_packet() ...");
         av_free_packet(_pAvPacket);
         Log::instance()->ffmpeg().trace("delete " + getName() + " dtor, ffmpeg::av_free() ...");
         av_free(_pAvPacket);
-//         delete _pAvPacket->data;
-//         delete _pAvPacket;
         _pAvPacket = 0;
         _data = 0;
         _size = 0;
@@ -1345,6 +1339,7 @@ Frame::~Frame()
         _data = 0;
         _size = 0;
     }
+    Log::instance()->avstream().trace("frame dtor finished.");
 }
 
 
@@ -2553,11 +2548,13 @@ Sink::run()
 void
 Sink::reset()
 {
+    Omm::AvStream::Log::instance()->avstream().debug("sink reset ...");
     closeDevice();
     _firstDecodeSuccess = false;
     _startTime = AV_NOPTS_VALUE;
     _timeQueue.clear();
     Node::reset();
+    Omm::AvStream::Log::instance()->avstream().debug("sink reset finished.");
 }
 
 
@@ -2686,9 +2683,11 @@ AudioSink::setVolume(char* buffer, int size)
 void
 AudioSink::reset()
 {
+    Log::instance()->avstream().debug("audio sink reset ...");
     _audioTime = AV_NOPTS_VALUE;
     _byteQueue.clear();
     Sink::reset();
+    Log::instance()->avstream().debug("audio sink reset finished.");
 }
 
 
@@ -2867,17 +2866,20 @@ VideoSink::displayRect(int& x, int& y, int& w, int& h)
 void
 VideoSink::reset()
 {
+    Log::instance()->avstream().debug("video sink reset ...");
     _overlayQueue.clear();
     _writeOverlayNumber = 0;
     _timerQuit = false;
 //     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
-//         while ((*it)->getQueue()->count()) {
-//             Frame* pFrame = (*it)->getQueue()->get();
-//             delete pFrame;
+//         if ((*it)->getQueue()) {
+//             while (Frame* pFrame = (*it)->getQueue()->get()) {
+//     //             delete pFrame;
+//             }
 //         }
 // //         (*it)->getQueue()->clear();
 //     }
     Sink::reset();
+    Log::instance()->avstream().debug("video sink reset finished.");
 }
 
 

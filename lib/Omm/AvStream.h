@@ -282,6 +282,7 @@ class StreamInfo
     
 public:
     StreamInfo();
+    ~StreamInfo();
     
     bool isAudio();
     bool isVideo();

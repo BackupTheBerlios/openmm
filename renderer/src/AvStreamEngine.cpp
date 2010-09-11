@@ -103,8 +103,6 @@ AvStreamEngine::setUri(std::string mrl)
         stop();
     }
     
-//     createPlayer();
-    
     std::clog << "<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>" << std::endl;
     _pDemuxer->set(mrl);
     
@@ -162,12 +160,12 @@ AvStreamEngine::stop()
     
     std::clog << "<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>" << std::endl;
     
-    _pDemuxer->reset();
     _pAudioSink->reset();
     _pVideoSink->reset();
+    // demuxer is last node to reset, because StreamInfo belongs to it and is refered to by downstream nodes.
+    _pDemuxer->reset();
     _pClock->reset();
     
-//     destructPlayer();
     _isPlaying = false;
 }
 
