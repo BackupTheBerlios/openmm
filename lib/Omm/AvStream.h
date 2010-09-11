@@ -765,7 +765,7 @@ public:
 private:
     void clockTick(Poco::Timer& timer);
     
-    static Clock*           _pInstance;
+//     static Clock*           _pInstance;
     // TODO: should Clock be able to sync more than one stream?
     // -> store a stream time for each stream
     int64_t                 _streamTime;  // stream current time in stream time base units [sec]

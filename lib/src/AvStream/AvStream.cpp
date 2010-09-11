@@ -2949,7 +2949,7 @@ Overlay::getFormat()
 }
 
 
-Clock* Clock::_pInstance = 0;
+// Clock* Clock::_pInstance = 0;
 
 Clock::Clock() :
 _streamTime(AV_NOPTS_VALUE),

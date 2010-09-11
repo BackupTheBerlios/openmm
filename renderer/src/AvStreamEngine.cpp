@@ -38,12 +38,13 @@ _pDemuxer(0),
 _pAudioSink(0),
 _pVideoSink(0)
 {
-
+    createPlayer();
 }
 
 
 AvStreamEngine::~AvStreamEngine()
 {
+    destructPlayer();
 }
 
 
@@ -102,7 +103,7 @@ AvStreamEngine::setUri(std::string mrl)
         stop();
     }
     
-    createPlayer();
+//     createPlayer();
     
     std::clog << "<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>" << std::endl;
     _pDemuxer->set(mrl);
@@ -166,7 +167,7 @@ AvStreamEngine::stop()
     _pVideoSink->reset();
     _pClock->reset();
     
-    destructPlayer();
+//     destructPlayer();
     _isPlaying = false;
 }
 

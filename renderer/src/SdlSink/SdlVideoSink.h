@@ -29,7 +29,8 @@
 class SdlOverlay : public Omm::AvStream::Overlay
 {
 public:
-    SdlOverlay(Omm::AvStream::VideoSink* pVideoSink);
+    SdlOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height, SDL_Surface* sdlScreen);
+    ~SdlOverlay();
     
     SDL_Overlay*    _pSDLOverlay;
 };
@@ -43,6 +44,7 @@ public:
     
 private:
     virtual bool initDevice();
+    virtual bool closeDevice();
     virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);
     
     virtual int displayWidth();

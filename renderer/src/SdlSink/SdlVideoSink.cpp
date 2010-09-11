@@ -26,33 +26,43 @@
 #include "SdlVideoSink.h"
 
 
-SdlOverlay::SdlOverlay(Omm::AvStream::VideoSink* pVideoSink) :
+SdlOverlay::SdlOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height, SDL_Surface* sdlScreen) :
 Overlay(pVideoSink)
 {
+    // SDL_YV12_OVERLAY corresponds to ffmpeg::PixelFormat == PIX_FMT_YUV420P
+    // TODO: catch, if SDL_Overlay could not be created (video card has to few memory)
+    _pSDLOverlay = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, sdlScreen);
+    _data[0] = _pSDLOverlay->pixels[0];
+    _data[1] = _pSDLOverlay->pixels[2];
+    _data[2] = _pSDLOverlay->pixels[1];
+    
+    _pitch[0] = _pSDLOverlay->pitches[0];
+    _pitch[1] = _pSDLOverlay->pitches[2];
+    _pitch[2] = _pSDLOverlay->pitches[1];
+}
+
+
+SdlOverlay::~SdlOverlay()
+{
+    SDL_FreeYUVOverlay(_pSDLOverlay);
+    _data[0] = 0;
+    _data[1] = 0;
+    _data[2] = 0;
+    _pitch[0] = 0;
+    _pitch[1] = 0;
+    _pitch[2] = 0;
 }
 
 
 SdlVideoSink::SdlVideoSink() :
-// reserve 5 overlays for SdlVideoSink
-VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 10)
-// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 5)
+// reserve 7 overlays for SdlVideoSink
+VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
+// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7)
 {
-}
+    Omm::AvStream::Log::instance()->avstream().debug("init SDL video sink ...");
 
-
-SdlVideoSink::~SdlVideoSink()
-{
-}
-
-
-bool
-SdlVideoSink::initDevice()
-{
-    Omm::AvStream::Log::instance()->avstream().debug("opening SDL video sink ...");
-    
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
         Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
-        return false;
     }
     
     int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
@@ -72,31 +82,39 @@ SdlVideoSink::initDevice()
     
     if (_pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
-        return false;
     }
+}
+
+
+SdlVideoSink::~SdlVideoSink()
+{
+    SDL_Quit();
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
+}
+
+
+bool
+SdlVideoSink::initDevice()
+{
+    Omm::AvStream::Log::instance()->avstream().debug("opening SDL video sink ...");
     
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
-        // SDL_YV12_OVERLAY corresponds to ffmpeg::PixelFormat == PIX_FMT_YUV420P
-        // TODO: catch, if SDL_Overlay could not be created (video card has to few memory)
-//         SDL_Overlay* pSDLOverlay = SDL_CreateYUVOverlay(getWidth(), getHeight(), SDL_YV12_OVERLAY, _pSdlScreen);
-        SDL_Overlay* pSDLOverlay = SDL_CreateYUVOverlay(getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height(), SDL_YV12_OVERLAY, _pSdlScreen);
-
-        SdlOverlay* pOverlay = new SdlOverlay(this);
-        
-        pOverlay->_pSDLOverlay = pSDLOverlay;
-        
-        pOverlay->_data[0] = pSDLOverlay->pixels[0];
-        pOverlay->_data[1] = pSDLOverlay->pixels[2];
-        pOverlay->_data[2] = pSDLOverlay->pixels[1];
-        
-        pOverlay->_pitch[0] = pSDLOverlay->pitches[0];
-        pOverlay->_pitch[1] = pSDLOverlay->pitches[2];
-        pOverlay->_pitch[2] = pSDLOverlay->pitches[1];
-        
+        SdlOverlay* pOverlay = new SdlOverlay(this, getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height(), _pSdlScreen);
         _overlayVector[numOverlay] = pOverlay;
     }
 
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " opened.");
+    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opened.");
+    
+    return true;
+}
+
+
+bool
+SdlVideoSink::closeDevice()
+{
+    for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
+        delete static_cast<SdlOverlay*>(_overlayVector[numOverlay]);
+    }
     return true;
 }
 
@@ -104,23 +122,22 @@ SdlVideoSink::initDevice()
 void
 SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
+    SDL_Rect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = _width;
+    rect.h = _height;
+    int bgColor = SDL_MapRGB(_pSdlScreen->format, 0x00, 0x00, 0x00);
+    SDL_FillRect(_pSdlScreen, &rect, bgColor);
+    
     int x, y, w, h;
     displayRect(x, y, w, h);
-    SDL_Rect rect;
     rect.x = x;
     rect.y = y;
     rect.w = w;
     rect.h = h;
     
-//     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s display frame %s, width: %s, height: %s",
-//         getName(),
-//         pOverlay->_pFrame->getName(),
-//         Poco::NumberFormatter::format(rect.w),
-//         Poco::NumberFormatter::format(rect.h)));
     Omm::AvStream::Log::instance()->avstream().debug("sdl video sink display overlay frame");
-//     + pOverlay->_pFrame->getName());
-//     Omm::AvStream::Log::instance()->avstream().debug("sdl video sink display frame");
-    
     SDL_DisplayYUVOverlay(static_cast<SdlOverlay*>(pOverlay)->_pSDLOverlay, &rect);
 }
 
