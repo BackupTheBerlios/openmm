@@ -43,11 +43,16 @@ _frames(_periodSize >> 2),
 _bufferSize((_periodSize * _periods) >> 2),
 _buffer(new char[_bufferSize])
 {
+    if (!open()) {
+        Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
+//         return false;
+    }
 }
 
 
 AlsaAudioSink::~AlsaAudioSink()
 {
+    close();
     delete _buffer;
 }
 
@@ -90,10 +95,6 @@ AlsaAudioSink::close()
 bool
 AlsaAudioSink::initDevice()
 {
-    if (!open()) {
-        Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
-        return false;
-    }
     snd_pcm_hw_params_alloca(&_hwParams);
     if (snd_pcm_hw_params_any(_pcmPlayback, _hwParams) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("can not configure PCM device.");
@@ -158,7 +159,7 @@ AlsaAudioSink::initDevice()
 bool
 AlsaAudioSink::closeDevice()
 {
-    close();
+//     close();
     return true;
 }
 
