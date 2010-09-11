@@ -27,7 +27,7 @@
 class PpmOverlay : public Omm::AvStream::Overlay
 {
 public:
-    PpmOverlay(Omm::AvStream::VideoSink* pVideoSink);
+    PpmOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height);
     
     Omm::AvStream::Frame*    _pFrame;
 };

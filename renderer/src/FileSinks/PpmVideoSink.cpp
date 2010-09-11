@@ -26,8 +26,8 @@
 #include "PpmVideoSink.h"
 
 
-PpmOverlay::PpmOverlay(Omm::AvStream::VideoSink* pVideoSink) :
-Overlay(pVideoSink)
+PpmOverlay::PpmOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height) :
+Overlay(pVideoSink, width, height)
 {
 }
 
@@ -53,7 +53,7 @@ PpmVideoSink::initDevice()
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
         Omm::AvStream::Frame* pFrame = getInStream(0)->allocateVideoFrame(_pixelFormat);
         
-        PpmOverlay* pOverlay = new PpmOverlay(this);
+        PpmOverlay* pOverlay = new PpmOverlay(this, getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height());
         
         pOverlay->_pFrame = pFrame;
         

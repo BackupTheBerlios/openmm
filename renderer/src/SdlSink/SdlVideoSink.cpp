@@ -27,11 +27,12 @@
 
 
 SdlOverlay::SdlOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height, SDL_Surface* sdlScreen) :
-Overlay(pVideoSink)
+Overlay(pVideoSink, width, height),
+_pSdlScreen(sdlScreen)
 {
     // SDL_YV12_OVERLAY corresponds to ffmpeg::PixelFormat == PIX_FMT_YUV420P
     // TODO: catch, if SDL_Overlay could not be created (video card has to few memory)
-    _pSDLOverlay = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, sdlScreen);
+    _pSDLOverlay = SDL_CreateYUVOverlay(_width, _height, SDL_YV12_OVERLAY, sdlScreen);
     _data[0] = _pSDLOverlay->pixels[0];
     _data[1] = _pSDLOverlay->pixels[2];
     _data[2] = _pSDLOverlay->pixels[1];
@@ -57,7 +58,7 @@ SdlOverlay::~SdlOverlay()
 SdlVideoSink::SdlVideoSink() :
 // reserve 7 overlays for SdlVideoSink
 VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
-// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7)
+// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7, true)
 {
     Omm::AvStream::Log::instance()->avstream().debug("init SDL video sink ...");
 
@@ -79,6 +80,8 @@ VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
 #endif
     
     _pSdlScreen = SDL_SetVideoMode(getWidth(), getHeight(), bitsPerPixel, flags);
+    
+    SDL_ShowCursor(SDL_DISABLE);
     
     if (_pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
@@ -123,13 +126,6 @@ void
 SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
     SDL_Rect rect;
-    rect.x = 0;
-    rect.y = 0;
-    rect.w = _width;
-    rect.h = _height;
-    int bgColor = SDL_MapRGB(_pSdlScreen->format, 0x00, 0x00, 0x00);
-    SDL_FillRect(_pSdlScreen, &rect, bgColor);
-    
     int x, y, w, h;
     displayRect(x, y, w, h);
     rect.x = x;

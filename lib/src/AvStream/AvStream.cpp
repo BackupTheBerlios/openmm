@@ -2724,7 +2724,7 @@ AudioSink::audioLength(int64_t bytes)
 }
 
 
-VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount) :
+VideoSink::VideoSink(const std::string& name, int width, int height, PixelFormat pixelFormat, int overlayCount, bool fullScreen) :
 Sink(name),
 _overlayCount(overlayCount),
 _overlayVector(overlayCount),
@@ -2732,7 +2732,7 @@ _overlayQueue(name + " overlay", overlayCount - 2),
 _timerThread(name + " timer thread"),
 _timerThreadRunnable(*this, &VideoSink::timerThread),
 _timerQuit(false),
-_fullScreen(false),
+_fullScreen(fullScreen),
 _width(width),
 _height(height),
 _pixelFormat(pixelFormat),
@@ -2887,7 +2887,6 @@ VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
 //     Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded video frame to overlay ...");
     Log::instance()->avstream().trace("video sink run thread, writing frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()) + " ...");
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
-    // FIXME: now timer thread can get the overlay pointer out of the _overlayQueue, and may not been completely written to the overlay
     pDecodedFrame->write(pWriteOverlay);
     pWriteOverlay->_pts = pDecodedFrame->getPts();
     Log::instance()->avstream().trace("video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()));
@@ -2921,9 +2920,11 @@ VideoSink::onTick(int64_t time)
 }
 
 
-Overlay::Overlay(VideoSink* pVideoSink) :
+Overlay::Overlay(VideoSink* pVideoSink, int width, int height) :
 _pVideoSink(pVideoSink),
-_pts(AV_NOPTS_VALUE)
+_pts(AV_NOPTS_VALUE),
+_width(width),
+_height(height)
 {
 }
 
@@ -3097,8 +3098,8 @@ Clock::stop()
     }
     Log::instance()->avstream().debug("CLOCK video presentation stopped.");
     Log::instance()->avstream().debug("CLOCK stop ticking ...");
-//     _clockTimer.stop();
-    _clockTimer.restart(0);
+    _clockTimer.stop();
+//     _clockTimer.restart(0);
     Log::instance()->avstream().debug("CLOCK stopped.");
 }
 

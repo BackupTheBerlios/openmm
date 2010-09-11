@@ -33,6 +33,7 @@ public:
     ~SdlOverlay();
     
     SDL_Overlay*    _pSDLOverlay;
+    SDL_Surface*    _pSdlScreen;
 };
 
 

@@ -672,7 +672,7 @@ class VideoSink : public Sink
 public:
     VideoSink(const std::string& name = "video sink",
          int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
-         int overlayCount = 5);
+         int overlayCount = 5, bool fullScreen = false);
     
     virtual int eventLoop() { return 0; }
     
@@ -723,7 +723,7 @@ private:
 class Overlay
 {
 public:
-    Overlay(VideoSink* pVideoSink);
+    Overlay(VideoSink* pVideoSink, int width, int height);
     
     int getWidth();
     int getHeight();
@@ -735,6 +735,8 @@ public:
     VideoSink*      _pVideoSink;
 //     Frame*          _pFrame;
     int64_t         _pts;
+    int             _width;
+    int             _height;
 };
 
 
