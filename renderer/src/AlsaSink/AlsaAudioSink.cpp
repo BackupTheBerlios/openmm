@@ -84,7 +84,6 @@ void
 AlsaAudioSink::close()
 {
     if (_pcmPlayback) {
-        snd_pcm_drop(_pcmPlayback);
         snd_pcm_close(_pcmPlayback);
     }
     
@@ -159,7 +158,6 @@ AlsaAudioSink::initDevice()
 bool
 AlsaAudioSink::closeDevice()
 {
-//     close();
     return true;
 }
 
@@ -189,11 +187,13 @@ AlsaAudioSink::stopPresentation()
     }
     _quitWriteThread = false;
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " write thread stopped.");
+    if (_pcmPlayback) {
+        snd_pcm_drop(_pcmPlayback);
+    }
 }
 
 
 // TODO: implement asynchonous playback: http://alsa.opensrc.org/index.php/HowTo_Asynchronous_Playback
-// FIXME: alsa device buffer underruns (try some simple test app and find out the difference)
 
 void
 AlsaAudioSink::writeThread()
@@ -203,6 +203,7 @@ AlsaAudioSink::writeThread()
     while(!_quitWriteThread) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
+        // FIXME: segfault at first write after restart of AvStreamEngine with new stream
         while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> 2)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
             Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");

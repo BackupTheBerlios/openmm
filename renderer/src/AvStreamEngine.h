@@ -68,7 +68,6 @@ private:
     void createPlayer();
     void destructPlayer();
 
-    bool                        _fullscreen;
     std::string                 _engineId;
     bool                        _isPlaying;
 //     Omm::AvStream::Demuxer      _demuxer;

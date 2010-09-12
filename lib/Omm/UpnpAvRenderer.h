@@ -23,14 +23,18 @@
 #define UpnpAvRenderer_INCLUDED
 
 #include "UpnpAvDevices.h"
+#include "Util.h"
 
 namespace Omm {
 namespace Av {
 
 
-class Engine
+class Engine : public Util::ConfigurablePlugin
 {
 public:
+    Engine();
+    
+    virtual void setOption(const std::string& key, const std::string& value);
     // Engine handling
     // virtual void setVideoDriver(std::string) = 0;
     // virtual void setAudioDriver(std::string) = 0;
@@ -79,6 +83,8 @@ public:
       Events
     */
 //     JSignal endOfTrack;
+protected:
+    bool                        _fullscreen;
 };
 
 

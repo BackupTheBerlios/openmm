@@ -83,6 +83,11 @@ protected:
                            .required(false)
                            .repeatable(false)
                            .argument("plugin name", true));
+        options.addOption(
+                           Option("option", "o", "option passed to plugin")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("plugin option", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
@@ -94,6 +99,9 @@ protected:
         }
         else if (name == "plugin") {
             _enginePlugin = value;
+        }
+        else if (name == "option") {
+            _pluginOption = value;
         }
     }
     
@@ -134,6 +142,10 @@ protected:
             }
             std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
             
+            if (_pluginOption == "fullscreen") {
+                pEnginePlugin->setOption("fullscreen", _pluginOption);
+            }
+            
             Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
             
             
@@ -166,6 +178,7 @@ protected:
 private:
     bool            _helpRequested;
     std::string     _enginePlugin;
+    std::string     _pluginOption;
 };
 
 

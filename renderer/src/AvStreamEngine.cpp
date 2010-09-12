@@ -30,7 +30,6 @@
 
 
 AvStreamEngine::AvStreamEngine() :
-_fullscreen(true),
 _engineId("OMM AvStream engine " + Omm::OMM_VERSION),
 _isPlaying(false),
 _pClock(0),

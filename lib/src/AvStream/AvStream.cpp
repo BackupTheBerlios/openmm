@@ -2290,8 +2290,8 @@ Tagger::tag(const std::string& uri)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 5000;
-    pMeta->_pFormatContext->max_analyze_duration = 1000000;
+    pMeta->_pFormatContext->probesize = 2500;
+    pMeta->_pFormatContext->max_analyze_duration = 500000;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
@@ -2726,7 +2726,9 @@ VideoSink::displayHeight()
 void
 VideoSink::displayRect(int& x, int& y, int& w, int& h)
 {
-    float ar = _overlayQueue.front()->_aspectRatio * (float)getInStream(0)->getInfo()->width()/getInStream(0)->getInfo()->height();
+    float ar = getInStream(0)->getInfo()->aspectRatio() * (float)getInStream(0)->getInfo()->width()/getInStream(0)->getInfo()->height();
+    // FIXME: _overlayQueue.front() causes segfault here.
+//     float ar = _overlayQueue.front()->_aspectRatio * (float)getInStream(0)->getInfo()->width()/getInStream(0)->getInfo()->height();
     h = displayHeight();
     w = ((int)rint(h * ar)) & ~1;
     if (w > displayWidth()) {

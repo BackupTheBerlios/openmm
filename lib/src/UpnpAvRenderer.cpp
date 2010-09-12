@@ -25,6 +25,21 @@
 namespace Omm {
 namespace Av {
 
+Engine::Engine() :
+_fullscreen(false)
+{
+}
+
+
+void
+Engine::setOption(const std::string& key, const std::string& value)
+{
+    if (key == "fullscreen") {
+        _fullscreen = true;
+    }
+}
+
+    
 UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
 MediaRenderer(new RenderingControlRendererImpl,
               new ConnectionManagerRendererImpl,
