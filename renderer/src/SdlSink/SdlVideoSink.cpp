@@ -151,7 +151,7 @@ SdlVideoSink::displayHeight()
 
 
 void
-SdlVideoSink::clearDisplay()
+SdlVideoSink::blankDisplay()
 {
     Omm::AvStream::Log::instance()->avstream().debug("clear display");
     SDL_Rect rect;

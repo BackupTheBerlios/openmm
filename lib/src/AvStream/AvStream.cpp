@@ -2609,7 +2609,8 @@ _fullScreen(fullScreen),
 _width(width),
 _height(height),
 _pixelFormat(pixelFormat),
-_writeOverlayNumber(0)
+_writeOverlayNumber(0),
+_lastAspectRatio(1.0)
 {
 }
 
@@ -2725,7 +2726,7 @@ VideoSink::displayHeight()
 void
 VideoSink::displayRect(int& x, int& y, int& w, int& h)
 {
-    float ar = getInStream(0)->getInfo()->aspectRatio() * (float)getInStream(0)->getInfo()->width()/getInStream(0)->getInfo()->height();
+    float ar = _overlayQueue.front()->_aspectRatio * (float)getInStream(0)->getInfo()->width()/getInStream(0)->getInfo()->height();
     h = displayHeight();
     w = ((int)rint(h * ar)) & ~1;
     if (w > displayWidth()) {
@@ -2734,6 +2735,11 @@ VideoSink::displayRect(int& x, int& y, int& w, int& h)
     }
     x = (displayWidth() - w) / 2;
     y = (displayHeight() - h) / 2;
+    
+    if (_lastAspectRatio != ar) {
+        blankDisplay();
+    }
+    _lastAspectRatio = ar;
 }
 
 
@@ -2741,7 +2747,6 @@ void
 VideoSink::reset()
 {
     Log::instance()->avstream().debug("video sink reset ...");
-    clearDisplay();
     _overlayQueue.clear();
     _writeOverlayNumber = 0;
     _timerQuit = false;
@@ -2754,6 +2759,7 @@ VideoSink::reset()
 // //         (*it)->getQueue()->clear();
 //     }
     Sink::reset();
+    blankDisplay();
     Log::instance()->avstream().debug("video sink reset finished.");
 }
 
@@ -2766,6 +2772,7 @@ VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
     pDecodedFrame->write(pWriteOverlay);
     pWriteOverlay->_pts = pDecodedFrame->getPts();
+    pWriteOverlay->_aspectRatio = getInStream(0)->getInfo()->aspectRatio();
     Log::instance()->avstream().trace("video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()));
     _overlayQueue.put(pWriteOverlay);
     // increment modulo _overlayCount
@@ -2801,7 +2808,8 @@ Overlay::Overlay(VideoSink* pVideoSink, int width, int height) :
 _pVideoSink(pVideoSink),
 _pts(AV_NOPTS_VALUE),
 _width(width),
-_height(height)
+_height(height),
+_aspectRatio(1.0)
 {
 }
 

@@ -51,7 +51,7 @@ private:
     virtual int displayWidth();
     virtual int displayHeight();
     
-    virtual void clearDisplay();
+    virtual void blankDisplay();
     
     SDL_Surface* _pSdlScreen;
 };

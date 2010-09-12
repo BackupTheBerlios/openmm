@@ -683,7 +683,7 @@ public:
     
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
-    virtual void clearDisplay() {}
+    virtual void blankDisplay() {}
     
     int                         _overlayCount;
     std::vector<Overlay*>       _overlayVector;
@@ -707,6 +707,7 @@ private:
     Poco::FastMutex                     _sinkLock;
     
     int                                 _writeOverlayNumber;
+    float                               _lastAspectRatio;
 };
 
 
@@ -726,6 +727,7 @@ public:
     int64_t         _pts;
     int             _width;
     int             _height;
+    float           _aspectRatio;
 };
 
 
