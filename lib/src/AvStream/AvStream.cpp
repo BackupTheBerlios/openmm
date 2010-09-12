@@ -728,16 +728,13 @@ _pNode(pNode),
 _pStreamInfo(0),
 _pStreamQueue(0)
 {
-//     Log::instance()->avstream().trace("allocating new stream ...");
-//     Log::instance()->avstream().trace("new stream allocated.");
 }
 
 
 Stream::~Stream()
 {
-    // StreamQueue belongs to the nodes that are connected downstream
+    // StreamQueues belong to the nodes that are connected downstream
     // so they are not deleted here
-//     delete _pStreamInfo;
 }
 
 
@@ -839,33 +836,6 @@ Stream::getNode()
 }
 
 
-// std::string
-// Stream::getName()
-// {
-// //     Log::instance()->avstream().debug("Stream::getName()");
-//     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-//     if (_pStreamInfo) {
-//         return _pStreamInfo->_streamName;
-//     }
-//     else {
-//         return "<unknown stream name>";
-//     }
-// }
-
-
-// void
-// Stream::setName(const std::string& name)
-// {
-//     if (_pStreamInfo) {
-//         _pStreamInfo->_streamName = name;
-//     }
-//     else {
-//         Log::instance()->avstream().warning("could not set stream name to: " +
-//             name);
-//     }
-// }
-
-
 Frame*
 Stream::allocateVideoFrame(PixelFormat targetFormat)
 {
@@ -916,13 +886,6 @@ Stream::decodeFrame(Frame* pFrame)
 Frame*
 Stream::decodeAudioFrame(Frame* pFrame)
 {
-//     const int outBufferSize = (AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2;
-//     Frame* pOutFrame = new Frame(pFrame->getNumber(), this, outBufferSize);
-//     pOutFrame->_data[outBufferSize-1] = 0;
-//     Log::instance()->avstream().debug("decode audio frame alloc size: " +
-//         Poco::NumberFormatter::format(outBufferSize)
-//         );
-//     _pDecodedAudioFrame->_number = pFrame->getNumber();
     getInfo()->_pDecodedAudioFrame->_size = getInfo()->_maxDecodedAudioFrameSize;
     
     uint8_t* inBuffer = (uint8_t*)pFrame->data();
@@ -934,8 +897,6 @@ Stream::decodeAudioFrame(Frame* pFrame)
         int bytesConsumed = avcodec_decode_audio2(_pStreamInfo->_pAvStream->codec,
             (int16_t*)getInfo()->_pDecodedAudioFrame->_data, &getInfo()->_pDecodedAudioFrame->_size,
             inBuffer, inBufferSize);
-        // TODO: decoded frame got new size after avcodec_decode_audio2(). Is buffer also resized?
-//         pOutFrame->_size = outBufferSize;
         
         Log::instance()->ffmpeg().debug("ffmpeg::avcodec_decode_audio2() frame size: " + Poco::NumberFormatter::format(inBufferSize) + ", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", decoded size: " +
             Poco::NumberFormatter::format(getInfo()->_pDecodedAudioFrame->size())
@@ -949,7 +910,6 @@ Stream::decodeAudioFrame(Frame* pFrame)
         inBuffer += bytesConsumed;
         inBufferSize -= bytesConsumed;
     }
-//     delete pFrame;
     return getInfo()->_pDecodedAudioFrame;
 }
 
@@ -1157,8 +1117,8 @@ Node::getDownstreamNode(int outStreamNumber)
 //     _quit = stop;
 //     _lock.unlock();
 // }
-// 
-// 
+
+
 bool
 Node::doStop()
 {
@@ -1200,11 +1160,6 @@ Node::reset()
         }
     }
     Omm::AvStream::Log::instance()->avstream().debug("node reset finished.");
-//     _inStreams.clear();
-//     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
-//         delete *it;
-//     }
-//     _outStreams.clear();
 }
 
 
@@ -1364,20 +1319,6 @@ Frame::~Frame()
 }
 
 
-// AVPacket*
-// Frame::copyPacket(AVPacket* pAvPacket, int padSize)
-// {
-//     av_dup_packet(pAvPacket);
-//     
-//     // allocate AVPacket struc
-//     AVPacket* pRes = new AVPacket;
-//     // copy fields of AVPacket struc
-//     *pRes = *pAvPacket;
-//     
-//     return pRes;
-// }
-
-
 AVPacket*
 Frame::copyPacket(AVPacket* pAvPacket, int padSize)
 {
@@ -1390,72 +1331,9 @@ Frame::copyPacket(AVPacket* pAvPacket, int padSize)
     AVPacket* pRes = (AVPacket*)av_malloc(sizeof(AVPacket));
     // copy fields of AVPacket struc
     *pRes = *pAvPacket;
-    // allocate payload
-//     Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(pAvPacket->size + padSize));
-//     pRes->data = new uint8_t[pAvPacket->size + padSize];
-//     pRes->size = pAvPacket->size + padSize;
-    // copy payload
-//     memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
     
     return pRes;
 }
-
-/*
-AVPacket*
-Frame::copyPacket0(AVPacket* pAvPacket, int padSize)
-{
-    // allocate AVPacket struc
-    AVPacket* pRes = new AVPacket;
-    // copy fields of AVPacket struc
-    *pRes = *pAvPacket;
-    // allocate payload
-    Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(pAvPacket->size + padSize));
-    pRes->data = new uint8_t[pAvPacket->size + padSize];
-    pRes->size = pAvPacket->size + padSize;
-    // copy payload
-    memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
-    
-    return pRes;
-}
-
-
-AVPacket*
-Frame::copyPacket1(AVPacket* pAvPacket, int padSize)
-{
-    // allocate AVPacket struc
-    AVPacket* pRes;
-    av_new_packet(pRes, pAvPacket->size + padSize)
-    // copy fields of AVPacket struc
-    *pRes = *pAvPacket;
-    // allocate payload
-    Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(pAvPacket->size + padSize));
-    pRes->data = new uint8_t[pAvPacket->size + padSize];
-    pRes->size = pAvPacket->size + padSize;
-    // copy payload
-    memcpy(pRes->data, pAvPacket->data, pAvPacket->size);
-    
-    return pRes;
-}
-*/
-
-// AVFrame*
-// Frame::allocateFrame(PixelFormat format)
-// {
-//     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
-//     AVFrame* pRes = avcodec_alloc_frame();
-//     
-//     // use int avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height) instead of avpicture_fill?
-//     Log::instance()->avstream().trace("alloc " + getName() + ", size " + Poco::NumberFormatter::format(_pStream->_pStreamInfo->pictureSize()));
-//     uint8_t* buffer = (uint8_t *)av_malloc(_pStream->_pStreamInfo->pictureSize());
-//     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
-//     avpicture_fill((AVPicture *)pRes,
-//                    buffer,
-//                    format,
-//                    _pStream->_pStreamInfo->width(),
-//                    _pStream->_pStreamInfo->height());
-//     
-//     return pRes;
-// }
 
 
 // AVFrame*
@@ -1590,17 +1468,6 @@ Frame::getStream()
 }
 
 
-// Frame*
-// Frame::decode()
-// {
-//     Frame* pRes = _pStream->decodeFrame(this);
-//     if (pRes) {
-//         pRes->setPts(getPts());
-//     }
-//     return pRes;
-// }
-
-
 Frame*
 Frame::convert(PixelFormat targetFormat, int targetWidth, int targetHeight)
 {
@@ -1726,10 +1593,6 @@ _firstVideoStream(-1)
 void
 Demuxer::set(const std::string& uri)
 {
-//     // clean up from last set()
-//     if (_pMeta) {
-//         delete _pMeta;
-//     }
     // analyze the data and init the demuxer streams
     Tagger tagger;
     _pMeta = tagger.tag(uri);
@@ -1750,10 +1613,6 @@ Demuxer::set(const std::string& uri)
 void
 Demuxer::set(std::istream& istr)
 {
-//     // clean up from last set()
-//     if (_pMeta) {
-//         delete _pMeta;
-//     }
     // analyze the data and init the demuxer streams
     Tagger tagger;
     _pMeta = tagger.tag(istr);

@@ -44,9 +44,6 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
-// #include <libavfilter/avfilter.h>
-// #include <libavdevice/avdevice.h>
-// #include <libpostproc/postprocess.h>
 
 //Forward declaration of ffmpeg structs
 struct AVInputFormat;
@@ -172,9 +169,6 @@ public:
         _size(size),
         _putSemaphore(size, size),
         _getSemaphore(0, size)
-        // FIXME: this should also work, but crashes when allocating sink plugin
-//         _putSemaphore(size),
-//         _getSemaphore(0)
     {
     }
     
@@ -367,7 +361,6 @@ private:
     StreamInfo*         _pStreamInfo;
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
-    Poco::FastMutex     _lock;
 };
 
 
@@ -472,13 +465,6 @@ private:
 };
 
 
-// class FrameInfo
-// {
-// public:
-//     
-// };
-
-
 class Frame
 {
     friend class Stream;
@@ -513,8 +499,6 @@ public:
     
     const Stream* getStream();
     
-//     Frame* decode();
-    
     // width and height = -1 means, leave the size of the frame as it is
     Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
     
@@ -522,11 +506,11 @@ public:
     void write(Overlay* overlay);
     
     AVPacket* copyPacket(AVPacket* pAvPacket, int padSize);
-//     AVFrame* allocateFrame(PixelFormat format);
 //     AVFrame* copyFrame(AVFrame* pAvFrame);
     
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
+    // because the stream type is dynamic: audio streams decode audio packets, same goes for video.
     int64_t             _number;
     Poco::Mutex         _numberLock;
     int64_t             _pts;
@@ -738,7 +722,6 @@ public:
     int             _pitch[4];
     
     VideoSink*      _pVideoSink;
-//     Frame*          _pFrame;
     int64_t         _pts;
     int             _width;
     int             _height;
@@ -749,7 +732,6 @@ class Clock
 {
 public:
     Clock();
-//     static Clock* instance();
     
     /** attachAudioSink() / attachVideoSink()
         pSink: pointer to sink, that receives the timing signals
@@ -772,7 +754,6 @@ public:
 private:
     void clockTick(Poco::Timer& timer);
     
-//     static Clock*           _pInstance;
     // TODO: should Clock be able to sync more than one stream?
     // -> store a stream time for each stream
     int64_t                 _streamTime;  // stream current time in stream time base units [sec]
