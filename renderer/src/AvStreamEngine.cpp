@@ -160,11 +160,11 @@ AvStreamEngine::stop()
     
     std::clog << "<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>" << std::endl;
     
-    _pAudioSink->reset();
+    _pClock->reset();
     _pVideoSink->reset();
+    _pAudioSink->reset();
     // demuxer is last node to reset, because StreamInfo belongs to it and is refered to by downstream nodes.
     _pDemuxer->reset();
-    _pClock->reset();
     
     _isPlaying = false;
 }

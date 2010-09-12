@@ -76,7 +76,7 @@ PpmVideoSink::initDevice()
 void
 PpmVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
-    std::string fileName(getInStream(0)->getName() + "_" + Poco::NumberFormatter::format0(++_frameCount, 3) + ".ppm");
+    std::string fileName(getInStream(0)->getInfo()->getName() + "_" + Poco::NumberFormatter::format0(++_frameCount, 3) + ".ppm");
     
     // normally, VideoSink implementation is responsible for scaling the video (hw-accelerated)
     // however, the ppm file sink only writes the stream in original size into files.

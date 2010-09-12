@@ -281,11 +281,13 @@ class StreamInfo
     friend class Frame;
     
 public:
-    StreamInfo();
+    StreamInfo(Stream* pStream, const std::string name = "avstream");
     ~StreamInfo();
     
     bool isAudio();
     bool isVideo();
+    std::string getName();
+    void setName(const std::string& name);
     
     bool findCodec();
     bool findEncoder();
@@ -311,10 +313,18 @@ public:
     
 private:
     std::string             _streamName;
+    Stream*                 _pStream;
     AVStream*               _pAvStream;
     AVCodecContext*         _pAvCodecContext;
     AVCodec*                _pAvCodec;
     int64_t                 _newFrameNumber;
+
+    int                     _maxDecodedAudioFrameSize;
+    Frame*                  _pDecodedAudioFrame;
+    Frame*                  _pDecodedVideoFrame;
+    struct SwsContext*      _pImgConvertContext;
+    
+    Poco::FastMutex         _lock;
 };
 
 
@@ -325,7 +335,7 @@ class Stream
     
 public:
     // TODO: in and out stream ctors (only in streams allocate a queue)
-    Stream(Node* node, const std::string name = "avstream");
+    Stream(Node* node);
     ~Stream();
     
     Frame* firstFrame();
@@ -339,10 +349,8 @@ public:
     // addQueue(StreamQueue* pQueue, int queueNumber = 0)
     // removeQueue(int queueNumber = 0)
     // _pStreamQueue -> std::vector<StreamQueue*>
-    std::string getName();
     StreamInfo* getInfo();
     StreamQueue* getQueue();
-    void setName(const std::string& name);
     void setInfo(StreamInfo* pInfo);
     void setQueue(StreamQueue* pQueue);
     
@@ -360,11 +368,6 @@ private:
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
     Poco::FastMutex     _lock;
-    
-    Frame*              _pDecodedVideoFrame;
-    int                 _maxDecodedAudioFrameSize;
-    Frame*              _pDecodedAudioFrame;
-    struct SwsContext*  _pImgConvertContext;
 };
 
 
@@ -479,6 +482,7 @@ private:
 class Frame
 {
     friend class Stream;
+    friend class StreamInfo;
     friend class Muxer;
     
 public:
