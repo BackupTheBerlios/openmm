@@ -2741,6 +2741,7 @@ void
 VideoSink::reset()
 {
     Log::instance()->avstream().debug("video sink reset ...");
+    clearDisplay();
     _overlayQueue.clear();
     _writeOverlayNumber = 0;
     _timerQuit = false;

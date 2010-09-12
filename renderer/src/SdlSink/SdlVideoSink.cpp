@@ -105,9 +105,7 @@ SdlVideoSink::initDevice()
         SdlOverlay* pOverlay = new SdlOverlay(this, getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height(), _pSdlScreen);
         _overlayVector[numOverlay] = pOverlay;
     }
-
     Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opened.");
-    
     return true;
 }
 
@@ -149,6 +147,20 @@ int
 SdlVideoSink::displayHeight()
 {
     return _pSdlScreen->h;
+}
+
+
+void
+SdlVideoSink::clearDisplay()
+{
+    Omm::AvStream::Log::instance()->avstream().debug("clear display");
+    SDL_Rect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = displayWidth();
+    rect.h = displayHeight();
+    SDL_FillRect(_pSdlScreen, &rect, SDL_MapRGB(_pSdlScreen->format, 0x00, 0x00, 0x00));
+    SDL_UpdateRect(_pSdlScreen, 0, 0, 0, 0);
 }
 
 

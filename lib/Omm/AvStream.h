@@ -683,6 +683,7 @@ public:
     
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
+    virtual void clearDisplay() {}
     
     int                         _overlayCount;
     std::vector<Overlay*>       _overlayVector;
