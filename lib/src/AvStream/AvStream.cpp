@@ -998,22 +998,20 @@ Node::stop()
 {
     Log::instance()->avstream().debug(getName() + " stopping run thread ...");
     
+    initiateStop();
+    waitForStop();
+    
+    Log::instance()->avstream().debug(getName() + " run thread stopped.");
+}
+
+
+void
+Node::initiateStop()
+{
+    Log::instance()->avstream().debug(getName() + " trying to stop run thread ...");
     // first stop this node by setting the _quit flag ...
     setStop(true);
-    Log::instance()->avstream().debug(getName() + " trying to join run thread ...");
-    try {
-        // wait for run thread loop to finish
-        // FIXME: what, if the thread finishes after _thread.isRunning() and _thread.join()
-        if (_thread.isRunning()) {
-            _thread.join(500);
-        }
-    }
-    catch(...) {
-        Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown run thread");
-    }
-    setStop(false);
-    Log::instance()->avstream().debug(getName() + " run thread stopped.");
-    
+
     // then stop all nodes downstream
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
@@ -1026,7 +1024,41 @@ Node::stop()
             Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no node attached");
             continue;
         }
-        downstreamNode->stop();
+        downstreamNode->initiateStop();
+    }
+}
+
+
+void
+Node::waitForStop()
+{
+    Log::instance()->avstream().debug(getName() + " trying to join run thread ...");
+    try {
+        // wait for run thread loop to finish
+        // FIXME: what, if the thread finishes after _thread.isRunning() and _thread.join()
+        if (_thread.isRunning()) {
+            _thread.join(500);
+        }
+    }
+    catch(...) {
+        Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown run thread");
+    }
+    setStop(false);
+    Log::instance()->avstream().debug(getName() + " run thread joined.");
+    
+    // then wait for all nodes downstream to stop
+    int outStreamNumber = 0;
+    for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
+        if (!(*it)) {
+            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not wait for downstream node to stop, no stream attached");
+            continue;
+        }
+        Node* downstreamNode = getDownstreamNode(outStreamNumber);
+        if (!downstreamNode) {
+            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not wait for downstream node to stop, no node attached");
+            continue;
+        }
+        downstreamNode->waitForStop();
     }
 }
 
@@ -2402,7 +2434,7 @@ Sink::run()
     }
     Omm::AvStream::Frame* pFrame;
     Log::instance()->avstream().debug(getName() + " run thread looping ...");
-    while (!getStop() && (pFrame = _inStreams[0]->getFrame())) {
+    while ((pFrame = _inStreams[0]->getFrame()) && !getStop()) {
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
@@ -2651,6 +2683,12 @@ VideoSink::stopPresentation()
     Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
     
     setTimerStop(true);
+}
+
+
+void
+VideoSink::waitPresentationStop()
+{
     Log::instance()->avstream().debug(getName() + " trying to join timer thread ...");
     try {
         // wait for run thread loop to finish
@@ -2998,12 +3036,19 @@ Clock::stop()
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->stopPresentation();
     }
-    Log::instance()->avstream().debug("CLOCK audio presentation stopped.");
     Log::instance()->avstream().debug("CLOCK stopping video presentation ...");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->stopPresentation();
     }
+    for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
+        (*it)->waitPresentationStop();
+    }
+    Log::instance()->avstream().debug("CLOCK audio presentation stopped.");
+    for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
+        (*it)->waitPresentationStop();
+    }
     Log::instance()->avstream().debug("CLOCK video presentation stopped.");
+    
     Log::instance()->avstream().debug("CLOCK stop ticking ...");
     _clockTimer.stop();
 //     _clockTimer.restart(0);

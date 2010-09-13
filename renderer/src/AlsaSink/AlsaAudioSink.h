@@ -39,6 +39,7 @@ private:
     virtual bool closeDevice();
     virtual void startPresentation();
     virtual void stopPresentation();
+    virtual void waitPresentationStop();
     
     bool open();
     bool open(const std::string& device);

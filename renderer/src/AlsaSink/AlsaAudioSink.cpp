@@ -176,6 +176,12 @@ AlsaAudioSink::stopPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
     setStopWriting(true);
+}
+
+
+void
+AlsaAudioSink::waitPresentationStop()
+{
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " trying to join write thread ...");
     try {
         if (_writeThread.isRunning()) {

@@ -380,7 +380,6 @@ public:
     
     Node* getDownstreamNode(int outStreamNumber = 0);
     
-    bool getStop();
     
     Stream* getInStream(int inStreamNumber);
     Stream* getOutStream(int outStreamNumber);
@@ -389,6 +388,10 @@ protected:
     virtual bool init() { return true; }
     virtual void run() {}
     
+    void initiateStop();
+    void waitForStop();
+
+    bool getStop();
     void setStop(bool stop);
     void reset();
     
@@ -595,6 +598,7 @@ public:
     
     virtual void startPresentation() {}
     virtual void stopPresentation() {}
+    virtual void waitPresentationStop() {}
     
     void currentTime(int64_t time);
 
@@ -670,6 +674,7 @@ public:
     
     virtual void startPresentation();
     virtual void stopPresentation();
+    virtual void waitPresentationStop();
     
     int getWidth();
     int getHeight();
