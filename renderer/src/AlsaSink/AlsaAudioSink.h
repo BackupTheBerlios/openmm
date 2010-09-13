@@ -45,10 +45,13 @@ private:
     void close();
     
     void writeThread();
+    void setStopWriting(bool stop);
+    bool getStopWriting();
     
     Poco::Thread                            _writeThread;
     Poco::RunnableAdapter<AlsaAudioSink>    _writeThreadRunnable;
     bool                                    _quitWriteThread;
+    Poco::FastMutex                         _writeLock;
     
     snd_pcm_t*                              _pcmPlayback;
     snd_pcm_hw_params_t*                    _hwParams;

@@ -418,10 +418,11 @@ _pImgConvertContext(0)
 
 StreamInfo::~StreamInfo()
 {
-    if (_pAvCodecContext) {
-        Log::instance()->ffmpeg().trace("ffmpeg::avcodec_flush_buffers() ...");
-        avcodec_flush_buffers(_pAvCodecContext);
-    }
+//     if (_pAvCodecContext) {
+        // FIXME: avcodec_flush_buffers() may crash and has no effect on memory consumption ...
+//         Log::instance()->ffmpeg().trace("ffmpeg::avcodec_flush_buffers() ...");
+//         avcodec_flush_buffers(_pAvCodecContext);
+//     }
     delete _pDecodedVideoFrame;
     delete _pDecodedAudioFrame;
 }
@@ -998,9 +999,7 @@ Node::stop()
     Log::instance()->avstream().debug(getName() + " stopping run thread ...");
     
     // first stop this node by setting the _quit flag ...
-    _quitLock.lock();
-    _quit = true;
-    _quitLock.unlock();
+    setStop(true);
     Log::instance()->avstream().debug(getName() + " trying to join run thread ...");
     try {
         // wait for run thread loop to finish
@@ -1012,7 +1011,7 @@ Node::stop()
     catch(...) {
         Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown run thread");
     }
-    _quit = false;
+    setStop(false);
     Log::instance()->avstream().debug(getName() + " run thread stopped.");
     
     // then stop all nodes downstream
@@ -1071,7 +1070,7 @@ Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
     }
     else {
         Log::instance()->avstream().warning(node->getName() + " init failed, start of node canceled.");
-        _quit = true;
+        setStop(true);
     }
 }
 
@@ -1110,20 +1109,24 @@ Node::getDownstreamNode(int outStreamNumber)
 }
 
 
-// void
-// Node::setStop(bool stop)
-// {
-//     _lock.lock();
-//     _quit = stop;
-//     _lock.unlock();
-// }
+void
+Node::setStop(bool stop)
+{
+    _quitLock.lock();
+    _quit = stop;
+    _quitLock.unlock();
+}
 
 
 bool
-Node::doStop()
+Node::getStop()
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    return _quit;
+//     Poco::ScopedLock<Poco::FastMutex> lock(_quitLock);
+    bool stop = false;
+    _quitLock.lock();
+    stop = _quit;
+    _quitLock.unlock();
+    return stop;
 }
 
 
@@ -1147,7 +1150,7 @@ void
 Node::reset()
 {
     Omm::AvStream::Log::instance()->avstream().debug("node reset ...");
-    _quit = false;
+    setStop(false);
     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
         Queue<Frame*>* pQueue = (*it)->getQueue();
         if (pQueue) {
@@ -1598,13 +1601,13 @@ Demuxer::set(const std::string& uri)
     _pMeta = tagger.tag(uri);
     if (!_pMeta) {
         Log::instance()->avstream().warning("demuxer could not tag input stream with uri " + uri + ", giving up.");
-        _quit = true;
+        setStop(true);
     }
     else {
         _pMeta->print();
         if (!init()) {
             Log::instance()->avstream().warning("demuxer init failed, giving up.");
-            _quit = true;
+            setStop(true);
         }
     }
 }
@@ -1618,13 +1621,13 @@ Demuxer::set(std::istream& istr)
     _pMeta = tagger.tag(istr);
     if (!_pMeta) {
         Log::instance()->avstream().warning("demuxer could not tag input stream, giving up.");
-        _quit = true;
+        setStop(true);
     }
     else {
         _pMeta->print();
         if (!init()) {
             Log::instance()->avstream().warning("demuxer init failed, giving up.");
-            _quit = true;
+            setStop(true);
         }
     }
 }
@@ -1707,7 +1710,7 @@ Demuxer::run()
     Log::instance()->ffmpeg().trace("ffmpeg::av_init_packet() ...");
     av_init_packet(&packet);
     
-    while (!_quit) {
+    while (!getStop()) {
         Log::instance()->ffmpeg().trace("ffmpeg::av_read_frame() ...");
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
         if (ret < 0) {
@@ -1983,7 +1986,7 @@ Muxer::run()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread started.");
     
-    while (!_quit) {
+    while (!getStop()) {
         // FIXME: handle packet number wrap in muxer
         Frame* pFirstStreamFrame = _inStreams[0]->getFrame();
         Frame* pSecondStreamFrame = _inStreams[1]->getFrame();
@@ -2061,7 +2064,7 @@ Decoder::run()
         Log::instance()->avstream().warning(getName() + " no in stream attached, stopping.");
         return;
     }
-    while (!_quit && (pFrame = _inStreams[0]->getFrame()))
+    while (!getStop() && (pFrame = _inStreams[0]->getFrame()))
     {
         if (!_outStreams[0]) {
             Log::instance()->avstream().warning(getName() + " no out stream attached, discarding packet.");
@@ -2399,7 +2402,7 @@ Sink::run()
     }
     Omm::AvStream::Frame* pFrame;
     Log::instance()->avstream().debug(getName() + " run thread looping ...");
-    while (!_quit && (pFrame = _inStreams[0]->getFrame())) {
+    while (!getStop() && (pFrame = _inStreams[0]->getFrame())) {
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
@@ -2647,12 +2650,11 @@ VideoSink::stopPresentation()
 {
     Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
     
-    // FIXME: possible race conditions with the thread loops and the _quit flags
-    _timerQuit = true;
+    setTimerStop(true);
     Log::instance()->avstream().debug(getName() + " trying to join timer thread ...");
     try {
         // wait for run thread loop to finish
-        // FIXME: what, if the thread finishes after _thread.isRunning() and _thread.join()
+        // FIXME: what, if the thread finishes after _thread.isRunning() and before _thread.join()
         if (_timerThread.isRunning()) {
             _timerThread.join(500);
         }
@@ -2660,7 +2662,7 @@ VideoSink::stopPresentation()
     catch(...) {
         Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown timer thread");
     }
-    _timerQuit = false;
+    setTimerStop(false);
     Log::instance()->avstream().debug(getName() + " timer thread stopped.");
 }
 
@@ -2670,7 +2672,7 @@ VideoSink::timerThread()
 {
     Log::instance()->avstream().debug(getName() + " timer thread started.");
 
-    while(!_timerQuit) {
+    while(!getTimerStop()) {
         Log::instance()->avstream().trace("video sink getting time ...");
         int64_t time = _timeQueue.get();
 //         Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
@@ -2680,6 +2682,26 @@ VideoSink::timerThread()
         onTick(time);
     }
     Log::instance()->avstream().debug(getName() + " timer thread finished.");
+}
+
+
+void
+VideoSink::setTimerStop(bool stop)
+{
+    _timerLock.lock();
+    _timerQuit = stop;
+    _timerLock.unlock();
+}
+
+
+bool
+VideoSink::getTimerStop()
+{
+    bool stop = false;
+    _timerLock.lock();
+    stop = _timerQuit;
+    _timerLock.unlock();
+    return stop;
 }
 
 
@@ -2751,7 +2773,7 @@ VideoSink::reset()
     Log::instance()->avstream().debug("video sink reset ...");
     _overlayQueue.clear();
     _writeOverlayNumber = 0;
-    _timerQuit = false;
+    setTimerStop(false);
 //     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
 //         if ((*it)->getQueue()) {
 //             while (Frame* pFrame = (*it)->getQueue()->get()) {
@@ -2836,8 +2858,6 @@ Overlay::getFormat()
     return _pVideoSink->getFormat();
 }
 
-
-// Clock* Clock::_pInstance = 0;
 
 Clock::Clock() :
 _streamTime(AV_NOPTS_VALUE),

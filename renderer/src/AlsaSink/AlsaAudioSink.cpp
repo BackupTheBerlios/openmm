@@ -175,7 +175,7 @@ void
 AlsaAudioSink::stopPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
-    _quitWriteThread = true;
+    setStopWriting(true);
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " trying to join write thread ...");
     try {
         if (_writeThread.isRunning()) {
@@ -185,7 +185,7 @@ AlsaAudioSink::stopPresentation()
     catch(...) {
         Omm::AvStream::Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown alsa audio write thread");
     }
-    _quitWriteThread = false;
+    setStopWriting(false);
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " write thread stopped.");
     if (_pcmPlayback) {
         snd_pcm_drop(_pcmPlayback);
@@ -200,7 +200,7 @@ AlsaAudioSink::writeThread()
 {
     Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread started.");
     
-    while(!_quitWriteThread) {
+    while(!getStopWriting()) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
         // FIXME: segfault at first write after restart of AvStreamEngine with new stream
@@ -212,6 +212,27 @@ AlsaAudioSink::writeThread()
             Poco::NumberFormatter::format(samplesWritten << 2));
     }
 }
+
+
+void
+AlsaAudioSink::setStopWriting(bool stop)
+{
+    _writeLock.lock();
+    _quitWriteThread = stop;
+    _writeLock.unlock();
+}
+
+
+bool
+AlsaAudioSink::getStopWriting()
+{
+    bool stop = false;
+    _writeLock.lock();
+    stop = _quitWriteThread;
+    _writeLock.unlock();
+    return stop;
+}
+
 
 
 POCO_BEGIN_MANIFEST(Omm::AvStream::AudioSink)

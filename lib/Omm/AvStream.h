@@ -380,7 +380,7 @@ public:
     
     Node* getDownstreamNode(int outStreamNumber = 0);
     
-    bool doStop();
+    bool getStop();
     
     Stream* getInStream(int inStreamNumber);
     Stream* getOutStream(int outStreamNumber);
@@ -389,6 +389,7 @@ protected:
     virtual bool init() { return true; }
     virtual void run() {}
     
+    void setStop(bool stop);
     void reset();
     
     std::string                     _name;
@@ -701,10 +702,13 @@ private:
     
     void onTick(int64_t time);
     void timerThread();
+    void setTimerStop(bool stop);
+    bool getTimerStop();
     
     Poco::Thread                        _timerThread;
     Poco::RunnableAdapter<VideoSink>    _timerThreadRunnable;
     Poco::FastMutex                     _sinkLock;
+    Poco::FastMutex                     _timerLock;
     
     int                                 _writeOverlayNumber;
     float                               _lastAspectRatio;
