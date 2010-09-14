@@ -26,7 +26,9 @@ namespace Omm {
 namespace Av {
 
 Engine::Engine() :
-_fullscreen(false)
+_fullscreen(false),
+_width(720),
+_height(576)
 {
 }
 
@@ -36,6 +38,12 @@ Engine::setOption(const std::string& key, const std::string& value)
 {
     if (key == "fullscreen") {
         _fullscreen = true;
+    }
+    else if (key == "width") {
+        _width = Poco::NumberParser::parse(value);
+    }
+    else if (key == "height") {
+        _height = Poco::NumberParser::parse(value);
     }
 }
 

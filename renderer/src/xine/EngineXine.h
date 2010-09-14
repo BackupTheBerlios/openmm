@@ -54,6 +54,7 @@ public:
     XineEngine();
     ~XineEngine();
     
+    virtual void createPlayer() {}
     // virtual void setVideoDriver(string);
     // virtual void setAudioDriver(string);
     // virtual void setFullscreen(bool on);

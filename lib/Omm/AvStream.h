@@ -668,10 +668,9 @@ public:
          int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
          int overlayCount = 5, bool fullScreen = false);
     
-    virtual int eventLoop() { return 0; }
-    
     void setStartTime(int64_t startTime);
     
+    virtual void openWindow(bool fullScreen, int width, int height) {}
     virtual void startPresentation();
     virtual void stopPresentation();
     virtual void waitPresentationStop();

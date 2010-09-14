@@ -58,9 +58,27 @@ SdlOverlay::~SdlOverlay()
 SdlVideoSink::SdlVideoSink() :
 // reserve 7 overlays for SdlVideoSink
 VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
+// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7)
 // VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7, true)
 {
-    Omm::AvStream::Log::instance()->avstream().debug("init SDL video sink ...");
+}
+
+
+SdlVideoSink::~SdlVideoSink()
+{
+    SDL_Quit();
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
+}
+
+
+void
+SdlVideoSink::openWindow(bool fullScreen, int width, int height)
+{
+    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opening window ...");
+    
+    _fullScreen = fullScreen;
+    _width = width;
+    _height = height;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
         Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
@@ -74,7 +92,7 @@ VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
         flags |= SDL_RESIZABLE;
     }
     
-    int bitsPerPixel = 0;
+    int bitsPerPixel = 0;  // 0 = current display bits per pixel
 #ifdef __DARWIN__
     bitsPerPixel = 24;
 #endif
@@ -86,13 +104,6 @@ VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
     if (_pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
     }
-}
-
-
-SdlVideoSink::~SdlVideoSink()
-{
-    SDL_Quit();
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
 }
 
 

@@ -35,6 +35,7 @@ public:
     Engine();
     
     virtual void setOption(const std::string& key, const std::string& value);
+    virtual void createPlayer()  = 0;
     // Engine handling
     // virtual void setVideoDriver(std::string) = 0;
     // virtual void setAudioDriver(std::string) = 0;
@@ -85,6 +86,8 @@ public:
 //     JSignal endOfTrack;
 protected:
     bool                        _fullscreen;
+    int                         _width;
+    int                         _height;
 };
 
 

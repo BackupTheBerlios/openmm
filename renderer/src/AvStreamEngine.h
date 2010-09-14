@@ -38,6 +38,8 @@ public:
     // virtual vector<string> getAudioAdapters();
     // virtual void setAudioAdapter(string);
     
+    virtual void createPlayer();
+    
     virtual void setFullscreen(bool on = true);
     std::string getEngineId() { return _engineId; }
     
@@ -65,8 +67,10 @@ private:
     bool isSeekable();
     void savePosition();
     
-    void createPlayer();
+//     void createPlayer();
     void destructPlayer();
+    
+//     virtual void setOption(const std::string& key, const std::string& value);
 
     std::string                 _engineId;
     bool                        _isPlaying;

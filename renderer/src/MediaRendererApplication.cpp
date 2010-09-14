@@ -50,7 +50,10 @@ class MediaRendererApplication : public Poco::Util::ServerApplication
 public:
     MediaRendererApplication():
         _helpRequested(false),
-        _enginePlugin("")
+        _enginePlugin(""),
+        _fullscreen(false),
+        _width(""),
+        _height("")
     {
     }
     
@@ -84,10 +87,20 @@ protected:
                            .repeatable(false)
                            .argument("plugin name", true));
         options.addOption(
-                           Option("option", "o", "option passed to plugin")
+                           Option("fullscreen", "f", "option passed to plugin")
+                           .required(false)
+                           .repeatable(false));
+//                            .argument("plugin option", true));
+        options.addOption(
+                           Option("width", "w", "width of video window")
                            .required(false)
                            .repeatable(false)
-                           .argument("plugin option", true));
+                           .argument("width", true));
+        options.addOption(
+                           Option("height", "h", "height of video window")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("height", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
@@ -100,8 +113,14 @@ protected:
         else if (name == "plugin") {
             _enginePlugin = value;
         }
-        else if (name == "option") {
-            _pluginOption = value;
+        else if (name == "fullscreen") {
+            _fullscreen = true;
+        }
+        else if (name == "width") {
+            _width = value;
+        }
+        else if (name == "height") {
+            _height = value;
         }
     }
     
@@ -142,9 +161,16 @@ protected:
             }
             std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
             
-            if (_pluginOption == "fullscreen") {
-                pEnginePlugin->setOption("fullscreen", _pluginOption);
+            if (_fullscreen) {
+                pEnginePlugin->setOption("fullscreen", "");
             }
+            if (_width != "") {
+                pEnginePlugin->setOption("width", _width);
+            }
+            if (_height != "") {
+                pEnginePlugin->setOption("height", _height);
+            }
+            pEnginePlugin->createPlayer();
             
             Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
             
@@ -164,7 +190,7 @@ protected:
             
 // //             Omm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
             
-            myMediaRenderer.setFullscreen();
+//             myMediaRenderer.setFullscreen();
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             myMediaRenderer.addIcon(pIcon);
             
@@ -178,7 +204,9 @@ protected:
 private:
     bool            _helpRequested;
     std::string     _enginePlugin;
-    std::string     _pluginOption;
+    bool            _fullscreen;
+    std::string     _width;
+    std::string     _height;
 };
 
 

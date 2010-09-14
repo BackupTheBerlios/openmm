@@ -44,6 +44,7 @@ public:
     virtual ~SdlVideoSink();
     
 private:
+    virtual void openWindow(bool fullScreen = false, int width = 720, int height = 576);
     virtual bool initDevice();
     virtual bool closeDevice();
     virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);

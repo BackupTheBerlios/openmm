@@ -37,7 +37,6 @@ _pDemuxer(0),
 _pAudioSink(0),
 _pVideoSink(0)
 {
-    createPlayer();
 }
 
 
@@ -72,6 +71,7 @@ AvStreamEngine::createPlayer()
         std::cerr << "Error could not find avstream video plugin: " << videoPlugin << std::endl;
         return;
     }
+    _pVideoSink->openWindow(_fullscreen, _width, _height);
 }
 
 
@@ -239,7 +239,6 @@ void
 AvStreamEngine::getVolume(int channel, float &vol)
 {
 }
-
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)

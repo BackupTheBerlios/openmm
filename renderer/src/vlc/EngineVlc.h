@@ -37,6 +37,7 @@ public:
     VlcEngine();
     ~VlcEngine();
     
+    virtual void createPlayer() {}
     virtual void setFullscreen(bool on = true);
     
     std::string getEngineId();
