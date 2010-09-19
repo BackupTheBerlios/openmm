@@ -147,6 +147,21 @@ ${LIB_OMM_UTIL}
 ${LIB_POCO_UTIL}
 )
 
+SET( OMMTEST_AV_STREAM_STRESS_SRCS
+../renderer/src/AvStreamEngine.cpp
+AvStreamEngineStress.cpp
+)
+
+ADD_EXECUTABLE( avstreamstress
+${OMMTEST_AV_STREAM_STRESS_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( avstreamstress
+${LIB_OMM_AV_STREAM}
+${LIB_OMM_AV}
+${LIB_OMM_UTIL}
+)
+
 SET( OMMTEST_AV_MUX_SRCS
 AvMux.cpp
 )

@@ -52,8 +52,8 @@ AvStreamEngine::createPlayer()
     _pClock = new Omm::AvStream::Clock;
     _pDemuxer = new Omm::AvStream::Demuxer;
     
-    std::string audioPlugin("audiosink-alsa");
-//     std::string audioPlugin("audiosink-sdl");
+//     std::string audioPlugin("audiosink-alsa");
+    std::string audioPlugin("audiosink-sdl");
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
     try {
         _pAudioSink = audioPluginLoader.load(audioPlugin, "AudioSink");
@@ -92,6 +92,7 @@ AvStreamEngine::destructPlayer()
 void
 AvStreamEngine::setFullscreen(bool on)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
@@ -102,6 +103,7 @@ AvStreamEngine::setUri(std::string mrl)
         stop();
     }
     
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     std::clog << "<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>" << std::endl;
     _pDemuxer->set(mrl);
     
@@ -127,6 +129,8 @@ AvStreamEngine::setUri(std::string mrl)
 void
 AvStreamEngine::load()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+
     std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
     
     _pDemuxer->start();
@@ -142,6 +146,8 @@ AvStreamEngine::load()
 void
 AvStreamEngine::stop()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+
     std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
     
     _pDemuxer->stop();
@@ -172,31 +178,37 @@ AvStreamEngine::stop()
 void
 AvStreamEngine::next()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+
 }
 
 
 void
 AvStreamEngine::previous()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 void
 AvStreamEngine::pause()
 {
-
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 void
 AvStreamEngine::seek(int seconds)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 bool
 AvStreamEngine::isSeekable()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+
     // TODO: depends on http header received from server
     return false;
 }
@@ -205,31 +217,35 @@ AvStreamEngine::isSeekable()
 void
 AvStreamEngine::savePosition()
 {
-
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 void
 AvStreamEngine::setSpeed(int nom, int denom)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 void
 AvStreamEngine::getPosition(float &seconds)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 void
 AvStreamEngine::getLength(float &seconds)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 void
 AvStreamEngine::setVolume(int channel, float vol)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     _pAudioSink->setVolume(vol);
 //     _pAudioSink->setVolume(channel, vol);
 }
@@ -238,6 +254,7 @@ AvStreamEngine::setVolume(int channel, float vol)
 void
 AvStreamEngine::getVolume(int channel, float &vol)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 

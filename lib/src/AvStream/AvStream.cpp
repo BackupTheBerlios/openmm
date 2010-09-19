@@ -2579,6 +2579,7 @@ AudioSink::setVolume(float vol)
 void
 AudioSink::setVolume(char* buffer, int size)
 {
+    Log::instance()->avstream().debug("audio sink set volume ...");
     int16_t* buf = (int16_t*) buffer;
     int s = size >> 1;
     _volumeLock.lock();
@@ -2586,6 +2587,7 @@ AudioSink::setVolume(char* buffer, int size)
         buf[i] = _volume * buf[i];
     }
     _volumeLock.unlock();
+    Log::instance()->avstream().debug("audio sink set volume finished.");
 }
 
 

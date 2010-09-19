@@ -39,6 +39,7 @@ public:
     // virtual void setAudioAdapter(string);
     
     virtual void createPlayer();
+    void destructPlayer();
     
     virtual void setFullscreen(bool on = true);
     std::string getEngineId() { return _engineId; }
@@ -67,18 +68,13 @@ private:
     bool isSeekable();
     void savePosition();
     
-//     void createPlayer();
-    void destructPlayer();
-    
-//     virtual void setOption(const std::string& key, const std::string& value);
-
     std::string                 _engineId;
     bool                        _isPlaying;
-//     Omm::AvStream::Demuxer      _demuxer;
     Omm::AvStream::Clock*       _pClock;
     Omm::AvStream::Demuxer*     _pDemuxer;
     Omm::AvStream::AudioSink*   _pAudioSink;
     Omm::AvStream::VideoSink*   _pVideoSink;
+    Poco::FastMutex             _actionLock;
 };
 
 #endif

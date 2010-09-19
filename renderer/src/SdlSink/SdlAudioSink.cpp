@@ -29,6 +29,10 @@
 SdlAudioSink::SdlAudioSink() :
 AudioSink("sdl audio sink")
 {
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0 ) {
+        Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
+//         return false;
+    }
 }
 
 
@@ -61,11 +65,6 @@ bool
 SdlAudioSink::initDevice()
 {
     Omm::AvStream::Log::instance()->avstream().debug("opening SDL audio sink ...");
-    
-    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0 ) {
-        Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
-        return false;
-    }
     
     SDL_AudioSpec deviceParamsWanted;
     SDL_AudioSpec deviceParams;
