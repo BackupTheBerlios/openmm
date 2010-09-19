@@ -59,7 +59,7 @@ AvStreamEngine::createPlayer()
         _pAudioSink = audioPluginLoader.load(audioPlugin, "AudioSink");
     }
     catch(Poco::NotFoundException) {
-        std::cerr << "Error could not find avstream audio plugin: " << audioPlugin << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream audio plugin: " + audioPlugin);
         return;
     }
     std::string videoPlugin("videosink-sdl");
@@ -68,7 +68,7 @@ AvStreamEngine::createPlayer()
         _pVideoSink = videoPluginLoader.load(videoPlugin, "VideoSink");
     }
     catch(Poco::NotFoundException) {
-        std::cerr << "Error could not find avstream video plugin: " << videoPlugin << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream video plugin: " + videoPlugin);
         return;
     }
     _pVideoSink->openWindow(_fullscreen, _width, _height);
@@ -104,11 +104,11 @@ AvStreamEngine::setUri(std::string mrl)
     }
     
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
-    std::clog << "<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>");
     _pDemuxer->set(mrl);
     
     if (_pDemuxer->firstAudioStream() < 0 && _pDemuxer->firstVideoStream() < 0) {
-        std::clog << "no audio or video stream found, exiting" << std::endl;
+        Omm::AvStream::Log::instance()->avstream().error("no audio or video stream found, exiting");;
         return;
     }
         
@@ -131,12 +131,12 @@ AvStreamEngine::load()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 
-    std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>");
     
     _pDemuxer->start();
     _pClock->setStartTime(true);
 
-    std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>");
 
     _pClock->start();
     _isPlaying = true;
@@ -148,12 +148,12 @@ AvStreamEngine::stop()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 
-    std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>");
     
     _pDemuxer->stop();
     _pClock->stop();
     
-    std::clog << "<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>");
     
     ////////// deallocate meta data and packet queues ////////////
     if (_pDemuxer->firstAudioStream() >= 0) {
@@ -163,7 +163,7 @@ AvStreamEngine::stop()
         _pDemuxer->detach(_pDemuxer->firstVideoStream());
     }
     
-    std::clog << "<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>" << std::endl;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>");
     
     _pClock->reset();
     _pVideoSink->reset();
