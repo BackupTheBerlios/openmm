@@ -1781,12 +1781,10 @@ Demuxer::run()
         lastPtsVec[packet.stream_index] = currentPts;
         lastDurationVec[packet.stream_index] = packet.duration;
         
+        // FIXME: if downstream queue is full, demuxer run thread is sometimes not stopped
+        // (although the sinks take packets from the queue)
         _outStreams[packet.stream_index]->putFrame(pFrame);
     }
-    // if no frames could be read from input stream, stop all nodes
-    //stop();
-    // TODO: clock should be stopped, too (if connected to a sink node)
-    // and it's connected timer threads in the sink nodes.
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
 }
 

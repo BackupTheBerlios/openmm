@@ -132,6 +132,9 @@ AlsaAudioSink::initDevice()
             ));
         return false;
     }
+    delete _buffer;
+    _bufferSize = bufferSize;
+    _buffer = new char[_bufferSize];
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s setting up PCM device buffer to size: %s, audio read buffer size is: %s",
         getName(),
         Poco::NumberFormatter::format(bufferSize),

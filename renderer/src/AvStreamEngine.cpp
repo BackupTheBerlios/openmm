@@ -52,8 +52,8 @@ AvStreamEngine::createPlayer()
     _pClock = new Omm::AvStream::Clock;
     _pDemuxer = new Omm::AvStream::Demuxer;
     
-//     std::string audioPlugin("audiosink-alsa");
-    std::string audioPlugin("audiosink-sdl");
+    std::string audioPlugin("audiosink-alsa");
+//     std::string audioPlugin("audiosink-sdl");
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
     try {
         _pAudioSink = audioPluginLoader.load(audioPlugin, "AudioSink");
