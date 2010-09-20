@@ -62,7 +62,6 @@ private:
     int                                     _channels;
     int                                     _periods;       // number of periods
     snd_pcm_uframes_t                       _periodSize;    // periodsize (bytes)
-    snd_pcm_uframes_t                       _frames;
     snd_pcm_uframes_t                       _bufferSize;
     char*                                   _buffer;
 };

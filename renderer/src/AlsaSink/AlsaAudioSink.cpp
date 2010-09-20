@@ -39,9 +39,8 @@ _rate(48000),
 _channels(2),
 _periods(2),
 _periodSize(8192),
-_frames(_periodSize >> 2),
-_bufferSize((_periodSize * _periods) >> 2),
-_buffer(new char[_bufferSize])
+_bufferSize(0),
+_buffer(0)
 {
     if (!open()) {
         Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
@@ -132,10 +131,12 @@ AlsaAudioSink::initDevice()
             ));
         return false;
     }
-    delete _buffer;
+    if (_buffer) {
+        delete _buffer;
+    }
     _bufferSize = bufferSize << 2;
     _buffer = new char[_bufferSize];
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s setting up PCM device buffer to size: %s, audio read buffer size is: %s",
+    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s setting up PCM device buffer to number of frames: %s, audio read buffer size in bytes is: %s",
         getName(),
         Poco::NumberFormatter::format(bufferSize),
         Poco::NumberFormatter::format(_bufferSize)
