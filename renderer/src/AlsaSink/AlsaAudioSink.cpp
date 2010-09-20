@@ -133,7 +133,7 @@ AlsaAudioSink::initDevice()
         return false;
     }
     delete _buffer;
-    _bufferSize = bufferSize;
+    _bufferSize = bufferSize << 2;
     _buffer = new char[_bufferSize];
     Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s setting up PCM device buffer to size: %s, audio read buffer size is: %s",
         getName(),
@@ -212,7 +212,7 @@ AlsaAudioSink::writeThread()
     while(!getStopWriting()) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
-        // FIXME: segfault at first write after restart of AvStreamEngine with new stream
+        // last parameter of snd_pcm_writei are the number of frames (not bytes) to write to the pcm ringbuffer
         while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> 2)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
             Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
