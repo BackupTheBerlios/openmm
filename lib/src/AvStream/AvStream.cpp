@@ -1024,6 +1024,10 @@ Node::initiateStop()
             Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no node attached");
             continue;
         }
+        if ((*it)->getQueue()->full()) {
+            Log::instance()->avstream().debug(getName() + " out stream queue full while stopping node, getting frame");
+            (*it)->getFrame();
+        }
         downstreamNode->initiateStop();
     }
 }

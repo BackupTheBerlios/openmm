@@ -226,6 +226,20 @@ public:
     }
     
     
+    const bool full()
+    {
+        Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+        return _queue.size() == _size;
+    }
+    
+    
+    const bool empty()
+    {
+        Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+        return _queue.size() == 0;
+    }
+    
+    
     const std::string& getName()
     {
 //         Log::instance()->avstream().debug("Queue::getName()");
