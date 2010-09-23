@@ -64,7 +64,7 @@ main(int argc, char** argv) {
     engine.createPlayer();
     
     seqPlay(engine, videoFiles);
-//     randPlay(engine, videoFiles);
+    randPlay(engine, videoFiles);
     
     engine.destructPlayer();
 }

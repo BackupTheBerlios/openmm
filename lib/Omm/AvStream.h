@@ -139,6 +139,9 @@ public:
     int level();
     void clear();
     
+    bool full();
+    bool empty();
+    
 private:
 //     int readSomeSemaphore(char* buffer, int num);
 //     int writeSomeSemaphore(char* buffer, int num);
@@ -652,6 +655,7 @@ public:
     void setVolume(float vol);
     virtual void setVolume(int channel, float vol) {}
     
+    void clearByteQueue();
     void reset();
 
 protected:

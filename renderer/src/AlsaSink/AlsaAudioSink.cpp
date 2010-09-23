@@ -180,6 +180,12 @@ AlsaAudioSink::stopPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
     setStopWriting(true);
+//     clearByteQueue();
+    // FIXME: should empty byte queue here ...?
+//     if (_byteQueue.full()) {
+//         Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue full while stopping node, getting a buffer full of audio.");
+//         audioReadBlocking(_buffer, _bufferSize);
+//     }
 }
 
 

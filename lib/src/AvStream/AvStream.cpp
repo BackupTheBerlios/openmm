@@ -297,8 +297,34 @@ ByteQueue::level()
 void
 ByteQueue::clear()
 {
-    _level = 0;
-    _ringBuffer.clear();
+    char buf[_level];
+    read(buf, _level);
+//     if (_level > 0) {
+//         try {
+//             _readSemaphore.wait();
+//             _writeSemaphore.set();
+//         }
+//         catch (Poco::SystemException) {
+//         }
+//         _level = 0;
+//         _ringBuffer.clear();
+//     }
+}
+
+
+bool
+ByteQueue::full()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    return _level = _size;
+}
+
+
+bool
+ByteQueue::empty()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    return _level = 0;
 }
 
 
@@ -1024,9 +1050,11 @@ Node::initiateStop()
             Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no node attached");
             continue;
         }
+        // FIXME: after getting the frame, downstream node gets a different frame but queue size remains constant (without another put frame)
         if ((*it)->getQueue()->full()) {
             Log::instance()->avstream().debug(getName() + " out stream queue full while stopping node, getting frame");
-            (*it)->getFrame();
+//             (*it)->getFrame();
+            delete (*it)->getFrame();
         }
         downstreamNode->initiateStop();
     }
@@ -1785,8 +1813,6 @@ Demuxer::run()
         lastPtsVec[packet.stream_index] = currentPts;
         lastDurationVec[packet.stream_index] = packet.duration;
         
-        // FIXME: if downstream queue is full, demuxer run thread is sometimes not stopped
-        // (although the sinks take packets from the queue)
         _outStreams[packet.stream_index]->putFrame(pFrame);
     }
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
@@ -2594,6 +2620,13 @@ AudioSink::setVolume(char* buffer, int size)
 
 
 void
+AudioSink::clearByteQueue()
+{
+    _byteQueue.clear();
+}
+
+
+void
 AudioSink::reset()
 {
     Log::instance()->avstream().debug("audio sink reset ...");
@@ -2687,6 +2720,18 @@ VideoSink::stopPresentation()
     Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
     
     setTimerStop(true);
+//     if (_overlayQueue.full()) {
+//         Log::instance()->avstream().debug("video sink overlay queue full while stopping node, getting overlay");
+//         _overlayQueue.get();
+//     }
+    if (_timeQueue.full()) {
+        Log::instance()->avstream().debug("video sink time queue full while stopping node, getting tick");
+        _timeQueue.get();
+    }
+    else if (_timeQueue.empty()) {
+        Log::instance()->avstream().debug("video sink time queue empty while stopping node, putting tick");
+        _timeQueue.put(0);
+    }
 }
 
 
@@ -3036,6 +3081,10 @@ Clock::start()
 void
 Clock::stop()
 {
+    Log::instance()->avstream().debug("CLOCK stop ticking ...");
+    _clockTimer.stop();
+//     _clockTimer.restart(0);
+    Log::instance()->avstream().debug("CLOCK ticking stopped.");
     Log::instance()->avstream().debug("CLOCK stopping audio presentation ...");
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->stopPresentation();
@@ -3052,10 +3101,6 @@ Clock::stop()
         (*it)->waitPresentationStop();
     }
     Log::instance()->avstream().debug("CLOCK video presentation stopped.");
-    
-    Log::instance()->avstream().debug("CLOCK stop ticking ...");
-    _clockTimer.stop();
-//     _clockTimer.restart(0);
     Log::instance()->avstream().debug("CLOCK stopped.");
 }
 
