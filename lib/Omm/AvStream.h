@@ -663,13 +663,14 @@ protected:
     unsigned int sampleRate();
     int silence();
     
+    ByteQueue                   _byteQueue;
+
 private:
     virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
     void setVolume(char* buffer, int size);
     int64_t audioLength(int64_t bytes);
     
-    ByteQueue                   _byteQueue;
     int64_t                     _audioTime;
     float                       _volume;
     Poco::FastMutex             _volumeLock;

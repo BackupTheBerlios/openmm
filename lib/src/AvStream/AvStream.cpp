@@ -203,10 +203,13 @@ ByteQueue::read(char* buffer, int num)
 void
 ByteQueue::write(const char* buffer, int num)
 {
+    Log::instance()->avstream().trace("byte queue write, num bytes: " + Poco::NumberFormatter::format(num));
     int bytesWritten = 0;
     while (bytesWritten < num) {
+        Log::instance()->avstream().trace("byte queue write -> writeSome, trying to write: " + Poco::NumberFormatter::format(num - bytesWritten) + " bytes");
         bytesWritten += writeSome(buffer + bytesWritten, num - bytesWritten);
     }
+    Log::instance()->avstream().trace("byte queue write finished.");
 }
 
 
@@ -252,10 +255,13 @@ int
 ByteQueue::writeSome(const char* buffer, int num)
 {
     // block byte queue for further writing
+    Log::instance()->avstream().trace("byte queue writeSome(), writeSemaphore.wait() ...");
     _writeSemaphore.wait();
     _lock.lock();
+    Log::instance()->avstream().trace("byte queue writeSome(), writeSemaphore.wait() over, trying to write " + Poco::NumberFormatter::format(num) + " bytes ...");
     
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
+    Log::instance()->avstream().trace("byte queue _ringBuffer.write num bytes: " + Poco::NumberFormatter::format(bytesWritten));
     _ringBuffer.write(buffer, bytesWritten);
     _level += bytesWritten;
     
@@ -264,24 +270,27 @@ ByteQueue::writeSome(const char* buffer, int num)
     // queue is not full, we can go on writing
     if (_level < _size) {
         try {
+            Log::instance()->avstream().trace("byte queue writeSome() set write semaphore with " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
             _writeSemaphore.set();
         }
         catch (Poco::SystemException) {
+            Log::instance()->avstream().trace("byte queue writeSome() could not set write semaphore " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
         }
     }
     // we've written some bytes, so we can get something out, again
     if (num > 0) {
         // check if the semaphore is already set
         try {
-            Log::instance()->avstream().trace("byte queue writeSome() set read semaphore with " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+            Log::instance()->avstream().trace("byte queue writeSome() set read semaphore, level: " + Poco::NumberFormatter::format(_level));
             _readSemaphore.set();
         }
         catch (Poco::SystemException) {
-            Log::instance()->avstream().trace("byte queue writeSome() could not set read semaphore " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+            Log::instance()->avstream().trace("byte queue writeSome() could not set read semaphore, level: " + Poco::NumberFormatter::format(_level));
         }
     }
-    
+    Log::instance()->avstream().trace("byte queue writeSome() unlock ...");
     _lock.unlock();
+    Log::instance()->avstream().trace("byte queue writeSome() unlock finished.");
     return bytesWritten;
 }
 
@@ -316,7 +325,7 @@ bool
 ByteQueue::full()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    return _level = _size;
+    return (_level == _size);
 }
 
 
@@ -324,7 +333,7 @@ bool
 ByteQueue::empty()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    return _level = 0;
+    return (_level == 0);
 }
 
 
@@ -1438,7 +1447,7 @@ const int
 Frame::size()
 {
 //     Log::instance()->avstream().debug("Frame::size()");
-//     Poco::ScopedLock<Poco::Mutex> lock(_sizeLock);
+    Poco::ScopedLock<Poco::Mutex> lock(_sizeLock);
     return _size;
 }
 
@@ -1447,7 +1456,7 @@ int
 Frame::paddedSize()
 {
 //     Log::instance()->avstream().debug("Frame::paddedSize()");
-//     Poco::ScopedLock<Poco::Mutex> lock(_sizeLock);
+    Poco::ScopedLock<Poco::Mutex> lock(_sizeLock);
     return _paddedSize;
 }
 
@@ -2534,8 +2543,9 @@ AudioSink::checkInStream()
 void
 AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
 {
-    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame to byte queue ...");
+    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame of size " + Poco::NumberFormatter::format(pDecodedFrame->size()) + "to byte queue ...");
     _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
+    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame to byte queue finished.");
 }
 
 
@@ -2720,10 +2730,7 @@ VideoSink::stopPresentation()
     Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
     
     setTimerStop(true);
-//     if (_overlayQueue.full()) {
-//         Log::instance()->avstream().debug("video sink overlay queue full while stopping node, getting overlay");
-//         _overlayQueue.get();
-//     }
+
     if (_timeQueue.full()) {
         Log::instance()->avstream().debug("video sink time queue full while stopping node, getting tick");
         _timeQueue.get();
@@ -2750,7 +2757,7 @@ VideoSink::waitPresentationStop()
         Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown timer thread");
     }
     setTimerStop(false);
-    Log::instance()->avstream().debug(getName() + " timer thread stopped.");
+    Log::instance()->avstream().debug(getName() + " timer thread joined.");
 }
 
 
@@ -2768,6 +2775,7 @@ VideoSink::timerThread()
                                           Poco::NumberFormatter::format(time));
         onTick(time);
     }
+    
     Log::instance()->avstream().debug(getName() + " timer thread finished.");
 }
 

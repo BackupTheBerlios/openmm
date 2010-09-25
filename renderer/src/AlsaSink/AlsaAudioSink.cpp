@@ -180,12 +180,16 @@ AlsaAudioSink::stopPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
     setStopWriting(true);
-//     clearByteQueue();
-    // FIXME: should empty byte queue here ...?
 //     if (_byteQueue.full()) {
-//         Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue full while stopping node, getting a buffer full of audio.");
-//         audioReadBlocking(_buffer, _bufferSize);
+//         Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue full while stopping node, clearing byte queue.");
+//         _byteQueue.clear();
 //     }
+//     else
+    if (_byteQueue.empty()) {
+        Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue empty while stopping node, inserting silence.");
+        initSilence(_buffer, _bufferSize);
+        _byteQueue.write(_buffer, _bufferSize);
+    }
 }
 
 
@@ -202,7 +206,7 @@ AlsaAudioSink::waitPresentationStop()
         Omm::AvStream::Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown alsa audio write thread");
     }
     setStopWriting(false);
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " write thread stopped.");
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " write thread joined.");
     if (_pcmPlayback) {
         snd_pcm_drop(_pcmPlayback);
     }
@@ -219,14 +223,18 @@ AlsaAudioSink::writeThread()
     while(!getStopWriting()) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
+        Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, trying to write " + Poco::NumberFormatter::format(_bufferSize) + " bytes");
+        // FIXME: crash here !!! (could be pulse audio related ...?)
         // last parameter of snd_pcm_writei are the number of frames (not bytes) to write to the pcm ringbuffer
         while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> 2)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
             Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
         }
-        Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, samples written: " +
+        Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, bytes written: " +
             Poco::NumberFormatter::format(samplesWritten << 2));
     }
+
+    Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread finished.");
 }
 
 

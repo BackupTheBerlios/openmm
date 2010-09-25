@@ -89,6 +89,7 @@ SdlAudioSink::initDevice()
 bool
 SdlAudioSink::closeDevice()
 {
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " closing ...");
     SDL_CloseAudio();
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " closed.");
 }
