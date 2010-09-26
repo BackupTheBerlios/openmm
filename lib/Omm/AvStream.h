@@ -36,6 +36,7 @@
 #include <Poco/RWLock.h>
 #include <Poco/Timer.h>
 #include <Poco/DateTime.h>
+#include <Poco/NotificationCenter.h>
 
 // FIXME: make clear if you need to set -malign-double when linking with libommavstream and ffmpeg is compiled with -malign-double
 // FIXME: find a build check for ffmpeg, if it is compiled with -malign-double
@@ -437,7 +438,7 @@ public:
     
     int firstAudioStream();
     int firstVideoStream();
-    
+
 private:
     virtual bool init();
     virtual void run();
@@ -496,7 +497,7 @@ class Frame
     
 public:
 //     Frame(int64_t number, const Frame& frame);
-    Frame(int64_t number, Stream* pStream);
+    Frame(int64_t number, Stream* pStream, bool endOfStream = false);
     Frame(int64_t number, Stream* pStream, int dataSize);
 //     Frame(int64_t number, Stream* pStream, char* data, int dataSize);
     
@@ -513,6 +514,7 @@ public:
     char* planeData(int plane);
     int planeSize(int plane);
     
+    bool isEndOfStream();
     void printInfo();
     std::string getName();
     const int64_t getNumber();
@@ -534,6 +536,7 @@ public:
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // because the stream type is dynamic: audio streams decode audio packets, same goes for video.
+    bool                _endOfStream;
     int64_t             _number;
     Poco::Mutex         _numberLock;
     int64_t             _pts;
@@ -621,6 +624,9 @@ public:
     
     void currentTime(int64_t time);
 
+    void registerStreamEventObserver(const Poco::AbstractObserver* pObserver);
+    class EndOfStream : public Poco::Notification {};
+
 protected:
     virtual bool checkInStream() {}
     virtual bool initDevice() {}
@@ -636,6 +642,8 @@ protected:
 private:
     virtual bool init();
     virtual void run();
+    
+    Poco::NotificationCenter    _streamEventNotifier;
 };
 
 

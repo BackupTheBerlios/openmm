@@ -1269,7 +1269,8 @@ Node::reset()
 // }
 
 
-Frame::Frame(int64_t number, Stream* pStream) :
+Frame::Frame(int64_t number, Stream* pStream, bool endOfStream) :
+_endOfStream(endOfStream),
 _number(number),
 _pts(AV_NOPTS_VALUE),
 _data(0),
@@ -1282,6 +1283,7 @@ _pStream(pStream)
 
 
 Frame::Frame(int64_t number, Stream* pStream, int dataSize) :
+_endOfStream(false),
 _number(number),
 _pts(AV_NOPTS_VALUE),
 _data(0),
@@ -1315,6 +1317,7 @@ _pStream(pStream)
 
 
 Frame::Frame(int64_t number, Stream* pStream, AVPacket* pAvPacket) :
+_endOfStream(false),
 _number(number),
 _pts(AV_NOPTS_VALUE),
 _data(0),
@@ -1356,6 +1359,7 @@ _pStream(pStream)
 
 
 Frame::Frame(int64_t number, Stream* pStream, AVFrame* pAvFrame) :
+_endOfStream(false),
 _number(number),
 _pts(AV_NOPTS_VALUE),
 _data(0),
@@ -1370,7 +1374,10 @@ _pStream(pStream)
 Frame::~Frame()
 {
     Log::instance()->avstream().trace("frame dtor ...");
-    if (_pAvPacket) {
+    if (_endOfStream) {
+        Log::instance()->ffmpeg().trace("video frame dtor, end of stream frame");
+    }
+    else if (_pAvPacket) {
        // called for non-decoded packets
         Log::instance()->ffmpeg().trace("delete " + getName() + " dtor, ffmpeg::av_free_packet() ...");
         av_free_packet(_pAvPacket);
@@ -1477,9 +1484,19 @@ Frame::planeSize(int plane)
 }
 
 
+bool
+Frame::isEndOfStream()
+{
+    return _endOfStream;
+}
+
+
 void
 Frame::printInfo()
 {
+    if (!_pAvFrame) {
+        return;
+    }
     Log::instance()->avstream().debug("frame linesize[0..2]: " + Poco::NumberFormatter::format(_pAvFrame->linesize[0]) + ", " + Poco::NumberFormatter::format(_pAvFrame->linesize[1]) + ", "+
         Poco::NumberFormatter::format(_pAvFrame->linesize[2]));
     
@@ -1784,15 +1801,18 @@ Demuxer::run()
     AVPacket packet;
     Log::instance()->ffmpeg().trace("ffmpeg::av_init_packet() ...");
     av_init_packet(&packet);
-    
     while (!getStop()) {
         Log::instance()->ffmpeg().trace("ffmpeg::av_read_frame() ...");
         int ret = av_read_frame(_pMeta->_pFormatContext, &packet);
+        frameNumber++;
         if (ret < 0) {
             Log::instance()->ffmpeg().error("ffmpeg::av_read_frame() returns: " + Poco::NumberFormatter::format(ret) + " (" + errorMessage(ret) + ")");
+            for(std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
+                Frame* pFrame = new Frame(frameNumber, *it, true);
+                (*it)->putFrame(pFrame);
+            }
             break;
         }
-        frameNumber++;
 //         Log::instance()->ffmpeg().debug(Poco::format("ffmpeg::av_read_frame() returns packet #%s, type: %s, pts: %s, size: %s, duration: %s",
 //             Poco::NumberFormatter::format0(frameNumber, 8),
 //             _outStreams[packet.stream_index]->getName(),
@@ -2474,6 +2494,11 @@ Sink::run()
     Omm::AvStream::Frame* pFrame;
     Log::instance()->avstream().debug(getName() + " run thread looping ...");
     while ((pFrame = _inStreams[0]->getFrame()) && !getStop()) {
+        if (pFrame->isEndOfStream()) {
+            Log::instance()->avstream().debug(getName() + " run thread got end of stream frame, bailing out ...");
+            _streamEventNotifier.postNotification(new EndOfStream);
+            break;
+        }
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->decodeFrame(pFrame);
         if (!pDecodedFrame) {
             Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
@@ -2512,6 +2537,13 @@ Sink::currentTime(int64_t time)
     Log::instance()->avstream().trace(getName() + " received current time: " + Poco::NumberFormatter::format(time));
     
     _timeQueue.put(time);
+}
+
+
+void
+Sink::registerStreamEventObserver(const Poco::AbstractObserver* pObserver)
+{
+    _streamEventNotifier.addObserver(*pObserver);
 }
 
 

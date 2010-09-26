@@ -34,30 +34,34 @@
 
 #include "../renderer/src/AvStreamEngine.h"
 
-class AvPlayer : public Poco::Util::ServerApplication
+class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
 {
 public:
     AvPlayer()
     {
-        _engine.createPlayer();
+        createPlayer();
     }
     
     
     ~AvPlayer()
     {
-        _engine.destructPlayer();
+        destructPlayer();
     }
     
     
     void play(const std::string& uri)
     {
-        _engine.setUri(uri);
-        _engine.load();
+        setUri(uri);
+        load();
         waitForTerminationRequest();
-        _engine.stop();
+        stop();
     }
 
-    AvStreamEngine _engine;
+    void endOfStream()
+    {
+        terminate();
+    }
+//     AvStreamEngine _engine;
 };
 
 

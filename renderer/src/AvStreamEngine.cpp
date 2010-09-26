@@ -72,6 +72,8 @@ AvStreamEngine::createPlayer()
         return;
     }
     _pVideoSink->openWindow(_fullscreen, _width, _height);
+
+    _pAudioSink->registerStreamEventObserver(new Poco::Observer<AvStreamEngine, Omm::AvStream::Sink::EndOfStream>(*this, &AvStreamEngine::endOfStream));
 }
 
 
@@ -256,6 +258,15 @@ AvStreamEngine::getVolume(int channel, float &vol)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
+
+
+void
+AvStreamEngine::endOfStream(Omm::AvStream::Sink::EndOfStream* eof)
+{
+    stop();
+    endOfStream();
+}
+
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)

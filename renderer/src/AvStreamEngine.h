@@ -62,11 +62,15 @@ public:
     virtual void setVolume(int channel, float vol);
     virtual void getVolume(int channel, float &vol);
     
+    virtual void endOfStream() {}
+    
 protected:
     
 private:
     bool isSeekable();
     void savePosition();
+    
+    void endOfStream(Omm::AvStream::Sink::EndOfStream* eof);
     
     std::string                 _engineId;
     bool                        _isPlaying;
