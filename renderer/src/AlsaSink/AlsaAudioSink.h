@@ -60,7 +60,8 @@ private:
     snd_pcm_format_t                        _format;
     unsigned int                            _rate;
     int                                     _channels;
-    int                                     _periods;       // number of periods
+    const int                               _periods;       // number of periods
+    const snd_pcm_uframes_t                 _startPeriodSize;    // periodsize (bytes)
     snd_pcm_uframes_t                       _periodSize;    // periodsize (bytes)
     snd_pcm_uframes_t                       _bufferSize;
     char*                                   _buffer;

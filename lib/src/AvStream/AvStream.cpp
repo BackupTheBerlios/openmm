@@ -283,6 +283,7 @@ bool
 ByteQueue::full()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Log::instance()->avstream().trace("byte queue full, level: " + Poco::NumberFormatter::format(_level));
     return (_level == _size);
 }
 
@@ -291,6 +292,7 @@ bool
 ByteQueue::empty()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Log::instance()->avstream().trace("byte queue empty, level: " + Poco::NumberFormatter::format(_level));
     return (_level == 0);
 }
 
