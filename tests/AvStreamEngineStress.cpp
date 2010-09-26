@@ -9,32 +9,53 @@
 
 #include "../renderer/src/AvStreamEngine.h"
 
+const int maxRandomPlayTime = 2000;
+const std::string liveStreamAddress = "http://anubis:8888/";
 
 void
-seqPlay(AvStreamEngine& engine, std::vector<std::string>& uris)
+seqPlay(AvStreamEngine& engine, std::vector<std::string>& uris, int playTime = -1)
 {
     // play all test streams once
+    Poco::Random playTimeRandom;
     for(std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
         engine.setUri(*it);
         engine.load();
-        Poco::Thread::sleep(1000);
+        if (playTime >= 0) {
+            Poco::Thread::sleep(playTime);
+        }
+        else {
+            int t = playTimeRandom.next(maxRandomPlayTime);
+            Poco::Thread::sleep(t);
+        }
         engine.stop();
     }
 }
 
 
 void
-randPlay(AvStreamEngine& engine, std::vector<std::string>& uris)
+randPlay(AvStreamEngine& engine, std::vector<std::string>& uris, int maxIterations = -1, int playTime = -1)
 {
     // play test streams randomly (TODO: with random play time between 0 and 2000 msecs.
     Poco::Random titleNumber;
+    Poco::Random playTimeRandom;
+    int iterations = 0;
     for(;;) {
+        if (maxIterations >= 0 && iterations >= maxIterations) {
+            break;
+        }
         int i = titleNumber.next(uris.size());
         std::clog << "playing stream number: " << i << ", uri: " << uris[i] << std::endl;
         engine.setUri(uris[i]);
         engine.load();
-        Poco::Thread::sleep(1000);
+        if (playTime >= 0) {
+            Poco::Thread::sleep(playTime);
+        }
+        else {
+            int t = playTimeRandom.next(maxRandomPlayTime);
+            Poco::Thread::sleep(t);
+        }
         engine.stop();
+        iterations++;
     }
 }
 
@@ -62,7 +83,7 @@ main(int argc, char** argv) {
     
     std::vector<std::string> liveTv;
     for (int i = 0; i < 10; ++i) {
-        liveTv.push_back("http://anubis:8888/" + Poco::NumberFormatter::format(i) + "$0");
+        liveTv.push_back(liveStreamAddress + Poco::NumberFormatter::format(i) + "$0");
     }
     
     std::vector<std::string> allStreams;
@@ -82,8 +103,8 @@ main(int argc, char** argv) {
 //     randPlay(engine, videoFiles);
 //     seqPlay(engine, liveTv);
 //     randPlay(engine, liveTv);
-//     seqPlay(engine, allStreams);
-    randPlay(engine, allStreams);
+    seqPlay(engine, allStreams);
+//     randPlay(engine, allStreams, 20);
     
     engine.destructPlayer();
 }
