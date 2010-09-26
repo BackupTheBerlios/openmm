@@ -168,8 +168,12 @@ AvStreamEngine::stop()
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>");
     
     _pClock->reset();
-    _pVideoSink->reset();
-    _pAudioSink->reset();
+    if (_pDemuxer->firstAudioStream() >= 0) {
+        _pAudioSink->reset();
+    }
+    if (_pDemuxer->firstVideoStream() >= 0) {
+        _pVideoSink->reset();
+    }
     // demuxer is last node to reset, because StreamInfo belongs to it and is refered to by downstream nodes.
     _pDemuxer->reset();
     
