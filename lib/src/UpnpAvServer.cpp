@@ -315,7 +315,8 @@ StreamingMediaObject::getServerProtocol()
 }
 
 
-TorchServer::TorchServer() :
+TorchServer::TorchServer(int port) :
+StreamingMediaObject(port),
 _pChild(new TorchItem(this))
 {
     _pChild->setParent(this);

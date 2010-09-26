@@ -45,7 +45,10 @@ _pSdlScreen(sdlScreen)
 
 SdlOverlay::~SdlOverlay()
 {
-    SDL_FreeYUVOverlay(_pSDLOverlay);
+    if (_pSDLOverlay) {
+        SDL_FreeYUVOverlay(_pSDLOverlay);
+        _pSDLOverlay = 0;
+    }
     _data[0] = 0;
     _data[1] = 0;
     _data[2] = 0;
@@ -124,9 +127,14 @@ SdlVideoSink::initDevice()
 bool
 SdlVideoSink::closeDevice()
 {
-    for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
-        delete static_cast<SdlOverlay*>(_overlayVector[numOverlay]);
-    }
+    Omm::AvStream::Log::instance()->avstream().debug("closing SDL video sink ...");
+//         FIXME: this causes a crash
+//     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
+//         Omm::AvStream::Log::instance()->avstream().debug("SDL video sink deleting overlay ...");
+//         delete static_cast<SdlOverlay*>(_overlayVector[numOverlay]);
+//         Omm::AvStream::Log::instance()->avstream().debug("SDL video sink overlay deleted.");
+//     }
+    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink closed.");
     return true;
 }
 

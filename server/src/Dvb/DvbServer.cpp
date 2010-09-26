@@ -130,6 +130,12 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
 }
 
 
+DvbServer::DvbServer() :
+TorchServer(8888)
+{
+}
+
+
 void
 DvbServer::setOption(const std::string& key, const std::string& value)
 {

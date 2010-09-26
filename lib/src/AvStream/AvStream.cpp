@@ -840,6 +840,7 @@ Stream::putFrame(Frame* pFrame)
 StreamInfo*
 Stream::getInfo()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
     return _pStreamInfo;
 }
 
@@ -847,6 +848,7 @@ Stream::getInfo()
 StreamQueue*
 Stream::getQueue()
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
     return _pStreamQueue;
 }
 
@@ -2362,8 +2364,8 @@ Tagger::tag(const std::string& uri)
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
     avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 2500;
-    pMeta->_pFormatContext->max_analyze_duration = 500000;
+    pMeta->_pFormatContext->probesize = 5000;
+    pMeta->_pFormatContext->max_analyze_duration = 1000000;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);

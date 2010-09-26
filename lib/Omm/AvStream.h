@@ -378,6 +378,8 @@ private:
     StreamInfo*         _pStreamInfo;
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
+    
+    Poco::FastMutex         _lock;
 };
 
 

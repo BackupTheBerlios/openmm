@@ -180,7 +180,7 @@ class TorchServer : public StreamingMediaObject
     friend class TorchItemResource;
     
 public:
-    TorchServer();
+    TorchServer(int port = 0);
     virtual ~TorchServer();
     
     void setDataModel(AbstractDataModel* pDataModel);

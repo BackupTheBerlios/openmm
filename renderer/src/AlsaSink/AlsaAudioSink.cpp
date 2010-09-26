@@ -180,11 +180,6 @@ AlsaAudioSink::stopPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
     setStopWriting(true);
-//     if (_byteQueue.full()) {
-//         Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue full while stopping node, clearing byte queue.");
-//         _byteQueue.clear();
-//     }
-//     else
     if (_byteQueue.empty()) {
         Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue empty while stopping node, inserting silence.");
         initSilence(_buffer, _bufferSize);

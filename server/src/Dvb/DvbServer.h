@@ -28,6 +28,9 @@
 
 class DvbServer : public Omm::Av::TorchServer
 {
+public:
+    DvbServer();
+    
     virtual void setOption(const std::string& key, const std::string& value);
 };
 

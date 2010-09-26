@@ -60,13 +60,30 @@ main(int argc, char** argv) {
         ++audioDir;
     }
     
+    std::vector<std::string> liveTv;
+    for (int i = 0; i < 10; ++i) {
+        liveTv.push_back("http://anubis:8888/" + Poco::NumberFormatter::format(i) + "$0");
+    }
+    
+    std::vector<std::string> allStreams;
+    for (std::vector<std::string>::iterator it = audioFiles.begin(); it != audioFiles.end(); ++it) {
+        allStreams.push_back(*it);
+    }
+    for (std::vector<std::string>::iterator it = videoFiles.begin(); it != videoFiles.end(); ++it) {
+        allStreams.push_back(*it);
+    }
+    
     AvStreamEngine engine;
     engine.createPlayer();
     
-    seqPlay(engine, videoFiles);
+//     seqPlay(engine, videoFiles);
 //     randPlay(engine, videoFiles);
 //     seqPlay(engine, audioFiles);
 //     randPlay(engine, audioFiles);
+    seqPlay(engine, liveTv);
+    randPlay(engine, liveTv);
+//     seqPlay(engine, allStreams);
+//     randPlay(engine, allStreams);
     
     engine.destructPlayer();
 }
