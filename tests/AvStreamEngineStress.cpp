@@ -78,12 +78,12 @@ main(int argc, char** argv) {
     
 //     seqPlay(engine, audioFiles);
 //     randPlay(engine, audioFiles);
-    seqPlay(engine, videoFiles);
+//     seqPlay(engine, videoFiles);
 //     randPlay(engine, videoFiles);
 //     seqPlay(engine, liveTv);
 //     randPlay(engine, liveTv);
 //     seqPlay(engine, allStreams);
-//     randPlay(engine, allStreams);
+    randPlay(engine, allStreams);
     
     engine.destructPlayer();
 }

@@ -59,10 +59,8 @@ SdlOverlay::~SdlOverlay()
 
 
 SdlVideoSink::SdlVideoSink() :
-// reserve 7 overlays for SdlVideoSink
-VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 7)
-// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7)
-// VideoSink("sdl video sink", 1920, 1080, PIX_FMT_YUV420P, 7, true)
+// reserve 3 overlays for SdlVideoSink
+VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 3)
 {
 }
 

@@ -34,6 +34,7 @@
 #include <Poco/Semaphore.h>
 #include <Poco/Mutex.h>
 #include <Poco/RWLock.h>
+#include <Poco/Condition.h>
 #include <Poco/Timer.h>
 #include <Poco/DateTime.h>
 #include <Poco/NotificationCenter.h>
@@ -144,23 +145,12 @@ public:
     bool empty();
     
 private:
-//     int readSomeSemaphore(char* buffer, int num);
-//     int writeSomeSemaphore(char* buffer, int num);
-//     int readSomeRwLock(char* buffer, int num);
-//     int writeSomeRwLock(char* buffer, int num);
-    
-    
     RingBuffer              _ringBuffer;
     int                     _size;
     volatile int            _level;
-    // TODO: this should also work with a read lock and a write lock and a condition. Use:
-    // Poco::FastMutex, Poco::Condition
-    // TODO: alternatively use a Poco::SharedObject
-    Poco::Semaphore         _writeSemaphore;
-    Poco::Semaphore         _readSemaphore;
     Poco::FastMutex         _lock;
-//     Poco::RWLock            _writeLock;
-//     Poco::RWLock            _readLock;
+    Poco::Condition         _writeCondition;
+    Poco::Condition         _readCondition;
 };
 
 
