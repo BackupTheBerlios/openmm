@@ -128,7 +128,6 @@ bool
 SdlVideoSink::closeDevice()
 {
     Omm::AvStream::Log::instance()->avstream().debug("closing SDL video sink ...");
-//         FIXME: this causes a crash
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
         Omm::AvStream::Log::instance()->avstream().debug("SDL video sink deleting overlay ...");
         delete static_cast<SdlOverlay*>(_overlayVector[numOverlay]);

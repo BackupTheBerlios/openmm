@@ -2900,7 +2900,6 @@ void
 VideoSink::reset()
 {
     Log::instance()->avstream().debug("video sink reset ...");
-    _overlayQueue.clear();
     _writeOverlayNumber = 0;
     setTimerStop(false);
 //     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
@@ -2911,8 +2910,9 @@ VideoSink::reset()
 //         }
 // //         (*it)->getQueue()->clear();
 //     }
-    Sink::reset();
     blankDisplay();
+    Sink::reset();
+    _overlayQueue.clear();
     Log::instance()->avstream().debug("video sink reset finished.");
 }
 

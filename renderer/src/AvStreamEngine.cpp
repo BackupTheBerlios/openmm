@@ -263,7 +263,6 @@ AvStreamEngine::getVolume(int channel, float &vol)
 void
 AvStreamEngine::endOfStream(Omm::AvStream::Sink::EndOfStream* eof)
 {
-    stop();
     endOfStream();
 }
 
