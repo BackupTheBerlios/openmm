@@ -32,70 +32,32 @@
 #include <AvStream.h>
 #include <Util.h>
 
+#include "../renderer/src/AvStreamEngine.h"
 
 class AvPlayer : public Poco::Util::ServerApplication
 {
 public:
+    AvPlayer()
+    {
+        _engine.createPlayer();
+    }
+    
+    
+    ~AvPlayer()
+    {
+        _engine.destructPlayer();
+    }
+    
+    
     void play(const std::string& uri)
     {
-        std::clog << "AvPlayer starts playing " << uri << " ..." << std::endl;
-        
-//         std::ifstream fileStream(uri.c_str());
-        
-        Omm::AvStream::Clock clock;
-        Omm::AvStream::Demuxer demuxer;
-        
-        demuxer.set(uri);
-//         demuxer.set(fileStream);
-        
-        if (demuxer.firstAudioStream() < 0 && demuxer.firstVideoStream() < 0) {
-            std::clog << "no audio or video stream found, exiting" << std::endl;
-            return;
-        }
-            
-        //////////// load and attach audio Sink ////////////
-        if (demuxer.firstAudioStream() >= 0) {
-            Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
-//             Omm::AvStream::AudioSink* pAudioSink = audioPluginLoader.load("audiosink-pcm", "AudioSink");
-//             Omm::AvStream::AudioSink* pAudioSink = audioPluginLoader.load("audiosink-sdl", "AudioSink");
-            Omm::AvStream::AudioSink* pAudioSink = audioPluginLoader.load("audiosink-alsa", "AudioSink");
-            demuxer.attach(pAudioSink, demuxer.firstAudioStream());
-            clock.attachAudioSink(pAudioSink);
-        }
-        
-        //////////// load and attach video sink ////////////
-        if (demuxer.firstVideoStream() >= 0) {
-            Omm::Util::PluginLoader<Omm::AvStream::VideoSink> videoPluginLoader;
-//             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-ppmold", "VideoSink");
-//             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-ppm", "VideoSink");
-//             Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-qt", "VideoSink");
-            Omm::AvStream::VideoSink* pVideoSink = videoPluginLoader.load("videosink-sdl", "VideoSink");
-            demuxer.attach(pVideoSink, demuxer.firstVideoStream());
-            clock.attachVideoSink(pVideoSink);
-        }
-        
-        std::clog << "<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>" << std::endl;
-        
-        demuxer.start();
-        clock.setStartTime(true);
-
-        std::clog << "<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>" << std::endl;
-
-        clock.start();
+        _engine.setUri(uri);
+        _engine.load();
         waitForTerminationRequest();
-        clock.stop();
-        
-        std::clog << "<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>" << std::endl;
-        
-        demuxer.stop();
-        
-        std::clog << "<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>" << std::endl;
-        
-        ////////// deallocate meta data and packet queues ////////////
-        demuxer.reset();
-        
-        std::clog << "AvPlayer finished." << std::endl;
+        _engine.stop();
     }
+
+    AvStreamEngine _engine;
 };
 
 

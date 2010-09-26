@@ -130,6 +130,7 @@ MediaObjectTest.cpp
 # )
 
 SET( OMMTEST_AV_STREAM_PLAY_SRCS
+../renderer/src/AvStreamEngine.cpp
 AvStreamPlay.cpp
 )
 
@@ -143,6 +144,7 @@ ADD_DEFINITIONS(
 
 TARGET_LINK_LIBRARIES( avstreamplay
 ${LIB_OMM_AV_STREAM}
+${LIB_OMM_AV}
 ${LIB_OMM_UTIL}
 ${LIB_POCO_UTIL}
 )

@@ -453,11 +453,11 @@ _pImgConvertContext(0)
 
 StreamInfo::~StreamInfo()
 {
-//     if (_pAvCodecContext) {
-        // FIXME: avcodec_flush_buffers() may crash and has no effect on memory consumption ...
-//         Log::instance()->ffmpeg().trace("ffmpeg::avcodec_flush_buffers() ...");
-//         avcodec_flush_buffers(_pAvCodecContext);
-//     }
+    if (_pAvCodecContext) {
+//         FIXME: avcodec_flush_buffers() may crash and has no effect on memory consumption ...
+        Log::instance()->ffmpeg().trace("ffmpeg::avcodec_flush_buffers() ...");
+        avcodec_flush_buffers(_pAvCodecContext);
+    }
     delete _pDecodedVideoFrame;
     delete _pDecodedAudioFrame;
 }
