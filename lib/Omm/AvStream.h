@@ -166,41 +166,33 @@ public:
     
     void put(T element)
     {
-//         Log::instance()->avstream().debug("Queue::put() wait ...");
         _queueLock.lock();
         if (_queue.size() == _size) {
             _putCondition.wait<Poco::FastMutex>(_queueLock);
         }
-//         Log::instance()->avstream().debug("Queue::put()");
         _queue.push(element);
         _getCondition.broadcast();
         _queueLock.unlock();
-//         Log::instance()->avstream().debug("Queue::put() finished");
     }
     
     
     T get()
     {
-//         Log::instance()->avstream().debug("Queue::get() wait ...");
         _queueLock.lock();
         if (_queue.size() == 0) {
             _getCondition.wait<Poco::FastMutex>(_queueLock);
         }
-//         Log::instance()->avstream().debug("Queue::put()");
         T ret = _queue.front();
         _queue.pop();
         _putCondition.broadcast();
         _queueLock.unlock();
-//         Log::instance()->avstream().debug("Queue::get() returning");
         return ret;
     }
     
     
     T front()
     {
-//         Log::instance()->avstream().debug("Queue::front()");
         Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
-        Poco::ScopedLock<Poco::FastMutex> sizeLock(_sizeLock);
         if (_queue.size() == 0) {
             return T();
         }
@@ -210,29 +202,27 @@ public:
     
     const int count()
     {
-//         Log::instance()->avstream().debug("Queue::count()");
-        Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+        Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
         return _queue.size();
     }
     
     
     const bool full()
     {
-        Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+        Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
         return _queue.size() == _size;
     }
     
     
     const bool empty()
     {
-        Poco::ScopedLock<Poco::FastMutex> lock(_sizeLock);
+        Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
         return _queue.size() == 0;
     }
     
     
     const std::string& getName()
     {
-//         Log::instance()->avstream().debug("Queue::getName()");
         Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
         return _name;
     }
@@ -251,7 +241,6 @@ private:
     std::queue<T>           _queue;
     Poco::FastMutex         _queueLock;
     int                     _size;
-    Poco::FastMutex         _sizeLock;
     
     Poco::Condition         _putCondition;
     Poco::Condition         _getCondition;
