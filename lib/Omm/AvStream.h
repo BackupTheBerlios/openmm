@@ -147,7 +147,7 @@ public:
 private:
     RingBuffer              _ringBuffer;
     int                     _size;
-    volatile int            _level;
+    int                     _level;
     Poco::FastMutex         _lock;
     Poco::Condition         _writeCondition;
     Poco::Condition         _readCondition;
@@ -160,24 +160,21 @@ class Queue
 public:
     Queue(const std::string& name, int size) :
         _name(name),
-        _size(size),
-        _putSemaphore(size, size),
-        _getSemaphore(0, size)
+        _size(size)
     {
     }
-    
     
     void put(T element)
     {
 //         Log::instance()->avstream().debug("Queue::put() wait ...");
-        _putSemaphore.wait();
-//         Log::instance()->avstream().debug("Queue::put()");
         _queueLock.lock();
-        
+        if (_queue.size() == _size) {
+            _putCondition.wait<Poco::FastMutex>(_queueLock);
+        }
+//         Log::instance()->avstream().debug("Queue::put()");
         _queue.push(element);
-        
+        _getCondition.broadcast();
         _queueLock.unlock();
-        _getSemaphore.set();
 //         Log::instance()->avstream().debug("Queue::put() finished");
     }
     
@@ -185,17 +182,16 @@ public:
     T get()
     {
 //         Log::instance()->avstream().debug("Queue::get() wait ...");
-        _getSemaphore.wait();
-//         Log::instance()->avstream().debug("Queue::get()");
         _queueLock.lock();
-        
+        if (_queue.size() == 0) {
+            _getCondition.wait<Poco::FastMutex>(_queueLock);
+        }
+//         Log::instance()->avstream().debug("Queue::put()");
         T ret = _queue.front();
         _queue.pop();
-        
+        _putCondition.broadcast();
         _queueLock.unlock();
-        _putSemaphore.set();
 //         Log::instance()->avstream().debug("Queue::get() returning");
-        
         return ret;
     }
     
@@ -257,8 +253,8 @@ private:
     int                     _size;
     Poco::FastMutex         _sizeLock;
     
-    Poco::Semaphore         _putSemaphore;
-    Poco::Semaphore         _getSemaphore;
+    Poco::Condition         _putCondition;
+    Poco::Condition         _getCondition;
 };
 
 

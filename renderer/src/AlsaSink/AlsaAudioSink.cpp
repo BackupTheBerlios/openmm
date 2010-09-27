@@ -47,7 +47,6 @@ _buffer(0)
         Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
 //         return false;
     }
-    _writeThread.setPriority(Poco::Thread::PRIO_HIGHEST);
 }
 
 
@@ -179,6 +178,7 @@ AlsaAudioSink::startPresentation()
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " starting write thread ...");
     
     _writeThread.start(_writeThreadRunnable);
+    _writeThread.setPriority(Poco::Thread::PRIO_HIGHEST);
 }
 
 
@@ -227,7 +227,6 @@ AlsaAudioSink::writeThread()
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
         Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, trying to write " + Poco::NumberFormatter::format(_bufferSize) + " bytes");
-        // FIXME: crash here !!! (could be pulse audio related ...?)
         // last parameter of snd_pcm_writei are the number of frames (not bytes) to write to the pcm ringbuffer
         while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> 2)) < 0) {
             snd_pcm_prepare(_pcmPlayback);

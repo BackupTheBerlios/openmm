@@ -245,7 +245,7 @@ ByteQueue::writeSome(const char* buffer, int num)
         // block byte queue for further writing
         Log::instance()->avstream().trace("byte queue writeSome() try to write " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
         _writeCondition.wait<Poco::FastMutex>(_lock);
-        Log::instance()->avstream().trace("byte queue readSome() wait over, now writing " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+        Log::instance()->avstream().trace("byte queue writeSome() wait over, now writing " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     }
     
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
@@ -274,6 +274,7 @@ ByteQueue::level()
 void
 ByteQueue::clear()
 {
+    Log::instance()->avstream().trace("byte queue clear");
     char buf[_level];
     read(buf, _level);
 }
@@ -292,7 +293,7 @@ bool
 ByteQueue::empty()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    Log::instance()->avstream().trace("byte queue empty, level: " + Poco::NumberFormatter::format(_level));
+    Log::instance()->avstream().trace("byte queue check empty() at level: " + Poco::NumberFormatter::format(_level));
     return (_level == 0);
 }
 
@@ -2453,7 +2454,7 @@ AudioSink::checkInStream()
 void
 AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
 {
-    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame of size " + Poco::NumberFormatter::format(pDecodedFrame->size()) + "to byte queue ...");
+    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame of size " + Poco::NumberFormatter::format(pDecodedFrame->size()) + " to byte queue ...");
     _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
     Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame to byte queue finished.");
 }

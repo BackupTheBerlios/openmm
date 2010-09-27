@@ -97,11 +97,11 @@ main(int argc, char** argv) {
     AvStreamEngine engine;
     engine.createPlayer();
     
-//     seqPlay(engine, audioFiles);
+    seqPlay(engine, audioFiles);
 //     randPlay(engine, audioFiles);
-//     seqPlay(engine, videoFiles);
+    seqPlay(engine, videoFiles);
 //     randPlay(engine, videoFiles);
-    seqPlay(engine, liveTv);
+//     seqPlay(engine, liveTv);
 //     randPlay(engine, liveTv, 10);
 //     seqPlay(engine, allStreams);
 //     randPlay(engine, allStreams, 20);
