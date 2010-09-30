@@ -156,7 +156,7 @@ ${LIB_POCO_UTIL}
 
 SET( OMMTEST_AV_STREAM_STRESS_SRCS
 ../renderer/src/avstream/AvStreamEngine.cpp
-AvStreamEngineStress.cpp
+AvStreamStress.cpp
 )
 
 ADD_EXECUTABLE( avstreamstress

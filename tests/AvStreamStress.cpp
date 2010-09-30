@@ -104,7 +104,7 @@ main(int argc, char** argv) {
 //     seqPlay(engine, liveTv);
 //     randPlay(engine, liveTv, 10);
 //     seqPlay(engine, allStreams);
-//     randPlay(engine, allStreams, 20);
+    randPlay(engine, allStreams);
     
     engine.destructPlayer();
 }
