@@ -129,6 +129,15 @@ MediaObjectTest.cpp
 # ${LIB_POCO_UTIL}
 # )
 
+IF (AVSTREAM_ALIGN_DOUBLE)
+ADD_DEFINITIONS(
+# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
+# we need to set this flag as it set in the installed ffmpeg libs, otherwise
+# we get a crash in ffmpeg::av_metadata_get()
+-malign-double
+)
+ENDIF (AVSTREAM_ALIGN_DOUBLE)
+
 SET( OMMTEST_AV_STREAM_PLAY_SRCS
 ../renderer/src/AvStreamEngine.cpp
 AvStreamPlay.cpp
@@ -136,13 +145,6 @@ AvStreamPlay.cpp
 
 ADD_EXECUTABLE( avstreamplay
 ${OMMTEST_AV_STREAM_PLAY_SRCS}
-)
-
-ADD_DEFINITIONS(
-# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
-# we need to set this flag as it set in the installed ffmpeg libs, otherwise
-# we get a crash in ffmpeg::av_metadata_get()
-# -malign-double
 )
 
 TARGET_LINK_LIBRARIES( avstreamplay
