@@ -17,58 +17,44 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
-#include <iostream>
-#include <fstream>
+ ***************************************************************************/
+#ifndef SdlVideoSink_INCLUDED
+#define SdlVideoSink_INCLUDED
 
-#include <Poco/Exception.h>
-#include <Poco/Thread.h>
-#include <Poco/NumberFormatter.h>
-#include <Poco/Util/ServerApplication.h>
-#include <Poco/Util/Option.h>
-#include <Poco/Util/OptionSet.h>
-#include <Poco/Util/HelpFormatter.h>
+#include <SDL/SDL.h>
 
-#include <AvStream.h>
-#include <Util.h>
+#include <Omm/AvStream.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
 
-class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
+class SdlOverlay : public Omm::AvStream::Overlay
 {
 public:
-    AvPlayer()
-    {
-        createPlayer();
-    }
+    SdlOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height, SDL_Surface* sdlScreen);
+    ~SdlOverlay();
     
-    
-    ~AvPlayer()
-    {
-        destructPlayer();
-    }
-    
-    
-    void play(const std::string& uri)
-    {
-        setUri(uri);
-        load();
-        waitForTerminationRequest();
-        stop();
-    }
-
-    void endOfStream()
-    {
-        terminate();
-    }
-//     AvStreamEngine _engine;
+    SDL_Overlay*    _pSDLOverlay;
+    SDL_Surface*    _pSdlScreen;
 };
 
 
-int main(int argc, char** argv)
+class SdlVideoSink : public Omm::AvStream::VideoSink
 {
-    AvPlayer player;
+public:
+    SdlVideoSink();
+    virtual ~SdlVideoSink();
     
-    player.play(std::string(argv[1]));
-}
+private:
+    virtual void openWindow(bool fullScreen = false, int width = 720, int height = 576);
+    virtual bool initDevice();
+    virtual bool closeDevice();
+    virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);
+    
+    virtual int displayWidth();
+    virtual int displayHeight();
+    
+    virtual void blankDisplay();
+    
+    SDL_Surface* _pSdlScreen;
+};
 
+#endif

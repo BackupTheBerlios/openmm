@@ -22,9 +22,6 @@ ommav
 SET(LIB_OMM_UTIL
 ommutil
 )
-SET(LIB_OMM_AVSTREAM
-ommavstream
-)
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
@@ -37,10 +34,6 @@ FIND_LIBRARY(LIB_OMM_UTIL
 NAME ommutil
 PATHS ${CMAKE_LIBRARY_PATH}
 )
-FIND_LIBRARY(LIB_OMM_AVSTREAM
-NAME ommavstream
-PATHS ${CMAKE_LIBRARY_PATH}
-)
 endif(TARGET omm)
 
 SET( OMMR_SRCS
@@ -49,30 +42,6 @@ MediaRendererApplication.cpp
 
 ADD_EXECUTABLE( ommrender
 ${OMMR_SRCS}
-)
-
-IF (AVSTREAM_ALIGN_DOUBLE)
-ADD_DEFINITIONS(
-# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
-# we need to set this flag as it set in the installed ffmpeg libs, otherwise
-# we get a crash in ffmpeg::av_metadata_get()
--malign-double
-)
-ENDIF (AVSTREAM_ALIGN_DOUBLE)
-
-SET( OMM_AVSTREAM_ENGINE_SRCS
-AvStreamEngine.cpp
-)
-
-ADD_LIBRARY( ommengine-avstream
-SHARED
-${OMM_AVSTREAM_ENGINE_SRCS}
-)
-
-TARGET_LINK_LIBRARIES( ommengine-avstream
-${LIB_OMM_AV}
-${LIB_OMM_UTIL}
-${LIB_OMM_AVSTREAM}
 )
 
 TARGET_LINK_LIBRARIES( ommrender
@@ -85,21 +54,12 @@ INSTALL( TARGETS ommrender
 RUNTIME DESTINATION bin
 )
 
-INSTALL( TARGETS ommengine-avstream
-LIBRARY DESTINATION lib/omm
-)
-
 else(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
 message(STATUS "Poco not found")
 endif(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
 
-
+ADD_SUBDIRECTORY(avstream)
 # ADD_SUBDIRECTORY(mplayer)
 ADD_SUBDIRECTORY(vlc)
 ADD_SUBDIRECTORY(xine)
-# ADD_SUBDIRECTORY(ffmpeg)
-ADD_SUBDIRECTORY(AlsaSink)
-# ADD_SUBDIRECTORY(QtSink)
-ADD_SUBDIRECTORY(SdlSink)
-ADD_SUBDIRECTORY(FileSinks)
 

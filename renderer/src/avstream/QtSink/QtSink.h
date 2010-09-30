@@ -17,58 +17,53 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
-#include <iostream>
-#include <fstream>
+ ***************************************************************************/
+#ifndef QtSink_INCLUDED
+#define QtSink_INCLUDED
 
-#include <Poco/Exception.h>
-#include <Poco/Thread.h>
-#include <Poco/NumberFormatter.h>
-#include <Poco/Util/ServerApplication.h>
-#include <Poco/Util/Option.h>
-#include <Poco/Util/OptionSet.h>
-#include <Poco/Util/HelpFormatter.h>
+#include <QtGui>
 
-#include <AvStream.h>
-#include <Util.h>
+#include <Omm/AvStream.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
-
-class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
+class VideoWidget : public QWidget
 {
+    Q_OBJECT
+    friend class QtSinkPlugin;
+    
 public:
-    AvPlayer()
-    {
-        createPlayer();
-    }
-    
-    
-    ~AvPlayer()
-    {
-        destructPlayer();
-    }
-    
-    
-    void play(const std::string& uri)
-    {
-        setUri(uri);
-        load();
-        waitForTerminationRequest();
-        stop();
-    }
+        
 
-    void endOfStream()
-    {
-        terminate();
-    }
-//     AvStreamEngine _engine;
+private:
+    void paintEvent(QPaintEvent *event);
+    
+    QImage                  _image;
 };
 
 
-int main(int argc, char** argv)
+class QtSinkPlugin : public QObject, public Omm::AvStream::Sink
 {
-    AvPlayer player;
+    Q_OBJECT
+        
+public:
+    QtSinkPlugin();
+    virtual ~QtSinkPlugin();
     
-    player.play(std::string(argv[1]));
-}
+    virtual void open();
+    virtual void close();
+    
+    virtual void writeFrame(Omm::AvStream::Frame *pFrame);
+    virtual void presentFrame() {}
+    
+    virtual int eventLoop();
+    
+signals:
+    void doUpdate();
+    
+private:
+    void showWindow();
+    
+    QApplication            _app;
+    VideoWidget             _widget;
+};
 
+#endif

@@ -139,7 +139,7 @@ ADD_DEFINITIONS(
 ENDIF (AVSTREAM_ALIGN_DOUBLE)
 
 SET( OMMTEST_AV_STREAM_PLAY_SRCS
-../renderer/src/AvStreamEngine.cpp
+../renderer/src/avstream/AvStreamEngine.cpp
 AvStreamPlay.cpp
 )
 
@@ -155,7 +155,7 @@ ${LIB_POCO_UTIL}
 )
 
 SET( OMMTEST_AV_STREAM_STRESS_SRCS
-../renderer/src/AvStreamEngine.cpp
+../renderer/src/avstream/AvStreamEngine.cpp
 AvStreamEngineStress.cpp
 )
 

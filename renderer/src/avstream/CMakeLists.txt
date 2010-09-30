@@ -1,0 +1,81 @@
+FIND_PATH(POCO_INCLUDE_DIR
+Poco/Poco.h
+PATHS ${CMAKE_INCLUDE_PATH}
+)
+
+FIND_LIBRARY(LIB_POCO_UTIL
+NAME PocoUtil
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+
+if(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
+message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(
+${POCO_INCLUDE_DIR}
+)
+
+
+if(TARGET omm)
+SET(LIB_OMM_AV
+ommav
+)
+SET(LIB_OMM_UTIL
+ommutil
+)
+SET(LIB_OMM_AVSTREAM
+ommavstream
+)
+INCLUDE_DIRECTORIES(
+${omm_SOURCE_DIR}/lib
+)
+else(TARGET omm)
+FIND_LIBRARY(LIB_OMM_AV
+NAME ommav
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+FIND_LIBRARY(LIB_OMM_UTIL
+NAME ommutil
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+FIND_LIBRARY(LIB_OMM_AVSTREAM
+NAME ommavstream
+PATHS ${CMAKE_LIBRARY_PATH}
+)
+endif(TARGET omm)
+
+IF (AVSTREAM_ALIGN_DOUBLE)
+ADD_DEFINITIONS(
+# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
+# we need to set this flag as it set in the installed ffmpeg libs, otherwise
+# we get a crash in ffmpeg::av_metadata_get()
+-malign-double
+)
+ENDIF (AVSTREAM_ALIGN_DOUBLE)
+
+SET( OMM_AVSTREAM_ENGINE_SRCS
+AvStreamEngine.cpp
+)
+
+ADD_LIBRARY( ommengine-avstream
+SHARED
+${OMM_AVSTREAM_ENGINE_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( ommengine-avstream
+${LIB_OMM_AV}
+${LIB_OMM_UTIL}
+${LIB_OMM_AVSTREAM}
+)
+
+INSTALL( TARGETS ommengine-avstream
+LIBRARY DESTINATION lib/omm
+)
+
+else(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
+message(STATUS "Poco not found")
+endif(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
+
+ADD_SUBDIRECTORY(AlsaSink)
+# ADD_SUBDIRECTORY(QtSink)
+ADD_SUBDIRECTORY(SdlSink)
+ADD_SUBDIRECTORY(FileSinks)

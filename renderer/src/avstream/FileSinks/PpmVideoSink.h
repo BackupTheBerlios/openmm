@@ -17,58 +17,33 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
-#include <iostream>
-#include <fstream>
+ ***************************************************************************/
+#ifndef PpmVideoSink_INCLUDED
+#define PpmVideoSink_INCLUDED
 
-#include <Poco/Exception.h>
-#include <Poco/Thread.h>
-#include <Poco/NumberFormatter.h>
-#include <Poco/Util/ServerApplication.h>
-#include <Poco/Util/Option.h>
-#include <Poco/Util/OptionSet.h>
-#include <Poco/Util/HelpFormatter.h>
+#include <Omm/AvStream.h>
 
-#include <AvStream.h>
-#include <Util.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
-
-class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
+class PpmOverlay : public Omm::AvStream::Overlay
 {
 public:
-    AvPlayer()
-    {
-        createPlayer();
-    }
+    PpmOverlay(Omm::AvStream::VideoSink* pVideoSink, int width, int height);
     
-    
-    ~AvPlayer()
-    {
-        destructPlayer();
-    }
-    
-    
-    void play(const std::string& uri)
-    {
-        setUri(uri);
-        load();
-        waitForTerminationRequest();
-        stop();
-    }
-
-    void endOfStream()
-    {
-        terminate();
-    }
-//     AvStreamEngine _engine;
+    Omm::AvStream::Frame*    _pFrame;
 };
 
 
-int main(int argc, char** argv)
+class PpmVideoSink : public Omm::AvStream::VideoSink
 {
-    AvPlayer player;
+public:
+    PpmVideoSink();
+    virtual ~PpmVideoSink();
     
-    player.play(std::string(argv[1]));
-}
+private:
+    virtual bool initDevice();
+    virtual void displayFrame(Omm::AvStream::Overlay* pOverlay);
+    
+    int _frameCount;
+};
 
+#endif

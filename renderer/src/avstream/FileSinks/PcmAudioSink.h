@@ -17,58 +17,28 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
-#include <iostream>
+ ***************************************************************************/
+#ifndef PcmAudioSink_INCLUDED
+#define PcmAudioSink_INCLUDED
+
 #include <fstream>
 
-#include <Poco/Exception.h>
-#include <Poco/Thread.h>
-#include <Poco/NumberFormatter.h>
-#include <Poco/Util/ServerApplication.h>
-#include <Poco/Util/Option.h>
-#include <Poco/Util/OptionSet.h>
-#include <Poco/Util/HelpFormatter.h>
+#include <Omm/AvStream.h>
 
-#include <AvStream.h>
-#include <Util.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
-
-class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
+class PcmAudioSink : public Omm::AvStream::AudioSink
 {
 public:
-    AvPlayer()
-    {
-        createPlayer();
-    }
+    PcmAudioSink();
+    virtual ~PcmAudioSink();
     
-    
-    ~AvPlayer()
-    {
-        destructPlayer();
-    }
-    
-    
-    void play(const std::string& uri)
-    {
-        setUri(uri);
-        load();
-        waitForTerminationRequest();
-        stop();
-    }
+private:
+    virtual bool initDevice();
+    virtual void startPresentation();
 
-    void endOfStream()
-    {
-        terminate();
-    }
-//     AvStreamEngine _engine;
+    std::ofstream           _pcmStream;
+    int                     _bufferSize;
+    char*                   _buffer;
 };
 
-
-int main(int argc, char** argv)
-{
-    AvPlayer player;
-    
-    player.play(std::string(argv[1]));
-}
-
+#endif

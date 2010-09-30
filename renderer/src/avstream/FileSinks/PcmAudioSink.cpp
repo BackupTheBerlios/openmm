@@ -18,57 +18,55 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#include <iostream>
-#include <fstream>
-
-#include <Poco/Exception.h>
+#include <Poco/ClassLibrary.h>
 #include <Poco/Thread.h>
+#include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
-#include <Poco/Util/ServerApplication.h>
-#include <Poco/Util/Option.h>
-#include <Poco/Util/OptionSet.h>
-#include <Poco/Util/HelpFormatter.h>
 
-#include <AvStream.h>
-#include <Util.h>
+#include "PcmAudioSink.h"
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
 
-class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
+PcmAudioSink::PcmAudioSink() :
+AudioSink("pcm audio sink"),
+_bufferSize(4 * 1024),
+_buffer(new char[_bufferSize])
 {
-public:
-    AvPlayer()
-    {
-        createPlayer();
-    }
-    
-    
-    ~AvPlayer()
-    {
-        destructPlayer();
-    }
-    
-    
-    void play(const std::string& uri)
-    {
-        setUri(uri);
-        load();
-        waitForTerminationRequest();
-        stop();
-    }
-
-    void endOfStream()
-    {
-        terminate();
-    }
-//     AvStreamEngine _engine;
-};
-
-
-int main(int argc, char** argv)
-{
-    AvPlayer player;
-    
-    player.play(std::string(argv[1]));
 }
 
+
+PcmAudioSink::~PcmAudioSink()
+{
+    delete _buffer;
+}
+
+
+bool
+PcmAudioSink::initDevice()
+{
+    std::string fileName(_inStreams[0]->getInfo()->getName() + ".pcm");
+    _pcmStream.open(fileName.c_str());
+    Omm::AvStream::Log::instance()->avstream().information(getName() + " writing PCM sample data to file " +
+        fileName);
+    return true;
+}
+
+
+void
+PcmAudioSink::startPresentation()
+{
+    int frameCount = 0;
+    Omm::AvStream::Frame* pFrame;
+    
+    while(true) {
+        audioReadBlocking(_buffer, _bufferSize);
+        _pcmStream.write(_buffer, _bufferSize);
+    }
+    
+    Omm::AvStream::Log::instance()->avstream().debug("audio sink finished.");
+}
+
+
+
+POCO_BEGIN_MANIFEST(Omm::AvStream::AudioSink)
+POCO_EXPORT_CLASS(PcmAudioSink)
+POCO_END_MANIFEST
