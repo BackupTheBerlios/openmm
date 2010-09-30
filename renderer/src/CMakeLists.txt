@@ -52,6 +52,13 @@ ${OMMR_SRCS}
 )
 
 
+ADD_DEFINITIONS(
+# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
+# we need to set this flag as it set in the installed ffmpeg libs, otherwise
+# we get a crash in ffmpeg::av_metadata_get()
+# -malign-double
+)
+
 SET( OMM_AVSTREAM_ENGINE_SRCS
 AvStreamEngine.cpp
 )

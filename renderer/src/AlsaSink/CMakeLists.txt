@@ -16,7 +16,10 @@ ${omm_SOURCE_DIR}/lib
 endif(TARGET omm)
 
 ADD_DEFINITIONS(
--malign-double
+# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
+# we need to set this flag as it set in the installed ffmpeg libs, otherwise
+# we get a crash in ffmpeg::av_metadata_get()
+# -malign-double
 )
 
 SET( OMM_AVSTREAM_ALSASINK_SRCS

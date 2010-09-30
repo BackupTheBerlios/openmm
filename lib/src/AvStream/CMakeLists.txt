@@ -65,7 +65,9 @@ ${ommlib_SOURCE_DIR}/Omm
 
 ADD_DEFINITIONS(
 ## it took me 1.5 days to find out that av_metadata_get() segfaults without being compiled with -malign-double ##
-##-malign-double
+# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
+# we need to set this flag as it set in the installed ffmpeg libs, otherwise
+# we get a crash in ffmpeg::av_metadata_get()
 # -malign-double
 # -mno-align-double
 # Control whether GCC aligns "double", "long double", and "long long" variables on a two word boundary or a one word boundary.  Aligning

@@ -34,7 +34,6 @@ _quitWriteThread(false),
 _pcmPlayback(0),
 _device("default"),
 _format(SND_PCM_FORMAT_S16),
-// _rate(44100),
 _rate(48000),
 _channels(2),
 _periods(2),
@@ -45,7 +44,6 @@ _buffer(0)
 {
     if (!open()) {
         Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
-//         return false;
     }
 }
 
@@ -124,10 +122,7 @@ AlsaAudioSink::initDevice()
     // Set buffer size (in frames). The resulting latency is given by
     // latency = periodSize * periods / (rate * bytes_per_frame)
     snd_pcm_uframes_t bufferSize = (_startPeriodSize * _periods) >> 2;
-    // FIXME: setting buffer size without "near" only works for the first time
-    // setting buffer size with near results in a decreasing buffer size and buffer underrungs after restart
     if (int ret = snd_pcm_hw_params_set_buffer_size_near(_pcmPlayback, _hwParams, &bufferSize)) {
-//     if (int ret = snd_pcm_hw_params_set_buffer_size(_pcmPlayback, _hwParams, bufferSize)) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s setting up PCM device buffer to size: %s returns: %s",
             getName(),
             Poco::NumberFormatter::format(_bufferSize),
@@ -148,7 +143,6 @@ AlsaAudioSink::initDevice()
         
     _periodSize = _startPeriodSize;
     if (int ret = snd_pcm_hw_params_set_period_size_near(_pcmPlayback, _hwParams, &_periodSize, 0)) {
-//     if (int ret = snd_pcm_hw_params_set_period_size(_pcmPlayback, _hwParams, _periodSize, 0)) {
         Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s setting up PCM device period to size: %s returns: %s",
             getName(),
             Poco::NumberFormatter::format(_periodSize),
@@ -187,12 +181,6 @@ AlsaAudioSink::stopPresentation()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
     setStopWriting(true);
-    if (_byteQueue.empty()) {
-        Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink byte queue empty while stopping node, inserting silence.");
-        char buffer[_bufferSize];
-        initSilence(buffer, _bufferSize);
-        _byteQueue.write(buffer, _bufferSize);
-    }
 }
 
 
@@ -215,8 +203,6 @@ AlsaAudioSink::waitPresentationStop()
     }
 }
 
-
-// TODO: implement asynchonous playback: http://alsa.opensrc.org/index.php/HowTo_Asynchronous_Playback
 
 void
 AlsaAudioSink::writeThread()

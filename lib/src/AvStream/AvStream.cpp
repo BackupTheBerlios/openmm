@@ -264,6 +264,14 @@ ByteQueue::writeSome(const char* buffer, int num)
 
 
 int
+ByteQueue::size()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    return _size;
+}
+
+
+int
 ByteQueue::level()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
@@ -284,7 +292,7 @@ bool
 ByteQueue::full()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    Log::instance()->avstream().trace("byte queue full, level: " + Poco::NumberFormatter::format(_level));
+    Log::instance()->avstream().trace("byte queue check full() at level: " + Poco::NumberFormatter::format(_level));
     return (_level == _size);
 }
 
@@ -938,13 +946,15 @@ Node::initiateStop()
             Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no node attached");
             continue;
         }
-        // FIXME: after getting the frame, downstream node gets a different frame but queue size remains constant (without another put frame)
+        downstreamNode->initiateStop();
         if ((*it)->getQueue()->full()) {
             Log::instance()->avstream().debug(getName() + " out stream queue full while stopping node, getting frame");
-//             (*it)->getFrame();
             delete (*it)->getFrame();
         }
-        downstreamNode->initiateStop();
+        else if ((*it)->getQueue()->empty()){
+            Log::instance()->avstream().debug(getName() + " out stream queue empty while stopping node, putting flush frame");
+            (*it)->putFrame(new Frame(0, *it, true));
+        }
     }
 }
 
@@ -2460,6 +2470,14 @@ AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
 }
 
 
+void
+AudioSink::stopSinkPresentation()
+{
+    stopPresentation();
+    halfByteQueue();
+}
+
+
 int
 AudioSink::channels()
 {
@@ -2537,6 +2555,26 @@ AudioSink::setVolume(char* buffer, int size)
     }
     _volumeLock.unlock();
     Log::instance()->avstream().debug("audio sink set volume finished.");
+}
+
+
+void
+AudioSink::halfByteQueue()
+{
+    Log::instance()->avstream().debug("trimming byte queue half full");
+    int diff = _byteQueue.size() / 2 - _byteQueue.level();
+    if (diff == 0) {
+        return;
+    }
+    int buffSize = std::abs(diff);
+    char buff[buffSize];
+    if (diff > 0) {
+        initSilence(buff, buffSize);
+        _byteQueue.write(buff, buffSize);
+    }
+    else {
+        _byteQueue.read(buff, buffSize);
+    }
 }
 
 
@@ -2650,6 +2688,13 @@ VideoSink::stopPresentation()
         Log::instance()->avstream().debug("video sink time queue empty while stopping node, putting tick");
         _timeQueue.put(0);
     }
+}
+
+
+void
+VideoSink::stopSinkPresentation()
+{
+    stopPresentation();
 }
 
 
@@ -3002,15 +3047,14 @@ Clock::stop()
 {
     Log::instance()->avstream().debug("CLOCK stop ticking ...");
     _clockTimer.stop();
-//     _clockTimer.restart(0);
     Log::instance()->avstream().debug("CLOCK ticking stopped.");
     Log::instance()->avstream().debug("CLOCK stopping audio presentation ...");
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
-        (*it)->stopPresentation();
+        (*it)->stopSinkPresentation();
     }
     Log::instance()->avstream().debug("CLOCK stopping video presentation ...");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
-        (*it)->stopPresentation();
+        (*it)->stopSinkPresentation();
     }
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->waitPresentationStop();

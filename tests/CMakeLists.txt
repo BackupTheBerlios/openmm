@@ -139,7 +139,10 @@ ${OMMTEST_AV_STREAM_PLAY_SRCS}
 )
 
 ADD_DEFINITIONS(
-##-malign-double
+# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
+# we need to set this flag as it set in the installed ffmpeg libs, otherwise
+# we get a crash in ffmpeg::av_metadata_get()
+# -malign-double
 )
 
 TARGET_LINK_LIBRARIES( avstreamplay
@@ -162,6 +165,18 @@ TARGET_LINK_LIBRARIES( avstreamstress
 ${LIB_OMM_AV_STREAM}
 ${LIB_OMM_AV}
 ${LIB_OMM_UTIL}
+)
+
+SET( OMMTEST_BYTEQUEUE_STRESS_SRCS
+ByteQueueStress.cpp
+)
+
+ADD_EXECUTABLE( bytequeuestress
+${OMMTEST_BYTEQUEUE_STRESS_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( bytequeuestress
+${LIB_OMM_AV_STREAM}
 )
 
 SET( OMMTEST_AV_MUX_SRCS

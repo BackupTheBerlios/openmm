@@ -31,7 +31,7 @@
 #include <Poco/NumberFormatter.h>
 #include <Poco/Runnable.h>
 #include <Poco/RunnableAdapter.h>
-#include <Poco/Semaphore.h>
+#include <Poco/Notification.h>
 #include <Poco/Mutex.h>
 #include <Poco/RWLock.h>
 #include <Poco/Condition.h>
@@ -138,6 +138,7 @@ public:
     int readSome(char* buffer, int num);
     int writeSome(const char* buffer, int num);
     
+    int size();
     int level();
     void clear();
     
@@ -163,6 +164,7 @@ public:
         _size(size)
     {
     }
+    
     
     void put(T element)
     {
@@ -607,6 +609,7 @@ protected:
     virtual bool initDevice() {}
     virtual bool closeDevice() {}
     virtual void writeDecodedFrame(Frame* pDecodedFrame) {}
+    virtual void stopSinkPresentation() {}
     
     void reset();
 
@@ -640,6 +643,7 @@ public:
     void setVolume(float vol);
     virtual void setVolume(int channel, float vol) {}
     
+    void halfByteQueue();
     void clearByteQueue();
     void reset();
 
@@ -653,6 +657,7 @@ protected:
 private:
     virtual bool checkInStream();
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
+    virtual void stopSinkPresentation();
     void setVolume(char* buffer, int size);
     int64_t audioLength(int64_t bytes);
     
@@ -667,18 +672,20 @@ class Overlay;
 
 class VideoSink : public Sink
 {
+    friend class Clock;
+    friend class Overlay;
+    
 public:
     VideoSink(const std::string& name = "video sink",
          int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
          int overlayCount = 5, bool fullScreen = false);
     
-    void setStartTime(int64_t startTime);
-    
     virtual void openWindow(bool fullScreen, int width, int height) {}
-    virtual void startPresentation();
-    virtual void stopPresentation();
-    virtual void waitPresentationStop();
+    void reset();
     
+protected:
+    virtual void displayFrame(Overlay* pOverlay) {}
+    virtual void blankDisplay() {}
     int getWidth();
     int getHeight();
     PixelFormat getFormat();
@@ -688,11 +695,6 @@ public:
     
     void displayRect(int& x, int& y, int& w, int& h);
     
-    void reset();
-    
-protected:
-    virtual void displayFrame(Overlay* pOverlay) {}
-    virtual void blankDisplay() {}
     
     int                         _overlayCount;
     std::vector<Overlay*>       _overlayVector;
@@ -706,7 +708,12 @@ protected:
     
 private:
     virtual bool checkInStream();
+    void setStartTime(int64_t startTime);
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
+    virtual void startPresentation();
+    virtual void waitPresentationStop();
+    virtual void stopPresentation();
+    virtual void stopSinkPresentation();
     
     void onTick(int64_t time);
     void timerThread();

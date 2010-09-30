@@ -129,8 +129,6 @@ int main(int argc, char** argv)
     std::clog << "starting reader 2 ..." << std::endl;
     t4.start(r2);
     
-    Poco::Thread::sleep(5000);
-    
     std::clog << "joining writer 1 ..." << std::endl;
     t1.join();
     std::clog << "writer 1 joined." << std::endl;
