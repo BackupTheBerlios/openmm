@@ -757,12 +757,16 @@ FFmpegStreamInfo::~FFmpegStreamInfo()
     if (_pAvCodecContext) {
         Log::instance()->ffmpeg().trace("ffmpeg::avcodec_flush_buffers() ...");
         avcodec_flush_buffers(_pAvCodecContext);
+        Log::instance()->ffmpeg().trace("ffmpeg::avcodec_close() ...");
+        avcodec_close(_pAvCodecContext);
     }
     if (_pDecodedVideoFrame) {
         delete _pDecodedVideoFrame;
+        _pDecodedVideoFrame = 0;
     }
     if (_pDecodedAudioFrame) {
         delete _pDecodedAudioFrame;
+        _pDecodedAudioFrame = 0;
     }
 }
 

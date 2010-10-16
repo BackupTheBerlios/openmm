@@ -32,7 +32,7 @@ then
 fi
 
 export CMAKE_PREFIX_PATH
-echo "staging dir:" ${CMAKE_PREFIX_PATH}
+#echo "staging dir:" ${CMAKE_PREFIX_PATH}
 
 CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_INSTALL_PREFIX=${CMAKE_PREFIX_PATH}"
 SRCDIR=${PWD}
