@@ -74,11 +74,14 @@ private:
     
     std::string                 _engineId;
     bool                        _isPlaying;
+    Omm::AvStream::Tagger*      _pTagger;
     Omm::AvStream::Clock*       _pClock;
     Omm::AvStream::Demuxer*     _pDemuxer;
     Omm::AvStream::AudioSink*   _pAudioSink;
     Omm::AvStream::VideoSink*   _pVideoSink;
     Poco::FastMutex             _actionLock;
+    
+    std::ifstream               _fileStream;
 };
 
 #endif

@@ -34,7 +34,7 @@ Overlay(pVideoSink, width, height)
 
 PpmVideoSink::PpmVideoSink() :
 // ppm file sink size doesn't matter, all frames are written out unscaled
-VideoSink("ppm video sink", 0, 0, PIX_FMT_RGB24, 5),
+VideoSink("ppm video sink", 0, 0, Omm::AvStream::Meta::CC_RGB24, 5),
 _frameCount(0)
 {
 }
@@ -51,7 +51,7 @@ PpmVideoSink::initDevice()
     Omm::AvStream::Log::instance()->avstream().debug("opening ppm video sink ...");
     
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
-        Omm::AvStream::Frame* pFrame = getInStream(0)->allocateVideoFrame(_pixelFormat);
+        Omm::AvStream::Frame* pFrame = getInStream(0)->getInfo()->allocateVideoFrame(_pixelFormat);
         
         PpmOverlay* pOverlay = new PpmOverlay(this, getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height());
         

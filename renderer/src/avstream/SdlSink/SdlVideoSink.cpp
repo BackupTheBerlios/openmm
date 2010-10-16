@@ -60,7 +60,7 @@ SdlOverlay::~SdlOverlay()
 
 SdlVideoSink::SdlVideoSink() :
 // reserve 3 overlays for SdlVideoSink
-VideoSink("sdl video sink", 720, 576, PIX_FMT_YUV420P, 3)
+VideoSink("sdl video sink", 720, 576, Omm::AvStream::Meta::CC_YUV420P, 3)
 {
 }
 

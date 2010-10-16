@@ -61,7 +61,6 @@ public:
     {
         terminate();
     }
-//     AvStreamEngine _engine;
 };
 
 

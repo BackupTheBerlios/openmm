@@ -17,71 +17,73 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
-#include <vector>
+***************************************************************************/
+#include <iostream>
 #include <string>
 
-#include <Poco/Thread.h>
-#include <Poco/NumberFormatter.h>
-#include <Poco/Random.h>
 #include <Poco/Environment.h>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/Exception.h>
+#include <Poco/Thread.h>
+#include <Poco/Random.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
+#include <AvStream.h>
+#include <UpnpAvController.h>
 
-const int maxRandomPlayTime = 2000;
 const std::string liveStreamAddress = "http://anubis:8888/";
 
 void
-seqPlay(AvStreamEngine& engine, std::vector<std::string>& uris, int playTime = -1)
+tagUri(std::vector<std::string>& uris)
 {
-    // play all test streams once
-    Poco::Random playTimeRandom;
     for(std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
-        engine.setUri(*it);
-        engine.load();
-        if (playTime >= 0) {
-            Poco::Thread::sleep(playTime);
+        std::clog << "tagging uri: " << *it << std::endl;
+        
+        Omm::AvStream::Tagger* pTagger;
+        std::string taggerPlugin("tagger-ffmpeg");
+        Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
+        try {
+            pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
         }
-        else {
-            int t = playTimeRandom.next(maxRandomPlayTime);
-            Poco::Thread::sleep(t);
+        catch(Poco::NotFoundException) {
+            Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+            return;
         }
-        engine.stop();
+        Omm::AvStream::Meta* pMeta = pTagger->tag(*it);
+        pMeta->print();
+        delete pMeta;
+        delete pTagger;
     }
 }
 
 
 void
-randPlay(AvStreamEngine& engine, std::vector<std::string>& uris, int maxIterations = -1, int playTime = -1)
+tagStream(std::vector<std::string>& uris)
 {
-    // play test streams randomly (TODO: with random play time between 0 and 2000 msecs.
-    Poco::Random titleNumber;
-    Poco::Random playTimeRandom;
-    int iterations = 0;
-    for(;;) {
-        if (maxIterations >= 0 && iterations >= maxIterations) {
-            break;
+    for(std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
+        std::clog << "tagging stream: " << *it << std::endl;
+
+        Omm::AvStream::Tagger* pTagger;
+        std::string taggerPlugin("tagger-ffmpeg");
+        Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
+        try {
+            pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
         }
-        int i = titleNumber.next(uris.size());
-        std::clog << "playing stream number: " << i << ", uri: " << uris[i] << std::endl;
-        engine.setUri(uris[i]);
-        engine.load();
-        if (playTime >= 0) {
-            Poco::Thread::sleep(playTime);
+        catch(Poco::NotFoundException) {
+            Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+            return;
         }
-        else {
-            int t = playTimeRandom.next(maxRandomPlayTime);
-            Poco::Thread::sleep(t);
-        }
-        engine.stop();
-        iterations++;
+        std::ifstream ifs((*it).c_str());
+        Omm::AvStream::Meta* pMeta = pTagger->tag(ifs);
+        pMeta->print();
+        delete pMeta;
+        delete pTagger;
     }
 }
 
 
 int
-main(int argc, char** argv) {
+main(int argc, char** argv)
+{
     std::string basePath(Poco::Environment::get("OMMTEST"));
     Poco::DirectoryIterator end;
 
@@ -114,17 +116,5 @@ main(int argc, char** argv) {
         allStreams.push_back(*it);
     }
     
-    AvStreamEngine engine;
-    engine.createPlayer();
-    
-//     seqPlay(engine, audioFiles);
-//     randPlay(engine, audioFiles);
-//     seqPlay(engine, videoFiles);
-//     randPlay(engine, videoFiles);
-//    seqPlay(engine, liveTv);
-//     randPlay(engine, liveTv, 10);
-     seqPlay(engine, allStreams);
-     randPlay(engine, allStreams);
-    
-    engine.destructPlayer();
+    tagStream(allStreams);
 }

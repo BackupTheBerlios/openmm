@@ -22,17 +22,21 @@
 #include <fstream>
 
 #include <AvStream.h>
+// #include <AvStreamFFmpeg.h>
+#include <UpnpAvController.h>
 
 int main(int argc, char** argv)
 {
+//     Omm::AvStream::FFmpegNodeFactory nodeFactory;
+//     Omm::AvStream::Tagger* pTagger = nodeFactory.tagger();
     Omm::AvStream::Demuxer demuxer;
-    demuxer.set(std::string(argv[1]));
+//     demuxer.set(pTagger->tag(std::string(argv[1])));
 
-    Omm::AvStream::Muxer muxer;
-    muxer.set(std::string("mux.mpeg"), std::string("mpeg"));
+//     Omm::AvStream::Muxer muxer;
+//     muxer.set(std::string("mux.mpeg"), std::string("mpeg"));
 
-    demuxer.attach(&muxer, demuxer.firstAudioStream(), 0);
-    demuxer.attach(&muxer, demuxer.firstVideoStream(), 1);
+//     demuxer.attach(&muxer, demuxer.firstAudioStream(), 0);
+//     demuxer.attach(&muxer, demuxer.firstVideoStream(), 1);
     
     demuxer.start();
     sleep(2);

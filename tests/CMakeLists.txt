@@ -27,6 +27,7 @@ SET(LIB_OMM_AV_STREAM
 ommavstream
 )
 
+
 INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 ${omm_SOURCE_DIR}/lib/Omm
@@ -129,14 +130,6 @@ MediaObjectTest.cpp
 # ${LIB_POCO_UTIL}
 # )
 
-IF (AVSTREAM_ALIGN_DOUBLE)
-ADD_DEFINITIONS(
-# FIXME: on some (32-bit intel?) systems, ffmpeg is compiled with -malign-double
-# we need to set this flag as it set in the installed ffmpeg libs, otherwise
-# we get a crash in ffmpeg::av_metadata_get()
--malign-double
-)
-ENDIF (AVSTREAM_ALIGN_DOUBLE)
 
 SET( OMMTEST_AV_STREAM_PLAY_SRCS
 ../renderer/src/avstream/AvStreamEngine.cpp
@@ -181,6 +174,19 @@ TARGET_LINK_LIBRARIES( bytequeuestress
 ${LIB_OMM_AV_STREAM}
 )
 
+SET( OMMTEST_TAG_TEST_SRCS
+TagTest.cpp
+)
+
+ADD_EXECUTABLE( tagtest
+${OMMTEST_TAG_TEST_SRCS}
+)
+
+TARGET_LINK_LIBRARIES( tagtest
+${LIB_OMM_AV_STREAM}
+${LIB_OMM_UTIL}
+)
+
 SET( OMMTEST_AV_MUX_SRCS
 AvMux.cpp
 )
@@ -191,5 +197,5 @@ ${OMMTEST_AV_MUX_SRCS}
 
 TARGET_LINK_LIBRARIES( avmux
 ${LIB_OMM_AV_STREAM}
-# ${LIB_POCO_UTIL}
+${LIB_POCO_UTIL}
 )

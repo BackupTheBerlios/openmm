@@ -18,15 +18,12 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#include <string>
+
 #include <Poco/ClassLibrary.h>
 
-#include "AvStreamEngine.h"
-
 #include "Omm/Util.h"
-
-#include <sys/stat.h>
-#include <cerrno>
-#include <string>
+#include "AvStreamEngine.h"
 
 
 AvStreamEngine::AvStreamEngine() :
@@ -52,6 +49,15 @@ AvStreamEngine::createPlayer()
     _pClock = new Omm::AvStream::Clock;
     _pDemuxer = new Omm::AvStream::Demuxer;
     
+    std::string taggerPlugin("tagger-ffmpeg");
+    Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
+    try {
+        _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
+    }
+    catch(Poco::NotFoundException) {
+        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+        return;
+    }
     std::string audioPlugin("audiosink-alsa");
 //     std::string audioPlugin("audiosink-sdl");
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
@@ -80,6 +86,8 @@ AvStreamEngine::createPlayer()
 void
 AvStreamEngine::destructPlayer()
 {
+    delete _pTagger;
+    _pTagger = 0;
     delete _pClock;
     _pClock = 0;
     delete _pDemuxer;
@@ -106,25 +114,32 @@ AvStreamEngine::setUri(std::string mrl)
     }
     
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
-    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET. >>>>>>>>>>>>");
-    _pDemuxer->set(mrl);
-    
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
+//     Omm::AvStream::Log::instance()->avstream().debug("trying to open ifstream with url: " + mrl + " ...");
+//     _fileStream.open(mrl.c_str());
+//     Omm::AvStream::Log::instance()->avstream().debug("opened ifstream.");
+//     _pDemuxer->set(_fileStream);
+//     Omm::AvStream::Log::instance()->avstream().debug("set ifstream.");
+    _pDemuxer->set(_pTagger->tag(mrl));
+    /**/
     if (_pDemuxer->firstAudioStream() < 0 && _pDemuxer->firstVideoStream() < 0) {
         Omm::AvStream::Log::instance()->avstream().error("no audio or video stream found, exiting");;
         return;
     }
-        
+    
     //////////// load and attach audio Sink ////////////
     if (_pDemuxer->firstAudioStream() >= 0) {
         _pDemuxer->attach(_pAudioSink, _pDemuxer->firstAudioStream());
         _pClock->attachAudioSink(_pAudioSink);
     }
     
+    /**/
     //////////// load and attach video sink ////////////
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pDemuxer->attach(_pVideoSink, _pDemuxer->firstVideoStream());
         _pClock->attachVideoSink(_pVideoSink);
     }
+    /**/
 }
 
 
@@ -136,11 +151,14 @@ AvStreamEngine::load()
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>");
     
     _pDemuxer->start();
-    _pClock->setStartTime(true);
+    /**/
+//     _pClock->setStartTime(true);
+    _pClock->setStartTime(false);
 
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>");
 
     _pClock->start();
+    /**/
     _isPlaying = true;
 }
 
@@ -153,6 +171,7 @@ AvStreamEngine::stop()
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>");
     
     _pDemuxer->stop();
+    /**/
     _pClock->stop();
     
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>");
@@ -161,23 +180,33 @@ AvStreamEngine::stop()
     if (_pDemuxer->firstAudioStream() >= 0) {
         _pDemuxer->detach(_pDemuxer->firstAudioStream());
     }
+    
+    /**/
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pDemuxer->detach(_pDemuxer->firstVideoStream());
     }
-    
+    /**/
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>");
-    
     _pClock->reset();
+    
     if (_pDemuxer->firstAudioStream() >= 0) {
         _pAudioSink->reset();
     }
+    
+    /**/
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pVideoSink->reset();
     }
     // demuxer is last node to reset, because StreamInfo belongs to it and is refered to by downstream nodes.
+    /**/
     _pDemuxer->reset();
     
+//     Omm::AvStream::Log::instance()->avstream().debug("trying to close ifstream ...");
+//     _fileStream.close();
+//     Omm::AvStream::Log::instance()->avstream().debug("deleted ifstream.");
+    
     _isPlaying = false;
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE OFF. >>>>>>>>>>>>");
 }
 
 
@@ -267,9 +296,9 @@ AvStreamEngine::getVolume(int channel, float &vol)
 void
 AvStreamEngine::endOfStream(Omm::AvStream::Sink::EndOfStream* eof)
 {
+    stop();
     endOfStream();
 }
-
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)

@@ -27,6 +27,8 @@
 #include <vector>
 #include <queue>
 
+#include <stdint.h>
+
 #include <Poco/Logger.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/Runnable.h>
@@ -39,39 +41,19 @@
 #include <Poco/DateTime.h>
 #include <Poco/NotificationCenter.h>
 
-// FIXME: make clear if you need to set -malign-double when linking with libommavstream and ffmpeg is compiled with -malign-double
-// FIXME: find a build check for ffmpeg, if it is compiled with -malign-double
-
-extern "C" {
-#include <libavformat/avformat.h>
-#include <libavcodec/avcodec.h>
-#include <libswscale/swscale.h>
-
-//Forward declaration of ffmpeg structs
-struct AVInputFormat;
-struct AVFormatContext;
-struct AVCodecContext;
-struct AVRational;
-struct SwsContext;
-struct ReSampleContext;
-struct AVPicture;
-struct AVPacket;
-struct AVPacketList;
-struct AVStream;
-}
-
 namespace Omm {
 namespace AvStream {
 
+class Tagger;
 class Meta;
 class Node;
+class Demuxer;
 class Frame;
 class Stream;
 class StreamInfo;
 class StreamQueue;
 class Overlay;
 class Sink;
-class PresentationTimer;
 class Clock;
 
 
@@ -81,14 +63,12 @@ public:
     static Log* instance();
     
     Poco::Logger& avstream();
-    Poco::Logger& ffmpeg();
     
 private:
     Log();
     
     static Log*     _pInstance;
     Poco::Logger*   _pAvStreamLogger;
-    Poco::Logger*   _pFfmpegLogger;
 };
 
 
@@ -261,58 +241,144 @@ private:
 };
 
 
-// FIXME: access to StreamInfo may be locked here and there
+class Meta
+{
+    friend class Tagger;
+    friend class StreamInfo;
+    friend class Demuxer;
+    friend class Muxer;
+    
+public:
+    virtual ~Meta();
+    
+    enum ColorCoding {
+        CC_NONE= -1,
+        CC_YUV420P,   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+        CC_YUYV422,   ///< packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr
+        CC_RGB24,     ///< packed RGB 8:8:8, 24bpp, RGBRGB...
+        CC_BGR24,     ///< packed RGB 8:8:8, 24bpp, BGRBGR...
+        CC_YUV422P,   ///< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+        CC_YUV444P,   ///< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+        CC_RGB32,     ///< packed RGB 8:8:8, 32bpp, (msb)8A 8R 8G 8B(lsb), in CPU endianness
+        CC_YUV410P,   ///< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
+        CC_YUV411P,   ///< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
+        CC_RGB565,    ///< packed RGB 5:6:5, 16bpp, (msb)   5R 6G 5B(lsb), in CPU endianness
+        CC_RGB555,    ///< packed RGB 5:5:5, 16bpp, (msb)1A 5R 5G 5B(lsb), in CPU endianness, most significant bit to 0
+        CC_GRAY8,     ///<        Y        ,  8bpp
+        CC_MONOWHITE, ///<        Y        ,  1bpp, 0 is white, 1 is black
+        CC_MONOBLACK, ///<        Y        ,  1bpp, 0 is black, 1 is white
+        CC_PAL8,      ///< 8 bit with CC_RGB32 palette
+        CC_YUVJ420P,  ///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
+        CC_YUVJ422P,  ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
+        CC_YUVJ444P,  ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
+        CC_XVMC_MPEG2_MC,///< XVideo Motion Acceleration via common packet passing
+        CC_XVMC_MPEG2_IDCT,
+        CC_UYVY422,   ///< packed YUV 4:2:2, 16bpp, Cb Y0 Cr Y1
+        CC_UYYVYY411, ///< packed YUV 4:1:1, 12bpp, Cb Y0 Y1 Cr Y2 Y3
+        CC_BGR32,     ///< packed RGB 8:8:8, 32bpp, (msb)8A 8B 8G 8R(lsb), in CPU endianness
+        CC_BGR565,    ///< packed RGB 5:6:5, 16bpp, (msb)   5B 6G 5R(lsb), in CPU endianness
+        CC_BGR555,    ///< packed RGB 5:5:5, 16bpp, (msb)1A 5B 5G 5R(lsb), in CPU endianness, most significant bit to 1
+        CC_BGR8,      ///< packed RGB 3:3:2,  8bpp, (msb)2B 3G 3R(lsb)
+        CC_BGR4,      ///< packed RGB 1:2:1,  4bpp, (msb)1B 2G 1R(lsb)
+        CC_BGR4_BYTE, ///< packed RGB 1:2:1,  8bpp, (msb)1B 2G 1R(lsb)
+        CC_RGB8,      ///< packed RGB 3:3:2,  8bpp, (msb)2R 3G 3B(lsb)
+        CC_RGB4,      ///< packed RGB 1:2:1,  4bpp, (msb)1R 2G 1B(lsb)
+        CC_RGB4_BYTE, ///< packed RGB 1:2:1,  8bpp, (msb)1R 2G 1B(lsb)
+        CC_NV12,      ///< planar YUV 4:2:0, 12bpp, 1 plane for Y and 1 for UV
+        CC_NV21,      ///< as above, but U and V bytes are swapped
+
+        CC_RGB32_1,   ///< packed RGB 8:8:8, 32bpp, (msb)8R 8G 8B 8A(lsb), in CPU endianness
+        CC_BGR32_1,   ///< packed RGB 8:8:8, 32bpp, (msb)8B 8G 8R 8A(lsb), in CPU endianness
+
+        CC_GRAY16BE,  ///<        Y        , 16bpp, big-endian
+        CC_GRAY16LE,  ///<        Y        , 16bpp, little-endian
+        CC_YUV440P,   ///< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
+        CC_YUVJ440P,  ///< planar YUV 4:4:0 full scale (JPEG)
+        CC_YUVA420P,  ///< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)
+        CC_VDPAU_H264,///< H.264 HW decoding with VDPAU, data[0] contains a vdpau_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
+        CC_VDPAU_MPEG1,///< MPEG-1 HW decoding with VDPAU, data[0] contains a vdpau_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
+        CC_VDPAU_MPEG2,///< MPEG-2 HW decoding with VDPAU, data[0] contains a vdpau_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
+        CC_VDPAU_WMV3,///< WMV3 HW decoding with VDPAU, data[0] contains a vdpau_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
+        CC_VDPAU_VC1, ///< VC-1 HW decoding with VDPAU, data[0] contains a vdpau_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
+        CC_RGB48BE,   ///< packed RGB 16:16:16, 48bpp, 16R, 16G, 16B, big-endian
+        CC_RGB48LE,   ///< packed RGB 16:16:16, 48bpp, 16R, 16G, 16B, little-endian
+        CC_VAAPI_MOCO, ///< HW acceleration through VA API at motion compensation entry-point, Picture.data[0] contains a vaapi_render_state struct which contains macroblocks as well as various fields extracted from headers
+        CC_VAAPI_IDCT, ///< HW acceleration through VA API at IDCT entry-point, Picture.data[0] contains a vaapi_render_state struct which contains fields extracted from headers
+        CC_VAAPI_VLD,  ///< HW decoding through VA API, Picture.data[0] contains a vaapi_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
+        CC_NB,        ///< number of pixel formats, DO NOT USE THIS if you want to link with shared libav* because the number of formats might differ between versions
+    };
+    
+    static const int64_t invalidPts;
+    
+    virtual Frame* readFrame() = 0;
+    // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
+    virtual void print(bool isOutFormat = false) = 0;
+    
+    int numberStreams();
+    void addStream(StreamInfo* pStreamInfo);
+    StreamInfo* streamInfo(int streamNumber);
+    
+protected:
+    Meta();
+
+private:
+    std::vector<StreamInfo*>        _streamInfos;
+};
+
+
+class Tagger
+{
+public:
+    virtual Meta* tag(const std::string& uri) = 0;
+    virtual Meta* tag(std::istream& istr) = 0;
+};
+
+
 class StreamInfo
 {
     friend class Stream;
     friend class Demuxer;
     friend class Muxer;
     friend class Frame;
+    friend class Sink;
     
 public:
-    StreamInfo(Stream* pStream, const std::string name = "avstream");
-    ~StreamInfo();
+    virtual ~StreamInfo();
     
-    bool isAudio();
-    bool isVideo();
-    std::string getName();
-    void setName(const std::string& name);
-    
-    bool findCodec();
-    bool findEncoder();
-    
-    void printInfo();
-    
-    int width();
-    int height();
-    float aspectRatio();
-    
+    virtual bool isAudio() = 0;
+    virtual bool isVideo() = 0;
+    virtual bool findCodec() = 0;
+    virtual bool findEncoder() = 0;
+//     virtual StreamInfo* cloneOutStreamInfo(Meta* pMeta, int outStreamNumber) = 0;
+
     // audio parameters
-    int sampleWidth();
-    unsigned int sampleRate();
-    int channels();
+    virtual int sampleWidth() = 0;
+    virtual unsigned int sampleRate() = 0;
+    virtual int channels() = 0;
     
     // video parameters
-    PixelFormat pixelFormat();
-    int pictureSize();
-    
+    virtual int width() = 0;
+    virtual int height() = 0;
+    virtual Meta::ColorCoding pixelFormat() = 0;
+    virtual int pictureSize() = 0;
+    virtual float aspectRatio() = 0;
+    virtual Frame* allocateVideoFrame(Meta::ColorCoding targetFormat) = 0;
+
+    std::string getName();
+    void setName(const std::string& name);
+    void printInfo();
     int64_t newFrameNumber();
+    Frame* decodeFrame(Frame* pFrame);
     
-    StreamInfo* cloneOutStreamInfo(Meta* pMeta, int outStreamNumber);
-    
+protected:
+    StreamInfo(const std::string name = "avstream");
+
+    virtual Frame* decodeAudioFrame(Frame* pFrame) = 0;
+    virtual Frame* decodeVideoFrame(Frame* pFrame) = 0;
+
 private:
     std::string             _streamName;
-    Stream*                 _pStream;
-    AVStream*               _pAvStream;
-    AVCodecContext*         _pAvCodecContext;
-    AVCodec*                _pAvCodec;
     int64_t                 _newFrameNumber;
-
-    int                     _maxDecodedAudioFrameSize;
-    Frame*                  _pDecodedAudioFrame;
-    Frame*                  _pDecodedVideoFrame;
-    struct SwsContext*      _pImgConvertContext;
-    
     Poco::FastMutex         _lock;
 };
 
@@ -321,16 +387,17 @@ class Stream
 {
     friend class Demuxer;
     friend class Frame;
+    friend class Sink;
     
 public:
     // TODO: in and out stream ctors (only in streams allocate a queue)
-    Stream(Node* node);
-    ~Stream();
-    
+    virtual ~Stream();
+
     Frame* firstFrame();
     Frame* getFrame();
     void putFrame(Frame* pFrame);
     
+    void setNode(Node* pNode);
     Node* getNode();
     
     // TODO: extend this to handle more than one queue (tee stream)
@@ -342,14 +409,11 @@ public:
     StreamQueue* getQueue();
     void setInfo(StreamInfo* pInfo);
     void setQueue(StreamQueue* pQueue);
-    
-    Frame* allocateVideoFrame(PixelFormat targetFormat);
-    Frame* decodeFrame(Frame* pFrame);
-    
+
+protected:
+    Stream(Node* node);
+
 private:
-    Frame* decodeAudioFrame(Frame* pFrame);
-    Frame* decodeVideoFrame(Frame* pFrame);
-    
     // _pNode of a Stream and of a StreamQueue can differ, as StreamQueue is shared between in and out streams
     Node*               _pNode;
     // _pStreamInfo and _pStreamQueue can be shared between in and out streams or are 0 if not attached
@@ -408,9 +472,7 @@ class Demuxer : public Node
 {
 public:
     Demuxer();
-    
-    void set(const std::string& uri);
-    void set(std::istream& istr);
+    void set(Meta* pMeta);
     void reset();
     
     int firstAudioStream();
@@ -421,7 +483,6 @@ private:
     virtual void run();
     
     int64_t correctPts(int64_t pts, int64_t lastPts, int lastDuration);
-    std::string errorMessage(int errorCode);
     
     Meta*       _pMeta;
     int         _firstAudioStream;
@@ -437,32 +498,21 @@ private:
 class Muxer : public Node
 {
 public:
-    Muxer();
+//     Muxer();
     ~Muxer();
     
-    void set(const std::string& uri = "mux.ts", const std::string& format = "mpegts");
+//     void set(const std::string& uri = "mux.ts", const std::string& format = "mpegts");
     void set(std::ostream& ostr, const std::string& format = "mpegts");
     void reset();
     
 private:
-    virtual bool init();
-    virtual void run();
+//     virtual bool init();
+//     virtual void run();
     
-    bool prepareOutStream(int streamNumber);
+//     bool prepareOutStream(int streamNumber);
     
     Meta*           _pMeta;
     std::string     _uri;
-};
-
-
-class Decoder : public Node
-{
-public:
-    Decoder();
-    
-private:
-    virtual bool init();
-    virtual void run();
 };
 
 
@@ -473,104 +523,42 @@ class Frame
     friend class Muxer;
     
 public:
-//     Frame(int64_t number, const Frame& frame);
-    Frame(int64_t number, Stream* pStream, bool endOfStream = false);
-    Frame(int64_t number, Stream* pStream, int dataSize);
-//     Frame(int64_t number, Stream* pStream, char* data, int dataSize);
+    Frame(int64_t number, StreamInfo* pStreamInfo, bool endOfStream = false);
+    virtual ~Frame();
     
-    // copies *pAvPacket (and it's payload) into Frame and deletes *pAvPacket (and it's payload)
-    Frame(int64_t number, Stream* pStream, AVPacket* pAvPacket);
-    // copies *pAvFrame (and it's payload) into Frame and deletes *pAvFrame (and it's payload)
-    Frame(int64_t number, Stream* pStream, AVFrame* pAvFrame);
-    ~Frame();
-    
-    const char* data();
-    const int size();
-    int paddedSize();
-    
-    char* planeData(int plane);
-    int planeSize(int plane);
+    virtual const char* data() { return 0; }
+    virtual const int size() { return 0; }
+    virtual char* planeData(int plane) { return 0; }
+    virtual int planeSize(int plane) { return 0; }
+    // width and height = -1 means, leave the size of the frame as it is
+    virtual Frame* convert(Meta::ColorCoding targetFormat, int targetWidth = -1, int targetHeight = -1) { return 0; }
+    virtual void write(Overlay* overlay) {}
+    virtual void printInfo() {}
+    virtual int streamIndex() { return -1; }
+    virtual int duration() { return -1; }
     
     bool isEndOfStream();
-    void printInfo();
     std::string getName();
     const int64_t getNumber();
     void setNumber(int64_t frameNumber);
     const int64_t getPts();
     void setPts(int64_t pts);
     
-    const Stream* getStream();
-    
-    // width and height = -1 means, leave the size of the frame as it is
-    Frame* convert(PixelFormat targetFormat, int targetWidth = -1, int targetHeight = -1);
+    StreamInfo* getStreamInfo();
     
     void writePpm(const std::string& fileName);
-    void write(Overlay* overlay);
-    
-    AVPacket* copyPacket(AVPacket* pAvPacket, int padSize);
-//     AVFrame* copyFrame(AVFrame* pAvFrame);
     
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // because the stream type is dynamic: audio streams decode audio packets, same goes for video.
-    bool                _endOfStream;
     int64_t             _number;
     Poco::Mutex         _numberLock;
     int64_t             _pts;
     Poco::Mutex         _ptsLock;
-    // face 1: audio/video packet coming from the demuxer
-    AVPacket*           _pAvPacket;
-    // face 2: buffer for decoded audio data
-    char*               _data;
-    int                 _size;
-    Poco::Mutex         _sizeLock;
-    int                 _paddedSize;
-    // face 3: decoded video frame
-    AVFrame*            _pAvFrame;
-    
     // reference to the stream this frame is contained in
-    Stream*             _pStream;
+    StreamInfo*         _pStreamInfo;
     Poco::FastMutex     _nameLock;
-};
-
-
-class Meta
-{
-    friend class Tagger;
-    friend class StreamInfo;
-    friend class Demuxer;
-    friend class Muxer;
-    
-public:
-    Meta();
-    ~Meta();
-    
-    void print(bool isOutFormat = false);
-    
-private:
-    AVFormatContext*    _pFormatContext; // contains pointers to ByteIOContext, AVInputFormat, codec ids, array of streams with AVCodecContext
-    ByteIOContext*      _pIoContext;
-    AVInputFormat*      _pInputFormat;  // contains the io access callbacks
-};
-
-
-class Tagger
-{
-public:
-    Tagger();
-    ~Tagger();
-    
-    Meta* tag(const std::string& uri);
-    // TODO: istr is currently ignored (hardcoded av_open_input_file())
-    Meta* tag(std::istream& istr);
-    
-private:
-    AVInputFormat* probeInputFormat(std::istream& istr);
-    ByteIOContext* initIo(std::istream& istr);
-    
-    int                 _tagBufferSize;
-    int                 _IoBufferSize;
-    unsigned char*      _pIoBuffer;
+    bool                _endOfStream;
 };
 
 
@@ -677,7 +665,7 @@ class VideoSink : public Sink
     
 public:
     VideoSink(const std::string& name = "video sink",
-         int width = 720, int height = 576, PixelFormat pixelFormat = PIX_FMT_YUV420P,
+         int width = 720, int height = 576, Meta::ColorCoding pixelFormat = Meta::CC_YUV420P,
          int overlayCount = 5, bool fullScreen = false);
     
     virtual void openWindow(bool fullScreen, int width, int height) {}
@@ -688,7 +676,7 @@ protected:
     virtual void blankDisplay() {}
     int getWidth();
     int getHeight();
-    PixelFormat getFormat();
+    Meta::ColorCoding getFormat();
     
     virtual int displayWidth();
     virtual int displayHeight();
@@ -704,7 +692,7 @@ protected:
     bool                        _fullScreen;
     int                         _width;
     int                         _height;
-    PixelFormat                 _pixelFormat;
+    Meta::ColorCoding           _pixelFormat;
     
 private:
     virtual bool checkInStream();
@@ -737,7 +725,7 @@ public:
     
     int getWidth();
     int getHeight();
-    PixelFormat getFormat();
+    Meta::ColorCoding getFormat();
     
     uint8_t*        _data[4];
     int             _pitch[4];
@@ -779,7 +767,7 @@ private:
     // TODO: should Clock be able to sync more than one stream?
     // -> store a stream time for each stream
     int64_t                 _streamTime;  // stream current time in stream time base units [sec]
-    double                  _streamBase;  // stream refresh rate in kHz ( = 1 / (time base * 1000))
+    float                   _streamBase;  // stream refresh rate in kHz ( = 1 / (time base * 1000))
     Poco::Timestamp         _systemTime;
     
     Poco::Timer             _clockTimer;
@@ -801,7 +789,6 @@ class Scanner
 class Transcoder
 {
 };
-
 
 
 } // namespace AvStream
