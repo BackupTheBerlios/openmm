@@ -104,7 +104,10 @@ _pFormatContext(avformat_alloc_context()),
 _pIoContext(0),
 _pInputFormat(0),
 _frameNumber(0),
-_inputIsStream(false)
+_inputIsStream(false),
+_pIoBuffer(0)
+// _totalRead(0),
+// _totalReadCount(0)
 {
 }
 
@@ -129,6 +132,10 @@ FFmpegMeta::~FFmpegMeta()
     if (_pIoContext) {
 //         Log::instance()->ffmpeg().trace("ffmpeg::av_freep(ByteIOContext*) ...");
 //         av_freep(_pIoContext);
+    }
+    if (_pIoBuffer) {
+        delete _pIoBuffer;
+        _pIoBuffer = 0;
     }
 }
 
@@ -453,11 +460,10 @@ FFmpegMeta::errorMessage(int errorCode)
 // FIXME: for correct buffer sizes see libavformat/utils.c: av_open_input_file()
 FFmpegTagger::FFmpegTagger() :
 _tagBufferSize(2048),
+_IoBufferSize(8192)
 // _IoBufferSize(32768),
 // _IoBufferSize(2048),
 // _IoBufferSize(1024),
-_IoBufferSize(8192),
-_pIoBuffer(new unsigned char[_IoBufferSize])
 {
     // Initialize libavformat and register all the muxers, demuxers and protocols
     Log::instance()->ffmpeg().trace("ffmpeg::av_register_all() ...");
@@ -467,9 +473,6 @@ _pIoBuffer(new unsigned char[_IoBufferSize])
 
 FFmpegTagger::~FFmpegTagger()
 {
-    if (_pIoBuffer) {
-        delete _pIoBuffer;
-    }
 }
 
 
@@ -482,7 +485,7 @@ FFmpegTagger::probeInputFormat(std::istream& istr)
     
     probeData.buf_size = _tagBufferSize;
     unsigned char buffer[_tagBufferSize];
-    probeData.buf = (unsigned char*)&buffer;
+    probeData.buf = buffer;
     istr.read((char*)probeData.buf, _tagBufferSize);
     if(istr.bad()) {
         Omm::AvStream::Log::instance()->avstream().error("error reading probe data");
@@ -492,7 +495,6 @@ FFmpegTagger::probeInputFormat(std::istream& istr)
     Omm::AvStream::Log::instance()->avstream().debug("done.");
     
     Omm::AvStream::Log::instance()->avstream().debug("detecting format ...");
-    // initialize _pInputFormat
     Log::instance()->ffmpeg().trace("ffmpeg::av_probe_input_format() ...");
     AVInputFormat* pInputFormat = av_probe_input_format(&probeData, 1 /*int is_opened*/);
     if (pInputFormat) {
@@ -503,8 +505,8 @@ FFmpegTagger::probeInputFormat(std::istream& istr)
         return 0;
     }
     
-    // this stops ffmpeg from seeking the stream
-    pInputFormat->flags |= AVFMT_NOFILE;
+    // this stops ffmpeg from seeking the stream, but av_probe_input_format() returns 0 when called after setting this flag.
+//     pInputFormat->flags |= AVFMT_NOFILE;
     
     // TODO: reset the stream after probing (if seekable)
     // Seek back to 0
@@ -527,10 +529,8 @@ FFmpegTagger::probeInputFormat(std::istream& istr)
 }
 
 
-static long totalRead = 0;
-static long totalReadCount = 0;
-
-static int IOOpen(URLContext* pUrlContext, const char* filename, int flags)
+int
+FFmpegTagger::IOOpen(URLContext* pUrlContext, const char* filename, int flags)
 {
     Omm::AvStream::Log::instance()->avstream().debug("IOOpen file: " + std::string(filename) + " ...");
     std::ifstream* pInputStream = (std::ifstream*)pUrlContext->priv_data;
@@ -544,7 +544,8 @@ static int IOOpen(URLContext* pUrlContext, const char* filename, int flags)
 }
 
 
-static int IOClose(URLContext* pUrlContext)
+int
+FFmpegTagger::IOClose(URLContext* pUrlContext)
 {
     Omm::AvStream::Log::instance()->avstream().debug("IOClose ...");
     std::ifstream* pInputStream = (std::ifstream*)pUrlContext->priv_data;
@@ -558,7 +559,8 @@ static int IOClose(URLContext* pUrlContext)
 }
 
 
-static int IORead(void *opaque, uint8_t *buf, int buf_size)
+int
+FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
 {
 //     Omm::AvStream::Log::instance()->avstream().trace("IORead()");
     
@@ -581,16 +583,19 @@ static int IORead(void *opaque, uint8_t *buf, int buf_size)
         return -1;
     }
     
-    totalRead += bytes;
-    totalReadCount++;
-    Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + ", total: " + Poco::NumberFormatter::format(totalRead) + ", read ops: " +
-        Poco::NumberFormatter::format(totalReadCount)
-        );
+    Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes));
     return bytes;
+
+//     _totalRead += bytes;
+//     totalReadCount++;
+//     Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + ", total: " + Poco::NumberFormatter::format(totalRead) + ", read ops: " +
+//         Poco::NumberFormatter::format(totalReadCount)
+//         );
 }
 
 
-static int64_t IOSeek(void *opaque, int64_t offset, int whence)
+int64_t
+FFmpegTagger::IOSeek(void *opaque, int64_t offset, int whence)
 {
     Omm::AvStream::Log::instance()->avstream().trace("IOSeek() offset: " + Poco::NumberFormatter::format(offset));
     
@@ -609,13 +614,14 @@ static int64_t IOSeek(void *opaque, int64_t offset, int whence)
         Omm::AvStream::Log::instance()->avstream().error("IOSeek failed to read from std::istream");
         return 0;
     }
-    totalRead = offset;
-    return totalRead;
+    return offset;
+//     totalRead = offset;
+//     return totalRead;
 }
 
 
 ByteIOContext*
-FFmpegTagger::initIo(std::istream& istr)
+FFmpegTagger::initIo(std::istream& istr, unsigned char* pIoBuffer)
 {
     static char streamName[] = "std::istream";
     
@@ -630,15 +636,15 @@ FFmpegTagger::initIo(std::istream& istr)
     pUrlContext->prot->next = 0;
     pUrlContext->prot->url_open = 0;
 //     pUrlContext->prot->url_open = (int (*)(URLContext *, const char *, int))IOOpen;
-    pUrlContext->prot->url_read = (int (*) (URLContext *, unsigned char *, int))IORead;
+    pUrlContext->prot->url_read = (int (*) (URLContext *, unsigned char *, int))FFmpegTagger::IORead;
     pUrlContext->prot->url_write = 0;
-    pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))IOSeek;
+    pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))FFmpegTagger::IOSeek;
 //     pUrlContext->prot->url_seek = 0;
     pUrlContext->prot->url_close = 0;
 //     pUrlContext->prot->url_close = (int (*)(URLContext *))IOClose;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_alloc_put_byte() ...");
-    ByteIOContext* pIoContext = av_alloc_put_byte(_pIoBuffer, _IoBufferSize, 0, pUrlContext, IORead, 0, IOSeek);
+    ByteIOContext* pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, FFmpegTagger::IOSeek);
 //     ByteIOContext* pIoContext = av_alloc_put_byte(_pIoBuffer, _IoBufferSize, 0, pUrlContext, IORead, 0, 0);
     pIoContext->is_streamed = 1;
     pIoContext->max_packet_size = _IoBufferSize;
@@ -691,11 +697,13 @@ FFmpegTagger::tag(std::istream& istr)
 {
     FFmpegMeta* pMeta = new FFmpegMeta;
     int error;
-    
-    pMeta->_inputIsStream = true;
-    pMeta->_pIoContext = initIo(istr);
     pMeta->_pInputFormat = probeInputFormat(istr);
+    
+    pMeta->_pIoBuffer = new unsigned char[_IoBufferSize];
+    pMeta->_pIoContext = initIo(istr, pMeta->_pIoBuffer);
 
+    pMeta->_inputIsStream = true;
+    
 //     AVFormatParameters avFormatParameters;
 //     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
 //     avFormatParameters.prealloced_context = 1;

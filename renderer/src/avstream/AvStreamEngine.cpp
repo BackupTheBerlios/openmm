@@ -29,6 +29,7 @@
 AvStreamEngine::AvStreamEngine() :
 _engineId("OMM AvStream engine " + Omm::OMM_VERSION),
 _isPlaying(false),
+_pTagger(0),
 _pClock(0),
 _pDemuxer(0),
 _pAudioSink(0),
@@ -59,7 +60,6 @@ AvStreamEngine::createPlayer()
         return;
     }
     std::string audioPlugin("audiosink-alsa");
-//     std::string audioPlugin("audiosink-sdl");
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
     try {
         _pAudioSink = audioPluginLoader.load(audioPlugin, "AudioSink");
@@ -115,12 +115,24 @@ AvStreamEngine::setUri(std::string mrl)
     
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
-//     Omm::AvStream::Log::instance()->avstream().debug("trying to open ifstream with url: " + mrl + " ...");
+    Omm::AvStream::Log::instance()->avstream().debug("trying to open ifstream with url: " + mrl + " ...");
+    _pFileStream = new std::ifstream(mrl.c_str());
+    if (!*_pFileStream) {
+        Omm::AvStream::Log::instance()->avstream().error("opening ifstream failed with url: " + mrl + " ...");
+        return;
+    }
+    Omm::AvStream::Log::instance()->avstream().debug("opened ifstream.");
+    _pDemuxer->set(_pTagger->tag(*_pFileStream));
+
 //     _fileStream.open(mrl.c_str());
+//     if (!_fileStream) {
+//         Omm::AvStream::Log::instance()->avstream().error("opening ifstream failed with url: " + mrl + " ...");
+//         return;
+//     }
 //     Omm::AvStream::Log::instance()->avstream().debug("opened ifstream.");
-//     _pDemuxer->set(_fileStream);
+//     _pDemuxer->set(_pTagger->tag(_fileStream));
 //     Omm::AvStream::Log::instance()->avstream().debug("set ifstream.");
-    _pDemuxer->set(_pTagger->tag(mrl));
+//     _pDemuxer->set(_pTagger->tag(mrl));
     /**/
     if (_pDemuxer->firstAudioStream() < 0 && _pDemuxer->firstVideoStream() < 0) {
         Omm::AvStream::Log::instance()->avstream().error("no audio or video stream found, exiting");;
@@ -201,9 +213,11 @@ AvStreamEngine::stop()
     /**/
     _pDemuxer->reset();
     
-//     Omm::AvStream::Log::instance()->avstream().debug("trying to close ifstream ...");
+    Omm::AvStream::Log::instance()->avstream().debug("trying to close ifstream ...");
 //     _fileStream.close();
-//     Omm::AvStream::Log::instance()->avstream().debug("deleted ifstream.");
+    _pFileStream->close();
+    delete _pFileStream;
+    Omm::AvStream::Log::instance()->avstream().debug("closed ifstream.");
     
     _isPlaying = false;
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE OFF. >>>>>>>>>>>>");

@@ -68,6 +68,9 @@ private:
     uint64_t            _frameNumber;
     
     bool                _inputIsStream;
+    unsigned char*      _pIoBuffer;
+//     long long           _totalRead;
+//     long long           _totalReadCount;
 };
 
 
@@ -82,11 +85,14 @@ public:
     
 private:
     AVInputFormat* probeInputFormat(std::istream& istr);
-    ByteIOContext* initIo(std::istream& istr);
+    ByteIOContext* initIo(std::istream& istr, unsigned char* pIoBuffer);
+    static int IOOpen(URLContext* pUrlContext, const char* filename, int flags);
+    static int IOClose(URLContext* pUrlContext);
+    static int IORead(void *opaque, uint8_t *buf, int buf_size);
+    static int64_t IOSeek(void *opaque, int64_t offset, int whence);
     
-    int                 _tagBufferSize;
-    int                 _IoBufferSize;
-    unsigned char*      _pIoBuffer;
+    const int            _tagBufferSize;
+    const int            _IoBufferSize;
 };
 
 

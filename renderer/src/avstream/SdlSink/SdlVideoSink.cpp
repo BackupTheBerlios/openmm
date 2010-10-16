@@ -104,20 +104,19 @@ SdlVideoSink::openWindow(bool fullScreen, int width, int height)
     
     if (_pSdlScreen == 0) {
         Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
+        return;
     }
+    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink window opened.");
 }
 
 
 bool
 SdlVideoSink::initDevice()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("opening SDL video sink ...");
-    
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
         SdlOverlay* pOverlay = new SdlOverlay(this, getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height(), _pSdlScreen);
         _overlayVector[numOverlay] = pOverlay;
     }
-    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opened.");
     return true;
 }
 
