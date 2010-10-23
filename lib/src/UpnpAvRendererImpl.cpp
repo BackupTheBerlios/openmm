@@ -70,10 +70,10 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     if (_pEngine->preferStdStream()) {
         Poco::URI uri(CurrentURI);
         _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-        _pRequest = new Poco::Net::HTTPRequest("GET", uri.getPath());
-        _pSession->sendRequest(*_pRequest);
+        Poco::Net::HTTPRequest request("GET", uri.getPath());
+        _pSession->sendRequest(request);
         std::stringstream requestHeader;
-        _pRequest->write(requestHeader);
+        request.write(requestHeader);
         Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
         
         Poco::Net::HTTPResponse response;
@@ -187,8 +187,6 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
         if (transportState != "STOPPED" && transportState != "PAUSED_PLAYBACK") {
             _pEngine->stop();
             if (_pEngine->preferStdStream()) {
-                delete _pRequest;
-                _pRequest = 0;
                 delete _pSession;
                 _pSession = 0;
             }

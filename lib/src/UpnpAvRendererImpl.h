@@ -52,7 +52,6 @@ private:
 
     Engine*                             _pEngine;
     Poco::Net::HTTPClientSession*       _pSession;
-    Poco::Net::HTTPRequest*             _pRequest;
     std::string                         _lastCurrentTrackUri;
 };
 
