@@ -563,7 +563,7 @@ FFmpegTagger::IOClose(URLContext* pUrlContext)
 int
 FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
 {
-    Omm::AvStream::Log::instance()->avstream().trace("IORead()");
+//     Omm::AvStream::Log::instance()->avstream().trace("IORead()");
     
     URLContext* pUrlContext = (URLContext*)opaque;
 //     Omm::AvStream::Log::instance()->avstream().trace("IORead() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
