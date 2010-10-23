@@ -49,8 +49,9 @@ public:
     /*
       AVTransport
     */
-    
+    virtual bool preferStdStream() { return false; }
     virtual void setUri(std::string uri) = 0;
+    virtual void setUri(std::istream& istr) {}
     virtual void load() = 0;
     
     /**

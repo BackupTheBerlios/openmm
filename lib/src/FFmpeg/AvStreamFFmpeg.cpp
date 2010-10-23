@@ -562,7 +562,7 @@ FFmpegTagger::IOClose(URLContext* pUrlContext)
 int
 FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
 {
-//     Omm::AvStream::Log::instance()->avstream().trace("IORead()");
+    Omm::AvStream::Log::instance()->avstream().trace("IORead()");
     
     URLContext* pUrlContext = (URLContext*)opaque;
 //     Omm::AvStream::Log::instance()->avstream().trace("IORead() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
@@ -575,9 +575,10 @@ FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
     }
     
 //     Omm::AvStream::Log::instance()->avstream().trace("IORead() trying to read " + Poco::NumberFormatter::format(buf_size) + " bytes from stream");
-    int bytes = pInputStream->readsome((char*)buf, buf_size);
-//     pInputStream->read((char*)buf, buf_size);
-//     int bytes = buf_size;
+//  readsome() reads 0 bytes from Poco::HTTPClientSession streams ... dunno why, but use read() instead.
+//     int bytes = pInputStream->readsome((char*)buf, buf_size);
+    pInputStream->read((char*)buf, buf_size);
+    int bytes = pInputStream->gcount();
     if (!pInputStream->good()) {
         Omm::AvStream::Log::instance()->avstream().error("IORead failed to read from std::istream");
         return -1;
@@ -600,21 +601,23 @@ FFmpegTagger::IOSeek(void *opaque, int64_t offset, int whence)
     Omm::AvStream::Log::instance()->avstream().trace("IOSeek() offset: " + Poco::NumberFormatter::format(offset));
     
     URLContext* pUrlContext = (URLContext*)opaque;
-    Omm::AvStream::Log::instance()->avstream().trace("IOSeek() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
-    Omm::AvStream::Log::instance()->avstream().trace("IOSeek() URLProtocol name: " + std::string(pUrlContext->prot->name));
+//     Omm::AvStream::Log::instance()->avstream().trace("IOSeek() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
+//     Omm::AvStream::Log::instance()->avstream().trace("IOSeek() URLProtocol name: " + std::string(pUrlContext->prot->name));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
     if (!pInputStream) {
         Omm::AvStream::Log::instance()->avstream().error("IOSeek failed, std::istream not set");
-        return 0;
+        return -1;
     }
     
     pInputStream->seekg(offset);
     if (!pInputStream->good()) {
-        Omm::AvStream::Log::instance()->avstream().error("IOSeek failed to read from std::istream");
-        return 0;
+        Omm::AvStream::Log::instance()->avstream().error("IOSeek failed to seek std::istream");
+        return pInputStream->tellg();
+//         return 0;
     }
-    return offset;
+    return pInputStream->tellg();
+//     return offset;
 //     totalRead = offset;
 //     return totalRead;
 }
@@ -638,14 +641,14 @@ FFmpegTagger::initIo(std::istream& istr, unsigned char* pIoBuffer)
 //     pUrlContext->prot->url_open = (int (*)(URLContext *, const char *, int))IOOpen;
     pUrlContext->prot->url_read = (int (*) (URLContext *, unsigned char *, int))FFmpegTagger::IORead;
     pUrlContext->prot->url_write = 0;
-    pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))FFmpegTagger::IOSeek;
-//     pUrlContext->prot->url_seek = 0;
+//     pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))FFmpegTagger::IOSeek;
+    pUrlContext->prot->url_seek = 0;
     pUrlContext->prot->url_close = 0;
 //     pUrlContext->prot->url_close = (int (*)(URLContext *))IOClose;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_alloc_put_byte() ...");
-    ByteIOContext* pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, FFmpegTagger::IOSeek);
-//     ByteIOContext* pIoContext = av_alloc_put_byte(_pIoBuffer, _IoBufferSize, 0, pUrlContext, IORead, 0, 0);
+//     ByteIOContext* pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, FFmpegTagger::IOSeek);
+    ByteIOContext* pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, 0);
     pIoContext->is_streamed = 1;
     pIoContext->max_packet_size = _IoBufferSize;
     
@@ -709,6 +712,7 @@ FFmpegTagger::tag(std::istream& istr)
 //     avFormatParameters.prealloced_context = 1;
 //     pMeta->_pFormatContext->probesize = 5000;
 //     pMeta->_pFormatContext->max_analyze_duration = 1000000;
+//     pMeta->_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
 
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
     // FIXME: av_open_input_stream needs to read several megabytes of a TS.

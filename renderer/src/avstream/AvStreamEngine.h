@@ -44,7 +44,9 @@ public:
     virtual void setFullscreen(bool on = true);
     std::string getEngineId() { return _engineId; }
     
+    virtual bool preferStdStream();
     virtual void setUri(std::string mrl);
+    virtual void setUri(std::istream& istr);
     virtual void load();
     virtual void pause();
     virtual void stop();
@@ -64,8 +66,6 @@ public:
     
     virtual void endOfStream() {}
     
-protected:
-    
 private:
     bool isSeekable();
     void savePosition();
@@ -82,8 +82,10 @@ private:
     Omm::AvStream::AudioSink*   _pAudioSink;
     Omm::AvStream::VideoSink*   _pVideoSink;
     
-//     std::ifstream               _fileStream;
-    std::ifstream*               _pFileStream;
+    std::ifstream               _file;
+    Poco::Net::HTTPClientSession _session;
+    bool                        _isFile;
+    std::string                 _uri;
 };
 
 #endif

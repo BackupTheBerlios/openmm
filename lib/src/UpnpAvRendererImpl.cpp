@@ -60,18 +60,34 @@ void
 AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportRendererImpl::SetAVTransportURI() enters in state: " << transportState << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI enters in state: " + transportState);
     
     if (transportState == "NO_MEDIA_PRESENT") {
         _setTransportState("STOPPED");
     }
 
-    std::cerr << "_engine->setUri() uri: " << CurrentURI << std::endl;
-//     std::cerr << "renderer: " << _pRenderer << std::endl;
-    std::cerr << "engine: " << _pEngine << std::endl;
-    std::cerr << "id: " << _pEngine->getEngineId() << std::endl;
-    _pEngine->setUri(CurrentURI);
-    std::cerr << "_engine->setUri() finished" << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
+    if (_pEngine->preferStdStream()) {
+        Poco::URI uri(CurrentURI);
+        _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
+        _pRequest = new Poco::Net::HTTPRequest("GET", uri.getPath());
+        _pSession->sendRequest(*_pRequest);
+        std::stringstream requestHeader;
+        _pRequest->write(requestHeader);
+        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+        
+        Poco::Net::HTTPResponse response;
+        std::istream& istr = _pSession->receiveResponse(response);
+        
+        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        _pEngine->setUri(istr);
+    }
+    else {
+        _pEngine->setUri(CurrentURI);
+    }
     _setCurrentTrackURI(CurrentURI);
 /*
 2.2.16.CurrentTrackMetaData
@@ -96,7 +112,7 @@ implementation doesn’t support this feature then this state variable must be s
 // //     std::string duration = obj.getProperty("res@duration");
 // //     _setCurrentMediaDuration(duration);
 // //     _setCurrentTrackDuration(duration);
-    std::cerr << "AVTransportRendererImpl::SetAVTransportURI() leaves in state: " << transportState << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + transportState);
 }
 
 
@@ -170,6 +186,12 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
         //       -> unfortunately mplayer has it's problems with stopping ...
         if (transportState != "STOPPED" && transportState != "PAUSED_PLAYBACK") {
             _pEngine->stop();
+            if (_pEngine->preferStdStream()) {
+                delete _pRequest;
+                _pRequest = 0;
+                delete _pSession;
+                _pSession = 0;
+            }
         }
         // TODO: check if engine really stopped (by return value)
         _setTransportState("STOPPED");

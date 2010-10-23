@@ -106,8 +106,68 @@ AvStreamEngine::setFullscreen(bool on)
 }
 
 
+bool
+AvStreamEngine::preferStdStream()
+{
+    return true;
+//     return false;
+}
+
+
+// void
+// AvStreamEngine::setUri(std::string mrl)
+// {
+//     if (_isPlaying) {
+//         stop();
+//     }
+//     
+//     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+//     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
+//     _pDemuxer->set(_pTagger->tag(mrl));
+// }
+
+
 void
 AvStreamEngine::setUri(std::string mrl)
+{
+    if (_isPlaying) {
+        stop();
+    }
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+    Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
+
+    _uri = mrl;
+    Poco::URI uri(mrl);
+    Omm::AvStream::Log::instance()->avstream().debug("getting stream of type: " + uri.getScheme());
+    if (uri.getScheme() == "http") {
+        _isFile = false;
+        _session.setHost(uri.getHost());
+        _session.setPort(uri.getPort());
+        Poco::Net::HTTPRequest request("GET", uri.getPath());
+        _session.sendRequest(request);
+        std::stringstream requestHeader;
+        request.write(requestHeader);
+        Omm::AvStream::Log::instance()->avstream().debug("request header:\n" + requestHeader.str());
+        
+        Poco::Net::HTTPResponse response;
+        std::istream& istr = _session.receiveResponse(response);
+        
+        Omm::AvStream::Log::instance()->avstream().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        Omm::AvStream::Log::instance()->avstream().debug("response header:\n" + responseHeader.str());
+        _pDemuxer->set(_pTagger->tag(istr));
+    }
+    else if (uri.getScheme() == "file" || uri.getScheme() == "") {
+        _isFile = true;
+        _file.open(uri.getPath().c_str());
+        _pDemuxer->set(_pTagger->tag(_file));
+    }
+}
+
+
+void
+AvStreamEngine::setUri(std::istream& istr)
 {
     if (_isPlaying) {
         stop();
@@ -115,25 +175,15 @@ AvStreamEngine::setUri(std::string mrl)
     
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
-    Omm::AvStream::Log::instance()->avstream().debug("trying to open ifstream with url: " + mrl + " ...");
-    _pFileStream = new std::ifstream(mrl.c_str());
-    if (!*_pFileStream) {
-        Omm::AvStream::Log::instance()->avstream().error("opening ifstream failed with url: " + mrl + " ...");
-        return;
-    }
-    Omm::AvStream::Log::instance()->avstream().debug("opened ifstream.");
-    _pDemuxer->set(_pTagger->tag(*_pFileStream));
+    _pDemuxer->set(_pTagger->tag(istr));
+}
 
-//     _fileStream.open(mrl.c_str());
-//     if (!_fileStream) {
-//         Omm::AvStream::Log::instance()->avstream().error("opening ifstream failed with url: " + mrl + " ...");
-//         return;
-//     }
-//     Omm::AvStream::Log::instance()->avstream().debug("opened ifstream.");
-//     _pDemuxer->set(_pTagger->tag(_fileStream));
-//     Omm::AvStream::Log::instance()->avstream().debug("set ifstream.");
-//     _pDemuxer->set(_pTagger->tag(mrl));
-    /**/
+
+void
+AvStreamEngine::load()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+    
     if (_pDemuxer->firstAudioStream() < 0 && _pDemuxer->firstVideoStream() < 0) {
         Omm::AvStream::Log::instance()->avstream().error("no audio or video stream found, exiting");;
         return;
@@ -145,32 +195,22 @@ AvStreamEngine::setUri(std::string mrl)
         _pClock->attachAudioSink(_pAudioSink);
     }
     
-    /**/
+
     //////////// load and attach video sink ////////////
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pDemuxer->attach(_pVideoSink, _pDemuxer->firstVideoStream());
         _pClock->attachVideoSink(_pVideoSink);
     }
-    /**/
-}
-
-
-void
-AvStreamEngine::load()
-{
-    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE START ... >>>>>>>>>>>>");
     
     _pDemuxer->start();
-    /**/
 //     _pClock->setStartTime(true);
     _pClock->setStartTime(false);
 
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RUN ... >>>>>>>>>>>>");
 
     _pClock->start();
-    /**/
     _isPlaying = true;
 }
 
@@ -183,7 +223,6 @@ AvStreamEngine::stop()
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE HALT. >>>>>>>>>>>>");
     
     _pDemuxer->stop();
-    /**/
     _pClock->stop();
     
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE STOP. >>>>>>>>>>>>");
@@ -193,11 +232,9 @@ AvStreamEngine::stop()
         _pDemuxer->detach(_pDemuxer->firstAudioStream());
     }
     
-    /**/
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pDemuxer->detach(_pDemuxer->firstVideoStream());
     }
-    /**/
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE RESET. >>>>>>>>>>>>");
     _pClock->reset();
     
@@ -205,19 +242,15 @@ AvStreamEngine::stop()
         _pAudioSink->reset();
     }
     
-    /**/
     if (_pDemuxer->firstVideoStream() >= 0) {
         _pVideoSink->reset();
     }
     // demuxer is last node to reset, because StreamInfo belongs to it and is refered to by downstream nodes.
-    /**/
     _pDemuxer->reset();
     
-    Omm::AvStream::Log::instance()->avstream().debug("trying to close ifstream ...");
-//     _fileStream.close();
-    _pFileStream->close();
-    delete _pFileStream;
-    Omm::AvStream::Log::instance()->avstream().debug("closed ifstream.");
+    if (_isFile) {
+        _file.close();
+    }
     
     _isPlaying = false;
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE OFF. >>>>>>>>>>>>");
