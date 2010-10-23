@@ -459,7 +459,8 @@ FFmpegMeta::errorMessage(int errorCode)
 
 // FIXME: for correct buffer sizes see libavformat/utils.c: av_open_input_file()
 FFmpegTagger::FFmpegTagger() :
-_tagBufferSize(2048),
+// _tagBufferSize(2048),
+_tagBufferSize(8192),
 _IoBufferSize(8192)
 // _IoBufferSize(32768),
 // _IoBufferSize(2048),
@@ -707,17 +708,17 @@ FFmpegTagger::tag(std::istream& istr)
 
     pMeta->_inputIsStream = true;
     
-//     AVFormatParameters avFormatParameters;
-//     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
-//     avFormatParameters.prealloced_context = 1;
-//     pMeta->_pFormatContext->probesize = 5000;
-//     pMeta->_pFormatContext->max_analyze_duration = 1000000;
+    AVFormatParameters avFormatParameters;
+    memset(&avFormatParameters, 0, sizeof(avFormatParameters));
+    avFormatParameters.prealloced_context = 1;
+    pMeta->_pFormatContext->probesize = 5000;
+    pMeta->_pFormatContext->max_analyze_duration = 1000000;
 //     pMeta->_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
 
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
     // FIXME: av_open_input_stream needs to read several megabytes of a TS.
-//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
-    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
+    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
+//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
 //     error = av_open_input_file(&pMeta->_pFormatContext, "std::istream", pMeta->_pInputFormat, 0, 0);
     if (error) {
         Omm::AvStream::Log::instance()->avstream().error("av_open_input_stream() failed");
