@@ -488,12 +488,12 @@ FFmpegTagger::probeInputFormat(std::istream& istr)
     unsigned char buffer[_tagBufferSize];
     probeData.buf = buffer;
     istr.read((char*)probeData.buf, _tagBufferSize);
-    if(istr.bad()) {
+    int bytes = istr.gcount();
+    Omm::AvStream::Log::instance()->avstream().debug("read " + Poco::NumberFormatter::format(bytes) + " bytes from stream");
+    if (istr.bad() || bytes == 0) {
         Omm::AvStream::Log::instance()->avstream().error("error reading probe data");
         return 0;
     }
-//     istr.seekg(0);
-    Omm::AvStream::Log::instance()->avstream().debug("done.");
     
     Omm::AvStream::Log::instance()->avstream().debug("detecting format ...");
     Log::instance()->ffmpeg().trace("ffmpeg::av_probe_input_format() ...");

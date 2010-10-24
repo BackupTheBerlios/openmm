@@ -83,7 +83,7 @@ private:
     Omm::AvStream::VideoSink*   _pVideoSink;
     
     std::ifstream               _file;
-    Poco::Net::HTTPClientSession _session;
+    Poco::Net::HTTPClientSession* _pSession;
     bool                        _isFile;
     std::string                 _uri;
 };

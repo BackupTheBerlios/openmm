@@ -718,7 +718,8 @@ Node::reset()
         if (pQueue) {
             while (pQueue->count()) {
                 Frame* pFrame = pQueue->get();
-                // NOTE: random segfaults deleting last video frame of VideoSink queue, reason unknown ...
+                // FIXME: random segfaults deleting last video frame of VideoSink queue (reading from std::istream, reason still unknown ...)
+                // ... this leaves a memory hole.
                 if (pFrame && pQueue->count()) {
                     delete pFrame;
                 }

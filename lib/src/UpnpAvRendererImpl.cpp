@@ -53,6 +53,8 @@ AVTransportRendererImpl::initStateVars()
     _setAbsoluteCounterPosition(2147483647);
     _setCurrentTransportActions("NOT_IMPLEMENTED");
     _setLastChange("");
+    
+    _pSession = 0;
 }
 
 
@@ -67,8 +69,12 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     }
 
     Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
-    if (_pEngine->preferStdStream()) {
+    if (_pEngine->preferStdStream() && (_getCurrentTrackURI() != CurrentURI || _getTransportState() == "STOPPED")) {
         Poco::URI uri(CurrentURI);
+        _pEngine->stop();
+        if (_pSession) {
+            delete _pSession;
+        }
         _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
         Poco::Net::HTTPRequest request("GET", uri.getPath());
         _pSession->sendRequest(request);
