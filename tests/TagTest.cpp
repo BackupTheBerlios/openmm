@@ -49,7 +49,9 @@ tagUri(std::vector<std::string>& uris)
             return;
         }
         Omm::AvStream::Meta* pMeta = pTagger->tag(*it);
-        pMeta->print();
+        if (pMeta) {
+            pMeta->print();
+        }
         delete pMeta;
         delete pTagger;
     }
@@ -74,7 +76,9 @@ tagStream(std::vector<std::string>& uris)
         }
         std::ifstream ifs((*it).c_str());
         Omm::AvStream::Meta* pMeta = pTagger->tag(ifs);
-        pMeta->print();
+        if (pMeta) {
+            pMeta->print();
+        }
         delete pMeta;
         delete pTagger;
     }
@@ -116,5 +120,6 @@ main(int argc, char** argv)
         allStreams.push_back(*it);
     }
     
+//     tagUri(allStreams);
     tagStream(allStreams);
 }

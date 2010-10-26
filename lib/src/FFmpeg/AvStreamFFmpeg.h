@@ -67,7 +67,7 @@ private:
     AVInputFormat*      _pInputFormat;  // contains the io access callbacks
     uint64_t            _frameNumber;
     
-    bool                _inputIsStream;
+    bool                _useAvOpenInputStream;
     unsigned char*      _pIoBuffer;
 //     long long           _totalRead;
 //     long long           _totalReadCount;
@@ -85,7 +85,7 @@ public:
     
 private:
     AVInputFormat* probeInputFormat(std::istream& istr);
-    ByteIOContext* initIo(std::istream& istr, unsigned char* pIoBuffer);
+    ByteIOContext* initIo(std::istream& istr, bool isSeekable, unsigned char* pIoBuffer);
     static int IOOpen(URLContext* pUrlContext, const char* filename, int flags);
     static int IOClose(URLContext* pUrlContext);
     static int IORead(void *opaque, uint8_t *buf, int buf_size);

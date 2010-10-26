@@ -197,6 +197,15 @@ ${LIB_OMM_AV_STREAM}
 ${LIB_OMM_UTIL}
 )
 
+ADD_EXECUTABLE( tag
+Tag.cpp
+)
+
+TARGET_LINK_LIBRARIES( tag
+${LIB_OMM_AV_STREAM}
+${LIB_OMM_UTIL}
+)
+
 ADD_EXECUTABLE( streamtest
 StreamTest.cpp
 )

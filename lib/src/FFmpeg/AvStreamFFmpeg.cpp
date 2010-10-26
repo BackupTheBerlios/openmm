@@ -100,22 +100,24 @@ Log::ffmpeg()
 
 
 FFmpegMeta::FFmpegMeta() :
-_pFormatContext(avformat_alloc_context()),
+_pFormatContext(0),
 _pIoContext(0),
 _pInputFormat(0),
 _frameNumber(0),
-_inputIsStream(false),
+        _useAvOpenInputStream(false),
 _pIoBuffer(0)
 // _totalRead(0),
 // _totalReadCount(0)
 {
+    Log::instance()->ffmpeg().trace("ffmpeg::avformat_alloc_context() ...");
+    _pFormatContext = avformat_alloc_context();
 }
 
 
 FFmpegMeta::~FFmpegMeta()
 {
     if (_pFormatContext) {
-        if (_inputIsStream) {
+        if (_useAvOpenInputStream) {
             Log::instance()->ffmpeg().trace("ffmpeg::av_close_input_stream() ...");
             // free AVFormatContext
             av_close_input_stream(_pFormatContext);
@@ -612,9 +614,10 @@ FFmpegTagger::IOSeek(void *opaque, int64_t offset, int whence)
     }
     
     pInputStream->seekg(offset);
+//     pInputStream->seekg(offset, std::ios::cur);
     if (!pInputStream->good()) {
         Omm::AvStream::Log::instance()->avstream().error("IOSeek failed to seek std::istream");
-        return pInputStream->tellg();
+//         return pInputStream->tellg();
 //         return 0;
     }
     return pInputStream->tellg();
@@ -625,7 +628,7 @@ FFmpegTagger::IOSeek(void *opaque, int64_t offset, int whence)
 
 
 ByteIOContext*
-FFmpegTagger::initIo(std::istream& istr, unsigned char* pIoBuffer)
+FFmpegTagger::initIo(std::istream& istr, bool isSeekable, unsigned char* pIoBuffer)
 {
     static char streamName[] = "std::istream";
     
@@ -642,15 +645,24 @@ FFmpegTagger::initIo(std::istream& istr, unsigned char* pIoBuffer)
 //     pUrlContext->prot->url_open = (int (*)(URLContext *, const char *, int))IOOpen;
     pUrlContext->prot->url_read = (int (*) (URLContext *, unsigned char *, int))FFmpegTagger::IORead;
     pUrlContext->prot->url_write = 0;
-//     pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))FFmpegTagger::IOSeek;
-    pUrlContext->prot->url_seek = 0;
+    if (isSeekable) {
+        pUrlContext->prot->url_seek = (int64_t (*) (URLContext *, int64_t, int))FFmpegTagger::IOSeek;
+    }
+    else {
+        pUrlContext->prot->url_seek = 0;
+    }
     pUrlContext->prot->url_close = 0;
 //     pUrlContext->prot->url_close = (int (*)(URLContext *))IOClose;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_alloc_put_byte() ...");
-//     ByteIOContext* pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, FFmpegTagger::IOSeek);
-    ByteIOContext* pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, 0);
-    pIoContext->is_streamed = 1;
+    ByteIOContext* pIoContext;
+    if (isSeekable) {
+        pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, FFmpegTagger::IOSeek);
+    }
+    else {
+        pIoContext = av_alloc_put_byte(pIoBuffer, _IoBufferSize, 0, pUrlContext, FFmpegTagger::IORead, 0, 0);
+        pIoContext->is_streamed = 1;
+    }
     pIoContext->max_packet_size = _IoBufferSize;
     
     return pIoContext;
@@ -663,7 +675,7 @@ FFmpegTagger::tag(const std::string& uri)
     FFmpegMeta* pMeta = new FFmpegMeta;
     int error;
     
-    pMeta->_inputIsStream = false;
+    pMeta->_useAvOpenInputStream = false;
     
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
@@ -674,14 +686,14 @@ FFmpegTagger::tag(const std::string& uri)
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
 //     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, 0);
-    if (error) {
-        Omm::AvStream::Log::instance()->avstream().error("av_open_input_file() failed");
+    if (error < 0) {
+        Omm::AvStream::Log::instance()->avstream().error("av_open_input_file() failed.");
         return 0;
     }
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_find_stream_info() ...");
     error = av_find_stream_info(pMeta->_pFormatContext);
-    if (error) {
+    if (error < 0) {
         Omm::AvStream::Log::instance()->avstream().error("av_find_stream_info() failed, could not find codec parameters");
         return 0;
     }
@@ -704,9 +716,10 @@ FFmpegTagger::tag(std::istream& istr)
     pMeta->_pInputFormat = probeInputFormat(istr);
     
     pMeta->_pIoBuffer = new unsigned char[_IoBufferSize];
-    pMeta->_pIoContext = initIo(istr, pMeta->_pIoBuffer);
+    pMeta->_pIoContext = initIo(istr, false, pMeta->_pIoBuffer);
+//     pMeta->_pIoContext = initIo(istr, true, pMeta->_pIoBuffer);
 
-    pMeta->_inputIsStream = true;
+    pMeta->_useAvOpenInputStream = true;
     
     AVFormatParameters avFormatParameters;
     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
@@ -720,7 +733,7 @@ FFmpegTagger::tag(std::istream& istr)
     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
 //     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
 //     error = av_open_input_file(&pMeta->_pFormatContext, "std::istream", pMeta->_pInputFormat, 0, 0);
-    if (error) {
+    if (error < 0) {
         Omm::AvStream::Log::instance()->avstream().error("av_open_input_stream() failed");
         return 0;
     }
@@ -729,7 +742,7 @@ FFmpegTagger::tag(std::istream& istr)
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_find_stream_info() ...");
     error = av_find_stream_info(pMeta->_pFormatContext);
-    if (error) {
+    if (error < 0) {
         Omm::AvStream::Log::instance()->avstream().error("av_find_stream_info() failed, could not find codec parameters");
         return 0;
     }
@@ -1027,7 +1040,7 @@ FFmpegStreamInfo::pixelFormat()
 int
 FFmpegStreamInfo::pictureSize()
 {
-    return avpicture_get_size(pixelFormat(), width(), height());
+    return avpicture_get_size(_pAvCodecContext->pix_fmt, width(), height());
 }
 
 
@@ -1056,13 +1069,13 @@ FFmpegStreamInfo::allocateVideoFrame(Omm::AvStream::Meta::ColorCoding targetForm
 {
     // Determine required buffer size and allocate buffer
     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_get_size() ...");
-    int numBytes = avpicture_get_size(targetFormat, width(), height());
+    int numBytes = avpicture_get_size(FFmpegMeta::toFFmpegPixFmt(targetFormat), width(), height());
     Log::instance()->ffmpeg().trace("ffmpeg::av_malloc() ...");
     uint8_t* buffer = (uint8_t *)av_malloc(numBytes);
     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_alloc_frame() ...");
     AVFrame* pRes = avcodec_alloc_frame();
     Log::instance()->ffmpeg().trace("ffmpeg::avpicture_fill() ...");
-    avpicture_fill((AVPicture *)pRes, buffer, targetFormat, width(), height());
+    avpicture_fill((AVPicture *)pRes, buffer, FFmpegMeta::toFFmpegPixFmt(targetFormat), width(), height());
     
     return new FFmpegFrame(newFrameNumber(), this, pRes);
 }
