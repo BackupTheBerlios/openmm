@@ -677,15 +677,15 @@ FFmpegTagger::tag(const std::string& uri)
     
     pMeta->_useAvOpenInputStream = false;
     
-    AVFormatParameters avFormatParameters;
-    memset(&avFormatParameters, 0, sizeof(avFormatParameters));
-    avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 5000;
-    pMeta->_pFormatContext->max_analyze_duration = 1000000;
+//     AVFormatParameters avFormatParameters;
+//     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
+//     avFormatParameters.prealloced_context = 1;
+//     pMeta->_pFormatContext->probesize = 5000;
+//     pMeta->_pFormatContext->max_analyze_duration = 1000000;
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_file() ...");
-    error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
-//     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, 0);
+//     error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, &avFormatParameters);
+    error = av_open_input_file(&pMeta->_pFormatContext, uri.c_str(), 0, 0, 0);
     if (error < 0) {
         Omm::AvStream::Log::instance()->avstream().error("av_open_input_file() failed.");
         return 0;
@@ -721,17 +721,17 @@ FFmpegTagger::tag(std::istream& istr)
 
     pMeta->_useAvOpenInputStream = true;
     
-    AVFormatParameters avFormatParameters;
-    memset(&avFormatParameters, 0, sizeof(avFormatParameters));
-    avFormatParameters.prealloced_context = 1;
-    pMeta->_pFormatContext->probesize = 5000;
-    pMeta->_pFormatContext->max_analyze_duration = 1000000;
+//     AVFormatParameters avFormatParameters;
+//     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
+//     avFormatParameters.prealloced_context = 1;
+//     pMeta->_pFormatContext->probesize = 5000;
+//     pMeta->_pFormatContext->max_analyze_duration = 1000000;
 //     pMeta->_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
 
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
     // FIXME: av_open_input_stream needs to read several megabytes of a TS.
-    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
-//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
+//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
+    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
 //     error = av_open_input_file(&pMeta->_pFormatContext, "std::istream", pMeta->_pInputFormat, 0, 0);
     if (error < 0) {
         Omm::AvStream::Log::instance()->avstream().error("av_open_input_stream() failed");

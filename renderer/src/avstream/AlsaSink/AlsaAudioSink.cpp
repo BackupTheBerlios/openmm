@@ -107,12 +107,12 @@ AlsaAudioSink::initDevice()
     }
     _rate = getInStream(0)->getInfo()->sampleRate();
     if (snd_pcm_hw_params_set_rate_near(_pcmPlayback, _hwParams, &_rate, 0) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate.");
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate to: " + Poco::NumberFormatter::format(_rate));
         return false;
     }
     _channels = getInStream(0)->getInfo()->channels();
     if (snd_pcm_hw_params_set_channels(_pcmPlayback, _hwParams, _channels) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels.");
+        Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels to: " + Poco::NumberFormatter::format(_channels));
         return false;
     }
 //     if (snd_pcm_hw_params_set_periods(_pcmPlayback, _hwParams, _periods, 0) < 0) {
@@ -209,12 +209,13 @@ AlsaAudioSink::writeThread()
 {
     Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread started.");
     
+    const int frameShift = _channels = getInStream(0)->getInfo()->channels();
     while(!getStopWriting()) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
         Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, trying to write " + Poco::NumberFormatter::format(_bufferSize) + " bytes");
         // last parameter of snd_pcm_writei are the number of frames (not bytes) to write to the pcm ringbuffer
-        while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> 2)) < 0) {
+        while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> frameShift)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
             Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
         }
