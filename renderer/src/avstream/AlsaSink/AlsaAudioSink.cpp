@@ -105,12 +105,12 @@ AlsaAudioSink::initDevice()
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device format.");
         return false;
     }
-    _rate = getInStream(0)->getInfo()->sampleRate();
+    _rate = sampleRate();
     if (snd_pcm_hw_params_set_rate_near(_pcmPlayback, _hwParams, &_rate, 0) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate to: " + Poco::NumberFormatter::format(_rate));
         return false;
     }
-    _channels = getInStream(0)->getInfo()->channels();
+    _channels = channels();
     if (snd_pcm_hw_params_set_channels(_pcmPlayback, _hwParams, _channels) < 0) {
         Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels to: " + Poco::NumberFormatter::format(_channels));
         return false;
@@ -121,33 +121,22 @@ AlsaAudioSink::initDevice()
 //     }
     // Set buffer size (in frames). The resulting latency is given by
     // latency = periodSize * periods / (rate * bytes_per_frame)
-    snd_pcm_uframes_t bufferSize = (_startPeriodSize * _periods) >> 2;
-    if (int ret = snd_pcm_hw_params_set_buffer_size_near(_pcmPlayback, _hwParams, &bufferSize)) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s setting up PCM device buffer to size: %s returns: %s",
-            getName(),
-            Poco::NumberFormatter::format(_bufferSize),
-            Poco::NumberFormatter::format(ret)
-            ));
+//     snd_pcm_uframes_t bufferSizeInFrames = (_startPeriodSize * _periods) >> 2;
+    snd_pcm_uframes_t bufferSizeInFrames = frameCount(_startPeriodSize * _channels);
+    if (int ret = snd_pcm_hw_params_set_buffer_size_near(_pcmPlayback, _hwParams, &bufferSizeInFrames)) {
+        Omm::AvStream::Log::instance()->avstream().error(getName() + " setting up PCM device buffer to size: " + Poco::NumberFormatter::format(_bufferSize) + " returns: " + Poco::NumberFormatter::format(ret));
         return false;
     }
     if (_buffer) {
         delete _buffer;
     }
-    _bufferSize = bufferSize << 2;
+    _bufferSize = byteCount(bufferSizeInFrames);
     _buffer = new char[_bufferSize];
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s setting up PCM device buffer to number of frames: %s, audio read buffer size in bytes is: %s",
-        getName(),
-        Poco::NumberFormatter::format(bufferSize),
-        Poco::NumberFormatter::format(_bufferSize)
-        ));
+    Omm::AvStream::Log::instance()->avstream().debug(getName() + " setting up PCM device buffer to number of frames: " + Poco::NumberFormatter::format(bufferSizeInFrames) + ", audio read buffer size in bytes is: " + Poco::NumberFormatter::format(_bufferSize));
         
     _periodSize = _startPeriodSize;
     if (int ret = snd_pcm_hw_params_set_period_size_near(_pcmPlayback, _hwParams, &_periodSize, 0)) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s setting up PCM device period to size: %s returns: %s",
-            getName(),
-            Poco::NumberFormatter::format(_periodSize),
-            Poco::NumberFormatter::format(ret)
-            ));
+        Omm::AvStream::Log::instance()->avstream().error(getName() + " setting up PCM device period to size: " + Poco::NumberFormatter::format(_periodSize) + " returns: " + Poco::NumberFormatter::format(ret));
         return false;
     }
     if (snd_pcm_hw_params(_pcmPlayback, _hwParams) < 0) {
@@ -209,13 +198,13 @@ AlsaAudioSink::writeThread()
 {
     Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread started.");
     
-    const int frameShift = _channels = getInStream(0)->getInfo()->channels();
+    const int bufferSizeInFrames = frameCount(_bufferSize);
     while(!getStopWriting()) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
         Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, trying to write " + Poco::NumberFormatter::format(_bufferSize) + " bytes");
         // last parameter of snd_pcm_writei are the number of frames (not bytes) to write to the pcm ringbuffer
-        while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, _bufferSize >> frameShift)) < 0) {
+        while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, bufferSizeInFrames)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
             Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
         }

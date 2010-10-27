@@ -638,6 +638,9 @@ public:
 protected:
     int channels();
     unsigned int sampleRate();
+    unsigned int sampleSize();
+    int frameCount(int bytes);
+    int byteCount(int frames);
     int silence();
     
     ByteQueue                   _byteQueue;

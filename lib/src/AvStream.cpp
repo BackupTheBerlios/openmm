@@ -1366,6 +1366,28 @@ AudioSink::sampleRate()
 }
 
 
+unsigned int
+AudioSink::sampleSize()
+{
+    // FIXME: calculate sample size from sound format. Currently it is fixed 16 bit.
+    return 2;
+}
+
+
+int
+AudioSink::frameCount(int bytes)
+{
+    return bytes / (channels() * sampleSize());
+}
+
+
+int
+AudioSink::byteCount(int frames)
+{
+    return frames * channels() * sampleSize();
+}
+
+
 int
 AudioSink::silence()
 {

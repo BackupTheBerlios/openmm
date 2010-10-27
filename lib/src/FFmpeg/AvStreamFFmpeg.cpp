@@ -989,8 +989,8 @@ FFmpegStreamInfo::sampleWidth()
 unsigned int
 FFmpegStreamInfo::sampleRate()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("stream sample rate: " +
-        Poco::NumberFormatter::format((int)_pAvStream->codec->sample_rate));
+//     Omm::AvStream::Log::instance()->avstream().debug("stream sample rate: " +
+//         Poco::NumberFormatter::format((int)_pAvStream->codec->sample_rate));
     
     return _pAvStream->codec->sample_rate;
 }
@@ -999,8 +999,8 @@ FFmpegStreamInfo::sampleRate()
 int
 FFmpegStreamInfo::channels()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("stream channels: " +
-        Poco::NumberFormatter::format((int)_pAvStream->codec->channels));
+//     Omm::AvStream::Log::instance()->avstream().debug("stream channels: " +
+//         Poco::NumberFormatter::format((int)_pAvStream->codec->channels));
     
     return _pAvStream->codec->channels;
 }
