@@ -38,7 +38,7 @@ public:
 
 
 private:
-    virtual void initVisual();
+    virtual void initVisual(int width = 720, int height = 576);
     virtual void closeVisual();
 
     fb_visual_t* _pVisual;

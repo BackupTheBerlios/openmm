@@ -31,7 +31,7 @@ PropertyChangeMask | PointerMotionMask)
 
 
 X11XineVideo::X11XineVideo() :
-        _pVisual(new x11_visual_t)
+_pVisual(new x11_visual_t)
 {
     XInitThreads ();
     x11Display = XOpenDisplay(NULL);
@@ -75,15 +75,16 @@ X11XineVideo::visual()
 
 
 void
-X11XineVideo::initVisual()
+X11XineVideo::initVisual(int width, int height)
 {
 
     
       /* some initalization for the X11 Window we will be showing video in */
     XLockDisplay(x11Display);
-//     fullscreen = 0;
+//     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
+//                                     0, 0, displayWidth(), displayHeight(), 1, 0, 0);
     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
-                                    0, 0, displayWidth(), displayHeight(), 1, 0, 0);
+                                    0, 0, width, height, 1, 0, 0);
     
     XSelectInput(x11Display, x11Window, INPUT_MOTION);
     

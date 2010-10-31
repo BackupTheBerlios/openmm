@@ -34,6 +34,8 @@ class Engine : public Util::ConfigurablePlugin
 public:
     Engine();
     
+    std::string getEngineId();
+    
     virtual void setOption(const std::string& key, const std::string& value);
     virtual void createPlayer()  = 0;
     // Engine handling
@@ -43,8 +45,6 @@ public:
     // virtual vector<std::string> getAudioAdapters() = 0;
     // virtual void setAudioAdapter(std::string) = 0;
 
-    virtual std::string getEngineId() = 0;
-    
     // UPnP methods
     /*
       AVTransport
@@ -86,6 +86,7 @@ public:
     */
 //     JSignal endOfTrack;
 protected:
+    std::string                 _engineId;
     bool                        _fullscreen;
     int                         _width;
     int                         _height;

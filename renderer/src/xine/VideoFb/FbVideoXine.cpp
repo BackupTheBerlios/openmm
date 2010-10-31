@@ -67,7 +67,7 @@ FbXineVideo::visual()
 
 
 void
-FbXineVideo::initVisual()
+FbXineVideo::initVisual(int width, int height)
 {
 //    char* videoDriverName = "fb";
 //    char* videoDriverName = "vidixfb";

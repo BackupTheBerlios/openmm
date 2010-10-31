@@ -26,8 +26,21 @@
 // FIXME: honor width and height
 
 // EnginePlugin::VlcEngine(int argc, char **argv) :
-VlcEngine::VlcEngine() :
-_fullscreen(true)
+VlcEngine::VlcEngine()
+{
+    _engineId = "OmmR VLC engine " + Omm::OMM_VERSION;
+}
+
+
+VlcEngine::~VlcEngine()
+{
+    libvlc_release(_vlcInstance);
+    closeXWindow();
+}
+
+
+void
+VlcEngine::createPlayer()
 {
 //     int argc = 1;
 //     char* argv[1] = {"ommr"};
@@ -50,22 +63,6 @@ _fullscreen(true)
 /*    clearException();
     libvlc_event_attach(vlc_my_object_event_manager(), NULL, &_exception);
     handleException();*/
-    
-    _engineId = "OmmR VLC engine " + Omm::OMM_VERSION;
-}
-
-
-VlcEngine::~VlcEngine()
-{
-    libvlc_release(_vlcInstance);
-    closeXWindow();
-}
-
-
-std::string
-VlcEngine::getEngineId()
-{
-    return _engineId;
 }
 
 
@@ -80,7 +77,6 @@ VlcEngine::setUri(std::string uri)
 void
 VlcEngine::setFullscreen(bool on)
 {
-    _fullscreen = on;
 }
 
 
@@ -92,26 +88,17 @@ VlcEngine::openXWindow()
     Window      xWindow;
     int xPos    = 0;
     int yPos    = 0;
-/*    int width   = 720;
-    int height  = 576;*/
-/*    int width   = 800;
-    int height  = 600;*/
-    /*    int width   = 1280;
-    int height  = 800;*/
-    int width   = 1360;
-    int height  = 768;
-    
     
     XInitThreads ();
     xDisplay = XOpenDisplay(NULL);
     xScreen = DefaultScreen(xDisplay);
     XLockDisplay(xDisplay);
     if(_fullscreen) {
-        width   = DisplayWidth(xDisplay, xScreen);
-        height  = DisplayHeight(xDisplay, xScreen);
+        _width   = DisplayWidth(xDisplay, xScreen);
+        _height  = DisplayHeight(xDisplay, xScreen);
     }
     xWindow = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
-                                  xPos, yPos, width, height, 1, 0, 0);
+                                  xPos, yPos, _width, _height, 1, 0, 0);
     XMapRaised(xDisplay, xWindow);
 //     res_h = (DisplayWidth(xDisplay, xScreen) * 1000 / DisplayWidthMM(xDisplay, xScreen));
 //     res_v = (DisplayHeight(xDisplay, xScreen) * 1000 / DisplayHeightMM(xDisplay, xScreen));

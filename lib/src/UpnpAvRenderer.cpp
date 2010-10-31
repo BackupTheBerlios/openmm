@@ -27,9 +27,17 @@ namespace Av {
 
 Engine::Engine() :
 _fullscreen(false),
-_width(720),
+// _width(720),
+_width(1020),
 _height(576)
 {
+}
+
+
+std::string
+Engine::getEngineId()
+{
+    return _engineId;
 }
 
 
@@ -38,6 +46,7 @@ Engine::setOption(const std::string& key, const std::string& value)
 {
     if (key == "fullscreen") {
         _fullscreen = true;
+        setFullscreen(true);
     }
     else if (key == "width") {
         _width = Poco::NumberParser::parse(value);
@@ -63,6 +72,7 @@ _pEngine(engine)
 void
 UpnpAvRenderer::setFullscreen(bool on)
 {
+    // FIXME: need to set Engine::_fullscreen.
     _pEngine->setFullscreen(on);
 }
 

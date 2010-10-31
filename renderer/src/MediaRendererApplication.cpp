@@ -78,7 +78,7 @@ protected:
         ServerApplication::defineOptions(options);
         
         options.addOption(
-                           Option("help", "h", "display help information on command line arguments")
+                           Option("help", "", "display help information on command line arguments")
                            .required(false)
                            .repeatable(false));
         options.addOption(

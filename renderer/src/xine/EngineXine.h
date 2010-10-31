@@ -37,7 +37,7 @@ public:
     virtual int visualType() = 0;
     virtual void* visual() = 0;
     
-    virtual void initVisual() = 0;
+    virtual void initVisual(int width, int height) = 0;
     virtual void closeVisual() = 0;
 
 };
@@ -54,7 +54,7 @@ public:
     XineEngine();
     ~XineEngine();
     
-    virtual void createPlayer() {}
+    virtual void createPlayer();
     // virtual void setVideoDriver(string);
     // virtual void setAudioDriver(string);
     // virtual void setFullscreen(bool on);
@@ -125,9 +125,6 @@ private:
     int                  _lengthStream;
     int                  _currentZoom;
     int                  _seekOff;
-    
-    bool                 _fullscreen;
-    std::string          _engineId;
 };
 
 #endif

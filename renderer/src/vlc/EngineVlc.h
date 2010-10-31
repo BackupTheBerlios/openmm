@@ -37,10 +37,8 @@ public:
     VlcEngine();
     ~VlcEngine();
     
-    virtual void createPlayer() {}
+    virtual void createPlayer();
     virtual void setFullscreen(bool on = true);
-    
-    std::string getEngineId();
     
     /*
       AVTransport
@@ -82,9 +80,6 @@ private:
     std::string             _uri;
     long long               _startTime;
     float                   _length; // length of media in seconds
-    bool                    _fullscreen;
-    
-    std::string             _engineId;
 };
 
 

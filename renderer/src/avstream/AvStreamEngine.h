@@ -42,7 +42,6 @@ public:
     void destructPlayer();
     
     virtual void setFullscreen(bool on = true);
-    std::string getEngineId() { return _engineId; }
     
     virtual bool preferStdStream();
     virtual void setUri(std::string mrl);
@@ -73,7 +72,6 @@ private:
     void endOfStream(Omm::AvStream::Sink::EndOfStream* eof);
     
     Poco::FastMutex             _actionLock;
-    std::string                 _engineId;
     bool                        _isPlaying;
     
     Omm::AvStream::Tagger*      _pTagger;

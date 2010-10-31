@@ -36,15 +36,15 @@ int XineEngine::videoFrameHeight = 200;
 double XineEngine::_pixel_aspect = 0.0;
 
 
-XineEngine::XineEngine()
- : _pause(false),
-   _currentZoom(100),
-   _audioDeviceNum(0),
-   _seekOff(50),
-   _posTime(0),
-   _lengthStream(0)
+XineEngine::XineEngine() :
+_pause(false),
+_currentZoom(100),
+_audioDeviceNum(0),
+_seekOff(50),
+_posTime(0),
+_lengthStream(0)
 {
-    init();
+    _engineId = "OMM xine engine " + Omm::OMM_VERSION;
 }
 
 
@@ -56,10 +56,8 @@ XineEngine::~XineEngine()
 
 
 void
-XineEngine::init()
+XineEngine::createPlayer()
 {
-//     TRACE("XineEngine::init()");
-
     _xineEngine = xine_new();
     
     Omm::Util::PluginLoader<XineVideo> pluginLoader;
@@ -89,32 +87,14 @@ XineEngine::init()
     xine_init(_xineEngine);
 
     _pixel_aspect = 1.0;
-// #ifdef __FRAMEBUFFER__
-// //    char* videoDriverName = "fb";
-// //    char* videoDriverName = "vidixfb";
-//     char* videoDriverName = "directfb";
-// //    int visualType = XINE_VISUAL_TYPE_FB;
-//     int visualType = XINE_VISUAL_TYPE_DFB;
-//     fb_visual_t visual;
-// #elif __X11__
-//     XInitThreads ();
-//     x11Display = XOpenDisplay(NULL);
-//     x11Screen = DefaultScreen(x11Display);
-// //     x11Window = _parent->windowId();
-//     initWindow();
-// 
-//     char* videoDriverName = "xv";
-//     int visualType = XINE_VISUAL_TYPE_X11;
-//     x11_visual_t visual;
-//     visual.display = x11Display;
-//     visual.screen = x11Screen;
-//     visual.d = x11Window;
-//     //visual.dest_size_cb = DestSizeCallback;
-// #endif
 
-    _pVideo->initVisual();
-    videoFrameWidth = _pVideo->displayWidth();
-    videoFrameHeight = _pVideo->displayHeight();
+    if (_fullscreen) {
+        _width = _pVideo->displayWidth();
+        _height = _pVideo->displayHeight();
+    }
+    videoFrameWidth = _width;
+    videoFrameHeight = _height;
+    _pVideo->initVisual(_width, _height);
 
     
     switch (_pVideo->visualType()) {
@@ -193,7 +173,6 @@ XineEngine::FrameOutputCallback(void* p, int video_width, int video_height, doub
 void
 XineEngine::setFullscreen(bool on)
 {
-    _fullscreen = on;
 }
 
 

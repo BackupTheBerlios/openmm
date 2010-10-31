@@ -27,7 +27,6 @@
 
 
 AvStreamEngine::AvStreamEngine() :
-_engineId("OMM AvStream engine " + Omm::OMM_VERSION),
 _isPlaying(false),
 _pTagger(0),
 _pClock(0),
@@ -36,6 +35,7 @@ _pAudioSink(0),
 _pVideoSink(0),
 _pSession(0)
 {
+    _engineId = "OMM AvStream engine " + Omm::OMM_VERSION;
 }
 
 

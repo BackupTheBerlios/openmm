@@ -40,7 +40,7 @@ public:
 
     
 private:
-    virtual void initVisual();
+    virtual void initVisual(int width, int height);
     virtual void closeVisual();
 
     Display*             x11Display;
