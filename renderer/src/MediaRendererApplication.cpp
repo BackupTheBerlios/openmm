@@ -142,7 +142,8 @@ protected:
         else
         {
             if (_enginePlugin == "") {
-                _enginePlugin = "engine-avstream";
+//                 _enginePlugin = "engine-avstream";
+                _enginePlugin = "engine-vlc";
             }
             
             Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;

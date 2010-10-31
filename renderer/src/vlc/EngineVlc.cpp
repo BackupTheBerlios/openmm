@@ -22,14 +22,19 @@
 #include "EngineVlc.h"
 
 
+// FIXME: stopp video and audio reopening on new stream
+// FIXME: honor width and height
+
 // EnginePlugin::VlcEngine(int argc, char **argv) :
 VlcEngine::VlcEngine() :
 _fullscreen(true)
 {
-    int argc = 1;
-    char* argv[1] = {"ommr"};
+//     int argc = 1;
+//     char* argv[1] = {"ommr"};
 //     int argc = 2;
 //     char* argv[2] = {"ommr", "--codec=avcodec"};
+    int argc = 2;
+    const char* argv[2] = {"ommr", "--no-osd"};
 //     int argc = 3;
 //     char* argv[3] = {"ommr", "--codec=avcodec",  "--vout fb"};
     libvlc_exception_init(&_exception);
@@ -145,7 +150,7 @@ VlcEngine::load()
         usleep(100000); // limit the cpu-load while loading the media
         state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
         handleException();
-    } while(state != libvlc_Playing && state != libvlc_Error && state != libvlc_MediaPlayerEndReached );
+    } while(state != libvlc_Playing && state != libvlc_Error /*&& state != libvlc_MediaPlayerEndReached*/ );
 
     int hasVideo = 0;
     int trackCount = 0;

@@ -121,11 +121,15 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
         unsigned int symbolRate = Poco::NumberParser::parseUnsigned(channelParams[4]) * 1000;
         Poco::StringTokenizer videoPid(channelParams[5], "+");
         unsigned int vpid = Poco::NumberParser::parseUnsigned(videoPid[0]);
+        unsigned int cpid = vpid;
+        if (videoPid.count() > 1) {
+            cpid = Poco::NumberParser::parseUnsigned(videoPid[1]);
+        }
         Poco::StringTokenizer audioChannel(channelParams[6], ";");
         Poco::StringTokenizer audioPid(audioChannel[0], "=");
         unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
         int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
-        _channels.push_back(new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, apid, sid));
+        _channels.push_back(new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid));
     }
 }
 

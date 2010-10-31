@@ -70,12 +70,13 @@ Log::dvb()
 
 
 
-DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int apid, int sid) :
+DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid) :
 _satNum(satNum),
 _freq(freq),
 _pol(pol),
 _symbolRate(symbolRate),
 _vpid(vpid),
+_cpid(cpid),
 _apid(apid),
 _sid(sid)
 {
@@ -217,7 +218,7 @@ DvbFrontend::tune(DvbChannel* pChannel)
     if (tuneFrontend(ifreq, pChannel->_symbolRate)) {
         if (_pAdapter->_pDemux->setVideoPid(pChannel->_vpid) &&
             _pAdapter->_pDemux->setAudioPid(pChannel->_apid) &&
-            _pAdapter->_pDemux->setPcrPid(pChannel->_vpid)) { // FIXME: handle channels where pcr pid is not equal to video pid
+            _pAdapter->_pDemux->setPcrPid(pChannel->_cpid)) {
                 success = true;
                 if (_pAdapter->_recPsi) {
                     unsigned int pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_sid);

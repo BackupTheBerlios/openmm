@@ -63,7 +63,7 @@ class DvbChannel
 public:
     typedef enum {HORIZ = 0, VERT = 1} Polarization;
     
-    DvbChannel(unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int apid, int sid);
+    DvbChannel(unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid);
     
     
 private:
@@ -72,6 +72,7 @@ private:
     Polarization _pol;
     unsigned int _symbolRate;
     unsigned int _vpid;
+    unsigned int _cpid;
     unsigned int _apid;
     int _sid;
 };
