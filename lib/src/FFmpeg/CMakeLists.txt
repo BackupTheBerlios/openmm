@@ -77,6 +77,14 @@ ADD_DEFINITIONS(
 # switch.
 )
 
+ADD_EXECUTABLE( aligntest
+aligntest.c
+)
+
+TARGET_LINK_LIBRARIES( aligntest
+${LIB_AV_FORMAT}
+)
+
 SET( OMM_AV_STREAM_FFMPEG_LIB_SRCS
 AvStreamFFmpeg.cpp
 )
@@ -86,7 +94,6 @@ SHARED
 ${OMM_AV_STREAM_FFMPEG_LIB_SRCS}
 )
 
- 
 TARGET_LINK_LIBRARIES( ommtagger-ffmpeg
 ommavstream
 ${LIB_POCO_FOUNDATION}

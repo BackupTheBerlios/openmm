@@ -86,7 +86,7 @@ DvbAdapter::DvbAdapter(int num)
 {
     _deviceName = "/dev/dvb/adapter" + Poco::NumberFormatter::format(num);
     _pLnb = DvbDevice::instance()->_lnbs["UNIVERSAL"];
-    _recPsi = false;
+    _recPsi = true;
     
     _pFrontend = new DvbFrontend(this, 0);
     _pDemux = new DvbDemux(this, 0);
@@ -216,7 +216,8 @@ DvbFrontend::tune(DvbChannel* pChannel)
     
     if (tuneFrontend(ifreq, pChannel->_symbolRate)) {
         if (_pAdapter->_pDemux->setVideoPid(pChannel->_vpid) &&
-            _pAdapter->_pDemux->setAudioPid(pChannel->_apid)) {
+            _pAdapter->_pDemux->setAudioPid(pChannel->_apid) &&
+            _pAdapter->_pDemux->setPcrPid(pChannel->_vpid)) { // FIXME: handle channels where pcr pid is not equal to video pid
                 success = true;
                 if (_pAdapter->_recPsi) {
                     unsigned int pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_sid);
@@ -365,6 +366,7 @@ DvbDemux::~DvbDemux()
 {
     close(_fileDescVideo);
     close(_fileDescAudio);
+    close(_fileDescPcr);
     if (_pAdapter->_recPsi) {
         close(_fileDescPat);
         close(_fileDescPmt);
@@ -380,17 +382,18 @@ DvbDemux::openDemux()
     if ((_fileDescVideo = open(_deviceName.c_str(), O_RDWR)) < 0) {
         Log::instance()->dvb().error("opening video demux failed");
     }
-    
     if ((_fileDescAudio = open(_deviceName.c_str(), O_RDWR)) < 0) {
         Log::instance()->dvb().error("opening audio demux failed");
+    }
+    if ((_fileDescPcr = open(_deviceName.c_str(), O_RDWR)) < 0) {
+        Log::instance()->dvb().error("opening pcr demux failed");
     }
     
     if (_pAdapter->_recPsi){
         if ((_fileDescPat = open(_deviceName.c_str(), O_RDWR)) < 0) {
             Log::instance()->dvb().error("opening pat demux failed");
         }
-        
-        if ((_fileDescAudio = open(_deviceName.c_str(), O_RDWR)) < 0) {
+        if ((_fileDescPmt = open(_deviceName.c_str(), O_RDWR)) < 0) {
             Log::instance()->dvb().error("opening pmt demux failed");
         }
     }
@@ -408,6 +411,13 @@ bool
 DvbDemux::setAudioPid(unsigned int pid)
 {
     return setPid(_fileDescAudio, pid, DMX_PES_AUDIO);
+}
+
+
+bool
+DvbDemux::setPcrPid(unsigned int pid)
+{
+    return setPid(_fileDescPcr, pid, DMX_PES_PCR);
 }
 
 

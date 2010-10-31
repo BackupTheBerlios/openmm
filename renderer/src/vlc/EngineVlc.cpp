@@ -26,10 +26,10 @@
 VlcEngine::VlcEngine() :
 _fullscreen(true)
 {
-//     int argc = 1;
-//     char* argv[1] = {"ommr"};
-    int argc = 2;
-    char* argv[2] = {"ommr", "--codec=avcodec"};
+    int argc = 1;
+    char* argv[1] = {"ommr"};
+//     int argc = 2;
+//     char* argv[2] = {"ommr", "--codec=avcodec"};
 //     int argc = 3;
 //     char* argv[3] = {"ommr", "--codec=avcodec",  "--vout fb"};
     libvlc_exception_init(&_exception);
@@ -67,7 +67,8 @@ VlcEngine::getEngineId()
 void
 VlcEngine::setUri(std::string uri)
 {
-    _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
+//     _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
+    _uri = uri;
 }
 
 

@@ -961,7 +961,7 @@ FFmpegStreamInfo::findEncoder()
 
 
 int
-FFmpegStreamInfo::sampleWidth()
+FFmpegStreamInfo::sampleSize()
 {
     Omm::AvStream::Log::instance()->avstream().debug("stream sample format: " +
         Poco::NumberFormatter::format((int)_pAvStream->codec->sample_fmt));
@@ -969,16 +969,16 @@ FFmpegStreamInfo::sampleWidth()
     // avcodec.h says sample_fmt is not used (always S16?)
     switch(_pAvStream->codec->sample_fmt) {
     case SAMPLE_FMT_U8:
-        return 8; // beware unsigned!
+        return 1; // beware unsigned!
         break;
     case SAMPLE_FMT_S16:
-        return 16;
+        return 2;
         break;
     case SAMPLE_FMT_S32:
-        return 32;
+        return 4;
         break;
     case SAMPLE_FMT_FLT:
-        return -32;
+        return -4;
         break;
     default:
         return 0;
@@ -1092,7 +1092,7 @@ FFmpegStreamInfo::decodeAudioFrame(Omm::AvStream::Frame* pFrame)
     // (it's only needed for e.g. .wav, where on packet contains multiple uncompressed frames
     while(inBufferSize > 0) {
         Log::instance()->ffmpeg().trace("ffmpeg::avcodec_decode_audio2() ...");
-        int bytesConsumed = avcodec_decode_audio2(_pAvStream->codec,
+        int bytesConsumed = avcodec_decode_audio2(_pAvCodecContext,
             (int16_t*)_pDecodedAudioFrame->_data, &_pDecodedAudioFrame->_size,
             inBuffer, inBufferSize);
         
@@ -1122,7 +1122,6 @@ FFmpegStreamInfo::decodeVideoFrame(Omm::AvStream::Frame* pFrame)
     Log::instance()->ffmpeg().trace("ffmpeg::avcodec_decode_video() ...");
     int bytesConsumed = avcodec_decode_video(_pAvCodecContext,
                                              pDecodedAvFrame, &decodeSuccess,
-//                                              (uint8_t*)pFrame->data(), pFrame->paddedSize());
                                             (uint8_t*)pFrame->data(), pFrame->size());
 
     std::string success(decodeSuccess ? "success" : "failed");

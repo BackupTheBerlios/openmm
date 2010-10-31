@@ -187,6 +187,7 @@ public:
     
     bool setVideoPid(unsigned int pid);
     bool setAudioPid(unsigned int pid);
+    bool setPcrPid(unsigned int pid);
     bool setPatPid(unsigned int pid);
     bool setPmtPid(unsigned int pid);
     
@@ -198,6 +199,7 @@ private:
     int                         _num;
     int                         _fileDescVideo;
     int                         _fileDescAudio;
+    int                         _fileDescPcr;
     int                         _fileDescPat;
     int                         _fileDescPmt;
 };

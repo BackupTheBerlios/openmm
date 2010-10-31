@@ -352,7 +352,7 @@ public:
 //     virtual StreamInfo* cloneOutStreamInfo(Meta* pMeta, int outStreamNumber) = 0;
 
     // audio parameters
-    virtual int sampleWidth() = 0;
+    virtual int sampleSize() = 0;
     virtual unsigned int sampleRate() = 0;
     virtual int channels() = 0;
     
