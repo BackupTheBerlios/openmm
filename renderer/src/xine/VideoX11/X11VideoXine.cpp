@@ -81,8 +81,6 @@ X11XineVideo::initVisual(int width, int height)
     
       /* some initalization for the X11 Window we will be showing video in */
     XLockDisplay(x11Display);
-//     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
-//                                     0, 0, displayWidth(), displayHeight(), 1, 0, 0);
     x11Window = XCreateSimpleWindow(x11Display, XDefaultRootWindow(x11Display),
                                     0, 0, width, height, 1, 0, 0);
     

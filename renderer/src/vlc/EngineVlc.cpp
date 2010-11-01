@@ -22,9 +22,6 @@
 #include "EngineVlc.h"
 
 
-// FIXME: stopp video and audio reopening on new stream
-// FIXME: honor width and height
-
 // EnginePlugin::VlcEngine(int argc, char **argv) :
 VlcEngine::VlcEngine()
 {
@@ -44,8 +41,6 @@ VlcEngine::createPlayer()
 {
 //     int argc = 1;
 //     char* argv[1] = {"ommr"};
-//     int argc = 2;
-//     char* argv[2] = {"ommr", "--codec=avcodec"};
     int argc = 2;
     const char* argv[2] = {"ommr", "--no-osd"};
 //     int argc = 3;

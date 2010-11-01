@@ -26,6 +26,7 @@
 #include <Poco/PatternFormatter.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/ConsoleChannel.h>
+#include <Poco/Timestamp.h>
 
 #include "AvStreamFFmpeg.h"
 
@@ -562,14 +563,14 @@ FFmpegTagger::IOClose(URLContext* pUrlContext)
 }
 
 
+static Poco::Timestamp _timestamp;
+static Poco::Timestamp _startTimestamp;
+static uint64_t _totalBytes = 0;
+
 int
 FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
 {
-//     Omm::AvStream::Log::instance()->avstream().trace("IORead()");
-    
     URLContext* pUrlContext = (URLContext*)opaque;
-//     Omm::AvStream::Log::instance()->avstream().trace("IORead() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
-//     Omm::AvStream::Log::instance()->avstream().trace("IORead() URLProtocol name: " + std::string(pUrlContext->prot->name));
     
     std::istream* pInputStream = (std::istream*)pUrlContext->priv_data;
     if (!pInputStream) {
@@ -577,24 +578,19 @@ FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
         return -1;
     }
     
-//     Omm::AvStream::Log::instance()->avstream().trace("IORead() trying to read " + Poco::NumberFormatter::format(buf_size) + " bytes from stream");
-//  readsome() reads 0 bytes from Poco::HTTPClientSession streams ... dunno why, but use read() instead.
-//     int bytes = pInputStream->readsome((char*)buf, buf_size);
     pInputStream->read((char*)buf, buf_size);
+    Poco::Timestamp::TimeDiff time = _timestamp.elapsed();
+    _timestamp.update();
+    Poco::Timestamp::TimeDiff startTime = _startTimestamp.elapsed();
     int bytes = pInputStream->gcount();
+    _totalBytes += bytes;
     if (!pInputStream->good()) {
         Omm::AvStream::Log::instance()->avstream().error("IORead failed to read from std::istream");
         return -1;
     }
-    
-    Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes));
+    Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + " in " + Poco::NumberFormatter::format(time/1000.0, 3) + " msec (" +  Poco::NumberFormatter::format(bytes*1000/time) + " kB/s), total : " + 
+    Poco::NumberFormatter::format(_totalBytes/1000) + "kB in " + Poco::NumberFormatter::format(startTime/1000000) + " sec (" + Poco::NumberFormatter::format(_totalBytes*1000/startTime) + "kB/s)");
     return bytes;
-
-//     _totalRead += bytes;
-//     totalReadCount++;
-//     Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + ", total: " + Poco::NumberFormatter::format(totalRead) + ", read ops: " +
-//         Poco::NumberFormatter::format(totalReadCount)
-//         );
 }
 
 
@@ -721,17 +717,17 @@ FFmpegTagger::tag(std::istream& istr)
 
     pMeta->_useAvOpenInputStream = true;
     
-//     AVFormatParameters avFormatParameters;
-//     memset(&avFormatParameters, 0, sizeof(avFormatParameters));
-//     avFormatParameters.prealloced_context = 1;
-//     pMeta->_pFormatContext->probesize = 5000;
-//     pMeta->_pFormatContext->max_analyze_duration = 1000000;
+    AVFormatParameters avFormatParameters;
+    memset(&avFormatParameters, 0, sizeof(avFormatParameters));
+    avFormatParameters.prealloced_context = 1;
+    pMeta->_pFormatContext->probesize = 20000;
+    pMeta->_pFormatContext->max_analyze_duration = 5000000;
 //     pMeta->_pFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
 
     Log::instance()->ffmpeg().trace("ffmpeg::av_open_input_stream() ...");
     // FIXME: av_open_input_stream needs to read several megabytes of a TS.
-//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
-    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
+    error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, &avFormatParameters);
+//     error = av_open_input_stream(&pMeta->_pFormatContext, pMeta->_pIoContext, "std::istream", pMeta->_pInputFormat, 0);
 //     error = av_open_input_file(&pMeta->_pFormatContext, "std::istream", pMeta->_pInputFormat, 0, 0);
     if (error < 0) {
         Omm::AvStream::Log::instance()->avstream().error("av_open_input_stream() failed");
