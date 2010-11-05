@@ -197,6 +197,21 @@ QtAvInterface::showMainWindow()
     _widget.show();
 }
 
+
+void
+QtAvInterface::beginNetworkActivity()
+{
+    std::clog << "beginNetworkActivity" << std::endl;
+}
+
+
+void
+QtAvInterface::endNetworkActivity()
+{
+    std::clog << "endNetworkActivity" << std::endl;
+}
+
+
 void
 QtAvInterface::checkSliderMoved(int value)
 {

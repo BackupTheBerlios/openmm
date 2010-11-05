@@ -77,8 +77,8 @@ public:
     
     virtual void initGui();
     virtual void showMainWindow();
-    // TODO: hideMainWindow();
-
+    virtual void beginNetworkActivity();
+    virtual void endNetworkActivity();
     
     
 //     void setBrowserTreeItemModel(QAbstractItemModel* model);

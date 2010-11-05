@@ -124,7 +124,7 @@ private:
 class AvController : public Controller
 {
 public:
-    virtual void setUserInterface(UserInterface* pUserInterface);
+    void setUserInterface(AvUserInterface* pUserInterface);
     
 private:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);

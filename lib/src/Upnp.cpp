@@ -1108,6 +1108,25 @@ Service::initClient()
 // FIXME: when starting 15 servers and killing them with killall at once
 //        ommc still shows a couple of them though they are dead
 
+
+void
+Service::actionNetworkActivity(bool begin)
+{
+    Controller* pController = _pDevice->getDeviceRoot()->getController();
+    if (pController) {
+        UserInterface* pUserInterface = pController->getUserInterface();
+        if (pUserInterface) {
+            if (begin) {
+                pUserInterface->beginNetworkActivity();
+            }
+            else {
+                pUserInterface->endNetworkActivity();
+            }
+        }
+    }
+}
+
+
 void
 Service::sendAction(Action* pAction)
 {
@@ -1128,25 +1147,24 @@ Service::sendAction(Action* pAction)
     Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request->getURI() + " ***");
 //     std::clog << "Header:" << std::endl;
 //     request->write(std::clog);
-    // TODO: call UpnpInterface::beginNetworkActivity()
+    actionNetworkActivity(true);
     try {
         std::ostream& ostr = _pControlRequestSession->sendRequest(*request);
         ostr << actionMessage;
         Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
     }
     catch(Poco::Net::ConnectionRefusedException) {
-        // TODO: call UpnpInterface::endNetworkActivity()
+        actionNetworkActivity(false);
         Log::instance()->ctrl().error("sending of action request failed, connection refused");
         throw Poco::Exception("");
     }
     catch (...) {
-        // TODO: call UpnpInterface::endNetworkActivity()
+        actionNetworkActivity(false);
         Log::instance()->ctrl().error("sending of action request failed for some reason");
         throw Poco::Exception("");
     }
     // receive answer ...
     Poco::Net::HTTPResponse response;
-    // FIXME: if we catch network exceptions here, the arguments of the action will be processed by the action caller leading to other errors.
     try {
         std::istream& rs = _pControlRequestSession->receiveResponse(response);
         Log::instance()->ctrl().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
@@ -1155,15 +1173,15 @@ Service::sendAction(Action* pAction)
         Log::instance()->ctrl().debug("action response received:\n" + responseBody);
         ActionResponseReader responseReader(responseBody, pAction);
         responseReader.action();
-        // TODO: call UpnpInterface::endNetworkActivity()
+        actionNetworkActivity(false);
     }
     catch (Poco::Net::NoMessageException) {
-        // TODO: call UpnpInterface::endNetworkActivity()
+        actionNetworkActivity(false);
         Log::instance()->ctrl().error("no response to action request");
         throw Poco::Exception("");
     }
     catch (...) {
-        // TODO: call UpnpInterface::endNetworkActivity()
+        actionNetworkActivity(false);
         Log::instance()->ctrl().error("no response to action request received for some reason");
         throw Poco::Exception("");
     }
@@ -1580,7 +1598,8 @@ DeviceRoot::DeviceRoot() :
 // _ssdpSocket(/*Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)*/),
 _ssdpSocket(),
 // _httpSocket(_ssdpSocket.getInterface())
-_httpSocket(NetworkInterfaceManager::instance()->getValidInterfaceAddress())
+_httpSocket(NetworkInterfaceManager::instance()->getValidInterfaceAddress()),
+_pController(0)
 {
 }
 
@@ -2024,6 +2043,13 @@ Controller::setUserInterface(UserInterface* pUserInterface)
 }
 
 
+UserInterface*
+Controller::getUserInterface()
+{
+    return _pUserInterface;
+}
+
+
 void
 Controller::sendMSearch()
 {
@@ -2095,8 +2121,9 @@ Controller::addDevice(DeviceRoot* pDeviceRoot)
     // TODO: handle "alive refreshments"
 //     std::clog << "Controller::addDevice()" << std::endl;
     std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
-    Log::instance()->upnp().debug("controller adds device: " + uuid);
     if (!_devices.contains(uuid)) {
+        Log::instance()->upnp().debug("controller adds device: " + uuid);
+        pDeviceRoot->_pController = this;
         _pUserInterface->beginAddDevice(_devices.position(uuid));
         _devices.append(uuid, pDeviceRoot);
         _pUserInterface->endAddDevice(_devices.position(uuid));
@@ -2111,10 +2138,12 @@ Controller::removeDevice(const std::string& uuid)
 //     std::clog << "Controller::removeDevice()" << std::endl;
     if (_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
-        deviceRemoved(&_devices.get(uuid));
+        DeviceRoot* pDeviceRoot = &_devices.get(uuid);
+        deviceRemoved(pDeviceRoot);
         _pUserInterface->beginRemoveDevice(_devices.position(uuid));
         _devices.remove(uuid);
         _pUserInterface->endRemoveDevice(_devices.position(uuid));
+        pDeviceRoot->_pController = 0;
     }
 }
 

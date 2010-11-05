@@ -758,6 +758,8 @@ public:
     void sendInitialEventMessage(Subscription* pSubscription);
     
 private:
+    void actionNetworkActivity(bool begin);
+    
     Device*                                 _pDevice;
     std::string                             _vendorDomain;
     std::string                             _serviceType;
@@ -865,10 +867,12 @@ private:
 
 
 class DeviceRootImplAdapter;
+class Controller;
 
 class DeviceRoot
 {
     friend class DeviceRootImplAdapter;
+    friend class Controller;
     
 public:
     DeviceRoot();
@@ -885,6 +889,7 @@ public:
     
     /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &_devices.get(uuid); }
     Device* getRootDevice() const { return _pRootDevice; }
+    Controller* getController() const { return _pController; }
     std::string* getDeviceDescription() const { return _pDeviceDescription; }
     const std::string& getDescriptionUri() const { return _descriptionUri; }
     Service* getServiceType(const std::string& serviceType);
@@ -935,6 +940,7 @@ private:
     HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
     DeviceRootImplAdapter*          _pDeviceRootImplAdapter;
+    Controller*                     _pController;
 };
 
 
@@ -967,12 +973,14 @@ protected:
 class UserInterface
 {
     friend class Controller;
+    friend class Service;
     
 public:
     // TODO: pass command line arguments to user interface gui-toolkit
     virtual int eventLoop() = 0;
     virtual void initGui() = 0;
     virtual void showMainWindow() = 0;
+//     virtual void hideMainWindow() = 0;
     
 protected:
     virtual void beginAddDevice(int position) {}
@@ -995,10 +1003,12 @@ public:
     void start();
     virtual void deviceAdded(DeviceRoot* pDeviceRoot) {}
     virtual void deviceRemoved(DeviceRoot* pDeviceRoot) {}
+
     void setUserInterface(UserInterface* pUserInterface);
+    UserInterface* getUserInterface();
 
 protected:
-    UserInterface*              _pUserInterface;
+    UserInterface*                  _pUserInterface;
     Container<DeviceRoot>           _devices;
     
 private:

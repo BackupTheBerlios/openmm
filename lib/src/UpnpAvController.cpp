@@ -252,13 +252,11 @@ RendererView::getName()
 
 
 void
-AvController::setUserInterface(UserInterface* pUserInterface)
+AvController::setUserInterface(AvUserInterface* pUserInterface)
 {
-//     _pUserInterface = pUserInterface;
     Controller::setUserInterface(pUserInterface);
-    AvUserInterface* pAvUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
-    pAvUserInterface->_pRenderers = &_renderers;
-    pAvUserInterface->_pServers = &_servers;
+    pUserInterface->_pRenderers = &_renderers;
+    pUserInterface->_pServers = &_servers;
 }
 
 
@@ -305,7 +303,7 @@ AvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 {
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceRoot->getRootDevice();
-    Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + " ,uuid: " + pDevice->getUuid());
+    Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpAvController::deviceRemoved()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
 //     std::clog << "type: " << pDevice->getDeviceType() << std::endl;
