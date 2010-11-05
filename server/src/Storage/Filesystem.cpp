@@ -133,6 +133,12 @@ FileDataModel::scanDirectory(Poco::File& directory)
 }
 
 
+// FileServer::FileServer() :
+// TorchServer(9999)
+// {
+// }
+
+
 void
 FileServer::setOption(const std::string& key, const std::string& value)
 {

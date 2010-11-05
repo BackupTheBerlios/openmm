@@ -661,6 +661,9 @@ FFmpegTagger::initIo(std::istream& istr, bool isSeekable, unsigned char* pIoBuff
     }
     pIoContext->max_packet_size = _IoBufferSize;
     
+    _timestamp.update();
+    _startTimestamp.update();
+
     return pIoContext;
 }
 

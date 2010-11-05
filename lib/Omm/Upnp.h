@@ -779,6 +779,33 @@ private:
 };
 
 
+template<typename T>
+T
+Service::getStateVar(const std::string& key)
+{
+    // TODO: lock the _stateVariables map because different threads could access it
+//     std::clog << "Service::getStateVar()" << std::endl;
+    return _stateVars.getValue<T>(key);
+}
+
+
+template<typename T>
+void
+Service::setStateVar(std::string key, const T& val)
+{
+    // TODO: lock the _stateVariables map because different threads could access it
+//     std::clog << "Service::setStateVar() name: " << key << std::endl;
+    // FIXME: segfault here
+//     std::clog << "service type: " << getServiceType() << std::endl;
+    _stateVars.setValue(key, val);
+    if (_stateVars.get(key).getSendEvents()) {
+//         std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
+        sendEventMessage(_stateVars.get(key));
+    }
+//     std::clog << "Service::setStateVar() finished" << std::endl;
+}
+
+
 // TODO: finish Device Property stuff ...
 // class Property
 // {
@@ -937,6 +964,28 @@ protected:
 };
 
 
+class UserInterface
+{
+    friend class Controller;
+    
+public:
+    // TODO: pass command line arguments to user interface gui-toolkit
+    virtual int eventLoop() = 0;
+    virtual void initGui() = 0;
+    virtual void showMainWindow() = 0;
+    
+protected:
+    virtual void beginAddDevice(int position) {}
+    virtual void beginRemoveDevice(int position) {}
+    virtual void endAddDevice(int position) {}
+    virtual void endRemoveDevice(int position) {}
+    
+    virtual void error(const std::string& message) {}
+    virtual void beginNetworkActivity() {}
+    virtual void endNetworkActivity() {}
+};
+
+
 class Controller
 {
 public:
@@ -944,8 +993,13 @@ public:
     ~Controller();
 
     void start();
-    virtual void deviceAdded(DeviceRoot* pDeviceRoot) = 0;
-    virtual void deviceRemoved(DeviceRoot* pDeviceRoot) = 0;
+    virtual void deviceAdded(DeviceRoot* pDeviceRoot) {}
+    virtual void deviceRemoved(DeviceRoot* pDeviceRoot) {}
+    void setUserInterface(UserInterface* pUserInterface);
+
+protected:
+    UserInterface*              _pUserInterface;
+    Container<DeviceRoot>           _devices;
     
 private:
     void sendMSearch();
@@ -955,9 +1009,7 @@ private:
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);
     
-    SsdpSocket              _ssdpSocket;
-    Container<DeviceRoot>   _devices;
-//     Poco::FastMutex     _controllerLock;
+    SsdpSocket                      _ssdpSocket;
 };
 
 
@@ -974,33 +1026,6 @@ protected:
     
     Device*         _pDevice;
 };
-
-
-template<typename T>
-T
-Service::getStateVar(const std::string& key)
-{
-    // TODO: lock the _stateVariables map because different threads could access it
-//     std::clog << "Service::getStateVar()" << std::endl;
-    return _stateVars.getValue<T>(key);
-}
-
-
-template<typename T>
-void
-Service::setStateVar(std::string key, const T& val)
-{
-    // TODO: lock the _stateVariables map because different threads could access it
-//     std::clog << "Service::setStateVar() name: " << key << std::endl;
-    // FIXME: segfault here
-//     std::clog << "service type: " << getServiceType() << std::endl;
-    _stateVars.setValue(key, val);
-    if (_stateVars.get(key).getSendEvents()) {
-//         std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
-        sendEventMessage(_stateVars.get(key));
-    }
-//     std::clog << "Service::setStateVar() finished" << std::endl;
-}
 
 
 class Urn

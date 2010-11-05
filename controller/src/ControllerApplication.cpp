@@ -26,8 +26,8 @@
 
 int main(int argc, char** argv)
 {
-    Omm::Util::PluginLoader<Omm::Av::UpnpAvUserInterface> pluginLoader;
-    Omm::Av::UpnpAvUserInterface* pUserInterface;
+    Omm::Util::PluginLoader<Omm::Av::AvUserInterface> pluginLoader;
+    Omm::Av::AvUserInterface* pUserInterface;
     try {
         pUserInterface = pluginLoader.load("avinterface-qt", "AvInterface");
     }
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    Omm::Av::UpnpAvController controller;
+    Omm::Av::AvController controller;
     
     controller.setUserInterface(pUserInterface);
     pUserInterface->initGui();

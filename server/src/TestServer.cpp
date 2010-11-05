@@ -96,21 +96,21 @@ TestServer::TestServer() //:
     appendChild(pMusic);
     
     
-    pluginName = "server-dvb";
-    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> DvbServerLoader;
-    Omm::Av::AbstractMediaObject* pDvb;
-    try {
-        pDvb = DvbServerLoader.load(pluginName);
-    }
-    catch(Poco::NotFoundException) {
-        std::cerr << "Error could not find server plugin: " << pluginName << std::endl;
-        return;
-    }
-    std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
-
-    pDvb->setTitle("Digital TV");
-    pDvb->setOption("basePath", "/home/jb/.omm/channels.conf");
-    appendChild(pDvb);
+//     pluginName = "server-dvb";
+//     Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> DvbServerLoader;
+//     Omm::Av::AbstractMediaObject* pDvb;
+//     try {
+//         pDvb = DvbServerLoader.load(pluginName);
+//     }
+//     catch(Poco::NotFoundException) {
+//         std::cerr << "Error could not find server plugin: " << pluginName << std::endl;
+//         return;
+//     }
+//     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
+// 
+//     pDvb->setTitle("Digital TV");
+//     pDvb->setOption("basePath", "/home/jb/.omm/channels.conf");
+//     appendChild(pDvb);
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)

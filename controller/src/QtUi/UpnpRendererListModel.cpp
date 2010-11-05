@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <QtDebug>
 
-UpnpRendererListModel::UpnpRendererListModel(Omm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent) :
+UpnpRendererListModel::UpnpRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
 // _pRenderers(pRenderers)
 _pUserInterface(pUserInterface)

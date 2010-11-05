@@ -62,7 +62,7 @@ private:
 };
 
 
-class QtAvInterface : public QObject, public Omm::Av::UpnpAvUserInterface
+class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
     Q_OBJECT
 

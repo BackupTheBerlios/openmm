@@ -28,6 +28,8 @@
 class FileServer : public Omm::Av::TorchServer
 {
 public:
+//     FileServer();
+    
     virtual void setOption(const std::string& key, const std::string& value);
 };
 

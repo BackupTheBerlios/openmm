@@ -23,7 +23,7 @@
 
 #include <QtDebug>
 
-UpnpBrowserModel::UpnpBrowserModel(Omm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent)
+UpnpBrowserModel::UpnpBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent)
 : QAbstractItemModel(parent),
 _pUserInterface(pUserInterface),
 _charEncoding(QTextCodec::codecForName("UTF-8")),

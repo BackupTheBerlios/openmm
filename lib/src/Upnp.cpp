@@ -39,7 +39,8 @@ Log::Log()
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
+//     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
@@ -182,17 +183,17 @@ NetworkInterfaceManager* NetworkInterfaceManager::_pInstance = 0;
 
 // TODO: may add an option to ignore loopback device
 
-NetworkInterfaceManager::NetworkInterfaceManager()
+NetworkInterfaceManager::NetworkInterfaceManager() :
+_loopbackProvided(false)
 {
-    _loopbackProvided = false;
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
-		Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName((*it).name()).address();
-		// FIXME: workaround for MacOS, isLoopback() doesn't work?
-		if (!address.isLoopback() && (*it).name() != "lo0") {
-			Log::instance()->upnp().information("found network interface: " + (*it).name());
-			_interfaceList.push_back((*it).name());
-		}	
+        Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName((*it).name()).address();
+        // FIXME: workaround for MacOS, isLoopback() doesn't work?
+//         if (!address.isLoopback() && (*it).name() != "lo0") {
+            Log::instance()->upnp().information("found network interface: " + (*it).name());
+            _interfaceList.push_back((*it).name());
+//         }
     }
     findValidIpAddress();
 }
@@ -214,7 +215,9 @@ NetworkInterfaceManager::findValidIpAddress()
     bool validAddressFound = false;
     for (std::vector<std::string>::iterator it = _interfaceList.begin(); it != _interfaceList.end(); ++it) {
         Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName(*it).address();
-        if (address.isLoopback()) {
+        // FIXME: workaround for MacOS, isLoopback() doesn't work?
+        if (address.isLoopback() || *it == "lo0") {
+            Log::instance()->upnp().debug("found one loopback address");
             _loopbackProvided = true;
             _loopbackAddress = address;
         }
@@ -224,6 +227,7 @@ NetworkInterfaceManager::findValidIpAddress()
         }
     }
     if (_interfaceList.size() == 1 && _loopbackProvided) {
+        Log::instance()->upnp().debug("setting valid IP address to loopback");
         validAddressFound = true;
         _validIpAddress = _loopbackAddress;
     }
@@ -1124,20 +1128,25 @@ Service::sendAction(Action* pAction)
     Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request->getURI() + " ***");
 //     std::clog << "Header:" << std::endl;
 //     request->write(std::clog);
-    
+    // TODO: call UpnpInterface::beginNetworkActivity()
     try {
         std::ostream& ostr = _pControlRequestSession->sendRequest(*request);
         ostr << actionMessage;
         Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
     }
     catch(Poco::Net::ConnectionRefusedException) {
+        // TODO: call UpnpInterface::endNetworkActivity()
         Log::instance()->ctrl().error("sending of action request failed, connection refused");
+        throw Poco::Exception("");
     }
     catch (...) {
+        // TODO: call UpnpInterface::endNetworkActivity()
         Log::instance()->ctrl().error("sending of action request failed for some reason");
+        throw Poco::Exception("");
     }
     // receive answer ...
     Poco::Net::HTTPResponse response;
+    // FIXME: if we catch network exceptions here, the arguments of the action will be processed by the action caller leading to other errors.
     try {
         std::istream& rs = _pControlRequestSession->receiveResponse(response);
         Log::instance()->ctrl().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
@@ -1146,12 +1155,17 @@ Service::sendAction(Action* pAction)
         Log::instance()->ctrl().debug("action response received:\n" + responseBody);
         ActionResponseReader responseReader(responseBody, pAction);
         responseReader.action();
+        // TODO: call UpnpInterface::endNetworkActivity()
     }
     catch (Poco::Net::NoMessageException) {
+        // TODO: call UpnpInterface::endNetworkActivity()
         Log::instance()->ctrl().error("no response to action request");
+        throw Poco::Exception("");
     }
     catch (...) {
+        // TODO: call UpnpInterface::endNetworkActivity()
         Log::instance()->ctrl().error("no response to action request received for some reason");
+        throw Poco::Exception("");
     }
     Log::instance()->ctrl().debug("*** action \"" + pAction->getName() + "\" completed ***");
 }
@@ -1962,13 +1976,10 @@ _ssdpSocket()
 }
 
 
-// void
-// Controller::init()
-// {
-// 
-// //     _ssdpSocket.setUnicastObserver(Observer<Controller, SsdpMessage>(*this, &Controller::handleMSearchResponse));
-// 
-// }
+Controller::~Controller()
+{
+}
+
 
 void
 Controller::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
@@ -2007,6 +2018,13 @@ Controller::start()
 
 
 void
+Controller::setUserInterface(UserInterface* pUserInterface)
+{
+    _pUserInterface = pUserInterface;
+}
+
+
+void
 Controller::sendMSearch()
 {
     SsdpMessage m;
@@ -2018,11 +2036,6 @@ Controller::sendMSearch()
     m.setSearchTarget("upnp:rootdevice");
     
     _ssdpSocket.sendMessage(m);
-}
-
-
-Controller::~Controller()
-{
 }
 
 
@@ -2084,7 +2097,9 @@ Controller::addDevice(DeviceRoot* pDeviceRoot)
     std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
     Log::instance()->upnp().debug("controller adds device: " + uuid);
     if (!_devices.contains(uuid)) {
+        _pUserInterface->beginAddDevice(_devices.position(uuid));
         _devices.append(uuid, pDeviceRoot);
+        _pUserInterface->endAddDevice(_devices.position(uuid));
         deviceAdded(pDeviceRoot);
     }
 }
@@ -2097,7 +2112,9 @@ Controller::removeDevice(const std::string& uuid)
     if (_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
         deviceRemoved(&_devices.get(uuid));
+        _pUserInterface->beginRemoveDevice(_devices.position(uuid));
         _devices.remove(uuid);
+        _pUserInterface->endRemoveDevice(_devices.position(uuid));
     }
 }
 
@@ -2676,7 +2693,7 @@ _name(interfaceName),
 _pSsdpSocket(pSsdpSocket),
 _pBuffer(new char[BUFFER_SIZE])
 {
-    Log::instance()->ssdp().information("setting up socket on interface " + interfaceName);
+    Log::instance()->ssdp().information("set up socket on interface " + interfaceName);
     
     if (interfaceName == "default") {
         _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface());
@@ -2686,19 +2703,42 @@ _pBuffer(new char[BUFFER_SIZE])
     }
 
     // listen to UDP unicast and send out to multicast
+    Log::instance()->ssdp().debug("set up broadcast socket ...");
     Poco::Net::IPAddress ip;
     Poco::Net::SocketAddress adr(ip, 0);
     _pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
+    Log::instance()->ssdp().debug("attach interface ...");
     _pSsdpSenderSocket->setInterface(*_pInterface);
-    _pSsdpSenderSocket->setLoopback(true);
+//     Log::instance()->ssdp().information("set option multicast loopback ...");
+//     _pSsdpSenderSocket->setLoopback(true);
+    Log::instance()->ssdp().debug("set ttl to 4 ...");
     _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
     
-//     std::clog << "setting up listener socket" << std::endl;
     // listen to UDP multicast
+    Log::instance()->ssdp().debug("set up listener socket ...");
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
+    Log::instance()->ssdp().debug("attach interface ...");
     _pSsdpListenerSocket->setInterface(*_pInterface);
-    _pSsdpListenerSocket->setLoopback(true);
-    _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+//     Log::instance()->ssdp().information("set option multicast loopback ...");
+//     _pSsdpListenerSocket->setLoopback(true);
+    // FIXME: joining multicast group throws exception on linux, when loopback is the only interface (MULTICAST on loopback enabled with ifconfig)
+    // http://oss.sgi.com/archives/netdev/2004-11/msg01452.html :
+    // The loopback device doesn't have IFF_MULTICAST set, so technically
+    // it is not a multicast-capable device, and you shouldn't be able to join a group on it.
+    // http://atastypixel.com/blog/the-making-of-talkie-multi-interface-broadcasting-and-multicast/
+    // http://netzflocken.de/categories/upnp/page/3
+    // you must add a route, than SSDP on loopback device works also:
+    // route add 239.255.255.250 lo
+    // and don't forget to enable multicasting on the loopback device:
+    // ifconfig lo multicast
+    Log::instance()->ssdp().debug("join group ...");
+    try {
+        _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+    }
+    catch (Poco::IOException) {
+        Log::instance()->ssdp().error("failed to join multicast group");
+    }
+    Log::instance()->ssdp().debug("all sockets set.");
     
 //     std::clog << "adding event handlers" << std::endl;
     _pSsdpSocket->_reactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));

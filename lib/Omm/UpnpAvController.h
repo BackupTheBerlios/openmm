@@ -21,7 +21,7 @@
 #ifndef UpnpAvController_INCLUDED
 #define UpnpAvController_INCLUDED
 
-#include "UpnpController.h"
+#include "Upnp.h"
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"
 
@@ -29,12 +29,12 @@ namespace Omm {
 namespace Av {
 
 class ServerController;
-class UpnpAvController;
+class AvController;
 
 class RendererView
 {
-    friend class UpnpAvController;
-    friend class UpnpAvUserInterface;
+    friend class AvController;
+    friend class AvUserInterface;
     
 public:
     const std::string& getName();
@@ -49,7 +49,7 @@ private:
 class ControllerObject : public MediaObject
 {
     friend class ServerController;
-    friend class UpnpAvUserInterface;
+    friend class AvUserInterface;
     
 public:
     ControllerObject();
@@ -78,12 +78,12 @@ private:
 };
 
 
-class UpnpAvUserInterface : public UpnpUserInterface
+class AvUserInterface : public UserInterface
 {
-    friend class UpnpAvController;
+    friend class AvController;
     
 public:
-    UpnpAvUserInterface();
+    AvUserInterface();
     
     // TODO: alle device add/remove callbacks should be run in the main thread where the event loop lives
     // this avoids complications when implementing thread safety in the target GUI toolkit
@@ -121,10 +121,10 @@ private:
 };
 
 
-class UpnpAvController : public UpnpController
+class AvController : public Controller
 {
 public:
-    void setUserInterface(UpnpAvUserInterface* pUserInterface);
+    virtual void setUserInterface(UserInterface* pUserInterface);
     
 private:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);
@@ -132,7 +132,6 @@ private:
     
     Container<RendererView>               _renderers;
     Container<ServerController>           _servers;
-    UpnpAvUserInterface*                  _pAvUserInterface;
 };
 
 

@@ -37,7 +37,7 @@ class UpnpBrowserModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(Omm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
+    UpnpBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
     ~UpnpBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -64,7 +64,7 @@ public:
     
 private:
 //     Omm::Container<ServerController>*      _pServers;
-    Omm::Av::UpnpAvUserInterface*           _pUserInterface;
+    Omm::Av::AvUserInterface*           _pUserInterface;
     QTextCodec*                             _charEncoding;
     QFileIconProvider*                      _iconProvider;
 //     bool                  _lazyRowCount;

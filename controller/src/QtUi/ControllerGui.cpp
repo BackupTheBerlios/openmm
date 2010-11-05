@@ -22,7 +22,7 @@
 #include <QtDebug>
 #include <Poco/ClassLibrary.h>
 
-#include <Omm/UpnpController.h>
+#include <Omm/Upnp.h>
 
 #include "ControllerGui.h"
 
@@ -401,6 +401,6 @@ QtAvInterface::endRemoveServer(int position)
 }
 
 
-POCO_BEGIN_MANIFEST(Omm::Av::UpnpAvUserInterface)
+POCO_BEGIN_MANIFEST(Omm::Av::AvUserInterface)
 POCO_EXPORT_CLASS(QtAvInterface)
 POCO_END_MANIFEST

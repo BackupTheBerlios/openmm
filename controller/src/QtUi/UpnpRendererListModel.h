@@ -36,7 +36,7 @@ class UpnpRendererListModel : public QAbstractItemModel
         
 public:
 //     UpnpRendererListModel(Omm::Container<RendererView>* pRenderers, QObject *parent = 0);
-    UpnpRendererListModel(Omm::Av::UpnpAvUserInterface* pUserInterface, QObject *parent = 0);
+    UpnpRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
     ~UpnpRendererListModel();
     
     QVariant data(const QModelIndex &index, int role) const;
@@ -59,7 +59,7 @@ signals:
     
 private:
 //     Omm::Container<RendererView>*   _pRenderers;
-    Omm::Av::UpnpAvUserInterface*   _pUserInterface;
+    Omm::Av::AvUserInterface*   _pUserInterface;
     QTextCodec*                     _charEncoding;
 };
 
