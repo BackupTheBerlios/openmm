@@ -149,10 +149,10 @@ AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& Cu
 void
 AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
-    std::cerr << "AVTransportRendererImpl::GetPositionInfo()" << std::endl;
-    std::cerr << "_getCurrentTrack()" << std::endl;
+//     std::cerr << "AVTransportRendererImpl::GetPositionInfo()" << std::endl;
+//     std::cerr << "_getCurrentTrack()" << std::endl;
     Track = _getCurrentTrack();
-    std::cerr << "_getCurrentTrackDuration()" << std::endl;
+//     std::cerr << "_getCurrentTrackDuration()" << std::endl;
     TrackDuration = _getCurrentTrackDuration();
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
@@ -184,7 +184,7 @@ void
 AVTransportRendererImpl::Stop(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportRendererImpl::Stop() enters in state: " << transportState << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() enters in state: " + transportState);
     
     if (transportState != "NO_MEDIA_PRESENT") {
         // be nice to the engine and don't stop when already in stopped or paused state
@@ -219,7 +219,7 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
 {
     std::string speed = Speed;
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportRendererImpl::Play() enters in state: " << transportState << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() enters in state: " + transportState);
     if (transportState == "STOPPED"
         || transportState == "PLAYING"
         || transportState == "PAUSED_PLAYBACK"
@@ -269,7 +269,7 @@ void
 AVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportRendererImpl::Pause() enters in state: " << transportState << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + transportState);
     
     if (transportState == "PLAYING" || transportState == "RECORDING") {
         _pEngine->pause();
@@ -288,11 +288,11 @@ void
 AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     std::string transportState = _getTransportState();
-    std::cerr << "AVTransportRendererImpl::Pause() enters in state: " << transportState << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() enters in state: " + transportState);
     
     if (transportState == "STOPPED" || transportState == "PLAYING") {
         // TODO: does it make sense to handle "PAUSED_PLAYBACK", too?
-        std::cerr << "AVTransportRendererImpl::Seek() seek mode: " << Unit << ", seek target: " << Target << std::endl;
+        Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() seek mode: " + Unit + ", seek target: " + Target);
         
         ui4 position;
         if (Unit == "ABS_TIME") {
@@ -674,12 +674,12 @@ RenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string
 void
 RenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
-    std::cerr << "RenderingControlRendererImpl::SetVolume() channel: " << Channel << ", volume: " << DesiredVolume << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
     
     _pEngine->setVolume(0, DesiredVolume);
     
     _setVolume(DesiredVolume);
-    std::cerr << "RenderingControlRendererImpl::SetVolume() finished" << std::endl;
+//     std::cerr << "RenderingControlRendererImpl::SetVolume() finished" << std::endl;
 }
 
 

@@ -34,7 +34,7 @@ QWidget(parent),
 _parentLayout(parent->layout()),
 _browserView(browserView),
 _index(index),
-_child(NULL)
+_child(0)
 {
     QString label;
     if (index == QModelIndex()) {
@@ -100,7 +100,7 @@ CrumbButton::deleteChildren()
             _parentLayout->removeWidget(_child);
         }
         delete _child;
-        _child = NULL;
+        _child = 0;
     }
 }
 
@@ -335,7 +335,7 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
     }
     if (selected.empty()) {
 //         std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
-//         _pSelectedRenderer = NULL;
+//         _pSelectedRenderer = 0;
         return;
     }
     
