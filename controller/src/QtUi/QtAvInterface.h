@@ -83,6 +83,15 @@ private:
 };
 
 
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow(QWidget* pCentralWidget);
+};
+
+
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
     Q_OBJECT
@@ -159,6 +168,7 @@ private:
     QtRendererListModel*                _pRendererListModel;
     
     QApplication                        _app;
+    QMainWindow*                        _pMainWindow;
     QFrame                              _widget;
     Ui::ControllerGui                   ui;
     bool                                _sliderMoved;

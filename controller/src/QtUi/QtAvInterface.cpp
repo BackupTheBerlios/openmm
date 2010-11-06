@@ -145,28 +145,34 @@ NetworkActivity::activity(bool set)
 void
 NetworkActivity::paintEvent(QPaintEvent *)
 {
-    
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     _symbolRenderer->render(&painter);
 }
 
 
+MainWindow::MainWindow(QWidget* pCentralWidget)
+{
+    setCentralWidget(pCentralWidget);
+}
+
+
 QtAvInterface::QtAvInterface(int argc) :
 _app(argc, (char**)0),
-_widget(),
 _sliderMoved(false),
 _pCurrentServer(0)
 {
+//     _pMainWindow = new QMainWindow;
 }
+
 
 QtAvInterface::QtAvInterface(int argc, char** argv) :
 _app(argc, argv),
-_widget(),
 _sliderMoved(false),
 _pServerCrumbButton(0),
 _pCurrentServer(0)
 {
+//     _pMainWindow = new QMainWindow;
 }
 
 
@@ -190,7 +196,6 @@ QtAvInterface::initGui()
     ui._seekBackwardButton->setText("");
 
     _pNetworkActivity = new NetworkActivity(ui._networkActivity);
-//     QPushButton* pButton = new QPushButton("push", ui._networkActivity);
     ui._activityLayout->addWidget(_pNetworkActivity);
     _pNetworkActivity->show();
     
@@ -200,7 +205,11 @@ QtAvInterface::initGui()
     ui._breadCrumpLayout->setSpacing(0);
     _pServerCrumbButton = new CrumbButton(ui._browserView, QModelIndex(), ui._breadCrump);
     
-    _widget.setWindowTitle("OmmC");
+//     _widget.setWindowTitle("OMM Controller");
+//     _mainWindow.setCentralWidget(ui.tabWidget);
+//     _mainWindow.setWindowTitle("OMM Controller");
+    _pMainWindow = new MainWindow(ui.tabWidget);
+    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, ui.dockWidget);
     
     _pRendererListModel = new QtRendererListModel(this);
     _pBrowserModel = new QtBrowserModel(this);
@@ -243,7 +252,10 @@ QtAvInterface::eventLoop()
 void
 QtAvInterface::showMainWindow()
 {
-    _widget.show();
+//     _widget.show();
+//     _mainWindow.show();
+//     show();
+    _pMainWindow->show();
 }
 
 

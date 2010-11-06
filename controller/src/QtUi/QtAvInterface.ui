@@ -130,6 +130,12 @@
      <property name="features">
       <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
      </property>
+     <property name="allowedAreas">
+      <set>Qt::AllDockWidgetAreas</set>
+     </property>
+     <property name="windowTitle">
+      <string>Player</string>
+     </property>
      <widget class="QWidget" name="dockWidgetContents">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
