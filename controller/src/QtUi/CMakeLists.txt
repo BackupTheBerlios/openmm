@@ -1,8 +1,4 @@
-#SET(CMAKE_LIBRARY_PATH
-#${CMAKE_SYSTEM_LIBRARY_PATH}
-#)
-
-FIND_PACKAGE(Qt4)
+FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtSvg REQUIRED)
 
 FIND_PATH(POCO_INCLUDE_DIR
 Poco/Poco.h
@@ -47,22 +43,26 @@ PATHS ${CMAKE_LIBRARY_PATH}
 endif(TARGET omm)
 
 SET( OMMC_QTUI_SRCS
-ControllerGui.cpp
+QtAvInterface.cpp
 # # modeltest.cpp
-UpnpBrowserModel.cpp
-UpnpRendererListModel.cpp
+QtBrowserModel.cpp
+QtRendererListModel.cpp
 )
 
 SET( OMMC_QTUI
 # settings.ui
-ControllerGui.ui
+QtAvInterface.ui
+)
+
+SET( OMMC_QTRES
+QtAvInterface.qrc
 )
 
 SET( OMMC_QTUI_MOC
-ControllerGui.h
+QtAvInterface.h
 # modeltest.h
-UpnpBrowserModel.h
-UpnpRendererListModel.h
+QtBrowserModel.h
+QtRendererListModel.h
 )
 
 QT4_WRAP_UI(
@@ -81,6 +81,10 @@ INCLUDE_DIRECTORIES(
 ${OMMC_QTUI_H_DIR}
 )
 
+QT4_ADD_RESOURCES(
+OMMC_RES_SRC ${OMMC_QTRES}
+)
+
 QT4_WRAP_CPP(
 OMMC_QTUI_MOC_CPP ${OMMC_QTUI_MOC}
 )
@@ -90,6 +94,7 @@ SHARED
 ${OMMC_QTUI_SRCS}
 ${OMMC_QTUI}
 ${OMMC_QTUI_MOC_CPP}
+${OMMC_RES_SRC}
 )
 
 TARGET_LINK_LIBRARIES( ommavinterface-qt

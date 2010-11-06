@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef OMMUPNP_PRIVATE_H
-#define OMMUPNP_PRIVATE_H
+#ifndef UpnpPrivate_INCLUDED
+#define UpnpPrivate_INCLUDED
 
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>

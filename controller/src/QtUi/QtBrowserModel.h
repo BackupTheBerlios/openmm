@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UPNPBROWSERMODEL_H
-#define UPNPBROWSERMODEL_H
+#ifndef QtBrowserModel_INCLUDED
+#define QtBrowserModel_INCLUDED
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
@@ -32,13 +32,13 @@
 #include <Omm/UpnpAvController.h>
 
 
-class UpnpBrowserModel : public QAbstractItemModel
+class QtBrowserModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    UpnpBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
-    ~UpnpBrowserModel();
+    QtBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
+    ~QtBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;

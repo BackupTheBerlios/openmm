@@ -24,7 +24,7 @@
 
 #include <Omm/Upnp.h>
 
-#include "ControllerGui.h"
+#include "QtAvInterface.h"
 
 CrumbButton* CrumbButton::_lastCrumbButton;
 
@@ -44,7 +44,7 @@ _child(NULL)
         label = index.data(Qt::DisplayRole).toString();
     }
     
-    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+//     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 //     sizePolicy.setHorizontalStretch(0);
 //     sizePolicy.setVerticalStretch(0);
 //     sizePolicy.setHeightForWidth(_browserRootButton->sizePolicy().hasHeightForWidth());
@@ -111,6 +111,47 @@ CrumbButton::~CrumbButton()
 }
 
 
+NetworkActivity::NetworkActivity(QWidget* parent, Qt::WindowFlags f) :
+QWidget(parent, f),
+_toggle(true)
+{
+    _symbolRenderer = new QSvgRenderer(this);
+}
+
+
+NetworkActivity::~NetworkActivity()
+{
+    delete _symbolRenderer;
+}
+
+
+void
+NetworkActivity::activity(bool set)
+{
+    std::clog << "NetworkActivity widget receives signal" << std::endl;
+    if (set) {
+        _toggle = !_toggle;
+    }
+    if (_toggle) {
+        _symbolRenderer->load(QString(":/images/circle_red.svg"));
+    }
+    else {
+        _symbolRenderer->load(QString(":/images/circle_grey.svg"));
+    }
+    update();
+}
+
+
+void
+NetworkActivity::paintEvent(QPaintEvent *)
+{
+    
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    _symbolRenderer->render(&painter);
+}
+
+
 QtAvInterface::QtAvInterface(int argc) :
 _app(argc, (char**)0),
 _widget(),
@@ -134,8 +175,8 @@ QtAvInterface::initGui()
     ui._playButton->setText("");
     ui._stopButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaStop));
     ui._stopButton->setText("");
-    ui._pauseButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPause));
-    ui._pauseButton->setText("");
+//     ui._pauseButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPause));
+//     ui._pauseButton->setText("");
     ui._skipForwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSkipForward));
     ui._skipForwardButton->setText("");
     ui._skipBackwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSkipBackward));
@@ -144,6 +185,11 @@ QtAvInterface::initGui()
     ui._seekForwardButton->setText("");
     ui._seekBackwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui._seekBackwardButton->setText("");
+
+    _pNetworkActivity = new NetworkActivity(ui._networkActivity);
+//     QPushButton* pButton = new QPushButton("push", ui._networkActivity);
+    ui._activityLayout->addWidget(_pNetworkActivity);
+    _pNetworkActivity->show();
     
     ui._browserView->setUniformRowHeights(true);
     
@@ -153,17 +199,15 @@ QtAvInterface::initGui()
     
     _widget.setWindowTitle("OmmC");
     
-//     _pBrowserModel = new UpnpBrowserModel(_pServers);
-//     _pRendererListModel = new UpnpRendererListModel(_pRenderers);
-    _pRendererListModel = new UpnpRendererListModel(this);
-    _pBrowserModel = new UpnpBrowserModel(this);
+    _pRendererListModel = new QtRendererListModel(this);
+    _pBrowserModel = new QtBrowserModel(this);
     
     ui._rendererListView->setModel(_pRendererListModel);
     ui._browserView->setModel(_pBrowserModel);
     
     connect(ui._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(ui._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
-    connect(ui._pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
+//     connect(ui._pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
     connect(ui._volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(ui._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
     connect(ui._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
@@ -181,6 +225,8 @@ QtAvInterface::initGui()
             this, SLOT(browserItemActivated(const QModelIndex&)));
     connect(ui._browserView, SIGNAL(pressed(const QModelIndex&)),
             this, SLOT(browserItemSelected(const QModelIndex&)));
+    connect(this, SIGNAL(networkActivity(bool)),
+            _pNetworkActivity, SLOT(activity(bool)));
 }
 
 
@@ -202,6 +248,7 @@ void
 QtAvInterface::beginNetworkActivity()
 {
     std::clog << "beginNetworkActivity" << std::endl;
+    emit networkActivity(true);
 }
 
 
@@ -209,6 +256,7 @@ void
 QtAvInterface::endNetworkActivity()
 {
     std::clog << "endNetworkActivity" << std::endl;
+    emit networkActivity(false);
 }
 
 

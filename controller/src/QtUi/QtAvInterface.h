@@ -19,16 +19,17 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef CONTROLLERGUI_H
-#define CONTROLLERGUI_H
+#ifndef QtAvInterface_INCLUDED
+#define QtAvInterface_INCLUDED
 
 #include <QtGui>
+#include <QtSvg/QSvgRenderer>
 
 #include <Omm/UpnpAvController.h>
 
-#include "UpnpBrowserModel.h"
-#include "UpnpRendererListModel.h"
-#include "ui_ControllerGui.h"
+#include "QtBrowserModel.h"
+#include "QtRendererListModel.h"
+#include "ui_QtAvInterface.h"
 
 // TODO: left and right arrows
 // TODO: tab for toggling between browser and renderer
@@ -62,12 +63,31 @@ private:
 };
 
 
+class NetworkActivity : public QWidget
+{
+    Q_OBJECT
+    
+public:
+    NetworkActivity(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    virtual ~NetworkActivity();
+    
+public slots:
+    void activity(bool set);
+
+private:
+    void paintEvent(QPaintEvent *event);
+
+    QSvgRenderer* _symbolRenderer;
+    bool          _toggle;
+};
+
+
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
     Q_OBJECT
 
-    friend class UpnpRendererListModel;
-    friend class UpnpBrowserModel;
+    friend class QtRendererListModel;
+    friend class QtBrowserModel;
     
 public:
     QtAvInterface(int argc = 0);
@@ -129,17 +149,19 @@ private slots:
     
 signals:
     void sliderMoved(int value);
+    void networkActivity(bool set);
     
 private:
     
 //     void sliderChange(QAbstractSlider::SliderChange change);
-    UpnpBrowserModel*       _pBrowserModel;
-    UpnpRendererListModel*  _pRendererListModel;
+    QtBrowserModel*       _pBrowserModel;
+    QtRendererListModel*  _pRendererListModel;
     
     QApplication            _app;
     QFrame                  _widget;
     Ui::ControllerGui       ui;
     bool                    _sliderMoved;
+    NetworkActivity*        _pNetworkActivity;
 };
 
 #endif //CONTROLLERGUI_H

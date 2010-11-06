@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UPNPAV_CTRL_H
-#define UPNPAV_CTRL_H
+#ifndef UpnpAvControllers_INCLUDED
+#define UpnpAvControllers_INCLUDED
 
 #include "Upnp.h"
 

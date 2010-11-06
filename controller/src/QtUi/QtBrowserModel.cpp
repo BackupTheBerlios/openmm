@@ -19,11 +19,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpBrowserModel.h"
+#include "QtBrowserModel.h"
 
 #include <QtDebug>
 
-UpnpBrowserModel::UpnpBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent)
+QtBrowserModel::QtBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent)
 : QAbstractItemModel(parent),
 _pUserInterface(pUserInterface),
 _charEncoding(QTextCodec::codecForName("UTF-8")),
@@ -32,20 +32,20 @@ _iconProvider(new QFileIconProvider())
 }
 
 
-UpnpBrowserModel::~UpnpBrowserModel()
+QtBrowserModel::~QtBrowserModel()
 {
 }
 
 
 Omm::Av::ControllerObject*
-UpnpBrowserModel::getObject(const QModelIndex &index) const
+QtBrowserModel::getObject(const QModelIndex &index) const
 {
     return index.isValid() ? static_cast<Omm::Av::ControllerObject*>(index.internalPointer()) : NULL;
 }
 
 
 int
-UpnpBrowserModel::rowCount(const QModelIndex &parent) const
+QtBrowserModel::rowCount(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
     
@@ -64,14 +64,14 @@ UpnpBrowserModel::rowCount(const QModelIndex &parent) const
 
 
 int
-UpnpBrowserModel::columnCount(const QModelIndex& /*parent*/) const
+QtBrowserModel::columnCount(const QModelIndex& /*parent*/) const
 {;
     return 1;
 }
 
 
 bool
-UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
+QtBrowserModel::hasChildren(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
     
@@ -91,7 +91,7 @@ UpnpBrowserModel::hasChildren(const QModelIndex &parent) const
 
 
 bool
-UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
+QtBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
     
@@ -106,7 +106,7 @@ UpnpBrowserModel::canFetchMore(const QModelIndex &parent) const
 
 
 void
-UpnpBrowserModel::fetchMore(const QModelIndex &parent)
+QtBrowserModel::fetchMore(const QModelIndex &parent)
 {
 //     std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
     
@@ -122,7 +122,7 @@ UpnpBrowserModel::fetchMore(const QModelIndex &parent)
 
 
 QVariant
-UpnpBrowserModel::data(const QModelIndex &index, int role) const
+QtBrowserModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) {
         return QVariant();
@@ -165,7 +165,7 @@ UpnpBrowserModel::data(const QModelIndex &index, int role) const
 
 
 QModelIndex
-UpnpBrowserModel::parent(const QModelIndex &index) const
+QtBrowserModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QModelIndex();
@@ -207,7 +207,7 @@ UpnpBrowserModel::parent(const QModelIndex &index) const
 
 
 QModelIndex
-UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
+QtBrowserModel::index(int row, int column, const QModelIndex &parent) const
 {
     // no index has been created yet, so we must be at the root of the tree ...?
     if (!hasIndex(row, column, parent)) {
@@ -231,7 +231,7 @@ UpnpBrowserModel::index(int row, int column, const QModelIndex &parent) const
 
 
 Qt::ItemFlags
-UpnpBrowserModel::flags(const QModelIndex &index) const
+QtBrowserModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid()) {
         return 0;
@@ -241,7 +241,7 @@ UpnpBrowserModel::flags(const QModelIndex &index) const
 
 
 QVariant
-UpnpBrowserModel::headerData(int section, Qt::Orientation orientation,
+QtBrowserModel::headerData(int section, Qt::Orientation orientation,
                              int role) const
 {
 /*    if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole) {
@@ -262,7 +262,7 @@ UpnpBrowserModel::headerData(int section, Qt::Orientation orientation,
 
 
 QIcon
-UpnpBrowserModel::icon(const QModelIndex &index) const
+QtBrowserModel::icon(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QIcon();
@@ -278,7 +278,7 @@ UpnpBrowserModel::icon(const QModelIndex &index) const
 
 
 void
-UpnpBrowserModel::beginAddServer(int position)
+QtBrowserModel::beginAddServer(int position)
 {
 //     std::clog << "UpnpBrowserModel::beginAddServer() at position: " << position << std::endl;
     
@@ -287,7 +287,7 @@ UpnpBrowserModel::beginAddServer(int position)
 
 
 void
-UpnpBrowserModel::endAddServer()
+QtBrowserModel::endAddServer()
 {
 //     std::clog << "UpnpBrowserModel::endAddServer()" << std::endl;
     
@@ -296,7 +296,7 @@ UpnpBrowserModel::endAddServer()
 }
 
 void
-UpnpBrowserModel::beginRemoveServer(int position)
+QtBrowserModel::beginRemoveServer(int position)
 {
 //     qDebug() << "UpnpBrowserModel::beginRemoveServer() at position: " << position;
     
@@ -305,7 +305,7 @@ UpnpBrowserModel::beginRemoveServer(int position)
 
 
 void
-UpnpBrowserModel::endRemoveServer()
+QtBrowserModel::endRemoveServer()
 {
 //     qDebug() << "UpnpBrowserModel::endRemoveServer()";
     

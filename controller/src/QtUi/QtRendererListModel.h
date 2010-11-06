@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UPNPRENDERERLISTMODEL_H
-#define UPNPRENDERERLISTMODEL_H
+#ifndef QtRendererListModel_INCLUDED
+#define QtRendererListModel_INCLUDED
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
@@ -30,14 +30,14 @@
 
 #include <Omm/UpnpAvController.h>
 
-class UpnpRendererListModel : public QAbstractItemModel
+class QtRendererListModel : public QAbstractItemModel
 {
     Q_OBJECT
         
 public:
 //     UpnpRendererListModel(Omm::Container<RendererView>* pRenderers, QObject *parent = 0);
-    UpnpRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
-    ~UpnpRendererListModel();
+    QtRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
+    ~QtRendererListModel();
     
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;

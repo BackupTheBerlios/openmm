@@ -19,12 +19,12 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpRendererListModel.h"
+#include "QtRendererListModel.h"
 
 #include <algorithm>
 #include <QtDebug>
 
-UpnpRendererListModel::UpnpRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent) :
+QtRendererListModel::QtRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
 // _pRenderers(pRenderers)
 _pUserInterface(pUserInterface)
@@ -33,13 +33,13 @@ _pUserInterface(pUserInterface)
 }
 
 
-UpnpRendererListModel::~UpnpRendererListModel()
+QtRendererListModel::~QtRendererListModel()
 {
 }
 
 
 QVariant
-UpnpRendererListModel::data(const QModelIndex &index, int role) const
+QtRendererListModel::data(const QModelIndex &index, int role) const
 {
 //     qDebug() << "UpnpRendererListModel::data() role:" << role;
     
@@ -62,7 +62,7 @@ UpnpRendererListModel::data(const QModelIndex &index, int role) const
 
 
 Qt::ItemFlags
-UpnpRendererListModel::flags(const QModelIndex &index) const
+QtRendererListModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return 0;
@@ -72,7 +72,7 @@ UpnpRendererListModel::flags(const QModelIndex &index) const
 
 
 QVariant
-UpnpRendererListModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
+QtRendererListModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
                              int /*role*/) const
 {
 //     if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole) {
@@ -82,7 +82,7 @@ UpnpRendererListModel::headerData(int /*section*/, Qt::Orientation /*orientation
 
 
 QModelIndex
-UpnpRendererListModel::index(int row, int column,
+QtRendererListModel::index(int row, int column,
                         const QModelIndex &/*parent*/) const
 {
 //     qDebug() << "UpnpRendererListModel::index()";
@@ -93,14 +93,14 @@ UpnpRendererListModel::index(int row, int column,
 
 
 QModelIndex
-UpnpRendererListModel::parent(const QModelIndex &/*index*/) const
+QtRendererListModel::parent(const QModelIndex &/*index*/) const
 {
     return QModelIndex();
 }
 
 
 int
-UpnpRendererListModel::rowCount(const QModelIndex &/*parent*/) const
+QtRendererListModel::rowCount(const QModelIndex &/*parent*/) const
 {
 //     qDebug() << "UpnpRendererListModel::rowCount()";
     
@@ -111,14 +111,14 @@ UpnpRendererListModel::rowCount(const QModelIndex &/*parent*/) const
 
 
 int
-UpnpRendererListModel::columnCount(const QModelIndex &/*parent*/) const
+QtRendererListModel::columnCount(const QModelIndex &/*parent*/) const
 {
     return 1;
 }
 
 
 void
-UpnpRendererListModel::beginAddRenderer(int position)
+QtRendererListModel::beginAddRenderer(int position)
 {
     qDebug() << "UpnpRendererListModel::beginAddRenderer() at position:" << position;
     
@@ -127,7 +127,7 @@ UpnpRendererListModel::beginAddRenderer(int position)
 
 
 void
-UpnpRendererListModel::endAddRenderer()
+QtRendererListModel::endAddRenderer()
 {
     qDebug() << "UpnpRendererListModel::endAddRenderer()";
     
@@ -139,7 +139,7 @@ UpnpRendererListModel::endAddRenderer()
 }
 
 void
-UpnpRendererListModel::beginRemoveRenderer(int position)
+QtRendererListModel::beginRemoveRenderer(int position)
 {
     qDebug() << "UpnpRendererListModel::beginRemoveRenderer() at position:" << position;
     
@@ -148,7 +148,7 @@ UpnpRendererListModel::beginRemoveRenderer(int position)
 
 
 void
-UpnpRendererListModel::endRemoveRenderer()
+QtRendererListModel::endRemoveRenderer()
 {
     qDebug() << "UpnpRendererListModel::endRemoveRenderer()";
     
