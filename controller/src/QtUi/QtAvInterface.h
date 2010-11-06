@@ -40,6 +40,7 @@ class CrumbButton : public QWidget
 {
     Q_OBJECT
 
+    friend class QtAvInterface;
 public:
     CrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0);
     ~CrumbButton();
@@ -154,14 +155,16 @@ signals:
 private:
     
 //     void sliderChange(QAbstractSlider::SliderChange change);
-    QtBrowserModel*       _pBrowserModel;
-    QtRendererListModel*  _pRendererListModel;
+    QtBrowserModel*                     _pBrowserModel;
+    QtRendererListModel*                _pRendererListModel;
     
-    QApplication            _app;
-    QFrame                  _widget;
-    Ui::ControllerGui       ui;
-    bool                    _sliderMoved;
-    NetworkActivity*        _pNetworkActivity;
+    QApplication                        _app;
+    QFrame                              _widget;
+    Ui::ControllerGui                   ui;
+    bool                                _sliderMoved;
+    NetworkActivity*                    _pNetworkActivity;
+    CrumbButton*                        _pServerCrumbButton;
+    Omm::Av::ControllerObject*          _pCurrentServer;
 };
 
 #endif //CONTROLLERGUI_H

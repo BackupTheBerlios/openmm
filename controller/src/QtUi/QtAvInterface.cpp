@@ -155,14 +155,17 @@ NetworkActivity::paintEvent(QPaintEvent *)
 QtAvInterface::QtAvInterface(int argc) :
 _app(argc, (char**)0),
 _widget(),
-_sliderMoved(false)
+_sliderMoved(false),
+_pCurrentServer(0)
 {
 }
 
 QtAvInterface::QtAvInterface(int argc, char** argv) :
 _app(argc, argv),
 _widget(),
-_sliderMoved(false)
+_sliderMoved(false),
+_pServerCrumbButton(0),
+_pCurrentServer(0)
 {
 }
 
@@ -195,7 +198,7 @@ QtAvInterface::initGui()
     
     ui._breadCrumpLayout->setAlignment(Qt::AlignLeft);
     ui._breadCrumpLayout->setSpacing(0);
-    new CrumbButton(ui._browserView, QModelIndex(), ui._breadCrump);
+    _pServerCrumbButton = new CrumbButton(ui._browserView, QModelIndex(), ui._breadCrump);
     
     _widget.setWindowTitle("OmmC");
     
@@ -282,12 +285,14 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
 {
 //     std::clog << "QtAvInterface::browserItemActivated()" << std::endl;
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
-    if (object == NULL) {
+    if (object == 0) {
         return;
     }
 //     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
 //     std::clog << "title: " << object->getTitle() << std::endl;
-    
+    if (index.parent() == QModelIndex()) {
+        _pCurrentServer = object;
+    }
     if (object->isContainer()) {
         new CrumbButton(ui._browserView, index, ui._breadCrump);
     }
@@ -303,11 +308,14 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
 {
 //     std::clog << "QtAvInterface::browserItemSelected()" << std::endl;
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
-    if (object == NULL) {
+    if (object == 0) {
         return;
     }
 //     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
 //     std::clog << "title: " << object->getTitle() << std::endl;
+    if (index.parent() == QModelIndex()) {
+        _pCurrentServer = object;
+    }
 
     if (object->isContainer()) {
         new CrumbButton(ui._browserView, index, ui._breadCrump);
@@ -335,7 +343,7 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
     
     Omm::Av::RendererView* selectedRenderer = static_cast<Omm::Av::RendererView*>(index.internalPointer());
     
-    if (selectedRenderer == NULL) {
+    if (selectedRenderer == 0) {
         return;
     }
     rendererSelected(selectedRenderer);
@@ -433,6 +441,10 @@ void
 QtAvInterface::beginRemoveServer(int position)
 {
     _pBrowserModel->beginRemoveServer(position);
+    Omm::Av::ControllerObject* pServerObject = serverRootObject(position);
+    if (_pCurrentServer && pServerObject == _pCurrentServer) {
+        _pServerCrumbButton->buttonPressed();
+    }
 }
 
 
