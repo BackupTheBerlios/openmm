@@ -81,6 +81,8 @@ private:
     bool activityInProgress();
     void setIndicatorOn(bool set);
     bool indicatorOn();
+    void setTimerStarted(bool set);
+    bool timerStarted();
 
     const int           _indicateDuration;
     QSvgRenderer*       _symbolRenderer;
@@ -88,6 +90,8 @@ private:
     QMutex              _activityInProgressLock;
     bool                _indicatorOn;
     QMutex              _indicatorOnLock;
+    bool                _timerStarted;
+    QMutex              _timerStartedLock;
 };
 
 

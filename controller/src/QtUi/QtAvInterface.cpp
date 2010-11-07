@@ -114,9 +114,13 @@ QtCrumbButton::~QtCrumbButton()
 QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
 _indicateDuration(250),
-_activityInProgress(false)
+_activityInProgress(false),
+_indicatorOn(false),
+_timerStarted(false)
 {
     _symbolRenderer = new QSvgRenderer(this);
+    _symbolRenderer->load(QString(":/images/circle_grey.svg"));
+    update();
 }
 
 
@@ -129,13 +133,16 @@ QtActivityIndicator::~QtActivityIndicator()
 void
 QtActivityIndicator::startActivity()
 {
-    // FIXME: sometimes indicator is off when network hangs
     setActivityInProgress(true);
     if (!indicatorOn()) {
         setIndicatorOn(true);
         _symbolRenderer->load(QString(":/images/circle_purple.svg"));
         update();
         Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED ON");
+        // FIXME: sometimes indicator is not showing circle_purple.svg at this point 
+        // http request hangs, this is the last message
+        // is QWidget::update() called asynchronously and gets therefore executed later ...?
+        // further testing shows that svg is shown before next svg is shown, but a noticable time after QWidget::update()
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("indicator already on, do nothing");
@@ -149,12 +156,13 @@ QtActivityIndicator::stopActivity()
     // NOTE: this timer only works when started from a Qt event loop thread.
     // with actions triggered by gui elements, this is ok. User QThread::exec() ?
     setActivityInProgress(false);
-    if (indicatorOn()) {
+    if (indicatorOn() && !timerStarted()) {
         Omm::Av::Log::instance()->upnpav().debug("turn off indicator after short delay ...");
         QTimer::singleShot(_indicateDuration, this, SLOT(stopIndicator()));
+        setTimerStarted(true);
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("indicator already off, do nothing");
+        Omm::Av::Log::instance()->upnpav().debug("indicator already off or timer running, do nothing");
     }
 }
 
@@ -162,6 +170,7 @@ QtActivityIndicator::stopActivity()
 void
 QtActivityIndicator::stopIndicator()
 {
+    setTimerStarted(false);
     if (!activityInProgress() && indicatorOn()) {
         _symbolRenderer->load(QString(":/images/circle_grey.svg"));
         update();
@@ -224,6 +233,28 @@ QtActivityIndicator::indicatorOn()
 {
     QMutexLocker locker(&_indicatorOnLock);
     return _indicatorOn;
+}
+
+
+void
+QtActivityIndicator::setTimerStarted(bool set)
+{
+    QMutexLocker locker(&_timerStartedLock);
+    if (set) {
+        Omm::Av::Log::instance()->upnpav().debug("flag \"timer started\" set to true");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("flag \"timer started\" set to false");
+    }
+    _timerStarted = set;
+}
+
+
+bool
+QtActivityIndicator::timerStarted()
+{
+    QMutexLocker locker(&_timerStartedLock);
+    return _timerStarted;
 }
 
 
