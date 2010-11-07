@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QtDebug>
 #include <Poco/ClassLibrary.h>
+#include <QTimer>
 
 #include <Omm/Upnp.h>
 
@@ -113,7 +113,7 @@ QtCrumbButton::~QtCrumbButton()
 
 QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
-_toggle(true)
+_indicateDuration(250)
 {
     _symbolRenderer = new QSvgRenderer(this);
 }
@@ -126,18 +126,20 @@ QtActivityIndicator::~QtActivityIndicator()
 
 
 void
-QtActivityIndicator::activity(bool set)
+QtActivityIndicator::startActivity()
 {
-    std::clog << "NetworkActivity widget receives signal" << std::endl;
-    if (set) {
-        _toggle = !_toggle;
-    }
-    if (_toggle) {
-        _symbolRenderer->load(QString(":/images/circle_red.svg"));
-    }
-    else {
-        _symbolRenderer->load(QString(":/images/circle_grey.svg"));
-    }
+    _symbolRenderer->load(QString(":/images/circle_purple.svg"));
+    update();
+    // NOTE: this timer only works when started from a Qt event loop thread.
+    // with actions triggered by gui elements, this is ok. User QThread::exec() ?
+    QTimer::singleShot(_indicateDuration, this, SLOT(stopActivity()));
+}
+
+
+void
+QtActivityIndicator::stopActivity()
+{
+    _symbolRenderer->load(QString(":/images/circle_grey.svg"));
     update();
 }
 
@@ -247,8 +249,8 @@ QtAvInterface::initGui()
             this, SLOT(browserItemActivated(const QModelIndex&)));
     connect(_browserWidget._browserView, SIGNAL(pressed(const QModelIndex&)),
             this, SLOT(browserItemSelected(const QModelIndex&)));
-    connect(this, SIGNAL(networkActivity(bool)),
-            _pActivityIndicator, SLOT(activity(bool)));
+    connect(this, SIGNAL(startNetworkActivity()),
+            _pActivityIndicator, SLOT(startActivity()));
 }
 
 
@@ -270,7 +272,7 @@ void
 QtAvInterface::beginNetworkActivity()
 {
     std::clog << "beginNetworkActivity" << std::endl;
-    emit networkActivity(true);
+    emit startNetworkActivity();
 }
 
 
@@ -278,7 +280,7 @@ void
 QtAvInterface::endNetworkActivity()
 {
     std::clog << "endNetworkActivity" << std::endl;
-    emit networkActivity(false);
+    emit stopNetworkActivity();
 }
 
 

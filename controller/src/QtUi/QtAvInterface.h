@@ -69,13 +69,14 @@ public:
     virtual ~QtActivityIndicator();
     
 public slots:
-    void activity(bool set);
+    void startActivity();
+    void stopActivity();
 
 private:
     void paintEvent(QPaintEvent *event);
 
-    QSvgRenderer* _symbolRenderer;
-    bool          _toggle;
+    const int           _indicateDuration;
+    QSvgRenderer*       _symbolRenderer;
 };
 
 
@@ -144,7 +145,8 @@ private slots:
     
 signals:
     void sliderMoved(int value);
-    void networkActivity(bool set);
+    void startNetworkActivity();
+    void stopNetworkActivity();
     
 private:
     QtBrowserModel*                     _pBrowserModel;
