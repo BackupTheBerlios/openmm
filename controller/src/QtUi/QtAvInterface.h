@@ -77,13 +77,13 @@ private slots:
 
 private:
     void paintEvent(QPaintEvent *event);
-    void setIndicatorActive(bool set);
-    bool indicatorActive();
+    void setActivityInProgress(bool set);
+    bool activityInProgress();
 
     const int           _indicateDuration;
     QSvgRenderer*       _symbolRenderer;
-    bool                _indicatorActive;
-    QMutex              _indicatorLock;
+    bool                _activityInProgress;
+    QMutex              _activityInProgressLock;
 };
 
 

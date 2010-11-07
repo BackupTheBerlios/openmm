@@ -114,7 +114,7 @@ QtCrumbButton::~QtCrumbButton()
 QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
 _indicateDuration(250),
-_indicatorActive(false)
+        _activityInProgress(false)
 {
     _symbolRenderer = new QSvgRenderer(this);
 }
@@ -131,7 +131,7 @@ QtActivityIndicator::startActivity()
 {
     _symbolRenderer->load(QString(":/images/circle_purple.svg"));
     update();
-    setIndicatorActive(true);
+    setActivityInProgress(true);
 }
 
 
@@ -140,7 +140,7 @@ QtActivityIndicator::stopActivity()
 {
     // NOTE: this timer only works when started from a Qt event loop thread.
     // with actions triggered by gui elements, this is ok. User QThread::exec() ?
-    setIndicatorActive(false);
+    setActivityInProgress(false);
     QTimer::singleShot(_indicateDuration, this, SLOT(stopIndicator()));
 }
 
@@ -148,7 +148,7 @@ QtActivityIndicator::stopActivity()
 void
 QtActivityIndicator::stopIndicator()
 {
-    if (!indicatorActive()) {
+    if (!activityInProgress()) {
         _symbolRenderer->load(QString(":/images/circle_grey.svg"));
         update();
     }
@@ -165,18 +165,18 @@ QtActivityIndicator::paintEvent(QPaintEvent *)
 
 
 void
-QtActivityIndicator::setIndicatorActive(bool set)
+QtActivityIndicator::setActivityInProgress(bool set)
 {
-    QMutexLocker locker(&_indicatorLock);
-    _indicatorActive = set;
+    QMutexLocker locker(&_activityInProgressLock);
+    _activityInProgress = set;
 }
 
 
 bool
-QtActivityIndicator::indicatorActive()
+QtActivityIndicator::activityInProgress()
 {
-    QMutexLocker locker(&_indicatorLock);
-    return _indicatorActive;
+    QMutexLocker locker(&_activityInProgressLock);
+    return _activityInProgress;
 }
 
 
