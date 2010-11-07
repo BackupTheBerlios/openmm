@@ -114,7 +114,7 @@ QtCrumbButton::~QtCrumbButton()
 QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
 _indicateDuration(250),
-        _activityInProgress(false)
+_activityInProgress(false)
 {
     _symbolRenderer = new QSvgRenderer(this);
 }
@@ -129,9 +129,17 @@ QtActivityIndicator::~QtActivityIndicator()
 void
 QtActivityIndicator::startActivity()
 {
-    _symbolRenderer->load(QString(":/images/circle_purple.svg"));
-    update();
+    // FIXME: sometimes indicator is off when network hangs
     setActivityInProgress(true);
+    if (!indicatorOn()) {
+        setIndicatorOn(true);
+        _symbolRenderer->load(QString(":/images/circle_purple.svg"));
+        update();
+        Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED ON");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("indicator already on, do nothing");
+    }
 }
 
 
@@ -141,16 +149,27 @@ QtActivityIndicator::stopActivity()
     // NOTE: this timer only works when started from a Qt event loop thread.
     // with actions triggered by gui elements, this is ok. User QThread::exec() ?
     setActivityInProgress(false);
-    QTimer::singleShot(_indicateDuration, this, SLOT(stopIndicator()));
+    if (indicatorOn()) {
+        Omm::Av::Log::instance()->upnpav().debug("turn off indicator after short delay ...");
+        QTimer::singleShot(_indicateDuration, this, SLOT(stopIndicator()));
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("indicator already off, do nothing");
+    }
 }
 
 
 void
 QtActivityIndicator::stopIndicator()
 {
-    if (!activityInProgress()) {
+    if (!activityInProgress() && indicatorOn()) {
         _symbolRenderer->load(QString(":/images/circle_grey.svg"));
         update();
+        setIndicatorOn(false);
+        Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED OFF, no activity in progress anymore");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("turn off indicator ignored, activity still in progress or indicator already off");
     }
 }
 
@@ -168,6 +187,12 @@ void
 QtActivityIndicator::setActivityInProgress(bool set)
 {
     QMutexLocker locker(&_activityInProgressLock);
+    if (set) {
+        Omm::Av::Log::instance()->upnpav().debug("flag \"activity in progress\" set to true");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("flag \"activity in progress\" set to false");
+    }
     _activityInProgress = set;
 }
 
@@ -177,6 +202,28 @@ QtActivityIndicator::activityInProgress()
 {
     QMutexLocker locker(&_activityInProgressLock);
     return _activityInProgress;
+}
+
+
+void
+QtActivityIndicator::setIndicatorOn(bool set)
+{
+    QMutexLocker locker(&_indicatorOnLock);
+    if (set) {
+        Omm::Av::Log::instance()->upnpav().debug("flag \"indicator on\" set to true");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("flag \"indicator on\" set to false");
+    }
+    _indicatorOn = set;
+}
+
+
+bool
+QtActivityIndicator::indicatorOn()
+{
+    QMutexLocker locker(&_indicatorOnLock);
+    return _indicatorOn;
 }
 
 
@@ -301,7 +348,7 @@ QtAvInterface::showMainWindow()
 void
 QtAvInterface::beginNetworkActivity()
 {
-    std::clog << "beginNetworkActivity" << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("begin network activity");
     emit startNetworkActivity();
 }
 
@@ -309,7 +356,7 @@ QtAvInterface::beginNetworkActivity()
 void
 QtAvInterface::endNetworkActivity()
 {
-    std::clog << "endNetworkActivity" << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("end network activity");
     emit stopNetworkActivity();
 }
 
@@ -334,13 +381,10 @@ QtAvInterface::setSliderMoved(int)
 void
 QtAvInterface::browserItemActivated(const QModelIndex& index)
 {
-//     std::clog << "QtAvInterface::browserItemActivated()" << std::endl;
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
     if (object == 0) {
         return;
     }
-//     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
-//     std::clog << "title: " << object->getTitle() << std::endl;
     if (index.parent() == QModelIndex()) {
         _pCurrentServer = object;
     }
@@ -357,13 +401,10 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
 void
 QtAvInterface::browserItemSelected(const QModelIndex& index)
 {
-//     std::clog << "QtAvInterface::browserItemSelected()" << std::endl;
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
     if (object == 0) {
         return;
     }
-//     std::clog << "type: " << (object->isContainer() ? "container" : "item") << std::endl;
-//     std::clog << "title: " << object->getTitle() << std::endl;
     if (index.parent() == QModelIndex()) {
         _pCurrentServer = object;
     }
@@ -385,8 +426,6 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
         return;
     }
     if (selected.empty()) {
-//         std::clog << "UpnpController::rendererSelectionChanged() nothing selected" << std::endl;
-//         _pSelectedRenderer = 0;
         return;
     }
     
@@ -410,7 +449,6 @@ QtAvInterface::setSlider(int max, int val)
     if (_rendererWidget._seekSlider->isSliderDown()) {
         return;
     }
-//     qDebug() << "QtAvInterface::setSlider() to:" << max << val;
     _rendererWidget._seekSlider->setRange(0, max>=0?max:0);
     _rendererWidget._seekSlider->setSliderPosition(val);
 }
@@ -423,7 +461,6 @@ QtAvInterface::setVolumeSlider(int max, int val)
     if (_rendererWidget._volumeSlider->isSliderDown()) {
         return;
     }
-//     qDebug() << "QtAvInterface::setSlider() to:" << max << val;
     _rendererWidget._volumeSlider->setRange(0, max>=0?max:0);
     _rendererWidget._volumeSlider->setSliderPosition(val);
 }

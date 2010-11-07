@@ -79,11 +79,15 @@ private:
     void paintEvent(QPaintEvent *event);
     void setActivityInProgress(bool set);
     bool activityInProgress();
+    void setIndicatorOn(bool set);
+    bool indicatorOn();
 
     const int           _indicateDuration;
     QSvgRenderer*       _symbolRenderer;
     bool                _activityInProgress;
     QMutex              _activityInProgressLock;
+    bool                _indicatorOn;
+    QMutex              _indicatorOnLock;
 };
 
 
