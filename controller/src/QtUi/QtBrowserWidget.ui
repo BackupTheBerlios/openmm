@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>_browserWidget</class>
  <widget class="QTabWidget" name="_browserWidget">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,7 +22,7 @@
   <property name="currentIndex">
    <number>0</number>
   </property>
-  <widget class="QWidget" name="tab">
+  <widget class="QWidget" name="_browserTab">
    <attribute name="title">
     <string>Browser</string>
    </attribute>
@@ -75,12 +78,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="tab">
+  <widget class="QWidget" name="_rendererTab">
    <attribute name="title">
     <string>Video</string>
    </attribute>
   </widget>
-  <widget class="QWidget" name="tab_2">
+  <widget class="QWidget" name="_settingsTab">
    <attribute name="title">
     <string>Settings</string>
    </attribute>
