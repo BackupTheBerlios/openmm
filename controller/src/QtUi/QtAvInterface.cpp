@@ -178,69 +178,74 @@ _pCurrentServer(0)
 QtAvInterface::~QtAvInterface()
 {
     delete _pMainWindow;
-    delete _pCentralWidget;
+    delete _pBrowserWidget;
+    delete _pRendererWidget;
 }
 
 
 void
 QtAvInterface::initGui()
 {
-    _pCentralWidget = new QFrame;
-    ui.setupUi(_pCentralWidget);
-    ui._playButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaPlay));
-    ui._playButton->setText("");
-    ui._stopButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaStop));
-    ui._stopButton->setText("");
-//     ui._pauseButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPause));
-//     ui._pauseButton->setText("");
-    ui._skipForwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSkipForward));
-    ui._skipForwardButton->setText("");
-    ui._skipBackwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSkipBackward));
-    ui._skipBackwardButton->setText("");
-    ui._seekForwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSeekForward));
-    ui._seekForwardButton->setText("");
-    ui._seekBackwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSeekBackward));
-    ui._seekBackwardButton->setText("");
+    _pBrowserWidget = new QTabWidget;
+    _browserWidget.setupUi(_pBrowserWidget);
+    
+    _browserWidget._browserView->setUniformRowHeights(true);
+    
+    _browserWidget._breadCrumpLayout->setAlignment(Qt::AlignLeft);
+    _browserWidget._breadCrumpLayout->setSpacing(0);
 
-    _pActivityIndicator = new QtActivityIndicator(ui._networkActivity);
-    ui._activityLayout->addWidget(_pActivityIndicator);
+    _pRendererWidget = new QDockWidget;
+    _rendererWidget.setupUi(_pRendererWidget);
+    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+    _rendererWidget._playButton->setText("");
+    _rendererWidget._stopButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaStop));
+    _rendererWidget._stopButton->setText("");
+//     _rendererWidget._pauseButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPause));
+//     _rendererWidget._pauseButton->setText("");
+    _rendererWidget._skipForwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSkipForward));
+    _rendererWidget._skipForwardButton->setText("");
+    _rendererWidget._skipBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSkipBackward));
+    _rendererWidget._skipBackwardButton->setText("");
+    _rendererWidget._seekForwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekForward));
+    _rendererWidget._seekForwardButton->setText("");
+    _rendererWidget._seekBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekBackward));
+    _rendererWidget._seekBackwardButton->setText("");
+
+    _pActivityIndicator = new QtActivityIndicator(_rendererWidget._networkActivity);
+    _rendererWidget._activityLayout->addWidget(_pActivityIndicator);
     _pActivityIndicator->show();
     
-    ui._browserView->setUniformRowHeights(true);
+    _pServerCrumbButton = new QtCrumbButton(_browserWidget._browserView, QModelIndex(), _browserWidget._breadCrump);
     
-    ui._breadCrumpLayout->setAlignment(Qt::AlignLeft);
-    ui._breadCrumpLayout->setSpacing(0);
-    _pServerCrumbButton = new QtCrumbButton(ui._browserView, QModelIndex(), ui._breadCrump);
-    
-    _pMainWindow = new QtMainWindow(ui._tabWidget);
-    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, ui._dockWidget);
+    _pMainWindow = new QtMainWindow(_pBrowserWidget);
+    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pRendererWidget);
     _pMainWindow->setWindowTitle("OMM Controller");
     
     _pRendererListModel = new QtRendererListModel(this);
     _pBrowserModel = new QtBrowserModel(this);
     
-    ui._rendererListView->setModel(_pRendererListModel);
-    ui._browserView->setModel(_pBrowserModel);
+    _rendererWidget._rendererListView->setModel(_pRendererListModel);
+    _browserWidget._browserView->setModel(_pBrowserModel);
     
-    connect(ui._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
-    connect(ui._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
+    connect(_rendererWidget._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
+    connect(_rendererWidget._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
 //     connect(ui._pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
-    connect(ui._volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
-    connect(ui._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
-    connect(ui._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+    connect(_rendererWidget._volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
+    connect(_rendererWidget._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+    connect(_rendererWidget._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 //     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSlider(int, int)));
 //     connect(ui._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
 //     connect(ui._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     
     connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
-            ui._rendererListView, SLOT(setCurrentIndex(QModelIndex)));
-    connect(ui._rendererListView->selectionModel(),
+            _rendererWidget._rendererListView, SLOT(setCurrentIndex(QModelIndex)));
+    connect(_rendererWidget._rendererListView->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
-    connect(ui._browserView, SIGNAL(activated(const QModelIndex&)),
+    connect(_browserWidget._browserView, SIGNAL(activated(const QModelIndex&)),
             this, SLOT(browserItemActivated(const QModelIndex&)));
-    connect(ui._browserView, SIGNAL(pressed(const QModelIndex&)),
+    connect(_browserWidget._browserView, SIGNAL(pressed(const QModelIndex&)),
             this, SLOT(browserItemSelected(const QModelIndex&)));
     connect(this, SIGNAL(networkActivity(bool)),
             _pActivityIndicator, SLOT(activity(bool)));
@@ -308,7 +313,7 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
         _pCurrentServer = object;
     }
     if (object->isContainer()) {
-        new QtCrumbButton(ui._browserView, index, ui._breadCrump);
+        new QtCrumbButton(_browserWidget._browserView, index, _browserWidget._breadCrump);
     }
     else {
         mediaObjectSelected(object);
@@ -332,7 +337,7 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
     }
 
     if (object->isContainer()) {
-        new QtCrumbButton(ui._browserView, index, ui._breadCrump);
+        new QtCrumbButton(_browserWidget._browserView, index, _browserWidget._breadCrump);
     }
     else {
         mediaObjectSelected(object);
@@ -361,9 +366,6 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
         return;
     }
     rendererSelected(selectedRenderer);
-//     _pSelectedRenderer = selectedRenderer;
-    
-//     std::clog << "UpnpController::rendererSelectionChanged() row:" << index.row() << std::endl;
     
     setVolumeSlider(100, 50);
 }
@@ -373,12 +375,12 @@ void
 QtAvInterface::setSlider(int max, int val)
 {
     // don't set slider position when user drags the slider
-    if (ui._seekSlider->isSliderDown()) {
+    if (_rendererWidget._seekSlider->isSliderDown()) {
         return;
     }
 //     qDebug() << "QtAvInterface::setSlider() to:" << max << val;
-    ui._seekSlider->setRange(0, max>=0?max:0);
-    ui._seekSlider->setSliderPosition(val);
+    _rendererWidget._seekSlider->setRange(0, max>=0?max:0);
+    _rendererWidget._seekSlider->setSliderPosition(val);
 }
 
 
@@ -386,12 +388,12 @@ void
 QtAvInterface::setVolumeSlider(int max, int val)
 {
     // don't set slider position when user drags the slider
-    if (ui._volumeSlider->isSliderDown()) {
+    if (_rendererWidget._volumeSlider->isSliderDown()) {
         return;
     }
 //     qDebug() << "QtAvInterface::setSlider() to:" << max << val;
-    ui._volumeSlider->setRange(0, max>=0?max:0);
-    ui._volumeSlider->setSliderPosition(val);
+    _rendererWidget._volumeSlider->setRange(0, max>=0?max:0);
+    _rendererWidget._volumeSlider->setSliderPosition(val);
 }
 
 

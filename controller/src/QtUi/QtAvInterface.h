@@ -29,8 +29,8 @@
 
 #include "QtBrowserModel.h"
 #include "QtRendererListModel.h"
-#include "ui_QtAvInterface.h"
-
+#include "ui_QtBrowserWidget.h"
+#include "ui_QtRendererWidget.h"
 
 class QtCrumbButton : public QWidget
 {
@@ -51,12 +51,12 @@ private slots:
 private:
     void deleteChildren();
     
-    QLayout*           _parentLayout;
-    QHBoxLayout*       _boxLayout;
-    QPushButton*       _button;
-    QAbstractItemView* _browserView;
-    const QModelIndex  _index;
-    QtCrumbButton*       _child;
+    QLayout*            _parentLayout;
+    QHBoxLayout*        _boxLayout;
+    QPushButton*        _button;
+    QAbstractItemView*  _browserView;
+    const QModelIndex   _index;
+    QtCrumbButton*      _child;
 };
 
 
@@ -107,15 +107,6 @@ public:
     virtual void beginNetworkActivity();
     virtual void endNetworkActivity();
     
-    
-//     void setBrowserTreeItemModel(QAbstractItemModel* model);
-//     void setRendererListItemModel(QAbstractItemModel* model);
-    
-//     QItemSelectionModel *getBrowserTreeSelectionModel() { return ui._browserView->selectionModel(); }
-//     QItemSelectionModel *getRendererListSelectionModel() { return ui._rendererListView->selectionModel(); }
-    
-
-    
 public slots:
     void setSlider(int max, int val);
     void setVolumeSlider(int max, int val);
@@ -126,8 +117,6 @@ private slots:
     void pauseButtonPressed();
     void positionSliderMoved(int position);
     void volumeSliderMoved(int value);
-    
-//     void activated(const QModelIndex& index);
     
     void rendererSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void browserItemActivated(const QModelIndex& index);
@@ -144,7 +133,6 @@ private slots:
     void checkSliderMoved(int value);
     void setSliderMoved(int value);
     
-// signals:
     virtual void beginAddRenderer(int position);
     virtual void beginAddServer(int position);
     virtual void beginRemoveRenderer(int position);
@@ -159,20 +147,20 @@ signals:
     void networkActivity(bool set);
     
 private:
-    
-//     void sliderChange(QAbstractSlider::SliderChange change);
     QtBrowserModel*                     _pBrowserModel;
     QtRendererListModel*                _pRendererListModel;
     
     QApplication                        _app;
     QMainWindow*                        _pMainWindow;
-    QFrame*                             _pCentralWidget;
-    Ui::ControllerGui                   ui;
-    bool                                _sliderMoved;
+    Ui::_browserWidget                  _browserWidget;
+    Ui::_rendererWidget                 _rendererWidget;
+    QTabWidget*                         _pBrowserWidget;
+    QDockWidget*                        _pRendererWidget;
     QtActivityIndicator*                _pActivityIndicator;
     QtCrumbButton*                      _pServerCrumbButton;
-    Omm::Av::ControllerObject*          _pCurrentServer;
     static QtCrumbButton*               _pLastCrumbButton;
+    Omm::Av::ControllerObject*          _pCurrentServer;
+    bool                                _sliderMoved;
 };
 
-#endif //CONTROLLERGUI_H
+#endif

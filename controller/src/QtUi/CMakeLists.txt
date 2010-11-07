@@ -50,8 +50,9 @@ QtRendererListModel.cpp
 )
 
 SET( OMMC_QTUI
-# settings.ui
-QtAvInterface.ui
+# QtAvInterface.ui
+QtBrowserWidget.ui
+QtRendererWidget.ui
 )
 
 SET( OMMC_QTRES
@@ -66,11 +67,15 @@ QtRendererListModel.h
 )
 
 QT4_WRAP_UI(
-OMMC_QTUI_H ${OMMC_QTUI}
+OMMC_QT_BROWSERUI_H QtBrowserWidget.ui
+)
+
+QT4_WRAP_UI(
+OMMC_QT_RENDERERUI_H QtRendererWidget.ui
 )
 
 GET_FILENAME_COMPONENT(
-OMMC_QTUI_H_DIR ${OMMC_QTUI_H} PATH
+OMMC_QTUI_H_DIR ${OMMC_QT_BROWSERUI_H} PATH
 )
 
 MESSAGE( STATUS
