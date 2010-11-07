@@ -115,12 +115,17 @@ QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
 _indicateDuration(250),
 _activityInProgress(false),
-_indicatorOn(false),
-_timerStarted(false)
+_indicatorOn(false)
 {
     _symbolRenderer = new QSvgRenderer(this);
     _symbolRenderer->load(QString(":/images/circle_grey.svg"));
     update();
+    // NOTE: if Qt::WA_OpaquePaintEvent is set, repaint() is faster,
+    // but root window shines through transparent parts of the image
+//     setAttribute(Qt::WA_OpaquePaintEvent, true);
+    _offTimer.setInterval(_indicateDuration);
+    _offTimer.setSingleShot(true);
+    connect(&_offTimer, SIGNAL(timeout()), this, SLOT(stopIndicator()));
 }
 
 
@@ -137,12 +142,15 @@ QtActivityIndicator::startActivity()
     if (!indicatorOn()) {
         setIndicatorOn(true);
         _symbolRenderer->load(QString(":/images/circle_purple.svg"));
-        update();
+//         update();
+        repaint();
         Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED ON");
-        // FIXME: sometimes indicator is not showing circle_purple.svg at this point 
-        // http request hangs, this is the last message
-        // is QWidget::update() called asynchronously and gets therefore executed later ...?
-        // further testing shows that svg is shown before next svg is shown, but a noticable time after QWidget::update()
+        // QWidget::update() is called asynchronously and gets therefore executed later sometimes.
+        // Qt docs of slot Widget::update():
+        // This function does not cause an immediate repaint; instead it schedules a paint event for processing when Qt returns
+        // to the main event loop. This permits Qt to optimize for more speed and less flicker than a call to repaint() does.
+        // we can set Qt::WA_OpaquePaintEvent as widget attribute
+        // so we use QWidget::repaint() instead:
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("indicator already on, do nothing");
@@ -153,13 +161,12 @@ QtActivityIndicator::startActivity()
 void
 QtActivityIndicator::stopActivity()
 {
-    // NOTE: this timer only works when started from a Qt event loop thread.
+    // NOTE: starting this timer only works when started from a Qt event loop thread.
     // with actions triggered by gui elements, this is ok. User QThread::exec() ?
     setActivityInProgress(false);
-    if (indicatorOn() && !timerStarted()) {
+    if (indicatorOn() && !_offTimer.isActive()) {
         Omm::Av::Log::instance()->upnpav().debug("turn off indicator after short delay ...");
-        QTimer::singleShot(_indicateDuration, this, SLOT(stopIndicator()));
-        setTimerStarted(true);
+        _offTimer.start();
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("indicator already off or timer running, do nothing");
@@ -170,10 +177,10 @@ QtActivityIndicator::stopActivity()
 void
 QtActivityIndicator::stopIndicator()
 {
-    setTimerStarted(false);
     if (!activityInProgress() && indicatorOn()) {
         _symbolRenderer->load(QString(":/images/circle_grey.svg"));
-        update();
+//         update();
+        repaint();
         setIndicatorOn(false);
         Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED OFF, no activity in progress anymore");
     }
@@ -233,28 +240,6 @@ QtActivityIndicator::indicatorOn()
 {
     QMutexLocker locker(&_indicatorOnLock);
     return _indicatorOn;
-}
-
-
-void
-QtActivityIndicator::setTimerStarted(bool set)
-{
-    QMutexLocker locker(&_timerStartedLock);
-    if (set) {
-        Omm::Av::Log::instance()->upnpav().debug("flag \"timer started\" set to true");
-    }
-    else {
-        Omm::Av::Log::instance()->upnpav().debug("flag \"timer started\" set to false");
-    }
-    _timerStarted = set;
-}
-
-
-bool
-QtActivityIndicator::timerStarted()
-{
-    QMutexLocker locker(&_timerStartedLock);
-    return _timerStarted;
 }
 
 
