@@ -31,23 +31,19 @@
 #include "QtRendererListModel.h"
 #include "ui_QtAvInterface.h"
 
-// TODO: left and right arrows
-// TODO: tab for toggling between browser and renderer
-// TODO: return in broswer should toggle play/stop (pause)
 
-
-class CrumbButton : public QWidget
+class QtCrumbButton : public QWidget
 {
     Q_OBJECT
 
     friend class QtAvInterface;
 public:
-    CrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0);
-    ~CrumbButton();
+    QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0);
+    ~QtCrumbButton();
     
-    void setChild(CrumbButton* child) { _child = child; }
+    void setChild(QtCrumbButton* child) { _child = child; }
     
-    static CrumbButton* _lastCrumbButton;
+    static QtCrumbButton* _pLastCrumbButton;
     
 private slots:
     void buttonPressed();
@@ -60,17 +56,17 @@ private:
     QPushButton*       _button;
     QAbstractItemView* _browserView;
     const QModelIndex  _index;
-    CrumbButton*       _child;
+    QtCrumbButton*       _child;
 };
 
 
-class NetworkActivity : public QWidget
+class QtActivityIndicator : public QWidget
 {
     Q_OBJECT
     
 public:
-    NetworkActivity(QWidget* parent = 0, Qt::WindowFlags f = 0);
-    virtual ~NetworkActivity();
+    QtActivityIndicator(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    virtual ~QtActivityIndicator();
     
 public slots:
     void activity(bool set);
@@ -83,12 +79,12 @@ private:
 };
 
 
-class MainWindow : public QMainWindow
+class QtMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* pCentralWidget);
+    QtMainWindow(QWidget* pCentralWidget);
 };
 
 
@@ -102,6 +98,7 @@ class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 public:
     QtAvInterface(int argc = 0);
     QtAvInterface(int argc, char** argv);
+    virtual ~QtAvInterface();
     
     virtual int eventLoop();
     
@@ -169,12 +166,13 @@ private:
     
     QApplication                        _app;
     QMainWindow*                        _pMainWindow;
-    QFrame                              _widget;
+    QFrame*                             _pCentralWidget;
     Ui::ControllerGui                   ui;
     bool                                _sliderMoved;
-    NetworkActivity*                    _pNetworkActivity;
-    CrumbButton*                        _pServerCrumbButton;
+    QtActivityIndicator*                _pActivityIndicator;
+    QtCrumbButton*                      _pServerCrumbButton;
     Omm::Av::ControllerObject*          _pCurrentServer;
+    static QtCrumbButton*               _pLastCrumbButton;
 };
 
 #endif //CONTROLLERGUI_H

@@ -21,7 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_4">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="_tabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>2</horstretch>
@@ -117,12 +117,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QDockWidget" name="dockWidget">
+    <widget class="QDockWidget" name="_dockWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>150</width>
+       <height>207</height>
+      </size>
      </property>
      <property name="floating">
       <bool>false</bool>
@@ -131,7 +137,7 @@
       <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
      </property>
      <property name="allowedAreas">
-      <set>Qt::AllDockWidgetAreas</set>
+      <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
      </property>
      <property name="windowTitle">
       <string>Player</string>
@@ -151,7 +157,7 @@
               <bool>false</bool>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -172,27 +178,17 @@
              <property name="enabled">
               <bool>false</bool>
              </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="focusPolicy">
               <enum>Qt::NoFocus</enum>
              </property>
              <property name="text">
               <string>RR</string>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3" colspan="2">
-            <widget class="QPushButton" name="_seekForwardButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="text">
-              <string>FF</string>
              </property>
              <property name="checkable">
               <bool>false</bool>
@@ -205,7 +201,7 @@
               <bool>false</bool>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -224,14 +220,14 @@
            <item row="1" column="0" colspan="2">
             <widget class="QPushButton" name="_playButton">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>80</width>
                <height>40</height>
               </size>
              </property>
@@ -249,14 +245,14 @@
            <item row="1" column="2" colspan="3">
             <widget class="QPushButton" name="_stopButton">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>80</width>
                <height>40</height>
               </size>
              </property>
@@ -277,14 +273,14 @@
            <item row="1" column="5">
             <widget class="QWidget" name="_networkActivity" native="true">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>40</width>
                <height>40</height>
               </size>
              </property>
@@ -292,6 +288,28 @@
               <bool>false</bool>
              </property>
              <layout class="QHBoxLayout" name="_activityLayout"/>
+            </widget>
+           </item>
+           <item row="0" column="3" colspan="2">
+            <widget class="QPushButton" name="_seekForwardButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="text">
+              <string>FF</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
           </layout>

@@ -26,9 +26,9 @@
 
 #include "QtAvInterface.h"
 
-CrumbButton* CrumbButton::_lastCrumbButton;
+QtCrumbButton* QtCrumbButton::_pLastCrumbButton = 0;
 
-CrumbButton::CrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent)
+QtCrumbButton::QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent)
 :
 QWidget(parent),
 _parentLayout(parent->layout()),
@@ -38,7 +38,7 @@ _child(0)
 {
     QString label;
     if (index == QModelIndex()) {
-        label = "Servers";
+        label = "Media";
     }
     else {
         label = index.data(Qt::DisplayRole).toString();
@@ -60,10 +60,10 @@ _child(0)
     _button->setCheckable(false);
     _button->setAutoDefault(false);
     
-    if (_lastCrumbButton) {
-        _lastCrumbButton->setChild(this);
+    if (_pLastCrumbButton) {
+        _pLastCrumbButton->setChild(this);
     }
-    _lastCrumbButton = this;
+    _pLastCrumbButton = this;
     if (_parentLayout) {
         _parentLayout->addWidget(this);
     }
@@ -78,20 +78,20 @@ _child(0)
 
 
 void
-CrumbButton::buttonPressed()
+QtCrumbButton::buttonPressed()
 {
     _browserView->setRootIndex(_index);
     if (_child) {
         _browserView->scrollTo(_child->_index, QAbstractItemView::PositionAtTop);
         _browserView->setCurrentIndex(_child->_index);
     }
-    _lastCrumbButton = this;
+    _pLastCrumbButton = this;
     deleteChildren();
 }
 
 
 void
-CrumbButton::deleteChildren()
+QtCrumbButton::deleteChildren()
 {
     if (_child) {
         _child->deleteChildren();
@@ -105,13 +105,13 @@ CrumbButton::deleteChildren()
 }
 
 
-CrumbButton::~CrumbButton()
+QtCrumbButton::~QtCrumbButton()
 {
     delete _button;
 }
 
 
-NetworkActivity::NetworkActivity(QWidget* parent, Qt::WindowFlags f) :
+QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
 _toggle(true)
 {
@@ -119,14 +119,14 @@ _toggle(true)
 }
 
 
-NetworkActivity::~NetworkActivity()
+QtActivityIndicator::~QtActivityIndicator()
 {
     delete _symbolRenderer;
 }
 
 
 void
-NetworkActivity::activity(bool set)
+QtActivityIndicator::activity(bool set)
 {
     std::clog << "NetworkActivity widget receives signal" << std::endl;
     if (set) {
@@ -143,7 +143,7 @@ NetworkActivity::activity(bool set)
 
 
 void
-NetworkActivity::paintEvent(QPaintEvent *)
+QtActivityIndicator::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -151,8 +151,9 @@ NetworkActivity::paintEvent(QPaintEvent *)
 }
 
 
-MainWindow::MainWindow(QWidget* pCentralWidget)
+QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 {
+    setGeometry(0, 0, 800, 480);
     setCentralWidget(pCentralWidget);
 }
 
@@ -162,7 +163,6 @@ _app(argc, (char**)0),
 _sliderMoved(false),
 _pCurrentServer(0)
 {
-//     _pMainWindow = new QMainWindow;
 }
 
 
@@ -172,44 +172,49 @@ _sliderMoved(false),
 _pServerCrumbButton(0),
 _pCurrentServer(0)
 {
-//     _pMainWindow = new QMainWindow;
+}
+
+
+QtAvInterface::~QtAvInterface()
+{
+    delete _pMainWindow;
+    delete _pCentralWidget;
 }
 
 
 void
 QtAvInterface::initGui()
 {
-    ui.setupUi(&_widget);
-    ui._playButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPlay));
+    _pCentralWidget = new QFrame;
+    ui.setupUi(_pCentralWidget);
+    ui._playButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaPlay));
     ui._playButton->setText("");
-    ui._stopButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaStop));
+    ui._stopButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaStop));
     ui._stopButton->setText("");
 //     ui._pauseButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPause));
 //     ui._pauseButton->setText("");
-    ui._skipForwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSkipForward));
+    ui._skipForwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSkipForward));
     ui._skipForwardButton->setText("");
-    ui._skipBackwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSkipBackward));
+    ui._skipBackwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSkipBackward));
     ui._skipBackwardButton->setText("");
-    ui._seekForwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSeekForward));
+    ui._seekForwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSeekForward));
     ui._seekForwardButton->setText("");
-    ui._seekBackwardButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaSeekBackward));
+    ui._seekBackwardButton->setIcon(_pCentralWidget->style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui._seekBackwardButton->setText("");
 
-    _pNetworkActivity = new NetworkActivity(ui._networkActivity);
-    ui._activityLayout->addWidget(_pNetworkActivity);
-    _pNetworkActivity->show();
+    _pActivityIndicator = new QtActivityIndicator(ui._networkActivity);
+    ui._activityLayout->addWidget(_pActivityIndicator);
+    _pActivityIndicator->show();
     
     ui._browserView->setUniformRowHeights(true);
     
     ui._breadCrumpLayout->setAlignment(Qt::AlignLeft);
     ui._breadCrumpLayout->setSpacing(0);
-    _pServerCrumbButton = new CrumbButton(ui._browserView, QModelIndex(), ui._breadCrump);
+    _pServerCrumbButton = new QtCrumbButton(ui._browserView, QModelIndex(), ui._breadCrump);
     
-//     _widget.setWindowTitle("OMM Controller");
-//     _mainWindow.setCentralWidget(ui.tabWidget);
-//     _mainWindow.setWindowTitle("OMM Controller");
-    _pMainWindow = new MainWindow(ui.tabWidget);
-    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, ui.dockWidget);
+    _pMainWindow = new QtMainWindow(ui._tabWidget);
+    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, ui._dockWidget);
+    _pMainWindow->setWindowTitle("OMM Controller");
     
     _pRendererListModel = new QtRendererListModel(this);
     _pBrowserModel = new QtBrowserModel(this);
@@ -238,7 +243,7 @@ QtAvInterface::initGui()
     connect(ui._browserView, SIGNAL(pressed(const QModelIndex&)),
             this, SLOT(browserItemSelected(const QModelIndex&)));
     connect(this, SIGNAL(networkActivity(bool)),
-            _pNetworkActivity, SLOT(activity(bool)));
+            _pActivityIndicator, SLOT(activity(bool)));
 }
 
 
@@ -252,9 +257,6 @@ QtAvInterface::eventLoop()
 void
 QtAvInterface::showMainWindow()
 {
-//     _widget.show();
-//     _mainWindow.show();
-//     show();
     _pMainWindow->show();
 }
 
@@ -306,7 +308,7 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
         _pCurrentServer = object;
     }
     if (object->isContainer()) {
-        new CrumbButton(ui._browserView, index, ui._breadCrump);
+        new QtCrumbButton(ui._browserView, index, ui._breadCrump);
     }
     else {
         mediaObjectSelected(object);
@@ -330,7 +332,7 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
     }
 
     if (object->isContainer()) {
-        new CrumbButton(ui._browserView, index, ui._breadCrump);
+        new QtCrumbButton(ui._browserView, index, ui._breadCrump);
     }
     else {
         mediaObjectSelected(object);
