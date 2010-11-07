@@ -401,7 +401,9 @@ AvUserInterface::playPressed()
         }
         catch (Poco::Exception e) {
             error(e.message());
+            return;
         }
+        std::clog << "playing: " << _pSelectedObject->getTitle() << std::endl;
     }
 }
 

@@ -71,12 +71,19 @@ public:
 public slots:
     void startActivity();
     void stopActivity();
+    
+private slots:
+    void stopIndicator();
 
 private:
     void paintEvent(QPaintEvent *event);
+    void setIndicatorActive(bool set);
+    bool indicatorActive();
 
     const int           _indicateDuration;
     QSvgRenderer*       _symbolRenderer;
+    bool                _indicatorActive;
+    QMutex              _indicatorLock;
 };
 
 

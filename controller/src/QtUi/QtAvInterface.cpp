@@ -113,7 +113,8 @@ QtCrumbButton::~QtCrumbButton()
 
 QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
 QWidget(parent, f),
-_indicateDuration(250)
+_indicateDuration(250),
+_indicatorActive(false)
 {
     _symbolRenderer = new QSvgRenderer(this);
 }
@@ -130,17 +131,27 @@ QtActivityIndicator::startActivity()
 {
     _symbolRenderer->load(QString(":/images/circle_purple.svg"));
     update();
-    // NOTE: this timer only works when started from a Qt event loop thread.
-    // with actions triggered by gui elements, this is ok. User QThread::exec() ?
-    QTimer::singleShot(_indicateDuration, this, SLOT(stopActivity()));
+    setIndicatorActive(true);
 }
 
 
 void
 QtActivityIndicator::stopActivity()
 {
-    _symbolRenderer->load(QString(":/images/circle_grey.svg"));
-    update();
+    // NOTE: this timer only works when started from a Qt event loop thread.
+    // with actions triggered by gui elements, this is ok. User QThread::exec() ?
+    setIndicatorActive(false);
+    QTimer::singleShot(_indicateDuration, this, SLOT(stopIndicator()));
+}
+
+
+void
+QtActivityIndicator::stopIndicator()
+{
+    if (!indicatorActive()) {
+        _symbolRenderer->load(QString(":/images/circle_grey.svg"));
+        update();
+    }
 }
 
 
@@ -153,6 +164,22 @@ QtActivityIndicator::paintEvent(QPaintEvent *)
 }
 
 
+void
+QtActivityIndicator::setIndicatorActive(bool set)
+{
+    QMutexLocker locker(&_indicatorLock);
+    _indicatorActive = set;
+}
+
+
+bool
+QtActivityIndicator::indicatorActive()
+{
+    QMutexLocker locker(&_indicatorLock);
+    return _indicatorActive;
+}
+
+
 QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 {
     setGeometry(0, 0, 800, 480);
@@ -162,17 +189,18 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 
 QtAvInterface::QtAvInterface(int argc) :
 _app(argc, (char**)0),
-_sliderMoved(false),
-_pCurrentServer(0)
+_pServerCrumbButton(0),
+_pCurrentServer(0),
+_sliderMoved(false)
 {
 }
 
 
 QtAvInterface::QtAvInterface(int argc, char** argv) :
 _app(argc, argv),
-_sliderMoved(false),
 _pServerCrumbButton(0),
-_pCurrentServer(0)
+_pCurrentServer(0),
+_sliderMoved(false)
 {
 }
 
@@ -251,6 +279,8 @@ QtAvInterface::initGui()
             this, SLOT(browserItemSelected(const QModelIndex&)));
     connect(this, SIGNAL(startNetworkActivity()),
             _pActivityIndicator, SLOT(startActivity()));
+    connect(this, SIGNAL(stopNetworkActivity()),
+            _pActivityIndicator, SLOT(stopActivity()));
 }
 
 
@@ -337,7 +367,7 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
     if (index.parent() == QModelIndex()) {
         _pCurrentServer = object;
     }
-
+    
     if (object->isContainer()) {
         new QtCrumbButton(_browserWidget._browserView, index, _browserWidget._breadCrump);
     }
