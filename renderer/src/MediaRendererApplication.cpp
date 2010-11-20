@@ -53,7 +53,8 @@ public:
         _enginePlugin(""),
         _fullscreen(false),
         _width(""),
-        _height("")
+        _height(""),
+        _name("")
     {
     }
     
@@ -101,6 +102,11 @@ protected:
                            .required(false)
                            .repeatable(false)
                            .argument("height", true));
+        options.addOption(
+                           Option("name", "n", "friendly name of UPnP-AV renderer")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("name", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
@@ -121,6 +127,9 @@ protected:
         }
         else if (name == "height") {
             _height = value;
+        }
+        else if (name == "name") {
+            _name = value;
         }
     }
     
@@ -194,6 +203,9 @@ protected:
 //             myMediaRenderer.setFullscreen();
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             myMediaRenderer.addIcon(pIcon);
+            if (_name != "") {
+                myMediaRenderer.setFriendlyName(_name);
+            }
             
             myMediaRenderer.start();
             waitForTerminationRequest();
@@ -208,6 +220,7 @@ private:
     bool            _fullscreen;
     std::string     _width;
     std::string     _height;
+    std::string     _name;
 };
 
 

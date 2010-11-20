@@ -40,8 +40,9 @@ class UpnpAvServerApplication: public Poco::Util::ServerApplication
 public:
     UpnpAvServerApplication():
         _helpRequested(false),
-        _containerPlugin(""),
-        _pluginOption("")
+        _containerPlugin("server-file"),
+        _pluginOption(""),
+        _name("")
     {
     }
     
@@ -79,6 +80,11 @@ protected:
                            .required(false)
                            .repeatable(false)
                            .argument("plugin option", true));
+        options.addOption(
+                           Option("name", "n", "friendly name of UPnP device")
+                           .required(false)
+                           .repeatable(false)
+                           .argument("friendly name", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
@@ -93,6 +99,9 @@ protected:
         }
         else if (name == "option") {
             _pluginOption = value;
+        }
+        else if (name == "name") {
+            _name = value;
         }
     }
     
@@ -113,13 +122,6 @@ protected:
         }
         else
         {
-            if (_containerPlugin == "") {
-//                 _containerPlugin = "server-webradio";
-//                 _containerPlugin = "server-webradiosimple";
-//                 _containerPlugin = "server-storage";
-                _containerPlugin = "server-test";
-            }
-            
             Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
             Omm::Av::AbstractMediaObject* pContainerPlugin;
             try {
@@ -131,32 +133,38 @@ protected:
             }
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
             
+            std::string home = Poco::Environment::get("HOME");
             if (_containerPlugin == "server-dvb") {
-                    pContainerPlugin->setTitle("Digital TV");
-                    if (_pluginOption == "") {
-                        pContainerPlugin->setOption("basePath", "/home/jb/.omm/channels.conf");
-                    }
+                if (_name == "") {
+                    _name = "Digital TV";
+                }
+                if (_pluginOption == "") {
+                    _pluginOption = home + "/.omm/channels.conf";
+                }
             }
             else if (_containerPlugin == "server-file") {
-                    pContainerPlugin->setTitle("Collection");
-                    if (_pluginOption == "") {
-                        pContainerPlugin->setOption("basePath", "/home/jb/mp3");
-                    }
+                if (_name == "") {
+                    _name = "Collection";
+                }
+                if (_pluginOption == "") {
+                    _pluginOption = home + "/mp3";
+//                     _pluginOption = home;
+                }
             }
             else if (_containerPlugin == "server-webradio") {
-                    pContainerPlugin->setTitle("Web Radio");
-                    if (_pluginOption == "") {
-                        pContainerPlugin->setOption("basePath", "/home/jb/.omm/webradio.conf");
-                    }
+                if (_name == "") {
+                    _name = "Web Radio";
+                }
+                if (_pluginOption == "") {
+                    _pluginOption = home + "/.omm/webradio.conf";
+                }
             }
-            if (_pluginOption != "") {
-                pContainerPlugin->setOption("basePath", _pluginOption);
-            }
+            pContainerPlugin->setOption("basePath", _pluginOption);
+            pContainerPlugin->setTitle(_name);
             
             Omm::Av::UpnpAvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);
-            
-            myMediaServer.setFriendlyName(pContainerPlugin->getTitle());
+            myMediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
             myMediaServer.addIcon(pIcon);
             myMediaServer.start();
@@ -170,6 +178,7 @@ private:
     bool            _helpRequested;
     std::string     _containerPlugin;
     std::string     _pluginOption;
+    std::string     _name;
 };
 
 

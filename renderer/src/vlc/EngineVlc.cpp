@@ -39,14 +39,20 @@ VlcEngine::~VlcEngine()
 void
 VlcEngine::createPlayer()
 {
-//     int argc = 1;
-//     char* argv[1] = {"ommr"};
-    int argc = 2;
-    const char* argv[2] = {"ommr", "--no-osd"};
-//     int argc = 3;
-//     char* argv[3] = {"ommr", "--codec=avcodec",  "--vout fb"};
     libvlc_exception_init(&_exception);
-    _vlcInstance = libvlc_new(argc, argv, &_exception);
+    if (_fullscreen) {
+        int argc = 3;
+        const char* argv[3] = {"ommrender", "--no-osd",  "--fullscreen"};
+        _vlcInstance = libvlc_new(argc, argv, &_exception);
+    }
+    else {
+        int argc = 2;
+        const char* argv[2] = {"ommrender", "--no-osd"};
+        _vlcInstance = libvlc_new(argc, argv, &_exception);
+    }
+//     int argc = 3;
+//     char* argv[3] = {"ommrender", "--codec=avcodec",  "--vout fb"};
+//     _vlcInstance = libvlc_new(argc, argv, &_exception);
     handleException();
     _vlcPlayer = libvlc_media_player_new(_vlcInstance, &_exception);
     handleException();
@@ -99,6 +105,22 @@ VlcEngine::openXWindow()
 //     res_v = (DisplayHeight(xDisplay, xScreen) * 1000 / DisplayHeightMM(xDisplay, xScreen));
     XSync(xDisplay, False);
     XUnlockDisplay(xDisplay);
+    
+    // hide X cursor
+    Cursor no_ptr;
+    Pixmap bm_no;
+    XColor black, dummy;
+    Colormap colormap;
+    static char no_data[] = { 0,0,0,0,0,0,0,0 };
+    
+    colormap = DefaultColormap(xDisplay, xScreen);
+    XAllocNamedColor(xDisplay, colormap, "black", &black, &dummy);
+    bm_no = XCreateBitmapFromData(xDisplay, xWindow, no_data, 8, 8);
+    no_ptr = XCreatePixmapCursor(xDisplay, bm_no, bm_no, &black, &black, 0, 0);
+    
+    XDefineCursor(xDisplay, xWindow, no_ptr);
+    XFreeCursor(xDisplay, no_ptr);
+    
     return xWindow;
 }
 

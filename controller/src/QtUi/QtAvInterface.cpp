@@ -144,7 +144,7 @@ QtActivityIndicator::startActivity()
         _symbolRenderer->load(QString(":/images/circle_purple.svg"));
 //         update();
         repaint();
-        Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED ON");
+        Omm::Av::Log::instance()->upnpav().trace("INDICATOR TURNED ON");
         // QWidget::update() is called asynchronously and gets therefore executed later sometimes.
         // Qt docs of slot Widget::update():
         // This function does not cause an immediate repaint; instead it schedules a paint event for processing when Qt returns
@@ -153,7 +153,7 @@ QtActivityIndicator::startActivity()
         // so we use QWidget::repaint() instead:
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("indicator already on, do nothing");
+        Omm::Av::Log::instance()->upnpav().trace("indicator already on, do nothing");
     }
 }
 
@@ -165,11 +165,11 @@ QtActivityIndicator::stopActivity()
     // with actions triggered by gui elements, this is ok. User QThread::exec() ?
     setActivityInProgress(false);
     if (indicatorOn() && !_offTimer.isActive()) {
-        Omm::Av::Log::instance()->upnpav().debug("turn off indicator after short delay ...");
+        Omm::Av::Log::instance()->upnpav().trace("turn off indicator after short delay ...");
         _offTimer.start();
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("indicator already off or timer running, do nothing");
+        Omm::Av::Log::instance()->upnpav().trace("indicator already off or timer running, do nothing");
     }
 }
 
@@ -182,10 +182,10 @@ QtActivityIndicator::stopIndicator()
 //         update();
         repaint();
         setIndicatorOn(false);
-        Omm::Av::Log::instance()->upnpav().debug("INDICATOR TURNED OFF, no activity in progress anymore");
+        Omm::Av::Log::instance()->upnpav().trace("INDICATOR TURNED OFF, no activity in progress anymore");
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("turn off indicator ignored, activity still in progress or indicator already off");
+        Omm::Av::Log::instance()->upnpav().trace("turn off indicator ignored, activity still in progress or indicator already off");
     }
 }
 
@@ -204,10 +204,10 @@ QtActivityIndicator::setActivityInProgress(bool set)
 {
     QMutexLocker locker(&_activityInProgressLock);
     if (set) {
-        Omm::Av::Log::instance()->upnpav().debug("flag \"activity in progress\" set to true");
+        Omm::Av::Log::instance()->upnpav().trace("flag \"activity in progress\" set to true");
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("flag \"activity in progress\" set to false");
+        Omm::Av::Log::instance()->upnpav().trace("flag \"activity in progress\" set to false");
     }
     _activityInProgress = set;
 }
@@ -226,10 +226,10 @@ QtActivityIndicator::setIndicatorOn(bool set)
 {
     QMutexLocker locker(&_indicatorOnLock);
     if (set) {
-        Omm::Av::Log::instance()->upnpav().debug("flag \"indicator on\" set to true");
+        Omm::Av::Log::instance()->upnpav().trace("flag \"indicator on\" set to true");
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("flag \"indicator on\" set to false");
+        Omm::Av::Log::instance()->upnpav().trace("flag \"indicator on\" set to false");
     }
     _indicatorOn = set;
 }
