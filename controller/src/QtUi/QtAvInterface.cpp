@@ -250,17 +250,9 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 }
 
 
-QtAvInterface::QtAvInterface(int argc) :
-_app(argc, (char**)0),
-_pServerCrumbButton(0),
-_pCurrentServer(0),
-_sliderMoved(false)
-{
-}
-
-
-QtAvInterface::QtAvInterface(int argc, char** argv) :
-_app(argc, argv),
+QtAvInterface::QtAvInterface() :
+_argc(0),
+_pApp(new QApplication(_argc, 0)),
 _pServerCrumbButton(0),
 _pCurrentServer(0),
 _sliderMoved(false)
@@ -273,6 +265,7 @@ QtAvInterface::~QtAvInterface()
     delete _pMainWindow;
     delete _pBrowserWidget;
     delete _pRendererWidget;
+    delete _pApp;
 }
 
 
@@ -350,7 +343,8 @@ QtAvInterface::initGui()
 int
 QtAvInterface::eventLoop()
 {
-    return _app.exec();
+    return _pApp->exec();
+//     return _app.exec();
 }
 
 

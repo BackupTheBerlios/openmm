@@ -109,8 +109,9 @@ class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
     friend class QtBrowserModel;
     
 public:
-    QtAvInterface(int argc = 0);
-    QtAvInterface(int argc, char** argv);
+    QtAvInterface();
+//     QtAvInterface(int argc = 0);
+//     QtAvInterface(int argc, char** argv);
     virtual ~QtAvInterface();
     
     virtual int eventLoop();
@@ -164,7 +165,8 @@ private:
     QtBrowserModel*                     _pBrowserModel;
     QtRendererListModel*                _pRendererListModel;
     
-    QApplication                        _app;
+    int                                 _argc;
+    QApplication*                       _pApp;
     QMainWindow*                        _pMainWindow;
     Ui::_browserWidget                  _browserWidget;
     Ui::_rendererWidget                 _rendererWidget;
