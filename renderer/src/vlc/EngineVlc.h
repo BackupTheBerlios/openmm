@@ -27,8 +27,11 @@
 #ifdef __X11__
 #include <X11/Xlib.h>
 #endif
-#include <vlc/vlc.h>
 
+#include <vlc/vlc.h>
+#ifdef LIBVLC_VERSION_HEADER_FOUND
+#include <vlc/libvlc_version.h>
+#endif
 
 class VlcEngine : public Omm::Av::Engine
 {
@@ -73,8 +76,10 @@ private:
     void handleException();
     int openXWindow();
     void closeXWindow();
-    
+
+#if LIBVLC_VERSION_INT < 0x110
     libvlc_exception_t      _exception;
+#endif
     libvlc_instance_t*      _vlcInstance;
     libvlc_media_player_t*  _vlcPlayer;
     std::string             _uri;

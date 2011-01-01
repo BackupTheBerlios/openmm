@@ -66,6 +66,7 @@ _pEngine(engine)
     static_cast<RenderingControlRendererImpl*>(_pRenderingControlImpl)->_pEngine = engine;
     static_cast<ConnectionManagerRendererImpl*>(_pConnectionManagerImpl)->_pEngine = engine;
     static_cast<AVTransportRendererImpl*>(_pAVTransportImpl)->_pEngine = engine;
+    Omm::Av::Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
 }
 
 
