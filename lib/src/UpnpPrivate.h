@@ -30,6 +30,7 @@
 namespace Omm {
 
 static const std::string    SSDP_ADDRESS        = "239.255.255.250";
+static const std::string    SSDP_LOOP_ADDRESS   = "127.255.255.255";
 static const Poco::UInt16   SSDP_PORT           = 1900;
 static const Poco::UInt16   SSDP_CACHE_DURATION = 1800;
 static const Poco::UInt16   SSDP_MIN_WAIT_TIME  = 1;

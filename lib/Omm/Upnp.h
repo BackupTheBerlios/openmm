@@ -198,22 +198,24 @@ public:
     static NetworkInterfaceManager* instance();
     // clients like DeviceRoot and Controller can register here
     void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
+    void scanInterfaces();
     // some OS dependent hardware abstraction layer can add and remove devices here
     void addInterface(const std::string& name);
     void removeInterface(const std::string& name);
     // this address can be announced for the HTTP servers to be reached at
     const Poco::Net::IPAddress& getValidInterfaceAddress();
+    const std::string loopbackInterfaceName();
     
 private:
     NetworkInterfaceManager();
     void findValidIpAddress();
+    static bool isLoopback(const std::string& interfaceName);
     
     static NetworkInterfaceManager*     _pInstance;
+    std::string                         _loopbackInterfaceName;
     std::vector<std::string>            _interfaceList;
     Poco::Net::IPAddress                _validIpAddress;
     Poco::NotificationCenter            _notificationCenter;
-    bool                                _loopbackProvided;
-    Poco::Net::IPAddress                _loopbackAddress;
 };
 
 
@@ -229,6 +231,7 @@ private:
     void onReadable(Poco::Net::ReadableNotification* pNotification);
     
     std::string                     _name;
+    bool                            _broadcastMode;
     SsdpSocket*                     _pSsdpSocket;
     Poco::Net::NetworkInterface*    _pInterface;
     Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
@@ -255,6 +258,7 @@ public:
     void removeInterface(const std::string& name);
     void setObserver(const Poco::AbstractObserver& observer);
     void start();
+    void stop();
     
     void sendMessage(SsdpMessage& message, const std::string& interface = "*", const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     
