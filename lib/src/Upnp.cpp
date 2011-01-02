@@ -172,6 +172,20 @@ Icon::retrieve(const std::string& uri)
 }
 
 
+void
+NetworkDeviceMonitor::addInterface(const std::string& name)
+{
+    NetworkInterfaceManager::instance()->addInterface(name);
+}
+
+
+void
+NetworkDeviceMonitor::removeInterface(const std::string& name)
+{
+    NetworkInterfaceManager::instance()->removeInterface(name);
+}
+
+
 NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
 _interfaceName(interfaceName),
 _added(added)
@@ -185,6 +199,8 @@ NetworkInterfaceManager::NetworkInterfaceManager()
 {
     scanInterfaces();
     findValidIpAddress();
+    _pNetworkDeviceMonitor = new Sys::LinuxNetworkDeviceMonitor;
+    _pNetworkDeviceMonitor->start();
 }
 
 
@@ -219,7 +235,7 @@ NetworkInterfaceManager::findValidIpAddress()
             _validIpAddress = Poco::Net::NetworkInterface::forName(*it).address();
         }
     }
-    if (_interfaceList.size() == 0 && loopBackProvided) {
+    if (_interfaceList.size() == 1 && loopBackProvided) {
         Log::instance()->upnp().debug("loopback is the only network interface, setting valid IP address to 127.0.0.1");
         validAddressFound = true;
         _validIpAddress = Poco::Net::IPAddress("127.0.0.1");
@@ -280,11 +296,13 @@ NetworkInterfaceManager::addInterface(const std::string& name)
     if (find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end()) {
         Log::instance()->upnp().information("adding network interface: " + name);
         _interfaceList.push_back(name);
+        Log::instance()->upnp().information("notify observer of new network interface: " + name);
         _notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
     }
     else {
         Log::instance()->upnp().information("added network interface already known: " + name);
     }
+    findValidIpAddress();
 }
 
 
@@ -294,6 +312,7 @@ NetworkInterfaceManager::removeInterface(const std::string& name)
     Log::instance()->upnp().information("removing network interface: " + name);
     
     _interfaceList.erase(find(_interfaceList.begin(), _interfaceList.end(), name));
+    Log::instance()->upnp().information("notify observer of removed network interface: " + name);
     _notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
     findValidIpAddress();
 }
@@ -337,22 +356,25 @@ _pBuffer(new char[BUFFER_SIZE])
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_ADDRESS), SSDP_PORT), true);
     Log::instance()->ssdp().debug("attach interface ...");
     _pSsdpListenerSocket->setInterface(*_pInterface);
-    Log::instance()->ssdp().debug("join group ...");
-    try {
-        _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+    if (interfaceName == NetworkInterfaceManager::instance()->loopbackInterfaceName()) {
+//         Log::instance()->ssdp().warning("loopback seems to be the only interface and not configured for multicast:");
+        Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+        Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+        Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+//         Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for local only UPnP operation.");
+        _broadcastMode = true;
+        _pSsdpSenderSocket->setBroadcast(true);
+        delete _pSsdpListenerSocket;
+        _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_LOOP_ADDRESS), SSDP_PORT), true);
+        _pSsdpListenerSocket->setInterface(*_pInterface);
     }
-    catch (Poco::IOException) {
-        Log::instance()->ssdp().error("failed to join multicast group");
-        if (interfaceName == NetworkInterfaceManager::instance()->loopbackInterfaceName()) {
-            Log::instance()->ssdp().warning("loopback seems to be the only interface and not configured for multicast:");
-            Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface need to be set.");
-            Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-            Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for local only UPnP operation.");
-            _broadcastMode = true;
-            _pSsdpSenderSocket->setBroadcast(true);
-            delete _pSsdpListenerSocket;
-            _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_LOOP_ADDRESS), SSDP_PORT), true);
-            _pSsdpListenerSocket->setInterface(*_pInterface);
+    else {
+        Log::instance()->ssdp().debug("join group ...");
+        try {
+            _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+        }
+        catch (Poco::IOException) {
+            Log::instance()->ssdp().error("failed to join multicast group");
         }
     }
     Log::instance()->ssdp().debug("all sockets set on interface " + interfaceName + ".");
@@ -1861,9 +1883,6 @@ DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 void
 DeviceRoot::initController()
 {
-//     std::clog << "DeviceRoot::initController()" << std::endl;
-    
-//     std::clog << "DeviceRoot::initController() finished" << std::endl;
 }
 
 
@@ -1903,6 +1922,138 @@ void
 DeviceRoot::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler) 
 {
     _httpSocket._pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
+}
+
+
+void
+DeviceRoot::startSsdp()
+{
+    SsdpNotifyAliveWriter aliveWriter(_ssdpNotifyAliveMessages);
+    SsdpNotifyByebyeWriter byebyeWriter(_ssdpNotifyByebyeMessages);
+    aliveWriter.deviceRoot(*this);
+    byebyeWriter.deviceRoot(*this);
+    
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        Device& device = **d;
+        aliveWriter.device(device);
+        byebyeWriter.device(device);
+        for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
+            Service* ps = *s;
+            
+            aliveWriter.service(*ps);
+            byebyeWriter.service(*ps);
+        }
+    }
+    
+    _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
+    _ssdpSocket.start();
+    // TODO: 3. send out initial set also on the occasion of new IP address or network interface.
+    
+    // 1. wait random intervall of less than 100msec when sending message set first time
+    // 2. send out all message sets two times (max three times according to specs, should be configurable).
+    _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
+    // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
+    _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
+//     std::clog << "DeviceRoot::startSsdp() finished" << std::endl;
+    Log::instance()->ssdp().information("SSDP started");
+}
+
+
+void
+DeviceRoot::stopSsdp()
+{
+    Log::instance()->ssdp().information("stopping SSDP ...");
+    _ssdpNotifyAliveMessages.stop();
+    _ssdpNotifyByebyeMessages.send(_ssdpSocket, 2, 0, false);
+}
+
+
+void
+DeviceRoot::startHttp()
+{
+    Log::instance()->http().information("starting HTTP services ...");
+//     _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
+    
+    _descriptionRequestHandler = new DescriptionRequestHandler(_pDeviceDescription);
+    Poco::URI descriptionUri(_descriptionUri);
+    registerHttpRequestHandler(descriptionUri.getPath(), _descriptionRequestHandler);
+
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
+            registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
+        }
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            Service* ps = *s;
+            // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
+            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+        }
+    }
+    Log::instance()->http().information("initialized message sets, service request handlers, and state variables");
+    
+    _httpSocket.startServer();
+    Log::instance()->http().information("services started");
+}
+
+
+void
+DeviceRoot::stopHttp()
+{
+    _httpSocket.stopServer();
+}
+
+
+void 
+DeviceRoot::sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver)
+{
+    _ssdpSocket.sendMessage(message, interface, receiver);
+}
+
+
+void
+DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
+{
+    if (pMessage->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
+        SsdpMessage m;
+        // TODO: use a skeleton to create response message
+        m.setRequestMethod(SsdpMessage::REQUEST_RESPONSE);
+        m.setCacheControl();
+        m.setDate();
+        m.setHttpExtensionConfirmed();
+        m.setLocation(_descriptionUri);
+        m.setServer("Omm/" + OMM_VERSION);
+        // ST field in response depends on ST field in M-SEARCH
+        m.setSearchTarget("upnp:rootdevice");
+        // same as USN in NOTIFY message
+        m.setUniqueServiceName("uuid:" + _pRootDevice->getUuid() + "::upnp:rootdevice");
+        
+        // TODO: react on ST field (search target)
+        // TODO: react on MX field (seconds to delay response)
+        //       -> create an SsdpMessageSet and send it out delayed
+        // TODO: fill in the correct value for CacheControl
+        //       -> _ssdpNotifyAliveMessages._sendTimer
+        //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
+        
+        _ssdpSocket.sendMessage(m, pMessage->getInterface(), pMessage->getSender());
+    }
+}
+
+
+void
+DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
+{
+    Log::instance()->upnp().debug("device root receives network interface change");
+    
+    if (pNotification->_added) {
+        _ssdpSocket.addInterface(pNotification->_interfaceName);
+        // TODO: send alive message set on this interface only
+        _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
+    }
+    else {
+        _ssdpSocket.removeInterface(pNotification->_interfaceName);
+        // TODO: send bye-bye message set on this interface (impossible, if interface is already removed ...)
+    }
 }
 
 
@@ -2049,142 +2200,6 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
     }
 //     std::clog << "SsdpMessageSet::onTimer() finished" << std::endl;
 }
-
-
-void
-DeviceRoot::startSsdp()
-{
-    Log::instance()->ssdp().information("starting SSDP ...");
-    
-    SsdpNotifyAliveWriter aliveWriter(_ssdpNotifyAliveMessages);
-    SsdpNotifyByebyeWriter byebyeWriter(_ssdpNotifyByebyeMessages);
-    aliveWriter.deviceRoot(*this);
-    byebyeWriter.deviceRoot(*this);
-    
-    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Device& device = **d;
-        aliveWriter.device(device);
-        byebyeWriter.device(device);
-        for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
-            Service* ps = *s;
-            
-            aliveWriter.service(*ps);
-            byebyeWriter.service(*ps);
-        }
-    }
-    
-    _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
-    _ssdpSocket.start();
-    // TODO: 3. send out initial set also on the occasion of new IP address or network interface.
-    
-    // 1. wait random intervall of less than 100msec when sending message set first time
-    // 2. send out all message sets two times (max three times according to specs, should be configurable).
-    _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
-    // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
-    _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
-//     std::clog << "DeviceRoot::startSsdp() finished" << std::endl;
-    Log::instance()->ssdp().information("SSDP started");
-}
-
-
-void
-DeviceRoot::stopSsdp()
-{
-    Log::instance()->ssdp().information("stopping SSDP ...");
-    _ssdpNotifyAliveMessages.stop();
-    _ssdpNotifyByebyeMessages.send(_ssdpSocket, 2, 0, false);
-}
-
-
-void
-DeviceRoot::startHttp()
-{
-    Log::instance()->http().information("starting HTTP services ...");
-//     _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
-    
-    _descriptionRequestHandler = new DescriptionRequestHandler(_pDeviceDescription);
-    Poco::URI descriptionUri(_descriptionUri);
-    registerHttpRequestHandler(descriptionUri.getPath(), _descriptionRequestHandler);
-
-    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
-            registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
-        }
-        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            Service* ps = *s;
-            // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
-            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
-            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
-        }
-    }
-//     std::clog << "DeviceRoot::startHttp() initialized message sets, service request handlers and state variables" << std::endl;
-    Log::instance()->http().information("initialized message sets, service request handlers, and state variables");
-    
-    _httpSocket.startServer();
-//     std::clog << "DeviceRoot::startHttp() server started" << std::endl;
-    Log::instance()->http().information("services started");
-}
-
-
-void
-DeviceRoot::stopHttp()
-{
-    _httpSocket.stopServer();
-}
-
-
-void 
-DeviceRoot::sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver)
-{
-    _ssdpSocket.sendMessage(message, interface, receiver);
-}
-
-
-void
-DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
-{
-    if (pMessage->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
-        SsdpMessage m;
-        // TODO: use a skeleton to create response message
-        m.setRequestMethod(SsdpMessage::REQUEST_RESPONSE);
-        m.setCacheControl();
-        m.setDate();
-        m.setHttpExtensionConfirmed();
-        m.setLocation(_descriptionUri);
-        m.setServer("Omm/" + OMM_VERSION);
-        // ST field in response depends on ST field in M-SEARCH
-        m.setSearchTarget("upnp:rootdevice");
-        // same as USN in NOTIFY message
-        m.setUniqueServiceName("uuid:" + _pRootDevice->getUuid() + "::upnp:rootdevice");
-        
-        // TODO: react on ST field (search target)
-        // TODO: react on MX field (seconds to delay response)
-        //       -> create an SsdpMessageSet and send it out delayed
-        // TODO: fill in the correct value for CacheControl
-        //       -> _ssdpNotifyAliveMessages._sendTimer
-        //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
-        
-        _ssdpSocket.sendMessage(m, pMessage->getInterface(), pMessage->getSender());
-    }
-}
-
-
-void
-DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
-{
-    Log::instance()->upnp().debug("device root receives network interface change");
-    
-    if (pNotification->_added) {
-        _ssdpSocket.addInterface(pNotification->_interfaceName);
-        // TODO: send alive message set on this interface
-    }
-    else {
-        _ssdpSocket.removeInterface(pNotification->_interfaceName);
-        // TODO: send bye-bye message set on this interface
-    }
-}
-
 
 
 Controller::Controller() :

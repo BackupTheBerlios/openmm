@@ -233,6 +233,7 @@ SysTest.cpp
 )
 
 TARGET_LINK_LIBRARIES( systest
+omm
 ommsys-linux
 ${LIB_POCO_FOUNDATION}
 ${LIB_POCO_UTIL}

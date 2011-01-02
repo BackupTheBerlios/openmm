@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef OMMUPNP_H
-#define OMMUPNP_H
+#ifndef Upnp_INCLUDED
+#define Upnp_INCLUDED
 
 #include <string>
 #include <map>
@@ -192,6 +192,18 @@ private:
 };
 
 
+class NetworkDeviceMonitor
+{
+public:
+    virtual void start() {}
+    virtual bool stop() {}
+
+// protected:
+    static void addInterface(const std::string& name);
+    static void removeInterface(const std::string& name);
+};
+
+
 class NetworkInterfaceManager
 {
 public:
@@ -212,6 +224,7 @@ private:
     static bool isLoopback(const std::string& interfaceName);
     
     static NetworkInterfaceManager*     _pInstance;
+    NetworkDeviceMonitor*          _pNetworkDeviceMonitor;
     std::string                         _loopbackInterfaceName;
     std::vector<std::string>            _interfaceList;
     Poco::Net::IPAddress                _validIpAddress;

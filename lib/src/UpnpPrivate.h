@@ -26,6 +26,8 @@
 #include <Poco/UUIDGenerator.h>
 
 #include "Upnp.h"
+#include "SysLinux/NetworkDevice.h"
+
 
 namespace Omm {
 
@@ -51,31 +53,6 @@ public:
     std::string     _interfaceName;
     bool            _added;
 };
-
-
-// class NetworkInterfaceManager
-// {
-// public:
-//     static NetworkInterfaceManager* instance();
-//     // clients like DeviceRoot and Controller can register here
-//     void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
-//     // some OS dependent hardware abstraction layer can add and remove devices here
-//     void addInterface(const std::string& name);
-//     void removeInterface(const std::string& name);
-//     // this address can be announced for the HTTP servers to be reached at
-//     const Poco::Net::IPAddress& getValidInterfaceAddress();
-//     
-// private:
-//     NetworkInterfaceManager();
-//     void findValidIpAddress();
-//     
-//     static NetworkInterfaceManager*     _pInstance;
-//     std::vector<std::string>            _interfaceList;
-//     Poco::Net::IPAddress                _validIpAddress;
-//     Poco::NotificationCenter            _notificationCenter;
-//     bool                                _loopbackProvided;
-//     Poco::Net::IPAddress                _loopbackAddress;
-// };
 
 
 class SsdpMessage : public Poco::Notification
