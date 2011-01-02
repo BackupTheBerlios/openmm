@@ -1728,24 +1728,28 @@ IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 }
 
 
-// HttpSocket::HttpSocket(Poco::Net::NetworkInterface interface) :
-HttpSocket::HttpSocket(Poco::Net::IPAddress address) :
-// _interface(interface)
-_address(address)
+HttpSocket::HttpSocket()
 {
-    init();
+}
+
+
+HttpSocket::~HttpSocket()
+{
+    delete _pHttpServer;
+    // FIXME: deleting _pDeviceRequestHandlerFactory segfaults.
+//     delete _pDeviceRequestHandlerFactory;
 }
 
 
 void
-HttpSocket::init()
+HttpSocket::init(Poco::Net::IPAddress address)
 {
+    _address = address;
     _pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory(this);
     Poco::Net::ServerSocket socket(0);
-        // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
+    // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
     //     socket.bind(_ssdpSocket._interface.address());
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-//     _httpServerAddress = Poco::Net::SocketAddress(_interface.address(), socket.address().port());
     _httpServerAddress = Poco::Net::SocketAddress(_address, socket.address().port());
     _pHttpServer = new Poco::Net::HTTPServer(_pDeviceRequestHandlerFactory, socket, pParams);
 }
@@ -1754,11 +1758,6 @@ HttpSocket::init()
 void
 HttpSocket::startServer()
 {
-
-    //     pParams->setMaxQueued(maxQueued);
-    //     pParams->setMaxThreads(maxThreads);
-        // set-up a server socket on an available port
-
     _pHttpServer->start();
     Log::instance()->http().information("server started on: " + _httpServerAddress.toString());
 }
@@ -1769,12 +1768,6 @@ HttpSocket::stopServer()
 {
     _pHttpServer->stop();
     Log::instance()->http().information("server stopped on: " + _httpServerAddress.toString());
-}
-
-
-HttpSocket::~HttpSocket()
-{
-    delete _pHttpServer;
 }
 
 
@@ -1817,11 +1810,12 @@ Device::addIcon(Icon* pIcon)
 DeviceRoot::DeviceRoot() :
 // TODO: allocate sockets later, not in ctor (e.g. ommgen doesn't need them)
 // _ssdpSocket(/*Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)*/),
-_ssdpSocket(),
+// _ssdpSocket(),
 // _httpSocket(_ssdpSocket.getInterface())
-_httpSocket(NetworkInterfaceManager::instance()->getValidInterfaceAddress()),
+// // _httpSocket(NetworkInterfaceManager::instance()->getValidInterfaceAddress()),
 _pController(0)
 {
+    _httpSocket.init(NetworkInterfaceManager::instance()->getValidInterfaceAddress());
 }
 
 
@@ -1915,6 +1909,13 @@ DeviceRoot::initDevice()
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
     _pDeviceDescription = descriptionWriter.write();
+}
+
+
+void
+DeviceRoot::registerActionHandler(const Poco::AbstractObserver& observer)
+{
+    _httpSocket._notificationCenter.addObserver(observer);
 }
 
 
@@ -2043,8 +2044,7 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
 void
 DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
 {
-    Log::instance()->upnp().debug("device root receives network interface change");
-    
+    Log::instance()->upnp().debug("device root receives network interface change notification");
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
         // TODO: send alive message set on this interface only
@@ -2059,14 +2059,12 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotificati
 
 DeviceRootImplAdapter::DeviceRootImplAdapter()
 {
-//     std::clog << "DeviceRootImplAdapter::DeviceRootImplAdapter()" << std::endl;
     // register the great action dispatcher
 };
 
 
 DeviceRootImplAdapter::~DeviceRootImplAdapter()
 {
-//     std::clog << "DeviceRootImplAdapter::~DeviceRootImplAdapter()" << std::endl;
     delete _pDeviceRoot;
 }
 
@@ -2074,7 +2072,6 @@ DeviceRootImplAdapter::~DeviceRootImplAdapter()
 void
 DeviceRootImplAdapter::start()
 {
-//     std::clog << "DeviceRootImplAdapter::start()" << std::endl;
     _pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
     
 //     _pDeviceRoot->print();
@@ -2088,7 +2085,6 @@ DeviceRootImplAdapter::start()
 void
 DeviceRootImplAdapter::stop()
 {
-//     std::clog << "DeviceRootImplAdapter::stop()" << std::endl;
     _pDeviceRoot->stopSsdp();
     _pDeviceRoot->stopHttp();
 }
@@ -2150,7 +2146,6 @@ SsdpMessageSet::addMessage(SsdpMessage& message)
 void
 SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous)
 {
-//     std::clog << "SsdpMessageSet::send()" << std::endl;
 //     Poco::ScopedLock<Poco::FastMutex> lock(_sendLock);
     // TODO: check if continuous Timer is already running and return
 //     if (_sendTimer) {
@@ -2171,7 +2166,6 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous
         // start synchronously
         onTimer(_sendTimer);
     }
-//     std::clog << "SsdpMessageSet::send() finished" << std::endl;
 }
 
 
@@ -2185,7 +2179,6 @@ SsdpMessageSet::stop()
 void
 SsdpMessageSet::onTimer(Poco::Timer& timer)
 {
-//     std::clog << "SsdpMessageSet::onTimer()" << std::endl;
     int r = _repeat;
     while (r--) {
         Log::instance()->ssdp().debug("#message sets left to send: " + Poco::NumberFormatter::format(r+1));
@@ -2198,7 +2191,6 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
         Log::instance()->ssdp().debug("restarting timer");
         timer.restart(_randomTimeGenerator.next(_delay));
     }
-//     std::clog << "SsdpMessageSet::onTimer() finished" << std::endl;
 }
 
 
@@ -2217,17 +2209,17 @@ Controller::~Controller()
 void
 Controller::handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification)
 {
-    Log::instance()->upnp().debug("controller receives network interface change");
+    Log::instance()->upnp().debug("controller receives network interface change notification");
     
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
         // TODO: send M-SEARCH only on this interface
-//         sendMSearch();
     }
     else {
         _ssdpSocket.removeInterface(pNotification->_interfaceName);
         // TODO: unregister subscriptions for devices on this interface
     }
+    update();
 }
 
 
@@ -2238,13 +2230,14 @@ Controller::start()
 
 #ifdef __DARWIN__
     _ssdpSocket.addInterface("default");
+    sendMSearch();
 #else
     NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<Controller,NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
 #endif
     
     _ssdpSocket.start();
-    sendMSearch();
+//     sendMSearch();
     
     Log::instance()->upnp().debug("controller started");
 }
@@ -2359,6 +2352,17 @@ Controller::removeDevice(const std::string& uuid)
         _pUserInterface->endRemoveDevice(_devices.position(uuid));
         pDeviceRoot->_pController = 0;
     }
+}
+
+
+void
+Controller::update()
+{
+    // TODO: do a more carefull controller update and don't remove servers that are still active.
+    for (Container<DeviceRoot>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+        removeDevice((*it).first);
+    }
+    sendMSearch();
 }
 
 

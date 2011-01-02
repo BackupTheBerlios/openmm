@@ -503,6 +503,12 @@ public:
         return _pEntities.end();
     }
     
+    void clear()
+    {
+        _pEntities.clear();
+        _keys.clear();
+    }
+    
 private:
     std::map<std::string,E*>    _pEntities;
     std::vector<E*>             _keys;
@@ -577,17 +583,15 @@ class HttpSocket
     friend class DeviceRoot;
     
 public:
-//     HttpSocket(Poco::Net::NetworkInterface interface);
-    HttpSocket(Poco::Net::IPAddress address);
+    HttpSocket();
     ~HttpSocket();
     
     std::string getServerUri() { return "http://" + _httpServerAddress.toString() + "/"; }
-    void init();
+    void init(Poco::Net::IPAddress address);
     void startServer();
     void stopServer();
     
 private:
-//     Poco::Net::NetworkInterface           _interface;
     Poco::Net::IPAddress                  _address;
     Poco::Net::SocketAddress              _httpServerAddress;
     DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
@@ -926,11 +930,7 @@ public:
     void stopSsdp();
     void stopHttp();
     
-    void registerActionHandler(const Poco::AbstractObserver& observer)
-    {
-        _httpSocket._notificationCenter.addObserver(observer);
-    }
-    
+    void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     
     void sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
@@ -1035,6 +1035,7 @@ private:
     void discoverDevice(const std::string& location);
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);
+    void update();
     
     SsdpSocket                      _ssdpSocket;
 };
