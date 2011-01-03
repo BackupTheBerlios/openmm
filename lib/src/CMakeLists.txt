@@ -40,11 +40,39 @@ ${POCO_INCLUDE_DIR}
 ${ommlib_SOURCE_DIR}/Omm
 )
 
-SET( OMM_LIB_SRCS
+ADD_LIBRARY(ommutil
+SHARED
+Util.cpp
+)
+
+TARGET_LINK_LIBRARIES( ommutil
+${LIB_POCO_FOUNDATION}
+)
+
+ADD_LIBRARY( ommsys
+SHARED
+Sys.cpp
+)
+
+TARGET_LINK_LIBRARIES( ommsys
+${LIB_POCO_FOUNDATION}
+ommsys-linux
+)
+
+ADD_LIBRARY(omm
+SHARED
 Upnp.cpp
 )
 
-SET( OMM_AV_LIB_SRCS
+TARGET_LINK_LIBRARIES( omm
+${LIB_POCO_FOUNDATION}
+${LIB_POCO_NET}
+${LIB_POCO_XML}
+ommsys
+)
+
+ADD_LIBRARY(ommav
+SHARED
 UpnpAvController.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
@@ -56,54 +84,20 @@ UpnpAvRendererImpl.cpp
 UpnpAvCtrlImpl.cpp
 )
 
-SET( OMM_UTIL_LIB_SRCS
-Util.cpp
-)
-
-ADD_LIBRARY(omm
-SHARED
-${OMM_LIB_SRCS}
-)
-
-ADD_LIBRARY(ommav
-SHARED
-${OMM_AV_LIB_SRCS}
-)
-
-ADD_LIBRARY(ommutil
-SHARED
-${OMM_UTIL_LIB_SRCS}
-)
-
-TARGET_LINK_LIBRARIES( omm
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_NET}
-${LIB_POCO_XML}
-ommsys-linux
-)
-
 TARGET_LINK_LIBRARIES( ommav
 omm
 )
 
-TARGET_LINK_LIBRARIES( ommutil
-${LIB_POCO_FOUNDATION}
-)
-
-SET( OMM_AV_STREAM_LIB_SRCS
-AvStream.cpp
-)
-
 ADD_LIBRARY( ommavstream
 SHARED
-${OMM_AV_STREAM_LIB_SRCS}
+AvStream.cpp
 )
 
 TARGET_LINK_LIBRARIES( ommavstream
 ${LIB_POCO_FOUNDATION}
 )
 
-INSTALL( TARGETS omm ommav ommutil ommavstream
+INSTALL( TARGETS ommutil ommsys omm ommav ommavstream
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )

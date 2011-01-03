@@ -21,7 +21,6 @@
 #ifndef NetworkDevice_INCLUDED
 #define NetworkDevice_INCLUDED
 
-#include <Poco/Logger.h>
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
@@ -32,29 +31,13 @@
 #include <vector>
 #include <map>
 
-// #include "Sys.h"
-#include "Upnp.h"
+#include "Sys.h"
 
 
 namespace Omm {
 namespace Sys {
 
-class Log
-{
-public:
-    static Log* instance();
-    
-    Poco::Logger& sys();
-    
-private:
-    Log();
-    
-    static Log*     _pInstance;
-    Poco::Logger*   _pSysLogger;
-};
-
-
-class LinuxNetworkDeviceMonitor : public Omm::NetworkDeviceMonitor, Poco::Runnable
+class LinuxNetworkDeviceMonitor : public NetworkDeviceMonitor, Poco::Runnable
 {
 public:
     LinuxNetworkDeviceMonitor();

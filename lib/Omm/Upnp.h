@@ -102,6 +102,7 @@
 #include <Poco/SAX/SAXException.h>
 #include <Poco/DOM/DOMException.h>
 
+#include "Sys.h"
 
 namespace Omm {
 
@@ -192,46 +193,6 @@ private:
 };
 
 
-class NetworkDeviceMonitor
-{
-public:
-    virtual void start() {}
-    virtual bool stop() {}
-
-// protected:
-    static void addInterface(const std::string& name);
-    static void removeInterface(const std::string& name);
-};
-
-
-class NetworkInterfaceManager
-{
-public:
-    static NetworkInterfaceManager* instance();
-    // clients like DeviceRoot and Controller can register here
-    void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
-    void scanInterfaces();
-    // some OS dependent hardware abstraction layer can add and remove devices here
-    void addInterface(const std::string& name);
-    void removeInterface(const std::string& name);
-    // this address can be announced for the HTTP servers to be reached at
-    const Poco::Net::IPAddress& getValidInterfaceAddress();
-    const std::string loopbackInterfaceName();
-    
-private:
-    NetworkInterfaceManager();
-    void findValidIpAddress();
-    static bool isLoopback(const std::string& interfaceName);
-    
-    static NetworkInterfaceManager*     _pInstance;
-    NetworkDeviceMonitor*          _pNetworkDeviceMonitor;
-    std::string                         _loopbackInterfaceName;
-    std::vector<std::string>            _interfaceList;
-    Poco::Net::IPAddress                _validIpAddress;
-    Poco::NotificationCenter            _notificationCenter;
-};
-
-
 class SsdpNetworkInterface
 {
     friend class SsdpSocket;
@@ -262,11 +223,9 @@ class SsdpSocket
 { 
     friend class SsdpNetworkInterface;
 public:
-//     SsdpSocket(const Poco::Net::NetworkInterface& interface);
     SsdpSocket();
     ~SsdpSocket();
     
-//     const Poco::Net::NetworkInterface& getInterface() { return _interface; }
     void addInterface(const std::string& name);
     void removeInterface(const std::string& name);
     void setObserver(const Poco::AbstractObserver& observer);
@@ -276,12 +235,6 @@ public:
     void sendMessage(SsdpMessage& message, const std::string& interface = "*", const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     
 private:
-//     void onUnicastReadable(const Poco::AutoPtr<Poco::Net::ReadableNotification>& pNf);
-    
-//     Poco::Net::NetworkInterface     _interface;
-//     Poco::Net::MulticastSocket*     _pSsdpSocket;
-//     Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
-    
     std::map<std::string,SsdpNetworkInterface*>     _interfaces;
     Poco::Net::SocketReactor                        _reactor;
     Poco::Thread                                    _listenerThread;
@@ -935,7 +888,7 @@ public:
     
     void sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
-    void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification);
         
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
@@ -1031,7 +984,7 @@ protected:
 private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
-    void handleNetworkInterfaceChangedNotification(NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);

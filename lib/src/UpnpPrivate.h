@@ -45,16 +45,6 @@ class Entity;
 class EntityItem;
 
 
-class NetworkInterfaceNotification : public Poco::Notification
-{
-public:
-    NetworkInterfaceNotification(const std::string& interfaceName, bool added);
-    
-    std::string     _interfaceName;
-    bool            _added;
-};
-
-
 class SsdpMessage : public Poco::Notification
 {
 public:
