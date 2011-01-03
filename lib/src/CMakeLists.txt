@@ -60,6 +60,7 @@ TARGET_LINK_LIBRARIES( ommsys
 ${LIB_POCO_FOUNDATION}
 ommsys-linux
 )
+elseif(DARWIN)
 endif(LINUX)
 
 ADD_LIBRARY(omm

@@ -32,6 +32,8 @@
 
 #ifdef __LINUX__
 #include "SysLinux/SysImplLinux.h"
+#elif __DARWIN__
+
 #else
 #include "SysImpl.h"
 #endif

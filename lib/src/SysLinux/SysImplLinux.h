@@ -24,7 +24,8 @@
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
-#include "NetworkDevice.h"
+#include <dbus-c++-1/dbus-c++/dbus.h>
+
 
 namespace Omm {
 namespace Sys {

@@ -18,58 +18,12 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#include <stdlib.h>
-#include <sstream>
-
+#include "Sys.h"
 #include "NetworkDevice.h"
 
 
 namespace Omm {
 namespace Sys {
-
-NetworkInterfaceManagerImpl::NetworkInterfaceManagerImpl()
-{
-}
-
-
-NetworkInterfaceManagerImpl::~NetworkInterfaceManagerImpl()
-{
-    stop();
-}
-
-
-void
-NetworkInterfaceManagerImpl::start()
-{
-    Log::instance()->sys().debug("connecting NetworkManager ...");
-    _monitorThread.start(*this);
-}
-
-
-void
-NetworkInterfaceManagerImpl::run()
-{
-    try {
-        DBus::default_dispatcher = &_dispatcher;
-        Log::instance()->sys().debug("connecting system bus");
-        DBus::Connection conn = DBus::Connection::SystemBus();
-        Log::instance()->sys().debug("initializing NetworkManager");
-        NetworkManager network(conn);
-        Log::instance()->sys().debug("waiting for network device changes ...");
-        _dispatcher.enter();
-    }
-    catch(DBus::Error err) {
-        Log::instance()->sys().error("DBus error occured: " + std::string(err.what()));
-    }
-}
-
-
-void
-NetworkInterfaceManagerImpl::stop()
-{
-    _dispatcher.leave();
-    Log::instance()->sys().debug("disconnected from NetworkManager.");
-}
 
 
 NetworkDeviceProperties::NetworkDeviceProperties(DBus::Connection& connection, DBus::Path& udi) :
