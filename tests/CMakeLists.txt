@@ -227,14 +227,3 @@ TARGET_LINK_LIBRARIES( avmux
 ${LIB_OMM_AV_STREAM}
 ${LIB_POCO_UTIL}
 )
-
-ADD_EXECUTABLE( systest
-SysTest.cpp
-)
-
-TARGET_LINK_LIBRARIES( systest
-omm
-ommsys-linux
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_UTIL}
-)

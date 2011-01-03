@@ -18,65 +18,32 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#ifndef NetworkDevice_INCLUDED
-#define NetworkDevice_INCLUDED
+#ifndef SysImplLinux_INCLUDED
+#define SysImplLinux_INCLUDED
 
-#include <dbus-1.0/dbus/dbus-shared.h>
-#include <dbus-c++-1/dbus-c++/dbus.h>
-#include <NetworkManager/NetworkManager.h>
+#include <Poco/Runnable.h>
+#include <Poco/Thread.h>
 
-#include <vector>
-#include <map>
-
-#include "Sys.h"
-#include "SysImplLinux.h"
+#include "NetworkDevice.h"
 
 namespace Omm {
 namespace Sys {
 
-
-class NetworkDeviceProperties : public DBus::PropertiesProxy, public DBus::ObjectProxy
+class NetworkInterfaceManagerImpl : Poco::Runnable
 {
 public:
-    NetworkDeviceProperties(DBus::Connection& connection, DBus::Path& udi);
+    NetworkInterfaceManagerImpl();
+    ~NetworkInterfaceManagerImpl();
 
-    std::string getDeviceName();
+    void start();
+    void stop();
 
 private:
-    DBus::Variant getProperty(const std::string property);
-};
-
-
-class NetworkDevice : public DBus::InterfaceProxy, public DBus::ObjectProxy
-{
-public:
-    NetworkDevice(DBus::Connection& connection, DBus::Path& udi);
+    virtual void run();
     
-private:
-    void stateChangedCb(const DBus::SignalMessage& sig);
-    std::string stateName(NMDeviceState state);
-    std::string reasonName(NMDeviceStateReason reason);
-
-    NetworkDeviceProperties     _deviceProperties;
-    std::string                 _deviceName;
+    DBus::BusDispatcher _dispatcher;
+    Poco::Thread        _monitorThread;
 };
-
-
-class NetworkManager : public DBus::InterfaceProxy, public DBus::ObjectProxy
-{
-public:
-    NetworkManager(DBus::Connection& connection);
-
-private:
-    std::vector<DBus::Path> getDevices();
-    void deviceAddedCb(const DBus::SignalMessage& sig);
-    void deviceRemovedCb(const DBus::SignalMessage& sig);
-    void stateChangedCb(const DBus::SignalMessage& sig);
-    std::string stateName(NMState state);
-
-    std::map<std::string, DBus::RefPtr<NetworkDevice> > m_devices;
-};
-
 
 }  // namespace Sys
 }  // namespace Omm

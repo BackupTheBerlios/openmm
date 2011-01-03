@@ -18,13 +18,20 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#include <../lib/src/SysLinux/NetworkDevice.h>
+#ifndef SysImpl_INCLUDED
+#define SysImpl_INCLUDED
 
-int main(int argc, char** argv)
+namespace Omm {
+namespace Sys {
+
+class NetworkInterfaceManagerImpl
 {
-    Omm::Sys::LinuxNetworkDeviceMonitor monitor;
-    
-    monitor.start();
-    monitor.stop();
-}
+public:
+    void start() {}
+    void stop() {}
+};
 
+}  // namespace Sys
+}  // namespace Omm
+
+#endif

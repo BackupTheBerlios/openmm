@@ -29,11 +29,15 @@
 #include <Poco/Net/NetworkInterface.h>
 
 #include "Sys.h"
-#include "SysLinux/NetworkDevice.h"
+
+#ifdef __LINUX__
+#include "SysLinux/SysImplLinux.h"
+#else
+#include "SysImpl.h"
+#endif
 
 namespace Omm {
 namespace Sys {
-
 
 Log* Log::_pInstance = 0;
 
@@ -70,21 +74,14 @@ Log::sys()
 }
 
 
-NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
-_interfaceName(interfaceName),
-_added(added)
-{
-}
-
-
 NetworkInterfaceManager* NetworkInterfaceManager::_pInstance = 0;
 
 NetworkInterfaceManager::NetworkInterfaceManager()
 {
     scanInterfaces();
     findValidIpAddress();
-    _pNetworkDeviceMonitor = new Sys::LinuxNetworkDeviceMonitor;
-    _pNetworkDeviceMonitor->start();
+    _pImpl = new NetworkInterfaceManagerImpl;
+    _pImpl->start();
 }
 
 
@@ -208,6 +205,14 @@ NetworkInterfaceManager::getValidInterfaceAddress()
     // TODO: probably need some locking here
     return _validIpAddress;
 }
+
+
+NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
+_interfaceName(interfaceName),
+_added(added)
+{
+}
+
 
 }  // namespace Sys
 }  // namespace Omm

@@ -45,17 +45,12 @@ private:
     Poco::Logger*   _pSysLogger;
 };
 
-
-class NetworkDeviceMonitor
-{
-public:
-    virtual void start() {}
-    virtual bool stop() {}
-};
-
+class NetworkInterfaceManagerImpl;
 
 class NetworkInterfaceManager
 {
+    friend class NetworkInterfaceManagerImpl;
+
 public:
     static NetworkInterfaceManager* instance();
     // clients like DeviceRoot and Controller can register here
@@ -67,14 +62,14 @@ public:
     // this address can be announced for the HTTP servers to be reached at
     const Poco::Net::IPAddress& getValidInterfaceAddress();
     const std::string loopbackInterfaceName();
-    
+
 private:
     NetworkInterfaceManager();
     void findValidIpAddress();
     static bool isLoopback(const std::string& interfaceName);
     
     static NetworkInterfaceManager*     _pInstance;
-    NetworkDeviceMonitor*               _pNetworkDeviceMonitor;
+    NetworkInterfaceManagerImpl*        _pImpl;
     std::string                         _loopbackInterfaceName;
     std::vector<std::string>            _interfaceList;
     Poco::Net::IPAddress                _validIpAddress;

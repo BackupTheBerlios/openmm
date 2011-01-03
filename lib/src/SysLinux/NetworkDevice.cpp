@@ -27,19 +27,19 @@
 namespace Omm {
 namespace Sys {
 
-LinuxNetworkDeviceMonitor::LinuxNetworkDeviceMonitor()
+NetworkInterfaceManagerImpl::NetworkInterfaceManagerImpl()
 {
 }
 
 
-LinuxNetworkDeviceMonitor::~LinuxNetworkDeviceMonitor()
+NetworkInterfaceManagerImpl::~NetworkInterfaceManagerImpl()
 {
     stop();
 }
 
 
 void
-LinuxNetworkDeviceMonitor::start()
+NetworkInterfaceManagerImpl::start()
 {
     Log::instance()->sys().debug("connecting NetworkManager ...");
     _monitorThread.start(*this);
@@ -47,7 +47,7 @@ LinuxNetworkDeviceMonitor::start()
 
 
 void
-LinuxNetworkDeviceMonitor::run()
+NetworkInterfaceManagerImpl::run()
 {
     try {
         DBus::default_dispatcher = &_dispatcher;
@@ -64,12 +64,11 @@ LinuxNetworkDeviceMonitor::run()
 }
 
 
-bool
-LinuxNetworkDeviceMonitor::stop()
+void
+NetworkInterfaceManagerImpl::stop()
 {
     _dispatcher.leave();
     Log::instance()->sys().debug("disconnected from NetworkManager.");
-    return true;
 }
 
 
