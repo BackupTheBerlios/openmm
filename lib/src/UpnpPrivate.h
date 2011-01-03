@@ -26,7 +26,6 @@
 #include <Poco/UUIDGenerator.h>
 
 #include "Upnp.h"
-#include "SysLinux/NetworkDevice.h"
 
 
 namespace Omm {

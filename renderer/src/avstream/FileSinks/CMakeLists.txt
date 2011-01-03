@@ -3,26 +3,22 @@ INCLUDE_DIRECTORIES(
 ${omm_SOURCE_DIR}/lib
 )
 
-# ADD_DEFINITIONS(
-# -malign-double
-# )
-
-SET( OMM_AV_STREAM_PPM_VIDEOSINK_SRCS
+ADD_LIBRARY( ommvideosink-ppm
+SHARED
 PpmVideoSink.cpp
 )
 
-ADD_LIBRARY( ommvideosink-ppm
-SHARED
-${OMM_AV_STREAM_PPM_VIDEOSINK_SRCS}
-)
-
-SET( OMM_AV_STREAM_PCM_AUDIOSINK_SRCS
-PcmAudioSink.cpp
+TARGET_LINK_LIBRARIES( ommvideosink-ppm
+ommavstream
 )
 
 ADD_LIBRARY( ommaudiosink-pcm
 SHARED
-${OMM_AV_STREAM_PCM_AUDIOSINK_SRCS}
+PcmAudioSink.cpp
+)
+
+TARGET_LINK_LIBRARIES( ommaudiosink-pcm
+ommavstream
 )
 
 INSTALL( TARGETS ommvideosink-ppm ommaudiosink-pcm

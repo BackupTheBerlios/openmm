@@ -1892,7 +1892,9 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotif
 {
     Log::instance()->upnp().debug("device root receives network interface change notification");
     if (pNotification->_added) {
-        _ssdpSocket.addInterface(pNotification->_interfaceName);
+        // FIXME, FIXME!!!: temporary workaround for Mac OSX / Darwin
+        _ssdpSocket.addInterface("default");
+//        _ssdpSocket.addInterface(pNotification->_interfaceName);
         // TODO: send alive message set on this interface only
         _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
     }

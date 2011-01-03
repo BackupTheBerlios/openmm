@@ -64,7 +64,7 @@ public:
     
 private:
 //     Omm::Container<ServerController>*      _pServers;
-    Omm::Av::AvUserInterface*           _pUserInterface;
+    Omm::Av::AvUserInterface*               _pUserInterface;
     QTextCodec*                             _charEncoding;
     QFileIconProvider*                      _iconProvider;
 //     bool                  _lazyRowCount;

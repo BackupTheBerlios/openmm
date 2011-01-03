@@ -24,6 +24,8 @@
 #include <Omm/UpnpAvController.h>
 #include <Omm/Util.h>
 
+//using namespace Omm::Av;
+
 int main(int argc, char** argv)
 {
     Omm::Util::PluginLoader<Omm::Av::AvUserInterface> pluginLoader;
@@ -32,16 +34,16 @@ int main(int argc, char** argv)
         pUserInterface = pluginLoader.load("avinterface-qt", "AvInterface");
     }
     catch(Poco::NotFoundException) {
-        std::cerr << "Error in ControllerApplication: could not find plugin for user interface" << std::endl;
+        Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for user interface");
         return 1;
     }
-    
+
     Omm::Av::AvController controller;
-    
+
     controller.setUserInterface(pUserInterface);
     pUserInterface->initGui();
     pUserInterface->showMainWindow();
     controller.start();
-    std::clog << "ControllerApplication: starting event loop" << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
     return pUserInterface->eventLoop();
 }

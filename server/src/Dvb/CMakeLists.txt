@@ -1,3 +1,11 @@
+FIND_PATH(LINUX_DVB_DIR
+linux/dvb/frontend.h
+PATHS ${CMAKE_INCLUDE_PATH}
+)
+
+if(LINUX_DVB_DIR)
+message(STATUS "Linux DVB headers found in " ${LINUX_DVB_DIR})
+
 SET(CMAKE_LIBRARY_PATH
 ${CMAKE_SYSTEM_LIBRARY_PATH}
 )
@@ -42,3 +50,7 @@ ${LIB_OMM_DVB}
 INSTALL( TARGETS ommserver-dvb
 LIBRARY DESTINATION lib/omm
 )
+
+else(LINUX_DVB_DIR)
+message(STATUS "Linux DVB headers not found")
+endif(LINUX_DVB_DIR)

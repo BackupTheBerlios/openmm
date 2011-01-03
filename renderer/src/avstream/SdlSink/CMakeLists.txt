@@ -16,13 +16,6 @@ ${omm_SOURCE_DIR}/lib
 )
 endif(TARGET omm)
 
-SET( OMM_AVSTREAM_SDL_VIDEOSINK_SRCS
-SdlVideoSink.cpp
-)
-
-SET( OMM_AVSTREAM_SDL_AUDIOSINK_SRCS
-SdlAudioSink.cpp
-)
 
 IF (AVSTREAM_ALIGN_DOUBLE)
 ADD_DEFINITIONS(
@@ -35,23 +28,25 @@ ENDIF (AVSTREAM_ALIGN_DOUBLE)
 
 ADD_LIBRARY( ommvideosink-sdl
 SHARED
-${OMM_AVSTREAM_SDL_VIDEOSINK_SRCS}
-)
-
-ADD_LIBRARY( ommaudiosink-sdl
-SHARED
-${OMM_AVSTREAM_SDL_AUDIOSINK_SRCS}
+SdlVideoSink.cpp
 )
 
 TARGET_LINK_LIBRARIES( ommvideosink-sdl
 ${SDL_LIBRARY}
+ommavstream
+)
+
+ADD_LIBRARY( ommaudiosink-sdl
+SHARED
+SdlAudioSink.cpp
 )
 
 TARGET_LINK_LIBRARIES( ommaudiosink-sdl
 ${SDL_LIBRARY}
+ommavstream
 )
 
-INSTALL( TARGETS ommvideosink-sdl
+INSTALL( TARGETS ommvideosink-sdl ommaudiosink-sdl
 LIBRARY DESTINATION lib/omm
 )
 

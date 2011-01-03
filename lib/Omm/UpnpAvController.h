@@ -21,6 +21,8 @@
 #ifndef UpnpAvController_INCLUDED
 #define UpnpAvController_INCLUDED
 
+#include <Poco/DOM/Node.h>
+
 #include "Upnp.h"
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"

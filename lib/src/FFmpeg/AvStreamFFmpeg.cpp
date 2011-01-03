@@ -589,7 +589,7 @@ FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
         return -1;
     }
     Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + " in " + Poco::NumberFormatter::format(time/1000.0, 3) + " msec (" +  Poco::NumberFormatter::format(bytes*1000/time) + " kB/s), total : " + 
-    Poco::NumberFormatter::format(_totalBytes/1000) + "kB in " + Poco::NumberFormatter::format(startTime/1000000) + " sec (" + Poco::NumberFormatter::format(_totalBytes*1000/startTime) + "kB/s)");
+    Poco::NumberFormatter::format((Poco::Int64)_totalBytes/1000) + "kB in " + Poco::NumberFormatter::format(startTime/1000000) + " sec (" + Poco::NumberFormatter::format((Poco::Int64)_totalBytes*1000/startTime) + "kB/s)");
     return bytes;
 }
 
@@ -597,7 +597,7 @@ FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
 int64_t
 FFmpegTagger::IOSeek(void *opaque, int64_t offset, int whence)
 {
-    Omm::AvStream::Log::instance()->avstream().trace("IOSeek() offset: " + Poco::NumberFormatter::format(offset));
+    Omm::AvStream::Log::instance()->avstream().trace("IOSeek() offset: " + Poco::NumberFormatter::format((Poco::Int64)offset));
     
     URLContext* pUrlContext = (URLContext*)opaque;
 //     Omm::AvStream::Log::instance()->avstream().trace("IOSeek() pUrlContext pointer: " + Poco::NumberFormatter::format(pUrlContext));
@@ -845,8 +845,8 @@ FFmpegStreamInfo::findCodec()
         return false;
     }
     Omm::AvStream::Log::instance()->avstream().information("found codec: " + std::string(_pAvCodec->name) + " (" + std::string(_pAvCodec->long_name) + ")");
-    Omm::AvStream::Log::instance()->avstream().information("start time: " + Poco::NumberFormatter::format(_pAvStream->start_time) + ", duration: " +
-        Poco::NumberFormatter::format(_pAvStream->duration));
+    Omm::AvStream::Log::instance()->avstream().information("start time: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->start_time) + ", duration: " +
+        Poco::NumberFormatter::format((Poco::Int64)_pAvStream->duration));
     
     // time_base: fundamental unit of time (in seconds) in terms of which frame timestamps are represented. 
     // This is the fundamental unit of time (in seconds) in terms
@@ -865,7 +865,7 @@ FFmpegStreamInfo::findCodec()
     // Initialized when AVCodecParserContext.dts_sync_point >= 0 and
     // a DTS is received from the underlying container. Otherwise set to
     // AV_NOPTS_VALUE by default.
-    Omm::AvStream::Log::instance()->avstream().information("first dts: " + Poco::NumberFormatter::format(_pAvStream->first_dts) + ", current dts: " + Poco::NumberFormatter::format(_pAvStream->cur_dts) + ", reference dts: " + Poco::NumberFormatter::format(_pAvStream->reference_dts) + ", last IP pts: " + Poco::NumberFormatter::format(_pAvStream->last_IP_pts) + ", last IP duration: " +Poco::NumberFormatter::format(_pAvStream->last_IP_duration));
+    Omm::AvStream::Log::instance()->avstream().information("first dts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->first_dts) + ", current dts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->cur_dts) + ", reference dts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->reference_dts) + ", last IP pts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->last_IP_pts) + ", last IP duration: " +Poco::NumberFormatter::format((Poco::Int64)_pAvStream->last_IP_duration));
     
 //     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("_pStreamInfo->_pAvCodecContext->codec_id %s",
 //         Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));

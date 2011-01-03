@@ -1,7 +1,3 @@
-#SET(CMAKE_LIBRARY_PATH
-#${CMAKE_SYSTEM_LIBRARY_PATH}
-#)
-
 FIND_PATH(POCO_INCLUDE_DIR
 Poco/Poco.h
 PATHS ${CMAKE_INCLUDE_PATH}
@@ -40,13 +36,8 @@ PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET omm)
 
-
-SET( OMMC_SRCS
-ControllerApplication.cpp
-)
-
 ADD_EXECUTABLE( ommcontrol
-${OMMC_SRCS}
+ControllerApplication.cpp
 )
 
 TARGET_LINK_LIBRARIES( ommcontrol

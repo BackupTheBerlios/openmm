@@ -757,8 +757,8 @@ Frame::getName()
     Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
     return "["
         + getStreamInfo()->getName() + "] "
-        + "#" + Poco::NumberFormatter::format(getNumber()) + ", pts: "
-        + (_pts == Meta::invalidPts ? "invalid pts" : Poco::NumberFormatter::format(getPts()));
+        + "#" + Poco::NumberFormatter::format((Poco::Int64)getNumber()) + ", pts: "
+        + (_pts == Meta::invalidPts ? "invalid pts" : Poco::NumberFormatter::format((Poco::Int64)getPts()));
 //         + ", duration: " + Poco::NumberFormatter::format(_duration);
 }
 
@@ -940,8 +940,8 @@ Demuxer::run()
         int64_t currentPts = pFrame->getPts();
         int64_t correctedPts = correctPts(currentPts, lastPtsVec[streamIndex], lastDurationVec[streamIndex]);
         if (correctedPts != currentPts) {
-            Log::instance()->avstream().warning(getName() + " frame " + pFrame->getName() + ", correct pts " + Poco::NumberFormatter::format(currentPts) + " -> " + Poco::NumberFormatter::format(correctedPts) + ", delta: " +
-                Poco::NumberFormatter::format(correctedPts - currentPts));
+            Log::instance()->avstream().warning(getName() + " frame " + pFrame->getName() + ", correct pts " + Poco::NumberFormatter::format((Poco::Int64)currentPts) + " -> " + Poco::NumberFormatter::format((Poco::Int64)correctedPts) + ", delta: " +
+                Poco::NumberFormatter::format((Poco::Int64)(correctedPts - currentPts)));
         }
         pFrame->setPts(correctedPts);
         lastPtsVec[streamIndex] = correctedPts;
@@ -1270,7 +1270,7 @@ Sink::run()
                 _startTime = pDecodedFrame->getPts();
                 _timeQueue.put(_startTime);
                 Omm::AvStream::Log::instance()->avstream().debug(getName() + " start time is " +
-                    Poco::NumberFormatter::format(_startTime));
+                    Poco::NumberFormatter::format((Poco::Int64)_startTime));
             }
             writeDecodedFrame(pDecodedFrame);
         }
@@ -1295,7 +1295,7 @@ Sink::reset()
 void
 Sink::currentTime(int64_t time)
 {
-    Log::instance()->avstream().trace(getName() + " received current time: " + Poco::NumberFormatter::format(time));
+    Log::instance()->avstream().trace(getName() + " received current time: " + Poco::NumberFormatter::format((Poco::Int64)time));
     
     _timeQueue.put(time);
 }
@@ -1494,7 +1494,7 @@ AudioSink::reset()
 void
 AudioSink::setStartTime(int64_t startTime, bool toFirstFrame)
 {
-    Log::instance()->avstream().debug(getName() + " audio start time: " + Poco::NumberFormatter::format(_startTime) + ", clock start time: " + Poco::NumberFormatter::format(startTime) + ".");
+    Log::instance()->avstream().debug(getName() + " audio start time: " + Poco::NumberFormatter::format((Poco::Int64)_startTime) + ", clock start time: " + Poco::NumberFormatter::format((Poco::Int64)startTime) + ".");
     
     if (startTime < _startTime) {
         // TODO: insert silence until _startTime ...?
@@ -1507,7 +1507,7 @@ AudioSink::setStartTime(int64_t startTime, bool toFirstFrame)
         discardSize = (discardSize >> 2) << 2;
         char discardBuffer[discardSize];
         
-        Log::instance()->avstream().debug(getName() + " start time is earlier than CLOCK start time, discarding " + Poco::NumberFormatter::format(discardSize) + " bytes.");
+        Log::instance()->avstream().debug(getName() + " start time is earlier than CLOCK start time, discarding " + Poco::NumberFormatter::format((Poco::Int64)discardSize) + " bytes.");
         audioReadBlocking(discardBuffer, discardSize);
     }
     _audioTime = startTime;
@@ -1621,7 +1621,7 @@ VideoSink::timerThread()
 //         Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
 //             getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
         Log::instance()->avstream().trace("video sink timer thread on tick time: " +
-                                          Poco::NumberFormatter::format(time));
+                                          Poco::NumberFormatter::format((Poco::Int64)time));
         onTick(time);
     }
     
@@ -1726,12 +1726,12 @@ void
 VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
 {
 //     Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded video frame to overlay ...");
-    Log::instance()->avstream().trace("video sink run thread, writing frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()) + " ...");
+    Log::instance()->avstream().trace("video sink run thread, writing frame to overlay, frame pts: " + Poco::NumberFormatter::format((Poco::Int64)pDecodedFrame->getPts()) + " ...");
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
     pDecodedFrame->write(pWriteOverlay);
     pWriteOverlay->_pts = pDecodedFrame->getPts();
     pWriteOverlay->_aspectRatio = getInStream(0)->getInfo()->aspectRatio();
-    Log::instance()->avstream().trace("video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()));
+    Log::instance()->avstream().trace("video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format((Poco::Int64)pDecodedFrame->getPts()));
     _overlayQueue.put(pWriteOverlay);
     // increment modulo _overlayCount
     _writeOverlayNumber = (_writeOverlayNumber + 1) % _overlayCount;
@@ -1749,7 +1749,7 @@ VideoSink::onTick(int64_t time)
     }
     
     int64_t framePts = pOverlay->_pts;
-    Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format(framePts - time));
+    Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format((Poco::Int64)time) + ", frame pts: " + Poco::NumberFormatter::format((Poco::Int64)framePts) + ", delta: " + Poco::NumberFormatter::format((Poco::Int64)(framePts - time)));
 
     // wait until the frame in the overlay queue is not newer than current clock time
     // then fetch it from the overlay queue and display it.
@@ -1830,7 +1830,7 @@ Clock::setStartTime(bool toFirstFrame)
     
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         int64_t time = (*it)->_timeQueue.get();
-        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
+        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format((Poco::Int64)time) + " from " + (*it)->getName());
         // if startTime is not yet in initialized with a valid pts, take the first audio pts
         if (startTime == Meta::invalidPts) {
             startTime = time;
@@ -1844,7 +1844,7 @@ Clock::setStartTime(bool toFirstFrame)
     }
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         int64_t time = (*it)->_timeQueue.get();
-        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
+        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format((Poco::Int64)time) + " from " + (*it)->getName());
         if (toFirstFrame) {
             startTime = std::min(time, startTime);
         }
@@ -1852,7 +1852,7 @@ Clock::setStartTime(bool toFirstFrame)
             startTime = std::max(time, startTime);
         }
     }
-    Log::instance()->avstream().debug("CLOCK setting start time to: " + Poco::NumberFormatter::format(startTime));
+    Log::instance()->avstream().debug("CLOCK setting start time to: " + Poco::NumberFormatter::format((Poco::Int64)startTime));
     
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->setStartTime(startTime, toFirstFrame);
@@ -1873,7 +1873,7 @@ Clock::setStartTime(bool toFirstFrame)
 void
 Clock::setTime(int64_t currentTime)
 {
-    Log::instance()->avstream().debug("CLOCK set stream time to: " + Poco::NumberFormatter::format(currentTime));
+    Log::instance()->avstream().debug("CLOCK set stream time to: " + Poco::NumberFormatter::format((Poco::Int64)currentTime));
 //     Poco::ScopedLock<Poco::FastMutex> lock(_clockLock);
     _clockLock.lock();
     _streamTime = currentTime;
@@ -1894,8 +1894,8 @@ Clock::clockTick(Poco::Timer& timer)
         _streamTime += _systemTime.elapsed() * 9.0 / 100.0;
         _systemTime.update();
 
-        Log::instance()->avstream().debug("CLOCK TICK " + Poco::NumberFormatter::format(_streamTime) + ", since last tick: " +
-             Poco::NumberFormatter::format(_streamTime - lastTick));
+        Log::instance()->avstream().debug("CLOCK TICK " + Poco::NumberFormatter::format((Poco::Int64)_streamTime) + ", since last tick: " +
+             Poco::NumberFormatter::format((Poco::Int64)(_streamTime - lastTick)));
         
         for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
             (*it)->currentTime(_streamTime);

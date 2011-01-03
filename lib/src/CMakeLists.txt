@@ -56,7 +56,7 @@ if(TARGET ommsys-linux)
 SET(LIB_OMMSYS_PLATFORM ommsys-linux)
 endif(TARGET ommsys-linux)
 elseif(DARWIN)
-ADD_SUBDIRECTORY(SysDarwin)
+#ADD_SUBDIRECTORY(SysDarwin)
 if(TARGET ommsys-darwin)
 SET(LIB_OMMSYS_PLATFORM ommsys-darwin)
 endif(TARGET ommsys-darwin)
@@ -78,6 +78,7 @@ Sys.cpp
 
 TARGET_LINK_LIBRARIES( ommsys
 ${LIB_POCO_FOUNDATION}
+${LIB_POCO_NET}
 ${LIB_OMMSYS_PLATFORM}
 )
 
