@@ -30,7 +30,9 @@
 
 #include "Sys.h"
 
-#ifdef __LINUX__
+#ifdef __SYS_STANDARD_PLATFORM__
+#include "SysImpl.h"
+#elif __LINUX__
 #include "SysLinux/SysImplLinux.h"
 #elif __DARWIN__
 
