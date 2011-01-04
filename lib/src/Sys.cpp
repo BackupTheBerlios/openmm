@@ -84,6 +84,8 @@ NetworkInterfaceManager::NetworkInterfaceManager()
 {
     scanInterfaces();
     findValidIpAddress();
+
+    // start monitoring of changes on network interfaces (if available on particular platform)
     _pImpl = new NetworkInterfaceManagerImpl;
     _pImpl->start();
 }
@@ -140,8 +142,7 @@ NetworkInterfaceManager::isLoopback(const std::string& interfaceName)
 {
     Poco::Net::IPAddress address = Poco::Net::NetworkInterface::forName(interfaceName).address();
     
-    return (address.isLoopback()
-            || interfaceName == "lo0"); // FIXME: workaround for MacOS, isLoopback() doesn't work?
+    return address.isLoopback();
 }
 
 
@@ -163,14 +164,19 @@ NetworkInterfaceManager::scanInterfaces()
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
         std::string interfaceName = (*it).name();
         Poco::Net::IPAddress address = (*it).address();
-        if (isLoopback(interfaceName)) {
-            Log::instance()->sys().debug("found loopback interface: " + interfaceName);
-            _loopbackInterfaceName = interfaceName;
+        if (address.family() == Poco::Net::IPAddress::IPv4 /*&& (*it).supportsIPv4()*/) {
+            if (isLoopback(interfaceName)) {
+                Log::instance()->sys().debug("found loopback interface: " + interfaceName + ", (index " + Poco::NumberFormatter::format((*it).index()) + ")");
+                _loopbackInterfaceName = interfaceName;
+            }
+            else {
+                Log::instance()->sys().information("found network interface: " + interfaceName + ", index: " + Poco::NumberFormatter::format((*it).index()) + ")");
+            }
+            _interfaceList.push_back(interfaceName);
         }
         else {
-            Log::instance()->sys().information("found network interface: " + interfaceName);
+            Log::instance()->sys().debug("interface "  + interfaceName + " (index " + Poco::NumberFormatter::format((*it).index()) + ") is not IP4, ignoring.");
         }
-        _interfaceList.push_back(interfaceName);
     }
 }
 
@@ -178,16 +184,18 @@ NetworkInterfaceManager::scanInterfaces()
 void
 NetworkInterfaceManager::addInterface(const std::string& name)
 {
-    if (find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end()) {
+    Poco::Net::NetworkInterface interface = Poco::Net::NetworkInterface::forName(name, false);
+    Poco::Net::IPAddress address = interface.address();
+    if (std::find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end() && address.family() == Poco::Net::IPAddress::IPv4 /*&& interface.supportsIPv4()*/) {
         Log::instance()->sys().information("adding network interface: " + name);
         _interfaceList.push_back(name);
         Log::instance()->sys().information("notify observer of new network interface: " + name);
         _notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
+        findValidIpAddress();
     }
     else {
-        Log::instance()->sys().information("added network interface already known: " + name);
+        Log::instance()->sys().information("added network interface already known or not IP4: " + name);
     }
-    findValidIpAddress();
 }
 
 
@@ -196,7 +204,7 @@ NetworkInterfaceManager::removeInterface(const std::string& name)
 {
     Log::instance()->sys().information("removing network interface: " + name);
     
-    _interfaceList.erase(find(_interfaceList.begin(), _interfaceList.end(), name));
+    _interfaceList.erase(std::find(_interfaceList.begin(), _interfaceList.end(), name));
     Log::instance()->sys().information("notify observer of removed network interface: " + name);
     _notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
     findValidIpAddress();
