@@ -193,31 +193,6 @@ private:
 };
 
 
-class SsdpNetworkInterface
-{
-    friend class SsdpSocket;
-    
-public:
-    SsdpNetworkInterface(/*const std::string& interfaceName,*/ SsdpSocket* pSsdpSocket);
-    ~SsdpNetworkInterface();
-    
-private:
-    void onReadable(Poco::Net::ReadableNotification* pNotification);
-    
-    //std::string                     _name;
-    bool                            _broadcastMode;
-    SsdpSocket*                     _pSsdpSocket;
-    Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
-    Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
-    char*                           _pBuffer;
-    
-    enum {
-        BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
-            // Note that each SSDP message must fit into one UDP Packet.
-    };
-};
-
-
 class SsdpSocket
 { 
     friend class SsdpNetworkInterface;
@@ -249,7 +224,7 @@ private:
     };
 
 
-    std::map<std::string,SsdpNetworkInterface*>     _interfaces;
+    //std::map<std::string,SsdpNetworkInterface*>     _interfaces;
     Poco::Net::SocketReactor                        _reactor;
     Poco::Thread                                    _listenerThread;
     Poco::NotificationCenter                        _notificationCenter;

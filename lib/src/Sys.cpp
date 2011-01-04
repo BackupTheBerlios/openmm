@@ -170,7 +170,7 @@ NetworkInterfaceManager::scanInterfaces()
                 _loopbackInterfaceName = interfaceName;
             }
             else {
-                Log::instance()->sys().information("found network interface: " + interfaceName + ", index: " + Poco::NumberFormatter::format((*it).index()) + ")");
+                Log::instance()->sys().information("found network interface: " + interfaceName + ", (index: " + Poco::NumberFormatter::format((*it).index()) + ")");
             }
             _interfaceList.push_back(interfaceName);
         }
