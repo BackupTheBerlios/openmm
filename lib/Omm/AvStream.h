@@ -308,7 +308,7 @@ public:
         CC_NB,        ///< number of pixel formats, DO NOT USE THIS if you want to link with shared libav* because the number of formats might differ between versions
     };
     
-    static const int64_t invalidPts;
+    static const Poco::Int64 invalidPts;
     
     virtual Frame* readFrame() = 0;
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
@@ -367,7 +367,7 @@ public:
     std::string getName();
     void setName(const std::string& name);
     void printInfo();
-    int64_t newFrameNumber();
+    Poco::Int64 newFrameNumber();
     Frame* decodeFrame(Frame* pFrame);
     
 protected:
@@ -378,7 +378,7 @@ protected:
 
 private:
     std::string             _streamName;
-    int64_t                 _newFrameNumber;
+    Poco::Int64             _newFrameNumber;
     Poco::FastMutex         _lock;
 };
 
@@ -421,7 +421,7 @@ private:
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
     
-    Poco::FastMutex         _lock;
+    Poco::FastMutex     _lock;
 };
 
 
@@ -482,7 +482,7 @@ private:
     virtual bool init();
     virtual void run();
     
-    int64_t correctPts(int64_t pts, int64_t lastPts, int lastDuration);
+    Poco::Int64 correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration);
     
     Meta*       _pMeta;
     int         _firstAudioStream;
@@ -523,7 +523,7 @@ class Frame
     friend class Muxer;
     
 public:
-    Frame(int64_t number, StreamInfo* pStreamInfo, bool endOfStream = false);
+    Frame(Poco::Int64 number, StreamInfo* pStreamInfo, bool endOfStream = false);
     virtual ~Frame();
     
     virtual const char* data() { return 0; }
@@ -539,10 +539,10 @@ public:
     
     bool isEndOfStream();
     std::string getName();
-    const int64_t getNumber();
-    void setNumber(int64_t frameNumber);
-    const int64_t getPts();
-    void setPts(int64_t pts);
+    const Poco::Int64 getNumber();
+    void setNumber(Poco::Int64 frameNumber);
+    const Poco::Int64 getPts();
+    void setPts(Poco::Int64 pts);
     
     StreamInfo* getStreamInfo();
     
@@ -551,9 +551,9 @@ public:
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // because the stream type is dynamic: audio streams decode audio packets, same goes for video.
-    int64_t             _number;
+    Poco::Int64         _number;
     Poco::Mutex         _numberLock;
-    int64_t             _pts;
+    Poco::Int64         _pts;
     Poco::Mutex         _ptsLock;
     // reference to the stream this frame is contained in
     StreamInfo*         _pStreamInfo;
@@ -587,7 +587,7 @@ public:
     virtual void stopPresentation() {}
     virtual void waitPresentationStop() {}
     
-    void currentTime(int64_t time);
+    void currentTime(Poco::Int64 time);
 
     void registerStreamEventObserver(const Poco::AbstractObserver* pObserver);
     class EndOfStream : public Poco::Notification {};
@@ -601,9 +601,9 @@ protected:
     
     void reset();
 
-    Queue<int64_t>          _timeQueue;
+    Queue<Poco::Int64>      _timeQueue;
     bool                    _firstDecodeSuccess;
-    int64_t                 _startTime;
+    Poco::Int64             _startTime;
     
 private:
     virtual bool init();
@@ -621,7 +621,7 @@ public:
     AudioSink(const std::string& name = "audio sink");
     virtual ~AudioSink();
     
-    void setStartTime(int64_t startTime, bool toFirstFrame);
+    void setStartTime(Poco::Int64 startTime, bool toFirstFrame);
     
     // methods for the audio driver (public, so it can be called form C callbacks)
     bool audioAvailable();
@@ -650,9 +650,9 @@ private:
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
     virtual void stopSinkPresentation();
     void setVolume(char* buffer, int size);
-    int64_t audioLength(int64_t bytes);
+    Poco::Int64 audioLength(Poco::Int64 bytes);
     
-    int64_t                     _audioTime;
+    Poco::Int64                 _audioTime;
     float                       _volume;
     Poco::FastMutex             _volumeLock;
     Clock*                      _pClock;
@@ -699,14 +699,14 @@ protected:
     
 private:
     virtual bool checkInStream();
-    void setStartTime(int64_t startTime);
+    void setStartTime(Poco::Int64 startTime);
     virtual void writeDecodedFrame(Frame* pDecodedFrame);
     virtual void startPresentation();
     virtual void waitPresentationStop();
     virtual void stopPresentation();
     virtual void stopSinkPresentation();
     
-    void onTick(int64_t time);
+    void onTick(Poco::Int64 time);
     void timerThread();
     void setTimerStop(bool stop);
     bool getTimerStop();
@@ -734,7 +734,7 @@ public:
     int             _pitch[4];
     
     VideoSink*      _pVideoSink;
-    int64_t         _pts;
+    Poco::Int64     _pts;
     int             _width;
     int             _height;
     float           _aspectRatio;
@@ -757,7 +757,7 @@ public:
     /** setTime()
         sets clock's current stream time to currentTime and notifies sinks
     **/
-    void setTime(int64_t currentTime);
+    void setTime(Poco::Int64 currentTime);
     
     // start clock
     void start();
@@ -769,7 +769,7 @@ private:
     
     // TODO: should Clock be able to sync more than one stream?
     // -> store a stream time for each stream
-    int64_t                 _streamTime;  // stream current time in stream time base units [sec]
+    Poco::Int64             _streamTime;  // stream current time in stream time base units [sec]
     float                   _streamBase;  // stream refresh rate in kHz ( = 1 / (time base * 1000))
     Poco::Timestamp         _systemTime;
     

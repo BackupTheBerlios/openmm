@@ -60,7 +60,11 @@ AvStreamEngine::createPlayer()
         Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
         return;
     }
+#ifdef __LINUX__
     std::string audioPlugin("audiosink-alsa");
+#else
+    std::string audioPlugin("audiosink-sdl");
+#endif
     Omm::Util::PluginLoader<Omm::AvStream::AudioSink> audioPluginLoader;
     try {
         _pAudioSink = audioPluginLoader.load(audioPlugin, "AudioSink");

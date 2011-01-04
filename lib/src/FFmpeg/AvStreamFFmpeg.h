@@ -65,7 +65,7 @@ private:
     AVFormatContext*    _pFormatContext; // contains pointers to ByteIOContext, AVInputFormat, codec ids, array of streams with AVCodecContext
     ByteIOContext*      _pIoContext;
     AVInputFormat*      _pInputFormat;  // contains the io access callbacks
-    uint64_t            _frameNumber;
+    Poco::UInt64        _frameNumber;
     
     bool                _useAvOpenInputStream;
     unsigned char*      _pIoBuffer;
@@ -102,9 +102,9 @@ class FFmpegFrame : public Omm::AvStream::Frame
     friend class FFmpegStreamInfo;
     
 public:
-    FFmpegFrame(int64_t number, Omm::AvStream::StreamInfo* pStreamInfo);
-    FFmpegFrame(int64_t number, Omm::AvStream::StreamInfo* pStreamInfo, int dataSize);
-    FFmpegFrame(int64_t number, Omm::AvStream::StreamInfo* pStreamInfo, AVFrame* pAvFrame);
+    FFmpegFrame(Poco::Int64 number, Omm::AvStream::StreamInfo* pStreamInfo);
+    FFmpegFrame(Poco::Int64 number, Omm::AvStream::StreamInfo* pStreamInfo, int dataSize);
+    FFmpegFrame(Poco::Int64 number, Omm::AvStream::StreamInfo* pStreamInfo, AVFrame* pAvFrame);
     virtual ~FFmpegFrame();
 
     virtual const char* data();

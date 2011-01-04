@@ -565,7 +565,7 @@ FFmpegTagger::IOClose(URLContext* pUrlContext)
 
 static Poco::Timestamp _timestamp;
 static Poco::Timestamp _startTimestamp;
-static uint64_t _totalBytes = 0;
+static Poco::UInt64 _totalBytes = 0;
 
 int
 FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
@@ -589,7 +589,7 @@ FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
         return -1;
     }
     Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + " in " + Poco::NumberFormatter::format(time/1000.0, 3) + " msec (" +  Poco::NumberFormatter::format(bytes*1000/time) + " kB/s), total : " + 
-    Poco::NumberFormatter::format((Poco::Int64)_totalBytes/1000) + "kB in " + Poco::NumberFormatter::format(startTime/1000000) + " sec (" + Poco::NumberFormatter::format((Poco::Int64)_totalBytes*1000/startTime) + "kB/s)");
+    Poco::NumberFormatter::format(_totalBytes/1000) + "kB in " + Poco::NumberFormatter::format(startTime/(Poco::Timestamp::TimeDiff)1000000) + " sec (" + Poco::NumberFormatter::format((Poco::Timestamp::TimeDiff)(_totalBytes*1000)/startTime) + "kB/s)");
     return bytes;
 }
 
@@ -1135,7 +1135,7 @@ FFmpegStreamInfo::decodeVideoFrame(Omm::AvStream::Frame* pFrame)
 }
 
 
-FFmpegFrame::FFmpegFrame(int64_t number, Omm::AvStream::StreamInfo* pStreamInfo, int dataSize) :
+FFmpegFrame::FFmpegFrame(Poco::Int64 number, Omm::AvStream::StreamInfo* pStreamInfo, int dataSize) :
 Frame(number, pStreamInfo),
 _pAvPacket(0),
 _pAvFrame(0)
@@ -1146,7 +1146,7 @@ _pAvFrame(0)
 }
 
 
-FFmpegFrame::FFmpegFrame(int64_t number, Omm::AvStream::StreamInfo* pStreamInfo) :
+FFmpegFrame::FFmpegFrame(Poco::Int64 number, Omm::AvStream::StreamInfo* pStreamInfo) :
 Frame(number, pStreamInfo),
 _pAvPacket(0),
 _data(0),
@@ -1156,7 +1156,7 @@ _pAvFrame(0)
 }
 
 
-FFmpegFrame::FFmpegFrame(int64_t number, Omm::AvStream::StreamInfo* pStreamInfo, AVFrame* pAvFrame) :
+FFmpegFrame::FFmpegFrame(Poco::Int64 number, Omm::AvStream::StreamInfo* pStreamInfo, AVFrame* pAvFrame) :
 Frame(number, pStreamInfo),
 _pAvPacket(0),
 _pAvFrame(pAvFrame)
