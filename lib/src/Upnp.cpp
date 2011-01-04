@@ -172,77 +172,42 @@ Icon::retrieve(const std::string& uri)
 }
 
 
-SsdpNetworkInterface::SsdpNetworkInterface(const std::string& interfaceName, SsdpSocket* pSsdpSocket) :
-_name(interfaceName),
+SsdpNetworkInterface::SsdpNetworkInterface(/*const std::string& interfaceName,*/ SsdpSocket* pSsdpSocket) :
+//_name(interfaceName),
 _broadcastMode(false),
 _pSsdpSocket(pSsdpSocket),
 _pBuffer(new char[BUFFER_SIZE])
-{
-    Log::instance()->ssdp().information("set up socket on interface " + interfaceName + " ...");
-    
-    if (interfaceName == "default") {
-        _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface());
-    }
-    else {
-        _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface::forName(interfaceName, false));
-    }
-  
-//    Poco::Net::IPAddress ip;
-//    Poco::Net::SocketAddress adr(ip, 0);
-
-    
+{   
     // listen to UDP unicast and send out to multicast
     Log::instance()->ssdp().debug("set up broadcast socket ...");
-    //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(_pInterface->address(), 0));
-    _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
-    //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
-    //Log::instance()->ssdp().debug("attach interface ...");
-    //_pSsdpSenderSocket->setInterface(*_pInterface);
+    _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
     Log::instance()->ssdp().debug("set ttl to 4 ...");
     _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
 
     // listen to UDP multicast
     Log::instance()->ssdp().debug("set up listener socket ...");
-    //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(_pInterface->address(), SSDP_PORT), true);
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
-    //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(SSDP_ADDRESS, SSDP_PORT), true);
-    //Log::instance()->ssdp().debug("attach interface ...");
-    //_pSsdpListenerSocket->setInterface(*_pInterface); // invalid argument exception
+    //_pSsdpListenerSocket = new Poco::Net::MulticastSocket;
     Log::instance()->ssdp().debug("join group ...");
     try {
         _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     }
     catch (Poco::IOException) {
         Log::instance()->ssdp().error("failed to join multicast group");
-        if (interfaceName == Sys::NetworkInterfaceManager::instance()->loopbackInterfaceName()) {
-            Log::instance()->ssdp().warning("loopback seems to be not configured for multicast:");
-            Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
-            Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-            Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
-            Log::instance()->ssdp().debug("set up broadcast socket ...");
-            delete _pSsdpSenderSocket;
-            _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
-            //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.1", 0));
-            //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
-            //Log::instance()->ssdp().debug("attach interface ...");
-            //_pSsdpSenderSocket->setInterface(*_pInterface);
-            _broadcastMode = true;
-            Log::instance()->ssdp().debug("enable broadcast ...");
-            _pSsdpSenderSocket->setBroadcast(true);
-            delete _pSsdpListenerSocket;
-            Log::instance()->ssdp().debug("set up listener socket ...");
-            _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true); // works
-            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true); // no exception, no reception
-            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.255.255.255", SSDP_PORT), true); // net exception
-            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.0", SSDP_PORT), true); // net exception
-            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS, SSDP_PORT), true);
-            //Poco::Net::DatagramSocket* _pSsdpListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_LOOP_ADDRESS), SSDP_PORT), true);
-    //        Log::instance()->ssdp().debug("attach interface ...");
-    //        _pSsdpListenerSocket->setInterface(*_pInterface);
-        }
+        Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+        Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+        Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+        Log::instance()->ssdp().debug("set up broadcast socket ...");
+        delete _pSsdpSenderSocket;
+        _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
+        _broadcastMode = true;
+        Log::instance()->ssdp().debug("enable broadcast ...");
+        _pSsdpSenderSocket->setBroadcast(true);
+        delete _pSsdpListenerSocket;
+        Log::instance()->ssdp().debug("set up listener socket ...");
+        _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
     }
-    Log::instance()->ssdp().debug("all sockets set on interface " + interfaceName + ".");
-    
+   
     _pSsdpSocket->_reactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
     _pSsdpSocket->_reactor.addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
 }
@@ -255,7 +220,7 @@ SsdpNetworkInterface::~SsdpNetworkInterface()
     _pSsdpSocket->_reactor.removeEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
     _pSsdpSocket->_reactor.removeEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
     
-    delete _pInterface;
+//    delete _pInterface;
     delete _pSsdpListenerSocket;
     delete _pSsdpSenderSocket;
     delete [] _pBuffer;
@@ -271,17 +236,20 @@ SsdpNetworkInterface::onReadable(Poco::Net::ReadableNotification* pNotification)
     int n = pDatagramSocket->receiveFrom(_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
 //         Log::instance()->ssdp().debug(Omm::Util::format("received message on interface %s from: %s\n%s", _name, sender.toString(), std::string(_pBuffer, n)));
-        Log::instance()->ssdp().debug("received message on interface " + _name + " from: " + sender.toString() + "\n" + std::string(_pBuffer, n));
+        Log::instance()->ssdp().debug("received message on interface " /*+ _name +*/ " from: " + sender.toString() + "\n" + std::string(_pBuffer, n));
         
-        _pSsdpSocket->_notificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), _name, sender));
+        _pSsdpSocket->_notificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), "" /*_name*/, sender));
     }
     // FIXME: this results in a segfault
 //     delete pNotification;
 }
 
 
-SsdpSocket::SsdpSocket()
+SsdpSocket::SsdpSocket() :
+_broadcastMode(false),
+_pBuffer(new char[BUFFER_SIZE])
 {
+    setupSockets();
 }
 
 
@@ -295,8 +263,8 @@ void
 SsdpSocket::addInterface(const std::string& name)
 {
     Log::instance()->ssdp().information("add interface: " + name);
-    
-    SsdpNetworkInterface* pInterface = new SsdpNetworkInterface(name, this);
+
+    SsdpNetworkInterface* pInterface = new SsdpNetworkInterface(/*name,*/ this);
     _interfaces[name] = pInterface;
 }
 
@@ -342,32 +310,72 @@ void
 SsdpSocket::sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver)
 {
     std::string m = message.toString();
-    
-    for (std::map<std::string,SsdpNetworkInterface*>::iterator it = _interfaces.begin(); it != _interfaces.end(); ++it) {
-        if (interface == "*" || interface == (*it).first) {
+
             int bytesSent = 0;
-            if ((*it).first == Sys::NetworkInterfaceManager::instance()->loopbackInterfaceName()) {
-                if (_interfaces.size() == 1) {
                     Poco::Net::SocketAddress loopReceiver;
-                    if (receiver.toString() == SSDP_FULL_ADDRESS && (*it).second->_broadcastMode) {
+                    if (receiver.toString() == SSDP_FULL_ADDRESS && _broadcastMode) {
                         loopReceiver = Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS, SSDP_PORT);
                     }
                     else {
                         loopReceiver = receiver;
                     }
-                    bytesSent = (*it).second->_pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
-                    Log::instance()->ssdp().debug("SSDP message sent to interface " + (*it).first + " with address: " + loopReceiver.toString());
-                }
-                else {
-                    // send nothing on loopback if physical network devices are present.
-                }
-            }
-            else {
-                bytesSent = (*it).second->_pSsdpSenderSocket->sendTo(m.c_str(), m.length(), receiver);
-                Log::instance()->ssdp().debug("SSDP message sent to interface " + (*it).first + " with address: " + receiver.toString());
-            }
-        }
+                    bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+                    Log::instance()->ssdp().debug("SSDP message sent to address: " + loopReceiver.toString());
+}
+
+
+void
+SsdpSocket::setupSockets()
+{
+   // listen to UDP unicast and send out to multicast
+    Log::instance()->ssdp().debug("set up broadcast socket ...");
+    _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
+    Log::instance()->ssdp().debug("set ttl to 4 ...");
+    _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
+
+    // listen to UDP multicast
+    Log::instance()->ssdp().debug("set up listener socket ...");
+    _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
+    Log::instance()->ssdp().debug("join group ...");
+    try {
+        _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     }
+    catch (Poco::IOException) {
+        Log::instance()->ssdp().error("failed to join multicast group");
+        Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+        Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+        Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+        Log::instance()->ssdp().debug("set up broadcast socket ...");
+        delete _pSsdpSenderSocket;
+        _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
+        _broadcastMode = true;
+        Log::instance()->ssdp().debug("enable broadcast ...");
+        _pSsdpSenderSocket->setBroadcast(true);
+        delete _pSsdpListenerSocket;
+        Log::instance()->ssdp().debug("set up listener socket ...");
+        _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
+    }
+
+    _reactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+    _reactor.addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+}
+
+
+void
+SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
+{
+    Poco::Net::SocketAddress sender;
+    Poco::Net::Socket* pSocket = &(pNotification->socket());
+    Poco::Net::DatagramSocket* pDatagramSocket = static_cast<Poco::Net::DatagramSocket*>(pSocket);
+    int n = pDatagramSocket->receiveFrom(_pBuffer, BUFFER_SIZE, sender);
+    if (n > 0) {
+//         Log::instance()->ssdp().debug(Omm::Util::format("received message on interface %s from: %s\n%s", _name, sender.toString(), std::string(_pBuffer, n)));
+        Log::instance()->ssdp().debug("received message on interface " /*+ _name +*/ " from: " + sender.toString() + "\n" + std::string(_pBuffer, n));
+
+        _notificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), "" /*_name*/, sender));
+    }
+    // FIXME: this results in a segfault
+//     delete pNotification;
 }
 
 
