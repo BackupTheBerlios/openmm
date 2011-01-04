@@ -187,61 +187,60 @@ _pBuffer(new char[BUFFER_SIZE])
         _pInterface = new Poco::Net::NetworkInterface(Poco::Net::NetworkInterface::forName(interfaceName, false));
     }
   
-    Poco::Net::IPAddress ip;
-    Poco::Net::SocketAddress adr(ip, 0);
+//    Poco::Net::IPAddress ip;
+//    Poco::Net::SocketAddress adr(ip, 0);
 
-//    if (false && interfaceName == Sys::NetworkInterfaceManager::instance()->loopbackInterfaceName()) {
-////         Log::instance()->ssdp().warning("loopback seems to be the only interface and not configured for multicast:");
-//        Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
-//        Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-//        Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
-////         Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for local only UPnP operation.");
-//        Log::instance()->ssdp().debug("set up broadcast socket ...");
-//        //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
-//        _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.1", 0));
-//        //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
-//        //Log::instance()->ssdp().debug("attach interface ...");
-//        //_pSsdpSenderSocket->setInterface(*_pInterface);
-//        _broadcastMode = true;
-//        Log::instance()->ssdp().debug("enable broadcast ...");
-//        _pSsdpSenderSocket->setBroadcast(true);
-////        delete _pSsdpListenerSocket;
-//        Log::instance()->ssdp().debug("set up listener socket ...");
-//        _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true); // works
-//        //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true); // no exception, no reception
-//        //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.255.255.255", SSDP_PORT), true); // net exception
-//        //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.0", SSDP_PORT), true); // net exception
-//        //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS, SSDP_PORT), true);
-//        //Poco::Net::DatagramSocket* _pSsdpListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_LOOP_ADDRESS), SSDP_PORT), true);
-////        Log::instance()->ssdp().debug("attach interface ...");
-////        _pSsdpListenerSocket->setInterface(*_pInterface);
-//    }
-//    else {
-        // listen to UDP unicast and send out to multicast
-        Log::instance()->ssdp().debug("set up broadcast socket ...");
-        //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(_pInterface->address(), 0));
-        _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
-        //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
-        //Log::instance()->ssdp().debug("attach interface ...");
-        //_pSsdpSenderSocket->setInterface(*_pInterface);
-        Log::instance()->ssdp().debug("set ttl to 4 ...");
-        _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
+    
+    // listen to UDP unicast and send out to multicast
+    Log::instance()->ssdp().debug("set up broadcast socket ...");
+    //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(_pInterface->address(), 0));
+    _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
+    //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
+    //Log::instance()->ssdp().debug("attach interface ...");
+    //_pSsdpSenderSocket->setInterface(*_pInterface);
+    Log::instance()->ssdp().debug("set ttl to 4 ...");
+    _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
 
-        // listen to UDP multicast
-        Log::instance()->ssdp().debug("set up listener socket ...");
-        //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(_pInterface->address(), SSDP_PORT), true);
-        _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
-        //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(SSDP_ADDRESS, SSDP_PORT), true);
-        //Log::instance()->ssdp().debug("attach interface ...");
-        //_pSsdpListenerSocket->setInterface(*_pInterface); // invalid argument exception
-        Log::instance()->ssdp().debug("join group ...");
-        try {
-            _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+    // listen to UDP multicast
+    Log::instance()->ssdp().debug("set up listener socket ...");
+    //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(_pInterface->address(), SSDP_PORT), true);
+    _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
+    //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(SSDP_ADDRESS, SSDP_PORT), true);
+    //Log::instance()->ssdp().debug("attach interface ...");
+    //_pSsdpListenerSocket->setInterface(*_pInterface); // invalid argument exception
+    Log::instance()->ssdp().debug("join group ...");
+    try {
+        _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+    }
+    catch (Poco::IOException) {
+        Log::instance()->ssdp().error("failed to join multicast group");
+        if (interfaceName == Sys::NetworkInterfaceManager::instance()->loopbackInterfaceName()) {
+            Log::instance()->ssdp().warning("loopback seems to be not configured for multicast:");
+            Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+            Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+            Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+            Log::instance()->ssdp().debug("set up broadcast socket ...");
+            delete _pSsdpSenderSocket;
+            _pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", 0));
+            //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.1", 0));
+            //_pSsdpSenderSocket = new Poco::Net::MulticastSocket(adr);
+            //Log::instance()->ssdp().debug("attach interface ...");
+            //_pSsdpSenderSocket->setInterface(*_pInterface);
+            _broadcastMode = true;
+            Log::instance()->ssdp().debug("enable broadcast ...");
+            _pSsdpSenderSocket->setBroadcast(true);
+            delete _pSsdpListenerSocket;
+            Log::instance()->ssdp().debug("set up listener socket ...");
+            _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true); // works
+            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true); // no exception, no reception
+            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.255.255.255", SSDP_PORT), true); // net exception
+            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("127.0.0.0", SSDP_PORT), true); // net exception
+            //_pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS, SSDP_PORT), true);
+            //Poco::Net::DatagramSocket* _pSsdpListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress(Poco::Net::IPAddress(SSDP_LOOP_ADDRESS), SSDP_PORT), true);
+    //        Log::instance()->ssdp().debug("attach interface ...");
+    //        _pSsdpListenerSocket->setInterface(*_pInterface);
         }
-        catch (Poco::IOException) {
-            Log::instance()->ssdp().error("failed to join multicast group");
-        }
-   // }
+    }
     Log::instance()->ssdp().debug("all sockets set on interface " + interfaceName + ".");
     
     _pSsdpSocket->_reactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpNetworkInterface, Poco::Net::ReadableNotification>(*this, &SsdpNetworkInterface::onReadable));
@@ -1911,8 +1910,6 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotif
 {
     Log::instance()->upnp().debug("device root receives network interface change notification");
     if (pNotification->_added) {
-        // FIXME, FIXME!!!: temporary workaround for Mac OSX / Darwin
-        //_ssdpSocket.addInterface("default");
         _ssdpSocket.addInterface(pNotification->_interfaceName);
         // TODO: send alive message set on this interface only
         _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
@@ -2095,16 +2092,10 @@ Controller::start()
 {
     Log::instance()->upnp().debug("starting controller ...");
 
-//#ifdef __DARWIN__
-//    _ssdpSocket.addInterface("default");
-//    sendMSearch();
-//#else
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<Controller,Sys::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
-//#endif
     
     _ssdpSocket.start();
-//     sendMSearch();
     
     Log::instance()->upnp().debug("controller started");
 }

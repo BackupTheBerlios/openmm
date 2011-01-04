@@ -164,7 +164,7 @@ NetworkInterfaceManager::scanInterfaces()
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
         std::string interfaceName = (*it).name();
         Poco::Net::IPAddress address = (*it).address();
-        if (address.family() == Poco::Net::IPAddress::IPv4 /*&& (*it).supportsIPv4()*/) {
+        if (address.family() == Poco::Net::IPAddress::IPv4) {
             if (isLoopback(interfaceName)) {
                 Log::instance()->sys().debug("found loopback interface: " + interfaceName + ", (index " + Poco::NumberFormatter::format((*it).index()) + ")");
                 _loopbackInterfaceName = interfaceName;
@@ -186,7 +186,7 @@ NetworkInterfaceManager::addInterface(const std::string& name)
 {
     Poco::Net::NetworkInterface interface = Poco::Net::NetworkInterface::forName(name, false);
     Poco::Net::IPAddress address = interface.address();
-    if (std::find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end() && address.family() == Poco::Net::IPAddress::IPv4 /*&& interface.supportsIPv4()*/) {
+    if (std::find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end() && address.family() == Poco::Net::IPAddress::IPv4) {
         Log::instance()->sys().information("adding network interface: " + name);
         _interfaceList.push_back(name);
         Log::instance()->sys().information("notify observer of new network interface: " + name);
