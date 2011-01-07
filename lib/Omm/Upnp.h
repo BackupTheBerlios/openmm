@@ -240,7 +240,8 @@ class SsdpMessageSet
 public:
     SsdpMessageSet();
     ~SsdpMessageSet();
-    
+
+    void clear();
     void addMessage(SsdpMessage& message);
     void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
     void stop();
@@ -890,6 +891,9 @@ public:
     
 private:
     void setDescriptionUri();
+    void writeSsdpMessages();
+    void sendSsdpAliveMessages();
+    void sendSsdpByebyeMessages();
 
 //     Poco::URI                       _baseUri;              // base URI for control URI and event URI       
     std::string                     _descriptionUri;            // for controller to download description

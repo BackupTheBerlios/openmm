@@ -1644,14 +1644,8 @@ Device::addIcon(Icon* pIcon)
 
 
 DeviceRoot::DeviceRoot() :
-// TODO: allocate sockets later, not in ctor (e.g. ommgen doesn't need them)
-// _ssdpSocket(/*Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage)*/),
-// _ssdpSocket(),
-// _httpSocket(_ssdpSocket.getInterface())
-// // _httpSocket(NetworkInterfaceManager::instance()->getValidInterfaceAddress()),
 _pController(0)
 {
-    //_httpSocket.init(Sys::NetworkInterfaceManager::instance()->getValidInterfaceAddress());
 }
 
 
@@ -1667,7 +1661,6 @@ DeviceRoot::~DeviceRoot()
 Service*
 DeviceRoot::getServiceType(const std::string& serviceType)
 {
-//     std::clog << "DeviceRoot::getServiceType(): " << serviceType << std::endl;
     std::map<std::string,Service*>::iterator i = _serviceTypes.find(serviceType);
     if (i == _serviceTypes.end()) {
         Log::instance()->upnp().error("unknown service type: " + serviceType);
@@ -1704,7 +1697,6 @@ DeviceRoot::print()
 void
 DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 {
-//     std::clog << "DeviceRoot::initStateVars() serviceType: " << serviceType << " , pThis: " << pThis << std::endl;
     Log::instance()->upnp().debug("init state vars of service: " + serviceType);
     _pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
 }
@@ -1719,10 +1711,8 @@ DeviceRoot::initController()
 void
 DeviceRoot::initDevice()
 {
-    // TODO: setup network socket here and not in the ctor of HttpSocket
     _ssdpSocket.init();
     _httpSocket.init();
-    //_httpSocket.init(Sys::NetworkInterfaceManager::instance()->getValidIpAddress());
     setDescriptionUri();
     
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
@@ -1766,35 +1756,59 @@ DeviceRoot::registerHttpRequestHandler(std::string path, UpnpRequestHandler* req
 
 
 void
-DeviceRoot::startSsdp()
+DeviceRoot::writeSsdpMessages()
 {
+    _ssdpNotifyAliveMessages.clear();
+    _ssdpNotifyByebyeMessages.clear();
+    
     SsdpNotifyAliveWriter aliveWriter(_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(_ssdpNotifyByebyeMessages);
     aliveWriter.deviceRoot(*this);
     byebyeWriter.deviceRoot(*this);
-    
+
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Device& device = **d;
         aliveWriter.device(device);
         byebyeWriter.device(device);
         for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
             Service* ps = *s;
-            
+
             aliveWriter.service(*ps);
             byebyeWriter.service(*ps);
         }
     }
-    
-    _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
-    _ssdpSocket.start();
-    // TODO: 3. send out initial set also on the occasion of new IP address or network interface.
-    
+}
+
+
+void
+DeviceRoot::sendSsdpAliveMessages()
+{
     // 1. wait random intervall of less than 100msec when sending message set first time
     // 2. send out all message sets two times (max three times according to specs, should be configurable).
     _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
+}
+
+
+void
+DeviceRoot::sendSsdpByebyeMessages()
+{
+    _ssdpNotifyByebyeMessages.send(_ssdpSocket, 2, 0, false);
+}
+
+
+void
+DeviceRoot::startSsdp()
+{
+    Log::instance()->ssdp().information("starting SSDP ...");
+    writeSsdpMessages();
+    
+    _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
+    _ssdpSocket.start();
+    
+    sendSsdpAliveMessages();
     // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
     _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
-    Log::instance()->ssdp().information("SSDP started");
+    Log::instance()->ssdp().information("SSDP started.");
 }
 
 
@@ -1803,7 +1817,8 @@ DeviceRoot::stopSsdp()
 {
     Log::instance()->ssdp().information("stopping SSDP ...");
     _ssdpNotifyAliveMessages.stop();
-    _ssdpNotifyByebyeMessages.send(_ssdpSocket, 2, 0, false);
+    sendSsdpByebyeMessages();
+    Log::instance()->ssdp().information("SSDP stopped.");
 }
 
 
@@ -1837,7 +1852,9 @@ DeviceRoot::startHttp()
 void
 DeviceRoot::stopHttp()
 {
+    Log::instance()->http().information("stopping HTTP ...");
     _httpSocket.stopServer();
+    Log::instance()->http().information("HTTP stopped.");
 }
 
 
@@ -1883,11 +1900,11 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotif
     Log::instance()->upnp().debug("device root receives network interface change notification");
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
-        _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
+        sendSsdpAliveMessages();
     }
     else {
         _ssdpSocket.removeInterface(pNotification->_interfaceName);
-        // TODO: send bye-bye message set on this interface (impossible, if interface is already removed ...)
+        writeSsdpMessages();
     }
 }
 
@@ -1976,6 +1993,13 @@ SsdpMessageSet::~SsdpMessageSet()
    for (std::vector<SsdpMessage*>::iterator i = _ssdpMessages.begin(); i != _ssdpMessages.end(); ++i) {
         delete *i;
     }*/
+}
+
+
+void
+SsdpMessageSet::clear()
+{
+    _ssdpMessages.clear();
 }
 
 
