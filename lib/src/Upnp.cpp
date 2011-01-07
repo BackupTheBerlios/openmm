@@ -216,6 +216,7 @@ void
 SsdpSocket::addInterface(const std::string& name)
 {
     Log::instance()->ssdp().information("add interface: " + name);
+    setupSockets();
 }
 
 
@@ -223,6 +224,7 @@ void
 SsdpSocket::removeInterface(const std::string& name)
 {
     Log::instance()->ssdp().information("remove interface: " + name);
+    setupSockets();
 }
 
 
@@ -317,7 +319,7 @@ SsdpSocket::setBroadcast()
     Log::instance()->ssdp().debug("enable broadcast ...");
     _broadcastMode = true;
     _pSsdpSenderSocket->setBroadcast(true);
-    _pSsdpListenerSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+    //_pSsdpListenerSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
 }
 
 
@@ -1568,7 +1570,8 @@ HttpSocket::HttpSocket()
 HttpSocket::~HttpSocket()
 {
     delete _pHttpServer;
-    delete _pDeviceRequestHandlerFactory;
+    // FIXME: segfault on deleting _pDeviceRequestHandlerFactory
+    //delete _pDeviceRequestHandlerFactory;
 }
 
 
@@ -1760,6 +1763,7 @@ DeviceRoot::writeSsdpMessages()
 {
     _ssdpNotifyAliveMessages.clear();
     _ssdpNotifyByebyeMessages.clear();
+    setDescriptionUri();
     
     SsdpNotifyAliveWriter aliveWriter(_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(_ssdpNotifyByebyeMessages);
@@ -1898,13 +1902,14 @@ void
 DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification)
 {
     Log::instance()->upnp().debug("device root receives network interface change notification");
+    writeSsdpMessages();
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
         sendSsdpAliveMessages();
     }
     else {
         _ssdpSocket.removeInterface(pNotification->_interfaceName);
-        writeSsdpMessages();
+        //writeSsdpMessages();
     }
 }
 

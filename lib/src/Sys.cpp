@@ -189,6 +189,7 @@ NetworkInterfaceManager::addInterface(const std::string& name)
     if (std::find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end() && address.family() == Poco::Net::IPAddress::IPv4) {
         Log::instance()->sys().information("adding network interface: " + name);
         _interfaceList.push_back(name);
+        findValidIpAddress();
         Log::instance()->sys().information("notify observer of new network interface: " + name);
         _notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
         findValidIpAddress();
@@ -205,9 +206,9 @@ NetworkInterfaceManager::removeInterface(const std::string& name)
     Log::instance()->sys().information("removing network interface: " + name);
     
     _interfaceList.erase(std::find(_interfaceList.begin(), _interfaceList.end(), name));
+    findValidIpAddress();
     Log::instance()->sys().information("notify observer of removed network interface: " + name);
     _notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
-    findValidIpAddress();
 }
 
 
