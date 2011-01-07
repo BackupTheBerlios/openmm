@@ -141,7 +141,6 @@ class SsdpSocket;
 class SsdpMessage;
 class SsdpMessageSet;
 class Subscription;
-class NetworkInterfaceNotification;
 
 
 class Log
@@ -194,8 +193,10 @@ private:
 
 
 class SsdpSocket
-{ 
-    friend class SsdpNetworkInterface;
+{
+    friend class DeviceRoot;
+    friend class Controller;
+    
 public:
     SsdpSocket();
     ~SsdpSocket();
@@ -206,10 +207,15 @@ public:
     void start();
     void stop();
     
-    void sendMessage(SsdpMessage& message, const std::string& interface = "*", const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     
 private:
+    void init();
+    void deinit();
     void setupSockets();
+    void resetSockets();
+    void setMulticast();
+    void setBroadcast();
 
     void onReadable(Poco::Net::ReadableNotification* pNotification);
 
@@ -223,8 +229,6 @@ private:
             // Note that each SSDP message must fit into one UDP Packet.
     };
 
-
-    //std::map<std::string,SsdpNetworkInterface*>     _interfaces;
     Poco::Net::SocketReactor                        _reactor;
     Poco::Thread                                    _listenerThread;
     Poco::NotificationCenter                        _notificationCenter;
@@ -875,7 +879,7 @@ public:
     void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     
-    void sendMessage(SsdpMessage& message, const std::string& interface, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     void handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification);
         

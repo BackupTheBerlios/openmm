@@ -64,7 +64,7 @@ public:
     SsdpMessage(TRequestMethod requestMethod);
     
     // map the received HTTP header to an SsdpMessage object in memory
-    SsdpMessage(const std::string& buf, const std::string& interface = "*", const Poco::Net::SocketAddress& sender = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    SsdpMessage(const std::string& buf, const Poco::Net::SocketAddress& sender = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     ~SsdpMessage();
     
     void setRequestMethod(TRequestMethod requestMethod);
@@ -108,7 +108,6 @@ public:
     void setDate();
     Poco::DateTime getDate();
     
-    const std::string& getInterface();
     Poco::Net::SocketAddress getSender();
     
     
@@ -118,7 +117,6 @@ private:
     TRequestMethod                          _requestMethod;
     TRequestMethod                          _notificationSubtype;
     std::map<std::string,std::string>       _messageHeader;
-    std::string                             _interface;
     Poco::Net::SocketAddress                _sender;
     
     std::map<TRequestMethod,std::string>    _messageMap;
