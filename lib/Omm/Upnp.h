@@ -532,17 +532,16 @@ public:
     HttpSocket();
     ~HttpSocket();
     
-    std::string getServerUri() { return "http://" + _httpServerAddress.toString() + "/"; }
-    void init(Poco::Net::IPAddress address);
+    void init();
     void startServer();
     void stopServer();
+    std::string getServerUri();
     
 private:
-    Poco::Net::IPAddress                  _address;
-    Poco::Net::SocketAddress              _httpServerAddress;
+    Poco::Net::HTTPServer*                _pHttpServer;
+    Poco::UInt16                          _httpServerPort;
     DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
     Poco::NotificationCenter              _notificationCenter;
-    Poco::Net::HTTPServer*                _pHttpServer;
 };
 
 
@@ -890,9 +889,10 @@ public:
 
     
 private:
-//     Poco::URI                       _baseUri;              // base URI for control URI and event URI
-//     Poco::URI                       _descriptionUri;       // for controller to download description
-    std::string                     _descriptionUri;
+    void setDescriptionUri();
+
+//     Poco::URI                       _baseUri;              // base URI for control URI and event URI       
+    std::string                     _descriptionUri;            // for controller to download description
     std::string*                    _pDeviceDescription;
     Container<Device>               _devices;
     Device*                         _pRootDevice;

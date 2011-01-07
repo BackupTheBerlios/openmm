@@ -1568,21 +1568,17 @@ HttpSocket::HttpSocket()
 HttpSocket::~HttpSocket()
 {
     delete _pHttpServer;
-    // FIXME: deleting _pDeviceRequestHandlerFactory segfaults.
-//     delete _pDeviceRequestHandlerFactory;
+    delete _pDeviceRequestHandlerFactory;
 }
 
 
 void
-HttpSocket::init(Poco::Net::IPAddress address)
+HttpSocket::init()
 {
-    _address = address;
     _pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory(this);
     Poco::Net::ServerSocket socket(0);
-    // TODO: bind only to the local subnetwork of the interface's IP-Address, where we sent the SSDP broadcasts out. Or: bind to 0.0.0.0 and broadcast SSDP to all available network interfaces by default.
-    //     socket.bind(_ssdpSocket._interface.address());
+    _httpServerPort = socket.address().port();
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-    _httpServerAddress = Poco::Net::SocketAddress(_address, socket.address().port());
     _pHttpServer = new Poco::Net::HTTPServer(_pDeviceRequestHandlerFactory, socket, pParams);
 }
 
@@ -1591,7 +1587,7 @@ void
 HttpSocket::startServer()
 {
     _pHttpServer->start();
-    Log::instance()->http().information("server started on: " + _httpServerAddress.toString());
+    Log::instance()->http().information("HTTP server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
 }
 
 
@@ -1599,7 +1595,15 @@ void
 HttpSocket::stopServer()
 {
     _pHttpServer->stop();
-    Log::instance()->http().information("server stopped on: " + _httpServerAddress.toString());
+    Log::instance()->http().information("HTTP server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
+}
+
+
+std::string
+HttpSocket::getServerUri()
+{
+    return "http://" + Sys::NetworkInterfaceManager::instance()->getValidIpAddress().toString()
+            + ":" + Poco::NumberFormatter::format(_httpServerPort) + "/";
 }
 
 
@@ -1717,8 +1721,9 @@ DeviceRoot::initDevice()
 {
     // TODO: setup network socket here and not in the ctor of HttpSocket
     _ssdpSocket.init();
-    _httpSocket.init(Sys::NetworkInterfaceManager::instance()->getValidInterfaceAddress());
-    _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
+    _httpSocket.init();
+    //_httpSocket.init(Sys::NetworkInterfaceManager::instance()->getValidIpAddress());
+    setDescriptionUri();
     
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<DeviceRoot,Sys::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
@@ -1805,9 +1810,7 @@ DeviceRoot::stopSsdp()
 void
 DeviceRoot::startHttp()
 {
-    Log::instance()->http().information("starting HTTP services ...");
-//     _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
-    
+    Log::instance()->http().information("starting HTTP ...");
     _descriptionRequestHandler = new DescriptionRequestHandler(_pDeviceDescription);
     Poco::URI descriptionUri(_descriptionUri);
     registerHttpRequestHandler(descriptionUri.getPath(), _descriptionRequestHandler);
@@ -1824,10 +1827,10 @@ DeviceRoot::startHttp()
             registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
         }
     }
-    Log::instance()->http().information("initialized message sets, service request handlers, and state variables");
+    Log::instance()->http().information("initialized message sets, service request handlers, and state variables.");
     
     _httpSocket.startServer();
-    Log::instance()->http().information("services started");
+    Log::instance()->http().information("HTTP started.");
 }
 
 
@@ -1880,13 +1883,20 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotif
     Log::instance()->upnp().debug("device root receives network interface change notification");
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
-        // TODO: send alive message set on this interface only
         _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
     }
     else {
         _ssdpSocket.removeInterface(pNotification->_interfaceName);
         // TODO: send bye-bye message set on this interface (impossible, if interface is already removed ...)
     }
+}
+
+
+void
+DeviceRoot::setDescriptionUri()
+{
+    _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
+
 }
 
 
@@ -2225,7 +2235,6 @@ _urn(urn)
 void
 SsdpNotifyAliveWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 {
-//     std::clog << "SsdpNotifyAliveWriter::deviceRoot()" << std::endl;
     // root device first message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m->setLocation(pDeviceRoot.getDescriptionUri());    // location of UPnP description of the root device
@@ -2238,7 +2247,6 @@ SsdpNotifyAliveWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 void
 SsdpNotifyAliveWriter::device(const Device& pDevice)
 {
-//     std::clog << "SsdpNotifyAliveWriter::device(): " << pDevice.getUuid() << std::endl;
     // device first message (root device second message)
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m->setLocation(pDevice.getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
@@ -2255,7 +2263,6 @@ SsdpNotifyAliveWriter::device(const Device& pDevice)
 void
 SsdpNotifyAliveWriter::service(const Service& pService)
 {
-//     std::clog << "SsdpNotifyAliveWriter::service()" << std::endl;
     // service first (and only) message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
     m->setLocation(pService.getDevice()->getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
@@ -2268,7 +2275,6 @@ SsdpNotifyAliveWriter::service(const Service& pService)
 void
 SsdpNotifyByebyeWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 {
-//     std::clog << "SsdpNotifyByebyeWriter::deviceRoot()" << std::endl;
     // root device first message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType("upnp:rootdevice");  // once for root device
@@ -2280,7 +2286,6 @@ SsdpNotifyByebyeWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
 void
 SsdpNotifyByebyeWriter::device(const Device& pDevice)
 {
-//     std::clog << "SsdpNotifyByebyeWriter::device(): " << pDevice.getUuid() << std::endl;
     // device first message (root device second message)
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType("uuid:" + pDevice.getUuid());
@@ -2296,7 +2301,6 @@ SsdpNotifyByebyeWriter::device(const Device& pDevice)
 void
 SsdpNotifyByebyeWriter::service(const Service& pService)
 {
-//     std::clog << "SsdpNotifyByebyeWriter::service()" << std::endl;
     // service first (and only) message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType(pService.getServiceType());

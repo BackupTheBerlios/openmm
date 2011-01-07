@@ -212,7 +212,7 @@ NetworkInterfaceManager::removeInterface(const std::string& name)
 
 
 const Poco::Net::IPAddress&
-NetworkInterfaceManager::getValidInterfaceAddress()
+NetworkInterfaceManager::getValidIpAddress()
 {
     // TODO: probably need some locking here
     return _validIpAddress;

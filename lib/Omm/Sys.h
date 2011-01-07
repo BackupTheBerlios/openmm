@@ -55,15 +55,17 @@ public:
     // clients like DeviceRoot and Controller can register here
     void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
     void scanInterfaces();
-    // some OS dependent hardware abstraction layer can add and remove devices here
-    void addInterface(const std::string& name);
-    void removeInterface(const std::string& name);
     // this address can be announced for the HTTP servers to be reached at
-    const Poco::Net::IPAddress& getValidInterfaceAddress();
+    const Poco::Net::IPAddress& getValidIpAddress();
     const std::string loopbackInterfaceName();
 
 private:
     NetworkInterfaceManager();
+
+    // some OS dependent hardware abstraction layer can add and remove devices here
+    void addInterface(const std::string& name);
+    void removeInterface(const std::string& name);
+
     void findValidIpAddress();
     static bool isLoopback(const std::string& interfaceName);
     
