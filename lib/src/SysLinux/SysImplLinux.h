@@ -24,8 +24,6 @@
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
-#include <dbus-c++-1/dbus-c++/dbus.h>
-
 
 namespace Omm {
 namespace Sys {
@@ -40,10 +38,12 @@ public:
     void stop();
 
 private:
+    class Private;
+
     virtual void run();
-    
-    DBus::BusDispatcher _dispatcher;
-    Poco::Thread        _monitorThread;
+
+    Private*                _d;
+    Poco::Thread            _monitorThread;
 };
 
 }  // namespace Sys

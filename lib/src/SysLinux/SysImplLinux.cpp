@@ -18,22 +18,33 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
+#include <dbus-c++-1/dbus-c++/dbus.h>
 
 #include "Sys.h"
 #include "NetworkDevice.h"
 #include "SysImplLinux.h"
 
+
 namespace Omm {
 namespace Sys {
 
+class NetworkInterfaceManagerImpl::Private
+{
+public:
+    DBus::BusDispatcher _dispatcher;
+};
+
+
 NetworkInterfaceManagerImpl::NetworkInterfaceManagerImpl()
 {
+    _d = new Private;
 }
 
 
 NetworkInterfaceManagerImpl::~NetworkInterfaceManagerImpl()
 {
     stop();
+    delete _d;
 }
 
 
@@ -49,13 +60,13 @@ void
 NetworkInterfaceManagerImpl::run()
 {
     try {
-        DBus::default_dispatcher = &_dispatcher;
+        DBus::default_dispatcher = &_d->_dispatcher;
         Log::instance()->sys().debug("connecting system bus");
         DBus::Connection conn = DBus::Connection::SystemBus();
         Log::instance()->sys().debug("initializing NetworkManager");
         NetworkManager network(conn);
         Log::instance()->sys().debug("waiting for network device changes ...");
-        _dispatcher.enter();
+        _d->_dispatcher.enter();
     }
     catch(DBus::Error err) {
         Log::instance()->sys().error("DBus error occured: " + std::string(err.what()));
@@ -66,7 +77,7 @@ NetworkInterfaceManagerImpl::run()
 void
 NetworkInterfaceManagerImpl::stop()
 {
-    _dispatcher.leave();
+    _d->_dispatcher.leave();
     Log::instance()->sys().debug("disconnected from NetworkManager.");
 }
 
