@@ -41,16 +41,13 @@ ${ommlib_SOURCE_DIR}/Omm
 
 ADD_LIBRARY( ommsys-darwin
     STATIC
-    #SHARED
     SysImplDarwin.cpp
-    #NetworkDevice.cpp
 )
 
 TARGET_LINK_LIBRARIES( ommsys-darwin
     ${LIB_POCO_FOUNDATION}
     ${SYSCONF_DIR}
     ${COREFOUNDATION_DIR}
-    #ommsys
 )
 
 INSTALL( TARGETS ommsys-darwin

@@ -43,7 +43,7 @@ ${ommlib_SOURCE_DIR}/Omm
 )
 
 ADD_LIBRARY( ommsys-linux
-    SHARED
+    STATIC
     SysImplLinux.cpp
     NetworkDevice.cpp
 )
