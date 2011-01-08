@@ -210,6 +210,8 @@ public:
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     
 private:
+    enum SocketMode {NotConfigured, Broadcast, Multicast};
+
     void init();
     void deinit();
     void setupSockets();
@@ -219,15 +221,13 @@ private:
 
     void onReadable(Poco::Net::ReadableNotification* pNotification);
 
-    bool                            _broadcastMode;
+    SocketMode                      _mode;
     Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
     Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
     char*                           _pBuffer;
 
-    enum {
-        BUFFER_SIZE = 65536 // Max UDP Packet size is 64 Kbyte.
-            // Note that each SSDP message must fit into one UDP Packet.
-    };
+    static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
+                 // Note that each SSDP message must fit into one UDP Packet.
 
     Poco::Net::SocketReactor                        _reactor;
     Poco::Thread                                    _listenerThread;
