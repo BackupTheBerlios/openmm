@@ -206,9 +206,12 @@ SsdpSocket::init()
 void
 SsdpSocket::deinit()
 {
+    _reactor.removeEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+    _reactor.removeEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
     delete _pSsdpSenderSocket;
     delete _pSsdpListenerSocket;
     delete _pBuffer;
+    _mode = NotConfigured;
 }
 
 
@@ -224,6 +227,9 @@ void
 SsdpSocket::removeInterface(const std::string& name)
 {
     Log::instance()->ssdp().information("remove interface: " + name);
+//    resetSockets();
+//    deinit();
+//    init();
     setupSockets();
 }
 
@@ -269,7 +275,12 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
         loopReceiver = receiver;
     }
     Log::instance()->ssdp().debug("sending SSDP message to address: " + loopReceiver.toString() + " ...");
-    bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+    try {
+        bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+    }
+    catch(Poco::Net::NetException& e) {
+        Log::instance()->ssdp().error("sending SSDP message failed: " + e.message());
+    }
     Log::instance()->ssdp().debug("SSDP message sent.");
 }
 
@@ -277,7 +288,7 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
 void
 SsdpSocket::setupSockets()
 {
-    Log::instance()->ssdp().debug("setup SSDP sockets ...");
+//    Log::instance()->ssdp().debug("setup SSDP sockets ...");
     if (_mode == NotConfigured || _mode == Broadcast) {
         try {
             setMulticast();
@@ -2158,7 +2169,8 @@ Controller::sendMSearch()
     m.setMaximumWaitTime();
 //     m.setSearchTarget("ssdp:all");
     m.setSearchTarget("upnp:rootdevice");
-    
+
+    // FIXME: network exception in controller when sending MSearch after network device removal
     _ssdpSocket.sendMessage(m);
 }
 
