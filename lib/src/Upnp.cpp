@@ -1827,9 +1827,8 @@ DeviceRoot::startSsdp()
         (Poco::Observer<DeviceRoot,Sys::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
     Log::instance()->upnp().debug("device root network interface manager installed");
     
-    //sendSsdpAliveMessages();
     // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
-    _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
+    _ssdpNotifyAliveMessages.startSendContinuous(_ssdpSocket);
     Log::instance()->ssdp().information("SSDP started.");
 }
 
@@ -1838,7 +1837,7 @@ void
 DeviceRoot::stopSsdp()
 {
     Log::instance()->ssdp().information("stopping SSDP ...");
-    _ssdpNotifyAliveMessages.stop();
+    _ssdpNotifyAliveMessages.stopSendContinuous();
     sendSsdpByebyeMessages();
     Log::instance()->ssdp().information("SSDP stopped.");
 }
@@ -2061,7 +2060,14 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous
 
 
 void
-SsdpMessageSet::stop()
+SsdpMessageSet::startSendContinuous(SsdpSocket& socket)
+{
+    send(socket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
+}
+
+
+void
+SsdpMessageSet::stopSendContinuous()
 {
     _sendTimer.stop();
 }

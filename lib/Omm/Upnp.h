@@ -244,7 +244,8 @@ public:
     void clear();
     void addMessage(SsdpMessage& message);
     void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
-    void stop();
+    void startSendContinuous(SsdpSocket& socket);
+    void stopSendContinuous();
     
 private:
     void onTimer(Poco::Timer& timer);
