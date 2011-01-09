@@ -163,7 +163,16 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             start = Poco::NumberParser::parse(range.substr(0, delim));
             Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long unsigned int)start) + ")");
         }
-        std::streamsize numBytes = pResource->stream(ostr, start);
+        std::streamsize numBytes;
+#ifdef __DARWIN__
+        signal(SIGPIPE, SIG_IGN); // fixes abort with "Program received signal SIGPIPE, Broken pipe." on Mac OSX when renderer stops the stream.
+#endif
+        try {
+            numBytes = pResource->stream(ostr, start);
+        }
+        catch(...) {
+            Log::instance()->upnpav().debug("streaming aborted with exception");
+        }
         Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
     }
     else if (request.getMethod() == "HEAD") {

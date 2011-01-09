@@ -2246,7 +2246,7 @@ Controller::update()
     for (Container<DeviceRoot>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
         removeDevice((*it).first);
     }
-    // // sendMSearch();
+    sendMSearch();
 }
 
 
