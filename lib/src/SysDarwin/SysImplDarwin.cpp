@@ -91,14 +91,14 @@ public:
 
 NetworkInterfaceManagerImpl::NetworkInterfaceManagerImpl()
 {
-    _d = new Private;
+    _p = new Private;
 }
 
 
 NetworkInterfaceManagerImpl::~NetworkInterfaceManagerImpl()
 {
     stop();
-    delete _d;
+    delete _p;
 }
 
 
@@ -107,7 +107,7 @@ NetworkInterfaceManagerImpl::start()
 {
     // list network devices
     Log::instance()->sys().debug("initializing dynamic store ...");
-    CFPropertyListRef interfacePropRef = SCDynamicStoreCopyValue(_d->_dynamicStoreRef, CFSTR("State:/Network/Interface"));
+    CFPropertyListRef interfacePropRef = SCDynamicStoreCopyValue(_p->_dynamicStoreRef, CFSTR("State:/Network/Interface"));
     CFDictionaryRef interfaceDictRef = static_cast<CFDictionaryRef>(interfacePropRef);
     CFArrayRef interfaceListRef = static_cast<CFArrayRef>(CFDictionaryGetValue(interfaceDictRef, CFSTR("Interfaces")));
     for(int i = 0; i < CFArrayGetCount(interfaceListRef); i++) {
@@ -119,15 +119,13 @@ NetworkInterfaceManagerImpl::start()
     // register for changes on network interfaces
     CFStringRef notifyKeyRegex[1];
     notifyKeyRegex[0] = CFSTR("State:/Network/Interface/.*/IPv4");
-    if (SCDynamicStoreSetNotificationKeys(_d->_dynamicStoreRef, 0, CFArrayCreate(0, (const void**)notifyKeyRegex, 1, &kCFTypeArrayCallBacks))) {
+    if (SCDynamicStoreSetNotificationKeys(_p->_dynamicStoreRef, 0, CFArrayCreate(0, (const void**)notifyKeyRegex, 1, &kCFTypeArrayCallBacks))) {
         Log::instance()->sys().debug("registered network interface monitor.");
     }
     else {
         Log::instance()->sys().warning("registration of network interface monitor failed.");
     }
-//    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, dispatch_get_current_queue())) {
-//    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, dispatch_get_main_queue())) {
-    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, _d->_dispatchQueue)) {
+    if (SCDynamicStoreSetDispatchQueue(_p->_dynamicStoreRef, _p->_dispatchQueue)) {
         Log::instance()->sys().debug("waiting for network device changes ...");
     }
     else {
@@ -139,13 +137,13 @@ NetworkInterfaceManagerImpl::start()
 void
 NetworkInterfaceManagerImpl::stop()
 {
-    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, 0)) {
+    if (SCDynamicStoreSetDispatchQueue(_p->_dynamicStoreRef, 0)) {
         Log::instance()->sys().debug("stop waiting for network device changes.");
     }
     else {
         Log::instance()->sys().warning("stop of network device monitor failed.");
     }
-    if (SCDynamicStoreSetNotificationKeys(_d->_dynamicStoreRef, 0, 0)) {
+    if (SCDynamicStoreSetNotificationKeys(_p->_dynamicStoreRef, 0, 0)) {
         Log::instance()->sys().debug("unregistered network interface monitor.");
     }
     else {

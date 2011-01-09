@@ -37,7 +37,7 @@ public:
 private:
     class Private;
 
-    Private* _d;
+    Private* _p;
 };
 
 }  // namespace Sys

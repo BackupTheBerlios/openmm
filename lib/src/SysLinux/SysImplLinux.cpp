@@ -37,14 +37,14 @@ public:
 
 NetworkInterfaceManagerImpl::NetworkInterfaceManagerImpl()
 {
-    _d = new Private;
+    _p = new Private;
 }
 
 
 NetworkInterfaceManagerImpl::~NetworkInterfaceManagerImpl()
 {
     stop();
-    delete _d;
+    delete _p;
 }
 
 
@@ -60,13 +60,13 @@ void
 NetworkInterfaceManagerImpl::run()
 {
     try {
-        DBus::default_dispatcher = &_d->_dispatcher;
+        DBus::default_dispatcher = &_p->_dispatcher;
         Log::instance()->sys().debug("connecting system bus");
         DBus::Connection conn = DBus::Connection::SystemBus();
         Log::instance()->sys().debug("initializing NetworkManager");
         NetworkManager network(conn);
         Log::instance()->sys().debug("waiting for network device changes ...");
-        _d->_dispatcher.enter();
+        _p->_dispatcher.enter();
     }
     catch(DBus::Error err) {
         Log::instance()->sys().error("DBus error occured: " + std::string(err.what()));
@@ -77,7 +77,7 @@ NetworkInterfaceManagerImpl::run()
 void
 NetworkInterfaceManagerImpl::stop()
 {
-    _d->_dispatcher.leave();
+    _p->_dispatcher.leave();
     Log::instance()->sys().debug("disconnected from NetworkManager.");
 }
 

@@ -42,7 +42,7 @@ private:
 
     virtual void run();
 
-    Private*                _d;
+    Private*                _p;
     Poco::Thread            _monitorThread;
 };
 
