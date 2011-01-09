@@ -238,20 +238,20 @@ SsdpSocket::setObserver(const Poco::AbstractObserver& observer)
 void
 SsdpSocket::start()
 {
-    Log::instance()->ssdp().information("setting up SSDP sockets...");
+    Log::instance()->ssdp().information("starting SSDP listener ...");
     _listenerThread.start(_reactor);
-    Log::instance()->ssdp().information("SSDP started.");
+    Log::instance()->ssdp().information("SSDP listener started.");
 }
 
 
 void
 SsdpSocket::stop()
 {
-    Log::instance()->ssdp().information("stopping SSDP ...");
+    Log::instance()->ssdp().information("stopping SSDP listener ...");
     _reactor.stop();
     _listenerThread.join();
     resetSockets();
-    Log::instance()->ssdp().information("SSDP stopped.");
+    Log::instance()->ssdp().information("SSDP listener stopped.");
 }
 
 
@@ -276,6 +276,7 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
 void
 SsdpSocket::setupSockets()
 {
+    Log::instance()->ssdp().debug("setup SSDP sockets ...");
     if (_mode == NotConfigured || _mode == Broadcast) {
         try {
             setMulticast();
@@ -1922,11 +1923,12 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotif
     writeSsdpMessages();
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
+        // TODO: send alive messages only once at startup of server
+        // (now triggered by loopback device and real network device)
         sendSsdpAliveMessages();
     }
     else {
         _ssdpSocket.removeInterface(pNotification->_interfaceName);
-        //writeSsdpMessages();
     }
 }
 
@@ -2100,7 +2102,6 @@ Controller::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotif
     
     if (pNotification->_added) {
         _ssdpSocket.addInterface(pNotification->_interfaceName);
-        // TODO: send M-SEARCH only on this interface
     }
     else {
         _ssdpSocket.removeInterface(pNotification->_interfaceName);
@@ -2144,6 +2145,7 @@ Controller::getUserInterface()
 void
 Controller::sendMSearch()
 {
+    Log::instance()->upnp().debug("controller sends MSearch");
     SsdpMessage m;
     m.setRequestMethod(SsdpMessage::REQUEST_SEARCH);
     m.setHost();
@@ -2210,7 +2212,6 @@ void
 Controller::addDevice(DeviceRoot* pDeviceRoot)
 {
     // TODO: handle "alive refreshments"
-//     std::clog << "Controller::addDevice()" << std::endl;
     std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
     if (!_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller adds device: " + uuid);
@@ -2226,7 +2227,6 @@ Controller::addDevice(DeviceRoot* pDeviceRoot)
 void
 Controller::removeDevice(const std::string& uuid)
 {
-//     std::clog << "Controller::removeDevice()" << std::endl;
     if (_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
         DeviceRoot* pDeviceRoot = &_devices.get(uuid);
@@ -2246,7 +2246,7 @@ Controller::update()
     for (Container<DeviceRoot>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
         removeDevice((*it).first);
     }
-    sendMSearch();
+    // // sendMSearch();
 }
 
 

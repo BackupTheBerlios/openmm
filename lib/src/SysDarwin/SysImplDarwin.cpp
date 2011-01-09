@@ -51,12 +51,14 @@ public:
         dynamicStoreContext.retain = 0;
         dynamicStoreContext.release = 0;
         dynamicStoreContext.copyDescription = 0;
-        _dynamicStoreRef = SCDynamicStoreCreate(NULL, CFSTR("Omm::Sys::SysImplDarwin"), callback, &dynamicStoreContext);
+        _dynamicStoreRef = SCDynamicStoreCreate(NULL, CFSTR("Omm::Sys::SysImplDarwin::_dynamicStoreRef"), callback, &dynamicStoreContext);
+        _dispatchQueue = dispatch_queue_create("Omm::Sys::SysImplDarwin::_dispatchQueue", 0);
     }
 
 
     ~Private()
     {
+        dispatch_release(_dispatchQueue);
         CFRelease(_dynamicStoreRef);
     }
 
@@ -66,7 +68,7 @@ public:
         Log::instance()->sys().debug("dynamic store detects network device change.");
         for(int i = 0; i < CFArrayGetCount(changedKeysRef); i++) {
             CFStringRef key = static_cast<CFStringRef>(CFArrayGetValueAtIndex(changedKeysRef, i));
-            Log::instance()->sys().debug("interface: " + std::string(CFStringGetCStringPtr(key, CFStringGetSystemEncoding())));
+            Log::instance()->sys().debug("key: " + std::string(CFStringGetCStringPtr(key, CFStringGetSystemEncoding())));
             CFPropertyListRef val = SCDynamicStoreCopyValue(storeRef, key);
             CFRange left = CFStringFind(key, CFSTR("Interface/"), 0);
             CFRange right = CFStringFind(key, CFSTR("/IPv4"), 0);
@@ -83,6 +85,7 @@ public:
     }
     
     SCDynamicStoreRef       _dynamicStoreRef;
+    dispatch_queue_t        _dispatchQueue;
 };
 
 
@@ -122,7 +125,9 @@ NetworkInterfaceManagerImpl::start()
     else {
         Log::instance()->sys().warning("registration of network interface monitor failed.");
     }
-    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, dispatch_get_current_queue())) {
+//    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, dispatch_get_current_queue())) {
+//    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, dispatch_get_main_queue())) {
+    if (SCDynamicStoreSetDispatchQueue(_d->_dynamicStoreRef, _d->_dispatchQueue)) {
         Log::instance()->sys().debug("waiting for network device changes ...");
     }
     else {
