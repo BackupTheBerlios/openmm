@@ -268,8 +268,9 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
     else {
         loopReceiver = receiver;
     }
+    Log::instance()->ssdp().debug("sending SSDP message to address: " + loopReceiver.toString() + " ...");
     bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
-    Log::instance()->ssdp().debug("SSDP message sent to address: " + loopReceiver.toString());
+    Log::instance()->ssdp().debug("SSDP message sent.");
 }
 
 
@@ -1736,11 +1737,6 @@ DeviceRoot::initDevice()
     _httpSocket.init();
     setDescriptionUri();
     
-    Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
-        (Poco::Observer<DeviceRoot,Sys::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
-    
-    Log::instance()->upnp().debug("init device root: network interface manager installed");
-    
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Log::instance()->upnp().debug("init device root: setting random uuid for device");
         (*d)->setRandomUuid();
@@ -1826,8 +1822,12 @@ DeviceRoot::startSsdp()
     
     _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
     _ssdpSocket.start();
+
+    Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
+        (Poco::Observer<DeviceRoot,Sys::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
+    Log::instance()->upnp().debug("device root network interface manager installed");
     
-    sendSsdpAliveMessages();
+    //sendSsdpAliveMessages();
     // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
     _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
     Log::instance()->ssdp().information("SSDP started.");
@@ -2118,11 +2118,10 @@ Controller::start()
 
     _ssdpSocket.init();
     _ssdpSocket.setObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
+    _ssdpSocket.start();
     
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
-        (Poco::Observer<Controller,Sys::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
-    
-    _ssdpSocket.start();
+        (Poco::Observer<Controller,Sys::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));    
     
     Log::instance()->upnp().debug("controller started");
 }
