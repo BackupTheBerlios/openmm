@@ -61,6 +61,8 @@ public:
     // this address can be announced for the HTTP servers to be reached at
     const Poco::Net::IPAddress& getValidIpAddress();
     const std::string loopbackInterfaceName();
+    bool loopbackOnly();
+    int interfaceCount();
 
 private:
     NetworkInterfaceManager();

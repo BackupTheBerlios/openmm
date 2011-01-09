@@ -220,6 +220,20 @@ NetworkInterfaceManager::getValidIpAddress()
 }
 
 
+bool
+NetworkInterfaceManager::loopbackOnly()
+{
+    return _interfaceList.size() == 1 && _interfaceList[0] == _loopbackInterfaceName;
+}
+
+
+int
+NetworkInterfaceManager::interfaceCount()
+{
+    return _interfaceList.size();
+}
+
+
 NetworkInterfaceNotification::NetworkInterfaceNotification(const std::string& interfaceName, bool added) :
 _interfaceName(interfaceName),
 _added(added)

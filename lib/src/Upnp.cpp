@@ -288,8 +288,11 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
 void
 SsdpSocket::setupSockets()
 {
-//    Log::instance()->ssdp().debug("setup SSDP sockets ...");
-    if (_mode == NotConfigured || _mode == Broadcast) {
+    if (Sys::NetworkInterfaceManager::instance()->loopbackOnly()) {
+        Log::instance()->ssdp().warning("loopback is the only network interface, forcing broadcast mode.");
+        setBroadcast();
+    }
+    else {
         try {
             setMulticast();
         }
@@ -301,7 +304,6 @@ SsdpSocket::setupSockets()
             setBroadcast();
         }
     }
-    // TODO: detect situation where SsdpSocket shall switch from Mulitcast mode to Broadcast mode.
 }
 
 
