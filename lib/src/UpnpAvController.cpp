@@ -334,6 +334,15 @@ _pServers(NULL),
 _pSelectedRenderer(NULL),
 _pSelectedObject(NULL)
 {
+    _positionInfoTimer.setPeriodicInterval(1000);
+    Poco::TimerCallback<AvUserInterface> callback(*this, &AvUserInterface::pollPositionInfo);
+    _positionInfoTimer.start(callback);
+}
+
+
+AvUserInterface::~AvUserInterface()
+{
+    _positionInfoTimer.stop();
 }
 
 
@@ -441,16 +450,16 @@ AvUserInterface::pausePressed()
 void
 AvUserInterface::positionMoved(int position)
 {
+    Log::instance()->upnpav().debug("position moved to: " + Poco::NumberFormatter::format(position));
     if (_pSelectedRenderer == 0) {
         return;
     }
-        // TODO: need to support UPnP time format in Variant
-//         try {
-//     _pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", );
-//     }
-//     catch (Poco::Exception e){
-//         error(e.message());
-//     }
+    try {
+        _pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", AvTypeConverter::writeTime(position * 1000000));
+    }
+    catch (Poco::Exception& e){
+        error(e.message());
+    }
 }
 
 
@@ -468,6 +477,31 @@ AvUserInterface::volumeChanged(int value)
     }
 }
 
+
+void
+AvUserInterface::pollPositionInfo(Poco::Timer& timer)
+{
+    if (_pSelectedRenderer == 0) {
+        return;
+    }
+    Log::instance()->upnpav().debug("poll position info ...");
+    // TODO: get TransportState and poll position info only, if it is PLAYING, RECORDING or TRANSITIONING
+//     _pSelectedRenderer->AVTransport()->
+    ui4 Track;
+    std::string TrackDuration;
+    std::string TrackMetaData;
+    std::string TrackURI;
+    std::string RelTime;
+    std::string AbsTime;
+    i4 RelCount;
+    i4 AbsCount;
+    _pSelectedRenderer->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
+    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
+    
+    r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
+    r8 absTime = AvTypeConverter::readDuration(AbsTime);
+    newPosition(trackDuration, absTime);
+}
 
 // 
 // void

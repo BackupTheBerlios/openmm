@@ -21,6 +21,7 @@
 #ifndef UpnpAvController_INCLUDED
 #define UpnpAvController_INCLUDED
 
+#include <Poco/Timer.h>
 #include <Poco/DOM/Node.h>
 
 #include "Upnp.h"
@@ -86,6 +87,7 @@ class AvUserInterface : public UserInterface
     
 public:
     AvUserInterface();
+    ~AvUserInterface();
     
     // TODO: alle device add/remove callbacks should be run in the main thread where the event loop lives
     // this avoids complications when implementing thread safety in the target GUI toolkit
@@ -100,6 +102,7 @@ public:
     virtual void endAddServer(int position) {}
     virtual void endRemoveRenderer(int position) {}
     virtual void endRemoveServer(int position) {}
+    virtual void newPosition(int duration, int position) {}
     
     int rendererCount();
     RendererView* rendererView(int numRenderer);
@@ -116,10 +119,13 @@ public:
     void mediaObjectSelected(ControllerObject* pObject);
     
 private:
+    void pollPositionInfo(Poco::Timer& timer);
+    
     Container<RendererView>*              _pRenderers;
     Container<ServerController>*          _pServers;
     MediaRendererController*              _pSelectedRenderer;
     ControllerObject*                     _pSelectedObject;
+    Poco::Timer                           _positionInfoTimer;
 };
 
 

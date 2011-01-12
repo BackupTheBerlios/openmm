@@ -272,7 +272,8 @@ QtAvInterface::~QtAvInterface()
 void
 QtAvInterface::initGui()
 {
-    _pBrowserWidget = new QTabWidget;
+//     _pBrowserWidget = new QTabWidget;
+    _pBrowserWidget = new QFrame;
     _browserWidget.setupUi(_pBrowserWidget);
     
     _browserWidget._browserView->setUniformRowHeights(true);
@@ -320,9 +321,7 @@ QtAvInterface::initGui()
     connect(_rendererWidget._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
     connect(_rendererWidget._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
-//     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSlider(int, int)));
-//     connect(ui._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
-//     connect(ui._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+    connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
     
     connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
             _rendererWidget._rendererListView, SLOT(setCurrentIndex(QModelIndex)));
@@ -344,7 +343,6 @@ int
 QtAvInterface::eventLoop()
 {
     return _pApp->exec();
-//     return _app.exec();
 }
 
 
@@ -453,7 +451,7 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
 
 
 void
-QtAvInterface::setSlider(int max, int val)
+QtAvInterface::setSeekSlider(int max, int val)
 {
     // don't set slider position when user drags the slider
     if (_rendererWidget._seekSlider->isSliderDown()) {
@@ -568,6 +566,13 @@ void
 QtAvInterface::endRemoveServer(int position)
 {
     _pBrowserModel->endRemoveServer();
+}
+
+
+void
+QtAvInterface::newPosition(int duration, int position)
+{
+    emit setSlider(duration, position);
 }
 
 

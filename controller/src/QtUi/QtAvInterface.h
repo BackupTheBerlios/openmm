@@ -122,7 +122,7 @@ public:
     virtual void endNetworkActivity();
     
 public slots:
-    void setSlider(int max, int val);
+    void setSeekSlider(int max, int val);
     void setVolumeSlider(int max, int val);
     
 private slots:
@@ -155,9 +155,11 @@ private slots:
     virtual void endAddServer(int position);
     virtual void endRemoveRenderer(int position);
     virtual void endRemoveServer(int position);
+    virtual void newPosition(int duration, int position);
     
 signals:
     void sliderMoved(int value);
+    void setSlider(int duration, int pos);
     void startNetworkActivity();
     void stopNetworkActivity();
     
@@ -170,7 +172,8 @@ private:
     QMainWindow*                        _pMainWindow;
     Ui::_browserWidget                  _browserWidget;
     Ui::_rendererWidget                 _rendererWidget;
-    QTabWidget*                         _pBrowserWidget;
+//     QTabWidget*                         _pBrowserWidget;
+    QFrame*                             _pBrowserWidget;
     QDockWidget*                        _pRendererWidget;
     QtActivityIndicator*                _pActivityIndicator;
     QtCrumbButton*                      _pServerCrumbButton;

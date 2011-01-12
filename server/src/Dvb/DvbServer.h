@@ -26,12 +26,33 @@
 #include <Omm/Dvb.h>
 
 
+// class RecTimer : public Poco::Timer
+// {
+// public:
+//     RecTimer();
+//     
+//     virtual void run();
+//     void setChannel(Omm::Dvb::DvbChannel* pChannel);
+//     
+// private:
+//     
+// };
+
+
 class DvbServer : public Omm::Av::TorchServer
 {
 public:
     DvbServer();
     
     virtual void setOption(const std::string& key, const std::string& value);
+    
+private:
+    void setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate);
+    void timerCallback(Poco::Timer& timer);
+    void stopCallback(Poco::Timer& timer);
+    
+    Poco::Timer _timer;
+    Omm::Dvb::DvbChannel* _pChannel;
 };
 
 

@@ -117,6 +117,9 @@ typedef float           r4;
 typedef double          r8;
 typedef r8              number;
 typedef Poco::URI       uri;
+typedef Poco::Timestamp date;
+typedef Poco::Timestamp dateTime;
+typedef Poco::Timestamp time;
 
 static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    OMM_VERSION         = "0.1.0";

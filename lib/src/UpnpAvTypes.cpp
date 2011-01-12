@@ -22,6 +22,8 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/NumberParser.h>
 #include <Poco/NumberFormatter.h>
+#include <Poco/DateTime.h>
+#include <Poco/DateTimeParser.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeIterator.h>
@@ -119,6 +121,30 @@ AvTypeConverter::writeDuration(const r8& duration)
         + Poco::NumberFormatter::format(seconds, 2, 3) + ":";
     
     return res;
+}
+
+
+time
+AvTypeConverter::readTime(const std::string& timeString)
+{
+    Poco::DateTime res;
+    int timeZoneDifferential;
+    // fill date part of ISO8601 date format with epoch date
+    try {
+        Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT, "1970-01-01T" + timeString, res, timeZoneDifferential);
+    }
+    catch (Poco::SyntaxException& e) {
+        Log::instance()->upnpav().debug("parsing time failed: " + e.message());
+        return 0;
+    }
+    return res.timestamp();
+}
+
+
+std::string
+AvTypeConverter::writeTime(const time& timeVal)
+{
+    return Poco::DateTimeFormatter::format(timeVal, Poco::DateTimeFormat::ISO8601_FORMAT, 0).substr(11);
 }
 
 

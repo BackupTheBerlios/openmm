@@ -149,10 +149,8 @@ AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& Cu
 void
 AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
-//     std::cerr << "AVTransportRendererImpl::GetPositionInfo()" << std::endl;
-//     std::cerr << "_getCurrentTrack()" << std::endl;
+    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
-//     std::cerr << "_getCurrentTrackDuration()" << std::endl;
     TrackDuration = _getCurrentTrackDuration();
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
@@ -296,7 +294,7 @@ AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, co
         
         ui4 position;
         if (Unit == "ABS_TIME") {
-//             PLT_Didl::ParseTimeStamp(seekTarget, position);
+            position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
         }
         _pEngine->seek(position);
         // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State

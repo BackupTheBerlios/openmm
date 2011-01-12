@@ -25,6 +25,8 @@
 
 class DvbDataModel : public Omm::Av::AbstractDataModel
 {
+    friend class DvbServer;
+    
 public:
     DvbDataModel(const std::string& channelConfig);
     
@@ -145,8 +147,55 @@ DvbServer::setOption(const std::string& key, const std::string& value)
 {
     if (key == "basePath") {
         setDataModel(new DvbDataModel(value));
+        //setTimer("ProSieben", Poco::DateTime(2011, 1, 9, 18, 27), Poco::DateTime(2011, 1, 9, 18, 8));
     }
 }
+
+
+void
+DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate)
+{
+    DvbDataModel* pDvbDataModel = static_cast<DvbDataModel*>(_pDataModel);
+    Omm::ui4 index = std::find(pDvbDataModel->_channelNames.begin(), pDvbDataModel->_channelNames.end(), channel)
+                    - pDvbDataModel->_channelNames.begin();
+
+    _pChannel = pDvbDataModel->_channels[index];
+    Poco::DateTime nowDate;
+    Omm::Dvb::Log::instance()->dvb().debug("set timer, channel: " + Poco::NumberFormatter::format(index)
+                + ", start:" + Poco::NumberFormatter::format((startDate - nowDate).milliseconds()));
+                
+    // FIXME: startInterval is wrong (too short)
+    _timer.setStartInterval((startDate - nowDate).milliseconds());
+    Poco::TimerCallback<DvbServer> callback(*this, &DvbServer::timerCallback);
+    _timer.start(callback);
+}
+
+
+void
+DvbServer::timerCallback(Poco::Timer& timer)
+{
+    Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
+    
+    Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
+    std::ifstream istr("/dev/dvb/adapter0/dvr0");
+    std::ofstream ostr("/var/local/ommrec.mpg");
+    // TODO: stop StreamCopier::copyStream() in the timerCallback thread by closing istr and/or ostr
+    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
+}
+
+
+// RecTimer::RecTimer() :
+// _pChannel(0)
+// {
+// }
+// 
+// 
+// void
+// RecTimer::setChannel(Omm::Dvb::DvbChannel* pChannel)
+// {
+//     _pChannel = pChannel;
+// }
+
 
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
