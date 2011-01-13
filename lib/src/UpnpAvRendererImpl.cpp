@@ -118,6 +118,31 @@ implementation doesn’t support this feature then this state variable must be s
 // //     std::string duration = obj.getProperty("res@duration");
 // //     _setCurrentMediaDuration(duration);
 // //     _setCurrentTrackDuration(duration);
+
+//     PLT_MediaItem* item;
+//     PLT_MediaObjectListReference didl;
+//     PLT_Didl::FromDidl(currentUriMetaData, didl);
+//     item = (PLT_MediaItem*)(*didl->GetFirstItem());
+//     int meta_duration = item->_Resources.GetFirstItem()->_Duration;
+    
+    MemoryMediaObject obj;
+    MediaObjectReader objReader(&obj);
+    objReader.read(CurrentURIMetaData);
+    
+//     std::string duration = obj.getResource()->getSize();
+//     std::string duration = obj.getProperty("res@duration");
+//     Omm::time metaDuration = AvTypeConverter::readDuration(duration);
+//     ui4 duration = obj.getResource()->getSize();
+//     duration = (duration > 0) ? duration : 0;
+
+//     std::string size = obj.getResource()->getAttributeValue("size");
+//     Omm::Av::Log::instance()->upnpav().debug("set duration to media size from CurrentURIMetaData to: " + size);
+//     _setCurrentMediaDuration(size);
+//     _setCurrentTrackDuration(size);
+    std::string duration = obj.getResource()->getAttributeValue("duration");
+    Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
+    _setCurrentMediaDuration(duration);
+    _setCurrentTrackDuration(duration);
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + transportState);
 }
 
@@ -151,11 +176,28 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
 {
     Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
+    
+    float engineTrackDuration;
+    _pEngine->getLength(engineTrackDuration);
+    Omm::Av::Log::instance()->upnpav().debug("engine claims track duration: " + Poco::NumberFormatter::format(engineTrackDuration));
+    if (engineTrackDuration > 0.0) {
+        _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
+    }
+    Omm::Av::Log::instance()->upnpav().debug("set TrackDuration to: " + _getCurrentTrackDuration());
     TrackDuration = _getCurrentTrackDuration();
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
+    
+    float engineTimePosition;
+    _pEngine->getPosition(engineTimePosition);
+    
+    // TODO: where should we set the state variables RelativeTimePosition and AbsoluteTimePosition?
+    std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
+    _setRelativeTimePosition(timePosition);
+    _setAbsoluteTimePosition(timePosition);
     RelTime = _getRelativeTimePosition();
     AbsTime = _getAbsoluteTimePosition();
+    
     RelCount = _getRelativeCounterPosition();
     AbsCount = _getAbsoluteCounterPosition();
 }

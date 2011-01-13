@@ -111,16 +111,19 @@ AvTypeConverter::readDuration(const std::string& duration)
 std::string
 AvTypeConverter::writeDuration(const r8& duration)
 {
-    std::string res;
-    int hours = duration / 3600 - 0.5;
-    int minutes = (duration - hours * 3600) / 60 - 0.5;
+    Log::instance()->upnpav().debug("writeDuration() with duration: " + Poco::NumberFormatter::format(duration, 2));
+    int hours = duration / 3600.0;
+    int minutes = (duration - hours * 3600) / 60.0;
     r8 seconds = duration - hours * 3600 - minutes * 60;
     
-    res = Poco::NumberFormatter::format(hours) + ":"
-        + Poco::NumberFormatter::format0(minutes, 2) + ":"
-        + Poco::NumberFormatter::format(seconds, 2, 3) + ":";
-    
-    return res;
+    Log::instance()->upnpav().debug("writeDuration() formating string ...");
+    Log::instance()->upnpav().debug("hours: " + Poco::NumberFormatter::format(hours));
+    Log::instance()->upnpav().debug("minutes: " + Poco::NumberFormatter::format0(minutes, 2));
+    Log::instance()->upnpav().debug("seconds: " + Poco::NumberFormatter::format(seconds, 2));
+    return
+        Poco::NumberFormatter::format(hours) + ":" +
+        Poco::NumberFormatter::format0(minutes, 2) + ":" +
+        Poco::NumberFormatter::format(seconds, 2);
 }
 
 
