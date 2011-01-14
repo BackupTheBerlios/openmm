@@ -40,6 +40,8 @@
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
 
+#include <cmath>
+
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"
 
@@ -84,22 +86,20 @@ Av::Log::upnpav()
     return *_pUpnpAvLogger;
 }
 
+
 r8
 AvTypeConverter::readDuration(const std::string& duration)
 {
     if (duration == "NOT_IMPLEMENTED") {
         return 0.0;
     }
-    
-    ui4 res;
     Poco::StringTokenizer tok(duration, ":./");
-    
-    res = 3600 * Poco::NumberParser::parse(tok[0])
-        + 60 * Poco::NumberParser::parse(tok[1])
-        + Poco::NumberParser::parse(tok[2]);
+    r8 res = 3600.0 * Poco::NumberParser::parse(tok[0])
+             + 60.0 * Poco::NumberParser::parse(tok[1])
+             + Poco::NumberParser::parse(tok[2]);
     
     if (tok.count() == 4) {
-        res += Poco::NumberParser::parseFloat(tok[3]);
+        res += Poco::NumberParser::parseFloat(tok[3]) / pow(10, tok[3].length());
     }
     else if (tok.count() == 5) {
         res += Poco::NumberParser::parse(tok[3]) / Poco::NumberParser::parse(tok[4]);
@@ -111,15 +111,9 @@ AvTypeConverter::readDuration(const std::string& duration)
 std::string
 AvTypeConverter::writeDuration(const r8& duration)
 {
-    Log::instance()->upnpav().debug("writeDuration() with duration: " + Poco::NumberFormatter::format(duration, 2));
     int hours = duration / 3600.0;
     int minutes = (duration - hours * 3600) / 60.0;
     r8 seconds = duration - hours * 3600 - minutes * 60;
-    
-    Log::instance()->upnpav().debug("writeDuration() formating string ...");
-    Log::instance()->upnpav().debug("hours: " + Poco::NumberFormatter::format(hours));
-    Log::instance()->upnpav().debug("minutes: " + Poco::NumberFormatter::format0(minutes, 2));
-    Log::instance()->upnpav().debug("seconds: " + Poco::NumberFormatter::format(seconds, 2));
     return
         Poco::NumberFormatter::format(hours) + ":" +
         Poco::NumberFormatter::format0(minutes, 2) + ":" +
