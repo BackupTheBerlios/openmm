@@ -150,8 +150,7 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
     Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
     
-    float engineTrackDuration;
-    _pEngine->getLength(engineTrackDuration);
+    float engineTrackDuration = _pEngine->getLengthSeconds();
     Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
         _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
@@ -162,8 +161,7 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
     
-    float engineTimePosition;
-    _pEngine->getPosition(engineTimePosition);
+    float engineTimePosition = _pEngine->getPositionSeconds();
     Omm::Av::Log::instance()->upnpav().debug("engine position (sec): " + Poco::NumberFormatter::format(engineTimePosition, 2));
     
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);

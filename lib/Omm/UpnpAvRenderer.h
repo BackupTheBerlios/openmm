@@ -72,20 +72,20 @@ public:
     virtual void next() = 0;
     virtual void previous() = 0;
     
-    virtual void getPosition(float &seconds) = 0;
-    virtual void getLength(float &seconds) = 0;
+    virtual float getPosition() = 0;
+    virtual float getPositionSeconds() = 0;
+    virtual float getLengthSeconds() = 0;
     
     /*
       Rendering Control
     */
     virtual void setVolume(int channel, float vol) = 0;
-    virtual void getVolume(int channel, float &vol) = 0;
+    virtual float getVolume(int channel) = 0;
     
-    /*
-      Events
-    */
-//     JSignal endOfTrack;
 protected:
+    // TODO: implement endOfStream(), which is called by the engine implementation on end of track
+    virtual void endOfStream() {}
+
     std::string                 _engineId;
     bool                        _fullscreen;
     int                         _width;

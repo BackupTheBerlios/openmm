@@ -319,15 +319,22 @@ AvStreamEngine::setSpeed(int nom, int denom)
 }
 
 
-void
-AvStreamEngine::getPosition(float &seconds)
+float
+AvStreamEngine::getPosition()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
-void
-AvStreamEngine::getLength(float &seconds)
+float
+AvStreamEngine::getPositionSeconds()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+}
+
+
+float
+AvStreamEngine::getLengthSeconds()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
@@ -342,8 +349,8 @@ AvStreamEngine::setVolume(int channel, float vol)
 }
 
 
-void
-AvStreamEngine::getVolume(int channel, float &vol)
+float
+AvStreamEngine::getVolume(int channel)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
@@ -353,7 +360,7 @@ void
 AvStreamEngine::endOfStream(Omm::AvStream::Sink::EndOfStream* eof)
 {
     stop();
-    endOfStream();
+    Engine::endOfStream();
 }
 
 

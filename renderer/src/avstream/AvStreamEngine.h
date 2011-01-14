@@ -54,16 +54,17 @@ public:
     virtual void previous();
     
     virtual void setSpeed(int nom, int denom);
-    virtual void getPosition(float &seconds);
-    virtual void getLength(float &seconds);
+    virtual float getPosition();
+    virtual float getPositionSeconds();
+    virtual float getLengthSeconds();
     
     /*
       Rendering Control
     */
     virtual void setVolume(int channel, float vol);
-    virtual void getVolume(int channel, float &vol);
+    virtual float getVolume(int channel);
     
-    virtual void endOfStream() {}
+//     virtual void endOfStream() {}
     
 private:
     bool isSeekable();

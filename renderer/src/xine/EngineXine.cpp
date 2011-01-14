@@ -264,14 +264,20 @@ XineEngine::setSpeed(int nom, int denom)
 }
 
 
-void
-XineEngine::getPosition(float &seconds)
+float
+XineEngine::getPosition()
 {
 }
 
 
-void
-XineEngine::getLength(float &seconds)
+float
+XineEngine::getPositionSeconds()
+{
+}
+
+
+float
+XineEngine::getLengthSeconds()
 {
 }
 
@@ -283,11 +289,12 @@ XineEngine::setVolume(int channel, float vol)
 }
 
 
-void
-XineEngine::getVolume(int channel, float &vol)
+float
+XineEngine::getVolume(int channel)
 {
-    vol = xine_get_param(_xineStream, XINE_PARAM_AUDIO_VOLUME);
+    return xine_get_param(_xineStream, XINE_PARAM_AUDIO_VOLUME);
 }
+
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
 POCO_EXPORT_CLASS(XineEngine)

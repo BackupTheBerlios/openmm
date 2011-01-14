@@ -340,44 +340,68 @@ VlcEngine::previous()
 }
 
 
-void
-VlcEngine::getPosition(float &seconds)
+float
+VlcEngine::getPosition()
 {
+    float res;
+    
     libvlc_state_t state;
-    // TODO: emit a real signal at end of track, don't poll it
 #if LIBVLC_VERSION_INT < 0x110
     state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
 #else
     state = libvlc_media_player_get_state(_vlcPlayer);
 #endif
     handleException();
+    // TODO: catch vlc event at end of track, don't poll it
     if (state == libvlc_Ended) {
-//         endOfTrack.emitSignal();
-        seconds = 0.0;
-        return;
+        endOfStream();
+        res = 0.0;
+        return res;
     }
     
-    if (_length > 0.0) {
 #if LIBVLC_VERSION_INT < 0x110
-        seconds = _length * libvlc_media_player_get_position(_vlcPlayer, &_exception);
+    res = _length * libvlc_media_player_get_position(_vlcPlayer, &_exception);
 #else
-        seconds = _length * libvlc_media_player_get_position(_vlcPlayer);
+    res = _length * libvlc_media_player_get_position(_vlcPlayer);
 #endif
-    }
-    else {
-#if LIBVLC_VERSION_INT < 0x110
-        seconds = (libvlc_media_player_get_time(_vlcPlayer, &_exception) - _startTime) / 1000.0;
-#else
-        seconds = (libvlc_media_player_get_time(_vlcPlayer) - _startTime) / 1000.0;
-#endif
-    }
     handleException();
+    return res;
 //     Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(seconds, 2));
 }
 
 
-void
-VlcEngine::getLength(float &seconds)
+float
+VlcEngine::getPositionSeconds()
+{
+    float res;
+    
+    libvlc_state_t state;
+#if LIBVLC_VERSION_INT < 0x110
+    state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
+#else
+    state = libvlc_media_player_get_state(_vlcPlayer);
+#endif
+    handleException();
+    // TODO: catch vlc event at end of track, don't poll it
+    if (state == libvlc_Ended) {
+        endOfStream();
+        res = 0.0;
+        return res;
+    }
+    
+#if LIBVLC_VERSION_INT < 0x110
+    res = (libvlc_media_player_get_time(_vlcPlayer, &_exception) - _startTime) / 1000.0;
+#else
+    res = (libvlc_media_player_get_time(_vlcPlayer) - _startTime) / 1000.0;
+#endif
+    handleException();
+    return res;
+//     Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(seconds, 2));
+}
+
+
+float
+VlcEngine::getLengthSeconds()
 {
     // libvlc_media_player_get_length() sometimes fetches the last position of the stream, and not the length
 #if LIBVLC_VERSION_INT < 0x110
@@ -386,7 +410,7 @@ VlcEngine::getLength(float &seconds)
     _length = (libvlc_media_player_get_length(_vlcPlayer) - _startTime) / 1000.0;
 #endif
     handleException();
-    seconds = _length;
+    return _length;
 //     TRACE("VlcEngine::getLength() seconds: %f", seconds);
     
     /* use instead?:
@@ -414,15 +438,17 @@ VlcEngine::setVolume(int channel, float vol)
 }
 
 
-void
-VlcEngine::getVolume(int channel, float &vol)
+float
+VlcEngine::getVolume(int channel)
 {
+    float res;
 #if LIBVLC_VERSION_INT < 0x110
-    vol = libvlc_audio_get_volume(_vlcInstance, &_exception);
+    res = libvlc_audio_get_volume(_vlcInstance, &_exception);
 #else
-    vol = libvlc_audio_get_volume(_vlcPlayer);
+    res = libvlc_audio_get_volume(_vlcPlayer);
 #endif
     handleException();
+    return res;
 }
 
 
