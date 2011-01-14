@@ -21,6 +21,8 @@
 #include <Poco/ClassLibrary.h>
 #include "EngineVlc.h"
 
+#include <Omm/Upnp.h>
+#include <Omm/UpnpAvTypes.h>
 
 // EnginePlugin::VlcEngine(int argc, char **argv) :
 VlcEngine::VlcEngine()
@@ -370,7 +372,7 @@ VlcEngine::getPosition(float &seconds)
 #endif
     }
     handleException();
-//     TRACE("VlcEngine::getPosition() seconds: %f", seconds);
+//     Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(seconds, 2));
 }
 
 

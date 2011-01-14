@@ -397,7 +397,6 @@ AvUserInterface::playPressed()
     if (_pSelectedRenderer == 0 || _pSelectedObject == 0) {
         return;
     }
-//     std::clog << "UpnpAvUserInterface::playPressed() _pSelectedObject: " << _pSelectedObject << std::endl;
     Resource* pRes = _pSelectedObject->getResource();
     if (pRes) {
         std::string metaData;
@@ -412,7 +411,7 @@ AvUserInterface::playPressed()
             error(e.message());
             return;
         }
-        std::clog << "playing: " << _pSelectedObject->getTitle() << std::endl;
+        Log::instance()->upnpav().debug("playing " + _pSelectedObject->getTitle());
     }
 }
 
@@ -429,6 +428,7 @@ AvUserInterface::stopPressed()
     catch (Poco::Exception e){
         error(e.message());
     }
+    newPosition(0, 0);
 }
 
 
@@ -502,44 +502,6 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     r8 absTime = AvTypeConverter::readDuration(AbsTime);
     newPosition(trackDuration, absTime);
 }
-
-// 
-// void
-// UpnpController::sliderMoved(int position)
-// {
-//     std::clog << "UpnpController::sliderMoved() to:" << position;
-//     if (_curMediaRenderer.IsNull()) {
-//         return;
-//     }
-//     
-//     NPT_String timestamp;
-//     PLT_Didl::FormatTimeStamp(timestamp, position);
-//     _mediaController->Seek(_curMediaRenderer, 0, "ABS_TIME", timestamp, NULL);
-// }
-// 
-// 
-// 
-// 
-// void
-// UpnpController::OnGetPositionInfoResult(
-//                                       NPT_Result               /* res */,
-//                                       PLT_DeviceDataReference& /*device*/,
-//                                       PLT_PositionInfo*        info,
-//                                       void*                    /* userdata */)
-// {
-//     std::clog << "UpnpController::OnGetPositionInfoResult() duration:" << info->track_duration << "position:" << info->abs_time;
-//     emit setSlider(info->track_duration, info->abs_time);
-// }
-
-
-// void
-// UpnpController::onSignalReceived()
-// {
-// //     std::clog << "UpnpController::pollPositionInfo()";
-//     if (!_curMediaRenderer.IsNull()) {
-//         _mediaController->GetPositionInfo(_curMediaRenderer, 0, NULL);
-//     }
-// }
 
 } // namespace Av
 } // namespace Omm

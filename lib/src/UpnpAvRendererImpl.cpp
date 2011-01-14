@@ -96,53 +96,26 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     }
     _setCurrentTrackURI(CurrentURI);
 /*
-2.2.16.CurrentTrackMetaData
-Metadata, in the form of a valid DIDL-Lite XML fragment (defined in the ContentDirectory service
-template), associated with the resource pointed to by state variable CurrentTrackURI. The meta data may
-have been extracted from state variable AVTransportURIMetaData, or extracted from the resource binary
-itself (e.g., embedded ID3 tags for MP3 audio). This is implementation dependent. If the service
-implementation doesn’t support this feature then this state variable must be set to value
-“NOT_IMPLEMENTED”.
+    2.2.16.CurrentTrackMetaData
+    Metadata, in the form of a valid DIDL-Lite XML fragment (defined in the ContentDirectory service
+    template), associated with the resource pointed to by state variable CurrentTrackURI. The meta data may
+    have been extracted from state variable AVTransportURIMetaData, or extracted from the resource binary
+    itself (e.g., embedded ID3 tags for MP3 audio). This is implementation dependent. If the service
+    implementation doesn’t support this feature then this state variable must be set to value
+    “NOT_IMPLEMENTED”.
 */
     _setCurrentTrackMetaData(CurrentURIMetaData);
-    
-//     PLT_MediaItem* item;
-//     PLT_MediaObjectListReference didl;
-//     PLT_Didl::FromDidl(currentUriMetaData, didl);
-//     item = (PLT_MediaItem*)(*didl->GetFirstItem());
-//     int meta_duration = item->_Resources.GetFirstItem()->_Duration;
-//     int duration = (meta_duration>0)?meta_duration:0;
-// //     MediaObject obj(CurrentURIMetaData);
-//     r8 duration;
-//     std::string timestamp = AvTypeConverter::writeDuration(duration);
-// //     std::string duration = obj.getProperty("res@duration");
-// //     _setCurrentMediaDuration(duration);
-// //     _setCurrentTrackDuration(duration);
-
-//     PLT_MediaItem* item;
-//     PLT_MediaObjectListReference didl;
-//     PLT_Didl::FromDidl(currentUriMetaData, didl);
-//     item = (PLT_MediaItem*)(*didl->GetFirstItem());
-//     int meta_duration = item->_Resources.GetFirstItem()->_Duration;
     
     MemoryMediaObject obj;
     MediaObjectReader objReader(&obj);
     objReader.read(CurrentURIMetaData);
     
-//     std::string duration = obj.getResource()->getSize();
-//     std::string duration = obj.getProperty("res@duration");
-//     Omm::time metaDuration = AvTypeConverter::readDuration(duration);
-//     ui4 duration = obj.getResource()->getSize();
-//     duration = (duration > 0) ? duration : 0;
-
-//     std::string size = obj.getResource()->getAttributeValue("size");
-//     Omm::Av::Log::instance()->upnpav().debug("set duration to media size from CurrentURIMetaData to: " + size);
-//     _setCurrentMediaDuration(size);
-//     _setCurrentTrackDuration(size);
+    _setCurrentTrackDuration("00:00:00");
     std::string duration = obj.getResource()->getAttributeValue("duration");
-    Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
-    _setCurrentMediaDuration(duration);
-    _setCurrentTrackDuration(duration);
+    if (duration != "") {
+        Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
+        _setCurrentTrackDuration(duration);
+    }
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + transportState);
 }
 
@@ -179,20 +152,22 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
     
     float engineTrackDuration;
     _pEngine->getLength(engineTrackDuration);
-    Omm::Av::Log::instance()->upnpav().debug("engine claims track duration: " + Poco::NumberFormatter::format(engineTrackDuration));
+    Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
         _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
+        Omm::Av::Log::instance()->upnpav().debug("set TrackDuration to: " + _getCurrentTrackDuration());
+        TrackDuration = _getCurrentTrackDuration();
     }
-    Omm::Av::Log::instance()->upnpav().debug("set TrackDuration to: " + _getCurrentTrackDuration());
-    TrackDuration = _getCurrentTrackDuration();
+
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
     
     float engineTimePosition;
     _pEngine->getPosition(engineTimePosition);
+    Omm::Av::Log::instance()->upnpav().debug("engine position (sec): " + Poco::NumberFormatter::format(engineTimePosition, 2));
     
-    // TODO: where should we set the state variables RelativeTimePosition and AbsoluteTimePosition?
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
+    Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);
     _setRelativeTimePosition(timePosition);
     _setAbsoluteTimePosition(timePosition);
     RelTime = _getRelativeTimePosition();
@@ -244,10 +219,8 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
         // TODO: reset positions and speed (this is not mentioned in the AVTransport 1.0 specs ...)?
         //       what does Stop() mean when in TRANSITIONING state? 
         //       -> stop transitioning and start playback at current position?
-            std::string pos;
-//             PLT_Didl::FormatTimeStamp(pos, 0);
-            _setAbsoluteTimePosition(pos);
-            _setRelativeTimePosition(pos);
+            _setAbsoluteTimePosition("00:00:00");
+            _setRelativeTimePosition("00:00:00");
             _setTransportPlaySpeed("0");
         }
     }
