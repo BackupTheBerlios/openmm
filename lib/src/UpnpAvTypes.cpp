@@ -281,7 +281,7 @@ AbstractMediaObject::setObjectNumber(ui4 id)
 void
 AbstractMediaObject::setObjectNumber(const std::string& id)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectId() from string, objectId" + id);
+    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectId() from string: " + id);
     
     _id = Poco::NumberParser::parseUnsigned(id);
 }

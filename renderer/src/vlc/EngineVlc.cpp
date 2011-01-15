@@ -343,6 +343,8 @@ VlcEngine::previous()
 float
 VlcEngine::getPosition()
 {
+    // TODO: try mediacontrol_get_media_position() and mediacontrol_set_media_position() for seek control
+    // use size in bytes from meta data.
     float res;
     
     libvlc_state_t state;

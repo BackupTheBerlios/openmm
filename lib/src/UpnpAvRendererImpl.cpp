@@ -105,16 +105,21 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     “NOT_IMPLEMENTED”.
 */
     _setCurrentTrackMetaData(CurrentURIMetaData);
-    
-    MemoryMediaObject obj;
-    MediaObjectReader objReader(&obj);
-    objReader.read(CurrentURIMetaData);
-    
     _setCurrentTrackDuration("00:00:00");
-    std::string duration = obj.getResource()->getAttributeValue("duration");
-    if (duration != "") {
-        Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
-        _setCurrentTrackDuration(duration);
+
+    try {
+        MemoryMediaObject obj;
+        MediaObjectReader objReader(&obj);
+        objReader.read(CurrentURIMetaData);
+        
+        std::string duration = obj.getResource()->getAttributeValue("duration");
+        if (duration != "") {
+            Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
+            _setCurrentTrackDuration(duration);
+        }
+    }
+    catch (...) {
+        Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data");
     }
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + transportState);
 }
@@ -161,6 +166,8 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
     
+    float enginePosition = _pEngine->getPosition();
+    Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(enginePosition, 2));
     float engineTimePosition = _pEngine->getPositionSeconds();
     Omm::Av::Log::instance()->upnpav().debug("engine position (sec): " + Poco::NumberFormatter::format(engineTimePosition, 2));
     
