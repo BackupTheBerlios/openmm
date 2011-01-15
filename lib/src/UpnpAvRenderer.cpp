@@ -57,7 +57,7 @@ Engine::setOption(const std::string& key, const std::string& value)
 }
 
     
-UpnpAvRenderer::UpnpAvRenderer(Engine* engine) :
+AvRenderer::AvRenderer(Engine* engine) :
 MediaRenderer(new RenderingControlRendererImpl,
               new ConnectionManagerRendererImpl,
               new AVTransportRendererImpl),
@@ -71,7 +71,7 @@ _pEngine(engine)
 
 
 void
-UpnpAvRenderer::setFullscreen(bool on)
+AvRenderer::setFullscreen(bool on)
 {
     // FIXME: need to set Engine::_fullscreen.
     _pEngine->setFullscreen(on);

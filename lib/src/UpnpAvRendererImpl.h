@@ -32,7 +32,7 @@ namespace Av {
 
 class AVTransportRendererImpl : public AVTransport
 {
-    friend class UpnpAvRenderer;
+    friend class AvRenderer;
     
 private:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -57,7 +57,7 @@ private:
 
 class ConnectionManagerRendererImpl : public ConnectionManager
 {
-    friend class UpnpAvRenderer;
+    friend class AvRenderer;
     
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -72,7 +72,7 @@ private:
 
 class RenderingControlRendererImpl : public RenderingControl
 {
-    friend class UpnpAvRenderer;
+    friend class AvRenderer;
     
 private:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);

@@ -182,7 +182,7 @@ protected:
             }
             pEnginePlugin->createPlayer();
             
-            Omm::Av::UpnpAvRenderer myMediaRenderer(pEnginePlugin);
+            Omm::Av::AvRenderer myMediaRenderer(pEnginePlugin);
             
             
 //             std::cerr << "MediaRendererApplication::main()" << std::endl;

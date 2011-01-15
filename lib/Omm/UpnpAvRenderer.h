@@ -96,10 +96,10 @@ protected:
 };
 
 
-class UpnpAvRenderer : public MediaRenderer
+class AvRenderer : public MediaRenderer
 {
 public:
-    UpnpAvRenderer(Engine* engine);
+    AvRenderer(Engine* engine);
     
     void setFullscreen(bool on = true);
     
