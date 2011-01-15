@@ -233,7 +233,37 @@ XineEngine::pause()
 
 
 void
-XineEngine::seekPosition(float position)
+XineEngine::seekByte(Poco::UInt64 byte)
+{
+}
+
+
+void
+XineEngine::seekPercentage(float percentage)
+{
+}
+
+
+Poco::UInt64
+XineEngine::getPositionByte()
+{
+}
+
+
+float
+XineEngine::getPositionPercentage()
+{
+}
+
+
+float
+XineEngine::getPositionSecond()
+{
+}
+
+
+float
+XineEngine::getLengthSeconds()
 {
 }
 
@@ -265,24 +295,6 @@ XineEngine::savePosition()
 
 void
 XineEngine::setSpeed(int nom, int denom)
-{
-}
-
-
-float
-XineEngine::getPosition()
-{
-}
-
-
-float
-XineEngine::getPositionSeconds()
-{
-}
-
-
-float
-XineEngine::getLengthSeconds()
 {
 }
 

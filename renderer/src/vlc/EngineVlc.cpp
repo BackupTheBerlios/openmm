@@ -304,34 +304,6 @@ VlcEngine::stop()
 
 
 void
-VlcEngine::seekPosition(float position)
-{
-#if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_position(_vlcPlayer, position, &_exception);
-#else
-    libvlc_media_player_set_position(_vlcPlayer, position);
-#endif
-}
-
-
-void
-VlcEngine::seekSecond(float second)
-{
-//     libvlc_media_player_set_time(_vlcPlayer, 78232 * 1000, &_exception);
-
-#if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_time(_vlcPlayer, second * 1000, &_exception);
-#else
-    libvlc_media_player_set_time(_vlcPlayer, second * 1000);
-#endif
-//     libvlc_media_player_set_time(_vlcPlayer, second * 1000, &_exception);
-    handleException();
-//     libvlc_media_player_set_position(_vlcPlayer, second * 1000.0, &_exception);
-//     handleException();
-}
-
-
-void
 VlcEngine::next()
 {
 }
@@ -343,8 +315,45 @@ VlcEngine::previous()
 }
 
 
+void
+VlcEngine::seekByte(Poco::UInt64 byte)
+{
+    
+}
+
+
+void
+VlcEngine::seekPercentage(float percentage)
+{
+#if LIBVLC_VERSION_INT < 0x110
+    libvlc_media_player_set_position(_vlcPlayer, percentage, &_exception);
+#else
+    libvlc_media_player_set_position(_vlcPlayer, percentage);
+#endif
+    handleException();
+}
+
+
+void
+VlcEngine::seekSecond(float second)
+{
+#if LIBVLC_VERSION_INT < 0x110
+    libvlc_media_player_set_time(_vlcPlayer, second * 1000, &_exception);
+#else
+    libvlc_media_player_set_time(_vlcPlayer, second * 1000);
+#endif
+    handleException();
+}
+
+
+Poco::UInt64
+VlcEngine::getPositionByte()
+{
+}
+
+
 float
-VlcEngine::getPosition()
+VlcEngine::getPositionPercentage()
 {
     // TODO: implement size based seeking (not time based).
     // try mediacontrol_get_media_position() and mediacontrol_set_media_position() for seek control
@@ -381,7 +390,7 @@ VlcEngine::getPosition()
 
 
 float
-VlcEngine::getPositionSeconds()
+VlcEngine::getPositionSecond()
 {
     float res;
     

@@ -73,10 +73,14 @@ public:
     
     virtual void setSpeed(int nom, int denom);
 
-    virtual void seekPosition(float position);
+    virtual void seekByte(Poco::UInt64 byte);
+    virtual void seekPercentage(float percentage);
     virtual void seekSecond(float second);
-    virtual float getPosition();
-    virtual float getPositionSeconds();
+    
+    virtual Poco::UInt64 getPositionByte();
+    virtual float getPositionPercentage();
+    virtual float getPositionSecond();
+
     virtual float getLengthSeconds();
     
     /*

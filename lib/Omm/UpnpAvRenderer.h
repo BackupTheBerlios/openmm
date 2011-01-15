@@ -65,17 +65,18 @@ public:
     */
     virtual void pause() = 0;
     virtual void stop() = 0;
-    // handle playlists in the engine (gapless playback possible with HTTP GET?) 
-    // or in UpnpMediaRenderer (same code for all)?
+
     virtual void next() = 0;
     virtual void previous() = 0;
     
-    // what type of seek should be supported by the engine?
-    virtual void seekPosition(float position) = 0;
+    virtual void seekByte(Poco::UInt64 byte) = 0;
+    virtual void seekPercentage(float percentage) = 0;
     virtual void seekSecond(float second) = 0;
 
-    virtual float getPosition() = 0;
-    virtual float getPositionSeconds() = 0;
+    virtual Poco::UInt64 getPositionByte() = 0;
+    virtual float getPositionPercentage() = 0;
+    virtual float getPositionSecond() = 0;
+    
     virtual float getLengthSeconds() = 0;
     
     /*

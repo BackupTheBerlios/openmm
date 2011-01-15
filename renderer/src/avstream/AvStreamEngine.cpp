@@ -289,7 +289,14 @@ AvStreamEngine::pause()
 
 
 void
-AvStreamEngine::seekPosition(float position)
+AvStreamEngine::seekByte(Poco::UInt64 byte)
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+}
+
+
+void
+AvStreamEngine::seekPercentage(float percentage)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
@@ -326,15 +333,22 @@ AvStreamEngine::setSpeed(int nom, int denom)
 }
 
 
-float
-AvStreamEngine::getPosition()
+Poco::UInt64
+AvStreamEngine::getPositionByte()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
 float
-AvStreamEngine::getPositionSeconds()
+AvStreamEngine::getPositionPercentage()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+}
+
+
+float
+AvStreamEngine::getPositionSecond()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
