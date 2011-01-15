@@ -289,7 +289,14 @@ AvStreamEngine::pause()
 
 
 void
-AvStreamEngine::seek(int seconds)
+AvStreamEngine::seekPosition(float position)
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+}
+
+
+void
+AvStreamEngine::seekSecond(float second)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }

@@ -304,26 +304,29 @@ VlcEngine::stop()
 
 
 void
-VlcEngine::seek(int seconds)
+VlcEngine::seekPosition(float position)
+{
+#if LIBVLC_VERSION_INT < 0x110
+    libvlc_media_player_set_position(_vlcPlayer, position, &_exception);
+#else
+    libvlc_media_player_set_position(_vlcPlayer, position);
+#endif
+}
+
+
+void
+VlcEngine::seekSecond(float second)
 {
 //     libvlc_media_player_set_time(_vlcPlayer, 78232 * 1000, &_exception);
-    if (_length > 0.0) {
+
 #if LIBVLC_VERSION_INT < 0x110
-        libvlc_media_player_set_position(_vlcPlayer, seconds / _length, &_exception);
+    libvlc_media_player_set_time(_vlcPlayer, second * 1000, &_exception);
 #else
-        libvlc_media_player_set_position(_vlcPlayer, seconds / _length);
+    libvlc_media_player_set_time(_vlcPlayer, second * 1000);
 #endif
-    }
-    else {
-#if LIBVLC_VERSION_INT < 0x110
-        libvlc_media_player_set_time(_vlcPlayer, seconds * 1000, &_exception);
-#else
-        libvlc_media_player_set_time(_vlcPlayer, seconds * 1000);
-#endif
-    }
-//     libvlc_media_player_set_time(_vlcPlayer, seconds * 1000, &_exception);
+//     libvlc_media_player_set_time(_vlcPlayer, second * 1000, &_exception);
     handleException();
-//     libvlc_media_player_set_position(_vlcPlayer, seconds * 1000.0, &_exception);
+//     libvlc_media_player_set_position(_vlcPlayer, second * 1000.0, &_exception);
 //     handleException();
 }
 
@@ -343,8 +346,13 @@ VlcEngine::previous()
 float
 VlcEngine::getPosition()
 {
-    // TODO: try mediacontrol_get_media_position() and mediacontrol_set_media_position() for seek control
-    // use size in bytes from meta data.
+    // TODO: implement size based seeking (not time based).
+    // try mediacontrol_get_media_position() and mediacontrol_set_media_position() for seek control
+    // mediacontrol API seems to be deprecated, it is not present in vlc 1.1
+    // 
+    // try libvlc_vlm API (present in all versions of vlc)
+    //
+    // use size in bytes from meta data or http get request answer
     float res;
     
     libvlc_state_t state;
@@ -469,6 +477,7 @@ VlcEngine::handleException()
     }
 #endif
 }
+
 
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
 POCO_EXPORT_CLASS(VlcEngine)

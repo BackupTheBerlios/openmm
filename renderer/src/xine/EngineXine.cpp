@@ -233,10 +233,15 @@ XineEngine::pause()
 
 
 void
-XineEngine::seek(int seconds)
+XineEngine::seekPosition(float position)
 {
-//     TRACE("XineEngine::seek() to position in millisec: %i", seekval);
-    xine_play(_xineStream, seconds, 0);
+}
+
+
+void
+XineEngine::seekSecond(float second)
+{
+    xine_play(_xineStream, second, 0);
 }
 
 

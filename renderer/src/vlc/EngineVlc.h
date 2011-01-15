@@ -60,9 +60,11 @@ public:
     */
     virtual void pause();
     virtual void stop();
-    virtual void seek(int seconds);
     virtual void next();
     virtual void previous();
+
+    virtual void seekPosition(float position);
+    virtual void seekSecond(float second);
     virtual float getPosition();
     virtual float getPositionSeconds();
     virtual float getLengthSeconds();

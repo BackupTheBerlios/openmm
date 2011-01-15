@@ -316,7 +316,7 @@ AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, co
         if (Unit == "ABS_TIME") {
             position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
         }
-        _pEngine->seek(position);
+        _pEngine->seekSecond(position);
         // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
         //       TransportState should be set to TRANSITIONING, but only while seeking.
         //       OnSeek() should return immediately! So we are not conform here.

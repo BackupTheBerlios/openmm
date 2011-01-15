@@ -49,11 +49,12 @@ public:
     virtual void load();
     virtual void pause();
     virtual void stop();
-    virtual void seek(int seconds);
     virtual void next();
     virtual void previous();
     
     virtual void setSpeed(int nom, int denom);
+    virtual void seekPosition(float position);
+    virtual void seekSecond(float second);
     virtual float getPosition();
     virtual float getPositionSeconds();
     virtual float getLengthSeconds();
