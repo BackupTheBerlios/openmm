@@ -162,7 +162,7 @@ protected:
             pContainerPlugin->setOption("basePath", _pluginOption);
             pContainerPlugin->setTitle(_name);
             
-            Omm::Av::UpnpAvServer myMediaServer;
+            Omm::Av::AvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);
             myMediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");

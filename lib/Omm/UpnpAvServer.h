@@ -86,10 +86,10 @@ class UpnpAvServer
 used by ServerApplication
 provides a meta data server that can be browsed by CDS implementation through root media object
 */
-class UpnpAvServer : public MediaServer
+class AvServer : public MediaServer
 {
 public:
-    UpnpAvServer();
+    AvServer();
 
     void setRoot(AbstractMediaObject* pRoot);
     AbstractMediaObject* getRoot();

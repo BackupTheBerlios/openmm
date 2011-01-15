@@ -185,7 +185,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 }
 
 
-UpnpAvServer::UpnpAvServer() :
+AvServer::AvServer() :
 MediaServer(
 new ContentDirectoryImplementation,
 new ConnectionManagerImplementation,
@@ -195,7 +195,7 @@ new AVTransportImplementation
 }
 
 void
-UpnpAvServer::setRoot(AbstractMediaObject* pRoot)
+AvServer::setRoot(AbstractMediaObject* pRoot)
 {
     _pRoot = pRoot;
     static_cast<ContentDirectoryImplementation*>(_pContentDirectoryImpl)->_pRoot = _pRoot;
@@ -204,7 +204,7 @@ UpnpAvServer::setRoot(AbstractMediaObject* pRoot)
 
 
 AbstractMediaObject*
-UpnpAvServer::getRoot()
+AvServer::getRoot()
 {
     return _pRoot;
 }

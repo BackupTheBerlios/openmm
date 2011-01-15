@@ -63,7 +63,7 @@ private:
 
 class ContentDirectoryImplementation : public ContentDirectory
 {
-    friend class UpnpAvServer;
+    friend class AvServer;
     
 private:
     virtual void GetSearchCapabilities(std::string& SearchCaps);
