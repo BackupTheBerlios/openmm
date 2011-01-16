@@ -54,6 +54,10 @@ public:
     
     virtual Omm::AvStream::Frame* readFrame();
     virtual void print(bool isOutFormat = false);
+    
+    virtual std::string getClass();
+    virtual std::string getProperty(const std::string& propertyName);
+    
     virtual int numberStreams();
     
     static PixelFormat toFFmpegPixFmt(Meta::ColorCoding colorCoding);

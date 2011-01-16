@@ -83,10 +83,10 @@ ControllerObject::readNode(Poco::XML::Node* pNode)
 //         _parentId = attr->getNamedItem("parentID")->nodeValue();
         
     }
-    if (pNode->nodeName() == "container") {
+    if (pNode->nodeName() == AvClass::CONTAINER) {
         _isContainer = true;
         if (attr != 0) {
-            _childCount = Poco::NumberParser::parse(attr->getNamedItem("childCount")->nodeValue());
+            _childCount = Poco::NumberParser::parse(attr->getNamedItem(AvProperty::CHILD_COUNT)->nodeValue());
         }
     }
     if (attr != 0) {
@@ -104,17 +104,17 @@ ControllerObject::readNode(Poco::XML::Node* pNode)
         {
 //             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
             
-            if (childNode->nodeName() == "res") {
+            if (childNode->nodeName() == AvProperty::RES) {
                 Poco::XML::NamedNodeMap* attr = 0;
                 std::string protInfo = "";
                 ui4 size = 0;
                 if (childNode->hasAttributes()) {
                     attr = childNode->attributes();
-                    Poco::XML::Node* attrNode = attr->getNamedItem("protocolInfo");
+                    Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
                     if (attrNode) {
                         protInfo = attrNode->nodeValue();
                     }
-                    attrNode = attr->getNamedItem("size");
+                    attrNode = attr->getNamedItem(AvProperty::SIZE);
                     if (attrNode) {
                         size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
                     }

@@ -88,6 +88,7 @@ Av::Log::upnpav()
 
 
 const std::string AvClass::OBJECT = "object";
+
 const std::string AvClass::ITEM = "item";
 const std::string AvClass::IMAGE_ITEM = "imageItem";
 const std::string AvClass::AUDIO_ITEM = "audioItem";
@@ -101,6 +102,7 @@ const std::string AvClass::AUDIO_BOOK = "audioBook";
 const std::string AvClass::MOVIE = "movie";
 const std::string AvClass::VIDEO_BROADCAST = "videoBroadcast";
 const std::string AvClass::MUSIC_VIDEO_CLIP = "musicVideoClip";
+
 const std::string AvClass::CONTAINER = "container";
 const std::string AvClass::PERSON = "person";
 const std::string AvClass::PLAYLIST_CONTAINER = "playlistContainer";
@@ -114,6 +116,78 @@ const std::string AvClass::MUSIC_ALBUM = "musicAlbum";
 const std::string AvClass::PHOTO_ALBUM = "photAlbum";
 const std::string AvClass::MUSIC_GENRE = "musicGenre";
 const std::string AvClass::MOVIE_GENRE = "movieGenre";
+
+
+const std::string AvProperty::ID = "id";
+const std::string AvProperty::TITLE = "dc:title";
+const std::string AvProperty::CREATOR = "dc:creator";
+const std::string AvProperty::RES = "res";
+const std::string AvProperty::CLASS = "upnp:class";
+const std::string AvProperty::CLASS_NAME = "upnp:name";
+const std::string AvProperty::CONTAINER_SEARCHABLE = "searchable";
+const std::string AvProperty::SEARCH_CLASS = "upnp:searchClass";
+const std::string AvProperty::SEARCH_CLASS_INCLUDE_DERIVED = "upnp:includeDerived";
+const std::string AvProperty::SEARCH_CLASS_NAME = "upnp:name";
+const std::string AvProperty::CREATE_CLASS = "upnp:createClass";
+const std::string AvProperty::CREATE_CLASS_INCLUDE_DERIVED = "upnp:includeDerived";
+const std::string AvProperty::CREATE_CLASS_NAME = "upnp:name";
+const std::string AvProperty::PARENT_ID = "parentID";
+const std::string AvProperty::REF_ID = "refID";
+const std::string AvProperty::RESTRICTED = "restricted";
+const std::string AvProperty::WRITE_STATUS = "upnp:writeStatus";
+const std::string AvProperty::CHILD_COUNT = "childCount";
+const std::string AvProperty::ARTIST = "upnp:artist";
+const std::string AvProperty::ARTIST_ROLE = "upnp:role";
+const std::string AvProperty::ACTOR = "upnp:actor";
+const std::string AvProperty::ACTOR_ROLE = "upnp:role";
+const std::string AvProperty::AUTHOR = "upnp:author";
+const std::string AvProperty::AUTHOR_ROLE = "upnp:role";
+const std::string AvProperty::PRODUCER = "upnp:producer";
+const std::string AvProperty::DIRECTOR = "upnp:director";
+const std::string AvProperty::PUBLISHER = "publisher";
+const std::string AvProperty::CONTRIBUTOR = "contributor";
+const std::string AvProperty::GENRE = "upnp:genre";
+const std::string AvProperty::ALBUM = "upnp:album";
+const std::string AvProperty::PLAYLIST = "upnp:playlist";
+const std::string AvProperty::SIZE = "size";
+const std::string AvProperty::DURATION = "duration";
+const std::string AvProperty::BITRATE = "bitrate";
+const std::string AvProperty::SAMPLE_FREQUENCY = "sampleFrequency";
+const std::string AvProperty::BITS_PER_SAMPLE = "bitsPerSample";
+const std::string AvProperty::NR_AUDIO_CHANNELS = "nrAudioChannels";
+const std::string AvProperty::RESOLUTION = "resolution";
+const std::string AvProperty::COLOR_DEPTH = "colorDepth";
+const std::string AvProperty::PROTOCOL_INFO = "protocolInfo";
+const std::string AvProperty::PROTECTION = "protection";
+const std::string AvProperty::IMPORT_URI = "importUri";
+const std::string AvProperty::ALBUM_ART_URI = "upnp:albumArtURI";
+const std::string AvProperty::ARTIST_DISCOGRAPHY_URI = "upnp:artistDiscographyURI";
+const std::string AvProperty::LYRICS_URI = "upnp:lyricsURI";
+const std::string AvProperty::RELATION = "relation";
+const std::string AvProperty::STORAGE_TOTAL = "upnp:storageTotal";
+const std::string AvProperty::STORAGE_USED = "upnp:storageUsed";
+const std::string AvProperty::STORAGE_FREE = "upnp:storageFree";
+const std::string AvProperty::STORAGE_MAX_PARTITION = "upnp:storageMaxPartition";
+const std::string AvProperty::STORAGE_MEDIUM = "upnp:storageMedium";
+const std::string AvProperty::DESCRIPTION = "description";
+const std::string AvProperty::LONG_DESCRIPTION = "upnp:longDescription";
+const std::string AvProperty::ICON = "upnp:icon";
+const std::string AvProperty::REGION = "upnp:region";
+const std::string AvProperty::RATING = "upnp:rating";
+const std::string AvProperty::RIGHTS = "rights";
+const std::string AvProperty::DATE = "date";
+const std::string AvProperty::LANGUAGE = "language";
+const std::string AvProperty::RADIO_CALL_SIGN = "upnp:radioCallSign";
+const std::string AvProperty::RADIO_STATION_ID = "upnp:radioStationID";
+const std::string AvProperty::RADIO_BAND = "upnp:radioBand";
+const std::string AvProperty::CHANNEL_NR = "upnp:channelNr";
+const std::string AvProperty::CHANNEL_NAME = "upnp:channelName";
+const std::string AvProperty::SCHEDULED_START_TIME = "upnp:scheduledStartTime";
+const std::string AvProperty::SCHEDULED_END_TIME = "upnp:scheduledEndTime";
+const std::string AvProperty::DVD_REGION_CODE = "upnp:DVDRegionCode";
+const std::string AvProperty::ORIGINAL_TRACK_NUMBER = "upnp:originalTrackNumber";
+const std::string AvProperty::TOC = "upnp:toc";
+const std::string AvProperty::USER_ANNOTATION = "upnp:userAnnotation";
 
 
 std::string
@@ -211,14 +285,14 @@ AbstractResource::getUri()
 std::string
 AbstractResource::getProtInfo()
 {
-    return getAttributeValue("protocolInfo");
+    return getAttributeValue(AvProperty::PROTOCOL_INFO);
 }
 
 
 ui4
 AbstractResource::getSize()
 {
-    return Poco::NumberParser::parseUnsigned(getAttributeValue("size"));
+    return Poco::NumberParser::parseUnsigned(getAttributeValue(AvProperty::SIZE));
 }
 
 
@@ -232,14 +306,14 @@ AbstractResource::setUri(const std::string& uri)
 void
 AbstractResource::setProtInfo(const std::string& protInfo)
 {
-    setAttribute("protocolInfo", protInfo);
+    setAttribute(AvProperty::PROTOCOL_INFO, protInfo);
 }
 
 
 void
 AbstractResource::setSize(ui4 size)
 {
-    setAttribute("size", Poco::NumberFormatter::format(size));
+    setAttribute(AvProperty::SIZE, Poco::NumberFormatter::format(size));
 }
 
 
@@ -373,7 +447,7 @@ AbstractMediaObject::setTitle(const std::string& title)
 {
     Log::instance()->upnpav().debug("AbstractMediaObject::setTitle() title: " + title);
     
-    setUniqueProperty("dc:title", title);
+    setUniqueProperty(AvProperty::TITLE, title);
 }
 
 
@@ -382,7 +456,7 @@ AbstractMediaObject::setClass(const std::string& subclass)
 {
     Log::instance()->upnpav().debug("AbstractMediaObject::setClass() subclass: " + subclass);
     
-    setUniqueProperty("upnp:class", subclass);
+    setUniqueProperty(AvProperty::CLASS, subclass);
 }
 
 
@@ -391,7 +465,16 @@ AbstractMediaObject::getTitle()
 {
     Log::instance()->upnpav().debug("AbstractMediaObject::getTitle()");
     
-    return getProperty("dc:title")->getValue();
+    return getProperty(AvProperty::TITLE)->getValue();
+}
+
+
+std::string
+AbstractMediaObject::getClass()
+{
+    Log::instance()->upnpav().debug("AbstractMediaObject::getClass()");
+    
+    return getProperty(AvProperty::CLASS)->getValue();
 }
 
 
@@ -524,7 +607,7 @@ AbstractMediaObject::getResource(int index)
 {
     Log::instance()->upnpav().debug("AbstractMediaObject::setResource() index: " + Poco::NumberFormatter::format(index));
     
-    return static_cast<AbstractResource*>(getProperty("res", index));
+    return static_cast<AbstractResource*>(getProperty(AvProperty::RES, index));
 }
 
 
@@ -542,7 +625,7 @@ AbstractMediaObject::getResourceCount()
 {
     Log::instance()->upnpav().debug("AbstractMediaObject::getResourceCount()");
     
-    return getPropertyCount("res");
+    return getPropertyCount(AvProperty::RES);
 }
 
 
@@ -840,12 +923,12 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
     if (pNode->hasAttributes()) {
         attr = pNode->attributes();
         // FIXME: object number is the full object path, take only the last segment here ...? Otherwise, Poco::NumberParser will crash.
-        pObject->setObjectNumber(attr->getNamedItem("id")->nodeValue());
+        pObject->setObjectNumber(attr->getNamedItem(AvProperty::ID)->nodeValue());
     }
-    if (pNode->nodeName() == "container") {
+    if (pNode->nodeName() == AvClass::CONTAINER) {
         pObject->setIsContainer(true);
         if (attr != 0) {
-            pObject->setTotalChildCount(Poco::NumberParser::parseUnsigned(attr->getNamedItem("childCount")->nodeValue()));
+            pObject->setTotalChildCount(Poco::NumberParser::parseUnsigned(attr->getNamedItem(AvProperty::CHILD_COUNT)->nodeValue()));
         }
     }
     if (attr != 0) {
@@ -857,17 +940,17 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
         while (childNode)
         {
             // TODO: special treatment of resources shouldn't be necessary
-            if (childNode->nodeName() == "res") {
+            if (childNode->nodeName() == AvProperty::RES) {
                 Poco::XML::NamedNodeMap* attr = 0;
                 std::string protInfo = "";
                 ui4 size = 0;
                 if (childNode->hasAttributes()) {
                     attr = childNode->attributes();
-                    Poco::XML::Node* attrNode = attr->getNamedItem("protocolInfo");
+                    Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
                     if (attrNode) {
                         protInfo = attrNode->nodeValue();
                     }
-                    attrNode = attr->getNamedItem("size");
+                    attrNode = attr->getNamedItem(AvProperty::SIZE);
                     if (attrNode) {
                         size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
                     }
@@ -968,13 +1051,13 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     Poco::XML::Document* pDoc = pDidl->ownerDocument();
     Poco::AutoPtr<Poco::XML::Element> pObject;
     if (_pMediaObject->isContainer()) {
-        pObject = pDoc->createElement("container");
+        pObject = pDoc->createElement(AvClass::CONTAINER);
         Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
         pChildCount->setValue(Poco::NumberFormatter::format(_pMediaObject->getChildCount()));
         pObject->setAttributeNode(pChildCount);
     }
     else {
-        pObject = pDoc->createElement("item");
+        pObject = pDoc->createElement(AvClass::ITEM);
     }
 
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() writing attributes ...");
@@ -982,11 +1065,11 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     // id (String, required)
     std::string parentId = _pMediaObject->getParentObjectId();
     std::string objectId = (parentId == "") ? "0" : (parentId + "/" + Poco::NumberFormatter::format(_pMediaObject->getObjectNumber()));
-    pObject->setAttribute("id", objectId);
+    pObject->setAttribute(AvProperty::ID, objectId);
     // parentID (String, required)
-    pObject->setAttribute("parentID", parentId);
+    pObject->setAttribute(AvProperty::PARENT_ID, parentId);
     // restricted (Boolean, required)
-    pObject->setAttribute("restricted", (_pMediaObject->isRestricted() ? "1" : "0"));
+    pObject->setAttribute(AvProperty::RESTRICTED, (_pMediaObject->isRestricted() ? "1" : "0"));
     
     // searchable (Boolean)
     // refID (String)
@@ -1256,7 +1339,7 @@ MediaObject::setTitle(const std::string& title)
     Log::instance()->upnpav().debug("setting object title: " + title);
     
 //     _properties.append("dc:title", new Omm::Variant(title));
-    _properties["dc:title"] = title;
+    _properties[AvProperty::TITLE] = title;
 //     std::clog << "MediaObject::setTitle() finished" << std::endl;
 }
 
@@ -1271,7 +1354,7 @@ MediaObject::getTitle()
 //         return "foo";
 //     }
 //     return res;
-    return _properties["dc:title"];
+    return _properties[AvProperty::TITLE];
 }
 
 
@@ -1427,41 +1510,41 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl)
     Poco::AutoPtr<Poco::XML::Element> pObject;
     if (_pMediaObject->isContainer()) {
 //         std::clog << "MediaObjectWriter::writeMetaData() is container" << std::endl;
-        pObject = pDoc->createElement("container");
+        pObject = pDoc->createElement(AvClass::CONTAINER);
         // childCount (Integer)
-        Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
+        Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute(AvProperty::CHILD_COUNT);
         pChildCount->setValue(Poco::NumberFormatter::format(_pMediaObject->getChildCount()));
         pObject->setAttributeNode(pChildCount);
     }
     else {
 //         std::clog << "MediaObjectWriter::writeMetaData() is item" << std::endl;
-        pObject = pDoc->createElement("item");
+        pObject = pDoc->createElement(AvClass::ITEM);
     }
     // write attributes:
     // id (String, required)
 //     std::clog << "MediaObjectWriter::writeMetaData() attributes" << std::endl;
 //     std::clog << "MediaObjectWriter::writeMetaData() id: " << _pMediaObject->getObjectId() << std::endl;
     // FIXME: when writing meta data in SetAVTransportURI(), 0/ is prepended
-    pObject->setAttribute("id", _pMediaObject->getObjectId());
+    pObject->setAttribute(AvProperty::ID, _pMediaObject->getObjectId());
     // parentID (String, required)
 //     std::clog << "MediaObjectWriter::writeMetaData() parentID: " << _pMediaObject->getParentId() << std::endl;
-    pObject->setAttribute("parentID", _pMediaObject->getParentId());
+    pObject->setAttribute(AvProperty::PARENT_ID, _pMediaObject->getParentId());
     // restricted (Boolean, required)
 //     std::clog << "MediaObjectWriter::writeMetaData() restricted: " << (_pMediaObject->isRestricted() ? "1" : "0") << std::endl;
-    pObject->setAttribute("restricted", (_pMediaObject->isRestricted() ? "1" : "0"));
+    pObject->setAttribute(AvProperty::RESTRICTED, (_pMediaObject->isRestricted() ? "1" : "0"));
     
     // searchable (Boolean)
     // refID (String)
     
     // resources
     for (MediaObject::ResourceIterator it = _pMediaObject->beginResource(); it != _pMediaObject->endResource(); ++it) {
-        Poco::AutoPtr<Poco::XML::Element> pResource = pDoc->createElement("res");
+        Poco::AutoPtr<Poco::XML::Element> pResource = pDoc->createElement(AvProperty::RES);
         Poco::AutoPtr<Poco::XML::Text> pUri = pDoc->createTextNode((*it)->getUri());
         if ((*it)->getProtInfo() != "") {
-            pResource->setAttribute("protocolInfo", (*it)->getProtInfo());
+            pResource->setAttribute(AvProperty::PROTOCOL_INFO, (*it)->getProtInfo());
         }
         if ((*it)->getSize() > 0) {
-            pResource->setAttribute("size", Poco::NumberFormatter::format((*it)->getSize()));
+            pResource->setAttribute(AvProperty::SIZE, Poco::NumberFormatter::format((*it)->getSize()));
         }
         pResource->appendChild(pUri);
         pObject->appendChild(pResource);

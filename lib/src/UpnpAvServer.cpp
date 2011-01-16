@@ -236,10 +236,10 @@ std::string
 StreamingResource::getAttributeName(int index)
 {
     if (index == 0) {
-        return "protocolInfo";
+        return AvProperty::PROTOCOL_INFO;
     }
     else if (index == 1) {
-        return "size";
+        return AvProperty::SIZE;
     }
 }
 
@@ -259,10 +259,10 @@ StreamingResource::getAttributeValue(int index)
 std::string
 StreamingResource::getAttributeValue(const std::string& name)
 {
-    if (name == "protocolInfo") {
+    if (name == AvProperty::PROTOCOL_INFO) {
         return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
     }
-    else if (name == "size") {
+    else if (name == AvProperty::SIZE) {
         return Poco::NumberFormatter::format(getSize());
     }
 }
@@ -381,7 +381,7 @@ int
 TorchServer::getPropertyCount(const std::string& name)
 {
     // only one property overall and one title property in particular
-    if (name == "" || name == "dc:title") {
+    if (name == "" || name == AvProperty::TITLE) {
         return 1;
     }
     else {
@@ -400,7 +400,7 @@ TorchServer::getProperty(int index)
 Omm::Av::AbstractProperty*
 TorchServer::getProperty(const std::string& name, int index)
 {
-    if (name == "dc:title") {
+    if (name == AvProperty::TITLE) {
         return _pTitleProp;
     }
     else {
@@ -522,7 +522,7 @@ TorchItemPropertyImpl::getValue()
 {
     std::clog << "TorchItemPropertyImpl::getValue() returns: " << _value << std::endl;
 
-    if (_name == "dc:title") {
+    if (_name == AvProperty::TITLE) {
         return _value;
     }
 }
@@ -540,7 +540,7 @@ _pTitleProp(new TorchItemProperty),
 _pResource(new TorchItemResource(pServer, this))
 {
     std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
-    _pTitleProp->setName("dc:title");
+    _pTitleProp->setName(AvProperty::TITLE);
 }
 
 
@@ -558,7 +558,7 @@ TorchItem::getPropertyCount(const std::string& name)
     if (name == "") {
         return 2;
     }
-    else if (name == "dc:title" || name == "res") {
+    else if (name == AvProperty::TITLE || name == AvProperty::RES) {
         return 1;
     }
     else {
@@ -586,10 +586,10 @@ TorchItem::getProperty(const std::string& name, int index)
 {
     std::clog << "TorchItem::getProperty(name, index), name: " << name << ", index: " << index << std::endl;
 
-    if (name == "dc:title") {
+    if (name == AvProperty::TITLE) {
         return _pTitleProp;
     }
-    else if (name == "res") {
+    else if (name == AvProperty::RES) {
         return _pResource;
     }
     else {

@@ -92,6 +92,82 @@ public:
 };
 
 
+class AvProperty
+{
+public:
+    const static std::string ID;
+    const static std::string TITLE;
+    const static std::string CREATOR;
+    const static std::string RES;
+    const static std::string CLASS;
+    const static std::string CLASS_NAME;
+    const static std::string CONTAINER_SEARCHABLE;
+    const static std::string SEARCH_CLASS;
+    const static std::string SEARCH_CLASS_INCLUDE_DERIVED;
+    const static std::string SEARCH_CLASS_NAME;
+    const static std::string CREATE_CLASS;
+    const static std::string CREATE_CLASS_INCLUDE_DERIVED;
+    const static std::string CREATE_CLASS_NAME;
+    const static std::string PARENT_ID;
+    const static std::string REF_ID;
+    const static std::string RESTRICTED;
+    const static std::string WRITE_STATUS;
+    const static std::string CHILD_COUNT;
+    const static std::string ARTIST;
+    const static std::string ARTIST_ROLE;
+    const static std::string ACTOR;
+    const static std::string ACTOR_ROLE;
+    const static std::string AUTHOR;
+    const static std::string AUTHOR_ROLE;
+    const static std::string PRODUCER;
+    const static std::string DIRECTOR;
+    const static std::string PUBLISHER;
+    const static std::string CONTRIBUTOR;
+    const static std::string GENRE;
+    const static std::string ALBUM;
+    const static std::string PLAYLIST;
+    const static std::string SIZE;
+    const static std::string DURATION;
+    const static std::string BITRATE;
+    const static std::string SAMPLE_FREQUENCY;
+    const static std::string BITS_PER_SAMPLE;
+    const static std::string NR_AUDIO_CHANNELS;
+    const static std::string RESOLUTION;
+    const static std::string COLOR_DEPTH;
+    const static std::string PROTOCOL_INFO;
+    const static std::string PROTECTION;
+    const static std::string IMPORT_URI;
+    const static std::string ALBUM_ART_URI;
+    const static std::string ARTIST_DISCOGRAPHY_URI;
+    const static std::string LYRICS_URI;
+    const static std::string RELATION;
+    const static std::string STORAGE_TOTAL;
+    const static std::string STORAGE_USED;
+    const static std::string STORAGE_FREE;
+    const static std::string STORAGE_MAX_PARTITION;
+    const static std::string STORAGE_MEDIUM;
+    const static std::string DESCRIPTION;
+    const static std::string LONG_DESCRIPTION;
+    const static std::string ICON;
+    const static std::string REGION;
+    const static std::string RATING;
+    const static std::string RIGHTS;
+    const static std::string DATE;
+    const static std::string LANGUAGE;
+    const static std::string RADIO_CALL_SIGN;
+    const static std::string RADIO_STATION_ID;
+    const static std::string RADIO_BAND;
+    const static std::string CHANNEL_NR;
+    const static std::string CHANNEL_NAME;
+    const static std::string SCHEDULED_START_TIME;
+    const static std::string SCHEDULED_END_TIME;
+    const static std::string DVD_REGION_CODE;
+    const static std::string ORIGINAL_TRACK_NUMBER;
+    const static std::string TOC;
+    const static std::string USER_ANNOTATION;
+};
+
+
 class AvTypeConverter
 {
 public:
@@ -195,6 +271,7 @@ public:
     AbstractMediaObject* getObject(const std::string& objectId);                                // server object, cds browse
     AbstractMediaObject* getChild(const std::string& objectId);
     std::string getTitle();                                                                     // controller object, browse
+    std::string getClass();
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
     int getResourceCount();
     void setUniqueProperty(const std::string& name, const std::string& value);
