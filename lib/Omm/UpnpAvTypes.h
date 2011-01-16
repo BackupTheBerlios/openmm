@@ -57,6 +57,41 @@ private:
 
 class MediaServerController;
 
+class AvClass
+{
+public:
+    const static std::string OBJECT;
+    const static std::string ITEM;
+    const static std::string IMAGE_ITEM;
+    const static std::string AUDIO_ITEM;
+    const static std::string VIDEO_ITEM;
+    const static std::string PLAYLIST_ITEM;
+    const static std::string TEXT_ITEM;
+    const static std::string PHOTO;
+    const static std::string MUSIC_TRACK;
+    const static std::string AUDIO_BROADCAST;
+    const static std::string AUDIO_BOOK;
+    const static std::string MOVIE;
+    const static std::string VIDEO_BROADCAST;
+    const static std::string MUSIC_VIDEO_CLIP;
+    const static std::string CONTAINER;
+    const static std::string PERSON;
+    const static std::string PLAYLIST_CONTAINER;
+    const static std::string ALBUM;
+    const static std::string GENRE;
+    const static std::string STORAGE_SYSTEM;
+    const static std::string STORAGE_VOLUME;
+    const static std::string STORAGE_FOLDER;
+    const static std::string MUSIC_ARTIST;
+    const static std::string MUSIC_ALBUM;
+    const static std::string PHOTO_ALBUM;
+    const static std::string MUSIC_GENRE;
+    const static std::string MOVIE_GENRE;
+    
+    std::string className(const std::string& c1, const std::string& c2 = "", const std::string& c3 = "", const std::string& c4 = "", const std::string& c5 = "");
+};
+
+
 class AvTypeConverter
 {
 public:

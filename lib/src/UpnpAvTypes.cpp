@@ -87,6 +87,56 @@ Av::Log::upnpav()
 }
 
 
+const std::string AvClass::OBJECT = "object";
+const std::string AvClass::ITEM = "item";
+const std::string AvClass::IMAGE_ITEM = "imageItem";
+const std::string AvClass::AUDIO_ITEM = "audioItem";
+const std::string AvClass::VIDEO_ITEM = "videoItem";
+const std::string AvClass::PLAYLIST_ITEM = "playlistItem";
+const std::string AvClass::TEXT_ITEM = "textItem";
+const std::string AvClass::PHOTO = "photo";
+const std::string AvClass::MUSIC_TRACK = "musicTrack";
+const std::string AvClass::AUDIO_BROADCAST = "audioBroadcast";
+const std::string AvClass::AUDIO_BOOK = "audioBook";
+const std::string AvClass::MOVIE = "movie";
+const std::string AvClass::VIDEO_BROADCAST = "videoBroadcast";
+const std::string AvClass::MUSIC_VIDEO_CLIP = "musicVideoClip";
+const std::string AvClass::CONTAINER = "container";
+const std::string AvClass::PERSON = "person";
+const std::string AvClass::PLAYLIST_CONTAINER = "playlistContainer";
+const std::string AvClass::ALBUM = "album";
+const std::string AvClass::GENRE = "genre";
+const std::string AvClass::STORAGE_SYSTEM = "storageSystem";
+const std::string AvClass::STORAGE_VOLUME = "storageVolume";
+const std::string AvClass::STORAGE_FOLDER = "storageFolder";
+const std::string AvClass::MUSIC_ARTIST = "musicArtist";
+const std::string AvClass::MUSIC_ALBUM = "musicAlbum";
+const std::string AvClass::PHOTO_ALBUM = "photAlbum";
+const std::string AvClass::MUSIC_GENRE = "musicGenre";
+const std::string AvClass::MOVIE_GENRE = "movieGenre";
+
+
+std::string
+AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4, const std::string& c5)
+{
+    if (c2 == "") {
+        return c1;
+    }
+    else if (c3 == "") {
+        return c1 + "." + c2;
+    }
+    else if (c4 == "") {
+        return c1 + "." + c2 + "." + c3;
+    }
+    else if (c5 == "") {
+        return c1 + "." + c2 + "." + c3 + "." + c4;
+    }
+    else {
+        return c1 + "." + c2 + "." + c3 + "." + c4 + "." + c5;
+    }
+}
+
+
 r8
 AvTypeConverter::readDuration(const std::string& duration)
 {

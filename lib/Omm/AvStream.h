@@ -314,6 +314,23 @@ public:
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
     virtual void print(bool isOutFormat = false) = 0;
     
+    virtual std::string getClass() { return "object"; }
+    
+    virtual std::string getTitle() { return ""; }
+    virtual std::string getArtist() { return ""; }
+    virtual std::string getGenre() { return ""; }
+    virtual std::string getAlbum() { return ""; }
+    virtual std::string getDuration() { return ""; }
+    virtual std::string getDescription() { return ""; }
+    virtual std::string getDate() { return ""; }
+    
+    virtual std::string getRadioCallSign() { return ""; }
+    virtual std::string getRadioStationID() { return ""; }
+    virtual std::string getRadioBand() { return ""; }
+    
+    virtual std::string getChannelNumber() { return ""; }
+    virtual std::string getChannelName() { return ""; }
+    
     int numberStreams();
     void addStream(StreamInfo* pStreamInfo);
     StreamInfo* streamInfo(int streamNumber);
