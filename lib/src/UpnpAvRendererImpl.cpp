@@ -118,10 +118,10 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
             _setCurrentTrackDuration(duration);
         }
     }
-    catch (...) {
-        Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data");
+    catch (Poco::Exception& e) {
+        Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data: " + e.message());
     }
-    Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + transportState);
+    Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + _getTransportState());
 }
 
 
@@ -152,6 +152,13 @@ AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& Cu
 void
 AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
+    std::string transportState = _getTransportState();
+    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
+    
+    if (transportState != "PLAYING" && transportState != "TRANSITIONING") {
+        // TODO: return an UPnP error
+        return;
+    }
     Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
     
@@ -166,10 +173,12 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
     
+    Poco::UInt64 enginePositionByte = _pEngine->getPositionByte();
+    Omm::Av::Log::instance()->upnpav().debug("engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
     float enginePosition = _pEngine->getPositionPercentage();
-    Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(enginePosition, 2));
+    Omm::Av::Log::instance()->upnpav().debug("engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
     float engineTimePosition = _pEngine->getPositionSecond();
-    Omm::Av::Log::instance()->upnpav().debug("engine position (sec): " + Poco::NumberFormatter::format(engineTimePosition, 2));
+    Omm::Av::Log::instance()->upnpav().debug("engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
     
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
     Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);

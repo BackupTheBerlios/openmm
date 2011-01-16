@@ -33,7 +33,7 @@ VlcEngine::VlcEngine()
 
 VlcEngine::~VlcEngine()
 {
-    libvlc_release(_vlcInstance);
+    libvlc_release(_pVlcInstance);
     closeXWindow();
 }
 
@@ -48,36 +48,36 @@ VlcEngine::createPlayer()
         int argc = 3;
         const char* argv[3] = {"ommrender", "--no-osd",  "--fullscreen"};
 #if LIBVLC_VERSION_INT < 0x110
-        _vlcInstance = libvlc_new(argc, argv, &_exception);
+        _pVlcInstance = libvlc_new(argc, argv, &_exception);
 #else
-        _vlcInstance = libvlc_new(argc, argv);
+        _pVlcInstance = libvlc_new(argc, argv);
 #endif
     }
     else {
         int argc = 2;
         const char* argv[2] = {"ommrender", "--no-osd"};
 #if LIBVLC_VERSION_INT < 0x110
-        _vlcInstance = libvlc_new(argc, argv, &_exception);
+        _pVlcInstance = libvlc_new(argc, argv, &_exception);
 #else
-        _vlcInstance = libvlc_new(argc, argv);
+        _pVlcInstance = libvlc_new(argc, argv);
 #endif
     }
 //     int argc = 3;
 //     char* argv[3] = {"ommrender", "--codec=avcodec",  "--vout fb"};
-//     _vlcInstance = libvlc_new(argc, argv, &_exception);
+//     _pVlcInstance = libvlc_new(argc, argv, &_exception);
     handleException();
 #if LIBVLC_VERSION_INT < 0x110
-    _vlcPlayer = libvlc_media_player_new(_vlcInstance, &_exception);
+    _pVlcPlayer = libvlc_media_player_new(_pVlcInstance, &_exception);
 #else
-    _vlcPlayer = libvlc_media_player_new(_vlcInstance);
+    _pVlcPlayer = libvlc_media_player_new(_pVlcInstance);
 #endif
     handleException();
         
     int xWindow = openXWindow();
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_xwindow(_vlcPlayer, xWindow, &_exception);
+    libvlc_media_player_set_xwindow(_pVlcPlayer, xWindow, &_exception);
 #else
-    libvlc_media_player_set_xwindow(_vlcPlayer, xWindow);
+    libvlc_media_player_set_xwindow(_pVlcPlayer, xWindow);
 #endif
     handleException();
     
@@ -93,6 +93,13 @@ VlcEngine::setUri(std::string uri)
 //     _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
     _uri = uri;
 }
+
+
+// void
+// VlcEngine::setUri(std::istream& istr)
+// {
+// //     _fd = istr.socket().sockfd();
+// }
 
 
 void
@@ -159,24 +166,24 @@ VlcEngine::load()
 {
     _startTime = 0;
     _length = 0.0;
-    libvlc_media_t* media = 0;
+    _pVlcMedia = 0;
 #if LIBVLC_VERSION_INT < 0x110
-    media = libvlc_media_new(_vlcInstance, _uri.c_str(), &_exception);
+    _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), &_exception);
 #else
-    media = libvlc_media_new_location(_vlcInstance, _uri.c_str());
+    _pVlcMedia = libvlc_media_new_location(_pVlcInstance, _uri.c_str());
 #endif
     handleException();
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_media(_vlcPlayer, media, &_exception);
+    libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia, &_exception);
 #else
-    libvlc_media_player_set_media(_vlcPlayer, media);
+    libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia);
 #endif
     handleException();
-    libvlc_media_release(media);
+    libvlc_media_release(_pVlcMedia);
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_play(_vlcPlayer, &_exception);
+    libvlc_media_player_play(_pVlcPlayer, &_exception);
 #else
-    libvlc_media_player_play(_vlcPlayer);
+    libvlc_media_player_play(_pVlcPlayer);
 #endif
     handleException();
 
@@ -185,9 +192,9 @@ VlcEngine::load()
     do {
         usleep(100000); // limit the cpu-load while loading the media
 #if LIBVLC_VERSION_INT < 0x110
-        state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
+        state = libvlc_media_player_get_state(_pVlcPlayer, &_exception);
 #else
-        state = libvlc_media_player_get_state(_vlcPlayer);
+        state = libvlc_media_player_get_state(_pVlcPlayer);
 #endif
         handleException();
     } while(state != libvlc_Playing && state != libvlc_Error /*&& state != libvlc_MediaPlayerEndReached*/ );
@@ -197,77 +204,76 @@ VlcEngine::load()
     do {
         usleep(100000); // limit the cpu-load while waiting for stream demux
 #if LIBVLC_VERSION_INT < 0x110
-        hasVideo = libvlc_media_player_has_vout(_vlcPlayer, &_exception);
+        hasVideo = libvlc_media_player_has_vout(_pVlcPlayer, &_exception);
         handleException();
-        trackCount = libvlc_audio_get_track_count(_vlcPlayer, &_exception);
+        trackCount = libvlc_audio_get_track_count(_pVlcPlayer, &_exception);
         handleException();
 #else
-        hasVideo = libvlc_media_player_has_vout(_vlcPlayer);
+        hasVideo = libvlc_media_player_has_vout(_pVlcPlayer);
         handleException();
-        trackCount = libvlc_audio_get_track_count(_vlcPlayer);
+        trackCount = libvlc_audio_get_track_count(_pVlcPlayer);
         handleException();
 #endif   
     } while(state == libvlc_Playing && !hasVideo && !trackCount);
 //     TRACE("VlcEngine::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
 #if LIBVLC_VERSION_INT < 0x110
-    _length = (libvlc_media_player_get_length(_vlcPlayer, &_exception) - _startTime) / 1000.0;
+    _length = (libvlc_media_player_get_length(_pVlcPlayer, &_exception) - _startTime) / 1000.0;
     libvlc_time_t d = libvlc_media_get_duration(media, &_exception);
     //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
     
-    _startTime = libvlc_media_player_get_time(_vlcPlayer, &_exception);
+    _startTime = libvlc_media_player_get_time(_pVlcPlayer, &_exception);
     handleException();
 //     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
 
-    if(!libvlc_media_player_is_seekable(_vlcPlayer, &_exception)) {
+    if(!libvlc_media_player_is_seekable(_pVlcPlayer, &_exception)) {
 //         TRACE("VlcEngine::load() media is not seekable");
     }
     handleException();
-    if(!libvlc_media_player_can_pause(_vlcPlayer, &_exception)) {
+    if(!libvlc_media_player_can_pause(_pVlcPlayer, &_exception)) {
 //         TRACE("VlcEngine::load() pause not possible on media");
     }
     handleException();
     
     // TODO: receive video size changed - events and adjust display size
-    int videoWidth = libvlc_video_get_width(_vlcPlayer, &_exception);
+    int videoWidth = libvlc_video_get_width(_pVlcPlayer, &_exception);
     handleException();
-    int videoHeight = libvlc_video_get_height(_vlcPlayer, &_exception);
+    int videoHeight = libvlc_video_get_height(_pVlcPlayer, &_exception);
     handleException();
 //     TRACE("VlcEngine::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
-/*    libvlc_video_resize(_vlcPlayer, videoWidth, videoHeight, &_exception);
+/*    libvlc_video_resize(_pVlcPlayer, videoWidth, videoHeight, &_exception);
     handleException();*/
     
     // TODO: fullscreen could initially be set at start
-//     libvlc_set_fullscreen(_vlcPlayer, (_fullscreen ? 1 : 0), &_exception);
+//     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0), &_exception);
 //     handleException();
 #else
-    _length = (libvlc_media_player_get_length(_vlcPlayer) - _startTime) / 1000.0;
-    libvlc_time_t d = libvlc_media_get_duration(media);
+    _length = (libvlc_media_player_get_length(_pVlcPlayer) - _startTime) / 1000.0;
+    libvlc_time_t d = libvlc_media_get_duration(_pVlcMedia);
     //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
     
-    _startTime = libvlc_media_player_get_time(_vlcPlayer);
+    _startTime = libvlc_media_player_get_time(_pVlcPlayer);
     handleException();
 //     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
 
-    if(!libvlc_media_player_is_seekable(_vlcPlayer)) {
+    if(!libvlc_media_player_is_seekable(_pVlcPlayer)) {
 //         TRACE("VlcEngine::load() media is not seekable");
     }
     handleException();
-    if(!libvlc_media_player_can_pause(_vlcPlayer)) {
+    if(!libvlc_media_player_can_pause(_pVlcPlayer)) {
 //         TRACE("VlcEngine::load() pause not possible on media");
     }
     handleException();
     
+    unsigned int videoWidth;
+    unsigned int videoHeight;
+    int success = libvlc_video_get_size(_pVlcPlayer, 0, &videoWidth, &videoHeight);
+    handleException();
     // TODO: receive video size changed - events and adjust display size
-    int videoWidth = libvlc_video_get_width(_vlcPlayer);
-    handleException();
-    int videoHeight = libvlc_video_get_height(_vlcPlayer);
-    handleException();
-//     TRACE("VlcEngine::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
-/*    libvlc_video_resize(_vlcPlayer, videoWidth, videoHeight);
+/*    libvlc_video_resize(_pVlcPlayer, videoWidth, videoHeight);
     handleException();*/
     
     // TODO: fullscreen could initially be set at start
-//     libvlc_set_fullscreen(_vlcPlayer, (_fullscreen ? 1 : 0));
+//     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0));
 //     handleException();
 #endif
 }
@@ -283,9 +289,9 @@ void
 VlcEngine::pause()
 {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_pause(_vlcPlayer, &_exception);
+    libvlc_media_player_pause(_pVlcPlayer, &_exception);
 #else
-    libvlc_media_player_pause(_vlcPlayer);
+    libvlc_media_player_pause(_pVlcPlayer);
 #endif
     handleException();
 }
@@ -295,9 +301,9 @@ void
 VlcEngine::stop()
 {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_stop(_vlcPlayer, &_exception);
+    libvlc_media_player_stop(_pVlcPlayer, &_exception);
 #else
-    libvlc_media_player_stop(_vlcPlayer);
+    libvlc_media_player_stop(_pVlcPlayer);
 #endif
     handleException();
 }
@@ -326,9 +332,9 @@ void
 VlcEngine::seekPercentage(float percentage)
 {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_position(_vlcPlayer, percentage, &_exception);
+    libvlc_media_player_set_position(_pVlcPlayer, percentage, &_exception);
 #else
-    libvlc_media_player_set_position(_vlcPlayer, percentage);
+    libvlc_media_player_set_position(_pVlcPlayer, percentage);
 #endif
     handleException();
 }
@@ -338,9 +344,9 @@ void
 VlcEngine::seekSecond(float second)
 {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_time(_vlcPlayer, second * 1000, &_exception);
+    libvlc_media_player_set_time(_pVlcPlayer, second * 1000, &_exception);
 #else
-    libvlc_media_player_set_time(_vlcPlayer, second * 1000);
+    libvlc_media_player_set_time(_pVlcPlayer, second * 1000);
 #endif
     handleException();
 }
@@ -349,6 +355,14 @@ VlcEngine::seekSecond(float second)
 Poco::UInt64
 VlcEngine::getPositionByte()
 {
+#if LIBVLC_VERSION_INT < 0x110
+    // TODO: implement getPositionByte() for vlc version 1.0
+#else
+    libvlc_media_stats_t stats;
+    int success = libvlc_media_get_stats(_pVlcMedia, &stats);
+    return stats.i_read_bytes;
+#endif
+    handleException();
 }
 
 
@@ -366,9 +380,9 @@ VlcEngine::getPositionPercentage()
     
     libvlc_state_t state;
 #if LIBVLC_VERSION_INT < 0x110
-    state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
+    state = libvlc_media_player_get_state(_pVlcPlayer, &_exception);
 #else
-    state = libvlc_media_player_get_state(_vlcPlayer);
+    state = libvlc_media_player_get_state(_pVlcPlayer);
 #endif
     handleException();
     // TODO: catch vlc event at end of track, don't poll it
@@ -379,9 +393,9 @@ VlcEngine::getPositionPercentage()
     }
     
 #if LIBVLC_VERSION_INT < 0x110
-    res = _length * libvlc_media_player_get_position(_vlcPlayer, &_exception);
+    res = _length * libvlc_media_player_get_position(_pVlcPlayer, &_exception);
 #else
-    res = _length * libvlc_media_player_get_position(_vlcPlayer);
+    res = _length * libvlc_media_player_get_position(_pVlcPlayer);
 #endif
     handleException();
     return res;
@@ -396,9 +410,9 @@ VlcEngine::getPositionSecond()
     
     libvlc_state_t state;
 #if LIBVLC_VERSION_INT < 0x110
-    state = libvlc_media_player_get_state(_vlcPlayer, &_exception);
+    state = libvlc_media_player_get_state(_pVlcPlayer, &_exception);
 #else
-    state = libvlc_media_player_get_state(_vlcPlayer);
+    state = libvlc_media_player_get_state(_pVlcPlayer);
 #endif
     handleException();
     // TODO: catch vlc event at end of track, don't poll it
@@ -409,9 +423,9 @@ VlcEngine::getPositionSecond()
     }
     
 #if LIBVLC_VERSION_INT < 0x110
-    res = (libvlc_media_player_get_time(_vlcPlayer, &_exception) - _startTime) / 1000.0;
+    res = (libvlc_media_player_get_time(_pVlcPlayer, &_exception) - _startTime) / 1000.0;
 #else
-    res = (libvlc_media_player_get_time(_vlcPlayer) - _startTime) / 1000.0;
+    res = (libvlc_media_player_get_time(_pVlcPlayer) - _startTime) / 1000.0;
 #endif
     handleException();
     return res;
@@ -424,9 +438,9 @@ VlcEngine::getLengthSeconds()
 {
     // libvlc_media_player_get_length() sometimes fetches the last position of the stream, and not the length
 #if LIBVLC_VERSION_INT < 0x110
-    _length = (libvlc_media_player_get_length(_vlcPlayer, &_exception) - _startTime) / 1000.0;
+    _length = (libvlc_media_player_get_length(_pVlcPlayer, &_exception) - _startTime) / 1000.0;
 #else
-    _length = (libvlc_media_player_get_length(_vlcPlayer) - _startTime) / 1000.0;
+    _length = (libvlc_media_player_get_length(_pVlcPlayer) - _startTime) / 1000.0;
 #endif
     handleException();
     return _length;
@@ -438,7 +452,7 @@ VlcEngine::getLengthSeconds()
                                libvlc_exception_t * p_e )
     */
     
-/*    seconds = libvlc_media_player_get_length(_vlcPlayer, &_exception) / 1000.0;
+/*    seconds = libvlc_media_player_get_length(_pVlcPlayer, &_exception) / 1000.0;
     handleException();
     seconds = 100.0;
     TRACE("VlcEngine::getLength() seconds: %f", seconds);*/
@@ -449,9 +463,9 @@ void
 VlcEngine::setVolume(int channel, float vol)
 {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_audio_set_volume(_vlcInstance, vol, &_exception);
+    libvlc_audio_set_volume(_pVlcInstance, vol, &_exception);
 #else
-    libvlc_audio_set_volume(_vlcPlayer, vol);
+    libvlc_audio_set_volume(_pVlcPlayer, vol);
 #endif
     handleException();
 }
@@ -462,9 +476,9 @@ VlcEngine::getVolume(int channel)
 {
     float res;
 #if LIBVLC_VERSION_INT < 0x110
-    res = libvlc_audio_get_volume(_vlcInstance, &_exception);
+    res = libvlc_audio_get_volume(_pVlcInstance, &_exception);
 #else
-    res = libvlc_audio_get_volume(_vlcPlayer);
+    res = libvlc_audio_get_volume(_pVlcPlayer);
 #endif
     handleException();
     return res;

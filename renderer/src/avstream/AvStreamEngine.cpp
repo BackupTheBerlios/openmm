@@ -119,55 +119,55 @@ AvStreamEngine::preferStdStream()
 }
 
 
-// void
-// AvStreamEngine::setUri(std::string mrl)
-// {
-//     if (_isPlaying) {
-//         stop();
-//     }
-//     
-//     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
-//     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
-//     _pDemuxer->set(_pTagger->tag(mrl));
-// }
-
-
 void
 AvStreamEngine::setUri(std::string mrl)
 {
     if (_isPlaying) {
         stop();
     }
+    
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
-
-    _uri = mrl;
-    Poco::URI uri(mrl);
-    Omm::AvStream::Log::instance()->avstream().debug("getting stream of type: " + uri.getScheme());
-    if (uri.getScheme() == "http") {
-        _isFile = false;
-        _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-        Poco::Net::HTTPRequest request("GET", uri.getPath());
-        _pSession->sendRequest(request);
-        std::stringstream requestHeader;
-        request.write(requestHeader);
-        Omm::AvStream::Log::instance()->avstream().debug("request header:\n" + requestHeader.str());
-        
-        Poco::Net::HTTPResponse response;
-        std::istream& istr = _pSession->receiveResponse(response);
-        
-        Omm::AvStream::Log::instance()->avstream().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
-        std::stringstream responseHeader;
-        response.write(responseHeader);
-        Omm::AvStream::Log::instance()->avstream().debug("response header:\n" + responseHeader.str());
-        _pDemuxer->set(_pTagger->tag(istr));
-    }
-    else if (uri.getScheme() == "file" || uri.getScheme() == "") {
-        _isFile = true;
-        _file.open(uri.getPath().c_str());
-        _pDemuxer->set(_pTagger->tag(_file));
-    }
+    _pDemuxer->set(_pTagger->tag(mrl));
 }
+
+
+// void
+// AvStreamEngine::setUri(std::string mrl)
+// {
+//     if (_isPlaying) {
+//         stop();
+//     }
+//     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
+//     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
+// 
+//     _uri = mrl;
+//     Poco::URI uri(mrl);
+//     Omm::AvStream::Log::instance()->avstream().debug("getting stream of type: " + uri.getScheme());
+//     if (uri.getScheme() == "http") {
+//         _isFile = false;
+//         _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
+//         Poco::Net::HTTPRequest request("GET", uri.getPath());
+//         _pSession->sendRequest(request);
+//         std::stringstream requestHeader;
+//         request.write(requestHeader);
+//         Omm::AvStream::Log::instance()->avstream().debug("request header:\n" + requestHeader.str());
+//         
+//         Poco::Net::HTTPResponse response;
+//         std::istream& istr = _pSession->receiveResponse(response);
+//         
+//         Omm::AvStream::Log::instance()->avstream().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+//         std::stringstream responseHeader;
+//         response.write(responseHeader);
+//         Omm::AvStream::Log::instance()->avstream().debug("response header:\n" + responseHeader.str());
+//         _pDemuxer->set(_pTagger->tag(istr));
+//     }
+//     else if (uri.getScheme() == "file" || uri.getScheme() == "") {
+//         _isFile = true;
+//         _file.open(uri.getPath().c_str());
+//         _pDemuxer->set(_pTagger->tag(_file));
+//     }
+// }
 
 
 void

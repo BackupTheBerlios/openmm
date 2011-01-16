@@ -47,6 +47,7 @@ public:
       AVTransport
     */
     virtual void setUri(std::string uri);
+//     virtual void setUri(std::istream& istr);
     virtual void load();
     
     /**
@@ -87,9 +88,11 @@ private:
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_exception_t      _exception;
 #endif
-    libvlc_instance_t*      _vlcInstance;
-    libvlc_media_player_t*  _vlcPlayer;
+    libvlc_instance_t*      _pVlcInstance;
+    libvlc_media_player_t*  _pVlcPlayer;
+    libvlc_media_t*         _pVlcMedia;
     std::string             _uri;
+//     int                     _fd;
     long long               _startTime;
     float                   _length; // length of media in seconds
 };
