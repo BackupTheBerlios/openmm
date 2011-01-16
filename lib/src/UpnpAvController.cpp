@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include "UpnpAvTypes.h"
 #include "UpnpAvController.h"
 #include "UpnpAvControllerPrivate.h"
 #include "UpnpAvCtrlImpl.h"
@@ -455,7 +456,7 @@ AvUserInterface::positionMoved(int position)
         return;
     }
     try {
-        _pSelectedRenderer->AVTransport()->Seek(0, "ABS_TIME", AvTypeConverter::writeTime(position * 1000000));
+        _pSelectedRenderer->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position * 1000000));
     }
     catch (Poco::Exception& e){
         error(e.message());
