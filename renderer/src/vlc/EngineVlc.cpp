@@ -218,7 +218,7 @@ VlcEngine::load()
 //     TRACE("VlcEngine::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
 #if LIBVLC_VERSION_INT < 0x110
     _length = (libvlc_media_player_get_length(_pVlcPlayer, &_exception) - _startTime) / 1000.0;
-    libvlc_time_t d = libvlc_media_get_duration(media, &_exception);
+    libvlc_time_t d = libvlc_media_get_duration(_pVlcMedia, &_exception);
     //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
     
     _startTime = libvlc_media_player_get_time(_pVlcPlayer, &_exception);

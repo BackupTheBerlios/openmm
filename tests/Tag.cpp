@@ -49,6 +49,14 @@ main(int argc, char** argv)
     if (pMeta) {
         pMeta->print();
     }
+    std::clog << std::endl;
+    std::clog << "Artist: " << pMeta->getProperty(Omm::AvStream::Meta::TK_ARTIST) << std::endl;
+    std::clog << "Album: " << pMeta->getProperty(Omm::AvStream::Meta::TK_ALBUM) << std::endl;
+    std::clog << "Title: " << pMeta->getProperty(Omm::AvStream::Meta::TK_TITLE) << std::endl;
+    std::clog << "Track: " << pMeta->getProperty(Omm::AvStream::Meta::TK_TRACK) << std::endl;
+    std::clog << "Genre: " << pMeta->getProperty(Omm::AvStream::Meta::TK_GENRE) << std::endl;
+    std::clog << std::endl;
+    
     delete pMeta;
     delete pTagger;
     return 0;

@@ -55,7 +55,7 @@ private:
 };
 
 
-class MediaServerController;
+// TODO: generate const strings for allowed values for action arguments with ommgen stub generator.
 
 class AvTransportArgument
 {

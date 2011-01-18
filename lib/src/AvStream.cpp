@@ -1188,7 +1188,41 @@ Meta::~Meta()
             delete *it;
         }
     }
-    _streamInfos.clear();
+//     _streamInfos.clear();
+//     _tags.clear();
+}
+
+
+std::string
+Meta::getClass()
+{
+}
+
+
+std::string
+Meta::getProperty(TagKey key)
+{
+    // for a comparison of tags, see http://age.hobba.nl/audio/tag_frame_reference.html
+    // id3 tags: http://www.id3.org/id3v2.4.0-frames
+    std::string res;
+    switch (key) {
+        case TK_TITLE:
+            res = getTag("TIT2", "TITLE");
+            break;
+        case TK_ALBUM:
+            res = getTag("TALB", "TOAL", "ALBUM");
+            break;
+        case TK_ARTIST:
+            res = getTag("TPE1", "ARTIST");
+            break;
+        case TK_GENRE:
+            res = getTag("TCON", "GENRE");
+            break;
+        case TK_TRACK:
+            res = getTag("TRCK", "TRACK", "TRACKNUMBER", "PART_NUMBER");
+            break;
+    }
+    return res;
 }
 
 
@@ -1210,6 +1244,65 @@ StreamInfo*
 Meta::streamInfo(int streamNumber)
 {
     return _streamInfos[streamNumber];
+}
+
+
+std::string
+Meta::getTag(const std::string& key1)
+{
+    return _tags[key1];
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+    else if (_tags[key3] != "") {
+        return _tags[key3];
+    }
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+    else if (_tags[key3] != "") {
+        return _tags[key3];
+    }
+    else if (_tags[key4] != "") {
+        return _tags[key4];
+    }
+}
+
+
+void
+Meta::setTag(const std::string& key, const std::string& value)
+{
+    _tags[key] = value;
 }
 
 

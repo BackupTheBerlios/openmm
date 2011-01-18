@@ -251,8 +251,17 @@ class Meta
 public:
     virtual ~Meta();
     
+    enum TagKey {
+        TK_TITLE = 0,
+        TK_ALBUM,
+        TK_ARTIST,
+        TK_AUTHOR,
+        TK_GENRE,
+        TK_TRACK
+    };
+    
     enum ColorCoding {
-        CC_NONE= -1,
+        CC_NONE = -1,
         CC_YUV420P,   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
         CC_YUYV422,   ///< packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr
         CC_RGB24,     ///< packed RGB 8:8:8, 24bpp, RGBRGB...
@@ -314,8 +323,8 @@ public:
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
     virtual void print(bool isOutFormat = false) = 0;
     
-    virtual std::string getClass() { return "object"; }
-    virtual std::string getProperty(const std::string& propertyName) { return ""; }
+    virtual std::string getClass();
+    virtual std::string getProperty(TagKey key);
     
     int numberStreams();
     void addStream(StreamInfo* pStreamInfo);
@@ -323,9 +332,16 @@ public:
     
 protected:
     Meta();
+    
+    std::string getTag(const std::string& key1);
+    std::string getTag(const std::string& key1, const std::string& key2);
+    std::string getTag(const std::string& key1, const std::string& key2, const std::string& key3);
+    std::string getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4);
+    void setTag(const std::string& key, const std::string& value);
 
 private:
-    std::vector<StreamInfo*>        _streamInfos;
+    std::vector<StreamInfo*>            _streamInfos;
+    std::map<std::string,std::string>   _tags;
 };
 
 

@@ -187,6 +187,7 @@ FFmpegMeta::print(bool isOutFormat)
         Log::instance()->ffmpeg().trace("ffmpeg::av_metadata_get() ...");
         while ((tag = av_metadata_get(_pFormatContext->metadata, "", tag, AV_METADATA_IGNORE_SUFFIX))) {
             std::clog << tag->key << ", " << tag->value << std::endl;
+//             addTag(tag->key, tag->value);
         }
     }
 }
@@ -690,6 +691,13 @@ FFmpegTagger::tag(const std::string& uri)
         return 0;
     }
     
+    AVMetadataTag* tag = 0;
+    Log::instance()->ffmpeg().trace("ffmpeg::av_metadata_get() ...");
+    while ((tag = av_metadata_get(pMeta->_pFormatContext->metadata, "", tag, AV_METADATA_IGNORE_SUFFIX))) {
+        std::clog << tag->key << ", " << tag->value << std::endl;
+        pMeta->setTag(tag->key, tag->value);
+    }
+    
     Log::instance()->ffmpeg().trace("ffmpeg::av_find_stream_info() ...");
     error = av_find_stream_info(pMeta->_pFormatContext);
     if (error < 0) {
@@ -738,6 +746,13 @@ FFmpegTagger::tag(std::istream& istr)
     }
     Log::instance()->ffmpeg().trace("probesize: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->probesize) +
     ", max_analyze_duration: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->max_analyze_duration));
+    
+    AVMetadataTag* tag = 0;
+    Log::instance()->ffmpeg().trace("ffmpeg::av_metadata_get() ...");
+    while ((tag = av_metadata_get(pMeta->_pFormatContext->metadata, "", tag, AV_METADATA_IGNORE_SUFFIX))) {
+        std::clog << tag->key << ", " << tag->value << std::endl;
+        pMeta->setTag(tag->key, tag->value);
+    }
     
     Log::instance()->ffmpeg().trace("ffmpeg::av_find_stream_info() ...");
     error = av_find_stream_info(pMeta->_pFormatContext);
