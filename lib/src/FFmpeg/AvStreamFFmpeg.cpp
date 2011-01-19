@@ -193,6 +193,20 @@ FFmpegMeta::print(bool isOutFormat)
 }
 
 
+bool
+FFmpegMeta::isStillImage()
+{
+    // TODO: detection of still image could be improved (this way, it could also be a jpeg stream?)
+    std::string format(_pFormatContext->iformat->name);
+    if (format == "image2") {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
 int
 FFmpegMeta::numberStreams()
 {

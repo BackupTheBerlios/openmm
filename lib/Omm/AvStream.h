@@ -251,6 +251,13 @@ class Meta
 public:
     virtual ~Meta();
     
+    enum ContainerFormat {
+        CF_UNKNOWN = 0,
+        CF_AUDIO,
+        CF_VIDEO,
+        CF_IMAGE
+    };
+    
     enum TagKey {
         TK_TITLE = 0,
         TK_ALBUM,
@@ -323,9 +330,10 @@ public:
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
     virtual void print(bool isOutFormat = false) = 0;
     
-    virtual std::string getClass();
+    virtual bool isStillImage() { return false; }
     virtual std::string getProperty(TagKey key);
     
+    ContainerFormat getContainerFormat();
     int numberStreams();
     void addStream(StreamInfo* pStreamInfo);
     StreamInfo* streamInfo(int streamNumber);
@@ -337,6 +345,7 @@ protected:
     std::string getTag(const std::string& key1, const std::string& key2);
     std::string getTag(const std::string& key1, const std::string& key2, const std::string& key3);
     std::string getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4);
+    std::string getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4, const std::string& key5);
     void setTag(const std::string& key, const std::string& value);
 
 private:

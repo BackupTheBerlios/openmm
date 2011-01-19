@@ -49,6 +49,19 @@ main(int argc, char** argv)
     if (pMeta) {
         pMeta->print();
     }
+    Omm::AvStream::Meta::ContainerFormat format = pMeta->getContainerFormat();
+    std::clog << std::endl;
+    switch (format) {
+        case Omm::AvStream::Meta::CF_AUDIO:
+            std::clog << "Audio stream" << std::endl;
+            break;
+        case Omm::AvStream::Meta::CF_VIDEO:
+            std::clog << "Video stream" << std::endl;
+            break;
+        case Omm::AvStream::Meta::CF_IMAGE:
+            std::clog << "Still image" << std::endl;
+            break;
+    }
     std::clog << std::endl;
     std::clog << "Artist: " << pMeta->getProperty(Omm::AvStream::Meta::TK_ARTIST) << std::endl;
     std::clog << "Album: " << pMeta->getProperty(Omm::AvStream::Meta::TK_ALBUM) << std::endl;

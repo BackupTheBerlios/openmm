@@ -1193,9 +1193,33 @@ Meta::~Meta()
 }
 
 
-std::string
-Meta::getClass()
+Meta::ContainerFormat
+Meta::getContainerFormat()
 {
+    bool hasAudio = false;
+    bool hasVideo = false;
+    for (int i = 0; i < numberStreams(); i++) {
+        if (streamInfo(i)->isAudio()) {
+            hasAudio = true;
+        }
+        if (streamInfo(i)->isVideo()) {
+            hasVideo = true;
+        }
+    }
+    if (!hasVideo && hasAudio) {
+        return Omm::AvStream::Meta::CF_AUDIO;
+    }
+    else if (hasVideo) {
+        if (isStillImage()) {
+            return Omm::AvStream::Meta::CF_IMAGE;
+        }
+        else {
+            return Omm::AvStream::Meta::CF_VIDEO;
+        }
+    }
+    else {
+        return Omm::AvStream::Meta::CF_UNKNOWN;
+    }
 }
 
 
@@ -1207,22 +1231,119 @@ Meta::getProperty(TagKey key)
     std::string res;
     switch (key) {
         case TK_TITLE:
-            res = getTag("TIT2", "TITLE");
+            res = getTag("TIT2", "TT2", "TITLE");
             break;
         case TK_ALBUM:
-            res = getTag("TALB", "TOAL", "ALBUM");
+            res = getTag("TALB", "TAL", "TOAL", "ALBUM");
             break;
         case TK_ARTIST:
-            res = getTag("TPE1", "ARTIST");
+            res = getTag("TPE1", "TP1", "ARTIST");
             break;
         case TK_GENRE:
-            res = getTag("TCON", "GENRE");
+            res = getTag("TCON", "TCO", "GENRE");
             break;
         case TK_TRACK:
-            res = getTag("TRCK", "TRACK", "TRACKNUMBER", "PART_NUMBER");
+            res = getTag("TRCK", "TRK", "TRACK", "TRACKNUMBER", "PART_NUMBER");
             break;
     }
     return res;
+}
+
+
+std::string
+Meta::getTag(const std::string& key1)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else {
+        return "";
+    }
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+    else {
+        return "";
+    }
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+    else if (_tags[key3] != "") {
+        return _tags[key3];
+    }
+    else {
+        return "";
+    }
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+    else if (_tags[key3] != "") {
+        return _tags[key3];
+    }
+    else if (_tags[key4] != "") {
+        return _tags[key4];
+    }
+    else {
+        return "";
+    }
+}
+
+
+std::string
+Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4, const std::string& key5)
+{
+    if (_tags[key1] != "") {
+        return _tags[key1];
+    }
+    else if (_tags[key2] != "") {
+        return _tags[key2];
+    }
+    else if (_tags[key3] != "") {
+        return _tags[key3];
+    }
+    else if (_tags[key4] != "") {
+        return _tags[key4];
+    }
+    else if (_tags[key5] != "") {
+        return _tags[key5];
+    }
+    else {
+        return "";
+    }
+}
+
+
+void
+Meta::setTag(const std::string& key, const std::string& value)
+{
+    _tags[key] = value;
 }
 
 
@@ -1244,65 +1365,6 @@ StreamInfo*
 Meta::streamInfo(int streamNumber)
 {
     return _streamInfos[streamNumber];
-}
-
-
-std::string
-Meta::getTag(const std::string& key1)
-{
-    return _tags[key1];
-}
-
-
-std::string
-Meta::getTag(const std::string& key1, const std::string& key2)
-{
-    if (_tags[key1] != "") {
-        return _tags[key1];
-    }
-    else if (_tags[key2] != "") {
-        return _tags[key2];
-    }
-}
-
-
-std::string
-Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3)
-{
-    if (_tags[key1] != "") {
-        return _tags[key1];
-    }
-    else if (_tags[key2] != "") {
-        return _tags[key2];
-    }
-    else if (_tags[key3] != "") {
-        return _tags[key3];
-    }
-}
-
-
-std::string
-Meta::getTag(const std::string& key1, const std::string& key2, const std::string& key3, const std::string& key4)
-{
-    if (_tags[key1] != "") {
-        return _tags[key1];
-    }
-    else if (_tags[key2] != "") {
-        return _tags[key2];
-    }
-    else if (_tags[key3] != "") {
-        return _tags[key3];
-    }
-    else if (_tags[key4] != "") {
-        return _tags[key4];
-    }
-}
-
-
-void
-Meta::setTag(const std::string& key, const std::string& value)
-{
-    _tags[key] = value;
 }
 
 

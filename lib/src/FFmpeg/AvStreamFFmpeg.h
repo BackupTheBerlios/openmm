@@ -55,6 +55,7 @@ public:
     virtual Omm::AvStream::Frame* readFrame();
     virtual void print(bool isOutFormat = false);
     
+    virtual bool isStillImage();
     virtual int numberStreams();
     
     static PixelFormat toFFmpegPixFmt(Meta::ColorCoding colorCoding);
