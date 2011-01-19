@@ -21,6 +21,9 @@
 #include <Poco/ClassLibrary.h>
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
+
+#include <Omm/AvStream.h>
+
 #include "Filesystem.h"
 
 
@@ -28,8 +31,10 @@ class FileDataModel : public Omm::Av::AbstractDataModel
 {
 public:
     FileDataModel(const std::string& basePath);
+    ~FileDataModel();
     
     virtual Omm::ui4 getChildCount();
+    virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
     
     virtual Omm::ui4 getSize(Omm::ui4 index);
@@ -41,15 +46,32 @@ public:
 private:
 //     void setBasePath(const std::string& basePath);
     void scanDirectory(Poco::File& directory);
-    
-    std::vector<Poco::File>              _files;
+        
+    std::vector<Poco::File>             _files;
+    Omm::AvStream::Tagger*              _pTagger;
 };
 
 
 FileDataModel::FileDataModel(const std::string& basePath)
 {
     Poco::File baseDir(basePath);
+    
+    std::string taggerPlugin("tagger-ffmpeg");
+    Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
+    try {
+        _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
+    }
+    catch(Poco::NotFoundException) {
+        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+    }
+    
     scanDirectory(baseDir);
+}
+
+
+FileDataModel::~FileDataModel()
+{
+    delete _pTagger;
 }
 
 
@@ -61,9 +83,51 @@ FileDataModel::getChildCount()
 
 
 std::string
+FileDataModel::getClass(Omm::ui4 index)
+{
+    Omm::Av::Log::instance()->upnpav().debug("tagging: " + _files[index].path());
+    
+    std::string res;
+    Omm::AvStream::Meta::ContainerFormat format;
+    Omm::AvStream::Meta* pMeta = _pTagger->tag(_files[index].path());
+    if (!pMeta) {
+        format = Omm::AvStream::Meta::CF_UNKNOWN;
+    }
+    else {
+        format = pMeta->getContainerFormat();
+    }
+    delete pMeta;
+    switch (format) {
+        case Omm::AvStream::Meta::CF_UNKNOWN:
+            return Omm::Av::AvClass::OBJECT;
+        case Omm::AvStream::Meta::CF_AUDIO:
+            return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::AUDIO_ITEM);
+        case Omm::AvStream::Meta::CF_VIDEO:
+            return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::VIDEO_ITEM);
+        case Omm::AvStream::Meta::CF_IMAGE:
+            return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::IMAGE_ITEM);
+    }
+}
+
+
+std::string
 FileDataModel::getTitle(Omm::ui4 index)
 {
-    return Poco::Path(_files[index].path()).getFileName();
+    Omm::Av::Log::instance()->upnpav().debug("tagging: " + _files[index].path());
+    
+    std::string res;
+    Omm::AvStream::Meta* pMeta = _pTagger->tag(_files[index].path());
+    if (!pMeta) {
+        res = "";
+    }
+    else {
+        res = pMeta->getTag(Omm::AvStream::Meta::TK_TITLE);
+    }
+    if (res == "") {
+        res = Poco::Path(_files[index].path()).getFileName();
+    }
+    delete pMeta;
+    return res;
 }
 
 

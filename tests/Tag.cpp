@@ -63,11 +63,11 @@ main(int argc, char** argv)
             break;
     }
     std::clog << std::endl;
-    std::clog << "Artist: " << pMeta->getProperty(Omm::AvStream::Meta::TK_ARTIST) << std::endl;
-    std::clog << "Album: " << pMeta->getProperty(Omm::AvStream::Meta::TK_ALBUM) << std::endl;
-    std::clog << "Title: " << pMeta->getProperty(Omm::AvStream::Meta::TK_TITLE) << std::endl;
-    std::clog << "Track: " << pMeta->getProperty(Omm::AvStream::Meta::TK_TRACK) << std::endl;
-    std::clog << "Genre: " << pMeta->getProperty(Omm::AvStream::Meta::TK_GENRE) << std::endl;
+    std::clog << "Artist: " << pMeta->getTag(Omm::AvStream::Meta::TK_ARTIST) << std::endl;
+    std::clog << "Album: " << pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM) << std::endl;
+    std::clog << "Title: " << pMeta->getTag(Omm::AvStream::Meta::TK_TITLE) << std::endl;
+    std::clog << "Track: " << pMeta->getTag(Omm::AvStream::Meta::TK_TRACK) << std::endl;
+    std::clog << "Genre: " << pMeta->getTag(Omm::AvStream::Meta::TK_GENRE) << std::endl;
     std::clog << std::endl;
     
     delete pMeta;

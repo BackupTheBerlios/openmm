@@ -216,15 +216,12 @@ _pServer(pServer),
 _pItem(pItem),
 _id(0)
 {
-    std::clog << "StreamingResource::StreamingResource(pServer, pItem), pServer: " << pServer << ", pItem: " << pItem << std::endl;
 }
 
 
 std::string
 StreamingResource::getValue()
 {
-    std::clog << "StreamingResourceImpl::getValue()" << std::endl;
-    
     std::string serverAddress = _pServer->getServerAddress();
     std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
     std::string resourceId = Poco::NumberFormatter::format(_id);
@@ -284,8 +281,6 @@ StreamingMediaItem::StreamingMediaItem(StreamingMediaObject* pServer)
 
 StreamingMediaObject::StreamingMediaObject(int port)
 {
-    std::clog << "StreamingMediaObject::StreamingMediaObject(port), port: " << port << std::endl;
-    
     _pItemServer = new MediaItemServer(port);
     _pItemServer->_pServerContainer = this;
     _pItemServer->start();
@@ -309,7 +304,7 @@ StreamingMediaObject::createChildObject()
 std::string
 StreamingMediaObject::getServerAddress()
 {
-    std::string address = Omm::Sys::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
+    std::string address = Sys::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
     int port = _pItemServer->_socket.address().port();
     return "http://" + address + ":" + Poco::NumberFormatter::format(port);
 }
@@ -345,20 +340,19 @@ TorchServer::setDataModel(AbstractDataModel* pDataModel)
 }
 
 
-Omm::Av::AbstractMediaObject*
-TorchServer::getChild(Omm::ui4 numChild)
+AbstractMediaObject*
+TorchServer::getChild(ui4 numChild)
 {
-    std::clog << "TorchServer::getChild()" << std::endl;
-    
     _pChild->setObjectNumber(numChild);
     // FIXME: title property of child item should get it's title based on item's object number
+    static_cast<TorchItem*>(_pChild)->_pClassProp->setValue(_pDataModel->getClass(numChild));
     static_cast<TorchItem*>(_pChild)->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
     
     return _pChild;
 }
 
 
-Omm::ui4
+ui4
 TorchServer::getChildCount()
 {
     if (_pDataModel) {
@@ -380,7 +374,8 @@ TorchServer::isContainer()
 int
 TorchServer::getPropertyCount(const std::string& name)
 {
-    // only one property overall and one title property in particular
+    // the server itself (not the media items) has only one property overall and one title property in particular
+    // TODO: add class property, it's required
     if (name == "" || name == AvProperty::TITLE) {
         return 1;
     }
@@ -390,14 +385,14 @@ TorchServer::getPropertyCount(const std::string& name)
 }
 
 
-Omm::Av::AbstractProperty*
+AbstractProperty*
 TorchServer::getProperty(int index)
 {
     return _pTitleProp;
 }
 
 
-Omm::Av::AbstractProperty*
+AbstractProperty*
 TorchServer::getProperty(const std::string& name, int index)
 {
     if (name == AvProperty::TITLE) {
@@ -410,20 +405,20 @@ TorchServer::getProperty(const std::string& name, int index)
 
 
 void
-TorchServer::addProperty(Omm::Av::AbstractProperty* pProperty)
+TorchServer::addProperty(AbstractProperty* pProperty)
 {
     _pTitleProp = pProperty;
 }
 
 
-Omm::Av::AbstractProperty*
+AbstractProperty*
 TorchServer::createProperty()
 {
-    return new Omm::Av::MemoryProperty;
+    return new MemoryProperty;
 }
 
 
-TorchItemResource::TorchItemResource(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+TorchItemResource::TorchItemResource(TorchServer* pServer, AbstractMediaObject* pItem) :
 StreamingResource(new MemoryPropertyImpl, pServer, pItem)
 {
 }
@@ -455,7 +450,7 @@ TorchItemResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 }
 
 
-Omm::ui4
+ui4
 TorchItemResource::getSize()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
@@ -511,7 +506,7 @@ TorchItemPropertyImpl::setValue(const std::string& value)
 std::string
 TorchItemPropertyImpl::getName()
 {
-    std::clog << "TorchItemPropertyImpl::getName() returns: " << _name << std::endl;
+    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getName() returns: " + _name);
 
     return _name;
 }
@@ -520,9 +515,9 @@ TorchItemPropertyImpl::getName()
 std::string
 TorchItemPropertyImpl::getValue()
 {
-    std::clog << "TorchItemPropertyImpl::getValue() returns: " << _value << std::endl;
+    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getValue() returns: " + _value);
 
-    if (_name == AvProperty::TITLE) {
+    if (_name == AvProperty::CLASS || _name == AvProperty::TITLE) {
         return _value;
     }
 }
@@ -536,16 +531,19 @@ AbstractProperty(new TorchItemPropertyImpl)
 
 TorchItem::TorchItem(TorchServer* pServer) :
 StreamingMediaItem(pServer),
+_pClassProp(new TorchItemProperty),
 _pTitleProp(new TorchItemProperty),
 _pResource(new TorchItemResource(pServer, this))
 {
-    std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
+//     std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
+    _pClassProp->setName(AvProperty::CLASS);
     _pTitleProp->setName(AvProperty::TITLE);
 }
 
 
 TorchItem::~TorchItem()
 {
+    delete _pClassProp;
     delete _pTitleProp;
 }
 
@@ -553,12 +551,12 @@ TorchItem::~TorchItem()
 int
 TorchItem::getPropertyCount(const std::string& name)
 {
-    std::clog << "TorchItem::getPropertyCount(name), name: " << name << std::endl;
+    Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
     
     if (name == "") {
-        return 2;
+        return 3;
     }
-    else if (name == AvProperty::TITLE || name == AvProperty::RES) {
+    else if (name == AvProperty::CLASS || name == AvProperty::TITLE || name == AvProperty::RES) {
         return 1;
     }
     else {
@@ -567,26 +565,32 @@ TorchItem::getPropertyCount(const std::string& name)
 }
 
 
-Omm::Av::AbstractProperty*
+AbstractProperty*
 TorchItem::getProperty(int index)
 {
-    std::clog << "TorchItem::getProperty(index), index: " << index << std::endl;
+    Log::instance()->upnpav().debug("TorchItem::getProperty(index), index: " + Poco::NumberFormatter::format(index));
     
     if (index == 0) {
-        return _pTitleProp;
+        return _pClassProp;
     }
     else if (index == 1) {
+        return _pTitleProp;
+    }
+    else if (index == 2) {
         return _pResource;
     }
 }
 
 
-Omm::Av::AbstractProperty*
+AbstractProperty*
 TorchItem::getProperty(const std::string& name, int index)
 {
-    std::clog << "TorchItem::getProperty(name, index), name: " << name << ", index: " << index << std::endl;
+    Log::instance()->upnpav().debug("TorchItem::getProperty(name, index), name: " + name + ", index: " + Poco::NumberFormatter::format(index));
 
-    if (name == AvProperty::TITLE) {
+    if (name == AvProperty::CLASS) {
+        return _pClassProp;
+    }
+    else if (name == AvProperty::TITLE) {
         return _pTitleProp;
     }
     else if (name == AvProperty::RES) {

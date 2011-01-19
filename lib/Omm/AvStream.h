@@ -329,11 +329,10 @@ public:
     virtual Frame* readFrame() = 0;
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
     virtual void print(bool isOutFormat = false) = 0;
-    
     virtual bool isStillImage() { return false; }
-    virtual std::string getProperty(TagKey key);
     
     ContainerFormat getContainerFormat();
+    std::string getTag(TagKey key);
     int numberStreams();
     void addStream(StreamInfo* pStreamInfo);
     StreamInfo* streamInfo(int streamNumber);

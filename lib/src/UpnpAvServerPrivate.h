@@ -77,6 +77,7 @@ public:
     virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
 
 private:
+    TorchItemProperty*                   _pClassProp;
     TorchItemProperty*                   _pTitleProp;
     TorchItemResource*                   _pResource;
 };

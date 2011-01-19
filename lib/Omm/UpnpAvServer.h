@@ -164,14 +164,15 @@ private:
 class AbstractDataModel
 {
 public:
-    virtual Omm::ui4 getChildCount() { return 0; }
-    virtual std::string getTitle(Omm::ui4 index) { return ""; }
+    virtual ui4 getChildCount() { return 0; }
+    virtual std::string getClass(Omm::ui4 index) { return AvClass::OBJECT; }
+    virtual std::string getTitle(ui4 index) { return ""; }
     
-    virtual Omm::ui4 getSize(Omm::ui4 index) { return 0; }
-    virtual std::string getMime(Omm::ui4 index) { return "*"; }
-    virtual std::string getDlna(Omm::ui4 index) { return "*"; }
-    virtual bool isSeekable(Omm::ui4 index) { return false; }
-    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek) { return 0; }
+    virtual ui4 getSize(ui4 index) { return 0; }
+    virtual std::string getMime(ui4 index) { return "*"; }
+    virtual std::string getDlna(ui4 index) { return "*"; }
+    virtual bool isSeekable(ui4 index) { return false; }
+    virtual std::streamsize stream(ui4 index, std::ostream& ostr, std::iostream::pos_type seek) { return 0; }
 };
 
 
@@ -189,14 +190,14 @@ protected:
     AbstractDataModel*          _pDataModel;
     
 private:
-    virtual Omm::Av::AbstractMediaObject* getChild(Omm::ui4 numChild);
-    virtual Omm::ui4 getChildCount();
+    virtual AbstractMediaObject* getChild(ui4 numChild);
+    virtual ui4 getChildCount();
     virtual bool isContainer();
     virtual int getPropertyCount(const std::string& name = "");
-    virtual Omm::Av::AbstractProperty* getProperty(int index);
-    virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
+    virtual AbstractProperty* getProperty(int index);
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);
     virtual void addProperty(AbstractProperty* pProperty);
-    virtual Omm::Av::AbstractProperty* createProperty();
+    virtual AbstractProperty* createProperty();
 
     AbstractProperty*           _pTitleProp;
     AbstractMediaObject*        _pChild;

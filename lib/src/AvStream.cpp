@@ -1224,7 +1224,7 @@ Meta::getContainerFormat()
 
 
 std::string
-Meta::getProperty(TagKey key)
+Meta::getTag(TagKey key)
 {
     // for a comparison of tags, see http://age.hobba.nl/audio/tag_frame_reference.html
     // id3 tags: http://www.id3.org/id3v2.4.0-frames

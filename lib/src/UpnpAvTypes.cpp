@@ -269,19 +269,19 @@ std::string
 AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4, const std::string& c5)
 {
     if (c2 == "") {
-        return c1;
+        return "object." + c1;
     }
     else if (c3 == "") {
-        return c1 + "." + c2;
+        return "object." + c1 + "." + c2;
     }
     else if (c4 == "") {
-        return c1 + "." + c2 + "." + c3;
+        return "object." + c1 + "." + c2 + "." + c3;
     }
     else if (c5 == "") {
-        return c1 + "." + c2 + "." + c3 + "." + c4;
+        return "object." + c1 + "." + c2 + "." + c3 + "." + c4;
     }
     else {
-        return c1 + "." + c2 + "." + c3 + "." + c4 + "." + c5;
+        return "object." + c1 + "." + c2 + "." + c3 + "." + c4 + "." + c5;
     }
 }
 

@@ -168,7 +168,7 @@ public:
     const static std::string MUSIC_GENRE;
     const static std::string MOVIE_GENRE;
     
-    std::string className(const std::string& c1, const std::string& c2 = "", const std::string& c3 = "", const std::string& c4 = "", const std::string& c5 = "");
+    static std::string className(const std::string& c1, const std::string& c2 = "", const std::string& c3 = "", const std::string& c4 = "", const std::string& c5 = "");
 };
 
 
