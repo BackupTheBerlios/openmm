@@ -36,6 +36,7 @@ public:
     virtual Omm::ui4 getChildCount();
     virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
+    virtual std::string getOptionalProperty(Omm::ui4 index, const std::string& property);
     
     virtual Omm::ui4 getSize(Omm::ui4 index);
     virtual std::string getMime(Omm::ui4 index);
@@ -125,6 +126,35 @@ FileDataModel::getTitle(Omm::ui4 index)
     }
     if (res == "") {
         res = Poco::Path(_files[index].path()).getFileName();
+    }
+    delete pMeta;
+    return res;
+}
+
+
+std::string
+FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
+{
+    Omm::Av::Log::instance()->upnpav().debug("tagging: " + _files[index].path());
+    
+    std::string res;
+    Omm::AvStream::Meta* pMeta = _pTagger->tag(_files[index].path());
+    if (!pMeta) {
+        res = "";
+    }
+    else {
+        if (property == Omm::Av::AvProperty::ARTIST) {
+            res = pMeta->getTag(Omm::AvStream::Meta::TK_ARTIST);
+        }
+        else if (property == Omm::Av::AvProperty::ALBUM) {
+            res = pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM);
+        }
+        else if (property == Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER) {
+            res = pMeta->getTag(Omm::AvStream::Meta::TK_TRACK);
+        }
+        else if (property == Omm::Av::AvProperty::GENRE) {
+            res = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
+        }
     }
     delete pMeta;
     return res;

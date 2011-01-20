@@ -165,8 +165,9 @@ class AbstractDataModel
 {
 public:
     virtual ui4 getChildCount() { return 0; }
-    virtual std::string getClass(Omm::ui4 index) { return AvClass::OBJECT; }
+    virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
     virtual std::string getTitle(ui4 index) { return ""; }
+    virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
     
     virtual ui4 getSize(ui4 index) { return 0; }
     virtual std::string getMime(ui4 index) { return "*"; }

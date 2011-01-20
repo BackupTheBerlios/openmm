@@ -344,9 +344,32 @@ AbstractMediaObject*
 TorchServer::getChild(ui4 numChild)
 {
     _pChild->setObjectNumber(numChild);
+    TorchItem*_pTorchChild = static_cast<TorchItem*>(_pChild);
+    _pTorchChild->_optionalProps.clear();
+
     // FIXME: title property of child item should get it's title based on item's object number
-    static_cast<TorchItem*>(_pChild)->_pClassProp->setValue(_pDataModel->getClass(numChild));
-    static_cast<TorchItem*>(_pChild)->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
+    _pTorchChild->_pClassProp->setValue(_pDataModel->getClass(numChild));
+    _pTorchChild->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
+    std::string artist = _pDataModel->getOptionalProperty(numChild, AvProperty::ARTIST);
+    if (artist != "") {
+        _pTorchChild->_pArtistProp->setValue(artist);
+        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pArtistProp);
+    }
+    std::string album = _pDataModel->getOptionalProperty(numChild, AvProperty::ALBUM);
+    if (album != "") {
+        _pTorchChild->_pAlbumProp->setValue(album);
+        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pAlbumProp);
+    }
+    std::string track = _pDataModel->getOptionalProperty(numChild, AvProperty::ORIGINAL_TRACK_NUMBER);
+    if (track != "") {
+        _pTorchChild->_pTrackProp->setValue(track);
+        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pTrackProp);
+    }
+    std::string genre = _pDataModel->getOptionalProperty(numChild, AvProperty::GENRE);
+    if (genre != "") {
+        _pTorchChild->_pGenreProp->setValue(genre);
+        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pGenreProp);
+    }
     
     return _pChild;
 }
@@ -517,7 +540,9 @@ TorchItemPropertyImpl::getValue()
 {
     Log::instance()->upnpav().debug("TorchItemPropertyImpl::getValue() returns: " + _value);
 
-    if (_name == AvProperty::CLASS || _name == AvProperty::TITLE) {
+    if (_name == AvProperty::CLASS || _name == AvProperty::TITLE
+        || _name == AvProperty::ARTIST || _name == AvProperty::ALBUM || _name == AvProperty::ORIGINAL_TRACK_NUMBER
+        || _name == AvProperty::GENRE) {
         return _value;
     }
 }
@@ -533,11 +558,19 @@ TorchItem::TorchItem(TorchServer* pServer) :
 StreamingMediaItem(pServer),
 _pClassProp(new TorchItemProperty),
 _pTitleProp(new TorchItemProperty),
-_pResource(new TorchItemResource(pServer, this))
+_pResource(new TorchItemResource(pServer, this)),
+_pArtistProp(new TorchItemProperty),
+_pAlbumProp(new TorchItemProperty),
+_pTrackProp(new TorchItemProperty),
+_pGenreProp(new TorchItemProperty)
 {
 //     std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
     _pClassProp->setName(AvProperty::CLASS);
     _pTitleProp->setName(AvProperty::TITLE);
+    _pArtistProp->setName(AvProperty::ARTIST);
+    _pAlbumProp->setName(AvProperty::ALBUM);
+    _pTrackProp->setName(AvProperty::ORIGINAL_TRACK_NUMBER);
+    _pGenreProp->setName(AvProperty::GENRE);
 }
 
 
@@ -554,9 +587,11 @@ TorchItem::getPropertyCount(const std::string& name)
     Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
     
     if (name == "") {
-        return 3;
+        return 3 + _optionalProps.size();
     }
-    else if (name == AvProperty::CLASS || name == AvProperty::TITLE || name == AvProperty::RES) {
+    else if (name == AvProperty::CLASS || name == AvProperty::TITLE || name == AvProperty::RES
+        || name == AvProperty::ARTIST || name == AvProperty::ALBUM || name == AvProperty::ORIGINAL_TRACK_NUMBER
+        || name == AvProperty::GENRE) {
         return 1;
     }
     else {
@@ -579,6 +614,9 @@ TorchItem::getProperty(int index)
     else if (index == 2) {
         return _pResource;
     }
+    else {
+        return _optionalProps[index - 3];
+    }
 }
 
 
@@ -597,6 +635,11 @@ TorchItem::getProperty(const std::string& name, int index)
         return _pResource;
     }
     else {
+        for (int i = 0; i < _optionalProps.size(); i++) {
+            if (_optionalProps[i]->getName() == name) {
+                return _optionalProps[i];
+            }
+        }
         return 0;
     }
 }

@@ -80,6 +80,11 @@ private:
     TorchItemProperty*                   _pClassProp;
     TorchItemProperty*                   _pTitleProp;
     TorchItemResource*                   _pResource;
+    std::vector<TorchItemProperty*>      _optionalProps;
+    TorchItemProperty*                   _pArtistProp;
+    TorchItemProperty*                   _pAlbumProp;
+    TorchItemProperty*                   _pTrackProp;
+    TorchItemProperty*                   _pGenreProp;
 };
 
 } // namespace Av
