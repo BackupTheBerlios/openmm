@@ -45,6 +45,7 @@
 class FileItem
 {
 public:
+    std::string sortKey();
     void setClass(Omm::AvStream::Meta::ContainerFormat format);
     void writeXml(Poco::XML::Node* node);
 
@@ -77,6 +78,14 @@ const std::string FileItem::FILE_ITEM_ALBUM = "album";
 const std::string FileItem::FILE_ITEM_ARTIST = "artist";
 const std::string FileItem::FILE_ITEM_TRACK = "track";
 const std::string FileItem::FILE_ITEM_GENRE = "genre";
+
+
+std::string
+FileItem::sortKey()
+{
+    return _artist + _album + _track + _title;
+}
+
 
 void
 FileItem::setClass(Omm::AvStream::Meta::ContainerFormat format)
@@ -184,6 +193,7 @@ private:
     std::string                         _cachePath;
     Omm::AvStream::Tagger*              _pTagger;
     std::vector<FileItem*>              _items;
+    std::map<std::string,FileItem*>     _itemMap;
     FileItem*                           _pParseItem;
     std::string                         _parseElement;
 };
@@ -371,12 +381,21 @@ FileDataModel::characters(const Poco::XML::XMLChar ch[], int start, int length)
 void
 FileDataModel::scanDirectory(const std::string& basePath)
 {
+    // read media items from cache (if already there), otherwise scan the disk for media items.
     if (cacheExists()) {
         readCache();
     }
     else {
         Poco::File baseDir(basePath);
         scanDirectoryRecursively(baseDir);
+        // sort items
+        for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
+            _itemMap[(*it)->sortKey()] = *it;
+        }
+        _items.clear();
+        for (std::map<std::string,FileItem*>::iterator it = _itemMap.begin(); it != _itemMap.end(); ++it) {
+            _items.push_back((*it).second);
+        }
         writeCache();
     }
     Omm::AvStream::Log::instance()->avstream().debug("file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
