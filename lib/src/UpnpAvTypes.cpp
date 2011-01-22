@@ -343,6 +343,15 @@ AvTypeConverter::writeTime(const time& timeVal)
 }
 
 
+void
+AvTypeConverter::replaceNonUtf8(std::string& str)
+{
+    std::string temp;
+    utf8::replace_invalid(str.begin(), str.end(), std::back_inserter(temp));
+    str = temp;
+}
+
+
 AbstractResource::AbstractResource(PropertyImpl* pPropertyImpl) :
 AbstractProperty(pPropertyImpl)
 {
@@ -1157,7 +1166,7 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
         std::string name = pProp->getName();
         std::string value = pProp->getValue();
         // non UTF-8 characters cause the DOM writer to stop and leave an unfinished XML fragment.
-        replaceNonUtf8(value);
+        AvTypeConverter::replaceNonUtf8(value);
         Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() property: " + name + ", " + value);
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement(name);
         Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(value);
@@ -1178,15 +1187,6 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     // class (String, upnp)
     
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() finished.");
-}
-
-
-void
-MediaObjectWriter2::replaceNonUtf8(std::string& str)
-{
-    std::string temp;
-    utf8::replace_invalid(str.begin(), str.end(), std::back_inserter(temp));
-    str = temp;
 }
 
 

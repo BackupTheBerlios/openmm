@@ -396,6 +396,7 @@ FileDataModel::scanDirectory(const std::string& basePath)
         for (std::map<std::string,FileItem*>::iterator it = _itemMap.begin(); it != _itemMap.end(); ++it) {
             _items.push_back((*it).second);
         }
+        _itemMap.clear();
         writeCache();
     }
     Omm::AvStream::Log::instance()->avstream().debug("file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
@@ -424,6 +425,10 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
                     pItem->_album = pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM );
                     pItem->_track = pMeta->getTag(Omm::AvStream::Meta::TK_TRACK);
                     pItem->_genre = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
+                    
+                    Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_title);
+                    Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_artist);
+                    Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_album);
                     
                     _items.push_back(pItem);
                     delete pMeta;
@@ -471,6 +476,8 @@ FileDataModel::readCache()
 void
 FileDataModel::writeCache()
 {
+    Omm::Av::Log::instance()->upnpav().debug("writing cache to disk ...");
+    
     Poco::XML::Document* pCacheDoc= new Poco::XML::Document;
     Poco::AutoPtr<Poco::XML::Element> pFileItemList = pCacheDoc->createElement(FileItem::FILE_ITEM_LIST);
     pCacheDoc->appendChild(pFileItemList);
@@ -483,6 +490,8 @@ FileDataModel::writeCache()
     writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
     std::ofstream ostr(_cachePath.c_str());
     writer.writeNode(ostr, pCacheDoc);
+    
+    Omm::Av::Log::instance()->upnpav().debug("cache written to disk.");
 }
 
 

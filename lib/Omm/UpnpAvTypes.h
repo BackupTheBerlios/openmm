@@ -255,6 +255,7 @@ public:
     static std::string writeDuration(const r8& duration);
     static time readTime(const std::string& timeString);
     static std::string writeTime(const time& timeVal);
+    static void replaceNonUtf8(std::string& str);
 };
 
 
@@ -469,7 +470,6 @@ private:
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
-    void replaceNonUtf8(std::string& str);
     
     AbstractMediaObject*                    _pMediaObject;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;

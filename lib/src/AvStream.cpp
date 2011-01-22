@@ -1231,19 +1231,19 @@ Meta::getTag(TagKey key)
     std::string res;
     switch (key) {
         case TK_TITLE:
-            res = getTag("TIT2", "TT2", "TITLE");
+            res = getTag("TIT2", "TT2", "title");
             break;
         case TK_ALBUM:
-            res = getTag("TALB", "TAL", "TOAL", "ALBUM");
+            res = getTag("TALB", "TAL", "TOAL", "album");
             break;
         case TK_ARTIST:
-            res = getTag("TPE1", "TP1", "ARTIST");
+            res = getTag("TPE1", "TP1", "artist");
             break;
         case TK_GENRE:
-            res = getTag("TCON", "TCO", "GENRE");
+            res = getTag("TCON", "TCO", "genre");
             break;
         case TK_TRACK:
-            res = getTag("TRCK", "TRK", "TRACK", "TRACKNUMBER", "PART_NUMBER");
+            res = getTag("TRCK", "TRK", "track", "TRACKNUMBER", "PART_NUMBER");
             break;
     }
     return res;
