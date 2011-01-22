@@ -16,19 +16,16 @@ PATHS ${CMAKE_LIBRARY_PATH}
 )
 endif(TARGET omm)
 
-
-SET( OMMS_STORAGE_SRCS
-Filesystem.cpp
-)
-
 ADD_LIBRARY( ommserver-file
 SHARED
-${OMMS_STORAGE_SRCS}
+Filesystem.cpp
 )
 
 TARGET_LINK_LIBRARIES( ommserver-file
 ${LIB_OMM_AV}
+${LIB_POCO_FOUNDATION}
 ${LIB_POCO_UTIL}
+${LIB_POCO_XML}
 )
 
 INSTALL( TARGETS ommserver-file
