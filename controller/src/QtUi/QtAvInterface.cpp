@@ -323,6 +323,7 @@ QtAvInterface::initGui()
     connect(_rendererWidget._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
+    connect(this, SIGNAL(volSliderMoved(int)), this, SLOT(setVolumeSlider(int)));
     
     connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
             _rendererWidget._rendererListView, SLOT(setCurrentIndex(QModelIndex)));
@@ -448,8 +449,6 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
         return;
     }
     rendererSelected(selectedRenderer);
-    
-    setVolumeSlider(100, 50);
 }
 
 
@@ -466,13 +465,13 @@ QtAvInterface::setSeekSlider(int max, int val)
 
 
 void
-QtAvInterface::setVolumeSlider(int max, int val)
+QtAvInterface::setVolumeSlider(int val)
 {
     // don't set slider position when user drags the slider
     if (_rendererWidget._volumeSlider->isSliderDown()) {
         return;
     }
-    _rendererWidget._volumeSlider->setRange(0, max>=0?max:0);
+    _rendererWidget._volumeSlider->setRange(0, 100);
     _rendererWidget._volumeSlider->setSliderPosition(val);
 }
 
@@ -592,6 +591,13 @@ void
 QtAvInterface::newTrack(const std::string& title, const std::string& artist, const std::string& album)
 {
     emit nowPlaying(QString(title.c_str()), QString(artist.c_str()), QString(album.c_str()));
+}
+
+
+void
+QtAvInterface::newVolume(const int volume)
+{
+    emit volSliderMoved(volume);
 }
 
 

@@ -122,15 +122,18 @@ public:
     virtual void endNetworkActivity();
     
 signals:
+    // position slider
     void sliderMoved(int value);
     void setSlider(int duration, int pos);
+    // volume slider
+    void volSliderMoved(int value);
     void nowPlaying(const QString& title, const QString& artist, const QString& album);
     void startNetworkActivity();
     void stopNetworkActivity();
 
 private slots:
     void setSeekSlider(int max, int val);
-    void setVolumeSlider(int max, int val);
+    void setVolumeSlider(int val);
     void setTrackInfo(const QString& title, const QString& artist, const QString& album);
     
     void playButtonPressed();
@@ -166,6 +169,7 @@ private:
 
     virtual void newPosition(int duration, int position);
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
+    virtual void newVolume(const int volume);
 
     QtBrowserModel*                     _pBrowserModel;
     QtRendererListModel*                _pRendererListModel;

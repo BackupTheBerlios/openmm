@@ -525,6 +525,12 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
             Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
         }
     }
+    
+    // FIXME: don't poll volume, use eventing through LastChange state variable.
+    ui2 vol;
+    _pSelectedRenderer->RenderingControl()->GetVolume(0, "Master", vol);
+    Log::instance()->upnpav().debug("volume of renderer is: " + Poco::NumberFormatter::format(vol));
+    newVolume(vol);
 }
 
 } // namespace Av
