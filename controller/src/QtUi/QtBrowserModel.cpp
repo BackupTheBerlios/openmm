@@ -64,9 +64,18 @@ QtBrowserModel::rowCount(const QModelIndex &parent) const
 
 
 int
-QtBrowserModel::columnCount(const QModelIndex& /*parent*/) const
-{;
-    return 1;
+QtBrowserModel::columnCount(const QModelIndex& parent) const
+{
+//     Omm::Av::ControllerObject* object = getObject(parent);
+//     if (!object) {
+//         Omm::Av::Log::instance()->upnpav().debug("1 col");
+//         return 1;
+//     }
+//     else {
+//         Omm::Av::Log::instance()->upnpav().debug("2 cols");
+//         return 2;
+//     }
+    return 3;
 }
 
 
@@ -112,7 +121,7 @@ QtBrowserModel::fetchMore(const QModelIndex &parent)
     
     Omm::Av::ControllerObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->_objectId.c_str();
-    if (object == NULL) {
+    if (object == 0) {
         return;
     }
     object->fetchChildren();
@@ -127,37 +136,51 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
     if (!index.isValid()) {
         return QVariant();
     }
-    if (index.internalPointer() == NULL) {
+    if (index.internalPointer() == 0) {
         qWarning() << "UpnpBrowserModel::data() objectId reference is NULL:";
         return QVariant();
     }
-/*    if (role != Qt::DisplayRole) {
-        return QVariant();
-    }*/
     Omm::Av::ControllerObject* object = getObject(index);
-//     std::string label = object->_objectId + ": " + object->getTitle();
-    std::string label = object->objectId() + ": " + object->getTitle();
+    std::string artist = object->getProperty(Omm::Av::AvProperty::ARTIST);
+    std::string album = object->getProperty(Omm::Av::AvProperty::ALBUM);
+    bool titleOnly = (artist == "");
     
     switch (role) {
     case Qt::DisplayRole:
     case Qt::EditRole:
         switch (index.column()) {
         case 0:
-            return _charEncoding->toUnicode(label.c_str());
-        case 1: 
-            return QString("1:00");
-//         case 2: return type(index);
-//         case 3: return time(index);
+            if (titleOnly) {
+                return _charEncoding->toUnicode(object->getTitle().c_str());
+            }
+            else {
+                return _charEncoding->toUnicode(artist.c_str());
+            }
+        case 1:
+            if (titleOnly) {
+                return QVariant();
+            }
+            else {
+                return _charEncoding->toUnicode(album.c_str());
+            }
+        case 2:
+            if (titleOnly) {
+                return QVariant();
+            }
+            else {
+                return _charEncoding->toUnicode(object->getTitle().c_str());
+            }
         }
         break;
     case Qt::DecorationRole:
-        if (index.column() == 0)
+        if (index.column() == 0) {
             return icon(index);
-        break;
-    case Qt::TextAlignmentRole:
-        if (index.column() == 1)
-            return Qt::AlignRight;
-        break;
+        }
+//     case Qt::TextAlignmentRole:
+//         if (index.column() == 1) {
+//             return Qt::AlignRight;
+//         }
+//         return QVariant();
     }
     
     return QVariant();
@@ -217,7 +240,7 @@ QtBrowserModel::index(int row, int column, const QModelIndex &parent) const
 //     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->_objectId.c_str() << "row:" << row;
     if (object == NULL) {
 //         return createIndex(row, 0, (void*)(_pServers->get(row).root()));
-        return createIndex(row, 0, (void*)(_pUserInterface->serverRootObject(row)));
+        return createIndex(row, column, (void*)(_pUserInterface->serverRootObject(row)));
     }
     
     // if we can't deliver an index, because _children.size()-1 < row
@@ -226,7 +249,7 @@ QtBrowserModel::index(int row, int column, const QModelIndex &parent) const
         return QModelIndex();
     }
 //     return createIndex(row, 0, (void*)(object->_children[row]));
-    return createIndex(row, 0, (void*)(object->getChild(row)));
+    return createIndex(row, column, (void*)(object->getChild(row)));
 }
 
 
@@ -244,17 +267,14 @@ QVariant
 QtBrowserModel::headerData(int section, Qt::Orientation orientation,
                              int role) const
 {
-/*    if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        return QVariant("Title");
-    }
-    return QVariant();
-*/
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         switch (section) {
-            case 0: return tr("Name");
-            case 1: return tr("Length");
-            case 2: return tr("Type");
-            default : return QVariant();
+            case 0:
+                return tr("Name");
+            case 1:
+                return tr("Album");
+            case 2:
+                return tr("Title");
         }
     }
     return QAbstractItemModel::headerData(section, orientation, role);
@@ -270,9 +290,19 @@ QtBrowserModel::icon(const QModelIndex &index) const
     if (object == NULL) {
         return QIcon();
     }
-    if (object->isContainer())
+    std::string objectClass = object->getProperty(Omm::Av::AvProperty::CLASS);
+    if (object->isContainer()) {
         return _iconProvider->icon(QFileIconProvider::Folder);
-    
+    }
+    else if (objectClass.find(Omm::Av::AvClass::AUDIO_ITEM) != std::string::npos) {
+        return _iconProvider->icon(QFileIconProvider::Drive);
+    }
+    else if (objectClass.find(Omm::Av::AvClass::VIDEO_ITEM) != std::string::npos) {
+        return _iconProvider->icon(QFileIconProvider::Desktop);
+    }
+    else if (objectClass.find(Omm::Av::AvClass::IMAGE_ITEM) != std::string::npos) {
+        return _iconProvider->icon(QFileIconProvider::Computer);
+    }
     return _iconProvider->icon(QFileIconProvider::File);
 }
 

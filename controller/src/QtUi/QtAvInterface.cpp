@@ -313,6 +313,7 @@ QtAvInterface::initGui()
     
     _rendererWidget._rendererListView->setModel(_pRendererListModel);
     _browserWidget._browserView->setModel(_pBrowserModel);
+    _browserWidget._browserView->setColumnWidth(0, 200);
     
     connect(_rendererWidget._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_rendererWidget._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
