@@ -109,6 +109,7 @@ public:
     
     int rendererCount();
     RendererView* rendererView(int numRenderer);
+    bool isPlaying(RendererView* pRenderer);
     int serverCount();
     ControllerObject* serverRootObject(int numServer);
     

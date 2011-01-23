@@ -361,6 +361,22 @@ AvUserInterface::rendererView(int numRenderer)
 }
 
 
+bool
+AvUserInterface::isPlaying(RendererView* pRenderer)
+{
+    std::string transportState;
+    std::string transportStatus;
+    std::string speed;
+    pRenderer->_pRendererController->AVTransport()->GetTransportInfo(0, transportState, transportStatus, speed);
+    if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
 int
 AvUserInterface::serverCount()
 {

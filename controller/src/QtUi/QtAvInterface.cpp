@@ -460,6 +460,12 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
         return;
     }
     rendererSelected(selectedRenderer);
+    if (isPlaying(selectedRenderer)) {
+        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+        _rendererWidget._playButton->setEnabled(true);
+        _playToggle = false;
+        _rendererWidget._stopButton->setEnabled(true);
+    }
 }
 
 
