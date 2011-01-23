@@ -139,6 +139,8 @@ private slots:
     void playButtonPressed();
     void stopButtonPressed();
     void pauseButtonPressed();
+    void skipForwardButtonPressed();
+    void skipBackwardButtonPressed();
     void positionSliderMoved(int position);
     void volumeSliderMoved(int value);
     

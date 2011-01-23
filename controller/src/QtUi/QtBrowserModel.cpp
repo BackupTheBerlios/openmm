@@ -40,7 +40,7 @@ QtBrowserModel::~QtBrowserModel()
 Omm::Av::ControllerObject*
 QtBrowserModel::getObject(const QModelIndex &index) const
 {
-    return index.isValid() ? static_cast<Omm::Av::ControllerObject*>(index.internalPointer()) : NULL;
+    return index.isValid() ? static_cast<Omm::Av::ControllerObject*>(index.internalPointer()) : 0;
 }
 
 

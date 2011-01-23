@@ -317,7 +317,9 @@ QtAvInterface::initGui()
     
     connect(_rendererWidget._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_rendererWidget._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
-//     connect(ui._pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
+//     connect(_rendererWidget._pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
+    connect(_rendererWidget._skipForwardButton, SIGNAL(pressed()), this, SLOT(skipForwardButtonPressed()));
+    connect(_rendererWidget._skipBackwardButton, SIGNAL(pressed()), this, SLOT(skipBackwardButtonPressed()));
     connect(_rendererWidget._volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(_rendererWidget._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
     connect(_rendererWidget._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
@@ -426,6 +428,8 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
     }
     else {
         mediaObjectSelected(object);
+        _rendererWidget._skipForwardButton->setEnabled(true);
+        _rendererWidget._skipBackwardButton->setEnabled(true);
     }
 }
 
@@ -503,6 +507,62 @@ void
 QtAvInterface::pauseButtonPressed()
 {
     pausePressed();
+}
+
+
+void
+QtAvInterface::skipForwardButtonPressed()
+{
+    Omm::Av::Log::instance()->upnpav().debug("skipping to next track in browser list ...");
+    QModelIndex current = _browserWidget._browserView->currentIndex();
+    if (current.isValid()) {
+        Omm::Av::ControllerObject* pCurrentObject = static_cast<Omm::Av::ControllerObject*>(current.internalPointer());
+        Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
+        QModelIndex next;
+        do {
+            next = current.sibling(current.row() + 1, 0);
+            if (next.isValid()) {
+                Omm::Av::ControllerObject* pNextObject = static_cast<Omm::Av::ControllerObject*>(next.internalPointer());
+                if (pNextObject->isContainer()) {
+                    current = next;
+                }
+                else {
+                    Omm::Av::Log::instance()->upnpav().debug("next title is: " + pNextObject->getTitle());
+                    _browserWidget._browserView->setCurrentIndex(next);
+                    mediaObjectSelected(pNextObject);
+                    playPressed();
+                }
+            }
+        } while(next.isValid() && current == next);
+    }
+}
+
+
+void
+QtAvInterface::skipBackwardButtonPressed()
+{
+    Omm::Av::Log::instance()->upnpav().debug("skipping to previous track in browser list ...");
+    QModelIndex current = _browserWidget._browserView->currentIndex();
+    if (current.isValid()) {
+        Omm::Av::ControllerObject* pCurrentObject = static_cast<Omm::Av::ControllerObject*>(current.internalPointer());
+        Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
+        QModelIndex previous;
+        do {
+            previous = current.sibling(current.row() - 1, 0);
+            if (previous.isValid()) {
+                Omm::Av::ControllerObject* pPreviousObject = static_cast<Omm::Av::ControllerObject*>(previous.internalPointer());
+                if (pPreviousObject->isContainer()) {
+                    current = previous;
+                }
+                else {
+                    Omm::Av::Log::instance()->upnpav().debug("previous title is: " + pPreviousObject->getTitle());
+                    _browserWidget._browserView->setCurrentIndex(previous);
+                    mediaObjectSelected(pPreviousObject);
+                    playPressed();
+                }
+            }
+        } while(previous.isValid() && current == previous);
+    }
 }
 
 
