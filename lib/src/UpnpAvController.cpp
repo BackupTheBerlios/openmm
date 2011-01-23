@@ -401,7 +401,7 @@ AvUserInterface::playPressed()
     Resource* pRes = _pSelectedObject->getResource();
     if (pRes) {
         std::string metaData;
-        Omm::Av::MediaObjectWriter writer(_pSelectedObject);
+        MediaObjectWriter writer(_pSelectedObject);
         writer.write(metaData);
 //         _pSelectedObject->writeMetaData(metaData);
         try {
@@ -502,6 +502,19 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
     r8 absTime = AvTypeConverter::readDuration(AbsTime);
     newPosition(trackDuration, absTime);
+    
+    ControllerObject object;
+    try {
+        object.readMetaData(TrackMetaData);
+        Log::instance()->upnpav().debug("new track title: " + object.getTitle());
+        Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
+        Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
+        newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
+    }
+
 }
 
 } // namespace Av

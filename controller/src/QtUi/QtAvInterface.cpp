@@ -293,10 +293,10 @@ QtAvInterface::initGui()
     _rendererWidget._skipForwardButton->setText("");
     _rendererWidget._skipBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSkipBackward));
     _rendererWidget._skipBackwardButton->setText("");
-    _rendererWidget._seekForwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekForward));
-    _rendererWidget._seekForwardButton->setText("");
-    _rendererWidget._seekBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekBackward));
-    _rendererWidget._seekBackwardButton->setText("");
+//     _rendererWidget._seekForwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekForward));
+//     _rendererWidget._seekForwardButton->setText("");
+//     _rendererWidget._seekBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekBackward));
+//     _rendererWidget._seekBackwardButton->setText("");
 
     _pActivityIndicator = new QtActivityIndicator(_rendererWidget._networkActivity);
     _rendererWidget._activityLayout->addWidget(_pActivityIndicator);
@@ -337,6 +337,8 @@ QtAvInterface::initGui()
             _pActivityIndicator, SLOT(startActivity()));
     connect(this, SIGNAL(stopNetworkActivity()),
             _pActivityIndicator, SLOT(stopActivity()));
+    connect(this, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
+            this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
 }
 
 
@@ -476,6 +478,15 @@ QtAvInterface::setVolumeSlider(int max, int val)
 
 
 void
+QtAvInterface::setTrackInfo(const QString& title, const QString& artist, const QString& album)
+{
+    _rendererWidget._title->setText(title);
+    _rendererWidget._artist->setText(artist);
+    _rendererWidget._album->setText(album);
+}
+
+
+void
 QtAvInterface::playButtonPressed()
 {
     playPressed();
@@ -574,6 +585,13 @@ void
 QtAvInterface::newPosition(int duration, int position)
 {
     emit setSlider(duration, position);
+}
+
+
+void
+QtAvInterface::newTrack(const std::string& title, const std::string& artist, const std::string& album)
+{
+    emit nowPlaying(QString(title.c_str()), QString(artist.c_str()), QString(album.c_str()));
 }
 
 

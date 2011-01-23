@@ -102,7 +102,9 @@ public:
     virtual void endAddServer(int position) {}
     virtual void endRemoveRenderer(int position) {}
     virtual void endRemoveServer(int position) {}
+    
     virtual void newPosition(int duration, int position) {}
+    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album) {}
     
     int rendererCount();
     RendererView* rendererView(int numRenderer);
