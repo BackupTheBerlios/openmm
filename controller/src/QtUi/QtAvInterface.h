@@ -138,7 +138,7 @@ private slots:
     
     void playButtonPressed();
     void stopButtonPressed();
-    void pauseButtonPressed();
+//     void pauseButtonPressed();
     void skipForwardButtonPressed();
     void skipBackwardButtonPressed();
     void positionSliderMoved(int position);
@@ -189,6 +189,7 @@ private:
     static QtCrumbButton*               _pLastCrumbButton;
     Omm::Av::ControllerObject*          _pCurrentServer;
     bool                                _sliderMoved;
+    bool                                _playToggle;
 };
 
 #endif

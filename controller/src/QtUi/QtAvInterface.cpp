@@ -255,7 +255,8 @@ _argc(0),
 _pApp(new QApplication(_argc, 0)),
 _pServerCrumbButton(0),
 _pCurrentServer(0),
-_sliderMoved(false)
+_sliderMoved(false),
+_playToggle(true)
 {
 }
 
@@ -408,6 +409,11 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
     else {
         mediaObjectSelected(object);
         playPressed();
+        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+        _rendererWidget._playButton->setEnabled(true);
+        _playToggle = false;
+        _rendererWidget._skipForwardButton->setEnabled(true);
+        _rendererWidget._skipBackwardButton->setEnabled(true);
     }
 }
 
@@ -428,8 +434,9 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
     }
     else {
         mediaObjectSelected(object);
-        _rendererWidget._skipForwardButton->setEnabled(true);
-        _rendererWidget._skipBackwardButton->setEnabled(true);
+        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+        _rendererWidget._playButton->setEnabled(true);
+        _playToggle = true;
     }
 }
 
@@ -492,7 +499,20 @@ QtAvInterface::setTrackInfo(const QString& title, const QString& artist, const Q
 void
 QtAvInterface::playButtonPressed()
 {
-    playPressed();
+    if (_playToggle) {
+        playPressed();
+        // TODO: only toggle play button to pause, if media is really playing
+        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+        _playToggle = false;
+    }
+    else {
+        pausePressed();
+        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+        _playToggle = true;
+    }
+    _rendererWidget._stopButton->setEnabled(true);
+    _rendererWidget._skipForwardButton->setEnabled(true);
+    _rendererWidget._skipBackwardButton->setEnabled(true);
 }
 
 
@@ -500,14 +520,19 @@ void
 QtAvInterface::stopButtonPressed()
 {
     stopPressed();
+    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+    _playToggle = true;
+    _rendererWidget._stopButton->setEnabled(false);
+    _rendererWidget._skipForwardButton->setEnabled(false);
+    _rendererWidget._skipBackwardButton->setEnabled(false);
 }
 
 
-void
-QtAvInterface::pauseButtonPressed()
-{
-    pausePressed();
-}
+// void
+// QtAvInterface::pauseButtonPressed()
+// {
+//     pausePressed();
+// }
 
 
 void
@@ -531,6 +556,9 @@ QtAvInterface::skipForwardButtonPressed()
                     _browserWidget._browserView->setCurrentIndex(next);
                     mediaObjectSelected(pNextObject);
                     playPressed();
+                    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+                    _playToggle = false;
+                    _rendererWidget._stopButton->setEnabled(true);
                 }
             }
         } while(next.isValid() && current == next);
@@ -559,6 +587,9 @@ QtAvInterface::skipBackwardButtonPressed()
                     _browserWidget._browserView->setCurrentIndex(previous);
                     mediaObjectSelected(pPreviousObject);
                     playPressed();
+                    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+                    _playToggle = false;
+                    _rendererWidget._stopButton->setEnabled(true);
                 }
             }
         } while(previous.isValid() && current == previous);

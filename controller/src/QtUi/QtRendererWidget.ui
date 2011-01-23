@@ -195,6 +195,9 @@
           </property>
           <item>
            <widget class="QPushButton" name="_playButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -226,6 +229,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="_stopButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
