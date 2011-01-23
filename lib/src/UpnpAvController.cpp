@@ -499,22 +499,32 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     _pSelectedRenderer->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
     Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
     
-    r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
-    r8 absTime = AvTypeConverter::readDuration(AbsTime);
-    newPosition(trackDuration, absTime);
-    
-    ControllerObject object;
     try {
-        object.readMetaData(TrackMetaData);
-        Log::instance()->upnpav().debug("new track title: " + object.getTitle());
-        Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
-        Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
-        newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
+        r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
+        r8 absTime = AvTypeConverter::readDuration(AbsTime);
+        newPosition(trackDuration, absTime);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
+        Log::instance()->upnpav().error("could not read current track position: " + e.displayText());
     }
-
+    
+    if (TrackMetaData == "") {
+        newTrack("", "", "");
+    }
+    else {
+        ControllerObject object;
+        try {
+            object.readMetaData(TrackMetaData);
+            Log::instance()->upnpav().debug("new track title: " + object.getTitle());
+            Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
+            Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
+            newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
+        }
+        catch (Poco::Exception& e) {
+            newTrack("", "", "");
+            Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
+        }
+    }
 }
 
 } // namespace Av
