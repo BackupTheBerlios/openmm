@@ -24,7 +24,6 @@
 #include <Omm/UpnpAvController.h>
 #include <Omm/Util.h>
 
-//using namespace Omm::Av;
 
 int main(int argc, char** argv)
 {

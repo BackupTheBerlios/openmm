@@ -50,11 +50,18 @@ TARGET_LINK_LIBRARIES( ommutil
 ${LIB_POCO_FOUNDATION}
 )
 
+SET(LIB_OMM_UTIL
+ommutil
+CACHE STRING libommutil
+)
+
 if(LINUX)
 ADD_SUBDIRECTORY(SysLinux)
 if(TARGET ommsys-linux)
 SET(LIB_OMMSYS_PLATFORM ommsys-linux)
 endif(TARGET ommsys-linux)
+elseif(IPHONE)
+# TODO: Darwin C SystemConfiguration API is not available on iPhone.
 elseif(DARWIN)
 ADD_SUBDIRECTORY(SysDarwin)
 if(TARGET ommsys-darwin)
@@ -82,6 +89,11 @@ ${LIB_POCO_NET}
 ${LIB_OMMSYS_PLATFORM}
 )
 
+SET(LIB_OMM_SYS
+ommsys
+CACHE STRING libommsys
+)
+
 ADD_LIBRARY(omm
 SHARED
 Upnp.cpp
@@ -92,6 +104,11 @@ ${LIB_POCO_FOUNDATION}
 ${LIB_POCO_NET}
 ${LIB_POCO_XML}
 ommsys
+)
+
+SET(LIB_OMM
+omm
+CACHE STRING libomm
 )
 
 ADD_LIBRARY(ommav
@@ -111,6 +128,11 @@ TARGET_LINK_LIBRARIES( ommav
 omm
 )
 
+SET(LIB_OMM_AV
+ommav
+CACHE STRING libommav
+)
+
 ADD_LIBRARY( ommavstream
 SHARED
 AvStream.cpp
@@ -118,6 +140,11 @@ AvStream.cpp
 
 TARGET_LINK_LIBRARIES( ommavstream
 ${LIB_POCO_FOUNDATION}
+)
+
+SET(LIB_OMM_AVSTREAM
+ommavstream
+CACHE STRING libommavstream
 )
 
 INSTALL( TARGETS ommutil ommsys omm ommav ommavstream
@@ -128,6 +155,10 @@ ARCHIVE DESTINATION lib
 INSTALL( DIRECTORY ${ommlib_SOURCE_DIR}/Omm
 DESTINATION include
 FILES_MATCHING PATTERN "*.h"
+)
+
+set(OMM_FOUND 1
+CACHE STRING OMM_FOUND
 )
 
 ADD_SUBDIRECTORY(FFmpeg)
