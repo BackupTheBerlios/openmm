@@ -1,0 +1,5 @@
+file(GLOB subdirs *)
+foreach (dir ${subdirs})
+message("building " ${dir} " ...")
+add_subdirectory(${dir})
+endforeach(dir)

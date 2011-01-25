@@ -31,9 +31,18 @@ message(STATUS "set build target to " ${BUILD_TARGET})
 
 ADD_DEFINITIONS(-g -Wno-unused-parameter)
 
-ADD_SUBDIRECTORY(lib)
-#ADD_SUBDIRECTORY(netlight)
-ADD_SUBDIRECTORY(controller)
-ADD_SUBDIRECTORY(renderer)
-ADD_SUBDIRECTORY(server)
-ADD_SUBDIRECTORY(tests)
+#file(GLOB subdirs src/*)
+#foreach (dir ${subdirs})
+#message("building " ${dir})
+#add_subdirectory(${dir})
+#endforeach(dir)
+
+add_subdirectory(src/lib)
+
+
+# ADD_SUBDIRECTORY(lib)
+# #ADD_SUBDIRECTORY(netlight)
+# ADD_SUBDIRECTORY(controller)
+# ADD_SUBDIRECTORY(renderer)
+# ADD_SUBDIRECTORY(server)
+# ADD_SUBDIRECTORY(tests)
