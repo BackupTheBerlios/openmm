@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
 
 PROJECT(omm)
 
-INCLUDE_DIRECTORIES(lib)
+INCLUDE_DIRECTORIES(src/include)
 
 IF(CMAKE_CROSSCOMPILING)
 message(STATUS "host system: " ${CMAKE_HOST_SYSTEM_NAME})
@@ -38,7 +38,9 @@ ADD_DEFINITIONS(-g -Wno-unused-parameter)
 #endforeach(dir)
 
 add_subdirectory(src/lib)
-
+add_subdirectory(src/app)
+add_subdirectory(src/plugin)
+add_subdirectory(src/test)
 
 # ADD_SUBDIRECTORY(lib)
 # #ADD_SUBDIRECTORY(netlight)

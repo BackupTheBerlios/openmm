@@ -29,6 +29,15 @@ PATHS ${CMAKE_LIBRARY_PATH}
 endif(TARGET omm)
 
 
+# find API Version of vdr from it's headers in /usr/include/vdr
+EXECUTE_PROCESS( COMMAND
+    sh -c "echo -n `grep \"define APIVERSION\" /usr/include/vdr/config.h | cut -d'\"' -f2`"
+    OUTPUT_VARIABLE VDR_API_VERSION
+)
+
+if (${VDR_API_VERSION})
+
+
 SET( UPNP_VDR_SRCS
     upnp.cpp
     VdrMediaServer.cpp
@@ -43,12 +52,6 @@ TARGET_LINK_LIBRARIES( vdr-upnp
 ${LIB_OMM_AV}
 )
 
-# find API Version of vdr from it's headers in /usr/include/vdr
-EXECUTE_PROCESS( COMMAND
-    sh -c "echo -n `grep \"define APIVERSION\" /usr/include/vdr/config.h | cut -d'\"' -f2`"
-    OUTPUT_VARIABLE VDR_API_VERSION
-)
-
 MESSAGE( STATUS
     "VDR's API_VERSION is: ${VDR_API_VERSION}"
 )
@@ -61,3 +64,9 @@ INSTALL( TARGETS vdr-upnp
     LIBRARY DESTINATION /usr/lib/vdr/plugins/
     OPTIONAL NAMELINK_SKIP
 )
+else (${VDR_API_VERSION})
+MESSAGE( STATUS
+    "VDR headers not found"
+)
+
+endif (${VDR_API_VERSION})

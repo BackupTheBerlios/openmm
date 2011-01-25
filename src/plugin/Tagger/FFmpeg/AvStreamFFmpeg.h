@@ -21,7 +21,7 @@
 #ifndef AvStreamFFmpeg_INCLUDED
 #define AvStreamFFmpeg_INCLUDED
 
-#include "AvStream.h"
+#include <Omm/AvStream.h>
 
 extern "C" {
 #include <libavformat/avformat.h>

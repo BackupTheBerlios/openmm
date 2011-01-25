@@ -21,9 +21,9 @@
 #include <iostream>
 #include <fstream>
 
-#include <AvStream.h>
+#include <Omm/AvStream.h>
 // #include <AvStreamFFmpeg.h>
-#include <UpnpAvController.h>
+#include <Omm/UpnpAvController.h>
 
 int main(int argc, char** argv)
 {

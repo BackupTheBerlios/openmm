@@ -25,8 +25,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "Upnp.h"
-#include "UpnpPrivate.h"
+#include <Omm/Upnp.h>
 
 using Omm::DeviceRoot;
 using Omm::Device;

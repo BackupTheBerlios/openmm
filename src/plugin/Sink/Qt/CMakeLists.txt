@@ -1,3 +1,6 @@
+# Qt video sink currently doesn't compile
+return()
+
 FIND_PACKAGE(Qt4)
 
 INCLUDE(

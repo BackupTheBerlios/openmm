@@ -1,0 +1,8 @@
+file (GLOB subdirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+foreach (dir ${subdirs})
+string (COMPARE EQUAL "CMakeLists.txt" ${dir} cmakelist)
+if (NOT cmakelist)
+message("descend into directory " ${dir} " ...")
+add_subdirectory (${dir})
+endif (NOT cmakelist)
+endforeach (dir)

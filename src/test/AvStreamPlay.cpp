@@ -29,10 +29,10 @@
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
 
-#include <AvStream.h>
-#include <Util.h>
+#include <Omm/AvStream.h>
+#include <Omm/Util.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
+#include "../plugin/Engine/AvStream/AvStreamEngine.h"
 
 class AvPlayer : AvStreamEngine, Poco::Util::ServerApplication
 {

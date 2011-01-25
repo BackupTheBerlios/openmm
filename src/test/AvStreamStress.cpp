@@ -27,7 +27,7 @@
 #include <Poco/Environment.h>
 #include <Poco/DirectoryIterator.h>
 
-#include "../renderer/src/avstream/AvStreamEngine.h"
+#include "../plugin/Engine/AvStream/AvStreamEngine.h"
 
 const int maxRandomPlayTime = 2000;
 const std::string liveStreamAddress = "http://anubis:8888/";

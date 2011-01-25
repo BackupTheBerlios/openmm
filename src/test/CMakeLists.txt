@@ -162,7 +162,7 @@ MediaObjectTest.cpp
 
 
 SET( OMMTEST_AV_STREAM_PLAY_SRCS
-../renderer/src/avstream/AvStreamEngine.cpp
+../plugin/Engine/AvStream/AvStreamEngine.cpp
 AvStreamPlay.cpp
 )
 
@@ -178,7 +178,7 @@ ${LIB_POCO_UTIL}
 )
 
 SET( OMMTEST_AV_STREAM_STRESS_SRCS
-../renderer/src/avstream/AvStreamEngine.cpp
+../plugin/Engine/AvStream/AvStreamEngine.cpp
 AvStreamStress.cpp
 )
 

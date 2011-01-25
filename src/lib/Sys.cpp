@@ -33,9 +33,9 @@
 #ifdef __SYS_STANDARD_PLATFORM__
 #include "SysImpl.h"
 #elif __LINUX__
-#include "SysLinux/SysImplLinux.h"
+#include "Sys/Linux/SysImplLinux.h"
 #elif __DARWIN__
-#include "SysDarwin/SysImplDarwin.h"
+#include "Sys/Darwin/SysImplDarwin.h"
 #else
 #include "SysImpl.h"
 #endif

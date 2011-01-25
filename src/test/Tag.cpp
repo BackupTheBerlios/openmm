@@ -26,8 +26,8 @@
 #include <Poco/Thread.h>
 #include <Poco/Random.h>
 
-#include <AvStream.h>
-#include <Util.h>
+#include <Omm/AvStream.h>
+#include <Omm/Util.h>
 
 
 int
