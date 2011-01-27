@@ -1,68 +1,15 @@
-FIND_PATH(POCO_INCLUDE_DIR
-Poco/Poco.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_UTIL
-NAME PocoUtil
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
-message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(
-${POCO_INCLUDE_DIR}
-)
-
-
-if(TARGET omm)
-SET(LIB_OMM_AV
-ommav
-)
-SET(LIB_OMM_UTIL
-ommutil
-)
-SET(LIB_OMM_AVSTREAM
-ommavstream
-)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-else(TARGET omm)
-FIND_LIBRARY(LIB_OMM_AV
-NAME ommav
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-FIND_LIBRARY(LIB_OMM_UTIL
-NAME ommutil
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-FIND_LIBRARY(LIB_OMM_AVSTREAM
-NAME ommavstream
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET omm)
-
-
-SET( OMM_AVSTREAM_ENGINE_SRCS
+add_library(ommengine-avstream
+SHARED
 AvStreamEngine.cpp
 )
 
-ADD_LIBRARY( ommengine-avstream
-SHARED
-${OMM_AVSTREAM_ENGINE_SRCS}
+target_link_libraries( ommengine-avstream
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-TARGET_LINK_LIBRARIES( ommengine-avstream
-${LIB_OMM_AV}
-${LIB_OMM_UTIL}
-${LIB_OMM_AVSTREAM}
-)
-
-INSTALL( TARGETS ommengine-avstream
+install(TARGETS ommengine-avstream
 LIBRARY DESTINATION lib/omm
 )
-
-else(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
-message(STATUS "Poco not found")
-endif(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)

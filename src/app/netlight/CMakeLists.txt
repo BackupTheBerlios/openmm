@@ -1,61 +1,28 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-
-PROJECT(ommlight)
-
-SET(CMAKE_LIBRARY_PATH
-${CMAKE_SYSTEM_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_UTIL
-NAME PocoUtil
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(TARGET omm)
-SET(LIB_OMM
-omm
-)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-else(TARGET omm)
-FIND_LIBRARY(LIB_OMM
-NAME omm
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET omm)
-
-SET( OMM_LIGHT_SRCS
+add_executable(ommlight
 DimmableLight.cpp
 DimmableLightImpl.cpp
 DimmableLightApp.cpp
 )
 
-SET( OMM_LIGHT_CTRL_SRCS
+add_executable(ommlightctrl
 DimmableLightCtrl.cpp
 DimmableLightCtrlImpl.cpp
 DimmableLightCtrlAppl.cpp
 )
 
-ADD_EXECUTABLE( ommlight
-${OMM_LIGHT_SRCS}
+target_link_libraries(ommlight
+${POCO_FOUNDATION}
+${POCO_UTIL}
+${OMM}
 )
 
-ADD_EXECUTABLE( ommlightctrl
-${OMM_LIGHT_CTRL_SRCS}
+target_link_libraries(ommlightctrl
+${POCO_FOUNDATION}
+${POCO_UTIL}
+${OMM}
 )
 
-TARGET_LINK_LIBRARIES( ommlight
-${LIB_OMM}
-${LIB_POCO_UTIL}
-)
-
-TARGET_LINK_LIBRARIES( ommlightctrl
-${LIB_OMM}
-${LIB_POCO_UTIL}
-)
-
-INSTALL( TARGETS ommlight ommlightctrl
+install(TARGETS ommlight ommlightctrl
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

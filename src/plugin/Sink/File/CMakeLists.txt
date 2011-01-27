@@ -1,30 +1,26 @@
-if(TARGET ommavstream)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-
-ADD_LIBRARY( ommvideosink-ppm
+add_library(ommvideosink-ppm
 SHARED
 PpmVideoSink.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommvideosink-ppm
-ommavstream
+target_link_libraries(ommvideosink-ppm
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-ADD_LIBRARY( ommaudiosink-pcm
+add_library(ommaudiosink-pcm
 SHARED
 PcmAudioSink.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommaudiosink-pcm
-ommavstream
+target_link_libraries(ommaudiosink-pcm
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-INSTALL( TARGETS ommvideosink-ppm ommaudiosink-pcm
+install(TARGETS ommvideosink-ppm ommaudiosink-pcm
 LIBRARY DESTINATION lib/omm
 )
 
-else(TARGET ommavstream)
-message(STATUS "libommavstream not found")
-endif(TARGET ommavstream)

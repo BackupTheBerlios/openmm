@@ -1,43 +1,17 @@
-SET(CMAKE_LIBRARY_PATH
-${CMAKE_SYSTEM_LIBRARY_PATH}
-)
-
-if(TARGET omm)
-SET(LIB_OMM_AV
-ommav
-)
-SET(LIB_OMM_AVSTREAM
-ommavstream
-)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-else(TARGET omm)
-FIND_LIBRARY(LIB_OMM_AV
-NAME ommav
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-FIND_LIBRARY(LIB_OMM_AVSTREAM
-NAME ommavstream
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET omm)
-
-ADD_LIBRARY( ommserver-file
+add_library(ommserver-file
 SHARED
 Filesystem.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommserver-file
-${LIB_OMM_UTIL}
-${LIB_OMM_AV}
-${LIB_OMM_AVSTREAM}
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_UTIL}
-${LIB_POCO_XML}
+target_link_libraries(ommserver-file
+${POCO_LIBRARIES}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-INSTALL( TARGETS ommserver-file
+install(TARGETS ommserver-file
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib/omm
 )

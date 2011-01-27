@@ -1,69 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
-
-PROJECT(tests)
-
-FIND_PATH(POCO_INCLUDE_DIR
-Poco/Poco.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
-if(POCO_INCLUDE_DIR)
-message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
-else(POCO_INCLUDE_DIR)
-message(SEND_ERROR "Poco headers not found")
-endif(POCO_INCLUDE_DIR)
-
-FIND_LIBRARY(LIB_POCO_FOUNDATION
-NAME PocoFoundation
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_UTIL
-NAME PocoUtil
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_NET
-NAME PocoNet
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_XML
-NAME PocoXML
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-message(STATUS "Poco libraries found: " ${LIB_POCO_FOUNDATION} ", " ${LIB_POCO_UTIL} ", " ${LIB_POCO_NET} ", " ${LIB_POCO_XML})
-else(LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-message(SEND_ERROR "Poco libraries not found")
-endif(LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-
-if(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-
-INCLUDE_DIRECTORIES(
-${POCO_INCLUDE_DIR}
-${omm_SOURCE_DIR}/lib
-${omm_SOURCE_DIR}/lib/Omm
-${omm_SOURCE_DIR}/lib/src
-)
-
-SET(LIB_OMM
-omm
-)
-
-SET(LIB_OMM_UTIL
-ommutil
-)
-
-SET(LIB_OMM_AV
-ommav
-)
-
-SET(LIB_OMM_AV_STREAM
-ommavstream
-)
-
-
 SET( OMMTEST_SSDP_SRCS
 ssdp.cpp
 )
@@ -127,127 +61,123 @@ MediaObjectTest.cpp
 
 
 # TARGET_LINK_LIBRARIES( ssdp_test
-# ${LIB_OMM}
-# ${LIB_POCO_UTIL}
+# ${OMM}
+# ${POCO_UTIL}
 # )
 # 
 # TARGET_LINK_LIBRARIES( device_test
-# ${LIB_OMM}
-# ${LIB_POCO_UTIL}
+# ${OMM}
+# ${POCO_UTIL}
 # )
 
 # TARGET_LINK_LIBRARIES( network_light
-# ${LIB_OMM}
-# ${LIB_POCO_UTIL}
+# ${OMM}
+# ${POCO_UTIL}
 # )
 
 # TARGET_LINK_LIBRARIES( netlight_ctrl
-# ${LIB_OMM}
-# ${LIB_POCO_UTIL}
+# ${OMM}
+# ${POCO_UTIL}
 # )
 # 
 # TARGET_LINK_LIBRARIES( controller_test
-# ${LIB_OMM}
-# ${LIB_POCO_UTIL}
+# ${OMM}
+# ${POCO_UTIL}
 # )
 # 
 # TARGET_LINK_LIBRARIES( media_object_test
-# ${LIB_OMM_AV}
+# ${OMM_AV}
 # )
 
 # TARGET_LINK_LIBRARIES( file_server_test
-# ${LIB_OMM_AV}
-# ${LIB_POCO_UTIL}
+# ${OMM_AV}
+# ${POCO_UTIL}
 # )
 
 
-SET( OMMTEST_AV_STREAM_PLAY_SRCS
+add_executable(avstreamplay
 ../plugin/Engine/AvStream/AvStreamEngine.cpp
 AvStreamPlay.cpp
 )
 
-ADD_EXECUTABLE( avstreamplay
-${OMMTEST_AV_STREAM_PLAY_SRCS}
+target_link_libraries(avstreamplay
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-TARGET_LINK_LIBRARIES( avstreamplay
-${LIB_OMM_AV_STREAM}
-${LIB_OMM_AV}
-${LIB_OMM_UTIL}
-${LIB_POCO_UTIL}
-)
-
-SET( OMMTEST_AV_STREAM_STRESS_SRCS
+add_executable( avstreamstress
 ../plugin/Engine/AvStream/AvStreamEngine.cpp
 AvStreamStress.cpp
 )
 
-ADD_EXECUTABLE( avstreamstress
-${OMMTEST_AV_STREAM_STRESS_SRCS}
+target_link_libraries( avstreamstress
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-TARGET_LINK_LIBRARIES( avstreamstress
-${LIB_OMM_AV_STREAM}
-${LIB_OMM_AV}
-${LIB_OMM_UTIL}
-)
-
-SET( OMMTEST_BYTEQUEUE_STRESS_SRCS
+add_executable(bytequeuestress
 ByteQueueStress.cpp
 )
 
-ADD_EXECUTABLE( bytequeuestress
-${OMMTEST_BYTEQUEUE_STRESS_SRCS}
+TARGET_LINK_LIBRARIES(bytequeuestress
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-TARGET_LINK_LIBRARIES( bytequeuestress
-${LIB_OMM_AV_STREAM}
-)
-
-SET( OMMTEST_TAG_TEST_SRCS
+add_executable(tagtest
 TagTest.cpp
 )
 
-ADD_EXECUTABLE( tagtest
-${OMMTEST_TAG_TEST_SRCS}
+target_link_libraries(tagtest
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-TARGET_LINK_LIBRARIES( tagtest
-${LIB_OMM_AV_STREAM}
-${LIB_OMM_UTIL}
-)
-
-ADD_EXECUTABLE( tag
+add_executable(tag
 Tag.cpp
 )
 
-TARGET_LINK_LIBRARIES( tag
-${LIB_OMM_AV_STREAM}
-${LIB_OMM_UTIL}
+target_link_libraries(tag
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
 
-ADD_EXECUTABLE( streamtest
+add_executable(streamtest
 StreamTest.cpp
 )
 
-TARGET_LINK_LIBRARIES( streamtest
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_NET}
+target_link_libraries(streamtest
+${POCO_FOUNDATION}
+${POCO_NET}
 )
 
 SET( OMMTEST_AV_MUX_SRCS
 AvMux.cpp
 )
 
-ADD_EXECUTABLE( avmux
+add_executable(avmux
 ${OMMTEST_AV_MUX_SRCS}
 )
 
-TARGET_LINK_LIBRARIES( avmux
-${LIB_OMM_AV_STREAM}
-${LIB_POCO_UTIL}
+target_link_libraries(avmux
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
 )
-
-elseif(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-message(SEND_ERROR "Poco libraries not found, cannot build project.")
-endif(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)

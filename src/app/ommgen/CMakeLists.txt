@@ -1,56 +1,14 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-
-PROJECT(ommgen)
-
-#SET(CMAKE_LIBRARY_PATH
-#${CMAKE_SYSTEM_LIBRARY_PATH}
-#)
-
-FIND_PATH(POCO_INCLUDE_DIR
-Poco/Poco.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
-
-#FIND_LIBRARY(LIB_POCO_FOUNDATION
-#NAME PocoFoundation
-#PATHS ${CMAKE_LIBRARY_PATH}
-#)
-
-FIND_LIBRARY(LIB_POCO_UTIL
-NAME PocoUtil
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
-message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(
-${POCO_INCLUDE_DIR}
-${omm_SOURCE_DIR}/lib/Omm
-${omm_SOURCE_DIR}/lib/src
-)
-
-
-SET( OMMGEN_SRCS
+add_executable(ommgen
 main.cpp
 ommgen.cpp
 )
 
-#list all source files here
-ADD_EXECUTABLE( ommgen
-${OMMGEN_SRCS}
+target_link_libraries(ommgen
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
 )
 
-#need to link to some other libraries ? just add them here
-TARGET_LINK_LIBRARIES( ommgen
-# ${LIB_OMM}
-omm
-${LIB_POCO_UTIL}
-)
-
-INSTALL( TARGETS ommgen
+install(TARGETS ommgen
 RUNTIME DESTINATION bin
 )
-
-else(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)
-message(STATUS "Poco not found")
-endif(POCO_INCLUDE_DIR AND LIB_POCO_UTIL)

@@ -1,88 +1,52 @@
-FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtSvg)
+find_package(Qt4 COMPONENTS QtCore QtGui QtSvg)
 
-FIND_PATH(POCO_INCLUDE_DIR
-Poco/Poco.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_FOUNDATION
-NAME PocoFoundation
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(QT4_FOUND AND POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-MESSAGE (STATUS "Qt4 use file: ${QT_USE_FILE}")
-INCLUDE(
+if(QT4_FOUND)
+message (STATUS "Qt4 use file: ${QT_USE_FILE}")
+include(
 ${QT_USE_FILE}
 )
-#message(STATUS "Qt4 found in " ${QT4_INCLUDE_DIR})
-message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(
-${POCO_INCLUDE_DIR}
-)
 
-if(TARGET omm)
-SET(LIB_OMM
-omm
-)
-SET(LIB_OMM_AV
-ommav
-)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-else(TARGET omm)
-FIND_LIBRARY(LIB_OMM
-NAME omm
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-FIND_LIBRARY(LIB_OMM_AV
-NAME ommav
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET omm)
-
-SET( OMMC_QTUI_SRCS
+set(OMMC_QTUI_SRCS
 QtAvInterface.cpp
-# # modeltest.cpp
+# modeltest.cpp
 QtBrowserModel.cpp
 QtRendererListModel.cpp
 )
 
-SET( OMMC_QTUI
+set(OMMC_QTUI
 # QtAvInterface.ui
 QtBrowserWidget.ui
 QtRendererWidget.ui
 )
 
-SET( OMMC_QTRES
+set(OMMC_QTRES
 QtAvInterface.qrc
 )
 
-SET( OMMC_QTUI_MOC
+set(OMMC_QTUI_MOC
 QtAvInterface.h
 # modeltest.h
 QtBrowserModel.h
 QtRendererListModel.h
 )
 
-QT4_WRAP_UI(
+qt4_wrap_ui(
 OMMC_QT_BROWSERUI_H QtBrowserWidget.ui
 )
 
-QT4_WRAP_UI(
+qt4_wrap_ui(
 OMMC_QT_RENDERERUI_H QtRendererWidget.ui
 )
 
-GET_FILENAME_COMPONENT(
+get_filename_component(
 OMMC_QTUI_H_DIR ${OMMC_QT_BROWSERUI_H} PATH
 )
 
-MESSAGE( STATUS
+message(STATUS
 "Directory for OmmC Qt UI files: ${OMMC_QTUI_H_DIR}"
 )
 
-INCLUDE_DIRECTORIES(
+include_directories(
 ${OMMC_QTUI_H_DIR}
 )
 
@@ -94,7 +58,7 @@ QT4_WRAP_CPP(
 OMMC_QTUI_MOC_CPP ${OMMC_QTUI_MOC}
 )
 
-ADD_LIBRARY( ommavinterface-qt
+add_library(ommavinterface-qt
 SHARED
 ${OMMC_QTUI_SRCS}
 ${OMMC_QTUI}
@@ -102,29 +66,16 @@ ${OMMC_QTUI_MOC_CPP}
 ${OMMC_RES_SRC}
 )
 
-TARGET_LINK_LIBRARIES( ommavinterface-qt
-${LIB_OMM}
-${LIB_OMM_AV}
+target_link_libraries(ommavinterface-qt
+${OMM}
+${OMM_AV}
 ${QT_LIBRARIES}
-${LIB_POCO_FOUNDATION}
 )
 
-ADD_DEFINITIONS(
-# -D_REENTRANT -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT -DQT_NO_WARNING_OUTPUT -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DQT_SHARED
-)
-
-
-INSTALL( TARGETS ommavinterface-qt
+install(TARGETS ommavinterface-qt
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib/omm
 )
 
-else(QT4_FOUND AND POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-if(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-message(STATUS "Qt4 not found")
-else(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-message(STATUS "Poco not found")
-endif(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-endif(QT4_FOUND AND POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-
+endif(QT4_FOUND)

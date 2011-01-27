@@ -1,117 +1,88 @@
-FIND_PATH(POCO_INCLUDE_DIR
-Poco/Poco.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
-if(POCO_INCLUDE_DIR)
-message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
-else(POCO_INCLUDE_DIR)
-message(SEND_ERROR "Poco headers not found")
-endif(POCO_INCLUDE_DIR)
-
-FIND_LIBRARY(LIB_POCO_FOUNDATION
-NAME PocoFoundation
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_UTIL
-NAME PocoUtil
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_NET
-NAME PocoNet
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_XML
-NAME PocoXML
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-message(STATUS "Poco libraries found: " ${LIB_POCO_FOUNDATION} ", " ${LIB_POCO_UTIL} ", " ${LIB_POCO_NET} ", " ${LIB_POCO_XML})
-else(LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-message(SEND_ERROR "Poco libraries not found")
-endif(LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-
-if(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-
-INCLUDE_DIRECTORIES(
-${POCO_INCLUDE_DIR}
+set(OMM_INCLUDE_DIR
 ${omm_SOURCE_DIR}/src/include/Omm
+CACHE INTERNAL ommincludedir
 )
 
-ADD_LIBRARY(ommutil
+set(OMM_INCLUDE_DIRS
+${OMM_INCLUDE_DIR}
+CACHE INTERNAL ommincludedirs
+)
+
+include_directories(
+${OMM_INCLUDE_DIRS}
+)
+
+add_library(ommutil
 SHARED
 Util.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommutil
-${LIB_POCO_FOUNDATION}
+target_link_libraries( ommutil
+${POCO_FOUNDATION}
 )
 
-SET(LIB_OMM_UTIL
+set(OMM_UTIL
 ommutil
-CACHE STRING libommutil
+CACHE INTERNAL libommutil
 )
 
 if(LINUX)
-ADD_SUBDIRECTORY(Sys/Linux)
+add_subdirectory(Sys/Linux)
 if(TARGET ommsys-linux)
-SET(LIB_OMMSYS_PLATFORM ommsys-linux)
+set(LIB_OMMSYS_PLATFORM ommsys-linux)
 endif(TARGET ommsys-linux)
 elseif(IPHONE)
-# TODO: Darwin C SystemConfiguration API is not available on iPhone.
+# TODO: Darwin SystemConfiguration C API is not available on iPhone.
 elseif(DARWIN)
-ADD_SUBDIRECTORY(Sys/Darwin)
+add_subdirectory(Sys/Darwin)
 if(TARGET ommsys-darwin)
-SET(LIB_OMMSYS_PLATFORM ommsys-darwin)
+set(LIB_OMMSYS_PLATFORM ommsys-darwin)
 endif(TARGET ommsys-darwin)
 endif(LINUX)
 
 if(LIB_OMMSYS_PLATFORM)
-message(STATUS "system specific implementation for " ${BUILD_TARGET} " is available, linking libommsys with " ${LIB_OMMSYS_PLATFORM})
+message(STATUS "System specific implementation for " ${BUILD_TARGET} " is available, linking libommsys with " ${LIB_OMMSYS_PLATFORM})
 else(LIB_OMMSYS_PLATFORM)
-message(STATUS "system specific implementation for " ${BUILD_TARGET} " not available, using standard implementation")
-ADD_DEFINITIONS(
+message(STATUS "System specific implementation for " ${BUILD_TARGET} " not available, using standard implementation")
+add_definitions(
 -D__SYS_STANDARD_PLATFORM__
 )
 endif(LIB_OMMSYS_PLATFORM)
 
-ADD_LIBRARY( ommsys
+add_library(ommsys
 SHARED
 Sys.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommsys
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_NET}
+target_link_libraries(ommsys
+${POCO_FOUNDATION}
+${POCO_NET}
 ${LIB_OMMSYS_PLATFORM}
 )
 
-SET(LIB_OMM_SYS
+set(OMM_SYS
 ommsys
-CACHE STRING libommsys
+CACHE INTERNAL libommsys
 )
 
-ADD_LIBRARY(omm
+add_library(omm
 SHARED
 Upnp.cpp
 )
 
-TARGET_LINK_LIBRARIES( omm
-${LIB_POCO_FOUNDATION}
-${LIB_POCO_NET}
-${LIB_POCO_XML}
+target_link_libraries(omm
+${POCO_FOUNDATION}
+${POCO_NET}
+${POCO_XML}
 ommsys
 )
 
-SET(LIB_OMM
+set(OMM
 omm
-CACHE STRING libomm
+CACHE INTERNAL libomm
 )
 
-ADD_LIBRARY(ommav
+add_library(ommav
 SHARED
 UpnpAvController.cpp
 UpnpAvControllers.cpp
@@ -124,45 +95,52 @@ UpnpAvRendererImpl.cpp
 UpnpAvCtrlImpl.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommav
+target_link_libraries(ommav
 omm
 )
 
-SET(LIB_OMM_AV
+set(OMM_AV
 ommav
-CACHE STRING libommav
+CACHE INTERNAL libommav
 )
 
-ADD_LIBRARY( ommavstream
+add_library(ommavstream
 SHARED
 AvStream.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommavstream
-${LIB_POCO_FOUNDATION}
+target_link_libraries(ommavstream
+${POCO_FOUNDATION}
 )
 
-SET(LIB_OMM_AVSTREAM
+set(OMM_AVSTREAM
 ommavstream
 CACHE STRING libommavstream
 )
 
-INSTALL( TARGETS ommutil ommsys omm ommav ommavstream
+add_subdirectory(Dvb)
+
+install(TARGETS ommutil ommsys omm ommav ommavstream
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
 
-INSTALL( DIRECTORY ${ommlib_SOURCE_DIR}/Omm
+install(DIRECTORY ${ommlib_SOURCE_DIR}/Omm
 DESTINATION include
 FILES_MATCHING PATTERN "*.h"
 )
 
-set(OMM_FOUND 1
-CACHE STRING OMM_FOUND
+set(OMM_LIBRARY
+${OMM_SYS}
+${OMM}
+${OMM_UTIL}
+${OMM_AV}
+${OMM_AVSTREAM}
+${OMM_DVB}
+CACHE INTERNAL ommlib
 )
 
-ADD_SUBDIRECTORY(Dvb)
-
-elseif(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
-message(SEND_ERROR "Poco libraries not found, cannot build project.")
-endif(POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION AND LIB_POCO_UTIL AND LIB_POCO_NET AND LIB_POCO_XML)
+set(OMM_LIBRARIES
+${OMM_LIBRARY}
+CACHE INTERNAL ommlibs
+)

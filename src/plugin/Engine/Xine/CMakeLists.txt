@@ -1,9 +1,9 @@
-FIND_PATH(XINE_INCLUDE_DIR
+find_path(XINE_INCLUDE_DIR
 xine.h
 PATHS ${CMAKE_INCLUDE_PATH}
 )
 
-FIND_LIBRARY(XINE_LIBRARIES
+find_library(XINE_LIBRARIES
 NAME xine
 PATHS ${CMAKE_LIBRARY_PATH}
 )
@@ -16,54 +16,35 @@ ${XINE_INCLUDE_DIR}
 ${POCO_INCLUDE_DIR}
 )
 
-
-if(TARGET omm)
-SET(LIB_OMM_AV
-ommav
-)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-else(TARGET omm)
-FIND_LIBRARY(LIB_OMM_AV
-NAME ommav
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET omm)
-
 # EXECUTE_PROCESS seems to be buggy in cmake 2.4.3 An out-of-source build complains
 # about ';' in CMakeCache.txt. The old EXEC_PROGRAM works though.
 
 #EXECUTE_PROCESS(COMMAND /usr/bin/xine-config --libs OUTPUT_VARIABLE XINE_LIBRARIES)
 #SET(XINE_LIBRARIES -L/usr/lib -lxine -lz -lnsl -lpthread -lrt)
-EXEC_PROGRAM( /usr/bin/xine-config
+exec_program(/usr/bin/xine-config
 ARGS --libs
 OUTPUT_VARIABLE XINE_LIBRARIES
 )
 
-SET( OMMR_XINE_SRCS
+add_library(ommengine-xine
+SHARED
 EngineXine.cpp
 )
 
-ADD_LIBRARY( ommengine-xine
-SHARED
-${OMMR_XINE_SRCS}
-)
-
-TARGET_LINK_LIBRARIES( ommengine-xine
+target_link_libraries(ommengine-xine
 ${XINE_LIBRARIES}
-${LIB_OMM_AV}
-${LIB_POCO_UTIL}
+${POCO_UTIL}
+${OMM}
+${OMM_AV}
 )
 
-ADD_SUBDIRECTORY(VideoFb)
-ADD_SUBDIRECTORY(VideoX11)
+add_subdirectory(VideoFb)
+add_subdirectory(VideoX11)
 
-INSTALL( TARGETS ommengine-xine
+install(TARGETS ommengine-xine
 LIBRARY DESTINATION lib/omm
 )
 
 else(XINE_INCLUDE_DIR AND XINE_LIBRARIES)
 message(STATUS "Xine lib not found")
 endif(XINE_INCLUDE_DIR AND XINE_LIBRARIES)
-
