@@ -23,4 +23,5 @@ ${OMM_AV}
 # install(TARGETS ommserver-webradio ommserver-webradiosimple
 install(TARGETS ommserver-webradio
 LIBRARY DESTINATION lib/omm
+ARCHIVE DESTINATION lib
 )

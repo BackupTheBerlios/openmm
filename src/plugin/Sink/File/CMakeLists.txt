@@ -22,5 +22,6 @@ ${OMM_AVSTREAM}
 
 install(TARGETS ommvideosink-ppm ommaudiosink-pcm
 LIBRARY DESTINATION lib/omm
+ARCHIVE DESTINATION lib
 )
 
