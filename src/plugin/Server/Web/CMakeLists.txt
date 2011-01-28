@@ -1,6 +1,6 @@
 add_library(ommserver-webradio
 SHARED
-WebRadio.cpp
+Webradio.cpp
 )
 
 target_link_libraries(ommserver-webradio
@@ -11,7 +11,7 @@ ${OMM_AV}
 
 # add_library(ommserver-webradiosimple
 # SHARED
-# WebRadioSimple.cpp
+# WebradioSimple.cpp
 # )
 
 # target_link_libraries(ommserver-webradiosimple

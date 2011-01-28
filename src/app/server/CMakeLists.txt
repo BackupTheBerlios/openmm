@@ -10,7 +10,7 @@ ${OMM_AV}
 )
 
 add_executable(ommserve
-UpnpAvServerApplication.cpp
+ServerApplication.cpp
 )
 
 target_link_libraries(ommserve
@@ -20,7 +20,31 @@ ${OMM}
 ${OMM_AV}
 )
 
-install(TARGETS ommserve
+add_executable(ommserve-webradio
+ServerWebradio.cpp
+)
+
+target_link_libraries(ommserve-webradio
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+ommserver-webradio
+)
+
+add_executable(ommserve-file
+ServerFile.cpp
+)
+
+target_link_libraries(ommserve-file
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+ommserver-file
+)
+
+install(TARGETS ommserve ommserve-webradio ommserve-file
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

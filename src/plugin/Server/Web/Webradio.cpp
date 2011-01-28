@@ -20,7 +20,7 @@
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
-#include "WebRadio.h"
+#include "Webradio.h"
 
 
 class WebradioDataModel : public Omm::Av::AbstractDataModel

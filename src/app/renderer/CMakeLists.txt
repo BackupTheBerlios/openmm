@@ -1,5 +1,5 @@
 add_executable(ommrender
-MediaRendererApplication.cpp
+RendererApplication.cpp
 )
 
 target_link_libraries(ommrender
