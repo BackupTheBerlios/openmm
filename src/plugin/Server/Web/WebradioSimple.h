@@ -2,7 +2,7 @@
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
 |  Copyright (C) 2009, 2010                                                 |
-|  Jörg Bakker (jb'at'open-multimedia.org)                                  |
+|  JÃ¶rg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
 |                                                                           |
@@ -31,3 +31,4 @@ public:
 };
 
 #endif
+
