@@ -11,13 +11,11 @@ DimmableLightCtrlAppl.cpp
 )
 
 target_link_libraries(ommlight
-${POCO_FOUNDATION}
 ${POCO_UTIL}
 ${OMM}
 )
 
 target_link_libraries(ommlightctrl
-${POCO_FOUNDATION}
 ${POCO_UTIL}
 ${OMM}
 )

@@ -40,9 +40,9 @@ SRCDIR=${PWD}
 # do a cross compile
 if [ ${TOOLCHAIN} ]
 then
-    echo "building with toolchain configuration" platform/${TOOLCHAIN}
+    echo "building with toolchain configuration" cmake/platform/${TOOLCHAIN}
     BINDIR=${BINDIR}.${TOOLCHAIN}
-    CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_TOOLCHAIN_FILE=${SRCDIR}/platform/${TOOLCHAIN}"
+    CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_TOOLCHAIN_FILE=${SRCDIR}/cmake/platform/${TOOLCHAIN}"
 fi
 
 echo "build directory:" ${BINDIR}

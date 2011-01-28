@@ -1,21 +1,20 @@
-find_library(LIB_ASOUND
-NAME asound
-PATHS ${CMAKE_LIBRARY_PATH}
-)
+find_package(ALSA)
 
-if(LIB_ASOUND)
+if(ALSA_FOUND)
 
 add_library(ommaudiosink-alsa
 SHARED
 AlsaAudioSink.cpp
 )
 
+include_directories(ALSA_INCLUDE_DIRS)
+
 target_link_libraries(ommaudiosink-alsa
-${LIB_ASOUND}
+${ALSA_LIBRARIES}
 )
 
 install(TARGETS ommaudiosink-alsa
 LIBRARY DESTINATION lib/omm
 )
 
-endif(LIB_ASOUND)
+endif(ALSA_FOUND)

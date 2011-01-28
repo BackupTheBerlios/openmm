@@ -41,7 +41,7 @@ ${POCO_LIBRARY}
 if(POCO_INCLUDE_DIR)
 message(STATUS "Found POCO headers in: " ${POCO_INCLUDE_DIR})
 else(POCO_INCLUDE_DIR)
-message(STATUS "Poco headers not found")
+message(STATUS "POCO headers not found")
 endif(POCO_INCLUDE_DIR)
 
 include(FindPackageHandleStandardArgs)

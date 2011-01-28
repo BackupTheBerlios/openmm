@@ -1,56 +1,20 @@
-FIND_PATH(LINUX_DVB_DIR
-linux/dvb/frontend.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
+find_package(LinuxDVB)
 
-if(LINUX_DVB_DIR)
-message(STATUS "Linux DVB headers found in " ${LINUX_DVB_DIR})
+if(LINUXDVB_FOUND)
 
-SET(CMAKE_LIBRARY_PATH
-${CMAKE_SYSTEM_LIBRARY_PATH}
-)
-
-if(TARGET omm)
-SET(LIB_OMM_AV
-ommav
-)
-SET(LIB_OMM_DVB
-ommdvb
-)
-INCLUDE_DIRECTORIES(
-${omm_SOURCE_DIR}/lib
-)
-else(TARGET omm)
-FIND_LIBRARY(LIB_OMM_AV
-NAME ommav
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-FIND_LIBRARY(LIB_OMM_DVB
-NAME ommdvb
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-endif(TARGET omm)
-
-
-SET( OMMS_DVB_SRCS
+add_library(ommserver-dvb
+SHARED
 DvbServer.cpp
 )
 
-ADD_LIBRARY( ommserver-dvb
-SHARED
-${OMMS_DVB_SRCS}
+target_link_libraries(ommserver-dvb
+${OMM}
+${OMM_AV}
+${OMM_DVB}
 )
 
-TARGET_LINK_LIBRARIES( ommserver-dvb
-${LIB_OMM_AV}
-${LIB_OMM_DVB}
-# ${LIB_POCO_UTIL}
-)
-
-INSTALL( TARGETS ommserver-dvb
+install(TARGETS ommserver-dvb
 LIBRARY DESTINATION lib/omm
 )
 
-else(LINUX_DVB_DIR)
-message(STATUS "Linux DVB headers not found")
-endif(LINUX_DVB_DIR)
+endif(LINUXDVB_FOUND)

@@ -17,7 +17,7 @@ SHARED
 Util.cpp
 )
 
-target_link_libraries( ommutil
+target_link_libraries(ommutil
 ${POCO_FOUNDATION}
 )
 
@@ -71,8 +71,6 @@ Upnp.cpp
 )
 
 target_link_libraries(omm
-${POCO_FOUNDATION}
-${POCO_NET}
 ${POCO_XML}
 ommsys
 )
@@ -125,7 +123,7 @@ LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
 
-install(DIRECTORY ${ommlib_SOURCE_DIR}/Omm
+install(DIRECTORY ${omm_SOURCE_DIR}/src/include/Omm
 DESTINATION include
 FILES_MATCHING PATTERN "*.h"
 )

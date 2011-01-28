@@ -4,7 +4,6 @@ Filesystem.cpp
 )
 
 target_link_libraries(ommserver-file
-${POCO_LIBRARIES}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
