@@ -2,6 +2,10 @@ find_package(FFMPEG)
 
 if(FFMPEG_FOUND)
 
+include_directories(
+${FFMPEG_INCLUDE_DIRS}
+)
+
 add_library(ommtagger-ffmpeg
 SHARED
 AvStreamFFmpeg.cpp

@@ -1,8 +1,8 @@
 find_package(SDL)
 
 if(SDL_FOUND)
-message(STATUS "SDL found in " ${SDL_INCLUDE_DIR} ", " ${SDL_LIBRARY})
-INCLUDE_DIRECTORIES(
+
+include_directories(
 ${SDL_INCLUDE_DIR}
 )
 
@@ -34,6 +34,4 @@ install(TARGETS ommvideosink-sdl ommaudiosink-sdl
 LIBRARY DESTINATION lib/omm
 )
 
-else(SDL_FOUND)
-message(STATUS "SDL not found")
 endif(SDL_FOUND)

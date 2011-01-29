@@ -9,6 +9,11 @@ ${OMM}
 ${OMM_AV}
 )
 
+set(OMMPLUGIN_SERVER_WEBRADIO
+ommserver-webradio
+CACHE INTERNAL ommserver-webradio
+)
+
 # add_library(ommserver-webradiosimple
 # SHARED
 # WebradioSimple.cpp
@@ -23,5 +28,6 @@ ${OMM_AV}
 # install(TARGETS ommserver-webradio ommserver-webradiosimple
 install(TARGETS ommserver-webradio
 LIBRARY DESTINATION lib/omm
-ARCHIVE DESTINATION lib
+ARCHIVE DESTINATION lib/omm
 )
+

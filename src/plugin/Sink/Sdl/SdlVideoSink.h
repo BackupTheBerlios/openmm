@@ -21,7 +21,7 @@
 #ifndef SdlVideoSink_INCLUDED
 #define SdlVideoSink_INCLUDED
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include <Omm/AvStream.h>
 

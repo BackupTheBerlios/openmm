@@ -27,8 +27,7 @@
 
 #include <Omm/UpnpAvServer.h>
 #include <Omm/Util.h>
-
-#include "../../plugin/Server/Storage/Filesystem.h"
+#include <Omm/Plugin/Filesystem.h>
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;

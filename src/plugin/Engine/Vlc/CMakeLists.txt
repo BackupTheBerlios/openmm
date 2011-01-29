@@ -1,6 +1,11 @@
 find_package(VLC)
 
 if(VLC_FOUND)
+
+include_directories(
+${VLC_INCLUDE_DIRS}
+)
+
 add_library(ommengine-vlc
 SHARED
 EngineVlc.cpp

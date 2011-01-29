@@ -28,41 +28,43 @@ endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 message(STATUS "Set build target to " ${BUILD_TARGET})
 
-include_directories(src/include)
 add_definitions(-g -Wno-unused-parameter)
 set(CMAKE_MODULE_PATH
 ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 ${CMAKE_MODULE_PATH}
 )
 
-# check basic dependencies: Poco and OMM libs
+# check basic dependency Poco
 find_package(POCO)
 if(POCO_FOUND)
-include_directories(${POCO_INCLUDE_DIRS})
-set(libdir
-"${CMAKE_CURRENT_SOURCE_DIR}/src/lib"
-)
+
+# set OMM lib and plugin includes
+set(libdir "${CMAKE_CURRENT_SOURCE_DIR}/src/lib")
 if(IS_DIRECTORY ${libdir})
-# omm libs are in the source tree so build them first
+# omm libs are in the source tree so build them first and use internal headers
 message(STATUS "Using internal OMM libraries")
-add_subdirectory(${libdir})
+include_directories(src/include)
 else(IS_DIRECTORY ${libdir})
 message(STATUS "Search for external OMM libraries ...")
 find_package(OMM)
 endif(IS_DIRECTORY ${libdir})
 
-# build the rest of the project: plugins, applications and tests
-set(subdirs
-src/plugin
-src/app
-src/test
-)
-foreach(dir ${subdirs})
-if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-message("Descend into directory ${CMAKE_CURRENT_SOURCE_DIR}/${dir} ...")
-add_subdirectory(${dir})
-endif(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-endforeach(dir ${subdirs})
+set(plugindir "${CMAKE_CURRENT_SOURCE_DIR}/src/plugin")
+if(IS_DIRECTORY ${plugindir})
+# omm plugins are in the source tree so build them first and use internal headers
+message(STATUS "Using internal OMM plugins")
+include_directories(${plugindir}/include)
+else(IS_DIRECTORY ${plugindir})
+message(STATUS "Search for external OMM plugins ...")
+find_package(OMMPLUGIN)
+endif(IS_DIRECTORY ${plugindir})
+
+# set Poco includes. Must be after OMM headers because Poco and OMM could be
+# in staging dir and internal OMM headers are always prefered.
+include_directories(${POCO_INCLUDE_DIRS})
+
+# build what is available in the source tree (libs, plugins, apps, tests)
+add_subdirectory(src)
 
 else(POCO_FOUND)
 message("giving up.")

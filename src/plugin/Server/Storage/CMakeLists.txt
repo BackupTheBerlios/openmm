@@ -10,7 +10,12 @@ ${OMM_AV}
 ${OMM_AVSTREAM}
 )
 
+set(OMMPLUGIN_SERVER_FILE
+ommserver-file
+CACHE INTERNAL ommserver-file
+)
+
 install(TARGETS ommserver-file
 LIBRARY DESTINATION lib/omm
-ARCHIVE DESTINATION lib
+ARCHIVE DESTINATION lib/omm
 )

@@ -20,6 +20,10 @@ ${OMM}
 ${OMM_AV}
 )
 
+include_directories(
+${OMMPLUGIN_INCLUDE_DIRS}
+)
+
 add_executable(ommserve-webradio
 ServerWebradio.cpp
 )
@@ -29,7 +33,7 @@ ${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
-ommserver-webradio
+${OMMPLUGIN_SERVER_WEBRADIO}
 )
 
 add_executable(ommserve-file
@@ -41,7 +45,7 @@ ${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
-ommserver-file
+${OMMPLUGIN_SERVER_FILE}
 )
 
 install(TARGETS ommserve ommserve-webradio ommserve-file
