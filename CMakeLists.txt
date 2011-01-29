@@ -35,8 +35,7 @@ ${CMAKE_MODULE_PATH}
 )
 
 # check basic dependency Poco
-find_package(POCO)
-if(POCO_FOUND)
+find_package(POCO REQUIRED)
 
 # set OMM lib and plugin includes
 set(libdir "${CMAKE_CURRENT_SOURCE_DIR}/src/lib")
@@ -46,7 +45,7 @@ message(STATUS "Using internal OMM libraries")
 include_directories(src/include)
 else(IS_DIRECTORY ${libdir})
 message(STATUS "Search for external OMM libraries ...")
-find_package(OMM)
+find_package(OMM REQUIRED)
 endif(IS_DIRECTORY ${libdir})
 
 set(plugindir "${CMAKE_CURRENT_SOURCE_DIR}/src/plugin")
@@ -65,7 +64,3 @@ include_directories(${POCO_INCLUDE_DIRS})
 
 # build what is available in the source tree (libs, plugins, apps, tests)
 add_subdirectory(src)
-
-else(POCO_FOUND)
-message("giving up.")
-endif(POCO_FOUND)

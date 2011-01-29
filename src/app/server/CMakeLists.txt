@@ -35,7 +35,6 @@ ServerWebradio.cpp
 )
 
 target_link_libraries(ommserve-webradio
-${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
