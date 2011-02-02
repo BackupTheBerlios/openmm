@@ -20,6 +20,8 @@
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
+#include <Omm/UpnpAvTypes.h>
+
 #include "Webradio.h"
 
 
@@ -29,6 +31,7 @@ public:
     WebradioDataModel(const std::string& stationConfig);
     
     virtual Omm::ui4 getChildCount();
+    virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
     
     virtual Omm::ui4 getSize(Omm::ui4 index);
@@ -55,6 +58,13 @@ Omm::ui4
 WebradioDataModel::getChildCount()
 {
     return _stationNames.size();
+}
+
+
+std::string
+WebradioDataModel::getClass(Omm::ui4 index)
+{
+    return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::AUDIO_BROADCAST);
 }
 
 

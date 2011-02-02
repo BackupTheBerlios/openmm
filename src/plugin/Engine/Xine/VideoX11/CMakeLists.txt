@@ -3,7 +3,7 @@ SHARED
 X11VideoXine.cpp
 )
 
-target_link_libaries(ommxinevideo-x11
+target_link_libraries(ommxinevideo-x11
 ommengine-xine
 X11
 )

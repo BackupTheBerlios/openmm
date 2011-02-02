@@ -5,7 +5,7 @@ PATHS ${CMAKE_INCLUDE_PATH}
 
 exec_program(/usr/bin/xine-config
 ARGS --libs
-OUTPUT_VARIABLE XINE_LIBRARY
+OUTPUT_VARIABLE Xine_LIBRARY
 )
 
 set(Xine_INCLUDE_DIRS

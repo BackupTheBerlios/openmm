@@ -31,6 +31,7 @@ public:
     DvbDataModel(const std::string& channelConfig);
     
     virtual Omm::ui4 getChildCount();
+    virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
     
     virtual Omm::ui4 getSize(Omm::ui4 index);
@@ -59,6 +60,13 @@ Omm::ui4
 DvbDataModel::getChildCount()
 {
     return _channelNames.size();
+}
+
+
+std::string
+DvbDataModel::getClass(Omm::ui4 index)
+{
+    return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::VIDEO_BROADCAST);
 }
 
 
