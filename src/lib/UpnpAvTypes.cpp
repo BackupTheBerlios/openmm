@@ -265,9 +265,12 @@ const std::string AvProperty::USER_ANNOTATION = "upnp:userAnnotation";
 
 
 std::string
-AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4, const std::string& c5)
+AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4)
 {
-    if (c2 == "") {
+    if (c1 == "") {
+        return "object";
+    }
+    else if (c2 == "") {
         return "object." + c1;
     }
     else if (c3 == "") {
@@ -276,12 +279,18 @@ AvClass::className(const std::string& c1, const std::string& c2, const std::stri
     else if (c4 == "") {
         return "object." + c1 + "." + c2 + "." + c3;
     }
-    else if (c5 == "") {
+    else {
         return "object." + c1 + "." + c2 + "." + c3 + "." + c4;
     }
-    else {
-        return "object." + c1 + "." + c2 + "." + c3 + "." + c4 + "." + c5;
-    }
+}
+
+
+bool
+AvClass::matchClass(const std::string& name, const std::string& c1, const std::string& c2 , const std::string& c3, const std::string& c4)
+{
+    std::string matchName = className(c1, c2, c3, c4);
+ 
+    return (name.substr(0, matchName.length()) == matchName);
 }
 
 
