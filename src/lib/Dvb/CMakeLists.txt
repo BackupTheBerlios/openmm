@@ -41,6 +41,11 @@ SHARED
 ${OMM_DVB_LIB_SRCS}
 )
 
+set(OMM_DVB
+ommdvb
+CACHE INTERNAL libommutil
+)
+
 
 TARGET_LINK_LIBRARIES( ommdvb
 ${LIB_POCO_FOUNDATION}

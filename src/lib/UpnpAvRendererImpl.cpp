@@ -436,7 +436,7 @@ RenderingControlRendererImpl::initStateVars()
     _setHorizontalKeystone(0);
     _setVerticalKeystone(0);
     _setMute(false);
-    _setVolume(0);
+    _setVolume(_pEngine->getVolume(0));
     _setVolumeDB(0);
     _setLoudness(false);
 }
