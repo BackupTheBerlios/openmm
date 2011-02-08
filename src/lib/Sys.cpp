@@ -118,8 +118,12 @@ NetworkInterfaceManager::findValidIpAddress()
             loopBackProvided = true;
         }
         else {
-            validAddressFound = true;
-            _validIpAddress = Poco::Net::NetworkInterface::forName(*it).address();
+            // iphone simulator returns an IPv6 address on an IPv4 interface, we have to double-check.
+            Poco::Net::IPAddress validIpAddress = Poco::Net::NetworkInterface::forName(*it).address();
+            if (validIpAddress.family() == Poco::Net::IPAddress::IPv4) {
+                validAddressFound = true;
+                _validIpAddress = validIpAddress;
+            }
         }
     }
     if (_interfaceList.size() == 1 && loopBackProvided) {

@@ -56,6 +56,7 @@ public:
     std::string         _album;
     std::string         _track;
     std::string         _genre;
+    std::string         _mime;
     
     const static std::string FILE_ITEM_LIST;
     const static std::string FILE_ITEM;
@@ -66,6 +67,7 @@ public:
     const static std::string FILE_ITEM_ARTIST;
     const static std::string FILE_ITEM_TRACK;
     const static std::string FILE_ITEM_GENRE;
+    const static std::string FILE_ITEM_MIME;
 };
 
 
@@ -78,6 +80,7 @@ const std::string FileItem::FILE_ITEM_ALBUM = "album";
 const std::string FileItem::FILE_ITEM_ARTIST = "artist";
 const std::string FileItem::FILE_ITEM_TRACK = "track";
 const std::string FileItem::FILE_ITEM_GENRE = "genre";
+const std::string FileItem::FILE_ITEM_MIME = "mime";
 
 
 std::string
@@ -148,6 +151,11 @@ FileItem::writeXml(Poco::XML::Node* pNode)
     Poco::AutoPtr<Poco::XML::Text> pGenreValue = pDoc->createTextNode(_genre);
     pGenre->appendChild(pGenreValue);
     pFileItem->appendChild(pGenre);
+
+    Poco::AutoPtr<Poco::XML::Element> pMime = pDoc->createElement(FILE_ITEM_MIME);
+    Poco::AutoPtr<Poco::XML::Text> pMimeValue = pDoc->createTextNode(_mime);
+    pMime->appendChild(pMimeValue);
+    pFileItem->appendChild(pMime);
 }
 
 
@@ -317,8 +325,8 @@ FileDataModel::getSize(Omm::ui4 index)
 std::string
 FileDataModel::getMime(Omm::ui4 index)
 {
-    // TODO: Tagger should determine the mime type
-    return "*";
+    Omm::Av::Log::instance()->upnpav().debug("get mime: " + _items[index]->_mime);
+    return _items[index]->_mime;
 }
 
 
@@ -375,6 +383,9 @@ FileDataModel::characters(const Poco::XML::XMLChar ch[], int start, int length)
     else if (_parseElement == FileItem::FILE_ITEM_GENRE) {
         _pParseItem->_genre += text;
     }
+    else if (_parseElement == FileItem::FILE_ITEM_MIME) {
+        _pParseItem->_mime += text;
+    }
 }
 
 
@@ -425,6 +436,7 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
                     pItem->_album = pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM );
                     pItem->_track = pMeta->getTag(Omm::AvStream::Meta::TK_TRACK);
                     pItem->_genre = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
+                    pItem->_mime = pMeta->getMime();
                     
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_title);
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_artist);

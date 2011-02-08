@@ -56,6 +56,7 @@ public:
     virtual void print(bool isOutFormat = false);
     
     virtual bool isStillImage();
+    virtual std::string getMime();
     virtual int numberStreams();
     
     static PixelFormat toFFmpegPixFmt(Meta::ColorCoding colorCoding);

@@ -207,6 +207,28 @@ FFmpegMeta::isStillImage()
 }
 
 
+std::string
+FFmpegMeta::getMime()
+{
+    std::string format(_pFormatContext->iformat->name);
+    if (format == "mp3") {
+        return "audio/mp3";
+    }
+    else if (format == "mpeg") {
+        return "video/mpeg";
+    }
+    else if (format == "avi") {
+        return "video/avi";
+    }
+    else if (format == "image2") {
+        return "image/jpeg";
+    }
+    else {
+        return "";
+    }
+}
+
+
 int
 FFmpegMeta::numberStreams()
 {

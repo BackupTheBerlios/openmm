@@ -1860,8 +1860,16 @@ void
 DeviceRoot::startHttp()
 {
     Log::instance()->http().information("starting HTTP ...");
+//    Log::instance()->http().debug("device description: " + *_pDeviceDescription);
     _descriptionRequestHandler = new DescriptionRequestHandler(_pDeviceDescription);
-    Poco::URI descriptionUri(_descriptionUri);
+//    Log::instance()->http().debug("description URI: " + _descriptionUri);
+    Poco::URI descriptionUri;
+    try {
+        descriptionUri = _descriptionUri;
+    }
+    catch(Poco::Exception& e) {
+        Log::instance()->http().error("could not parse description URI: " + e.displayText());
+    }
     registerHttpRequestHandler(descriptionUri.getPath(), _descriptionRequestHandler);
 
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
