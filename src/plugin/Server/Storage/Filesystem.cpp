@@ -174,7 +174,7 @@ public:
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index);
-    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek);
+    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end = 0);
     
     // SAX parser interface
     virtual void setDocumentLocator(const Poco::XML::Locator* loc) {}
@@ -293,17 +293,18 @@ FileDataModel::isSeekable(Omm::ui4 index)
 
 
 std::streamsize
-FileDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek)
+FileDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end)
 {
     std::ifstream istr((_basePath + _items[index]->_path).c_str());
     if (!istr) {
         Omm::AvStream::Log::instance()->avstream().error("could not open file for streaming: " + _basePath + _items[index]->_path);
         return 0;
     }
-    if (seek > 0) {
-        istr.seekg(seek);
-    }
-    return Poco::StreamCopier::copyStream(istr, ostr);
+//    if (start > 0) {
+//        istr.seekg(start);
+//    }
+//    return Poco::StreamCopier::copyStream(istr, ostr);
+    return Omm::Av::StreamingResource::copyStream(istr, ostr, start, end);
 }
 
 

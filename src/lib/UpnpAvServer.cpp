@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <Poco/File.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Exception.h>
 
 #include "UpnpAvServer.h"
 #include "UpnpAvServerPrivate.h"
@@ -127,6 +129,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     ui4 resSize = pResource->getSize();
     
     response.setContentType(mime);
+    response.set("Mime-Version", "1.0");
     response.set("transferMode.dlna.org", "Streaming");
     response.set("EXT", "");
     response.set("Server", Poco::Environment::osName() + "/"
@@ -137,45 +140,63 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     if (pResource->isSeekable()) {
         response.set("Accept-Ranges", "bytes");
     }
-    if (resSize > 0 ) {
-        response.setContentLength(resSize);
-    }
-    if (request.has("getMediaInfo.sec")) {
-        response.setContentType(mime);
-    }
     if (request.has("getcontentFeatures.dlna.org")) {
         response.set("contentFeatures.dlna.org", dlna);
     }
     
-    std::ostringstream responseHeader;
-    response.write(responseHeader);
-    Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
-
     if (request.getMethod() == "GET") {
-        Log::instance()->upnpav().debug("sending stream ...");
-        std::ostream& ostr = response.send();
         std::iostream::pos_type start = 0;
-        if (request.has("Range")) {
+        std::iostream::pos_type end = resSize;
+        std::string::size_type len = resSize;
+        if (request.has("Range") && pResource->isSeekable()) {
+            response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_PARTIAL_CONTENT, "Partial Content");
             std::string rangeVal = request.get("Range");
             std::string range = rangeVal.substr(rangeVal.find('=') + 1);
+            response.set("Content-Range", "bytes " + range + "/" + Poco::NumberFormatter::format(pResource->getSize()));
             
             std::string::size_type delim = range.find('-');
             start = Poco::NumberParser::parse(range.substr(0, delim));
-            Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long unsigned int)start) + ")");
+            try {
+                end = Poco::NumberParser::parse(range.substr(delim + 1));
+            }
+            catch (Poco::Exception& e) {
+                Log::instance()->upnpav().error("range end parsing: " + e.displayText());
+            }
+            Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long unsigned int)start)
+                                                              + ", end: " + Poco::NumberFormatter::format((long unsigned int)end) + ")");
+
+            if (end > 0) {
+                len = end - start + 1;
+            }
+            else {
+                len = resSize - start;
+            }
+            response.setContentLength(len);
         }
+        std::ostringstream responseHeader;
+        response.write(responseHeader);
+        Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        Log::instance()->upnpav().debug("sending stream ...");
+        std::ostream& ostr = response.send();
         std::streamsize numBytes;
 #ifdef __DARWIN__
         signal(SIGPIPE, SIG_IGN); // fixes abort with "Program received signal SIGPIPE, Broken pipe." on Mac OSX when renderer stops the stream.
 #endif
         try {
-            numBytes = pResource->stream(ostr, start);
+            numBytes = pResource->stream(ostr, start, end);
         }
-        catch(...) {
-            Log::instance()->upnpav().debug("streaming aborted with exception");
+        catch(Poco::Exception& e) {
+            Log::instance()->upnpav().debug("streaming aborted: " + e.displayText());
         }
         Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
     }
     else if (request.getMethod() == "HEAD") {
+        if (resSize > 0 ) {
+            response.setContentLength(resSize);
+        }
+        std::ostringstream responseHeader;
+        response.write(responseHeader);
+        Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
         response.send();
     }
     
@@ -270,6 +291,50 @@ StreamingResource::getAttributeCount()
 {
     // protocolInfo and size
     return 2;
+}
+
+
+std::streamsize
+StreamingResource::copyStream(std::istream& istr, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end, unsigned bufferSize)
+{
+    poco_assert(bufferSize > 0);
+
+    if (start > 0) {
+        istr.seekg(start);
+    }
+
+    char buffer[bufferSize];
+    std::streamsize len = 0;
+    std::streamsize left = end;
+    left -= start;
+    left++;
+    if (end > 0 && left < bufferSize) {
+        istr.read(buffer, left);
+    }
+    else {
+        istr.read(buffer, bufferSize);
+    }
+    std::streamsize n = istr.gcount();
+    while (n > 0)
+    {
+        len += n;
+        if (end > 0) {
+            left -= n;
+        }
+        ostr.write(buffer, n);
+        if (istr && ostr)
+        {
+            if (end > 0 && left < bufferSize) {
+                istr.read(buffer, left);
+            }
+            else {
+                istr.read(buffer, bufferSize);
+            }
+            n = istr.gcount();
+        }
+        else n = 0;
+    }
+    return len;
 }
 
 
@@ -461,11 +526,11 @@ TorchItemResource::isSeekable()
 
 
 std::streamsize
-TorchItemResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
+TorchItemResource::stream(std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end)
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->stream(_pItem->getObjectNumber(), ostr, seek);
+        return pDataModel->stream(_pItem->getObjectNumber(), ostr, start, end);
     }
     else {
         return 0;

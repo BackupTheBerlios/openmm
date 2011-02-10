@@ -212,7 +212,7 @@ FFmpegMeta::getMime()
 {
     std::string format(_pFormatContext->iformat->name);
     if (format == "mp3") {
-        return "audio/mp3";
+        return "audio/mpeg";
     }
     else if (format == "mpeg") {
         return "video/mpeg";

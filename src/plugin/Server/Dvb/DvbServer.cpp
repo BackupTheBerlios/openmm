@@ -38,7 +38,7 @@ public:
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index);
-    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek);
+    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end);
 
 private:
     void scanChannelConfig(const std::string& channelConfig);
@@ -85,14 +85,15 @@ DvbDataModel::isSeekable(Omm::ui4 index)
 
 
 std::streamsize
-DvbDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek)
+DvbDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end)
 {
     Omm::Dvb::DvbDevice::instance()->tune(_channels[index]);
     
     Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
     std::ifstream istr("/dev/dvb/adapter0/dvr0");
-    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
-    return bytes;
+    return Poco::StreamCopier::copyStream(istr, ostr);
+//    return Omm::Av::StreamingResource::copyStream(istr, ostr, start, end);
+//    return bytes;
 }
 
 

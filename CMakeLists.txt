@@ -19,6 +19,8 @@ elseif(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(DARWIN 1)
 if(IPHONE)
 set(BUILD_TARGET "iPhone")
+# use hardware floating point ops on simulator and softemu on iphone device
+add_definitions(-msoft-float)
 else(IPHONE)
 set(BUILD_TARGET "Mac OSX")
 endif(IPHONE)

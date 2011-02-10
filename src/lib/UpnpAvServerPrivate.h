@@ -60,7 +60,7 @@ public:
     virtual std::string getDlna();
     
     virtual bool isSeekable();
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
+    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end = 0);
 };
 
 

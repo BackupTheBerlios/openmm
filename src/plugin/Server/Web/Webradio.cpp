@@ -38,7 +38,7 @@ public:
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index);
-    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek);
+    virtual std::streamsize stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end);
 
 private:
     void scanStationConfig(const std::string& stationConfig);
@@ -83,7 +83,7 @@ WebradioDataModel::isSeekable(Omm::ui4 index)
 
 
 std::streamsize
-WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type seek)
+WebradioDataModel::stream(Omm::ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end)
 {
     Poco::URI uri(_stationUris[index]);
     
