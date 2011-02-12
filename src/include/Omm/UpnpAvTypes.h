@@ -312,7 +312,7 @@ public:
     virtual std::string getName() { return "res"; }
     virtual std::string getUri();
     virtual std::string getProtInfo();
-    virtual ui4 getSize();
+    virtual std::streamsize getSize();
 };
 
 
@@ -505,7 +505,7 @@ public:
     
     const std::string& getUri();
     const std::string& getProtInfo();
-    ui4 getSize();
+    std::streamsize getSize();
     
     void setUri(const std::string& uri);
     void setProtInfo(const std::string& protInfo);
@@ -513,7 +513,7 @@ public:
 private:
     std::string     _uri;
     std::string     _protInfo;
-    ui4             _size;
+    std::streamsize _size;
 };
 
 

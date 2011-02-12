@@ -381,10 +381,10 @@ AbstractResource::getProtInfo()
 }
 
 
-ui4
+std::streamsize
 AbstractResource::getSize()
 {
-    return Poco::NumberParser::parseUnsigned(getAttributeValue(AvProperty::SIZE));
+    return Poco::NumberParser::parse(getAttributeValue(AvProperty::SIZE));
 }
 
 
@@ -1238,7 +1238,7 @@ Resource::getProtInfo()
 }
 
 
-ui4
+std::streamsize
 Resource::getSize()
 {
     return _size;

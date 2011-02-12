@@ -55,12 +55,12 @@ class TorchItemResource : public Omm::Av::StreamingResource
 public:
     TorchItemResource(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
     
-    virtual Omm::ui4 getSize();
+    virtual std::streamsize getSize();
     virtual std::string getMime();
     virtual std::string getDlna();
     
     virtual bool isSeekable();
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end = 0);
+    virtual std::istream* getStream();
 };
 
 

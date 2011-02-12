@@ -64,6 +64,10 @@ public:
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
+    std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::streamoff start = 0, std::streamoff end = -1);
+    void parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end);
+
+    unsigned int _bufferSize;
     MediaItemServer*  _pItemServer;
 };
 
@@ -112,15 +116,13 @@ public:
     virtual std::string getAttributeValue(const std::string& name);
     virtual int getAttributeCount();
 
-    static std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::iostream::pos_type start = 0, std::iostream::pos_type end = 0, unsigned bufferSize = 8192);
-
 protected:
-    virtual ui4 getSize() { return 0; }
+    virtual std::streamsize getSize() { return -1; }
     virtual std::string getMime() { return "*"; }
     virtual std::string getDlna() { return "*"; }
     
     virtual bool isSeekable() = 0;
-    virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end = 0) = 0;
+    virtual std::istream* getStream() = 0;
     
 protected:
     StreamingMediaObject*       _pServer;
@@ -171,11 +173,11 @@ public:
     virtual std::string getTitle(ui4 index) { return ""; }
     virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
     
-    virtual ui4 getSize(ui4 index) { return 0; }
+    virtual std::streamsize getSize(ui4 index) { return -1; }
     virtual std::string getMime(ui4 index) { return "*"; }
     virtual std::string getDlna(ui4 index) { return "*"; }
     virtual bool isSeekable(ui4 index) { return false; }
-    virtual std::streamsize stream(ui4 index, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end = 0) { return 0; }
+    virtual std::istream* getStream(ui4 index) { return 0; }
 };
 
 

@@ -91,6 +91,7 @@ ItemRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 
 
 ItemRequestHandler::ItemRequestHandler(MediaItemServer* pItemServer) :
+_bufferSize(8192),
 _pItemServer(pItemServer)
 {
 }
@@ -126,7 +127,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         dlna = prot[3];
     }
     Log::instance()->upnpav().debug("protInfo mime: " + mime + ", dlna: " + dlna);
-    ui4 resSize = pResource->getSize();
+    std::streamsize resSize = pResource->getSize();
     
     response.setContentType(mime);
     response.set("Mime-Version", "1.0");
@@ -145,27 +146,18 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     }
     
     if (request.getMethod() == "GET") {
-        std::iostream::pos_type start = 0;
-        std::iostream::pos_type end = resSize;
-        std::string::size_type len = resSize;
+        std::streamoff start = 0;
+        std::streamoff end = -1;
+        std::streamsize len = resSize;
         if (request.has("Range") && pResource->isSeekable()) {
             response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_PARTIAL_CONTENT, "Partial Content");
-            std::string rangeVal = request.get("Range");
-            std::string range = rangeVal.substr(rangeVal.find('=') + 1);
-            response.set("Content-Range", "bytes " + range + "/" + Poco::NumberFormatter::format(pResource->getSize()));
-            
-            std::string::size_type delim = range.find('-');
-            start = Poco::NumberParser::parse(range.substr(0, delim));
-            try {
-                end = Poco::NumberParser::parse(range.substr(delim + 1));
-            }
-            catch (Poco::Exception& e) {
-                Log::instance()->upnpav().error("range end parsing: " + e.displayText());
-            }
-            Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long unsigned int)start)
-                                                              + ", end: " + Poco::NumberFormatter::format((long unsigned int)end) + ")");
-
-            if (end > 0) {
+            std::string rangeValue = request.get("Range");
+            parseRange(rangeValue, start, end);
+            response.set("Content-Range", "bytes " 
+                        + Poco::NumberFormatter::format((long)start) + "-"
+                        + (end == -1 ? "" : Poco::NumberFormatter::format((long)end)) + "/"
+                        + Poco::NumberFormatter::format(pResource->getSize()));
+            if (end >= 0) {
                 len = end - start + 1;
             }
             else {
@@ -176,19 +168,22 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         std::ostringstream responseHeader;
         response.write(responseHeader);
         Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
-        Log::instance()->upnpav().debug("sending stream ...");
         std::ostream& ostr = response.send();
-        std::streamsize numBytes;
 #ifdef __DARWIN__
         signal(SIGPIPE, SIG_IGN); // fixes abort with "Program received signal SIGPIPE, Broken pipe." on Mac OSX when renderer stops the stream.
 #endif
         try {
-            numBytes = pResource->stream(ostr, start, end);
+            std::istream* pIstr = pResource->getStream();
+            if (pIstr) {
+                Log::instance()->upnpav().debug("sending stream ...");
+                std::streamsize numBytes = copyStream(*pIstr, ostr, start, end);
+                Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
+                delete pIstr;
+            }
         }
         catch(Poco::Exception& e) {
             Log::instance()->upnpav().debug("streaming aborted: " + e.displayText());
         }
-        Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
     }
     else if (request.getMethod() == "HEAD") {
         if (resSize > 0 ) {
@@ -203,6 +198,68 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     if (response.sent()) {
         Log::instance()->upnpav().debug("media item request finished: " + request.getURI());
     }
+}
+
+
+std::streamsize
+ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::streamoff start, std::streamoff end)
+{
+    if (start > 0) {
+        istr.seekg(start);
+    }
+
+    char buffer[_bufferSize];
+    std::streamsize len = 0;
+    std::streamsize left = end;
+    if (end >= 0) {
+        left -= start;
+        left++;
+    }
+    if (left >= 0 && left < _bufferSize) {
+        istr.read(buffer, left);
+    }
+    else {
+        istr.read(buffer, _bufferSize);
+    }
+    std::streamsize n = istr.gcount();
+    while (n > 0)
+    {
+        len += n;
+        if (end >= 0) {
+            left -= n;
+        }
+        ostr.write(buffer, n);
+        if (istr && ostr)
+        {
+            if (left >= 0 && left < _bufferSize) {
+                istr.read(buffer, left);
+            }
+            else {
+                istr.read(buffer, _bufferSize);
+            }
+            n = istr.gcount();
+        }
+        else n = 0;
+    }
+    return len;
+}
+
+
+void
+ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end)
+{
+   std::string range = rangeValue.substr(rangeValue.find('=') + 1);
+
+    std::string::size_type delim = range.find('-');
+    start = Poco::NumberParser::parse(range.substr(0, delim));
+    try {
+        end = Poco::NumberParser::parse(range.substr(delim + 1));
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("range end parsing: " + e.displayText());
+    }
+    Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long)start)
+                                                      + ", end: " + (end == -1 ? "not defined" : Poco::NumberFormatter::format((long)end)) + ")");
 }
 
 
@@ -291,50 +348,6 @@ StreamingResource::getAttributeCount()
 {
     // protocolInfo and size
     return 2;
-}
-
-
-std::streamsize
-StreamingResource::copyStream(std::istream& istr, std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end, unsigned bufferSize)
-{
-    poco_assert(bufferSize > 0);
-
-    if (start > 0) {
-        istr.seekg(start);
-    }
-
-    char buffer[bufferSize];
-    std::streamsize len = 0;
-    std::streamsize left = end;
-    left -= start;
-    left++;
-    if (end > 0 && left < bufferSize) {
-        istr.read(buffer, left);
-    }
-    else {
-        istr.read(buffer, bufferSize);
-    }
-    std::streamsize n = istr.gcount();
-    while (n > 0)
-    {
-        len += n;
-        if (end > 0) {
-            left -= n;
-        }
-        ostr.write(buffer, n);
-        if (istr && ostr)
-        {
-            if (end > 0 && left < bufferSize) {
-                istr.read(buffer, left);
-            }
-            else {
-                istr.read(buffer, bufferSize);
-            }
-            n = istr.gcount();
-        }
-        else n = 0;
-    }
-    return len;
 }
 
 
@@ -525,12 +538,12 @@ TorchItemResource::isSeekable()
 }
 
 
-std::streamsize
-TorchItemResource::stream(std::ostream& ostr, std::iostream::pos_type start, std::iostream::pos_type end)
+std::istream*
+TorchItemResource::getStream()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->stream(_pItem->getObjectNumber(), ostr, start, end);
+        return pDataModel->getStream(_pItem->getObjectNumber());
     }
     else {
         return 0;
@@ -538,7 +551,7 @@ TorchItemResource::stream(std::ostream& ostr, std::iostream::pos_type start, std
 }
 
 
-ui4
+std::streamsize
 TorchItemResource::getSize()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
