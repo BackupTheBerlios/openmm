@@ -36,7 +36,7 @@ then
 fi
 
 # print out setup
-if [ ${PRINT_USAGE} -o ${#} -gt 1 ]
+if [ ${PRINT_USAGE} ]
 then
     echo
     echo "usage: $0 [-h] [-v] [-s staging_dir] [-t platform_target] [build_target]"
@@ -51,7 +51,7 @@ do echo ${i}
 done
 echo
 
-if [ ${PRINT_USAGE} -o ${#} -gt 1 ]
+if [ ${PRINT_USAGE} ]
 then
     echo "platform targets (for cross compiling):"
     ls -1 ${TOOLCHAIN_FILE_DIR}
@@ -63,12 +63,13 @@ then
     exit
 fi
 
-# run cmake in out of source build tree
+# now do the stuff ...
 if [ ! -d ${BIN_DIR} ]
 then
     mkdir -p ${BIN_DIR}
 fi
 
+# clean up build and staging directories
 if [ "${1}" = "distclean" ]
 then
     echo "removing build directory: ${BIN_DIR}"
@@ -78,10 +79,12 @@ then
         echo "removing staging files:"
         rm -rvf ${STAGING_DIR}/lib/libomm* ${STAGING_DIR}/lib/omm ${STAGING_DIR}/include/Omm ${STAGING_DIRª}/bin/omm*
     fi
+# configure build system
 elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
     ${CMAKE_CMD} ${CMAKE_OPTS} ${SRC_DIR}
+# build targets in out of source tree
 else
     cd ${BIN_DIR}
     make ${VERBOSE} ${1}
