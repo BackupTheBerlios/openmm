@@ -182,10 +182,17 @@ WebradioDataModel::getDlna(Omm::ui4 index)
 void
 WebradioDataModel::scanStationConfig(const std::string& stationConfig)
 {
-    Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file ...");
+    Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file: " + stationConfig + " ...");
     Poco::XML::DOMParser parser;
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
-    Poco::XML::Document* pDoc = parser.parse(stationConfig);
+    Poco::XML::Document* pDoc;
+    try {
+        pDoc = parser.parse(stationConfig);
+    }
+    catch (Poco::Exception& e) {
+        Omm::Av::Log::instance()->upnpav().error("webradio config not found and scanning of stations not yet supported, giving up.");
+        return;
+    }
     
     Poco::XML::Node* pStationList = pDoc->firstChild();
     if (pStationList->nodeName() != "stationlist") {
@@ -231,6 +238,8 @@ WebradioServer::setOption(const std::string& key, const std::string& value)
 }
 
 
+#ifndef OMM_MODULE
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
 POCO_EXPORT_CLASS(WebradioServer)
 POCO_END_MANIFEST
+#endif

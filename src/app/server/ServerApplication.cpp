@@ -152,6 +152,8 @@ protected:
                 }
             }
             else if (_containerPlugin == "server-webradio") {
+                // FIXME: only start web radio server, if internet is available
+                // check this in AvServer::setRoot() by calling for example MediaObject::isAvailable()
                 if (_name == "") {
                     _name = "Web Radio";
                 }

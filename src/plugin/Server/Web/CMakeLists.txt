@@ -9,9 +9,24 @@ ${OMM}
 ${OMM_AV}
 )
 
+add_library(ommserver-webradio-module
+SHARED
+Webradio.cpp
+)
+
+set_target_properties(ommserver-webradio-module
+PROPERTIES COMPILE_DEFINITIONS OMM_MODULE
+)
+
+target_link_libraries(ommserver-webradio-module
+${POCO_UTIL}
+${OMM}
+${OMM_AV}
+)
+
 set(OMMPLUGIN_SERVER_WEBRADIO
-ommserver-webradio
-CACHE INTERNAL ommserver-webradio
+ommserver-webradio-module
+CACHE INTERNAL ommserver-webradio-module
 )
 
 # add_library(ommserver-webradiosimple
@@ -31,3 +46,7 @@ LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib/omm
 )
 
+install(TARGETS ommserver-webradio-module
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+)

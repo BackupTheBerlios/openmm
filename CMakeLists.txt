@@ -10,25 +10,25 @@ else(CMAKE_CROSSCOMPILING)
 message(STATUS "Building native for system: " ${CMAKE_SYSTEM_NAME})
 endif(CMAKE_CROSSCOMPILING)
 
+# override BUILD_TARGET if not specified
 if(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 set(LINUX 1)
 set(BUILD_TARGET "Linux")
 add_definitions(-D__LINUX__)
-
 elseif(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(DARWIN 1)
-if(IPHONE)
-set(BUILD_TARGET "iPhone")
-# use hardware floating point ops on simulator and softemu on iphone device
-add_definitions(-msoft-float)
-else(IPHONE)
-set(BUILD_TARGET "Mac OSX")
-endif(IPHONE)
 add_definitions(-D__DARWIN__)
 set(CMAKE_INSTALL_NAME_DIR ${CMAKE_PREFIX_PATH})
+elseif(NOT BUILD_TARGET)
+set(BUILD_TARGET "Native")
 endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-message(STATUS "Set build target to " ${BUILD_TARGET})
+message(STATUS "Build target is: " ${BUILD_TARGET})
+
+if(DEFINED BUILD_TARGET AND (${BUILD_TARGET} STREQUAL iphone))
+# use hardware floating point ops on simulator and softemu on iphone device
+add_definitions(-msoft-float)
+endif(DEFINED BUILD_TARGET AND (${BUILD_TARGET} STREQUAL iphone))
 
 add_definitions(-g -Wno-unused-parameter)
 set(CMAKE_MODULE_PATH

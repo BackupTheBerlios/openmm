@@ -1,67 +1,88 @@
 #!/bin/sh
 
+BIN_DIR=../`basename ${PWD}`bin
+STAGING_DIR=/usr
+BUILD_TARGET=
+BUILD_TYPE="None"
+
 VERBOSE=
-CMAKE_PREFIX_PATH=/usr
-TOOLCHAIN=
-BINDIR=../`basename ${PWD}`bin
+PRINT_USAGE=
 CMAKE_CMD=cmake
-CMAKE_OPTS="-DCMAKE_BUILD_TYPE=None"
+CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
-usage()
-{
-    echo >&2 \
-    "usage: $0 [-h] [-v] [-s stagingdir] [-t toolchain] [target]"
-    exit 1
-}
-
+# get command line options
 while getopts hvs:t: opt
 do
     case "$opt" in
-	h) usage;;
+	h) PRINT_USAGE=1;;
         v) VERBOSE="VERBOSE=1";;
-        s) CMAKE_PREFIX_PATH="$OPTARG";;
-	t) TOOLCHAIN="$OPTARG";;
-        \?) usage;;    # unknown flag
+        s) STAGING_DIR="${OPTARG}";;
+	t) BUILD_TARGET="${OPTARG}";;
+        \?) PRINT_USAGE=1;;    # unknown flag
     esac
 done
 shift `expr $OPTIND - 1`
 
-if [ $# -gt 1 ]
+CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_INSTALL_PREFIX=${STAGING_DIR}"
+SRC_DIR=${PWD}
+TOOLCHAIN_FILE_DIR=${SRC_DIR}/cmake/platform
+
+# setup cross compile
+if [ ${BUILD_TARGET} ]
 then
-    usage
+    BIN_DIR=${BIN_DIR}.${BUILD_TARGET}
+    TOOLCHAIN_FILE=${TOOLCHAIN_FILE_DIR}/${BUILD_TARGET}
+    CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_PREFIX_PATH=${STAGING_DIR} -DBUILD_TARGET=${BUILD_TARGET} -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
 fi
 
-export CMAKE_PREFIX_PATH
-#echo "staging dir:" ${CMAKE_PREFIX_PATH}
-
-CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_INSTALL_PREFIX=${CMAKE_PREFIX_PATH}"
-SRCDIR=${PWD}
-
-# do a cross compile
-if [ ${TOOLCHAIN} ]
+# print out setup
+if [ ${PRINT_USAGE} -o ${#} -gt 1 ]
 then
-    echo "building with toolchain configuration" cmake/platform/${TOOLCHAIN}
-    BINDIR=${BINDIR}.${TOOLCHAIN}
-    CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_TOOLCHAIN_FILE=${SRCDIR}/cmake/platform/${TOOLCHAIN}"
+    echo
+    echo "usage: $0 [-h] [-v] [-s staging_dir] [-t platform_target] [build_target]"
+    echo
 fi
 
-echo "build directory:" ${BINDIR}
-echo "cmake options:" ${CMAKE_OPTS}
+echo "build directory:" ${BIN_DIR}
+echo "staging directory:" ${STAGING_DIR}
+echo "cmake options:"
+for i in ${CMAKE_OPTS}
+do echo ${i}
+done
+echo
+
+if [ ${PRINT_USAGE} -o ${#} -gt 1 ]
+then
+    echo "platform targets (for cross compiling):"
+    ls -1 ${TOOLCHAIN_FILE_DIR}
+    echo
+    echo "build targets:"
+    cd ${BIN_DIR}
+    make help
+    echo
+    exit
+fi
 
 # run cmake in out of source build tree
-if [ ! -d ${BINDIR} ]
+if [ ! -d ${BIN_DIR} ]
 then
-    mkdir -p ${BINDIR}
+    mkdir -p ${BIN_DIR}
 fi
 
-if [ "$1" = "distclean" ]
+if [ "${1}" = "distclean" ]
 then
-    rm -rf ${BINDIR}
-elif [ "$1" = "config" ]
+    echo "removing build directory: ${BIN_DIR}"
+    rm -rf ${BIN_DIR}
+    if [ ${STAGING_DIR} ]
+    then
+        echo "removing staging files:"
+        rm -rvf ${STAGING_DIR}/lib/libomm* ${STAGING_DIR}/lib/omm ${STAGING_DIR}/include/Omm ${STAGING_DIRª}/bin/omm*
+    fi
+elif [ "${1}" = "config" ]
 then
-    cd ${BINDIR}
-    ${CMAKE_CMD} ${CMAKE_OPTS} ${SRCDIR}
+    cd ${BIN_DIR}
+    ${CMAKE_CMD} ${CMAKE_OPTS} ${SRC_DIR}
 else
-    cd ${BINDIR}
-    make ${VERBOSE} $1
+    cd ${BIN_DIR}
+    make ${VERBOSE} ${1}
 fi

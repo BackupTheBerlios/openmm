@@ -26,7 +26,6 @@
 #include <Poco/Util/HelpFormatter.h>
 
 #include <Omm/UpnpAvServer.h>
-#include <Omm/Util.h>
 #include <Omm/Plugin/Webradio.h>
 
 using Poco::Util::ServerApplication;
@@ -129,6 +128,8 @@ protected:
             myMediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
             myMediaServer.addIcon(pIcon);
+            // FIXME: only start web radio server, if internet is available
+            // check this in AvServer::setRoot() by calling for example MediaObject::isAvailable()
             myMediaServer.start();
             waitForTerminationRequest();
         }

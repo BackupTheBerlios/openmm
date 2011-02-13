@@ -90,7 +90,7 @@ DvbDataModel::getStream(Omm::ui4 index)
 
     Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
     std::ifstream* pIstr = new std::ifstream("/dev/dvb/adapter0/dvr0");
-    return return pIstr;
+    return pIstr;
 }
 
 
