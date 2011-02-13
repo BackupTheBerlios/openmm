@@ -25,12 +25,16 @@ endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 message(STATUS "Build target is: " ${BUILD_TARGET})
 
-if(DEFINED BUILD_TARGET AND (${BUILD_TARGET} STREQUAL iphone))
+if(DEFINED BUILD_TARGET)
+if(${BUILD_TARGET} STREQUAL iphone)
 # use hardware floating point ops on simulator and softemu on iphone device
 add_definitions(-msoft-float)
-endif(DEFINED BUILD_TARGET AND (${BUILD_TARGET} STREQUAL iphone))
+endif(${BUILD_TARGET} STREQUAL iphone)
+endif(DEFINED BUILD_TARGET)
 
 add_definitions(-g -Wno-unused-parameter)
+get_property(BUILD_SHARED_LIBS
+GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
 set(CMAKE_MODULE_PATH
 ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 ${CMAKE_MODULE_PATH}

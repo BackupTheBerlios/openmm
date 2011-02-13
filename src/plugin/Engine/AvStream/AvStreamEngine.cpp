@@ -385,6 +385,10 @@ AvStreamEngine::endOfStream(Omm::AvStream::Sink::EndOfStream* eof)
 }
 
 
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
 POCO_EXPORT_CLASS(AvStreamEngine)
 POCO_END_MANIFEST
+#endif
+
+        

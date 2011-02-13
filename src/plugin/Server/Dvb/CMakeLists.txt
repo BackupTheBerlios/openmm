@@ -2,19 +2,25 @@ find_package(LinuxDVB)
 
 if(LINUXDVB_FOUND)
 
-add_library(ommserver-dvb
+if(BUILD_PLUGINS)
+add_library(ommplugin-server-dvb
 SHARED
 DvbServer.cpp
 )
 
-target_link_libraries(ommserver-dvb
+target_link_libraries(ommplugin-server-dvb
 ${OMM}
 ${OMM_AV}
 ${OMM_DVB}
 )
 
-install(TARGETS ommserver-dvb
+set_target_properties(ommplugin-server-dvb
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
+install(TARGETS ommplugin-server-dvb
 LIBRARY DESTINATION lib/omm
 )
 
+endif(BUILD_PLUGINS)
 endif(LINUXDVB_FOUND)

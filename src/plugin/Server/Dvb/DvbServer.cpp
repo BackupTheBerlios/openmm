@@ -196,7 +196,8 @@ DvbServer::timerCallback(Poco::Timer& timer)
 // }
 
 
-
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
 POCO_EXPORT_CLASS(DvbServer)
 POCO_END_MANIFEST
+#endif

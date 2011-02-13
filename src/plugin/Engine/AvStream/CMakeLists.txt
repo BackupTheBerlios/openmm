@@ -1,16 +1,21 @@
-add_library(ommengine-avstream
+if(BUILD_PLUGINS)
+add_library(ommplugin-engine-avstream
 SHARED
 AvStreamEngine.cpp
 )
 
-target_link_libraries( ommengine-avstream
+target_link_libraries(ommplugin-engine-avstream
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
 ${OMM_AVSTREAM}
 )
 
-install(TARGETS ommengine-avstream
-LIBRARY DESTINATION lib/omm
-ARCHIVE DESTINATION lib
+set_target_properties(ommplugin-engine-avstream
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
+
+install(TARGETS ommplugin-engine-avstream
+LIBRARY DESTINATION lib/omm
+)
+endif(BUILD_PLUGINS)

@@ -236,7 +236,8 @@ AlsaAudioSink::getStopWriting()
 }
 
 
-
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::AvStream::AudioSink)
 POCO_EXPORT_CLASS(AlsaAudioSink)
 POCO_END_MANIFEST
+#endif

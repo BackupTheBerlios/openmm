@@ -502,6 +502,8 @@ VlcEngine::handleException()
 }
 
 
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
 POCO_EXPORT_CLASS(VlcEngine)
 POCO_END_MANIFEST
+#endif

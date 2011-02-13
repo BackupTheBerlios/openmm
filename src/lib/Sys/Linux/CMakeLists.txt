@@ -44,7 +44,6 @@ ${ommlib_SOURCE_DIR}/Omm
 
 ADD_LIBRARY( ommsys-linux
     #STATIC    # doesn't work on all linux version of the linker
-    SHARED
     SysImplLinux.cpp
     NetworkDevice.cpp
 )

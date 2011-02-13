@@ -1,42 +1,43 @@
-add_library(ommserver-file
+if(BUILD_PLUGINS)
+add_library(ommplugin-server-file
 SHARED
 Filesystem.cpp
 )
 
-target_link_libraries(ommserver-file
+target_link_libraries(ommplugin-server-file
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
 ${OMM_AVSTREAM}
 )
 
-add_library(ommmodule-server-file
-SHARED
-Filesystem.cpp
+set_target_properties(ommplugin-server-file
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
-set_target_properties(ommmodule-server-file
-PROPERTIES COMPILE_DEFINITIONS OMM_MODULE
-)
-
-target_link_libraries(ommmodule-server-file
-${OMM_UTIL}
-${OMM}
-${OMM_AV}
-${OMM_AVSTREAM}
-)
-
-set(OMMPLUGIN_SERVER_FILE
-ommserver-file-module
-CACHE INTERNAL ommserver-file-module
-)
-
-install(TARGETS ommserver-file
+install(TARGETS ommplugin-server-file
 LIBRARY DESTINATION lib/omm
-ARCHIVE DESTINATION lib/omm
+)
+endif(BUILD_PLUGINS)
+
+
+add_library(ommx-server-file
+Filesystem.cpp
 )
 
-install(TARGETS ommmodule-server-file
+target_link_libraries(ommx-server-file
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
+)
+
+set(OMMX_SERVER_FILE
+ommx-server-file
+CACHE INTERNAL ommx-server-file
+)
+
+install(TARGETS ommx-server-file
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )

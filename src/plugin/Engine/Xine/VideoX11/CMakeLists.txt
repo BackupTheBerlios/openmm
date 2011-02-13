@@ -1,13 +1,19 @@
-add_library(ommxinevideo-x11
+if(BUILD_PLUGINS)
+add_library(ommplugin-xinevideo-x11
 SHARED
 X11VideoXine.cpp
 )
 
-target_link_libraries(ommxinevideo-x11
+target_link_libraries(ommplugin-xinevideo-x11
 ommengine-xine
 X11
 )
 
-install(TARGETS ommxinevideo-x11
+set_target_properties(ommplugin-xinevideo-x11
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
+install(TARGETS ommplugin-xinevideo-x11
 LIBRARY DESTINATION lib/omm
 )
+endif(BUILD_PLUGINS)

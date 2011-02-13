@@ -312,7 +312,8 @@ XineEngine::getVolume(int channel)
     return xine_get_param(_xineStream, XINE_PARAM_AUDIO_VOLUME);
 }
 
-
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::Av::Engine)
 POCO_EXPORT_CLASS(XineEngine)
 POCO_END_MANIFEST
+#endif

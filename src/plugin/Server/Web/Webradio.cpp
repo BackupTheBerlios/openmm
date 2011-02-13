@@ -238,7 +238,7 @@ WebradioServer::setOption(const std::string& key, const std::string& value)
 }
 
 
-#ifndef OMM_MODULE
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
 POCO_EXPORT_CLASS(WebradioServer)
 POCO_END_MANIFEST

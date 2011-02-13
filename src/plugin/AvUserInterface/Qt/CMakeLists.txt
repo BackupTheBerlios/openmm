@@ -58,7 +58,8 @@ QT4_WRAP_CPP(
 OMMC_QTUI_MOC_CPP ${OMMC_QTUI_MOC}
 )
 
-add_library(ommavinterface-qt
+if(BUILD_PLUGINS)
+add_library(ommplugin-avinterface-qt
 SHARED
 ${OMMC_QTUI_SRCS}
 ${OMMC_QTUI}
@@ -66,16 +67,19 @@ ${OMMC_QTUI_MOC_CPP}
 ${OMMC_RES_SRC}
 )
 
-target_link_libraries(ommavinterface-qt
+target_link_libraries(ommplugin-avinterface-qt
 ${OMM}
 ${OMM_AV}
 ${QT_LIBRARIES}
 )
 
-install(TARGETS ommavinterface-qt
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib/omm
-ARCHIVE DESTINATION lib/omm
+set_target_properties(ommplugin-avinterface-qt
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
+
+install(TARGETS ommplugin-avinterface-qt
+LIBRARY DESTINATION lib/omm
+)
+endif(BUILD_PLUGINS)
 
 endif(QT4_FOUND)

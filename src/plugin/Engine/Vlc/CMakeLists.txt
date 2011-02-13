@@ -6,19 +6,24 @@ include_directories(
 ${VLC_INCLUDE_DIRS}
 )
 
-add_library(ommengine-vlc
+if(BUILD_PLUGINS)
+add_library(ommplugin-engine-vlc
 SHARED
 EngineVlc.cpp
 )
 
-target_link_libraries(ommengine-vlc
+target_link_libraries(ommplugin-engine-vlc
 ${OMM}
 ${OMM_AV}
 ${VLC_LIBRARIES}
 )
 
-install(TARGETS ommengine-vlc
-LIBRARY DESTINATION lib/omm
+set_target_properties(ommplugin-engine-vlc
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
+install(TARGETS ommplugin-engine-vlc
+LIBRARY DESTINATION lib/omm
+)
+endif(BUILD_PLUGINS)
 endif(VLC_FOUND)

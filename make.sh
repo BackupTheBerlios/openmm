@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BIN_DIR=../`basename ${PWD}`bin
-STAGING_DIR=/usr
+STAGING_DIR=
 BUILD_TARGET=
 BUILD_TYPE="None"
 
@@ -11,7 +11,8 @@ CMAKE_CMD=cmake
 CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # get command line options
-while getopts hvs:t: opt
+#while getopts :h(help)v(verbose)s(staging):t(target): opt
+while getopts :hvs:t: opt
 do
     case "$opt" in
 	h) PRINT_USAGE=1;;
@@ -23,22 +24,28 @@ do
 done
 shift `expr $OPTIND - 1`
 
-CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_INSTALL_PREFIX=${STAGING_DIR}"
 SRC_DIR=${PWD}
 TOOLCHAIN_FILE_DIR=${SRC_DIR}/cmake/platform
+
+# setup staging dir
+if [ ${STAGING_DIR} ]
+then
+    CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_INSTALL_PREFIX=${STAGING_DIR} -DCMAKE_PREFIX_PATH=${STAGING_DIR}"
+fi
 
 # setup cross compile
 if [ ${BUILD_TARGET} ]
 then
     BIN_DIR=${BIN_DIR}.${BUILD_TARGET}
     TOOLCHAIN_FILE=${TOOLCHAIN_FILE_DIR}/${BUILD_TARGET}
-    CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_PREFIX_PATH=${STAGING_DIR} -DBUILD_TARGET=${BUILD_TARGET} -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
+    CMAKE_OPTS="${CMAKE_OPTS} -DBUILD_TARGET=${BUILD_TARGET} -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
 fi
 
 # print out setup
+echo
+
 if [ ${PRINT_USAGE} ]
 then
-    echo
     echo "usage: $0 [-h] [-v] [-s staging_dir] [-t platform_target] [build_target]"
     echo
 fi
@@ -53,13 +60,18 @@ echo
 
 if [ ${PRINT_USAGE} ]
 then
-    echo "platform targets (for cross compiling):"
+    echo "platform targets (cross compiling):"
     ls -1 ${TOOLCHAIN_FILE_DIR}
     echo
     echo "build targets:"
-    cd ${BIN_DIR}
-    make help
-    echo
+    echo "... config"
+    echo "... distclean"
+    if [ -f ${BIN_DIR}/Makefile ]
+    then
+        cd ${BIN_DIR}
+        make help | grep '^\.\.\.'
+        echo
+    fi
     exit
 fi
 

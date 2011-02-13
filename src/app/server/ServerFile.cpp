@@ -26,7 +26,7 @@
 #include <Poco/Util/HelpFormatter.h>
 
 #include <Omm/UpnpAvServer.h>
-#include <Omm/Plugin/Filesystem.h>
+#include <Omm/X/Filesystem.h>
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;

@@ -1414,6 +1414,8 @@ FFmpegFrame::duration()
 }
 
 
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::AvStream::Tagger)
 POCO_EXPORT_CLASS(FFmpegTagger)
 POCO_END_MANIFEST
+#endif

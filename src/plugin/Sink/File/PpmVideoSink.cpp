@@ -91,7 +91,8 @@ PpmVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 }
 
 
-
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::AvStream::VideoSink)
 POCO_EXPORT_CLASS(PpmVideoSink)
 POCO_END_MANIFEST
+#endif

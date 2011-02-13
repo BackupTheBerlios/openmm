@@ -26,7 +26,7 @@
 #include <Poco/Util/HelpFormatter.h>
 
 #include <Omm/UpnpAvServer.h>
-#include <Omm/Plugin/Webradio.h>
+#include <Omm/X/Webradio.h>
 
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;

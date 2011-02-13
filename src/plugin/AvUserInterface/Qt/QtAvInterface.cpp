@@ -698,6 +698,8 @@ QtAvInterface::newVolume(const int volume)
 }
 
 
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::Av::AvUserInterface)
 POCO_EXPORT_CLASS(QtAvInterface)
 POCO_END_MANIFEST
+#endif

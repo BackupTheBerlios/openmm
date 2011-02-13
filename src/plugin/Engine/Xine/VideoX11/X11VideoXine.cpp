@@ -106,6 +106,8 @@ X11XineVideo::closeVisual()
 }
 
 
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(XineVideo)
 POCO_EXPORT_CLASS(X11XineVideo)
 POCO_END_MANIFEST
+#endif

@@ -13,7 +13,6 @@ ${OMM_INCLUDE_DIRS}
 )
 
 add_library(ommutil
-SHARED
 Util.cpp
 )
 
@@ -50,7 +49,6 @@ add_definitions(
 endif(LIB_OMMSYS_PLATFORM)
 
 add_library(ommsys
-SHARED
 Sys.cpp
 )
 
@@ -66,7 +64,6 @@ CACHE INTERNAL libommsys
 )
 
 add_library(omm
-SHARED
 Upnp.cpp
 )
 
@@ -81,7 +78,7 @@ CACHE INTERNAL libomm
 )
 
 add_library(ommav
-SHARED
+#SHARED
 UpnpAvController.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
@@ -103,7 +100,6 @@ CACHE INTERNAL libommav
 )
 
 add_library(ommavstream
-SHARED
 AvStream.cpp
 )
 

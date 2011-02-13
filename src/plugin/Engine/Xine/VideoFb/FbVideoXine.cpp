@@ -84,6 +84,8 @@ FbXineVideo::closeVisual()
 }
 
 
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(XineVideo)
 POCO_EXPORT_CLASS(FbXineVideo)
 POCO_END_MANIFEST
+#endif

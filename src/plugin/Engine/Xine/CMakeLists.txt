@@ -2,23 +2,30 @@ find_package(Xine)
 
 if(XINE_FOUND)
 
-add_library(ommengine-xine
+if(BUILD_PLUGINS)
+
+add_library(ommplugin-engine-xine
 SHARED
 EngineXine.cpp
 )
 
-target_link_libraries(ommengine-xine
+target_link_libraries(ommplugin-engine-xine
 ${POCO_UTIL}
 ${OMM}
 ${OMM_AV}
 ${XINE_LIBRARIES}
 )
 
-add_subdirectory(VideoFb)
-add_subdirectory(VideoX11)
+set_target_properties(ommplugin-engine-xine
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
 
-install(TARGETS ommengine-xine
+install(TARGETS ommplugin-engine-xine
 LIBRARY DESTINATION lib/omm
 )
 
+add_subdirectory(VideoFb)
+add_subdirectory(VideoX11)
+
+endif(BUILD_PLUGINS)
 endif(XINE_FOUND)

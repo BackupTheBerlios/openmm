@@ -23,13 +23,13 @@ install(TARGETS ommserve
 RUNTIME DESTINATION bin
 )
 
-if(OMMMODULE_FOUND)
+if(OMMX_FOUND)
 
 include_directories(
-${OMMMODULE_INCLUDE_DIRS}
+${OMMX_INCLUDE_DIRS}
 )
 
-if(OMMMODULE_SERVER_WEBRADIO)
+if(OMMX_SERVER_WEBRADIO)
 add_executable(ommserve-webradio
 ServerWebradio.cpp
 )
@@ -38,14 +38,14 @@ target_link_libraries(ommserve-webradio
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
-${OMMMODULE_SERVER_WEBRADIO}
+${OMMX_SERVER_WEBRADIO}
 )
 install(TARGETS ommserve-webradio
 RUNTIME DESTINATION bin
 )
-endif(OMMMODULE_SERVER_WEBRADIO)
+endif(OMMX_SERVER_WEBRADIO)
 
-if(OMMMODULE_SERVER_FILE)
+if(OMMX_SERVER_FILE)
 add_executable(ommserve-file
 ServerFile.cpp
 )
@@ -55,12 +55,12 @@ ${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
-${OMMMODULE_SERVER_FILE}
+${OMMX_SERVER_FILE}
 )
 
 install(TARGETS ommserve-file
 RUNTIME DESTINATION bin
 )
-endif(OMMMODULE_SERVER_FILE)
+endif(OMMX_SERVER_FILE)
 
-endif(OMMMODULE_FOUND)
+endif(OMMX_FOUND)

@@ -1,12 +1,18 @@
-add_library(ommxinevideo-fb
+if(BUILD_PLUGINS)
+add_library(ommplugin-xinevideo-fb
 SHARED
 FbVideoXine.cpp
 )
 
-target_link_libraries(ommxinevideo-fb
+target_link_libraries(ommplugin-xinevideo-fb
 ommengine-xine
 )
 
-install(TARGETS ommxinevideo-fb
+set_target_properties(ommplugin-xinevideo-fb
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
+install(TARGETS ommplugin-xinevideo-fb
 LIBRARY DESTINATION lib/omm
 )
+endif(BUILD_PLUGINS)

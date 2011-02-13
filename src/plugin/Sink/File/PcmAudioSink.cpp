@@ -66,7 +66,8 @@ PcmAudioSink::startPresentation()
 }
 
 
-
+#ifdef OMMPLUGIN
 POCO_BEGIN_MANIFEST(Omm::AvStream::AudioSink)
 POCO_EXPORT_CLASS(PcmAudioSink)
 POCO_END_MANIFEST
+#endif
