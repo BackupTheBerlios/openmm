@@ -18,7 +18,13 @@ add_definitions(-D__LINUX__)
 elseif(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(DARWIN 1)
 add_definitions(-D__DARWIN__)
-set(CMAKE_INSTALL_NAME_DIR ${CMAKE_PREFIX_PATH})
+if(${BUILD_TARGET} MATCHES "iphone")
+set(IPHONE 1)
+endif(${BUILD_TARGET} MATCHES "iphone")
+# set install_name for libraries on Darwin
+set(CMAKE_INSTALL_NAME_DIR
+${CMAKE_INSTALL_PREFIX}/lib
+)
 elseif(NOT BUILD_TARGET)
 set(BUILD_TARGET "Native")
 endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
