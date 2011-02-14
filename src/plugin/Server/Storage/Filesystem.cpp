@@ -193,6 +193,7 @@ private:
 //     void setBasePath(const std::string& basePath);
     void scanDirectory(const std::string& basePath);
     void scanDirectoryRecursively(Poco::File& directory);
+    void loadTagger();
     bool cacheExists();
     void readCache();
     void writeCache();
@@ -214,16 +215,6 @@ _pTagger(0),
 _pParseItem(0),
 _parseElement("")
 {
-    
-    std::string taggerPlugin("tagger-ffmpeg");
-    Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
-    try {
-        _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
-    }
-    catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
-    }
-    
 //     Poco::File baseDir(basePath);
     scanDirectory(basePath);
 }
@@ -394,6 +385,7 @@ FileDataModel::scanDirectory(const std::string& basePath)
         readCache();
     }
     else {
+        loadTagger();
         Poco::File baseDir(basePath);
         scanDirectoryRecursively(baseDir);
         // sort items
@@ -451,6 +443,20 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
             Omm::Av::Log::instance()->upnpav().warning("some file not found, ignoring.");
         }
         ++dir;
+    }
+}
+
+
+void
+FileDataModel::loadTagger()
+{
+    std::string taggerPlugin("tagger-ffmpeg");
+    Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
+    try {
+        _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
+    }
+    catch(Poco::NotFoundException) {
+        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
     }
 }
 

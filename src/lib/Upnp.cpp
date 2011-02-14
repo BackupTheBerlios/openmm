@@ -127,6 +127,14 @@ _iconPath(":/usr/lib/omm:/usr/local/lib/omm")
 }
 
 
+Icon::~Icon()
+{
+    if (_pData) {
+        delete _pData;
+    }
+}
+
+
 void
 Icon::retrieve(const std::string& uri)
 {
@@ -140,7 +148,7 @@ Icon::retrieve(const std::string& uri)
         Log::instance()->upnp().debug("reading icon from file: " + iconUri.getPath());
         std::ifstream ifs(iconUri.getPath().c_str());
         _pData = new char[f.getSize()];
-        ifs.read((char*)_pData, f.getSize());
+        ifs.read(_pData, f.getSize());
         _size = f.getSize();
 
     }
@@ -161,7 +169,7 @@ Icon::retrieve(const std::string& uri)
             Log::instance()->upnp().debug("reading icon from file: " + baseUri.getPath());
             std::ifstream ifs(baseUri.getPath().c_str());
             _pData = new char[f.getSize()];
-            ifs.read((char*)_pData, f.getSize());
+            ifs.read(_pData, f.getSize());
             _size = f.getSize();
             break;
         }

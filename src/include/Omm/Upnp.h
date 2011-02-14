@@ -188,7 +188,7 @@ private:
     int                     _height;
     int                     _depth;
     Poco::Net::MediaType    _mime;
-    void*                   _pData;
+    char*                   _pData;
     std::size_t             _size;
     std::string             _requestUri;
     std::string             _iconPath;

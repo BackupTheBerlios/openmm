@@ -501,7 +501,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     if (_pSelectedRenderer == 0) {
         return;
     }
-    Log::instance()->upnpav().debug("poll position info ...");
+//    Log::instance()->upnpav().debug("poll position info ...");
     // TODO: get TransportState and poll position info only, if it is PLAYING, RECORDING or TRANSITIONING
 //     _pSelectedRenderer->AVTransport()->
     ui4 Track;
@@ -513,7 +513,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     i4 RelCount;
     i4 AbsCount;
     _pSelectedRenderer->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
-    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
+//    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
     
     try {
         r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
@@ -531,9 +531,9 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
         ControllerObject object;
         try {
             object.readMetaData(TrackMetaData);
-            Log::instance()->upnpav().debug("new track title: " + object.getTitle());
-            Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
-            Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
+//            Log::instance()->upnpav().debug("new track title: " + object.getTitle());
+//            Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
+//            Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
             newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
         }
         catch (Poco::Exception& e) {
@@ -545,7 +545,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     // FIXME: don't poll volume, use eventing through LastChange state variable.
     ui2 vol;
     _pSelectedRenderer->RenderingControl()->GetVolume(0, "Master", vol);
-    Log::instance()->upnpav().debug("volume of renderer is: " + Poco::NumberFormatter::format(vol));
+//    Log::instance()->upnpav().debug("volume of renderer is: " + Poco::NumberFormatter::format(vol));
     newVolume(vol);
 }
 
