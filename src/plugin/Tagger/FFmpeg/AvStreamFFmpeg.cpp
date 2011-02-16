@@ -29,6 +29,7 @@
 #include <Poco/Timestamp.h>
 
 #include "AvStreamFFmpeg.h"
+#include "Omm/UpnpAvTypes.h"
 
 #define PRINT_LIB_VERSION(outstream,libname,LIBNAME,indent) \
 version= libname##_version(); \
@@ -212,19 +213,19 @@ FFmpegMeta::getMime()
 {
     std::string format(_pFormatContext->iformat->name);
     if (format == "mp3") {
-        return "audio/mpeg";
+        return Omm::Av::Mime::AUDIO_MPEG;
     }
     else if (format == "mpeg") {
-        return "video/mpeg";
+        return Omm::Av::Mime::VIDEO_MPEG;
     }
     else if (format.substr(0, 3) == "mov") {
-        return "video/quicktime";
+        return Omm::Av::Mime::VIDEO_QUICKTIME;
     }
     else if (format == "avi") {
-        return "video/avi";
+        return Omm::Av::Mime::VIDEO_AVI;
     }
     else if (format == "image2") {
-        return "image/jpeg";
+        return Omm::Av::Mime::IMAGE_JPEG;
     }
     else {
         return "";

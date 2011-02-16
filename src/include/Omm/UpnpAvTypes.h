@@ -249,6 +249,17 @@ public:
 };
 
 
+class Mime
+{
+public:
+    const static std::string AUDIO_MPEG;
+    const static std::string VIDEO_MPEG;
+    const static std::string VIDEO_QUICKTIME;
+    const static std::string VIDEO_AVI;
+    const static std::string IMAGE_JPEG;
+};
+
+
 class AvTypeConverter
 {
 public:

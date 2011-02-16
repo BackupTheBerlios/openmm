@@ -263,6 +263,11 @@ const std::string AvProperty::ORIGINAL_TRACK_NUMBER = "upnp:originalTrackNumber"
 const std::string AvProperty::TOC = "upnp:toc";
 const std::string AvProperty::USER_ANNOTATION = "upnp:userAnnotation";
 
+const std::string Mime::AUDIO_MPEG = "audio/mpeg";
+const std::string Mime::VIDEO_MPEG = "video/mpeg";
+const std::string Mime::VIDEO_QUICKTIME = "video/quicktime";
+const std::string Mime::VIDEO_AVI = "video/avi";
+const std::string Mime::IMAGE_JPEG = "image/jpeg";
 
 std::string
 AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4)
