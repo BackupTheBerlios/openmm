@@ -217,6 +217,9 @@ FFmpegMeta::getMime()
     else if (format == "mpeg") {
         return "video/mpeg";
     }
+    else if (format.substr(0, 3) == "mov") {
+        return "video/quicktime";
+    }
     else if (format == "avi") {
         return "video/avi";
     }

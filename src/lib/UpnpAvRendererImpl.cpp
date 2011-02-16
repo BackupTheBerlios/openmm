@@ -67,32 +67,8 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     if (transportState == AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
     }
-
-    Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
-    if (_pEngine->preferStdStream() && (_getCurrentTrackURI() != CurrentURI || _getTransportState() == AvTransportArgument::TRANSPORT_STATE_STOPPED)) {
-        Poco::URI uri(CurrentURI);
-        _pEngine->stop();
-        if (_pSession) {
-            delete _pSession;
-        }
-        _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-        Poco::Net::HTTPRequest request("GET", uri.getPath());
-        _pSession->sendRequest(request);
-        std::stringstream requestHeader;
-        request.write(requestHeader);
-        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
-        
-        Poco::Net::HTTPResponse response;
-        std::istream& istr = _pSession->receiveResponse(response);
-        
-        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
-        std::stringstream responseHeader;
-        response.write(responseHeader);
-        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
-        _pEngine->setUri(istr);
-    }
-    else {
-        _pEngine->setUri(CurrentURI);
+    if (_getCurrentTrackURI() == CurrentURI) {
+        return;
     }
     _setCurrentTrackURI(CurrentURI);
 /*
@@ -107,12 +83,14 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     _setCurrentTrackMetaData(CurrentURIMetaData);
     _setCurrentTrackDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
 
+    std::string protInfoString;
     try {
         MemoryMediaObject obj;
         MediaObjectReader objReader(&obj);
         objReader.read(CurrentURIMetaData);
         
-        std::string duration = obj.getResource()->getAttributeValue("duration");
+        std::string duration = obj.getResource()->getAttributeValue(AvProperty::DURATION);
+        protInfoString = obj.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
         if (duration != "") {
             Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
             _setCurrentTrackDuration(duration);
@@ -121,6 +99,35 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     catch (Poco::Exception& e) {
         Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data: " + e.message());
     }
+    
+    ProtocolInfo protInfo(protInfoString);
+    Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
+    if (_pEngine->preferStdStream()) {
+        Poco::URI uri(CurrentURI);
+        _pEngine->stop();
+        if (_pSession) {
+            delete _pSession;
+        }
+        _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
+        Poco::Net::HTTPRequest request("GET", uri.getPath());
+        _pSession->sendRequest(request);
+        std::stringstream requestHeader;
+        request.write(requestHeader);
+        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+
+        Poco::Net::HTTPResponse response;
+        std::istream& istr = _pSession->receiveResponse(response);
+
+        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        _pEngine->setUri(istr);
+    }
+    else {
+        _pEngine->setUri(CurrentURI, protInfo.getMime());
+    }
+
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + _getTransportState());
 }
 

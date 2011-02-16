@@ -361,6 +361,33 @@ AvTypeConverter::replaceNonUtf8(std::string& str)
 }
 
 
+ProtocolInfo::ProtocolInfo(const std::string& infoString)
+{
+    Poco::StringTokenizer infoTokens(infoString, ":");
+    try {
+        _mime = infoTokens[2];
+        _dlna = infoTokens[3];
+    }
+    catch (Poco::RangeException) {
+    }
+    Log::instance()->upnpav().debug("Protocol Info mime: " + _mime + ", dlna: " + _dlna);
+}
+
+
+std::string
+ProtocolInfo::getMime()
+{
+    return _mime;
+}
+
+
+std::string
+ProtocolInfo::getDlna()
+{
+    return _dlna;
+}
+
+
 AbstractResource::AbstractResource(PropertyImpl* pPropertyImpl) :
 AbstractProperty(pPropertyImpl)
 {
@@ -1015,7 +1042,12 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
     if (pNode->hasAttributes()) {
         attr = pNode->attributes();
         // FIXME: object number is the full object path, take only the last segment here ...? Otherwise, Poco::NumberParser will crash.
-        pObject->setObjectNumber(attr->getNamedItem(AvProperty::ID)->nodeValue());
+        try {
+            pObject->setObjectNumber(attr->getNamedItem(AvProperty::ID)->nodeValue());
+        }
+        catch (...) {
+        }
+//        pObject->setObjectId(attr->getNamedItem(AvProperty::ID)->nodeValue());
     }
     if (pNode->nodeName() == AvClass::CONTAINER) {
         pObject->setIsContainer(true);
@@ -1035,7 +1067,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
             if (childNode->nodeName() == AvProperty::RES) {
                 Poco::XML::NamedNodeMap* attr = 0;
                 std::string protInfo = "";
-                ui4 size = 0;
+                std::streamsize size = 0;
                 if (childNode->hasAttributes()) {
                     attr = childNode->attributes();
                     Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
@@ -1044,7 +1076,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                     }
                     attrNode = attr->getNamedItem(AvProperty::SIZE);
                     if (attrNode) {
-                        size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
+                        size = Poco::NumberParser::parse(attrNode->nodeValue());
                     }
                 }
                 AbstractResource* pResource = pObject->createResource();

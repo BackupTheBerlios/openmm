@@ -260,6 +260,20 @@ public:
 };
 
 
+class ProtocolInfo
+{
+public:
+    ProtocolInfo(const std::string& infoString);
+
+    std::string getMime();
+    std::string getDlna();
+
+private:
+    std::string _mime;
+    std::string _dlna;
+};
+
+
 class PropertyImpl
 {
 public:

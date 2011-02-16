@@ -88,7 +88,7 @@ VlcEngine::createPlayer()
 
 
 void
-VlcEngine::setUri(std::string uri)
+VlcEngine::setUri(const std::string& uri, const std::string& mime)
 {
 //     _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
     _uri = uri;

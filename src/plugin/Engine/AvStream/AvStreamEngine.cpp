@@ -120,7 +120,7 @@ AvStreamEngine::preferStdStream()
 
 
 void
-AvStreamEngine::setUri(std::string mrl)
+AvStreamEngine::setUri(const std::string& uri, const std::string& mime)
 {
     if (_isPlaying) {
         stop();
@@ -128,7 +128,7 @@ AvStreamEngine::setUri(std::string mrl)
     
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     Omm::AvStream::Log::instance()->avstream().debug("<<<<<<<<<<<< ENGINE SET ... >>>>>>>>>>>>");
-    _pDemuxer->set(_pTagger->tag(mrl));
+    _pDemuxer->set(_pTagger->tag(uri));
 }
 
 

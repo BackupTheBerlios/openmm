@@ -46,7 +46,7 @@ public:
     /*
       AVTransport
     */
-    virtual void setUri(std::string uri);
+    virtual void setUri(const std::string& uri, const std::string& mime = "");
 //     virtual void setUri(std::istream& istr);
     virtual void load();
     
