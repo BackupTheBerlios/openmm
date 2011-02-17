@@ -120,7 +120,7 @@ AvStreamEngine::preferStdStream()
 
 
 void
-AvStreamEngine::setUri(const std::string& uri, const std::string& mime)
+AvStreamEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 {
     if (_isPlaying) {
         stop();
@@ -171,7 +171,7 @@ AvStreamEngine::setUri(const std::string& uri, const std::string& mime)
 
 
 void
-AvStreamEngine::setUri(std::istream& istr)
+AvStreamEngine::setUri(std::istream& istr, const Omm::Av::ProtocolInfo& protInfo)
 {
     if (_isPlaying) {
         stop();

@@ -366,8 +366,17 @@ AvTypeConverter::replaceNonUtf8(std::string& str)
 }
 
 
+ProtocolInfo::ProtocolInfo() :
+_mime(""),
+_dlna("")
+{
+}
+
+
 ProtocolInfo::ProtocolInfo(const std::string& infoString)
 {
+    Log::instance()->upnpav().debug("Protocol Info: " + infoString);
+
     Poco::StringTokenizer infoTokens(infoString, ":");
     try {
         _mime = infoTokens[2];
@@ -390,6 +399,13 @@ std::string
 ProtocolInfo::getDlna()
 {
     return _dlna;
+}
+
+
+bool
+ProtocolInfo::isImage()
+{
+    return _mime.substr(0, 5) == "image";
 }
 
 

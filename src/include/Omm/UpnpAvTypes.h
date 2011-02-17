@@ -274,10 +274,13 @@ public:
 class ProtocolInfo
 {
 public:
+    ProtocolInfo();
     ProtocolInfo(const std::string& infoString);
 
     std::string getMime();
     std::string getDlna();
+
+    bool isImage();
 
 private:
     std::string _mime;

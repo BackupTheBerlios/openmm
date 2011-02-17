@@ -104,7 +104,7 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
     if (_pEngine->preferStdStream()) {
         Poco::URI uri(CurrentURI);
-        _pEngine->stop();
+//        _pEngine->stop();
         if (_pSession) {
             delete _pSession;
         }
@@ -122,10 +122,10 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
         std::stringstream responseHeader;
         response.write(responseHeader);
         Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
-        _pEngine->setUri(istr);
+        _pEngine->setUri(istr, protInfo);
     }
     else {
-        _pEngine->setUri(CurrentURI, protInfo.getMime());
+        _pEngine->setUri(CurrentURI, protInfo);
     }
 
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + _getTransportState());
@@ -160,20 +160,20 @@ void
 AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
     std::string transportState = _getTransportState();
-    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
+//    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
     
     if (transportState != AvTransportArgument::TRANSPORT_STATE_PLAYING && transportState != AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
         // TODO: return an UPnP error
         return;
     }
-    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
+//    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
     
     float engineTrackDuration = _pEngine->getLengthSeconds();
-    Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
+//    Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
         _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
-        Omm::Av::Log::instance()->upnpav().debug("set TrackDuration to: " + _getCurrentTrackDuration());
+//        Omm::Av::Log::instance()->upnpav().debug("set TrackDuration to: " + _getCurrentTrackDuration());
         TrackDuration = _getCurrentTrackDuration();
     }
 
@@ -181,14 +181,14 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
     TrackURI = _getCurrentTrackURI();
     
     Poco::UInt64 enginePositionByte = _pEngine->getPositionByte();
-    Omm::Av::Log::instance()->upnpav().debug("engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
+//    Omm::Av::Log::instance()->upnpav().debug("engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
     float enginePosition = _pEngine->getPositionPercentage();
-    Omm::Av::Log::instance()->upnpav().debug("engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
+//    Omm::Av::Log::instance()->upnpav().debug("engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
     float engineTimePosition = _pEngine->getPositionSecond();
-    Omm::Av::Log::instance()->upnpav().debug("engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
+//    Omm::Av::Log::instance()->upnpav().debug("engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
     
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
-    Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);
+//    Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);
     _setRelativeTimePosition(timePosition);
     _setAbsoluteTimePosition(timePosition);
     RelTime = _getRelativeTimePosition();
@@ -271,8 +271,8 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
-                std::string pos;
-//                 PLT_Didl::FormatTimeStamp(pos, 0);
+//                _pEngine->stop();
+                std::string pos = AvTransportArgument::CURRENT_TRACK_DURATION_0;
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
                 _pEngine->load();

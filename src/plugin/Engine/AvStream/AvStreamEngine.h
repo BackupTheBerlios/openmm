@@ -44,8 +44,8 @@ public:
     virtual void setFullscreen(bool on = true);
     
     virtual bool preferStdStream();
-    virtual void setUri(const std::string& uri, const std::string& mime = "");
-    virtual void setUri(std::istream& istr);
+    virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
+    virtual void setUri(std::istream& istr, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
     virtual void load();
     virtual void pause();
     virtual void stop();

@@ -116,16 +116,6 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     StreamingResource* pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
 
     std::string protInfoString = pResource->getProtInfo();
-    Log::instance()->upnpav().debug("protInfo: " + protInfoString);
-//    Poco::StringTokenizer prot(resProtInfo, ":");
-//    std::string mime = "*";
-//    if (prot.count() >= 3) {
-//        mime = prot[2];
-//    }
-//    std::string dlna = "*";
-//    if (prot.count() >= 4) {
-//        dlna = prot[3];
-//    }
     ProtocolInfo protInfo(protInfoString);
     std::string mime = protInfo.getMime();
     std::string dlna = protInfo.getDlna();
