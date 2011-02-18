@@ -117,8 +117,8 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 
     std::string protInfoString = pResource->getProtInfo();
     ProtocolInfo protInfo(protInfoString);
-    std::string mime = protInfo.getMime();
-    std::string dlna = protInfo.getDlna();
+    std::string mime = protInfo.getMimeString();
+    std::string dlna = protInfo.getDlnaString();
     std::streamsize resSize = pResource->getSize();
     
     response.setContentType(mime);

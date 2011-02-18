@@ -263,11 +263,14 @@ const std::string AvProperty::ORIGINAL_TRACK_NUMBER = "upnp:originalTrackNumber"
 const std::string AvProperty::TOC = "upnp:toc";
 const std::string AvProperty::USER_ANNOTATION = "upnp:userAnnotation";
 
-const std::string Mime::AUDIO_MPEG = "audio/mpeg";
-const std::string Mime::VIDEO_MPEG = "video/mpeg";
-const std::string Mime::VIDEO_QUICKTIME = "video/quicktime";
-const std::string Mime::VIDEO_AVI = "video/avi";
-const std::string Mime::IMAGE_JPEG = "image/jpeg";
+const std::string Mime::TYPE_AUDIO = "audio";
+const std::string Mime::TYPE_VIDEO = "video";
+const std::string Mime::TYPE_IMAGE = "image";
+const std::string Mime::AUDIO_MPEG = Mime::TYPE_AUDIO + "/mpeg";
+const std::string Mime::VIDEO_MPEG = Mime::TYPE_VIDEO + "/mpeg";
+const std::string Mime::VIDEO_QUICKTIME = Mime::TYPE_VIDEO + "/quicktime";
+const std::string Mime::VIDEO_AVI = Mime::TYPE_VIDEO + "/avi";
+const std::string Mime::IMAGE_JPEG = Mime::TYPE_IMAGE + "/jpeg";
 
 std::string
 AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4)
@@ -366,9 +369,61 @@ AvTypeConverter::replaceNonUtf8(std::string& str)
 }
 
 
+Mime::Mime() :
+Poco::Net::MediaType("")
+{
+
+}
+
+
+Mime::Mime(const Mime& mime) :
+Poco::Net::MediaType(mime)
+{
+
+}
+
+
+Mime::Mime(const std::string& mimeString) :
+Poco::Net::MediaType(mimeString)
+{
+
+}
+
+
+bool
+Mime::isAudio()
+{
+    Log::instance()->upnpav().debug("Mime type: " + getType());
+    return getType() == TYPE_AUDIO;
+}
+
+
+bool
+Mime::isVideo()
+{
+    Log::instance()->upnpav().debug("Mime type: " + getType());
+    return getType() == TYPE_VIDEO;
+}
+
+
+bool
+Mime::isImage()
+{
+    Log::instance()->upnpav().debug("Mime type: " + getType());
+    return getType() == TYPE_IMAGE;
+}
+
+
 ProtocolInfo::ProtocolInfo() :
 _mime(""),
 _dlna("")
+{
+}
+
+
+ProtocolInfo::ProtocolInfo(const ProtocolInfo& protInfo) :
+_mime(protInfo._mime),
+_dlna(protInfo._dlna)
 {
 }
 
@@ -389,23 +444,16 @@ ProtocolInfo::ProtocolInfo(const std::string& infoString)
 
 
 std::string
-ProtocolInfo::getMime()
+ProtocolInfo::getMimeString() const
 {
     return _mime;
 }
 
 
 std::string
-ProtocolInfo::getDlna()
+ProtocolInfo::getDlnaString() const
 {
     return _dlna;
-}
-
-
-bool
-ProtocolInfo::isImage()
-{
-    return _mime.substr(0, 5) == "image";
 }
 
 

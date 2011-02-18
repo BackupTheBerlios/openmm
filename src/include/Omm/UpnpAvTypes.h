@@ -29,6 +29,7 @@
 #include <Poco/ConsoleChannel.h>
 #include <Poco/FileChannel.h>
 #include <Poco/SplitterChannel.h>
+#include <Poco/Net/MediaType.h>
 
 #include "Upnp.h"
 #include "Util.h"
@@ -249,17 +250,6 @@ public:
 };
 
 
-class Mime
-{
-public:
-    const static std::string AUDIO_MPEG;
-    const static std::string VIDEO_MPEG;
-    const static std::string VIDEO_QUICKTIME;
-    const static std::string VIDEO_AVI;
-    const static std::string IMAGE_JPEG;
-};
-
-
 class AvTypeConverter
 {
 public:
@@ -271,16 +261,37 @@ public:
 };
 
 
+class Mime : Poco::Net::MediaType
+{
+public:
+    Mime();
+    Mime(const Mime& mime);
+    Mime(const std::string& mimeString);
+
+    const static std::string TYPE_AUDIO;
+    const static std::string TYPE_VIDEO;
+    const static std::string TYPE_IMAGE;
+    const static std::string AUDIO_MPEG;
+    const static std::string VIDEO_MPEG;
+    const static std::string VIDEO_QUICKTIME;
+    const static std::string VIDEO_AVI;
+    const static std::string IMAGE_JPEG;
+
+    bool isAudio();
+    bool isVideo();
+    bool isImage();
+};
+
+
 class ProtocolInfo
 {
 public:
     ProtocolInfo();
+    ProtocolInfo(const ProtocolInfo& protInfo);
     ProtocolInfo(const std::string& infoString);
 
-    std::string getMime();
-    std::string getDlna();
-
-    bool isImage();
+    std::string getMimeString() const;
+    std::string getDlnaString() const;
 
 private:
     std::string _mime;
