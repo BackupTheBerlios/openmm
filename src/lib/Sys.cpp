@@ -165,6 +165,7 @@ void
 NetworkInterfaceManager::scanInterfaces()
 {
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
+    Log::instance()->sys().debug("number of network interfaces: " + Poco::NumberFormatter::format(ifList.size()));
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
         std::string interfaceName = (*it).name();
         Poco::Net::IPAddress address = (*it).address();

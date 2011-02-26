@@ -199,8 +199,6 @@ SsdpSocket::init()
     // listen to UDP unicast and send out to multicast
     Log::instance()->ssdp().debug("create broadcast socket");
     _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
-    Log::instance()->ssdp().debug("set ttl to 4");
-    _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
 
     // listen to UDP multicast
     Log::instance()->ssdp().debug("create listener socket ...");
@@ -302,6 +300,8 @@ SsdpSocket::setupSockets()
     }
     else {
         try {
+            Log::instance()->ssdp().debug("set ttl to 4");
+            _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
             setMulticast();
         }
         catch (Poco::IOException) {
