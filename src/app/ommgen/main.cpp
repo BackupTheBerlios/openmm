@@ -43,6 +43,7 @@ public:
         _descriptionPath("./"),
         _outputPath("./")
     {
+        setUnixOptions(true);
     }
     
     ~OmmGenApplication()

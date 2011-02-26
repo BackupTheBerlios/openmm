@@ -56,6 +56,7 @@ public:
         _height(""),
         _name("")
     {
+        setUnixOptions(true);
     }
     
     ~MediaRendererApplication()

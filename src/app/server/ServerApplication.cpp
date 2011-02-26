@@ -44,6 +44,7 @@ public:
         _pluginOption(""),
         _name("")
     {
+        setUnixOptions(true);
     }
     
     ~UpnpAvServerApplication()
