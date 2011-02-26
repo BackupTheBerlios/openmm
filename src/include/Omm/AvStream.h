@@ -41,6 +41,8 @@
 #include <Poco/DateTime.h>
 #include <Poco/NotificationCenter.h>
 
+#undef CC_NONE
+
 namespace Omm {
 namespace AvStream {
 

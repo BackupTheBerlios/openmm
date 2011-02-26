@@ -184,7 +184,11 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
 {
     Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file: " + stationConfig + " ...");
     Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
     Poco::XML::Document* pDoc;
     try {
         pDoc = parser.parse(stationConfig);

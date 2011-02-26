@@ -466,7 +466,11 @@ Poco::XML::Node*
 DescriptionReader::parseDescription(const std::string& description)
 {
     Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
     _pDocStack.push(parser.parseString(description));
     return _pDocStack.top()->documentElement()->firstChild();
 }
@@ -707,7 +711,11 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
     Log::instance()->ctrl().debug("action request:\n" + requestBody);
     
     Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
     _pDoc = parser.parseString(requestBody);
     Poco::XML::NodeIterator it(_pDoc, Poco::XML::NodeFilter::SHOW_ALL);
     _nodeStack.push(it.nextNode());
@@ -756,7 +764,11 @@ _pDoc(0)
     Poco::XML::DOMParser parser;
     // TODO: set encoding with parser.setEncoding();
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
     // FIXME: shouldn't throw exception in ctor, put it in a method (e.g. read())
     try {
         _pDoc = parser.parseString(responseBody);

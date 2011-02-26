@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 //     demuxer.attach(&muxer, demuxer.firstVideoStream(), 1);
     
     demuxer.start();
-    sleep(2);
+    Poco::Thread::sleep(2);
     demuxer.stop();
 }
 

@@ -32,6 +32,7 @@ PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 
 install(TARGETS ommplugin-videosink-ppm ommplugin-audiosink-pcm
 LIBRARY DESTINATION lib/omm
+ARCHIVE DESTINATION lib/omm
 )
 
 endif(BUILD_PLUGINS)

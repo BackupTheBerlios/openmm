@@ -1,3 +1,6 @@
+# for now, vlc relies on X11 ... don't build it on windows
+return()
+
 find_package(VLC)
 
 if(VLC_FOUND)
@@ -24,6 +27,7 @@ PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 
 install(TARGETS ommplugin-engine-vlc
 LIBRARY DESTINATION lib/omm
+ARCHIVE DESTINATION lib/omm
 )
 endif(BUILD_PLUGINS)
 endif(VLC_FOUND)

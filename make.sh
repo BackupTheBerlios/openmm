@@ -8,7 +8,13 @@ BUILD_TYPE="None"
 VERBOSE=
 PRINT_USAGE=
 CMAKE_CMD=cmake
+CMAKE_GENERATOR="Unix Makefiles"
+if [ ${MINGW} ]
+then
+    CMAKE_GENERATOR="MSYS Makefiles"
+fi
 CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+
 
 # get command line options
 #while getopts :h(help)v(verbose)s(staging):t(target): opt
@@ -95,7 +101,7 @@ then
 elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
-    ${CMAKE_CMD} ${CMAKE_OPTS} ${SRC_DIR}
+    ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} ${SRC_DIR}
 # build targets in out of source tree
 else
     cd ${BIN_DIR}
