@@ -245,8 +245,8 @@ QtActivityIndicator::indicatorOn()
 
 QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 {
-    setGeometry(0, 0, 800, 480);
     setCentralWidget(pCentralWidget);
+    resize(800, 480);
 }
 
 

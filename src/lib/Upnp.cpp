@@ -301,7 +301,8 @@ SsdpSocket::setupSockets()
     else {
         try {
             Log::instance()->ssdp().debug("set ttl to 4");
-            _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
+            // FIXME: setting TTL on windows segfaults
+//            _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
             setMulticast();
         }
         catch (Poco::IOException) {
