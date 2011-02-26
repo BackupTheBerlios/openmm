@@ -25,6 +25,10 @@ endif(${BUILD_TARGET} MATCHES "iphone")
 set(CMAKE_INSTALL_NAME_DIR
 ${CMAKE_INSTALL_PREFIX}/lib
 )
+elseif(WINDOWS OR ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+set(WINDOWS 1)
+add_definitions(-D__WINDOWS__)
+set(BUILD_TARGET "Windows")
 elseif(NOT BUILD_TARGET)
 set(BUILD_TARGET "Native")
 endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")

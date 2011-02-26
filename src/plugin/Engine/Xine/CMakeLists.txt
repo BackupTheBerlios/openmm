@@ -21,7 +21,9 @@ PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
 install(TARGETS ommplugin-engine-xine
+RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
+ARCHIVE DESTINATION lib
 )
 
 add_subdirectory(VideoFb)

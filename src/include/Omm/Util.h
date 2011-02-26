@@ -53,8 +53,13 @@ template<class C>
 public:
     PluginLoader() :
         _pPluginLoader(new Poco::ClassLoader<C>),
+#ifdef __WINDOWS__
+        _pluginPath(":.")
+#else
         _pluginPath(":/usr/local/lib/omm:/usr/lib/omm")
-    {}
+#endif
+    {
+    }
     
     
     ~PluginLoader()

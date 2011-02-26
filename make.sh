@@ -95,7 +95,8 @@ then
     if [ ${STAGING_DIR} ]
     then
         echo "removing staging files:"
-        rm -rvf ${STAGING_DIR}/lib/libomm* ${STAGING_DIR}/lib/omm ${STAGING_DIR}/include/Omm ${STAGING_DIR}/bin/omm*
+        rm -rvf ${STAGING_DIR}/lib/omm ${STAGING_DIR}/include/Omm 
+        rm -vf ${STAGING_DIR}/lib/libomm* ${STAGING_DIR}/bin/omm* ${STAGING_DIR}/bin/libomm*
     fi
 # configure build system
 elif [ "${1}" = "config" ]

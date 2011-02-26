@@ -41,7 +41,9 @@ PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
 install(TARGETS ommplugin-videosink-sdl ommplugin-audiosink-sdl
+RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
+ARCHIVE DESTINATION lib
 )
 
 endif(BUILD_PLUGINS)

@@ -115,6 +115,7 @@ CACHE STRING libommavstream
 add_subdirectory(Dvb)
 
 install(TARGETS ommutil ommsys omm ommav ommavstream
+RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
