@@ -1,5 +1,5 @@
 # for now, vlc relies on X11 ... don't build it on windows
-return()
+#return()
 
 find_package(VLC)
 

@@ -525,7 +525,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
         newPosition(trackDuration, absTime);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("could not read current track position: " + e.displayText());
+        //Log::instance()->upnpav().warning("could not read current track position: " + e.displayText());
     }
     
     if (TrackMetaData == "") {

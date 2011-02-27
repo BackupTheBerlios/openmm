@@ -793,7 +793,7 @@ AbstractMediaObject::getTotalChildCount()
 AbstractResource*
 AbstractMediaObject::getResource(int index)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setResource() index: " + Poco::NumberFormatter::format(index));
+    Log::instance()->upnpav().debug("AbstractMediaObject::getResource() index: " + Poco::NumberFormatter::format(index));
     
     return static_cast<AbstractResource*>(getProperty(AvProperty::RES, index));
 }
@@ -1058,7 +1058,12 @@ AbstractProperty*
 MemoryMediaObject::getProperty(const std::string& name, int index)
 {
     Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() name: " + name + ", index: " + Poco::NumberFormatter::format(index));
-    
+
+    // FIXME: workaround, seeking std::multimap returns null-pointer on iphone (but not iphone-simulator or any other system)
+    // so we just search the first one (for now, this is ok as we provide only one resource in our servers).
+    PropertyIterator it = _propertyMap.find(name);
+    return (*it).second;
+
     std::pair<PropertyIterator,PropertyIterator> range = _propertyMap.equal_range(name);
     int i = 0;
     for (PropertyIterator it = range.first; it != range.second; ++it, ++i) {

@@ -88,19 +88,21 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
         MemoryMediaObject obj;
         MediaObjectReader objReader(&obj);
         objReader.read(CurrentURIMetaData);
-        
-        std::string duration = obj.getResource()->getAttributeValue(AvProperty::DURATION);
-        protInfoString = obj.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
-        if (duration != "") {
-            Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
-            _setCurrentTrackDuration(duration);
+
+        if (obj.getResource()) {
+            protInfoString = obj.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
+            std::string duration = obj.getResource()->getAttributeValue(AvProperty::DURATION);
+            if (duration != "") {
+                Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
+                _setCurrentTrackDuration(duration);
+            }
         }
     }
     catch (Poco::Exception& e) {
         Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data: " + e.message());
     }
-    
     ProtocolInfo protInfo(protInfoString);
+    
     Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
     if (_pEngine->preferStdStream()) {
         Poco::URI uri(CurrentURI);
