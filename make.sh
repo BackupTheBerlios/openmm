@@ -9,7 +9,7 @@ VERBOSE=
 PRINT_USAGE=
 CMAKE_CMD=cmake
 CMAKE_GENERATOR="Unix Makefiles"
-if [ ${MINGW} ]
+if [ "${MSYSTEM}" = "MINGW32" ]
 then
     CMAKE_GENERATOR="MSYS Makefiles"
 fi

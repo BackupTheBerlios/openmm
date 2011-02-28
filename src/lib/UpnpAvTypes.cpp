@@ -1062,15 +1062,20 @@ MemoryMediaObject::getProperty(const std::string& name, int index)
     // FIXME: workaround, seeking std::multimap returns null-pointer on iphone (but not iphone-simulator or any other system)
     // so we just search the first one (for now, this is ok as we provide only one resource in our servers).
     PropertyIterator it = _propertyMap.find(name);
-    return (*it).second;
-
-    std::pair<PropertyIterator,PropertyIterator> range = _propertyMap.equal_range(name);
-    int i = 0;
-    for (PropertyIterator it = range.first; it != range.second; ++it, ++i) {
-        if (i == index) {
-            return (*it).second;
-        }
+    if (it != _propertyMap.end()) {
+        return (*it).second;
     }
+    else {
+        return 0;
+    }
+
+//    std::pair<PropertyIterator,PropertyIterator> range = _propertyMap.equal_range(name);
+//    int i = 0;
+//    for (PropertyIterator it = range.first; it != range.second; ++it, ++i) {
+//        if (i == index) {
+//            return (*it).second;
+//        }
+//    }
 }
 
 
