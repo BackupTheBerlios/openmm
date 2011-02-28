@@ -260,8 +260,35 @@ void
 AvController::setUserInterface(AvUserInterface* pUserInterface)
 {
     Controller::setUserInterface(pUserInterface);
-    pUserInterface->_pRenderers = &_renderers;
-    pUserInterface->_pServers = &_servers;
+    pUserInterface->_pAvController = this;
+}
+
+
+int
+AvController::rendererCount()
+{
+    return _renderers.size();
+}
+
+
+RendererView*
+AvController::rendererView(int numRenderer)
+{
+    return &_renderers.get(numRenderer);
+}
+
+
+int
+AvController::serverCount()
+{
+    return _servers.size();
+}
+
+
+ControllerObject*
+AvController::serverRootObject(int numServer)
+{
+    return _servers.get(numServer).root();
 }
 
 
@@ -300,6 +327,7 @@ AvController::deviceAdded(DeviceRoot* pDeviceRoot)
 //         std::clog << "UpnpAvController::deviceAdded() number of servers: " << _servers.size() << std::endl;
         pUserInterface->endAddServer(_servers.size() - 1);
     }
+    Log::instance()->upnpav().information("device added finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
 
@@ -332,14 +360,14 @@ AvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 //         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << _servers.size() << std::endl;
         pUserInterface->endRemoveServer(position);
     }
+    Log::instance()->upnpav().information("device removed finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
 
 AvUserInterface::AvUserInterface() :
-_pRenderers(NULL),
-_pServers(NULL),
-_pSelectedRenderer(NULL),
-_pSelectedObject(NULL)
+_pAvController(0),
+_pSelectedRenderer(0),
+_pSelectedObject(0)
 {
     _positionInfoTimer.setPeriodicInterval(1000);
     Poco::TimerCallback<AvUserInterface> callback(*this, &AvUserInterface::pollPositionInfo);
@@ -356,14 +384,14 @@ AvUserInterface::~AvUserInterface()
 int
 AvUserInterface::rendererCount()
 {
-    return _pRenderers->size();
+    return _pAvController->rendererCount();
 }
 
 
 RendererView*
 AvUserInterface::rendererView(int numRenderer)
 {
-    return &_pRenderers->get(numRenderer);
+    return _pAvController->rendererView(numRenderer);
 }
 
 
@@ -386,14 +414,14 @@ AvUserInterface::isPlaying(RendererView* pRenderer)
 int
 AvUserInterface::serverCount()
 {
-    return _pServers->size();
+    return _pAvController->serverCount();
 }
 
 
 ControllerObject*
 AvUserInterface::serverRootObject(int numServer)
 {
-    return _pServers->get(numServer).root();
+    return _pAvController->serverRootObject(numServer);
 }
 
 

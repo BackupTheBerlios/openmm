@@ -125,8 +125,7 @@ public:
 private:
     void pollPositionInfo(Poco::Timer& timer);
     
-    Container<RendererView>*              _pRenderers;
-    Container<ServerController>*          _pServers;
+    AvController*                         _pAvController;
     MediaRendererController*              _pSelectedRenderer;
     ControllerObject*                     _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
@@ -137,6 +136,11 @@ class AvController : public Controller
 {
 public:
     void setUserInterface(AvUserInterface* pUserInterface);
+
+    int rendererCount();
+    int serverCount();
+    RendererView* rendererView(int numRenderer);
+    ControllerObject* serverRootObject(int numServer);
     
 private:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);
