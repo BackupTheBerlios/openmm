@@ -57,7 +57,11 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
+#ifdef NDEBUG
+    _pSysLogger = &Poco::Logger::create("SYS", pFormatLogger, 0);
+#else
     _pSysLogger = &Poco::Logger::create("SYS", pFormatLogger, Poco::Message::PRIO_DEBUG);
+#endif
 }
 
 

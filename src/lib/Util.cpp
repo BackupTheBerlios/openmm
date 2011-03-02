@@ -44,7 +44,11 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
+#ifdef NDEBUG
+    _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, 0);
+#else
     _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, Poco::Message::PRIO_DEBUG);
+#endif
 }
 
 

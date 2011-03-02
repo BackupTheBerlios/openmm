@@ -52,7 +52,11 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
+#ifdef NDEBUG
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, 0);
+#else
     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
+#endif
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
 //     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);

@@ -38,6 +38,14 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
+#ifdef NDEBUG
+    _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, 0);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, 0);
+    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, 0);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, 0);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, 0);
+    _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, 0);
+#else
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
@@ -45,6 +53,7 @@ Log::Log()
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_ERROR);
+#endif
 }
 
 

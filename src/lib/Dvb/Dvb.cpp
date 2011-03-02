@@ -48,7 +48,11 @@ Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
+#ifdef NDEBUG
+    _pDvbLogger = &Poco::Logger::create("DVB", pFormatLogger, 0);
+#else
     _pDvbLogger = &Poco::Logger::create("DVB", pFormatLogger, Poco::Message::PRIO_DEBUG);
+#endif
 }
 
 

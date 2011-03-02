@@ -65,7 +65,11 @@ Av::Log::Log()
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
+#ifdef NDEBUG
+    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, 0);
+#else
     _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
+#endif
 }
 
 

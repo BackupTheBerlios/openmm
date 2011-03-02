@@ -56,6 +56,9 @@ protected:
     {
         loadConfiguration(); // load default configuration files, if present
         ServerApplication::initialize(self);
+//        Poco::Logger::root().setLevel(0);
+//        Poco::Logger::setLevel("", 0);
+//        self.logger().setLevel(0);
     }
     
     void uninitialize()

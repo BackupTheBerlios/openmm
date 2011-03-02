@@ -30,7 +30,7 @@ elseif(NOT BUILD_TARGET)
 set(BUILD_TARGET "Native")
 endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-# iphone only
+# iphone or iphone-simulator
 if("${BUILD_TARGET}" MATCHES "iphone")
 set(IPHONE 1)
 add_definitions(-D__DARWIN__)
@@ -38,15 +38,13 @@ endif("${BUILD_TARGET}" MATCHES "iphone")
 
 message(STATUS "Build target is: " ${BUILD_TARGET})
 
-#if(DEFINED BUILD_TARGET)
-# iphone or iphone-simulator
+# iphone only
 if("${BUILD_TARGET}" STREQUAL iphone)
 # use hardware floating point ops on simulator and softemu on iphone device
 add_definitions(-msoft-float)
 endif("${BUILD_TARGET}" STREQUAL iphone)
-#endif(DEFINED BUILD_TARGET)
 
-add_definitions(-g -Wno-unused-parameter)
+add_definitions(-Wno-unused-parameter)
 get_property(BUILD_SHARED_LIBS
 GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
 set(CMAKE_MODULE_PATH

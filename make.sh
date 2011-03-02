@@ -3,7 +3,7 @@
 BIN_DIR=../`basename ${PWD}`bin
 STAGING_DIR=
 BUILD_TARGET=
-BUILD_TYPE="None"
+BUILD_TYPE="Debug"
 
 VERBOSE=
 PRINT_USAGE=
@@ -13,16 +13,16 @@ if [ "${MSYSTEM}" = "MINGW32" ]
 then
     CMAKE_GENERATOR="MSYS Makefiles"
 fi
-CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 
 # get command line options
 #while getopts :h(help)v(verbose)s(staging):t(target): opt
-while getopts :hvs:t: opt
+while getopts :hvrs:t: opt
 do
     case "$opt" in
 	h) PRINT_USAGE=1;;
         v) VERBOSE="VERBOSE=1";;
+        r) RELEASE=1;;
         s) STAGING_DIR="${OPTARG}";;
 	t) BUILD_TARGET="${OPTARG}";;
         \?) PRINT_USAGE=1;;    # unknown flag
@@ -32,6 +32,14 @@ shift `expr $OPTIND - 1`
 
 SRC_DIR=${PWD}
 TOOLCHAIN_FILE_DIR=${SRC_DIR}/cmake/platform
+
+# build a release
+if [ ${RELEASE} ]
+then
+    BUILD_TYPE="Release"
+fi
+
+CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # setup staging dir
 if [ ${STAGING_DIR} ]

@@ -363,7 +363,7 @@ QtAvInterface::showMainWindow()
 void
 QtAvInterface::beginNetworkActivity()
 {
-    Omm::Av::Log::instance()->upnpav().debug("begin network activity");
+//    Omm::Av::Log::instance()->upnpav().debug("begin network activity");
     emit startNetworkActivity();
 }
 
@@ -371,7 +371,7 @@ QtAvInterface::beginNetworkActivity()
 void
 QtAvInterface::endNetworkActivity()
 {
-    Omm::Av::Log::instance()->upnpav().debug("end network activity");
+//    Omm::Av::Log::instance()->upnpav().debug("end network activity");
     emit stopNetworkActivity();
 }
 
