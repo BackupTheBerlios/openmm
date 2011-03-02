@@ -18,9 +18,6 @@ add_definitions(-D__LINUX__)
 elseif(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(DARWIN 1)
 add_definitions(-D__DARWIN__)
-if(${BUILD_TARGET} MATCHES "iphone")
-set(IPHONE 1)
-endif(${BUILD_TARGET} MATCHES "iphone")
 # set install_name for libraries on Darwin
 set(CMAKE_INSTALL_NAME_DIR
 ${CMAKE_INSTALL_PREFIX}/lib
@@ -33,14 +30,21 @@ elseif(NOT BUILD_TARGET)
 set(BUILD_TARGET "Native")
 endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+# iphone only
+if("${BUILD_TARGET}" MATCHES "iphone")
+set(IPHONE 1)
+add_definitions(-D__DARWIN__)
+endif("${BUILD_TARGET}" MATCHES "iphone")
+
 message(STATUS "Build target is: " ${BUILD_TARGET})
 
-if(DEFINED BUILD_TARGET)
-if(${BUILD_TARGET} STREQUAL iphone)
+#if(DEFINED BUILD_TARGET)
+# iphone or iphone-simulator
+if("${BUILD_TARGET}" STREQUAL iphone)
 # use hardware floating point ops on simulator and softemu on iphone device
 add_definitions(-msoft-float)
-endif(${BUILD_TARGET} STREQUAL iphone)
-endif(DEFINED BUILD_TARGET)
+endif("${BUILD_TARGET}" STREQUAL iphone)
+#endif(DEFINED BUILD_TARGET)
 
 add_definitions(-g -Wno-unused-parameter)
 get_property(BUILD_SHARED_LIBS
