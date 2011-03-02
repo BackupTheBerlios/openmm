@@ -39,8 +39,8 @@ Log::Log()
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
-//     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
@@ -294,23 +294,28 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
 void
 SsdpSocket::setupSockets()
 {
+#ifndef __DARWIN__
     if (Sys::NetworkInterfaceManager::instance()->loopbackOnly()) {
         Log::instance()->ssdp().warning("loopback is the only network interface, forcing broadcast mode.");
         setBroadcast();
     }
-    else {
-        try {
-            Log::instance()->ssdp().debug("set ttl to 4");
-            // FIXME: setting TTL on windows segfaults
-//            _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
-            setMulticast();
-        }
-        catch (Poco::IOException) {
-            Log::instance()->ssdp().error("failed to join multicast group");
-            Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
-            Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-            Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
-            setBroadcast();
+    else
+#endif
+    {
+        if (_mode != Multicast) {
+            try {
+                Log::instance()->ssdp().debug("set ttl to 4");
+                // FIXME: setting TTL on windows segfaults
+    //            _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
+                setMulticast();
+            }
+            catch (Poco::IOException) {
+                Log::instance()->ssdp().error("failed to join multicast group");
+                Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+                Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+                Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+                setBroadcast();
+            }
         }
     }
 }
