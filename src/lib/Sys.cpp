@@ -114,7 +114,7 @@ NetworkInterfaceManager::instance()
 const std::string
 NetworkInterfaceManager::loopbackInterfaceName()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     return _loopbackInterfaceName;
 }
@@ -123,7 +123,7 @@ NetworkInterfaceManager::loopbackInterfaceName()
 void
 NetworkInterfaceManager::findValidIpAddress()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     bool validAddressFound = false;
     bool loopBackProvided = false;
@@ -167,9 +167,11 @@ NetworkInterfaceManager::isLoopback(const std::string& interfaceName)
 void
 NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObserver& observer)
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     _notificationCenter.addObserver(observer);
+
+    // FIXME: really inform all observers of all network interface when a new observer is registered?
     for (std::vector<std::string>::iterator it = _interfaceList.begin(); it != _interfaceList.end(); ++it) {
         Log::instance()->sys().information("notify observer of new network interface: " + (*it));
         observer.notify(new NetworkInterfaceNotification((*it), true));
@@ -180,7 +182,7 @@ NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObse
 void
 NetworkInterfaceManager::scanInterfaces()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
     Log::instance()->sys().debug("number of network interfaces: " + Poco::NumberFormatter::format(ifList.size()));
@@ -207,7 +209,7 @@ NetworkInterfaceManager::scanInterfaces()
 void
 NetworkInterfaceManager::addInterface(const std::string& name)
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     Poco::Net::NetworkInterface interface = Poco::Net::NetworkInterface::forName(name, false);
     Poco::Net::IPAddress address = interface.address();
@@ -228,7 +230,7 @@ NetworkInterfaceManager::addInterface(const std::string& name)
 void
 NetworkInterfaceManager::removeInterface(const std::string& name)
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
     
     Log::instance()->sys().information("removing network interface: " + name);
     
@@ -242,7 +244,7 @@ NetworkInterfaceManager::removeInterface(const std::string& name)
 const Poco::Net::IPAddress&
 NetworkInterfaceManager::getValidIpAddress()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     return _validIpAddress;
 }
@@ -251,7 +253,7 @@ NetworkInterfaceManager::getValidIpAddress()
 bool
 NetworkInterfaceManager::loopbackOnly()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     return _interfaceList.size() == 1 && _interfaceList[0] == _loopbackInterfaceName;
 }
@@ -260,7 +262,7 @@ NetworkInterfaceManager::loopbackOnly()
 int
 NetworkInterfaceManager::interfaceCount()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     return _interfaceList.size();
 }
