@@ -83,9 +83,12 @@ Log::sys()
 
 
 NetworkInterfaceManager* NetworkInterfaceManager::_pInstance = 0;
+Poco::FastMutex NetworkInterfaceManager::_instanceLock;
 
 NetworkInterfaceManager::NetworkInterfaceManager()
 {
+    Log::instance()->sys().debug("installing network interface manager");
+    
     scanInterfaces();
     findValidIpAddress();
 
@@ -98,6 +101,9 @@ NetworkInterfaceManager::NetworkInterfaceManager()
 NetworkInterfaceManager*
 NetworkInterfaceManager::instance()
 {
+    Log::instance()->sys().debug("getting instance of network interface manager");
+    
+    Poco::FastMutex::ScopedLock lock(_instanceLock);
     if (!_pInstance) {
         _pInstance = new NetworkInterfaceManager;
     }

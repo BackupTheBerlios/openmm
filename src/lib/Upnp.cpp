@@ -2181,7 +2181,7 @@ Controller::start()
     _ssdpSocket.init();
     _ssdpSocket.setObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
     _ssdpSocket.start();
-    
+
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<Controller,Sys::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));    
     

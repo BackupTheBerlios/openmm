@@ -23,6 +23,7 @@
 
 #include <Poco/Logger.h>
 #include <Poco/NotificationCenter.h>
+#include <Poco/SingletonHolder.h>
 #include <Poco/Net/IPAddress.h>
 #include <vector>
 #include <string>
@@ -71,6 +72,8 @@ private:
     static bool isLoopback(const std::string& interfaceName);
     
     static NetworkInterfaceManager*     _pInstance;
+    static Poco::FastMutex              _instanceLock;
+
     NetworkInterfaceManagerImpl*        _pImpl;
     std::string                         _loopbackInterfaceName;
     std::vector<std::string>            _interfaceList;
