@@ -50,7 +50,7 @@ Log::Log()
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_ERROR);
 #endif
@@ -114,8 +114,6 @@ _width(width),
 _height(height),
 _depth(depth),
 _mime(mime),
-_pData(0),
-_size(0),
 _requestUri(""),
 _iconPath(":/usr/lib/omm:/usr/local/lib/omm")
 {
@@ -138,9 +136,14 @@ _iconPath(":/usr/lib/omm:/usr/local/lib/omm")
 
 Icon::~Icon()
 {
-    if (_pData) {
-        delete _pData;
-    }
+    _buffer.clear();
+}
+
+
+const std::string&
+Icon::getBuffer()
+{
+    return _buffer;
 }
 
 
@@ -156,10 +159,33 @@ Icon::retrieve(const std::string& uri)
         }
         Log::instance()->upnp().debug("reading icon from file: " + iconUri.getPath());
         std::ifstream ifs(iconUri.getPath().c_str());
-        _pData = new char[f.getSize()];
-        ifs.read(_pData, f.getSize());
-        _size = f.getSize();
+        char* pData = new char[f.getSize()];
+        ifs.read(pData, f.getSize());
+        _buffer = std::string(pData, f.getSize());
 
+    }
+    else if (iconUri.getScheme() == "http") {
+        Log::instance()->upnp().debug("download icon: " + uri);
+        Poco::Net::HTTPStreamFactory streamOpener;
+
+        _buffer.clear();
+        std::size_t size;
+        try {
+            std::istream* pInStream = streamOpener.open(Poco::URI(uri));
+            if (pInStream) {
+                size = Poco::StreamCopier::copyToString(*pInStream, _buffer);
+            }
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnp().error("download icon failed: " + e.displayText());
+        }
+        if (size == 0) {
+            Log::instance()->upnp().error("download icon failed, no bytes received.");
+            return;
+        }
+        else {
+            Log::instance()->upnp().debug("download icon success, bytes: " + Poco::NumberFormatter::format(size));
+        }
     }
     else if (iconUri.isRelative()) {
         Poco::StringTokenizer pathSplitter(_iconPath, ":");
@@ -177,9 +203,9 @@ Icon::retrieve(const std::string& uri)
             }
             Log::instance()->upnp().debug("reading icon from file: " + baseUri.getPath());
             std::ifstream ifs(baseUri.getPath().c_str());
-            _pData = new char[f.getSize()];
-            ifs.read(_pData, f.getSize());
-            _size = f.getSize();
+            char* pData = new char[f.getSize()];
+            ifs.read(pData, f.getSize());
+            _buffer = std::string(pData, f.getSize());
             break;
         }
         if (it == pathSplitter.end()) {
@@ -420,7 +446,8 @@ UriDescriptionReader::getDescription(const std::string& relativeUri)
         res = new std::string(ss.str());
     }
     else if (targetUri.getScheme() == "http") {
-        Log::instance()->desc().information("downloading description from: " + targetUri.getPath());
+        Log::instance()->desc().information("downloading description from host: " + targetUri.getHost()
+             + ", port: " + Poco::NumberFormatter::format(targetUri.getPort()) + ", path: " + targetUri.getPath());
         Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
         Poco::Net::HTTPRequest request("GET", targetUri.getPath());
         session.sendRequest(request);
@@ -906,7 +933,8 @@ DeviceDescriptionWriter::device(Device& device)
     pDevice->appendChild(pIconList);
     // Icons
     for (Device::IconIterator it = device.beginIcon(); it != device.endIcon(); ++it) {
-        if ((*it)->_pData) {
+//        if ((*it)->_pData) {
+        if ((*it)->_buffer.size()) {
             pIconList->appendChild(icon(*it));
             Log::instance()->desc().debug("writer added icon: " + (*it)->_requestUri);
         }
@@ -1625,7 +1653,7 @@ IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 {
     Log::instance()->upnp().debug("icon request from: " + request.getHost());
     
-    response.sendBuffer(_pIcon->_pData, _pIcon->_size);
+    response.sendBuffer(_pIcon->_buffer.data(), _pIcon->_buffer.size());
 }
 
 
@@ -1672,8 +1700,12 @@ HttpSocket::stopServer()
 std::string
 HttpSocket::getServerUri()
 {
-    return "http://" + Sys::NetworkInterfaceManager::instance()->getValidIpAddress().toString()
-            + ":" + Poco::NumberFormatter::format(_httpServerPort) + "/";
+    Poco::Net::IPAddress validIpAddress = Sys::NetworkInterfaceManager::instance()->getValidIpAddress();
+    std::string validIpAddressString = validIpAddress.toString();
+    if (validIpAddress.family() == Poco::Net::IPAddress::IPv6) {
+        validIpAddressString = "[" + validIpAddressString + "]";
+    }
+    return "http://" + validIpAddressString + ":" + Poco::NumberFormatter::format(_httpServerPort) + "/";
 }
 
 

@@ -198,6 +198,23 @@ ControllerObject::getProperty(const std::string& name)
 }
 
 
+Icon*
+ControllerObject::getIcon()
+{
+    std::string prop = getProperty(AvProperty::CLASS);
+    if (AvClass::matchClass(prop, AvClass::ITEM, AvClass::IMAGE_ITEM))
+    {
+        // FIXME: if object is an image, the resource itself is used as the icon representation.
+        // this should be replaced with getting the icon property, which is a lower resolution
+        // thumb nail of the original picture (but should be displayable on a handheld device).
+        return new Icon(0, 0, 0, Mime::IMAGE_JPEG, getResource()->getUri());
+    }
+    else {
+        // for any other object type, we currently don't supply any icon.
+        return 0;
+    }
+}
+
 
 Resource*
 ControllerObject::getResource(int num)

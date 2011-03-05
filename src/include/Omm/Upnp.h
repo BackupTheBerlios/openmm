@@ -171,7 +171,8 @@ private:
 };
 
 
-class Icon {
+class Icon
+{
     friend class IconRequestHandler;
     friend class DeviceRoot;
     friend class Device;
@@ -180,6 +181,8 @@ class Icon {
 public:
     Icon(int width, int height, int depth, const std::string& mime, const std::string& uri = "");
     ~Icon();
+
+    const std::string& getBuffer();
     
 private:
     void retrieve(const std::string& uri);
@@ -188,8 +191,7 @@ private:
     int                     _height;
     int                     _depth;
     Poco::Net::MediaType    _mime;
-    char*                   _pData;
-    std::size_t             _size;
+    std::string             _buffer;
     std::string             _requestUri;
     std::string             _iconPath;
 };

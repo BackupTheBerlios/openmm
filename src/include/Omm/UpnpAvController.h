@@ -65,6 +65,8 @@ public:
     ControllerObject* parent();
     
     std::string getProperty(const std::string& name);
+
+    Icon* getIcon();
     
 private:
     Resource* getResource(int num = 0);
@@ -112,6 +114,12 @@ public:
     bool isPlaying(RendererView* pRenderer);
     int serverCount();
     ControllerObject* serverRootObject(int numServer);
+
+    // TODO: getIcon() ... of server or renderer device ...
+    // retrieves the icon that is closest to width, heigth, depth.
+    // if no parameters are given, the first icon is retrieved.
+    // if no icon is retrieved, 0 is returned.
+//    Icon* getIcon(int width = 0, int height = 0, int depth = 0);
     
     void playPressed();
     void stopPressed();

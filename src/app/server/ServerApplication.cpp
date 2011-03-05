@@ -171,7 +171,7 @@ protected:
             Omm::Av::AvServer myMediaServer;
             myMediaServer.setRoot(pContainerPlugin);
             myMediaServer.setFriendlyName(_name);
-            Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
+            Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
             myMediaServer.addIcon(pIcon);
             myMediaServer.start();
             waitForTerminationRequest();

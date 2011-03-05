@@ -24,6 +24,7 @@
 
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>
+#include <Poco/Net/HTTPStreamFactory.h>
 
 #include "Upnp.h"
 

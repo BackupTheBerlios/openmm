@@ -584,6 +584,7 @@ public:
     
     std::string objectId();
     std::string getTitle();
+
     bool isContainer();
     bool isRestricted();
     

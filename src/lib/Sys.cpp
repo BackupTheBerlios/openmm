@@ -132,7 +132,10 @@ NetworkInterfaceManager::findValidIpAddress()
             loopBackProvided = true;
         }
         else {
+            // FIXME:
             // iphone simulator returns an IPv6 address on an IPv4 interface, we have to double-check.
+            // funny, that it works anyway on iphone-simulator with a validIpAddress = 0.0.0.0
+            // and for example device descriptions are downloaded from http://0.0.0.0:port/Description.xml
             Poco::Net::IPAddress validIpAddress = Poco::Net::NetworkInterface::forName(*it).address();
             if (validIpAddress.family() == Poco::Net::IPAddress::IPv4) {
                 validAddressFound = true;
