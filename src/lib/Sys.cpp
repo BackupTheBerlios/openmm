@@ -170,12 +170,6 @@ NetworkInterfaceManager::registerInterfaceChangeHandler(const Poco::AbstractObse
     Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     _notificationCenter.addObserver(observer);
-
-    // FIXME: really inform all observers of all network interface when a new observer is registered?
-    for (std::vector<std::string>::iterator it = _interfaceList.begin(); it != _interfaceList.end(); ++it) {
-        Log::instance()->sys().information("notify observer of new network interface: " + (*it));
-        observer.notify(new NetworkInterfaceNotification((*it), true));
-    }
 }
 
 

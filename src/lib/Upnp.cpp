@@ -1869,7 +1869,10 @@ DeviceRoot::startSsdp()
     writeSsdpMessages();
     
     _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
+    _ssdpSocket.setupSockets();
     _ssdpSocket.start();
+    writeSsdpMessages();
+    sendSsdpAliveMessages();
 
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<DeviceRoot,Sys::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
@@ -1972,19 +1975,27 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
 
 
 void
-DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification)
+DeviceRoot::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
 {
-    Log::instance()->upnp().debug("device root receives network interface change notification");
+    Log::instance()->upnp().debug("device root adds network interface: " + interfaceName);
     writeSsdpMessages();
-    if (pNotification->_added) {
-        _ssdpSocket.addInterface(pNotification->_interfaceName);
+    if (added) {
+        _ssdpSocket.addInterface(interfaceName);
         // TODO: send alive messages only once at startup of server
         // (now triggered by loopback device and real network device)
         sendSsdpAliveMessages();
     }
     else {
-        _ssdpSocket.removeInterface(pNotification->_interfaceName);
+        _ssdpSocket.removeInterface(interfaceName);
     }
+}
+
+
+void
+DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification)
+{
+    Log::instance()->upnp().debug("device root receives network interface change notification");
+    handleNetworkInterfaceChange(pNotification->_interfaceName, pNotification->_added);
 }
 
 
@@ -2180,7 +2191,9 @@ Controller::start()
 
     _ssdpSocket.init();
     _ssdpSocket.setObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
+    _ssdpSocket.setupSockets();
     _ssdpSocket.start();
+    sendMSearch();
 
     Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<Controller,Sys::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));    
