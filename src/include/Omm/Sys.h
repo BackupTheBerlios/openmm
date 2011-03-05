@@ -76,6 +76,7 @@ private:
     std::vector<std::string>            _interfaceList;
     Poco::Net::IPAddress                _validIpAddress;
     Poco::NotificationCenter            _notificationCenter;
+    Poco::FastMutex                     _lock;
 };
 
 
