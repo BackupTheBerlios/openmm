@@ -23,6 +23,7 @@
 #include <Poco/PatternFormatter.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/ConsoleChannel.h>
+#include <Poco/Environment.h>
 
 #include "Util.h"
 
@@ -68,6 +69,22 @@ Log::util()
     return *_pUtilLogger;
 }
 
+
+std::string Home::_home = "";
+const std::string Home::_defaultHome("/var/omm");
+Poco::FastMutex Home::_lock;
+
+const std::string
+Home::getHomePath()
+{
+    Poco::FastMutex::ScopedLock lock(_lock);
+    
+    if (_home == "") {
+        _home = Poco::Environment::get("OMM_HOME", Poco::Environment::get("HOME", _defaultHome));
+        Log::instance()->util().information("OMM HOME: " + _home);
+    }
+    return _home;
+}
 
 } // namespace Util
 } // namespace Omm

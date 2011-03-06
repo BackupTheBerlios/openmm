@@ -47,8 +47,20 @@ private:
 };
 
 
+class Home
+{
+public:
+    static const std::string getHomePath();
+    
+private:
+    static std::string _home;
+    static const std::string _defaultHome;
+    static Poco::FastMutex _lock;
+};
+
+
 template<class C>
-    class PluginLoader
+class PluginLoader
 {
 public:
     PluginLoader() :
