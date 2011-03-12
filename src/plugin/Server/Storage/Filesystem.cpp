@@ -32,9 +32,12 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/XML/XMLWriter.h>
 #include <Poco/SAX/ContentHandler.h>
+
+#include "Omm/UpnpAvTypes.h"
 #include <Poco/SAX/Attributes.h>
 
 #include <Omm/AvStream.h>
+#include <Poco/NumberFormatter.h>
 
 #include "Filesystem.h"
 
@@ -59,6 +62,7 @@ public:
     std::string         _mime;
     
     const static std::string FILE_ITEM_LIST;
+    const static std::string FILE_ITEM_CONTAINER_CLASS_PROPERTY;
     const static std::string FILE_ITEM;
     const static std::string FILE_ITEM_PATH;
     const static std::string FILE_ITEM_CLASS;
@@ -72,6 +76,7 @@ public:
 
 
 const std::string FileItem::FILE_ITEM_LIST = "itemList";
+const std::string FileItem::FILE_ITEM_CONTAINER_CLASS_PROPERTY = "class";
 const std::string FileItem::FILE_ITEM = "item";
 const std::string FileItem::FILE_ITEM_PATH = "path";
 const std::string FileItem::FILE_ITEM_CLASS = "class";
@@ -166,6 +171,7 @@ public:
     ~FileDataModel();
     
     virtual Omm::ui4 getChildCount();
+    virtual std::string getContainerClass();
     virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
     virtual std::string getOptionalProperty(Omm::ui4 index, const std::string& property);
@@ -200,6 +206,7 @@ private:
     
     std::string                         _basePath;
     std::string                         _cachePath;
+    std::string                         _containerClass;
     Omm::AvStream::Tagger*              _pTagger;
     std::vector<FileItem*>              _items;
     std::map<std::string,FileItem*>     _itemMap;
@@ -233,6 +240,13 @@ Omm::ui4
 FileDataModel::getChildCount()
 {
     return _items.size();
+}
+
+
+std::string
+FileDataModel::getContainerClass()
+{
+    return _containerClass;
 }
 
 
@@ -339,6 +353,11 @@ FileDataModel::startElement(const Poco::XML::XMLString& uri, const Poco::XML::XM
     if (localName == FileItem::FILE_ITEM) {
         _pParseItem = new FileItem;
         _items.push_back(_pParseItem);
+    }
+    else if (localName == FileItem::FILE_ITEM_LIST) {
+        //_containerClass = attributes.getValue(FileItem::FILE_ITEM_CONTAINER_CLASS_PROPERTY);
+        _containerClass = attributes.getValue(0);
+        Omm::AvStream::Log::instance()->avstream().debug("local name: " + localName + " number of attributes: " + Poco::NumberFormatter::format(attributes.getLength()) + " parsing attribute container class: " + _containerClass);
     }
     else {
         _parseElement = localName;
@@ -495,6 +514,7 @@ FileDataModel::writeCache()
     
     Poco::XML::Document* pCacheDoc= new Poco::XML::Document;
     Poco::AutoPtr<Poco::XML::Element> pFileItemList = pCacheDoc->createElement(FileItem::FILE_ITEM_LIST);
+    pFileItemList->setAttribute("class", Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
     pCacheDoc->appendChild(pFileItemList);
 
     for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
@@ -520,7 +540,10 @@ void
 FileServer::setOption(const std::string& key, const std::string& value)
 {
     if (key == "basePath") {
-        setDataModel(new FileDataModel(value));
+        FileDataModel* pDataModel = new FileDataModel(value);
+        setDataModel(pDataModel);
+        setTitle(value);
+        setClass(pDataModel->getContainerClass());
     }
 }
 

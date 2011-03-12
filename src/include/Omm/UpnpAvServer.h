@@ -169,6 +169,7 @@ class AbstractDataModel
 {
 public:
     virtual ui4 getChildCount() { return 0; }
+    virtual std::string getContainerClass() { return AvClass::CONTAINER; }
     virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
     virtual std::string getTitle(ui4 index) { return ""; }
     virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
@@ -204,8 +205,9 @@ private:
     virtual void addProperty(AbstractProperty* pProperty);
     virtual AbstractProperty* createProperty();
 
-    AbstractProperty*           _pTitleProp;
-    AbstractMediaObject*        _pChild;
+    AbstractProperty*               _pTitleProperty;
+    AbstractProperty*               _pClassProperty;
+    AbstractMediaObject*            _pChild;
 };
 
 

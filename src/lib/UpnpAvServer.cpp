@@ -398,8 +398,9 @@ _pChild(new TorchItem(this))
 TorchServer::~TorchServer()
 {
     delete _pDataModel;
-    delete _pTitleProp;
     delete _pChild;
+    delete _pTitleProperty;
+    delete _pClassProperty;
 }
 
 
@@ -467,9 +468,12 @@ TorchServer::isContainer()
 int
 TorchServer::getPropertyCount(const std::string& name)
 {
-    // the server itself (not the media items) has only one property overall and one title property in particular
-    // TODO: add class property, it's required
-    if (name == "" || name == AvProperty::TITLE) {
+    // the server itself (not the media items) has two properties overall
+    if (name == "") {
+        return 2;
+    }
+    // and one property for title and class
+    else if (name == AvProperty::TITLE || name == AvProperty::CLASS) {
         return 1;
     }
     else {
@@ -481,7 +485,15 @@ TorchServer::getPropertyCount(const std::string& name)
 AbstractProperty*
 TorchServer::getProperty(int index)
 {
-    return _pTitleProp;
+    if (index == 0) {
+        return _pTitleProperty;
+    }
+    else if (index == 1) {
+        return _pClassProperty;
+    }
+    else {
+        return 0;
+    }
 }
 
 
@@ -489,7 +501,10 @@ AbstractProperty*
 TorchServer::getProperty(const std::string& name, int index)
 {
     if (name == AvProperty::TITLE) {
-        return _pTitleProp;
+        return _pTitleProperty;
+    }
+    else if (name == AvProperty::CLASS) {
+        return _pClassProperty;
     }
     else {
         return 0;
@@ -500,7 +515,12 @@ TorchServer::getProperty(const std::string& name, int index)
 void
 TorchServer::addProperty(AbstractProperty* pProperty)
 {
-    _pTitleProp = pProperty;
+    if (pProperty->getName() == AvProperty::TITLE) {
+        _pTitleProperty = pProperty;
+    }
+    else if (pProperty->getName() == AvProperty::CLASS) {
+        _pClassProperty = pProperty;
+    }
 }
 
 

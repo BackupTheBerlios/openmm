@@ -23,6 +23,7 @@
 #include "UpnpAvController.h"
 #include "UpnpAvControllerPrivate.h"
 #include "UpnpAvCtrlImpl.h"
+#include "UpnpAvControllers.h"
 
 namespace Omm {
 namespace Av {
@@ -47,6 +48,11 @@ void
 ControllerObject::readChildren(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
     while (pObjectNode)
@@ -73,8 +79,8 @@ ControllerObject::readMetaData(const std::string& metaData)
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
-    Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
-    readNode(pDidl);
+    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
+    readNode(pObjectNode);
 }
 
 
@@ -153,10 +159,11 @@ ControllerObject::fetchChildren()
         try {
             _server->ContentDirectory()->Browse(_objectId, "BrowseDirectChildren", "*", _children.size(), 10, "", result, numberReturned, totalMatches, updateId);
         }
-        catch (...){
+        catch (Poco::Exception& e){
 //             error("");
 // FIXME: if no children are fetched (network error) and _fetchedAllChildren remains false, controller doesn't stop fetching children
 //             _fetchedAllChildren = true;
+            Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
             return 0;
         }
         readChildren(result);
@@ -250,13 +257,23 @@ ServerController::ServerController(MediaServerController* pServerController) :
 _pServerController(pServerController)
 {
     _pRoot = new ControllerObject();
-    _pRoot->setObjectId("0");
+    try {
+        std::string rootMeta;
+        ui4 numberReturned;
+        ui4 totalMatches;
+        ui4 updateId;
+        pServerController->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
+        _pRoot->readMetaData(rootMeta);
+        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS));
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("controller could not fetch root object, setting default replacement object: " + e.displayText());
+        _pRoot->setObjectId("0");
+        _pRoot->setIsContainer(true);
+    }
     _pRoot->setTitle(_pServerController->getDevice()->getFriendlyName());
     _pRoot->setServerController(_pServerController);
     _pRoot->setFetchedAllChildren(false);
-    // TODO: browse root object "0" here
-    // TODO: this should depend on the browse result for root object "0"
-    _pRoot->setIsContainer(true);
 }
 
 

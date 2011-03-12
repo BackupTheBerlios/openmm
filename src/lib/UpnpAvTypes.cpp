@@ -191,7 +191,7 @@ const std::string AvClass::STORAGE_VOLUME = "storageVolume";
 const std::string AvClass::STORAGE_FOLDER = "storageFolder";
 const std::string AvClass::MUSIC_ARTIST = "musicArtist";
 const std::string AvClass::MUSIC_ALBUM = "musicAlbum";
-const std::string AvClass::PHOTO_ALBUM = "photAlbum";
+const std::string AvClass::PHOTO_ALBUM = "photoAlbum";
 const std::string AvClass::MUSIC_GENRE = "musicGenre";
 const std::string AvClass::MOVIE_GENRE = "movieGenre";
 
