@@ -301,6 +301,7 @@ bool
 AvClass::matchClass(const std::string& name, const std::string& c1, const std::string& c2 , const std::string& c3, const std::string& c4)
 {
     std::string matchName = className(c1, c2, c3, c4);
+ //   Log::instance()->upnpav().debug("matching class: " + name + " with class: " + matchName);
  
     return (name.substr(0, matchName.length()) == matchName);
 }
