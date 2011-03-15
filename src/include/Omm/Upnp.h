@@ -31,6 +31,9 @@
 #include <ostream>
 #include <sstream>
 
+#if (POCO_VERSION & 0xFFFFFFFF) >= 0x01040000
+#include <Poco/Version.h>
+#endif
 #include <Poco/NumberFormatter.h>
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>

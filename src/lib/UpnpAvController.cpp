@@ -256,7 +256,7 @@ ControllerObject::setServerController(MediaServerController* _pServer)
 ServerController::ServerController(MediaServerController* pServerController) :
 _pServerController(pServerController)
 {
-    _pRoot = new ControllerObject();
+    _pRoot = new ControllerObject;
     try {
         std::string rootMeta;
         ui4 numberReturned;

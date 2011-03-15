@@ -238,6 +238,7 @@ WebradioServer::setOption(const std::string& key, const std::string& value)
 {
     if (key == "basePath") {
         setDataModel(new WebradioDataModel(value));
+        setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::AUDIO_BROADCAST));
     }
 }
 
