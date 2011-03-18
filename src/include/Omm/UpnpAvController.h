@@ -67,6 +67,7 @@ public:
     std::string getProperty(const std::string& name);
 
     Icon* getIcon();
+    Icon* getImageRepresentation();
     
 private:
     Resource* getResource(int num = 0);
