@@ -32,17 +32,22 @@ namespace Av {
 class TorchItemProperty : public Omm::Av::AbstractProperty
 {
 public:
-    TorchItemProperty();
+    TorchItemProperty(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
 };
 
 
-class TorchItemPropertyImpl : public Omm::Av::PropertyImpl
+class TorchItemPropertyImpl : public Omm::Av::StreamingPropertyImpl
 {
 public:
+    TorchItemPropertyImpl(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+
     virtual void setName(const std::string& name);
     virtual void setValue(const std::string& value);
     virtual std::string getName();
     virtual std::string getValue();
+
+    // some properties can stream: icon, album art
+    virtual std::istream* getStream();
     
 private:
     std::string         _name;
@@ -80,11 +85,13 @@ private:
     TorchItemProperty*                   _pClassProp;
     TorchItemProperty*                   _pTitleProp;
     TorchItemResource*                   _pResource;
+
     std::vector<TorchItemProperty*>      _optionalProps;
     TorchItemProperty*                   _pArtistProp;
     TorchItemProperty*                   _pAlbumProp;
     TorchItemProperty*                   _pTrackProp;
     TorchItemProperty*                   _pGenreProp;
+    TorchItemProperty*                   _pIconProp;
 };
 
 } // namespace Av

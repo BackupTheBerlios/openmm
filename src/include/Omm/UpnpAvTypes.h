@@ -337,8 +337,8 @@ public:
     virtual std::string getAttributeValue(int index);
     virtual std::string getAttributeValue(const std::string& name);
     virtual int getAttributeCount();
-    
-private:
+
+protected:
     PropertyImpl*       _pPropertyImpl;
 };
 

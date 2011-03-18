@@ -26,6 +26,7 @@
 #include "UpnpAvServer.h"
 #include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"
+#include "UpnpAvTypes.h"
 
 namespace Omm {
 namespace Av {
@@ -102,6 +103,8 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 {
     Log::instance()->upnpav().debug("handle media item request: " + request.getURI());
 
+    response.setDate(Poco::Timestamp());
+
     std::ostringstream requestHeader;
     request.write(requestHeader);
     Log::instance()->upnpav().debug("request method: " + request.getMethod());
@@ -109,33 +112,63 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
-    int resourceId = Poco::NumberParser::parse(uri[1]);
     Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
-    
     AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
-    StreamingResource* pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
 
-    std::string protInfoString = pResource->getProtInfo();
-    ProtocolInfo protInfo(protInfoString);
-    std::string mime = protInfo.getMimeString();
-    std::string dlna = protInfo.getDlnaString();
-    std::streamsize resSize = pResource->getSize();
-    
-    response.setContentType(mime);
-    response.set("Mime-Version", "1.0");
-    response.set("transferMode.dlna.org", "Streaming");
-    response.set("EXT", "");
-    response.set("Server", Poco::Environment::osName() + "/"
-                 + Poco::Environment::osVersion()
-                 + " UPnP/" + UPNP_VERSION + " Omm/" + OMM_VERSION);
-    response.setDate(Poco::Timestamp());
-    
-    if (pResource->isSeekable()) {
-        response.set("Accept-Ranges", "bytes");
+    StreamingResource* pResource;
+    StreamingProperty* pProperty;
+    std::streamsize resSize = 0;
+    if (uri[1] == "i") {
+        // object icon requested by controller
+        Log::instance()->upnpav().debug("icon request: server creates icon property");
+        pProperty = static_cast<StreamingProperty*>(pItem->getProperty(AvProperty::ICON));
+        Log::instance()->upnpav().debug("icon request: server icon property created");
+        // deliver icon
+        if (pProperty) {
+            // icon requested (handle other streamable properties as well, such as album art ...)
+            try {
+                std::istream* pIstr = pProperty->getStream();
+                if (pIstr) {
+                    Log::instance()->upnpav().debug("sending icon ...");
+                    std::ostream& ostr = response.send();
+                    std::streamsize numBytes = Poco::StreamCopier::copyStream(*pIstr, ostr);
+                    Log::instance()->upnpav().debug("icon sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
+                    delete pIstr;
+                }
+            }
+            catch(Poco::Exception& e) {
+                Log::instance()->upnpav().debug("delivering icon failed: " + e.displayText());
+            }
+        }
+        return;
     }
-    if (request.has("getcontentFeatures.dlna.org")) {
-        response.set("contentFeatures.dlna.org", dlna);
+    else {
+        // resource requested by controller
+        int resourceId = Poco::NumberParser::parse(uri[1]);
+        pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
+        resSize = pResource->getSize();
+
+        std::string protInfoString = pResource->getProtInfo();
+        ProtocolInfo protInfo(protInfoString);
+        std::string mime = protInfo.getMimeString();
+        std::string dlna = protInfo.getDlnaString();
+
+        response.setContentType(mime);
+        response.set("Mime-Version", "1.0");
+        response.set("transferMode.dlna.org", "Streaming");
+        response.set("EXT", "");
+        response.set("Server", Poco::Environment::osName() + "/"
+                     + Poco::Environment::osVersion()
+                     + " UPnP/" + UPNP_VERSION + " Omm/" + OMM_VERSION);
+
+        if (pResource->isSeekable()) {
+            response.set("Accept-Ranges", "bytes");
+        }
+        if (request.has("getcontentFeatures.dlna.org")) {
+            response.set("contentFeatures.dlna.org", dlna);
+        }
     }
+
     
     if (request.getMethod() == "GET") {
         std::streamoff start = 0;
@@ -165,7 +198,9 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         signal(SIGPIPE, SIG_IGN); // fixes abort with "Program received signal SIGPIPE, Broken pipe." on Mac OSX when renderer stops the stream.
 #endif
         try {
-            std::istream* pIstr = pResource->getStream();
+            std::istream* pIstr;
+            // deliver resource
+            pIstr = pResource->getStream();
             if (pIstr) {
                 Log::instance()->upnpav().debug("sending stream ...");
                 std::streamsize numBytes = copyStream(*pIstr, ostr, start, end);
@@ -280,6 +315,31 @@ AvServer::getRoot()
 }
 
 
+std::istream*
+StreamingProperty::getStream()
+{
+    return static_cast<StreamingPropertyImpl*>(_pPropertyImpl)->getStream();
+}
+
+
+StreamingPropertyImpl::StreamingPropertyImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
+_pServer(pServer),
+_pItem(pItem)
+{
+
+}
+
+
+std::string
+StreamingPropertyImpl::getValue()
+{
+    std::string serverAddress = _pServer->getServerAddress();
+    std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
+    std::string resourceId = "i";
+    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+}
+
+
 StreamingResource::StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
 AbstractResource(pPropertyImpl),
 _pServer(pServer),
@@ -387,6 +447,13 @@ StreamingMediaObject::getServerProtocol()
 }
 
 
+std::istream*
+StreamingMediaObject::getIconStream()
+{
+
+}
+
+
 TorchServer::TorchServer(int port) :
 StreamingMediaObject(port),
 _pChild(new TorchItem(this))
@@ -415,31 +482,37 @@ AbstractMediaObject*
 TorchServer::getChild(ui4 numChild)
 {
     _pChild->setObjectNumber(numChild);
-    TorchItem*_pTorchChild = static_cast<TorchItem*>(_pChild);
-    _pTorchChild->_optionalProps.clear();
+    TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
+    pTorchChild->_optionalProps.clear();
 
     // FIXME: title property of child item should get it's title based on item's object number
-    _pTorchChild->_pClassProp->setValue(_pDataModel->getClass(numChild));
-    _pTorchChild->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
+    pTorchChild->_pClassProp->setValue(_pDataModel->getClass(numChild));
+    pTorchChild->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
     std::string artist = _pDataModel->getOptionalProperty(numChild, AvProperty::ARTIST);
     if (artist != "") {
-        _pTorchChild->_pArtistProp->setValue(artist);
-        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pArtistProp);
+        pTorchChild->_pArtistProp->setValue(artist);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pArtistProp);
     }
     std::string album = _pDataModel->getOptionalProperty(numChild, AvProperty::ALBUM);
     if (album != "") {
-        _pTorchChild->_pAlbumProp->setValue(album);
-        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pAlbumProp);
+        pTorchChild->_pAlbumProp->setValue(album);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pAlbumProp);
     }
     std::string track = _pDataModel->getOptionalProperty(numChild, AvProperty::ORIGINAL_TRACK_NUMBER);
     if (track != "") {
-        _pTorchChild->_pTrackProp->setValue(track);
-        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pTrackProp);
+        pTorchChild->_pTrackProp->setValue(track);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pTrackProp);
     }
     std::string genre = _pDataModel->getOptionalProperty(numChild, AvProperty::GENRE);
     if (genre != "") {
-        _pTorchChild->_pGenreProp->setValue(genre);
-        _pTorchChild->_optionalProps.push_back(_pTorchChild->_pGenreProp);
+        pTorchChild->_pGenreProp->setValue(genre);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pGenreProp);
+    }
+    std::string icon = _pDataModel->getOptionalProperty(numChild, AvProperty::ICON);
+    if (icon != "") {
+        Log::instance()->upnpav().debug("torch server adds icon property: " + icon);
+        pTorchChild->_pIconProp->setValue(icon);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pIconProp);
     }
     
     return _pChild;
@@ -602,6 +675,12 @@ TorchItemResource::getDlna()
 }
 
 
+TorchItemPropertyImpl::TorchItemPropertyImpl(TorchServer* pServer, AbstractMediaObject* pItem) :
+StreamingPropertyImpl(pServer, pItem)
+{
+}
+
+
 void
 TorchItemPropertyImpl::setName(const std::string& name)
 {
@@ -635,32 +714,53 @@ TorchItemPropertyImpl::getValue()
         || _name == AvProperty::GENRE) {
         return _value;
     }
+    else if (_name == AvProperty::ICON) {
+        return StreamingPropertyImpl::getValue();
+    }
 }
 
 
-TorchItemProperty::TorchItemProperty() :
-AbstractProperty(new TorchItemPropertyImpl)
+std::istream*
+TorchItemPropertyImpl::getStream()
+{
+    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getStream()");
+
+    AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
+    if (pDataModel) {
+        return pDataModel->getIconStream(_pItem->getObjectNumber());
+    }
+    else {
+        return 0;
+    }
+}
+
+
+TorchItemProperty::TorchItemProperty(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+AbstractProperty(new TorchItemPropertyImpl(pServer, pItem))
 {
 }
 
 
 TorchItem::TorchItem(TorchServer* pServer) :
 StreamingMediaItem(pServer),
-_pClassProp(new TorchItemProperty),
-_pTitleProp(new TorchItemProperty),
+_pClassProp(new TorchItemProperty(pServer, this)),
+_pTitleProp(new TorchItemProperty(pServer, this)),
 _pResource(new TorchItemResource(pServer, this)),
-_pArtistProp(new TorchItemProperty),
-_pAlbumProp(new TorchItemProperty),
-_pTrackProp(new TorchItemProperty),
-_pGenreProp(new TorchItemProperty)
+_pArtistProp(new TorchItemProperty(pServer, this)),
+_pAlbumProp(new TorchItemProperty(pServer, this)),
+_pTrackProp(new TorchItemProperty(pServer, this)),
+_pGenreProp(new TorchItemProperty(pServer, this)),
+_pIconProp(new TorchItemProperty(pServer, this))
 {
 //     std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
     _pClassProp->setName(AvProperty::CLASS);
     _pTitleProp->setName(AvProperty::TITLE);
+
     _pArtistProp->setName(AvProperty::ARTIST);
     _pAlbumProp->setName(AvProperty::ALBUM);
     _pTrackProp->setName(AvProperty::ORIGINAL_TRACK_NUMBER);
     _pGenreProp->setName(AvProperty::GENRE);
+    _pIconProp->setName(AvProperty::ICON);
 }
 
 
@@ -668,6 +768,13 @@ TorchItem::~TorchItem()
 {
     delete _pClassProp;
     delete _pTitleProp;
+    delete _pResource;
+
+    delete _pArtistProp;
+    delete _pAlbumProp;
+    delete _pTrackProp;
+    delete _pGenreProp;
+    delete _pIconProp;
 }
 
 
@@ -681,7 +788,7 @@ TorchItem::getPropertyCount(const std::string& name)
     }
     else if (name == AvProperty::CLASS || name == AvProperty::TITLE || name == AvProperty::RES
         || name == AvProperty::ARTIST || name == AvProperty::ALBUM || name == AvProperty::ORIGINAL_TRACK_NUMBER
-        || name == AvProperty::GENRE) {
+        || name == AvProperty::GENRE || name == AvProperty::ICON) {
         return 1;
     }
     else {

@@ -103,6 +103,31 @@ private:
 };
 
 
+class StreamingProperty : public AbstractProperty
+{
+public:
+    std::istream* getStream();
+};
+
+
+class StreamingPropertyImpl : public PropertyImpl
+{
+    friend class ItemRequestHandler;
+    
+public:
+    StreamingPropertyImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem);
+    
+    virtual std::string getValue();
+    // some properties can stream: icon, album art
+    virtual std::istream* getStream() { return 0; }
+
+
+protected:
+    StreamingMediaObject*       _pServer;
+    AbstractMediaObject*        _pItem;
+};
+
+
 class StreamingResource : public AbstractResource
 {
     friend class ItemRequestHandler;
@@ -149,12 +174,16 @@ class StreamingMediaObject : public AbstractMediaObject
 {
     friend class ItemRequestHandler;
     friend class StreamingResource;
+    friend class StreamingPropertyImpl;
     
 public:
     StreamingMediaObject(int port = 0);
     ~StreamingMediaObject();
     
     virtual AbstractMediaObject* createChildObject();
+
+protected:
+    virtual std::istream* getIconStream();
     
 private:
     std::string getServerAddress();
@@ -179,12 +208,14 @@ public:
     virtual std::string getDlna(ui4 index) { return "*"; }
     virtual bool isSeekable(ui4 index) { return false; }
     virtual std::istream* getStream(ui4 index) { return 0; }
+    virtual std::istream* getIconStream(ui4 index) { return 0; }
 };
 
 
 class TorchServer : public StreamingMediaObject
 {
     friend class TorchItemResource;
+    friend class TorchItemPropertyImpl;
     
 public:
     TorchServer(int port = 0);

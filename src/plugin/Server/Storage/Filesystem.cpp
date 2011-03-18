@@ -60,6 +60,7 @@ public:
     std::string         _track;
     std::string         _genre;
     std::string         _mime;
+    std::string         _icon;
     
     const static std::string FILE_ITEM_LIST;
     const static std::string FILE_ITEM_CONTAINER_CLASS_PROPERTY;
@@ -72,6 +73,7 @@ public:
     const static std::string FILE_ITEM_TRACK;
     const static std::string FILE_ITEM_GENRE;
     const static std::string FILE_ITEM_MIME;
+    const static std::string FILE_ITEM_ICON;
 };
 
 
@@ -86,6 +88,7 @@ const std::string FileItem::FILE_ITEM_ARTIST = "artist";
 const std::string FileItem::FILE_ITEM_TRACK = "track";
 const std::string FileItem::FILE_ITEM_GENRE = "genre";
 const std::string FileItem::FILE_ITEM_MIME = "mime";
+const std::string FileItem::FILE_ITEM_ICON = "icon";
 
 
 std::string
@@ -161,6 +164,11 @@ FileItem::writeXml(Poco::XML::Node* pNode)
     Poco::AutoPtr<Poco::XML::Text> pMimeValue = pDoc->createTextNode(_mime);
     pMime->appendChild(pMimeValue);
     pFileItem->appendChild(pMime);
+
+    Poco::AutoPtr<Poco::XML::Element> pIcon = pDoc->createElement(FILE_ITEM_ICON);
+    Poco::AutoPtr<Poco::XML::Text> pIconValue = pDoc->createTextNode(_icon);
+    pIcon->appendChild(pIconValue);
+    pFileItem->appendChild(pIcon);
 }
 
 
@@ -181,6 +189,7 @@ public:
     virtual std::string getDlna(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index);
     virtual std::istream* getStream(Omm::ui4 index);
+    virtual std::istream* getIconStream(Omm::ui4 index);
     
     // SAX parser interface
     virtual void setDocumentLocator(const Poco::XML::Locator* loc) {}
@@ -284,6 +293,9 @@ FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
     else if (property == Omm::Av::AvProperty::GENRE) {
         return _items[index]->_genre;
     }
+    else if (property == Omm::Av::AvProperty::ICON) {
+        return _items[index]->_icon;
+    }
     else {
         return "";
     }
@@ -300,9 +312,23 @@ FileDataModel::isSeekable(Omm::ui4 index)
 std::istream*
 FileDataModel::getStream(Omm::ui4 index)
 {
-    std::istream* pRes = new std::ifstream((_basePath + _items[index]->_path).c_str());
+    std::string filePath = _basePath + _items[index]->_path;
+    std::istream* pRes = new std::ifstream(filePath.c_str());
     if (!*pRes) {
         Omm::AvStream::Log::instance()->avstream().error("could not open file for streaming: " + _basePath + _items[index]->_path);
+        return 0;
+    }
+    return pRes;
+}
+
+
+std::istream*
+FileDataModel::getIconStream(Omm::ui4 index)
+{
+    std::string iconPath = _basePath + "/.omm/cache/icons" + _items[index]->_path;
+    std::istream* pRes = new std::ifstream(iconPath.c_str());
+    if (!*pRes) {
+        Omm::AvStream::Log::instance()->avstream().error("could not open icon for streaming: " + iconPath);
         return 0;
     }
     return pRes;
@@ -393,6 +419,9 @@ FileDataModel::characters(const Poco::XML::XMLChar ch[], int start, int length)
     else if (_parseElement == FileItem::FILE_ITEM_MIME) {
         _pParseItem->_mime += text;
     }
+    else if (_parseElement == FileItem::FILE_ITEM_ICON) {
+        _pParseItem->_icon += text;
+    }
 }
 
 
@@ -445,6 +474,7 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
                     pItem->_track = pMeta->getTag(Omm::AvStream::Meta::TK_TRACK);
                     pItem->_genre = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
                     pItem->_mime = pMeta->getMime();
+                    pItem->_icon = pItem->_path;
                     
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_title);
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_artist);

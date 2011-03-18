@@ -208,6 +208,9 @@ ControllerObject::getProperty(const std::string& name)
 Icon*
 ControllerObject::getIcon()
 {
+    return new Icon(0, 0, 0, Mime::IMAGE_JPEG, getProperty(AvProperty::ICON));
+
+/*
     std::string prop = getProperty(AvProperty::CLASS);
     if (AvClass::matchClass(prop, AvClass::ITEM, AvClass::IMAGE_ITEM))
     {
@@ -220,6 +223,7 @@ ControllerObject::getIcon()
         // for any other object type, we currently don't supply any icon.
         return 0;
     }
+ */
 }
 
 
