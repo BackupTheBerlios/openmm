@@ -174,6 +174,7 @@ Icon::retrieve(const std::string& uri)
             if (pInStream) {
                 size = Poco::StreamCopier::copyToString(*pInStream, _buffer);
             }
+            delete pInStream;
         }
         catch (Poco::Exception& e) {
             Log::instance()->upnp().error("download icon failed: " + e.displayText());
