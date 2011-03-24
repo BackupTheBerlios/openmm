@@ -88,7 +88,7 @@ public:
     
 protected:
     // TODO: implement endOfStream(), which is called by the engine implementation on end of track
-    virtual void endOfStream() {}
+    void endOfStream() {}
 
     std::string                 _engineId;
     bool                        _fullscreen;

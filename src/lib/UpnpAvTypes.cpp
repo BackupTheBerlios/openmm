@@ -589,7 +589,7 @@ _pParent(0)
 void
 AbstractMediaObject::setObjectNumber(ui4 id)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectNumber() objectId: " + Poco::NumberFormatter::format(id));
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectNumber() objectId: " + Poco::NumberFormatter::format(id));
     
     _id = id;
 }
@@ -598,7 +598,7 @@ AbstractMediaObject::setObjectNumber(ui4 id)
 void
 AbstractMediaObject::setObjectNumber(const std::string& id)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectId() from string: " + id);
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectId() from string: " + id);
     
     _id = Poco::NumberParser::parseUnsigned(id);
 }
@@ -607,7 +607,7 @@ AbstractMediaObject::setObjectNumber(const std::string& id)
 void
 AbstractMediaObject::setParent(AbstractMediaObject* pParent)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setParent()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setParent()");
     
     _pParent = pParent;
 }
@@ -625,7 +625,7 @@ AbstractMediaObject::appendChild(AbstractMediaObject* pChild)
 void
 AbstractMediaObject::setUniqueProperty(const std::string& name, const std::string& value)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setUniqueProperty() name: " +  name + ", value: " + value);
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setUniqueProperty() name: " +  name + ", value: " + value);
 
     // TODO: check if property title is already set
     AbstractProperty* pProp = createProperty();
@@ -638,7 +638,7 @@ AbstractMediaObject::setUniqueProperty(const std::string& name, const std::strin
 void
 AbstractMediaObject::setTitle(const std::string& title)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setTitle() title: " + title);
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setTitle() title: " + title);
     
     setUniqueProperty(AvProperty::TITLE, title);
 }
@@ -647,7 +647,7 @@ AbstractMediaObject::setTitle(const std::string& title)
 void
 AbstractMediaObject::setClass(const std::string& subclass)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setClass() subclass: " + subclass);
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setClass() subclass: " + subclass);
     
     setUniqueProperty(AvProperty::CLASS, subclass);
 }
@@ -656,7 +656,7 @@ AbstractMediaObject::setClass(const std::string& subclass)
 std::string
 AbstractMediaObject::getTitle()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getTitle()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getTitle()");
     
     return getProperty(AvProperty::TITLE)->getValue();
 }
@@ -665,7 +665,7 @@ AbstractMediaObject::getTitle()
 std::string
 AbstractMediaObject::getClass()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getClass()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getClass()");
     
     return getProperty(AvProperty::CLASS)->getValue();
 }
@@ -681,7 +681,7 @@ AbstractMediaObject::getChild(const std::string& objectId)
 AbstractMediaObject*
 AbstractMediaObject::getObject(const std::string& objectId)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::setObject() objectId: " + objectId);
+//    Log::instance()->upnpav().debug("AbstractMediaObject::setObject() objectId: " + objectId);
     
     std::string::size_type slashPos = objectId.find('/');
     AbstractMediaObject* pChild;
@@ -725,7 +725,7 @@ AbstractMediaObject::getObject(const std::string& objectId)
 ui4
 AbstractMediaObject::getObjectNumber()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectNumber id: " + Poco::NumberFormatter::format(_id));
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectNumber id: " + Poco::NumberFormatter::format(_id));
     
     return _id;
 }
@@ -734,7 +734,7 @@ AbstractMediaObject::getObjectNumber()
 std::string
 AbstractMediaObject::getObjectId()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectId()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectId()");
 
     AbstractMediaObject* pParent = getParent();
     if (pParent == 0) {
@@ -749,7 +749,7 @@ AbstractMediaObject::getObjectId()
 bool
 AbstractMediaObject::fetchedAllChildren()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::fetchedAllChildren()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::fetchedAllChildren()");
     
     return getChildCount() >= getTotalChildCount();
 }
@@ -758,7 +758,7 @@ AbstractMediaObject::fetchedAllChildren()
 AbstractMediaObject*
 AbstractMediaObject::getParent()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getParent()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getParent()");
 
     return _pParent;
 }
@@ -767,7 +767,7 @@ AbstractMediaObject::getParent()
 std::string
 AbstractMediaObject::getParentObjectId()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getParentObjectId()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getParentObjectId()");
     
     AbstractMediaObject* pParent = getParent();
     if (pParent) {
@@ -789,7 +789,7 @@ AbstractMediaObject::fetchChildren()
 ui4
 AbstractMediaObject::getTotalChildCount()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getTotalChildCount()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getTotalChildCount()");
     
     return getChildCount();
 }
@@ -798,7 +798,7 @@ AbstractMediaObject::getTotalChildCount()
 AbstractResource*
 AbstractMediaObject::getResource(int index)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getResource() index: " + Poco::NumberFormatter::format(index));
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getResource() index: " + Poco::NumberFormatter::format(index));
     
     return static_cast<AbstractResource*>(getProperty(AvProperty::RES, index));
 }
@@ -807,7 +807,7 @@ AbstractMediaObject::getResource(int index)
 void
 AbstractMediaObject::addResource(AbstractResource* pResource)
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::addResource()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::addResource()");
     
     addProperty(pResource);
 }
@@ -816,7 +816,7 @@ AbstractMediaObject::addResource(AbstractResource* pResource)
 int
 AbstractMediaObject::getResourceCount()
 {
-    Log::instance()->upnpav().debug("AbstractMediaObject::getResourceCount()");
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getResourceCount()");
     
     return getPropertyCount(AvProperty::RES);
 }
@@ -908,7 +908,7 @@ MemoryMediaObject::~MemoryMediaObject()
 AbstractMediaObject*
 MemoryMediaObject::createChildObject()
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::createObject()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::createObject()");
 
     AbstractMediaObject* pChild = new MemoryMediaObject;
     pChild->setObjectNumber(Poco::NumberFormatter::format(getChildCount()));
@@ -920,7 +920,7 @@ MemoryMediaObject::createChildObject()
 AbstractProperty*
 MemoryMediaObject::createProperty()
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::createProperty()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::createProperty()");
     
     return new AbstractProperty(new MemoryPropertyImpl);
 }
@@ -929,7 +929,7 @@ MemoryMediaObject::createProperty()
 AbstractResource*
 MemoryMediaObject::createResource()
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::createResource()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::createResource()");
     
     AbstractResource* pResource = new MemoryResource;
     addResource(pResource);
@@ -966,7 +966,7 @@ MemoryMediaObject::createResource()
 void
 MemoryMediaObject::setIsContainer(bool isContainer)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::setIsContainer()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::setIsContainer()");
     
     _isContainer = isContainer;
 }
@@ -975,7 +975,7 @@ MemoryMediaObject::setIsContainer(bool isContainer)
 void
 MemoryMediaObject::appendChildImpl(AbstractMediaObject* pChild)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::appendChildImpl()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::appendChildImpl()");
     
     _childVec.push_back(pChild);
 }
@@ -993,7 +993,7 @@ MemoryMediaObject::appendChildImpl(AbstractMediaObject* pChild)
 ui4
 MemoryMediaObject::getChildCount()
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::getChildCount()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::getChildCount()");
     
     return _childVec.size();
 }
@@ -1002,7 +1002,7 @@ MemoryMediaObject::getChildCount()
 bool
 MemoryMediaObject::isContainer()
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::isContainer()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::isContainer()");
     
     return _isContainer;
 }
@@ -1011,7 +1011,7 @@ MemoryMediaObject::isContainer()
 AbstractMediaObject*
 MemoryMediaObject::getChild(ui4 numChild)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::getChild() number: " + Poco::NumberFormatter::format(numChild));
+//    Log::instance()->upnpav().debug("MemoryMediaObject::getChild() number: " + Poco::NumberFormatter::format(numChild));
     
     return _childVec[numChild];
 }
@@ -1020,7 +1020,7 @@ MemoryMediaObject::getChild(ui4 numChild)
 bool
 MemoryMediaObject::isRestricted()
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::isRestricted()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::isRestricted()");
     
     return _restricted;
 }
@@ -1029,7 +1029,7 @@ MemoryMediaObject::isRestricted()
 void
 MemoryMediaObject::addProperty(AbstractProperty* pProperty)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::addProperty()");
+//    Log::instance()->upnpav().debug("MemoryMediaObject::addProperty()");
     
     _propertyVec.push_back(pProperty);
     _propertyMap.insert(make_pair(pProperty->getName(), pProperty));
@@ -1039,7 +1039,7 @@ MemoryMediaObject::addProperty(AbstractProperty* pProperty)
 AbstractProperty*
 MemoryMediaObject::getProperty(int index)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() index: " + Poco::NumberFormatter::format(index));
+//    Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() index: " + Poco::NumberFormatter::format(index));
     
     return _propertyVec[index];
 }
@@ -1048,7 +1048,7 @@ MemoryMediaObject::getProperty(int index)
 int
 MemoryMediaObject::getPropertyCount(const std::string& name)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::getPropertyCount() name: " + name);
+//    Log::instance()->upnpav().debug("MemoryMediaObject::getPropertyCount() name: " + name);
     
     if (name == "") {
         return _propertyMap.size();
@@ -1062,7 +1062,7 @@ MemoryMediaObject::getPropertyCount(const std::string& name)
 AbstractProperty*
 MemoryMediaObject::getProperty(const std::string& name, int index)
 {
-    Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() name: " + name + ", index: " + Poco::NumberFormatter::format(index));
+//    Log::instance()->upnpav().debug("MemoryMediaObject::getProperty() name: " + name + ", index: " + Poco::NumberFormatter::format(index));
 
     // FIXME: workaround, seeking std::multimap returns null-pointer on iphone (but not iphone-simulator or any other system)
     // so we just search the first one (for now, this is ok as we provide only one resource in our servers).

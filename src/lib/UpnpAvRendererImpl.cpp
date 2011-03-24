@@ -236,8 +236,6 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
                 _pSession = 0;
             }
         }
-        // TODO: check if engine really stopped (by return value)
-        _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
         
         if (transportState == "PLAYING" || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
         // TODO: reset positions and speed (this is not mentioned in the AVTransport 1.0 specs ...)?
@@ -248,6 +246,10 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
 //             _setTransportPlaySpeed("0");  // only allowed value is "1" ...?
         }
     }
+    // TODO: check if engine really stopped (by return value)
+    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() leaves in state: " + _getTransportState());
 }
 
 
@@ -299,6 +301,7 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
         
         _lastCurrentTrackUri = _getCurrentTrackURI();
     }
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() leaves in state: " + _getTransportState());
 }
 
 
