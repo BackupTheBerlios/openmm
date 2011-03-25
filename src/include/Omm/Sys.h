@@ -69,17 +69,18 @@ private:
     NetworkInterfaceManager();
 
     void findValidIpAddress();
-    static bool isLoopback(const std::string& interfaceName);
+    static bool isLoopback(const Poco::Net::NetworkInterface& interface);
     
-    static NetworkInterfaceManager*     _pInstance;
-    static Poco::FastMutex              _instanceLock;
+    static NetworkInterfaceManager*             _pInstance;
+    static Poco::FastMutex                      _instanceLock;
 
-    NetworkInterfaceManagerImpl*        _pImpl;
-    std::string                         _loopbackInterfaceName;
-    std::vector<std::string>            _interfaceList;
-    Poco::Net::IPAddress                _validIpAddress;
-    Poco::NotificationCenter            _notificationCenter;
-    Poco::Mutex                     _lock;
+    NetworkInterfaceManagerImpl*                _pImpl;
+    std::string                                 _loopbackInterfaceName;
+//    std::vector<std::string>            _interfaceList;
+    std::vector<Poco::Net::NetworkInterface>    _interfaceList;
+    Poco::Net::IPAddress                        _validIpAddress;
+    Poco::NotificationCenter                    _notificationCenter;
+    Poco::Mutex                                 _lock;
 };
 
 
