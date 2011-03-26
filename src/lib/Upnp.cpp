@@ -1285,7 +1285,8 @@ Service::sendAction(Action* pAction)
     ActionRequestWriter requestWriter;
     requestWriter.action(pAction);
     requestWriter.write(actionMessage);
-    
+
+    _serviceLock.lock();
     Poco::URI baseUri(_pDevice->getDeviceRoot()->getDescriptionUri());
     Poco::URI controlUri(baseUri);
     controlUri.resolve(_controlPath);
@@ -1294,12 +1295,10 @@ Service::sendAction(Action* pAction)
     request.setContentType("text/xml; charset=\"utf-8\"");
     request.set("SOAPACTION", "\"" + _serviceType + "#" + pAction->getName() + "\"");
     request.setContentLength(actionMessage.size());
-    // set request body and send request
-    Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request.getURI() + " ***");
-//     std::clog << "Header:" << std::endl;
-//     request->write(std::clog);
-
     Poco::Net::HTTPClientSession controlRequestSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
+    _serviceLock.unlock();
+
+    Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request.getURI() + " ***");
 
     actionNetworkActivity(true);
     try {
