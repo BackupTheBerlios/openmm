@@ -50,7 +50,7 @@ Log::Log()
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_ERROR);
 #endif
 }
@@ -1245,8 +1245,9 @@ Service::addStateVar(StateVar* pStateVar)
 void
 Service::initClient()
 {
-    Poco::URI baseUri(_pDevice->getDeviceRoot()->getDescriptionUri());
-    _pControlRequestSession = new Poco::Net::HTTPClientSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
+    _baseUri = Poco::URI(_pDevice->getDeviceRoot()->getDescriptionUri());
+    //_pControlRequestSession = new Poco::Net::HTTPClientSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
+
     // TODO: subscribe to services
     // -> generate eventHandlerURIs: device uuid + service type
     // TODO: setup event message handler
@@ -1288,18 +1289,21 @@ Service::sendAction(Action* pAction)
     Poco::URI baseUri(_pDevice->getDeviceRoot()->getDescriptionUri());
     Poco::URI controlUri(baseUri);
     controlUri.resolve(_controlPath);
-    Poco::Net::HTTPRequest* request = new Poco::Net::HTTPRequest("POST", controlUri.getPath(), "HTTP/1.1");
-    request->set("HOST", baseUri.getAuthority());
-    request->setContentType("text/xml; charset=\"utf-8\"");
-    request->set("SOAPACTION", "\"" + _serviceType + "#" + pAction->getName() + "\"");
-    request->setContentLength(actionMessage.size());
+    Poco::Net::HTTPRequest request("POST", controlUri.getPath(), "HTTP/1.1");
+    request.set("HOST", baseUri.getAuthority());
+    request.setContentType("text/xml; charset=\"utf-8\"");
+    request.set("SOAPACTION", "\"" + _serviceType + "#" + pAction->getName() + "\"");
+    request.setContentLength(actionMessage.size());
     // set request body and send request
-    Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request->getURI() + " ***");
+    Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request.getURI() + " ***");
 //     std::clog << "Header:" << std::endl;
 //     request->write(std::clog);
+
+    Poco::Net::HTTPClientSession controlRequestSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
+
     actionNetworkActivity(true);
     try {
-        std::ostream& ostr = _pControlRequestSession->sendRequest(*request);
+        std::ostream& ostr = controlRequestSession.sendRequest(request);
         ostr << actionMessage;
         Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
     }
@@ -1316,7 +1320,7 @@ Service::sendAction(Action* pAction)
     // receive answer ...
     Poco::Net::HTTPResponse response;
     try {
-        std::istream& rs = _pControlRequestSession->receiveResponse(response);
+        std::istream& rs = controlRequestSession.receiveResponse(response);
         Log::instance()->ctrl().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::string responseBody;
         Poco::StreamCopier::copyToString(rs, responseBody);
@@ -1327,12 +1331,12 @@ Service::sendAction(Action* pAction)
     }
     catch (Poco::Net::NoMessageException) {
         actionNetworkActivity(false);
-        Log::instance()->ctrl().error("no response to action request");
+        Log::instance()->ctrl().error("no response to action request \"" + pAction->getName()+ "\"");
         throw Poco::Exception("");
     }
     catch (...) {
         actionNetworkActivity(false);
-        Log::instance()->ctrl().error("no response to action request received for some reason");
+        Log::instance()->ctrl().error("no response to action request \"" + pAction->getName()+ "\" received for some reason");
         throw Poco::Exception("");
     }
     Log::instance()->ctrl().debug("*** action \"" + pAction->getName() + "\" completed ***");

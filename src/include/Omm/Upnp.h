@@ -744,9 +744,9 @@ private:
     std::string*                            _pDescription;
     std::string                             _descriptionPath;
     DescriptionRequestHandler*              _pDescriptionRequestHandler;
+    Poco::URI                               _baseUri;
     std::string                             _controlPath;
     ControlRequestHandler*                  _controlRequestHandler;
-    Poco::Net::HTTPClientSession*                _pControlRequestSession;
     std::string                             _eventPath;
     Container<Action>                       _actions;
     Container<StateVar>                     _stateVars;

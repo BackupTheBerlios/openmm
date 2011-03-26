@@ -56,8 +56,9 @@ StressAvUserInterface::eventLoop()
     Poco::Random playTime;
     playTime.seed();
 
+    bool testCountUnlimited = true;
     int test = 1;
-    while (test <= maxTests) {
+    while (testCountUnlimited || test <= maxTests) {
         if (serverCount() == 0 || rendererCount() == 0) {
             Poco::Thread::sleep(waitForDevice);
         }
@@ -91,7 +92,8 @@ StressAvUserInterface::eventLoop()
                 mediaObjectSelected(pObject);
                 Omm::Av::Log::instance()->upnpav().debug("playing: " + pObject->getTitle() + " on: " + pRenderer->getName());
                 playPressed();
-                Poco::Thread::sleep(playTime.next(maxPlayTime));
+                Poco::Thread::sleep(maxPlayTime);
+//                Poco::Thread::sleep(playTime.next(maxPlayTime));
                 stopPressed();
             }
             test++;
