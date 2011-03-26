@@ -5,7 +5,7 @@ X11VideoXine.cpp
 )
 
 target_link_libraries(ommplugin-xinevideo-x11
-ommengine-xine
+ommplugin-engine-xine
 X11
 )
 

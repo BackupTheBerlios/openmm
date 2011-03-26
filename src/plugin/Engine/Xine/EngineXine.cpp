@@ -177,7 +177,7 @@ XineEngine::setFullscreen(bool on)
 
 
 void
-XineEngine::setUri(const std::string& uri, const std::string& mime)
+XineEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 {
     _mrl = uri;
 }

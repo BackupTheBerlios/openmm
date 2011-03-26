@@ -64,7 +64,7 @@ public:
     virtual void setFullscreen(bool on = true);
     std::string getEngineId() { return _engineId; }
     
-    virtual void setUri(const std::string& uri, const std::string& mime = "");
+    virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
     virtual void load();
     virtual void pause();
     virtual void stop();

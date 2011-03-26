@@ -5,7 +5,7 @@ FbVideoXine.cpp
 )
 
 target_link_libraries(ommplugin-xinevideo-fb
-ommengine-xine
+ommplugin-engine-xine
 )
 
 set_target_properties(ommplugin-xinevideo-fb
