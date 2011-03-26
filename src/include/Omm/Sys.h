@@ -25,6 +25,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/SingletonHolder.h>
 #include <Poco/Net/IPAddress.h>
+#include <Poco/Net/NetworkInterface.h>
 #include <vector>
 #include <string>
 

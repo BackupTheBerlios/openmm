@@ -181,3 +181,14 @@ ${OMM}
 ${OMM_AV}
 ${OMM_AVSTREAM}
 )
+
+add_executable(upnpavstress
+UpnpAvStress.cpp
+)
+
+target_link_libraries(upnpavstress
+${POCO_UTIL}
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+)

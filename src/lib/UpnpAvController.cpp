@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include "Upnp.h"
 #include "UpnpAvTypes.h"
 #include "UpnpAvController.h"
 #include "UpnpAvControllerPrivate.h"
@@ -288,10 +289,17 @@ _pRendererController(rendererController)
 }
 
 
-const std::string&
+const std::string
 RendererView::getName()
 {
     return _pRendererController->getDevice()->getFriendlyName();
+}
+
+
+const std::string
+RendererView::getUuid()
+{
+    return _pRendererController->getDevice()->getUuid();
 }
 
 
@@ -328,6 +336,13 @@ ControllerObject*
 AvController::serverRootObject(int numServer)
 {
     return _servers.get(numServer).root();
+}
+
+
+Device*
+AvController::serverDevice(int numServer)
+{
+    return _servers.get(numServer).controller()->getDevice();
 }
 
 
@@ -461,6 +476,13 @@ ControllerObject*
 AvUserInterface::serverRootObject(int numServer)
 {
     return _pAvController->serverRootObject(numServer);
+}
+
+
+const std::string
+AvUserInterface::serverUuid(int numServer)
+{
+    return _pAvController->serverDevice(numServer)->getUuid();
 }
 
 

@@ -954,10 +954,10 @@ class UserInterface
     
 public:
     // TODO: pass command line arguments to user interface gui-toolkit
-    virtual int eventLoop() = 0;
-    virtual void initGui() = 0;
-    virtual void showMainWindow() = 0;
-//     virtual void hideMainWindow() = 0;
+    virtual int eventLoop() { return 0; };
+    virtual void initGui() {};
+    virtual void showMainWindow() {};
+//     virtual void hideMainWindow() {};
     
 protected:
     virtual void beginAddDevice(int position) {}

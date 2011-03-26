@@ -40,7 +40,8 @@ class RendererView
     friend class AvUserInterface;
     
 public:
-    const std::string& getName();
+    const std::string getName();
+    const std::string getUuid();
     
 private:
     RendererView(MediaRendererController* rendererController);
@@ -115,6 +116,7 @@ public:
     bool isPlaying(RendererView* pRenderer);
     int serverCount();
     ControllerObject* serverRootObject(int numServer);
+    const std::string serverUuid(int numServer);
 
     // TODO: getIcon() ... of server or renderer device ...
     // retrieves the icon that is closest to width, heigth, depth.
@@ -150,6 +152,7 @@ public:
     int serverCount();
     RendererView* rendererView(int numRenderer);
     ControllerObject* serverRootObject(int numServer);
+    Device* serverDevice(int numServer);
     
 private:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);
