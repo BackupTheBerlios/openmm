@@ -106,6 +106,7 @@
 #include <Poco/DOM/DOMException.h>
 
 #include "Sys.h"
+#include "Util.h"
 
 namespace Omm {
 
@@ -921,7 +922,7 @@ private:
 };
 
 
-class DeviceRootImplAdapter
+class DeviceRootImplAdapter : public Util::Startable
 {
     friend class DeviceRoot;
     
@@ -929,8 +930,8 @@ public:
     DeviceRootImplAdapter();
     ~DeviceRootImplAdapter();
     
-    void start();
-    void stop();
+    virtual void start();
+    virtual void stop();
     
     void setUuid(std::string uuid, int deviceNumber = 0);
     void setRandomUuid(int deviceNumber = 0);
@@ -940,6 +941,9 @@ public:
 protected:
     virtual void actionHandler(Action* action) = 0;
     virtual void initStateVars(const std::string& serviceType, Service* pThis) = 0;
+    virtual bool initDevice() { return true; }
+    /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
+    /// if initialization takes a while to process, start the device in threaded mode with start(true).
     
     std::map<std::string,std::string*>  _descriptions;
     // _deviceRoot is the link into the "dynamic-string-world".

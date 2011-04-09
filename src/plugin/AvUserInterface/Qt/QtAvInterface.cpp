@@ -343,6 +343,31 @@ QtAvInterface::initGui()
             _pActivityIndicator, SLOT(stopActivity()));
     connect(this, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
             this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
+
+    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
+    Omm::Av::AbstractMediaObject* pContainerPlugin;
+    std::string containerPlugin("server-webradio");
+    std::string home = Omm::Util::Home::getHomePath();
+    std::string name("Web Radio");
+    try {
+        pContainerPlugin = pluginLoader.load(containerPlugin);
+    }
+    catch(Poco::NotFoundException) {
+        std::cerr << "Error could not find server plugin: " << containerPlugin << std::endl;
+        return;
+    }
+    std::clog << "container plugin: " << containerPlugin << " loaded successfully" << std::endl;
+    pContainerPlugin->setOption("basePath", home + "/.omm/webradio.conf");
+    pContainerPlugin->setTitle(name);
+
+    Omm::Av::AvServer* pServer = new Omm::Av::AvServer;
+    pServer->setRoot(pContainerPlugin);
+    pServer->setFriendlyName(name);
+    Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
+    pServer->addIcon(pIcon);
+
+    addLocalServer(pServer);
+    startLocalServers();
 }
 
 

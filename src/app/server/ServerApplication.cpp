@@ -151,7 +151,7 @@ protected:
                     _name = "Collection";
                 }
                 if (_pluginOption == "") {
-                    _pluginOption = home + "/mp3";
+                    _pluginOption = home + "/music";
 //                     _pluginOption = home;
                 }
             }

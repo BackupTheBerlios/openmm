@@ -46,8 +46,16 @@ public:
     
     void start();
     void stop();
+    // TODO: set a data model here. Initialization of data model should be
+    // asynchronous, using update mechanism of UPnP AV directory service.
+
     Poco::UInt16 getPort() const;
     std::string getProtocol();
+
+protected:
+    // virtual bool initItemServer() { return true; }
+    /// will be executed at start. If initializion takes a while, start(true)
+    /// may be used for asynchronous initialization.
     
 private:
     StreamingMediaObject*                       _pServerContainer;

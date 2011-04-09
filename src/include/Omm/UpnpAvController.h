@@ -27,6 +27,8 @@
 #include "Upnp.h"
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"
+#include "UpnpAvServer.h"
+#include "UpnpAvRenderer.h"
 
 namespace Omm {
 namespace Av {
@@ -93,11 +95,9 @@ public:
     AvUserInterface();
     ~AvUserInterface();
     
-    // TODO: alle device add/remove callbacks should be run in the main thread where the event loop lives
-    // this avoids complications when implementing thread safety in the target GUI toolkit
-    // Poco::NotificationCenter doesn't help here, cause notifications are delivered in the thread in which
-    // they are posted ... after thinking a bit about it, it seems to be impossible, as the method call has
-    // to be queued in the event loop, and this is responsibility of the GUI main thread's event loop.
+    /// all device add/remove callbacks must run/queue a method in the main
+    /// thread where the event loop of the GUI toolkit lives
+
     virtual void beginAddRenderer(int position) {}
     virtual void beginAddServer(int position) {}
     virtual void beginRemoveRenderer(int position) {}
@@ -132,14 +132,27 @@ public:
     
     void rendererSelected(RendererView* pRenderer);
     void mediaObjectSelected(ControllerObject* pObject);
+
+    void setLocalEngine(Engine* pEngine);
+    void addLocalServer(AvServer* pServer);
+    void startLocalServers();
+    void stopLocalServers();
+    void startLocalRenderer();
+    void stopLocalRenderer();
     
 private:
     void pollPositionInfo(Poco::Timer& timer);
+//    void startFileServers();
+//    void startWebradio();
     
     AvController*                         _pAvController;
     MediaRendererController*              _pSelectedRenderer;
     ControllerObject*                     _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
+
+    Engine*                               _pEngine;
+    AvRenderer*                           _pRenderer;
+    std::vector<AvServer*>                _servers;
 };
 
 

@@ -1,14 +1,14 @@
-FIND_PATH( DBUS_INCLUDE_DIR
+FIND_PATH(DBUS_INCLUDE_DIR
 dbus-1.0/dbus/dbus-shared.h
 PATHS ${CMAKE_INCLUDE_PATH}
 )
 
-FIND_PATH( DBUS_CPP_INCLUDE_DIR
+FIND_PATH(DBUS_CPP_INCLUDE_DIR
 dbus-c++-1/dbus-c++/dbus.h
 PATHS ${CMAKE_INCLUDE_PATH}
 )
 
-FIND_PATH( NETWORK_MANAGER_INCLUDE_DIR
+FIND_PATH(NETWORK_MANAGER_INCLUDE_DIR
 NetworkManager/NetworkManager.h
 PATHS ${CMAKE_INCLUDE_PATH}
 )
@@ -42,18 +42,18 @@ ${POCO_INCLUDE_DIR}
 ${ommlib_SOURCE_DIR}/Omm
 )
 
-ADD_LIBRARY( ommsys-linux
-    #STATIC    # doesn't work on all linux version of the linker
+ADD_LIBRARY(ommsys-linux
+    #STATIC    # doesn't work on all linux versions of the linker
     SysImplLinux.cpp
     NetworkDevice.cpp
 )
 
-TARGET_LINK_LIBRARIES( ommsys-linux
+TARGET_LINK_LIBRARIES(ommsys-linux
     ${LIB_POCO_FOUNDATION}
     ${LIB_DBUS_CPP}
 )
 
-INSTALL( TARGETS ommsys-linux
+INSTALL(TARGETS ommsys-linux
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )

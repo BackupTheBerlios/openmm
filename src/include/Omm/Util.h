@@ -28,6 +28,8 @@
 #include <Poco/Environment.h>
 #include <Poco/String.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/Runnable.h>
+#include <Poco/Thread.h>
 
 namespace Omm {
 namespace Util {
@@ -172,16 +174,29 @@ private:
 };
 
 
-/**
 class ConfigurablePlugin
-interface for plugins, that can be parametrized with options
-*/
-
-class ConfigurablePlugin
+    /// interface for plugins, that can be parametrized with options
 {
 public:
     virtual void setOption(const std::string& key, const std::string& value) {}
 };
+
+
+class Startable : Poco::Runnable
+{
+public:
+    virtual void start() = 0;
+    virtual void stop() = 0;
+
+    void startThreaded();
+    void stopThreaded();
+
+private:
+    void run();
+
+    Poco::Thread        _thread;
+};
+
 
 }  // namespace Omm
 }  // namespace Util

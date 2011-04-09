@@ -95,6 +95,21 @@ public:
 };
 
 
+class Visual
+    /// Visual is a basic window that can be supplied by the graphical user
+    /// interface of the OS.
+    /// More sophisticated subclasses of Visual are implemented in AVUserInterface.
+{
+public:
+    enum VisualType {VTUserInterface, VTX11, VTMac, VTWin};
+    
+    int getWidth();
+    int getHeight();
+
+    VisualType getType();
+};
+
+
 }  // namespace Sys
 }  // namespace Omm
 

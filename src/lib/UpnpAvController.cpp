@@ -421,7 +421,8 @@ AvController::deviceRemoved(DeviceRoot* pDeviceRoot)
 AvUserInterface::AvUserInterface() :
 _pAvController(0),
 _pSelectedRenderer(0),
-_pSelectedObject(0)
+_pSelectedObject(0),
+_pEngine(0)
 {
     _positionInfoTimer.setPeriodicInterval(1000);
     Poco::TimerCallback<AvUserInterface> callback(*this, &AvUserInterface::pollPositionInfo);
@@ -588,6 +589,95 @@ AvUserInterface::volumeChanged(int value)
         error(e.message());
     }
 }
+
+
+void
+AvUserInterface::startLocalServers()
+{
+    for (std::vector<AvServer*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+        (*it)->startThreaded();
+    }
+}
+
+
+void
+AvUserInterface::stopLocalServers()
+{
+    for (std::vector<AvServer*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+        (*it)->stopThreaded();
+    }
+}
+
+
+void
+AvUserInterface::startLocalRenderer()
+{
+    if (_pEngine) {
+        _pEngine->createPlayer();
+        _pRenderer = new Omm::Av::AvRenderer(_pEngine);
+        _pRenderer->setFriendlyName("Local Player");
+        //_pEngine->setParentView(parentView);
+        _pRenderer->start();
+    }
+    else {
+        Log::instance()->upnpav().warning("no engine set in user interface, local renderer not started.");
+    }
+}
+
+
+void
+AvUserInterface::stopLocalRenderer()
+{
+    _pRenderer->stop();
+}
+
+
+void
+AvUserInterface::setLocalEngine(Engine* pEngine)
+{
+    _pEngine = pEngine;
+}
+
+
+void
+AvUserInterface::addLocalServer(AvServer* pServer)
+{
+    _servers.push_back(pServer);
+}
+
+
+//void
+//AvUserInterface::startFileServers()
+//{
+//    ThreadedServer* pMusic = new ThreadedServer("mp3", "Music (on iPhone)");
+//    _FileServers.push_back(pMusic);
+//    ThreadedServer* pNeuseeland = new ThreadedServer("Neuseeland", "Neuseeland (on iPhone)");
+//    _FileServers.push_back(pNeuseeland);
+//    pMusic->start();
+//    pNeuseeland->start();
+//}
+
+
+//void
+//AvUserInterface::startWebradio()
+//{
+//    std::string home = Poco::Environment::get("HOME");
+//
+//    // TODO: load webradio server plugin?
+//    //_pWebradioContainer = new WebradioServer;
+//    std::string webradioName = "Web Radio";
+//    std::string webradioConf = home + "/.omm/webradio.conf";
+////    std::string webradioConf = "/var/root/.omm/webradio.conf";
+////    std::string webradioConf = "/Users/jb/.omm/webradio.conf";
+//    _pWebradioContainer->setOption("basePath", webradioConf);
+//    _pWebradioContainer->setTitle(webradioName);
+//    _pWebradioServer = new Omm::Av::AvServer;
+//    _pWebradioServer->setRoot(_pWebradioContainer);
+//    _pWebradioServer->setFriendlyName(webradioName);
+//    _pWebradioIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
+//    _pWebradioServer->addIcon(_pWebradioIcon);
+//    _pWebradioServer->start();
+//}
 
 
 void

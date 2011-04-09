@@ -70,6 +70,7 @@ Upnp.cpp
 target_link_libraries(omm
 ${POCO_XML}
 ommsys
+ommutil
 )
 
 set(OMM

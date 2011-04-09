@@ -86,5 +86,29 @@ Home::getHomePath()
     return _home;
 }
 
+
+void
+Startable::startThreaded()
+{
+    _thread.setOSPriority(Poco::Thread::getMinOSPriority());
+    _thread.start(*this);
+}
+
+
+void
+Startable::stopThreaded()
+{
+    stop();
+    _thread.join();
+}
+
+
+void
+Startable::run()
+{
+    start();
+}
+
+
 } // namespace Util
 } // namespace Omm

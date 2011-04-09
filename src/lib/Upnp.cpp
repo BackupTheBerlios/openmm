@@ -2042,7 +2042,8 @@ DeviceRoot::setDescriptionUri()
 }
 
 
-DeviceRootImplAdapter::DeviceRootImplAdapter()
+DeviceRootImplAdapter::DeviceRootImplAdapter() :
+_pDeviceRoot(0)
 {
     // register the great action dispatcher
 };
@@ -2057,13 +2058,18 @@ DeviceRootImplAdapter::~DeviceRootImplAdapter()
 void
 DeviceRootImplAdapter::start()
 {
-    _pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
-    
-//     _pDeviceRoot->print();
-    _pDeviceRoot->initDevice();
-//     _pDeviceRoot->print();
-    _pDeviceRoot->startHttp();
-    _pDeviceRoot->startSsdp();
+    if (initDevice()) {
+        _pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
+
+    //     _pDeviceRoot->print();
+        _pDeviceRoot->initDevice();
+    //     _pDeviceRoot->print();
+        _pDeviceRoot->startHttp();
+        _pDeviceRoot->startSsdp();
+    }
+    else {
+         Log::instance()->upnp().warning("init device failed, device was not started.");
+    }
 }
 
 
