@@ -31,7 +31,7 @@
 #include <ostream>
 #include <sstream>
 
-#if (POCO_VERSION & 0xFFFFFFFF) >= 0x01040000
+#ifdef POCO_VERSION_HEADER_FOUND
 #include <Poco/Version.h>
 #endif
 #include <Poco/NumberFormatter.h>

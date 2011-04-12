@@ -40,6 +40,20 @@ ${POCO_LIBRARY}
 
 if(POCO_INCLUDE_DIR)
 message(STATUS "Found POCO headers in: " ${POCO_INCLUDE_DIR})
+find_file(POCO_VERSION_HEADER
+Poco/Version.h
+PATHS ${CMAKE_INCLUDE_PATH}
+)
+if(POCO_VERSION_HEADER)
+add_definitions(
+-DPOCO_VERSION_HEADER_FOUND
+)
+else(POCO_VERSION_HEADER)
+add_definitions(
+-DPOCO_VERSION=0
+)
+endif(LIB_VLC_VERSION_HEADER)
+
 else(POCO_INCLUDE_DIR)
 message(STATUS "POCO headers not found")
 endif(POCO_INCLUDE_DIR)
