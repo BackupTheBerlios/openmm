@@ -1134,6 +1134,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
             pObject->setObjectNumber(attr->getNamedItem(AvProperty::ID)->nodeValue());
         }
         catch (...) {
+            Log::instance()->upnpav().error("setting object number in media object reader failed");
         }
 //        pObject->setObjectId(attr->getNamedItem(AvProperty::ID)->nodeValue());
     }

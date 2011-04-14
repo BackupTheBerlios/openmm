@@ -1,3 +1,9 @@
+# FIXME: on windows, debug builds of Qt plugin fails. The plugin is linked
+# against debug and non-debug versions of Qt libs at the same time.
+if(WINDOWS)
+set(CMAKE_BUILD_TYPE "")
+endif(WINDOWS)
+
 find_package(Qt4 COMPONENTS QtCore QtGui QtSvg)
 
 if(QT4_FOUND)

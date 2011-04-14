@@ -52,7 +52,7 @@ else(POCO_VERSION_HEADER)
 add_definitions(
 -DPOCO_VERSION=0
 )
-endif(LIB_VLC_VERSION_HEADER)
+endif(POCO_VERSION_HEADER)
 
 else(POCO_INCLUDE_DIR)
 message(STATUS "POCO headers not found")
