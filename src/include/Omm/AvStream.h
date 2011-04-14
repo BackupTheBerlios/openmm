@@ -328,9 +328,9 @@ public:
     
     static const Poco::Int64 invalidPts;
     
-    virtual Frame* readFrame() = 0;
+    virtual Frame* readFrame() {}
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
-    virtual void print(bool isOutFormat = false) = 0;
+    virtual void print(bool isOutFormat = false) {}
     virtual bool isStillImage() { return false; }
     virtual std::string getMime() { return ""; }
 
@@ -392,7 +392,7 @@ public:
     virtual Meta::ColorCoding pixelFormat() = 0;
     virtual int pictureSize() = 0;
     virtual float aspectRatio() = 0;
-    virtual Frame* allocateVideoFrame(Meta::ColorCoding targetFormat) = 0;
+    virtual Frame* allocateVideoFrame(Meta::ColorCoding targetFormat) { return 0; }
 
     std::string getName();
     void setName(const std::string& name);
@@ -403,8 +403,8 @@ public:
 protected:
     StreamInfo(const std::string name = "avstream");
 
-    virtual Frame* decodeAudioFrame(Frame* pFrame) = 0;
-    virtual Frame* decodeVideoFrame(Frame* pFrame) = 0;
+    virtual Frame* decodeAudioFrame(Frame* pFrame) { return 0; }
+    virtual Frame* decodeVideoFrame(Frame* pFrame) { return 0; }
 
 private:
     std::string             _streamName;

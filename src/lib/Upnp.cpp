@@ -1628,7 +1628,7 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
                      Poco::Environment::osName() + "/"
                      + Poco::Environment::osVersion() + ", "
                     + "UPnP/" + UPNP_VERSION + ", "
-                    + "Omm/" + OMM_VERSION);
+                    + "OMM/" + OMM_VERSION);
         response.set("SID", "uuid:" + Poco::UUIDGenerator().create().toString());
         response.set("TIMEOUT", "Second-1800");
         response.setContentLength(0);

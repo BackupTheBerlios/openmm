@@ -489,7 +489,7 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
             }
         }
         catch(...) {
-            Omm::Av::Log::instance()->upnpav().warning("some file not found, ignoring.");
+            Omm::Av::Log::instance()->upnpav().warning(dir->path() + " not found while scanning directory, ignoring.");
         }
         ++dir;
     }
@@ -505,7 +505,8 @@ FileDataModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+        Omm::AvStream::Log::instance()->avstream().warning("Error could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
+        _pTagger = taggerPluginLoader.load("tagger-simple");
     }
 }
 
