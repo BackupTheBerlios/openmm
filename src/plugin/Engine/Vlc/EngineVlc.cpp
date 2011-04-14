@@ -34,7 +34,9 @@ VlcEngine::VlcEngine()
 VlcEngine::~VlcEngine()
 {
     libvlc_release(_pVlcInstance);
+#ifdef __Linux__
     closeXWindow();
+#endif
 }
 
 
@@ -72,13 +74,18 @@ VlcEngine::createPlayer()
     _pVlcPlayer = libvlc_media_player_new(_pVlcInstance);
 #endif
     handleException();
-        
+
+#ifdef __Linux
     int xWindow = openXWindow();
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_set_xwindow(_pVlcPlayer, xWindow, &_exception);
 #else
     libvlc_media_player_set_xwindow(_pVlcPlayer, xWindow);
 #endif
+#else
+// open window on window system.
+#endif
+
     handleException();
     
 /*    clearException();
@@ -107,7 +114,7 @@ VlcEngine::setFullscreen(bool on)
 {
 }
 
-
+#ifdef __Linux__
 int
 VlcEngine::openXWindow()
 {
@@ -151,7 +158,6 @@ VlcEngine::openXWindow()
     return xWindow;
 }
 
-
 void
 VlcEngine::closeXWindow()
 {
@@ -159,6 +165,7 @@ VlcEngine::closeXWindow()
         XCloseDisplay(xDisplay);
     xDisplay = NULL;*/
 }
+#endif
 
 
 void
@@ -190,7 +197,8 @@ VlcEngine::load()
     // settle to a defined state
     libvlc_state_t state;
     do {
-        usleep(100000); // limit the cpu-load while loading the media
+        Poco::Thread::sleep(100); // limit the cpu-load while loading the media and sleep for 100ms
+        //usleep(100000); // limit the cpu-load while loading the media
 #if LIBVLC_VERSION_INT < 0x110
         state = libvlc_media_player_get_state(_pVlcPlayer, &_exception);
 #else
@@ -202,7 +210,8 @@ VlcEngine::load()
     int hasVideo = 0;
     int trackCount = 0;
     do {
-        usleep(100000); // limit the cpu-load while waiting for stream demux
+        Poco::Thread::sleep(100); // limit the cpu-load while loading the media and sleep for 100ms
+        //usleep(100000); // limit the cpu-load while waiting for stream demux
 #if LIBVLC_VERSION_INT < 0x110
         hasVideo = libvlc_media_player_has_vout(_pVlcPlayer, &_exception);
         handleException();

@@ -1,7 +1,7 @@
 # for now, vlc relies on X11 ... don't build it on windows
-if(WINDOWS)
-return()
-endif(WINDOWS)
+#if(WINDOWS)
+#return()
+#endif(WINDOWS)
 
 find_package(VLC)
 

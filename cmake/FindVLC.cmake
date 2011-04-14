@@ -8,6 +8,7 @@ NAME vlc
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
+if(LINUX)
 find_package(X11)
 
 # without X11 libraries, omm can't load the engine plugin (when running under X11)
@@ -20,13 +21,18 @@ add_definitions(
 -D__X11__
 )
 
-set(VLC_INCLUDE_DIRS
-${VLC_INCLUDE_DIR}
-)
-
 set(VLC_LIBRARIES
 ${VLC_LIBRARY}
 ${X11_LIBRARIES}
+)
+else(LINUX)
+set(VLC_LIBRARIES
+${VLC_LIBRARY}
+)
+endif(LINUX)
+
+set(VLC_INCLUDE_DIRS
+${VLC_INCLUDE_DIR}
 )
 
 if(VLC_INCLUDE_DIR)
