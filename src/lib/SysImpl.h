@@ -24,12 +24,29 @@
 namespace Omm {
 namespace Sys {
 
+#ifndef __SYS_NETMAN_PLATFORM__
 class NetworkInterfaceManagerImpl
 {
 public:
     void start() {}
     void stop() {}
 };
+#endif
+
+
+#ifndef __SYS_VISUAL_PLATFORM__
+class VisualImpl
+{
+public:
+    void* getWindow() { return 0; }
+    void show() {}
+    void hide() {}
+    int getWidth() { return 0; }
+    int getHeight() { return 0; }
+
+    Visual::VisualType getType() { return Visual::VTNone; }
+};
+#endif
 
 }  // namespace Sys
 }  // namespace Omm

@@ -94,6 +94,7 @@ protected:
     bool                        _fullscreen;
     int                         _width;
     int                         _height;
+    Sys::Visual*                _pVisual;
 };
 
 

@@ -48,6 +48,15 @@ add_definitions(
 )
 endif(LIB_OMMSYS_PLATFORM)
 
+if(SYS_NETMAN_PLATFORM)
+message(STATUS "using " ${BUILD_TARGET} " specific implementation for network device change detection")
+add_definitions(-D__SYS_NETMAN_PLATFORM__)
+endif(SYS_NETMAN_PLATFORM)
+if(SYS_VISUAL_PLATFORM)
+message(STATUS "using " ${BUILD_TARGET} " specific implementation for video visuals")
+add_definitions(-D__SYS_VISUAL_PLATFORM__)
+endif(SYS_VISUAL_PLATFORM)
+
 add_library(ommsys
 Sys.cpp
 )

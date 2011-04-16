@@ -81,6 +81,5 @@ NetworkInterfaceManagerImpl::stop()
     Log::instance()->sys().debug("disconnected from NetworkManager.");
 }
 
-
 }  // namespace Sys
 } // namespace Omm

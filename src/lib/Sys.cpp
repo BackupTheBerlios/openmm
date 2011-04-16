@@ -29,15 +29,11 @@
 #include <Poco/Net/NetworkInterface.h>
 
 #include "Sys.h"
-
-#ifdef __SYS_STANDARD_PLATFORM__
 #include "SysImpl.h"
-#elif __LINUX__
+#ifdef __LINUX__
 #include "Sys/Linux/SysImplLinux.h"
 #elif __DARWIN__
 #include "Sys/Darwin/SysImplDarwin.h"
-#else
-#include "SysImpl.h"
 #endif
 
 namespace Omm {
@@ -276,6 +272,85 @@ _interfaceName(interfaceName),
 _added(added)
 {
 }
+
+
+Visual::Visual()
+{
+    _pImpl = new VisualImpl;
+}
+
+
+Visual::~Visual()
+{
+    delete _pImpl;
+}
+
+
+void*
+Visual::getWindow()
+{
+    if (_pImpl) {
+        return _pImpl->getWindow();
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+Visual::show()
+{
+    if (_pImpl) {
+        _pImpl->show();
+    }
+}
+
+
+void
+Visual::hide()
+{
+    if (_pImpl) {
+        _pImpl->hide();
+    }
+}
+
+
+int
+Visual::getWidth()
+{
+    if (_pImpl) {
+        return _pImpl->getWidth();
+    }
+    else {
+        return 0;
+    }
+}
+
+
+int
+Visual::getHeight()
+{
+    if (_pImpl) {
+        return _pImpl->getHeight();
+    }
+    else {
+        return 0;
+    }
+}
+
+
+Visual::VisualType
+Visual::getType()
+{
+    if (_pImpl) {
+        return _pImpl->getType();
+    }
+    else {
+        return VTNone;
+    }
+}
+
 
 
 }  // namespace Sys

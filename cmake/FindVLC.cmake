@@ -8,8 +8,8 @@ NAME vlc
 PATHS ${CMAKE_LIBRARY_PATH}
 )
 
-if(LINUX)
-find_package(X11)
+#if(LINUX)
+#find_package(X11)
 
 # without X11 libraries, omm can't load the engine plugin (when running under X11)
 # so we explicitely link the plugin against X11.
@@ -17,19 +17,19 @@ find_package(X11)
 # for the frambuffer version, this can be left out.
 # TODO: generate two shared objects: one for X11, one for framebuffer.
 
-add_definitions(
--D__X11__
-)
+#add_definitions(
+#-D__X11__
+#)
 
+#set(VLC_LIBRARIES
+#${VLC_LIBRARY}
+#${X11_LIBRARIES}
+#)
+#else(LINUX)
 set(VLC_LIBRARIES
 ${VLC_LIBRARY}
-${X11_LIBRARIES}
 )
-else(LINUX)
-set(VLC_LIBRARIES
-${VLC_LIBRARY}
-)
-endif(LINUX)
+#endif(LINUX)
 
 set(VLC_INCLUDE_DIRS
 ${VLC_INCLUDE_DIR}

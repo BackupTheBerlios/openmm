@@ -28,6 +28,7 @@
 namespace Omm {
 namespace Sys {
 
+#ifdef __SYS_NETMAN_PLATFORM__
 class NetworkInterfaceManagerImpl : Poco::Runnable
 {
 public:
@@ -45,6 +46,31 @@ private:
     Private*                _p;
     Poco::Thread            _monitorThread;
 };
+#endif
+
+
+#ifdef __SYS_VISUAL_PLATFORM__
+class VisualImpl
+{
+public:
+    VisualImpl();
+    ~VisualImpl();
+    
+    void* getWindow();
+    void show();
+    void hide();
+    int getWidth();
+    int getHeight();
+    Visual::VisualType getType();
+
+private:
+    int             _width;
+    int             _height;
+    bool            _fullscreen;
+    Poco::UInt32*   _pX11Window;
+};
+#endif
+
 
 }  // namespace Sys
 }  // namespace Omm

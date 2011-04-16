@@ -24,12 +24,6 @@
 
 #include <Omm/UpnpAvRenderer.h>
 
-#ifdef __Linux__
-#ifdef __X11__
-#include <X11/Xlib.h>
-#endif
-#endif
-
 #include <vlc/vlc.h>
 #ifdef LIBVLC_VERSION_HEADER_FOUND
 #include <vlc/libvlc_version.h>

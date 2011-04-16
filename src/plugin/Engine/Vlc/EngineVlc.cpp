@@ -34,9 +34,11 @@ VlcEngine::VlcEngine()
 VlcEngine::~VlcEngine()
 {
     libvlc_release(_pVlcInstance);
-#ifdef __Linux__
-    closeXWindow();
-#endif
+
+    if (_pVisual) {
+        _pVisual->hide();
+        delete _pVisual;
+    }
 }
 
 
@@ -75,16 +77,18 @@ VlcEngine::createPlayer()
 #endif
     handleException();
 
-#ifdef __Linux
-    int xWindow = openXWindow();
+    // create window on window system
+    _pVisual = new Omm::Sys::Visual;
+    // open window on window system
+    _pVisual->show();
+
+    if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_xwindow(_pVlcPlayer, xWindow, &_exception);
+        libvlc_media_player_set_xwindow(_pVlcPlayer, *(Poco::UInt32*)_pVisual->getWindow(), &_exception);
 #else
-    libvlc_media_player_set_xwindow(_pVlcPlayer, xWindow);
+        libvlc_media_player_set_xwindow(_pVlcPlayer, *(Poco::UInt32*)_pVisual->getWindow());
 #endif
-#else
-// open window on window system.
-#endif
+    }
 
     handleException();
     
@@ -113,59 +117,6 @@ void
 VlcEngine::setFullscreen(bool on)
 {
 }
-
-#ifdef __Linux__
-int
-VlcEngine::openXWindow()
-{
-    Display*    xDisplay;
-    int         xScreen;
-    Window      xWindow;
-    int xPos    = 0;
-    int yPos    = 0;
-    
-    XInitThreads ();
-    xDisplay = XOpenDisplay(NULL);
-    xScreen = DefaultScreen(xDisplay);
-    XLockDisplay(xDisplay);
-    if(_fullscreen) {
-        _width   = DisplayWidth(xDisplay, xScreen);
-        _height  = DisplayHeight(xDisplay, xScreen);
-    }
-    xWindow = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
-                                  xPos, yPos, _width, _height, 1, 0, 0);
-    XMapRaised(xDisplay, xWindow);
-//     res_h = (DisplayWidth(xDisplay, xScreen) * 1000 / DisplayWidthMM(xDisplay, xScreen));
-//     res_v = (DisplayHeight(xDisplay, xScreen) * 1000 / DisplayHeightMM(xDisplay, xScreen));
-    XSync(xDisplay, False);
-    XUnlockDisplay(xDisplay);
-    
-    // hide X cursor
-    Cursor no_ptr;
-    Pixmap bm_no;
-    XColor black, dummy;
-    Colormap colormap;
-    static char no_data[] = { 0,0,0,0,0,0,0,0 };
-    
-    colormap = DefaultColormap(xDisplay, xScreen);
-    XAllocNamedColor(xDisplay, colormap, "black", &black, &dummy);
-    bm_no = XCreateBitmapFromData(xDisplay, xWindow, no_data, 8, 8);
-    no_ptr = XCreatePixmapCursor(xDisplay, bm_no, bm_no, &black, &black, 0, 0);
-    
-    XDefineCursor(xDisplay, xWindow, no_ptr);
-    XFreeCursor(xDisplay, no_ptr);
-    
-    return xWindow;
-}
-
-void
-VlcEngine::closeXWindow()
-{
-/*    if (xDisplay)
-        XCloseDisplay(xDisplay);
-    xDisplay = NULL;*/
-}
-#endif
 
 
 void

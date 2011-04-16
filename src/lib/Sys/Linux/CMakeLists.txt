@@ -1,74 +1,67 @@
-FIND_PATH(DBUS_INCLUDE_DIR
-dbus-1.0/dbus/dbus-shared.h
-PATHS ${CMAKE_INCLUDE_PATH}
+# TODO: also check for framebuffer libs
+# if X11 or fb is available, set SYS_VISUAL_PLATFORM
+# at runtime, choose between X11 and fb (in this order of precedence)
+find_package(X11)
+find_package(DBUS)
+
+find_package(NetMan)
+if(DBUS_FOUND AND NETMAN_FOUND)
+set(SYS_NETMAN_PLATFORM 1
+CACHE STRING sys_netman_platform)
+set(NETMAN_SRC
+NetworkInterfaceMangerImpl.cpp
+NetworkDevice.cpp
 )
+endif(DBUS_FOUND AND NETMAN_FOUND)
 
-FIND_PATH(DBUS_CPP_INCLUDE_DIR
-dbus-c++-1/dbus-c++/dbus.h
-PATHS ${CMAKE_INCLUDE_PATH}
+if(DBUS_FOUND)
+set(SYS_HWDETECT_PLATFORM 1
+CACHE STRING sys_hwdetect_platform)
+endif(DBUS_FOUND)
+
+if(X11_FOUND)
+set(SYS_VISUAL_PLATFORM 1
+CACHE STRING sys_visual_platform)
+set(VISUAL_SRC
+X11VisualImpl.cpp
 )
+endif(X11_FOUND)
 
-FIND_PATH(NETWORK_MANAGER_INCLUDE_DIR
-NetworkManager/NetworkManager.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
+if(SYS_NETMAN_PLATFORM)
+message(STATUS "using " ${BUILD_TARGET} " specific implementation for network device change detection")
+add_definitions(-D__SYS_NETMAN_PLATFORM__)
+endif(SYS_NETMAN_PLATFORM)
+if(SYS_VISUAL_PLATFORM)
+message(STATUS "using " ${BUILD_TARGET} " specific implementation for video visuals")
+add_definitions(-D__SYS_VISUAL_PLATFORM__)
+endif(SYS_VISUAL_PLATFORM)
 
-FIND_LIBRARY(LIB_DBUS_CPP
-NAME dbus-c++-1
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-FIND_PATH(POCO_INCLUDE_DIR
-Poco/Poco.h
-PATHS ${CMAKE_INCLUDE_PATH}
-)
-
-FIND_LIBRARY(LIB_POCO_FOUNDATION
-NAME PocoFoundation
-PATHS ${CMAKE_LIBRARY_PATH}
-)
-
-if(DBUS_INCLUDE_DIR AND DBUS_CPP_INCLUDE_DIR AND NETWORK_MANAGER_INCLUDE_DIR AND LIB_DBUS_CPP AND POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-message(STATUS "dbus found in " ${DBUS_INCLUDE_DIR})
-message(STATUS "dbus-c++-1 found in " ${DBUS_CPP_INCLUDE_DIR})
-message(STATUS "NetworkManager headers found in " ${NETWORK_MANAGER_INCLUDE_DIR})
-message(STATUS "Poco headers found in " ${POCO_INCLUDE_DIR})
-
-INCLUDE_DIRECTORIES(
-${DBUS_INCLUDE_DIR}
-${DBUS_CPP_INCLUDE_DIR}
-${NETWORK_MANAGER_INCLUDE_DIR}
-${POCO_INCLUDE_DIR}
-${ommlib_SOURCE_DIR}/Omm
-)
-
-ADD_LIBRARY(ommsys-linux
-    #STATIC    # doesn't work on all linux versions of the linker
-    SysImplLinux.cpp
-    NetworkDevice.cpp
+if(X11_FOUND OR DBUS_FOUND)
+add_library(ommsys-linux
+#STATIC    # doesn't work on all linux versions of the linker
+${NETMAN_SRC}
+${VISUAL_SRC}
 )
 
 TARGET_LINK_LIBRARIES(ommsys-linux
-    ${LIB_POCO_FOUNDATION}
-    ${LIB_DBUS_CPP}
+    ${POCO_FOUNDATION}
 )
 
-INSTALL(TARGETS ommsys-linux
+if(DBUS_FOUND)
+target_link_libraries(ommsys-linux
+${DBUS_LIBRARIES}
+)
+endif(DBUS_FOUND)
+
+if(X11_FOUND)
+target_link_libraries(ommsys-linux
+${X11_LIBRARIES}
+)
+endif(X11_FOUND)
+
+install(TARGETS ommsys-linux
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
 
-else(DBUS_INCLUDE_DIR AND DBUS_CPP_INCLUDE_DIR AND NETWORK_MANAGER_INCLUDE_DIR AND LIB_DBUS_CPP AND POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
-if(NOT DBUS_INCLUDE_DIR)
-message(STATUS "dbus not found")
-endif(NOT DBUS_INCLUDE_DIR)
-if(NOT DBUS_CPP_INCLUDE_DIR)
-message(STATUS "dbus-c++-1 not found")
-endif(NOT DBUS_CPP_INCLUDE_DIR)
-if(NOT NETWORK_MANAGER_INCLUDE_DIR)
-message(STATUS "NetworkManager not found")
-endif(NOT NETWORK_MANAGER_INCLUDE_DIR)
-if(NOT (POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION))
-message(STATUS "Poco not found")
-endif(NOT (POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION))
-endif(DBUS_INCLUDE_DIR AND DBUS_CPP_INCLUDE_DIR AND NETWORK_MANAGER_INCLUDE_DIR AND LIB_DBUS_CPP AND POCO_INCLUDE_DIR AND LIB_POCO_FOUNDATION)
+endif(X11_FOUND OR DBUS_FOUND)
