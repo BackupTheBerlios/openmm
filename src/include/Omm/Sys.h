@@ -44,30 +44,29 @@ private:
 };
 
 
-class VisualImpl;
+//class VisualImpl;
 
 class Visual
     /// Visual is a basic window that can be supplied by the graphical user
     /// interface of the OS.
-    /// More sophisticated subclasses of Visual are implemented in AVUserInterface.
 {
 public:
     enum VisualType {VTNone, VTQt, VTX11, VTFB, VTMacOSX, VTWin};
 
-    Visual();
-    virtual ~Visual();
+    Visual() {}
+    virtual ~Visual() {}
 
-    void show();
-    void hide();
+    virtual void show() {}
+    virtual void hide() {}
 
-    void* getWindow();
-    int getWidth();
-    int getHeight();
+    virtual void* getWindow() { return 0; }
+    virtual int getWidth() { return 0; }
+    virtual int getHeight() { return 0; }
 
-    VisualType getType();
+    virtual VisualType getType() { return VTNone; }
 
-private:
-    VisualImpl*     _pImpl;
+//private:
+//    VisualImpl*     _pImpl;
 };
 
 

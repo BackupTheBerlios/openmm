@@ -18,18 +18,13 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-
+#include <Poco/ClassLibrary.h>
 #include <X11/Xlib.h>
 
-#include "Sys.h"
-#include "SysImplLinux.h"
+#include "X11Visual.h"
 
 
-namespace Omm {
-namespace Sys {
-
-
-VisualImpl::VisualImpl() :
+X11Visual::X11Visual() :
 _width(1020),
 _height(576),
 _fullscreen(false)
@@ -37,21 +32,21 @@ _fullscreen(false)
 }
 
 
-VisualImpl::~VisualImpl()
+X11Visual::~X11Visual()
 {
 
 }
 
 
 void*
-VisualImpl::getWindow()
+X11Visual::getWindow()
 {
     return _pX11Window;
 }
 
 
 void
-VisualImpl::show()
+X11Visual::show()
 {
     Display*    xDisplay;
     int         xScreen;
@@ -94,7 +89,7 @@ VisualImpl::show()
 
 
 void
-VisualImpl::hide()
+X11Visual::hide()
 {
 /*    if (xDisplay)
         XCloseDisplay(xDisplay);
@@ -106,24 +101,28 @@ VisualImpl::hide()
 
 
 int
-VisualImpl::getWidth()
+X11Visual::getWidth()
 {
     return _width;
 }
 
 
 int
-VisualImpl::getHeight()
+X11Visual::getHeight()
 {
     return _height;
 }
 
 
-Visual::VisualType
-VisualImpl::getType()
+Omm::Sys::Visual::VisualType
+X11Visual::getType()
 {
-    return Visual::VTX11;
+    return Omm::Sys::Visual::VTX11;
 }
 
-}  // namespace Sys
-} // namespace Omm
+
+#ifdef OMMPLUGIN
+POCO_BEGIN_MANIFEST(Omm::Sys::Visual)
+POCO_EXPORT_CLASS(X11Visual)
+POCO_END_MANIFEST
+#endif

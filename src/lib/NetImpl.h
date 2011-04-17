@@ -25,6 +25,8 @@ namespace Omm {
 namespace Net {
 
 class NetworkInterfaceManagerImpl
+/// Generic network interface manager implementation does nothing.
+/// Network device changes are not detected.
 {
 public:
     void start() {}

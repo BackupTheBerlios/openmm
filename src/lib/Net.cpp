@@ -35,6 +35,8 @@
 #include "Net/Linux/NetImplLinux.h"
 #elif __DARWIN__
 #include "Net/Darwin/NetImplDarwin.h"
+#else
+#include "NetImpl.h"
 #endif
 
 namespace Omm {
