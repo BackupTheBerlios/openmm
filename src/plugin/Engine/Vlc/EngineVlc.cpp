@@ -149,7 +149,6 @@ VlcEngine::load()
     libvlc_state_t state;
     do {
         Poco::Thread::sleep(100); // limit the cpu-load while loading the media and sleep for 100ms
-        //usleep(100000); // limit the cpu-load while loading the media
 #if LIBVLC_VERSION_INT < 0x110
         state = libvlc_media_player_get_state(_pVlcPlayer, &_exception);
 #else
@@ -162,7 +161,6 @@ VlcEngine::load()
     int trackCount = 0;
     do {
         Poco::Thread::sleep(100); // limit the cpu-load while loading the media and sleep for 100ms
-        //usleep(100000); // limit the cpu-load while waiting for stream demux
 #if LIBVLC_VERSION_INT < 0x110
         hasVideo = libvlc_media_player_has_vout(_pVlcPlayer, &_exception);
         handleException();

@@ -44,8 +44,6 @@ private:
 };
 
 
-//class VisualImpl;
-
 class Visual
     /// Visual is a basic window that can be supplied by the graphical user
     /// interface of the OS.
@@ -64,9 +62,6 @@ public:
     virtual int getHeight() { return 0; }
 
     virtual VisualType getType() { return VTNone; }
-
-//private:
-//    VisualImpl*     _pImpl;
 };
 
 

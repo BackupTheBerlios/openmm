@@ -29,6 +29,7 @@ _width(1020),
 _height(576),
 _fullscreen(false)
 {
+    // TODO: check for DISPLAY environment variable and throw exception if not present.
 }
 
 

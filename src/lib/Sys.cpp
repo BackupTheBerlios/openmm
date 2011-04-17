@@ -25,15 +25,8 @@
 #include <Poco/ConsoleChannel.h>
 #include <Poco/FileChannel.h>
 #include <Poco/SplitterChannel.h>
-#include <Poco/AbstractObserver.h>
 
 #include "Sys.h"
-//#include "SysImpl.h"
-//#ifdef __LINUX__
-//#include "Sys/Linux/SysImplLinux.h"
-//#elif __DARWIN__
-//#include "Sys/Darwin/SysImplDarwin.h"
-//#endif
 
 namespace Omm {
 namespace Sys {
@@ -75,84 +68,6 @@ Log::sys()
 {
     return *_pSysLogger;
 }
-
-
-//Visual::Visual()
-//{
-//    _pImpl = new VisualImpl;
-//}
-//
-//
-//Visual::~Visual()
-//{
-//    delete _pImpl;
-//}
-//
-//
-//void*
-//Visual::getWindow()
-//{
-//    if (_pImpl) {
-//        return _pImpl->getWindow();
-//    }
-//    else {
-//        return 0;
-//    }
-//}
-//
-//
-//void
-//Visual::show()
-//{
-//    if (_pImpl) {
-//        _pImpl->show();
-//    }
-//}
-//
-//
-//void
-//Visual::hide()
-//{
-//    if (_pImpl) {
-//        _pImpl->hide();
-//    }
-//}
-//
-//
-//int
-//Visual::getWidth()
-//{
-//    if (_pImpl) {
-//        return _pImpl->getWidth();
-//    }
-//    else {
-//        return 0;
-//    }
-//}
-//
-//
-//int
-//Visual::getHeight()
-//{
-//    if (_pImpl) {
-//        return _pImpl->getHeight();
-//    }
-//    else {
-//        return 0;
-//    }
-//}
-//
-//
-//Visual::VisualType
-//Visual::getType()
-//{
-//    if (_pImpl) {
-//        return _pImpl->getType();
-//    }
-//    else {
-//        return VTNone;
-//    }
-//}
 
 
 }  // namespace Sys
