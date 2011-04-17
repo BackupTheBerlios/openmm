@@ -434,7 +434,7 @@ StreamingMediaObject::createChildObject()
 std::string
 StreamingMediaObject::getServerAddress()
 {
-    std::string address = Sys::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
+    std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
     int port = _pItemServer->_socket.address().port();
     return "http://" + address + ":" + Poco::NumberFormatter::format(port);
 }

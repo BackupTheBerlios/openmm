@@ -30,8 +30,8 @@ namespace Sys {
 
 
 VisualImpl::VisualImpl() :
-_width(640),
-_height(480),
+_width(1020),
+_height(576),
 _fullscreen(false)
 {
 }

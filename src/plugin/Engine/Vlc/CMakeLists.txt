@@ -15,6 +15,8 @@ EngineVlc.cpp
 target_link_libraries(ommplugin-engine-vlc
 ${OMM}
 ${OMM_AV}
+# FIXME: ommsys should be linked with the render app, not the render engine
+${OMM_SYS}
 ${VLC_LIBRARIES}
 )
 

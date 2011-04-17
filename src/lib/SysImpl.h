@@ -24,15 +24,6 @@
 namespace Omm {
 namespace Sys {
 
-#ifndef __SYS_NETMAN_PLATFORM__
-class NetworkInterfaceManagerImpl
-{
-public:
-    void start() {}
-    void stop() {}
-};
-#endif
-
 
 #ifndef __SYS_VISUAL_PLATFORM__
 class VisualImpl

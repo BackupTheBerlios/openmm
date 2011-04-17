@@ -9,18 +9,18 @@ ${SystemConfiguration_INCLUDE_DIRS}
 ${CoreFoundation_INCLUDE_DIRS}
 )
 
-add_library(ommsys-darwin
+add_library(ommnet-darwin
 STATIC
-SysImplDarwin.cpp
+NetImplDarwin.cpp
 )
 
-target_link_libraries(ommsys-darwin
+target_link_libraries(ommnet-darwin
 ${LIB_POCO_FOUNDATION}
 ${SystemConfiguration_LIBRARIES}
 ${CoreFoundation_LIBRARIES}
 )
 
-install(TARGETS ommsys-darwin
+install(TARGETS ommnet-darwin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )

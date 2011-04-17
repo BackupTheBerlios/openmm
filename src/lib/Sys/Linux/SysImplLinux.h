@@ -28,26 +28,6 @@
 namespace Omm {
 namespace Sys {
 
-#ifdef __SYS_NETMAN_PLATFORM__
-class NetworkInterfaceManagerImpl : Poco::Runnable
-{
-public:
-    NetworkInterfaceManagerImpl();
-    ~NetworkInterfaceManagerImpl();
-
-    void start();
-    void stop();
-
-private:
-    class Private;
-
-    virtual void run();
-
-    Private*                _p;
-    Poco::Thread            _monitorThread;
-};
-#endif
-
 
 #ifdef __SYS_VISUAL_PLATFORM__
 class VisualImpl

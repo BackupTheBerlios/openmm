@@ -26,50 +26,41 @@ CACHE INTERNAL libommutil
 )
 
 if(LINUX)
-add_subdirectory(Sys/Linux)
-if(TARGET ommsys-linux)
-set(LIB_OMMSYS_PLATFORM ommsys-linux)
-endif(TARGET ommsys-linux)
+add_subdirectory(Net/Linux)
+if(TARGET ommnet-linux)
+set(LIB_OMMNET_PLATFORM ommnet-linux)
+endif(TARGET ommnet-linux)
 elseif(IPHONE)
 # TODO: Darwin SystemConfiguration C API is not available on iPhone.
 elseif(DARWIN)
-add_subdirectory(Sys/Darwin)
-if(TARGET ommsys-darwin)
-set(LIB_OMMSYS_PLATFORM ommsys-darwin)
-endif(TARGET ommsys-darwin)
+add_subdirectory(Net/Darwin)
+if(TARGET ommnet-darwin)
+set(LIB_OMMNET_PLATFORM ommnet-darwin)
+endif(TARGET ommnet-darwin)
 endif(LINUX)
 
-if(LIB_OMMSYS_PLATFORM)
-message(STATUS "System specific implementation for " ${BUILD_TARGET} " is available, linking libommsys with " ${LIB_OMMSYS_PLATFORM})
-else(LIB_OMMSYS_PLATFORM)
-message(STATUS "System specific implementation for " ${BUILD_TARGET} " not available, using standard implementation")
+if(LIB_OMMNET_PLATFORM)
+message(STATUS "Network device change detection for " ${BUILD_TARGET} " is available, linking libommnet with " ${LIB_OMMNET_PLATFORM})
+else(LIB_OMMNET_PLATFORM)
+message(STATUS "Network device change detection for " ${BUILD_TARGET} " not available, using generic implementation")
 add_definitions(
--D__SYS_STANDARD_PLATFORM__
+-D__NET_GENERIC_PLATFORM__
 )
-endif(LIB_OMMSYS_PLATFORM)
+endif(LIB_OMMNET_PLATFORM)
 
-if(SYS_NETMAN_PLATFORM)
-message(STATUS "using " ${BUILD_TARGET} " specific implementation for network device change detection")
-add_definitions(-D__SYS_NETMAN_PLATFORM__)
-endif(SYS_NETMAN_PLATFORM)
-if(SYS_VISUAL_PLATFORM)
-message(STATUS "using " ${BUILD_TARGET} " specific implementation for video visuals")
-add_definitions(-D__SYS_VISUAL_PLATFORM__)
-endif(SYS_VISUAL_PLATFORM)
-
-add_library(ommsys
-Sys.cpp
+add_library(ommnet
+Net.cpp
 )
 
-target_link_libraries(ommsys
+target_link_libraries(ommnet
 ${POCO_FOUNDATION}
 ${POCO_NET}
-${LIB_OMMSYS_PLATFORM}
+${LIB_OMMNET_PLATFORM}
 )
 
-set(OMM_SYS
-ommsys
-CACHE INTERNAL libommsys
+set(OMM_NET
+ommnet
+CACHE INTERNAL libommnet
 )
 
 add_library(omm
@@ -78,7 +69,7 @@ Upnp.cpp
 
 target_link_libraries(omm
 ${POCO_XML}
-ommsys
+ommnet
 ommutil
 )
 
@@ -124,7 +115,52 @@ CACHE STRING libommavstream
 
 add_subdirectory(Dvb)
 
-install(TARGETS ommutil ommsys omm ommav ommavstream
+if(LINUX)
+add_subdirectory(Sys/Linux)
+if(TARGET ommsys-linux)
+set(LIB_OMMSYS_PLATFORM ommsys-linux)
+endif(TARGET ommsys-linux)
+elseif(IPHONE)
+# TODO: Darwin SystemConfiguration C API is not available on iPhone.
+elseif(DARWIN)
+add_subdirectory(Sys/Darwin)
+if(TARGET ommsys-darwin)
+set(LIB_OMMSYS_PLATFORM ommsys-darwin)
+endif(TARGET ommsys-darwin)
+endif(LINUX)
+
+if(LIB_OMMSYS_PLATFORM)
+message(STATUS "System specific implementation for " ${BUILD_TARGET} " is available, linking libommsys with " ${LIB_OMMSYS_PLATFORM})
+else(LIB_OMMSYS_PLATFORM)
+message(STATUS "System specific implementation for " ${BUILD_TARGET} " not available, using standard implementation")
+add_definitions(
+-D__SYS_STANDARD_PLATFORM__
+)
+endif(LIB_OMMSYS_PLATFORM)
+
+# FIXME: -D__SYS_NETMAN_PLATFORM__ ist set twice (also in system specific subdirectory)
+if(SYS_VISUAL_PLATFORM)
+message(STATUS "using " ${BUILD_TARGET} " specific implementation for video visuals")
+add_definitions(-D__SYS_VISUAL_PLATFORM__)
+endif(SYS_VISUAL_PLATFORM)
+
+add_library(ommsys
+Sys.cpp
+)
+
+target_link_libraries(ommsys
+${POCO_FOUNDATION}
+${POCO_NET}
+${LIB_OMMSYS_PLATFORM}
+)
+
+set(OMM_SYS
+ommsys
+CACHE INTERNAL libommsys
+)
+
+
+install(TARGETS ommutil ommnet omm ommav ommavstream ommsys
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
@@ -142,6 +178,7 @@ ${OMM_UTIL}
 ${OMM_AV}
 ${OMM_AVSTREAM}
 ${OMM_DVB}
+${OMM_SYS}
 CACHE INTERNAL ommlib
 )
 

@@ -28,7 +28,6 @@ namespace Av {
 
 Engine::Engine() :
 _fullscreen(false),
-// _width(720),
 _width(1020),
 _height(576),
 _pVisual(0)

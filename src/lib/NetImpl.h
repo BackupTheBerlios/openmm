@@ -17,61 +17,22 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
-#ifndef Sys_INCLUDED
-#define Sys_INCLUDED
-
-#include <Poco/Logger.h>
-#include <Poco/NotificationCenter.h>
-#include <vector>
-#include <string>
+***************************************************************************/
+#ifndef NetImpl_INCLUDED
+#define NetImpl_INCLUDED
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
-class Log
+class NetworkInterfaceManagerImpl
 {
 public:
-    static Log* instance();
-    
-    Poco::Logger& sys();
-    
-private:
-    Log();
-    
-    static Log*     _pInstance;
-    Poco::Logger*   _pSysLogger;
+    void start() {}
+    void stop() {}
 };
 
 
-class VisualImpl;
-
-class Visual
-    /// Visual is a basic window that can be supplied by the graphical user
-    /// interface of the OS.
-    /// More sophisticated subclasses of Visual are implemented in AVUserInterface.
-{
-public:
-    enum VisualType {VTNone, VTQt, VTX11, VTFB, VTMacOSX, VTWin};
-
-    Visual();
-    virtual ~Visual();
-
-    void show();
-    void hide();
-
-    void* getWindow();
-    int getWidth();
-    int getHeight();
-
-    VisualType getType();
-
-private:
-    VisualImpl*     _pImpl;
-};
-
-
-}  // namespace Sys
+}  // namespace Net
 }  // namespace Omm
 
 #endif

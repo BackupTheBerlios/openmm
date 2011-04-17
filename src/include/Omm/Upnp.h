@@ -105,7 +105,7 @@
 #include <Poco/SAX/SAXException.h>
 #include <Poco/DOM/DOMException.h>
 
-#include "Sys.h"
+#include "Net.h"
 #include "Util.h"
 
 namespace Omm {
@@ -892,7 +892,7 @@ public:
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
     void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
-    void handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
         
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
@@ -995,7 +995,7 @@ protected:
 private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
-    void handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
     void addDevice(DeviceRoot* pDevice);
     void removeDevice(const std::string& uuid);

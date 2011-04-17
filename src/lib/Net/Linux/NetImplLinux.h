@@ -17,58 +17,59 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
-#ifndef Sys_INCLUDED
-#define Sys_INCLUDED
+***************************************************************************/
+#ifndef SysImplLinux_INCLUDED
+#define SysImplLinux_INCLUDED
 
-#include <Poco/Logger.h>
-#include <Poco/NotificationCenter.h>
-#include <vector>
-#include <string>
+#include <Poco/Runnable.h>
+#include <Poco/Thread.h>
+
 
 namespace Omm {
 namespace Sys {
 
-class Log
+#ifdef __SYS_NETMAN_PLATFORM__
+class NetworkInterfaceManagerImpl : Poco::Runnable
 {
 public:
-    static Log* instance();
-    
-    Poco::Logger& sys();
-    
+    NetworkInterfaceManagerImpl();
+    ~NetworkInterfaceManagerImpl();
+
+    void start();
+    void stop();
+
 private:
-    Log();
-    
-    static Log*     _pInstance;
-    Poco::Logger*   _pSysLogger;
+    class Private;
+
+    virtual void run();
+
+    Private*                _p;
+    Poco::Thread            _monitorThread;
 };
+#endif
 
 
-class VisualImpl;
-
-class Visual
-    /// Visual is a basic window that can be supplied by the graphical user
-    /// interface of the OS.
-    /// More sophisticated subclasses of Visual are implemented in AVUserInterface.
+#ifdef __SYS_VISUAL_PLATFORM__
+class VisualImpl
 {
 public:
-    enum VisualType {VTNone, VTQt, VTX11, VTFB, VTMacOSX, VTWin};
-
-    Visual();
-    virtual ~Visual();
-
+    VisualImpl();
+    ~VisualImpl();
+    
+    void* getWindow();
     void show();
     void hide();
-
-    void* getWindow();
     int getWidth();
     int getHeight();
-
-    VisualType getType();
+    Visual::VisualType getType();
 
 private:
-    VisualImpl*     _pImpl;
+    int             _width;
+    int             _height;
+    bool            _fullscreen;
+    Poco::UInt32*   _pX11Window;
 };
+#endif
 
 
 }  // namespace Sys

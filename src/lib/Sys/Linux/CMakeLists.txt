@@ -4,16 +4,6 @@
 find_package(X11)
 find_package(DBUS)
 
-find_package(NetMan)
-if(DBUS_FOUND AND NETMAN_FOUND)
-set(SYS_NETMAN_PLATFORM 1
-CACHE STRING sys_netman_platform)
-set(NETMAN_SRC
-NetworkInterfaceMangerImpl.cpp
-NetworkDevice.cpp
-)
-endif(DBUS_FOUND AND NETMAN_FOUND)
-
 if(DBUS_FOUND)
 set(SYS_HWDETECT_PLATFORM 1
 CACHE STRING sys_hwdetect_platform)
@@ -27,24 +17,20 @@ X11VisualImpl.cpp
 )
 endif(X11_FOUND)
 
-if(SYS_NETMAN_PLATFORM)
-message(STATUS "using " ${BUILD_TARGET} " specific implementation for network device change detection")
-add_definitions(-D__SYS_NETMAN_PLATFORM__)
-endif(SYS_NETMAN_PLATFORM)
 if(SYS_VISUAL_PLATFORM)
 message(STATUS "using " ${BUILD_TARGET} " specific implementation for video visuals")
 add_definitions(-D__SYS_VISUAL_PLATFORM__)
 endif(SYS_VISUAL_PLATFORM)
 
 if(X11_FOUND OR DBUS_FOUND)
+
 add_library(ommsys-linux
 #STATIC    # doesn't work on all linux versions of the linker
-${NETMAN_SRC}
 ${VISUAL_SRC}
 )
 
-TARGET_LINK_LIBRARIES(ommsys-linux
-    ${POCO_FOUNDATION}
+target_link_libraries(ommsys-linux
+${POCO_FOUNDATION}
 )
 
 if(DBUS_FOUND)

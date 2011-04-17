@@ -330,7 +330,7 @@ void
 SsdpSocket::setupSockets()
 {
 #ifndef __DARWIN__
-    if (Sys::NetworkInterfaceManager::instance()->loopbackOnly()) {
+    if (Net::NetworkInterfaceManager::instance()->loopbackOnly()) {
         Log::instance()->ssdp().warning("loopback is the only network interface, forcing broadcast mode.");
         setBroadcast();
     }
@@ -1703,7 +1703,7 @@ HttpSocket::stopServer()
 std::string
 HttpSocket::getServerUri()
 {
-    Poco::Net::IPAddress validIpAddress = Sys::NetworkInterfaceManager::instance()->getValidIpAddress();
+    Poco::Net::IPAddress validIpAddress = Net::NetworkInterfaceManager::instance()->getValidIpAddress();
     std::string validIpAddressString = validIpAddress.toString();
     if (validIpAddress.family() == Poco::Net::IPAddress::IPv6) {
         validIpAddressString = "[" + validIpAddressString + "]";
@@ -1909,8 +1909,8 @@ DeviceRoot::startSsdp()
     writeSsdpMessages();
     sendSsdpAliveMessages();
 
-    Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
-        (Poco::Observer<DeviceRoot,Sys::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
+    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
+        (Poco::Observer<DeviceRoot,Net::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
     Log::instance()->upnp().debug("device root network interface manager installed");
     
     // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
@@ -2027,7 +2027,7 @@ DeviceRoot::handleNetworkInterfaceChange(const std::string& interfaceName, bool 
 
 
 void
-DeviceRoot::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification)
+DeviceRoot::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
 {
     Log::instance()->upnp().debug("device root receives network interface change notification");
     handleNetworkInterfaceChange(pNotification->_interfaceName, pNotification->_added);
@@ -2210,7 +2210,7 @@ Controller::~Controller()
 
 
 void
-Controller::handleNetworkInterfaceChangedNotification(Sys::NetworkInterfaceNotification* pNotification)
+Controller::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
 {
     Log::instance()->upnp().debug("controller receives network interface change notification");
     
@@ -2236,8 +2236,8 @@ Controller::start()
     _ssdpSocket.start();
     sendMSearch();
 
-    Sys::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
-        (Poco::Observer<Controller,Sys::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));    
+    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
+        (Poco::Observer<Controller,Net::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
     
     Log::instance()->upnp().debug("controller started");
 }

@@ -25,6 +25,7 @@
 #include "UpnpAvTypes.h"
 #include "UpnpAvDevices.h"
 #include "Util.h"
+#include "Sys.h"
 
 namespace Omm {
 namespace Av {
