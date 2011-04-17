@@ -37,15 +37,12 @@ public:
     Engine();
     
     std::string getEngineId();
-    
+    void setVisual(Sys::Visual* pVisual);
+
     virtual void setOption(const std::string& key, const std::string& value);
     virtual void createPlayer()  = 0;
     // Engine handling
-    // virtual void setVideoDriver(std::string) = 0;
-    // virtual void setAudioDriver(std::string) = 0;
     virtual void setFullscreen(bool on = true) = 0;
-    // virtual vector<std::string> getAudioAdapters() = 0;
-    // virtual void setAudioAdapter(std::string) = 0;
 
     // UPnP methods
     /*

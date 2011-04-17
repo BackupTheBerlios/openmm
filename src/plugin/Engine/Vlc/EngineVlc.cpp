@@ -78,7 +78,9 @@ VlcEngine::createPlayer()
     handleException();
 
     // create window on window system
-    _pVisual = new Omm::Sys::Visual;
+    if (!_pVisual) {
+        _pVisual = new Omm::Sys::Visual;
+    }
     // open window on window system
     _pVisual->show();
 

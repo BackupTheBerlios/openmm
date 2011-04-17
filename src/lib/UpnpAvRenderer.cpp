@@ -43,6 +43,13 @@ Engine::getEngineId()
 
 
 void
+Engine::setVisual(Sys::Visual* pVisual)
+{
+    _pVisual = pVisual;
+}
+
+
+void
 Engine::setOption(const std::string& key, const std::string& value)
 {
     if (key == "fullscreen") {
@@ -57,7 +64,7 @@ Engine::setOption(const std::string& key, const std::string& value)
     }
 }
 
-    
+
 AvRenderer::AvRenderer(Engine* engine) :
 MediaRenderer(new RenderingControlRendererImpl,
               new ConnectionManagerRendererImpl,
@@ -77,6 +84,7 @@ AvRenderer::setFullscreen(bool on)
     // FIXME: need to set Engine::_fullscreen.
     _pEngine->setFullscreen(on);
 }
+
 
 } // namespace Av
 } // namespace Omm

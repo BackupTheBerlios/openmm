@@ -171,6 +171,21 @@ protected:
                 return 1;
             }
             std::clog << "engine plugin: " << _enginePlugin << " loaded successfully" << std::endl;
+
+            std::string visualPlugin = "visual-x11";
+
+            Omm::Util::PluginLoader<Omm::Sys::Visual> visualPluginLoader;
+            Omm::Sys::Visual* pVisualPlugin;
+            try {
+                pVisualPlugin = visualPluginLoader.load(visualPlugin, "Visual", "X11");
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error could not find visual plugin: " << visualPlugin << std::endl;
+                return 1;
+            }
+            std::clog << "visual plugin: " << visualPlugin << " loaded successfully" << std::endl;
+
+            pEnginePlugin->setVisual(pVisualPlugin);
             
             if (_fullscreen) {
                 pEnginePlugin->setOption("fullscreen", "");
