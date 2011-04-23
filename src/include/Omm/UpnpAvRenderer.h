@@ -41,8 +41,6 @@ public:
 
     virtual void setOption(const std::string& key, const std::string& value);
     virtual void createPlayer()  = 0;
-    // Engine handling
-    virtual void setFullscreen(bool on = true) = 0;
 
     // UPnP methods
     /*
@@ -86,9 +84,6 @@ protected:
     void endOfStream() {}
 
     std::string                 _engineId;
-    bool                        _fullscreen;
-    int                         _width;
-    int                         _height;
     Sys::Visual*                _pVisual;
 };
 
@@ -97,8 +92,6 @@ class AvRenderer : public MediaRenderer
 {
 public:
     AvRenderer(Engine* engine);
-    
-    void setFullscreen(bool on = true);
     
 private:
     Engine*     _pEngine;

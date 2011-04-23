@@ -27,9 +27,6 @@ namespace Av {
 
 
 Engine::Engine() :
-_fullscreen(false),
-_width(1020),
-_height(576),
 _pVisual(0)
 {
 }
@@ -52,16 +49,6 @@ Engine::setVisual(Sys::Visual* pVisual)
 void
 Engine::setOption(const std::string& key, const std::string& value)
 {
-    if (key == "fullscreen") {
-        _fullscreen = true;
-        setFullscreen(true);
-    }
-    else if (key == "width") {
-        _width = Poco::NumberParser::parse(value);
-    }
-    else if (key == "height") {
-        _height = Poco::NumberParser::parse(value);
-    }
 }
 
 
@@ -75,14 +62,6 @@ _pEngine(engine)
     static_cast<ConnectionManagerRendererImpl*>(_pConnectionManagerImpl)->_pEngine = engine;
     static_cast<AVTransportRendererImpl*>(_pAVTransportImpl)->_pEngine = engine;
     Omm::Av::Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
-}
-
-
-void
-AvRenderer::setFullscreen(bool on)
-{
-    // FIXME: need to set Engine::_fullscreen.
-    _pEngine->setFullscreen(on);
 }
 
 

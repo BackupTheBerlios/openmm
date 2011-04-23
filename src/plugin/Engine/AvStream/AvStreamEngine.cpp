@@ -82,7 +82,9 @@ AvStreamEngine::createPlayer()
         Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream video plugin: " + videoPlugin);
         return;
     }
-    _pVideoSink->openWindow(_fullscreen, _width, _height);
+    // FIXME: set a Sys::Visual here.
+    _pVideoSink->openWindow(false, 1020, 576);
+//    _pVideoSink->openWindow(_fullscreen, _width, _height);
 
     _pAudioSink->registerStreamEventObserver(new Poco::Observer<AvStreamEngine, Omm::AvStream::Sink::EndOfStream>(*this, &AvStreamEngine::endOfStream));
 }

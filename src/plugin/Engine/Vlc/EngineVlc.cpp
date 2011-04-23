@@ -48,16 +48,16 @@ VlcEngine::createPlayer()
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_exception_init(&_exception);
 #endif
-    if (_fullscreen) {
-        int argc = 3;
-        const char* argv[3] = {"ommrender", "--no-osd",  "--fullscreen"};
-#if LIBVLC_VERSION_INT < 0x110
-        _pVlcInstance = libvlc_new(argc, argv, &_exception);
-#else
-        _pVlcInstance = libvlc_new(argc, argv);
-#endif
-    }
-    else {
+//    if (_fullscreen) {
+//        int argc = 3;
+//        const char* argv[3] = {"ommrender", "--no-osd",  "--fullscreen"};
+//#if LIBVLC_VERSION_INT < 0x110
+//        _pVlcInstance = libvlc_new(argc, argv, &_exception);
+//#else
+//        _pVlcInstance = libvlc_new(argc, argv);
+//#endif
+//    }
+//    else {
         int argc = 2;
         const char* argv[2] = {"ommrender", "--no-osd"};
 #if LIBVLC_VERSION_INT < 0x110
@@ -65,7 +65,7 @@ VlcEngine::createPlayer()
 #else
         _pVlcInstance = libvlc_new(argc, argv);
 #endif
-    }
+//    }
 //     int argc = 3;
 //     char* argv[3] = {"ommrender", "--codec=avcodec",  "--vout fb"};
 //     _pVlcInstance = libvlc_new(argc, argv, &_exception);
