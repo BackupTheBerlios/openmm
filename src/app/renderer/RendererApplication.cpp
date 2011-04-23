@@ -52,8 +52,8 @@ public:
         _helpRequested(false),
         _enginePlugin(""),
         _fullscreen(false),
-        _width(""),
-        _height(""),
+        _width(1020),
+        _height(576),
         _name("")
     {
         setUnixOptions(true);
@@ -124,10 +124,10 @@ protected:
             _fullscreen = true;
         }
         else if (name == "width") {
-            _width = value;
+            _width = Poco::NumberParser::parse(value);
         }
         else if (name == "height") {
-            _height = value;
+            _height = Poco::NumberParser::parse(value);
         }
         else if (name == "name") {
             _name = value;
@@ -186,15 +186,14 @@ protected:
             std::clog << "visual plugin: " << visualPlugin << " loaded successfully" << std::endl;
 
             pEnginePlugin->setVisual(pVisualPlugin);
-            
+
+            // TODO: set these options for visual, not for engine.
             if (_fullscreen) {
-                pEnginePlugin->setOption("fullscreen", "");
+                pVisualPlugin->setFullscreen();
             }
-            if (_width != "") {
-                pEnginePlugin->setOption("width", _width);
-            }
-            if (_height != "") {
-                pEnginePlugin->setOption("height", _height);
+            else {
+                pVisualPlugin->setWidth(_width);
+                pVisualPlugin->setHeight(_height);
             }
             pEnginePlugin->createPlayer();
             
@@ -234,8 +233,8 @@ private:
     bool            _helpRequested;
     std::string     _enginePlugin;
     bool            _fullscreen;
-    std::string     _width;
-    std::string     _height;
+    int             _width;
+    int             _height;
     std::string     _name;
 };
 

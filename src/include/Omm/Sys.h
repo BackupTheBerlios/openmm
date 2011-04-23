@@ -51,17 +51,26 @@ class Visual
 public:
     enum VisualType {VTNone, VTQt, VTX11, VTFB, VTMacOSX, VTWin};
 
-    Visual() {}
+    Visual();
     virtual ~Visual() {}
 
     virtual void show() {}
     virtual void hide() {}
 
     virtual void* getWindow() { return 0; }
-    virtual int getWidth() { return 0; }
-    virtual int getHeight() { return 0; }
-
     virtual VisualType getType() { return VTNone; }
+
+    int getWidth();
+    int getHeight();
+    bool getFullscreen();
+    void setWidth(int width);
+    void setHeight(int height);
+    void setFullscreen(bool fullscreen = true);
+ 
+private:
+    int             _width;
+    int             _height;
+    bool            _fullscreen;
 };
 
 

@@ -77,7 +77,8 @@ VlcEngine::createPlayer()
 #endif
     handleException();
 
-    // create window on window system
+    // create window on window system (TODO: load visual plugin and don't instantiate null implementation)
+    // vlc creates its own window if no window is set.
     if (!_pVisual) {
         _pVisual = new Omm::Sys::Visual;
     }

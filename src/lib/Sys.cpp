@@ -70,5 +70,55 @@ Log::sys()
 }
 
 
+Visual::Visual() :
+_width(1020),
+_height(576),
+_fullscreen(false)
+{
+}
+
+
+int
+Visual::getWidth()
+{
+    return _width;
+}
+
+
+int
+Visual::getHeight()
+{
+    return _height;
+}
+
+
+bool
+Visual::getFullscreen()
+{
+    return _fullscreen;
+}
+
+
+void
+Visual::setWidth(int width)
+{
+    _width = width;
+}
+
+
+void
+Visual::setHeight(int height)
+{
+    _height = height;
+}
+
+
+void
+Visual::setFullscreen(bool fullscreen)
+{
+    _fullscreen = fullscreen;
+}
+
+
 }  // namespace Sys
 }  // namespace Omm

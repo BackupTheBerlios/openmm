@@ -24,10 +24,7 @@
 #include "X11Visual.h"
 
 
-X11Visual::X11Visual() :
-_width(1020),
-_height(576),
-_fullscreen(false)
+X11Visual::X11Visual()
 {
     // TODO: check for DISPLAY environment variable and throw exception if not present.
 }
@@ -58,13 +55,13 @@ X11Visual::show()
     xDisplay = XOpenDisplay(NULL);
     xScreen = DefaultScreen(xDisplay);
     XLockDisplay(xDisplay);
-    if(_fullscreen) {
-        _width   = DisplayWidth(xDisplay, xScreen);
-        _height  = DisplayHeight(xDisplay, xScreen);
+    if(getFullscreen()) {
+        setWidth(DisplayWidth(xDisplay, xScreen));
+        setHeight(DisplayHeight(xDisplay, xScreen));
     }
     _pX11Window = new Poco::UInt32;
     *_pX11Window = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
-                                  xPos, yPos, _width, _height, 1, 0, 0);
+                                  xPos, yPos, getWidth(), getHeight(), 1, 0, 0);
     
     XMapRaised(xDisplay, *_pX11Window);
 //     res_h = (DisplayWidth(xDisplay, xScreen) * 1000 / DisplayWidthMM(xDisplay, xScreen));
@@ -98,20 +95,6 @@ X11Visual::hide()
     if (_pX11Window) {
         delete _pX11Window;
     }
-}
-
-
-int
-X11Visual::getWidth()
-{
-    return _width;
-}
-
-
-int
-X11Visual::getHeight()
-{
-    return _height;
 }
 
 

@@ -32,14 +32,9 @@ public:
     void* getWindow();
     void show();
     void hide();
-    int getWidth();
-    int getHeight();
     Omm::Sys::Visual::VisualType getType();
 
 private:
-    int             _width;
-    int             _height;
-    bool            _fullscreen;
     Poco::UInt32*   _pX11Window;
 };
 
