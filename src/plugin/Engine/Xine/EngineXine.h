@@ -55,13 +55,7 @@ public:
     ~XineEngine();
     
     virtual void createPlayer();
-    // virtual void setVideoDriver(string);
-    // virtual void setAudioDriver(string);
-    // virtual void setFullscreen(bool on);
-    // virtual vector<string> getAudioAdapters();
-    // virtual void setAudioAdapter(string);
     
-    virtual void setFullscreen(bool on = true);
     std::string getEngineId() { return _engineId; }
     
     virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
@@ -111,20 +105,21 @@ private:
     bool isSeekable();
     void savePosition();
 
-
-
     void initOSD();
+
+    x11_visual_t         _x11Visual;
+    fb_visual_t          _fbVisual;
     
-    xine_audio_port_t   *_audioDriver;
-    xine_stream_t       *_xineStream;
-    char                *_audioDriverName;
+    xine_audio_port_t*   _audioDriver;
+    xine_stream_t*       _xineStream;
+    char*                _audioDriverName;
     int                  _audioDeviceNum;
 
-    XineVideo*		_pVideo;
+//    XineVideo*		 _pVideo;
 
     std::string          _mrl;
 
-    xine_event_queue_t  *eventQueue;
+    xine_event_queue_t*  eventQueue;
 
     bool                 _pause;
     int                  _posStream;

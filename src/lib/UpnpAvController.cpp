@@ -426,7 +426,10 @@ _pEngine(0)
 {
     _positionInfoTimer.setPeriodicInterval(1000);
     Poco::TimerCallback<AvUserInterface> callback(*this, &AvUserInterface::pollPositionInfo);
-    _positionInfoTimer.start(callback);
+    // NOTE: position info polling disabled for now. Reason: engine throws exceptions
+    // when stream is not seekable. We should check if stream is seekable somewhere
+    // and avoid reading the position (in Engine?)
+//    _positionInfoTimer.start(callback);
 }
 
 

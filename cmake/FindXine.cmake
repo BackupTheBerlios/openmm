@@ -3,17 +3,22 @@ xine.h
 PATHS ${CMAKE_INCLUDE_PATH}
 )
 
-exec_program(/usr/bin/xine-config
-ARGS --libs
-OUTPUT_VARIABLE Xine_LIBRARY
-)
+#exec_program(/usr/bin/xine-config
+#ARGS --libs
+#OUTPUT_VARIABLE Xine_LIBRARY
+#)
 
-set(Xine_INCLUDE_DIRS
-${Xine_INCLUDE_DIR}
+find_library(Xine_LIBRARY
+NAME xine
+PATHS ${CMAKE_LIBRARY_PATH}
 )
 
 set(Xine_LIBRARIES
 ${Xine_LIBRARY}
+)
+
+set(Xine_INCLUDE_DIRS
+${Xine_INCLUDE_DIR}
 )
 
 if(Xine_INCLUDE_DIR)

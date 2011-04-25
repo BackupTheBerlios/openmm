@@ -117,17 +117,8 @@ VlcEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 
 
 void
-VlcEngine::setFullscreen(bool on)
-{
-}
-
-
-void
 VlcEngine::load()
 {
-    _startTime = 0;
-    _length = 0.0;
-    _pVlcMedia = 0;
 #if LIBVLC_VERSION_INT < 0x110
     _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), &_exception);
 #else
@@ -147,6 +138,14 @@ VlcEngine::load()
     libvlc_media_player_play(_pVlcPlayer);
 #endif
     handleException();
+}
+
+
+void
+VlcEngine::analyzeStream()
+{
+    _startTime = 0;
+    _length = 0.0;
 
     // settle to a defined state
     libvlc_state_t state;
@@ -174,14 +173,14 @@ VlcEngine::load()
         handleException();
         trackCount = libvlc_audio_get_track_count(_pVlcPlayer);
         handleException();
-#endif   
+#endif
     } while(state == libvlc_Playing && !hasVideo && !trackCount);
 //     TRACE("VlcEngine::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
 #if LIBVLC_VERSION_INT < 0x110
     _length = (libvlc_media_player_get_length(_pVlcPlayer, &_exception) - _startTime) / 1000.0;
     libvlc_time_t d = libvlc_media_get_duration(_pVlcMedia, &_exception);
     //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
-    
+
     _startTime = libvlc_media_player_get_time(_pVlcPlayer, &_exception);
     handleException();
 //     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
@@ -194,16 +193,16 @@ VlcEngine::load()
 //         TRACE("VlcEngine::load() pause not possible on media");
     }
     handleException();
-    
+
     // TODO: receive video size changed - events and adjust display size
-    int videoWidth = libvlc_video_get_width(_pVlcPlayer, &_exception);
-    handleException();
-    int videoHeight = libvlc_video_get_height(_pVlcPlayer, &_exception);
-    handleException();
+//    int videoWidth = libvlc_video_get_width(_pVlcPlayer, &_exception);
+//    handleException();
+//    int videoHeight = libvlc_video_get_height(_pVlcPlayer, &_exception);
+//    handleException();
 //     TRACE("VlcEngine::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
 /*    libvlc_video_resize(_pVlcPlayer, videoWidth, videoHeight, &_exception);
     handleException();*/
-    
+
     // TODO: fullscreen could initially be set at start
 //     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0), &_exception);
 //     handleException();
@@ -211,7 +210,7 @@ VlcEngine::load()
     _length = (libvlc_media_player_get_length(_pVlcPlayer) - _startTime) / 1000.0;
     libvlc_time_t d = libvlc_media_get_duration(_pVlcMedia);
     //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
-    
+
     _startTime = libvlc_media_player_get_time(_pVlcPlayer);
     handleException();
 //     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
@@ -224,7 +223,7 @@ VlcEngine::load()
 //         TRACE("VlcEngine::load() pause not possible on media");
     }
     handleException();
-    
+
     unsigned int videoWidth;
     unsigned int videoHeight;
     int success = libvlc_video_get_size(_pVlcPlayer, 0, &videoWidth, &videoHeight);
@@ -232,7 +231,7 @@ VlcEngine::load()
     // TODO: receive video size changed - events and adjust display size
 /*    libvlc_video_resize(_pVlcPlayer, videoWidth, videoHeight);
     handleException();*/
-    
+
     // TODO: fullscreen could initially be set at start
 //     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0));
 //     handleException();
@@ -267,18 +266,6 @@ VlcEngine::stop()
     libvlc_media_player_stop(_pVlcPlayer);
 #endif
     handleException();
-}
-
-
-void
-VlcEngine::next()
-{
-}
-
-
-void
-VlcEngine::previous()
-{
 }
 
 
@@ -449,15 +436,17 @@ VlcEngine::getVolume(int channel)
 void
 VlcEngine::handleException()
 {
+    // TODO: really handle exception (vlc may crash, if exception is ignored).
+    // throw exception to signal renderer engine code that engine failed.
 #if LIBVLC_VERSION_INT < 0x110
     if (libvlc_exception_raised(&_exception)) {
-        std::cerr << "Error in VlcEngine: " << libvlc_exception_get_message(&_exception) << std::endl;
+        Omm::Av::Log::instance()->upnpav().error("vlc engine: " + std::string(libvlc_exception_get_message(&_exception)));
     }
     libvlc_exception_init(&_exception);
 #else
     const char* errMsg = libvlc_errmsg();
     if (errMsg) {
-        std::cerr << "Error in VlcEngine: " <<  errMsg << std::endl;
+        Omm::Av::Log::instance()->upnpav().error("vlc engine: " + std::string(errMsg));
     }
 #endif
 }

@@ -45,7 +45,8 @@ int
 StressAvUserInterface::eventLoop()
 {
     const int maxTests = 10;
-    const int maxPlayTime = 2000;  // msec
+    const int maxPlayTime = 3500;  // msec
+//    const int maxPlayTime = 1000;  // msec
     const int waitForDevice = 1000; // msec
     const std::string ignoreServerUuid("fa095ecc-e13e-40e7-8e6c-001f3fbdd43e");
 
@@ -94,7 +95,9 @@ StressAvUserInterface::eventLoop()
                 playPressed();
                 Poco::Thread::sleep(maxPlayTime);
 //                Poco::Thread::sleep(playTime.next(maxPlayTime));
-                stopPressed();
+                // without stop, renderer crashes occasionally (vlc engine: "No active input").
+                // so we put further stress on the engine without stopping it.
+//                stopPressed();
             }
             test++;
         }

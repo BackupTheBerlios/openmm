@@ -13,7 +13,7 @@ target_link_libraries(ommplugin-engine-xine
 ${POCO_UTIL}
 ${OMM}
 ${OMM_AV}
-${XINE_LIBRARIES}
+${Xine_LIBRARIES}
 )
 
 set_target_properties(ommplugin-engine-xine
@@ -26,8 +26,8 @@ LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib
 )
 
-add_subdirectory(VideoFb)
-add_subdirectory(VideoX11)
+#add_subdirectory(VideoFb)
+#add_subdirectory(VideoX11)
 
 endif(BUILD_PLUGINS)
 endif(XINE_FOUND)

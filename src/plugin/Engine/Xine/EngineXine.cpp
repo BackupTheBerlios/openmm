@@ -51,27 +51,33 @@ _lengthStream(0)
 XineEngine::~XineEngine()
 {
     close();
-    delete _pVideo;
+//    delete _pVideo;
 }
 
 
 void
 XineEngine::createPlayer()
-{
-    _xineEngine = xine_new();
-    
-    Omm::Util::PluginLoader<XineVideo> pluginLoader;
-    std::string videoPlugin("xinevideo-x11");
-//     std::string videoPlugin("xinevideo-fb");
-    
-    try {
-	_pVideo = pluginLoader.load(videoPlugin, "XineVideo");
+{    
+//    Omm::Util::PluginLoader<XineVideo> pluginLoader;
+//    std::string videoPlugin("xinevideo-x11");
+////     std::string videoPlugin("xinevideo-fb");
+//
+//    try {
+//	_pVideo = pluginLoader.load(videoPlugin, "XineVideo");
+//    }
+//    catch(Poco::NotFoundException) {
+//	std::cerr << "Error could not find xine video plugin: " << videoPlugin << std::endl;
+//	return;
+//    }
+//    std::clog << "xine video plugin: " << videoPlugin << " loaded successfully" << std::endl;
+
+    if (!_pVisual) {
+        _pVisual = new Omm::Sys::Visual;
     }
-    catch(Poco::NotFoundException) {
-	std::cerr << "Error could not find xine video plugin: " << videoPlugin << std::endl;
-	return;
-    }
-    std::clog << "xine video plugin: " << videoPlugin << " loaded successfully" << std::endl;
+    // open window on window system
+    _pVisual->show();
+
+
     
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
 //     char* configFile = "/etc/omm/xineconfig";
@@ -84,33 +90,48 @@ XineEngine::createPlayer()
     else {
         TRACE("MediaPlayer::initStream() no config file loaded: %s", strerror(errno));
     }*/
+
+    _xineEngine = xine_new();
     xine_init(_xineEngine);
 
     _pixel_aspect = 1.0;
 
-    if (_fullscreen) {
-        _width = _pVideo->displayWidth();
-        _height = _pVideo->displayHeight();
-    }
-    videoFrameWidth = _width;
-    videoFrameHeight = _height;
-    _pVideo->initVisual(_width, _height);
+//    if (getFullscreen()) {
+//        setWidth(_pVideo->displayWidth());
+//        setHeight(_pVideo->displayHeight());
+//    }
+    videoFrameWidth = _pVisual->getWidth();
+    videoFrameHeight = _pVisual->getHeight();
+//    _pVideo->initVisual(getWidth(), getHeight);
 
-    
-    switch (_pVideo->visualType()) {
-	case XINE_VISUAL_TYPE_X11:
-	    x11_visual_t* v = (x11_visual_t*)(_pVideo->visual());
-	    v->frame_output_cb = FrameOutputCallback;
-	    break;
+    std::string driverName;
+
+    if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
+        driverName = "xv";
+        _x11Visual.frame_output_cb = FrameOutputCallback;
+        _x11Visual.d = *(Poco::UInt32*)_pVisual->getWindow();
+//        _x11Visual.display = XOpenDisplay(NULL);
+//        _x11Visual.screen = x11Screen;
+        _videoDriver = xine_open_video_driver(_xineEngine,
+        driverName.c_str(), XINE_VISUAL_TYPE_X11,
+        _pVisual);
     }
 
-    _videoDriver = xine_open_video_driver(_xineEngine,
-        _pVideo->driverName().c_str(),  _pVideo->visualType(),
-        _pVideo->visual());
+//    switch (_pVideo->visualType()) {
+//	case XINE_VISUAL_TYPE_X11:
+//	    x11_visual_t* v = (x11_visual_t*)(_pVideo->visual());
+//	    v->frame_output_cb = FrameOutputCallback;
+//	    break;
+//    }
+
+//    _videoDriver = xine_open_video_driver(_xineEngine,
+//        _pVideo->driverName().c_str(),  _pVideo->visualType(),
+//        _pVideo->visual());
 
     if (!_videoDriver)
     {
-        std::cerr << "XineEngine::init() can't init video driver " << _pVideo->driverName() << std::endl;
+        Omm::Av::Log::instance()->upnpav().error("xine engine can't init video driver " + driverName);
+//        std::cerr << "XineEngine::init() can't init video driver " << _pVideo->driverName() << std::endl;
     }
 
 /*
@@ -148,7 +169,7 @@ XineEngine::close()
     xine_close_video_driver(_xineEngine, _videoDriver);
     xine_exit(_xineEngine);
     
-    _pVideo->closeVisual();
+//    _pVideo->closeVisual();
 }
 
 
@@ -167,12 +188,6 @@ XineEngine::FrameOutputCallback(void* p, int video_width, int video_height, doub
     //*dest_aspect = _pixel_aspect;
     //*win_x = _globX;
     //*win_y = _globY;
-}
-
-
-void
-XineEngine::setFullscreen(bool on)
-{
 }
 
 

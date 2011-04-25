@@ -106,7 +106,6 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
     Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
     if (_pEngine->preferStdStream()) {
         Poco::URI uri(CurrentURI);
-//        _pEngine->stop();
         if (_pSession) {
             delete _pSession;
         }
@@ -275,7 +274,8 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
-//                _pEngine->stop();
+                // NOTE: not shure if we should stop here, or in the engine (if necessary)
+                _pEngine->stop();
                 std::string pos = AvTransportArgument::CURRENT_TRACK_DURATION_0;
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);

@@ -37,7 +37,6 @@ public:
     ~VlcEngine();
     
     virtual void createPlayer();
-    virtual void setFullscreen(bool on = true);
     
     /*
       AVTransport
@@ -57,8 +56,6 @@ public:
     */
     virtual void pause();
     virtual void stop();
-    virtual void next();
-    virtual void previous();
 
     virtual void seekByte(Poco::UInt64 byte);
     virtual void seekPercentage(float percentage);
@@ -78,10 +75,7 @@ public:
     
 private:
     void handleException();
-#ifdef __Linux__
-    int openXWindow();
-    void closeXWindow();
-#endif
+    void analyzeStream();
 
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_exception_t      _exception;

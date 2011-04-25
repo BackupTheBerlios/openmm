@@ -18,11 +18,14 @@ ${VLC_INCLUDE_DIR}
 
 if(VLC_INCLUDE_DIR)
 message(STATUS "Found VLC headers in: " ${VLC_INCLUDE_DIR})
+# be carefull to search for version header only in first vlc location found
 find_file(LIB_VLC_VERSION_HEADER
 vlc/libvlc_version.h
-PATHS ${CMAKE_INCLUDE_PATH}
+PATHS ${VLC_INCLUDE_DIR}
+NO_DEFAULT_PATH
 )
 if(LIB_VLC_VERSION_HEADER)
+message(STATUS "Found VLC version header in: " ${LIB_VLC_VERSION_HEADER})
 add_definitions(
 -DLIBVLC_VERSION_HEADER_FOUND
 )

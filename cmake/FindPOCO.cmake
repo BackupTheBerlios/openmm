@@ -40,9 +40,11 @@ ${POCO_LIBRARY}
 
 if(POCO_INCLUDE_DIR)
 message(STATUS "Found POCO headers in: " ${POCO_INCLUDE_DIR})
+# be carefull to search for version header only in first poco location found
 find_file(POCO_VERSION_HEADER
 Poco/Version.h
-PATHS ${CMAKE_INCLUDE_PATH}
+PATHS ${POCO_INCLUDE_DIR}
+NO_DEFAULT_PATH
 )
 if(POCO_VERSION_HEADER)
 add_definitions(
