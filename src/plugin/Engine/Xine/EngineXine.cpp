@@ -199,7 +199,7 @@ XineEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo
 
 
 void
-XineEngine::load()
+XineEngine::play()
 {
     xine_open(_xineStream, _mrl.c_str());
     if (!isSeekable()) {

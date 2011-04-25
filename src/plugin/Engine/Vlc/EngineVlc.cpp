@@ -25,7 +25,9 @@
 #include <Omm/UpnpAvTypes.h>
 
 // EnginePlugin::VlcEngine(int argc, char **argv) :
-VlcEngine::VlcEngine()
+VlcEngine::VlcEngine() :
+_pVlcMedia(0),
+_maxMediaConnect(5)
 {
     _engineId = "VLC engine " + Omm::OMM_VERSION + ", vlc version " + libvlc_get_version();
 }
@@ -117,21 +119,37 @@ VlcEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 
 
 void
-VlcEngine::load()
+VlcEngine::play()
 {
+//    int tryMediaConnect = _maxMediaConnect;
+//    while (tryMediaConnect-- && !_pVlcMedia) {
+//#if LIBVLC_VERSION_INT < 0x110
+//        _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), &_exception);
+//#else
+//        _pVlcMedia = libvlc_media_new_location(_pVlcInstance, _uri.c_str());
+//#endif
+//        handleException();
+//        if (!_pVlcMedia) {
+//            Poco::Thread::sleep(100);
+//        }
+//    }
+
 #if LIBVLC_VERSION_INT < 0x110
     _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), &_exception);
 #else
     _pVlcMedia = libvlc_media_new_location(_pVlcInstance, _uri.c_str());
 #endif
     handleException();
+
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia, &_exception);
 #else
     libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia);
 #endif
     handleException();
+
     libvlc_media_release(_pVlcMedia);
+
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_play(_pVlcPlayer, &_exception);
 #else

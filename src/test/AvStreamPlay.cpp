@@ -53,7 +53,7 @@ public:
     void play(const std::string& uri)
     {
         setUri(uri);
-        load();
+        AvStreamEngine::play();
         waitForTerminationRequest();
         stop();
     }

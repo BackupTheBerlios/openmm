@@ -270,7 +270,7 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
             //       if no:  Action Stop behaves like Pause
             //       -> maybe it should be: AvTransportArgument::TRANSPORT_STATE_STOPPED -> TRANSITIONING -> PAUSED_PLAYBACK
             //          contradicting AVTransport, 1.0, 2.4.12.3.
-            _pEngine->load();
+            _pEngine->play();
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
@@ -279,7 +279,7 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
                 std::string pos = AvTransportArgument::CURRENT_TRACK_DURATION_0;
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
-                _pEngine->load();
+                _pEngine->play();
             }
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {

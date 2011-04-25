@@ -39,7 +39,7 @@ seqPlay(AvStreamEngine& engine, std::vector<std::string>& uris, int playTime = -
     Poco::Random playTimeRandom;
     for(std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
         engine.setUri(*it);
-        engine.load();
+        engine.play();
         if (playTime >= 0) {
             Poco::Thread::sleep(playTime);
         }
@@ -66,7 +66,7 @@ randPlay(AvStreamEngine& engine, std::vector<std::string>& uris, int maxIteratio
         int i = titleNumber.next(uris.size());
         std::clog << "playing stream number: " << i << ", uri: " << uris[i] << std::endl;
         engine.setUri(uris[i]);
-        engine.load();
+        engine.play();
         if (playTime >= 0) {
             Poco::Thread::sleep(playTime);
         }

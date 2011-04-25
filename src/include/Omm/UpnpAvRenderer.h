@@ -49,7 +49,7 @@ public:
     virtual bool preferStdStream() { return false; }
     virtual void setUri(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo()) = 0;
     virtual void setUri(std::istream& istr, const ProtocolInfo& protInfo = ProtocolInfo()) {}
-    virtual void load() = 0;
+    virtual void play() = 0;
     
     /**
         void setSpeed(int nom, int denom)

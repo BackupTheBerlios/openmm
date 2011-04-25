@@ -43,7 +43,7 @@ public:
     */
     virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
 //     virtual void setUri(std::istream& istr, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
-    virtual void load();
+    virtual void play();
     
     /**
         void setSpeed(int nom, int denom)
@@ -87,6 +87,7 @@ private:
 //     int                     _fd;
     long long               _startTime;
     float                   _length; // length of media in seconds
+    const int               _maxMediaConnect;
 };
 
 

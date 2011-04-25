@@ -186,7 +186,7 @@ AvStreamEngine::setUri(std::istream& istr, const Omm::Av::ProtocolInfo& protInfo
 
 
 void
-AvStreamEngine::load()
+AvStreamEngine::play()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     

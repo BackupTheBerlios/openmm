@@ -59,7 +59,7 @@ public:
     std::string getEngineId() { return _engineId; }
     
     virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
-    virtual void load();
+    virtual void play();
     virtual void pause();
     virtual void stop();
     virtual void next();
