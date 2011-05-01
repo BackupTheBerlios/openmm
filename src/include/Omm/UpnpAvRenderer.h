@@ -31,6 +31,8 @@ namespace Omm {
 namespace Av {
 
 
+class Visual;
+
 class Engine : public Util::ConfigurablePlugin
 {
 public:

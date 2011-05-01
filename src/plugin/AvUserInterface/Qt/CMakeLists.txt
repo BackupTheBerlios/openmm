@@ -76,6 +76,7 @@ ${OMMC_RES_SRC}
 target_link_libraries(ommplugin-avinterface-qt
 ${OMM}
 ${OMM_AV}
+${OMM_SYS}
 ${QT_LIBRARIES}
 )
 

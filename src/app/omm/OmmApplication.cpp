@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -22,6 +22,7 @@
 #include <Poco/Exception.h>
 
 #include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvRenderer.h>
 #include <Omm/Util.h>
 
 
@@ -37,6 +38,26 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    Omm::Util::PluginLoader<Omm::Av::Engine> enginePluginLoader;
+    Omm::Av::Engine* pEnginePlugin;
+    try {
+        pEnginePlugin = enginePluginLoader.load("engine-vlc");
+    }
+    catch(Poco::NotFoundException) {
+        Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
+        return 1;
+    }
+
+    pEnginePlugin->setVisual(pUserInterface->getVisual());
+
+    pEnginePlugin->createPlayer();
+
+    Omm::Av::AvRenderer renderer(pEnginePlugin);
+    Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
+    renderer.addIcon(pIcon);
+    renderer.setFriendlyName("OMM Renderer");
+    renderer.start();
+
     Omm::Av::AvController controller;
 
     controller.setUserInterface(pUserInterface);
@@ -44,7 +65,5 @@ int main(int argc, char** argv)
     pUserInterface->showMainWindow();
     controller.start();
     Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
-    int ret =  pUserInterface->eventLoop();
-    //controller.stop();
-    return ret;
+    return pUserInterface->eventLoop();
 }

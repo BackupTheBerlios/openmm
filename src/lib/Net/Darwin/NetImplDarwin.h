@@ -23,7 +23,7 @@
 
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
 class NetworkInterfaceManagerImpl
 {
@@ -40,7 +40,7 @@ private:
     Private* _p;
 };
 
-}  // namespace Sys
+}  // namespace Net
 }  // namespace Omm
 
 #endif

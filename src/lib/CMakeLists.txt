@@ -63,22 +63,22 @@ ommnet
 CACHE INTERNAL libommnet
 )
 
-add_library(omm
+add_library(ommupnp
 Upnp.cpp
 )
 
-target_link_libraries(omm
+target_link_libraries(ommupnp
 ${POCO_XML}
 ommnet
 ommutil
 )
 
 set(OMM
-omm
-CACHE INTERNAL libomm
+ommupnp
+CACHE INTERNAL libommupnp
 )
 
-add_library(ommav
+add_library(ommupnpav
 #SHARED
 UpnpAvController.cpp
 UpnpAvControllers.cpp
@@ -91,13 +91,13 @@ UpnpAvRendererImpl.cpp
 UpnpAvCtrlImpl.cpp
 )
 
-target_link_libraries(ommav
-omm
+target_link_libraries(ommupnpav
+${OMM}
 )
 
 set(OMM_AV
-ommav
-CACHE INTERNAL libommav
+ommupnpav
+CACHE INTERNAL libommupnpav
 )
 
 add_library(ommavstream
@@ -129,7 +129,7 @@ CACHE INTERNAL libommsys
 add_subdirectory(Dvb)
 
 
-install(TARGETS ommutil ommnet omm ommav ommavstream ommsys
+install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib

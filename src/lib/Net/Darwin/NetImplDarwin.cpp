@@ -37,7 +37,7 @@
 
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
 
 class NetworkInterfaceManagerImpl::Private
@@ -152,5 +152,5 @@ NetworkInterfaceManagerImpl::stop()
 }
 
 
-}  // namespace Sys
+}  // namespace Net
 } // namespace Omm

@@ -29,7 +29,7 @@
 #include <map>
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
 
 class NetworkDeviceProperties : public DBus::PropertiesProxy, public DBus::ObjectProxy
@@ -75,7 +75,7 @@ private:
 };
 
 
-}  // namespace Sys
+}  // namespace Net
 }  // namespace Omm
 
 #endif

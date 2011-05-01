@@ -26,6 +26,7 @@
 #include <QtSvg/QSvgRenderer>
 
 #include <Omm/UpnpAvController.h>
+#include <Omm/Sys.h>
 
 #include "QtBrowserModel.h"
 #include "QtRendererListModel.h"
@@ -101,6 +102,23 @@ public:
 };
 
 
+class QtVisual : public Omm::Sys::Visual
+{
+public:
+    QtVisual();
+    virtual ~QtVisual();
+
+    virtual void show();
+    virtual void hide();
+
+    virtual void* getWindow();
+    virtual VisualType getType();
+
+private:
+    QWidget*    _pWidget;
+};
+
+
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
     Q_OBJECT
@@ -118,6 +136,8 @@ public:
     
     virtual void initGui();
     virtual void showMainWindow();
+    virtual Omm::Sys::Visual* getVisual();
+
     virtual void beginNetworkActivity();
     virtual void endNetworkActivity();
     
@@ -190,6 +210,7 @@ private:
     Omm::Av::ControllerObject*          _pCurrentServer;
     bool                                _sliderMoved;
     bool                                _playToggle;
+    QtVisual*                           _pVisual;
 };
 
 #endif

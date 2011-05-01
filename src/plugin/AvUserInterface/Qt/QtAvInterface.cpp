@@ -250,13 +250,58 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 }
 
 
+QtVisual::QtVisual()
+{
+    _pWidget = new QWidget;
+}
+
+
+QtVisual::~QtVisual()
+{
+    delete _pWidget;
+}
+
+
+void
+QtVisual::show()
+{
+    _pWidget->show();
+}
+
+
+void
+QtVisual::hide()
+{
+    _pWidget->hide();
+}
+
+
+void*
+QtVisual::getWindow()
+{
+    return (void*)_pWidget->winId();
+}
+
+
+Omm::Sys::Visual::VisualType
+QtVisual::getType()
+{
+#ifdef __LINUX__
+    return Omm::Sys::Visual::VTX11;
+#else
+    return Omm::Sys::Visual::VTNone;
+#endif
+}
+
+
 QtAvInterface::QtAvInterface() :
 _argc(0),
 _pApp(new QApplication(_argc, 0)),
 _pServerCrumbButton(0),
 _pCurrentServer(0),
 _sliderMoved(false),
-_playToggle(true)
+_playToggle(true),
+_pVisual(0)
 {
 }
 
@@ -267,6 +312,7 @@ QtAvInterface::~QtAvInterface()
     delete _pBrowserWidget;
     delete _pRendererWidget;
     delete _pApp;
+    delete _pVisual;
 }
 
 
@@ -315,6 +361,8 @@ QtAvInterface::initGui()
     _rendererWidget._rendererListView->setModel(_pRendererListModel);
     _browserWidget._browserView->setModel(_pBrowserModel);
     _browserWidget._browserView->setColumnWidth(0, 200);
+
+    _pVisual= new QtVisual;
 
     connect(_rendererWidget._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_rendererWidget._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
@@ -384,6 +432,13 @@ void
 QtAvInterface::showMainWindow()
 {
     _pMainWindow->show();
+}
+
+
+Omm::Sys::Visual*
+QtAvInterface::getVisual()
+{
+    return _pVisual;
 }
 
 

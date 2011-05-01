@@ -26,7 +26,7 @@
 
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
 class NetworkInterfaceManagerImpl::Private
 {
@@ -81,5 +81,5 @@ NetworkInterfaceManagerImpl::stop()
     Log::instance()->sys().debug("disconnected from NetworkManager.");
 }
 
-}  // namespace Sys
+}  // namespace Net
 } // namespace Omm

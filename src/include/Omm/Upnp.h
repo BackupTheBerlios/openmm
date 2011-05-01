@@ -107,6 +107,7 @@
 
 #include "Net.h"
 #include "Util.h"
+#include "Sys.h"
 
 namespace Omm {
 
@@ -962,6 +963,7 @@ public:
     virtual void initGui() {};
     virtual void showMainWindow() {};
 //     virtual void hideMainWindow() {};
+    virtual Sys::Visual* getVisual() { return 0; }
     
 protected:
     virtual void beginAddDevice(int position) {}
