@@ -250,9 +250,9 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 }
 
 
-QtVisual::QtVisual()
+QtVisual::QtVisual(QWidget* pParent)
 {
-    _pWidget = new QWidget;
+    _pWidget = new QWidget(pParent);
 }
 
 
@@ -279,15 +279,25 @@ QtVisual::hide()
 void*
 QtVisual::getWindow()
 {
-    return (void*)_pWidget->winId();
+#ifdef __LINUX__
+    _x11Window = _pWidget->winId();
+    return &_x11Window;
+#else
+    return 0;
+#endif
 }
 
 
 Omm::Sys::Visual::VisualType
 QtVisual::getType()
 {
+    // QtVisual is multi-platform, and type of visual is platform dependent.
 #ifdef __LINUX__
     return Omm::Sys::Visual::VTX11;
+#elif __DARWIN__
+    return Omm::Sys::Visual::VTMacOSX;
+#elif __WINDOWS__
+    return Omm::Sys::Visual::VTWin;
 #else
     return Omm::Sys::Visual::VTNone;
 #endif
@@ -309,6 +319,7 @@ _pVisual(0)
 QtAvInterface::~QtAvInterface()
 {
     delete _pMainWindow;
+    delete _pMainWidget;
     delete _pBrowserWidget;
     delete _pRendererWidget;
     delete _pApp;
@@ -319,7 +330,13 @@ QtAvInterface::~QtAvInterface()
 void
 QtAvInterface::initGui()
 {
-//     _pBrowserWidget = new QTabWidget;
+    _pMainWidget = new QStackedWidget;
+//    _pMainWindow = new QtMainWindow(_pBrowserWidget);
+    _pMainWindow = new QtMainWindow(_pMainWidget);
+
+    _pVisual = new QtVisual(_pMainWindow);
+    _pVisual->_pWidget->setParent(_pMainWidget);
+
     _pBrowserWidget = new QFrame;
     _browserWidget.setupUi(_pBrowserWidget);
     
@@ -350,10 +367,13 @@ QtAvInterface::initGui()
     _pActivityIndicator->show();
     
     _pServerCrumbButton = new QtCrumbButton(_browserWidget._browserView, QModelIndex(), _browserWidget._breadCrump);
-    
-    _pMainWindow = new QtMainWindow(_pBrowserWidget);
+
+    _pMainWidget->addWidget(_pVisual->_pWidget);
+    _pMainWidget->addWidget(_pBrowserWidget);
+    _pMainWidget->setCurrentWidget(_pBrowserWidget);
+
     _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pRendererWidget);
-    _pMainWindow->setWindowTitle("OMM Controller");
+    _pMainWindow->setWindowTitle("OMM");
     
     _pRendererListModel = new QtRendererListModel(this);
     _pBrowserModel = new QtBrowserModel(this);
@@ -361,8 +381,6 @@ QtAvInterface::initGui()
     _rendererWidget._rendererListView->setModel(_pRendererListModel);
     _browserWidget._browserView->setModel(_pBrowserModel);
     _browserWidget._browserView->setColumnWidth(0, 200);
-
-    _pVisual= new QtVisual;
 
     connect(_rendererWidget._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_rendererWidget._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
@@ -493,6 +511,8 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
         playPressed();
         _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
         _rendererWidget._playButton->setEnabled(true);
+        _rendererWidget._stopButton->setEnabled(true);
+        _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
         _playToggle = false;
         _rendererWidget._skipForwardButton->setEnabled(true);
         _rendererWidget._skipBackwardButton->setEnabled(true);
@@ -601,6 +621,8 @@ QtAvInterface::playButtonPressed()
     _rendererWidget._stopButton->setEnabled(true);
     _rendererWidget._skipForwardButton->setEnabled(true);
     _rendererWidget._skipBackwardButton->setEnabled(true);
+
+    _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
 }
 
 
@@ -613,6 +635,8 @@ QtAvInterface::stopButtonPressed()
     _rendererWidget._stopButton->setEnabled(false);
     _rendererWidget._skipForwardButton->setEnabled(false);
     _rendererWidget._skipBackwardButton->setEnabled(false);
+    
+    _pMainWidget->setCurrentWidget(_pBrowserWidget);
 }
 
 

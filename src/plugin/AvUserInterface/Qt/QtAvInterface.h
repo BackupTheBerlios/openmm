@@ -104,8 +104,10 @@ public:
 
 class QtVisual : public Omm::Sys::Visual
 {
+    friend class QtAvInterface;
+
 public:
-    QtVisual();
+    QtVisual(QWidget* pParent = 0);
     virtual ~QtVisual();
 
     virtual void show();
@@ -115,7 +117,10 @@ public:
     virtual VisualType getType();
 
 private:
-    QWidget*    _pWidget;
+    QWidget*        _pWidget;
+#ifdef __LINUX__
+    unsigned long   _x11Window;
+#endif
 };
 
 
@@ -199,6 +204,7 @@ private:
     int                                 _argc;
     QApplication*                       _pApp;
     QMainWindow*                        _pMainWindow;
+    QStackedWidget*                     _pMainWidget;
     Ui::_browserWidget                  _browserWidget;
     Ui::_rendererWidget                 _rendererWidget;
 //     QTabWidget*                         _pBrowserWidget;

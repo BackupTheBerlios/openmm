@@ -48,8 +48,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    pEnginePlugin->setVisual(pUserInterface->getVisual());
+    Omm::Av::AvController controller;
+    controller.setUserInterface(pUserInterface);
+    pUserInterface->initGui();
+    pUserInterface->showMainWindow();
+    controller.start();
 
+    pEnginePlugin->setVisual(pUserInterface->getVisual());
     pEnginePlugin->createPlayer();
 
     Omm::Av::AvRenderer renderer(pEnginePlugin);
@@ -58,12 +63,10 @@ int main(int argc, char** argv)
     renderer.setFriendlyName("OMM Renderer");
     renderer.start();
 
-    Omm::Av::AvController controller;
-
-    controller.setUserInterface(pUserInterface);
-    pUserInterface->initGui();
-    pUserInterface->showMainWindow();
-    controller.start();
     Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
-    return pUserInterface->eventLoop();
+    int ret = pUserInterface->eventLoop();
+
+    renderer.stop();
+
+    return ret;
 }

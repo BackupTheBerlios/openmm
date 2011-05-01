@@ -49,7 +49,7 @@ class Visual
     /// interface of the OS.
 {
 public:
-    enum VisualType {VTNone, VTQt, VTX11, VTFB, VTMacOSX, VTWin};
+    enum VisualType {VTNone, VTX11, VTFB, VTMacOSX, VTWin};
 
     Visual();
     virtual ~Visual() {}

@@ -89,7 +89,9 @@ VlcEngine::createPlayer()
 
     if (_pVisual) {
         _pVisual->show();
+        Omm::Av::Log::instance()->upnpav().error("vlc engine: set visual ...");
         if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
+            Omm::Av::Log::instance()->upnpav().error("vlc engine: set x11 visual ...");
 #if LIBVLC_VERSION_INT < 0x110
             libvlc_media_player_set_xwindow(_pVlcPlayer, *(Poco::UInt32*)_pVisual->getWindow(), &_exception);
 #else
@@ -123,7 +125,7 @@ VlcEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 void
 VlcEngine::play()
 {
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: play media ...");
+    Omm::Av::Log::instance()->upnpav().error("vlc engine: play ...");
 //    int tryMediaConnect = _maxMediaConnect;
 //    while (tryMediaConnect-- && !_pVlcMedia) {
 //#if LIBVLC_VERSION_INT < 0x110
