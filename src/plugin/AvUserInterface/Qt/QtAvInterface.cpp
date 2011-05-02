@@ -253,6 +253,11 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 QtVisual::QtVisual(QWidget* pParent)
 {
     _pWidget = new QWidget(pParent);
+    _pWidget->setCursor(QCursor(Qt::BlankCursor));
+    _pWidget->setAutoFillBackground(true);
+    QPalette pal = _pWidget->palette();
+    pal.setColor(QPalette::Window, Qt::black);
+    _pWidget->setPalette(pal);
 }
 
 
@@ -265,14 +270,12 @@ QtVisual::~QtVisual()
 void
 QtVisual::show()
 {
-    _pWidget->show();
 }
 
 
 void
 QtVisual::hide()
 {
-    _pWidget->hide();
 }
 
 

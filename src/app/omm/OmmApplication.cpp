@@ -51,8 +51,6 @@ int main(int argc, char** argv)
     Omm::Av::AvController controller;
     controller.setUserInterface(pUserInterface);
     pUserInterface->initGui();
-    pUserInterface->showMainWindow();
-    controller.start();
 
     pEnginePlugin->setVisual(pUserInterface->getVisual());
     pEnginePlugin->createPlayer();
@@ -61,6 +59,9 @@ int main(int argc, char** argv)
     Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
     renderer.addIcon(pIcon);
     renderer.setFriendlyName("OMM Renderer");
+
+    pUserInterface->showMainWindow();
+    controller.start();
     renderer.start();
 
     Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
