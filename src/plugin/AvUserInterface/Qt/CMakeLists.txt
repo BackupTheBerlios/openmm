@@ -1,4 +1,4 @@
-# FIXME: on windows, debug builds of Qt plugin fails. The plugin is linked
+# FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
 # against debug and non-debug versions of Qt libs at the same time.
 if(WINDOWS)
 set(CMAKE_BUILD_TYPE "")
@@ -20,9 +20,8 @@ QtRendererListModel.cpp
 )
 
 set(OMMC_QTUI
-# QtAvInterface.ui
 QtBrowserWidget.ui
-QtRendererWidget.ui
+QtPlayerRack.ui
 )
 
 set(OMMC_QTRES
@@ -41,7 +40,7 @@ OMMC_QT_BROWSERUI_H QtBrowserWidget.ui
 )
 
 qt4_wrap_ui(
-OMMC_QT_RENDERERUI_H QtRendererWidget.ui
+OMMC_QT_PLAYERUI_H QtPlayerRack.ui
 )
 
 get_filename_component(

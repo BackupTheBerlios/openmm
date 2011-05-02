@@ -32,6 +32,7 @@
 #include "QtRendererListModel.h"
 #include "ui_QtBrowserWidget.h"
 #include "ui_QtRendererWidget.h"
+#include "ui_QtPlayerRack.h"
 
 class QtCrumbButton : public QWidget
 {
@@ -66,7 +67,7 @@ class QtActivityIndicator : public QWidget
     Q_OBJECT
     
 public:
-    QtActivityIndicator(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    QtActivityIndicator(QWidget* parent = 0, Qt::WindowFlags flags = 0);
     virtual ~QtActivityIndicator();
     
 public slots:
@@ -206,10 +207,12 @@ private:
     QMainWindow*                        _pMainWindow;
     QStackedWidget*                     _pMainWidget;
     Ui::_browserWidget                  _browserWidget;
-    Ui::_rendererWidget                 _rendererWidget;
-//     QTabWidget*                         _pBrowserWidget;
+//    Ui::_rendererWidget                 _rendererWidget;
+    Ui::_playerRack                     _playerRack;
+    QToolBar*                           _pToolBar;
     QFrame*                             _pBrowserWidget;
     QDockWidget*                        _pRendererWidget;
+    QDockWidget*                        _pPlayerRack;
     QtActivityIndicator*                _pActivityIndicator;
     QtCrumbButton*                      _pServerCrumbButton;
     static QtCrumbButton*               _pLastCrumbButton;
@@ -217,6 +220,14 @@ private:
     bool                                _sliderMoved;
     bool                                _playToggle;
     QtVisual*                           _pVisual;
+
+    QPushButton*                        _pBackButton;
+    QPushButton*                        _pPlayButton;
+    QPushButton*                        _pStopButton;
+    QPushButton*                        _pForwardButton;
+
+    QSlider*                            _pVolumeSlider;
+    QSlider*                            _pSeekSlider;
 };
 
 #endif

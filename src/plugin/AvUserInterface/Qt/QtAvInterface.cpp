@@ -111,8 +111,8 @@ QtCrumbButton::~QtCrumbButton()
 }
 
 
-QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags f) :
-QWidget(parent, f),
+QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags flags) :
+QWidget(parent, flags),
 _indicateDuration(250),
 _activityInProgress(false),
 _indicatorOn(false)
@@ -126,6 +126,11 @@ _indicatorOn(false)
     _offTimer.setInterval(_indicateDuration);
     _offTimer.setSingleShot(true);
     connect(&_offTimer, SIGNAL(timeout()), this, SLOT(stopIndicator()));
+
+    setMinimumSize(20, 20);
+    QSizePolicy sizePolicy;
+    sizePolicy.setHeightForWidth(true);
+    setSizePolicy(sizePolicy);
 }
 
 
@@ -327,6 +332,7 @@ QtAvInterface::~QtAvInterface()
     delete _pRendererWidget;
     delete _pApp;
     delete _pVisual;
+    delete _pToolBar;
 }
 
 
@@ -334,7 +340,6 @@ void
 QtAvInterface::initGui()
 {
     _pMainWidget = new QStackedWidget;
-//    _pMainWindow = new QtMainWindow(_pBrowserWidget);
     _pMainWindow = new QtMainWindow(_pMainWidget);
 
     _pVisual = new QtVisual(_pMainWindow);
@@ -348,60 +353,70 @@ QtAvInterface::initGui()
     _browserWidget._breadCrumpLayout->setAlignment(Qt::AlignLeft);
     _browserWidget._breadCrumpLayout->setSpacing(0);
 
-    _pRendererWidget = new QDockWidget;
-    _rendererWidget.setupUi(_pRendererWidget);
-    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
-    _rendererWidget._playButton->setText("");
-    _rendererWidget._stopButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaStop));
-    _rendererWidget._stopButton->setText("");
-//     _rendererWidget._pauseButton->setIcon(_widget.style()->standardIcon(QStyle::SP_MediaPause));
-//     _rendererWidget._pauseButton->setText("");
-    _rendererWidget._skipForwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSkipForward));
-    _rendererWidget._skipForwardButton->setText("");
-    _rendererWidget._skipBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSkipBackward));
-    _rendererWidget._skipBackwardButton->setText("");
-//     _rendererWidget._seekForwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekForward));
-//     _rendererWidget._seekForwardButton->setText("");
-//     _rendererWidget._seekBackwardButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaSeekBackward));
-//     _rendererWidget._seekBackwardButton->setText("");
+    _pPlayerRack = new QDockWidget;
+    _playerRack.setupUi(_pPlayerRack);
 
-    _pActivityIndicator = new QtActivityIndicator(_rendererWidget._networkActivity);
-    _rendererWidget._activityLayout->addWidget(_pActivityIndicator);
-    _pActivityIndicator->show();
-    
     _pServerCrumbButton = new QtCrumbButton(_browserWidget._browserView, QModelIndex(), _browserWidget._breadCrump);
 
     _pMainWidget->addWidget(_pVisual->_pWidget);
     _pMainWidget->addWidget(_pBrowserWidget);
     _pMainWidget->setCurrentWidget(_pBrowserWidget);
 
-    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pRendererWidget);
+    _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pPlayerRack);
     _pMainWindow->setWindowTitle("OMM");
     
     _pRendererListModel = new QtRendererListModel(this);
     _pBrowserModel = new QtBrowserModel(this);
     
-    _rendererWidget._rendererListView->setModel(_pRendererListModel);
+    _playerRack._playerListView->setModel(_pRendererListModel);
     _browserWidget._browserView->setModel(_pBrowserModel);
     _browserWidget._browserView->setColumnWidth(0, 200);
 
-    connect(_rendererWidget._playButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
-    connect(_rendererWidget._stopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
-//     connect(_rendererWidget._pauseButton, SIGNAL(pressed()), this, SLOT(pauseButtonPressed()));
-    connect(_rendererWidget._skipForwardButton, SIGNAL(pressed()), this, SLOT(skipForwardButtonPressed()));
-    connect(_rendererWidget._skipBackwardButton, SIGNAL(pressed()), this, SLOT(skipBackwardButtonPressed()));
-    connect(_rendererWidget._volumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
-    connect(_rendererWidget._seekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
-    connect(_rendererWidget._seekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+    _pToolBar = new QToolBar("ControlPanel", _pMainWindow);
+    _pBackButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipBackward), "", _pToolBar);
+    _pPlayButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaPlay), "", _pToolBar);
+    _pStopButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaStop), "", _pToolBar);
+    _pForwardButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipForward), "", _pToolBar);
+    _pToolBar->addWidget(_pBackButton);
+    _pToolBar->addWidget(_pPlayButton);
+    _pToolBar->addWidget(_pStopButton);
+    _pToolBar->addWidget(_pForwardButton);
+
+    _pActivityIndicator = new QtActivityIndicator(_pToolBar);
+    _pToolBar->addWidget(_pActivityIndicator);
+    _pActivityIndicator->show();
+
+    _pVolumeSlider = new QSlider(Qt::Horizontal, _pToolBar);
+    _pVolumeSlider->setTracking(true);
+    _pVolumeSlider->setSingleStep(5);
+    _pSeekSlider = new QSlider(Qt::Horizontal, _pToolBar);
+    _pSeekSlider->setSingleStep(10);
+    _pSeekSlider->setPageStep(25);
+
+    _pToolBar->addWidget(_pVolumeSlider);
+    _pToolBar->addWidget(_pSeekSlider);
+
+    _pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pToolBar);
+
+    connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
+    connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
+    connect(_pForwardButton, SIGNAL(pressed()), this, SLOT(skipForwardButtonPressed()));
+    connect(_pBackButton, SIGNAL(pressed()), this, SLOT(skipBackwardButtonPressed()));
+
+    connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
+            _playerRack._playerListView, SLOT(setCurrentIndex(QModelIndex)));
+    connect(_playerRack._playerListView->selectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
+
+    connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
+    connect(_pSeekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+    connect(_pSeekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
     connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
     connect(this, SIGNAL(volSliderMoved(int)), this, SLOT(setVolumeSlider(int)));
-    
-    connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
-            _rendererWidget._rendererListView, SLOT(setCurrentIndex(QModelIndex)));
-    connect(_rendererWidget._rendererListView->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
+
     connect(_browserWidget._browserView, SIGNAL(activated(const QModelIndex&)),
             this, SLOT(browserItemActivated(const QModelIndex&)));
     connect(_browserWidget._browserView, SIGNAL(pressed(const QModelIndex&)),
@@ -512,13 +527,13 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
     else {
         mediaObjectSelected(object);
         playPressed();
-        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
-        _rendererWidget._playButton->setEnabled(true);
-        _rendererWidget._stopButton->setEnabled(true);
+        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+        _pPlayButton->setEnabled(true);
+        _pStopButton->setEnabled(true);
         _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
         _playToggle = false;
-        _rendererWidget._skipForwardButton->setEnabled(true);
-        _rendererWidget._skipBackwardButton->setEnabled(true);
+        _pForwardButton->setEnabled(true);
+        _pBackButton->setEnabled(true);
     }
 }
 
@@ -539,8 +554,8 @@ QtAvInterface::browserItemSelected(const QModelIndex& index)
     }
     else {
         mediaObjectSelected(object);
-        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
-        _rendererWidget._playButton->setEnabled(true);
+        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+        _pPlayButton->setEnabled(true);
         _playToggle = true;
     }
 }
@@ -566,10 +581,10 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
     }
     rendererSelected(selectedRenderer);
     if (isPlaying(selectedRenderer)) {
-        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
-        _rendererWidget._playButton->setEnabled(true);
+        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+        _pPlayButton->setEnabled(true);
         _playToggle = false;
-        _rendererWidget._stopButton->setEnabled(true);
+        _pStopButton->setEnabled(true);
     }
 }
 
@@ -578,11 +593,11 @@ void
 QtAvInterface::setSeekSlider(int max, int val)
 {
     // don't set slider position when user drags the slider
-    if (_rendererWidget._seekSlider->isSliderDown()) {
+    if (_pSeekSlider->isSliderDown()) {
         return;
     }
-    _rendererWidget._seekSlider->setRange(0, max>=0?max:0);
-    _rendererWidget._seekSlider->setSliderPosition(val);
+    _pSeekSlider->setRange(0, max>=0?max:0);
+    _pSeekSlider->setSliderPosition(val);
 }
 
 
@@ -590,20 +605,20 @@ void
 QtAvInterface::setVolumeSlider(int val)
 {
     // don't set slider position when user drags the slider
-    if (_rendererWidget._volumeSlider->isSliderDown()) {
+    if (_pVolumeSlider->isSliderDown()) {
         return;
     }
-    _rendererWidget._volumeSlider->setRange(0, 100);
-    _rendererWidget._volumeSlider->setSliderPosition(val);
+    _pVolumeSlider->setRange(0, 100);
+    _pVolumeSlider->setSliderPosition(val);
 }
 
 
 void
 QtAvInterface::setTrackInfo(const QString& title, const QString& artist, const QString& album)
 {
-    _rendererWidget._title->setText(title);
-    _rendererWidget._artist->setText(artist);
-    _rendererWidget._album->setText(album);
+//    _rendererWidget._title->setText(title);
+//    _rendererWidget._artist->setText(artist);
+//    _rendererWidget._album->setText(album);
 }
 
 
@@ -613,17 +628,17 @@ QtAvInterface::playButtonPressed()
     if (_playToggle) {
         playPressed();
         // TODO: only toggle play button to pause, if media is really playing
-        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
         _playToggle = false;
     }
     else {
         pausePressed();
-        _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
         _playToggle = true;
     }
-    _rendererWidget._stopButton->setEnabled(true);
-    _rendererWidget._skipForwardButton->setEnabled(true);
-    _rendererWidget._skipBackwardButton->setEnabled(true);
+    _pStopButton->setEnabled(true);
+    _pForwardButton->setEnabled(true);
+    _pBackButton->setEnabled(true);
 
     _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
 }
@@ -633,11 +648,11 @@ void
 QtAvInterface::stopButtonPressed()
 {
     stopPressed();
-    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
+    _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
     _playToggle = true;
-    _rendererWidget._stopButton->setEnabled(false);
-    _rendererWidget._skipForwardButton->setEnabled(false);
-    _rendererWidget._skipBackwardButton->setEnabled(false);
+    _pStopButton->setEnabled(false);
+    _pForwardButton->setEnabled(false);
+    _pBackButton->setEnabled(false);
     
     _pMainWidget->setCurrentWidget(_pBrowserWidget);
 }
@@ -671,9 +686,9 @@ QtAvInterface::skipForwardButtonPressed()
                     _browserWidget._browserView->setCurrentIndex(next);
                     mediaObjectSelected(pNextObject);
                     playPressed();
-                    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+                    _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
                     _playToggle = false;
-                    _rendererWidget._stopButton->setEnabled(true);
+                    _pStopButton->setEnabled(true);
                 }
             }
         } while(next.isValid() && current == next);
@@ -702,9 +717,9 @@ QtAvInterface::skipBackwardButtonPressed()
                     _browserWidget._browserView->setCurrentIndex(previous);
                     mediaObjectSelected(pPreviousObject);
                     playPressed();
-                    _rendererWidget._playButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+                    _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
                     _playToggle = false;
-                    _rendererWidget._stopButton->setEnabled(true);
+                    _pStopButton->setEnabled(true);
                 }
             }
         } while(previous.isValid() && current == previous);
