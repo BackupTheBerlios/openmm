@@ -79,16 +79,7 @@ VlcEngine::createPlayer()
 #endif
     handleException();
 
-    // create window on window system (TODO: load visual plugin and don't instantiate null implementation)
-    // vlc creates its own window if no window is set.
-//    if (!_pVisual) {
-//        _pVisual = new Omm::Sys::Visual;
-//    }
-//    // open window on window system
-//    _pVisual->show();
-
     if (_pVisual) {
-        _pVisual->show();
         Omm::Av::Log::instance()->upnpav().error("vlc engine: set visual ...");
         if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
             Omm::Av::Log::instance()->upnpav().error("vlc engine: set x11 visual ...");
@@ -112,6 +103,7 @@ VlcEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 {
 //     _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
     _uri = uri;
+    _mime = Omm::Av::Mime(protInfo.getMimeString());
 }
 
 
@@ -165,6 +157,10 @@ VlcEngine::play()
     libvlc_media_player_play(_pVlcPlayer);
 #endif
     handleException();
+
+    if (!_mime.isAudio()) {
+        _pVisual->show();
+    }
 
     Omm::Av::Log::instance()->upnpav().error("vlc engine: play media finished.");
 }
@@ -295,6 +291,10 @@ VlcEngine::stop()
     libvlc_media_player_stop(_pVlcPlayer);
 #endif
     handleException();
+
+    if (!_mime.isAudio()) {
+        _pVisual->hide();
+    }
 }
 
 

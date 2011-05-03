@@ -35,6 +35,8 @@ public:
     Omm::Sys::Visual::VisualType getType();
 
 private:
+    void createWindow();
+
     Poco::UInt32*   _pX11Window;
 };
 

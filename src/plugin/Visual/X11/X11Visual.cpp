@@ -27,12 +27,18 @@
 X11Visual::X11Visual()
 {
     // TODO: check for DISPLAY environment variable and throw exception if not present.
+    createWindow();
 }
 
 
 X11Visual::~X11Visual()
 {
-
+/*    if (xDisplay)
+        XCloseDisplay(xDisplay);
+    xDisplay = NULL;*/
+    if (_pX11Window) {
+        delete _pX11Window;
+    }
 }
 
 
@@ -44,7 +50,7 @@ X11Visual::getWindow()
 
 
 void
-X11Visual::show()
+X11Visual::createWindow()
 {
     Display*    xDisplay;
     int         xScreen;
@@ -87,14 +93,14 @@ X11Visual::show()
 
 
 void
+X11Visual::show()
+{
+}
+
+
+void
 X11Visual::hide()
 {
-/*    if (xDisplay)
-        XCloseDisplay(xDisplay);
-    xDisplay = NULL;*/
-    if (_pX11Window) {
-        delete _pX11Window;
-    }
 }
 
 

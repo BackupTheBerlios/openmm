@@ -31,7 +31,6 @@
 #include "QtBrowserModel.h"
 #include "QtRendererListModel.h"
 #include "ui_QtBrowserWidget.h"
-#include "ui_QtRendererWidget.h"
 #include "ui_QtPlayerRack.h"
 
 class QtCrumbButton : public QWidget
@@ -103,8 +102,10 @@ public:
 };
 
 
-class QtVisual : public Omm::Sys::Visual
+class QtVisual : public QObject, public Omm::Sys::Visual
 {
+    Q_OBJECT
+
     friend class QtAvInterface;
 
 public:
@@ -117,10 +118,13 @@ public:
     virtual void* getWindow();
     virtual VisualType getType();
 
+signals:
+    void showMenu(bool show);
+
 private:
     QWidget*        _pWidget;
 #ifdef __LINUX__
-    unsigned long   _x11Window;
+    Poco::UInt32    _x11Window;
 #endif
 };
 
@@ -184,6 +188,7 @@ private slots:
     */
     void checkSliderMoved(int value);
     void setSliderMoved(int value);
+    void showMenu(bool show);
     
 private:
     virtual void beginAddRenderer(int position);

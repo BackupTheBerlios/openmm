@@ -275,12 +275,14 @@ QtVisual::~QtVisual()
 void
 QtVisual::show()
 {
+    emit showMenu(false);
 }
 
 
 void
 QtVisual::hide()
 {
+    emit showMenu(true);
 }
 
 
@@ -428,6 +430,8 @@ QtAvInterface::initGui()
     connect(this, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
             this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
 
+    connect(_pVisual, SIGNAL(showMenu(bool)), this, SLOT(showMenu(bool)));
+
 // TODO: starting of local servers should go in controller application.
 
 //    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
@@ -512,6 +516,18 @@ QtAvInterface::setSliderMoved(int)
 
 
 void
+QtAvInterface::showMenu(bool show)
+{
+    if (show) {
+        _pMainWidget->setCurrentWidget(_pBrowserWidget);
+    }
+    else {
+        _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
+    }
+}
+
+
+void
 QtAvInterface::browserItemActivated(const QModelIndex& index)
 {
     Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
@@ -530,7 +546,6 @@ QtAvInterface::browserItemActivated(const QModelIndex& index)
         _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
         _pPlayButton->setEnabled(true);
         _pStopButton->setEnabled(true);
-        _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
         _playToggle = false;
         _pForwardButton->setEnabled(true);
         _pBackButton->setEnabled(true);
@@ -639,8 +654,6 @@ QtAvInterface::playButtonPressed()
     _pStopButton->setEnabled(true);
     _pForwardButton->setEnabled(true);
     _pBackButton->setEnabled(true);
-
-    _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
 }
 
 
@@ -653,8 +666,6 @@ QtAvInterface::stopButtonPressed()
     _pStopButton->setEnabled(false);
     _pForwardButton->setEnabled(false);
     _pBackButton->setEnabled(false);
-    
-    _pMainWidget->setCurrentWidget(_pBrowserWidget);
 }
 
 

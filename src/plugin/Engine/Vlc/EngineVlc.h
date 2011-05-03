@@ -84,6 +84,7 @@ private:
     libvlc_media_player_t*  _pVlcPlayer;
     libvlc_media_t*         _pVlcMedia;
     std::string             _uri;
+    Omm::Av::Mime           _mime;
 //     int                     _fd;
     long long               _startTime;
     float                   _length; // length of media in seconds
