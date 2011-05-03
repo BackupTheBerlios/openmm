@@ -255,6 +255,13 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 }
 
 
+//void
+//QtMainWindow::keyPressEvent(QKeyEvent* event)
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("key pressed: " + event->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(event->key()));
+//}
+
+
 QtVisual::QtVisual(QWidget* pParent)
 {
     _pWidget = new QWidget(pParent);
@@ -314,6 +321,36 @@ QtVisual::getType()
 }
 
 
+// NOTE: QtEventFilter, see jam.2006-12-28/src/graphic/qt
+class QtEventFilter : public QObject
+{
+public:
+//    QtEventFilter();
+
+private:
+    virtual bool eventFilter(QObject* object, QEvent* event);
+
+//    map<int, Event::EventT> m_eventMap;
+};
+
+
+bool
+QtEventFilter::eventFilter(QObject* object, QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = (QKeyEvent*)event;
+        Omm::Av::Log::instance()->upnpav().debug("key pressed: " + keyEvent->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(keyEvent->key()));
+//        if (Controler::instance()->getCurrentPage()->hasEventType(m_eventMap.find(k->key())->second)) {
+//            Controler::instance()->queueEvent(new Event(m_eventMap.find(k->key())->second));
+//            // don't forward the event to the Qt event loop.
+//            return true;
+//        }
+    }
+    // standard event processing in the Qt event loop.
+    return false;
+}
+
+
 QtAvInterface::QtAvInterface() :
 _argc(0),
 _pApp(new QApplication(_argc, 0)),
@@ -341,6 +378,8 @@ QtAvInterface::~QtAvInterface()
 void
 QtAvInterface::initGui()
 {
+    _pApp->installEventFilter(new QtEventFilter());
+    
     _pMainWidget = new QStackedWidget;
     _pMainWindow = new QtMainWindow(_pMainWidget);
 
@@ -499,6 +538,18 @@ QtAvInterface::endNetworkActivity()
 
 
 void
+QtAvInterface::showMenu(bool show)
+{
+    if (show) {
+        _pMainWidget->setCurrentWidget(_pBrowserWidget);
+    }
+    else {
+        _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
+    }
+}
+
+
+void
 QtAvInterface::checkSliderMoved(int value)
 {
     if (_sliderMoved) {
@@ -512,18 +563,6 @@ void
 QtAvInterface::setSliderMoved(int)
 {
     _sliderMoved = true;
-}
-
-
-void
-QtAvInterface::showMenu(bool show)
-{
-    if (show) {
-        _pMainWidget->setCurrentWidget(_pBrowserWidget);
-    }
-    else {
-        _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
-    }
 }
 
 

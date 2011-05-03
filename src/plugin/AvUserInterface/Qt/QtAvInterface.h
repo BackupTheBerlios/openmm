@@ -99,6 +99,8 @@ class QtMainWindow : public QMainWindow
 
 public:
     QtMainWindow(QWidget* pCentralWidget);
+
+//    virtual void keyPressEvent(QKeyEvent* event);
 };
 
 
@@ -150,6 +152,9 @@ public:
 
     virtual void beginNetworkActivity();
     virtual void endNetworkActivity();
+
+public slots:
+    virtual void showMenu(bool show);
     
 signals:
     // position slider
@@ -188,7 +193,6 @@ private slots:
     */
     void checkSliderMoved(int value);
     void setSliderMoved(int value);
-    void showMenu(bool show);
     
 private:
     virtual void beginAddRenderer(int position);
