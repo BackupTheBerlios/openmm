@@ -131,6 +131,22 @@ private:
 };
 
 
+class QtAvInterface;
+
+// NOTE: QtEventFilter, see jam.2006-12-28/src/graphic/qt
+class QtEventFilter : public QObject
+{
+public:
+    QtEventFilter(QtAvInterface* avInterface);
+
+private:
+    virtual bool eventFilter(QObject* object, QEvent* event);
+
+    QtAvInterface*      _pAvInterface;
+//    map<int, Event::EventT> m_eventMap;
+};
+
+
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
     Q_OBJECT
@@ -153,8 +169,13 @@ public:
     virtual void beginNetworkActivity();
     virtual void endNetworkActivity();
 
+    bool menuVisible();
+    bool isFullscreen();
+
 public slots:
     virtual void showMenu(bool show);
+    virtual void setFullscreen(bool fullscreen);
+    virtual void resize(int width, int height);
     
 signals:
     // position slider
@@ -220,7 +241,6 @@ private:
     Ui::_playerRack                     _playerRack;
     QToolBar*                           _pToolBar;
     QFrame*                             _pBrowserWidget;
-    QDockWidget*                        _pRendererWidget;
     QDockWidget*                        _pPlayerRack;
     QtActivityIndicator*                _pActivityIndicator;
     QtCrumbButton*                      _pServerCrumbButton;
@@ -228,6 +248,8 @@ private:
     Omm::Av::ControllerObject*          _pCurrentServer;
     bool                                _sliderMoved;
     bool                                _playToggle;
+    bool                                _menuVisible;
+    bool                                _fullscreen;
     QtVisual*                           _pVisual;
 
     QPushButton*                        _pBackButton;
@@ -237,6 +259,8 @@ private:
 
     QSlider*                            _pVolumeSlider;
     QSlider*                            _pSeekSlider;
+
+    QtEventFilter*                      _pEventFilter;
 };
 
 #endif

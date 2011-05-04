@@ -3,6 +3,7 @@ OmmApplication.cpp
 )
 
 target_link_libraries(omm
+${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}

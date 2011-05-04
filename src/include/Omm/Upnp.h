@@ -959,11 +959,13 @@ class UserInterface
     
 public:
     // TODO: pass command line arguments to user interface gui-toolkit
-    virtual int eventLoop() { return 0; };
-    virtual void initGui() {};
-    virtual void showMainWindow() {};
+    virtual int eventLoop() { return 0; }
+    virtual void initGui() {}
+    virtual void showMainWindow() {}
 //     virtual void hideMainWindow() {};
     virtual Sys::Visual* getVisual() { return 0; }
+    virtual void setFullscreen(bool fullscreen) {}
+    virtual void resize(int width, int height) {}
     
 protected:
     virtual void beginAddDevice(int position) {}

@@ -265,7 +265,7 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 QtVisual::QtVisual(QWidget* pParent)
 {
     _pWidget = new QWidget(pParent);
-    _pWidget->setCursor(QCursor(Qt::BlankCursor));
+//    _pWidget->setCursor(QCursor(Qt::BlankCursor));
     _pWidget->setAutoFillBackground(true);
     QPalette pal = _pWidget->palette();
     pal.setColor(QPalette::Window, Qt::black);
@@ -321,17 +321,10 @@ QtVisual::getType()
 }
 
 
-// NOTE: QtEventFilter, see jam.2006-12-28/src/graphic/qt
-class QtEventFilter : public QObject
+QtEventFilter::QtEventFilter(QtAvInterface* avInterface) :
+_pAvInterface(avInterface)
 {
-public:
-//    QtEventFilter();
-
-private:
-    virtual bool eventFilter(QObject* object, QEvent* event);
-
-//    map<int, Event::EventT> m_eventMap;
-};
+}
 
 
 bool
@@ -345,6 +338,14 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
 //            // don't forward the event to the Qt event loop.
 //            return true;
 //        }
+        if (keyEvent->text() == "m" || keyEvent->key() == 16777301) {
+            _pAvInterface->showMenu(!_pAvInterface->menuVisible());
+            return true;
+        }
+        else if (keyEvent->text() == "f") {
+            _pAvInterface->setFullscreen(!_pAvInterface->isFullscreen());
+            return true;
+        }
     }
     // standard event processing in the Qt event loop.
     return false;
@@ -358,7 +359,9 @@ _pServerCrumbButton(0),
 _pCurrentServer(0),
 _sliderMoved(false),
 _playToggle(true),
-_pVisual(0)
+_fullscreen(false),
+_pVisual(0),
+_pEventFilter(new QtEventFilter(this))
 {
 }
 
@@ -368,17 +371,23 @@ QtAvInterface::~QtAvInterface()
     delete _pMainWindow;
     delete _pMainWidget;
     delete _pBrowserWidget;
-    delete _pRendererWidget;
     delete _pApp;
     delete _pVisual;
     delete _pToolBar;
+    delete _pBackButton;
+    delete _pPlayButton;
+    delete _pStopButton;
+    delete _pForwardButton;
+    delete _pVolumeSlider;
+    delete _pSeekSlider;
+    delete _pEventFilter;
 }
 
 
 void
 QtAvInterface::initGui()
 {
-    _pApp->installEventFilter(new QtEventFilter());
+    _pApp->installEventFilter(_pEventFilter);
     
     _pMainWidget = new QStackedWidget;
     _pMainWindow = new QtMainWindow(_pMainWidget);
@@ -396,12 +405,14 @@ QtAvInterface::initGui()
 
     _pPlayerRack = new QDockWidget;
     _playerRack.setupUi(_pPlayerRack);
+    _pPlayerRack->setFeatures(QDockWidget::AllDockWidgetFeatures);
 
     _pServerCrumbButton = new QtCrumbButton(_browserWidget._browserView, QModelIndex(), _browserWidget._breadCrump);
 
     _pMainWidget->addWidget(_pVisual->_pWidget);
     _pMainWidget->addWidget(_pBrowserWidget);
     _pMainWidget->setCurrentWidget(_pBrowserWidget);
+    _menuVisible = true;
 
     _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pPlayerRack);
     _pMainWindow->setWindowTitle("OMM");
@@ -537,15 +548,53 @@ QtAvInterface::endNetworkActivity()
 }
 
 
+bool
+QtAvInterface::menuVisible()
+{
+    return _menuVisible;
+}
+
+
+bool
+QtAvInterface::isFullscreen()
+{
+    return _fullscreen;
+}
+
+
 void
 QtAvInterface::showMenu(bool show)
 {
+    _menuVisible = show;
     if (show) {
         _pMainWidget->setCurrentWidget(_pBrowserWidget);
     }
     else {
         _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
     }
+}
+
+
+void
+QtAvInterface::setFullscreen(bool fullscreen)
+{
+    _fullscreen = fullscreen;
+    if (fullscreen) {
+        _pToolBar->hide();
+        _pPlayerRack->hide();
+        _pVisual->_pWidget->setCursor(QCursor(Qt::BlankCursor));
+    }
+    else {
+        _pToolBar->show();
+        _pPlayerRack->show();
+    }
+}
+
+
+void
+QtAvInterface::resize(int width, int height)
+{
+    _pMainWindow->resize(width, height);
 }
 
 
