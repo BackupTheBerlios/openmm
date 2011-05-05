@@ -321,6 +321,42 @@ QtVisual::getType()
 }
 
 
+QtPlayerRackButton::QtPlayerRackButton(QWidget* pParent) :
+QPushButton(pParent)
+{
+    setMinimumWidth(250);
+    setCheckable(true);
+}
+
+
+void
+QtPlayerRackButton::setPlayerName(const std::string& name)
+{
+    _playerName = name;
+    setLabel();
+}
+
+
+void
+QtPlayerRackButton::setTitleName(const std::string& name)
+{
+    _titleName = name;
+    setLabel();
+}
+
+
+void
+QtPlayerRackButton::setLabel()
+{
+    if (_titleName == "") {
+        setText(_playerName.c_str());
+    }
+    else {
+        setText((_playerName + " - " + _titleName).c_str());
+    }
+}
+
+
 QtEventFilter::QtEventFilter(QtAvInterface* avInterface) :
 _pAvInterface(avInterface)
 {
@@ -373,11 +409,12 @@ QtAvInterface::~QtAvInterface()
     delete _pBrowserWidget;
     delete _pApp;
     delete _pVisual;
-    delete _pToolBar;
+    delete _pControlPanel;
     delete _pBackButton;
     delete _pPlayButton;
     delete _pStopButton;
     delete _pForwardButton;
+    delete _pPlayerRackButton;
     delete _pVolumeSlider;
     delete _pSeekSlider;
     delete _pEventFilter;
@@ -405,7 +442,7 @@ QtAvInterface::initGui()
 
     _pPlayerRack = new QDockWidget;
     _playerRack.setupUi(_pPlayerRack);
-    _pPlayerRack->setFeatures(QDockWidget::AllDockWidgetFeatures);
+//    _pPlayerRack->setFeatures(QDockWidget::AllDockWidgetFeatures);
 
     _pServerCrumbButton = new QtCrumbButton(_browserWidget._browserView, QModelIndex(), _browserWidget._breadCrump);
 
@@ -424,32 +461,37 @@ QtAvInterface::initGui()
     _browserWidget._browserView->setModel(_pBrowserModel);
     _browserWidget._browserView->setColumnWidth(0, 200);
 
-    _pToolBar = new QToolBar("ControlPanel", _pMainWindow);
-    _pBackButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipBackward), "", _pToolBar);
-    _pPlayButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaPlay), "", _pToolBar);
-    _pStopButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaStop), "", _pToolBar);
-    _pForwardButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipForward), "", _pToolBar);
-    _pToolBar->addWidget(_pBackButton);
-    _pToolBar->addWidget(_pPlayButton);
-    _pToolBar->addWidget(_pStopButton);
-    _pToolBar->addWidget(_pForwardButton);
+    _pControlPanel = new QToolBar("ControlPanel", _pMainWindow);
+    _pBackButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipBackward), "", _pControlPanel);
+    _pPlayButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaPlay), "", _pControlPanel);
+    _pStopButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaStop), "", _pControlPanel);
+    _pForwardButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipForward), "", _pControlPanel);
+    _pControlPanel->addWidget(_pBackButton);
+    _pControlPanel->addWidget(_pPlayButton);
+    _pControlPanel->addWidget(_pStopButton);
+    _pControlPanel->addWidget(_pForwardButton);
 
-    _pActivityIndicator = new QtActivityIndicator(_pToolBar);
-    _pToolBar->addWidget(_pActivityIndicator);
+    _pActivityIndicator = new QtActivityIndicator(_pControlPanel);
+    _pControlPanel->addWidget(_pActivityIndicator);
     _pActivityIndicator->show();
 
-    _pVolumeSlider = new QSlider(Qt::Horizontal, _pToolBar);
+    _pVolumeSlider = new QSlider(Qt::Horizontal, _pControlPanel);
     _pVolumeSlider->setTracking(true);
     _pVolumeSlider->setSingleStep(5);
-    _pSeekSlider = new QSlider(Qt::Horizontal, _pToolBar);
+    _pSeekSlider = new QSlider(Qt::Horizontal, _pControlPanel);
     _pSeekSlider->setSingleStep(10);
     _pSeekSlider->setPageStep(25);
 
-    _pToolBar->addWidget(_pVolumeSlider);
-    _pToolBar->addWidget(_pSeekSlider);
+    _pControlPanel->addWidget(_pVolumeSlider);
+    _pControlPanel->addWidget(_pSeekSlider);
 
-    _pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pToolBar);
+    _pPlayerRackButton = new QtPlayerRackButton(_pControlPanel);
+    // set player rack button checked if player rack is visible
+    _pPlayerRackButton->setChecked(true);
+    _pControlPanel->addWidget(_pPlayerRackButton);
+
+    _pControlPanel->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pControlPanel);
 
     connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
@@ -481,6 +523,7 @@ QtAvInterface::initGui()
             this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
 
     connect(_pVisual, SIGNAL(showMenu(bool)), this, SLOT(showMenu(bool)));
+    connect(_pPlayerRackButton, SIGNAL(toggled(bool)), this, SLOT(showPlayerRack(bool)));
 
 // TODO: starting of local servers should go in controller application.
 
@@ -580,12 +623,12 @@ QtAvInterface::setFullscreen(bool fullscreen)
 {
     _fullscreen = fullscreen;
     if (fullscreen) {
-        _pToolBar->hide();
+        _pControlPanel->hide();
         _pPlayerRack->hide();
         _pVisual->_pWidget->setCursor(QCursor(Qt::BlankCursor));
     }
     else {
-        _pToolBar->show();
+        _pControlPanel->show();
         _pPlayerRack->show();
     }
 }
@@ -595,6 +638,30 @@ void
 QtAvInterface::resize(int width, int height)
 {
     _pMainWindow->resize(width, height);
+}
+
+
+void
+QtAvInterface::showPlayerRack(bool show)
+{
+    if (show) {
+        _pPlayerRack->show();
+    }
+    else {
+        _pPlayerRack->hide();
+    }
+}
+
+
+void
+QtAvInterface::showControlPanel(bool show)
+{
+    if (show) {
+        _pControlPanel->show();
+    }
+    else {
+        _pControlPanel->hide();
+    }
 }
 
 
@@ -689,6 +756,8 @@ QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
         _playToggle = false;
         _pStopButton->setEnabled(true);
     }
+    _pPlayerRackButton->setPlayerName(selectedRenderer->getName());
+//    _pPlayerRackButton->setText(selectedRenderer->getName().c_str());
 }
 
 
@@ -910,6 +979,8 @@ QtAvInterface::newPosition(int duration, int position)
 void
 QtAvInterface::newTrack(const std::string& title, const std::string& artist, const std::string& album)
 {
+    _pPlayerRackButton->setTitleName(title);
+    
     emit nowPlaying(QString(title.c_str()), QString(artist.c_str()), QString(album.c_str()));
 }
 

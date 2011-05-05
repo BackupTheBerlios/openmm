@@ -131,6 +131,22 @@ private:
 };
 
 
+class QtPlayerRackButton : public QPushButton
+{
+public:
+    QtPlayerRackButton(QWidget* pParent);
+
+    void setPlayerName(const std::string& name);
+    void setTitleName(const std::string& name);
+
+private:
+    void setLabel();
+
+    std::string     _playerName;
+    std::string     _titleName;
+};
+
+
 class QtAvInterface;
 
 // NOTE: QtEventFilter, see jam.2006-12-28/src/graphic/qt
@@ -176,6 +192,8 @@ public slots:
     virtual void showMenu(bool show);
     virtual void setFullscreen(bool fullscreen);
     virtual void resize(int width, int height);
+    virtual void showPlayerRack(bool show);
+    virtual void showControlPanel(bool show);
     
 signals:
     // position slider
@@ -194,7 +212,6 @@ private slots:
     
     void playButtonPressed();
     void stopButtonPressed();
-//     void pauseButtonPressed();
     void skipForwardButtonPressed();
     void skipBackwardButtonPressed();
     void positionSliderMoved(int position);
@@ -237,9 +254,8 @@ private:
     QMainWindow*                        _pMainWindow;
     QStackedWidget*                     _pMainWidget;
     Ui::_browserWidget                  _browserWidget;
-//    Ui::_rendererWidget                 _rendererWidget;
     Ui::_playerRack                     _playerRack;
-    QToolBar*                           _pToolBar;
+    QToolBar*                           _pControlPanel;
     QFrame*                             _pBrowserWidget;
     QDockWidget*                        _pPlayerRack;
     QtActivityIndicator*                _pActivityIndicator;
@@ -259,6 +275,8 @@ private:
 
     QSlider*                            _pVolumeSlider;
     QSlider*                            _pSeekSlider;
+
+    QtPlayerRackButton*                 _pPlayerRackButton;
 
     QtEventFilter*                      _pEventFilter;
 };
