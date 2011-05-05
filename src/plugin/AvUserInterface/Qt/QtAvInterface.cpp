@@ -487,7 +487,7 @@ QtAvInterface::initGui()
 
     _pPlayerRackButton = new QtPlayerRackButton(_pControlPanel);
     // set player rack button checked if player rack is visible
-    _pPlayerRackButton->setChecked(true);
+//    _pPlayerRackButton->setChecked(true);
     _pControlPanel->addWidget(_pPlayerRackButton);
 
     _pControlPanel->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -524,6 +524,7 @@ QtAvInterface::initGui()
 
     connect(_pVisual, SIGNAL(showMenu(bool)), this, SLOT(showMenu(bool)));
     connect(_pPlayerRackButton, SIGNAL(toggled(bool)), this, SLOT(showPlayerRack(bool)));
+//    _pPlayerRackButton->addAction(_pPlayerRack->toggleViewAction());
 
 // TODO: starting of local servers should go in controller application.
 
@@ -624,12 +625,18 @@ QtAvInterface::setFullscreen(bool fullscreen)
     _fullscreen = fullscreen;
     if (fullscreen) {
         _pControlPanel->hide();
-        _pPlayerRack->hide();
-        _pVisual->_pWidget->setCursor(QCursor(Qt::BlankCursor));
+        showPlayerRack(false);
+        _pMainWindow->setCursor(QCursor(Qt::BlankCursor));
     }
     else {
         _pControlPanel->show();
-        _pPlayerRack->show();
+        if (_pPlayerRackButton->isChecked()) {
+            showPlayerRack(true);
+        }
+        else {
+            showPlayerRack(false);
+        }
+        _pMainWindow->setCursor(QCursor(Qt::ArrowCursor));
     }
 }
 
