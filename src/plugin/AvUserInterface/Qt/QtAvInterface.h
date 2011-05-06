@@ -33,6 +33,8 @@
 #include "ui_QtBrowserWidget.h"
 #include "ui_QtPlayerRack.h"
 
+Q_DECLARE_METATYPE(std::string);
+
 class QtCrumbButton : public QWidget
 {
     Q_OBJECT
@@ -119,12 +121,18 @@ public:
 
     virtual void* getWindow();
     virtual VisualType getType();
+    virtual void renderImage(const std::string& imageData);
+    virtual void blank();
 
 signals:
     void showMenu(bool show);
+    void signalShowImage(const std::string& imageData);
+
+private slots:
+    void slotShowImage(const std::string& imageData);
 
 private:
-    QWidget*        _pWidget;
+    QLabel*        _pWidget;
 #ifdef __LINUX__
     Poco::UInt32    _x11Window;
 #endif

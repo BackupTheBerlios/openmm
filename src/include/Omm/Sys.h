@@ -59,6 +59,8 @@ public:
 
     virtual void* getWindow() { return 0; }
     virtual VisualType getType() { return VTNone; }
+    virtual void renderImage(const std::string& imageData) {}
+    virtual void blank() {}
 
     int getWidth();
     int getHeight();
@@ -66,7 +68,7 @@ public:
     void setWidth(int width);
     void setHeight(int height);
     void setFullscreen(bool fullscreen = true);
- 
+
 private:
     int             _width;
     int             _height;

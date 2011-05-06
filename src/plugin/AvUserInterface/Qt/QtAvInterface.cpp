@@ -264,12 +264,14 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 
 QtVisual::QtVisual(QWidget* pParent)
 {
-    _pWidget = new QWidget(pParent);
-//    _pWidget->setCursor(QCursor(Qt::BlankCursor));
+    _pWidget = new QLabel(pParent);
     _pWidget->setAutoFillBackground(true);
     QPalette pal = _pWidget->palette();
     pal.setColor(QPalette::Window, Qt::black);
     _pWidget->setPalette(pal);
+    _pWidget->setAlignment(Qt::AlignCenter);
+
+    connect(this, SIGNAL(signalShowImage(const std::string&)), this, SLOT(slotShowImage(const std::string&)), Qt::QueuedConnection);
 }
 
 
@@ -318,6 +320,29 @@ QtVisual::getType()
 #else
     return Omm::Sys::Visual::VTNone;
 #endif
+}
+
+
+void
+QtVisual::renderImage(const std::string& imageData)
+{
+    emit signalShowImage(imageData);
+}
+
+
+void
+QtVisual::blank()
+{
+    _pWidget->clear();
+}
+
+
+void
+QtVisual::slotShowImage(const std::string& imageData)
+{
+    QPixmap pixmap;
+    pixmap.loadFromData((uchar*)imageData.c_str(), (uint)imageData.size());
+    _pWidget->setPixmap(pixmap);
 }
 
 
@@ -424,6 +449,8 @@ QtAvInterface::~QtAvInterface()
 void
 QtAvInterface::initGui()
 {
+    qRegisterMetaType<std::string>();
+
     _pApp->installEventFilter(_pEventFilter);
     
     _pMainWidget = new QStackedWidget;

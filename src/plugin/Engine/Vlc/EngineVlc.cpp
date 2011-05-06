@@ -117,6 +117,11 @@ VlcEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 void
 VlcEngine::play()
 {
+    if (_mime.isImage()) {
+        Omm::Icon image(0, 0, 0, "", _uri);
+        _pVisual->renderImage(image.getBuffer());
+    }
+    else {
     Omm::Av::Log::instance()->upnpav().error("vlc engine: play ...");
 //    int tryMediaConnect = _maxMediaConnect;
 //    while (tryMediaConnect-- && !_pVlcMedia) {
@@ -157,7 +162,8 @@ VlcEngine::play()
     libvlc_media_player_play(_pVlcPlayer);
 #endif
     handleException();
-
+    }
+    
     if (!_mime.isAudio()) {
         _pVisual->show();
     }
@@ -293,6 +299,7 @@ VlcEngine::stop()
     handleException();
 
     if (!_mime.isAudio()) {
+        _pVisual->blank();
         _pVisual->hide();
     }
 }
