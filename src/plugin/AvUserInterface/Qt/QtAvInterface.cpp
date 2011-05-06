@@ -342,7 +342,7 @@ QtVisual::slotShowImage(const std::string& imageData)
 {
     QPixmap pixmap;
     pixmap.loadFromData((uchar*)imageData.c_str(), (uint)imageData.size());
-    _pWidget->setPixmap(pixmap);
+    _pWidget->setPixmap(pixmap.scaled(getWidth(), getHeight(), Qt::KeepAspectRatio));
 }
 
 
@@ -672,6 +672,8 @@ void
 QtAvInterface::resize(int width, int height)
 {
     _pMainWindow->resize(width, height);
+    _pVisual->setWidth(width);
+    _pVisual->setHeight(height);
 }
 
 
