@@ -407,7 +407,7 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
             return true;
         }
         // fullscreen
-        else if (keyEvent->text() == "f") {
+        else if (keyEvent->text() == "x") {
             _pAvInterface->setFullscreen(!_pAvInterface->isFullscreen());
             return true;
         }
@@ -417,14 +417,16 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
         }
         // vol up
         else if (((keyEvent->modifiers() & Qt::AltModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777330) {
-            // TODO: get current volume
-//            _pAvInterface->volumeChanged();
+            Omm::Av::Log::instance()->upnpav().debug("vol up key");
+            int oldValue = _pAvInterface->_pVolumeSlider->value();
+            _pAvInterface->volumeChanged(++oldValue);
             return true;
         }
         // vol down
         else if (((keyEvent->modifiers() & Qt::AltModifier) && keyEvent->key() == 16777237) || keyEvent->key() == 16777328) {
-            // TODO: get current volume
-//            _pAvInterface->volumeChanged();
+            Omm::Av::Log::instance()->upnpav().debug("vol down key");
+            int oldValue = _pAvInterface->_pVolumeSlider->value();
+            _pAvInterface->volumeChanged(--oldValue);
             return true;
         }
         // chan up
@@ -433,7 +435,7 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
             return true;
         }
         // chan down
-        else if (((keyEvent->modifiers() & Qt::ControlModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777239) {
+        else if (((keyEvent->modifiers() & Qt::ControlModifier) && keyEvent->key() == 16777237) || keyEvent->key() == 16777239) {
             _pAvInterface->skipBackwardButtonPressed();
             return true;
         }
@@ -447,13 +449,11 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
         }
         // play
         else if (keyEvent->text() == "p") {
-            // TODO: playPressed() or playButtonPressed()?
             _pAvInterface->playPressed();
             return true;
         }
         // stop
         else if (keyEvent->text() == "s") {
-            // TODO: stopPressed() or stopButtonPressed()?
             _pAvInterface->stopPressed();
             return true;
         }
@@ -495,6 +495,7 @@ QtAvInterface::~QtAvInterface()
 {
     delete _pMainWindow;
     delete _pMainWidget;
+    delete _pListItem;
     delete _pBrowserWidget;
     delete _pApp;
     delete _pVisual;
@@ -527,6 +528,8 @@ QtAvInterface::initGui()
     _browserWidget.setupUi(_pBrowserWidget);
     
     _browserWidget._browserView->setUniformRowHeights(true);
+    _pListItem = new QtListItem(_browserWidget._browserView);
+    _browserWidget._browserView->setItemDelegate(_pListItem);
     
     _browserWidget._breadCrumpLayout->setAlignment(Qt::AlignLeft);
     _browserWidget._breadCrumpLayout->setSpacing(0);
@@ -577,8 +580,6 @@ QtAvInterface::initGui()
     _pControlPanel->addWidget(_pSeekSlider);
 
     _pPlayerRackButton = new QtPlayerRackButton(_pControlPanel);
-    // set player rack button checked if player rack is visible
-//    _pPlayerRackButton->setChecked(true);
     _pControlPanel->addWidget(_pPlayerRackButton);
 
     _pControlPanel->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);

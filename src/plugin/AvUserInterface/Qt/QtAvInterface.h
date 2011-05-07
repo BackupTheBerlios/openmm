@@ -161,7 +161,6 @@ private:
 
 class QtAvInterface;
 
-// NOTE: QtEventFilter, see jam.2006-12-28/src/graphic/qt
 class QtEventFilter : public QObject
 {
 public:
@@ -267,6 +266,7 @@ private:
     QMainWindow*                        _pMainWindow;
     QStackedWidget*                     _pMainWidget;
     Ui::_browserWidget                  _browserWidget;
+    QtListItem*                         _pListItem;
     Ui::_playerRack                     _playerRack;
     QToolBar*                           _pControlPanel;
     QFrame*                             _pBrowserWidget;

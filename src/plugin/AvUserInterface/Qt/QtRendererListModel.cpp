@@ -22,7 +22,6 @@
 #include "QtRendererListModel.h"
 
 #include <algorithm>
-#include <QtDebug>
 
 QtRendererListModel::QtRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
@@ -46,8 +45,8 @@ QtRendererListModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
     
-    if (index.internalPointer() == NULL) {
-        qWarning() << "UpnpRendererListModel::data() reference to renderer device is NULL:";
+    if (index.internalPointer() == 0) {
+        Omm::Av::Log::instance()->upnpav().warning("UpnpRendererListModel::data() reference to renderer device is 0:");
         return QVariant();
     }
     
@@ -120,7 +119,7 @@ QtRendererListModel::columnCount(const QModelIndex &/*parent*/) const
 void
 QtRendererListModel::beginAddRenderer(int position)
 {
-    qDebug() << "UpnpRendererListModel::beginAddRenderer() at position:" << position;
+    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::beginAddRenderer() at position:" + Poco::NumberFormatter::format(position));
     
     beginInsertRows(QModelIndex(), position, position);
 }
@@ -129,7 +128,7 @@ QtRendererListModel::beginAddRenderer(int position)
 void
 QtRendererListModel::endAddRenderer()
 {
-    qDebug() << "UpnpRendererListModel::endAddRenderer()";
+    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::endAddRenderer()");
     
     endInsertRows();
     emit layoutChanged();
@@ -141,7 +140,7 @@ QtRendererListModel::endAddRenderer()
 void
 QtRendererListModel::beginRemoveRenderer(int position)
 {
-    qDebug() << "UpnpRendererListModel::beginRemoveRenderer() at position:" << position;
+    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::beginRemoveRenderer() at position:" + Poco::NumberFormatter::format(position));
     
     beginRemoveRows(QModelIndex(), position, position);
 }
@@ -150,7 +149,7 @@ QtRendererListModel::beginRemoveRenderer(int position)
 void
 QtRendererListModel::endRemoveRenderer()
 {
-    qDebug() << "UpnpRendererListModel::endRemoveRenderer()";
+    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::endRemoveRenderer()");
     
     endRemoveRows();
     emit layoutChanged();

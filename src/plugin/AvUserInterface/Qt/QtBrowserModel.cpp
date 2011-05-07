@@ -21,7 +21,57 @@
 
 #include "QtBrowserModel.h"
 
-#include <QtDebug>
+#include <QPainter>
+
+QtListItem::QtListItem(QObject* parent) :
+QStyledItemDelegate(parent)
+{
+}
+
+
+void
+QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    int padding = 4;
+    QRect iconRect(option.rect);
+    iconRect.setLeft(padding);
+    iconRect.setWidth(option.rect.height());
+    QRect textRect(option.rect);
+    textRect.setLeft(iconRect.right() + padding);
+
+    if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
+        QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        if (option.state & QStyle::State_Selected) {
+            painter->fillRect(option.rect, option.palette.highlight());
+            painter->setPen(option.palette.highlightedText().color());
+        }
+        painter->drawText(textRect, Qt::AlignVCenter, title);
+        painter->restore();
+    }
+    if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
+//        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
+        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+        painter->save();
+        icon.paint(painter, iconRect);
+        painter->restore();
+    }
+//    else {
+//        // default presentation of data
+//        QStyledItemDelegate::paint(painter, option, index);
+//    }
+}
+
+
+QSize
+QtListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QSize itemSize = QStyledItemDelegate::sizeHint(option, index);
+    itemSize.rheight() *= 2;
+    return itemSize;
+}
+
 
 QtBrowserModel::QtBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent)
 : QAbstractItemModel(parent),
@@ -75,7 +125,8 @@ QtBrowserModel::columnCount(const QModelIndex& parent) const
 //         Omm::Av::Log::instance()->upnpav().debug("2 cols");
 //         return 2;
 //     }
-    return 3;
+//    return 3;
+    return 1;
 }
 
 
@@ -137,7 +188,7 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
     if (index.internalPointer() == 0) {
-        qWarning() << "UpnpBrowserModel::data() objectId reference is NULL:";
+        Omm::Av::Log::instance()->upnpav().warning("UpnpBrowserModel::data() objectId reference is 0:");
         return QVariant();
     }
     Omm::Av::ControllerObject* object = getObject(index);
@@ -148,28 +199,12 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Qt::DisplayRole:
     case Qt::EditRole:
-        switch (index.column()) {
-        case 0:
-            if (titleOnly) {
-                return _charEncoding->toUnicode(object->getTitle().c_str());
-            }
-            else {
-                return _charEncoding->toUnicode(artist.c_str());
-            }
-        case 1:
-            if (titleOnly) {
-                return QVariant();
-            }
-            else {
-                return _charEncoding->toUnicode(album.c_str());
-            }
-        case 2:
-            if (titleOnly) {
-                return QVariant();
-            }
-            else {
-                return _charEncoding->toUnicode(object->getTitle().c_str());
-            }
+        if (titleOnly) {
+//            return QString::fromStdString(object->getTitle());
+            return _charEncoding->toUnicode(object->getTitle().c_str());
+        }
+        else {
+            return _charEncoding->toUnicode(artist.c_str());
         }
         break;
     case Qt::DecorationRole:
@@ -267,16 +302,6 @@ QVariant
 QtBrowserModel::headerData(int section, Qt::Orientation orientation,
                              int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        switch (section) {
-            case 0:
-                return tr("Name");
-            case 1:
-                return tr("Album");
-            case 2:
-                return tr("Title");
-        }
-    }
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 

@@ -4,7 +4,7 @@ if(WINDOWS)
 set(CMAKE_BUILD_TYPE "")
 endif(WINDOWS)
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtSvg)
+find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
 
 if(QT4_FOUND)
 message (STATUS "Qt4 use file: ${QT_USE_FILE}")

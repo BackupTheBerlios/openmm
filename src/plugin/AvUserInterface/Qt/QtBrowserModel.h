@@ -28,8 +28,19 @@
 #include <QList>
 #include <QTextCodec>
 #include <QFileIconProvider>
+#include <QStyledItemDelegate>
 
 #include <Omm/UpnpAvController.h>
+
+
+class QtListItem : public QStyledItemDelegate
+{
+public:
+    QtListItem(QObject* parent = 0);
+
+    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+};
 
 
 class QtBrowserModel : public QAbstractItemModel
