@@ -40,11 +40,14 @@ class QtCrumbButton : public QWidget
     Q_OBJECT
 
     friend class QtAvInterface;
+    friend class QtEventFilter;
+    
 public:
-    QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0);
+    QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0, QtCrumbButton* parentButton = 0);
     ~QtCrumbButton();
     
     void setChild(QtCrumbButton* child) { _child = child; }
+    void setParent(QtCrumbButton* parent) { _parent = parent; }
     
     static QtCrumbButton* _pLastCrumbButton;
     
@@ -60,6 +63,7 @@ private:
     QAbstractItemView*  _browserView;
     const QModelIndex   _index;
     QtCrumbButton*      _child;
+    QtCrumbButton*      _parent;
 };
 
 
@@ -177,6 +181,7 @@ class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 
     friend class QtRendererListModel;
     friend class QtBrowserModel;
+    friend class QtEventFilter;
     
 public:
     QtAvInterface();
@@ -268,7 +273,6 @@ private:
     QDockWidget*                        _pPlayerRack;
     QtActivityIndicator*                _pActivityIndicator;
     QtCrumbButton*                      _pServerCrumbButton;
-    static QtCrumbButton*               _pLastCrumbButton;
     Omm::Av::ControllerObject*          _pCurrentServer;
     bool                                _sliderMoved;
     bool                                _playToggle;

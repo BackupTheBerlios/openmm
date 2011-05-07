@@ -28,13 +28,14 @@
 
 QtCrumbButton* QtCrumbButton::_pLastCrumbButton = 0;
 
-QtCrumbButton::QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent)
+QtCrumbButton::QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent, QtCrumbButton* parentButton)
 :
 QWidget(parent),
 _parentLayout(parent->layout()),
 _browserView(browserView),
 _index(index),
-_child(0)
+_child(0),
+_parent(parentButton)
 {
     QString label;
     if (index == QModelIndex()) {
@@ -62,6 +63,7 @@ _child(0)
     
     if (_pLastCrumbButton) {
         _pLastCrumbButton->setChild(this);
+        _parent = _pLastCrumbButton;
     }
     _pLastCrumbButton = this;
     if (_parentLayout) {
@@ -399,12 +401,74 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
 //            // don't forward the event to the Qt event loop.
 //            return true;
 //        }
+        // menu
         if (keyEvent->text() == "m" || keyEvent->key() == 16777301) {
             _pAvInterface->showMenu(!_pAvInterface->menuVisible());
             return true;
         }
+        // fullscreen
         else if (keyEvent->text() == "f") {
             _pAvInterface->setFullscreen(!_pAvInterface->isFullscreen());
+            return true;
+        }
+        // power
+        else if (keyEvent->key() == 16777399) {
+            return true;
+        }
+        // vol up
+        else if (((keyEvent->modifiers() & Qt::AltModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777330) {
+            // TODO: get current volume
+//            _pAvInterface->volumeChanged();
+            return true;
+        }
+        // vol down
+        else if (((keyEvent->modifiers() & Qt::AltModifier) && keyEvent->key() == 16777237) || keyEvent->key() == 16777328) {
+            // TODO: get current volume
+//            _pAvInterface->volumeChanged();
+            return true;
+        }
+        // chan up
+        else if (((keyEvent->modifiers() & Qt::ControlModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777238) {
+            _pAvInterface->skipForwardButtonPressed();
+            return true;
+        }
+        // chan down
+        else if (((keyEvent->modifiers() & Qt::ControlModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777239) {
+            _pAvInterface->skipBackwardButtonPressed();
+            return true;
+        }
+        // back
+        else if (keyEvent->key() == 16777219) {
+            QtCrumbButton* pButton = _pAvInterface->_pServerCrumbButton->_pLastCrumbButton->_parent;
+            if (pButton) {
+                pButton->buttonPressed();
+            }
+            return true;
+        }
+        // play
+        else if (keyEvent->text() == "p") {
+            // TODO: playPressed() or playButtonPressed()?
+            _pAvInterface->playPressed();
+            return true;
+        }
+        // stop
+        else if (keyEvent->text() == "s") {
+            // TODO: stopPressed() or stopButtonPressed()?
+            _pAvInterface->stopPressed();
+            return true;
+        }
+        // skip fwd
+        else if (keyEvent->text() == "f") {
+            _pAvInterface->skipForwardButtonPressed();
+            return true;
+        }
+        // skip back
+        else if (keyEvent->text() == "b") {
+            _pAvInterface->skipBackwardButtonPressed();
+            return true;
+        }
+        // mute
+        else if (keyEvent->text() == " " || keyEvent->key() == 16777329) {
             return true;
         }
     }
@@ -860,13 +924,6 @@ QtAvInterface::stopButtonPressed()
     _pForwardButton->setEnabled(false);
     _pBackButton->setEnabled(false);
 }
-
-
-// void
-// QtAvInterface::pauseButtonPressed()
-// {
-//     pausePressed();
-// }
 
 
 void
