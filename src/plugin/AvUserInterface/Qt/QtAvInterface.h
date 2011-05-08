@@ -30,39 +30,9 @@
 
 #include "QtRendererListModel.h"
 #include "ui_QtPlayerRack.h"
+#include "QtActivityIndicator.h"
 
 Q_DECLARE_METATYPE(std::string);
-
-class QtActivityIndicator : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    QtActivityIndicator(QWidget* parent = 0, Qt::WindowFlags flags = 0);
-    virtual ~QtActivityIndicator();
-    
-public slots:
-    void startActivity();
-    void stopActivity();
-    
-private slots:
-    void stopIndicator();
-
-private:
-    void paintEvent(QPaintEvent *event);
-    void setActivityInProgress(bool set);
-    bool activityInProgress();
-    void setIndicatorOn(bool set);
-    bool indicatorOn();
-
-    const int           _indicateDuration;
-    QSvgRenderer*       _symbolRenderer;
-    bool                _activityInProgress;
-    QMutex              _activityInProgressLock;
-    bool                _indicatorOn;
-    QMutex              _indicatorOnLock;
-    QTimer              _offTimer;
-};
 
 
 class QtMainWindow : public QMainWindow
