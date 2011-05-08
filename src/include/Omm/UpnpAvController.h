@@ -153,7 +153,7 @@ private:
 
     Engine*                               _pEngine;
     AvRenderer*                           _pRenderer;
-    std::vector<AvServer*>                _servers;
+    std::vector<AvServer*>                _localServers;
 };
 
 

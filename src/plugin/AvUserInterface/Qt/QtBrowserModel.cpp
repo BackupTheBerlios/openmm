@@ -39,14 +39,20 @@ QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const Q
     QRect textRect(option.rect);
     textRect.setLeft(iconRect.right() + padding);
 
+    Omm::Av::Log::instance()->upnpav().debug(
+        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
+        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
+    );
+
     if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
         QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));
         painter->save();
-        painter->setRenderHint(QPainter::Antialiasing, true);
+//        painter->setRenderHint(QPainter::Antialiasing, true);
         if (option.state & QStyle::State_Selected) {
             painter->fillRect(option.rect, option.palette.highlight());
             painter->setPen(option.palette.highlightedText().color());
         }
+//        painter->setFont(option.font);  // painter is style aware, don't need to set this.
         painter->drawText(textRect, Qt::AlignVCenter, title);
         painter->restore();
     }
@@ -57,8 +63,10 @@ QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const Q
         icon.paint(painter, iconRect);
         painter->restore();
     }
+    // use QApplication::style()->drawControl() to draw Qt widgets on the painter
+    
 //    else {
-//        // default presentation of data
+//        // default painter
 //        QStyledItemDelegate::paint(painter, option, index);
 //    }
 }

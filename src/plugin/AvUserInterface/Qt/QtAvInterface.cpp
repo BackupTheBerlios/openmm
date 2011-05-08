@@ -25,92 +25,7 @@
 #include <Omm/Upnp.h>
 
 #include "QtAvInterface.h"
-
-QtCrumbButton* QtCrumbButton::_pLastCrumbButton = 0;
-
-QtCrumbButton::QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent, QtCrumbButton* parentButton)
-:
-QWidget(parent),
-_parentLayout(parent->layout()),
-_browserView(browserView),
-_index(index),
-_child(0),
-_parent(parentButton)
-{
-    QString label;
-    if (index == QModelIndex()) {
-        label = "Media";
-    }
-    else {
-        label = index.data(Qt::DisplayRole).toString();
-    }
-    
-//     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-//     sizePolicy.setHorizontalStretch(0);
-//     sizePolicy.setVerticalStretch(0);
-//     sizePolicy.setHeightForWidth(_browserRootButton->sizePolicy().hasHeightForWidth());
-    
-    _boxLayout = new QHBoxLayout(this);
-    _boxLayout->setSpacing(0);
-    _boxLayout->setMargin(0);
-    _boxLayout->setContentsMargins(0, 0, 0, 0);
-    _button = new QPushButton(label, this);
-    _boxLayout->addWidget(_button);
-//     _button->setSizePolicy(sizePolicy);
-    _button->setFlat(true);
-    _button->setCheckable(false);
-    _button->setAutoDefault(false);
-    
-    if (_pLastCrumbButton) {
-        _pLastCrumbButton->setChild(this);
-        _parent = _pLastCrumbButton;
-    }
-    _pLastCrumbButton = this;
-    if (_parentLayout) {
-        _parentLayout->addWidget(this);
-    }
-    connect(_button, SIGNAL(pressed()), this, SLOT(buttonPressed()));
-    _browserView->setRootIndex(index);
-    show();
-//     else {  // TODO: want to select the first item without activating it
-//         _browserView->selectionModel()->setCurrentIndex(index.child(0, 0), QItemSelectionModel::NoUpdate);
-//         _browserView->setCurrentIndex(index.child(0, 0));
-//     }
-}
-
-
-void
-QtCrumbButton::buttonPressed()
-{
-    _browserView->setRootIndex(_index);
-    if (_child) {
-        _browserView->scrollTo(_child->_index, QAbstractItemView::PositionAtTop);
-        _browserView->setCurrentIndex(_child->_index);
-    }
-    _pLastCrumbButton = this;
-    deleteChildren();
-}
-
-
-void
-QtCrumbButton::deleteChildren()
-{
-    if (_child) {
-        _child->deleteChildren();
-        _child->hide();
-        if (_parentLayout) {
-            _parentLayout->removeWidget(_child);
-        }
-        delete _child;
-        _child = 0;
-    }
-}
-
-
-QtCrumbButton::~QtCrumbButton()
-{
-    delete _button;
-}
+#include "QtBrowserWidget.h"
 
 
 QtActivityIndicator::QtActivityIndicator(QWidget* parent, Qt::WindowFlags flags) :
@@ -441,10 +356,11 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
         }
         // back
         else if (keyEvent->key() == 16777219) {
-            QtCrumbButton* pButton = _pAvInterface->_pServerCrumbButton->_pLastCrumbButton->_parent;
-            if (pButton) {
-                pButton->buttonPressed();
-            }
+            _pAvInterface->_pBrowserWidget->goBack();
+//            QtCrumbButton* pButton = _pAvInterface->_pServerCrumbButton->_pLastCrumbButton->_parent;
+//            if (pButton) {
+//                pButton->buttonPressed();
+//            }
             return true;
         }
         // play
@@ -479,14 +395,9 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
 
 QtAvInterface::QtAvInterface() :
 _argc(0),
-_pApp(new QApplication(_argc, 0)),
-_pServerCrumbButton(0),
-_pCurrentServer(0),
 _sliderMoved(false),
 _playToggle(true),
-_fullscreen(false),
-_pVisual(0),
-_pEventFilter(new QtEventFilter(this))
+_fullscreen(false)
 {
 }
 
@@ -495,7 +406,6 @@ QtAvInterface::~QtAvInterface()
 {
     delete _pMainWindow;
     delete _pMainWidget;
-    delete _pListItem;
     delete _pBrowserWidget;
     delete _pApp;
     delete _pVisual;
@@ -514,9 +424,27 @@ QtAvInterface::~QtAvInterface()
 void
 QtAvInterface::initGui()
 {
+    Omm::Av::Log::instance()->upnpav().debug("init qt gui ...");
+
     qRegisterMetaType<std::string>();
 
+//    _defaultStyleSheet = _pApp->styleSheet();
+//    Omm::Av::Log::instance()->upnpav().debug("default style sheet: " + _defaultStyleSheet.toStdString());
+//    _defaultStyleSheet +=
+//            "* {font-size: 12px}";
+//    _defaultStyleSheet +=
+//            "* {font-size: 9pt}";
+    _fullscreenStyleSheet =
+            "*         { font-size: 32pt } \
+             QTreeView { background-color: black;\
+                         selection-color: white; \
+                         selection-background-color: darkblue; } \
+             QTreeView { color: white }";
+
+    _pApp = new QApplication(_argc, 0);
+    _pEventFilter = new QtEventFilter(this);
     _pApp->installEventFilter(_pEventFilter);
+//    _pApp->setStyleSheet(_defaultStyleSheet);
     
     _pMainWidget = new QStackedWidget;
     _pMainWindow = new QtMainWindow(_pMainWidget);
@@ -524,21 +452,11 @@ QtAvInterface::initGui()
     _pVisual = new QtVisual(_pMainWindow);
     _pVisual->_pWidget->setParent(_pMainWidget);
 
-    _pBrowserWidget = new QFrame;
-    _browserWidget.setupUi(_pBrowserWidget);
-    
-    _browserWidget._browserView->setUniformRowHeights(true);
-    _pListItem = new QtListItem(_browserWidget._browserView);
-    _browserWidget._browserView->setItemDelegate(_pListItem);
-    
-    _browserWidget._breadCrumpLayout->setAlignment(Qt::AlignLeft);
-    _browserWidget._breadCrumpLayout->setSpacing(0);
+    _pBrowserWidget = new QtBrowserWidget(_pMainWindow, this);
 
     _pPlayerRack = new QDockWidget;
     _playerRack.setupUi(_pPlayerRack);
 //    _pPlayerRack->setFeatures(QDockWidget::AllDockWidgetFeatures);
-
-    _pServerCrumbButton = new QtCrumbButton(_browserWidget._browserView, QModelIndex(), _browserWidget._breadCrump);
 
     _pMainWidget->addWidget(_pVisual->_pWidget);
     _pMainWidget->addWidget(_pBrowserWidget);
@@ -549,11 +467,7 @@ QtAvInterface::initGui()
     _pMainWindow->setWindowTitle("OMM");
     
     _pRendererListModel = new QtRendererListModel(this);
-    _pBrowserModel = new QtBrowserModel(this);
-    
     _playerRack._playerListView->setModel(_pRendererListModel);
-    _browserWidget._browserView->setModel(_pBrowserModel);
-    _browserWidget._browserView->setColumnWidth(0, 200);
 
     _pControlPanel = new QToolBar("ControlPanel", _pMainWindow);
     _pBackButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipBackward), "", _pControlPanel);
@@ -603,10 +517,6 @@ QtAvInterface::initGui()
     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
     connect(this, SIGNAL(volSliderMoved(int)), this, SLOT(setVolumeSlider(int)));
 
-    connect(_browserWidget._browserView, SIGNAL(activated(const QModelIndex&)),
-            this, SLOT(browserItemActivated(const QModelIndex&)));
-    connect(_browserWidget._browserView, SIGNAL(pressed(const QModelIndex&)),
-            this, SLOT(browserItemSelected(const QModelIndex&)));
     connect(this, SIGNAL(startNetworkActivity()),
             _pActivityIndicator, SLOT(startActivity()));
     connect(this, SIGNAL(stopNetworkActivity()),
@@ -644,6 +554,8 @@ QtAvInterface::initGui()
 //
 //    addLocalServer(pServer);
 //    startLocalServers();
+
+    Omm::Av::Log::instance()->upnpav().debug("finished init qt gui.");
 }
 
 
@@ -719,6 +631,8 @@ QtAvInterface::setFullscreen(bool fullscreen)
         _pControlPanel->hide();
         showPlayerRack(false);
         _pMainWindow->setCursor(QCursor(Qt::BlankCursor));
+        _pApp->setStyleSheet(_fullscreenStyleSheet);
+//        _browserWidget._browserView->setAlternatingRowColors(false);
     }
     else {
         _pControlPanel->show();
@@ -729,6 +643,9 @@ QtAvInterface::setFullscreen(bool fullscreen)
             showPlayerRack(false);
         }
         _pMainWindow->setCursor(QCursor(Qt::ArrowCursor));
+//        _pApp->setStyleSheet(_defaultStyleSheet);
+        _pApp->setStyleSheet("");
+//        _browserWidget._browserView->setAlternatingRowColors(true);
     }
 }
 
@@ -780,55 +697,6 @@ void
 QtAvInterface::setSliderMoved(int)
 {
     _sliderMoved = true;
-}
-
-
-void
-QtAvInterface::browserItemActivated(const QModelIndex& index)
-{
-    Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
-    if (object == 0) {
-        return;
-    }
-    if (index.parent() == QModelIndex()) {
-        _pCurrentServer = object;
-    }
-    if (object->isContainer()) {
-        new QtCrumbButton(_browserWidget._browserView, index, _browserWidget._breadCrump);
-    }
-    else {
-        mediaObjectSelected(object);
-        playPressed();
-        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
-        _pPlayButton->setEnabled(true);
-        _pStopButton->setEnabled(true);
-        _playToggle = false;
-        _pForwardButton->setEnabled(true);
-        _pBackButton->setEnabled(true);
-    }
-}
-
-
-void
-QtAvInterface::browserItemSelected(const QModelIndex& index)
-{
-    Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
-    if (object == 0) {
-        return;
-    }
-    if (index.parent() == QModelIndex()) {
-        _pCurrentServer = object;
-    }
-    
-    if (object->isContainer()) {
-        new QtCrumbButton(_browserWidget._browserView, index, _browserWidget._breadCrump);
-    }
-    else {
-        mediaObjectSelected(object);
-        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
-        _pPlayButton->setEnabled(true);
-        _playToggle = true;
-    }
 }
 
 
@@ -931,7 +799,8 @@ void
 QtAvInterface::skipForwardButtonPressed()
 {
     Omm::Av::Log::instance()->upnpav().debug("skipping to next track in browser list ...");
-    QModelIndex current = _browserWidget._browserView->currentIndex();
+    QModelIndex current = _pBrowserWidget->getCurrentIndex();
+//    QModelIndex current = _browserWidget._browserView->currentIndex();
     if (current.isValid()) {
         Omm::Av::ControllerObject* pCurrentObject = static_cast<Omm::Av::ControllerObject*>(current.internalPointer());
         Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
@@ -945,7 +814,8 @@ QtAvInterface::skipForwardButtonPressed()
                 }
                 else {
                     Omm::Av::Log::instance()->upnpav().debug("next title is: " + pNextObject->getTitle());
-                    _browserWidget._browserView->setCurrentIndex(next);
+                    _pBrowserWidget->setCurrentIndex(next);
+//                    _browserWidget._browserView->setCurrentIndex(next);
                     mediaObjectSelected(pNextObject);
                     playPressed();
                     _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
@@ -962,7 +832,8 @@ void
 QtAvInterface::skipBackwardButtonPressed()
 {
     Omm::Av::Log::instance()->upnpav().debug("skipping to previous track in browser list ...");
-    QModelIndex current = _browserWidget._browserView->currentIndex();
+    QModelIndex current = _pBrowserWidget->getCurrentIndex();
+//    QModelIndex current = _browserWidget._browserView->currentIndex();
     if (current.isValid()) {
         Omm::Av::ControllerObject* pCurrentObject = static_cast<Omm::Av::ControllerObject*>(current.internalPointer());
         Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
@@ -976,7 +847,8 @@ QtAvInterface::skipBackwardButtonPressed()
                 }
                 else {
                     Omm::Av::Log::instance()->upnpav().debug("previous title is: " + pPreviousObject->getTitle());
-                    _browserWidget._browserView->setCurrentIndex(previous);
+                    _pBrowserWidget->setCurrentIndex(previous);
+//                    _browserWidget._browserView->setCurrentIndex(previous);
                     mediaObjectSelected(pPreviousObject);
                     playPressed();
                     _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
@@ -1013,7 +885,7 @@ QtAvInterface::beginAddRenderer(int position)
 void
 QtAvInterface::beginAddServer(int position)
 {
-    _pBrowserModel->beginAddServer(position);
+    _pBrowserWidget->beginAddServer(position);
 }
 
 
@@ -1027,11 +899,7 @@ QtAvInterface::beginRemoveRenderer(int position)
 void
 QtAvInterface::beginRemoveServer(int position)
 {
-    _pBrowserModel->beginRemoveServer(position);
-    Omm::Av::ControllerObject* pServerObject = serverRootObject(position);
-    if (_pCurrentServer && pServerObject == _pCurrentServer) {
-        _pServerCrumbButton->buttonPressed();
-    }
+    _pBrowserWidget->beginRemoveServer(position);
 }
 
 
@@ -1045,7 +913,7 @@ QtAvInterface::endAddRenderer(int position)
 void
 QtAvInterface::endAddServer(int position)
 {
-    _pBrowserModel->endAddServer();
+    _pBrowserWidget->endAddServer();
 }
 
 
@@ -1059,7 +927,7 @@ QtAvInterface::endRemoveRenderer(int position)
 void
 QtAvInterface::endRemoveServer(int position)
 {
-    _pBrowserModel->endRemoveServer();
+    _pBrowserWidget->endRemoveServer();
 }
 
 

@@ -597,7 +597,7 @@ AvUserInterface::volumeChanged(int value)
 void
 AvUserInterface::startLocalServers()
 {
-    for (std::vector<AvServer*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+    for (std::vector<AvServer*>::iterator it = _localServers.begin(); it != _localServers.end(); ++it) {
         (*it)->startThreaded();
     }
 }
@@ -606,7 +606,7 @@ AvUserInterface::startLocalServers()
 void
 AvUserInterface::stopLocalServers()
 {
-    for (std::vector<AvServer*>::iterator it = _servers.begin(); it != _servers.end(); ++it) {
+    for (std::vector<AvServer*>::iterator it = _localServers.begin(); it != _localServers.end(); ++it) {
         (*it)->stopThreaded();
     }
 }
@@ -645,7 +645,7 @@ AvUserInterface::setLocalEngine(Engine* pEngine)
 void
 AvUserInterface::addLocalServer(AvServer* pServer)
 {
-    _servers.push_back(pServer);
+    _localServers.push_back(pServer);
 }
 
 

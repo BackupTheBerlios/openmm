@@ -16,11 +16,11 @@ set(OMMC_QTUI_SRCS
 QtAvInterface.cpp
 # modeltest.cpp
 QtBrowserModel.cpp
+QtBrowserWidget.cpp
 QtRendererListModel.cpp
 )
 
 set(OMMC_QTUI
-QtBrowserWidget.ui
 QtPlayerRack.ui
 )
 
@@ -32,11 +32,8 @@ set(OMMC_QTUI_MOC
 QtAvInterface.h
 # modeltest.h
 QtBrowserModel.h
+QtBrowserWidget.h
 QtRendererListModel.h
-)
-
-qt4_wrap_ui(
-OMMC_QT_BROWSERUI_H QtBrowserWidget.ui
 )
 
 qt4_wrap_ui(
@@ -44,7 +41,7 @@ OMMC_QT_PLAYERUI_H QtPlayerRack.ui
 )
 
 get_filename_component(
-OMMC_QTUI_H_DIR ${OMMC_QT_BROWSERUI_H} PATH
+OMMC_QTUI_H_DIR ${OMMC_QT_PLAYERUI_H} PATH
 )
 
 message(STATUS

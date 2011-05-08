@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -28,44 +28,10 @@
 #include <Omm/UpnpAvController.h>
 #include <Omm/Sys.h>
 
-#include "QtBrowserModel.h"
 #include "QtRendererListModel.h"
-#include "ui_QtBrowserWidget.h"
 #include "ui_QtPlayerRack.h"
 
 Q_DECLARE_METATYPE(std::string);
-
-class QtCrumbButton : public QWidget
-{
-    Q_OBJECT
-
-    friend class QtAvInterface;
-    friend class QtEventFilter;
-    
-public:
-    QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0, QtCrumbButton* parentButton = 0);
-    ~QtCrumbButton();
-    
-    void setChild(QtCrumbButton* child) { _child = child; }
-    void setParent(QtCrumbButton* parent) { _parent = parent; }
-    
-    static QtCrumbButton* _pLastCrumbButton;
-    
-private slots:
-    void buttonPressed();
-    
-private:
-    void deleteChildren();
-    
-    QLayout*            _parentLayout;
-    QHBoxLayout*        _boxLayout;
-    QPushButton*        _button;
-    QAbstractItemView*  _browserView;
-    const QModelIndex   _index;
-    QtCrumbButton*      _child;
-    QtCrumbButton*      _parent;
-};
-
 
 class QtActivityIndicator : public QWidget
 {
@@ -164,7 +130,7 @@ class QtAvInterface;
 class QtEventFilter : public QObject
 {
 public:
-    QtEventFilter(QtAvInterface* avInterface);
+    QtEventFilter(QtAvInterface* pAvInterface);
 
 private:
     virtual bool eventFilter(QObject* object, QEvent* event);
@@ -173,6 +139,7 @@ private:
 //    map<int, Event::EventT> m_eventMap;
 };
 
+class QtBrowserWidget;
 
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
@@ -230,8 +197,8 @@ private slots:
     void volumeSliderMoved(int value);
     
     void rendererSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void browserItemActivated(const QModelIndex& index);
-    void browserItemSelected(const QModelIndex& index);
+//    void browserItemActivated(const QModelIndex& index);
+//    void browserItemSelected(const QModelIndex& index);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
         once moved and some time later (a new track is loaded), the range
@@ -258,22 +225,19 @@ private:
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
     virtual void newVolume(const int volume);
 
-    QtBrowserModel*                     _pBrowserModel;
     QtRendererListModel*                _pRendererListModel;
     
     int                                 _argc;
     QApplication*                       _pApp;
+//    QString                             _defaultStyleSheet;
+    QString                             _fullscreenStyleSheet;
     QMainWindow*                        _pMainWindow;
     QStackedWidget*                     _pMainWidget;
-    Ui::_browserWidget                  _browserWidget;
-    QtListItem*                         _pListItem;
+    QtBrowserWidget*                    _pBrowserWidget;
     Ui::_playerRack                     _playerRack;
     QToolBar*                           _pControlPanel;
-    QFrame*                             _pBrowserWidget;
     QDockWidget*                        _pPlayerRack;
     QtActivityIndicator*                _pActivityIndicator;
-    QtCrumbButton*                      _pServerCrumbButton;
-    Omm::Av::ControllerObject*          _pCurrentServer;
     bool                                _sliderMoved;
     bool                                _playToggle;
     bool                                _menuVisible;
