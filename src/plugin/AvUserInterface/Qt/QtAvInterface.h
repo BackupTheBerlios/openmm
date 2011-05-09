@@ -23,20 +23,17 @@
 #define QtAvInterface_INCLUDED
 
 #include <QtGui>
-#include <QtSvg/QSvgRenderer>
 
 #include <Omm/UpnpAvController.h>
 #include <Omm/Sys.h>
-
-#include "QtRendererListModel.h"
-#include "ui_QtPlayerRack.h"
-#include "QtActivityIndicator.h"
 
 Q_DECLARE_METATYPE(std::string);
 
 class QtVisual;
 class QtAvInterface;
 class QtBrowserWidget;
+class QtActivityIndicator;
+class QtPlayerRack;
 
 
 class QtMainWindow : public QMainWindow
@@ -53,7 +50,7 @@ public:
 class QtPlayerRackButton : public QPushButton
 {
 public:
-    QtPlayerRackButton(QWidget* pParent);
+    QtPlayerRackButton(QWidget* pParent = 0);
 
     void setPlayerName(const std::string& name);
     void setTitleName(const std::string& name);
@@ -83,8 +80,8 @@ class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {
     Q_OBJECT
 
-    friend class QtRendererListModel;
-    friend class QtBrowserModel;
+    friend class QtBrowserWidget;
+    friend class QtPlayerRack;
     friend class QtEventFilter;
     
 public:
@@ -133,10 +130,8 @@ private slots:
     void skipBackwardButtonPressed();
     void positionSliderMoved(int position);
     void volumeSliderMoved(int value);
-    
-    void rendererSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-//    void browserItemActivated(const QModelIndex& index);
-//    void browserItemSelected(const QModelIndex& index);
+
+    void rendererSelected(Omm::Av::RendererView* pRenderer);
     /*
         QAbstractSlider emits signal valueChanged() when the slider was
         once moved and some time later (a new track is loaded), the range
@@ -150,37 +145,36 @@ private slots:
     void setSliderMoved(int value);
     
 private:
-    virtual void beginAddRenderer(int position);
     virtual void beginAddServer(int position);
-    virtual void beginRemoveRenderer(int position);
-    virtual void beginRemoveServer(int position);
-    virtual void endAddRenderer(int position);
     virtual void endAddServer(int position);
-    virtual void endRemoveRenderer(int position);
+    virtual void beginRemoveServer(int position);
     virtual void endRemoveServer(int position);
+    virtual void beginAddRenderer(int position);
+    virtual void endAddRenderer(int position);
+    virtual void beginRemoveRenderer(int position);
+    virtual void endRemoveRenderer(int position);
 
     virtual void newPosition(int duration, int position);
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
     virtual void newVolume(const int volume);
-
-    QtRendererListModel*                _pRendererListModel;
     
     int                                 _argc;
     QApplication*                       _pApp;
 //    QString                             _defaultStyleSheet;
     QString                             _fullscreenStyleSheet;
+    QtEventFilter*                      _pEventFilter;
     QMainWindow*                        _pMainWindow;
     QStackedWidget*                     _pMainWidget;
     QtBrowserWidget*                    _pBrowserWidget;
-    Ui::_playerRack                     _playerRack;
+    QtPlayerRack*                       _pPlayerRack;
     QToolBar*                           _pControlPanel;
-    QDockWidget*                        _pPlayerRack;
     QtActivityIndicator*                _pActivityIndicator;
+    QtVisual*                           _pVisual;
+
     bool                                _sliderMoved;
     bool                                _playToggle;
     bool                                _menuVisible;
     bool                                _fullscreen;
-    QtVisual*                           _pVisual;
 
     QPushButton*                        _pBackButton;
     QPushButton*                        _pPlayButton;
@@ -191,8 +185,6 @@ private:
     QSlider*                            _pSeekSlider;
 
     QtPlayerRackButton*                 _pPlayerRackButton;
-
-    QtEventFilter*                      _pEventFilter;
 };
 
 #endif

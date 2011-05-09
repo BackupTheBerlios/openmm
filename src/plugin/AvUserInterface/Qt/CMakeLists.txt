@@ -20,11 +20,12 @@ QtBrowserWidget.cpp
 QtRendererListModel.cpp
 QtActivityIndicator.cpp
 QtVisual.cpp
+QtPlayerRack.cpp
 )
 
-set(OMMC_QTUI
-QtPlayerRack.ui
-)
+#set(OMMC_QTUI
+#QtPlayerRack.ui
+#)
 
 set(OMMC_QTRES
 QtAvInterface.qrc
@@ -38,23 +39,24 @@ QtBrowserWidget.h
 QtRendererListModel.h
 QtActivityIndicator.h
 QtVisual.h
+QtPlayerRack.h
 )
 
-qt4_wrap_ui(
-OMMC_QT_PLAYERUI_H QtPlayerRack.ui
-)
+#qt4_wrap_ui(
+#OMMC_QT_PLAYERUI_H QtPlayerRack.ui
+#)
 
-get_filename_component(
-OMMC_QTUI_H_DIR ${OMMC_QT_PLAYERUI_H} PATH
-)
+#get_filename_component(
+#OMMC_QTUI_H_DIR ${OMMC_QT_PLAYERUI_H} PATH
+#)
 
-message(STATUS
-"Directory for OmmC Qt UI files: ${OMMC_QTUI_H_DIR}"
-)
+#message(STATUS
+#"Directory for OmmC Qt UI files: ${OMMC_QTUI_H_DIR}"
+#)
 
-include_directories(
-${OMMC_QTUI_H_DIR}
-)
+#include_directories(
+#${OMMC_QTUI_H_DIR}
+#)
 
 QT4_ADD_RESOURCES(
 OMMC_RES_SRC ${OMMC_QTRES}

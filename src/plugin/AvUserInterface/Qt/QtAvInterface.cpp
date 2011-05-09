@@ -24,6 +24,10 @@
 #include "QtAvInterface.h"
 #include "QtBrowserWidget.h"
 #include "QtVisual.h"
+#include "QtActivityIndicator.h"
+#include "QtRendererListModel.h"
+#include "QtPlayerRack.h"
+
 
 
 QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
@@ -181,11 +185,12 @@ _fullscreen(false)
 
 QtAvInterface::~QtAvInterface()
 {
+    delete _pApp;
+    delete _pEventFilter;
+    delete _pVisual;
     delete _pMainWindow;
     delete _pMainWidget;
     delete _pBrowserWidget;
-    delete _pApp;
-    delete _pVisual;
     delete _pControlPanel;
     delete _pBackButton;
     delete _pPlayButton;
@@ -194,7 +199,6 @@ QtAvInterface::~QtAvInterface()
     delete _pPlayerRackButton;
     delete _pVolumeSlider;
     delete _pSeekSlider;
-    delete _pEventFilter;
 }
 
 
@@ -222,7 +226,7 @@ QtAvInterface::initGui()
     _pEventFilter = new QtEventFilter(this);
     _pApp->installEventFilter(_pEventFilter);
 //    _pApp->setStyleSheet(_defaultStyleSheet);
-    
+
     _pMainWidget = new QStackedWidget;
     _pMainWindow = new QtMainWindow(_pMainWidget);
 
@@ -230,9 +234,7 @@ QtAvInterface::initGui()
 
     _pBrowserWidget = new QtBrowserWidget(_pMainWindow, this);
 
-    _pPlayerRack = new QDockWidget;
-    _playerRack.setupUi(_pPlayerRack);
-//    _pPlayerRack->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    _pPlayerRack = new QtPlayerRack(this);
 
     _pMainWidget->addWidget(_pVisual);
     _pMainWidget->addWidget(_pBrowserWidget);
@@ -242,9 +244,6 @@ QtAvInterface::initGui()
     _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pPlayerRack);
     _pMainWindow->setWindowTitle("OMM");
     
-    _pRendererListModel = new QtRendererListModel(this);
-    _playerRack._playerListView->setModel(_pRendererListModel);
-
     _pControlPanel = new QToolBar("ControlPanel", _pMainWindow);
     _pBackButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipBackward), "", _pControlPanel);
     _pPlayButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaPlay), "", _pControlPanel);
@@ -279,10 +278,7 @@ QtAvInterface::initGui()
     connect(_pForwardButton, SIGNAL(pressed()), this, SLOT(skipForwardButtonPressed()));
     connect(_pBackButton, SIGNAL(pressed()), this, SLOT(skipBackwardButtonPressed()));
 
-    connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
-            _playerRack._playerListView, SLOT(setCurrentIndex(QModelIndex)));
-    connect(_playerRack._playerListView->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+    connect(_pPlayerRack, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
 
     connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
@@ -476,33 +472,40 @@ QtAvInterface::setSliderMoved(int)
 
 
 void
-QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
-                                         const QItemSelection& /*deselected*/)
+QtAvInterface::rendererSelected(Omm::Av::RendererView* pRenderer)
 {
-    if (selected.count() > 1) {
-        return;
-    }
-    if (selected.empty()) {
-        return;
-    }
-    
-    QModelIndex index = selected.indexes().first();
-    
-    Omm::Av::RendererView* selectedRenderer = static_cast<Omm::Av::RendererView*>(index.internalPointer());
-    
-    if (selectedRenderer == 0) {
-        return;
-    }
-    rendererSelected(selectedRenderer);
-    if (isPlaying(selectedRenderer)) {
-        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
-        _pPlayButton->setEnabled(true);
-        _playToggle = false;
-        _pStopButton->setEnabled(true);
-    }
-    _pPlayerRackButton->setPlayerName(selectedRenderer->getName());
-//    _pPlayerRackButton->setText(selectedRenderer->getName().c_str());
+    AvUserInterface::rendererSelected(pRenderer);
+    _pPlayerRackButton->setPlayerName(pRenderer->getName());
 }
+
+//void
+//QtAvInterface::rendererSelectionChanged(const QItemSelection& selected,
+//                                         const QItemSelection& /*deselected*/)
+//{
+//    if (selected.count() > 1) {
+//        return;
+//    }
+//    if (selected.empty()) {
+//        return;
+//    }
+//
+//    QModelIndex index = selected.indexes().first();
+//
+//    Omm::Av::RendererView* selectedRenderer = static_cast<Omm::Av::RendererView*>(index.internalPointer());
+//
+//    if (selectedRenderer == 0) {
+//        return;
+//    }
+//    rendererSelected(selectedRenderer);
+//    if (isPlaying(selectedRenderer)) {
+//        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
+//        _pPlayButton->setEnabled(true);
+//        _playToggle = false;
+//        _pStopButton->setEnabled(true);
+//    }
+//    _pPlayerRackButton->setPlayerName(selectedRenderer->getName());
+////    _pPlayerRackButton->setText(selectedRenderer->getName().c_str());
+//}
 
 
 void
@@ -651,37 +654,9 @@ QtAvInterface::volumeSliderMoved(int value)
 
 
 void
-QtAvInterface::beginAddRenderer(int position)
-{
-    _pRendererListModel->beginAddRenderer(position);
-}
-
-
-void
 QtAvInterface::beginAddServer(int position)
 {
     _pBrowserWidget->beginAddServer(position);
-}
-
-
-void
-QtAvInterface::beginRemoveRenderer(int position)
-{
-    _pRendererListModel->beginRemoveRenderer(position);
-}
-
-
-void
-QtAvInterface::beginRemoveServer(int position)
-{
-    _pBrowserWidget->beginRemoveServer(position);
-}
-
-
-void
-QtAvInterface::endAddRenderer(int position)
-{
-    _pRendererListModel->endAddRenderer();
 }
 
 
@@ -693,9 +668,9 @@ QtAvInterface::endAddServer(int position)
 
 
 void
-QtAvInterface::endRemoveRenderer(int position)
+QtAvInterface::beginRemoveServer(int position)
 {
-    _pRendererListModel->endRemoveRenderer();
+    _pBrowserWidget->beginRemoveServer(position);
 }
 
 
@@ -703,6 +678,34 @@ void
 QtAvInterface::endRemoveServer(int position)
 {
     _pBrowserWidget->endRemoveServer();
+}
+
+
+void
+QtAvInterface::beginAddRenderer(int position)
+{
+    _pPlayerRack->beginAddRenderer(position);
+}
+
+
+void
+QtAvInterface::endAddRenderer(int position)
+{
+    _pPlayerRack->endAddRenderer();
+}
+
+
+void
+QtAvInterface::beginRemoveRenderer(int position)
+{
+    _pPlayerRack->beginRemoveRenderer(position);
+}
+
+
+void
+QtAvInterface::endRemoveRenderer(int position)
+{
+    _pPlayerRack->endRemoveRenderer();
 }
 
 

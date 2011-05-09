@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <qt4/QtGui/qtreeview.h>
-#include <qt4/QtGui/qboxlayout.h>
+#include <QTreeView>
+#include <QBoxLayout>
 
 #include "QtBrowserWidget.h"
 
