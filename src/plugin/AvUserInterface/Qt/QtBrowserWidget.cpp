@@ -139,7 +139,7 @@ _pAvInterface(pAvInterface)
     _pBrowserModel = new QtBrowserModel(pAvInterface);
     _pBrowserView->setModel(_pBrowserModel);
     _pBrowserView->setUniformRowHeights(true);
-    _pBrowserView->setAlternatingRowColors(true);
+//    _pBrowserView->setAlternatingRowColors(true);
     _pBrowserView->setHeaderHidden(true);
     _pBrowserView->setRootIsDecorated(false);
     _pBrowserView->setItemsExpandable(false);

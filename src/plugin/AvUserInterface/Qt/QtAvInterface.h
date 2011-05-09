@@ -34,6 +34,10 @@
 
 Q_DECLARE_METATYPE(std::string);
 
+class QtVisual;
+class QtAvInterface;
+class QtBrowserWidget;
+
 
 class QtMainWindow : public QMainWindow
 {
@@ -43,39 +47,6 @@ public:
     QtMainWindow(QWidget* pCentralWidget);
 
 //    virtual void keyPressEvent(QKeyEvent* event);
-};
-
-
-class QtVisual : public QObject, public Omm::Sys::Visual
-{
-    Q_OBJECT
-
-    friend class QtAvInterface;
-
-public:
-    QtVisual(QWidget* pParent = 0);
-    virtual ~QtVisual();
-
-    virtual void show();
-    virtual void hide();
-
-    virtual void* getWindow();
-    virtual VisualType getType();
-    virtual void renderImage(const std::string& imageData);
-    virtual void blank();
-
-signals:
-    void showMenu(bool show);
-    void signalShowImage(const std::string& imageData);
-
-private slots:
-    void slotShowImage(const std::string& imageData);
-
-private:
-    QLabel*        _pWidget;
-#ifdef __LINUX__
-    Poco::UInt32    _x11Window;
-#endif
 };
 
 
@@ -95,8 +66,6 @@ private:
 };
 
 
-class QtAvInterface;
-
 class QtEventFilter : public QObject
 {
 public:
@@ -109,7 +78,6 @@ private:
 //    map<int, Event::EventT> m_eventMap;
 };
 
-class QtBrowserWidget;
 
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
 {

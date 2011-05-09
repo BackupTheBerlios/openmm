@@ -19,6 +19,7 @@ QtBrowserModel.cpp
 QtBrowserWidget.cpp
 QtRendererListModel.cpp
 QtActivityIndicator.cpp
+QtVisual.cpp
 )
 
 set(OMMC_QTUI
@@ -36,6 +37,7 @@ QtBrowserModel.h
 QtBrowserWidget.h
 QtRendererListModel.h
 QtActivityIndicator.h
+QtVisual.h
 )
 
 qt4_wrap_ui(

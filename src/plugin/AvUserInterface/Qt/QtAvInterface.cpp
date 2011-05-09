@@ -23,6 +23,7 @@
 
 #include "QtAvInterface.h"
 #include "QtBrowserWidget.h"
+#include "QtVisual.h"
 
 
 QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
@@ -37,90 +38,6 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 //{
 //    Omm::Av::Log::instance()->upnpav().debug("key pressed: " + event->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(event->key()));
 //}
-
-
-QtVisual::QtVisual(QWidget* pParent)
-{
-    _pWidget = new QLabel(pParent);
-    _pWidget->setAutoFillBackground(true);
-    QPalette pal = _pWidget->palette();
-    pal.setColor(QPalette::Window, Qt::black);
-    _pWidget->setPalette(pal);
-    _pWidget->setAlignment(Qt::AlignCenter);
-
-    connect(this, SIGNAL(signalShowImage(const std::string&)), this, SLOT(slotShowImage(const std::string&)), Qt::QueuedConnection);
-}
-
-
-QtVisual::~QtVisual()
-{
-    delete _pWidget;
-}
-
-
-void
-QtVisual::show()
-{
-    emit showMenu(false);
-}
-
-
-void
-QtVisual::hide()
-{
-    emit showMenu(true);
-}
-
-
-void*
-QtVisual::getWindow()
-{
-#ifdef __LINUX__
-    _x11Window = _pWidget->winId();
-    return &_x11Window;
-#else
-    return 0;
-#endif
-}
-
-
-Omm::Sys::Visual::VisualType
-QtVisual::getType()
-{
-    // QtVisual is multi-platform, and type of visual is platform dependent.
-#ifdef __LINUX__
-    return Omm::Sys::Visual::VTX11;
-#elif __DARWIN__
-    return Omm::Sys::Visual::VTMacOSX;
-#elif __WINDOWS__
-    return Omm::Sys::Visual::VTWin;
-#else
-    return Omm::Sys::Visual::VTNone;
-#endif
-}
-
-
-void
-QtVisual::renderImage(const std::string& imageData)
-{
-    emit signalShowImage(imageData);
-}
-
-
-void
-QtVisual::blank()
-{
-    _pWidget->clear();
-}
-
-
-void
-QtVisual::slotShowImage(const std::string& imageData)
-{
-    QPixmap pixmap;
-    pixmap.loadFromData((uchar*)imageData.c_str(), (uint)imageData.size());
-    _pWidget->setPixmap(pixmap.scaled(getWidth(), getHeight(), Qt::KeepAspectRatio));
-}
 
 
 QtPlayerRackButton::QtPlayerRackButton(QWidget* pParent) :
@@ -309,8 +226,7 @@ QtAvInterface::initGui()
     _pMainWidget = new QStackedWidget;
     _pMainWindow = new QtMainWindow(_pMainWidget);
 
-    _pVisual = new QtVisual(_pMainWindow);
-    _pVisual->_pWidget->setParent(_pMainWidget);
+    _pVisual = new QtVisual(_pMainWidget);
 
     _pBrowserWidget = new QtBrowserWidget(_pMainWindow, this);
 
@@ -318,7 +234,7 @@ QtAvInterface::initGui()
     _playerRack.setupUi(_pPlayerRack);
 //    _pPlayerRack->setFeatures(QDockWidget::AllDockWidgetFeatures);
 
-    _pMainWidget->addWidget(_pVisual->_pWidget);
+    _pMainWidget->addWidget(_pVisual);
     _pMainWidget->addWidget(_pBrowserWidget);
     _pMainWidget->setCurrentWidget(_pBrowserWidget);
     _menuVisible = true;
@@ -477,7 +393,7 @@ QtAvInterface::showMenu(bool show)
         _pMainWidget->setCurrentWidget(_pBrowserWidget);
     }
     else {
-        _pMainWidget->setCurrentWidget(_pVisual->_pWidget);
+        _pMainWidget->setCurrentWidget(_pVisual);
     }
 }
 
