@@ -21,6 +21,7 @@ QtRendererListModel.cpp
 QtActivityIndicator.cpp
 QtVisual.cpp
 QtPlayerRack.cpp
+QtControlPanel.cpp
 )
 
 #set(OMMC_QTUI
@@ -40,6 +41,7 @@ QtRendererListModel.h
 QtActivityIndicator.h
 QtVisual.h
 QtPlayerRack.h
+QtControlPanel.h
 )
 
 #qt4_wrap_ui(
