@@ -43,42 +43,6 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 //}
 
 
-//QtPlayerRackButton::QtPlayerRackButton(QWidget* pParent) :
-//QPushButton(pParent)
-//{
-//    setMinimumWidth(250);
-//    setCheckable(true);
-//}
-//
-//
-//void
-//QtPlayerRackButton::setPlayerName(const std::string& name)
-//{
-//    _playerName = name;
-//    setLabel();
-//}
-//
-//
-//void
-//QtPlayerRackButton::setTitleName(const std::string& name)
-//{
-//    _titleName = name;
-//    setLabel();
-//}
-//
-//
-//void
-//QtPlayerRackButton::setLabel()
-//{
-//    if (_titleName == "") {
-//        setText(_playerName.c_str());
-//    }
-//    else {
-//        setText((_playerName + " - " + _titleName).c_str());
-//    }
-//}
-
-
 QtEventFilter::QtEventFilter(QtAvInterface* avInterface) :
 _pAvInterface(avInterface)
 {
@@ -137,10 +101,6 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
         // back
         else if (keyEvent->key() == 16777219) {
             _pAvInterface->_pBrowserWidget->goBack();
-//            QtCrumbButton* pButton = _pAvInterface->_pServerCrumbButton->_pLastCrumbButton->_parent;
-//            if (pButton) {
-//                pButton->buttonPressed();
-//            }
             return true;
         }
         // play
@@ -175,8 +135,6 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
 
 QtAvInterface::QtAvInterface() :
 _argc(0),
-//_sliderMoved(false),
-//_playToggle(true),
 _fullscreen(false),
 _playerRackVisible(false)
 {
@@ -192,13 +150,6 @@ QtAvInterface::~QtAvInterface()
     delete _pMainWidget;
     delete _pBrowserWidget;
     delete _pControlPanel;
-//    delete _pBackButton;
-//    delete _pPlayButton;
-//    delete _pStopButton;
-//    delete _pForwardButton;
-//    delete _pPlayerRackButton;
-//    delete _pVolumeSlider;
-//    delete _pSeekSlider;
 }
 
 
@@ -244,71 +195,10 @@ QtAvInterface::initGui()
     _pMainWindow->addDockWidget(Qt::RightDockWidgetArea, _pPlayerRack);
     _pMainWindow->setWindowTitle("OMM");
 
-
-
-//    _pControlPanel = new QToolBar("ControlPanel", _pMainWindow);
     _pControlPanel = new QtControlPanel(this, _pMainWindow);
-
-
-//    _pBackButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipBackward), "", _pControlPanel);
-//    _pPlayButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaPlay), "", _pControlPanel);
-//    _pStopButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaStop), "", _pControlPanel);
-//    _pForwardButton = new QPushButton(_pMainWindow->style()->standardIcon(QStyle::SP_MediaSkipForward), "", _pControlPanel);
-//    _pControlPanel->addWidget(_pBackButton);
-//    _pControlPanel->addWidget(_pPlayButton);
-//    _pControlPanel->addWidget(_pStopButton);
-//    _pControlPanel->addWidget(_pForwardButton);
-//
-//    _pActivityIndicator = new QtActivityIndicator(_pControlPanel);
-//    _pControlPanel->addWidget(_pActivityIndicator);
-//
-//    _pVolumeSlider = new QSlider(Qt::Horizontal, _pControlPanel);
-//    _pVolumeSlider->setTracking(true);
-//    _pVolumeSlider->setSingleStep(5);
-//    _pSeekSlider = new QSlider(Qt::Horizontal, _pControlPanel);
-//    _pSeekSlider->setSingleStep(10);
-//    _pSeekSlider->setPageStep(25);
-//
-//    _pControlPanel->addWidget(_pVolumeSlider);
-//    _pControlPanel->addWidget(_pSeekSlider);
-//
-//    _pPlayerRackButton = new QtPlayerRackButton(_pControlPanel);
-//    _pControlPanel->addWidget(_pPlayerRackButton);
-//
-//    _pControlPanel->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-//
-//    connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
-//    connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
-//    connect(_pForwardButton, SIGNAL(pressed()), this, SLOT(skipForwardButtonPressed()));
-//    connect(_pBackButton, SIGNAL(pressed()), this, SLOT(skipBackwardButtonPressed()));
-
-
-    
     _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pControlPanel);
 
-//    connect(_pPlayerRack, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-//            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
-
-//    connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
-
-//    connect(_pSeekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
-//    connect(_pSeekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
-//
-//    connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
-
-//    connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
-//    connect(this, SIGNAL(volSliderMoved(int)), this, SLOT(setVolumeSlider(int)));
-//
-//    connect(this, SIGNAL(startNetworkActivity()),
-//            _pActivityIndicator, SLOT(startActivity()));
-//    connect(this, SIGNAL(stopNetworkActivity()),
-//            _pActivityIndicator, SLOT(stopActivity()));
-//    connect(this, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
-//            this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
-//
     connect(_pVisual, SIGNAL(showMenu(bool)), this, SLOT(showMenu(bool)));
-//    connect(_pPlayerRackButton, SIGNAL(toggled(bool)), this, SLOT(showPlayerRack(bool)));
-//    _pPlayerRackButton->addAction(_pPlayerRack->toggleViewAction());
 
 // TODO: starting of local servers should go in controller application.
 
@@ -466,23 +356,6 @@ QtAvInterface::showControlPanel(bool show)
 }
 
 
-//void
-//QtAvInterface::checkSliderMoved(int value)
-//{
-//    if (_sliderMoved) {
-//        _sliderMoved = false;
-//        emit sliderMoved(value);
-//    }
-//}
-//
-//
-//void
-//QtAvInterface::setSliderMoved(int)
-//{
-//    _sliderMoved = true;
-//}
-
-
 void
 QtAvInterface::rendererSelected(Omm::Av::RendererView* pRenderer)
 {
@@ -518,71 +391,6 @@ QtAvInterface::rendererSelected(Omm::Av::RendererView* pRenderer)
 //    }
 //    _pPlayerRackButton->setPlayerName(selectedRenderer->getName());
 ////    _pPlayerRackButton->setText(selectedRenderer->getName().c_str());
-//}
-
-
-//void
-//QtAvInterface::setSeekSlider(int max, int val)
-//{
-//    // don't set slider position when user drags the slider
-//    if (_pSeekSlider->isSliderDown()) {
-//        return;
-//    }
-//    _pSeekSlider->setRange(0, max>=0?max:0);
-//    _pSeekSlider->setSliderPosition(val);
-//}
-//
-//
-//void
-//QtAvInterface::setVolumeSlider(int val)
-//{
-//    // don't set slider position when user drags the slider
-//    if (_pVolumeSlider->isSliderDown()) {
-//        return;
-//    }
-//    _pVolumeSlider->setRange(0, 100);
-//    _pVolumeSlider->setSliderPosition(val);
-//}
-//
-//
-//void
-//QtAvInterface::setTrackInfo(const QString& title, const QString& artist, const QString& album)
-//{
-////    _rendererWidget._title->setText(title);
-////    _rendererWidget._artist->setText(artist);
-////    _rendererWidget._album->setText(album);
-//}
-
-
-//void
-//QtAvInterface::playButtonPressed()
-//{
-//    if (_playToggle) {
-//        playPressed();
-//        // TODO: only toggle play button to pause, if media is really playing
-//        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPause));
-//        _playToggle = false;
-//    }
-//    else {
-//        pausePressed();
-//        _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
-//        _playToggle = true;
-//    }
-//    _pStopButton->setEnabled(true);
-//    _pForwardButton->setEnabled(true);
-//    _pBackButton->setEnabled(true);
-//}
-//
-//
-//void
-//QtAvInterface::stopButtonPressed()
-//{
-//    stopPressed();
-//    _pPlayButton->setIcon(_pBrowserWidget->style()->standardIcon(QStyle::SP_MediaPlay));
-//    _playToggle = true;
-//    _pStopButton->setEnabled(false);
-//    _pForwardButton->setEnabled(false);
-//    _pBackButton->setEnabled(false);
 //}
 
 
@@ -650,20 +458,6 @@ QtAvInterface::skipBackwardButtonPressed()
         } while(previous.isValid() && current == previous);
     }
 }
-
-
-//void
-//QtAvInterface::positionSliderMoved(int position)
-//{
-//    positionMoved(position);
-//}
-//
-//
-//void
-//QtAvInterface::volumeSliderMoved(int value)
-//{
-//    volumeChanged(value);
-//}
 
 
 void

@@ -94,8 +94,8 @@ _pAvInterface(pAvInterface)
 
     connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
-    connect(_pForwardButton, SIGNAL(pressed()), this, SLOT(skipForwardButtonPressed()));
-    connect(_pBackButton, SIGNAL(pressed()), this, SLOT(skipBackwardButtonPressed()));
+    connect(_pForwardButton, SIGNAL(pressed()), _pAvInterface, SLOT(skipForwardButtonPressed()));
+    connect(_pBackButton, SIGNAL(pressed()), _pAvInterface, SLOT(skipBackwardButtonPressed()));
 
     connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(_pSeekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
@@ -105,11 +105,10 @@ _pAvInterface(pAvInterface)
     connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
     connect(this, SIGNAL(volSliderMoved(int)), this, SLOT(setVolumeSlider(int)));
 
-    connect(this, SIGNAL(startNetworkActivity()),
-            _pActivityIndicator, SLOT(startActivity()));
-    connect(this, SIGNAL(stopNetworkActivity()),
-            _pActivityIndicator, SLOT(stopActivity()));
-    connect(this, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
+    connect(_pAvInterface, SIGNAL(startNetworkActivity()), _pActivityIndicator, SLOT(startActivity()));
+    connect(_pAvInterface, SIGNAL(stopNetworkActivity()), _pActivityIndicator, SLOT(stopActivity()));
+
+    connect(_pAvInterface, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
             this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
 
     connect(_pPlayerRackButton, SIGNAL(toggled(bool)), _pAvInterface, SLOT(showPlayerRack(bool)));

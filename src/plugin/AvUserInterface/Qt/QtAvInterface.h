@@ -47,22 +47,6 @@ public:
 };
 
 
-//class QtPlayerRackButton : public QPushButton
-//{
-//public:
-//    QtPlayerRackButton(QWidget* pParent = 0);
-//
-//    void setPlayerName(const std::string& name);
-//    void setTitleName(const std::string& name);
-//
-//private:
-//    void setLabel();
-//
-//    std::string     _playerName;
-//    std::string     _titleName;
-//};
-//
-
 class QtEventFilter : public QObject
 {
 public:
@@ -110,40 +94,15 @@ public slots:
     virtual void showControlPanel(bool show);
     
 signals:
-//    // position slider
-//    void sliderMoved(int value);
-//    void setSlider(int duration, int pos);
-//    // volume slider
-//    void volSliderMoved(int value);
-
     void nowPlaying(const QString& title, const QString& artist, const QString& album);
     void startNetworkActivity();
     void stopNetworkActivity();
 
 private slots:
-//    void setSeekSlider(int max, int val);
-//    void setVolumeSlider(int val);
-//    void setTrackInfo(const QString& title, const QString& artist, const QString& album);
-    
-//    void playButtonPressed();
-//    void stopButtonPressed();
     void skipForwardButtonPressed();
     void skipBackwardButtonPressed();
-//    void positionSliderMoved(int position);
-//    void volumeSliderMoved(int value);
 
     void rendererSelected(Omm::Av::RendererView* pRenderer);
-//    /*
-//        QAbstractSlider emits signal valueChanged() when the slider was
-//        once moved and some time later (a new track is loaded), the range
-//        changes. This triggers a Seek in the MediaRenderer to the position
-//        of the last Seek (in the previous track). The following two slots
-//        make QAbstractSlider only emit valueChanged() when triggered by
-//        a user action.
-//        This could be considered a bug and not a feature ...
-//    */
-//    void checkSliderMoved(int value);
-//    void setSliderMoved(int value);
     
 private:
     virtual void beginAddServer(int position);
@@ -169,25 +128,12 @@ private:
     QStackedWidget*                     _pMainWidget;
     QtBrowserWidget*                    _pBrowserWidget;
     QtPlayerRack*                       _pPlayerRack;
-//    QToolBar*                           _pControlPanel;
     QtControlPanel*                     _pControlPanel;
     QtVisual*                           _pVisual;
 
-//    bool                                _sliderMoved;
-//    bool                                _playToggle;
     bool                                _menuVisible;
     bool                                _playerRackVisible;
     bool                                _fullscreen;
-
-//    QPushButton*                        _pBackButton;
-//    QPushButton*                        _pPlayButton;
-//    QPushButton*                        _pStopButton;
-//    QPushButton*                        _pForwardButton;
-//
-//    QSlider*                            _pVolumeSlider;
-//    QSlider*                            _pSeekSlider;
-//
-//    QtPlayerRackButton*                 _pPlayerRackButton;
 };
 
 #endif
