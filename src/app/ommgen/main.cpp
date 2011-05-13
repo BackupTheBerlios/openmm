@@ -25,6 +25,7 @@
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
+#include "Poco/Exception.h"
 
 #include "ommgen.h"
 
@@ -40,7 +41,6 @@ public:
     OmmGenApplication() :
         _helpRequested(false),
         _description(""),
-        _descriptionPath("./"),
         _outputPath("./")
     {
         setUnixOptions(true);
@@ -57,11 +57,12 @@ protected:
         try {
             Application::initialize(self);
         }
-//     catch (Poco::Util::MissingArgumentException) {
+//        catch (Poco::Exception::MissingOptionException) {
         catch (...) {
             displayHelp();
         }
-        
+        std::clog << "description: " << _description << std::endl;
+        std::clog << "output path: " << _outputPath << std::endl;
     }
     
     void uninitialize()
@@ -76,15 +77,11 @@ protected:
         options.addOption(Option("help", "h", "display help information on command line arguments")
                             .required(false)
                             .repeatable(false));
-        options.addOption(Option("description", "d", "device description file")
+        options.addOption(Option("description", "d", "absolute path to device description file, with service description files relative to device description path according to SDCP URIs")
                             .required(false)
                             .repeatable(false)
                             .argument("description name", true));
-        options.addOption(Option("description-path", "p", "path to device and service description files")
-                            .required(false)
-                            .repeatable(false)
-                            .argument("description path", true));
-        options.addOption(Option("output-path", "o", "path to generated stub files")
+        options.addOption(Option("output-path", "o", "output path for generated stub files")
                           .required(false)
                           .repeatable(false)
                           .argument("output path", true));
@@ -93,14 +90,11 @@ protected:
     void handleOption(const std::string& name, const std::string& value)
     {
         Application::handleOption(name, value);
-        std::cerr << "Application::handleOption() name: " << name << " , value: " << value << std::endl;
             
         if (name == "help") {
             _helpRequested = true;
         } else if (name == "description") {
             _description = value;
-        } else if (name == "description-path") {
-            _descriptionPath = value;
         } else if (name == "output-path") {
             _outputPath = value;
         }
@@ -111,7 +105,7 @@ protected:
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
         helpFormatter.setUsage("[OPTIONS] DESCRIPTION_FILE");
-        helpFormatter.setHeader("A stub generator for OmmLib UPnP.");
+        helpFormatter.setHeader("A stub generator for OMM UPnP.");
         helpFormatter.format(std::cout);
     }
     
@@ -123,20 +117,21 @@ protected:
         }
         else
         {
-//             Omm::UriDescriptionReader descriptionReader(Poco::URI("file:" + _descriptionPath + "/"), _description);
             Omm::UriDescriptionReader descriptionReader;
-            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + _descriptionPath + "/" + _description);
-            
+            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + _description);
+
+            std::clog << "generating stubs ..." << std::endl;
             _stubWriters.push_back(new DeviceH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCpp(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceImplH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceDescH(pDeviceRoot, _outputPath));
+//            _stubWriters.push_back(new DeviceDescH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlImplH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlCpp(pDeviceRoot, _outputPath));
-            
+
+            std::clog << "writing code ..." << std::endl;
             for (std::vector<StubWriter*>::iterator i = _stubWriters.begin(); i != _stubWriters.end(); ++i) {
                 (*i)->write();
             }
@@ -147,7 +142,6 @@ protected:
 private:
     bool                        _helpRequested;
     std::string                 _description;
-    std::string                 _descriptionPath;
     std::string                 _outputPath;
     std::vector<StubWriter*>    _stubWriters;
 };

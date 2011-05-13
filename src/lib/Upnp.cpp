@@ -49,7 +49,7 @@ Log::Log()
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
@@ -424,7 +424,7 @@ SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
 DeviceRoot*
 UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
 {
-    _deviceDescriptionUri = deviceDescriptionUri;
+    _descriptionUri = deviceDescriptionUri;
     return parseDeviceRoot(parseDescription(getDescription(deviceDescriptionUri)));
 }
 
@@ -432,20 +432,26 @@ UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
 std::string&
 UriDescriptionReader::getDescription(const std::string& relativeUri)
 {
-    Poco::URI targetUri(_deviceDescriptionUri);
-    targetUri.resolve(relativeUri);
-    Log::instance()->desc().information("retrieving device description from: " + targetUri.toString());
-    
+    Log::instance()->desc().information("base URI: " + _descriptionUri);
+    Log::instance()->desc().information("relative URI: " + relativeUri);
     std::string* res;
+    Poco::URI targetUri(_descriptionUri);
     
     if (targetUri.getScheme() == "file") {
-        Log::instance()->desc().information("reading description from file: " + targetUri.getPath());
-        std::ifstream ifs(targetUri.getPath().c_str());
+        // NOTE: resolving file path against description uri doesn't work because
+        // base directory is deleted, when relativeUri has a leading slash
+        Poco::Path descriptionPath(targetUri.getPath());
+        Poco::Path relativePath(relativeUri);
+        std::string path = descriptionPath.parent().toString() + relativePath.getFileName();
+        Log::instance()->desc().information("reading description from file: " + path);
+        std::ifstream ifs(path.c_str());
         std::stringstream ss;
         Poco::StreamCopier::copyStream(ifs, ss);
         res = new std::string(ss.str());
     }
     else if (targetUri.getScheme() == "http") {
+        targetUri.resolve(relativeUri);
+        Log::instance()->desc().information("retrieving description from: " + targetUri.toString());
         Log::instance()->desc().information("downloading description from host: " + targetUri.getHost()
              + ", port: " + Poco::NumberFormatter::format(targetUri.getPort()) + ", path: " + targetUri.getPath());
         Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
@@ -532,16 +538,19 @@ DeviceRoot*
 DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
 {
     DeviceRoot* pRes = new DeviceRoot();
-    // NOTE: a running HttpSocket is needed here, to set host and port of BaseUri and DescriptionUri
-    //       that's why ommgen crashes without setting up a socket in HttpSocket::init()
+    bool deviceNodeFound = false;
     while (pNode)
     {
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
+            deviceNodeFound = true;
             Device* pDevice = device(pNode->firstChild(), pRes);
             pRes->addDevice(pDevice);
             pRes->setRootDevice(pDevice);
         }
         pNode = pNode->nextSibling();
+    }
+    if (!deviceNodeFound) {
+        Log::instance()->desc().error("file does not contain a UPnP device description.");
     }
     return pRes;
 }
@@ -1661,6 +1670,8 @@ IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 
 
 HttpSocket::HttpSocket()
+//:
+//_isRunning(false)
 {
 }
 
@@ -1688,6 +1699,7 @@ void
 HttpSocket::startServer()
 {
     _pHttpServer->start();
+//    _isRunning = true;
     Log::instance()->http().information("HTTP server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
 }
 
@@ -1696,6 +1708,7 @@ void
 HttpSocket::stopServer()
 {
     _pHttpServer->stop();
+//    _isRunning = false;
     Log::instance()->http().information("HTTP server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
 }
 
@@ -1703,12 +1716,17 @@ HttpSocket::stopServer()
 std::string
 HttpSocket::getServerUri()
 {
+//    if (_isRunning) {
     Poco::Net::IPAddress validIpAddress = Net::NetworkInterfaceManager::instance()->getValidIpAddress();
     std::string validIpAddressString = validIpAddress.toString();
     if (validIpAddress.family() == Poco::Net::IPAddress::IPv6) {
         validIpAddressString = "[" + validIpAddressString + "]";
     }
     return "http://" + validIpAddressString + ":" + Poco::NumberFormatter::format(_httpServerPort) + "/";
+//    }
+//    else {
+//        return "";
+//    }
 }
 
 

@@ -34,7 +34,7 @@ using Omm::StateVar;
 using Omm::Action;
 using Omm::Argument;
 
-// TODO: the original UPnP-AV XML service description contain eventedAttributes as
+// TODO: the original UPnP-AV XML service descriptions contain eventedAttributes as
 //       elements and not as attributes. This case is not handled here and segfaults.
 
 class StubWriter

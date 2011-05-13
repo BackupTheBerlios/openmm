@@ -476,14 +476,11 @@ private:
 class DescriptionReader
 {
 public:
-//     DescriptionReader(const std::string& deviceDescriptionUri);  
     DescriptionReader();
     ~DescriptionReader();
     
     
 protected:
-//     virtual void fixQuirkyPath(std::string& path);
-//     virtual void fixQuirkyPathRemoveFileName(std::string& path);
     virtual std::string& getDescription(const std::string& path) = 0;
     
     void releaseDescriptionDocument();
@@ -496,29 +493,22 @@ protected:
     Argument* argument(Poco::XML::Node* pNode);
     StateVar* stateVar(Poco::XML::Node* pNode);
     
-    
-//     Poco::URI                           _deviceDescriptionUri;  // this is the base URI
-//     std::string                         _deviceDescriptionPath;
-    // TODO: replace _nodeStack by argument Node* in the factory methods
-//     std::stack<Poco::XML::Node*>        _nodeStack;
     std::stack<Poco::XML::Document*>    _pDocStack;
-//     DeviceRoot*                         _pDeviceRoot;
 };
 
 
 class UriDescriptionReader : public DescriptionReader
 {
 public:
-    // deviceDescriptionUri is the base URI
-//     UriDescriptionReader(const std::string& deviceDescriptionUri);
-//     UriDescriptionReader(Poco::URI uri, const std::string& deviceDescriptionPath);
     DeviceRoot* deviceRoot(const std::string& deviceDescriptionUri);
+    /// read and parse a description from the URI given in deviceDescriptionUri
+    /// the service description URIs contained in the device description
+    /// can be relative to deviceDescriptionUri
     
 private:
     virtual std::string& getDescription(const std::string& relativeUri);
     
-    std::string   _deviceDescriptionUri; // this is the base URI
-//     Poco::URI _uri;
+    std::string   _descriptionUri; // this is the base URI
 };
 
 

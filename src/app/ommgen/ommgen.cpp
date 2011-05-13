@@ -28,7 +28,7 @@ std::string StubWriter::preamble = \
 /***************************************************************************|\n\
 |  OMM - Open Multimedia                                                    |\n\
 |                                                                           |\n\
-|  Copyright (C) 2009, 2010                                                 |\n\
+|  Copyright (C) 2009, 2010, 2011                                           |\n\
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |\n\
 |                                                                           |\n\
 |  This file is part of OMM.                                                |\n\
@@ -69,9 +69,13 @@ StubWriter::StubWriter(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 _pDeviceRoot(pDeviceRoot),
 _outputPath(outputPath)
 {
+    std::clog << "ctor stub writer";
+    
     Omm::Urn deviceType(pDeviceRoot->getRootDevice()->getDeviceType());
     _deviceName = deviceType.getTypeName();
     _outputPath += "/";
+
+    std::clog << "device name: " << _deviceName << ", output path: " << _outputPath << std::endl;
     
     _typeMapper["boolean"] = "bool";
     _typeMapper["ui1"] = "Omm::ui1";
@@ -91,6 +95,8 @@ _outputPath(outputPath)
 void
 StubWriter::write()
 {
+    std::clog << "writing: " << _outputPath + "/" + _deviceName << std::endl;
+
     deviceRoot(*_pDeviceRoot);
     for (DeviceRoot::ServiceTypeIterator s = _pDeviceRoot->beginServiceType(); s != _pDeviceRoot->endServiceType(); ++s) {
         Service& rs = *((*s).second);
@@ -671,6 +677,7 @@ DeviceImplCpp::argument(const Argument& argument, bool lastArgument)
 DeviceDescH::DeviceDescH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 _out((_outputPath + _deviceName + "Descriptions.h").c_str())
+//        _out(std::clog)
 {
 }
 
