@@ -750,6 +750,8 @@ private:
     std::string                             _controlPath;
     ControlRequestHandler*                  _controlRequestHandler;
     std::string                             _eventPath;
+    // PROPOSE: add EventRequestHandler* for Controller here??
+    // PROPOSE: rename current EventRequestHandler to EventSubscriptionRequestHandler
     Container<Action>                       _actions;
     Container<StateVar>                     _stateVars;
     Container<StateVar>                     _eventedStateVars;
@@ -898,7 +900,8 @@ public:
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
     void setImplAdapter(DeviceRootImplAdapter* implAdapter) { _pDeviceRootImplAdapter = implAdapter; }
-    void initStateVars(const std::string& serviceType, Service* pThis);
+//    void initStateVars(const std::string& serviceType, Service* pThis);
+    void initStateVars(Service* pThis);
 
     
 private:
@@ -941,7 +944,7 @@ public:
     
 protected:
     virtual void actionHandler(Action* action) = 0;
-    virtual void initStateVars(const std::string& serviceType, Service* pThis) = 0;
+    virtual void initStateVars(Service* pThis) = 0;
     virtual bool initDevice() { return true; }
     /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
     /// if initialization takes a while to process, start the device in threaded mode with start(true).
@@ -979,6 +982,25 @@ protected:
 };
 
 
+class ControllerImplAdapter
+{
+    friend class Controller;
+
+public:
+    Device* getDevice() const { return _pDevice; }
+
+//protected:
+    ControllerImplAdapter(Device* pDevice) : _pDevice(pDevice) {}
+
+protected:
+//    virtual void eventHandler(StateVar* stateVar) = 0;
+    virtual void eventHandler(StateVar* stateVar) {}
+    void init();
+
+    Device*         _pDevice;
+};
+
+
 class Controller
 {
 public:
@@ -993,8 +1015,9 @@ public:
     UserInterface* getUserInterface();
 
 protected:
-    UserInterface*                  _pUserInterface;
-    Container<DeviceRoot>           _devices;
+    UserInterface*                      _pUserInterface;
+//    Container<DeviceRoot>           _devices;
+    Container<ControllerImplAdapter>    _devices;
     
 private:
     void sendMSearch();
@@ -1006,21 +1029,7 @@ private:
     void update();
     
     SsdpSocket                      _ssdpSocket;
-};
-
-
-class ControllerImplAdapter
-{
-public:
-    Device* getDevice() const { return _pDevice; }
-
-protected:
-    ControllerImplAdapter(Device* pDevice) : _pDevice(pDevice) {}
-    
-    virtual void eventHandler(StateVar* stateVar) = 0;
-    void init();
-    
-    Device*         _pDevice;
+//    HttpSocket                      _eventSocket;
 };
 
 

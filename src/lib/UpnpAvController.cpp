@@ -349,6 +349,10 @@ AvController::serverDevice(int numServer)
 void
 AvController::deviceAdded(DeviceRoot* pDeviceRoot)
 {
+    // FIXME: need a list of ControllerImplAdapters for calling eventHandler(StateVar*)
+    // FIXME: ownership of ControllerImplAdapters ...
+    // FIXME: add all devices, not only root device
+
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceRoot->getRootDevice();
     Log::instance()->upnpav().information("device added, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());

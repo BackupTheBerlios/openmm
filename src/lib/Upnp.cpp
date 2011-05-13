@@ -47,11 +47,11 @@ Log::Log()
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, 0);
 #else
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
 
@@ -1257,7 +1257,7 @@ Service::initClient()
 }
 
 // FIXME: when starting 15 servers and killing them with killall at once
-//        ommc still shows a couple of them though they are dead
+//        ommcontrol still shows a couple of them though they are dead
 
 
 void
@@ -1800,16 +1800,27 @@ DeviceRoot::print()
 
 
 void
-DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
+//DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
+DeviceRoot::initStateVars(Service* pThis)
 {
-    Log::instance()->upnp().debug("init state vars of service: " + serviceType);
-    _pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
+    Log::instance()->upnp().debug("init state vars of service: " + pThis->getServiceType());
+//    _pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
+    _pDeviceRootImplAdapter->initStateVars(pThis);
 }
 
 
 void
 DeviceRoot::initController()
 {
+    _httpSocket.init();
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        Log::instance()->upnp().debug("init device root (controller)");
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            Service* ps = *s;
+//            initStateVars(ps->getServiceType(), ps);
+            ps->setEventPath("/" + ps->getServiceId() + "/EventNotification");
+        }
+    }
 }
 
 
@@ -1828,7 +1839,8 @@ DeviceRoot::initDevice()
         
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
-            initStateVars(ps->getServiceType(), ps);
+//            initStateVars(ps->getServiceType(), ps);
+            initStateVars(ps);
             ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
             ps->setControlPath("/" + ps->getServiceId() + "/Control");
             ps->setEventPath("/" + ps->getServiceId() + "/EventSubscription");
@@ -2328,15 +2340,19 @@ void
 Controller::addDevice(DeviceRoot* pDeviceRoot)
 {
     // TODO: handle "alive refreshments"
+    // TODO: handle subdevices
     std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
     if (!_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller adds device: " + uuid);
         pDeviceRoot->_pController = this;
+        pDeviceRoot->initController();
         _pUserInterface->beginAddDevice(_devices.position(uuid));
-        _devices.append(uuid, pDeviceRoot);
+//        _devices.append(pDeviceRoot);
+        _devices.append(uuid, new ControllerImplAdapter(pDeviceRoot->getRootDevice()));
         _pUserInterface->endAddDevice(_devices.position(uuid));
         deviceAdded(pDeviceRoot);
     }
+//    _devices.get("").eventHandler(0);
 }
 
 
@@ -2345,7 +2361,8 @@ Controller::removeDevice(const std::string& uuid)
 {
     if (_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
-        DeviceRoot* pDeviceRoot = &_devices.get(uuid);
+//        DeviceRoot* pDeviceRoot = &_devices.get(uuid);
+        DeviceRoot* pDeviceRoot = _devices.get(uuid).getDevice()->getDeviceRoot();
         deviceRemoved(pDeviceRoot);
         _pUserInterface->beginRemoveDevice(_devices.position(uuid));
         _devices.remove(uuid);
@@ -2359,7 +2376,10 @@ void
 Controller::update()
 {
     // TODO: do a more carefull controller update and don't remove servers that are still active.
-    for (Container<DeviceRoot>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+//    for (Container<DeviceRoot>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+//        removeDevice((*it).first);
+//    }
+    for (Container<ControllerImplAdapter>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
         removeDevice((*it).first);
     }
     sendMSearch();

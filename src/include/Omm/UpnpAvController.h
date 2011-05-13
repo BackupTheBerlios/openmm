@@ -170,6 +170,11 @@ public:
     
 private:
     virtual void deviceAdded(DeviceRoot* pDeviceRoot);
+    /// get root device of pDeviceRoot
+    /// create ControllerImplAdapter with ServiceControllers depending on type of root device
+    /// add it to list of renderers if type is AvRenderer
+    /// add it to list of servers if type is AvServer
+    // TODO: handle subdevices.
     virtual void deviceRemoved(DeviceRoot* pDeviceRoot);
     
     Container<RendererView>               _renderers;

@@ -276,7 +276,8 @@ protected:
 
 private:
     virtual void actionHandler(Action* action);
-    virtual void initStateVars(const std::string& serviceType, Service* pThis);
+    // 2011-05-13 virtual void initStateVars(const std::string& serviceType, Service* pThis);
+    virtual void initStateVars(Service* pThis); // 2011-05-13
 
     static std::string _deviceDescription;
 };
@@ -294,7 +295,8 @@ protected:
     
 private:
     virtual void actionHandler(Action* action);
-    virtual void initStateVars(const std::string& serviceType, Service* pThis);
+    // 2011-05-13 virtual void initStateVars(const std::string& serviceType, Service* pThis);
+    virtual void initStateVars(Service* pThis); // 2011-05-13
 
     static std::string _deviceDescription;
 };

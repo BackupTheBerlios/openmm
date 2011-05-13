@@ -77,8 +77,9 @@ DimmableLight::actionHandler(Action* pAction)
 
 
 void
-DimmableLight::initStateVars(const std::string& serviceType, Service* pThis)
+DimmableLight::initStateVars(Service* pThis)
 {
+    std::string serviceType = pThis->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:Dimming:1") {
         _pDimmingImpl->_pService = pThis;
         _pDimmingImpl->initStateVars();

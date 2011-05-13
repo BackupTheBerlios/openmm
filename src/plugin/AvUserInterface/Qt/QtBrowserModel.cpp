@@ -39,10 +39,10 @@ QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const Q
     QRect textRect(option.rect);
     textRect.setLeft(iconRect.right() + padding);
 
-    Omm::Av::Log::instance()->upnpav().debug(
-        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
-    );
+//    Omm::Av::Log::instance()->upnpav().debug(
+//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
+//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
+//    );
 
     if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
         QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));

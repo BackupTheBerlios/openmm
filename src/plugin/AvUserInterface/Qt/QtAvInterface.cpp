@@ -156,7 +156,7 @@ QtAvInterface::~QtAvInterface()
 void
 QtAvInterface::initGui()
 {
-    Omm::Av::Log::instance()->upnpav().debug("init qt gui ...");
+//    Omm::Av::Log::instance()->upnpav().debug("init qt gui ...");
 
     qRegisterMetaType<std::string>();
 
@@ -227,7 +227,7 @@ QtAvInterface::initGui()
 //    addLocalServer(pServer);
 //    startLocalServers();
 
-    Omm::Av::Log::instance()->upnpav().debug("finished init qt gui.");
+//    Omm::Av::Log::instance()->upnpav().debug("finished init qt gui.");
 }
 
 

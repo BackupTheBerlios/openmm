@@ -80,9 +80,9 @@ VlcEngine::createPlayer()
     handleException();
 
     if (_pVisual) {
-        Omm::Av::Log::instance()->upnpav().error("vlc engine: set visual ...");
+        Omm::Av::Log::instance()->upnpav().debug("vlc engine: set visual ...");
         if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
-            Omm::Av::Log::instance()->upnpav().error("vlc engine: set x11 visual ...");
+            Omm::Av::Log::instance()->upnpav().debug("vlc engine: set x11 visual ...");
 #if LIBVLC_VERSION_INT < 0x110
             libvlc_media_player_set_xwindow(_pVlcPlayer, *(Poco::UInt32*)_pVisual->getWindow(), &_exception);
 #else
@@ -122,7 +122,7 @@ VlcEngine::play()
         _pVisual->renderImage(image.getBuffer());
     }
     else {
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: play ...");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: play ...");
 //    int tryMediaConnect = _maxMediaConnect;
 //    while (tryMediaConnect-- && !_pVlcMedia) {
 //#if LIBVLC_VERSION_INT < 0x110
@@ -136,7 +136,7 @@ VlcEngine::play()
 //        }
 //    }
 
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: create new media ...");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: create new media ...");
 #if LIBVLC_VERSION_INT < 0x110
     _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), &_exception);
 #else
@@ -144,7 +144,7 @@ VlcEngine::play()
 #endif
     handleException();
 
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: player set media ...");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: player set media ...");
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia, &_exception);
 #else
@@ -152,10 +152,10 @@ VlcEngine::play()
 #endif
     handleException();
 
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: release media ...");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: release media ...");
     libvlc_media_release(_pVlcMedia);
 
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: play media ...");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: play media ...");
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_play(_pVlcPlayer, &_exception);
 #else
@@ -168,7 +168,7 @@ VlcEngine::play()
         _pVisual->show();
     }
 
-    Omm::Av::Log::instance()->upnpav().error("vlc engine: play media finished.");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: play media finished.");
 }
 
 
