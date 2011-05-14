@@ -1141,6 +1141,10 @@ ServiceDescriptionWriter::argument(Argument* pArgument)
     pArgumentElement->appendChild(pDirection);
     
     // relatedStateVariable
+    Poco::AutoPtr<Poco::XML::Element> pRelatedStateVar = _pDoc->createElement("relatedStateVariable");
+    Poco::AutoPtr<Poco::XML::Text> pRelatedStateVarVal = _pDoc->createTextNode(pArgument->getRelatedStateVarName());
+    pRelatedStateVar->appendChild(pRelatedStateVarVal);
+    pArgumentElement->appendChild(pRelatedStateVar);
 
     return pArgumentElement;
 }
