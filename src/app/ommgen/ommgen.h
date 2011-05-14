@@ -112,6 +112,7 @@ private:
     std::stringstream           _currentOutArgSetter;
     std::stringstream           _getSet;
     std::stringstream           _stateVarInitializer;
+    std::stringstream           _serviceActionDispatcher;
     bool                        _firstService;
     bool                        _firstAction;
 };

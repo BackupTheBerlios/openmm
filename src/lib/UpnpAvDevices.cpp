@@ -29,111 +29,112 @@ MediaRenderer::actionHandler(Action* pAction)
 {
     // the great action dispatcher
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:AVTransport:1") {
-        std::string actionName = pAction->getName();
-
-        if (actionName == "SetAVTransportURI") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            std::string CurrentURI = pAction->getArgument<std::string>("CurrentURI");
-            std::string CurrentURIMetaData = pAction->getArgument<std::string>("CurrentURIMetaData");
-            _pAVTransportImpl->SetAVTransportURI(InstanceID, CurrentURI, CurrentURIMetaData);
-        }
-        else if (actionName == "GetMediaInfo") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            ui4 NrTracks;
-            std::string MediaDuration;
-            std::string CurrentURI;
-            std::string CurrentURIMetaData;
-            std::string NextURI;
-            std::string NextURIMetaData;
-            std::string PlayMedium;
-            std::string RecordMedium;
-            std::string WriteStatus;
-            _pAVTransportImpl->GetMediaInfo(InstanceID, NrTracks, MediaDuration, CurrentURI, CurrentURIMetaData, NextURI, NextURIMetaData, PlayMedium, RecordMedium, WriteStatus);
-            pAction->setArgument<ui4>("NrTracks", NrTracks);
-            pAction->setArgument<std::string>("MediaDuration", MediaDuration);
-            pAction->setArgument<std::string>("CurrentURI", CurrentURI);
-            pAction->setArgument<std::string>("CurrentURIMetaData", CurrentURIMetaData);
-            pAction->setArgument<std::string>("NextURI", NextURI);
-            pAction->setArgument<std::string>("NextURIMetaData", NextURIMetaData);
-            pAction->setArgument<std::string>("PlayMedium", PlayMedium);
-            pAction->setArgument<std::string>("RecordMedium", RecordMedium);
-            pAction->setArgument<std::string>("WriteStatus", WriteStatus);
-        }
-        else if (actionName == "GetTransportInfo") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            std::string CurrentTransportState;
-            std::string CurrentTransportStatus;
-            std::string CurrentSpeed;
-            _pAVTransportImpl->GetTransportInfo(InstanceID, CurrentTransportState, CurrentTransportStatus, CurrentSpeed);
-            pAction->setArgument<std::string>("CurrentTransportState", CurrentTransportState);
-            pAction->setArgument<std::string>("CurrentTransportStatus", CurrentTransportStatus);
-            pAction->setArgument<std::string>("CurrentSpeed", CurrentSpeed);
-        }
-        else if (actionName == "GetPositionInfo") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            ui4 Track;
-            std::string TrackDuration;
-            std::string TrackMetaData;
-            std::string TrackURI;
-            std::string RelTime;
-            std::string AbsTime;
-            i4 RelCount;
-            i4 AbsCount;
-            _pAVTransportImpl->GetPositionInfo(InstanceID, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
-            pAction->setArgument<ui4>("Track", Track);
-            pAction->setArgument<std::string>("TrackDuration", TrackDuration);
-            pAction->setArgument<std::string>("TrackMetaData", TrackMetaData);
-            pAction->setArgument<std::string>("TrackURI", TrackURI);
-            pAction->setArgument<std::string>("RelTime", RelTime);
-            pAction->setArgument<std::string>("AbsTime", AbsTime);
-            pAction->setArgument<i4>("RelCount", RelCount);
-            pAction->setArgument<i4>("AbsCount", AbsCount);
-        }
-        else if (actionName == "GetDeviceCapabilities") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            std::string PlayMedia;
-            std::string RecMedia;
-            std::string RecQualityModes;
-            _pAVTransportImpl->GetDeviceCapabilities(InstanceID, PlayMedia, RecMedia, RecQualityModes);
-            pAction->setArgument<std::string>("PlayMedia", PlayMedia);
-            pAction->setArgument<std::string>("RecMedia", RecMedia);
-            pAction->setArgument<std::string>("RecQualityModes", RecQualityModes);
-        }
-        else if (actionName == "GetTransportSettings") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            std::string PlayMode;
-            std::string RecQualityMode;
-            _pAVTransportImpl->GetTransportSettings(InstanceID, PlayMode, RecQualityMode);
-            pAction->setArgument<std::string>("PlayMode", PlayMode);
-            pAction->setArgument<std::string>("RecQualityMode", RecQualityMode);
-        }
-        else if (actionName == "Stop") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            _pAVTransportImpl->Stop(InstanceID);
-        }
-        else if (actionName == "Play") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            std::string Speed = pAction->getArgument<std::string>("Speed");
-            _pAVTransportImpl->Play(InstanceID, Speed);
-        }
-        else if (actionName == "Pause") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            _pAVTransportImpl->Pause(InstanceID);
-        }
-        else if (actionName == "Seek") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            std::string Unit = pAction->getArgument<std::string>("Unit");
-            std::string Target = pAction->getArgument<std::string>("Target");
-            _pAVTransportImpl->Seek(InstanceID, Unit, Target);
-        }
-        else if (actionName == "Next") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            _pAVTransportImpl->Next(InstanceID);
-        }
-        else if (actionName == "Previous") {
-            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
-            _pAVTransportImpl->Previous(InstanceID);
-        }
+        _pAVTransportImpl->actionHandler(pAction);
+//        std::string actionName = pAction->getName();
+//
+//        if (actionName == "SetAVTransportURI") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            std::string CurrentURI = pAction->getArgument<std::string>("CurrentURI");
+//            std::string CurrentURIMetaData = pAction->getArgument<std::string>("CurrentURIMetaData");
+//            _pAVTransportImpl->SetAVTransportURI(InstanceID, CurrentURI, CurrentURIMetaData);
+//        }
+//        else if (actionName == "GetMediaInfo") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            ui4 NrTracks;
+//            std::string MediaDuration;
+//            std::string CurrentURI;
+//            std::string CurrentURIMetaData;
+//            std::string NextURI;
+//            std::string NextURIMetaData;
+//            std::string PlayMedium;
+//            std::string RecordMedium;
+//            std::string WriteStatus;
+//            _pAVTransportImpl->GetMediaInfo(InstanceID, NrTracks, MediaDuration, CurrentURI, CurrentURIMetaData, NextURI, NextURIMetaData, PlayMedium, RecordMedium, WriteStatus);
+//            pAction->setArgument<ui4>("NrTracks", NrTracks);
+//            pAction->setArgument<std::string>("MediaDuration", MediaDuration);
+//            pAction->setArgument<std::string>("CurrentURI", CurrentURI);
+//            pAction->setArgument<std::string>("CurrentURIMetaData", CurrentURIMetaData);
+//            pAction->setArgument<std::string>("NextURI", NextURI);
+//            pAction->setArgument<std::string>("NextURIMetaData", NextURIMetaData);
+//            pAction->setArgument<std::string>("PlayMedium", PlayMedium);
+//            pAction->setArgument<std::string>("RecordMedium", RecordMedium);
+//            pAction->setArgument<std::string>("WriteStatus", WriteStatus);
+//        }
+//        else if (actionName == "GetTransportInfo") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            std::string CurrentTransportState;
+//            std::string CurrentTransportStatus;
+//            std::string CurrentSpeed;
+//            _pAVTransportImpl->GetTransportInfo(InstanceID, CurrentTransportState, CurrentTransportStatus, CurrentSpeed);
+//            pAction->setArgument<std::string>("CurrentTransportState", CurrentTransportState);
+//            pAction->setArgument<std::string>("CurrentTransportStatus", CurrentTransportStatus);
+//            pAction->setArgument<std::string>("CurrentSpeed", CurrentSpeed);
+//        }
+//        else if (actionName == "GetPositionInfo") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            ui4 Track;
+//            std::string TrackDuration;
+//            std::string TrackMetaData;
+//            std::string TrackURI;
+//            std::string RelTime;
+//            std::string AbsTime;
+//            i4 RelCount;
+//            i4 AbsCount;
+//            _pAVTransportImpl->GetPositionInfo(InstanceID, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
+//            pAction->setArgument<ui4>("Track", Track);
+//            pAction->setArgument<std::string>("TrackDuration", TrackDuration);
+//            pAction->setArgument<std::string>("TrackMetaData", TrackMetaData);
+//            pAction->setArgument<std::string>("TrackURI", TrackURI);
+//            pAction->setArgument<std::string>("RelTime", RelTime);
+//            pAction->setArgument<std::string>("AbsTime", AbsTime);
+//            pAction->setArgument<i4>("RelCount", RelCount);
+//            pAction->setArgument<i4>("AbsCount", AbsCount);
+//        }
+//        else if (actionName == "GetDeviceCapabilities") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            std::string PlayMedia;
+//            std::string RecMedia;
+//            std::string RecQualityModes;
+//            _pAVTransportImpl->GetDeviceCapabilities(InstanceID, PlayMedia, RecMedia, RecQualityModes);
+//            pAction->setArgument<std::string>("PlayMedia", PlayMedia);
+//            pAction->setArgument<std::string>("RecMedia", RecMedia);
+//            pAction->setArgument<std::string>("RecQualityModes", RecQualityModes);
+//        }
+//        else if (actionName == "GetTransportSettings") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            std::string PlayMode;
+//            std::string RecQualityMode;
+//            _pAVTransportImpl->GetTransportSettings(InstanceID, PlayMode, RecQualityMode);
+//            pAction->setArgument<std::string>("PlayMode", PlayMode);
+//            pAction->setArgument<std::string>("RecQualityMode", RecQualityMode);
+//        }
+//        else if (actionName == "Stop") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            _pAVTransportImpl->Stop(InstanceID);
+//        }
+//        else if (actionName == "Play") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            std::string Speed = pAction->getArgument<std::string>("Speed");
+//            _pAVTransportImpl->Play(InstanceID, Speed);
+//        }
+//        else if (actionName == "Pause") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            _pAVTransportImpl->Pause(InstanceID);
+//        }
+//        else if (actionName == "Seek") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            std::string Unit = pAction->getArgument<std::string>("Unit");
+//            std::string Target = pAction->getArgument<std::string>("Target");
+//            _pAVTransportImpl->Seek(InstanceID, Unit, Target);
+//        }
+//        else if (actionName == "Next") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            _pAVTransportImpl->Next(InstanceID);
+//        }
+//        else if (actionName == "Previous") {
+//            ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+//            _pAVTransportImpl->Previous(InstanceID);
+//        }
     }
     else if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:ConnectionManager:1") {
         std::string actionName = pAction->getName();
@@ -387,7 +388,7 @@ MediaRenderer::actionHandler(Action* pAction)
 void
 MediaRenderer::initStateVars(Service* pThis)
 {
-    std::string serviceType = pThis->getServiceType(); // 2011-05-13
+    std::string serviceType = pThis->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
         _pAVTransportImpl->_pService = pThis;
         _pAVTransportImpl->initStateVars();
@@ -417,6 +418,117 @@ _pAVTransportImpl(pAVTransportImpl)
     StringDescriptionReader descriptionReader(_descriptions);
     _pDeviceRoot = descriptionReader.deviceRoot("/MediaRenderer.xml");
     _pDeviceRoot->setImplAdapter(this);
+}
+
+
+void
+AVTransport::actionHandler(Action* pAction)
+{
+    std::string actionName = pAction->getName();
+
+    if (actionName == "SetAVTransportURI") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        std::string CurrentURI = pAction->getArgument<std::string>("CurrentURI");
+        std::string CurrentURIMetaData = pAction->getArgument<std::string>("CurrentURIMetaData");
+        SetAVTransportURI(InstanceID, CurrentURI, CurrentURIMetaData);
+    }
+    else if (actionName == "GetMediaInfo") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        ui4 NrTracks;
+        std::string MediaDuration;
+        std::string CurrentURI;
+        std::string CurrentURIMetaData;
+        std::string NextURI;
+        std::string NextURIMetaData;
+        std::string PlayMedium;
+        std::string RecordMedium;
+        std::string WriteStatus;
+        GetMediaInfo(InstanceID, NrTracks, MediaDuration, CurrentURI, CurrentURIMetaData, NextURI, NextURIMetaData, PlayMedium, RecordMedium, WriteStatus);
+        pAction->setArgument<ui4>("NrTracks", NrTracks);
+        pAction->setArgument<std::string>("MediaDuration", MediaDuration);
+        pAction->setArgument<std::string>("CurrentURI", CurrentURI);
+        pAction->setArgument<std::string>("CurrentURIMetaData", CurrentURIMetaData);
+        pAction->setArgument<std::string>("NextURI", NextURI);
+        pAction->setArgument<std::string>("NextURIMetaData", NextURIMetaData);
+        pAction->setArgument<std::string>("PlayMedium", PlayMedium);
+        pAction->setArgument<std::string>("RecordMedium", RecordMedium);
+        pAction->setArgument<std::string>("WriteStatus", WriteStatus);
+    }
+    else if (actionName == "GetTransportInfo") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        std::string CurrentTransportState;
+        std::string CurrentTransportStatus;
+        std::string CurrentSpeed;
+        GetTransportInfo(InstanceID, CurrentTransportState, CurrentTransportStatus, CurrentSpeed);
+        pAction->setArgument<std::string>("CurrentTransportState", CurrentTransportState);
+        pAction->setArgument<std::string>("CurrentTransportStatus", CurrentTransportStatus);
+        pAction->setArgument<std::string>("CurrentSpeed", CurrentSpeed);
+    }
+    else if (actionName == "GetPositionInfo") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        ui4 Track;
+        std::string TrackDuration;
+        std::string TrackMetaData;
+        std::string TrackURI;
+        std::string RelTime;
+        std::string AbsTime;
+        i4 RelCount;
+        i4 AbsCount;
+        GetPositionInfo(InstanceID, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
+        pAction->setArgument<ui4>("Track", Track);
+        pAction->setArgument<std::string>("TrackDuration", TrackDuration);
+        pAction->setArgument<std::string>("TrackMetaData", TrackMetaData);
+        pAction->setArgument<std::string>("TrackURI", TrackURI);
+        pAction->setArgument<std::string>("RelTime", RelTime);
+        pAction->setArgument<std::string>("AbsTime", AbsTime);
+        pAction->setArgument<i4>("RelCount", RelCount);
+        pAction->setArgument<i4>("AbsCount", AbsCount);
+    }
+    else if (actionName == "GetDeviceCapabilities") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        std::string PlayMedia;
+        std::string RecMedia;
+        std::string RecQualityModes;
+        GetDeviceCapabilities(InstanceID, PlayMedia, RecMedia, RecQualityModes);
+        pAction->setArgument<std::string>("PlayMedia", PlayMedia);
+        pAction->setArgument<std::string>("RecMedia", RecMedia);
+        pAction->setArgument<std::string>("RecQualityModes", RecQualityModes);
+    }
+    else if (actionName == "GetTransportSettings") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        std::string PlayMode;
+        std::string RecQualityMode;
+        GetTransportSettings(InstanceID, PlayMode, RecQualityMode);
+        pAction->setArgument<std::string>("PlayMode", PlayMode);
+        pAction->setArgument<std::string>("RecQualityMode", RecQualityMode);
+    }
+    else if (actionName == "Stop") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        Stop(InstanceID);
+    }
+    else if (actionName == "Play") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        std::string Speed = pAction->getArgument<std::string>("Speed");
+        Play(InstanceID, Speed);
+    }
+    else if (actionName == "Pause") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        Pause(InstanceID);
+    }
+    else if (actionName == "Seek") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        std::string Unit = pAction->getArgument<std::string>("Unit");
+        std::string Target = pAction->getArgument<std::string>("Target");
+        Seek(InstanceID, Unit, Target);
+    }
+    else if (actionName == "Next") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        Next(InstanceID);
+    }
+    else if (actionName == "Previous") {
+        ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
+        Previous(InstanceID);
+    }
 }
 
 

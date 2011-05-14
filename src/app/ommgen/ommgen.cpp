@@ -184,7 +184,7 @@ DeviceH::deviceRootEnd(const DeviceRoot& deviceRoot)
     _out <<  std::endl
         << "private:" << std::endl
         << indent(1) << "virtual void actionHandler(Action* action);" << std::endl
-        << indent(1) << "virtual void initStateVars(Service* pThis);" << std::endl
+        << indent(1) << "virtual void initStateVars(Service* pService);" << std::endl
         << std::endl
         << indent(1) << "static std::string _deviceDescription;" << std::endl
         ;
@@ -290,7 +290,6 @@ DeviceH::stateVar(const StateVar& stateVar)
 DeviceCpp::DeviceCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 _out((_outputPath + _deviceName + ".cpp").c_str())
-// _out(&std::cout)
 {
 }
 
@@ -300,7 +299,6 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
 {
     _out
         << preamble
-//         << "#include <omm/upnp.h>" << std::endl
         << "#include \"" << _deviceName << ".h\"" << std::endl
         << "#include \"" << _deviceName << "Descriptions.h\"" << std::endl
         << std::endl
@@ -308,13 +306,14 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
         << "void" << std::endl
         << _deviceName << "::actionHandler(Action* pAction)" << std::endl
         << "{" << std::endl
-        << indent(1) << "// the great action dispatcher" << std::endl;
+//        << indent(1) << "// the great action dispatcher" << std::endl;
+        << indent(1) << "std::string serviceType = pAction->getService()->getServiceType();" << std::endl;
     
     _stateVarInitializer
         << "void" << std::endl
-        << _deviceName << "::initStateVars(Service* pThis)" << std::endl
+        << _deviceName << "::initStateVars(Service* pService)" << std::endl
         << "{" << std::endl
-        << indent(1) <<  "std::string serviceType = pThis->getServiceType();"
+        << indent(1) <<  "std::string serviceType = pService->getServiceType();"
         << std::endl;
     
     _firstService = true;
@@ -381,6 +380,7 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
         << "}" << std::endl
         << std::endl
         << std::endl
+        << _serviceActionDispatcher.str()
         << _getSet.str()
         << std::endl;
 }
@@ -398,16 +398,23 @@ DeviceCpp::serviceType(const Service& service)
     
     _out
         << indent(1) << (_firstService ? "" : "else ")
-        << "if (pAction->getService()->getServiceType() == \""
+        << "if (serviceType == \""
         << service.getServiceType() << "\") {" << std::endl
 //        << indent(2) << "_p" << serviceName << "Impl->_pService = pAction->getService();" << std::endl
-        << indent(2) << "std::string actionName = pAction->getName();" << std::endl
+//        << indent(2) << "std::string actionName = pAction->getName();" << std::endl
+        << indent(2) << "_p" << serviceName << "Impl->actionHandler(pAction);"
         << std::endl;
+
+    _serviceActionDispatcher
+        << "void" << std::endl
+        << _currentService << "::actionHandler(Action* pAction)" << std::endl
+        << "{" << std::endl
+        << indent(1) << "std::string actionName = pAction->getName();" << std::endl;
     
     _stateVarInitializer
         << indent(1) << (_firstService ? "" : "else ")
         << "if (serviceType == \"" << service.getServiceType() << "\") {" << std::endl
-        << indent(2) << "_p" << serviceName << "Impl->_pService = pThis;" << std::endl
+        << indent(2) << "_p" << serviceName << "Impl->_pService = pService;" << std::endl
         << indent(2) << "_p" << serviceName << "Impl->initStateVars();" << std::endl
         << indent(1) << "}" << std::endl;
     
@@ -421,14 +428,20 @@ DeviceCpp::serviceTypeEnd(const Service& service)
     _out
         << indent(1) << "}"
         << std::endl;
+    
+    _serviceActionDispatcher
+        << "}"
+        << std::endl
+        << std::endl
+        << std::endl;
 }
 
 
 void
 DeviceCpp::action(const Action& action)
 {
-    _out
-        << indent(2) << (_firstAction ? "" : "else ")
+    _serviceActionDispatcher
+        << indent(1) << (_firstAction ? "" : "else ")
         << "if (actionName == \"" << action.getName() << "\") {" << std::endl
         ;
     _currentOutArgs = "";
@@ -440,12 +453,13 @@ DeviceCpp::action(const Action& action)
 void
 DeviceCpp::actionEnd(const Action& action)
 {
-    _out
+    _serviceActionDispatcher
         // do the implementation callback here
-        << indent(3) << "_p" << _currentService << "Impl->" << action.getName()
+//        << indent(2) << "_p" << _currentService << "Impl->" << action.getName()
+        << indent(2) << action.getName()
         << "(" << _currentOutArgs << ");" << std::endl
         << _currentOutArgSetter.str()
-        << indent(2) << "}"
+        << indent(1) << "}"
         << std::endl;
 }
 
@@ -454,14 +468,14 @@ void
 DeviceCpp::argument(const Argument& argument, bool lastArgument)
 {
     std::string argType = _typeMapper[argument.getRelatedStateVarReference()->getType()];
-    _out
-        << indent(3) << argType
+    _serviceActionDispatcher
+        << indent(2) << argType
         << " " /*<< argument.getDirection()*/ << argument.getName();
     if (argument.getDirection() == "in") {
-        _out <<
-            " = pAction->getArgument<" << argType << ">(\"" << argument.getName() << "\")";
+        _serviceActionDispatcher
+            << " = pAction->getArgument<" << argType << ">(\"" << argument.getName() << "\")";
     }
-    _out
+    _serviceActionDispatcher
         << ";" << std::endl;
     _currentOutArgs += /*(argument.getDirection() == "in" ? "const " : "")*/
 //         + argType + "& "
@@ -469,7 +483,7 @@ DeviceCpp::argument(const Argument& argument, bool lastArgument)
         + (lastArgument ? "" : ", ");
     if (argument.getDirection() == "out") {
         _currentOutArgSetter
-            << indent(3) << "pAction->setArgument<"
+            << indent(2) << "pAction->setArgument<"
             << argType << ">(\"" << argument.getName()
             << "\", " << argument.getName() 
             << ");" << std::endl;
@@ -494,7 +508,7 @@ DeviceCpp::stateVar(const StateVar& stateVar)
         << indent(1) << "_pService->setStateVar<" << stateVarType 
         << ">(\"" << stateVar.getName() << "\", val);" << std::endl
         << "}" << std::endl
-        << std::endl
+        << std::endl << std::endl
         << stateVarType << std::endl
         
         // StateVar getter method
@@ -504,7 +518,7 @@ DeviceCpp::stateVar(const StateVar& stateVar)
         << indent(1) << "return _pService->getStateVar<" << stateVarType 
         << ">(\"" << stateVar.getName() << "\");" << std::endl
         << "}" << std::endl
-        << std::endl;
+        << std::endl << std::endl;
 }
 
 

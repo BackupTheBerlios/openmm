@@ -53,6 +53,7 @@ protected:
     virtual void Previous(const ui4& InstanceID) = 0;
 
     virtual void initStateVars() = 0;
+    void actionHandler(Action* pAction);
 
     void _setTransportState(const std::string& val);
     std::string _getTransportState();
