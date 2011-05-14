@@ -69,14 +69,10 @@ StubWriter::StubWriter(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 _pDeviceRoot(pDeviceRoot),
 _outputPath(outputPath)
 {
-    std::clog << "ctor stub writer";
-    
     Omm::Urn deviceType(pDeviceRoot->getRootDevice()->getDeviceType());
     _deviceName = deviceType.getTypeName();
     _outputPath += "/";
 
-    std::clog << "device name: " << _deviceName << ", output path: " << _outputPath << std::endl;
-    
     _typeMapper["boolean"] = "bool";
     _typeMapper["ui1"] = "Omm::ui1";
     _typeMapper["ui2"] = "Omm::ui2";
@@ -95,8 +91,6 @@ _outputPath(outputPath)
 void
 StubWriter::write()
 {
-    std::clog << "writing: " << _outputPath + "/" + _deviceName << std::endl;
-
     deviceRoot(*_pDeviceRoot);
     for (DeviceRoot::ServiceTypeIterator s = _pDeviceRoot->beginServiceType(); s != _pDeviceRoot->endServiceType(); ++s) {
         Service& rs = *((*s).second);
@@ -190,7 +184,7 @@ DeviceH::deviceRootEnd(const DeviceRoot& deviceRoot)
     _out <<  std::endl
         << "private:" << std::endl
         << indent(1) << "virtual void actionHandler(Action* action);" << std::endl
-        << indent(1) << "virtual void initStateVars(const std::string& serviceType, Service* pThis);" << std::endl
+        << indent(1) << "virtual void initStateVars(Service* pThis);" << std::endl
         << std::endl
         << indent(1) << "static std::string _deviceDescription;" << std::endl
         ;
@@ -318,8 +312,9 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
     
     _stateVarInitializer
         << "void" << std::endl
-        << _deviceName << "::initStateVars(const std::string& serviceType, Service* pThis)" << std::endl
-        << "{"
+        << _deviceName << "::initStateVars(Service* pThis)" << std::endl
+        << "{" << std::endl
+        << indent(1) <<  "std::string serviceType = pThis->getServiceType();"
         << std::endl;
     
     _firstService = true;
@@ -405,7 +400,7 @@ DeviceCpp::serviceType(const Service& service)
         << indent(1) << (_firstService ? "" : "else ")
         << "if (pAction->getService()->getServiceType() == \""
         << service.getServiceType() << "\") {" << std::endl
-        << indent(2) << "_p" << serviceName << "Impl->_pService = pAction->getService();" << std::endl
+//        << indent(2) << "_p" << serviceName << "Impl->_pService = pAction->getService();" << std::endl
         << indent(2) << "std::string actionName = pAction->getName();" << std::endl
         << std::endl;
     
@@ -992,7 +987,6 @@ DeviceCtrlH::deviceRootEnd(const DeviceRoot& deviceRoot)
         << "private:" << std::endl
         << indent(1) << "virtual void eventHandler(Omm::StateVar* pStateVar);" << std::endl
         << std::endl
-        << indent(1) << "Omm::Device* _pDevice;" << std::endl
         ;
     
     i = _serviceNames.size();
@@ -1202,7 +1196,7 @@ DeviceCtrlCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
         << ctorArgs
         << ") :" << std::endl
         << "ControllerImplAdapter(pDevice)," << std::endl
-        << "_pDevice(pDevice)," << std::endl;
+            ;
     
     i = _serviceNames.size();
     while (i--) {

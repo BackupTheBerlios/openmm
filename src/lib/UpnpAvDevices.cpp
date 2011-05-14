@@ -29,7 +29,6 @@ MediaRenderer::actionHandler(Action* pAction)
 {
     // the great action dispatcher
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:AVTransport:1") {
-// 2011-05-13       _pAVTransportImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "SetAVTransportURI") {
@@ -137,7 +136,6 @@ MediaRenderer::actionHandler(Action* pAction)
         }
     }
     else if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-// 2011-05-13       _pConnectionManagerImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "GetProtocolInfo") {
@@ -176,7 +174,6 @@ MediaRenderer::actionHandler(Action* pAction)
         }
     }
     else if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:RenderingControl:1") {
-// 2011-05-13       _pRenderingControlImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "ListPresets") {
@@ -388,7 +385,6 @@ MediaRenderer::actionHandler(Action* pAction)
 
 
 void
-// 2011-05-13 MediaRenderer::initStateVars(const std::string& serviceType, Service* pThis)
 MediaRenderer::initStateVars(Service* pThis)
 {
     std::string serviceType = pThis->getServiceType(); // 2011-05-13
@@ -1006,7 +1002,6 @@ MediaServer::actionHandler(Action* pAction)
 {
     // the great action dispatcher
     if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:AVTransport:1") {
-// 2011-05-13        _pAVTransportImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "SetAVTransportURI") {
@@ -1114,7 +1109,6 @@ MediaServer::actionHandler(Action* pAction)
         }
     }
     else if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-// 2011-05-13        _pConnectionManagerImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "GetProtocolInfo") {
@@ -1153,7 +1147,6 @@ MediaServer::actionHandler(Action* pAction)
         }
     }
     else if (pAction->getService()->getServiceType() == "urn:schemas-upnp-org:service:ContentDirectory:1") {
-// 2011-05-13       _pContentDirectoryImpl->_pService = pAction->getService();
         std::string actionName = pAction->getName();
 
         if (actionName == "GetSearchCapabilities") {
@@ -1257,10 +1250,9 @@ MediaServer::actionHandler(Action* pAction)
 
 
 void
-// 2011-05-13 MediaServer::initStateVars(const std::string& serviceType, Service* pThis)
-MediaServer::initStateVars(Service* pThis)  // 2011-05-13
+MediaServer::initStateVars(Service* pThis)
 {
-    std::string serviceType = pThis->getServiceType(); // 2011-05-13 
+    std::string serviceType = pThis->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
         _pAVTransportImpl->_pService = pThis;
         _pAVTransportImpl->initStateVars();

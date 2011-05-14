@@ -380,7 +380,6 @@ public:
 private:
     virtual void eventHandler(StateVar* pStateVar);
 
-//     Device* _pDevice;
     RenderingControlController* _pRenderingControlController;
     ConnectionManagerController* _pConnectionManagerController;
     AVTransportController* _pAVTransportController;
@@ -399,7 +398,6 @@ public:
 private:
     virtual void eventHandler(StateVar* pStateVar);
 
-//     Device* _pDevice;
     ContentDirectoryController* _pContentDirectoryController;
     ConnectionManagerController* _pConnectionManagerController;
     AVTransportController* _pAVTransportController;

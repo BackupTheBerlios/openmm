@@ -6,13 +6,13 @@
   </specVersion>
   <device>
     <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
-    <friendlyName>OmmR</friendlyName>
-    <manufacturer>joerg at hakker dot de</manufacturer>
-    <manufacturerURL>http://hakker.de/omm</manufacturerURL>
-    <modelName>Omm Media Renderer</modelName>
-    <modelNumber>0.3</modelNumber>
-    <modelDescription>Omm UPnP Suite's Media Renderer</modelDescription>
-    <modelURL>http://hakker.de/omm</modelURL>
+    <friendlyName>OMM Renderer</friendlyName>
+    <manufacturer>joerg at open-multimedia dot org</manufacturer>
+    <manufacturerURL>http://open-multimedia.org</manufacturerURL>
+    <modelName>OMM Media Renderer</modelName>
+    <modelNumber>0.1</modelNumber>
+    <modelDescription>OMM UPnP Suite's Media Renderer</modelDescription>
+    <modelURL>http://open-multimedia.org</modelURL>
     <UDN>uuid:23b0189c-549f-11dc-a7c7-001641597c49</UDN>
     <serviceList>
       <service>

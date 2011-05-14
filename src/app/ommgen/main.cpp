@@ -61,8 +61,8 @@ protected:
         catch (...) {
             displayHelp();
         }
-        std::clog << "description: " << _description << std::endl;
-        std::clog << "output path: " << _outputPath << std::endl;
+//        std::clog << "description: " << _description << std::endl;
+//        std::clog << "output path: " << _outputPath << std::endl;
     }
     
     void uninitialize()
@@ -123,7 +123,6 @@ protected:
             // headerotherwise DeviceRoot::_pDeviceDescription is 0, std::bad_alloc
             pDeviceRoot->initDevice();
 
-            std::clog << "generating stubs ..." << std::endl;
             _stubWriters.push_back(new DeviceH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCpp(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceImplH(pDeviceRoot, _outputPath));
@@ -134,7 +133,6 @@ protected:
             _stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlCpp(pDeviceRoot, _outputPath));
 
-            std::clog << "writing code ..." << std::endl;
             for (std::vector<StubWriter*>::iterator i = _stubWriters.begin(); i != _stubWriters.end(); ++i) {
                 (*i)->write();
             }

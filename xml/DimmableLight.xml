@@ -6,13 +6,13 @@
 </specVersion>
 <device>
 <deviceType>urn:schemas-upnp-org:device:DimmableLight:1</deviceType>
-<friendlyName>Omm Network Light</friendlyName>
-<manufacturer>Omm Developers</manufacturer>
-<manufacturerURL>http://hakker.de/omm</manufacturerURL>
+<friendlyName>OMM Network Light</friendlyName>
+<manufacturer>joerg at open-multimedia dot org</manufacturer>
+<manufacturerURL>http://open-multimedia.org</manufacturerURL>
 <modelDescription>Software emulated UPnP light bulb</modelDescription>
 <modelName>Network Light</modelName>
 <modelNumber>0.1</modelNumber>
-<modelURL>http://hakker.de/omm</modelURL>
+<modelURL>http://open-multimedia.org</modelURL>
 <serialNumber>0.1</serialNumber>
 <UDN>uuid:23b0189c-549f-11dc-a7c7-001641597c49</UDN>
 <serviceList>
