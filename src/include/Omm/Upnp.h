@@ -871,7 +871,8 @@ public:
     void addServiceType(std::string serviceType, Service* pService) { _serviceTypes[serviceType] = pService; }
     
     void print();
-    
+
+    void initSockets();
     void initDevice();
     void initController();
     void startSsdp();
@@ -890,7 +891,6 @@ public:
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
     void setImplAdapter(DeviceRootImplAdapter* implAdapter) { _pDeviceRootImplAdapter = implAdapter; }
-//    void initStateVars(const std::string& serviceType, Service* pThis);
     void initStateVars(Service* pThis);
 
     

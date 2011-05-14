@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -677,7 +677,6 @@ DeviceImplCpp::argument(const Argument& argument, bool lastArgument)
 DeviceDescH::DeviceDescH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
 _out((_outputPath + _deviceName + "Descriptions.h").c_str())
-//        _out(std::clog)
 {
 }
 
@@ -751,7 +750,6 @@ DeviceDescH::escapeDescription(const std::string& description)
 
 DeviceCtrlImplH::DeviceCtrlImplH(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
-// _out(&std::cout)
 _out((_outputPath + _deviceName + "CtrlImpl.h.sample").c_str())
 {
 }
@@ -857,7 +855,6 @@ DeviceCtrlImplH::stateVar(const StateVar& stateVar)
 
 DeviceCtrlImplCpp::DeviceCtrlImplCpp(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 StubWriter(pDeviceRoot, outputPath),
-// _out(&std::cout)
 _out((_outputPath + _deviceName + "CtrlImpl.cpp.sample").c_str())
 {
 }

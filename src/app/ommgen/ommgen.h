@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -165,7 +165,6 @@ private:
     virtual void serviceType(const Service& service);
     
     std::ofstream       _out;
-//     std::ostream*       _out;
 };
 
 
@@ -185,7 +184,6 @@ private:
     virtual void stateVar(const StateVar& stateVar);
     
     std::ofstream       _out;
-//     std::ostream*       _out;
     std::stringstream   _eventedStateVars;
 };
 
@@ -204,7 +202,6 @@ private:
     virtual void stateVar(const StateVar& stateVar);
     
     std::ofstream       _out;
-//     std::ostream*       _out;
     std::string         _serviceName;
 };
 

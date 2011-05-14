@@ -1767,7 +1767,8 @@ Device::addIcon(Icon* pIcon)
 
 
 DeviceRoot::DeviceRoot() :
-_pController(0)
+_pController(0),
+_pDeviceRootImplAdapter(0)
 {
 }
 
@@ -1818,12 +1819,12 @@ DeviceRoot::print()
 
 
 void
-//DeviceRoot::initStateVars(const std::string& serviceType, Service* pThis)
 DeviceRoot::initStateVars(Service* pThis)
 {
     Log::instance()->upnp().debug("init state vars of service: " + pThis->getServiceType());
-//    _pDeviceRootImplAdapter->initStateVars(serviceType, pThis);
-    _pDeviceRootImplAdapter->initStateVars(pThis);
+    if (_pDeviceRootImplAdapter) {
+        _pDeviceRootImplAdapter->initStateVars(pThis);
+    }
 }
 
 
@@ -1835,7 +1836,7 @@ DeviceRoot::initController()
         Log::instance()->upnp().debug("init device root (controller)");
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
-//            initStateVars(ps->getServiceType(), ps);
+//            initStateVars(ps);
             ps->setEventPath("/" + ps->getServiceId() + "/EventNotification");
         }
     }
@@ -1843,12 +1844,18 @@ DeviceRoot::initController()
 
 
 void
-DeviceRoot::initDevice()
+DeviceRoot::initSockets()
 {
     _ssdpSocket.init();
     _httpSocket.init();
+
     setDescriptionUri();
-    
+}
+
+
+void
+DeviceRoot::initDevice()
+{    
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Log::instance()->upnp().debug("init device root: setting random uuid for device");
         (*d)->setRandomUuid();
@@ -1857,7 +1864,6 @@ DeviceRoot::initDevice()
         
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
-//            initStateVars(ps->getServiceType(), ps);
             initStateVars(ps);
             ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
             ps->setControlPath("/" + ps->getServiceId() + "/Control");
@@ -2092,6 +2098,7 @@ DeviceRootImplAdapter::start()
         _pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
 
     //     _pDeviceRoot->print();
+        _pDeviceRoot->initSockets();
         _pDeviceRoot->initDevice();
     //     _pDeviceRoot->print();
         _pDeviceRoot->startHttp();

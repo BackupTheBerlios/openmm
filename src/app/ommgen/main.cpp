@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -119,13 +119,14 @@ protected:
         {
             Omm::UriDescriptionReader descriptionReader;
             Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + _description);
+            pDeviceRoot->initDevice();
 
             std::clog << "generating stubs ..." << std::endl;
             _stubWriters.push_back(new DeviceH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCpp(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceImplH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, _outputPath));
-//            _stubWriters.push_back(new DeviceDescH(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceDescH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlImplH(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceRoot, _outputPath));
             _stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, _outputPath));
