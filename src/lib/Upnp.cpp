@@ -930,7 +930,7 @@ DeviceDescriptionWriter::device(Device& device)
     pDevice->appendChild(pUuid);
     
     // Properties
-    for (Container<std::string>::KeyIterator it = device._properties.beginKey(); it != device._properties.endKey(); ++it) {
+    for (Device::PropertyIterator it = device.beginProperty(); it != device.endProperty(); ++it) {
         Poco::AutoPtr<Poco::XML::Element> pProp = _pDoc->createElement((*it).first);
         Poco::AutoPtr<Poco::XML::Text> pVal = _pDoc->createTextNode(*((*it).second));
         pProp->appendChild(pVal);
@@ -938,9 +938,9 @@ DeviceDescriptionWriter::device(Device& device)
         Log::instance()->desc().debug("writer added property: " + (*it).first + " = " + *(*it).second);
     }
     
+    // Icons
     Poco::AutoPtr<Poco::XML::Element> pIconList = _pDoc->createElement("iconList");
     pDevice->appendChild(pIconList);
-    // Icons
     for (Device::IconIterator it = device.beginIcon(); it != device.endIcon(); ++it) {
 //        if ((*it)->_pData) {
         if ((*it)->_buffer.size()) {
@@ -949,10 +949,10 @@ DeviceDescriptionWriter::device(Device& device)
         }
     }
     
-    Poco::AutoPtr<Poco::XML::Element> pServiceList = _pDoc->createElement("serviceList");
-    pDevice->appendChild(pServiceList);
     // Services
-    for (Container<Service>::Iterator it = device._services.begin(); it != device._services.end(); ++it) {
+    Poco::AutoPtr<Poco::XML::Element> pServiceList = _pDoc->createElement("serviceList");
+    pDevice->appendChild(pServiceList);    
+    for (Device::ServiceIterator it = device.beginService(); it != device.endService(); ++it) {
         pServiceList->appendChild(service(*it));
         Log::instance()->desc().debug("writer added service: " + (*it)->getServiceType());
     }
@@ -1040,8 +1040,136 @@ DeviceDescriptionWriter::write()
     
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug("rewrote description:\n*BEGIN*" + ss.str() + "*END*");
+    Log::instance()->desc().debug("rewrote device description:\n*BEGIN*" + ss.str() + "*END*");
     return new std::string(ss.str());
+}
+
+
+ServiceDescriptionWriter::ServiceDescriptionWriter()
+{
+    _pDoc = new Poco::XML::Document;
+}
+
+
+void
+ServiceDescriptionWriter::service(Service& service)
+{
+    Poco::AutoPtr<Poco::XML::Element> pRoot = _pDoc->createElement("scpd");
+    pRoot->setAttribute("xmlns", "urn:schemas-upnp-org:service-1-0");
+    Poco::AutoPtr<Poco::XML::Element> pSpecVersion = _pDoc->createElement("specVersion");
+    Poco::AutoPtr<Poco::XML::Element> pMajor = _pDoc->createElement("major");
+    Poco::AutoPtr<Poco::XML::Element> pMinor = _pDoc->createElement("minor");
+    Poco::AutoPtr<Poco::XML::Text> pMajorVersion = _pDoc->createTextNode("1");
+    Poco::AutoPtr<Poco::XML::Text> pMinorVersion = _pDoc->createTextNode("0");
+    pMajor->appendChild(pMajorVersion);
+    pMinor->appendChild(pMinorVersion);
+    pSpecVersion->appendChild(pMajor);
+    pSpecVersion->appendChild(pMinor);
+    pRoot->appendChild(pSpecVersion);
+    _pDoc->appendChild(pRoot);
+
+    // write action list
+    Poco::AutoPtr<Poco::XML::Element> pActionList = _pDoc->createElement("actionList");
+    pRoot->appendChild(pActionList);
+    for (Service::ActionIterator it = service.beginAction(); it != service.endAction(); ++it) {
+        pActionList->appendChild(action(*it));
+        Log::instance()->desc().debug("writer added action: " + (*it)->getName());
+    }
+
+    // write service state table
+    Poco::AutoPtr<Poco::XML::Element> pStateTableList = _pDoc->createElement("serviceStateTable");
+    pRoot->appendChild(pStateTableList);
+    for (Service::StateVarIterator it = service.beginStateVar(); it != service.endStateVar(); ++it) {
+        pActionList->appendChild(stateVar(*it));
+        Log::instance()->desc().debug("writer added state variable: " + (*it)->getName());
+    }
+}
+
+
+std::string*
+ServiceDescriptionWriter::write()
+{
+    Poco::XML::DOMWriter writer;
+    writer.setNewLine("\r\n");
+    writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
+
+    std::stringstream ss;
+    writer.writeNode(ss, _pDoc);
+    Log::instance()->desc().debug("rewrote service description:\n*BEGIN*" + ss.str() + "*END*");
+    return new std::string(ss.str());
+}
+
+
+Poco::XML::Element*
+ServiceDescriptionWriter::action(Action* pAction)
+{
+    Poco::XML::Element* pActionElement = _pDoc->createElement("action");
+
+    // name
+    Poco::AutoPtr<Poco::XML::Element> pActionName = _pDoc->createElement("name");
+    Poco::AutoPtr<Poco::XML::Text> pActionNameVal = _pDoc->createTextNode(pAction->getName());
+    pActionName->appendChild(pActionNameVal);
+    pActionElement->appendChild(pActionName);
+    
+    // argumentList
+    Poco::AutoPtr<Poco::XML::Element> pArgumentList = _pDoc->createElement("argumentList");
+    pActionElement->appendChild(pArgumentList);
+    for (Action::ArgumentIterator it = pAction->beginArgument(); it != pAction->endArgument(); ++it) {
+        pArgumentList->appendChild(argument(*it));
+        Log::instance()->desc().debug("writer added action argument: " + (*it)->getName());
+    }
+
+    return pActionElement;
+}
+
+
+Poco::XML::Element*
+ServiceDescriptionWriter::argument(Argument* pArgument)
+{
+    Poco::XML::Element* pArgumentElement = _pDoc->createElement("argument");
+
+    // name
+    Poco::AutoPtr<Poco::XML::Element> pArgumentName = _pDoc->createElement("name");
+    Poco::AutoPtr<Poco::XML::Text> pArgumentNameVal = _pDoc->createTextNode(pArgument->getName());
+    pArgumentName->appendChild(pArgumentNameVal);
+    pArgumentElement->appendChild(pArgumentName);
+    
+    // direction
+    Poco::AutoPtr<Poco::XML::Element> pDirection = _pDoc->createElement("direction");
+    Poco::AutoPtr<Poco::XML::Text> pDirectionNameVal = _pDoc->createTextNode(pArgument->getDirection());
+    pDirection->appendChild(pDirectionNameVal);
+    pArgumentElement->appendChild(pDirection);
+    
+    // relatedStateVariable
+
+    return pArgumentElement;
+}
+
+
+Poco::XML::Element*
+ServiceDescriptionWriter::stateVar(StateVar* pStateVar)
+{
+    Poco::XML::Element* pStateVariable = _pDoc->createElement("stateVariable");
+
+    // sendEvents attribute
+    pStateVariable->setAttribute("sendEvents", (pStateVar->getSendEvents() ? "yes" : "no"));
+
+    // name
+    Poco::AutoPtr<Poco::XML::Element> pStateVarName = _pDoc->createElement("name");
+    Poco::AutoPtr<Poco::XML::Text> pStateVarNameVal = _pDoc->createTextNode(pStateVar->getName());
+    pStateVarName->appendChild(pStateVarNameVal);
+    pStateVariable->appendChild(pStateVarName);
+
+    // dataType
+    Poco::AutoPtr<Poco::XML::Element> pStateVarType = _pDoc->createElement("dataType");
+    Poco::AutoPtr<Poco::XML::Text> pStateVarTypeVal = _pDoc->createTextNode(pStateVar->getType());
+    pStateVarType->appendChild(pStateVarTypeVal);
+    pStateVariable->appendChild(pStateVarType);
+
+    // allowedValueList
+    // TODO: allowed value stuff for state variables
+
+    return pStateVariable;
 }
 
 
@@ -1868,6 +1996,10 @@ DeviceRoot::initDevice()
             ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
             ps->setControlPath("/" + ps->getServiceId() + "/Control");
             ps->setEventPath("/" + ps->getServiceId() + "/EventSubscription");
+
+            ServiceDescriptionWriter serviceDescriptionWriter;
+            serviceDescriptionWriter.service(*ps);
+            ps->setDescription(*serviceDescriptionWriter.write());
         }
     }
     

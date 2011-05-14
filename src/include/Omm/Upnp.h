@@ -801,9 +801,9 @@ public:
     ServiceIterator beginService() { return _services.begin(); }
     ServiceIterator endService() { return _services.end(); }
     
-    typedef Container<std::string>::Iterator PropertyIterator;
-    PropertyIterator beginProperty() { return _properties.begin(); }
-    PropertyIterator endProperty() { return _properties.end(); }
+    typedef Container<std::string>::KeyIterator PropertyIterator;
+    PropertyIterator beginProperty() { return _properties.beginKey(); }
+    PropertyIterator endProperty() { return _properties.endKey(); }
     
     typedef std::vector<Icon*>::iterator IconIterator;
     IconIterator beginIcon() { return _iconList.begin(); }

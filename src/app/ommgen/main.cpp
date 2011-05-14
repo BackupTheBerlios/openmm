@@ -119,6 +119,8 @@ protected:
         {
             Omm::UriDescriptionReader descriptionReader;
             Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + _description);
+            // device initialization needed for writing device description
+            // headerotherwise DeviceRoot::_pDeviceDescription is 0, std::bad_alloc
             pDeviceRoot->initDevice();
 
             std::clog << "generating stubs ..." << std::endl;

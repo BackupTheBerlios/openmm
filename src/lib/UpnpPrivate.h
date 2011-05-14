@@ -166,6 +166,7 @@ private:
     Poco::XML::Element* device(Device& device);
     Poco::XML::Element* service(Service* pService);
     Poco::XML::Element* icon(Icon* pIcon);
+
     Poco::AutoPtr<Poco::XML::Document>   _pDoc;
 };
 
@@ -173,16 +174,16 @@ private:
 class ServiceDescriptionWriter
 {
 public:
-    ServiceDescriptionWriter(std::string& description) : _pDescription(&description), _pDoc(new Poco::XML::Document) {}
+    ServiceDescriptionWriter();
     
     void service(Service& service);
+    std::string* write();
     
 private:
-    void stateVar(StateVar& stateVar);
-    void action(Action& action);
-    void argument(Argument& argument);
+    Poco::XML::Element*  action(Action* pAction);
+    Poco::XML::Element*  argument(Argument* pArgument);
+    Poco::XML::Element*  stateVar(StateVar* pStateVar);
     
-    std::string*                            _pDescription;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
 };
 
