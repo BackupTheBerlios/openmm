@@ -18,23 +18,17 @@
       <service>
         <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
         <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
-        <SCPDURL>/RenderingControl.xml</SCPDURL>
-        <controlURL>/RenderingControl/Control</controlURL>
-        <eventSubURL>/RenderingControl/Event</eventSubURL>
+        <SCPDURL>RenderingControl.xml</SCPDURL>
       </service>
       <service>
         <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
         <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
-        <SCPDURL>/ConnectionManager.xml</SCPDURL>
-        <controlURL>/ConnectionManager/Control</controlURL>
-        <eventSubURL>/ConnectionManager/Event</eventSubURL>
+        <SCPDURL>ConnectionManager.xml</SCPDURL>
       </service>
       <service>
         <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
         <serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
-        <SCPDURL>/AVTransport.xml</SCPDURL>
-        <controlURL>/AVTransport/Control</controlURL>
-        <eventSubURL>/AVTransport/Event</eventSubURL>
+        <SCPDURL>AVTransport.xml</SCPDURL>
       </service>
     </serviceList>
   </device>
