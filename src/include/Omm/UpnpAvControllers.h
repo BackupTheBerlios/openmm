@@ -29,6 +29,48 @@
 namespace Omm {
 namespace Av {
 
+// Forward declaration of all UPnP AV services
+class AVTransportController;
+class ConnectionManagerController;
+class RenderingControlController;
+class ContentDirectoryController;
+
+
+class MediaRendererController : public ControllerImplAdapter
+{
+public:
+    MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
+
+    RenderingControlController* RenderingControl() { return _pRenderingControlController; }
+    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
+    AVTransportController* AVTransport() { return _pAVTransportController; }
+
+private:
+    virtual void eventHandler(StateVar* pStateVar);
+
+    RenderingControlController* _pRenderingControlController;
+    ConnectionManagerController* _pConnectionManagerController;
+    AVTransportController* _pAVTransportController;
+};
+
+
+class MediaServerController : public ControllerImplAdapter
+{
+public:
+    MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
+
+    ContentDirectoryController* ContentDirectory() { return _pContentDirectoryController; }
+    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
+    AVTransportController* AVTransport() { return _pAVTransportController; }
+
+private:
+    virtual void eventHandler(StateVar* pStateVar);
+
+    ContentDirectoryController* _pContentDirectoryController;
+    ConnectionManagerController* _pConnectionManagerController;
+    AVTransportController* _pAVTransportController;
+};
+
 
 class AVTransportController
 {
@@ -367,41 +409,6 @@ private:
     Service* _pService;
 };
 
-
-class MediaRendererController : public ControllerImplAdapter
-{
-public:
-    MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
-
-    RenderingControlController* RenderingControl() { return _pRenderingControlController; }
-    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
-    AVTransportController* AVTransport() { return _pAVTransportController; }
-
-private:
-    virtual void eventHandler(StateVar* pStateVar);
-
-    RenderingControlController* _pRenderingControlController;
-    ConnectionManagerController* _pConnectionManagerController;
-    AVTransportController* _pAVTransportController;
-};
-
-
-class MediaServerController : public ControllerImplAdapter
-{
-public:
-    MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
-
-    ContentDirectoryController* ContentDirectory() { return _pContentDirectoryController; }
-    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
-    AVTransportController* AVTransport() { return _pAVTransportController; }
-
-private:
-    virtual void eventHandler(StateVar* pStateVar);
-
-    ContentDirectoryController* _pContentDirectoryController;
-    ConnectionManagerController* _pConnectionManagerController;
-    AVTransportController* _pAVTransportController;
-};
 
 } // namespace Av
 } // namespace Omm
