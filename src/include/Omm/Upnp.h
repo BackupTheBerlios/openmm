@@ -873,6 +873,9 @@ public:
     void print();
 
     void initSockets();
+    void initUuid();
+    void initStateVars();
+    void rewriteDescriptions();
     void initDevice();
     void initController();
     void startSsdp();
@@ -891,7 +894,7 @@ public:
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
     void setImplAdapter(DeviceRootImplAdapter* implAdapter) { _pDeviceRootImplAdapter = implAdapter; }
-    void initStateVars(Service* pThis);
+    void initStateVars(Service* pService);
 
     
 private:

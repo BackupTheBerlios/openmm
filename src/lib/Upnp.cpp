@@ -1960,11 +1960,11 @@ DeviceRoot::print()
 
 
 void
-DeviceRoot::initStateVars(Service* pThis)
+DeviceRoot::initStateVars(Service* pService)
 {
-    Log::instance()->upnp().debug("init state vars of service: " + pThis->getServiceType());
+    Log::instance()->upnp().debug("init state vars of service: " + pService->getServiceType());
     if (_pDeviceRootImplAdapter) {
-        _pDeviceRootImplAdapter->initStateVars(pThis);
+        _pDeviceRootImplAdapter->initStateVars(pService);
     }
 }
 
@@ -1995,27 +1995,50 @@ DeviceRoot::initSockets()
 
 
 void
-DeviceRoot::initDevice()
-{    
+DeviceRoot::initUuid()
+{
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Log::instance()->upnp().debug("init device root: setting random uuid for device");
         (*d)->setRandomUuid();
         // FIXME: this should override a base uri, if already present in the device description
 //         (*d)->addProperty("URLBase", _httpSocket.getServerUri());
-        
-        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            Service* ps = *s;
-            initStateVars(ps);
+    }
+}
 
-            ServiceDescriptionWriter serviceDescriptionWriter;
-            serviceDescriptionWriter.service(*ps);
-            ps->setDescription(*serviceDescriptionWriter.write());
+
+void
+DeviceRoot::initStateVars()
+{
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            initStateVars(*s);
         }
     }
-    
+}
+
+
+void
+DeviceRoot::rewriteDescriptions()
+{
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            ServiceDescriptionWriter serviceDescriptionWriter;
+            serviceDescriptionWriter.service(**s);
+            (*s)->setDescription(*serviceDescriptionWriter.write());
+        }
+    }
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
     setDeviceDescription(*descriptionWriter.write());
+}
+
+
+void
+DeviceRoot::initDevice()
+{    
+    initUuid();
+    initStateVars();
+    rewriteDescriptions();
 }
 
 
