@@ -2006,13 +2006,6 @@ DeviceRoot::initDevice()
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
             initStateVars(ps);
-            Log::instance()->upnp().debug("init state vars finished.");
-            ps->setDescriptionPath("/" + ps->getServiceType() + "/Description.xml");
-            ps->setControlPath("/" + ps->getServiceType() + "/Control");
-            ps->setEventPath("/" + ps->getServiceType() + "/EventSubscription");
-//            ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
-//            ps->setControlPath("/" + ps->getServiceId() + "/Control");
-//            ps->setEventPath("/" + ps->getServiceId() + "/EventSubscription");
 
             ServiceDescriptionWriter serviceDescriptionWriter;
             serviceDescriptionWriter.service(*ps);
@@ -2022,7 +2015,7 @@ DeviceRoot::initDevice()
     
     DeviceDescriptionWriter descriptionWriter;
     descriptionWriter.deviceRoot(*this);
-    _pDeviceDescription = descriptionWriter.write();
+    setDeviceDescription(*descriptionWriter.write());
 }
 
 

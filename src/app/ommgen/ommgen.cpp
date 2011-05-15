@@ -397,8 +397,8 @@ void
 DeviceCpp::serviceType(const Service& service)
 {
     _serviceTypes.push_back(service.getServiceType());
-//    std::string servicePath = "/" + service.getServiceType() + "/Description.xml";
-    std::string servicePath = service.getDescriptionPath();
+    std::string servicePath = "/" + service.getServiceType() + "/Description.xml";
+//    std::string servicePath = service.getDescriptionPath();
 //    service.setDescriptionPath(servicePath);
     _servicePaths.push_back(servicePath);
     Omm::Urn serviceType(service.getServiceType());
