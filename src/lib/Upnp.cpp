@@ -493,9 +493,7 @@ StringDescriptionReader::deviceRoot(const std::string& deviceDescriptionKey)
 std::string&
 StringDescriptionReader::getDescription(const std::string& path)
 {
-    std::string* res = (*_pStringMap)[path];
-    parseDescription(*res);
-    return *res;
+    return *(*_pStringMap)[path];
 }
 
 
@@ -519,7 +517,10 @@ DescriptionReader::parseDescription(const std::string& description)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
+    Log::instance()->desc().debug("parsing description ...");
+    Log::instance()->desc().debug(description);
     _pDocStack.push(parser.parseString(description));
+    Log::instance()->desc().debug("parsing description finished.");
     return _pDocStack.top()->documentElement()->firstChild();
 }
 

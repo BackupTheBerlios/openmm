@@ -128,6 +128,7 @@ protected:
     virtual void GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status) = 0;
 
     virtual void initStateVars() = 0;
+    void actionHandler(Action* pAction);
 
     void _setSourceProtocolInfo(const std::string& val);
     std::string _getSourceProtocolInfo();
@@ -161,6 +162,7 @@ protected:
     virtual void CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID) = 0;
 
     virtual void initStateVars() = 0;
+    void actionHandler(Action* pAction);
 
     void _setTransferIDs(const std::string& val);
     std::string _getTransferIDs();
@@ -221,6 +223,7 @@ protected:
     virtual void SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness) = 0;
 
     virtual void initStateVars() = 0;
+    void actionHandler(Action* pAction);
 
     void _setPresetNameList(const std::string& val);
     std::string _getPresetNameList();
@@ -276,8 +279,8 @@ protected:
     AVTransport* _pAVTransportImpl;
 
 private:
-    virtual void actionHandler(Action* action);
-    virtual void initStateVars(Service* pThis);
+    virtual void actionHandler(Action* pAction);
+    virtual void initStateVars(Service* pService);
 
     static std::string _deviceDescription;
 };
@@ -294,7 +297,7 @@ protected:
     AVTransport* _pAVTransportImpl;
     
 private:
-    virtual void actionHandler(Action* action);
+    virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pThis);
 
     static std::string _deviceDescription;

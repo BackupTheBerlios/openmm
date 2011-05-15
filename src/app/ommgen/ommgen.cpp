@@ -177,23 +177,23 @@ DeviceH::deviceRootEnd(const DeviceRoot& deviceRoot)
         << indent(1) << _deviceName << "("
         << ctorArgs
         << ");" << std::endl
-        << std::endl;
-//         << "private:"
-//         << std::endl;
-    
-    _out <<  std::endl
-        << "private:" << std::endl
-        << indent(1) << "virtual void actionHandler(Action* action);" << std::endl
-        << indent(1) << "virtual void initStateVars(Service* pService);" << std::endl
         << std::endl
-        << indent(1) << "static std::string _deviceDescription;" << std::endl
-        ;
-    
+        << "protected:"
+        << std::endl;
+
     i = _serviceNames.size();
     while (i--) {
         _out << indent(1) << _serviceNames[i] << "* _p" << _serviceNames[i] << "Impl;" << std::endl;
     }
-    
+
+    _out <<  std::endl
+        << "private:" << std::endl
+        << indent(1) << "virtual void actionHandler(Action* pAction);" << std::endl
+        << indent(1) << "virtual void initStateVars(Service* pService);" << std::endl
+        << std::endl
+        << indent(1) << "static std::string _deviceDescription;" << std::endl
+        ;
+        
     _out
         << "};" << std::endl
         << std::endl
@@ -254,6 +254,7 @@ DeviceH::actionBlockEnd()
 {
     _out << std::endl
         << indent(1) << "virtual void initStateVars() = 0;" << std::endl
+        << indent(1) << "void actionHandler(Action* pAction);" << std::endl
         << std::endl;
 }
 
@@ -373,9 +374,10 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
 //     }
     
     _out << std::endl
-        << indent(1) << "Omm::StringDescriptionReader descriptionReader(_descriptions, \""
-        << deviceDescriptionPath << "\");" << std::endl
-        << indent(1) << "_pDeviceRoot = descriptionReader.deviceRoot();" << std::endl
+        << indent(1) << "Omm::StringDescriptionReader descriptionReader(_descriptions);" << std::endl
+//        << deviceDescriptionPath << "\");" << std::endl
+        << indent(1) << "_pDeviceRoot = descriptionReader.deviceRoot(\"/"
+        <<  _deviceName << ".xml\");" << std::endl
         << indent(1) << "_pDeviceRoot->setImplAdapter(this);" << std::endl
         << "}" << std::endl
         << std::endl
