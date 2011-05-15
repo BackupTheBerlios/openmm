@@ -1089,7 +1089,7 @@ ServiceDescriptionWriter::service(Service& service)
     Poco::AutoPtr<Poco::XML::Element> pStateTableList = _pDoc->createElement("serviceStateTable");
     pRoot->appendChild(pStateTableList);
     for (Service::StateVarIterator it = service.beginStateVar(); it != service.endStateVar(); ++it) {
-        pActionList->appendChild(stateVar(*it));
+        pStateTableList->appendChild(stateVar(*it));
         Log::instance()->desc().debug("writer added state variable: " + (*it)->getName());
     }
 }
