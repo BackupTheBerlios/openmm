@@ -25,6 +25,7 @@
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
+#include "Poco/LineEndingConverter.h"
 #include "Poco/Exception.h"
 
 #include "ommgen.h"
@@ -40,7 +41,6 @@ class OmmGenApplication : public Poco::Util::Application
 public:
     OmmGenApplication() :
         _helpRequested(false),
-        _description(""),
         _outputPath("./")
     {
         setUnixOptions(true);
@@ -53,16 +53,7 @@ public:
 protected:
     void initialize(Application& self)
     {
-//         loadConfiguration(); // load default configuration files, if present
-        try {
-            Application::initialize(self);
-        }
-//        catch (Poco::Exception::MissingOptionException) {
-        catch (...) {
-            displayHelp();
-        }
-//        std::clog << "description: " << _description << std::endl;
-//        std::clog << "output path: " << _outputPath << std::endl;
+        Application::initialize(self);
     }
     
     void uninitialize()
@@ -77,10 +68,6 @@ protected:
         options.addOption(Option("help", "h", "display help information on command line arguments")
                             .required(false)
                             .repeatable(false));
-        options.addOption(Option("description", "d", "absolute path to device description file, with service description files relative to device description path according to SDCP URIs")
-                            .required(false)
-                            .repeatable(false)
-                            .argument("description name", true));
         options.addOption(Option("output-path", "o", "output path for generated stub files")
                           .required(false)
                           .repeatable(false)
@@ -93,8 +80,6 @@ protected:
             
         if (name == "help") {
             _helpRequested = true;
-        } else if (name == "description") {
-            _description = value;
         } else if (name == "output-path") {
             _outputPath = value;
         }
@@ -104,23 +89,28 @@ protected:
     {
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
-        helpFormatter.setUsage("[OPTIONS] DESCRIPTION_FILE");
+        helpFormatter.setUsage("[-o OUTPUT_DIRECTORY] DEVICE_DESCRIPTION_FILE_PATH" + Poco::LineEnding::NEWLINE_DEFAULT
+                                + "SCPDURLs in device description file must be relative to device description file path"
+                                );
         helpFormatter.setHeader("A stub generator for OMM UPnP.");
         helpFormatter.format(std::cout);
     }
     
     int main(const std::vector<std::string>& args)
     {
-        if (_helpRequested)
+
+        if (_helpRequested || args.size() == 0)
         {
             displayHelp();
         }
         else
         {
+            std::string descriptionPath = args[0];
+
             Omm::UriDescriptionReader descriptionReader;
-            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + _description);
+            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + descriptionPath);
             // device initialization needed for writing device description
-            // headerotherwise DeviceRoot::_pDeviceDescription is 0, std::bad_alloc
+            // otherwise DeviceRoot::_pDeviceDescription is 0, std::bad_alloc
             pDeviceRoot->initDevice();
 
             _stubWriters.push_back(new DeviceH(pDeviceRoot, _outputPath));
@@ -142,7 +132,7 @@ protected:
     
 private:
     bool                        _helpRequested;
-    std::string                 _description;
+    std::string                 _descriptionPath;
     std::string                 _outputPath;
     std::vector<StubWriter*>    _stubWriters;
 };
