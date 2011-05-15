@@ -424,12 +424,6 @@ ConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionID, 
 }
 
 
-// RenderingControlRendererImpl::RenderingControlRendererImpl()
-// {
-//     _pRenderer = static_cast<MediaRendererImplementation*>(_pMediaRenderer);
-// }
-
-
 void
 RenderingControlRendererImpl::initStateVars()
 {

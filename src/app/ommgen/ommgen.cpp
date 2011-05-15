@@ -69,7 +69,9 @@ StubWriter::StubWriter(DeviceRoot* pDeviceRoot, const std::string& outputPath) :
 _pDeviceRoot(pDeviceRoot),
 _outputPath(outputPath)
 {
-    Omm::Urn deviceType(pDeviceRoot->getRootDevice()->getDeviceType());
+    // TODO: honor subdevices, not only root device
+    _deviceType = pDeviceRoot->getRootDevice()->getDeviceType();
+    Omm::Urn deviceType(_deviceType);
     _deviceName = deviceType.getTypeName();
     _outputPath += "/";
 
@@ -324,7 +326,8 @@ DeviceCpp::deviceRoot(const DeviceRoot& deviceRoot)
 void
 DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
 {
-    std::string deviceDescriptionPath = deviceRoot.getDescriptionUri();
+//    std::string deviceDescriptionPath = deviceRoot.getDescriptionUri();
+    std::string deviceDescriptionPath = "/" + _deviceType + "/Description.xml";
     std::string ctorArgs = "";
     int i = _serviceNames.size();
     while (i--) {
@@ -361,6 +364,7 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
     while (i--) {
         _out
             << indent(1) << "_descriptions[\"" << _servicePaths[i] << "\"]"
+//            << indent(1) << "_descriptions[\"/" << _serviceTypes[i] << "/Description.xml" << "\"]"
             << " = &" << _serviceNames[i] << "::_description;" << std::endl;
     }
     
@@ -376,8 +380,9 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
     _out << std::endl
         << indent(1) << "Omm::StringDescriptionReader descriptionReader(_descriptions);" << std::endl
 //        << deviceDescriptionPath << "\");" << std::endl
-        << indent(1) << "_pDeviceRoot = descriptionReader.deviceRoot(\"/"
-        <<  _deviceName << ".xml\");" << std::endl
+        << indent(1) << "_pDeviceRoot = descriptionReader.deviceRoot(\""
+//        <<  _deviceName << ".xml\");" << std::endl
+        <<  deviceDescriptionPath << "\");" << std::endl
         << indent(1) << "_pDeviceRoot->setImplAdapter(this);" << std::endl
         << "}" << std::endl
         << std::endl
@@ -391,11 +396,15 @@ DeviceCpp::deviceRootEnd(const DeviceRoot& deviceRoot)
 void
 DeviceCpp::serviceType(const Service& service)
 {
+    _serviceTypes.push_back(service.getServiceType());
+//    std::string servicePath = "/" + service.getServiceType() + "/Description.xml";
+    std::string servicePath = service.getDescriptionPath();
+//    service.setDescriptionPath(servicePath);
+    _servicePaths.push_back(servicePath);
     Omm::Urn serviceType(service.getServiceType());
     std::string serviceName = serviceType.getTypeName();
     _serviceNames.push_back(serviceName);
     _currentService = serviceName;
-    _servicePaths.push_back(service.getDescriptionPath());
     _firstAction = true;
     
     _out

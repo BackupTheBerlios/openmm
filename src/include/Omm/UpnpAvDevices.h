@@ -31,7 +31,48 @@
 namespace Omm {
 namespace Av {
 
-class MediaRenderer;
+// Forward declaration of all UPnP AV services
+class AVTransport;
+class ConnectionManager;
+class RenderingControl;
+class ContentDirectory;
+
+
+class MediaRenderer : public DeviceRootImplAdapter
+{
+public:
+    MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+
+protected:
+    RenderingControl* _pRenderingControlImpl;
+    ConnectionManager* _pConnectionManagerImpl;
+    AVTransport* _pAVTransportImpl;
+
+private:
+    virtual void actionHandler(Action* pAction);
+    virtual void initStateVars(Service* pService);
+
+    static std::string _deviceDescription;
+};
+
+
+class MediaServer : public DeviceRootImplAdapter
+{
+public:
+    MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+
+protected:
+    ContentDirectory* _pContentDirectoryImpl;
+    ConnectionManager* _pConnectionManagerImpl;
+    AVTransport* _pAVTransportImpl;
+
+private:
+    virtual void actionHandler(Action* pAction);
+    virtual void initStateVars(Service* pService);
+
+    static std::string _deviceDescription;
+};
+
 
 class AVTransport
 {
@@ -267,41 +308,6 @@ private:
     Service* _pService;
 };
 
-
-class MediaRenderer : public DeviceRootImplAdapter
-{
-public:
-    MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
-
-protected:
-    RenderingControl* _pRenderingControlImpl;
-    ConnectionManager* _pConnectionManagerImpl;
-    AVTransport* _pAVTransportImpl;
-
-private:
-    virtual void actionHandler(Action* pAction);
-    virtual void initStateVars(Service* pService);
-
-    static std::string _deviceDescription;
-};
-
-
-class MediaServer : public DeviceRootImplAdapter
-{
-public:
-    MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
-
-protected:
-    ContentDirectory* _pContentDirectoryImpl;
-    ConnectionManager* _pConnectionManagerImpl;
-    AVTransport* _pAVTransportImpl;
-    
-private:
-    virtual void actionHandler(Action* pAction);
-    virtual void initStateVars(Service* pThis);
-
-    static std::string _deviceDescription;
-};
 
 } // namespace Av
 } // namespace Omm

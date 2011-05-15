@@ -425,7 +425,7 @@ public:
 //         std::clog << "_pEntities has: " << _pEntities.size() << " entries" << std::endl;
 //         std::clog << "_keys has: " << _keys.size() << " entries" << std::endl;
         if (_pEntities.find(key) == _pEntities.end()) {
-//             std::cerr << "Container::setValue() could not find key"<< std::endl;
+            Log::instance()->upnp().error("could not set container value, key not found: " + key);
             return;
         }
 //         std::clog << "Container::setValue() found key" << std::endl;
@@ -766,15 +766,15 @@ void
 Service::setStateVar(std::string key, const T& val)
 {
     // TODO: lock the _stateVariables map because different threads could access it
-//     std::clog << "Service::setStateVar() name: " << key << std::endl;
+//    Log::instance()->upnp().debug("service set state var: " + key);
     // FIXME: segfault here
-//     std::clog << "service type: " << getServiceType() << std::endl;
+//    Log::instance()->upnp().debug("service type: " + getServiceType());
     _stateVars.setValue(key, val);
     if (_stateVars.get(key).getSendEvents()) {
-//         std::clog << "Service::setStateVar() " << key << " sends event message" << std::endl;
+//        Log::instance()->upnp().debug("state var " + key + " sends event message");
         sendEventMessage(_stateVars.get(key));
     }
-//     std::clog << "Service::setStateVar() finished" << std::endl;
+//    Log::instance()->upnp().debug("service set state var: " + key + " finished.");
 }
 
 

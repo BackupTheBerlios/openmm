@@ -47,7 +47,7 @@ Log::Log()
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, 0);
 #else
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
@@ -493,7 +493,15 @@ StringDescriptionReader::deviceRoot(const std::string& deviceDescriptionKey)
 std::string&
 StringDescriptionReader::getDescription(const std::string& path)
 {
-    return *(*_pStringMap)[path];
+    Log::instance()->desc().debug("retrieving in-memory device description: " + path);
+
+    std::string* description = (*_pStringMap)[path];
+    if (!description) {
+        Log::instance()->desc().error("failed to retrieve in-memory device description: " + path);
+        // TODO: throw exception
+    }
+
+    return *description;
 }
 
 
@@ -1998,9 +2006,13 @@ DeviceRoot::initDevice()
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
             initStateVars(ps);
-            ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
-            ps->setControlPath("/" + ps->getServiceId() + "/Control");
-            ps->setEventPath("/" + ps->getServiceId() + "/EventSubscription");
+            Log::instance()->upnp().debug("init state vars finished.");
+            ps->setDescriptionPath("/" + ps->getServiceType() + "/Description.xml");
+            ps->setControlPath("/" + ps->getServiceType() + "/Control");
+            ps->setEventPath("/" + ps->getServiceType() + "/EventSubscription");
+//            ps->setDescriptionPath("/" + ps->getServiceId() + "/Description.xml");
+//            ps->setControlPath("/" + ps->getServiceId() + "/Control");
+//            ps->setEventPath("/" + ps->getServiceId() + "/EventSubscription");
 
             ServiceDescriptionWriter serviceDescriptionWriter;
             serviceDescriptionWriter.service(*ps);

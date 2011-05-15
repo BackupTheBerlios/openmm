@@ -61,6 +61,7 @@ protected:
     
     DeviceRoot*                         _pDeviceRoot;
     std::string                         _outputPath;
+    std::string                         _deviceType;
     std::string                         _deviceName;
     std::map<std::string,std::string>   _typeMapper;
 };
@@ -105,8 +106,9 @@ private:
     virtual void stateVar(const StateVar& stateVar);
     
     std::ofstream               _out;
-    std::vector<std::string>    _serviceNames;
+    std::vector<std::string>    _serviceTypes;
     std::vector<std::string>    _servicePaths;
+    std::vector<std::string>    _serviceNames;
     std::string                 _currentService;
     std::string                 _currentOutArgs;
     std::stringstream           _currentOutArgSetter;
