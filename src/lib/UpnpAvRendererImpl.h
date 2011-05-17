@@ -30,7 +30,7 @@ namespace Av {
 
 // TODO: LastChange
 
-class AVTransportRendererImpl : public AVTransport
+class DevAVTransportRendererImpl : public DevAVTransport
 {
     friend class AvRenderer;
     
@@ -55,7 +55,8 @@ private:
     std::string                         _lastCurrentTrackUri;
 };
 
-class ConnectionManagerRendererImpl : public ConnectionManager
+
+class DevConnectionManagerRendererImpl : public DevConnectionManager
 {
     friend class AvRenderer;
     
@@ -70,7 +71,8 @@ private:
     Engine* _pEngine;
 };
 
-class RenderingControlRendererImpl : public RenderingControl
+
+class DevRenderingControlRendererImpl : public DevRenderingControl
 {
     friend class AvRenderer;
     

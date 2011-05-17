@@ -27,7 +27,8 @@
 namespace Omm {
 namespace Av {
 
-class AVTransportControllerImpl : public AVTransportController
+
+class CtlAVTransportImpl : public CtlAVTransport
 {
 private:
     virtual void _ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -46,7 +47,8 @@ private:
     virtual void _changedLastChange(const std::string& val);
 };
 
-class ConnectionManagerControllerImpl : public ConnectionManagerController
+
+class CtlConnectionManagerImpl : public CtlConnectionManager
 {
 private:
     virtual void _ansGetProtocolInfo(const std::string& Source, const std::string& Sink);
@@ -59,7 +61,8 @@ private:
     virtual void _changedCurrentConnectionIDs(const std::string& val);
 };
 
-class RenderingControlControllerImpl : public RenderingControlController
+
+class CtlRenderingControlImpl : public CtlRenderingControl
 {
 private:
     virtual void _ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList);
@@ -102,7 +105,7 @@ private:
 };
 
 
-class ContentDirectoryControllerImpl : public ContentDirectoryController
+class CtlContentDirectoryImpl : public CtlContentDirectory
 {
 private:
     virtual void _ansGetSearchCapabilities(const std::string& SearchCaps);

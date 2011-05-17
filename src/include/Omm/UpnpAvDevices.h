@@ -32,21 +32,21 @@ namespace Omm {
 namespace Av {
 
 // Forward declaration of all UPnP AV services
-class AVTransport;
-class ConnectionManager;
-class RenderingControl;
-class ContentDirectory;
+class DevAVTransport;
+class DevConnectionManager;
+class DevRenderingControl;
+class DevContentDirectory;
 
 
 class DevMediaRenderer : public DevDevice
 {
 public:
-    DevMediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+    DevMediaRenderer(DevRenderingControl* pDevRenderingControlImpl, DevConnectionManager* pDevConnectionManagerImpl, DevAVTransport* pDevAVTransportImpl);
 
 protected:
-    RenderingControl* _pRenderingControlImpl;
-    ConnectionManager* _pConnectionManagerImpl;
-    AVTransport* _pAVTransportImpl;
+    DevRenderingControl* _pDevRenderingControlImpl;
+    DevConnectionManager* _pDevConnectionManagerImpl;
+    DevAVTransport* _pDevAVTransportImpl;
 
 private:
     virtual void actionHandler(Action* pAction);
@@ -59,12 +59,12 @@ private:
 class DevMediaServer : public DevDevice
 {
 public:
-    DevMediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+    DevMediaServer(DevContentDirectory* pDevContentDirectoryImpl, DevConnectionManager* pDevConnectionManagerImpl, DevAVTransport* pDevAVTransportImpl);
 
 protected:
-    ContentDirectory* _pContentDirectoryImpl;
-    ConnectionManager* _pConnectionManagerImpl;
-    AVTransport* _pAVTransportImpl;
+    DevContentDirectory* _pDevContentDirectoryImpl;
+    DevConnectionManager* _pDevConnectionManagerImpl;
+    DevAVTransport* _pDevAVTransportImpl;
 
 private:
     virtual void actionHandler(Action* pAction);
@@ -74,7 +74,7 @@ private:
 };
 
 
-class AVTransport
+class DevAVTransport
 {
     friend class DevMediaServer;
     friend class DevMediaRenderer;
@@ -157,7 +157,7 @@ private:
 };
 
 
-class ConnectionManager
+class DevConnectionManager
 {
     friend class DevMediaServer;
     friend class DevMediaRenderer;
@@ -184,7 +184,7 @@ private:
 };
 
 
-class ContentDirectory
+class DevContentDirectory
 {
     friend class DevMediaServer;
 
@@ -222,7 +222,7 @@ private:
 };
 
 
-class RenderingControl
+class DevRenderingControl
 {
     friend class DevMediaRenderer;
 

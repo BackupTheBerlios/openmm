@@ -25,7 +25,7 @@ namespace Omm {
 namespace Av {
 
 void
-AVTransportControllerImpl::_ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+CtlAVTransportImpl::_ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
 // begin of your own code
 
@@ -34,7 +34,7 @@ AVTransportControllerImpl::_ansSetAVTransportURI(const ui4& InstanceID, const st
 
 
 void
-AVTransportControllerImpl::_ansGetMediaInfo(const ui4& InstanceID, const ui4& NrTracks, const std::string& MediaDuration, const std::string& CurrentURI, const std::string& CurrentURIMetaData, const std::string& NextURI, const std::string& NextURIMetaData, const std::string& PlayMedium, const std::string& RecordMedium, const std::string& WriteStatus)
+CtlAVTransportImpl::_ansGetMediaInfo(const ui4& InstanceID, const ui4& NrTracks, const std::string& MediaDuration, const std::string& CurrentURI, const std::string& CurrentURIMetaData, const std::string& NextURI, const std::string& NextURIMetaData, const std::string& PlayMedium, const std::string& RecordMedium, const std::string& WriteStatus)
 {
 // begin of your own code
 
@@ -43,7 +43,7 @@ AVTransportControllerImpl::_ansGetMediaInfo(const ui4& InstanceID, const ui4& Nr
 
 
 void
-AVTransportControllerImpl::_ansGetTransportInfo(const ui4& InstanceID, const std::string& CurrentTransportState, const std::string& CurrentTransportStatus, const std::string& CurrentSpeed)
+CtlAVTransportImpl::_ansGetTransportInfo(const ui4& InstanceID, const std::string& CurrentTransportState, const std::string& CurrentTransportStatus, const std::string& CurrentSpeed)
 {
 // begin of your own code
 
@@ -52,7 +52,7 @@ AVTransportControllerImpl::_ansGetTransportInfo(const ui4& InstanceID, const std
 
 
 void
-AVTransportControllerImpl::_ansGetPositionInfo(const ui4& InstanceID, const ui4& Track, const std::string& TrackDuration, const std::string& TrackMetaData, const std::string& TrackURI, const std::string& RelTime, const std::string& AbsTime, const i4& RelCount, const i4& AbsCount)
+CtlAVTransportImpl::_ansGetPositionInfo(const ui4& InstanceID, const ui4& Track, const std::string& TrackDuration, const std::string& TrackMetaData, const std::string& TrackURI, const std::string& RelTime, const std::string& AbsTime, const i4& RelCount, const i4& AbsCount)
 {
 // begin of your own code
 
@@ -61,7 +61,7 @@ AVTransportControllerImpl::_ansGetPositionInfo(const ui4& InstanceID, const ui4&
 
 
 void
-AVTransportControllerImpl::_ansGetDeviceCapabilities(const ui4& InstanceID, const std::string& PlayMedia, const std::string& RecMedia, const std::string& RecQualityModes)
+CtlAVTransportImpl::_ansGetDeviceCapabilities(const ui4& InstanceID, const std::string& PlayMedia, const std::string& RecMedia, const std::string& RecQualityModes)
 {
 // begin of your own code
 
@@ -70,7 +70,7 @@ AVTransportControllerImpl::_ansGetDeviceCapabilities(const ui4& InstanceID, cons
 
 
 void
-AVTransportControllerImpl::_ansGetTransportSettings(const ui4& InstanceID, const std::string& PlayMode, const std::string& RecQualityMode)
+CtlAVTransportImpl::_ansGetTransportSettings(const ui4& InstanceID, const std::string& PlayMode, const std::string& RecQualityMode)
 {
 // begin of your own code
 
@@ -79,7 +79,7 @@ AVTransportControllerImpl::_ansGetTransportSettings(const ui4& InstanceID, const
 
 
 void
-AVTransportControllerImpl::_ansStop(const ui4& InstanceID)
+CtlAVTransportImpl::_ansStop(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -88,7 +88,7 @@ AVTransportControllerImpl::_ansStop(const ui4& InstanceID)
 
 
 void
-AVTransportControllerImpl::_ansPlay(const ui4& InstanceID, const std::string& Speed)
+CtlAVTransportImpl::_ansPlay(const ui4& InstanceID, const std::string& Speed)
 {
 // begin of your own code
 
@@ -97,7 +97,7 @@ AVTransportControllerImpl::_ansPlay(const ui4& InstanceID, const std::string& Sp
 
 
 void
-AVTransportControllerImpl::_ansPause(const ui4& InstanceID)
+CtlAVTransportImpl::_ansPause(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -106,7 +106,7 @@ AVTransportControllerImpl::_ansPause(const ui4& InstanceID)
 
 
 void
-AVTransportControllerImpl::_ansSeek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
+CtlAVTransportImpl::_ansSeek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
 // begin of your own code
 
@@ -115,7 +115,7 @@ AVTransportControllerImpl::_ansSeek(const ui4& InstanceID, const std::string& Un
 
 
 void
-AVTransportControllerImpl::_ansNext(const ui4& InstanceID)
+CtlAVTransportImpl::_ansNext(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -124,7 +124,7 @@ AVTransportControllerImpl::_ansNext(const ui4& InstanceID)
 
 
 void
-AVTransportControllerImpl::_ansPrevious(const ui4& InstanceID)
+CtlAVTransportImpl::_ansPrevious(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -133,7 +133,7 @@ AVTransportControllerImpl::_ansPrevious(const ui4& InstanceID)
 
 
 void
-AVTransportControllerImpl::_changedLastChange(const std::string& val)
+CtlAVTransportImpl::_changedLastChange(const std::string& val)
 {
 // begin of your own code
 
@@ -142,7 +142,7 @@ AVTransportControllerImpl::_changedLastChange(const std::string& val)
 
 
 void
-ConnectionManagerControllerImpl::_ansGetProtocolInfo(const std::string& Source, const std::string& Sink)
+CtlConnectionManagerImpl::_ansGetProtocolInfo(const std::string& Source, const std::string& Sink)
 {
 // begin of your own code
 
@@ -151,7 +151,7 @@ ConnectionManagerControllerImpl::_ansGetProtocolInfo(const std::string& Source, 
 
 
 void
-ConnectionManagerControllerImpl::_ansConnectionComplete(const i4& ConnectionID)
+CtlConnectionManagerImpl::_ansConnectionComplete(const i4& ConnectionID)
 {
 // begin of your own code
 
@@ -160,7 +160,7 @@ ConnectionManagerControllerImpl::_ansConnectionComplete(const i4& ConnectionID)
 
 
 void
-ConnectionManagerControllerImpl::_ansGetCurrentConnectionIDs(const std::string& ConnectionIDs)
+CtlConnectionManagerImpl::_ansGetCurrentConnectionIDs(const std::string& ConnectionIDs)
 {
 // begin of your own code
 
@@ -169,7 +169,7 @@ ConnectionManagerControllerImpl::_ansGetCurrentConnectionIDs(const std::string& 
 
 
 void
-ConnectionManagerControllerImpl::_ansGetCurrentConnectionInfo(const i4& ConnectionID, const i4& RcsID, const i4& AVTransportID, const std::string& ProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, const std::string& Status)
+CtlConnectionManagerImpl::_ansGetCurrentConnectionInfo(const i4& ConnectionID, const i4& RcsID, const i4& AVTransportID, const std::string& ProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, const std::string& Status)
 {
 // begin of your own code
 
@@ -178,7 +178,7 @@ ConnectionManagerControllerImpl::_ansGetCurrentConnectionInfo(const i4& Connecti
 
 
 void
-ConnectionManagerControllerImpl::_changedSourceProtocolInfo(const std::string& val)
+CtlConnectionManagerImpl::_changedSourceProtocolInfo(const std::string& val)
 {
 // begin of your own code
 
@@ -187,7 +187,7 @@ ConnectionManagerControllerImpl::_changedSourceProtocolInfo(const std::string& v
 
 
 void
-ConnectionManagerControllerImpl::_changedSinkProtocolInfo(const std::string& val)
+CtlConnectionManagerImpl::_changedSinkProtocolInfo(const std::string& val)
 {
 // begin of your own code
 
@@ -196,7 +196,7 @@ ConnectionManagerControllerImpl::_changedSinkProtocolInfo(const std::string& val
 
 
 void
-ConnectionManagerControllerImpl::_changedCurrentConnectionIDs(const std::string& val)
+CtlConnectionManagerImpl::_changedCurrentConnectionIDs(const std::string& val)
 {
 // begin of your own code
 
@@ -205,7 +205,7 @@ ConnectionManagerControllerImpl::_changedCurrentConnectionIDs(const std::string&
 
 
 void
-RenderingControlControllerImpl::_ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList)
+CtlRenderingControlImpl::_ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList)
 {
 // begin of your own code
 
@@ -214,7 +214,7 @@ RenderingControlControllerImpl::_ansListPresets(const ui4& InstanceID, const std
 
 
 void
-RenderingControlControllerImpl::_ansSelectPreset(const ui4& InstanceID, const std::string& PresetName)
+CtlRenderingControlImpl::_ansSelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
 // begin of your own code
 
@@ -223,7 +223,7 @@ RenderingControlControllerImpl::_ansSelectPreset(const ui4& InstanceID, const st
 
 
 void
-RenderingControlControllerImpl::_ansGetBrightness(const ui4& InstanceID, const ui2& CurrentBrightness)
+CtlRenderingControlImpl::_ansGetBrightness(const ui4& InstanceID, const ui2& CurrentBrightness)
 {
 // begin of your own code
 
@@ -232,7 +232,7 @@ RenderingControlControllerImpl::_ansGetBrightness(const ui4& InstanceID, const u
 
 
 void
-RenderingControlControllerImpl::_ansSetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
+CtlRenderingControlImpl::_ansSetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
 // begin of your own code
 
@@ -241,7 +241,7 @@ RenderingControlControllerImpl::_ansSetBrightness(const ui4& InstanceID, const u
 
 
 void
-RenderingControlControllerImpl::_ansGetContrast(const ui4& InstanceID, const ui2& CurrentContrast)
+CtlRenderingControlImpl::_ansGetContrast(const ui4& InstanceID, const ui2& CurrentContrast)
 {
 // begin of your own code
 
@@ -250,7 +250,7 @@ RenderingControlControllerImpl::_ansGetContrast(const ui4& InstanceID, const ui2
 
 
 void
-RenderingControlControllerImpl::_ansSetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
+CtlRenderingControlImpl::_ansSetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
 // begin of your own code
 
@@ -259,7 +259,7 @@ RenderingControlControllerImpl::_ansSetContrast(const ui4& InstanceID, const ui2
 
 
 void
-RenderingControlControllerImpl::_ansGetSharpness(const ui4& InstanceID, const ui2& CurrentSharpness)
+CtlRenderingControlImpl::_ansGetSharpness(const ui4& InstanceID, const ui2& CurrentSharpness)
 {
 // begin of your own code
 
@@ -268,7 +268,7 @@ RenderingControlControllerImpl::_ansGetSharpness(const ui4& InstanceID, const ui
 
 
 void
-RenderingControlControllerImpl::_ansSetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
+CtlRenderingControlImpl::_ansSetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
 // begin of your own code
 
@@ -277,7 +277,7 @@ RenderingControlControllerImpl::_ansSetSharpness(const ui4& InstanceID, const ui
 
 
 void
-RenderingControlControllerImpl::_ansGetRedVideoGain(const ui4& InstanceID, const ui2& CurrentRedVideoGain)
+CtlRenderingControlImpl::_ansGetRedVideoGain(const ui4& InstanceID, const ui2& CurrentRedVideoGain)
 {
 // begin of your own code
 
@@ -286,7 +286,7 @@ RenderingControlControllerImpl::_ansGetRedVideoGain(const ui4& InstanceID, const
 
 
 void
-RenderingControlControllerImpl::_ansSetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
+CtlRenderingControlImpl::_ansSetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
 // begin of your own code
 
@@ -295,7 +295,7 @@ RenderingControlControllerImpl::_ansSetRedVideoGain(const ui4& InstanceID, const
 
 
 void
-RenderingControlControllerImpl::_ansGetGreenVideoGain(const ui4& InstanceID, const ui2& CurrentGreenVideoGain)
+CtlRenderingControlImpl::_ansGetGreenVideoGain(const ui4& InstanceID, const ui2& CurrentGreenVideoGain)
 {
 // begin of your own code
 
@@ -304,7 +304,7 @@ RenderingControlControllerImpl::_ansGetGreenVideoGain(const ui4& InstanceID, con
 
 
 void
-RenderingControlControllerImpl::_ansSetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
+CtlRenderingControlImpl::_ansSetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
 // begin of your own code
 
@@ -313,7 +313,7 @@ RenderingControlControllerImpl::_ansSetGreenVideoGain(const ui4& InstanceID, con
 
 
 void
-RenderingControlControllerImpl::_ansGetBlueVideoGain(const ui4& InstanceID, const ui2& CurrentBlueVideoGain)
+CtlRenderingControlImpl::_ansGetBlueVideoGain(const ui4& InstanceID, const ui2& CurrentBlueVideoGain)
 {
 // begin of your own code
 
@@ -322,7 +322,7 @@ RenderingControlControllerImpl::_ansGetBlueVideoGain(const ui4& InstanceID, cons
 
 
 void
-RenderingControlControllerImpl::_ansSetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
+CtlRenderingControlImpl::_ansSetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
 // begin of your own code
 
@@ -331,7 +331,7 @@ RenderingControlControllerImpl::_ansSetBlueVideoGain(const ui4& InstanceID, cons
 
 
 void
-RenderingControlControllerImpl::_ansGetRedVideoBlackLevel(const ui4& InstanceID, const ui2& CurrentRedVideoBlackLevel)
+CtlRenderingControlImpl::_ansGetRedVideoBlackLevel(const ui4& InstanceID, const ui2& CurrentRedVideoBlackLevel)
 {
 // begin of your own code
 
@@ -340,7 +340,7 @@ RenderingControlControllerImpl::_ansGetRedVideoBlackLevel(const ui4& InstanceID,
 
 
 void
-RenderingControlControllerImpl::_ansSetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
+CtlRenderingControlImpl::_ansSetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
 // begin of your own code
 
@@ -349,7 +349,7 @@ RenderingControlControllerImpl::_ansSetRedVideoBlackLevel(const ui4& InstanceID,
 
 
 void
-RenderingControlControllerImpl::_ansGetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& CurrentGreenVideoBlackLevel)
+CtlRenderingControlImpl::_ansGetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& CurrentGreenVideoBlackLevel)
 {
 // begin of your own code
 
@@ -358,7 +358,7 @@ RenderingControlControllerImpl::_ansGetGreenVideoBlackLevel(const ui4& InstanceI
 
 
 void
-RenderingControlControllerImpl::_ansSetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
+CtlRenderingControlImpl::_ansSetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
 // begin of your own code
 
@@ -367,7 +367,7 @@ RenderingControlControllerImpl::_ansSetGreenVideoBlackLevel(const ui4& InstanceI
 
 
 void
-RenderingControlControllerImpl::_ansGetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& CurrentBlueVideoBlackLevel)
+CtlRenderingControlImpl::_ansGetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& CurrentBlueVideoBlackLevel)
 {
 // begin of your own code
 
@@ -376,7 +376,7 @@ RenderingControlControllerImpl::_ansGetBlueVideoBlackLevel(const ui4& InstanceID
 
 
 void
-RenderingControlControllerImpl::_ansSetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
+CtlRenderingControlImpl::_ansSetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
 // begin of your own code
 
@@ -385,7 +385,7 @@ RenderingControlControllerImpl::_ansSetBlueVideoBlackLevel(const ui4& InstanceID
 
 
 void
-RenderingControlControllerImpl::_ansGetColorTemperature (const ui4& InstanceID, const ui2& CurrentColorTemperature)
+CtlRenderingControlImpl::_ansGetColorTemperature (const ui4& InstanceID, const ui2& CurrentColorTemperature)
 {
 // begin of your own code
 
@@ -394,7 +394,7 @@ RenderingControlControllerImpl::_ansGetColorTemperature (const ui4& InstanceID, 
 
 
 void
-RenderingControlControllerImpl::_ansSetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
+CtlRenderingControlImpl::_ansSetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
 // begin of your own code
 
@@ -403,7 +403,7 @@ RenderingControlControllerImpl::_ansSetColorTemperature(const ui4& InstanceID, c
 
 
 void
-RenderingControlControllerImpl::_ansGetHorizontalKeystone(const ui4& InstanceID, const i2& CurrentHorizontalKeystone)
+CtlRenderingControlImpl::_ansGetHorizontalKeystone(const ui4& InstanceID, const i2& CurrentHorizontalKeystone)
 {
 // begin of your own code
 
@@ -412,7 +412,7 @@ RenderingControlControllerImpl::_ansGetHorizontalKeystone(const ui4& InstanceID,
 
 
 void
-RenderingControlControllerImpl::_ansSetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
+CtlRenderingControlImpl::_ansSetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
 // begin of your own code
 
@@ -421,7 +421,7 @@ RenderingControlControllerImpl::_ansSetHorizontalKeystone(const ui4& InstanceID,
 
 
 void
-RenderingControlControllerImpl::_ansGetVerticalKeystone(const ui4& InstanceID, const i2& CurrentVerticalKeystone)
+CtlRenderingControlImpl::_ansGetVerticalKeystone(const ui4& InstanceID, const i2& CurrentVerticalKeystone)
 {
 // begin of your own code
 
@@ -430,7 +430,7 @@ RenderingControlControllerImpl::_ansGetVerticalKeystone(const ui4& InstanceID, c
 
 
 void
-RenderingControlControllerImpl::_ansSetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
+CtlRenderingControlImpl::_ansSetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
 // begin of your own code
 
@@ -439,7 +439,7 @@ RenderingControlControllerImpl::_ansSetVerticalKeystone(const ui4& InstanceID, c
 
 
 void
-RenderingControlControllerImpl::_ansGetMute(const ui4& InstanceID, const std::string& Channel, const bool& CurrentMute)
+CtlRenderingControlImpl::_ansGetMute(const ui4& InstanceID, const std::string& Channel, const bool& CurrentMute)
 {
 // begin of your own code
 
@@ -448,7 +448,7 @@ RenderingControlControllerImpl::_ansGetMute(const ui4& InstanceID, const std::st
 
 
 void
-RenderingControlControllerImpl::_ansSetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+CtlRenderingControlImpl::_ansSetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
 // begin of your own code
 
@@ -457,7 +457,7 @@ RenderingControlControllerImpl::_ansSetMute(const ui4& InstanceID, const std::st
 
 
 void
-RenderingControlControllerImpl::_ansGetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& CurrentVolume)
+CtlRenderingControlImpl::_ansGetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& CurrentVolume)
 {
 // begin of your own code
 
@@ -466,7 +466,7 @@ RenderingControlControllerImpl::_ansGetVolume(const ui4& InstanceID, const std::
 
 
 void
-RenderingControlControllerImpl::_ansSetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
+CtlRenderingControlImpl::_ansSetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
 // begin of your own code
 
@@ -475,7 +475,7 @@ RenderingControlControllerImpl::_ansSetVolume(const ui4& InstanceID, const std::
 
 
 void
-RenderingControlControllerImpl::_ansGetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& CurrentVolume)
+CtlRenderingControlImpl::_ansGetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& CurrentVolume)
 {
 // begin of your own code
 
@@ -484,7 +484,7 @@ RenderingControlControllerImpl::_ansGetVolumeDB(const ui4& InstanceID, const std
 
 
 void
-RenderingControlControllerImpl::_ansSetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
+CtlRenderingControlImpl::_ansSetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
 // begin of your own code
 
@@ -493,7 +493,7 @@ RenderingControlControllerImpl::_ansSetVolumeDB(const ui4& InstanceID, const std
 
 
 void
-RenderingControlControllerImpl::_ansGetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, const i2& MinValue, const i2& MaxValue)
+CtlRenderingControlImpl::_ansGetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, const i2& MinValue, const i2& MaxValue)
 {
 // begin of your own code
 
@@ -502,7 +502,7 @@ RenderingControlControllerImpl::_ansGetVolumeDBRange(const ui4& InstanceID, cons
 
 
 void
-RenderingControlControllerImpl::_ansGetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& CurrentLoudness)
+CtlRenderingControlImpl::_ansGetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& CurrentLoudness)
 {
 // begin of your own code
 
@@ -511,7 +511,7 @@ RenderingControlControllerImpl::_ansGetLoudness(const ui4& InstanceID, const std
 
 
 void
-RenderingControlControllerImpl::_ansSetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+CtlRenderingControlImpl::_ansSetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
 // begin of your own code
 
@@ -520,7 +520,7 @@ RenderingControlControllerImpl::_ansSetLoudness(const ui4& InstanceID, const std
 
 
 void
-RenderingControlControllerImpl::_changedLastChange(const std::string& val)
+CtlRenderingControlImpl::_changedLastChange(const std::string& val)
 {
 // begin of your own code
 
@@ -528,7 +528,7 @@ RenderingControlControllerImpl::_changedLastChange(const std::string& val)
 }
 
 void
-ContentDirectoryControllerImpl::_ansGetSearchCapabilities(const std::string& SearchCaps)
+CtlContentDirectoryImpl::_ansGetSearchCapabilities(const std::string& SearchCaps)
 {
 // begin of your own code
 
@@ -537,7 +537,7 @@ ContentDirectoryControllerImpl::_ansGetSearchCapabilities(const std::string& Sea
 
 
 void
-ContentDirectoryControllerImpl::_ansGetSortCapabilities(const std::string& SortCaps)
+CtlContentDirectoryImpl::_ansGetSortCapabilities(const std::string& SortCaps)
 {
 // begin of your own code
 
@@ -546,7 +546,7 @@ ContentDirectoryControllerImpl::_ansGetSortCapabilities(const std::string& SortC
 
 
 void
-ContentDirectoryControllerImpl::_ansGetSystemUpdateID(const ui4& Id)
+CtlContentDirectoryImpl::_ansGetSystemUpdateID(const ui4& Id)
 {
 // begin of your own code
 
@@ -555,7 +555,7 @@ ContentDirectoryControllerImpl::_ansGetSystemUpdateID(const ui4& Id)
 
 
 void
-ContentDirectoryControllerImpl::_ansBrowse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, const std::string& Result, const ui4& NumberReturned, const ui4& TotalMatches, const ui4& UpdateID)
+CtlContentDirectoryImpl::_ansBrowse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, const std::string& Result, const ui4& NumberReturned, const ui4& TotalMatches, const ui4& UpdateID)
 {
 // begin of your own code
 
@@ -564,7 +564,7 @@ ContentDirectoryControllerImpl::_ansBrowse(const std::string& ObjectID, const st
 
 
 void
-ContentDirectoryControllerImpl::_ansSearch(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, const std::string& Result, const ui4& NumberReturned, const ui4& TotalMatches, const ui4& UpdateID)
+CtlContentDirectoryImpl::_ansSearch(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, const std::string& Result, const ui4& NumberReturned, const ui4& TotalMatches, const ui4& UpdateID)
 {
 // begin of your own code
 
@@ -573,7 +573,7 @@ ContentDirectoryControllerImpl::_ansSearch(const std::string& ContainerID, const
 
 
 void
-ContentDirectoryControllerImpl::_ansCreateObject(const std::string& ContainerID, const std::string& Elements, const std::string& ObjectID, const std::string& Result)
+CtlContentDirectoryImpl::_ansCreateObject(const std::string& ContainerID, const std::string& Elements, const std::string& ObjectID, const std::string& Result)
 {
 // begin of your own code
 
@@ -582,7 +582,7 @@ ContentDirectoryControllerImpl::_ansCreateObject(const std::string& ContainerID,
 
 
 void
-ContentDirectoryControllerImpl::_ansDestroyObject(const std::string& ObjectID)
+CtlContentDirectoryImpl::_ansDestroyObject(const std::string& ObjectID)
 {
 // begin of your own code
 
@@ -591,7 +591,7 @@ ContentDirectoryControllerImpl::_ansDestroyObject(const std::string& ObjectID)
 
 
 void
-ContentDirectoryControllerImpl::_ansUpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
+CtlContentDirectoryImpl::_ansUpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
 {
 // begin of your own code
 
@@ -600,7 +600,7 @@ ContentDirectoryControllerImpl::_ansUpdateObject(const std::string& ObjectID, co
 
 
 void
-ContentDirectoryControllerImpl::_ansImportResource(const uri& SourceURI, const uri& DestinationURI, const ui4& TransferID)
+CtlContentDirectoryImpl::_ansImportResource(const uri& SourceURI, const uri& DestinationURI, const ui4& TransferID)
 {
 // begin of your own code
 
@@ -609,7 +609,7 @@ ContentDirectoryControllerImpl::_ansImportResource(const uri& SourceURI, const u
 
 
 void
-ContentDirectoryControllerImpl::_ansGetTransferProgress(const ui4& TransferID, const std::string& TransferStatus, const std::string& TransferLength, const std::string& TransferTotal)
+CtlContentDirectoryImpl::_ansGetTransferProgress(const ui4& TransferID, const std::string& TransferStatus, const std::string& TransferLength, const std::string& TransferTotal)
 {
 // begin of your own code
 
@@ -618,7 +618,7 @@ ContentDirectoryControllerImpl::_ansGetTransferProgress(const ui4& TransferID, c
 
 
 void
-ContentDirectoryControllerImpl::_ansDeleteResource(const uri& ResourceURI)
+CtlContentDirectoryImpl::_ansDeleteResource(const uri& ResourceURI)
 {
 // begin of your own code
 
@@ -627,7 +627,7 @@ ContentDirectoryControllerImpl::_ansDeleteResource(const uri& ResourceURI)
 
 
 void
-ContentDirectoryControllerImpl::_ansCreateReference(const std::string& ContainerID, const std::string& ObjectID, const std::string& NewID)
+CtlContentDirectoryImpl::_ansCreateReference(const std::string& ContainerID, const std::string& ObjectID, const std::string& NewID)
 {
 // begin of your own code
 
@@ -636,7 +636,7 @@ ContentDirectoryControllerImpl::_ansCreateReference(const std::string& Container
 
 
 void
-ContentDirectoryControllerImpl::_changedTransferIDs(const std::string& val)
+CtlContentDirectoryImpl::_changedTransferIDs(const std::string& val)
 {
 // begin of your own code
 
@@ -645,7 +645,7 @@ ContentDirectoryControllerImpl::_changedTransferIDs(const std::string& val)
 
 
 void
-ContentDirectoryControllerImpl::_changedSystemUpdateID(const ui4& val)
+CtlContentDirectoryImpl::_changedSystemUpdateID(const ui4& val)
 {
 // begin of your own code
 
@@ -654,7 +654,7 @@ ContentDirectoryControllerImpl::_changedSystemUpdateID(const ui4& val)
 
 
 void
-ContentDirectoryControllerImpl::_changedContainerUpdateIDs(const std::string& val)
+CtlContentDirectoryImpl::_changedContainerUpdateIDs(const std::string& val)
 {
 // begin of your own code
 

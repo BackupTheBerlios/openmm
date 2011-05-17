@@ -24,7 +24,7 @@ namespace Omm {
 namespace Av {
 
 void
-AVTransportRendererImpl::initStateVars()
+DevAVTransportRendererImpl::initStateVars()
 {
     _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
     _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
@@ -59,7 +59,7 @@ AVTransportRendererImpl::initStateVars()
 
 
 void
-AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     std::string transportState = _getTransportState();
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI enters in state: " + transportState);
@@ -134,7 +134,7 @@ AVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::str
 
 
 void
-AVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+DevAVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
     NrTracks = _getNumberOfTracks();
     MediaDuration = _getCurrentMediaDuration();
@@ -149,7 +149,7 @@ AVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std:
 
 
 void
-AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+DevAVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
     CurrentTransportState = _getTransportState();
     CurrentTransportStatus = _getTransportStatus();
@@ -158,7 +158,7 @@ AVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& Cu
 
 
 void
-AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
+DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
     std::string transportState = _getTransportState();
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
@@ -201,7 +201,7 @@ AVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std:
 
 
 void
-AVTransportRendererImpl::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+DevAVTransportRendererImpl::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
     PlayMedia = _getPossiblePlaybackStorageMedia();
     RecMedia = _getPossibleRecordStorageMedia();
@@ -210,7 +210,7 @@ AVTransportRendererImpl::GetDeviceCapabilities(const ui4& InstanceID, std::strin
 
 
 void
-AVTransportRendererImpl::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+DevAVTransportRendererImpl::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
     PlayMode = _getCurrentPlayMode();
     RecQualityMode = _getCurrentRecordQualityMode();
@@ -218,7 +218,7 @@ AVTransportRendererImpl::GetTransportSettings(const ui4& InstanceID, std::string
 
 
 void
-AVTransportRendererImpl::Stop(const ui4& InstanceID)
+DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() enters in state: " + transportState);
@@ -253,7 +253,7 @@ AVTransportRendererImpl::Stop(const ui4& InstanceID)
 
 
 void
-AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
+DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
 {
     std::string speed = Speed;
     std::string transportState = _getTransportState();
@@ -306,7 +306,7 @@ AVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
 
 
 void
-AVTransportRendererImpl::Pause(const ui4& InstanceID)
+DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + transportState);
@@ -326,7 +326,7 @@ AVTransportRendererImpl::Pause(const ui4& InstanceID)
 
 
 void
-AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
+DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     std::string transportState = _getTransportState();
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() enters in state: " + transportState);
@@ -353,7 +353,7 @@ AVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, co
 
 
 void
-AVTransportRendererImpl::Next(const ui4& InstanceID)
+DevAVTransportRendererImpl::Next(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -362,7 +362,7 @@ AVTransportRendererImpl::Next(const ui4& InstanceID)
 
 
 void
-AVTransportRendererImpl::Previous(const ui4& InstanceID)
+DevAVTransportRendererImpl::Previous(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -377,7 +377,7 @@ AVTransportRendererImpl::Previous(const ui4& InstanceID)
 
 
 void
-ConnectionManagerRendererImpl::initStateVars()
+DevConnectionManagerRendererImpl::initStateVars()
 {
 //     _setSourceProtocolInfo("http-get:*:*:*");
     _setSourceProtocolInfo("");
@@ -387,7 +387,7 @@ ConnectionManagerRendererImpl::initStateVars()
 
 
 void
-ConnectionManagerRendererImpl::GetProtocolInfo(std::string& Source, std::string& Sink)
+DevConnectionManagerRendererImpl::GetProtocolInfo(std::string& Source, std::string& Sink)
 {
 // begin of your own code
     Source = "";
@@ -398,7 +398,7 @@ ConnectionManagerRendererImpl::GetProtocolInfo(std::string& Source, std::string&
 
 
 void
-ConnectionManagerRendererImpl::ConnectionComplete(const i4& ConnectionID)
+DevConnectionManagerRendererImpl::ConnectionComplete(const i4& ConnectionID)
 {
 // begin of your own code
     
@@ -407,7 +407,7 @@ ConnectionManagerRendererImpl::ConnectionComplete(const i4& ConnectionID)
 
 
 void
-ConnectionManagerRendererImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
+DevConnectionManagerRendererImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
 // begin of your own code
     ConnectionIDs = "0";
@@ -416,7 +416,7 @@ ConnectionManagerRendererImpl::GetCurrentConnectionIDs(std::string& ConnectionID
 
 
 void
-ConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
+DevConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
 // begin of your own code
 
@@ -425,7 +425,7 @@ ConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionID, 
 
 
 void
-RenderingControlRendererImpl::initStateVars()
+DevRenderingControlRendererImpl::initStateVars()
 {
     _setPresetNameList("");
     _setLastChange("");
@@ -449,7 +449,7 @@ RenderingControlRendererImpl::initStateVars()
 
 
 void
-RenderingControlRendererImpl::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
+DevRenderingControlRendererImpl::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
 {
 // begin of your own code
     
@@ -458,7 +458,7 @@ RenderingControlRendererImpl::ListPresets(const ui4& InstanceID, std::string& Cu
 
 
 void
-RenderingControlRendererImpl::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
+DevRenderingControlRendererImpl::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
 // begin of your own code
     
@@ -467,7 +467,7 @@ RenderingControlRendererImpl::SelectPreset(const ui4& InstanceID, const std::str
 
 
 void
-RenderingControlRendererImpl::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
+DevRenderingControlRendererImpl::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
 {
 // begin of your own code
     
@@ -476,7 +476,7 @@ RenderingControlRendererImpl::GetBrightness(const ui4& InstanceID, ui2& CurrentB
 
 
 void
-RenderingControlRendererImpl::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
+DevRenderingControlRendererImpl::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
 // begin of your own code
     
@@ -485,7 +485,7 @@ RenderingControlRendererImpl::SetBrightness(const ui4& InstanceID, const ui2& De
 
 
 void
-RenderingControlRendererImpl::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
+DevRenderingControlRendererImpl::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
 {
 // begin of your own code
     
@@ -494,7 +494,7 @@ RenderingControlRendererImpl::GetContrast(const ui4& InstanceID, ui2& CurrentCon
 
 
 void
-RenderingControlRendererImpl::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
+DevRenderingControlRendererImpl::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
 // begin of your own code
     
@@ -503,7 +503,7 @@ RenderingControlRendererImpl::SetContrast(const ui4& InstanceID, const ui2& Desi
 
 
 void
-RenderingControlRendererImpl::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
+DevRenderingControlRendererImpl::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
 {
 // begin of your own code
     
@@ -512,7 +512,7 @@ RenderingControlRendererImpl::GetSharpness(const ui4& InstanceID, ui2& CurrentSh
 
 
 void
-RenderingControlRendererImpl::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
+DevRenderingControlRendererImpl::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
 // begin of your own code
     
@@ -521,7 +521,7 @@ RenderingControlRendererImpl::SetSharpness(const ui4& InstanceID, const ui2& Des
 
 
 void
-RenderingControlRendererImpl::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
+DevRenderingControlRendererImpl::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
 {
 // begin of your own code
     
@@ -530,7 +530,7 @@ RenderingControlRendererImpl::GetRedVideoGain(const ui4& InstanceID, ui2& Curren
 
 
 void
-RenderingControlRendererImpl::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
+DevRenderingControlRendererImpl::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
 // begin of your own code
     
@@ -539,7 +539,7 @@ RenderingControlRendererImpl::SetRedVideoGain(const ui4& InstanceID, const ui2& 
 
 
 void
-RenderingControlRendererImpl::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
+DevRenderingControlRendererImpl::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
 {
 // begin of your own code
     
@@ -548,7 +548,7 @@ RenderingControlRendererImpl::GetGreenVideoGain(const ui4& InstanceID, ui2& Curr
 
 
 void
-RenderingControlRendererImpl::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
+DevRenderingControlRendererImpl::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
 // begin of your own code
     
@@ -557,7 +557,7 @@ RenderingControlRendererImpl::SetGreenVideoGain(const ui4& InstanceID, const ui2
 
 
 void
-RenderingControlRendererImpl::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
+DevRenderingControlRendererImpl::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
 {
 // begin of your own code
     
@@ -566,7 +566,7 @@ RenderingControlRendererImpl::GetBlueVideoGain(const ui4& InstanceID, ui2& Curre
 
 
 void
-RenderingControlRendererImpl::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
+DevRenderingControlRendererImpl::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
 // begin of your own code
     
@@ -575,7 +575,7 @@ RenderingControlRendererImpl::SetBlueVideoGain(const ui4& InstanceID, const ui2&
 
 
 void
-RenderingControlRendererImpl::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
+DevRenderingControlRendererImpl::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
 {
 // begin of your own code
     
@@ -584,7 +584,7 @@ RenderingControlRendererImpl::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& 
 
 
 void
-RenderingControlRendererImpl::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
+DevRenderingControlRendererImpl::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
 // begin of your own code
     
@@ -593,7 +593,7 @@ RenderingControlRendererImpl::SetRedVideoBlackLevel(const ui4& InstanceID, const
 
 
 void
-RenderingControlRendererImpl::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
+DevRenderingControlRendererImpl::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
 {
 // begin of your own code
     
@@ -602,7 +602,7 @@ RenderingControlRendererImpl::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2
 
 
 void
-RenderingControlRendererImpl::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
+DevRenderingControlRendererImpl::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
 // begin of your own code
     
@@ -611,7 +611,7 @@ RenderingControlRendererImpl::SetGreenVideoBlackLevel(const ui4& InstanceID, con
 
 
 void
-RenderingControlRendererImpl::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
+DevRenderingControlRendererImpl::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
 {
 // begin of your own code
     
@@ -620,7 +620,7 @@ RenderingControlRendererImpl::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2&
 
 
 void
-RenderingControlRendererImpl::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
+DevRenderingControlRendererImpl::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
 // begin of your own code
     
@@ -629,7 +629,7 @@ RenderingControlRendererImpl::SetBlueVideoBlackLevel(const ui4& InstanceID, cons
 
 
 void
-RenderingControlRendererImpl::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
+DevRenderingControlRendererImpl::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
 {
 // begin of your own code
     
@@ -638,7 +638,7 @@ RenderingControlRendererImpl::GetColorTemperature (const ui4& InstanceID, ui2& C
 
 
 void
-RenderingControlRendererImpl::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
+DevRenderingControlRendererImpl::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
 // begin of your own code
     
@@ -647,7 +647,7 @@ RenderingControlRendererImpl::SetColorTemperature(const ui4& InstanceID, const u
 
 
 void
-RenderingControlRendererImpl::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
+DevRenderingControlRendererImpl::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
 {
 // begin of your own code
     
@@ -656,7 +656,7 @@ RenderingControlRendererImpl::GetHorizontalKeystone(const ui4& InstanceID, i2& C
 
 
 void
-RenderingControlRendererImpl::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
+DevRenderingControlRendererImpl::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
 // begin of your own code
     
@@ -665,7 +665,7 @@ RenderingControlRendererImpl::SetHorizontalKeystone(const ui4& InstanceID, const
 
 
 void
-RenderingControlRendererImpl::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
+DevRenderingControlRendererImpl::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
 {
 // begin of your own code
     
@@ -674,7 +674,7 @@ RenderingControlRendererImpl::GetVerticalKeystone(const ui4& InstanceID, i2& Cur
 
 
 void
-RenderingControlRendererImpl::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
+DevRenderingControlRendererImpl::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
 // begin of your own code
     
@@ -683,7 +683,7 @@ RenderingControlRendererImpl::SetVerticalKeystone(const ui4& InstanceID, const i
 
 
 void
-RenderingControlRendererImpl::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
+DevRenderingControlRendererImpl::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
 // begin of your own code
     
@@ -692,7 +692,7 @@ RenderingControlRendererImpl::GetMute(const ui4& InstanceID, const std::string& 
 
 
 void
-RenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+DevRenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
 // begin of your own code
     
@@ -701,14 +701,14 @@ RenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& 
 
 
 void
-RenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
+DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
     CurrentVolume = _getVolume();
 }
 
 
 void
-RenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
+DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
     Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
     
@@ -720,14 +720,14 @@ RenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string
 
 
 void
-RenderingControlRendererImpl::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
+DevRenderingControlRendererImpl::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
 {
     CurrentVolume = _getVolumeDB();
 }
 
 
 void
-RenderingControlRendererImpl::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
+DevRenderingControlRendererImpl::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
 // begin of your own code
     
@@ -736,7 +736,7 @@ RenderingControlRendererImpl::SetVolumeDB(const ui4& InstanceID, const std::stri
 
 
 void
-RenderingControlRendererImpl::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
+DevRenderingControlRendererImpl::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
 {
 // begin of your own code
     
@@ -745,7 +745,7 @@ RenderingControlRendererImpl::GetVolumeDBRange(const ui4& InstanceID, const std:
 
 
 void
-RenderingControlRendererImpl::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
+DevRenderingControlRendererImpl::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
 {
 // begin of your own code
     
@@ -754,7 +754,7 @@ RenderingControlRendererImpl::GetLoudness(const ui4& InstanceID, const std::stri
 
 
 void
-RenderingControlRendererImpl::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+DevRenderingControlRendererImpl::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
 // begin of your own code
     

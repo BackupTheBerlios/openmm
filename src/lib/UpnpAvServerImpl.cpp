@@ -24,7 +24,7 @@ namespace Omm {
 namespace Av {
 
 void
-AVTransportImplementation::initStateVars()
+DevAVTransportServerImpl::initStateVars()
 {
 // you may set state variables here with the _set<state_variable_name>() methods
 // default values are already set, if defined by the service
@@ -32,7 +32,7 @@ AVTransportImplementation::initStateVars()
 
 
 void
-AVTransportImplementation::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+DevAVTransportServerImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
 // begin of your own code
 
@@ -41,7 +41,7 @@ AVTransportImplementation::SetAVTransportURI(const ui4& InstanceID, const std::s
 
 
 void
-AVTransportImplementation::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+DevAVTransportServerImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
 // begin of your own code
 
@@ -50,7 +50,7 @@ AVTransportImplementation::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, st
 
 
 void
-AVTransportImplementation::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+DevAVTransportServerImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
 // begin of your own code
 
@@ -59,7 +59,7 @@ AVTransportImplementation::GetTransportInfo(const ui4& InstanceID, std::string& 
 
 
 void
-AVTransportImplementation::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
+DevAVTransportServerImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
 // begin of your own code
 
@@ -68,7 +68,7 @@ AVTransportImplementation::GetPositionInfo(const ui4& InstanceID, ui4& Track, st
 
 
 void
-AVTransportImplementation::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+DevAVTransportServerImpl::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
 // begin of your own code
 
@@ -77,7 +77,7 @@ AVTransportImplementation::GetDeviceCapabilities(const ui4& InstanceID, std::str
 
 
 void
-AVTransportImplementation::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+DevAVTransportServerImpl::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
 // begin of your own code
 
@@ -86,7 +86,7 @@ AVTransportImplementation::GetTransportSettings(const ui4& InstanceID, std::stri
 
 
 void
-AVTransportImplementation::Stop(const ui4& InstanceID)
+DevAVTransportServerImpl::Stop(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -95,7 +95,7 @@ AVTransportImplementation::Stop(const ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Play(const ui4& InstanceID, const std::string& Speed)
+DevAVTransportServerImpl::Play(const ui4& InstanceID, const std::string& Speed)
 {
 // begin of your own code
 
@@ -104,7 +104,7 @@ AVTransportImplementation::Play(const ui4& InstanceID, const std::string& Speed)
 
 
 void
-AVTransportImplementation::Pause(const ui4& InstanceID)
+DevAVTransportServerImpl::Pause(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -113,7 +113,7 @@ AVTransportImplementation::Pause(const ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
+DevAVTransportServerImpl::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
 // begin of your own code
 
@@ -122,7 +122,7 @@ AVTransportImplementation::Seek(const ui4& InstanceID, const std::string& Unit, 
 
 
 void
-AVTransportImplementation::Next(const ui4& InstanceID)
+DevAVTransportServerImpl::Next(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -131,7 +131,7 @@ AVTransportImplementation::Next(const ui4& InstanceID)
 
 
 void
-AVTransportImplementation::Previous(const ui4& InstanceID)
+DevAVTransportServerImpl::Previous(const ui4& InstanceID)
 {
 // begin of your own code
 
@@ -140,7 +140,7 @@ AVTransportImplementation::Previous(const ui4& InstanceID)
 
 
 void
-ConnectionManagerImplementation::initStateVars()
+DevConnectionManagerServerImpl::initStateVars()
 {
 // you may set state variables here with the _set<state_variable_name>() methods
 // default values are already set, if defined by the service
@@ -148,7 +148,7 @@ ConnectionManagerImplementation::initStateVars()
 
 
 void
-ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::string& Sink)
+DevConnectionManagerServerImpl::GetProtocolInfo(std::string& Source, std::string& Sink)
 {
 // begin of your own code
 
@@ -157,7 +157,7 @@ ConnectionManagerImplementation::GetProtocolInfo(std::string& Source, std::strin
 
 
 void
-ConnectionManagerImplementation::ConnectionComplete(const i4& ConnectionID)
+DevConnectionManagerServerImpl::ConnectionComplete(const i4& ConnectionID)
 {
 // begin of your own code
 
@@ -166,7 +166,7 @@ ConnectionManagerImplementation::ConnectionComplete(const i4& ConnectionID)
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& ConnectionIDs)
+DevConnectionManagerServerImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
 // begin of your own code
 
@@ -175,7 +175,7 @@ ConnectionManagerImplementation::GetCurrentConnectionIDs(std::string& Connection
 
 
 void
-ConnectionManagerImplementation::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
+DevConnectionManagerServerImpl::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
 // begin of your own code
 
@@ -184,7 +184,7 @@ ConnectionManagerImplementation::GetCurrentConnectionInfo(const i4& ConnectionID
 
 
 void
-ContentDirectoryImplementation::initStateVars()
+DevContentDirectoryServerImpl::initStateVars()
 {
 // you may set state variables here with the _set<state_variable_name>() methods
 // default values are already set, if defined by the service
@@ -192,7 +192,7 @@ ContentDirectoryImplementation::initStateVars()
 
 
 void
-ContentDirectoryImplementation::GetSearchCapabilities(std::string& SearchCaps)
+DevContentDirectoryServerImpl::GetSearchCapabilities(std::string& SearchCaps)
 {
 // begin of your own code
 
@@ -201,7 +201,7 @@ ContentDirectoryImplementation::GetSearchCapabilities(std::string& SearchCaps)
 
 
 void
-ContentDirectoryImplementation::GetSortCapabilities(std::string& SortCaps)
+DevContentDirectoryServerImpl::GetSortCapabilities(std::string& SortCaps)
 {
 // begin of your own code
 
@@ -210,7 +210,7 @@ ContentDirectoryImplementation::GetSortCapabilities(std::string& SortCaps)
 
 
 void
-ContentDirectoryImplementation::GetSystemUpdateID(ui4& Id)
+DevContentDirectoryServerImpl::GetSystemUpdateID(ui4& Id)
 {
 // begin of your own code
 
@@ -219,7 +219,7 @@ ContentDirectoryImplementation::GetSystemUpdateID(ui4& Id)
 
 
 void
-ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
+DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
     AbstractMediaObject* object;
     if (ObjectID == "0") {
@@ -246,7 +246,7 @@ ContentDirectoryImplementation::Browse(const std::string& ObjectID, const std::s
 
 
 void
-ContentDirectoryImplementation::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
+DevContentDirectoryServerImpl::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
 // begin of your own code
 
@@ -255,7 +255,7 @@ ContentDirectoryImplementation::Search(const std::string& ContainerID, const std
 
 
 void
-ContentDirectoryImplementation::CreateObject(const std::string& ContainerID, const std::string& Elements, std::string& ObjectID, std::string& Result)
+DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, const std::string& Elements, std::string& ObjectID, std::string& Result)
 {
 // begin of your own code
 
@@ -264,7 +264,7 @@ ContentDirectoryImplementation::CreateObject(const std::string& ContainerID, con
 
 
 void
-ContentDirectoryImplementation::DestroyObject(const std::string& ObjectID)
+DevContentDirectoryServerImpl::DestroyObject(const std::string& ObjectID)
 {
 // begin of your own code
 
@@ -273,7 +273,7 @@ ContentDirectoryImplementation::DestroyObject(const std::string& ObjectID)
 
 
 void
-ContentDirectoryImplementation::UpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
+DevContentDirectoryServerImpl::UpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
 {
 // begin of your own code
 
@@ -282,7 +282,7 @@ ContentDirectoryImplementation::UpdateObject(const std::string& ObjectID, const 
 
 
 void
-ContentDirectoryImplementation::ImportResource(const uri& SourceURI, const uri& DestinationURI, ui4& TransferID)
+DevContentDirectoryServerImpl::ImportResource(const uri& SourceURI, const uri& DestinationURI, ui4& TransferID)
 {
 // begin of your own code
 
@@ -291,7 +291,7 @@ ContentDirectoryImplementation::ImportResource(const uri& SourceURI, const uri& 
 
 
 void
-ContentDirectoryImplementation::GetTransferProgress(const ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal)
+DevContentDirectoryServerImpl::GetTransferProgress(const ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal)
 {
 // begin of your own code
 
@@ -300,7 +300,7 @@ ContentDirectoryImplementation::GetTransferProgress(const ui4& TransferID, std::
 
 
 void
-ContentDirectoryImplementation::DeleteResource(const uri& ResourceURI)
+DevContentDirectoryServerImpl::DeleteResource(const uri& ResourceURI)
 {
 // begin of your own code
 
@@ -309,7 +309,7 @@ ContentDirectoryImplementation::DeleteResource(const uri& ResourceURI)
 
 
 void
-ContentDirectoryImplementation::CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID)
+DevContentDirectoryServerImpl::CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID)
 {
 // begin of your own code
 

@@ -31,7 +31,8 @@
 namespace Omm {
 namespace Av {
 
-class AVTransportImplementation : public AVTransport
+
+class DevAVTransportServerImpl : public DevAVTransport
 {
 private:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -50,7 +51,8 @@ private:
     virtual void initStateVars();
 };
 
-class ConnectionManagerImplementation : public ConnectionManager
+
+class DevConnectionManagerServerImpl : public DevConnectionManager
 {
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -61,7 +63,8 @@ private:
     virtual void initStateVars();
 };
 
-class ContentDirectoryImplementation : public ContentDirectory
+
+class DevContentDirectoryServerImpl : public DevContentDirectory
 {
     friend class AvServer;
     

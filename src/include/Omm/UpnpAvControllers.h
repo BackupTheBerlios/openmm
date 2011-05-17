@@ -30,49 +30,49 @@ namespace Omm {
 namespace Av {
 
 // Forward declaration of all UPnP AV services
-class AVTransportController;
-class ConnectionManagerController;
-class RenderingControlController;
-class ContentDirectoryController;
+class CtlAVTransport;
+class CtlConnectionManager;
+class CtlRenderingControl;
+class CtlContentDirectory;
 
 
 class CtlMediaRenderer : public CtlDevice
 {
 public:
-    CtlMediaRenderer(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
+    CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
 
-    RenderingControlController* RenderingControl() { return _pRenderingControlController; }
-    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
-    AVTransportController* AVTransport() { return _pAVTransportController; }
+    CtlRenderingControl* RenderingControl() { return _pCtlRenderingControl; }
+    CtlConnectionManager* ConnectionManager() { return _pCtlConnectionManager; }
+    CtlAVTransport* AVTransport() { return _pCtlAVTransport; }
 
 private:
     virtual void eventHandler(StateVar* pStateVar);
 
-    RenderingControlController* _pRenderingControlController;
-    ConnectionManagerController* _pConnectionManagerController;
-    AVTransportController* _pAVTransportController;
+    CtlRenderingControl* _pCtlRenderingControl;
+    CtlConnectionManager* _pCtlConnectionManager;
+    CtlAVTransport* _pCtlAVTransport;
 };
 
 
 class CtlMediaServer : public CtlDevice
 {
 public:
-    CtlMediaServer(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
+    CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
 
-    ContentDirectoryController* ContentDirectory() { return _pContentDirectoryController; }
-    ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
-    AVTransportController* AVTransport() { return _pAVTransportController; }
+    CtlContentDirectory* ContentDirectory() { return _pCtlContentDirectory; }
+    CtlConnectionManager* ConnectionManager() { return _pCtlConnectionManager; }
+    CtlAVTransport* AVTransport() { return _pCtlAVTransport; }
 
 private:
     virtual void eventHandler(StateVar* pStateVar);
 
-    ContentDirectoryController* _pContentDirectoryController;
-    ConnectionManagerController* _pConnectionManagerController;
-    AVTransportController* _pAVTransportController;
+    CtlContentDirectory* _pCtlContentDirectory;
+    CtlConnectionManager* _pCtlConnectionManager;
+    CtlAVTransport* _pCtlAVTransport;
 };
 
 
-class AVTransportController
+class CtlAVTransport
 {
     friend class CtlMediaRenderer;
     friend class CtlMediaServer;
@@ -140,7 +140,7 @@ private:
 };
 
 
-class ConnectionManagerController
+class CtlConnectionManager
 {
     friend class CtlMediaRenderer;
     friend class CtlMediaServer;
@@ -180,7 +180,7 @@ private:
 };
 
 
-class ContentDirectoryController
+class CtlContentDirectory
 {
     friend class CtlMediaServer;
 
@@ -251,7 +251,7 @@ private:
 };
 
 
-class RenderingControlController
+class CtlRenderingControl
 {
     friend class CtlMediaRenderer;
 

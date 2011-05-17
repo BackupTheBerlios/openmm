@@ -29,13 +29,13 @@ DevMediaRenderer::actionHandler(Action* pAction)
 {
     std::string serviceType = pAction->getService()->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pAVTransportImpl->actionHandler(pAction);
+        _pDevAVTransportImpl->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pConnectionManagerImpl->actionHandler(pAction);
+        _pDevConnectionManagerImpl->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:RenderingControl:1") {
-        _pRenderingControlImpl->actionHandler(pAction);
+        _pDevRenderingControlImpl->actionHandler(pAction);
     }
 }
 
@@ -45,30 +45,30 @@ DevMediaRenderer::initStateVars(Service* pService)
 {
     std::string serviceType = pService->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pAVTransportImpl->_pService = pService;
-        _pAVTransportImpl->initStateVars();
+        _pDevAVTransportImpl->_pService = pService;
+        _pDevAVTransportImpl->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pConnectionManagerImpl->_pService = pService;
-        _pConnectionManagerImpl->initStateVars();
+        _pDevConnectionManagerImpl->_pService = pService;
+        _pDevConnectionManagerImpl->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:RenderingControl:1") {
-        _pRenderingControlImpl->_pService = pService;
-        _pRenderingControlImpl->initStateVars();
+        _pDevRenderingControlImpl->_pService = pService;
+        _pDevRenderingControlImpl->initStateVars();
     }
 }
 
 
-DevMediaRenderer::DevMediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
+DevMediaRenderer::DevMediaRenderer(DevRenderingControl* pRenderingControlImpl, DevConnectionManager* pConnectionManagerImpl, DevAVTransport* pAVTransportImpl) :
 DevDevice(),
-_pRenderingControlImpl(pRenderingControlImpl),
-_pConnectionManagerImpl(pConnectionManagerImpl),
-_pAVTransportImpl(pAVTransportImpl)
+_pDevRenderingControlImpl(pRenderingControlImpl),
+_pDevConnectionManagerImpl(pConnectionManagerImpl),
+_pDevAVTransportImpl(pAVTransportImpl)
 {
     _descriptions["/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml"] = &DevMediaRenderer::_deviceDescription;
-    _descriptions["/urn:schemas-upnp-org:service:RenderingControl:1/Description.xml"] = &RenderingControl::_description;
-    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &ConnectionManager::_description;
-    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &AVTransport::_description;
+    _descriptions["/urn:schemas-upnp-org:service:RenderingControl:1/Description.xml"] = &DevRenderingControl::_description;
+    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &DevConnectionManager::_description;
+    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
 
     StringDescriptionReader descriptionReader(_descriptions);
     _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
@@ -81,13 +81,13 @@ DevMediaServer::actionHandler(Action* pAction)
 {
     std::string serviceType = pAction->getService()->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pAVTransportImpl->actionHandler(pAction);
+        _pDevAVTransportImpl->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pConnectionManagerImpl->actionHandler(pAction);
+        _pDevConnectionManagerImpl->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1") {
-        _pContentDirectoryImpl->actionHandler(pAction);
+        _pDevContentDirectoryImpl->actionHandler(pAction);
     }
 }
 
@@ -97,30 +97,30 @@ DevMediaServer::initStateVars(Service* pService)
 {
     std::string serviceType = pService->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pAVTransportImpl->_pService = pService;
-        _pAVTransportImpl->initStateVars();
+        _pDevAVTransportImpl->_pService = pService;
+        _pDevAVTransportImpl->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pConnectionManagerImpl->_pService = pService;
-        _pConnectionManagerImpl->initStateVars();
+        _pDevConnectionManagerImpl->_pService = pService;
+        _pDevConnectionManagerImpl->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1") {
-        _pContentDirectoryImpl->_pService = pService;
-        _pContentDirectoryImpl->initStateVars();
+        _pDevContentDirectoryImpl->_pService = pService;
+        _pDevContentDirectoryImpl->initStateVars();
     }
 }
 
 
-DevMediaServer::DevMediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
+DevMediaServer::DevMediaServer(DevContentDirectory* pContentDirectoryImpl, DevConnectionManager* pConnectionManagerImpl, DevAVTransport* pAVTransportImpl) :
 DevDevice(),
-_pContentDirectoryImpl(pContentDirectoryImpl),
-_pConnectionManagerImpl(pConnectionManagerImpl),
-_pAVTransportImpl(pAVTransportImpl)
+_pDevContentDirectoryImpl(pContentDirectoryImpl),
+_pDevConnectionManagerImpl(pConnectionManagerImpl),
+_pDevAVTransportImpl(pAVTransportImpl)
 {
     _descriptions["/urn:schemas-upnp-org:device:MediaServer:1/Description.xml"] = &DevMediaServer::_deviceDescription;
-    _descriptions["/urn:schemas-upnp-org:service:ContentDirectory:1/Description.xml"] = &ContentDirectory::_description;
-    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &ConnectionManager::_description;
-    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &AVTransport::_description;
+    _descriptions["/urn:schemas-upnp-org:service:ContentDirectory:1/Description.xml"] = &DevContentDirectory::_description;
+    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &DevConnectionManager::_description;
+    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
 
     StringDescriptionReader descriptionReader(_descriptions);
     _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
@@ -129,7 +129,7 @@ _pAVTransportImpl(pAVTransportImpl)
 
 
 void
-AVTransport::actionHandler(Action* pAction)
+DevAVTransport::actionHandler(Action* pAction)
 {
     std::string actionName = pAction->getName();
 
@@ -240,385 +240,385 @@ AVTransport::actionHandler(Action* pAction)
 
 
 void
-AVTransport::_setTransportState(const std::string& val)
+DevAVTransport::_setTransportState(const std::string& val)
 {
     _pService->setStateVar<std::string>("TransportState", val);
 }
 
 
 std::string
-AVTransport::_getTransportState()
+DevAVTransport::_getTransportState()
 {
     return _pService->getStateVar<std::string>("TransportState");
 }
 
 
 void
-AVTransport::_setTransportStatus(const std::string& val)
+DevAVTransport::_setTransportStatus(const std::string& val)
 {
     _pService->setStateVar<std::string>("TransportStatus", val);
 }
 
 
 std::string
-AVTransport::_getTransportStatus()
+DevAVTransport::_getTransportStatus()
 {
     return _pService->getStateVar<std::string>("TransportStatus");
 }
 
 
 void
-AVTransport::_setPlaybackStorageMedium(const std::string& val)
+DevAVTransport::_setPlaybackStorageMedium(const std::string& val)
 {
     _pService->setStateVar<std::string>("PlaybackStorageMedium", val);
 }
 
 
 std::string
-AVTransport::_getPlaybackStorageMedium()
+DevAVTransport::_getPlaybackStorageMedium()
 {
     return _pService->getStateVar<std::string>("PlaybackStorageMedium");
 }
 
 
 void
-AVTransport::_setRecordStorageMedium(const std::string& val)
+DevAVTransport::_setRecordStorageMedium(const std::string& val)
 {
     _pService->setStateVar<std::string>("RecordStorageMedium", val);
 }
 
 
 std::string
-AVTransport::_getRecordStorageMedium()
+DevAVTransport::_getRecordStorageMedium()
 {
     return _pService->getStateVar<std::string>("RecordStorageMedium");
 }
 
 
 void
-AVTransport::_setPossiblePlaybackStorageMedia(const std::string& val)
+DevAVTransport::_setPossiblePlaybackStorageMedia(const std::string& val)
 {
     _pService->setStateVar<std::string>("PossiblePlaybackStorageMedia", val);
 }
 
 
 std::string
-AVTransport::_getPossiblePlaybackStorageMedia()
+DevAVTransport::_getPossiblePlaybackStorageMedia()
 {
     return _pService->getStateVar<std::string>("PossiblePlaybackStorageMedia");
 }
 
 
 void
-AVTransport::_setPossibleRecordStorageMedia(const std::string& val)
+DevAVTransport::_setPossibleRecordStorageMedia(const std::string& val)
 {
     _pService->setStateVar<std::string>("PossibleRecordStorageMedia", val);
 }
 
 
 std::string
-AVTransport::_getPossibleRecordStorageMedia()
+DevAVTransport::_getPossibleRecordStorageMedia()
 {
     return _pService->getStateVar<std::string>("PossibleRecordStorageMedia");
 }
 
 
 void
-AVTransport::_setCurrentPlayMode(const std::string& val)
+DevAVTransport::_setCurrentPlayMode(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentPlayMode", val);
 }
 
 
 std::string
-AVTransport::_getCurrentPlayMode()
+DevAVTransport::_getCurrentPlayMode()
 {
     return _pService->getStateVar<std::string>("CurrentPlayMode");
 }
 
 
 void
-AVTransport::_setTransportPlaySpeed(const std::string& val)
+DevAVTransport::_setTransportPlaySpeed(const std::string& val)
 {
     _pService->setStateVar<std::string>("TransportPlaySpeed", val);
 }
 
 
 std::string
-AVTransport::_getTransportPlaySpeed()
+DevAVTransport::_getTransportPlaySpeed()
 {
     return _pService->getStateVar<std::string>("TransportPlaySpeed");
 }
 
 
 void
-AVTransport::_setRecordMediumWriteStatus(const std::string& val)
+DevAVTransport::_setRecordMediumWriteStatus(const std::string& val)
 {
     _pService->setStateVar<std::string>("RecordMediumWriteStatus", val);
 }
 
 
 std::string
-AVTransport::_getRecordMediumWriteStatus()
+DevAVTransport::_getRecordMediumWriteStatus()
 {
     return _pService->getStateVar<std::string>("RecordMediumWriteStatus");
 }
 
 
 void
-AVTransport::_setCurrentRecordQualityMode(const std::string& val)
+DevAVTransport::_setCurrentRecordQualityMode(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentRecordQualityMode", val);
 }
 
 
 std::string
-AVTransport::_getCurrentRecordQualityMode()
+DevAVTransport::_getCurrentRecordQualityMode()
 {
     return _pService->getStateVar<std::string>("CurrentRecordQualityMode");
 }
 
 
 void
-AVTransport::_setPossibleRecordQualityModes(const std::string& val)
+DevAVTransport::_setPossibleRecordQualityModes(const std::string& val)
 {
     _pService->setStateVar<std::string>("PossibleRecordQualityModes", val);
 }
 
 
 std::string
-AVTransport::_getPossibleRecordQualityModes()
+DevAVTransport::_getPossibleRecordQualityModes()
 {
     return _pService->getStateVar<std::string>("PossibleRecordQualityModes");
 }
 
 
 void
-AVTransport::_setNumberOfTracks(const ui4& val)
+DevAVTransport::_setNumberOfTracks(const ui4& val)
 {
     _pService->setStateVar<ui4>("NumberOfTracks", val);
 }
 
 
 ui4
-AVTransport::_getNumberOfTracks()
+DevAVTransport::_getNumberOfTracks()
 {
     return _pService->getStateVar<ui4>("NumberOfTracks");
 }
 
 
 void
-AVTransport::_setCurrentTrack(const ui4& val)
+DevAVTransport::_setCurrentTrack(const ui4& val)
 {
     _pService->setStateVar<ui4>("CurrentTrack", val);
 }
 
 
 ui4
-AVTransport::_getCurrentTrack()
+DevAVTransport::_getCurrentTrack()
 {
     return _pService->getStateVar<ui4>("CurrentTrack");
 }
 
 
 void
-AVTransport::_setCurrentTrackDuration(const std::string& val)
+DevAVTransport::_setCurrentTrackDuration(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentTrackDuration", val);
 }
 
 
 std::string
-AVTransport::_getCurrentTrackDuration()
+DevAVTransport::_getCurrentTrackDuration()
 {
     return _pService->getStateVar<std::string>("CurrentTrackDuration");
 }
 
 
 void
-AVTransport::_setCurrentMediaDuration(const std::string& val)
+DevAVTransport::_setCurrentMediaDuration(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentMediaDuration", val);
 }
 
 
 std::string
-AVTransport::_getCurrentMediaDuration()
+DevAVTransport::_getCurrentMediaDuration()
 {
     return _pService->getStateVar<std::string>("CurrentMediaDuration");
 }
 
 
 void
-AVTransport::_setCurrentTrackMetaData(const std::string& val)
+DevAVTransport::_setCurrentTrackMetaData(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentTrackMetaData", val);
 }
 
 
 std::string
-AVTransport::_getCurrentTrackMetaData()
+DevAVTransport::_getCurrentTrackMetaData()
 {
     return _pService->getStateVar<std::string>("CurrentTrackMetaData");
 }
 
 
 void
-AVTransport::_setCurrentTrackURI(const std::string& val)
+DevAVTransport::_setCurrentTrackURI(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentTrackURI", val);
 }
 
 
 std::string
-AVTransport::_getCurrentTrackURI()
+DevAVTransport::_getCurrentTrackURI()
 {
     return _pService->getStateVar<std::string>("CurrentTrackURI");
 }
 
 
 void
-AVTransport::_setAVTransportURI(const std::string& val)
+DevAVTransport::_setAVTransportURI(const std::string& val)
 {
     _pService->setStateVar<std::string>("AVTransportURI", val);
 }
 
 
 std::string
-AVTransport::_getAVTransportURI()
+DevAVTransport::_getAVTransportURI()
 {
     return _pService->getStateVar<std::string>("AVTransportURI");
 }
 
 
 void
-AVTransport::_setAVTransportURIMetaData(const std::string& val)
+DevAVTransport::_setAVTransportURIMetaData(const std::string& val)
 {
     _pService->setStateVar<std::string>("AVTransportURIMetaData", val);
 }
 
 
 std::string
-AVTransport::_getAVTransportURIMetaData()
+DevAVTransport::_getAVTransportURIMetaData()
 {
     return _pService->getStateVar<std::string>("AVTransportURIMetaData");
 }
 
 
 void
-AVTransport::_setNextAVTransportURI(const std::string& val)
+DevAVTransport::_setNextAVTransportURI(const std::string& val)
 {
     _pService->setStateVar<std::string>("NextAVTransportURI", val);
 }
 
 
 std::string
-AVTransport::_getNextAVTransportURI()
+DevAVTransport::_getNextAVTransportURI()
 {
     return _pService->getStateVar<std::string>("NextAVTransportURI");
 }
 
 
 void
-AVTransport::_setNextAVTransportURIMetaData(const std::string& val)
+DevAVTransport::_setNextAVTransportURIMetaData(const std::string& val)
 {
     _pService->setStateVar<std::string>("NextAVTransportURIMetaData", val);
 }
 
 
 std::string
-AVTransport::_getNextAVTransportURIMetaData()
+DevAVTransport::_getNextAVTransportURIMetaData()
 {
     return _pService->getStateVar<std::string>("NextAVTransportURIMetaData");
 }
 
 
 void
-AVTransport::_setRelativeTimePosition(const std::string& val)
+DevAVTransport::_setRelativeTimePosition(const std::string& val)
 {
     _pService->setStateVar<std::string>("RelativeTimePosition", val);
 }
 
 
 std::string
-AVTransport::_getRelativeTimePosition()
+DevAVTransport::_getRelativeTimePosition()
 {
     return _pService->getStateVar<std::string>("RelativeTimePosition");
 }
 
 
 void
-AVTransport::_setAbsoluteTimePosition(const std::string& val)
+DevAVTransport::_setAbsoluteTimePosition(const std::string& val)
 {
     _pService->setStateVar<std::string>("AbsoluteTimePosition", val);
 }
 
 
 std::string
-AVTransport::_getAbsoluteTimePosition()
+DevAVTransport::_getAbsoluteTimePosition()
 {
     return _pService->getStateVar<std::string>("AbsoluteTimePosition");
 }
 
 
 void
-AVTransport::_setRelativeCounterPosition(const i4& val)
+DevAVTransport::_setRelativeCounterPosition(const i4& val)
 {
     _pService->setStateVar<i4>("RelativeCounterPosition", val);
 }
 
 
 i4
-AVTransport::_getRelativeCounterPosition()
+DevAVTransport::_getRelativeCounterPosition()
 {
     return _pService->getStateVar<i4>("RelativeCounterPosition");
 }
 
 
 void
-AVTransport::_setAbsoluteCounterPosition(const i4& val)
+DevAVTransport::_setAbsoluteCounterPosition(const i4& val)
 {
     _pService->setStateVar<i4>("AbsoluteCounterPosition", val);
 }
 
 
 i4
-AVTransport::_getAbsoluteCounterPosition()
+DevAVTransport::_getAbsoluteCounterPosition()
 {
     return _pService->getStateVar<i4>("AbsoluteCounterPosition");
 }
 
 
 void
-AVTransport::_setCurrentTransportActions(const std::string& val)
+DevAVTransport::_setCurrentTransportActions(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentTransportActions", val);
 }
 
 
 std::string
-AVTransport::_getCurrentTransportActions()
+DevAVTransport::_getCurrentTransportActions()
 {
     return _pService->getStateVar<std::string>("CurrentTransportActions");
 }
 
 
 void
-AVTransport::_setLastChange(const std::string& val)
+DevAVTransport::_setLastChange(const std::string& val)
 {
     _pService->setStateVar<std::string>("LastChange", val);
 }
 
 
 std::string
-AVTransport::_getLastChange()
+DevAVTransport::_getLastChange()
 {
     return _pService->getStateVar<std::string>("LastChange");
 }
 
 
 void
-ConnectionManager::actionHandler(Action* pAction)
+DevConnectionManager::actionHandler(Action* pAction)
 {
     std::string actionName = pAction->getName();
     if (actionName == "GetProtocolInfo") {
@@ -659,49 +659,49 @@ ConnectionManager::actionHandler(Action* pAction)
 
 
 void
-ConnectionManager::_setSourceProtocolInfo(const std::string& val)
+DevConnectionManager::_setSourceProtocolInfo(const std::string& val)
 {
     _pService->setStateVar<std::string>("SourceProtocolInfo", val);
 }
 
 
 std::string
-ConnectionManager::_getSourceProtocolInfo()
+DevConnectionManager::_getSourceProtocolInfo()
 {
     return _pService->getStateVar<std::string>("SourceProtocolInfo");
 }
 
 
 void
-ConnectionManager::_setSinkProtocolInfo(const std::string& val)
+DevConnectionManager::_setSinkProtocolInfo(const std::string& val)
 {
     _pService->setStateVar<std::string>("SinkProtocolInfo", val);
 }
 
 
 std::string
-ConnectionManager::_getSinkProtocolInfo()
+DevConnectionManager::_getSinkProtocolInfo()
 {
     return _pService->getStateVar<std::string>("SinkProtocolInfo");
 }
 
 
 void
-ConnectionManager::_setCurrentConnectionIDs(const std::string& val)
+DevConnectionManager::_setCurrentConnectionIDs(const std::string& val)
 {
     _pService->setStateVar<std::string>("CurrentConnectionIDs", val);
 }
 
 
 std::string
-ConnectionManager::_getCurrentConnectionIDs()
+DevConnectionManager::_getCurrentConnectionIDs()
 {
     return _pService->getStateVar<std::string>("CurrentConnectionIDs");
 }
 
 
 void
-RenderingControl::actionHandler(Action* pAction)
+DevRenderingControl::actionHandler(Action* pAction)
 {
     std::string actionName = pAction->getName();
     if (actionName == "ListPresets") {
@@ -912,259 +912,259 @@ RenderingControl::actionHandler(Action* pAction)
 
 
 void
-RenderingControl::_setPresetNameList(const std::string& val)
+DevRenderingControl::_setPresetNameList(const std::string& val)
 {
     _pService->setStateVar<std::string>("PresetNameList", val);
 }
 
 
 std::string
-RenderingControl::_getPresetNameList()
+DevRenderingControl::_getPresetNameList()
 {
     return _pService->getStateVar<std::string>("PresetNameList");
 }
 
 
 void
-RenderingControl::_setLastChange(const std::string& val)
+DevRenderingControl::_setLastChange(const std::string& val)
 {
     _pService->setStateVar<std::string>("LastChange", val);
 }
 
 
 std::string
-RenderingControl::_getLastChange()
+DevRenderingControl::_getLastChange()
 {
     return _pService->getStateVar<std::string>("LastChange");
 }
 
 
 void
-RenderingControl::_setBrightness(const ui2& val)
+DevRenderingControl::_setBrightness(const ui2& val)
 {
     _pService->setStateVar<ui2>("Brightness", val);
 }
 
 
 ui2
-RenderingControl::_getBrightness()
+DevRenderingControl::_getBrightness()
 {
     return _pService->getStateVar<ui2>("Brightness");
 }
 
 
 void
-RenderingControl::_setContrast(const ui2& val)
+DevRenderingControl::_setContrast(const ui2& val)
 {
     _pService->setStateVar<ui2>("Contrast", val);
 }
 
 
 ui2
-RenderingControl::_getContrast()
+DevRenderingControl::_getContrast()
 {
     return _pService->getStateVar<ui2>("Contrast");
 }
 
 
 void
-RenderingControl::_setSharpness(const ui2& val)
+DevRenderingControl::_setSharpness(const ui2& val)
 {
     _pService->setStateVar<ui2>("Sharpness", val);
 }
 
 
 ui2
-RenderingControl::_getSharpness()
+DevRenderingControl::_getSharpness()
 {
     return _pService->getStateVar<ui2>("Sharpness");
 }
 
 
 void
-RenderingControl::_setRedVideoGain(const ui2& val)
+DevRenderingControl::_setRedVideoGain(const ui2& val)
 {
     _pService->setStateVar<ui2>("RedVideoGain", val);
 }
 
 
 ui2
-RenderingControl::_getRedVideoGain()
+DevRenderingControl::_getRedVideoGain()
 {
     return _pService->getStateVar<ui2>("RedVideoGain");
 }
 
 
 void
-RenderingControl::_setGreenVideoGain(const ui2& val)
+DevRenderingControl::_setGreenVideoGain(const ui2& val)
 {
     _pService->setStateVar<ui2>("GreenVideoGain", val);
 }
 
 
 ui2
-RenderingControl::_getGreenVideoGain()
+DevRenderingControl::_getGreenVideoGain()
 {
     return _pService->getStateVar<ui2>("GreenVideoGain");
 }
 
 
 void
-RenderingControl::_setBlueVideoGain(const ui2& val)
+DevRenderingControl::_setBlueVideoGain(const ui2& val)
 {
     _pService->setStateVar<ui2>("BlueVideoGain", val);
 }
 
 
 ui2
-RenderingControl::_getBlueVideoGain()
+DevRenderingControl::_getBlueVideoGain()
 {
     return _pService->getStateVar<ui2>("BlueVideoGain");
 }
 
 
 void
-RenderingControl::_setRedVideoBlackLevel(const ui2& val)
+DevRenderingControl::_setRedVideoBlackLevel(const ui2& val)
 {
     _pService->setStateVar<ui2>("RedVideoBlackLevel", val);
 }
 
 
 ui2
-RenderingControl::_getRedVideoBlackLevel()
+DevRenderingControl::_getRedVideoBlackLevel()
 {
     return _pService->getStateVar<ui2>("RedVideoBlackLevel");
 }
 
 
 void
-RenderingControl::_setGreenVideoBlackLevel(const ui2& val)
+DevRenderingControl::_setGreenVideoBlackLevel(const ui2& val)
 {
     _pService->setStateVar<ui2>("GreenVideoBlackLevel", val);
 }
 
 
 ui2
-RenderingControl::_getGreenVideoBlackLevel()
+DevRenderingControl::_getGreenVideoBlackLevel()
 {
     return _pService->getStateVar<ui2>("GreenVideoBlackLevel");
 }
 
 
 void
-RenderingControl::_setBlueVideoBlackLevel(const ui2& val)
+DevRenderingControl::_setBlueVideoBlackLevel(const ui2& val)
 {
     _pService->setStateVar<ui2>("BlueVideoBlackLevel", val);
 }
 
 
 ui2
-RenderingControl::_getBlueVideoBlackLevel()
+DevRenderingControl::_getBlueVideoBlackLevel()
 {
     return _pService->getStateVar<ui2>("BlueVideoBlackLevel");
 }
 
 
 void
-RenderingControl::_setColorTemperature(const ui2& val)
+DevRenderingControl::_setColorTemperature(const ui2& val)
 {
     _pService->setStateVar<ui2>("ColorTemperature", val);
 }
 
 
 ui2
-RenderingControl::_getColorTemperature()
+DevRenderingControl::_getColorTemperature()
 {
     return _pService->getStateVar<ui2>("ColorTemperature");
 }
 
 
 void
-RenderingControl::_setHorizontalKeystone(const i2& val)
+DevRenderingControl::_setHorizontalKeystone(const i2& val)
 {
     _pService->setStateVar<i2>("HorizontalKeystone", val);
 }
 
 
 i2
-RenderingControl::_getHorizontalKeystone()
+DevRenderingControl::_getHorizontalKeystone()
 {
     return _pService->getStateVar<i2>("HorizontalKeystone");
 }
 
 
 void
-RenderingControl::_setVerticalKeystone(const i2& val)
+DevRenderingControl::_setVerticalKeystone(const i2& val)
 {
     _pService->setStateVar<i2>("VerticalKeystone", val);
 }
 
 
 i2
-RenderingControl::_getVerticalKeystone()
+DevRenderingControl::_getVerticalKeystone()
 {
     return _pService->getStateVar<i2>("VerticalKeystone");
 }
 
 
 void
-RenderingControl::_setMute(const bool& val)
+DevRenderingControl::_setMute(const bool& val)
 {
     _pService->setStateVar<bool>("Mute", val);
 }
 
 
 bool
-RenderingControl::_getMute()
+DevRenderingControl::_getMute()
 {
     return _pService->getStateVar<bool>("Mute");
 }
 
 
 void
-RenderingControl::_setVolume(const ui2& val)
+DevRenderingControl::_setVolume(const ui2& val)
 {
     _pService->setStateVar<ui2>("Volume", val);
 }
 
 
 ui2
-RenderingControl::_getVolume()
+DevRenderingControl::_getVolume()
 {
     return _pService->getStateVar<ui2>("Volume");
 }
 
 
 void
-RenderingControl::_setVolumeDB(const i2& val)
+DevRenderingControl::_setVolumeDB(const i2& val)
 {
     _pService->setStateVar<i2>("VolumeDB", val);
 }
 
 
 i2
-RenderingControl::_getVolumeDB()
+DevRenderingControl::_getVolumeDB()
 {
     return _pService->getStateVar<i2>("VolumeDB");
 }
 
 
 void
-RenderingControl::_setLoudness(const bool& val)
+DevRenderingControl::_setLoudness(const bool& val)
 {
     _pService->setStateVar<bool>("Loudness", val);
 }
 
 
 bool
-RenderingControl::_getLoudness()
+DevRenderingControl::_getLoudness()
 {
     return _pService->getStateVar<bool>("Loudness");
 }
 
 
 void
-ContentDirectory::actionHandler(Action* pAction)
+DevContentDirectory::actionHandler(Action* pAction)
 {
     std::string actionName = pAction->getName();
     if (actionName == "GetSearchCapabilities") {
@@ -1267,70 +1267,70 @@ ContentDirectory::actionHandler(Action* pAction)
 
 
 void
-ContentDirectory::_setTransferIDs(const std::string& val)
+DevContentDirectory::_setTransferIDs(const std::string& val)
 {
     _pService->setStateVar<std::string>("TransferIDs", val);
 }
 
 
 std::string
-ContentDirectory::_getTransferIDs()
+DevContentDirectory::_getTransferIDs()
 {
     return _pService->getStateVar<std::string>("TransferIDs");
 }
 
 
 void
-ContentDirectory::_setSearchCapabilities(const std::string& val)
+DevContentDirectory::_setSearchCapabilities(const std::string& val)
 {
     _pService->setStateVar<std::string>("SearchCapabilities", val);
 }
 
 
 std::string
-ContentDirectory::_getSearchCapabilities()
+DevContentDirectory::_getSearchCapabilities()
 {
     return _pService->getStateVar<std::string>("SearchCapabilities");
 }
 
 
 void
-ContentDirectory::_setSortCapabilities(const std::string& val)
+DevContentDirectory::_setSortCapabilities(const std::string& val)
 {
     _pService->setStateVar<std::string>("SortCapabilities", val);
 }
 
 
 std::string
-ContentDirectory::_getSortCapabilities()
+DevContentDirectory::_getSortCapabilities()
 {
     return _pService->getStateVar<std::string>("SortCapabilities");
 }
 
 
 void
-ContentDirectory::_setSystemUpdateID(const ui4& val)
+DevContentDirectory::_setSystemUpdateID(const ui4& val)
 {
     _pService->setStateVar<ui4>("SystemUpdateID", val);
 }
 
 
 ui4
-ContentDirectory::_getSystemUpdateID()
+DevContentDirectory::_getSystemUpdateID()
 {
     return _pService->getStateVar<ui4>("SystemUpdateID");
 }
 
 
 void
-ContentDirectory::_setContainerUpdateIDs(const std::string& val)
+DevContentDirectory::_setContainerUpdateIDs(const std::string& val)
 {
     _pService->setStateVar<std::string>("ContainerUpdateIDs", val);
 }
 
 
 std::string
-ContentDirectory::_getContainerUpdateIDs()
+DevContentDirectory::_getContainerUpdateIDs()
 {
     return _pService->getStateVar<std::string>("ContainerUpdateIDs");
 }

@@ -24,8 +24,109 @@
 namespace Omm {
 namespace Av {
 
+
+CtlMediaRenderer::CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
+CtlDevice(pDevice),
+_pCtlRenderingControl(pCtlRenderingControl),
+_pCtlConnectionManager(pCtlConnectionManager),
+_pCtlAVTransport(pCtlAVTransport)
+{
+    _pCtlRenderingControl->_pService = _pDevice->getService("urn:schemas-upnp-org:service:RenderingControl:1");
+    _pCtlConnectionManager->_pService = _pDevice->getService("urn:schemas-upnp-org:service:ConnectionManager:1");
+    _pCtlAVTransport->_pService = _pDevice->getService("urn:schemas-upnp-org:service:AVTransport:1");
+
+    init();
+}
+
+
 void
-AVTransportController::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+CtlMediaRenderer::eventHandler(StateVar* pStateVar)
+{
+    if (pStateVar->getName() == "LastChange") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlAVTransport->_changedLastChange(val);
+    }
+    else if (pStateVar->getName() == "SourceProtocolInfo") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlConnectionManager->_changedSourceProtocolInfo(val);
+    }
+    else if (pStateVar->getName() == "SinkProtocolInfo") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlConnectionManager->_changedSinkProtocolInfo(val);
+    }
+    else if (pStateVar->getName() == "CurrentConnectionIDs") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlConnectionManager->_changedCurrentConnectionIDs(val);
+    }
+    else if (pStateVar->getName() == "LastChange") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlRenderingControl->_changedLastChange(val);
+    }
+}
+
+
+CtlMediaServer::CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
+CtlDevice(pDevice),
+_pCtlContentDirectory(pCtlContentDirectory),
+_pCtlConnectionManager(pCtlConnectionManager),
+_pCtlAVTransport(pCtlAVTransport)
+{
+    _pCtlContentDirectory->_pService = _pDevice->getService("urn:schemas-upnp-org:service:ContentDirectory:1");
+    _pCtlConnectionManager->_pService = _pDevice->getService("urn:schemas-upnp-org:service:ConnectionManager:1");
+    _pCtlAVTransport->_pService = _pDevice->getService("urn:schemas-upnp-org:service:AVTransport:1");
+
+    init();
+}
+
+
+void
+CtlMediaServer::eventHandler(StateVar* pStateVar)
+{
+    if (pStateVar->getName() == "LastChange") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlAVTransport->_changedLastChange(val);
+    }
+    else if (pStateVar->getName() == "SourceProtocolInfo") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlConnectionManager->_changedSourceProtocolInfo(val);
+    }
+    else if (pStateVar->getName() == "SinkProtocolInfo") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlConnectionManager->_changedSinkProtocolInfo(val);
+    }
+    else if (pStateVar->getName() == "CurrentConnectionIDs") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlConnectionManager->_changedCurrentConnectionIDs(val);
+    }
+    else if (pStateVar->getName() == "TransferIDs") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlContentDirectory->_changedTransferIDs(val);
+    }
+    else if (pStateVar->getName() == "SystemUpdateID") {
+        Omm::ui4 val;
+        pStateVar->getValue(val);
+        _pCtlContentDirectory->_changedSystemUpdateID(val);
+    }
+    else if (pStateVar->getName() == "ContainerUpdateIDs") {
+        std::string val;
+        pStateVar->getValue(val);
+        _pCtlContentDirectory->_changedContainerUpdateIDs(val);
+    }
+}
+
+
+void
+CtlAVTransport::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     Action* pAction = _pService->getAction("SetAVTransportURI")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -35,7 +136,7 @@ AVTransportController::SetAVTransportURI(const ui4& InstanceID, const std::strin
 }
 
 void
-AVTransportController::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
+CtlAVTransport::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus)
 {
     Action* pAction = _pService->getAction("GetMediaInfo")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -52,7 +153,7 @@ AVTransportController::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::s
 }
 
 void
-AVTransportController::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
+CtlAVTransport::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
     Action* pAction = _pService->getAction("GetTransportInfo")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -63,7 +164,7 @@ AVTransportController::GetTransportInfo(const ui4& InstanceID, std::string& Curr
 }
 
 void
-AVTransportController::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
+CtlAVTransport::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
     Action* pAction = _pService->getAction("GetPositionInfo")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -79,7 +180,7 @@ AVTransportController::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::s
 }
 
 void
-AVTransportController::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
+CtlAVTransport::GetDeviceCapabilities(const ui4& InstanceID, std::string& PlayMedia, std::string& RecMedia, std::string& RecQualityModes)
 {
     Action* pAction = _pService->getAction("GetDeviceCapabilities")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -90,7 +191,7 @@ AVTransportController::GetDeviceCapabilities(const ui4& InstanceID, std::string&
 }
 
 void
-AVTransportController::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
+CtlAVTransport::GetTransportSettings(const ui4& InstanceID, std::string& PlayMode, std::string& RecQualityMode)
 {
     Action* pAction = _pService->getAction("GetTransportSettings")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -100,7 +201,7 @@ AVTransportController::GetTransportSettings(const ui4& InstanceID, std::string& 
 }
 
 void
-AVTransportController::Stop(const ui4& InstanceID)
+CtlAVTransport::Stop(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Stop")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -108,7 +209,7 @@ AVTransportController::Stop(const ui4& InstanceID)
 }
 
 void
-AVTransportController::Play(const ui4& InstanceID, const std::string& Speed)
+CtlAVTransport::Play(const ui4& InstanceID, const std::string& Speed)
 {
     Action* pAction = _pService->getAction("Play")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -117,7 +218,7 @@ AVTransportController::Play(const ui4& InstanceID, const std::string& Speed)
 }
 
 void
-AVTransportController::Pause(const ui4& InstanceID)
+CtlAVTransport::Pause(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Pause")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -125,7 +226,7 @@ AVTransportController::Pause(const ui4& InstanceID)
 }
 
 void
-AVTransportController::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
+CtlAVTransport::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     Action* pAction = _pService->getAction("Seek")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -135,7 +236,7 @@ AVTransportController::Seek(const ui4& InstanceID, const std::string& Unit, cons
 }
 
 void
-AVTransportController::Next(const ui4& InstanceID)
+CtlAVTransport::Next(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Next")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -143,7 +244,7 @@ AVTransportController::Next(const ui4& InstanceID)
 }
 
 void
-AVTransportController::Previous(const ui4& InstanceID)
+CtlAVTransport::Previous(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Previous")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -151,127 +252,127 @@ AVTransportController::Previous(const ui4& InstanceID)
 }
 
 std::string
-AVTransportController::_getLastChange()
+CtlAVTransport::_getLastChange()
 {
     return _pService->getStateVar<std::string>("LastChange");
 }
 
 
 void 
-AVTransportController::_reqSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
+CtlAVTransport::_reqSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     Action* pAction = _pService->getAction("SetAVTransportURI")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("CurrentURI", CurrentURI);
     pAction->setArgument<std::string>("CurrentURIMetaData", CurrentURIMetaData);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadSetAVTransportURI, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadSetAVTransportURI, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqGetMediaInfo(const ui4& InstanceID)
+CtlAVTransport::_reqGetMediaInfo(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetMediaInfo")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadGetMediaInfo, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadGetMediaInfo, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqGetTransportInfo(const ui4& InstanceID)
+CtlAVTransport::_reqGetTransportInfo(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetTransportInfo")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadGetTransportInfo, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadGetTransportInfo, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqGetPositionInfo(const ui4& InstanceID)
+CtlAVTransport::_reqGetPositionInfo(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetPositionInfo")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadGetPositionInfo, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadGetPositionInfo, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqGetDeviceCapabilities(const ui4& InstanceID)
+CtlAVTransport::_reqGetDeviceCapabilities(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetDeviceCapabilities")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadGetDeviceCapabilities, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadGetDeviceCapabilities, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqGetTransportSettings(const ui4& InstanceID)
+CtlAVTransport::_reqGetTransportSettings(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetTransportSettings")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadGetTransportSettings, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadGetTransportSettings, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqStop(const ui4& InstanceID)
+CtlAVTransport::_reqStop(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Stop")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadStop, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadStop, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqPlay(const ui4& InstanceID, const std::string& Speed)
+CtlAVTransport::_reqPlay(const ui4& InstanceID, const std::string& Speed)
 {
     Action* pAction = _pService->getAction("Play")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Speed", Speed);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadPlay, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadPlay, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqPause(const ui4& InstanceID)
+CtlAVTransport::_reqPause(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Pause")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadPause, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadPause, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqSeek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
+CtlAVTransport::_reqSeek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     Action* pAction = _pService->getAction("Seek")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Unit", Unit);
     pAction->setArgument<std::string>("Target", Target);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadSeek, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadSeek, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqNext(const ui4& InstanceID)
+CtlAVTransport::_reqNext(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Next")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadNext, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadNext, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_reqPrevious(const ui4& InstanceID)
+CtlAVTransport::_reqPrevious(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Previous")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<AVTransportController> thread(this, &AVTransportController::_threadPrevious, pAction);
+    ActionThread<CtlAVTransport> thread(this, &CtlAVTransport::_threadPrevious, pAction);
     thread.start();
 }
 
 void 
-AVTransportController::_threadSetAVTransportURI(Action* pAction)
+CtlAVTransport::_threadSetAVTransportURI(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -281,7 +382,7 @@ AVTransportController::_threadSetAVTransportURI(Action* pAction)
 }
 
 void 
-AVTransportController::_threadGetMediaInfo(Action* pAction)
+CtlAVTransport::_threadGetMediaInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -298,7 +399,7 @@ AVTransportController::_threadGetMediaInfo(Action* pAction)
 }
 
 void 
-AVTransportController::_threadGetTransportInfo(Action* pAction)
+CtlAVTransport::_threadGetTransportInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -309,7 +410,7 @@ AVTransportController::_threadGetTransportInfo(Action* pAction)
 }
 
 void 
-AVTransportController::_threadGetPositionInfo(Action* pAction)
+CtlAVTransport::_threadGetPositionInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -325,7 +426,7 @@ AVTransportController::_threadGetPositionInfo(Action* pAction)
 }
 
 void 
-AVTransportController::_threadGetDeviceCapabilities(Action* pAction)
+CtlAVTransport::_threadGetDeviceCapabilities(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -336,7 +437,7 @@ AVTransportController::_threadGetDeviceCapabilities(Action* pAction)
 }
 
 void 
-AVTransportController::_threadGetTransportSettings(Action* pAction)
+CtlAVTransport::_threadGetTransportSettings(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -346,7 +447,7 @@ AVTransportController::_threadGetTransportSettings(Action* pAction)
 }
 
 void 
-AVTransportController::_threadStop(Action* pAction)
+CtlAVTransport::_threadStop(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -354,7 +455,7 @@ AVTransportController::_threadStop(Action* pAction)
 }
 
 void 
-AVTransportController::_threadPlay(Action* pAction)
+CtlAVTransport::_threadPlay(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -363,7 +464,7 @@ AVTransportController::_threadPlay(Action* pAction)
 }
 
 void 
-AVTransportController::_threadPause(Action* pAction)
+CtlAVTransport::_threadPause(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -371,7 +472,7 @@ AVTransportController::_threadPause(Action* pAction)
 }
 
 void 
-AVTransportController::_threadSeek(Action* pAction)
+CtlAVTransport::_threadSeek(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -381,7 +482,7 @@ AVTransportController::_threadSeek(Action* pAction)
 }
 
 void 
-AVTransportController::_threadNext(Action* pAction)
+CtlAVTransport::_threadNext(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -389,7 +490,7 @@ AVTransportController::_threadNext(Action* pAction)
 }
 
 void 
-AVTransportController::_threadPrevious(Action* pAction)
+CtlAVTransport::_threadPrevious(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -399,7 +500,7 @@ AVTransportController::_threadPrevious(Action* pAction)
 
 
 void
-ConnectionManagerController::GetProtocolInfo(std::string& Source, std::string& Sink)
+CtlConnectionManager::GetProtocolInfo(std::string& Source, std::string& Sink)
 {
     Action* pAction = _pService->getAction("GetProtocolInfo")->clone();
     _pService->sendAction(pAction);
@@ -408,7 +509,7 @@ ConnectionManagerController::GetProtocolInfo(std::string& Source, std::string& S
 }
 
 void
-ConnectionManagerController::ConnectionComplete(const i4& ConnectionID)
+CtlConnectionManager::ConnectionComplete(const i4& ConnectionID)
 {
     Action* pAction = _pService->getAction("ConnectionComplete")->clone();
     pAction->setArgument<i4>("ConnectionID", ConnectionID);
@@ -416,7 +517,7 @@ ConnectionManagerController::ConnectionComplete(const i4& ConnectionID)
 }
 
 void
-ConnectionManagerController::GetCurrentConnectionIDs(std::string& ConnectionIDs)
+CtlConnectionManager::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
     Action* pAction = _pService->getAction("GetCurrentConnectionIDs")->clone();
     _pService->sendAction(pAction);
@@ -424,7 +525,7 @@ ConnectionManagerController::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 }
 
 void
-ConnectionManagerController::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
+CtlConnectionManager::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
     Action* pAction = _pService->getAction("GetCurrentConnectionInfo")->clone();
     pAction->setArgument<i4>("ConnectionID", ConnectionID);
@@ -439,60 +540,60 @@ ConnectionManagerController::GetCurrentConnectionInfo(const i4& ConnectionID, i4
 }
 
 std::string
-ConnectionManagerController::_getSourceProtocolInfo()
+CtlConnectionManager::_getSourceProtocolInfo()
 {
     return _pService->getStateVar<std::string>("SourceProtocolInfo");
 }
 
 std::string
-ConnectionManagerController::_getSinkProtocolInfo()
+CtlConnectionManager::_getSinkProtocolInfo()
 {
     return _pService->getStateVar<std::string>("SinkProtocolInfo");
 }
 
 std::string
-ConnectionManagerController::_getCurrentConnectionIDs()
+CtlConnectionManager::_getCurrentConnectionIDs()
 {
     return _pService->getStateVar<std::string>("CurrentConnectionIDs");
 }
 
 
 void 
-ConnectionManagerController::_reqGetProtocolInfo()
+CtlConnectionManager::_reqGetProtocolInfo()
 {
     Action* pAction = _pService->getAction("GetProtocolInfo")->clone();
-    ActionThread<ConnectionManagerController> thread(this, &ConnectionManagerController::_threadGetProtocolInfo, pAction);
+    ActionThread<CtlConnectionManager> thread(this, &CtlConnectionManager::_threadGetProtocolInfo, pAction);
     thread.start();
 }
 
 void 
-ConnectionManagerController::_reqConnectionComplete(const i4& ConnectionID)
+CtlConnectionManager::_reqConnectionComplete(const i4& ConnectionID)
 {
     Action* pAction = _pService->getAction("ConnectionComplete")->clone();
     pAction->setArgument<i4>("ConnectionID", ConnectionID);
-    ActionThread<ConnectionManagerController> thread(this, &ConnectionManagerController::_threadConnectionComplete, pAction);
+    ActionThread<CtlConnectionManager> thread(this, &CtlConnectionManager::_threadConnectionComplete, pAction);
     thread.start();
 }
 
 void 
-ConnectionManagerController::_reqGetCurrentConnectionIDs()
+CtlConnectionManager::_reqGetCurrentConnectionIDs()
 {
     Action* pAction = _pService->getAction("GetCurrentConnectionIDs")->clone();
-    ActionThread<ConnectionManagerController> thread(this, &ConnectionManagerController::_threadGetCurrentConnectionIDs, pAction);
+    ActionThread<CtlConnectionManager> thread(this, &CtlConnectionManager::_threadGetCurrentConnectionIDs, pAction);
     thread.start();
 }
 
 void 
-ConnectionManagerController::_reqGetCurrentConnectionInfo(const i4& ConnectionID)
+CtlConnectionManager::_reqGetCurrentConnectionInfo(const i4& ConnectionID)
 {
     Action* pAction = _pService->getAction("GetCurrentConnectionInfo")->clone();
     pAction->setArgument<i4>("ConnectionID", ConnectionID);
-    ActionThread<ConnectionManagerController> thread(this, &ConnectionManagerController::_threadGetCurrentConnectionInfo, pAction);
+    ActionThread<CtlConnectionManager> thread(this, &CtlConnectionManager::_threadGetCurrentConnectionInfo, pAction);
     thread.start();
 }
 
 void 
-ConnectionManagerController::_threadGetProtocolInfo(Action* pAction)
+CtlConnectionManager::_threadGetProtocolInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string Source = pAction->getArgument<std::string>("Source");
@@ -501,7 +602,7 @@ ConnectionManagerController::_threadGetProtocolInfo(Action* pAction)
 }
 
 void 
-ConnectionManagerController::_threadConnectionComplete(Action* pAction)
+CtlConnectionManager::_threadConnectionComplete(Action* pAction)
 {
     _pService->sendAction(pAction);
     i4 ConnectionID = pAction->getArgument<i4>("ConnectionID");
@@ -509,7 +610,7 @@ ConnectionManagerController::_threadConnectionComplete(Action* pAction)
 }
 
 void 
-ConnectionManagerController::_threadGetCurrentConnectionIDs(Action* pAction)
+CtlConnectionManager::_threadGetCurrentConnectionIDs(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ConnectionIDs = pAction->getArgument<std::string>("ConnectionIDs");
@@ -517,7 +618,7 @@ ConnectionManagerController::_threadGetCurrentConnectionIDs(Action* pAction)
 }
 
 void 
-ConnectionManagerController::_threadGetCurrentConnectionInfo(Action* pAction)
+CtlConnectionManager::_threadGetCurrentConnectionInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
     i4 ConnectionID = pAction->getArgument<i4>("ConnectionID");
@@ -534,7 +635,7 @@ ConnectionManagerController::_threadGetCurrentConnectionInfo(Action* pAction)
 
 
 void
-RenderingControlController::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
+CtlRenderingControl::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
 {
     Action* pAction = _pService->getAction("ListPresets")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -543,7 +644,7 @@ RenderingControlController::ListPresets(const ui4& InstanceID, std::string& Curr
 }
 
 void
-RenderingControlController::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
+CtlRenderingControl::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
     Action* pAction = _pService->getAction("SelectPreset")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -552,7 +653,7 @@ RenderingControlController::SelectPreset(const ui4& InstanceID, const std::strin
 }
 
 void
-RenderingControlController::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
+CtlRenderingControl::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
 {
     Action* pAction = _pService->getAction("GetBrightness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -561,7 +662,7 @@ RenderingControlController::GetBrightness(const ui4& InstanceID, ui2& CurrentBri
 }
 
 void
-RenderingControlController::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
+CtlRenderingControl::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
     Action* pAction = _pService->getAction("SetBrightness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -570,7 +671,7 @@ RenderingControlController::SetBrightness(const ui4& InstanceID, const ui2& Desi
 }
 
 void
-RenderingControlController::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
+CtlRenderingControl::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
 {
     Action* pAction = _pService->getAction("GetContrast")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -579,7 +680,7 @@ RenderingControlController::GetContrast(const ui4& InstanceID, ui2& CurrentContr
 }
 
 void
-RenderingControlController::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
+CtlRenderingControl::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
     Action* pAction = _pService->getAction("SetContrast")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -588,7 +689,7 @@ RenderingControlController::SetContrast(const ui4& InstanceID, const ui2& Desire
 }
 
 void
-RenderingControlController::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
+CtlRenderingControl::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
 {
     Action* pAction = _pService->getAction("GetSharpness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -597,7 +698,7 @@ RenderingControlController::GetSharpness(const ui4& InstanceID, ui2& CurrentShar
 }
 
 void
-RenderingControlController::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
+CtlRenderingControl::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
     Action* pAction = _pService->getAction("SetSharpness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -606,7 +707,7 @@ RenderingControlController::SetSharpness(const ui4& InstanceID, const ui2& Desir
 }
 
 void
-RenderingControlController::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
+CtlRenderingControl::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
 {
     Action* pAction = _pService->getAction("GetRedVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -615,7 +716,7 @@ RenderingControlController::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentR
 }
 
 void
-RenderingControlController::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
+CtlRenderingControl::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
     Action* pAction = _pService->getAction("SetRedVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -624,7 +725,7 @@ RenderingControlController::SetRedVideoGain(const ui4& InstanceID, const ui2& De
 }
 
 void
-RenderingControlController::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
+CtlRenderingControl::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
 {
     Action* pAction = _pService->getAction("GetGreenVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -633,7 +734,7 @@ RenderingControlController::GetGreenVideoGain(const ui4& InstanceID, ui2& Curren
 }
 
 void
-RenderingControlController::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
+CtlRenderingControl::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
     Action* pAction = _pService->getAction("SetGreenVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -642,7 +743,7 @@ RenderingControlController::SetGreenVideoGain(const ui4& InstanceID, const ui2& 
 }
 
 void
-RenderingControlController::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
+CtlRenderingControl::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
 {
     Action* pAction = _pService->getAction("GetBlueVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -651,7 +752,7 @@ RenderingControlController::GetBlueVideoGain(const ui4& InstanceID, ui2& Current
 }
 
 void
-RenderingControlController::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
+CtlRenderingControl::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
     Action* pAction = _pService->getAction("SetBlueVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -660,7 +761,7 @@ RenderingControlController::SetBlueVideoGain(const ui4& InstanceID, const ui2& D
 }
 
 void
-RenderingControlController::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
+CtlRenderingControl::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("GetRedVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -669,7 +770,7 @@ RenderingControlController::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& Cu
 }
 
 void
-RenderingControlController::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
+CtlRenderingControl::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetRedVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -678,7 +779,7 @@ RenderingControlController::SetRedVideoBlackLevel(const ui4& InstanceID, const u
 }
 
 void
-RenderingControlController::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
+CtlRenderingControl::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("GetGreenVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -687,7 +788,7 @@ RenderingControlController::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& 
 }
 
 void
-RenderingControlController::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
+CtlRenderingControl::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetGreenVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -696,7 +797,7 @@ RenderingControlController::SetGreenVideoBlackLevel(const ui4& InstanceID, const
 }
 
 void
-RenderingControlController::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
+CtlRenderingControl::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("GetBlueVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -705,7 +806,7 @@ RenderingControlController::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& C
 }
 
 void
-RenderingControlController::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
+CtlRenderingControl::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetBlueVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -714,7 +815,7 @@ RenderingControlController::SetBlueVideoBlackLevel(const ui4& InstanceID, const 
 }
 
 void
-RenderingControlController::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
+CtlRenderingControl::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
 {
     Action* pAction = _pService->getAction("GetColorTemperature ")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -723,7 +824,7 @@ RenderingControlController::GetColorTemperature (const ui4& InstanceID, ui2& Cur
 }
 
 void
-RenderingControlController::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
+CtlRenderingControl::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
     Action* pAction = _pService->getAction("SetColorTemperature")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -732,7 +833,7 @@ RenderingControlController::SetColorTemperature(const ui4& InstanceID, const ui2
 }
 
 void
-RenderingControlController::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
+CtlRenderingControl::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
 {
     Action* pAction = _pService->getAction("GetHorizontalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -741,7 +842,7 @@ RenderingControlController::GetHorizontalKeystone(const ui4& InstanceID, i2& Cur
 }
 
 void
-RenderingControlController::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
+CtlRenderingControl::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
     Action* pAction = _pService->getAction("SetHorizontalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -750,7 +851,7 @@ RenderingControlController::SetHorizontalKeystone(const ui4& InstanceID, const i
 }
 
 void
-RenderingControlController::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
+CtlRenderingControl::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
 {
     Action* pAction = _pService->getAction("GetVerticalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -759,7 +860,7 @@ RenderingControlController::GetVerticalKeystone(const ui4& InstanceID, i2& Curre
 }
 
 void
-RenderingControlController::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
+CtlRenderingControl::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
     Action* pAction = _pService->getAction("SetVerticalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -768,7 +869,7 @@ RenderingControlController::SetVerticalKeystone(const ui4& InstanceID, const i2&
 }
 
 void
-RenderingControlController::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
+CtlRenderingControl::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
     Action* pAction = _pService->getAction("GetMute")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -778,7 +879,7 @@ RenderingControlController::GetMute(const ui4& InstanceID, const std::string& Ch
 }
 
 void
-RenderingControlController::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+CtlRenderingControl::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
     Action* pAction = _pService->getAction("SetMute")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -788,7 +889,7 @@ RenderingControlController::SetMute(const ui4& InstanceID, const std::string& Ch
 }
 
 void
-RenderingControlController::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
+CtlRenderingControl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
     Action* pAction = _pService->getAction("GetVolume")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -798,7 +899,7 @@ RenderingControlController::GetVolume(const ui4& InstanceID, const std::string& 
 }
 
 void
-RenderingControlController::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
+CtlRenderingControl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
     Action* pAction = _pService->getAction("SetVolume")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -808,7 +909,7 @@ RenderingControlController::SetVolume(const ui4& InstanceID, const std::string& 
 }
 
 void
-RenderingControlController::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
+CtlRenderingControl::GetVolumeDB(const ui4& InstanceID, const std::string& Channel, i2& CurrentVolume)
 {
     Action* pAction = _pService->getAction("GetVolumeDB")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -818,7 +919,7 @@ RenderingControlController::GetVolumeDB(const ui4& InstanceID, const std::string
 }
 
 void
-RenderingControlController::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
+CtlRenderingControl::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
     Action* pAction = _pService->getAction("SetVolumeDB")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -828,7 +929,7 @@ RenderingControlController::SetVolumeDB(const ui4& InstanceID, const std::string
 }
 
 void
-RenderingControlController::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
+CtlRenderingControl::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
 {
     Action* pAction = _pService->getAction("GetVolumeDBRange")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -839,7 +940,7 @@ RenderingControlController::GetVolumeDBRange(const ui4& InstanceID, const std::s
 }
 
 void
-RenderingControlController::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
+CtlRenderingControl::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
 {
     Action* pAction = _pService->getAction("GetLoudness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -849,7 +950,7 @@ RenderingControlController::GetLoudness(const ui4& InstanceID, const std::string
 }
 
 void
-RenderingControlController::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+CtlRenderingControl::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
     Action* pAction = _pService->getAction("SetLoudness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
@@ -859,355 +960,355 @@ RenderingControlController::SetLoudness(const ui4& InstanceID, const std::string
 }
 
 std::string
-RenderingControlController::_getLastChange()
+CtlRenderingControl::_getLastChange()
 {
     return _pService->getStateVar<std::string>("LastChange");
 }
 
 
 void 
-RenderingControlController::_reqListPresets(const ui4& InstanceID)
+CtlRenderingControl::_reqListPresets(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("ListPresets")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadListPresets, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadListPresets, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSelectPreset(const ui4& InstanceID, const std::string& PresetName)
+CtlRenderingControl::_reqSelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
     Action* pAction = _pService->getAction("SelectPreset")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("PresetName", PresetName);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSelectPreset, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSelectPreset, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetBrightness(const ui4& InstanceID)
+CtlRenderingControl::_reqGetBrightness(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetBrightness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetBrightness, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetBrightness, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
+CtlRenderingControl::_reqSetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
     Action* pAction = _pService->getAction("SetBrightness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredBrightness", DesiredBrightness);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetBrightness, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetBrightness, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetContrast(const ui4& InstanceID)
+CtlRenderingControl::_reqGetContrast(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetContrast")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetContrast, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetContrast, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
+CtlRenderingControl::_reqSetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
     Action* pAction = _pService->getAction("SetContrast")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredContrast", DesiredContrast);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetContrast, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetContrast, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetSharpness(const ui4& InstanceID)
+CtlRenderingControl::_reqGetSharpness(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetSharpness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetSharpness, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetSharpness, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
+CtlRenderingControl::_reqSetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
     Action* pAction = _pService->getAction("SetSharpness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredSharpness", DesiredSharpness);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetSharpness, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetSharpness, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetRedVideoGain(const ui4& InstanceID)
+CtlRenderingControl::_reqGetRedVideoGain(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetRedVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetRedVideoGain, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetRedVideoGain, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
+CtlRenderingControl::_reqSetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
     Action* pAction = _pService->getAction("SetRedVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredRedVideoGain", DesiredRedVideoGain);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetRedVideoGain, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetRedVideoGain, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetGreenVideoGain(const ui4& InstanceID)
+CtlRenderingControl::_reqGetGreenVideoGain(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetGreenVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetGreenVideoGain, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetGreenVideoGain, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
+CtlRenderingControl::_reqSetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
     Action* pAction = _pService->getAction("SetGreenVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredGreenVideoGain", DesiredGreenVideoGain);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetGreenVideoGain, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetGreenVideoGain, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetBlueVideoGain(const ui4& InstanceID)
+CtlRenderingControl::_reqGetBlueVideoGain(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetBlueVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetBlueVideoGain, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetBlueVideoGain, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
+CtlRenderingControl::_reqSetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
     Action* pAction = _pService->getAction("SetBlueVideoGain")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredBlueVideoGain", DesiredBlueVideoGain);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetBlueVideoGain, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetBlueVideoGain, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetRedVideoBlackLevel(const ui4& InstanceID)
+CtlRenderingControl::_reqGetRedVideoBlackLevel(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetRedVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetRedVideoBlackLevel, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetRedVideoBlackLevel, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
+CtlRenderingControl::_reqSetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetRedVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredRedVideoBlackLevel", DesiredRedVideoBlackLevel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetRedVideoBlackLevel, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetRedVideoBlackLevel, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetGreenVideoBlackLevel(const ui4& InstanceID)
+CtlRenderingControl::_reqGetGreenVideoBlackLevel(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetGreenVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetGreenVideoBlackLevel, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetGreenVideoBlackLevel, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
+CtlRenderingControl::_reqSetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetGreenVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredGreenVideoBlackLevel", DesiredGreenVideoBlackLevel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetGreenVideoBlackLevel, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetGreenVideoBlackLevel, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetBlueVideoBlackLevel(const ui4& InstanceID)
+CtlRenderingControl::_reqGetBlueVideoBlackLevel(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetBlueVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetBlueVideoBlackLevel, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetBlueVideoBlackLevel, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
+CtlRenderingControl::_reqSetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetBlueVideoBlackLevel")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredBlueVideoBlackLevel", DesiredBlueVideoBlackLevel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetBlueVideoBlackLevel, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetBlueVideoBlackLevel, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetColorTemperature (const ui4& InstanceID)
+CtlRenderingControl::_reqGetColorTemperature (const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetColorTemperature ")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetColorTemperature , pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetColorTemperature , pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
+CtlRenderingControl::_reqSetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
     Action* pAction = _pService->getAction("SetColorTemperature")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<ui2>("DesiredColorTemperature", DesiredColorTemperature);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetColorTemperature, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetColorTemperature, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetHorizontalKeystone(const ui4& InstanceID)
+CtlRenderingControl::_reqGetHorizontalKeystone(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetHorizontalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetHorizontalKeystone, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetHorizontalKeystone, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
+CtlRenderingControl::_reqSetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
     Action* pAction = _pService->getAction("SetHorizontalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<i2>("DesiredHorizontalKeystone", DesiredHorizontalKeystone);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetHorizontalKeystone, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetHorizontalKeystone, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetVerticalKeystone(const ui4& InstanceID)
+CtlRenderingControl::_reqGetVerticalKeystone(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetVerticalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetVerticalKeystone, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetVerticalKeystone, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
+CtlRenderingControl::_reqSetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
     Action* pAction = _pService->getAction("SetVerticalKeystone")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<i2>("DesiredVerticalKeystone", DesiredVerticalKeystone);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetVerticalKeystone, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetVerticalKeystone, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetMute(const ui4& InstanceID, const std::string& Channel)
+CtlRenderingControl::_reqGetMute(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetMute")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetMute, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetMute, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
+CtlRenderingControl::_reqSetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
     Action* pAction = _pService->getAction("SetMute")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
     pAction->setArgument<bool>("DesiredMute", DesiredMute);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetMute, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetMute, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetVolume(const ui4& InstanceID, const std::string& Channel)
+CtlRenderingControl::_reqGetVolume(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetVolume")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetVolume, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetVolume, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
+CtlRenderingControl::_reqSetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
     Action* pAction = _pService->getAction("SetVolume")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
     pAction->setArgument<ui2>("DesiredVolume", DesiredVolume);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetVolume, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetVolume, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetVolumeDB(const ui4& InstanceID, const std::string& Channel)
+CtlRenderingControl::_reqGetVolumeDB(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetVolumeDB")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetVolumeDB, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetVolumeDB, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
+CtlRenderingControl::_reqSetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
     Action* pAction = _pService->getAction("SetVolumeDB")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
     pAction->setArgument<i2>("DesiredVolume", DesiredVolume);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetVolumeDB, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetVolumeDB, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetVolumeDBRange(const ui4& InstanceID, const std::string& Channel)
+CtlRenderingControl::_reqGetVolumeDBRange(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetVolumeDBRange")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetVolumeDBRange, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetVolumeDBRange, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqGetLoudness(const ui4& InstanceID, const std::string& Channel)
+CtlRenderingControl::_reqGetLoudness(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetLoudness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadGetLoudness, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadGetLoudness, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_reqSetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
+CtlRenderingControl::_reqSetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
     Action* pAction = _pService->getAction("SetLoudness")->clone();
     pAction->setArgument<ui4>("InstanceID", InstanceID);
     pAction->setArgument<std::string>("Channel", Channel);
     pAction->setArgument<bool>("DesiredLoudness", DesiredLoudness);
-    ActionThread<RenderingControlController> thread(this, &RenderingControlController::_threadSetLoudness, pAction);
+    ActionThread<CtlRenderingControl> thread(this, &CtlRenderingControl::_threadSetLoudness, pAction);
     thread.start();
 }
 
 void 
-RenderingControlController::_threadListPresets(Action* pAction)
+CtlRenderingControl::_threadListPresets(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1216,7 +1317,7 @@ RenderingControlController::_threadListPresets(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSelectPreset(Action* pAction)
+CtlRenderingControl::_threadSelectPreset(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1225,7 +1326,7 @@ RenderingControlController::_threadSelectPreset(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetBrightness(Action* pAction)
+CtlRenderingControl::_threadGetBrightness(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1234,7 +1335,7 @@ RenderingControlController::_threadGetBrightness(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetBrightness(Action* pAction)
+CtlRenderingControl::_threadSetBrightness(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1243,7 +1344,7 @@ RenderingControlController::_threadSetBrightness(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetContrast(Action* pAction)
+CtlRenderingControl::_threadGetContrast(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1252,7 +1353,7 @@ RenderingControlController::_threadGetContrast(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetContrast(Action* pAction)
+CtlRenderingControl::_threadSetContrast(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1261,7 +1362,7 @@ RenderingControlController::_threadSetContrast(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetSharpness(Action* pAction)
+CtlRenderingControl::_threadGetSharpness(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1270,7 +1371,7 @@ RenderingControlController::_threadGetSharpness(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetSharpness(Action* pAction)
+CtlRenderingControl::_threadSetSharpness(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1279,7 +1380,7 @@ RenderingControlController::_threadSetSharpness(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetRedVideoGain(Action* pAction)
+CtlRenderingControl::_threadGetRedVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1288,7 +1389,7 @@ RenderingControlController::_threadGetRedVideoGain(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetRedVideoGain(Action* pAction)
+CtlRenderingControl::_threadSetRedVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1297,7 +1398,7 @@ RenderingControlController::_threadSetRedVideoGain(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetGreenVideoGain(Action* pAction)
+CtlRenderingControl::_threadGetGreenVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1306,7 +1407,7 @@ RenderingControlController::_threadGetGreenVideoGain(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetGreenVideoGain(Action* pAction)
+CtlRenderingControl::_threadSetGreenVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1315,7 +1416,7 @@ RenderingControlController::_threadSetGreenVideoGain(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetBlueVideoGain(Action* pAction)
+CtlRenderingControl::_threadGetBlueVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1324,7 +1425,7 @@ RenderingControlController::_threadGetBlueVideoGain(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetBlueVideoGain(Action* pAction)
+CtlRenderingControl::_threadSetBlueVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1333,7 +1434,7 @@ RenderingControlController::_threadSetBlueVideoGain(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetRedVideoBlackLevel(Action* pAction)
+CtlRenderingControl::_threadGetRedVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1342,7 +1443,7 @@ RenderingControlController::_threadGetRedVideoBlackLevel(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetRedVideoBlackLevel(Action* pAction)
+CtlRenderingControl::_threadSetRedVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1351,7 +1452,7 @@ RenderingControlController::_threadSetRedVideoBlackLevel(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetGreenVideoBlackLevel(Action* pAction)
+CtlRenderingControl::_threadGetGreenVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1360,7 +1461,7 @@ RenderingControlController::_threadGetGreenVideoBlackLevel(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetGreenVideoBlackLevel(Action* pAction)
+CtlRenderingControl::_threadSetGreenVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1369,7 +1470,7 @@ RenderingControlController::_threadSetGreenVideoBlackLevel(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetBlueVideoBlackLevel(Action* pAction)
+CtlRenderingControl::_threadGetBlueVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1378,7 +1479,7 @@ RenderingControlController::_threadGetBlueVideoBlackLevel(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetBlueVideoBlackLevel(Action* pAction)
+CtlRenderingControl::_threadSetBlueVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1387,7 +1488,7 @@ RenderingControlController::_threadSetBlueVideoBlackLevel(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetColorTemperature (Action* pAction)
+CtlRenderingControl::_threadGetColorTemperature (Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1396,7 +1497,7 @@ RenderingControlController::_threadGetColorTemperature (Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetColorTemperature(Action* pAction)
+CtlRenderingControl::_threadSetColorTemperature(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1405,7 +1506,7 @@ RenderingControlController::_threadSetColorTemperature(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetHorizontalKeystone(Action* pAction)
+CtlRenderingControl::_threadGetHorizontalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1414,7 +1515,7 @@ RenderingControlController::_threadGetHorizontalKeystone(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetHorizontalKeystone(Action* pAction)
+CtlRenderingControl::_threadSetHorizontalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1423,7 +1524,7 @@ RenderingControlController::_threadSetHorizontalKeystone(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetVerticalKeystone(Action* pAction)
+CtlRenderingControl::_threadGetVerticalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1432,7 +1533,7 @@ RenderingControlController::_threadGetVerticalKeystone(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetVerticalKeystone(Action* pAction)
+CtlRenderingControl::_threadSetVerticalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1441,7 +1542,7 @@ RenderingControlController::_threadSetVerticalKeystone(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetMute(Action* pAction)
+CtlRenderingControl::_threadGetMute(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1451,7 +1552,7 @@ RenderingControlController::_threadGetMute(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetMute(Action* pAction)
+CtlRenderingControl::_threadSetMute(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1461,7 +1562,7 @@ RenderingControlController::_threadSetMute(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetVolume(Action* pAction)
+CtlRenderingControl::_threadGetVolume(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1471,7 +1572,7 @@ RenderingControlController::_threadGetVolume(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetVolume(Action* pAction)
+CtlRenderingControl::_threadSetVolume(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1481,7 +1582,7 @@ RenderingControlController::_threadSetVolume(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetVolumeDB(Action* pAction)
+CtlRenderingControl::_threadGetVolumeDB(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1491,7 +1592,7 @@ RenderingControlController::_threadGetVolumeDB(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetVolumeDB(Action* pAction)
+CtlRenderingControl::_threadSetVolumeDB(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1501,7 +1602,7 @@ RenderingControlController::_threadSetVolumeDB(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetVolumeDBRange(Action* pAction)
+CtlRenderingControl::_threadGetVolumeDBRange(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1512,7 +1613,7 @@ RenderingControlController::_threadGetVolumeDBRange(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadGetLoudness(Action* pAction)
+CtlRenderingControl::_threadGetLoudness(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1522,7 +1623,7 @@ RenderingControlController::_threadGetLoudness(Action* pAction)
 }
 
 void 
-RenderingControlController::_threadSetLoudness(Action* pAction)
+CtlRenderingControl::_threadSetLoudness(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 InstanceID = pAction->getArgument<ui4>("InstanceID");
@@ -1532,54 +1633,8 @@ RenderingControlController::_threadSetLoudness(Action* pAction)
 }
 
 
-
 void
-CtlMediaRenderer::eventHandler(StateVar* pStateVar)
-{
-    if (pStateVar->getName() == "LastChange") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pAVTransportController->_changedLastChange(val);
-    }
-    else if (pStateVar->getName() == "SourceProtocolInfo") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pConnectionManagerController->_changedSourceProtocolInfo(val);
-    }
-    else if (pStateVar->getName() == "SinkProtocolInfo") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pConnectionManagerController->_changedSinkProtocolInfo(val);
-    }
-    else if (pStateVar->getName() == "CurrentConnectionIDs") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pConnectionManagerController->_changedCurrentConnectionIDs(val);
-    }
-    else if (pStateVar->getName() == "LastChange") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pRenderingControlController->_changedLastChange(val);
-    }
-}
-
-
-CtlMediaRenderer::CtlMediaRenderer(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
-CtlDevice(pDevice),
-_pRenderingControlController(pRenderingControlController), 
-_pConnectionManagerController(pConnectionManagerController), 
-_pAVTransportController(pAVTransportController)
-{
-    _pRenderingControlController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:RenderingControl:1");
-    _pConnectionManagerController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:ConnectionManager:1");
-    _pAVTransportController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:AVTransport:1");
-
-    init();
-}
-
-
-void
-ContentDirectoryController::GetSearchCapabilities(std::string& SearchCaps)
+CtlContentDirectory::GetSearchCapabilities(std::string& SearchCaps)
 {
     Action* pAction = _pService->getAction("GetSearchCapabilities")->clone();
     _pService->sendAction(pAction);
@@ -1587,7 +1642,7 @@ ContentDirectoryController::GetSearchCapabilities(std::string& SearchCaps)
 }
 
 void
-ContentDirectoryController::GetSortCapabilities(std::string& SortCaps)
+CtlContentDirectory::GetSortCapabilities(std::string& SortCaps)
 {
     Action* pAction = _pService->getAction("GetSortCapabilities")->clone();
     _pService->sendAction(pAction);
@@ -1595,7 +1650,7 @@ ContentDirectoryController::GetSortCapabilities(std::string& SortCaps)
 }
 
 void
-ContentDirectoryController::GetSystemUpdateID(ui4& Id)
+CtlContentDirectory::GetSystemUpdateID(ui4& Id)
 {
     Action* pAction = _pService->getAction("GetSystemUpdateID")->clone();
     _pService->sendAction(pAction);
@@ -1603,7 +1658,7 @@ ContentDirectoryController::GetSystemUpdateID(ui4& Id)
 }
 
 void
-ContentDirectoryController::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
+CtlContentDirectory::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
     Action* pAction = _pService->getAction("Browse")->clone();
     pAction->setArgument<std::string>("ObjectID", ObjectID);
@@ -1620,7 +1675,7 @@ ContentDirectoryController::Browse(const std::string& ObjectID, const std::strin
 }
 
 void
-ContentDirectoryController::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
+CtlContentDirectory::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
     Action* pAction = _pService->getAction("Search")->clone();
     pAction->setArgument<std::string>("ContainerID", ContainerID);
@@ -1637,7 +1692,7 @@ ContentDirectoryController::Search(const std::string& ContainerID, const std::st
 }
 
 void
-ContentDirectoryController::CreateObject(const std::string& ContainerID, const std::string& Elements, std::string& ObjectID, std::string& Result)
+CtlContentDirectory::CreateObject(const std::string& ContainerID, const std::string& Elements, std::string& ObjectID, std::string& Result)
 {
     Action* pAction = _pService->getAction("CreateObject")->clone();
     pAction->setArgument<std::string>("ContainerID", ContainerID);
@@ -1648,7 +1703,7 @@ ContentDirectoryController::CreateObject(const std::string& ContainerID, const s
 }
 
 void
-ContentDirectoryController::DestroyObject(const std::string& ObjectID)
+CtlContentDirectory::DestroyObject(const std::string& ObjectID)
 {
     Action* pAction = _pService->getAction("DestroyObject")->clone();
     pAction->setArgument<std::string>("ObjectID", ObjectID);
@@ -1656,7 +1711,7 @@ ContentDirectoryController::DestroyObject(const std::string& ObjectID)
 }
 
 void
-ContentDirectoryController::UpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
+CtlContentDirectory::UpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
 {
     Action* pAction = _pService->getAction("UpdateObject")->clone();
     pAction->setArgument<std::string>("ObjectID", ObjectID);
@@ -1666,7 +1721,7 @@ ContentDirectoryController::UpdateObject(const std::string& ObjectID, const std:
 }
 
 void
-ContentDirectoryController::ImportResource(const uri& SourceURI, const uri& DestinationURI, ui4& TransferID)
+CtlContentDirectory::ImportResource(const uri& SourceURI, const uri& DestinationURI, ui4& TransferID)
 {
     Action* pAction = _pService->getAction("ImportResource")->clone();
     pAction->setArgument<uri>("SourceURI", SourceURI);
@@ -1676,7 +1731,7 @@ ContentDirectoryController::ImportResource(const uri& SourceURI, const uri& Dest
 }
 
 void
-ContentDirectoryController::GetTransferProgress(const ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal)
+CtlContentDirectory::GetTransferProgress(const ui4& TransferID, std::string& TransferStatus, std::string& TransferLength, std::string& TransferTotal)
 {
     Action* pAction = _pService->getAction("GetTransferProgress")->clone();
     pAction->setArgument<ui4>("TransferID", TransferID);
@@ -1687,7 +1742,7 @@ ContentDirectoryController::GetTransferProgress(const ui4& TransferID, std::stri
 }
 
 void
-ContentDirectoryController::DeleteResource(const uri& ResourceURI)
+CtlContentDirectory::DeleteResource(const uri& ResourceURI)
 {
     Action* pAction = _pService->getAction("DeleteResource")->clone();
     pAction->setArgument<uri>("ResourceURI", ResourceURI);
@@ -1695,7 +1750,7 @@ ContentDirectoryController::DeleteResource(const uri& ResourceURI)
 }
 
 void
-ContentDirectoryController::CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID)
+CtlContentDirectory::CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID)
 {
     Action* pAction = _pService->getAction("CreateReference")->clone();
     pAction->setArgument<std::string>("ContainerID", ContainerID);
@@ -1705,50 +1760,50 @@ ContentDirectoryController::CreateReference(const std::string& ContainerID, cons
 }
 
 std::string
-ContentDirectoryController::_getTransferIDs()
+CtlContentDirectory::_getTransferIDs()
 {
     return _pService->getStateVar<std::string>("TransferIDs");
 }
 
 ui4
-ContentDirectoryController::_getSystemUpdateID()
+CtlContentDirectory::_getSystemUpdateID()
 {
     return _pService->getStateVar<ui4>("SystemUpdateID");
 }
 
 std::string
-ContentDirectoryController::_getContainerUpdateIDs()
+CtlContentDirectory::_getContainerUpdateIDs()
 {
     return _pService->getStateVar<std::string>("ContainerUpdateIDs");
 }
 
 
 void 
-ContentDirectoryController::_reqGetSearchCapabilities()
+CtlContentDirectory::_reqGetSearchCapabilities()
 {
     Action* pAction = _pService->getAction("GetSearchCapabilities")->clone();
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadGetSearchCapabilities, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadGetSearchCapabilities, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqGetSortCapabilities()
+CtlContentDirectory::_reqGetSortCapabilities()
 {
     Action* pAction = _pService->getAction("GetSortCapabilities")->clone();
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadGetSortCapabilities, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadGetSortCapabilities, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqGetSystemUpdateID()
+CtlContentDirectory::_reqGetSystemUpdateID()
 {
     Action* pAction = _pService->getAction("GetSystemUpdateID")->clone();
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadGetSystemUpdateID, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadGetSystemUpdateID, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqBrowse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria)
+CtlContentDirectory::_reqBrowse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria)
 {
     Action* pAction = _pService->getAction("Browse")->clone();
     pAction->setArgument<std::string>("ObjectID", ObjectID);
@@ -1757,12 +1812,12 @@ ContentDirectoryController::_reqBrowse(const std::string& ObjectID, const std::s
     pAction->setArgument<ui4>("StartingIndex", StartingIndex);
     pAction->setArgument<ui4>("RequestedCount", RequestedCount);
     pAction->setArgument<std::string>("SortCriteria", SortCriteria);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadBrowse, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadBrowse, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqSearch(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria)
+CtlContentDirectory::_reqSearch(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria)
 {
     Action* pAction = _pService->getAction("Search")->clone();
     pAction->setArgument<std::string>("ContainerID", ContainerID);
@@ -1771,80 +1826,80 @@ ContentDirectoryController::_reqSearch(const std::string& ContainerID, const std
     pAction->setArgument<ui4>("StartingIndex", StartingIndex);
     pAction->setArgument<ui4>("RequestedCount", RequestedCount);
     pAction->setArgument<std::string>("SortCriteria", SortCriteria);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadSearch, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadSearch, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqCreateObject(const std::string& ContainerID, const std::string& Elements)
+CtlContentDirectory::_reqCreateObject(const std::string& ContainerID, const std::string& Elements)
 {
     Action* pAction = _pService->getAction("CreateObject")->clone();
     pAction->setArgument<std::string>("ContainerID", ContainerID);
     pAction->setArgument<std::string>("Elements", Elements);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadCreateObject, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadCreateObject, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqDestroyObject(const std::string& ObjectID)
+CtlContentDirectory::_reqDestroyObject(const std::string& ObjectID)
 {
     Action* pAction = _pService->getAction("DestroyObject")->clone();
     pAction->setArgument<std::string>("ObjectID", ObjectID);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadDestroyObject, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadDestroyObject, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqUpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
+CtlContentDirectory::_reqUpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
 {
     Action* pAction = _pService->getAction("UpdateObject")->clone();
     pAction->setArgument<std::string>("ObjectID", ObjectID);
     pAction->setArgument<std::string>("CurrentTagValue", CurrentTagValue);
     pAction->setArgument<std::string>("NewTagValue", NewTagValue);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadUpdateObject, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadUpdateObject, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqImportResource(const uri& SourceURI, const uri& DestinationURI)
+CtlContentDirectory::_reqImportResource(const uri& SourceURI, const uri& DestinationURI)
 {
     Action* pAction = _pService->getAction("ImportResource")->clone();
     pAction->setArgument<uri>("SourceURI", SourceURI);
     pAction->setArgument<uri>("DestinationURI", DestinationURI);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadImportResource, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadImportResource, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqGetTransferProgress(const ui4& TransferID)
+CtlContentDirectory::_reqGetTransferProgress(const ui4& TransferID)
 {
     Action* pAction = _pService->getAction("GetTransferProgress")->clone();
     pAction->setArgument<ui4>("TransferID", TransferID);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadGetTransferProgress, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadGetTransferProgress, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqDeleteResource(const uri& ResourceURI)
+CtlContentDirectory::_reqDeleteResource(const uri& ResourceURI)
 {
     Action* pAction = _pService->getAction("DeleteResource")->clone();
     pAction->setArgument<uri>("ResourceURI", ResourceURI);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadDeleteResource, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadDeleteResource, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_reqCreateReference(const std::string& ContainerID, const std::string& ObjectID)
+CtlContentDirectory::_reqCreateReference(const std::string& ContainerID, const std::string& ObjectID)
 {
     Action* pAction = _pService->getAction("CreateReference")->clone();
     pAction->setArgument<std::string>("ContainerID", ContainerID);
     pAction->setArgument<std::string>("ObjectID", ObjectID);
-    ActionThread<ContentDirectoryController> thread(this, &ContentDirectoryController::_threadCreateReference, pAction);
+    ActionThread<CtlContentDirectory> thread(this, &CtlContentDirectory::_threadCreateReference, pAction);
     thread.start();
 }
 
 void 
-ContentDirectoryController::_threadGetSearchCapabilities(Action* pAction)
+CtlContentDirectory::_threadGetSearchCapabilities(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string SearchCaps = pAction->getArgument<std::string>("SearchCaps");
@@ -1852,7 +1907,7 @@ ContentDirectoryController::_threadGetSearchCapabilities(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadGetSortCapabilities(Action* pAction)
+CtlContentDirectory::_threadGetSortCapabilities(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string SortCaps = pAction->getArgument<std::string>("SortCaps");
@@ -1860,7 +1915,7 @@ ContentDirectoryController::_threadGetSortCapabilities(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadGetSystemUpdateID(Action* pAction)
+CtlContentDirectory::_threadGetSystemUpdateID(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 Id = pAction->getArgument<ui4>("Id");
@@ -1868,7 +1923,7 @@ ContentDirectoryController::_threadGetSystemUpdateID(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadBrowse(Action* pAction)
+CtlContentDirectory::_threadBrowse(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ObjectID = pAction->getArgument<std::string>("ObjectID");
@@ -1885,7 +1940,7 @@ ContentDirectoryController::_threadBrowse(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadSearch(Action* pAction)
+CtlContentDirectory::_threadSearch(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ContainerID = pAction->getArgument<std::string>("ContainerID");
@@ -1902,7 +1957,7 @@ ContentDirectoryController::_threadSearch(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadCreateObject(Action* pAction)
+CtlContentDirectory::_threadCreateObject(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ContainerID = pAction->getArgument<std::string>("ContainerID");
@@ -1913,7 +1968,7 @@ ContentDirectoryController::_threadCreateObject(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadDestroyObject(Action* pAction)
+CtlContentDirectory::_threadDestroyObject(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ObjectID = pAction->getArgument<std::string>("ObjectID");
@@ -1921,7 +1976,7 @@ ContentDirectoryController::_threadDestroyObject(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadUpdateObject(Action* pAction)
+CtlContentDirectory::_threadUpdateObject(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ObjectID = pAction->getArgument<std::string>("ObjectID");
@@ -1931,7 +1986,7 @@ ContentDirectoryController::_threadUpdateObject(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadImportResource(Action* pAction)
+CtlContentDirectory::_threadImportResource(Action* pAction)
 {
     _pService->sendAction(pAction);
     uri SourceURI = pAction->getArgument<uri>("SourceURI");
@@ -1941,7 +1996,7 @@ ContentDirectoryController::_threadImportResource(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadGetTransferProgress(Action* pAction)
+CtlContentDirectory::_threadGetTransferProgress(Action* pAction)
 {
     _pService->sendAction(pAction);
     ui4 TransferID = pAction->getArgument<ui4>("TransferID");
@@ -1952,7 +2007,7 @@ ContentDirectoryController::_threadGetTransferProgress(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadDeleteResource(Action* pAction)
+CtlContentDirectory::_threadDeleteResource(Action* pAction)
 {
     _pService->sendAction(pAction);
     uri ResourceURI = pAction->getArgument<uri>("ResourceURI");
@@ -1960,7 +2015,7 @@ ContentDirectoryController::_threadDeleteResource(Action* pAction)
 }
 
 void 
-ContentDirectoryController::_threadCreateReference(Action* pAction)
+CtlContentDirectory::_threadCreateReference(Action* pAction)
 {
     _pService->sendAction(pAction);
     std::string ContainerID = pAction->getArgument<std::string>("ContainerID");
@@ -1969,61 +2024,6 @@ ContentDirectoryController::_threadCreateReference(Action* pAction)
     _ansCreateReference(ContainerID, ObjectID, NewID);
 }
 
-
-
-void
-CtlMediaServer::eventHandler(StateVar* pStateVar)
-{
-    if (pStateVar->getName() == "LastChange") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pAVTransportController->_changedLastChange(val);
-    }
-    else if (pStateVar->getName() == "SourceProtocolInfo") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pConnectionManagerController->_changedSourceProtocolInfo(val);
-    }
-    else if (pStateVar->getName() == "SinkProtocolInfo") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pConnectionManagerController->_changedSinkProtocolInfo(val);
-    }
-    else if (pStateVar->getName() == "CurrentConnectionIDs") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pConnectionManagerController->_changedCurrentConnectionIDs(val);
-    }
-    else if (pStateVar->getName() == "TransferIDs") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pContentDirectoryController->_changedTransferIDs(val);
-    }
-    else if (pStateVar->getName() == "SystemUpdateID") {
-        ui4 val;
-        pStateVar->getValue(val);
-        _pContentDirectoryController->_changedSystemUpdateID(val);
-    }
-    else if (pStateVar->getName() == "ContainerUpdateIDs") {
-        std::string val;
-        pStateVar->getValue(val);
-        _pContentDirectoryController->_changedContainerUpdateIDs(val);
-    }
-}
-
-
-CtlMediaServer::CtlMediaServer(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
-CtlDevice(pDevice),
-_pContentDirectoryController(pContentDirectoryController), 
-_pConnectionManagerController(pConnectionManagerController), 
-_pAVTransportController(pAVTransportController)
-{
-    _pContentDirectoryController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:ContentDirectory:1");
-    _pConnectionManagerController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:ConnectionManager:1");
-    _pAVTransportController->_pService = _pDevice->getService("urn:schemas-upnp-org:service:AVTransport:1");
-
-    init();
-}
 
 } // namespace Av
 } // namespace Omm

@@ -364,9 +364,9 @@ AvController::deviceAdded(DeviceContainer* pDeviceContainer)
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         CtlMediaRenderer* pRenderer = new CtlMediaRenderer(
             pDevice,
-            new RenderingControlControllerImpl,
-            new ConnectionManagerControllerImpl,
-            new AVTransportControllerImpl);
+            new CtlRenderingControlImpl,
+            new CtlConnectionManagerImpl,
+            new CtlAVTransportImpl);
         pUserInterface->beginAddRenderer(_renderers.size());
 //         std::clog << "UpnpAvController::deviceAdded() number of renderers: " << _renderers.size() << std::endl;
         _renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
@@ -376,9 +376,9 @@ AvController::deviceAdded(DeviceContainer* pDeviceContainer)
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
         ServerController* pServer = new ServerController(new Omm::Av::CtlMediaServer(
             pDevice,
-            new ContentDirectoryControllerImpl,
-            new ConnectionManagerControllerImpl,
-            new AVTransportControllerImpl));
+            new CtlContentDirectoryImpl,
+            new CtlConnectionManagerImpl,
+            new CtlAVTransportImpl));
         pUserInterface->beginAddServer(_servers.size());
 //         std::clog << "UpnpAvController::deviceAdded() number of servers: " << _servers.size() << std::endl;
         _servers.append(pDevice->getUuid(), pServer);

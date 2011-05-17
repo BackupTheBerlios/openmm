@@ -1039,7 +1039,7 @@ CtlDeviceDispH::deviceContainerEnd(const DeviceContainer& deviceContainer)
     i = _serviceNames.size();
     while (i--) {
         _out << indent(1)
-            << "Ctl" + _serviceNames[i] << "* " << "Ctl" + _serviceNames[i]
+            << "Ctl" + _serviceNames[i] << "* " << _serviceNames[i]
             << "() { return _p" << "Ctl" + _serviceNames[i] << "; }"
             << std::endl;
     }
