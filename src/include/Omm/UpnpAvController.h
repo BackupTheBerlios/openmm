@@ -46,9 +46,9 @@ public:
     const std::string getUuid();
     
 private:
-    RendererView(MediaRendererController* rendererController);
+    RendererView(CtlMediaRenderer* rendererController);
     
-    MediaRendererController*    _pRendererController;
+    CtlMediaRenderer*    _pRendererController;
 };
 
 
@@ -60,7 +60,7 @@ class ControllerObject : public MediaObject
 public:
     ControllerObject();
     
-    void setServerController(MediaServerController* _pServer);
+    void setServerController(CtlMediaServer* _pServer);
     
     int fetchChildren();
     bool fetchedAllChildren();
@@ -83,7 +83,7 @@ private:
     
     unsigned int                            _childCount;
     bool                                    _fetchedAllChildren;
-    MediaServerController*                  _server;
+    CtlMediaServer*                  _server;
 };
 
 
@@ -147,7 +147,7 @@ private:
 //    void startWebradio();
     
     AvController*                         _pAvController;
-    MediaRendererController*              _pSelectedRenderer;
+    CtlMediaRenderer*              _pSelectedRenderer;
     ControllerObject*                     _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
 

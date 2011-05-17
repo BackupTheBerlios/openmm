@@ -29,13 +29,13 @@ namespace Av {
 class ServerController
 {
 public:
-    ServerController(MediaServerController* pServerController);
+    ServerController(CtlMediaServer* pServerController);
     
-    MediaServerController* controller() { return _pServerController; }
+    CtlMediaServer* controller() { return _pServerController; }
     ControllerObject* root() { return _pRoot; }
     
 private:
-    MediaServerController*    _pServerController;
+    CtlMediaServer*    _pServerController;
     ControllerObject*         _pRoot;
 };
 

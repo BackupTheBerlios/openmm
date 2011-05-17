@@ -253,13 +253,13 @@ ControllerObject::setFetchedAllChildren(bool fetchedAllChildren)
 
 
 void
-ControllerObject::setServerController(MediaServerController* _pServer)
+ControllerObject::setServerController(CtlMediaServer* _pServer)
 {
     _server = _pServer;
 }
 
 
-ServerController::ServerController(MediaServerController* pServerController) :
+ServerController::ServerController(CtlMediaServer* pServerController) :
 _pServerController(pServerController)
 {
     _pRoot = new ControllerObject;
@@ -283,7 +283,7 @@ _pServerController(pServerController)
 }
 
 
-RendererView::RendererView(MediaRendererController* rendererController) :
+RendererView::RendererView(CtlMediaRenderer* rendererController) :
 _pRendererController(rendererController)
 {
 }
@@ -362,7 +362,7 @@ AvController::deviceAdded(DeviceContainer* pDeviceContainer)
 //     std::clog << "friendly name: " << pDevice->getFriendlyName() << std::endl;
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        MediaRendererController* pRenderer = new MediaRendererController(
+        CtlMediaRenderer* pRenderer = new CtlMediaRenderer(
             pDevice,
             new RenderingControlControllerImpl,
             new ConnectionManagerControllerImpl,
@@ -374,7 +374,7 @@ AvController::deviceAdded(DeviceContainer* pDeviceContainer)
         pUserInterface->endAddRenderer(_renderers.size() - 1);
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        ServerController* pServer = new ServerController(new Omm::Av::MediaServerController(
+        ServerController* pServer = new ServerController(new Omm::Av::CtlMediaServer(
             pDevice,
             new ContentDirectoryControllerImpl,
             new ConnectionManagerControllerImpl,

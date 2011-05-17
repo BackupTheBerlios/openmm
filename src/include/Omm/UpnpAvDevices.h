@@ -38,10 +38,10 @@ class RenderingControl;
 class ContentDirectory;
 
 
-class MediaRenderer : public DevDevice
+class DevMediaRenderer : public DevDevice
 {
 public:
-    MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+    DevMediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
 protected:
     RenderingControl* _pRenderingControlImpl;
@@ -56,10 +56,10 @@ private:
 };
 
 
-class MediaServer : public DevDevice
+class DevMediaServer : public DevDevice
 {
 public:
-    MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
+    DevMediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
 
 protected:
     ContentDirectory* _pContentDirectoryImpl;
@@ -76,8 +76,8 @@ private:
 
 class AVTransport
 {
-    friend class MediaServer;
-    friend class MediaRenderer;
+    friend class DevMediaServer;
+    friend class DevMediaRenderer;
 
 protected:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData) = 0;
@@ -159,8 +159,8 @@ private:
 
 class ConnectionManager
 {
-    friend class MediaServer;
-    friend class MediaRenderer;
+    friend class DevMediaServer;
+    friend class DevMediaRenderer;
 
 protected:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink) = 0;
@@ -186,7 +186,7 @@ private:
 
 class ContentDirectory
 {
-    friend class MediaServer;
+    friend class DevMediaServer;
 
 protected:
     virtual void GetSearchCapabilities(std::string& SearchCaps) = 0;
@@ -224,7 +224,7 @@ private:
 
 class RenderingControl
 {
-    friend class MediaRenderer;
+    friend class DevMediaRenderer;
 
 protected:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList) = 0;

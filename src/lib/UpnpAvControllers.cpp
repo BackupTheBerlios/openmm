@@ -1534,7 +1534,7 @@ RenderingControlController::_threadSetLoudness(Action* pAction)
 
 
 void
-MediaRendererController::eventHandler(StateVar* pStateVar)
+CtlMediaRenderer::eventHandler(StateVar* pStateVar)
 {
     if (pStateVar->getName() == "LastChange") {
         std::string val;
@@ -1564,7 +1564,7 @@ MediaRendererController::eventHandler(StateVar* pStateVar)
 }
 
 
-MediaRendererController::MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
+CtlMediaRenderer::CtlMediaRenderer(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
 CtlDevice(pDevice),
 _pRenderingControlController(pRenderingControlController), 
 _pConnectionManagerController(pConnectionManagerController), 
@@ -1972,7 +1972,7 @@ ContentDirectoryController::_threadCreateReference(Action* pAction)
 
 
 void
-MediaServerController::eventHandler(StateVar* pStateVar)
+CtlMediaServer::eventHandler(StateVar* pStateVar)
 {
     if (pStateVar->getName() == "LastChange") {
         std::string val;
@@ -2012,7 +2012,7 @@ MediaServerController::eventHandler(StateVar* pStateVar)
 }
 
 
-MediaServerController::MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
+CtlMediaServer::CtlMediaServer(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController) :
 CtlDevice(pDevice),
 _pContentDirectoryController(pContentDirectoryController), 
 _pConnectionManagerController(pConnectionManagerController), 

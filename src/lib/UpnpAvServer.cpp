@@ -291,7 +291,7 @@ ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& st
 
 
 AvServer::AvServer() :
-MediaServer(
+DevMediaServer(
 new ContentDirectoryImplementation,
 new ConnectionManagerImplementation,
 new AVTransportImplementation

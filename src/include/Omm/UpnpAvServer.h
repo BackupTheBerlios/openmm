@@ -98,7 +98,7 @@ class UpnpAvServer
 used by ServerApplication
 provides a meta data server that can be browsed by CDS implementation through root media object
 */
-class AvServer : public MediaServer
+class AvServer : public DevMediaServer
 {
 public:
     AvServer();

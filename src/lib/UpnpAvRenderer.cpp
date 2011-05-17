@@ -53,7 +53,7 @@ Engine::setOption(const std::string& key, const std::string& value)
 
 
 AvRenderer::AvRenderer(Engine* engine) :
-MediaRenderer(new RenderingControlRendererImpl,
+DevMediaRenderer(new RenderingControlRendererImpl,
               new ConnectionManagerRendererImpl,
               new AVTransportRendererImpl),
 _pEngine(engine)

@@ -36,10 +36,10 @@ class RenderingControlController;
 class ContentDirectoryController;
 
 
-class MediaRendererController : public CtlDevice
+class CtlMediaRenderer : public CtlDevice
 {
 public:
-    MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
+    CtlMediaRenderer(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
 
     RenderingControlController* RenderingControl() { return _pRenderingControlController; }
     ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
@@ -54,10 +54,10 @@ private:
 };
 
 
-class MediaServerController : public CtlDevice
+class CtlMediaServer : public CtlDevice
 {
 public:
-    MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
+    CtlMediaServer(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
 
     ContentDirectoryController* ContentDirectory() { return _pContentDirectoryController; }
     ConnectionManagerController* ConnectionManager() { return _pConnectionManagerController; }
@@ -74,8 +74,8 @@ private:
 
 class AVTransportController
 {
-    friend class MediaRendererController;
-    friend class MediaServerController;
+    friend class CtlMediaRenderer;
+    friend class CtlMediaServer;
 
 public:
     void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -142,8 +142,8 @@ private:
 
 class ConnectionManagerController
 {
-    friend class MediaRendererController;
-    friend class MediaServerController;
+    friend class CtlMediaRenderer;
+    friend class CtlMediaServer;
 
 public:
     void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -182,7 +182,7 @@ private:
 
 class ContentDirectoryController
 {
-    friend class MediaServerController;
+    friend class CtlMediaServer;
 
 public:
     void GetSearchCapabilities(std::string& SearchCaps);
@@ -253,7 +253,7 @@ private:
 
 class RenderingControlController
 {
-    friend class MediaRendererController;
+    friend class CtlMediaRenderer;
 
 public:
     void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);

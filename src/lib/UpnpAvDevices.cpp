@@ -25,7 +25,7 @@
 
 
 void
-MediaRenderer::actionHandler(Action* pAction)
+DevMediaRenderer::actionHandler(Action* pAction)
 {
     std::string serviceType = pAction->getService()->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
@@ -41,7 +41,7 @@ MediaRenderer::actionHandler(Action* pAction)
 
 
 void
-MediaRenderer::initStateVars(Service* pService)
+DevMediaRenderer::initStateVars(Service* pService)
 {
     std::string serviceType = pService->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
@@ -59,13 +59,13 @@ MediaRenderer::initStateVars(Service* pService)
 }
 
 
-MediaRenderer::MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
+DevMediaRenderer::DevMediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
 DevDevice(),
 _pRenderingControlImpl(pRenderingControlImpl),
 _pConnectionManagerImpl(pConnectionManagerImpl),
 _pAVTransportImpl(pAVTransportImpl)
 {
-    _descriptions["/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml"] = &MediaRenderer::_deviceDescription;
+    _descriptions["/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml"] = &DevMediaRenderer::_deviceDescription;
     _descriptions["/urn:schemas-upnp-org:service:RenderingControl:1/Description.xml"] = &RenderingControl::_description;
     _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &ConnectionManager::_description;
     _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &AVTransport::_description;
@@ -77,7 +77,7 @@ _pAVTransportImpl(pAVTransportImpl)
 
 
 void
-MediaServer::actionHandler(Action* pAction)
+DevMediaServer::actionHandler(Action* pAction)
 {
     std::string serviceType = pAction->getService()->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
@@ -93,7 +93,7 @@ MediaServer::actionHandler(Action* pAction)
 
 
 void
-MediaServer::initStateVars(Service* pService)
+DevMediaServer::initStateVars(Service* pService)
 {
     std::string serviceType = pService->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
@@ -111,13 +111,13 @@ MediaServer::initStateVars(Service* pService)
 }
 
 
-MediaServer::MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
+DevMediaServer::DevMediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
 DevDevice(),
 _pContentDirectoryImpl(pContentDirectoryImpl),
 _pConnectionManagerImpl(pConnectionManagerImpl),
 _pAVTransportImpl(pAVTransportImpl)
 {
-    _descriptions["/urn:schemas-upnp-org:device:MediaServer:1/Description.xml"] = &MediaServer::_deviceDescription;
+    _descriptions["/urn:schemas-upnp-org:device:MediaServer:1/Description.xml"] = &DevMediaServer::_deviceDescription;
     _descriptions["/urn:schemas-upnp-org:service:ContentDirectory:1/Description.xml"] = &ContentDirectory::_description;
     _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &ConnectionManager::_description;
     _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &AVTransport::_description;
