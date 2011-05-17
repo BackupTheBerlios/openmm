@@ -535,7 +535,7 @@ DeviceCpp::stateVar(const StateVar& stateVar)
 
 DeviceImplH::DeviceImplH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + _deviceName + "Impl.h.sample").c_str())
+_out((_outputPath + _deviceName + "Impl.h.skeleton").c_str())
 {
 }
 
@@ -626,7 +626,7 @@ DeviceImplH::argument(const Argument& argument, bool lastArgument)
 
 DeviceImplCpp::DeviceImplCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + _deviceName + "Impl.cpp.sample").c_str())
+_out((_outputPath + _deviceName + "Impl.cpp.skeleton").c_str())
 {
 }
 
@@ -770,7 +770,7 @@ DeviceDescH::escapeDescription(const std::string& description)
 
 DeviceCtrlImplH::DeviceCtrlImplH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + _deviceName + "CtrlImpl.h.sample").c_str())
+_out((_outputPath + _deviceName + "CtrlImpl.h.skeleton").c_str())
 {
 }
 
@@ -875,7 +875,7 @@ DeviceCtrlImplH::stateVar(const StateVar& stateVar)
 
 DeviceCtrlImplCpp::DeviceCtrlImplCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + _deviceName + "CtrlImpl.cpp.sample").c_str())
+_out((_outputPath + _deviceName + "CtrlImpl.cpp.skeleton").c_str())
 {
 }
 
