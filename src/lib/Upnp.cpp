@@ -484,7 +484,7 @@ _pStringMap(&stringMap)
 
 
 DeviceContainer*
-StringDescriptionReader::deviceRoot(const std::string& deviceDescriptionKey)
+StringDescriptionReader::deviceContainer(const std::string& deviceDescriptionKey)
 {
     return parseDeviceContainer(parseDescription(getDescription(deviceDescriptionKey)));
 }

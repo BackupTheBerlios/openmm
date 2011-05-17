@@ -44,8 +44,8 @@ public:
     virtual void write();
     
 protected:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot) {}
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot) {}
+    virtual void deviceContainer(const DeviceContainer& deviceContainer) {}
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer) {}
     virtual void serviceType(const Service& service) {}
     virtual void serviceTypeEnd(const Service& service) {}
     virtual void action(const Action& action) {}
@@ -73,8 +73,8 @@ public:
     DeviceH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
@@ -96,8 +96,8 @@ public:
     DeviceCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
@@ -126,8 +126,8 @@ public:
     DeviceImplH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
@@ -144,7 +144,7 @@ public:
     DeviceImplCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void action(const Action& action);
     virtual void actionEnd(const Action& action);
@@ -163,8 +163,8 @@ public:
 private:
     std::string escapeDescription(const std::string& description);
     
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     
     std::ofstream       _out;
@@ -177,8 +177,8 @@ public:
     DeviceCtrlImplH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
@@ -197,7 +197,7 @@ public:
     DeviceCtrlImplCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void action(const Action& action);
     virtual void actionEnd(const Action& action);
@@ -215,8 +215,8 @@ public:
     DeviceCtrlH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);
@@ -242,8 +242,8 @@ public:
     DeviceCtrlCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    virtual void deviceRoot(const DeviceContainer& deviceRoot);
-    virtual void deviceRootEnd(const DeviceContainer& deviceRoot);
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     virtual void serviceTypeEnd(const Service& service);
     virtual void action(const Action& action);

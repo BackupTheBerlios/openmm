@@ -101,7 +101,7 @@ _pDimmingImpl(pDimmingImpl)
     _descriptions["/Dimming-scpd.xml"] = &Dimming::_description;
 
     Omm::StringDescriptionReader descriptionReader(_descriptions);
-    _pDeviceContainer = descriptionReader.deviceRoot("/network-light-desc.xml");
+    _pDeviceContainer = descriptionReader.deviceContainer("/network-light-desc.xml");
     _pDeviceContainer->setImplAdapter(this);
 }
 

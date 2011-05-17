@@ -517,7 +517,7 @@ class StringDescriptionReader : public DescriptionReader
 public:
     StringDescriptionReader(std::map<std::string,std::string*>& stringMap);
     
-    DeviceContainer* deviceRoot(const std::string& deviceDescriptionKey);
+    DeviceContainer* deviceContainer(const std::string& deviceDescriptionKey);
     
 private:
     virtual std::string& getDescription(const std::string& descriptionKey);

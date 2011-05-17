@@ -93,7 +93,7 @@ _outputPath(outputPath)
 void
 StubWriter::write()
 {
-    deviceRoot(*_pDeviceContainer);
+    deviceContainer(*_pDeviceContainer);
     for (DeviceContainer::ServiceTypeIterator s = _pDeviceContainer->beginServiceType(); s != _pDeviceContainer->endServiceType(); ++s) {
         Service& rs = *((*s).second);
         serviceType(rs);
@@ -114,7 +114,7 @@ StubWriter::write()
         }
         serviceTypeEnd(rs);
     }
-    deviceRootEnd(*_pDeviceContainer);
+    deviceContainerEnd(*_pDeviceContainer);
 }
 
 
@@ -144,7 +144,7 @@ _out((_outputPath + _deviceName + ".h").c_str())
 
 
 void
-DeviceH::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -153,7 +153,7 @@ DeviceH::deviceRoot(const DeviceContainer& deviceRoot)
         << std::endl
         << "#include <omm/upnp.h>" << std::endl
         << std::endl
-        << "using Omm::DeviceContainerImplAdapter;" << std::endl
+        << "using Omm::DevDevice;" << std::endl
         << "using Omm::Service;" << std::endl
         << "using Omm::Action;" << std::endl
         << std::endl
@@ -163,7 +163,7 @@ DeviceH::deviceRoot(const DeviceContainer& deviceRoot)
 
 
 void
-DeviceH::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     std::string ctorArgs = "";
 //     std::string implPointers = "";
@@ -173,7 +173,7 @@ DeviceH::deviceRootEnd(const DeviceContainer& deviceRoot)
     }
     
     _out << std::endl
-        << "class " << _deviceName << " : public DeviceContainerImplAdapter" << std::endl
+        << "class " << _deviceName << " : public DevDevice" << std::endl
         << "{" << std::endl
         << "public:" << std::endl
         << indent(1) << _deviceName << "("
@@ -298,7 +298,7 @@ _out((_outputPath + _deviceName + ".cpp").c_str())
 
 
 void
-DeviceCpp::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -324,9 +324,9 @@ DeviceCpp::deviceRoot(const DeviceContainer& deviceRoot)
 
 
 void
-DeviceCpp::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
-//    std::string deviceDescriptionPath = deviceRoot.getDescriptionUri();
+//    std::string deviceDescriptionPath = deviceContainer.getDescriptionUri();
     std::string deviceDescriptionPath = "/" + _deviceType + "/Description.xml";
     std::string ctorArgs = "";
     int i = _serviceNames.size();
@@ -345,7 +345,7 @@ DeviceCpp::deviceRootEnd(const DeviceContainer& deviceRoot)
         << _deviceName << "::" << _deviceName << "("
         << ctorArgs
         << ") :" << std::endl
-        << "DeviceContainerImplAdapter()," << std::endl
+        << "DevDevice()," << std::endl
         ;
     
     i = _serviceNames.size();
@@ -380,7 +380,7 @@ DeviceCpp::deviceRootEnd(const DeviceContainer& deviceRoot)
     _out << std::endl
         << indent(1) << "Omm::StringDescriptionReader descriptionReader(_descriptions);" << std::endl
 //        << deviceDescriptionPath << "\");" << std::endl
-        << indent(1) << "_pDeviceContainer = descriptionReader.deviceRoot(\""
+        << indent(1) << "_pDeviceContainer = descriptionReader.deviceContainer(\""
 //        <<  _deviceName << ".xml\");" << std::endl
         <<  deviceDescriptionPath << "\");" << std::endl
         << indent(1) << "_pDeviceContainer->setImplAdapter(this);" << std::endl
@@ -541,7 +541,7 @@ _out((_outputPath + _deviceName + "Impl.h.sample").c_str())
 
 
 void
-DeviceImplH::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceImplH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << samplePreamble
@@ -555,7 +555,7 @@ DeviceImplH::deviceRoot(const DeviceContainer& deviceRoot)
 
 
 void
-DeviceImplH::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceImplH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     _out
         << "#endif" << std::endl
@@ -632,7 +632,7 @@ _out((_outputPath + _deviceName + "Impl.cpp.sample").c_str())
 
 
 void
-DeviceImplCpp::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceImplCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << samplePreamble
@@ -702,7 +702,7 @@ _out((_outputPath + _deviceName + "Descriptions.h").c_str())
 
 
 void
-DeviceDescH::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceDescH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -710,14 +710,14 @@ DeviceDescH::deviceRoot(const DeviceContainer& deviceRoot)
         << "#define " << Poco::toUpper(_deviceName) << "_DESCRIPTIONS_H" << std::endl
         << std::endl
         << "std::string " << _deviceName << "::_deviceDescription =" << std::endl
-        << escapeDescription(*deviceRoot.getDeviceDescription())
+        << escapeDescription(*deviceContainer.getDeviceDescription())
         << ";" << std::endl
         << std::endl;
 }
 
 
 void
-DeviceDescH::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceDescH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     _out
         << "#endif" << std::endl
@@ -776,7 +776,7 @@ _out((_outputPath + _deviceName + "CtrlImpl.h.sample").c_str())
 
 
 void
-DeviceCtrlImplH::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceCtrlImplH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << samplePreamble
@@ -790,7 +790,7 @@ DeviceCtrlImplH::deviceRoot(const DeviceContainer& deviceRoot)
 
 
 void
-DeviceCtrlImplH::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceCtrlImplH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     _out
         << "#endif" << std::endl
@@ -881,7 +881,7 @@ _out((_outputPath + _deviceName + "CtrlImpl.cpp.sample").c_str())
 
 
 void
-DeviceCtrlImplCpp::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceCtrlImplCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << samplePreamble
@@ -969,7 +969,7 @@ _out((_outputPath + _deviceName + "Ctrl.h").c_str())
 
 
 void
-DeviceCtrlH::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceCtrlH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -982,7 +982,7 @@ DeviceCtrlH::deviceRoot(const DeviceContainer& deviceRoot)
 
 
 void
-DeviceCtrlH::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceCtrlH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     std::string ctorArgs = "";
     int i = _serviceNames.size();
@@ -991,7 +991,7 @@ DeviceCtrlH::deviceRootEnd(const DeviceContainer& deviceRoot)
     }
     
     _out << std::endl
-        << "class " << _deviceName << "Controller : public Omm::ControllerImplAdapter" << std::endl
+        << "class " << _deviceName << "Controller : public Omm::CtlDevice" << std::endl
         << "{" << std::endl
         << "public:" << std::endl
         << indent(1) << _deviceName << "Controller("
@@ -1180,7 +1180,7 @@ _out((_outputPath + _deviceName + "Ctrl.cpp").c_str())
 
 
 void
-DeviceCtrlCpp::deviceRoot(const DeviceContainer& deviceRoot)
+DeviceCtrlCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -1192,7 +1192,7 @@ DeviceCtrlCpp::deviceRoot(const DeviceContainer& deviceRoot)
 
 
 void
-DeviceCtrlCpp::deviceRootEnd(const DeviceContainer& deviceRoot)
+DeviceCtrlCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     std::string ctorArgs = "";
 //     std::string implPointers = "";
@@ -1213,14 +1213,14 @@ DeviceCtrlCpp::deviceRootEnd(const DeviceContainer& deviceRoot)
     
     // Device ctor ...
     _out << std::endl
-//         << "class " << _deviceName << "Controller : public Omm::ControllerImplAdapter" << std::endl
+//         << "class " << _deviceName << "Controller : public Omm::CtlDevice" << std::endl
 //         << "{" << std::endl
 //         << "public:" << std::endl
         << _deviceName << "Controller" << "::" << _deviceName << "Controller" << "("
         << "Omm::Device* pDevice, "
         << ctorArgs
         << ") :" << std::endl
-        << "ControllerImplAdapter(pDevice)," << std::endl
+        << "CtlDevice(pDevice)," << std::endl
             ;
     
     i = _serviceNames.size();
