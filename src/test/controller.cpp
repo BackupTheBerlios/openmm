@@ -36,12 +36,12 @@ using Poco::Util::HelpFormatter;
 
 class MyController : public Omm::Controller
 {
-    virtual void deviceAdded(Omm::DeviceRoot* device)
+    virtual void deviceAdded(Omm::DeviceContainer* device)
     {
         std::cerr << "MyController::deviceAdded() uuid: " << device->getRootDevice()->getUuid() << std::endl;
     }
     
-    virtual void deviceRemoved(Omm::DeviceRoot* device)
+    virtual void deviceRemoved(Omm::DeviceContainer* device)
     {
         std::cerr << "MyController::deviceRemoved() uuid: " << device->getRootDevice()->getUuid() << std::endl;
     }

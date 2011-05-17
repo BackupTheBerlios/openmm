@@ -104,12 +104,12 @@ protected:
             std::ifstream ifs("/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
             StreamCopier::copyStream(ifs, ss);
             std::string s = ss.str();
-            DeviceRoot* device = new DeviceRoot();
+            DeviceContainer* device = new DeviceContainer();
             device->init(s);*/
             
             Omm::UriDescriptionReader descriptionReader;
             
-            Omm::DeviceRoot* device = descriptionReader.deviceRoot("file:/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
+            Omm::DeviceContainer* device = descriptionReader.deviceRoot("file:/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
             
             waitForTerminationRequest();
         }

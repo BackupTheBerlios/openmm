@@ -36,7 +36,7 @@ class RenderingControlController;
 class ContentDirectoryController;
 
 
-class MediaRendererController : public ControllerImplAdapter
+class MediaRendererController : public CtlDevice
 {
 public:
     MediaRendererController(Device* pDevice, RenderingControlController* pRenderingControlController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);
@@ -54,7 +54,7 @@ private:
 };
 
 
-class MediaServerController : public ControllerImplAdapter
+class MediaServerController : public CtlDevice
 {
 public:
     MediaServerController(Device* pDevice, ContentDirectoryController* pContentDirectoryController, ConnectionManagerController* pConnectionManagerController, AVTransportController* pAVTransportController);

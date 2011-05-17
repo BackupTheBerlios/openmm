@@ -131,12 +131,12 @@ static const std::string    OMM_VERSION         = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 
 class Device;
-class DeviceRoot;
+class DeviceContainer;
 class Service;
 class Action;
 class Argument;
 class StateVar;
-class DeviceRoot;
+class DeviceContainer;
 class ControlRequestHandler;
 class HttpSocket;
 class Entity;
@@ -179,7 +179,7 @@ private:
 class Icon
 {
     friend class IconRequestHandler;
-    friend class DeviceRoot;
+    friend class DeviceContainer;
     friend class Device;
     friend class DeviceDescriptionWriter;
     
@@ -204,7 +204,7 @@ private:
 
 class SsdpSocket
 {
-    friend class DeviceRoot;
+    friend class DeviceContainer;
     friend class Controller;
     
 public:
@@ -486,8 +486,8 @@ protected:
     void releaseDescriptionDocument();
     
     Poco::XML::Node* parseDescription(const std::string& description);
-    DeviceRoot* parseDeviceRoot(Poco::XML::Node* pNode);
-    Device* device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot);
+    DeviceContainer* parseDeviceContainer(Poco::XML::Node* pNode);
+    Device* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer);
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
     Argument* argument(Poco::XML::Node* pNode);
@@ -500,7 +500,7 @@ protected:
 class UriDescriptionReader : public DescriptionReader
 {
 public:
-    DeviceRoot* deviceRoot(const std::string& deviceDescriptionUri);
+    DeviceContainer* deviceRoot(const std::string& deviceDescriptionUri);
     /// read and parse a description from the URI given in deviceDescriptionUri
     /// the service description URIs contained in the device description
     /// can be relative to deviceDescriptionUri
@@ -517,7 +517,7 @@ class StringDescriptionReader : public DescriptionReader
 public:
     StringDescriptionReader(std::map<std::string,std::string*>& stringMap);
     
-    DeviceRoot* deviceRoot(const std::string& deviceDescriptionKey);
+    DeviceContainer* deviceRoot(const std::string& deviceDescriptionKey);
     
 private:
     virtual std::string& getDescription(const std::string& descriptionKey);
@@ -528,7 +528,7 @@ private:
 
 class HttpSocket
 {
-    friend class DeviceRoot;
+    friend class DeviceContainer;
     
 public:
     HttpSocket();
@@ -690,7 +690,7 @@ public:
     void setServiceType(std::string serviceType) { _serviceType = serviceType; }
     void setServiceId(std::string serviceId) { _serviceId = serviceId; }
     void setDescriptionPath(std::string descriptionPath) { _descriptionPath = descriptionPath; }
-    void setDescription(std::string& description) { _pDescription = &description; }
+    void setServiceDescription(std::string& description) { _pDescription = &description; }
     void setDescriptionRequestHandler();
     void setControlPath(std::string controlPath) { _controlPath = controlPath; }
     void setEventPath(std::string eventPath) { _eventPath = eventPath; }
@@ -809,14 +809,14 @@ public:
     IconIterator beginIcon() { return _iconList.begin(); }
     IconIterator endIcon() { return _iconList.end(); }
     
-    DeviceRoot* getDeviceRoot() const { return _pDeviceRoot; }
+    DeviceContainer* getDeviceContainer() const { return _pDeviceContainer; }
     std::string getUuid() const { return _uuid; }
     std::string getDeviceType() const { return _deviceType; }
     const std::string& getFriendlyName() { return getProperty("friendlyName"); }
     Service* getService(std::string serviceType) { return &_services.get(serviceType); }
     const std::string& getProperty(const std::string& name) { return _properties.get(name); }
     
-    void setDeviceRoot(DeviceRoot* pDeviceRoot) { _pDeviceRoot = pDeviceRoot; }
+    void setDeviceContainer(DeviceContainer* pDeviceContainer) { _pDeviceContainer = pDeviceContainer; }
     void setUuid(std::string uuid) { _uuid = uuid; }
     void setRandomUuid();
     void setDeviceType(std::string deviceType) { _deviceType = deviceType; }
@@ -827,7 +827,7 @@ public:
     void addIcon(Icon* pIcon);
     
 private:
-    DeviceRoot*                         _pDeviceRoot;
+    DeviceContainer*                         _pDeviceContainer;
     std::string                         _uuid;
     std::string                         _deviceType;
     Container<Service>                  _services;
@@ -836,17 +836,17 @@ private:
 };
 
 
-class DeviceRootImplAdapter;
+class DevDevice;
 class Controller;
 
-class DeviceRoot
+class DeviceContainer
 {
-    friend class DeviceRootImplAdapter;
+    friend class DevDevice;
     friend class Controller;
     
 public:
-    DeviceRoot();
-    ~DeviceRoot();
+    DeviceContainer();
+    ~DeviceContainer();
     
     typedef Container<Device>::Iterator DeviceIterator;
     DeviceIterator beginDevice() { return _devices.begin(); }
@@ -893,7 +893,7 @@ public:
         
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
-    void setImplAdapter(DeviceRootImplAdapter* implAdapter) { _pDeviceRootImplAdapter = implAdapter; }
+    void setImplAdapter(DevDevice* implAdapter) { _pDeviceContainerImplAdapter = implAdapter; }
     void initStateVars(Service* pService);
 
     
@@ -914,18 +914,18 @@ private:
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
     HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
-    DeviceRootImplAdapter*          _pDeviceRootImplAdapter;
+    DevDevice*          _pDeviceContainerImplAdapter;
     Controller*                     _pController;
 };
 
 
-class DeviceRootImplAdapter : public Util::Startable
+class DevDevice : public Util::Startable
 {
-    friend class DeviceRoot;
+    friend class DeviceContainer;
     
 public:
-    DeviceRootImplAdapter();
-    ~DeviceRootImplAdapter();
+    DevDevice();
+    ~DevDevice();
     
     virtual void start();
     virtual void stop();
@@ -937,14 +937,14 @@ public:
     
 protected:
     virtual void actionHandler(Action* action) = 0;
-    virtual void initStateVars(Service* pThis) = 0;
+    virtual void initStateVars(Service* pService) = 0;
     virtual bool initDevice() { return true; }
     /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
     /// if initialization takes a while to process, start the device in threaded mode with start(true).
     
     std::map<std::string,std::string*>  _descriptions;
     // _deviceRoot is the link into the "dynamic-string-world".
-    DeviceRoot*                         _pDeviceRoot;
+    DeviceContainer*                         _pDeviceContainer;
 };
 
 
@@ -975,7 +975,7 @@ protected:
 };
 
 
-class ControllerImplAdapter
+class CtlDevice
 {
     friend class Controller;
 
@@ -983,7 +983,7 @@ public:
     Device* getDevice() const { return _pDevice; }
 
 //protected:
-    ControllerImplAdapter(Device* pDevice) : _pDevice(pDevice) {}
+    CtlDevice(Device* pDevice) : _pDevice(pDevice) {}
 
 protected:
 //    virtual void eventHandler(StateVar* stateVar) = 0;
@@ -1001,23 +1001,23 @@ public:
     ~Controller();
 
     void start();
-    virtual void deviceAdded(DeviceRoot* pDeviceRoot) {}
-    virtual void deviceRemoved(DeviceRoot* pDeviceRoot) {}
+    virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
+    virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
 
     void setUserInterface(UserInterface* pUserInterface);
     UserInterface* getUserInterface();
 
 protected:
     UserInterface*                      _pUserInterface;
-//    Container<DeviceRoot>           _devices;
-    Container<ControllerImplAdapter>    _devices;
+//    Container<DeviceContainer>           _devices;
+    Container<CtlDevice>    _devices;
     
 private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
     void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
-    void addDevice(DeviceRoot* pDevice);
+    void addDevice(DeviceContainer* pDevice);
     void removeDevice(const std::string& uuid);
     void update();
     

@@ -159,7 +159,7 @@ class DeviceDescriptionWriter
 public:
     DeviceDescriptionWriter();
     
-    void deviceRoot(DeviceRoot& deviceRoot);
+    void deviceContainer(DeviceContainer& deviceRoot);
     std::string* write();
     
 private:
@@ -193,7 +193,7 @@ class SsdpNotifyAliveWriter
 public:
     SsdpNotifyAliveWriter(SsdpMessageSet& generatedMessages) : _res(&generatedMessages) {}
     
-    void deviceRoot(const DeviceRoot& pDeviceRoot);
+    void deviceContainer(const DeviceContainer& pDeviceContainer);
     void device(const Device& pDevice);
     void service(const Service& pService);
 
@@ -207,7 +207,7 @@ class SsdpNotifyByebyeWriter
 public:
     SsdpNotifyByebyeWriter(SsdpMessageSet& generatedMessages) : _res(&generatedMessages) {}
     
-    void deviceRoot(const DeviceRoot& pDeviceRoot);
+    void deviceContainer(const DeviceContainer& pDeviceContainer);
     void device(const Device& pDevice);
     void service(const Service& pService);
     
@@ -310,14 +310,14 @@ class VariableQuery : public Poco::Notification
 class ControlRequestHandler: public UpnpRequestHandler
 {
 public:
-//     ControlRequestHandler(DeviceRoot& deviceRoot);
+//     ControlRequestHandler(DeviceContainer& deviceRoot);
     ControlRequestHandler(Service* service);
     
     ControlRequestHandler* create();
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-//     DeviceRoot* _deviceRoot;
+//     DeviceContainer* _deviceRoot;
     Service*    _pService;
 };
 

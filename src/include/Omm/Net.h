@@ -54,7 +54,7 @@ class NetworkInterfaceManager
 
 public:
     static NetworkInterfaceManager* instance();
-    // clients like DeviceRoot and Controller can register here
+    // clients like DeviceContainer and Controller can register here
     void registerInterfaceChangeHandler(const Poco::AbstractObserver& observer);
     void scanInterfaces();
    // some OS dependent hardware abstraction layer can add and remove devices here

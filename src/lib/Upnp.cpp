@@ -421,11 +421,11 @@ SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
 }
 
 
-DeviceRoot*
+DeviceContainer*
 UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
 {
     _descriptionUri = deviceDescriptionUri;
-    return parseDeviceRoot(parseDescription(getDescription(deviceDescriptionUri)));
+    return parseDeviceContainer(parseDescription(getDescription(deviceDescriptionUri)));
 }
 
 
@@ -483,10 +483,10 @@ _pStringMap(&stringMap)
 }
 
 
-DeviceRoot*
+DeviceContainer*
 StringDescriptionReader::deviceRoot(const std::string& deviceDescriptionKey)
 {
-    return parseDeviceRoot(parseDescription(getDescription(deviceDescriptionKey)));
+    return parseDeviceContainer(parseDescription(getDescription(deviceDescriptionKey)));
 }
 
 
@@ -543,10 +543,10 @@ DescriptionReader::releaseDescriptionDocument()
 }
 
 
-DeviceRoot*
-DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
+DeviceContainer*
+DescriptionReader::parseDeviceContainer(Poco::XML::Node* pNode)
 {
-    DeviceRoot* pRes = new DeviceRoot();
+    DeviceContainer* pRes = new DeviceContainer();
     bool deviceNodeFound = false;
     while (pNode)
     {
@@ -566,10 +566,10 @@ DescriptionReader::parseDeviceRoot(Poco::XML::Node* pNode)
 
 
 Device*
-DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
+DescriptionReader::device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer)
 {
     Device* pRes = new Device();
-    pRes->setDeviceRoot(pDeviceRoot);
+    pRes->setDeviceContainer(pDeviceContainer);
 
     while (pNode)
     {
@@ -604,7 +604,7 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceRoot* pDeviceRoot)
                 while (pChild) {
                     if (pChild->nodeName() == "device") {
                         if (pChild->hasChildNodes()) {
-                            pDeviceRoot->addDevice(device(pChild->firstChild(), pDeviceRoot));
+                            pDeviceContainer->addDevice(device(pChild->firstChild(), pDeviceContainer));
                         }
                         else {
                             Log::instance()->desc().error("empty embedded device");
@@ -645,7 +645,7 @@ DescriptionReader::service(Poco::XML::Node* pNode)
             std::string descriptionPath = pNode->innerText();
             pRes->setDescriptionPath(descriptionPath);
             // load the service description into the Service object.
-            pRes->setDescription(getDescription(descriptionPath));
+            pRes->setServiceDescription(getDescription(descriptionPath));
             Poco::XML::Node* pScpd = parseDescription(*pRes->getDescription());
             while (pScpd) {
                 if (pScpd->nodeName() == "actionList" && pScpd->hasChildNodes()) {
@@ -894,7 +894,7 @@ DeviceDescriptionWriter::DeviceDescriptionWriter()
 
 
 void
-DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
+DeviceDescriptionWriter::deviceContainer(DeviceContainer& deviceRoot)
 {
     Poco::AutoPtr<Poco::XML::Element> pRoot = _pDoc->createElement("root");
     pRoot->setAttribute("xmlns", "urn:schemas-upnp-org:device-1-0");
@@ -918,7 +918,7 @@ DeviceDescriptionWriter::deviceRoot(DeviceRoot& deviceRoot)
     // write embedded devices
     // end embedded devices
     
-    // end DeviceRoot
+    // end DeviceContainer
 }
 
 
@@ -1395,15 +1395,15 @@ Service::addStateVar(StateVar* pStateVar)
 void
 Service::initClient()
 {
-    _baseUri = Poco::URI(_pDevice->getDeviceRoot()->getDescriptionUri());
+    _baseUri = Poco::URI(_pDevice->getDeviceContainer()->getDescriptionUri());
     //_pControlRequestSession = new Poco::Net::HTTPClientSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
     // TODO: subscribe to services
     // -> generate eventHandlerURIs: device uuid + service type
     // TODO: setup event message handler
-    // -> this should go in DeviceRoot::initClient()?
+    // -> this should go in DeviceContainer::initClient()?
     // -> or in Controller::init()?
-    // _pDevice->getDeviceRoot()->registerEventHandler(...);
+    // _pDevice->getDeviceContainer()->registerEventHandler(...);
 }
 
 // FIXME: when starting 15 servers and killing them with killall at once
@@ -1413,7 +1413,7 @@ Service::initClient()
 void
 Service::actionNetworkActivity(bool begin)
 {
-    Controller* pController = _pDevice->getDeviceRoot()->getController();
+    Controller* pController = _pDevice->getDeviceContainer()->getController();
     if (pController) {
         UserInterface* pUserInterface = pController->getUserInterface();
         if (pUserInterface) {
@@ -1437,7 +1437,7 @@ Service::sendAction(Action* pAction)
     requestWriter.write(actionMessage);
 
     _serviceLock.lock();
-    Poco::URI baseUri(_pDevice->getDeviceRoot()->getDescriptionUri());
+    Poco::URI baseUri(_pDevice->getDeviceContainer()->getDescriptionUri());
     Poco::URI controlUri(baseUri);
     controlUri.resolve(_controlPath);
     Poco::Net::HTTPRequest request("POST", controlUri.getPath(), "HTTP/1.1");
@@ -1722,7 +1722,7 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     ActionRequestReader requestReader(requestBody, pAction);
     pAction = requestReader.action();
     // the corresponding Service should register as a Notification Handler
-    _pService->getDevice()->getDeviceRoot()->postAction(pAction);
+    _pService->getDevice()->getDeviceContainer()->postAction(pAction);
     // return Action response with out arguments filled in by Notification Handler
     std::string responseBody;
     ActionResponseWriter responseWriter(responseBody);
@@ -1886,7 +1886,7 @@ Device::addService(Service* pService)
 {
 //     std::clog << "Device::addService(): " << pService->getServiceType() << std::endl;
     _services.append(pService->getServiceType(), pService);
-    _pDeviceRoot->addServiceType(pService->getServiceType(), pService);
+    _pDeviceContainer->addServiceType(pService->getServiceType(), pService);
     pService->setDevice(this);
 }
 
@@ -1907,14 +1907,14 @@ Device::addIcon(Icon* pIcon)
 }
 
 
-DeviceRoot::DeviceRoot() :
+DeviceContainer::DeviceContainer() :
 _pController(0),
-_pDeviceRootImplAdapter(0)
+_pDeviceContainerImplAdapter(0)
 {
 }
 
 
-DeviceRoot::~DeviceRoot()
+DeviceContainer::~DeviceContainer()
 {
     stopSsdp();
     stopHttp();
@@ -1924,7 +1924,7 @@ DeviceRoot::~DeviceRoot()
 
 
 Service*
-DeviceRoot::getServiceType(const std::string& serviceType)
+DeviceContainer::getServiceType(const std::string& serviceType)
 {
     std::map<std::string,Service*>::iterator i = _serviceTypes.find(serviceType);
     if (i == _serviceTypes.end()) {
@@ -1935,7 +1935,7 @@ DeviceRoot::getServiceType(const std::string& serviceType)
 
 
 void
-DeviceRoot::print()
+DeviceContainer::print()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         std::cout << "DeviceType: " << (*d)->getDeviceType() << std::endl;
@@ -1960,17 +1960,17 @@ DeviceRoot::print()
 
 
 void
-DeviceRoot::initStateVars(Service* pService)
+DeviceContainer::initStateVars(Service* pService)
 {
     Log::instance()->upnp().debug("init state vars of service: " + pService->getServiceType());
-    if (_pDeviceRootImplAdapter) {
-        _pDeviceRootImplAdapter->initStateVars(pService);
+    if (_pDeviceContainerImplAdapter) {
+        _pDeviceContainerImplAdapter->initStateVars(pService);
     }
 }
 
 
 void
-DeviceRoot::initController()
+DeviceContainer::initController()
 {
     _httpSocket.init();
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
@@ -1985,7 +1985,7 @@ DeviceRoot::initController()
 
 
 void
-DeviceRoot::initSockets()
+DeviceContainer::initSockets()
 {
     _ssdpSocket.init();
     _httpSocket.init();
@@ -1995,7 +1995,7 @@ DeviceRoot::initSockets()
 
 
 void
-DeviceRoot::initUuid()
+DeviceContainer::initUuid()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Log::instance()->upnp().debug("init device root: setting random uuid for device");
@@ -2007,7 +2007,7 @@ DeviceRoot::initUuid()
 
 
 void
-DeviceRoot::initStateVars()
+DeviceContainer::initStateVars()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
@@ -2018,23 +2018,23 @@ DeviceRoot::initStateVars()
 
 
 void
-DeviceRoot::rewriteDescriptions()
+DeviceContainer::rewriteDescriptions()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             ServiceDescriptionWriter serviceDescriptionWriter;
             serviceDescriptionWriter.service(**s);
-            (*s)->setDescription(*serviceDescriptionWriter.write());
+            (*s)->setServiceDescription(*serviceDescriptionWriter.write());
         }
     }
     DeviceDescriptionWriter descriptionWriter;
-    descriptionWriter.deviceRoot(*this);
+    descriptionWriter.deviceContainer(*this);
     setDeviceDescription(*descriptionWriter.write());
 }
 
 
 void
-DeviceRoot::initDevice()
+DeviceContainer::initDevice()
 {    
     initUuid();
     initStateVars();
@@ -2043,21 +2043,21 @@ DeviceRoot::initDevice()
 
 
 void
-DeviceRoot::registerActionHandler(const Poco::AbstractObserver& observer)
+DeviceContainer::registerActionHandler(const Poco::AbstractObserver& observer)
 {
     _httpSocket._notificationCenter.addObserver(observer);
 }
 
 
 void
-DeviceRoot::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler) 
+DeviceContainer::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler)
 {
     _httpSocket._pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
 }
 
 
 void
-DeviceRoot::writeSsdpMessages()
+DeviceContainer::writeSsdpMessages()
 {
     _ssdpNotifyAliveMessages.clear();
     _ssdpNotifyByebyeMessages.clear();
@@ -2065,8 +2065,8 @@ DeviceRoot::writeSsdpMessages()
     
     SsdpNotifyAliveWriter aliveWriter(_ssdpNotifyAliveMessages);
     SsdpNotifyByebyeWriter byebyeWriter(_ssdpNotifyByebyeMessages);
-    aliveWriter.deviceRoot(*this);
-    byebyeWriter.deviceRoot(*this);
+    aliveWriter.deviceContainer(*this);
+    byebyeWriter.deviceContainer(*this);
 
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Device& device = **d;
@@ -2083,7 +2083,7 @@ DeviceRoot::writeSsdpMessages()
 
 
 void
-DeviceRoot::sendSsdpAliveMessages()
+DeviceContainer::sendSsdpAliveMessages()
 {
     // 1. wait random intervall of less than 100msec when sending message set first time
     // 2. send out all message sets two times (max three times according to specs, should be configurable).
@@ -2092,26 +2092,26 @@ DeviceRoot::sendSsdpAliveMessages()
 
 
 void
-DeviceRoot::sendSsdpByebyeMessages()
+DeviceContainer::sendSsdpByebyeMessages()
 {
     _ssdpNotifyByebyeMessages.send(_ssdpSocket, 2, 0, false);
 }
 
 
 void
-DeviceRoot::startSsdp()
+DeviceContainer::startSsdp()
 {
     Log::instance()->ssdp().information("starting SSDP ...");
     writeSsdpMessages();
     
-    _ssdpSocket.setObserver(Poco::Observer<DeviceRoot, SsdpMessage>(*this, &DeviceRoot::handleSsdpMessage));
+    _ssdpSocket.setObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*this, &DeviceContainer::handleSsdpMessage));
     _ssdpSocket.setupSockets();
     _ssdpSocket.start();
     writeSsdpMessages();
     sendSsdpAliveMessages();
 
     Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
-        (Poco::Observer<DeviceRoot,Net::NetworkInterfaceNotification>(*this, &DeviceRoot::handleNetworkInterfaceChangedNotification));
+        (Poco::Observer<DeviceContainer,Net::NetworkInterfaceNotification>(*this, &DeviceContainer::handleNetworkInterfaceChangedNotification));
     Log::instance()->upnp().debug("device root network interface manager installed");
     
     // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
@@ -2121,7 +2121,7 @@ DeviceRoot::startSsdp()
 
 
 void
-DeviceRoot::stopSsdp()
+DeviceContainer::stopSsdp()
 {
     Log::instance()->ssdp().information("stopping SSDP ...");
     _ssdpNotifyAliveMessages.stopSendContinuous();
@@ -2131,7 +2131,7 @@ DeviceRoot::stopSsdp()
 
 
 void
-DeviceRoot::startHttp()
+DeviceContainer::startHttp()
 {
     Log::instance()->http().information("starting HTTP ...");
 //    Log::instance()->http().debug("device description: " + *_pDeviceDescription);
@@ -2166,7 +2166,7 @@ DeviceRoot::startHttp()
 
 
 void
-DeviceRoot::stopHttp()
+DeviceContainer::stopHttp()
 {
     Log::instance()->http().information("stopping HTTP ...");
     _httpSocket.stopServer();
@@ -2175,14 +2175,14 @@ DeviceRoot::stopHttp()
 
 
 void 
-DeviceRoot::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver)
+DeviceContainer::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver)
 {
     _ssdpSocket.sendMessage(message, receiver);
 }
 
 
 void
-DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
+DeviceContainer::handleSsdpMessage(SsdpMessage* pMessage)
 {
     if (pMessage->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
         SsdpMessage m;
@@ -2211,7 +2211,7 @@ DeviceRoot::handleSsdpMessage(SsdpMessage* pMessage)
 
 
 void
-DeviceRoot::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
+DeviceContainer::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
 {
     Log::instance()->upnp().debug("device root adds network interface: " + interfaceName);
     writeSsdpMessages();
@@ -2228,7 +2228,7 @@ DeviceRoot::handleNetworkInterfaceChange(const std::string& interfaceName, bool 
 
 
 void
-DeviceRoot::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
+DeviceContainer::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
 {
     Log::instance()->upnp().debug("device root receives network interface change notification");
     handleNetworkInterfaceChange(pNotification->_interfaceName, pNotification->_added);
@@ -2236,38 +2236,38 @@ DeviceRoot::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotif
 
 
 void
-DeviceRoot::setDescriptionUri()
+DeviceContainer::setDescriptionUri()
 {
     _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
 
 }
 
 
-DeviceRootImplAdapter::DeviceRootImplAdapter() :
-_pDeviceRoot(0)
+DevDevice::DevDevice() :
+_pDeviceContainer(0)
 {
     // register the great action dispatcher
 };
 
 
-DeviceRootImplAdapter::~DeviceRootImplAdapter()
+DevDevice::~DevDevice()
 {
-    delete _pDeviceRoot;
+    delete _pDeviceContainer;
 }
 
 
 void
-DeviceRootImplAdapter::start()
+DevDevice::start()
 {
     if (initDevice()) {
-        _pDeviceRoot->registerActionHandler(Poco::Observer<DeviceRootImplAdapter, Action>(*this, &DeviceRootImplAdapter::actionHandler));
+        _pDeviceContainer->registerActionHandler(Poco::Observer<DevDevice, Action>(*this, &DevDevice::actionHandler));
 
-    //     _pDeviceRoot->print();
-        _pDeviceRoot->initSockets();
-        _pDeviceRoot->initDevice();
-    //     _pDeviceRoot->print();
-        _pDeviceRoot->startHttp();
-        _pDeviceRoot->startSsdp();
+    //     _pDeviceContainer->print();
+        _pDeviceContainer->initSockets();
+        _pDeviceContainer->initDevice();
+    //     _pDeviceContainer->print();
+        _pDeviceContainer->startHttp();
+        _pDeviceContainer->startSsdp();
     }
     else {
          Log::instance()->upnp().warning("init device failed, device was not started.");
@@ -2276,38 +2276,38 @@ DeviceRootImplAdapter::start()
 
 
 void
-DeviceRootImplAdapter::stop()
+DevDevice::stop()
 {
-    _pDeviceRoot->stopSsdp();
-    _pDeviceRoot->stopHttp();
+    _pDeviceContainer->stopSsdp();
+    _pDeviceContainer->stopHttp();
 }
 
 
 void
-DeviceRootImplAdapter::setUuid(std::string uuid, int deviceNumber)
+DevDevice::setUuid(std::string uuid, int deviceNumber)
 {
-    _pDeviceRoot->_devices.get(deviceNumber).setUuid(uuid);
+    _pDeviceContainer->_devices.get(deviceNumber).setUuid(uuid);
 }
 
 
 void
-DeviceRootImplAdapter::setRandomUuid(int deviceNumber)
+DevDevice::setRandomUuid(int deviceNumber)
 {
-    _pDeviceRoot->_devices.get(deviceNumber).setRandomUuid();
+    _pDeviceContainer->_devices.get(deviceNumber).setRandomUuid();
 }
 
 
 void
-DeviceRootImplAdapter::setFriendlyName(const std::string& friendlyName, int deviceNumber)
+DevDevice::setFriendlyName(const std::string& friendlyName, int deviceNumber)
 {
-    _pDeviceRoot->_devices.get(deviceNumber).setProperty("friendlyName", friendlyName);
+    _pDeviceContainer->_devices.get(deviceNumber).setProperty("friendlyName", friendlyName);
 }
 
 
 void
-DeviceRootImplAdapter::addIcon(Icon* pIcon, int deviceNumber)
+DevDevice::addIcon(Icon* pIcon, int deviceNumber)
 {
-    _pDeviceRoot->_devices.get(deviceNumber).addIcon(pIcon);
+    _pDeviceContainer->_devices.get(deviceNumber).addIcon(pIcon);
 }
 
 
@@ -2482,7 +2482,7 @@ Controller::discoverDevice(const std::string& location)
     Log::instance()->upnp().debug("controller discovers device location: " + location);
     
     UriDescriptionReader descriptionReader;
-    DeviceRoot* deviceRoot = descriptionReader.deviceRoot(location);
+    DeviceContainer* deviceRoot = descriptionReader.deviceRoot(location);
     deviceRoot->setDescriptionUri(location);
     addDevice(deviceRoot);
 }
@@ -2527,20 +2527,20 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 
 
 void
-Controller::addDevice(DeviceRoot* pDeviceRoot)
+Controller::addDevice(DeviceContainer* pDeviceContainer)
 {
     // TODO: handle "alive refreshments"
     // TODO: handle subdevices
-    std::string uuid = pDeviceRoot->getRootDevice()->getUuid();
+    std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller adds device: " + uuid);
-        pDeviceRoot->_pController = this;
-        pDeviceRoot->initController();
+        pDeviceContainer->_pController = this;
+        pDeviceContainer->initController();
         _pUserInterface->beginAddDevice(_devices.position(uuid));
-//        _devices.append(pDeviceRoot);
-        _devices.append(uuid, new ControllerImplAdapter(pDeviceRoot->getRootDevice()));
+//        _devices.append(pDeviceContainer);
+        _devices.append(uuid, new CtlDevice(pDeviceContainer->getRootDevice()));
         _pUserInterface->endAddDevice(_devices.position(uuid));
-        deviceAdded(pDeviceRoot);
+        deviceAdded(pDeviceContainer);
     }
 //    _devices.get("").eventHandler(0);
 }
@@ -2551,13 +2551,13 @@ Controller::removeDevice(const std::string& uuid)
 {
     if (_devices.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
-//        DeviceRoot* pDeviceRoot = &_devices.get(uuid);
-        DeviceRoot* pDeviceRoot = _devices.get(uuid).getDevice()->getDeviceRoot();
-        deviceRemoved(pDeviceRoot);
+//        DeviceContainer* pDeviceContainer = &_devices.get(uuid);
+        DeviceContainer* pDeviceContainer = _devices.get(uuid).getDevice()->getDeviceContainer();
+        deviceRemoved(pDeviceContainer);
         _pUserInterface->beginRemoveDevice(_devices.position(uuid));
         _devices.remove(uuid);
         _pUserInterface->endRemoveDevice(_devices.position(uuid));
-        pDeviceRoot->_pController = 0;
+        pDeviceContainer->_pController = 0;
     }
 }
 
@@ -2566,10 +2566,10 @@ void
 Controller::update()
 {
     // TODO: do a more carefull controller update and don't remove servers that are still active.
-//    for (Container<DeviceRoot>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+//    for (Container<DeviceContainer>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
 //        removeDevice((*it).first);
 //    }
-    for (Container<ControllerImplAdapter>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+    for (Container<CtlDevice>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
         removeDevice((*it).first);
     }
     sendMSearch();
@@ -2577,7 +2577,7 @@ Controller::update()
 
 
 void
-ControllerImplAdapter::init()
+CtlDevice::init()
 {
     for (Device::ServiceIterator i = _pDevice->beginService(); i != _pDevice->endService(); ++i) {
         (*i)->initClient();
@@ -2605,13 +2605,13 @@ _urn(urn)
 
 
 void
-SsdpNotifyAliveWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
+SsdpNotifyAliveWriter::deviceContainer(const DeviceContainer& pDeviceContainer)
 {
     // root device first message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m->setLocation(pDeviceRoot.getDescriptionUri());    // location of UPnP description of the root device
+    m->setLocation(pDeviceContainer.getDescriptionUri());    // location of UPnP description of the root device
     m->setNotificationType("upnp:rootdevice");  // once for root device
-    m->setUniqueServiceName("uuid:" + pDeviceRoot.getRootDevice()->getUuid() + "::upnp:rootdevice");
+    m->setUniqueServiceName("uuid:" + pDeviceContainer.getRootDevice()->getUuid() + "::upnp:rootdevice");
     _res->addMessage(*m);
 }
 
@@ -2621,7 +2621,7 @@ SsdpNotifyAliveWriter::device(const Device& pDevice)
 {
     // device first message (root device second message)
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m->setLocation(pDevice.getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
+    m->setLocation(pDevice.getDeviceContainer()->getDescriptionUri());    // location of UPnP description of the root device
     m->setNotificationType("uuid:" + pDevice.getUuid());
     m->setUniqueServiceName("uuid:" + pDevice.getUuid());
     _res->addMessage(*m);
@@ -2637,7 +2637,7 @@ SsdpNotifyAliveWriter::service(const Service& pService)
 {
     // service first (and only) message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_ALIVE);
-    m->setLocation(pService.getDevice()->getDeviceRoot()->getDescriptionUri());    // location of UPnP description of the root device
+    m->setLocation(pService.getDevice()->getDeviceContainer()->getDescriptionUri());    // location of UPnP description of the root device
     m->setNotificationType(pService.getServiceType());
     m->setUniqueServiceName("uuid:" + pService.getDevice()->getUuid() + "::" +  pService.getServiceType());
     _res->addMessage(*m);
@@ -2645,12 +2645,12 @@ SsdpNotifyAliveWriter::service(const Service& pService)
 
 
 void
-SsdpNotifyByebyeWriter::deviceRoot(const DeviceRoot& pDeviceRoot)
+SsdpNotifyByebyeWriter::deviceContainer(const DeviceContainer& pDeviceContainer)
 {
     // root device first message
     SsdpMessage* m = new SsdpMessage(SsdpMessage::REQUEST_NOTIFY_BYEBYE);
     m->setNotificationType("upnp:rootdevice");  // once for root device
-    m->setUniqueServiceName("uuid:" + pDeviceRoot.getRootDevice()->getUuid() + "::upnp:rootdevice");
+    m->setUniqueServiceName("uuid:" + pDeviceContainer.getRootDevice()->getUuid() + "::upnp:rootdevice");
     _res->addMessage(*m);
 }
 

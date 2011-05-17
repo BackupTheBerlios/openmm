@@ -70,7 +70,7 @@ void
 DimmableLightController::eventHandler(Omm::StateVar* pStateVar)
 {
     // react on event messages, dispatch to corresponding _changeStateVar() method
-    // (*i) should point to the correct StateVar in the DeviceRoot object
+    // (*i) should point to the correct StateVar in the DeviceContainer object
     // call _changeStateVar() method
     if (pStateVar->getName() == "Status") {
         bool val;
@@ -83,7 +83,7 @@ DimmableLightController::eventHandler(Omm::StateVar* pStateVar)
 
 
 DimmableLightController::DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController) :
-ControllerImplAdapter(pDevice),
+CtlDevice(pDevice),
 _pDevice(pDevice),
 _pSwitchPowerController(pSwitchPowerController)
 {

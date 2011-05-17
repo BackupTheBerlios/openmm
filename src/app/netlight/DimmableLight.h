@@ -30,7 +30,7 @@
 
 #include <Omm/Upnp.h>
 
-using Omm::DeviceRootImplAdapter;
+using Omm::DevDevice;
 using Omm::Service;
 using Omm::Action;
 
@@ -80,7 +80,7 @@ private:
 };
 
 
-class DimmableLight : public DeviceRootImplAdapter
+class DimmableLight : public DevDevice
 {
 public:
     DimmableLight(SwitchPower* pSwitchPowerImpl, Dimming* pDimmingImpl);

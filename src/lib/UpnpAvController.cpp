@@ -347,14 +347,14 @@ AvController::serverDevice(int numServer)
 
 
 void
-AvController::deviceAdded(DeviceRoot* pDeviceRoot)
+AvController::deviceAdded(DeviceContainer* pDeviceContainer)
 {
     // FIXME: need a list of ControllerImplAdapters for calling eventHandler(StateVar*)
     // FIXME: ownership of ControllerImplAdapters ...
     // FIXME: add all devices, not only root device
 
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
-    Device* pDevice = pDeviceRoot->getRootDevice();
+    Device* pDevice = pDeviceContainer->getRootDevice();
     Log::instance()->upnpav().information("device added, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpAvController::deviceAdded()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;
@@ -390,10 +390,10 @@ AvController::deviceAdded(DeviceRoot* pDeviceRoot)
 
 
 void
-AvController::deviceRemoved(DeviceRoot* pDeviceRoot)
+AvController::deviceRemoved(DeviceContainer* pDeviceContainer)
 {
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
-    Device* pDevice = pDeviceRoot->getRootDevice();
+    Device* pDevice = pDeviceContainer->getRootDevice();
     Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 //     std::clog << "UpnpAvController::deviceRemoved()" << std::endl;
 //     std::clog << "uuid: " << pDevice->getUuid() << std::endl;

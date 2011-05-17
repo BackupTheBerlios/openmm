@@ -60,7 +60,7 @@ MediaRenderer::initStateVars(Service* pService)
 
 
 MediaRenderer::MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
-DeviceRootImplAdapter(),
+DevDevice(),
 _pRenderingControlImpl(pRenderingControlImpl),
 _pConnectionManagerImpl(pConnectionManagerImpl),
 _pAVTransportImpl(pAVTransportImpl)
@@ -71,8 +71,8 @@ _pAVTransportImpl(pAVTransportImpl)
     _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &AVTransport::_description;
 
     StringDescriptionReader descriptionReader(_descriptions);
-    _pDeviceRoot = descriptionReader.deviceRoot("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
-    _pDeviceRoot->setImplAdapter(this);
+    _pDeviceContainer = descriptionReader.deviceRoot("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
+    _pDeviceContainer->setImplAdapter(this);
 }
 
 
@@ -112,7 +112,7 @@ MediaServer::initStateVars(Service* pService)
 
 
 MediaServer::MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl) :
-DeviceRootImplAdapter(),
+DevDevice(),
 _pContentDirectoryImpl(pContentDirectoryImpl),
 _pConnectionManagerImpl(pConnectionManagerImpl),
 _pAVTransportImpl(pAVTransportImpl)
@@ -123,8 +123,8 @@ _pAVTransportImpl(pAVTransportImpl)
     _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &AVTransport::_description;
 
     StringDescriptionReader descriptionReader(_descriptions);
-    _pDeviceRoot = descriptionReader.deviceRoot("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
-    _pDeviceRoot->setImplAdapter(this);
+    _pDeviceContainer = descriptionReader.deviceRoot("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
+    _pDeviceContainer->setImplAdapter(this);
 }
 
 

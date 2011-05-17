@@ -91,7 +91,7 @@ private:
 };
 
 
-class DimmableLightController : public Omm::ControllerImplAdapter
+class DimmableLightController : public Omm::CtlDevice
 {
 public:
     DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController, DimmingController* pDimmingController);

@@ -35,20 +35,20 @@ using Poco::Util::HelpFormatter;
 
 class MyController : public Omm::Controller
 {
-    virtual void deviceAdded(Omm::DeviceRoot* pDeviceRoot)
+    virtual void deviceAdded(Omm::DeviceContainer* pDeviceContainer)
     {
         std::cout << "MyController::deviceAdded()" << std::endl;
-        std::cout << "uuid: " << pDeviceRoot->getRootDevice()->getUuid() << std::endl;
-        std::cout << "type: " << pDeviceRoot->getRootDevice()->getDeviceType() << std::endl;
-//         std::cout << "friendly name: " << pDeviceRoot->getRootDevice()->getFriendlyName() << std::endl;
+        std::cout << "uuid: " << pDeviceContainer->getRootDevice()->getUuid() << std::endl;
+        std::cout << "type: " << pDeviceContainer->getRootDevice()->getDeviceType() << std::endl;
+//         std::cout << "friendly name: " << pDeviceContainer->getRootDevice()->getFriendlyName() << std::endl;
         
         // NOTE: could write a DeviceFactory here ...
-        // NOTE: could iterate through all devices of DeviceRoot here ...
-        if (pDeviceRoot->getRootDevice()->getDeviceType() == "urn:schemas-upnp-org:device:DimmableLight:1") {
+        // NOTE: could iterate through all devices of DeviceContainer here ...
+        if (pDeviceContainer->getRootDevice()->getDeviceType() == "urn:schemas-upnp-org:device:DimmableLight:1") {
             Poco::Timestamp t;
             std::cout << "TIME: " << t.elapsed() << std::endl;
             DimmableLightController* pDimmableLightCtrl = new DimmableLightController(
-                pDeviceRoot->getRootDevice(),
+                pDeviceContainer->getRootDevice(),
                 new SwitchPowerControllerImpl,
                 new DimmingControllerImpl);
             
@@ -70,9 +70,9 @@ class MyController : public Omm::Controller
         }
     }
     
-    virtual void deviceRemoved(Omm::DeviceRoot* pDeviceRoot)
+    virtual void deviceRemoved(Omm::DeviceContainer* pDeviceContainer)
     {
-        std::cerr << "MyController::deviceRemoved() uuid: " << pDeviceRoot->getRootDevice()->getUuid() << std::endl;
+        std::cerr << "MyController::deviceRemoved() uuid: " << pDeviceContainer->getRootDevice()->getUuid() << std::endl;
     }
 };
 

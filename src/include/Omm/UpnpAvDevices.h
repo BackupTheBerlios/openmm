@@ -38,7 +38,7 @@ class RenderingControl;
 class ContentDirectory;
 
 
-class MediaRenderer : public DeviceRootImplAdapter
+class MediaRenderer : public DevDevice
 {
 public:
     MediaRenderer(RenderingControl* pRenderingControlImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);
@@ -56,7 +56,7 @@ private:
 };
 
 
-class MediaServer : public DeviceRootImplAdapter
+class MediaServer : public DevDevice
 {
 public:
     MediaServer(ContentDirectory* pContentDirectoryImpl, ConnectionManager* pConnectionManagerImpl, AVTransport* pAVTransportImpl);

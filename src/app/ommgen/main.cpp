@@ -108,18 +108,18 @@ protected:
             std::string descriptionPath = args[0];
 
             Omm::UriDescriptionReader descriptionReader;
-            Omm::DeviceRoot* pDeviceRoot = descriptionReader.deviceRoot("file:" + descriptionPath);
-            pDeviceRoot->rewriteDescriptions();
+            Omm::DeviceContainer* pDeviceContainer = descriptionReader.deviceRoot("file:" + descriptionPath);
+            pDeviceContainer->rewriteDescriptions();
 
-            _stubWriters.push_back(new DeviceH(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceCpp(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceImplH(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceImplCpp(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceDescH(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceCtrlImplH(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceCtrlH(pDeviceRoot, _outputPath));
-            _stubWriters.push_back(new DeviceCtrlCpp(pDeviceRoot, _outputPath));
+            _stubWriters.push_back(new DeviceH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceCpp(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceImplH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceImplCpp(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceDescH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlImplH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlImplCpp(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceCtrlCpp(pDeviceContainer, _outputPath));
 
             for (std::vector<StubWriter*>::iterator i = _stubWriters.begin(); i != _stubWriters.end(); ++i) {
                 (*i)->write();
