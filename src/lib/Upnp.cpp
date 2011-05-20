@@ -1871,7 +1871,9 @@ HttpSocket::getServerUri()
 }
 
 
-Device::Device()
+Device::Device() :
+_pDeviceContainer(0),
+_pDevDevice(0)
 {
 }
 
@@ -1907,9 +1909,18 @@ Device::addIcon(Icon* pIcon)
 }
 
 
+void
+Device::initStateVars()
+{
+    for(ServiceIterator s = beginService(); s != endService(); ++s) {
+//        _pDeviceContainerImplAdapter->initStateVars(*s);
+        _pDevDevice->initStateVars(*s);
+    }
+}
+
+
 DeviceContainer::DeviceContainer() :
-_pController(0),
-_pDeviceContainerImplAdapter(0)
+_pController(0)
 {
 }
 
@@ -1974,7 +1985,7 @@ DeviceContainer::initController()
 {
     _httpSocket.init();
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Log::instance()->upnp().debug("init device root (controller)");
+        Log::instance()->upnp().debug("init device container (controller)");
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
 //            initStateVars(ps);
@@ -1998,7 +2009,7 @@ void
 DeviceContainer::initUuid()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Log::instance()->upnp().debug("init device root: setting random uuid for device");
+        Log::instance()->upnp().debug("init device container: setting random uuid for device");
         (*d)->setRandomUuid();
         // FIXME: this should override a base uri, if already present in the device description
 //         (*d)->addProperty("URLBase", _httpSocket.getServerUri());
@@ -2009,10 +2020,9 @@ DeviceContainer::initUuid()
 void
 DeviceContainer::initStateVars()
 {
+    Log::instance()->upnp().debug("init device container: init state vars");
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            initStateVars(*s);
-        }
+        (*d)->initStateVars();
     }
 }
 
@@ -2020,6 +2030,7 @@ DeviceContainer::initStateVars()
 void
 DeviceContainer::rewriteDescriptions()
 {
+    Log::instance()->upnp().debug("init device container: rewrite descriptions");
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             ServiceDescriptionWriter serviceDescriptionWriter;
@@ -2244,9 +2255,9 @@ DeviceContainer::setDescriptionUri()
 
 
 DevDevice::DevDevice() :
-_pDeviceContainer(0)
+_pDeviceContainer(0),
+_pDevice(0)
 {
-    // register the great action dispatcher
 };
 
 
@@ -2262,15 +2273,14 @@ DevDevice::start()
     if (initDevice()) {
         _pDeviceContainer->registerActionHandler(Poco::Observer<DevDevice, Action>(*this, &DevDevice::actionHandler));
 
-    //     _pDeviceContainer->print();
         _pDeviceContainer->initSockets();
         _pDeviceContainer->initDevice();
-    //     _pDeviceContainer->print();
+
         _pDeviceContainer->startHttp();
         _pDeviceContainer->startSsdp();
     }
     else {
-         Log::instance()->upnp().warning("init device failed, device was not started.");
+         Log::instance()->upnp().warning("start of device failed.");
     }
 }
 

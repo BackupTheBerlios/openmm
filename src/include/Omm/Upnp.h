@@ -131,7 +131,9 @@ static const std::string    OMM_VERSION         = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 
 class Device;
+class DevDevice;
 class DeviceContainer;
+class Controller;
 class Service;
 class Action;
 class Argument;
@@ -817,6 +819,7 @@ public:
     const std::string& getProperty(const std::string& name) { return _properties.get(name); }
     
     void setDeviceContainer(DeviceContainer* pDeviceContainer) { _pDeviceContainer = pDeviceContainer; }
+    void setDevDevice(DevDevice* pDevDevice) { _pDevDevice = pDevDevice; }
     void setUuid(std::string uuid) { _uuid = uuid; }
     void setRandomUuid();
     void setDeviceType(std::string deviceType) { _deviceType = deviceType; }
@@ -825,9 +828,12 @@ public:
     void addProperty(const std::string& name, const std::string& val) { _properties.append(name, new std::string(val)); }
     void addService(Service* pService);
     void addIcon(Icon* pIcon);
+
+    void initStateVars();
     
 private:
-    DeviceContainer*                         _pDeviceContainer;
+    DeviceContainer*                    _pDeviceContainer;
+    DevDevice*                          _pDevDevice;
     std::string                         _uuid;
     std::string                         _deviceType;
     Container<Service>                  _services;
@@ -835,9 +841,6 @@ private:
     std::vector<Icon*>                  _iconList;
 };
 
-
-class DevDevice;
-class Controller;
 
 class DeviceContainer
 {
@@ -914,7 +917,7 @@ private:
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
     HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
-    DevDevice*          _pDeviceContainerImplAdapter;
+    DevDevice*                      _pDeviceContainerImplAdapter;
     Controller*                     _pController;
 };
 
@@ -922,6 +925,7 @@ private:
 class DevDevice : public Util::Startable
 {
     friend class DeviceContainer;
+    friend class Device;
     
 public:
     DevDevice();
@@ -942,9 +946,10 @@ protected:
     /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
     /// if initialization takes a while to process, start the device in threaded mode with start(true).
     
-    std::map<std::string,std::string*>  _descriptions;
+    std::map<std::string,std::string*>      _descriptions;
     // _deviceRoot is the link into the "dynamic-string-world".
-    DeviceContainer*                         _pDeviceContainer;
+    DeviceContainer*                        _pDeviceContainer;
+    Device*                                 _pDevice;
 };
 
 

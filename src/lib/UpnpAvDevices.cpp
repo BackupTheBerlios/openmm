@@ -73,6 +73,9 @@ _pDevAVTransportImpl(pAVTransportImpl)
     StringDescriptionReader descriptionReader(_descriptions);
     _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
     _pDeviceContainer->setImplAdapter(this);
+//    _pDevice = descriptionReader.device("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
+//    _pDevice->setDevDevice(this);
+    _pDeviceContainer->getRootDevice()->setDevDevice(this);
 }
 
 
@@ -125,6 +128,9 @@ _pDevAVTransportImpl(pAVTransportImpl)
     StringDescriptionReader descriptionReader(_descriptions);
     _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
     _pDeviceContainer->setImplAdapter(this);
+//    _pDevice = descriptionReader.device("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
+//    _pDevice->setDevDevice(this);
+    _pDeviceContainer->getRootDevice()->setDevDevice(this);
 }
 
 

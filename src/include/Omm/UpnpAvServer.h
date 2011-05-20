@@ -93,12 +93,11 @@ private:
 };
 
 
-/**
-class UpnpAvServer
-used by ServerApplication
-provides a meta data server that can be browsed by CDS implementation through root media object
-*/
+
 class AvServer : public DevMediaServer
+    /// class UpnpAvServer
+    /// used by ServerApplication
+    /// provides a meta data server that can be browsed by CDS implementation through root media object
 {
 public:
     AvServer();
