@@ -503,7 +503,8 @@ protected:
     /// Device description URI and base URI for service descriptions.
 
 private:
-    Device* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer);
+    Device* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer, bool ignoreSubdevices = false);
+    /// Creates devices and subdevices (if ignoreSubdevices is true) and adds them to pDeviceContainer
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
     Argument* argument(Poco::XML::Node* pNode);
@@ -512,8 +513,6 @@ private:
     void parseDescription(const std::string& description);
     void releaseDescriptionDocument();
     /// release parsed xml document of root device / service description
-
-    DeviceContainer* parseDeviceContainer(Poco::XML::Node* pNode);
 
     std::stack<Poco::XML::Document*>    _pDocStack;
     /// _pDocStack contains device description of root device and it's service

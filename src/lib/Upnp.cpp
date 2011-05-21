@@ -443,14 +443,42 @@ DescriptionReader::getDeviceDescription(const std::string& deviceDescriptionUri)
 DeviceContainer*
 DescriptionReader::deviceContainer()
 {
-    return parseDeviceContainer(_pDocStack.top()->documentElement()->firstChild());
+    DeviceContainer* pRes = new DeviceContainer;
+    Poco::XML::Node* pNode = _pDocStack.top()->documentElement()->firstChild();
+    bool deviceNodeFound = false;
+    while (pNode)
+    {
+        if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
+            deviceNodeFound = true;
+            Device* pDevice = device(pNode->firstChild(), pRes);
+            pRes->setRootDevice(pDevice);
+        }
+        pNode = pNode->nextSibling();
+    }
+    if (!deviceNodeFound) {
+        Log::instance()->desc().error("file does not contain a UPnP device description.");
+    }
+    return pRes;
 }
 
 
 Device*
 DescriptionReader::rootDevice()
 {
-
+    Poco::XML::Node* pNode = _pDocStack.top()->documentElement()->firstChild();
+    bool deviceNodeFound = false;
+    while (pNode)
+    {
+        if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
+            deviceNodeFound = true;
+            return device(pNode->firstChild(), 0, true);
+        }
+        pNode = pNode->nextSibling();
+    }
+    if (!deviceNodeFound) {
+        Log::instance()->desc().error("file does not contain a UPnP root device.");
+        return 0;
+    }
 }
 
 
@@ -480,33 +508,12 @@ DescriptionReader::releaseDescriptionDocument()
 }
 
 
-DeviceContainer*
-DescriptionReader::parseDeviceContainer(Poco::XML::Node* pNode)
-{
-    DeviceContainer* pRes = new DeviceContainer();
-    bool deviceNodeFound = false;
-    while (pNode)
-    {
-        if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
-            deviceNodeFound = true;
-            Device* pDevice = device(pNode->firstChild(), pRes);
-            pRes->addDevice(pDevice);
-            pRes->setRootDevice(pDevice);
-        }
-        pNode = pNode->nextSibling();
-    }
-    if (!deviceNodeFound) {
-        Log::instance()->desc().error("file does not contain a UPnP device description.");
-    }
-    return pRes;
-}
-
-
 Device*
-DescriptionReader::device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer)
+DescriptionReader::device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer, bool ignoreSubdevices)
 {
     Device* pRes = new Device();
     pRes->setDeviceContainer(pDeviceContainer);
+    pDeviceContainer->addDevice(pRes);
 
     while (pNode)
     {
@@ -535,7 +542,7 @@ DescriptionReader::device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContai
                 Log::instance()->desc().error("service list without services");
             }
         }
-        else if (pNode->nodeName() == "deviceList") {
+        else if (pNode->nodeName() == "deviceList" && !ignoreSubdevices) {
             if (pNode->hasChildNodes()) {
                 Poco::XML::Node* pChild = pNode->firstChild();
                 while (pChild) {
