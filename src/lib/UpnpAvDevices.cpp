@@ -71,7 +71,9 @@ _pDevAVTransportImpl(pAVTransportImpl)
     _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
 
     StringDescriptionReader descriptionReader(_descriptions);
-    _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
+    descriptionReader.getDeviceDescription("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
+//    _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
+    _pDeviceContainer = descriptionReader.deviceContainer();
     _pDeviceContainer->setImplAdapter(this);
 //    _pDevice = descriptionReader.device("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
 //    _pDevice->setDevDevice(this);
@@ -126,7 +128,9 @@ _pDevAVTransportImpl(pAVTransportImpl)
     _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
 
     StringDescriptionReader descriptionReader(_descriptions);
-    _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
+    descriptionReader.getDeviceDescription("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
+//    _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
+    _pDeviceContainer = descriptionReader.deviceContainer();
     _pDeviceContainer->setImplAdapter(this);
 //    _pDevice = descriptionReader.device("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
 //    _pDevice->setDevDevice(this);

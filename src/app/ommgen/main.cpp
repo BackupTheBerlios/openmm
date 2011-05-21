@@ -108,7 +108,8 @@ protected:
             std::string descriptionPath = args[0];
 
             Omm::UriDescriptionReader descriptionReader;
-            Omm::DeviceContainer* pDeviceContainer = descriptionReader.deviceRoot("file:" + descriptionPath);
+            descriptionReader.getDeviceDescription("file:" + descriptionPath);
+            Omm::DeviceContainer* pDeviceContainer = descriptionReader.deviceContainer();
             pDeviceContainer->rewriteDescriptions();
 
             _stubWriters.push_back(new DevDeviceDispH(pDeviceContainer, _outputPath));

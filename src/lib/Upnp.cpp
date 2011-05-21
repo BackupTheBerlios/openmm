@@ -421,90 +421,6 @@ SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
 }
 
 
-DeviceContainer*
-UriDescriptionReader::deviceRoot(const std::string& deviceDescriptionUri)
-{
-    _descriptionUri = deviceDescriptionUri;
-    return parseDeviceContainer(parseDescription(getDescription(deviceDescriptionUri)));
-}
-
-
-std::string&
-UriDescriptionReader::getDescription(const std::string& relativeUri)
-{
-    Log::instance()->desc().information("base URI: " + _descriptionUri);
-    Log::instance()->desc().information("relative URI: " + relativeUri);
-    std::string* res;
-    Poco::URI targetUri(_descriptionUri);
-    
-    if (targetUri.getScheme() == "file") {
-        // NOTE: resolving file path against description uri doesn't work because
-        // base directory is deleted, when relativeUri has a leading slash
-        Poco::Path descriptionPath(targetUri.getPath());
-        Poco::Path relativePath(relativeUri);
-        std::string path = descriptionPath.parent().toString() + relativePath.getFileName();
-        Log::instance()->desc().information("reading description from file: " + path);
-        std::ifstream ifs(path.c_str());
-        std::stringstream ss;
-        Poco::StreamCopier::copyStream(ifs, ss);
-        res = new std::string(ss.str());
-    }
-    else if (targetUri.getScheme() == "http") {
-        targetUri.resolve(relativeUri);
-        Log::instance()->desc().information("retrieving description from: " + targetUri.toString());
-        Log::instance()->desc().information("downloading description from host: " + targetUri.getHost()
-             + ", port: " + Poco::NumberFormatter::format(targetUri.getPort()) + ", path: " + targetUri.getPath());
-        Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
-        Poco::Net::HTTPRequest request("GET", targetUri.getPath());
-        session.sendRequest(request);
-        
-        Poco::Net::HTTPResponse response;
-        std::istream& rs = session.receiveResponse(response);
-        Log::instance()->desc().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
-        std::stringstream header;
-        response.write(header);
-        Log::instance()->desc().debug("response header:\n" + header.str());
-        res = new std::string;
-        Poco::StreamCopier::copyToString(rs, *res);
-    }
-    else {
-        Log::instance()->desc().error("Error in UriDescriptionReader: unknown scheme in description uri");
-        res = new std::string;
-        return *res;
-    }
-    Log::instance()->desc().debug("retrieved description:\n*BEGIN*" + *res + "*END*");
-    return *res;
-}
-
-
-StringDescriptionReader::StringDescriptionReader(std::map<std::string,std::string*>& stringMap) :
-_pStringMap(&stringMap)
-{
-}
-
-
-DeviceContainer*
-StringDescriptionReader::deviceContainer(const std::string& deviceDescriptionKey)
-{
-    return parseDeviceContainer(parseDescription(getDescription(deviceDescriptionKey)));
-}
-
-
-std::string&
-StringDescriptionReader::getDescription(const std::string& path)
-{
-    Log::instance()->desc().debug("retrieving in-memory device description: " + path);
-
-    std::string* description = (*_pStringMap)[path];
-    if (!description) {
-        Log::instance()->desc().error("failed to retrieve in-memory device description: " + path);
-        // TODO: throw exception
-    }
-
-    return *description;
-}
-
-
 DescriptionReader::DescriptionReader()
 {
 }
@@ -516,7 +432,29 @@ DescriptionReader::~DescriptionReader()
 }
 
 
-Poco::XML::Node*
+void
+DescriptionReader::getDeviceDescription(const std::string& deviceDescriptionUri)
+{
+    _deviceDescriptionUri = deviceDescriptionUri;
+    parseDescription(retrieveDescription(deviceDescriptionUri));
+}
+
+
+DeviceContainer*
+DescriptionReader::deviceContainer()
+{
+    return parseDeviceContainer(_pDocStack.top()->documentElement()->firstChild());
+}
+
+
+Device*
+DescriptionReader::rootDevice()
+{
+
+}
+
+
+void
 DescriptionReader::parseDescription(const std::string& description)
 {
     Poco::XML::DOMParser parser;
@@ -529,17 +467,16 @@ DescriptionReader::parseDescription(const std::string& description)
     Log::instance()->desc().debug(description);
     _pDocStack.push(parser.parseString(description));
     Log::instance()->desc().debug("parsing description finished.");
-    return _pDocStack.top()->documentElement()->firstChild();
 }
 
 
 void
 DescriptionReader::releaseDescriptionDocument()
 {
-//     if (!_pDocStack.empty()) {
-//         _pDocStack.top()->release();
-//         _pDocStack.pop();
-//     }
+     if (!_pDocStack.empty()) {
+         _pDocStack.top()->release();
+         _pDocStack.pop();
+     }
 }
 
 
@@ -645,8 +582,9 @@ DescriptionReader::service(Poco::XML::Node* pNode)
             std::string descriptionPath = pNode->innerText();
             pRes->setDescriptionPath(descriptionPath);
             // load the service description into the Service object.
-            pRes->setServiceDescription(getDescription(descriptionPath));
-            Poco::XML::Node* pScpd = parseDescription(*pRes->getDescription());
+            pRes->setServiceDescription(retrieveDescription(descriptionPath));
+            parseDescription(*pRes->getDescription());
+            Poco::XML::Node* pScpd = _pDocStack.top()->documentElement()->firstChild();
             while (pScpd) {
                 if (pScpd->nodeName() == "actionList" && pScpd->hasChildNodes()) {
                     Poco::XML::Node* pChild = pScpd->firstChild();
@@ -763,6 +701,75 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
         pNode = pNode->nextSibling();
     }
     return pRes;
+}
+
+
+std::string&
+UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
+{
+    Log::instance()->desc().information("base URI: " + _deviceDescriptionUri);
+    Log::instance()->desc().information("relative URI: " + relativeUri);
+    std::string* res;
+    Poco::URI targetUri(_deviceDescriptionUri);
+
+    if (targetUri.getScheme() == "file") {
+        // NOTE: resolving file path against description uri doesn't work because
+        // base directory is deleted, when relativeUri has a leading slash
+        Poco::Path descriptionPath(targetUri.getPath());
+        Poco::Path relativePath(relativeUri);
+        std::string path = descriptionPath.parent().toString() + relativePath.getFileName();
+        Log::instance()->desc().information("reading description from file: " + path);
+        std::ifstream ifs(path.c_str());
+        std::stringstream ss;
+        Poco::StreamCopier::copyStream(ifs, ss);
+        res = new std::string(ss.str());
+    }
+    else if (targetUri.getScheme() == "http") {
+        targetUri.resolve(relativeUri);
+        Log::instance()->desc().information("retrieving description from: " + targetUri.toString());
+        Log::instance()->desc().information("downloading description from host: " + targetUri.getHost()
+             + ", port: " + Poco::NumberFormatter::format(targetUri.getPort()) + ", path: " + targetUri.getPath());
+        Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
+        Poco::Net::HTTPRequest request("GET", targetUri.getPath());
+        session.sendRequest(request);
+
+        Poco::Net::HTTPResponse response;
+        std::istream& rs = session.receiveResponse(response);
+        Log::instance()->desc().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream header;
+        response.write(header);
+        Log::instance()->desc().debug("response header:\n" + header.str());
+        res = new std::string;
+        Poco::StreamCopier::copyToString(rs, *res);
+    }
+    else {
+        Log::instance()->desc().error("Error in UriDescriptionReader: unknown scheme in description uri");
+        res = new std::string;
+        return *res;
+    }
+    Log::instance()->desc().debug("retrieved description:\n*BEGIN*" + *res + "*END*");
+    return *res;
+}
+
+
+StringDescriptionReader::StringDescriptionReader(std::map<std::string,std::string*>& stringMap) :
+_pStringMap(&stringMap)
+{
+}
+
+
+std::string&
+StringDescriptionReader::retrieveDescription(const std::string& path)
+{
+    Log::instance()->desc().debug("retrieving in-memory device description: " + path);
+
+    std::string* description = (*_pStringMap)[path];
+    if (!description) {
+        Log::instance()->desc().error("failed to retrieve in-memory device description: " + path);
+        // TODO: throw exception
+    }
+
+    return *description;
 }
 
 
@@ -2492,9 +2499,10 @@ Controller::discoverDevice(const std::string& location)
     Log::instance()->upnp().debug("controller discovers device location: " + location);
     
     UriDescriptionReader descriptionReader;
-    DeviceContainer* deviceRoot = descriptionReader.deviceRoot(location);
-    deviceRoot->setDescriptionUri(location);
-    addDevice(deviceRoot);
+    descriptionReader.getDeviceDescription(location);
+    DeviceContainer* pDeviceContainer = descriptionReader.deviceContainer();
+    pDeviceContainer->setDescriptionUri(location);
+    addDevice(pDeviceContainer);
 }
 
 

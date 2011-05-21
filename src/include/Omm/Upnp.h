@@ -480,37 +480,53 @@ class DescriptionReader
 public:
     DescriptionReader();
     ~DescriptionReader();
-    
+
+    void getDeviceDescription(const std::string& deviceDescriptionUri);
+    /// Reads a device description from the URI given in deviceDescriptionUri.
+    /// The service description URIs contained in the device description
+    /// can be relative to the device description uri (depending on implementation
+    /// of retrieveDescriptionUri).
+
+    DeviceContainer* deviceContainer();
+    /// Parses the device description, creates and returns a DeviceContainer, including
+    /// the root device and all subdevices. This is used at the controller side
+    /// when a new device pops up and is read by the controller.
+    Device* rootDevice();
+    /// Parses the device description, creates and returns a Device, including only
+    /// the root device. Subdevices, if present, are ignored. This is used by
+    /// the device side, when building the internal device tree from the memory description.
     
 protected:
-    virtual std::string& getDescription(const std::string& path) = 0;
-    
-    void releaseDescriptionDocument();
-    
-    Poco::XML::Node* parseDescription(const std::string& description);
-    DeviceContainer* parseDeviceContainer(Poco::XML::Node* pNode);
+    virtual std::string& retrieveDescription(const std::string& descriptionUri) = 0;
+    /// Retrieves the description from descriptionUri, which can be relative to _deviceDescriptionUri.
+    std::string   _deviceDescriptionUri;
+    /// Device description URI and base URI for service descriptions.
+
+private:
     Device* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer);
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
     Argument* argument(Poco::XML::Node* pNode);
     StateVar* stateVar(Poco::XML::Node* pNode);
-    
+
+    void parseDescription(const std::string& description);
+    void releaseDescriptionDocument();
+    /// release parsed xml document of root device / service description
+
+    DeviceContainer* parseDeviceContainer(Poco::XML::Node* pNode);
+
     std::stack<Poco::XML::Document*>    _pDocStack;
+    /// _pDocStack contains device description of root device and it's service
+    /// descriptions. When descriptions are parsed, the parsed xml document
+    /// is released and the document is popped from the stack.
 };
 
 
 class UriDescriptionReader : public DescriptionReader
 {
-public:
-    DeviceContainer* deviceRoot(const std::string& deviceDescriptionUri);
-    /// read and parse a description from the URI given in deviceDescriptionUri
-    /// the service description URIs contained in the device description
-    /// can be relative to deviceDescriptionUri
-    
 private:
-    virtual std::string& getDescription(const std::string& relativeUri);
-    
-    std::string   _descriptionUri; // this is the base URI
+    virtual std::string& retrieveDescription(const std::string& relativeUri);
+
 };
 
 
@@ -519,10 +535,8 @@ class StringDescriptionReader : public DescriptionReader
 public:
     StringDescriptionReader(std::map<std::string,std::string*>& stringMap);
     
-    DeviceContainer* deviceContainer(const std::string& deviceDescriptionKey);
-    
 private:
-    virtual std::string& getDescription(const std::string& descriptionKey);
+    virtual std::string& retrieveDescription(const std::string& descriptionKey);
     
     std::map<std::string,std::string*>*  _pStringMap;
 };

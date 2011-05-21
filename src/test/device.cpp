@@ -109,7 +109,7 @@ protected:
             
             Omm::UriDescriptionReader descriptionReader;
             
-            Omm::DeviceContainer* device = descriptionReader.deviceRoot("file:/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
+            Omm::DeviceContainer* device = descriptionReader.deviceContainer("file:/home/jb/devel/cc/omm/tests/xml/network-light-desc.xml");
             
             waitForTerminationRequest();
         }
