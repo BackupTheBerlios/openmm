@@ -53,14 +53,23 @@ Engine::setOption(const std::string& key, const std::string& value)
 
 
 AvRenderer::AvRenderer(Engine* engine) :
-DevMediaRenderer(new DevRenderingControlRendererImpl,
-              new DevConnectionManagerRendererImpl,
-              new DevAVTransportRendererImpl),
+//DevMediaRenderer(new DevRenderingControlRendererImpl,
+//              new DevConnectionManagerRendererImpl,
+//              new DevAVTransportRendererImpl),
 _pEngine(engine)
 {
-    static_cast<DevRenderingControlRendererImpl*>(_pDevRenderingControlImpl)->_pEngine = engine;
-    static_cast<DevConnectionManagerRendererImpl*>(_pDevConnectionManagerImpl)->_pEngine = engine;
-    static_cast<DevAVTransportRendererImpl*>(_pDevAVTransportImpl)->_pEngine = engine;
+    setDevDevice(new DevMediaRenderer(
+              new DevRenderingControlRendererImpl,
+              new DevConnectionManagerRendererImpl,
+              new DevAVTransportRendererImpl));
+
+    static_cast<DevRenderingControlRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevRenderingControlImpl)->_pEngine = engine;
+    static_cast<DevConnectionManagerRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevConnectionManagerImpl)->_pEngine = engine;
+    static_cast<DevAVTransportRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevAVTransportImpl)->_pEngine = engine;
+
+//    static_cast<DevRenderingControlRendererImpl*>(_pDevRenderingControlImpl)->_pEngine = engine;
+//    static_cast<DevConnectionManagerRendererImpl*>(_pDevConnectionManagerImpl)->_pEngine = engine;
+//    static_cast<DevAVTransportRendererImpl*>(_pDevAVTransportImpl)->_pEngine = engine;
     Omm::Av::Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
 }
 

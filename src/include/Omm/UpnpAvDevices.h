@@ -43,7 +43,7 @@ class DevMediaRenderer : public DevDevice
 public:
     DevMediaRenderer(DevRenderingControl* pDevRenderingControlImpl, DevConnectionManager* pDevConnectionManagerImpl, DevAVTransport* pDevAVTransportImpl);
 
-protected:
+//protected:
     DevRenderingControl* _pDevRenderingControlImpl;
     DevConnectionManager* _pDevConnectionManagerImpl;
     DevAVTransport* _pDevAVTransportImpl;
@@ -61,7 +61,7 @@ class DevMediaServer : public DevDevice
 public:
     DevMediaServer(DevContentDirectory* pDevContentDirectoryImpl, DevConnectionManager* pDevConnectionManagerImpl, DevAVTransport* pDevAVTransportImpl);
 
-protected:
+//protected:
     DevContentDirectory* _pDevContentDirectoryImpl;
     DevConnectionManager* _pDevConnectionManagerImpl;
     DevAVTransport* _pDevAVTransportImpl;

@@ -196,8 +196,11 @@ protected:
                 pVisualPlugin->setHeight(_height);
             }
             pEnginePlugin->createPlayer();
-            
-            Omm::Av::AvRenderer myMediaRenderer(pEnginePlugin);
+
+            Omm::DeviceContainer rendererContainer;
+            Omm::Av::AvRenderer mediaRenderer(pEnginePlugin);
+            rendererContainer.addDevice(&mediaRenderer);
+            rendererContainer.setRootDevice(&mediaRenderer);
             
             
 //             std::cerr << "MediaRendererApplication::main()" << std::endl;
@@ -217,12 +220,13 @@ protected:
             
 //             myMediaRenderer.setFullscreen();
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
-            myMediaRenderer.addIcon(pIcon);
+            mediaRenderer.addIcon(pIcon);
             if (_name != "") {
-                myMediaRenderer.setFriendlyName(_name);
+//                mediaRenderer.setFriendlyName(_name);
+                mediaRenderer.setProperty("friendlyName", _name);
             }
             
-            myMediaRenderer.start();
+            rendererContainer.start();
             waitForTerminationRequest();
             // myMediaRenderer.stop();
         }

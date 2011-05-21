@@ -1960,6 +1960,15 @@ DeviceContainer::getServiceType(const std::string& serviceType)
 
 
 void
+DeviceContainer::addDevice(Device* pDevice)
+{
+    _devices.append(pDevice);
+    pDevice->setDeviceContainer(this);
+    registerActionHandler(Poco::Observer<DevDevice, Action>(*pDevice->_pDevDevice, &DevDevice::actionHandler));
+}
+
+
+void
 DeviceContainer::print()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
@@ -1984,14 +1993,14 @@ DeviceContainer::print()
 }
 
 
-void
-DeviceContainer::initStateVars(Service* pService)
-{
-    Log::instance()->upnp().debug("init state vars of service: " + pService->getServiceType());
-    if (_pDeviceContainerImplAdapter) {
-        _pDeviceContainerImplAdapter->initStateVars(pService);
-    }
-}
+//void
+//DeviceContainer::initStateVars(Service* pService)
+//{
+//    Log::instance()->upnp().debug("init state vars of service: " + pService->getServiceType());
+//    if (_pDeviceContainerImplAdapter) {
+//        _pDeviceContainerImplAdapter->initStateVars(pService);
+//    }
+//}
 
 
 void
@@ -2199,6 +2208,32 @@ DeviceContainer::stopHttp()
 }
 
 
+void
+DeviceContainer::start()
+{
+//    if (initDevice()) {
+//        _pDeviceContainer->registerActionHandler(Poco::Observer<DevDevice, Action>(*this, &DevDevice::actionHandler));
+
+        initSockets();
+        initDevice();
+
+        startHttp();
+        startSsdp();
+//    }
+//    else {
+//         Log::instance()->upnp().warning("start of device failed.");
+//    }
+}
+
+
+void
+DeviceContainer::stop()
+{
+    stopSsdp();
+    stopHttp();
+}
+
+
 void 
 DeviceContainer::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver)
 {
@@ -2277,34 +2312,34 @@ _pDevice(0)
 
 DevDevice::~DevDevice()
 {
-    delete _pDeviceContainer;
+//    delete _pDeviceContainer;
 }
 
 
-void
-DevDevice::start()
-{
-    if (initDevice()) {
-        _pDeviceContainer->registerActionHandler(Poco::Observer<DevDevice, Action>(*this, &DevDevice::actionHandler));
-
-        _pDeviceContainer->initSockets();
-        _pDeviceContainer->initDevice();
-
-        _pDeviceContainer->startHttp();
-        _pDeviceContainer->startSsdp();
-    }
-    else {
-         Log::instance()->upnp().warning("start of device failed.");
-    }
-}
-
-
-void
-DevDevice::stop()
-{
-    _pDeviceContainer->stopSsdp();
-    _pDeviceContainer->stopHttp();
-}
+//void
+//DevDevice::start()
+//{
+//    if (initDevice()) {
+//        _pDeviceContainer->registerActionHandler(Poco::Observer<DevDevice, Action>(*this, &DevDevice::actionHandler));
+//
+//        _pDeviceContainer->initSockets();
+//        _pDeviceContainer->initDevice();
+//
+//        _pDeviceContainer->startHttp();
+//        _pDeviceContainer->startSsdp();
+//    }
+//    else {
+//         Log::instance()->upnp().warning("start of device failed.");
+//    }
+//}
+//
+//
+//void
+//DevDevice::stop()
+//{
+//    _pDeviceContainer->stopSsdp();
+//    _pDeviceContainer->stopHttp();
+//}
 
 
 void

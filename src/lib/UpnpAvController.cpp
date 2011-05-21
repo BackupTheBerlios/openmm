@@ -602,7 +602,8 @@ void
 AvUserInterface::startLocalServers()
 {
     for (std::vector<AvServer*>::iterator it = _localServers.begin(); it != _localServers.end(); ++it) {
-        (*it)->startThreaded();
+        // TODO: start DeviceContainer instead of single devices
+//        (*it)->startThreaded();
     }
 }
 
@@ -611,7 +612,8 @@ void
 AvUserInterface::stopLocalServers()
 {
     for (std::vector<AvServer*>::iterator it = _localServers.begin(); it != _localServers.end(); ++it) {
-        (*it)->stopThreaded();
+        // TODO: start DeviceContainer instead of single devices
+//        (*it)->stopThreaded();
     }
 }
 
@@ -622,9 +624,10 @@ AvUserInterface::startLocalRenderer()
     if (_pEngine) {
         _pEngine->createPlayer();
         _pRenderer = new Omm::Av::AvRenderer(_pEngine);
-        _pRenderer->setFriendlyName("Local Player");
+//        _pRenderer->setFriendlyName("Local Player");
         //_pEngine->setParentView(parentView);
-        _pRenderer->start();
+        // TODO: start device container of renderer
+//        _pRenderer->start();
     }
     else {
         Log::instance()->upnpav().warning("no engine set in user interface, local renderer not started.");
@@ -635,7 +638,8 @@ AvUserInterface::startLocalRenderer()
 void
 AvUserInterface::stopLocalRenderer()
 {
-    _pRenderer->stop();
+    // TODO: stop device container of renderer
+//    _pRenderer->stop();
 }
 
 

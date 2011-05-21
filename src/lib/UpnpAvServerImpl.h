@@ -67,6 +67,7 @@ private:
 class DevContentDirectoryServerImpl : public DevContentDirectory
 {
     friend class AvServer;
+    friend class DevMediaServer;
     
 private:
     virtual void GetSearchCapabilities(std::string& SearchCaps);
@@ -84,7 +85,6 @@ private:
 
     virtual void initStateVars();
     
-//     ServerObject* _pRoot;
     AbstractMediaObject* _pRoot;
 };
 

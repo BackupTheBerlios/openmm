@@ -90,7 +90,8 @@ protected:
 };
 
 
-class AvRenderer : public DevMediaRenderer
+//class AvRenderer : public DevMediaRenderer
+class AvRenderer : public Device
 {
 public:
     AvRenderer(Engine* engine);

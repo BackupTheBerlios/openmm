@@ -102,7 +102,8 @@ protected:
             DimmableLight    networkLight(&mySwitchPowerServiceImplementation,
                                           &myDimmingServiceImplementation
                                          );
-            networkLight.start();
+            // TODO: rewrite to new Device/DeviceContainer stuff
+//            networkLight.start();
             waitForTerminationRequest();
             // networkLight.stop();
         }

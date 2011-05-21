@@ -103,7 +103,8 @@ _pDimmingImpl(pDimmingImpl)
     Omm::StringDescriptionReader descriptionReader(_descriptions);
     descriptionReader.getDeviceDescription("/network-light-desc.xml");
     _pDeviceContainer = descriptionReader.deviceContainer();
-    _pDeviceContainer->setImplAdapter(this);
+    // TODO: rewrite to new Device / DeviceContainer stuff
+//    _pDeviceContainer->setImplAdapter(this);
 }
 
 

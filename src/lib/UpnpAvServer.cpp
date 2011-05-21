@@ -290,20 +290,28 @@ ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& st
 }
 
 
-AvServer::AvServer() :
-DevMediaServer(
-new DevContentDirectoryServerImpl,
-new DevConnectionManagerServerImpl,
-new DevAVTransportServerImpl
-)
+AvServer::AvServer()
 {
+    // TODO: dispose those four objects
+    setDevDevice(new DevMediaServer(
+        new DevContentDirectoryServerImpl,
+        new DevConnectionManagerServerImpl,
+        new DevAVTransportServerImpl)
+    );
 }
+
+
+//AvServer::~AvServer()
+//{
+//}
+
 
 void
 AvServer::setRoot(AbstractMediaObject* pRoot)
 {
     _pRoot = pRoot;
-    static_cast<DevContentDirectoryServerImpl*>(_pDevContentDirectoryImpl)->_pRoot = _pRoot;
+    static_cast<DevContentDirectoryServerImpl*>(static_cast<DevMediaServer*>(getDevDevice())->_pDevContentDirectoryImpl)->_pRoot = _pRoot;
+//    static_cast<DevContentDirectoryServerImpl*>(_pDevContentDirectoryImpl)->_pRoot = _pRoot;
 //     _pRoot->setObjectId("0");
 }
 

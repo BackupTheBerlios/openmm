@@ -807,6 +807,7 @@ Service::setStateVar(std::string key, const T& val)
 class Device
 {
     friend class DeviceDescriptionWriter;
+    friend class DeviceContainer;
     
 public:
     Device();
@@ -825,6 +826,7 @@ public:
     IconIterator endIcon() { return _iconList.end(); }
     
     DeviceContainer* getDeviceContainer() const { return _pDeviceContainer; }
+    DevDevice* getDevDevice() const { return _pDevDevice; }
     std::string getUuid() const { return _uuid; }
     std::string getDeviceType() const { return _deviceType; }
     const std::string& getFriendlyName() { return getProperty("friendlyName"); }
@@ -855,7 +857,7 @@ private:
 };
 
 
-class DeviceContainer
+class DeviceContainer : public Util::Startable
 {
     friend class DevDevice;
     friend class Controller;
@@ -883,7 +885,7 @@ public:
     void setRootDevice(Device* pDevice) { _pRootDevice = pDevice; }
     void setDeviceDescription(std::string& description) { _pDeviceDescription = &description; }
     void setDescriptionUri(const std::string uri) { _descriptionUri = uri; }
-    void addDevice(Device* pDevice) { _devices.append(pDevice); }
+    void addDevice(Device* pDevice);
     void addServiceType(std::string serviceType, Service* pService) { _serviceTypes[serviceType] = pService; }
     
     void print();
@@ -898,6 +900,8 @@ public:
     void startHttp();
     void stopSsdp();
     void stopHttp();
+    void start();
+    void stop();
     
     void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
@@ -909,8 +913,8 @@ public:
         
     void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
     
-    void setImplAdapter(DevDevice* implAdapter) { _pDeviceContainerImplAdapter = implAdapter; }
-    void initStateVars(Service* pService);
+//    void setImplAdapter(DevDevice* implAdapter) { _pDeviceContainerImplAdapter = implAdapter; }
+//    void initStateVars(Service* pService);
 
     
 private:
@@ -930,12 +934,12 @@ private:
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
     HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
-    DevDevice*                      _pDeviceContainerImplAdapter;
+//    DevDevice*                      _pDeviceContainerImplAdapter;
     Controller*                     _pController;
 };
 
 
-class DevDevice : public Util::Startable
+class DevDevice //: public Util::Startable
 {
     friend class DeviceContainer;
     friend class Device;
@@ -944,8 +948,8 @@ public:
     DevDevice();
     ~DevDevice();
     
-    virtual void start();
-    virtual void stop();
+//    virtual void start();
+//    virtual void stop();
     
     void setUuid(std::string uuid, int deviceNumber = 0);
     void setRandomUuid(int deviceNumber = 0);

@@ -167,13 +167,18 @@ protected:
             }
             pContainerPlugin->setOption("basePath", _pluginOption);
             pContainerPlugin->setTitle(_name);
-            
-            Omm::Av::AvServer myMediaServer;
-            myMediaServer.setRoot(pContainerPlugin);
-            myMediaServer.setFriendlyName(_name);
+
+            Omm::DeviceContainer serverContainer;
+            Omm::Av::AvServer mediaServer;
+            serverContainer.addDevice(&mediaServer);
+            serverContainer.setRootDevice(&mediaServer);
+
+            mediaServer.setRoot(pContainerPlugin);
+//            mediaServer.setFriendlyName(_name);
+            mediaServer.setProperty("friendlyName", _name);
             Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
-            myMediaServer.addIcon(pIcon);
-            myMediaServer.start();
+            mediaServer.addIcon(pIcon);
+            serverContainer.start();
             waitForTerminationRequest();
             // myMediaServer.stop();
         }

@@ -123,15 +123,20 @@ protected:
             }
             pObject->setOption("basePath", _pluginOption);
             pObject->setTitle(_name);
-            
-            Omm::Av::AvServer myMediaServer;
-            myMediaServer.setRoot(pObject);
-            myMediaServer.setFriendlyName(_name);
+
+            Omm::DeviceContainer serverContainer;
+            Omm::Av::AvServer mediaServer;
+            serverContainer.addDevice(&mediaServer);
+            serverContainer.setRootDevice(&mediaServer);
+
+            mediaServer.setRoot(pObject);
+//            myMediaServer.setFriendlyName(_name);
+            mediaServer.setProperty("friendlyName", _name);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
-            myMediaServer.addIcon(pIcon);
+            mediaServer.addIcon(pIcon);
             // FIXME: only start web radio server, if internet is available
             // check this in AvServer::setRoot() by calling for example MediaObject::isAvailable()
-            myMediaServer.start();
+            serverContainer.start();
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;
