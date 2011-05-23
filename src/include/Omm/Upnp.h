@@ -135,7 +135,7 @@ class DeviceData;
 class DeviceContainer;
 class DevDeviceCode;
 class CtlDeviceCode;
-class DeviceDescriptionProvider;
+class DescriptionProvider;
 class Controller;
 class Service;
 class Action;
@@ -535,24 +535,12 @@ private:
 class MemoryDescriptionReader : public DescriptionReader
 {
 public:
-    MemoryDescriptionReader(DeviceDescriptionProvider& deviceDescriptionProvider);
+    MemoryDescriptionReader(DescriptionProvider& deviceDescriptionProvider);
 
 private:
     virtual std::string& retrieveDescription(const std::string& descriptionKey);
 
-    DeviceDescriptionProvider& _deviceDescriptionProvider;
-};
-
-
-class StringDescriptionReader : public DescriptionReader
-{
-public:
-    StringDescriptionReader(std::map<std::string,std::string*>& stringMap);
-    
-private:
-    virtual std::string& retrieveDescription(const std::string& descriptionKey);
-    
-    std::map<std::string,std::string*>*  _pStringMap;
+    DescriptionProvider& _deviceDescriptionProvider;
 };
 
 
@@ -819,7 +807,7 @@ Service::setStateVar(std::string key, const T& val)
 // };
 
 
-class DeviceDescriptionProvider
+class DescriptionProvider
 {
 public:
     std::string& getDeviceDescription();

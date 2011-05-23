@@ -772,7 +772,7 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
 }
 
 
-MemoryDescriptionReader::MemoryDescriptionReader(DeviceDescriptionProvider& deviceDescriptionProvider) :
+MemoryDescriptionReader::MemoryDescriptionReader(DescriptionProvider& deviceDescriptionProvider) :
 _deviceDescriptionProvider(deviceDescriptionProvider)
 {
 }
@@ -787,27 +787,6 @@ MemoryDescriptionReader::retrieveDescription(const std::string& descriptionKey)
     else {
         return _deviceDescriptionProvider.getServiceDescription(descriptionKey);
     }
-}
-
-
-StringDescriptionReader::StringDescriptionReader(std::map<std::string,std::string*>& stringMap) :
-_pStringMap(&stringMap)
-{
-}
-
-
-std::string&
-StringDescriptionReader::retrieveDescription(const std::string& path)
-{
-    Log::instance()->desc().debug("retrieving in-memory device description: " + path);
-
-    std::string* description = (*_pStringMap)[path];
-    if (!description) {
-        Log::instance()->desc().error("failed to retrieve in-memory device description: " + path);
-        // TODO: throw exception
-    }
-
-    return *description;
 }
 
 
@@ -2109,14 +2088,14 @@ HttpSocket::getServerUri()
 
 
 std::string&
-DeviceDescriptionProvider::getDeviceDescription()
+DescriptionProvider::getDeviceDescription()
 {
     return *_pDeviceDescription;
 }
 
 
 std::string&
-DeviceDescriptionProvider::getServiceDescription(const std::string& path)
+DescriptionProvider::getServiceDescription(const std::string& path)
 {
     return *_serviceDescriptions[path];
 }

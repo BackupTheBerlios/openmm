@@ -9,26 +9,15 @@
 namespace Omm {
 namespace Av {
 
-class Descriptions
-{
-public:
-    static std::string MediaRenderer;
-    static std::string MediaServer;
-    static std::string AVTransport;
-    static std::string ConnectionManager;
-    static std::string RenderingControl;
-    static std::string ContentDirectory;
-};
 
-
-class MediaRendererDescriptions : public DeviceDescriptionProvider
+class MediaRendererDescriptions : public DescriptionProvider
 {
 public:
     MediaRendererDescriptions();
 };
 
 
-class MediaServerDescriptions : public DeviceDescriptionProvider
+class MediaServerDescriptions : public DescriptionProvider
 {
 public:
     MediaServerDescriptions();
