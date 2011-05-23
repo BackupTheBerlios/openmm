@@ -210,7 +210,7 @@ protected:
             
             rendererContainer.start();
             waitForTerminationRequest();
-            // mediaRenderer.stop();
+            // rendererContainer.stop();
         }
         return Application::EXIT_OK;
     }

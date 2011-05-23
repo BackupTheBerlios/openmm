@@ -23,8 +23,8 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Exception.h>
 
-#include "UpnpAvDescriptions.h"
 #include "UpnpAvServer.h"
+#include "UpnpAvDescriptions.h"
 #include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"
 #include "UpnpAvTypes.h"

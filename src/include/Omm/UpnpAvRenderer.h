@@ -94,6 +94,7 @@ class AvRenderer : public Device
 {
 public:
     AvRenderer(Engine* engine);
+    ~AvRenderer();
     
 private:
     Engine*     _pEngine;

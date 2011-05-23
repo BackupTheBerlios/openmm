@@ -156,19 +156,26 @@ protected:
             pEnginePlugin->setVisual(pUserInterface->getVisual());
             pEnginePlugin->createPlayer();
 
-//            Omm::Av::AvRenderer renderer(pEnginePlugin);
-//            Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
-//            renderer.addIcon(pIcon);
-//            renderer.setFriendlyName(_name);
+            Omm::DeviceContainer rendererContainer;
+            Omm::Av::AvRenderer mediaRenderer(pEnginePlugin);
+            rendererContainer.addDevice(&mediaRenderer);
+            rendererContainer.setRootDevice(&mediaRenderer);
+
+            Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
+            mediaRenderer.addIcon(pIcon);
+            if (_name != "") {
+//                mediaRenderer.setFriendlyName(_name);
+                mediaRenderer.setProperty("friendlyName", _name);
+            }
 
             pUserInterface->showMainWindow();
             controller.start();
-//            renderer.start();
+            rendererContainer.start();
 
             Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
             int ret = pUserInterface->eventLoop();
 
-//            renderer.stop();
+//            rendererContainer.stop();
         }
         return Application::EXIT_OK;
     }

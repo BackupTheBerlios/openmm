@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpAvDescriptions.h"
 #include "UpnpAvRenderer.h"
+#include "UpnpAvDescriptions.h"
 #include "UpnpAvRendererImpl.h"
 
 namespace Omm {
@@ -67,6 +67,12 @@ _pEngine(engine)
               new DevAVTransportRendererImpl(engine)));
 
     Omm::Av::Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
+}
+
+
+AvRenderer::~AvRenderer()
+{
+    delete _pEngine;
 }
 
 
