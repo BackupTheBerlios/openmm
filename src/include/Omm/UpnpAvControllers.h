@@ -40,6 +40,7 @@ class CtlMediaRenderer : public CtlDeviceCode
 {
 public:
     CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
+    ~CtlMediaRenderer();
 
     CtlRenderingControl* RenderingControl() { return _pCtlRenderingControl; }
     CtlConnectionManager* ConnectionManager() { return _pCtlConnectionManager; }
@@ -58,6 +59,7 @@ class CtlMediaServer : public CtlDeviceCode
 {
 public:
     CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
+    ~CtlMediaServer();
 
     CtlContentDirectory* ContentDirectory() { return _pCtlContentDirectory; }
     CtlConnectionManager* ConnectionManager() { return _pCtlConnectionManager; }
@@ -107,6 +109,8 @@ public:
     std::string _getLastChange();
 
 protected:
+    virtual ~CtlAVTransport() {}
+
     virtual void _ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData) = 0;
     virtual void _ansGetMediaInfo(const ui4& InstanceID, const ui4& NrTracks, const std::string& MediaDuration, const std::string& CurrentURI, const std::string& CurrentURIMetaData, const std::string& NextURI, const std::string& NextURIMetaData, const std::string& PlayMedium, const std::string& RecordMedium, const std::string& WriteStatus) = 0;
     virtual void _ansGetTransportInfo(const ui4& InstanceID, const std::string& CurrentTransportState, const std::string& CurrentTransportStatus, const std::string& CurrentSpeed) = 0;
@@ -161,6 +165,8 @@ public:
     std::string _getCurrentConnectionIDs();
 
 protected:
+    virtual ~CtlConnectionManager() {}
+
     virtual void _ansGetProtocolInfo(const std::string& Source, const std::string& Sink) = 0;
     virtual void _ansConnectionComplete(const i4& ConnectionID) = 0;
     virtual void _ansGetCurrentConnectionIDs(const std::string& ConnectionIDs) = 0;
@@ -216,6 +222,8 @@ public:
     std::string _getContainerUpdateIDs();
 
 protected:
+    virtual ~CtlContentDirectory() {}
+
     virtual void _ansGetSearchCapabilities(const std::string& SearchCaps) = 0;
     virtual void _ansGetSortCapabilities(const std::string& SortCaps) = 0;
     virtual void _ansGetSystemUpdateID(const ui4& Id) = 0;
@@ -331,6 +339,8 @@ public:
     std::string _getLastChange();
 
 protected:
+    virtual ~CtlRenderingControl() {}
+
     virtual void _ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList) = 0;
     virtual void _ansSelectPreset(const ui4& InstanceID, const std::string& PresetName) = 0;
     virtual void _ansGetBrightness(const ui4& InstanceID, const ui2& CurrentBrightness) = 0;

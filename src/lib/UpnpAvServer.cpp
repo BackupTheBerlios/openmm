@@ -298,11 +298,15 @@ AvServer::AvServer()
     descriptionReader.getDeviceDescription();
     setDeviceData(descriptionReader.rootDevice());
 
-    // TODO: dispose those four objects?
-    // service implementations should be owned by DevMediaServer (DevDeviceCode)
+    // service implementations are owned by DevMediaServer (DevDeviceCode)
     // DevDeviceCode should be owned by super class Device
+
+    // store a pointer to content directory implementation, so that the
+    // root object can be set later.
+    _pDevContentDirectoryServerImpl = new DevContentDirectoryServerImpl;
+
     setDevDevice(new DevMediaServer(
-        new DevContentDirectoryServerImpl,
+        _pDevContentDirectoryServerImpl,
         new DevConnectionManagerServerImpl,
         new DevAVTransportServerImpl)
     );
@@ -319,7 +323,7 @@ void
 AvServer::setRoot(AbstractMediaObject* pRoot)
 {
     _pRoot = pRoot;
-    static_cast<DevContentDirectoryServerImpl*>(static_cast<DevMediaServer*>(getDevDevice())->_pDevContentDirectory)->_pRoot = _pRoot;
+    _pDevContentDirectoryServerImpl->_pRoot = _pRoot;
 }
 
 

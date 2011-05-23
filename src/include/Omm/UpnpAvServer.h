@@ -93,6 +93,7 @@ private:
 };
 
 
+class DevContentDirectoryServerImpl;
 
 class AvServer : public Device
     /// Used by ServerApplication
@@ -106,9 +107,7 @@ public:
     AbstractMediaObject* getRoot();
 
 private:
-//    DevContentDirectoryServerImpl devContentDirectoryServerImpl;
-//    DevConnectionManagerServerImpl devConnectionManagerServerImpl;
-//    DevAVTransportServerImpl devAVTransportServerImpl;
+    DevContentDirectoryServerImpl* _pDevContentDirectoryServerImpl;
 
     AbstractMediaObject* _pRoot;
 };

@@ -856,7 +856,6 @@ public:
     void setDevDevice(DevDeviceCode* pDevDevice);
     void setUuid(std::string uuid);
     void setRandomUuid();
-//    void setDeviceType(std::string deviceType);
     void setProperty(const std::string& name, const std::string& val);
     
     void addProperty(const std::string& name, const std::string& val);
@@ -870,12 +869,6 @@ private:
     DeviceData*                         _pDeviceData;
     DevDeviceCode*                      _pDevDeviceCode;
     CtlDeviceCode*                      _pCtlDeviceCode;
-
-//    std::string                         _uuid;
-//    std::string                         _deviceType;
-//    Container<Service>                  _services;
-//    Container<std::string>              _properties;
-//    std::vector<Icon*>                  _iconList;
 };
 
 

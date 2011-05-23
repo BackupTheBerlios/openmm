@@ -187,7 +187,6 @@ protected:
 
             pEnginePlugin->setVisual(pVisualPlugin);
 
-            // TODO: set these options for visual, not for engine.
             if (_fullscreen) {
                 pVisualPlugin->setFullscreen();
             }

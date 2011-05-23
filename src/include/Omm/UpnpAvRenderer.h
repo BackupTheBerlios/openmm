@@ -90,7 +90,6 @@ protected:
 };
 
 
-//class AvRenderer : public DevMediaRenderer
 class AvRenderer : public Device
 {
 public:

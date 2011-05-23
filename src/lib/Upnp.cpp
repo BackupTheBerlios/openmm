@@ -2112,6 +2112,18 @@ _pCtlDeviceCode(0)
 
 Device::~Device()
 {
+    if (_pDeviceData) {
+        delete _pDeviceData;
+        _pDeviceData = 0;
+    }
+    if (_pDevDeviceCode) {
+        delete _pDevDeviceCode;
+        _pDevDeviceCode = 0;
+    }
+    if (_pCtlDeviceCode) {
+        delete _pCtlDeviceCode;
+        _pCtlDeviceCode = 0;
+    }
 }
 
 

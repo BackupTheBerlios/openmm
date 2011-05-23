@@ -39,6 +39,14 @@ _pCtlAVTransport(pCtlAVTransport)
 }
 
 
+CtlMediaRenderer::~CtlMediaRenderer()
+{
+    delete _pCtlRenderingControl;
+    delete _pCtlConnectionManager;
+    delete _pCtlAVTransport;
+}
+
+
 void
 CtlMediaRenderer::eventHandler(StateVar* pStateVar)
 {
@@ -81,6 +89,14 @@ _pCtlAVTransport(pCtlAVTransport)
     _pCtlAVTransport->_pService = _pDevice->getService("urn:schemas-upnp-org:service:AVTransport:1");
 
     init();
+}
+
+
+CtlMediaServer::~CtlMediaServer()
+{
+    delete _pCtlContentDirectory;
+    delete _pCtlConnectionManager;
+    delete _pCtlAVTransport;
 }
 
 

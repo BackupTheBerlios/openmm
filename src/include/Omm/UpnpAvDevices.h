@@ -42,13 +42,14 @@ class DevMediaRenderer : public DevDeviceCode
 {
 public:
     DevMediaRenderer(DevRenderingControl* pDevRenderingControl, DevConnectionManager* pDevConnectionManager, DevAVTransport* pDevAVTransport);
+    ~DevMediaRenderer();
 
-//protected:
+private:
     DevRenderingControl* _pDevRenderingControl;
     DevConnectionManager* _pDevConnectionManager;
     DevAVTransport* _pDevAVTransport;
 
-private:
+//private:
     virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pService);
 
@@ -60,13 +61,14 @@ class DevMediaServer : public DevDeviceCode
 {
 public:
     DevMediaServer(DevContentDirectory* pDevContentDirectory, DevConnectionManager* pDevConnectionManager, DevAVTransport* pDevAVTransport);
+    ~DevMediaServer();
 
-//protected:
+private:
     DevContentDirectory* _pDevContentDirectory;
     DevConnectionManager* _pDevConnectionManager;
     DevAVTransport* _pDevAVTransport;
 
-private:
+//private:
     virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pService);
 
@@ -80,6 +82,8 @@ class DevAVTransport
     friend class DevMediaRenderer;
 
 protected:
+    virtual ~DevAVTransport() {}
+
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData) = 0;
     virtual void GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus) = 0;
     virtual void GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed) = 0;
@@ -163,6 +167,8 @@ class DevConnectionManager
     friend class DevMediaRenderer;
 
 protected:
+    virtual ~DevConnectionManager() {}
+
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink) = 0;
     virtual void ConnectionComplete(const i4& ConnectionID) = 0;
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs) = 0;
@@ -189,6 +195,8 @@ class DevContentDirectory
     friend class DevMediaServer;
 
 protected:
+    virtual ~DevContentDirectory() {}
+
     virtual void GetSearchCapabilities(std::string& SearchCaps) = 0;
     virtual void GetSortCapabilities(std::string& SortCaps) = 0;
     virtual void GetSystemUpdateID(ui4& Id) = 0;
@@ -227,6 +235,8 @@ class DevRenderingControl
     friend class DevMediaRenderer;
 
 protected:
+    virtual ~DevRenderingControl() {}
+    
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList) = 0;
     virtual void SelectPreset(const ui4& InstanceID, const std::string& PresetName) = 0;
     virtual void GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness) = 0;

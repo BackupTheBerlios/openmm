@@ -32,7 +32,8 @@ namespace Av {
 
 class DevAVTransportRendererImpl : public DevAVTransport
 {
-    friend class AvRenderer;
+public:
+    DevAVTransportRendererImpl(Engine* pEngine) : _pEngine(pEngine) {}
     
 private:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -58,7 +59,8 @@ private:
 
 class DevConnectionManagerRendererImpl : public DevConnectionManager
 {
-    friend class AvRenderer;
+public:
+    DevConnectionManagerRendererImpl(Engine* pEngine) : _pEngine(pEngine) {}
     
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -74,7 +76,8 @@ private:
 
 class DevRenderingControlRendererImpl : public DevRenderingControl
 {
-    friend class AvRenderer;
+public:
+    DevRenderingControlRendererImpl(Engine* pEngine) : _pEngine(pEngine) {}
     
 private:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);

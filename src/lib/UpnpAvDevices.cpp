@@ -86,6 +86,14 @@ _pDevAVTransport(pAVTransport)
 }
 
 
+DevMediaRenderer::~DevMediaRenderer()
+{
+    delete _pDevRenderingControl;
+    delete _pDevConnectionManager;
+    delete _pDevAVTransport;
+}
+
+
 void
 DevMediaServer::actionHandler(Action* pAction)
 {
@@ -141,6 +149,14 @@ _pDevAVTransport(pAVTransport)
 
 //    _pDevice = descriptionReader.rootDevice();
 //    _pDevice->setDevDevice(this);
+}
+
+
+DevMediaServer::~DevMediaServer()
+{
+    delete _pDevContentDirectory;
+    delete _pDevConnectionManager;
+    delete _pDevAVTransport;
 }
 
 
