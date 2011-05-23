@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include "UpnpAvDescriptions.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvRendererImpl.h"
 
@@ -58,14 +59,19 @@ AvRenderer::AvRenderer(Engine* engine) :
 //              new DevAVTransportRendererImpl),
 _pEngine(engine)
 {
+    MediaRendererDescriptions mediaRendererDescriptions;
+    MemoryDescriptionReader descriptionReader(mediaRendererDescriptions);
+    descriptionReader.getDeviceDescription();
+    setDeviceData(descriptionReader.rootDevice());
+
     setDevDevice(new DevMediaRenderer(
               new DevRenderingControlRendererImpl,
               new DevConnectionManagerRendererImpl,
               new DevAVTransportRendererImpl));
 
-    static_cast<DevRenderingControlRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevRenderingControlImpl)->_pEngine = engine;
-    static_cast<DevConnectionManagerRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevConnectionManagerImpl)->_pEngine = engine;
-    static_cast<DevAVTransportRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevAVTransportImpl)->_pEngine = engine;
+    static_cast<DevRenderingControlRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevRenderingControl)->_pEngine = engine;
+    static_cast<DevConnectionManagerRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevConnectionManager)->_pEngine = engine;
+    static_cast<DevAVTransportRendererImpl*>(static_cast<DevMediaRenderer*>(getDevDevice())->_pDevAVTransport)->_pEngine = engine;
 
 //    static_cast<DevRenderingControlRendererImpl*>(_pDevRenderingControlImpl)->_pEngine = engine;
 //    static_cast<DevConnectionManagerRendererImpl*>(_pDevConnectionManagerImpl)->_pEngine = engine;

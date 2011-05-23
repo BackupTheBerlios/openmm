@@ -26,7 +26,7 @@ namespace Av {
 
 
 CtlMediaRenderer::CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
-CtlDevice(pDevice),
+CtlDeviceCode(pDevice),
 _pCtlRenderingControl(pCtlRenderingControl),
 _pCtlConnectionManager(pCtlConnectionManager),
 _pCtlAVTransport(pCtlAVTransport)
@@ -71,7 +71,7 @@ CtlMediaRenderer::eventHandler(StateVar* pStateVar)
 
 
 CtlMediaServer::CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
-CtlDevice(pDevice),
+CtlDeviceCode(pDevice),
 _pCtlContentDirectory(pCtlContentDirectory),
 _pCtlConnectionManager(pCtlConnectionManager),
 _pCtlAVTransport(pCtlAVTransport)

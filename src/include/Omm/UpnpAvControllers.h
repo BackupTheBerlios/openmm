@@ -36,7 +36,7 @@ class CtlRenderingControl;
 class CtlContentDirectory;
 
 
-class CtlMediaRenderer : public CtlDevice
+class CtlMediaRenderer : public CtlDeviceCode
 {
 public:
     CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
@@ -54,7 +54,7 @@ private:
 };
 
 
-class CtlMediaServer : public CtlDevice
+class CtlMediaServer : public CtlDeviceCode
 {
 public:
     CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);

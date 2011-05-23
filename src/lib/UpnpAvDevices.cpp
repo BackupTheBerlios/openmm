@@ -21,21 +21,23 @@
 
 #include "UpnpPrivate.h"
 #include "UpnpAvDevices.h"
-#include "UpnpAvDescriptions.h"
 
+
+namespace Omm {
+namespace Av {
 
 void
 DevMediaRenderer::actionHandler(Action* pAction)
 {
     std::string serviceType = pAction->getService()->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pDevAVTransportImpl->actionHandler(pAction);
+        _pDevAVTransport->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pDevConnectionManagerImpl->actionHandler(pAction);
+        _pDevConnectionManager->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:RenderingControl:1") {
-        _pDevRenderingControlImpl->actionHandler(pAction);
+        _pDevRenderingControl->actionHandler(pAction);
     }
 }
 
@@ -45,41 +47,42 @@ DevMediaRenderer::initStateVars(Service* pService)
 {
     std::string serviceType = pService->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pDevAVTransportImpl->_pService = pService;
-        _pDevAVTransportImpl->initStateVars();
+        _pDevAVTransport->_pService = pService;
+        _pDevAVTransport->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pDevConnectionManagerImpl->_pService = pService;
-        _pDevConnectionManagerImpl->initStateVars();
+        _pDevConnectionManager->_pService = pService;
+        _pDevConnectionManager->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:RenderingControl:1") {
-        _pDevRenderingControlImpl->_pService = pService;
-        _pDevRenderingControlImpl->initStateVars();
+        _pDevRenderingControl->_pService = pService;
+        _pDevRenderingControl->initStateVars();
     }
 }
 
 
-DevMediaRenderer::DevMediaRenderer(DevRenderingControl* pRenderingControlImpl, DevConnectionManager* pConnectionManagerImpl, DevAVTransport* pAVTransportImpl) :
-DevDevice(),
-_pDevRenderingControlImpl(pRenderingControlImpl),
-_pDevConnectionManagerImpl(pConnectionManagerImpl),
-_pDevAVTransportImpl(pAVTransportImpl)
+DevMediaRenderer::DevMediaRenderer(DevRenderingControl* pRenderingControl, DevConnectionManager* pConnectionManager, DevAVTransport* pAVTransport) :
+//DevDeviceCode(),
+_pDevRenderingControl(pRenderingControl),
+_pDevConnectionManager(pConnectionManager),
+_pDevAVTransport(pAVTransport)
 {
-    _descriptions["/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml"] = &DevMediaRenderer::_deviceDescription;
-    _descriptions["/urn:schemas-upnp-org:service:RenderingControl:1/Description.xml"] = &DevRenderingControl::_description;
-    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &DevConnectionManager::_description;
-    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
+//    _descriptions["/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml"] = &DevMediaRenderer::_deviceDescription;
+//    _descriptions["/urn:schemas-upnp-org:service:RenderingControl:1/Description.xml"] = &DevRenderingControl::_description;
+//    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &DevConnectionManager::_description;
+//    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
 
-    StringDescriptionReader descriptionReader(_descriptions);
-    descriptionReader.getDeviceDescription("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
+//    StringDescriptionReader descriptionReader(_descriptions);
+//    descriptionReader.getDeviceDescription("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
 //    _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
 //    _pDeviceContainer = descriptionReader.deviceContainer();
 //    _pDeviceContainer->setImplAdapter(this);
 //    _pDevice = descriptionReader.device("/urn:schemas-upnp-org:device:MediaRenderer:1/Description.xml");
 //    _pDevice->setDevDevice(this);
 //    _pDeviceContainer->getRootDevice()->setDevDevice(this);
-    _pDevice = descriptionReader.rootDevice();
-    _pDevice->setDevDevice(this);
+
+//    _pDevice = descriptionReader.rootDevice();
+//    _pDevice->setDevDevice(this);
 }
 
 
@@ -88,13 +91,13 @@ DevMediaServer::actionHandler(Action* pAction)
 {
     std::string serviceType = pAction->getService()->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pDevAVTransportImpl->actionHandler(pAction);
+        _pDevAVTransport->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pDevConnectionManagerImpl->actionHandler(pAction);
+        _pDevConnectionManager->actionHandler(pAction);
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1") {
-        _pDevContentDirectoryImpl->actionHandler(pAction);
+        _pDevContentDirectory->actionHandler(pAction);
     }
 }
 
@@ -104,39 +107,40 @@ DevMediaServer::initStateVars(Service* pService)
 {
     std::string serviceType = pService->getServiceType();
     if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1") {
-        _pDevAVTransportImpl->_pService = pService;
-        _pDevAVTransportImpl->initStateVars();
+        _pDevAVTransport->_pService = pService;
+        _pDevAVTransport->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1") {
-        _pDevConnectionManagerImpl->_pService = pService;
-        _pDevConnectionManagerImpl->initStateVars();
+        _pDevConnectionManager->_pService = pService;
+        _pDevConnectionManager->initStateVars();
     }
     else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1") {
-        _pDevContentDirectoryImpl->_pService = pService;
-        _pDevContentDirectoryImpl->initStateVars();
+        _pDevContentDirectory->_pService = pService;
+        _pDevContentDirectory->initStateVars();
     }
 }
 
 
-DevMediaServer::DevMediaServer(DevContentDirectory* pContentDirectoryImpl, DevConnectionManager* pConnectionManagerImpl, DevAVTransport* pAVTransportImpl) :
-DevDevice(),
-_pDevContentDirectoryImpl(pContentDirectoryImpl),
-_pDevConnectionManagerImpl(pConnectionManagerImpl),
-_pDevAVTransportImpl(pAVTransportImpl)
+DevMediaServer::DevMediaServer(DevContentDirectory* pContentDirectory, DevConnectionManager* pConnectionManager, DevAVTransport* pAVTransport) :
+//DevDeviceCode(),
+_pDevContentDirectory(pContentDirectory),
+_pDevConnectionManager(pConnectionManager),
+_pDevAVTransport(pAVTransport)
 {
-    _descriptions["/urn:schemas-upnp-org:device:MediaServer:1/Description.xml"] = &DevMediaServer::_deviceDescription;
-    _descriptions["/urn:schemas-upnp-org:service:ContentDirectory:1/Description.xml"] = &DevContentDirectory::_description;
-    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &DevConnectionManager::_description;
-    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
-
-    StringDescriptionReader descriptionReader(_descriptions);
-    descriptionReader.getDeviceDescription("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
+//    _descriptions["/urn:schemas-upnp-org:device:MediaServer:1/Description.xml"] = &DevMediaServer::_deviceDescription;
+//    _descriptions["/urn:schemas-upnp-org:service:ContentDirectory:1/Description.xml"] = &DevContentDirectory::_description;
+//    _descriptions["/urn:schemas-upnp-org:service:ConnectionManager:1/Description.xml"] = &DevConnectionManager::_description;
+//    _descriptions["/urn:schemas-upnp-org:service:AVTransport:1/Description.xml"] = &DevAVTransport::_description;
+//
+//    StringDescriptionReader descriptionReader(_descriptions);
+//    descriptionReader.getDeviceDescription("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
 //    _pDeviceContainer = descriptionReader.deviceContainer("/urn:schemas-upnp-org:device:MediaServer:1/Description.xml");
 //    _pDeviceContainer = descriptionReader.deviceContainer();
 //    _pDeviceContainer->setImplAdapter(this);
 //    _pDeviceContainer->getRootDevice()->setDevDevice(this);
-    _pDevice = descriptionReader.rootDevice();
-    _pDevice->setDevDevice(this);
+
+//    _pDevice = descriptionReader.rootDevice();
+//    _pDevice->setDevDevice(this);
 }
 
 
@@ -1348,3 +1352,5 @@ DevContentDirectory::_getContainerUpdateIDs()
 }
 
 
+} // namespace Av
+} // namespace Omm

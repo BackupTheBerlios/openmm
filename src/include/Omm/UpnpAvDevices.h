@@ -38,39 +38,39 @@ class DevRenderingControl;
 class DevContentDirectory;
 
 
-class DevMediaRenderer : public DevDevice
+class DevMediaRenderer : public DevDeviceCode
 {
 public:
-    DevMediaRenderer(DevRenderingControl* pDevRenderingControlImpl, DevConnectionManager* pDevConnectionManagerImpl, DevAVTransport* pDevAVTransportImpl);
+    DevMediaRenderer(DevRenderingControl* pDevRenderingControl, DevConnectionManager* pDevConnectionManager, DevAVTransport* pDevAVTransport);
 
 //protected:
-    DevRenderingControl* _pDevRenderingControlImpl;
-    DevConnectionManager* _pDevConnectionManagerImpl;
-    DevAVTransport* _pDevAVTransportImpl;
+    DevRenderingControl* _pDevRenderingControl;
+    DevConnectionManager* _pDevConnectionManager;
+    DevAVTransport* _pDevAVTransport;
 
 private:
     virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pService);
 
-    static std::string _deviceDescription;
+//    static std::string _deviceDescription;
 };
 
 
-class DevMediaServer : public DevDevice
+class DevMediaServer : public DevDeviceCode
 {
 public:
-    DevMediaServer(DevContentDirectory* pDevContentDirectoryImpl, DevConnectionManager* pDevConnectionManagerImpl, DevAVTransport* pDevAVTransportImpl);
+    DevMediaServer(DevContentDirectory* pDevContentDirectory, DevConnectionManager* pDevConnectionManager, DevAVTransport* pDevAVTransport);
 
 //protected:
-    DevContentDirectory* _pDevContentDirectoryImpl;
-    DevConnectionManager* _pDevConnectionManagerImpl;
-    DevAVTransport* _pDevAVTransportImpl;
+    DevContentDirectory* _pDevContentDirectory;
+    DevConnectionManager* _pDevConnectionManager;
+    DevAVTransport* _pDevAVTransport;
 
 private:
     virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pService);
 
-    static std::string _deviceDescription;
+//    static std::string _deviceDescription;
 };
 
 
@@ -152,7 +152,7 @@ protected:
     std::string _getLastChange();
 
 private:
-    static std::string  _description;
+//    static std::string  _description;
     Service* _pService;
 };
 
@@ -179,7 +179,7 @@ protected:
     std::string _getCurrentConnectionIDs();
 
 private:
-    static std::string  _description;
+//    static std::string  _description;
     Service* _pService;
 };
 
@@ -217,7 +217,7 @@ protected:
     std::string _getContainerUpdateIDs();
 
 private:
-    static std::string  _description;
+//    static std::string  _description;
     Service* _pService;
 };
 
@@ -304,7 +304,7 @@ protected:
     bool _getLoudness();
 
 private:
-    static std::string  _description;
+//    static std::string  _description;
     Service* _pService;
 };
 

@@ -100,7 +100,7 @@ class AvServer : public Device
 {
 public:
     AvServer();
-//    ~AvServer();
+    virtual ~AvServer();
 
     void setRoot(AbstractMediaObject* pRoot);
     AbstractMediaObject* getRoot();

@@ -92,18 +92,19 @@ DimmableLight::initStateVars(Service* pThis)
 
 
 DimmableLight::DimmableLight(SwitchPower* pSwitchPowerImpl, Dimming* pDimmingImpl) :
-DevDevice(),
+DevDeviceCode(),
 _pSwitchPowerImpl(pSwitchPowerImpl), 
 _pDimmingImpl(pDimmingImpl)
 {
-    _descriptions["/network-light-desc.xml"] = &DimmableLight::_deviceDescription;
-    _descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::_description;
-    _descriptions["/Dimming-scpd.xml"] = &Dimming::_description;
-
-    Omm::StringDescriptionReader descriptionReader(_descriptions);
-    descriptionReader.getDeviceDescription("/network-light-desc.xml");
-    _pDeviceContainer = descriptionReader.deviceContainer();
     // TODO: rewrite to new Device / DeviceContainer stuff
+
+//    _descriptions["/network-light-desc.xml"] = &DimmableLight::_deviceDescription;
+//    _descriptions["/SwitchPower-scpd.xml"] = &SwitchPower::_description;
+//    _descriptions["/Dimming-scpd.xml"] = &Dimming::_description;
+//
+//    Omm::StringDescriptionReader descriptionReader(_descriptions);
+//    descriptionReader.getDeviceDescription("/network-light-desc.xml");
+//    _pDeviceContainer = descriptionReader.deviceContainer();
 //    _pDeviceContainer->setImplAdapter(this);
 }
 

@@ -30,7 +30,7 @@
 
 #include <Omm/Upnp.h>
 
-using Omm::DevDevice;
+using Omm::DevDeviceCode;
 using Omm::Service;
 using Omm::Action;
 
@@ -80,7 +80,7 @@ private:
 };
 
 
-class DimmableLight : public DevDevice
+class DimmableLight : public DevDeviceCode
 {
 public:
     DimmableLight(SwitchPower* pSwitchPowerImpl, Dimming* pDimmingImpl);

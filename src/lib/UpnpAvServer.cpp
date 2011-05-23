@@ -23,6 +23,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Exception.h>
 
+#include "UpnpAvDescriptions.h"
 #include "UpnpAvServer.h"
 #include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"
@@ -292,7 +293,14 @@ ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& st
 
 AvServer::AvServer()
 {
-    // TODO: dispose those four objects
+    MediaServerDescriptions mediaServerDescriptions;
+    MemoryDescriptionReader descriptionReader(mediaServerDescriptions);
+    descriptionReader.getDeviceDescription();
+    setDeviceData(descriptionReader.rootDevice());
+
+    // TODO: dispose those four objects?
+    // service implementations should be owned by DevMediaServer (DevDeviceCode)
+    // DevDeviceCode should be owned by super class Device
     setDevDevice(new DevMediaServer(
         new DevContentDirectoryServerImpl,
         new DevConnectionManagerServerImpl,
@@ -301,18 +309,17 @@ AvServer::AvServer()
 }
 
 
-//AvServer::~AvServer()
-//{
-//}
+AvServer::~AvServer()
+{
+    delete _pRoot;
+}
 
 
 void
 AvServer::setRoot(AbstractMediaObject* pRoot)
 {
     _pRoot = pRoot;
-    static_cast<DevContentDirectoryServerImpl*>(static_cast<DevMediaServer*>(getDevDevice())->_pDevContentDirectoryImpl)->_pRoot = _pRoot;
-//    static_cast<DevContentDirectoryServerImpl*>(_pDevContentDirectoryImpl)->_pRoot = _pRoot;
-//     _pRoot->setObjectId("0");
+    static_cast<DevContentDirectoryServerImpl*>(static_cast<DevMediaServer*>(getDevDevice())->_pDevContentDirectory)->_pRoot = _pRoot;
 }
 
 

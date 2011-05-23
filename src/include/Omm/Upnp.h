@@ -131,14 +131,16 @@ static const std::string    OMM_VERSION         = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 
 class Device;
-class DevDevice;
+class DeviceData;
 class DeviceContainer;
+class DevDeviceCode;
+class CtlDeviceCode;
+class DeviceDescriptionProvider;
 class Controller;
 class Service;
 class Action;
 class Argument;
 class StateVar;
-class DeviceContainer;
 class ControlRequestHandler;
 class HttpSocket;
 class Entity;
@@ -481,17 +483,18 @@ public:
     DescriptionReader();
     ~DescriptionReader();
 
-    void getDeviceDescription(const std::string& deviceDescriptionUri);
+    void getDeviceDescription(const std::string& deviceDescriptionUri = "");
     /// Reads a device description from the URI given in deviceDescriptionUri.
     /// The service description URIs contained in the device description
     /// can be relative to the device description uri (depending on implementation
     /// of retrieveDescriptionUri).
+    /// When device description location is unique, deviceDescriptionUri can be ""
 
     DeviceContainer* deviceContainer();
     /// Parses the device description, creates and returns a DeviceContainer, including
     /// the root device and all subdevices. This is used at the controller side
     /// when a new device pops up and is read by the controller.
-    Device* rootDevice();
+    DeviceData* rootDevice();
     /// Parses the device description, creates and returns a Device, including only
     /// the root device. Subdevices, if present, are ignored. This is used by
     /// the device side, when building the internal device tree from the memory description.
@@ -503,7 +506,7 @@ protected:
     /// Device description URI and base URI for service descriptions.
 
 private:
-    Device* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer, bool ignoreSubdevices = false);
+    DeviceData* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer = 0);
     /// Creates devices and subdevices (if ignoreSubdevices is true) and adds them to pDeviceContainer
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
@@ -526,6 +529,18 @@ class UriDescriptionReader : public DescriptionReader
 private:
     virtual std::string& retrieveDescription(const std::string& relativeUri);
 
+};
+
+
+class MemoryDescriptionReader : public DescriptionReader
+{
+public:
+    MemoryDescriptionReader(DeviceDescriptionProvider& deviceDescriptionProvider);
+
+private:
+    virtual std::string& retrieveDescription(const std::string& descriptionKey);
+
+    DeviceDescriptionProvider& _deviceDescriptionProvider;
 };
 
 
@@ -687,29 +702,43 @@ class Service {
 public:
     Service() {}
     ~Service();
-    
-    std::string getServiceType() const { return _serviceType; }
-    std::string getServiceId() const { return _serviceId; }
-    std::string getDescriptionPath() const { return _descriptionPath; }
-    std::string* getDescription() const { return _pDescription; }
-    std::string getControlPath() const { return _controlPath; }
-    std::string getEventPath() const { return _eventPath; }
-    DescriptionRequestHandler* getDescriptionRequestHandler() const { return _pDescriptionRequestHandler; }
-    ControlRequestHandler* getControlRequestHandler() const { return _controlRequestHandler; }
-    Device* getDevice() const { return _pDevice; }
-    Action* getAction(const std::string& actionName) { return &_actions.get(actionName); }
-    Subscription* getSubscription(const std::string& sid) { return &_eventSubscriptions.get(sid); }
-    StateVar* getStateVarReference(const std::string& key) { return &_stateVars.get(key); }
+
+    typedef Container<StateVar>::Iterator StateVarIterator;
+    StateVarIterator beginStateVar();
+    StateVarIterator endStateVar();
+    StateVarIterator beginEventedStateVar();
+    StateVarIterator endEventedStateVar();
+
+    typedef Container<Action>::Iterator ActionIterator;
+    ActionIterator beginAction();
+    ActionIterator endAction();
+
+    typedef Container<Subscription>::Iterator SubscriptionIterator;
+    SubscriptionIterator beginEventSubscription();
+    SubscriptionIterator endEventSubscription();
+
+    std::string getServiceType() const;
+    std::string getServiceId() const;
+    std::string getDescriptionPath() const;
+    std::string* getDescription() const;
+    std::string getControlPath() const;
+    std::string getEventPath() const;
+    DescriptionRequestHandler* getDescriptionRequestHandler() const;
+    ControlRequestHandler* getControlRequestHandler() const;
+    Device* getDevice() const;
+    Action* getAction(const std::string& actionName);
+    Subscription* getSubscription(const std::string& sid);
+    StateVar* getStateVarReference(const std::string& key);
     template<typename T> T getStateVar(const std::string& key);
     
-    void setServiceType(std::string serviceType) { _serviceType = serviceType; }
-    void setServiceId(std::string serviceId) { _serviceId = serviceId; }
-    void setDescriptionPath(std::string descriptionPath) { _descriptionPath = descriptionPath; }
-    void setServiceDescription(std::string& description) { _pDescription = &description; }
+    void setServiceType(std::string serviceType);
+    void setServiceId(std::string serviceId);
+    void setDescriptionPath(std::string descriptionPath);
+    void setServiceDescription(std::string& description);
     void setDescriptionRequestHandler();
-    void setControlPath(std::string controlPath) { _controlPath = controlPath; }
-    void setEventPath(std::string eventPath) { _eventPath = eventPath; }
-    void setDevice(Device* pDevice) { _pDevice = pDevice; }
+    void setControlPath(std::string controlPath);
+    void setEventPath(std::string eventPath);
+    void setDeviceData(DeviceData* pDeviceData);
     template<typename T> void setStateVar(std::string key, const T& val);
     
     void addAction(Action* pAction);
@@ -717,20 +746,6 @@ public:
     
     void initClient();
     void sendAction(Action* pAction);
-    
-    typedef Container<StateVar>::Iterator StateVarIterator;
-    StateVarIterator beginStateVar() { return _stateVars.begin(); }
-    StateVarIterator endStateVar() { return _stateVars.end(); }
-    StateVarIterator beginEventedStateVar() { return _eventedStateVars.begin(); }
-    StateVarIterator endEventedStateVar() { return _eventedStateVars.end(); }
-    
-    typedef Container<Action>::Iterator ActionIterator;
-    ActionIterator beginAction() { return _actions.begin(); }
-    ActionIterator endAction() { return _actions.end(); }
-    
-    typedef Container<Subscription>::Iterator SubscriptionIterator;
-    SubscriptionIterator beginEventSubscription() { return _eventSubscriptions.begin(); }
-    SubscriptionIterator endEventSubscription() { return _eventSubscriptions.end(); }
     
     void registerSubscription(Subscription* subscription);
     void unregisterSubscription(Subscription* subscription);
@@ -743,7 +758,7 @@ public:
 private:
     void actionNetworkActivity(bool begin);
     
-    Device*                                 _pDevice;
+    DeviceData*                             _pDeviceData;
     std::string                             _vendorDomain;
     std::string                             _serviceType;
     std::string                             _serviceId;
@@ -804,6 +819,21 @@ Service::setStateVar(std::string key, const T& val)
 // };
 
 
+class DeviceDescriptionProvider
+{
+public:
+    std::string& getDeviceDescription();
+    std::string& getServiceDescription(const std::string& path);
+    /// Argument path correspond to the SCPD fields of the device description,
+    /// because usually the device description is retrieved first and then
+    /// the service descriptions listed in the device description.
+
+protected:
+    std::string*                            _pDeviceDescription;
+    std::map<std::string,std::string*>      _serviceDescriptions;
+};
+
+
 class Device
 {
     friend class DeviceDescriptionWriter;
@@ -811,36 +841,37 @@ class Device
     
 public:
     Device();
-    ~Device();
+    virtual ~Device();
     
     typedef Container<Service>::Iterator ServiceIterator;
-    ServiceIterator beginService() { return _services.begin(); }
-    ServiceIterator endService() { return _services.end(); }
+    ServiceIterator beginService();
+    ServiceIterator endService();
     
     typedef Container<std::string>::KeyIterator PropertyIterator;
-    PropertyIterator beginProperty() { return _properties.beginKey(); }
-    PropertyIterator endProperty() { return _properties.endKey(); }
+    PropertyIterator beginProperty();
+    PropertyIterator endProperty();
     
     typedef std::vector<Icon*>::iterator IconIterator;
-    IconIterator beginIcon() { return _iconList.begin(); }
-    IconIterator endIcon() { return _iconList.end(); }
+    IconIterator beginIcon();
+    IconIterator endIcon();
     
-    DeviceContainer* getDeviceContainer() const { return _pDeviceContainer; }
-    DevDevice* getDevDevice() const { return _pDevDevice; }
-    std::string getUuid() const { return _uuid; }
-    std::string getDeviceType() const { return _deviceType; }
-    const std::string& getFriendlyName() { return getProperty("friendlyName"); }
-    Service* getService(std::string serviceType) { return &_services.get(serviceType); }
-    const std::string& getProperty(const std::string& name) { return _properties.get(name); }
+    DeviceContainer* getDeviceContainer() const;
+    DevDeviceCode* getDevDevice() const;
+    std::string getUuid() const;
+    std::string getDeviceType() const;
+    const std::string& getFriendlyName();
+    Service* getService(std::string serviceType);
+    const std::string& getProperty(const std::string& name);
     
-    void setDeviceContainer(DeviceContainer* pDeviceContainer) { _pDeviceContainer = pDeviceContainer; }
-    void setDevDevice(DevDevice* pDevDevice) { _pDevDevice = pDevDevice; }
-    void setUuid(std::string uuid) { _uuid = uuid; }
+    void setDeviceContainer(DeviceContainer* pDeviceContainer);
+    void setDeviceData(DeviceData* pDeviceData);
+    void setDevDevice(DevDeviceCode* pDevDevice);
+    void setUuid(std::string uuid);
     void setRandomUuid();
-    void setDeviceType(std::string deviceType) { _deviceType = deviceType; }
-    void setProperty(const std::string& name, const std::string& val) { _properties.get(name) = val; }
+//    void setDeviceType(std::string deviceType);
+    void setProperty(const std::string& name, const std::string& val);
     
-    void addProperty(const std::string& name, const std::string& val) { _properties.append(name, new std::string(val)); }
+    void addProperty(const std::string& name, const std::string& val);
     void addService(Service* pService);
     void addIcon(Icon* pIcon);
 
@@ -848,7 +879,35 @@ public:
     
 private:
     DeviceContainer*                    _pDeviceContainer;
-    DevDevice*                          _pDevDevice;
+    DeviceData*                         _pDeviceData;
+    DevDeviceCode*                      _pDevDeviceCode;
+    CtlDeviceCode*                      _pCtlDeviceCode;
+
+//    std::string                         _uuid;
+//    std::string                         _deviceType;
+//    Container<Service>                  _services;
+//    Container<std::string>              _properties;
+//    std::vector<Icon*>                  _iconList;
+};
+
+
+class DeviceData
+{
+    friend class Device;
+public:
+    DeviceData();
+
+    Device* getDevice();
+
+    void setDeviceType(std::string deviceType);
+    void setUuid(std::string uuid);
+    void setDevice(Device* pDevice);
+
+    void addProperty(const std::string& name, const std::string& val);
+    void addService(Service* pService);
+
+private:
+    Device*                             _pDevice;
     std::string                         _uuid;
     std::string                         _deviceType;
     Container<Service>                  _services;
@@ -859,7 +918,7 @@ private:
 
 class DeviceContainer : public Util::Startable
 {
-    friend class DevDevice;
+    friend class DevDeviceCode;
     friend class Controller;
     
 public:
@@ -867,26 +926,25 @@ public:
     ~DeviceContainer();
     
     typedef Container<Device>::Iterator DeviceIterator;
-    DeviceIterator beginDevice() { return _devices.begin(); }
-    DeviceIterator endDevice() { return _devices.end(); }
+    DeviceIterator beginDevice();
+    DeviceIterator endDevice();
     
     typedef std::map<std::string,Service*>::iterator ServiceTypeIterator;
-    ServiceTypeIterator beginServiceType() { return _serviceTypes.begin(); }
-    ServiceTypeIterator endServiceType() { return _serviceTypes.end(); }
+    ServiceTypeIterator beginServiceType();
+    ServiceTypeIterator endServiceType();
     
-    
-    /*const*/ Device* getDevice(std::string uuid) /*const*/ { return &_devices.get(uuid); }
-    Device* getRootDevice() const { return _pRootDevice; }
-    Controller* getController() const { return _pController; }
-    std::string* getDeviceDescription() const { return _pDeviceDescription; }
-    const std::string& getDescriptionUri() const { return _descriptionUri; }
+    /*const*/ Device* getDevice(std::string uuid) /*const*/;
+    Device* getRootDevice() const;
+    Controller* getController() const;
+    std::string* getDeviceDescription() const;
+    const std::string& getDescriptionUri() const;
     Service* getServiceType(const std::string& serviceType);
     
-    void setRootDevice(Device* pDevice) { _pRootDevice = pDevice; }
-    void setDeviceDescription(std::string& description) { _pDeviceDescription = &description; }
-    void setDescriptionUri(const std::string uri) { _descriptionUri = uri; }
+    void setRootDevice(Device* pDevice);
+    void setDeviceDescription(std::string& description);
+    void setDescriptionUri(const std::string uri);
     void addDevice(Device* pDevice);
-    void addServiceType(std::string serviceType, Service* pService) { _serviceTypes[serviceType] = pService; }
+    void addServiceType(std::string serviceType, Service* pService);
     
     void print();
 
@@ -911,11 +969,7 @@ public:
     void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
     void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
         
-    void postAction(Action* pAction) { _httpSocket._notificationCenter.postNotification(pAction); }
-    
-//    void setImplAdapter(DevDevice* implAdapter) { _pDeviceContainerImplAdapter = implAdapter; }
-//    void initStateVars(Service* pService);
-
+    void postAction(Action* pAction);
     
 private:
     void setDescriptionUri();
@@ -934,39 +988,42 @@ private:
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
     HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
-//    DevDevice*                      _pDeviceContainerImplAdapter;
     Controller*                     _pController;
 };
 
 
-class DevDevice //: public Util::Startable
+class DevDeviceCode
 {
     friend class DeviceContainer;
     friend class Device;
     
 public:
-    DevDevice();
-    ~DevDevice();
+    DevDeviceCode();
+    ~DevDeviceCode();
+
+    std::string& deviceDescription();
+    std::map<std::string,std::string*>& serviceDescriptions();
     
 //    virtual void start();
 //    virtual void stop();
     
-    void setUuid(std::string uuid, int deviceNumber = 0);
-    void setRandomUuid(int deviceNumber = 0);
-    void setFriendlyName(const std::string& friendlyName, int deviceNumber = 0);
-    void addIcon(Icon* pIcon, int deviceNumber = 0);
+//    void setUuid(std::string uuid, int deviceNumber = 0);
+//    void setRandomUuid(int deviceNumber = 0);
+//    void setFriendlyName(const std::string& friendlyName, int deviceNumber = 0);
+//    void addIcon(Icon* pIcon, int deviceNumber = 0);
     
 protected:
     virtual void actionHandler(Action* action) = 0;
     virtual void initStateVars(Service* pService) = 0;
-    virtual bool initDevice() { return true; }
+//    virtual bool initDevice() { return true; }
     /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
     /// if initialization takes a while to process, start the device in threaded mode with start(true).
-    
-    std::map<std::string,std::string*>      _descriptions;
-    // _deviceRoot is the link into the "dynamic-string-world".
-    DeviceContainer*                        _pDeviceContainer;
+
+//    std::string&                            _deviceDescription;
+//    std::map<std::string,std::string*>      _descriptions;
     Device*                                 _pDevice;
+    // TODO: DeviceContainer should be accessed through Device*
+    DeviceContainer*                        _pDeviceContainer;
 };
 
 
@@ -997,7 +1054,7 @@ protected:
 };
 
 
-class CtlDevice
+class CtlDeviceCode
 {
     friend class Controller;
 
@@ -1005,7 +1062,7 @@ public:
     Device* getDevice() const { return _pDevice; }
 
 //protected:
-    CtlDevice(Device* pDevice) : _pDevice(pDevice) {}
+    CtlDeviceCode(Device* pDevice) : _pDevice(pDevice) {}
 
 protected:
 //    virtual void eventHandler(StateVar* stateVar) = 0;
@@ -1032,7 +1089,7 @@ public:
 protected:
     UserInterface*                      _pUserInterface;
 //    Container<DeviceContainer>           _devices;
-    Container<CtlDevice>    _devices;
+    Container<CtlDeviceCode>    _devices;
     
 private:
     void sendMSearch();

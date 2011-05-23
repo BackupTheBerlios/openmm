@@ -202,23 +202,6 @@ protected:
             rendererContainer.addDevice(&mediaRenderer);
             rendererContainer.setRootDevice(&mediaRenderer);
             
-            
-//             std::cerr << "MediaRendererApplication::main()" << std::endl;
-//             char* argv[args.size()] = new char*[args.size()];
-//             for (int i = 0; i < args.size(); ++i) {
-//                 argv[i] = args[i].c_str();
-//             }
-// //             char* argv[1] = {"ommr"};
-//             char** argv
-            // TODO: change Engine ctor with arg as std::vector<std::string>
-//             Omm::Av::Engine* pEngine = new EngineVlc(1, argv);
-// //             Omm::Av::Engine* pEngine = new EngineXine;
-//             std::cerr << "MediaRendererApplication::main() pEngine: " << pEngine << std::endl;
-//             std::cerr << "MediaRendererApplication::main() engine id: " << pEngine->getEngineId() << std::endl;
-            
-// //             Omm::Av::UpnpAvRenderer myMediaRenderer(pEngine);
-            
-//             myMediaRenderer.setFullscreen();
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pIcon);
             if (_name != "") {
@@ -228,7 +211,7 @@ protected:
             
             rendererContainer.start();
             waitForTerminationRequest();
-            // myMediaRenderer.stop();
+            // mediaRenderer.stop();
         }
         return Application::EXIT_OK;
     }

@@ -170,6 +170,8 @@ protected:
 
             Omm::DeviceContainer serverContainer;
             Omm::Av::AvServer mediaServer;
+            Omm::Log::instance()->upnp().debug("server application created device container: " + Poco::NumberFormatter::format(&serverContainer));
+            Omm::Log::instance()->upnp().debug("server application created device: " + Poco::NumberFormatter::format(&mediaServer));
             serverContainer.addDevice(&mediaServer);
             serverContainer.setRootDevice(&mediaServer);
 

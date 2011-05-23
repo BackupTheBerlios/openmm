@@ -55,7 +55,7 @@ private:
 };
 
 
-class DimmableLightController : public Omm::CtlDevice
+class DimmableLightController : public Omm::CtlDeviceCode
 {
 public:
     DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController);

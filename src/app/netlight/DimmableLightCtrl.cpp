@@ -208,7 +208,7 @@ DimmableLightController::eventHandler(Omm::StateVar* pStateVar)
 
 
 DimmableLightController::DimmableLightController(Omm::Device* pDevice, SwitchPowerController* pSwitchPowerController, DimmingController* pDimmingController) :
-CtlDevice(pDevice),
+CtlDeviceCode(pDevice),
 _pDevice(pDevice),
 _pSwitchPowerController(pSwitchPowerController), 
 _pDimmingController(pDimmingController)
