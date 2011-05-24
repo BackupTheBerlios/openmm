@@ -317,14 +317,12 @@ DevDeviceCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
-        << "#include \"" << "Dev" + _deviceName << "Disp.h\"" << std::endl
-        << "#include \"" << _deviceName << "Desc.h\"" << std::endl
+        << "#include \"" << "Dev" + _deviceName << ".h\"" << std::endl
         << std::endl
         << std::endl
         << "void" << std::endl
         << "Dev" + _deviceName << "::actionHandler(Action* pAction)" << std::endl
         << "{" << std::endl
-//        << indent(1) << "// the great action dispatcher" << std::endl;
         << indent(1) << "std::string serviceType = pAction->getService()->getServiceType();" << std::endl;
     
     _stateVarInitializer
@@ -346,7 +344,7 @@ DevDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
     std::string ctorArgs = "";
     int i = _serviceNames.size();
     while (i--) {
-        ctorArgs += "Dev" + _serviceNames[i] + "* p" + _serviceNames[i] + "Impl" + (i ? ", " : "");
+        ctorArgs += "Dev" + _serviceNames[i] + "* p" + _serviceNames[i] + (i ? ", " : "");
     }
     
     _out
@@ -357,49 +355,39 @@ DevDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
         << "}" << std::endl
         << std::endl
         << std::endl
+
+        // Constructor
         << "Dev" + _deviceName << "::" << _deviceName << "("
         << ctorArgs
         << ") :" << std::endl
-        << "DevDevice()," << std::endl
         ;
     
     i = _serviceNames.size();
     while (i--) {
         _out 
-            << "_p" << "Dev" + _serviceNames[i] << "Impl(p" << _serviceNames[i] << "Impl)"
+            << "_p" << "Dev" + _serviceNames[i] << "(p" << _serviceNames[i] << ")"
             << (i ? ", " : "") << std::endl;
     }
     
     _out
         << "{" << std::endl
-        << indent(1) << "_descriptions[\"" << deviceDescriptionPath << "\"]"
-        << " = &" << "Dev" + _deviceName << "::_deviceDescription;" << std::endl;
-    
+        << "}" << std::endl
+
+        // Destructor
+        << std::endl
+        << std::endl
+        << "Dev" + _deviceName << "::~" << _deviceName << "()" << std::endl
+        << "{" << std::endl
+        ;
+
     i = _serviceNames.size();
     while (i--) {
-        _out
-            << indent(1) << "_descriptions[\"" << _servicePaths[i] << "\"]"
-//            << indent(1) << "_descriptions[\"/" << _serviceTypes[i] << "/Description.xml" << "\"]"
-            << " = &" << "Dev" + _serviceNames[i] << "::_description;" << std::endl;
+        _out << indent(1) << "delete _p" << "Dev" + _serviceNames[i] << ";" << std::endl;
     }
-    
-//     _out << std::endl;
-//     
-//     i = _serviceNames.size();
-//     while (i--) {
-//         _out
-//             << indent(1) << "p" << _serviceNames[i] << "Impl->_pMediaRenderer = this;"
-//             << std::endl;
-//     }
-    
-    _out << std::endl
-        << indent(1) << "StringDescriptionReader descriptionReader(_descriptions);" << std::endl
-//        << deviceDescriptionPath << "\");" << std::endl
-        << indent(1) << "_pDeviceContainer = descriptionReader.deviceContainer(\""
-//        <<  _deviceName << ".xml\");" << std::endl
-        <<  deviceDescriptionPath << "\");" << std::endl
-        << indent(1) << "_pDeviceContainer->setImplAdapter(this);" << std::endl
+
+    _out
         << "}" << std::endl
+
         << std::endl
         << std::endl
         << _serviceActionDispatcher.str()
