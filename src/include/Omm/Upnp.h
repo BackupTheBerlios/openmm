@@ -130,13 +130,14 @@ static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    OMM_VERSION         = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 
+class DescriptionProvider;
+class DeviceManager;
+class Controller;
+class DeviceContainer;
 class Device;
 class DeviceData;
-class DeviceContainer;
 class DevDeviceCode;
 class CtlDeviceCode;
-class DescriptionProvider;
-class Controller;
 class Service;
 class Action;
 class Argument;
@@ -271,6 +272,27 @@ private:
     int                                 _repeat;
     long                                _delay;
     bool                                _continuous;
+};
+
+
+class HttpSocket
+{
+    friend class DeviceContainer;
+
+public:
+    HttpSocket();
+    ~HttpSocket();
+
+    void init();
+    void startServer();
+    void stopServer();
+    std::string getServerUri();
+
+private:
+    Poco::Net::HTTPServer*                _pHttpServer;
+    Poco::UInt16                          _httpServerPort;
+    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
+    Poco::NotificationCenter              _notificationCenter;
 };
 
 
@@ -477,6 +499,21 @@ private:
 };
 
 
+class DescriptionProvider
+{
+public:
+    std::string& getDeviceDescription();
+    std::string& getServiceDescription(const std::string& path);
+    /// Argument path correspond to the SCPD fields of the device description,
+    /// because usually the device description is retrieved first and then
+    /// the service descriptions listed in the device description.
+
+protected:
+    std::string*                            _pDeviceDescription;
+    std::map<std::string,std::string*>      _serviceDescriptions;
+};
+
+
 class DescriptionReader
 {
 public:
@@ -545,24 +582,188 @@ private:
 };
 
 
-class HttpSocket
+class DeviceManager : public Util::Startable
+{
+public:
+    DeviceManager();
+    virtual ~DeviceManager();
+
+private:
+    Container<DeviceContainer>           _deviceContainers;
+};
+
+
+class DeviceContainer : public Util::Startable
+{
+    friend class DevDeviceCode;
+    friend class Controller;
+
+public:
+    DeviceContainer();
+    ~DeviceContainer();
+
+    typedef Container<Device>::Iterator DeviceIterator;
+    DeviceIterator beginDevice();
+    DeviceIterator endDevice();
+
+    typedef std::map<std::string,Service*>::iterator ServiceTypeIterator;
+    ServiceTypeIterator beginServiceType();
+    ServiceTypeIterator endServiceType();
+
+    /*const*/ Device* getDevice(std::string uuid) /*const*/;
+    Device* getRootDevice() const;
+    Controller* getController() const;
+    std::string* getDeviceDescription() const;
+    const std::string& getDescriptionUri() const;
+    Service* getServiceType(const std::string& serviceType);
+
+    void setRootDevice(Device* pDevice);
+    void setDeviceDescription(std::string& description);
+    void setDescriptionUri(const std::string uri);
+    void addDevice(Device* pDevice);
+    void addServiceType(Service* pService);
+
+    void print();
+
+    void initSockets();
+    void initUuid();
+    void initStateVars();
+    void rewriteDescriptions();
+    void initDevice();
+    void initController();
+    void startSsdp();
+    void startHttp();
+    void stopSsdp();
+    void stopHttp();
+    void start();
+    void stop();
+
+    void registerActionHandler(const Poco::AbstractObserver& observer);
+    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
+
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void handleSsdpMessage(SsdpMessage* pNf);
+    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+
+    void postAction(Action* pAction);
+
+private:
+    void setDescriptionUri();
+    void writeSsdpMessages();
+    void sendSsdpAliveMessages();
+    void sendSsdpByebyeMessages();
+
+//     Poco::URI                       _baseUri;              // base URI for control URI and event URI
+    std::string                     _descriptionUri;            // for controller to download description
+    std::string*                    _pDeviceDescription;
+    Container<Device>               _devices;
+    Device*                         _pRootDevice;
+    std::map<std::string,Service*>  _serviceTypes;
+    SsdpSocket                      _ssdpSocket;
+    SsdpMessageSet                  _ssdpNotifyAliveMessages;
+    SsdpMessageSet                  _ssdpNotifyByebyeMessages;
+    HttpSocket                      _httpSocket;
+    DescriptionRequestHandler*      _descriptionRequestHandler;
+    Controller*                     _pController;
+};
+
+
+class Device
+{
+    friend class DeviceDescriptionWriter;
+    friend class DeviceContainer;
+
+public:
+    Device();
+    virtual ~Device();
+
+    typedef Container<Service>::Iterator ServiceIterator;
+    ServiceIterator beginService();
+    ServiceIterator endService();
+
+    typedef Container<std::string>::KeyIterator PropertyIterator;
+    PropertyIterator beginProperty();
+    PropertyIterator endProperty();
+
+    typedef std::vector<Icon*>::iterator IconIterator;
+    IconIterator beginIcon();
+    IconIterator endIcon();
+
+    DeviceContainer* getDeviceContainer() const;
+    DevDeviceCode* getDevDevice() const;
+    std::string getUuid() const;
+    std::string getDeviceType() const;
+    const std::string& getFriendlyName();
+    Service* getService(std::string serviceType);
+    const std::string& getProperty(const std::string& name);
+
+    void setDeviceContainer(DeviceContainer* pDeviceContainer);
+    void setDeviceData(DeviceData* pDeviceData);
+    void setDeviceCode(DevDeviceCode* pDevDevice);
+    void setUuid(std::string uuid);
+    void setRandomUuid();
+    void setProperty(const std::string& name, const std::string& val);
+
+    void addProperty(const std::string& name, const std::string& val);
+    void addService(Service* pService);
+    void addIcon(Icon* pIcon);
+
+    void initStateVars();
+
+private:
+    DeviceContainer*                    _pDeviceContainer;
+    DeviceData*                         _pDeviceData;
+    DevDeviceCode*                      _pDevDeviceCode;
+    CtlDeviceCode*                      _pCtlDeviceCode;
+};
+
+
+class DeviceData
+{
+    friend class Device;
+public:
+    DeviceData();
+
+    Device* getDevice();
+
+    void setDeviceType(std::string deviceType);
+    void setUuid(std::string uuid);
+    void setDevice(Device* pDevice);
+
+    void addProperty(const std::string& name, const std::string& val);
+    void addService(Service* pService);
+
+private:
+    Device*                             _pDevice;
+    std::string                         _uuid;
+    std::string                         _deviceType;
+    Container<Service>                  _services;
+    Container<std::string>              _properties;
+    std::vector<Icon*>                  _iconList;
+};
+
+
+class DevDeviceCode
 {
     friend class DeviceContainer;
-    
+    friend class Device;
+
 public:
-    HttpSocket();
-    ~HttpSocket();
-    
-    void init();
-    void startServer();
-    void stopServer();
-    std::string getServerUri();
-    
-private:
-    Poco::Net::HTTPServer*                _pHttpServer;
-    Poco::UInt16                          _httpServerPort;
-    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
-    Poco::NotificationCenter              _notificationCenter;
+    DevDeviceCode();
+    ~DevDeviceCode();
+
+    std::string& deviceDescription();
+    std::map<std::string,std::string*>& serviceDescriptions();
+
+protected:
+    virtual void actionHandler(Action* action) = 0;
+    virtual void initStateVars(Service* pService) = 0;
+//    virtual bool initDevice() { return true; }
+    /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
+    /// if initialization takes a while to process, start the device in threaded mode with start(true).
+
+    Device*                                 _pDevice;
 };
 
 
@@ -571,7 +772,7 @@ class StateVar : public Variant
 public:
     StateVar() : Variant() {}
     template<typename T> StateVar(const T& val) : Variant(val) {}
-    
+
     std::string getName() const { return _name; }
     const std::string& getType() const { return _type; }
     void setName(std::string name) { _name = name; }
@@ -579,7 +780,7 @@ public:
     void setDefaultValue(std::string defaultValue) { _defaultValue = defaultValue; }
     void setSendEvents(std::string sendEvents) { _sendEvents = (sendEvents=="yes") ? true : false; }
     bool getSendEvents() const { return _sendEvents; }
-    
+
 private:
     std::string     _name;
     std::string     _type;
@@ -588,29 +789,114 @@ private:
 };
 
 
-class Argument : public Variant
-{
+class Service {
 public:
-    Argument() : Variant() {}
-    template<typename T> Argument(const T& val) : Variant(val) {}
-    
-    std::string getName() const { return _name; }
-    std::string getDirection() const { return _in ? "in" : "out"; }
-    const std::string& getRelatedStateVarName() const { return _relatedStateVar; }
-    StateVar* getRelatedStateVarReference() const;
-    Action* getAction() const { return _pAction; }
-    
-    void setName(std::string name) { _name = name; }
-    void setDirection(std::string direction) { _in = (direction == "in") ? true : false; }
-    void setRelatedStateVar(std::string relatedStateVar) { _relatedStateVar = relatedStateVar; }
-    void setAction(Action* pAction) { _pAction = pAction; }
-    
+    Service() {}
+    ~Service();
+
+    typedef Container<StateVar>::Iterator StateVarIterator;
+    StateVarIterator beginStateVar();
+    StateVarIterator endStateVar();
+    StateVarIterator beginEventedStateVar();
+    StateVarIterator endEventedStateVar();
+
+    typedef Container<Action>::Iterator ActionIterator;
+    ActionIterator beginAction();
+    ActionIterator endAction();
+
+    typedef Container<Subscription>::Iterator SubscriptionIterator;
+    SubscriptionIterator beginEventSubscription();
+    SubscriptionIterator endEventSubscription();
+
+    std::string getServiceType() const;
+    std::string getServiceId() const;
+    std::string getDescriptionPath() const;
+    std::string* getDescription() const;
+    std::string getControlPath() const;
+    std::string getEventPath() const;
+    DescriptionRequestHandler* getDescriptionRequestHandler() const;
+    ControlRequestHandler* getControlRequestHandler() const;
+    Device* getDevice() const;
+    Action* getAction(const std::string& actionName);
+    Subscription* getSubscription(const std::string& sid);
+    StateVar* getStateVarReference(const std::string& key);
+    template<typename T> T getStateVar(const std::string& key);
+
+    void setServiceType(std::string serviceType);
+    void setServiceId(std::string serviceId);
+    void setDescriptionPath(std::string descriptionPath);
+    void setServiceDescription(std::string& description);
+    void setDescriptionRequestHandler();
+    void setControlPath(std::string controlPath);
+    void setEventPath(std::string eventPath);
+    void setDeviceData(DeviceData* pDeviceData);
+    template<typename T> void setStateVar(std::string key, const T& val);
+
+    void addAction(Action* pAction);
+    void addStateVar(StateVar* pStateVar);
+
+    void initClient();
+    void sendAction(Action* pAction);
+
+    void registerSubscription(Subscription* subscription);
+    void unregisterSubscription(Subscription* subscription);
+
+    // TODO: moderated event messaging
+    // TODO: honor maximumRate and minimumDelta (specs p. 72)
+    void sendEventMessage(StateVar& stateVar);
+    void sendInitialEventMessage(Subscription* pSubscription);
+
 private:
-    std::string     _name;
-    std::string     _relatedStateVar;
-    bool            _in;
-    Action*         _pAction;
+    void actionNetworkActivity(bool begin);
+
+    DeviceData*                             _pDeviceData;
+    std::string                             _vendorDomain;
+    std::string                             _serviceType;
+    std::string                             _serviceId;
+    std::string                             _serviceVersion;
+    std::string*                            _pDescription;
+    std::string                             _descriptionPath;
+    DescriptionRequestHandler*              _pDescriptionRequestHandler;
+    Poco::URI                               _baseUri;
+    std::string                             _controlPath;
+    ControlRequestHandler*                  _controlRequestHandler;
+    std::string                             _eventPath;
+    // PROPOSE: add EventRequestHandler* for Controller here??
+    // PROPOSE: rename current EventRequestHandler to EventSubscriptionRequestHandler
+    Container<Action>                       _actions;
+    Container<StateVar>                     _stateVars;
+    Container<StateVar>                     _eventedStateVars;
+    Container<Subscription>                 _eventSubscriptions;
+
+    Poco::FastMutex                         _serviceLock;
 };
+
+
+template<typename T>
+T
+Service::getStateVar(const std::string& key)
+{
+    // TODO: lock the _stateVariables map because different threads could access it
+//     std::clog << "Service::getStateVar()" << std::endl;
+    return _stateVars.getValue<T>(key);
+}
+
+
+template<typename T>
+void
+Service::setStateVar(std::string key, const T& val)
+{
+    // TODO: lock the _stateVariables map because different threads could access it
+//    Log::instance()->upnp().debug("service set state var: " + key);
+    // FIXME: segfault here
+//    Log::instance()->upnp().debug("service type: " + getServiceType());
+    _stateVars.setValue(key, val);
+    if (_stateVars.get(key).getSendEvents()) {
+//        Log::instance()->upnp().debug("state var " + key + " sends event message");
+        sendEventMessage(_stateVars.get(key));
+    }
+//    Log::instance()->upnp().debug("service set state var: " + key + " finished.");
+}
 
 
 class Action : public Poco::Notification
@@ -687,325 +973,28 @@ private:
 };
 
 
-class Service {
-public:
-    Service() {}
-    ~Service();
-
-    typedef Container<StateVar>::Iterator StateVarIterator;
-    StateVarIterator beginStateVar();
-    StateVarIterator endStateVar();
-    StateVarIterator beginEventedStateVar();
-    StateVarIterator endEventedStateVar();
-
-    typedef Container<Action>::Iterator ActionIterator;
-    ActionIterator beginAction();
-    ActionIterator endAction();
-
-    typedef Container<Subscription>::Iterator SubscriptionIterator;
-    SubscriptionIterator beginEventSubscription();
-    SubscriptionIterator endEventSubscription();
-
-    std::string getServiceType() const;
-    std::string getServiceId() const;
-    std::string getDescriptionPath() const;
-    std::string* getDescription() const;
-    std::string getControlPath() const;
-    std::string getEventPath() const;
-    DescriptionRequestHandler* getDescriptionRequestHandler() const;
-    ControlRequestHandler* getControlRequestHandler() const;
-    Device* getDevice() const;
-    Action* getAction(const std::string& actionName);
-    Subscription* getSubscription(const std::string& sid);
-    StateVar* getStateVarReference(const std::string& key);
-    template<typename T> T getStateVar(const std::string& key);
-    
-    void setServiceType(std::string serviceType);
-    void setServiceId(std::string serviceId);
-    void setDescriptionPath(std::string descriptionPath);
-    void setServiceDescription(std::string& description);
-    void setDescriptionRequestHandler();
-    void setControlPath(std::string controlPath);
-    void setEventPath(std::string eventPath);
-    void setDeviceData(DeviceData* pDeviceData);
-    template<typename T> void setStateVar(std::string key, const T& val);
-    
-    void addAction(Action* pAction);
-    void addStateVar(StateVar* pStateVar);
-    
-    void initClient();
-    void sendAction(Action* pAction);
-    
-    void registerSubscription(Subscription* subscription);
-    void unregisterSubscription(Subscription* subscription);
-    
-    // TODO: moderated event messaging
-    // TODO: honor maximumRate and minimumDelta (specs p. 72)
-    void sendEventMessage(StateVar& stateVar);
-    void sendInitialEventMessage(Subscription* pSubscription);
-    
-private:
-    void actionNetworkActivity(bool begin);
-    
-    DeviceData*                             _pDeviceData;
-    std::string                             _vendorDomain;
-    std::string                             _serviceType;
-    std::string                             _serviceId;
-    std::string                             _serviceVersion;
-    std::string*                            _pDescription;
-    std::string                             _descriptionPath;
-    DescriptionRequestHandler*              _pDescriptionRequestHandler;
-    Poco::URI                               _baseUri;
-    std::string                             _controlPath;
-    ControlRequestHandler*                  _controlRequestHandler;
-    std::string                             _eventPath;
-    // PROPOSE: add EventRequestHandler* for Controller here??
-    // PROPOSE: rename current EventRequestHandler to EventSubscriptionRequestHandler
-    Container<Action>                       _actions;
-    Container<StateVar>                     _stateVars;
-    Container<StateVar>                     _eventedStateVars;
-    Container<Subscription>                 _eventSubscriptions;
-    
-    Poco::FastMutex                         _serviceLock;
-};
-
-
-template<typename T>
-T
-Service::getStateVar(const std::string& key)
-{
-    // TODO: lock the _stateVariables map because different threads could access it
-//     std::clog << "Service::getStateVar()" << std::endl;
-    return _stateVars.getValue<T>(key);
-}
-
-
-template<typename T>
-void
-Service::setStateVar(std::string key, const T& val)
-{
-    // TODO: lock the _stateVariables map because different threads could access it
-//    Log::instance()->upnp().debug("service set state var: " + key);
-    // FIXME: segfault here
-//    Log::instance()->upnp().debug("service type: " + getServiceType());
-    _stateVars.setValue(key, val);
-    if (_stateVars.get(key).getSendEvents()) {
-//        Log::instance()->upnp().debug("state var " + key + " sends event message");
-        sendEventMessage(_stateVars.get(key));
-    }
-//    Log::instance()->upnp().debug("service set state var: " + key + " finished.");
-}
-
-
-// TODO: finish Device Property stuff ...
-// class Property
-// {
-//     std::string getValue() { return _value; }
-//     void setValue(const std::string& val) { _value = val; }
-//     
-// private:
-//     std::string     _value;
-// };
-
-
-class DescriptionProvider
+class Argument : public Variant
 {
 public:
-    std::string& getDeviceDescription();
-    std::string& getServiceDescription(const std::string& path);
-    /// Argument path correspond to the SCPD fields of the device description,
-    /// because usually the device description is retrieved first and then
-    /// the service descriptions listed in the device description.
+    Argument() : Variant() {}
+    template<typename T> Argument(const T& val) : Variant(val) {}
 
-protected:
-    std::string*                            _pDeviceDescription;
-    std::map<std::string,std::string*>      _serviceDescriptions;
-};
+    std::string getName() const { return _name; }
+    std::string getDirection() const { return _in ? "in" : "out"; }
+    const std::string& getRelatedStateVarName() const { return _relatedStateVar; }
+    StateVar* getRelatedStateVarReference() const;
+    Action* getAction() const { return _pAction; }
 
-
-class Device
-{
-    friend class DeviceDescriptionWriter;
-    friend class DeviceContainer;
-    
-public:
-    Device();
-    virtual ~Device();
-    
-    typedef Container<Service>::Iterator ServiceIterator;
-    ServiceIterator beginService();
-    ServiceIterator endService();
-    
-    typedef Container<std::string>::KeyIterator PropertyIterator;
-    PropertyIterator beginProperty();
-    PropertyIterator endProperty();
-    
-    typedef std::vector<Icon*>::iterator IconIterator;
-    IconIterator beginIcon();
-    IconIterator endIcon();
-    
-    DeviceContainer* getDeviceContainer() const;
-    DevDeviceCode* getDevDevice() const;
-    std::string getUuid() const;
-    std::string getDeviceType() const;
-    const std::string& getFriendlyName();
-    Service* getService(std::string serviceType);
-    const std::string& getProperty(const std::string& name);
-    
-    void setDeviceContainer(DeviceContainer* pDeviceContainer);
-    void setDeviceData(DeviceData* pDeviceData);
-    void setDeviceCode(DevDeviceCode* pDevDevice);
-    void setUuid(std::string uuid);
-    void setRandomUuid();
-    void setProperty(const std::string& name, const std::string& val);
-    
-    void addProperty(const std::string& name, const std::string& val);
-    void addService(Service* pService);
-    void addIcon(Icon* pIcon);
-
-    void initStateVars();
-    
-private:
-    DeviceContainer*                    _pDeviceContainer;
-    DeviceData*                         _pDeviceData;
-    DevDeviceCode*                      _pDevDeviceCode;
-    CtlDeviceCode*                      _pCtlDeviceCode;
-};
-
-
-class DeviceData
-{
-    friend class Device;
-public:
-    DeviceData();
-
-    Device* getDevice();
-
-    void setDeviceType(std::string deviceType);
-    void setUuid(std::string uuid);
-    void setDevice(Device* pDevice);
-
-    void addProperty(const std::string& name, const std::string& val);
-    void addService(Service* pService);
+    void setName(std::string name) { _name = name; }
+    void setDirection(std::string direction) { _in = (direction == "in") ? true : false; }
+    void setRelatedStateVar(std::string relatedStateVar) { _relatedStateVar = relatedStateVar; }
+    void setAction(Action* pAction) { _pAction = pAction; }
 
 private:
-    Device*                             _pDevice;
-    std::string                         _uuid;
-    std::string                         _deviceType;
-    Container<Service>                  _services;
-    Container<std::string>              _properties;
-    std::vector<Icon*>                  _iconList;
-};
-
-
-class DeviceContainer : public Util::Startable
-{
-    friend class DevDeviceCode;
-    friend class Controller;
-    
-public:
-    DeviceContainer();
-    ~DeviceContainer();
-    
-    typedef Container<Device>::Iterator DeviceIterator;
-    DeviceIterator beginDevice();
-    DeviceIterator endDevice();
-    
-    typedef std::map<std::string,Service*>::iterator ServiceTypeIterator;
-    ServiceTypeIterator beginServiceType();
-    ServiceTypeIterator endServiceType();
-    
-    /*const*/ Device* getDevice(std::string uuid) /*const*/;
-    Device* getRootDevice() const;
-    Controller* getController() const;
-    std::string* getDeviceDescription() const;
-    const std::string& getDescriptionUri() const;
-    Service* getServiceType(const std::string& serviceType);
-    
-    void setRootDevice(Device* pDevice);
-    void setDeviceDescription(std::string& description);
-    void setDescriptionUri(const std::string uri);
-    void addDevice(Device* pDevice);
-    void addServiceType(Service* pService);
-    
-    void print();
-
-    void initSockets();
-    void initUuid();
-    void initStateVars();
-    void rewriteDescriptions();
-    void initDevice();
-    void initController();
-    void startSsdp();
-    void startHttp();
-    void stopSsdp();
-    void stopHttp();
-    void start();
-    void stop();
-    
-    void registerActionHandler(const Poco::AbstractObserver& observer);
-    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
-    
-    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    void handleSsdpMessage(SsdpMessage* pNf);
-    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-        
-    void postAction(Action* pAction);
-    
-private:
-    void setDescriptionUri();
-    void writeSsdpMessages();
-    void sendSsdpAliveMessages();
-    void sendSsdpByebyeMessages();
-
-//     Poco::URI                       _baseUri;              // base URI for control URI and event URI       
-    std::string                     _descriptionUri;            // for controller to download description
-    std::string*                    _pDeviceDescription;
-    Container<Device>               _devices;
-    Device*                         _pRootDevice;
-    std::map<std::string,Service*>  _serviceTypes;
-    SsdpSocket                      _ssdpSocket;
-    SsdpMessageSet                  _ssdpNotifyAliveMessages;
-    SsdpMessageSet                  _ssdpNotifyByebyeMessages;
-    HttpSocket                      _httpSocket;
-    DescriptionRequestHandler*      _descriptionRequestHandler;
-    Controller*                     _pController;
-};
-
-
-class DevDeviceCode
-{
-    friend class DeviceContainer;
-    friend class Device;
-    
-public:
-    DevDeviceCode();
-    ~DevDeviceCode();
-
-    std::string& deviceDescription();
-    std::map<std::string,std::string*>& serviceDescriptions();
-    
-//    virtual void start();
-//    virtual void stop();
-    
-//    void setUuid(std::string uuid, int deviceNumber = 0);
-//    void setRandomUuid(int deviceNumber = 0);
-//    void setFriendlyName(const std::string& friendlyName, int deviceNumber = 0);
-//    void addIcon(Icon* pIcon, int deviceNumber = 0);
-    
-protected:
-    virtual void actionHandler(Action* action) = 0;
-    virtual void initStateVars(Service* pService) = 0;
-//    virtual bool initDevice() { return true; }
-    /// initDevice() can be implemented by the customer to execute code before UPnP device is started.
-    /// if initialization takes a while to process, start the device in threaded mode with start(true).
-
-//    std::string&                            _deviceDescription;
-//    std::map<std::string,std::string*>      _descriptions;
-    Device*                                 _pDevice;
-    // TODO: DeviceContainer should be accessed through Device*
-    DeviceContainer*                        _pDeviceContainer;
+    std::string     _name;
+    std::string     _relatedStateVar;
+    bool            _in;
+    Action*         _pAction;
 };
 
 
@@ -1041,13 +1030,11 @@ class CtlDeviceCode
     friend class Controller;
 
 public:
-    Device* getDevice() const { return _pDevice; }
-
-//protected:
     CtlDeviceCode(Device* pDevice) : _pDevice(pDevice) {}
 
+    Device* getDevice() const { return _pDevice; }
+
 protected:
-//    virtual void eventHandler(StateVar* stateVar) = 0;
     virtual void eventHandler(StateVar* stateVar) {}
     void init();
 
@@ -1055,7 +1042,7 @@ protected:
 };
 
 
-class Controller
+class Controller : public DeviceManager
 {
 public:
     Controller();
