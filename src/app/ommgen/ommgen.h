@@ -59,7 +59,7 @@ protected:
     std::string indent(int level);
     std::string firstLetterToLower(const std::string& s);
     
-    DeviceContainer*                         _pDeviceContainer;
+    DeviceContainer*                    _pDeviceContainer;
     std::string                         _outputPath;
     std::string                         _deviceType;
     std::string                         _deviceName;
@@ -161,11 +161,11 @@ public:
     DeviceDescH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
-    std::string escapeDescription(const std::string& description);
+//    std::string escapeDescription(const std::string& description);
     
     virtual void deviceContainer(const DeviceContainer& deviceContainer);
-    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
-    virtual void serviceType(const Service& service);
+//    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
+//    virtual void serviceType(const Service& service);
     
     std::ofstream       _out;
 };
@@ -177,7 +177,15 @@ public:
     DeviceDescCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
 
 private:
-    std::ofstream       _out;
+    std::string escapeDescription(const std::string& description);
+
+    virtual void deviceContainer(const DeviceContainer& deviceContainer);
+    virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
+    virtual void serviceType(const Service& service);
+    
+    std::ofstream               _out;
+    std::vector<std::string>    _serviceNames;
+    std::vector<std::string>    _serviceTypes;
 };
 
 

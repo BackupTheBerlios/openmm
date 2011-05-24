@@ -713,7 +713,88 @@ DeviceDescH::deviceContainer(const DeviceContainer& deviceContainer)
         << "#ifndef " << Poco::toUpper(_deviceName) << "_DESCRIPTIONS_H" << std::endl
         << "#define " << Poco::toUpper(_deviceName) << "_DESCRIPTIONS_H" << std::endl
         << std::endl
-        << "std::string " << "Dev" + _deviceName << "::_deviceDescription =" << std::endl
+        << "#include <Omm/Upnp.h>" << std::endl
+        << std::endl
+
+        << "class " + _deviceName + "Descriptions : public DescriptionProvider" << std::endl
+        << "{" << std::endl
+        << "public:" << std::endl
+        << indent(1) << _deviceName + "Descriptions();" << std::endl
+        << "};" << std::endl
+        << std::endl
+        << "#endif" << std::endl
+        << std::endl;
+}
+
+
+//void
+//DeviceDescH::deviceContainerEnd(const DeviceContainer& deviceContainer)
+//{
+//    _out
+//        << "#endif" << std::endl
+//        << std::endl;
+//}
+//
+//
+//void
+//DeviceDescH::serviceType(const Service& service)
+//{
+//    Omm::Urn serviceType(service.getServiceType());
+//    std::string serviceName = serviceType.getTypeName();
+//
+//    _out
+//        << "std::string " << "Dev" + serviceName << "::_description =" << std::endl
+//        << escapeDescription(*service.getDescription())
+//        << ";" << std::endl
+//        << std::endl;
+//}
+//
+//
+//std::string
+//DeviceDescH::escapeDescription(const std::string& description)
+//{
+//    std::string res = description;
+//
+//    // escape all quotes
+//    std::string::size_type i = 0;
+//    while ((i = res.find("\"", i)) != std::string::npos) {
+//        res.insert(i, "\\");
+//        ++i; ++i;
+//    }
+//
+//    // delete all carriage returns
+//    i = 0;
+//    while ((i = res.find("\r", i)) != std::string::npos) {
+//        res.erase(i, 1);
+//    }
+//
+//    // escape all newlines
+//    i = 0;
+//    while ((i = res.find("\n", i)) != std::string::npos) {
+//        res.insert(i, "\\");
+//        ++i; ++i;
+//    }
+//
+//    return "\"" + res + "\"";
+//}
+
+
+DeviceDescCpp::DeviceDescCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+StubWriter(pDeviceContainer, outputPath),
+_out((_outputPath + _deviceName + "Desc.cpp").c_str())
+{
+}
+
+
+void
+DeviceDescCpp::deviceContainer(const DeviceContainer& deviceContainer)
+{
+    _out
+        << preamble
+        << "#include \"" << _deviceName << "Desc.h" << std::endl
+        << std::endl
+        << "static std::string " << _deviceName << "Description =" << std::endl
+        // rewritten device description is written out as a std::string
         << escapeDescription(*deviceContainer.getDeviceDescription())
         << ";" << std::endl
         << std::endl;
@@ -721,22 +802,37 @@ DeviceDescH::deviceContainer(const DeviceContainer& deviceContainer)
 
 
 void
-DeviceDescH::deviceContainerEnd(const DeviceContainer& deviceContainer)
+DeviceDescCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     _out
-        << "#endif" << std::endl
+        << std::endl
+        << _deviceName << "Descriptions::" << _deviceName << "Descriptions()" << std::endl
+        << "{" << std::endl
+        << indent(1) << "_pDeviceDescription = &" + _deviceName + "Description;" << std::endl;
+
+    int i = _serviceNames.size();
+    while (i--) {
+        _out << indent(1) << "_serviceDescriptions[\"" + _serviceTypes[i] << "/Description.xml\"] = &" << _serviceNames[i] << "Description;" << std::endl;
+    }
+
+    _out
+        << "}" << std::endl
         << std::endl;
+
 }
 
 
 void
-DeviceDescH::serviceType(const Service& service)
+DeviceDescCpp::serviceType(const Service& service)
 {
     Omm::Urn serviceType(service.getServiceType());
+    _serviceTypes.push_back(service.getServiceType());
     std::string serviceName = serviceType.getTypeName();
-    
+    _serviceNames.push_back(serviceName);
+
     _out
-        << "std::string " << "Dev" + serviceName << "::_description =" << std::endl
+        << "static std::string " << serviceName << "Description =" << std::endl
+        // rewritten service description is written out as a std::string
         << escapeDescription(*service.getDescription())
         << ";" << std::endl
         << std::endl;
@@ -744,38 +840,31 @@ DeviceDescH::serviceType(const Service& service)
 
 
 std::string
-DeviceDescH::escapeDescription(const std::string& description)
+DeviceDescCpp::escapeDescription(const std::string& description)
 {
     std::string res = description;
-    
+
     // escape all quotes
     std::string::size_type i = 0;
     while ((i = res.find("\"", i)) != std::string::npos) {
         res.insert(i, "\\");
         ++i; ++i;
     }
-    
+
     // delete all carriage returns
     i = 0;
     while ((i = res.find("\r", i)) != std::string::npos) {
         res.erase(i, 1);
     }
-    
+
     // escape all newlines
     i = 0;
     while ((i = res.find("\n", i)) != std::string::npos) {
         res.insert(i, "\\");
         ++i; ++i;
     }
-    
+
     return "\"" + res + "\"";
-}
-
-
-DeviceDescCpp::DeviceDescCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
-StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + _deviceName + "Desc.cpp").c_str())
-{
 }
 
 
