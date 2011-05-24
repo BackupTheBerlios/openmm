@@ -2057,7 +2057,7 @@ HttpSocket::HttpSocket()
 
 HttpSocket::~HttpSocket()
 {
-    delete _pHttpServer;
+//    delete _pHttpServer;
     // FIXME: segfault on deleting _pDeviceRequestHandlerFactory
     //delete _pDeviceRequestHandlerFactory;
 }
@@ -2109,6 +2109,33 @@ HttpSocket::getServerUri()
 }
 
 
+NetworkListener::NetworkListener()
+{
+
+}
+
+
+NetworkListener::~NetworkListener()
+{
+
+}
+
+
+void
+NetworkListener::initSockets()
+{
+    _ssdpSocket.init();
+    _httpSocket.init();
+}
+
+
+void
+NetworkListener::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler)
+{
+    _httpSocket._pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
+}
+
+
 std::string&
 DescriptionProvider::getDeviceDescription()
 {
@@ -2123,7 +2150,8 @@ DescriptionProvider::getServiceDescription(const std::string& path)
 }
 
 
-DeviceManager::DeviceManager()
+DeviceManager::DeviceManager(NetworkListener* pNetworkListener) :
+_pNetworkListener(pNetworkListener)
 {
 
 }
@@ -2131,7 +2159,30 @@ DeviceManager::DeviceManager()
 
 DeviceManager::~DeviceManager()
 {
+    delete _pNetworkListener;
+}
 
+
+void
+DeviceManager::registerHttpRequestHandlers()
+{
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        // FIXME: DeviceContainer::getDescriptionUri() may be wrong here (only path needed!!)
+        _pNetworkListener->registerHttpRequestHandler((*it)->_stringDescriptionUri, (*it)->_descriptionRequestHandler);
+
+        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+            for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
+                _pNetworkListener->registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
+            }
+            for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+                Service* ps = *s;
+                // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
+                _pNetworkListener->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+                _pNetworkListener->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+                _pNetworkListener->registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+            }
+        }
+    }
 }
 
 
@@ -2279,7 +2330,7 @@ DeviceContainer::getDeviceDescription() const
 const std::string&
 DeviceContainer::getDescriptionUri() const
 {
-    return _descriptionUri;
+    return _stringDescriptionUri;
 }
 
 
@@ -2300,7 +2351,22 @@ DeviceContainer::setDeviceDescription(std::string& description)
 void
 DeviceContainer::setDescriptionUri(const std::string uri)
 {
-    _descriptionUri = uri;
+    _stringDescriptionUri = uri;
+    try {
+        _descriptionUri = _stringDescriptionUri;
+    }
+    catch(Poco::Exception& e) {
+        Log::instance()->http().error("could not parse description URI: " + e.displayText());
+    }
+    Log::instance()->upnp().debug("set description URI finished.");
+}
+
+
+void
+DeviceContainer::setDescriptionUri()
+{
+    Log::instance()->upnp().debug("set description URI ...");
+    setDescriptionUri(_httpSocket.getServerUri() + "Description.xml");
 }
 
 
@@ -2384,6 +2450,35 @@ DeviceContainer::initStateVars()
 
 
 void
+DeviceContainer::initDeviceDescriptionHandler()
+{
+    _descriptionRequestHandler = new DescriptionRequestHandler(_pDeviceDescription);
+
+}
+
+
+void
+DeviceContainer::registerHttpRequestHandlers()
+{
+
+    registerHttpRequestHandler(_descriptionUri.getPath(), _descriptionRequestHandler);
+
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
+            registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
+        }
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            Service* ps = *s;
+            // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
+            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+        }
+    }
+}
+
+
+void
 DeviceContainer::rewriteDescriptions()
 {
     Log::instance()->upnp().debug("init device container: rewrite descriptions");
@@ -2406,6 +2501,7 @@ DeviceContainer::initDevice()
     initUuid();
     initStateVars();
     rewriteDescriptions();
+    initDeviceDescriptionHandler();
 }
 
 
@@ -2507,30 +2603,6 @@ DeviceContainer::startHttp()
 {
     Log::instance()->http().information("starting HTTP ...");
 //    Log::instance()->http().debug("device description: " + *_pDeviceDescription);
-    _descriptionRequestHandler = new DescriptionRequestHandler(_pDeviceDescription);
-//    Log::instance()->http().debug("description URI: " + _descriptionUri);
-    Poco::URI descriptionUri;
-    try {
-        descriptionUri = _descriptionUri;
-    }
-    catch(Poco::Exception& e) {
-        Log::instance()->http().error("could not parse description URI: " + e.displayText());
-    }
-    registerHttpRequestHandler(descriptionUri.getPath(), _descriptionRequestHandler);
-
-    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
-            registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
-        }
-        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            Service* ps = *s;
-            // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
-            registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
-            registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-            registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
-        }
-    }
-//    Log::instance()->http().information("initialized message sets, service request handlers, and state variables.");
 
     _httpSocket.startServer();
     Log::instance()->http().information("HTTP started.");
@@ -2554,6 +2626,7 @@ DeviceContainer::start()
 
         initSockets();
         initDevice();
+        registerHttpRequestHandlers();
 
         startHttp();
         startSsdp();
@@ -2589,7 +2662,7 @@ DeviceContainer::handleSsdpMessage(SsdpMessage* pMessage)
         m.setCacheControl();
         m.setDate();
         m.setHttpExtensionConfirmed();
-        m.setLocation(_descriptionUri);
+        m.setLocation(_stringDescriptionUri);
         m.setServer("Omm/" + OMM_VERSION);
         // ST field in response depends on ST field in M-SEARCH
         m.setSearchTarget("upnp:rootdevice");
@@ -2637,15 +2710,6 @@ void
 DeviceContainer::postAction(Action* pAction)
 {
     _httpSocket._notificationCenter.postNotification(pAction);
-}
-
-
-void
-DeviceContainer::setDescriptionUri()
-{
-    Log::instance()->upnp().debug("set description URI ...");
-    _descriptionUri = _httpSocket.getServerUri() + "Description.xml";
-    Log::instance()->upnp().debug("set description URI finished.");
 }
 
 
@@ -3008,7 +3072,8 @@ CtlDeviceCode::init()
 }
 
 
-Controller::Controller()
+Controller::Controller() :
+DeviceManager(new CtlNetworkListener)
 {
 }
 
@@ -3191,7 +3256,8 @@ Controller::update()
 }
 
 
-DeviceServer::DeviceServer()
+DeviceServer::DeviceServer() :
+DeviceManager(new DevNetworkListener)
 {
 
 }
@@ -3199,7 +3265,6 @@ DeviceServer::DeviceServer()
 
 DeviceServer::~DeviceServer()
 {
-
 }
 
 

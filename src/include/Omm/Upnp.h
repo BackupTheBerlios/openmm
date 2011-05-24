@@ -185,6 +185,7 @@ private:
 class Icon
 {
     friend class IconRequestHandler;
+    friend class DeviceManager;
     friend class DeviceContainer;
     friend class Device;
     friend class DeviceDescriptionWriter;
@@ -435,6 +436,7 @@ class SsdpSocket
 {
     friend class DeviceContainer;
     friend class Controller;
+    friend class NetworkListener;
 
 public:
     SsdpSocket();
@@ -502,6 +504,7 @@ private:
 class HttpSocket
 {
     friend class DeviceContainer;
+    friend class NetworkListener;
 
 public:
     HttpSocket();
@@ -522,9 +525,28 @@ private:
 
 class NetworkListener
 {
+public:
+    NetworkListener();
+    virtual ~NetworkListener();
+
+    void initSockets();
+    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
+
 private:
     SsdpSocket                      _ssdpSocket;
     HttpSocket                      _httpSocket;
+};
+
+
+class DevNetworkListener : public NetworkListener
+{
+
+};
+
+
+class CtlNetworkListener : public NetworkListener
+{
+
 };
 
 
@@ -595,7 +617,6 @@ class UriDescriptionReader : public DescriptionReader
 {
 private:
     virtual std::string& retrieveDescription(const std::string& relativeUri);
-
 };
 
 
@@ -614,7 +635,7 @@ private:
 class DeviceManager : public Util::Startable
 {
 public:
-    DeviceManager();
+    DeviceManager(NetworkListener* pNetworkListener);
     virtual ~DeviceManager();
 
     typedef Container<DeviceContainer>::Iterator DeviceContainerIterator;
@@ -628,7 +649,12 @@ protected:
     virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
     virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
 
-    Container<DeviceContainer>           _deviceContainers;
+    Container<DeviceContainer>          _deviceContainers;
+
+private:
+    void registerHttpRequestHandlers();
+
+    NetworkListener*                    _pNetworkListener;
 };
 
 
@@ -676,8 +702,10 @@ public:
 };
 
 
+// TODO: remove Util::Startable and all start/stop methods from DeviceContainer
 class DeviceContainer : public Util::Startable
 {
+    friend class DeviceManager;
     friend class DevDeviceCode;
     friend class Controller;
 
@@ -712,17 +740,22 @@ public:
     void initUuid();
     void initStateVars();
     void rewriteDescriptions();
+    void initDeviceDescriptionHandler();
     void initDevice();
     void initController();
+
     void startSsdp();
     void startHttp();
     void stopSsdp();
-    void stopHttp();
     void start();
+
+    void stopHttp();
     void stop();
 
-    void registerActionHandler(const Poco::AbstractObserver& observer);
+    void registerHttpRequestHandlers();
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
+
+    void registerActionHandler(const Poco::AbstractObserver& observer);
 
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void handleSsdpMessage(SsdpMessage* pNf);
@@ -738,7 +771,8 @@ private:
     void sendSsdpByebyeMessages();
 
 //     Poco::URI                       _baseUri;              // base URI for control URI and event URI
-    std::string                     _descriptionUri;            // for controller to download description
+    std::string                     _stringDescriptionUri;            // for controller to download description
+    Poco::URI                       _descriptionUri;
     std::string*                    _pDeviceDescription;
     Container<Device>               _devices;
     Device*                         _pRootDevice;
