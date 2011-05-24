@@ -552,7 +552,7 @@ DevDeviceImplH::deviceContainer(const DeviceContainer& deviceContainer)
         << "#define " << Poco::toUpper(_deviceName) << "_IMPLEMENTATION_H" << std::endl
         << std::endl
         << "#include <Omm/Upnp.h>" << std::endl
-        << "#include \"" << "Dev" + _deviceName << "Disp.h\"" << std::endl
+        << "#include \"" << "Dev" + _deviceName << ".h\"" << std::endl
         << std::endl;
 }
 
@@ -1028,6 +1028,7 @@ CtlDeviceH::deviceContainerEnd(const DeviceContainer& deviceContainer)
         << "Device* pDevice, "
         << ctorArgs
         << ");" << std::endl
+        << indent(1) << "~Ctl" + _deviceName << "();" << std::endl
         << std::endl;
     
     i = _serviceNames.size();
@@ -1241,7 +1242,7 @@ CtlDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
         << "}" << std::endl
         << std::endl;
     
-    // Device ctor ...
+    // Constructor
     _out << std::endl
 //         << "class " << _deviceName << "Controller : public CtlDevice" << std::endl
 //         << "{" << std::endl
@@ -1276,8 +1277,21 @@ CtlDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
         << std::endl
         << indent(1) << "init();" << std::endl
         << "}" << std::endl
+        << std::endl
         << std::endl;
-    
+
+    // Destructor
+
+    _out
+        << "Ctl" + _deviceName << "::" << "~Ctl" + _deviceName << "()" << std::endl
+        << "{" << std::endl;
+    i = _serviceNames.size();
+    while (i--) {
+        _out
+            << indent(1) << "delete _p" << "Ctl" + _serviceNames[i] << ";" << std::endl;
+    }
+    _out << "}" << std::endl;
+
 //     i = _serviceNames.size();
 //     while (i--) {
 //         _out << indent(1)
