@@ -207,6 +207,26 @@ private:
 };
 
 
+class Urn
+{
+public:
+    Urn(const std::string& urn);
+
+    const std::string& getUrn() { return _urn; }
+    const std::string& getDomainName() { return _domainName; }
+    const std::string& getType() { return _type; }
+    const std::string& getTypeName() { return _typeName; }
+    const std::string& getVersion() { return _version; }
+
+private:
+    std::string     _urn;
+    std::string     _domainName;
+    std::string     _type;
+    std::string     _typeName;
+    std::string     _version;
+};
+
+
 class SsdpSocket
 {
     friend class DeviceContainer;
@@ -1046,7 +1066,7 @@ class Controller : public DeviceManager
 {
 public:
     Controller();
-    ~Controller();
+    virtual ~Controller();
 
     virtual void start();
     virtual void stop();
@@ -1075,23 +1095,14 @@ private:
 };
 
 
-class Urn
+class DeviceServer : public DeviceManager
 {
 public:
-    Urn(const std::string& urn);
-    
-    const std::string& getUrn() { return _urn; }
-    const std::string& getDomainName() { return _domainName; }
-    const std::string& getType() { return _type; }
-    const std::string& getTypeName() { return _typeName; }
-    const std::string& getVersion() { return _version; }
-    
-private:
-    std::string     _urn;
-    std::string     _domainName;
-    std::string     _type;
-    std::string     _typeName;
-    std::string     _version;
+    DeviceServer();
+    virtual ~DeviceServer();
+
+    virtual void start();
+    virtual void stop();
 };
 
 } // namespace Omm

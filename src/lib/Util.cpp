@@ -88,7 +88,7 @@ Home::getHomePath()
 
 
 void
-Startable::startThreaded()
+Startable::startAsThread()
 {
     _thread.setOSPriority(Poco::Thread::getMinOSPriority());
     _thread.start(*this);
@@ -96,7 +96,7 @@ Startable::startThreaded()
 
 
 void
-Startable::stopThreaded()
+Startable::stopThread()
 {
     stop();
     _thread.join();

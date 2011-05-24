@@ -216,6 +216,25 @@ Icon::retrieve(const std::string& uri)
 }
 
 
+Urn::Urn(const std::string& urn) :
+_urn(urn)
+{
+    std::vector<std::string> vec;
+    std::string::size_type left = 0;
+    std::string::size_type right = 0;
+    do
+    {
+        left = _urn.find(':', right);
+        right = _urn.find(':', ++left);
+        vec.push_back(_urn.substr(left, right - left));
+    } while (right != std::string::npos);
+    _domainName = vec[0];
+    _type = vec[1];
+    _typeName = vec[2];
+    _version = vec[3];
+}
+
+
 SsdpSocket::SsdpSocket()
 {
 }
@@ -2930,6 +2949,15 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
 }
 
 
+void
+CtlDeviceCode::init()
+{
+    for (Device::ServiceIterator i = _pDevice->beginService(); i != _pDevice->endService(); ++i) {
+        (*i)->initClient();
+    }
+}
+
+
 Controller::Controller()
 {
 }
@@ -3070,7 +3098,7 @@ Controller::addDevice(DeviceContainer* pDeviceContainer)
     // TODO: handle subdevices
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        Log::instance()->upnp().debug("controller adds device: " + uuid);
+        Log::instance()->upnp().debug("controller adds device container with root device uuid: " + uuid);
         pDeviceContainer->_pController = this;
         pDeviceContainer->initController();
         _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
@@ -3113,31 +3141,29 @@ Controller::update()
 }
 
 
-void
-CtlDeviceCode::init()
+DeviceServer::DeviceServer()
 {
-    for (Device::ServiceIterator i = _pDevice->beginService(); i != _pDevice->endService(); ++i) {
-        (*i)->initClient();
-    }
+
 }
 
 
-Urn::Urn(const std::string& urn) :
-_urn(urn)
+DeviceServer::~DeviceServer()
 {
-    std::vector<std::string> vec;
-    std::string::size_type left = 0;
-    std::string::size_type right = 0;
-    do 
-    {
-        left = _urn.find(':', right);
-        right = _urn.find(':', ++left);
-        vec.push_back(_urn.substr(left, right - left));
-    } while (right != std::string::npos);
-    _domainName = vec[0];
-    _type = vec[1];
-    _typeName = vec[2];
-    _version = vec[3];
+
+}
+
+
+void
+DeviceServer::start()
+{
+
+}
+
+
+void
+DeviceServer::stop()
+{
+
 }
 
 

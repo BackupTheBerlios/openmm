@@ -188,8 +188,8 @@ public:
     virtual void start() = 0;
     virtual void stop() = 0;
 
-    void startThreaded();
-    void stopThreaded();
+    void startAsThread();
+    void stopThread();
 
 private:
     void run();
