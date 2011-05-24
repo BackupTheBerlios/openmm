@@ -2975,6 +2975,13 @@ Controller::start()
 
 
 void
+Controller::stop()
+{
+
+}
+
+
+void
 Controller::setUserInterface(UserInterface* pUserInterface)
 {
     _pUserInterface = pUserInterface;
@@ -3034,7 +3041,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
 //             Log::instance()->ssdp().debug("identified alive message");
-            if (pMessage->getNotificationType() == "upnp:rootdevice" && !_devices.contains(uuid)) {
+            if (pMessage->getNotificationType() == "upnp:rootdevice" && !_deviceContainers.contains(uuid)) {
                 discoverDevice(pMessage->getLocation());
             }
             break;
@@ -3048,7 +3055,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     break;
     case SsdpMessage::REQUEST_RESPONSE:
 //         Log::instance()->ssdp().debug("identified m-search response");
-        if (!_devices.contains(uuid)) {
+        if (!_deviceContainers.contains(uuid)) {
             discoverDevice(pMessage->getLocation());
         }
         break;
@@ -3062,14 +3069,14 @@ Controller::addDevice(DeviceContainer* pDeviceContainer)
     // TODO: handle "alive refreshments"
     // TODO: handle subdevices
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
-    if (!_devices.contains(uuid)) {
+    if (!_deviceContainers.contains(uuid)) {
         Log::instance()->upnp().debug("controller adds device: " + uuid);
         pDeviceContainer->_pController = this;
         pDeviceContainer->initController();
-        _pUserInterface->beginAddDevice(_devices.position(uuid));
-//        _devices.append(pDeviceContainer);
-        _devices.append(uuid, new CtlDeviceCode(pDeviceContainer->getRootDevice()));
-        _pUserInterface->endAddDevice(_devices.position(uuid));
+        _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
+        _deviceContainers.append(pDeviceContainer);
+//        _devices.append(uuid, new CtlDeviceCode(pDeviceContainer->getRootDevice()));
+        _pUserInterface->endAddDevice(_deviceContainers.position(uuid));
         deviceAdded(pDeviceContainer);
     }
 //    _devices.get("").eventHandler(0);
@@ -3079,14 +3086,14 @@ Controller::addDevice(DeviceContainer* pDeviceContainer)
 void
 Controller::removeDevice(const std::string& uuid)
 {
-    if (_devices.contains(uuid)) {
+    if (_deviceContainers.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
-//        DeviceContainer* pDeviceContainer = &_devices.get(uuid);
-        DeviceContainer* pDeviceContainer = _devices.get(uuid).getDevice()->getDeviceContainer();
+        DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
+//        DeviceContainer* pDeviceContainer = _devices.get(uuid).getDevice()->getDeviceContainer();
         deviceRemoved(pDeviceContainer);
-        _pUserInterface->beginRemoveDevice(_devices.position(uuid));
-        _devices.remove(uuid);
-        _pUserInterface->endRemoveDevice(_devices.position(uuid));
+        _pUserInterface->beginRemoveDevice(_deviceContainers.position(uuid));
+        _deviceContainers.remove(uuid);
+        _pUserInterface->endRemoveDevice(_deviceContainers.position(uuid));
         pDeviceContainer->_pController = 0;
     }
 }
@@ -3096,12 +3103,12 @@ void
 Controller::update()
 {
     // TODO: do a more carefull controller update and don't remove servers that are still active.
-//    for (Container<DeviceContainer>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
-//        removeDevice((*it).first);
-//    }
-    for (Container<CtlDeviceCode>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+    for (Container<DeviceContainer>::KeyIterator it = _deviceContainers.beginKey(); it != _deviceContainers.endKey(); ++it) {
         removeDevice((*it).first);
     }
+//    for (Container<CtlDeviceCode>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
+//        removeDevice((*it).first);
+//    }
     sendMSearch();
 }
 

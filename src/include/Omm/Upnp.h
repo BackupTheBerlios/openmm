@@ -588,7 +588,7 @@ public:
     DeviceManager();
     virtual ~DeviceManager();
 
-private:
+protected:
     Container<DeviceContainer>           _deviceContainers;
 };
 
@@ -1048,7 +1048,8 @@ public:
     Controller();
     ~Controller();
 
-    void start();
+    virtual void start();
+    virtual void stop();
     virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
     virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
 
@@ -1058,7 +1059,7 @@ public:
 protected:
     UserInterface*                      _pUserInterface;
 //    Container<DeviceContainer>           _devices;
-    Container<CtlDeviceCode>    _devices;
+//    Container<CtlDeviceCode>    _devices;
     
 private:
     void sendMSearch();
