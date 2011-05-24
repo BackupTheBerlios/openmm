@@ -228,95 +228,6 @@ private:
 };
 
 
-class SsdpSocket
-{
-    friend class DeviceContainer;
-    friend class Controller;
-    
-public:
-    SsdpSocket();
-    ~SsdpSocket();
-    
-    void addInterface(const std::string& name);
-    void removeInterface(const std::string& name);
-    void setObserver(const Poco::AbstractObserver& observer);
-    void start();
-    void stop();
-    
-    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    
-private:
-    enum SocketMode {NotConfigured, Broadcast, Multicast};
-
-    void init();
-    void deinit();
-    void setupSockets();
-    void resetSockets();
-    void setMulticast();
-    void setBroadcast();
-
-    void onReadable(Poco::Net::ReadableNotification* pNotification);
-
-    SocketMode                      _mode;
-    Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
-    Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
-    char*                           _pBuffer;
-
-    static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
-                 // Note that each SSDP message must fit into one UDP Packet.
-
-    Poco::Net::SocketReactor                        _reactor;
-    Poco::Thread                                    _listenerThread;
-    Poco::NotificationCenter                        _notificationCenter;
-};
-
-
-class SsdpMessageSet
-{
-public:
-    SsdpMessageSet();
-    ~SsdpMessageSet();
-
-    void clear();
-    void addMessage(SsdpMessage& message);
-    void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
-    void startSendContinuous(SsdpSocket& socket);
-    void stopSendContinuous();
-    
-private:
-    void onTimer(Poco::Timer& timer);
-    
-    Poco::Random                        _randomTimeGenerator;
-    Poco::Timer                         _sendTimer;
-    SsdpSocket*                         _socket;
-    std::vector<SsdpMessage*>           _ssdpMessages;
-    int                                 _repeat;
-    long                                _delay;
-    bool                                _continuous;
-};
-
-
-class HttpSocket
-{
-    friend class DeviceContainer;
-
-public:
-    HttpSocket();
-    ~HttpSocket();
-
-    void init();
-    void startServer();
-    void stopServer();
-    std::string getServerUri();
-
-private:
-    Poco::Net::HTTPServer*                _pHttpServer;
-    Poco::UInt16                          _httpServerPort;
-    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
-    Poco::NotificationCenter              _notificationCenter;
-};
-
-
 class Variant
 {
 public:
@@ -517,6 +428,103 @@ public:
 private:
     std::map<std::string,E*>    _pEntities;
     std::vector<E*>             _keys;
+};
+
+
+class SsdpSocket
+{
+    friend class DeviceContainer;
+    friend class Controller;
+
+public:
+    SsdpSocket();
+    ~SsdpSocket();
+
+    void addInterface(const std::string& name);
+    void removeInterface(const std::string& name);
+    void setObserver(const Poco::AbstractObserver& observer);
+    void start();
+    void stop();
+
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+
+private:
+    enum SocketMode {NotConfigured, Broadcast, Multicast};
+
+    void init();
+    void deinit();
+    void setupSockets();
+    void resetSockets();
+    void setMulticast();
+    void setBroadcast();
+
+    void onReadable(Poco::Net::ReadableNotification* pNotification);
+
+    SocketMode                      _mode;
+    Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
+    Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
+    char*                           _pBuffer;
+
+    static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
+                 // Note that each SSDP message must fit into one UDP Packet.
+
+    Poco::Net::SocketReactor                        _reactor;
+    Poco::Thread                                    _listenerThread;
+    Poco::NotificationCenter                        _notificationCenter;
+};
+
+
+class SsdpMessageSet
+{
+public:
+    SsdpMessageSet();
+    ~SsdpMessageSet();
+
+    void clear();
+    void addMessage(SsdpMessage& message);
+    void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
+    void startSendContinuous(SsdpSocket& socket);
+    void stopSendContinuous();
+
+private:
+    void onTimer(Poco::Timer& timer);
+
+    Poco::Random                        _randomTimeGenerator;
+    Poco::Timer                         _sendTimer;
+    SsdpSocket*                         _socket;
+    std::vector<SsdpMessage*>           _ssdpMessages;
+    int                                 _repeat;
+    long                                _delay;
+    bool                                _continuous;
+};
+
+
+class HttpSocket
+{
+    friend class DeviceContainer;
+
+public:
+    HttpSocket();
+    ~HttpSocket();
+
+    void init();
+    void startServer();
+    void stopServer();
+    std::string getServerUri();
+
+private:
+    Poco::Net::HTTPServer*                _pHttpServer;
+    Poco::UInt16                          _httpServerPort;
+    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
+    Poco::NotificationCenter              _notificationCenter;
+};
+
+
+class NetworkListener
+{
+private:
+    SsdpSocket                      _ssdpSocket;
+    HttpSocket                      _httpSocket;
 };
 
 
@@ -736,9 +744,9 @@ private:
     Device*                         _pRootDevice;
     std::map<std::string,Service*>  _serviceTypes;
     SsdpSocket                      _ssdpSocket;
+    HttpSocket                      _httpSocket;
     SsdpMessageSet                  _ssdpNotifyAliveMessages;
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
-    HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
     // TODO: remove _pController (only needed in Service::actionNetworkActivity())
     // replace it with a notification center in DeviceManager
