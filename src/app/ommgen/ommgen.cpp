@@ -139,15 +139,15 @@ StubWriter::firstLetterToLower(const std::string& s)
 }
 
 
-DevDeviceDispH::DevDeviceDispH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+DevDeviceH::DevDeviceH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + "Dev" + _deviceName + "Disp.h").c_str())
+_out((_outputPath + "Dev" + _deviceName + ".h").c_str())
 {
 }
 
 
 void
-DevDeviceDispH::deviceContainer(const DeviceContainer& deviceContainer)
+DevDeviceH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -181,7 +181,7 @@ DevDeviceDispH::deviceContainer(const DeviceContainer& deviceContainer)
 
 
 void
-DevDeviceDispH::deviceContainerEnd(const DeviceContainer& deviceContainer)
+DevDeviceH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     std::string ctorArgs = "";
 //     std::string implPointers = "";
@@ -198,22 +198,18 @@ DevDeviceDispH::deviceContainerEnd(const DeviceContainer& deviceContainer)
         << ctorArgs
         << ");" << std::endl
         << std::endl
-        << "protected:"
-        << std::endl;
+        << "private:" << std::endl
+        << indent(1) << "virtual void actionHandler(Action* pAction);" << std::endl
+        << indent(1) << "virtual void initStateVars(Service* pService);" << std::endl
+        << std::endl
+//        << indent(1) << "static std::string _deviceDescription;" << std::endl
+        ;
 
     i = _serviceNames.size();
     while (i--) {
         _out << indent(1) << "Dev" + _serviceNames[i] << "* _pDev" << _serviceNames[i] << "Impl;" << std::endl;
     }
 
-    _out <<  std::endl
-        << "private:" << std::endl
-        << indent(1) << "virtual void actionHandler(Action* pAction);" << std::endl
-        << indent(1) << "virtual void initStateVars(Service* pService);" << std::endl
-        << std::endl
-        << indent(1) << "static std::string _deviceDescription;" << std::endl
-        ;
-        
     _out
         << "};" << std::endl
         << std::endl
@@ -223,7 +219,7 @@ DevDeviceDispH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 
 
 void
-DevDeviceDispH::serviceType(const Service& service)
+DevDeviceH::serviceType(const Service& service)
 {
     Omm::Urn serviceType(service.getServiceType());
     std::string serviceName = serviceType.getTypeName();
@@ -234,17 +230,18 @@ DevDeviceDispH::serviceType(const Service& service)
         << "{" << std::endl
         << indent(1) << "friend class " << "Dev" + _deviceName << ";" << std::endl
         << std::endl
-        << "protected:"
+        << "protected:" << std::endl
+        << indent(1) << "virtual ~Dev" + serviceName + "() {}" << std::endl
         << std::endl;
 }
 
 
 void
-DevDeviceDispH::serviceTypeEnd(const Service& service)
+DevDeviceH::serviceTypeEnd(const Service& service)
 {
     _out << std::endl
         << "private:" << std::endl
-        << indent(1) << "static std::string  _description;" << std::endl
+//        << indent(1) << "static std::string  _description;" << std::endl
         << indent(1) << "Service* _pService;" << std::endl
         << "};" << std::endl
         << std::endl;
@@ -252,7 +249,7 @@ DevDeviceDispH::serviceTypeEnd(const Service& service)
 
 
 void
-DevDeviceDispH::action(const Action& action)
+DevDeviceH::action(const Action& action)
 {
     _out
         << indent(1) << "virtual void " << action.getName() << "("
@@ -261,7 +258,7 @@ DevDeviceDispH::action(const Action& action)
 
 
 void
-DevDeviceDispH::actionEnd(const Action& action)
+DevDeviceH::actionEnd(const Action& action)
 {
     _out
         << ") = 0;"
@@ -270,7 +267,7 @@ DevDeviceDispH::actionEnd(const Action& action)
 
 
 void
-DevDeviceDispH::actionBlockEnd()
+DevDeviceH::actionBlockEnd()
 {
     _out << std::endl
         << indent(1) << "virtual void initStateVars() = 0;" << std::endl
@@ -280,7 +277,7 @@ DevDeviceDispH::actionBlockEnd()
 
 
 void
-DevDeviceDispH::argument(const Argument& argument, bool lastArgument)
+DevDeviceH::argument(const Argument& argument, bool lastArgument)
 {
     _out
         << ((argument.getDirection() == "in") ? "const " : "")
@@ -292,7 +289,7 @@ DevDeviceDispH::argument(const Argument& argument, bool lastArgument)
 
 
 void
-DevDeviceDispH::stateVar(const StateVar& stateVar)
+DevDeviceH::stateVar(const StateVar& stateVar)
 {
     if (stateVar.getName().substr(0, std::string("A_ARG_TYPE_").size()) == "A_ARG_TYPE_") {
         return;
@@ -308,15 +305,15 @@ DevDeviceDispH::stateVar(const StateVar& stateVar)
 }
 
 
-DevDeviceDispCpp::DevDeviceDispCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+DevDeviceCpp::DevDeviceCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + "Dev" + _deviceName + "Disp.cpp").c_str())
+_out((_outputPath + "Dev" + _deviceName + ".cpp").c_str())
 {
 }
 
 
 void
-DevDeviceDispCpp::deviceContainer(const DeviceContainer& deviceContainer)
+DevDeviceCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -342,7 +339,7 @@ DevDeviceDispCpp::deviceContainer(const DeviceContainer& deviceContainer)
 
 
 void
-DevDeviceDispCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
+DevDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
 //    std::string deviceDescriptionPath = deviceContainer.getDescriptionUri();
     std::string deviceDescriptionPath = "/" + _deviceType + "/Description.xml";
@@ -412,7 +409,7 @@ DevDeviceDispCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 
 
 void
-DevDeviceDispCpp::serviceType(const Service& service)
+DevDeviceCpp::serviceType(const Service& service)
 {
     _serviceTypes.push_back(service.getServiceType());
     std::string servicePath = "/" + service.getServiceType() + "/Description.xml";
@@ -452,7 +449,7 @@ DevDeviceDispCpp::serviceType(const Service& service)
 
 
 void
-DevDeviceDispCpp::serviceTypeEnd(const Service& service)
+DevDeviceCpp::serviceTypeEnd(const Service& service)
 {
     _out
         << indent(1) << "}"
@@ -467,7 +464,7 @@ DevDeviceDispCpp::serviceTypeEnd(const Service& service)
 
 
 void
-DevDeviceDispCpp::action(const Action& action)
+DevDeviceCpp::action(const Action& action)
 {
     _serviceActionDispatcher
         << indent(1) << (_firstAction ? "" : "else ")
@@ -480,7 +477,7 @@ DevDeviceDispCpp::action(const Action& action)
 
 
 void
-DevDeviceDispCpp::actionEnd(const Action& action)
+DevDeviceCpp::actionEnd(const Action& action)
 {
     _serviceActionDispatcher
         // do the implementation callback here
@@ -494,7 +491,7 @@ DevDeviceDispCpp::actionEnd(const Action& action)
 
 
 void
-DevDeviceDispCpp::argument(const Argument& argument, bool lastArgument)
+DevDeviceCpp::argument(const Argument& argument, bool lastArgument)
 {
     std::string argType = _typeMapper[argument.getRelatedStateVarReference()->getType()];
     _serviceActionDispatcher
@@ -521,7 +518,7 @@ DevDeviceDispCpp::argument(const Argument& argument, bool lastArgument)
 
 
 void
-DevDeviceDispCpp::stateVar(const StateVar& stateVar)
+DevDeviceCpp::stateVar(const StateVar& stateVar)
 {
     if (stateVar.getName().substr(0, std::string("A_ARG_TYPE_").size()) == "A_ARG_TYPE_") {
         return;
@@ -713,15 +710,15 @@ DevDeviceImplCpp::argument(const Argument& argument, bool lastArgument)
 }
 
 
-DevDeviceDescH::DevDeviceDescH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+DeviceDescH::DeviceDescH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + "Dev" + _deviceName + "Desc.h").c_str())
+_out((_outputPath + _deviceName + "Desc.h").c_str())
 {
 }
 
 
 void
-DevDeviceDescH::deviceContainer(const DeviceContainer& deviceContainer)
+DeviceDescH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -736,7 +733,7 @@ DevDeviceDescH::deviceContainer(const DeviceContainer& deviceContainer)
 
 
 void
-DevDeviceDescH::deviceContainerEnd(const DeviceContainer& deviceContainer)
+DeviceDescH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     _out
         << "#endif" << std::endl
@@ -745,7 +742,7 @@ DevDeviceDescH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 
 
 void
-DevDeviceDescH::serviceType(const Service& service)
+DeviceDescH::serviceType(const Service& service)
 {
     Omm::Urn serviceType(service.getServiceType());
     std::string serviceName = serviceType.getTypeName();
@@ -759,7 +756,7 @@ DevDeviceDescH::serviceType(const Service& service)
 
 
 std::string
-DevDeviceDescH::escapeDescription(const std::string& description)
+DeviceDescH::escapeDescription(const std::string& description)
 {
     std::string res = description;
     
@@ -787,6 +784,13 @@ DevDeviceDescH::escapeDescription(const std::string& description)
 }
 
 
+DeviceDescCpp::DeviceDescCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+StubWriter(pDeviceContainer, outputPath),
+_out((_outputPath + _deviceName + "Desc.cpp").c_str())
+{
+}
+
+
 CtlDeviceImplH::CtlDeviceImplH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
 _out((_outputPath + "Ctl" + _deviceName + "Impl.h").c_str())
@@ -803,7 +807,7 @@ CtlDeviceImplH::deviceContainer(const DeviceContainer& deviceContainer)
         << "#define " << Poco::toUpper(_deviceName) << "_CTRL_IMPL_H" << std::endl
         << std::endl
         << "#include <Omm/Upnp.h>" << std::endl
-        << "#include \"" << "Ctl" + _deviceName << "Disp.h\"" << std::endl
+        << "#include \"" << "Ctl" + _deviceName << ".h\"" << std::endl
         << std::endl;
 }
 
@@ -981,15 +985,15 @@ CtlDeviceImplCpp::stateVar(const StateVar& stateVar)
 
 
 
-CtlDeviceDispH::CtlDeviceDispH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+CtlDeviceH::CtlDeviceH(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + "Ctl" + _deviceName + "Disp.h").c_str())
+_out((_outputPath + "Ctl" + _deviceName + ".h").c_str())
 {
 }
 
 
 void
-CtlDeviceDispH::deviceContainer(const DeviceContainer& deviceContainer)
+CtlDeviceH::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
@@ -1020,7 +1024,7 @@ CtlDeviceDispH::deviceContainer(const DeviceContainer& deviceContainer)
 
 
 void
-CtlDeviceDispH::deviceContainerEnd(const DeviceContainer& deviceContainer)
+CtlDeviceH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     std::string ctorArgs = "";
     int i = _serviceNames.size();
@@ -1066,7 +1070,7 @@ CtlDeviceDispH::deviceContainerEnd(const DeviceContainer& deviceContainer)
 
 
 void
-CtlDeviceDispH::serviceType(const Service& service)
+CtlDeviceH::serviceType(const Service& service)
 {
     Omm::Urn serviceType(service.getServiceType());
     std::string serviceName = serviceType.getTypeName();
@@ -1083,7 +1087,7 @@ CtlDeviceDispH::serviceType(const Service& service)
 
 
 void
-CtlDeviceDispH::serviceTypeEnd(const Service& service)
+CtlDeviceH::serviceTypeEnd(const Service& service)
 {
     _out
         << std::endl
@@ -1112,7 +1116,7 @@ CtlDeviceDispH::serviceTypeEnd(const Service& service)
 
 
 void
-CtlDeviceDispH::action(const Action& action)
+CtlDeviceH::action(const Action& action)
 {
     _out
         << indent(1) << "void " << action.getName() << "("
@@ -1130,7 +1134,7 @@ CtlDeviceDispH::action(const Action& action)
 
 
 void
-CtlDeviceDispH::actionEnd(const Action& action)
+CtlDeviceH::actionEnd(const Action& action)
 {
     _out
         << ");"
@@ -1159,7 +1163,7 @@ CtlDeviceDispH::actionEnd(const Action& action)
 
 
 void
-CtlDeviceDispH::argument(const Argument& argument, bool lastArgument)
+CtlDeviceH::argument(const Argument& argument, bool lastArgument)
 {
     _out
         << ((argument.getDirection() == "in") ? "const " : "")
@@ -1187,7 +1191,7 @@ CtlDeviceDispH::argument(const Argument& argument, bool lastArgument)
 
 
 void
-CtlDeviceDispH::stateVar(const StateVar& stateVar)
+CtlDeviceH::stateVar(const StateVar& stateVar)
 {
     if (stateVar.getName().substr(0, std::string("A_ARG_TYPE_").size()) == "A_ARG_TYPE_") {
         return;
@@ -1210,19 +1214,19 @@ CtlDeviceDispH::stateVar(const StateVar& stateVar)
 }
 
 
-CtlDeviceDispCpp::CtlDeviceDispCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
+CtlDeviceCpp::CtlDeviceCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath) :
 StubWriter(pDeviceContainer, outputPath),
-_out((_outputPath + "Ctl" + _deviceName + "Disp.cpp").c_str())
+_out((_outputPath + "Ctl" + _deviceName + ".cpp").c_str())
 {
 }
 
 
 void
-CtlDeviceDispCpp::deviceContainer(const DeviceContainer& deviceContainer)
+CtlDeviceCpp::deviceContainer(const DeviceContainer& deviceContainer)
 {
     _out
         << preamble
-        << "#include \"" << "Ctl" + _deviceName << "Disp.h\"" << std::endl
+        << "#include \"" << "Ctl" + _deviceName << ".h\"" << std::endl
         << std::endl;
     
     _firstStateVar = true;
@@ -1230,7 +1234,7 @@ CtlDeviceDispCpp::deviceContainer(const DeviceContainer& deviceContainer)
 
 
 void
-CtlDeviceDispCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
+CtlDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 {
     std::string ctorArgs = "";
 //     std::string implPointers = "";
@@ -1315,7 +1319,7 @@ CtlDeviceDispCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
 
 
 void
-CtlDeviceDispCpp::serviceType(const Service& service)
+CtlDeviceCpp::serviceType(const Service& service)
 {
     Omm::Urn serviceType(service.getServiceType());
     _serviceTypes.push_back(service.getServiceType());
@@ -1326,7 +1330,7 @@ CtlDeviceDispCpp::serviceType(const Service& service)
 
 
 void
-CtlDeviceDispCpp::serviceTypeEnd(const Service& service)
+CtlDeviceCpp::serviceTypeEnd(const Service& service)
 {
     _out
         << std::endl
@@ -1355,7 +1359,7 @@ CtlDeviceDispCpp::serviceTypeEnd(const Service& service)
 
 
 void
-CtlDeviceDispCpp::action(const Action& action)
+CtlDeviceCpp::action(const Action& action)
 {
     _out
         << "void" << std::endl
@@ -1374,7 +1378,7 @@ CtlDeviceDispCpp::action(const Action& action)
 
 
 void
-CtlDeviceDispCpp::actionEnd(const Action& action)
+CtlDeviceCpp::actionEnd(const Action& action)
 {
     _out
         << ")" << std::endl
@@ -1426,7 +1430,7 @@ CtlDeviceDispCpp::actionEnd(const Action& action)
 
 
 void
-CtlDeviceDispCpp::argument(const Argument& argument, bool lastArgument)
+CtlDeviceCpp::argument(const Argument& argument, bool lastArgument)
 {
     std::string argType = _typeMapper[argument.getRelatedStateVarReference()->getType()];
     
@@ -1489,7 +1493,7 @@ CtlDeviceDispCpp::argument(const Argument& argument, bool lastArgument)
 
 
 void
-CtlDeviceDispCpp::stateVar(const StateVar& stateVar)
+CtlDeviceCpp::stateVar(const StateVar& stateVar)
 {
     std::string varType = _typeMapper[stateVar.getType()];
     

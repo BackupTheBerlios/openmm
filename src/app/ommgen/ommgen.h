@@ -67,10 +67,10 @@ protected:
 };
 
 
-class DevDeviceDispH : public StubWriter
+class DevDeviceH : public StubWriter
 {
 public:
-    DevDeviceDispH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
+    DevDeviceH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
     virtual void deviceContainer(const DeviceContainer& deviceContainer);
@@ -90,10 +90,10 @@ private:
 
 
 
-class DevDeviceDispCpp : public StubWriter
+class DevDeviceCpp : public StubWriter
 {
 public:
-    DevDeviceDispCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
+    DevDeviceCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
     virtual void deviceContainer(const DeviceContainer& deviceContainer);
@@ -155,10 +155,10 @@ private:
 };
 
 
-class DevDeviceDescH : public StubWriter
+class DeviceDescH : public StubWriter
 {
 public:
-    DevDeviceDescH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
+    DeviceDescH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
     std::string escapeDescription(const std::string& description);
@@ -167,6 +167,16 @@ private:
     virtual void deviceContainerEnd(const DeviceContainer& deviceContainer);
     virtual void serviceType(const Service& service);
     
+    std::ofstream       _out;
+};
+
+
+class DeviceDescCpp : public StubWriter
+{
+public:
+    DeviceDescCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
+
+private:
     std::ofstream       _out;
 };
 
@@ -209,10 +219,10 @@ private:
 };
 
 
-class CtlDeviceDispH : public StubWriter
+class CtlDeviceH : public StubWriter
 {
 public:
-    CtlDeviceDispH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
+    CtlDeviceH(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
     virtual void deviceContainer(const DeviceContainer& deviceContainer);
@@ -236,10 +246,10 @@ private:
 };
 
 
-class CtlDeviceDispCpp : public StubWriter
+class CtlDeviceCpp : public StubWriter
 {
 public:
-    CtlDeviceDispCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
+    CtlDeviceCpp(DeviceContainer* pDeviceContainer, const std::string& outputPath);
     
 private:
     virtual void deviceContainer(const DeviceContainer& deviceContainer);

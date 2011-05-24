@@ -112,15 +112,16 @@ protected:
             Omm::DeviceContainer* pDeviceContainer = descriptionReader.deviceContainer();
             pDeviceContainer->rewriteDescriptions();
 
-            _stubWriters.push_back(new DevDeviceDispH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DevDeviceDispCpp(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DevDeviceH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DevDeviceCpp(pDeviceContainer, _outputPath));
             _stubWriters.push_back(new DevDeviceImplH(pDeviceContainer, _outputPath));
             _stubWriters.push_back(new DevDeviceImplCpp(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DevDeviceDescH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceDescH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new DeviceDescCpp(pDeviceContainer, _outputPath));
             _stubWriters.push_back(new CtlDeviceImplH(pDeviceContainer, _outputPath));
             _stubWriters.push_back(new CtlDeviceImplCpp(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new CtlDeviceDispH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new CtlDeviceDispCpp(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new CtlDeviceH(pDeviceContainer, _outputPath));
+            _stubWriters.push_back(new CtlDeviceCpp(pDeviceContainer, _outputPath));
 
             for (std::vector<StubWriter*>::iterator i = _stubWriters.begin(); i != _stubWriters.end(); ++i) {
                 (*i)->write();

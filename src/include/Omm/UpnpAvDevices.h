@@ -45,15 +45,12 @@ public:
     ~DevMediaRenderer();
 
 private:
-    DevRenderingControl* _pDevRenderingControl;
-    DevConnectionManager* _pDevConnectionManager;
-    DevAVTransport* _pDevAVTransport;
-
-//private:
     virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pService);
 
-//    static std::string _deviceDescription;
+    DevRenderingControl* _pDevRenderingControl;
+    DevConnectionManager* _pDevConnectionManager;
+    DevAVTransport* _pDevAVTransport;
 };
 
 
@@ -64,15 +61,12 @@ public:
     ~DevMediaServer();
 
 private:
-    DevContentDirectory* _pDevContentDirectory;
-    DevConnectionManager* _pDevConnectionManager;
-    DevAVTransport* _pDevAVTransport;
-
-//private:
     virtual void actionHandler(Action* pAction);
     virtual void initStateVars(Service* pService);
 
-//    static std::string _deviceDescription;
+    DevContentDirectory* _pDevContentDirectory;
+    DevConnectionManager* _pDevConnectionManager;
+    DevAVTransport* _pDevAVTransport;
 };
 
 
@@ -156,7 +150,6 @@ protected:
     std::string _getLastChange();
 
 private:
-//    static std::string  _description;
     Service* _pService;
 };
 
@@ -185,7 +178,6 @@ protected:
     std::string _getCurrentConnectionIDs();
 
 private:
-//    static std::string  _description;
     Service* _pService;
 };
 
@@ -225,7 +217,6 @@ protected:
     std::string _getContainerUpdateIDs();
 
 private:
-//    static std::string  _description;
     Service* _pService;
 };
 
@@ -314,7 +305,6 @@ protected:
     bool _getLoudness();
 
 private:
-//    static std::string  _description;
     Service* _pService;
 };
 
