@@ -242,7 +242,6 @@ SsdpSocket::SsdpSocket()
 
 SsdpSocket::~SsdpSocket()
 {
-    stop();
 }
 
 
@@ -312,7 +311,7 @@ SsdpSocket::start()
 
 
 void
-SsdpSocket::stop()
+SsdpSocket::stopListen()
 {
     Log::instance()->ssdp().information("stopping SSDP listener ...");
     _reactor.stop();
@@ -2244,8 +2243,6 @@ _pController(0)
 
 DeviceContainer::~DeviceContainer()
 {
-    stopSsdp();
-    stopHttp();
     // TODO: free all Devices, Services, Actions, ...
 //     delete _descriptionRequestHandler;
 }
@@ -2594,6 +2591,7 @@ DeviceContainer::stopSsdp()
     Log::instance()->ssdp().information("stopping SSDP ...");
     _ssdpNotifyAliveMessages.stopSendContinuous();
     sendSsdpByebyeMessages();
+    _ssdpSocket.stopListen();
     Log::instance()->ssdp().information("SSDP stopped.");
 }
 
