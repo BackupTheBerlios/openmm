@@ -124,18 +124,28 @@ protected:
             pObject->setOption("basePath", _pluginOption);
             pObject->setTitle(_name);
 
-            Omm::DeviceContainer serverContainer;
+            // create a media server device
             Omm::Av::AvServer mediaServer;
-            serverContainer.addDevice(&mediaServer);
-            serverContainer.setRootDevice(&mediaServer);
-
             mediaServer.setRoot(pObject);
-//            mediaServer.setFriendlyName(_name);
             mediaServer.setProperty("friendlyName", _name);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
             mediaServer.addIcon(pIcon);
-            serverContainer.start();
+
+            // create a device container and put media server device in it.
+            Omm::DeviceContainer serverContainer;
+            serverContainer.addDevice(&mediaServer);
+            // set media server device as root device
+            serverContainer.setRootDevice(&mediaServer);
+
+            // create a runnable server and add media server container
+            Omm::DeviceServer server;
+            server.addDeviceContainer(&serverContainer);
+            // start runnable server
+            server.start();
+
             waitForTerminationRequest();
+
+            server.stop();
         }
         return Application::EXIT_OK;
     }

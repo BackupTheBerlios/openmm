@@ -133,6 +133,7 @@ static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 class DescriptionProvider;
 class DeviceManager;
 class Controller;
+class UserInterface;
 class DeviceContainer;
 class Device;
 class DeviceData;
@@ -608,8 +609,62 @@ public:
     DeviceManager();
     virtual ~DeviceManager();
 
+    typedef Container<DeviceContainer>::Iterator DeviceContainerIterator;
+    DeviceContainerIterator beginDeviceContainer();
+    DeviceContainerIterator endDeviceContainer();
+
+    void addDeviceContainer(DeviceContainer* pDevice);
+    void removeDeviceContainer(const std::string& uuid);
+
 protected:
+    virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
+    virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
+
     Container<DeviceContainer>           _deviceContainers;
+};
+
+
+class Controller : public DeviceManager
+{
+public:
+    Controller();
+    virtual ~Controller();
+
+    virtual void start();
+    virtual void stop();
+//    virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
+//    virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
+
+    void setUserInterface(UserInterface* pUserInterface);
+    UserInterface* getUserInterface();
+
+protected:
+    UserInterface*                      _pUserInterface;
+//    Container<DeviceContainer>           _devices;
+//    Container<CtlDeviceCode>    _devices;
+
+private:
+    void sendMSearch();
+    void handleSsdpMessage(SsdpMessage* pMessage);
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+    void discoverDevice(const std::string& location);
+    void addDeviceContainer(DeviceContainer* pDevice);
+    void removeDeviceContainer(const std::string& uuid);
+    void update();
+
+    SsdpSocket                      _ssdpSocket;
+//    HttpSocket                      _eventSocket;
+};
+
+
+class DeviceServer : public DeviceManager
+{
+public:
+    DeviceServer();
+    virtual ~DeviceServer();
+
+    virtual void start();
+    virtual void stop();
 };
 
 
@@ -685,6 +740,8 @@ private:
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
     HttpSocket                      _httpSocket;
     DescriptionRequestHandler*      _descriptionRequestHandler;
+    // TODO: remove _pController (only needed in Service::actionNetworkActivity())
+    // replace it with a notification center in DeviceManager
     Controller*                     _pController;
 };
 
@@ -1061,49 +1118,6 @@ protected:
     Device*         _pDevice;
 };
 
-
-class Controller : public DeviceManager
-{
-public:
-    Controller();
-    virtual ~Controller();
-
-    virtual void start();
-    virtual void stop();
-    virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
-    virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
-
-    void setUserInterface(UserInterface* pUserInterface);
-    UserInterface* getUserInterface();
-
-protected:
-    UserInterface*                      _pUserInterface;
-//    Container<DeviceContainer>           _devices;
-//    Container<CtlDeviceCode>    _devices;
-    
-private:
-    void sendMSearch();
-    void handleSsdpMessage(SsdpMessage* pMessage);
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-    void discoverDevice(const std::string& location);
-    void addDevice(DeviceContainer* pDevice);
-    void removeDevice(const std::string& uuid);
-    void update();
-    
-    SsdpSocket                      _ssdpSocket;
-//    HttpSocket                      _eventSocket;
-};
-
-
-class DeviceServer : public DeviceManager
-{
-public:
-    DeviceServer();
-    virtual ~DeviceServer();
-
-    virtual void start();
-    virtual void stop();
-};
 
 } // namespace Omm
 

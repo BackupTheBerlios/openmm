@@ -2135,6 +2135,56 @@ DeviceManager::~DeviceManager()
 }
 
 
+DeviceManager::DeviceContainerIterator
+DeviceManager::beginDeviceContainer()
+{
+    return _deviceContainers.begin();
+}
+
+
+DeviceManager::DeviceContainerIterator
+DeviceManager::endDeviceContainer()
+{
+    return _deviceContainers.end();
+}
+
+
+void
+DeviceManager::addDeviceContainer(DeviceContainer* pDeviceContainer)
+{
+    // TODO: handle "alive refreshments"
+    // TODO: handle subdevices
+    std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
+    if (!_deviceContainers.contains(uuid)) {
+        Log::instance()->upnp().debug("device manager adds device container with root device uuid: " + uuid);
+//        pDeviceContainer->_pController = this;
+//        pDeviceContainer->initController();
+//        _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
+        _deviceContainers.append(uuid, pDeviceContainer);
+//        _devices.append(uuid, new CtlDeviceCode(pDeviceContainer->getRootDevice()));
+//        _pUserInterface->endAddDevice(_deviceContainers.position(uuid));
+        deviceAdded(pDeviceContainer);
+    }
+//    _devices.get("").eventHandler(0);
+}
+
+
+void
+DeviceManager::removeDeviceContainer(const std::string& uuid)
+{
+    if (_deviceContainers.contains(uuid)) {
+        Log::instance()->upnp().debug("device manager removes device container with root device uuid: " + uuid);
+        DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
+//        DeviceContainer* pDeviceContainer = _devices.get(uuid).getDevice()->getDeviceContainer();
+        deviceRemoved(pDeviceContainer);
+//        _pUserInterface->beginRemoveDevice(_deviceContainers.position(uuid));
+        _deviceContainers.remove(uuid);
+//        _pUserInterface->endRemoveDevice(_deviceContainers.position(uuid));
+//        pDeviceContainer->_pController = 0;
+    }
+}
+
+
 DeviceContainer::DeviceContainer() :
 _pController(0)
 {
@@ -3049,7 +3099,7 @@ Controller::discoverDevice(const std::string& location)
     descriptionReader.getDeviceDescription(location);
     DeviceContainer* pDeviceContainer = descriptionReader.deviceContainer();
     pDeviceContainer->setDescriptionUri(location);
-    addDevice(pDeviceContainer);
+    addDeviceContainer(pDeviceContainer);
 }
 
 
@@ -3076,7 +3126,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         case SsdpMessage::SUBTYPE_BYEBYE:
 //             Log::instance()->ssdp().debug("identified byebye message");
             if (pMessage->getNotificationType() == "upnp:rootdevice") {
-                removeDevice(uuid);
+                removeDeviceContainer(uuid);
             }
             break;
         }
@@ -3092,7 +3142,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 
 
 void
-Controller::addDevice(DeviceContainer* pDeviceContainer)
+Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     // TODO: handle "alive refreshments"
     // TODO: handle subdevices
@@ -3112,7 +3162,7 @@ Controller::addDevice(DeviceContainer* pDeviceContainer)
 
 
 void
-Controller::removeDevice(const std::string& uuid)
+Controller::removeDeviceContainer(const std::string& uuid)
 {
     if (_deviceContainers.contains(uuid)) {
         Log::instance()->upnp().debug("controller removes device: " + uuid);
@@ -3132,7 +3182,7 @@ Controller::update()
 {
     // TODO: do a more carefull controller update and don't remove servers that are still active.
     for (Container<DeviceContainer>::KeyIterator it = _deviceContainers.beginKey(); it != _deviceContainers.endKey(); ++it) {
-        removeDevice((*it).first);
+        removeDeviceContainer((*it).first);
     }
 //    for (Container<CtlDeviceCode>::KeyIterator it = _devices.beginKey(); it != _devices.endKey(); ++it) {
 //        removeDevice((*it).first);
@@ -3156,14 +3206,19 @@ DeviceServer::~DeviceServer()
 void
 DeviceServer::start()
 {
-
+    // TODO: preliminary implementation. Later, DeviceContainer won't be startable.
+    for(DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        (*it)->start();
+    }
 }
 
 
 void
 DeviceServer::stop()
 {
-
+    for(DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        (*it)->stop();
+    }
 }
 
 

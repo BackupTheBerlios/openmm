@@ -32,8 +32,6 @@
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/Util.h>
 
-// #include "AvStreamEngine.h"
-
 
 using Poco::UInt8;
 using Poco::StreamCopier;
@@ -196,21 +194,28 @@ protected:
             }
             pEnginePlugin->createPlayer();
 
-            Omm::DeviceContainer rendererContainer;
+            // create a media renderer device
             Omm::Av::AvRenderer mediaRenderer(pEnginePlugin);
-            rendererContainer.addDevice(&mediaRenderer);
-            rendererContainer.setRootDevice(&mediaRenderer);
-            
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pIcon);
             if (_name != "") {
-//                mediaRenderer.setFriendlyName(_name);
                 mediaRenderer.setProperty("friendlyName", _name);
             }
-            
-            rendererContainer.start();
+
+            // create a device container and put media renderer device in it.
+            Omm::DeviceContainer rendererContainer;
+            rendererContainer.addDevice(&mediaRenderer);
+            rendererContainer.setRootDevice(&mediaRenderer);
+
+            // create a runnable device server and add media server container
+            Omm::DeviceServer renderer;
+            renderer.addDeviceContainer(&rendererContainer);
+            // start runnable server
+            renderer.start();
+
             waitForTerminationRequest();
-            // rendererContainer.stop();
+
+            renderer.stop();
         }
         return Application::EXIT_OK;
     }
