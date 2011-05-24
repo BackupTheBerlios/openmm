@@ -493,11 +493,13 @@ public:
     DeviceContainer* deviceContainer();
     /// Parses the device description, creates and returns a DeviceContainer, including
     /// the root device and all subdevices. This is used at the controller side
-    /// when a new device pops up and is read by the controller.
+    /// when a new device pops up and is read by the controller. Also, the stub
+    /// generator uses this to build the device tree and generate the stub code.
+    /// The stub generator could also use rootDeviceData(), but this is more robust.
     DeviceData* rootDeviceData(Device* pDevice);
-    /// Parses the device description, creates and returns a Device, including only
+    /// Parses the device description, creates and returns the device data of
     /// the root device. Subdevices, if present, are ignored. This is used by
-    /// the device side, when building the internal device tree from the memory description.
+    /// the device side, when building the internal device tree from a memory description.
     
 protected:
     virtual std::string& retrieveDescription(const std::string& descriptionUri) = 0;
@@ -507,7 +509,6 @@ protected:
 
 private:
     DeviceData* deviceData(Poco::XML::Node* pNode, Device* pDevice);
-    /// Creates devices and subdevices (if ignoreSubdevices is true) and adds them to pDeviceContainer
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
     Argument* argument(Poco::XML::Node* pNode);
