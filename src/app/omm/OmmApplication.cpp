@@ -156,26 +156,31 @@ protected:
             pEnginePlugin->setVisual(pUserInterface->getVisual());
             pEnginePlugin->createPlayer();
 
-            Omm::DeviceContainer rendererContainer;
             Omm::Av::AvRenderer mediaRenderer(pEnginePlugin);
-            rendererContainer.addDevice(&mediaRenderer);
-            rendererContainer.setRootDevice(&mediaRenderer);
-
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pIcon);
             if (_name != "") {
-//                mediaRenderer.setFriendlyName(_name);
                 mediaRenderer.setProperty("friendlyName", _name);
             }
 
+            // create a device container and put media renderer device in it.
+            Omm::DeviceContainer rendererContainer;
+            rendererContainer.addDevice(&mediaRenderer);
+            // set media renderer device as root device
+            rendererContainer.setRootDevice(&mediaRenderer);
+
+            // create a runnable device server and add media server container
+            Omm::DeviceServer localDevices;
+            localDevices.addDeviceContainer(&rendererContainer);
+
             pUserInterface->showMainWindow();
             controller.start();
-            rendererContainer.start();
+            localDevices.start();
 
             Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
             int ret = pUserInterface->eventLoop();
 
-//            rendererContainer.stop();
+            rendererContainer.stop();
         }
         return Application::EXIT_OK;
     }
