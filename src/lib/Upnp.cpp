@@ -3074,7 +3074,7 @@ Controller::addDevice(DeviceContainer* pDeviceContainer)
         pDeviceContainer->_pController = this;
         pDeviceContainer->initController();
         _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
-        _deviceContainers.append(pDeviceContainer);
+        _deviceContainers.append(uuid, pDeviceContainer);
 //        _devices.append(uuid, new CtlDeviceCode(pDeviceContainer->getRootDevice()));
         _pUserInterface->endAddDevice(_deviceContainers.position(uuid));
         deviceAdded(pDeviceContainer);
