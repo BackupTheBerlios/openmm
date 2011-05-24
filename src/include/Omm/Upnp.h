@@ -494,7 +494,7 @@ public:
     /// Parses the device description, creates and returns a DeviceContainer, including
     /// the root device and all subdevices. This is used at the controller side
     /// when a new device pops up and is read by the controller.
-    DeviceData* rootDevice();
+    DeviceData* rootDeviceData(Device* pDevice);
     /// Parses the device description, creates and returns a Device, including only
     /// the root device. Subdevices, if present, are ignored. This is used by
     /// the device side, when building the internal device tree from the memory description.
@@ -506,7 +506,7 @@ protected:
     /// Device description URI and base URI for service descriptions.
 
 private:
-    DeviceData* device(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer = 0);
+    DeviceData* deviceData(Poco::XML::Node* pNode, Device* pDevice);
     /// Creates devices and subdevices (if ignoreSubdevices is true) and adds them to pDeviceContainer
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
@@ -853,7 +853,7 @@ public:
     
     void setDeviceContainer(DeviceContainer* pDeviceContainer);
     void setDeviceData(DeviceData* pDeviceData);
-    void setDevDevice(DevDeviceCode* pDevDevice);
+    void setDeviceCode(DevDeviceCode* pDevDevice);
     void setUuid(std::string uuid);
     void setRandomUuid();
     void setProperty(const std::string& name, const std::string& val);
@@ -925,7 +925,7 @@ public:
     void setDeviceDescription(std::string& description);
     void setDescriptionUri(const std::string uri);
     void addDevice(Device* pDevice);
-    void addServiceType(std::string serviceType, Service* pService);
+    void addServiceType(Service* pService);
     
     void print();
 

@@ -98,9 +98,11 @@ StubWriter::write()
     for (DeviceContainer::ServiceTypeIterator s = _pDeviceContainer->beginServiceType(); s != _pDeviceContainer->endServiceType(); ++s) {
         Service& rs = *((*s).second);
         serviceType(rs);
+        std::cout << "service: " << rs.getServiceType() << std::endl;
         for (Service::ActionIterator a = rs.beginAction(); a != rs.endAction(); ++a) {
             Action& ra = **a;
             action(ra);
+            std::cout << "action: " << ra.getName() << std::endl;
             for (Action::ArgumentIterator arg = ra.beginArgument(); arg != ra.endArgument(); ++arg) {
                 int dist = distance(arg, ra.endArgument());
                 Argument& rarg = **arg;

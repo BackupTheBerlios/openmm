@@ -59,9 +59,9 @@ _pEngine(engine)
     MediaRendererDescriptions mediaRendererDescriptions;
     MemoryDescriptionReader descriptionReader(mediaRendererDescriptions);
     descriptionReader.getDeviceDescription();
-    setDeviceData(descriptionReader.rootDevice());
+    setDeviceData(descriptionReader.rootDeviceData(this));
 
-    setDevDevice(new DevMediaRenderer(
+    setDeviceCode(new DevMediaRenderer(
               new DevRenderingControlRendererImpl(engine),
               new DevConnectionManagerRendererImpl(engine),
               new DevAVTransportRendererImpl(engine)));
