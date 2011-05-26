@@ -114,7 +114,7 @@ protected:
         // set-up a server socket
 //             SsdpSocket s(NObserver<SsdpTest, SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
             Omm::SsdpSocket s;
-            s.setObserver(Poco::Observer<SsdpTest, Omm::SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
+            s.addObserver(Poco::Observer<SsdpTest, Omm::SsdpMessage>(*this, &SsdpTest::handleSsdpMessage));
             s.start();
             waitForTerminationRequest();
         }

@@ -295,7 +295,7 @@ SsdpSocket::removeInterface(const std::string& name)
 
 
 void
-SsdpSocket::setObserver(const Poco::AbstractObserver& observer)
+SsdpSocket::addObserver(const Poco::AbstractObserver& observer)
 {
     _notificationCenter.addObserver(observer);
 }
@@ -2135,6 +2135,61 @@ NetworkListener::registerHttpRequestHandler(std::string path, UpnpRequestHandler
 }
 
 
+void
+NetworkListener::startSsdp()
+{
+    Log::instance()->ssdp().information("starting SSDP ...");
+
+    // FIXME: *this is wrong, should point to DeviceContainer
+//    _ssdpSocket.setObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*this, &DeviceContainer::handleSsdpMessage));
+
+    _ssdpSocket.setupSockets();
+    _ssdpSocket.start();
+    Log::instance()->ssdp().information("socket started.");
+
+//    writeSsdpMessages();
+//    sendSsdpAliveMessages();
+
+    // FIXME: *this is wrong, should point to DeviceContainer
+//    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
+//        (Poco::Observer<DeviceContainer,Net::NetworkInterfaceNotification>(*this, &DeviceContainer::handleNetworkInterfaceChangedNotification));
+    Log::instance()->upnp().debug("device root network interface manager installed");
+
+    // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
+//    _ssdpNotifyAliveMessages.startSendContinuous(_ssdpSocket);
+    Log::instance()->ssdp().information("SSDP started.");
+}
+
+
+void
+NetworkListener::stopSsdp()
+{
+    Log::instance()->ssdp().information("stopping SSDP ...");
+//    _ssdpNotifyAliveMessages.stopSendContinuous();
+//    sendSsdpByebyeMessages();
+    _ssdpSocket.stopListen();
+    Log::instance()->ssdp().information("SSDP stopped.");
+}
+
+
+void
+NetworkListener::startHttp()
+{
+    Log::instance()->http().information("starting HTTP ...");
+    _httpSocket.startServer();
+    Log::instance()->http().information("HTTP started.");
+}
+
+
+void
+NetworkListener::stopHttp()
+{
+    Log::instance()->http().information("stopping HTTP ...");
+    _httpSocket.stopServer();
+    Log::instance()->http().information("HTTP stopped.");
+}
+
+
 std::string&
 DescriptionProvider::getDeviceDescription()
 {
@@ -2166,8 +2221,7 @@ void
 DeviceManager::registerHttpRequestHandlers()
 {
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        // FIXME: DeviceContainer::getDescriptionUri() may be wrong here (only path needed!!)
-        _pNetworkListener->registerHttpRequestHandler((*it)->_stringDescriptionUri, (*it)->_descriptionRequestHandler);
+        _pNetworkListener->registerHttpRequestHandler((*it)->_descriptionUri.getPath(), (*it)->_descriptionRequestHandler);
 
         for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
             for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
@@ -2232,6 +2286,107 @@ DeviceManager::removeDeviceContainer(const std::string& uuid)
 //        _pUserInterface->endRemoveDevice(_deviceContainers.position(uuid));
 //        pDeviceContainer->_pController = 0;
     }
+}
+
+
+void
+DeviceManager::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
+{
+    Log::instance()->upnp().debug("device manager receives network interface change notification");
+    handleNetworkInterfaceChange(pNotification->_interfaceName, pNotification->_added);
+}
+
+
+void
+DeviceManager::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
+{
+    Log::instance()->upnp().debug("device manager adds network interface: " + interfaceName);
+//    writeSsdpMessages();
+    if (added) {
+        _pNetworkListener->_ssdpSocket.addInterface(interfaceName);
+        // TODO: send alive messages only once at startup of server
+        // (now triggered by loopback device and real network device)
+//        sendSsdpAliveMessages();
+    }
+    else {
+        _pNetworkListener->_ssdpSocket.removeInterface(interfaceName);
+    }
+}
+
+
+void
+DeviceManager::init()
+{
+    // FIXME: *this is wrong, should point to DeviceContainer
+//    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
+//        (Poco::Observer<DeviceContainer,Net::NetworkInterfaceNotification>(*this, &DeviceContainer::handleNetworkInterfaceChangedNotification));
+//    Log::instance()->upnp().debug("device root network interface manager installed");
+}
+
+
+void
+DeviceManager::start()
+{
+    _pNetworkListener->initSockets();
+    registerHttpRequestHandlers();
+    startHttp();
+    startSsdp();
+}
+
+
+void
+DeviceManager::stop()
+{
+
+}
+
+
+void
+DeviceManager::startSsdp()
+{
+    Log::instance()->ssdp().information("starting SSDP ...");
+
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        // TODO: also send announcements when adding a subdevice.
+        _pNetworkListener->_ssdpSocket.addObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*(*it), &DeviceContainer::handleSsdpMessage));
+        (*it)->writeSsdpMessages();
+        (*it)->sendSsdpAliveMessages(_pNetworkListener->_ssdpSocket);
+//        // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
+        (*it)->_ssdpNotifyAliveMessages.startSendContinuous(_pNetworkListener->_ssdpSocket);
+    }
+
+    Log::instance()->ssdp().information("SSDP started.");
+}
+
+
+void
+DeviceManager::stopSsdp()
+{
+    Log::instance()->ssdp().information("stopping SSDP ...");
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        (*it)->_ssdpNotifyAliveMessages.stopSendContinuous();
+        (*it)->sendSsdpByebyeMessages(_pNetworkListener->_ssdpSocket);
+        (*it)->_ssdpSocket.stopListen();
+    }
+    Log::instance()->ssdp().information("SSDP stopped.");
+}
+
+
+void
+DeviceManager::startHttp()
+{
+    Log::instance()->http().information("starting HTTP ...");
+    _pNetworkListener->_httpSocket.startServer();
+    Log::instance()->http().information("HTTP started.");
+}
+
+
+void
+DeviceManager::stopHttp()
+{
+    Log::instance()->http().information("stopping HTTP ...");
+    _pNetworkListener->_httpSocket.stopServer();
+    Log::instance()->http().information("HTTP stopped.");
 }
 
 
@@ -2547,18 +2702,18 @@ DeviceContainer::writeSsdpMessages()
 
 
 void
-DeviceContainer::sendSsdpAliveMessages()
+DeviceContainer::sendSsdpAliveMessages(SsdpSocket& ssdpSocket)
 {
     // 1. wait random intervall of less than 100msec when sending message set first time
     // 2. send out all message sets two times (max three times according to specs, should be configurable).
-    _ssdpNotifyAliveMessages.send(_ssdpSocket, 2, 100, false);
+    _ssdpNotifyAliveMessages.send(ssdpSocket, 2, 100, false);
 }
 
 
 void
-DeviceContainer::sendSsdpByebyeMessages()
+DeviceContainer::sendSsdpByebyeMessages(SsdpSocket& ssdpSocket)
 {
-    _ssdpNotifyByebyeMessages.send(_ssdpSocket, 2, 0, false);
+    _ssdpNotifyByebyeMessages.send(ssdpSocket, 2, 0, false);
 }
 
 
@@ -2568,12 +2723,12 @@ DeviceContainer::startSsdp()
     Log::instance()->ssdp().information("starting SSDP ...");
 //    writeSsdpMessages();
 
-    _ssdpSocket.setObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*this, &DeviceContainer::handleSsdpMessage));
+    _ssdpSocket.addObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*this, &DeviceContainer::handleSsdpMessage));
     _ssdpSocket.setupSockets();
     _ssdpSocket.start();
     Log::instance()->ssdp().information("socket started.");
     writeSsdpMessages();
-    sendSsdpAliveMessages();
+    sendSsdpAliveMessages(_ssdpSocket);
 
     Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
         (Poco::Observer<DeviceContainer,Net::NetworkInterfaceNotification>(*this, &DeviceContainer::handleNetworkInterfaceChangedNotification));
@@ -2590,7 +2745,7 @@ DeviceContainer::stopSsdp()
 {
     Log::instance()->ssdp().information("stopping SSDP ...");
     _ssdpNotifyAliveMessages.stopSendContinuous();
-    sendSsdpByebyeMessages();
+    sendSsdpByebyeMessages(_ssdpSocket);
     _ssdpSocket.stopListen();
     Log::instance()->ssdp().information("SSDP stopped.");
 }
@@ -2688,7 +2843,7 @@ DeviceContainer::handleNetworkInterfaceChange(const std::string& interfaceName, 
         _ssdpSocket.addInterface(interfaceName);
         // TODO: send alive messages only once at startup of server
         // (now triggered by loopback device and real network device)
-        sendSsdpAliveMessages();
+        sendSsdpAliveMessages(_ssdpSocket);
     }
     else {
         _ssdpSocket.removeInterface(interfaceName);
@@ -3103,7 +3258,7 @@ Controller::start()
     Log::instance()->upnp().debug("starting controller ...");
 
     _ssdpSocket.init();
-    _ssdpSocket.setObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
+    _ssdpSocket.addObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
     _ssdpSocket.setupSockets();
     _ssdpSocket.start();
     sendMSearch();
@@ -3270,18 +3425,23 @@ void
 DeviceServer::start()
 {
     // TODO: preliminary implementation. Later, DeviceContainer won't be startable.
-    for(DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        (*it)->start();
-    }
+//    for(DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+//        (*it)->start();
+//    }
+
+    DeviceManager::start();
 }
 
 
 void
 DeviceServer::stop()
 {
-    for(DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        (*it)->stop();
-    }
+    // TODO: preliminary implementation. Later, DeviceContainer won't be startable.
+//    for(DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+//        (*it)->stop();
+//    }
+
+    DeviceManager::stop();
 }
 
 
