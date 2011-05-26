@@ -445,7 +445,7 @@ public:
     void addInterface(const std::string& name);
     void removeInterface(const std::string& name);
     void addObserver(const Poco::AbstractObserver& observer);
-    void start();
+    void startListen();
     void stopListen();
 
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));

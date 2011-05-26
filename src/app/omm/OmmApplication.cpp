@@ -180,7 +180,8 @@ protected:
             Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
             int ret = pUserInterface->eventLoop();
 
-            rendererContainer.stop();
+            controller.stop();
+            localDevices.stop();
         }
         return Application::EXIT_OK;
     }

@@ -302,7 +302,7 @@ SsdpSocket::addObserver(const Poco::AbstractObserver& observer)
 
 
 void
-SsdpSocket::start()
+SsdpSocket::startListen()
 {
     Log::instance()->ssdp().information("starting SSDP listener ...");
     _listenerThread.start(_reactor);
@@ -2144,7 +2144,7 @@ NetworkListener::startSsdp()
 //    _ssdpSocket.setObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*this, &DeviceContainer::handleSsdpMessage));
 
     _ssdpSocket.setupSockets();
-    _ssdpSocket.start();
+    _ssdpSocket.startListen();
     Log::instance()->ssdp().information("socket started.");
 
 //    writeSsdpMessages();
@@ -2337,7 +2337,8 @@ DeviceManager::start()
 void
 DeviceManager::stop()
 {
-
+    stopSsdp();
+    stopHttp();
 }
 
 
@@ -2366,8 +2367,8 @@ DeviceManager::stopSsdp()
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
         (*it)->_ssdpNotifyAliveMessages.stopSendContinuous();
         (*it)->sendSsdpByebyeMessages(_pNetworkListener->_ssdpSocket);
-        (*it)->_ssdpSocket.stopListen();
     }
+//    _pNetworkListener->_ssdpSocket.stopListen();
     Log::instance()->ssdp().information("SSDP stopped.");
 }
 
@@ -2725,7 +2726,7 @@ DeviceContainer::startSsdp()
 
     _ssdpSocket.addObserver(Poco::Observer<DeviceContainer, SsdpMessage>(*this, &DeviceContainer::handleSsdpMessage));
     _ssdpSocket.setupSockets();
-    _ssdpSocket.start();
+    _ssdpSocket.startListen();
     Log::instance()->ssdp().information("socket started.");
     writeSsdpMessages();
     sendSsdpAliveMessages(_ssdpSocket);
@@ -3260,7 +3261,7 @@ Controller::start()
     _ssdpSocket.init();
     _ssdpSocket.addObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
     _ssdpSocket.setupSockets();
-    _ssdpSocket.start();
+    _ssdpSocket.startListen();
     sendMSearch();
 
     Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler

@@ -45,6 +45,6 @@ int main(int argc, char** argv)
     controller.start();
     Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
     int ret =  pUserInterface->eventLoop();
-    //controller.stop();
+    controller.stop();
     return ret;
 }
