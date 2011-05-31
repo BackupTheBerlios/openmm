@@ -141,6 +141,7 @@ protected:
             Omm::DeviceServer server;
             server.addDeviceContainer(&serverContainer);
             // start runnable server
+            server.init();
             server.start();
 
             waitForTerminationRequest();

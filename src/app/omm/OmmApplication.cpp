@@ -175,6 +175,7 @@ protected:
 
             pUserInterface->showMainWindow();
             controller.start();
+            localDevices.init();
             localDevices.start();
 
             Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");

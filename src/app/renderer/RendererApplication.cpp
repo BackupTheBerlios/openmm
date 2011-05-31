@@ -211,6 +211,7 @@ protected:
             Omm::DeviceServer renderer;
             renderer.addDeviceContainer(&rendererContainer);
             // start runnable server
+            renderer.init();
             renderer.start();
 
             waitForTerminationRequest();

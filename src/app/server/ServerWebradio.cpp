@@ -144,6 +144,7 @@ protected:
             // FIXME: only start web radio server, if internet is available
             // check this in AvServer::setRoot() by calling for example MediaObject::isAvailable()
             // start runnable server
+            server.init();
             server.start();
             
             waitForTerminationRequest();

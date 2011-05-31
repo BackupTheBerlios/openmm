@@ -504,6 +504,7 @@ private:
 class HttpSocket
 {
     friend class DeviceContainer;
+    friend class DeviceManager;
     friend class NetworkListener;
 
 public:
@@ -667,6 +668,8 @@ public:
     void stopSsdp();
     void stopHttp();
 
+    void postAction(Action* pAction);
+
 protected:
     virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
     virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
@@ -675,6 +678,7 @@ protected:
 
 private:
     void registerHttpRequestHandlers();
+    void registerActionHandler(const Poco::AbstractObserver& observer);
 
     NetworkListener*                    _pNetworkListener;
 };
@@ -743,6 +747,7 @@ public:
     ServiceTypeIterator beginServiceType();
     ServiceTypeIterator endServiceType();
 
+    DeviceManager* getDeviceManager();
     /*const*/ Device* getDevice(std::string uuid) /*const*/;
     Device* getRootDevice() const;
     Controller* getController() const;
@@ -750,6 +755,7 @@ public:
     const std::string& getDescriptionUri() const;
     Service* getServiceType(const std::string& serviceType);
 
+    void setDeviceManager(DeviceManager* pDeviceManager);
     void setRootDevice(Device* pDevice);
     void setDeviceDescription(std::string& description);
     void setDescriptionUri(const std::string uri);
@@ -796,6 +802,7 @@ private:
     std::string                     _stringDescriptionUri;            // for controller to download description
     Poco::URI                       _descriptionUri;
     std::string*                    _pDeviceDescription;
+    DeviceManager*                  _pDeviceManager;
     Container<Device>               _devices;
     Device*                         _pRootDevice;
     std::map<std::string,Service*>  _serviceTypes;
@@ -814,6 +821,7 @@ class Device
 {
     friend class DeviceDescriptionWriter;
     friend class DeviceContainer;
+    friend class DeviceManager;
 
 public:
     Device();
@@ -888,6 +896,7 @@ private:
 class DevDeviceCode
 {
     friend class DeviceContainer;
+    friend class DeviceManager;
     friend class Device;
 
 public:
