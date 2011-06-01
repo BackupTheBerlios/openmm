@@ -1647,6 +1647,8 @@ Service::initClient()
 //        ommcontrol still shows a couple of them though they are dead
 
 
+// FIXME: queue a notification in DeviceManager on network activity events, don't call
+// user interface methods directly.
 void
 Service::actionNetworkActivity(bool begin)
 {
@@ -2268,16 +2270,15 @@ DescriptionProvider::getServiceDescription(const std::string& path)
 }
 
 
-DeviceManager::DeviceManager(Socket* pNetworkListener) :
-_pNetworkListener(pNetworkListener)
+DeviceManager::DeviceManager(Socket* pSocket) :
+_pSocket(pSocket)
 {
-
 }
 
 
 DeviceManager::~DeviceManager()
 {
-    delete _pNetworkListener;
+    delete _pSocket;
 }
 
 
@@ -2286,18 +2287,18 @@ DeviceManager::registerHttpRequestHandlers()
 {
     Log::instance()->http().debug("registering http request handlers ...");
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        _pNetworkListener->registerHttpRequestHandler((*it)->_descriptionUri.getPath(), (*it)->_descriptionRequestHandler);
+        _pSocket->registerHttpRequestHandler((*it)->_descriptionUri.getPath(), (*it)->_descriptionRequestHandler);
 
         for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
             for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
-                _pNetworkListener->registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
+                _pSocket->registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
             }
             for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
                 Service* ps = *s;
                 // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
-                _pNetworkListener->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
-                _pNetworkListener->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-                _pNetworkListener->registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+                _pSocket->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+                _pSocket->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+                _pSocket->registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
             }
             registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
         }
@@ -2309,7 +2310,7 @@ DeviceManager::registerHttpRequestHandlers()
 void
 DeviceManager::registerActionHandler(const Poco::AbstractObserver& observer)
 {
-    _pNetworkListener->registerActionHandler(observer);
+    _pSocket->registerActionHandler(observer);
 }
 
 
@@ -2363,16 +2364,16 @@ DeviceManager::init()
 //        (Poco::Observer<DeviceContainer,Net::NetworkInterfaceNotification>(*this, &DeviceContainer::handleNetworkInterfaceChangedNotification));
 //    Log::instance()->upnp().debug("device root network interface manager installed");
 
-    _pNetworkListener->initSockets();
+    _pSocket->initSockets();
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
         (*it)->initUuid();
         (*it)->initStateVars();
         (*it)->rewriteDescriptions();
         (*it)->initDeviceDescriptionHandler();
-        (*it)->setDescriptionUri(_pNetworkListener->getHttpServerUri() + (*it)->getRootDevice()->getUuid() +  "/Description.xml");
+        (*it)->setDescriptionUri(_pSocket->getHttpServerUri() + (*it)->getRootDevice()->getUuid() +  "/Description.xml");
     }
     registerHttpRequestHandlers();
-    _pNetworkListener->registerSsdpMessageHandler(Poco::Observer<DeviceManager, SsdpMessage>(*this, &DeviceManager::handleSsdpMessage));
+    _pSocket->registerSsdpMessageHandler(Poco::Observer<DeviceManager, SsdpMessage>(*this, &DeviceManager::handleSsdpMessage));
 }
 
 
@@ -2396,7 +2397,7 @@ void
 DeviceManager::startSsdp()
 {
     Log::instance()->ssdp().information("starting SSDP ...");
-    _pNetworkListener->startSsdp();
+    _pSocket->startSsdp();
     Log::instance()->ssdp().information("SSDP started.");
 }
 
@@ -2405,7 +2406,7 @@ void
 DeviceManager::stopSsdp()
 {
     Log::instance()->ssdp().information("stopping SSDP ...");
-    _pNetworkListener->stopSsdp();
+    _pSocket->stopSsdp();
     Log::instance()->ssdp().information("SSDP stopped.");
 }
 
@@ -2414,7 +2415,7 @@ void
 DeviceManager::startHttp()
 {
     Log::instance()->http().information("starting HTTP ...");
-    _pNetworkListener->startHttp();
+    _pSocket->startHttp();
     Log::instance()->http().information("HTTP started.");
 }
 
@@ -2423,7 +2424,7 @@ void
 DeviceManager::stopHttp()
 {
     Log::instance()->http().information("stopping HTTP ...");
-    _pNetworkListener->stopHttp();
+    _pSocket->stopHttp();
     Log::instance()->http().information("HTTP stopped.");
 }
 
@@ -2431,7 +2432,7 @@ DeviceManager::stopHttp()
 void
 DeviceManager::postAction(Action* pAction)
 {
-    _pNetworkListener->postAction(pAction);
+    _pSocket->postAction(pAction);
 }
 
 
@@ -3114,7 +3115,7 @@ Controller::sendMSearch()
     m.setSearchTarget("upnp:rootdevice");
 
     // FIXME: network exception in controller when sending MSearch after network device removal
-    _pNetworkListener->sendSsdpMessage(m);
+    _pSocket->sendSsdpMessage(m);
 }
 
 
@@ -3234,9 +3235,9 @@ DeviceServer::startSsdp()
         (*it)->writeSsdpMessages();
 
         // 3. send advertisement messages twice with a random delay up to 100ms
-        _pNetworkListener->sendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages, 2, 100);
+        _pSocket->sendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages, 2, 100);
         // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
-        _pNetworkListener->startSendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages);
+        _pSocket->startSendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages);
     }
 }
 
@@ -3245,9 +3246,9 @@ void
 DeviceServer::stopSsdp()
 {
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        _pNetworkListener->stopSendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages);
+        _pSocket->stopSendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages);
         // send device unavailable messages once with no delay
-        _pNetworkListener->sendSsdpMessageSet((*it)->_ssdpNotifyByebyeMessages, 1, 0);
+        _pSocket->sendSsdpMessageSet((*it)->_ssdpNotifyByebyeMessages, 1, 0);
     }
     DeviceManager::stopSsdp();
 }
@@ -3278,7 +3279,7 @@ DeviceServer::handleSsdpMessage(SsdpMessage* pMessage)
             //       -> _ssdpNotifyAliveMessages._sendTimer
             //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
 
-            _pNetworkListener->sendSsdpMessage(m, pMessage->getSender());
+            _pSocket->sendSsdpMessage(m, pMessage->getSender());
         }
     }
 }

@@ -478,17 +478,19 @@ private:
 
 class SsdpMessageSet
 {
+    friend class Socket;
+
 public:
     SsdpMessageSet();
     ~SsdpMessageSet();
 
     void clear();
     void addMessage(SsdpMessage& message);
+
+private:
     void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false);
     void startSendContinuous(SsdpSocket& socket);
     void stopSendContinuous();
-
-private:
     void onTimer(Poco::Timer& timer);
 
     Poco::Random                        _randomTimeGenerator;
@@ -503,8 +505,6 @@ private:
 
 class HttpSocket
 {
-    friend class DeviceContainer;
-    friend class DeviceManager;
     friend class Socket;
 
 public:
@@ -671,7 +671,7 @@ protected:
     void stopHttp();
 
     Container<DeviceContainer> _deviceContainers;
-    Socket*                    _pNetworkListener;
+    Socket*                    _pSocket;
 
 private:
     void registerHttpRequestHandlers();
