@@ -436,7 +436,7 @@ class SsdpSocket
 {
     friend class DeviceContainer;
     friend class Controller;
-    friend class NetworkListener;
+    friend class Socket;
 
 public:
     SsdpSocket();
@@ -505,7 +505,7 @@ class HttpSocket
 {
     friend class DeviceContainer;
     friend class DeviceManager;
-    friend class NetworkListener;
+    friend class Socket;
 
 public:
     HttpSocket();
@@ -524,11 +524,11 @@ private:
 };
 
 
-class NetworkListener
+class Socket
 {
 public:
-    NetworkListener();
-    virtual ~NetworkListener();
+    Socket();
+    virtual ~Socket();
 
     void initSockets();
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
@@ -554,18 +554,6 @@ private:
 
     SsdpSocket                      _ssdpSocket;
     HttpSocket                      _httpSocket;
-};
-
-
-class DevNetworkListener : public NetworkListener
-{
-
-};
-
-
-class CtlNetworkListener : public NetworkListener
-{
-
 };
 
 
@@ -656,7 +644,7 @@ class DeviceManager : public Util::Startable
     friend class ControlRequestHandler;
 
 public:
-    DeviceManager(NetworkListener* pNetworkListener);
+    DeviceManager(Socket* pNetworkListener);
     virtual ~DeviceManager();
 
     typedef Container<DeviceContainer>::Iterator DeviceContainerIterator;
@@ -683,7 +671,7 @@ protected:
     void stopHttp();
 
     Container<DeviceContainer>          _deviceContainers;
-    NetworkListener*                    _pNetworkListener;
+    Socket*                    _pNetworkListener;
 
 private:
     void registerHttpRequestHandlers();
