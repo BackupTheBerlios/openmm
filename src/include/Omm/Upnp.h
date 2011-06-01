@@ -527,6 +527,8 @@ private:
 class NetworkListener
 {
     friend class DeviceManager;
+    friend class DeviceServer;
+    friend class Controller;
 
 public:
     NetworkListener();
@@ -643,6 +645,8 @@ private:
 
 class DeviceManager : public Util::Startable
 {
+    friend class ControlRequestHandler;
+
 public:
     DeviceManager(NetworkListener* pNetworkListener);
     virtual ~DeviceManager();
@@ -656,31 +660,31 @@ public:
 
     void init();
 
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
-
     virtual void start();
     virtual void stop();
 
-    void startSsdp();
-    void startHttp();
+protected:
+    virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
+    virtual void deviceContainerAdded(DeviceContainer* pDeviceContainer) {}
+    virtual void deviceContainerRemoved(DeviceContainer* pDeviceContainer) {}
 
-    void stopSsdp();
+    virtual void startSsdp();
+    virtual void stopSsdp();
+
+    void startHttp();
     void stopHttp();
 
-    void postAction(Action* pAction);
-
-protected:
-    virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
-    virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
-
     Container<DeviceContainer>          _deviceContainers;
+    NetworkListener*                    _pNetworkListener;
 
 private:
     void registerHttpRequestHandlers();
     void registerActionHandler(const Poco::AbstractObserver& observer);
 
-    NetworkListener*                    _pNetworkListener;
+    void postAction(Action* pAction);
+
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
 };
 
 
@@ -700,8 +704,6 @@ public:
 
 protected:
     UserInterface*                      _pUserInterface;
-//    Container<DeviceContainer>           _devices;
-//    Container<CtlDeviceCode>    _devices;
 
 private:
     void sendMSearch();
@@ -711,9 +713,6 @@ private:
     void addDeviceContainer(DeviceContainer* pDevice);
     void removeDeviceContainer(const std::string& uuid);
     void update();
-
-    SsdpSocket                      _ssdpSocket;
-//    HttpSocket                      _eventSocket;
 };
 
 
@@ -723,15 +722,16 @@ public:
     DeviceServer();
     virtual ~DeviceServer();
 
-    virtual void start();
-    virtual void stop();
+    virtual void startSsdp();
+    virtual void stopSsdp();
+    virtual void handleSsdpMessage(SsdpMessage* pMessage);
 };
 
 
-// TODO: remove Util::Startable and all start/stop methods from DeviceContainer
-class DeviceContainer : public Util::Startable
+class DeviceContainer
 {
     friend class DeviceManager;
+    friend class DeviceServer;
     friend class DevDeviceCode;
     friend class Controller;
 
@@ -764,7 +764,6 @@ public:
 
     void print();
 
-    void initSockets();
     void initUuid();
     void initStateVars();
     void rewriteDescriptions();
@@ -772,28 +771,7 @@ public:
     void initDevice();
     void initController();
 
-    void startSsdp();
-    void startHttp();
-    void stopSsdp();
-    void start();
-
-    void stopHttp();
-    void stop();
-
-    void registerHttpRequestHandlers();
-    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
-
-    void registerActionHandler(const Poco::AbstractObserver& observer);
-
-    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    void handleSsdpMessage(SsdpMessage* pNf);
-    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-
-    void postAction(Action* pAction);
-
 private:
-    void setDescriptionUri();
     void writeSsdpMessages();
     void sendSsdpAliveMessages(SsdpSocket& ssdpSocket);
     void sendSsdpByebyeMessages(SsdpSocket& ssdpSocket);
@@ -806,8 +784,6 @@ private:
     Container<Device>               _devices;
     Device*                         _pRootDevice;
     std::map<std::string,Service*>  _serviceTypes;
-    SsdpSocket                      _ssdpSocket;
-    HttpSocket                      _httpSocket;
     SsdpMessageSet                  _ssdpNotifyAliveMessages;
     SsdpMessageSet                  _ssdpNotifyByebyeMessages;
     DescriptionRequestHandler*      _descriptionRequestHandler;

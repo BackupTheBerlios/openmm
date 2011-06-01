@@ -347,7 +347,7 @@ AvController::serverDevice(int numServer)
 
 
 void
-AvController::deviceAdded(DeviceContainer* pDeviceContainer)
+AvController::deviceContainerAdded(DeviceContainer* pDeviceContainer)
 {
     // FIXME: need a list of ControllerImplAdapters for calling eventHandler(StateVar*)
     // FIXME: ownership of ControllerImplAdapters ...
@@ -390,7 +390,7 @@ AvController::deviceAdded(DeviceContainer* pDeviceContainer)
 
 
 void
-AvController::deviceRemoved(DeviceContainer* pDeviceContainer)
+AvController::deviceContainerRemoved(DeviceContainer* pDeviceContainer)
 {
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();

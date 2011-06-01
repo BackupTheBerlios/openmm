@@ -174,6 +174,7 @@ protected:
             localDevices.addDeviceContainer(&rendererContainer);
 
             pUserInterface->showMainWindow();
+            controller.init();
             controller.start();
             localDevices.init();
             localDevices.start();
