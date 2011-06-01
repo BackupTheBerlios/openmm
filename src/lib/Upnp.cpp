@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -1860,7 +1860,6 @@ RequestNotFoundRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& reque
 }
 
 
-// DescriptionRequestHandler::DescriptionRequestHandler(std::string& description):
 DescriptionRequestHandler::DescriptionRequestHandler(std::string* pDescription):
 _pDescription(pDescription)
 {
@@ -1871,7 +1870,6 @@ DescriptionRequestHandler*
 DescriptionRequestHandler::create()
 {
     // TODO: can we somehow avoid to make a copy of the RequestHandler on each request?
-//     return new DescriptionRequestHandler(_description);
     return new DescriptionRequestHandler(_pDescription);
 }
 
@@ -2337,13 +2335,8 @@ DeviceManager::addDeviceContainer(DeviceContainer* pDeviceContainer)
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
         Log::instance()->upnp().debug("device manager adds device container with root device uuid: " + uuid);
-//        pDeviceContainer->_pController = this;
-//        pDeviceContainer->initController();
-//        _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
         _deviceContainers.append(uuid, pDeviceContainer);
         pDeviceContainer->setDeviceManager(this);
-//        _devices.append(uuid, new CtlDeviceCode(pDeviceContainer->getRootDevice()));
-//        _pUserInterface->endAddDevice(_deviceContainers.position(uuid));
         deviceContainerAdded(pDeviceContainer);
     }
 //    _devices.get("").eventHandler(0);
@@ -2356,12 +2349,8 @@ DeviceManager::removeDeviceContainer(const std::string& uuid)
     if (_deviceContainers.contains(uuid)) {
         Log::instance()->upnp().debug("device manager removes device container with root device uuid: " + uuid);
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
-//        DeviceContainer* pDeviceContainer = _devices.get(uuid).getDevice()->getDeviceContainer();
         deviceContainerRemoved(pDeviceContainer);
-//        _pUserInterface->beginRemoveDevice(_deviceContainers.position(uuid));
         _deviceContainers.remove(uuid);
-//        _pUserInterface->endRemoveDevice(_deviceContainers.position(uuid));
-//        pDeviceContainer->_pController = 0;
     }
 }
 
@@ -3086,33 +3075,10 @@ Controller::~Controller()
 }
 
 
-//void
-//Controller::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
-//{
-//    Log::instance()->upnp().debug("controller receives network interface change notification");
-//
-//    if (pNotification->_added) {
-//        _pNetworkListener->_ssdpSocket.addInterface(pNotification->_interfaceName);
-//    }
-//    else {
-//        _pNetworkListener->_ssdpSocket.removeInterface(pNotification->_interfaceName);
-//        // TODO: unregister subscriptions for devices on this interface
-//    }
-//    update();
-//}
-
-
 void
 Controller::start()
 {
     Log::instance()->upnp().debug("starting controller ...");
-
-//    _ssdpSocket.init();
-//    _ssdpSocket.addObserver(Poco::Observer<Controller, SsdpMessage>(*this, &Controller::handleSsdpMessage));
-//    _ssdpSocket.setupSockets();
-//    _ssdpSocket.startListen();
-//    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
-//        (Poco::Observer<Controller,Net::NetworkInterfaceNotification>(*this, &Controller::handleNetworkInterfaceChangedNotification));
 
     DeviceManager::start();
     sendMSearch();
@@ -3155,7 +3121,6 @@ Controller::sendMSearch()
     m.setSearchTarget("upnp:rootdevice");
 
     // FIXME: network exception in controller when sending MSearch after network device removal
-//    _pNetworkListener->_ssdpSocket.sendMessage(m);
     _pNetworkListener->sendSsdpMessage(m);
 }
 
@@ -3736,12 +3701,10 @@ SsdpMessage::getMaximumWaitTime()
         return Poco::NumberParser::parse(_messageHeader["MX"]);
     }
     catch (Poco::NotFoundException) {
-//         std::clog << "missing MX in SSDP header" << std::endl;
         Log::instance()->ssdp().error("missing MX in SSDP header");
         
     }
     catch (Poco::SyntaxException) {
-//         std::clog << "wrong number format of MX in SSDP header" << std::endl;
         Log::instance()->ssdp().error("wrong number format of MX in SSDP header");
     }
     return SSDP_MIN_WAIT_TIME;  // if no valid number is given, return minimum required value
@@ -3766,7 +3729,6 @@ SsdpMessage::getDate()
         return Poco::DateTimeParser::parse(Poco::DateTimeFormat::HTTP_FORMAT, value, timeZoneDifferentail);
     }
     catch (Poco::SyntaxException) {
-//         std::clog << "wrong date format of DATE in SSDP header" << std::endl;
         Log::instance()->ssdp().error("wrong date format of DATE in SSDP header");
     }
 }
