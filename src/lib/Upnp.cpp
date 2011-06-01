@@ -2283,31 +2283,6 @@ DeviceManager::~DeviceManager()
 
 
 void
-DeviceManager::registerHttpRequestHandlers()
-{
-    Log::instance()->http().debug("registering http request handlers ...");
-    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        _pSocket->registerHttpRequestHandler((*it)->_descriptionUri.getPath(), (*it)->_descriptionRequestHandler);
-
-        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-            for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
-                _pSocket->registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
-            }
-            for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-                Service* ps = *s;
-                // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
-                _pSocket->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
-                _pSocket->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-                _pSocket->registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
-            }
-            registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
-        }
-    }
-    Log::instance()->http().debug("registering http request handlers finished.");
-}
-
-
-void
 DeviceManager::registerActionHandler(const Poco::AbstractObserver& observer)
 {
     _pSocket->registerActionHandler(observer);
@@ -3282,6 +3257,31 @@ DeviceServer::handleSsdpMessage(SsdpMessage* pMessage)
             _pSocket->sendSsdpMessage(m, pMessage->getSender());
         }
     }
+}
+
+
+void
+DeviceServer::registerHttpRequestHandlers()
+{
+    Log::instance()->http().debug("registering device http request handlers ...");
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        _pSocket->registerHttpRequestHandler((*it)->_descriptionUri.getPath(), (*it)->_descriptionRequestHandler);
+
+        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+            for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
+                _pSocket->registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
+            }
+            for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+                Service* ps = *s;
+                // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
+                _pSocket->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
+                _pSocket->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
+                _pSocket->registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+            }
+            registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
+        }
+    }
+    Log::instance()->http().debug("registering device http request handlers finished.");
 }
 
 

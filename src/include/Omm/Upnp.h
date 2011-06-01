@@ -185,7 +185,7 @@ private:
 class Icon
 {
     friend class IconRequestHandler;
-    friend class DeviceManager;
+    friend class DeviceServer;
     friend class DeviceContainer;
     friend class Device;
     friend class DeviceDescriptionWriter;
@@ -663,6 +663,7 @@ protected:
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
     virtual void deviceContainerAdded(DeviceContainer* pDeviceContainer) {}
     virtual void deviceContainerRemoved(DeviceContainer* pDeviceContainer) {}
+    virtual void registerHttpRequestHandlers() {}
 
     virtual void startSsdp();
     virtual void stopSsdp();
@@ -670,13 +671,12 @@ protected:
     void startHttp();
     void stopHttp();
 
+    void registerActionHandler(const Poco::AbstractObserver& observer);
+
     Container<DeviceContainer> _deviceContainers;
     Socket*                    _pSocket;
 
 private:
-    void registerHttpRequestHandlers();
-    void registerActionHandler(const Poco::AbstractObserver& observer);
-
     void postAction(Action* pAction);
 };
 
@@ -715,6 +715,7 @@ public:
     virtual void startSsdp();
     virtual void stopSsdp();
     virtual void handleSsdpMessage(SsdpMessage* pMessage);
+    virtual void registerHttpRequestHandlers();
 };
 
 
@@ -786,6 +787,7 @@ class Device
     friend class DeviceDescriptionWriter;
     friend class DeviceContainer;
     friend class DeviceManager;
+    friend class DeviceServer;
 
 public:
     Device();
@@ -860,7 +862,7 @@ private:
 class DevDeviceCode
 {
     friend class DeviceContainer;
-    friend class DeviceManager;
+    friend class DeviceServer;
     friend class Device;
 
 public:
