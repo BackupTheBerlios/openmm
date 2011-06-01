@@ -670,7 +670,7 @@ protected:
     void startHttp();
     void stopHttp();
 
-    Container<DeviceContainer>          _deviceContainers;
+    Container<DeviceContainer> _deviceContainers;
     Socket*                    _pNetworkListener;
 
 private:
@@ -688,9 +688,6 @@ public:
     virtual ~Controller();
 
     virtual void start();
-    virtual void stop();
-//    virtual void deviceAdded(DeviceContainer* pDeviceContainer) {}
-//    virtual void deviceRemoved(DeviceContainer* pDeviceContainer) {}
 
     void setUserInterface(UserInterface* pUserInterface);
     UserInterface* getUserInterface();

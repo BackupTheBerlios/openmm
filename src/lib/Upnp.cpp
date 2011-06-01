@@ -3088,13 +3088,6 @@ Controller::start()
 
 
 void
-Controller::stop()
-{
-
-}
-
-
-void
 Controller::setUserInterface(UserInterface* pUserInterface)
 {
     _pUserInterface = pUserInterface;

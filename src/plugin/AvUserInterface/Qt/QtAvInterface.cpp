@@ -158,6 +158,7 @@ QtAvInterface::initGui()
 {
 //    Omm::Av::Log::instance()->upnpav().debug("init qt gui ...");
 
+    setupUnixSignalHandlers();
     qRegisterMetaType<std::string>();
 
 //    _defaultStyleSheet = _pApp->styleSheet();
@@ -514,6 +515,77 @@ QtAvInterface::endRemoveRenderer(int position)
 {
     _pPlayerRack->endRemoveRenderer();
 }
+
+
+#ifdef __LINUX__
+#include <signal.h>
+#endif
+
+void
+QtAvInterface::setupUnixSignalHandlers()
+{
+#ifdef __LINUX__
+     struct sigaction hup, term;
+
+     hup.sa_handler = QtAvInterface::unixSignalHandler;
+     sigemptyset(&hup.sa_mask);
+     hup.sa_flags = 0;
+     hup.sa_flags |= SA_RESTART;
+
+//     if (sigaction(SIGHUP, &hup, 0) > 0)
+//        return 1;
+
+     term.sa_handler = QtAvInterface::unixSignalHandler;
+     sigemptyset(&term.sa_mask);
+     term.sa_flags |= SA_RESTART;
+
+//     if (sigaction(SIGTERM, &term, 0) > 0)
+//        return 2;
+//
+//     return 0;
+#endif
+}
+
+
+void
+QtAvInterface::unixSignalHandler(int)
+{
+    Omm::Av::Log::instance()->upnpav().debug("caught unix signal");
+//    _pApp->quit();
+}
+
+/*
+
+ *
+ * Better use something like Poco::Util::ServerApplication::waitForTerminationRequest()
+ * unix style:
+void ServerApplication::waitForTerminationRequest()
+{
+	sigset_t sset;
+	sigemptyset(&sset);
+	if (!std::getenv("POCO_ENABLE_DEBUGGER"))
+	{
+		sigaddset(&sset, SIGINT);
+	}
+	sigaddset(&sset, SIGQUIT);
+	sigaddset(&sset, SIGTERM);
+	sigprocmask(SIG_BLOCK, &sset, NULL);
+	int sig;
+	sigwait(&sset, &sig);
+}
+ *
+ * windows style:
+ void ServerApplication::waitForTerminationRequest()
+{
+	SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE);
+	std::string evName("POCOTRM");
+	NumberFormatter::appendHex(evName, Process::id(), 8);
+	NamedEvent ev(evName);
+	ev.wait();
+	_terminated.set();
+}
+
+ */
 
 
 //void
