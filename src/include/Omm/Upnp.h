@@ -484,7 +484,7 @@ public:
 
     void clear();
     void addMessage(SsdpMessage& message);
-    void send(SsdpSocket& socket, int repeat, long delay, bool continuous);
+    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false);
     void startSendContinuous(SsdpSocket& socket);
     void stopSendContinuous();
 
@@ -493,7 +493,7 @@ private:
 
     Poco::Random                        _randomTimeGenerator;
     Poco::Timer                         _sendTimer;
-    SsdpSocket*                         _socket;
+    SsdpSocket*                         _pSsdpSocket;
     std::vector<SsdpMessage*>           _ssdpMessages;
     int                                 _repeat;
     long                                _delay;
@@ -526,16 +526,14 @@ private:
 
 class NetworkListener
 {
-    friend class DeviceManager;
-    friend class DeviceServer;
-    friend class Controller;
-
 public:
     NetworkListener();
     virtual ~NetworkListener();
 
     void initSockets();
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
+    void registerActionHandler(const Poco::AbstractObserver& observer);
+    void registerSsdpMessageHandler(const Poco::AbstractObserver& observer);
 
     void startSsdp();
     void startHttp();
@@ -543,7 +541,17 @@ public:
     void stopSsdp();
     void stopHttp();
 
+    std::string getHttpServerUri();
+    void postAction(Action* pAction);
+    void sendSsdpMessage(SsdpMessage& ssdpMessage, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat = 1, long delay = 0);
+    void startSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
+    void stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
+
 private:
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
+
     SsdpSocket                      _ssdpSocket;
     HttpSocket                      _httpSocket;
 };
@@ -682,9 +690,6 @@ private:
     void registerActionHandler(const Poco::AbstractObserver& observer);
 
     void postAction(Action* pAction);
-
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
 };
 
 
@@ -708,7 +713,7 @@ protected:
 private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+//    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
     void addDeviceContainer(DeviceContainer* pDevice);
     void removeDeviceContainer(const std::string& uuid);
@@ -773,8 +778,6 @@ public:
 
 private:
     void writeSsdpMessages();
-    void sendSsdpAliveMessages(SsdpSocket& ssdpSocket);
-    void sendSsdpByebyeMessages(SsdpSocket& ssdpSocket);
 
 //     Poco::URI                       _baseUri;              // base URI for control URI and event URI
     std::string                     _stringDescriptionUri;            // for controller to download description
