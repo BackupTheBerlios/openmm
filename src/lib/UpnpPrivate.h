@@ -357,14 +357,27 @@ private:
 };
 
 
-class EventRequestHandler: public UpnpRequestHandler
+class EventSubscriptionRequestHandler: public UpnpRequestHandler
 {
 public:
-    EventRequestHandler(Service* pService) : _pService(pService) {}
+    EventSubscriptionRequestHandler(Service* pService) : _pService(pService) {}
     
-    EventRequestHandler* create();
+    EventSubscriptionRequestHandler* create();
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
+private:
+    Service*    _pService;
+};
+
+
+class EventNotificationRequestHandler: public UpnpRequestHandler
+{
+public:
+    EventNotificationRequestHandler(Service* pService) : _pService(pService) {}
+
+    EventNotificationRequestHandler* create();
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+
 private:
     Service*    _pService;
 };

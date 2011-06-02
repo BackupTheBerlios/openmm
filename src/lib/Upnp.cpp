@@ -661,7 +661,7 @@ DescriptionReader::service(Poco::XML::Node* pNode)
         }
         else if (pNode->nodeName() == "eventSubURL" && pNode->hasChildNodes()) {
             std::string eventPath = pNode->innerText();
-            pRes->setEventPath(eventPath);
+            pRes->setEventSubscriptionPath(eventPath);
         }
         
         pNode = pNode->nextSibling();
@@ -1042,7 +1042,7 @@ DeviceDescriptionWriter::service(Service* pService)
     pServiceElement->appendChild(pControl);
     // eventSubURL
     Poco::AutoPtr<Poco::XML::Element> pEvent = _pDoc->createElement("eventSubURL");
-    Poco::AutoPtr<Poco::XML::Text> pEventVal = _pDoc->createTextNode(pService->getEventPath());
+    Poco::AutoPtr<Poco::XML::Text> pEventVal = _pDoc->createTextNode(pService->getEventSubscriptionPath());
     pEvent->appendChild(pEventVal);
     pServiceElement->appendChild(pEvent);
     
@@ -1473,6 +1473,20 @@ Service::endEventSubscription()
 }
 
 
+Service::EventCallbackPathIterator
+Service::beginEventCallbackPath()
+{
+    return _eventCallbackPaths.begin();
+}
+
+
+Service::EventCallbackPathIterator
+Service::endEventCallbackPath()
+{
+    return _eventCallbackPaths.end();
+}
+
+
 std::string
 Service::getServiceType() const
 {
@@ -1510,9 +1524,16 @@ Service::getControlPath() const
 
 
 std::string
-Service::getEventPath() const
+Service::getEventSubscriptionPath() const
 {
-    return _eventPath;
+    return _eventSubscriptionPath;
+}
+
+
+std::string
+Service::getEventCallbackPath(int callbackPathIndex)
+{
+    return _eventCallbackPaths[callbackPathIndex];
 }
 
 
@@ -1595,9 +1616,9 @@ Service::setControlPath(std::string controlPath)
 
 
 void
-Service::setEventPath(std::string eventPath)
+Service::setEventSubscriptionPath(std::string eventPath)
 {
-    _eventPath = eventPath;
+    _eventSubscriptionPath = eventPath;
 }
 
 
@@ -1626,6 +1647,13 @@ Service::addStateVar(StateVar* pStateVar)
     if(pStateVar->getSendEvents()) {
         _eventedStateVars.append(pStateVar->getName(), pStateVar);
     }
+}
+
+
+void
+Service::addEventCallbackPath(const std::string path)
+{
+    _eventCallbackPaths.push_back(path);
 }
 
 
@@ -1977,17 +2005,16 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
 }
 
 
-EventRequestHandler*
-EventRequestHandler::create()
+EventSubscriptionRequestHandler*
+EventSubscriptionRequestHandler::create()
 {
-    return new EventRequestHandler(_pService);
+    return new EventSubscriptionRequestHandler(_pService);
 }
 
 
 void
-EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->event().debug("event request from: " + request.getHost() + " (" + request.get("CALLBACK") + ")");
 //     std::clog << "handle event request: " << request.getMethod() << std::endl;
 //     std::clog << "HOST: " << request.getHost() << std::endl;
 //     std::clog << "CALLBACK: " << request.get("CALLBACK") << std::endl;
@@ -1997,6 +2024,7 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     std::string sid;
     
     if (request.getMethod() == "SUBSCRIBE") {
+        Log::instance()->event().debug("event subscription request from: " + request.getHost() + " (" + request.get("CALLBACK") + ")");
 //         Poco::Timestamp t;
         if (request.has("SID")) {
             sid = request.get("SID");
@@ -2027,7 +2055,34 @@ EventRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
         // TODO: may make subscription uuid's persistance
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
+        Log::instance()->event().debug("event unsubscription request from: " + request.getHost() + " (" + request.get("CALLBACK") + ")");
         _pService->unregisterSubscription(_pService->getSubscription(sid));
+    }
+}
+
+
+EventNotificationRequestHandler*
+EventNotificationRequestHandler::create()
+{
+    return new EventNotificationRequestHandler(_pService);
+}
+
+
+void
+EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+{
+    std::string sid;
+
+    if (request.getMethod() == "NOTIFY") {
+        Log::instance()->event().debug("event notification request from: " + request.getHost());
+        if (request.has("SID")) {
+            sid = request.get("SID");
+        }
+        else {
+        }
+    }
+    else {
+        Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.getHost());
     }
 }
 
@@ -2340,14 +2395,6 @@ DeviceManager::init()
 //    Log::instance()->upnp().debug("device root network interface manager installed");
 
     _pSocket->initSockets();
-    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        (*it)->initUuid();
-        (*it)->initStateVars();
-        (*it)->rewriteDescriptions();
-        (*it)->initDeviceDescriptionHandler();
-        (*it)->setDescriptionUri(_pSocket->getHttpServerUri() + (*it)->getRootDevice()->getUuid() +  "/Description.xml");
-    }
-    registerHttpRequestHandlers();
     _pSocket->registerSsdpMessageHandler(Poco::Observer<DeviceManager, SsdpMessage>(*this, &DeviceManager::handleSsdpMessage));
 }
 
@@ -2365,6 +2412,13 @@ DeviceManager::stop()
 {
     stopSsdp();
     stopHttp();
+}
+
+
+std::string
+DeviceManager::getHttpServerUri()
+{
+    return _pSocket->getHttpServerUri();
 }
 
 
@@ -2593,7 +2647,7 @@ DeviceContainer::initController()
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
 //            initStateVars(ps);
-            ps->setEventPath("/" + ps->getServiceId() + "/EventNotification");
+            ps->addEventCallbackPath("/" + ps->getServiceId() + "/EventNotification");
         }
     }
 }
@@ -2653,6 +2707,7 @@ DeviceContainer::initDevice()
     initStateVars();
     rewriteDescriptions();
     initDeviceDescriptionHandler();
+    setDescriptionUri(_pDeviceManager->getHttpServerUri() + getRootDevice()->getUuid() +  "/Description.xml");
 }
 
 
@@ -2985,7 +3040,7 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, Poco::UInt16 ca
     Poco::ScopedLock<Poco::FastMutex> lock(_sendTimerLock);
     // check if continuous Timer is already running and if so then cancel sending of message set and return.
      if (_sendTimerIsRunning) {
-         Log::instance()->ssdp().warning("send timer for ssdp message set is already running, sending of this message set cancelled.");
+         Log::instance()->ssdp().warning("send timer for ssdp message set is already running, sending cancelled.");
          return;
      }
     _pSsdpSocket = &socket;
@@ -2998,14 +3053,14 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, Poco::UInt16 ca
         if (_delay > 0) {
             _sendTimer.setStartInterval(_randomTimeGenerator.next(_delay));
         }
-        // start a timer thread that restarts itself after random delays within cacheDuration.
+        // if continuous, start a timer thread that restarts itself after random delays within cacheDuration.
         _sendTimerIsRunning = true;
         _sendTimer.start(Poco::TimerCallback<SsdpMessageSet>(*this, &SsdpMessageSet::onTimer));
     }
     else {
         // if not continuous, no thread is started, we sleep for delay milliseconds and send out
-        // the ssdp messages synchronuously. This way, send returns when the message set is sent out
-        // and the message set can be a temporary (must not be stored on the heap). This is the case
+        // the ssdp messages synchronously. This way, send returns when the message set is sent out
+        // and the message set can be a temporary (e.g. must not be stored on the heap). This is the case
         // when a device responds to an msearch from a controller.
         if (_delay > 0) {
             Poco::Thread::sleep(_randomTimeGenerator.next(_delay));
@@ -3043,9 +3098,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
         }
     }
     if (_continuous) {
-        long randomDelay = _randomTimeGenerator.next(_cacheDuration);
-        Log::instance()->ssdp().debug("restarting timer with delay: " + Poco::NumberFormatter::format(randomDelay));
-        timer.restart(randomDelay);
+        timer.restart(_randomTimeGenerator.next(_cacheDuration));
     }
 }
 
@@ -3079,6 +3132,23 @@ Controller::start()
     sendMSearch();
     
     Log::instance()->upnp().debug("controller started");
+}
+
+
+void
+Controller::registerHttpRequestHandlers()
+{
+    Log::instance()->http().debug("registering controller http request handlers ...");
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+            for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+                Service* ps = *s;
+                // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
+                _pSocket->registerHttpRequestHandler(ps->getEventCallbackPath(), new EventNotificationRequestHandler(ps));
+            }
+        }
+    }
+    Log::instance()->http().debug("registering controller http request handlers finished.");
 }
 
 
@@ -3221,6 +3291,17 @@ DeviceServer::~DeviceServer()
 
 
 void
+DeviceServer::init()
+{
+    DeviceManager::init();
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        (*it)->initDevice();
+    }
+    registerHttpRequestHandlers();
+}
+
+
+void
 DeviceServer::startSsdp()
 {
     DeviceManager::startSsdp();
@@ -3298,7 +3379,7 @@ DeviceServer::registerHttpRequestHandlers()
                 // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
                 _pSocket->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
                 _pSocket->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-                _pSocket->registerHttpRequestHandler(ps->getEventPath(), new EventRequestHandler(ps));
+                _pSocket->registerHttpRequestHandler(ps->getEventSubscriptionPath(), new EventSubscriptionRequestHandler(ps));
             }
             registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
         }

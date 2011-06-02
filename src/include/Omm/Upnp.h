@@ -627,10 +627,11 @@ public:
     void addDeviceContainer(DeviceContainer* pDevice);
     void removeDeviceContainer(const std::string& uuid);
 
-    void init();
-
+    virtual void init();
     virtual void start();
     virtual void stop();
+
+    std::string getHttpServerUri();
 
 protected:
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
@@ -661,6 +662,7 @@ public:
     virtual ~Controller();
 
     virtual void start();
+    virtual void registerHttpRequestHandlers();
 
     void setUserInterface(UserInterface* pUserInterface);
     UserInterface* getUserInterface();
@@ -685,6 +687,9 @@ public:
     DeviceServer();
     virtual ~DeviceServer();
 
+    virtual void init();
+
+private:
     virtual void startSsdp();
     virtual void stopSsdp();
     virtual void handleSsdpMessage(SsdpMessage* pMessage);
@@ -897,12 +902,17 @@ public:
     SubscriptionIterator beginEventSubscription();
     SubscriptionIterator endEventSubscription();
 
+    typedef std::vector<std::string>::iterator EventCallbackPathIterator;
+    EventCallbackPathIterator beginEventCallbackPath();
+    EventCallbackPathIterator endEventCallbackPath();
+
     std::string getServiceType() const;
     std::string getServiceId() const;
     std::string getDescriptionPath() const;
     std::string* getDescription() const;
     std::string getControlPath() const;
-    std::string getEventPath() const;
+    std::string getEventSubscriptionPath() const;
+    std::string getEventCallbackPath(int callbackPathIndex = 0);
     DescriptionRequestHandler* getDescriptionRequestHandler() const;
     ControlRequestHandler* getControlRequestHandler() const;
     Device* getDevice() const;
@@ -917,12 +927,13 @@ public:
     void setServiceDescription(std::string& description);
     void setDescriptionRequestHandler();
     void setControlPath(std::string controlPath);
-    void setEventPath(std::string eventPath);
+    void setEventSubscriptionPath(std::string eventPath);
     void setDeviceData(DeviceData* pDeviceData);
     template<typename T> void setStateVar(std::string key, const T& val);
 
     void addAction(Action* pAction);
     void addStateVar(StateVar* pStateVar);
+    void addEventCallbackPath(const std::string path);
 
     void initClient();
     void sendAction(Action* pAction);
@@ -949,9 +960,9 @@ private:
     Poco::URI                               _baseUri;
     std::string                             _controlPath;
     ControlRequestHandler*                  _controlRequestHandler;
-    std::string                             _eventPath;
+    std::string                             _eventSubscriptionPath;
+    std::vector<std::string>                _eventCallbackPaths;
     // PROPOSE: add EventRequestHandler* for Controller here??
-    // PROPOSE: rename current EventRequestHandler to EventSubscriptionRequestHandler
     Container<Action>                       _actions;
     Container<StateVar>                     _stateVars;
     Container<StateVar>                     _eventedStateVars;
