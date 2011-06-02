@@ -2708,6 +2708,7 @@ DeviceContainer::initDevice()
     rewriteDescriptions();
     initDeviceDescriptionHandler();
     setDescriptionUri(_pDeviceManager->getHttpServerUri() + getRootDevice()->getUuid() +  "/Description.xml");
+    writeSsdpMessages();
 }
 
 
@@ -3306,12 +3307,8 @@ DeviceServer::startSsdp()
 {
     DeviceManager::startSsdp();
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        // TODO: also send announcements when adding a subdevice.
-        (*it)->writeSsdpMessages();
-
-        // 3. send advertisement messages twice with a random delay up to 100ms
-//        _pSocket->sendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages, 2, 100);
-        // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
+        // send advertisements once delayed for up to 100ms and continuously in random intervals
+        // of max half the expiraton time (CACHE-CONTROL header)
         _pSocket->startSendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages);
     }
 }
