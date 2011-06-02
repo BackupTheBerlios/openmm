@@ -3007,7 +3007,9 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, Poco::UInt16 ca
         // the ssdp messages synchronuously. This way, send returns when the message set is sent out
         // and the message set can be a temporary (must not be stored on the heap). This is the case
         // when a device responds to an msearch from a controller.
-        Poco::Thread::sleep(_randomTimeGenerator.next(_delay));
+        if (_delay > 0) {
+            Poco::Thread::sleep(_randomTimeGenerator.next(_delay));
+        }
         onTimer(_sendTimer);
     }
 }
