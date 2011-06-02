@@ -309,10 +309,9 @@ public:
 
 
 class DescriptionRequestHandler: public UpnpRequestHandler
-	/// Return service or device description.
+/// Return service or device description.
 {
 public:
-//     DescriptionRequestHandler(std::string& description);
     DescriptionRequestHandler(std::string* pDescription);
     
     DescriptionRequestHandler* create();
@@ -345,14 +344,12 @@ class VariableQuery : public Poco::Notification
 class ControlRequestHandler: public UpnpRequestHandler
 {
 public:
-//     ControlRequestHandler(DeviceContainer& deviceRoot);
     ControlRequestHandler(Service* service);
     
     ControlRequestHandler* create();
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
     
 private:
-//     DeviceContainer* _deviceRoot;
     Service*    _pService;
 };
 

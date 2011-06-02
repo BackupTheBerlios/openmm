@@ -195,6 +195,7 @@ public:
     ~Icon();
 
     const std::string& getBuffer();
+    std::string getIconRequestPath();
     
 private:
     void retrieve(const std::string& uri);
@@ -204,8 +205,8 @@ private:
     int                     _depth;
     Poco::Net::MediaType    _mime;
     std::string             _buffer;
-    std::string             _requestUri;
-    std::string             _iconPath;
+    std::string             _requestPath;
+    std::string             _searchPath;
 };
 
 

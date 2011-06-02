@@ -114,11 +114,11 @@ _width(width),
 _height(height),
 _depth(depth),
 _mime(mime),
-_requestUri(""),
-_iconPath(":/usr/lib/omm:/usr/local/lib/omm")
+_requestPath(""),
+_searchPath(":/usr/lib/omm:/usr/local/lib/omm")
 {
     try {
-        _iconPath = Poco::Environment::get("OMM_ICON_PATH") + _iconPath;
+        _searchPath = Poco::Environment::get("OMM_ICON_PATH") + _searchPath;
     }
     catch (Poco::NotFoundException) {
     }
@@ -144,6 +144,13 @@ const std::string&
 Icon::getBuffer()
 {
     return _buffer;
+}
+
+
+std::string
+Icon::getIconRequestPath()
+{
+    return _requestPath;
 }
 
 
@@ -189,7 +196,7 @@ Icon::retrieve(const std::string& uri)
         }
     }
     else if (iconUri.isRelative()) {
-        Poco::StringTokenizer pathSplitter(_iconPath, ":");
+        Poco::StringTokenizer pathSplitter(_searchPath, ":");
         Poco::StringTokenizer::Iterator it;
         for (it = pathSplitter.begin(); it != pathSplitter.end(); ++it) {
             if (*it == "") {
@@ -999,7 +1006,7 @@ DeviceDescriptionWriter::device(Device& device)
 //        if ((*it)->_pData) {
         if ((*it)->_buffer.size()) {
             pIconList->appendChild(icon(*it));
-            Log::instance()->desc().debug("writer added icon: " + (*it)->_requestUri);
+            Log::instance()->desc().debug("writer added icon: " + (*it)->_requestPath);
         }
     }
     
@@ -1077,7 +1084,7 @@ DeviceDescriptionWriter::icon(Icon* pIcon)
     pIconElement->appendChild(pDepth);
     // url
     Poco::AutoPtr<Poco::XML::Element> pUrl = _pDoc->createElement("url");
-    Poco::AutoPtr<Poco::XML::Text> pUrlVal = _pDoc->createTextNode(pIcon->_requestUri);
+    Poco::AutoPtr<Poco::XML::Text> pUrlVal = _pDoc->createTextNode(pIcon->_requestPath);
     pUrl->appendChild(pUrlVal);
     pIconElement->appendChild(pUrl);
     
@@ -2695,11 +2702,12 @@ DeviceContainer::initDevice()
     setDescriptionUri(_pDeviceManager->getHttpServerUri() + getRootDevice()->getUuid() +  "/Description.xml");
     writeSsdpMessages();
 
+    // initialize http request handlers and state vars.
     _pDeviceManager->registerHttpRequestHandler(_descriptionUri.getPath(), _descriptionRequestHandler);
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         (*d)->initStateVars();
         for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
-            _pDeviceManager->registerHttpRequestHandler((*i)->_requestUri, new IconRequestHandler(*i));
+            _pDeviceManager->registerHttpRequestHandler((*i)->getIconRequestPath(), new IconRequestHandler(*i));
         }
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
@@ -2718,6 +2726,7 @@ DeviceContainer::initController()
 {
     Log::instance()->upnp().debug("init device container (controller)");
 
+    // initialize http request handlers and state vars.
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
 //        (*d)->initStateVars();
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
@@ -2796,7 +2805,7 @@ void
 Device::addIcon(Icon* pIcon)
 {
     _pDeviceData->_iconList.push_back(pIcon);
-    pIcon->_requestUri = "/DeviceIcon" + Poco::NumberFormatter::format(_pDeviceData->_iconList.size());
+    pIcon->_requestPath = "/DeviceIcon" + Poco::NumberFormatter::format(_pDeviceData->_iconList.size());
 }
 
 
