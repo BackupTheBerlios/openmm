@@ -125,6 +125,34 @@ private:
 };
 
 
+class SsdpMessageSet
+{
+    friend class Socket;
+
+public:
+    SsdpMessageSet();
+    ~SsdpMessageSet();
+
+    void clear();
+    void addMessage(SsdpMessage& message);
+
+private:
+    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void startSendContinuous(SsdpSocket& socket, Poco::UInt16 ssdpCacheDuration = SSDP_CACHE_DURATION);
+    void stopSendContinuous();
+    void onTimer(Poco::Timer& timer);
+
+    Poco::Random                        _randomTimeGenerator;
+    Poco::Timer                         _sendTimer;
+    SsdpSocket*                         _pSsdpSocket;
+    std::vector<SsdpMessage*>           _ssdpMessages;
+    int                                 _repeat;
+    long                                _delay;
+    bool                                _continuous;
+    const Poco::Net::SocketAddress*     _pReceiver;
+};
+
+
 class ActionRequestReader
 {
 public:

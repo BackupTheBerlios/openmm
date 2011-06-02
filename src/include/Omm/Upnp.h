@@ -476,34 +476,6 @@ private:
 };
 
 
-class SsdpMessageSet
-{
-    friend class Socket;
-
-public:
-    SsdpMessageSet();
-    ~SsdpMessageSet();
-
-    void clear();
-    void addMessage(SsdpMessage& message);
-
-private:
-    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    void startSendContinuous(SsdpSocket& socket);
-    void stopSendContinuous();
-    void onTimer(Poco::Timer& timer);
-
-    Poco::Random                        _randomTimeGenerator;
-    Poco::Timer                         _sendTimer;
-    SsdpSocket*                         _pSsdpSocket;
-    std::vector<SsdpMessage*>           _ssdpMessages;
-    int                                 _repeat;
-    long                                _delay;
-    bool                                _continuous;
-    const Poco::Net::SocketAddress*     _pReceiver;
-};
-
-
 class HttpSocket
 {
     friend class Socket;
@@ -774,8 +746,8 @@ private:
     Container<Device>               _devices;
     Device*                         _pRootDevice;
     std::map<std::string,Service*>  _serviceTypes;
-    SsdpMessageSet                  _ssdpNotifyAliveMessages;
-    SsdpMessageSet                  _ssdpNotifyByebyeMessages;
+    SsdpMessageSet*                 _pSsdpNotifyAliveMessages;
+    SsdpMessageSet*                 _pSsdpNotifyByebyeMessages;
     DescriptionRequestHandler*      _descriptionRequestHandler;
     // TODO: remove _pController (only needed in Service::actionNetworkActivity())
     // replace it with a notification center in DeviceManager

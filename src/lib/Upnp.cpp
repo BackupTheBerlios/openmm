@@ -2413,7 +2413,9 @@ DeviceManager::postAction(Action* pAction)
 
 DeviceContainer::DeviceContainer() :
 _pDeviceManager(0),
-_pController(0)
+_pController(0),
+_pSsdpNotifyAliveMessages(new SsdpMessageSet),
+_pSsdpNotifyByebyeMessages(new SsdpMessageSet)
 {
 }
 
@@ -2422,6 +2424,8 @@ DeviceContainer::~DeviceContainer()
 {
     // TODO: free all Devices, Services, Actions, ...
 //     delete _descriptionRequestHandler;
+    delete _pSsdpNotifyAliveMessages;
+    delete _pSsdpNotifyByebyeMessages;
 }
 
 
@@ -2657,11 +2661,11 @@ DeviceContainer::writeSsdpMessages()
 {
     Log::instance()->ssdp().debug("writing messages ...");
 
-    _ssdpNotifyAliveMessages.clear();
-    _ssdpNotifyByebyeMessages.clear();
+    _pSsdpNotifyAliveMessages->clear();
+    _pSsdpNotifyByebyeMessages->clear();
 
-    SsdpNotifyAliveWriter aliveWriter(_ssdpNotifyAliveMessages);
-    SsdpNotifyByebyeWriter byebyeWriter(_ssdpNotifyByebyeMessages);
+    SsdpNotifyAliveWriter aliveWriter(*_pSsdpNotifyAliveMessages);
+    SsdpNotifyByebyeWriter byebyeWriter(*_pSsdpNotifyByebyeMessages);
     aliveWriter.deviceContainer(*this);
     byebyeWriter.deviceContainer(*this);
 
@@ -3003,9 +3007,9 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous
 
 
 void
-SsdpMessageSet::startSendContinuous(SsdpSocket& socket)
+SsdpMessageSet::startSendContinuous(SsdpSocket& socket, Poco::UInt16 ssdpCacheDuration)
 {
-    send(socket, 2, SSDP_CACHE_DURATION * 1000 / 2, true);
+    send(socket, 2, ssdpCacheDuration * 1000 / 2, true);
 }
 
 
@@ -3213,9 +3217,9 @@ DeviceServer::startSsdp()
         (*it)->writeSsdpMessages();
 
         // 3. send advertisement messages twice with a random delay up to 100ms
-        _pSocket->sendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages, 2, 100);
+        _pSocket->sendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages, 2, 100);
         // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
-        _pSocket->startSendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages);
+        _pSocket->startSendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages);
     }
 }
 
@@ -3224,9 +3228,9 @@ void
 DeviceServer::stopSsdp()
 {
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        _pSocket->stopSendSsdpMessageSet((*it)->_ssdpNotifyAliveMessages);
+        _pSocket->stopSendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages);
         // send device unavailable messages once with no delay
-        _pSocket->sendSsdpMessageSet((*it)->_ssdpNotifyByebyeMessages, 1, 0);
+        _pSocket->sendSsdpMessageSet(*(*it)->_pSsdpNotifyByebyeMessages, 1, 0);
     }
     DeviceManager::stopSsdp();
 }
@@ -3255,7 +3259,7 @@ DeviceServer::handleSsdpMessage(SsdpMessage* pMessage)
             //       -> _ssdpNotifyAliveMessages._sendTimer
             //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
             int mx = pMessage->getMaximumWaitTime();
-            // MX greater than 5 is cut down to 5
+            // MX greater than 5 then cut down to 5
             mx = (mx > 5) ? 5 : mx;
             SsdpMessageSet ms;
             ms.addMessage(m);
