@@ -2213,7 +2213,7 @@ Socket::sendSsdpMessage(SsdpMessage& ssdpMessage, const Poco::Net::SocketAddress
 void
 Socket::sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat, long delay, const Poco::Net::SocketAddress& receiver)
 {
-    ssdpMessageSet.send(_ssdpSocket, repeat, delay, false, receiver);
+    ssdpMessageSet.send(_ssdpSocket, repeat, delay, 0, false, receiver);
 }
 
 
@@ -2947,7 +2947,7 @@ DevDeviceCode::~DevDeviceCode()
 
 SsdpMessageSet::SsdpMessageSet() :
 _pSsdpSocket(0),
-_pReceiver(0)
+_sendTimerIsRunning(false)
 {
     _randomTimeGenerator.seed();
 }
@@ -2980,43 +2980,52 @@ SsdpMessageSet::addMessage(SsdpMessage& message)
 
 
 void
-SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous, const Poco::Net::SocketAddress& receiver)
+SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, Poco::UInt16 cacheDuration, bool continuous, const Poco::Net::SocketAddress& receiver)
 {
-//     Poco::ScopedLock<Poco::FastMutex> lock(_sendLock);
-    // TODO: check if continuous Timer is already running and return
-//     if (_sendTimer) {
-//         return;
-//     }
+    Poco::ScopedLock<Poco::FastMutex> lock(_sendTimerLock);
+    // check if continuous Timer is already running and if so then cancel sending of message set and return.
+     if (_sendTimerIsRunning) {
+         Log::instance()->ssdp().warning("send timer for ssdp message set is already running, sending of this message set cancelled.");
+         return;
+     }
     _pSsdpSocket = &socket;
     _repeat = repeat;
     _delay = delay;
+    _cacheDuration = cacheDuration;
     _continuous = continuous;
-    _pReceiver = &receiver;
-    if (_delay > 0) {
-        _sendTimer.setStartInterval(_randomTimeGenerator.next(_delay));
-    }
+    _receiver = receiver;
     if (_continuous) {
-        // start asynchronously
+        if (_delay > 0) {
+            _sendTimer.setStartInterval(_randomTimeGenerator.next(_delay));
+        }
+        // start a timer thread that restarts itself after random delays within cacheDuration.
+        _sendTimerIsRunning = true;
         _sendTimer.start(Poco::TimerCallback<SsdpMessageSet>(*this, &SsdpMessageSet::onTimer));
     }
     else {
-        // start synchronously
+        // if not continuous, no thread is started, we sleep for delay milliseconds and send out
+        // the ssdp messages synchronuously. This way, send returns when the message set is sent out
+        // and the message set can be a temporary (must not be stored on the heap). This is the case
+        // when a device responds to an msearch from a controller.
+        Poco::Thread::sleep(_randomTimeGenerator.next(_delay));
         onTimer(_sendTimer);
     }
 }
 
 
 void
-SsdpMessageSet::startSendContinuous(SsdpSocket& socket, Poco::UInt16 ssdpCacheDuration)
+SsdpMessageSet::startSendContinuous(SsdpSocket& socket, long delay, Poco::UInt16 cacheDuration)
 {
-    send(socket, 2, ssdpCacheDuration * 1000 / 2, true);
+    send(socket, 2, delay, cacheDuration * 1000 / 2, true);
 }
 
 
 void
 SsdpMessageSet::stopSendContinuous()
 {
+     Poco::ScopedLock<Poco::FastMutex> lock(_sendTimerLock);
     _sendTimer.stop();
+    _sendTimerIsRunning = false;
 }
 
 
@@ -3028,12 +3037,13 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
         Log::instance()->ssdp().debug("#message sets left to send: " + Poco::NumberFormatter::format(r+1));
         
         for (std::vector<SsdpMessage*>::const_iterator i = _ssdpMessages.begin(); i != _ssdpMessages.end(); ++i) {
-            _pSsdpSocket->sendMessage(**i, *_pReceiver);
+            _pSsdpSocket->sendMessage(**i, _receiver);
         }
     }
     if (_continuous) {
-        Log::instance()->ssdp().debug("restarting timer");
-        timer.restart(_randomTimeGenerator.next(_delay));
+        long randomDelay = _randomTimeGenerator.next(_cacheDuration);
+        Log::instance()->ssdp().debug("restarting timer with delay: " + Poco::NumberFormatter::format(randomDelay));
+        timer.restart(randomDelay);
     }
 }
 
@@ -3217,7 +3227,7 @@ DeviceServer::startSsdp()
         (*it)->writeSsdpMessages();
 
         // 3. send advertisement messages twice with a random delay up to 100ms
-        _pSocket->sendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages, 2, 100);
+//        _pSocket->sendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages, 2, 100);
         // 4. resend advertisements in random intervals of max half the expiraton time (CACHE-CONTROL header)
         _pSocket->startSendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages);
     }

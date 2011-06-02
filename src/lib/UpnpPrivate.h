@@ -137,19 +137,26 @@ public:
     void addMessage(SsdpMessage& message);
 
 private:
-    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    void startSendContinuous(SsdpSocket& socket, Poco::UInt16 ssdpCacheDuration = SSDP_CACHE_DURATION);
+    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, Poco::UInt16 cacheDuration = SSDP_CACHE_DURATION, bool continuous = false, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    /// Sends message set "repeat" times delayed for up to "delay" millisecs (actual delay randomly chosen).
+    /// If continuous is true, message set is sent out repeatatly with a delay of up to cacheDuration / 2 (actual delay randomly chosen).
+    /// Receiver of message set is by default ssdp multicast address, but can be chosen in parameter "receiver".
+    /// Note that send blocks when started with continuous = false and does not block with continuous = true.
+    void startSendContinuous(SsdpSocket& socket, long delay = 100, Poco::UInt16 cacheDuration = SSDP_CACHE_DURATION);
     void stopSendContinuous();
     void onTimer(Poco::Timer& timer);
 
+    Poco::FastMutex                     _sendTimerLock;
     Poco::Random                        _randomTimeGenerator;
     Poco::Timer                         _sendTimer;
     SsdpSocket*                         _pSsdpSocket;
     std::vector<SsdpMessage*>           _ssdpMessages;
     int                                 _repeat;
     long                                _delay;
+    Poco::UInt16                        _cacheDuration;
     bool                                _continuous;
-    const Poco::Net::SocketAddress*     _pReceiver;
+    bool                                _sendTimerIsRunning;
+    Poco::Net::SocketAddress            _receiver;
 };
 
 
