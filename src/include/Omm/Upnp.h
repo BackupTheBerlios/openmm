@@ -632,12 +632,13 @@ public:
     virtual void stop();
 
     std::string getHttpServerUri();
+    void registerActionHandler(const Poco::AbstractObserver& observer);
+    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
 
 protected:
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
     virtual void deviceContainerAdded(DeviceContainer* pDeviceContainer) {}
     virtual void deviceContainerRemoved(DeviceContainer* pDeviceContainer) {}
-    virtual void registerHttpRequestHandlers() {}
 
     virtual void startSsdp();
     virtual void stopSsdp();
@@ -645,7 +646,6 @@ protected:
     void startHttp();
     void stopHttp();
 
-    void registerActionHandler(const Poco::AbstractObserver& observer);
 
     Container<DeviceContainer> _deviceContainers;
     Socket*                    _pSocket;
@@ -662,7 +662,6 @@ public:
     virtual ~Controller();
 
     virtual void start();
-    virtual void registerHttpRequestHandlers();
 
     void setUserInterface(UserInterface* pUserInterface);
     UserInterface* getUserInterface();
@@ -693,7 +692,6 @@ private:
     virtual void startSsdp();
     virtual void stopSsdp();
     virtual void handleSsdpMessage(SsdpMessage* pMessage);
-    virtual void registerHttpRequestHandlers();
 };
 
 
