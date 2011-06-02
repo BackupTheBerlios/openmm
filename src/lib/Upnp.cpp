@@ -2211,9 +2211,9 @@ Socket::sendSsdpMessage(SsdpMessage& ssdpMessage, const Poco::Net::SocketAddress
 
 
 void
-Socket::sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat, long delay)
+Socket::sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat, long delay, const Poco::Net::SocketAddress& receiver)
 {
-    ssdpMessageSet.send(_ssdpSocket, repeat, delay, false);
+    ssdpMessageSet.send(_ssdpSocket, repeat, delay, false, receiver);
 }
 
 
@@ -2941,7 +2941,9 @@ DevDeviceCode::~DevDeviceCode()
 }
 
 
-SsdpMessageSet::SsdpMessageSet()
+SsdpMessageSet::SsdpMessageSet() :
+_pSsdpSocket(0),
+_pReceiver(0)
 {
     _randomTimeGenerator.seed();
 }
@@ -2974,7 +2976,7 @@ SsdpMessageSet::addMessage(SsdpMessage& message)
 
 
 void
-SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous)
+SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous, const Poco::Net::SocketAddress& receiver)
 {
 //     Poco::ScopedLock<Poco::FastMutex> lock(_sendLock);
     // TODO: check if continuous Timer is already running and return
@@ -2985,6 +2987,7 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, bool continuous
     _repeat = repeat;
     _delay = delay;
     _continuous = continuous;
+    _pReceiver = &receiver;
     if (_delay > 0) {
         _sendTimer.setStartInterval(_randomTimeGenerator.next(_delay));
     }
@@ -3021,7 +3024,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
         Log::instance()->ssdp().debug("#message sets left to send: " + Poco::NumberFormatter::format(r+1));
         
         for (std::vector<SsdpMessage*>::const_iterator i = _ssdpMessages.begin(); i != _ssdpMessages.end(); ++i) {
-            _pSsdpSocket->sendMessage(**i);
+            _pSsdpSocket->sendMessage(**i, *_pReceiver);
         }
     }
     if (_continuous) {
@@ -3248,13 +3251,16 @@ DeviceServer::handleSsdpMessage(SsdpMessage* pMessage)
             m.setUniqueServiceName("uuid:" + (*it)->getRootDevice()->getUuid() + "::upnp:rootdevice");
 
             // TODO: react on ST field (search target)
-            // TODO: react on MX field (seconds to delay response)
-            //       -> create an SsdpMessageSet and send it out delayed
             // TODO: fill in the correct value for CacheControl
             //       -> _ssdpNotifyAliveMessages._sendTimer
             //       -> need to know the elapsed time ... (though initial timer val isn't so wrong)
-
-            _pSocket->sendSsdpMessage(m, pMessage->getSender());
+            int mx = pMessage->getMaximumWaitTime();
+            // MX greater than 5 is cut down to 5
+            mx = (mx > 5) ? 5 : mx;
+            SsdpMessageSet ms;
+            ms.addMessage(m);
+            // send out response delayed according to MX field of msearch request
+            _pSocket->sendSsdpMessageSet(ms, 1, mx * 1000, pMessage->getSender());
         }
     }
 }

@@ -488,7 +488,7 @@ public:
     void addMessage(SsdpMessage& message);
 
 private:
-    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false);
+    void send(SsdpSocket& socket, int repeat = 1, long delay = 0, bool continuous = false, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void startSendContinuous(SsdpSocket& socket);
     void stopSendContinuous();
     void onTimer(Poco::Timer& timer);
@@ -500,6 +500,7 @@ private:
     int                                 _repeat;
     long                                _delay;
     bool                                _continuous;
+    const Poco::Net::SocketAddress*     _pReceiver;
 };
 
 
@@ -544,7 +545,7 @@ public:
     std::string getHttpServerUri();
     void postAction(Action* pAction);
     void sendSsdpMessage(SsdpMessage& ssdpMessage, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
-    void sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat = 1, long delay = 0);
+    void sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat = 1, long delay = 0, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void startSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
     void stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
 
