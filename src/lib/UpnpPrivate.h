@@ -396,13 +396,15 @@ private:
 class Subscription
 {
 public:
-    Subscription(std::string callbackUri);
+    Subscription();
+    ~Subscription();
     
     std::string getUuid() { return _uuid.toString(); }
     
     Poco::Net::HTTPClientSession* getSession() { return _pSession; }
     std::string getEventKey();
-    
+
+    void addCallbackUri(const std::string& uri);
     void sendEventMessage(const std::string& eventMessage);
     void renew(int seconds);  // TODO: implement this
     void expire(Poco::Timer& timer);  // TODO: implement this
@@ -410,7 +412,8 @@ public:
 private:
 //     HTTPRequest* newRequest();
     
-    Poco::URI                       _deliveryAddress;
+    std::vector<Poco::URI>          _callbackUris;
+    Poco::URI*                      _pSessionUri;
     Poco::Net::HTTPClientSession*   _pSession;
     Poco::UUID                      _uuid;
     Poco::UInt32                    _eventKey;

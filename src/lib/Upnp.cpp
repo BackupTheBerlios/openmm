@@ -1361,16 +1361,39 @@ EventMessageWriter::stateVar(const StateVar& stateVar)
 }
 
 
-Subscription::Subscription(std::string callbackUri) :
-_deliveryAddress(callbackUri)
+Subscription::Subscription() :
+_pSession(0),
+_pSessionUri(0)
 {
-    Log::instance()->event().debug("subscription uri: " + callbackUri);
-    
     // TODO: implement timer stuff
     _uuid = Poco::UUIDGenerator().createRandom();
     Log::instance()->event().debug("SID: " + _uuid.toString());
     _eventKey = 0;
-    _pSession = new Poco::Net::HTTPClientSession(_deliveryAddress.getHost(), _deliveryAddress.getPort());
+}
+
+
+Subscription::~Subscription()
+{
+    delete _pSession;
+}
+
+
+void
+Subscription::addCallbackUri(const std::string& uri)
+{
+    try {
+        _callbackUris.push_back(Poco::URI(uri));
+        if (_pSession) {
+            Log::instance()->event().warning("connection to callback uri already established, skip adding of uri: " + uri);
+        }
+        else {
+            _pSessionUri = &_callbackUris.back();
+            _pSession = new Poco::Net::HTTPClientSession(_pSessionUri->getHost(), _pSessionUri->getPort());
+        }
+    }
+    catch(...) {
+        Log::instance()->event().warning("callback uri not valid or reachable, skip adding of uri: " + uri);
+    }
 }
 
 
@@ -1391,8 +1414,8 @@ Subscription::sendEventMessage(const std::string& eventMessage)
 //     if (path.substr(0, 1) == "/") {
 //         path = path.substr(1);
 //     }
-    Poco::Net::HTTPRequest request("NOTIFY", _deliveryAddress.getPath(), "HTTP/1.1");
-    request.set("HOST", _deliveryAddress.getAuthority());
+    Poco::Net::HTTPRequest request("NOTIFY", _pSessionUri->getPath(), "HTTP/1.1");
+    request.set("HOST", _pSessionUri->getAuthority());
     request.setContentType("text/xml");
     request.set("NT", "upnp:event");
     request.set("NTS", "upnp:propchange");
@@ -1402,7 +1425,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
     // set request body and send request
-    Log::instance()->event().debug("sending event message to: " + getSession()->getHost() + ":" + Poco::NumberFormatter::format(getSession()->getPort()) + "/" + request.getURI() + " ...");
+    Log::instance()->event().debug("sending event message to: " + _pSessionUri->toString() + " ...");
 //     std::clog << "Header:" << std::endl;
 //     request.write(std::clog);
     
@@ -1745,7 +1768,7 @@ Service::sendAction(Action* pAction)
         Log::instance()->ctrl().error("sending of action request failed for some reason");
         throw Poco::Exception("");
     }
-    // receive answer ...
+    // receive response ...
     Poco::Net::HTTPResponse response;
     try {
         std::istream& rs = controlRequestSession.receiveResponse(response);
@@ -1788,10 +1811,10 @@ Service::sendSubscriptionRequest()
     request.set("TIMEOUT", "Second-infinite");
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
 
-    Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI());
+    Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI() + "...");
 
     try {
-        std::ostream& ostr = eventSubscriptionSession.sendRequest(request);
+        eventSubscriptionSession.sendRequest(request);
         Log::instance()->event().debug("subscription request sent");
     }
     catch(Poco::Net::ConnectionRefusedException) {
@@ -1802,6 +1825,22 @@ Service::sendSubscriptionRequest()
         Log::instance()->event().error("sending of subscription request failed for some reason");
         throw Poco::Exception("");
     }
+    // receive response ...
+    Poco::Net::HTTPResponse response;
+    try {
+        eventSubscriptionSession.receiveResponse(response);
+        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+    }
+    catch (Poco::Net::NoMessageException) {
+        Log::instance()->event().error("no response to subscription request.");
+        throw Poco::Exception("");
+    }
+    catch (...) {
+        Log::instance()->event().error("no response to subscription received for some reason.");
+        throw Poco::Exception("");
+    }
+    
+    Log::instance()->event().debug("subscription request completed");
 }
 
 
@@ -2078,9 +2117,12 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
             _pService->getSubscription(sid)->renew(1800);
         }
         else {
-            std::string callback = request.get("CALLBACK");
-            callback = callback.substr(1, callback.size() - 2);
-            Subscription* pSubscription = new Subscription(callback);
+            std::string callbackUriString = request.get("CALLBACK");
+            Poco::StringTokenizer callbackUris(callbackUriString, "<>", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
+            Subscription* pSubscription = new Subscription;
+            for (Poco::StringTokenizer::Iterator it = callbackUris.begin(); it != callbackUris.end(); ++it) {
+                pSubscription->addCallbackUri(*it);
+            }
             _pService->sendInitialEventMessage(pSubscription);
             _pService->registerSubscription(pSubscription);
         }
