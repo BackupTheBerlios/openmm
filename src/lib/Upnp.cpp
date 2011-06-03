@@ -1678,10 +1678,6 @@ Service::initClient()
     // _pDevice->getDeviceContainer()->registerEventHandler(...);
 }
 
-// FIXME: when starting 15 servers and killing them with killall at once
-//        ommcontrol still shows a couple of them though they are dead
-
-
 // FIXME: queue a notification in DeviceManager on network activity events, don't call
 // user interface methods directly.
 void
@@ -2697,6 +2693,7 @@ DeviceContainer::initDevice()
     Log::instance()->upnp().debug("init device container (device)");
 
     initUuid();
+    // TODO: init http request paths including uuid of device (respectively subdevice).
     rewriteDescriptions();
     initDeviceDescriptionHandler();
     setDescriptionUri(_pDeviceManager->getHttpServerUri() + getRootDevice()->getUuid() +  "/Description.xml");
@@ -2732,7 +2729,7 @@ DeviceContainer::initController()
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
             ps->addEventCallbackPath("/" + ps->getServiceId() + "/EventNotification");
-//            _pDeviceManager->registerHttpRequestHandler(ps->getEventCallbackPath(), new EventNotificationRequestHandler(ps));
+            _pDeviceManager->registerHttpRequestHandler(ps->getEventCallbackPath(), new EventNotificationRequestHandler(ps));
         }
     }
 }
@@ -3247,19 +3244,14 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 void
 Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    // TODO: handle "alive refreshments"
-    // TODO: handle subdevices
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        Log::instance()->upnp().debug("controller adds device container with root device uuid: " + uuid);
+        _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
+        DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
         pDeviceContainer->initController();
-        _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
-        _deviceContainers.append(uuid, pDeviceContainer);
         _pUserInterface->endAddDevice(_deviceContainers.position(uuid));
-        deviceContainerAdded(pDeviceContainer);
     }
-//    _devices.get("").eventHandler(0);
 }
 
 
@@ -3267,11 +3259,9 @@ void
 Controller::removeDeviceContainer(const std::string& uuid)
 {
     if (_deviceContainers.contains(uuid)) {
-        Log::instance()->upnp().debug("controller removes device: " + uuid);
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
-        deviceContainerRemoved(pDeviceContainer);
         _pUserInterface->beginRemoveDevice(_deviceContainers.position(uuid));
-        _deviceContainers.remove(uuid);
+        DeviceManager::removeDeviceContainer(uuid);
         _pUserInterface->endRemoveDevice(_deviceContainers.position(uuid));
         pDeviceContainer->_pController = 0;
     }
