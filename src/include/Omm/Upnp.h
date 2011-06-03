@@ -629,9 +629,9 @@ public:
     void addDeviceContainer(DeviceContainer* pDevice);
     void removeDeviceContainer(const std::string& uuid);
 
-    virtual void init();
-    virtual void start();
-    virtual void stop();
+    void init();
+    void start();
+    void stop();
 
     std::string getHttpServerUri();
     void registerActionHandler(const Poco::AbstractObserver& observer);
@@ -663,7 +663,8 @@ public:
     Controller();
     virtual ~Controller();
 
-    virtual void start();
+    void start();
+    void stop();
 
     void setUserInterface(UserInterface* pUserInterface);
     UserInterface* getUserInterface();
@@ -688,11 +689,12 @@ public:
     DeviceServer();
     virtual ~DeviceServer();
 
-    virtual void init();
+    void init();
 
 private:
     virtual void startSsdp();
     virtual void stopSsdp();
+
     virtual void handleSsdpMessage(SsdpMessage* pMessage);
 };
 
@@ -886,7 +888,7 @@ private:
 
 class Service {
 public:
-    Service() {}
+    Service();
     ~Service();
 
     typedef Container<StateVar>::Iterator StateVarIterator;
@@ -939,7 +941,8 @@ public:
     void initClient();
     void sendAction(Action* pAction);
 
-    void sendSubscriptionRequest();
+    void sendSubscriptionRequest(unsigned int duration = 0, bool renew = false);
+    void sendCancelSubscriptionRequest();
     void registerSubscription(Subscription* subscription);
     void unregisterSubscription(Subscription* subscription);
 
@@ -969,6 +972,7 @@ private:
     Container<StateVar>                     _stateVars;
     Container<StateVar>                     _eventedStateVars;
     Container<Subscription>                 _eventSubscriptions;
+    Subscription*                           _pControllerSubscriptionData;
 
     Poco::FastMutex                         _serviceLock;
 };

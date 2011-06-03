@@ -399,7 +399,8 @@ public:
     Subscription();
     ~Subscription();
     
-    std::string getUuid() { return _uuid.toString(); }
+    std::string getUuid();
+    void setSid(const std::string& uuid);
     
     Poco::Net::HTTPClientSession* getSession() { return _pSession; }
     std::string getEventKey();

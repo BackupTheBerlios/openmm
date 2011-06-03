@@ -1367,7 +1367,7 @@ _pSessionUri(0)
 {
     // TODO: implement timer stuff
     _uuid = Poco::UUIDGenerator().createRandom();
-    Log::instance()->event().debug("SID: " + _uuid.toString());
+    Log::instance()->event().debug("creating subscription with SID: " + _uuid.toString());
     _eventKey = 0;
 }
 
@@ -1375,6 +1375,21 @@ _pSessionUri(0)
 Subscription::~Subscription()
 {
     delete _pSession;
+}
+
+
+std::string
+Subscription::getUuid()
+{
+     return _uuid.toString();
+}
+
+
+void
+Subscription::setSid(const std::string& sid)
+{
+    Log::instance()->event().debug("set controller subscription sid: " + sid.substr(5));
+    _uuid = Poco::UUID(sid.substr(5));
 }
 
 
@@ -1451,8 +1466,15 @@ Subscription::expire(Poco::Timer& timer)
 }
 
 
+Service::Service() :
+_pControllerSubscriptionData(new Subscription)
+{
+}
+
+
 Service::~Service()
 {
+    delete _pControllerSubscriptionData;
 }
 
 
@@ -1795,20 +1817,30 @@ Service::sendAction(Action* pAction)
 
 
 void
-Service::sendSubscriptionRequest()
+Service::sendSubscriptionRequest(unsigned int duration, bool renew)
 {
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
     Poco::URI eventSubscriptionUri(baseUri);
     eventSubscriptionUri.resolve(getEventSubscriptionPath());
     Poco::Net::HTTPRequest request("SUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
     request.set("HOST", baseUri.getAuthority());
-    std::string callbackUris;
-    for (EventCallbackPathIterator it = beginEventCallbackPath(); it != endEventCallbackPath(); ++it) {
-        callbackUris += "<" + getDevice()->getDeviceContainer()->getDeviceManager()->getHttpServerUri() + (*it) + ">";
+    if (renew) {
+        request.set("SID", _pControllerSubscriptionData->getUuid());
     }
-    request.set("CALLBACK", callbackUris);
-    request.set("NT", "upnp:event");
-    request.set("TIMEOUT", "Second-infinite");
+    else {
+        std::string callbackUris;
+        for (EventCallbackPathIterator it = beginEventCallbackPath(); it != endEventCallbackPath(); ++it) {
+            callbackUris += "<" + getDevice()->getDeviceContainer()->getDeviceManager()->getHttpServerUri() + (*it) + ">";
+        }
+        request.set("CALLBACK", callbackUris);
+        request.set("NT", "upnp:event");
+    }
+    if (duration == 0) {
+        request.set("TIMEOUT", "Second-infinite");
+    }
+    else {
+        request.set("TIMEOUT", "Second-" + Poco::NumberFormatter::format(duration));
+    }
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
 
     Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI() + "...");
@@ -1839,8 +1871,58 @@ Service::sendSubscriptionRequest()
         Log::instance()->event().error("no response to subscription received for some reason.");
         throw Poco::Exception("");
     }
+
+    if (!renew) {
+        _pControllerSubscriptionData->setSid(response.get("SID"));
+    }
     
     Log::instance()->event().debug("subscription request completed");
+}
+
+
+void
+Service::sendCancelSubscriptionRequest()
+{
+    // FIXME: crash here, because wrong device pointer returned from getDevice() ?
+    Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
+    Poco::URI eventSubscriptionUri(baseUri);
+    eventSubscriptionUri.resolve(getEventSubscriptionPath());
+    Poco::Net::HTTPRequest request("UNSUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
+    request.set("HOST", baseUri.getAuthority());
+    // controller stores only one subscription in each service.
+    request.set("SID", _pControllerSubscriptionData->getUuid());
+    Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
+
+    Log::instance()->event().debug("sending cancel subscription request to " + baseUri.getAuthority() + request.getURI() + "...");
+
+    try {
+        eventSubscriptionSession.sendRequest(request);
+        Log::instance()->event().debug("cancel subscription request sent");
+    }
+    catch(Poco::Net::ConnectionRefusedException) {
+        Log::instance()->event().error("sending of cancel subscription request failed, connection refused");
+        throw Poco::Exception("");
+    }
+    catch (...) {
+        Log::instance()->event().error("sending of cancel subscription request failed for some reason");
+        throw Poco::Exception("");
+    }
+    // receive response ...
+    Poco::Net::HTTPResponse response;
+    try {
+        eventSubscriptionSession.receiveResponse(response);
+        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+    }
+    catch (Poco::Net::NoMessageException) {
+        Log::instance()->event().error("no response to cancel subscription request.");
+        throw Poco::Exception("");
+    }
+    catch (...) {
+        Log::instance()->event().error("no response to cancel subscription received for some reason.");
+        throw Poco::Exception("");
+    }
+
+    Log::instance()->event().debug("cancel subscription request completed");
 }
 
 
@@ -2836,11 +2918,10 @@ DeviceContainer::initController()
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
 //        (*d)->initStateVars();
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            Service* ps = *s;
-            ps->addEventCallbackPath((*d)->getUuid() + "/" + ps->getServiceType() + "/EventNotification");
-            _pDeviceManager->registerHttpRequestHandler(ps->getEventCallbackPath(), new EventNotificationRequestHandler(ps));
+            (*s)->addEventCallbackPath((*d)->getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
+            _pDeviceManager->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
             // subscribe to event notifications
-            ps->sendSubscriptionRequest();
+            (*s)->sendSubscriptionRequest();
         }
     }
 }
@@ -3266,7 +3347,25 @@ Controller::start()
     DeviceManager::start();
     sendMSearch();
     
-    Log::instance()->upnp().debug("controller started");
+    Log::instance()->upnp().debug("controller started.");
+}
+
+
+void
+Controller::stop()
+{
+    Log::instance()->upnp().debug("stopping controller ...");
+
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+            for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+                (*s)->sendCancelSubscriptionRequest();
+            }
+        }
+    }
+    DeviceManager::stop();
+
+    Log::instance()->upnp().debug("controller stopped.");
 }
 
 
