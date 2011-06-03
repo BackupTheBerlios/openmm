@@ -196,6 +196,7 @@ public:
 
     const std::string& getBuffer();
     std::string getIconRequestPath();
+    void setIconRequestPath(const std::string& path);
     
 private:
     void retrieve(const std::string& uri);
@@ -721,6 +722,7 @@ public:
     Controller* getController() const;
     std::string* getDeviceDescription() const;
     const std::string& getDescriptionUri() const;
+    std::string getDescriptionPath() const;
     Service* getServiceType(const std::string& serviceType);
 
     void setDeviceManager(DeviceManager* pDeviceManager);
@@ -937,6 +939,7 @@ public:
     void initClient();
     void sendAction(Action* pAction);
 
+    void sendSubscriptionRequest();
     void registerSubscription(Subscription* subscription);
     void unregisterSubscription(Subscription* subscription);
 

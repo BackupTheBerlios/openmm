@@ -419,6 +419,7 @@ private:
     Service*                        _pService;
 };
 
+
 } // namespace Omm
 
 #endif

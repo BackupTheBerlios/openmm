@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/LineEndingConverter.h>
+
 #include "Upnp.h"
 #include "UpnpPrivate.h"
 
@@ -52,7 +54,7 @@ Log::Log()
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pEventingLogger = &Poco::Logger::create("UPNP.EVENTING", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pEventingLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
 
@@ -151,6 +153,13 @@ std::string
 Icon::getIconRequestPath()
 {
     return _requestPath;
+}
+
+
+void
+Icon::setIconRequestPath(const std::string& path)
+{
+    _requestPath = path;
 }
 
 
@@ -438,7 +447,7 @@ SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
     Poco::Net::DatagramSocket* pDatagramSocket = static_cast<Poco::Net::DatagramSocket*>(pSocket);
     int n = pDatagramSocket->receiveFrom(_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-        Log::instance()->ssdp().debug("received message from: " + sender.toString() + "\n" + std::string(_pBuffer, n));
+        Log::instance()->ssdp().debug("received message from: " + sender.toString() + "" + Poco::LineEnding::NEWLINE_DEFAULT + std::string(_pBuffer, n));
 
         _notificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), sender));
     }
@@ -786,7 +795,7 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
         Log::instance()->desc().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream header;
         response.write(header);
-        Log::instance()->desc().debug("response header:\n" + header.str());
+        Log::instance()->desc().debug("response header:" + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
     }
@@ -795,7 +804,7 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
         res = new std::string;
         return *res;
     }
-    Log::instance()->desc().debug("retrieved description:\n*BEGIN*" + *res + "*END*");
+    Log::instance()->desc().debug("retrieved description:" + Poco::LineEnding::NEWLINE_DEFAULT + "*BEGIN*" + *res + "*END*");
     return *res;
 }
 
@@ -820,7 +829,7 @@ MemoryDescriptionReader::retrieveDescription(const std::string& descriptionKey)
 
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : _pActionTemplate(pActionTemplate)
 {
-    Log::instance()->ctrl().debug("action request:\n" + requestBody);
+    Log::instance()->ctrl().debug("action request:" + Poco::LineEnding::NEWLINE_DEFAULT + requestBody);
     
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -1156,7 +1165,7 @@ ServiceDescriptionWriter::write()
 
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug("rewrote service description:\n*BEGIN*" + ss.str() + "*END*");
+    Log::instance()->desc().debug("rewrote service description:" + Poco::LineEnding::NEWLINE_DEFAULT + "*BEGIN*" + ss.str() + "*END*");
     return new std::string(ss.str());
 }
 
@@ -1336,7 +1345,7 @@ EventMessageWriter::write(std::string& eventMessage)
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     eventMessage = ss.str();
-    Log::instance()->event().debug("event message:\n" + ss.str());
+    Log::instance()->event().debug("event message:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
 }
 
 
@@ -1724,7 +1733,7 @@ Service::sendAction(Action* pAction)
     try {
         std::ostream& ostr = controlRequestSession.sendRequest(request);
         ostr << actionMessage;
-        Log::instance()->ctrl().debug("action request sent:\n" + actionMessage);
+        Log::instance()->ctrl().debug("action request sent:" + Poco::LineEnding::NEWLINE_DEFAULT + actionMessage);
     }
     catch(Poco::Net::ConnectionRefusedException) {
         actionNetworkActivity(false);
@@ -1743,7 +1752,7 @@ Service::sendAction(Action* pAction)
         Log::instance()->ctrl().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::string responseBody;
         Poco::StreamCopier::copyToString(rs, responseBody);
-        Log::instance()->ctrl().debug("action response received:\n" + responseBody);
+        Log::instance()->ctrl().debug("action response received:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
         ActionResponseReader responseReader(responseBody, pAction);
         responseReader.action();
         actionNetworkActivity(false);
@@ -1759,6 +1768,40 @@ Service::sendAction(Action* pAction)
         throw Poco::Exception("");
     }
     Log::instance()->ctrl().debug("*** action \"" + pAction->getName() + "\" completed ***");
+}
+
+
+void
+Service::sendSubscriptionRequest()
+{
+    Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
+    Poco::URI eventSubscriptionUri(baseUri);
+    eventSubscriptionUri.resolve(getEventSubscriptionPath());
+    Poco::Net::HTTPRequest request("SUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
+    request.set("HOST", baseUri.getAuthority());
+    std::string callbackUris;
+    for (EventCallbackPathIterator it = beginEventCallbackPath(); it != endEventCallbackPath(); ++it) {
+        callbackUris += "<" + getDevice()->getDeviceContainer()->getDeviceManager()->getHttpServerUri() + (*it) + ">";
+    }
+    request.set("CALLBACK", callbackUris);
+    request.set("NT", "upnp:event");
+    request.set("TIMEOUT", "Second-infinite");
+    Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
+
+    Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI());
+
+    try {
+        std::ostream& ostr = eventSubscriptionSession.sendRequest(request);
+        Log::instance()->event().debug("subscription request sent");
+    }
+    catch(Poco::Net::ConnectionRefusedException) {
+        Log::instance()->event().error("sending of subscription request failed, connection refused");
+        throw Poco::Exception("");
+    }
+    catch (...) {
+        Log::instance()->event().error("sending of subscription request failed for some reason");
+        throw Poco::Exception("");
+    }
 }
 
 
@@ -1810,7 +1853,7 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
     }
     messageWriter.write(eventMessage);
     pSubscription->sendEventMessage(eventMessage);
-    Log::instance()->event().debug("sending initial event message:\n" + eventMessage);
+    Log::instance()->event().debug("sending initial event message:" + Poco::LineEnding::NEWLINE_DEFAULT + eventMessage);
 }
 
 
@@ -1913,7 +1956,7 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
     std::ostringstream requestHeader;
     request.write(requestHeader);
     Log::instance()->desc().debug("description request: " + request.getURI());
-    Log::instance()->desc().debug("description request header: \n" + requestHeader.str());
+    Log::instance()->desc().debug("description request header: " + Poco::LineEnding::NEWLINE_DEFAULT + requestHeader.str());
     if (request.has("Accept-Language")) {
         std::string lang = request.get("Accept-Language");
         // TODO: set proper lang in description response
@@ -1932,7 +1975,7 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
 //     response.set("LAST-MODIFIED", "Sun, 14 Mar 2010 11:30:22 GMT");
     std::ostringstream responseHeader;
     response.write(responseHeader);
-    Log::instance()->desc().debug("description response header: \n" + responseHeader.str());
+    Log::instance()->desc().debug("description response header: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
     response.sendBuffer(_pDescription->c_str(), _pDescription->size());
     if (response.sent()) {
         Log::instance()->desc().debug("description (header) successfully sent");
@@ -2003,7 +2046,7 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
-    Log::instance()->ctrl().debug("action response sent:\n" + responseBody);
+    Log::instance()->ctrl().debug("action response sent:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
     Log::instance()->ctrl().debug("*** action request completed: " + request.getURI() + " ***");
 }
 
@@ -2018,11 +2061,11 @@ EventSubscriptionRequestHandler::create()
 void
 EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-//     std::clog << "handle event request: " << request.getMethod() << std::endl;
-//     std::clog << "HOST: " << request.getHost() << std::endl;
-//     std::clog << "CALLBACK: " << request.get("CALLBACK") << std::endl;
-//     std::clog << "NT: " << request.get("NT") << std::endl;
-//     std::clog << "TIMEOUT: " << request.get("TIMEOUT") << std::endl;
+    Log::instance()->event().debug("handle event request: " + request.getMethod());
+    Log::instance()->event().debug("HOST: " + request.getHost());
+    Log::instance()->event().debug("CALLBACK: " + request.get("CALLBACK"));
+    Log::instance()->event().debug("NT: " + request.get("NT"));
+    Log::instance()->event().debug("TIMEOUT: " + request.get("TIMEOUT"));
     
     std::string sid;
     
@@ -2573,6 +2616,13 @@ DeviceContainer::getDescriptionUri() const
 }
 
 
+std::string
+DeviceContainer::getDescriptionPath() const
+{
+    return _descriptionUri.getPath();
+}
+
+
 void
 DeviceContainer::setDeviceManager(DeviceManager* pDeviceManager)
 {
@@ -2693,14 +2743,29 @@ DeviceContainer::initDevice()
     Log::instance()->upnp().debug("init device container (device)");
 
     initUuid();
-    // TODO: init http request paths including uuid of device (respectively subdevice).
+
+    // initialize http request paths.
+    setDescriptionUri(_pDeviceManager->getHttpServerUri() + getRootDevice()->getUuid() +  "/Description.xml");
+    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+        for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
+            // prepend the already assigned icon request path with the device uuid.
+            (*i)->setIconRequestPath((*d)->getUuid() + "/" + (*i)->getIconRequestPath());
+        }
+        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+            Service* ps = *s;
+            std::string servicePathPrefix = "/" + (*d)->getUuid() + "/" + ps->getServiceType();
+            ps->setDescriptionPath(servicePathPrefix + "/Description.xml");
+            ps->setControlPath(servicePathPrefix + "/Control");
+            ps->setEventSubscriptionPath(servicePathPrefix + "/EventSubscription");
+        }
+    }
+
     rewriteDescriptions();
     initDeviceDescriptionHandler();
-    setDescriptionUri(_pDeviceManager->getHttpServerUri() + getRootDevice()->getUuid() +  "/Description.xml");
     writeSsdpMessages();
 
     // initialize http request handlers and state vars.
-    _pDeviceManager->registerHttpRequestHandler(_descriptionUri.getPath(), _descriptionRequestHandler);
+    _pDeviceManager->registerHttpRequestHandler(getDescriptionPath(), _descriptionRequestHandler);
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         (*d)->initStateVars();
         for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
@@ -2715,6 +2780,8 @@ DeviceContainer::initDevice()
         }
         _pDeviceManager->registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
     }
+
+
 }
 
 
@@ -2728,8 +2795,10 @@ DeviceContainer::initController()
 //        (*d)->initStateVars();
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             Service* ps = *s;
-            ps->addEventCallbackPath("/" + ps->getServiceId() + "/EventNotification");
+            ps->addEventCallbackPath((*d)->getUuid() + "/" + ps->getServiceType() + "/EventNotification");
             _pDeviceManager->registerHttpRequestHandler(ps->getEventCallbackPath(), new EventNotificationRequestHandler(ps));
+            // subscribe to event notifications
+            ps->sendSubscriptionRequest();
         }
     }
 }
@@ -2802,7 +2871,7 @@ void
 Device::addIcon(Icon* pIcon)
 {
     _pDeviceData->_iconList.push_back(pIcon);
-    pIcon->_requestPath = "/DeviceIcon" + Poco::NumberFormatter::format(_pDeviceData->_iconList.size());
+    pIcon->_requestPath = "DeviceIcon" + Poco::NumberFormatter::format(_pDeviceData->_iconList.size());
 }
 
 
@@ -3212,7 +3281,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-    Log::instance()->ssdp().debug("controller received message:\n" + pMessage->toString());
+    Log::instance()->ssdp().debug("controller received message:" + Poco::LineEnding::NEWLINE_DEFAULT + pMessage->toString());
     
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
