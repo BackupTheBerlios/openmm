@@ -3168,6 +3168,13 @@ Device::setProperty(const std::string& name, const std::string& val)
 
 
 void
+Device::setFriendlyName(const std::string& name)
+{
+    setProperty("friendlyName", name);
+}
+
+
+void
 Device::addProperty(const std::string& name, const std::string& val)
 {
     _pDeviceData->addProperty(name, val);

@@ -351,6 +351,7 @@ private:
 class DeviceManager : public Util::Startable
 {
     friend class ControlRequestHandler;
+    friend class DeviceContainer;
 
 public:
     DeviceManager(Socket* pNetworkListener);
@@ -368,10 +369,11 @@ public:
     void stop();
 
     std::string getHttpServerUri();
+
+protected:
     void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
 
-protected:
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
     virtual void deviceContainerAdded(DeviceContainer* pDeviceContainer) {}
     virtual void deviceContainerRemoved(DeviceContainer* pDeviceContainer) {}
@@ -439,6 +441,10 @@ class DeviceContainer
     friend class DeviceServer;
     friend class DevDeviceCode;
     friend class Controller;
+    friend class DescriptionReader;
+    friend class Service;
+    friend class DeviceData;
+    friend class SsdpNotifyAliveWriter;
 
 public:
     DeviceContainer();
@@ -452,32 +458,37 @@ public:
     ServiceTypeIterator beginServiceType();
     ServiceTypeIterator endServiceType();
 
+    void addDevice(Device* pDevice);
+
     DeviceManager* getDeviceManager();
     /*const*/ Device* getDevice(std::string uuid) /*const*/;
     Device* getRootDevice() const;
     Controller* getController() const;
+
+    void setRootDevice(Device* pDevice);
+
+    // ommgen needs this
+    void rewriteDescriptions();
     std::string* getDeviceDescription() const;
+
+private:
     const std::string& getDescriptionUri() const;
     std::string getDescriptionPath() const;
     Service* getServiceType(const std::string& serviceType);
 
     void setDeviceManager(DeviceManager* pDeviceManager);
-    void setRootDevice(Device* pDevice);
     void setDeviceDescription(std::string& description);
     void setDescriptionUri(const std::string uri);
-    void addDevice(Device* pDevice);
     void addServiceType(Service* pService);
 
     void print();
 
     void initUuid();
     void initStateVars();
-    void rewriteDescriptions();
     void initDeviceDescriptionHandler();
     void initDevice();
     void initController();
 
-private:
     void writeSsdpMessages();
 
 //     Poco::URI                       _baseUri;              // base URI for control URI and event URI
@@ -499,6 +510,7 @@ private:
 
 class Device
 {
+    friend class DescriptionReader;
     friend class DeviceDescriptionWriter;
     friend class DeviceContainer;
     friend class DeviceManager;
@@ -521,11 +533,10 @@ public:
     IconIterator endIcon();
 
     DeviceContainer* getDeviceContainer() const;
-    DevDeviceCode* getDevDevice() const;
     std::string getUuid() const;
     std::string getDeviceType() const;
-    const std::string& getFriendlyName();
     Service* getService(std::string serviceType);
+    const std::string& getFriendlyName();
     const std::string& getProperty(const std::string& name);
 
     void setDeviceContainer(DeviceContainer* pDeviceContainer);
@@ -534,14 +545,17 @@ public:
     void setUuid(std::string uuid);
     void setRandomUuid();
     void setProperty(const std::string& name, const std::string& val);
+    void setFriendlyName(const std::string& name);
 
-    void addProperty(const std::string& name, const std::string& val);
-    void addService(Service* pService);
     void addIcon(Icon* pIcon);
 
     void initStateVars();
 
 private:
+    void addProperty(const std::string& name, const std::string& val);
+    void addService(Service* pService);
+    DevDeviceCode* getDevDevice() const;
+
     DeviceContainer*                    _pDeviceContainer;
     DeviceData*                         _pDeviceData;
     DevDeviceCode*                      _pDevDeviceCode;

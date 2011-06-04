@@ -162,7 +162,7 @@ protected:
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pIcon);
             if (_name != "") {
-                mediaRenderer.setProperty("friendlyName", _name);
+                mediaRenderer.setFriendlyName(_name);
             }
 
             // create a device container and put media renderer device in it.
