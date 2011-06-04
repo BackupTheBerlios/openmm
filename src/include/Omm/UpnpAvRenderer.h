@@ -45,25 +45,18 @@ public:
     virtual void setOption(const std::string& key, const std::string& value);
     virtual void createPlayer()  = 0;
 
-    // UPnP methods
+    // UPnP AV methods
     /*
       AVTransport
     */
     virtual bool preferStdStream() { return false; }
-    // TODO: get independent of UpnpAvTypes.h by don't using ctor ProtocolInfo()
-    virtual void setUri(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo()) = 0;
-    virtual void setUri(std::istream& istr, const ProtocolInfo& protInfo = ProtocolInfo()) {}
+    virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo()) = 0;
+    /// Set uri and protocol info of media item.
+    virtual void setUri(std::istream& istr, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo()) {}
+    /// Set stream and protocol info of media item.
     virtual void play() = 0;
     
-    /**
-        void setSpeed(int nom, int denom)
-        set speed to nom/denom
-    */
     virtual void setSpeed(int nom, int denom) = 0;
-    /**
-        void pause()
-        toggle pause
-    */
     virtual void pause() = 0;
     virtual void stop() = 0;
 

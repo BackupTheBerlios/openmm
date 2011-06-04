@@ -22,10 +22,12 @@
 #ifndef OMMUPNPAV_SERVER_H
 #define OMMUPNPAV_SERVER_H
 
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/Net/HTTPRequestHandler.h>
 
 // #include "AvStream.h"
+#include "Upnp.h"
 #include "UpnpAvTypes.h"
-#include "UpnpAvDevices.h"
 
 
 namespace Omm {
@@ -33,6 +35,7 @@ namespace Av {
 
 class MediaItemServer;
 class StreamingMediaObject;
+class DevContentDirectoryServerImpl;
 
 
 class MediaItemServer
@@ -92,8 +95,6 @@ private:
     MediaItemServer*  _pItemServer;
 };
 
-
-class DevContentDirectoryServerImpl;
 
 class AvServer : public Device
     /// Used by ServerApplication

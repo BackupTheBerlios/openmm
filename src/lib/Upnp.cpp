@@ -23,6 +23,25 @@
 #include <fstream>
 #include <sstream>
 
+#include <Poco/Path.h>
+#include <Poco/File.h>
+#include <Poco/Message.h>
+#include <Poco/NObserver.h>
+#include <Poco/Observer.h>
+#include <Poco/Net/SocketStream.h>
+#include <Poco/Net/ServerSocket.h>
+#include <Poco/Net/NetException.h>
+#include <Poco/Net/NetworkInterface.h>
+#include <Poco/Net/MessageHeader.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
+#include <Poco/Net/HTTPServerParams.h>
+#include <Poco/Net/HTTPServerParams.h>
+#include <Poco/Net/HTTPServerRequest.h>
+#include <Poco/Net/HTTPServerResponse.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/MediaType.h>
+#include <Poco/StreamCopier.h>
 #include <Poco/LineEndingConverter.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>

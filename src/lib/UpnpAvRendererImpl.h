@@ -21,6 +21,10 @@
 #ifndef MEDIARENDERER_IMPLEMENTATION_H
 #define MEDIARENDERER_IMPLEMENTATION_H
 
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPRequest.h>
+
 #include "UpnpAvRenderer.h"
 #include "UpnpAvDevices.h"
 

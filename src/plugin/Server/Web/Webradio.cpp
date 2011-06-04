@@ -23,6 +23,12 @@
 
 #include <Poco/ClassLibrary.h>
 #include <Poco/Net/HTTPIOStream.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+
 
 #include <Omm/UpnpAvTypes.h>
 

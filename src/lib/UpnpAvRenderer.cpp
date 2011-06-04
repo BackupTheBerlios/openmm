@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include "UpnpAvTypes.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvDescriptions.h"
 #include "UpnpAvRendererImpl.h"
@@ -66,7 +67,7 @@ _pEngine(engine)
               new DevConnectionManagerRendererImpl(engine),
               new DevAVTransportRendererImpl(engine)));
 
-    Omm::Av::Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
+    Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
 }
 
 

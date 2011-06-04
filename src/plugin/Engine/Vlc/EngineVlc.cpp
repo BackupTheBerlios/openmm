@@ -21,8 +21,6 @@
 #include <Poco/ClassLibrary.h>
 #include "EngineVlc.h"
 
-#include <Omm/Upnp.h>
-#include <Omm/UpnpAvTypes.h>
 
 // EnginePlugin::VlcEngine(int argc, char **argv) :
 VlcEngine::VlcEngine() :

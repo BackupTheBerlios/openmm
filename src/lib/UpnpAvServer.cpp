@@ -22,15 +22,18 @@
 #include <sstream>
 
 #include <Poco/File.h>
+#include <Poco/StreamCopier.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPServerRequest.h>
+#include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Exception.h>
 
 #include "UpnpAvServer.h"
 #include "UpnpInternal.h"
+#include "UpnpAvDevices.h"
 #include "UpnpAvDescriptions.h"
 #include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"
-#include "UpnpAvTypes.h"
 
 namespace Omm {
 namespace Av {

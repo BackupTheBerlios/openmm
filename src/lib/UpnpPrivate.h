@@ -22,9 +22,22 @@
 #ifndef UpnpPrivate_INCLUDED
 #define UpnpPrivate_INCLUDED
 
+
+#include <Poco/Net/MulticastSocket.h>
+#include <Poco/Net/SocketNotification.h>
+#include <Poco/Net/DatagramSocket.h>
+#include <Poco/Net/SocketAddress.h>
+#include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/NotificationQueue.h>
+#include <Poco/NotificationCenter.h>
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>
 #include <Poco/Net/HTTPStreamFactory.h>
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/Net/SocketReactor.h>
+
+
 #include <Poco/DateTime.h>
 
 #include "Upnp.h"

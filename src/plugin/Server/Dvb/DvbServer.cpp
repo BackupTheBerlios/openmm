@@ -19,6 +19,9 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
+#include <Poco/StreamCopier.h>
+#include <Poco/Timer.h>
+
 
 #include "DvbServer.h"
 
