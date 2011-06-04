@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef OMMUPNPAV_TYPES_H
-#define OMMUPNPAV_TYPES_H
+#ifndef UpnpAvTypes_INCLUDED
+#define UpnpAvTypes_INCLUDED
 
 #include <Poco/Format.h>
 #include <Poco/Logger.h>
@@ -33,8 +33,7 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-
-#include "Upnp.h"
+#include "UpnpTypes.h"
 #include "Util.h"
 
 // NOTE: for media object ids only use non-reserved characters for segments 
