@@ -49,21 +49,6 @@
 
 namespace Omm {
 
-//// TODO: make a typedef and extent Variant for remaining UPnP datatypes (see specs p.33)
-//typedef Poco::UInt8     ui1;
-//typedef Poco::UInt16    ui2;
-//typedef Poco::UInt32    ui4;
-//typedef Poco::Int8      i1;
-//typedef Poco::Int16     i2;
-//typedef Poco::Int32     i4;
-//typedef float           r4;
-//typedef double          r8;
-//typedef r8              number;
-//typedef Poco::URI       uri;
-//typedef Poco::Timestamp date;
-//typedef Poco::Timestamp dateTime;
-//typedef Poco::Timestamp time;
-
 static const std::string    UPNP_VERSION        = "1.0";
 static const std::string    OMM_VERSION         = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
@@ -79,21 +64,11 @@ class DevDeviceCode;
 class CtlDeviceCode;
 class Service;
 class Action;
-class Argument;
-class StateVar;
-class ControlRequestHandler;
 class Socket;
-class HttpSocket;
-class Entity;
-class EntityItem;
 class UpnpRequestHandler;
 class DescriptionRequestHandler;
-class DeviceRequestHandlerFactory;
-class ControlRequestHandler;
-class SsdpSocket;
 class SsdpMessage;
 class SsdpMessageSet;
-class Subscription;
 
 
 class Log
