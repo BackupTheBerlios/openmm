@@ -24,8 +24,10 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 #include <Omm/Upnp.h>
+#include <Omm/UpnpInternal.h>
 
 using Omm::DeviceContainer;
 using Omm::Device;

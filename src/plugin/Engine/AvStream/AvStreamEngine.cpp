@@ -21,6 +21,7 @@
 #include <string>
 
 #include <Poco/ClassLibrary.h>
+#include <Poco/Observer.h>
 
 #include "Omm/Util.h"
 #include "AvStreamEngine.h"

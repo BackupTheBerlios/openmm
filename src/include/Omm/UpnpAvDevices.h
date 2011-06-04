@@ -23,6 +23,7 @@
 #define UPNPAV_DEV_H
 
 #include "Upnp.h"
+#include "UpnpInternal.h"
 
 // Somewhere, there's an evil macro that scrambles argument Status in
 // ConnectionManager::GetCurrentConnectionInfo()

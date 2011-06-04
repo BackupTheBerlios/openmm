@@ -5,6 +5,7 @@
 // <dlna:X_DLNADOC xmlns:dlna=\"urn:schemas-dlna-org:device-1-0\">DMS-1.50</dlna:X_DLNADOC>
 
 #include "Upnp.h"
+#include "UpnpInternal.h"
 
 namespace Omm {
 namespace Av {

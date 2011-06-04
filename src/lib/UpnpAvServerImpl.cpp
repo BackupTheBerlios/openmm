@@ -238,8 +238,7 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
         TotalMatches = object->getTotalChildCount();
     }
     else {
-        // TODO: use a logger or throw an exception
-        std::cerr << "Error in Browse: unkown BrowseFlag" << std::endl;
+        Log::instance()->upnpav().error("Error in Browse: unkown BrowseFlag");
     }
     UpdateID = 0;
 }

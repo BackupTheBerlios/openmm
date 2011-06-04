@@ -30,6 +30,9 @@
 #include <Poco/FileChannel.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/Net/MediaType.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+
 
 #include "Upnp.h"
 #include "Util.h"

@@ -25,6 +25,8 @@
 |       Don't edit, it will be overriden at the next run of ommgen.         |
 ****************************************************************************/
 
+#include <Omm/UpnpInternal.h>
+
 #include "DimmableLightCtrl.h"
 
 void

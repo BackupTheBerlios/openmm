@@ -25,6 +25,8 @@
 #include <Poco/SplitterChannel.h>
 #include <Poco/ConsoleChannel.h>
 #include <Poco/Timestamp.h>
+#include <Poco/Path.h>
+
 #include <Omm/AvStream.h>
 
 #include "SimpleTagger.h"

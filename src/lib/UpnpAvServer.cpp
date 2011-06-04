@@ -19,11 +19,14 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <sstream>
+
 #include <Poco/File.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Exception.h>
 
 #include "UpnpAvServer.h"
+#include "UpnpInternal.h"
 #include "UpnpAvDescriptions.h"
 #include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"

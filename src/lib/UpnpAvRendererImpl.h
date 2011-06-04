@@ -21,8 +21,9 @@
 #ifndef MEDIARENDERER_IMPLEMENTATION_H
 #define MEDIARENDERER_IMPLEMENTATION_H
 
-#include "UpnpAvTypes.h"
 #include "UpnpAvRenderer.h"
+#include "UpnpAvDevices.h"
+
 
 namespace Omm {
 namespace Av {

@@ -19,7 +19,14 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 #include <Poco/LineEndingConverter.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
 
 #include "Upnp.h"
 #include "UpnpPrivate.h"
@@ -1873,6 +1880,11 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     }
 
     if (!renew) {
+        Log::instance()->event().debug("subscription response DATE: " + response.get("DATE"));
+        Log::instance()->event().debug("subscription response SERVER: " + response.get("SERVER"));
+        Log::instance()->event().debug("subscription response SID: " + response.get("SID"));
+        Log::instance()->event().debug("subscription response TIMEOUT: " + response.get("TIMEOUT"));
+        
         _pControllerSubscriptionData->setSid(response.get("SID"));
     }
     

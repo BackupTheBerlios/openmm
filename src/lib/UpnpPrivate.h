@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -25,8 +25,10 @@
 #include <Poco/UUID.h>
 #include <Poco/UUIDGenerator.h>
 #include <Poco/Net/HTTPStreamFactory.h>
+#include <Poco/DateTime.h>
 
 #include "Upnp.h"
+#include "UpnpInternal.h"
 
 
 namespace Omm {
@@ -38,11 +40,106 @@ static const Poco::UInt16   SSDP_CACHE_DURATION = 1800;
 static const Poco::UInt16   SSDP_MIN_WAIT_TIME  = 1;
 static const Poco::UInt16   SSDP_MAX_WAIT_TIME  = 120;
 
-class Argument;
 class ControlRequestHandler;
 class HttpSocket;
-class Entity;
-class EntityItem;
+
+
+class SsdpSocket
+{
+    friend class DeviceContainer;
+    friend class Controller;
+    friend class Socket;
+
+public:
+    SsdpSocket();
+    ~SsdpSocket();
+
+    void addInterface(const std::string& name);
+    void removeInterface(const std::string& name);
+    void addObserver(const Poco::AbstractObserver& observer);
+    void startListen();
+    void stopListen();
+
+    void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+
+private:
+    enum SocketMode {NotConfigured, Broadcast, Multicast};
+
+    void init();
+    void deinit();
+    void setupSockets();
+    void resetSockets();
+    void setMulticast();
+    void setBroadcast();
+
+    void onReadable(Poco::Net::ReadableNotification* pNotification);
+
+    SocketMode                      _mode;
+    Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
+    Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
+    char*                           _pBuffer;
+
+    static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
+                 // Note that each SSDP message must fit into one UDP Packet.
+
+    Poco::Net::SocketReactor                        _reactor;
+    Poco::Thread                                    _listenerThread;
+    Poco::NotificationCenter                        _notificationCenter;
+};
+
+
+class HttpSocket
+{
+    friend class Socket;
+
+public:
+    HttpSocket();
+    ~HttpSocket();
+
+    void init();
+    void startServer();
+    void stopServer();
+    std::string getServerUri();
+
+private:
+    Poco::Net::HTTPServer*                _pHttpServer;
+    Poco::UInt16                          _httpServerPort;
+    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
+    Poco::NotificationCenter              _notificationCenter;
+};
+
+
+class Socket
+{
+public:
+    Socket();
+    virtual ~Socket();
+
+    void initSockets();
+    void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
+    void registerActionHandler(const Poco::AbstractObserver& observer);
+    void registerSsdpMessageHandler(const Poco::AbstractObserver& observer);
+
+    void startSsdp();
+    void startHttp();
+
+    void stopSsdp();
+    void stopHttp();
+
+    std::string getHttpServerUri();
+    void postAction(Action* pAction);
+    void sendSsdpMessage(SsdpMessage& ssdpMessage, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat = 1, long delay = 0, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
+    void startSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
+    void stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
+
+private:
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
+
+    SsdpSocket                      _ssdpSocket;
+    HttpSocket                      _httpSocket;
+};
 
 
 class SsdpMessage : public Poco::Notification
@@ -421,6 +518,31 @@ private:
     std::string                     _duration;
     Poco::Timer                     _timer;
     Service*                        _pService;
+};
+
+
+class DeviceData
+{
+    friend class Device;
+public:
+    DeviceData();
+
+    Device* getDevice();
+
+    void setDeviceType(std::string deviceType);
+    void setUuid(std::string uuid);
+    void setDevice(Device* pDevice);
+
+    void addProperty(const std::string& name, const std::string& val);
+    void addService(Service* pService);
+
+private:
+    Device*                             _pDevice;
+    std::string                         _uuid;
+    std::string                         _deviceType;
+    Container<Service>                  _services;
+    Container<std::string>              _properties;
+    std::vector<Icon*>                  _iconList;
 };
 
 

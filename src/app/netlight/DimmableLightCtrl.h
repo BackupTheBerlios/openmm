@@ -29,6 +29,7 @@
 #define DIMMABLELIGHT_CTRL_H
 
 #include <Omm/Upnp.h>
+#include <Omm/UpnpInternal.h>
 
 class DimmingController
 {

@@ -4,6 +4,8 @@
 |       Don't edit, it will be overriden at the next run of ommgen.         |
 ****************************************************************************/
 
+#include <iostream>
+
 #include <Omm/Upnp.h>
 #include "DimmableLightImpl.h"
 

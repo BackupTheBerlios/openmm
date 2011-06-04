@@ -19,11 +19,16 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <cmath>
+#include <sstream>
+
 #include <Poco/StringTokenizer.h>
 #include <Poco/NumberParser.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeFormatter.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeIterator.h>
@@ -38,8 +43,6 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
-
-#include <cmath>
 
 #include "UpnpAvTypes.h"
 #include "UpnpAvControllers.h"

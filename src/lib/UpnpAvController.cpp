@@ -19,12 +19,15 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include "Upnp.h"
+#include "UpnpAvServer.h"
+#include "UpnpAvRenderer.h"
 #include "UpnpAvTypes.h"
-#include "UpnpAvController.h"
-#include "UpnpAvControllerPrivate.h"
 #include "UpnpAvCtrlImpl.h"
 #include "UpnpAvControllers.h"
+
+#include "UpnpAvController.h"
+#include "UpnpAvControllerPrivate.h"
+
 
 namespace Omm {
 namespace Av {

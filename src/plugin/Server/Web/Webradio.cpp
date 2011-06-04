@@ -18,6 +18,9 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#include <fstream>
+#include <sstream>
+
 #include <Poco/ClassLibrary.h>
 #include <Poco/Net/HTTPIOStream.h>
 
@@ -205,7 +208,7 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
     }
     if (pStationList->hasChildNodes()) {
         Poco::XML::Node* pStation = pStationList->firstChild();
-        std::clog << "stationlist first child: " << pStation->nodeName() << std::endl;
+        Omm::Av::Log::instance()->upnpav().debug("stationlist first child: " + pStation->nodeName());
         while (pStation) {
             if (pStation->nodeName() != "station") {
                 Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, no station found.");

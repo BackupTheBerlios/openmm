@@ -22,6 +22,8 @@
 #ifndef AvStreamEngine_INCLUDED
 #define AvStreamEngine_INCLUDED
 
+#include <Poco/Net/HTTPClientSession.h>
+
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/AvStream.h>
 
@@ -78,19 +80,19 @@ private:
     
     void endOfStream(Omm::AvStream::Sink::EndOfStream* eof);
     
-    Poco::FastMutex             _actionLock;
-    bool                        _isPlaying;
+    Poco::FastMutex                 _actionLock;
+    bool                            _isPlaying;
     
-    Omm::AvStream::Tagger*      _pTagger;
-    Omm::AvStream::Clock*       _pClock;
-    Omm::AvStream::Demuxer*     _pDemuxer;
-    Omm::AvStream::AudioSink*   _pAudioSink;
-    Omm::AvStream::VideoSink*   _pVideoSink;
+    Omm::AvStream::Tagger*          _pTagger;
+    Omm::AvStream::Clock*           _pClock;
+    Omm::AvStream::Demuxer*         _pDemuxer;
+    Omm::AvStream::AudioSink*       _pAudioSink;
+    Omm::AvStream::VideoSink*       _pVideoSink;
     
-    std::ifstream               _file;
-    Poco::Net::HTTPClientSession* _pSession;
-    bool                        _isFile;
-    std::string                 _uri;
+    std::ifstream                   _file;
+    Poco::Net::HTTPClientSession*   _pSession;
+    bool                            _isFile;
+    std::string                     _uri;
 };
 
 #endif

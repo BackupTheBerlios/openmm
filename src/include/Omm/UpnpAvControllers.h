@@ -23,11 +23,16 @@
 #define UpnpAvControllers_INCLUDED
 
 #include "Upnp.h"
+#include "UpnpInternal.h"
 
 #undef Status
 
 namespace Omm {
+
+class Service;
+
 namespace Av {
+
 
 // Forward declaration of all UPnP AV services
 class CtlAVTransport;

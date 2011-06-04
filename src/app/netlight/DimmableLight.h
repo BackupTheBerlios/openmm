@@ -29,6 +29,7 @@
 #define DIMMABLELIGHT_H
 
 #include <Omm/Upnp.h>
+#include <Omm/UpnpInternal.h>
 
 using Omm::DevDeviceCode;
 using Omm::Service;

@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "UpnpAvControllers.h"
+#include "UpnpInternal.h"
 
 namespace Omm {
 namespace Av {

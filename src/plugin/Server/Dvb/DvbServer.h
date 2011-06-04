@@ -22,6 +22,8 @@
 #ifndef DvbServer_INCLUDED
 #define DvbServer_INCLUDED
 
+#include <Poco/DateTime.h>
+
 #include <Omm/UpnpAvServer.h>
 #include <Omm/Dvb.h>
 

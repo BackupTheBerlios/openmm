@@ -26,6 +26,7 @@
 ****************************************************************************/
 
 #include <Omm/Upnp.h>
+#include <Omm/UpnpInternal.h>
 
 #include "DimmableLight.h"
 #include "DimmableLightDescriptions.h"

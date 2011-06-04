@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include <fstream>
+#include <iostream>
 
 #include <Poco/Types.h>
 #include <Poco/Util/ServerApplication.h>

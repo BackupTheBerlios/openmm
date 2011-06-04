@@ -22,8 +22,8 @@
 #ifndef UpnpAvRenderer_INCLUDED
 #define UpnpAvRenderer_INCLUDED
 
+#include "Upnp.h"
 #include "UpnpAvTypes.h"
-#include "UpnpAvDevices.h"
 #include "Util.h"
 #include "Sys.h"
 
@@ -32,6 +32,7 @@ namespace Av {
 
 
 class Visual;
+class ProtocolInfo;
 
 class Engine : public Util::ConfigurablePlugin
 {
@@ -49,6 +50,7 @@ public:
       AVTransport
     */
     virtual bool preferStdStream() { return false; }
+    // TODO: get independent of UpnpAvTypes.h by don't using ctor ProtocolInfo()
     virtual void setUri(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo()) = 0;
     virtual void setUri(std::istream& istr, const ProtocolInfo& protInfo = ProtocolInfo()) {}
     virtual void play() = 0;

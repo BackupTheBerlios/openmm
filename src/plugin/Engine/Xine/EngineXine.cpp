@@ -153,7 +153,7 @@ XineEngine::createPlayer()
 
     if (!_audioDriver)
     {
-        std::cerr << "XineEngine::init() can't init audio driver " << _audioDriverName << std::endl;
+//        std::cerr << "XineEngine::init() can't init audio driver " << _audioDriverName << std::endl;
     }
     
     _xineStream = xine_stream_new(_xineEngine, _audioDriver, _videoDriver);

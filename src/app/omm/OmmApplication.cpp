@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <iostream>
+
 #include <Poco/Exception.h>
 #include <Poco/Util/Application.h>
 #include <Poco/Util/Option.h>

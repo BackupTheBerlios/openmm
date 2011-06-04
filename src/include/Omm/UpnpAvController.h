@@ -26,15 +26,18 @@
 
 #include "Upnp.h"
 #include "UpnpAvTypes.h"
-#include "UpnpAvControllers.h"
-#include "UpnpAvServer.h"
-#include "UpnpAvRenderer.h"
+
 
 namespace Omm {
 namespace Av {
 
 class ServerController;
 class AvController;
+class CtlMediaServer;
+class CtlMediaRenderer;
+class Engine;
+class AvServer;
+class AvRenderer;
 
 class RendererView
 {
@@ -81,8 +84,8 @@ private:
     void readMetaData(const std::string& metaData);
     void readNode(Poco::XML::Node* pNode);
     
-    unsigned int                            _childCount;
-    bool                                    _fetchedAllChildren;
+    unsigned int                     _childCount;
+    bool                             _fetchedAllChildren;
     CtlMediaServer*                  _server;
 };
 
@@ -147,7 +150,7 @@ private:
 //    void startWebradio();
     
     AvController*                         _pAvController;
-    CtlMediaRenderer*              _pSelectedRenderer;
+    CtlMediaRenderer*                     _pSelectedRenderer;
     ControllerObject*                     _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
 
