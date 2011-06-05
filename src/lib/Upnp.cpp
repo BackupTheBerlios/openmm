@@ -76,10 +76,10 @@ Log::Log()
 #else
     _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_INFORMATION);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
@@ -1641,7 +1641,7 @@ Service::getControlRequestHandler() const
 Device*
 Service::getDevice() const
 {
-    Log::instance()->upnp().debug("service, get device: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
+//    Log::instance()->upnp().debug("service, get device: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
     return _pDeviceData->getDevice();
 }
 
@@ -1712,7 +1712,7 @@ Service::setEventSubscriptionPath(std::string eventPath)
 void
 Service::setDeviceData(DeviceData* pDeviceData)
 {
-    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
+//    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
 }
 
@@ -2335,7 +2335,7 @@ HttpSocket::startServer()
 {
     _pHttpServer->start();
 //    _isRunning = true;
-    Log::instance()->http().information("HTTP server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
+    Log::instance()->http().information("server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
 }
 
 
@@ -2344,7 +2344,7 @@ HttpSocket::stopServer()
 {
     _pHttpServer->stop();
 //    _isRunning = false;
-    Log::instance()->http().information("HTTP server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
+    Log::instance()->http().information("server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
 }
 
 
@@ -2567,19 +2567,18 @@ DeviceManager::addDeviceContainer(DeviceContainer* pDeviceContainer)
         Log::instance()->upnp().debug("device manager adds device container with root device uuid: " + uuid);
         _deviceContainers.append(uuid, pDeviceContainer);
         pDeviceContainer->setDeviceManager(this);
-        deviceContainerAdded(pDeviceContainer);
     }
 //    _devices.get("").eventHandler(0);
 }
 
 
 void
-DeviceManager::removeDeviceContainer(const std::string& uuid)
+DeviceManager::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
+    std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (_deviceContainers.contains(uuid)) {
         Log::instance()->upnp().debug("device manager removes device container with root device uuid: " + uuid);
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
-        deviceContainerRemoved(pDeviceContainer);
         _deviceContainers.remove(uuid);
     }
 }
@@ -2624,36 +2623,36 @@ DeviceManager::getHttpServerUri()
 void
 DeviceManager::startSsdp()
 {
-    Log::instance()->ssdp().information("starting SSDP ...");
+    Log::instance()->ssdp().information("starting socket ...");
     _pSocket->startSsdp();
-    Log::instance()->ssdp().information("SSDP started.");
+    Log::instance()->ssdp().information("socket started.");
 }
 
 
 void
 DeviceManager::stopSsdp()
 {
-    Log::instance()->ssdp().information("stopping SSDP ...");
+    Log::instance()->ssdp().information("stopping socket ...");
     _pSocket->stopSsdp();
-    Log::instance()->ssdp().information("SSDP stopped.");
+    Log::instance()->ssdp().information("socket stopped.");
 }
 
 
 void
 DeviceManager::startHttp()
 {
-    Log::instance()->http().information("starting HTTP ...");
+    Log::instance()->http().information("starting socket...");
     _pSocket->startHttp();
-    Log::instance()->http().information("HTTP started.");
+    Log::instance()->http().information("socket started.");
 }
 
 
 void
 DeviceManager::stopHttp()
 {
-    Log::instance()->http().information("stopping HTTP ...");
+    Log::instance()->http().information("stopping socket...");
     _pSocket->stopHttp();
-    Log::instance()->http().information("HTTP stopped.");
+    Log::instance()->http().information("socket stopped.");
 }
 
 
@@ -2943,7 +2942,7 @@ DeviceContainer::initDevice()
 void
 DeviceContainer::initController()
 {
-    Log::instance()->upnp().debug("init device container (controller)");
+    Log::instance()->upnp().debug("init device container (controller) ...");
 
     // initialize http request handlers and state vars.
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
@@ -2952,9 +2951,11 @@ DeviceContainer::initController()
             (*s)->addEventCallbackPath((*d)->getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceManager->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
             // subscribe to event notifications
-            (*s)->sendSubscriptionRequest();
+            // FIXME: segfault here.
+//            (*s)->sendSubscriptionRequest();
         }
     }
+    Log::instance()->upnp().debug("init device container (controller) finished.");
 }
 
 
@@ -3083,7 +3084,7 @@ Device::endIcon()
 DeviceContainer*
 Device::getDeviceContainer() const
 {
-    Log::instance()->upnp().debug("get device container: " + Poco::NumberFormatter::format(_pDeviceContainer));
+//    Log::instance()->upnp().debug("get device container: " + Poco::NumberFormatter::format(_pDeviceContainer));
     return _pDeviceContainer;
 }
 
@@ -3133,7 +3134,7 @@ Device::getProperty(const std::string& name)
 void
 Device::setDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    Log::instance()->upnp().debug("device, set device container to: " + Poco::NumberFormatter::format(pDeviceContainer));
+//    Log::instance()->upnp().debug("device, set device container to: " + Poco::NumberFormatter::format(pDeviceContainer));
     _pDeviceContainer = pDeviceContainer;
 }
 
@@ -3198,7 +3199,7 @@ _pDevice(0)
 Device*
 DeviceData::getDevice()
 {
-    Log::instance()->upnp().debug("device data, get device: " + Poco::NumberFormatter::format(_pDevice));
+//    Log::instance()->upnp().debug("device data, get device: " + Poco::NumberFormatter::format(_pDevice));
     return _pDevice;
 }
 
@@ -3467,14 +3468,16 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
 //             Log::instance()->ssdp().debug("identified alive message");
+            // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && !_deviceContainers.contains(uuid)) {
                 discoverDevice(pMessage->getLocation());
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
 //             Log::instance()->ssdp().debug("identified byebye message");
-            if (pMessage->getNotificationType() == "upnp:rootdevice") {
-                removeDeviceContainer(uuid);
+            // TODO: handle other notification types than upnp:rootdevice
+            if (pMessage->getNotificationType() == "upnp:rootdevice" && _deviceContainers.contains(uuid)) {
+                removeDeviceContainer(&_deviceContainers.get(uuid));
             }
             break;
         }
@@ -3492,25 +3495,30 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 void
 Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
+    Log::instance()->upnp().debug("controller adds device container");
+
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        _pUserInterface->beginAddDevice(_deviceContainers.position(uuid));
+        _pUserInterface->beginAddDeviceContainer(_deviceContainers.position(uuid));
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
         pDeviceContainer->initController();
-        _pUserInterface->endAddDevice(_deviceContainers.position(uuid));
+        _pUserInterface->endAddDeviceContainer(_deviceContainers.position(uuid));
     }
 }
 
 
 void
-Controller::removeDeviceContainer(const std::string& uuid)
+Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
+    Log::instance()->upnp().debug("controller removes device container");
+
+    std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
-        _pUserInterface->beginRemoveDevice(_deviceContainers.position(uuid));
-        DeviceManager::removeDeviceContainer(uuid);
-        _pUserInterface->endRemoveDevice(_deviceContainers.position(uuid));
+        _pUserInterface->beginRemoveDeviceContainer(_deviceContainers.position(uuid));
+        DeviceManager::removeDeviceContainer(pDeviceContainer);
+        _pUserInterface->endRemoveDeviceContainer(_deviceContainers.position(uuid));
         pDeviceContainer->_pController = 0;
     }
 }
@@ -3521,7 +3529,7 @@ Controller::update()
 {
     // TODO: do a more carefull controller update and don't remove servers that are still active.
     for (Container<DeviceContainer>::KeyIterator it = _deviceContainers.beginKey(); it != _deviceContainers.endKey(); ++it) {
-        removeDeviceContainer((*it).first);
+//        removeDeviceContainer((*it).first);
     }
     sendMSearch();
 }

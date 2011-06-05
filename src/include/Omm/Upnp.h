@@ -361,8 +361,8 @@ public:
     DeviceContainerIterator beginDeviceContainer();
     DeviceContainerIterator endDeviceContainer();
 
-    void addDeviceContainer(DeviceContainer* pDevice);
-    void removeDeviceContainer(const std::string& uuid);
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
 
     void init();
     void start();
@@ -375,8 +375,6 @@ protected:
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
 
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
-    virtual void deviceContainerAdded(DeviceContainer* pDeviceContainer) {}
-    virtual void deviceContainerRemoved(DeviceContainer* pDeviceContainer) {}
 
     virtual void startSsdp();
     virtual void stopSsdp();
@@ -406,6 +404,9 @@ public:
     UserInterface* getUserInterface();
 
 protected:
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
+
     UserInterface*                      _pUserInterface;
 
 private:
@@ -413,8 +414,6 @@ private:
     void handleSsdpMessage(SsdpMessage* pMessage);
 //    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
-    void addDeviceContainer(DeviceContainer* pDevice);
-    void removeDeviceContainer(const std::string& uuid);
     void update();
 };
 
@@ -579,10 +578,14 @@ public:
     virtual void resize(int width, int height) {}
     
 protected:
-    virtual void beginAddDevice(int position) {}
-    virtual void beginRemoveDevice(int position) {}
-    virtual void endAddDevice(int position) {}
-    virtual void endRemoveDevice(int position) {}
+    virtual void beginAddDeviceContainer(int position) {}
+    /// Before a device container is added, beginAddDevice() is called.
+    virtual void beginRemoveDeviceContainer(int position) {}
+    /// Before a device container is removed, beginRemoveDevice() is called.
+    virtual void endAddDeviceContainer(int position) {}
+    /// After adding a device container, endAddDevice() is called.
+    virtual void endRemoveDeviceContainer(int position) {}
+    /// After removing a device container, endRemoveDevice() is called.
     
     virtual void error(const std::string& message) {}
     virtual void beginNetworkActivity() {}

@@ -350,11 +350,15 @@ AvController::serverDevice(int numServer)
 
 
 void
-AvController::deviceContainerAdded(DeviceContainer* pDeviceContainer)
+AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     // FIXME: need a list of ControllerImplAdapters for calling eventHandler(StateVar*)
     // FIXME: ownership of ControllerImplAdapters ...
     // FIXME: add all devices, not only root device
+
+    Log::instance()->upnpav().debug("avcontroller adds device container");
+
+    Controller::addDeviceContainer(pDeviceContainer);
 
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();
@@ -393,8 +397,10 @@ AvController::deviceContainerAdded(DeviceContainer* pDeviceContainer)
 
 
 void
-AvController::deviceContainerRemoved(DeviceContainer* pDeviceContainer)
+AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
+    Log::instance()->upnpav().debug("avcontroller removes device container");
+
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();
     Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
@@ -421,6 +427,9 @@ AvController::deviceContainerRemoved(DeviceContainer* pDeviceContainer)
 //         std::clog << "UpnpAvController::deviceRemoved() number of servers: " << _servers.size() << std::endl;
         pUserInterface->endRemoveServer(position);
     }
+
+    Controller::removeDeviceContainer(pDeviceContainer);
+
     Log::instance()->upnpav().information("device removed finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
