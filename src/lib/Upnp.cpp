@@ -1848,7 +1848,7 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
     Poco::URI eventSubscriptionUri(baseUri);
     eventSubscriptionUri.resolve(getEventSubscriptionPath());
-    Log::instance()->event().debug("preparing subscription request for uri: "  + eventSubscriptionUri.toString());
+//    Log::instance()->event().debug("preparing subscription request for uri: "  + eventSubscriptionUri.toString());
     Poco::Net::HTTPRequest request("SUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
     request.set("HOST", baseUri.getAuthority());
     if (renew) {
@@ -1870,12 +1870,11 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     }
     std::stringstream ss;
     request.write(ss);
-    Log::instance()->event().debug("subscription request: " + ss.str());
+    Log::instance()->event().debug("subscription request: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     Log::instance()->event().debug("set up client session to uri: " + baseUri.getAuthority());
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
     Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI());
-
     try {
         eventSubscriptionSession.sendRequest(request);
         Log::instance()->event().debug("subscription request sent");
@@ -1892,7 +1891,10 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     Poco::Net::HTTPResponse response;
     try {
         eventSubscriptionSession.receiveResponse(response);
-        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+//        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream ss;
+        response.write(ss);
+        Log::instance()->event().debug("subscription response: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     }
     catch (Poco::Net::NoMessageException) {
         Log::instance()->event().error("no response to subscription request.");
@@ -1904,11 +1906,6 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     }
 
     if (!renew) {
-        Log::instance()->event().debug("subscription response DATE: " + response.get("DATE"));
-        Log::instance()->event().debug("subscription response SERVER: " + response.get("SERVER"));
-        Log::instance()->event().debug("subscription response SID: " + response.get("SID"));
-        Log::instance()->event().debug("subscription response TIMEOUT: " + response.get("TIMEOUT"));
-        
         _pControllerSubscriptionData->setSid(response.get("SID"));
     }
     
@@ -1929,8 +1926,11 @@ Service::sendCancelSubscriptionRequest()
     request.set("SID", _pControllerSubscriptionData->getUuid());
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
-    Log::instance()->event().debug("sending cancel subscription request to " + baseUri.getAuthority() + request.getURI() + "...");
+    std::stringstream ss;
+    request.write(ss);
+    Log::instance()->event().debug("cancel subscription request: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
 
+    Log::instance()->event().debug("sending cancel subscription request to " + baseUri.getAuthority() + request.getURI());
     try {
         eventSubscriptionSession.sendRequest(request);
         Log::instance()->event().debug("cancel subscription request sent");
@@ -1946,8 +1946,13 @@ Service::sendCancelSubscriptionRequest()
     // receive response ...
     Poco::Net::HTTPResponse response;
     try {
-        eventSubscriptionSession.receiveResponse(response);
-        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::istream& rs = eventSubscriptionSession.receiveResponse(response);
+//        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream ss;
+        response.write(ss);
+        std::string body;
+        Poco::StreamCopier::copyToString(rs, body);
+        Log::instance()->event().debug("cancel subscription response: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + body);
     }
     catch (Poco::Net::NoMessageException) {
         Log::instance()->event().error("no response to cancel subscription request.");
