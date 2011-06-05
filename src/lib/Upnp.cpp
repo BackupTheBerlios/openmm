@@ -1976,8 +1976,8 @@ Service::unregisterSubscription(Subscription* subscription)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
     std::string sid = subscription->getUuid();
-    _eventSubscriptions.remove(sid);
     Log::instance()->event().debug("unregister subscription with SID: " + sid);
+    _eventSubscriptions.remove(sid);
     if (subscription) {
         delete subscription;
     }
@@ -2262,7 +2262,13 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
         Log::instance()->event().debug("cancel subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
-        _pService->unregisterSubscription(_pService->getSubscription(sid));
+        try {
+            _pService->unregisterSubscription(_pService->getSubscription(sid));
+        }
+        catch (...) {
+            // TODO: forward error in response to request
+            Log::instance()->event().error("unregister subscription failed, ignoring.");
+        }
     }
     
     std::stringstream responseHeader;

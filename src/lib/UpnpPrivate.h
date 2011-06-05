@@ -524,6 +524,7 @@ private:
     Poco::URI*                      _pSessionUri;
     Poco::Net::HTTPClientSession*   _pSession;
     Poco::UUID                      _uuid;
+//    std::string                     _uuid;
     Poco::UInt32                    _eventKey;
     std::string                     _duration;
     Poco::Timer                     _timer;

@@ -240,10 +240,17 @@ public:
     }
     
     void remove(std::string key)
-    {   
-        E* pEntity = _pEntities.find(key)->second;
-        _pEntities.erase(key);
-        _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
+    {
+        KeyIterator it = _pEntities.find(key);
+        if (it != _pEntities.end()) {
+            E* pEntity = (*it).second;
+            _pEntities.erase(key);
+            _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
+        }
+        else {
+            Log::instance()->upnp().error("could not remove entity from container, key not found: " + key);
+            throw Poco::Exception("");
+        }
     }
     
     void remove(E* pEntity)
