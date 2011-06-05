@@ -396,7 +396,21 @@ private:
 };
 
 
-// TODO: possible request handler types:
+class UpnpRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
+{
+public:
+    UpnpRequestHandlerFactory(HttpSocket* pHttpSocket);
+
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
+    void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
+
+private:
+    std::map<std::string,UpnpRequestHandler*> _requestHandlerMap;
+    HttpSocket*                               _pHttpSocket;
+};
+
+
+// possible upnp request handler types:
 //       RequestNotFoundRequestHandler
 //       FileRequestHandler, MultiFileRequestHandler,
 //       DescriptionRequestHandler
@@ -429,20 +443,6 @@ public:
     
 private:
     std::string*    _pDescription;
-};
-
-
-class UpnpRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
-{
-public:
-    UpnpRequestHandlerFactory(HttpSocket* pHttpSocket);
-    
-    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
-    void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
-    
-private:
-    std::map<std::string,UpnpRequestHandler*> _requestHandlerMap;
-    HttpSocket*                               _pHttpSocket;
 };
 
 
