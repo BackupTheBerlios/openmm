@@ -1923,7 +1923,7 @@ Service::sendCancelSubscriptionRequest()
     Poco::Net::HTTPRequest request("UNSUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
     request.set("HOST", baseUri.getAuthority());
     // controller stores only one subscription in each service.
-    request.set("SID", _pControllerSubscriptionData->getUuid());
+    request.set("SID", "uuid:" + _pControllerSubscriptionData->getUuid());
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
     std::stringstream ss;
