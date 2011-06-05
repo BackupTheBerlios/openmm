@@ -382,7 +382,6 @@ protected:
     void startHttp();
     void stopHttp();
 
-
     Container<DeviceContainer> _deviceContainers;
     Socket*                    _pSocket;
 

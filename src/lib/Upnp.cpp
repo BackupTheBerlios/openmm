@@ -1848,6 +1848,7 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
     Poco::URI eventSubscriptionUri(baseUri);
     eventSubscriptionUri.resolve(getEventSubscriptionPath());
+    Log::instance()->event().debug("preparing subscription request for uri: "  + eventSubscriptionUri.toString());
     Poco::Net::HTTPRequest request("SUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
     request.set("HOST", baseUri.getAuthority());
     if (renew) {
@@ -1867,9 +1868,13 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     else {
         request.set("TIMEOUT", "Second-" + Poco::NumberFormatter::format(duration));
     }
-    Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
+    std::stringstream ss;
+    request.write(ss);
+    Log::instance()->event().debug("subscription request: " + ss.str());
+    Log::instance()->event().debug("set up client session to uri: " + baseUri.getAuthority());
+    Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
-    Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI() + "...");
+    Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI());
 
     try {
         eventSubscriptionSession.sendRequest(request);
@@ -1922,7 +1927,7 @@ Service::sendCancelSubscriptionRequest()
     request.set("HOST", baseUri.getAuthority());
     // controller stores only one subscription in each service.
     request.set("SID", _pControllerSubscriptionData->getUuid());
-    Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
+    Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
     Log::instance()->event().debug("sending cancel subscription request to " + baseUri.getAuthority() + request.getURI() + "...");
 
@@ -2951,8 +2956,7 @@ DeviceContainer::initController()
             (*s)->addEventCallbackPath((*d)->getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceManager->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
             // subscribe to event notifications
-            // FIXME: segfault here.
-//            (*s)->sendSubscriptionRequest();
+            (*s)->sendSubscriptionRequest(1800);
         }
     }
     Log::instance()->upnp().debug("init device container (controller) finished.");
@@ -3495,8 +3499,6 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 void
 Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    Log::instance()->upnp().debug("controller adds device container");
-
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
         _pUserInterface->beginAddDeviceContainer(_deviceContainers.position(uuid));
@@ -3511,8 +3513,6 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 void
 Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    Log::instance()->upnp().debug("controller removes device container");
-
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
