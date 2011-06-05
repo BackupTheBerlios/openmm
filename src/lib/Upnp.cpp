@@ -2060,8 +2060,10 @@ Poco::Net::HTTPRequestHandler*
 DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
     Log::instance()->http().debug("dispatching request: " + request.getURI());
+    Poco::Path path(request.getURI());
+    std::string absolutePath = path.absolute("/").toString();
     Poco::Net::HTTPRequestHandler* res;
-    std::map<std::string,UpnpRequestHandler*>::iterator i = _requestHandlerMap.find(request.getURI());
+    std::map<std::string,UpnpRequestHandler*>::iterator i = _requestHandlerMap.find(absolutePath);
     if (i != _requestHandlerMap.end()) {
         return i->second->create();
     }
@@ -2072,9 +2074,11 @@ DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReq
 
 
 void
-DeviceRequestHandlerFactory::registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler)
+DeviceRequestHandlerFactory::registerRequestHandler(std::string uri, UpnpRequestHandler* requestHandler)
 {
-    _requestHandlerMap[Uri] = requestHandler;
+    Poco::Path path(uri);
+    std::string absolutePath = path.absolute("/").toString();
+    _requestHandlerMap[absolutePath] = requestHandler;
 }
 
 
@@ -2911,11 +2915,10 @@ DeviceContainer::initDevice()
             (*i)->setIconRequestPath((*d)->getUuid() + "/" + (*i)->getIconRequestPath());
         }
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            Service* ps = *s;
-            std::string servicePathPrefix = "/" + (*d)->getUuid() + "/" + ps->getServiceType();
-            ps->setDescriptionPath(servicePathPrefix + "/Description.xml");
-            ps->setControlPath(servicePathPrefix + "/Control");
-            ps->setEventSubscriptionPath(servicePathPrefix + "/EventSubscription");
+            std::string servicePathPrefix = "/" + (*d)->getUuid() + "/" + (*s)->getServiceType();
+            (*s)->setDescriptionPath(servicePathPrefix + "/Description.xml");
+            (*s)->setControlPath(servicePathPrefix + "/Control");
+            (*s)->setEventSubscriptionPath(servicePathPrefix + "/EventSubscription");
         }
     }
 
@@ -2931,11 +2934,10 @@ DeviceContainer::initDevice()
             _pDeviceManager->registerHttpRequestHandler((*i)->getIconRequestPath(), new IconRequestHandler(*i));
         }
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            Service* ps = *s;
             // TODO: to be totally correct, all relative URIs should be resolved to base URI (=description uri)
-            _pDeviceManager->registerHttpRequestHandler(ps->getDescriptionPath(), new DescriptionRequestHandler(ps->getDescription()));
-            _pDeviceManager->registerHttpRequestHandler(ps->getControlPath(), new ControlRequestHandler(ps));
-            _pDeviceManager->registerHttpRequestHandler(ps->getEventSubscriptionPath(), new EventSubscriptionRequestHandler(ps));
+            _pDeviceManager->registerHttpRequestHandler((*s)->getDescriptionPath(), new DescriptionRequestHandler((*s)->getDescription()));
+            _pDeviceManager->registerHttpRequestHandler((*s)->getControlPath(), new ControlRequestHandler((*s)));
+            _pDeviceManager->registerHttpRequestHandler((*s)->getEventSubscriptionPath(), new EventSubscriptionRequestHandler((*s)));
         }
         _pDeviceManager->registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
     }
@@ -2982,10 +2984,9 @@ DeviceContainer::writeSsdpMessages()
         aliveWriter.device(device);
         byebyeWriter.device(device);
         for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
-            Service* ps = *s;
-            Log::instance()->ssdp().debug("writing messages for service: " + ps->getServiceType());
-            aliveWriter.service(*ps);
-            byebyeWriter.service(*ps);
+            Log::instance()->ssdp().debug("writing messages for service: " + (*s)->getServiceType());
+            aliveWriter.service(**s);
+            byebyeWriter.service(**s);
         }
     }
     Log::instance()->ssdp().debug("writing messages finished.");
