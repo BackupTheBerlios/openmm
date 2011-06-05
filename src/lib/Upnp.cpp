@@ -864,8 +864,6 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
     _pDoc = parser.parseString(requestBody);
-    Poco::XML::NodeIterator it(_pDoc, Poco::XML::NodeFilter::SHOW_ALL);
-    _nodeStack.push(it.nextNode());
 }
 
 
@@ -873,11 +871,10 @@ Action*
 ActionRequestReader::action()
 {
     Action* pRes = _pActionTemplate;
-    Poco::XML::Node* pNode = _nodeStack.top();
-    Poco::XML::NodeIterator it(pNode, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
     
     while(pNode && (pNode->nodeName() != pNode->prefix() + ":Body")) {
-        pNode = it.nextNode();
+        pNode = pNode->nextSibling();
     }
     Poco::XML::Node* pBody = pNode;
     if (pBody && pBody->hasChildNodes()) {
@@ -898,7 +895,6 @@ ActionRequestReader::action()
     else {
         Log::instance()->ctrl().error("action without body");
     }
-    _nodeStack.pop();
     return pRes;
 }
 
@@ -1378,7 +1374,7 @@ EventMessageWriter::write(std::string& eventMessage)
 void
 EventMessageWriter::stateVar(const StateVar& stateVar)
 {
-    Poco::AutoPtr<Poco::XML::Element> pProperty = _pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "property");
+    Poco::AutoPtr<Poco::XML::Element> pProperty = _pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "property");
     Poco::AutoPtr<Poco::XML::Element> pStateVar = _pDoc->createElement(stateVar.getName());
     Poco::AutoPtr<Poco::XML::Text> pStateVarValue = _pDoc->createTextNode(stateVar.getValue());
     pStateVar->appendChild(pStateVarValue);
@@ -2227,16 +2223,14 @@ EventSubscriptionRequestHandler::create()
 void
 EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->event().debug("handle event request: " + request.getMethod());
-    Log::instance()->event().debug("HOST: " + request.getHost());
-    Log::instance()->event().debug("CALLBACK: " + request.get("CALLBACK"));
-    Log::instance()->event().debug("NT: " + request.get("NT"));
-    Log::instance()->event().debug("TIMEOUT: " + request.get("TIMEOUT"));
+    std::stringstream header;
+    request.write(header);
+    Log::instance()->event().debug("handle event request: " + request.getMethod() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
     
     std::string sid;
     
     if (request.getMethod() == "SUBSCRIBE") {
-        Log::instance()->event().debug("event subscription request from: " + request.getHost() + " (" + request.get("CALLBACK") + ")");
+        Log::instance()->event().debug("event subscription request from: " + request.clientAddress().toString() + " (" + request.get("CALLBACK") + ")");
 //         Poco::Timestamp t;
         if (request.has("SID")) {
             sid = request.get("SID");
@@ -2270,7 +2264,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         // TODO: may make subscription uuid's persistance
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
-        Log::instance()->event().debug("event unsubscription request from: " + request.getHost() + " (" + request.get("CALLBACK") + ")");
+        Log::instance()->event().debug("event unsubscription request from: " + request.clientAddress().toString() + " (" + request.get("CALLBACK") + ")");
         _pService->unregisterSubscription(_pService->getSubscription(sid));
     }
 }
@@ -2289,7 +2283,11 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     std::string sid;
 
     if (request.getMethod() == "NOTIFY") {
-        Log::instance()->event().debug("event notification request from: " + request.getHost());
+        std::stringstream requestString;
+        request.write(requestString);
+        std::istream& body = request.stream();
+        Poco::StreamCopier::copyStream(body, requestString);
+        Log::instance()->event().debug("event notification request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + requestString.str());
         if (request.has("SID")) {
             sid = request.get("SID");
         }
@@ -2297,7 +2295,7 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         }
     }
     else {
-        Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.getHost());
+        Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.clientAddress().toString());
     }
 }
 

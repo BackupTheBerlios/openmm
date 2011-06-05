@@ -278,8 +278,6 @@ public:
     Action* action();
     
 private:
-    // TODO: replace _nodeStack by Node* in action()
-    std::stack<Poco::XML::Node*>            _nodeStack;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Action*                                 _pActionTemplate;
 };
