@@ -2049,7 +2049,7 @@ Action::appendArgument(Argument* pArgument)
 }
 
 
-DeviceRequestHandlerFactory::DeviceRequestHandlerFactory(HttpSocket* pHttpSocket):
+UpnpRequestHandlerFactory::UpnpRequestHandlerFactory(HttpSocket* pHttpSocket):
 _pHttpSocket(pHttpSocket)
 {
     registerRequestHandler(std::string(""), new RequestNotFoundRequestHandler());
@@ -2057,7 +2057,7 @@ _pHttpSocket(pHttpSocket)
 
 
 Poco::Net::HTTPRequestHandler*
-DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
+UpnpRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
     Log::instance()->http().debug("dispatching request: " + request.getURI());
     Poco::Path path(request.getURI());
@@ -2074,7 +2074,7 @@ DeviceRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReq
 
 
 void
-DeviceRequestHandlerFactory::registerRequestHandler(std::string uri, UpnpRequestHandler* requestHandler)
+UpnpRequestHandlerFactory::registerRequestHandler(std::string uri, UpnpRequestHandler* requestHandler)
 {
     Poco::Path path(uri);
     std::string absolutePath = path.absolute("/").toString();
@@ -2331,7 +2331,7 @@ HttpSocket::~HttpSocket()
 void
 HttpSocket::init()
 {
-    _pDeviceRequestHandlerFactory = new DeviceRequestHandlerFactory(this);
+    _pDeviceRequestHandlerFactory = new UpnpRequestHandlerFactory(this);
     Poco::Net::ServerSocket socket(0);
     _httpServerPort = socket.address().port();
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;

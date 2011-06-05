@@ -117,7 +117,7 @@ public:
 private:
     Poco::Net::HTTPServer*                _pHttpServer;
     Poco::UInt16                          _httpServerPort;
-    DeviceRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
+    UpnpRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
     Poco::NotificationCenter              _notificationCenter;
 };
 
@@ -432,10 +432,10 @@ private:
 };
 
 
-class DeviceRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
+class UpnpRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    DeviceRequestHandlerFactory(HttpSocket* pHttpSocket);
+    UpnpRequestHandlerFactory(HttpSocket* pHttpSocket);
     
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
     void registerRequestHandler(std::string Uri, UpnpRequestHandler* requestHandler);
@@ -443,11 +443,6 @@ public:
 private:
     std::map<std::string,UpnpRequestHandler*> _requestHandlerMap;
     HttpSocket*                               _pHttpSocket;
-};
-
-
-class VariableQuery : public Poco::Notification
-{
 };
 
 
@@ -500,6 +495,11 @@ public:
     
 private:
     Icon*    _pIcon;
+};
+
+
+class VariableQuery : public Poco::Notification
+{
 };
 
 

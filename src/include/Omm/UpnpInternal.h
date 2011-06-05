@@ -70,7 +70,7 @@ class Socket;
 class HttpSocket;
 class UpnpRequestHandler;
 class DescriptionRequestHandler;
-class DeviceRequestHandlerFactory;
+class UpnpRequestHandlerFactory;
 class ControlRequestHandler;
 class SsdpSocket;
 class SsdpMessage;
