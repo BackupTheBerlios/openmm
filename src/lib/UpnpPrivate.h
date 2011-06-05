@@ -291,7 +291,6 @@ public:
     Action* action();
     
 private:
-    std::stack<Poco::XML::Node*>        _nodeStack;
     Poco::AutoPtr<Poco::XML::Document>  _pDoc;
     Action*                             _pActionTemplate;
 };

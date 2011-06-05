@@ -925,8 +925,6 @@ _pDoc(0)
         return;
     }
     // TODO: new reader design: don't go further if parser has failed
-    Poco::XML::NodeIterator it(_pDoc, Poco::XML::NodeFilter::SHOW_ALL);
-    _nodeStack.push(it.nextNode());
 }
 
 
@@ -939,11 +937,10 @@ ActionResponseReader::action()
     }
     // TODO: same code as in ActionRequestReader
     Action* pRes = _pActionTemplate;
-    Poco::XML::Node* pNode = _nodeStack.top();
-    Poco::XML::NodeIterator it(pNode, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
     
     while(pNode && (pNode->nodeName() != pNode->prefix() + ":Body")) {
-        pNode = it.nextNode();
+        pNode = pNode->nextSibling();
     }
     Poco::XML::Node* pBody = pNode;
     if (pBody && pBody->hasChildNodes()) {
@@ -964,7 +961,6 @@ ActionResponseReader::action()
     else {
         Log::instance()->ctrl().error("action without body");
     }
-    _nodeStack.pop();
     return pRes;
 }
 
