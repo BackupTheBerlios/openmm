@@ -965,6 +965,69 @@ ActionResponseReader::action()
 }
 
 
+EventMessageReader::EventMessageReader(const std::string& responseBody, Service* pService) :
+_pService(pService)
+{
+    Log::instance()->event().debug("parsing event message: " + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
+    
+    Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
+    try {
+        _pDoc = parser.parseString(responseBody);
+    }
+    catch (Poco::XML::SAXParseException) {
+        Log::instance()->event().error("could not parse event message");
+        return;
+    }
+    catch (Poco::XML::DOMException) {
+        Log::instance()->event().error("could not parse event message");
+        return;
+    }
+}
+
+
+void
+EventMessageReader::stateVarValues()
+{
+    if (!_pDoc) {
+        return;
+    }
+    Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
+    while(pNode && (pNode->nodeName() != pNode->prefix() + ":propertyset")) {
+        pNode = pNode->nextSibling();
+    }
+    Poco::XML::Node* pPropertySet = pNode;
+    if (pPropertySet && pPropertySet->hasChildNodes()) {
+        Poco::XML::Node* pProperty = pPropertySet->firstChild();
+
+        while (pProperty && pProperty->hasChildNodes()) {
+            stateVar(pProperty);
+            pProperty = pProperty->nextSibling();
+        }
+    }
+    else {
+        Log::instance()->event().error("event message without property set.");
+    }
+}
+
+
+void
+EventMessageReader::stateVar(Poco::XML::Node* pNode)
+{
+    if (pNode->nodeName() == pNode->prefix() + "property" && pNode->hasChildNodes()) {
+        Poco::XML::Node* pStateVar = pNode->firstChild();
+        _pService->setStateVar<std::string>(pStateVar->nodeName(), pStateVar->innerText());
+        // call CtlMediaServer::enventHandler(StateVar* pStateVar)
+    }
+    else {
+        Log::instance()->event().error("event message with wrong element in property set.");
+    }
+}
+
 
 DeviceDescriptionWriter::DeviceDescriptionWriter()
 {
@@ -1569,7 +1632,6 @@ Service::endEventCallbackPath()
 std::string
 Service::getServiceType() const
 {
-    Log::instance()->upnp().debug("service, get type: " + _serviceType);
     return _serviceType;
 }
 
@@ -1737,18 +1799,11 @@ Service::addEventCallbackPath(const std::string path)
 
 
 void
-Service::initClient()
+Service::init()
 {
     _baseUri = Poco::URI(getDevice()->getDeviceContainer()->getDescriptionUri());
-    //_pControlRequestSession = new Poco::Net::HTTPClientSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
-
-    // TODO: subscribe to services
-    // -> generate eventHandlerURIs: device uuid + service type
-    // TODO: setup event message handler
-    // -> this should go in DeviceContainer::initClient()?
-    // -> or in Controller::init()?
-    // _pDevice->getDeviceContainer()->registerEventHandler(...);
 }
+
 
 // FIXME: queue a notification in DeviceManager on network activity events, don't call
 // user interface methods directly.
@@ -2292,16 +2347,18 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     std::string sid;
 
     if (request.getMethod() == "NOTIFY") {
-        std::stringstream requestString;
-        request.write(requestString);
+        std::stringstream headerString;
+        request.write(headerString);
         std::istream& body = request.stream();
-        Poco::StreamCopier::copyStream(body, requestString);
-        Log::instance()->event().debug("event notification request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + requestString.str());
+        std::string bodyString;
+        Poco::StreamCopier::copyToString(body, bodyString);
+        Log::instance()->event().debug("event notification request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + headerString.str() + bodyString);
         if (request.has("SID")) {
             sid = request.get("SID");
         }
         else {
         }
+        EventMessageReader eventMessageReader(bodyString, _pService);
     }
     else {
         Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.clientAddress().toString());
@@ -3391,7 +3448,7 @@ void
 CtlDeviceCode::init()
 {
     for (Device::ServiceIterator i = _pDevice->beginService(); i != _pDevice->endService(); ++i) {
-        (*i)->initClient();
+        (*i)->init();
     }
 }
 

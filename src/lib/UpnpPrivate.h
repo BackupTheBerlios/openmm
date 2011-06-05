@@ -296,6 +296,21 @@ private:
 };
 
 
+class EventMessageReader
+{
+public:
+    EventMessageReader(const std::string& responseBody, Service* pService);
+
+    void stateVarValues();
+
+private:
+    void stateVar(Poco::XML::Node* pNode);
+
+    Poco::AutoPtr<Poco::XML::Document>  _pDoc;
+    Service*                            _pService;
+};
+
+
 class DeviceDescriptionWriter
 {
 public:

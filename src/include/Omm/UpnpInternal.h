@@ -235,7 +235,7 @@ public:
     void addStateVar(StateVar* pStateVar);
     void addEventCallbackPath(const std::string path);
 
-    void initClient();
+    void init();
     void sendAction(Action* pAction);
 
     void sendSubscriptionRequest(unsigned int duration = 0, bool renew = false);
