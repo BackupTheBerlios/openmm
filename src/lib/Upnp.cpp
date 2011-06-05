@@ -2221,12 +2221,11 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
 {
     std::stringstream header;
     request.write(header);
-    Log::instance()->event().debug("handle event request: " + request.getMethod() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
+    Log::instance()->event().debug("event subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
     
     std::string sid;
     
     if (request.getMethod() == "SUBSCRIBE") {
-        Log::instance()->event().debug("event subscription request from: " + request.clientAddress().toString() + " (" + request.get("CALLBACK") + ")");
 //         Poco::Timestamp t;
         if (request.has("SID")) {
             sid = request.get("SID");
@@ -2237,10 +2236,10 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
             std::string callbackUriString = request.get("CALLBACK");
             Poco::StringTokenizer callbackUris(callbackUriString, "<>", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
             Subscription* pSubscription = new Subscription;
+            sid = pSubscription->getUuid();
             for (Poco::StringTokenizer::Iterator it = callbackUris.begin(); it != callbackUris.end(); ++it) {
                 pSubscription->addCallbackUri(*it);
             }
-            _pService->sendInitialEventMessage(pSubscription);
             _pService->registerSubscription(pSubscription);
         }
 //         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
@@ -2250,7 +2249,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
                      + Poco::Environment::osVersion() + ", "
                     + "UPnP/" + UPNP_VERSION + ", "
                     + "OMM/" + OMM_VERSION);
-        response.set("SID", "uuid:" + Poco::UUIDGenerator().create().toString());
+        response.set("SID", "uuid:" + sid);
         response.set("TIMEOUT", "Second-1800");
         response.setContentLength(0);
         // TODO: make shure the SUBSCRIBE message is received by the controller before
@@ -2258,11 +2257,16 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         // TODO: choose timeout according to controller activity
         // TODO: provide TCP FIN flag or Content-Length=0 before initial event message (see specs p. 65)
         // TODO: may make subscription uuid's persistance
+//            _pService->sendInitialEventMessage(pSubscription);
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
         Log::instance()->event().debug("event unsubscription request from: " + request.clientAddress().toString() + " (" + request.get("CALLBACK") + ")");
         _pService->unregisterSubscription(_pService->getSubscription(sid));
     }
+    std::stringstream responseHeader;
+    response.write(responseHeader);
+    response.send();
+    Log::instance()->event().debug("event subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
 }
 
 
