@@ -1978,7 +1978,9 @@ Service::unregisterSubscription(Subscription* subscription)
     std::string sid = subscription->getUuid();
     _eventSubscriptions.remove(sid);
     Log::instance()->event().debug("unregister subscription with SID: " + sid);
-    delete subscription;
+    if (subscription) {
+        delete subscription;
+    }
 }
 
 
@@ -2221,12 +2223,10 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
 {
     std::stringstream header;
     request.write(header);
-    Log::instance()->event().debug("event subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
-    
     std::string sid;
-    
+
     if (request.getMethod() == "SUBSCRIBE") {
-//         Poco::Timestamp t;
+        Log::instance()->event().debug("subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         if (request.has("SID")) {
             sid = request.get("SID");
             // renew subscription
@@ -2242,6 +2242,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
             }
             _pService->registerSubscription(pSubscription);
         }
+//         Poco::Timestamp t;
 //         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
         response.setDate(Poco::Timestamp());
         response.set("SERVER", 
@@ -2260,9 +2261,10 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
 //            _pService->sendInitialEventMessage(pSubscription);
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
-        Log::instance()->event().debug("event unsubscription request from: " + request.clientAddress().toString() + " (" + request.get("CALLBACK") + ")");
+        Log::instance()->event().debug("cancel subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         _pService->unregisterSubscription(_pService->getSubscription(sid));
     }
+    
     std::stringstream responseHeader;
     response.write(responseHeader);
     response.send();
@@ -2961,7 +2963,12 @@ DeviceContainer::initController()
             (*s)->addEventCallbackPath((*d)->getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceManager->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
             // subscribe to event notifications
-            (*s)->sendSubscriptionRequest(1800);
+            try {
+                (*s)->sendSubscriptionRequest(1800);
+            }
+            catch (...) {
+                Log::instance()->upnp().error("controller failed to initialize device container while subscribing to events, ignoring.");
+            }
         }
     }
     Log::instance()->upnp().debug("init device container (controller) finished.");
@@ -3406,7 +3413,12 @@ Controller::stop()
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
         for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
             for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-                (*s)->sendCancelSubscriptionRequest();
+                try {
+                    (*s)->sendCancelSubscriptionRequest();
+                }
+                catch (...) {
+                    Log::instance()->upnp().error("controller failed to cancel event subscriptions, ignoring.");
+                }
             }
         }
     }
