@@ -1384,8 +1384,8 @@ _pSession(0),
 _pSessionUri(0)
 {
     // TODO: implement timer stuff
-    _uuid = Poco::UUIDGenerator().createRandom();
-    Log::instance()->event().debug("creating subscription with SID: " + _uuid.toString());
+    _uuid = Poco::UUIDGenerator().createRandom().toString();
+    Log::instance()->event().debug("creating subscription with SID: " + _uuid);
     _eventKey = 0;
 }
 
@@ -1399,7 +1399,7 @@ Subscription::~Subscription()
 std::string
 Subscription::getUuid()
 {
-     return _uuid.toString();
+     return _uuid;
 }
 
 
@@ -1407,7 +1407,7 @@ void
 Subscription::setSid(const std::string& sid)
 {
     Log::instance()->event().debug("set controller subscription sid: " + sid.substr(5));
-    _uuid = Poco::UUID(sid.substr(5));
+    _uuid = sid.substr(5);
 }
 
 
@@ -1452,7 +1452,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     request.setContentType("text/xml");
     request.set("NT", "upnp:event");
     request.set("NTS", "upnp:propchange");
-    request.set("SID", "uuid:" + _uuid.toString());
+    request.set("SID", "uuid:" + _uuid);
     
 //     HTTPRequest* request = newRequest();
     request.set("SEQ", getEventKey());
@@ -2228,7 +2228,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     if (request.getMethod() == "SUBSCRIBE") {
         Log::instance()->event().debug("subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         if (request.has("SID")) {
-            sid = request.get("SID");
+            sid = request.get("SID").substr(5);
             // renew subscription
             _pService->getSubscription(sid)->renew(1800);
         }
@@ -2262,6 +2262,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
         Log::instance()->event().debug("cancel subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
+        sid = request.get("SID").substr(5);
         try {
             _pService->unregisterSubscription(_pService->getSubscription(sid));
         }
@@ -3141,7 +3142,14 @@ Device::getFriendlyName()
 Service*
 Device::getService(std::string serviceType)
 {
-    return &_pDeviceData->_services.get(serviceType);
+    Service* pRes = 0;
+    try {
+        pRes = &_pDeviceData->_services.get(serviceType);
+    }
+    catch (...) {
+        Log::instance()->upnp().debug("service not available: " + serviceType);
+    }
+    return pRes;
 }
 
 
@@ -3523,11 +3531,11 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        _pUserInterface->beginAddDeviceContainer(_deviceContainers.position(uuid));
+        _pUserInterface->beginAddDeviceContainer(_deviceContainers.size());
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
         pDeviceContainer->initController();
-        _pUserInterface->endAddDeviceContainer(_deviceContainers.position(uuid));
+        _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
     }
 }
 
@@ -3538,9 +3546,10 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
-        _pUserInterface->beginRemoveDeviceContainer(_deviceContainers.position(uuid));
+        int position = _deviceContainers.position(uuid);
+        _pUserInterface->beginRemoveDeviceContainer(position);
         DeviceManager::removeDeviceContainer(pDeviceContainer);
-        _pUserInterface->endRemoveDeviceContainer(_deviceContainers.position(uuid));
+        _pUserInterface->endRemoveDeviceContainer(position);
         pDeviceContainer->_pController = 0;
     }
 }

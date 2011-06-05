@@ -265,13 +265,19 @@ ControllerObject::setServerController(CtlMediaServer* _pServer)
 ServerController::ServerController(CtlMediaServer* pServerController) :
 _pServerController(pServerController)
 {
-    _pRoot = new ControllerObject;
+}
+
+
+void
+ServerController::browseRootObject()
+{
+  _pRoot = new ControllerObject;
     try {
         std::string rootMeta;
         ui4 numberReturned;
         ui4 totalMatches;
         ui4 updateId;
-        pServerController->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
+        _pServerController->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
         _pRoot->readMetaData(rootMeta);
         Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS));
     }
@@ -360,7 +366,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();
-    Log::instance()->upnpav().information("device added, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+    Log::instance()->upnpav().information("AV controller add root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         CtlMediaRenderer* pRenderer = new CtlMediaRenderer(
@@ -378,11 +384,12 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
             new CtlContentDirectoryImpl,
             new CtlConnectionManagerImpl,
             new CtlAVTransportImpl));
+        pServer->browseRootObject();
         pUserInterface->beginAddServer(_servers.size());
         _servers.append(pDevice->getUuid(), pServer);
         pUserInterface->endAddServer(_servers.size() - 1);
     }
-    Log::instance()->upnpav().information("device added finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+    Log::instance()->upnpav().information("AV controller add root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
 
@@ -391,7 +398,7 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();
-    Log::instance()->upnpav().information("device removed, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+    Log::instance()->upnpav().information("av controller removed root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
         // TODO: delete renderer controller
@@ -410,7 +417,7 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 
     Controller::removeDeviceContainer(pDeviceContainer);
 
-    Log::instance()->upnpav().information("device removed finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+    Log::instance()->upnpav().information("av controller removed root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
 

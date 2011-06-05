@@ -219,7 +219,14 @@ public:
     
     E& get(std::string key)
     {
-        return *_pEntities.find(key)->second;
+        KeyIterator it = _pEntities.find(key);
+        if (it != _pEntities.end()) {
+            return *(*it).second;
+        }
+        else {
+            Log::instance()->upnp().error("container has no entity with key: " + key);
+            throw Poco::Exception("");
+        }
     }
     
     E& get(int index)
@@ -270,8 +277,15 @@ public:
     
     int position(const std::string& key)
     {
-        E* pEntity = _pEntities.find(key)->second;
-        return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
+        KeyIterator it = _pEntities.find(key);
+        if (it != _pEntities.end()) {
+            E* pEntity = (*it).second;
+            return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
+        }
+        else {
+            Log::instance()->upnp().error("could not find position of entity in container, key not found: " + key);
+            throw Poco::Exception("");
+        }
     }
     
     int position(E* pEntity)
@@ -541,6 +555,8 @@ public:
     std::string getUuid() const;
     std::string getDeviceType() const;
     Service* getService(std::string serviceType);
+    /// Get the service data of a device. If device has no service of type
+    /// serviceType, 0 is returned.
     const std::string& getFriendlyName();
     const std::string& getProperty(const std::string& name);
 

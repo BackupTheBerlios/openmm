@@ -33,10 +33,12 @@ public:
     
     CtlMediaServer* controller() { return _pServerController; }
     ControllerObject* root() { return _pRoot; }
+
+    void browseRootObject();
     
 private:
-    CtlMediaServer*    _pServerController;
-    ControllerObject*         _pRoot;
+    CtlMediaServer*         _pServerController;
+    ControllerObject*       _pRoot;
 };
 
 } // namespace Av
