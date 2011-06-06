@@ -564,7 +564,7 @@ DescriptionReader::parseDescription(const std::string& description)
 #endif
     Log::instance()->desc().debug("parsing description ...");
     Log::instance()->desc().debug(description);
-    _pDocStack.push(parser.parseString(description));
+    _pDocStack.push(parser.parseString(description.substr(0, description.rfind('>') + 1)));
     Log::instance()->desc().debug("parsing description finished.");
 }
 
@@ -863,7 +863,17 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    _pDoc = parser.parseString(requestBody);
+    try {
+        _pDoc = parser.parseString(requestBody.substr(0, requestBody.rfind('>') + 1));
+    }
+    catch (Poco::XML::SAXParseException) {
+        Log::instance()->ctrl().error("could not parse event message, SAX parser exception.");
+        return;
+    }
+    catch (Poco::XML::DOMException) {
+        Log::instance()->ctrl().error("could not parse event message, DOM exception.");
+        return;
+    }
 }
 
 
@@ -905,26 +915,24 @@ _pDoc(0)
 {
 //     Log::instance()->ctrl().debug(Omm::Util::format("action response:\n%s", responseBody));
     Poco::XML::DOMParser parser;
-    // TODO: set encoding with parser.setEncoding();
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    // FIXME: shouldn't throw exception in ctor, put it in a method (e.g. read())
     try {
-        _pDoc = parser.parseString(responseBody);
+        // some servers send terminating 0 char at the end of the message, we chop that rubbish off ...
+        _pDoc = parser.parseString(responseBody.substr(0, responseBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->ctrl().error("could not parse action response");
+        Log::instance()->ctrl().error("could not parse event message, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->ctrl().error("could not parse action response");
+        Log::instance()->ctrl().error("could not parse event message, DOM exception.");
         return;
     }
-    // TODO: new reader design: don't go further if parser has failed
 }
 
 
@@ -965,11 +973,9 @@ ActionResponseReader::action()
 }
 
 
-EventMessageReader::EventMessageReader(const std::string& responseBody, Service* pService) :
+EventMessageReader::EventMessageReader(std::string& responseBody, Service* pService) :
 _pService(pService)
 {
-    Log::instance()->event().debug("parsing event message: " + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
-    
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
@@ -977,14 +983,16 @@ _pService(pService)
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
     try {
+        // some servers send terminating 0 char at the end of the message, we chop that rubbish off ...
+        responseBody.resize(responseBody.rfind('>') + 1);
         _pDoc = parser.parseString(responseBody);
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->event().error("could not parse event message");
+        Log::instance()->event().error("could not parse event message, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->event().error("could not parse event message");
+        Log::instance()->event().error("could not parse event message, DOM exception.");
         return;
     }
 }
@@ -1021,7 +1029,7 @@ EventMessageReader::stateVar(Poco::XML::Node* pNode)
     if (pNode->nodeName() == pNode->prefix() + "property" && pNode->hasChildNodes()) {
         Poco::XML::Node* pStateVar = pNode->firstChild();
         _pService->setStateVar<std::string>(pStateVar->nodeName(), pStateVar->innerText());
-        // call CtlMediaServer::enventHandler(StateVar* pStateVar)
+        // call CtlMediaServer::eventHandler(StateVar* pStateVar)
     }
     else {
         Log::instance()->event().error("event message with wrong element in property set.");
@@ -2279,23 +2287,25 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     std::stringstream header;
     request.write(header);
     std::string sid;
+    Subscription* pSubscription;
 
     if (request.getMethod() == "SUBSCRIBE") {
         Log::instance()->event().debug("subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
-        if (request.has("SID")) {
-            sid = request.get("SID").substr(5);
-            // renew subscription
-            _pService->getSubscription(sid)->renew(1800);
-        }
-        else {
+        if (!request.has("SID")) {
             std::string callbackUriString = request.get("CALLBACK");
             Poco::StringTokenizer callbackUris(callbackUriString, "<>", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
-            Subscription* pSubscription = new Subscription;
+            pSubscription = new Subscription;
             sid = pSubscription->getUuid();
             for (Poco::StringTokenizer::Iterator it = callbackUris.begin(); it != callbackUris.end(); ++it) {
                 pSubscription->addCallbackUri(*it);
             }
             _pService->registerSubscription(pSubscription);
+        }
+        else {
+            sid = request.get("SID").substr(5);
+            // renew subscription
+            pSubscription = _pService->getSubscription(sid);
+            pSubscription->renew(1800);
         }
 //         Poco::Timestamp t;
 //         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
@@ -2308,12 +2318,16 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         response.set("SID", "uuid:" + sid);
         response.set("TIMEOUT", "Second-1800");
         response.setContentLength(0);
-        // TODO: make shure the SUBSCRIBE message is received by the controller before
-        //       sending out the initial event message.
         // TODO: choose timeout according to controller activity
         // TODO: provide TCP FIN flag or Content-Length=0 before initial event message (see specs p. 65)
         // TODO: may make subscription uuid's persistance
-//            _pService->sendInitialEventMessage(pSubscription);
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        response.send();
+        Log::instance()->event().debug("event subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
+        if (!request.has("SID")) {
+            _pService->sendInitialEventMessage(pSubscription);
+        }
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
         Log::instance()->event().debug("cancel subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
@@ -2325,12 +2339,11 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
             // TODO: forward error in response to request
             Log::instance()->event().error("unregister subscription failed, ignoring.");
         }
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        response.send();
+        Log::instance()->event().debug("event cancel subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
     }
-    
-    std::stringstream responseHeader;
-    response.write(responseHeader);
-    response.send();
-    Log::instance()->event().debug("event subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
 }
 
 

@@ -57,7 +57,7 @@ ControllerObject::readChildren(const std::string& metaData)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
     while (pObjectNode)
     {
@@ -82,7 +82,7 @@ ControllerObject::readMetaData(const std::string& metaData)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
     readNode(pObjectNode);
 }

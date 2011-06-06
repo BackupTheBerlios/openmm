@@ -1097,7 +1097,7 @@ void
 MediaObjectReader::readChildren(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
     while (pObjectNode)
     {
@@ -1120,7 +1120,7 @@ MediaObjectReader::read(const std::string& metaData)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
     Poco::XML::Node* pDidl = pDoc->documentElement()->firstChild();
     readNode(_pMediaObject, pDidl);
 }
