@@ -973,7 +973,7 @@ ActionResponseReader::action()
 }
 
 
-EventMessageReader::EventMessageReader(std::string& responseBody, Service* pService) :
+EventMessageReader::EventMessageReader(const std::string& responseBody, Service* pService) :
 _pService(pService)
 {
     Poco::XML::DOMParser parser;
@@ -984,8 +984,8 @@ _pService(pService)
 #endif
     try {
         // some servers send terminating 0 char at the end of the message, we chop that rubbish off ...
-        responseBody.resize(responseBody.rfind('>') + 1);
-        _pDoc = parser.parseString(responseBody);
+//        responseBody.resize(responseBody.rfind('>') + 1);
+        _pDoc = parser.parseString(responseBody.substr(0, responseBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
         Log::instance()->event().error("could not parse event message, SAX parser exception.");
@@ -1004,21 +1004,10 @@ EventMessageReader::stateVarValues()
     if (!_pDoc) {
         return;
     }
-    Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
-    while(pNode && (pNode->nodeName() != pNode->prefix() + ":propertyset")) {
-        pNode = pNode->nextSibling();
-    }
-    Poco::XML::Node* pPropertySet = pNode;
-    if (pPropertySet && pPropertySet->hasChildNodes()) {
-        Poco::XML::Node* pProperty = pPropertySet->firstChild();
-
-        while (pProperty && pProperty->hasChildNodes()) {
-            stateVar(pProperty);
-            pProperty = pProperty->nextSibling();
-        }
-    }
-    else {
-        Log::instance()->event().error("event message without property set.");
+    Poco::XML::Node* pProperty = _pDoc->documentElement()->firstChild();
+    while (pProperty && pProperty->hasChildNodes()) {
+        stateVar(pProperty);
+        pProperty = pProperty->nextSibling();
     }
 }
 
@@ -1026,13 +1015,20 @@ EventMessageReader::stateVarValues()
 void
 EventMessageReader::stateVar(Poco::XML::Node* pNode)
 {
-    if (pNode->nodeName() == pNode->prefix() + "property" && pNode->hasChildNodes()) {
+    if (pNode->nodeName() == pNode->prefix() + ":property" && pNode->hasChildNodes()) {
+        Log::instance()->event().debug("event message reader got property");
         Poco::XML::Node* pStateVar = pNode->firstChild();
-        _pService->setStateVar<std::string>(pStateVar->nodeName(), pStateVar->innerText());
-        // call CtlMediaServer::eventHandler(StateVar* pStateVar)
+        std::string stateVarName = pStateVar->nodeName();
+        std::string stateVarValue = pStateVar->innerText();
+        Log::instance()->event().debug("event message reader got state var: " + stateVarName + ", value: " + stateVarValue);
+        _pService->setStateVar<std::string>(stateVarName, stateVarValue);
+        // FIXME: where do these strange "event message: ..." logs come from, popping up at this point.
+        Log::instance()->event().debug("calling event handler of state var: " + stateVarName);
+        // FIXME: getCtlDevice() returns 0, control code is not set ...
+//        _pService->getDevice()->getCtlDevice()->eventHandler(_pService->getStateVarReference(stateVarName));
     }
     else {
-        Log::instance()->event().error("event message with wrong element in property set.");
+        Log::instance()->event().error("event message without state var element in property set.");
     }
 }
 
@@ -1703,7 +1699,7 @@ Service::getControlRequestHandler() const
 Device*
 Service::getDevice() const
 {
-//    Log::instance()->upnp().debug("service, get device: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
+    Log::instance()->upnp().debug("service, get device pointer: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
     return _pDeviceData->getDevice();
 }
 
@@ -2372,6 +2368,7 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         else {
         }
         EventMessageReader eventMessageReader(bodyString, _pService);
+        eventMessageReader.stateVarValues();
     }
     else {
         Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.clientAddress().toString());
@@ -3185,6 +3182,14 @@ DevDeviceCode*
 Device::getDevDevice() const
 {
     return _pDevDeviceCode;
+}
+
+
+CtlDeviceCode*
+Device::getCtlDevice() const
+{
+    Log::instance()->upnp().debug("get device ctl code: " + Poco::NumberFormatter::format(_pCtlDeviceCode));
+    return _pCtlDeviceCode;
 }
 
 

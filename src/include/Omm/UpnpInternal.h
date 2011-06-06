@@ -427,7 +427,7 @@ protected:
 
 class CtlDeviceCode
 {
-    friend class Controller;
+    friend class EventMessageReader;
 
 public:
     CtlDeviceCode(Device* pDevice) : _pDevice(pDevice) {}

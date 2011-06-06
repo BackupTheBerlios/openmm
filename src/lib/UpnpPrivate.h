@@ -299,7 +299,7 @@ private:
 class EventMessageReader
 {
 public:
-    EventMessageReader(std::string& responseBody, Service* pService);
+    EventMessageReader(const std::string& responseBody, Service* pService);
 
     void stateVarValues();
 

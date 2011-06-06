@@ -534,6 +534,7 @@ class Device
     friend class DeviceContainer;
     friend class DeviceManager;
     friend class DeviceServer;
+    friend class EventMessageReader;
 
 public:
     Device();
@@ -576,6 +577,7 @@ private:
     void addProperty(const std::string& name, const std::string& val);
     void addService(Service* pService);
     DevDeviceCode* getDevDevice() const;
+    CtlDeviceCode* getCtlDevice() const;
 
     DeviceContainer*                    _pDeviceContainer;
     DeviceData*                         _pDeviceData;

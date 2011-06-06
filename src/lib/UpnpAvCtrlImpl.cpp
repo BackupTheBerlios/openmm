@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -648,7 +648,7 @@ void
 CtlContentDirectoryImpl::_changedSystemUpdateID(const ui4& val)
 {
 // begin of your own code
-
+    Log::instance()->event().debug("event handler for ContentDirectory::SystemUpdateID gets: " + Poco::NumberFormatter::format(val));
 // end of your own code
 }
 
