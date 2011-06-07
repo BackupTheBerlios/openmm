@@ -164,18 +164,22 @@ private:
 class StateVar : public Variant
 {
 public:
-    StateVar() : Variant() {}
+    StateVar() {};
     template<typename T> StateVar(const T& val) : Variant(val) {}
 
-    std::string getName() const { return _name; }
-    const std::string& getType() const { return _type; }
-    void setName(std::string name) { _name = name; }
-    void setType(std::string type) { _type = type; }
-    void setDefaultValue(std::string defaultValue) { _defaultValue = defaultValue; }
-    void setSendEvents(std::string sendEvents) { _sendEvents = (sendEvents=="yes") ? true : false; }
-    bool getSendEvents() const { return _sendEvents; }
+    std::string getName() const;
+    Service* getService();
+    const std::string& getType() const;
+
+    void setService(Service* pService);
+    void setName(std::string name);
+    void setType(std::string type);
+    void setDefaultValue(std::string defaultValue);
+    void setSendEvents(std::string sendEvents);
+    bool getSendEvents() const;
 
 private:
+    Service*        _pService;
     std::string     _name;
     std::string     _type;
     std::string     _defaultValue;
@@ -336,8 +340,8 @@ public:
     void appendArgument(Argument* pArgument);
 
 private:
-    std::string                         _actionName;
     Service*                            _pService;
+    std::string                         _actionName;
 
     Container<Argument>                 _arguments;
     Container<Argument>                 _inArguments;

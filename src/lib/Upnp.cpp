@@ -1550,6 +1550,69 @@ Subscription::expire(Poco::Timer& timer)
 }
 
 
+std::string
+StateVar::getName() const
+{
+    return _name;
+}
+
+
+Service*
+StateVar::getService()
+{
+    return _pService;
+}
+
+
+const std::string&
+StateVar::getType() const
+{
+    return _type;
+}
+
+
+void
+StateVar::setService(Service* pService)
+{
+    _pService = pService;
+}
+
+
+void
+StateVar::setName(std::string name)
+{
+    _name = name;
+}
+
+
+void
+StateVar::setType(std::string type)
+{
+    _type = type;
+}
+
+
+void
+StateVar::setDefaultValue(std::string defaultValue)
+{
+    _defaultValue = defaultValue;
+}
+
+
+void
+StateVar::setSendEvents(std::string sendEvents)
+{
+    _sendEvents = (sendEvents=="yes") ? true : false;
+}
+
+
+bool
+StateVar::getSendEvents() const
+{
+    return _sendEvents;
+}
+
+
 Service::Service() :
 _pControllerSubscriptionData(new Subscription)
 {
@@ -1791,6 +1854,7 @@ Service::addStateVar(StateVar* pStateVar)
     if(pStateVar->getSendEvents()) {
         _eventedStateVars.append(pStateVar->getName(), pStateVar);
     }
+    pStateVar->setService(this);
 }
 
 
