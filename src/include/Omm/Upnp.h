@@ -563,7 +563,8 @@ public:
 
     void setDeviceContainer(DeviceContainer* pDeviceContainer);
     void setDeviceData(DeviceData* pDeviceData);
-    void setDeviceCode(DevDeviceCode* pDevDevice);
+    void setDevDeviceCode(DevDeviceCode* pDevDevice);
+    void setCtlDeviceCode(CtlDeviceCode* pCtlDevice);
     void setUuid(std::string uuid);
     void setRandomUuid();
     void setProperty(const std::string& name, const std::string& val);

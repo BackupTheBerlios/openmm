@@ -311,7 +311,7 @@ AvServer::AvServer()
     // root object can be set later.
     _pDevContentDirectoryServerImpl = new DevContentDirectoryServerImpl;
 
-    setDeviceCode(new DevMediaServer(
+    setDevDeviceCode(new DevMediaServer(
         _pDevContentDirectoryServerImpl,
         new DevConnectionManagerServerImpl,
         new DevAVTransportServerImpl)

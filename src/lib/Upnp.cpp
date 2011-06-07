@@ -1017,15 +1017,14 @@ EventMessageReader::stateVar(Poco::XML::Node* pNode)
 {
     if (pNode->nodeName() == pNode->prefix() + ":property" && pNode->hasChildNodes()) {
         Log::instance()->event().debug("event message reader got property");
-        Poco::XML::Node* pStateVar = pNode->firstChild();
-        std::string stateVarName = pStateVar->nodeName();
-        std::string stateVarValue = pStateVar->innerText();
+        Poco::XML::Node* pStateVarNode = pNode->firstChild();
+        std::string stateVarName = pStateVarNode->nodeName();
+        std::string stateVarValue = pStateVarNode->innerText();
         Log::instance()->event().debug("event message reader got state var: " + stateVarName + ", value: " + stateVarValue);
         _pService->setStateVar<std::string>(stateVarName, stateVarValue);
-        // FIXME: where do these strange "event message: ..." logs come from, popping up at this point.
         Log::instance()->event().debug("calling event handler of state var: " + stateVarName);
-        // FIXME: getCtlDevice() returns 0, control code is not set ...
-//        _pService->getDevice()->getCtlDevice()->eventHandler(_pService->getStateVarReference(stateVarName));
+        StateVar* pStateVar = _pService->getStateVarReference(stateVarName);
+        _pService->getDevice()->getCtlDevice()->eventHandler(pStateVar);
     }
     else {
         Log::instance()->event().error("event message without state var element in property set.");
@@ -3252,9 +3251,16 @@ Device::setDeviceData(DeviceData* pDeviceData)
 
 
 void
-Device::setDeviceCode(DevDeviceCode* pDevDevice)
+Device::setDevDeviceCode(DevDeviceCode* pDevDevice)
 {
     _pDevDeviceCode = pDevDevice;
+}
+
+
+void
+Device::setCtlDeviceCode(CtlDeviceCode* pCtlDevice)
+{
+    _pCtlDeviceCode = pCtlDevice;
 }
 
 

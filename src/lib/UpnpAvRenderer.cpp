@@ -62,7 +62,7 @@ _pEngine(engine)
     descriptionReader.getDeviceDescription();
     setDeviceData(descriptionReader.rootDeviceData(this));
 
-    setDeviceCode(new DevMediaRenderer(
+    setDevDeviceCode(new DevMediaRenderer(
               new DevRenderingControlRendererImpl(engine),
               new DevConnectionManagerRendererImpl(engine),
               new DevAVTransportRendererImpl(engine)));

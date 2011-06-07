@@ -362,28 +362,32 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
     // FIXME: ownership of ControllerImplAdapters ...
     // FIXME: add all devices, not only root device
 
-    Controller::addDeviceContainer(pDeviceContainer);
 
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();
     Log::instance()->upnpav().information("AV controller add root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        CtlMediaRenderer* pRenderer = new CtlMediaRenderer(
+        Controller::addDeviceContainer(pDeviceContainer);
+        CtlMediaRenderer* pRendererImpl = new CtlMediaRenderer(
             pDevice,
             new CtlRenderingControlImpl,
             new CtlConnectionManagerImpl,
             new CtlAVTransportImpl);
+        pDevice->setCtlDeviceCode(pRendererImpl);
         pUserInterface->beginAddRenderer(_renderers.size());
-        _renderers.append(pDevice->getUuid(), new RendererView(pRenderer));
+        _renderers.append(pDevice->getUuid(), new RendererView(pRendererImpl));
         pUserInterface->endAddRenderer(_renderers.size() - 1);
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        ServerController* pServer = new ServerController(new Omm::Av::CtlMediaServer(
+        Controller::addDeviceContainer(pDeviceContainer);
+        CtlMediaServer* pServerImpl = new Omm::Av::CtlMediaServer(
             pDevice,
             new CtlContentDirectoryImpl,
             new CtlConnectionManagerImpl,
-            new CtlAVTransportImpl));
+            new CtlAVTransportImpl);
+        pDevice->setCtlDeviceCode(pServerImpl);
+        ServerController* pServer = new ServerController(pServerImpl);
         pServer->browseRootObject();
         pUserInterface->beginAddServer(_servers.size());
         _servers.append(pDevice->getUuid(), pServer);
