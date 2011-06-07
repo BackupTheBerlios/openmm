@@ -51,27 +51,30 @@ CtlMediaRenderer::~CtlMediaRenderer()
 void
 CtlMediaRenderer::eventHandler(StateVar* pStateVar)
 {
-    if (pStateVar->getName() == "LastChange") {
+    std::string serviceType = pStateVar->getService()->getServiceType();
+    std::string varName = pStateVar->getName();
+
+    if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1" && varName == "LastChange") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlAVTransport->_changedLastChange(val);
     }
-    else if (pStateVar->getName() == "SourceProtocolInfo") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1" && varName == "SourceProtocolInfo") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlConnectionManager->_changedSourceProtocolInfo(val);
     }
-    else if (pStateVar->getName() == "SinkProtocolInfo") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1" && varName == "SinkProtocolInfo") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlConnectionManager->_changedSinkProtocolInfo(val);
     }
-    else if (pStateVar->getName() == "CurrentConnectionIDs") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1" && varName == "CurrentConnectionIDs") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlConnectionManager->_changedCurrentConnectionIDs(val);
     }
-    else if (pStateVar->getName() == "LastChange") {
+    else if (serviceType == "urn:schemas-upnp-org:service:RenderingControl:1" && varName == "LastChange") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlRenderingControl->_changedLastChange(val);
@@ -104,37 +107,40 @@ CtlMediaServer::~CtlMediaServer()
 void
 CtlMediaServer::eventHandler(StateVar* pStateVar)
 {
-    if (pStateVar->getName() == "LastChange") {
+    std::string serviceType = pStateVar->getService()->getServiceType();
+    std::string varName = pStateVar->getName();
+
+    if (serviceType == "urn:schemas-upnp-org:service:AVTransport:1" && varName == "LastChange") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlAVTransport->_changedLastChange(val);
     }
-    else if (pStateVar->getName() == "SourceProtocolInfo") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1" && varName == "SourceProtocolInfo") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlConnectionManager->_changedSourceProtocolInfo(val);
     }
-    else if (pStateVar->getName() == "SinkProtocolInfo") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1" && varName == "SinkProtocolInfo") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlConnectionManager->_changedSinkProtocolInfo(val);
     }
-    else if (pStateVar->getName() == "CurrentConnectionIDs") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ConnectionManager:1" && varName == "CurrentConnectionIDs") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlConnectionManager->_changedCurrentConnectionIDs(val);
     }
-    else if (pStateVar->getName() == "TransferIDs") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1" && varName == "TransferIDs") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlContentDirectory->_changedTransferIDs(val);
     }
-    else if (pStateVar->getName() == "SystemUpdateID") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1" && varName == "SystemUpdateID") {
         Omm::ui4 val;
         pStateVar->getValue(val);
         _pCtlContentDirectory->_changedSystemUpdateID(val);
     }
-    else if (pStateVar->getName() == "ContainerUpdateIDs") {
+    else if (serviceType == "urn:schemas-upnp-org:service:ContentDirectory:1" && varName == "ContainerUpdateIDs") {
         std::string val;
         pStateVar->getValue(val);
         _pCtlContentDirectory->_changedContainerUpdateIDs(val);

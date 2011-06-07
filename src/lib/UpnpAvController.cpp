@@ -395,8 +395,8 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
     // if device container contains a MediaRenderer or a MediaServer, add device container
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" ||
         pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        // FIXME: subscription requests are sent, when adding a device container (see DeviceContainer::initController()
-        // when device sends its initial event message right afterwards, the event handler code is not yet registered.
+        // NOTE: subscription requests are sent, when adding a device container (see DeviceContainer::initController()
+        // when device sends its initial event message right afterwards, the event handler code must be registered.
         Controller::addDeviceContainer(pDeviceContainer);
     }
     
