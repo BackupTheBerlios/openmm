@@ -358,30 +358,28 @@ AvController::serverDevice(int numServer)
 void
 AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    // FIXME: need a list of ControllerImplAdapters for calling eventHandler(StateVar*)
-    // FIXME: ownership of ControllerImplAdapters ...
-    // FIXME: add all devices, not only root device
-
+    // TODO: add all devices, not only root device
 
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
     Device* pDevice = pDeviceContainer->getRootDevice();
     Log::instance()->upnpav().information("AV controller add root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
-    
+
     if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        Controller::addDeviceContainer(pDeviceContainer);
+        Log::instance()->upnpav().debug("AV controller add media renderer");
         CtlMediaRenderer* pRendererImpl = new CtlMediaRenderer(
             pDevice,
             new CtlRenderingControlImpl,
             new CtlConnectionManagerImpl,
             new CtlAVTransportImpl);
         pDevice->setCtlDeviceCode(pRendererImpl);
+        RendererView* pRendererView = new RendererView(pRendererImpl);
         pUserInterface->beginAddRenderer(_renderers.size());
-        _renderers.append(pDevice->getUuid(), new RendererView(pRendererImpl));
+        _renderers.append(pDevice->getUuid(), pRendererView);
         pUserInterface->endAddRenderer(_renderers.size() - 1);
     }
     else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        Controller::addDeviceContainer(pDeviceContainer);
-        CtlMediaServer* pServerImpl = new Omm::Av::CtlMediaServer(
+        Log::instance()->upnpav().debug("AV controller add media server");
+        CtlMediaServer* pServerImpl = new CtlMediaServer(
             pDevice,
             new CtlContentDirectoryImpl,
             new CtlConnectionManagerImpl,
@@ -393,6 +391,15 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
         _servers.append(pDevice->getUuid(), pServer);
         pUserInterface->endAddServer(_servers.size() - 1);
     }
+
+    // if device container contains a MediaRenderer or a MediaServer, add device container
+    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" ||
+        pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
+        // FIXME: subscription requests are sent, when adding a device container (see DeviceContainer::initController()
+        // when device sends its initial event message right afterwards, the event handler code is not yet registered.
+        Controller::addDeviceContainer(pDeviceContainer);
+    }
+    
     Log::instance()->upnpav().information("AV controller add root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
@@ -404,14 +411,14 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
     Device* pDevice = pDeviceContainer->getRootDevice();
     Log::instance()->upnpav().information("av controller removed root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     
-    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
+    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" && _renderers.contains(pDevice->getUuid())) {
         // TODO: delete renderer controller
         int position = _renderers.position(pDevice->getUuid());
         pUserInterface->beginRemoveRenderer(position);
         _renderers.remove(pDevice->getUuid());
         pUserInterface->endRemoveRenderer(position);
     }
-    else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
+    else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1" && _servers.contains(pDevice->getUuid())) {
         // TODO: delete server controller
         int position = _servers.position(pDevice->getUuid());
         pUserInterface->beginRemoveServer(position);
