@@ -1328,6 +1328,9 @@ CtlDeviceCpp::deviceContainerEnd(const DeviceContainer& deviceContainer)
         << "void" << std::endl
         << "Ctl" + _deviceName << "::eventHandler(StateVar* pStateVar)" << std::endl
         << "{" << std::endl
+        << indent(1) << "std::string serviceType = pStateVar->getService()->getServiceType();" << std::endl
+        << indent(1) << "std::string varName = pStateVar->getName();" << std::endl
+        << std::endl
         << _eventDispatcher.str()
         << "}" << std::endl
         << std::endl;
@@ -1418,6 +1421,7 @@ CtlDeviceCpp::serviceType(const Service& service)
     std::string serviceName = serviceType.getTypeName();
     _serviceNames.push_back(serviceName);
     _currentService = serviceName;
+    _currentServiceType = service.getServiceType();
 }
 
 
@@ -1610,7 +1614,7 @@ CtlDeviceCpp::stateVar(const StateVar& stateVar)
     
     _eventDispatcher
         << indent(1) << (_firstStateVar ? "" : "else ")
-        << "if (pStateVar->getName() == \"" << stateVar.getName() << "\") {" << std::endl
+        << "if (serviceType == \"" + _currentServiceType + "\" && varName == \"" << stateVar.getName() << "\") {" << std::endl
         << indent(2) << varType << " val;" << std::endl
         << indent(2) << "pStateVar->getValue(val);" << std::endl
         << indent(2) << "_p" << "Ctl" + _currentService << "->_changed" << stateVar.getName() << "(val);" << std::endl

@@ -288,6 +288,7 @@ private:
     std::vector<std::string>    _serviceTypes;
     std::vector<std::string>    _serviceNames;
     std::string                 _currentService;
+    std::string                 _currentServiceType;
     bool                        _firstStateVar;
 };
 
