@@ -648,7 +648,7 @@ void
 CtlContentDirectoryImpl::_changedSystemUpdateID(const ui4& val)
 {
 // begin of your own code
-    Log::instance()->event().debug("event handler for ContentDirectory::SystemUpdateID gets: " + Poco::NumberFormatter::format(val));
+    Log::instance()->upnpav().debug("event handler for ContentDirectory::SystemUpdateID gets: " + Poco::NumberFormatter::format(val));
 // end of your own code
 }
 

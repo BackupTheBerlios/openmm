@@ -33,8 +33,6 @@ namespace Omm {
 namespace Av {
 
 
-// TODO: LastChange
-
 class DevAVTransportRendererImpl : public DevAVTransport
 {
 public:

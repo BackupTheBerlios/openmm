@@ -22,6 +22,7 @@
 #ifndef UPNPAV_CTRL_IMPL_H
 #define UPNPAV_CTRL_IMPL_H
 
+#include "UpnpAvController.h"
 #include "UpnpAvControllers.h"
 
 namespace Omm {
@@ -30,6 +31,9 @@ namespace Av {
 
 class CtlAVTransportImpl : public CtlAVTransport
 {
+public:
+    CtlAVTransportImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+
 private:
     virtual void _ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
     virtual void _ansGetMediaInfo(const ui4& InstanceID, const ui4& NrTracks, const std::string& MediaDuration, const std::string& CurrentURI, const std::string& CurrentURIMetaData, const std::string& NextURI, const std::string& NextURIMetaData, const std::string& PlayMedium, const std::string& RecordMedium, const std::string& WriteStatus);
@@ -45,11 +49,16 @@ private:
     virtual void _ansPrevious(const ui4& InstanceID);
 
     virtual void _changedLastChange(const std::string& val);
+
+    AvUserInterface*    _pAvUserInterface;
 };
 
 
 class CtlConnectionManagerImpl : public CtlConnectionManager
 {
+public:
+    CtlConnectionManagerImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+
 private:
     virtual void _ansGetProtocolInfo(const std::string& Source, const std::string& Sink);
     virtual void _ansConnectionComplete(const i4& ConnectionID);
@@ -59,11 +68,16 @@ private:
     virtual void _changedSourceProtocolInfo(const std::string& val);
     virtual void _changedSinkProtocolInfo(const std::string& val);
     virtual void _changedCurrentConnectionIDs(const std::string& val);
+
+    AvUserInterface*    _pAvUserInterface;
 };
 
 
 class CtlRenderingControlImpl : public CtlRenderingControl
 {
+public:
+    CtlRenderingControlImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+
 private:
     virtual void _ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList);
     virtual void _ansSelectPreset(const ui4& InstanceID, const std::string& PresetName);
@@ -102,11 +116,16 @@ private:
     virtual void _ansSetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness);
 
     virtual void _changedLastChange(const std::string& val);
+
+    AvUserInterface*    _pAvUserInterface;
 };
 
 
 class CtlContentDirectoryImpl : public CtlContentDirectory
 {
+public:
+    CtlContentDirectoryImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+
 private:
     virtual void _ansGetSearchCapabilities(const std::string& SearchCaps);
     virtual void _ansGetSortCapabilities(const std::string& SortCaps);
@@ -124,6 +143,8 @@ private:
     virtual void _changedTransferIDs(const std::string& val);
     virtual void _changedSystemUpdateID(const ui4& val);
     virtual void _changedContainerUpdateIDs(const std::string& val);
+
+    AvUserInterface*    _pAvUserInterface;
 };
 
 } // namespace Av

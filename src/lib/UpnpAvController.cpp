@@ -368,9 +368,9 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
         Log::instance()->upnpav().debug("AV controller add media renderer");
         CtlMediaRenderer* pRendererImpl = new CtlMediaRenderer(
             pDevice,
-            new CtlRenderingControlImpl,
-            new CtlConnectionManagerImpl,
-            new CtlAVTransportImpl);
+            new CtlRenderingControlImpl(pUserInterface),
+            new CtlConnectionManagerImpl(pUserInterface),
+            new CtlAVTransportImpl(pUserInterface));
         pDevice->setCtlDeviceCode(pRendererImpl);
         RendererView* pRendererView = new RendererView(pRendererImpl);
         pUserInterface->beginAddRenderer(_renderers.size());
@@ -381,9 +381,9 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
         Log::instance()->upnpav().debug("AV controller add media server");
         CtlMediaServer* pServerImpl = new CtlMediaServer(
             pDevice,
-            new CtlContentDirectoryImpl,
-            new CtlConnectionManagerImpl,
-            new CtlAVTransportImpl);
+            new CtlContentDirectoryImpl(pUserInterface),
+            new CtlConnectionManagerImpl(pUserInterface),
+            new CtlAVTransportImpl(pUserInterface));
         pDevice->setCtlDeviceCode(pServerImpl);
         ServerController* pServer = new ServerController(pServerImpl);
         pServer->browseRootObject();
