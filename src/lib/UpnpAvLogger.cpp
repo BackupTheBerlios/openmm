@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,31 +19,52 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpTypes_INCLUDED
-#define	UpnpTypes_INCLUDED
-
-#include <Poco/URI.h>
-#include <Poco/Timestamp.h>
+#include "UpnpAvLogger.h"
 
 
 namespace Omm {
-
-// TODO: make a typedef and extent Variant for remaining UPnP datatypes (see specs p.33)
-typedef Poco::UInt8     ui1;
-typedef Poco::UInt16    ui2;
-typedef Poco::UInt32    ui4;
-typedef Poco::Int8      i1;
-typedef Poco::Int16     i2;
-typedef Poco::Int32     i4;
-typedef float           r4;
-typedef double          r8;
-typedef r8              number;
-typedef Poco::URI       uri;
-typedef Poco::Timestamp date;
-typedef Poco::Timestamp dateTime;
-typedef Poco::Timestamp time;
+namespace Av {
 
 
-} // namespace Omm
+Av::Log* Av::Log::_pInstance = 0;
 
+// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
+
+Av::Log::Log()
+{
+    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
+    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
+    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
+    pSplitterChannel->addChannel(pConsoleChannel);
+//     pSplitterChannel->addChannel(pFileChannel);
+    pFormatLogger->setChannel(pSplitterChannel);
+    pFormatLogger->open();
+#ifdef NDEBUG
+    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, 0);
+#else
+    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
+}
+
+
+Av::Log*
+Av::Log::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Log;
+    }
+    return _pInstance;
+}
+
+
+Poco::Logger&
+Av::Log::upnpav()
+{
+    return *_pUpnpAvLogger;
+}
+
+
+}  // namespace Omm
+}  // namespace Av
+

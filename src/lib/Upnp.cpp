@@ -3099,6 +3099,8 @@ DeviceContainer::initController()
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             (*s)->addEventCallbackPath((*d)->getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceManager->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
+            
+            // TODO: event notifications should go into Device, after it is accepted and added to the controller
             // subscribe to event notifications
             try {
                 (*s)->sendSubscriptionRequest(1800);

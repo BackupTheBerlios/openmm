@@ -22,18 +22,12 @@
 #ifndef UpnpAvTypes_INCLUDED
 #define UpnpAvTypes_INCLUDED
 
-#include <Poco/Format.h>
-#include <Poco/Logger.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/FormattingChannel.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/FileChannel.h>
-#include <Poco/SplitterChannel.h>
 #include <Poco/Net/MediaType.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
 #include "UpnpTypes.h"
+#include "UpnpAvLogger.h"
 #include "Util.h"
 
 // NOTE: for media object ids only use non-reserved characters for segments 
@@ -41,21 +35,10 @@
 // These characters are alphanumerics, digits, "-", ".", "_", "!", ";", ",", "="
 
 namespace Omm {
-namespace Av {
 
-class Log
-{
-public:
-    static Log* instance();
-    
-    Poco::Logger& upnpav();
-    
-private:
-    Log();
-    
-    static Log*     _pInstance;
-    Poco::Logger*   _pUpnpAvLogger;
-};
+class StateVar;
+
+namespace Av {
 
 
 // TODO: generate const strings for allowed values for action arguments with ommgen stub generator.
@@ -634,6 +617,7 @@ private:
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;
 };
+
 
 } // namespace Av
 } // namespace Omm

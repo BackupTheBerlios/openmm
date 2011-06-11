@@ -80,6 +80,8 @@ CACHE INTERNAL libommupnp
 
 add_library(ommupnpav
 #SHARED
+UpnpAvLogger.cpp
+UpnpAv.cpp
 UpnpAvDescriptions.cpp
 UpnpAvController.cpp
 UpnpAvControllers.cpp

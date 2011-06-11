@@ -25,6 +25,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPRequest.h>
 
+#include "UpnpAvPrivate.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvDevices.h"
 
@@ -80,7 +81,8 @@ private:
 class DevRenderingControlRendererImpl : public DevRenderingControl
 {
 public:
-    DevRenderingControlRendererImpl(Engine* pEngine) : _pEngine(pEngine) {}
+    DevRenderingControlRendererImpl(Engine* pEngine) : _pEngine(pEngine), _pLastChange(new RenderingControlLastChange(_pService)) {}
+    ~DevRenderingControlRendererImpl() { delete _pEngine; delete _pLastChange; }
     
 private:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);
@@ -121,7 +123,8 @@ private:
 
     virtual void initStateVars();
 
-    Engine* _pEngine;
+    Engine*     _pEngine;
+    LastChange* _pLastChange;
 };
 
 

@@ -150,7 +150,7 @@ class Variant
 public:
     Variant() : _val("") {}
     Variant(const std::string& val) : _val(val) {}
-    
+
     // TODO: check if string formats are conform to specs (-> p. 33).
     void setValue(const std::string& val) {
 //         std::clog << "Variant::setValue(const std::string& val), val: " << val << std::endl;
@@ -166,17 +166,17 @@ public:
     void setValue(float val) { _val = Poco::NumberFormatter::format(val); }
     void setValue(double val) { _val = Poco::NumberFormatter::format(val); }
     void setValue(Poco::URI val) { _val = val.toString(); }
-    
+
     const std::string& getValue() const {
-        return _val; 
+        return _val;
     }
-    void getValue(std::string& val) { 
-        val = _val; 
+    void getValue(std::string& val) {
+        val = _val;
     }
     void getValue(bool& val) { val = (_val == "1" || _val == "true") ? true : false; }
     void getValue(ui1& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(ui2& val) { val = Poco::NumberParser::parse(_val); }
-    void getValue(ui4& val) { 
+    void getValue(ui4& val) {
         if (_val == "") {
             val = 0;
         }
@@ -184,7 +184,7 @@ public:
             val = Poco::NumberParser::parseUnsigned(_val);
         }
     }
-    void getValue(i1& val) { 
+    void getValue(i1& val) {
         if (_val == "") {
             val = 0;
         }
@@ -204,7 +204,7 @@ public:
     void getValue(float& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(double& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(Poco::URI& val) { val = Poco::URI(_val); }
-    
+
 private:
     std::string     _val;
 };

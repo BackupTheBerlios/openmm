@@ -150,7 +150,7 @@ protected:
     void _setLastChange(const std::string& val);
     std::string _getLastChange();
 
-private:
+//private:
     Service* _pService;
 };
 
@@ -178,7 +178,7 @@ protected:
     void _setCurrentConnectionIDs(const std::string& val);
     std::string _getCurrentConnectionIDs();
 
-private:
+//private:
     Service* _pService;
 };
 
@@ -217,7 +217,7 @@ protected:
     void _setContainerUpdateIDs(const std::string& val);
     std::string _getContainerUpdateIDs();
 
-private:
+//private:
     Service* _pService;
 };
 
@@ -305,7 +305,7 @@ protected:
     void _setLoudness(const bool& val);
     bool _getLoudness();
 
-private:
+//private:
     Service* _pService;
 };
 

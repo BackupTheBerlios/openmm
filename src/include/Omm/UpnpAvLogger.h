@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,31 +19,38 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpTypes_INCLUDED
-#define	UpnpTypes_INCLUDED
+#ifndef UpnpAvLogger_INCLUDED
+#define UpnpAvLogger_INCLUDED
 
-#include <Poco/URI.h>
-#include <Poco/Timestamp.h>
+#include <Poco/Format.h>
+#include <Poco/Logger.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/ConsoleChannel.h>
+#include <Poco/FileChannel.h>
+#include <Poco/SplitterChannel.h>
 
 
 namespace Omm {
+namespace Av {
 
-// TODO: make a typedef and extent Variant for remaining UPnP datatypes (see specs p.33)
-typedef Poco::UInt8     ui1;
-typedef Poco::UInt16    ui2;
-typedef Poco::UInt32    ui4;
-typedef Poco::Int8      i1;
-typedef Poco::Int16     i2;
-typedef Poco::Int32     i4;
-typedef float           r4;
-typedef double          r8;
-typedef r8              number;
-typedef Poco::URI       uri;
-typedef Poco::Timestamp date;
-typedef Poco::Timestamp dateTime;
-typedef Poco::Timestamp time;
+class Log
+{
+public:
+    static Log* instance();
 
+    Poco::Logger& upnpav();
 
-} // namespace Omm
+private:
+    Log();
+
+    static Log*     _pInstance;
+    Poco::Logger*   _pUpnpAvLogger;
+};
+
+}  // namespace Omm
+}  // namespace Av
+
 
 #endif
+

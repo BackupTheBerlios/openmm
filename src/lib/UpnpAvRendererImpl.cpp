@@ -718,7 +718,10 @@ DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::str
     _pEngine->setVolume(0, DesiredVolume);
     
     _setVolume(DesiredVolume);
-//     std::cerr << "RenderingControlRendererImpl::SetVolume() finished" << std::endl;
+//    StateVar* pStateVar = _pService->getStateVarReference("Volume");
+//    Variant val;
+//    val.setValue(DesiredVolume);
+    _pLastChange->setStateVar(InstanceID, "Volume");
 }
 
 
