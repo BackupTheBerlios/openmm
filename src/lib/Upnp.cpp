@@ -1436,6 +1436,8 @@ EventMessageWriter::write(std::string& eventMessage)
 void
 EventMessageWriter::stateVar(const StateVar& stateVar)
 {
+    Log::instance()->event().debug("event message writer for state var: " + stateVar.getName());
+    
     Poco::AutoPtr<Poco::XML::Element> pProperty = _pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "property");
     Poco::AutoPtr<Poco::XML::Element> pStateVar = _pDoc->createElement(stateVar.getName());
     Poco::AutoPtr<Poco::XML::Text> pStateVarValue = _pDoc->createTextNode(stateVar.getValue());

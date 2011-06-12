@@ -34,28 +34,42 @@ namespace Omm {
 namespace Av {
 
 
+class LastChangeSet
+{
+public:
+    void setStateVarAttribute(const std::string& name, const std::string& attr, const Variant& val);
+    void writeStateVar(Poco::XML::Node* pNode);
+    void clear();
+    
+private:
+    typedef std::map<std::string, std::map<std::string, std::string> >::iterator StateVarIterator;
+    StateVarIterator beginStateVar();
+    StateVarIterator endStateVar();
+
+    typedef std::map<std::string, std::string>::iterator StateVarValIterator;
+    StateVarValIterator beginStateVarVal(const std::string& stateVar);
+    StateVarValIterator endStateVarVal(const std::string& stateVar);
+
+    std::map<std::string, std::map<std::string, std::string> >   _stateVars;
+};
+
+
 class LastChange
 {
 public:
-    LastChange(Service* pService);
+    LastChange(Service*& pService);
     virtual ~LastChange();
 
+    void addInstance();
     void setStateVar(const ui4& InstanceID, const std::string& name, const Variant& val);
 
 protected:
-    typedef std::map<std::string, std::map<std::string, std::string> >::iterator StateVarIterator;
-    StateVarIterator beginStateVar(int instanceId);
-    StateVarIterator endStateVar(int instanceId);
-
-    typedef std::map<std::string, std::string>::iterator StateVarValIterator;
-    StateVarValIterator beginStateVarVal(int instanceId, const std::string& stateVar);
-    StateVarValIterator endStateVarVal(int instanceId, const std::string& stateVar);
-
     void notify();
     void write();
     void writeMessageHeader();
     void writeMessageClose();
     void writeMessageData();
+    void clear();
 
     virtual void writeSchemeAttribute() = 0;
 
@@ -64,17 +78,18 @@ protected:
     Poco::AutoPtr<Poco::XML::Element>                                           _pMessage;
 
 private:
-    Service*                                                                    _pService;
-    std::vector<std::map<std::string, std::map<std::string, std::string> > >    _stateVars;
+    Service*&                                                                   _pService;
     std::string                                                                 _message;
     Poco::AutoPtr<Poco::XML::Document>                                          _pDoc;
+    std::vector<LastChangeSet>                                                  _changeSet;
+    std::vector<LastChangeSet>                                                  _initialSet;
 };
 
 
 class RenderingControlLastChange : public LastChange
 {
 public:
-    RenderingControlLastChange(Service* pService);
+    RenderingControlLastChange(Service*& pService);
 
     void setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, const Variant& val);
 

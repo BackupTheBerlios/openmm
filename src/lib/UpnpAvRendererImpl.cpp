@@ -35,32 +35,31 @@ DevAVTransportRendererImpl::initStateVars()
     
     _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
     _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
-    _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-    _setRecordStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-    _setPossiblePlaybackStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-    _setPossibleRecordStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-    _setCurrentPlayMode(AvTransportArgument::CURRENT_PLAY_MODE_NORMAL);
-    _setTransportPlaySpeed(AvTransportArgument::TRANSPORT_PLAY_SPEED_1);
-    _setRecordMediumWriteStatus(AvTransportArgument::RECORD_MEDIUM_WRITE_STATUS_NOT_IMPLEMENTED);
-    _setCurrentRecordQualityMode(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
-    _setPossibleRecordQualityModes(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
-    _setNumberOfTracks(0);
-    _setCurrentTrack(0);
-    _setCurrentTrackDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
-    _setCurrentMediaDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
-    _setCurrentTrackMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
-    _setCurrentTrackURI("");
-    _setAVTransportURI("");
-    _setAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
-    _setNextAVTransportURI("");
-    _setNextAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
-    _setRelativeTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
-    _setAbsoluteTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
-    _setRelativeCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
-    _setAbsoluteCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
-    _setCurrentTransportActions(AvTransportArgument::CURRENT_TRANSPORT_ACTIONS_NOT_IMPLEMENTED);
-    _setLastChange("");
-    
+//    _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+//    _setRecordStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+//    _setPossiblePlaybackStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+//    _setPossibleRecordStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+//    _setCurrentPlayMode(AvTransportArgument::CURRENT_PLAY_MODE_NORMAL);
+//    _setTransportPlaySpeed(AvTransportArgument::TRANSPORT_PLAY_SPEED_1);
+//    _setRecordMediumWriteStatus(AvTransportArgument::RECORD_MEDIUM_WRITE_STATUS_NOT_IMPLEMENTED);
+//    _setCurrentRecordQualityMode(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
+//    _setPossibleRecordQualityModes(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
+//    _setNumberOfTracks(0);
+//    _setCurrentTrack(0);
+//    _setCurrentTrackDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
+//    _setCurrentMediaDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
+//    _setCurrentTrackMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
+//    _setCurrentTrackURI("");
+//    _setAVTransportURI("");
+//    _setAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
+//    _setNextAVTransportURI("");
+//    _setNextAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
+//    _setRelativeTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
+//    _setAbsoluteTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
+//    _setRelativeCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
+//    _setAbsoluteCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
+//    _setCurrentTransportActions(AvTransportArgument::CURRENT_TRANSPORT_ACTIONS_NOT_IMPLEMENTED);
+
     _pSession = 0;
 }
 
@@ -434,24 +433,25 @@ DevConnectionManagerRendererImpl::GetCurrentConnectionInfo(const i4& ConnectionI
 void
 DevRenderingControlRendererImpl::initStateVars()
 {
-    _setPresetNameList("");
-    _setLastChange("");
-    _setBrightness(0);
-    _setContrast(0);
-    _setSharpness(0);
-    _setRedVideoGain(0);
-    _setGreenVideoGain(0);
-    _setBlueVideoGain(0);
-    _setRedVideoBlackLevel(0);
-    _setGreenVideoBlackLevel(0);
-    _setBlueVideoBlackLevel(0);
-    _setColorTemperature(0);
-    _setHorizontalKeystone(0);
-    _setVerticalKeystone(0);
-    _setMute(false);
-    _setVolume(_pEngine->getVolume(0));
-    _setVolumeDB(0);
-    _setLoudness(false);
+    // FIXME: init all engine instances instead of the state vars in the service tree.
+    
+//    _setPresetNameList("");
+//    _setBrightness(0);
+//    _setContrast(0);
+//    _setSharpness(0);
+//    _setRedVideoGain(0);
+//    _setGreenVideoGain(0);
+//    _setBlueVideoGain(0);
+//    _setRedVideoBlackLevel(0);
+//    _setGreenVideoBlackLevel(0);
+//    _setBlueVideoBlackLevel(0);
+//    _setColorTemperature(0);
+//    _setHorizontalKeystone(0);
+//    _setVerticalKeystone(0);
+//    _setMute(false);
+//    _setVolume(_pEngine->getVolume(0));
+//    _setVolumeDB(0);
+//    _setLoudness(false);
 }
 
 
@@ -727,6 +727,7 @@ DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::str
     // we don't cache values in the state vars but retreive them directly from the enginge.
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    _setVolume(DesiredVolume);
+
     Variant val;
     val.setValue(DesiredVolume);
     _pLastChange->setChannelStateVar(InstanceID, Channel, "Volume", val);

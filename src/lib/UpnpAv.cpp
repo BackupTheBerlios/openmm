@@ -141,12 +141,79 @@ const std::string PresetName::FACTORY_DEFAULTS = "FactoryDefaults";
 const std::string PresetName::INSTALLATION_DEFAULTS = "InstallationDefaults";
 
 
-LastChange::LastChange(Service* pService) :
+
+LastChangeSet::StateVarIterator
+LastChangeSet::beginStateVar()
+{
+    return _stateVars.begin();
+}
+
+
+LastChangeSet::StateVarIterator
+LastChangeSet::endStateVar()
+{
+    return _stateVars.end();
+}
+
+
+LastChangeSet::StateVarValIterator
+LastChangeSet::beginStateVarVal(const std::string& stateVar)
+{
+    return _stateVars[stateVar].begin();
+}
+
+
+LastChangeSet::StateVarValIterator
+LastChangeSet::endStateVarVal(const std::string& stateVar)
+{
+    return _stateVars[stateVar].end();
+}
+
+
+void
+LastChangeSet::setStateVarAttribute(const std::string& name, const std::string& attr, const Variant& val)
+{
+    _stateVars[name][attr] = val.getValue();
+}
+
+
+void
+LastChangeSet::writeStateVar(Poco::XML::Node* pNode)
+{
+    Log::instance()->upnpav().debug("LastChangeSet::writeStateVar() ...");
+    Poco::XML::Document* pDoc = pNode->ownerDocument();
+
+    for (StateVarIterator varIt = beginStateVar(); varIt != endStateVar(); ++varIt) {
+        std::string varName = (*varIt).first;
+        Log::instance()->upnpav().debug("LastChangeSet::writeStateVar() writing: " + varName);
+        Poco::AutoPtr<Poco::XML::Element> pStateVar = pDoc->createElement(varName);
+        for (StateVarValIterator it = beginStateVarVal(varName); it != endStateVarVal(varName); ++it) {
+            Poco::AutoPtr<Poco::XML::Attr> pVal = pDoc->createAttribute((*it).first);
+            pVal->setValue((*it).second);
+            pStateVar->setAttributeNode(pVal);
+        }
+        pNode->appendChild(pStateVar);
+    }
+    Log::instance()->upnpav().debug("LastChangeSet::writeStateVar() finished.");
+}
+
+
+void
+LastChangeSet::clear()
+{
+    for (StateVarIterator varIt = beginStateVar(); varIt != endStateVar(); ++varIt) {
+        (*varIt).second.clear();
+    }
+    _stateVars.clear();
+}
+
+
+LastChange::LastChange(Service*& pService) :
 _pService(pService),
 _pDoc(0),
 _pMessage(0)
 {
-
+    addInstance();
 }
 
 
@@ -156,31 +223,11 @@ LastChange::~LastChange()
 }
 
 
-LastChange::StateVarIterator
-LastChange::beginStateVar(int instanceId)
+void
+LastChange::addInstance()
 {
-    return _stateVars[instanceId].begin();
-}
-
-
-LastChange::StateVarIterator
-LastChange::endStateVar(int instanceId)
-{
-    return _stateVars[instanceId].end();
-}
-
-
-LastChange::StateVarValIterator
-LastChange::beginStateVarVal(int instanceId, const std::string& stateVar)
-{
-    return _stateVars[instanceId][stateVar].begin();
-}
-
-
-LastChange::StateVarValIterator
-LastChange::endStateVarVal(int instanceId, const std::string& stateVar)
-{
-    return _stateVars[instanceId][stateVar].end();
+    _changeSet.push_back(LastChangeSet());
+    _initialSet.push_back(LastChangeSet());
 }
 
 
@@ -196,6 +243,8 @@ void
 LastChange::notify()
 {
     write();
+    _pService->setStateVar<std::string>("LastChange", _message);
+    clear();
 }
 
 
@@ -243,23 +292,14 @@ LastChange::writeMessageData()
 {
     Log::instance()->upnpav().debug("LastChange::writeMessageData()");
 
-    Poco::XML::Document* pDoc = _pMessage->ownerDocument();
-
-
-    for (int instanceId = 0; instanceId < _stateVars.size(); ++instanceId) {
-        Poco::AutoPtr<Poco::XML::Element> pInstanceId = pDoc->createElement("InstanceID");
-        Poco::AutoPtr<Poco::XML::Attr> pInstanceIdVal = pDoc->createAttribute("val");
+    for (int instanceId = 0; instanceId < _changeSet.size(); ++instanceId) {
+        Poco::AutoPtr<Poco::XML::Element> pInstanceId = _pDoc->createElement("InstanceID");
+        Poco::AutoPtr<Poco::XML::Attr> pInstanceIdVal = _pDoc->createAttribute("val");
         pInstanceIdVal->setValue(Poco::NumberFormatter::format(instanceId));
-        for (StateVarIterator varIt = beginStateVar(instanceId); varIt != endStateVar(instanceId); ++varIt) {
-            std::string varName = (*varIt).first;
-            Poco::AutoPtr<Poco::XML::Element> pStateVar = pDoc->createElement(varName);
-            for (StateVarValIterator it = beginStateVarVal(instanceId, varName); it != endStateVarVal(instanceId, varName); ++it) {
-                Poco::AutoPtr<Poco::XML::Attr> pVal = pDoc->createAttribute((*it).first);
-                pVal->setValue((*it).second);
-                pStateVar->setAttributeNode(pVal);
-            }
-            pInstanceId->appendChild(pStateVar);
-        }
+        pInstanceId->setAttributeNode(pInstanceIdVal);
+        _pMessage->appendChild(pInstanceId);
+        
+        _changeSet[instanceId].writeStateVar(pInstanceId);
     }
 
     Log::instance()->upnpav().debug("LastChange::writeMessageData() finished.");
@@ -267,13 +307,25 @@ LastChange::writeMessageData()
 
 
 void
-LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, const Variant& val)
+LastChange::clear()
 {
-    _stateVars[InstanceID][name][attr] = val.getValue();
+    for (int instanceId = 0; instanceId < _changeSet.size(); ++instanceId) {
+        _changeSet[instanceId].clear();
+    }
+    _pDoc->release();
+    _pDoc = 0;
+    _pMessage = 0;
 }
 
 
-RenderingControlLastChange::RenderingControlLastChange(Service* pService) :
+void
+LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, const Variant& val)
+{
+    _changeSet[InstanceID].setStateVarAttribute(name, attr, val);
+}
+
+
+RenderingControlLastChange::RenderingControlLastChange(Service*& pService) :
 LastChange(pService)
 {
 }
