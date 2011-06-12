@@ -86,7 +86,7 @@ UpnpAvDescriptions.cpp
 UpnpAvController.cpp
 UpnpAvControllers.cpp
 UpnpAvDevices.cpp
-UpnpAvTypes.cpp
+UpnpAvObject.cpp
 UpnpAvServer.cpp
 UpnpAvServerImpl.cpp
 UpnpAvRenderer.cpp

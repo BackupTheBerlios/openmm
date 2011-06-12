@@ -24,7 +24,6 @@
 #include <cerrno>
 #include <string>
 
-#include <Omm/UpnpAvTypes.h>
 #include <Omm/Util.h>
 
 #include "EngineXine.h"

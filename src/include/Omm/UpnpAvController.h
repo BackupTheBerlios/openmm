@@ -25,7 +25,7 @@
 #include <Poco/DOM/Node.h>
 
 #include "Upnp.h"
-#include "UpnpAvTypes.h"
+#include "UpnpAvObject.h"
 
 
 namespace Omm {

@@ -30,7 +30,7 @@
 #include <Poco/DOM/Document.h>
 
 
-#include <Omm/UpnpAvTypes.h>
+#include <Omm/UpnpAvObject.h>
 
 #include "Webradio.h"
 

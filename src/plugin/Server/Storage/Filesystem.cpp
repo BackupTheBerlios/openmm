@@ -36,7 +36,7 @@
 #include <Poco/SAX/Attributes.h>
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/UpnpAvTypes.h>
+#include <Omm/UpnpAvObject.h>
 #include <Omm/AvStream.h>
 
 #include "Filesystem.h"

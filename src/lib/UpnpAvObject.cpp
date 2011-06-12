@@ -44,7 +44,7 @@
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include "UpnpAvTypes.h"
+#include "UpnpAvObject.h"
 
 #include "utf8.h"
 

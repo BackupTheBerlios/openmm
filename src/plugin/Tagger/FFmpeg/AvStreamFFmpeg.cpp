@@ -29,7 +29,7 @@
 #include <Poco/Timestamp.h>
 
 #include "AvStreamFFmpeg.h"
-#include "Omm/UpnpAvTypes.h"
+#include "Omm/UpnpAvObject.h"
 
 #define PRINT_LIB_VERSION(outstream,libname,LIBNAME,indent) \
 version= libname##_version(); \

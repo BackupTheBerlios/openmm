@@ -19,7 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpAvTypes.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvDescriptions.h"
 #include "UpnpAvRendererImpl.h"

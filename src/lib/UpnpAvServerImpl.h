@@ -23,7 +23,7 @@
 #define MEDIASERVER_IMPLEMENTATION_H
 
 #include "Upnp.h"
-#include "UpnpAvTypes.h"
+#include "UpnpAvObject.h"
 #include "UpnpAvServer.h"
 #include "UpnpAvDevices.h"
 

@@ -22,7 +22,6 @@
 #include "UpnpAv.h"
 #include "UpnpAvServer.h"
 #include "UpnpAvRenderer.h"
-#include "UpnpAvTypes.h"
 #include "UpnpAvCtrlImpl.h"
 #include "UpnpAvControllers.h"
 

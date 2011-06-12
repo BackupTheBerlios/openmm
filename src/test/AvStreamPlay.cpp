@@ -29,7 +29,6 @@
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
 
-#include <Omm/UpnpAvTypes.h>
 #include <Omm/AvStream.h>
 #include <Omm/Util.h>
 

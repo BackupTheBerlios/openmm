@@ -30,7 +30,7 @@
 #include <Omm/AvStream.h>
 
 #include "SimpleTagger.h"
-#include "Omm/UpnpAvTypes.h"
+#include "Omm/UpnpAvObject.h"
 
 
 SimpleMeta::SimpleMeta() :

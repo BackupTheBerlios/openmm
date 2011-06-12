@@ -23,7 +23,7 @@
 #define UpnpAvRenderer_INCLUDED
 
 #include "Upnp.h"
-#include "UpnpAvTypes.h"
+#include "UpnpAvObject.h"
 #include "Util.h"
 #include "Sys.h"
 
