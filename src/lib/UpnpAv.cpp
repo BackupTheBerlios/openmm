@@ -187,14 +187,15 @@ LastChange::endStateVarVal(int instanceId, const std::string& stateVar)
 void
 LastChange::setStateVar(const ui4& InstanceID, const std::string& name, const Variant& val)
 {
-    _stateVars[InstanceID][name]["val"] = val.getValue();
+    setStateVarAttribute(InstanceID, name, "val", val);
+    notify();
 }
 
 
 void
 LastChange::notify()
 {
-
+    write();
 }
 
 
@@ -265,6 +266,13 @@ LastChange::writeMessageData()
 }
 
 
+void
+LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, const Variant& val)
+{
+    _stateVars[InstanceID][name][attr] = val.getValue();
+}
+
+
 RenderingControlLastChange::RenderingControlLastChange(Service* pService) :
 LastChange(pService)
 {
@@ -275,6 +283,16 @@ void
 RenderingControlLastChange::writeSchemeAttribute()
 {
     _pMessage->setAttribute("xmlns", "urn:schemas-upnp-org:metadata-1-0/RCS/");
+}
+
+
+void
+RenderingControlLastChange::setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, const Variant& val)
+{
+    setStateVarAttribute(InstanceID, name, "val", val);
+    Variant chan(channel);
+    setStateVarAttribute(InstanceID, name, "channel", chan);
+    notify();
 }
 
 

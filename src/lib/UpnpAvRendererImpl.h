@@ -123,8 +123,8 @@ private:
 
     virtual void initStateVars();
 
-    Engine*     _pEngine;
-    LastChange* _pLastChange;
+    Engine*                         _pEngine;
+    RenderingControlLastChange*     _pLastChange;
 };
 
 

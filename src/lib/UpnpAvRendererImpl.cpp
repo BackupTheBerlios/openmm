@@ -31,6 +31,8 @@ namespace Av {
 void
 DevAVTransportRendererImpl::initStateVars()
 {
+    // FIXME: init all engine instances instead of the state vars in the service tree.
+    
     _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
     _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
     _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
@@ -718,7 +720,7 @@ DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::str
 void
 DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
-    Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
+    Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() instance: " + Poco::NumberFormatter::format(InstanceID) + ", channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
     
     _pEngine->setVolume(Channel, DesiredVolume);
     
@@ -727,7 +729,7 @@ DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::str
 //    _setVolume(DesiredVolume);
     Variant val;
     val.setValue(DesiredVolume);
-    _pLastChange->setStateVar(InstanceID, "Volume", val);
+    _pLastChange->setChannelStateVar(InstanceID, Channel, "Volume", val);
 }
 
 

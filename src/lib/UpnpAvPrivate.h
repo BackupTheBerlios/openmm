@@ -59,11 +59,15 @@ protected:
 
     virtual void writeSchemeAttribute() = 0;
 
+    void setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, const Variant& val);
+
+    Poco::AutoPtr<Poco::XML::Element>                                           _pMessage;
+
+private:
     Service*                                                                    _pService;
     std::vector<std::map<std::string, std::map<std::string, std::string> > >    _stateVars;
     std::string                                                                 _message;
     Poco::AutoPtr<Poco::XML::Document>                                          _pDoc;
-    Poco::AutoPtr<Poco::XML::Element>                                           _pMessage;
 };
 
 
@@ -72,10 +76,10 @@ class RenderingControlLastChange : public LastChange
 public:
     RenderingControlLastChange(Service* pService);
 
+    void setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, const Variant& val);
+
 private:
     virtual void writeSchemeAttribute();
-
-    void setChannelVar();
 };
 
 
