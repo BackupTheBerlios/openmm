@@ -522,9 +522,7 @@ CtlRenderingControlImpl::_ansSetLoudness(const ui4& InstanceID, const std::strin
 void
 CtlRenderingControlImpl::_changedLastChange(const std::string& val)
 {
-// begin of your own code
-
-// end of your own code
+    Log::instance()->upnpav().debug("controller rendering control got last change: " + val);
 }
 
 void

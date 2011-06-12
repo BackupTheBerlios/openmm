@@ -79,7 +79,7 @@ Log::Log()
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pEventingLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
@@ -867,11 +867,11 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
         _pDoc = parser.parseString(requestBody.substr(0, requestBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->ctrl().error("could not parse event message, SAX parser exception.");
+        Log::instance()->ctrl().error("could not parse action request, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->ctrl().error("could not parse event message, DOM exception.");
+        Log::instance()->ctrl().error("could not parse action request, DOM exception.");
         return;
     }
 }
@@ -913,7 +913,7 @@ ActionResponseReader::ActionResponseReader(const std::string& responseBody, Acti
 _pActionTemplate(pActionTemplate),
 _pDoc(0)
 {
-//     Log::instance()->ctrl().debug(Omm::Util::format("action response:\n%s", responseBody));
+    Log::instance()->ctrl().debug("action response:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
     Poco::XML::DOMParser parser;
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -926,11 +926,11 @@ _pDoc(0)
         _pDoc = parser.parseString(responseBody.substr(0, responseBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->ctrl().error("could not parse event message, SAX parser exception.");
+        Log::instance()->ctrl().error("could not parse action response, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->ctrl().error("could not parse event message, DOM exception.");
+        Log::instance()->ctrl().error("could not parse action response, DOM exception.");
         return;
     }
 }
@@ -1511,10 +1511,6 @@ void
 Subscription::sendEventMessage(const std::string& eventMessage)
 {
     // TODO: queue the eventMessages for sending ...?
-//     std::string path = _deliveryAddress.getPath();
-//     if (path.substr(0, 1) == "/") {
-//         path = path.substr(1);
-//     }
     Poco::Net::HTTPRequest request("NOTIFY", _pSessionUri->getPath(), "HTTP/1.1");
     request.set("HOST", _pSessionUri->getAuthority());
     request.setContentType("text/xml");
@@ -1522,17 +1518,19 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     request.set("NTS", "upnp:propchange");
     request.set("SID", "uuid:" + _uuid);
     
-//     HTTPRequest* request = newRequest();
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
-    // set request body and send request
-    Log::instance()->event().debug("sending event message to: " + _pSessionUri->toString() + " ...");
-//     std::clog << "Header:" << std::endl;
-//     request.write(std::clog);
+    Log::instance()->event().debug("sending event message to: " + _pSessionUri->toString());
+    std::stringstream ss;
+    request.write(ss);
     
+    // set request body and send request
     std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
-    
+
+    Log::instance()->event().debug("event message request sent: " + ss.str() + Poco::LineEnding::NEWLINE_DEFAULT + eventMessage);
+
+    // FIXME: receive no response from request, controller returns with HTTP 500 internal server error on enclosing action request.
     // receive answer ...
     Poco::Net::HTTPResponse response;
     getSession()->receiveResponse(response);
@@ -2434,10 +2432,12 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         }
         EventMessageReader eventMessageReader(bodyString, _pService);
         eventMessageReader.stateVarValues();
+        response.send();
     }
     else {
         Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.clientAddress().toString());
     }
+    Log::instance()->event().debug("event notification request handler finished.");
 }
 
 
