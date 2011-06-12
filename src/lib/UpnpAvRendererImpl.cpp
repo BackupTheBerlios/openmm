@@ -21,10 +21,12 @@
 
 #include <sstream>
 
+#include "UpnpAv.h"
 #include "UpnpAvRendererImpl.h"
 
 namespace Omm {
 namespace Av {
+
 
 void
 DevAVTransportRendererImpl::initStateVars()
@@ -706,7 +708,10 @@ DevRenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::strin
 void
 DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
-    CurrentVolume = _getVolume();
+    // we don't cache values in the state vars but retreive them directly from the enginge.
+    // reason: we would need instances of the Service tree for each instanceID and channel.
+//    CurrentVolume = _getVolume();
+    CurrentVolume = _pEngine->getVolume(Channel);
 }
 
 
@@ -715,13 +720,14 @@ DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::str
 {
     Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
     
-    _pEngine->setVolume(0, DesiredVolume);
+    _pEngine->setVolume(Channel, DesiredVolume);
     
-    _setVolume(DesiredVolume);
-//    StateVar* pStateVar = _pService->getStateVarReference("Volume");
-//    Variant val;
-//    val.setValue(DesiredVolume);
-    _pLastChange->setStateVar(InstanceID, "Volume");
+    // we don't cache values in the state vars but retreive them directly from the enginge.
+    // reason: we would need instances of the Service tree for each instanceID and channel.
+//    _setVolume(DesiredVolume);
+    Variant val;
+    val.setValue(DesiredVolume);
+    _pLastChange->setStateVar(InstanceID, "Volume", val);
 }
 
 

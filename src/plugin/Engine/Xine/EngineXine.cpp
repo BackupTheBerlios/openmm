@@ -318,14 +318,14 @@ XineEngine::setSpeed(int nom, int denom)
 
 
 void
-XineEngine::setVolume(int channel, float vol)
+XineEngine::setVolume(const std::string& channel, float vol)
 {
     xine_set_param(_xineStream, XINE_PARAM_AUDIO_VOLUME, vol);
 }
 
 
 float
-XineEngine::getVolume(int channel)
+XineEngine::getVolume(const std::string& channel)
 {
     return xine_get_param(_xineStream, XINE_PARAM_AUDIO_VOLUME);
 }

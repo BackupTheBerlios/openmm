@@ -365,7 +365,7 @@ AvStreamEngine::getLengthSeconds()
 
 
 void
-AvStreamEngine::setVolume(int channel, float vol)
+AvStreamEngine::setVolume(const std::string& channel, float vol)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
     _pAudioSink->setVolume(vol);
@@ -374,7 +374,7 @@ AvStreamEngine::setVolume(int channel, float vol)
 
 
 float
-AvStreamEngine::getVolume(int channel)
+AvStreamEngine::getVolume(const std::string& channel)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }

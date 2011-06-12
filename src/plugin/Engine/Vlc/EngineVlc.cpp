@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 #include "EngineVlc.h"
+#include "Omm/UpnpAv.h"
 
 
 // EnginePlugin::VlcEngine(int argc, char **argv) :
@@ -442,19 +443,23 @@ VlcEngine::getLengthSeconds()
 
 
 void
-VlcEngine::setVolume(int channel, float vol)
+VlcEngine::setVolume(const std::string& channel, float vol)
 {
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_audio_set_volume(_pVlcInstance, vol, &_exception);
+    if (channel == Omm::Av::AvChannel::MASTER) {
+        libvlc_audio_set_volume(_pVlcInstance, vol, &_exception);
+    }
 #else
-    libvlc_audio_set_volume(_pVlcPlayer, vol);
+    if (channel == Omm::Av::AvChannel::MASTER) {
+        libvlc_audio_set_volume(_pVlcPlayer, vol);
+    }
 #endif
     handleException();
 }
 
 
 float
-VlcEngine::getVolume(int channel)
+VlcEngine::getVolume(const std::string& channel)
 {
     float res;
 #if LIBVLC_VERSION_INT < 0x110

@@ -73,8 +73,8 @@ public:
     /*
       Rendering Control
     */
-    virtual void setVolume(int channel, float vol) = 0;
-    virtual float getVolume(int channel) = 0;
+    virtual void setVolume(const std::string& channel, float vol) = 0;
+    virtual float getVolume(const std::string& channel) = 0;
     
 protected:
     // TODO: implement endOfStream(), which is called by the engine implementation on end of track

@@ -40,16 +40,16 @@ public:
     LastChange(Service* pService);
     virtual ~LastChange();
 
-    void setStateVar(const ui4& InstanceID, const std::string& stateVarName);
+    void setStateVar(const ui4& InstanceID, const std::string& name, const Variant& val);
 
 protected:
     typedef std::map<std::string, std::map<std::string, std::string> >::iterator StateVarIterator;
-    StateVarIterator beginStateVar();
-    StateVarIterator endStateVar();
+    StateVarIterator beginStateVar(int instanceId);
+    StateVarIterator endStateVar(int instanceId);
 
     typedef std::map<std::string, std::string>::iterator StateVarValIterator;
-    StateVarValIterator beginStateVarVal(const std::string& stateVar);
-    StateVarValIterator endStateVarVal(const std::string& stateVar);
+    StateVarValIterator beginStateVarVal(int instanceId, const std::string& stateVar);
+    StateVarValIterator endStateVarVal(int instanceId, const std::string& stateVar);
 
     void notify();
     void write();
@@ -59,11 +59,11 @@ protected:
 
     virtual void writeSchemeAttribute() = 0;
 
-    Service*                                                        _pService;
-    std::map<std::string, std::map<std::string, std::string> >      _stateVars;
-    std::string                                                     _message;
-    Poco::AutoPtr<Poco::XML::Document>                              _pDoc;
-    Poco::AutoPtr<Poco::XML::Element>                               _pMessage;
+    Service*                                                                    _pService;
+    std::vector<std::map<std::string, std::map<std::string, std::string> > >    _stateVars;
+    std::string                                                                 _message;
+    Poco::AutoPtr<Poco::XML::Document>                                          _pDoc;
+    Poco::AutoPtr<Poco::XML::Element>                                           _pMessage;
 };
 
 
