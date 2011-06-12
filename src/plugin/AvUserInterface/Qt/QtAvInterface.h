@@ -97,6 +97,8 @@ signals:
     void nowPlaying(const QString& title, const QString& artist, const QString& album);
     void startNetworkActivity();
     void stopNetworkActivity();
+        // volume slider
+    void volSliderMoved(int value);
 
 private slots:
     void skipForwardButtonPressed();
@@ -119,7 +121,7 @@ private:
 
 //    virtual void newPosition(int duration, int position);
 //    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
-//    virtual void newVolume(const int volume);
+    virtual void newVolume(const int volume);
 
     int                                 _argc;
 //    QString                             _defaultStyleSheet;

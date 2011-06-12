@@ -523,7 +523,9 @@ void
 CtlRenderingControlImpl::_changedLastChange(const std::string& val)
 {
     Log::instance()->upnpav().debug("controller rendering control got last change: " + val);
+    _pAvUserInterface->newVolume(30);
 }
+
 
 void
 CtlContentDirectoryImpl::_ansGetSearchCapabilities(const std::string& SearchCaps)

@@ -200,6 +200,7 @@ QtAvInterface::initGui()
     _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pControlPanel);
 
     connect(_pVisual, SIGNAL(showMenu(bool)), this, SLOT(showMenu(bool)));
+    connect(this, SIGNAL(volSliderMoved(int)), _pControlPanel, SIGNAL(volSliderMoved(int)));
 
 // TODO: starting of local servers should go in controller application.
 
@@ -603,12 +604,12 @@ void ServerApplication::waitForTerminationRequest()
 //    emit nowPlaying(QString(title.c_str()), QString(artist.c_str()), QString(album.c_str()));
 //}
 //
-//
-//void
-//QtAvInterface::newVolume(const int volume)
-//{
-//    emit volSliderMoved(volume);
-//}
+
+void
+QtAvInterface::newVolume(const int volume)
+{
+    emit volSliderMoved(volume);
+}
 
 
 #ifdef OMMPLUGIN

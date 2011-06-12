@@ -112,7 +112,7 @@ public:
     
     virtual void newPosition(int duration, int position) {}
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album) {}
-    virtual void newVolume(const int volume) {}
+    virtual void newVolume(const int volume) { Log::instance()->upnpav().debug("AVUserInterface new volume: " + Poco::NumberFormatter::format(volume)); }
     virtual void showMenu(bool show) {}
     
     int rendererCount();
