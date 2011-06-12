@@ -295,9 +295,10 @@ Service::setStateVar(std::string key, const T& val)
 {
     // TODO: lock the _stateVariables map because different threads could access it
 //    Log::instance()->upnp().debug("service set state var: " + key);
-    // FIXME: segfault here
 //    Log::instance()->upnp().debug("service type: " + getServiceType());
     _stateVars.setValue(key, val);
+
+    // FIXME: event messages should only be sent on device side, not on controller side.
     if (_stateVars.get(key).getSendEvents()) {
 //        Log::instance()->upnp().debug("state var " + key + " sends event message");
         sendEventMessage(_stateVars.get(key));

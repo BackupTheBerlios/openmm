@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include "UpnpAvPrivate.h"
+
 #include "UpnpAvCtrlImpl.h"
 
 namespace Omm {
@@ -523,7 +525,20 @@ void
 CtlRenderingControlImpl::_changedLastChange(const std::string& val)
 {
     Log::instance()->upnpav().debug("controller rendering control got last change: " + val);
-    _pAvUserInterface->newVolume(30);
+
+    LastChangeReader lastChangeReader;
+    lastChangeReader.read(val);
+
+    // dispatcher code for last change state var
+    for (LastChangeReader::ChangeSetIterator instanceIdIt = lastChangeReader.beginChangeSet(); instanceIdIt != lastChangeReader.endChangeSet(); ++instanceIdIt) {
+        for (LastChangeSet::StateVarIterator it = (*instanceIdIt).beginStateVar(); it != (*instanceIdIt).endStateVar(); ++it) {
+            std::string stateVarName = (*it).first;
+            if (stateVarName == "Volume") {
+                std::string val = (*it).second["val"];
+                _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
+            }
+        }
+    }
 }
 
 

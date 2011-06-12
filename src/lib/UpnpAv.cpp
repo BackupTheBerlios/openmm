@@ -21,6 +21,7 @@
 
 #include <sstream>
 
+#include <Poco/LineEndingConverter.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeIterator.h>
@@ -205,6 +206,81 @@ LastChangeSet::clear()
         (*varIt).second.clear();
     }
     _stateVars.clear();
+}
+
+
+void
+LastChangeSet::readStateVars(Poco::XML::Node* pInstanceId)
+{
+    Poco::XML::Node* pStateVar = pInstanceId->firstChild();
+    while (pStateVar && pStateVar->hasAttributes()) {
+        Log::instance()->upnpav().debug("last change set reader, reading state var: " + pStateVar->nodeName());
+        Poco::XML::NamedNodeMap* pAttributes = pStateVar->attributes();
+        for (int i = 0; i < pAttributes->length(); ++i) {
+            Log::instance()->upnpav().debug("last change set reader, reading attribute: " + pAttributes->item(i)->nodeName() + " = " + pAttributes->item(i)->nodeValue());
+            _stateVars[pStateVar->nodeName()][pAttributes->item(i)->nodeName()] = pAttributes->item(i)->nodeValue();
+        }
+        pAttributes->release();
+        pStateVar = pStateVar->nextSibling();
+    }
+}
+
+
+LastChangeReader::ChangeSetIterator
+LastChangeReader::beginChangeSet()
+{
+    return _changeSet.begin();
+}
+
+
+LastChangeReader::ChangeSetIterator
+LastChangeReader::endChangeSet()
+{
+    return _changeSet.end();
+}
+
+
+void
+LastChangeReader::read(const std::string& message)
+{
+    Log::instance()->upnpav().debug("last change message reader parsing:" + Poco::LineEnding::NEWLINE_DEFAULT + message);
+
+    Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
+    try {
+        _pDoc = parser.parseString(message.substr(0, message.rfind('>') + 1));
+    }
+    catch (Poco::XML::SAXParseException) {
+        Log::instance()->upnpav().error("could not parse last change message, SAX parser exception.");
+        return;
+    }
+    catch (Poco::XML::DOMException) {
+        Log::instance()->upnpav().error("could not parse last change message, DOM exception.");
+        return;
+    }
+
+//    Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
+    Poco::XML::Node* pNode = _pDoc->documentElement();
+
+    while(pNode && (pNode->nodeName() != "Event")) {
+        pNode = pNode->nextSibling();
+    }
+    Poco::XML::Node* pChangeSet = pNode;
+    
+    if (pChangeSet && pChangeSet->hasChildNodes()) {
+        Poco::XML::Node* pInstanceId = pChangeSet->firstChild();
+
+        while (pInstanceId && pInstanceId->hasChildNodes()) {
+            Log::instance()->upnpav().debug("last change set reader, reading instance id: " + pInstanceId->nodeName());
+            _changeSet.push_back(LastChangeSet());
+            _changeSet.back().readStateVars(pInstanceId);
+            pInstanceId = pInstanceId->nextSibling();
+        }
+    }
 }
 
 

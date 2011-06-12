@@ -37,11 +37,6 @@ namespace Av {
 class LastChangeSet
 {
 public:
-    void setStateVarAttribute(const std::string& name, const std::string& attr, const Variant& val);
-    void writeStateVar(Poco::XML::Node* pNode);
-    void clear();
-    
-private:
     typedef std::map<std::string, std::map<std::string, std::string> >::iterator StateVarIterator;
     StateVarIterator beginStateVar();
     StateVarIterator endStateVar();
@@ -50,7 +45,29 @@ private:
     StateVarValIterator beginStateVarVal(const std::string& stateVar);
     StateVarValIterator endStateVarVal(const std::string& stateVar);
 
+    void setStateVarAttribute(const std::string& name, const std::string& attr, const Variant& val);
+    void writeStateVar(Poco::XML::Node* pNode);
+    void clear();
+
+    void readStateVars(Poco::XML::Node* pInstanceId);
+
+private:
     std::map<std::string, std::map<std::string, std::string> >   _stateVars;
+};
+
+
+class LastChangeReader
+{
+public:
+    typedef std::vector<LastChangeSet>::iterator ChangeSetIterator;
+    ChangeSetIterator beginChangeSet();
+    ChangeSetIterator endChangeSet();
+
+    void read(const std::string& message);
+
+private:
+    Poco::AutoPtr<Poco::XML::Document>                                          _pDoc;
+    std::vector<LastChangeSet>                                                  _changeSet;
 };
 
 
