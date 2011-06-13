@@ -131,6 +131,8 @@ protected:
 
     virtual void _changedLastChange(const std::string& val) = 0;
 
+    Service* _pService;
+
 private:
     void _threadSetAVTransportURI(Action* pAction);
     void _threadGetMediaInfo(Action* pAction);
@@ -144,8 +146,6 @@ private:
     void _threadSeek(Action* pAction);
     void _threadNext(Action* pAction);
     void _threadPrevious(Action* pAction);
-
-    Service* _pService;
 };
 
 
@@ -181,13 +181,13 @@ protected:
     virtual void _changedSinkProtocolInfo(const std::string& val) = 0;
     virtual void _changedCurrentConnectionIDs(const std::string& val) = 0;
 
+    Service* _pService;
+
 private:
     void _threadGetProtocolInfo(Action* pAction);
     void _threadConnectionComplete(Action* pAction);
     void _threadGetCurrentConnectionIDs(Action* pAction);
     void _threadGetCurrentConnectionInfo(Action* pAction);
-
-    Service* _pService;
 };
 
 
@@ -246,6 +246,8 @@ protected:
     virtual void _changedSystemUpdateID(const ui4& val) = 0;
     virtual void _changedContainerUpdateIDs(const std::string& val) = 0;
 
+    Service* _pService;
+
 private:
     void _threadGetSearchCapabilities(Action* pAction);
     void _threadGetSortCapabilities(Action* pAction);
@@ -259,8 +261,6 @@ private:
     void _threadGetTransferProgress(Action* pAction);
     void _threadDeleteResource(Action* pAction);
     void _threadCreateReference(Action* pAction);
-
-    Service* _pService;
 };
 
 
@@ -384,6 +384,8 @@ protected:
 
     virtual void _changedLastChange(const std::string& val) = 0;
 
+    Service* _pService;
+
 private:
     void _threadListPresets(Action* pAction);
     void _threadSelectPreset(Action* pAction);
@@ -420,8 +422,6 @@ private:
     void _threadGetVolumeDBRange(Action* pAction);
     void _threadGetLoudness(Action* pAction);
     void _threadSetLoudness(Action* pAction);
-
-    Service* _pService;
 };
 
 

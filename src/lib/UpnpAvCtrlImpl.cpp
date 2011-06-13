@@ -535,7 +535,12 @@ CtlRenderingControlImpl::_changedLastChange(const std::string& val)
             std::string stateVarName = (*it).first;
             if (stateVarName == "Volume") {
                 std::string val = (*it).second["val"];
-                _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
+                // set volume only when this renderer is selected.
+                Log::instance()->upnpav().debug("controller, volume changed on device: " + _pService->getDevice()->getUuid());
+                if (_pAvUserInterface->selectedRendererUuid() == _pService->getDevice()->getUuid()) {
+                    _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
+                }
+                // TODO: remember volume for each renderer tracked by the controller.
             }
         }
     }

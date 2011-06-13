@@ -521,6 +521,18 @@ AvUserInterface::mediaObjectSelected(ControllerObject* pObject)
 }
 
 
+std::string
+AvUserInterface::selectedRendererUuid()
+{
+    if (_pSelectedRenderer) {
+        return _pSelectedRenderer->getDevice()->getUuid();
+    }
+    else {
+        return "";
+    }
+}
+
+
 void
 AvUserInterface::playPressed()
 {

@@ -263,11 +263,11 @@ LastChangeReader::read(const std::string& message)
         return;
     }
 
-//    Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
     Poco::XML::Node* pNode = _pDoc->documentElement();
 
-    while(pNode && (pNode->nodeName() != "Event")) {
-        pNode = pNode->nextSibling();
+    if(pNode && (pNode->nodeName() != "Event")) {
+        Log::instance()->upnpav().error("no valid last change message, ignoring.");
+        return;
     }
     Poco::XML::Node* pChangeSet = pNode;
     

@@ -137,13 +137,15 @@ public:
     void rendererSelected(RendererView* pRenderer);
     void mediaObjectSelected(ControllerObject* pObject);
 
+    std::string selectedRendererUuid();
+
     void setLocalEngine(Engine* pEngine);
     void addLocalServer(AvServer* pServer);
     void startLocalServers();
     void stopLocalServers();
     void startLocalRenderer();
     void stopLocalRenderer();
-    
+
 private:
     void pollPositionInfo(Poco::Timer& timer);
 //    void startFileServers();
