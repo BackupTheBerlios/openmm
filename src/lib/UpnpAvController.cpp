@@ -511,10 +511,15 @@ AvUserInterface::rendererSelected(RendererView* pRenderer)
     std::string sourceInfo;
     std::string sinkInfo;
     _pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
-    std::string volString = _pSelectedRenderer->getDevice()->getService(ServiceType::RC_1)->getStateVar<std::string>("Volume");
-    if (volString != "") {
-        newVolume(Poco::NumberParser::parse(volString));
-    }
+    ui4 instanceId;
+    std::string channel;
+    ui2 volume;
+    _pSelectedRenderer->RenderingControl()->GetVolume(instanceId, channel, volume);
+    newVolume(volume);
+//    std::string volString = _pSelectedRenderer->getDevice()->getService(ServiceType::RC_1)->getStateVar<std::string>("Volume");
+//    if (volString != "") {
+//        newVolume(Poco::NumberParser::parse(volString));
+//    }
 }
 
 
