@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT4_FOUND)
 MESSAGE (STATUS "Qt4 use file: ${QT_USE_FILE}")

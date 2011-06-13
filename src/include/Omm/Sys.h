@@ -49,7 +49,15 @@ class Visual
     /// interface of the OS.
 {
 public:
-    enum VisualType {VTNone, VTX11, VTFB, VTMacOSX, VTWin};
+    enum VisualType {VTNone, VTX11, VTFB, VTOSX, VTWin};
+    
+#ifdef __LINUX__
+    typedef uint32_t WindowHandle;
+#elif __DARWIN__
+    typedef uint32_t WindowHandle;
+#elif __WINDOWS__
+    typedef void* WindowHandle;
+#endif
 
     Visual();
     virtual ~Visual() {}
@@ -57,7 +65,7 @@ public:
     virtual void show() {}
     virtual void hide() {}
 
-    virtual void* getWindow() { return 0; }
+    virtual WindowHandle getWindow() { return 0; }
     virtual VisualType getType() { return VTNone; }
     virtual void renderImage(const std::string& imageData) {}
     virtual void blank() {}

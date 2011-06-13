@@ -80,14 +80,32 @@ VlcEngine::createPlayer()
 
     if (_pVisual) {
         Omm::Av::Log::instance()->upnpav().debug("vlc engine: set visual ...");
-        if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
-            Omm::Av::Log::instance()->upnpav().debug("vlc engine: set x11 visual ...");
+#ifdef __LINUX__
+            Omm::Av::Log::instance()->upnpav().debug("vlc engine: set X11 visual ...");
 #if LIBVLC_VERSION_INT < 0x110
-            libvlc_media_player_set_xwindow(_pVlcPlayer, *(Poco::UInt32*)_pVisual->getWindow(), &_exception);
+            libvlc_media_player_set_xwindow(_pVlcPlayer, _pVisual->getWindow(), &_exception);
 #else
-            libvlc_media_player_set_xwindow(_pVlcPlayer, *(Poco::UInt32*)_pVisual->getWindow());
+            libvlc_media_player_set_xwindow(_pVlcPlayer, _pVisual->getWindow());
 #endif
-        }
+#endif
+#ifdef __DARWIN__
+            Omm::Av::Log::instance()->upnpav().debug("vlc engine: set OSX visual ...");
+#if LIBVLC_VERSION_INT < 0x110
+//            libvlc_media_player_set_nsobject(_pVlcPlayer, _pVisual->getWindow(), &_exception);
+            libvlc_media_player_set_agl(_pVlcPlayer, _pVisual->getWindow(), &_exception);
+#else
+//            libvlc_media_player_set_nsobject(_pVlcPlayer, _pVisual->getWindow());
+            libvlc_media_player_set_agl(_pVlcPlayer, _pVisual->getWindow());
+#endif
+#endif
+#ifdef __WINDOWS__
+            Omm::Av::Log::instance()->upnpav().debug("vlc engine: set Windows visual ...");
+#if LIBVLC_VERSION_INT < 0x110
+            libvlc_media_player_set_hwnd(_pVlcPlayer, _pVisual->getWindow(), &_exception);
+#else
+            libvlc_media_player_set_hwnd(_pVlcPlayer, _pVisual->getWindow());
+#endif
+#endif
         handleException();
     }
     

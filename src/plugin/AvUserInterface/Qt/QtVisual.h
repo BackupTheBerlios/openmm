@@ -39,7 +39,7 @@ public:
     virtual void show();
     virtual void hide();
 
-    virtual void* getWindow();
+    virtual WindowHandle getWindow();
     virtual VisualType getType();
     virtual void renderImage(const std::string& imageData);
     virtual void blank();
@@ -50,11 +50,6 @@ signals:
 
 private slots:
     void slotShowImage(const std::string& imageData);
-
-private:
-#ifdef __LINUX__
-    Poco::UInt32    _x11Window;
-#endif
 };
 
 

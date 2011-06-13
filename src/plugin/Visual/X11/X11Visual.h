@@ -29,7 +29,7 @@ public:
     X11Visual();
     ~X11Visual();
     
-    void* getWindow();
+    WindowHandle getWindow();
     void show();
     void hide();
     Omm::Sys::Visual::VisualType getType();
@@ -37,7 +37,7 @@ public:
 private:
     void createWindow();
 
-    Poco::UInt32*   _pX11Window;
+    WindowHandle    _x11Window;
 };
 
 #endif

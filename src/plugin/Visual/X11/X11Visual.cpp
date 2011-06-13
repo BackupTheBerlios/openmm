@@ -36,16 +36,13 @@ X11Visual::~X11Visual()
 /*    if (xDisplay)
         XCloseDisplay(xDisplay);
     xDisplay = NULL;*/
-    if (_pX11Window) {
-        delete _pX11Window;
-    }
 }
 
 
-void*
+X11Visual::WindowHandle
 X11Visual::getWindow()
 {
-    return _pX11Window;
+    return _x11Window;
 }
 
 
@@ -65,11 +62,10 @@ X11Visual::createWindow()
         setWidth(DisplayWidth(xDisplay, xScreen));
         setHeight(DisplayHeight(xDisplay, xScreen));
     }
-    _pX11Window = new Poco::UInt32;
-    *_pX11Window = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
+    _x11Window = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
                                   xPos, yPos, getWidth(), getHeight(), 1, 0, 0);
     
-    XMapRaised(xDisplay, *_pX11Window);
+    XMapRaised(xDisplay, _x11Window);
 //     res_h = (DisplayWidth(xDisplay, xScreen) * 1000 / DisplayWidthMM(xDisplay, xScreen));
 //     res_v = (DisplayHeight(xDisplay, xScreen) * 1000 / DisplayHeightMM(xDisplay, xScreen));
     XSync(xDisplay, False);
@@ -84,10 +80,10 @@ X11Visual::createWindow()
 
     colormap = DefaultColormap(xDisplay, xScreen);
     XAllocNamedColor(xDisplay, colormap, "black", &black, &dummy);
-    bm_no = XCreateBitmapFromData(xDisplay, *_pX11Window, no_data, 8, 8);
+    bm_no = XCreateBitmapFromData(xDisplay, _x11Window, no_data, 8, 8);
     no_ptr = XCreatePixmapCursor(xDisplay, bm_no, bm_no, &black, &black, 0, 0);
 
-    XDefineCursor(xDisplay, *_pX11Window, no_ptr);
+    XDefineCursor(xDisplay, _x11Window, no_ptr);
     XFreeCursor(xDisplay, no_ptr);
 }
 

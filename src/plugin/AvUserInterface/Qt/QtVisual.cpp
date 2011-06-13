@@ -53,15 +53,10 @@ QtVisual::hide()
 }
 
 
-void*
+QtVisual::WindowHandle
 QtVisual::getWindow()
 {
-#ifdef __LINUX__
-    _x11Window = winId();
-    return &_x11Window;
-#else
-    return 0;
-#endif
+    return winId();
 }
 
 
@@ -72,7 +67,7 @@ QtVisual::getType()
 #ifdef __LINUX__
     return Omm::Sys::Visual::VTX11;
 #elif __DARWIN__
-    return Omm::Sys::Visual::VTMacOSX;
+    return Omm::Sys::Visual::VTOSX;
 #elif __WINDOWS__
     return Omm::Sys::Visual::VTWin;
 #else
