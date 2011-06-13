@@ -47,6 +47,10 @@
 namespace Omm {
 namespace Av {
 
+const std::string ServiceType::AVT_1 = "urn:schemas-upnp-org:service:AVTransport:1";
+const std::string ServiceType::CD_1 = "urn:schemas-upnp-org:service:ContentDirectory:1";
+const std::string ServiceType::CM_1 = "urn:schemas-upnp-org:service:ConnectionManager:1";
+const std::string ServiceType::RC_1 = "urn:schemas-upnp-org:service:RenderingControl:1";
 
 const std::string AvTransportArgument::TRANSPORT_STATE_STOPPED = "STOPPED";
 const std::string AvTransportArgument::TRANSPORT_STATE_PLAYING = "PLAYING";

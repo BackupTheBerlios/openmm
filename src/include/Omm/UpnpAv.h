@@ -30,6 +30,16 @@ namespace Omm {
 namespace Av {
 
 
+class ServiceType
+{
+public:
+    const static std::string RC_1;
+    const static std::string AVT_1;
+    const static std::string CM_1;
+    const static std::string CD_1;
+};
+
+
 class AvTransportArgument
 {
 public:

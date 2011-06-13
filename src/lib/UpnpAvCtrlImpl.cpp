@@ -533,14 +533,15 @@ CtlRenderingControlImpl::_changedLastChange(const std::string& val)
     for (LastChangeReader::ChangeSetIterator instanceIdIt = lastChangeReader.beginChangeSet(); instanceIdIt != lastChangeReader.endChangeSet(); ++instanceIdIt) {
         for (LastChangeSet::StateVarIterator it = (*instanceIdIt).beginStateVar(); it != (*instanceIdIt).endStateVar(); ++it) {
             std::string stateVarName = (*it).first;
+            std::string val = (*it).second["val"];
+            // FIXME: InstanceID and Channel are not honored when storing the new evented value, device tree has only one instance (and one channel).
+            _pService->setStateVar<std::string>(stateVarName, val);
             if (stateVarName == "Volume") {
-                std::string val = (*it).second["val"];
                 // set volume only when this renderer is selected.
                 Log::instance()->upnpav().debug("controller, volume changed on device: " + _pService->getDevice()->getUuid());
                 if (_pAvUserInterface->selectedRendererUuid() == _pService->getDevice()->getUuid()) {
                     _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
                 }
-                // TODO: remember volume for each renderer tracked by the controller.
             }
         }
     }
