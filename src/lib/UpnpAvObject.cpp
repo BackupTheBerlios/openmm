@@ -22,6 +22,9 @@
 #include <cmath>
 #include <sstream>
 
+#ifdef POCO_VERSION_HEADER_FOUND
+#include <Poco/Version.h>
+#endif
 #include <Poco/StringTokenizer.h>
 #include <Poco/NumberParser.h>
 #include <Poco/NumberFormatter.h>

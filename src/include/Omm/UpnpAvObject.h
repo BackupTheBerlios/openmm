@@ -22,6 +22,7 @@
 #ifndef UpnpAvTypes_INCLUDED
 #define UpnpAvTypes_INCLUDED
 
+#include <Poco/AutoPtr.h>
 #include <Poco/Net/MediaType.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
