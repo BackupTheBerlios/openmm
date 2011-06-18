@@ -44,17 +44,24 @@ public:
   
 private slots:
     void fileChanged(const QString& path);
+    void filterChanged();
   
 private:
     bool isLogEntry(const QString& line);
     QChar debugLevel(const QString& line);
+//    void filterDebugLevel(const QChar& level);
+//    void filterChannel(const QChar& level);
     void colorLine(const QString& line);
+    void clear();
+    void reread();
     void appendLine(const QString& line);
 
-    QFile           _file;
-    Ui::LogWidget   _logWidget;
-
-    QFileSystemWatcher* _pMonitor;
+    QFile                   _file;
+    Ui::LogWidget           _logWidget;
+    QFileSystemWatcher*     _pMonitor;
+    QString                 _filter;
+//    QString                 _channelFilter;
+//    QChar                   _levelFilter;
 };
 
 

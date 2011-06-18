@@ -34,7 +34,9 @@ LoganMainWindow::LoganMainWindow(QWidget* pCentralWidget)
 
 
 LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor) :
-_pMonitor(pMonitor)
+_pMonitor(pMonitor),
+_filter("")
+//_channelFilter("")
 {
     _logWidget.setupUi(this);
     _logWidget.logViewer->setReadOnly(true);
@@ -51,6 +53,7 @@ LoganLogger::init()
         appendLine(_file.readLine());
     }
     connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    connect(_logWidget.filterEdit, SIGNAL(editingFinished()), this, SLOT(filterChanged()));
 }
 
 
@@ -90,11 +93,33 @@ LoganLogger::colorLine(const QString& line)
 
 
 void
+LoganLogger::clear()
+{
+    _logWidget.logViewer->clear();
+}
+
+
+void
+LoganLogger::reread()
+{
+    disconnect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    _file.reset();
+    clear();
+    while (!_file.atEnd()) {
+        appendLine(_file.readLine());
+    }
+    connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+}
+
+
+void
 LoganLogger::appendLine(const QString& line)
 {
     colorLine(line);
-    _logWidget.logViewer->insertPlainText(line);
-    _logWidget.logViewer->moveCursor(QTextCursor::End);
+    if (_filter.length() == 0 || line.indexOf(_filter) != -1) {
+        _logWidget.logViewer->insertPlainText(line);
+        _logWidget.logViewer->moveCursor(QTextCursor::End);
+    }
 }
 
 
@@ -104,6 +129,14 @@ LoganLogger::fileChanged(const QString& path)
     while (!_file.atEnd()) {
         appendLine(_file.readLine());
     }
+}
+
+
+void
+LoganLogger::filterChanged()
+{
+    _filter = _logWidget.filterEdit->text();
+    reread();
 }
 
 
