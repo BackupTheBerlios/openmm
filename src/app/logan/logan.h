@@ -36,17 +36,22 @@ public:
 
 class LoganLogger : public QWidget
 {
-  Q_OBJECT
+    Q_OBJECT
   
 public:
-  LoganLogger(QFileSystemWatcher* pMonitor);
+    LoganLogger(QFileSystemWatcher* pMonitor);
   
 private slots:
-  void fileChanged(const QString& path);
+    void fileChanged(const QString& path);
   
 private:
-  QFile _file;
-  Ui::LogWidget _logWidget;
+    void init();
+    bool isLogEntry(const QString& line);
+    QChar debugLevel(const QString& line);
+    void appendLine(const QString& line);
+
+    QFile           _file;
+    Ui::LogWidget   _logWidget;
 
 //   QFileSystemWatcher* _pMonitor;
 };

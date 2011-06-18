@@ -52,7 +52,7 @@ public:
     enum VisualType {VTNone, VTX11, VTFB, VTOSX, VTWin};
     
 #ifdef __LINUX__
-    typedef uint32_t WindowHandle;
+    typedef Poco::UInt32 WindowHandle;
 #elif __DARWIN__
     typedef uint32_t WindowHandle;
 #elif __WINDOWS__

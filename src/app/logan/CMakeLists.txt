@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 2.6)
+# FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
+# against debug and non-debug versions of Qt libs at the same time.
+if(WINDOWS)
+set(CMAKE_BUILD_TYPE "")
+endif(WINDOWS)
 
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui)
 

@@ -19,35 +19,85 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <iostream>
+
+#include <qt4/QtCore/qfile.h>
+
 #include "logan.h"
 
 
 LoganMainWindow::LoganMainWindow(QWidget* pCentralWidget)
 {
-    setGeometry(0, 0, 800, 480);
     setCentralWidget(pCentralWidget);
+    resize(800, 480);
 }
 
 
 LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor)
 {
-  _logWidget.setupUi(this);
-  _logWidget.logViewer->setReadOnly(true);
-  _logWidget.logViewer->setLineWrapMode(QTextEdit::NoWrap);
-  connect(pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    _logWidget.setupUi(this);
+    _logWidget.logViewer->setReadOnly(true);
+    _logWidget.logViewer->setLineWrapMode(QTextEdit::NoWrap);
+    connect(pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
 
 //   _pFile = new QFile(pMonitor->files()[0]);
-  _file.setFileName(pMonitor->files()[0]);
-  _file.open(QIODevice::ReadOnly | QIODevice::Text);
-//   _logWidget.logViewer->append(_file.readLine());
+    _file.setFileName(pMonitor->files()[0]);
+    _file.open(QIODevice::ReadOnly | QIODevice::Text);
+    init();
+}
+
+
+void
+LoganLogger::init()
+{
+    while (!_file.atEnd()) {
+        appendLine(_file.readLine());
+    }
+}
+
+
+bool
+LoganLogger::isLogEntry(const QString& line)
+{
+    return line.length() > 30 && line[2] == ':' && line[5] == ':' && line[8] == '.';
+}
+
+
+QChar
+LoganLogger::debugLevel(const QString& line)
+{
+    return line[line.indexOf(']') + 2];
+}
+
+
+void
+LoganLogger::appendLine(const QString& line)
+{
+    if (isLogEntry(line)) {
+        QChar level = debugLevel(line);
+        if (level == 'E') {
+            _logWidget.logViewer->setTextColor(Qt::red);
+        }
+        else if (level == 'I') {
+            _logWidget.logViewer->setTextColor(Qt::blue);
+        }
+        else {
+            _logWidget.logViewer->setTextColor(Qt::black);
+        }
+    }
+    else {
+        _logWidget.logViewer->setTextColor(Qt::black);
+    }
+    _logWidget.logViewer->append(line.trimmed());
 }
 
 
 void
 LoganLogger::fileChanged(const QString& path)
 {
-//   _logWidget.logViewer->append(_file.readLine());
-  _logWidget.logViewer->insertPlainText(_file.readLine());
+    while (!_file.atEnd()) {
+        appendLine(_file.readLine());
+    }
 }
 
 
