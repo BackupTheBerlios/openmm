@@ -94,6 +94,7 @@ LoganLogger::appendLine(const QString& line)
 {
     colorLine(line);
     _logWidget.logViewer->insertPlainText(line);
+    _logWidget.logViewer->moveCursor(QTextCursor::End);
 }
 
 
