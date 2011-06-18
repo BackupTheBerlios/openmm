@@ -40,24 +40,22 @@ class LoganLogger : public QWidget
   
 public:
     LoganLogger(QFileSystemWatcher* pMonitor);
+    void init();
   
 private slots:
     void fileChanged(const QString& path);
   
 private:
-    void init();
     bool isLogEntry(const QString& line);
     QChar debugLevel(const QString& line);
+    void colorLine(const QString& line);
     void appendLine(const QString& line);
 
     QFile           _file;
     Ui::LogWidget   _logWidget;
 
-//   QFileSystemWatcher* _pMonitor;
+    QFileSystemWatcher* _pMonitor;
 };
 
-// class FileMonitor : public QFileSystemWatcher
-// {
-// };
 
 #endif

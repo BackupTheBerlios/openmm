@@ -33,26 +33,24 @@ LoganMainWindow::LoganMainWindow(QWidget* pCentralWidget)
 }
 
 
-LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor)
+LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor) :
+_pMonitor(pMonitor)
 {
     _logWidget.setupUi(this);
     _logWidget.logViewer->setReadOnly(true);
     _logWidget.logViewer->setLineWrapMode(QTextEdit::NoWrap);
-    connect(pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
-
-//   _pFile = new QFile(pMonitor->files()[0]);
-    _file.setFileName(pMonitor->files()[0]);
-    _file.open(QIODevice::ReadOnly | QIODevice::Text);
-    init();
 }
 
 
 void
 LoganLogger::init()
 {
+    _file.setFileName(_pMonitor->files()[0]);
+    _file.open(QIODevice::ReadOnly | QIODevice::Text);
     while (!_file.atEnd()) {
         appendLine(_file.readLine());
     }
+    connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
 }
 
 
@@ -71,7 +69,7 @@ LoganLogger::debugLevel(const QString& line)
 
 
 void
-LoganLogger::appendLine(const QString& line)
+LoganLogger::colorLine(const QString& line)
 {
     if (isLogEntry(line)) {
         QChar level = debugLevel(line);
@@ -88,7 +86,14 @@ LoganLogger::appendLine(const QString& line)
     else {
         _logWidget.logViewer->setTextColor(Qt::black);
     }
-    _logWidget.logViewer->append(line.trimmed());
+}
+
+
+void
+LoganLogger::appendLine(const QString& line)
+{
+    colorLine(line);
+    _logWidget.logViewer->insertPlainText(line);
 }
 
 
@@ -108,8 +113,10 @@ main(int argc, char** argv)
 
   QFileSystemWatcher monitor;
   monitor.addPath(argv[1]);
-
+  
   LoganLogger* pLogWidget = new LoganLogger(&monitor);
+  pLogWidget->init();
+
   QMainWindow* pMainWindow;
   pMainWindow = new LoganMainWindow(pLogWidget);
   pMainWindow->show();
