@@ -26,27 +26,33 @@
 #include "logan.h"
 
 
-LoganMainWindow::LoganMainWindow(QWidget* pCentralWidget)
-{
-    setCentralWidget(pCentralWidget);
-    resize(800, 480);
-}
-
-
-LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor) :
+LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent) :
+//QMdiSubWindow(parent),
+QWidget(parent),
 _pMonitor(pMonitor),
 _filter("")
 //_channelFilter("")
 {
+//    _pLayout = new QVBoxLayout;
+
+//    _pMainWidget = new QWidget;
+//    setWidget(_pMainWidget);
+//    _logWidget.setupUi(_pMainWidget);
+    
     _logWidget.setupUi(this);
     _logWidget.logViewer->setReadOnly(true);
+    _logWidget.logViewer->setAcceptRichText(false);
     _logWidget.logViewer->setLineWrapMode(QTextEdit::NoWrap);
+
+//    _pLayout->addWidget(&_logWidget);
 }
 
 
 void
 LoganLogger::init()
 {
+    std::clog << "init log window ..." << std::endl;
+
     _file.setFileName(_pMonitor->files()[0]);
     _file.open(QIODevice::ReadOnly | QIODevice::Text);
     while (!_file.atEnd()) {
@@ -54,6 +60,8 @@ LoganLogger::init()
     }
     connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
     connect(_logWidget.filterEdit, SIGNAL(editingFinished()), this, SLOT(filterChanged()));
+
+    std::clog << "init log window finished." << std::endl;
 }
 
 
@@ -140,6 +148,57 @@ LoganLogger::filterChanged()
 }
 
 
+MdiArea::MdiArea(QWidget* parent) :
+QWidget(parent)
+{
+    _pLayout = new QVBoxLayout(this);
+}
+
+
+MdiArea::~MdiArea()
+{
+    delete _pLayout;
+}
+
+
+void
+MdiArea::addSubWindow(QWidget* pSubWindow)
+{
+    pSubWindow->setParent(this);
+    _pLayout->addWidget(pSubWindow);
+}
+
+
+LoganMainWindow::LoganMainWindow()
+{
+//    _pMdiArea = new QMdiArea;
+    _pMdiArea = new MdiArea;
+    setCentralWidget(_pMdiArea);
+    resize(800, 900);
+}
+
+
+LoganMainWindow::~LoganMainWindow()
+{
+    delete _pMdiArea;
+}
+
+
+void
+LoganMainWindow::addLogWindow(LoganLogger* pLogWindow)
+{
+    _pMdiArea->addSubWindow(pLogWindow);
+}
+
+
+void
+LoganMainWindow::tileSubWindows()
+{
+//    _pMdiArea->tileSubWindows();
+//    _pMdiArea->cascadeSubWindows();
+}
+
+
 int
 main(int argc, char** argv)
 {
@@ -147,13 +206,26 @@ main(int argc, char** argv)
 
   QFileSystemWatcher monitor;
   monitor.addPath(argv[1]);
-  
-  LoganLogger* pLogWidget = new LoganLogger(&monitor);
-  pLogWidget->init();
 
-  QMainWindow* pMainWindow;
-  pMainWindow = new LoganMainWindow(pLogWidget);
-  pMainWindow->show();
-    
+  LoganMainWindow mainWindow;
+  mainWindow.show();
+
+  LoganLogger* pLog1 = new LoganLogger(&monitor);
+  pLog1->init();
+  mainWindow.addLogWindow(pLog1);
+  pLog1->show();
+
+  LoganLogger* pLog2 = new LoganLogger(&monitor);
+  pLog2->init();
+  mainWindow.addLogWindow(pLog2);
+  pLog2->show();
+
+//  LoganLogger* pLog3 = new LoganLogger(&monitor);
+//  pLog3->init();
+//  mainWindow.addLogWindow(pLog3);
+//  pLog3->show();
+
+  mainWindow.tileSubWindows();
+
   return app.exec();
 }

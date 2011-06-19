@@ -25,21 +25,14 @@
 #include <QtGui>
 #include "ui_logwidget.h"
 
-class LoganMainWindow : public QMainWindow
-{
-    Q_OBJECT
 
-public:
-    LoganMainWindow(QWidget* pCentralWidget);
-};
-
-
+//class LoganLogger : public QMdiSubWindow
 class LoganLogger : public QWidget
 {
     Q_OBJECT
   
 public:
-    LoganLogger(QFileSystemWatcher* pMonitor);
+    LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent = 0);
     void init();
   
 private slots:
@@ -56,12 +49,45 @@ private:
     void reread();
     void appendLine(const QString& line);
 
+    QVBoxLayout*            _pLayout;
+    QWidget*                _pMainWidget;
     QFile                   _file;
     Ui::LogWidget           _logWidget;
     QFileSystemWatcher*     _pMonitor;
     QString                 _filter;
 //    QString                 _channelFilter;
 //    QChar                   _levelFilter;
+};
+
+
+class MdiArea : public QWidget
+{
+    Q_OBJECT
+public:
+    MdiArea(QWidget* parent = 0);
+    ~MdiArea();
+
+    void addSubWindow(QWidget* pSubWindow);
+
+private:
+    QVBoxLayout*    _pLayout;
+};
+
+
+class LoganMainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    LoganMainWindow();
+    ~LoganMainWindow();
+
+    void addLogWindow(LoganLogger* pLogWindow);
+    void tileSubWindows();
+
+private:
+//    QMdiArea*       _pMdiArea;
+    MdiArea*       _pMdiArea;
 };
 
 
