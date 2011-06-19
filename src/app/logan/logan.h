@@ -27,7 +27,6 @@
 #include "ui_logwidget.h"
 
 
-//class LoganLogger : public QMdiSubWindow
 class LoganLogger : public QWidget
 {
     Q_OBJECT
@@ -41,7 +40,13 @@ private slots:
     void filterChanged();
   
 private:
-    bool isLogEntry(const QString& line);
+    enum LogLevel {NO_LEVEL, TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, CRITICAL, FATAL};
+    enum Channel {NO_CHANNEL, UPNP_GENERAL, UPNP_SSDP, UPNP_HTTP, UPNP_DESC, UPNP_CONTROL, UPNP_EVENT, UPNP_AV};
+
+    void getDebugLevelPosition(const QString& line);
+    void getIsLogEntry(const QString& line);
+    void getLogLevel(const QString& line);
+    void getChannel(const QString& line);
     QChar debugLevel(const QString& line);
 //    void filterDebugLevel(const QChar& level);
 //    void filterChannel(const QChar& level);
@@ -54,12 +59,15 @@ private:
     QVBoxLayout*            _pLayout;
     QWidget*                _pMainWidget;
     QFile                   _file;
-//    std::ifstream           _file;
     Ui::LogWidget           _logWidget;
     QFileSystemWatcher*     _pMonitor;
     QString                 _filter;
 //    QString                 _channelFilter;
 //    QChar                   _levelFilter;
+    bool                    _isLogEntry;
+    int                     _debugLevelPosition;
+    LogLevel                _logLevel;
+    Channel                 _channel;
 };
 
 
@@ -89,7 +97,6 @@ public:
     void tileSubWindows();
 
 private:
-//    QMdiArea*       _pMdiArea;
     MdiArea*       _pMdiArea;
 };
 

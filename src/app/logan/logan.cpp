@@ -27,24 +27,17 @@
 
 
 LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent) :
-//QMdiSubWindow(parent),
 QWidget(parent),
 _pMonitor(pMonitor),
+_logLevel(NO_LEVEL),
+_channel(NO_CHANNEL),
 _filter("")
 //_channelFilter("")
 {
-//    _pLayout = new QVBoxLayout;
-
-//    _pMainWidget = new QWidget;
-//    setWidget(_pMainWidget);
-//    _logWidget.setupUi(_pMainWidget);
-    
     _logWidget.setupUi(this);
     _logWidget.logViewer->setReadOnly(true);
     _logWidget.logViewer->setAcceptRichText(false);
     _logWidget.logViewer->setLineWrapMode(QTextEdit::NoWrap);
-
-//    _pLayout->addWidget(&_logWidget);
 }
 
 
@@ -55,60 +48,109 @@ LoganLogger::init()
 
     _file.setFileName(_pMonitor->files()[0]);
     _file.open(QIODevice::ReadOnly | QIODevice::Text);
-//    while (!_file.atEnd()) {
-//        appendLine(_file.readLine());
-//    }
     QString lines;
     while (!_file.atEnd()) {
         lines += _file.readLine();
     }
     setLines(lines);
-//    _file.open(_pMonitor->files()[0].toAscii());
-//    while (_file) {
-//        std::string line;
-//        std::getline(_file, line);
-//        appendLine(line.c_str());
-//    }
+
     connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
     connect(_logWidget.filterEdit, SIGNAL(returnPressed()), this, SLOT(filterChanged()));
-//    connect(_logWidget.filterEdit, SIGNAL(editingFinished()), this, SLOT(filterChanged()));
 
     std::clog << "init log window finished." << std::endl;
 }
 
 
-bool
-LoganLogger::isLogEntry(const QString& line)
+void
+LoganLogger::getIsLogEntry(const QString& line)
 {
-    return line.length() > 30 && line[2] == ':' && line[5] == ':' && line[8] == '.';
+    _isLogEntry = line.length() > 30 && line[2] == ':' && line[5] == ':' && line[8] == '.';
+}
+
+
+void
+LoganLogger::getLogLevel(const QString& line)
+{
+    if (_isLogEntry) {
+        QChar level = debugLevel(line);
+        if (level == 'E') {
+            _logLevel = ERROR;
+        }
+        else if (level == 'D') {
+            _logLevel = DEBUG;
+        }
+        else if (level == 'I') {
+            _logLevel = INFO;
+        }
+        else {
+            _logLevel = TRACE;
+        }
+    }
+    else {
+        _logLevel = NO_LEVEL;
+    }
+}
+
+
+void
+LoganLogger::getChannel(const QString& line)
+{
+    if (_isLogEntry) {
+        int channelBegin = _debugLevelPosition + 2;
+        int channelEnd = line.indexOf(' ', channelBegin);
+        QStringRef channel = line.midRef(channelBegin, channelEnd - channelBegin);
+        if (channel == "UPNP") {
+            _channel = UPNP_GENERAL;
+        }
+        else if (channel == "UPNP.SSDP") {
+            _channel = UPNP_SSDP;
+        }
+        else {
+            _channel = NO_CHANNEL;
+        }
+    }
+    else {
+        // do nothing, leave same channel as line before.
+    }
+}
+
+
+void
+LoganLogger::getDebugLevelPosition(const QString& line)
+{
+    if (_isLogEntry) {
+        _debugLevelPosition = line.indexOf(']') + 2;
+    }
 }
 
 
 QChar
 LoganLogger::debugLevel(const QString& line)
 {
-    return line[line.indexOf(']') + 2];
+    return line[_debugLevelPosition];
 }
 
 
 void
 LoganLogger::colorLine(const QString& line)
 {
-    if (isLogEntry(line)) {
-        QChar level = debugLevel(line);
-        if (level == 'E') {
-            _logWidget.logViewer->setTextColor(Qt::red);
-        }
-        else if (level == 'I') {
-            _logWidget.logViewer->setTextColor(Qt::blue);
-        }
-        else {
-            _logWidget.logViewer->setTextColor(Qt::black);
-        }
+    QColor color = Qt::gray;
+
+    switch (_logLevel) {
+        case ERROR:
+            color = Qt::red;
+            break;
+        case DEBUG:
+            color = Qt::black;
+            break;
+        case INFO:
+            color = Qt::green;
+            break;
+        case NO_LEVEL:
+            color = Qt::blue;
+            break;
     }
-    else {
-        _logWidget.logViewer->setTextColor(Qt::black);
-    }
+    _logWidget.logViewer->setTextColor(color);
 }
 
 
@@ -128,12 +170,6 @@ LoganLogger::reread()
     while (!_file.atEnd()) {
         appendLine(_file.readLine());
     }
-//    _file.seekg(0);
-//    while (_file) {
-//        std::string line;
-//        std::getline(_file, line);
-//        appendLine(line.c_str());
-//    }
     connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
 }
 
@@ -148,22 +184,28 @@ LoganLogger::setLines(const QString& lines)
 void
 LoganLogger::appendLine(const QString& line)
 {
+    // analyze current line
+    getIsLogEntry(line);
+    getDebugLevelPosition(line);
+    getLogLevel(line);
+    getChannel(line);
+
+    // display line
     colorLine(line);
-    if (_filter.length() == 0 || line.indexOf(_filter) != -1) {
+    if (_channel == UPNP_SSDP) {
         _logWidget.logViewer->insertPlainText(line);
         _logWidget.logViewer->moveCursor(QTextCursor::End);
     }
+//    if (_filter.length() == 0 || line.indexOf(_filter) != -1) {
+//        _logWidget.logViewer->insertPlainText(line);
+//        _logWidget.logViewer->moveCursor(QTextCursor::End);
+//    }
 }
 
 
 void
 LoganLogger::fileChanged(const QString& path)
 {
-//    while (_file) {
-//        std::string line;
-//        std::getline(_file, line);
-//        appendLine(line.c_str());
-//    }
     while (!_file.atEnd()) {
         appendLine(_file.readLine());
     }
@@ -203,7 +245,6 @@ MdiArea::addSubWindow(QWidget* pSubWindow)
 
 LoganMainWindow::LoganMainWindow()
 {
-//    _pMdiArea = new QMdiArea;
     _pMdiArea = new MdiArea;
     setCentralWidget(_pMdiArea);
     resize(800, 900);
@@ -227,7 +268,6 @@ void
 LoganMainWindow::tileSubWindows()
 {
 //    _pMdiArea->tileSubWindows();
-//    _pMdiArea->cascadeSubWindows();
 }
 
 
