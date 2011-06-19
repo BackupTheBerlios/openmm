@@ -22,6 +22,7 @@
 #ifndef logan_INCLUDED
 #define logan_INCLUDED
 
+#include <fstream>
 #include <QtGui>
 #include "ui_logwidget.h"
 
@@ -47,11 +48,13 @@ private:
     void colorLine(const QString& line);
     void clear();
     void reread();
+    void setLines(const QString& lines);
     void appendLine(const QString& line);
 
     QVBoxLayout*            _pLayout;
     QWidget*                _pMainWidget;
     QFile                   _file;
+//    std::ifstream           _file;
     Ui::LogWidget           _logWidget;
     QFileSystemWatcher*     _pMonitor;
     QString                 _filter;

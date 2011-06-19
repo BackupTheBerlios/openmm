@@ -561,8 +561,7 @@ DescriptionReader::parseDescription(const std::string& description)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    Log::instance()->desc().debug("parsing description ...");
-    Log::instance()->desc().debug(description);
+    Log::instance()->desc().debug("parsing description:" + Poco::LineEnding::NEWLINE_DEFAULT + description);
     _pDocStack.push(parser.parseString(description.substr(0, description.rfind('>') + 1)));
     Log::instance()->desc().debug("parsing description finished.");
 }
@@ -829,7 +828,7 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
         res = new std::string;
         return *res;
     }
-    Log::instance()->desc().debug("retrieved description:" + Poco::LineEnding::NEWLINE_DEFAULT + "*BEGIN*" + *res + "*END*");
+    Log::instance()->desc().debug("retrieved description:" + Poco::LineEnding::NEWLINE_DEFAULT + *res);
     return *res;
 }
 
@@ -1193,7 +1192,7 @@ DeviceDescriptionWriter::write()
     
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug("rewrote device description:\n*BEGIN*" + ss.str() + "*END*");
+    Log::instance()->desc().debug("rewrote device description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     return new std::string(ss.str());
 }
 
@@ -1248,7 +1247,7 @@ ServiceDescriptionWriter::write()
 
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug("rewrote service description:" + Poco::LineEnding::NEWLINE_DEFAULT + "*BEGIN*" + ss.str() + "*END*");
+    Log::instance()->desc().debug("rewrote service description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     return new std::string(ss.str());
 }
 
