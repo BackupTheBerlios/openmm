@@ -38,10 +38,31 @@ public:
 private slots:
     void fileChanged(const QString& path);
     void filterChanged();
+    void channelChanged(const QString& chan);
   
 private:
-    enum LogLevel {NO_LEVEL, TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, CRITICAL, FATAL};
-    enum Channel {NO_CHANNEL, UPNP_GENERAL, UPNP_SSDP, UPNP_HTTP, UPNP_DESC, UPNP_CONTROL, UPNP_EVENT, UPNP_AV};
+    enum LogLevel {LEVEL_NONE, TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, CRITICAL, FATAL};
+//    enum Channel {CHANNEL_NONE, CHANNEL_ALL, UPNP_GENERAL, UPNP_SSDP, UPNP_HTTP, UPNP_DESC, UPNP_CONTROL, UPNP_EVENT, UPNP_AV};
+
+    const static QString LOG_LEVEL_NONE;
+    const static QString LOG_LEVEL_TRACE;
+    const static QString LOG_LEVEL_DEBUG;
+    const static QString LOG_LEVEL_INFO;
+    const static QString LOG_LEVEL_NOTICE;
+    const static QString LOG_LEVEL_WARN;
+    const static QString LOG_LEVEL_ERROR;
+    const static QString LOG_LEVEL_CRITICAL;
+    const static QString LOG_LEVEL_FATAL;
+
+    const static QString CHAN_NONE;
+    const static QString CHAN_ALL;
+    const static QString CHAN_UPNP_GENERAL;
+    const static QString CHAN_UPNP_SSDP;
+    const static QString CHAN_UPNP_HTTP;
+    const static QString CHAN_UPNP_DESC;
+    const static QString CHAN_UPNP_CONTROL;
+    const static QString CHAN_UPNP_EVENT;
+    const static QString CHAN_UPNP_AV;
 
     void getDebugLevelPosition(const QString& line);
     void getIsLogEntry(const QString& line);
@@ -67,7 +88,8 @@ private:
     bool                    _isLogEntry;
     int                     _debugLevelPosition;
     LogLevel                _logLevel;
-    Channel                 _channel;
+    QString                 _channel;
+//    Channel                 _channel;
 };
 
 

@@ -19,18 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <qt4/QtCore/qfile.h>
-
 #include <iostream>
-#include <qt4/QtGui/qboxlayout.h>
 #include "logan.h"
+
+
+const QString LoganLogger::LOG_LEVEL_NONE = "";
+const QString LoganLogger::LOG_LEVEL_TRACE = "T";
+const QString LoganLogger::LOG_LEVEL_DEBUG = "D";
+const QString LoganLogger::LOG_LEVEL_INFO = "I";
+const QString LoganLogger::LOG_LEVEL_NOTICE = "N";
+const QString LoganLogger::LOG_LEVEL_WARN = "W";
+const QString LoganLogger::LOG_LEVEL_ERROR = "E";
+const QString LoganLogger::LOG_LEVEL_CRITICAL = "C";
+const QString LoganLogger::LOG_LEVEL_FATAL = "F";
+
+const QString LoganLogger::CHAN_NONE = "";
+const QString LoganLogger::CHAN_ALL = "*";
+const QString LoganLogger::CHAN_UPNP_GENERAL = "UPNP.GENERAL";
+const QString LoganLogger::CHAN_UPNP_SSDP = "UPNP.SSDP";
+const QString LoganLogger::CHAN_UPNP_HTTP = "UPNP.HTTP";
+const QString LoganLogger::CHAN_UPNP_DESC = "UPNP.DESC";
+const QString LoganLogger::CHAN_UPNP_CONTROL = "UPNP.CONTROL";
+const QString LoganLogger::CHAN_UPNP_EVENT = "UPNP.EVENT";
+const QString LoganLogger::CHAN_UPNP_AV = "UPNP.AV";
 
 
 LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent) :
 QWidget(parent),
 _pMonitor(pMonitor),
-_logLevel(NO_LEVEL),
-_channel(NO_CHANNEL),
+_logLevel(LEVEL_NONE),
+//_channel(CHANNEL_NONE),
+_channel(CHAN_NONE),
 _filter("")
 //_channelFilter("")
 {
@@ -48,14 +67,25 @@ LoganLogger::init()
 
     _file.setFileName(_pMonitor->files()[0]);
     _file.open(QIODevice::ReadOnly | QIODevice::Text);
-    QString lines;
-    while (!_file.atEnd()) {
-        lines += _file.readLine();
-    }
-    setLines(lines);
+//    QString lines;
+//    while (!_file.atEnd()) {
+//        lines += _file.readLine();
+//    }
+//    setLines(lines);
+
+    _logWidget.channelSelector->addItem(CHAN_NONE);
+    _logWidget.channelSelector->addItem(CHAN_ALL);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_GENERAL);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_SSDP);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_HTTP);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_DESC);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_CONTROL);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_EVENT);
+    _logWidget.channelSelector->addItem(CHAN_UPNP_AV);
 
     connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
     connect(_logWidget.filterEdit, SIGNAL(returnPressed()), this, SLOT(filterChanged()));
+    connect(_logWidget.channelSelector, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(channelChanged(const QString&)));
 
     std::clog << "init log window finished." << std::endl;
 }
@@ -87,7 +117,7 @@ LoganLogger::getLogLevel(const QString& line)
         }
     }
     else {
-        _logLevel = NO_LEVEL;
+        _logLevel = LEVEL_NONE;
     }
 }
 
@@ -98,16 +128,17 @@ LoganLogger::getChannel(const QString& line)
     if (_isLogEntry) {
         int channelBegin = _debugLevelPosition + 2;
         int channelEnd = line.indexOf(' ', channelBegin);
-        QStringRef channel = line.midRef(channelBegin, channelEnd - channelBegin);
-        if (channel == "UPNP") {
-            _channel = UPNP_GENERAL;
-        }
-        else if (channel == "UPNP.SSDP") {
-            _channel = UPNP_SSDP;
-        }
-        else {
-            _channel = NO_CHANNEL;
-        }
+        _channel = line.mid(channelBegin, channelEnd - channelBegin);
+//        QStringRef channel = line.midRef(channelBegin, channelEnd - channelBegin);
+//        if (channel == CHAN_UPNP_GENERAL) {
+//            _channel = UPNP_GENERAL;
+//        }
+//        else if (channel == CHAN_UPNP_SSDP) {
+//            _channel = UPNP_SSDP;
+//        }
+//        else {
+//            _channel = CHANNEL_NONE;
+//        }
     }
     else {
         // do nothing, leave same channel as line before.
@@ -146,7 +177,7 @@ LoganLogger::colorLine(const QString& line)
         case INFO:
             color = Qt::green;
             break;
-        case NO_LEVEL:
+        case LEVEL_NONE:
             color = Qt::blue;
             break;
     }
@@ -192,7 +223,10 @@ LoganLogger::appendLine(const QString& line)
 
     // display line
     colorLine(line);
-    if (_channel == UPNP_SSDP) {
+
+//    Channel chan = static_cast<Channel>(_logWidget.channelSelector->itemData(_logWidget.channelSelector->currentIndex()));
+    QString selectedChannel = _logWidget.channelSelector->currentText();
+    if (selectedChannel == CHAN_ALL || _channel == selectedChannel) {
         _logWidget.logViewer->insertPlainText(line);
         _logWidget.logViewer->moveCursor(QTextCursor::End);
     }
@@ -216,6 +250,13 @@ void
 LoganLogger::filterChanged()
 {
     _filter = _logWidget.filterEdit->text();
+    reread();
+}
+
+
+void
+LoganLogger::channelChanged(const QString& chan)
+{
     reread();
 }
 
