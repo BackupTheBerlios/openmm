@@ -22,6 +22,7 @@
 #include <iostream>
 #include <QtXml>
 #include <qt4/QtCore/qstring.h>
+#include <qt4/QtGui/qwidget.h>
 #include "logan.h"
 
 
@@ -246,6 +247,9 @@ LoganLogger::appendLine(const QString& line)
         }
     }
     if (_isLogEntry && _channelMatches) {
+//        bool cursorIsAtBottom = _logWidget.logViewer->viewPort()->rect();
+        QScrollBar* scrollBar = _logWidget.logViewer->verticalScrollBar();
+        bool scrolledToBottom = (scrollBar->value() >= scrollBar->maximum() - 50) || !scrollBar->isVisible();
         // NOTE: this relies on the xml message coming always after the non-xml message.
         if (_message.length() || _xmlMessage.length()) {
             colorMessageLine();
@@ -258,13 +262,14 @@ LoganLogger::appendLine(const QString& line)
             if (_isXml) {
                 _isXml = false;
             }
-            _logWidget.logViewer->moveCursor(QTextCursor::End);
             _message = "";
             _xmlMessage = "";
         }
         colorLogLine(line);
         _logWidget.logViewer->insertPlainText(line);
-        _logWidget.logViewer->moveCursor(QTextCursor::End);
+        if (scrolledToBottom) {
+            _logWidget.logViewer->moveCursor(QTextCursor::End);
+        }
     }
 
 //    if (_filter.length() == 0 || line.indexOf(_filter) != -1) {
