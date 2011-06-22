@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <iostream>
+#include <QtXml>
+#include <qt4/QtCore/qstring.h>
 #include "logan.h"
 
 
@@ -48,10 +50,12 @@ LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent) :
 QWidget(parent),
 _pMonitor(pMonitor),
 _logLevel(LEVEL_NONE),
-//_channel(CHANNEL_NONE),
 _channel(CHAN_NONE),
-_filter("")
-//_channelFilter("")
+_channelMatches(false),
+_filter(""),
+_message(""),
+_xmlMessage(""),
+_isXml(false)
 {
     _logWidget.setupUi(this);
     _logWidget.logViewer->setReadOnly(true);
@@ -129,16 +133,6 @@ LoganLogger::getChannel(const QString& line)
         int channelBegin = _debugLevelPosition + 2;
         int channelEnd = line.indexOf(' ', channelBegin);
         _channel = line.mid(channelBegin, channelEnd - channelBegin);
-//        QStringRef channel = line.midRef(channelBegin, channelEnd - channelBegin);
-//        if (channel == CHAN_UPNP_GENERAL) {
-//            _channel = UPNP_GENERAL;
-//        }
-//        else if (channel == CHAN_UPNP_SSDP) {
-//            _channel = UPNP_SSDP;
-//        }
-//        else {
-//            _channel = CHANNEL_NONE;
-//        }
     }
     else {
         // do nothing, leave same channel as line before.
@@ -162,8 +156,24 @@ LoganLogger::debugLevel(const QString& line)
 }
 
 
+QString
+LoganLogger::prettyPrint(const QString& xml)
+{
+    QDomDocument doc;
+    doc.setContent(xml);
+    return doc.toString(2);
+}
+
+
 void
-LoganLogger::colorLine(const QString& line)
+LoganLogger::colorMessageLine()
+{
+    _logWidget.logViewer->setTextColor(Qt::blue);
+}
+
+
+void
+LoganLogger::colorLogLine(const QString& line)
 {
     QColor color = Qt::gray;
 
@@ -215,21 +225,48 @@ LoganLogger::setLines(const QString& lines)
 void
 LoganLogger::appendLine(const QString& line)
 {
-    // analyze current line
-    getIsLogEntry(line);
-    getDebugLevelPosition(line);
-    getLogLevel(line);
-    getChannel(line);
-
-    // display line
-    colorLine(line);
-
-//    Channel chan = static_cast<Channel>(_logWidget.channelSelector->itemData(_logWidget.channelSelector->currentIndex()));
     QString selectedChannel = _logWidget.channelSelector->currentText();
-    if (selectedChannel == CHAN_ALL || _channel == selectedChannel) {
+
+    getIsLogEntry(line);
+    if (_isLogEntry) {
+        getDebugLevelPosition(line);
+        getLogLevel(line);
+        getChannel(line);
+        _channelMatches = (_channel == selectedChannel || selectedChannel == CHAN_ALL);
+    }
+    else if (_channelMatches) {
+        if (line.startsWith("<?xml")) {
+            _isXml = true;
+        }
+        if (_isXml) {
+            _xmlMessage += line;
+        }
+        else {
+            _message += line;
+        }
+    }
+    if (_isLogEntry && _channelMatches) {
+        // NOTE: this relies on the xml message coming always after the non-xml message.
+        if (_message.length() || _xmlMessage.length()) {
+            colorMessageLine();
+            if (_message.length()) {
+                _logWidget.logViewer->insertPlainText(_message);
+            }
+            if (_xmlMessage.length()) {
+                _logWidget.logViewer->insertPlainText(prettyPrint(_xmlMessage));
+            }
+            if (_isXml) {
+                _isXml = false;
+            }
+            _logWidget.logViewer->moveCursor(QTextCursor::End);
+            _message = "";
+            _xmlMessage = "";
+        }
+        colorLogLine(line);
         _logWidget.logViewer->insertPlainText(line);
         _logWidget.logViewer->moveCursor(QTextCursor::End);
     }
+
 //    if (_filter.length() == 0 || line.indexOf(_filter) != -1) {
 //        _logWidget.logViewer->insertPlainText(line);
 //        _logWidget.logViewer->moveCursor(QTextCursor::End);
@@ -337,11 +374,6 @@ main(int argc, char** argv)
     pLog3->init();
     mainWindow.addLogWindow(pLog3);
     pLog3->show();
-
-    LoganLogger* pLog4 = new LoganLogger(&monitor);
-    pLog4->init();
-    mainWindow.addLogWindow(pLog4);
-    pLog4->show();
 
     mainWindow.tileSubWindows();
 

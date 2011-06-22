@@ -42,7 +42,6 @@ private slots:
   
 private:
     enum LogLevel {LEVEL_NONE, TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, CRITICAL, FATAL};
-//    enum Channel {CHANNEL_NONE, CHANNEL_ALL, UPNP_GENERAL, UPNP_SSDP, UPNP_HTTP, UPNP_DESC, UPNP_CONTROL, UPNP_EVENT, UPNP_AV};
 
     const static QString LOG_LEVEL_NONE;
     const static QString LOG_LEVEL_TRACE;
@@ -70,8 +69,9 @@ private:
     void getChannel(const QString& line);
     QChar debugLevel(const QString& line);
 //    void filterDebugLevel(const QChar& level);
-//    void filterChannel(const QChar& level);
-    void colorLine(const QString& line);
+    QString prettyPrint(const QString& xml);
+    void colorMessageLine();
+    void colorLogLine(const QString& line);
     void clear();
     void reread();
     void setLines(const QString& lines);
@@ -83,13 +83,14 @@ private:
     Ui::LogWidget           _logWidget;
     QFileSystemWatcher*     _pMonitor;
     QString                 _filter;
-//    QString                 _channelFilter;
-//    QChar                   _levelFilter;
     bool                    _isLogEntry;
     int                     _debugLevelPosition;
     LogLevel                _logLevel;
     QString                 _channel;
-//    Channel                 _channel;
+    QString                 _message;
+    QString                 _xmlMessage;
+    bool                    _channelMatches;
+    bool                    _isXml;
 };
 
 
