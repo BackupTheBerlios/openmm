@@ -70,7 +70,9 @@ public slots:
     void reread();
 
 private slots:
-    void filterChanged();
+    void search(bool backward = true);
+    void searchBackwards();
+    void searchForwards();
     void channelChanged(const QString& chan);
   
 private:

@@ -20,7 +20,21 @@
       <widget class="QComboBox" name="channelSelector"/>
      </item>
      <item>
-      <widget class="QLineEdit" name="filterEdit"/>
+      <widget class="QPushButton" name="searchBackButton">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="searchForwardButton">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="searchEdit"/>
      </item>
     </layout>
    </item>

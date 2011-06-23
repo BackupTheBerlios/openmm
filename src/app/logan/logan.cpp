@@ -165,8 +165,13 @@ LoganLogger::init()
     connect(_pMonitor, SIGNAL(newLine(const QString&)), this, SLOT(newLine(const QString&)));
     connect(_pMonitor, SIGNAL(fileClosed()), this, SLOT(clear()));
 
-    connect(_logWidget.filterEdit, SIGNAL(returnPressed()), this, SLOT(filterChanged()));
     connect(_logWidget.channelSelector, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(channelChanged(const QString&)));
+    connect(_logWidget.searchEdit, SIGNAL(returnPressed()), this, SLOT(search()));
+    connect(_logWidget.searchBackButton, SIGNAL(pressed()), this, SLOT(searchBackwards()));
+    connect(_logWidget.searchForwardButton, SIGNAL(pressed()), this, SLOT(searchForwards()));
+
+    _logWidget.searchBackButton->setIcon(style()->standardIcon(QStyle::SP_ArrowLeft));
+    _logWidget.searchForwardButton->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
 }
 
 
@@ -357,18 +362,40 @@ LoganLogger::appendLine(const QString& line)
 void
 LoganLogger::newLine(const QString& line)
 {
-//    while (!_file.atEnd()) {
-//        appendLine(_file.readLine());
-//    }
     appendLine(line);
 }
 
 
 void
-LoganLogger::filterChanged()
+LoganLogger::search(bool backward)
 {
-    _filter = _logWidget.filterEdit->text();
-    reread();
+    std::clog << "find: " << _logWidget.searchEdit->text().toStdString() << std::endl;
+
+    QTextDocument::FindFlag findFlag;
+    if (backward) {
+        findFlag = QTextDocument::FindBackward;
+    }
+
+    if (_logWidget.logViewer->find(_logWidget.searchEdit->text(), findFlag)) {
+        std::clog << "found." << std::endl;
+    }
+    else {
+        std::clog << "not found." << std::endl;
+    }
+}
+
+
+void
+LoganLogger::searchBackwards()
+{
+    search(true);
+}
+
+
+void
+LoganLogger::searchForwards()
+{
+    search(false);
 }
 
 
