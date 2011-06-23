@@ -52,7 +52,7 @@ private:
     QFileSystemWatcher      _fileSystemWatcher;
     QFileInfo               _fileInfo;
     QFile                   _file;
-    qint64                  _size;
+    qint64                  _fileSize;
 };
 
 
@@ -62,6 +62,7 @@ class LoganLogger : public QWidget
   
 public:
     LoganLogger(FileWatcher* pMonitor, QWidget* parent = 0);
+    ~LoganLogger();
     void init();
 
 public slots:
@@ -103,7 +104,6 @@ private:
     void getLogLevel(const QString& line);
     void getChannel(const QString& line);
     QChar debugLevel(const QString& line);
-//    void filterDebugLevel(const QChar& level);
     QString prettyPrint(const QString& xml);
     void colorMessageLine();
     void colorLogLine(const QString& line);
@@ -113,7 +113,6 @@ private:
     FileWatcher*            _pMonitor;
     QVBoxLayout*            _pLayout;
     QWidget*                _pMainWidget;
-//    QFile                   _file;
     Ui::LogWidget           _logWidget;
     QString                 _filter;
     bool                    _isLogEntry;
@@ -154,6 +153,22 @@ public:
 
 private:
     MdiArea*       _pMdiArea;
+};
+
+
+class Settings : public QSettings
+{
+    Q_OBJECT
+
+public:
+
+    static Settings* instance();
+
+private:
+    Settings();
+    ~Settings();
+
+    static Settings*   _pInstance;
 };
 
 

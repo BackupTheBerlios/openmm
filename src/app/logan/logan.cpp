@@ -49,7 +49,7 @@ const QString LoganLogger::CHAN_UPNP_AV = "UPNP.AV";
 
 
 FileWatcher::FileWatcher() :
-_size(0)
+_fileSize(0)
 {
 }
 
@@ -57,6 +57,8 @@ _size(0)
 void
 FileWatcher::init(const QString& path)
 {
+//    QString home = QProcessEnvironment::systemEnvironment().value("HOME", ".");
+
     _fileInfo.setFile(path);
     _fileInfo.setCaching(false);
     _fileSystemWatcher.addPath(_fileInfo.path());
@@ -103,11 +105,11 @@ FileWatcher::fileChanged(const QString& path)
         closeFile();
     }
     else {
-        if (_fileInfo.size() < _size) {
+        if (_fileInfo.size() < _fileSize) {
             _file.reset();
             emit fileClosed();
         }
-        _size = _fileInfo.size();
+        _fileSize = _fileInfo.size();
         while(!_file.atEnd()) {
             emit newLine(_file.readLine());
         }
@@ -146,6 +148,12 @@ _isXml(false)
     _logWidget.logViewer->setReadOnly(true);
     _logWidget.logViewer->setAcceptRichText(false);
     _logWidget.logViewer->setLineWrapMode(QTextEdit::NoWrap);
+}
+
+
+LoganLogger::~LoganLogger()
+{
+
 }
 
 
@@ -433,12 +441,15 @@ LoganMainWindow::LoganMainWindow()
 {
     _pMdiArea = new MdiArea;
     setCentralWidget(_pMdiArea);
-    resize(800, 900);
+    QSize windowSize = Settings::instance()->value("mainWindow/size", QSize(800, 900)).toSize();
+    resize(windowSize);
 }
 
 
 LoganMainWindow::~LoganMainWindow()
 {
+    Settings::instance()->setValue("mainWindow/size", size());
+    Settings::instance()->sync();
     delete _pMdiArea;
 }
 
@@ -454,6 +465,34 @@ void
 LoganMainWindow::tileSubWindows()
 {
 //    _pMdiArea->tileSubWindows();
+}
+
+
+Settings* Settings::_pInstance = 0;
+
+Settings::Settings() :
+QSettings("open-multimedia.org", "logan")
+{
+
+}
+
+
+Settings::~Settings()
+{
+    if (_pInstance) {
+        delete _pInstance;
+        _pInstance = 0;
+    }
+}
+
+
+Settings*
+Settings::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Settings;
+    }
+    return _pInstance;
 }
 
 
@@ -485,5 +524,7 @@ main(int argc, char** argv)
 
     mainWindow.tileSubWindows();
 
-    return app.exec();
+    bool ret = app.exec();
+
+    return ret;
 }
