@@ -19,10 +19,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <qt4/QtCore/qfilesystemwatcher.h>
+
+
 #include <iostream>
 #include <QtXml>
-#include <qt4/QtCore/qstring.h>
-#include <qt4/QtGui/qwidget.h>
 #include "logan.h"
 
 
@@ -47,7 +48,90 @@ const QString LoganLogger::CHAN_UPNP_EVENT = "UPNP.EVENT";
 const QString LoganLogger::CHAN_UPNP_AV = "UPNP.AV";
 
 
-LoganLogger::LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent) :
+FileWatcher::FileWatcher() :
+_size(0)
+{
+}
+
+
+void
+FileWatcher::init(const QString& path)
+{
+    _fileInfo.setFile(path);
+    _fileInfo.setCaching(false);
+    _fileSystemWatcher.addPath(_fileInfo.path());
+    connect(&_fileSystemWatcher, SIGNAL(directoryChanged(const QString&)), this, SLOT(directoryChanged(const QString&)));
+    openFile();
+}
+
+
+void
+FileWatcher::openFile()
+{
+    std::clog << "open file " << _fileInfo.absoluteFilePath().toStdString() << std::endl;
+
+    if (_fileInfo.isFile() && _fileInfo.isReadable()) {
+        _file.setFileName(_fileInfo.absoluteFilePath());
+        _file.open(QIODevice::ReadOnly | QIODevice::Text);
+        _fileSystemWatcher.addPath(_fileInfo.absoluteFilePath());
+        connect(&_fileSystemWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    }
+    else {
+        std::clog << "file " << _fileInfo.absoluteFilePath().toStdString() << " not present, waiting ..." << std::endl;
+    }
+}
+
+
+void
+FileWatcher::closeFile()
+{
+    std::clog << "close file " << _fileInfo.absoluteFilePath().toStdString() << std::endl;
+    
+    disconnect(&_fileSystemWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    _fileSystemWatcher.removePath(_fileInfo.absoluteFilePath());
+    _file.close();
+    emit fileClosed();
+}
+
+
+void
+FileWatcher::fileChanged(const QString& path)
+{
+//    std::clog << "file " << path.toStdString() << " changed." << std::endl;
+
+    if (!(_fileInfo.isFile() && _fileInfo.isReadable())) {
+        closeFile();
+    }
+    else {
+        if (_fileInfo.size() < _size) {
+            _file.reset();
+            emit fileClosed();
+        }
+        _size = _fileInfo.size();
+        while(!_file.atEnd()) {
+            emit newLine(_file.readLine());
+        }
+    }
+}
+
+
+void
+FileWatcher::directoryChanged(const QString& path)
+{
+    std::clog << "directory " << path.toStdString() << " changed." << std::endl;
+
+    openFile();
+}
+
+
+QString
+FileWatcher::fileName()
+{
+    return _fileInfo.absoluteFilePath();
+}
+
+
+LoganLogger::LoganLogger(FileWatcher* pMonitor, QWidget* parent) :
 QWidget(parent),
 _pMonitor(pMonitor),
 _logLevel(LEVEL_NONE),
@@ -68,16 +152,6 @@ _isXml(false)
 void
 LoganLogger::init()
 {
-    std::clog << "init log window ..." << std::endl;
-
-    _file.setFileName(_pMonitor->files()[0]);
-    _file.open(QIODevice::ReadOnly | QIODevice::Text);
-//    QString lines;
-//    while (!_file.atEnd()) {
-//        lines += _file.readLine();
-//    }
-//    setLines(lines);
-
     _logWidget.channelSelector->addItem(CHAN_NONE);
     _logWidget.channelSelector->addItem(CHAN_ALL);
     _logWidget.channelSelector->addItem(CHAN_UPNP_GENERAL);
@@ -88,11 +162,11 @@ LoganLogger::init()
     _logWidget.channelSelector->addItem(CHAN_UPNP_EVENT);
     _logWidget.channelSelector->addItem(CHAN_UPNP_AV);
 
-    connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    connect(_pMonitor, SIGNAL(newLine(const QString&)), this, SLOT(newLine(const QString&)));
+    connect(_pMonitor, SIGNAL(fileClosed()), this, SLOT(clear()));
+
     connect(_logWidget.filterEdit, SIGNAL(returnPressed()), this, SLOT(filterChanged()));
     connect(_logWidget.channelSelector, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(channelChanged(const QString&)));
-
-    std::clog << "init log window finished." << std::endl;
 }
 
 
@@ -206,13 +280,15 @@ LoganLogger::clear()
 void
 LoganLogger::reread()
 {
-    disconnect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    disconnect(_pMonitor, SIGNAL(newLine(const QString&)), this, SLOT(newLine(const QString&)));
     clear();
-    _file.reset();
-    while (!_file.atEnd()) {
-        appendLine(_file.readLine());
+    QFile file;
+    file.setFileName(_pMonitor->fileName());
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    while (!file.atEnd()) {
+        appendLine(file.readLine());
     }
-    connect(_pMonitor, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
+    connect(_pMonitor, SIGNAL(newLine(const QString&)), this, SLOT(newLine(const QString&)));
 }
 
 
@@ -247,7 +323,6 @@ LoganLogger::appendLine(const QString& line)
         }
     }
     if (_isLogEntry && _channelMatches) {
-//        bool cursorIsAtBottom = _logWidget.logViewer->viewPort()->rect();
         QScrollBar* scrollBar = _logWidget.logViewer->verticalScrollBar();
         bool scrolledToBottom = (scrollBar->value() >= scrollBar->maximum() - 50) || !scrollBar->isVisible();
         // NOTE: this relies on the xml message coming always after the non-xml message.
@@ -280,11 +355,12 @@ LoganLogger::appendLine(const QString& line)
 
 
 void
-LoganLogger::fileChanged(const QString& path)
+LoganLogger::newLine(const QString& line)
 {
-    while (!_file.atEnd()) {
-        appendLine(_file.readLine());
-    }
+//    while (!_file.atEnd()) {
+//        appendLine(_file.readLine());
+//    }
+    appendLine(line);
 }
 
 
@@ -359,8 +435,8 @@ main(int argc, char** argv)
 {
     QApplication app(argc, argv);
 
-    QFileSystemWatcher monitor;
-    monitor.addPath(argv[1]);
+    FileWatcher monitor;
+    monitor.init(argv[1]);
 
     LoganMainWindow mainWindow;
     mainWindow.show();

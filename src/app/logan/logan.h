@@ -27,16 +27,49 @@
 #include "ui_logwidget.h"
 
 
+class FileWatcher : public QObject
+{
+    Q_OBJECT
+
+public:
+    FileWatcher();
+
+    void init(const QString& path);
+    QString fileName();
+
+signals:
+    void newLine(const QString& line);
+    void fileClosed();
+
+private slots:
+    void fileChanged(const QString& path);
+    void directoryChanged(const QString& path);
+    
+private:
+    void openFile();
+    void closeFile();
+    
+    QFileSystemWatcher      _fileSystemWatcher;
+    QFileInfo               _fileInfo;
+    QFile                   _file;
+    qint64                  _size;
+};
+
+
 class LoganLogger : public QWidget
 {
     Q_OBJECT
   
 public:
-    LoganLogger(QFileSystemWatcher* pMonitor, QWidget* parent = 0);
+    LoganLogger(FileWatcher* pMonitor, QWidget* parent = 0);
     void init();
-  
+
+public slots:
+    void newLine(const QString& line);
+    void clear();
+    void reread();
+
 private slots:
-    void fileChanged(const QString& path);
     void filterChanged();
     void channelChanged(const QString& chan);
   
@@ -72,16 +105,14 @@ private:
     QString prettyPrint(const QString& xml);
     void colorMessageLine();
     void colorLogLine(const QString& line);
-    void clear();
-    void reread();
     void setLines(const QString& lines);
     void appendLine(const QString& line);
 
+    FileWatcher*            _pMonitor;
     QVBoxLayout*            _pLayout;
     QWidget*                _pMainWidget;
-    QFile                   _file;
+//    QFile                   _file;
     Ui::LogWidget           _logWidget;
-    QFileSystemWatcher*     _pMonitor;
     QString                 _filter;
     bool                    _isLogEntry;
     int                     _debugLevelPosition;
