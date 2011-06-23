@@ -46,16 +46,19 @@ const QString LoganLogger::CHAN_UPNP_DESC = "UPNP.DESC";
 const QString LoganLogger::CHAN_UPNP_CONTROL = "UPNP.CONTROL";
 const QString LoganLogger::CHAN_UPNP_EVENT = "UPNP.EVENT";
 const QString LoganLogger::CHAN_UPNP_AV = "UPNP.AV";
+const QString LoganLogger::CHAN_UTIL = "UTIL";
+const QString LoganLogger::CHAN_NET = "NET";
+const QString LoganLogger::CHAN_SYS = "SYS";
 
 
-FileWatcher::FileWatcher() :
+LoganFileWatcher::LoganFileWatcher() :
 _fileSize(0)
 {
 }
 
 
 void
-FileWatcher::init(const QString& path)
+LoganFileWatcher::init(const QString& path)
 {
 //    QString home = QProcessEnvironment::systemEnvironment().value("HOME", ".");
 
@@ -68,7 +71,7 @@ FileWatcher::init(const QString& path)
 
 
 void
-FileWatcher::openFile()
+LoganFileWatcher::openFile()
 {
     std::clog << "open file " << _fileInfo.absoluteFilePath().toStdString() << std::endl;
 
@@ -90,7 +93,7 @@ FileWatcher::openFile()
 
 
 void
-FileWatcher::closeFile()
+LoganFileWatcher::closeFile()
 {
     std::clog << "close file " << _fileInfo.absoluteFilePath().toStdString() << std::endl;
     
@@ -102,7 +105,7 @@ FileWatcher::closeFile()
 
 
 void
-FileWatcher::fileChanged(const QString& path)
+LoganFileWatcher::fileChanged(const QString& path)
 {
     if (!(_fileInfo.isFile() && _fileInfo.isReadable())) {
         closeFile();
@@ -121,7 +124,7 @@ FileWatcher::fileChanged(const QString& path)
 
 
 void
-FileWatcher::directoryChanged(const QString& path)
+LoganFileWatcher::directoryChanged(const QString& path)
 {
     std::clog << "directory " << path.toStdString() << " changed." << std::endl;
 
@@ -130,13 +133,13 @@ FileWatcher::directoryChanged(const QString& path)
 
 
 QString
-FileWatcher::fileName()
+LoganFileWatcher::fileName()
 {
     return _fileInfo.absoluteFilePath();
 }
 
 
-LoganLogger::LoganLogger(FileWatcher* pMonitor, QWidget* parent) :
+LoganLogger::LoganLogger(LoganFileWatcher* pMonitor, QWidget* parent) :
 QWidget(parent),
 _pMonitor(pMonitor),
 _logLevel(LEVEL_NONE),
@@ -172,6 +175,9 @@ LoganLogger::init()
     _logWidget.channelSelector->addItem(CHAN_UPNP_CONTROL);
     _logWidget.channelSelector->addItem(CHAN_UPNP_EVENT);
     _logWidget.channelSelector->addItem(CHAN_UPNP_AV);
+    _logWidget.channelSelector->addItem(CHAN_UTIL);
+    _logWidget.channelSelector->addItem(CHAN_NET);
+    _logWidget.channelSelector->addItem(CHAN_SYS);
 
     connect(_pMonitor, SIGNAL(newLine(const QString&)), this, SLOT(newLine(const QString&)));
     connect(_pMonitor, SIGNAL(fileClosed()), this, SLOT(clear()));
@@ -183,29 +189,26 @@ LoganLogger::init()
 
     _logWidget.searchBackButton->setIcon(style()->standardIcon(QStyle::SP_ArrowLeft));
     _logWidget.searchForwardButton->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
-
-//    QString selectedChannel = _logWidget.channelSelector->currentText();
-//    QString selectedChannel = Settings::instance()->value("");
 }
 
 
 void
 LoganLogger::readConfig(int windowNumber)
 {
-    Settings::instance()->beginGroup("WindowNumber" + QString(windowNumber));
-    QString selectedChannel = Settings::instance()->value("Channel", "").toString();
+    LoganSettings::instance()->beginGroup("WindowNumber" + QString(windowNumber));
+    QString selectedChannel = LoganSettings::instance()->value("Channel", "").toString();
     int index = _logWidget.channelSelector->findText(selectedChannel);
     _logWidget.channelSelector->setCurrentIndex(index);
-    Settings::instance()->endGroup();
+    LoganSettings::instance()->endGroup();
 }
 
 
 void
 LoganLogger::saveConfig(int windowNumber)
 {
-    Settings::instance()->beginGroup("WindowNumber" + QString(windowNumber));
-    Settings::instance()->setValue("Channel", _logWidget.channelSelector->currentText());
-    Settings::instance()->endGroup();
+    LoganSettings::instance()->beginGroup("WindowNumber" + QString(windowNumber));
+    LoganSettings::instance()->setValue("Channel", _logWidget.channelSelector->currentText());
+    LoganSettings::instance()->endGroup();
 }
 
 
@@ -440,7 +443,7 @@ LoganLogger::channelChanged(const QString& chan)
 }
 
 
-MdiArea::MdiArea(QWidget* parent) :
+LoganMdiArea::LoganMdiArea(QWidget* parent) :
 QWidget(parent)
 {
     _pLayout = new QVBoxLayout(this);
@@ -449,14 +452,14 @@ QWidget(parent)
 }
 
 
-MdiArea::~MdiArea()
+LoganMdiArea::~LoganMdiArea()
 {
     delete _pLayout;
 }
 
 
 void
-MdiArea::addSubWindow(QWidget* pSubWindow)
+LoganMdiArea::addSubWindow(QWidget* pSubWindow)
 {
     pSubWindow->setParent(this);
     _pLayout->addWidget(pSubWindow);
@@ -465,16 +468,16 @@ MdiArea::addSubWindow(QWidget* pSubWindow)
 
 LoganMainWindow::LoganMainWindow()
 {
-    _pMdiArea = new MdiArea;
+    _pMdiArea = new LoganMdiArea;
     setCentralWidget(_pMdiArea);
-    QSize windowSize = Settings::instance()->value("mainWindow/size", QSize(800, 900)).toSize();
+    QSize windowSize = LoganSettings::instance()->value("mainWindow/size", QSize(800, 900)).toSize();
     resize(windowSize);
 }
 
 
 LoganMainWindow::~LoganMainWindow()
 {
-    Settings::instance()->setValue("mainWindow/size", size());
+    LoganSettings::instance()->setValue("mainWindow/size", size());
     delete _pMdiArea;
 }
 
@@ -493,9 +496,9 @@ LoganMainWindow::tileSubWindows()
 }
 
 
-Settings* Settings::_pInstance = 0;
+LoganSettings* LoganSettings::_pInstance = 0;
 
-Settings::Settings() :
+LoganSettings::LoganSettings() :
 QSettings("open-multimedia.org", "logan")
 {
 
@@ -503,7 +506,7 @@ QSettings("open-multimedia.org", "logan")
 
 
 void
-Settings::release()
+LoganSettings::release()
 {
     if (_pInstance) {
         _pInstance->sync();
@@ -513,11 +516,11 @@ Settings::release()
 }
 
 
-Settings*
-Settings::instance()
+LoganSettings*
+LoganSettings::instance()
 {
     if (!_pInstance) {
-        _pInstance = new Settings;
+        _pInstance = new LoganSettings;
     }
     return _pInstance;
 }
@@ -528,7 +531,7 @@ main(int argc, char** argv)
 {
     QApplication app(argc, argv);
 
-    FileWatcher monitor;
+    LoganFileWatcher monitor;
     monitor.init(argv[1]);
 
     LoganMainWindow* pMainWindow = new LoganMainWindow;
@@ -546,26 +549,18 @@ main(int argc, char** argv)
     pMainWindow->addLogWindow(pLog2);
     pLog2->show();
 
-    LoganLogger* pLog3 = new LoganLogger(&monitor);
-    pLog3->init();
-    pLog3->readConfig(3);
-    pMainWindow->addLogWindow(pLog3);
-    pLog3->show();
-
     pMainWindow->tileSubWindows();
 
     bool ret = app.exec();
 
-    pLog3->saveConfig(3);
     pLog2->saveConfig(2);
     pLog1->saveConfig(1);
 
-    delete pLog3;
     delete pLog2;
     delete pLog1;
     delete pMainWindow;
 
-    Settings::release();
+    LoganSettings::release();
     
     return ret;
 }

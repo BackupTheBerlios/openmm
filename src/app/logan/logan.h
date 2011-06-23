@@ -27,12 +27,12 @@
 #include "ui_logwidget.h"
 
 
-class FileWatcher : public QObject
+class LoganFileWatcher : public QObject
 {
     Q_OBJECT
 
 public:
-    FileWatcher();
+    LoganFileWatcher();
 
     void init(const QString& path);
     QString fileName();
@@ -61,7 +61,7 @@ class LoganLogger : public QWidget
     Q_OBJECT
   
 public:
-    LoganLogger(FileWatcher* pMonitor, QWidget* parent = 0);
+    LoganLogger(LoganFileWatcher* pMonitor, QWidget* parent = 0);
     ~LoganLogger();
     void init();
     void readConfig(int windowNumber);
@@ -100,6 +100,9 @@ private:
     const static QString CHAN_UPNP_CONTROL;
     const static QString CHAN_UPNP_EVENT;
     const static QString CHAN_UPNP_AV;
+    const static QString CHAN_UTIL;
+    const static QString CHAN_NET;
+    const static QString CHAN_SYS;
 
     void getDebugLevelPosition(const QString& line);
     void getIsLogEntry(const QString& line);
@@ -112,7 +115,7 @@ private:
     void setLines(const QString& lines);
     void appendLine(const QString& line);
 
-    FileWatcher*            _pMonitor;
+    LoganFileWatcher*            _pMonitor;
     QVBoxLayout*            _pLayout;
     QWidget*                _pMainWidget;
     Ui::LogWidget           _logWidget;
@@ -128,12 +131,12 @@ private:
 };
 
 
-class MdiArea : public QWidget
+class LoganMdiArea : public QWidget
 {
     Q_OBJECT
 public:
-    MdiArea(QWidget* parent = 0);
-    ~MdiArea();
+    LoganMdiArea(QWidget* parent = 0);
+    ~LoganMdiArea();
 
     void addSubWindow(QWidget* pSubWindow);
 
@@ -154,23 +157,23 @@ public:
     void tileSubWindows();
 
 private:
-    MdiArea*       _pMdiArea;
+    LoganMdiArea*       _pMdiArea;
 };
 
 
-class Settings : public QSettings
+class LoganSettings : public QSettings
 {
     Q_OBJECT
 
 public:
 
-    static Settings* instance();
+    static LoganSettings* instance();
     static void release();
 
 private:
-    Settings();
+    LoganSettings();
 
-    static Settings*   _pInstance;
+    static LoganSettings*   _pInstance;
 };
 
 

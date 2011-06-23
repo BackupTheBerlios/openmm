@@ -911,7 +911,7 @@ ActionResponseReader::ActionResponseReader(const std::string& responseBody, Acti
 _pActionTemplate(pActionTemplate),
 _pDoc(0)
 {
-    Log::instance()->ctrl().debug("action response:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
+//    Log::instance()->ctrl().debug("action response:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
     Poco::XML::DOMParser parser;
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
