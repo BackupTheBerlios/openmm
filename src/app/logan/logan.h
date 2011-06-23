@@ -163,10 +163,10 @@ class Settings : public QSettings
 public:
 
     static Settings* instance();
+    static void release();
 
 private:
     Settings();
-    ~Settings();
 
     static Settings*   _pInstance;
 };

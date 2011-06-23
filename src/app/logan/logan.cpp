@@ -449,7 +449,6 @@ LoganMainWindow::LoganMainWindow()
 LoganMainWindow::~LoganMainWindow()
 {
     Settings::instance()->setValue("mainWindow/size", size());
-    Settings::instance()->sync();
     delete _pMdiArea;
 }
 
@@ -477,9 +476,11 @@ QSettings("open-multimedia.org", "logan")
 }
 
 
-Settings::~Settings()
+void
+Settings::release()
 {
     if (_pInstance) {
+        _pInstance->sync();
         delete _pInstance;
         _pInstance = 0;
     }
@@ -504,27 +505,34 @@ main(int argc, char** argv)
     FileWatcher monitor;
     monitor.init(argv[1]);
 
-    LoganMainWindow mainWindow;
-    mainWindow.show();
+    LoganMainWindow* pMainWindow = new LoganMainWindow;
+    pMainWindow->show();
 
     LoganLogger* pLog1 = new LoganLogger(&monitor);
     pLog1->init();
-    mainWindow.addLogWindow(pLog1);
+    pMainWindow->addLogWindow(pLog1);
     pLog1->show();
 
     LoganLogger* pLog2 = new LoganLogger(&monitor);
     pLog2->init();
-    mainWindow.addLogWindow(pLog2);
+    pMainWindow->addLogWindow(pLog2);
     pLog2->show();
 
     LoganLogger* pLog3 = new LoganLogger(&monitor);
     pLog3->init();
-    mainWindow.addLogWindow(pLog3);
+    pMainWindow->addLogWindow(pLog3);
     pLog3->show();
 
-    mainWindow.tileSubWindows();
+    pMainWindow->tileSubWindows();
 
     bool ret = app.exec();
 
+    delete pLog3;
+    delete pLog2;
+    delete pLog1;
+    delete pMainWindow;
+
+    Settings::release();
+    
     return ret;
 }
