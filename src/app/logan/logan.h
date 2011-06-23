@@ -64,6 +64,8 @@ public:
     LoganLogger(FileWatcher* pMonitor, QWidget* parent = 0);
     ~LoganLogger();
     void init();
+    void readConfig(int windowNumber);
+    void saveConfig(int windowNumber);
 
 public slots:
     void newLine(const QString& line);

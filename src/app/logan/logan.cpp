@@ -72,6 +72,11 @@ FileWatcher::openFile()
 {
     std::clog << "open file " << _fileInfo.absoluteFilePath().toStdString() << std::endl;
 
+    if (_file.isOpen()) {
+        std::clog << "file " << _fileInfo.absoluteFilePath().toStdString() << " already open, doing nothing." << std::endl;
+        return;
+    }
+
     if (_fileInfo.isFile() && _fileInfo.isReadable()) {
         _file.setFileName(_fileInfo.absoluteFilePath());
         _file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -99,8 +104,6 @@ FileWatcher::closeFile()
 void
 FileWatcher::fileChanged(const QString& path)
 {
-//    std::clog << "file " << path.toStdString() << " changed." << std::endl;
-
     if (!(_fileInfo.isFile() && _fileInfo.isReadable())) {
         closeFile();
     }
@@ -180,6 +183,29 @@ LoganLogger::init()
 
     _logWidget.searchBackButton->setIcon(style()->standardIcon(QStyle::SP_ArrowLeft));
     _logWidget.searchForwardButton->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
+
+//    QString selectedChannel = _logWidget.channelSelector->currentText();
+//    QString selectedChannel = Settings::instance()->value("");
+}
+
+
+void
+LoganLogger::readConfig(int windowNumber)
+{
+    Settings::instance()->beginGroup("WindowNumber" + QString(windowNumber));
+    QString selectedChannel = Settings::instance()->value("Channel", "").toString();
+    int index = _logWidget.channelSelector->findText(selectedChannel);
+    _logWidget.channelSelector->setCurrentIndex(index);
+    Settings::instance()->endGroup();
+}
+
+
+void
+LoganLogger::saveConfig(int windowNumber)
+{
+    Settings::instance()->beginGroup("WindowNumber" + QString(windowNumber));
+    Settings::instance()->setValue("Channel", _logWidget.channelSelector->currentText());
+    Settings::instance()->endGroup();
 }
 
 
@@ -510,22 +536,29 @@ main(int argc, char** argv)
 
     LoganLogger* pLog1 = new LoganLogger(&monitor);
     pLog1->init();
+    pLog1->readConfig(1);
     pMainWindow->addLogWindow(pLog1);
     pLog1->show();
 
     LoganLogger* pLog2 = new LoganLogger(&monitor);
     pLog2->init();
+    pLog2->readConfig(2);
     pMainWindow->addLogWindow(pLog2);
     pLog2->show();
 
     LoganLogger* pLog3 = new LoganLogger(&monitor);
     pLog3->init();
+    pLog3->readConfig(3);
     pMainWindow->addLogWindow(pLog3);
     pLog3->show();
 
     pMainWindow->tileSubWindows();
 
     bool ret = app.exec();
+
+    pLog3->saveConfig(3);
+    pLog2->saveConfig(2);
+    pLog1->saveConfig(1);
 
     delete pLog3;
     delete pLog2;
