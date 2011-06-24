@@ -561,9 +561,9 @@ DescriptionReader::parseDescription(const std::string& description)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-    Log::instance()->desc().debug("parsing description:" + Poco::LineEnding::NEWLINE_DEFAULT + description);
+//    Log::instance()->desc().debug("parsing description:" + Poco::LineEnding::NEWLINE_DEFAULT + description);
     _pDocStack.push(parser.parseString(description.substr(0, description.rfind('>') + 1)));
-    Log::instance()->desc().debug("parsing description finished.");
+//    Log::instance()->desc().debug("parsing description finished.");
 }
 
 
@@ -1018,9 +1018,9 @@ EventMessageReader::stateVar(Poco::XML::Node* pNode)
         Poco::XML::Node* pStateVarNode = pNode->firstChild();
         std::string stateVarName = pStateVarNode->nodeName();
         std::string stateVarValue = pStateVarNode->innerText();
-        Log::instance()->event().debug("event message reader got state var: " + stateVarName + ", value: " + stateVarValue);
+//        Log::instance()->event().debug("event message reader got state var: " + stateVarName + ", value: " + stateVarValue);
         _pService->setStateVar<std::string>(stateVarName, stateVarValue);
-        Log::instance()->event().debug("calling event handler of state var: " + stateVarName);
+        Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue);
         StateVar* pStateVar = _pService->getStateVarReference(stateVarName);
         _pService->getDevice()->getCtlDevice()->eventHandler(pStateVar);
     }
@@ -1526,7 +1526,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
 
-    Log::instance()->event().debug("event message request sent: " + ss.str() + Poco::LineEnding::NEWLINE_DEFAULT + eventMessage);
+    Log::instance()->event().debug("event message request sent: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + eventMessage);
 
     // FIXME: receive no response from request, controller returns with HTTP 500 internal server error on enclosing action request.
     // receive answer ...
@@ -1545,6 +1545,71 @@ Subscription::renew(int seconds)
 void
 Subscription::expire(Poco::Timer& timer)
 {
+}
+
+
+EventMessageQueue::EventMessageQueue(Service* pService) :
+_pService(pService),
+_maxEventRate(200),
+_pModeratorTimer(0),
+_timerIsRunning(false),
+_firstStart(true)
+{
+}
+
+
+EventMessageQueue::~EventMessageQueue()
+{
+    if (_pModeratorTimer) {
+        delete _pModeratorTimer;
+    }
+}
+
+
+void
+EventMessageQueue::queueStateVar(StateVar& stateVar)
+{
+    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
+    
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+
+    _stateVars.insert(&stateVar);
+    if (!_timerIsRunning) {
+        Log::instance()->event().debug("starting timer ...");
+        _timerIsRunning = true;
+        if (_pModeratorTimer) {
+            delete _pModeratorTimer;
+        }
+        // need to create a new Poco::Timer, because same timer can't be reused (works perhaps twice, but not the third time).
+        _pModeratorTimer = new Poco::Timer(_maxEventRate);
+        _pModeratorTimer->start(Poco::TimerCallback<EventMessageQueue> (*this, &EventMessageQueue::sendEventMessage));
+        Log::instance()->event().debug("timer started.");
+    }
+    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " finished.");
+}
+
+
+void
+EventMessageQueue::sendEventMessage(Poco::Timer& timer)
+{
+    Log::instance()->event().debug("event message queue sends event notifications ...");
+
+    _lock.lock();
+    _timerIsRunning = false;
+    std::string eventMessage;
+    EventMessageWriter messageWriter;
+    for (std::set<StateVar*>::iterator it = _stateVars.begin(); it != _stateVars.end(); ++it) {
+        messageWriter.stateVar(**it);
+    }
+    _stateVars.clear();
+    _lock.unlock();
+    
+    messageWriter.write(eventMessage);
+
+    for (Service::SubscriptionIterator i = _pService->beginEventSubscription(); i != _pService->endEventSubscription(); ++i) {
+        (*i)->sendEventMessage(eventMessage);
+    }
+    Log::instance()->event().debug("event message queue sends event notifications finished.");
 }
 
 
@@ -1612,13 +1677,16 @@ StateVar::getSendEvents() const
 
 
 Service::Service() :
-_pControllerSubscriptionData(new Subscription)
+_pControllerSubscriptionData(new Subscription),
+_eventingEnabled(true),
+_pEventMessageQueue(new EventMessageQueue(this))
 {
 }
 
 
 Service::~Service()
 {
+    delete _pEventMessageQueue;
     delete _pControllerSubscriptionData;
 }
 
@@ -1864,8 +1932,9 @@ Service::addEventCallbackPath(const std::string path)
 
 
 void
-Service::init()
+Service::initController()
 {
+    _eventingEnabled = false;
     _baseUri = Poco::URI(getDevice()->getDeviceContainer()->getDescriptionUri());
 }
 
@@ -2101,6 +2170,13 @@ Service::unregisterSubscription(Subscription* subscription)
     if (subscription) {
         delete subscription;
     }
+}
+
+
+void
+Service::queueEventMessage(StateVar& stateVar)
+{
+    _pEventMessageQueue->queueStateVar(stateVar);
 }
 
 
@@ -3538,7 +3614,7 @@ void
 CtlDeviceCode::init()
 {
     for (Device::ServiceIterator i = _pDevice->beginService(); i != _pDevice->endService(); ++i) {
-        (*i)->init();
+        (*i)->initController();
     }
 }
 

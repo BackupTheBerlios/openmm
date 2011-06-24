@@ -546,6 +546,27 @@ private:
 };
 
 
+class EventMessageQueue
+{
+public:
+    EventMessageQueue(Service* pService);
+    ~EventMessageQueue();
+
+    void queueStateVar(StateVar& stateVar);
+
+private:
+    void sendEventMessage(Poco::Timer& timer);
+    
+    Service*                _pService;
+    std::set<StateVar*>     _stateVars;
+    const int               _maxEventRate;  // event / _maxEventRate msec
+    Poco::Timer*            _pModeratorTimer;
+    bool                    _timerIsRunning;
+    bool                    _firstStart;
+    Poco::FastMutex         _lock;
+};
+
+
 class DeviceData
 {
     friend class Device;

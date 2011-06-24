@@ -76,7 +76,7 @@ class SsdpSocket;
 class SsdpMessage;
 class SsdpMessageSet;
 class Subscription;
-
+class EventMessageQueue;
 
 
 class DescriptionProvider
@@ -239,7 +239,7 @@ public:
     void addStateVar(StateVar* pStateVar);
     void addEventCallbackPath(const std::string path);
 
-    void init();
+    void initController();
     void sendAction(Action* pAction);
 
     void sendSubscriptionRequest(unsigned int duration = 0, bool renew = false);
@@ -249,6 +249,7 @@ public:
 
     // TODO: moderated event messaging
     // TODO: honor maximumRate and minimumDelta (specs p. 72)
+    void queueEventMessage(StateVar& stateVar);
     void sendEventMessage(StateVar& stateVar);
     void sendInitialEventMessage(Subscription* pSubscription);
 
@@ -268,12 +269,13 @@ private:
     ControlRequestHandler*                  _controlRequestHandler;
     std::string                             _eventSubscriptionPath;
     std::vector<std::string>                _eventCallbackPaths;
-    // PROPOSE: add EventRequestHandler* for Controller here??
     Container<Action>                       _actions;
     Container<StateVar>                     _stateVars;
     Container<StateVar>                     _eventedStateVars;
     Container<Subscription>                 _eventSubscriptions;
     Subscription*                           _pControllerSubscriptionData;
+    bool                                    _eventingEnabled;
+    EventMessageQueue*                      _pEventMessageQueue;
 
     Poco::FastMutex                         _serviceLock;
 };
@@ -283,8 +285,8 @@ template<typename T>
 T
 Service::getStateVar(const std::string& key)
 {
-    // TODO: lock the _stateVariables map because different threads could access it
-//     std::clog << "Service::getStateVar()" << std::endl;
+    Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
+
     return _stateVars.getValue<T>(key);
 }
 
@@ -293,17 +295,14 @@ template<typename T>
 void
 Service::setStateVar(std::string key, const T& val)
 {
-    // TODO: lock the _stateVariables map because different threads could access it
-//    Log::instance()->upnp().debug("service set state var: " + key);
-//    Log::instance()->upnp().debug("service type: " + getServiceType());
-    _stateVars.setValue(key, val);
+   Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
 
-    // FIXME: event messages should only be sent on device side, not on controller side.
-    if (_stateVars.get(key).getSendEvents()) {
-//        Log::instance()->upnp().debug("state var " + key + " sends event message");
-        sendEventMessage(_stateVars.get(key));
+    _stateVars.setValue(key, val);
+    StateVar& stateVar = _stateVars.get(key);
+
+    if (_eventingEnabled && stateVar.getSendEvents()) {
+        queueEventMessage(stateVar);
     }
-//    Log::instance()->upnp().debug("service set state var: " + key + " finished.");
 }
 
 
