@@ -56,7 +56,7 @@ static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 class DescriptionProvider;
 class DeviceManager;
 class Controller;
-class UserInterface;
+class ControllerUserInterface;
 class DeviceContainer;
 class Device;
 class DeviceData;
@@ -420,14 +420,14 @@ public:
     void start();
     void stop();
 
-    void setUserInterface(UserInterface* pUserInterface);
-    UserInterface* getUserInterface();
+    void setUserInterface(ControllerUserInterface* pUserInterface);
+    ControllerUserInterface* getUserInterface();
 
 protected:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
 
-    UserInterface*                      _pUserInterface;
+    ControllerUserInterface*                      _pUserInterface;
 
 private:
     void sendMSearch();
@@ -435,6 +435,37 @@ private:
 //    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
     void update();
+};
+
+
+class ControllerUserInterface
+{
+    friend class Controller;
+    friend class Service;
+
+public:
+    // TODO: pass command line arguments to user interface gui-toolkit
+    virtual int eventLoop() { return 0; }
+    virtual void initGui() {}
+    virtual void showMainWindow() {}
+//     virtual void hideMainWindow() {};
+    virtual Sys::Visual* getVisual() { return 0; }
+    virtual void setFullscreen(bool fullscreen) {}
+    virtual void resize(int width, int height) {}
+
+protected:
+    virtual void beginAddDeviceContainer(int position) {}
+    /// Before a device container is added, beginAddDevice() is called.
+    virtual void beginRemoveDeviceContainer(int position) {}
+    /// Before a device container is removed, beginRemoveDevice() is called.
+    virtual void endAddDeviceContainer(int position) {}
+    /// After adding a device container, endAddDevice() is called.
+    virtual void endRemoveDeviceContainer(int position) {}
+    /// After removing a device container, endRemoveDevice() is called.
+
+    virtual void error(const std::string& message) {}
+    virtual void beginNetworkActivity() {}
+    virtual void endNetworkActivity() {}
 };
 
 
@@ -584,37 +615,6 @@ private:
     DeviceData*                         _pDeviceData;
     DevDeviceCode*                      _pDevDeviceCode;
     CtlDeviceCode*                      _pCtlDeviceCode;
-};
-
-
-class UserInterface
-{
-    friend class Controller;
-    friend class Service;
-    
-public:
-    // TODO: pass command line arguments to user interface gui-toolkit
-    virtual int eventLoop() { return 0; }
-    virtual void initGui() {}
-    virtual void showMainWindow() {}
-//     virtual void hideMainWindow() {};
-    virtual Sys::Visual* getVisual() { return 0; }
-    virtual void setFullscreen(bool fullscreen) {}
-    virtual void resize(int width, int height) {}
-    
-protected:
-    virtual void beginAddDeviceContainer(int position) {}
-    /// Before a device container is added, beginAddDevice() is called.
-    virtual void beginRemoveDeviceContainer(int position) {}
-    /// Before a device container is removed, beginRemoveDevice() is called.
-    virtual void endAddDeviceContainer(int position) {}
-    /// After adding a device container, endAddDevice() is called.
-    virtual void endRemoveDeviceContainer(int position) {}
-    /// After removing a device container, endRemoveDevice() is called.
-    
-    virtual void error(const std::string& message) {}
-    virtual void beginNetworkActivity() {}
-    virtual void endNetworkActivity() {}
 };
 
 

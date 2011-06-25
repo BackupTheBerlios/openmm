@@ -29,6 +29,7 @@
 
 #include <Omm/UpnpAvController.h>
 #include <Omm/UpnpAvRenderer.h>
+//#include <Omm/UpnpAvApplication.h>
 #include <Omm/Util.h>
 
 
@@ -40,7 +41,7 @@ public:
         _fullscreen(false),
         _width(800),
         _height(480),
-        _name("OMM Renderer")
+        _name("OMM")
     {
         setUnixOptions(true);
     }
@@ -151,6 +152,8 @@ protected:
 
             Omm::Av::AvController controller;
             controller.setUserInterface(pUserInterface);
+//            Omm::Av::AvApplication application;
+//            application.setUserInterface(pUserInterface);
             pUserInterface->initGui();
             pUserInterface->resize(_width, _height);
             pUserInterface->setFullscreen(_fullscreen);
@@ -162,7 +165,7 @@ protected:
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pIcon);
             if (_name != "") {
-                mediaRenderer.setFriendlyName(_name);
+                mediaRenderer.setFriendlyName("OMM Renderer");
             }
 
             // create a device container and put media renderer device in it.

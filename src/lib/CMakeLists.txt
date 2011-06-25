@@ -65,6 +65,7 @@ CACHE INTERNAL libommnet
 
 add_library(ommupnp
 Upnp.cpp
+UpnpApplication.cpp
 )
 
 target_link_libraries(ommupnp

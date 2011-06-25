@@ -1948,7 +1948,7 @@ Service::actionNetworkActivity(bool begin)
 {
     Controller* pController = getDevice()->getDeviceContainer()->getController();
     if (pController) {
-        UserInterface* pUserInterface = pController->getUserInterface();
+        ControllerUserInterface* pUserInterface = pController->getUserInterface();
         if (pUserInterface) {
             if (begin) {
                 pUserInterface->beginNetworkActivity();
@@ -3678,13 +3678,13 @@ Controller::stop()
 
 
 void
-Controller::setUserInterface(UserInterface* pUserInterface)
+Controller::setUserInterface(ControllerUserInterface* pUserInterface)
 {
     _pUserInterface = pUserInterface;
 }
 
 
-UserInterface*
+ControllerUserInterface*
 Controller::getUserInterface()
 {
     return _pUserInterface;

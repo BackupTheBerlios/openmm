@@ -35,9 +35,6 @@ class ServerController;
 class AvController;
 class CtlMediaServer;
 class CtlMediaRenderer;
-class Engine;
-class AvServer;
-class AvRenderer;
 
 class RendererView
 {
@@ -90,7 +87,7 @@ private:
 };
 
 
-class AvUserInterface : public UserInterface
+class AvUserInterface : public ControllerUserInterface
 {
     friend class AvController;
     
@@ -137,28 +134,21 @@ public:
     void rendererSelected(RendererView* pRenderer);
     void mediaObjectSelected(ControllerObject* pObject);
 
+    int selectedRendererIndex();
     std::string selectedRendererUuid();
-
-    void setLocalEngine(Engine* pEngine);
-    void addLocalServer(AvServer* pServer);
-    void startLocalServers();
-    void stopLocalServers();
-    void startLocalRenderer();
-    void stopLocalRenderer();
 
 private:
     void pollPositionInfo(Poco::Timer& timer);
-//    void startFileServers();
-//    void startWebradio();
     
     AvController*                         _pAvController;
+    RendererView*                         _pSelectedRendererView;
     CtlMediaRenderer*                     _pSelectedRenderer;
     ControllerObject*                     _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
 
-    Engine*                               _pEngine;
-    AvRenderer*                           _pRenderer;
-    std::vector<AvServer*>                _localServers;
+//    Engine*                               _pEngine;
+//    AvRenderer*                           _pRenderer;
+//    std::vector<AvServer*>                _localServers;
 };
 
 
@@ -170,6 +160,7 @@ public:
     int rendererCount();
     int serverCount();
     RendererView* rendererView(int numRenderer);
+    int rendererIndex(RendererView* pRendererView);
     ControllerObject* serverRootObject(int numServer);
     Device* serverDevice(int numServer);
     
