@@ -19,9 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <qt4/QtCore/qfilesystemwatcher.h>
-
-
 #include <iostream>
 #include <QtXml>
 #include "logan.h"

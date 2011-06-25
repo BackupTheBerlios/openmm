@@ -247,8 +247,8 @@ public:
     void registerSubscription(Subscription* subscription);
     void unregisterSubscription(Subscription* subscription);
 
-    // TODO: moderated event messaging
     // TODO: honor maximumRate and minimumDelta (specs p. 72)
+    void enableEventing(bool enable = true);
     void queueEventMessage(StateVar& stateVar);
     void sendEventMessage(StateVar& stateVar);
     void sendInitialEventMessage(Subscription* pSubscription);

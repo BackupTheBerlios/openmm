@@ -1018,11 +1018,11 @@ EventMessageReader::stateVar(Poco::XML::Node* pNode)
         Poco::XML::Node* pStateVarNode = pNode->firstChild();
         std::string stateVarName = pStateVarNode->nodeName();
         std::string stateVarValue = pStateVarNode->innerText();
-//        Log::instance()->event().debug("event message reader got state var: " + stateVarName + ", value: " + stateVarValue);
         _pService->setStateVar<std::string>(stateVarName, stateVarValue);
-        Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue);
+        Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " ...");
         StateVar* pStateVar = _pService->getStateVarReference(stateVarName);
         _pService->getDevice()->getCtlDevice()->eventHandler(pStateVar);
+        Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " finished.");
     }
     else {
         Log::instance()->event().error("event message without state var element in property set.");
@@ -1488,6 +1488,9 @@ Subscription::addCallbackUri(const std::string& uri)
         else {
             _pSessionUri = &_callbackUris.back();
             _pSession = new Poco::Net::HTTPClientSession(_pSessionUri->getHost(), _pSessionUri->getPort());
+            _pSession->setKeepAlive(true);
+            _pSession->setTimeout(Poco::Timespan(5, 0)); // set http timeout to 5 secs. Should be 30 secs according to specs.
+            _pSession->setKeepAliveTimeout(Poco::Timespan(5, 0)); // set http timeout to 5 secs. Should be 30 secs according to specs.
         }
     }
     catch(...) {
@@ -1518,7 +1521,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
-    Log::instance()->event().debug("sending event message to: " + _pSessionUri->toString());
+    Log::instance()->event().debug("sending event notification request to: " + _pSessionUri->toString());
     std::stringstream ss;
     request.write(ss);
     
@@ -1526,9 +1529,8 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
 
-    Log::instance()->event().debug("event message request sent: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + eventMessage);
+    Log::instance()->event().debug("event notification request sent: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + eventMessage);
 
-    // FIXME: receive no response from request, controller returns with HTTP 500 internal server error on enclosing action request.
     // receive answer ...
     Poco::Net::HTTPResponse response;
     getSession()->receiveResponse(response);
@@ -1571,7 +1573,7 @@ EventMessageQueue::queueStateVar(StateVar& stateVar)
 {
     Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
     
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    //Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     _stateVars.insert(&stateVar);
     if (!_timerIsRunning) {
@@ -1594,7 +1596,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
 {
     Log::instance()->event().debug("event message queue sends event notifications ...");
 
-    _lock.lock();
+    //_lock.lock();
     _timerIsRunning = false;
     std::string eventMessage;
     EventMessageWriter messageWriter;
@@ -1602,7 +1604,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
         messageWriter.stateVar(**it);
     }
     _stateVars.clear();
-    _lock.unlock();
+    //_lock.unlock();
     
     messageWriter.write(eventMessage);
 
@@ -1678,7 +1680,7 @@ StateVar::getSendEvents() const
 
 Service::Service() :
 _pControllerSubscriptionData(new Subscription),
-_eventingEnabled(true),
+_eventingEnabled(false),
 _pEventMessageQueue(new EventMessageQueue(this))
 {
 }
@@ -2174,6 +2176,13 @@ Service::unregisterSubscription(Subscription* subscription)
 
 
 void
+Service::enableEventing(bool enable)
+{
+    _eventingEnabled = true;
+}
+
+
+void
 Service::queueEventMessage(StateVar& stateVar)
 {
     _pEventMessageQueue->queueStateVar(stateVar);
@@ -2506,7 +2515,9 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         }
         EventMessageReader eventMessageReader(bodyString, _pService);
         eventMessageReader.stateVarValues();
+        Log::instance()->event().debug("event notification request handled, sending response ...");
         response.send();
+        Log::instance()->event().debug("event notification request response sent.");
     }
     else {
         Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.clientAddress().toString());
@@ -3156,6 +3167,7 @@ DeviceContainer::initDevice()
             _pDeviceManager->registerHttpRequestHandler((*s)->getDescriptionPath(), new DescriptionRequestHandler((*s)->getDescription()));
             _pDeviceManager->registerHttpRequestHandler((*s)->getControlPath(), new ControlRequestHandler((*s)));
             _pDeviceManager->registerHttpRequestHandler((*s)->getEventSubscriptionPath(), new EventSubscriptionRequestHandler((*s)));
+            (*s)->enableEventing();
         }
         _pDeviceManager->registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
     }

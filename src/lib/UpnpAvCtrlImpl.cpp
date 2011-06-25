@@ -541,6 +541,7 @@ CtlRenderingControlImpl::_changedLastChange(const std::string& val)
                 Log::instance()->upnpav().debug("controller, volume changed on device: " + _pService->getDevice()->getUuid());
                 if (_pAvUserInterface->selectedRendererUuid() == _pService->getDevice()->getUuid()) {
                     _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
+                    Log::instance()->upnpav().debug("user interface, volume changed on device: " + _pService->getDevice()->getUuid());
                 }
             }
         }
