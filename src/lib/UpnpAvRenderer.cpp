@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include "UpnpAv.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvDescriptions.h"
 #include "UpnpAvRendererImpl.h"
@@ -28,6 +29,8 @@ namespace Av {
 
 
 Engine::Engine() :
+_pAVTransportImpl(0),
+_pRenderingControlImpl(0),
 _pVisual(0)
 {
 }
@@ -53,28 +56,46 @@ Engine::setOption(const std::string& key, const std::string& value)
 }
 
 
-AvRenderer::AvRenderer(Engine* engine) :
-_pEngine(engine)
+void
+Engine::endOfStream()
+{
+    _pAVTransportImpl->_setAbsoluteTimePosition(Omm::Av::AvTransportArgument::CURRENT_TRACK_DURATION_0);
+    _pAVTransportImpl->_setRelativeTimePosition(Omm::Av::AvTransportArgument::CURRENT_TRACK_DURATION_0);
+    _pAVTransportImpl->_setTransportState(Omm::Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
+}
+
+
+AvRenderer::AvRenderer() 
 {
     MediaRendererDescriptions mediaRendererDescriptions;
     MemoryDescriptionReader descriptionReader(mediaRendererDescriptions);
     descriptionReader.getDeviceDescription();
     setDeviceData(descriptionReader.rootDeviceData(this));
 
+    _pAVTransportImpl = new DevAVTransportRendererImpl;
+    _pRenderingControlImpl = new DevRenderingControlRendererImpl;
     setDevDeviceCode(new DevMediaRenderer(
-              new DevRenderingControlRendererImpl(engine),
-              new DevConnectionManagerRendererImpl(engine),
-              new DevAVTransportRendererImpl(engine)));
-
-    Log::instance()->upnpav().information("renderer engine: " + engine->getEngineId());
+              _pRenderingControlImpl,
+              new DevConnectionManagerRendererImpl,
+              _pAVTransportImpl));
 }
 
 
 AvRenderer::~AvRenderer()
 {
-    delete _pEngine;
 }
 
+
+void
+AvRenderer::addEngine(Engine* pEngine)
+{
+    _pAVTransportImpl->_engines.push_back(pEngine);
+    pEngine->_pAVTransportImpl = _pAVTransportImpl;
+    _pRenderingControlImpl->_engines.push_back(pEngine);
+    pEngine->_pRenderingControlImpl = _pRenderingControlImpl;
+    
+    Log::instance()->upnpav().information("add renderer engine: " + pEngine->getEngineId());
+}
 
 } // namespace Av
 } // namespace Omm

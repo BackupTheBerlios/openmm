@@ -110,8 +110,8 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
     }
     ProtocolInfo protInfo(protInfoString);
     
-    Omm::Av::Log::instance()->upnpav().debug("engine: " + _pEngine->getEngineId() + " set uri: " + CurrentURI);
-    if (_pEngine->preferStdStream()) {
+    Omm::Av::Log::instance()->upnpav().debug("engine: " + _engines[InstanceID]->getEngineId() + " set uri: " + CurrentURI);
+    if (_engines[InstanceID]->preferStdStream()) {
         Poco::URI uri(CurrentURI);
         if (_pSession) {
             delete _pSession;
@@ -130,10 +130,10 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
         std::stringstream responseHeader;
         response.write(responseHeader);
         Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
-        _pEngine->setUri(istr, protInfo);
+        _engines[InstanceID]->setUri(istr, protInfo);
     }
     else {
-        _pEngine->setUri(CurrentURI, protInfo);
+        _engines[InstanceID]->setUri(CurrentURI, protInfo);
     }
 
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + _getTransportState());
@@ -177,7 +177,7 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
     
-    float engineTrackDuration = _pEngine->getLengthSeconds();
+    float engineTrackDuration = _engines[InstanceID]->getLengthSeconds();
 //    Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
         _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
@@ -188,11 +188,11 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
     
-    Poco::UInt64 enginePositionByte = _pEngine->getPositionByte();
+    Poco::UInt64 enginePositionByte = _engines[InstanceID]->getPositionByte();
 //    Omm::Av::Log::instance()->upnpav().debug("engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
-    float enginePosition = _pEngine->getPositionPercentage();
+    float enginePosition = _engines[InstanceID]->getPositionPercentage();
 //    Omm::Av::Log::instance()->upnpav().debug("engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
-    float engineTimePosition = _pEngine->getPositionSecond();
+    float engineTimePosition = _engines[InstanceID]->getPositionSecond();
 //    Omm::Av::Log::instance()->upnpav().debug("engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
     
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
@@ -236,8 +236,8 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
         //       -> unfortunately mplayer has it's problems with stopping ...
         if (transportState != AvTransportArgument::TRANSPORT_STATE_STOPPED
             && transportState != AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
-            _pEngine->stop();
-            if (_pEngine->preferStdStream()) {
+            _engines[InstanceID]->stop();
+            if (_engines[InstanceID]->preferStdStream()) {
                 delete _pSession;
                 _pSession = 0;
             }
@@ -277,24 +277,24 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
             //       if no:  Action Stop behaves like Pause
             //       -> maybe it should be: AvTransportArgument::TRANSPORT_STATE_STOPPED -> TRANSITIONING -> PAUSED_PLAYBACK
             //          contradicting AVTransport, 1.0, 2.4.12.3.
-            _pEngine->play();
+            _engines[InstanceID]->play();
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
                 // NOTE: not shure if we should stop here, or in the engine (if necessary)
-                _pEngine->stop();
+                _engines[InstanceID]->stop();
                 std::string pos = AvTransportArgument::CURRENT_TRACK_DURATION_0;
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
-                _pEngine->play();
+                _engines[InstanceID]->play();
             }
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
-            _pEngine->pause();
+            _engines[InstanceID]->pause();
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
             // TODO: can we set another speed after transitioning, than normal speed?
-            _pEngine->setSpeed(1, 1);
+            _engines[InstanceID]->setSpeed(1, 1);
             speed = "1";
         }
         // TODO: handle changes in speed
@@ -320,7 +320,7 @@ DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
     
     if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
         || transportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
-        _pEngine->pause();
+        _engines[InstanceID]->pause();
         
         if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             _setTransportState(AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK);
@@ -347,7 +347,7 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
         if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
             position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
         }
-        _pEngine->seekSecond(position);
+        _engines[InstanceID]->seekSecond(position);
         // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
         //       TransportState should be set to TRANSITIONING, but only while seeking.
         //       OnSeek() should return immediately! So we are not conform here.
@@ -450,7 +450,7 @@ DevRenderingControlRendererImpl::initStateVars()
 //    _setHorizontalKeystone(0);
 //    _setVerticalKeystone(0);
 //    _setMute(false);
-//    _setVolume(_pEngine->getVolume(0));
+//    _setVolume(_engines[InstanceID]->getVolume(0));
 //    _setVolumeDB(0);
 //    _setLoudness(false);
 }
@@ -714,7 +714,9 @@ DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::str
     // we don't cache values in the state vars but retreive them directly from the enginge.
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    CurrentVolume = _getVolume();
-    CurrentVolume = _pEngine->getVolume(Channel);
+    Log::instance()->upnpav().debug("get volume of engine instance: " + Poco::NumberFormatter::format(InstanceID));
+    
+    CurrentVolume = _engines[InstanceID]->getVolume(Channel);
 }
 
 
@@ -723,9 +725,9 @@ DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::str
 {
     Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() instance: " + Poco::NumberFormatter::format(InstanceID) + ", channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
     
-    _pEngine->setVolume(Channel, DesiredVolume);
+    _engines[InstanceID]->setVolume(Channel, DesiredVolume);
     
-    // we don't cache values in the state vars but retreive them directly from the enginge.
+    // we don't cache values in the state vars but retreive them directly from the engine.
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    _setVolume(DesiredVolume);
 

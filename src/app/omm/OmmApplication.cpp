@@ -161,7 +161,8 @@ protected:
             pEnginePlugin->setVisual(pUserInterface->getVisual());
             pEnginePlugin->createPlayer();
 
-            Omm::Av::AvRenderer mediaRenderer(pEnginePlugin);
+            Omm::Av::AvRenderer mediaRenderer;
+            mediaRenderer.addEngine(pEnginePlugin);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pIcon);
             if (_name != "") {

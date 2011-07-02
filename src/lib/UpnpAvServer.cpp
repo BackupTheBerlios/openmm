@@ -321,23 +321,23 @@ AvServer::AvServer()
 
 AvServer::~AvServer()
 {
-    delete _pRoot;
+//    delete _pRoot;
 }
 
 
 void
 AvServer::setRoot(AbstractMediaObject* pRoot)
 {
-    _pRoot = pRoot;
-    _pDevContentDirectoryServerImpl->_pRoot = _pRoot;
+//    _pRoot = pRoot;
+    _pDevContentDirectoryServerImpl->_pRoot = pRoot;
 }
 
 
-AbstractMediaObject*
-AvServer::getRoot()
-{
-    return _pRoot;
-}
+//AbstractMediaObject*
+//AvServer::getRoot()
+//{
+//    return _pRoot;
+//}
 
 
 std::istream*

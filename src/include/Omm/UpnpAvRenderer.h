@@ -31,11 +31,15 @@ namespace Omm {
 namespace Av {
 
 
+class DevAVTransportRendererImpl;
+class DevRenderingControlRendererImpl;
 class Visual;
 class ProtocolInfo;
 
 class Engine : public Util::ConfigurablePlugin
 {
+    friend class AvRenderer;
+    
 public:
     Engine();
     
@@ -77,22 +81,28 @@ public:
     virtual float getVolume(const std::string& channel) = 0;
     
 protected:
-    // TODO: implement endOfStream(), which is called by the engine implementation on end of track
-    void endOfStream() {}
+    // TODO: implement endOfStream(), which is called by the engine implementation on end of track.
+    void endOfStream();
 
-    std::string                 _engineId;
-    Sys::Visual*                _pVisual;
+    std::string                         _engineId;
+    Sys::Visual*                        _pVisual;
+    DevAVTransportRendererImpl*         _pAVTransportImpl;
+    DevRenderingControlRendererImpl*    _pRenderingControlImpl;
 };
 
 
 class AvRenderer : public Device
 {
 public:
-    AvRenderer(Engine* engine);
+    AvRenderer();
     ~AvRenderer();
+
+    void addEngine(Engine* pEngine);
     
 private:
-    Engine*     _pEngine;
+    // these pointers to service implementations are only temporarily needed when setting them in the engine.
+    DevAVTransportRendererImpl*         _pAVTransportImpl;
+    DevRenderingControlRendererImpl*    _pRenderingControlImpl;
 };
 
 } // namespace Av

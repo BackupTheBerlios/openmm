@@ -522,8 +522,8 @@ AvUserInterface::rendererSelected(RendererView* pRenderer)
     std::string sourceInfo;
     std::string sinkInfo;
     _pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
-    ui4 instanceId;
-    std::string channel;
+    ui4 instanceId = 0;
+    std::string channel = AvChannel::MASTER;
     ui2 volume;
     _pSelectedRenderer->RenderingControl()->GetVolume(instanceId, channel, volume);
     newVolume(volume);

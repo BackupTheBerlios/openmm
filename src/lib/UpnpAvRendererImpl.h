@@ -36,9 +36,12 @@ namespace Av {
 
 class DevAVTransportRendererImpl : public DevAVTransport
 {
+    friend class Engine;
+    friend class AvRenderer;
+
 public:
-    DevAVTransportRendererImpl(Engine* pEngine) : _pEngine(pEngine) {}
-    
+    DevAVTransportRendererImpl() {}
+
 private:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
     virtual void GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, std::string& MediaDuration, std::string& CurrentURI, std::string& CurrentURIMetaData, std::string& NextURI, std::string& NextURIMetaData, std::string& PlayMedium, std::string& RecordMedium, std::string& WriteStatus);
@@ -55,7 +58,8 @@ private:
 
     virtual void initStateVars();
 
-    Engine*                             _pEngine;
+    std::vector<Engine*>                _engines;
+//    Engine*                             _pEngine;
     Poco::Net::HTTPClientSession*       _pSession;
     std::string                         _lastCurrentTrackUri;
 };
@@ -64,7 +68,7 @@ private:
 class DevConnectionManagerRendererImpl : public DevConnectionManager
 {
 public:
-    DevConnectionManagerRendererImpl(Engine* pEngine) : _pEngine(pEngine) {}
+    DevConnectionManagerRendererImpl() {}
     
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -74,15 +78,18 @@ private:
 
     virtual void initStateVars();
 
-    Engine* _pEngine;
+    std::vector<Engine*>                _engines;
+//    Engine* _pEngine;
 };
 
 
 class DevRenderingControlRendererImpl : public DevRenderingControl
 {
+    friend class AvRenderer;
+    
 public:
-    DevRenderingControlRendererImpl(Engine* pEngine) : _pEngine(pEngine), _pLastChange(new RenderingControlLastChange(_pService)) {}
-    ~DevRenderingControlRendererImpl() { delete _pEngine; delete _pLastChange; }
+    DevRenderingControlRendererImpl() : _pLastChange(new RenderingControlLastChange(_pService)) {}
+    ~DevRenderingControlRendererImpl() { delete _pLastChange; }
     
 private:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);
@@ -123,8 +130,9 @@ private:
 
     virtual void initStateVars();
 
-    Engine*                         _pEngine;
-    RenderingControlLastChange*     _pLastChange;
+    std::vector<Engine*>                _engines;
+//    Engine*                         _pEngine;
+    RenderingControlLastChange*         _pLastChange;
 };
 
 

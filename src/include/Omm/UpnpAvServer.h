@@ -105,12 +105,12 @@ public:
     virtual ~AvServer();
 
     void setRoot(AbstractMediaObject* pRoot);
-    AbstractMediaObject* getRoot();
+//    AbstractMediaObject* getRoot();
 
 private:
     DevContentDirectoryServerImpl* _pDevContentDirectoryServerImpl;
 
-    AbstractMediaObject* _pRoot;
+//    AbstractMediaObject* _pRoot;
 };
 
 
