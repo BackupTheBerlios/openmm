@@ -78,7 +78,6 @@ public:
     virtual float getLengthSeconds() = 0;
 
     const std::string& transportState();
-    void transportStateChanged();
 
     /*
       Rendering Control
@@ -89,8 +88,14 @@ public:
 protected:
     virtual TransportState getTransportState() = 0;
 
-    void endOfStream();
+    void transportStateChanged();
+    /// When engine generates a "play", "stop", "pause" or "end of stream event", 
+    /// transportStateChanged() is triggered and generates the corresponding UPnP event
+    /// via the LastChange mechanism.
+
+//    void endOfStream();
     /// endOfStream is called by the engine implementation on end of track.
+    /// depricated, replaced by transportStateChanged().
 
     std::string                         _engineId;
     Omm::ui4                            _instanceId;

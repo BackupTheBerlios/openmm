@@ -391,7 +391,7 @@ void
 AvStreamEngine::endOfStream(Omm::AvStream::Sink::EndOfStream* eof)
 {
     stop();
-    Engine::endOfStream();
+//    Engine::endOfStream();
 }
 
 

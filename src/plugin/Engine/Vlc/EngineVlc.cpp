@@ -85,10 +85,15 @@ VlcEngine::createPlayer()
 #endif
     handleException();
 
+    int ret;
 #if LIBVLC_VERSION_INT < 0x110
-    int ret = libvlc_event_attach(_pEventManager, &_exception);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerStopped, &eventHandler, this, &_exception);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerPlaying, &eventHandler, this, &_exception);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerEndReached, &eventHandler, this, &_exception);
 #else
-    int ret = libvlc_event_attach(_pEventManager, libvlc_MediaStateChanged, &eventHandler, this);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerStopped, &eventHandler, this);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerPlaying, &eventHandler, this);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerEndReached, &eventHandler, this);
 #endif
     handleException();
 
@@ -304,7 +309,7 @@ VlcEngine::analyzeStream()
 void
 VlcEngine::eventHandler(const struct libvlc_event_t* pEvent, void* pUserData)
 {
-    static_cast<Omm::Av::Engine*>(pUserData)->transportStateChanged();
+    static_cast<VlcEngine*>(pUserData)->transportStateChanged();
 }
 
 
@@ -409,7 +414,7 @@ VlcEngine::getPositionPercentage()
     handleException();
     // TODO: catch vlc event at end of track, don't poll it
     if (state == libvlc_Ended) {
-        endOfStream();
+//        endOfStream();
         res = 0.0;
         return res;
     }
@@ -439,7 +444,7 @@ VlcEngine::getPositionSecond()
     handleException();
     // TODO: catch vlc event at end of track, don't poll it
     if (state == libvlc_Ended) {
-        endOfStream();
+//        endOfStream();
         res = 0.0;
         return res;
     }
@@ -491,6 +496,8 @@ VlcEngine::getTransportState()
     res = libvlc_media_player_get_state(_pVlcPlayer);
 #endif
     handleException();
+
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine transport state: " + Poco::NumberFormatter::format(res));
     
     switch (res) {
         case libvlc_Ended:

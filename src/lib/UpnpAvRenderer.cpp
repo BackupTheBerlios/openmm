@@ -97,18 +97,18 @@ Engine::transportStateChanged()
 }
 
 
-void
-Engine::endOfStream()
-{
-    // position state vars are not evented via LastChange state var (and not evented at all).
-    _pAVTransportImpl->_setAbsoluteTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
-    _pAVTransportImpl->_setRelativeTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
-    // transport state is evented via LastChange state var.
-    _pAVTransportImpl->_setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
-    Variant val;
-    val.setValue(AvTransportArgument::TRANSPORT_STATE_STOPPED);
-    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
-}
+//void
+//Engine::endOfStream()
+//{
+//    // position state vars are not evented via LastChange state var (and not evented at all).
+//    _pAVTransportImpl->_setAbsoluteTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
+//    _pAVTransportImpl->_setRelativeTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
+//    // transport state is evented via LastChange state var.
+//    _pAVTransportImpl->_setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+//    Variant val;
+//    val.setValue(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+//    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+//}
 
 
 AvRenderer::AvRenderer() 
