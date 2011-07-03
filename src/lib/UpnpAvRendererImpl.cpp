@@ -316,6 +316,7 @@ void
 DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
     std::string transportState = _getTransportState();
+    std::string newTransportState;
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + transportState);
     
     if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
@@ -323,12 +324,16 @@ DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
         _engines[InstanceID]->pause();
         
         if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
-            _setTransportState(AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK);
+            newTransportState = AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK;
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
-            _setTransportState(AvTransportArgument::TRANSPORT_STATE_PAUSED_RECORDING);
+            newTransportState = AvTransportArgument::TRANSPORT_STATE_PAUSED_RECORDING;
         }
     }
+//    _setTransportState(newTransportState);
+    Variant val;
+    val.setValue(newTransportState);
+    _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 }
 
 
@@ -740,7 +745,7 @@ DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::str
 
     Variant val;
     val.setValue(DesiredVolume);
-    _pLastChange->setChannelStateVar(InstanceID, Channel, "Volume", val);
+    _pLastChange->setChannelStateVar(InstanceID, Channel, RenderingControlEventedStateVar::VOLUME, val);
 }
 
 

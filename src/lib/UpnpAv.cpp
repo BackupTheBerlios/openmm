@@ -52,6 +52,28 @@ const std::string ServiceType::CD_1 = "urn:schemas-upnp-org:service:ContentDirec
 const std::string ServiceType::CM_1 = "urn:schemas-upnp-org:service:ConnectionManager:1";
 const std::string ServiceType::RC_1 = "urn:schemas-upnp-org:service:RenderingControl:1";
 
+const std::string AvTransportEventedStateVar::TRANSPORT_STATE = "TransportState";
+const std::string AvTransportEventedStateVar::TRANSPORT_STATUS = "TransportStatus";
+const std::string AvTransportEventedStateVar::PLAYBACK_STORAGE_MEDIUM = "PlaybackStorageMedium";
+const std::string AvTransportEventedStateVar::POSSIBLE_PLAYBACK_STORAGE_MEDIA = "PossiblePlaybackStorageMedia";
+const std::string AvTransportEventedStateVar::POSSIBLE_RECORD_STORAGE_MEDIA = "PossibleRecordStorageMedia";
+const std::string AvTransportEventedStateVar::CURRENT_PLAY_MODE = "CurrentPlayMode";
+const std::string AvTransportEventedStateVar::TRANSPORT_PLAY_SPEED = "TransportPlaySpeed";
+const std::string AvTransportEventedStateVar::RECORD_MEDIUM_WRITE_STATUS = "RecordMediumWriteStatus";
+const std::string AvTransportEventedStateVar::POSSIBLE_RECORD_QUALITY_MODES = "PossibleRecordQualityModes";
+const std::string AvTransportEventedStateVar::CURRENT_RECORD_QUALITY_MODE = "CurrentRecordQualityMode";
+const std::string AvTransportEventedStateVar::NUMBER_OF_TRACKS = "NumberOfTracks";
+const std::string AvTransportEventedStateVar::CURRENT_TRACK = "CurrentTrack";
+const std::string AvTransportEventedStateVar::CURRENT_TRACK_DURATION = "CurrentTrackDuration";
+const std::string AvTransportEventedStateVar::CURRENT_MEDIA_DURATION = "CurrentMediaDuration";
+const std::string AvTransportEventedStateVar::CURRENT_TRACK_URI = "CurrentTrackURI";
+const std::string AvTransportEventedStateVar::CURRENT_TRACK_META_DATA = "CurrentTrackMetaData";
+const std::string AvTransportEventedStateVar::AVTRANSPORT_URI = "AVTransportURI";
+const std::string AvTransportEventedStateVar::AVTRANSPORT_URI_META_DATA = "AVTransportURIMetaData";
+const std::string AvTransportEventedStateVar::NEXT_AVTRANSPORT_URI = "NextAVTransportURI";
+const std::string AvTransportEventedStateVar::NEXT_AVTRANSPORT_URI_META_DATA = "NextAVTransportURIMetaData";
+const std::string AvTransportEventedStateVar::CURRENT_TRANSPORT_ACTIONS = "CurrentTransportActions";
+
 const std::string AvTransportArgument::TRANSPORT_STATE_STOPPED = "STOPPED";
 const std::string AvTransportArgument::TRANSPORT_STATE_PLAYING = "PLAYING";
 const std::string AvTransportArgument::TRANSPORT_STATE_TRANSITIONING = "TRANSITIONING";
@@ -126,6 +148,24 @@ const std::string AvTransportArgument::SEEK_MODE_CHANNEL_FREQ = "CHANNEL_FREQ";
 const std::string AvTransportArgument::SEEK_MODE_TAPE_INDEX = "TAPE_INDEX";
 const std::string AvTransportArgument::SEEK_MODE_FRAME = "FRAME";
 const i4 AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED = 2147483647;
+
+const std::string RenderingControlEventedStateVar::PRESET_NAME_LIST = "PresetNameList";
+const std::string RenderingControlEventedStateVar::BRIGHTNESS = "Brightness";
+const std::string RenderingControlEventedStateVar::CONTRAST = "Contrast";
+const std::string RenderingControlEventedStateVar::SHARPNESS = "Sharpness";
+const std::string RenderingControlEventedStateVar::RED_VIDEO_GAIN = "RedVideoGain";
+const std::string RenderingControlEventedStateVar::GREEN_VIDEO_GAIN = "GreenVideoGain";
+const std::string RenderingControlEventedStateVar::BLUE_VIDEO_GAIN = "BlueVideoGain";
+const std::string RenderingControlEventedStateVar::RED_BLACK_LEVEL = "RedBlackLevel";
+const std::string RenderingControlEventedStateVar::GREEN_BLACK_LEVEL = "GreenBlackLevel";
+const std::string RenderingControlEventedStateVar::BLUE_BLACK_LEVEL = "BlueBlackLevel";
+const std::string RenderingControlEventedStateVar::COLOR_TEMPERATURE = "ColorTemperature";
+const std::string RenderingControlEventedStateVar::HORIZONTAL_KEYSTONE = "HorizontalKeystone";
+const std::string RenderingControlEventedStateVar::VERTICAL_KEYSTONE = "VerticalKeystone";
+const std::string RenderingControlEventedStateVar::MUTE = "Mute";
+const std::string RenderingControlEventedStateVar::VOLUME = "Volume";
+const std::string RenderingControlEventedStateVar::VOLUME_DB = "VolumeDB";
+const std::string RenderingControlEventedStateVar::LOUDNESS = "Loudness";
 
 const std::string AvChannel::MASTER = "Master";
 const std::string AvChannel::LF = "LF";
@@ -293,7 +333,7 @@ _pService(pService),
 _pDoc(0),
 _pMessage(0)
 {
-    addInstance();
+//    addInstance();
 }
 
 

@@ -40,6 +40,33 @@ public:
 };
 
 
+class AvTransportEventedStateVar
+{
+public:
+    const static std::string TRANSPORT_STATE;
+    const static std::string TRANSPORT_STATUS;
+    const static std::string PLAYBACK_STORAGE_MEDIUM;
+    const static std::string POSSIBLE_PLAYBACK_STORAGE_MEDIA;
+    const static std::string POSSIBLE_RECORD_STORAGE_MEDIA;
+    const static std::string CURRENT_PLAY_MODE;
+    const static std::string TRANSPORT_PLAY_SPEED;
+    const static std::string RECORD_MEDIUM_WRITE_STATUS;
+    const static std::string POSSIBLE_RECORD_QUALITY_MODES;
+    const static std::string CURRENT_RECORD_QUALITY_MODE;
+    const static std::string NUMBER_OF_TRACKS;
+    const static std::string CURRENT_TRACK;
+    const static std::string CURRENT_TRACK_DURATION;
+    const static std::string CURRENT_MEDIA_DURATION;
+    const static std::string CURRENT_TRACK_URI;
+    const static std::string CURRENT_TRACK_META_DATA;
+    const static std::string AVTRANSPORT_URI;
+    const static std::string AVTRANSPORT_URI_META_DATA;
+    const static std::string NEXT_AVTRANSPORT_URI;
+    const static std::string NEXT_AVTRANSPORT_URI_META_DATA;
+    const static std::string CURRENT_TRANSPORT_ACTIONS;
+};
+
+
 class AvTransportArgument
 {
 public:
@@ -117,6 +144,29 @@ public:
     const static std::string SEEK_MODE_TAPE_INDEX;
     const static std::string SEEK_MODE_FRAME;
     const static i4 RELATIVE_COUNTER_POSITION_UNDEFINED;
+};
+
+
+class RenderingControlEventedStateVar
+{
+public:
+    const static std::string PRESET_NAME_LIST;
+    const static std::string BRIGHTNESS;
+    const static std::string CONTRAST;
+    const static std::string SHARPNESS;
+    const static std::string RED_VIDEO_GAIN;
+    const static std::string GREEN_VIDEO_GAIN;
+    const static std::string BLUE_VIDEO_GAIN;
+    const static std::string RED_BLACK_LEVEL;
+    const static std::string GREEN_BLACK_LEVEL;
+    const static std::string BLUE_BLACK_LEVEL;
+    const static std::string COLOR_TEMPERATURE;
+    const static std::string HORIZONTAL_KEYSTONE;
+    const static std::string VERTICAL_KEYSTONE;
+    const static std::string MUTE;
+    const static std::string VOLUME;
+    const static std::string VOLUME_DB;
+    const static std::string LOUDNESS;
 };
 
 
