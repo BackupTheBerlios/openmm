@@ -34,8 +34,8 @@ DevAVTransportRendererImpl::initStateVars()
 {
     // FIXME: init all engine instances instead of the state vars in the service tree.
     
-    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
-    _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
+//    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+//    _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
 //    _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
 //    _setRecordStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
 //    _setPossiblePlaybackStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
@@ -68,7 +68,8 @@ DevAVTransportRendererImpl::initStateVars()
 void
 DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
-    std::string transportState = _getTransportState();
+//    std::string transportState = _getTransportState();
+    std::string transportState = _engines[InstanceID]->transportState();
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI enters in state: " + transportState);
     
     if (transportState == AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
@@ -158,7 +159,8 @@ DevAVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, s
 void
 DevAVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
-    CurrentTransportState = _getTransportState();
+//    CurrentTransportState = _getTransportState();
+    CurrentTransportState = _engines[InstanceID]->transportState();
     CurrentTransportStatus = _getTransportStatus();
     CurrentSpeed = _getTransportPlaySpeed();
 }
@@ -167,7 +169,8 @@ DevAVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string&
 void
 DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
-    std::string transportState = _getTransportState();
+//    std::string transportState = _getTransportState();
+    std::string transportState = _engines[InstanceID]->transportState();
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
     
     if (transportState != AvTransportArgument::TRANSPORT_STATE_PLAYING && transportState != AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
@@ -227,15 +230,16 @@ DevAVTransportRendererImpl::GetTransportSettings(const ui4& InstanceID, std::str
 void
 DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
 {
-    std::string transportState = _getTransportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() enters in state: " + transportState);
+//    std::string transportState = _getTransportState();
+    std::string oldTransportState = _engines[InstanceID]->transportState();
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() enters in state: " + oldTransportState);
     
-    if (transportState != AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
+    if (oldTransportState != AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         // be nice to the engine and don't stop when already in stopped or paused state
         // TODO: when in PAUSED_PLAYBACK we should actually stop (according to AVTransport 1.0 specs
         //       -> unfortunately mplayer has it's problems with stopping ...
-        if (transportState != AvTransportArgument::TRANSPORT_STATE_STOPPED
-            && transportState != AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
+        if (oldTransportState != AvTransportArgument::TRANSPORT_STATE_STOPPED
+            && oldTransportState != AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
             _engines[InstanceID]->stop();
             if (_engines[InstanceID]->preferStdStream()) {
                 delete _pSession;
@@ -243,7 +247,7 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
             }
         }
         
-        if (transportState == "PLAYING" || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
+        if (oldTransportState == "PLAYING" || oldTransportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
         // TODO: reset positions and speed (this is not mentioned in the AVTransport 1.0 specs ...)?
         //       what does Stop() mean when in TRANSITIONING state? 
         //       -> stop transitioning and start playback at current position?
@@ -252,10 +256,14 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
 //             _setTransportPlaySpeed("0");  // only allowed value is "1" ...?
         }
     }
-    // TODO: check if engine really stopped (by return value)
-    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+    // TODO: check if engine really stopped
+//    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+    std::string newTransportState = _engines[InstanceID]->transportState();
+    Variant val;
+    val.setValue(newTransportState);
+    _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() leaves in state: " + _getTransportState());
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() leaves in state: " + newTransportState);
 }
 
 
@@ -263,14 +271,16 @@ void
 DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed)
 {
     std::string speed = Speed;
-    std::string transportState = _getTransportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() enters in state: " + transportState);
-    if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
-        || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
-        || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK
-        || transportState == AvTransportArgument::TRANSPORT_STATE_TRANSITIONING)
+//    std::string transportState = _getTransportState();
+    std::string oldTransportState = _engines[InstanceID]->transportState();
+    std::string newTransportState;
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() enters in state: " + oldTransportState);
+    if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
+        || oldTransportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
+        || oldTransportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK
+        || oldTransportState == AvTransportArgument::TRANSPORT_STATE_TRANSITIONING)
     {
-        if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED) {
+        if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_STOPPED) {
             // TODO: does it mean: play from beginning now?
             //       if yes: after AvTransportArgument::TRANSPORT_STATE_STOPPED -> TRANSITIONING -> AvTransportArgument::TRANSPORT_STATE_STOPPED we would play from beginning
             //               and not from the position we were seeking to.
@@ -279,7 +289,7 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
             //          contradicting AVTransport, 1.0, 2.4.12.3.
             _engines[InstanceID]->play();
         }
-        else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        else if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
                 // NOTE: not shure if we should stop here, or in the engine (if necessary)
                 _engines[InstanceID]->stop();
@@ -289,10 +299,10 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
                 _engines[InstanceID]->play();
             }
         }
-        else if (transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
+        else if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
             _engines[InstanceID]->pause();
         }
-        else if (transportState == AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
+        else if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
             // TODO: can we set another speed after transitioning, than normal speed?
             _engines[InstanceID]->setSpeed(1, 1);
             speed = "1";
@@ -303,30 +313,35 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
         //       If start playing takes considerable amount of time
         //       set state to "TRANSITIONING" (-> 2.4.9.3. Effect on State, AVTransport spec)
         
-        _setTransportState(AvTransportArgument::TRANSPORT_STATE_PLAYING);
+//        _setTransportState(AvTransportArgument::TRANSPORT_STATE_PLAYING);
+        newTransportState = _engines[InstanceID]->transportState();
+        Variant val;
+        val.setValue(newTransportState);
+        _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+        
         _setTransportPlaySpeed(speed);
         
         _lastCurrentTrackUri = _getCurrentTrackURI();
     }
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() leaves in state: " + _getTransportState());
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() leaves in state: " + newTransportState);
 }
 
 
 void
 DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
-    std::string transportState = _getTransportState();
+    std::string oldTransportState = _getTransportState();
     std::string newTransportState;
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + transportState);
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + oldTransportState);
     
-    if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
-        || transportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
+    if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
+        || oldTransportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
         _engines[InstanceID]->pause();
         
-        if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             newTransportState = AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK;
         }
-        else if (transportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
+        else if (oldTransportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
             newTransportState = AvTransportArgument::TRANSPORT_STATE_PAUSED_RECORDING;
         }
     }

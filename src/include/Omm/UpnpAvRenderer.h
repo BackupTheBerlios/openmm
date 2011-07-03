@@ -41,7 +41,7 @@ class Engine : public Util::ConfigurablePlugin
     friend class AvRenderer;
     
 public:
-    enum TransportState {Stopped, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent, TransportStatusOk, TransportStatusError};
+    enum TransportState {Stopped, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent};
     
     Engine();
     
@@ -77,8 +77,7 @@ public:
     
     virtual float getLengthSeconds() = 0;
 
-    virtual TransportState getTransportState() = 0;
-    
+    const std::string& transportState();
     /*
       Rendering Control
     */
@@ -86,8 +85,10 @@ public:
     virtual float getVolume(const std::string& channel) = 0;
     
 protected:
-    // TODO: implement endOfStream(), which is called by the engine implementation on end of track.
+    virtual TransportState getTransportState() = 0;
+
     void endOfStream();
+    /// endOfStream is called by the engine implementation on end of track.
 
     std::string                         _engineId;
     Omm::ui4                            _instanceId;

@@ -489,12 +489,9 @@ VlcEngine::getTransportState()
             return Transitioning;
         case libvlc_Paused:
             return PausedPlayback;
-        case libvlc_NothingSpecial:
-            return TransportStatusOk;
-        case libvlc_Error:
-            return TransportStatusError;
+//        case libvlc_NothingSpecial:
         default:
-            return TransportStatusOk;
+            return Stopped;
     }
 }
 

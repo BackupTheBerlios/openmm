@@ -64,6 +64,28 @@ Engine::setOption(const std::string& key, const std::string& value)
 }
 
 
+const std::string&
+Engine::transportState()
+{
+    switch (getTransportState()) {
+        case Stopped:
+            return AvTransportArgument::TRANSPORT_STATE_STOPPED;
+        case Playing:
+            return AvTransportArgument::TRANSPORT_STATE_PLAYING;
+        case Transitioning:
+            return AvTransportArgument::TRANSPORT_STATE_TRANSITIONING;
+        case PausedPlayback:
+            return AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK;
+        case PausedRecording:
+            return AvTransportArgument::TRANSPORT_STATE_PAUSED_RECORDING;
+        case Recording:
+            return AvTransportArgument::TRANSPORT_STATE_RECORDING;
+        case NoMediaPresent:
+            return AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT;
+    }
+}
+
+
 void
 Engine::endOfStream()
 {
