@@ -41,6 +41,8 @@ class Engine : public Util::ConfigurablePlugin
     friend class AvRenderer;
     
 public:
+    enum TransportState {Stopped, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent, TransportStatusOk, TransportStatusError};
+    
     Engine();
     
     std::string getEngineId();
@@ -74,6 +76,8 @@ public:
     virtual float getPositionSecond() = 0;
     
     virtual float getLengthSeconds() = 0;
+
+    virtual TransportState getTransportState() = 0;
     
     /*
       Rendering Control

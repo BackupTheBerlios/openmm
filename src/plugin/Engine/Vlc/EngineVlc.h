@@ -66,6 +66,8 @@ public:
     virtual float getPositionSecond();
     
     virtual float getLengthSeconds();
+
+    virtual TransportState getTransportState();
     
     /*
       Rendering Control
@@ -82,6 +84,7 @@ private:
 #endif
     libvlc_instance_t*      _pVlcInstance;
     libvlc_media_player_t*  _pVlcPlayer;
+    libvlc_event_manager_t* _pEventManager;
     libvlc_media_t*         _pVlcMedia;
     std::string             _uri;
     Omm::Av::Mime           _mime;

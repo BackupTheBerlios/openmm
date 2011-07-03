@@ -285,6 +285,13 @@ XineEngine::getLengthSeconds()
 }
 
 
+XineEngine::TransportState
+XineEngine::getTransportState()
+{
+    // TODO: implement getTransportState() in XineEngine.
+}
+
+
 void
 XineEngine::seekSecond(float second)
 {

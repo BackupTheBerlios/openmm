@@ -65,6 +65,8 @@ public:
     virtual float getPositionSecond();
     
     virtual float getLengthSeconds();
+
+    virtual TransportState getTransportState();
     
     /*
       Rendering Control

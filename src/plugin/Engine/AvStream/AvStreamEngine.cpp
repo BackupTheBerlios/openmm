@@ -364,6 +364,13 @@ AvStreamEngine::getLengthSeconds()
 }
 
 
+AvStreamEngine::TransportState
+AvStreamEngine::getTransportState()
+{
+    // TODO: implement getTransportState in AvStreamEngine.
+}
+
+
 void
 AvStreamEngine::setVolume(const std::string& channel, float vol)
 {

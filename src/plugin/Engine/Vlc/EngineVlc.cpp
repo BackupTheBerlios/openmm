@@ -78,6 +78,13 @@ VlcEngine::createPlayer()
 #endif
     handleException();
 
+#if LIBVLC_VERSION_INT < 0x110
+    _pEventManager = libvlc_media_player_event_manager(_pVlcPlayer, &_exception);
+#else
+    _pEventManager = libvlc_media_player_event_manager(_pVlcPlayer);
+#endif
+    handleException();
+
     if (_pVisual) {
         Omm::Av::Log::instance()->upnpav().debug("vlc engine: set visual ...");
 #ifdef __LINUX__
@@ -457,6 +464,38 @@ VlcEngine::getLengthSeconds()
     handleException();
     seconds = 100.0;
     TRACE("VlcEngine::getLength() seconds: %f", seconds);*/
+}
+
+
+VlcEngine::TransportState
+VlcEngine::getTransportState()
+{
+    libvlc_state_t res;
+#if LIBVLC_VERSION_INT < 0x110
+    res = libvlc_media_player_get_state(_pVlcPlayer, &_exception);
+#else
+    res = libvlc_media_player_get_state(_pVlcPlayer);
+#endif
+    handleException();
+    
+    switch (res) {
+        case libvlc_Ended:
+        case libvlc_Stopped:
+            return Stopped;
+        case libvlc_Playing:
+            return Playing;
+        case libvlc_Opening:
+        case libvlc_Buffering:
+            return Transitioning;
+        case libvlc_Paused:
+            return PausedPlayback;
+        case libvlc_NothingSpecial:
+            return TransportStatusOk;
+        case libvlc_Error:
+            return TransportStatusError;
+        default:
+            return TransportStatusOk;
+    }
 }
 
 
