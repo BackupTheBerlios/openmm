@@ -377,6 +377,13 @@ DevAVTransportRendererImpl::Previous(const ui4& InstanceID)
 }
 
 
+void
+DevAVTransportRendererImpl::addEngine(Engine* pEngine)
+{
+    _engines.push_back(pEngine);
+    _pLastChange->addInstance();
+}
+
 // ConnectionManagerRendererImpl::ConnectionManagerRendererImpl()
 // {
 //     _pRenderer = static_cast<MediaRendererImplementation*>(_pMediaRenderer);
@@ -777,6 +784,14 @@ DevRenderingControlRendererImpl::SetLoudness(const ui4& InstanceID, const std::s
 // begin of your own code
     
 // end of your own code
+}
+
+
+void
+DevRenderingControlRendererImpl::addEngine(Engine* pEngine)
+{
+    _engines.push_back(pEngine);
+    _pLastChange->addInstance();
 }
 
 } // namespace Av

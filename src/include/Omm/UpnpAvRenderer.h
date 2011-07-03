@@ -44,6 +44,7 @@ public:
     Engine();
     
     std::string getEngineId();
+    void setInstancedId(Omm::ui4 instanceId);
     void setVisual(Sys::Visual* pVisual);
 
     virtual void setOption(const std::string& key, const std::string& value);
@@ -85,6 +86,7 @@ protected:
     void endOfStream();
 
     std::string                         _engineId;
+    Omm::ui4                            _instanceId;
     Sys::Visual*                        _pVisual;
     DevAVTransportRendererImpl*         _pAVTransportImpl;
     DevRenderingControlRendererImpl*    _pRenderingControlImpl;

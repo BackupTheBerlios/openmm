@@ -29,6 +29,7 @@ namespace Av {
 
 
 Engine::Engine() :
+_instanceId(0),
 _pAVTransportImpl(0),
 _pRenderingControlImpl(0),
 _pVisual(0)
@@ -40,6 +41,13 @@ std::string
 Engine::getEngineId()
 {
     return _engineId;
+}
+
+
+void
+Engine::setInstancedId(Omm::ui4 instanceId)
+{
+    _instanceId = instanceId;
 }
 
 
@@ -59,9 +67,14 @@ Engine::setOption(const std::string& key, const std::string& value)
 void
 Engine::endOfStream()
 {
+    // position state vars are not evented via LastChange state var (and not evented at all).
     _pAVTransportImpl->_setAbsoluteTimePosition(Omm::Av::AvTransportArgument::CURRENT_TRACK_DURATION_0);
     _pAVTransportImpl->_setRelativeTimePosition(Omm::Av::AvTransportArgument::CURRENT_TRACK_DURATION_0);
+    // transport state is evented via LastChange state var.
     _pAVTransportImpl->_setTransportState(Omm::Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
+    Variant val;
+    val.setValue(Omm::Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
+    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, "TransportState", val);
 }
 
 
@@ -89,9 +102,11 @@ AvRenderer::~AvRenderer()
 void
 AvRenderer::addEngine(Engine* pEngine)
 {
-    _pAVTransportImpl->_engines.push_back(pEngine);
+    Omm::ui4 instanceId = _pAVTransportImpl->_engines.size();
+    pEngine->setInstancedId(instanceId);
+    _pAVTransportImpl->addEngine(pEngine);
     pEngine->_pAVTransportImpl = _pAVTransportImpl;
-    _pRenderingControlImpl->_engines.push_back(pEngine);
+    _pRenderingControlImpl->addEngine(pEngine);
     pEngine->_pRenderingControlImpl = _pRenderingControlImpl;
     
     Log::instance()->upnpav().information("add renderer engine: " + pEngine->getEngineId());

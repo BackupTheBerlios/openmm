@@ -40,7 +40,8 @@ class DevAVTransportRendererImpl : public DevAVTransport
     friend class AvRenderer;
 
 public:
-    DevAVTransportRendererImpl() {}
+    DevAVTransportRendererImpl() : _pLastChange(new AvTransportLastChange(_pService)) {}
+    ~DevAVTransportRendererImpl() { delete _pLastChange; }
 
 private:
     virtual void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -58,10 +59,12 @@ private:
 
     virtual void initStateVars();
 
+    void addEngine(Engine* pEngine);
+
     std::vector<Engine*>                _engines;
-//    Engine*                             _pEngine;
     Poco::Net::HTTPClientSession*       _pSession;
     std::string                         _lastCurrentTrackUri;
+    AvTransportLastChange*              _pLastChange;
 };
 
 
@@ -79,7 +82,6 @@ private:
     virtual void initStateVars();
 
     std::vector<Engine*>                _engines;
-//    Engine* _pEngine;
 };
 
 
@@ -130,8 +132,9 @@ private:
 
     virtual void initStateVars();
 
+    void addEngine(Engine* pEngine);
+    
     std::vector<Engine*>                _engines;
-//    Engine*                         _pEngine;
     RenderingControlLastChange*         _pLastChange;
 };
 

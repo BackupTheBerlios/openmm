@@ -103,6 +103,16 @@ private:
 };
 
 
+class AvTransportLastChange : public LastChange
+{
+public:
+    AvTransportLastChange(Service*& pService);
+
+private:
+    virtual void writeSchemeAttribute();
+};
+
+
 class RenderingControlLastChange : public LastChange
 {
 public:

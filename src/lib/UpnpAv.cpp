@@ -405,6 +405,19 @@ LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name,
 }
 
 
+AvTransportLastChange::AvTransportLastChange(Service*& pService) :
+LastChange(pService)
+{
+}
+
+
+void
+AvTransportLastChange::writeSchemeAttribute()
+{
+    _pMessage->setAttribute("xmlns", "urn:schemas-upnp-org:metadata-1-0/AVT/");
+}
+
+
 RenderingControlLastChange::RenderingControlLastChange(Service*& pService) :
 LastChange(pService)
 {
