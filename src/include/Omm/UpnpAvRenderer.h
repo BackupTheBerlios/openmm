@@ -78,6 +78,8 @@ public:
     virtual float getLengthSeconds() = 0;
 
     const std::string& transportState();
+    void transportStateChanged();
+
     /*
       Rendering Control
     */

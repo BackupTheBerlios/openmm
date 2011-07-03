@@ -85,6 +85,13 @@ VlcEngine::createPlayer()
 #endif
     handleException();
 
+#if LIBVLC_VERSION_INT < 0x110
+    int ret = libvlc_event_attach(_pEventManager, &_exception);
+#else
+    int ret = libvlc_event_attach(_pEventManager, libvlc_MediaStateChanged, &eventHandler, this);
+#endif
+    handleException();
+
     if (_pVisual) {
         Omm::Av::Log::instance()->upnpav().debug("vlc engine: set visual ...");
 #ifdef __LINUX__
@@ -291,6 +298,13 @@ VlcEngine::analyzeStream()
 //     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0));
 //     handleException();
 #endif
+}
+
+
+void
+VlcEngine::eventHandler(const struct libvlc_event_t* pEvent, void* pUserData)
+{
+    static_cast<Omm::Av::Engine*>(pUserData)->transportStateChanged();
 }
 
 

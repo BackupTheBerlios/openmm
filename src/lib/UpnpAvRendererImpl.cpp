@@ -258,12 +258,12 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
     }
     // TODO: check if engine really stopped
 //    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
-    std::string newTransportState = _engines[InstanceID]->transportState();
-    Variant val;
-    val.setValue(newTransportState);
-    _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+//    std::string newTransportState = _engines[InstanceID]->transportState();
+//    Variant val;
+//    val.setValue(newTransportState);
+//    _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() leaves in state: " + newTransportState);
+//    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() leaves in state: " + newTransportState);
 }
 
 
@@ -314,16 +314,16 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
         //       set state to "TRANSITIONING" (-> 2.4.9.3. Effect on State, AVTransport spec)
         
 //        _setTransportState(AvTransportArgument::TRANSPORT_STATE_PLAYING);
-        newTransportState = _engines[InstanceID]->transportState();
-        Variant val;
-        val.setValue(newTransportState);
-        _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+//        newTransportState = _engines[InstanceID]->transportState();
+//        Variant val;
+//        val.setValue(newTransportState);
+//        _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
         
         _setTransportPlaySpeed(speed);
         
         _lastCurrentTrackUri = _getCurrentTrackURI();
     }
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() leaves in state: " + newTransportState);
+//    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() leaves in state: " + newTransportState);
 }
 
 
@@ -346,9 +346,9 @@ DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
         }
     }
 //    _setTransportState(newTransportState);
-    Variant val;
-    val.setValue(newTransportState);
-    _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+//    Variant val;
+//    val.setValue(newTransportState);
+//    _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 }
 
 

@@ -79,6 +79,8 @@ private:
     void handleException();
     void analyzeStream();
 
+    static void eventHandler(const struct libvlc_event_t* pEvent, void* pUserData);
+    
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_exception_t      _exception;
 #endif

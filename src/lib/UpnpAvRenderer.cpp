@@ -87,6 +87,17 @@ Engine::transportState()
 
 
 void
+Engine::transportStateChanged()
+{
+    std::string newTransportState = transportState();
+    Variant val;
+    val.setValue(newTransportState);
+    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+    Omm::Av::Log::instance()->upnpav().debug("new transport state: " + newTransportState);
+}
+
+
+void
 Engine::endOfStream()
 {
     // position state vars are not evented via LastChange state var (and not evented at all).
