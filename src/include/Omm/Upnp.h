@@ -512,6 +512,7 @@ public:
 
     DeviceManager* getDeviceManager();
     /*const*/ Device* getDevice(std::string uuid) /*const*/;
+    int getDeviceCount();
     Device* getRootDevice() const;
     Controller* getController() const;
 

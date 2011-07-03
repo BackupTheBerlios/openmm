@@ -33,6 +33,11 @@ void
 DevAVTransportRendererImpl::initStateVars()
 {
     // FIXME: init all engine instances instead of the state vars in the service tree.
+    // TODO: URIs and positions must be implemented for each engine:
+    // positions are read directly from the engine, without caching the values.
+    // two implementations for URIs:
+    // 1. gapless play in engine and engine stores the URIs and transitions between them (e.g. in a playlist).
+    // 2. keep track of each engine URIs in renderer implementation.
     
 //    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
 //    _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
@@ -68,7 +73,6 @@ DevAVTransportRendererImpl::initStateVars()
 void
 DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
-//    std::string transportState = _getTransportState();
     std::string transportState = _engines[InstanceID]->transportState();
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI enters in state: " + transportState);
     
@@ -159,7 +163,6 @@ DevAVTransportRendererImpl::GetMediaInfo(const ui4& InstanceID, ui4& NrTracks, s
 void
 DevAVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string& CurrentTransportState, std::string& CurrentTransportStatus, std::string& CurrentSpeed)
 {
-//    CurrentTransportState = _getTransportState();
     CurrentTransportState = _engines[InstanceID]->transportState();
     CurrentTransportStatus = _getTransportStatus();
     CurrentSpeed = _getTransportPlaySpeed();
@@ -169,7 +172,6 @@ DevAVTransportRendererImpl::GetTransportInfo(const ui4& InstanceID, std::string&
 void
 DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
-//    std::string transportState = _getTransportState();
     std::string transportState = _engines[InstanceID]->transportState();
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
     

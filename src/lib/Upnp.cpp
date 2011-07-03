@@ -1037,7 +1037,7 @@ DeviceDescriptionWriter::DeviceDescriptionWriter()
 
 
 void
-DeviceDescriptionWriter::deviceContainer(DeviceContainer& deviceRoot)
+DeviceDescriptionWriter::deviceContainer(DeviceContainer& deviceContainer)
 {
     Poco::AutoPtr<Poco::XML::Element> pRoot = _pDoc->createElement("root");
     pRoot->setAttribute("xmlns", "urn:schemas-upnp-org:device-1-0");
@@ -1052,13 +1052,23 @@ DeviceDescriptionWriter::deviceContainer(DeviceContainer& deviceRoot)
     pSpecVersion->appendChild(pMinor);
     pRoot->appendChild(pSpecVersion);
     // write root device
-    Poco::AutoPtr<Poco::XML::Element> pRootDevice = device(*deviceRoot.getRootDevice());
+    Poco::AutoPtr<Poco::XML::Element> pRootDevice = device(*deviceContainer.getRootDevice());
     pRoot->appendChild(pRootDevice);
     _pDoc->appendChild(pRoot);
     // end root device
     
-    // TODO: if there are embedded devices open a deviceList
-    // write embedded devices
+    if (deviceContainer.getDeviceCount() > 1) {
+        // if there are embedded devices open a deviceList
+        Poco::AutoPtr<Poco::XML::Element> pDeviceList = _pDoc->createElement("deviceList");
+        pRootDevice->appendChild(pDeviceList);
+        for (DeviceContainer::DeviceIterator it = deviceContainer.beginDevice(); it != deviceContainer.endDevice(); ++it) {
+            // write embedded devices
+            if (*it != deviceContainer.getRootDevice()) {
+                Poco::AutoPtr<Poco::XML::Element> pSubDevice = device(**it);
+                pDeviceList->appendChild(pSubDevice);
+            }
+        }
+    }
     // end embedded devices
     
     // end DeviceContainer
@@ -2977,6 +2987,13 @@ Device*
 DeviceContainer::getDevice(std::string uuid)
 {
     return &_devices.get(uuid);
+}
+
+
+int
+DeviceContainer::getDeviceCount()
+{
+    return _devices.size();
 }
 
 

@@ -29,6 +29,7 @@
 
 #include <Omm/UpnpAvController.h>
 #include <Omm/UpnpAvRenderer.h>
+#include <Omm/UpnpAvServer.h>
 //#include <Omm/UpnpAvApplication.h>
 #include <Omm/Util.h>
 
@@ -150,6 +151,16 @@ protected:
                 return 1;
             }
 
+            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> serverPluginLoader;
+            Omm::Av::AbstractMediaObject* pContainerPlugin;
+            try {
+                pContainerPlugin = serverPluginLoader.load("server-file");
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error could not find server plugin: " << "server-file" << std::endl;
+                return 1;
+            }
+
             Omm::Av::AvController controller;
             controller.setUserInterface(pUserInterface);
 //            Omm::Av::AvApplication application;
@@ -163,8 +174,8 @@ protected:
 
             Omm::Av::AvRenderer mediaRenderer;
             mediaRenderer.addEngine(pEnginePlugin);
-            Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
-            mediaRenderer.addIcon(pIcon);
+            Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
+            mediaRenderer.addIcon(pRendererIcon);
             if (_name != "") {
                 mediaRenderer.setFriendlyName("OMM Renderer");
             }
@@ -174,6 +185,17 @@ protected:
             rendererContainer.addDevice(&mediaRenderer);
             // set media renderer device as root device
             rendererContainer.setRootDevice(&mediaRenderer);
+
+            pContainerPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/music");
+            pContainerPlugin->setTitle("Music");
+            // create a media server device
+            Omm::Av::AvServer mediaServer;
+            mediaServer.setRoot(pContainerPlugin);
+            mediaServer.setFriendlyName(_name);
+            Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
+            mediaServer.addIcon(pServerIcon);
+
+            rendererContainer.addDevice(&mediaServer);
 
             // create a runnable device server and add media server container
             Omm::DeviceServer localDevices;

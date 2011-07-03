@@ -316,7 +316,7 @@ class DeviceDescriptionWriter
 public:
     DeviceDescriptionWriter();
     
-    void deviceContainer(DeviceContainer& deviceRoot);
+    void deviceContainer(DeviceContainer& deviceContainer);
     std::string* write();
     
 private:
