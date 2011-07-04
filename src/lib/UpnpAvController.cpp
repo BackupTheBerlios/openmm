@@ -368,50 +368,49 @@ AvController::serverDevice(int numServer)
 void
 AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    // TODO: add all devices, not only root device
-
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
-    Device* pDevice = pDeviceContainer->getRootDevice();
-    Log::instance()->upnpav().information("AV controller add root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
-    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-        Log::instance()->upnpav().debug("AV controller add media renderer");
-        CtlMediaRenderer* pRendererImpl = new CtlMediaRenderer(
-            pDevice,
-            new CtlRenderingControlImpl(pUserInterface),
-            new CtlConnectionManagerImpl(pUserInterface),
-            new CtlAVTransportImpl(pUserInterface));
-        pDevice->setCtlDeviceCode(pRendererImpl);
-        RendererView* pRendererView = new RendererView(pRendererImpl);
-        pUserInterface->beginAddRenderer(_renderers.size());
-        _renderers.append(pDevice->getUuid(), pRendererView);
-        pUserInterface->endAddRenderer(_renderers.size() - 1);
-    }
-    else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        Log::instance()->upnpav().debug("AV controller add media server");
-        CtlMediaServer* pServerImpl = new CtlMediaServer(
-            pDevice,
-            new CtlContentDirectoryImpl(pUserInterface),
-            new CtlConnectionManagerImpl(pUserInterface),
-            new CtlAVTransportImpl(pUserInterface));
-        pDevice->setCtlDeviceCode(pServerImpl);
-        ServerController* pServer = new ServerController(pServerImpl);
-        pServer->browseRootObject();
-        pUserInterface->beginAddServer(_servers.size());
-        _servers.append(pDevice->getUuid(), pServer);
-        pUserInterface->endAddServer(_servers.size() - 1);
-    }
+    for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
+        Device* pDevice = *it;
+        Log::instance()->upnpav().information("AV controller add root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
-    // if device container contains a MediaRenderer or a MediaServer, add device container
-    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" ||
-        pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-        // NOTE: subscription requests are sent, when adding a device container (see DeviceContainer::initController()
-        // when device sends its initial event message right afterwards, the event handler code must be registered.
-        Controller::addDeviceContainer(pDeviceContainer);
-        pDevice->initControllerEventing();
+        if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
+            Log::instance()->upnpav().debug("AV controller add media renderer");
+            CtlMediaRenderer* pRendererImpl = new CtlMediaRenderer(
+                pDevice,
+                new CtlRenderingControlImpl(pUserInterface),
+                new CtlConnectionManagerImpl(pUserInterface),
+                new CtlAVTransportImpl(pUserInterface));
+            pDevice->setCtlDeviceCode(pRendererImpl);
+            RendererView* pRendererView = new RendererView(pRendererImpl);
+            pUserInterface->beginAddRenderer(_renderers.size());
+            _renderers.append(pDevice->getUuid(), pRendererView);
+            pUserInterface->endAddRenderer(_renderers.size() - 1);
+        }
+        else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
+            Log::instance()->upnpav().debug("AV controller add media server");
+            CtlMediaServer* pServerImpl = new CtlMediaServer(
+                pDevice,
+                new CtlContentDirectoryImpl(pUserInterface),
+                new CtlConnectionManagerImpl(pUserInterface),
+                new CtlAVTransportImpl(pUserInterface));
+            pDevice->setCtlDeviceCode(pServerImpl);
+            ServerController* pServer = new ServerController(pServerImpl);
+            pServer->browseRootObject();
+            pUserInterface->beginAddServer(_servers.size());
+            _servers.append(pDevice->getUuid(), pServer);
+            pUserInterface->endAddServer(_servers.size() - 1);
+        }
+
+        // if device container contains a MediaRenderer or a MediaServer, add device container
+        if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" ||
+            pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
+            Controller::addDeviceContainer(pDeviceContainer);
+            pDevice->initControllerEventing();
+        }
+
+        Log::instance()->upnpav().information("AV controller add root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     }
-    
-    Log::instance()->upnpav().information("AV controller add root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 }
 
 
@@ -419,27 +418,30 @@ void
 AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     AvUserInterface* pUserInterface = static_cast<AvUserInterface*>(_pUserInterface);
-    Device* pDevice = pDeviceContainer->getRootDevice();
-    Log::instance()->upnpav().information("av controller removed root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
-    
-    if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" && _renderers.contains(pDevice->getUuid())) {
-        // TODO: delete renderer controller
-        int position = _renderers.position(pDevice->getUuid());
-        pUserInterface->beginRemoveRenderer(position);
-        _renderers.remove(pDevice->getUuid());
-        pUserInterface->endRemoveRenderer(position);
-    }
-    else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1" && _servers.contains(pDevice->getUuid())) {
-        // TODO: delete server controller
-        int position = _servers.position(pDevice->getUuid());
-        pUserInterface->beginRemoveServer(position);
-        _servers.remove(pDevice->getUuid());
-        pUserInterface->endRemoveServer(position);
-    }
 
-    Controller::removeDeviceContainer(pDeviceContainer);
+    for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
+        Device* pDevice = *it;
+        Log::instance()->upnpav().information("av controller removed root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
-    Log::instance()->upnpav().information("av controller removed root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" && _renderers.contains(pDevice->getUuid())) {
+            // TODO: delete renderer controller
+            int position = _renderers.position(pDevice->getUuid());
+            pUserInterface->beginRemoveRenderer(position);
+            _renderers.remove(pDevice->getUuid());
+            pUserInterface->endRemoveRenderer(position);
+        }
+        else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1" && _servers.contains(pDevice->getUuid())) {
+            // TODO: delete server controller
+            int position = _servers.position(pDevice->getUuid());
+            pUserInterface->beginRemoveServer(position);
+            _servers.remove(pDevice->getUuid());
+            pUserInterface->endRemoveServer(position);
+        }
+
+        Controller::removeDeviceContainer(pDeviceContainer);
+
+        Log::instance()->upnpav().information("av controller removed root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+    }
 }
 
 

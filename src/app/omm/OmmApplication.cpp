@@ -191,7 +191,7 @@ protected:
             // create a media server device
             Omm::Av::AvServer mediaServer;
             mediaServer.setRoot(pContainerPlugin);
-            mediaServer.setFriendlyName(_name);
+            mediaServer.setFriendlyName("Music Collection");
             Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
             mediaServer.addIcon(pServerIcon);
 
