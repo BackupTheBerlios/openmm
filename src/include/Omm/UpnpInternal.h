@@ -113,7 +113,7 @@ public:
     /// when a new device pops up and is read by the controller. Also, the stub
     /// generator uses this to build the device tree and generate the stub code.
     /// The stub generator could also use rootDeviceData(), but this is more robust.
-    DeviceData* rootDeviceData(Device* pDevice);
+    DeviceData* rootDeviceData();
     /// Parses the device description, creates and returns the device data of
     /// the root device. Subdevices, if present, are ignored. This is used by
     /// the device side, when building the internal device tree from a memory description.
@@ -125,7 +125,7 @@ protected:
     /// Device description URI and base URI for service descriptions.
 
 private:
-    DeviceData* deviceData(Poco::XML::Node* pNode, Device* pDevice);
+    DeviceData* deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer);
     Service* service(Poco::XML::Node* pNode);
     Action* action(Poco::XML::Node* pNode);
     Argument* argument(Poco::XML::Node* pNode);

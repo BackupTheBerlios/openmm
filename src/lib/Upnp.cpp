@@ -513,12 +513,13 @@ DescriptionReader::deviceContainer()
             deviceNodeFound = true;
             // device must be created and added to device container first, so that
             // service types in device container are populated.
-            Device* pDevice = new Device;
-            pRes->addDevice(pDevice);
-            pRes->setRootDevice(pDevice);
+            Device* pRootDevice = new Device;
             // parse device, which must be the root device at this place in description
             // and add the generated device tree to our Device.
-            DeviceData* pDeviceData = deviceData(pNode->firstChild(), pDevice);
+            DeviceData* pDeviceData = deviceData(pNode->firstChild(), pRes);
+            pRootDevice->setDeviceData(pDeviceData);
+            pRes->addDevice(pRootDevice);
+            pRes->setRootDevice(pRootDevice);
         }
         pNode = pNode->nextSibling();
     }
@@ -530,7 +531,7 @@ DescriptionReader::deviceContainer()
 
 
 DeviceData*
-DescriptionReader::rootDeviceData(Device* pDevice)
+DescriptionReader::rootDeviceData()
 {
     Log::instance()->desc().debug("parsing root device ...");
     DeviceData* pRes = 0;
@@ -540,7 +541,7 @@ DescriptionReader::rootDeviceData(Device* pDevice)
     {
         if (pNode->nodeName() == "device" && pNode->hasChildNodes()) {
             deviceNodeFound = true;
-            pRes = deviceData(pNode->firstChild(), pDevice);
+            pRes = deviceData(pNode->firstChild(), 0);
         }
         pNode = pNode->nextSibling();
     }
@@ -578,12 +579,12 @@ DescriptionReader::releaseDescriptionDocument()
 
 
 DeviceData*
-DescriptionReader::deviceData(Poco::XML::Node* pNode, Device* pDevice)
+DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer)
 {
     Log::instance()->desc().debug("parsing device ...");
     DeviceData* pRes = new DeviceData();
-    pDevice->setDeviceData(pRes);
-    DeviceContainer* pDeviceContainer = pDevice->getDeviceContainer();
+//    pDevice->setDeviceData(pRes);
+//    DeviceContainer* pDeviceContainer = pDevice->getDeviceContainer();
 
     while (pNode)
     {
@@ -618,10 +619,10 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, Device* pDevice)
                 while (pChild) {
                     if (pChild->nodeName() == "device") {
                         if (pChild->hasChildNodes()) {
-                            Device* pDevice = new Device;
-                            pDeviceContainer->addDevice(pDevice);
-                            DeviceData* pDeviceData = deviceData(pChild->firstChild(), pDevice);
-                            pDevice->setDeviceData(pDeviceData);
+                            Device* pSubDevice = new Device;
+                            DeviceData* pDeviceData = deviceData(pChild->firstChild(), pDeviceContainer);
+                            pSubDevice->setDeviceData(pDeviceData);
+                            pDeviceContainer->addDevice(pSubDevice);
                         }
                         else {
                             Log::instance()->desc().error("empty embedded device");
@@ -1030,14 +1031,14 @@ EventMessageReader::stateVar(Poco::XML::Node* pNode)
 }
 
 
-DeviceDescriptionWriter::DeviceDescriptionWriter()
+DescriptionWriter::DescriptionWriter()
 {
     _pDoc = new Poco::XML::Document;
 }
 
 
 void
-DeviceDescriptionWriter::deviceContainer(DeviceContainer& deviceContainer)
+DescriptionWriter::deviceContainer(DeviceContainer& deviceContainer)
 {
     Poco::AutoPtr<Poco::XML::Element> pRoot = _pDoc->createElement("root");
     pRoot->setAttribute("xmlns", "urn:schemas-upnp-org:device-1-0");
@@ -1076,7 +1077,7 @@ DeviceDescriptionWriter::deviceContainer(DeviceContainer& deviceContainer)
 
 
 Poco::XML::Element*
-DeviceDescriptionWriter::device(Device& device)
+DescriptionWriter::device(Device& device)
 {
     Poco::XML::Element* pDevice = _pDoc->createElement("device");
     
@@ -1124,7 +1125,7 @@ DeviceDescriptionWriter::device(Device& device)
 
 
 Poco::XML::Element*
-DeviceDescriptionWriter::service(Service* pService)
+DescriptionWriter::service(Service* pService)
 {
     Poco::XML::Element* pServiceElement = _pDoc->createElement("service");
     
@@ -1159,7 +1160,7 @@ DeviceDescriptionWriter::service(Service* pService)
 
 
 Poco::XML::Element*
-DeviceDescriptionWriter::icon(Icon* pIcon)
+DescriptionWriter::icon(Icon* pIcon)
 {
     Poco::XML::Element* pIconElement = _pDoc->createElement("icon");
     
@@ -1194,7 +1195,7 @@ DeviceDescriptionWriter::icon(Icon* pIcon)
 
 
 std::string*
-DeviceDescriptionWriter::write()
+DescriptionWriter::write()
 {
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
@@ -2943,8 +2944,12 @@ DeviceContainer::getServiceType(const std::string& serviceType)
 void
 DeviceContainer::addDevice(Device* pDevice)
 {
+//    Log::instance()->upnp().debug("add device: " + pDevice->getUuid());
     _devices.append(pDevice);
     pDevice->setDeviceContainer(this);
+    for (Device::ServiceIterator it = pDevice->beginService(); it != pDevice->endService(); ++it) {
+        addServiceType(*it);
+    }
 }
 
 
@@ -3042,6 +3047,7 @@ DeviceContainer::setDeviceManager(DeviceManager* pDeviceManager)
 void
 DeviceContainer::setRootDevice(Device* pDevice)
 {
+//    Log::instance()->upnp().debug("set root device: " + pDevice->getUuid());
     _pRootDevice = pDevice;
 }
 
@@ -3140,7 +3146,7 @@ DeviceContainer::rewriteDescriptions()
             (*s)->setServiceDescription(*serviceDescriptionWriter.write());
         }
     }
-    DeviceDescriptionWriter descriptionWriter;
+    DescriptionWriter descriptionWriter;
     descriptionWriter.deviceContainer(*this);
     setDeviceDescription(*descriptionWriter.write());
 }
@@ -3518,10 +3524,11 @@ DeviceData::addService(Service* pService)
 {
     _services.append(pService->getServiceType(), pService);
     pService->setDeviceData(this);
-    DeviceContainer* pDeviceContainer = getDevice()->getDeviceContainer();
-    if (pDeviceContainer) {
-        pDeviceContainer->addServiceType(pService);
-    }
+    // NOTE: moved this into DeviceContainer::addDevice()
+//    DeviceContainer* pDeviceContainer = getDevice()->getDeviceContainer();
+//    if (pDeviceContainer) {
+//        pDeviceContainer->addServiceType(pService);
+//    }
 }
 
 

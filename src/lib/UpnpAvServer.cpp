@@ -302,7 +302,7 @@ AvServer::AvServer()
     MediaServerDescriptions mediaServerDescriptions;
     MemoryDescriptionReader descriptionReader(mediaServerDescriptions);
     descriptionReader.getDeviceDescription();
-    setDeviceData(descriptionReader.rootDeviceData(this));
+    setDeviceData(descriptionReader.rootDeviceData());
 
     // service implementations are owned by DevMediaServer (DevDeviceCode)
     // DevDeviceCode should be owned by super class Device

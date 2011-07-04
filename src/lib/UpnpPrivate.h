@@ -311,10 +311,10 @@ private:
 };
 
 
-class DeviceDescriptionWriter
+class DescriptionWriter
 {
 public:
-    DeviceDescriptionWriter();
+    DescriptionWriter();
     
     void deviceContainer(DeviceContainer& deviceContainer);
     std::string* write();

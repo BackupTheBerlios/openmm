@@ -116,7 +116,7 @@ AvRenderer::AvRenderer()
     MediaRendererDescriptions mediaRendererDescriptions;
     MemoryDescriptionReader descriptionReader(mediaRendererDescriptions);
     descriptionReader.getDeviceDescription();
-    setDeviceData(descriptionReader.rootDeviceData(this));
+    setDeviceData(descriptionReader.rootDeviceData());
 
     _pAVTransportImpl = new DevAVTransportRendererImpl;
     _pRenderingControlImpl = new DevRenderingControlRendererImpl;

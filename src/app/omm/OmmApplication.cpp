@@ -195,7 +195,7 @@ protected:
             Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
             mediaServer.addIcon(pServerIcon);
 
-            rendererContainer.addDevice(&mediaServer);
+//            rendererContainer.addDevice(&mediaServer);
 
             // create a runnable device server and add media server container
             Omm::DeviceServer localDevices;

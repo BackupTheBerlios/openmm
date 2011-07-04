@@ -102,7 +102,7 @@ class Icon
     friend class DeviceServer;
     friend class DeviceContainer;
     friend class Device;
-    friend class DeviceDescriptionWriter;
+    friend class DescriptionWriter;
     
 public:
     Icon(int width, int height, int depth, const std::string& mime, const std::string& uri = "");
@@ -562,7 +562,7 @@ private:
 class Device
 {
     friend class DescriptionReader;
-    friend class DeviceDescriptionWriter;
+    friend class DescriptionWriter;
     friend class DeviceContainer;
     friend class DeviceManager;
     friend class DeviceServer;
