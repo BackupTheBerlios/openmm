@@ -408,6 +408,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
         // NOTE: subscription requests are sent, when adding a device container (see DeviceContainer::initController()
         // when device sends its initial event message right afterwards, the event handler code must be registered.
         Controller::addDeviceContainer(pDeviceContainer);
+        pDevice->initControllerEventing();
     }
     
     Log::instance()->upnpav().information("AV controller add root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());

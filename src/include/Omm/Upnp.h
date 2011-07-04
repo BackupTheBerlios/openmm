@@ -373,6 +373,7 @@ class DeviceManager : public Util::Startable
 {
     friend class ControlRequestHandler;
     friend class DeviceContainer;
+    friend class Device;
 
 public:
     DeviceManager(Socket* pNetworkListener);
@@ -538,7 +539,6 @@ private:
     void initStateVars();
     void initDeviceDescriptionHandler();
     void initDevice();
-    void initController();
 
     void writeSsdpMessages();
 
@@ -605,6 +605,7 @@ public:
     void addIcon(Icon* pIcon);
 
     void initStateVars();
+    void initControllerEventing();
 
 private:
     void addProperty(const std::string& name, const std::string& val);

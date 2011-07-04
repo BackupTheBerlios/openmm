@@ -583,8 +583,6 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
 {
     Log::instance()->desc().debug("parsing device ...");
     DeviceData* pRes = new DeviceData();
-//    pDevice->setDeviceData(pRes);
-//    DeviceContainer* pDeviceContainer = pDevice->getDeviceContainer();
 
     while (pNode)
     {
@@ -3200,32 +3198,6 @@ DeviceContainer::initDevice()
 
 
 void
-DeviceContainer::initController()
-{
-    Log::instance()->upnp().debug("init device container (controller) ...");
-
-    // initialize http request handlers and state vars.
-    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-//        (*d)->initStateVars();
-        for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-            (*s)->addEventCallbackPath((*d)->getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
-            _pDeviceManager->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
-            
-            // TODO: event notifications should go into Device, after it is accepted and added to the controller
-            // subscribe to event notifications
-            try {
-                (*s)->sendSubscriptionRequest(1800);
-            }
-            catch (...) {
-                Log::instance()->upnp().error("controller failed to initialize device container while subscribing to events, ignoring.");
-            }
-        }
-    }
-    Log::instance()->upnp().debug("init device container (controller) finished.");
-}
-
-
-void
 DeviceContainer::writeSsdpMessages()
 {
     Log::instance()->ssdp().debug("writing messages ...");
@@ -3300,6 +3272,25 @@ Device::initStateVars()
 {
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
         _pDevDeviceCode->initStateVars(*s);
+    }
+}
+
+
+void
+Device::initControllerEventing()
+{
+    for(Device::ServiceIterator s = beginService(); s != endService(); ++s) {
+        (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
+        _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
+
+        // TODO: event notifications should go into Device, after it is accepted and added to the controller
+        // subscribe to event notifications
+        try {
+            (*s)->sendSubscriptionRequest(1800);
+        }
+        catch (...) {
+            Log::instance()->upnp().error("controller failed to initialize device while subscribing to events, ignoring.");
+        }
     }
 }
 
@@ -3524,11 +3515,6 @@ DeviceData::addService(Service* pService)
 {
     _services.append(pService->getServiceType(), pService);
     pService->setDeviceData(this);
-    // NOTE: moved this into DeviceContainer::addDevice()
-//    DeviceContainer* pDeviceContainer = getDevice()->getDeviceContainer();
-//    if (pDeviceContainer) {
-//        pDeviceContainer->addServiceType(pService);
-//    }
 }
 
 
@@ -3793,7 +3779,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         _pUserInterface->beginAddDeviceContainer(_deviceContainers.size());
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
-        pDeviceContainer->initController();
+//        pDeviceContainer->initController();
         _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
     }
 }
