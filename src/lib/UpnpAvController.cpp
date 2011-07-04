@@ -372,7 +372,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
     for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
         Device* pDevice = *it;
-        Log::instance()->upnpav().information("AV controller add root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        Log::instance()->upnpav().information("AV controller add device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
         if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
             Log::instance()->upnpav().debug("AV controller add media renderer");
@@ -409,7 +409,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
             pDevice->initControllerEventing();
         }
 
-        Log::instance()->upnpav().information("AV controller add root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        Log::instance()->upnpav().information("AV controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     }
 }
 
@@ -421,7 +421,7 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 
     for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
         Device* pDevice = *it;
-        Log::instance()->upnpav().information("av controller removed root device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        Log::instance()->upnpav().information("av controller removed device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
         if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" && _renderers.contains(pDevice->getUuid())) {
             // TODO: delete renderer controller
@@ -440,7 +440,7 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 
         Controller::removeDeviceContainer(pDeviceContainer);
 
-        Log::instance()->upnpav().information("av controller removed root device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        Log::instance()->upnpav().information("av controller removed device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     }
 }
 

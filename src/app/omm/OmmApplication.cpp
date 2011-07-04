@@ -131,6 +131,7 @@ protected:
         }
         else
         {
+            ///////// set up controller with its user interface /////////
             Omm::Util::PluginLoader<Omm::Av::AvUserInterface> pluginLoader;
             Omm::Av::AvUserInterface* pUserInterface;
             try {
@@ -141,6 +142,15 @@ protected:
                 return 1;
             }
 
+            Omm::Av::AvController controller;
+            controller.setUserInterface(pUserInterface);
+//            Omm::Av::AvApplication application;
+//            application.setUserInterface(pUserInterface);
+            pUserInterface->initGui();
+            pUserInterface->resize(_width, _height);
+            pUserInterface->setFullscreen(_fullscreen);
+
+            ///////// add a media renderer /////////
             Omm::Util::PluginLoader<Omm::Av::Engine> enginePluginLoader;
             Omm::Av::Engine* pEnginePlugin;
             try {
@@ -150,24 +160,6 @@ protected:
                 Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
                 return 1;
             }
-
-            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> serverPluginLoader;
-            Omm::Av::AbstractMediaObject* pContainerPlugin;
-            try {
-                pContainerPlugin = serverPluginLoader.load("server-file");
-            }
-            catch(Poco::NotFoundException) {
-                std::cerr << "Error could not find server plugin: " << "server-file" << std::endl;
-                return 1;
-            }
-
-            Omm::Av::AvController controller;
-            controller.setUserInterface(pUserInterface);
-//            Omm::Av::AvApplication application;
-//            application.setUserInterface(pUserInterface);
-            pUserInterface->initGui();
-            pUserInterface->resize(_width, _height);
-            pUserInterface->setFullscreen(_fullscreen);
 
             pEnginePlugin->setVisual(pUserInterface->getVisual());
             pEnginePlugin->createPlayer();
@@ -186,21 +178,52 @@ protected:
             // set media renderer device as root device
             rendererContainer.setRootDevice(&mediaRenderer);
 
+            ///////// add a file server /////////
+            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> serverPluginLoader;
+            Omm::Av::AbstractMediaObject* pContainerPlugin;
+            try {
+                pContainerPlugin = serverPluginLoader.load("server-file");
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error could not find server plugin: " << "server-file" << std::endl;
+                return 1;
+            }
+
             pContainerPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/music");
             pContainerPlugin->setTitle("Music");
             // create a media server device
             Omm::Av::AvServer mediaServer;
             mediaServer.setRoot(pContainerPlugin);
-            mediaServer.setFriendlyName("Music Collection");
+            mediaServer.setFriendlyName("OMM Music Collection");
             Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
             mediaServer.addIcon(pServerIcon);
-
             rendererContainer.addDevice(&mediaServer);
 
-            // create a runnable device server and add media server container
+            ///////// add a webradio server /////////
+            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> webradioPluginLoader;
+            Omm::Av::AbstractMediaObject* pWebradioPlugin;
+            try {
+                pWebradioPlugin = webradioPluginLoader.load("server-webradio");
+            }
+            catch(Poco::NotFoundException) {
+                std::cerr << "Error could not find server plugin: " << "server-webradio" << std::endl;
+                return 1;
+            }
+
+            pWebradioPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/.omm/webradio.conf");
+            pWebradioPlugin->setTitle("Web Radio");
+            Omm::Av::AvServer webradioServer;
+            webradioServer.setRoot(pWebradioPlugin);
+            webradioServer.setFriendlyName("OMM Webradio");
+            Omm::Icon* pWebradioIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
+            webradioServer.addIcon(pWebradioIcon);
+            rendererContainer.addDevice(&webradioServer);
+
+            ///////// create a runnable device server and add container with local devices /////////
             Omm::DeviceServer localDevices;
             localDevices.addDeviceContainer(&rendererContainer);
 
+            ///////// start the whole thing /////////
             pUserInterface->showMainWindow();
             controller.init();
             controller.start();

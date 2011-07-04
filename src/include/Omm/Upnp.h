@@ -426,6 +426,7 @@ public:
 
 protected:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
+    /// adds device container if not already added before (checks for uuid of root device).
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
 
     ControllerUserInterface*                      _pUserInterface;

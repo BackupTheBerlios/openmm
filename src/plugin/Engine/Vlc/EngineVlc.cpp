@@ -89,11 +89,11 @@ VlcEngine::createPlayer()
 #if LIBVLC_VERSION_INT < 0x110
     ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerStopped, &eventHandler, this, &_exception);
     ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerPlaying, &eventHandler, this, &_exception);
-//    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerEndReached, &eventHandler, this, &_exception);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerEndReached, &eventHandler, this, &_exception);
 #else
     ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerStopped, &eventHandler, this);
     ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerPlaying, &eventHandler, this);
-//    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerEndReached, &eventHandler, this);
+    ret = libvlc_event_attach(_pEventManager, libvlc_MediaPlayerEndReached, &eventHandler, this);
 #endif
     handleException();
 
