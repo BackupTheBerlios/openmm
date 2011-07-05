@@ -202,7 +202,7 @@ QtBrowserWidget::setCurrentIndex(QModelIndex index)
 void
 QtBrowserWidget::browserItemActivated(const QModelIndex& index)
 {
-    Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
+    Omm::Av::MediaObjectView* object = static_cast<Omm::Av::MediaObjectView*>(index.internalPointer());
     if (object == 0) {
         return;
     }
@@ -229,7 +229,7 @@ QtBrowserWidget::browserItemActivated(const QModelIndex& index)
 void
 QtBrowserWidget::browserItemSelected(const QModelIndex& index)
 {
-    Omm::Av::ControllerObject* object = static_cast<Omm::Av::ControllerObject*>(index.internalPointer());
+    Omm::Av::MediaObjectView* object = static_cast<Omm::Av::MediaObjectView*>(index.internalPointer());
     if (object == 0) {
         return;
     }
@@ -267,7 +267,7 @@ void
 QtBrowserWidget::beginRemoveServer(int position)
 {
     _pBrowserModel->beginRemoveServer(position);
-    Omm::Av::ControllerObject* pServerRootObject = _pAvInterface->serverRootObject(position);
+    Omm::Av::MediaObjectView* pServerRootObject = _pAvInterface->serverRootObject(position);
     if (_pCurrentServerRootObject && pServerRootObject == _pCurrentServerRootObject) {
         _pCrumbButton->buttonPressed();
     }

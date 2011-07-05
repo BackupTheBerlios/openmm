@@ -95,10 +95,10 @@ QtBrowserModel::~QtBrowserModel()
 }
 
 
-Omm::Av::ControllerObject*
+Omm::Av::MediaObjectView*
 QtBrowserModel::getObject(const QModelIndex &index) const
 {
-    return index.isValid() ? static_cast<Omm::Av::ControllerObject*>(index.internalPointer()) : 0;
+    return index.isValid() ? static_cast<Omm::Av::MediaObjectView*>(index.internalPointer()) : 0;
 }
 
 
@@ -107,7 +107,7 @@ QtBrowserModel::rowCount(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
     
-    Omm::Av::ControllerObject* object = getObject(parent);
+    Omm::Av::MediaObjectView* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->_objectId.c_str() << "return rows:" << object->_children.size();
     if (object == 0) {
 //         std::clog << "UpnpBrowserModel::rowCount() number of servers: " << _pServers->size() << std::endl;
@@ -143,7 +143,7 @@ QtBrowserModel::hasChildren(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
     
-    Omm::Av::ControllerObject* object = getObject(parent);
+    Omm::Av::MediaObjectView* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->_objectId.c_str();
     if (object == 0) {
 //         std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((_pServers->size() > 0) ? "yes" : "nope") << std::endl;
@@ -163,7 +163,7 @@ QtBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
     
-    Omm::Av::ControllerObject* object = getObject(parent);
+    Omm::Av::MediaObjectView* object = getObject(parent);
     if (object == 0) {
         return false;
     }
@@ -178,7 +178,7 @@ QtBrowserModel::fetchMore(const QModelIndex &parent)
 {
 //     std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
     
-    Omm::Av::ControllerObject* object = getObject(parent);
+    Omm::Av::MediaObjectView* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->_objectId.c_str();
     if (object == 0) {
         return;
@@ -199,7 +199,7 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
         Omm::Av::Log::instance()->upnpav().warning("UpnpBrowserModel::data() objectId reference is 0:");
         return QVariant();
     }
-    Omm::Av::ControllerObject* object = getObject(index);
+    Omm::Av::MediaObjectView* object = getObject(index);
     std::string artist = object->getProperty(Omm::Av::AvProperty::ARTIST);
     std::string album = object->getProperty(Omm::Av::AvProperty::ALBUM);
     bool titleOnly = (artist == "");
@@ -236,13 +236,13 @@ QtBrowserModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
-    Omm::Av::ControllerObject* object = getObject(index);
+    Omm::Av::MediaObjectView* object = getObject(index);
 //     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->_objectId.c_str();
 //     if (object->_parent == NULL) {
     if (object->parent() == 0) {
             return QModelIndex();
     }
-    Omm::Av::ControllerObject* grandp = object->parent()->parent();
+    Omm::Av::MediaObjectView* grandp = object->parent()->parent();
     if (grandp == 0) {
         int i = 0;
         while (i < _pUserInterface->serverCount() && _pUserInterface->serverRootObject(i) != object->parent()) {
@@ -262,7 +262,7 @@ QtBrowserModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
 //     std::vector<Omm::Av::MediaObject*>::iterator row;
-    Omm::Av::ControllerObject::ChildIterator row;
+    Omm::Av::MediaObjectView::ChildIterator row;
     row = find(grandp->beginChildren(), grandp->endChildren(), object->parent());
     if (row != grandp->endChildren()) {
 //         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->_children.begin());
@@ -279,7 +279,7 @@ QtBrowserModel::index(int row, int column, const QModelIndex &parent) const
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
-    Omm::Av::ControllerObject* object = getObject(parent);
+    Omm::Av::MediaObjectView* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->_objectId.c_str() << "row:" << row;
     if (object == NULL) {
 //         return createIndex(row, 0, (void*)(_pServers->get(row).root()));
@@ -319,7 +319,7 @@ QtBrowserModel::icon(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QIcon();
-    Omm::Av::ControllerObject* object = getObject(index);
+    Omm::Av::MediaObjectView* object = getObject(index);
     if (object == NULL) {
         return QIcon();
     }

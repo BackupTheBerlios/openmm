@@ -64,7 +64,7 @@ QtPlayerRack::rendererSelectionChanged(const QItemSelection& selected, const QIt
 
     QModelIndex index = selected.indexes().first();
 
-    Omm::Av::RendererView* selectedRenderer = static_cast<Omm::Av::RendererView*>(index.internalPointer());
+    Omm::Av::AvRendererView* selectedRenderer = static_cast<Omm::Av::AvRendererView*>(index.internalPointer());
     if (selectedRenderer) {
         _pAvInterface->rendererSelected(selectedRenderer);
     }

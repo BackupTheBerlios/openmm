@@ -31,12 +31,12 @@
 namespace Omm {
 namespace Av {
 
-class ServerController;
+class AvServerView;
 class AvController;
 class CtlMediaServer;
 class CtlMediaRenderer;
 
-class RendererView
+class AvRendererView
 {
     friend class AvController;
     friend class AvUserInterface;
@@ -46,26 +46,26 @@ public:
     const std::string getUuid();
     
 private:
-    RendererView(CtlMediaRenderer* rendererController);
+    AvRendererView(CtlMediaRenderer* rendererController);
     
     CtlMediaRenderer*    _pRendererController;
 };
 
 
-class ControllerObject : public MediaObject
+class MediaObjectView : public MediaObject
 {
-    friend class ServerController;
+    friend class AvServerView;
     friend class AvUserInterface;
     
 public:
-    ControllerObject();
+    MediaObjectView();
     
     void setServerController(CtlMediaServer* _pServer);
     
     int fetchChildren();
     bool fetchedAllChildren();
     ui4 childCount();
-    ControllerObject* parent();
+    MediaObjectView* parent();
     
     std::string getProperty(const std::string& name);
 
@@ -113,10 +113,10 @@ public:
     virtual void showMenu(bool show) {}
     
     int rendererCount();
-    RendererView* rendererView(int numRenderer);
-    bool isPlaying(RendererView* pRenderer);
+    AvRendererView* rendererView(int numRenderer);
+    bool isPlaying(AvRendererView* pRenderer);
     int serverCount();
-    ControllerObject* serverRootObject(int numServer);
+    MediaObjectView* serverRootObject(int numServer);
     const std::string serverUuid(int numServer);
 
     // TODO: getIcon() ... of server or renderer device ...
@@ -131,8 +131,8 @@ public:
     void positionMoved(int position);
     void volumeChanged(int value);
     
-    void rendererSelected(RendererView* pRenderer);
-    void mediaObjectSelected(ControllerObject* pObject);
+    void rendererSelected(AvRendererView* pRenderer);
+    void mediaObjectSelected(MediaObjectView* pObject);
 
     int selectedRendererIndex();
     std::string selectedRendererUuid();
@@ -141,9 +141,9 @@ private:
     void pollPositionInfo(Poco::Timer& timer);
     
     AvController*                         _pAvController;
-    RendererView*                         _pSelectedRendererView;
+    AvRendererView*                         _pSelectedRendererView;
     CtlMediaRenderer*                     _pSelectedRenderer;
-    ControllerObject*                     _pSelectedObject;
+    MediaObjectView*                     _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
 
 //    Engine*                               _pEngine;
@@ -159,9 +159,9 @@ public:
 
     int rendererCount();
     int serverCount();
-    RendererView* rendererView(int numRenderer);
-    int rendererIndex(RendererView* pRendererView);
-    ControllerObject* serverRootObject(int numServer);
+    AvRendererView* rendererView(int numRenderer);
+    int rendererIndex(AvRendererView* pRendererView);
+    MediaObjectView* serverRootObject(int numServer);
     Device* serverDevice(int numServer);
     
 private:
@@ -173,8 +173,8 @@ private:
     // TODO: handle subdevices.
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
     
-    Container<RendererView>               _renderers;
-    Container<ServerController>           _servers;
+    Container<AvRendererView>               _renderers;
+    Container<AvServerView>           _servers;
 };
 
 

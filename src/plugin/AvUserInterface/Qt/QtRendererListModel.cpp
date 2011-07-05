@@ -54,7 +54,7 @@ QtRendererListModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
     
-    Omm::Av::RendererView* pRenderer = static_cast<Omm::Av::RendererView*>(index.internalPointer());
+    Omm::Av::AvRendererView* pRenderer = static_cast<Omm::Av::AvRendererView*>(index.internalPointer());
     return QString(pRenderer->getName().c_str());
 //     return QString(pRenderer->getDevice()->getFriendlyName().c_str());
 }

@@ -95,7 +95,7 @@ private slots:
     void browserItemSelected(const QModelIndex& index);
 
 private:
-    Omm::Av::ControllerObject*      _pCurrentServerRootObject;
+    Omm::Av::MediaObjectView*      _pCurrentServerRootObject;
     QtAvInterface*                  _pAvInterface;
 
     QVBoxLayout*                    _pLayout;

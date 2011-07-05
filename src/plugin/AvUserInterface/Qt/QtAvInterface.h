@@ -104,7 +104,7 @@ private slots:
     void skipForwardButtonPressed();
     void skipBackwardButtonPressed();
 
-    void rendererSelected(Omm::Av::RendererView* pRenderer);
+    void rendererSelected(Omm::Av::AvRendererView* pRenderer);
     
 private:
     virtual void beginAddServer(int position);

@@ -30,7 +30,7 @@
 namespace Omm {
 namespace Av {
 
-ControllerObject::ControllerObject() :
+MediaObjectView::MediaObjectView() :
 Omm::Av::MediaObject(),
 _childCount(0),
 _fetchedAllChildren(false)
@@ -39,7 +39,7 @@ _fetchedAllChildren(false)
 
 
 void
-ControllerObject::addResource(Resource* pResource)
+MediaObjectView::addResource(Resource* pResource)
 {
 //     std::clog << "ControllerObject::addResource() with uri: " << pResource->getUri() << std::endl;
     _resources.push_back(pResource);
@@ -47,7 +47,7 @@ ControllerObject::addResource(Resource* pResource)
 
 
 void
-ControllerObject::readChildren(const std::string& metaData)
+MediaObjectView::readChildren(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -60,7 +60,7 @@ ControllerObject::readChildren(const std::string& metaData)
     while (pObjectNode)
     {
         if (pObjectNode->hasChildNodes()) {
-            ControllerObject* pObject = new ControllerObject;
+            MediaObjectView* pObject = new MediaObjectView;
             pObject->readNode(pObjectNode);
             pObject->_parent = this;
             pObject->_server = _server;
@@ -72,7 +72,7 @@ ControllerObject::readChildren(const std::string& metaData)
 
 
 void
-ControllerObject::readMetaData(const std::string& metaData)
+MediaObjectView::readMetaData(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -87,7 +87,7 @@ ControllerObject::readMetaData(const std::string& metaData)
 
 
 void
-ControllerObject::readNode(Poco::XML::Node* pNode)
+MediaObjectView::readNode(Poco::XML::Node* pNode)
 {
     Poco::XML::NamedNodeMap* attr = 0;
     if (pNode->hasAttributes()) {
@@ -149,7 +149,7 @@ ControllerObject::readNode(Poco::XML::Node* pNode)
 
 
 int
-ControllerObject::fetchChildren()
+MediaObjectView::fetchChildren()
 {
     // TODO: browse meta data for the root object with id "0"
 //     std::clog << "MediaObject::fetchChildren() objectId: " << _objectId << std::endl;
@@ -182,21 +182,21 @@ ControllerObject::fetchChildren()
 
 
 bool
-ControllerObject::fetchedAllChildren()
+MediaObjectView::fetchedAllChildren()
 {
     return _fetchedAllChildren;
 }
 
 
-ControllerObject*
-ControllerObject::parent()
+MediaObjectView*
+MediaObjectView::parent()
 {
-    return static_cast<ControllerObject*>(_parent);
+    return static_cast<MediaObjectView*>(_parent);
 }
 
 
 std::string
-ControllerObject::getProperty(const std::string& name)
+MediaObjectView::getProperty(const std::string& name)
 {
 //     std::clog << "MediaObject::getProperty() name: " << name << std::endl;
 //     std::clog << "MediaObject::getProperty() number of properties: " << _properties.size() << std::endl;
@@ -208,7 +208,7 @@ ControllerObject::getProperty(const std::string& name)
 
 
 Icon*
-ControllerObject::getIcon()
+MediaObjectView::getIcon()
 {
     // icon property is a lower resolution thumb nail of the original picture (but should be displayable on a handheld device).
     return new Icon(0, 0, 0, Mime::IMAGE_JPEG, getProperty(AvProperty::ICON));
@@ -216,7 +216,7 @@ ControllerObject::getIcon()
 
 
 Icon*
-ControllerObject::getImageRepresentation()
+MediaObjectView::getImageRepresentation()
 {
     std::string prop = getProperty(AvProperty::CLASS);
     if (AvClass::matchClass(prop, AvClass::ITEM, AvClass::IMAGE_ITEM))
@@ -231,7 +231,7 @@ ControllerObject::getImageRepresentation()
 
 
 Resource*
-ControllerObject::getResource(int num)
+MediaObjectView::getResource(int num)
 {
 //     std::clog << "ControllerObject::getResource() number: " << num << std::endl;
 //     std::clog << "ControllerObject::getResource() with uri: " << _resources[num]->getUri() << std::endl;
@@ -240,36 +240,36 @@ ControllerObject::getResource(int num)
 
 
 ui4
-ControllerObject::childCount()
+MediaObjectView::childCount()
 {
     return _childCount;
 }
 
 
 void
-ControllerObject::setFetchedAllChildren(bool fetchedAllChildren)
+MediaObjectView::setFetchedAllChildren(bool fetchedAllChildren)
 {
     _fetchedAllChildren = fetchedAllChildren;
 }
 
 
 void
-ControllerObject::setServerController(CtlMediaServer* _pServer)
+MediaObjectView::setServerController(CtlMediaServer* _pServer)
 {
     _server = _pServer;
 }
 
 
-ServerController::ServerController(CtlMediaServer* pServerController) :
+AvServerView::AvServerView(CtlMediaServer* pServerController) :
 _pServerController(pServerController)
 {
 }
 
 
 void
-ServerController::browseRootObject()
+AvServerView::browseRootObject()
 {
-  _pRoot = new ControllerObject;
+  _pRoot = new MediaObjectView;
     try {
         std::string rootMeta;
         ui4 numberReturned;
@@ -290,21 +290,21 @@ ServerController::browseRootObject()
 }
 
 
-RendererView::RendererView(CtlMediaRenderer* rendererController) :
+AvRendererView::AvRendererView(CtlMediaRenderer* rendererController) :
 _pRendererController(rendererController)
 {
 }
 
 
 const std::string
-RendererView::getName()
+AvRendererView::getName()
 {
     return _pRendererController->getDevice()->getFriendlyName();
 }
 
 
 const std::string
-RendererView::getUuid()
+AvRendererView::getUuid()
 {
     return _pRendererController->getDevice()->getUuid();
 }
@@ -325,7 +325,7 @@ AvController::rendererCount()
 }
 
 
-RendererView*
+AvRendererView*
 AvController::rendererView(int numRenderer)
 {
     return &_renderers.get(numRenderer);
@@ -340,7 +340,7 @@ AvController::serverCount()
 
 
 int
-AvController::rendererIndex(RendererView* pRendererView)
+AvController::rendererIndex(AvRendererView* pRendererView)
 {
     if (pRendererView) {
         return _renderers.position(pRendererView);
@@ -351,7 +351,7 @@ AvController::rendererIndex(RendererView* pRendererView)
 }
 
 
-ControllerObject*
+MediaObjectView*
 AvController::serverRootObject(int numServer)
 {
     return _servers.get(numServer).root();
@@ -382,7 +382,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 new CtlConnectionManagerImpl(pUserInterface),
                 new CtlAVTransportImpl(pUserInterface));
             pDevice->setCtlDeviceCode(pRendererImpl);
-            RendererView* pRendererView = new RendererView(pRendererImpl);
+            AvRendererView* pRendererView = new AvRendererView(pRendererImpl);
             pUserInterface->beginAddRenderer(_renderers.size());
             _renderers.append(pDevice->getUuid(), pRendererView);
             pUserInterface->endAddRenderer(_renderers.size() - 1);
@@ -395,7 +395,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 new CtlConnectionManagerImpl(pUserInterface),
                 new CtlAVTransportImpl(pUserInterface));
             pDevice->setCtlDeviceCode(pServerImpl);
-            ServerController* pServer = new ServerController(pServerImpl);
+            AvServerView* pServer = new AvServerView(pServerImpl);
             pServer->browseRootObject();
             pUserInterface->beginAddServer(_servers.size());
             _servers.append(pDevice->getUuid(), pServer);
@@ -473,7 +473,7 @@ AvUserInterface::rendererCount()
 }
 
 
-RendererView*
+AvRendererView*
 AvUserInterface::rendererView(int numRenderer)
 {
     return _pAvController->rendererView(numRenderer);
@@ -481,7 +481,7 @@ AvUserInterface::rendererView(int numRenderer)
 
 
 bool
-AvUserInterface::isPlaying(RendererView* pRenderer)
+AvUserInterface::isPlaying(AvRendererView* pRenderer)
 {
     std::string transportState;
     std::string transportStatus;
@@ -503,7 +503,7 @@ AvUserInterface::serverCount()
 }
 
 
-ControllerObject*
+MediaObjectView*
 AvUserInterface::serverRootObject(int numServer)
 {
     return _pAvController->serverRootObject(numServer);
@@ -518,7 +518,7 @@ AvUserInterface::serverUuid(int numServer)
 
 
 void
-AvUserInterface::rendererSelected(RendererView* pRenderer)
+AvUserInterface::rendererSelected(AvRendererView* pRenderer)
 {
     _pSelectedRendererView = pRenderer;
     _pSelectedRenderer = pRenderer->_pRendererController;
@@ -539,7 +539,7 @@ AvUserInterface::rendererSelected(RendererView* pRenderer)
 
 
 void
-AvUserInterface::mediaObjectSelected(ControllerObject* pObject)
+AvUserInterface::mediaObjectSelected(MediaObjectView* pObject)
 {
     _pSelectedObject = pObject;
 }
@@ -689,7 +689,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
         newTrack("", "", "");
     }
     else {
-        ControllerObject object;
+        MediaObjectView object;
         try {
             object.readMetaData(TrackMetaData);
 //            Log::instance()->upnpav().debug("new track title: " + object.getTitle());

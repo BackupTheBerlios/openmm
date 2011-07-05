@@ -359,7 +359,7 @@ QtAvInterface::showControlPanel(bool show)
 
 
 void
-QtAvInterface::rendererSelected(Omm::Av::RendererView* pRenderer)
+QtAvInterface::rendererSelected(Omm::Av::AvRendererView* pRenderer)
 {
     AvUserInterface::rendererSelected(pRenderer);
 //    _pPlayerRackButton->setPlayerName(pRenderer->getName());
@@ -403,13 +403,13 @@ QtAvInterface::skipForwardButtonPressed()
     QModelIndex current = _pBrowserWidget->getCurrentIndex();
 //    QModelIndex current = _browserWidget._browserView->currentIndex();
     if (current.isValid()) {
-        Omm::Av::ControllerObject* pCurrentObject = static_cast<Omm::Av::ControllerObject*>(current.internalPointer());
+        Omm::Av::MediaObjectView* pCurrentObject = static_cast<Omm::Av::MediaObjectView*>(current.internalPointer());
         Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
         QModelIndex next;
         do {
             next = current.sibling(current.row() + 1, 0);
             if (next.isValid()) {
-                Omm::Av::ControllerObject* pNextObject = static_cast<Omm::Av::ControllerObject*>(next.internalPointer());
+                Omm::Av::MediaObjectView* pNextObject = static_cast<Omm::Av::MediaObjectView*>(next.internalPointer());
                 if (pNextObject->isContainer()) {
                     current = next;
                 }
@@ -436,13 +436,13 @@ QtAvInterface::skipBackwardButtonPressed()
     QModelIndex current = _pBrowserWidget->getCurrentIndex();
 //    QModelIndex current = _browserWidget._browserView->currentIndex();
     if (current.isValid()) {
-        Omm::Av::ControllerObject* pCurrentObject = static_cast<Omm::Av::ControllerObject*>(current.internalPointer());
+        Omm::Av::MediaObjectView* pCurrentObject = static_cast<Omm::Av::MediaObjectView*>(current.internalPointer());
         Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
         QModelIndex previous;
         do {
             previous = current.sibling(current.row() - 1, 0);
             if (previous.isValid()) {
-                Omm::Av::ControllerObject* pPreviousObject = static_cast<Omm::Av::ControllerObject*>(previous.internalPointer());
+                Omm::Av::MediaObjectView* pPreviousObject = static_cast<Omm::Av::MediaObjectView*>(previous.internalPointer());
                 if (pPreviousObject->isContainer()) {
                     current = previous;
                 }

@@ -37,7 +37,7 @@ public:
     virtual int eventLoop();
 
 private:
-    Omm::Av::ControllerObject* chooseRandomItem(Omm::Av::ControllerObject* pParentContainer);
+    Omm::Av::MediaObjectView* chooseRandomItem(Omm::Av::MediaObjectView* pParentContainer);
 };
 
 
@@ -75,17 +75,17 @@ StressAvUserInterface::eventLoop()
             }
             while (serverUuid(selectedServerNumber) == ignoreServerUuid);
 
-            Omm::Av::ControllerObject* pRootObject = serverRootObject(selectedServerNumber);
+            Omm::Av::MediaObjectView* pRootObject = serverRootObject(selectedServerNumber);
             Omm::Av::Log::instance()->upnpav().debug("server: " + pRootObject->getTitle() + ", uuid: " + serverUuid(selectedServerNumber));
 
             // choose a random item
-            Omm::Av::ControllerObject* pObject = pRootObject;
+            Omm::Av::MediaObjectView* pObject = pRootObject;
             if (pRootObject->isContainer()) {
                 pObject = chooseRandomItem(pRootObject);
             }
 
             // choose a random renderer
-            Omm::Av::RendererView* pRenderer = rendererView(rendererNumber.next(rendererCount()));
+            Omm::Av::AvRendererView* pRenderer = rendererView(rendererNumber.next(rendererCount()));
 
             // play item on renderer
             if (pRenderer && pObject) {
@@ -105,8 +105,8 @@ StressAvUserInterface::eventLoop()
 }
 
 
-Omm::Av::ControllerObject*
-StressAvUserInterface::chooseRandomItem(Omm::Av::ControllerObject* pParentContainer)
+Omm::Av::MediaObjectView*
+StressAvUserInterface::chooseRandomItem(Omm::Av::MediaObjectView* pParentContainer)
 {
     Poco::Random childNumber;
     childNumber.seed();
@@ -120,7 +120,7 @@ StressAvUserInterface::chooseRandomItem(Omm::Av::ControllerObject* pParentContai
         pParentContainer->fetchChildren();
     }
 
-    Omm::Av::ControllerObject* pObject = static_cast<Omm::Av::ControllerObject*>(pParentContainer->getChild(child));
+    Omm::Av::MediaObjectView* pObject = static_cast<Omm::Av::MediaObjectView*>(pParentContainer->getChild(child));
     if (pObject->isContainer()) {
         pObject = chooseRandomItem(pObject);
     }

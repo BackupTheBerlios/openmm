@@ -26,19 +26,19 @@
 namespace Omm {
 namespace Av {
 
-class ServerController
+class AvServerView
 {
 public:
-    ServerController(CtlMediaServer* pServerController);
+    AvServerView(CtlMediaServer* pServerController);
     
     CtlMediaServer* controller() { return _pServerController; }
-    ControllerObject* root() { return _pRoot; }
+    MediaObjectView* root() { return _pRoot; }
 
     void browseRootObject();
     
 private:
     CtlMediaServer*         _pServerController;
-    ControllerObject*       _pRoot;
+    MediaObjectView*       _pRoot;
 };
 
 } // namespace Av
