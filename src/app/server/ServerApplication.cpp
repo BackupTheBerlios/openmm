@@ -171,7 +171,7 @@ protected:
             pContainerPlugin->setTitle(_name);
 
             // create a media server device
-            Omm::Av::AvServer mediaServer;
+            Omm::Av::MediaServer mediaServer;
             mediaServer.setRoot(pContainerPlugin);
             mediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");

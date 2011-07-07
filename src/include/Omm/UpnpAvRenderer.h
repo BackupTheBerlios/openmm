@@ -38,7 +38,7 @@ class ProtocolInfo;
 
 class Engine : public Util::ConfigurablePlugin
 {
-    friend class AvRenderer;
+    friend class MediaRenderer;
     
 public:
     enum TransportState {Stopped, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent};
@@ -105,11 +105,11 @@ protected:
 };
 
 
-class AvRenderer : public Device
+class MediaRenderer : public Device
 {
 public:
-    AvRenderer();
-    ~AvRenderer();
+    MediaRenderer();
+    ~MediaRenderer();
 
     void addEngine(Engine* pEngine);
     

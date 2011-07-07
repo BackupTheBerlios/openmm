@@ -127,7 +127,7 @@ protected:
             pObject->setTitle(_name);
 
             // create a media server device
-            Omm::Av::AvServer mediaServer;
+            Omm::Av::MediaServer mediaServer;
             mediaServer.setRoot(pObject);
             mediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");

@@ -111,7 +111,7 @@ Engine::transportStateChanged()
 //}
 
 
-AvRenderer::AvRenderer() 
+MediaRenderer::MediaRenderer()
 {
     MediaRendererDescriptions mediaRendererDescriptions;
     MemoryDescriptionReader descriptionReader(mediaRendererDescriptions);
@@ -127,13 +127,13 @@ AvRenderer::AvRenderer()
 }
 
 
-AvRenderer::~AvRenderer()
+MediaRenderer::~MediaRenderer()
 {
 }
 
 
 void
-AvRenderer::addEngine(Engine* pEngine)
+MediaRenderer::addEngine(Engine* pEngine)
 {
     Omm::ui4 instanceId = _pAVTransportImpl->_engines.size();
     pEngine->setInstancedId(instanceId);

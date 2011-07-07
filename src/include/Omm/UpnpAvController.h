@@ -33,57 +33,124 @@ namespace Av {
 
 class AvServerView;
 class AvController;
-class CtlMediaServer;
-class CtlMediaRenderer;
+class CtlMediaServerCode;
+class CtlMediaRendererCode;
+class CtlMediaObject;
+
+
+class CtlMediaRenderer : public Device
+{
+public:
+    void setObject(CtlMediaObject* pObject);
+    void playPressed();
+    void stopPressed();
+    void pausePressed();
+    void positionMoved(int position);
+    void volumeChanged(int value);
+
+    virtual void newPosition(int duration, int position) {}
+    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album) {}
+    virtual void newVolume(const int volume) {}
+
+    CtlMediaRenderer(DeviceData* pDeviceData);
+
+private:
+    // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
+    CtlMediaRendererCode*   _pCtlMediaRendererCode;
+};
+
+
+class CtlMediaRendererGroup : public DeviceGroup
+{
+public:
+    CtlMediaRendererGroup();
+
+    void selectMediaRenderer(CtlMediaRenderer* pRenderer);
+
+    CtlMediaRenderer* getSelectedMediaRenderer();
+    CtlMediaRenderer* getMediaRenderer(int index);
+    /// convenience method, saves multiple type casts from Device* to CtlMediaRenderer*
+
+private:
+    CtlMediaRenderer*   _pSelectedRenderer;
+    std::string         _preferredRendererUuid;
+};
+
+
+class CtlMediaServer : public Device
+{
+public:
+    CtlMediaObject* getRootObject();
+};
+
+
+class CtlMediaServerGroup : public DeviceGroup
+{
+public:
+    CtlMediaServerGroup();
+    CtlMediaServer* getMediaServer(int index);
+
+private:
+    CtlMediaServer*     _pSelectedMediaServer;
+    CtlMediaObject*     _pSelectedMediaObject;
+    std::string         _preferredServerUuid;
+};
+
+
+class CtlMediaObject : public MediaObject
+{
+    friend class AvServerView;
+    friend class AvRendererView;
+    friend class CtlMediaRenderer;
+    friend class AvUserInterface;
+
+public:
+    CtlMediaObject();
+
+    void setServerController(CtlMediaServerCode* _pServer);
+
+    int fetchChildren();
+    bool fetchedAllChildren();
+    ui4 childCount();
+    CtlMediaObject* parent();
+
+    std::string getProperty(const std::string& name);
+
+    Icon* getIcon();
+    Icon* getImageRepresentation();
+
+private:
+    Resource* getResource(int num = 0);
+    virtual void addResource(Resource* pResource);
+    void setFetchedAllChildren(bool fetchedAllChildren);
+
+    void readChildren(const std::string& metaData);
+    void readMetaData(const std::string& metaData);
+    void readNode(Poco::XML::Node* pNode);
+
+    unsigned int                     _childCount;
+    bool                             _fetchedAllChildren;
+    CtlMediaServerCode*                  _server;
+};
+
+
+
+//////////////////////// deprecated ///////////////////////////
+
 
 class AvRendererView
 {
     friend class AvController;
     friend class AvUserInterface;
-    
+
 public:
     const std::string getName();
     const std::string getUuid();
-    
+
 private:
-    AvRendererView(CtlMediaRenderer* rendererController);
-    
-    CtlMediaRenderer*    _pRendererController;
-};
+    AvRendererView(CtlMediaRendererCode* pCtlMediaRenderer);
 
-
-class MediaObjectView : public MediaObject
-{
-    friend class AvServerView;
-    friend class AvUserInterface;
-    
-public:
-    MediaObjectView();
-    
-    void setServerController(CtlMediaServer* _pServer);
-    
-    int fetchChildren();
-    bool fetchedAllChildren();
-    ui4 childCount();
-    MediaObjectView* parent();
-    
-    std::string getProperty(const std::string& name);
-
-    Icon* getIcon();
-    Icon* getImageRepresentation();
-    
-private:
-    Resource* getResource(int num = 0);
-    virtual void addResource(Resource* pResource);
-    void setFetchedAllChildren(bool fetchedAllChildren);
-    
-    void readChildren(const std::string& metaData);
-    void readMetaData(const std::string& metaData);
-    void readNode(Poco::XML::Node* pNode);
-    
-    unsigned int                     _childCount;
-    bool                             _fetchedAllChildren;
-    CtlMediaServer*                  _server;
+    CtlMediaRendererCode*    _pCtlMediaRenderer;
 };
 
 
@@ -116,7 +183,7 @@ public:
     AvRendererView* rendererView(int numRenderer);
     bool isPlaying(AvRendererView* pRenderer);
     int serverCount();
-    MediaObjectView* serverRootObject(int numServer);
+    CtlMediaObject* serverRootObject(int numServer);
     const std::string serverUuid(int numServer);
 
     // TODO: getIcon() ... of server or renderer device ...
@@ -132,7 +199,7 @@ public:
     void volumeChanged(int value);
     
     void rendererSelected(AvRendererView* pRenderer);
-    void mediaObjectSelected(MediaObjectView* pObject);
+    void mediaObjectSelected(CtlMediaObject* pObject);
 
     int selectedRendererIndex();
     std::string selectedRendererUuid();
@@ -141,9 +208,9 @@ private:
     void pollPositionInfo(Poco::Timer& timer);
     
     AvController*                         _pAvController;
-    AvRendererView*                         _pSelectedRendererView;
-    CtlMediaRenderer*                     _pSelectedRenderer;
-    MediaObjectView*                     _pSelectedObject;
+    AvRendererView*                       _pSelectedRendererView;
+    CtlMediaRendererCode*                     _pSelectedRenderer;
+    CtlMediaObject*                      _pSelectedObject;
     Poco::Timer                           _positionInfoTimer;
 
 //    Engine*                               _pEngine;
@@ -161,7 +228,7 @@ public:
     int serverCount();
     AvRendererView* rendererView(int numRenderer);
     int rendererIndex(AvRendererView* pRendererView);
-    MediaObjectView* serverRootObject(int numServer);
+    CtlMediaObject* serverRootObject(int numServer);
     Device* serverDevice(int numServer);
     
 private:
@@ -173,7 +240,7 @@ private:
     // TODO: handle subdevices.
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
     
-    Container<AvRendererView>               _renderers;
+    Container<AvRendererView>         _renderers;
     Container<AvServerView>           _servers;
 };
 

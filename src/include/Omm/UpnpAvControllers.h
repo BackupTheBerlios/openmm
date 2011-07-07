@@ -41,11 +41,11 @@ class CtlRenderingControl;
 class CtlContentDirectory;
 
 
-class CtlMediaRenderer : public CtlDeviceCode
+class CtlMediaRendererCode : public CtlDeviceCode
 {
 public:
-    CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
-    ~CtlMediaRenderer();
+    CtlMediaRendererCode(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
+    ~CtlMediaRendererCode();
 
     CtlRenderingControl* RenderingControl() { return _pCtlRenderingControl; }
     CtlConnectionManager* ConnectionManager() { return _pCtlConnectionManager; }
@@ -60,11 +60,11 @@ private:
 };
 
 
-class CtlMediaServer : public CtlDeviceCode
+class CtlMediaServerCode : public CtlDeviceCode
 {
 public:
-    CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
-    ~CtlMediaServer();
+    CtlMediaServerCode(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport);
+    ~CtlMediaServerCode();
 
     CtlContentDirectory* ContentDirectory() { return _pCtlContentDirectory; }
     CtlConnectionManager* ConnectionManager() { return _pCtlConnectionManager; }
@@ -81,8 +81,8 @@ private:
 
 class CtlAVTransport
 {
-    friend class CtlMediaRenderer;
-    friend class CtlMediaServer;
+    friend class CtlMediaRendererCode;
+    friend class CtlMediaServerCode;
 
 public:
     void SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -151,8 +151,8 @@ private:
 
 class CtlConnectionManager
 {
-    friend class CtlMediaRenderer;
-    friend class CtlMediaServer;
+    friend class CtlMediaRendererCode;
+    friend class CtlMediaServerCode;
 
 public:
     void GetProtocolInfo(std::string& Source, std::string& Sink);
@@ -193,7 +193,7 @@ private:
 
 class CtlContentDirectory
 {
-    friend class CtlMediaServer;
+    friend class CtlMediaServerCode;
 
 public:
     void GetSearchCapabilities(std::string& SearchCaps);
@@ -266,7 +266,7 @@ private:
 
 class CtlRenderingControl
 {
-    friend class CtlMediaRenderer;
+    friend class CtlMediaRendererCode;
 
 public:
     void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);

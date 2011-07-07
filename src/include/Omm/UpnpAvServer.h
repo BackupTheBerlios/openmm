@@ -96,13 +96,13 @@ private:
 };
 
 
-class AvServer : public Device
+class MediaServer : public Device
     /// Used by ServerApplication
     /// Provides a meta data server that can be browsed by CDS implementation through root media object
 {
 public:
-    AvServer();
-    virtual ~AvServer();
+    MediaServer();
+    virtual ~MediaServer();
 
     void setRoot(AbstractMediaObject* pRoot);
 //    AbstractMediaObject* getRoot();

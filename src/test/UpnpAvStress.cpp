@@ -37,7 +37,7 @@ public:
     virtual int eventLoop();
 
 private:
-    Omm::Av::MediaObjectView* chooseRandomItem(Omm::Av::MediaObjectView* pParentContainer);
+    Omm::Av::CtlMediaObject* chooseRandomItem(Omm::Av::CtlMediaObject* pParentContainer);
 };
 
 
@@ -75,11 +75,11 @@ StressAvUserInterface::eventLoop()
             }
             while (serverUuid(selectedServerNumber) == ignoreServerUuid);
 
-            Omm::Av::MediaObjectView* pRootObject = serverRootObject(selectedServerNumber);
+            Omm::Av::CtlMediaObject* pRootObject = serverRootObject(selectedServerNumber);
             Omm::Av::Log::instance()->upnpav().debug("server: " + pRootObject->getTitle() + ", uuid: " + serverUuid(selectedServerNumber));
 
             // choose a random item
-            Omm::Av::MediaObjectView* pObject = pRootObject;
+            Omm::Av::CtlMediaObject* pObject = pRootObject;
             if (pRootObject->isContainer()) {
                 pObject = chooseRandomItem(pRootObject);
             }
@@ -105,8 +105,8 @@ StressAvUserInterface::eventLoop()
 }
 
 
-Omm::Av::MediaObjectView*
-StressAvUserInterface::chooseRandomItem(Omm::Av::MediaObjectView* pParentContainer)
+Omm::Av::CtlMediaObject*
+StressAvUserInterface::chooseRandomItem(Omm::Av::CtlMediaObject* pParentContainer)
 {
     Poco::Random childNumber;
     childNumber.seed();
@@ -120,7 +120,7 @@ StressAvUserInterface::chooseRandomItem(Omm::Av::MediaObjectView* pParentContain
         pParentContainer->fetchChildren();
     }
 
-    Omm::Av::MediaObjectView* pObject = static_cast<Omm::Av::MediaObjectView*>(pParentContainer->getChild(child));
+    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(pParentContainer->getChild(child));
     if (pObject->isContainer()) {
         pObject = chooseRandomItem(pObject);
     }

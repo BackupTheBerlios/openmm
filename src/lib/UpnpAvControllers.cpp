@@ -26,7 +26,7 @@ namespace Omm {
 namespace Av {
 
 
-CtlMediaRenderer::CtlMediaRenderer(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
+CtlMediaRendererCode::CtlMediaRendererCode(Device* pDevice, CtlRenderingControl* pCtlRenderingControl, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
 CtlDeviceCode(pDevice),
 _pCtlRenderingControl(pCtlRenderingControl),
 _pCtlConnectionManager(pCtlConnectionManager),
@@ -40,7 +40,7 @@ _pCtlAVTransport(pCtlAVTransport)
 }
 
 
-CtlMediaRenderer::~CtlMediaRenderer()
+CtlMediaRendererCode::~CtlMediaRendererCode()
 {
     delete _pCtlRenderingControl;
     delete _pCtlConnectionManager;
@@ -49,7 +49,7 @@ CtlMediaRenderer::~CtlMediaRenderer()
 
 
 void
-CtlMediaRenderer::eventHandler(StateVar* pStateVar)
+CtlMediaRendererCode::eventHandler(StateVar* pStateVar)
 {
     std::string serviceType = pStateVar->getService()->getServiceType();
     std::string varName = pStateVar->getName();
@@ -82,7 +82,7 @@ CtlMediaRenderer::eventHandler(StateVar* pStateVar)
 }
 
 
-CtlMediaServer::CtlMediaServer(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
+CtlMediaServerCode::CtlMediaServerCode(Device* pDevice, CtlContentDirectory* pCtlContentDirectory, CtlConnectionManager* pCtlConnectionManager, CtlAVTransport* pCtlAVTransport) :
 CtlDeviceCode(pDevice),
 _pCtlContentDirectory(pCtlContentDirectory),
 _pCtlConnectionManager(pCtlConnectionManager),
@@ -96,7 +96,7 @@ _pCtlAVTransport(pCtlAVTransport)
 }
 
 
-CtlMediaServer::~CtlMediaServer()
+CtlMediaServerCode::~CtlMediaServerCode()
 {
     delete _pCtlContentDirectory;
     delete _pCtlConnectionManager;
@@ -105,7 +105,7 @@ CtlMediaServer::~CtlMediaServer()
 
 
 void
-CtlMediaServer::eventHandler(StateVar* pStateVar)
+CtlMediaServerCode::eventHandler(StateVar* pStateVar)
 {
     std::string serviceType = pStateVar->getService()->getServiceType();
     std::string varName = pStateVar->getName();

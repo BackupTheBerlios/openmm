@@ -37,7 +37,7 @@ namespace Av {
 class DevAVTransportRendererImpl : public DevAVTransport
 {
     friend class Engine;
-    friend class AvRenderer;
+    friend class MediaRenderer;
 
 public:
     DevAVTransportRendererImpl() : _pLastChange(new AvTransportLastChange(_pService)) {}
@@ -87,7 +87,7 @@ private:
 
 class DevRenderingControlRendererImpl : public DevRenderingControl
 {
-    friend class AvRenderer;
+    friend class MediaRenderer;
     
 public:
     DevRenderingControlRendererImpl() : _pLastChange(new RenderingControlLastChange(_pService)) {}

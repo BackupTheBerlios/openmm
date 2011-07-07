@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include "UpnpPrivate.h"
 #include "UpnpAv.h"
 #include "UpnpAvCtrlImpl.h"
 #include "UpnpAvControllers.h"
@@ -30,7 +31,146 @@
 namespace Omm {
 namespace Av {
 
-MediaObjectView::MediaObjectView() :
+
+CtlMediaRenderer::CtlMediaRenderer(DeviceData* pDeviceData)
+{
+    setDeviceData(pDeviceData);
+    setDeviceContainer(pDeviceData->getDevice()->getDeviceContainer());
+    // FIXME: don't pass UserInterface but this to each service implementation
+    _pCtlMediaRendererCode = new CtlMediaRendererCode(this,
+        new CtlRenderingControlImpl(0),
+        new CtlConnectionManagerImpl(0),
+        new CtlAVTransportImpl(0));
+    setCtlDeviceCode(_pCtlMediaRendererCode);
+}
+
+
+void
+CtlMediaRenderer::setObject(CtlMediaObject* pObject)
+{
+    Resource* pRes = pObject->getResource();
+    if (pRes) {
+        std::string metaData;
+        MediaObjectWriter writer(pObject);
+        writer.write(metaData);
+        try {
+            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
+        }
+        catch (Poco::Exception e) {
+//            error(e.message());
+            return;
+        }
+    }
+}
+
+
+void
+CtlMediaRenderer::playPressed()
+{
+    try {
+        _pCtlMediaRendererCode->AVTransport()->Play(0, "1");
+    }
+    catch (Poco::Exception e) {
+//        error(e.message());
+        return;
+    }
+}
+
+
+void
+CtlMediaRenderer::stopPressed()
+{
+    try {
+        _pCtlMediaRendererCode->AVTransport()->Stop(0);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+//    newPosition(0, 0);
+}
+
+
+void
+CtlMediaRenderer::pausePressed()
+{
+    try {
+        _pCtlMediaRendererCode->AVTransport()->Pause(0);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+}
+
+
+void
+CtlMediaRenderer::positionMoved(int position)
+{
+    Log::instance()->upnpav().debug("position moved to: " + Poco::NumberFormatter::format(position));
+    try {
+        _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position * 1000000));
+    }
+    catch (Poco::Exception& e){
+//        error(e.message());
+    }
+}
+
+
+void
+CtlMediaRenderer::volumeChanged(int value)
+{
+    try {
+        _pCtlMediaRendererCode->RenderingControl()->SetVolume(0, "Master", value);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+}
+
+
+CtlMediaRendererGroup::CtlMediaRendererGroup() :
+_pSelectedRenderer(0)
+{
+
+}
+
+
+void
+CtlMediaRendererGroup::selectMediaRenderer(CtlMediaRenderer* pRenderer)
+{
+    _pSelectedRenderer = pRenderer;
+}
+
+
+CtlMediaRenderer*
+CtlMediaRendererGroup::getSelectedMediaRenderer()
+{
+    return _pSelectedRenderer;
+}
+
+
+CtlMediaRenderer*
+CtlMediaRendererGroup::getMediaRenderer(int index)
+{
+    return static_cast<CtlMediaRenderer*>(&_devices.get(index));
+}
+
+
+CtlMediaServerGroup::CtlMediaServerGroup() :
+_pSelectedMediaServer(0),
+_pSelectedMediaObject(0)
+{
+
+}
+
+
+CtlMediaServer*
+CtlMediaServerGroup::getMediaServer(int index)
+{
+    return static_cast<CtlMediaServer*>(&_devices.get(index));
+}
+
+
+CtlMediaObject::CtlMediaObject() :
 Omm::Av::MediaObject(),
 _childCount(0),
 _fetchedAllChildren(false)
@@ -39,7 +179,7 @@ _fetchedAllChildren(false)
 
 
 void
-MediaObjectView::addResource(Resource* pResource)
+CtlMediaObject::addResource(Resource* pResource)
 {
 //     std::clog << "ControllerObject::addResource() with uri: " << pResource->getUri() << std::endl;
     _resources.push_back(pResource);
@@ -47,7 +187,7 @@ MediaObjectView::addResource(Resource* pResource)
 
 
 void
-MediaObjectView::readChildren(const std::string& metaData)
+CtlMediaObject::readChildren(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -60,7 +200,7 @@ MediaObjectView::readChildren(const std::string& metaData)
     while (pObjectNode)
     {
         if (pObjectNode->hasChildNodes()) {
-            MediaObjectView* pObject = new MediaObjectView;
+            CtlMediaObject* pObject = new CtlMediaObject;
             pObject->readNode(pObjectNode);
             pObject->_parent = this;
             pObject->_server = _server;
@@ -72,7 +212,7 @@ MediaObjectView::readChildren(const std::string& metaData)
 
 
 void
-MediaObjectView::readMetaData(const std::string& metaData)
+CtlMediaObject::readMetaData(const std::string& metaData)
 {
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -87,14 +227,14 @@ MediaObjectView::readMetaData(const std::string& metaData)
 
 
 void
-MediaObjectView::readNode(Poco::XML::Node* pNode)
+CtlMediaObject::readNode(Poco::XML::Node* pNode)
 {
     Poco::XML::NamedNodeMap* attr = 0;
     if (pNode->hasAttributes()) {
         attr = pNode->attributes();
         _objectId = attr->getNamedItem("id")->nodeValue();
 //         _parentId = attr->getNamedItem("parentID")->nodeValue();
-        
+
     }
     if (pNode->nodeName() == AvClass::CONTAINER) {
         _isContainer = true;
@@ -105,18 +245,18 @@ MediaObjectView::readNode(Poco::XML::Node* pNode)
     if (attr != 0) {
         attr->release();
     }
-    
+
 //     std::clog << "isContainer: " << (_isContainer ? "1" : "0") << std::endl;
 //     std::clog << "id: " << _objectId << std::endl;
 // //     std::clog << "parentId: " << _parentId << std::endl;
 //     std::clog << "childCount: " << _childCount << std::endl;
-    
+
     if (pNode->hasChildNodes()) {
         Poco::XML::Node* childNode = pNode->firstChild();
         while (childNode)
         {
 //             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
-            
+
             if (childNode->nodeName() == AvProperty::RES) {
                 Poco::XML::NamedNodeMap* attr = 0;
                 std::string protInfo = "";
@@ -149,7 +289,7 @@ MediaObjectView::readNode(Poco::XML::Node* pNode)
 
 
 int
-MediaObjectView::fetchChildren()
+CtlMediaObject::fetchChildren()
 {
     // TODO: browse meta data for the root object with id "0"
 //     std::clog << "MediaObject::fetchChildren() objectId: " << _objectId << std::endl;
@@ -182,33 +322,33 @@ MediaObjectView::fetchChildren()
 
 
 bool
-MediaObjectView::fetchedAllChildren()
+CtlMediaObject::fetchedAllChildren()
 {
     return _fetchedAllChildren;
 }
 
 
-MediaObjectView*
-MediaObjectView::parent()
+CtlMediaObject*
+CtlMediaObject::parent()
 {
-    return static_cast<MediaObjectView*>(_parent);
+    return static_cast<CtlMediaObject*>(_parent);
 }
 
 
 std::string
-MediaObjectView::getProperty(const std::string& name)
+CtlMediaObject::getProperty(const std::string& name)
 {
 //     std::clog << "MediaObject::getProperty() name: " << name << std::endl;
 //     std::clog << "MediaObject::getProperty() number of properties: " << _properties.size() << std::endl;
 //     std::clog << "MediaObject::getProperty() value: " << _properties[name] << std::endl;
-    
+
 //     return _properties.getValue<std::string>(name);
     return _properties[name];
 }
 
 
 Icon*
-MediaObjectView::getIcon()
+CtlMediaObject::getIcon()
 {
     // icon property is a lower resolution thumb nail of the original picture (but should be displayable on a handheld device).
     return new Icon(0, 0, 0, Mime::IMAGE_JPEG, getProperty(AvProperty::ICON));
@@ -216,7 +356,7 @@ MediaObjectView::getIcon()
 
 
 Icon*
-MediaObjectView::getImageRepresentation()
+CtlMediaObject::getImageRepresentation()
 {
     std::string prop = getProperty(AvProperty::CLASS);
     if (AvClass::matchClass(prop, AvClass::ITEM, AvClass::IMAGE_ITEM))
@@ -231,7 +371,7 @@ MediaObjectView::getImageRepresentation()
 
 
 Resource*
-MediaObjectView::getResource(int num)
+CtlMediaObject::getResource(int num)
 {
 //     std::clog << "ControllerObject::getResource() number: " << num << std::endl;
 //     std::clog << "ControllerObject::getResource() with uri: " << _resources[num]->getUri() << std::endl;
@@ -240,28 +380,38 @@ MediaObjectView::getResource(int num)
 
 
 ui4
-MediaObjectView::childCount()
+CtlMediaObject::childCount()
 {
     return _childCount;
 }
 
 
 void
-MediaObjectView::setFetchedAllChildren(bool fetchedAllChildren)
+CtlMediaObject::setFetchedAllChildren(bool fetchedAllChildren)
 {
     _fetchedAllChildren = fetchedAllChildren;
 }
 
 
 void
-MediaObjectView::setServerController(CtlMediaServer* _pServer)
+CtlMediaObject::setServerController(CtlMediaServerCode* _pServer)
 {
     _server = _pServer;
 }
 
 
-AvServerView::AvServerView(CtlMediaServer* pServerController) :
-_pServerController(pServerController)
+
+
+
+
+
+
+//////////////////////// deprecated ///////////////////////////
+
+
+
+AvServerView::AvServerView(CtlMediaServerCode* pCtlMediaServer) :
+_pCtlMediaServer(pCtlMediaServer)
 {
 }
 
@@ -269,13 +419,13 @@ _pServerController(pServerController)
 void
 AvServerView::browseRootObject()
 {
-  _pRoot = new MediaObjectView;
+    _pRoot = new CtlMediaObject;
     try {
         std::string rootMeta;
         ui4 numberReturned;
         ui4 totalMatches;
         ui4 updateId;
-        _pServerController->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
+        _pCtlMediaServer->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
         _pRoot->readMetaData(rootMeta);
         Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS));
     }
@@ -284,29 +434,28 @@ AvServerView::browseRootObject()
         _pRoot->setObjectId("0");
         _pRoot->setIsContainer(true);
     }
-    _pRoot->setTitle(_pServerController->getDevice()->getFriendlyName());
-    _pRoot->setServerController(_pServerController);
+    _pRoot->setTitle(_pCtlMediaServer->getDevice()->getFriendlyName());
+    _pRoot->setServerController(_pCtlMediaServer);
     _pRoot->setFetchedAllChildren(false);
 }
 
 
-AvRendererView::AvRendererView(CtlMediaRenderer* rendererController) :
-_pRendererController(rendererController)
+AvRendererView::AvRendererView(CtlMediaRendererCode* pCtlMediaRenderer) :
+_pCtlMediaRenderer(pCtlMediaRenderer)
 {
 }
-
 
 const std::string
 AvRendererView::getName()
 {
-    return _pRendererController->getDevice()->getFriendlyName();
+    return _pCtlMediaRenderer->getDevice()->getFriendlyName();
 }
 
 
 const std::string
 AvRendererView::getUuid()
 {
-    return _pRendererController->getDevice()->getUuid();
+    return _pCtlMediaRenderer->getDevice()->getUuid();
 }
 
 
@@ -351,7 +500,7 @@ AvController::rendererIndex(AvRendererView* pRendererView)
 }
 
 
-MediaObjectView*
+CtlMediaObject*
 AvController::serverRootObject(int numServer)
 {
     return _servers.get(numServer).root();
@@ -376,7 +525,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
         if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
             Log::instance()->upnpav().debug("AV controller add media renderer");
-            CtlMediaRenderer* pRendererImpl = new CtlMediaRenderer(
+            CtlMediaRendererCode* pRendererImpl = new CtlMediaRendererCode(
                 pDevice,
                 new CtlRenderingControlImpl(pUserInterface),
                 new CtlConnectionManagerImpl(pUserInterface),
@@ -389,7 +538,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
         }
         else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
             Log::instance()->upnpav().debug("AV controller add media server");
-            CtlMediaServer* pServerImpl = new CtlMediaServer(
+            CtlMediaServerCode* pServerImpl = new CtlMediaServerCode(
                 pDevice,
                 new CtlContentDirectoryImpl(pUserInterface),
                 new CtlConnectionManagerImpl(pUserInterface),
@@ -486,7 +635,7 @@ AvUserInterface::isPlaying(AvRendererView* pRenderer)
     std::string transportState;
     std::string transportStatus;
     std::string speed;
-    pRenderer->_pRendererController->AVTransport()->GetTransportInfo(0, transportState, transportStatus, speed);
+    pRenderer->_pCtlMediaRenderer->AVTransport()->GetTransportInfo(0, transportState, transportStatus, speed);
     if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
         return true;
     }
@@ -503,7 +652,7 @@ AvUserInterface::serverCount()
 }
 
 
-MediaObjectView*
+CtlMediaObject*
 AvUserInterface::serverRootObject(int numServer)
 {
     return _pAvController->serverRootObject(numServer);
@@ -521,7 +670,7 @@ void
 AvUserInterface::rendererSelected(AvRendererView* pRenderer)
 {
     _pSelectedRendererView = pRenderer;
-    _pSelectedRenderer = pRenderer->_pRendererController;
+    _pSelectedRenderer = pRenderer->_pCtlMediaRenderer;
     std::string sourceInfo;
     std::string sinkInfo;
     _pSelectedRenderer->ConnectionManager()->GetProtocolInfo(sourceInfo, sinkInfo);
@@ -539,7 +688,7 @@ AvUserInterface::rendererSelected(AvRendererView* pRenderer)
 
 
 void
-AvUserInterface::mediaObjectSelected(MediaObjectView* pObject)
+AvUserInterface::mediaObjectSelected(CtlMediaObject* pObject)
 {
     _pSelectedObject = pObject;
 }
@@ -689,7 +838,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
         newTrack("", "", "");
     }
     else {
-        MediaObjectView object;
+        CtlMediaObject object;
         try {
             object.readMetaData(TrackMetaData);
 //            Log::instance()->upnpav().debug("new track title: " + object.getTitle());

@@ -59,6 +59,7 @@ class Controller;
 class ControllerUserInterface;
 class DeviceContainer;
 class Device;
+class DeviceGroup;
 class DeviceData;
 class DevDeviceCode;
 class CtlDeviceCode;
@@ -219,12 +220,12 @@ public:
     
     E& get(std::string key)
     {
-        KeyIterator it = _pEntities.find(key);
-        if (it != _pEntities.end()) {
+        KeyIterator it = _pElements.find(key);
+        if (it != _pElements.end()) {
             return *(*it).second;
         }
         else {
-            Log::instance()->upnp().error("container has no entity with key: " + key);
+            Log::instance()->upnp().error("container has no element with key: " + key);
             throw Poco::Exception("");
         }
     }
@@ -235,39 +236,39 @@ public:
     }
     
     // TODO: make shure that only one entry exists in _pEntities and _keys for key
-    void append(std::string key, E* pEntity)
+    void append(std::string key, E* pElement)
     {
-        _pEntities[key] = pEntity;
-        _keys.push_back(pEntity);
+        _pElements[key] = pElement;
+        _keys.push_back(pElement);
     }
     
-    void append(E* pEntity)
+    void append(E* pElement)
     {
-        _keys.push_back(pEntity);
+        _keys.push_back(pElement);
     }
     
     void remove(std::string key)
     {
-        KeyIterator it = _pEntities.find(key);
-        if (it != _pEntities.end()) {
+        KeyIterator it = _pElements.find(key);
+        if (it != _pElements.end()) {
             E* pEntity = (*it).second;
-            _pEntities.erase(key);
+            _pElements.erase(key);
             _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
         }
         else {
-            Log::instance()->upnp().error("could not remove entity from container, key not found: " + key);
+            Log::instance()->upnp().error("could not remove element from container, key not found: " + key);
             throw Poco::Exception("");
         }
     }
     
-    void remove(E* pEntity)
+    void remove(E* pElement)
     {   
-        _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
+        _keys.erase(find(_keys.begin(), _keys.end(), pElement));
     }
     
     bool contains(const std::string& key)
     {
-        return _pEntities.find(key) != _pEntities.end();
+        return _pElements.find(key) != _pElements.end();
     }
     
     bool contains(E* pEntity)
@@ -277,13 +278,13 @@ public:
     
     int position(const std::string& key)
     {
-        KeyIterator it = _pEntities.find(key);
-        if (it != _pEntities.end()) {
+        KeyIterator it = _pElements.find(key);
+        if (it != _pElements.end()) {
             E* pEntity = (*it).second;
             return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
         }
         else {
-            Log::instance()->upnp().error("could not find position of entity in container, key not found: " + key);
+            Log::instance()->upnp().error("could not find position of element in container, key not found: " + key);
             throw Poco::Exception("");
         }
     }
@@ -301,7 +302,7 @@ public:
     template<typename T> T getValue(const std::string& key)
     {
 //         std::clog << "Container::getValue() key: " << key << std::endl;
-        Variant* e = (*_pEntities.find(key)).second;
+        Variant* e = (*_pElements.find(key)).second;
         // FIXME: is this a proper check for "key not found in _pEntities"
         if (e) {
             T res;
@@ -320,12 +321,12 @@ public:
 //         std::clog << "Container::setValue() key: " << key << std::endl;
 //         std::clog << "_pEntities has: " << _pEntities.size() << " entries" << std::endl;
 //         std::clog << "_keys has: " << _keys.size() << " entries" << std::endl;
-        if (_pEntities.find(key) == _pEntities.end()) {
+        if (_pElements.find(key) == _pElements.end()) {
             Log::instance()->upnp().error("could not set container value, key not found: " + key);
             return;
         }
 //         std::clog << "Container::setValue() found key" << std::endl;
-        Variant* e = (*_pEntities.find(key)).second;
+        Variant* e = (*_pElements.find(key)).second;
 //         std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
         if (e) {
 //             std::clog << "Container::setValue() found key: " << key << std::endl;
@@ -349,22 +350,22 @@ public:
     
     KeyIterator beginKey()
     {
-        return _pEntities.begin();
+        return _pElements.begin();
     }
         
     KeyIterator endKey()
     {
-        return _pEntities.end();
+        return _pElements.end();
     }
     
     void clear()
     {
-        _pEntities.clear();
+        _pElements.clear();
         _keys.clear();
     }
     
 private:
-    std::map<std::string,E*>    _pEntities;
+    std::map<std::string,E*>    _pElements;
     std::vector<E*>             _keys;
 };
 
@@ -421,10 +422,19 @@ public:
     void start();
     void stop();
 
+    // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);
+    // deprecated
     ControllerUserInterface* getUserInterface();
 
 protected:
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+
+    virtual void addDeviceGroup(DeviceGroup* pDeviceGroup, bool begin) {}
+    virtual void removeDeviceGroup(DeviceGroup* pDeviceGroup, bool begin) {}
+
+    // next two methods should go into private api
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
     /// adds device container if not already added before (checks for uuid of root device).
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
@@ -437,6 +447,8 @@ private:
 //    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
     void update();
+
+    std::map<std::string, DeviceGroup*>        _deviceGroups;
 };
 
 
@@ -468,6 +480,67 @@ protected:
     virtual void error(const std::string& message) {}
     virtual void beginNetworkActivity() {}
     virtual void endNetworkActivity() {}
+};
+
+
+class Device
+{
+    friend class DescriptionReader;
+    friend class DescriptionWriter;
+    friend class DeviceContainer;
+    friend class DeviceManager;
+    friend class DeviceServer;
+    friend class EventMessageReader;
+
+public:
+    Device();
+    virtual ~Device();
+
+    typedef Container<Service>::Iterator ServiceIterator;
+    ServiceIterator beginService();
+    ServiceIterator endService();
+
+    typedef Container<std::string>::KeyIterator PropertyIterator;
+    PropertyIterator beginProperty();
+    PropertyIterator endProperty();
+
+    typedef std::vector<Icon*>::iterator IconIterator;
+    IconIterator beginIcon();
+    IconIterator endIcon();
+
+    DeviceContainer* getDeviceContainer() const;
+    std::string getUuid() const;
+    std::string getDeviceType() const;
+    Service* getService(std::string serviceType);
+    /// Get the service data of a device. If device has no service of type
+    /// serviceType, 0 is returned.
+    const std::string& getFriendlyName();
+    const std::string& getProperty(const std::string& name);
+
+    void setDeviceContainer(DeviceContainer* pDeviceContainer);
+    void setDeviceData(DeviceData* pDeviceData);
+    void setDevDeviceCode(DevDeviceCode* pDevDevice);
+    void setCtlDeviceCode(CtlDeviceCode* pCtlDevice);
+    void setUuid(std::string uuid);
+    void setRandomUuid();
+    void setProperty(const std::string& name, const std::string& val);
+    void setFriendlyName(const std::string& name);
+
+    void addIcon(Icon* pIcon);
+
+    void initStateVars();
+    void initControllerEventing();
+
+private:
+    void addProperty(const std::string& name, const std::string& val);
+    void addService(Service* pService);
+    DevDeviceCode* getDevDevice() const;
+    CtlDeviceCode* getCtlDevice() const;
+
+    DeviceContainer*                    _pDeviceContainer;
+    DeviceData*                         _pDeviceData;
+    DevDeviceCode*                      _pDevDeviceCode;
+    CtlDeviceCode*                      _pCtlDeviceCode;
 };
 
 
@@ -560,64 +633,24 @@ private:
 };
 
 
-class Device
+class DeviceGroup
+/// Corresponds to one tab in the user interface.
+/// May be loaded as a plugin when a new device type is discovered.
 {
-    friend class DescriptionReader;
-    friend class DescriptionWriter;
-    friend class DeviceContainer;
-    friend class DeviceManager;
-    friend class DeviceServer;
-    friend class EventMessageReader;
-
 public:
-    Device();
-    virtual ~Device();
+    int getDeviceCount();
+    
+    virtual std::string shortName() { return ""; }
+    virtual Icon* groupIcon() { return 0; }
+    
+    virtual void addDevice(Device* pDevice, int index, bool begin) {}
+    virtual void removeDevice(Device* pDevice, int index, bool begin) {}
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
-    typedef Container<Service>::Iterator ServiceIterator;
-    ServiceIterator beginService();
-    ServiceIterator endService();
-
-    typedef Container<std::string>::KeyIterator PropertyIterator;
-    PropertyIterator beginProperty();
-    PropertyIterator endProperty();
-
-    typedef std::vector<Icon*>::iterator IconIterator;
-    IconIterator beginIcon();
-    IconIterator endIcon();
-
-    DeviceContainer* getDeviceContainer() const;
-    std::string getUuid() const;
-    std::string getDeviceType() const;
-    Service* getService(std::string serviceType);
-    /// Get the service data of a device. If device has no service of type
-    /// serviceType, 0 is returned.
-    const std::string& getFriendlyName();
-    const std::string& getProperty(const std::string& name);
-
-    void setDeviceContainer(DeviceContainer* pDeviceContainer);
-    void setDeviceData(DeviceData* pDeviceData);
-    void setDevDeviceCode(DevDeviceCode* pDevDevice);
-    void setCtlDeviceCode(CtlDeviceCode* pCtlDevice);
-    void setUuid(std::string uuid);
-    void setRandomUuid();
-    void setProperty(const std::string& name, const std::string& val);
-    void setFriendlyName(const std::string& name);
-
-    void addIcon(Icon* pIcon);
-
-    void initStateVars();
-    void initControllerEventing();
-
-private:
-    void addProperty(const std::string& name, const std::string& val);
-    void addService(Service* pService);
-    DevDeviceCode* getDevDevice() const;
-    CtlDeviceCode* getCtlDevice() const;
-
-    DeviceContainer*                    _pDeviceContainer;
-    DeviceData*                         _pDeviceData;
-    DevDeviceCode*                      _pDevDeviceCode;
-    CtlDeviceCode*                      _pCtlDeviceCode;
+protected:
+    std::vector<DeviceContainer>    _deviceContainers;
+    Container<Device>               _devices;
 };
 
 

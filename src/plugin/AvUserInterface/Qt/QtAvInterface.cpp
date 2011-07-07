@@ -403,13 +403,13 @@ QtAvInterface::skipForwardButtonPressed()
     QModelIndex current = _pBrowserWidget->getCurrentIndex();
 //    QModelIndex current = _browserWidget._browserView->currentIndex();
     if (current.isValid()) {
-        Omm::Av::MediaObjectView* pCurrentObject = static_cast<Omm::Av::MediaObjectView*>(current.internalPointer());
+        Omm::Av::CtlMediaObject* pCurrentObject = static_cast<Omm::Av::CtlMediaObject*>(current.internalPointer());
         Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
         QModelIndex next;
         do {
             next = current.sibling(current.row() + 1, 0);
             if (next.isValid()) {
-                Omm::Av::MediaObjectView* pNextObject = static_cast<Omm::Av::MediaObjectView*>(next.internalPointer());
+                Omm::Av::CtlMediaObject* pNextObject = static_cast<Omm::Av::CtlMediaObject*>(next.internalPointer());
                 if (pNextObject->isContainer()) {
                     current = next;
                 }
@@ -436,13 +436,13 @@ QtAvInterface::skipBackwardButtonPressed()
     QModelIndex current = _pBrowserWidget->getCurrentIndex();
 //    QModelIndex current = _browserWidget._browserView->currentIndex();
     if (current.isValid()) {
-        Omm::Av::MediaObjectView* pCurrentObject = static_cast<Omm::Av::MediaObjectView*>(current.internalPointer());
+        Omm::Av::CtlMediaObject* pCurrentObject = static_cast<Omm::Av::CtlMediaObject*>(current.internalPointer());
         Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
         QModelIndex previous;
         do {
             previous = current.sibling(current.row() - 1, 0);
             if (previous.isValid()) {
-                Omm::Av::MediaObjectView* pPreviousObject = static_cast<Omm::Av::MediaObjectView*>(previous.internalPointer());
+                Omm::Av::CtlMediaObject* pPreviousObject = static_cast<Omm::Av::CtlMediaObject*>(previous.internalPointer());
                 if (pPreviousObject->isContainer()) {
                     current = previous;
                 }

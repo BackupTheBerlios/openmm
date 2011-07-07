@@ -164,7 +164,7 @@ protected:
             pEnginePlugin->setVisual(pUserInterface->getVisual());
             pEnginePlugin->createPlayer();
 
-            Omm::Av::AvRenderer mediaRenderer;
+            Omm::Av::MediaRenderer mediaRenderer;
             mediaRenderer.addEngine(pEnginePlugin);
             Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pRendererIcon);
@@ -192,7 +192,7 @@ protected:
             pContainerPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/music");
             pContainerPlugin->setTitle("Music");
             // create a media server device
-            Omm::Av::AvServer mediaServer;
+            Omm::Av::MediaServer mediaServer;
             mediaServer.setRoot(pContainerPlugin);
             mediaServer.setFriendlyName("OMM Music Collection");
             Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
@@ -212,7 +212,7 @@ protected:
 
             pWebradioPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/.omm/webradio.conf");
             pWebradioPlugin->setTitle("Web Radio");
-            Omm::Av::AvServer webradioServer;
+            Omm::Av::MediaServer webradioServer;
             webradioServer.setRoot(pWebradioPlugin);
             webradioServer.setFriendlyName("OMM Webradio");
             Omm::Icon* pWebradioIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");

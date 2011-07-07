@@ -297,7 +297,7 @@ ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& st
 }
 
 
-AvServer::AvServer()
+MediaServer::MediaServer()
 {
     MediaServerDescriptions mediaServerDescriptions;
     MemoryDescriptionReader descriptionReader(mediaServerDescriptions);
@@ -319,14 +319,14 @@ AvServer::AvServer()
 }
 
 
-AvServer::~AvServer()
+MediaServer::~MediaServer()
 {
 //    delete _pRoot;
 }
 
 
 void
-AvServer::setRoot(AbstractMediaObject* pRoot)
+MediaServer::setRoot(AbstractMediaObject* pRoot)
 {
 //    _pRoot = pRoot;
     _pDevContentDirectoryServerImpl->_pRoot = pRoot;

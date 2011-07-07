@@ -41,7 +41,7 @@ class DevContentDirectory;
 
 class DevMediaRenderer : public DevDeviceCode
 {
-    friend class AvRenderer;
+    friend class MediaRenderer;
 
 public:
     DevMediaRenderer(DevRenderingControl* pDevRenderingControl, DevConnectionManager* pDevConnectionManager, DevAVTransport* pDevAVTransport);

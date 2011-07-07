@@ -66,7 +66,7 @@ private:
 
 class DevContentDirectoryServerImpl : public DevContentDirectory
 {
-    friend class AvServer;
+    friend class MediaServer;
     friend class DevMediaServer;
     
 private:
