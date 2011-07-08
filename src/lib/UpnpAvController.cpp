@@ -127,24 +127,29 @@ CtlMediaRenderer::volumeChanged(int value)
 }
 
 
-CtlMediaRendererGroup::CtlMediaRendererGroup() :
-_pSelectedRenderer(0)
+CtlMediaRendererGroup::CtlMediaRendererGroup()
 {
-
 }
 
 
-void
-CtlMediaRendererGroup::selectMediaRenderer(CtlMediaRenderer* pRenderer)
+std::string
+CtlMediaRendererGroup::getDeviceType()
 {
-    _pSelectedRenderer = pRenderer;
+    return DeviceType::MEDIA_RENDERER_1;
+}
+
+
+Device*
+CtlMediaRendererGroup::createDevice(DeviceData* pDeviceData)
+{
+    return new CtlMediaRenderer(pDeviceData);
 }
 
 
 CtlMediaRenderer*
 CtlMediaRendererGroup::getSelectedMediaRenderer()
 {
-    return _pSelectedRenderer;
+    return static_cast<CtlMediaRenderer*>(_pSelectedDevice);
 }
 
 
@@ -155,11 +160,23 @@ CtlMediaRendererGroup::getMediaRenderer(int index)
 }
 
 
-CtlMediaServerGroup::CtlMediaServerGroup() :
-_pSelectedMediaServer(0),
-_pSelectedMediaObject(0)
+CtlMediaServer::CtlMediaServer(DeviceData* pDeviceData)
 {
+    setDeviceData(pDeviceData);
+    setDeviceContainer(pDeviceData->getDevice()->getDeviceContainer());
+    // FIXME: don't pass UserInterface but this to each service implementation
+    _pCtlMediaServerCode = new CtlMediaServerCode(this,
+        new CtlContentDirectoryImpl(0),
+        new CtlConnectionManagerImpl(0),
+        new CtlAVTransportImpl(0));
+    setCtlDeviceCode(_pCtlMediaServerCode);
+}
 
+
+CtlMediaServer*
+CtlMediaServerGroup::getSelectedMediaServer()
+{
+    return static_cast<CtlMediaServer*>(_pSelectedDevice);
 }
 
 
@@ -167,6 +184,26 @@ CtlMediaServer*
 CtlMediaServerGroup::getMediaServer(int index)
 {
     return static_cast<CtlMediaServer*>(&_devices.get(index));
+}
+
+
+CtlMediaServerGroup::CtlMediaServerGroup() :
+_pSelectedMediaObject(0)
+{
+}
+
+
+std::string
+CtlMediaServerGroup::getDeviceType()
+{
+    return DeviceType::MEDIA_SERVER_1;
+}
+
+
+Device*
+CtlMediaServerGroup::createDevice(DeviceData* pDeviceData)
+{
+    return new CtlMediaServer(pDeviceData);
 }
 
 

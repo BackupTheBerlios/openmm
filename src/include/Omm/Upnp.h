@@ -422,6 +422,10 @@ public:
     void start();
     void stop();
 
+    virtual DeviceGroup* createDeviceGroup(const std::string deviceType) { return 0; }
+    void addDeviceGroup(DeviceGroup* pDeviceGroup);
+    DeviceGroup* getDeviceGroup(const std::string& deviceType);
+
     // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);
     // deprecated
@@ -432,13 +436,16 @@ protected:
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
     virtual void addDeviceGroup(DeviceGroup* pDeviceGroup, bool begin) {}
+    /// called when a new device type is discovered.
     virtual void removeDeviceGroup(DeviceGroup* pDeviceGroup, bool begin) {}
+    /// called when a last device of a certain type disappears.
 
     // next two methods should go into private api
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
     /// adds device container if not already added before (checks for uuid of root device).
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
 
+    // deprecated
     ControllerUserInterface*                      _pUserInterface;
 
 private:
@@ -452,37 +459,6 @@ private:
 };
 
 
-class ControllerUserInterface
-{
-    friend class Controller;
-    friend class Service;
-
-public:
-    // TODO: pass command line arguments to user interface gui-toolkit
-    virtual int eventLoop() { return 0; }
-    virtual void initGui() {}
-    virtual void showMainWindow() {}
-//     virtual void hideMainWindow() {};
-    virtual Sys::Visual* getVisual() { return 0; }
-    virtual void setFullscreen(bool fullscreen) {}
-    virtual void resize(int width, int height) {}
-
-protected:
-    virtual void beginAddDeviceContainer(int position) {}
-    /// Before a device container is added, beginAddDevice() is called.
-    virtual void beginRemoveDeviceContainer(int position) {}
-    /// Before a device container is removed, beginRemoveDevice() is called.
-    virtual void endAddDeviceContainer(int position) {}
-    /// After adding a device container, endAddDevice() is called.
-    virtual void endRemoveDeviceContainer(int position) {}
-    /// After removing a device container, endRemoveDevice() is called.
-
-    virtual void error(const std::string& message) {}
-    virtual void beginNetworkActivity() {}
-    virtual void endNetworkActivity() {}
-};
-
-
 class Device
 {
     friend class DescriptionReader;
@@ -491,6 +467,7 @@ class Device
     friend class DeviceManager;
     friend class DeviceServer;
     friend class EventMessageReader;
+    friend class Controller;
 
 public:
     Device();
@@ -534,8 +511,9 @@ public:
 private:
     void addProperty(const std::string& name, const std::string& val);
     void addService(Service* pService);
-    DevDeviceCode* getDevDevice() const;
-    CtlDeviceCode* getCtlDevice() const;
+    DeviceData* getDeviceData() const;
+    DevDeviceCode* getDevDeviceCode() const;
+    CtlDeviceCode* getCtlDeviceCode() const;
 
     DeviceContainer*                    _pDeviceContainer;
     DeviceData*                         _pDeviceData;
@@ -634,14 +612,24 @@ private:
 
 
 class DeviceGroup
+/// Contains only devices of the same type (which can be in different containers).
 /// Corresponds to one tab in the user interface.
 /// May be loaded as a plugin when a new device type is discovered.
 {
+    friend class Controller;
+
 public:
+    DeviceGroup();
+
     int getDeviceCount();
-    
+
+    virtual std::string getDeviceType() { return ""; }
     virtual std::string shortName() { return ""; }
     virtual Icon* groupIcon() { return 0; }
+
+    virtual Device* createDevice(DeviceData* pDeviceData) { return 0; }
+    /// factory method to create a device of a certain type associated with the
+    /// corresponding device code.
     
     virtual void addDevice(Device* pDevice, int index, bool begin) {}
     virtual void removeDevice(Device* pDevice, int index, bool begin) {}
@@ -649,10 +637,50 @@ public:
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
 protected:
+    void addDevice(Device* pDevice);
+    void removeDevice(Device* pDevice);
+
     std::vector<DeviceContainer>    _deviceContainers;
     Container<Device>               _devices;
+    Device*                         _pSelectedDevice;
+    std::string                     _preferredDeviceUuid;
 };
 
+
+
+
+//////////////////////// deprecated ///////////////////////////
+
+
+class ControllerUserInterface
+{
+    friend class Controller;
+    friend class Service;
+
+public:
+    // TODO: pass command line arguments to user interface gui-toolkit
+    virtual int eventLoop() { return 0; }
+    virtual void initGui() {}
+    virtual void showMainWindow() {}
+//     virtual void hideMainWindow() {};
+    virtual Sys::Visual* getVisual() { return 0; }
+    virtual void setFullscreen(bool fullscreen) {}
+    virtual void resize(int width, int height) {}
+
+protected:
+    virtual void beginAddDeviceContainer(int position) {}
+    /// Before a device container is added, beginAddDevice() is called.
+    virtual void beginRemoveDeviceContainer(int position) {}
+    /// Before a device container is removed, beginRemoveDevice() is called.
+    virtual void endAddDeviceContainer(int position) {}
+    /// After adding a device container, endAddDevice() is called.
+    virtual void endRemoveDeviceContainer(int position) {}
+    /// After removing a device container, endRemoveDevice() is called.
+
+    virtual void error(const std::string& message) {}
+    virtual void beginNetworkActivity() {}
+    virtual void endNetworkActivity() {}
+};
 
 } // namespace Omm
 

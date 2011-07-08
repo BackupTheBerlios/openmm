@@ -41,6 +41,8 @@ class CtlMediaObject;
 class CtlMediaRenderer : public Device
 {
 public:
+    CtlMediaRenderer(DeviceData* pDeviceData);
+
     void setObject(CtlMediaObject* pObject);
     void playPressed();
     void stopPressed();
@@ -51,8 +53,6 @@ public:
     virtual void newPosition(int duration, int position) {}
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album) {}
     virtual void newVolume(const int volume) {}
-
-    CtlMediaRenderer(DeviceData* pDeviceData);
 
 private:
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
@@ -65,22 +65,24 @@ class CtlMediaRendererGroup : public DeviceGroup
 public:
     CtlMediaRendererGroup();
 
-    void selectMediaRenderer(CtlMediaRenderer* pRenderer);
+    virtual std::string getDeviceType();
+    virtual Device* createDevice(DeviceData* pDeviceData);
 
     CtlMediaRenderer* getSelectedMediaRenderer();
     CtlMediaRenderer* getMediaRenderer(int index);
     /// convenience method, saves multiple type casts from Device* to CtlMediaRenderer*
-
-private:
-    CtlMediaRenderer*   _pSelectedRenderer;
-    std::string         _preferredRendererUuid;
 };
 
 
 class CtlMediaServer : public Device
 {
 public:
+    CtlMediaServer(DeviceData* pDeviceData);
+
     CtlMediaObject* getRootObject();
+
+private:
+    CtlMediaServerCode*   _pCtlMediaServerCode;
 };
 
 
@@ -88,12 +90,15 @@ class CtlMediaServerGroup : public DeviceGroup
 {
 public:
     CtlMediaServerGroup();
+
+    virtual std::string getDeviceType();
+    virtual Device* createDevice(DeviceData* pDeviceData);
+    
+    CtlMediaServer* getSelectedMediaServer();
     CtlMediaServer* getMediaServer(int index);
 
 private:
-    CtlMediaServer*     _pSelectedMediaServer;
     CtlMediaObject*     _pSelectedMediaObject;
-    std::string         _preferredServerUuid;
 };
 
 
@@ -130,7 +135,7 @@ private:
 
     unsigned int                     _childCount;
     bool                             _fetchedAllChildren;
-    CtlMediaServerCode*                  _server;
+    CtlMediaServerCode*              _server;
 };
 
 

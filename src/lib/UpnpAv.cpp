@@ -47,6 +47,9 @@
 namespace Omm {
 namespace Av {
 
+const std::string DeviceType::MEDIA_RENDERER_1 = "urn:schemas-upnp-org:device:MediaRenderer:1";
+const std::string DeviceType::MEDIA_SERVER_1 = "urn:schemas-upnp-org:device:MediaServer:1";
+
 const std::string ServiceType::AVT_1 = "urn:schemas-upnp-org:service:AVTransport:1";
 const std::string ServiceType::CD_1 = "urn:schemas-upnp-org:service:ContentDirectory:1";
 const std::string ServiceType::CM_1 = "urn:schemas-upnp-org:service:ConnectionManager:1";

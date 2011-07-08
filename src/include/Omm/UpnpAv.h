@@ -30,6 +30,14 @@ namespace Omm {
 namespace Av {
 
 
+class DeviceType
+{
+public:
+    const static std::string MEDIA_RENDERER_1;
+    const static std::string MEDIA_SERVER_1;
+};
+
+
 class ServiceType
 {
 public:

@@ -1020,7 +1020,7 @@ EventMessageReader::stateVar(Poco::XML::Node* pNode)
         _pService->setStateVar<std::string>(stateVarName, stateVarValue);
         Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " ...");
         StateVar* pStateVar = _pService->getStateVarReference(stateVarName);
-        _pService->getDevice()->getCtlDevice()->eventHandler(pStateVar);
+        _pService->getDevice()->getCtlDeviceCode()->eventHandler(pStateVar);
         Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " finished.");
     }
     else {
@@ -3345,15 +3345,22 @@ Device::getDeviceContainer() const
 }
 
 
+DeviceData*
+Device::getDeviceData() const
+{
+    return _pDeviceData;
+}
+
+
 DevDeviceCode*
-Device::getDevDevice() const
+Device::getDevDeviceCode() const
 {
     return _pDevDeviceCode;
 }
 
 
 CtlDeviceCode*
-Device::getCtlDevice() const
+Device::getCtlDeviceCode() const
 {
     Log::instance()->upnp().debug("get device ctl code: " + Poco::NumberFormatter::format(_pCtlDeviceCode));
     return _pCtlDeviceCode;
@@ -3688,6 +3695,26 @@ Controller::stop()
 
 
 void
+Controller::addDeviceGroup(DeviceGroup* pDeviceGroup)
+{
+    _deviceGroups[pDeviceGroup->getDeviceType()] = pDeviceGroup;
+}
+
+
+DeviceGroup*
+Controller::getDeviceGroup(const std::string& deviceType)
+{
+    std::map<std::string, DeviceGroup*>::iterator it = _deviceGroups.find(deviceType);
+    if (it != _deviceGroups.end()) {
+        return (*it).second;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
 Controller::setUserInterface(ControllerUserInterface* pUserInterface)
 {
     _pUserInterface = pUserInterface;
@@ -3780,6 +3807,20 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         addDeviceContainer(pDeviceContainer, _deviceContainers.size(), true);
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
+
+        for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
+            Device* pDevice = *it;
+            Log::instance()->upnp().debug("controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+            DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
+            if (pDeviceGroup) {
+                Log::instance()->upnp().information("controller adds device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+                pDeviceGroup->createDevice(pDevice->getDeviceData());
+                pDeviceGroup->addDevice(pDevice);
+                // TODO: we may replace the discovered device with the specialized device just created in the device data tree.
+                pDevice->initControllerEventing();
+            }
+        }
+        
         addDeviceContainer(pDeviceContainer, _deviceContainers.size() - 1, false);
         _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
     }
@@ -3796,6 +3837,16 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
         _pUserInterface->beginRemoveDeviceContainer(position);
         removeDeviceContainer(pDeviceContainer, position, true);
         DeviceManager::removeDeviceContainer(pDeviceContainer);
+
+        for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
+            Device* pDevice = *it;
+            DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
+            if (pDeviceGroup) {
+                Log::instance()->upnp().information("controller removes device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+                pDeviceGroup->removeDevice(pDevice);
+            }
+        }
+
         removeDeviceContainer(pDeviceContainer, position, false);
         _pUserInterface->endRemoveDeviceContainer(position);
         pDeviceContainer->_pController = 0;
@@ -4343,10 +4394,36 @@ SsdpMessage::getSender()
 }
 
 
+DeviceGroup::DeviceGroup() :
+_pSelectedDevice(0),
+_preferredDeviceUuid("")
+{
+
+}
+
+
 int
 DeviceGroup::getDeviceCount()
 {
     return _devices.size();
+}
+
+
+void
+DeviceGroup::addDevice(Device* pDevice)
+{
+    addDevice(pDevice, _devices.size(), true);
+    _devices.append(pDevice->getUuid(), pDevice);
+    addDevice(pDevice, _devices.size() - 1, false);
+}
+
+
+void
+DeviceGroup::removeDevice(Device* pDevice)
+{
+    removeDevice(pDevice, _devices.size(), true);
+    _devices.remove(pDevice->getUuid());
+    removeDevice(pDevice, _devices.size() - 1, false);
 }
 
 
