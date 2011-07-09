@@ -53,12 +53,12 @@ QtApplication::init()
 //    setupUnixSignalHandlers();
     qRegisterMetaType<std::string>();
 
-//    _fullscreenStyleSheet =
-//            "*         { font-size: 32pt } \
-//             QTreeView { background-color: black;\
-//                         selection-color: white; \
-//                         selection-background-color: darkblue; } \
-//             QTreeView { color: white }";
+    _fullscreenStyleSheet =
+            "*         { font-size: 32pt } \
+             QTreeView { background-color: black;\
+                         selection-color: white; \
+                         selection-background-color: darkblue; } \
+             QTreeView { color: white }";
 
     // TODO: command line arguments can be passed after Poco::Application has processed them.
     _pApp = new QApplication(_argc, 0);

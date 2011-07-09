@@ -127,8 +127,16 @@ CtlMediaRenderer::volumeChanged(int value)
 }
 
 
-CtlMediaRendererGroup::CtlMediaRendererGroup()
+CtlMediaRendererGroup::CtlMediaRendererGroup(DeviceGroupInterface* pDeviceGroupDelegate) :
+DeviceGroup(pDeviceGroupDelegate)
 {
+}
+
+
+std::string
+CtlMediaRendererGroup::shortName()
+{
+    return "Player";
 }
 
 
@@ -187,9 +195,17 @@ CtlMediaServerGroup::getMediaServer(int index)
 }
 
 
-CtlMediaServerGroup::CtlMediaServerGroup() :
+CtlMediaServerGroup::CtlMediaServerGroup(DeviceGroupInterface* pDeviceGroupDelegate) :
+DeviceGroup(pDeviceGroupDelegate),
 _pSelectedMediaObject(0)
 {
+}
+
+
+std::string
+CtlMediaServerGroup::shortName()
+{
+    return "Media";
 }
 
 

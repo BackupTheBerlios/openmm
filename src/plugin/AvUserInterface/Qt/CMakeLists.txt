@@ -31,16 +31,17 @@ set(OMMC_QTAPP_SRCS
 QtApplication.cpp
 QtMainWindow.cpp
 QtController.cpp
+#QtEventFilter.cpp
+QtDeviceGroup.cpp
+QtCrumbButton.cpp
+QtBrowserModel.cpp
 # modeltest.cpp
-#QtBrowserModel.cpp
 #QtBrowserWidget.cpp
 #QtRendererListModel.cpp
 #QtActivityIndicator.cpp
 #QtVisual.cpp
 #QtPlayerRack.cpp
 #QtControlPanel.cpp
-#QtEventFilter.cpp
-#QtCrumbButton.cpp
 )
 
 #set(OMMC_QTUI
@@ -69,17 +70,17 @@ QtCrumbButton.h
 set(OMMC_QTAPP_MOC
 QtMainWindow.h
 QtController.h
-#QtApplication.h
+#QtEventFilter.h
+QtDeviceGroup.h
+QtCrumbButton.h
+QtBrowserModel.h
 # modeltest.h
-#QtBrowserModel.h
 #QtBrowserWidget.h
 #QtRendererListModel.h
 #QtActivityIndicator.h
 #QtVisual.h
 #QtPlayerRack.h
 #QtControlPanel.h
-#QtEventFilter.h
-#QtCrumbButton.h
 )
 
 #qt4_wrap_ui(

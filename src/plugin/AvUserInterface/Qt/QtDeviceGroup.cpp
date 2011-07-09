@@ -19,57 +19,40 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtUpnpApplication_INCLUDED
-#define QtUpnpApplication_INCLUDED
+#include "QtDeviceGroup.h"
+#include "QtCrumbButton.h"
+#include "QtBrowserModel.h"
 
-#include <Omm/Upnp.h>
-#include <Omm/UpnpApplication.h>
-#include <Omm/Sys.h>
-
-
-class QApplication;
-class QtMainWindow;
-class QStackedWidget;
-class QtVisual;
-class QtBrowserWidget;
-class QtPlayerRack;
-class QtControlPanel;
-class QtEventFilter;
-class QtControllerWidget;
-
-
-class QtApplication : public Omm::UpnpApplication
+QtDeviceGroup::QtDeviceGroup()
 {
-public:
-    QtApplication();
-    virtual ~QtApplication();
+//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget browser view ...");
+    _pBrowserView = new QTreeView(this);
+//    _pListItem = new QtListItem(_pBrowserView);
+//    _pBrowserView->setItemDelegate(_pListItem);
+//    _pBrowserModel = new QtBrowserModel(pAvInterface);
+//    _pBrowserView->setModel(pQtDeviceGroup->_pBrowserModel);
+    _pBrowserView->setUniformRowHeights(true);
+    _pBrowserView->setHeaderHidden(true);
+    _pBrowserView->setRootIsDecorated(false);
+    _pBrowserView->setItemsExpandable(false);
 
-    virtual int eventLoop();
+//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget crumb panel ...");
+    _pCrumbPanel = new QtCrumbPanel(this);
+    _pCrumbButton = new QtCrumbButton(_pBrowserView, QModelIndex(), _pCrumbPanel);
 
-private:
-    virtual void init();
-    
-    virtual Omm::Controller* createController();
-    virtual void addController();
-    virtual void removeController();
+//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget layout...");
+    _pLayout = new QVBoxLayout;
+    _pLayout->addWidget(_pCrumbPanel);
+    _pLayout->addWidget(_pBrowserView);
+    setLayout(_pLayout);
 
-    int                                 _argc;
-    std::string                         _fullscreenStyleSheet;
+//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget signal connections ...");
 
-    QApplication*                       _pApp;
-    QtEventFilter*                      _pEventFilter;
-    QMainWindow*                        _pMainWindow;
-    QStackedWidget*                     _pMainWidget;
-    QtControllerWidget*                 _pControllerWidget;
-    QtBrowserWidget*                    _pBrowserWidget;
-    QtPlayerRack*                       _pPlayerRack;
-    QtControlPanel*                     _pControlPanel;
-    QtVisual*                           _pVisual;
+//    connect(_pBrowserView, SIGNAL(activated(const QModelIndex&)),
+//            this, SLOT(browserItemActivated(const QModelIndex&)));
+//    connect(_pBrowserView, SIGNAL(pressed(const QModelIndex&)),
+//            this, SLOT(browserItemSelected(const QModelIndex&)));
 
-    bool                                _menuVisible;
-    bool                                _playerRackVisible;
-    bool                                _fullscreen;
-};
+//    Omm::Av::Log::instance()->upnpav().debug("finished ctor qt browser widget.");
+}
 
-
-#endif

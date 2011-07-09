@@ -63,8 +63,9 @@ private:
 class CtlMediaRendererGroup : public DeviceGroup
 {
 public:
-    CtlMediaRendererGroup();
+    CtlMediaRendererGroup(DeviceGroupInterface* pDeviceGroupDelegate = 0);
 
+    virtual std::string shortName();
     virtual std::string getDeviceType();
     virtual Device* createDevice(DeviceData* pDeviceData);
 
@@ -89,8 +90,9 @@ private:
 class CtlMediaServerGroup : public DeviceGroup
 {
 public:
-    CtlMediaServerGroup();
+    CtlMediaServerGroup(DeviceGroupInterface* pDeviceGroupDelegate = 0);
 
+    virtual std::string shortName();
     virtual std::string getDeviceType();
     virtual Device* createDevice(DeviceData* pDeviceData);
     

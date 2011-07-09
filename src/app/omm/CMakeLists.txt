@@ -16,7 +16,7 @@ target_link_libraries(newomm
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
-#ommplugin-application-qt
+ommplugin-application-qt
 )
 
 install(TARGETS omm newomm

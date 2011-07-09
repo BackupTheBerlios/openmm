@@ -611,17 +611,13 @@ private:
 };
 
 
-class DeviceGroup
-/// Contains only devices of the same type (which can be in different containers).
-/// Corresponds to one tab in the user interface.
-/// May be loaded as a plugin when a new device type is discovered.
+class DeviceGroupInterface
 {
-    friend class Controller;
-
+    friend class DeviceGroup;
+    
 public:
-    DeviceGroup();
-
     int getDeviceCount();
+    Device* getDevice(int index);
 
     virtual std::string getDeviceType() { return ""; }
     virtual std::string shortName() { return ""; }
@@ -635,11 +631,43 @@ public:
     virtual void removeDevice(Device* pDevice, int index, bool begin) {}
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+    
+private:
+    DeviceGroup*    _pDeviceGroup;
+};
+
+
+class DeviceGroup
+/// Contains only devices of the same type (which can be in different containers).
+/// Corresponds to one tab in the user interface.
+/// May be loaded as a plugin when a new device type is discovered.
+{
+    friend class Controller;
+
+public:
+    DeviceGroup(DeviceGroupInterface* pDeviceGroupDelegate = 0);
+
+    int getDeviceCount();
+    Device* getDevice(int index);
+    
+    virtual std::string getDeviceType();
+    virtual std::string shortName();
+    virtual Icon* groupIcon();
+
+    virtual Device* createDevice(DeviceData* pDeviceData);
+    /// factory method to create a device of a certain type associated with the
+    /// corresponding device code.
+
+    virtual void addDevice(Device* pDevice, int index, bool begin);
+    virtual void removeDevice(Device* pDevice, int index, bool begin);
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
 
 protected:
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
 
+    DeviceGroupInterface*           _pDeviceGroupDelegate;
     std::vector<DeviceContainer>    _deviceContainers;
     Container<Device>               _devices;
     Device*                         _pSelectedDevice;

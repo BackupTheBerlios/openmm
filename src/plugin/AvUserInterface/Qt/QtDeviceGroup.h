@@ -19,57 +19,33 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtUpnpApplication_INCLUDED
-#define QtUpnpApplication_INCLUDED
+#ifndef QtDeviceGroup_INCLUDED
+#define QtDeviceGroup_INCLUDED
 
+#include <QtGui>
 #include <Omm/Upnp.h>
-#include <Omm/UpnpApplication.h>
-#include <Omm/Sys.h>
+
+class QtCrumbButton;
+class QtCrumbPanel;
+class QtBrowserModel;
+class QtListItem;
 
 
-class QApplication;
-class QtMainWindow;
-class QStackedWidget;
-class QtVisual;
-class QtBrowserWidget;
-class QtPlayerRack;
-class QtControlPanel;
-class QtEventFilter;
-class QtControllerWidget;
-
-
-class QtApplication : public Omm::UpnpApplication
+class QtDeviceGroup : public QWidget, public Omm::DeviceGroupInterface
 {
+    Q_OBJECT
 public:
-    QtApplication();
-    virtual ~QtApplication();
-
-    virtual int eventLoop();
-
-private:
-    virtual void init();
+    QtDeviceGroup();
     
-    virtual Omm::Controller* createController();
-    virtual void addController();
-    virtual void removeController();
+private:
 
-    int                                 _argc;
-    std::string                         _fullscreenStyleSheet;
-
-    QApplication*                       _pApp;
-    QtEventFilter*                      _pEventFilter;
-    QMainWindow*                        _pMainWindow;
-    QStackedWidget*                     _pMainWidget;
-    QtControllerWidget*                 _pControllerWidget;
-    QtBrowserWidget*                    _pBrowserWidget;
-    QtPlayerRack*                       _pPlayerRack;
-    QtControlPanel*                     _pControlPanel;
-    QtVisual*                           _pVisual;
-
-    bool                                _menuVisible;
-    bool                                _playerRackVisible;
-    bool                                _fullscreen;
+    QVBoxLayout*                    _pLayout;
+//    QtBrowserModel*                 _pBrowserModel;
+    QtCrumbPanel*                   _pCrumbPanel;
+    QtCrumbButton*                  _pCrumbButton;
+    QTreeView*                      _pBrowserView;
+    QtListItem*                     _pListItem;
 };
 
-
 #endif
+

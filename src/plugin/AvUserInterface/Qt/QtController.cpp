@@ -19,6 +19,16 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Omm/UpnpAvController.h>
+
 #include "QtController.h"
+#include "QtDeviceGroup.h"
 
 
+QtController::QtController()
+{
+    QtDeviceGroup* pQtDeviceGroup = new QtDeviceGroup;
+    Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtDeviceGroup);
+//    addDeviceGroup(pMediaRendererGroup);
+    addTab(pQtDeviceGroup, pMediaRendererGroup->shortName().c_str());
+}

@@ -4403,11 +4403,26 @@ SsdpMessage::getSender()
 }
 
 
-DeviceGroup::DeviceGroup() :
+int
+DeviceGroupInterface::getDeviceCount()
+{
+    return _pDeviceGroup->getDeviceCount();
+}
+
+
+Device*
+DeviceGroupInterface::getDevice(int index)
+{
+    return _pDeviceGroup->getDevice(index);
+}
+
+
+DeviceGroup::DeviceGroup(DeviceGroupInterface* pDeviceGroupDelegate) :
+_pDeviceGroupDelegate(pDeviceGroupDelegate),
 _pSelectedDevice(0),
 _preferredDeviceUuid("")
 {
-
+    pDeviceGroupDelegate->_pDeviceGroup = this;
 }
 
 
@@ -4415,6 +4430,97 @@ int
 DeviceGroup::getDeviceCount()
 {
     return _devices.size();
+}
+
+
+Device*
+DeviceGroup::getDevice(int index)
+{
+    return &_devices.get(index);
+}
+
+
+std::string
+DeviceGroup::getDeviceType()
+{
+    if (_pDeviceGroupDelegate) {
+        return _pDeviceGroupDelegate->getDeviceType();
+    }
+    else {
+        return "";
+    }
+}
+
+
+std::string
+DeviceGroup::shortName()
+{
+    if (_pDeviceGroupDelegate) {
+        return _pDeviceGroupDelegate->shortName();
+    }
+    else {
+        return "";
+    }
+}
+
+
+Icon*
+DeviceGroup::groupIcon()
+{
+    if (_pDeviceGroupDelegate) {
+        return _pDeviceGroupDelegate->groupIcon();
+    }
+    else {
+        return 0;
+    }
+}
+
+
+Device*
+DeviceGroup::createDevice(DeviceData* pDeviceData)
+{
+    if (_pDeviceGroupDelegate) {
+        return _pDeviceGroupDelegate->createDevice(pDeviceData);
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+DeviceGroup::addDevice(Device* pDevice, int index, bool begin)
+{
+    if (_pDeviceGroupDelegate) {
+        _pDeviceGroupDelegate->addDevice(pDevice, index, begin);
+    }
+}
+
+
+void
+DeviceGroup::removeDevice(Device* pDevice, int index, bool begin)
+{
+    if (_pDeviceGroupDelegate) {
+        _pDeviceGroupDelegate->removeDevice(pDevice, index, begin);
+    }
+}
+
+
+void
+DeviceGroup::addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
+{
+    if (_pDeviceGroupDelegate) {
+        _pDeviceGroupDelegate->addDeviceContainer(pDeviceContainer, index, begin);
+    }
+}
+
+
+void
+DeviceGroup::removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
+{
+    if (_pDeviceGroupDelegate) {
+        _pDeviceGroupDelegate->removeDeviceContainer(pDeviceContainer, index, begin);
+    }
 }
 
 

@@ -29,6 +29,9 @@
 class QtController : public QTabWidget, public Omm::Controller
 {
     Q_OBJECT
+
+public:
+    QtController();
 };
 
 #endif
