@@ -19,148 +19,169 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-//#include "UpnpAvServer.h"
-//#include "UpnpAvRenderer.h"
+#include <iostream>
+
+#include <Poco/Util/HelpFormatter.h>
 
 #include "UpnpApplication.h"
 
 namespace Omm {
-//namespace Av {
 
 
 UpnpApplication::UpnpApplication() :
-_pApplicationUserInterface(0)
-//_pEngine(0)
+_pController(0),
+_pDevices(0),
+_helpRequested(false)
 {
-    _pController = new Controller;
+    setUnixOptions(true);
+}
+
+
+UpnpApplication::~UpnpApplication()
+{
+    if (_pController) {
+        delete _pController;
+    }
+    if (_pDevices) {
+        delete _pDevices;
+    }
+}
+
+
+int
+UpnpApplication::eventLoop()
+{
+    waitForTerminationRequest();
 }
 
 
 void
-UpnpApplication::setUserInterface(ApplicationUserInterface* pAppUserInterface)
+UpnpApplication::initialize(Poco::Util::Application& self)
 {
-    _pApplicationUserInterface = pAppUserInterface;
-    _pApplicationUserInterface->_pApp = this;
-    _pController->setUserInterface(pAppUserInterface);
+    loadConfiguration(); // load default configuration files, if present
+    ServerApplication::initialize(self);
+
+    // FIXME: is Controller already created?
+    if (_pController) {
+        _pController->init();
+    }
+    if (_pDevices) {
+        _pDevices->init();
+    }
 }
 
 
 void
-UpnpApplication::init()
+UpnpApplication::uninitialize()
 {
-    _pController->init();
-    _pApplicationUserInterface->initGui();
-    _pApplicationUserInterface->showMainWindow();
+    ServerApplication::uninitialize();
+}
+
+
+void
+UpnpApplication::defineOptions(Poco::Util::OptionSet& options)
+{
+    ServerApplication::defineOptions(options);
+    
+    options.addOption(
+        Poco::Util::Option("help", "h", "display help information on command line arguments")
+        .required(false)
+        .repeatable(false));
+}
+
+
+void
+UpnpApplication::handleOption(const std::string& name, const std::string& value)
+{
+    ServerApplication::handleOption(name, value);
+    
+    if (name == "help") {
+        _helpRequested = true;
+    }
+}
+
+
+void
+UpnpApplication::displayHelp()
+{
+    Poco::Util::HelpFormatter helpFormatter(options());
+    helpFormatter.setCommand(commandName());
+    helpFormatter.setUsage("OPTIONS");
+    helpFormatter.setHeader("A UPnP Application with optionally a controller and local devices.");
+    helpFormatter.format(std::cout);
+}
+
+
+int
+UpnpApplication::main(const std::vector<std::string>& args)
+{
+    if (_helpRequested)
+    {
+        displayHelp();
+    }
+    else
+    {
+        init();
+        start();
+
+        int ret = eventLoop();
+
+        stop();
+    }
+    return Poco::Util::Application::EXIT_OK;
+}
+
+
+void
+UpnpApplication::enableController(bool enable)
+{
+    if (enable && !_pController) {
+        _pController = createController();
+    }
+    else if (!enable && _pController) {
+        _pController->stop();
+        delete _pController;
+        _pController = 0;
+    }
+}
+
+
+void
+UpnpApplication::enableDevices(bool enable)
+{
+    if (enable && !_pDevices) {
+        _pDevices = new DeviceServer;
+    }
+    else if (!enable && _pDevices) {
+        _pDevices->stop();
+        delete _pDevices;
+        _pDevices = 0;
+    }
 }
 
 
 void
 UpnpApplication::start()
 {
-    _pController->start();
+    if (_pController) {
+        _pController->start();
+    }
+    if (_pDevices) {
+        _pDevices->startAsThread();
+    }
 }
 
 
 void
 UpnpApplication::stop()
 {
-    _pController->stop();
+    if (_pDevices) {
+        _pDevices->stopThread();
+    }
+    if (_pController) {
+        _pController->stop();
+    }
 }
 
 
-//void
-//UpnpApplication::startLocalServers()
-//{
-//    for (std::vector<AvServer*>::iterator it = _localServers.begin(); it != _localServers.end(); ++it) {
-//        // TODO: start DeviceContainer instead of single devices
-////        (*it)->startThreaded();
-//    }
-//}
-//
-//
-//void
-//UpnpApplication::stopLocalServers()
-//{
-//    for (std::vector<AvServer*>::iterator it = _localServers.begin(); it != _localServers.end(); ++it) {
-//        // TODO: start DeviceContainer instead of single devices
-////        (*it)->stopThreaded();
-//    }
-//}
-//
-//
-//void
-//UpnpApplication::startLocalRenderer()
-//{
-//    if (_pEngine) {
-//        _pEngine->createPlayer();
-//        _pRenderer = new Omm::Av::AvRenderer(_pEngine);
-////        _pRenderer->setFriendlyName("Local Player");
-//        //_pEngine->setParentView(parentView);
-//        // TODO: start device container of renderer
-////        _pRenderer->start();
-//    }
-//    else {
-//        Log::instance()->upnpav().warning("no engine set in user interface, local renderer not started.");
-//    }
-//}
-//
-//
-//void
-//UpnpApplication::stopLocalRenderer()
-//{
-//    // TODO: stop device container of renderer
-////    _pRenderer->stop();
-//}
-//
-//
-//void
-//UpnpApplication::setLocalEngine(Engine* pEngine)
-//{
-//    _pEngine = pEngine;
-//}
-//
-//
-//void
-//UpnpApplication::addLocalServer(AvServer* pServer)
-//{
-//    _localServers.push_back(pServer);
-//}
-
-
-//void
-//AvUserInterface::startFileServers()
-//{
-//    ThreadedServer* pMusic = new ThreadedServer("mp3", "Music (on iPhone)");
-//    _FileServers.push_back(pMusic);
-//    ThreadedServer* pNeuseeland = new ThreadedServer("Neuseeland", "Neuseeland (on iPhone)");
-//    _FileServers.push_back(pNeuseeland);
-//    pMusic->start();
-//    pNeuseeland->start();
-//}
-
-
-//void
-//AvUserInterface::startWebradio()
-//{
-//    std::string home = Poco::Environment::get("HOME");
-//
-//    // TODO: load webradio server plugin?
-//    //_pWebradioContainer = new WebradioServer;
-//    std::string webradioName = "Web Radio";
-//    std::string webradioConf = home + "/.omm/webradio.conf";
-////    std::string webradioConf = "/var/root/.omm/webradio.conf";
-////    std::string webradioConf = "/Users/jb/.omm/webradio.conf";
-//    _pWebradioContainer->setOption("basePath", webradioConf);
-//    _pWebradioContainer->setTitle(webradioName);
-//    _pWebradioServer = new Omm::Av::AvServer;
-//    _pWebradioServer->setRoot(_pWebradioContainer);
-//    _pWebradioServer->setFriendlyName(webradioName);
-//    _pWebradioIcon = new Omm::Icon(22, 22, 8, "image/png", "device.png");
-//    _pWebradioServer->addIcon(_pWebradioIcon);
-//    _pWebradioServer->start();
-//}
-
-
-
-//} // namespace Av
 } // namespace Omm
