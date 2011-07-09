@@ -3649,7 +3649,8 @@ CtlDeviceCode::init()
 
 
 Controller::Controller() :
-DeviceManager(new Socket)
+DeviceManager(new Socket),
+_pUserInterface(0)
 {
 }
 
@@ -3803,7 +3804,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        _pUserInterface->beginAddDeviceContainer(_deviceContainers.size());
+        if (_pUserInterface) {
+            _pUserInterface->beginAddDeviceContainer(_deviceContainers.size());
+        }
         addDeviceContainer(pDeviceContainer, _deviceContainers.size(), true);
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
@@ -3822,7 +3825,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         }
         
         addDeviceContainer(pDeviceContainer, _deviceContainers.size() - 1, false);
-        _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
+        if (_pUserInterface) {
+            _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
+        }
     }
 }
 
@@ -3834,7 +3839,9 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
         int position = _deviceContainers.position(uuid);
-        _pUserInterface->beginRemoveDeviceContainer(position);
+        if (_pUserInterface) {
+            _pUserInterface->beginRemoveDeviceContainer(position);
+        }
         removeDeviceContainer(pDeviceContainer, position, true);
         DeviceManager::removeDeviceContainer(pDeviceContainer);
 
@@ -3848,7 +3855,9 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
         }
 
         removeDeviceContainer(pDeviceContainer, position, false);
-        _pUserInterface->endRemoveDeviceContainer(position);
+        if (_pUserInterface) {
+            _pUserInterface->endRemoveDeviceContainer(position);
+        }
         pDeviceContainer->_pController = 0;
     }
 }

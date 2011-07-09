@@ -3,13 +3,22 @@ OmmApplication.cpp
 )
 
 target_link_libraries(omm
-${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
 )
 
-install(TARGETS omm
+add_executable(newomm
+NewOmmApplication.cpp
+)
+
+target_link_libraries(newomm
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+)
+
+install(TARGETS omm newomm
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

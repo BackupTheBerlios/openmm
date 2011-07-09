@@ -33,13 +33,24 @@
 namespace Omm {
 
 
+class ControllerSubSystem : public Poco::Util::Subsystem
+{
+
+};
+
+
+class DevicesSubSystem : public Poco::Util::Subsystem
+{
+
+};
+
+
 class UpnpApplication : public Poco::Util::ServerApplication
 {
 public:
     UpnpApplication();
     ~UpnpApplication();
 
-    virtual int main(const std::vector<std::string>& args);
     void enableController(bool enable = true);
     void enableDevices(bool enable = false);
     
@@ -49,12 +60,12 @@ public:
     virtual void setFullscreen(bool fullscreen) {}
 
 protected:
+    virtual int main(const std::vector<std::string>& args);
     virtual void defineOptions(Poco::Util::OptionSet& options);
     virtual void handleOption(const std::string& name, const std::string& value);
 
     virtual int eventLoop();
     virtual void init() {}
-
     virtual Controller* createController() { return new Controller; }
     virtual Sys::Visual* createVisual() { return 0; }
 
