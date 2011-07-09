@@ -28,6 +28,7 @@
 
 
 class QtAvInterface;
+class QtApplication;
 class QtActivityIndicator;
 
 
@@ -53,6 +54,7 @@ class QtControlPanel : public QToolBar
 
 public:
     QtControlPanel(QtAvInterface* pAvInterface, QWidget* pParent = 0);
+    QtControlPanel(QtApplication* pApplication, QWidget* pParent = 0);
     ~QtControlPanel();
 
     void setPlayerName(const std::string& name);
@@ -87,6 +89,7 @@ private slots:
 
 private:
     QtAvInterface*                      _pAvInterface;
+    QtApplication*                      _pApplication;
     QPushButton*                        _pBackButton;
     QPushButton*                        _pPlayButton;
     QPushButton*                        _pStopButton;

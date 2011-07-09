@@ -60,14 +60,6 @@ UpnpApplication::initialize(Poco::Util::Application& self)
 {
     loadConfiguration(); // load default configuration files, if present
     ServerApplication::initialize(self);
-
-    // FIXME: is Controller already created?
-    if (_pController) {
-        _pController->init();
-    }
-    if (_pDevices) {
-        _pDevices->init();
-    }
 }
 
 
@@ -121,7 +113,6 @@ UpnpApplication::main(const std::vector<std::string>& args)
     }
     else
     {
-        init();
         start();
 
         int ret = eventLoop();
@@ -137,9 +128,12 @@ UpnpApplication::enableController(bool enable)
 {
     if (enable && !_pController) {
         _pController = createController();
+        addController();
+        _pController->init();
     }
     else if (!enable && _pController) {
         _pController->stop();
+        removeController();
         delete _pController;
         _pController = 0;
     }
@@ -151,6 +145,7 @@ UpnpApplication::enableDevices(bool enable)
 {
     if (enable && !_pDevices) {
         _pDevices = new DeviceServer;
+        _pDevices->init();
     }
     else if (!enable && _pDevices) {
         _pDevices->stop();

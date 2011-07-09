@@ -19,19 +19,26 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpAvController.h>
-#include <Omm/UpnpAvRenderer.h>
-#include <Omm/UpnpAvServer.h>
 #include <Omm/UpnpApplication.h>
 #include <Omm/Util.h>
 
-
-
 int main(int argc, char** argv)
 {
-    Omm::UpnpApplication app;
-    app.enableController();
-    
-    return app.run(argc, argv);
+    Omm::Util::PluginLoader<Omm::UpnpApplication> pluginLoader;
+    Omm::UpnpApplication* pApp;
+    try {
+        pApp = pluginLoader.load("application-qt");
+    }
+    catch(Poco::NotFoundException) {
+        Omm::Log::instance()->upnp().error("OMM application could not find Qt application plugin");
+        return 1;
+    }
+
+    pApp->init();
+    pApp->enableController();
+    int ret = pApp->run(argc, argv);
+    delete pApp;
+
+    return ret;
 }
 

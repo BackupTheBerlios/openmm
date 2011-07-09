@@ -31,7 +31,7 @@
 #include <QStyledItemDelegate>
 
 #include <Omm/UpnpAvController.h>
-
+#include <Omm/UpnpApplication.h>
 
 class QtListItem : public QStyledItemDelegate
 {
@@ -49,6 +49,7 @@ class QtBrowserModel : public QAbstractItemModel
 
 public:
     QtBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
+    QtBrowserModel(Omm::UpnpApplication* pApplication, QObject *parent = 0);
     ~QtBrowserModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -76,6 +77,7 @@ public:
 private:
 //     Omm::Container<ServerController>*      _pServers;
     Omm::Av::AvUserInterface*               _pUserInterface;
+    Omm::UpnpApplication*                   _pApplication;
     QTextCodec*                             _charEncoding;
     QFileIconProvider*                      _iconProvider;
 //     bool                  _lazyRowCount;

@@ -25,8 +25,17 @@
 
 QtRendererListModel::QtRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent) :
 QAbstractItemModel(parent),
-// _pRenderers(pRenderers)
-_pUserInterface(pUserInterface)
+_pUserInterface(pUserInterface),
+_pRendererGroup(0)
+{
+    _charEncoding = QTextCodec::codecForName("UTF-8");
+}
+
+
+QtRendererListModel::QtRendererListModel(Omm::Av::CtlMediaRendererGroup* pRendererGroup, QObject *parent) :
+QAbstractItemModel(parent),
+_pUserInterface(0),
+_pRendererGroup(pRendererGroup)
 {
     _charEncoding = QTextCodec::codecForName("UTF-8");
 }

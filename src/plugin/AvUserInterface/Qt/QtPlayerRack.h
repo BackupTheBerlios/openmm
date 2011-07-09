@@ -29,6 +29,7 @@
 
 class QtRendererListModel;
 class QtAvInterface;
+class QtApplication;
 
 class QtPlayerRack : public QDockWidget
 {
@@ -36,6 +37,7 @@ class QtPlayerRack : public QDockWidget
 
 public:
     QtPlayerRack(QtAvInterface* pAvInterface, QWidget* pParent = 0);
+    QtPlayerRack(QtApplication* pApplication, QWidget* pParent = 0);
     ~QtPlayerRack();
 
 public slots:
@@ -49,6 +51,7 @@ private slots:
     
 private:
     QtAvInterface*              _pAvInterface;
+    QtApplication*              _pApplication;
     QListView*                  _pPlayerListView;
 
     QtRendererListModel*        _pRendererListModel;

@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,57 +19,53 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtBrowserWidget_INCLUDED
-#define	QtBrowserWidget_INCLUDED
+#ifndef QtCrumbButton_INCLUDED
+#define QtCrumbButton_INCLUDED
 
 #include <QtGui>
 
-#include <Omm/UpnpAvController.h>
 
-class QtAvInterface;
-class QtApplication;
-class QtBrowserModel;
-class QtListItem;
-class QtCrumbButton;
-class QtCrumbPanel;
-
-
-class QtBrowserWidget : public QWidget
+class QtCrumbButton : public QWidget
 {
     Q_OBJECT
 
-    friend class QtAvInterface;
+    friend class QtBrowserWidget;
 
 public:
-    QtBrowserWidget(QWidget* parent, QtAvInterface* pAvInterface);
-    QtBrowserWidget(QWidget* parent, QtApplication* pApplication);
-    ~QtBrowserWidget();
+    QtCrumbButton(QAbstractItemView* browserView, const QModelIndex& index, QWidget* parent = 0, QtCrumbButton* parentButton = 0);
+    ~QtCrumbButton();
 
-    void goBack();
-    QModelIndex getCurrentIndex();
-    void setCurrentIndex(QModelIndex index);
-    void beginAddServer(int position);
-    void endAddServer();
-    void beginRemoveServer(int position);
-    void endRemoveServer();
+    void setChild(QtCrumbButton* child) { _child = child; }
+    void setParent(QtCrumbButton* parent) { _parent = parent; }
+
+    static QtCrumbButton* _pLastCrumbButton;
 
 private slots:
-    void browserItemActivated(const QModelIndex& index);
-    void browserItemSelected(const QModelIndex& index);
+    void buttonPressed();
 
 private:
-    Omm::Av::CtlMediaObject*        _pCurrentServerRootObject;
-    QtAvInterface*                  _pAvInterface;
-    QtApplication*                  _pApplication;
+    void deleteChildren();
 
-    QVBoxLayout*                    _pLayout;
-    QtBrowserModel*                 _pBrowserModel;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QTreeView*                      _pBrowserView;
-    QtListItem*                     _pListItem;
+    QLayout*            _parentLayout;
+    QHBoxLayout*        _boxLayout;
+    QPushButton*        _button;
+    QAbstractItemView*  _browserView;
+    const QModelIndex   _index;
+    QtCrumbButton*      _child;
+    QtCrumbButton*      _parent;
 };
 
 
-#endif
+class QtCrumbPanel : public QWidget
+{
+    Q_OBJECT
 
+public:
+    QtCrumbPanel(QWidget* parent);
+    ~QtCrumbPanel();
+
+private:
+    QHBoxLayout*    _pCrumbButtonLayout;
+};
+
+#endif

@@ -84,6 +84,16 @@ QtListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& inde
 QtBrowserModel::QtBrowserModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent)
 : QAbstractItemModel(parent),
 _pUserInterface(pUserInterface),
+_pApplication(0),
+_charEncoding(QTextCodec::codecForName("UTF-8")),
+_iconProvider(new QFileIconProvider())
+{
+}
+
+QtBrowserModel::QtBrowserModel(Omm::UpnpApplication* pApplication, QObject *parent)
+: QAbstractItemModel(parent),
+_pUserInterface(0),
+_pApplication(pApplication),
 _charEncoding(QTextCodec::codecForName("UTF-8")),
 _iconProvider(new QFileIconProvider())
 {

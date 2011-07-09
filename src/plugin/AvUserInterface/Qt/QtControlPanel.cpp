@@ -21,6 +21,7 @@
 
 #include "QtControlPanel.h"
 #include "QtAvInterface.h"
+#include "QtApplication.h"
 #include "QtActivityIndicator.h"
 
 
@@ -62,7 +63,8 @@ QtPlayerRackButton::setLabel()
 
 QtControlPanel::QtControlPanel(QtAvInterface* pAvInterface, QWidget* pParent) :
 QToolBar("ControlPanel", pParent),
-_pAvInterface(pAvInterface)
+_pAvInterface(pAvInterface),
+_pApplication(0)
 {
     _pBackButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipBackward), "", this);
     _pPlayButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "", this);
@@ -115,6 +117,62 @@ _pAvInterface(pAvInterface)
 }
 
 
+QtControlPanel::QtControlPanel(QtApplication* pApplication, QWidget* pParent) :
+QToolBar("ControlPanel", pParent),
+_pAvInterface(0),
+_pApplication(pApplication)
+{
+    _pBackButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipBackward), "", this);
+    _pPlayButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "", this);
+    _pStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaStop), "", this);
+    _pForwardButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipForward), "", this);
+
+    addWidget(_pBackButton);
+    addWidget(_pPlayButton);
+    addWidget(_pStopButton);
+    addWidget(_pForwardButton);
+
+    _pActivityIndicator = new QtActivityIndicator(this);
+    addWidget(_pActivityIndicator);
+
+    _pVolumeSlider = new QSlider(Qt::Horizontal, this);
+    _pVolumeSlider->setTracking(true);
+    _pVolumeSlider->setSingleStep(5);
+    _pSeekSlider = new QSlider(Qt::Horizontal, this);
+    _pSeekSlider->setSingleStep(10);
+    _pSeekSlider->setPageStep(25);
+
+    addWidget(_pVolumeSlider);
+    addWidget(_pSeekSlider);
+
+    _pPlayerRackButton = new QtPlayerRackButton(this);
+    addWidget(_pPlayerRackButton);
+
+    setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+
+    connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
+    connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
+//    connect(_pForwardButton, SIGNAL(pressed()), _pApplication, SLOT(skipForwardButtonPressed()));
+//    connect(_pBackButton, SIGNAL(pressed()), _pApplication, SLOT(skipBackwardButtonPressed()));
+
+    connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
+    connect(_pSeekSlider, SIGNAL(valueChanged(int)), this, SLOT(checkSliderMoved(int)));
+    connect(_pSeekSlider, SIGNAL(actionTriggered(int)), this, SLOT(setSliderMoved(int)));
+
+    connect(this, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
+    connect(this, SIGNAL(setSlider(int, int)), this, SLOT(setSeekSlider(int, int)));
+    connect(this, SIGNAL(volSliderMoved(int)), this, SLOT(setVolumeSlider(int)));
+
+//    connect(_pApplication, SIGNAL(startNetworkActivity()), _pActivityIndicator, SLOT(startActivity()));
+//    connect(_pApplication, SIGNAL(stopNetworkActivity()), _pActivityIndicator, SLOT(stopActivity()));
+
+//    connect(_pApplication, SIGNAL(nowPlaying(const QString&, const QString&, const QString&)),
+//            this, SLOT(setTrackInfo(const QString&, const QString&, const QString&)));
+
+//    connect(_pPlayerRackButton, SIGNAL(toggled(bool)), _pApplication, SLOT(showPlayerRack(bool)));
+}
+
+
 QtControlPanel::~QtControlPanel()
 {
     delete _pBackButton;
@@ -138,13 +196,23 @@ void
 QtControlPanel::playButtonPressed()
 {
     if (_playToggle) {
-        _pAvInterface->playPressed();
+        if (_pAvInterface) {
+            _pAvInterface->playPressed();
+        }
+        else {
+//            _pApplication->playPressed();
+        }
         // TODO: only toggle play button to pause, if media is really playing
         _pPlayButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
         _playToggle = false;
     }
     else {
-        _pAvInterface->pausePressed();
+        if (_pAvInterface) {
+            _pAvInterface->pausePressed();
+        }
+        else {
+//            _pApplication->pausePressed();
+        }
         _pPlayButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         _playToggle = true;
     }
@@ -157,7 +225,12 @@ QtControlPanel::playButtonPressed()
 void
 QtControlPanel::stopButtonPressed()
 {
-    _pAvInterface->stopPressed();
+    if (_pAvInterface) {
+        _pAvInterface->stopPressed();
+    }
+    else {
+//        _pApplication->stopPressed();
+    }
     _pPlayButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     _playToggle = true;
     _pStopButton->setEnabled(false);
@@ -202,14 +275,24 @@ QtControlPanel::setTrackInfo(const QString& title, const QString& artist, const 
 void
 QtControlPanel::positionSliderMoved(int position)
 {
-    _pAvInterface->positionMoved(position);
+    if (_pAvInterface) {
+        _pAvInterface->positionMoved(position);
+    }
+    else {
+//        _pApplication->positionMoved(position);
+    }
 }
 
 
 void
 QtControlPanel::volumeSliderMoved(int value)
 {
-    _pAvInterface->volumeChanged(value);
+    if (_pAvInterface) {
+        _pAvInterface->volumeChanged(value);
+    }
+    else {
+//        _pApplication->volumeChanged(value);
+    }
 }
 
 

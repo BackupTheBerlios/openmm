@@ -14,6 +14,7 @@ ${QT_USE_FILE}
 
 set(OMMC_QTUI_SRCS
 QtAvInterface.cpp
+QtMainWindow.cpp
 # modeltest.cpp
 QtBrowserModel.cpp
 QtBrowserWidget.cpp
@@ -22,6 +23,24 @@ QtActivityIndicator.cpp
 QtVisual.cpp
 QtPlayerRack.cpp
 QtControlPanel.cpp
+QtEventFilter.cpp
+QtCrumbButton.cpp
+)
+
+set(OMMC_QTAPP_SRCS
+QtApplication.cpp
+QtMainWindow.cpp
+QtController.cpp
+# modeltest.cpp
+#QtBrowserModel.cpp
+#QtBrowserWidget.cpp
+#QtRendererListModel.cpp
+#QtActivityIndicator.cpp
+#QtVisual.cpp
+#QtPlayerRack.cpp
+#QtControlPanel.cpp
+#QtEventFilter.cpp
+#QtCrumbButton.cpp
 )
 
 #set(OMMC_QTUI
@@ -34,6 +53,7 @@ QtAvInterface.qrc
 
 set(OMMC_QTUI_MOC
 QtAvInterface.h
+QtMainWindow.h
 # modeltest.h
 QtBrowserModel.h
 QtBrowserWidget.h
@@ -42,6 +62,24 @@ QtActivityIndicator.h
 QtVisual.h
 QtPlayerRack.h
 QtControlPanel.h
+QtEventFilter.h
+QtCrumbButton.h
+)
+
+set(OMMC_QTAPP_MOC
+QtMainWindow.h
+QtController.h
+#QtApplication.h
+# modeltest.h
+#QtBrowserModel.h
+#QtBrowserWidget.h
+#QtRendererListModel.h
+#QtActivityIndicator.h
+#QtVisual.h
+#QtPlayerRack.h
+#QtControlPanel.h
+#QtEventFilter.h
+#QtCrumbButton.h
 )
 
 #qt4_wrap_ui(
@@ -68,12 +106,24 @@ QT4_WRAP_CPP(
 OMMC_QTUI_MOC_CPP ${OMMC_QTUI_MOC}
 )
 
+QT4_WRAP_CPP(
+OMMC_QTAPP_MOC_CPP ${OMMC_QTAPP_MOC}
+)
+
 if(BUILD_PLUGINS)
 add_library(ommplugin-avinterface-qt
 SHARED
 ${OMMC_QTUI_SRCS}
 ${OMMC_QTUI}
 ${OMMC_QTUI_MOC_CPP}
+${OMMC_RES_SRC}
+)
+
+add_library(ommplugin-application-qt
+SHARED
+${OMMC_QTAPP_SRCS}
+${OMMC_QTAPP}
+${OMMC_QTAPP_MOC_CPP}
 ${OMMC_RES_SRC}
 )
 
@@ -84,11 +134,22 @@ ${OMM_SYS}
 ${QT_LIBRARIES}
 )
 
+target_link_libraries(ommplugin-application-qt
+${OMM}
+${OMM_AV}
+${OMM_SYS}
+${QT_LIBRARIES}
+)
+
 set_target_properties(ommplugin-avinterface-qt
 PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
-install(TARGETS ommplugin-avinterface-qt
+set_target_properties(ommplugin-application-qt
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
+install(TARGETS ommplugin-avinterface-qt ommplugin-application-qt
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib

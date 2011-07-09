@@ -21,12 +21,14 @@
 
 #include "QtPlayerRack.h"
 #include "QtAvInterface.h"
+#include "QtApplication.h"
 #include "QtRendererListModel.h"
 
 
 QtPlayerRack::QtPlayerRack(QtAvInterface* pAvInterface, QWidget* pParent) :
 QDockWidget(pParent),
-_pAvInterface(pAvInterface)
+_pAvInterface(pAvInterface),
+_pApplication(0)
 {
     _pPlayerListView = new QListView(this);
     setWidget(_pPlayerListView);
@@ -36,6 +38,29 @@ _pAvInterface(pAvInterface)
     setWindowTitle("Player Rack");
 
     _pRendererListModel = new QtRendererListModel(pAvInterface);
+    _pPlayerListView->setModel(_pRendererListModel);
+
+    connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),
+            _pPlayerListView, SLOT(setCurrentIndex(QModelIndex)));
+    connect(_pPlayerListView->selectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this, SLOT(rendererSelectionChanged(const QItemSelection&, const QItemSelection&)));
+}
+
+
+QtPlayerRack::QtPlayerRack(QtApplication* pApplication, QWidget* pParent) :
+QDockWidget(pParent),
+_pAvInterface(0),
+_pApplication(pApplication)
+{
+    _pPlayerListView = new QListView(this);
+    setWidget(_pPlayerListView);
+//    setFeatures(QDockWidget::AllDockWidgetFeatures);
+    setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    setWindowTitle("Player Rack");
+
+//    _pRendererListModel = new QtRendererListModel(pApplication);
     _pPlayerListView->setModel(_pRendererListModel);
 
     connect(_pRendererListModel, SIGNAL(setCurrentIndex(QModelIndex)),

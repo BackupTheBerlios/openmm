@@ -29,35 +29,13 @@
 
 Q_DECLARE_METATYPE(std::string);
 
+class QtMainWindow;
 class QtVisual;
 class QtAvInterface;
 class QtBrowserWidget;
 class QtPlayerRack;
 class QtControlPanel;
-
-
-class QtMainWindow : public QMainWindow
-{
-    Q_OBJECT
-
-public:
-    QtMainWindow(QWidget* pCentralWidget);
-
-//    virtual void keyPressEvent(QKeyEvent* event);
-};
-
-
-class QtEventFilter : public QObject
-{
-public:
-    QtEventFilter(QtAvInterface* pAvInterface);
-
-private:
-    virtual bool eventFilter(QObject* object, QEvent* event);
-
-    QtAvInterface*      _pAvInterface;
-//    map<int, Event::EventT> m_eventMap;
-};
+class QtEventFilter;
 
 
 class QtAvInterface : public QObject, public Omm::Av::AvUserInterface
