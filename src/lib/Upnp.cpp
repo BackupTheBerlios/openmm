@@ -2945,7 +2945,7 @@ void
 DeviceContainer::addDevice(Device* pDevice)
 {
 //    Log::instance()->upnp().debug("add device: " + pDevice->getUuid());
-    _devices.append(pDevice);
+    _devices.append(pDevice->getUuid(), pDevice);
     pDevice->setDeviceContainer(this);
     for (Device::ServiceIterator it = pDevice->beginService(); it != pDevice->endService(); ++it) {
         addServiceType(*it);
