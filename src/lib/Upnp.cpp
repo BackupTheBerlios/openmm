@@ -3832,19 +3832,19 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
             Device* pDevice = *it;
             Log::instance()->upnp().debug("controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
-            Log::instance()->upnp().debug("device: " + Poco::NumberFormatter::format(pDevice));
-            Log::instance()->upnp().debug("device data: " + Poco::NumberFormatter::format(pDevice->getDeviceData()));
-            Log::instance()->upnp().debug("device data thinks its device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceData()->getDevice()->getDeviceContainer()));
-            Log::instance()->upnp().debug("device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceContainer()));
+//            Log::instance()->upnp().debug("device: " + Poco::NumberFormatter::format(pDevice));
+//            Log::instance()->upnp().debug("device data: " + Poco::NumberFormatter::format(pDevice->getDeviceData()));
+//            Log::instance()->upnp().debug("device data thinks its device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceData()->getDevice()->getDeviceContainer()));
+//            Log::instance()->upnp().debug("device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceContainer()));
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
                 Log::instance()->upnp().information("controller adds device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
                 Device* pTypedDevice = pDeviceGroup->createDevice();
                 pDeviceContainer->replaceDevice(pDevice, pTypedDevice);
                 pTypedDevice->addCtlDeviceCode();
-                Log::instance()->upnp().debug("controller created device");
+//                Log::instance()->upnp().debug("controller created device");
                 pDeviceGroup->addDevice(pTypedDevice);
-                Log::instance()->upnp().debug("controller added device");
+//                Log::instance()->upnp().debug("controller added device");
                 pDevice->initControllerEventing();
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             }

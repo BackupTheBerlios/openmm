@@ -19,21 +19,45 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpAvController.h>
+#ifndef QtDeviceGroupModel_INCLUDED
+#define QtDeviceGroupModel_INCLUDED
 
-#include "QtController.h"
-#include "QtDeviceGroup.h"
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QVariant>
+#include <QList>
+#include <QTextCodec>
+#include <QFileIconProvider>
 
+#include <Omm/Upnp.h>
 
-QtController::QtController()
+class QtDeviceGroupModel : public QAbstractItemModel
 {
-    QtDeviceGroup* pQtMediaServerGroup = new QtDeviceGroup;
-    Omm::DeviceGroup* pMediaServerGroup = new Omm::Av::CtlMediaServerGroup(pQtMediaServerGroup);
-    addDeviceGroup(pMediaServerGroup);
-    addTab(pQtMediaServerGroup, pMediaServerGroup->shortName().c_str());
+    Q_OBJECT
+        
+public:
+    QtDeviceGroupModel(Omm::DeviceGroupInterface* pDeviceGroup, QObject *parent = 0);
+    ~QtDeviceGroupModel();
+    
+    QVariant data(const QModelIndex& index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex& index) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+    
+    void addDevice(int position, bool begin);
+    void removeDevice(int position, bool begin);
+    
+signals:
+    void setCurrentIndex(const QModelIndex& index);
+    
+private:
+    Omm::DeviceGroupInterface*      _pDeviceGroup;
+    QTextCodec*                     _charEncoding;
+    QFileIconProvider*              _iconProvider;
+};
 
-    QtDeviceGroup* pQtMediaRendererGroup = new QtDeviceGroup;
-    Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroup);
-    addDeviceGroup(pMediaRendererGroup);
-    addTab(pQtMediaRendererGroup, pMediaRendererGroup->shortName().c_str());
-}
+#endif
+

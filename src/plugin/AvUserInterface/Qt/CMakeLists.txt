@@ -33,8 +33,8 @@ QtMainWindow.cpp
 QtController.cpp
 #QtEventFilter.cpp
 QtDeviceGroup.cpp
+QtDeviceGroupModel.cpp
 QtCrumbButton.cpp
-QtBrowserModel.cpp
 # modeltest.cpp
 #QtBrowserWidget.cpp
 #QtRendererListModel.cpp
@@ -72,8 +72,8 @@ QtMainWindow.h
 QtController.h
 #QtEventFilter.h
 QtDeviceGroup.h
+QtDeviceGroupModel.h
 QtCrumbButton.h
-QtBrowserModel.h
 # modeltest.h
 #QtBrowserWidget.h
 #QtRendererListModel.h

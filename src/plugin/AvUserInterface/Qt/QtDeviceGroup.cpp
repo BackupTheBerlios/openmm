@@ -20,30 +20,100 @@
  ***************************************************************************/
 
 #include "QtDeviceGroup.h"
+#include "QtDeviceGroupModel.h"
 #include "QtCrumbButton.h"
 #include "QtBrowserModel.h"
+
+
+class QtDeviceListItem : public QStyledItemDelegate
+{
+public:
+    QtDeviceListItem(QObject* parent = 0);
+
+    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+};
+
+
+QtDeviceListItem::QtDeviceListItem(QObject* parent) :
+QStyledItemDelegate(parent)
+{
+}
+
+
+void
+QtDeviceListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    int padding = 4;
+    QRect iconRect(option.rect);
+    iconRect.setLeft(padding);
+    iconRect.setWidth(option.rect.height());
+    QRect textRect(option.rect);
+    textRect.setLeft(iconRect.right() + padding);
+
+//    Omm::Av::Log::instance()->upnpav().debug(
+//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
+//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
+//    );
+
+    if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
+        QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));
+        painter->save();
+//        painter->setRenderHint(QPainter::Antialiasing, true);
+        if (option.state & QStyle::State_Selected) {
+            painter->fillRect(option.rect, option.palette.highlight());
+            painter->setPen(option.palette.highlightedText().color());
+        }
+//        painter->setFont(option.font);  // painter is style aware, don't need to set this.
+        painter->drawText(textRect, Qt::AlignVCenter, title);
+        painter->restore();
+    }
+    if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
+//        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
+        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+        painter->save();
+        icon.paint(painter, iconRect);
+        painter->restore();
+    }
+    // use QApplication::style()->drawControl() to draw Qt widgets on the painter
+
+//    else {
+//        // default painter
+//        QStyledItemDelegate::paint(painter, option, index);
+//    }
+}
+
+
+QSize
+QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QSize itemSize = QStyledItemDelegate::sizeHint(option, index);
+    itemSize.rheight() *= 2;
+    return itemSize;
+}
+
 
 QtDeviceGroup::QtDeviceGroup()
 {
 //    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget browser view ...");
-    _pBrowserView = new QTreeView(this);
-//    _pListItem = new QtListItem(_pBrowserView);
-//    _pBrowserView->setItemDelegate(_pListItem);
-//    _pBrowserModel = new QtBrowserModel(pAvInterface);
-//    _pBrowserView->setModel(pQtDeviceGroup->_pBrowserModel);
-    _pBrowserView->setUniformRowHeights(true);
-    _pBrowserView->setHeaderHidden(true);
-    _pBrowserView->setRootIsDecorated(false);
-    _pBrowserView->setItemsExpandable(false);
+    _pDeviceListView = new QTreeView(this);
+    _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
+    _pDeviceListView->setItemDelegate(_pDeviceListItem);
+    _pDeviceGroupModel = new QtDeviceGroupModel(this);
+    _pDeviceListView->setModel(_pDeviceGroupModel);
+    _pDeviceListView->setUniformRowHeights(true);
+    _pDeviceListView->setHeaderHidden(true);
+    _pDeviceListView->setRootIsDecorated(false);
+    _pDeviceListView->setItemsExpandable(false);
 
 //    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget crumb panel ...");
     _pCrumbPanel = new QtCrumbPanel(this);
-    _pCrumbButton = new QtCrumbButton(_pBrowserView, QModelIndex(), _pCrumbPanel);
+    _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
 
 //    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget layout...");
     _pLayout = new QVBoxLayout;
     _pLayout->addWidget(_pCrumbPanel);
-    _pLayout->addWidget(_pBrowserView);
+    _pLayout->addWidget(_pDeviceListView);
     setLayout(_pLayout);
 
 //    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget signal connections ...");
@@ -56,3 +126,16 @@ QtDeviceGroup::QtDeviceGroup()
 //    Omm::Av::Log::instance()->upnpav().debug("finished ctor qt browser widget.");
 }
 
+
+void
+QtDeviceGroup::addDevice(Omm::Device* pDevice, int index, bool begin)
+{
+    _pDeviceGroupModel->addDevice(index, begin);
+}
+
+
+void
+QtDeviceGroup::removeDevice(Omm::Device* pDevice, int index, bool begin)
+{
+    _pDeviceGroupModel->removeDevice(index, begin);
+}

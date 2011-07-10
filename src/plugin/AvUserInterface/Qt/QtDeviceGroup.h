@@ -25,26 +25,28 @@
 #include <QtGui>
 #include <Omm/Upnp.h>
 
+class QtDeviceGroupModel;
 class QtCrumbButton;
 class QtCrumbPanel;
 class QtBrowserModel;
-class QtListItem;
-
+class QtDeviceListItem;
 
 class QtDeviceGroup : public QWidget, public Omm::DeviceGroupInterface
 {
     Q_OBJECT
 public:
     QtDeviceGroup();
-    
-private:
 
+    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
+    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+
+private:
+    QtDeviceGroupModel*             _pDeviceGroupModel;
+    QTreeView*                      _pDeviceListView;
+    QtDeviceListItem*               _pDeviceListItem;
     QVBoxLayout*                    _pLayout;
-//    QtBrowserModel*                 _pBrowserModel;
     QtCrumbPanel*                   _pCrumbPanel;
     QtCrumbButton*                  _pCrumbButton;
-    QTreeView*                      _pBrowserView;
-    QtListItem*                     _pListItem;
 };
 
 #endif
