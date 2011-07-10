@@ -3839,11 +3839,12 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
                 Log::instance()->upnp().information("controller adds device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
-                Device* pTypedDevice = pDeviceGroup->createDevice(pDevice->getDeviceData());
+                Device* pTypedDevice = pDeviceGroup->createDevice();
+                pDeviceContainer->replaceDevice(pDevice, pTypedDevice);
+                pTypedDevice->addCtlDeviceCode();
                 Log::instance()->upnp().debug("controller created device");
                 pDeviceGroup->addDevice(pTypedDevice);
                 Log::instance()->upnp().debug("controller added device");
-                // TODO: we may replace the discovered device with the specialized device just created in the device data tree.
                 pDevice->initControllerEventing();
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             }
@@ -4502,11 +4503,11 @@ DeviceGroup::groupIcon()
 
 
 Device*
-DeviceGroup::createDevice(DeviceData* pDeviceData)
+DeviceGroup::createDevice()
 {
-    Log::instance()->upnp().debug("Device group, create device from device data: " + Poco::NumberFormatter::format(pDeviceData));
+    Log::instance()->upnp().debug("Device group, create device");
     if (_pDeviceGroupDelegate) {
-        return _pDeviceGroupDelegate->createDevice(pDeviceData);
+        return _pDeviceGroupDelegate->createDevice();
     }
     else {
         return 0;

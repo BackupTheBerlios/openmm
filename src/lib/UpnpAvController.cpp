@@ -32,10 +32,9 @@ namespace Omm {
 namespace Av {
 
 
-CtlMediaRenderer::CtlMediaRenderer(DeviceData* pDeviceData)
+void
+CtlMediaRenderer::addCtlDeviceCode()
 {
-    setDeviceData(pDeviceData);
-    setDeviceContainer(pDeviceData->getDevice()->getDeviceContainer());
     // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaRendererCode = new CtlMediaRendererCode(this,
         new CtlRenderingControlImpl(0),
@@ -148,9 +147,9 @@ CtlMediaRendererGroup::getDeviceType()
 
 
 Device*
-CtlMediaRendererGroup::createDevice(DeviceData* pDeviceData)
+CtlMediaRendererGroup::createDevice()
 {
-    return new CtlMediaRenderer(pDeviceData);
+    return new CtlMediaRenderer;
 }
 
 
@@ -168,14 +167,9 @@ CtlMediaRendererGroup::getMediaRenderer(int index)
 }
 
 
-CtlMediaServer::CtlMediaServer(DeviceData* pDeviceData)
+void
+CtlMediaServer::addCtlDeviceCode()
 {
-    Device* pOldDevice = pDeviceData->getDevice();
-    DeviceContainer* pDeviceContainer = pOldDevice->getDeviceContainer();
-    // replace device in device data tree with specialized device that also contains controller device code.
-    pDeviceContainer->replaceDevice(pOldDevice, this);
-
-    Log::instance()->upnpav().debug("media server data is in container: " + Poco::NumberFormatter::format(getDeviceContainer()));
     // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaServerCode = new CtlMediaServerCode(this,
         new CtlContentDirectoryImpl(0),
@@ -221,12 +215,10 @@ CtlMediaServerGroup::getDeviceType()
 
 
 Device*
-CtlMediaServerGroup::createDevice(DeviceData* pDeviceData)
+CtlMediaServerGroup::createDevice()
 {
-    Log::instance()->upnpav().debug("Media server group, create media server from device data: " + Poco::NumberFormatter::format(pDeviceData));
-    Device* pRet = new CtlMediaServer(pDeviceData);
-    pRet->setDeviceContainer(pDeviceData->getDevice()->getDeviceContainer());
-    return pRet;
+    Log::instance()->upnpav().debug("Media server group, create media server");
+    return new CtlMediaServer;
 }
 
 

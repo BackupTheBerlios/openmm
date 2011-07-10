@@ -521,6 +521,8 @@ public:
     void initStateVars();
     void initControllerEventing();
 
+    virtual void addCtlDeviceCode() {}
+
 private:
     void addProperty(const std::string& name, const std::string& val);
     void addService(Service* pService);
@@ -638,6 +640,7 @@ public:
     virtual std::string shortName() { return ""; }
     virtual Icon* groupIcon() { return 0; }
 
+    virtual Device* createDevice() { return 0; }
     virtual Device* createDevice(DeviceData* pDeviceData) { return 0; }
     /// factory method to create a device of a certain type associated with the
     /// corresponding device code.
@@ -669,9 +672,8 @@ public:
     virtual std::string shortName();
     virtual Icon* groupIcon();
 
-    virtual Device* createDevice(DeviceData* pDeviceData);
-    /// factory method to create a device of a certain type associated with the
-    /// corresponding device code.
+    virtual Device* createDevice();
+    /// factory method to create a device of a certain type.
 
     virtual void addDevice(Device* pDevice, int index, bool begin);
     virtual void removeDevice(Device* pDevice, int index, bool begin);

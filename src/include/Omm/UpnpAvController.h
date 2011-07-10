@@ -41,7 +41,7 @@ class CtlMediaObject;
 class CtlMediaRenderer : public Device
 {
 public:
-    CtlMediaRenderer(DeviceData* pDeviceData);
+    virtual void addCtlDeviceCode();
 
     void setObject(CtlMediaObject* pObject);
     void playPressed();
@@ -67,7 +67,7 @@ public:
 
     virtual std::string shortName();
     virtual std::string getDeviceType();
-    virtual Device* createDevice(DeviceData* pDeviceData);
+    virtual Device* createDevice();
 
     CtlMediaRenderer* getSelectedMediaRenderer();
     CtlMediaRenderer* getMediaRenderer(int index);
@@ -78,7 +78,7 @@ public:
 class CtlMediaServer : public Device
 {
 public:
-    CtlMediaServer(DeviceData* pDeviceData);
+    virtual void addCtlDeviceCode();
 
     CtlMediaObject* getRootObject();
 
@@ -94,7 +94,7 @@ public:
 
     virtual std::string shortName();
     virtual std::string getDeviceType();
-    virtual Device* createDevice(DeviceData* pDeviceData);
+    virtual Device* createDevice();
     
     CtlMediaServer* getSelectedMediaServer();
     CtlMediaServer* getMediaServer(int index);
