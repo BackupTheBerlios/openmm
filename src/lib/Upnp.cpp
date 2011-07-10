@@ -1909,7 +1909,7 @@ Service::setEventSubscriptionPath(std::string eventPath)
 void
 Service::setDeviceData(DeviceData* pDeviceData)
 {
-//    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
+    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
 }
 
@@ -1925,7 +1925,7 @@ Service::addAction(Action* pAction)
 void
 Service::addStateVar(StateVar* pStateVar)
 {
-//     std::clog << "Service::addStateVar() name: " << pStateVar->getName() << " is evented: " << pStateVar->getSendEvents() << std::endl;
+//     Log::instance()->upnp().debug("Service::addStateVar() name: " + pStateVar->getName() + " is evented: " << pStateVar->getSendEvents());
     
     _stateVars.append(pStateVar->getName(), pStateVar);
     if(pStateVar->getSendEvents()) {
@@ -1945,8 +1945,10 @@ Service::addEventCallbackPath(const std::string path)
 void
 Service::initController()
 {
+    Log::instance()->upnp().debug("service, init controller ...");
     _eventingEnabled = false;
     _baseUri = Poco::URI(getDevice()->getDeviceContainer()->getDescriptionUri());
+    Log::instance()->upnp().debug("service, init controller finished.");
 }
 
 
@@ -2951,6 +2953,20 @@ DeviceContainer::addDevice(Device* pDevice)
 }
 
 
+void
+DeviceContainer::replaceDevice(Device* pOldDevice, Device* pNewDevice)
+{
+    // set pointers to nodes up and down the device tree.
+    pNewDevice->setDeviceContainer(pOldDevice->getDeviceContainer());
+    pNewDevice->setDeviceData(pOldDevice->getDeviceData());
+    // set the reverse pointers pointing to pNewDevice.
+    pOldDevice->getDeviceData()->setDevice(pNewDevice);
+    // FIXME: replacing device in container doesn't work, key (uuid) not found.
+    _devices.replace(pOldDevice->getUuid(), pNewDevice);
+    // TODO: shallow delete old device, don't do a delete pOldDevice;
+}
+
+
 DeviceContainer::DeviceIterator
 DeviceContainer::beginDevice()
 {
@@ -3412,7 +3428,7 @@ Device::getProperty(const std::string& name)
 void
 Device::setDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-//    Log::instance()->upnp().debug("device, set device container to: " + Poco::NumberFormatter::format(pDeviceContainer));
+    Log::instance()->upnp().debug("device, set device container to: " + Poco::NumberFormatter::format(pDeviceContainer));
     _pDeviceContainer = pDeviceContainer;
 }
 
@@ -3420,6 +3436,7 @@ Device::setDeviceContainer(DeviceContainer* pDeviceContainer)
 void
 Device::setDeviceData(DeviceData* pDeviceData)
 {
+    Log::instance()->upnp().debug("device, set device data to: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
     pDeviceData->setDevice(this);
 }
@@ -3435,6 +3452,7 @@ Device::setDevDeviceCode(DevDeviceCode* pDevDevice)
 void
 Device::setCtlDeviceCode(CtlDeviceCode* pCtlDevice)
 {
+    Log::instance()->upnp().debug("device, set device controller code to: " + Poco::NumberFormatter::format(pCtlDevice));
     _pCtlDeviceCode = pCtlDevice;
 }
 
@@ -3814,13 +3832,20 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
             Device* pDevice = *it;
             Log::instance()->upnp().debug("controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+            Log::instance()->upnp().debug("device: " + Poco::NumberFormatter::format(pDevice));
+            Log::instance()->upnp().debug("device data: " + Poco::NumberFormatter::format(pDevice->getDeviceData()));
+            Log::instance()->upnp().debug("device data thinks its device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceData()->getDevice()->getDeviceContainer()));
+            Log::instance()->upnp().debug("device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceContainer()));
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
                 Log::instance()->upnp().information("controller adds device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
-                pDeviceGroup->createDevice(pDevice->getDeviceData());
-                pDeviceGroup->addDevice(pDevice);
+                Device* pTypedDevice = pDeviceGroup->createDevice(pDevice->getDeviceData());
+                Log::instance()->upnp().debug("controller created device");
+                pDeviceGroup->addDevice(pTypedDevice);
+                Log::instance()->upnp().debug("controller added device");
                 // TODO: we may replace the discovered device with the specialized device just created in the device data tree.
                 pDevice->initControllerEventing();
+                Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             }
         }
         
@@ -4479,6 +4504,7 @@ DeviceGroup::groupIcon()
 Device*
 DeviceGroup::createDevice(DeviceData* pDeviceData)
 {
+    Log::instance()->upnp().debug("Device group, create device from device data: " + Poco::NumberFormatter::format(pDeviceData));
     if (_pDeviceGroupDelegate) {
         return _pDeviceGroupDelegate->createDevice(pDeviceData);
     }

@@ -251,9 +251,9 @@ public:
     {
         KeyIterator it = _pElements.find(key);
         if (it != _pElements.end()) {
-            E* pEntity = (*it).second;
+            E* pElement = (*it).second;
             _pElements.erase(key);
-            _keys.erase(find(_keys.begin(), _keys.end(), pEntity));
+            _keys.erase(find(_keys.begin(), _keys.end(), pElement));
         }
         else {
             Log::instance()->upnp().error("could not remove element from container, key not found: " + key);
@@ -271,17 +271,17 @@ public:
         return _pElements.find(key) != _pElements.end();
     }
     
-    bool contains(E* pEntity)
+    bool contains(E* pElement)
     {
-        return find(_keys.begin(), _keys.end(), pEntity) != _keys.end();
+        return find(_keys.begin(), _keys.end(), pElement) != _keys.end();
     }
     
     int position(const std::string& key)
     {
         KeyIterator it = _pElements.find(key);
         if (it != _pElements.end()) {
-            E* pEntity = (*it).second;
-            return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
+            E* pElement = (*it).second;
+            return find(_keys.begin(), _keys.end(), pElement) - _keys.begin();
         }
         else {
             Log::instance()->upnp().error("could not find position of element in container, key not found: " + key);
@@ -289,11 +289,24 @@ public:
         }
     }
     
-    int position(E* pEntity)
+    int position(E* pElement)
     {
-        return find(_keys.begin(), _keys.end(), pEntity) - _keys.begin();
+        return find(_keys.begin(), _keys.end(), pElement) - _keys.begin();
     }
-    
+
+    void replace(const std::string& key, E* pElement)
+    {
+        KeyIterator it = _pElements.find(key);
+        if (it == _pElements.end()) {
+            Log::instance()->upnp().error("could not replace element, key not found: " + key);
+            return;
+        }
+        int i = position(pElement);
+
+        (*it).second = pElement;
+        _keys[i] = pElement;
+    }
+
     int size()
     {
         return _keys.size();
@@ -337,7 +350,7 @@ public:
         }
 //         std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
     }
-    
+
     Iterator begin()
     {
         return _keys.begin();
@@ -562,6 +575,8 @@ public:
     ServiceTypeIterator endServiceType();
 
     void addDevice(Device* pDevice);
+    void replaceDevice(Device* pOldDevice, Device* pNewDevice);
+    /// replaces pOldDevice with pNewDevice in device tree (data only, code is not touched).
 
     DeviceManager* getDeviceManager();
     /*const*/ Device* getDevice(std::string uuid) /*const*/;

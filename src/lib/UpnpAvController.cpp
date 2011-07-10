@@ -170,8 +170,12 @@ CtlMediaRendererGroup::getMediaRenderer(int index)
 
 CtlMediaServer::CtlMediaServer(DeviceData* pDeviceData)
 {
-    setDeviceData(pDeviceData);
-    setDeviceContainer(pDeviceData->getDevice()->getDeviceContainer());
+    Device* pOldDevice = pDeviceData->getDevice();
+    DeviceContainer* pDeviceContainer = pOldDevice->getDeviceContainer();
+    // replace device in device data tree with specialized device that also contains controller device code.
+    pDeviceContainer->replaceDevice(pOldDevice, this);
+
+    Log::instance()->upnpav().debug("media server data is in container: " + Poco::NumberFormatter::format(getDeviceContainer()));
     // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaServerCode = new CtlMediaServerCode(this,
         new CtlContentDirectoryImpl(0),
@@ -219,7 +223,10 @@ CtlMediaServerGroup::getDeviceType()
 Device*
 CtlMediaServerGroup::createDevice(DeviceData* pDeviceData)
 {
-    return new CtlMediaServer(pDeviceData);
+    Log::instance()->upnpav().debug("Media server group, create media server from device data: " + Poco::NumberFormatter::format(pDeviceData));
+    Device* pRet = new CtlMediaServer(pDeviceData);
+    pRet->setDeviceContainer(pDeviceData->getDevice()->getDeviceContainer());
+    return pRet;
 }
 
 
