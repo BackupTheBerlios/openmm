@@ -34,7 +34,7 @@ _parent(parentButton)
 {
     QString label;
     if (index == QModelIndex()) {
-        label = "Menu";
+        label = ">";
     }
     else {
         label = index.data(Qt::DisplayRole).toString();

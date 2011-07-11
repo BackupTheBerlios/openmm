@@ -27,12 +27,12 @@
 
 QtController::QtController()
 {
-    QtDeviceGroup* pQtMediaServerGroup = new QtDeviceGroup;
+    QtDeviceGroupDelegate* pQtMediaServerGroup = new QtDeviceGroupDelegate;
     Omm::DeviceGroup* pMediaServerGroup = new Omm::Av::CtlMediaServerGroup(pQtMediaServerGroup);
     addDeviceGroup(pMediaServerGroup);
     addTab(pQtMediaServerGroup, pMediaServerGroup->shortName().c_str());
 
-    QtDeviceGroup* pQtMediaRendererGroup = new QtDeviceGroup;
+    QtDeviceGroupDelegate* pQtMediaRendererGroup = new QtDeviceGroupDelegate;
     Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroup);
     addDeviceGroup(pMediaRendererGroup);
     addTab(pQtMediaRendererGroup, pMediaRendererGroup->shortName().c_str());

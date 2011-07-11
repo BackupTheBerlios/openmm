@@ -19,48 +19,17 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroup_INCLUDED
-#define QtDeviceGroup_INCLUDED
+#ifndef QtBrowser_INCLUDED
+#define QtBrowser_INCLUDED
 
-#include <stack>
-#include <QtGui>
-#include <Omm/Upnp.h>
+#include <QWidget>
 
-class QtDeviceGroupModel;
-class QtCrumbButton;
-class QtCrumbPanel;
-class QtBrowserModel;
-class QtDeviceListItem;
-class QtBrowser;
-
-
-class QtDeviceGroupDelegate : public QWidget, public Omm::DeviceGroupDelegate
+class QtBrowser : public QWidget
 {
     Q_OBJECT
 
 public:
-    QtDeviceGroupDelegate();
-
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-    void pushBrowser(QtBrowser* pBrowser);
-    void popBrowser();
-
-private:
-
-    QVBoxLayout*                    _pLayout;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QStackedWidget*                 _pStackedWidget;
-    std::stack<QtBrowser*>          _stack;
-            
-    QtDeviceGroupModel*             _pDeviceGroupModel;
-    QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
+    virtual QString getBrowserTitle() { return ""; }
 };
 
 #endif

@@ -23,6 +23,7 @@
 #include "QtDeviceGroupModel.h"
 #include "QtCrumbButton.h"
 #include "QtBrowserModel.h"
+#include "QtBrowser.h"
 
 
 class QtDeviceListItem : public QStyledItemDelegate
@@ -93,9 +94,11 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 }
 
 
-QtDeviceGroup::QtDeviceGroup()
+QtDeviceGroupDelegate::QtDeviceGroupDelegate()
 {
-    _pDeviceListView = new QTreeView(this);
+    _pStackedWidget = new QStackedWidget(this);
+
+    _pDeviceListView = new QTreeView;
     _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
     _pDeviceListView->setItemDelegate(_pDeviceListItem);
     _pDeviceGroupModel = new QtDeviceGroupModel(this);
@@ -106,36 +109,63 @@ QtDeviceGroup::QtDeviceGroup()
     _pDeviceListView->setItemsExpandable(false);
 
     _pCrumbPanel = new QtCrumbPanel(this);
-    _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
 
     _pLayout = new QVBoxLayout;
     _pLayout->addWidget(_pCrumbPanel);
-    _pLayout->addWidget(_pDeviceListView);
+    _pLayout->addWidget(_pStackedWidget);
     setLayout(_pLayout);
+
+    _pStackedWidget->addWidget(_pDeviceListView);
 
     // activated() is return, click or double click, selected() is click or double click on it.
     connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)),
-            this, SLOT(selectedDevice(const QModelIndex&)));
+            this, SLOT(selectedModelIndex(const QModelIndex&)));
 }
 
 
 void
-QtDeviceGroup::addDevice(Omm::Device* pDevice, int index, bool begin)
+QtDeviceGroupDelegate::addDevice(Omm::Device* pDevice, int index, bool begin)
 {
     _pDeviceGroupModel->addDevice(index, begin);
 }
 
 
 void
-QtDeviceGroup::removeDevice(Omm::Device* pDevice, int index, bool begin)
+QtDeviceGroupDelegate::removeDevice(Omm::Device* pDevice, int index, bool begin)
 {
     _pDeviceGroupModel->removeDevice(index, begin);
 }
 
 
 void
-QtDeviceGroup::selectedDevice(const QModelIndex& index)
+QtDeviceGroupDelegate::selectDevice(Omm::Device* pDevice, int index)
+{
+
+}
+
+
+void
+QtDeviceGroupDelegate::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
-    selectDevice(pDevice);
+    DeviceGroupDelegate::selectDevice(pDevice);
+}
+
+
+void
+QtDeviceGroupDelegate::pushBrowser(QtBrowser* pBrowser)
+{
+//    new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbButton);
+    // FIXME: this only works for first level.
+    _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
+    _pStackedWidget->addWidget(pBrowser);
+    _stack.push(pBrowser);
+}
+
+
+void
+QtDeviceGroupDelegate::popBrowser()
+{
+    _pStackedWidget->removeWidget(_stack.top());
+    _stack.pop();
 }
