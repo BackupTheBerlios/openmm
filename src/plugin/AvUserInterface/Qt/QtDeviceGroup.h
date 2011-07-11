@@ -31,7 +31,7 @@ class QtCrumbPanel;
 class QtBrowserModel;
 class QtDeviceListItem;
 
-class QtDeviceGroup : public QWidget, public Omm::DeviceGroupInterface
+class QtDeviceGroup : public QWidget, public Omm::DeviceGroupDelegate
 {
     Q_OBJECT
 public:
@@ -39,6 +39,9 @@ public:
 
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+
+private slots:
+    void selectedDevice(const QModelIndex& index);
 
 private:
     QtDeviceGroupModel*             _pDeviceGroupModel;

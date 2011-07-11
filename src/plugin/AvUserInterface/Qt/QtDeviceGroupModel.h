@@ -36,7 +36,7 @@ class QtDeviceGroupModel : public QAbstractItemModel
     Q_OBJECT
         
 public:
-    QtDeviceGroupModel(Omm::DeviceGroupInterface* pDeviceGroup, QObject *parent = 0);
+    QtDeviceGroupModel(Omm::DeviceGroupDelegate* pDeviceGroup, QObject *parent = 0);
     ~QtDeviceGroupModel();
     
     QVariant data(const QModelIndex& index, int role) const;
@@ -54,7 +54,7 @@ signals:
     void setCurrentIndex(const QModelIndex& index);
     
 private:
-    Omm::DeviceGroupInterface*      _pDeviceGroup;
+    Omm::DeviceGroupDelegate*      _pDeviceGroup;
     QTextCodec*                     _charEncoding;
     QFileIconProvider*              _iconProvider;
 };

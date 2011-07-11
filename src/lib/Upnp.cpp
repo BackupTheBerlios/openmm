@@ -4430,20 +4430,27 @@ SsdpMessage::getSender()
 
 
 int
-DeviceGroupInterface::getDeviceCount()
+DeviceGroupDelegate::getDeviceCount()
 {
     return _pDeviceGroup->getDeviceCount();
 }
 
 
 Device*
-DeviceGroupInterface::getDevice(int index)
+DeviceGroupDelegate::getDevice(int index)
 {
     return _pDeviceGroup->getDevice(index);
 }
 
 
-DeviceGroup::DeviceGroup(DeviceGroupInterface* pDeviceGroupDelegate) :
+void
+DeviceGroupDelegate::selectDevice(Device* pDevice)
+{
+    _pDeviceGroup->selectDevice(pDevice);
+}
+
+
+DeviceGroup::DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
 _pDeviceGroupDelegate(pDeviceGroupDelegate),
 _pSelectedDevice(0),
 _preferredDeviceUuid("")
@@ -4534,6 +4541,15 @@ DeviceGroup::removeDevice(Device* pDevice, int index, bool begin)
 
 
 void
+DeviceGroup::selectDevice(Device* pDevice, int index)
+{
+    if (_pDeviceGroupDelegate) {
+        _pDeviceGroupDelegate->selectDevice(pDevice, index);
+    }
+}
+
+
+void
 DeviceGroup::addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
 {
     if (_pDeviceGroupDelegate) {
@@ -4568,5 +4584,13 @@ DeviceGroup::removeDevice(Device* pDevice)
     removeDevice(pDevice, _devices.size() - 1, false);
 }
 
+
+void
+DeviceGroup::selectDevice(Device* pDevice)
+{
+    Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
+    _pSelectedDevice = pDevice;
+    selectDevice(pDevice, _devices.position(pDevice));
+}
 
 } // namespace Omm

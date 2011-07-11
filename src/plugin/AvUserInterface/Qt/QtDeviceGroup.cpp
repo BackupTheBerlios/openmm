@@ -95,7 +95,6 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 
 QtDeviceGroup::QtDeviceGroup()
 {
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget browser view ...");
     _pDeviceListView = new QTreeView(this);
     _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
     _pDeviceListView->setItemDelegate(_pDeviceListItem);
@@ -106,24 +105,17 @@ QtDeviceGroup::QtDeviceGroup()
     _pDeviceListView->setRootIsDecorated(false);
     _pDeviceListView->setItemsExpandable(false);
 
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget crumb panel ...");
     _pCrumbPanel = new QtCrumbPanel(this);
     _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
 
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget layout...");
     _pLayout = new QVBoxLayout;
     _pLayout->addWidget(_pCrumbPanel);
     _pLayout->addWidget(_pDeviceListView);
     setLayout(_pLayout);
 
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget signal connections ...");
-
-//    connect(_pBrowserView, SIGNAL(activated(const QModelIndex&)),
-//            this, SLOT(browserItemActivated(const QModelIndex&)));
-//    connect(_pBrowserView, SIGNAL(pressed(const QModelIndex&)),
-//            this, SLOT(browserItemSelected(const QModelIndex&)));
-
-//    Omm::Av::Log::instance()->upnpav().debug("finished ctor qt browser widget.");
+    // activated() is return, click or double click, selected() is click or double click on it.
+    connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)),
+            this, SLOT(selectedDevice(const QModelIndex&)));
 }
 
 
@@ -138,4 +130,12 @@ void
 QtDeviceGroup::removeDevice(Omm::Device* pDevice, int index, bool begin)
 {
     _pDeviceGroupModel->removeDevice(index, begin);
+}
+
+
+void
+QtDeviceGroup::selectedDevice(const QModelIndex& index)
+{
+    Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
+    selectDevice(pDevice);
 }

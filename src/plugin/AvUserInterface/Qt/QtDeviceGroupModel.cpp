@@ -22,7 +22,7 @@
 
 #include "QtDeviceGroupModel.h"
 
-QtDeviceGroupModel::QtDeviceGroupModel(Omm::DeviceGroupInterface* pDeviceGroup, QObject *parent) :
+QtDeviceGroupModel::QtDeviceGroupModel(Omm::DeviceGroupDelegate* pDeviceGroup, QObject *parent) :
 QAbstractItemModel(parent),
 _pDeviceGroup(pDeviceGroup),
 _iconProvider(new QFileIconProvider())

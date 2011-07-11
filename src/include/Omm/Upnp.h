@@ -628,7 +628,7 @@ private:
 };
 
 
-class DeviceGroupInterface
+class DeviceGroupDelegate
 {
     friend class DeviceGroup;
     
@@ -647,8 +647,12 @@ public:
     
     virtual void addDevice(Device* pDevice, int index, bool begin) {}
     virtual void removeDevice(Device* pDevice, int index, bool begin) {}
+    virtual void selectDevice(Device* pDevice, int index) {}
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+
+protected:
+    void selectDevice(Device* pDevice);
     
 private:
     DeviceGroup*    _pDeviceGroup;
@@ -661,9 +665,10 @@ class DeviceGroup
 /// May be loaded as a plugin when a new device type is discovered.
 {
     friend class Controller;
+    friend class DeviceGroupDelegate;
 
 public:
-    DeviceGroup(DeviceGroupInterface* pDeviceGroupDelegate = 0);
+    DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate = 0);
 
     int getDeviceCount();
     Device* getDevice(int index);
@@ -677,14 +682,16 @@ public:
 
     virtual void addDevice(Device* pDevice, int index, bool begin);
     virtual void removeDevice(Device* pDevice, int index, bool begin);
+    virtual void selectDevice(Device* pDevice, int index);
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
 
 protected:
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
+    void selectDevice(Device* pDevice);
 
-    DeviceGroupInterface*           _pDeviceGroupDelegate;
+    DeviceGroupDelegate*           _pDeviceGroupDelegate;
     std::vector<DeviceContainer>    _deviceContainers;
     Container<Device>               _devices;
     Device*                         _pSelectedDevice;

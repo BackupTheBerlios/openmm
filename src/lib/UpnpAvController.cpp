@@ -126,7 +126,7 @@ CtlMediaRenderer::volumeChanged(int value)
 }
 
 
-CtlMediaRendererGroup::CtlMediaRendererGroup(DeviceGroupInterface* pDeviceGroupDelegate) :
+CtlMediaRendererGroup::CtlMediaRendererGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
 DeviceGroup(pDeviceGroupDelegate)
 {
 }
@@ -193,7 +193,7 @@ CtlMediaServerGroup::getMediaServer(int index)
 }
 
 
-CtlMediaServerGroup::CtlMediaServerGroup(DeviceGroupInterface* pDeviceGroupDelegate) :
+CtlMediaServerGroup::CtlMediaServerGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
 DeviceGroup(pDeviceGroupDelegate),
 _pSelectedMediaObject(0)
 {
