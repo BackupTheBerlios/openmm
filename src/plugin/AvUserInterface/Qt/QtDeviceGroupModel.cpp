@@ -22,9 +22,7 @@
 
 #include "QtDeviceGroupModel.h"
 
-QtDeviceGroupModel::QtDeviceGroupModel(Omm::DeviceGroupDelegate* pDeviceGroup, QObject *parent) :
-QAbstractItemModel(parent),
-_pDeviceGroup(pDeviceGroup),
+QtDeviceGroupModel::QtDeviceGroupModel() :
 _iconProvider(new QFileIconProvider())
 {
     _charEncoding = QTextCodec::codecForName("UTF-8");
@@ -80,7 +78,7 @@ QtDeviceGroupModel::headerData(int section, Qt::Orientation orientation, int rol
 QModelIndex
 QtDeviceGroupModel::index(int row, int column, const QModelIndex& parent) const
 {
-    return createIndex(row, column, _pDeviceGroup->getDevice(row));
+    return createIndex(row, column, getDevice(row));
 }
 
 
@@ -94,7 +92,7 @@ QtDeviceGroupModel::parent(const QModelIndex& index) const
 int
 QtDeviceGroupModel::rowCount(const QModelIndex& parent) const
 {
-    return _pDeviceGroup->getDeviceCount();
+    return getDeviceCount();
 }
 
 
@@ -106,7 +104,7 @@ QtDeviceGroupModel::columnCount(const QModelIndex& parent) const
 
 
 void
-QtDeviceGroupModel::addDevice(int position, bool begin)
+QtDeviceGroupModel::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
     Omm::Log::instance()->upnp().debug("Qt device group model adds device at position:" + Poco::NumberFormatter::format(position));
 
@@ -125,7 +123,7 @@ QtDeviceGroupModel::addDevice(int position, bool begin)
 
 
 void
-QtDeviceGroupModel::removeDevice(int position, bool begin)
+QtDeviceGroupModel::removeDevice(Omm::Device* pDevice, int position, bool begin)
 {
     Omm::Log::instance()->upnp().debug("Qt device group model removes device at position:" + Poco::NumberFormatter::format(position));
 

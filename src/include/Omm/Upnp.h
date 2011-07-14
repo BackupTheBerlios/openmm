@@ -633,8 +633,9 @@ class DeviceGroupDelegate
     friend class DeviceGroup;
     
 public:
-    int getDeviceCount();
-    Device* getDevice(int index);
+    int getDeviceCount() const;
+    Device* getDevice(int index) const;
+    void selectDevice(Device* pDevice);
 
     virtual std::string getDeviceType() { return ""; }
     virtual std::string shortName() { return ""; }
@@ -650,9 +651,6 @@ public:
     virtual void selectDevice(Device* pDevice, int index) {}
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
-
-protected:
-    void selectDevice(Device* pDevice);
     
 private:
     DeviceGroup*    _pDeviceGroup;

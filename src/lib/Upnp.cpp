@@ -4430,14 +4430,14 @@ SsdpMessage::getSender()
 
 
 int
-DeviceGroupDelegate::getDeviceCount()
+DeviceGroupDelegate::getDeviceCount() const
 {
     return _pDeviceGroup->getDeviceCount();
 }
 
 
 Device*
-DeviceGroupDelegate::getDevice(int index)
+DeviceGroupDelegate::getDevice(int index) const
 {
     return _pDeviceGroup->getDevice(index);
 }

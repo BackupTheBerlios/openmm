@@ -23,17 +23,20 @@
 
 #include "QtController.h"
 #include "QtDeviceGroup.h"
+#include "QtDeviceGroupModel.h"
 
 
 QtController::QtController()
 {
-    QtDeviceGroupDelegate* pQtMediaServerGroup = new QtDeviceGroupDelegate;
-    Omm::DeviceGroup* pMediaServerGroup = new Omm::Av::CtlMediaServerGroup(pQtMediaServerGroup);
+    QtDeviceGroupModel* pQtMediaServerGroupModel = new QtDeviceGroupModel;
+    Omm::DeviceGroup* pMediaServerGroup = new Omm::Av::CtlMediaServerGroup(pQtMediaServerGroupModel);
+    QtDeviceGroup* pQtMediaServerGroup = new QtDeviceGroup(pQtMediaServerGroupModel);
     addDeviceGroup(pMediaServerGroup);
     addTab(pQtMediaServerGroup, pMediaServerGroup->shortName().c_str());
 
-    QtDeviceGroupDelegate* pQtMediaRendererGroup = new QtDeviceGroupDelegate;
-    Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroup);
+    QtDeviceGroupModel* pQtMediaRendererGroupModel = new QtDeviceGroupModel;
+    Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroupModel);
+    QtDeviceGroup* pQtMediaRendererGroup = new QtDeviceGroup(pQtMediaRendererGroupModel);
     addDeviceGroup(pMediaRendererGroup);
     addTab(pQtMediaRendererGroup, pMediaRendererGroup->shortName().c_str());
 }

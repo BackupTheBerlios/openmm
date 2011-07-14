@@ -24,12 +24,13 @@
 
 #include <QWidget>
 
-class QtBrowser : public QWidget
+class QtNavigable : public QWidget
 {
     Q_OBJECT
 
 public:
     virtual QString getBrowserTitle() { return ""; }
+    virtual void show() {}
 };
 
 #endif

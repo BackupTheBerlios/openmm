@@ -31,23 +31,21 @@ class QtCrumbButton;
 class QtCrumbPanel;
 class QtBrowserModel;
 class QtDeviceListItem;
-class QtBrowser;
+class QtNavigable;
 
 
-class QtDeviceGroupDelegate : public QWidget, public Omm::DeviceGroupDelegate
+class QtDeviceGroup : public QWidget //, public Omm::DeviceGroupDelegate
 {
     Q_OBJECT
 
 public:
-    QtDeviceGroupDelegate();
+    QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel);
 
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:
     void selectedModelIndex(const QModelIndex& index);
-    void pushBrowser(QtBrowser* pBrowser);
+    void pushBrowser(QtNavigable* pBrowser);
     void popBrowser();
 
 private:
@@ -56,7 +54,7 @@ private:
     QtCrumbPanel*                   _pCrumbPanel;
     QtCrumbButton*                  _pCrumbButton;
     QStackedWidget*                 _pStackedWidget;
-    std::stack<QtBrowser*>          _stack;
+    std::stack<QtNavigable*>        _stack;
             
     QtDeviceGroupModel*             _pDeviceGroupModel;
     QTreeView*                      _pDeviceListView;
