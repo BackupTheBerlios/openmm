@@ -26,6 +26,8 @@
 #include <QtGui>
 #include <Omm/Upnp.h>
 
+#include "QtNavigator.h"
+
 class QtDeviceGroupModel;
 class QtCrumbButton;
 class QtCrumbPanel;
@@ -34,19 +36,20 @@ class QtDeviceListItem;
 class QtNavigable;
 
 
-class QtDeviceGroup : public QWidget //, public Omm::DeviceGroupDelegate
+class QtDeviceGroup : public QWidget , public QtNavigable
 {
     Q_OBJECT
 
 public:
     QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel);
 
+    virtual QString getBrowserTitle();
+//    virtual void show(QtNavigator* pNavigator);
+    virtual QWidget* getWidget();
     virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:
     void selectedModelIndex(const QModelIndex& index);
-    void pushBrowser(QtNavigable* pBrowser);
-    void popBrowser();
 
 private:
 

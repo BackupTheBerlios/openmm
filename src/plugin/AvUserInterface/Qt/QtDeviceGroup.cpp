@@ -23,7 +23,6 @@
 #include "QtDeviceGroupModel.h"
 #include "QtCrumbButton.h"
 #include "QtBrowserModel.h"
-#include "QtBrowser.h"
 
 
 class QtDeviceListItem : public QStyledItemDelegate
@@ -123,6 +122,27 @@ _pDeviceGroupModel(pDeviceGroupModel)
 }
 
 
+QString
+QtDeviceGroup::getBrowserTitle()
+{
+    return ">";
+}
+
+
+//void
+//QtDeviceGroup::show(QtNavigator* pNavigator)
+//{
+//
+//}
+
+
+QWidget*
+QtDeviceGroup::getWidget()
+{
+    return this;
+}
+
+
 void
 QtDeviceGroup::selectDevice(Omm::Device* pDevice, int index)
 {
@@ -134,25 +154,6 @@ void
 QtDeviceGroup::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
-//    DeviceGroupDelegate::selectDevice(pDevice);
     _pDeviceGroupModel->selectDevice(pDevice);
 }
 
-
-void
-QtDeviceGroup::pushBrowser(QtNavigable* pBrowser)
-{
-//    new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbButton);
-    // FIXME: this only works for first level.
-    _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
-    _pStackedWidget->addWidget(pBrowser);
-    _stack.push(pBrowser);
-}
-
-
-void
-QtDeviceGroup::popBrowser()
-{
-    _pStackedWidget->removeWidget(_stack.top());
-    _stack.pop();
-}

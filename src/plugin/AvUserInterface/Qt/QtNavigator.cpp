@@ -19,19 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtBrowser_INCLUDED
-#define QtBrowser_INCLUDED
+#include "QtNavigator.h"
 
-#include <QWidget>
 
-class QtNavigable : public QWidget
+void
+QtNavigator::push(QtNavigable* pNavigable, QWidget* pWidget)
 {
-    Q_OBJECT
 
-public:
-    virtual QString getBrowserTitle() { return ""; }
-    virtual void show() {}
-};
+}
 
-#endif
 
+void
+QtNavigator::pop(QtNavigable* pNavigable, QWidget* pWidget)
+{
+
+}
+
+
+//void
+//QtDeviceGroup::pushBrowser(QtNavigable* pBrowser)
+//{
+////    new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbButton);
+//    // FIXME: this only works for first level.
+//    _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
+//    _pStackedWidget->addWidget(pBrowser);
+//    _stack.push(pBrowser);
+//}
+//
+//
+//void
+//QtDeviceGroup::popBrowser()
+//{
+//    _pStackedWidget->removeWidget(_stack.top());
+//    _stack.pop();
+//}

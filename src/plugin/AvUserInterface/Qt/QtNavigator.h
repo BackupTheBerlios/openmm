@@ -19,4 +19,46 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "QtBrowser.h"
+#ifndef QtBrowser_INCLUDED
+#define QtBrowser_INCLUDED
+
+#include <QWidget>
+
+class QtNavigable
+{
+public:
+    virtual QString getBrowserTitle() { return ""; }
+//    virtual void show(QtNavigator* pNavigator) {}
+    virtual QWidget* getWidget() { return 0; }
+    // if getWidget() returns not null but a valid widget, the widget
+    // is pushed on QtNavigator::_pStackedWidget.
+};
+
+
+class QtNavigatorPanel : public QWidget
+{
+    Q_OBJECT
+
+public:
+};
+
+
+class QtNavigator : public QWidget
+{
+    Q_OBJECT
+
+public:
+    void push(QtNavigable* pNavigable, QWidget* pWidget = 0);
+    void pop(QtNavigable* pNavigable, QWidget* pWidget = 0);
+
+private:
+    QtNavigatorPanel*           _pNavigatorPanel;
+    QStackedWidget*             _pStackedWidget;
+};
+
+
+
+
+
+#endif
+
