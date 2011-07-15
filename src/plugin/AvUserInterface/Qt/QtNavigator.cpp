@@ -19,20 +19,119 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include<Omm/UpnpAvLogger.h>
+
 #include "QtNavigator.h"
 
 
-void
-QtNavigator::push(QtNavigable* pNavigable, QWidget* pWidget)
+QtNavigatorPanelButton::QtNavigatorPanelButton(QtNavigable* pNavigable) :
+_pNavigable(pNavigable)
 {
+}
 
+
+QtNavigable*
+QtNavigatorPanelButton::getNavigable()
+{
+    return _pNavigable;
+}
+
+
+QtNavigatorPanel::QtNavigatorPanel(QWidget* pParent) :
+QWidget(pParent)
+{
+    _pButtonLayout = new QHBoxLayout(this);
+    _pSignalMapper = new QSignalMapper(this);
+//    connect(_pSignalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonPushed()));
 }
 
 
 void
-QtNavigator::pop(QtNavigable* pNavigable, QWidget* pWidget)
+QtNavigatorPanel::push(QtNavigable* pNavigable)
 {
+    QtNavigatorPanelButton* pButton = new QtNavigatorPanelButton(pNavigable);
+    pButton->setText(pNavigable->getBrowserTitle());
+    _pButtonLayout->addWidget(pButton);
+//    connect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
+    connect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
+    _buttonStack.push(pButton);
+}
 
+
+void
+QtNavigatorPanel::pop(QtNavigable* pNavigable)
+{
+    while(!_buttonStack.empty() && _buttonStack.top()->getNavigable() != pNavigable) {
+        QtNavigatorPanelButton* pButton = _buttonStack.top();
+        disconnect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
+        _pButtonLayout->removeWidget(pButton);
+        delete pButton;
+        _buttonStack.pop();
+    }
+}
+
+
+void
+QtNavigatorPanel::buttonPushed()
+{
+    QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
+    Omm::Av::Log::instance()->upnpav().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
+    pop(pButton->getNavigable());
+    emit selectedNavigable(pButton->getNavigable());
+}
+
+
+QtNavigator::QtNavigator(QWidget* pParent) :
+QWidget(pParent)
+{
+    _pNavigatorPanel = new QtNavigatorPanel(this);
+    _pStackedWidget = new QStackedWidget(this);
+    _pNavigatorLayout = new QVBoxLayout(this);
+    _pNavigatorLayout->addWidget(_pNavigatorPanel);
+    _pNavigatorLayout->addWidget(_pStackedWidget);
+
+    connect(_pNavigatorPanel, SIGNAL(selectedNavigable(QtNavigable*)), this, SLOT(expose(QtNavigable*)));
+}
+
+
+QtNavigator::~QtNavigator()
+{
+    delete _pNavigatorLayout;
+    delete _pStackedWidget;
+    delete _pNavigatorPanel;
+}
+
+
+void
+QtNavigator::push(QtNavigable* pNavigable)
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
+    
+    if (pNavigable->getWidget()) {
+        _pStackedWidget->addWidget(pNavigable->getWidget());
+    }
+    _pNavigatorPanel->push(pNavigable);
+    _navigableStack.push(pNavigable);
+    pNavigable->show();
+}
+
+
+void
+QtNavigator::expose(QtNavigable* pNavigable)
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
+
+    while(!_navigableStack.empty() && _navigableStack.top() != pNavigable) {
+        QtNavigable* pPoppedNavigable = _navigableStack.top();
+        if (pPoppedNavigable->getWidget()) {
+            _pStackedWidget->removeWidget(pPoppedNavigable->getWidget());
+        }
+        delete pPoppedNavigable;
+        _navigableStack.pop();
+    }
+    if (!_navigableStack.empty()) {
+        pNavigable->show();
+    }
 }
 
 

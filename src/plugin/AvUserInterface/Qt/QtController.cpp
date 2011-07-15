@@ -24,6 +24,7 @@
 #include "QtController.h"
 #include "QtDeviceGroup.h"
 #include "QtDeviceGroupModel.h"
+#include "QtNavigator.h"
 
 
 QtController::QtController()
@@ -32,7 +33,10 @@ QtController::QtController()
     Omm::DeviceGroup* pMediaServerGroup = new Omm::Av::CtlMediaServerGroup(pQtMediaServerGroupModel);
     QtDeviceGroup* pQtMediaServerGroup = new QtDeviceGroup(pQtMediaServerGroupModel);
     addDeviceGroup(pMediaServerGroup);
-    addTab(pQtMediaServerGroup, pMediaServerGroup->shortName().c_str());
+    QtNavigator* pQtMediaServerNavigator = new QtNavigator;
+    pQtMediaServerNavigator->push(pQtMediaServerGroup);
+    addTab(pQtMediaServerNavigator, pMediaServerGroup->shortName().c_str());
+//    addTab(pQtMediaServerGroup, pMediaServerGroup->shortName().c_str());
 
     QtDeviceGroupModel* pQtMediaRendererGroupModel = new QtDeviceGroupModel;
     Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroupModel);

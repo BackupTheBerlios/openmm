@@ -21,9 +21,9 @@
 
 #include "QtDeviceGroup.h"
 #include "QtDeviceGroupModel.h"
-#include "QtCrumbButton.h"
 #include "QtBrowserModel.h"
-
+//#include "QtCrumbButton.h"
+#include "QtNavigator.h"
 
 class QtDeviceListItem : public QStyledItemDelegate
 {
@@ -96,7 +96,7 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 QtDeviceGroup::QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel) :
 _pDeviceGroupModel(pDeviceGroupModel)
 {
-    _pStackedWidget = new QStackedWidget(this);
+//    _pStackedWidget = new QStackedWidget(this);
 
     _pDeviceListView = new QTreeView;
     _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
@@ -107,14 +107,15 @@ _pDeviceGroupModel(pDeviceGroupModel)
     _pDeviceListView->setRootIsDecorated(false);
     _pDeviceListView->setItemsExpandable(false);
 
-    _pCrumbPanel = new QtCrumbPanel(this);
+//    _pCrumbPanel = new QtCrumbPanel(this);
 
-    _pLayout = new QVBoxLayout;
-    _pLayout->addWidget(_pCrumbPanel);
-    _pLayout->addWidget(_pStackedWidget);
-    setLayout(_pLayout);
+    _pLayout = new QVBoxLayout(this);
+    _pLayout->addWidget(_pDeviceListView);
+//    _pLayout->addWidget(_pCrumbPanel);
+//    _pLayout->addWidget(_pStackedWidget);
+//    setLayout(_pLayout);
 
-    _pStackedWidget->addWidget(_pDeviceListView);
+//    _pStackedWidget->addWidget(_pDeviceListView);
 
     // activated() is return, click or double click, selected() is click or double click on it.
     connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)),

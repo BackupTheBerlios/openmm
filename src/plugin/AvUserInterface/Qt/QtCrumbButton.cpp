@@ -114,6 +114,8 @@ QWidget(parent)
     _pCrumbButtonLayout = new QHBoxLayout;
     _pCrumbButtonLayout->setAlignment(Qt::AlignLeft);
     _pCrumbButtonLayout->setSpacing(0);
+    _pCrumbButtonLayout->setMargin(0);
+    _pCrumbButtonLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(_pCrumbButtonLayout);
 }
 

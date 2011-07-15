@@ -44,8 +44,8 @@ public:
     QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel);
 
     virtual QString getBrowserTitle();
-//    virtual void show(QtNavigator* pNavigator);
     virtual QWidget* getWidget();
+    
     virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:
@@ -54,10 +54,10 @@ private slots:
 private:
 
     QVBoxLayout*                    _pLayout;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QStackedWidget*                 _pStackedWidget;
-    std::stack<QtNavigable*>        _stack;
+//    QtCrumbPanel*                   _pCrumbPanel;
+//    QtCrumbButton*                  _pCrumbButton;
+//    QStackedWidget*                 _pStackedWidget;
+//    std::stack<QtNavigable*>        _stack;
             
     QtDeviceGroupModel*             _pDeviceGroupModel;
     QTreeView*                      _pDeviceListView;

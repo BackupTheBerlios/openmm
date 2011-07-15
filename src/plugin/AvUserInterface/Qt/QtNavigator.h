@@ -22,16 +22,33 @@
 #ifndef QtBrowser_INCLUDED
 #define QtBrowser_INCLUDED
 
-#include <QWidget>
+#include <stack>
+#include <QtGui>
 
 class QtNavigable
 {
 public:
     virtual QString getBrowserTitle() { return ""; }
-//    virtual void show(QtNavigator* pNavigator) {}
     virtual QWidget* getWidget() { return 0; }
-    // if getWidget() returns not null but a valid widget, the widget
-    // is pushed on QtNavigator::_pStackedWidget.
+    /// If getWidget() returns not null but a valid widget, the widget
+    /// is pushed on QtNavigator::_pStackedWidget.
+    virtual void show() {}
+    /// Additionally, show() can be implemented if for example no widget
+    /// is pushed but some other action is necessary to show the correct view.
+};
+
+
+class QtNavigatorPanelButton : public QPushButton
+{
+    Q_OBJECT
+
+public:
+    QtNavigatorPanelButton(QtNavigable* pNavigable);
+
+    QtNavigable* getNavigable();
+
+private:
+    QtNavigable*    _pNavigable;
 };
 
 
@@ -40,6 +57,21 @@ class QtNavigatorPanel : public QWidget
     Q_OBJECT
 
 public:
+    QtNavigatorPanel(QWidget* pParent = 0);
+
+    void push(QtNavigable* pNavigable);
+    void pop(QtNavigable* pNavigable);
+
+signals:
+    void selectedNavigable(QtNavigable* pNavigable);
+
+private slots:
+    void buttonPushed();
+
+private:
+    std::stack<QtNavigatorPanelButton*>     _buttonStack;
+    QHBoxLayout*                            _pButtonLayout;
+    QSignalMapper*                          _pSignalMapper;
 };
 
 
@@ -48,12 +80,19 @@ class QtNavigator : public QWidget
     Q_OBJECT
 
 public:
-    void push(QtNavigable* pNavigable, QWidget* pWidget = 0);
-    void pop(QtNavigable* pNavigable, QWidget* pWidget = 0);
+    QtNavigator(QWidget* pParent = 0);
+    ~QtNavigator();
+    
+    void push(QtNavigable* pNavigable);
+
+private slots:
+    void expose(QtNavigable* pNavigable);
 
 private:
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;
+    QVBoxLayout*                _pNavigatorLayout;
+    std::stack<QtNavigable*>    _navigableStack;
 };
 
 
