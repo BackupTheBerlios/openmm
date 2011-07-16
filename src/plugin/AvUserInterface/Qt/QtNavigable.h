@@ -19,41 +19,22 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroup_INCLUDED
-#define QtDeviceGroup_INCLUDED
-
-#include <QtGui>
-#include <Omm/Upnp.h>
-
-#include "QtNavigable.h"
-
-class QtDeviceGroupModel;
-class QtDeviceListItem;
+#ifndef QtNavigable_INCLUDED
+#define QtNavigable_INCLUDED
 
 
-class QtDeviceGroup : public QWidget , public QtNavigable
+class QtNavigable
 {
-    Q_OBJECT
-
 public:
-    QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel);
-
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
-    
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
-private:
-
-    QVBoxLayout*                    _pLayout;
-            
-    QtDeviceGroupModel*             _pDeviceGroupModel;
-    QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
+    virtual QString getBrowserTitle() { return ""; }
+    virtual QWidget* getWidget() { return 0; }
+    /// If getWidget() returns not null but a valid widget, the widget
+    /// is pushed on QtNavigator::_pStackedWidget.
+    virtual void show() {}
+    /// Additionally, show() can be implemented if for example no widget
+    /// is pushed but some other action is necessary to show the correct view.
 };
+
 
 #endif
 

@@ -3,8 +3,8 @@ OmmApplication.cpp
 )
 
 target_link_libraries(omm
-${OMM_UTIL}
 ${OMM}
+${OMM_UTIL}
 ${OMM_AV}
 )
 
@@ -13,8 +13,8 @@ NewOmmApplication.cpp
 )
 
 target_link_libraries(newomm
-${OMM_UTIL}
 ${OMM}
+${OMM_UTIL}
 ${OMM_AV}
 ommplugin-application-qt
 )

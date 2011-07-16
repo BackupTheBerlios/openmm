@@ -47,8 +47,10 @@ Log::Log()
     pFormatLogger->open();
 #ifdef NDEBUG
     _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, 0);
+    _pPluginLogger = &Poco::Logger::create("PLUGIN", pFormatLogger, 0);
 #else
     _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pPluginLogger = &Poco::Logger::create("PLUGIN", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
 
@@ -67,6 +69,13 @@ Poco::Logger&
 Log::util()
 {
     return *_pUtilLogger;
+}
+
+
+Poco::Logger&
+Log::plugin()
+{
+    return *_pPluginLogger;
 }
 
 

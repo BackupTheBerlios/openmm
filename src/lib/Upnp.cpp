@@ -72,14 +72,14 @@ Log::Log()
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, 0);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, 0);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, 0);
-    _pEventingLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, 0);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, 0);
 #else
     _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pEventingLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
 
@@ -132,7 +132,7 @@ Log::ctrl()
 Poco::Logger&
 Log::event()
 {
-    return *_pEventingLogger;
+    return *_pEventLogger;
 }
 
 

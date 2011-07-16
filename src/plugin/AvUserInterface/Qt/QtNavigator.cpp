@@ -19,9 +19,14 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+// need a logger
+#include<Omm/Util.h>
+// FIXME: UPNP.AV logger works, but PLUGIN logger in Util.h doesn't
 #include<Omm/UpnpAvLogger.h>
 
 #include "QtNavigator.h"
+#include "QtNavigable.h"
+#include "QtNavigatorPrivate.h"
 
 
 QtNavigatorPanelButton::QtNavigatorPanelButton(QtNavigable* pNavigable) :
@@ -76,6 +81,7 @@ QtNavigatorPanel::buttonPushed()
 {
     QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
     Omm::Av::Log::instance()->upnpav().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
+//    Omm::Util::Log::instance()->plugin().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
     pop(pButton->getNavigable());
     emit selectedNavigable(pButton->getNavigable());
 }
@@ -106,6 +112,7 @@ void
 QtNavigator::push(QtNavigable* pNavigable)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
+//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
     
     if (pNavigable->getWidget()) {
         _pStackedWidget->addWidget(pNavigable->getWidget());
@@ -120,6 +127,7 @@ void
 QtNavigator::expose(QtNavigable* pNavigable)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
+//    Omm::Util::Log::instance()->plugin().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
 
     while(!_navigableStack.empty() && _navigableStack.top() != pNavigable) {
         QtNavigable* pPoppedNavigable = _navigableStack.top();

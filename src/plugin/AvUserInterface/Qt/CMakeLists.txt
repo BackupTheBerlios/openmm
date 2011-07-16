@@ -75,6 +75,7 @@ QtController.h
 QtDeviceGroup.h
 QtDeviceGroupModel.h
 QtNavigator.h
+QtNavigatorPrivate.h
 QtCrumbButton.h
 # modeltest.h
 #QtBrowserWidget.h
@@ -141,6 +142,7 @@ target_link_libraries(ommplugin-application-qt
 ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
+${OMM_UTIL}
 ${QT_LIBRARIES}
 )
 

@@ -40,12 +40,14 @@ public:
     static Log* instance();
     
     Poco::Logger& util();
+    Poco::Logger& plugin();
     
 private:
     Log();
     
     static Log*     _pInstance;
     Poco::Logger*   _pUtilLogger;
+    Poco::Logger*   _pPluginLogger;
 };
 
 
@@ -55,9 +57,9 @@ public:
     static const std::string getHomePath();
     
 private:
-    static std::string _home;
-    static const std::string _defaultHome;
-    static Poco::FastMutex _lock;
+    static std::string          _home;
+    static const std::string    _defaultHome;
+    static Poco::FastMutex      _lock;
 };
 
 

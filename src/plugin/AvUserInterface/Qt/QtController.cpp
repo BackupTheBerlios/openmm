@@ -36,7 +36,6 @@ QtController::QtController()
     QtNavigator* pQtMediaServerNavigator = new QtNavigator;
     pQtMediaServerNavigator->push(pQtMediaServerGroup);
     addTab(pQtMediaServerNavigator, pMediaServerGroup->shortName().c_str());
-//    addTab(pQtMediaServerGroup, pMediaServerGroup->shortName().c_str());
 
     QtDeviceGroupModel* pQtMediaRendererGroupModel = new QtDeviceGroupModel;
     Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroupModel);

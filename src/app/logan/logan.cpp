@@ -44,6 +44,7 @@ const QString LoganLogger::CHAN_UPNP_CONTROL = "UPNP.CONTROL";
 const QString LoganLogger::CHAN_UPNP_EVENT = "UPNP.EVENT";
 const QString LoganLogger::CHAN_UPNP_AV = "UPNP.AV";
 const QString LoganLogger::CHAN_UTIL = "UTIL";
+const QString LoganLogger::CHAN_PLUGIN = "PLUGIN";
 const QString LoganLogger::CHAN_NET = "NET";
 const QString LoganLogger::CHAN_SYS = "SYS";
 
@@ -173,6 +174,7 @@ LoganLogger::init()
     _logWidget.channelSelector->addItem(CHAN_UPNP_EVENT);
     _logWidget.channelSelector->addItem(CHAN_UPNP_AV);
     _logWidget.channelSelector->addItem(CHAN_UTIL);
+    _logWidget.channelSelector->addItem(CHAN_PLUGIN);
     _logWidget.channelSelector->addItem(CHAN_NET);
     _logWidget.channelSelector->addItem(CHAN_SYS);
 

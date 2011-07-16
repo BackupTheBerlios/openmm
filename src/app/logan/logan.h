@@ -101,6 +101,7 @@ private:
     const static QString CHAN_UPNP_EVENT;
     const static QString CHAN_UPNP_AV;
     const static QString CHAN_UTIL;
+    const static QString CHAN_PLUGIN;
     const static QString CHAN_NET;
     const static QString CHAN_SYS;
 
@@ -115,7 +116,7 @@ private:
     void setLines(const QString& lines);
     void appendLine(const QString& line);
 
-    LoganFileWatcher*            _pMonitor;
+    LoganFileWatcher*       _pMonitor;
     QVBoxLayout*            _pLayout;
     QWidget*                _pMainWidget;
     Ui::LogWidget           _logWidget;

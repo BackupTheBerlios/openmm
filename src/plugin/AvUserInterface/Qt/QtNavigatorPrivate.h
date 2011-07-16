@@ -19,41 +19,50 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroup_INCLUDED
-#define QtDeviceGroup_INCLUDED
+#ifndef QtNavigatorPrivate_INCLUDED
+#define QtNavigatorPrivate_INCLUDED
 
+#include <stack>
 #include <QtGui>
-#include <Omm/Upnp.h>
 
-#include "QtNavigable.h"
+class QtNavigable;
 
-class QtDeviceGroupModel;
-class QtDeviceListItem;
-
-
-class QtDeviceGroup : public QWidget , public QtNavigable
+class QtNavigatorPanelButton : public QPushButton
 {
     Q_OBJECT
 
 public:
-    QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel);
+    QtNavigatorPanelButton(QtNavigable* pNavigable);
 
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
-    
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
+    QtNavigable* getNavigable();
 
 private:
-
-    QVBoxLayout*                    _pLayout;
-            
-    QtDeviceGroupModel*             _pDeviceGroupModel;
-    QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
+    QtNavigable*    _pNavigable;
 };
+
+
+class QtNavigatorPanel : public QWidget
+{
+    Q_OBJECT
+
+public:
+    QtNavigatorPanel(QWidget* pParent = 0);
+
+    void push(QtNavigable* pNavigable);
+    void pop(QtNavigable* pNavigable);
+
+signals:
+    void selectedNavigable(QtNavigable* pNavigable);
+
+private slots:
+    void buttonPushed();
+
+private:
+    std::stack<QtNavigatorPanelButton*>     _buttonStack;
+    QHBoxLayout*                            _pButtonLayout;
+    QSignalMapper*                          _pSignalMapper;
+};
+
 
 #endif
 

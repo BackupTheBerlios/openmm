@@ -93,7 +93,7 @@ private:
     Poco::Logger*   _pHttpLogger;
     Poco::Logger*   _pDescriptionLogger;
     Poco::Logger*   _pControlLogger;
-    Poco::Logger*   _pEventingLogger;
+    Poco::Logger*   _pEventLogger;
 };
 
 
