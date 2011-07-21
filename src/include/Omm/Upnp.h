@@ -230,7 +230,7 @@ public:
         }
     }
     
-    E& get(int index)
+    E& get(int index) const
     {
         return *_keys[index];
     }
@@ -307,7 +307,7 @@ public:
         _keys[i] = pElement;
     }
 
-    int size()
+    int size() const
     {
         return _keys.size();
     }
@@ -435,7 +435,7 @@ public:
     void start();
     void stop();
 
-    virtual DeviceGroup* createDeviceGroup(const std::string deviceType) { return 0; }
+//    virtual DeviceGroup* createDeviceGroup(const std::string deviceType) { return 0; }
     void addDeviceGroup(DeviceGroup* pDeviceGroup);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
@@ -628,35 +628,6 @@ private:
 };
 
 
-class DeviceGroupDelegate
-{
-    friend class DeviceGroup;
-    
-public:
-    int getDeviceCount() const;
-    Device* getDevice(int index) const;
-    void selectDevice(Device* pDevice);
-
-    virtual std::string getDeviceType() { return ""; }
-    virtual std::string shortName() { return ""; }
-    virtual Icon* groupIcon() { return 0; }
-
-    virtual Device* createDevice() { return 0; }
-    virtual Device* createDevice(DeviceData* pDeviceData) { return 0; }
-    /// factory method to create a device of a certain type associated with the
-    /// corresponding device code.
-    
-    virtual void addDevice(Device* pDevice, int index, bool begin) {}
-    virtual void removeDevice(Device* pDevice, int index, bool begin) {}
-    virtual void selectDevice(Device* pDevice, int index) {}
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
-    
-private:
-    DeviceGroup*    _pDeviceGroup;
-};
-
-
 class DeviceGroup
 /// Contains only devices of the same type (which can be in different containers).
 /// Corresponds to one tab in the user interface.
@@ -666,10 +637,11 @@ class DeviceGroup
     friend class DeviceGroupDelegate;
 
 public:
-    DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate = 0);
+    DeviceGroup(const std::string& deviceType, const std::string& shortName);
 
-    int getDeviceCount();
-    Device* getDevice(int index);
+    int getDeviceCount() const;
+    Device* getDevice(int index) const;
+    void selectDevice(Device* pDevice);
     
     virtual std::string getDeviceType();
     virtual std::string shortName();
@@ -687,13 +659,13 @@ public:
 protected:
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
-    void selectDevice(Device* pDevice);
 
-    DeviceGroupDelegate*           _pDeviceGroupDelegate;
     std::vector<DeviceContainer>    _deviceContainers;
     Container<Device>               _devices;
     Device*                         _pSelectedDevice;
     std::string                     _preferredDeviceUuid;
+    std::string                     _deviceType;
+    std::string                     _shortName;
 };
 
 

@@ -126,47 +126,6 @@ CtlMediaRenderer::volumeChanged(int value)
 }
 
 
-CtlMediaRendererGroup::CtlMediaRendererGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
-DeviceGroup(pDeviceGroupDelegate)
-{
-}
-
-
-std::string
-CtlMediaRendererGroup::shortName()
-{
-    return "Player";
-}
-
-
-std::string
-CtlMediaRendererGroup::getDeviceType()
-{
-    return DeviceType::MEDIA_RENDERER_1;
-}
-
-
-Device*
-CtlMediaRendererGroup::createDevice()
-{
-    return new CtlMediaRenderer;
-}
-
-
-CtlMediaRenderer*
-CtlMediaRendererGroup::getSelectedMediaRenderer()
-{
-    return static_cast<CtlMediaRenderer*>(_pSelectedDevice);
-}
-
-
-CtlMediaRenderer*
-CtlMediaRendererGroup::getMediaRenderer(int index)
-{
-    return static_cast<CtlMediaRenderer*>(&_devices.get(index));
-}
-
-
 void
 CtlMediaServer::addCtlDeviceCode()
 {
@@ -176,49 +135,6 @@ CtlMediaServer::addCtlDeviceCode()
         new CtlConnectionManagerImpl(0),
         new CtlAVTransportImpl(0));
     setCtlDeviceCode(_pCtlMediaServerCode);
-}
-
-
-CtlMediaServer*
-CtlMediaServerGroup::getSelectedMediaServer()
-{
-    return static_cast<CtlMediaServer*>(_pSelectedDevice);
-}
-
-
-CtlMediaServer*
-CtlMediaServerGroup::getMediaServer(int index)
-{
-    return static_cast<CtlMediaServer*>(&_devices.get(index));
-}
-
-
-CtlMediaServerGroup::CtlMediaServerGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
-DeviceGroup(pDeviceGroupDelegate),
-_pSelectedMediaObject(0)
-{
-}
-
-
-std::string
-CtlMediaServerGroup::shortName()
-{
-    return "Media";
-}
-
-
-std::string
-CtlMediaServerGroup::getDeviceType()
-{
-    return DeviceType::MEDIA_SERVER_1;
-}
-
-
-Device*
-CtlMediaServerGroup::createDevice()
-{
-    Log::instance()->upnpav().debug("Media server group, create media server");
-    return new CtlMediaServer;
 }
 
 

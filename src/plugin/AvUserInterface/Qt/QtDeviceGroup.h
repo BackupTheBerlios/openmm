@@ -40,7 +40,7 @@ public:
 
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
-    
+
     virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:

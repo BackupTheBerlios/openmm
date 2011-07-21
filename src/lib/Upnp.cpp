@@ -2961,7 +2961,6 @@ DeviceContainer::replaceDevice(Device* pOldDevice, Device* pNewDevice)
     pNewDevice->setDeviceData(pOldDevice->getDeviceData());
     // set the reverse pointers pointing to pNewDevice.
     pOldDevice->getDeviceData()->setDevice(pNewDevice);
-    // FIXME: replacing device in container doesn't work, key (uuid) not found.
     _devices.replace(pOldDevice->getUuid(), pNewDevice);
     // TODO: shallow delete old device, don't do a delete pOldDevice;
 }
@@ -4429,46 +4428,57 @@ SsdpMessage::getSender()
 }
 
 
-int
-DeviceGroupDelegate::getDeviceCount() const
-{
-    return _pDeviceGroup->getDeviceCount();
-}
+//int
+//DeviceGroupDelegate::getDeviceCount() const
+//{
+//    return _pDeviceGroup->getDeviceCount();
+//}
+//
+//
+//Device*
+//DeviceGroupDelegate::getDevice(int index) const
+//{
+//    return _pDeviceGroup->getDevice(index);
+//}
+//
+//
+//void
+//DeviceGroupDelegate::selectDevice(Device* pDevice)
+//{
+//    _pDeviceGroup->selectDevice(pDevice);
+//}
 
 
-Device*
-DeviceGroupDelegate::getDevice(int index) const
-{
-    return _pDeviceGroup->getDevice(index);
-}
+//DeviceGroup::DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
+//_pDeviceGroupDelegate(pDeviceGroupDelegate),
+//_pSelectedDevice(0),
+//_preferredDeviceUuid("")
+//{
+//    pDeviceGroupDelegate->_pDeviceGroup = this;
+//}
 
 
-void
-DeviceGroupDelegate::selectDevice(Device* pDevice)
-{
-    _pDeviceGroup->selectDevice(pDevice);
-}
-
-
-DeviceGroup::DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
-_pDeviceGroupDelegate(pDeviceGroupDelegate),
+DeviceGroup::DeviceGroup(const std::string& deviceType, const std::string& shortName) :
+_deviceType(deviceType),
+_shortName(shortName),
 _pSelectedDevice(0),
 _preferredDeviceUuid("")
 {
-    pDeviceGroupDelegate->_pDeviceGroup = this;
+
 }
 
 
 int
-DeviceGroup::getDeviceCount()
+DeviceGroup::getDeviceCount() const
 {
     return _devices.size();
 }
 
 
 Device*
-DeviceGroup::getDevice(int index)
+DeviceGroup::getDevice(int index) const
 {
+    
     return &_devices.get(index);
 }
 
@@ -4476,94 +4486,58 @@ DeviceGroup::getDevice(int index)
 std::string
 DeviceGroup::getDeviceType()
 {
-    if (_pDeviceGroupDelegate) {
-        return _pDeviceGroupDelegate->getDeviceType();
-    }
-    else {
-        return "";
-    }
+    return _deviceType;
 }
 
 
 std::string
 DeviceGroup::shortName()
 {
-    if (_pDeviceGroupDelegate) {
-        return _pDeviceGroupDelegate->shortName();
-    }
-    else {
-        return "";
-    }
+    return _shortName;
 }
 
 
 Icon*
 DeviceGroup::groupIcon()
 {
-    if (_pDeviceGroupDelegate) {
-        return _pDeviceGroupDelegate->groupIcon();
-    }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 
 Device*
 DeviceGroup::createDevice()
 {
-    Log::instance()->upnp().debug("Device group, create device");
-    if (_pDeviceGroupDelegate) {
-        return _pDeviceGroupDelegate->createDevice();
-    }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 
 void
 DeviceGroup::addDevice(Device* pDevice, int index, bool begin)
 {
-    if (_pDeviceGroupDelegate) {
-        _pDeviceGroupDelegate->addDevice(pDevice, index, begin);
-    }
 }
 
 
 void
 DeviceGroup::removeDevice(Device* pDevice, int index, bool begin)
 {
-    if (_pDeviceGroupDelegate) {
-        _pDeviceGroupDelegate->removeDevice(pDevice, index, begin);
-    }
 }
 
 
 void
 DeviceGroup::selectDevice(Device* pDevice, int index)
 {
-    if (_pDeviceGroupDelegate) {
-        _pDeviceGroupDelegate->selectDevice(pDevice, index);
-    }
 }
 
 
 void
 DeviceGroup::addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
 {
-    if (_pDeviceGroupDelegate) {
-        _pDeviceGroupDelegate->addDeviceContainer(pDeviceContainer, index, begin);
-    }
 }
 
 
 void
 DeviceGroup::removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
 {
-    if (_pDeviceGroupDelegate) {
-        _pDeviceGroupDelegate->removeDeviceContainer(pDeviceContainer, index, begin);
-    }
 }
 
 

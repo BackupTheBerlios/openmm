@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Omm/UpnpAv.h>
 #include <Omm/UpnpAvController.h>
 
 #include "QtController.h"
@@ -29,17 +30,15 @@
 
 QtController::QtController()
 {
-    QtDeviceGroupModel* pQtMediaServerGroupModel = new QtDeviceGroupModel;
-    Omm::DeviceGroup* pMediaServerGroup = new Omm::Av::CtlMediaServerGroup(pQtMediaServerGroupModel);
+    QtDeviceGroupModel* pQtMediaServerGroupModel = new QtDeviceGroupModel(Omm::Av::DeviceType::MEDIA_SERVER_1, "Media");
     QtDeviceGroup* pQtMediaServerGroup = new QtDeviceGroup(pQtMediaServerGroupModel);
-    addDeviceGroup(pMediaServerGroup);
+    addDeviceGroup(pQtMediaServerGroupModel);
     QtNavigator* pQtMediaServerNavigator = new QtNavigator;
     pQtMediaServerNavigator->push(pQtMediaServerGroup);
-    addTab(pQtMediaServerNavigator, pMediaServerGroup->shortName().c_str());
+    addTab(pQtMediaServerNavigator, pQtMediaServerGroupModel->shortName().c_str());
 
-    QtDeviceGroupModel* pQtMediaRendererGroupModel = new QtDeviceGroupModel;
-    Omm::DeviceGroup* pMediaRendererGroup = new Omm::Av::CtlMediaRendererGroup(pQtMediaRendererGroupModel);
+    QtDeviceGroupModel* pQtMediaRendererGroupModel = new QtDeviceGroupModel(Omm::Av::DeviceType::MEDIA_RENDERER_1, "Player");
     QtDeviceGroup* pQtMediaRendererGroup = new QtDeviceGroup(pQtMediaRendererGroupModel);
-    addDeviceGroup(pMediaRendererGroup);
-    addTab(pQtMediaRendererGroup, pMediaRendererGroup->shortName().c_str());
+    addDeviceGroup(pQtMediaRendererGroupModel);
+    addTab(pQtMediaRendererGroup, pQtMediaRendererGroupModel->shortName().c_str());
 }

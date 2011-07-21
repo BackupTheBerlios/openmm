@@ -36,7 +36,6 @@ class QtRendererListModel : public QAbstractItemModel
         
 public:
     QtRendererListModel(Omm::Av::AvUserInterface* pUserInterface, QObject *parent = 0);
-    QtRendererListModel(Omm::Av::CtlMediaRendererGroup* pRendererGroup, QObject *parent = 0);
     ~QtRendererListModel();
     
     QVariant data(const QModelIndex &index, int role) const;
@@ -60,7 +59,6 @@ signals:
 private:
 //     Omm::Container<RendererView>*   _pRenderers;
     Omm::Av::AvUserInterface*   _pUserInterface;
-    Omm::Av::CtlMediaRendererGroup* _pRendererGroup;
     QTextCodec*                     _charEncoding;
 };
 

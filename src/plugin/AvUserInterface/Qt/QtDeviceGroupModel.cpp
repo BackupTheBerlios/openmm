@@ -20,9 +20,13 @@
  ***************************************************************************/
 #include <algorithm>
 
+#include <Omm/UpnpAv.h>
+#include <Omm/UpnpAvController.h>
+
 #include "QtDeviceGroupModel.h"
 
-QtDeviceGroupModel::QtDeviceGroupModel() :
+QtDeviceGroupModel::QtDeviceGroupModel(const std::string& deviceType, const std::string& shortName) :
+DeviceGroup(deviceType, shortName),
 _iconProvider(new QFileIconProvider())
 {
     _charEncoding = QTextCodec::codecForName("UTF-8");
@@ -100,6 +104,18 @@ int
 QtDeviceGroupModel::columnCount(const QModelIndex& parent) const
 {
     return 1;
+}
+
+
+Omm::Device*
+QtDeviceGroupModel::createDevice()
+{
+    if (_deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
+        return new Omm::Av::CtlMediaRenderer;
+    }
+    else if (_deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
+        return new Omm::Av::CtlMediaServer;
+    }
 }
 
 

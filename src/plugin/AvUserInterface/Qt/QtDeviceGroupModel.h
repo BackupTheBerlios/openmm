@@ -31,12 +31,12 @@
 
 #include <Omm/Upnp.h>
 
-class QtDeviceGroupModel : public QAbstractItemModel, public Omm::DeviceGroupDelegate
+class QtDeviceGroupModel : public QAbstractItemModel, public Omm::DeviceGroup
 {
     Q_OBJECT
         
 public:
-    QtDeviceGroupModel();
+    QtDeviceGroupModel(const std::string& deviceType, const std::string& shortName);
     ~QtDeviceGroupModel();
     
     QVariant data(const QModelIndex& index, int role) const;
@@ -47,6 +47,7 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
+    virtual Omm::Device* createDevice();
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
 

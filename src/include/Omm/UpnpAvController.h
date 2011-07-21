@@ -60,21 +60,6 @@ private:
 };
 
 
-class CtlMediaRendererGroup : public DeviceGroup
-{
-public:
-    CtlMediaRendererGroup(DeviceGroupDelegate* pDeviceGroupDelegate = 0);
-
-    virtual std::string shortName();
-    virtual std::string getDeviceType();
-    virtual Device* createDevice();
-
-    CtlMediaRenderer* getSelectedMediaRenderer();
-    CtlMediaRenderer* getMediaRenderer(int index);
-    /// convenience method, saves multiple type casts from Device* to CtlMediaRenderer*
-};
-
-
 class CtlMediaServer : public Device
 {
 public:
@@ -84,23 +69,6 @@ public:
 
 private:
     CtlMediaServerCode*   _pCtlMediaServerCode;
-};
-
-
-class CtlMediaServerGroup : public DeviceGroup
-{
-public:
-    CtlMediaServerGroup(DeviceGroupDelegate* pDeviceGroupDelegate = 0);
-
-    virtual std::string shortName();
-    virtual std::string getDeviceType();
-    virtual Device* createDevice();
-    
-    CtlMediaServer* getSelectedMediaServer();
-    CtlMediaServer* getMediaServer(int index);
-
-private:
-    CtlMediaObject*     _pSelectedMediaObject;
 };
 
 
