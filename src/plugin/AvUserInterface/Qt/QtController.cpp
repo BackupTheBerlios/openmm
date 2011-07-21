@@ -24,7 +24,7 @@
 
 #include "QtController.h"
 #include "QtDeviceGroup.h"
-#include "QtDeviceGroupModel.h"
+#include "QtDeviceGroupWidget.h"
 #include "QtNavigator.h"
 
 
@@ -45,8 +45,8 @@ QtController::createDeviceGroup(const std::string deviceType)
     else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
         shortName = "Player";
     }
-    QtDeviceGroupModel* pQtDeviceGroupModel = new QtDeviceGroupModel(deviceType, shortName);
-    QtDeviceGroup* pQtDeviceGroup = new QtDeviceGroup(pQtDeviceGroupModel);
+    QtDeviceGroup* pQtDeviceGroupModel = new QtDeviceGroup(deviceType, shortName);
+    QtDeviceGroupWidget* pQtDeviceGroup = new QtDeviceGroupWidget(pQtDeviceGroupModel);
     addDeviceGroup(pQtDeviceGroupModel);
     QtNavigator* pQtNavigator = new QtNavigator;
     pQtNavigator->push(pQtDeviceGroup);

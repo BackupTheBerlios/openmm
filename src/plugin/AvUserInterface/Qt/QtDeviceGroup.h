@@ -22,37 +22,41 @@
 #ifndef QtDeviceGroup_INCLUDED
 #define QtDeviceGroup_INCLUDED
 
-#include <QtGui>
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QVariant>
+#include <QList>
+#include <QTextCodec>
+#include <QFileIconProvider>
+
 #include <Omm/Upnp.h>
 
-#include "QtNavigable.h"
-
-class QtDeviceGroupModel;
-class QtDeviceListItem;
-
-
-class QtDeviceGroup : public QWidget , public QtNavigable
+class QtDeviceGroup : public QAbstractItemModel, public Omm::DeviceGroup
 {
     Q_OBJECT
-
+        
 public:
-    QtDeviceGroup(QtDeviceGroupModel* pDeviceGroupModel);
+    QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
+    ~QtDeviceGroup();
+    
+    QVariant data(const QModelIndex& index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex& index) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
+    virtual Omm::Device* createDevice();
+    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
+    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
 
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
+signals:
+    void setCurrentIndex(const QModelIndex& index);
+    
 private:
-
-    QVBoxLayout*                    _pLayout;
-            
-    QtDeviceGroupModel*             _pDeviceGroupModel;
-    QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
+    QTextCodec*                     _charEncoding;
+    QFileIconProvider*              _iconProvider;
 };
 
 #endif

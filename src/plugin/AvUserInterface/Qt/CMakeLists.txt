@@ -33,7 +33,7 @@ QtMainWindow.cpp
 QtController.cpp
 #QtEventFilter.cpp
 QtDeviceGroup.cpp
-QtDeviceGroupModel.cpp
+QtDeviceGroupWidget.cpp
 QtNavigator.cpp
 QtCrumbButton.cpp
 # modeltest.cpp
@@ -73,7 +73,7 @@ QtMainWindow.h
 QtController.h
 #QtEventFilter.h
 QtDeviceGroup.h
-QtDeviceGroupModel.h
+QtDeviceGroupWidget.h
 QtNavigator.h
 QtNavigatorPrivate.h
 QtCrumbButton.h

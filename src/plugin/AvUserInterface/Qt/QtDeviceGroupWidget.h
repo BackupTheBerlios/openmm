@@ -19,44 +19,40 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroupModel_INCLUDED
-#define QtDeviceGroupModel_INCLUDED
+#ifndef QtDeviceGroupWidget_INCLUDED
+#define QtDeviceGroupWidget_INCLUDED
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QList>
-#include <QTextCodec>
-#include <QFileIconProvider>
-
+#include <QtGui>
 #include <Omm/Upnp.h>
 
-class QtDeviceGroupModel : public QAbstractItemModel, public Omm::DeviceGroup
+#include "QtNavigable.h"
+
+class QtDeviceGroup;
+class QtDeviceListItem;
+
+
+class QtDeviceGroupWidget : public QWidget , public QtNavigable
 {
     Q_OBJECT
-        
+
 public:
-    QtDeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    ~QtDeviceGroupModel();
-    
-    QVariant data(const QModelIndex& index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex& index) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex& index) const;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+    QtDeviceGroupWidget(QtDeviceGroup* pDeviceGroupModel);
 
-    virtual Omm::Device* createDevice();
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+    virtual QString getBrowserTitle();
+    virtual QWidget* getWidget();
 
-signals:
-    void setCurrentIndex(const QModelIndex& index);
-    
+    virtual void selectDevice(Omm::Device* pDevice, int index);
+
+private slots:
+    void selectedModelIndex(const QModelIndex& index);
+
 private:
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
+
+    QVBoxLayout*                    _pLayout;
+            
+    QtDeviceGroup*             _pDeviceGroupModel;
+    QTreeView*                      _pDeviceListView;
+    QtDeviceListItem*               _pDeviceListItem;
 };
 
 #endif
