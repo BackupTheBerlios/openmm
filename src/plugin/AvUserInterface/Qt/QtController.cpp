@@ -30,15 +30,25 @@
 
 QtController::QtController()
 {
-    QtDeviceGroupModel* pQtMediaServerGroupModel = new QtDeviceGroupModel(Omm::Av::DeviceType::MEDIA_SERVER_1, "Media");
-    QtDeviceGroup* pQtMediaServerGroup = new QtDeviceGroup(pQtMediaServerGroupModel);
-    addDeviceGroup(pQtMediaServerGroupModel);
-    QtNavigator* pQtMediaServerNavigator = new QtNavigator;
-    pQtMediaServerNavigator->push(pQtMediaServerGroup);
-    addTab(pQtMediaServerNavigator, pQtMediaServerGroupModel->shortName().c_str());
+    createDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1);
+    createDeviceGroup(Omm::Av::DeviceType::MEDIA_RENDERER_1);
+}
 
-    QtDeviceGroupModel* pQtMediaRendererGroupModel = new QtDeviceGroupModel(Omm::Av::DeviceType::MEDIA_RENDERER_1, "Player");
-    QtDeviceGroup* pQtMediaRendererGroup = new QtDeviceGroup(pQtMediaRendererGroupModel);
-    addDeviceGroup(pQtMediaRendererGroupModel);
-    addTab(pQtMediaRendererGroup, pQtMediaRendererGroupModel->shortName().c_str());
+
+Omm::DeviceGroup*
+QtController::createDeviceGroup(const std::string deviceType)
+{
+    std::string shortName;
+    if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
+        shortName = "Media";
+    }
+    else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
+        shortName = "Player";
+    }
+    QtDeviceGroupModel* pQtDeviceGroupModel = new QtDeviceGroupModel(deviceType, shortName);
+    QtDeviceGroup* pQtDeviceGroup = new QtDeviceGroup(pQtDeviceGroupModel);
+    addDeviceGroup(pQtDeviceGroupModel);
+    QtNavigator* pQtNavigator = new QtNavigator;
+    pQtNavigator->push(pQtDeviceGroup);
+    addTab(pQtNavigator, shortName.c_str());
 }

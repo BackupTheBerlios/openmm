@@ -435,7 +435,7 @@ public:
     void start();
     void stop();
 
-//    virtual DeviceGroup* createDeviceGroup(const std::string deviceType) { return 0; }
+    virtual DeviceGroup* createDeviceGroup(const std::string deviceType) { return 0; }
     void addDeviceGroup(DeviceGroup* pDeviceGroup);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 

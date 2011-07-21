@@ -32,6 +32,8 @@ class QtController : public QTabWidget, public Omm::Controller
 
 public:
     QtController();
+
+    virtual Omm::DeviceGroup* createDeviceGroup(const std::string deviceType);
 };
 
 #endif
