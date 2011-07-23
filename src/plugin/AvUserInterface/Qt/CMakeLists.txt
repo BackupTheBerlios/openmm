@@ -32,16 +32,15 @@ QtApplication.cpp
 QtMainWindow.cpp
 QtController.cpp
 #QtEventFilter.cpp
+QtNavigator.cpp
+QtDevice.cpp
 QtDeviceGroup.cpp
 QtDeviceGroupWidget.cpp
-QtNavigator.cpp
-QtCrumbButton.cpp
+QtMediaServerModel.cpp
+QtMediaObject.cpp
 # modeltest.cpp
-#QtBrowserWidget.cpp
-#QtRendererListModel.cpp
 #QtActivityIndicator.cpp
 #QtVisual.cpp
-#QtPlayerRack.cpp
 #QtControlPanel.cpp
 )
 
@@ -72,17 +71,16 @@ set(OMMC_QTAPP_MOC
 QtMainWindow.h
 QtController.h
 #QtEventFilter.h
-QtDeviceGroup.h
-QtDeviceGroupWidget.h
 QtNavigator.h
 QtNavigatorPrivate.h
-QtCrumbButton.h
+#QtDevice.h
+QtDeviceGroup.h
+QtDeviceGroupWidget.h
+QtMediaServerModel.h
+#QtMediaObject.h
 # modeltest.h
-#QtBrowserWidget.h
-#QtRendererListModel.h
 #QtActivityIndicator.h
 #QtVisual.h
-#QtPlayerRack.h
 #QtControlPanel.h
 )
 

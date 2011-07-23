@@ -19,40 +19,5 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroupWidget_INCLUDED
-#define QtDeviceGroupWidget_INCLUDED
-
-#include <QtGui>
-#include <Omm/Upnp.h>
-
-#include "QtNavigable.h"
-
-class QtDeviceGroup;
-class QtDeviceListItem;
-
-
-class QtDeviceGroupWidget : public QWidget , public QtNavigable
-{
-    Q_OBJECT
-
-public:
-    QtDeviceGroupWidget(QtDeviceGroup* pDeviceGroupModel);
-
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
-
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
-private:
-    QVBoxLayout*                    _pLayout;
-            
-    QtDeviceGroup*                  _pDeviceGroupModel;
-    QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
-};
-
-#endif
+#include "QtMediaObject.h"
 

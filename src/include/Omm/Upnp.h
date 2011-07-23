@@ -521,6 +521,7 @@ public:
     void initStateVars();
     void initControllerEventing();
 
+    virtual void initController() {}
     virtual void addCtlDeviceCode() {}
 
 private:

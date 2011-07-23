@@ -19,40 +19,32 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroupWidget_INCLUDED
-#define QtDeviceGroupWidget_INCLUDED
+#ifndef QtDevice_INCLUDED
+#define QtDevice_INCLUDED
 
 #include <QtGui>
-#include <Omm/Upnp.h>
+#include <Omm/UpnpAvController.h>
 
 #include "QtNavigable.h"
 
-class QtDeviceGroup;
-class QtDeviceListItem;
+class QtMediaContainerItem;
+class QtMediaServerModel;
 
 
-class QtDeviceGroupWidget : public QWidget , public QtNavigable
+class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
 {
-    Q_OBJECT
-
 public:
-    QtDeviceGroupWidget(QtDeviceGroup* pDeviceGroupModel);
-
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
-
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
+    QtMediaServer();
+    ~QtMediaServer();
+    
 private:
-    QVBoxLayout*                    _pLayout;
-            
-    QtDeviceGroup*                  _pDeviceGroupModel;
+    virtual void initController();
+
+    QtMediaServerModel*             _pMediaServerModel;
     QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
+    QtMediaContainerItem*           _pMediaContainerItem;
 };
+
 
 #endif
 

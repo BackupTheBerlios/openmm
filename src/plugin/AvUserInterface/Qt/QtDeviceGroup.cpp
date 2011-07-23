@@ -24,6 +24,8 @@
 #include <Omm/UpnpAvController.h>
 
 #include "QtDeviceGroup.h"
+#include "QtDevice.h"
+
 
 QtDeviceGroup::QtDeviceGroup(const std::string& deviceType, const std::string& shortName) :
 DeviceGroup(deviceType, shortName),
@@ -114,7 +116,7 @@ QtDeviceGroup::createDevice()
         return new Omm::Av::CtlMediaRenderer;
     }
     else if (_deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        return new Omm::Av::CtlMediaServer;
+        return new QtMediaServer;
     }
 }
 

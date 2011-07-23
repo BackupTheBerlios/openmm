@@ -67,16 +67,22 @@ public:
 
     CtlMediaObject* getRootObject();
 
-private:
+protected:
+    void browseRootObject();
+
+private:    
     CtlMediaServerCode*   _pCtlMediaServerCode;
+    CtlMediaObject*       _pRoot;
 };
 
 
 class CtlMediaObject : public MediaObject
 {
+    friend class CtlMediaServer;
+    friend class CtlMediaRenderer;
+
     friend class AvServerView;
     friend class AvRendererView;
-    friend class CtlMediaRenderer;
     friend class AvUserInterface;
 
 public:

@@ -3841,10 +3841,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 Device* pTypedDevice = pDeviceGroup->createDevice();
                 pDeviceContainer->replaceDevice(pDevice, pTypedDevice);
                 pTypedDevice->addCtlDeviceCode();
-//                Log::instance()->upnp().debug("controller created device");
                 pDeviceGroup->addDevice(pTypedDevice);
-//                Log::instance()->upnp().debug("controller added device");
-                pDevice->initControllerEventing();
+                pTypedDevice->initControllerEventing();
+                pTypedDevice->initController();
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             }
         }
