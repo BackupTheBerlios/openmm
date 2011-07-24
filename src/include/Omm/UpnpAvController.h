@@ -65,10 +65,11 @@ class CtlMediaServer : public Device
 public:
     virtual void addCtlDeviceCode();
 
-    CtlMediaObject* getRootObject();
+    CtlMediaObject* getRootObject() const;
 
 protected:
     void browseRootObject();
+    void selectMediaObject(CtlMediaObject* pObject);
 
 private:    
     CtlMediaServerCode*   _pCtlMediaServerCode;

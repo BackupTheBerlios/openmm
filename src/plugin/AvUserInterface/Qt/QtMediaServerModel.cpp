@@ -245,3 +245,11 @@ QtMediaServerModel::icon(const QModelIndex &index) const
     }
     return _iconProvider->icon(QFileIconProvider::File);
 }
+
+
+void
+QtMediaServerModel::selectedModelIndex(const QModelIndex& index)
+{
+    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
+//    CtlMediaServer::selectMediaObject(pObject);
+}

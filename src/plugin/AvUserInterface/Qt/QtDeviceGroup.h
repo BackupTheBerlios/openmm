@@ -64,9 +64,6 @@ private slots:
 signals:
     void setCurrentIndex(const QModelIndex& index);
 
-//protected:
-//    QtNavigator* getNavigator();
-
 private:
     QVBoxLayout*                    _pLayout;
     QWidget*                        _pDeviceGroupWidget;

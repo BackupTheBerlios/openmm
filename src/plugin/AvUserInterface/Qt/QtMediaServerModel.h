@@ -69,6 +69,9 @@ public:
     QtMediaObject* getObject(const QModelIndex &index) const;
     
     QIcon icon(const QModelIndex &index) const;
+
+private slots:
+    void selectedModelIndex(const QModelIndex& index);
     
 private:
     Omm::Av::CtlMediaObject*                _pRootObject;

@@ -139,7 +139,7 @@ CtlMediaServer::addCtlDeviceCode()
 
 
 CtlMediaObject*
-CtlMediaServer::getRootObject()
+CtlMediaServer::getRootObject() const
 {
     return _pRoot;
 }
@@ -164,10 +164,16 @@ CtlMediaServer::browseRootObject()
         _pRoot->setObjectId("0");
         _pRoot->setIsContainer(true);
     }
-    _pRoot->setTitle(getFriendlyName());
     _pRoot->setServerController(_pCtlMediaServerCode);
     _pRoot->setFetchedAllChildren(false);
     Log::instance()->upnpav().debug("browse root object finished.");
+}
+
+
+void
+CtlMediaServer::selectMediaObject(CtlMediaObject* pObject)
+{
+    Log::instance()->upnpav().debug("media server object selected: " + pObject->getTitle());
 }
 
 

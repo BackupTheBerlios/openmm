@@ -35,7 +35,7 @@ QtController.cpp
 QtNavigator.cpp
 QtDevice.cpp
 QtDeviceGroup.cpp
-QtMediaServerModel.cpp
+#QtMediaServerModel.cpp
 QtMediaObject.cpp
 # modeltest.cpp
 #QtActivityIndicator.cpp
@@ -74,7 +74,7 @@ QtNavigator.h
 QtNavigatorPrivate.h
 #QtDevice.h
 QtDeviceGroup.h
-QtMediaServerModel.h
+#QtMediaServerModel.h
 #QtMediaObject.h
 # modeltest.h
 #QtActivityIndicator.h
