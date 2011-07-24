@@ -37,6 +37,7 @@ public:
     QtMediaServer();
     ~QtMediaServer();
 
+    virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
     
 private:

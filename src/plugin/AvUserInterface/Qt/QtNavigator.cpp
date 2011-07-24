@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/NumberFormatter.h>
 // need a logger
 #include<Omm/Util.h>
 // FIXME: UPNP.AV logger works, but PLUGIN logger in Util.h doesn't
@@ -115,7 +116,9 @@ QtNavigator::push(QtNavigable* pNavigable)
 //    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
     
     if (pNavigable->getWidget()) {
+        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
         _pStackedWidget->addWidget(pNavigable->getWidget());
+        _pStackedWidget->setCurrentWidget(pNavigable->getWidget());
     }
     _pNavigatorPanel->push(pNavigable);
     _navigableStack.push(pNavigable);
@@ -134,7 +137,8 @@ QtNavigator::expose(QtNavigable* pNavigable)
         if (pPoppedNavigable->getWidget()) {
             _pStackedWidget->removeWidget(pPoppedNavigable->getWidget());
         }
-        delete pPoppedNavigable;
+        // FIXME: crash when deleting popped navigable
+//        delete pPoppedNavigable;
         _navigableStack.pop();
     }
     if (!_navigableStack.empty()) {

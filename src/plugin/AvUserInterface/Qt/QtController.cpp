@@ -47,7 +47,5 @@ QtController::createDeviceGroup(const std::string deviceType)
     }
     QtDeviceGroup* pQtDeviceGroup = new QtDeviceGroup(deviceType, shortName);
     addDeviceGroup(pQtDeviceGroup);
-    QtNavigator* pQtNavigator = new QtNavigator;
-    pQtNavigator->push(pQtDeviceGroup);
-    addTab(pQtNavigator, shortName.c_str());
+    addTab(pQtDeviceGroup->getDeviceGroupWidget(), shortName.c_str());
 }

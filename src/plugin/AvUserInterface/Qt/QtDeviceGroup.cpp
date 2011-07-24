@@ -18,8 +18,6 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#include <algorithm>
-
 #include <Omm/UpnpAv.h>
 #include <Omm/UpnpAvController.h>
 
@@ -106,6 +104,8 @@ _iconProvider(new QFileIconProvider())
     _pLayout = new QVBoxLayout(_pDeviceGroupWidget);
 
     _pNavigator = new QtNavigator;
+    _pLayout->addWidget(_pNavigator);
+
     _pDeviceListView = new QTreeView;
     _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
     _pDeviceListView->setItemDelegate(_pDeviceListItem);
@@ -115,7 +115,7 @@ _iconProvider(new QFileIconProvider())
     _pDeviceListView->setRootIsDecorated(false);
     _pDeviceListView->setItemsExpandable(false);
 
-    _pLayout->addWidget(_pDeviceListView);
+    _pNavigator->push(this);
 
     // activated() is return, click or double click, selected() is click or double click on it.
     connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)),
@@ -268,7 +268,9 @@ QtDeviceGroup::getWidget()
 void
 QtDeviceGroup::selectDevice(Omm::Device* pDevice, int index)
 {
-    
+    if (_deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
+        _pNavigator->push(static_cast<QtMediaServer*>(pDevice));
+    }
 }
 
 

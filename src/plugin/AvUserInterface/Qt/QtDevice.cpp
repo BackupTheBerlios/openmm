@@ -35,6 +35,13 @@ QtMediaServer::~QtMediaServer()
 }
 
 
+QString
+QtMediaServer::getBrowserTitle()
+{
+    return QString(getFriendlyName().c_str());
+}
+
+
 QWidget*
 QtMediaServer::getWidget()
 {
@@ -45,6 +52,7 @@ QtMediaServer::getWidget()
 void
 QtMediaServer::initController()
 {
+    Omm::Av::Log::instance()->upnpav().debug("init qt media server (controller)");
     browseRootObject();
     _pMediaServerModel = new QtMediaServerModel(getRootObject());
 }
@@ -53,6 +61,7 @@ QtMediaServer::initController()
 void
 QtMediaServer::selected()
 {
+    Omm::Av::Log::instance()->upnpav().debug("qt media server selected (controller)");
     // creating a QTreeView and setting the model outside the GUI thread is not allowed,
     // so we do it on first selection and not on discovery of the device.
     if (!_pMediaServerListView) {
