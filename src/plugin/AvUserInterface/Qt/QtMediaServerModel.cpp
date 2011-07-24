@@ -40,27 +40,26 @@ QtMediaServerModel::~QtMediaServerModel()
 QtMediaObject*
 QtMediaServerModel::getObject(const QModelIndex &index) const
 {
-//    return index.isValid() ? static_cast<QtMediaObject*>(index.internalPointer()) : 0;
-    return index.isValid() ? static_cast<QtMediaObject*>(index.internalPointer()) : static_cast<QtMediaObject*>(_pRootObject);
+    QtMediaObject* res = index.isValid() ? static_cast<QtMediaObject*>(index.internalPointer()) : 0;
+    Omm::Av::Log::instance()->upnpav().debug("media server model get object: " + Poco::NumberFormatter::format(res));
+    return res;
 }
 
 
 int
 QtMediaServerModel::rowCount(const QModelIndex &parent) const
 {
-    if (!_pRootObject->fetchedAllChildren()) {
-        _pRootObject->fetchChildren();
-    }
-//    QtMediaObject* parentObject = getObject(parent);
-
-//    if (!parentObject) {
-        Omm::Av::Log::instance()->upnpav().debug("media server model parent object: NULL, row count: " + Poco::NumberFormatter::format(_pRootObject->getChildCount()));
-//        return _pRootObject->getChildCount();
-//    }
+    Omm::Av::Log::instance()->upnpav().debug("media server model row count");
     
-//    Omm::Av::Log::instance()->upnpav().debug("media server model parent object: " + parentObject->getObjectId() + " , row count: " + Poco::NumberFormatter::format(parentObject->getChildCount()));
-//    return parentObject->getChildCount();
-    return _pRootObject->getChildCount();
+    QtMediaObject* pParentObject = getObject(parent);
+
+    if (!pParentObject) {
+        Omm::Av::Log::instance()->upnpav().debug("media server model parent object: NULL, row count: 1");
+        return 1; // root object has no parent and is the only row.
+    }
+    
+    Omm::Av::Log::instance()->upnpav().debug("media server model parent object: " + pParentObject->getObjectId() + " , row count: " + Poco::NumberFormatter::format(pParentObject->getChildCount()));
+    return pParentObject->getChildCount();
 }
 
 
@@ -71,57 +70,52 @@ QtMediaServerModel::columnCount(const QModelIndex& parent) const
 }
 
 
-//bool
-//QtMediaServerModel::hasChildren(const QModelIndex &parent) const
-//{
-////     std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
-//
-//    QtMediaObject* object = getObject(parent);
-////     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->_objectId.c_str();
-//    if (object == 0) {
-////         std::clog << "UpnpBrowserModel::hasChildren() there are servers: " << ((_pServers->size() > 0) ? "yes" : "nope") << std::endl;
-//        return _pRootObject->isContainer();
-//    }
-////     std::clog << "UpnpBrowserModel::hasChildren() object has children: " << (object->isContainer() ? "yes" : "nope") << std::endl;
-//    return object->isContainer();
-//}
+bool
+QtMediaServerModel::hasChildren(const QModelIndex &parent) const
+{
+    Omm::Av::Log::instance()->upnpav().debug("media server model has children");
+
+    QtMediaObject* pParentObject = getObject(parent);
+    if (!pParentObject) {
+        return _pRootObject->isContainer();
+    }
+    return pParentObject->isContainer();
+}
 
 
-//bool
-//QtMediaServerModel::canFetchMore(const QModelIndex &parent) const
-//{
-////     std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
-//
-//    QtMediaObject* object = getObject(parent);
-//    if (object == 0) {
-////        return false;
-//        return !_pRootObject->fetchedAllChildren();
-//    }
-////     qDebug() << "UpnpBrowserModel::canFetchMore() parent objectId:" << object->_objectId.c_str();
-//    return (!object->fetchedAllChildren());
-//}
+bool
+QtMediaServerModel::canFetchMore(const QModelIndex &parent) const
+{
+    Omm::Av::Log::instance()->upnpav().debug("media server model can fetch more");
+
+    QtMediaObject* pParentObject = getObject(parent);
+    if (!pParentObject) {
+        return !_pRootObject->fetchedAllChildren();
+    }
+    return (!pParentObject->fetchedAllChildren());
+}
 
 
-//void
-//QtMediaServerModel::fetchMore(const QModelIndex &parent)
-//{
-////     std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
-//
-//    QtMediaObject* object = getObject(parent);
-////     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->_objectId.c_str();
-//    if (object == 0) {
-//        _pRootObject->fetchChildren();
-//        return;
-//    }
-//    object->fetchChildren();
-////     qDebug() << "UpnpBrowserModel::fetchMore() number of children:" << object->_children.size();
-//    emit layoutChanged();
-//}
+void
+QtMediaServerModel::fetchMore(const QModelIndex &parent)
+{
+    Omm::Av::Log::instance()->upnpav().debug("media server model fetch more");
+
+    QtMediaObject* pParentObject = getObject(parent);
+    if (!pParentObject) {
+        _pRootObject->fetchChildren();
+        return;
+    }
+    pParentObject->fetchChildren();
+    emit layoutChanged();
+}
 
 
 QVariant
 QtMediaServerModel::data(const QModelIndex &index, int role) const
 {
+    Omm::Av::Log::instance()->upnpav().debug("media server model data");
+
     if (!index.isValid()) {
         return QVariant();
     }
@@ -129,7 +123,7 @@ QtMediaServerModel::data(const QModelIndex &index, int role) const
         Omm::Av::Log::instance()->upnpav().warning("UpnpBrowserModel::data() objectId reference is 0:");
         return QVariant();
     }
-    QtMediaObject* object = getObject(index);
+    QtMediaObject* pObject = getObject(index);
 //    std::string artist = object->getProperty(Omm::Av::AvProperty::ARTIST);
 //    std::string album = object->getProperty(Omm::Av::AvProperty::ALBUM);
 //    bool titleOnly = (artist == "");
@@ -139,7 +133,7 @@ QtMediaServerModel::data(const QModelIndex &index, int role) const
     case Qt::EditRole:
 //        if (titleOnly) {
 //            return QString::fromStdString(object->getTitle());
-            return _charEncoding->toUnicode(object->getTitle().c_str());
+            return _charEncoding->toUnicode(pObject->getTitle().c_str());
 //        }
 //        else {
 //            return _charEncoding->toUnicode(artist.c_str());
@@ -163,24 +157,25 @@ QtMediaServerModel::data(const QModelIndex &index, int role) const
 QModelIndex
 QtMediaServerModel::parent(const QModelIndex &index) const
 {
-//    if (!index.isValid())
-//        return QModelIndex();
-//
-//    QtMediaObject* object = getObject(index);
-////     qDebug() << "UpnpBrowserModel::parent() index objectId:" << object->_objectId.c_str();
-//    if (object->parent() == 0) {
-//            return QModelIndex();
-//    }
-//    Omm::Av::MediaObject* grandp = object->parent()->parent();
-//    if (grandp == 0) {
-//        return QModelIndex();
-//    }
-//    Omm::Av::MediaObject::ChildIterator row;
-//    row = find(grandp->beginChildren(), grandp->endChildren(), object->parent());
-//    if (row != grandp->endChildren()) {
-////         qDebug() << "UpnpBrowserModel::parent() return row:" << (row - grandp->_children.begin());
-//        return createIndex(row - grandp->beginChildren(), 0, (void*)(object->parent()));
-//    }
+    Omm::Av::Log::instance()->upnpav().debug("media server model parent");
+
+    QtMediaObject* pObject = getObject(index);
+    if (!pObject) {
+        return QModelIndex();
+    }
+    Omm::Av::MediaObject* pParentObject = pObject->parent();
+    if (!pParentObject) {
+        return QModelIndex();
+    }
+    Omm::Av::MediaObject* pGrandParentObject = pObject->parent()->parent();
+    if (!pGrandParentObject) {
+        return createIndex(0, 0, _pRootObject);
+    }
+    Omm::Av::MediaObject::ChildIterator row;
+    row = find(pGrandParentObject->beginChildren(), pGrandParentObject->endChildren(), pObject->parent());
+    if (row != pGrandParentObject->endChildren()) {
+        return createIndex(row - pGrandParentObject->beginChildren(), 0, pObject->parent());
+    }
     return QModelIndex();
 }
 
@@ -188,25 +183,23 @@ QtMediaServerModel::parent(const QModelIndex &index) const
 QModelIndex
 QtMediaServerModel::index(int row, int column, const QModelIndex &parent) const
 {
-//    // no index has been created yet, so we must be at the root of the tree ...?
-//    if (!hasIndex(row, column, parent)) {
-//        return QModelIndex();
-//    }
-//    QtMediaObject* object = getObject(parent);
-////     qDebug() << "UpnpBrowserModel::index() parent objectId:" << object->_objectId.c_str() << "row:" << row;
-//    if (object == 0) {
-//        return createIndex(row, column, _pRootObject);
-//    }
-//
-//    // if we can't deliver an index, because _children.size()-1 < row
-//    // then fetchMore() is triggered -> return QModelIndex()
-//    if (row > int(object->childCount()) - 1) {
-//        return QModelIndex();
-//    }
-////     return createIndex(row, 0, (void*)(object->_children[row]));
-//    return createIndex(row, column, (void*)(object->getChild(row)));
+    Omm::Av::Log::instance()->upnpav().debug("media server model index");
 
-    return createIndex(row, column, _pRootObject->getChild(row));
+    // no index has been created yet, so we must be at the root of the tree or need to fetch more data.
+    if (!hasIndex(row, column, parent)) {
+        return QModelIndex();
+    }
+    QtMediaObject* pParentObject = getObject(parent);
+    if (!pParentObject) {
+        return createIndex(0, 0, _pRootObject);
+    }
+
+    // if we can't deliver an index, because _children.size()-1 < row
+    // then fetchMore() is triggered -> return QModelIndex()
+    if (row > int(pParentObject->childCount()) - 1) {
+        return QModelIndex();
+    }
+    return createIndex(row, column, pParentObject->getChild(row));
 }
 
 
@@ -224,7 +217,6 @@ QVariant
 QtMediaServerModel::headerData(int section, Qt::Orientation orientation,
                              int role) const
 {
-//    return QAbstractItemModel::headerData(section, orientation, role);
     return "";
 }
 
@@ -234,12 +226,12 @@ QtMediaServerModel::icon(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QIcon();
-    QtMediaObject* object = getObject(index);
-    if (object == 0) {
+    QtMediaObject* pObject = getObject(index);
+    if (pObject == 0) {
         return QIcon();
     }
-    std::string objectClass = object->getProperty(Omm::Av::AvProperty::CLASS);
-    if (object->isContainer()) {
+    std::string objectClass = pObject->getProperty(Omm::Av::AvProperty::CLASS);
+    if (pObject->isContainer()) {
         return _iconProvider->icon(QFileIconProvider::Folder);
     }
     else if (objectClass.find(Omm::Av::AvClass::AUDIO_ITEM) != std::string::npos) {

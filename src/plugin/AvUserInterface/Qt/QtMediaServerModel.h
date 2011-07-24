@@ -62,9 +62,9 @@ public:
     QModelIndex parent(const QModelIndex &index) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
-//    bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
-//    void fetchMore (const QModelIndex & parent);
-//    bool canFetchMore (const QModelIndex & parent) const;
+    bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
+    void fetchMore (const QModelIndex & parent);
+    bool canFetchMore (const QModelIndex & parent) const;
     
     QtMediaObject* getObject(const QModelIndex &index) const;
     
