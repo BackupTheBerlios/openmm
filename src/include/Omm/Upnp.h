@@ -479,6 +479,7 @@ class Device
     friend class DeviceContainer;
     friend class DeviceManager;
     friend class DeviceServer;
+    friend class DeviceGroup;
     friend class EventMessageReader;
     friend class Controller;
 
@@ -521,8 +522,11 @@ public:
     void initStateVars();
     void initControllerEventing();
 
-    virtual void initController() {}
     virtual void addCtlDeviceCode() {}
+
+protected:
+    virtual void initController() {}
+    virtual void selected() {}
 
 private:
     void addProperty(const std::string& name, const std::string& val);

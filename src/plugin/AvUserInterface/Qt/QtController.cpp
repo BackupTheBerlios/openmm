@@ -45,9 +45,8 @@ QtController::createDeviceGroup(const std::string deviceType)
     else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
         shortName = "Player";
     }
-    QtDeviceGroup* pQtDeviceGroupModel = new QtDeviceGroup(deviceType, shortName);
-    QtDeviceGroupWidget* pQtDeviceGroup = new QtDeviceGroupWidget(pQtDeviceGroupModel);
-    addDeviceGroup(pQtDeviceGroupModel);
+    QtDeviceGroup* pQtDeviceGroup = new QtDeviceGroup(deviceType, shortName);
+    addDeviceGroup(pQtDeviceGroup);
     QtNavigator* pQtNavigator = new QtNavigator;
     pQtNavigator->push(pQtDeviceGroup);
     addTab(pQtNavigator, shortName.c_str());

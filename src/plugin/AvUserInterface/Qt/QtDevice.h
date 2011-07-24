@@ -36,12 +36,15 @@ class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
 public:
     QtMediaServer();
     ~QtMediaServer();
+
+    virtual QWidget* getWidget();
     
 private:
     virtual void initController();
+    virtual void selected();
 
     QtMediaServerModel*             _pMediaServerModel;
-    QTreeView*                      _pDeviceListView;
+    QTreeView*                      _pMediaServerListView;
     QtMediaContainerItem*           _pMediaContainerItem;
 };
 

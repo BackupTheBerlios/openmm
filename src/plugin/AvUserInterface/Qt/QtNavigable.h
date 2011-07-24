@@ -22,7 +22,8 @@
 #ifndef QtNavigable_INCLUDED
 #define QtNavigable_INCLUDED
 
-#include <QtGui>
+class QString;
+class QWidget;
 
 class QtNavigable
 {

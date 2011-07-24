@@ -23,80 +23,12 @@
 #include "QtDeviceGroup.h"
 
 
-class QtDeviceListItem : public QStyledItemDelegate
-{
-public:
-    QtDeviceListItem(QObject* parent = 0);
-
-    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
-};
-
-
-QtDeviceListItem::QtDeviceListItem(QObject* parent) :
-QStyledItemDelegate(parent)
-{
-}
-
-
-void
-QtDeviceListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    int padding = 4;
-    QRect iconRect(option.rect);
-    iconRect.setLeft(padding);
-    iconRect.setWidth(option.rect.height());
-    QRect textRect(option.rect);
-    textRect.setLeft(iconRect.right() + padding);
-
-//    Omm::Av::Log::instance()->upnpav().debug(
-//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
-//    );
-
-    if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
-        QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));
-        painter->save();
-//        painter->setRenderHint(QPainter::Antialiasing, true);
-        if (option.state & QStyle::State_Selected) {
-            painter->fillRect(option.rect, option.palette.highlight());
-            painter->setPen(option.palette.highlightedText().color());
-        }
-//        painter->setFont(option.font);  // painter is style aware, don't need to set this.
-        painter->drawText(textRect, Qt::AlignVCenter, title);
-        painter->restore();
-    }
-    if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
-//        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
-        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
-        painter->save();
-        icon.paint(painter, iconRect);
-        painter->restore();
-    }
-    // use QApplication::style()->drawControl() to draw Qt widgets on the painter
-
-//    else {
-//        // default painter
-//        QStyledItemDelegate::paint(painter, option, index);
-//    }
-}
-
-
-QSize
-QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    QSize itemSize = QStyledItemDelegate::sizeHint(option, index);
-    itemSize.rheight() *= 2;
-    return itemSize;
-}
-
-
 QtDeviceGroupWidget::QtDeviceGroupWidget(QtDeviceGroup* pDeviceGroupModel) :
 _pDeviceGroupModel(pDeviceGroupModel)
 {
     _pDeviceListView = new QTreeView;
-    _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
-    _pDeviceListView->setItemDelegate(_pDeviceListItem);
+//    _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
+//    _pDeviceListView->setItemDelegate(_pDeviceListItem);
     _pDeviceListView->setModel(_pDeviceGroupModel);
     _pDeviceListView->setUniformRowHeights(true);
     _pDeviceListView->setHeaderHidden(true);
@@ -137,6 +69,6 @@ void
 QtDeviceGroupWidget::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
-    _pDeviceGroupModel->selectDevice(pDevice);
+//    _pDeviceGroupModel->selectDevice(pDevice);
 }
 

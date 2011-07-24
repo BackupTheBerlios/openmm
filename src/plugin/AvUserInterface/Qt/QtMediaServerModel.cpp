@@ -26,7 +26,7 @@ QtMediaServerModel::QtMediaServerModel(Omm::Av::CtlMediaObject* pRootObject, QOb
 QAbstractItemModel(parent),
 _pRootObject(pRootObject),
 _charEncoding(QTextCodec::codecForName("UTF-8"))
-// FIXME: it is not safe to use QPixmap outside the gui thread ... crash in ctor off QFileIconProvider
+// FIXME: QPixmap: it is not safe to use pixmaps outside the gui thread ... crash in ctor off QFileIconProvider
 //_iconProvider(new QFileIconProvider())
 {
 }

@@ -3841,9 +3841,10 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 Device* pTypedDevice = pDeviceGroup->createDevice();
                 pDeviceContainer->replaceDevice(pDevice, pTypedDevice);
                 pTypedDevice->addCtlDeviceCode();
-                pDeviceGroup->addDevice(pTypedDevice);
                 pTypedDevice->initControllerEventing();
                 pTypedDevice->initController();
+                
+                pDeviceGroup->addDevice(pTypedDevice);
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             }
         }
@@ -4563,6 +4564,7 @@ DeviceGroup::selectDevice(Device* pDevice)
 {
     Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
     _pSelectedDevice = pDevice;
+    pDevice->selected();
     selectDevice(pDevice, _devices.position(pDevice));
 }
 

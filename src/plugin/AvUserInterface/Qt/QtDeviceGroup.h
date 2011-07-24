@@ -22,22 +22,24 @@
 #ifndef QtDeviceGroup_INCLUDED
 #define QtDeviceGroup_INCLUDED
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QList>
-#include <QTextCodec>
-#include <QFileIconProvider>
+#include <QtGui>
 
 #include <Omm/Upnp.h>
 
-class QtDeviceGroup : public QAbstractItemModel, public Omm::DeviceGroup
+#include "QtNavigable.h"
+
+class QtNavigator;
+class QtDeviceListItem;
+
+class QtDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm::DeviceGroup
 {
     Q_OBJECT
         
 public:
     QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
     ~QtDeviceGroup();
+
+    QWidget* getDeviceGroupWidget();
     
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -50,14 +52,38 @@ public:
     virtual Omm::Device* createDevice();
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+    
+    virtual QString getBrowserTitle();
+    virtual QWidget* getWidget();
+
+    virtual void selectDevice(Omm::Device* pDevice, int index);
+
+private slots:
+    void selectedModelIndex(const QModelIndex& index);
 
 signals:
     void setCurrentIndex(const QModelIndex& index);
-    
+
+//protected:
+//    QtNavigator* getNavigator();
+
 private:
+    QVBoxLayout*                    _pLayout;
+    QWidget*                        _pDeviceGroupWidget;
+    QtNavigator*                    _pNavigator;
+    QTreeView*                      _pDeviceListView;
+    QtDeviceListItem*               _pDeviceListItem;
+
     QTextCodec*                     _charEncoding;
     QFileIconProvider*              _iconProvider;
 };
+
+
+class QtMediaServerGroup : public QtDeviceGroup
+{
+
+};
+
 
 #endif
 

@@ -23,7 +23,8 @@
 #include "QtMediaServerModel.h"
 
 
-QtMediaServer::QtMediaServer()
+QtMediaServer::QtMediaServer() :
+_pMediaServerListView(0)
 {
 }
 
@@ -34,11 +35,30 @@ QtMediaServer::~QtMediaServer()
 }
 
 
+QWidget*
+QtMediaServer::getWidget()
+{
+    return _pMediaServerListView;
+}
+
+
 void
 QtMediaServer::initController()
 {
     browseRootObject();
     _pMediaServerModel = new QtMediaServerModel(getRootObject());
+}
+
+
+void
+QtMediaServer::selected()
+{
+    // creating a QTreeView and setting the model outside the GUI thread is not allowed,
+    // so we do it on first selection and not on discovery of the device.
+    if (!_pMediaServerListView) {
+        _pMediaServerListView = new QTreeView;
+        _pMediaServerListView->setModel(_pMediaServerModel);
+    }
 }
 
 
