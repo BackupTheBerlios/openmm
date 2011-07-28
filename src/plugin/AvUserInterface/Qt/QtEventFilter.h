@@ -36,9 +36,6 @@ public:
     QtEventFilter(QtAvInterface* pAvInterface);
     QtEventFilter(QtApplication* pApplication);
 
-signals:
-    void fakeSignal();
-
 private:
     virtual bool eventFilter(QObject* object, QEvent* event);
 

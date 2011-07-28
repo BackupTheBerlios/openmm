@@ -33,7 +33,6 @@
 #include "QtController.h"
 
 Q_DECLARE_METATYPE(std::string);
-//Q_DECLARE_METATYPE(QItemSelection);
 
 
 QtApplication::QtApplication()
@@ -53,7 +52,6 @@ QtApplication::init()
 
 //    setupUnixSignalHandlers();
     qRegisterMetaType<std::string>();
-//    qRegisterMetaType<QItemSelection>();
 
     _fullscreenStyleSheet =
             "*         { font-size: 32pt } \

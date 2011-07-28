@@ -122,11 +122,6 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
             return true;
         }
     }
-    if (event->type() == QEvent::MouseButtonPress) {
-//        QMouseEvent* keyEvent = (QMouseEvent*)event;
-        Omm::Av::Log::instance()->upnpav().debug("mouse pressed.");
-        emit fakeSignal();
-    }
     // standard event processing in the Qt event loop.
     return false;
 }

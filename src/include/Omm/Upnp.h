@@ -527,7 +527,6 @@ public:
 protected:
     virtual void initController() {}
     virtual void selected() {}
-    virtual void exposed() {}
 
 private:
     void addProperty(const std::string& name, const std::string& val);

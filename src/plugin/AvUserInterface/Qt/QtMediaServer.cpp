@@ -90,14 +90,15 @@ QtMediaContainerItem::sizeHint(const QStyleOptionViewItem& option, const QModelI
 }
 
 
-QtMediaServerWidget::QtMediaServerWidget(QAbstractItemModel* pModel)
+QtMediaServerWidget::QtMediaServerWidget(QtMediaServer* pMediaServer) :
+_pMediaServer(pMediaServer)
 {
-    setModel(pModel);
+    setModel(pMediaServer);
     setUniformRowHeights(true);
     setHeaderHidden(true);
 //        _pMediaServerTreeView->setRootIsDecorated(false);
 //        _pMediaServerTreeView->setItemsExpandable(false);
-//         activated() is return, click or double click, selected() is click or double click on it.
+    // activated() is return, click or double click, selected() is click or double click on it.
     connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));    
 }
 
@@ -107,14 +108,13 @@ QtMediaServerWidget::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Av::Log::instance()->upnpav().debug("media server selected index");
 
-//    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
-//    selectMediaObject(pObject);
+    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
+    _pMediaServer->selectedMediaObject(pObject);
 }
 
 
 QtMediaServer::QtMediaServer() :
-_pMediaServerTreeView(0),
-_pFakeButton(0),
+_pMediaServerWidget(0),
 _charEncoding(QTextCodec::codecForName("UTF-8"))
 {
 }
@@ -136,9 +136,7 @@ QtMediaServer::getBrowserTitle()
 QWidget*
 QtMediaServer::getWidget()
 {
-    return _pMediaServerTreeView;
-//    return _pFakeButton;
-//    return _pFakeWidget;
+    return _pMediaServerWidget;
 }
 
 
@@ -157,93 +155,18 @@ QtMediaServer::selected()
     Omm::Av::Log::instance()->upnpav().debug("qt media server selected (controller)");
     // creating a QTreeView and setting the model outside the GUI thread is not allowed,
     // so we do it on first selection and not on discovery of the device.
-    if (!_pMediaServerTreeView) {
-//        _pMediaServerTreeView = new QTreeView;
-        _pMediaServerTreeView = new QtMediaServerWidget(this);
-//        _pMediaServerTreeView->setModel(this);
-//        _pMediaServerTreeView->setUniformRowHeights(true);
-//        _pMediaServerTreeView->setHeaderHidden(true);
-//        _pMediaServerTreeView->setRootIsDecorated(false);
-//        _pMediaServerTreeView->setItemsExpandable(false);
-//         activated() is return, click or double click, selected() is click or double click on it.
-//        connect(_pMediaServerTreeView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(selected(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(entered(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(expanded(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
+    if (!_pMediaServerWidget) {
+        _pMediaServerWidget = new QtMediaServerWidget(this);
     }
-    if (!_pFakeButton) {
-        Omm::Av::Log::instance()->upnpav().debug("qt media server creating fake button");
-        _pFakeWidget = new QWidget;
-        QHBoxLayout* pLayout = new QHBoxLayout(_pFakeWidget);
-        _pFakeButton = new QPushButton;
-        pLayout->addWidget(_pFakeButton);
-        Omm::Av::Log::instance()->upnpav().debug("qt media server connecting fake button");
-        if (connect(_pFakeButton, SIGNAL(pressed()), this, SLOT(fakeButtonPushed()))) {
-            Omm::Av::Log::instance()->upnpav().debug("qt media server fake button connected");
-        };
-        connect(_pFakeButton, SIGNAL(pressed()), this, SIGNAL(fakeSignal()));
-        _pSignalSpy = new QSignalSpy(_pFakeButton, SIGNAL(pressed()));
-
-        
-        // following gives: Object::connect: No such slot QtMediaServer::QtMediaServer::fakeButtonPushed()
-//        connect(_pFakeButton, SIGNAL(pressed()), this, SLOT(QtMediaServer::fakeButtonPushed()));
-//        connect(_pFakeButton, SIGNAL(pressed()), this, SLOT(fakeButtonPushed()), Qt::QueuedConnection);
-        _pFakeButton->setText("c'mon sucker, push me");
-        QtEventFilter* pEventFilter = new QtEventFilter;
-        _pFakeButton->installEventFilter(pEventFilter);
-        connect(pEventFilter, SIGNAL(fakeSignal()), this, SLOT(fakeButtonPushed()));
-    }
-//    _pMediaServerTreeView->setCurrentIndex(index(0, 0, QModelIndex()));
-    Omm::Av::Log::instance()->upnpav().debug("number of fake signals recorded: " + Poco::NumberFormatter::format(_pSignalSpy->count()));
+//    QtMediaServerWidget->setCurrentIndex(index(0, 0, QModelIndex()));
 }
 
 
 void
-QtMediaServer::fakeButtonPushed()
+QtMediaServer::selectedMediaObject(Omm::Av::CtlMediaObject* pObject)
 {
-    Omm::Av::Log::instance()->upnpav().debug("qt media server fake button pushed");
-    _pFakeButton->setText("darn, you pushed me ...");
+    selectMediaObject(pObject);
 }
-
-
-void
-QtMediaServer::selectionChanged(const QItemSelection&, const QItemSelection&)
-{
-    Omm::Av::Log::instance()->upnpav().debug("qt media server selection changed");
-}
-
-
-//void
-//QtMediaServer::createServerModel()
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("qt media server createServerModel()");
-//    // creating a QTreeView and setting the model outside the GUI thread is not allowed,
-//    // so we do it on first selection and not on discovery of the device.
-//    if (!_pMediaServerTreeView) {
-//        _pMediaServerTreeView = new QTreeView;
-//        _pMediaServerTreeView->setModel(this);
-//        _pMediaServerTreeView->setUniformRowHeights(true);
-//        _pMediaServerTreeView->setHeaderHidden(true);
-////        _pMediaServerTreeView->setRootIsDecorated(false);
-////        _pMediaServerTreeView->setItemsExpandable(false);
-//        // activated() is return, click or double click, selected() is click or double click on it.
-//        connect(_pMediaServerTreeView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-////        connect(_pMediaServerTreeView, SIGNAL(selected(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-////        connect(_pMediaServerTreeView, SIGNAL(entered(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-////        connect(_pMediaServerTreeView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//        connect(_pMediaServerTreeView, SIGNAL(expanded(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//    }
-//}
-
-//void
-//QtMediaServer::exposed()
-//{
-//    connect(_pMediaServerTreeView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
-//}
 
 
 QIcon

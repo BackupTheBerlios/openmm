@@ -270,13 +270,6 @@ QtDeviceGroup::selectDevice(Omm::Device* pDevice, int index)
 
 
 void
-QtDeviceGroup::fakeSlot()
-{
-    Omm::Log::instance()->upnp().debug("fake slot");
-}
-
-
-void
 QtDeviceGroup::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
