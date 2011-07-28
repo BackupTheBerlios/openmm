@@ -4,7 +4,7 @@ if(WINDOWS)
 set(CMAKE_BUILD_TYPE "")
 endif(WINDOWS)
 
-find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
+find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg QtTest)
 
 if(QT4_FOUND)
 message (STATUS "Qt4 use file: ${QT_USE_FILE}")
@@ -33,10 +33,10 @@ QtMainWindow.cpp
 QtController.cpp
 #QtEventFilter.cpp
 QtNavigator.cpp
-QtDevice.cpp
 QtDeviceGroup.cpp
-#QtMediaServerModel.cpp
+QtMediaServer.cpp
 QtMediaObject.cpp
+QtEventFilter.cpp
 # modeltest.cpp
 #QtActivityIndicator.cpp
 #QtVisual.cpp
@@ -72,10 +72,10 @@ QtController.h
 #QtEventFilter.h
 QtNavigator.h
 QtNavigatorPrivate.h
-#QtDevice.h
 QtDeviceGroup.h
-#QtMediaServerModel.h
+QtMediaServer.h
 #QtMediaObject.h
+QtEventFilter.h
 # modeltest.h
 #QtActivityIndicator.h
 #QtVisual.h

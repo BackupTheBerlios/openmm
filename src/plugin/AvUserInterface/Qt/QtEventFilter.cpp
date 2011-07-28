@@ -23,6 +23,12 @@
 #include "QtApplication.h"
 #include "QtBrowserWidget.h"
 
+
+QtEventFilter::QtEventFilter()
+{
+}
+
+
 QtEventFilter::QtEventFilter(QtAvInterface* avInterface) :
 _pAvInterface(avInterface),
 _pApplication(0)
@@ -41,7 +47,7 @@ bool
 QtEventFilter::eventFilter(QObject* object, QEvent* event)
 {
     if (event->type() == QEvent::KeyPress) {
-        QKeyEvent* keyEvent = (QKeyEvent*)event;
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
         Omm::Av::Log::instance()->upnpav().debug("key pressed: " + keyEvent->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(keyEvent->key()));
 //        if (Controler::instance()->getCurrentPage()->hasEventType(m_eventMap.find(k->key())->second)) {
 //            Controler::instance()->queueEvent(new Event(m_eventMap.find(k->key())->second));
@@ -50,12 +56,12 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
 //        }
         // menu
         if (keyEvent->text() == "m" || keyEvent->key() == 16777301) {
-            _pAvInterface->showMenu(!_pAvInterface->menuVisible());
+//            _pAvInterface->showMenu(!_pAvInterface->menuVisible());
             return true;
         }
         // fullscreen
         else if (keyEvent->text() == "x") {
-            _pAvInterface->setFullscreen(!_pAvInterface->isFullscreen());
+//            _pAvInterface->setFullscreen(!_pAvInterface->isFullscreen());
             return true;
         }
         // power
@@ -78,43 +84,48 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
         }
         // chan up
         else if (((keyEvent->modifiers() & Qt::ControlModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777238) {
-            _pAvInterface->skipForwardButtonPressed();
+//            _pAvInterface->skipForwardButtonPressed();
             return true;
         }
         // chan down
         else if (((keyEvent->modifiers() & Qt::ControlModifier) && keyEvent->key() == 16777237) || keyEvent->key() == 16777239) {
-            _pAvInterface->skipBackwardButtonPressed();
+//            _pAvInterface->skipBackwardButtonPressed();
             return true;
         }
         // back
         else if (keyEvent->key() == 16777219) {
-            _pAvInterface->_pBrowserWidget->goBack();
+//            _pAvInterface->_pBrowserWidget->goBack();
             return true;
         }
         // play
         else if (keyEvent->text() == "p") {
-            _pAvInterface->playPressed();
+//            _pAvInterface->playPressed();
             return true;
         }
         // stop
         else if (keyEvent->text() == "s") {
-            _pAvInterface->stopPressed();
+//            _pAvInterface->stopPressed();
             return true;
         }
         // skip fwd
         else if (keyEvent->text() == "f") {
-            _pAvInterface->skipForwardButtonPressed();
+//            _pAvInterface->skipForwardButtonPressed();
             return true;
         }
         // skip back
         else if (keyEvent->text() == "b") {
-            _pAvInterface->skipBackwardButtonPressed();
+//            _pAvInterface->skipBackwardButtonPressed();
             return true;
         }
         // mute
         else if (keyEvent->text() == " " || keyEvent->key() == 16777329) {
             return true;
         }
+    }
+    if (event->type() == QEvent::MouseButtonPress) {
+//        QMouseEvent* keyEvent = (QMouseEvent*)event;
+        Omm::Av::Log::instance()->upnpav().debug("mouse pressed.");
+        emit fakeSignal();
     }
     // standard event processing in the Qt event loop.
     return false;

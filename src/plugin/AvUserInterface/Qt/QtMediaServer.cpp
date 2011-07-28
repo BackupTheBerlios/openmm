@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "QtDevice.h"
-
+#include "QtMediaServer.h"
+#include "QtEventFilter.h"
 
 class QtMediaContainerItem : public QStyledItemDelegate
 {
@@ -90,8 +90,31 @@ QtMediaContainerItem::sizeHint(const QStyleOptionViewItem& option, const QModelI
 }
 
 
+QtMediaServerWidget::QtMediaServerWidget(QAbstractItemModel* pModel)
+{
+    setModel(pModel);
+    setUniformRowHeights(true);
+    setHeaderHidden(true);
+//        _pMediaServerTreeView->setRootIsDecorated(false);
+//        _pMediaServerTreeView->setItemsExpandable(false);
+//         activated() is return, click or double click, selected() is click or double click on it.
+    connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));    
+}
+
+
+void
+QtMediaServerWidget::selectedModelIndex(const QModelIndex& index)
+{
+    Omm::Av::Log::instance()->upnpav().debug("media server selected index");
+
+//    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
+//    selectMediaObject(pObject);
+}
+
+
 QtMediaServer::QtMediaServer() :
-_pMediaServerListView(0),
+_pMediaServerTreeView(0),
+_pFakeButton(0),
 _charEncoding(QTextCodec::codecForName("UTF-8"))
 {
 }
@@ -113,7 +136,9 @@ QtMediaServer::getBrowserTitle()
 QWidget*
 QtMediaServer::getWidget()
 {
-    return _pMediaServerListView;
+    return _pMediaServerTreeView;
+//    return _pFakeButton;
+//    return _pFakeWidget;
 }
 
 
@@ -121,8 +146,8 @@ void
 QtMediaServer::initController()
 {
     Omm::Av::Log::instance()->upnpav().debug("init qt media server (controller)");
+    // TODO: check if root object is an item or container and change the visual appearance accordingly.
     browseRootObject();
-//    _pMediaServerModel = new QtMediaServer(getRootObject());
 }
 
 
@@ -132,10 +157,128 @@ QtMediaServer::selected()
     Omm::Av::Log::instance()->upnpav().debug("qt media server selected (controller)");
     // creating a QTreeView and setting the model outside the GUI thread is not allowed,
     // so we do it on first selection and not on discovery of the device.
-    if (!_pMediaServerListView) {
-        _pMediaServerListView = new QTreeView;
-        _pMediaServerListView->setModel(this);
+    if (!_pMediaServerTreeView) {
+//        _pMediaServerTreeView = new QTreeView;
+        _pMediaServerTreeView = new QtMediaServerWidget(this);
+//        _pMediaServerTreeView->setModel(this);
+//        _pMediaServerTreeView->setUniformRowHeights(true);
+//        _pMediaServerTreeView->setHeaderHidden(true);
+//        _pMediaServerTreeView->setRootIsDecorated(false);
+//        _pMediaServerTreeView->setItemsExpandable(false);
+//         activated() is return, click or double click, selected() is click or double click on it.
+//        connect(_pMediaServerTreeView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(selected(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(entered(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(expanded(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
     }
+    if (!_pFakeButton) {
+        Omm::Av::Log::instance()->upnpav().debug("qt media server creating fake button");
+        _pFakeWidget = new QWidget;
+        QHBoxLayout* pLayout = new QHBoxLayout(_pFakeWidget);
+        _pFakeButton = new QPushButton;
+        pLayout->addWidget(_pFakeButton);
+        Omm::Av::Log::instance()->upnpav().debug("qt media server connecting fake button");
+        if (connect(_pFakeButton, SIGNAL(pressed()), this, SLOT(fakeButtonPushed()))) {
+            Omm::Av::Log::instance()->upnpav().debug("qt media server fake button connected");
+        };
+        connect(_pFakeButton, SIGNAL(pressed()), this, SIGNAL(fakeSignal()));
+        _pSignalSpy = new QSignalSpy(_pFakeButton, SIGNAL(pressed()));
+
+        
+        // following gives: Object::connect: No such slot QtMediaServer::QtMediaServer::fakeButtonPushed()
+//        connect(_pFakeButton, SIGNAL(pressed()), this, SLOT(QtMediaServer::fakeButtonPushed()));
+//        connect(_pFakeButton, SIGNAL(pressed()), this, SLOT(fakeButtonPushed()), Qt::QueuedConnection);
+        _pFakeButton->setText("c'mon sucker, push me");
+        QtEventFilter* pEventFilter = new QtEventFilter;
+        _pFakeButton->installEventFilter(pEventFilter);
+        connect(pEventFilter, SIGNAL(fakeSignal()), this, SLOT(fakeButtonPushed()));
+    }
+//    _pMediaServerTreeView->setCurrentIndex(index(0, 0, QModelIndex()));
+    Omm::Av::Log::instance()->upnpav().debug("number of fake signals recorded: " + Poco::NumberFormatter::format(_pSignalSpy->count()));
+}
+
+
+void
+QtMediaServer::fakeButtonPushed()
+{
+    Omm::Av::Log::instance()->upnpav().debug("qt media server fake button pushed");
+    _pFakeButton->setText("darn, you pushed me ...");
+}
+
+
+void
+QtMediaServer::selectionChanged(const QItemSelection&, const QItemSelection&)
+{
+    Omm::Av::Log::instance()->upnpav().debug("qt media server selection changed");
+}
+
+
+//void
+//QtMediaServer::createServerModel()
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("qt media server createServerModel()");
+//    // creating a QTreeView and setting the model outside the GUI thread is not allowed,
+//    // so we do it on first selection and not on discovery of the device.
+//    if (!_pMediaServerTreeView) {
+//        _pMediaServerTreeView = new QTreeView;
+//        _pMediaServerTreeView->setModel(this);
+//        _pMediaServerTreeView->setUniformRowHeights(true);
+//        _pMediaServerTreeView->setHeaderHidden(true);
+////        _pMediaServerTreeView->setRootIsDecorated(false);
+////        _pMediaServerTreeView->setItemsExpandable(false);
+//        // activated() is return, click or double click, selected() is click or double click on it.
+//        connect(_pMediaServerTreeView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+////        connect(_pMediaServerTreeView, SIGNAL(selected(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+////        connect(_pMediaServerTreeView, SIGNAL(entered(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+////        connect(_pMediaServerTreeView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(collapsed(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//        connect(_pMediaServerTreeView, SIGNAL(expanded(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//    }
+//}
+
+//void
+//QtMediaServer::exposed()
+//{
+//    connect(_pMediaServerTreeView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+//}
+
+
+QIcon
+QtMediaServer::icon(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return QIcon();
+    QtMediaObject* pObject = getObject(index);
+    if (pObject == 0) {
+        return QIcon();
+    }
+    std::string objectClass = pObject->getProperty(Omm::Av::AvProperty::CLASS);
+    if (pObject->isContainer()) {
+        return _iconProvider->icon(QFileIconProvider::Folder);
+    }
+    else if (objectClass.find(Omm::Av::AvClass::AUDIO_ITEM) != std::string::npos) {
+        return _iconProvider->icon(QFileIconProvider::Drive);
+    }
+    else if (objectClass.find(Omm::Av::AvClass::VIDEO_ITEM) != std::string::npos) {
+        return _iconProvider->icon(QFileIconProvider::Desktop);
+    }
+    else if (objectClass.find(Omm::Av::AvClass::IMAGE_ITEM) != std::string::npos) {
+        return _iconProvider->icon(QFileIconProvider::Computer);
+    }
+    return _iconProvider->icon(QFileIconProvider::File);
+}
+
+
+void
+QtMediaServer::selectedModelIndex(const QModelIndex& index)
+{
+    Omm::Av::Log::instance()->upnpav().debug("media server selected index");
+
+    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
+    selectMediaObject(pObject);
 }
 
 
@@ -143,7 +286,7 @@ QtMediaObject*
 QtMediaServer::getObject(const QModelIndex &index) const
 {
     QtMediaObject* res = index.isValid() ? static_cast<QtMediaObject*>(index.internalPointer()) : 0;
-    Omm::Av::Log::instance()->upnpav().debug("media server model get object: " + Poco::NumberFormatter::format(res));
+//    Omm::Av::Log::instance()->upnpav().debug("media server model get object: " + Poco::NumberFormatter::format(res));
     return res;
 }
 
@@ -151,16 +294,16 @@ QtMediaServer::getObject(const QModelIndex &index) const
 int
 QtMediaServer::rowCount(const QModelIndex &parent) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model row count");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model row count");
 
     QtMediaObject* pParentObject = getObject(parent);
 
     if (!pParentObject) {
-        Omm::Av::Log::instance()->upnpav().debug("media server model parent object: NULL, row count: 1");
+//        Omm::Av::Log::instance()->upnpav().debug("media server model parent object: NULL, row count: 1");
         return 1; // root object has no parent and is the only row.
     }
 
-    Omm::Av::Log::instance()->upnpav().debug("media server model parent object: " + pParentObject->getObjectId() + " , row count: " + Poco::NumberFormatter::format(pParentObject->getChildCount()));
+//    Omm::Av::Log::instance()->upnpav().debug("media server model parent object: " + pParentObject->getObjectId() + " , row count: " + Poco::NumberFormatter::format(pParentObject->getChildCount()));
     return pParentObject->getChildCount();
 }
 
@@ -175,7 +318,7 @@ QtMediaServer::columnCount(const QModelIndex& parent) const
 bool
 QtMediaServer::hasChildren(const QModelIndex &parent) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model has children");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model has children");
 
     QtMediaObject* pParentObject = getObject(parent);
     if (!pParentObject) {
@@ -188,7 +331,7 @@ QtMediaServer::hasChildren(const QModelIndex &parent) const
 bool
 QtMediaServer::canFetchMore(const QModelIndex &parent) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model can fetch more");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model can fetch more");
 
     QtMediaObject* pParentObject = getObject(parent);
     if (!pParentObject) {
@@ -201,7 +344,7 @@ QtMediaServer::canFetchMore(const QModelIndex &parent) const
 void
 QtMediaServer::fetchMore(const QModelIndex &parent)
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model fetch more");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model fetch more");
 
     QtMediaObject* pParentObject = getObject(parent);
     if (!pParentObject) {
@@ -216,7 +359,7 @@ QtMediaServer::fetchMore(const QModelIndex &parent)
 QVariant
 QtMediaServer::data(const QModelIndex &index, int role) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model data");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model data");
 
     if (!index.isValid()) {
         return QVariant();
@@ -259,7 +402,7 @@ QtMediaServer::data(const QModelIndex &index, int role) const
 QModelIndex
 QtMediaServer::parent(const QModelIndex &index) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model parent");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model parent");
 
     QtMediaObject* pObject = getObject(index);
     if (!pObject) {
@@ -285,7 +428,7 @@ QtMediaServer::parent(const QModelIndex &index) const
 QModelIndex
 QtMediaServer::index(int row, int column, const QModelIndex &parent) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("media server model index");
+//    Omm::Av::Log::instance()->upnpav().debug("media server model index");
 
     // no index has been created yet, so we must be at the root of the tree or need to fetch more data.
     if (!hasIndex(row, column, parent)) {
@@ -316,42 +459,7 @@ QtMediaServer::flags(const QModelIndex &index) const
 
 
 QVariant
-QtMediaServer::headerData(int section, Qt::Orientation orientation,
-                             int role) const
+QtMediaServer::headerData(int section, Qt::Orientation orientation, int role) const
 {
     return "";
-}
-
-
-QIcon
-QtMediaServer::icon(const QModelIndex &index) const
-{
-    if (!index.isValid())
-        return QIcon();
-    QtMediaObject* pObject = getObject(index);
-    if (pObject == 0) {
-        return QIcon();
-    }
-    std::string objectClass = pObject->getProperty(Omm::Av::AvProperty::CLASS);
-    if (pObject->isContainer()) {
-        return _iconProvider->icon(QFileIconProvider::Folder);
-    }
-    else if (objectClass.find(Omm::Av::AvClass::AUDIO_ITEM) != std::string::npos) {
-        return _iconProvider->icon(QFileIconProvider::Drive);
-    }
-    else if (objectClass.find(Omm::Av::AvClass::VIDEO_ITEM) != std::string::npos) {
-        return _iconProvider->icon(QFileIconProvider::Desktop);
-    }
-    else if (objectClass.find(Omm::Av::AvClass::IMAGE_ITEM) != std::string::npos) {
-        return _iconProvider->icon(QFileIconProvider::Computer);
-    }
-    return _iconProvider->icon(QFileIconProvider::File);
-}
-
-
-void
-QtMediaServer::selectedModelIndex(const QModelIndex& index)
-{
-    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
-//    CtlMediaServer::selectMediaObject(pObject);
 }

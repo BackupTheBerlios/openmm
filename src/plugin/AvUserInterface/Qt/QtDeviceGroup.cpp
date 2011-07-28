@@ -22,8 +22,8 @@
 #include <Omm/UpnpAvController.h>
 
 #include "QtDeviceGroup.h"
-#include "QtDevice.h"
 #include "QtNavigator.h"
+#include "QtMediaServer.h"
 
 
 class QtDeviceListItem : public QStyledItemDelegate
@@ -100,12 +100,6 @@ _iconProvider(new QFileIconProvider())
 {
     _charEncoding = QTextCodec::codecForName("UTF-8");
 
-    _pDeviceGroupWidget = new QWidget;
-    _pLayout = new QVBoxLayout(_pDeviceGroupWidget);
-
-    _pNavigator = new QtNavigator;
-    _pLayout->addWidget(_pNavigator);
-
     _pDeviceListView = new QTreeView;
     _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
     _pDeviceListView->setItemDelegate(_pDeviceListItem);
@@ -114,12 +108,12 @@ _iconProvider(new QFileIconProvider())
     _pDeviceListView->setHeaderHidden(true);
     _pDeviceListView->setRootIsDecorated(false);
     _pDeviceListView->setItemsExpandable(false);
-
-    _pNavigator->push(this);
-
     // activated() is return, click or double click, selected() is click or double click on it.
-    connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)),
-            this, SLOT(selectedModelIndex(const QModelIndex&)));
+    connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+
+    _pNavigator = new QtNavigator;
+    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
+    _pNavigator->push(this);
 }
 
 
@@ -131,7 +125,7 @@ QtDeviceGroup::~QtDeviceGroup()
 QWidget*
 QtDeviceGroup::getDeviceGroupWidget()
 {
-    return _pDeviceGroupWidget;
+    return _pNavigator;
 }
 
 
@@ -270,7 +264,15 @@ QtDeviceGroup::selectDevice(Omm::Device* pDevice, int index)
 {
     if (_deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
         _pNavigator->push(static_cast<QtMediaServer*>(pDevice));
+        connect(static_cast<QtMediaServer*>(pDevice), SIGNAL(fakeSignal()), this, SLOT(fakeSlot()));
     }
+}
+
+
+void
+QtDeviceGroup::fakeSlot()
+{
+    Omm::Log::instance()->upnp().debug("fake slot");
 }
 
 
@@ -278,5 +280,6 @@ void
 QtDeviceGroup::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
+//    static_cast<QtMediaServer*>(pDevice)->createServerModel();
     DeviceGroup::selectDevice(pDevice);
 }

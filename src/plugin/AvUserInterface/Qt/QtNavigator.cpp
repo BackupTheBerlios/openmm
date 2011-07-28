@@ -57,9 +57,9 @@ QtNavigatorPanel::push(QtNavigable* pNavigable)
 {
     QtNavigatorPanelButton* pButton = new QtNavigatorPanelButton(pNavigable);
     pButton->setText(pNavigable->getBrowserTitle());
-    _pButtonLayout->addWidget(pButton);
 //    connect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
     connect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
+    _pButtonLayout->addWidget(pButton);
     _buttonStack.push(pButton);
 }
 

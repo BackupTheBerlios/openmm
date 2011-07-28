@@ -527,6 +527,7 @@ public:
 protected:
     virtual void initController() {}
     virtual void selected() {}
+    virtual void exposed() {}
 
 private:
     void addProperty(const std::string& name, const std::string& val);
@@ -660,7 +661,7 @@ public:
     virtual void selectDevice(Device* pDevice, int index);
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
+    
 protected:
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);

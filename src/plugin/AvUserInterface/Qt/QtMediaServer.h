@@ -23,6 +23,7 @@
 #define QtDevice_INCLUDED
 
 #include <QtGui>
+#include <QtTest>
 
 #include <Omm/UpnpAvController.h>
 
@@ -31,11 +32,26 @@
 
 
 class QtMediaContainerItem;
-class QtMediaServerModel;
+
+
+class QtMediaServerWidget : public QTreeView
+{
+    Q_OBJECT
+
+public:
+    QtMediaServerWidget(QAbstractItemModel* pModel);
+
+private slots:
+    void selectedModelIndex(const QModelIndex& index);
+
+
+};
 
 
 class QtMediaServer : public QAbstractItemModel, public QtNavigable, public Omm::Av::CtlMediaServer
 {
+    Q_OBJECT
+    
 public:
     QtMediaServer();
     ~QtMediaServer();
@@ -62,16 +78,26 @@ public:
 
     QIcon icon(const QModelIndex &index) const;
 
+//    void createServerModel();
+signals:
+    void fakeSignal();
+
 private slots:
     void selectedModelIndex(const QModelIndex& index);
+    void fakeButtonPushed();
+    void selectionChanged(const QItemSelection&, const QItemSelection&);
 
 private:
     virtual void initController();
     virtual void selected();
+//    virtual void exposed();
 
-    QtMediaServerModel*             _pMediaServerModel;
-    QTreeView*                      _pMediaServerListView;
+    QTreeView*                      _pMediaServerTreeView;
+    QtMediaServerWidget*            _pMediaServerWidget;
     QtMediaContainerItem*           _pMediaContainerItem;
+    QPushButton*                    _pFakeButton;
+    QWidget*                        _pFakeWidget;
+    QSignalSpy*                     _pSignalSpy;
 
     QTextCodec*                     _charEncoding;
     QFileIconProvider*              _iconProvider;

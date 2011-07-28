@@ -66,7 +66,7 @@ private:
     std::string errorMessage(int errorCode);
 
     AVFormatContext*    _pFormatContext; // contains pointers to ByteIOContext, AVInputFormat, codec ids, array of streams with AVCodecContext
-    ByteIOContext*      _pIoContext;
+    ByteIOContext*      _pIoContext;  // ByteIOContext deprecated, use AVIOContext instead? (mail on libav-user 2011-07-26)
     AVInputFormat*      _pInputFormat;  // contains the io access callbacks
     Poco::UInt64        _frameNumber;
     

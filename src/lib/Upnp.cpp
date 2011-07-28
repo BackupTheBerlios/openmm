@@ -4566,6 +4566,7 @@ DeviceGroup::selectDevice(Device* pDevice)
     _pSelectedDevice = pDevice;
     pDevice->selected();
     selectDevice(pDevice, _devices.position(pDevice));
+    pDevice->exposed();
 }
 
 } // namespace Omm

@@ -60,13 +60,12 @@ public:
 
 private slots:
     void selectedModelIndex(const QModelIndex& index);
+    void fakeSlot();
 
 signals:
     void setCurrentIndex(const QModelIndex& index);
 
 private:
-    QVBoxLayout*                    _pLayout;
-    QWidget*                        _pDeviceGroupWidget;
     QtNavigator*                    _pNavigator;
     QTreeView*                      _pDeviceListView;
     QtDeviceListItem*               _pDeviceListItem;
