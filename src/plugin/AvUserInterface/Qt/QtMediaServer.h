@@ -94,7 +94,7 @@ private slots:
     void selectedModelIndex(const QModelIndex& index);
 
 private:
-    QtMediaServer*      _pMediaServer;
+    QtMediaServer*                  _pMediaServer;
 };
 
 

@@ -446,6 +446,11 @@ protected:
 };
 
 
+class DeviceGroupDelegate
+{
+    
+};
+
 } // namespace Omm
 
 #endif

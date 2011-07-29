@@ -23,8 +23,10 @@
 
 #include <Poco/Timer.h>
 #include <Poco/DOM/Node.h>
+#include <Poco/Notification.h>
 
 #include "Upnp.h"
+#include "UpnpInternal.h"
 #include "UpnpAvObject.h"
 
 
@@ -57,6 +59,12 @@ public:
 private:
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
     CtlMediaRendererCode*   _pCtlMediaRendererCode;
+};
+
+
+class MediaRendererGroupDelegate : public DeviceGroupDelegate
+{
+
 };
 
 
@@ -115,6 +123,15 @@ private:
     CtlMediaServerCode*              _server;
 };
 
+
+class MediaItemNotification : public Poco::Notification
+{
+public:
+    MediaItemNotification(CtlMediaObject* pItem);
+
+private:
+    CtlMediaObject*     _pItem;
+};
 
 
 //////////////////////// deprecated ///////////////////////////

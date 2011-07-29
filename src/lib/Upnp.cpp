@@ -2912,6 +2912,14 @@ DeviceManager::postAction(Action* pAction)
 }
 
 
+void
+DeviceManager::postDeviceNotification(Poco::Notification* pNotification)
+{
+    Log::instance()->upnp().debug("posting device notification to device manager");
+    _deviceNotificationCenter.postNotification(pNotification);
+}
+
+
 DeviceContainer::DeviceContainer() :
 _pDeviceManager(0),
 _pController(0),

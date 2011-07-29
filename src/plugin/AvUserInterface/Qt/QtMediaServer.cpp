@@ -122,7 +122,6 @@ _charEncoding(QTextCodec::codecForName("UTF-8"))
 
 QtMediaServer::~QtMediaServer()
 {
-
 }
 
 
@@ -158,7 +157,7 @@ QtMediaServer::selected()
     if (!_pMediaServerWidget) {
         _pMediaServerWidget = new QtMediaServerWidget(this);
     }
-//    QtMediaServerWidget->setCurrentIndex(index(0, 0, QModelIndex()));
+//    _pMediaServerWidget->setCurrentIndex(index(0, 0, QModelIndex()));
 }
 
 

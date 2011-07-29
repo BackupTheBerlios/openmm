@@ -41,6 +41,7 @@
 #include <Poco/FileChannel.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/Net/MediaType.h>
+#include <Poco/NotificationCenter.h>
 
 #include "UpnpTypes.h"
 #include "Net.h"
@@ -60,6 +61,7 @@ class ControllerUserInterface;
 class DeviceContainer;
 class Device;
 class DeviceGroup;
+class DeviceGroupDelegate;
 class DeviceData;
 class DevDeviceCode;
 class CtlDeviceCode;
@@ -406,6 +408,8 @@ public:
 
     std::string getHttpServerUri();
 
+    void postDeviceNotification(Poco::Notification* pNotification);
+
 protected:
     void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
@@ -419,6 +423,7 @@ protected:
     void stopHttp();
 
     Container<DeviceContainer> _deviceContainers;
+    Poco::NotificationCenter   _deviceNotificationCenter;
     Socket*                    _pSocket;
 
 private:
@@ -627,8 +632,7 @@ private:
     SsdpMessageSet*                 _pSsdpNotifyAliveMessages;
     SsdpMessageSet*                 _pSsdpNotifyByebyeMessages;
     DescriptionRequestHandler*      _descriptionRequestHandler;
-    // TODO: remove _pController (only needed in Service::actionNetworkActivity())
-    // replace it with a notification center in DeviceManager
+    // TODO: remove _pController, it should be a specialized _pDeviceManager
     Controller*                     _pController;
 };
 
@@ -643,6 +647,7 @@ class DeviceGroup
 
 public:
     DeviceGroup(const std::string& deviceType, const std::string& shortName);
+    DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate);
 
     int getDeviceCount() const;
     Device* getDevice(int index) const;
