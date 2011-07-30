@@ -4624,6 +4624,13 @@ DeviceGroup::selectDevice(Device* pDevice)
 }
 
 
+Device*
+DeviceGroup::getSelectedDevice() const
+{
+    return _pSelectedDevice;
+}
+
+
 DeviceGroupDelegate::DeviceGroupDelegate() :
 _pDeviceGroup(0)
 {

@@ -152,7 +152,13 @@ MediaRendererGroupDelegate::init()
 void
 MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification)
 {
-    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pMediaItemNotification->getMediaItem()->getTitle());
+    CtlMediaObject* pItem = pMediaItemNotification->getMediaItem();
+    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pItem->getTitle());
+    CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->setObject(pItem);
+        pRenderer->playPressed();
+    }
 }
 
 

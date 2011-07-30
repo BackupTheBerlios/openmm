@@ -654,6 +654,7 @@ public:
     Device* getDevice(int index) const;
     Controller* getController() const;
     void selectDevice(Device* pDevice);
+    Device* getSelectedDevice() const;
     
     virtual std::string getDeviceType();
     virtual std::string shortName();
