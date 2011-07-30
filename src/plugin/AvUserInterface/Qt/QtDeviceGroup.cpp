@@ -24,6 +24,8 @@
 #include "QtDeviceGroup.h"
 #include "QtNavigator.h"
 #include "QtMediaServer.h"
+#include "QtController.h"
+#include "QtMediaRendererControlPanel.h"
 
 
 class QtDeviceListItem : public QStyledItemDelegate
@@ -276,9 +278,8 @@ QtDeviceGroup::getWidget()
 void
 QtDeviceGroup::selectDevice(Omm::Device* pDevice, int index)
 {
-    if (_deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
+    if (getDeviceType() == Omm::Av::DeviceType::MEDIA_SERVER_1) {
         _pNavigator->push(static_cast<QtMediaServer*>(pDevice));
-        connect(static_cast<QtMediaServer*>(pDevice), SIGNAL(fakeSignal()), this, SLOT(fakeSlot()));
     }
 }
 
@@ -289,4 +290,63 @@ QtDeviceGroup::selectedModelIndex(const QModelIndex& index)
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
 //    static_cast<QtMediaServer*>(pDevice)->createServerModel();
     DeviceGroup::selectDevice(pDevice);
+}
+
+
+QtMediaRendererGroup::QtMediaRendererGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
+QtDeviceGroup(pDeviceGroupDelegate)
+{
+}
+
+
+void
+QtMediaRendererGroup::playButtonPressed()
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->playPressed();
+    }
+}
+
+
+void
+QtMediaRendererGroup::stopButtonPressed()
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->stopPressed();
+    }
+}
+
+
+void
+QtMediaRendererGroup::volumeSliderMoved(int value)
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->volumeChanged(value);
+    }
+}
+
+
+void
+QtMediaRendererGroup::positionSliderMoved(int value)
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->positionMoved(value);
+    }
+}
+
+
+void
+QtMediaRendererGroup::init()
+{
+    _pControlPanel = new QtMediaRendererControlPanel;
+    static_cast<QtController*>(getController())->addPanel(_pControlPanel);
+
+    connect(_pControlPanel, SIGNAL(playButtonPressed()), this, SLOT(playButtonPressed()));
+    connect(_pControlPanel, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
+    connect(_pControlPanel, SIGNAL(volumeSliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
+    connect(_pControlPanel, SIGNAL(positionSliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 }

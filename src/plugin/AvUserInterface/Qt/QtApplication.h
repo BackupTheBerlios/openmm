@@ -46,6 +46,8 @@ public:
 
     virtual int eventLoop();
 
+    void addToolBar(QToolBar* pToolBar);
+
 private:
     virtual void init();
     

@@ -46,6 +46,13 @@ QtApplication::~QtApplication()
 
 
 void
+QtApplication::addToolBar(QToolBar* pToolBar)
+{
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, pToolBar);
+}
+
+
+void
 QtApplication::init()
 {
     Omm::Log::instance()->upnp().debug("init qt application ...");
@@ -98,7 +105,7 @@ QtApplication::init()
 Omm::Controller*
 QtApplication::createController()
 {
-    return new QtController;
+    return new QtController(this);
 }
 
 

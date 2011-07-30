@@ -24,11 +24,11 @@
 
 #include "QtController.h"
 #include "QtDeviceGroup.h"
-#include "QtDeviceGroupWidget.h"
-#include "QtNavigator.h"
+#include "QtApplication.h"
 
 
-QtController::QtController()
+QtController::QtController(QtApplication* pQtApplication) :
+_pQtApplication(pQtApplication)
 {
     createDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1);
     createDeviceGroup(Omm::Av::DeviceType::MEDIA_RENDERER_1);
@@ -38,19 +38,26 @@ QtController::QtController()
 Omm::DeviceGroup*
 QtController::createDeviceGroup(const std::string deviceType)
 {
-    std::string shortName;
+    // TODO: this could be improved that creation of DeviceGroupDelegate is handled by the generic layer in Omm::Av
+    //       and may be device group can be loaded as a plugin when a device of that type pops up.
     Omm::DeviceGroupDelegate* pDeviceGroupDelegate;
     QtDeviceGroup* pQtDeviceGroup;
 
     if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        shortName = "Media";
-        pQtDeviceGroup = new QtDeviceGroup(deviceType, shortName);
+        pQtDeviceGroup = new QtDeviceGroup(deviceType, "Media");
     }
     else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
         pDeviceGroupDelegate = new Omm::Av::MediaRendererGroupDelegate;
-        pQtDeviceGroup = new QtDeviceGroup(pDeviceGroupDelegate);
+        pQtDeviceGroup = new QtMediaRendererGroup(pDeviceGroupDelegate);
     }
     
     addDeviceGroup(pQtDeviceGroup);
     addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
+}
+
+
+void
+QtController::addPanel(QToolBar* pPanel)
+{
+    _pQtApplication->addToolBar(pPanel);
 }

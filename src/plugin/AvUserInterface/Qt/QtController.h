@@ -23,7 +23,10 @@
 #define QtControllerWidget_INCLUDED
 
 #include <QtGui>
+
 #include <Omm/Upnp.h>
+
+class QtApplication;
 
 
 class QtController : public QTabWidget, public Omm::Controller
@@ -31,9 +34,14 @@ class QtController : public QTabWidget, public Omm::Controller
     Q_OBJECT
 
 public:
-    QtController();
+    QtController(QtApplication* pQtApplication);
 
     virtual Omm::DeviceGroup* createDeviceGroup(const std::string deviceType);
+
+    void addPanel(QToolBar* pPanel);
+
+private:
+    QtApplication*       _pQtApplication;
 };
 
 #endif

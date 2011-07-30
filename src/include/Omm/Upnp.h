@@ -670,8 +670,12 @@ public:
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
     
 protected:
+    virtual void init() {}
+
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
+
+private:
     void initDelegate();
 
     DeviceGroupDelegate*            _pDeviceGroupDelegate;

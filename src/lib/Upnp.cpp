@@ -3732,6 +3732,7 @@ Controller::addDeviceGroup(DeviceGroup* pDeviceGroup)
 {
     pDeviceGroup->_pController = this;
     _deviceGroups[pDeviceGroup->getDeviceType()] = pDeviceGroup;
+    pDeviceGroup->init();
     pDeviceGroup->initDelegate();
 }
 

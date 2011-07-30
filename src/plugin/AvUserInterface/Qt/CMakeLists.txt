@@ -40,7 +40,7 @@ QtEventFilter.cpp
 # modeltest.cpp
 #QtActivityIndicator.cpp
 #QtVisual.cpp
-#QtControlPanel.cpp
+QtMediaRendererControlPanel.cpp
 )
 
 #set(OMMC_QTUI
@@ -79,7 +79,7 @@ QtEventFilter.h
 # modeltest.h
 #QtActivityIndicator.h
 #QtVisual.h
-#QtControlPanel.h
+QtMediaRendererControlPanel.h
 )
 
 #qt4_wrap_ui(
