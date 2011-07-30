@@ -39,13 +39,18 @@ Omm::DeviceGroup*
 QtController::createDeviceGroup(const std::string deviceType)
 {
     std::string shortName;
+    Omm::DeviceGroupDelegate* pDeviceGroupDelegate;
+    QtDeviceGroup* pQtDeviceGroup;
+
     if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
         shortName = "Media";
+        pQtDeviceGroup = new QtDeviceGroup(deviceType, shortName);
     }
     else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
-        shortName = "Player";
+        pDeviceGroupDelegate = new Omm::Av::MediaRendererGroupDelegate;
+        pQtDeviceGroup = new QtDeviceGroup(pDeviceGroupDelegate);
     }
-    QtDeviceGroup* pQtDeviceGroup = new QtDeviceGroup(deviceType, shortName);
+    
     addDeviceGroup(pQtDeviceGroup);
-    addTab(pQtDeviceGroup->getDeviceGroupWidget(), shortName.c_str());
+    addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
 }

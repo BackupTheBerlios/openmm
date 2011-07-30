@@ -409,6 +409,7 @@ public:
     std::string getHttpServerUri();
 
     void postDeviceNotification(Poco::Notification* pNotification);
+    void registerDeviceNotificationHandler(const Poco::AbstractObserver& observer);
 
 protected:
     void registerActionHandler(const Poco::AbstractObserver& observer);
@@ -651,6 +652,7 @@ public:
 
     int getDeviceCount() const;
     Device* getDevice(int index) const;
+    Controller* getController() const;
     void selectDevice(Device* pDevice);
     
     virtual std::string getDeviceType();
@@ -669,7 +671,10 @@ public:
 protected:
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
+    void initDelegate();
 
+    DeviceGroupDelegate*            _pDeviceGroupDelegate;
+    Controller*                     _pController;
     std::vector<DeviceContainer>    _deviceContainers;
     Container<Device>               _devices;
     Device*                         _pSelectedDevice;

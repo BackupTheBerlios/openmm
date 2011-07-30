@@ -38,6 +38,7 @@ class AvController;
 class CtlMediaServerCode;
 class CtlMediaRendererCode;
 class CtlMediaObject;
+class MediaItemNotification;
 
 
 class CtlMediaRenderer : public Device
@@ -64,7 +65,14 @@ private:
 
 class MediaRendererGroupDelegate : public DeviceGroupDelegate
 {
+public:
+    virtual std::string getDeviceType();
+    virtual std::string shortName();
 
+private:
+    virtual void init();
+
+    void mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification);
 };
 
 
@@ -128,6 +136,8 @@ class MediaItemNotification : public Poco::Notification
 {
 public:
     MediaItemNotification(CtlMediaObject* pItem);
+
+    CtlMediaObject* getMediaItem() const;
 
 private:
     CtlMediaObject*     _pItem;

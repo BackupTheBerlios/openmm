@@ -37,6 +37,7 @@ class QtDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm:
         
 public:
     QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
+    QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
     ~QtDeviceGroup();
 
     QWidget* getDeviceGroupWidget();
@@ -65,6 +66,8 @@ signals:
     void setCurrentIndex(const QModelIndex& index);
 
 private:
+    void initGui();
+
     QtNavigator*                    _pNavigator;
     QTreeView*                      _pDeviceListView;
     QtDeviceListItem*               _pDeviceListItem;

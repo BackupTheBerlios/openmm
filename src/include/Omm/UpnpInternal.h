@@ -448,7 +448,20 @@ protected:
 
 class DeviceGroupDelegate
 {
+    friend class DeviceGroup;
     
+public:
+    DeviceGroupDelegate();
+
+    virtual std::string getDeviceType() { return ""; }
+    virtual std::string shortName() { return ""; }
+
+protected:
+    void setDeviceGroup(DeviceGroup* pDeviceGroup);
+
+    virtual void init() {}
+    
+    DeviceGroup*    _pDeviceGroup;
 };
 
 } // namespace Omm

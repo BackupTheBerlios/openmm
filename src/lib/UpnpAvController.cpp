@@ -126,6 +126,36 @@ CtlMediaRenderer::volumeChanged(int value)
 }
 
 
+std::string
+MediaRendererGroupDelegate::getDeviceType()
+{
+    return DeviceType::MEDIA_RENDERER_1;
+}
+
+
+std::string
+MediaRendererGroupDelegate::shortName()
+{
+    return "Player";
+}
+
+
+void
+MediaRendererGroupDelegate::init()
+{
+    Log::instance()->upnpav().debug("media renderer delegate init");
+    Controller* pController = _pDeviceGroup->getController();
+    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
+}
+
+
+void
+MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification)
+{
+    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pMediaItemNotification->getMediaItem()->getTitle());
+}
+
+
 void
 CtlMediaServer::addCtlDeviceCode()
 {
@@ -417,7 +447,11 @@ _pItem(pObject)
 }
 
 
-
+CtlMediaObject*
+MediaItemNotification::getMediaItem() const
+{
+    return _pItem;
+}
 
 
 //////////////////////// deprecated ///////////////////////////

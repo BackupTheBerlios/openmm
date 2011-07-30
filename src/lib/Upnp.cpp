@@ -2779,6 +2779,13 @@ DeviceManager::~DeviceManager()
 
 
 void
+DeviceManager::registerDeviceNotificationHandler(const Poco::AbstractObserver& observer)
+{
+    _deviceNotificationCenter.addObserver(observer);
+}
+
+
+void
 DeviceManager::registerActionHandler(const Poco::AbstractObserver& observer)
 {
     _pSocket->registerActionHandler(observer);
@@ -3723,7 +3730,9 @@ Controller::stop()
 void
 Controller::addDeviceGroup(DeviceGroup* pDeviceGroup)
 {
+    pDeviceGroup->_pController = this;
     _deviceGroups[pDeviceGroup->getDeviceType()] = pDeviceGroup;
+    pDeviceGroup->initDelegate();
 }
 
 
@@ -4467,12 +4476,24 @@ SsdpMessage::getSender()
 
 
 DeviceGroup::DeviceGroup(const std::string& deviceType, const std::string& shortName) :
+_pDeviceGroupDelegate(0),
+_pController(0),
 _deviceType(deviceType),
 _shortName(shortName),
 _pSelectedDevice(0),
 _preferredDeviceUuid("")
 {
 
+}
+
+
+DeviceGroup::DeviceGroup(DeviceGroupDelegate* pDeviceGroupDelegate) :
+_pDeviceGroupDelegate(pDeviceGroupDelegate),
+_pController(0),
+_pSelectedDevice(0),
+_preferredDeviceUuid("")
+{
+    _pDeviceGroupDelegate->setDeviceGroup(this);
 }
 
 
@@ -4491,17 +4512,34 @@ DeviceGroup::getDevice(int index) const
 }
 
 
+Controller*
+DeviceGroup::getController() const
+{
+    return _pController;
+}
+
+
 std::string
 DeviceGroup::getDeviceType()
 {
-    return _deviceType;
+    if (_pDeviceGroupDelegate) {
+        return _pDeviceGroupDelegate->getDeviceType();
+    }
+    else {
+        return _deviceType;
+    }
 }
 
 
 std::string
 DeviceGroup::shortName()
 {
-    return _shortName;
+    if (_pDeviceGroupDelegate) {
+        return _pDeviceGroupDelegate->shortName();
+    }
+    else {
+        return _shortName;
+    }
 }
 
 
@@ -4568,12 +4606,34 @@ DeviceGroup::removeDevice(Device* pDevice)
 
 
 void
+DeviceGroup::initDelegate()
+{
+    if (_pDeviceGroupDelegate) {
+        _pDeviceGroupDelegate->init();
+    }
+}
+
+
+void
 DeviceGroup::selectDevice(Device* pDevice)
 {
     Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
     _pSelectedDevice = pDevice;
     pDevice->selected();
     selectDevice(pDevice, _devices.position(pDevice));
+}
+
+
+DeviceGroupDelegate::DeviceGroupDelegate() :
+_pDeviceGroup(0)
+{
+}
+
+
+void
+DeviceGroupDelegate::setDeviceGroup(DeviceGroup* pDeviceGroup)
+{
+    _pDeviceGroup = pDeviceGroup;
 }
 
 } // namespace Omm

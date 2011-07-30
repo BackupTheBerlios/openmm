@@ -95,10 +95,29 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 
 
 QtDeviceGroup::QtDeviceGroup(const std::string& deviceType, const std::string& shortName) :
-DeviceGroup(deviceType, shortName),
-_iconProvider(new QFileIconProvider())
+DeviceGroup(deviceType, shortName)
+{
+    initGui();
+}
+
+
+QtDeviceGroup::QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
+DeviceGroup(pDeviceGroupDelegate)
+{
+    initGui();
+}
+
+
+QtDeviceGroup::~QtDeviceGroup()
+{
+}
+
+
+void
+QtDeviceGroup::initGui()
 {
     _charEncoding = QTextCodec::codecForName("UTF-8");
+    _iconProvider = new QFileIconProvider;
 
     _pDeviceListView = new QTreeView;
     _pDeviceListItem = new QtDeviceListItem(_pDeviceListView);
@@ -114,11 +133,6 @@ _iconProvider(new QFileIconProvider())
     _pNavigator = new QtNavigator;
     // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
     _pNavigator->push(this);
-}
-
-
-QtDeviceGroup::~QtDeviceGroup()
-{
 }
 
 
@@ -201,10 +215,10 @@ QtDeviceGroup::columnCount(const QModelIndex& parent) const
 Omm::Device*
 QtDeviceGroup::createDevice()
 {
-    if (_deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
+    if (getDeviceType() == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
         return new Omm::Av::CtlMediaRenderer;
     }
-    else if (_deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
+    else if (getDeviceType() == Omm::Av::DeviceType::MEDIA_SERVER_1) {
         return new QtMediaServer;
     }
 }
