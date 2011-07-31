@@ -34,6 +34,7 @@ QtController.cpp
 #QtEventFilter.cpp
 QtNavigator.cpp
 QtDeviceGroup.cpp
+QtMediaRendererGroup.cpp
 QtMediaServer.cpp
 QtMediaObject.cpp
 QtEventFilter.cpp
@@ -73,6 +74,7 @@ QtController.h
 QtNavigator.h
 QtNavigatorPrivate.h
 QtDeviceGroup.h
+QtMediaRendererGroup.h
 QtMediaServer.h
 #QtMediaObject.h
 QtEventFilter.h

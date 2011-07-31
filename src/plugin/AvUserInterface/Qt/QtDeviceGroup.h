@@ -30,7 +30,6 @@
 
 class QtNavigator;
 class QtDeviceListItem;
-class QtMediaRendererControlPanel;
 
 
 class QtDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm::DeviceGroup
@@ -76,27 +75,6 @@ private:
 
     QTextCodec*                     _charEncoding;
     QFileIconProvider*              _iconProvider;
-};
-
-
-class QtMediaRendererGroup : public QtDeviceGroup
-{
-    Q_OBJECT
-
-public:
-    QtMediaRendererGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
-
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
-
-private:
-    virtual void init();
-
-    QtMediaRendererControlPanel*     _pControlPanel;
 };
 
 

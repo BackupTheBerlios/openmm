@@ -22,43 +22,65 @@
 #include <Omm/UpnpAv.h>
 #include <Omm/UpnpAvController.h>
 
-#include "QtController.h"
-#include "QtDeviceGroup.h"
 #include "QtMediaRendererGroup.h"
-#include "QtApplication.h"
+#include "QtMediaRendererControlPanel.h"
+#include "QtController.h"
 
 
-QtController::QtController(QtApplication* pQtApplication) :
-_pQtApplication(pQtApplication)
+QtMediaRendererGroup::QtMediaRendererGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
+QtDeviceGroup(pDeviceGroupDelegate)
 {
-    createDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1);
-    createDeviceGroup(Omm::Av::DeviceType::MEDIA_RENDERER_1);
-}
-
-
-Omm::DeviceGroup*
-QtController::createDeviceGroup(const std::string deviceType)
-{
-    // TODO: this could be improved that creation of DeviceGroupDelegate is handled by the generic layer in Omm::Av
-    //       and may be device group can be loaded as a plugin when a device of that type pops up.
-    Omm::DeviceGroupDelegate* pDeviceGroupDelegate;
-    QtDeviceGroup* pQtDeviceGroup;
-
-    if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        pQtDeviceGroup = new QtDeviceGroup(deviceType, "Media");
-    }
-    else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
-        pDeviceGroupDelegate = new Omm::Av::MediaRendererGroupDelegate;
-        pQtDeviceGroup = new QtMediaRendererGroup(pDeviceGroupDelegate);
-    }
-    
-    addDeviceGroup(pQtDeviceGroup);
-    addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
 }
 
 
 void
-QtController::addPanel(QToolBar* pPanel)
+QtMediaRendererGroup::playButtonPressed()
 {
-    _pQtApplication->addToolBar(pPanel);
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->playPressed();
+    }
+}
+
+
+void
+QtMediaRendererGroup::stopButtonPressed()
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->stopPressed();
+    }
+}
+
+
+void
+QtMediaRendererGroup::volumeSliderMoved(int value)
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->volumeChanged(value);
+    }
+}
+
+
+void
+QtMediaRendererGroup::positionSliderMoved(int value)
+{
+    Omm::Av::CtlMediaRenderer* pRenderer = static_cast<Omm::Av::CtlMediaRenderer*>(getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->positionMoved(value);
+    }
+}
+
+
+void
+QtMediaRendererGroup::init()
+{
+    _pControlPanel = new QtMediaRendererControlPanel;
+    static_cast<QtController*>(getController())->addPanel(_pControlPanel);
+
+    connect(_pControlPanel, SIGNAL(playButtonPressed()), this, SLOT(playButtonPressed()));
+    connect(_pControlPanel, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
+    connect(_pControlPanel, SIGNAL(volumeSliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
+    connect(_pControlPanel, SIGNAL(positionSliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 }

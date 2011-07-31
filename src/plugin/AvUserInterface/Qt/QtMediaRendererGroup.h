@@ -19,46 +19,34 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpAv.h>
-#include <Omm/UpnpAvController.h>
+#ifndef QtMediaRendererGroup_INCLUDED
+#define QtMediaRendererGroup_INCLUDED
 
-#include "QtController.h"
 #include "QtDeviceGroup.h"
-#include "QtMediaRendererGroup.h"
-#include "QtApplication.h"
+
+class QtMediaRendererControlPanel;
 
 
-QtController::QtController(QtApplication* pQtApplication) :
-_pQtApplication(pQtApplication)
+class QtMediaRendererGroup : public QtDeviceGroup
 {
-    createDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1);
-    createDeviceGroup(Omm::Av::DeviceType::MEDIA_RENDERER_1);
-}
+    Q_OBJECT
+
+public:
+    QtMediaRendererGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
 
 
-Omm::DeviceGroup*
-QtController::createDeviceGroup(const std::string deviceType)
-{
-    // TODO: this could be improved that creation of DeviceGroupDelegate is handled by the generic layer in Omm::Av
-    //       and may be device group can be loaded as a plugin when a device of that type pops up.
-    Omm::DeviceGroupDelegate* pDeviceGroupDelegate;
-    QtDeviceGroup* pQtDeviceGroup;
+private slots:
+    void playButtonPressed();
+    void stopButtonPressed();
+    void volumeSliderMoved(int value);
+    void positionSliderMoved(int value);
 
-    if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        pQtDeviceGroup = new QtDeviceGroup(deviceType, "Media");
-    }
-    else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
-        pDeviceGroupDelegate = new Omm::Av::MediaRendererGroupDelegate;
-        pQtDeviceGroup = new QtMediaRendererGroup(pDeviceGroupDelegate);
-    }
-    
-    addDeviceGroup(pQtDeviceGroup);
-    addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
-}
+private:
+    virtual void init();
+
+    QtMediaRendererControlPanel*     _pControlPanel;
+};
 
 
-void
-QtController::addPanel(QToolBar* pPanel)
-{
-    _pQtApplication->addToolBar(pPanel);
-}
+#endif
+
