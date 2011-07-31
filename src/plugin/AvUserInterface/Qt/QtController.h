@@ -36,8 +36,7 @@ class QtController : public QTabWidget, public Omm::Controller
 public:
     QtController(QtApplication* pQtApplication);
 
-    virtual Omm::DeviceGroup* createDeviceGroup(const std::string deviceType);
-
+    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
     void addPanel(QToolBar* pPanel);
 
 private:

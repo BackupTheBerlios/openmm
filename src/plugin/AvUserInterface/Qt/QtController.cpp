@@ -31,25 +31,15 @@
 QtController::QtController(QtApplication* pQtApplication) :
 _pQtApplication(pQtApplication)
 {
-    createDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1);
-    createDeviceGroup(Omm::Av::DeviceType::MEDIA_RENDERER_1);
+    registerDeviceGroup(new QtDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1, "Media"));
+    registerDeviceGroup(new QtMediaRendererGroup);
 }
 
 
-Omm::DeviceGroup*
-QtController::createDeviceGroup(const std::string deviceType)
+void
+QtController::showDeviceGroup(Omm::DeviceGroup* pDeviceGroup)
 {
-    // TODO: device group can be loaded as a plugin and is shown when a device of that type pops up
-    QtDeviceGroup* pQtDeviceGroup;
-
-    if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        pQtDeviceGroup = new QtDeviceGroup(deviceType, "Media");
-    }
-    else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
-        pQtDeviceGroup = new QtMediaRendererGroup;
-    }
-    
-    addDeviceGroup(pQtDeviceGroup);
+    QtDeviceGroup* pQtDeviceGroup = static_cast<QtDeviceGroup*>(pDeviceGroup);
     addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
 }
 

@@ -3728,12 +3728,15 @@ Controller::stop()
 
 
 void
-Controller::addDeviceGroup(DeviceGroup* pDeviceGroup)
+Controller::registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show)
 {
     pDeviceGroup->_pController = this;
     _deviceGroups[pDeviceGroup->getDeviceType()] = pDeviceGroup;
     pDeviceGroup->init();
     pDeviceGroup->initDelegate();
+    if (show) {
+        showDeviceGroup(pDeviceGroup);
+    }
 }
 
 

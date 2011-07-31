@@ -441,9 +441,10 @@ public:
     void start();
     void stop();
 
-    virtual DeviceGroup* createDeviceGroup(const std::string deviceType) { return 0; }
-    void addDeviceGroup(DeviceGroup* pDeviceGroup);
+    void registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show = true);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
+
+    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
 
     // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);
