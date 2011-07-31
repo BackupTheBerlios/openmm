@@ -39,17 +39,14 @@ _pQtApplication(pQtApplication)
 Omm::DeviceGroup*
 QtController::createDeviceGroup(const std::string deviceType)
 {
-    // TODO: this could be improved that creation of DeviceGroupDelegate is handled by the generic layer in Omm::Av
-    //       and may be device group can be loaded as a plugin when a device of that type pops up.
-    Omm::DeviceGroupDelegate* pDeviceGroupDelegate;
+    // TODO: device group can be loaded as a plugin and is shown when a device of that type pops up
     QtDeviceGroup* pQtDeviceGroup;
 
     if (deviceType == Omm::Av::DeviceType::MEDIA_SERVER_1) {
         pQtDeviceGroup = new QtDeviceGroup(deviceType, "Media");
     }
     else if (deviceType == Omm::Av::DeviceType::MEDIA_RENDERER_1) {
-        pDeviceGroupDelegate = new Omm::Av::MediaRendererGroupDelegate;
-        pQtDeviceGroup = new QtMediaRendererGroup(pDeviceGroupDelegate);
+        pQtDeviceGroup = new QtMediaRendererGroup;
     }
     
     addDeviceGroup(pQtDeviceGroup);

@@ -32,7 +32,7 @@ class QtMediaRendererGroup : public QtDeviceGroup
     Q_OBJECT
 
 public:
-    QtMediaRendererGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
+    QtMediaRendererGroup();
 
 
 private slots:

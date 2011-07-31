@@ -27,8 +27,8 @@
 #include "QtController.h"
 
 
-QtMediaRendererGroup::QtMediaRendererGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
-QtDeviceGroup(pDeviceGroupDelegate)
+QtMediaRendererGroup::QtMediaRendererGroup() :
+QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 {
 }
 
