@@ -673,11 +673,13 @@ public:
 protected:
     virtual void init() {}
 
+    void setVisible(bool visible = true);
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
 
 private:
     void initDelegate();
+    bool getVisible();
 
     DeviceGroupDelegate*            _pDeviceGroupDelegate;
     Controller*                     _pController;
@@ -687,6 +689,7 @@ private:
     std::string                     _preferredDeviceUuid;
     std::string                     _deviceType;
     std::string                     _shortName;
+    bool                            _visible;
 };
 
 

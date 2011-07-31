@@ -3734,6 +3734,7 @@ Controller::registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show)
     _deviceGroups[pDeviceGroup->getDeviceType()] = pDeviceGroup;
     pDeviceGroup->init();
     pDeviceGroup->initDelegate();
+    pDeviceGroup->setVisible(show);
     if (show) {
         showDeviceGroup(pDeviceGroup);
     }
@@ -3852,10 +3853,6 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
             Device* pDevice = *it;
             Log::instance()->upnp().debug("controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
-//            Log::instance()->upnp().debug("device: " + Poco::NumberFormatter::format(pDevice));
-//            Log::instance()->upnp().debug("device data: " + Poco::NumberFormatter::format(pDevice->getDeviceData()));
-//            Log::instance()->upnp().debug("device data thinks its device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceData()->getDevice()->getDeviceContainer()));
-//            Log::instance()->upnp().debug("device is in container: " + Poco::NumberFormatter::format(pDevice->getDeviceContainer()));
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
                 Log::instance()->upnp().information("controller adds device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
@@ -3866,6 +3863,10 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 pTypedDevice->initController();
                 
                 pDeviceGroup->addDevice(pTypedDevice);
+                if (!pDeviceGroup->getVisible()) {
+                    showDeviceGroup(pDeviceGroup);
+                }
+
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             }
         }
@@ -4592,6 +4593,13 @@ DeviceGroup::removeDeviceContainer(DeviceContainer* pDeviceContainer, int index,
 
 
 void
+DeviceGroup::setVisible(bool visible)
+{
+    _visible = visible;
+}
+
+
+void
 DeviceGroup::addDevice(Device* pDevice)
 {
     addDevice(pDevice, _devices.size(), true);
@@ -4615,6 +4623,13 @@ DeviceGroup::initDelegate()
     if (_pDeviceGroupDelegate) {
         _pDeviceGroupDelegate->init();
     }
+}
+
+
+bool
+DeviceGroup::getVisible()
+{
+    return _visible;
 }
 
 

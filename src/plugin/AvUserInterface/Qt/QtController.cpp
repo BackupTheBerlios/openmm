@@ -32,7 +32,7 @@ QtController::QtController(QtApplication* pQtApplication) :
 _pQtApplication(pQtApplication)
 {
     registerDeviceGroup(new QtDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1, "Media"));
-    registerDeviceGroup(new QtMediaRendererGroup);
+    registerDeviceGroup(new QtMediaRendererGroup, false);
 }
 
 
