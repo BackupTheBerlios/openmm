@@ -59,10 +59,8 @@ public:
     virtual QString getBrowserTitle();
 
     // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:
     void selectedModelIndex(const QModelIndex& index);
@@ -70,10 +68,12 @@ private slots:
 signals:
     void setCurrentIndex(const QModelIndex& index);
 
+protected:
+    QtNavigator*                    _pNavigator;
+
 private:
     virtual void initGui();
 
-    QtNavigator*                    _pNavigator;
     QListView*                      _pDeviceListView;
     QStyledItemDelegate*            _pItemDelegate;
 

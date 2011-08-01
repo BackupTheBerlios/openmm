@@ -19,19 +19,22 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroup_INCLUDED
-#define QtDeviceGroup_INCLUDED
+#ifndef QtMediaServerGroup_INCLUDED
+#define QtMediaServerGroup_INCLUDED
+
+#include "QtStandardDeviceGroup.h"
 
 
-class QWidget;
-
-class QtDeviceGroup: public Omm::DeviceGroup
+class QtMediaServerGroup : public QtStandardDeviceGroup
 {
-public:
-    QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
-    QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
+    Q_OBJECT
 
-    virtual QWidget* getDeviceGroupWidget() { return 0; }
+public:
+    QtMediaServerGroup();
+
+    // Omm::DeviceGroup interface
+    virtual Omm::Device* createDevice();
+    virtual void selectDevice(Omm::Device* pDevice, int index);
 };
 
 

@@ -217,6 +217,20 @@ CtlMediaServer::selectMediaObject(CtlMediaObject* pObject)
 }
 
 
+std::string
+MediaServerGroupDelegate::getDeviceType()
+{
+    return DeviceType::MEDIA_SERVER_1;
+}
+
+
+std::string
+MediaServerGroupDelegate::shortName()
+{
+    return "Media";
+}
+
+
 CtlMediaObject::CtlMediaObject() :
 Omm::Av::MediaObject(),
 _childCount(0),

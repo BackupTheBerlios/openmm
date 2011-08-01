@@ -19,21 +19,29 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtDeviceGroup_INCLUDED
-#define QtDeviceGroup_INCLUDED
+#include <Omm/UpnpAv.h>
+#include <Omm/UpnpAvController.h>
+
+#include "QtMediaServerGroup.h"
+#include "QtMediaServer.h"
+#include "QtNavigator.h"
 
 
-class QWidget;
-
-class QtDeviceGroup: public Omm::DeviceGroup
+QtMediaServerGroup::QtMediaServerGroup() :
+QtStandardDeviceGroup(new Omm::Av::MediaServerGroupDelegate)
 {
-public:
-    QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
-    QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
-
-    virtual QWidget* getDeviceGroupWidget() { return 0; }
-};
+}
 
 
-#endif
+Omm::Device*
+QtMediaServerGroup::createDevice()
+{
+    return new QtMediaServer;
+}
 
+
+void
+QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
+{
+    _pNavigator->push(static_cast<QtMediaServer*>(pDevice));
+}

@@ -32,23 +32,10 @@
 QtDeviceGroup::QtDeviceGroup(const std::string& deviceType, const std::string& shortName) :
 DeviceGroup(deviceType, shortName)
 {
-//    _pNavigator = new QtNavigator;
-//    initGui();
-//    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
-//    _pNavigator->push(this);
 }
 
 
 QtDeviceGroup::QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
 DeviceGroup(pDeviceGroupDelegate)
 {
-//    _pNavigator = new QtNavigator;
-//    initGui();
-//    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
-//    _pNavigator->push(this);
 }
-//
-//
-//QtDeviceGroup::~QtDeviceGroup()
-//{
-//}

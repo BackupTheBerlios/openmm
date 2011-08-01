@@ -215,15 +215,6 @@ QtStandardDeviceGroup::columnCount(const QModelIndex& parent) const
 }
 
 
-Omm::Device*
-QtStandardDeviceGroup::createDevice()
-{
-    if (getDeviceType() == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        return new QtMediaServer;
-    }
-}
-
-
 void
 QtStandardDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
@@ -270,15 +261,6 @@ QString
 QtStandardDeviceGroup::getBrowserTitle()
 {
     return ">";
-}
-
-
-void
-QtStandardDeviceGroup::selectDevice(Omm::Device* pDevice, int index)
-{
-    if (getDeviceType() == Omm::Av::DeviceType::MEDIA_SERVER_1) {
-        _pNavigator->push(static_cast<QtMediaServer*>(pDevice));
-    }
 }
 
 

@@ -93,6 +93,14 @@ private:
 };
 
 
+class MediaServerGroupDelegate : public DeviceGroupDelegate
+{
+public:
+    virtual std::string getDeviceType();
+    virtual std::string shortName();
+};
+
+
 class CtlMediaObject : public MediaObject
 {
     friend class CtlMediaServer;

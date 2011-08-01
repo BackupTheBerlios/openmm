@@ -37,6 +37,7 @@ QtDeviceGroup.cpp
 QtStandardDeviceGroup.cpp
 QtMediaRendererGroup.cpp
 QtMediaRenderer.cpp
+QtMediaServerGroup.cpp
 QtMediaServer.cpp
 QtMediaObject.cpp
 QtEventFilter.cpp
@@ -79,6 +80,7 @@ QtNavigatorPrivate.h
 QtStandardDeviceGroup.h
 QtMediaRendererGroup.h
 QtMediaRenderer.h
+QtMediaServerGroup.h
 QtMediaServer.h
 #QtMediaObject.h
 QtEventFilter.h
