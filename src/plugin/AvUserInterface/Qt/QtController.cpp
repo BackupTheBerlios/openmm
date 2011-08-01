@@ -31,7 +31,7 @@
 QtController::QtController(QtApplication* pQtApplication) :
 _pQtApplication(pQtApplication)
 {
-    setMovable(true);
+//    setMovable(true);
     
     registerDeviceGroup(new QtMediaServerGroup);
     registerDeviceGroup(new QtMediaRendererGroup);

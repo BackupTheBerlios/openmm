@@ -23,16 +23,6 @@
 #include <Omm/UpnpAvController.h>
 
 #include "QtDeviceGroup.h"
-#include "QtNavigator.h"
-#include "QtMediaServer.h"
-#include "QtController.h"
-
-
-
-QtDeviceGroup::QtDeviceGroup(const std::string& deviceType, const std::string& shortName) :
-DeviceGroup(deviceType, shortName)
-{
-}
 
 
 QtDeviceGroup::QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :

@@ -28,7 +28,6 @@ class QWidget;
 class QtDeviceGroup: public Omm::DeviceGroup
 {
 public:
-    QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
     QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
 
     virtual QWidget* getDeviceGroupWidget() { return 0; }

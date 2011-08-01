@@ -38,7 +38,6 @@ class QtStandardDeviceGroup : public QAbstractItemModel, public QtNavigable, pub
     Q_OBJECT
         
 public:
-    QtStandardDeviceGroup(const std::string& deviceType, const std::string& shortName, QStyledItemDelegate* pItemDelegate = 0);
     QtStandardDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate = 0);
     ~QtStandardDeviceGroup();
 
@@ -72,7 +71,7 @@ protected:
     QtNavigator*                    _pNavigator;
 
 private:
-    virtual void initGui();
+    void initGui();
 
     QListView*                      _pDeviceListView;
     QStyledItemDelegate*            _pItemDelegate;
