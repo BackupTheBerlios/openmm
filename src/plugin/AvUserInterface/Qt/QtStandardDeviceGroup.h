@@ -19,83 +19,67 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaServer_INCLUDED
-#define QtMediaServer_INCLUDED
+#ifndef QtStandardDeviceGroup_INCLUDED
+#define QtStandardDeviceGroup_INCLUDED
 
 #include <QtGui>
 
-#include <Omm/UpnpAvController.h>
+#include <Omm/Upnp.h>
 
 #include "QtNavigable.h"
-#include "QtMediaObject.h"
+#include "QtDeviceGroup.h"
+
+class QtNavigator;
+class QtDeviceListItem;
 
 
-class QtMediaContainerItem;
-class QtMediaServerWidget;
-
-
-class QtMediaServer : public QAbstractItemModel, public QtNavigable, public Omm::Av::CtlMediaServer
+class QtStandardDeviceGroup : public QAbstractItemModel, public QtNavigable, public QtDeviceGroup
 {
     Q_OBJECT
-
-    friend class QtMediaServerWidget;
-
+        
 public:
-    QtMediaServer();
-    ~QtMediaServer();
+    QtStandardDeviceGroup(const std::string& deviceType, const std::string& shortName, QStyledItemDelegate* pItemDelegate = 0);
+    QtStandardDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate = 0);
+    ~QtStandardDeviceGroup();
+
+    // QtDeviceGroup interface
+    virtual QWidget* getDeviceGroupWidget();
+
+    // QAbstractItemModel interface
+    QVariant data(const QModelIndex& index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex& index) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
     // QtNavigable interface
-    virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
-    
-    // QAbstractItemModel
-    QVariant data(const QModelIndex &index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column,
-                      const QModelIndex &parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
-    void fetchMore (const QModelIndex & parent);
-    bool canFetchMore (const QModelIndex & parent) const;
-    
-    QtMediaObject* getObject(const QModelIndex &index) const;
+    virtual QString getBrowserTitle();
 
-    QIcon icon(const QModelIndex &index) const;
+    // Omm::DeviceGroup interface
+    virtual Omm::Device* createDevice();
+    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
+    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+    virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:
     void selectedModelIndex(const QModelIndex& index);
 
-private:
-    virtual void initController();
-    virtual void selected();
-    void selectedMediaObject(Omm::Av::CtlMediaObject* pObject);
+signals:
+    void setCurrentIndex(const QModelIndex& index);
 
-    QtMediaServerWidget*            _pMediaServerWidget;
-    QtMediaContainerItem*           _pMediaContainerItem;
+private:
+    virtual void initGui();
+
+    QtNavigator*                    _pNavigator;
+    QListView*                      _pDeviceListView;
+    QStyledItemDelegate*            _pItemDelegate;
 
     QTextCodec*                     _charEncoding;
     QFileIconProvider*              _iconProvider;
 };
-
-
-class QtMediaServerWidget : public QTreeView
-{
-    Q_OBJECT
-
-public:
-    QtMediaServerWidget(QtMediaServer* pMediaServer);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
-private:
-    QtMediaServer*                  _pMediaServer;
-};
-
 
 
 #endif

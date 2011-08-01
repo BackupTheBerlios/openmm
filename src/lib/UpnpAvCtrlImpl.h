@@ -76,7 +76,7 @@ private:
 class CtlRenderingControlImpl : public CtlRenderingControl
 {
 public:
-    CtlRenderingControlImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+    CtlRenderingControlImpl(AvUserInterface* pAvUserInterface, CtlMediaRenderer* pMediaRenderer = 0) : _pAvUserInterface(pAvUserInterface), _pMediaRenderer(pMediaRenderer) {}
 
 private:
     virtual void _ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList);
@@ -118,6 +118,7 @@ private:
     virtual void _changedLastChange(const std::string& val);
 
     AvUserInterface*    _pAvUserInterface;
+    CtlMediaRenderer*   _pMediaRenderer;
 };
 
 

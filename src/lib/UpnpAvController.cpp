@@ -37,7 +37,7 @@ CtlMediaRenderer::addCtlDeviceCode()
 {
     // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaRendererCode = new CtlMediaRendererCode(this,
-        new CtlRenderingControlImpl(0),
+        new CtlRenderingControlImpl(0, this),
         new CtlConnectionManagerImpl(0),
         new CtlAVTransportImpl(0));
     setCtlDeviceCode(_pCtlMediaRendererCode);

@@ -20,7 +20,6 @@
  ***************************************************************************/
 
 #include "QtMediaServer.h"
-#include "QtEventFilter.h"
 
 class QtMediaContainerItem : public QStyledItemDelegate
 {

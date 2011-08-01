@@ -22,59 +22,32 @@
 #ifndef QtDeviceGroup_INCLUDED
 #define QtDeviceGroup_INCLUDED
 
-#include <QtGui>
+//#include <QtGui>
 
-#include <Omm/Upnp.h>
-
-#include "QtNavigable.h"
-
-class QtNavigator;
-class QtDeviceListItem;
+//#include <Omm/Upnp.h>
 
 
-class QtDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm::DeviceGroup
+//class QtNavigator;
+//class QtDeviceListItem;
+class QWidget;
+
+class QtDeviceGroup: public Omm::DeviceGroup
 {
-    Q_OBJECT
-        
 public:
     QtDeviceGroup(const std::string& deviceType, const std::string& shortName);
     QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
-    ~QtDeviceGroup();
+//    ~QtDeviceGroup();
 
-    QWidget* getDeviceGroupWidget();
-    
-    QVariant data(const QModelIndex& index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex& index) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex& index) const;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+    virtual QWidget* getDeviceGroupWidget() { return 0; }
 
-    virtual Omm::Device* createDevice();
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
-    
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
+    // QtNavigable interface
+//    virtual QWidget* getWidget() { return 0; }
+//    virtual QString getBrowserTitle();
 
-    virtual void selectDevice(Omm::Device* pDevice, int index);
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
-signals:
-    void setCurrentIndex(const QModelIndex& index);
-
-private:
-    void initGui();
-
-    QtNavigator*                    _pNavigator;
-    QTreeView*                      _pDeviceListView;
-    QtDeviceListItem*               _pDeviceListItem;
-
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
+//protected:
+//    virtual void initGui() {}
+//
+//    QtNavigator*                    _pNavigator;
 };
 
 

@@ -19,36 +19,36 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpAv.h>
-#include <Omm/UpnpAvController.h>
-
-#include "QtDeviceGroup.h"
-#include "QtNavigator.h"
-#include "QtMediaServer.h"
-#include "QtController.h"
+#include "QtMediaRenderer.h"
 
 
-
-QtDeviceGroup::QtDeviceGroup(const std::string& deviceType, const std::string& shortName) :
-DeviceGroup(deviceType, shortName)
+QtMediaRenderer::QtMediaRenderer()
 {
-//    _pNavigator = new QtNavigator;
-//    initGui();
-//    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
-//    _pNavigator->push(this);
+    _pMediaRendererWidget = new QtMediaRendererWidget(this);
 }
 
 
-QtDeviceGroup::QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
-DeviceGroup(pDeviceGroupDelegate)
+QtMediaRenderer::~QtMediaRenderer()
 {
-//    _pNavigator = new QtNavigator;
-//    initGui();
-//    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
-//    _pNavigator->push(this);
 }
-//
-//
-//QtDeviceGroup::~QtDeviceGroup()
-//{
-//}
+
+
+QWidget*
+QtMediaRenderer::getWidget()
+{
+    return _pMediaRendererWidget;
+}
+
+
+void
+QtMediaRenderer::initController()
+{
+    _pMediaRendererWidget->_pLabel->setText(getFriendlyName().c_str());
+}
+
+
+QtMediaRendererWidget::QtMediaRendererWidget(QtMediaRenderer* pMediaRenderer) :
+_pMediaRenderer(pMediaRenderer)
+{
+    _pLabel = new QLabel(this);
+}

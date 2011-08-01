@@ -22,18 +22,20 @@
 #ifndef QtMediaRendererGroup_INCLUDED
 #define QtMediaRendererGroup_INCLUDED
 
-#include "QtDeviceGroup.h"
+#include "QtStandardDeviceGroup.h"
 
 class QtMediaRendererControlPanel;
 
 
-class QtMediaRendererGroup : public QtDeviceGroup
+class QtMediaRendererGroup : public QtStandardDeviceGroup
 {
     Q_OBJECT
 
 public:
     QtMediaRendererGroup();
 
+    // Omm::DeviceGroup interface
+    virtual Omm::Device* createDevice();
 
 private slots:
     void playButtonPressed();

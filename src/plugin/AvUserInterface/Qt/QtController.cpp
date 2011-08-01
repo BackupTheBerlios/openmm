@@ -23,7 +23,7 @@
 #include <Omm/UpnpAvController.h>
 
 #include "QtController.h"
-#include "QtDeviceGroup.h"
+#include "QtStandardDeviceGroup.h"
 #include "QtMediaRendererGroup.h"
 #include "QtApplication.h"
 
@@ -31,8 +31,10 @@
 QtController::QtController(QtApplication* pQtApplication) :
 _pQtApplication(pQtApplication)
 {
-    registerDeviceGroup(new QtDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1, "Media"));
-    registerDeviceGroup(new QtMediaRendererGroup, false);
+    setMovable(true);
+    
+    registerDeviceGroup(new QtStandardDeviceGroup(Omm::Av::DeviceType::MEDIA_SERVER_1, "Media"));
+    registerDeviceGroup(new QtMediaRendererGroup);
 }
 
 

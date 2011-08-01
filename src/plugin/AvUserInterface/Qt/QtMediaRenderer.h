@@ -19,36 +19,50 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpAv.h>
+#ifndef QtMediaRenderer_INCLUDED
+#define QtMediaRenderer_INCLUDED
+
+#include <QtGui>
+
 #include <Omm/UpnpAvController.h>
 
-#include "QtDeviceGroup.h"
-#include "QtNavigator.h"
-#include "QtMediaServer.h"
-#include "QtController.h"
+class QtMediaRendererWidget;
 
 
-
-QtDeviceGroup::QtDeviceGroup(const std::string& deviceType, const std::string& shortName) :
-DeviceGroup(deviceType, shortName)
+class QtMediaRenderer : public QObject, public Omm::Av::CtlMediaRenderer
 {
-//    _pNavigator = new QtNavigator;
-//    initGui();
-//    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
-//    _pNavigator->push(this);
-}
+    Q_OBJECT
+
+    friend class QtMediaRendererWidget;
+
+public:
+    QtMediaRenderer();
+    ~QtMediaRenderer();
+
+    QWidget* getWidget();
+    
+    virtual void initController();
+
+private:
+    QtMediaRendererWidget*            _pMediaRendererWidget;
+};
 
 
-QtDeviceGroup::QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
-DeviceGroup(pDeviceGroupDelegate)
+class QtMediaRendererWidget : public QWidget
 {
-//    _pNavigator = new QtNavigator;
-//    initGui();
-//    // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).
-//    _pNavigator->push(this);
-}
-//
-//
-//QtDeviceGroup::~QtDeviceGroup()
-//{
-//}
+    Q_OBJECT
+
+    friend class QtMediaRenderer;
+    
+public:
+    QtMediaRendererWidget(QtMediaRenderer* pMediaRenderer);
+
+private:
+    QtMediaRenderer*                _pMediaRenderer;
+    QLabel*                         _pLabel;
+};
+
+
+
+#endif
+
