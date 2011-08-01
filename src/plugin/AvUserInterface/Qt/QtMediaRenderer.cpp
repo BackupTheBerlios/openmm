@@ -24,7 +24,7 @@
 
 QtMediaRenderer::QtMediaRenderer()
 {
-    _pMediaRendererWidget = new QtMediaRendererWidget(this);
+//    _pMediaRendererWidget = new QtMediaRendererWidget(this);
 }
 
 
@@ -33,9 +33,19 @@ QtMediaRenderer::~QtMediaRenderer()
 }
 
 
-QWidget*
-QtMediaRenderer::getWidget()
+void
+QtMediaRenderer::setDeviceWidget(QtMediaRendererWidget* pWidget)
 {
+    _pMediaRendererWidget = pWidget;
+//    _pMediaRendererWidget->setText("bla");
+}
+
+
+QtMediaRendererWidget*
+QtMediaRenderer::getDeviceWidget()
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer get device Widget");
+    
     return _pMediaRendererWidget;
 }
 
@@ -43,12 +53,21 @@ QtMediaRenderer::getWidget()
 void
 QtMediaRenderer::initController()
 {
-    _pMediaRendererWidget->_pLabel->setText(getFriendlyName().c_str());
+    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer init controller");
+    
+//    _pMediaRendererWidget->setText(getFriendlyName().c_str());
 }
 
 
-QtMediaRendererWidget::QtMediaRendererWidget(QtMediaRenderer* pMediaRenderer) :
-_pMediaRenderer(pMediaRenderer)
+//QtMediaRendererWidget::QtMediaRendererWidget(QtMediaRenderer* pMediaRenderer) :
+//_pMediaRenderer(pMediaRenderer)
+//{
+//}
+
+
+void
+QtMediaRendererWidget::paintEvent(QPaintEvent* event)
 {
-    _pLabel = new QLabel(this);
+    QLabel::paintEvent(event);
+    setText(_pMediaRenderer->getFriendlyName().c_str());
 }

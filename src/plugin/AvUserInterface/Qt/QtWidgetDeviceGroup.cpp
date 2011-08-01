@@ -19,38 +19,61 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#include <Omm/UpnpAv.h>
+#include <Omm/UpnpAvController.h>
 
 #include "QtWidgetDeviceGroup.h"
 
-class QtMediaRendererControlPanel;
-class QtMediaRenderer;
 
-class QtMediaRendererGroup : public QtWidgetDeviceGroup
+QtWidgetDeviceGroup::QtWidgetDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
+QtDeviceGroup(pDeviceGroupDelegate),
+_lastWidget(0)
 {
-    Q_OBJECT
-
-public:
-    QtMediaRendererGroup();
-
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
-
-private:
-    virtual void init();
-
-    QtMediaRendererControlPanel*    _pControlPanel;
-};
+//    _pScrollArea = new QScrollArea;
+    _pGraphicsScene = new QGraphicsScene;
+    _pGrahpicsView = new QGraphicsView(_pGraphicsScene);
+}
 
 
-#endif
+QtWidgetDeviceGroup::~QtWidgetDeviceGroup()
+{
+}
 
+
+QWidget*
+QtWidgetDeviceGroup::getDeviceGroupWidget()
+{
+    return _pGrahpicsView;
+}
+
+
+void
+QtWidgetDeviceGroup::addWidget(QWidget* pWidget)
+{
+    _widgetPool.push_back(pWidget);
+    _pGraphicsScene->addWidget(pWidget);
+    pWidget->hide();
+//    pWidget->show();
+}
+
+
+QWidget*
+QtWidgetDeviceGroup::getWidget()
+{
+    Omm::Av::Log::instance()->upnpav().debug("get device widget[" + Poco::NumberFormatter::format(_lastWidget) + "]: " + Poco::NumberFormatter::format(_widgetPool[_lastWidget]));
+
+    QWidget* pRes = _widgetPool[_lastWidget];
+    _lastWidget++;
+
+    return pRes;
+}
+
+
+void
+QtWidgetDeviceGroup::showWidget(QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt widget device group show device widget");
+
+    pWidget->show();
+//    _pGraphicsScene->addWidget(pWidget);
+}

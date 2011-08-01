@@ -26,20 +26,23 @@
 
 #include <Omm/UpnpAvController.h>
 
+#include "QtWidgetDeviceGroup.h"
+
 class QtMediaRendererWidget;
 
 
-class QtMediaRenderer : public QObject, public Omm::Av::CtlMediaRenderer
+class QtMediaRenderer : public Omm::Av::CtlMediaRenderer
 {
-    Q_OBJECT
-
     friend class QtMediaRendererWidget;
+    friend class QtMediaRendererGroup;
 
 public:
     QtMediaRenderer();
     ~QtMediaRenderer();
 
-    QWidget* getWidget();
+
+    void setDeviceWidget(QtMediaRendererWidget* pWidget);
+    QtMediaRendererWidget* getDeviceWidget();
     
     virtual void initController();
 
@@ -48,18 +51,24 @@ private:
 };
 
 
-class QtMediaRendererWidget : public QWidget
+class QtMediaRendererWidget : public QLabel
 {
     Q_OBJECT
 
     friend class QtMediaRenderer;
+    friend class QtMediaRendererGroup;
     
 public:
-    QtMediaRendererWidget(QtMediaRenderer* pMediaRenderer);
+//    QtMediaRendererWidget();
+
+signals:
+    void showWidget();
+    void hideWidget();
 
 private:
+    virtual void paintEvent(QPaintEvent* event);
+    
     QtMediaRenderer*                _pMediaRenderer;
-    QLabel*                         _pLabel;
 };
 
 

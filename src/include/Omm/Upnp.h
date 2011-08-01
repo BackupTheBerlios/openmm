@@ -218,12 +218,13 @@ class Container
 {
 public:
     typedef typename std::vector<E*>::iterator Iterator;
-    typedef typename std::map<std::string,E*>::iterator KeyIterator;
+    typedef typename std::map<std::string, E*>::iterator KeyIterator;
+    typedef typename std::map<std::string, int>::iterator PosIterator;
     
     E& get(std::string key)
     {
-        KeyIterator it = _pElements.find(key);
-        if (it != _pElements.end()) {
+        KeyIterator it = _elementMap.find(key);
+        if (it != _elementMap.end()) {
             return *(*it).second;
         }
         else {
@@ -234,90 +235,75 @@ public:
     
     E& get(int index) const
     {
-        return *_keys[index];
+        return *_elementVector[index];
     }
     
-    // TODO: make shure that only one entry exists in _pEntities and _keys for key
     void append(std::string key, E* pElement)
     {
-        _pElements[key] = pElement;
-        _keys.push_back(pElement);
+        KeyIterator it = _elementMap.find(key);
+        if (it == _elementMap.end()) {
+            _elementMap[key] = pElement;
+            _positionMap[key] = _elementVector.size();
+            _elementVector.push_back(pElement);
+        }
+        else {
+            Log::instance()->upnp().error("could not append element to container, key already present (ignoring): " + key);
+        }
     }
-    
-    void append(E* pElement)
-    {
-        _keys.push_back(pElement);
-    }
-    
+        
     void remove(std::string key)
     {
-        KeyIterator it = _pElements.find(key);
-        if (it != _pElements.end()) {
-            E* pElement = (*it).second;
-            _pElements.erase(key);
-            _keys.erase(find(_keys.begin(), _keys.end(), pElement));
+        KeyIterator it = _elementMap.find(key);
+        if (it != _elementMap.end()) {
+            _elementMap.erase(key);
+            _elementVector.erase(_elementVector.begin() + (*_positionMap.find(key)).second);
+            _positionMap.erase(key);
         }
         else {
             Log::instance()->upnp().error("could not remove element from container, key not found: " + key);
             throw Poco::Exception("");
         }
     }
-    
-    void remove(E* pElement)
-    {   
-        _keys.erase(find(_keys.begin(), _keys.end(), pElement));
-    }
-    
+        
     bool contains(const std::string& key)
     {
-        return _pElements.find(key) != _pElements.end();
-    }
-    
-    bool contains(E* pElement)
-    {
-        return find(_keys.begin(), _keys.end(), pElement) != _keys.end();
+        return _elementMap.find(key) != _elementMap.end();
     }
     
     int position(const std::string& key)
     {
-        KeyIterator it = _pElements.find(key);
-        if (it != _pElements.end()) {
-            E* pElement = (*it).second;
-            return find(_keys.begin(), _keys.end(), pElement) - _keys.begin();
+        PosIterator it = _positionMap.find(key);
+        if (it != _positionMap.end()) {
+            return (*it).second;
         }
         else {
             Log::instance()->upnp().error("could not find position of element in container, key not found: " + key);
             throw Poco::Exception("");
         }
     }
-    
-    int position(E* pElement)
-    {
-        return find(_keys.begin(), _keys.end(), pElement) - _keys.begin();
-    }
 
     void replace(const std::string& key, E* pElement)
     {
-        KeyIterator it = _pElements.find(key);
-        if (it == _pElements.end()) {
+        KeyIterator it = _elementMap.find(key);
+        if (it == _elementMap.end()) {
             Log::instance()->upnp().error("could not replace element, key not found: " + key);
             return;
         }
-        int i = position(pElement);
-
+        int i = _positionMap[key];
+        _elementVector[i] = pElement;
+        Log::instance()->upnp().debug("replace position: " + Poco::NumberFormatter::format(i) + ", old: " + Poco::NumberFormatter::format((*it).second) + ", new: " + Poco::NumberFormatter::format(pElement));
         (*it).second = pElement;
-        _keys[i] = pElement;
     }
 
     int size() const
     {
-        return _keys.size();
+        return _elementVector.size();
     }
     
     template<typename T> T getValue(const std::string& key)
     {
 //         std::clog << "Container::getValue() key: " << key << std::endl;
-        Variant* e = (*_pElements.find(key)).second;
+        Variant* e = (*_elementMap.find(key)).second;
         // FIXME: is this a proper check for "key not found in _pEntities"
         if (e) {
             T res;
@@ -336,12 +322,12 @@ public:
 //         std::clog << "Container::setValue() key: " << key << std::endl;
 //         std::clog << "_pEntities has: " << _pEntities.size() << " entries" << std::endl;
 //         std::clog << "_keys has: " << _keys.size() << " entries" << std::endl;
-        if (_pElements.find(key) == _pElements.end()) {
+        if (_elementMap.find(key) == _elementMap.end()) {
             Log::instance()->upnp().error("could not set container value, key not found: " + key);
             return;
         }
 //         std::clog << "Container::setValue() found key" << std::endl;
-        Variant* e = (*_pElements.find(key)).second;
+        Variant* e = (*_elementMap.find(key)).second;
 //         std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
         if (e) {
 //             std::clog << "Container::setValue() found key: " << key << std::endl;
@@ -355,33 +341,35 @@ public:
 
     Iterator begin()
     {
-        return _keys.begin();
+        return _elementVector.begin();
     }
     
     Iterator end()
     {
-        return _keys.end();
+        return _elementVector.end();
     }
     
     KeyIterator beginKey()
     {
-        return _pElements.begin();
+        return _elementMap.begin();
     }
         
     KeyIterator endKey()
     {
-        return _pElements.end();
+        return _elementMap.end();
     }
     
     void clear()
     {
-        _pElements.clear();
-        _keys.clear();
+        _elementMap.clear();
+        _positionMap.clear();
+        _elementVector.clear();
     }
     
 private:
-    std::map<std::string,E*>    _pElements;
-    std::vector<E*>             _keys;
+    std::map<std::string, E*>   _elementMap;
+    std::map<std::string, int>  _positionMap;
+    std::vector<E*>             _elementVector;
 };
 
 

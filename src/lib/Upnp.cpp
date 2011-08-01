@@ -2977,7 +2977,10 @@ DeviceContainer::replaceDevice(Device* pOldDevice, Device* pNewDevice)
     // set the reverse pointers pointing to pNewDevice.
     pOldDevice->getDeviceData()->setDevice(pNewDevice);
     _devices.replace(pOldDevice->getUuid(), pNewDevice);
-    // TODO: shallow delete old device, don't do a delete pOldDevice;
+    if (pOldDevice->getUuid() == _pRootDevice->getUuid()) {
+        _pRootDevice = pNewDevice;
+    }
+    delete pOldDevice;
 }
 
 
@@ -3266,18 +3269,22 @@ _pCtlDeviceCode(0)
 
 Device::~Device()
 {
-    if (_pDeviceData) {
-        delete _pDeviceData;
-        _pDeviceData = 0;
-    }
-    if (_pDevDeviceCode) {
-        delete _pDevDeviceCode;
-        _pDevDeviceCode = 0;
-    }
-    if (_pCtlDeviceCode) {
-        delete _pCtlDeviceCode;
-        _pCtlDeviceCode = 0;
-    }
+    _pDeviceData = 0;
+    _pDevDeviceCode = 0;
+    _pCtlDeviceCode = 0;
+
+//    if (_pDeviceData) {
+//        delete _pDeviceData;
+//        _pDeviceData = 0;
+//    }
+//    if (_pDevDeviceCode) {
+//        delete _pDevDeviceCode;
+//        _pDevDeviceCode = 0;
+//    }
+//    if (_pCtlDeviceCode) {
+//        delete _pCtlDeviceCode;
+//        _pCtlDeviceCode = 0;
+//    }
 }
 
 
@@ -3820,9 +3827,10 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
-//             Log::instance()->ssdp().debug("identified byebye message");
+             Log::instance()->ssdp().debug("identified byebye message");
             // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && _deviceContainers.contains(uuid)) {
+                Log::instance()->ssdp().debug("identified byebye message, attempting to remove device container");
                 removeDeviceContainer(&_deviceContainers.get(uuid));
             }
             break;
@@ -3846,6 +3854,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         if (_pUserInterface) {
             _pUserInterface->beginAddDeviceContainer(_deviceContainers.size());
         }
+
         addDeviceContainer(pDeviceContainer, _deviceContainers.size(), true);
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
@@ -3855,9 +3864,10 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
             Log::instance()->upnp().debug("controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
-                Log::instance()->upnp().information("controller adds device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
                 Device* pTypedDevice = pDeviceGroup->createDevice();
                 pDeviceContainer->replaceDevice(pDevice, pTypedDevice);
+
+                Log::instance()->upnp().information("controller adds device, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
                 pTypedDevice->addCtlDeviceCode();
                 pTypedDevice->initControllerEventing();
                 pTypedDevice->initController();
@@ -3866,12 +3876,12 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 if (!pDeviceGroup->getVisible()) {
                     showDeviceGroup(pDeviceGroup);
                 }
-
-                Log::instance()->upnp().debug("controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+                Log::instance()->upnp().debug("controller add device finished, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
             }
         }
-        
+
         addDeviceContainer(pDeviceContainer, _deviceContainers.size() - 1, false);
+
         if (_pUserInterface) {
             _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
         }
@@ -3882,7 +3892,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 void
 Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
+    Log::instance()->upnp().debug("remove device container");
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
+    Log::instance()->upnp().debug("remove device container with root device uuid: " + uuid);
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
         int position = _deviceContainers.position(uuid);
@@ -4611,9 +4623,9 @@ DeviceGroup::addDevice(Device* pDevice)
 void
 DeviceGroup::removeDevice(Device* pDevice)
 {
-    removeDevice(pDevice, _devices.size(), true);
+    removeDevice(pDevice, _devices.size() - 1, true);
     _devices.remove(pDevice->getUuid());
-    removeDevice(pDevice, _devices.size() - 1, false);
+    removeDevice(pDevice, _devices.size(), false);
 }
 
 
@@ -4639,7 +4651,7 @@ DeviceGroup::selectDevice(Device* pDevice)
     Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
     _pSelectedDevice = pDevice;
     pDevice->selected();
-    selectDevice(pDevice, _devices.position(pDevice));
+    selectDevice(pDevice, _devices.position(pDevice->getUuid()));
 }
 
 

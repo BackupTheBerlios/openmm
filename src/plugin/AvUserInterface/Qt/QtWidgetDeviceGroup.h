@@ -19,36 +19,47 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#ifndef QtWidgetDeviceGroup_INCLUDED
+#define QtWidgetDeviceGroup_INCLUDED
 
-#include "QtWidgetDeviceGroup.h"
+#include <QtGui>
 
-class QtMediaRendererControlPanel;
-class QtMediaRenderer;
+#include <Omm/Upnp.h>
 
-class QtMediaRendererGroup : public QtWidgetDeviceGroup
+#include "QtDeviceGroup.h"
+
+
+//class QtWidgetDevice
+//{
+//public:
+//    virtual QWidget* getDeviceWidget() = 0;
+//};
+
+
+class QtWidgetDeviceGroup : public QObject, public QtDeviceGroup
 {
     Q_OBJECT
-
+        
 public:
-    QtMediaRendererGroup();
+    QtWidgetDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
+    ~QtWidgetDeviceGroup();
 
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+    void addWidget(QWidget* pWidget);
+    QWidget* getWidget();
 
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
+    void showWidget(QWidget* pWidget);
+
+    // QtDeviceGroup interface
+    virtual QWidget* getDeviceGroupWidget();
+
+protected:
+    std::vector<QWidget*>           _widgetPool;
+    int                             _lastWidget;
 
 private:
-    virtual void init();
-
-    QtMediaRendererControlPanel*    _pControlPanel;
+//    QScrollArea*                    _pScrollArea;
+    QGraphicsScene*                 _pGraphicsScene;
+    QGraphicsView*                  _pGrahpicsView;
 };
 
 

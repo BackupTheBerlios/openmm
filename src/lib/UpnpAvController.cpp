@@ -560,7 +560,7 @@ int
 AvController::rendererIndex(AvRendererView* pRendererView)
 {
     if (pRendererView) {
-        return _renderers.position(pRendererView);
+        return _renderers.position(pRendererView->getUuid());
     }
     else {
         return -1;
