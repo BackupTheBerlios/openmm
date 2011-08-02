@@ -106,11 +106,11 @@ void
 QtDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
-        Omm::Log::instance()->upnp().debug("Qt standard device group adds device at position: " + Poco::NumberFormatter::format(position));
+        Omm::Log::instance()->upnp().debug("Qt device group adds device at position: " + Poco::NumberFormatter::format(position));
         beginInsertRows(QModelIndex(), position, position);
     }
     else {
-        Omm::Log::instance()->upnp().debug("Qt standard device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
         endInsertRows();
         emit layoutChanged();
         if (rowCount() == 1) {
@@ -124,11 +124,11 @@ void
 QtDeviceGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
-        Omm::Log::instance()->upnp().debug("Qt standard device group removes device at position: " + Poco::NumberFormatter::format(position));
+        Omm::Log::instance()->upnp().debug("Qt device group removes device at position: " + Poco::NumberFormatter::format(position));
         beginRemoveRows(QModelIndex(), position, position);
     }
     else {
-        Omm::Log::instance()->upnp().debug("Qt standard device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
         endRemoveRows();
         emit layoutChanged();
     }

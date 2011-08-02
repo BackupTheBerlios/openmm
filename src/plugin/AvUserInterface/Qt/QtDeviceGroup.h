@@ -23,11 +23,11 @@
 #define QtDeviceGroup_INCLUDED
 
 #include <QtGui>
-
 #include <Omm/Upnp.h>
+#include "QtWidgetList.h"
 
 
-class QtDeviceGroup: public QAbstractItemModel, public Omm::DeviceGroup
+class QtDeviceGroup: public QtWidgetListModel, public Omm::DeviceGroup
 {
     Q_OBJECT
     

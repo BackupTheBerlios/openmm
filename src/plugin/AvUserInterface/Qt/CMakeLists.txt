@@ -36,6 +36,7 @@ QtNavigator.cpp
 QtDeviceGroup.cpp
 QtWidgetDeviceGroup.cpp
 QtStandardDeviceGroup.cpp
+QtWidgetList.cpp
 QtMediaRendererGroup.cpp
 QtMediaRenderer.cpp
 QtMediaServerGroup.cpp
@@ -80,6 +81,7 @@ QtNavigatorPrivate.h
 QtDeviceGroup.h
 QtWidgetDeviceGroup.h
 QtStandardDeviceGroup.h
+QtWidgetList.h
 QtMediaRendererGroup.h
 QtMediaRenderer.h
 QtMediaServerGroup.h

@@ -26,96 +26,15 @@
 #include "QtMediaRendererControlPanel.h"
 #include "QtMediaRenderer.h"
 #include "QtController.h"
+#include "QtWidgetList.h"
 
-
-
-class QtMediaRendererItem : public QStyledItemDelegate
-{
-public:
-    QtMediaRendererItem(QObject* parent = 0);
-
-    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
-};
-
-
-QtMediaRendererItem::QtMediaRendererItem(QObject* parent) :
-QStyledItemDelegate(parent)
-{
-}
-
-
-void
-QtMediaRendererItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    int padding = 4;
-    QRect iconRect(option.rect);
-    iconRect.setLeft(padding);
-    iconRect.setWidth(option.rect.height());
-    QRect textRect(option.rect);
-    textRect.setLeft(iconRect.right() + padding);
-
-
-    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
-    painter->save();
-    Omm::Av::Log::instance()->upnpav().debug("media renderer widget: " + Poco::NumberFormatter::format(pRenderer->getDeviceWidget()));
-//    pRenderer->getWidget()->render(painter);
-    painter->restore();
-
-
-//    Omm::Av::Log::instance()->upnpav().debug(
-//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
-//    );
-
-//    if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
-//        QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));
-//        painter->save();
-////        painter->setRenderHint(QPainter::Antialiasing, true);
-//        if (option.state & QStyle::State_Selected) {
-//            painter->fillRect(option.rect, option.palette.highlight());
-//            painter->setPen(option.palette.highlightedText().color());
-//        }
-////        painter->setFont(option.font);  // painter is style aware, don't need to set this.
-//        painter->drawText(textRect, Qt::AlignVCenter, title);
-//        painter->restore();
-//    }
-//    if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
-////        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
-//        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
-//        painter->save();
-//        icon.paint(painter, iconRect);
-//        painter->restore();
-//    }
-    // use QApplication::style()->drawControl() to draw Qt widgets on the painter
-
-//    else {
-//        // default painter
-//        QStyledItemDelegate::paint(painter, option, index);
-//    }
-}
-
-
-QSize
-QtMediaRendererItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    QSize itemSize = QStyledItemDelegate::sizeHint(option, index);
-    itemSize.rheight() *= 2;
-    return itemSize;
-}
 
 
 QtMediaRendererGroup::QtMediaRendererGroup() :
-//QtStandardDeviceGroup(new Omm::Av::MediaRendererGroupDelegate, new QtMediaRendererItem),
-QtWidgetDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
+QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 {
-    for (int i = 0; i < 10; ++i) {
-        QtMediaRendererWidget* pRendererWidget = new QtMediaRendererWidget;
-        pRendererWidget->setText(QString::number(i));
-//        pRendererWidget->setText(QString(10));
-        Omm::Av::Log::instance()->upnpav().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pRendererWidget));
-        addWidget(pRendererWidget);
-    }
+    _pWidgetList = new QtWidgetList;
+    _pWidgetList->setModel(this);
 }
 
 
@@ -123,17 +42,7 @@ Omm::Device*
 QtMediaRendererGroup::createDevice()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group create media renderer");
-
-//    QtMediaRenderer* pRes = new QtMediaRenderer;
-//    pRes->moveToThread(QApplication::instance()->thread());
-    
-    QtMediaRendererWidget* pWidget = static_cast<QtMediaRendererWidget*>(getWidget());
-    QtMediaRenderer* pRes = new QtMediaRenderer;
-    pWidget->_pMediaRenderer = pRes;
-    pRes->setDeviceWidget(pWidget);
-    connect(pWidget, SIGNAL(showWidget()), pWidget, SLOT(show()));
-    connect(pWidget, SIGNAL(hideWidget()), pWidget, SLOT(hide()));
-    return pRes;
+    return new QtMediaRenderer;
 }
 
 
@@ -141,13 +50,14 @@ void
 QtMediaRendererGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group adds device at position:" + Poco::NumberFormatter::format(position));
+        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group adds device at position: " + Poco::NumberFormatter::format(position));
     }
     else {
         QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
         Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
         Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-        emit pRenderer->getDeviceWidget()->showWidget();
+//        emit pRenderer->getDeviceWidget()->showWidget();
+        insertWidget(position);
         Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished adding device.");
     }
 }
@@ -157,15 +67,117 @@ void
 QtMediaRendererGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group removes device at position:" + Poco::NumberFormatter::format(position));
+        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group removes device at position: " + Poco::NumberFormatter::format(position));
         QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
         Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
         Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-        emit pRenderer->getDeviceWidget()->hideWidget();
+//        emit pRenderer->getDeviceWidget()->hideWidget();
+        removeWidget(position);
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished removing device.");
     }
+}
+
+
+QWidget*
+QtMediaRendererGroup::getDeviceGroupWidget()
+{
+    return _pWidgetList;
+}
+
+
+//QWidget*
+//QtMediaRendererGroup::createWidget(const QModelIndex& parent)
+//{
+//    return new QtMediaRendererWidget;
+//}
+//
+//
+//QWidget*
+//QtMediaRendererGroup::getWidget(const QModelIndex& index)
+//{
+//    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
+//    return pRenderer->getDeviceWidget();
+//}
+//
+//
+//void
+//QtMediaRendererGroup::attachWidget(const QModelIndex& index, QWidget* pWidget)
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
+//    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
+//    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget: " + pRenderer->getFriendlyName());
+//    QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
+//    pRendererWidget->_pMediaRenderer = pRenderer;
+//    pRenderer->setDeviceWidget(pRendererWidget);
+//    connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
+//    connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
+//}
+//
+//
+//void
+//QtMediaRendererGroup::detachWidget(const QModelIndex& index)
+//{
+//    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
+//    QtMediaRendererWidget* pRendererWidget = pRenderer->getDeviceWidget();
+//    pRendererWidget->_pMediaRenderer = 0;
+//    pRenderer->setDeviceWidget(0);
+//    disconnect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
+//    disconnect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
+//}
+
+
+QWidget*
+QtMediaRendererGroup::createWidget()
+{
+    return new QtMediaRendererWidget;
+}
+
+
+QWidget*
+QtMediaRendererGroup::getWidget(int row)
+{
+    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
+    return pRenderer->getDeviceWidget();
+}
+
+
+void
+QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
+    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
+    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget: " + pRenderer->getFriendlyName());
+    QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
+    pRendererWidget->_pMediaRenderer = pRenderer;
+    pRenderer->setDeviceWidget(pRendererWidget);
+
+//    pRendererWidget->setRendererName(pRenderer->getFriendlyName());
+    
+    connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
+    connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
+    connect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
+
+    emit pRendererWidget->configureWidget();
+    emit pRendererWidget->showWidget();
+}
+
+
+void
+QtMediaRendererGroup::detachWidget(int row)
+{
+    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
+    QtMediaRendererWidget* pRendererWidget = pRenderer->getDeviceWidget();
+
+    emit pRendererWidget->hideWidget();
+
+    disconnect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
+    disconnect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
+    disconnect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
+
+    pRendererWidget->_pMediaRenderer = 0;
+    pRenderer->setDeviceWidget(0);
 }
 
 

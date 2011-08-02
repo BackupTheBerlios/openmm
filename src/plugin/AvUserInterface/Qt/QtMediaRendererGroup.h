@@ -22,12 +22,13 @@
 #ifndef QtMediaRendererGroup_INCLUDED
 #define QtMediaRendererGroup_INCLUDED
 
-#include "QtWidgetDeviceGroup.h"
+#include "QtDeviceGroup.h"
 
-class QtMediaRendererControlPanel;
 class QtMediaRenderer;
+class QtWidgetList;
+class QtMediaRendererControlPanel;
 
-class QtMediaRendererGroup : public QtWidgetDeviceGroup
+class QtMediaRendererGroup : public QtDeviceGroup
 {
     Q_OBJECT
 
@@ -39,6 +40,21 @@ public:
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
 
+    // QtDeviceGroup interface
+    virtual QWidget* getDeviceGroupWidget();
+
+    // QtWidgetListModel interface
+//    virtual QWidget* createWidget(const QModelIndex& parent = QModelIndex());
+//    virtual QWidget* getWidget(const QModelIndex& index);
+//    virtual void attachWidget(const QModelIndex& index, QWidget* pWidget);
+//    virtual void detachWidget(const QModelIndex& index);
+
+    // QtWidgetListModel interface
+    virtual QWidget* createWidget();
+    virtual QWidget* getWidget(int row);
+    virtual void attachWidget(int row, QWidget* pWidget);
+    virtual void detachWidget(int row);
+
 private slots:
     void playButtonPressed();
     void stopButtonPressed();
@@ -48,6 +64,7 @@ private slots:
 private:
     virtual void init();
 
+    QtWidgetList*                   _pWidgetList;
     QtMediaRendererControlPanel*    _pControlPanel;
 };
 

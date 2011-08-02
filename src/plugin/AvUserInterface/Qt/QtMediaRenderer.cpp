@@ -24,7 +24,6 @@
 
 QtMediaRenderer::QtMediaRenderer()
 {
-//    _pMediaRendererWidget = new QtMediaRendererWidget(this);
 }
 
 
@@ -37,7 +36,6 @@ void
 QtMediaRenderer::setDeviceWidget(QtMediaRendererWidget* pWidget)
 {
     _pMediaRendererWidget = pWidget;
-//    _pMediaRendererWidget->setText("bla");
 }
 
 
@@ -54,20 +52,36 @@ void
 QtMediaRenderer::initController()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media renderer init controller");
-    
-//    _pMediaRendererWidget->setText(getFriendlyName().c_str());
 }
 
 
-//QtMediaRendererWidget::QtMediaRendererWidget(QtMediaRenderer* pMediaRenderer) :
-//_pMediaRenderer(pMediaRenderer)
-//{
-//}
+QtMediaRendererWidget::QtMediaRendererWidget()
+{
+    resize(200, 40);
+    _pLayout = new QHBoxLayout(this);
+    _pLabel = new QPushButton(this);
+    _pBackButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipBackward), "", this);
+    _pPlayButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "", this);
+    _pStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaStop), "", this);
+    _pForwardButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipForward), "", this);
+
+    _pLayout->addWidget(_pLabel);
+    _pLayout->addWidget(_pBackButton);
+    _pLayout->addWidget(_pPlayButton);
+    _pLayout->addWidget(_pStopButton);
+    _pLayout->addWidget(_pForwardButton);
+}
 
 
 void
-QtMediaRendererWidget::paintEvent(QPaintEvent* event)
+QtMediaRendererWidget::configure()
 {
-    QLabel::paintEvent(event);
-    setText(_pMediaRenderer->getFriendlyName().c_str());
+    _pLabel->setText(QString::fromStdString(_pMediaRenderer->getFriendlyName()));
+}
+
+
+void
+QtMediaRendererWidget::setRendererName(const std::string& name)
+{
+    _pLabel->setText(QString::fromStdString(name));
 }

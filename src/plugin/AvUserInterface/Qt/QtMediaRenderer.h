@@ -51,7 +51,7 @@ private:
 };
 
 
-class QtMediaRendererWidget : public QLabel
+class QtMediaRendererWidget : public QWidget
 {
     Q_OBJECT
 
@@ -59,16 +59,26 @@ class QtMediaRendererWidget : public QLabel
     friend class QtMediaRendererGroup;
     
 public:
-//    QtMediaRendererWidget();
+    QtMediaRendererWidget();
+
+    void setRendererName(const std::string& name);
 
 signals:
     void showWidget();
     void hideWidget();
+    void configureWidget();
+
+public slots:
+    void configure();
 
 private:
-    virtual void paintEvent(QPaintEvent* event);
-    
     QtMediaRenderer*                _pMediaRenderer;
+    QHBoxLayout*                    _pLayout;
+    QPushButton*                    _pLabel;
+    QPushButton*                    _pBackButton;
+    QPushButton*                    _pPlayButton;
+    QPushButton*                    _pStopButton;
+    QPushButton*                    _pForwardButton;
 };
 
 
