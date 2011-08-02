@@ -152,12 +152,14 @@ QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
     QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
     pRendererWidget->_pMediaRenderer = pRenderer;
     pRenderer->setDeviceWidget(pRendererWidget);
+    pRendererWidget->setRow(row);
 
 //    pRendererWidget->setRendererName(pRenderer->getFriendlyName());
     
     connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
     connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
     connect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
+    connect(pRendererWidget, SIGNAL(selectedWidget(int)), _pWidgetList, SIGNAL(selectedWidget(int)));
 
     emit pRendererWidget->configureWidget();
     emit pRendererWidget->showWidget();
@@ -222,6 +224,14 @@ QtMediaRendererGroup::positionSliderMoved(int value)
 
 
 void
+QtMediaRendererGroup::selectedRenderer(int row)
+{
+    Omm::Device* pDevice = getDevice(row);
+    DeviceGroup::selectDevice(pDevice);
+}
+
+
+void
 QtMediaRendererGroup::init()
 {
     _pControlPanel = new QtMediaRendererControlPanel;
@@ -231,4 +241,6 @@ QtMediaRendererGroup::init()
     connect(_pControlPanel, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
     connect(_pControlPanel, SIGNAL(volumeSliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(_pControlPanel, SIGNAL(positionSliderMoved(int)), this, SLOT(positionSliderMoved(int)));
+
+    connect(_pWidgetList, SIGNAL(selectedWidget(int)), this, SLOT(selectedRenderer(int)));
 }

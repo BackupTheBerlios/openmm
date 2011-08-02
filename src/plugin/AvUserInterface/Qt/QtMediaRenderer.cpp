@@ -57,7 +57,7 @@ QtMediaRenderer::initController()
 
 QtMediaRendererWidget::QtMediaRendererWidget()
 {
-    resize(200, 40);
+    resize(600, 40);
     _pLayout = new QHBoxLayout(this);
     _pLabel = new QPushButton(this);
     _pBackButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipBackward), "", this);
@@ -65,11 +65,22 @@ QtMediaRendererWidget::QtMediaRendererWidget()
     _pStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaStop), "", this);
     _pForwardButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipForward), "", this);
 
+    _pVolumeSlider = new QSlider(Qt::Horizontal, this);
+    _pVolumeSlider->setTracking(true);
+    _pVolumeSlider->setSingleStep(5);
+    _pSeekSlider = new QSlider(Qt::Horizontal, this);
+    _pSeekSlider->setSingleStep(10);
+    _pSeekSlider->setPageStep(25);
+
     _pLayout->addWidget(_pLabel);
     _pLayout->addWidget(_pBackButton);
     _pLayout->addWidget(_pPlayButton);
     _pLayout->addWidget(_pStopButton);
     _pLayout->addWidget(_pForwardButton);
+    _pLayout->addWidget(_pVolumeSlider);
+    _pLayout->addWidget(_pSeekSlider);
+
+    connect(_pLabel, SIGNAL(pressed()), this, SLOT(rendererSelected()));
 }
 
 
@@ -81,7 +92,22 @@ QtMediaRendererWidget::configure()
 
 
 void
-QtMediaRendererWidget::setRendererName(const std::string& name)
+QtMediaRendererWidget::rendererSelected()
 {
-    _pLabel->setText(QString::fromStdString(name));
+    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer widget selected renderer: " + _pMediaRenderer->getFriendlyName());
+    emit selectedWidget(_row);
+}
+
+
+//void
+//QtMediaRendererWidget::setRendererName(const std::string& name)
+//{
+//    _pLabel->setText(QString::fromStdString(name));
+//}
+
+
+void
+QtMediaRendererWidget::setRow(int row)
+{
+    _row = row;
 }

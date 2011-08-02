@@ -84,6 +84,9 @@ public:
     virtual void insertWidget(int row);
     virtual void removeWidget(int row);
 
+signals:
+    void selectedWidget(int row);
+
 private:
     QGraphicsScene*                         _pGraphicsScene;
     std::vector<QGraphicsProxyWidget*>      _proxyWidgets;

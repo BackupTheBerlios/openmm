@@ -60,6 +60,7 @@ private slots:
     void stopButtonPressed();
     void volumeSliderMoved(int value);
     void positionSliderMoved(int value);
+    void selectedRenderer(int row);
 
 private:
     virtual void init();
