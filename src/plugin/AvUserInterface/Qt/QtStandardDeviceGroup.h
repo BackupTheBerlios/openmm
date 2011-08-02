@@ -33,7 +33,7 @@ class QtNavigator;
 class QtDeviceListItem;
 
 
-class QtStandardDeviceGroup : public QAbstractItemModel, public QtNavigable, public QtDeviceGroup
+class QtStandardDeviceGroup : public QtDeviceGroup, public QtNavigable
 {
     Q_OBJECT
         
@@ -44,28 +44,12 @@ public:
     // QtDeviceGroup interface
     virtual QWidget* getDeviceGroupWidget();
 
-    // QAbstractItemModel interface
-    QVariant data(const QModelIndex& index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex& index) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex& index) const;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
-
     // QtNavigable interface
     virtual QWidget* getWidget();
     virtual QString getBrowserTitle();
 
-    // Omm::DeviceGroup interface
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
-
 private slots:
     void selectedModelIndex(const QModelIndex& index);
-
-signals:
-    void setCurrentIndex(const QModelIndex& index);
 
 protected:
     QtNavigator*                    _pNavigator;
@@ -75,9 +59,6 @@ private:
 
     QListView*                      _pDeviceListView;
     QStyledItemDelegate*            _pItemDelegate;
-
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
 };
 
 

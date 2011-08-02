@@ -77,7 +77,7 @@ QtController.h
 #QtEventFilter.h
 QtNavigator.h
 QtNavigatorPrivate.h
-#QtDeviceGroup.h
+QtDeviceGroup.h
 QtWidgetDeviceGroup.h
 QtStandardDeviceGroup.h
 QtMediaRendererGroup.h

@@ -22,15 +22,39 @@
 #ifndef QtDeviceGroup_INCLUDED
 #define QtDeviceGroup_INCLUDED
 
+#include <QtGui>
 
-class QWidget;
+#include <Omm/Upnp.h>
 
-class QtDeviceGroup: public Omm::DeviceGroup
+
+class QtDeviceGroup: public QAbstractItemModel, public Omm::DeviceGroup
 {
+    Q_OBJECT
+    
 public:
     QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
 
     virtual QWidget* getDeviceGroupWidget() { return 0; }
+
+    // QAbstractItemModel interface
+    QVariant data(const QModelIndex& index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex& index) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+
+    // Omm::DeviceGroup interface
+    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
+    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
+
+signals:
+    void setCurrentIndex(const QModelIndex& index);
+
+private:
+    QTextCodec*                     _charEncoding;
+    QFileIconProvider*              _iconProvider;
 };
 
 

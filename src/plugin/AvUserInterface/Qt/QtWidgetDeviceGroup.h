@@ -29,16 +29,9 @@
 #include "QtDeviceGroup.h"
 
 
-//class QtWidgetDevice
-//{
-//public:
-//    virtual QWidget* getDeviceWidget() = 0;
-//};
-
-
-class QtWidgetDeviceGroup : public QObject, public QtDeviceGroup
+class QtWidgetDeviceGroup : public QtDeviceGroup
 {
-    Q_OBJECT
+//    Q_OBJECT
         
 public:
     QtWidgetDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
