@@ -80,30 +80,55 @@ QtMediaRendererWidget::QtMediaRendererWidget()
     _pLayout->addWidget(_pVolumeSlider);
     _pLayout->addWidget(_pSeekSlider);
 
-    connect(_pLabel, SIGNAL(pressed()), this, SLOT(rendererSelected()));
+    connect(_pLabel, SIGNAL(pressed()), this, SLOT(selectedRenderer()));
+    connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
+    connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
+    connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
+    connect(_pSeekSlider, SIGNAL(sliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 }
 
 
 void
 QtMediaRendererWidget::configure()
 {
-    _pLabel->setText(QString::fromStdString(_pMediaRenderer->getFriendlyName()));
+    _pLabel->setText(QString::fromStdString(_pRenderer->getFriendlyName()));
 }
 
 
 void
-QtMediaRendererWidget::rendererSelected()
+QtMediaRendererWidget::selectedRenderer()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer widget selected renderer: " + _pMediaRenderer->getFriendlyName());
+    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer widget selected renderer: " + _pRenderer->getFriendlyName());
     emit selectedWidget(_row);
 }
 
 
-//void
-//QtMediaRendererWidget::setRendererName(const std::string& name)
-//{
-//    _pLabel->setText(QString::fromStdString(name));
-//}
+void
+QtMediaRendererWidget::playButtonPressed()
+{
+    _pRenderer->playPressed();
+}
+
+
+void
+QtMediaRendererWidget::stopButtonPressed()
+{
+    _pRenderer->stopPressed();
+}
+
+
+void
+QtMediaRendererWidget::volumeSliderMoved(int value)
+{
+    _pRenderer->volumeChanged(value);
+}
+
+
+void
+QtMediaRendererWidget::positionSliderMoved(int value)
+{
+    _pRenderer->positionMoved(value);
+}
 
 
 void

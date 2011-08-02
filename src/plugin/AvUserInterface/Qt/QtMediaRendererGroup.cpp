@@ -150,7 +150,7 @@ QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
     Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget: " + pRenderer->getFriendlyName());
     QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
-    pRendererWidget->_pMediaRenderer = pRenderer;
+    pRendererWidget->_pRenderer = pRenderer;
     pRenderer->setDeviceWidget(pRendererWidget);
     pRendererWidget->setRow(row);
 
@@ -178,7 +178,7 @@ QtMediaRendererGroup::detachWidget(int row)
     disconnect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
     disconnect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
 
-    pRendererWidget->_pMediaRenderer = 0;
+    pRendererWidget->_pRenderer = 0;
     pRenderer->setDeviceWidget(0);
 }
 

@@ -61,7 +61,6 @@ class QtMediaRendererWidget : public QWidget
 public:
     QtMediaRendererWidget();
 
-//    void setRendererName(const std::string& name);
     void setRow(int row);
 
 signals:
@@ -74,10 +73,14 @@ public slots:
     void configure();
 
 private slots:
-    void rendererSelected();
+    void selectedRenderer();
+    void playButtonPressed();
+    void stopButtonPressed();
+    void volumeSliderMoved(int value);
+    void positionSliderMoved(int value);
 
 private:
-    QtMediaRenderer*                _pMediaRenderer;
+    QtMediaRenderer*                _pRenderer;
     QHBoxLayout*                    _pLayout;
     QPushButton*                    _pLabel;
     QPushButton*                    _pBackButton;
