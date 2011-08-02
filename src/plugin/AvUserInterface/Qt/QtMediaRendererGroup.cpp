@@ -161,8 +161,7 @@ QtMediaRendererGroup::removeDevice(Omm::Device* pDevice, int position, bool begi
         QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
         Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
         Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-        pRenderer->getDeviceWidget();
-//        emit pRenderer->getDeviceWidget()->hideWidget();
+        emit pRenderer->getDeviceWidget()->hideWidget();
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished removing device.");

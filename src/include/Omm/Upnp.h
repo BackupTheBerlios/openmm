@@ -217,9 +217,9 @@ template<class E>
 class Container
 {
 public:
-    typedef typename std::vector<E*>::iterator Iterator;
     typedef typename std::map<std::string, E*>::iterator KeyIterator;
-    typedef typename std::map<std::string, int>::iterator PosIterator;
+    typedef typename std::vector<E*>::iterator Iterator;
+    typedef typename std::vector<std::string>::iterator PosIterator;
     
     E& get(std::string key)
     {
@@ -243,38 +243,24 @@ public:
         KeyIterator it = _elementMap.find(key);
         if (it == _elementMap.end()) {
             _elementMap[key] = pElement;
-            _positionMap[key] = _elementVector.size();
             _elementVector.push_back(pElement);
+            _keyVector.push_back(key);
         }
         else {
             Log::instance()->upnp().error("could not append element to container, key already present (ignoring): " + key);
         }
     }
-        
-    void remove(std::string key)
+
+    int size() const
     {
-        KeyIterator it = _elementMap.find(key);
-        if (it != _elementMap.end()) {
-            _elementMap.erase(key);
-            _elementVector.erase(_elementVector.begin() + (*_positionMap.find(key)).second);
-            _positionMap.erase(key);
-        }
-        else {
-            Log::instance()->upnp().error("could not remove element from container, key not found: " + key);
-            throw Poco::Exception("");
-        }
+        return _elementVector.size();
     }
-        
-    bool contains(const std::string& key)
-    {
-        return _elementMap.find(key) != _elementMap.end();
-    }
-    
+
     int position(const std::string& key)
     {
-        PosIterator it = _positionMap.find(key);
-        if (it != _positionMap.end()) {
-            return (*it).second;
+        PosIterator it = find(_keyVector.begin(), _keyVector.end(), key);
+        if (it != _keyVector.end()) {
+            return it - _keyVector.begin();
         }
         else {
             Log::instance()->upnp().error("could not find position of element in container, key not found: " + key);
@@ -282,6 +268,25 @@ public:
         }
     }
 
+    bool contains(const std::string& key)
+    {
+        return _elementMap.find(key) != _elementMap.end();
+    }
+
+    void remove(std::string key)
+    {
+        KeyIterator it = _elementMap.find(key);
+        if (it != _elementMap.end()) {
+            _elementMap.erase(key);
+            _elementVector.erase(_elementVector.begin() + position(key));
+            _keyVector.erase(_keyVector.begin() + position(key));
+        }
+        else {
+            Log::instance()->upnp().error("could not remove element from container, key not found: " + key);
+            throw Poco::Exception("");
+        }
+    }
+        
     void replace(const std::string& key, E* pElement)
     {
         KeyIterator it = _elementMap.find(key);
@@ -289,54 +294,39 @@ public:
             Log::instance()->upnp().error("could not replace element, key not found: " + key);
             return;
         }
-        int i = _positionMap[key];
+        int i = position(key);
         _elementVector[i] = pElement;
         Log::instance()->upnp().debug("replace position: " + Poco::NumberFormatter::format(i) + ", old: " + Poco::NumberFormatter::format((*it).second) + ", new: " + Poco::NumberFormatter::format(pElement));
         (*it).second = pElement;
     }
 
-    int size() const
-    {
-        return _elementVector.size();
-    }
-    
     template<typename T> T getValue(const std::string& key)
     {
-//         std::clog << "Container::getValue() key: " << key << std::endl;
         Variant* e = (*_elementMap.find(key)).second;
-        // FIXME: is this a proper check for "key not found in _pEntities"
         if (e) {
             T res;
             e->getValue(res);
-//             std::clog << "Container::getValue() key: " << key << ", val: " << e->getValue() << std::endl;
             return res;
         } else {
-//             std::cerr << "Container::getValue() could not find key: " << key << std::endl;
-            // TODO: throw an exception
+             Log::instance()->upnp().error("get container value, could not find key: " + key);
+//            throw Poco::Exception("");
             return T();
         }
     }
     
     template<typename T> void setValue(const std::string& key, const T& val)
     {
-//         std::clog << "Container::setValue() key: " << key << std::endl;
-//         std::clog << "_pEntities has: " << _pEntities.size() << " entries" << std::endl;
-//         std::clog << "_keys has: " << _keys.size() << " entries" << std::endl;
         if (_elementMap.find(key) == _elementMap.end()) {
             Log::instance()->upnp().error("could not set container value, key not found: " + key);
             return;
         }
-//         std::clog << "Container::setValue() found key" << std::endl;
         Variant* e = (*_elementMap.find(key)).second;
-//         std::clog << "Container::setValue() found Variant pointer: " << e << std::endl;
         if (e) {
-//             std::clog << "Container::setValue() found key: " << key << std::endl;
             e->setValue(val);
         }
         else {
-//             std::cerr << "Container::setValue() pointer to Variant is invalid" << std::endl;
+             Log::instance()->upnp().error("set container value, pointer to Variant is invalid (ignoring)");
         }
-//         std::clog << "Container::setValue() key: " << key << ", val: " << e->getValue() << std::endl;
     }
 
     Iterator begin()
@@ -362,14 +352,14 @@ public:
     void clear()
     {
         _elementMap.clear();
-        _positionMap.clear();
         _elementVector.clear();
+        _keyVector.clear();
     }
     
 private:
     std::map<std::string, E*>   _elementMap;
-    std::map<std::string, int>  _positionMap;
     std::vector<E*>             _elementVector;
+    std::vector<std::string>    _keyVector;
 };
 
 
