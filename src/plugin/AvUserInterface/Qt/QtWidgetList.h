@@ -77,9 +77,12 @@ protected:
     virtual void createProxyWidget(QWidget* pWidget) {}
     virtual void showItemWidget(int row, QWidget* pWidget) {}
     virtual void hideItemWidget(int row, QWidget* pWidget) {}
+    virtual void updateSize() {}
+    virtual int getViewOffset() {}
+
+    QtWidgetListModel*              _pModel;
 
 private:
-    QtWidgetListModel*              _pModel;
 
     std::vector<QWidget*>           _widgetPool;
     std::vector<QWidget*>           _visibleWidgets;
@@ -87,7 +90,8 @@ private:
 };
 
 
-class QtWidgetList : public QGraphicsView, public QtWidgetListView
+//class QtWidgetList : public QGraphicsView, public QtWidgetListView
+class QtWidgetList : public QScrollArea, public QtWidgetListView
 {
     Q_OBJECT
 
@@ -100,6 +104,8 @@ protected:
     virtual void createProxyWidget(QWidget* pWidget);
     virtual void showItemWidget(int row, QWidget* pWidget);
     virtual void hideItemWidget(int row, QWidget* pWidget);
+    virtual void updateSize();
+    virtual int getViewOffset();
 
 signals:
     void selectedWidget(int row);
@@ -108,14 +114,18 @@ signals:
     void moveWidget(int targetRow, QWidget* pWidget);
 
 private slots:
-    void show(QWidget* pWidget);
-    void hide(QWidget* pWidget);
+//    void show(QWidget* pWidget);
+//    void hide(QWidget* pWidget);
     void move(int targetRow, QWidget* pWidget);
+    void viewScrolled(int value);
 
 private:
     QGraphicsScene*                                 _pGraphicsScene;
     std::map<QWidget*, QGraphicsProxyWidget*>       _proxyWidgetPool;
     int                                             _widgetHeight;
+    QWidget*                                        _pScrollWidget;
+    QWidget*                                        _pBottomWidget;
+    QGridLayout*                                    _pLayout;
 };
 
 

@@ -129,6 +129,9 @@ QtWidgetListView::visibleWidget(int index)
 void
 QtWidgetListView::insertItem(int row)
 {
+    // resize view to the size with this item added
+    updateSize();
+
     // check if item is visible
 //    if (!itemIsVisible(row)) {
 //        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
@@ -152,6 +155,9 @@ QtWidgetListView::insertItem(int row)
 void
 QtWidgetListView::removeItem(int row)
 {
+    // resize view to the size with this item added
+    updateSize();
+
     // check if item is visible
 //    if (!itemIsVisible(row)) {
 //        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
@@ -168,14 +174,50 @@ QtWidgetListView::removeItem(int row)
 
 
 QtWidgetList::QtWidgetList(QWidget* pParent) :
-QGraphicsView(pParent)
+//QGraphicsView(pParent)
+QScrollArea(pParent)
 {
-    _pGraphicsScene = new QGraphicsScene;
-    setScene(_pGraphicsScene);
+//    _pGraphicsScene = new QGraphicsScene;
+//    setScene(_pGraphicsScene);
+//    setAlignment(Qt::AlignTop);
+
+    _pScrollWidget = new QWidget;
+   _pScrollWidget->resize(700, 100);
+    setWidget(_pScrollWidget);
+
+//     QPushButton* pButton = new QPushButton(_pScrollWidget);
+//    pButton->hide();
+//   _pScrollWidget->resize(800, 1000);
+
+//    pButton->setGeometry(0, 100, 100, 20);
+//    pButton->show();
+
+
+//    _pScrollWidget->show();
+//    pButton->show();
+
+//    _pLayout = new QGridLayout(_pTopWidget);
+//    _pLayout->addWidget(new QPushButton);
+//    for (int i = 0; i < 10; i++) {
+//        _pLayout->addWidget(new QPushButton);
+//    }
+//    _pTopWidget->resize(1, 1);
+//    _proxyWidgetPool[_pTopWidget] = _pGraphicsScene->addWidget(_pTopWidget);
+//    _proxyWidgetPool[_pTopWidget]->setPos(0, 0);
+
+//    _pLayout->addWidget(new QPushButton);
+
+//    _pBottomWidget = new QWidget;
+//    _pBottomWidget->resize(1, 1);
+//    _proxyWidgetPool[_pBottomWidget] = _pGraphicsScene->addWidget(_pBottomWidget);
+//    _proxyWidgetPool[_pBottomWidget]->setPos(0, 1000);
+//    viewport()->resize(QSize(800, 1000));
     
 //    connect(this, SIGNAL(showWidget(QWidget*)), this, SLOT(show(QWidget*)));
 //    connect(this, SIGNAL(hideWidget(QWidget*)), this, SLOT(hide(QWidget*)));
     connect(this, SIGNAL(moveWidget(int, QWidget*)), this, SLOT(move(int, QWidget*)));
+//    connect(verticalScrollBar(), SIGNAL(sliderMoved(int)), this, SLOT(viewScrolled(int)));
+    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolled(int)));
 }
 
 
@@ -194,9 +236,11 @@ QtWidgetList::itemIsVisible(int row)
 void
 QtWidgetList::createProxyWidget(QWidget* pWidget)
 {
-    QGraphicsProxyWidget* pProxyWidget = _pGraphicsScene->addWidget(pWidget);
-    _proxyWidgetPool[pWidget] = pProxyWidget;
+//    QGraphicsProxyWidget* pProxyWidget = _pGraphicsScene->addWidget(pWidget);
+//    _proxyWidgetPool[pWidget] = pProxyWidget;
     _widgetHeight = pWidget->height();
+
+    pWidget->setParent(_pScrollWidget);
 }
 
 
@@ -229,27 +273,75 @@ QtWidgetList::hideItemWidget(int row, QWidget* pWidget)
 
 
 void
-QtWidgetList::show(QWidget* pWidget)
+QtWidgetList::updateSize()
 {
-    Omm::Av::Log::instance()->upnpav().debug("widget list show widget");
-
-    _proxyWidgetPool[pWidget]->show();
+//    QSize size = viewport()->size();
+//    Omm::Av::Log::instance()->upnpav().debug("viewport size: " + Poco::NumberFormatter::format(size.width()) + "," + Poco::NumberFormatter::format(size.height()));
+//    size.setHeight(_pModel->totalItemCount() * _widgetHeight);
+//    Omm::Av::Log::instance()->upnpav().debug("viewport size: " + Poco::NumberFormatter::format(size.width()) + "," + Poco::NumberFormatter::format(size.height()));
+//    viewport()->resize(size);
+//    emit moveWidget(_pModel->totalItemCount(), _pBottomWidget);
+    _pScrollWidget->resize(_pScrollWidget->width(), _pModel->totalItemCount() * _widgetHeight);
 }
 
 
-void
-QtWidgetList::hide(QWidget* pWidget)
+int
+QtWidgetList::getViewOffset()
 {
-    Omm::Av::Log::instance()->upnpav().debug("widget list hide widget");
-
-    _proxyWidgetPool[pWidget]->hide();
+    return _pScrollWidget->geometry().y();
+    
+//    QRect rv = viewport()->geometry();
+////    QPoint pv = mapToGlobal(QPoint(rv.x(), rv.y()));
+//    QRect rw = _pScrollWidget->geometry();
+////    QPoint pw = mapToGlobal(QPoint(rw.x(), rw.y()));
+//
+////    QRectF rs = sceneRect();
+////    QPoint ps = mapToGlobal(QPoint(rs.x(), rs.y()));
+////    QPointF pt = _proxyWidgetPool[_pTopWidget]->mapToParent(_proxyWidgetPool[_pTopWidget]->pos());
+////    QPointF ptg = mapToGlobal(QPoint(pt.x(), pt.y()));
+//
+//
+////    QPoint p = viewport()->mapFromGlobal(QPoint(0,0));
+//    Omm::Av::Log::instance()->upnpav().debug("viewport offset: " + Poco::NumberFormatter::format(rv.y()));
+//    Omm::Av::Log::instance()->upnpav().debug("widget offset: " + Poco::NumberFormatter::format(rw.y()));
+////    Omm::Av::Log::instance()->upnpav().debug("scene offset: " + Poco::NumberFormatter::format(ps.y()));
+////    Omm::Av::Log::instance()->upnpav().debug("top widget offset: " + Poco::NumberFormatter::format(ptg.y()));
 }
+
+
+//void
+//QtWidgetList::show(QWidget* pWidget)
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("widget list show widget");
+//
+//    _proxyWidgetPool[pWidget]->show();
+//}
+//
+//
+//void
+//QtWidgetList::hide(QWidget* pWidget)
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("widget list hide widget");
+//
+//    _proxyWidgetPool[pWidget]->hide();
+//}
 
 
 void
 QtWidgetList::move(int row, QWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list move widget to row: " + Poco::NumberFormatter::format(row));
-    
-    _proxyWidgetPool[pWidget]->setPos(0, _widgetHeight * row);
+
+    pWidget->move(0, _widgetHeight * row);
+
+    // TODO: use moveBy() or scroll() instead of setPos()?
+//    _proxyWidgetPool[pWidget]->setPos(0, _widgetHeight * row);
+}
+
+
+void
+QtWidgetList::viewScrolled(int value)
+{
+    Omm::Av::Log::instance()->upnpav().debug("widget list scrolling ...");
+    getViewOffset();
 }
