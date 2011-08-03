@@ -23,12 +23,12 @@
 #define QtMediaRendererGroup_INCLUDED
 
 #include "QtDeviceGroup.h"
+#include "QtWidgetList.h"
 
 class QtMediaRenderer;
-class QtWidgetList;
 class QtMediaRendererControlPanel;
 
-class QtMediaRendererGroup : public QtDeviceGroup
+class QtMediaRendererGroup : public QtDeviceGroup, public QtWidgetListModel
 {
     Q_OBJECT
 
@@ -44,12 +44,7 @@ public:
     virtual QWidget* getDeviceGroupWidget();
 
     // QtWidgetListModel interface
-//    virtual QWidget* createWidget(const QModelIndex& parent = QModelIndex());
-//    virtual QWidget* getWidget(const QModelIndex& index);
-//    virtual void attachWidget(const QModelIndex& index, QWidget* pWidget);
-//    virtual void detachWidget(const QModelIndex& index);
-
-    // QtWidgetListModel interface
+    virtual int totalItemCount();
     virtual QWidget* createWidget();
     virtual QWidget* getWidget(int row);
     virtual void attachWidget(int row, QWidget* pWidget);

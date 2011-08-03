@@ -22,36 +22,36 @@
 #ifndef QtWidgetList_INCLUDED
 #define QtWidgetList_INCLUDED
 
+#include <stack>
 #include <QtGui>
 
 class QtWidgetListModel;
 class QtWidgetListView;
 
-class QtWidgetListModel : public QAbstractItemModel
+class QtWidgetListModel
 {
-    Q_OBJECT
-
     friend class QtWidgetListView;
     
 public:
     QtWidgetListModel();
 
+    // item related
+    virtual int totalItemCount() { return 0; }
+    void insertItem(int row);
+    /// Ask the view to show an item at row. No data is created (cached), as
+    /// the whole data of the model is already present in the underlying implementation.
+    /// The model is only an abstraction layer on top of the data.
+    void removeItem(int row);
+    /// See insertItem().
+
+    // widget related
     virtual QWidget* createWidget() { return 0; }
     virtual QWidget* getWidget(int row) { return 0; }
     virtual void attachWidget(int row, QWidget* pWidget) {}
     virtual void detachWidget(int row) {}
 
-    void insertWidget(int row);
-    void removeWidget(int row);
-
-//signals:
 private:
     QtWidgetListView*               _pView;
-//    void insertRow(int row, bool begin);
-//    virtual QWidget* createWidget(const QModelIndex& parent = QModelIndex()) { return 0; }
-//    virtual QWidget* getWidget(const QModelIndex& index) { return 0; }
-//    virtual void attachWidget(const QModelIndex& index, QWidget* pWidget) {}
-//    virtual void detachWidget(const QModelIndex& index) {}
 };
 
 
@@ -61,48 +61,49 @@ public:
     QtWidgetListView();
     
     void setModel(QtWidgetListModel* pModel);
-
-    virtual void addWidget(QWidget* pWidget) {}
-    virtual void insertWidget(int row) {}
-    virtual void removeWidget(int row) {}
+    void insertItem(int row);
+    void removeItem(int row);
 
 protected:
+    void extendWidgetPool(int n);
+    /// The view has a widget pool which is large enough to fill the area of the view
+    /// with widgets (created by the model).
+
+    virtual bool itemIsVisible(int row) { return false; }
+    virtual void addWidgetToView(QWidget* pWidget) {}
+    virtual void insertItemAndWidgetIntoView(int row, QWidget* pWidget) {}
+    virtual void removeItemAndWidgetFromView(int row, QWidget* pWidget) {}
+
+private:
     QtWidgetListModel*              _pModel;
+
     std::vector<QWidget*>           _widgetPool;
+    std::vector<QWidget*>           _visibleWidgets;
+    std::stack<QWidget*>            _freeWidgets;
 };
 
 
 class QtWidgetList : public QGraphicsView, public QtWidgetListView
 {
     Q_OBJECT
-        
+
 public:
     QtWidgetList(QWidget* pParent = 0);
     virtual ~QtWidgetList();
 
-    virtual void addWidget(QWidget* pWidget);
-    virtual void insertWidget(int row);
-    virtual void removeWidget(int row);
+protected:
+    virtual bool itemIsVisible(int row);
+    virtual void addWidgetToView(QWidget* pWidget);
+    virtual void insertItemAndWidgetIntoView(int row, QWidget* pWidget);
+    virtual void removeItemAndWidgetFromView(int row, QWidget* pWidget);
 
 signals:
     void selectedWidget(int row);
 
 private:
-    QGraphicsScene*                         _pGraphicsScene;
-    std::vector<QGraphicsProxyWidget*>      _proxyWidgets;
-    int                                     _widgetHeight;
-
-//private slots:
-//    void rowsAboutToBeInserted(const QModelIndex& parent, int start, int end);
-
-//    void addWidget(QWidget* pWidget);
-//    QWidget* getWidget();
-//
-//    void showWidget(QWidget* pWidget);
-//
-//    // QtDeviceGroup interface
-//    virtual QWidget* getDeviceGroupWidget();
-
+    QGraphicsScene*                                 _pGraphicsScene;
+    std::map<QWidget*, QGraphicsProxyWidget*>       _proxyWidgetPool;
+    int                                             _widgetHeight;
 };
 
 

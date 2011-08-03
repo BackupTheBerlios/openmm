@@ -56,8 +56,7 @@ QtMediaRendererGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
         QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
         Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
         Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-//        emit pRenderer->getDeviceWidget()->showWidget();
-        insertWidget(position);
+        insertItem(position);
         Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished adding device.");
     }
 }
@@ -71,8 +70,7 @@ QtMediaRendererGroup::removeDevice(Omm::Device* pDevice, int position, bool begi
         QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
         Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
         Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-//        emit pRenderer->getDeviceWidget()->hideWidget();
-        removeWidget(position);
+        removeItem(position);
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished removing device.");
@@ -85,47 +83,6 @@ QtMediaRendererGroup::getDeviceGroupWidget()
 {
     return _pWidgetList;
 }
-
-
-//QWidget*
-//QtMediaRendererGroup::createWidget(const QModelIndex& parent)
-//{
-//    return new QtMediaRendererWidget;
-//}
-//
-//
-//QWidget*
-//QtMediaRendererGroup::getWidget(const QModelIndex& index)
-//{
-//    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
-//    return pRenderer->getDeviceWidget();
-//}
-//
-//
-//void
-//QtMediaRendererGroup::attachWidget(const QModelIndex& index, QWidget* pWidget)
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
-//    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
-//    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget: " + pRenderer->getFriendlyName());
-//    QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
-//    pRendererWidget->_pMediaRenderer = pRenderer;
-//    pRenderer->setDeviceWidget(pRendererWidget);
-//    connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
-//    connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
-//}
-//
-//
-//void
-//QtMediaRendererGroup::detachWidget(const QModelIndex& index)
-//{
-//    QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(index.internalPointer());
-//    QtMediaRendererWidget* pRendererWidget = pRenderer->getDeviceWidget();
-//    pRendererWidget->_pMediaRenderer = 0;
-//    pRenderer->setDeviceWidget(0);
-//    disconnect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
-//    disconnect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
-//}
 
 
 QWidget*
@@ -154,8 +111,6 @@ QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
     pRenderer->setDeviceWidget(pRendererWidget);
     pRendererWidget->setRow(row);
 
-//    pRendererWidget->setRendererName(pRenderer->getFriendlyName());
-    
     connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
     connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
     connect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
@@ -180,6 +135,13 @@ QtMediaRendererGroup::detachWidget(int row)
 
     pRendererWidget->_pRenderer = 0;
     pRenderer->setDeviceWidget(0);
+}
+
+
+int
+QtMediaRendererGroup::totalItemCount()
+{
+    return getDeviceCount();
 }
 
 
