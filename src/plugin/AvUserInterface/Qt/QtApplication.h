@@ -22,6 +22,8 @@
 #ifndef QtUpnpApplication_INCLUDED
 #define QtUpnpApplication_INCLUDED
 
+#include <QtGui>
+
 #include <Omm/Upnp.h>
 #include <Omm/UpnpApplication.h>
 #include <Omm/Sys.h>
@@ -38,15 +40,21 @@ class QtEventFilter;
 class QtControllerWidget;
 
 
-class QtApplication : public Omm::UpnpApplication
+class QtApplication : public QObject, public Omm::UpnpApplication
 {
+    Q_OBJECT
+
 public:
     QtApplication();
     virtual ~QtApplication();
 
-    virtual int eventLoop();
+    virtual void eventLoop();
+    virtual void quit();
 
     void addToolBar(QToolBar* pToolBar);
+
+signals:
+    void doQuit();
 
 private:
     virtual void init();

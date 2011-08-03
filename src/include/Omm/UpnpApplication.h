@@ -52,8 +52,6 @@ public:
     virtual ~UpnpApplication();
 
     virtual void init() {}
-//    virtual void showMainWindow() {}
-//    virtual void hideMainWindow() {}
     virtual void resize(int width, int height) {}
     virtual void setFullscreen(bool fullscreen) {}
 
@@ -61,7 +59,11 @@ public:
     void enableDevices(bool enable = false);
 
 protected:
-    virtual int eventLoop();
+    virtual void eventLoop();
+    virtual void quit() {}
+    /// When eventLoop() is used to execute the GUI thread's event loop,
+    /// quit() and installSignalHandler() can be used to quit the application on sigterm.
+    void installSignalHandler();
     virtual Controller* createController() { return new Controller; }
     virtual void addController() {}
     virtual void removeController() {}
@@ -81,6 +83,7 @@ private:
 
     void start();
     void stop();
+    void signalHandler();
     
     bool                    _helpRequested;
 };

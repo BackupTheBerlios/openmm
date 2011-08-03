@@ -20,7 +20,6 @@
  ***************************************************************************/
 
 #include <Poco/ClassLibrary.h>
-#include <QtGui>
 
 #include "QtApplication.h"
 #include "QtMainWindow.h"
@@ -71,6 +70,8 @@ QtApplication::init()
     _pApp = new QApplication(_argc, 0);
 //    _pEventFilter = new QtEventFilter(this);
 //    _pApp->installEventFilter(_pEventFilter);
+//    connect(this, SIGNAL(doQuit()), _pApp, SLOT(quit()));
+//    installSignalHandler();
 
     _pMainWidget = new QStackedWidget;
     _pMainWindow = new QtMainWindow(_pMainWidget);
@@ -123,12 +124,18 @@ QtApplication::removeController()
 }
 
 
-int
+void
 QtApplication::eventLoop()
 {
-    return _pApp->exec();
+    _pApp->exec();
 }
 
+
+void
+QtApplication::quit()
+{
+    emit doQuit();
+}
 
 //void
 //QtApplication::showMainWindow()

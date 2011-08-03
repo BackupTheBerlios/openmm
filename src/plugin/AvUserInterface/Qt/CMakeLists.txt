@@ -73,6 +73,7 @@ QtCrumbButton.h
 )
 
 set(OMMC_QTAPP_MOC
+QtApplication.h
 QtMainWindow.h
 QtController.h
 #QtEventFilter.h

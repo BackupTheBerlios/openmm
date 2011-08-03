@@ -22,6 +22,8 @@
 #include <iostream>
 
 #include <Poco/Util/HelpFormatter.h>
+#include <Poco/Thread.h>
+#include <Poco/RunnableAdapter.h>
 
 #include "UpnpApplication.h"
 
@@ -48,10 +50,27 @@ UpnpApplication::~UpnpApplication()
 }
 
 
-int
+void
 UpnpApplication::eventLoop()
 {
     waitForTerminationRequest();
+}
+
+
+void
+UpnpApplication::signalHandler()
+{
+    waitForTerminationRequest();
+    quit();
+}
+
+
+void
+UpnpApplication::installSignalHandler()
+{
+    Poco::RunnableAdapter<UpnpApplication> sighandler(*this, &UpnpApplication::signalHandler);
+    Poco::Thread thread;
+    thread.start(sighandler);
 }
 
 
@@ -115,7 +134,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
     {
         start();
 
-        int ret = eventLoop();
+        eventLoop();
 
         stop();
     }
