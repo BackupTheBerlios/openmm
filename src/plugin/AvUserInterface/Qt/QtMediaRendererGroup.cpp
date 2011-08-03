@@ -109,12 +109,13 @@ QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
     QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
     pRendererWidget->_pRenderer = pRenderer;
     pRenderer->setDeviceWidget(pRendererWidget);
+    // FIXME: _row changes when devices are added / removed
     pRendererWidget->setRow(row);
 
     connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
     connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
     connect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
-    connect(pRendererWidget, SIGNAL(selectedWidget(int)), _pWidgetList, SIGNAL(selectedWidget(int)));
+//    connect(pRendererWidget, SIGNAL(selectedWidget(int)), _pWidgetList, SIGNAL(selectedWidget(int)));
 
     emit pRendererWidget->configureWidget();
     emit pRendererWidget->showWidget();

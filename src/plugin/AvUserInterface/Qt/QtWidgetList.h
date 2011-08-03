@@ -65,14 +65,18 @@ public:
     void removeItem(int row);
 
 protected:
+    int widgetPoolSize();
     void extendWidgetPool(int n);
     /// The view has a widget pool which is large enough to fill the area of the view
     /// with widgets (created by the model).
+    int visibleIndex(int row);
+    int countVisibleWidgets();
+    QWidget* visibleWidget(int index);
 
     virtual bool itemIsVisible(int row) { return false; }
-    virtual void addWidgetToView(QWidget* pWidget) {}
-    virtual void insertItemAndWidgetIntoView(int row, QWidget* pWidget) {}
-    virtual void removeItemAndWidgetFromView(int row, QWidget* pWidget) {}
+    virtual void createProxyWidget(QWidget* pWidget) {}
+    virtual void showItemWidget(int row, QWidget* pWidget) {}
+    virtual void hideItemWidget(int row, QWidget* pWidget) {}
 
 private:
     QtWidgetListModel*              _pModel;
@@ -93,12 +97,20 @@ public:
 
 protected:
     virtual bool itemIsVisible(int row);
-    virtual void addWidgetToView(QWidget* pWidget);
-    virtual void insertItemAndWidgetIntoView(int row, QWidget* pWidget);
-    virtual void removeItemAndWidgetFromView(int row, QWidget* pWidget);
+    virtual void createProxyWidget(QWidget* pWidget);
+    virtual void showItemWidget(int row, QWidget* pWidget);
+    virtual void hideItemWidget(int row, QWidget* pWidget);
 
 signals:
     void selectedWidget(int row);
+//    void showWidget(QWidget* pWidget);
+//    void hideWidget(QWidget* pWidget);
+    void moveWidget(int targetRow, QWidget* pWidget);
+
+private slots:
+    void show(QWidget* pWidget);
+    void hide(QWidget* pWidget);
+    void move(int targetRow, QWidget* pWidget);
 
 private:
     QGraphicsScene*                                 _pGraphicsScene;

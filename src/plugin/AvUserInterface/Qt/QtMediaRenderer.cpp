@@ -99,7 +99,8 @@ void
 QtMediaRendererWidget::selectedRenderer()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media renderer widget selected renderer: " + _pRenderer->getFriendlyName());
-    emit selectedWidget(_row);
+    // FIXME: _row changes when devices are added / removed
+//    emit selectedWidget(_row);
 }
 
 

@@ -67,7 +67,7 @@ signals:
     void showWidget();
     void hideWidget();
     void configureWidget();
-    void selectedWidget(int row);
+//    void selectedWidget(int row);
 
 public slots:
     void configure();

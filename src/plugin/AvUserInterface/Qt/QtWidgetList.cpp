@@ -75,6 +75,13 @@ QtWidgetListView::setModel(QtWidgetListModel* pModel)
 }
 
 
+int
+QtWidgetListView::widgetPoolSize()
+{
+    return _widgetPool.size();
+}
+
+
 void
 QtWidgetListView::extendWidgetPool(int n)
 {
@@ -83,10 +90,38 @@ QtWidgetListView::extendWidgetPool(int n)
         pWidget->hide();
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
-        addWidgetToView(pWidget);
+        createProxyWidget(pWidget);
 
 //        Omm::Util::Log::instance()->util().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
         Omm::Av::Log::instance()->upnpav().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
+    }
+}
+
+
+int
+QtWidgetListView::visibleIndex(int row)
+{
+    // FIX: row is not correct index of visible widgets.
+    return row;
+}
+
+
+int
+QtWidgetListView::countVisibleWidgets()
+{
+    return _visibleWidgets.size();
+}
+
+
+QWidget*
+QtWidgetListView::visibleWidget(int index)
+{
+    if (0 <= index && index < _visibleWidgets.size()) {
+        return _visibleWidgets[index];
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("widget list view failed to retrieve visible widget, out of range (ignoring)");
+        return 0;
     }
 }
 
@@ -96,6 +131,7 @@ QtWidgetListView::insertItem(int row)
 {
     // check if item is visible
 //    if (!itemIsVisible(row)) {
+//        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
 //        return;
 //    }
 
@@ -103,8 +139,9 @@ QtWidgetListView::insertItem(int row)
     if (_freeWidgets.size()) {
         QWidget* pWidget = _freeWidgets.top();
         _freeWidgets.pop();
+        _visibleWidgets.insert(_visibleWidgets.begin() + visibleIndex(row), pWidget);
         _pModel->attachWidget(row, pWidget);
-        insertItemAndWidgetIntoView(row, pWidget);
+        showItemWidget(row, pWidget);
     }
     else {
         Omm::Av::Log::instance()->upnpav().error("widget list view failed to attach widget to item, widget pool is empty (ignoring)");
@@ -117,13 +154,15 @@ QtWidgetListView::removeItem(int row)
 {
     // check if item is visible
 //    if (!itemIsVisible(row)) {
+//        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
 //        return;
 //    }
     
     // detach item from visible widget
     QWidget* pWidget = _pModel->getWidget(row);
-    removeItemAndWidgetFromView(row, pWidget);
+    hideItemWidget(row, pWidget);
     _pModel->detachWidget(row);
+    _visibleWidgets.erase(_visibleWidgets.begin() + visibleIndex(row));
     _freeWidgets.push(pWidget);
 }
 
@@ -133,6 +172,10 @@ QGraphicsView(pParent)
 {
     _pGraphicsScene = new QGraphicsScene;
     setScene(_pGraphicsScene);
+    
+//    connect(this, SIGNAL(showWidget(QWidget*)), this, SLOT(show(QWidget*)));
+//    connect(this, SIGNAL(hideWidget(QWidget*)), this, SLOT(hide(QWidget*)));
+    connect(this, SIGNAL(moveWidget(int, QWidget*)), this, SLOT(move(int, QWidget*)));
 }
 
 
@@ -144,12 +187,12 @@ QtWidgetList::~QtWidgetList()
 bool
 QtWidgetList::itemIsVisible(int row)
 {
-
+    // TODO: implement itemIsVisible()
 }
 
 
 void
-QtWidgetList::addWidgetToView(QWidget* pWidget)
+QtWidgetList::createProxyWidget(QWidget* pWidget)
 {
     QGraphicsProxyWidget* pProxyWidget = _pGraphicsScene->addWidget(pWidget);
     _proxyWidgetPool[pWidget] = pProxyWidget;
@@ -158,17 +201,55 @@ QtWidgetList::addWidgetToView(QWidget* pWidget)
 
 
 void
-QtWidgetList::insertItemAndWidgetIntoView(int row, QWidget* pWidget)
+QtWidgetList::showItemWidget(int row, QWidget* pWidget)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt widget list insert row: " + Poco::NumberFormatter::format(row));
+    Omm::Av::Log::instance()->upnpav().debug("widget list show item widget at row: " + Poco::NumberFormatter::format(row));
     
-    _proxyWidgetPool[pWidget]->setPos(-100, _widgetHeight * row);
+    emit moveWidget(row, pWidget);
+//    emit show(pWidget);
 }
 
 
 void
-QtWidgetList::removeItemAndWidgetFromView(int row, QWidget* pWidget)
+QtWidgetList::hideItemWidget(int row, QWidget* pWidget)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt widget list remove row: " + Poco::NumberFormatter::format(row));
+    Omm::Av::Log::instance()->upnpav().debug("widget list hide item widget at row: " + Poco::NumberFormatter::format(row));
 
+//    emit hide(pWidget);
+    
+    int index = visibleIndex(row);
+    if (index < 0) {
+        Omm::Av::Log::instance()->upnpav().error("widget list failed to hide item widget, item is not visible (ignoring)");
+        return;
+    }
+    for (int i = index + 1; i < countVisibleWidgets(); i++) {
+        emit moveWidget(row + i - index - 1, visibleWidget(i));
+    }
+}
+
+
+void
+QtWidgetList::show(QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("widget list show widget");
+
+    _proxyWidgetPool[pWidget]->show();
+}
+
+
+void
+QtWidgetList::hide(QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("widget list hide widget");
+
+    _proxyWidgetPool[pWidget]->hide();
+}
+
+
+void
+QtWidgetList::move(int row, QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("widget list move widget to row: " + Poco::NumberFormatter::format(row));
+    
+    _proxyWidgetPool[pWidget]->setPos(0, _widgetHeight * row);
 }
