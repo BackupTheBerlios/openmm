@@ -48,6 +48,7 @@ public:
     QtApplication();
     virtual ~QtApplication();
 
+    virtual void setWindowTitle(const std::string& title);
     virtual void eventLoop();
     virtual void quit();
 

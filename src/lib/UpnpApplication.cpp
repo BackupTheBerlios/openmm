@@ -33,7 +33,8 @@ namespace Omm {
 UpnpApplication::UpnpApplication() :
 _pController(0),
 _pDevices(0),
-_helpRequested(false)
+_helpRequested(false),
+_applicationName("OMM")
 {
     setUnixOptions(true);
 }
@@ -75,10 +76,18 @@ UpnpApplication::installSignalHandler()
 
 
 void
+UpnpApplication::setApplicationName(const std::string& name)
+{
+    _applicationName = name;
+}
+
+
+void
 UpnpApplication::initialize(Poco::Util::Application& self)
 {
     loadConfiguration(); // load default configuration files, if present
     ServerApplication::initialize(self);
+    setWindowTitle(_applicationName);
 }
 
 
@@ -98,6 +107,11 @@ UpnpApplication::defineOptions(Poco::Util::OptionSet& options)
         Poco::Util::Option("help", "h", "display help information on command line arguments")
         .required(false)
         .repeatable(false));
+    options.addOption(
+        Poco::Util::Option("name", "n", "set name of the application")
+        .required(false)
+        .repeatable(false)
+        .argument("name", true));
 }
 
 
@@ -108,6 +122,9 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
     
     if (name == "help") {
         _helpRequested = true;
+    }
+    if (name == "name") {
+        _applicationName = value;
     }
 }
 

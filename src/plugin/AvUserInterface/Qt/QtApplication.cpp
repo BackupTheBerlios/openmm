@@ -125,6 +125,13 @@ QtApplication::removeController()
 
 
 void
+QtApplication::setWindowTitle(const std::string& title)
+{
+    _pMainWindow->setWindowTitle(QString::fromStdString(title));
+}
+
+
+void
 QtApplication::eventLoop()
 {
     _pApp->exec();

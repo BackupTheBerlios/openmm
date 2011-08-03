@@ -54,6 +54,8 @@ public:
     virtual void init() {}
     virtual void resize(int width, int height) {}
     virtual void setFullscreen(bool fullscreen) {}
+    void setApplicationName(const std::string& name);
+    /// Set the name of the application. This can be overriden on the command line (option -n).
 
     void enableController(bool enable = true);
     void enableDevices(bool enable = false);
@@ -64,6 +66,9 @@ protected:
     /// When eventLoop() is used to execute the GUI thread's event loop,
     /// quit() and installSignalHandler() can be used to quit the application on sigterm.
     void installSignalHandler();
+    virtual void setWindowTitle(const std::string& title) {}
+    /// Implement this to set the window title of the main application window.
+    /// The title is set to the applications name.
     virtual Controller* createController() { return new Controller; }
     virtual void addController() {}
     virtual void removeController() {}
@@ -86,6 +91,7 @@ private:
     void signalHandler();
     
     bool                    _helpRequested;
+    std::string             _applicationName;
 };
 
 

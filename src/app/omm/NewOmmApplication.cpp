@@ -34,6 +34,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    pApp->setApplicationName("New OMM");
     pApp->init();
     pApp->enableController();
     int ret = pApp->run(argc, argv);
