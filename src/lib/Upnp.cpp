@@ -4623,9 +4623,10 @@ DeviceGroup::addDevice(Device* pDevice)
 void
 DeviceGroup::removeDevice(Device* pDevice)
 {
-    removeDevice(pDevice, _devices.size() - 1, true);
+    int position = _devices.position(pDevice->getUuid());
+    removeDevice(pDevice, position, true);
     _devices.remove(pDevice->getUuid());
-    removeDevice(pDevice, _devices.size(), false);
+    removeDevice(pDevice, position, false);
 }
 
 
