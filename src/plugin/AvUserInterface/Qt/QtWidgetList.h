@@ -65,6 +65,18 @@ public:
     void removeItem(int row);
 
 protected:
+    virtual void initWidget(QWidget* pWidget) {}
+    virtual void moveWidgetToRow(int row, QWidget* pWidget) {}
+    virtual void updateScrollWidgetSize() {}
+    virtual int getOffset() {}
+    virtual int visibleRows() {}
+
+    void scrolledToRow(int rowOffset);
+
+    QtWidgetListModel*              _pModel;
+    int                             _widgetHeight;
+
+private:
     int widgetPoolSize();
     void extendWidgetPool(int n);
     /// The view has a widget pool which is large enough to fill the area of the view
@@ -72,21 +84,10 @@ protected:
     int visibleIndex(int row);
     int countVisibleWidgets();
     QWidget* visibleWidget(int index);
-    void scrolledToRow(int rowOffset);
+    bool itemIsVisible(int row);
+    void showItemWidget(int row, QWidget* pWidget);
+    void hideItemWidget(int row, QWidget* pWidget);
 
-    virtual bool itemIsVisible(int row);
-    virtual void initWidget(QWidget* pWidget) {}
-    virtual void showItemWidget(int row, QWidget* pWidget) {}
-    virtual void hideItemWidget(int row, QWidget* pWidget) {}
-    virtual void moveWidgetToRow(int row, QWidget* pWidget) {}
-    virtual void updateScrollWidgetSize() {}
-    virtual int getOffset() {}
-    virtual int visibleRows() {}
-
-    QtWidgetListModel*              _pModel;
-    int                             _widgetHeight;
-
-private:
     std::vector<QWidget*>           _widgetPool;
     std::vector<QWidget*>           _visibleWidgets;
     std::stack<QWidget*>            _freeWidgets;
@@ -104,8 +105,6 @@ public:
 
 protected:
     virtual void initWidget(QWidget* pWidget);
-    virtual void showItemWidget(int row, QWidget* pWidget);
-    virtual void hideItemWidget(int row, QWidget* pWidget);
     virtual void moveWidgetToRow(int row, QWidget* pWidget);
     virtual void updateScrollWidgetSize();
     virtual int getOffset();

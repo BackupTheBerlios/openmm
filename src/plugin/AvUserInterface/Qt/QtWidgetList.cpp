@@ -181,6 +181,31 @@ QtWidgetListView::itemIsVisible(int row)
 
 
 void
+QtWidgetListView::showItemWidget(int row, QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("widget list show item widget at row: " + Poco::NumberFormatter::format(row));
+
+    moveWidgetToRow(row, pWidget);
+}
+
+
+void
+QtWidgetListView::hideItemWidget(int row, QWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("widget list hide item widget at row: " + Poco::NumberFormatter::format(row));
+
+    int index = visibleIndex(row);
+    if (index < 0) {
+        Omm::Av::Log::instance()->upnpav().error("widget list failed to hide item widget, item is not visible (ignoring)");
+        return;
+    }
+    for (int i = index + 1; i < countVisibleWidgets(); i++) {
+        moveWidgetToRow(row + i - index - 1, visibleWidget(i));
+    }
+}
+
+
+void
 QtWidgetListView::insertItem(int row)
 {
     // resize view to the size with this item added
@@ -249,35 +274,8 @@ QtWidgetList::~QtWidgetList()
 void
 QtWidgetList::initWidget(QWidget* pWidget)
 {
-//    _widgetHeight = pWidget->height();
-
     pWidget->resize(viewport()->width(), _widgetHeight);
     pWidget->setParent(_pScrollWidget);
-}
-
-
-void
-QtWidgetList::showItemWidget(int row, QWidget* pWidget)
-{
-    Omm::Av::Log::instance()->upnpav().debug("widget list show item widget at row: " + Poco::NumberFormatter::format(row));
-    
-    emit moveWidget(row, pWidget);
-}
-
-
-void
-QtWidgetList::hideItemWidget(int row, QWidget* pWidget)
-{
-    Omm::Av::Log::instance()->upnpav().debug("widget list hide item widget at row: " + Poco::NumberFormatter::format(row));
-
-    int index = visibleIndex(row);
-    if (index < 0) {
-        Omm::Av::Log::instance()->upnpav().error("widget list failed to hide item widget, item is not visible (ignoring)");
-        return;
-    }
-    for (int i = index + 1; i < countVisibleWidgets(); i++) {
-        emit moveWidget(row + i - index - 1, visibleWidget(i));
-    }
 }
 
 
@@ -326,6 +324,5 @@ void
 QtWidgetList::viewScrolled(int value)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list scrolling ...");
-    int offset = getOffset();
-    scrolledToRow(-offset / _widgetHeight);
+    scrolledToRow(-getOffset() / _widgetHeight);
 }
