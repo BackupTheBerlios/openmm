@@ -57,8 +57,9 @@ QtWidgetListModel::removeItem(int row)
 }
 
 
-QtWidgetListView::QtWidgetListView() :
+QtWidgetListView::QtWidgetListView(int widgetHeight) :
 _pModel(0),
+_widgetHeight(widgetHeight),
 _rowOffset(0)
 {
 }
@@ -67,12 +68,14 @@ _rowOffset(0)
 void
 QtWidgetListView::setModel(QtWidgetListModel* pModel)
 {
+    Omm::Av::Log::instance()->upnpav().debug("widget list view set model");
+    
     // double link model and view.
     _pModel = pModel;
     _pModel->_pView = this;
 
     // create an initial widget pool. This also retrieves the height of the widget.
-    extendWidgetPool(10);
+    extendWidgetPool(visibleRows());
 }
 
 
@@ -86,6 +89,8 @@ QtWidgetListView::widgetPoolSize()
 void
 QtWidgetListView::extendWidgetPool(int n)
 {
+    Omm::Av::Log::instance()->upnpav().debug("widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
+
     for (int i = 0; i < n; ++i) {
         QWidget* pWidget = _pModel->createWidget();
         pWidget->hide();
@@ -132,9 +137,9 @@ QtWidgetListView::scrolledToRow(int rowOffset)
     if (rowDelta == 0) {
         return;
     }
-    Omm::Av::Log::instance()->upnpav().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset));
 
     int rowDeltaAbsolute = std::abs(rowDelta);
+    Omm::Av::Log::instance()->upnpav().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {
             // detach first visible widget
@@ -168,17 +173,24 @@ QtWidgetListView::scrolledToRow(int rowOffset)
 }
 
 
+bool
+QtWidgetListView::itemIsVisible(int row)
+{
+    return _rowOffset <= row && row < _rowOffset + visibleRows();
+}
+
+
 void
 QtWidgetListView::insertItem(int row)
 {
     // resize view to the size with this item added
-    updateSize();
+    updateScrollWidgetSize();
 
     // check if item is visible
-//    if (!itemIsVisible(row)) {
-//        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
-//        return;
-//    }
+    if (!itemIsVisible(row)) {
+        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
+        return;
+    }
 
     // attach item to a free (not visible) widget
     if (_freeWidgets.size()) {
@@ -198,13 +210,13 @@ void
 QtWidgetListView::removeItem(int row)
 {
     // resize view to the size with this item added
-    updateSize();
+    updateScrollWidgetSize();
 
     // check if item is visible
-//    if (!itemIsVisible(row)) {
-//        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
-//        return;
-//    }
+    if (!itemIsVisible(row)) {
+        Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
+        return;
+    }
     
     // detach item from visible widget
     QWidget* pWidget = _pModel->getWidget(row);
@@ -216,16 +228,14 @@ QtWidgetListView::removeItem(int row)
 
 
 QtWidgetList::QtWidgetList(QWidget* pParent) :
+QtWidgetListView(50),
 QScrollArea(pParent),
-_pScrollWidget(0),
-_widgetHeight(0)
+_pScrollWidget(0)
 {
     _pScrollWidget = new QWidget;
-   _pScrollWidget->resize(700, 100);
+    _pScrollWidget->resize(viewport()->size());
     setWidget(_pScrollWidget);
 
-//    connect(this, SIGNAL(showWidget(QWidget*)), this, SLOT(show(QWidget*)));
-//    connect(this, SIGNAL(hideWidget(QWidget*)), this, SLOT(hide(QWidget*)));
     connect(this, SIGNAL(moveWidget(int, QWidget*)), this, SLOT(move(int, QWidget*)));
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolled(int)));
 }
@@ -239,16 +249,10 @@ QtWidgetList::~QtWidgetList()
 void
 QtWidgetList::initWidget(QWidget* pWidget)
 {
-    _widgetHeight = pWidget->height();
+//    _widgetHeight = pWidget->height();
 
+    pWidget->resize(viewport()->width(), _widgetHeight);
     pWidget->setParent(_pScrollWidget);
-}
-
-
-bool
-QtWidgetList::itemIsVisible(int row)
-{
-    // TODO: implement itemIsVisible()
 }
 
 
@@ -258,7 +262,6 @@ QtWidgetList::showItemWidget(int row, QWidget* pWidget)
     Omm::Av::Log::instance()->upnpav().debug("widget list show item widget at row: " + Poco::NumberFormatter::format(row));
     
     emit moveWidget(row, pWidget);
-//    emit show(pWidget);
 }
 
 
@@ -267,8 +270,6 @@ QtWidgetList::hideItemWidget(int row, QWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list hide item widget at row: " + Poco::NumberFormatter::format(row));
 
-//    emit hide(pWidget);
-    
     int index = visibleIndex(row);
     if (index < 0) {
         Omm::Av::Log::instance()->upnpav().error("widget list failed to hide item widget, item is not visible (ignoring)");
@@ -288,9 +289,9 @@ QtWidgetList::moveWidgetToRow(int row, QWidget* pWidget)
 
 
 void
-QtWidgetList::updateSize()
+QtWidgetList::updateScrollWidgetSize()
 {
-    _pScrollWidget->resize(_pScrollWidget->width(), _pModel->totalItemCount() * _widgetHeight);
+   _pScrollWidget->resize(geometry().width(), _pModel->totalItemCount() * _widgetHeight);
 }
 
 
@@ -303,22 +304,13 @@ QtWidgetList::getOffset()
 }
 
 
-//void
-//QtWidgetList::show(QWidget* pWidget)
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("widget list show widget");
-//
-//    _proxyWidgetPool[pWidget]->show();
-//}
-//
-//
-//void
-//QtWidgetList::hide(QWidget* pWidget)
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("widget list hide widget");
-//
-//    _proxyWidgetPool[pWidget]->hide();
-//}
+int
+QtWidgetList::visibleRows()
+{
+    int rows = viewport()->geometry().height() / _widgetHeight;
+    Omm::Av::Log::instance()->upnpav().debug("widget list number of visible rows: " + Poco::NumberFormatter::format(rows));
+    return rows;
+}
 
 
 void

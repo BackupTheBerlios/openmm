@@ -58,7 +58,7 @@ private:
 class QtWidgetListView
 {
 public:
-    QtWidgetListView();
+    QtWidgetListView(int widgetHeight);
     
     void setModel(QtWidgetListModel* pModel);
     void insertItem(int row);
@@ -74,18 +74,19 @@ protected:
     QWidget* visibleWidget(int index);
     void scrolledToRow(int rowOffset);
 
-    virtual bool itemIsVisible(int row) { return false; }
+    virtual bool itemIsVisible(int row);
     virtual void initWidget(QWidget* pWidget) {}
     virtual void showItemWidget(int row, QWidget* pWidget) {}
     virtual void hideItemWidget(int row, QWidget* pWidget) {}
     virtual void moveWidgetToRow(int row, QWidget* pWidget) {}
-    virtual void updateSize() {}
+    virtual void updateScrollWidgetSize() {}
     virtual int getOffset() {}
+    virtual int visibleRows() {}
 
     QtWidgetListModel*              _pModel;
+    int                             _widgetHeight;
 
 private:
-
     std::vector<QWidget*>           _widgetPool;
     std::vector<QWidget*>           _visibleWidgets;
     std::stack<QWidget*>            _freeWidgets;
@@ -103,28 +104,23 @@ public:
 
 protected:
     virtual void initWidget(QWidget* pWidget);
-    virtual bool itemIsVisible(int row);
     virtual void showItemWidget(int row, QWidget* pWidget);
     virtual void hideItemWidget(int row, QWidget* pWidget);
     virtual void moveWidgetToRow(int row, QWidget* pWidget);
-    virtual void updateSize();
+    virtual void updateScrollWidgetSize();
     virtual int getOffset();
+    virtual int visibleRows();
 
 signals:
     void selectedWidget(int row);
-//    void showWidget(QWidget* pWidget);
-//    void hideWidget(QWidget* pWidget);
     void moveWidget(int targetRow, QWidget* pWidget);
 
 private slots:
-//    void show(QWidget* pWidget);
-//    void hide(QWidget* pWidget);
     void move(int targetRow, QWidget* pWidget);
     void viewScrolled(int value);
 
 private:
     QWidget*                 _pScrollWidget;
-    int                      _widgetHeight;
 };
 
 
