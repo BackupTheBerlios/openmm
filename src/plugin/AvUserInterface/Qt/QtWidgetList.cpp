@@ -133,34 +133,38 @@ QtWidgetListView::scrolledToRow(int rowOffset)
         return;
     }
     Omm::Av::Log::instance()->upnpav().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset));
-    
-    if (rowDelta > 0) {
-        // detach first visible widget
-        QWidget* pWidget = _visibleWidgets.front();
-        _pModel->detachWidget(_rowOffset);
-        // move first widget to the end
-        int lastRow = _rowOffset + _visibleWidgets.size();
-        moveWidgetToRow(lastRow, pWidget);
-        // attach widget
-        _pModel->attachWidget(lastRow, pWidget);
-        // move widget to end of visible rows
-        _visibleWidgets.erase(_visibleWidgets.begin());
-        _visibleWidgets.push_back(pWidget);
+
+    int rowDeltaAbsolute = std::abs(rowDelta);
+    while (rowDeltaAbsolute--) {
+        if (rowDelta > 0) {
+            // detach first visible widget
+            QWidget* pWidget = _visibleWidgets.front();
+            _pModel->detachWidget(_rowOffset);
+            // move first widget to the end
+            int lastRow = _rowOffset + _visibleWidgets.size();
+            moveWidgetToRow(lastRow, pWidget);
+            // attach widget
+            _pModel->attachWidget(lastRow, pWidget);
+            // move widget to end of visible rows
+            _visibleWidgets.erase(_visibleWidgets.begin());
+            _visibleWidgets.push_back(pWidget);
+            _rowOffset++;
+        }
+        else if (rowDelta < 0) {
+            // detach last visible widget
+            QWidget* pWidget = _visibleWidgets.back();
+            int lastRow = _rowOffset + _visibleWidgets.size() - 1;
+            _pModel->detachWidget(lastRow);
+            // move last widget to the beginning
+            moveWidgetToRow(_rowOffset - 1, pWidget);
+            // attach widget
+            _pModel->attachWidget(_rowOffset - 1, pWidget);
+            // move widget to beginning of visible rows
+            _visibleWidgets.erase(_visibleWidgets.end() - 1);
+            _visibleWidgets.insert(_visibleWidgets.begin(), pWidget);
+            _rowOffset--;
+        }
     }
-    else if (rowDelta < 0) {
-        // detach last visible widget
-        QWidget* pWidget = _visibleWidgets.back();
-        int lastRow = _rowOffset + _visibleWidgets.size() - 1;
-        _pModel->detachWidget(lastRow);
-        // move last widget to the beginning
-        moveWidgetToRow(_rowOffset - 1, pWidget);
-        // attach widget
-        _pModel->attachWidget(_rowOffset - 1, pWidget);
-        // move widget to beginning of visible rows
-        _visibleWidgets.erase(_visibleWidgets.end() - 1);
-        _visibleWidgets.insert(_visibleWidgets.begin(), pWidget);
-    }
-    _rowOffset = rowOffset;
 }
 
 
