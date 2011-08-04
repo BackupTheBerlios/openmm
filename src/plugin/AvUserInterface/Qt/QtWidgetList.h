@@ -85,8 +85,8 @@ private:
     int countVisibleWidgets();
     QWidget* visibleWidget(int index);
     bool itemIsVisible(int row);
-    void showItemWidget(int row, QWidget* pWidget);
-    void hideItemWidget(int row, QWidget* pWidget);
+    void showItem(int row, QWidget* pWidget);
+//    void hideItem(int row, QWidget* pWidget);
 
     std::vector<QWidget*>           _widgetPool;
     std::vector<QWidget*>           _visibleWidgets;
