@@ -72,13 +72,15 @@ protected:
     int visibleIndex(int row);
     int countVisibleWidgets();
     QWidget* visibleWidget(int index);
+    void scrolledToRow(int rowOffset);
 
     virtual bool itemIsVisible(int row) { return false; }
-    virtual void createProxyWidget(QWidget* pWidget) {}
+    virtual void initWidget(QWidget* pWidget) {}
     virtual void showItemWidget(int row, QWidget* pWidget) {}
     virtual void hideItemWidget(int row, QWidget* pWidget) {}
+    virtual void moveWidgetToRow(int row, QWidget* pWidget) {}
     virtual void updateSize() {}
-    virtual int getViewOffset() {}
+    virtual int getOffset() {}
 
     QtWidgetListModel*              _pModel;
 
@@ -87,10 +89,10 @@ private:
     std::vector<QWidget*>           _widgetPool;
     std::vector<QWidget*>           _visibleWidgets;
     std::stack<QWidget*>            _freeWidgets;
+    int                             _rowOffset;
 };
 
 
-//class QtWidgetList : public QGraphicsView, public QtWidgetListView
 class QtWidgetList : public QScrollArea, public QtWidgetListView
 {
     Q_OBJECT
@@ -100,12 +102,13 @@ public:
     virtual ~QtWidgetList();
 
 protected:
+    virtual void initWidget(QWidget* pWidget);
     virtual bool itemIsVisible(int row);
-    virtual void createProxyWidget(QWidget* pWidget);
     virtual void showItemWidget(int row, QWidget* pWidget);
     virtual void hideItemWidget(int row, QWidget* pWidget);
+    virtual void moveWidgetToRow(int row, QWidget* pWidget);
     virtual void updateSize();
-    virtual int getViewOffset();
+    virtual int getOffset();
 
 signals:
     void selectedWidget(int row);
@@ -120,12 +123,8 @@ private slots:
     void viewScrolled(int value);
 
 private:
-    QGraphicsScene*                                 _pGraphicsScene;
-    std::map<QWidget*, QGraphicsProxyWidget*>       _proxyWidgetPool;
-    int                                             _widgetHeight;
-    QWidget*                                        _pScrollWidget;
-    QWidget*                                        _pBottomWidget;
-    QGridLayout*                                    _pLayout;
+    QWidget*                 _pScrollWidget;
+    int                      _widgetHeight;
 };
 
 

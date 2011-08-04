@@ -58,7 +58,8 @@ QtWidgetListModel::removeItem(int row)
 
 
 QtWidgetListView::QtWidgetListView() :
-_pModel(0)
+_pModel(0),
+_rowOffset(0)
 {
 }
 
@@ -90,9 +91,7 @@ QtWidgetListView::extendWidgetPool(int n)
         pWidget->hide();
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
-        createProxyWidget(pWidget);
-
-//        Omm::Util::Log::instance()->util().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
+        initWidget(pWidget);
         Omm::Av::Log::instance()->upnpav().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }
@@ -101,8 +100,7 @@ QtWidgetListView::extendWidgetPool(int n)
 int
 QtWidgetListView::visibleIndex(int row)
 {
-    // FIX: row is not correct index of visible widgets.
-    return row;
+    return row - _rowOffset;
 }
 
 
@@ -123,6 +121,46 @@ QtWidgetListView::visibleWidget(int index)
         Omm::Av::Log::instance()->upnpav().error("widget list view failed to retrieve visible widget, out of range (ignoring)");
         return 0;
     }
+}
+
+
+void
+QtWidgetListView::scrolledToRow(int rowOffset)
+{
+    int rowDelta = rowOffset - _rowOffset;
+
+    if (rowDelta == 0) {
+        return;
+    }
+    Omm::Av::Log::instance()->upnpav().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset));
+    
+    if (rowDelta > 0) {
+        // detach first visible widget
+        QWidget* pWidget = _visibleWidgets.front();
+        _pModel->detachWidget(_rowOffset);
+        // move first widget to the end
+        int lastRow = _rowOffset + _visibleWidgets.size();
+        moveWidgetToRow(lastRow, pWidget);
+        // attach widget
+        _pModel->attachWidget(lastRow, pWidget);
+        // move widget to end of visible rows
+        _visibleWidgets.erase(_visibleWidgets.begin());
+        _visibleWidgets.push_back(pWidget);
+    }
+    else if (rowDelta < 0) {
+        // detach last visible widget
+        QWidget* pWidget = _visibleWidgets.back();
+        int lastRow = _rowOffset + _visibleWidgets.size() - 1;
+        _pModel->detachWidget(lastRow);
+        // move last widget to the beginning
+        moveWidgetToRow(_rowOffset - 1, pWidget);
+        // attach widget
+        _pModel->attachWidget(_rowOffset - 1, pWidget);
+        // move widget to beginning of visible rows
+        _visibleWidgets.erase(_visibleWidgets.end() - 1);
+        _visibleWidgets.insert(_visibleWidgets.begin(), pWidget);
+    }
+    _rowOffset = rowOffset;
 }
 
 
@@ -174,49 +212,17 @@ QtWidgetListView::removeItem(int row)
 
 
 QtWidgetList::QtWidgetList(QWidget* pParent) :
-//QGraphicsView(pParent)
-QScrollArea(pParent)
+QScrollArea(pParent),
+_pScrollWidget(0),
+_widgetHeight(0)
 {
-//    _pGraphicsScene = new QGraphicsScene;
-//    setScene(_pGraphicsScene);
-//    setAlignment(Qt::AlignTop);
-
     _pScrollWidget = new QWidget;
    _pScrollWidget->resize(700, 100);
     setWidget(_pScrollWidget);
 
-//     QPushButton* pButton = new QPushButton(_pScrollWidget);
-//    pButton->hide();
-//   _pScrollWidget->resize(800, 1000);
-
-//    pButton->setGeometry(0, 100, 100, 20);
-//    pButton->show();
-
-
-//    _pScrollWidget->show();
-//    pButton->show();
-
-//    _pLayout = new QGridLayout(_pTopWidget);
-//    _pLayout->addWidget(new QPushButton);
-//    for (int i = 0; i < 10; i++) {
-//        _pLayout->addWidget(new QPushButton);
-//    }
-//    _pTopWidget->resize(1, 1);
-//    _proxyWidgetPool[_pTopWidget] = _pGraphicsScene->addWidget(_pTopWidget);
-//    _proxyWidgetPool[_pTopWidget]->setPos(0, 0);
-
-//    _pLayout->addWidget(new QPushButton);
-
-//    _pBottomWidget = new QWidget;
-//    _pBottomWidget->resize(1, 1);
-//    _proxyWidgetPool[_pBottomWidget] = _pGraphicsScene->addWidget(_pBottomWidget);
-//    _proxyWidgetPool[_pBottomWidget]->setPos(0, 1000);
-//    viewport()->resize(QSize(800, 1000));
-    
 //    connect(this, SIGNAL(showWidget(QWidget*)), this, SLOT(show(QWidget*)));
 //    connect(this, SIGNAL(hideWidget(QWidget*)), this, SLOT(hide(QWidget*)));
     connect(this, SIGNAL(moveWidget(int, QWidget*)), this, SLOT(move(int, QWidget*)));
-//    connect(verticalScrollBar(), SIGNAL(sliderMoved(int)), this, SLOT(viewScrolled(int)));
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolled(int)));
 }
 
@@ -226,21 +232,19 @@ QtWidgetList::~QtWidgetList()
 }
 
 
+void
+QtWidgetList::initWidget(QWidget* pWidget)
+{
+    _widgetHeight = pWidget->height();
+
+    pWidget->setParent(_pScrollWidget);
+}
+
+
 bool
 QtWidgetList::itemIsVisible(int row)
 {
     // TODO: implement itemIsVisible()
-}
-
-
-void
-QtWidgetList::createProxyWidget(QWidget* pWidget)
-{
-//    QGraphicsProxyWidget* pProxyWidget = _pGraphicsScene->addWidget(pWidget);
-//    _proxyWidgetPool[pWidget] = pProxyWidget;
-    _widgetHeight = pWidget->height();
-
-    pWidget->setParent(_pScrollWidget);
 }
 
 
@@ -273,39 +277,25 @@ QtWidgetList::hideItemWidget(int row, QWidget* pWidget)
 
 
 void
+QtWidgetList::moveWidgetToRow(int row, QWidget* pWidget)
+{
+    emit moveWidget(row, pWidget);
+}
+
+
+void
 QtWidgetList::updateSize()
 {
-//    QSize size = viewport()->size();
-//    Omm::Av::Log::instance()->upnpav().debug("viewport size: " + Poco::NumberFormatter::format(size.width()) + "," + Poco::NumberFormatter::format(size.height()));
-//    size.setHeight(_pModel->totalItemCount() * _widgetHeight);
-//    Omm::Av::Log::instance()->upnpav().debug("viewport size: " + Poco::NumberFormatter::format(size.width()) + "," + Poco::NumberFormatter::format(size.height()));
-//    viewport()->resize(size);
-//    emit moveWidget(_pModel->totalItemCount(), _pBottomWidget);
     _pScrollWidget->resize(_pScrollWidget->width(), _pModel->totalItemCount() * _widgetHeight);
 }
 
 
 int
-QtWidgetList::getViewOffset()
+QtWidgetList::getOffset()
 {
+    Omm::Av::Log::instance()->upnpav().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry().y()));
+
     return _pScrollWidget->geometry().y();
-    
-//    QRect rv = viewport()->geometry();
-////    QPoint pv = mapToGlobal(QPoint(rv.x(), rv.y()));
-//    QRect rw = _pScrollWidget->geometry();
-////    QPoint pw = mapToGlobal(QPoint(rw.x(), rw.y()));
-//
-////    QRectF rs = sceneRect();
-////    QPoint ps = mapToGlobal(QPoint(rs.x(), rs.y()));
-////    QPointF pt = _proxyWidgetPool[_pTopWidget]->mapToParent(_proxyWidgetPool[_pTopWidget]->pos());
-////    QPointF ptg = mapToGlobal(QPoint(pt.x(), pt.y()));
-//
-//
-////    QPoint p = viewport()->mapFromGlobal(QPoint(0,0));
-//    Omm::Av::Log::instance()->upnpav().debug("viewport offset: " + Poco::NumberFormatter::format(rv.y()));
-//    Omm::Av::Log::instance()->upnpav().debug("widget offset: " + Poco::NumberFormatter::format(rw.y()));
-////    Omm::Av::Log::instance()->upnpav().debug("scene offset: " + Poco::NumberFormatter::format(ps.y()));
-////    Omm::Av::Log::instance()->upnpav().debug("top widget offset: " + Poco::NumberFormatter::format(ptg.y()));
 }
 
 
@@ -333,9 +323,6 @@ QtWidgetList::move(int row, QWidget* pWidget)
     Omm::Av::Log::instance()->upnpav().debug("widget list move widget to row: " + Poco::NumberFormatter::format(row));
 
     pWidget->move(0, _widgetHeight * row);
-
-    // TODO: use moveBy() or scroll() instead of setPos()?
-//    _proxyWidgetPool[pWidget]->setPos(0, _widgetHeight * row);
 }
 
 
@@ -343,5 +330,6 @@ void
 QtWidgetList::viewScrolled(int value)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list scrolling ...");
-    getViewOffset();
+    int offset = getOffset();
+    scrolledToRow(-offset / _widgetHeight);
 }
