@@ -172,7 +172,9 @@ WidgetListModel::insertItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Log::instance()->util().debug("widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        _pView->insertItem(row);
+        if (_pView) {
+            _pView->insertItem(row);
+        }
     }
     else {
         Log::instance()->util().error("widget list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
@@ -185,7 +187,9 @@ WidgetListModel::removeItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Log::instance()->util().debug("widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        _pView->removeItem(row);
+        if (_pView) {
+            _pView->removeItem(row);
+        }
     }
     else {
         Log::instance()->util().error("widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");

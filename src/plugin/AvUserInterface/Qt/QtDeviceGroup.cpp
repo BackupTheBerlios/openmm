@@ -102,6 +102,21 @@ QtDeviceGroup::columnCount(const QModelIndex& parent) const
 }
 
 
+int
+QtDeviceGroup::totalItemCount()
+{
+    return getDeviceCount();
+}
+
+
+void
+QtDeviceGroup::selectItem(int row)
+{
+    Omm::Device* pDevice = getDevice(row);
+    DeviceGroup::selectDevice(pDevice);
+}
+
+
 void
 QtDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
@@ -110,12 +125,16 @@ QtDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
         beginInsertRows(QModelIndex(), position, position);
     }
     else {
-        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+        // WidgetListModel interface
+        insertItem(position);
+
+        // QAbstractItemModel interface
         endInsertRows();
         emit layoutChanged();
         if (rowCount() == 1) {
             emit setCurrentIndex(index(0, 0));
         }
+        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
     }
 }
 
@@ -125,11 +144,16 @@ QtDeviceGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
         Omm::Log::instance()->upnp().debug("Qt device group removes device at position: " + Poco::NumberFormatter::format(position));
+
+        // WidgetListModel interface
+        removeItem(position);
+
+        // QAbstractItemModel interface
         beginRemoveRows(QModelIndex(), position, position);
     }
     else {
-        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
         endRemoveRows();
         emit layoutChanged();
+        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
     }
 }

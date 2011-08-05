@@ -24,9 +24,10 @@
 
 #include <QtGui>
 #include <Omm/Upnp.h>
+#include <Omm/Util.h>
 
 
-class QtDeviceGroup: public QAbstractItemModel, public Omm::DeviceGroup
+class QtDeviceGroup: public QAbstractItemModel, public Omm::Util::WidgetListModel, public Omm::DeviceGroup
 {
     Q_OBJECT
     
@@ -43,6 +44,10 @@ public:
     QModelIndex parent(const QModelIndex& index) const;
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
+
+    // WidgetListModel interface (could also move to Omm::Device)
+    virtual int totalItemCount();
+    virtual void selectItem(int row);
 
     // Omm::DeviceGroup interface
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);

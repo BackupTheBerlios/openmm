@@ -29,7 +29,6 @@
 #include "QtWidgetList.h"
 
 
-
 QtMediaRendererGroup::QtMediaRendererGroup() :
 QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 {
@@ -49,38 +48,6 @@ QtMediaRendererGroup::createDevice()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group create media renderer");
     return new QtMediaRenderer;
-}
-
-
-void
-QtMediaRendererGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
-{
-    if (begin) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group adds device at position: " + Poco::NumberFormatter::format(position));
-    }
-    else {
-        QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
-        Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
-        Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-        insertItem(position);
-        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished adding device.");
-    }
-}
-
-
-void
-QtMediaRendererGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
-{
-    if (begin) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group removes device at position: " + Poco::NumberFormatter::format(position));
-        QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(pDevice);
-        Omm::Av::Log::instance()->upnpav().debug("get device: " + Poco::NumberFormatter::format(pDevice) + ", friendly name: " + pDevice->getFriendlyName());
-        Omm::Av::Log::instance()->upnpav().debug("get renderer: " + Poco::NumberFormatter::format(pRenderer) + ", friendly name: " + pRenderer->getFriendlyName());
-        removeItem(position);
-    }
-    else {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group finished removing device.");
-    }
 }
 
 
@@ -149,20 +116,6 @@ QtMediaRendererGroup::detachWidget(int row)
 }
 
 
-int
-QtMediaRendererGroup::totalItemCount()
-{
-    return getDeviceCount();
-}
-
-
-void
-QtMediaRendererGroup::selectItem(int row)
-{
-    selectedRenderer(row);
-}
-
-
 void
 QtMediaRendererGroup::playButtonPressed()
 {
@@ -204,14 +157,6 @@ QtMediaRendererGroup::positionSliderMoved(int value)
 
 
 void
-QtMediaRendererGroup::selectedRenderer(int row)
-{
-    Omm::Device* pDevice = getDevice(row);
-    DeviceGroup::selectDevice(pDevice);
-}
-
-
-void
 QtMediaRendererGroup::init()
 {
     _pControlPanel = new QtMediaRendererControlPanel;
@@ -221,6 +166,4 @@ QtMediaRendererGroup::init()
     connect(_pControlPanel, SIGNAL(stopButtonPressed()), this, SLOT(stopButtonPressed()));
     connect(_pControlPanel, SIGNAL(volumeSliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(_pControlPanel, SIGNAL(positionSliderMoved(int)), this, SLOT(positionSliderMoved(int)));
-
-//    connect(_pWidgetList, SIGNAL(selectedWidget(int)), this, SLOT(selectedRenderer(int)));
 }

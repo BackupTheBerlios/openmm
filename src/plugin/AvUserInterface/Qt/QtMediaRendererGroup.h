@@ -23,12 +23,13 @@
 #define QtMediaRendererGroup_INCLUDED
 
 #include "QtDeviceGroup.h"
-#include "QtWidgetList.h"
 
 class QtMediaRenderer;
+class QtWidgetList;
+class QtWidgetCanvas;
 class QtMediaRendererControlPanel;
 
-class QtMediaRendererGroup : public QtDeviceGroup, public Omm::Util::WidgetListModel
+class QtMediaRendererGroup : public QtDeviceGroup
 {
     Q_OBJECT
 
@@ -37,26 +38,21 @@ public:
 
     // Omm::DeviceGroup interface
     virtual Omm::Device* createDevice();
-    virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
 
     // QtDeviceGroup interface
     virtual QWidget* getDeviceGroupWidget();
 
-    // QtWidgetListModel interface
-    virtual int totalItemCount();
+    // WidgetListModel interface
     virtual Omm::Util::Widget* createWidget();
     virtual Omm::Util::Widget* getWidget(int row);
     virtual void attachWidget(int row, Omm::Util::Widget* pWidget);
     virtual void detachWidget(int row);
-    virtual void selectItem(int row);
 
 private slots:
     void playButtonPressed();
     void stopButtonPressed();
     void volumeSliderMoved(int value);
     void positionSliderMoved(int value);
-    void selectedRenderer(int row);
 
 private:
     virtual void init();
