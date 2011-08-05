@@ -78,7 +78,7 @@ public slots:
     void unconfigure();
 
 private slots:
-    void selectedRenderer();
+//    void selectedRenderer();
     void playButtonPressed();
     void stopButtonPressed();
     void volumeSliderMoved(int value);

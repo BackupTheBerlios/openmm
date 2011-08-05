@@ -36,7 +36,10 @@ QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 //    _pWidgetList = new QtWidgetList;
 //    _pWidgetList->setModel(this);
 
-    _pWidgetCanvas = new QtWidgetCanvas;
+    // widgets movable:
+    _pWidgetCanvas = new QtWidgetCanvas(true);
+    // widgets not movable
+//    _pWidgetCanvas = new QtWidgetCanvas;
     _pWidgetCanvas->setModel(this);
 }
 
@@ -153,6 +156,13 @@ int
 QtMediaRendererGroup::totalItemCount()
 {
     return getDeviceCount();
+}
+
+
+void
+QtMediaRendererGroup::selectItem(int row)
+{
+    selectedRenderer(row);
 }
 
 

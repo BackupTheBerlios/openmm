@@ -49,6 +49,7 @@ public:
     virtual QWidget* getWidget(int row);
     virtual void attachWidget(int row, QWidget* pWidget);
     virtual void detachWidget(int row);
+    virtual void selectItem(int row);
 
 private slots:
     void playButtonPressed();

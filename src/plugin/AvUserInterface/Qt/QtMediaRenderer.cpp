@@ -80,7 +80,7 @@ QtMediaRendererWidget::QtMediaRendererWidget()
     _pLayout->addWidget(_pVolumeSlider);
     _pLayout->addWidget(_pSeekSlider);
 
-    connect(_pLabel, SIGNAL(pressed()), this, SLOT(selectedRenderer()));
+//    connect(_pLabel, SIGNAL(pressed()), this, SLOT(selectedRenderer()));
     connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
     connect(_pVolumeSlider, SIGNAL(sliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
@@ -104,13 +104,13 @@ QtMediaRendererWidget::unconfigure()
 }
 
 
-void
-QtMediaRendererWidget::selectedRenderer()
-{
-    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer widget selected renderer: " + _pRenderer->getFriendlyName());
-    // FIXME: _row changes when devices are added / removed
-//    emit selectedWidget(_row);
-}
+//void
+//QtMediaRendererWidget::selectedRenderer()
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer widget selected renderer: " + _pRenderer->getFriendlyName());
+//    // FIXME: _row changes when devices are added / removed
+////    emit selectedWidget(_row);
+//}
 
 
 void

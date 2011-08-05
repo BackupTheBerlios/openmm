@@ -51,11 +51,13 @@ public:
     /// The model is only an abstraction layer on top of the data.
     void removeItem(int row);
     /// See insertItem().
+    virtual void selectItem(int row) {}
+    /// View should call selectItem() when the item in row is selected.
 
     // lazy model related
-    bool canFetchMore() { return false; }
-    void fetchMore(bool forward = true) {}
-    int lastFetched(bool forward = true) { return totalItemCount(); }
+    virtual bool canFetchMore() { return false; }
+    virtual void fetchMore(bool forward = true) {}
+    virtual int lastFetched(bool forward = true) { return totalItemCount(); }
 
     // widget related
     void setWidgetFactory(QtWidgetFactory* pWidgetFactory);
@@ -78,6 +80,7 @@ public:
     void setModel(QtWidgetListModel* pModel);
     void insertItem(int row);
     void removeItem(int row);
+    void selectedRow(int row);
 
 protected:
     virtual int visibleRows() { return 0; }
@@ -142,12 +145,14 @@ private:
 };
 
 
+class QtWidgetCanvasItem;
+
 class QtWidgetCanvas : public QGraphicsView, public QtWidgetListView
 {
     Q_OBJECT
 
 public:
-    QtWidgetCanvas(QWidget* pParent = 0);
+    QtWidgetCanvas(bool movableWidgets = false, QWidget* pParent = 0);
     virtual ~QtWidgetCanvas();
 
 protected:
@@ -168,7 +173,8 @@ private slots:
 
 private:
     QGraphicsScene*                              _pGraphicsScene;
-    std::map<QWidget*, QGraphicsProxyWidget*>    _proxyWidgets;
+    std::map<QWidget*, QtWidgetCanvasItem*>    _proxyWidgets;
+    bool                                         _movableWidgets;
 };
 
 
