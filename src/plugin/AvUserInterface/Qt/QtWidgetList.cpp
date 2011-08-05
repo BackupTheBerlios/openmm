@@ -28,7 +28,6 @@
 Widget::Widget() :
 _row(0)
 {
-
 }
 
 
@@ -43,6 +42,26 @@ void
 Widget::setRow(int row)
 {
     _row = row;
+}
+
+
+Widget::SelectNotification::SelectNotification(int row) :
+_row(row)
+{
+}
+
+
+void
+Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
+{
+    _eventNotificationCenter.addObserver(observer);
+}
+
+
+void
+Widget::select()
+{
+    _eventNotificationCenter.postNotification(new SelectNotification(_row));
 }
 
 
@@ -137,6 +156,7 @@ WidgetListView::extendWidgetPool(int n)
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
+        pWidget->registerEventNotificationHandler(Poco::Observer<WidgetListView, Widget::SelectNotification>(*this, &WidgetListView::selectNotificationHandler));
         Omm::Av::Log::instance()->upnpav().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }
@@ -221,6 +241,21 @@ WidgetListView::itemIsVisible(int row)
 
 
 void
+WidgetListView::moveWidgetToRow(int row, Widget* pWidget)
+{
+    pWidget->setRow(row);
+    moveWidget(row, pWidget);
+}
+
+
+void
+WidgetListView::selectNotificationHandler(Widget::SelectNotification* pSelectNotification)
+{
+    _pModel->selectItem(pSelectNotification->_row);
+}
+
+
+void
 WidgetListView::insertItem(int row)
 {
     if (_lazy) {
@@ -282,6 +317,7 @@ WidgetListView::removeItem(int row)
     _visibleWidgets.erase(_visibleWidgets.begin() + visibleIndex(row));
     
     if (_pModel->totalItemCount() - lastRow > 0) {
+        // FIXME: something's going wrong with removal of rows, duplicate rows appear and crash
         // reuse and attach widget below last widget cause it is now becoming visible
         Omm::Av::Log::instance()->upnpav().debug("widget list view reuse removed item widget");
         _pModel->attachWidget(lastRow - 1, pWidget);
@@ -294,14 +330,6 @@ WidgetListView::removeItem(int row)
         _freeWidgets.push(pWidget);
     }
 }
-
-
-void
-WidgetListView::selectedRow(int row)
-{
-    _pModel->selectItem(row);
-}
-
 
 
 void
@@ -318,6 +346,15 @@ QtWidget::hideWidget()
 }
 
 
+void
+QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    select();
+    QWidget::mousePressEvent(pMouseEvent);
+}
+
+
 QtWidgetList::QtWidgetList(QWidget* pParent) :
 QScrollArea(pParent),
 WidgetListView(50, true),
@@ -327,8 +364,8 @@ _pScrollWidget(0)
     _pScrollWidget->resize(viewport()->size());
     setWidget(_pScrollWidget);
 
-    connect(this, SIGNAL(moveWidget(int, Widget*)), this, SLOT(move(int, Widget*)));
-    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolled(int)));
+    connect(this, SIGNAL(moveWidgetSignal(int, Widget*)), this, SLOT(moveWidgetSlot(int, Widget*)));
+    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledSlot(int)));
 }
 
 
@@ -355,10 +392,10 @@ QtWidgetList::initWidget(Widget* pWidget)
 
 
 void
-QtWidgetList::moveWidgetToRow(int row, Widget* pWidget)
+QtWidgetList::moveWidget(int row, Widget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
-    emit moveWidget(row, pWidget);
+    emit moveWidgetSignal(row, pWidget);
 }
 
 
@@ -378,64 +415,16 @@ QtWidgetList::getOffset()
 
 
 void
-QtWidgetList::move(int row, Widget* pWidget)
+QtWidgetList::moveWidgetSlot(int row, Widget* pWidget)
 {
     static_cast<QtWidget*>(pWidget)->move(0, _widgetHeight * row);
 }
 
 
 void
-QtWidgetList::viewScrolled(int value)
+QtWidgetList::viewScrolledSlot(int value)
 {
     scrolledToRow(-getOffset() / _widgetHeight);
-}
-
-
-class QtWidgetScene : public QGraphicsScene
-{
-private:
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent* pMouseEvent);
-};
-
-
-void
-QtWidgetScene::mousePressEvent(QGraphicsSceneMouseEvent* pMouseEvent)
-{
-    Omm::Av::Log::instance()->upnpav().debug("widget scene mouse pressed");
-    itemAt(pMouseEvent->scenePos());
-
-    QGraphicsScene::mousePressEvent(pMouseEvent);
-}
-
-
-class QtWidgetCanvasItem : public QGraphicsProxyWidget
-{
-    friend class QtWidgetCanvas;
-    
-public:
-    QtWidgetCanvasItem(QGraphicsItem* pParent = 0, Qt::WindowFlags wFlags = 0);
-
-private:
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent* pMouseEvent);
-
-    QtWidgetCanvas*     _pWidgetCanvas;
-    int                 _row;
-};
-
-
-void
-QtWidgetCanvasItem::mousePressEvent(QGraphicsSceneMouseEvent* pMouseEvent)
-{
-    Omm::Av::Log::instance()->upnpav().debug("widget canvas item mouse pressed in widget with row: " + Poco::NumberFormatter::format(_row));
-    _pWidgetCanvas->selectedRow(_row);
-    QGraphicsProxyWidget::mousePressEvent(pMouseEvent);
-}
-
-
-QtWidgetCanvasItem::QtWidgetCanvasItem(QGraphicsItem* pParent, Qt::WindowFlags wFlags) :
-QGraphicsProxyWidget(pParent, wFlags)
-{
-
 }
 
 
@@ -447,10 +436,9 @@ _movableWidgets(movableWidgets)
     setAlignment((Qt::AlignLeft | Qt::AlignTop));
 
     _pGraphicsScene = new QGraphicsScene;
-//    _pGraphicsScene = new QtWidgetScene;
     setScene(_pGraphicsScene);
 
-    connect(this, SIGNAL(moveWidget(int, Widget*)), this, SLOT(move(int, Widget*)));
+    connect(this, SIGNAL(moveWidgetSignal(int, Widget*)), this, SLOT(moveWidgetSlot(int, Widget*)));
     connect(this, SIGNAL(extendPoolSignal()), this, SLOT(extendPoolSlot()));
 }
 
@@ -475,28 +463,20 @@ QtWidgetCanvas::initWidget(Widget* pWidget)
     QtWidget* pQtWidget = static_cast<QtWidget*>(pWidget);
     pQtWidget->resize(viewport()->width(), _widgetHeight);
 
-    QtWidgetCanvasItem* pProxyWidget;
     if (_movableWidgets) {
-        pProxyWidget = new QtWidgetCanvasItem(0, Qt::Window);
+        _proxyWidgets[pWidget] = _pGraphicsScene->addWidget(pQtWidget, Qt::Window);
     }
     else {
-        pProxyWidget = new QtWidgetCanvasItem;
+        _proxyWidgets[pWidget] = _pGraphicsScene->addWidget(pQtWidget);
    }
-    pProxyWidget->_pWidgetCanvas = this;
-    pProxyWidget->setWidget(pQtWidget);
-    _pGraphicsScene->addItem(pProxyWidget);
-    _proxyWidgets[pWidget] = pProxyWidget;
-//    _proxyWidgets[pWidget] = _pGraphicsScene->addWidget(pWidget);
 }
 
 
 void
-QtWidgetCanvas::moveWidgetToRow(int row, Widget* pWidget)
+QtWidgetCanvas::moveWidget(int row, Widget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
-    // with a non-lazy model, move widget is only called when inserting / removing widgets (lazy models also scroll widgets)
-    _proxyWidgets[pWidget]->_row = row;
-    emit moveWidget(row, pWidget);
+    emit moveWidgetSignal(row, pWidget);
 }
 
 
@@ -508,7 +488,7 @@ QtWidgetCanvas::extendWidgetPool()
 
 
 void
-QtWidgetCanvas::move(int row, Widget* pWidget)
+QtWidgetCanvas::moveWidgetSlot(int row, Widget* pWidget)
 {
     _proxyWidgets[pWidget]->setPos(0, _widgetHeight * row);
 }

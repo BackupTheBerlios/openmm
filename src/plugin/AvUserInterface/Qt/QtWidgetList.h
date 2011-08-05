@@ -25,6 +25,9 @@
 #include <stack>
 #include <QtGui>
 
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+
 class WidgetListModel;
 class WidgetListView;
 
@@ -40,8 +43,22 @@ public:
     int getRow();
     void setRow(int row);
 
+    class SelectNotification : public Poco::Notification
+    {
+    public:
+        SelectNotification(int row);
+        
+        int _row;
+    };
+
+    void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
+
+protected:
+    void select();
+
 private:
     int _row;
+    Poco::NotificationCenter _eventNotificationCenter;
 };
 
 
@@ -96,12 +113,11 @@ public:
     void setModel(WidgetListModel* pModel);
     void insertItem(int row);
     void removeItem(int row);
-    void selectedRow(int row);
 
 protected:
     virtual int visibleRows() { return 0; }
     virtual void initWidget(Widget* pWidget) {}
-    virtual void moveWidgetToRow(int row, Widget* pWidget) {}
+    virtual void moveWidget(int row, Widget* pWidget) {}
 
     // non-lazy views only
     virtual void extendWidgetPool() {}
@@ -123,6 +139,8 @@ private:
     int countVisibleWidgets();
     Widget* visibleWidget(int index);
     bool itemIsVisible(int row);
+    void moveWidgetToRow(int row, Widget* pWidget);
+    void selectNotificationHandler(Widget::SelectNotification* pSelectNotification);
 
     bool                            _lazy;
     std::vector<Widget*>            _widgetPool;
@@ -139,6 +157,9 @@ class QtWidget : public QWidget, public Widget
 public:
     virtual void showWidget();
     virtual void hideWidget();
+
+private:
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
 
@@ -153,25 +174,22 @@ public:
 protected:
     virtual int visibleRows();
     virtual void initWidget(Widget* pWidget);
-    virtual void moveWidgetToRow(int row, Widget* pWidget);
+    virtual void moveWidget(int row, Widget* pWidget);
 
     virtual void updateScrollWidgetSize();
     virtual int getOffset();
 
 signals:
-    void moveWidget(int targetRow, Widget* pWidget);
-    void selectedWidget(int row);
+    void moveWidgetSignal(int targetRow, Widget* pWidget);
 
 private slots:
-    void move(int targetRow, Widget* pWidget);
-    void viewScrolled(int value);
+    void moveWidgetSlot(int targetRow, Widget* pWidget);
+    void viewScrolledSlot(int value);
 
 private:
     QWidget*                 _pScrollWidget;
 };
 
-
-class QtWidgetCanvasItem;
 
 class QtWidgetCanvas : public QGraphicsView, public WidgetListView
 {
@@ -184,22 +202,21 @@ public:
 protected:
     virtual int visibleRows();
     virtual void initWidget(Widget* pWidget);
-    virtual void moveWidgetToRow(int row, Widget* pWidget);
+    virtual void moveWidget(int row, Widget* pWidget);
 
     virtual void extendWidgetPool();
 
 signals:
-    void moveWidget(int targetRow, Widget* pWidget);
+    void moveWidgetSignal(int targetRow, Widget* pWidget);
     void extendPoolSignal();
-    void selectedWidget(int row);
 
 private slots:
-    void move(int targetRow, Widget* pWidget);
+    void moveWidgetSlot(int targetRow, Widget* pWidget);
     void extendPoolSlot();
 
 private:
     QGraphicsScene*                              _pGraphicsScene;
-    std::map<Widget*, QtWidgetCanvasItem*>    _proxyWidgets;
+    std::map<Widget*, QGraphicsProxyWidget*>     _proxyWidgets;
     bool                                         _movableWidgets;
 };
 
