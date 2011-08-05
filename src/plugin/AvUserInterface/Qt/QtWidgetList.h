@@ -58,19 +58,24 @@ private:
 class QtWidgetListView
 {
 public:
-    QtWidgetListView(int widgetHeight);
+    QtWidgetListView(int widgetHeight, bool lazy = false);
     
     void setModel(QtWidgetListModel* pModel);
     void insertItem(int row);
     void removeItem(int row);
 
 protected:
+    virtual int visibleRows() { return 0; }
     virtual void initWidget(QWidget* pWidget) {}
     virtual void moveWidgetToRow(int row, QWidget* pWidget) {}
-    virtual void updateScrollWidgetSize() {}
-    virtual int getOffset() {}
-    virtual int visibleRows() {}
 
+    // non-lazy views only
+    virtual void extendWidgetPool() {}
+    void extendWidgetPool(int n);
+
+    // lazy views only
+    virtual int getOffset() { return 0; }
+    virtual void updateScrollWidgetSize() {}
     void scrolledToRow(int rowOffset);
 
     QtWidgetListModel*              _pModel;
@@ -78,16 +83,14 @@ protected:
 
 private:
     int widgetPoolSize();
-    void extendWidgetPool(int n);
     /// The view has a widget pool which is large enough to fill the area of the view
     /// with widgets (created by the model).
     int visibleIndex(int row);
     int countVisibleWidgets();
     QWidget* visibleWidget(int index);
     bool itemIsVisible(int row);
-    void showItem(int row, QWidget* pWidget);
-//    void hideItem(int row, QWidget* pWidget);
 
+    bool                            _lazy;
     std::vector<QWidget*>           _widgetPool;
     std::vector<QWidget*>           _visibleWidgets;
     std::stack<QWidget*>            _freeWidgets;
@@ -104,15 +107,16 @@ public:
     virtual ~QtWidgetList();
 
 protected:
+    virtual int visibleRows();
     virtual void initWidget(QWidget* pWidget);
     virtual void moveWidgetToRow(int row, QWidget* pWidget);
+
     virtual void updateScrollWidgetSize();
     virtual int getOffset();
-    virtual int visibleRows();
 
 signals:
-    void selectedWidget(int row);
     void moveWidget(int targetRow, QWidget* pWidget);
+    void selectedWidget(int row);
 
 private slots:
     void move(int targetRow, QWidget* pWidget);
@@ -120,6 +124,36 @@ private slots:
 
 private:
     QWidget*                 _pScrollWidget;
+};
+
+
+class QtWidgetCanvas : public QGraphicsView, public QtWidgetListView
+{
+    Q_OBJECT
+
+public:
+    QtWidgetCanvas(QWidget* pParent = 0);
+    virtual ~QtWidgetCanvas();
+
+protected:
+    virtual int visibleRows();
+    virtual void initWidget(QWidget* pWidget);
+    virtual void moveWidgetToRow(int row, QWidget* pWidget);
+
+    virtual void extendWidgetPool();
+
+signals:
+    void moveWidget(int targetRow, QWidget* pWidget);
+    void extendPoolSignal();
+    void selectedWidget(int row);
+
+private slots:
+    void move(int targetRow, QWidget* pWidget);
+    void extendPoolSlot();
+
+private:
+    QGraphicsScene*                              _pGraphicsScene;
+    std::map<QWidget*, QGraphicsProxyWidget*>    _proxyWidgets;
 };
 
 

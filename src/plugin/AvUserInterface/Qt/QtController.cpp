@@ -41,8 +41,15 @@ _pQtApplication(pQtApplication)
 void
 QtController::showDeviceGroup(Omm::DeviceGroup* pDeviceGroup)
 {
+    Omm::Log::instance()->upnp().debug("Qt controller show device group: " + pDeviceGroup->getDeviceType());
+    
     QtDeviceGroup* pQtDeviceGroup = static_cast<QtDeviceGroup*>(pDeviceGroup);
-    addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
+    if (pQtDeviceGroup->getDeviceGroupWidget()) {
+        addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
+    }
+    else {
+        Omm::Log::instance()->upnp().error("Qt controller failed to show device group, no widget available: " + pDeviceGroup->getDeviceType());
+    }
 }
 
 

@@ -33,8 +33,11 @@
 QtMediaRendererGroup::QtMediaRendererGroup() :
 QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 {
-    _pWidgetList = new QtWidgetList;
-    _pWidgetList->setModel(this);
+//    _pWidgetList = new QtWidgetList;
+//    _pWidgetList->setModel(this);
+
+    _pWidgetCanvas = new QtWidgetCanvas;
+    _pWidgetCanvas->setModel(this);
 }
 
 
@@ -81,7 +84,8 @@ QtMediaRendererGroup::removeDevice(Omm::Device* pDevice, int position, bool begi
 QWidget*
 QtMediaRendererGroup::getDeviceGroupWidget()
 {
-    return _pWidgetList;
+//    return _pWidgetList;
+    return _pWidgetCanvas;
 }
 
 
@@ -110,11 +114,12 @@ QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
     pRendererWidget->_pRenderer = pRenderer;
     pRenderer->setDeviceWidget(pRendererWidget);
     // FIXME: _row changes when devices are added / removed
-    pRendererWidget->setRow(row);
+//    pRendererWidget->setRow(row);
 
     connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
     connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
     connect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
+    connect(pRendererWidget, SIGNAL(unconfigureWidget()), pRendererWidget, SLOT(unconfigure()));
 //    connect(pRendererWidget, SIGNAL(selectedWidget(int)), _pWidgetList, SIGNAL(selectedWidget(int)));
 
     emit pRendererWidget->configureWidget();
@@ -131,10 +136,12 @@ QtMediaRendererGroup::detachWidget(int row)
     QtMediaRendererWidget* pRendererWidget = pRenderer->getDeviceWidget();
 
     emit pRendererWidget->hideWidget();
+    emit pRendererWidget->unconfigureWidget();
 
     disconnect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
     disconnect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
     disconnect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
+    disconnect(pRendererWidget, SIGNAL(unconfigureWidget()), pRendererWidget, SLOT(unconfigure()));
 
     pRendererWidget->_pRenderer = 0;
     pRenderer->setDeviceWidget(0);
@@ -208,5 +215,5 @@ QtMediaRendererGroup::init()
     connect(_pControlPanel, SIGNAL(volumeSliderMoved(int)), this, SLOT(volumeSliderMoved(int)));
     connect(_pControlPanel, SIGNAL(positionSliderMoved(int)), this, SLOT(positionSliderMoved(int)));
 
-    connect(_pWidgetList, SIGNAL(selectedWidget(int)), this, SLOT(selectedRenderer(int)));
+//    connect(_pWidgetList, SIGNAL(selectedWidget(int)), this, SLOT(selectedRenderer(int)));
 }

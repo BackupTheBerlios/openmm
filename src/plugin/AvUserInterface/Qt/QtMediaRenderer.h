@@ -67,10 +67,15 @@ signals:
     void showWidget();
     void hideWidget();
     void configureWidget();
+    // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
+    // that means, values have to be cached to allow for fast scrolling (don't retrieve
+    // them via network for example).
+    void unconfigureWidget();
 //    void selectedWidget(int row);
 
 public slots:
     void configure();
+    void unconfigure();
 
 private slots:
     void selectedRenderer();

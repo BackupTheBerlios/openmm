@@ -61,6 +61,7 @@ private:
     virtual void init();
 
     QtWidgetList*                   _pWidgetList;
+    QtWidgetCanvas*                 _pWidgetCanvas;
     QtMediaRendererControlPanel*    _pControlPanel;
 };
 

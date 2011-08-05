@@ -80,7 +80,6 @@ QtMediaRendererWidget::QtMediaRendererWidget()
     _pLayout->addWidget(_pVolumeSlider);
     _pLayout->addWidget(_pSeekSlider);
 
-    // FIXME: signal connect and disconnect have to go into configure() / unconfigure()
     connect(_pLabel, SIGNAL(pressed()), this, SLOT(selectedRenderer()));
     connect(_pPlayButton, SIGNAL(pressed()), this, SLOT(playButtonPressed()));
     connect(_pStopButton, SIGNAL(pressed()), this, SLOT(stopButtonPressed()));
@@ -93,6 +92,15 @@ void
 QtMediaRendererWidget::configure()
 {
     _pLabel->setText(QString::fromStdString(_pRenderer->getFriendlyName()));
+}
+
+
+void
+QtMediaRendererWidget::unconfigure()
+{
+    _pLabel->setText("");
+    _pVolumeSlider->setValue(0);
+    _pSeekSlider->setValue(0);
 }
 
 
