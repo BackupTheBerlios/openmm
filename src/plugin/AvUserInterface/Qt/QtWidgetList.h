@@ -28,6 +28,14 @@
 class QtWidgetListModel;
 class QtWidgetListView;
 
+
+class QtWidgetFactory
+{
+public:
+    virtual QWidget* createWidget() { return 0; }
+};
+
+
 class QtWidgetListModel
 {
     friend class QtWidgetListView;
@@ -44,14 +52,21 @@ public:
     void removeItem(int row);
     /// See insertItem().
 
+    // lazy model related
+    bool canFetchMore() { return false; }
+    void fetchMore(bool forward = true) {}
+    int lastFetched(bool forward = true) { return totalItemCount(); }
+
     // widget related
-    virtual QWidget* createWidget() { return 0; }
+    void setWidgetFactory(QtWidgetFactory* pWidgetFactory);
+    virtual QWidget* createWidget();
     virtual QWidget* getWidget(int row) { return 0; }
     virtual void attachWidget(int row, QWidget* pWidget) {}
     virtual void detachWidget(int row) {}
 
 private:
     QtWidgetListView*               _pView;
+    QtWidgetFactory*                _pWidgetFactory;
 };
 
 

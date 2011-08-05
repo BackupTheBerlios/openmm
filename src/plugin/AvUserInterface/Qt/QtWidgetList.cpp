@@ -26,7 +26,8 @@
 
 
 QtWidgetListModel::QtWidgetListModel() :
-_pView(0)
+_pView(0),
+_pWidgetFactory(0)
 {
 }
 
@@ -54,6 +55,23 @@ QtWidgetListModel::removeItem(int row)
     else {
         Omm::Av::Log::instance()->upnpav().error("widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
     }
+}
+
+
+void
+QtWidgetListModel::setWidgetFactory(QtWidgetFactory* pWidgetFactory)
+{
+    _pWidgetFactory= pWidgetFactory;
+}
+
+
+QWidget*
+QtWidgetListModel::createWidget()
+{
+    if (_pWidgetFactory) {
+        return _pWidgetFactory->createWidget();
+    }
+    return 0;
 }
 
 
