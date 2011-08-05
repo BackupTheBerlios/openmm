@@ -92,14 +92,14 @@ QtMediaRendererGroup::getDeviceGroupWidget()
 }
 
 
-QWidget*
+Widget*
 QtMediaRendererGroup::createWidget()
 {
     return new QtMediaRendererWidget;
 }
 
 
-QWidget*
+Widget*
 QtMediaRendererGroup::getWidget(int row)
 {
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
@@ -108,7 +108,7 @@ QtMediaRendererGroup::getWidget(int row)
 
 
 void
-QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
+QtMediaRendererGroup::attachWidget(int row, Widget* pWidget)
 {
 //    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
@@ -119,14 +119,13 @@ QtMediaRendererGroup::attachWidget(int row, QWidget* pWidget)
     // FIXME: _row changes when devices are added / removed
 //    pRendererWidget->setRow(row);
 
-    connect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
-    connect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
+    connect(pRendererWidget, SIGNAL(showWidgetSignal()), pRendererWidget, SLOT(show()));
+    connect(pRendererWidget, SIGNAL(hideWidgetSignal()), pRendererWidget, SLOT(hide()));
     connect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
     connect(pRendererWidget, SIGNAL(unconfigureWidget()), pRendererWidget, SLOT(unconfigure()));
-//    connect(pRendererWidget, SIGNAL(selectedWidget(int)), _pWidgetList, SIGNAL(selectedWidget(int)));
 
     emit pRendererWidget->configureWidget();
-    emit pRendererWidget->showWidget();
+    emit pRendererWidget->showWidgetSignal();
     Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget finished.");
 }
 
@@ -138,11 +137,11 @@ QtMediaRendererGroup::detachWidget(int row)
     Omm::Av::Log::instance()->upnpav().debug("media renderer group detach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pRenderer->getFriendlyName());
     QtMediaRendererWidget* pRendererWidget = pRenderer->getDeviceWidget();
 
-    emit pRendererWidget->hideWidget();
+    emit pRendererWidget->hideWidgetSignal();
     emit pRendererWidget->unconfigureWidget();
 
-    disconnect(pRendererWidget, SIGNAL(showWidget()), pRendererWidget, SLOT(show()));
-    disconnect(pRendererWidget, SIGNAL(hideWidget()), pRendererWidget, SLOT(hide()));
+    disconnect(pRendererWidget, SIGNAL(showWidgetSignal()), pRendererWidget, SLOT(show()));
+    disconnect(pRendererWidget, SIGNAL(hideWidgetSignal()), pRendererWidget, SLOT(hide()));
     disconnect(pRendererWidget, SIGNAL(configureWidget()), pRendererWidget, SLOT(configure()));
     disconnect(pRendererWidget, SIGNAL(unconfigureWidget()), pRendererWidget, SLOT(unconfigure()));
 

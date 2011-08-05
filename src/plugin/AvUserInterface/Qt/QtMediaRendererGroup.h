@@ -28,7 +28,7 @@
 class QtMediaRenderer;
 class QtMediaRendererControlPanel;
 
-class QtMediaRendererGroup : public QtDeviceGroup, public QtWidgetListModel
+class QtMediaRendererGroup : public QtDeviceGroup, public WidgetListModel
 {
     Q_OBJECT
 
@@ -45,9 +45,9 @@ public:
 
     // QtWidgetListModel interface
     virtual int totalItemCount();
-    virtual QWidget* createWidget();
-    virtual QWidget* getWidget(int row);
-    virtual void attachWidget(int row, QWidget* pWidget);
+    virtual Widget* createWidget();
+    virtual Widget* getWidget(int row);
+    virtual void attachWidget(int row, Widget* pWidget);
     virtual void detachWidget(int row);
     virtual void selectItem(int row);
 

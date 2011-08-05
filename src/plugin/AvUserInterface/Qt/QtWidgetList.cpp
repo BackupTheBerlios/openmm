@@ -25,7 +25,28 @@
 #include "QtWidgetList.h"
 
 
-QtWidgetListModel::QtWidgetListModel() :
+Widget::Widget() :
+_row(0)
+{
+
+}
+
+
+int
+Widget::getRow()
+{
+    return _row;
+}
+
+
+void
+Widget::setRow(int row)
+{
+    _row = row;
+}
+
+
+WidgetListModel::WidgetListModel() :
 _pView(0),
 _pWidgetFactory(0)
 {
@@ -33,7 +54,7 @@ _pWidgetFactory(0)
 
 
 void
-QtWidgetListModel::insertItem(int row)
+WidgetListModel::insertItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Omm::Av::Log::instance()->upnpav().debug("widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
@@ -46,7 +67,7 @@ QtWidgetListModel::insertItem(int row)
 
 
 void
-QtWidgetListModel::removeItem(int row)
+WidgetListModel::removeItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Omm::Av::Log::instance()->upnpav().debug("widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
@@ -59,14 +80,14 @@ QtWidgetListModel::removeItem(int row)
 
 
 void
-QtWidgetListModel::setWidgetFactory(QtWidgetFactory* pWidgetFactory)
+WidgetListModel::setWidgetFactory(WidgetFactory* pWidgetFactory)
 {
     _pWidgetFactory = pWidgetFactory;
 }
 
 
-QWidget*
-QtWidgetListModel::createWidget()
+Widget*
+WidgetListModel::createWidget()
 {
     if (_pWidgetFactory) {
         return _pWidgetFactory->createWidget();
@@ -75,7 +96,7 @@ QtWidgetListModel::createWidget()
 }
 
 
-QtWidgetListView::QtWidgetListView(int widgetHeight, bool lazy) :
+WidgetListView::WidgetListView(int widgetHeight, bool lazy) :
 _lazy(lazy),
 _pModel(0),
 _widgetHeight(widgetHeight),
@@ -85,7 +106,7 @@ _rowOffset(0)
 
 
 void
-QtWidgetListView::setModel(QtWidgetListModel* pModel)
+WidgetListView::setModel(WidgetListModel* pModel)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list view set model");
     
@@ -99,20 +120,20 @@ QtWidgetListView::setModel(QtWidgetListModel* pModel)
 
 
 int
-QtWidgetListView::widgetPoolSize()
+WidgetListView::widgetPoolSize()
 {
     return _widgetPool.size();
 }
 
 
 void
-QtWidgetListView::extendWidgetPool(int n)
+WidgetListView::extendWidgetPool(int n)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
 
     for (int i = 0; i < n; ++i) {
-        QWidget* pWidget = _pModel->createWidget();
-        pWidget->hide();
+        Widget* pWidget = _pModel->createWidget();
+        pWidget->hideWidget();
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
@@ -122,21 +143,21 @@ QtWidgetListView::extendWidgetPool(int n)
 
 
 int
-QtWidgetListView::visibleIndex(int row)
+WidgetListView::visibleIndex(int row)
 {
     return row - _rowOffset;
 }
 
 
 int
-QtWidgetListView::countVisibleWidgets()
+WidgetListView::countVisibleWidgets()
 {
     return _visibleWidgets.size();
 }
 
 
-QWidget*
-QtWidgetListView::visibleWidget(int index)
+Widget*
+WidgetListView::visibleWidget(int index)
 {
     if (0 <= index && index < _visibleWidgets.size()) {
         return _visibleWidgets[index];
@@ -149,7 +170,7 @@ QtWidgetListView::visibleWidget(int index)
 
 
 void
-QtWidgetListView::scrolledToRow(int rowOffset)
+WidgetListView::scrolledToRow(int rowOffset)
 {
     int rowDelta = rowOffset - _rowOffset;
 
@@ -162,7 +183,7 @@ QtWidgetListView::scrolledToRow(int rowOffset)
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {
             // detach first visible widget
-            QWidget* pWidget = _visibleWidgets.front();
+            Widget* pWidget = _visibleWidgets.front();
             _pModel->detachWidget(_rowOffset);
             // move first widget to the end
             int lastRow = _rowOffset + _visibleWidgets.size();
@@ -176,7 +197,7 @@ QtWidgetListView::scrolledToRow(int rowOffset)
         }
         else if (rowDelta < 0) {
             // detach last visible widget
-            QWidget* pWidget = _visibleWidgets.back();
+            Widget* pWidget = _visibleWidgets.back();
             int lastRow = _rowOffset + _visibleWidgets.size() - 1;
             _pModel->detachWidget(lastRow);
             // move last widget to the beginning
@@ -193,14 +214,14 @@ QtWidgetListView::scrolledToRow(int rowOffset)
 
 
 bool
-QtWidgetListView::itemIsVisible(int row)
+WidgetListView::itemIsVisible(int row)
 {
     return _rowOffset <= row && row < _rowOffset + visibleRows();
 }
 
 
 void
-QtWidgetListView::insertItem(int row)
+WidgetListView::insertItem(int row)
 {
     if (_lazy) {
         // resize view to the size with this item added
@@ -220,7 +241,7 @@ QtWidgetListView::insertItem(int row)
 
     // attach item to a free (not visible) widget
     if (_freeWidgets.size()) {
-        QWidget* pWidget = _freeWidgets.top();
+        Widget* pWidget = _freeWidgets.top();
         _freeWidgets.pop();
         _visibleWidgets.insert(_visibleWidgets.begin() + visibleIndex(row), pWidget);
         _pModel->attachWidget(row, pWidget);
@@ -235,7 +256,7 @@ QtWidgetListView::insertItem(int row)
 
 
 void
-QtWidgetListView::removeItem(int row)
+WidgetListView::removeItem(int row)
 {
     if (_lazy) {
         // resize view to the size with this item added
@@ -248,7 +269,7 @@ QtWidgetListView::removeItem(int row)
     }
     
     // detach item from visible widget
-    QWidget* pWidget = _pModel->getWidget(row);
+    Widget* pWidget = _pModel->getWidget(row);
 
     // remove widget from this position in visible widgets
     int index = visibleIndex(row);
@@ -276,22 +297,37 @@ QtWidgetListView::removeItem(int row)
 
 
 void
-QtWidgetListView::selectedRow(int row)
+WidgetListView::selectedRow(int row)
 {
     _pModel->selectItem(row);
 }
 
 
+
+void
+QtWidget::showWidget()
+{
+    QWidget::show();
+}
+
+
+void
+QtWidget::hideWidget()
+{
+    QWidget::hide();
+}
+
+
 QtWidgetList::QtWidgetList(QWidget* pParent) :
 QScrollArea(pParent),
-QtWidgetListView(50, true),
+WidgetListView(50, true),
 _pScrollWidget(0)
 {
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(viewport()->size());
     setWidget(_pScrollWidget);
 
-    connect(this, SIGNAL(moveWidget(int, QWidget*)), this, SLOT(move(int, QWidget*)));
+    connect(this, SIGNAL(moveWidget(int, Widget*)), this, SLOT(move(int, Widget*)));
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolled(int)));
 }
 
@@ -311,15 +347,15 @@ QtWidgetList::visibleRows()
 
 
 void
-QtWidgetList::initWidget(QWidget* pWidget)
+QtWidgetList::initWidget(Widget* pWidget)
 {
-    pWidget->resize(viewport()->width(), _widgetHeight);
-    pWidget->setParent(_pScrollWidget);
+    static_cast<QtWidget*>(pWidget)->resize(viewport()->width(), _widgetHeight);
+    static_cast<QtWidget*>(pWidget)->setParent(_pScrollWidget);
 }
 
 
 void
-QtWidgetList::moveWidgetToRow(int row, QWidget* pWidget)
+QtWidgetList::moveWidgetToRow(int row, Widget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidget(row, pWidget);
@@ -342,9 +378,9 @@ QtWidgetList::getOffset()
 
 
 void
-QtWidgetList::move(int row, QWidget* pWidget)
+QtWidgetList::move(int row, Widget* pWidget)
 {
-    pWidget->move(0, _widgetHeight * row);
+    static_cast<QtWidget*>(pWidget)->move(0, _widgetHeight * row);
 }
 
 
@@ -405,7 +441,7 @@ QGraphicsProxyWidget(pParent, wFlags)
 
 QtWidgetCanvas::QtWidgetCanvas(bool movableWidgets, QWidget* pParent) :
 QGraphicsView(pParent),
-QtWidgetListView(50, false),
+WidgetListView(50, false),
 _movableWidgets(movableWidgets)
 {
     setAlignment((Qt::AlignLeft | Qt::AlignTop));
@@ -414,7 +450,7 @@ _movableWidgets(movableWidgets)
 //    _pGraphicsScene = new QtWidgetScene;
     setScene(_pGraphicsScene);
 
-    connect(this, SIGNAL(moveWidget(int, QWidget*)), this, SLOT(move(int, QWidget*)));
+    connect(this, SIGNAL(moveWidget(int, Widget*)), this, SLOT(move(int, Widget*)));
     connect(this, SIGNAL(extendPoolSignal()), this, SLOT(extendPoolSlot()));
 }
 
@@ -434,9 +470,10 @@ QtWidgetCanvas::visibleRows()
 
 
 void
-QtWidgetCanvas::initWidget(QWidget* pWidget)
+QtWidgetCanvas::initWidget(Widget* pWidget)
 {
-    pWidget->resize(viewport()->width(), _widgetHeight);
+    QtWidget* pQtWidget = static_cast<QtWidget*>(pWidget);
+    pQtWidget->resize(viewport()->width(), _widgetHeight);
 
     QtWidgetCanvasItem* pProxyWidget;
     if (_movableWidgets) {
@@ -446,7 +483,7 @@ QtWidgetCanvas::initWidget(QWidget* pWidget)
         pProxyWidget = new QtWidgetCanvasItem;
    }
     pProxyWidget->_pWidgetCanvas = this;
-    pProxyWidget->setWidget(pWidget);
+    pProxyWidget->setWidget(pQtWidget);
     _pGraphicsScene->addItem(pProxyWidget);
     _proxyWidgets[pWidget] = pProxyWidget;
 //    _proxyWidgets[pWidget] = _pGraphicsScene->addWidget(pWidget);
@@ -454,7 +491,7 @@ QtWidgetCanvas::initWidget(QWidget* pWidget)
 
 
 void
-QtWidgetCanvas::moveWidgetToRow(int row, QWidget* pWidget)
+QtWidgetCanvas::moveWidgetToRow(int row, Widget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
     // with a non-lazy model, move widget is only called when inserting / removing widgets (lazy models also scroll widgets)
@@ -471,7 +508,7 @@ QtWidgetCanvas::extendWidgetPool()
 
 
 void
-QtWidgetCanvas::move(int row, QWidget* pWidget)
+QtWidgetCanvas::move(int row, Widget* pWidget)
 {
     _proxyWidgets[pWidget]->setPos(0, _widgetHeight * row);
 }
@@ -480,5 +517,5 @@ QtWidgetCanvas::move(int row, QWidget* pWidget)
 void
 QtWidgetCanvas::extendPoolSlot()
 {
-    QtWidgetListView::extendWidgetPool(visibleRows());
+    WidgetListView::extendWidgetPool(visibleRows());
 }

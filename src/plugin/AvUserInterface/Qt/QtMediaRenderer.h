@@ -27,6 +27,7 @@
 #include <Omm/UpnpAvController.h>
 
 #include "QtWidgetDeviceGroup.h"
+#include "QtWidgetList.h"
 
 class QtMediaRendererWidget;
 
@@ -51,7 +52,7 @@ private:
 };
 
 
-class QtMediaRendererWidget : public QWidget
+class QtMediaRendererWidget : public QtWidget
 {
     Q_OBJECT
 
@@ -64,8 +65,8 @@ public:
     void setRow(int row);
 
 signals:
-    void showWidget();
-    void hideWidget();
+    void showWidgetSignal();
+    void hideWidgetSignal();
     void configureWidget();
     // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
     // that means, values have to be cached to allow for fast scrolling (don't retrieve
