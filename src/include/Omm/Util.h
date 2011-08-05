@@ -22,6 +22,8 @@
 #ifndef Util_INCLUDED
 #define Util_INCLUDED
 
+#include <stack>
+
 #include <Poco/Format.h>
 #include <Poco/Logger.h>
 #include <Poco/ClassLoader.h>
@@ -30,6 +32,9 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+
 
 namespace Omm {
 namespace Util {
@@ -197,6 +202,128 @@ private:
     void run();
 
     Poco::Thread        _thread;
+};
+
+
+class WidgetListModel;
+class WidgetListView;
+
+
+class Widget
+{
+public:
+    Widget();
+
+    virtual void showWidget() {}
+    virtual void hideWidget() {}
+
+    int getRow();
+    void setRow(int row);
+
+    class SelectNotification : public Poco::Notification
+    {
+    public:
+        SelectNotification(int row);
+
+        int _row;
+    };
+
+    void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
+
+protected:
+    void select();
+
+private:
+    int _row;
+    Poco::NotificationCenter _eventNotificationCenter;
+};
+
+
+class WidgetFactory
+{
+public:
+    virtual Widget* createWidget() { return 0; }
+};
+
+
+class WidgetListModel
+{
+    friend class WidgetListView;
+
+public:
+    WidgetListModel();
+
+    // item related
+    virtual int totalItemCount() { return 0; }
+    void insertItem(int row);
+    /// Ask the view to show an item at row. No data is created (cached), as
+    /// the whole data of the model is already present in the underlying implementation.
+    /// The model is only an abstraction layer on top of the data.
+    void removeItem(int row);
+    /// See insertItem().
+    virtual void selectItem(int row) {}
+    /// View should call selectItem() when the item in row is selected.
+
+    // lazy model related
+    virtual bool canFetchMore() { return false; }
+    virtual void fetchMore(bool forward = true) {}
+    virtual int lastFetched(bool forward = true) { return totalItemCount(); }
+
+    // widget related
+    void setWidgetFactory(WidgetFactory* pWidgetFactory);
+    virtual Widget* createWidget();
+    virtual Widget* getWidget(int row) { return 0; }
+    virtual void attachWidget(int row, Widget* pWidget) {}
+    virtual void detachWidget(int row) {}
+
+private:
+    WidgetListView*                 _pView;
+    WidgetFactory*                  _pWidgetFactory;
+};
+
+
+class WidgetListView
+{
+public:
+    WidgetListView(int widgetHeight, bool lazy = false);
+
+    void setModel(WidgetListModel* pModel);
+    void insertItem(int row);
+    void removeItem(int row);
+
+protected:
+    virtual int visibleRows() { return 0; }
+    virtual void initWidget(Widget* pWidget) {}
+    virtual void moveWidget(int row, Widget* pWidget) {}
+
+    // non-lazy views only
+    virtual void extendWidgetPool() {}
+    void extendWidgetPool(int n);
+
+    // lazy views only
+    virtual int getOffset() { return 0; }
+    virtual void updateScrollWidgetSize() {}
+    void scrolledToRow(int rowOffset);
+
+    WidgetListModel*                _pModel;
+    int                             _widgetHeight;
+
+private:
+    int widgetPoolSize();
+    /// The view has a widget pool which is large enough to fill the area of the view
+    /// with widgets (created by the model).
+    int visibleIndex(int row);
+    int countVisibleWidgets();
+    Widget* visibleWidget(int index);
+    bool itemIsVisible(int row);
+    void moveWidgetToRow(int row, Widget* pWidget);
+    void selectNotificationHandler(Widget::SelectNotification* pSelectNotification);
+
+    bool                            _lazy;
+    std::vector<Widget*>            _widgetPool;
+    std::vector<Widget*>            _visibleWidgets;
+    std::stack<Widget*>             _freeWidgets;
+    int                             _rowOffset;
 };
 
 
