@@ -25,11 +25,12 @@
 #include <stack>
 #include <QtGui>
 
+#include "QtWidget.h"
 
 class QtNavigable;
 class QtNavigatorPanel;
 
-class QtNavigator : public QWidget
+class QtNavigator : public QtWidget
 {
     Q_OBJECT
 

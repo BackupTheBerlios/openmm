@@ -26,6 +26,7 @@
 #include "QtMediaServerGroup.h"
 #include "QtMediaRendererGroup.h"
 #include "QtApplication.h"
+#include "QtWidget.h"
 
 
 QtController::QtController(QtApplication* pQtApplication) :
@@ -43,9 +44,9 @@ QtController::showDeviceGroup(Omm::DeviceGroup* pDeviceGroup)
 {
     Omm::Log::instance()->upnp().debug("Qt controller show device group: " + pDeviceGroup->getDeviceType());
     
-    QtDeviceGroup* pQtDeviceGroup = static_cast<QtDeviceGroup*>(pDeviceGroup);
-    if (pQtDeviceGroup->getDeviceGroupWidget()) {
-        addTab(pQtDeviceGroup->getDeviceGroupWidget(), pQtDeviceGroup->shortName().c_str());
+    QtWidget* pDeviceGroupWidget = static_cast<QtWidget*>(pDeviceGroup->getDeviceGroupWidget());
+    if (pDeviceGroupWidget) {
+        addTab(pDeviceGroupWidget, pDeviceGroup->shortName().c_str());
     }
     else {
         Omm::Log::instance()->upnp().error("Qt controller failed to show device group, no widget available: " + pDeviceGroup->getDeviceType());

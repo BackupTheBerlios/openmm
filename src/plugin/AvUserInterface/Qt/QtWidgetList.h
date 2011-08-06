@@ -23,21 +23,8 @@
 #define QtWidgetList_INCLUDED
 
 #include <QtGui>
-
 #include <Omm/Util.h>
-
-
-class QtWidget : public QWidget, public Omm::Util::Widget
-{
-    Q_OBJECT
-    
-public:
-    virtual void showWidget();
-    virtual void hideWidget();
-
-private:
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-};
+#include "QtWidget.h"
 
 
 class QtWidgetList : public QScrollArea, public Omm::Util::WidgetListView
@@ -68,7 +55,7 @@ private:
 };
 
 
-class QtWidgetCanvas : public QGraphicsView, public Omm::Util::WidgetListView
+class QtWidgetCanvas : public QGraphicsView, public Omm::Util::Widget, public Omm::Util::WidgetListView
 {
     Q_OBJECT
 

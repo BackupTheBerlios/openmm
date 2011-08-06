@@ -641,6 +641,7 @@ public:
 
     virtual Device* createDevice();
     /// factory method to create a device of a certain type.
+    virtual Util::Widget* getDeviceGroupWidget();
 
     virtual void addDevice(Device* pDevice, int index, bool begin);
     virtual void removeDevice(Device* pDevice, int index, bool begin);

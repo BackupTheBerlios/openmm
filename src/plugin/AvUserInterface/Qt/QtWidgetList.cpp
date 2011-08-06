@@ -25,29 +25,6 @@
 #include "QtWidgetList.h"
 
 
-void
-QtWidget::showWidget()
-{
-    QWidget::show();
-}
-
-
-void
-QtWidget::hideWidget()
-{
-    QWidget::hide();
-}
-
-
-void
-QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
-{
-    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
-    select();
-    QWidget::mousePressEvent(pMouseEvent);
-}
-
-
 QtWidgetList::QtWidgetList(QWidget* pParent) :
 QScrollArea(pParent),
 WidgetListView(50, true),

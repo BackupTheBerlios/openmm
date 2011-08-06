@@ -19,15 +19,35 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpAv.h>
-#include <Omm/UpnpAvController.h>
+#include <Poco/NumberFormatter.h>
+#include <Omm/UpnpAvLogger.h>
+#include "QtWidget.h"
 
-#include "QtDeviceGroup.h"
 
-
-QtDeviceGroup::QtDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
-DeviceGroup(pDeviceGroupDelegate)
+QtWidget::QtWidget(QWidget* pParent) :
+QWidget(pParent)
 {
-
 }
 
+
+void
+QtWidget::showWidget()
+{
+    QWidget::show();
+}
+
+
+void
+QtWidget::hideWidget()
+{
+    QWidget::hide();
+}
+
+
+void
+QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    select();
+    QWidget::mousePressEvent(pMouseEvent);
+}

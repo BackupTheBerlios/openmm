@@ -30,8 +30,7 @@
 
 
 QtMediaRendererGroup::QtMediaRendererGroup() :
-//QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
-QtDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
+DeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 {
 //    _pWidgetList = new QtWidgetList;
 //    _pWidgetList->setModel(this);
@@ -52,7 +51,7 @@ QtMediaRendererGroup::createDevice()
 }
 
 
-QWidget*
+Omm::Util::Widget*
 QtMediaRendererGroup::getDeviceGroupWidget()
 {
 //    return _pWidgetList;

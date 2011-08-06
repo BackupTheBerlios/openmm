@@ -27,22 +27,19 @@
 #include <Omm/Upnp.h>
 
 #include "QtNavigable.h"
-#include "QtDeviceGroup.h"
+//#include "QtDeviceGroup.h"
 
 class QtNavigator;
 class QtDeviceListItem;
 
 
-class QtStandardDeviceGroup : public QAbstractItemModel, public QtDeviceGroup, public QtNavigable
+class QtStandardDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm::DeviceGroup
 {
     Q_OBJECT
         
 public:
     QtStandardDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate = 0);
     ~QtStandardDeviceGroup();
-
-    // QtDeviceGroup interface
-    virtual QWidget* getDeviceGroupWidget();
 
     // QtNavigable interface
     virtual QWidget* getWidget();
@@ -58,6 +55,7 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
     // Omm::DeviceGroup interface (could also move to Omm::Device)
+    virtual Omm::Util::Widget* getDeviceGroupWidget();
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);
 

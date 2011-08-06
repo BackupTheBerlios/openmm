@@ -4574,6 +4574,13 @@ DeviceGroup::createDevice()
 }
 
 
+Util::Widget*
+DeviceGroup::getDeviceGroupWidget()
+{
+    return 0;
+}
+
+
 void
 DeviceGroup::addDevice(Device* pDevice, int index, bool begin)
 {

@@ -23,10 +23,7 @@
 #define QtMediaRenderer_INCLUDED
 
 #include <QtGui>
-
 #include <Omm/UpnpAvController.h>
-
-//#include "QtWidgetDeviceGroup.h"
 #include "QtWidgetList.h"
 
 class QtMediaRendererWidget;
@@ -40,7 +37,6 @@ class QtMediaRenderer : public Omm::Av::CtlMediaRenderer
 public:
     QtMediaRenderer();
     ~QtMediaRenderer();
-
 
     void setDeviceWidget(QtMediaRendererWidget* pWidget);
     QtMediaRendererWidget* getDeviceWidget();
@@ -72,14 +68,12 @@ signals:
     // that means, values have to be cached to allow for fast scrolling (don't retrieve
     // them via network for example).
     void unconfigureWidget();
-//    void selectedWidget(int row);
 
 public slots:
     void configure();
     void unconfigure();
 
 private slots:
-//    void selectedRenderer();
     void playButtonPressed();
     void stopButtonPressed();
     void volumeSliderMoved(int value);

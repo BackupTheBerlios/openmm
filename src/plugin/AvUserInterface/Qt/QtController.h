@@ -23,7 +23,6 @@
 #define QtControllerWidget_INCLUDED
 
 #include <QtGui>
-
 #include <Omm/Upnp.h>
 
 class QtApplication;

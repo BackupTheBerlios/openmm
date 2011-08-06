@@ -97,7 +97,7 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 
 
 QtStandardDeviceGroup::QtStandardDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate) :
-QtDeviceGroup(pDeviceGroupDelegate),
+DeviceGroup(pDeviceGroupDelegate),
 _pItemDelegate(pItemDelegate)
 {
     initGui();
@@ -131,7 +131,7 @@ QtStandardDeviceGroup::initGui()
 }
 
 
-QWidget*
+Omm::Util::Widget*
 QtStandardDeviceGroup::getDeviceGroupWidget()
 {
     return _pNavigator;

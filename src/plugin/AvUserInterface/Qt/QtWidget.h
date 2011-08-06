@@ -19,40 +19,24 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtWidgetDeviceGroup_INCLUDED
-#define QtWidgetDeviceGroup_INCLUDED
+#ifndef QtWidget_INCLUDED
+#define QtWidget_INCLUDED
 
 #include <QtGui>
 
-#include <Omm/Upnp.h>
-
-#include "QtDeviceGroup.h"
+#include <Omm/Util.h>
 
 
-class QtWidgetDeviceGroup : public QtDeviceGroup
+class QtWidget : public QWidget, public Omm::Util::Widget
 {
-//    Q_OBJECT
-        
 public:
-    QtWidgetDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate);
-    ~QtWidgetDeviceGroup();
+    QtWidget(QWidget* pParent = 0);
 
-    void addWidget(QWidget* pWidget);
-    QWidget* getWidget();
-
-    void showWidget(QWidget* pWidget);
-
-    // QtDeviceGroup interface
-    virtual QWidget* getDeviceGroupWidget();
-
-protected:
-    std::vector<QWidget*>           _widgetPool;
-    int                             _lastWidget;
+    virtual void showWidget();
+    virtual void hideWidget();
 
 private:
-//    QScrollArea*                    _pScrollArea;
-    QGraphicsScene*                 _pGraphicsScene;
-    QGraphicsView*                  _pGrahpicsView;
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
 
