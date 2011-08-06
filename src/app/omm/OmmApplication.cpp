@@ -30,7 +30,6 @@
 #include <Omm/UpnpAvController.h>
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/UpnpAvServer.h>
-//#include <Omm/UpnpAvApplication.h>
 #include <Omm/Util.h>
 
 
@@ -42,7 +41,8 @@ public:
         _fullscreen(false),
         _width(800),
         _height(480),
-        _name("OMM")
+        _name("OMM"),
+        _gui("avinterface-qt")
     {
         setUnixOptions(true);
     }
@@ -75,7 +75,6 @@ protected:
                            Poco::Util::Option("fullscreen", "f", "option passed to plugin")
                            .required(false)
                            .repeatable(false));
-//                            .argument("plugin option", true));
         options.addOption(
                            Poco::Util::Option("width", "w", "width of video window")
                            .required(false)
@@ -91,6 +90,11 @@ protected:
                            .required(false)
                            .repeatable(false)
                            .argument("name", true));
+        options.addOption(
+                   Poco::Util::Option("gui", "g", "user interface for application")
+                   .required(false)
+                   .repeatable(false)
+                   .argument("gui", true));
     }
 
     void handleOption(const std::string& name, const std::string& value)
@@ -111,6 +115,9 @@ protected:
         }
         else if (name == "name") {
             _name = value;
+        }
+        else if (name == "gui") {
+            _gui = value;
         }
     }
 
@@ -134,6 +141,7 @@ protected:
             ///////// set up controller with its user interface /////////
             Omm::Util::PluginLoader<Omm::Av::AvUserInterface> pluginLoader;
             Omm::Av::AvUserInterface* pUserInterface;
+
             try {
                 pUserInterface = pluginLoader.load("avinterface-qt", "AvInterface");
             }
@@ -245,6 +253,7 @@ private:
     int             _width;
     int             _height;
     std::string     _name;
+    std::string     _gui;
 };
 
 

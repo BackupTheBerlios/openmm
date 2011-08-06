@@ -27,8 +27,6 @@
 
 class QtMediaServerGroup : public QtStandardDeviceGroup
 {
-    Q_OBJECT
-
 public:
     QtMediaServerGroup();
 

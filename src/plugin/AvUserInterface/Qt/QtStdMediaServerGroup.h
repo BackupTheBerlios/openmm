@@ -19,28 +19,22 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtController_INCLUDED
-#define QtController_INCLUDED
+#ifndef QtStdMediaServerGroup_INCLUDED
+#define QtStdMediaServerGroup_INCLUDED
 
-#include <QtGui>
-#include <Omm/Upnp.h>
-
-class QtApplication;
+#include "QtStandardDeviceGroup.h"
 
 
-class QtController : public QTabWidget, public Omm::Controller
+class QtStdMediaServerGroup : public QtStandardDeviceGroup
 {
-    Q_OBJECT
-
 public:
-    QtController(QtApplication* pQtApplication);
+    QtStdMediaServerGroup();
 
-    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
-    void addPanel(QToolBar* pPanel);
-
-private:
-    QtApplication*       _pQtApplication;
+    // Omm::DeviceGroup interface
+    virtual Omm::Device* createDevice();
+    virtual void selectDevice(Omm::Device* pDevice, int index);
 };
+
 
 #endif
 

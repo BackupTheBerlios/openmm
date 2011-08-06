@@ -19,28 +19,29 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtController_INCLUDED
-#define QtController_INCLUDED
+#include <Omm/UpnpAv.h>
+#include <Omm/UpnpAvController.h>
 
-#include <QtGui>
-#include <Omm/Upnp.h>
+#include "QtStdMediaServerGroup.h"
+#include "QtStdMediaServer.h"
+#include "QtNavigator.h"
 
-class QtApplication;
 
-
-class QtController : public QTabWidget, public Omm::Controller
+QtStdMediaServerGroup::QtStdMediaServerGroup() :
+QtStandardDeviceGroup(new Omm::Av::MediaServerGroupDelegate)
 {
-    Q_OBJECT
+}
 
-public:
-    QtController(QtApplication* pQtApplication);
 
-    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
-    void addPanel(QToolBar* pPanel);
+Omm::Device*
+QtStdMediaServerGroup::createDevice()
+{
+    return new QtStdMediaServer;
+}
 
-private:
-    QtApplication*       _pQtApplication;
-};
 
-#endif
-
+void
+QtStdMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
+{
+    _pNavigator->push(static_cast<QtStdMediaServer*>(pDevice));
+}

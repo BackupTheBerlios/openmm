@@ -19,27 +19,27 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtController_INCLUDED
-#define QtController_INCLUDED
+#ifndef QtStdController_INCLUDED
+#define QtStdController_INCLUDED
 
 #include <QtGui>
 #include <Omm/Upnp.h>
 
-class QtApplication;
+class QtStdApplication;
 
 
-class QtController : public QTabWidget, public Omm::Controller
+class QtStdController : public QTabWidget, public Omm::Controller
 {
     Q_OBJECT
 
 public:
-    QtController(QtApplication* pQtApplication);
+    QtStdController(QtStdApplication* pQtApplication);
 
     virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
     void addPanel(QToolBar* pPanel);
 
 private:
-    QtApplication*       _pQtApplication;
+    QtStdApplication*       _pQtApplication;
 };
 
 #endif

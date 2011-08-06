@@ -163,8 +163,6 @@ QtStandardDeviceGroup::selectedModelIndex(const QModelIndex& index)
 QVariant
 QtStandardDeviceGroup::data(const QModelIndex& index, int role) const
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt standard device data()");
-
     if (!index.isValid()) {
         return QVariant();
     }

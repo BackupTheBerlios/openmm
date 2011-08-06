@@ -37,7 +37,6 @@ class QtBrowserWidget;
 class QtPlayerRack;
 class QtControlPanel;
 class QtEventFilter;
-class QtControllerWidget;
 
 
 class QtApplication : public QObject, public Omm::UpnpApplication
@@ -71,7 +70,6 @@ private:
     QtEventFilter*                      _pEventFilter;
     QMainWindow*                        _pMainWindow;
     QStackedWidget*                     _pMainWidget;
-    QtControllerWidget*                 _pControllerWidget;
     QtBrowserWidget*                    _pBrowserWidget;
     QtPlayerRack*                       _pPlayerRack;
     QtControlPanel*                     _pControlPanel;

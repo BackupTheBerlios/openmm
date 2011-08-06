@@ -24,7 +24,6 @@
 
 #include <QtGui>
 
-//#include "QtDeviceGroup.h"
 #include <Omm/Upnp.h>
 
 class QtMediaRenderer;

@@ -19,28 +19,66 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtController_INCLUDED
-#define QtController_INCLUDED
+#ifndef QtUpnpApplication_INCLUDED
+#define QtUpnpApplication_INCLUDED
 
 #include <QtGui>
+
 #include <Omm/Upnp.h>
+#include <Omm/UpnpApplication.h>
+#include <Omm/Sys.h>
 
-class QtApplication;
+
+class QStdApplication;
+class QtMainWindow;
+class QStackedWidget;
+class QtVisual;
+class QtBrowserWidget;
+class QtPlayerRack;
+class QtControlPanel;
+class QtEventFilter;
 
 
-class QtController : public QTabWidget, public Omm::Controller
+class QtStdApplication : public QObject, public Omm::UpnpApplication
 {
     Q_OBJECT
 
 public:
-    QtController(QtApplication* pQtApplication);
+    QtStdApplication();
+    virtual ~QtStdApplication();
 
-    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
-    void addPanel(QToolBar* pPanel);
+    virtual void setWindowTitle(const std::string& title);
+    virtual void eventLoop();
+    virtual void quit();
+
+    void addToolBar(QToolBar* pToolBar);
+
+signals:
+    void doQuit();
 
 private:
-    QtApplication*       _pQtApplication;
+    virtual void init();
+    
+    virtual Omm::Controller* createController();
+    virtual void addController();
+    virtual void removeController();
+
+    int                                 _argc;
+    std::string                         _fullscreenStyleSheet;
+
+    QApplication*                       _pApp;
+    QtEventFilter*                      _pEventFilter;
+    QMainWindow*                        _pMainWindow;
+    QStackedWidget*                     _pMainWidget;
+    QtBrowserWidget*                    _pBrowserWidget;
+    QtPlayerRack*                       _pPlayerRack;
+    QtControlPanel*                     _pControlPanel;
+    QtVisual*                           _pVisual;
+
+    bool                                _menuVisible;
+    bool                                _playerRackVisible;
+    bool                                _fullscreen;
 };
 
-#endif
 
+#endif

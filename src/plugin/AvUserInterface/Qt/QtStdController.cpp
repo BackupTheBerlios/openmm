@@ -19,28 +19,43 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtController_INCLUDED
-#define QtController_INCLUDED
+#include <Omm/UpnpAv.h>
+#include <Omm/UpnpAvController.h>
 
-#include <QtGui>
-#include <Omm/Upnp.h>
+#include "QtStdController.h"
+#include "QtStdMediaServerGroup.h"
+#include "QtStdMediaRendererGroup.h"
+#include "QtStdApplication.h"
+#include "QtWidget.h"
 
-class QtApplication;
 
-
-class QtController : public QTabWidget, public Omm::Controller
+QtStdController::QtStdController(QtStdApplication* pQtApplication) :
+_pQtApplication(pQtApplication)
 {
-    Q_OBJECT
+//    setMovable(true);
+    
+    registerDeviceGroup(new QtStdMediaServerGroup);
+    registerDeviceGroup(new QtStdMediaRendererGroup);
+}
 
-public:
-    QtController(QtApplication* pQtApplication);
 
-    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
-    void addPanel(QToolBar* pPanel);
+void
+QtStdController::showDeviceGroup(Omm::DeviceGroup* pDeviceGroup)
+{
+    Omm::Log::instance()->upnp().debug("Qt controller show device group: " + pDeviceGroup->getDeviceType());
+    
+    QtWidget* pDeviceGroupWidget = static_cast<QtWidget*>(pDeviceGroup->getDeviceGroupWidget());
+    if (pDeviceGroupWidget) {
+        addTab(pDeviceGroupWidget, pDeviceGroup->shortName().c_str());
+    }
+    else {
+        Omm::Log::instance()->upnp().error("Qt controller failed to show device group, no widget available: " + pDeviceGroup->getDeviceType());
+    }
+}
 
-private:
-    QtApplication*       _pQtApplication;
-};
 
-#endif
-
+void
+QtStdController::addPanel(QToolBar* pPanel)
+{
+    _pQtApplication->addToolBar(pPanel);
+}

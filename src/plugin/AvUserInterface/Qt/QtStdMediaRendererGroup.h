@@ -19,28 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtController_INCLUDED
-#define QtController_INCLUDED
+#ifndef QtStdMediaRendererGroup_INCLUDED
+#define QtStdMediaRendererGroup_INCLUDED
 
-#include <QtGui>
-#include <Omm/Upnp.h>
+#include "QtStandardDeviceGroup.h"
 
-class QtApplication;
+class QtMediaRendererControlPanel;
 
 
-class QtController : public QTabWidget, public Omm::Controller
+class QtStdMediaRendererGroup : public QtStandardDeviceGroup
 {
     Q_OBJECT
-
+    
 public:
-    QtController(QtApplication* pQtApplication);
+    QtStdMediaRendererGroup();
 
-    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
-    void addPanel(QToolBar* pPanel);
+    // Omm::DeviceGroup interface
+    virtual Omm::Device* createDevice();
+    virtual void selectDevice(Omm::Device* pDevice, int index);
+
+private slots:
+    void playButtonPressed();
+    void stopButtonPressed();
+    void volumeSliderMoved(int value);
+    void positionSliderMoved(int value);
 
 private:
-    QtApplication*       _pQtApplication;
+    virtual void init();
+
+    QtMediaRendererControlPanel*    _pControlPanel;
 };
+
 
 #endif
 

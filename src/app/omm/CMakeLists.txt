@@ -8,6 +8,17 @@ ${OMM_UTIL}
 ${OMM_AV}
 )
 
+add_executable(stdomm
+NewOmmStdApplication.cpp
+)
+
+target_link_libraries(stdomm
+${OMM}
+${OMM_UTIL}
+${OMM_AV}
+ommplugin-stdapplication-qt
+)
+
 add_executable(newomm
 NewOmmApplication.cpp
 )
@@ -19,7 +30,7 @@ ${OMM_AV}
 ommplugin-application-qt
 )
 
-install(TARGETS omm newomm
+install(TARGETS omm stdomm newomm
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

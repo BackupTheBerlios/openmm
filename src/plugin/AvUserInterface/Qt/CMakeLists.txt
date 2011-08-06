@@ -27,14 +27,33 @@ QtEventFilter.cpp
 QtCrumbButton.cpp
 )
 
+set(OMMC_QTSTDAPP_SRCS
+QtStdApplication.cpp
+QtMainWindow.cpp
+QtStdController.cpp
+#QtEventFilter.cpp
+QtNavigator.cpp
+QtStandardDeviceGroup.cpp
+QtWidget.cpp
+QtWidgetList.cpp
+QtStdMediaRendererGroup.cpp
+QtMediaRenderer.cpp
+QtStdMediaServerGroup.cpp
+QtStdMediaServer.cpp
+QtMediaObject.cpp
+QtEventFilter.cpp
+# modeltest.cpp
+#QtActivityIndicator.cpp
+#QtVisual.cpp
+QtMediaRendererControlPanel.cpp
+)
+
 set(OMMC_QTAPP_SRCS
 QtApplication.cpp
 QtMainWindow.cpp
 QtController.cpp
 #QtEventFilter.cpp
 QtNavigator.cpp
-#QtDeviceGroup.cpp
-#QtWidgetDeviceGroup.cpp
 QtStandardDeviceGroup.cpp
 QtWidget.cpp
 QtWidgetList.cpp
@@ -73,6 +92,28 @@ QtEventFilter.h
 QtCrumbButton.h
 )
 
+set(OMMC_QTSTDAPP_MOC
+QtStdApplication.h
+QtMainWindow.h
+QtStdController.h
+#QtEventFilter.h
+QtNavigator.h
+QtNavigatorPrivate.h
+QtStandardDeviceGroup.h
+#QtWidget.h
+QtWidgetList.h
+QtStdMediaRendererGroup.h
+QtMediaRenderer.h
+QtStdMediaServerGroup.h
+QtStdMediaServer.h
+#QtMediaObject.h
+QtEventFilter.h
+# modeltest.h
+#QtActivityIndicator.h
+#QtVisual.h
+QtMediaRendererControlPanel.h
+)
+
 set(OMMC_QTAPP_MOC
 QtApplication.h
 QtMainWindow.h
@@ -80,14 +121,12 @@ QtController.h
 #QtEventFilter.h
 QtNavigator.h
 QtNavigatorPrivate.h
-#QtDeviceGroup.h
-#QtWidgetDeviceGroup.h
 QtStandardDeviceGroup.h
 #QtWidget.h
 QtWidgetList.h
 QtMediaRendererGroup.h
 QtMediaRenderer.h
-QtMediaServerGroup.h
+#QtMediaServerGroup.h
 QtMediaServer.h
 #QtMediaObject.h
 QtEventFilter.h
@@ -125,12 +164,24 @@ QT4_WRAP_CPP(
 OMMC_QTAPP_MOC_CPP ${OMMC_QTAPP_MOC}
 )
 
+QT4_WRAP_CPP(
+OMMC_QTSTDAPP_MOC_CPP ${OMMC_QTSTDAPP_MOC}
+)
+
 if(BUILD_PLUGINS)
 add_library(ommplugin-avinterface-qt
 SHARED
 ${OMMC_QTUI_SRCS}
 ${OMMC_QTUI}
 ${OMMC_QTUI_MOC_CPP}
+${OMMC_RES_SRC}
+)
+
+add_library(ommplugin-stdapplication-qt
+SHARED
+${OMMC_QTSTDAPP_SRCS}
+${OMMC_QTSTDAPP}
+${OMMC_QTSTDAPP_MOC_CPP}
 ${OMMC_RES_SRC}
 )
 
@@ -149,6 +200,14 @@ ${OMM_SYS}
 ${QT_LIBRARIES}
 )
 
+target_link_libraries(ommplugin-stdapplication-qt
+${OMM}
+${OMM_AV}
+${OMM_SYS}
+${OMM_UTIL}
+${QT_LIBRARIES}
+)
+
 target_link_libraries(ommplugin-application-qt
 ${OMM}
 ${OMM_AV}
@@ -161,11 +220,15 @@ set_target_properties(ommplugin-avinterface-qt
 PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
+set_target_properties(ommplugin-stdapplication-qt
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
 set_target_properties(ommplugin-application-qt
 PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
-install(TARGETS ommplugin-avinterface-qt ommplugin-application-qt
+install(TARGETS ommplugin-avinterface-qt ommplugin-stdapplication-qt ommplugin-application-qt
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib
