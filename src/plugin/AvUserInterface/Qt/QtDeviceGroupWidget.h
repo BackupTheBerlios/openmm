@@ -27,7 +27,7 @@
 
 #include "QtNavigable.h"
 
-class QtDeviceGroup;
+class QtStandardDeviceGroup;
 class QtDeviceListItem;
 
 
@@ -36,7 +36,7 @@ class QtDeviceGroupWidget : public QWidget , public QtNavigable
     Q_OBJECT
 
 public:
-    QtDeviceGroupWidget(QtDeviceGroup* pDeviceGroupModel);
+    QtDeviceGroupWidget(QtStandardDeviceGroup* pDeviceGroupModel);
 
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
@@ -49,7 +49,7 @@ private slots:
 private:
     QVBoxLayout*                    _pLayout;
             
-    QtDeviceGroup*                  _pDeviceGroupModel;
+    QtStandardDeviceGroup*                  _pDeviceGroupModel;
     QTreeView*                      _pDeviceListView;
     QtDeviceListItem*               _pDeviceListItem;
 };

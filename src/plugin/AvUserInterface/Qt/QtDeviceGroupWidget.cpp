@@ -23,7 +23,7 @@
 #include "QtDeviceGroup.h"
 
 
-QtDeviceGroupWidget::QtDeviceGroupWidget(QtDeviceGroup* pDeviceGroupModel) :
+QtDeviceGroupWidget::QtDeviceGroupWidget(QtStandardDeviceGroup* pDeviceGroupModel) :
 _pDeviceGroupModel(pDeviceGroupModel)
 {
     _pDeviceListView = new QTreeView;

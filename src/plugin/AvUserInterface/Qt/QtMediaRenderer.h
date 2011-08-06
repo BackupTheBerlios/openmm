@@ -26,7 +26,7 @@
 
 #include <Omm/UpnpAvController.h>
 
-#include "QtWidgetDeviceGroup.h"
+//#include "QtWidgetDeviceGroup.h"
 #include "QtWidgetList.h"
 
 class QtMediaRendererWidget;

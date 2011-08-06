@@ -22,14 +22,17 @@
 #ifndef QtMediaRendererGroup_INCLUDED
 #define QtMediaRendererGroup_INCLUDED
 
+#include <QtGui>
+
 #include "QtDeviceGroup.h"
+#include <Omm/Upnp.h>
 
 class QtMediaRenderer;
 class QtWidgetList;
 class QtWidgetCanvas;
 class QtMediaRendererControlPanel;
 
-class QtMediaRendererGroup : public QtDeviceGroup
+class QtMediaRendererGroup : public QObject, public QtDeviceGroup
 {
     Q_OBJECT
 

@@ -4577,12 +4577,20 @@ DeviceGroup::createDevice()
 void
 DeviceGroup::addDevice(Device* pDevice, int index, bool begin)
 {
+    if (!begin) {
+        // WidgetListModel interface
+        insertItem(index);
+    }
 }
 
 
 void
 DeviceGroup::removeDevice(Device* pDevice, int index, bool begin)
 {
+    if (begin) {
+        // WidgetListModel interface
+        removeItem(index);
+    }
 }
 
 
@@ -4601,6 +4609,21 @@ DeviceGroup::addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bo
 void
 DeviceGroup::removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
 {
+}
+
+
+int
+DeviceGroup::totalItemCount()
+{
+    return getDeviceCount();
+}
+
+
+void
+DeviceGroup::selectItem(int row)
+{
+    Device* pDevice = getDevice(row);
+    selectDevice(pDevice);
 }
 
 

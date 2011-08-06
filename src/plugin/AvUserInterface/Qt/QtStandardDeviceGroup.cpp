@@ -112,6 +112,9 @@ QtStandardDeviceGroup::~QtStandardDeviceGroup()
 void
 QtStandardDeviceGroup::initGui()
 {
+    _charEncoding = QTextCodec::codecForName("UTF-8");
+    _iconProvider = new QFileIconProvider;
+    
     _pDeviceListView = new QListView;
     if (!_pItemDelegate) {
         _pItemDelegate = new QtDeviceListItem(_pDeviceListView);
@@ -154,4 +157,108 @@ QtStandardDeviceGroup::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
     DeviceGroup::selectDevice(pDevice);
+}
+
+
+QVariant
+QtStandardDeviceGroup::data(const QModelIndex& index, int role) const
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt standard device data()");
+
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
+    if (index.internalPointer() == 0) {
+        Omm::Log::instance()->upnp().warning("QtDeviceGroupModel::data() reference to device is 0:");
+        return QVariant();
+    }
+
+    Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
+    switch (role) {
+        case Qt::DisplayRole:
+            return QString(pDevice->getFriendlyName().c_str());
+        case Qt::DecorationRole:
+            return _iconProvider->icon(QFileIconProvider::Folder);
+        default:
+            return QVariant();
+    }
+}
+
+
+Qt::ItemFlags
+QtStandardDeviceGroup::flags(const QModelIndex& index) const
+{
+    if (!index.isValid())
+        return 0;
+
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+
+QVariant
+QtStandardDeviceGroup::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    return "";
+}
+
+
+QModelIndex
+QtStandardDeviceGroup::index(int row, int column, const QModelIndex& parent) const
+{
+    return createIndex(row, column, getDevice(row));
+}
+
+
+QModelIndex
+QtStandardDeviceGroup::parent(const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
+
+int
+QtStandardDeviceGroup::rowCount(const QModelIndex& parent) const
+{
+    return getDeviceCount();
+}
+
+
+int
+QtStandardDeviceGroup::columnCount(const QModelIndex& parent) const
+{
+    return 1;
+}
+
+
+void
+QtStandardDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
+{
+    if (begin) {
+        Omm::Log::instance()->upnp().debug("Qt device group adds device at position: " + Poco::NumberFormatter::format(position));
+        beginInsertRows(QModelIndex(), position, position);
+    }
+    else {
+        endInsertRows();
+        emit layoutChanged();
+        if (rowCount() == 1) {
+//            emit setCurrentIndex(index(0, 0));
+        }
+        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+    }
+}
+
+
+void
+QtStandardDeviceGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
+{
+    if (begin) {
+        Omm::Log::instance()->upnp().debug("Qt device group removes device at position: " + Poco::NumberFormatter::format(position));
+        beginRemoveRows(QModelIndex(), position, position);
+    }
+    else {
+        endRemoveRows();
+        emit layoutChanged();
+        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+    }
 }

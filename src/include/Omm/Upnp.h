@@ -617,7 +617,7 @@ private:
 };
 
 
-class DeviceGroup
+class DeviceGroup : public Util::WidgetListModel
 /// Contains only devices of the same type (which can be in different containers).
 /// Corresponds to one tab in the user interface.
 /// May be loaded as a plugin when a new device type is discovered.
@@ -647,7 +647,11 @@ public:
     virtual void selectDevice(Device* pDevice, int index);
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    
+
+    // WidgetListModel interface
+    virtual int totalItemCount();
+    virtual void selectItem(int row);
+
 protected:
     virtual void init() {}
 
