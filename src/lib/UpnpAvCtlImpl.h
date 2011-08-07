@@ -23,7 +23,8 @@
 #define UPNPAV_CTRL_IMPL_H
 
 #include "UpnpAvController.h"
-#include "UpnpAvControllers.h"
+#include "UpnpAvCtlDevices.h"
+#include "UpnpAvCtlRenderer.h"
 
 namespace Omm {
 namespace Av {

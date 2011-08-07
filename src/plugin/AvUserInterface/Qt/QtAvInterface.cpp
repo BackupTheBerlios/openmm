@@ -21,6 +21,8 @@
 
 #include <Poco/ClassLibrary.h>
 
+#include <Omm/UpnpAvCtlObject.h>
+
 #include "QtAvInterface.h"
 #include "QtMainWindow.h"
 #include "QtBrowserWidget.h"

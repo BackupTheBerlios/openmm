@@ -21,7 +21,7 @@
 
 #include "UpnpAvPrivate.h"
 
-#include "UpnpAvCtrlImpl.h"
+#include "UpnpAvCtlImpl.h"
 
 namespace Omm {
 namespace Av {

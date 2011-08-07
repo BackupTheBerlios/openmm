@@ -25,6 +25,8 @@
 #include <QtGui>
 
 #include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvCtlServer.h>
+#include <Omm/UpnpAvCtlObject.h>
 #include <Omm/Util.h>
 
 #include "QtNavigable.h"

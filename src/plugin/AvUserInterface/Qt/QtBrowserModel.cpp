@@ -20,8 +20,8 @@
  ***************************************************************************/
 
 #include "QtBrowserModel.h"
-
 #include <QPainter>
+
 
 QtListItem::QtListItem(QObject* parent) :
 QStyledItemDelegate(parent)

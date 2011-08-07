@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -18,19 +18,56 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#ifndef UpnpAvCtlServer_INCLUDED
+#define UpnpAvCtlServer_INCLUDED
 
-#ifndef QtMediaObject_INCLUDED
-#define QtMediaObject_INCLUDED
+#include <Poco/Timer.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Notification.h>
 
-//#include <Omm/UpnpAvObject.h>
-//#include <Omm/UpnpAvController.h>
-#include <Omm/UpnpAvCtlObject.h>
+#include "Upnp.h"
+#include "UpnpInternal.h"
+#include "UpnpAvCtlObject.h"
 
-class QtMediaObject : public Omm::Av::CtlMediaObject
+
+namespace Omm {
+namespace Av {
+
+class AvServerView;
+class AvController;
+class CtlMediaServerCode;
+class CtlMediaRendererCode;
+class CtlMediaObject;
+class MediaItemNotification;
+
+
+class CtlMediaServer : public Device
 {
+public:
+    virtual void addCtlDeviceCode();
 
+    CtlMediaObject* getRootObject() const;
+
+protected:
+    void browseRootObject();
+    void selectMediaObject(CtlMediaObject* pObject);
+
+private:    
+    CtlMediaServerCode*   _pCtlMediaServerCode;
+    CtlMediaObject*       _pRoot;
 };
 
 
-#endif
+class MediaServerGroupDelegate : public DeviceGroupDelegate
+{
+public:
+    virtual std::string getDeviceType();
+    virtual std::string shortName();
+};
 
+
+} // namespace Av
+} // namespace Omm
+
+
+#endif

@@ -85,15 +85,18 @@ add_library(ommupnpav
 UpnpAvLogger.cpp
 UpnpAv.cpp
 UpnpAvDescriptions.cpp
-UpnpAvController.cpp
-UpnpAvControllers.cpp
+UpnpAvController.cpp # depricated
+UpnpAvCtlRenderer.cpp
+UpnpAvCtlServer.cpp
+UpnpAvCtlObject.cpp
+UpnpAvCtlDevices.cpp
 UpnpAvDevices.cpp
 UpnpAvObject.cpp
 UpnpAvServer.cpp
 UpnpAvServerImpl.cpp
 UpnpAvRenderer.cpp
 UpnpAvRendererImpl.cpp
-UpnpAvCtrlImpl.cpp
+UpnpAvCtlImpl.cpp
 )
 
 target_link_libraries(ommupnpav

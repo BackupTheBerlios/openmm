@@ -28,6 +28,7 @@
 #include <Poco/DirectoryIterator.h>
 
 #include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvCtlObject.h>
 #include <Omm/Util.h>
 
 

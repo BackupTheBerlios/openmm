@@ -23,7 +23,11 @@
 #define QtMediaRenderer_INCLUDED
 
 #include <QtGui>
+
 #include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvCtlRenderer.h>
+#include <Omm/UpnpAvCtlObject.h>
+
 #include "QtWidgetList.h"
 
 class QtMediaRendererWidget;

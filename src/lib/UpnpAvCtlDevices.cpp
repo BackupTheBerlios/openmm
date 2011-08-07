@@ -19,7 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpAvControllers.h"
+#include "UpnpAvCtlDevices.h"
 #include "UpnpInternal.h"
 
 namespace Omm {

@@ -31,6 +31,7 @@
 #include <QStyledItemDelegate>
 
 #include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvCtlObject.h>
 #include <Omm/UpnpApplication.h>
 
 class QtListItem : public QStyledItemDelegate

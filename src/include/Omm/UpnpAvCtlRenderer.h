@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -18,19 +18,66 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#ifndef UpnpAvCtlRenderer_INCLUDED
+#define UpnpAvCtlRenderer_INCLUDED
 
-#ifndef QtMediaObject_INCLUDED
-#define QtMediaObject_INCLUDED
+#include <Poco/Timer.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Notification.h>
 
-//#include <Omm/UpnpAvObject.h>
-//#include <Omm/UpnpAvController.h>
-#include <Omm/UpnpAvCtlObject.h>
+#include "Upnp.h"
+#include "UpnpInternal.h"
+#include "UpnpAvObject.h"
 
-class QtMediaObject : public Omm::Av::CtlMediaObject
+
+namespace Omm {
+namespace Av {
+
+class AvServerView;
+class AvController;
+class CtlMediaServerCode;
+class CtlMediaRendererCode;
+class CtlMediaObject;
+class MediaItemNotification;
+
+
+class CtlMediaRenderer : public Device
 {
+public:
+    virtual void addCtlDeviceCode();
 
+    void setObject(CtlMediaObject* pObject);
+    void playPressed();
+    void stopPressed();
+    void pausePressed();
+    void positionMoved(int position);
+    void volumeChanged(int value);
+
+    virtual void newPosition(int duration, int position) {}
+    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album) {}
+    virtual void newVolume(const int volume) {}
+
+private:
+    // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
+    CtlMediaRendererCode*   _pCtlMediaRendererCode;
 };
 
 
-#endif
+class MediaRendererGroupDelegate : public DeviceGroupDelegate
+{
+public:
+    virtual std::string getDeviceType();
+    virtual std::string shortName();
 
+private:
+    virtual void init();
+
+    void mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification);
+};
+
+
+} // namespace Av
+} // namespace Omm
+
+
+#endif
