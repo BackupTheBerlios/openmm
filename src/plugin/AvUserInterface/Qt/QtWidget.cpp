@@ -63,7 +63,9 @@ QtWidget(pParent)
 QtSimpleListWidget::QtSimpleListWidget(QWidget* pParent) :
 QtListWidget(pParent)
 {
+    _pLayout = new QHBoxLayout(this);
     _pNameLabel = new QLabel;
+    _pLayout->addWidget(_pNameLabel);
 }
 
 
@@ -74,14 +76,7 @@ QtSimpleListWidget::~QtSimpleListWidget()
 
 
 void
-QtSimpleListWidget::configure()
+QtSimpleListWidget::setLabel(const std::string& text)
 {
-
-}
-
-
-void
-QtSimpleListWidget::unconfigure()
-{
-
+    _pNameLabel->setText(QString::fromStdString(text));
 }

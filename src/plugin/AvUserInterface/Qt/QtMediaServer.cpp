@@ -313,9 +313,9 @@ QtMediaServer::headerData(int section, Qt::Orientation orientation, int role) co
 QtMediaServerWidget::QtMediaServerWidget(QtMediaServer* pMediaServer) :
 _pMediaServer(pMediaServer)
 {
-    _pLayout = new QHBoxLayout(this);
-    _pNameLabel = new QLabel;
-    _pLayout->addWidget(_pNameLabel);
+//    _pLayout = new QHBoxLayout(this);
+//    _pNameLabel = new QLabel;
+//    _pLayout->addWidget(_pNameLabel);
 
     _pMediaContainerWidget = new QTreeView;
 
@@ -352,13 +352,13 @@ void
 QtMediaServerWidget::configure()
 {
     Omm::Av::Log::instance()->upnpav().debug("media server widget set name: " + _pMediaServer->getFriendlyName());
-    
-    _pNameLabel->setText(QString::fromStdString(_pMediaServer->getFriendlyName()));
+
+    setLabel(_pMediaServer->getFriendlyName());
 }
 
 
 void
 QtMediaServerWidget::unconfigure()
 {
-    _pNameLabel->setText("");
+    setLabel("");
 }

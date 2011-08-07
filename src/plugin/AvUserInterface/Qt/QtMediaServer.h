@@ -85,7 +85,7 @@ private:
 };
 
 
-class QtMediaServerWidget : public QtListWidget
+class QtMediaServerWidget : public QtSimpleListWidget
 {
     Q_OBJECT
 
@@ -106,8 +106,6 @@ public slots:
 
 private:
     QtMediaServer*                  _pMediaServer;
-    QHBoxLayout*                    _pLayout;
-    QLabel*                         _pNameLabel;
     QTreeView*                      _pMediaContainerWidget;
 };
 

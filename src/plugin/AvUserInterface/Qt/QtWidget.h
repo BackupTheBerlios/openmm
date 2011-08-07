@@ -72,12 +72,12 @@ public:
     QtSimpleListWidget(QWidget* pParent = 0);
     virtual ~QtSimpleListWidget();
 
-public slots:
-    virtual void configure();
-    virtual void unconfigure();
+protected:
+    void setLabel(const std::string& text);
 
 private:
-    QLabel*      _pNameLabel;
+    QHBoxLayout*                    _pLayout;
+    QLabel*                         _pNameLabel;
 };
 
 #endif
