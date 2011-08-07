@@ -28,20 +28,17 @@
 #include "Upnp.h"
 #include "UpnpInternal.h"
 #include "UpnpAvObject.h"
+#include "Util.h"
 
 
 namespace Omm {
 namespace Av {
 
-class AvServerView;
-class AvController;
 class CtlMediaServerCode;
-class CtlMediaRendererCode;
-class CtlMediaObject;
 class MediaItemNotification;
 
 
-class CtlMediaObject : public MediaObject
+class CtlMediaObject : public MediaObject, public Util::WidgetListModel
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;
@@ -64,6 +61,15 @@ public:
 
     Icon* getIcon();
     Icon* getImageRepresentation();
+
+    // WidgetListModel interface
+    virtual int totalItemCount();
+    virtual void selectItem(int row);
+
+    // lazy model related
+    virtual bool canFetchMore();
+    virtual void fetchMore(bool forward = true);
+    virtual int lastFetched(bool forward = true);
 
 private:
     Resource* getResource(int num = 0);

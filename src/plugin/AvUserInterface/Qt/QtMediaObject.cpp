@@ -20,4 +20,66 @@
  ***************************************************************************/
 
 #include "QtMediaObject.h"
+#include <Omm/UpnpAvLogger.h>
 
+
+QtMediaObject::QtMediaObject()
+{
+//    _pContainerView = new QtWidgetList;
+}
+
+
+QtMediaObject::~QtMediaObject()
+{
+
+}
+
+
+QString
+QtMediaObject::getBrowserTitle()
+{
+    if (_pObject) {
+        return QString::fromStdString(_pObject->getTitle());
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object title (ignoring)");
+    }
+}
+
+
+QWidget*
+QtMediaObject::getWidget()
+{
+    return _pContainerView;
+}
+
+
+Omm::Util::Widget*
+QtMediaObject::createWidget()
+{
+    return new QtMediaObject;
+}
+
+
+void
+QtMediaObject::configure()
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object configure");
+    
+    if (!_pObject) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to configure object (ignoring)");
+        return;
+    }
+    setLabel(_pObject->getTitle());
+    if (_pObject->isContainer()) {
+        _pObject->setWidgetFactory(this);
+        _pContainerView->setModel(_pObject);
+    }
+}
+
+
+void
+QtMediaObject::unconfigure()
+{
+    setLabel("");
+}

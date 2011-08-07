@@ -86,17 +86,17 @@ UpnpAvLogger.cpp
 UpnpAv.cpp
 UpnpAvDescriptions.cpp
 UpnpAvController.cpp # depricated
+UpnpAvCtlDevices.cpp
 UpnpAvCtlRenderer.cpp
 UpnpAvCtlServer.cpp
 UpnpAvCtlObject.cpp
-UpnpAvCtlDevices.cpp
+UpnpAvCtlImpl.cpp
 UpnpAvDevices.cpp
-UpnpAvObject.cpp
-UpnpAvServer.cpp
-UpnpAvServerImpl.cpp
 UpnpAvRenderer.cpp
 UpnpAvRendererImpl.cpp
-UpnpAvCtlImpl.cpp
+UpnpAvServer.cpp
+UpnpAvServerImpl.cpp
+UpnpAvObject.cpp
 )
 
 target_link_libraries(ommupnpav

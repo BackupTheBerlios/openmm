@@ -32,6 +32,7 @@ QtStdApplication.cpp
 QtMainWindow.cpp
 QtStdController.cpp
 #QtEventFilter.cpp
+QtNavigable.cpp
 QtNavigator.cpp
 QtStandardDeviceGroup.cpp
 QtWidget.cpp
@@ -53,6 +54,7 @@ QtApplication.cpp
 QtMainWindow.cpp
 QtController.cpp
 #QtEventFilter.cpp
+QtNavigable.cpp
 QtNavigator.cpp
 QtStandardDeviceGroup.cpp
 QtWidget.cpp

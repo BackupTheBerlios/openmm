@@ -22,12 +22,18 @@
 #ifndef QtNavigable_INCLUDED
 #define QtNavigable_INCLUDED
 
-class QString;
-class QWidget;
+#include <QtGui>
+//class QString;
+//class QWidget;
+class QtNavigator;
 
 class QtNavigable
 {
+    friend class QtNavigator;
+    
 public:
+    QtNavigable();
+
     virtual QString getBrowserTitle() { return ""; }
     virtual QWidget* getWidget() { return 0; }
     /// If getWidget() returns not null but a valid widget, the widget
@@ -35,6 +41,10 @@ public:
     virtual void show() {}
     /// Additionally, show() can be implemented if for example no widget
     /// is pushed but some other action is necessary to show the correct view.
+    QtNavigator* getNavigator() const;
+
+private:
+    QtNavigator*    _pNavigator;
 };
 
 

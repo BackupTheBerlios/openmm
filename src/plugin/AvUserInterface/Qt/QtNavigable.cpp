@@ -19,42 +19,18 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaObject_INCLUDED
-#define QtMediaObject_INCLUDED
-
-#include <Omm/UpnpAvCtlObject.h>
-#include <Omm/Util.h>
-
-#include "QtWidget.h"
-#include "QtWidgetList.h"
 #include "QtNavigable.h"
 
-// NOTE: QtNavigable could go into CtlMediaObject as a generic Navigable, with a generic Navigator
-class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Util::WidgetFactory
+
+QtNavigable::QtNavigable() :
+_pNavigator(0)
 {
-    friend class QtMediaServer;
-    friend class QtMediaServerGroup;
 
-public:
-    QtMediaObject();
-    ~QtMediaObject();
-    
-    // QtNavigable interface
-    virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
-
-    // QtWidgetFactory interface
-    virtual Omm::Util::Widget* createWidget();
-
-public slots:
-    virtual void configure();
-    virtual void unconfigure();
-
-private:
-    Omm::Av::CtlMediaObject*    _pObject;
-    QtWidgetList*               _pContainerView;
-};
+}
 
 
-#endif
-
+QtNavigator*
+QtNavigable::getNavigator() const
+{
+    return _pNavigator;
+}

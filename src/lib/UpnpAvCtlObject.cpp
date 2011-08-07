@@ -230,6 +230,49 @@ CtlMediaObject::getImageRepresentation()
 }
 
 
+int
+CtlMediaObject::totalItemCount()
+{
+    Log::instance()->upnpav().debug("controller media object child count: " + Poco::NumberFormatter::format(childCount()));
+    
+    if (isContainer()) {
+//        return getChildCount();
+        return childCount();
+    }
+    return 0;
+}
+
+
+void
+CtlMediaObject::selectItem(int row)
+{
+    Log::instance()->upnpav().debug("controller media object select item in row: " + Poco::NumberFormatter::format(row));
+
+}
+
+
+bool
+CtlMediaObject::canFetchMore()
+{
+    return false;
+}
+
+
+void
+CtlMediaObject::fetchMore(bool forward)
+{
+
+}
+
+
+int
+CtlMediaObject::lastFetched(bool forward)
+{
+
+    return (forward ? totalItemCount() : 0);
+}
+
+
 Resource*
 CtlMediaObject::getResource(int num)
 {

@@ -62,9 +62,6 @@ class QtMediaRendererWidget : public QtListWidget
 public:
     QtMediaRendererWidget();
 
-    // FIXME: setRow not needed here ...
-    void setRow(int row);
-
 public slots:
     virtual void configure();
     virtual void unconfigure();

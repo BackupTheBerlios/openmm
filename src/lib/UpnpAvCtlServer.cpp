@@ -78,7 +78,10 @@ void
 CtlMediaServer::selectMediaObject(CtlMediaObject* pObject)
 {
     Log::instance()->upnpav().debug("media server object selected: " + pObject->getTitle());
-    if (!pObject->isContainer()) {
+
+    if (pObject->isContainer()) {
+    }
+    else {
         MediaItemNotification* pNotification = new MediaItemNotification(pObject);
         getDeviceContainer()->getDeviceManager()->postDeviceNotification(pNotification);
     }

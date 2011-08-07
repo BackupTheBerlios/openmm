@@ -34,14 +34,13 @@
 #include "QtMediaObject.h"
 
 
-class QtMediaContainerItem;
+class QtMediaObject;
 class QtMediaServerWidget;
+class QtWidgetList;
 
 
-class QtMediaServer : public QAbstractItemModel, public QtNavigable, public Omm::Av::CtlMediaServer
+class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
 {
-    Q_OBJECT
-
     friend class QtMediaServerWidget;
 
 public:
@@ -53,34 +52,14 @@ public:
     
     // QtNavigable interface
     virtual QString getBrowserTitle();
-    virtual QWidget* getWidget();
-    
-    // QAbstractItemModel
-    QVariant data(const QModelIndex &index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    bool hasChildren (const QModelIndex & parent = QModelIndex()) const;
-    void fetchMore (const QModelIndex & parent);
-    bool canFetchMore (const QModelIndex & parent) const;
-    
-    QtMediaObject* getObject(const QModelIndex &index) const;
-
-    QIcon icon(const QModelIndex &index) const;
-
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
+//    virtual QWidget* getWidget();
 
 private:
     virtual void initController();
-    virtual void selected();
-    void selectedMediaObject(Omm::Av::CtlMediaObject* pObject);
+//    virtual void selected();
 
     QtMediaServerWidget*            _pMediaServerWidget;
-    QtMediaContainerItem*           _pMediaContainerItem;
+//    QtWidgetList*                   _pMediaContainerWidget;
 
     QTextCodec*                     _charEncoding;
     QFileIconProvider*              _iconProvider;
@@ -97,18 +76,12 @@ class QtMediaServerWidget : public QtSimpleListWidget
 public:
     QtMediaServerWidget(QtMediaServer* pMediaServer = 0);
 
-    QWidget* getContainerWidget();
-
 public slots:
     virtual void configure();
     virtual void unconfigure();
 
-//private slots:
-//    void selectedModelIndex(const QModelIndex& index);
-
 private:
     QtMediaServer*                  _pMediaServer;
-    QTreeView*                      _pMediaContainerWidget;
 };
 
 

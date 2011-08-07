@@ -226,14 +226,29 @@ _rowOffset(0)
 void
 WidgetListView::setModel(WidgetListModel* pModel)
 {
-    Log::instance()->util().debug("widget list view set model");
+    Log::instance()->util().debug("widget list view set model ...");
 
     // double link model and view.
     _pModel = pModel;
-    _pModel->_pView = this;
+    if (_pModel) {
+        _pModel->_pView = this;
+    }
+    else {
+        Log::instance()->util().error("widget list view failed to set model (ignoring)");
+        return;
+    }
 
     // create an initial widget pool. This also retrieves the height of the widget.
-    extendWidgetPool(visibleRows());
+    int rows = visibleRows();
+    extendWidgetPool(rows);
+
+    // insert items that are already in the model.
+    for (int i = 0; i < _pModel->totalItemCount(); i++) {
+//        _pModel->insertItem(i);
+        insertItem(i);
+    }
+
+    Log::instance()->util().debug("widget list view set model finished.");
 }
 
 
@@ -251,12 +266,16 @@ WidgetListView::extendWidgetPool(int n)
 
     for (int i = 0; i < n; ++i) {
         Widget* pWidget = _pModel->createWidget();
+        if (!pWidget) {
+            Log::instance()->util().error("widget list view failed to create widget for pool (ignoring)");
+            return;
+        }
         pWidget->hideWidget();
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
         pWidget->registerEventNotificationHandler(Poco::Observer<WidgetListView, Widget::SelectNotification>(*this, &WidgetListView::selectNotificationHandler));
-        Log::instance()->util().debug("allocate QtMediaRenderer[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
+        Log::instance()->util().debug("allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }
 

@@ -129,10 +129,3 @@ QtMediaRendererWidget::positionSliderMoved(int value)
 {
     _pRenderer->positionMoved(value);
 }
-
-
-void
-QtMediaRendererWidget::setRow(int row)
-{
-    _row = row;
-}

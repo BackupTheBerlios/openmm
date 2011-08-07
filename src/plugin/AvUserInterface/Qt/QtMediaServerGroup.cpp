@@ -24,6 +24,7 @@
 
 #include "QtMediaServerGroup.h"
 #include "QtMediaServer.h"
+#include "QtMediaObject.h"
 #include "QtNavigator.h"
 #include "QtWidget.h"
 #include "QtWidgetList.h"
@@ -72,7 +73,21 @@ QtMediaServerGroup::createDevice()
 void
 QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
 {
-    _pNavigator->push(static_cast<QtMediaServer*>(pDevice));
+    QtMediaServer* pMediaServer = static_cast<QtMediaServer*>(pDevice);
+
+    Omm::Av::Log::instance()->upnpav().debug("Qt media server group select device");
+    Omm::Av::CtlMediaObject* pRootObject = pMediaServer->getRootObject();
+    if (pRootObject->isContainer()) {
+        pRootObject->fetchChildren();
+        Omm::Av::Log::instance()->upnpav().debug("Qt media server root object is container, creating container widget.");
+        QtMediaObject* pRootWidget = new QtMediaObject;
+        pRootWidget->_pObject = pRootObject;
+        pRootObject->setWidgetFactory(pRootWidget);
+        pRootWidget->_pContainerView = new QtWidgetList;
+        Omm::Av::Log::instance()->upnpav().debug("Qt media server pushing root container widget ...");
+        _pNavigator->push(pRootWidget);
+        pRootWidget->_pContainerView->setModel(pRootObject);
+    }
 }
 
 

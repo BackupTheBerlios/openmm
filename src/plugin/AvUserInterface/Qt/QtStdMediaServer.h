@@ -29,7 +29,6 @@
 #include <Omm/UpnpAvCtlObject.h>
 
 #include "QtNavigable.h"
-#include "QtMediaObject.h"
 
 
 class QtStdMediaContainerItem;
@@ -64,7 +63,7 @@ public:
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
     
-    QtMediaObject* getObject(const QModelIndex &index) const;
+    Omm::Av::CtlMediaObject* getObject(const QModelIndex &index) const;
 
     QIcon icon(const QModelIndex &index) const;
 

@@ -267,7 +267,7 @@ public:
     // lazy model related
     virtual bool canFetchMore() { return false; }
     virtual void fetchMore(bool forward = true) {}
-    virtual int lastFetched(bool forward = true) { return totalItemCount(); }
+    virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
 
     // widget related
     void setWidgetFactory(WidgetFactory* pWidgetFactory);

@@ -33,12 +33,8 @@
 namespace Omm {
 namespace Av {
 
-class AvServerView;
-class AvController;
 class CtlMediaServerCode;
-class CtlMediaRendererCode;
 class CtlMediaObject;
-class MediaItemNotification;
 
 
 class CtlMediaServer : public Device
