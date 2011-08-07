@@ -25,8 +25,10 @@
 #include <QtGui>
 
 #include <Omm/UpnpAvController.h>
+#include <Omm/Util.h>
 
 #include "QtNavigable.h"
+#include "QtWidget.h"
 #include "QtMediaObject.h"
 
 
@@ -44,6 +46,9 @@ public:
     QtMediaServer();
     ~QtMediaServer();
 
+    void setDeviceWidget(QtMediaServerWidget* pWidget);
+    QtMediaServerWidget* getDeviceWidget();
+    
     // QtNavigable interface
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
@@ -51,14 +56,12 @@ public:
     // QAbstractItemModel
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
-    QModelIndex index(int row, int column,
-                      const QModelIndex &parent = QModelIndex()) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &index) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
+    bool hasChildren (const QModelIndex & parent = QModelIndex()) const;
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
     
@@ -82,20 +85,31 @@ private:
 };
 
 
-class QtMediaServerWidget : public QTreeView
+class QtMediaServerWidget : public QtListWidget
 {
     Q_OBJECT
 
-public:
-    QtMediaServerWidget(QtMediaServer* pMediaServer);
+    friend class QtMediaServer;
+    friend class QtMediaServerGroup;
 
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
+public:
+    QtMediaServerWidget(QtMediaServer* pMediaServer = 0);
+
+    QWidget* getContainerWidget();
+
+public slots:
+    virtual void configure();
+    virtual void unconfigure();
+
+//private slots:
+//    void selectedModelIndex(const QModelIndex& index);
 
 private:
     QtMediaServer*                  _pMediaServer;
+    QHBoxLayout*                    _pLayout;
+    QLabel*                         _pNameLabel;
+    QTreeView*                      _pMediaContainerWidget;
 };
-
 
 
 #endif

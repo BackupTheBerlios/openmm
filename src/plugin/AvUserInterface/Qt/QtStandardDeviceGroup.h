@@ -23,11 +23,8 @@
 #define QtStandardDeviceGroup_INCLUDED
 
 #include <QtGui>
-
 #include <Omm/Upnp.h>
-
 #include "QtNavigable.h"
-//#include "QtDeviceGroup.h"
 
 class QtNavigator;
 class QtDeviceListItem;
@@ -54,7 +51,7 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-    // Omm::DeviceGroup interface (could also move to Omm::Device)
+    // Omm::DeviceGroup interface
     virtual Omm::Util::Widget* getDeviceGroupWidget();
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);

@@ -40,5 +40,45 @@ private:
 };
 
 
+class QtListWidget : public QtWidget
+{
+    Q_OBJECT
+
+    friend class QtMediaServerGroup;
+
+public:
+    QtListWidget(QWidget* pParent = 0);
+
+signals:
+    void showWidgetSignal();
+    void hideWidgetSignal();
+    void configureWidget();
+    // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
+    // that means, values have to be cached to allow for fast scrolling (don't retrieve
+    // them via network for example).
+    void unconfigureWidget();
+
+public slots:
+    virtual void configure() {}
+    virtual void unconfigure() {}
+};
+
+
+class QtSimpleListWidget : public QtListWidget
+{
+    Q_OBJECT
+
+public:
+    QtSimpleListWidget(QWidget* pParent = 0);
+    virtual ~QtSimpleListWidget();
+
+public slots:
+    virtual void configure();
+    virtual void unconfigure();
+
+private:
+    QLabel*      _pNameLabel;
+};
+
 #endif
 

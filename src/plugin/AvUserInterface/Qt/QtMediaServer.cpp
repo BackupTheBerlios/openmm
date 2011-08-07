@@ -21,96 +21,6 @@
 
 #include "QtMediaServer.h"
 
-class QtMediaContainerItem : public QStyledItemDelegate
-{
-public:
-    QtMediaContainerItem(QObject* parent = 0);
-
-    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
-};
-
-
-QtMediaContainerItem::QtMediaContainerItem(QObject* parent) :
-QStyledItemDelegate(parent)
-{
-}
-
-
-void
-QtMediaContainerItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    int padding = 4;
-    QRect iconRect(option.rect);
-    iconRect.setLeft(padding);
-    iconRect.setWidth(option.rect.height());
-    QRect textRect(option.rect);
-    textRect.setLeft(iconRect.right() + padding);
-
-//    Omm::Av::Log::instance()->upnpav().debug(
-//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
-//    );
-
-    if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
-        QString title = qvariant_cast<QString>(index.data(Qt::DisplayRole));
-        painter->save();
-//        painter->setRenderHint(QPainter::Antialiasing, true);
-        if (option.state & QStyle::State_Selected) {
-            painter->fillRect(option.rect, option.palette.highlight());
-            painter->setPen(option.palette.highlightedText().color());
-        }
-//        painter->setFont(option.font);  // painter is style aware, don't need to set this.
-        painter->drawText(textRect, Qt::AlignVCenter, title);
-        painter->restore();
-    }
-    if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
-//        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
-        QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
-        painter->save();
-        icon.paint(painter, iconRect);
-        painter->restore();
-    }
-    // use QApplication::style()->drawControl() to draw Qt widgets on the painter
-
-//    else {
-//        // default painter
-//        QStyledItemDelegate::paint(painter, option, index);
-//    }
-}
-
-
-QSize
-QtMediaContainerItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    QSize itemSize = QStyledItemDelegate::sizeHint(option, index);
-    itemSize.rheight() *= 2;
-    return itemSize;
-}
-
-
-QtMediaServerWidget::QtMediaServerWidget(QtMediaServer* pMediaServer) :
-_pMediaServer(pMediaServer)
-{
-    setModel(pMediaServer);
-    setUniformRowHeights(true);
-    setHeaderHidden(true);
-//        _pMediaServerTreeView->setRootIsDecorated(false);
-//        _pMediaServerTreeView->setItemsExpandable(false);
-    // activated() is return, click or double click, selected() is click or double click on it.
-    connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));    
-}
-
-
-void
-QtMediaServerWidget::selectedModelIndex(const QModelIndex& index)
-{
-    Omm::Av::Log::instance()->upnpav().debug("media server selected index");
-
-    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
-    _pMediaServer->selectedMediaObject(pObject);
-}
-
 
 QtMediaServer::QtMediaServer() :
 _pMediaServerWidget(0),
@@ -124,6 +34,20 @@ QtMediaServer::~QtMediaServer()
 }
 
 
+void
+QtMediaServer::setDeviceWidget(QtMediaServerWidget* pWidget)
+{
+    _pMediaServerWidget = pWidget;
+}
+
+
+QtMediaServerWidget*
+QtMediaServer::getDeviceWidget()
+{
+    return _pMediaServerWidget;
+}
+
+
 QString
 QtMediaServer::getBrowserTitle()
 {
@@ -134,7 +58,7 @@ QtMediaServer::getBrowserTitle()
 QWidget*
 QtMediaServer::getWidget()
 {
-    return _pMediaServerWidget;
+    return _pMediaServerWidget->getContainerWidget();
 }
 
 
@@ -383,4 +307,58 @@ QVariant
 QtMediaServer::headerData(int section, Qt::Orientation orientation, int role) const
 {
     return "";
+}
+
+
+QtMediaServerWidget::QtMediaServerWidget(QtMediaServer* pMediaServer) :
+_pMediaServer(pMediaServer)
+{
+    _pLayout = new QHBoxLayout(this);
+    _pNameLabel = new QLabel;
+    _pLayout->addWidget(_pNameLabel);
+
+    _pMediaContainerWidget = new QTreeView;
+
+    if (_pMediaServer) {
+        _pMediaContainerWidget->setModel(_pMediaServer);
+    }
+    _pMediaContainerWidget->setUniformRowHeights(true);
+    _pMediaContainerWidget->setHeaderHidden(true);
+//        _pMediaContainerWidget->setRootIsDecorated(false);
+//        _pMediaContainerWidget->setItemsExpandable(false);
+    // activated() is return, click or double click, selected() is click or double click on it.
+    connect(_pMediaContainerWidget, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+}
+
+
+QWidget*
+QtMediaServerWidget::getContainerWidget()
+{
+    return _pMediaContainerWidget;
+}
+
+
+//void
+//QtMediaServerWidget::selectedModelIndex(const QModelIndex& index)
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("media server selected index");
+//
+//    Omm::Av::CtlMediaObject* pObject = static_cast<Omm::Av::CtlMediaObject*>(index.internalPointer());
+//    _pMediaServer->selectedMediaObject(pObject);
+//}
+
+
+void
+QtMediaServerWidget::configure()
+{
+    Omm::Av::Log::instance()->upnpav().debug("media server widget set name: " + _pMediaServer->getFriendlyName());
+    
+    _pNameLabel->setText(QString::fromStdString(_pMediaServer->getFriendlyName()));
+}
+
+
+void
+QtMediaServerWidget::unconfigure()
+{
+    _pNameLabel->setText("");
 }

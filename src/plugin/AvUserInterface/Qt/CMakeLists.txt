@@ -100,7 +100,7 @@ QtStdController.h
 QtNavigator.h
 QtNavigatorPrivate.h
 QtStandardDeviceGroup.h
-#QtWidget.h
+QtWidget.h
 QtWidgetList.h
 QtStdMediaRendererGroup.h
 QtMediaRenderer.h
@@ -122,7 +122,7 @@ QtController.h
 QtNavigator.h
 QtNavigatorPrivate.h
 QtStandardDeviceGroup.h
-#QtWidget.h
+QtWidget.h
 QtWidgetList.h
 QtMediaRendererGroup.h
 QtMediaRenderer.h

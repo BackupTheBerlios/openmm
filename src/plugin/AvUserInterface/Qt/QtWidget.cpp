@@ -51,3 +51,37 @@ QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
     select();
     QWidget::mousePressEvent(pMouseEvent);
 }
+
+
+QtListWidget::QtListWidget(QWidget* pParent) :
+QtWidget(pParent)
+{
+
+}
+
+
+QtSimpleListWidget::QtSimpleListWidget(QWidget* pParent) :
+QtListWidget(pParent)
+{
+    _pNameLabel = new QLabel;
+}
+
+
+QtSimpleListWidget::~QtSimpleListWidget()
+{
+    delete _pNameLabel;
+}
+
+
+void
+QtSimpleListWidget::configure()
+{
+
+}
+
+
+void
+QtSimpleListWidget::unconfigure()
+{
+
+}

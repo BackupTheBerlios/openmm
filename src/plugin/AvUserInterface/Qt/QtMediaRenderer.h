@@ -48,7 +48,7 @@ private:
 };
 
 
-class QtMediaRendererWidget : public QtWidget
+class QtMediaRendererWidget : public QtListWidget
 {
     Q_OBJECT
 
@@ -58,20 +58,12 @@ class QtMediaRendererWidget : public QtWidget
 public:
     QtMediaRendererWidget();
 
+    // FIXME: setRow not needed here ...
     void setRow(int row);
 
-signals:
-    void showWidgetSignal();
-    void hideWidgetSignal();
-    void configureWidget();
-    // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
-    // that means, values have to be cached to allow for fast scrolling (don't retrieve
-    // them via network for example).
-    void unconfigureWidget();
-
 public slots:
-    void configure();
-    void unconfigure();
+    virtual void configure();
+    virtual void unconfigure();
 
 private slots:
     void playButtonPressed();

@@ -22,17 +22,38 @@
 #ifndef QtMediaServerGroup_INCLUDED
 #define QtMediaServerGroup_INCLUDED
 
-#include "QtStandardDeviceGroup.h"
+#include <QtGui>
+#include <Omm/Upnp.h>
+#include "QtNavigable.h"
+
+class QtNavigator;
+class QtWidgetCanvas;
 
 
-class QtMediaServerGroup : public QtStandardDeviceGroup
+class QtMediaServerGroup : public QObject, public QtNavigable, public Omm::DeviceGroup
 {
 public:
     QtMediaServerGroup();
 
+    // QtNavigable interface
+    virtual QWidget* getWidget();
+    virtual QString getBrowserTitle();
+
     // Omm::DeviceGroup interface
+    virtual Omm::Util::Widget* getDeviceGroupWidget();
     virtual Omm::Device* createDevice();
     virtual void selectDevice(Omm::Device* pDevice, int index);
+
+    // WidgetListModel interface
+    virtual Omm::Util::Widget* createWidget();
+    // FIXME: getWidget() can move into Omm::DeviceGroup (introduce Omm::Device::getDeviceWidget()).
+    virtual Omm::Util::Widget* getWidget(int row);
+    virtual void attachWidget(int row, Omm::Util::Widget* pWidget);
+    virtual void detachWidget(int row);
+
+private:
+    QtNavigator*                    _pNavigator;
+    QtWidgetCanvas*                 _pWidgetCanvas;
 };
 
 
