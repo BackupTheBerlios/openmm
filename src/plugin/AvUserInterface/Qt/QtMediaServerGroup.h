@@ -45,10 +45,10 @@ public:
     virtual void selectDevice(Omm::Device* pDevice, int index);
 
     // WidgetListModel interface
-    virtual Omm::Util::Widget* createWidget();
+    virtual Omm::Util::ListWidget* createWidget();
     // FIXME: getWidget() can move into Omm::DeviceGroup (introduce Omm::Device::getDeviceWidget()).
-    virtual Omm::Util::Widget* getWidget(int row);
-    virtual void attachWidget(int row, Omm::Util::Widget* pWidget);
+    virtual Omm::Util::ListWidget* getWidget(int row);
+    virtual void attachWidget(int row, Omm::Util::ListWidget* pWidget);
     virtual void detachWidget(int row);
 
 private:

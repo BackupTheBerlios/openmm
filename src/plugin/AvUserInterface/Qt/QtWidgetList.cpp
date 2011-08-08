@@ -34,7 +34,7 @@ _pScrollWidget(0)
     _pScrollWidget->resize(viewport()->size());
     setWidget(_pScrollWidget);
 
-    connect(this, SIGNAL(moveWidgetSignal(int, Omm::Util::Widget*)), this, SLOT(moveWidgetSlot(int, Omm::Util::Widget*)));
+    connect(this, SIGNAL(moveWidgetSignal(int, Omm::Util::ListWidget*)), this, SLOT(moveWidgetSlot(int, Omm::Util::ListWidget*)));
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledSlot(int)));
 }
 
@@ -54,15 +54,15 @@ QtWidgetList::visibleRows()
 
 
 void
-QtWidgetList::initWidget(Omm::Util::Widget* pWidget)
+QtWidgetList::initWidget(Omm::Util::ListWidget* pWidget)
 {
-    static_cast<QtWidget*>(pWidget)->resize(viewport()->width(), _widgetHeight);
-    static_cast<QtWidget*>(pWidget)->setParent(_pScrollWidget);
+    static_cast<QtListWidget*>(pWidget)->resize(viewport()->width(), _widgetHeight);
+    static_cast<QtListWidget*>(pWidget)->setParent(_pScrollWidget);
 }
 
 
 void
-QtWidgetList::moveWidget(int row, Omm::Util::Widget* pWidget)
+QtWidgetList::moveWidget(int row, Omm::Util::ListWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pWidget);
@@ -85,9 +85,9 @@ QtWidgetList::getOffset()
 
 
 void
-QtWidgetList::moveWidgetSlot(int row, Omm::Util::Widget* pWidget)
+QtWidgetList::moveWidgetSlot(int row, Omm::Util::ListWidget* pWidget)
 {
-    static_cast<QtWidget*>(pWidget)->move(0, _widgetHeight * row);
+    static_cast<QtListWidget*>(pWidget)->move(0, _widgetHeight * row);
 }
 
 
@@ -108,7 +108,7 @@ _movableWidgets(movableWidgets)
     _pGraphicsScene = new QGraphicsScene;
     setScene(_pGraphicsScene);
 
-    connect(this, SIGNAL(moveWidgetSignal(int, Omm::Util::Widget*)), this, SLOT(moveWidgetSlot(int, Omm::Util::Widget*)));
+    connect(this, SIGNAL(moveWidgetSignal(int, Omm::Util::ListWidget*)), this, SLOT(moveWidgetSlot(int, Omm::Util::ListWidget*)));
     connect(this, SIGNAL(extendPoolSignal()), this, SLOT(extendPoolSlot()));
 }
 
@@ -128,9 +128,9 @@ QtWidgetCanvas::visibleRows()
 
 
 void
-QtWidgetCanvas::initWidget(Omm::Util::Widget* pWidget)
+QtWidgetCanvas::initWidget(Omm::Util::ListWidget* pWidget)
 {
-    QtWidget* pQtWidget = static_cast<QtWidget*>(pWidget);
+    QtListWidget* pQtWidget = static_cast<QtListWidget*>(pWidget);
     pQtWidget->resize(viewport()->width(), _widgetHeight);
 
     if (_movableWidgets) {
@@ -143,7 +143,7 @@ QtWidgetCanvas::initWidget(Omm::Util::Widget* pWidget)
 
 
 void
-QtWidgetCanvas::moveWidget(int row, Omm::Util::Widget* pWidget)
+QtWidgetCanvas::moveWidget(int row, Omm::Util::ListWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pWidget);
@@ -158,7 +158,7 @@ QtWidgetCanvas::extendWidgetPool()
 
 
 void
-QtWidgetCanvas::moveWidgetSlot(int row, Omm::Util::Widget* pWidget)
+QtWidgetCanvas::moveWidgetSlot(int row, Omm::Util::ListWidget* pWidget)
 {
     _proxyWidgets[pWidget]->setPos(0, _widgetHeight * row);
 }

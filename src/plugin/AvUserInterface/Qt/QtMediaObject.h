@@ -30,7 +30,7 @@
 #include "QtNavigable.h"
 
 // NOTE: QtNavigable could go into CtlMediaObject as a generic Navigable, with a generic Navigator
-class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Util::WidgetFactory
+class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Util::ListWidgetFactory
 {
     friend class QtMediaServer;
     friend class QtMediaServerGroup;
@@ -44,7 +44,7 @@ public:
     virtual QWidget* getWidget();
 
     // QtWidgetFactory interface
-    virtual Omm::Util::Widget* createWidget();
+    virtual Omm::Util::ListWidget* createWidget();
 
 public slots:
     virtual void configure();

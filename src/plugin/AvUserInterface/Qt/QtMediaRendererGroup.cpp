@@ -59,14 +59,14 @@ QtMediaRendererGroup::getDeviceGroupWidget()
 }
 
 
-Omm::Util::Widget*
+Omm::Util::ListWidget*
 QtMediaRendererGroup::createWidget()
 {
     return new QtMediaRendererWidget;
 }
 
 
-Omm::Util::Widget*
+Omm::Util::ListWidget*
 QtMediaRendererGroup::getWidget(int row)
 {
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
@@ -75,7 +75,7 @@ QtMediaRendererGroup::getWidget(int row)
 
 
 void
-QtMediaRendererGroup::attachWidget(int row, Omm::Util::Widget* pWidget)
+QtMediaRendererGroup::attachWidget(int row, Omm::Util::ListWidget* pWidget)
 {
 //    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));

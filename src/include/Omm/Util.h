@@ -217,32 +217,49 @@ public:
     virtual void showWidget() {}
     virtual void hideWidget() {}
 
-    int getRow();
-    void setRow(int row);
-
     class SelectNotification : public Poco::Notification
     {
     public:
-        SelectNotification(int row);
-
-        int _row;
+        SelectNotification();
     };
 
     void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
 
 protected:
-    void select();
+    virtual void select();
 
-private:
-    int _row;
     Poco::NotificationCenter _eventNotificationCenter;
 };
 
 
-class WidgetFactory
+class ListWidget : public Widget
 {
 public:
-    virtual Widget* createWidget() { return 0; }
+    ListWidget();
+
+    int getRow();
+    void setRow(int row);
+
+    class RowSelectNotification : public Poco::Notification
+    {
+    public:
+        RowSelectNotification(int row);
+
+        int _row;
+    };
+
+protected:
+    virtual void select();
+
+private:
+    int _row;
+};
+
+
+class ListWidgetFactory
+{
+public:
+    virtual ListWidget* createWidget() { return 0; }
 };
 
 
@@ -270,15 +287,15 @@ public:
     virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
 
     // widget related
-    void setWidgetFactory(WidgetFactory* pWidgetFactory);
-    virtual Widget* createWidget();
-    virtual Widget* getWidget(int row) { return 0; }
-    virtual void attachWidget(int row, Widget* pWidget) {}
+    void setWidgetFactory(ListWidgetFactory* pWidgetFactory);
+    virtual ListWidget* createWidget();
+    virtual ListWidget* getWidget(int row) { return 0; }
+    virtual void attachWidget(int row, ListWidget* pWidget) {}
     virtual void detachWidget(int row) {}
 
 private:
     WidgetListView*                 _pView;
-    WidgetFactory*                  _pWidgetFactory;
+    ListWidgetFactory*                  _pWidgetFactory;
 };
 
 
@@ -293,8 +310,8 @@ public:
 
 protected:
     virtual int visibleRows() { return 0; }
-    virtual void initWidget(Widget* pWidget) {}
-    virtual void moveWidget(int row, Widget* pWidget) {}
+    virtual void initWidget(ListWidget* pWidget) {}
+    virtual void moveWidget(int row, ListWidget* pWidget) {}
 
     // non-lazy views only
     virtual void extendWidgetPool() {}
@@ -314,16 +331,16 @@ private:
     /// with widgets (created by the model).
     int visibleIndex(int row);
     int countVisibleWidgets();
-    Widget* visibleWidget(int index);
+    ListWidget* visibleWidget(int index);
     bool itemIsVisible(int row);
-    void moveWidgetToRow(int row, Widget* pWidget);
-    void selectNotificationHandler(Widget::SelectNotification* pSelectNotification);
+    void moveWidgetToRow(int row, ListWidget* pWidget);
+    void selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification);
 
-    bool                            _lazy;
-    std::vector<Widget*>            _widgetPool;
-    std::vector<Widget*>            _visibleWidgets;
-    std::stack<Widget*>             _freeWidgets;
-    int                             _rowOffset;
+    bool                                _lazy;
+    std::vector<ListWidget*>            _widgetPool;
+    std::vector<ListWidget*>            _visibleWidgets;
+    std::stack<ListWidget*>             _freeWidgets;
+    int                                 _rowOffset;
 };
 
 

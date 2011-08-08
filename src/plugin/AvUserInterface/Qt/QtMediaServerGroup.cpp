@@ -91,14 +91,14 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
 }
 
 
-Omm::Util::Widget*
+Omm::Util::ListWidget*
 QtMediaServerGroup::createWidget()
 {
     return new QtMediaServerWidget;
 }
 
 
-Omm::Util::Widget*
+Omm::Util::ListWidget*
 QtMediaServerGroup::getWidget(int row)
 {
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));
@@ -107,7 +107,7 @@ QtMediaServerGroup::getWidget(int row)
 
 
 void
-QtMediaServerGroup::attachWidget(int row, Omm::Util::Widget* pWidget)
+QtMediaServerGroup::attachWidget(int row, Omm::Util::ListWidget* pWidget)
 {
 //    Omm::Av::Log::instance()->upnpav().debug("media server group attach widget");
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));

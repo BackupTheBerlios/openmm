@@ -120,28 +120,12 @@ Startable::run()
 }
 
 
-Widget::Widget() :
-_row(0)
+Widget::Widget()
 {
 }
 
 
-int
-Widget::getRow()
-{
-    return _row;
-}
-
-
-void
-Widget::setRow(int row)
-{
-    _row = row;
-}
-
-
-Widget::SelectNotification::SelectNotification(int row) :
-_row(row)
+Widget::SelectNotification::SelectNotification()
 {
 }
 
@@ -156,7 +140,42 @@ Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
 void
 Widget::select()
 {
-    _eventNotificationCenter.postNotification(new SelectNotification(_row));
+    _eventNotificationCenter.postNotification(new SelectNotification);
+}
+
+
+ListWidget::ListWidget() :
+_row(0)
+{
+
+}
+
+
+int
+ListWidget::getRow()
+{
+    return _row;
+}
+
+
+void
+ListWidget::setRow(int row)
+{
+    _row = row;
+}
+
+
+ListWidget::RowSelectNotification::RowSelectNotification(int row) :
+_row(row)
+{
+}
+
+
+void
+ListWidget::select()
+{
+    Widget::select();
+    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
 }
 
 
@@ -198,13 +217,13 @@ WidgetListModel::removeItem(int row)
 
 
 void
-WidgetListModel::setWidgetFactory(WidgetFactory* pWidgetFactory)
+WidgetListModel::setWidgetFactory(ListWidgetFactory* pWidgetFactory)
 {
     _pWidgetFactory = pWidgetFactory;
 }
 
 
-Widget*
+ListWidget*
 WidgetListModel::createWidget()
 {
     if (_pWidgetFactory) {
@@ -265,7 +284,7 @@ WidgetListView::extendWidgetPool(int n)
     Log::instance()->util().debug("widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
 
     for (int i = 0; i < n; ++i) {
-        Widget* pWidget = _pModel->createWidget();
+        ListWidget* pWidget = _pModel->createWidget();
         if (!pWidget) {
             Log::instance()->util().error("widget list view failed to create widget for pool (ignoring)");
             return;
@@ -274,7 +293,7 @@ WidgetListView::extendWidgetPool(int n)
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
-        pWidget->registerEventNotificationHandler(Poco::Observer<WidgetListView, Widget::SelectNotification>(*this, &WidgetListView::selectNotificationHandler));
+        pWidget->registerEventNotificationHandler(Poco::Observer<WidgetListView, ListWidget::RowSelectNotification>(*this, &WidgetListView::selectNotificationHandler));
         Log::instance()->util().debug("allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }
@@ -294,7 +313,7 @@ WidgetListView::countVisibleWidgets()
 }
 
 
-Widget*
+ListWidget*
 WidgetListView::visibleWidget(int index)
 {
     if (0 <= index && index < _visibleWidgets.size()) {
@@ -321,7 +340,7 @@ WidgetListView::scrolledToRow(int rowOffset)
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {
             // detach first visible widget
-            Widget* pWidget = _visibleWidgets.front();
+            ListWidget* pWidget = _visibleWidgets.front();
             _pModel->detachWidget(_rowOffset);
             // move first widget to the end
             int lastRow = _rowOffset + _visibleWidgets.size();
@@ -335,7 +354,7 @@ WidgetListView::scrolledToRow(int rowOffset)
         }
         else if (rowDelta < 0) {
             // detach last visible widget
-            Widget* pWidget = _visibleWidgets.back();
+            ListWidget* pWidget = _visibleWidgets.back();
             int lastRow = _rowOffset + _visibleWidgets.size() - 1;
             _pModel->detachWidget(lastRow);
             // move last widget to the beginning
@@ -359,7 +378,7 @@ WidgetListView::itemIsVisible(int row)
 
 
 void
-WidgetListView::moveWidgetToRow(int row, Widget* pWidget)
+WidgetListView::moveWidgetToRow(int row, ListWidget* pWidget)
 {
     pWidget->setRow(row);
     moveWidget(row, pWidget);
@@ -367,7 +386,7 @@ WidgetListView::moveWidgetToRow(int row, Widget* pWidget)
 
 
 void
-WidgetListView::selectNotificationHandler(Widget::SelectNotification* pSelectNotification)
+WidgetListView::selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification)
 {
     _pModel->selectItem(pSelectNotification->_row);
 }
@@ -394,7 +413,7 @@ WidgetListView::insertItem(int row)
 
     // attach item to a free (not visible) widget
     if (_freeWidgets.size()) {
-        Widget* pWidget = _freeWidgets.top();
+        ListWidget* pWidget = _freeWidgets.top();
         _freeWidgets.pop();
         _visibleWidgets.insert(_visibleWidgets.begin() + visibleIndex(row), pWidget);
         _pModel->attachWidget(row, pWidget);
@@ -422,7 +441,7 @@ WidgetListView::removeItem(int row)
     }
 
     // detach item from visible widget
-    Widget* pWidget = _pModel->getWidget(row);
+    ListWidget* pWidget = _pModel->getWidget(row);
 
     // remove widget from this position in visible widgets
     int index = visibleIndex(row);

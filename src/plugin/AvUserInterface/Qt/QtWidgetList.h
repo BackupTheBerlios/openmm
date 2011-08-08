@@ -37,17 +37,17 @@ public:
 
 protected:
     virtual int visibleRows();
-    virtual void initWidget(Omm::Util::Widget* pWidget);
-    virtual void moveWidget(int row, Omm::Util::Widget* pWidget);
+    virtual void initWidget(Omm::Util::ListWidget* pWidget);
+    virtual void moveWidget(int row, Omm::Util::ListWidget* pWidget);
 
     virtual void updateScrollWidgetSize();
     virtual int getOffset();
 
 signals:
-    void moveWidgetSignal(int targetRow, Omm::Util::Widget* pWidget);
+    void moveWidgetSignal(int targetRow, Omm::Util::ListWidget* pWidget);
 
 private slots:
-    void moveWidgetSlot(int targetRow, Omm::Util::Widget* pWidget);
+    void moveWidgetSlot(int targetRow, Omm::Util::ListWidget* pWidget);
     void viewScrolledSlot(int value);
 
 private:
@@ -65,23 +65,23 @@ public:
 
 protected:
     virtual int visibleRows();
-    virtual void initWidget(Omm::Util::Widget* pWidget);
-    virtual void moveWidget(int row, Omm::Util::Widget* pWidget);
+    virtual void initWidget(Omm::Util::ListWidget* pWidget);
+    virtual void moveWidget(int row, Omm::Util::ListWidget* pWidget);
 
     virtual void extendWidgetPool();
 
 signals:
-    void moveWidgetSignal(int targetRow, Omm::Util::Widget* pWidget);
+    void moveWidgetSignal(int targetRow, Omm::Util::ListWidget* pWidget);
     void extendPoolSignal();
 
 private slots:
-    void moveWidgetSlot(int targetRow, Omm::Util::Widget* pWidget);
+    void moveWidgetSlot(int targetRow, Omm::Util::ListWidget* pWidget);
     void extendPoolSlot();
 
 private:
-    QGraphicsScene*                              _pGraphicsScene;
-    std::map<Omm::Util::Widget*, QGraphicsProxyWidget*>     _proxyWidgets;
-    bool                                         _movableWidgets;
+    QGraphicsScene*                                             _pGraphicsScene;
+    std::map<Omm::Util::ListWidget*, QGraphicsProxyWidget*>     _proxyWidgets;
+    bool                                                        _movableWidgets;
 };
 
 

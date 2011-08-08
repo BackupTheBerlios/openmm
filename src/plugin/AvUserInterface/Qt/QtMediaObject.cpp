@@ -38,12 +38,13 @@ QtMediaObject::~QtMediaObject()
 QString
 QtMediaObject::getBrowserTitle()
 {
-    if (_pObject) {
-        return QString::fromStdString(_pObject->getTitle());
-    }
-    else {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object title (ignoring)");
-    }
+//    if (_pObject) {
+//        return QString::fromStdString(_pObject->getTitle());
+//    }
+//    else {
+//        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object title (ignoring)");
+//    }
+    return 
 }
 
 
@@ -54,7 +55,7 @@ QtMediaObject::getWidget()
 }
 
 
-Omm::Util::Widget*
+Omm::Util::ListWidget*
 QtMediaObject::createWidget()
 {
     return new QtMediaObject;

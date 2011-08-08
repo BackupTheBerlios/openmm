@@ -57,7 +57,7 @@ QtMediaRenderer::initController()
 
 QtMediaRendererWidget::QtMediaRendererWidget()
 {
-    resize(600, 40);
+//    resize(600, 40);
     _pLayout = new QHBoxLayout(this);
     _pLabel = new QPushButton(this);
     _pBackButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaSkipBackward), "", this);

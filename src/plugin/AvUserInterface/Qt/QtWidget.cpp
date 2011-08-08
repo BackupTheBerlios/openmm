@@ -47,16 +47,39 @@ QtWidget::hideWidget()
 void
 QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget");
     select();
     QWidget::mousePressEvent(pMouseEvent);
 }
 
 
 QtListWidget::QtListWidget(QWidget* pParent) :
-QtWidget(pParent)
+QWidget(pParent)
 {
 
+}
+
+
+void
+QtListWidget::showWidget()
+{
+    QWidget::show();
+}
+
+
+void
+QtListWidget::hideWidget()
+{
+    QWidget::hide();
+}
+
+
+void
+QtListWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    Omm::Av::Log::instance()->upnpav().debug("QtListWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    select();
+    QWidget::mousePressEvent(pMouseEvent);
 }
 
 

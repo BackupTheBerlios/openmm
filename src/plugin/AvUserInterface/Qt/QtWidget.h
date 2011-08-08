@@ -40,7 +40,7 @@ private:
 };
 
 
-class QtListWidget : public QtWidget
+class QtListWidget : public QWidget, public Omm::Util::ListWidget
 {
     Q_OBJECT
 
@@ -48,6 +48,9 @@ class QtListWidget : public QtWidget
 
 public:
     QtListWidget(QWidget* pParent = 0);
+
+    virtual void showWidget();
+    virtual void hideWidget();
 
 signals:
     void showWidgetSignal();
@@ -61,6 +64,9 @@ signals:
 public slots:
     virtual void configure() {}
     virtual void unconfigure() {}
+
+private:
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
 
