@@ -38,27 +38,144 @@ QtMediaObject::~QtMediaObject()
 QString
 QtMediaObject::getBrowserTitle()
 {
-//    if (_pObject) {
-//        return QString::fromStdString(_pObject->getTitle());
-//    }
-//    else {
-//        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object title (ignoring)");
-//    }
-    return 
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object get widget browser title");
+
+    if (_pObject) {
+        return QString::fromStdString(_pObject->getTitle());
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object title (ignoring)");
+    }
+//    return QString::fromStdString(getTitle());
 }
 
 
 QWidget*
 QtMediaObject::getWidget()
 {
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object get container widget");
+
     return _pContainerView;
+}
+
+
+int
+QtMediaObject::totalItemCount()
+{
+
+    if (!_pObject) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get total item count (ignoring)");
+        return 0;
+    }
+    if (_pObject->isContainer()) {
+        Omm::Av::Log::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->childCount()));
+//        return getChildCount();
+        return _pObject->childCount();
+    }
+    return 0;
+}
+
+
+void
+QtMediaObject::selectItem(int row)
+{
+    Omm::Av::Log::Log::instance()->upnpav().debug("Qt media object select item in row: " + Poco::NumberFormatter::format(row));
+
+}
+
+
+bool
+QtMediaObject::canFetchMore()
+{
+    return false;
+}
+
+
+void
+QtMediaObject::fetchMore(bool forward)
+{
+
+}
+
+
+int
+QtMediaObject::lastFetched(bool forward)
+{
+
+    return (forward ? totalItemCount() : 0);
 }
 
 
 Omm::Util::ListWidget*
 QtMediaObject::createWidget()
 {
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object create object widget");
+    
     return new QtMediaObject;
+}
+
+
+Omm::Util::ListWidget*
+QtMediaObject::getWidget(int row)
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
+
+    if (_pObject) {
+        Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+        return pChildObject->getListWidget();
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object widget (ignoring)");
+    }
+}
+
+
+void
+QtMediaObject::attachWidget(int row, Omm::Util::ListWidget* pWidget)
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object attach widget row: " + Poco::NumberFormatter::format(row));
+
+    if (!_pObject) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to attach object widget (ignoring)");
+        return;
+    }
+    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+    pChildObject->setListWidget(pWidget);
+    QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pWidget);
+    pChildWidget->_pObject = pChildObject;
+
+    connect(pChildWidget, SIGNAL(showWidgetSignal()), pChildWidget, SLOT(show()));
+    connect(pChildWidget, SIGNAL(hideWidgetSignal()), pChildWidget, SLOT(hide()));
+    connect(pChildWidget, SIGNAL(configureWidget()), pChildWidget, SLOT(configure()));
+    connect(pChildWidget, SIGNAL(unconfigureWidget()), pChildWidget, SLOT(unconfigure()));
+
+    emit pChildWidget->configureWidget();
+    emit pChildWidget->showWidgetSignal();
+}
+
+
+void
+QtMediaObject::detachWidget(int row)
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt media object detach widget row: " + Poco::NumberFormatter::format(row));
+
+    if (!_pObject) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to detach object widget (ignoring)");
+        return;
+    }
+    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+    QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pChildObject->getListWidget());
+
+    emit pChildWidget->hideWidgetSignal();
+    emit pChildWidget->unconfigureWidget();
+
+    disconnect(pChildWidget, SIGNAL(showWidgetSignal()), pChildWidget, SLOT(show()));
+    disconnect(pChildWidget, SIGNAL(hideWidgetSignal()), pChildWidget, SLOT(hide()));
+    disconnect(pChildWidget, SIGNAL(configureWidget()), pChildWidget, SLOT(configure()));
+    disconnect(pChildWidget, SIGNAL(unconfigureWidget()), pChildWidget, SLOT(unconfigure()));
+
+    pChildWidget->_pObject = 0;
+    pChildObject->setListWidget(0);
 }
 
 
@@ -72,10 +189,10 @@ QtMediaObject::configure()
         return;
     }
     setLabel(_pObject->getTitle());
-    if (_pObject->isContainer()) {
-        _pObject->setWidgetFactory(this);
-        _pContainerView->setModel(_pObject);
-    }
+//    if (_pObject->isContainer()) {
+//        _pObject->setWidgetFactory(this);
+//        _pContainerView->setModel(_pObject);
+//    }
 }
 
 

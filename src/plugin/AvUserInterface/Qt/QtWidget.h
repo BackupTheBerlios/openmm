@@ -35,8 +35,8 @@ public:
     virtual void showWidget();
     virtual void hideWidget();
 
-private:
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+//private:
+//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
 

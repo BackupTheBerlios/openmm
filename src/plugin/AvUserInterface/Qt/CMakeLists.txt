@@ -106,7 +106,7 @@ QtWidget.h
 QtWidgetList.h
 QtStdMediaRendererGroup.h
 QtMediaRenderer.h
-QtStdMediaServerGroup.h
+#QtStdMediaServerGroup.h
 QtStdMediaServer.h
 #QtMediaObject.h
 QtEventFilter.h

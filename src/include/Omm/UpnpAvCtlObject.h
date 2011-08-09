@@ -38,7 +38,7 @@ class CtlMediaServerCode;
 class MediaItemNotification;
 
 
-class CtlMediaObject : public MediaObject, public Util::WidgetListModel
+class CtlMediaObject : public MediaObject //, public Util::WidgetListModel
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;
@@ -62,14 +62,17 @@ public:
     Icon* getIcon();
     Icon* getImageRepresentation();
 
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
+    void setListWidget(Omm::Util::ListWidget* pWidget);
+    Omm::Util::ListWidget* getListWidget();
 
-    // lazy model related
-    virtual bool canFetchMore();
-    virtual void fetchMore(bool forward = true);
-    virtual int lastFetched(bool forward = true);
+//    // WidgetListModel interface
+//    virtual int totalItemCount();
+//    virtual void selectItem(int row);
+//
+//    // lazy model related
+//    virtual bool canFetchMore();
+//    virtual void fetchMore(bool forward = true);
+//    virtual int lastFetched(bool forward = true);
 
 private:
     Resource* getResource(int num = 0);
@@ -83,6 +86,7 @@ private:
     unsigned int                     _childCount;
     bool                             _fetchedAllChildren;
     CtlMediaServerCode*              _server;
+    Omm::Util::ListWidget*           _pListWidget;
 };
 
 

@@ -441,7 +441,7 @@ WidgetListView::removeItem(int row)
     }
 
     // detach item from visible widget
-    ListWidget* pWidget = _pModel->getWidget(row);
+    ListWidget* pWidget = _pModel->getChildWidget(row);
 
     // remove widget from this position in visible widgets
     int index = visibleIndex(row);

@@ -67,7 +67,7 @@ QtMediaRendererGroup::createWidget()
 
 
 Omm::Util::ListWidget*
-QtMediaRendererGroup::getWidget(int row)
+QtMediaRendererGroup::getChildWidget(int row)
 {
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
     return pRenderer->getDeviceWidget();

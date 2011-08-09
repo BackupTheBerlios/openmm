@@ -289,7 +289,7 @@ public:
     // widget related
     void setWidgetFactory(ListWidgetFactory* pWidgetFactory);
     virtual ListWidget* createWidget();
-    virtual ListWidget* getWidget(int row) { return 0; }
+    virtual ListWidget* getChildWidget(int row) { return 0; }
     virtual void attachWidget(int row, ListWidget* pWidget) {}
     virtual void detachWidget(int row) {}
 

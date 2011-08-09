@@ -29,8 +29,11 @@
 #include "QtWidgetList.h"
 #include "QtNavigable.h"
 
-// NOTE: QtNavigable could go into CtlMediaObject as a generic Navigable, with a generic Navigator
-class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Util::ListWidgetFactory
+
+class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Util::WidgetListModel
+/// QtMediaObject has two roles:
+/// As a container it implements the WidgetListModel interface of CtlMediaObject and has a pushable WidgetList for the Navigable interface.
+/// As a child widget it has _pObject as an attachable pointer to its CtlMediaObject to implement configure() of its QtSimpleListWidget interface.
 {
     friend class QtMediaServer;
     friend class QtMediaServerGroup;
@@ -43,8 +46,20 @@ public:
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
 
-    // QtWidgetFactory interface
+    // WidgetListModel interface
+    virtual int totalItemCount();
+    virtual void selectItem(int row);
+
+    // lazy model related
+    virtual bool canFetchMore();
+    virtual void fetchMore(bool forward = true);
+    virtual int lastFetched(bool forward = true);
+
+    // child widget related
     virtual Omm::Util::ListWidget* createWidget();
+    virtual Omm::Util::ListWidget* getWidget(int row);
+    virtual void attachWidget(int row, Omm::Util::ListWidget* pWidget);
+    virtual void detachWidget(int row);
 
 public slots:
     virtual void configure();

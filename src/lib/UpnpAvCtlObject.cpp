@@ -33,7 +33,8 @@ namespace Av {
 CtlMediaObject::CtlMediaObject() :
 Omm::Av::MediaObject(),
 _childCount(0),
-_fetchedAllChildren(false)
+_fetchedAllChildren(false),
+_pListWidget(0)
 {
 }
 
@@ -230,47 +231,61 @@ CtlMediaObject::getImageRepresentation()
 }
 
 
-int
-CtlMediaObject::totalItemCount()
-{
-    Log::instance()->upnpav().debug("controller media object child count: " + Poco::NumberFormatter::format(childCount()));
-    
-    if (isContainer()) {
-//        return getChildCount();
-        return childCount();
-    }
-    return 0;
-}
-
-
 void
-CtlMediaObject::selectItem(int row)
+CtlMediaObject::setListWidget(Omm::Util::ListWidget* pWidget)
 {
-    Log::instance()->upnpav().debug("controller media object select item in row: " + Poco::NumberFormatter::format(row));
-
+    _pListWidget = pWidget;
 }
 
 
-bool
-CtlMediaObject::canFetchMore()
+Omm::Util::ListWidget*
+CtlMediaObject::getListWidget()
 {
-    return false;
+    return _pListWidget;
 }
 
 
-void
-CtlMediaObject::fetchMore(bool forward)
-{
-
-}
-
-
-int
-CtlMediaObject::lastFetched(bool forward)
-{
-
-    return (forward ? totalItemCount() : 0);
-}
+//int
+//CtlMediaObject::totalItemCount()
+//{
+//    Log::instance()->upnpav().debug("controller media object child count: " + Poco::NumberFormatter::format(childCount()));
+//
+//    if (isContainer()) {
+////        return getChildCount();
+//        return childCount();
+//    }
+//    return 0;
+//}
+//
+//
+//void
+//CtlMediaObject::selectItem(int row)
+//{
+//    Log::instance()->upnpav().debug("controller media object select item in row: " + Poco::NumberFormatter::format(row));
+//
+//}
+//
+//
+//bool
+//CtlMediaObject::canFetchMore()
+//{
+//    return false;
+//}
+//
+//
+//void
+//CtlMediaObject::fetchMore(bool forward)
+//{
+//
+//}
+//
+//
+//int
+//CtlMediaObject::lastFetched(bool forward)
+//{
+//
+//    return (forward ? totalItemCount() : 0);
+//}
 
 
 Resource*

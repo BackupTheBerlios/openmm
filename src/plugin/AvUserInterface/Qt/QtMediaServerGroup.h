@@ -47,7 +47,7 @@ public:
     // WidgetListModel interface
     virtual Omm::Util::ListWidget* createWidget();
     // FIXME: getWidget() can move into Omm::DeviceGroup (introduce Omm::Device::getDeviceWidget()).
-    virtual Omm::Util::ListWidget* getWidget(int row);
+    virtual Omm::Util::ListWidget* getChildWidget(int row);
     virtual void attachWidget(int row, Omm::Util::ListWidget* pWidget);
     virtual void detachWidget(int row);
 

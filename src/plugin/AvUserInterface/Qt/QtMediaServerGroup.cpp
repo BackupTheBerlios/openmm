@@ -82,11 +82,11 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
         Omm::Av::Log::instance()->upnpav().debug("Qt media server root object is container, creating container widget.");
         QtMediaObject* pRootWidget = new QtMediaObject;
         pRootWidget->_pObject = pRootObject;
-        pRootObject->setWidgetFactory(pRootWidget);
         pRootWidget->_pContainerView = new QtWidgetList;
         Omm::Av::Log::instance()->upnpav().debug("Qt media server pushing root container widget ...");
         _pNavigator->push(pRootWidget);
-        pRootWidget->_pContainerView->setModel(pRootObject);
+        pRootWidget->_pContainerView->setModel(pRootWidget);
+//        pRootWidget->_pContainerView->setModel(pRootObject);
     }
 }
 
@@ -99,7 +99,7 @@ QtMediaServerGroup::createWidget()
 
 
 Omm::Util::ListWidget*
-QtMediaServerGroup::getWidget(int row)
+QtMediaServerGroup::getChildWidget(int row)
 {
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));
     return pServer->getDeviceWidget();

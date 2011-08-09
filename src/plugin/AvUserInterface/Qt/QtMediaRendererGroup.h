@@ -40,7 +40,7 @@ public:
  
     // WidgetListModel interface
     virtual Omm::Util::ListWidget* createWidget();
-    virtual Omm::Util::ListWidget* getWidget(int row);
+    virtual Omm::Util::ListWidget* getChildWidget(int row);
     virtual void attachWidget(int row, Omm::Util::ListWidget* pWidget);
     virtual void detachWidget(int row);
 
