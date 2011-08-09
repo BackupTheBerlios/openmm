@@ -19,8 +19,10 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "QtMediaObject.h"
 #include <Omm/UpnpAvLogger.h>
+
+#include "QtMediaObject.h"
+#include "QtNavigator.h"
 
 
 QtMediaObject::QtMediaObject()
@@ -81,6 +83,31 @@ QtMediaObject::selectItem(int row)
 {
     Omm::Av::Log::Log::instance()->upnpav().debug("Qt media object select item in row: " + Poco::NumberFormatter::format(row));
 
+    if (!_pObject) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object cannot be selected (ignoring)");
+        return;
+    }
+
+    if (_pObject->isContainer()) {
+        if (!getNavigator()) {
+            Omm::Av::Log::instance()->upnpav().error("Qt media container cannot be pushed (ignoring)");
+            return;
+        }
+        Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+        if (!pChildObject) {
+            Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child object to push (ignoring)");
+            return;
+        }
+        QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(getWidget(row));
+        pChildWidget->_pObject = pChildObject;
+        if (!pChildWidget) {
+            Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child widget to push (ignoring)");
+            return;
+        }
+        pChildWidget->_pContainerView = new QtWidgetList;
+        getNavigator()->push(pChildWidget);
+        pChildWidget->_pContainerView->setModel(pChildWidget);
+    }
 }
 
 
@@ -134,12 +161,19 @@ void
 QtMediaObject::attachWidget(int row, Omm::Util::ListWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object attach widget row: " + Poco::NumberFormatter::format(row));
-
+    if (!pWidget) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object cannot attach null widget (ignoring)");
+        return;
+    }
     if (!_pObject) {
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to attach object widget (ignoring)");
         return;
     }
     Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+    if (!pChildObject) {
+        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get child object (ignoring)");
+        return;
+    }
     pChildObject->setListWidget(pWidget);
     QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pWidget);
     pChildWidget->_pObject = pChildObject;
