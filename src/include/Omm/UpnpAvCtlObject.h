@@ -52,7 +52,7 @@ public:
 
     void setServerController(CtlMediaServerCode* _pServer);
 
-    int fetchChildren();
+    int fetchChildren(ui4 count = 10);
     bool fetchedAllChildren();
     ui4 childCount();
     CtlMediaObject* parent();

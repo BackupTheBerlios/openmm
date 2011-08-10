@@ -150,7 +150,7 @@ CtlMediaObject::readNode(Poco::XML::Node* pNode)
 
 
 int
-CtlMediaObject::fetchChildren()
+CtlMediaObject::fetchChildren(ui4 count)
 {
     Log::instance()->upnpav().debug("controller media object fetch children of object: " + _objectId);
 
@@ -160,7 +160,7 @@ CtlMediaObject::fetchChildren()
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
         try {
-            _server->ContentDirectory()->Browse(_objectId, "BrowseDirectChildren", "*", _children.size(), 10, "", result, numberReturned, totalMatches, updateId);
+            _server->ContentDirectory()->Browse(_objectId, "BrowseDirectChildren", "*", _children.size(), count, "", result, numberReturned, totalMatches, updateId);
         }
         catch (Poco::Exception& e){
 //             error("");
