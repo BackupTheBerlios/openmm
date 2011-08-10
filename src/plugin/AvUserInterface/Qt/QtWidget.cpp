@@ -89,6 +89,9 @@ QtListWidget(pParent)
     _pLayout = new QHBoxLayout(this);
     _pNameLabel = new QLabel;
     _pLayout->addWidget(_pNameLabel);
+    _pLayout->setSpacing(0);
+    _pLayout->setMargin(0);
+    _pLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 

@@ -43,10 +43,10 @@ public:
     virtual void addCtlDeviceCode();
 
     CtlMediaObject* getRootObject() const;
+    void selectMediaObject(CtlMediaObject* pObject);
 
 protected:
     void browseRootObject();
-    void selectMediaObject(CtlMediaObject* pObject);
 
 private:    
     CtlMediaServerCode*   _pCtlMediaServerCode;

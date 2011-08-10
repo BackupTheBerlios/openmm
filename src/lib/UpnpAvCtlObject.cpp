@@ -64,7 +64,8 @@ CtlMediaObject::readChildren(const std::string& metaData)
             CtlMediaObject* pObject = new CtlMediaObject;
             pObject->readNode(pObjectNode);
             pObject->_parent = this;
-            pObject->_server = _server;
+            pObject->_pServer = _pServer;
+            pObject->_pServerCode = _pServerCode;
             _children.push_back(pObject);
         }
         pObjectNode = pObjectNode->nextSibling();
@@ -154,13 +155,13 @@ CtlMediaObject::fetchChildren(ui4 count)
 {
     Log::instance()->upnpav().debug("controller media object fetch children of object: " + _objectId);
 
-    if (_server && !_fetchedAllChildren) {
+    if (_pServerCode && !_fetchedAllChildren) {
         std::string result;
         Omm::ui4 numberReturned;
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
         try {
-            _server->ContentDirectory()->Browse(_objectId, "BrowseDirectChildren", "*", _children.size(), count, "", result, numberReturned, totalMatches, updateId);
+            _pServerCode->ContentDirectory()->Browse(_objectId, "BrowseDirectChildren", "*", _children.size(), count, "", result, numberReturned, totalMatches, updateId);
         }
         catch (Poco::Exception& e){
 //             error("");
@@ -313,10 +314,24 @@ CtlMediaObject::setFetchedAllChildren(bool fetchedAllChildren)
 }
 
 
-void
-CtlMediaObject::setServerController(CtlMediaServerCode* _pServer)
+CtlMediaServer*
+CtlMediaObject::getServer() const
 {
-    _server = _pServer;
+    return _pServer;
+}
+
+
+void
+CtlMediaObject::setServer(CtlMediaServer* pServer)
+{
+    _pServer = pServer;
+}
+
+
+void
+CtlMediaObject::setServerController(CtlMediaServerCode* pServerCode)
+{
+    _pServerCode = pServerCode;
 }
 
 

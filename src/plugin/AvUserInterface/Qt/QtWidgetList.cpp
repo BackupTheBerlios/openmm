@@ -27,7 +27,7 @@
 
 QtWidgetList::QtWidgetList(QWidget* pParent) :
 QScrollArea(pParent),
-WidgetListView(50, true),
+WidgetListView(32, true),
 _pScrollWidget(0)
 {
     _pScrollWidget = new QWidget;

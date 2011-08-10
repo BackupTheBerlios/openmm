@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include <Omm/UpnpAvLogger.h>
+#include <Omm/UpnpAvCtlServer.h>
 
 #include "QtMediaObject.h"
 #include "QtNavigator.h"
@@ -108,6 +109,9 @@ QtMediaObject::selectItem(int row)
         pChildWidget->_pContainerView = new QtWidgetList;
         getNavigator()->push(pChildWidget);
         pChildWidget->_pContainerView->setModel(pChildWidget);
+    }
+    else {
+        _pObject->getServer()->selectMediaObject(pChildObject);
     }
 }
 

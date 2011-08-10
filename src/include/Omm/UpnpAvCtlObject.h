@@ -34,6 +34,7 @@
 namespace Omm {
 namespace Av {
 
+class CtlMediaServer;
 class CtlMediaServerCode;
 class MediaItemNotification;
 
@@ -50,7 +51,9 @@ class CtlMediaObject : public MediaObject //, public Util::WidgetListModel
 public:
     CtlMediaObject();
 
-    void setServerController(CtlMediaServerCode* _pServer);
+    CtlMediaServer* getServer() const;
+    void setServer(CtlMediaServer* pServer);
+    void setServerController(CtlMediaServerCode* pServerCode);
 
     int fetchChildren(ui4 count = 10);
     bool fetchedAllChildren();
@@ -85,7 +88,8 @@ private:
 
     unsigned int                     _childCount;
     bool                             _fetchedAllChildren;
-    CtlMediaServerCode*              _server;
+    CtlMediaServer*                  _pServer;
+    CtlMediaServerCode*              _pServerCode;
     Omm::Util::ListWidget*           _pListWidget;
 };
 

@@ -68,6 +68,7 @@ CtlMediaServer::browseRootObject()
         _pRoot->setObjectId("0");
         _pRoot->setIsContainer(true);
     }
+    _pRoot->setServer(this);
     _pRoot->setServerController(_pCtlMediaServerCode);
     _pRoot->setFetchedAllChildren(false);
     Log::instance()->upnpav().debug("browse root object finished.");
