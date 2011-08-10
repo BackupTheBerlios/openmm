@@ -88,10 +88,19 @@ QtListWidget(pParent)
 {
     _pLayout = new QHBoxLayout(this);
     _pNameLabel = new QLabel;
+//    _pNameLabel->setBackgroundRole(QPalette::Shadow);
     _pLayout->addWidget(_pNameLabel);
     _pLayout->setSpacing(0);
     _pLayout->setMargin(0);
     _pLayout->setContentsMargins(0, 0, 0, 0);
+//    QWidget::setBackgroundColor(QColor::fromRgb(255, 255, 255, 255));
+//    QWidget::setBackgroundRole(QPalette::Highlight);
+//    QWidget::setBackgroundRole(QPalette::NoRole);
+//    QWidget::setBackgroundRole(QPalette::Light);
+//    QWidget::setBackgroundRole(QPalette::Shadow);
+//    QWidget::setBackgroundRole(QPalette(QColor("white")));
+    QWidget::setPalette( QPalette( Qt::white ) );
+    QWidget::setAutoFillBackground( true );
 }
 
 
