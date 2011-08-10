@@ -312,6 +312,7 @@ protected:
     virtual int visibleRows() { return 0; }
     virtual void initWidget(ListWidget* pWidget) {}
     virtual void moveWidget(int row, ListWidget* pWidget) {}
+    void resize(int rows);
 
     // non-lazy views only
     virtual void extendWidgetPool() {}

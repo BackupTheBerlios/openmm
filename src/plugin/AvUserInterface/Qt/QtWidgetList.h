@@ -51,6 +51,8 @@ private slots:
     void viewScrolledSlot(int value);
 
 private:
+    virtual void resizeEvent(QResizeEvent* event);
+
     QWidget*                 _pScrollWidget;
 };
 

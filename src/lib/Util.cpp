@@ -271,6 +271,25 @@ WidgetListView::setModel(WidgetListModel* pModel)
 }
 
 
+void
+WidgetListView::resize(int rows)
+{
+    int rowDelta = rows - widgetPoolSize();
+    Log::instance()->util().debug("widget list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+    if (rowDelta > 0) {
+        extendWidgetPool(rowDelta);
+        for (int i = 0; i < rowDelta; i++) {
+            ListWidget* pWidget = _freeWidgets.top();
+            _freeWidgets.pop();
+            int lastRow = _rowOffset + _visibleWidgets.size();
+            moveWidgetToRow(lastRow, pWidget);
+            _pModel->attachWidget(lastRow, pWidget);
+            _visibleWidgets.push_back(pWidget);
+        }
+    }
+}
+
+
 int
 WidgetListView::widgetPoolSize()
 {

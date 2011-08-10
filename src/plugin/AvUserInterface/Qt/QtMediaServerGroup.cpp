@@ -86,7 +86,6 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
         Omm::Av::Log::instance()->upnpav().debug("Qt media server pushing root container widget ...");
         _pNavigator->push(pRootWidget);
         pRootWidget->_pContainerView->setModel(pRootWidget);
-//        pRootWidget->_pContainerView->setModel(pRootObject);
     }
 }
 

@@ -98,6 +98,17 @@ QtWidgetList::viewScrolledSlot(int value)
 }
 
 
+void
+QtWidgetList::resizeEvent(QResizeEvent* pEvent)
+{
+    int rows = pEvent->size().height() / _widgetHeight;
+    Omm::Av::Log::instance()->upnpav().debug("Qt widget list resize: " + Poco::NumberFormatter::format(rows));
+    if (pEvent->oldSize().height() > 0) {
+        WidgetListView::resize(rows);
+    }
+}
+
+
 QtWidgetCanvas::QtWidgetCanvas(bool movableWidgets, QWidget* pParent) :
 QGraphicsView(pParent),
 WidgetListView(50, false),
