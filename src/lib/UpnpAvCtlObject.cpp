@@ -152,8 +152,8 @@ CtlMediaObject::readNode(Poco::XML::Node* pNode)
 int
 CtlMediaObject::fetchChildren()
 {
-    // TODO: browse meta data for the root object with id "0"
-//     std::clog << "MediaObject::fetchChildren() objectId: " << _objectId << std::endl;
+    Log::instance()->upnpav().debug("controller media object fetch children of object: " + _objectId);
+
     if (_server && !_fetchedAllChildren) {
         std::string result;
         Omm::ui4 numberReturned;
@@ -234,6 +234,8 @@ CtlMediaObject::getImageRepresentation()
 void
 CtlMediaObject::setListWidget(Omm::Util::ListWidget* pWidget)
 {
+    Log::instance()->upnpav().debug("controller media object set list widget");
+
     _pListWidget = pWidget;
 }
 

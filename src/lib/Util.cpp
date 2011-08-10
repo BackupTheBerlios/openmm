@@ -262,6 +262,7 @@ WidgetListView::setModel(WidgetListModel* pModel)
     extendWidgetPool(rows);
 
     // insert items that are already in the model.
+    Log::instance()->util().debug("inserting number of items: " + Poco::NumberFormatter::format(_pModel->totalItemCount()));
     for (int i = 0; i < _pModel->totalItemCount(); i++) {
 //        _pModel->insertItem(i);
         insertItem(i);
