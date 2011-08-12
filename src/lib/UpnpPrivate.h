@@ -82,21 +82,24 @@ private:
     void deinit();
     void setupSockets();
     void resetSockets();
-    void setMulticast();
-    void setBroadcast();
+    void setMode(SocketMode mode = NotConfigured);
 
     void onReadable(Poco::Net::ReadableNotification* pNotification);
 
     SocketMode                      _mode;
     Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
     Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
+    Poco::Net::MulticastSocket*     _pSsdpLocalListenerSocket;
+    Poco::Net::MulticastSocket*     _pSsdpLocalSenderSocket;
     char*                           _pBuffer;
 
     static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
                  // Note that each SSDP message must fit into one UDP Packet.
 
-    Poco::Net::SocketReactor                        _reactor;
-    Poco::Thread                                    _listenerThread;
+    Poco::Net::SocketReactor                        _multicastReactor;
+    Poco::Net::SocketReactor                        _broadcastReactor;
+    Poco::Thread                                    _multicastListenerThread;
+    Poco::Thread                                    _broadcastListenerThread;
     Poco::NotificationCenter                        _notificationCenter;
 };
 
