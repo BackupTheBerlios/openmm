@@ -353,7 +353,9 @@ WidgetListView::scrolledToRow(int rowOffset)
     if (rowDelta == 0) {
         return;
     }
-
+    if (rowOffset + _visibleWidgets.size() > _pModel->totalItemCount()) {
+        return;
+    }
     int rowDeltaAbsolute = std::abs(rowDelta);
     Log::instance()->util().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {

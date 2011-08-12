@@ -99,8 +99,8 @@ QtListWidget(pParent)
 //    QWidget::setBackgroundRole(QPalette::Light);
 //    QWidget::setBackgroundRole(QPalette::Shadow);
 //    QWidget::setBackgroundRole(QPalette(QColor("white")));
-    QWidget::setPalette( QPalette( Qt::white ) );
-    QWidget::setAutoFillBackground( true );
+    QWidget::setPalette(QPalette(Qt::white));
+    QWidget::setAutoFillBackground(true);
 }
 
 
