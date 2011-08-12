@@ -176,7 +176,7 @@ QtStdMediaServer::icon(const QModelIndex &index) const
     if (pObject == 0) {
         return QIcon();
     }
-    std::string objectClass = pObject->getProperty(Omm::Av::AvProperty::CLASS);
+    std::string objectClass = pObject->getProperty(Omm::Av::AvProperty::CLASS)->getValue();
     if (pObject->isContainer()) {
         return _iconProvider->icon(QFileIconProvider::Folder);
     }
@@ -329,19 +329,25 @@ QtStdMediaServer::parent(const QModelIndex &index) const
     if (!pObject) {
         return QModelIndex();
     }
-    Omm::Av::MediaObject* pParentObject = pObject->parent();
+    Omm::Av::CtlMediaObject2* pParentObject = static_cast<Omm::Av::CtlMediaObject2*>(pObject->getParent());
     if (!pParentObject) {
         return QModelIndex();
     }
-    Omm::Av::CtlMediaObject2* pGrandParentObject = pObject->parent()->parent();
+    Omm::Av::CtlMediaObject2* pGrandParentObject = static_cast<Omm::Av::CtlMediaObject2*>(pParentObject->getParent());
     if (!pGrandParentObject) {
         return createIndex(0, 0, getRootObject());
     }
-    Omm::Av::CtlMediaObject2::ChildIterator row;
-    row = find(pGrandParentObject->beginChildren(), pGrandParentObject->endChildren(), pObject->parent());
-    if (row != pGrandParentObject->endChildren()) {
-        return createIndex(row - pGrandParentObject->beginChildren(), 0, pObject->parent());
+    std::string parentObjectId = pParentObject->getObjectId();
+    // FIXME: determine row of parent as a grand parent's child in new media object implementation.
+    Omm::ui4 parentRow = 0;
+    if (pGrandParentObject->getChild(parentObjectId)) {
+        return createIndex(parentRow, 0, pParentObject);
     }
+//    Omm::Av::CtlMediaObject2::ChildIterator row;
+//    row = find(pGrandParentObject->beginChildren(), pGrandParentObject->endChildren(), pObject->getParent());
+//    if (row != pGrandParentObject->endChildren()) {
+//        return createIndex(row - pGrandParentObject->beginChildren(), 0, pObject->getParent());
+//    }
     return QModelIndex();
 }
 
@@ -362,7 +368,7 @@ QtStdMediaServer::index(int row, int column, const QModelIndex &parent) const
 
     // if we can't deliver an index, because _children.size()-1 < row
     // then fetchMore() is triggered -> return QModelIndex()
-    if (row > int(pParentObject->childCount()) - 1) {
+    if (row > int(pParentObject->getChildCount()) - 1) {
         return QModelIndex();
     }
     return createIndex(row, column, pParentObject->getChild(row));

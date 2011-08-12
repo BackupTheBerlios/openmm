@@ -900,6 +900,13 @@ MemoryMediaObject::isContainer()
 
 
 AbstractMediaObject*
+MemoryMediaObject::getChild(const std::string& objectId)
+{
+    return AbstractMediaObject::getChild(objectId);
+}
+
+
+AbstractMediaObject*
 MemoryMediaObject::getChild(ui4 numChild)
 {
 //    Log::instance()->upnpav().debug("MemoryMediaObject::getChild() number: " + Poco::NumberFormatter::format(numChild));

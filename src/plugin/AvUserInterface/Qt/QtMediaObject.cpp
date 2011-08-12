@@ -71,9 +71,11 @@ QtMediaObject::totalItemCount()
         return 0;
     }
     if (_pObject->isContainer()) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->childCount()));
+//        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
+        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getTotalChildCount()));
 //        return getChildCount();
-        return _pObject->childCount();
+//        return _pObject->getChildCount();
+        return _pObject->getTotalChildCount();
     }
     return 0;
 }

@@ -380,6 +380,7 @@ public:
                                                                                 // controller object, browse
     virtual bool isContainer();                                                 // server object, write meta data
                                                                                 // controller object, browse
+    AbstractMediaObject* getChild(const std::string& objectId);                 // calls base class getChild(), needed to make method signature visible in this class
     virtual AbstractMediaObject* getChild(ui4 numChild);                        // server object, write meta data
                                                                                 // controller object, browse
     virtual bool isRestricted();                                                // server object, write meta data

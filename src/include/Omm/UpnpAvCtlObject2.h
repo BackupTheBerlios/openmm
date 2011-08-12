@@ -39,7 +39,7 @@ class CtlMediaServerCode;
 class MediaItemNotification;
 
 
-class CtlMediaObject2 : public MediaObject //, public Util::WidgetListModel
+class CtlMediaObject2 : public MemoryMediaObject //, public Util::WidgetListModel
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;
@@ -57,10 +57,10 @@ public:
 
     int fetchChildren(ui4 count = 10);
     bool fetchedAllChildren();
-    ui4 childCount();
-    CtlMediaObject2* parent();
+//    ui4 childCount();
+//    CtlMediaObject2* parent();
 
-    std::string getProperty(const std::string& name);
+//    std::string getProperty(const std::string& name);
 
     Icon* getIcon();
     Icon* getImageRepresentation();
@@ -78,8 +78,8 @@ public:
 //    virtual int lastFetched(bool forward = true);
 
 private:
-    Resource* getResource(int num = 0);
-    virtual void addResource(Resource* pResource);
+//    AbstractResource* getResource(int num = 0);
+//    virtual void addResource(Resource* pResource);
     void setFetchedAllChildren(bool fetchedAllChildren);
 
     void readChildren(const std::string& metaData);

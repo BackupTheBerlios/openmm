@@ -60,12 +60,14 @@ CtlMediaServer::browseRootObject()
         ui4 totalMatches;
         ui4 updateId;
         _pCtlMediaServerCode->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
-        _pRoot->readMetaData(rootMeta);
-        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS));
+        MediaObjectReader reader(_pRoot);
+        reader.read(rootMeta);
+        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS)->getValue());
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().error("controller could not fetch root object, setting default replacement object: " + e.displayText());
-        _pRoot->setObjectId("0");
+//        _pRoot->setObjectId("0");
+        _pRoot->setObjectNumber("0");
         _pRoot->setIsContainer(true);
     }
     _pRoot->setServer(this);
