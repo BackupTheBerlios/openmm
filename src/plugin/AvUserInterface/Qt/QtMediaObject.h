@@ -22,7 +22,7 @@
 #ifndef QtMediaObject_INCLUDED
 #define QtMediaObject_INCLUDED
 
-#include <Omm/UpnpAvCtlObject.h>
+#include <Omm/UpnpAvCtlObject2.h>
 #include <Omm/Util.h>
 
 #include "QtWidget.h"
@@ -66,7 +66,7 @@ public slots:
     virtual void unconfigure();
 
 private:
-    Omm::Av::CtlMediaObject*    _pObject;
+    Omm::Av::CtlMediaObject2*    _pObject;
     QtWidgetList*               _pContainerView;
 };
 

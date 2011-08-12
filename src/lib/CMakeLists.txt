@@ -90,6 +90,7 @@ UpnpAvCtlDevices.cpp
 UpnpAvCtlRenderer.cpp
 UpnpAvCtlServer.cpp
 UpnpAvCtlObject.cpp
+UpnpAvCtlObject2.cpp
 UpnpAvCtlImpl.cpp
 UpnpAvDevices.cpp
 UpnpAvRenderer.cpp

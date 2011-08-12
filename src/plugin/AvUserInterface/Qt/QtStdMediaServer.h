@@ -26,7 +26,7 @@
 
 #include <Omm/UpnpAvController.h>
 #include <Omm/UpnpAvCtlServer.h>
-#include <Omm/UpnpAvCtlObject.h>
+#include <Omm/UpnpAvCtlObject2.h>
 
 #include "QtNavigable.h"
 
@@ -63,7 +63,7 @@ public:
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
     
-    Omm::Av::CtlMediaObject* getObject(const QModelIndex &index) const;
+    Omm::Av::CtlMediaObject2* getObject(const QModelIndex &index) const;
 
     QIcon icon(const QModelIndex &index) const;
 
@@ -73,7 +73,7 @@ private slots:
 private:
     virtual void initController();
     virtual void selected();
-    void selectedMediaObject(Omm::Av::CtlMediaObject* pObject);
+    void selectedMediaObject(Omm::Av::CtlMediaObject2* pObject);
 
     QtStdMediaServerWidget*            _pMediaServerWidget;
     QtStdMediaContainerItem*           _pMediaContainerItem;

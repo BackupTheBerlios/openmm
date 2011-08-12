@@ -42,7 +42,7 @@ CtlMediaServer::addCtlDeviceCode()
 }
 
 
-CtlMediaObject*
+CtlMediaObject2*
 CtlMediaServer::getRootObject() const
 {
     return _pRoot;
@@ -53,7 +53,7 @@ void
 CtlMediaServer::browseRootObject()
 {
     Log::instance()->upnpav().debug("browse root object ...");
-    _pRoot = new CtlMediaObject;
+    _pRoot = new CtlMediaObject2;
     try {
         std::string rootMeta;
         ui4 numberReturned;
@@ -76,14 +76,14 @@ CtlMediaServer::browseRootObject()
 
 
 void
-CtlMediaServer::selectMediaObject(CtlMediaObject* pObject)
+CtlMediaServer::selectMediaObject(CtlMediaObject2* pObject)
 {
     Log::instance()->upnpav().debug("media server object selected: " + pObject->getTitle());
 
     if (pObject->isContainer()) {
     }
     else {
-        MediaItemNotification* pNotification = new MediaItemNotification(pObject);
+        MediaItemNotification2* pNotification = new MediaItemNotification2(pObject);
         getDeviceContainer()->getDeviceManager()->postDeviceNotification(pNotification);
     }
 }

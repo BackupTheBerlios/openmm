@@ -89,7 +89,7 @@ QtMediaObject::selectItem(int row)
         return;
     }
 
-    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+    Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChild(row));
     if (!pChildObject) {
         Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child object (ignoring)");
         return;
@@ -153,7 +153,7 @@ QtMediaObject::getWidget(int row)
     Omm::Av::Log::instance()->upnpav().debug("Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
 
     if (_pObject) {
-        Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+        Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChild(row));
         return pChildObject->getListWidget();
     }
     else {
@@ -174,7 +174,7 @@ QtMediaObject::attachWidget(int row, Omm::Util::ListWidget* pWidget)
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to attach object widget (ignoring)");
         return;
     }
-    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+    Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChild(row));
     if (!pChildObject) {
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get child object (ignoring)");
         return;
@@ -202,7 +202,7 @@ QtMediaObject::detachWidget(int row)
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to detach object widget (ignoring)");
         return;
     }
-    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChild(row));
+    Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChild(row));
     QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pChildObject->getListWidget());
 
     emit pChildWidget->hideWidgetSignal();
