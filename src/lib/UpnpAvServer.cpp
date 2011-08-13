@@ -504,7 +504,7 @@ TorchServer::setDataModel(AbstractDataModel* pDataModel)
 
 
 AbstractMediaObject*
-TorchServer::getChildFromIndex(ui4 numChild)
+TorchServer::getChildForIndex(ui4 numChild)
 {
     _pChild->setIndex(numChild);
     TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);

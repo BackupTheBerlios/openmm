@@ -165,7 +165,7 @@ CtlMediaObject2::fetchChildren(ui4 count)
 {
     std::string objectId = getId();
     ui4 lastFetchedChild = getChildCount();
-    Log::instance()->upnpav().debug("controller media object fetch children of object: " + objectId
+    Log::instance()->upnpav().debug("controller media object fetch children of object with id: " + objectId
                                     + ", number of requested children: " + Poco::NumberFormatter::format(count)
                                     + ", child offset: " + Poco::NumberFormatter::format(lastFetchedChild));
 
@@ -351,6 +351,20 @@ void
 CtlMediaObject2::setServerController(CtlMediaServerCode* pServerCode)
 {
     _pServerCode = pServerCode;
+}
+
+
+std::string
+CtlMediaObject2::getId()
+{
+    return _id;
+}
+
+
+void
+CtlMediaObject2::setId(const std::string& id)
+{
+    _id = id;
 }
 
 

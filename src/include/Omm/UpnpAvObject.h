@@ -281,7 +281,6 @@ public:
     virtual AbstractResource* createResource() { return 0; }
 
     // id and index
-    void setParent(AbstractMediaObject* pParent);
     virtual std::string getId();                                                                // server object, write meta data
     virtual void setId(const std::string& id) {}
     std::string getParentId();                                                                  // server object, write meta data
@@ -310,6 +309,7 @@ public:
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
 
     // descendants
+    void setParent(AbstractMediaObject* pParent);
     void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
     virtual void appendChildImpl(AbstractMediaObject* pChild) {}
     virtual bool isContainer() { return false; }                                                // server object, write meta data
@@ -318,9 +318,9 @@ public:
     virtual ui4 getTotalChildCount();
     virtual void setTotalChildCount(ui4 childCount) {}                                          // controller object, read from xml into memory
     AbstractMediaObject* getDescendant(const std::string& objectId);                            // server object, cds browse
-    virtual AbstractMediaObject* getChildFromIndex(const std::string& index);
-    virtual AbstractMediaObject* getChildFromIndex(ui4 numChild) { return 0; }                  // server object, write meta data
-    virtual AbstractMediaObject* getChildFromRow(ui4 row) { return 0; }                         // server object, write meta data
+    virtual AbstractMediaObject* getChildForIndex(const std::string& index);
+    virtual AbstractMediaObject* getChildForIndex(ui4 numChild) { return 0; }                  // server object, write meta data
+    virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                         // server object, write meta data
     // TODO: next two methods are only for a special form of lazy browsing
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
@@ -380,7 +380,7 @@ public:
     virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
     virtual ui4 getTotalChildCount();
     virtual void setTotalChildCount(ui4 childCount);                            // controller object, read from xml into memory
-    virtual AbstractMediaObject* getChildFromRow(ui4 row);                      // server object, write meta data
+    virtual AbstractMediaObject* getChildForRow(ui4 row);                      // server object, write meta data
     
 private:
     typedef std::multimap<std::string,AbstractProperty*>::iterator      PropertyIterator;

@@ -55,6 +55,9 @@ public:
     void setServer(CtlMediaServer* pServer);
     void setServerController(CtlMediaServerCode* pServerCode);
 
+    virtual std::string getId();
+    virtual void setId(const std::string& id);
+
     int fetchChildren(ui4 count = 10);
 //    bool fetchedAllChildren();
 //    ui4 childCount();

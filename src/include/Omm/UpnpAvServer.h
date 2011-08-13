@@ -238,7 +238,7 @@ protected:
     AbstractDataModel*          _pDataModel;
     
 private:
-    virtual AbstractMediaObject* getChildFromIndex(ui4 numChild);
+    virtual AbstractMediaObject* getChildForIndex(ui4 numChild);
     virtual ui4 getChildCount();
     virtual bool isContainer();
     virtual int getPropertyCount(const std::string& name = "");
