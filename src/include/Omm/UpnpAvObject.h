@@ -308,7 +308,7 @@ public:
     void addResource(AbstractResource* pResource);                                              // controller object, read from xml into memory
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
 
-    // descendants and parent
+    // parent and descendants
     void setParent(AbstractMediaObject* pParent);
     void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
     virtual bool isContainer() { return false; }                                                // server object, write meta data

@@ -41,7 +41,10 @@ _pListWidget(0)
 AbstractMediaObject*
 CtlMediaObject2::createChildObject()
 {
-    return new CtlMediaObject2;
+    CtlMediaObject2* pChildObject = new CtlMediaObject2;
+    pChildObject->_pServer = _pServer;
+    pChildObject->_pServerCode = _pServerCode;
+    return pChildObject;
 }
 
 
@@ -54,8 +57,9 @@ CtlMediaObject2::fetchChildren(ui4 count)
                                     + ", number of requested children: " + Poco::NumberFormatter::format(count)
                                     + ", child offset: " + Poco::NumberFormatter::format(lastFetchedChild));
 
-    Omm::ui4 numberReturned;
-    if (_pServerCode && !fetchedAllChildren()) {
+    Omm::ui4 numberReturned = 0;
+//    if (_pServerCode && !fetchedAllChildren()) {
+    if (_pServerCode) {
         std::string result;
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
@@ -71,6 +75,9 @@ CtlMediaObject2::fetchChildren(ui4 count)
         setTotalChildCount(totalMatches);
         MediaObjectReader reader(this);
         reader.readChildren(result);
+    }
+    else {
+        Log::instance()->upnpav().error("controller media object fetch children failed");
     }
     return numberReturned;
 }

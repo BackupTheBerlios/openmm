@@ -802,14 +802,7 @@ MemoryMediaObject::~MemoryMediaObject()
 AbstractMediaObject*
 MemoryMediaObject::createChildObject()
 {
-//    Log::instance()->upnpav().debug("MemoryMediaObject::createObject()");
-
     return new MemoryMediaObject;
-
-//    AbstractMediaObject* pChild = new MemoryMediaObject;
-//    pChild->setIndex(Poco::NumberFormatter::format(getChildCount()));
-//    appendChild(pChild);
-//    return pChild;
 }
 
 
@@ -828,35 +821,10 @@ MemoryMediaObject::createResource()
 //    Log::instance()->upnpav().debug("MemoryMediaObject::createResource()");
     
     AbstractResource* pResource = new MemoryResource;
+    // FIXME: createResouce() should only create a resource and not add it.
     addResource(pResource);
     return pResource;
 }
-
-
-// void
-// MemoryMediaObject::setObjectId(const std::string& id)
-// {
-//     Log::instance()->upnpav().debug("MemoryMediaObject::setObjectId() objectId" + objectId);
-//     
-//     _id = objectId;
-// }
-
-// void
-// MemoryMediaObject::setObjectId(ui4 id)
-// {
-//     Log::instance()->upnpav().debug("MemoryMediaObject::setObjectId() objectId: " + Poco::NumberFormatter::format(id));
-//     
-//     _id = id;
-// }
-
-
-// void
-// MemoryMediaObject::setParent(AbstractMediaObject* pParent)
-// {
-//     Log::instance()->upnpav().debug("MemoryMediaObject::setParent()");
-//     
-//     _parent = pParent;
-// }
 
 
 void
