@@ -280,6 +280,9 @@ WidgetListView::resize(int rows)
     int rowDelta = rows - widgetPoolSize();
     Log::instance()->util().debug("widget list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDelta > 0) {
+        if (_rowOffset + _visibleWidgets.size() + rowDelta >= _pModel->lastFetched()) {
+            _pModel->fetch(_visibleWidgets.size() + rowDelta);
+        }
         extendWidgetPool(rowDelta);
         for (int i = 0; i < rowDelta; i++) {
             ListWidget* pWidget = _freeWidgets.top();

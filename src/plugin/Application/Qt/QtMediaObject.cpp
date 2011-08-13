@@ -101,7 +101,6 @@ QtMediaObject::selectItem(int row)
             Omm::Av::Log::instance()->upnpav().error("Qt child container of media object cannot be pushed (ignoring)");
             return;
         }
-//        pChildObject->fetchChildren(pChildObject->getTotalChildCount());
         QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(getWidget(row));
         if (!pChildWidget) {
             Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child widget to push (ignoring)");
