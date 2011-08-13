@@ -48,6 +48,8 @@ QtStdMediaContainerItem::paint(QPainter* painter, const QStyleOptionViewItem& op
     iconRect.setWidth(option.rect.height());
     QRect textRect(option.rect);
     textRect.setLeft(iconRect.right() + padding);
+    QRect textRect2(option.rect);
+    textRect2.setLeft(textRect.right() + padding);
 
 //    Omm::Av::Log::instance()->upnpav().debug(
 //        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
@@ -293,8 +295,6 @@ QtStdMediaServer::fetchMore(const QModelIndex &parent)
 QVariant
 QtStdMediaServer::data(const QModelIndex &index, int role) const
 {
-//    Omm::Av::Log::instance()->upnpav().debug("media server model data");
-
     if (!index.isValid()) {
         return QVariant();
     }
@@ -303,30 +303,21 @@ QtStdMediaServer::data(const QModelIndex &index, int role) const
         return QVariant();
     }
      Omm::Av::CtlMediaObject2* pObject = getObject(index);
-//    std::string artist = object->getProperty(Omm::Av::AvProperty::ARTIST);
-//    std::string album = object->getProperty(Omm::Av::AvProperty::ALBUM);
-//    bool titleOnly = (artist == "");
 
-    switch (role) {
-    case Qt::DisplayRole:
-    case Qt::EditRole:
-//        if (titleOnly) {
-//            return QString::fromStdString(object->getTitle());
+    if (role == Qt::DisplayRole) {
+        Omm::Av::AbstractProperty* pArtist = pObject->getProperty(Omm::Av::AvProperty::ARTIST);
+//        std::string album = pObject->getProperty(Omm::Av::AvProperty::ALBUM)->getValue();
+        if (!pArtist) {
             return _pCharEncoding->toUnicode(pObject->getTitle().c_str());
-//        }
-//        else {
-//            return _charEncoding->toUnicode(artist.c_str());
-//        }
-//        break;
-    case Qt::DecorationRole:
+        }
+        else {
+            return _pCharEncoding->toUnicode((pArtist->getValue() + " - " + pObject->getTitle()).c_str());
+        }
+    }
+    else if (role == Qt::DecorationRole) {
         if (index.column() == 0) {
             return icon(index);
         }
-//     case Qt::TextAlignmentRole:
-//         if (index.column() == 1) {
-//             return Qt::AlignRight;
-//         }
-//         return QVariant();
     }
 
     return QVariant();
