@@ -31,8 +31,8 @@ namespace Av {
 
 
 CtlMediaObject2::CtlMediaObject2() :
-_childCount(0),
-_fetchedAllChildren(false),
+//_childCount(0),
+//_fetchedAllChildren(false),
 _pListWidget(0)
 {
 }
@@ -46,130 +46,132 @@ _pListWidget(0)
 //}
 
 
-void
-CtlMediaObject2::readChildren(const std::string& metaData)
-{
-    Poco::XML::DOMParser parser;
-#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
-    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
-#else
-    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
-#endif
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
-    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
-    while (pObjectNode)
-    {
-        if (pObjectNode->hasChildNodes()) {
-            CtlMediaObject2* pObject = new CtlMediaObject2;
-            pObject->readNode(pObjectNode);
-            pObject->setParent(this);
-            pObject->_pServer = _pServer;
-            pObject->_pServerCode = _pServerCode;
-            appendChild(pObject);
-        }
-        pObjectNode = pObjectNode->nextSibling();
-    }
-}
-
-
-void
-CtlMediaObject2::readMetaData(const std::string& metaData)
-{
-    Poco::XML::DOMParser parser;
-#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
-    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
-#else
-    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
-#endif
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
-    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
-    readNode(pObjectNode);
-}
-
-
-void
-CtlMediaObject2::readNode(Poco::XML::Node* pNode)
-{
-    Log::instance()->upnpav().debug("controller media object read node ...");
-    
-    Poco::XML::NamedNodeMap* attr = 0;
-    if (pNode->hasAttributes()) {
-        attr = pNode->attributes();
-//        _objectId = attr->getNamedItem("id")->nodeValue();
-        //FIXME: new media object implementation stores id as number, which only holds for OMM implementation.
-        setObjectNumber(attr->getNamedItem("id")->nodeValue());
-//         _parentId = attr->getNamedItem("parentID")->nodeValue();
-
-    }
-    if (pNode->nodeName() == AvClass::CONTAINER) {
-        setIsContainer(true);
-        if (attr != 0) {
-            _childCount = Poco::NumberParser::parse(attr->getNamedItem(AvProperty::CHILD_COUNT)->nodeValue());
-        }
-    }
-    if (attr != 0) {
-        attr->release();
-    }
-
-//     std::clog << "isContainer: " << (_isContainer ? "1" : "0") << std::endl;
-//     std::clog << "id: " << _objectId << std::endl;
-// //     std::clog << "parentId: " << _parentId << std::endl;
-//     std::clog << "childCount: " << _childCount << std::endl;
-
-    if (pNode->hasChildNodes()) {
-        Poco::XML::Node* childNode = pNode->firstChild();
-        while (childNode)
-        {
-//             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
-
-            if (childNode->nodeName() == AvProperty::RES) {
-                Poco::XML::NamedNodeMap* attr = 0;
-                std::string protInfo = "";
-                ui4 size = 0;
-                if (childNode->hasAttributes()) {
-                    attr = childNode->attributes();
-                    Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
-                    if (attrNode) {
-                        protInfo = attrNode->nodeValue();
-                    }
-                    attrNode = attr->getNamedItem(AvProperty::SIZE);
-                    if (attrNode) {
-                        size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
-                    }
-                }
-                MemoryResource* pResource = new MemoryResource;
-                pResource->setUri(childNode->innerText());
-                pResource->setProtInfo(protInfo);
-                pResource->setSize(size);
-                addResource(pResource);
-//                 addResource(childNode->innerText(), protInfo, size);
-                if (attr != 0) {
-                    attr->release();
-                }
-            }
-            else {
-//                 _properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
-                MemoryProperty* pProperty = new MemoryProperty;
-                pProperty->setAttribute(childNode->nodeName(), childNode->innerText());
-//                addProperty(new MemoryProperty([childNode->nodeName()] =  childNode->innerText()));
-            }
-            childNode = childNode->nextSibling();
-        }
-    }
-    Log::instance()->upnpav().debug("controller media object read node finished.");
-}
+//void
+//CtlMediaObject2::readChildren(const std::string& metaData)
+//{
+//    Poco::XML::DOMParser parser;
+//#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
+//    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+//#else
+//    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+//#endif
+//    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
+//    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
+//    while (pObjectNode)
+//    {
+//        if (pObjectNode->hasChildNodes()) {
+//            CtlMediaObject2* pObject = new CtlMediaObject2;
+//            pObject->readNode(pObjectNode);
+//            pObject->setParent(this);
+//            pObject->_pServer = _pServer;
+//            pObject->_pServerCode = _pServerCode;
+//            appendChild(pObject);
+//        }
+//        pObjectNode = pObjectNode->nextSibling();
+//    }
+//}
+//
+//
+//void
+//CtlMediaObject2::readMetaData(const std::string& metaData)
+//{
+//    Poco::XML::DOMParser parser;
+//#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
+//    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+//#else
+//    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+//#endif
+//    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
+//    Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
+//    readNode(pObjectNode);
+//}
+//
+//
+//void
+//CtlMediaObject2::readNode(Poco::XML::Node* pNode)
+//{
+//    Log::instance()->upnpav().debug("controller media object read node ...");
+//
+//    Poco::XML::NamedNodeMap* attr = 0;
+//    if (pNode->hasAttributes()) {
+//        attr = pNode->attributes();
+////        _objectId = attr->getNamedItem("id")->nodeValue();
+//        //FIXME: new media object implementation stores id as number, which only holds for OMM implementation.
+//        setObjectNumber(attr->getNamedItem("id")->nodeValue());
+////         _parentId = attr->getNamedItem("parentID")->nodeValue();
+//
+//    }
+//    if (pNode->nodeName() == AvClass::CONTAINER) {
+//        setIsContainer(true);
+//        if (attr != 0) {
+//            _childCount = Poco::NumberParser::parse(attr->getNamedItem(AvProperty::CHILD_COUNT)->nodeValue());
+//        }
+//    }
+//    if (attr != 0) {
+//        attr->release();
+//    }
+//
+////     std::clog << "isContainer: " << (_isContainer ? "1" : "0") << std::endl;
+////     std::clog << "id: " << _objectId << std::endl;
+//// //     std::clog << "parentId: " << _parentId << std::endl;
+////     std::clog << "childCount: " << _childCount << std::endl;
+//
+//    if (pNode->hasChildNodes()) {
+//        Poco::XML::Node* childNode = pNode->firstChild();
+//        while (childNode)
+//        {
+////             std::clog << childNode->nodeName() << ": " << childNode->innerText() << std::endl;
+//
+//            if (childNode->nodeName() == AvProperty::RES) {
+//                Poco::XML::NamedNodeMap* attr = 0;
+//                std::string protInfo = "";
+//                ui4 size = 0;
+//                if (childNode->hasAttributes()) {
+//                    attr = childNode->attributes();
+//                    Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
+//                    if (attrNode) {
+//                        protInfo = attrNode->nodeValue();
+//                    }
+//                    attrNode = attr->getNamedItem(AvProperty::SIZE);
+//                    if (attrNode) {
+//                        size = Poco::NumberParser::parseUnsigned(attrNode->nodeValue());
+//                    }
+//                }
+//                MemoryResource* pResource = new MemoryResource;
+//                pResource->setUri(childNode->innerText());
+//                pResource->setProtInfo(protInfo);
+//                pResource->setSize(size);
+//                addResource(pResource);
+////                 addResource(childNode->innerText(), protInfo, size);
+//                if (attr != 0) {
+//                    attr->release();
+//                }
+//            }
+//            else {
+////                 _properties.append(childNode->nodeName(), new Variant(childNode->innerText()));
+//                MemoryProperty* pProperty = new MemoryProperty;
+//                pProperty->setAttribute(childNode->nodeName(), childNode->innerText());
+////                addProperty(new MemoryProperty([childNode->nodeName()] =  childNode->innerText()));
+//            }
+//            childNode = childNode->nextSibling();
+//        }
+//    }
+//    Log::instance()->upnpav().debug("controller media object read node finished.");
+//}
 
 
 int
 CtlMediaObject2::fetchChildren(ui4 count)
 {
-    std::string objectId = getObjectId();
+    std::string objectId = getId();
     ui4 lastFetchedChild = getChildCount();
-    Log::instance()->upnpav().debug("controller media object fetch children of object: " + objectId);
+    Log::instance()->upnpav().debug("controller media object fetch children of object: " + objectId
+                                    + ", number of requested children: " + Poco::NumberFormatter::format(count)
+                                    + ", child offset: " + Poco::NumberFormatter::format(lastFetchedChild));
 
-    if (_pServerCode && !_fetchedAllChildren) {
+    Omm::ui4 numberReturned;
+    if (_pServerCode && !fetchedAllChildren()) {
         std::string result;
-        Omm::ui4 numberReturned;
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
         try {
@@ -182,24 +184,28 @@ CtlMediaObject2::fetchChildren(ui4 count)
             Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
             return 0;
         }
-        readChildren(result);
+        setTotalChildCount(totalMatches);
+        MediaObjectReader reader(this);
+        reader.readChildren(result);
+
+//        readChildren(result);
 //         UpnpBrowseResult res = _server->browseChildren(this, _children.size(), UpnpServer::_sliceSize);
         // _totalMatches is the number of items in the browse result, that matches
         // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
-        if (lastFetchedChild >= totalMatches) {
-            _fetchedAllChildren = true;
-        }
-        _childCount = totalMatches;
+//        if (lastFetchedChild >= totalMatches) {
+//            _fetchedAllChildren = true;
+//        }
+//        _childCount = totalMatches;
     }
-    return _childCount;
+    return numberReturned;
 }
 
 
-bool
-CtlMediaObject2::fetchedAllChildren()
-{
-    return _fetchedAllChildren;
-}
+//bool
+//CtlMediaObject2::fetchedAllChildren()
+//{
+//    return _fetchedAllChildren;
+//}
 
 
 //CtlMediaObject2*
@@ -320,11 +326,11 @@ CtlMediaObject2::getListWidget()
 //}
 
 
-void
-CtlMediaObject2::setFetchedAllChildren(bool fetchedAllChildren)
-{
-    _fetchedAllChildren = fetchedAllChildren;
-}
+//void
+//CtlMediaObject2::setFetchedAllChildren(bool fetchedAllChildren)
+//{
+//    _fetchedAllChildren = fetchedAllChildren;
+//}
 
 
 CtlMediaServer*

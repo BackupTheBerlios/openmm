@@ -274,65 +274,60 @@ class AbstractMediaObject : public Util::ConfigurablePlugin
 public:
     AbstractMediaObject();
     virtual ~AbstractMediaObject() {};
-    
+
+    // factory methods
     virtual AbstractMediaObject* createChildObject() { return 0; }
     virtual AbstractProperty* createProperty() { return 0; }
     virtual AbstractResource* createResource() { return 0; }
-    
-    /*------------- write interface -------------*/
-    void setTitle(const std::string& title);
-    void setClass(const std::string& subclass);
-    
-    void setObjectNumber(const std::string& objectId);                                          // controller object, read from xml into memory
-    void setParentObjectId(const std::string& objectId);                                        // controller object, read from xml into memory
-    void setObjectNumber(ui4 id);                                                               // controller object, read from xml into memory
+
+    // id and index
     void setParent(AbstractMediaObject* pParent);
-    void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
-    void addResource(AbstractResource* pResource);                                              // controller object, read from xml into memory
+    virtual std::string getId();                                                                // server object, write meta data
+    virtual void setId(const std::string& id) {}
+    std::string getParentId();                                                                  // server object, write meta data
+    virtual ui4 getIndex();
+    void setIndex(const std::string& index);                                                    // controller object, read from xml into memory
+    void setIndex(ui4 index);                                                                   // controller object, read from xml into memory
+    AbstractMediaObject* getParent();                                                           // controller object, browse
 
-    virtual void appendChildImpl(AbstractMediaObject* pChild) {}
-    // TODO: is this setTotalChildCount() ?
-    virtual void setTotalChildCount(ui4 childCount) {}                                          // controller object, read from xml into memory
-
-    virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
+    // properties
+    std::string getTitle();                                                                     // controller object, browse
+    void setTitle(const std::string& title);
+    std::string getClass();
+    void setClass(const std::string& subclass);
+    virtual bool isRestricted() { return true; }                                                // server object, write meta data
     virtual void setIsRestricted(bool isRestricted) {}                                          // controller object, read from xml into memory
     virtual void addProperty(AbstractProperty* pProperty) {}                                    // controller object, read from xml into memory
-    
-    /*------------- read interface --------------*/
-    // generic implementation
-    std::string getObjectId();                                                                  // server object, write meta data
-    std::string getParentObjectId();                                                            // server object, write meta data
-    AbstractMediaObject* getParent();                                                           // controller object, browse
-    AbstractMediaObject* getObject(const std::string& objectId);                                // server object, cds browse
-    AbstractMediaObject* getChild(const std::string& objectId);
-    std::string getTitle();                                                                     // controller object, browse
-    std::string getClass();
-    bool fetchedAllChildren();                                                                  // controller object, lazy browse
-    int getResourceCount();
-    void setUniqueProperty(const std::string& name, const std::string& value);
-
-    // API for read interface
-    virtual ui4 getObjectNumber(); // default implementation is returning _id
-    // TODO: next two methods are only for a special form of lazy browsing
-    virtual int fetchChildren();                                                                // controller object, lazy browse
-    virtual ui4 getTotalChildCount();
-
-    virtual ui4 getChildCount() { return 0; }                                                   // server object, cds browse / write meta data
-                                                                                                // controller object, browse
-    virtual bool isContainer() { return false; }                                                // server object, write meta data
-                                                                                                // controller object, browse
-    virtual AbstractMediaObject* getChild(ui4 numChild) { return 0; }                           // server object, write meta data
-                                                                                                // controller object, browse
-    virtual bool isRestricted() { return true; }                                                // server object, write meta data
-    // TODO: title and class are mandatory properties
+     // TODO: title and class are mandatory properties
     virtual int getPropertyCount(const std::string& name = "") = 0;
     virtual AbstractProperty* getProperty(int index) = 0;
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;          // server object, write meta data
+    void setUniqueProperty(const std::string& name, const std::string& value);
+
+    // resources
+    int getResourceCount();
+    void addResource(AbstractResource* pResource);                                              // controller object, read from xml into memory
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
+
+    // descendants
+    void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
+    virtual void appendChildImpl(AbstractMediaObject* pChild) {}
+    virtual bool isContainer() { return false; }                                                // server object, write meta data
+    virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
+    virtual ui4 getChildCount() { return 0; }                                                   // server object, cds browse / write meta data
+    virtual ui4 getTotalChildCount();
+    virtual void setTotalChildCount(ui4 childCount) {}                                          // controller object, read from xml into memory
+    AbstractMediaObject* getDescendant(const std::string& objectId);                            // server object, cds browse
+    virtual AbstractMediaObject* getChildFromIndex(const std::string& index);
+    virtual AbstractMediaObject* getChildFromIndex(ui4 numChild) { return 0; }                  // server object, write meta data
+    virtual AbstractMediaObject* getChildFromRow(ui4 row) { return 0; }                         // server object, write meta data
+    // TODO: next two methods are only for a special form of lazy browsing
+    virtual int fetchChildren();                                                                // controller object, lazy browse
+    bool fetchedAllChildren();                                                                  // controller object, lazy browse
 
 private:
     // TODO: put these private members in MediaObject (aka ServerObject)
-    ui4                         _id;
+    ui4                         _index;
     AbstractMediaObject*        _pParent;
 };
 
@@ -366,29 +361,26 @@ public:
     MemoryMediaObject();
     virtual ~MemoryMediaObject();
 
+    // factory methods
     virtual AbstractMediaObject* createChildObject();
     virtual AbstractProperty* createProperty();
     virtual AbstractResource* createResource();
     
-    virtual void setIsContainer(bool isContainer);
-    virtual void setTotalChildCount(ui4 childCount);                            // controller object, read from xml into memory
-
-    virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
-    void addProperty(AbstractProperty* pProperty);                              // controller object, read from xml into memory
-
-    /*------------- read interface --------------*/
-    virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
-    virtual ui4 getTotalChildCount();
-
-    virtual bool isContainer();                                                 // server object, write meta data
-                                                                                // controller object, browse
-    AbstractMediaObject* getChild(const std::string& objectId);                 // calls base class getChild(), needed to make method signature visible in this class
-    virtual AbstractMediaObject* getChild(ui4 numChild);                        // server object, write meta data
-                                                                                // controller object, browse
+    // properties
     virtual bool isRestricted();                                                // server object, write meta data
     virtual int getPropertyCount(const std::string& name = "");
+    void addProperty(AbstractProperty* pProperty);                              // controller object, read from xml into memory
     virtual AbstractProperty* getProperty(int index);
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0);             // server object, write meta data
+
+    // descendants
+    virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
+    virtual bool isContainer();                                                 // server object, write meta data
+    virtual void setIsContainer(bool isContainer);
+    virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
+    virtual ui4 getTotalChildCount();
+    virtual void setTotalChildCount(ui4 childCount);                            // controller object, read from xml into memory
+    virtual AbstractMediaObject* getChildFromRow(ui4 row);                      // server object, write meta data
     
 private:
     typedef std::multimap<std::string,AbstractProperty*>::iterator      PropertyIterator;

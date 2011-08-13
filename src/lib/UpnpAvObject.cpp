@@ -471,27 +471,27 @@ AbstractProperty::getAttributeCount()
 
 
 AbstractMediaObject::AbstractMediaObject() :
-_id(0),
+_index(0),
 _pParent(0)
 {
 }
 
 
 void
-AbstractMediaObject::setObjectNumber(ui4 id)
+AbstractMediaObject::setIndex(ui4 index)
 {
 //    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectNumber() objectId: " + Poco::NumberFormatter::format(id));
     
-    _id = id;
+    _index = index;
 }
 
 
 void
-AbstractMediaObject::setObjectNumber(const std::string& id)
+AbstractMediaObject::setIndex(const std::string& index)
 {
 //    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectId() from string: " + id);
     
-    _id = Poco::NumberParser::parseUnsigned(id);
+    _index = Poco::NumberParser::parseUnsigned(index);
 }
 
 
@@ -507,7 +507,7 @@ AbstractMediaObject::setParent(AbstractMediaObject* pParent)
 void
 AbstractMediaObject::appendChild(AbstractMediaObject* pChild)
 {
-    pChild->setObjectNumber(getChildCount());
+    pChild->setIndex(getChildCount());
     pChild->setParent(this);
     appendChildImpl(pChild);
 }
@@ -563,25 +563,27 @@ AbstractMediaObject::getClass()
 
 
 AbstractMediaObject*
-AbstractMediaObject::getChild(const std::string& objectId)
+AbstractMediaObject::getChildFromIndex(const std::string& index)
 {
-    return getChild(Poco::NumberParser::parseUnsigned(objectId));
+    return getChildFromIndex(Poco::NumberParser::parseUnsigned(index));
 }
 
 
 AbstractMediaObject*
-AbstractMediaObject::getObject(const std::string& objectId)
+AbstractMediaObject::getDescendant(const std::string& objectId)
 {
 //    Log::instance()->upnpav().debug("AbstractMediaObject::setObject() objectId: " + objectId);
     
+    // TODO: what about this object, not only child objects?
+
     std::string::size_type slashPos = objectId.find('/');
     AbstractMediaObject* pChild;
     if (slashPos != std::string::npos) {
         // child is a container
-        pChild = getChild(objectId.substr(0, slashPos));
+        pChild = getChildFromIndex(objectId.substr(0, slashPos));
         if (pChild == 0) {
             // child container is not a child of this container, we try the full path
-            pChild = getChild(objectId);
+            pChild = getChildFromIndex(objectId);
             if (pChild == 0) {
                 // child container is not a child of this container
                 Log::instance()->upnpav().error("retrieving child objectId of container, but no child container found");
@@ -594,12 +596,12 @@ AbstractMediaObject::getObject(const std::string& objectId)
         }
         else {
             // recurse into child container
-            return pChild->getObject(objectId.substr(slashPos + 1));
+            return pChild->getDescendant(objectId.substr(slashPos + 1));
         }
     }
     else {
         // child is an item
-        pChild = getChild(objectId);
+        pChild = getChildFromIndex(objectId);
         if (pChild == 0) {
             // child item is not a child of this container
             Log::instance()->upnpav().error("no child item found");
@@ -614,16 +616,16 @@ AbstractMediaObject::getObject(const std::string& objectId)
 
 
 ui4
-AbstractMediaObject::getObjectNumber()
+AbstractMediaObject::getIndex()
 {
 //    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectNumber id: " + Poco::NumberFormatter::format(_id));
     
-    return _id;
+    return _index;
 }
 
 
 std::string
-AbstractMediaObject::getObjectId()
+AbstractMediaObject::getId()
 {
 //    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectId()");
 
@@ -632,7 +634,7 @@ AbstractMediaObject::getObjectId()
         return "0";
     }
     else {
-        return pParent->getObjectId() + "/" + Poco::NumberFormatter::format(getObjectNumber());
+        return pParent->getId() + "/" + Poco::NumberFormatter::format(getIndex());
     }
 }
 
@@ -656,13 +658,13 @@ AbstractMediaObject::getParent()
 
 
 std::string
-AbstractMediaObject::getParentObjectId()
+AbstractMediaObject::getParentId()
 {
 //    Log::instance()->upnpav().debug("AbstractMediaObject::getParentObjectId()");
     
     AbstractMediaObject* pParent = getParent();
     if (pParent) {
-        return pParent->getObjectId();
+        return pParent->getId();
     }
     else {
         return "";
@@ -803,7 +805,7 @@ MemoryMediaObject::createChildObject()
 //    Log::instance()->upnpav().debug("MemoryMediaObject::createObject()");
 
     AbstractMediaObject* pChild = new MemoryMediaObject;
-    pChild->setObjectNumber(Poco::NumberFormatter::format(getChildCount()));
+    pChild->setIndex(Poco::NumberFormatter::format(getChildCount()));
     appendChild(pChild);
     return pChild;
 }
@@ -914,19 +916,19 @@ MemoryMediaObject::isContainer()
 }
 
 
-AbstractMediaObject*
-MemoryMediaObject::getChild(const std::string& objectId)
-{
-    return AbstractMediaObject::getChild(objectId);
-}
+//AbstractMediaObject*
+//MemoryMediaObject::getChild(const std::string& objectId)
+//{
+//    return AbstractMediaObject::getChild(objectId);
+//}
 
 
 AbstractMediaObject*
-MemoryMediaObject::getChild(ui4 numChild)
+MemoryMediaObject::getChildFromRow(ui4 row)
 {
 //    Log::instance()->upnpav().debug("MemoryMediaObject::getChild() number: " + Poco::NumberFormatter::format(numChild));
     
-    return _childVec[numChild];
+    return _childVec[row];
 }
 
 
@@ -1044,7 +1046,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
         attr = pNode->attributes();
         // FIXME: object number is the full object path, take only the last segment here ...? Otherwise, Poco::NumberParser will crash.
         try {
-            pObject->setObjectNumber(attr->getNamedItem(AvProperty::ID)->nodeValue());
+            pObject->setIndex(attr->getNamedItem(AvProperty::ID)->nodeValue());
         }
         catch (...) {
             Log::instance()->upnpav().error("setting object number in media object reader failed");
@@ -1130,7 +1132,7 @@ MediaObjectWriter2::writeChildren(ui4 startingIndex, ui4 requestedCount, std::st
     ui4 c;
     ui4 childCount = _pMediaObject->getChildCount();
     for (c = 0; (c < requestedCount) && (c < childCount - startingIndex); ++c) {
-        MediaObjectWriter2 writer(_pMediaObject->getChild(startingIndex + c));
+        MediaObjectWriter2 writer(_pMediaObject->getChildFromIndex(startingIndex + c));
         writer.writeMetaData(_pDidl);
     }
     
@@ -1189,8 +1191,8 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() writing attributes ...");
     // write attributes:
     // id (String, required)
-    std::string parentId = _pMediaObject->getParentObjectId();
-    std::string objectId = (parentId == "") ? "0" : (parentId + "/" + Poco::NumberFormatter::format(_pMediaObject->getObjectNumber()));
+    std::string parentId = _pMediaObject->getParentId();
+    std::string objectId = (parentId == "") ? "0" : (parentId + "/" + Poco::NumberFormatter::format(_pMediaObject->getIndex()));
     pObject->setAttribute(AvProperty::ID, objectId);
     // parentID (String, required)
     pObject->setAttribute(AvProperty::PARENT_ID, parentId);

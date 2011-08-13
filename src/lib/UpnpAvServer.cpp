@@ -120,7 +120,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
     Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
-    AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getObject(objectId);
+    AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getDescendant(objectId);
 
     StreamingResource* pResource;
     StreamingProperty* pProperty;
@@ -359,7 +359,7 @@ std::string
 StreamingPropertyImpl::getValue()
 {
     std::string serverAddress = _pServer->getServerAddress();
-    std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
+    std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length()+1);
     std::string resourceId = "i";
     return serverAddress + "/" + relativeObjectId + "$" + resourceId;
 }
@@ -378,7 +378,7 @@ std::string
 StreamingResource::getValue()
 {
     std::string serverAddress = _pServer->getServerAddress();
-    std::string relativeObjectId = _pItem->getObjectId().substr(_pServer->getObjectId().length()+1);
+    std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length()+1);
     std::string resourceId = Poco::NumberFormatter::format(_id);
     return serverAddress + "/" + relativeObjectId + "$" + resourceId;
 }
@@ -504,9 +504,9 @@ TorchServer::setDataModel(AbstractDataModel* pDataModel)
 
 
 AbstractMediaObject*
-TorchServer::getChild(ui4 numChild)
+TorchServer::getChildFromIndex(ui4 numChild)
 {
-    _pChild->setObjectNumber(numChild);
+    _pChild->setIndex(numChild);
     TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
     pTorchChild->_optionalProps.clear();
 
@@ -640,7 +640,7 @@ TorchItemResource::isSeekable()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->isSeekable(_pItem->getObjectNumber());
+        return pDataModel->isSeekable(_pItem->getIndex());
     }
     else {
         return false;
@@ -653,7 +653,7 @@ TorchItemResource::getStream()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->getStream(_pItem->getObjectNumber());
+        return pDataModel->getStream(_pItem->getIndex());
     }
     else {
         return 0;
@@ -666,7 +666,7 @@ TorchItemResource::getSize()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->getSize(_pItem->getObjectNumber());
+        return pDataModel->getSize(_pItem->getIndex());
     }
     else {
         return 0;
@@ -679,7 +679,7 @@ TorchItemResource::getMime()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->getMime(_pItem->getObjectNumber());
+        return pDataModel->getMime(_pItem->getIndex());
     }
     else {
         return "*";
@@ -692,7 +692,7 @@ TorchItemResource::getDlna()
 {
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->getDlna(_pItem->getObjectNumber());
+        return pDataModel->getDlna(_pItem->getIndex());
     }
     else {
         return "*";
@@ -752,7 +752,7 @@ TorchItemPropertyImpl::getStream()
 
     AbstractDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->_pDataModel;
     if (pDataModel) {
-        return pDataModel->getIconStream(_pItem->getObjectNumber());
+        return pDataModel->getIconStream(_pItem->getIndex());
     }
     else {
         return 0;

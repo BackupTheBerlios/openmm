@@ -226,7 +226,7 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
         object = _pRoot;
     }
     else {
-        object = _pRoot->getObject(ObjectID.substr(2));
+        object = _pRoot->getDescendant(ObjectID.substr(2));
     }
     
     MediaObjectWriter2 writer(object);

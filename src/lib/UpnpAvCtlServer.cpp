@@ -67,12 +67,12 @@ CtlMediaServer::browseRootObject()
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().error("controller could not fetch root object, setting default replacement object: " + e.displayText());
 //        _pRoot->setObjectId("0");
-        _pRoot->setObjectNumber("0");
+        _pRoot->setIndex("0");
         _pRoot->setIsContainer(true);
     }
     _pRoot->setServer(this);
     _pRoot->setServerController(_pCtlMediaServerCode);
-    _pRoot->setFetchedAllChildren(false);
+//    _pRoot->setFetchedAllChildren(false);
     Log::instance()->upnpav().debug("browse root object finished.");
 }
 
