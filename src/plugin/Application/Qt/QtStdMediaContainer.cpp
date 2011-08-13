@@ -19,72 +19,43 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaServer_INCLUDED
-#define QtMediaServer_INCLUDED
-
-#include <QtGui>
-
-#include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvLogger.h>
 #include <Omm/UpnpAvCtlServer.h>
-#include <Omm/UpnpAvCtlObject.h>
-#include <Omm/Util.h>
 
-#include "QtNavigable.h"
-#include "QtWidget.h"
-#include "QtListWidget.h"
-#include "QtMediaObject.h"
+#include "QtStdMediaContainer.h"
+#include "QtNavigator.h"
+#include "QtStdMediaServer.h"
 
 
-class QtMediaObject;
-class QtMediaServerWidget;
-class QtWidgetList;
-
-
-class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
+QtStdMediaContainer::QtStdMediaContainer()
 {
-    friend class QtMediaServerWidget;
+}
 
-public:
-    QtMediaServer();
-    ~QtMediaServer();
 
-    void setDeviceWidget(QtMediaServerWidget* pWidget);
-    QtMediaServerWidget* getDeviceWidget();
+QtStdMediaContainer::~QtStdMediaContainer()
+{
+
+}
+
+
+QString
+QtStdMediaContainer::getBrowserTitle()
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt standard media object get widget browser title");
+
+    if (_pObject) {
+        return QString::fromStdString(_pObject->getTitle());
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("Qt standard media object failed to get object title (ignoring)");
+    }
+}
+
+
+void
+QtStdMediaContainer::show()
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt standard media object show");
     
-    // QtNavigable interface
-    virtual QString getBrowserTitle();
-//    virtual QWidget* getWidget();
-
-private:
-    virtual void initController();
-//    virtual void selected();
-
-    QtMediaServerWidget*            _pMediaServerWidget;
-//    QtWidgetList*                   _pMediaContainerWidget;
-
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
-};
-
-
-class QtMediaServerWidget : public QtSimpleListWidget
-{
-    Q_OBJECT
-
-    friend class QtMediaServer;
-    friend class QtMediaServerGroup;
-
-public:
-    QtMediaServerWidget(QtMediaServer* pMediaServer = 0);
-
-public slots:
-    virtual void configure();
-    virtual void unconfigure();
-
-private:
-    QtMediaServer*                  _pMediaServer;
-};
-
-
-#endif
-
+    _pServerWidget->setRootIndex(_modelIndex);
+}

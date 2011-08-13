@@ -48,6 +48,7 @@ public:
     // QtNavigable interface
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
+    virtual void show();
     
     // QAbstractItemModel
     QVariant data(const QModelIndex &index, int role) const;
@@ -67,16 +68,13 @@ public:
 
     QIcon icon(const QModelIndex &index) const;
 
-private slots:
-    void selectedModelIndex(const QModelIndex& index);
-
 private:
     virtual void initController();
     virtual void selected();
-    void selectedMediaObject(Omm::Av::CtlMediaObject2* pObject);
 
     QtStdMediaServerWidget*            _pMediaServerWidget;
     QtStdMediaContainerItem*           _pMediaContainerItem;
+    bool                               _treeView;
 
     QTextCodec*                        _charEncoding;
     QFileIconProvider*                 _iconProvider;

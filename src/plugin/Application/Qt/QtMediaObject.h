@@ -26,6 +26,7 @@
 #include <Omm/Util.h>
 
 #include "QtWidget.h"
+#include "QtListWidget.h"
 #include "QtWidgetList.h"
 #include "QtNavigable.h"
 

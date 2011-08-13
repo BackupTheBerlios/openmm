@@ -24,7 +24,6 @@
 #include "QtApplication.h"
 #include "QtMainWindow.h"
 #include "QtVisual.h"
-#include "QtControlPanel.h"
 #include "QtEventFilter.h"
 #include "QtController.h"
 

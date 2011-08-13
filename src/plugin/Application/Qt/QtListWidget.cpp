@@ -19,72 +19,70 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaServer_INCLUDED
-#define QtMediaServer_INCLUDED
-
-#include <QtGui>
-
-#include <Omm/UpnpAvController.h>
-#include <Omm/UpnpAvCtlServer.h>
-#include <Omm/UpnpAvCtlObject.h>
-#include <Omm/Util.h>
-
-#include "QtNavigable.h"
-#include "QtWidget.h"
+#include <Poco/NumberFormatter.h>
+#include <Omm/UpnpAvLogger.h>
 #include "QtListWidget.h"
-#include "QtMediaObject.h"
 
 
-class QtMediaObject;
-class QtMediaServerWidget;
-class QtWidgetList;
-
-
-class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
+QtListWidget::QtListWidget(QWidget* pParent) :
+QWidget(pParent)
 {
-    friend class QtMediaServerWidget;
 
-public:
-    QtMediaServer();
-    ~QtMediaServer();
-
-    void setDeviceWidget(QtMediaServerWidget* pWidget);
-    QtMediaServerWidget* getDeviceWidget();
-    
-    // QtNavigable interface
-    virtual QString getBrowserTitle();
-//    virtual QWidget* getWidget();
-
-private:
-    virtual void initController();
-//    virtual void selected();
-
-    QtMediaServerWidget*            _pMediaServerWidget;
-//    QtWidgetList*                   _pMediaContainerWidget;
-
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
-};
+}
 
 
-class QtMediaServerWidget : public QtSimpleListWidget
+void
+QtListWidget::showWidget()
 {
-    Q_OBJECT
-
-    friend class QtMediaServer;
-    friend class QtMediaServerGroup;
-
-public:
-    QtMediaServerWidget(QtMediaServer* pMediaServer = 0);
-
-public slots:
-    virtual void configure();
-    virtual void unconfigure();
-
-private:
-    QtMediaServer*                  _pMediaServer;
-};
+    QWidget::show();
+}
 
 
-#endif
+void
+QtListWidget::hideWidget()
+{
+    QWidget::hide();
+}
 
+
+void
+QtListWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    Omm::Av::Log::instance()->upnpav().debug("QtListWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    select();
+    QWidget::mousePressEvent(pMouseEvent);
+}
+
+
+QtSimpleListWidget::QtSimpleListWidget(QWidget* pParent) :
+QtListWidget(pParent)
+{
+    _pLayout = new QHBoxLayout(this);
+    _pNameLabel = new QLabel;
+//    _pNameLabel->setBackgroundRole(QPalette::Shadow);
+    _pLayout->addWidget(_pNameLabel);
+    _pLayout->setSpacing(0);
+    _pLayout->setMargin(0);
+    _pLayout->setContentsMargins(0, 0, 0, 0);
+//    QWidget::setBackgroundColor(QColor::fromRgb(255, 255, 255, 255));
+//    QWidget::setBackgroundRole(QPalette::Highlight);
+//    QWidget::setBackgroundRole(QPalette::NoRole);
+//    QWidget::setBackgroundRole(QPalette::Light);
+//    QWidget::setBackgroundRole(QPalette::Shadow);
+//    QWidget::setBackgroundRole(QPalette(QColor("white")));
+    QWidget::setPalette(QPalette(Qt::white));
+    QWidget::setAutoFillBackground(true);
+}
+
+
+QtSimpleListWidget::~QtSimpleListWidget()
+{
+    delete _pNameLabel;
+}
+
+
+void
+QtSimpleListWidget::setLabel(const std::string& text)
+{
+    _pNameLabel->setText(QString::fromStdString(text));
+}

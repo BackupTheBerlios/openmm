@@ -19,72 +19,59 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaServer_INCLUDED
-#define QtMediaServer_INCLUDED
+#ifndef QtListWidget_INCLUDED
+#define QtListWidget_INCLUDED
 
 #include <QtGui>
 
-#include <Omm/UpnpAvController.h>
-#include <Omm/UpnpAvCtlServer.h>
-#include <Omm/UpnpAvCtlObject.h>
 #include <Omm/Util.h>
 
-#include "QtNavigable.h"
-#include "QtWidget.h"
-#include "QtListWidget.h"
-#include "QtMediaObject.h"
 
-
-class QtMediaObject;
-class QtMediaServerWidget;
-class QtWidgetList;
-
-
-class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
-{
-    friend class QtMediaServerWidget;
-
-public:
-    QtMediaServer();
-    ~QtMediaServer();
-
-    void setDeviceWidget(QtMediaServerWidget* pWidget);
-    QtMediaServerWidget* getDeviceWidget();
-    
-    // QtNavigable interface
-    virtual QString getBrowserTitle();
-//    virtual QWidget* getWidget();
-
-private:
-    virtual void initController();
-//    virtual void selected();
-
-    QtMediaServerWidget*            _pMediaServerWidget;
-//    QtWidgetList*                   _pMediaContainerWidget;
-
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
-};
-
-
-class QtMediaServerWidget : public QtSimpleListWidget
+class QtListWidget : public QWidget, public Omm::Util::ListWidget
 {
     Q_OBJECT
 
-    friend class QtMediaServer;
     friend class QtMediaServerGroup;
 
 public:
-    QtMediaServerWidget(QtMediaServer* pMediaServer = 0);
+    QtListWidget(QWidget* pParent = 0);
+
+    virtual void showWidget();
+    virtual void hideWidget();
+
+signals:
+    void showWidgetSignal();
+    void hideWidgetSignal();
+    void configureWidget();
+    // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
+    // that means, values have to be cached to allow for fast scrolling (don't retrieve
+    // them via network for example).
+    void unconfigureWidget();
 
 public slots:
-    virtual void configure();
-    virtual void unconfigure();
+    virtual void configure() {}
+    virtual void unconfigure() {}
 
 private:
-    QtMediaServer*                  _pMediaServer;
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
+
+class QtSimpleListWidget : public QtListWidget
+{
+    Q_OBJECT
+
+public:
+    QtSimpleListWidget(QWidget* pParent = 0);
+    virtual ~QtSimpleListWidget();
+
+protected:
+    void setLabel(const std::string& text);
+
+private:
+    QHBoxLayout*                    _pLayout;
+    QLabel*                         _pNameLabel;
+};
 
 #endif
 

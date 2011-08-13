@@ -36,7 +36,7 @@ public:
 
     // Omm::DeviceGroup interface
     virtual Omm::Device* createDevice();
-    virtual void selectDevice(Omm::Device* pDevice, int index);
+//    virtual void selectDevice(Omm::Device* pDevice, int index);
 
 private slots:
     void playButtonPressed();

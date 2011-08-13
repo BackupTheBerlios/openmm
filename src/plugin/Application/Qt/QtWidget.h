@@ -40,51 +40,5 @@ public:
 };
 
 
-class QtListWidget : public QWidget, public Omm::Util::ListWidget
-{
-    Q_OBJECT
-
-    friend class QtMediaServerGroup;
-
-public:
-    QtListWidget(QWidget* pParent = 0);
-
-    virtual void showWidget();
-    virtual void hideWidget();
-
-signals:
-    void showWidgetSignal();
-    void hideWidgetSignal();
-    void configureWidget();
-    // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
-    // that means, values have to be cached to allow for fast scrolling (don't retrieve
-    // them via network for example).
-    void unconfigureWidget();
-
-public slots:
-    virtual void configure() {}
-    virtual void unconfigure() {}
-
-private:
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-};
-
-
-class QtSimpleListWidget : public QtListWidget
-{
-    Q_OBJECT
-
-public:
-    QtSimpleListWidget(QWidget* pParent = 0);
-    virtual ~QtSimpleListWidget();
-
-protected:
-    void setLabel(const std::string& text);
-
-private:
-    QHBoxLayout*                    _pLayout;
-    QLabel*                         _pNameLabel;
-};
-
 #endif
 

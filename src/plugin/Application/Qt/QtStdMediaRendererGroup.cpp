@@ -20,12 +20,11 @@
  ***************************************************************************/
 
 #include <Omm/UpnpAv.h>
-#include <Omm/UpnpAvController.h>
+#include <Omm/UpnpAvCtlRenderer.h>
 
 #include "QtStdMediaRendererGroup.h"
 #include "QtStdController.h"
 #include "QtNavigator.h"
-#include "QtMediaRenderer.h"
 #include "QtMediaRendererControlPanel.h"
 
 
@@ -38,15 +37,15 @@ QtStdDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 Omm::Device*
 QtStdMediaRendererGroup::createDevice()
 {
-    return new QtMediaRenderer;
+    return new Omm::Av::CtlMediaRenderer;
 }
 
 
-void
-QtStdMediaRendererGroup::selectDevice(Omm::Device* pDevice, int index)
-{
-//    _pNavigator->push(static_cast<QtMediaRenderer*>(pDevice));
-}
+//void
+//QtStdMediaRendererGroup::selectDevice(Omm::Device* pDevice, int index)
+//{
+////    _pNavigator->push(static_cast<QtMediaRenderer*>(pDevice));
+//}
 
 
 void

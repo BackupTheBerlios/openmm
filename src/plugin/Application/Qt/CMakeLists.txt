@@ -12,52 +12,28 @@ include(
 ${QT_USE_FILE}
 )
 
+set(OMMC_QTRES
+QtApplication.qrc
+)
+
 set(OMMC_QTSTDAPP_SRCS
 QtStdApplication.cpp
 QtMainWindow.cpp
+QtMediaRendererControlPanel.cpp
 QtStdController.cpp
 #QtEventFilter.cpp
 QtNavigable.cpp
 QtNavigator.cpp
-QtStdDeviceGroup.cpp
 QtWidget.cpp
-QtWidgetList.cpp
+QtStdDeviceGroup.cpp
 QtStdMediaRendererGroup.cpp
-QtMediaRenderer.cpp
 QtStdMediaServerGroup.cpp
 QtStdMediaServer.cpp
-QtMediaObject.cpp
+QtStdMediaContainer.cpp
 QtEventFilter.cpp
 # modeltest.cpp
 #QtActivityIndicator.cpp
 #QtVisual.cpp
-QtMediaRendererControlPanel.cpp
-)
-
-set(OMMC_QTAPP_SRCS
-QtApplication.cpp
-QtMainWindow.cpp
-QtController.cpp
-#QtEventFilter.cpp
-QtNavigable.cpp
-QtNavigator.cpp
-QtStdDeviceGroup.cpp
-QtWidget.cpp
-QtWidgetList.cpp
-QtMediaRendererGroup.cpp
-QtMediaRenderer.cpp
-QtMediaServerGroup.cpp
-QtMediaServer.cpp
-QtMediaObject.cpp
-QtEventFilter.cpp
-# modeltest.cpp
-#QtActivityIndicator.cpp
-#QtVisual.cpp
-QtMediaRendererControlPanel.cpp
-)
-
-set(OMMC_QTRES
-QtApplication.qrc
 )
 
 set(OMMC_QTSTDAPP_MOC
@@ -68,18 +44,35 @@ QtStdController.h
 QtNavigator.h
 QtNavigatorPrivate.h
 QtStdDeviceGroup.h
-QtWidget.h
-QtWidgetList.h
 QtStdMediaRendererGroup.h
-QtMediaRenderer.h
-#QtStdMediaServerGroup.h
 QtStdMediaServer.h
-#QtMediaObject.h
 QtEventFilter.h
 # modeltest.h
 #QtActivityIndicator.h
 #QtVisual.h
 QtMediaRendererControlPanel.h
+)
+
+set(OMMC_QTAPP_SRCS
+QtApplication.cpp
+QtMainWindow.cpp
+QtMediaRendererControlPanel.cpp
+QtController.cpp
+#QtEventFilter.cpp
+QtNavigable.cpp
+QtNavigator.cpp
+QtWidget.cpp
+QtListWidget.cpp
+QtWidgetList.cpp
+QtMediaRendererGroup.cpp
+QtMediaRenderer.cpp
+QtMediaServerGroup.cpp
+QtMediaServer.cpp
+QtMediaObject.cpp
+QtEventFilter.cpp
+# modeltest.cpp
+#QtActivityIndicator.cpp
+#QtVisual.cpp
 )
 
 set(OMMC_QTAPP_MOC
@@ -89,8 +82,7 @@ QtController.h
 #QtEventFilter.h
 QtNavigator.h
 QtNavigatorPrivate.h
-QtStdDeviceGroup.h
-QtWidget.h
+QtListWidget.h
 QtWidgetList.h
 QtMediaRendererGroup.h
 QtMediaRenderer.h
@@ -142,30 +134,7 @@ ${OMMC_QTSTDAPP_MOC_CPP}
 ${OMMC_RES_SRC}
 )
 
-add_library(ommplugin-application-qt
-SHARED
-${OMMC_QTAPP_SRCS}
-${OMMC_QTAPP}
-${OMMC_QTAPP_MOC_CPP}
-${OMMC_RES_SRC}
-)
-
-# target_link_libraries(ommplugin-avinterface-qt
-# ${OMM}
-# ${OMM_AV}
-# ${OMM_SYS}
-# ${QT_LIBRARIES}
-# )
-
 target_link_libraries(ommplugin-stdapplication-qt
-${OMM}
-${OMM_AV}
-${OMM_SYS}
-${OMM_UTIL}
-${QT_LIBRARIES}
-)
-
-target_link_libraries(ommplugin-application-qt
 ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
@@ -175,6 +144,22 @@ ${QT_LIBRARIES}
 
 set_target_properties(ommplugin-stdapplication-qt
 PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
+add_library(ommplugin-application-qt
+SHARED
+${OMMC_QTAPP_SRCS}
+${OMMC_QTAPP}
+${OMMC_QTAPP_MOC_CPP}
+${OMMC_RES_SRC}
+)
+
+target_link_libraries(ommplugin-application-qt
+${OMM}
+${OMM_AV}
+${OMM_SYS}
+${OMM_UTIL}
+${QT_LIBRARIES}
 )
 
 set_target_properties(ommplugin-application-qt

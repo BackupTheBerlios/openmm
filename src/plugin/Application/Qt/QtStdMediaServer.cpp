@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include "QtStdMediaServer.h"
+#include "QtNavigator.h"
+#include "QtStdMediaContainer.h"
 
 class QtStdMediaContainerItem : public QStyledItemDelegate
 {
@@ -95,8 +97,10 @@ _pMediaServer(pMediaServer)
     setModel(pMediaServer);
     setUniformRowHeights(true);
     setHeaderHidden(true);
-//        _pMediaServerTreeView->setRootIsDecorated(false);
-//        _pMediaServerTreeView->setItemsExpandable(false);
+    if (!_pMediaServer->_treeView) {
+        setRootIsDecorated(false);
+        setItemsExpandable(false);
+    }
     // activated() is return, click or double click, selected() is click or double click on it.
     connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));    
 }
@@ -108,12 +112,23 @@ QtStdMediaServerWidget::selectedModelIndex(const QModelIndex& index)
     Omm::Av::Log::instance()->upnpav().debug("Qt standard media server widget selected index");
 
     Omm::Av::CtlMediaObject2* pObject = static_cast<Omm::Av::CtlMediaObject2*>(index.internalPointer());
-    _pMediaServer->selectedMediaObject(pObject);
+
+    if (pObject->isContainer() && !_pMediaServer->_treeView) {
+        QtStdMediaContainer* pQtObject = new QtStdMediaContainer;
+        pQtObject->_pObject = pObject;
+        pQtObject->_pServerWidget = this;
+        pQtObject->_modelIndex = index;
+        _pMediaServer->getNavigator()->push(pQtObject);
+    }
+    else {
+        _pMediaServer->selectMediaObject(pObject);
+    }
 }
 
 
 QtStdMediaServer::QtStdMediaServer() :
 _pMediaServerWidget(0),
+_treeView(false),
 _charEncoding(QTextCodec::codecForName("UTF-8"))
 {
 }
@@ -139,6 +154,13 @@ QtStdMediaServer::getWidget()
 
 
 void
+QtStdMediaServer::show()
+{
+    _pMediaServerWidget->setRootIndex(index(0, 0, QModelIndex()));
+}
+
+
+void
 QtStdMediaServer::initController()
 {
     Omm::Av::Log::instance()->upnpav().debug("init Qt standard media server (controller)");
@@ -157,13 +179,6 @@ QtStdMediaServer::selected()
         _pMediaServerWidget = new QtStdMediaServerWidget(this);
     }
 //    _pMediaServerWidget->setCurrentIndex(index(0, 0, QModelIndex()));
-}
-
-
-void
-QtStdMediaServer::selectedMediaObject(Omm::Av::CtlMediaObject2* pObject)
-{
-    selectMediaObject(pObject);
 }
 
 
@@ -190,16 +205,6 @@ QtStdMediaServer::icon(const QModelIndex &index) const
         return _iconProvider->icon(QFileIconProvider::Computer);
     }
     return _iconProvider->icon(QFileIconProvider::File);
-}
-
-
-void
-QtStdMediaServer::selectedModelIndex(const QModelIndex& index)
-{
-    Omm::Av::Log::instance()->upnpav().debug("Qt standard media server selected index");
-
-    Omm::Av::CtlMediaObject2* pObject = static_cast<Omm::Av::CtlMediaObject2*>(index.internalPointer());
-    selectMediaObject(pObject);
 }
 
 

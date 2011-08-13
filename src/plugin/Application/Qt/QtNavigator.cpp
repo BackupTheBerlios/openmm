@@ -136,6 +136,7 @@ QtNavigator::expose(QtNavigable* pNavigable)
     Omm::Av::Log::instance()->upnpav().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
 //    Omm::Util::Log::instance()->plugin().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
 
+    pNavigable->show();
     while(!_navigableStack.empty() && _navigableStack.top() != pNavigable) {
         QtNavigable* pPoppedNavigable = _navigableStack.top();
         if (pPoppedNavigable->getWidget()) {
@@ -145,26 +146,7 @@ QtNavigator::expose(QtNavigable* pNavigable)
 //        delete pPoppedNavigable;
         _navigableStack.pop();
     }
-    if (!_navigableStack.empty()) {
-        pNavigable->show();
-    }
+//    if (!_navigableStack.empty()) {
+//        pNavigable->show();
+//    }
 }
-
-
-//void
-//QtDeviceGroup::pushBrowser(QtNavigable* pBrowser)
-//{
-////    new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbButton);
-//    // FIXME: this only works for first level.
-//    _pCrumbButton = new QtCrumbButton(_pDeviceListView, QModelIndex(), _pCrumbPanel);
-//    _pStackedWidget->addWidget(pBrowser);
-//    _stack.push(pBrowser);
-//}
-//
-//
-//void
-//QtDeviceGroup::popBrowser()
-//{
-//    _pStackedWidget->removeWidget(_stack.top());
-//    _stack.pop();
-//}

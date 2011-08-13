@@ -28,6 +28,7 @@
 #include <Omm/UpnpAvCtlRenderer.h>
 #include <Omm/UpnpAvCtlObject.h>
 
+#include "QtListWidget.h"
 #include "QtWidgetList.h"
 
 class QtMediaRendererWidget;

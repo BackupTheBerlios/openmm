@@ -20,9 +20,12 @@
  ***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
+
 #include <Omm/Util.h>
 #include <Omm/UpnpAvLogger.h>
+
 #include "QtWidgetList.h"
+#include "QtListWidget.h"
 
 
 QtWidgetList::QtWidgetList(QWidget* pParent) :

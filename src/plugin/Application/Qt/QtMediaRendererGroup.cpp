@@ -26,6 +26,7 @@
 #include "QtMediaRendererControlPanel.h"
 #include "QtMediaRenderer.h"
 #include "QtController.h"
+#include "QtListWidget.h"
 #include "QtWidgetList.h"
 
 

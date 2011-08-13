@@ -19,70 +19,36 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaServer_INCLUDED
-#define QtMediaServer_INCLUDED
+#ifndef QtStdMediaContainer_INCLUDED
+#define QtStdMediaContainer_INCLUDED
 
 #include <QtGui>
 
-#include <Omm/UpnpAvController.h>
-#include <Omm/UpnpAvCtlServer.h>
-#include <Omm/UpnpAvCtlObject.h>
+#include <Omm/UpnpAvCtlObject2.h>
 #include <Omm/Util.h>
 
 #include "QtNavigable.h"
-#include "QtWidget.h"
-#include "QtListWidget.h"
-#include "QtMediaObject.h"
 
+class QtStdMediaServerWidget;
 
-class QtMediaObject;
-class QtMediaServerWidget;
-class QtWidgetList;
-
-
-class QtMediaServer : public QtNavigable, public Omm::Av::CtlMediaServer
+class QtStdMediaContainer : public QtNavigable
 {
-    friend class QtMediaServerWidget;
+    friend class QtStdMediaServerWidget;
+    friend class QtStdMediaServer;
+    friend class QtStdMediaServerGroup;
 
 public:
-    QtMediaServer();
-    ~QtMediaServer();
-
-    void setDeviceWidget(QtMediaServerWidget* pWidget);
-    QtMediaServerWidget* getDeviceWidget();
+    QtStdMediaContainer();
+    ~QtStdMediaContainer();
     
     // QtNavigable interface
     virtual QString getBrowserTitle();
-//    virtual QWidget* getWidget();
+    virtual void show();
 
 private:
-    virtual void initController();
-//    virtual void selected();
-
-    QtMediaServerWidget*            _pMediaServerWidget;
-//    QtWidgetList*                   _pMediaContainerWidget;
-
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
-};
-
-
-class QtMediaServerWidget : public QtSimpleListWidget
-{
-    Q_OBJECT
-
-    friend class QtMediaServer;
-    friend class QtMediaServerGroup;
-
-public:
-    QtMediaServerWidget(QtMediaServer* pMediaServer = 0);
-
-public slots:
-    virtual void configure();
-    virtual void unconfigure();
-
-private:
-    QtMediaServer*                  _pMediaServer;
+    Omm::Av::CtlMediaObject2*    _pObject;
+    QtStdMediaServerWidget*      _pServerWidget;
+    QModelIndex                  _modelIndex;
 };
 
 
