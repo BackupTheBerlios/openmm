@@ -59,11 +59,6 @@ public:
     virtual void setId(const std::string& id);
 
     int fetchChildren(ui4 count = 10);
-//    bool fetchedAllChildren();
-//    ui4 childCount();
-//    CtlMediaObject2* parent();
-
-//    std::string getProperty(const std::string& name);
 
     Icon* getIcon();
     Icon* getImageRepresentation();
@@ -81,16 +76,6 @@ public:
 //    virtual int lastFetched(bool forward = true);
 
 private:
-//    AbstractResource* getResource(int num = 0);
-//    virtual void addResource(Resource* pResource);
-//    void setFetchedAllChildren(bool fetchedAllChildren);
-
-//    void readChildren(const std::string& metaData);
-//    void readMetaData(const std::string& metaData);
-//    void readNode(Poco::XML::Node* pNode);
-
-//    unsigned int                     _childCount;
-//    bool                             _fetchedAllChildren;
     std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;

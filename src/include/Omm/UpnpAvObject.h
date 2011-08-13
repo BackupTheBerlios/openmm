@@ -308,10 +308,9 @@ public:
     void addResource(AbstractResource* pResource);                                              // controller object, read from xml into memory
     virtual AbstractResource* getResource(int index = 0);                                       // controller object, transport
 
-    // descendants
+    // descendants and parent
     void setParent(AbstractMediaObject* pParent);
     void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
-    virtual void appendChildImpl(AbstractMediaObject* pChild) {}
     virtual bool isContainer() { return false; }                                                // server object, write meta data
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
     virtual ui4 getChildCount() { return 0; }                                                   // server object, cds browse / write meta data
@@ -319,11 +318,14 @@ public:
     virtual void setTotalChildCount(ui4 childCount) {}                                          // controller object, read from xml into memory
     AbstractMediaObject* getDescendant(const std::string& objectId);                            // server object, cds browse
     virtual AbstractMediaObject* getChildForIndex(const std::string& index);
-    virtual AbstractMediaObject* getChildForIndex(ui4 numChild) { return 0; }                  // server object, write meta data
-    virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                         // server object, write meta data
+    virtual AbstractMediaObject* getChildForIndex(ui4 index) { return 0; }                      // server object, write meta data
+    virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                          // server object, write meta data
     // TODO: next two methods are only for a special form of lazy browsing
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
+
+protected:
+    virtual void appendChildImpl(AbstractMediaObject* pChild) {}
 
 private:
     // TODO: put these private members in MediaObject (aka ServerObject)
