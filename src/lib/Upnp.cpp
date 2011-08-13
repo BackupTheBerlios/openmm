@@ -295,12 +295,13 @@ SsdpSocket::init()
     // listen to UDP unicast and send out to multicast
     Log::instance()->ssdp().debug("create broadcast socket");
     _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
-    _pSsdpLocalSenderSocket = new Poco::Net::MulticastSocket;
+    _pSsdpLocalSenderSocket = new Poco::Net::DatagramSocket;
 
     // listen to UDP multicast
     Log::instance()->ssdp().debug("create listener socket ...");
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
-    _pSsdpLocalListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
+    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
+//    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.255.255.255", SSDP_PORT), true);
 
     _multicastReactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
     _broadcastReactor.addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
@@ -358,11 +359,9 @@ SsdpSocket::startListen()
         Log::instance()->ssdp().error("failed to start SSDP socket, not configured.");
         return;
     }
-    else if (_mode == Multicast) {
+    else {
         Log::instance()->ssdp().information("starting SSDP multicast listener ...");
         _multicastListenerThread.start(_multicastReactor);
-    }
-    else {
         Log::instance()->ssdp().information("starting SSDP broadcast listener ...");
         _broadcastListenerThread.start(_broadcastReactor);
     }
@@ -377,12 +376,10 @@ SsdpSocket::stopListen()
         Log::instance()->ssdp().error("failed to start SSDP socket, not configured.");
         return;
     }
-    if (_mode == Multicast) {
+    else {
         Log::instance()->ssdp().information("stopping SSDP multicast listener ...");
         _multicastReactor.stop();
         _multicastListenerThread.join();
-    }
-    else {
         Log::instance()->ssdp().information("stopping SSDP broadcast listener ...");
         _broadcastReactor.stop();
         _broadcastListenerThread.join();
@@ -408,9 +405,11 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
     Log::instance()->ssdp().debug("sending SSDP message to address: " + loopReceiver.toString() + " ...");
     try {
         if (_mode == Multicast) {
+            Log::instance()->ssdp().debug("sending SSDP message through multicast socket ...");
             bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
         }
         else if (_mode == Broadcast) {
+            Log::instance()->ssdp().debug("sending SSDP message through broadcast socket ...");
             bytesSent = _pSsdpLocalSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
         }
     }
@@ -482,20 +481,20 @@ SsdpSocket::setupSockets()
 }
 
 
-void
-SsdpSocket::resetSockets()
-{
-    Log::instance()->ssdp().debug("reset SSDP sockets ...");
-    if (_mode == Multicast) {
-        Log::instance()->ssdp().debug("leave multicast group ...");
-        _pSsdpListenerSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
-    }
-    else if (_mode == Broadcast) {
-        Log::instance()->ssdp().debug("disable broadcast mode ...");
-        _pSsdpLocalSenderSocket->setBroadcast(false);
-    }
-    _mode = NotConfigured;
-}
+//void
+//SsdpSocket::resetSockets()
+//{
+//    Log::instance()->ssdp().debug("reset SSDP sockets ...");
+//    if (_mode == Multicast) {
+//        Log::instance()->ssdp().debug("leave multicast group ...");
+//        _pSsdpListenerSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
+//    }
+//    else if (_mode == Broadcast) {
+//        Log::instance()->ssdp().debug("disable broadcast mode ...");
+//        _pSsdpLocalSenderSocket->setBroadcast(false);
+//    }
+//    _mode = NotConfigured;
+//}
 
 
 void

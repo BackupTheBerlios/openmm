@@ -81,7 +81,7 @@ private:
     void init();
     void deinit();
     void setupSockets();
-    void resetSockets();
+//    void resetSockets();
     void setMode(SocketMode mode = NotConfigured);
 
     void onReadable(Poco::Net::ReadableNotification* pNotification);
@@ -89,8 +89,8 @@ private:
     SocketMode                      _mode;
     Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
     Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
-    Poco::Net::MulticastSocket*     _pSsdpLocalListenerSocket;
-    Poco::Net::MulticastSocket*     _pSsdpLocalSenderSocket;
+    Poco::Net::DatagramSocket*      _pSsdpLocalListenerSocket;
+    Poco::Net::DatagramSocket*      _pSsdpLocalSenderSocket;
     char*                           _pBuffer;
 
     static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
