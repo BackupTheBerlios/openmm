@@ -1295,7 +1295,7 @@ Resource::setProtInfo(const std::string& protInfo)
 }
 
 
-MediaObject::MediaObject() :
+MediaObjectOld::MediaObjectOld() :
 _parent(0),
 _isContainer(false),
 _restricted(true)
@@ -1304,27 +1304,27 @@ _restricted(true)
 
 
 bool
-MediaObject::isContainer()
+MediaObjectOld::isContainer()
 {
     return _isContainer;
 }
 
 
 bool
-MediaObject::isRestricted()
+MediaObjectOld::isRestricted()
 {
     return _restricted;
 }
 
 void
-MediaObject::setIsContainer(bool isContainer)
+MediaObjectOld::setIsContainer(bool isContainer)
 {
     _isContainer = isContainer;
 }
 
 
 void
-MediaObject::appendChild(MediaObject* pChild)
+MediaObjectOld::appendChild(MediaObjectOld* pChild)
 {
 //     std::clog << "MediaObject::appendChild() with objectId: " << pChild->_objectId << std::endl;
     
@@ -1340,14 +1340,14 @@ MediaObject::appendChild(MediaObject* pChild)
 
 
 void
-MediaObject::addResource(Resource* pResource)
+MediaObjectOld::addResource(Resource* pResource)
 {
     _resources.push_back(pResource);
 }
 
 
 std::string
-MediaObject::getObjectId() const
+MediaObjectOld::getObjectId() const
 {
     if (_objectId == "0") {
         return _objectId;
@@ -1363,56 +1363,56 @@ MediaObject::getObjectId() const
 }
 
 
-MediaObject::PropertyIterator
-MediaObject::beginProperty()
+MediaObjectOld::PropertyIterator
+MediaObjectOld::beginProperty()
 {
     return _properties.begin();
 }
 
 
-MediaObject::PropertyIterator
-MediaObject::endProperty()
+MediaObjectOld::PropertyIterator
+MediaObjectOld::endProperty()
 {
     return _properties.end();
 }
 
 
-MediaObject::ChildIterator
-MediaObject::beginChildren()
+MediaObjectOld::ChildIterator
+MediaObjectOld::beginChildren()
 {
     return _children.begin();
 }
 
 
-MediaObject::ChildIterator
-MediaObject::endChildren()
+MediaObjectOld::ChildIterator
+MediaObjectOld::endChildren()
 {
     return _children.end();
 }
 
 
-MediaObject::ResourceIterator
-MediaObject::beginResource()
+MediaObjectOld::ResourceIterator
+MediaObjectOld::beginResource()
 {
     return _resources.begin();
 }
 
-MediaObject::ResourceIterator
-MediaObject::endResource()
+MediaObjectOld::ResourceIterator
+MediaObjectOld::endResource()
 {
     return _resources.end();
 }
 
 
 ui4
-MediaObject::getChildCount()
+MediaObjectOld::getChildCount()
 {
     return _children.size();
 }
 
 
 std::string
-MediaObject::getParentId()
+MediaObjectOld::getParentId()
 {
     if (_parent) {
         return _parent->getObjectId();
@@ -1423,22 +1423,22 @@ MediaObject::getParentId()
 }
 
 
-MediaObject*
-MediaObject::getChild(ui4 num)
+MediaObjectOld*
+MediaObjectOld::getChild(ui4 num)
 {
     return _children[num];
 }
 
 
 std::string
-MediaObject::objectId()
+MediaObjectOld::objectId()
 {
     return _objectId;
 }
 
 
 void
-MediaObject::setObjectId(const std::string& objectId)
+MediaObjectOld::setObjectId(const std::string& objectId)
 {
     _objectId = objectId;
 }
@@ -1452,7 +1452,7 @@ MediaObject::setObjectId(const std::string& objectId)
 
 
 void
-MediaObject::setTitle(const std::string& title)
+MediaObjectOld::setTitle(const std::string& title)
 {
 //     std::clog << "MediaObject::setTitle() title: " << title << std::endl;
     Log::instance()->upnpav().debug("setting object title: " + title);
@@ -1464,7 +1464,7 @@ MediaObject::setTitle(const std::string& title)
 
 
 std::string
-MediaObject::getTitle()
+MediaObjectOld::getTitle()
 {
 //     std::clog << "MediaObject::getTitle()" << std::endl;
     
@@ -1478,7 +1478,7 @@ MediaObject::getTitle()
 
 
 void
-MediaObject::setProperty(const std::string& name, const std::string& value)
+MediaObjectOld::setProperty(const std::string& name, const std::string& value)
 {
 //     std::clog << "MediaObject::setProperty() name : " << name << ", value: " << value << std::endl;
 //     _properties.append(name, new Omm::Variant(value));
@@ -1538,7 +1538,7 @@ MediaObject::setProperty(const std::string& name, const std::string& value)
 // }
 
 
-MediaObjectWriter::MediaObjectWriter(MediaObject* pMediaObject) :
+MediaObjectWriter::MediaObjectWriter(MediaObjectOld* pMediaObject) :
 _pMediaObject(pMediaObject),
 _pDoc(0),
 _pDidl(0)
@@ -1656,7 +1656,7 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl)
     // refID (String)
     
     // resources
-    for (MediaObject::ResourceIterator it = _pMediaObject->beginResource(); it != _pMediaObject->endResource(); ++it) {
+    for (MediaObjectOld::ResourceIterator it = _pMediaObject->beginResource(); it != _pMediaObject->endResource(); ++it) {
         Poco::AutoPtr<Poco::XML::Element> pResource = pDoc->createElement(AvProperty::RES);
         Poco::AutoPtr<Poco::XML::Text> pUri = pDoc->createTextNode((*it)->getUri());
         if ((*it)->getProtInfo() != "") {
@@ -1671,7 +1671,7 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl)
     
     // write properties
 //     std::clog << "MediaObjectWriter::writeMetaData() property elements" << std::endl;
-    for (MediaObject::PropertyIterator it = _pMediaObject->beginProperty(); it != _pMediaObject->endProperty(); ++it) {
+    for (MediaObjectOld::PropertyIterator it = _pMediaObject->beginProperty(); it != _pMediaObject->endProperty(); ++it) {
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement((*it).first);
 //         std::string propVal;
 //         (*it).second->getValue(propVal);

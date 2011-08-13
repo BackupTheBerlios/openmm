@@ -163,15 +163,15 @@ QtMediaServerModel::parent(const QModelIndex &index) const
     if (!pObject) {
         return QModelIndex();
     }
-    Omm::Av::MediaObject* pParentObject = pObject->parent();
+    Omm::Av::MediaObjectOld* pParentObject = pObject->parent();
     if (!pParentObject) {
         return QModelIndex();
     }
-    Omm::Av::MediaObject* pGrandParentObject = pObject->parent()->parent();
+    Omm::Av::MediaObjectOld* pGrandParentObject = pObject->parent()->parent();
     if (!pGrandParentObject) {
         return createIndex(0, 0, _pRootObject);
     }
-    Omm::Av::MediaObject::ChildIterator row;
+    Omm::Av::MediaObjectOld::ChildIterator row;
     row = find(pGrandParentObject->beginChildren(), pGrandParentObject->endChildren(), pObject->parent());
     if (row != pGrandParentObject->endChildren()) {
         return createIndex(row - pGrandParentObject->beginChildren(), 0, pObject->parent());

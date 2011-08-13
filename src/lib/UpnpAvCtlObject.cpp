@@ -31,7 +31,7 @@ namespace Av {
 
 
 CtlMediaObject::CtlMediaObject() :
-Omm::Av::MediaObject(),
+Omm::Av::MediaObjectOld(),
 _childCount(0),
 _fetchedAllChildren(false),
 _pListWidget(0)

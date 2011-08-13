@@ -39,7 +39,7 @@ class CtlMediaServerCode;
 class MediaItemNotification;
 
 
-class CtlMediaObject : public MediaObject //, public Util::WidgetListModel
+class CtlMediaObject : public MediaObjectOld //, public Util::WidgetListModel
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;

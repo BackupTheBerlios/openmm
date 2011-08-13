@@ -447,7 +447,7 @@ public:
 
 class Resource
 {
-    friend class MediaObject;
+    friend class MediaObjectOld;
     
 public:
     Resource(const std::string& uri, const std::string& protInfo, ui4 size);
@@ -466,18 +466,18 @@ private:
 };
 
 
-class MediaObject
+class MediaObjectOld
 {
     friend class MediaObjectWriter;
     
 public:
-    MediaObject();
+    MediaObjectOld();
     
     typedef std::map<std::string,std::string>::iterator PropertyIterator;
     PropertyIterator beginProperty();
     PropertyIterator endProperty();
     
-    typedef std::vector<MediaObject*>::iterator ChildIterator;
+    typedef std::vector<MediaObjectOld*>::iterator ChildIterator;
     ChildIterator beginChildren();
     ChildIterator endChildren();
     
@@ -485,10 +485,10 @@ public:
     ResourceIterator beginResource();
     ResourceIterator endResource();
     
-    void appendChild(MediaObject* pChild);
+    void appendChild(MediaObjectOld* pChild);
     void addResource(Resource* pResource);
     virtual std::string getObjectId() const;
-    MediaObject* getChild(ui4 num);
+    MediaObjectOld* getChild(ui4 num);
     std::string getParentId();
     ui4 getChildCount();
     
@@ -511,8 +511,8 @@ protected:
     
     bool                                    _isContainer;
     // is Container:
-    MediaObject*                            _parent;
-    std::vector<MediaObject*>               _children;
+    MediaObjectOld*                            _parent;
+    std::vector<MediaObjectOld*>               _children;
     // is Item:
     std::vector<Resource*>                  _resources;
 };
@@ -521,7 +521,7 @@ protected:
 class MediaObjectWriter
 {
 public:
-    MediaObjectWriter(MediaObject* pMediaObject);
+    MediaObjectWriter(MediaObjectOld* pMediaObject);
     
     void write(std::string& metaData);
     ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
@@ -531,7 +531,7 @@ private:
     void writeMetaDataClose(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
     
-    MediaObject*                            _pMediaObject;
+    MediaObjectOld*                            _pMediaObject;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;
 };

@@ -151,7 +151,7 @@ std::string arMediaTomb1_orig = "\
 
 int main(int argc, char** argv)
 {
-    Omm::Av::MediaObject ex1Object;
+    Omm::Av::MediaObjectOld ex1Object;
     std::clog << "Content Directory 1, 2.8.3.2." << std::endl << ex1 << std::endl << std::endl;
     ex1Object.readMetaData(ex1);
     std::clog << std::endl;
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
     ex1Object.readChildren(ex2);
     std::clog << std::endl;
     
-    Omm::Av::MediaObject ex3Object;
+    Omm::Av::MediaObjectOld ex3Object;
     std::clog << "Content Directory 1, 2.8.3.5." << std::endl << ex1 << std::endl << std::endl;
     ex3Object.readChildren(ex3);
     
