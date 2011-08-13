@@ -259,11 +259,14 @@ WidgetListView::setModel(WidgetListModel* pModel)
 
     // create an initial widget pool. This also retrieves the height of the widget.
     int rows = visibleRows();
+    int rowsFetched = _pModel->fetch(std::min(_pModel->totalItemCount(), rows));
+
     extendWidgetPool(rows);
 
     // insert items that are already in the model.
     Log::instance()->util().debug("inserting number of items: " + Poco::NumberFormatter::format(_pModel->totalItemCount()));
-    for (int i = 0; i < std::min(_pModel->totalItemCount(), rows); i++) {
+//    for (int i = 0; i < std::min(_pModel->totalItemCount(), rows); i++) {
+    for (int i = 0; i < rowsFetched; i++) {
         insertItem(i);
     }
 
@@ -356,7 +359,13 @@ WidgetListView::scrolledToRow(int rowOffset)
     if (rowOffset + _visibleWidgets.size() > _pModel->totalItemCount()) {
         return;
     }
+
     int rowDeltaAbsolute = std::abs(rowDelta);
+
+    if (rowOffset + _visibleWidgets.size() + rowDeltaAbsolute >= _pModel->lastFetched()) {
+        _pModel->fetch(_visibleWidgets.size() + rowDeltaAbsolute);
+    }
+
     Log::instance()->util().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {

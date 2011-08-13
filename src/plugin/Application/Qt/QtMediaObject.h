@@ -54,6 +54,7 @@ public:
     // lazy model related
     virtual bool canFetchMore();
     virtual void fetchMore(bool forward = true);
+    virtual int fetch(int rowCount = 10, bool forward = true);
     virtual int lastFetched(bool forward = true);
 
     // child widget related
@@ -69,6 +70,8 @@ public slots:
 private:
     Omm::Av::CtlMediaObject2*    _pObject;
     QtWidgetList*               _pContainerView;
+    // lazy model related
+    Omm::ui4                    _lastFetched;
 };
 
 

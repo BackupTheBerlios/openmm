@@ -26,15 +26,14 @@
 #include "QtNavigator.h"
 
 
-QtMediaObject::QtMediaObject()
+QtMediaObject::QtMediaObject() :
+_lastFetched(0)
 {
-//    _pContainerView = new QtWidgetList;
 }
 
 
 QtMediaObject::~QtMediaObject()
 {
-
 }
 
 
@@ -102,7 +101,7 @@ QtMediaObject::selectItem(int row)
             Omm::Av::Log::instance()->upnpav().error("Qt child container of media object cannot be pushed (ignoring)");
             return;
         }
-        pChildObject->fetchChildren(pChildObject->getTotalChildCount());
+//        pChildObject->fetchChildren(pChildObject->getTotalChildCount());
         QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(getWidget(row));
         if (!pChildWidget) {
             Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child widget to push (ignoring)");
@@ -121,14 +120,23 @@ QtMediaObject::selectItem(int row)
 bool
 QtMediaObject::canFetchMore()
 {
-    return false;
+    return _lastFetched >= _pObject->getTotalChildCount();
 }
 
 
 void
 QtMediaObject::fetchMore(bool forward)
 {
-    _pObject->fetchChildren();
+    _lastFetched += _pObject->fetchChildren();
+}
+
+
+int
+QtMediaObject::fetch(int rowCount, bool forward)
+{
+    int fetched = _pObject->fetchChildren(rowCount);
+    _lastFetched += fetched;
+    return fetched;
 }
 
 
@@ -136,7 +144,7 @@ int
 QtMediaObject::lastFetched(bool forward)
 {
 
-    return (forward ? totalItemCount() : 0);
+    return (forward ? _lastFetched : 0);
 }
 
 
