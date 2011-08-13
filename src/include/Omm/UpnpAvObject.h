@@ -371,13 +371,15 @@ public:
     virtual AbstractResource* createResource();
     
     virtual void setIsContainer(bool isContainer);
+    virtual void setTotalChildCount(ui4 childCount);                            // controller object, read from xml into memory
 
     virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
     void addProperty(AbstractProperty* pProperty);                              // controller object, read from xml into memory
 
     /*------------- read interface --------------*/
     virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
-                                                                                // controller object, browse
+    virtual ui4 getTotalChildCount();
+
     virtual bool isContainer();                                                 // server object, write meta data
                                                                                 // controller object, browse
     AbstractMediaObject* getChild(const std::string& objectId);                 // calls base class getChild(), needed to make method signature visible in this class
@@ -395,6 +397,7 @@ private:
     std::vector<AbstractMediaObject*>                                   _childVec;
     std::vector<AbstractProperty*>                                      _propertyVec;
     std::multimap<std::string,AbstractProperty*>                        _propertyMap;
+    ui4                                                                 _totalChildCount;
 };
 
 

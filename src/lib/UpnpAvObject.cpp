@@ -786,7 +786,8 @@ MemoryPropertyImpl::getAttributeCount()
 
 MemoryMediaObject::MemoryMediaObject() :
 _restricted(true),
-_isContainer(false)
+_isContainer(false),
+_totalChildCount(0)
 {
 }
 
@@ -864,6 +865,13 @@ MemoryMediaObject::setIsContainer(bool isContainer)
 
 
 void
+MemoryMediaObject::setTotalChildCount(ui4 childCount)
+{
+    _totalChildCount = childCount;
+}
+
+
+void
 MemoryMediaObject::appendChildImpl(AbstractMediaObject* pChild)
 {
 //    Log::instance()->upnpav().debug("MemoryMediaObject::appendChildImpl()");
@@ -887,6 +895,13 @@ MemoryMediaObject::getChildCount()
 //    Log::instance()->upnpav().debug("MemoryMediaObject::getChildCount()");
     
     return _childVec.size();
+}
+
+
+ui4
+MemoryMediaObject::getTotalChildCount()
+{
+    return _totalChildCount;
 }
 
 
