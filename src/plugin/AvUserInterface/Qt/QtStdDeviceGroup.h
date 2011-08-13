@@ -30,13 +30,13 @@ class QtNavigator;
 class QtDeviceListItem;
 
 
-class QtStandardDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm::DeviceGroup
+class QtStdDeviceGroup : public QAbstractItemModel, public QtNavigable, public Omm::DeviceGroup
 {
     Q_OBJECT
         
 public:
-    QtStandardDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate = 0);
-    ~QtStandardDeviceGroup();
+    QtStdDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate = 0);
+    ~QtStdDeviceGroup();
 
     // QtNavigable interface
     virtual QWidget* getWidget();

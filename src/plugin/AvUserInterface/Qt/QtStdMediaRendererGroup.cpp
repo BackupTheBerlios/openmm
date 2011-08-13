@@ -30,7 +30,7 @@
 
 
 QtStdMediaRendererGroup::QtStdMediaRendererGroup() :
-QtStandardDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
+QtStdDeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
 {
 }
 

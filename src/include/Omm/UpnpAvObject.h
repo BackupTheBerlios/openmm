@@ -376,7 +376,6 @@ public:
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0);             // server object, write meta data
 
     // descendants
-    virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
     virtual bool isContainer();                                                 // server object, write meta data
     virtual void setIsContainer(bool isContainer);
     virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
@@ -386,6 +385,9 @@ public:
     
 private:
     typedef std::multimap<std::string,AbstractProperty*>::iterator      PropertyIterator;
+
+    virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
+
     bool                                                                _restricted;
     bool                                                                _isContainer;
     std::vector<AbstractMediaObject*>                                   _childVec;

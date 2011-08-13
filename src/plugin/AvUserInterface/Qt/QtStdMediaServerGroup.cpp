@@ -28,7 +28,7 @@
 
 
 QtStdMediaServerGroup::QtStdMediaServerGroup() :
-QtStandardDeviceGroup(new Omm::Av::MediaServerGroupDelegate)
+QtStdDeviceGroup(new Omm::Av::MediaServerGroupDelegate)
 {
 }
 

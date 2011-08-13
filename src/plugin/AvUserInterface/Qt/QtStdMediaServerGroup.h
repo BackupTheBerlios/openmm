@@ -22,10 +22,10 @@
 #ifndef QtStdMediaServerGroup_INCLUDED
 #define QtStdMediaServerGroup_INCLUDED
 
-#include "QtStandardDeviceGroup.h"
+#include "QtStdDeviceGroup.h"
 
 
-class QtStdMediaServerGroup : public QtStandardDeviceGroup
+class QtStdMediaServerGroup : public QtStdDeviceGroup
 {
 public:
     QtStdMediaServerGroup();

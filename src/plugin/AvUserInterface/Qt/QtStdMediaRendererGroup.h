@@ -22,12 +22,12 @@
 #ifndef QtStdMediaRendererGroup_INCLUDED
 #define QtStdMediaRendererGroup_INCLUDED
 
-#include "QtStandardDeviceGroup.h"
+#include "QtStdDeviceGroup.h"
 
 class QtMediaRendererControlPanel;
 
 
-class QtStdMediaRendererGroup : public QtStandardDeviceGroup
+class QtStdMediaRendererGroup : public QtStdDeviceGroup
 {
     Q_OBJECT
     

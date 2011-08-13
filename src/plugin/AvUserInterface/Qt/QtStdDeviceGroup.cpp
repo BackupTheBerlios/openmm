@@ -22,7 +22,7 @@
 #include <Omm/UpnpAv.h>
 #include <Omm/UpnpAvController.h>
 
-#include "QtStandardDeviceGroup.h"
+#include "QtStdDeviceGroup.h"
 #include "QtNavigator.h"
 #include "QtMediaServer.h"
 #include "QtController.h"
@@ -96,7 +96,7 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 }
 
 
-QtStandardDeviceGroup::QtStandardDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate) :
+QtStdDeviceGroup::QtStdDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate) :
 DeviceGroup(pDeviceGroupDelegate),
 _pItemDelegate(pItemDelegate)
 {
@@ -104,13 +104,13 @@ _pItemDelegate(pItemDelegate)
 }
 
 
-QtStandardDeviceGroup::~QtStandardDeviceGroup()
+QtStdDeviceGroup::~QtStdDeviceGroup()
 {
 }
 
 
 void
-QtStandardDeviceGroup::initGui()
+QtStdDeviceGroup::initGui()
 {
     _charEncoding = QTextCodec::codecForName("UTF-8");
     _iconProvider = new QFileIconProvider;
@@ -132,28 +132,28 @@ QtStandardDeviceGroup::initGui()
 
 
 Omm::Util::Widget*
-QtStandardDeviceGroup::getDeviceGroupWidget()
+QtStdDeviceGroup::getDeviceGroupWidget()
 {
     return _pNavigator;
 }
 
 
 QWidget*
-QtStandardDeviceGroup::getWidget()
+QtStdDeviceGroup::getWidget()
 {
     return _pDeviceListView;
 }
 
 
 QString
-QtStandardDeviceGroup::getBrowserTitle()
+QtStdDeviceGroup::getBrowserTitle()
 {
     return ">";
 }
 
 
 void
-QtStandardDeviceGroup::selectedModelIndex(const QModelIndex& index)
+QtStdDeviceGroup::selectedModelIndex(const QModelIndex& index)
 {
     Omm::Device* pDevice = static_cast<Omm::Device*>(index.internalPointer());
     DeviceGroup::selectDevice(pDevice);
@@ -161,7 +161,7 @@ QtStandardDeviceGroup::selectedModelIndex(const QModelIndex& index)
 
 
 QVariant
-QtStandardDeviceGroup::data(const QModelIndex& index, int role) const
+QtStdDeviceGroup::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid()) {
         return QVariant();
@@ -185,7 +185,7 @@ QtStandardDeviceGroup::data(const QModelIndex& index, int role) const
 
 
 Qt::ItemFlags
-QtStandardDeviceGroup::flags(const QModelIndex& index) const
+QtStdDeviceGroup::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return 0;
@@ -195,42 +195,42 @@ QtStandardDeviceGroup::flags(const QModelIndex& index) const
 
 
 QVariant
-QtStandardDeviceGroup::headerData(int section, Qt::Orientation orientation, int role) const
+QtStdDeviceGroup::headerData(int section, Qt::Orientation orientation, int role) const
 {
     return "";
 }
 
 
 QModelIndex
-QtStandardDeviceGroup::index(int row, int column, const QModelIndex& parent) const
+QtStdDeviceGroup::index(int row, int column, const QModelIndex& parent) const
 {
     return createIndex(row, column, getDevice(row));
 }
 
 
 QModelIndex
-QtStandardDeviceGroup::parent(const QModelIndex& index) const
+QtStdDeviceGroup::parent(const QModelIndex& index) const
 {
     return QModelIndex();
 }
 
 
 int
-QtStandardDeviceGroup::rowCount(const QModelIndex& parent) const
+QtStdDeviceGroup::rowCount(const QModelIndex& parent) const
 {
     return getDeviceCount();
 }
 
 
 int
-QtStandardDeviceGroup::columnCount(const QModelIndex& parent) const
+QtStdDeviceGroup::columnCount(const QModelIndex& parent) const
 {
     return 1;
 }
 
 
 void
-QtStandardDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
+QtStdDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
         Omm::Log::instance()->upnp().debug("Qt device group adds device at position: " + Poco::NumberFormatter::format(position));
@@ -248,7 +248,7 @@ QtStandardDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 
 
 void
-QtStandardDeviceGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
+QtStdDeviceGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
         Omm::Log::instance()->upnp().debug("Qt device group removes device at position: " + Poco::NumberFormatter::format(position));
