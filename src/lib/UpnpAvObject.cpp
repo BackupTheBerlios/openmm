@@ -804,10 +804,12 @@ MemoryMediaObject::createChildObject()
 {
 //    Log::instance()->upnpav().debug("MemoryMediaObject::createObject()");
 
-    AbstractMediaObject* pChild = new MemoryMediaObject;
-    pChild->setIndex(Poco::NumberFormatter::format(getChildCount()));
-    appendChild(pChild);
-    return pChild;
+    return new MemoryMediaObject;
+
+//    AbstractMediaObject* pChild = new MemoryMediaObject;
+//    pChild->setIndex(Poco::NumberFormatter::format(getChildCount()));
+//    appendChild(pChild);
+//    return pChild;
 }
 
 

@@ -51,6 +51,9 @@ class CtlMediaObject2 : public MemoryMediaObject //, public Util::WidgetListMode
 public:
     CtlMediaObject2();
 
+    // factory methods
+    virtual AbstractMediaObject* createChildObject();
+
     CtlMediaServer* getServer() const;
     void setServer(CtlMediaServer* pServer);
     void setServerController(CtlMediaServerCode* pServerCode);

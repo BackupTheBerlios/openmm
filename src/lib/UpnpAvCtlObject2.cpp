@@ -38,6 +38,13 @@ _pListWidget(0)
 }
 
 
+AbstractMediaObject*
+CtlMediaObject2::createChildObject()
+{
+    return new CtlMediaObject2;
+}
+
+
 int
 CtlMediaObject2::fetchChildren(ui4 count)
 {
