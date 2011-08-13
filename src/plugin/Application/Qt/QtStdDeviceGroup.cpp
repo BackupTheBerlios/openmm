@@ -112,8 +112,8 @@ QtStdDeviceGroup::~QtStdDeviceGroup()
 void
 QtStdDeviceGroup::initGui()
 {
-    _charEncoding = QTextCodec::codecForName("UTF-8");
-    _iconProvider = new QFileIconProvider;
+    _pCharEncoding = QTextCodec::codecForName("UTF-8");
+    _pIconProvider = new QFileIconProvider;
     
     _pDeviceListView = new QListView;
     if (!_pItemDelegate) {
@@ -177,7 +177,7 @@ QtStdDeviceGroup::data(const QModelIndex& index, int role) const
         case Qt::DisplayRole:
             return QString(pDevice->getFriendlyName().c_str());
         case Qt::DecorationRole:
-            return _iconProvider->icon(QFileIconProvider::Folder);
+            return _pIconProvider->icon(QFileIconProvider::Folder);
         default:
             return QVariant();
     }

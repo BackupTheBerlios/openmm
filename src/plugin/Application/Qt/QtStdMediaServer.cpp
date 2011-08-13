@@ -92,12 +92,15 @@ QtStdMediaContainerItem::sizeHint(const QStyleOptionViewItem& option, const QMod
 
 
 QtStdMediaServerWidget::QtStdMediaServerWidget(QtStdMediaServer* pMediaServer) :
-_pMediaServer(pMediaServer)
+_pMediaServer(pMediaServer),
+_pItemDelegate(0)
 {
     setModel(pMediaServer);
     setUniformRowHeights(true);
     setHeaderHidden(true);
     if (!_pMediaServer->_treeView) {
+        _pItemDelegate = new QtStdMediaContainerItem;
+        setItemDelegate(_pItemDelegate);
         setRootIsDecorated(false);
         setItemsExpandable(false);
     }
@@ -129,7 +132,8 @@ QtStdMediaServerWidget::selectedModelIndex(const QModelIndex& index)
 QtStdMediaServer::QtStdMediaServer() :
 _pMediaServerWidget(0),
 _treeView(false),
-_charEncoding(QTextCodec::codecForName("UTF-8"))
+_pCharEncoding(0),
+_pIconProvider(0)
 {
 }
 
@@ -173,8 +177,12 @@ void
 QtStdMediaServer::selected()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt standard media server selected (controller)");
-    // creating a QTreeView and setting the model outside the GUI thread is not allowed,
+
+    // creating a QObjects like QTreeView or QFileIconProvider and setting a model outside the GUI thread is not allowed,
     // so we do it on first selection and not on discovery of the device.
+    _pCharEncoding = QTextCodec::codecForName("UTF-8");
+    _pIconProvider = new QFileIconProvider;
+
     if (!_pMediaServerWidget) {
         _pMediaServerWidget = new QtStdMediaServerWidget(this);
     }
@@ -188,23 +196,23 @@ QtStdMediaServer::icon(const QModelIndex &index) const
     if (!index.isValid())
         return QIcon();
     Omm::Av::CtlMediaObject2* pObject = getObject(index);
-    if (pObject == 0) {
+    if (!pObject) {
         return QIcon();
     }
     std::string objectClass = pObject->getProperty(Omm::Av::AvProperty::CLASS)->getValue();
     if (pObject->isContainer()) {
-        return _iconProvider->icon(QFileIconProvider::Folder);
+        return _pIconProvider->icon(QFileIconProvider::Folder);
     }
     else if (objectClass.find(Omm::Av::AvClass::AUDIO_ITEM) != std::string::npos) {
-        return _iconProvider->icon(QFileIconProvider::Drive);
+        return _pIconProvider->icon(QFileIconProvider::Drive);
     }
     else if (objectClass.find(Omm::Av::AvClass::VIDEO_ITEM) != std::string::npos) {
-        return _iconProvider->icon(QFileIconProvider::Desktop);
+        return _pIconProvider->icon(QFileIconProvider::Desktop);
     }
     else if (objectClass.find(Omm::Av::AvClass::IMAGE_ITEM) != std::string::npos) {
-        return _iconProvider->icon(QFileIconProvider::Computer);
+        return _pIconProvider->icon(QFileIconProvider::Computer);
     }
-    return _iconProvider->icon(QFileIconProvider::File);
+    return _pIconProvider->icon(QFileIconProvider::File);
 }
 
 
@@ -304,21 +312,21 @@ QtStdMediaServer::data(const QModelIndex &index, int role) const
     case Qt::EditRole:
 //        if (titleOnly) {
 //            return QString::fromStdString(object->getTitle());
-            return _charEncoding->toUnicode(pObject->getTitle().c_str());
+            return _pCharEncoding->toUnicode(pObject->getTitle().c_str());
 //        }
 //        else {
 //            return _charEncoding->toUnicode(artist.c_str());
 //        }
-        break;
+//        break;
     case Qt::DecorationRole:
-//        if (index.column() == 0) {
-//            return icon(index);
-//        }
+        if (index.column() == 0) {
+            return icon(index);
+        }
 //     case Qt::TextAlignmentRole:
 //         if (index.column() == 1) {
 //             return Qt::AlignRight;
 //         }
-         return QVariant();
+//         return QVariant();
     }
 
     return QVariant();

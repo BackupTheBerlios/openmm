@@ -76,8 +76,8 @@ private:
     QtStdMediaContainerItem*           _pMediaContainerItem;
     bool                               _treeView;
 
-    QTextCodec*                        _charEncoding;
-    QFileIconProvider*                 _iconProvider;
+    QTextCodec*                        _pCharEncoding;
+    QFileIconProvider*                 _pIconProvider;
 };
 
 
@@ -93,6 +93,7 @@ private slots:
 
 private:
     QtStdMediaServer*                  _pMediaServer;
+    QtStdMediaContainerItem*           _pItemDelegate;
 };
 
 

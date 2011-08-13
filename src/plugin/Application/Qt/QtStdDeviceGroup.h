@@ -67,8 +67,9 @@ private:
 
     QListView*                      _pDeviceListView;
     QStyledItemDelegate*            _pItemDelegate;
-    QTextCodec*                     _charEncoding;
-    QFileIconProvider*              _iconProvider;
+
+    QTextCodec*                     _pCharEncoding;
+    QFileIconProvider*              _pIconProvider;
 };
 
 
