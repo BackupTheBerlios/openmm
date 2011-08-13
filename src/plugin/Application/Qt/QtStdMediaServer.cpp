@@ -340,14 +340,11 @@ QtStdMediaServer::parent(const QModelIndex &index) const
     std::string parentObjectId = pParentObject->getId();
     // FIXME: determine row of parent as a grand parent's child in new media object implementation.
     Omm::ui4 parentRow = 0;
-    if (pGrandParentObject->getChildForIndex(parentObjectId)) {
-        return createIndex(parentRow, 0, pParentObject);
+    for (int i = 0; i < pGrandParentObject->getChildCount(); i++) {
+        if (pGrandParentObject->getChildForRow(parentRow)->getId() == parentObjectId) {
+            return createIndex(parentRow, 0, pParentObject);
+        }
     }
-//    Omm::Av::CtlMediaObject2::ChildIterator row;
-//    row = find(pGrandParentObject->beginChildren(), pGrandParentObject->endChildren(), pObject->getParent());
-//    if (row != pGrandParentObject->endChildren()) {
-//        return createIndex(row - pGrandParentObject->beginChildren(), 0, pObject->getParent());
-//    }
     return QModelIndex();
 }
 
@@ -371,7 +368,7 @@ QtStdMediaServer::index(int row, int column, const QModelIndex &parent) const
     if (row > int(pParentObject->getChildCount()) - 1) {
         return QModelIndex();
     }
-    return createIndex(row, column, pParentObject->getChildForIndex(row));
+    return createIndex(row, column, pParentObject->getChildForRow(row));
 }
 
 
