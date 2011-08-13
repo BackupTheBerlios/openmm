@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,56 +19,28 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtBrowserWidget_INCLUDED
-#define	QtBrowserWidget_INCLUDED
+#ifndef QtController_INCLUDED
+#define QtController_INCLUDED
 
 #include <QtGui>
+#include <Omm/Upnp.h>
 
-#include <Omm/UpnpAvController.h>
-
-class QtAvInterface;
 class QtApplication;
-class QtBrowserModel;
-class QtListItem;
-class QtCrumbButton;
-class QtCrumbPanel;
 
 
-class QtBrowserWidget : public QWidget
+class QtController : public QTabWidget, public Omm::Controller
 {
     Q_OBJECT
 
-    friend class QtAvInterface;
-
 public:
-    QtBrowserWidget(QWidget* parent, QtAvInterface* pAvInterface);
-    ~QtBrowserWidget();
+    QtController(QtApplication* pQtApplication);
 
-    void goBack();
-    QModelIndex getCurrentIndex();
-    void setCurrentIndex(QModelIndex index);
-    void beginAddServer(int position);
-    void endAddServer();
-    void beginRemoveServer(int position);
-    void endRemoveServer();
-
-private slots:
-    void browserItemActivated(const QModelIndex& index);
-    void browserItemSelected(const QModelIndex& index);
+    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
+    void addPanel(QToolBar* pPanel);
 
 private:
-    Omm::Av::CtlMediaObject*        _pCurrentServerRootObject;
-    QtAvInterface*                  _pAvInterface;
-    QtApplication*                  _pApplication;
-
-    QVBoxLayout*                    _pLayout;
-    QtBrowserModel*                 _pBrowserModel;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QTreeView*                      _pBrowserView;
-    QtListItem*                     _pListItem;
+    QtApplication*       _pQtApplication;
 };
-
 
 #endif
 

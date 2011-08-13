@@ -34,7 +34,6 @@ class QtEventFilter : public QObject
 public:
     QtEventFilter();
     QtEventFilter(QtAvInterface* pAvInterface);
-    QtEventFilter(QtApplication* pApplication);
 
 private:
     virtual bool eventFilter(QObject* object, QEvent* event);

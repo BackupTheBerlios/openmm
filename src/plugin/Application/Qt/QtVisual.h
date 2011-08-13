@@ -19,54 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtBrowserWidget_INCLUDED
-#define	QtBrowserWidget_INCLUDED
+#ifndef QtVisual_INCLUDED
+#define	QtVisual_INCLUDED
 
-#include <QtGui>
+#include <QLabel>
 
-#include <Omm/UpnpAvController.h>
+#include <Omm/Sys.h>
 
-class QtAvInterface;
-class QtApplication;
-class QtBrowserModel;
-class QtListItem;
-class QtCrumbButton;
-class QtCrumbPanel;
-
-
-class QtBrowserWidget : public QWidget
+class QtVisual : public QLabel, public Omm::Sys::Visual
 {
     Q_OBJECT
 
     friend class QtAvInterface;
 
 public:
-    QtBrowserWidget(QWidget* parent, QtAvInterface* pAvInterface);
-    ~QtBrowserWidget();
+    QtVisual(QWidget* pParent = 0);
+    virtual ~QtVisual();
 
-    void goBack();
-    QModelIndex getCurrentIndex();
-    void setCurrentIndex(QModelIndex index);
-    void beginAddServer(int position);
-    void endAddServer();
-    void beginRemoveServer(int position);
-    void endRemoveServer();
+    virtual void show();
+    virtual void hide();
+
+    virtual WindowHandle getWindow();
+    virtual VisualType getType();
+    virtual void renderImage(const std::string& imageData);
+    virtual void blank();
+
+signals:
+    void showMenu(bool show);
+    void signalShowImage(const std::string& imageData);
 
 private slots:
-    void browserItemActivated(const QModelIndex& index);
-    void browserItemSelected(const QModelIndex& index);
-
-private:
-    Omm::Av::CtlMediaObject*        _pCurrentServerRootObject;
-    QtAvInterface*                  _pAvInterface;
-    QtApplication*                  _pApplication;
-
-    QVBoxLayout*                    _pLayout;
-    QtBrowserModel*                 _pBrowserModel;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QTreeView*                      _pBrowserView;
-    QtListItem*                     _pListItem;
+    void slotShowImage(const std::string& imageData);
 };
 
 

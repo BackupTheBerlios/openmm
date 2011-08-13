@@ -18,9 +18,11 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+
+#include <Omm/UpnpAvLogger.h>
+
 #include "QtEventFilter.h"
-#include "QtAvInterface.h"
-#include "QtBrowserWidget.h"
+#include "QtApplication.h"
 
 
 QtEventFilter::QtEventFilter()
@@ -28,9 +30,8 @@ QtEventFilter::QtEventFilter()
 }
 
 
-QtEventFilter::QtEventFilter(QtAvInterface* avInterface) :
-_pAvInterface(avInterface),
-_pApplication(0)
+QtEventFilter::QtEventFilter(QtApplication* pApplication) :
+_pApplication(pApplication)
 {
 }
 

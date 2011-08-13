@@ -19,56 +19,82 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtBrowserWidget_INCLUDED
-#define	QtBrowserWidget_INCLUDED
+#include "QtVisual.h"
 
-#include <QtGui>
-
-#include <Omm/UpnpAvController.h>
-
-class QtAvInterface;
-class QtApplication;
-class QtBrowserModel;
-class QtListItem;
-class QtCrumbButton;
-class QtCrumbPanel;
-
-
-class QtBrowserWidget : public QWidget
+QtVisual::QtVisual(QWidget* pParent) :
+QLabel(pParent)
 {
-    Q_OBJECT
+    setAutoFillBackground(true);
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, Qt::black);
+    setPalette(pal);
+    setAlignment(Qt::AlignCenter);
 
-    friend class QtAvInterface;
-
-public:
-    QtBrowserWidget(QWidget* parent, QtAvInterface* pAvInterface);
-    ~QtBrowserWidget();
-
-    void goBack();
-    QModelIndex getCurrentIndex();
-    void setCurrentIndex(QModelIndex index);
-    void beginAddServer(int position);
-    void endAddServer();
-    void beginRemoveServer(int position);
-    void endRemoveServer();
-
-private slots:
-    void browserItemActivated(const QModelIndex& index);
-    void browserItemSelected(const QModelIndex& index);
-
-private:
-    Omm::Av::CtlMediaObject*        _pCurrentServerRootObject;
-    QtAvInterface*                  _pAvInterface;
-    QtApplication*                  _pApplication;
-
-    QVBoxLayout*                    _pLayout;
-    QtBrowserModel*                 _pBrowserModel;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QTreeView*                      _pBrowserView;
-    QtListItem*                     _pListItem;
-};
+    connect(this, SIGNAL(signalShowImage(const std::string&)), this, SLOT(slotShowImage(const std::string&)), Qt::QueuedConnection);
+}
 
 
+QtVisual::~QtVisual()
+{
+}
+
+
+void
+QtVisual::show()
+{
+    emit showMenu(false);
+}
+
+
+void
+QtVisual::hide()
+{
+    emit showMenu(true);
+}
+
+
+QtVisual::WindowHandle
+QtVisual::getWindow()
+{
+    return winId();
+}
+
+
+Omm::Sys::Visual::VisualType
+QtVisual::getType()
+{
+    // QtVisual is multi-platform, and type of visual is platform dependent.
+#ifdef __LINUX__
+    return Omm::Sys::Visual::VTX11;
+#elif __DARWIN__
+    return Omm::Sys::Visual::VTOSX;
+#elif __WINDOWS__
+    return Omm::Sys::Visual::VTWin;
+#else
+    return Omm::Sys::Visual::VTNone;
 #endif
+}
 
+
+void
+QtVisual::renderImage(const std::string& imageData)
+{
+    emit signalShowImage(imageData);
+}
+
+
+void
+QtVisual::blank()
+{
+    clear();
+}
+
+
+void
+QtVisual::slotShowImage(const std::string& imageData)
+{
+    QPixmap pixmap;
+    pixmap.loadFromData((uchar*)imageData.c_str(), (uint)imageData.size());
+//    _pWidget->setPixmap(pixmap.scaled(getWidth(), getHeight(), Qt::KeepAspectRatio));
+    setPixmap(pixmap.scaled(getWidth(), getHeight(), Qt::KeepAspectRatio));
+}

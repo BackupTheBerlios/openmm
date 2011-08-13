@@ -25,7 +25,6 @@
 #include "QtBrowserWidget.h"
 #include "QtCrumbButton.h"
 #include "QtAvInterface.h"
-#include "QtApplication.h"
 #include "QtBrowserModel.h"
 
 
@@ -39,44 +38,6 @@ _pApplication(0)
     _pListItem = new QtListItem(_pBrowserView);
     _pBrowserView->setItemDelegate(_pListItem);
     _pBrowserModel = new QtBrowserModel(pAvInterface);
-    _pBrowserView->setModel(_pBrowserModel);
-    _pBrowserView->setUniformRowHeights(true);
-//    _pBrowserView->setAlternatingRowColors(true);
-    _pBrowserView->setHeaderHidden(true);
-    _pBrowserView->setRootIsDecorated(false);
-    _pBrowserView->setItemsExpandable(false);
-
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget crumb panel ...");
-    _pCrumbPanel = new QtCrumbPanel(this);
-    _pCrumbButton = new QtCrumbButton(_pBrowserView, QModelIndex(), _pCrumbPanel);
-
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget layout...");
-    _pLayout = new QVBoxLayout;
-    _pLayout->addWidget(_pCrumbPanel);
-    _pLayout->addWidget(_pBrowserView);
-    setLayout(_pLayout);
-
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget signal connections ...");
-
-    connect(_pBrowserView, SIGNAL(activated(const QModelIndex&)),
-            this, SLOT(browserItemActivated(const QModelIndex&)));
-    connect(_pBrowserView, SIGNAL(pressed(const QModelIndex&)),
-            this, SLOT(browserItemSelected(const QModelIndex&)));
-
-//    Omm::Av::Log::instance()->upnpav().debug("finished ctor qt browser widget.");
-}
-
-
-QtBrowserWidget::QtBrowserWidget(QWidget* parent, QtApplication* pApplication) :
-QWidget(parent),
-_pAvInterface(0),
-_pApplication(pApplication)
-{
-//    Omm::Av::Log::instance()->upnpav().debug("ctor qt browser widget browser view ...");
-    _pBrowserView = new QTreeView(this);
-    _pListItem = new QtListItem(_pBrowserView);
-    _pBrowserView->setItemDelegate(_pListItem);
-    _pBrowserModel = new QtBrowserModel(pApplication);
     _pBrowserView->setModel(_pBrowserModel);
     _pBrowserView->setUniformRowHeights(true);
 //    _pBrowserView->setAlternatingRowColors(true);

@@ -23,10 +23,7 @@
 
 #include "QtStdApplication.h"
 #include "QtMainWindow.h"
-#include "QtBrowserWidget.h"
 #include "QtVisual.h"
-#include "QtRendererListModel.h"
-#include "QtPlayerRack.h"
 #include "QtControlPanel.h"
 #include "QtEventFilter.h"
 #include "QtStdController.h"

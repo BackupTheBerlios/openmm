@@ -19,56 +19,45 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtBrowserWidget_INCLUDED
-#define	QtBrowserWidget_INCLUDED
+#ifndef QtActivityIndicator_INCLUDED
+#define	QtActivityIndicator_INCLUDED
 
-#include <QtGui>
-
-#include <Omm/UpnpAvController.h>
-
-class QtAvInterface;
-class QtApplication;
-class QtBrowserModel;
-class QtListItem;
-class QtCrumbButton;
-class QtCrumbPanel;
+#include <QWidget>
+#include <QTimer>
+#include <QMutex>
+#include <QSvgRenderer>
 
 
-class QtBrowserWidget : public QWidget
+class QtActivityIndicator : public QWidget
 {
     Q_OBJECT
 
-    friend class QtAvInterface;
-
 public:
-    QtBrowserWidget(QWidget* parent, QtAvInterface* pAvInterface);
-    ~QtBrowserWidget();
+    QtActivityIndicator(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    virtual ~QtActivityIndicator();
 
-    void goBack();
-    QModelIndex getCurrentIndex();
-    void setCurrentIndex(QModelIndex index);
-    void beginAddServer(int position);
-    void endAddServer();
-    void beginRemoveServer(int position);
-    void endRemoveServer();
+public slots:
+    void startActivity();
+    void stopActivity();
 
 private slots:
-    void browserItemActivated(const QModelIndex& index);
-    void browserItemSelected(const QModelIndex& index);
+    void stopIndicator();
 
 private:
-    Omm::Av::CtlMediaObject*        _pCurrentServerRootObject;
-    QtAvInterface*                  _pAvInterface;
-    QtApplication*                  _pApplication;
+    void paintEvent(QPaintEvent *event);
+    void setActivityInProgress(bool set);
+    bool activityInProgress();
+    void setIndicatorOn(bool set);
+    bool indicatorOn();
 
-    QVBoxLayout*                    _pLayout;
-    QtBrowserModel*                 _pBrowserModel;
-    QtCrumbPanel*                   _pCrumbPanel;
-    QtCrumbButton*                  _pCrumbButton;
-    QTreeView*                      _pBrowserView;
-    QtListItem*                     _pListItem;
+    const int           _indicateDuration;
+    QSvgRenderer*       _symbolRenderer;
+    bool                _activityInProgress;
+    QMutex              _activityInProgressLock;
+    bool                _indicatorOn;
+    QMutex              _indicatorOnLock;
+    QTimer              _offTimer;
 };
-
 
 #endif
 

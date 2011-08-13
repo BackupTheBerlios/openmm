@@ -54,6 +54,7 @@ class QtControlPanel : public QToolBar
 
 public:
     QtControlPanel(QtAvInterface* pAvInterface, QWidget* pParent = 0);
+    QtControlPanel(QtApplication* pApplication, QWidget* pParent = 0);
     ~QtControlPanel();
 
     void setPlayerName(const std::string& name);

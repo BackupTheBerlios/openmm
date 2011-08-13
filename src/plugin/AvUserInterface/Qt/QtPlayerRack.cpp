@@ -21,7 +21,6 @@
 
 #include "QtPlayerRack.h"
 #include "QtAvInterface.h"
-#include "QtApplication.h"
 #include "QtRendererListModel.h"
 
 
