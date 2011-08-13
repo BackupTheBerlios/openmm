@@ -25,6 +25,7 @@
 #include "UpnpAvCtlImpl.h"
 #include "UpnpAvCtlDevices.h"
 #include "UpnpAvCtlObject.h"
+#include "UpnpAvCtlObject2.h"
 
 
 namespace Omm {
@@ -50,6 +51,25 @@ CtlMediaRenderer::setObject(CtlMediaObject* pObject)
     if (pRes) {
         std::string metaData;
         MediaObjectWriter writer(pObject);
+        writer.write(metaData);
+        try {
+            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
+        }
+        catch (Poco::Exception e) {
+//            error(e.message());
+            return;
+        }
+    }
+}
+
+
+void
+CtlMediaRenderer::setObject2(CtlMediaObject2* pObject)
+{
+    AbstractResource* pRes = pObject->getResource();
+    if (pRes) {
+        std::string metaData;
+        MediaObjectWriter2 writer(pObject);
         writer.write(metaData);
         try {
             _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
@@ -145,6 +165,7 @@ MediaRendererGroupDelegate::init()
     Log::instance()->upnpav().debug("media renderer delegate init");
     Controller* pController = _pDeviceGroup->getController();
     pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
+    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification2>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler2));
 }
 
 
@@ -156,6 +177,19 @@ MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaItemNotification* pMed
     CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
     if (pRenderer) {
         pRenderer->setObject(pItem);
+        pRenderer->playPressed();
+    }
+}
+
+
+void
+MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaItemNotification2* pMediaItemNotification)
+{
+    CtlMediaObject2* pItem = pMediaItemNotification->getMediaItem();
+    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pItem->getTitle());
+    CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
+    if (pRenderer) {
+        pRenderer->setObject2(pItem);
         pRenderer->playPressed();
     }
 }

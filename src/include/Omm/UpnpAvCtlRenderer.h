@@ -38,7 +38,9 @@ class AvController;
 class CtlMediaServerCode;
 class CtlMediaRendererCode;
 class CtlMediaObject;
+class CtlMediaObject2;
 class MediaItemNotification;
+class MediaItemNotification2;
 
 
 class CtlMediaRenderer : public Device
@@ -47,6 +49,7 @@ public:
     virtual void addCtlDeviceCode();
 
     void setObject(CtlMediaObject* pObject);
+    void setObject2(CtlMediaObject2* pObject);
     void playPressed();
     void stopPressed();
     void pausePressed();
@@ -73,6 +76,7 @@ private:
     virtual void init();
 
     void mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification);
+    void mediaItemSelectedHandler2(MediaItemNotification2* pMediaItemNotification);
 };
 
 
