@@ -24,7 +24,6 @@ QtStdController.cpp
 #QtEventFilter.cpp
 QtNavigable.cpp
 QtNavigator.cpp
-QtWidget.cpp
 QtStdDeviceGroup.cpp
 QtStdMediaRendererGroup.cpp
 QtStdMediaServerGroup.cpp
@@ -139,8 +138,6 @@ ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
 ${OMM_UTIL}
-${OMM_GUI} # FIXME: dependency of standard application on libommgui should be removed
-${OMM_UPNPGUI}
 ${QT_LIBRARIES}
 )
 

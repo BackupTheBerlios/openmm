@@ -89,7 +89,7 @@ QtNavigatorPanel::buttonPushed()
 
 
 QtNavigator::QtNavigator(QWidget* pParent) :
-QtWidget(pParent)
+QWidget(pParent)
 {
     _pNavigatorPanel = new QtNavigatorPanel(this);
     _pStackedWidget = new QStackedWidget(this);

@@ -23,8 +23,6 @@
 #define QtNavigable_INCLUDED
 
 #include <QtGui>
-//class QString;
-//class QWidget;
 class QtNavigator;
 
 // NOTE: QtNavigable could go into CtlMediaObject as a generic Navigable, with a generic Navigator

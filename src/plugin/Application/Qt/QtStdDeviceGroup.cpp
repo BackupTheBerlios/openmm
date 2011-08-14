@@ -97,7 +97,7 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 
 
 QtStdDeviceGroup::QtStdDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate) :
-DeviceGroupModel(pDeviceGroupDelegate),
+DeviceGroup(pDeviceGroupDelegate),
 _pItemDelegate(pItemDelegate)
 {
     initGui();
