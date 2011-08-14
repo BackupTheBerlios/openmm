@@ -3801,7 +3801,8 @@ Controller::registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show)
     pDeviceGroup->initDelegate();
     pDeviceGroup->setVisible(show);
     if (show) {
-        showDeviceGroup(pDeviceGroup);
+//        showDeviceGroup(pDeviceGroup);
+        pDeviceGroup->show();
     }
 }
 
@@ -3932,7 +3933,8 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 
                 pDeviceGroup->addDevice(pTypedDevice);
                 if (!pDeviceGroup->getVisible()) {
-                    showDeviceGroup(pDeviceGroup);
+//                    showDeviceGroup(pDeviceGroup);
+                    pDeviceGroup->show();
                 }
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
             }
@@ -4629,66 +4631,6 @@ Device*
 DeviceGroup::createDevice()
 {
     return 0;
-}
-
-
-Util::Widget*
-DeviceGroup::getDeviceGroupWidget()
-{
-    return 0;
-}
-
-
-void
-DeviceGroup::addDevice(Device* pDevice, int index, bool begin)
-{
-    if (!begin) {
-        // WidgetListModel interface
-        insertItem(index);
-    }
-}
-
-
-void
-DeviceGroup::removeDevice(Device* pDevice, int index, bool begin)
-{
-    if (begin) {
-        // WidgetListModel interface
-        removeItem(index);
-    }
-}
-
-
-void
-DeviceGroup::selectDevice(Device* pDevice, int index)
-{
-}
-
-
-void
-DeviceGroup::addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
-{
-}
-
-
-void
-DeviceGroup::removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
-{
-}
-
-
-int
-DeviceGroup::totalItemCount()
-{
-    return getDeviceCount();
-}
-
-
-void
-DeviceGroup::selectItem(int row)
-{
-    Device* pDevice = getDevice(row);
-    selectDevice(pDevice);
 }
 
 

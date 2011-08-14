@@ -31,7 +31,7 @@
 #include "QtNavigable.h"
 
 
-class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Util::WidgetListModel
+class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Omm::Gui::WidgetListModel
 /// QtMediaObject has two roles:
 /// As a container it implements the WidgetListModel interface of CtlMediaObject and has a pushable WidgetList for the Navigable interface.
 /// As a child widget it has _pObject as an attachable pointer to its CtlMediaObject to implement configure() of its QtSimpleListWidget interface.
@@ -58,9 +58,9 @@ public:
     virtual int lastFetched(bool forward = true);
 
     // child widget related
-    virtual Omm::Util::ListWidget* createWidget();
-    virtual Omm::Util::ListWidget* getWidget(int row);
-    virtual void attachWidget(int row, Omm::Util::ListWidget* pWidget);
+    virtual Omm::Gui::ListWidget* createWidget();
+    virtual Omm::Gui::ListWidget* getWidget(int row);
+    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
     virtual void detachWidget(int row);
 
 public slots:

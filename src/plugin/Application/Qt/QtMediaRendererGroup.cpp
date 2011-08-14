@@ -31,7 +31,7 @@
 
 
 QtMediaRendererGroup::QtMediaRendererGroup() :
-DeviceGroup(new Omm::Av::MediaRendererGroupDelegate)
+DeviceGroupModel(new Omm::Av::MediaRendererGroupDelegate)
 {
 //    _pWidgetList = new QtWidgetList;
 //    _pWidgetList->setModel(this);
@@ -52,22 +52,38 @@ QtMediaRendererGroup::createDevice()
 }
 
 
-Omm::Util::Widget*
-QtMediaRendererGroup::getDeviceGroupWidget()
+void
+QtMediaRendererGroup::show()
 {
-//    return _pWidgetList;
-    return _pWidgetCanvas;
+    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group show: " + getDeviceType());
+
+    QtController* pController = static_cast<QtController*>(getController());
+
+    if (_pWidgetCanvas && pController) {
+        pController->addTab(_pWidgetCanvas, shortName().c_str());
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("Qt media renderer group failed to show device group, no widget available: " + getDeviceType());
+    }
 }
 
 
-Omm::Util::ListWidget*
+//Omm::Gui::Widget*
+//QtMediaRendererGroup::getDeviceGroupWidget()
+//{
+////    return _pWidgetList;
+//    return _pWidgetCanvas;
+//}
+
+
+Omm::Gui::ListWidget*
 QtMediaRendererGroup::createWidget()
 {
     return new QtMediaRendererWidget;
 }
 
 
-Omm::Util::ListWidget*
+Omm::Gui::ListWidget*
 QtMediaRendererGroup::getChildWidget(int row)
 {
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
@@ -76,7 +92,7 @@ QtMediaRendererGroup::getChildWidget(int row)
 
 
 void
-QtMediaRendererGroup::attachWidget(int row, Omm::Util::ListWidget* pWidget)
+QtMediaRendererGroup::attachWidget(int row, Omm::Gui::ListWidget* pWidget)
 {
 //    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));

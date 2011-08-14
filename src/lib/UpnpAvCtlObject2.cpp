@@ -108,7 +108,7 @@ CtlMediaObject2::getImageRepresentation()
 
 
 void
-CtlMediaObject2::setListWidget(Omm::Util::ListWidget* pWidget)
+CtlMediaObject2::setListWidget(Omm::Gui::ListWidget* pWidget)
 {
     Log::instance()->upnpav().debug("controller media object set list widget");
 
@@ -116,7 +116,7 @@ CtlMediaObject2::setListWidget(Omm::Util::ListWidget* pWidget)
 }
 
 
-Omm::Util::ListWidget*
+Omm::Gui::ListWidget*
 CtlMediaObject2::getListWidget()
 {
     return _pListWidget;

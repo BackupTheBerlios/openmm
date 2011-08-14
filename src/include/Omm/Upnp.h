@@ -422,7 +422,7 @@ public:
     void registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show = true);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
-    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
+//    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
 
     // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);
@@ -617,9 +617,9 @@ private:
 };
 
 
-class DeviceGroup : public Util::WidgetListModel
+class DeviceGroup
 /// Contains only devices of the same type (which can be in different containers).
-/// Corresponds to one tab in the user interface.
+/// May corresponds to one tab in the user interface.
 /// May be loaded as a plugin when a new device type is discovered.
 {
     friend class Controller;
@@ -641,17 +641,13 @@ public:
 
     virtual Device* createDevice();
     /// factory method to create a device of a certain type.
-    virtual Util::Widget* getDeviceGroupWidget();
-
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
+    virtual void show() {}
+    
+    virtual void addDevice(Device* pDevice, int index, bool begin) {}
+    virtual void removeDevice(Device* pDevice, int index, bool begin) {}
+    virtual void selectDevice(Device* pDevice, int index) {}
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
 protected:
     virtual void init() {}

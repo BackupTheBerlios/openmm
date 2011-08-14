@@ -25,6 +25,7 @@ ommutil
 CACHE INTERNAL libommutil
 )
 
+
 if(LINUX)
 add_subdirectory(Net/Linux)
 if(TARGET ommnet-linux)
@@ -63,6 +64,7 @@ ommnet
 CACHE INTERNAL libommnet
 )
 
+
 add_library(ommupnp
 Upnp.cpp
 UpnpApplication.cpp
@@ -79,6 +81,7 @@ set(OMM
 ommupnp
 CACHE INTERNAL libommupnp
 )
+
 
 add_library(ommupnpav
 #SHARED
@@ -109,6 +112,7 @@ ommupnpav
 CACHE INTERNAL libommupnpav
 )
 
+
 add_library(ommavstream
 AvStream.cpp
 )
@@ -121,6 +125,7 @@ set(OMM_AVSTREAM
 ommavstream
 CACHE STRING libommavstream
 )
+
 
 add_library(ommsys
 Sys.cpp
@@ -135,10 +140,41 @@ ommsys
 CACHE INTERNAL libommsys
 )
 
+
+add_library(ommgui
+Gui.cpp
+)
+
+target_link_libraries(ommgui
+${POCO_FOUNDATION}
+)
+
+set(OMM_GUI
+ommgui
+CACHE INTERNAL libommgui
+)
+
+
+add_library(ommupnpgui
+UpnpGui.cpp
+)
+
+target_link_libraries(ommupnpgui
+${POCO_FOUNDATION}
+ommupnp
+ommgui
+)
+
+set(OMM_UPNPGUI
+ommupnpgui
+CACHE INTERNAL ommupnpgui
+)
+
+
 add_subdirectory(Dvb)
 
 
-install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys
+install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys ommgui ommupnpgui
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
@@ -157,6 +193,7 @@ ${OMM_AV}
 ${OMM_AVSTREAM}
 ${OMM_DVB}
 ${OMM_SYS}
+${OMM_GUI}
 CACHE INTERNAL ommlib
 )
 

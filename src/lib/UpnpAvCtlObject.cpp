@@ -33,8 +33,7 @@ namespace Av {
 CtlMediaObject::CtlMediaObject() :
 Omm::Av::MediaObjectOld(),
 _childCount(0),
-_fetchedAllChildren(false),
-_pListWidget(0)
+_fetchedAllChildren(false)
 {
 }
 
@@ -230,65 +229,6 @@ CtlMediaObject::getImageRepresentation()
         return 0;
     }
 }
-
-
-void
-CtlMediaObject::setListWidget(Omm::Util::ListWidget* pWidget)
-{
-    Log::instance()->upnpav().debug("controller media object set list widget");
-
-    _pListWidget = pWidget;
-}
-
-
-Omm::Util::ListWidget*
-CtlMediaObject::getListWidget()
-{
-    return _pListWidget;
-}
-
-
-//int
-//CtlMediaObject::totalItemCount()
-//{
-//    Log::instance()->upnpav().debug("controller media object child count: " + Poco::NumberFormatter::format(childCount()));
-//
-//    if (isContainer()) {
-////        return getChildCount();
-//        return childCount();
-//    }
-//    return 0;
-//}
-//
-//
-//void
-//CtlMediaObject::selectItem(int row)
-//{
-//    Log::instance()->upnpav().debug("controller media object select item in row: " + Poco::NumberFormatter::format(row));
-//
-//}
-//
-//
-//bool
-//CtlMediaObject::canFetchMore()
-//{
-//    return false;
-//}
-//
-//
-//void
-//CtlMediaObject::fetchMore(bool forward)
-//{
-//
-//}
-//
-//
-//int
-//CtlMediaObject::lastFetched(bool forward)
-//{
-//
-//    return (forward ? totalItemCount() : 0);
-//}
 
 
 Resource*

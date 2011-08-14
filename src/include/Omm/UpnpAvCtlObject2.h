@@ -28,7 +28,7 @@
 #include "Upnp.h"
 #include "UpnpInternal.h"
 #include "UpnpAvObject.h"
-#include "Util.h"
+#include "Gui.h"
 
 
 namespace Omm {
@@ -66,8 +66,8 @@ public:
     Icon* getIcon();
     Icon* getImageRepresentation();
 
-    void setListWidget(Omm::Util::ListWidget* pWidget);
-    Omm::Util::ListWidget* getListWidget();
+    void setListWidget(Omm::Gui::ListWidget* pWidget);
+    Omm::Gui::ListWidget* getListWidget();
 
 //    // WidgetListModel interface
 //    virtual int totalItemCount();
@@ -82,7 +82,7 @@ private:
     std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
-    Omm::Util::ListWidget*           _pListWidget;
+    Omm::Gui::ListWidget*           _pListWidget;
 };
 
 

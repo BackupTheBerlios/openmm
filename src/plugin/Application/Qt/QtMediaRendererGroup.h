@@ -24,14 +24,14 @@
 
 #include <QtGui>
 
-#include <Omm/Upnp.h>
+#include <Omm/UpnpGui.h>
 
 class QtMediaRenderer;
 class QtWidgetList;
 class QtWidgetCanvas;
 class QtMediaRendererControlPanel;
 
-class QtMediaRendererGroup : public QObject, public Omm::DeviceGroup
+class QtMediaRendererGroup : public QObject, public Omm::Gui::DeviceGroupModel
 {
     Q_OBJECT
 
@@ -39,14 +39,17 @@ public:
     QtMediaRendererGroup();
  
     // WidgetListModel interface
-    virtual Omm::Util::ListWidget* createWidget();
-    virtual Omm::Util::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Util::ListWidget* pWidget);
+    virtual Omm::Gui::ListWidget* createWidget();
+    virtual Omm::Gui::ListWidget* getChildWidget(int row);
+    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
     virtual void detachWidget(int row);
 
     // Omm::DeviceGroup interface
     virtual Omm::Device* createDevice();
-    virtual Omm::Util::Widget* getDeviceGroupWidget();
+    virtual void show();
+
+    // Gui::DeviceGroupModel interface
+//    virtual Omm::Gui::Widget* getDeviceGroupWidget();
 
 private slots:
     void playButtonPressed();

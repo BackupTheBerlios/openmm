@@ -23,11 +23,11 @@
 #define QtWidgetList_INCLUDED
 
 #include <QtGui>
-#include <Omm/Util.h>
+#include <Omm/Gui.h>
 #include "QtWidget.h"
 
 
-class QtWidgetList : public QScrollArea, public Omm::Util::WidgetListView
+class QtWidgetList : public QScrollArea, public Omm::Gui::WidgetListView
 {
     Q_OBJECT
 
@@ -37,17 +37,17 @@ public:
 
 protected:
     virtual int visibleRows();
-    virtual void initWidget(Omm::Util::ListWidget* pWidget);
-    virtual void moveWidget(int row, Omm::Util::ListWidget* pWidget);
+    virtual void initWidget(Omm::Gui::ListWidget* pWidget);
+    virtual void moveWidget(int row, Omm::Gui::ListWidget* pWidget);
 
     virtual void updateScrollWidgetSize();
     virtual int getOffset();
 
 signals:
-    void moveWidgetSignal(int targetRow, Omm::Util::ListWidget* pWidget);
+    void moveWidgetSignal(int targetRow, Omm::Gui::ListWidget* pWidget);
 
 private slots:
-    void moveWidgetSlot(int targetRow, Omm::Util::ListWidget* pWidget);
+    void moveWidgetSlot(int targetRow, Omm::Gui::ListWidget* pWidget);
     void viewScrolledSlot(int value);
 
 private:
@@ -57,7 +57,7 @@ private:
 };
 
 
-class QtWidgetCanvas : public QGraphicsView, public Omm::Util::Widget, public Omm::Util::WidgetListView
+class QtWidgetCanvas : public QGraphicsView, public Omm::Gui::Widget, public Omm::Gui::WidgetListView
 {
     Q_OBJECT
 
@@ -67,22 +67,22 @@ public:
 
 protected:
     virtual int visibleRows();
-    virtual void initWidget(Omm::Util::ListWidget* pWidget);
-    virtual void moveWidget(int row, Omm::Util::ListWidget* pWidget);
+    virtual void initWidget(Omm::Gui::ListWidget* pWidget);
+    virtual void moveWidget(int row, Omm::Gui::ListWidget* pWidget);
 
     virtual void extendWidgetPool();
 
 signals:
-    void moveWidgetSignal(int targetRow, Omm::Util::ListWidget* pWidget);
+    void moveWidgetSignal(int targetRow, Omm::Gui::ListWidget* pWidget);
     void extendPoolSignal();
 
 private slots:
-    void moveWidgetSlot(int targetRow, Omm::Util::ListWidget* pWidget);
+    void moveWidgetSlot(int targetRow, Omm::Gui::ListWidget* pWidget);
     void extendPoolSlot();
 
 private:
     QGraphicsScene*                                             _pGraphicsScene;
-    std::map<Omm::Util::ListWidget*, QGraphicsProxyWidget*>     _proxyWidgets;
+    std::map<Omm::Gui::ListWidget*, QGraphicsProxyWidget*>     _proxyWidgets;
     bool                                                        _movableWidgets;
 };
 

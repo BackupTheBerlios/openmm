@@ -139,6 +139,8 @@ ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
 ${OMM_UTIL}
+${OMM_GUI} # FIXME: dependency of standard application on libommgui should be removed
+${OMM_UPNPGUI}
 ${QT_LIBRARIES}
 )
 
@@ -159,6 +161,8 @@ ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
 ${OMM_UTIL}
+${OMM_GUI}
+${OMM_UPNPGUI}
 ${QT_LIBRARIES}
 )
 

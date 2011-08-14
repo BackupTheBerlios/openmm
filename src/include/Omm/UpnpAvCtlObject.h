@@ -29,6 +29,7 @@
 #include "UpnpInternal.h"
 #include "UpnpAvObject.h"
 #include "Util.h"
+#include "Gui.h"
 
 
 namespace Omm {
@@ -65,18 +66,6 @@ public:
     Icon* getIcon();
     Icon* getImageRepresentation();
 
-    void setListWidget(Omm::Util::ListWidget* pWidget);
-    Omm::Util::ListWidget* getListWidget();
-
-//    // WidgetListModel interface
-//    virtual int totalItemCount();
-//    virtual void selectItem(int row);
-//
-//    // lazy model related
-//    virtual bool canFetchMore();
-//    virtual void fetchMore(bool forward = true);
-//    virtual int lastFetched(bool forward = true);
-
 private:
     Resource* getResource(int num = 0);
     virtual void addResource(Resource* pResource);
@@ -90,7 +79,6 @@ private:
     bool                             _fetchedAllChildren;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
-    Omm::Util::ListWidget*           _pListWidget;
 };
 
 

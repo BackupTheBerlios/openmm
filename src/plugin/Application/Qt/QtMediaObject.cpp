@@ -147,7 +147,7 @@ QtMediaObject::lastFetched(bool forward)
 }
 
 
-Omm::Util::ListWidget*
+Omm::Gui::ListWidget*
 QtMediaObject::createWidget()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object create object widget");
@@ -156,7 +156,7 @@ QtMediaObject::createWidget()
 }
 
 
-Omm::Util::ListWidget*
+Omm::Gui::ListWidget*
 QtMediaObject::getWidget(int row)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
@@ -172,7 +172,7 @@ QtMediaObject::getWidget(int row)
 
 
 void
-QtMediaObject::attachWidget(int row, Omm::Util::ListWidget* pWidget)
+QtMediaObject::attachWidget(int row, Omm::Gui::ListWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object attach widget row: " + Poco::NumberFormatter::format(row));
     if (!pWidget) {

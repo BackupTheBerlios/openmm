@@ -27,6 +27,8 @@ target_link_libraries(newomm
 ${OMM}
 ${OMM_UTIL}
 ${OMM_AV}
+${OMM_GUI}
+${OMM_UPNPGUI}
 ommplugin-application-qt
 )
 

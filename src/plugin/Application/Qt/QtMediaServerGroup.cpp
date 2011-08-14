@@ -26,12 +26,13 @@
 #include "QtMediaServer.h"
 #include "QtMediaObject.h"
 #include "QtNavigator.h"
+#include "QtController.h"
 #include "QtWidget.h"
 #include "QtWidgetList.h"
 
 
 QtMediaServerGroup::QtMediaServerGroup() :
-DeviceGroup(new Omm::Av::MediaServerGroupDelegate)
+DeviceGroupModel(new Omm::Av::MediaServerGroupDelegate)
 {
     _pWidgetCanvas = new QtWidgetCanvas(true);
     _pWidgetCanvas->setModel(this);
@@ -56,17 +57,33 @@ QtMediaServerGroup::getBrowserTitle()
 }
 
 
-Omm::Util::Widget*
-QtMediaServerGroup::getDeviceGroupWidget()
-{
-    return _pNavigator;
-}
+//Omm::Gui::Widget*
+//QtMediaServerGroup::getDeviceGroupWidget()
+//{
+//    return _pNavigator;
+//}
 
 
 Omm::Device*
 QtMediaServerGroup::createDevice()
 {
     return new QtMediaServer;
+}
+
+
+void
+QtMediaServerGroup::show()
+{
+    Omm::Av::Log::instance()->upnpav().debug("Qt media server group show: " + getDeviceType());
+
+    QtController* pController = static_cast<QtController*>(getController());
+
+    if (_pNavigator && pController) {
+        pController->addTab(_pNavigator, shortName().c_str());
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("Qt media server group failed to show device group, no widget available: " + getDeviceType());
+    }
 }
 
 
@@ -89,14 +106,14 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
 }
 
 
-Omm::Util::ListWidget*
+Omm::Gui::ListWidget*
 QtMediaServerGroup::createWidget()
 {
     return new QtMediaServerWidget;
 }
 
 
-Omm::Util::ListWidget*
+Omm::Gui::ListWidget*
 QtMediaServerGroup::getChildWidget(int row)
 {
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));
@@ -105,7 +122,7 @@ QtMediaServerGroup::getChildWidget(int row)
 
 
 void
-QtMediaServerGroup::attachWidget(int row, Omm::Util::ListWidget* pWidget)
+QtMediaServerGroup::attachWidget(int row, Omm::Gui::ListWidget* pWidget)
 {
 //    Omm::Av::Log::instance()->upnpav().debug("media server group attach widget");
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));

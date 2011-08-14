@@ -26,7 +26,7 @@
 #include <Omm/Upnp.h>
 
 class QtStdApplication;
-
+class QtStdDeviceGroup;
 
 class QtStdController : public QTabWidget, public Omm::Controller
 {
@@ -35,7 +35,7 @@ class QtStdController : public QTabWidget, public Omm::Controller
 public:
     QtStdController(QtStdApplication* pQtApplication);
 
-    virtual void showDeviceGroup(Omm::DeviceGroup* pDeviceGroup);
+//    virtual void showDeviceGroup(QtStdDeviceGroup* pDeviceGroup);
     void addPanel(QToolBar* pPanel);
 
 private:

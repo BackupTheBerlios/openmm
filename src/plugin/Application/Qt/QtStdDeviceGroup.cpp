@@ -25,7 +25,7 @@
 #include "QtStdDeviceGroup.h"
 #include "QtNavigator.h"
 #include "QtMediaServer.h"
-#include "QtController.h"
+#include "QtStdController.h"
 
 
 class QtDeviceListItem : public QStyledItemDelegate
@@ -97,7 +97,7 @@ QtDeviceListItem::sizeHint(const QStyleOptionViewItem& option, const QModelIndex
 
 
 QtStdDeviceGroup::QtStdDeviceGroup(Omm::DeviceGroupDelegate* pDeviceGroupDelegate, QStyledItemDelegate* pItemDelegate) :
-DeviceGroup(pDeviceGroupDelegate),
+DeviceGroupModel(pDeviceGroupDelegate),
 _pItemDelegate(pItemDelegate)
 {
     initGui();
@@ -131,11 +131,11 @@ QtStdDeviceGroup::initGui()
 }
 
 
-Omm::Util::Widget*
-QtStdDeviceGroup::getDeviceGroupWidget()
-{
-    return _pNavigator;
-}
+//Omm::Gui::Widget*
+//QtStdDeviceGroup::getDeviceGroupWidget()
+//{
+//    return _pNavigator;
+//}
 
 
 QWidget*
@@ -226,6 +226,22 @@ int
 QtStdDeviceGroup::columnCount(const QModelIndex& parent) const
 {
     return 1;
+}
+
+
+void
+QtStdDeviceGroup::show()
+{
+    Omm::Log::instance()->upnp().debug("Qt standard device group show: " + getDeviceType());
+
+    QtStdController* pController = static_cast<QtStdController*>(getController());
+
+    if (_pNavigator && pController) {
+        pController->addTab(_pNavigator, shortName().c_str());
+    }
+    else {
+        Omm::Log::instance()->upnp().error("Qt standard device group failed to show device group, no widget available: " + getDeviceType());
+    }
 }
 
 

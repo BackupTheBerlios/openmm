@@ -39,19 +39,19 @@ _pQtApplication(pQtApplication)
 }
 
 
-void
-QtController::showDeviceGroup(Omm::DeviceGroup* pDeviceGroup)
-{
-    Omm::Log::instance()->upnp().debug("Qt controller show device group: " + pDeviceGroup->getDeviceType());
-    
-    QtWidget* pDeviceGroupWidget = static_cast<QtWidget*>(pDeviceGroup->getDeviceGroupWidget());
-    if (pDeviceGroupWidget) {
-        addTab(pDeviceGroupWidget, pDeviceGroup->shortName().c_str());
-    }
-    else {
-        Omm::Log::instance()->upnp().error("Qt controller failed to show device group, no widget available: " + pDeviceGroup->getDeviceType());
-    }
-}
+//void
+//QtController::showDeviceGroup(Omm::DeviceGroup* pDeviceGroup)
+//{
+//    Omm::Log::instance()->upnp().debug("Qt controller show device group: " + pDeviceGroup->getDeviceType());
+//
+//    QtWidget* pDeviceGroupWidget = static_cast<QtWidget*>(pDeviceGroup->getDeviceGroupWidget());
+//    if (pDeviceGroupWidget) {
+//        addTab(pDeviceGroupWidget, pDeviceGroup->shortName().c_str());
+//    }
+//    else {
+//        Omm::Log::instance()->upnp().error("Qt controller failed to show device group, no widget available: " + pDeviceGroup->getDeviceType());
+//    }
+//}
 
 
 void
