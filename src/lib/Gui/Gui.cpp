@@ -26,7 +26,7 @@
 #include <Poco/Environment.h>
 #include <Poco/NumberFormatter.h>
 
-#include "Gui.h"
+#include "Gui/Gui.h"
 
 namespace Omm {
 namespace Gui {

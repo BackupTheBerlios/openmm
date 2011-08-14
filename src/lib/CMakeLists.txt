@@ -141,40 +141,11 @@ CACHE INTERNAL libommsys
 )
 
 
-add_library(ommgui
-Gui.cpp
-)
-
-target_link_libraries(ommgui
-${POCO_FOUNDATION}
-)
-
-set(OMM_GUI
-ommgui
-CACHE INTERNAL libommgui
-)
-
-
-add_library(ommupnpgui
-UpnpGui.cpp
-)
-
-target_link_libraries(ommupnpgui
-${POCO_FOUNDATION}
-ommupnp
-ommgui
-)
-
-set(OMM_UPNPGUI
-ommupnpgui
-CACHE INTERNAL ommupnpgui
-)
-
-
+add_subdirectory(Gui)
 add_subdirectory(Dvb)
 
 
-install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys ommgui ommupnpgui
+install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
@@ -194,6 +165,7 @@ ${OMM_AVSTREAM}
 ${OMM_DVB}
 ${OMM_SYS}
 ${OMM_GUI}
+${OMM_UPNPGUI}
 CACHE INTERNAL ommlib
 )
 

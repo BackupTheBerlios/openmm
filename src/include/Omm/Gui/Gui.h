@@ -82,11 +82,11 @@ protected:
 };
 
 
-template<class C>
-class WidgetImpl : public Widget
-{
-
-};
+//template<class C>
+//class WidgetImpl : public Widget
+//{
+//
+//};
 
 
 class ListWidget : public Widget

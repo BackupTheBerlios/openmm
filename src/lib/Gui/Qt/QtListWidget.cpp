@@ -19,52 +19,70 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#include <Poco/NumberFormatter.h>
+#include <Omm/UpnpAvLogger.h>
+#include "QtListWidget.h"
 
-#include <QtGui>
 
-#include <Omm/Gui/UpnpGui.h>
-
-class QtMediaRenderer;
-class QtWidgetList;
-class QtWidgetCanvas;
-class QtMediaRendererControlPanel;
-
-class QtMediaRendererGroup : public QObject, public Omm::Gui::DeviceGroupModel
+QtListWidget::QtListWidget(QWidget* pParent) :
+QWidget(pParent)
 {
-    Q_OBJECT
 
-public:
-    QtMediaRendererGroup();
- 
-    // WidgetListModel interface
-    virtual Omm::Gui::ListWidget* createWidget();
-    virtual Omm::Gui::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
-    virtual void detachWidget(int row);
-
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void show();
-
-    // Gui::DeviceGroupModel interface
-//    virtual Omm::Gui::Widget* getDeviceGroupWidget();
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
-
-private:
-    virtual void init();
-
-    QtWidgetList*                   _pWidgetList;
-    QtWidgetCanvas*                 _pWidgetCanvas;
-    QtMediaRendererControlPanel*    _pControlPanel;
-};
+}
 
 
-#endif
+void
+QtListWidget::showWidget()
+{
+    QWidget::show();
+}
 
+
+void
+QtListWidget::hideWidget()
+{
+    QWidget::hide();
+}
+
+
+void
+QtListWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    Omm::Av::Log::instance()->upnpav().debug("QtListWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    select();
+    QWidget::mousePressEvent(pMouseEvent);
+}
+
+
+QtSimpleListWidget::QtSimpleListWidget(QWidget* pParent) :
+QtListWidget(pParent)
+{
+    _pLayout = new QHBoxLayout(this);
+    _pNameLabel = new QLabel;
+//    _pNameLabel->setBackgroundRole(QPalette::Shadow);
+    _pLayout->addWidget(_pNameLabel);
+    _pLayout->setSpacing(0);
+    _pLayout->setMargin(0);
+    _pLayout->setContentsMargins(0, 0, 0, 0);
+//    QWidget::setBackgroundColor(QColor::fromRgb(255, 255, 255, 255));
+//    QWidget::setBackgroundRole(QPalette::Highlight);
+//    QWidget::setBackgroundRole(QPalette::NoRole);
+//    QWidget::setBackgroundRole(QPalette::Light);
+//    QWidget::setBackgroundRole(QPalette::Shadow);
+//    QWidget::setBackgroundRole(QPalette(QColor("white")));
+    QWidget::setPalette(QPalette(Qt::white));
+    QWidget::setAutoFillBackground(true);
+}
+
+
+QtSimpleListWidget::~QtSimpleListWidget()
+{
+    delete _pNameLabel;
+}
+
+
+void
+QtSimpleListWidget::setLabel(const std::string& text)
+{
+    _pNameLabel->setText(QString::fromStdString(text));
+}

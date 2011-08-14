@@ -23,7 +23,7 @@
 #define QtMediaServerGroup_INCLUDED
 
 #include <QtGui>
-#include <Omm/UpnpGui.h>
+#include <Omm/Gui/UpnpGui.h>
 #include "QtNavigable.h"
 
 class QtNavigator;

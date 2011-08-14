@@ -23,7 +23,7 @@
 #define QtWidgetList_INCLUDED
 
 #include <QtGui>
-#include <Omm/Gui/Gui.h>
+#include <Omm/Gui.h>
 #include "QtWidget.h"
 
 

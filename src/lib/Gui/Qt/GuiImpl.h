@@ -19,77 +19,10 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "UpnpGui.h"
+#ifndef GuiImpl_INCLUDED
+#define GuiImpl_INCLUDED
 
-namespace Omm {
-namespace Gui {
+#include "QtWidget.h"
 
-DeviceGroupModel::DeviceGroupModel(const std::string& deviceType, const std::string& shortName) :
-DeviceGroup(deviceType, shortName)
-{
+#endif
 
-}
-
-
-DeviceGroupModel::DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate) :
-DeviceGroup(pDeviceGroupDelegate)
-{
-    
-}
-
-
-void
-DeviceGroupModel::addDevice(Device* pDevice, int index, bool begin)
-{
-    if (!begin) {
-        // WidgetListModel interface
-        insertItem(index);
-    }
-}
-
-
-void
-DeviceGroupModel::removeDevice(Device* pDevice, int index, bool begin)
-{
-    if (begin) {
-        // WidgetListModel interface
-        removeItem(index);
-    }
-}
-
-
-void
-DeviceGroupModel::selectDevice(Device* pDevice, int index)
-{
-}
-
-
-void
-DeviceGroupModel::addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
-{
-}
-
-
-void
-DeviceGroupModel::removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin)
-{
-}
-
-
-int
-DeviceGroupModel::totalItemCount()
-{
-    return getDeviceCount();
-}
-
-
-void
-DeviceGroupModel::selectItem(int row)
-{
-    Device* pDevice = getDevice(row);
-    DeviceGroup::selectDevice(pDevice);
-}
-
-
-} // namespace Gui
-} // namespace Omm

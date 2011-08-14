@@ -19,52 +19,58 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#ifndef QtListWidget_INCLUDED
+#define QtListWidget_INCLUDED
 
 #include <QtGui>
+#include <Omm/Gui.h>
 
-#include <Omm/Gui/UpnpGui.h>
 
-class QtMediaRenderer;
-class QtWidgetList;
-class QtWidgetCanvas;
-class QtMediaRendererControlPanel;
+class QtListWidget : public QWidget, public Omm::Gui::ListWidget
+{
+    Q_OBJECT
 
-class QtMediaRendererGroup : public QObject, public Omm::Gui::DeviceGroupModel
+    friend class QtMediaServerGroup;
+
+public:
+    QtListWidget(QWidget* pParent = 0);
+
+    virtual void showWidget();
+    virtual void hideWidget();
+
+signals:
+    void showWidgetSignal();
+    void hideWidgetSignal();
+    void configureWidget();
+    // NOTE: unconfigureWidget() isn't needed. Widget must only be configured correct,
+    // that means, values have to be cached to allow for fast scrolling (don't retrieve
+    // them via network for example).
+    void unconfigureWidget();
+
+public slots:
+    virtual void configure() {}
+    virtual void unconfigure() {}
+
+private:
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+};
+
+
+class QtSimpleListWidget : public QtListWidget
 {
     Q_OBJECT
 
 public:
-    QtMediaRendererGroup();
- 
-    // WidgetListModel interface
-    virtual Omm::Gui::ListWidget* createWidget();
-    virtual Omm::Gui::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
-    virtual void detachWidget(int row);
+    QtSimpleListWidget(QWidget* pParent = 0);
+    virtual ~QtSimpleListWidget();
 
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void show();
-
-    // Gui::DeviceGroupModel interface
-//    virtual Omm::Gui::Widget* getDeviceGroupWidget();
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
+protected:
+    void setLabel(const std::string& text);
 
 private:
-    virtual void init();
-
-    QtWidgetList*                   _pWidgetList;
-    QtWidgetCanvas*                 _pWidgetCanvas;
-    QtMediaRendererControlPanel*    _pControlPanel;
+    QHBoxLayout*                    _pLayout;
+    QLabel*                         _pNameLabel;
 };
-
 
 #endif
 

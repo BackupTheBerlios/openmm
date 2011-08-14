@@ -23,7 +23,7 @@
 #define QtWidget_INCLUDED
 
 #include <QtGui>
-#include <Omm/Gui.h>
+#include <Omm/Gui/Gui.h>
 
 
 class QtWidget : public QWidget, public Omm::Gui::Widget

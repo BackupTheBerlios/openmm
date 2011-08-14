@@ -19,37 +19,10 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#ifndef GuiImpl_INCLUDED
+#define GuiImpl_INCLUDED
 
-#include "Upnp.h"
-#include "Gui.h"
-
-namespace Omm {
-namespace Gui {
-
-class DeviceGroupModel : public DeviceGroup, public WidgetListModel
-{
-public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
-
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
-
-protected:
-    virtual void init() {}
-};
-
-
-}  // namespace Omm
-}  // namespace Gui
+#include "QtWidget.h"
 
 #endif
+

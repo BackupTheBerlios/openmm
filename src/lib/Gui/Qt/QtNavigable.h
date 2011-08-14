@@ -19,50 +19,32 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#ifndef QtNavigable_INCLUDED
+#define QtNavigable_INCLUDED
 
 #include <QtGui>
+class QtNavigator;
 
-#include <Omm/Gui/UpnpGui.h>
+// NOTE: QtNavigable could go into CtlMediaObject as a generic Navigable, with a generic Navigator
 
-class QtMediaRenderer;
-class QtWidgetList;
-class QtWidgetCanvas;
-class QtMediaRendererControlPanel;
-
-class QtMediaRendererGroup : public QObject, public Omm::Gui::DeviceGroupModel
+class QtNavigable
 {
-    Q_OBJECT
-
+    friend class QtNavigator;
+    
 public:
-    QtMediaRendererGroup();
- 
-    // WidgetListModel interface
-    virtual Omm::Gui::ListWidget* createWidget();
-    virtual Omm::Gui::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
-    virtual void detachWidget(int row);
+    QtNavigable();
 
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void show();
-
-    // Gui::DeviceGroupModel interface
-//    virtual Omm::Gui::Widget* getDeviceGroupWidget();
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
+    virtual QString getBrowserTitle() { return ""; }
+    virtual QWidget* getWidget() { return 0; }
+    /// If getWidget() returns not null but a valid widget, the widget
+    /// is pushed on QtNavigator::_pStackedWidget.
+    virtual void show() {}
+    /// Additionally, show() can be implemented if for example no widget
+    /// is pushed but some other action is necessary to show the correct view.
+    QtNavigator* getNavigator() const;
 
 private:
-    virtual void init();
-
-    QtWidgetList*                   _pWidgetList;
-    QtWidgetCanvas*                 _pWidgetCanvas;
-    QtMediaRendererControlPanel*    _pControlPanel;
+    QtNavigator*    _pNavigator;
 };
 
 

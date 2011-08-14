@@ -19,52 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#ifndef UpnpGui_INCLUDED
+#define UpnpGui_INCLUDED
 
-#include <QtGui>
+#include "../Upnp.h"
+#include "Gui.h"
 
-#include <Omm/Gui/UpnpGui.h>
+namespace Omm {
+namespace Gui {
 
-class QtMediaRenderer;
-class QtWidgetList;
-class QtWidgetCanvas;
-class QtMediaRendererControlPanel;
-
-class QtMediaRendererGroup : public QObject, public Omm::Gui::DeviceGroupModel
+class DeviceGroupModel : public DeviceGroup, public WidgetListModel
 {
-    Q_OBJECT
-
 public:
-    QtMediaRendererGroup();
- 
+    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
+    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
+
+    virtual void addDevice(Device* pDevice, int index, bool begin);
+    virtual void removeDevice(Device* pDevice, int index, bool begin);
+    virtual void selectDevice(Device* pDevice, int index);
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+
     // WidgetListModel interface
-    virtual Omm::Gui::ListWidget* createWidget();
-    virtual Omm::Gui::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
-    virtual void detachWidget(int row);
+    virtual int totalItemCount();
+    virtual void selectItem(int row);
 
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void show();
-
-    // Gui::DeviceGroupModel interface
-//    virtual Omm::Gui::Widget* getDeviceGroupWidget();
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
-
-private:
-    virtual void init();
-
-    QtWidgetList*                   _pWidgetList;
-    QtWidgetCanvas*                 _pWidgetCanvas;
-    QtMediaRendererControlPanel*    _pControlPanel;
+protected:
+    virtual void init() {}
 };
 
 
-#endif
+}  // namespace Omm
+}  // namespace Gui
 
+#endif

@@ -19,52 +19,33 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtMediaRendererGroup_INCLUDED
-#define QtMediaRendererGroup_INCLUDED
+#include "QtWidget.h"
 
-#include <QtGui>
 
-#include <Omm/Gui/UpnpGui.h>
-
-class QtMediaRenderer;
-class QtWidgetList;
-class QtWidgetCanvas;
-class QtMediaRendererControlPanel;
-
-class QtMediaRendererGroup : public QObject, public Omm::Gui::DeviceGroupModel
+WidgetImpl::WidgetImpl(QWidget* pParent) :
+QWidget(pParent)
 {
-    Q_OBJECT
-
-public:
-    QtMediaRendererGroup();
- 
-    // WidgetListModel interface
-    virtual Omm::Gui::ListWidget* createWidget();
-    virtual Omm::Gui::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
-    virtual void detachWidget(int row);
-
-    // Omm::DeviceGroup interface
-    virtual Omm::Device* createDevice();
-    virtual void show();
-
-    // Gui::DeviceGroupModel interface
-//    virtual Omm::Gui::Widget* getDeviceGroupWidget();
-
-private slots:
-    void playButtonPressed();
-    void stopButtonPressed();
-    void volumeSliderMoved(int value);
-    void positionSliderMoved(int value);
-
-private:
-    virtual void init();
-
-    QtWidgetList*                   _pWidgetList;
-    QtWidgetCanvas*                 _pWidgetCanvas;
-    QtMediaRendererControlPanel*    _pControlPanel;
-};
+}
 
 
-#endif
+void
+WidgetImpl::showWidget()
+{
+    QWidget::show();
+}
 
+
+void
+WidgetImpl::hideWidget()
+{
+    QWidget::hide();
+}
+
+
+//void
+//QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget");
+//    select();
+//    QWidget::mousePressEvent(pMouseEvent);
+//}
