@@ -24,6 +24,9 @@
 
 #include <QtGui>
 
+namespace Omm {
+namespace Gui {
+
 
 class WidgetImpl : public QWidget
 {
@@ -37,6 +40,9 @@ public:
 //    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
+
+}  // namespace Omm
+}  // namespace Gui
 
 #endif
 

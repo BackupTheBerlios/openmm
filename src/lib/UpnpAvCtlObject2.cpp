@@ -32,8 +32,8 @@ namespace Av {
 
 CtlMediaObject2::CtlMediaObject2() :
 _pServer(0),
-_pServerCode(0),
-_pListWidget(0)
+_pServerCode(0)
+//_pListWidget(0)
 {
 }
 
@@ -107,20 +107,20 @@ CtlMediaObject2::getImageRepresentation()
 }
 
 
-void
-CtlMediaObject2::setListWidget(Omm::Gui::ListWidget* pWidget)
-{
-    Log::instance()->upnpav().debug("controller media object set list widget");
-
-    _pListWidget = pWidget;
-}
-
-
-Omm::Gui::ListWidget*
-CtlMediaObject2::getListWidget()
-{
-    return _pListWidget;
-}
+//void
+//CtlMediaObject2::setListWidget(Omm::Gui::ListWidget* pWidget)
+//{
+//    Log::instance()->upnpav().debug("controller media object set list widget");
+//
+//    _pListWidget = pWidget;
+//}
+//
+//
+//Omm::Gui::ListWidget*
+//CtlMediaObject2::getListWidget()
+//{
+//    return _pListWidget;
+//}
 
 //
 //void

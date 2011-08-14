@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Gui_INCLUDED
-#define Gui_INCLUDED
+#ifndef AppGui_INCLUDED
+#define AppGui_INCLUDED
 
 #include <stack>
 
@@ -36,28 +36,9 @@
 #include <Poco/Observer.h>
 
 
-namespace Omm {
-namespace Gui {
-
-class WidgetImpl;
 class WidgetListModel;
 class WidgetListView;
 class Navigator;
-
-
-class Log
-{
-public:
-    static Log* instance();
-    
-    Poco::Logger& gui();
-    
-private:
-    Log();
-    
-    static Log*     _pInstance;
-    Poco::Logger*   _pGuiLogger;
-};
 
 
 class Widget
@@ -66,8 +47,8 @@ public:
     Widget();
     virtual ~Widget();
 
-    virtual void showWidget();
-    virtual void hideWidget();
+    virtual void showWidget() {}
+    virtual void hideWidget() {}
 
     class SelectNotification : public Poco::Notification
     {
@@ -81,9 +62,6 @@ protected:
     virtual void select();
 
     Poco::NotificationCenter _eventNotificationCenter;
-
-private:
-    WidgetImpl*     _pImpl;
 };
 
 
@@ -244,8 +222,5 @@ private:
     std::stack<Navigable*>    _navigableStack;
 };
 
-
-}  // namespace Omm
-}  // namespace Gui
 
 #endif

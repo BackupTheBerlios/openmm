@@ -147,7 +147,7 @@ QtMediaObject::lastFetched(bool forward)
 }
 
 
-Omm::Gui::ListWidget*
+ListWidget*
 QtMediaObject::createWidget()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object create object widget");
@@ -156,14 +156,15 @@ QtMediaObject::createWidget()
 }
 
 
-Omm::Gui::ListWidget*
+ListWidget*
 QtMediaObject::getWidget(int row)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
 
     if (_pObject) {
         Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
-        return pChildObject->getListWidget();
+        // FIXME: had to comment this out, CtlMediaObject should contain no gui code
+//        return pChildObject->getListWidget();
     }
     else {
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object widget (ignoring)");
@@ -172,7 +173,7 @@ QtMediaObject::getWidget(int row)
 
 
 void
-QtMediaObject::attachWidget(int row, Omm::Gui::ListWidget* pWidget)
+QtMediaObject::attachWidget(int row, ListWidget* pWidget)
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object attach widget row: " + Poco::NumberFormatter::format(row));
     if (!pWidget) {
@@ -188,7 +189,8 @@ QtMediaObject::attachWidget(int row, Omm::Gui::ListWidget* pWidget)
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get child object (ignoring)");
         return;
     }
-    pChildObject->setListWidget(pWidget);
+    // FIXME: had to comment this out, CtlMediaObject should contain no gui code
+//    pChildObject->setListWidget(pWidget);
     QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pWidget);
     pChildWidget->_pObject = pChildObject;
 
@@ -212,18 +214,20 @@ QtMediaObject::detachWidget(int row)
         return;
     }
     Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
-    QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pChildObject->getListWidget());
-
-    emit pChildWidget->hideWidgetSignal();
-    emit pChildWidget->unconfigureWidget();
-
-    disconnect(pChildWidget, SIGNAL(showWidgetSignal()), pChildWidget, SLOT(show()));
-    disconnect(pChildWidget, SIGNAL(hideWidgetSignal()), pChildWidget, SLOT(hide()));
-    disconnect(pChildWidget, SIGNAL(configureWidget()), pChildWidget, SLOT(configure()));
-    disconnect(pChildWidget, SIGNAL(unconfigureWidget()), pChildWidget, SLOT(unconfigure()));
-
-    pChildWidget->_pObject = 0;
-    pChildObject->setListWidget(0);
+    // FIXME: had to comment this out, CtlMediaObject should contain no gui code
+//    QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pChildObject->getListWidget());
+//
+//    emit pChildWidget->hideWidgetSignal();
+//    emit pChildWidget->unconfigureWidget();
+//
+//    disconnect(pChildWidget, SIGNAL(showWidgetSignal()), pChildWidget, SLOT(show()));
+//    disconnect(pChildWidget, SIGNAL(hideWidgetSignal()), pChildWidget, SLOT(hide()));
+//    disconnect(pChildWidget, SIGNAL(configureWidget()), pChildWidget, SLOT(configure()));
+//    disconnect(pChildWidget, SIGNAL(unconfigureWidget()), pChildWidget, SLOT(unconfigure()));
+//
+//    pChildWidget->_pObject = 0;
+    // FIXME: had to comment this out, CtlMediaObject should contain no gui code
+//    pChildObject->setListWidget(0);
 }
 
 

@@ -23,14 +23,14 @@
 #define QtMediaServerGroup_INCLUDED
 
 #include <QtGui>
-#include <Omm/Gui/UpnpGui.h>
+#include "AppUpnpGui.h"
 #include "QtNavigable.h"
 
 class QtNavigator;
 class QtWidgetCanvas;
 
 
-class QtMediaServerGroup : public QObject, public QtNavigable, public Omm::Gui::DeviceGroupModel
+class QtMediaServerGroup : public QObject, public QtNavigable, public DeviceGroupModel
 {
 public:
     QtMediaServerGroup();
@@ -48,10 +48,10 @@ public:
 //    virtual Omm::Gui::Widget* getDeviceGroupWidget();
 
     // WidgetListModel interface
-    virtual Omm::Gui::ListWidget* createWidget();
+    virtual ListWidget* createWidget();
     // FIXME: getWidget() can move into Omm::DeviceGroup (introduce Omm::Device::getDeviceWidget()).
-    virtual Omm::Gui::ListWidget* getChildWidget(int row);
-    virtual void attachWidget(int row, Omm::Gui::ListWidget* pWidget);
+    virtual ListWidget* getChildWidget(int row);
+    virtual void attachWidget(int row, ListWidget* pWidget);
     virtual void detachWidget(int row);
 
 private:

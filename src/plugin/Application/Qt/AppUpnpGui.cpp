@@ -19,24 +19,72 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtWidget_INCLUDED
-#define QtWidget_INCLUDED
-
-#include <QtGui>
+#include "AppUpnpGui.h"
 
 
-class WidgetImpl : public QWidget
+DeviceGroupModel::DeviceGroupModel(const std::string& deviceType, const std::string& shortName) :
+DeviceGroup(deviceType, shortName)
 {
-public:
-    WidgetImpl(QWidget* pParent = 0);
 
-    virtual void showWidget();
-    virtual void hideWidget();
-
-//private:
-//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-};
+}
 
 
-#endif
+DeviceGroupModel::DeviceGroupModel(Omm::DeviceGroupDelegate* pDeviceGroupDelegate) :
+DeviceGroup(pDeviceGroupDelegate)
+{
+    
+}
+
+
+void
+DeviceGroupModel::addDevice(Omm::Device* pDevice, int index, bool begin)
+{
+    if (!begin) {
+        // WidgetListModel interface
+        insertItem(index);
+    }
+}
+
+
+void
+DeviceGroupModel::removeDevice(Omm::Device* pDevice, int index, bool begin)
+{
+    if (begin) {
+        // WidgetListModel interface
+        removeItem(index);
+    }
+}
+
+
+void
+DeviceGroupModel::selectDevice(Omm::Device* pDevice, int index)
+{
+}
+
+
+void
+DeviceGroupModel::addDeviceContainer(Omm::DeviceContainer* pDeviceContainer, int index, bool begin)
+{
+}
+
+
+void
+DeviceGroupModel::removeDeviceContainer(Omm::DeviceContainer* pDeviceContainer, int index, bool begin)
+{
+}
+
+
+int
+DeviceGroupModel::totalItemCount()
+{
+    return getDeviceCount();
+}
+
+
+void
+DeviceGroupModel::selectItem(int row)
+{
+    Omm::Device* pDevice = getDevice(row);
+    Omm::DeviceGroup::selectDevice(pDevice);
+}
 

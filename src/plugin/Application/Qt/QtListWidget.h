@@ -23,10 +23,10 @@
 #define QtListWidget_INCLUDED
 
 #include <QtGui>
-#include <Omm/Gui/Gui.h>
+#include "AppGui.h"
 
 
-class QtListWidget : public QWidget, public Omm::Gui::ListWidget
+class QtListWidget : public QWidget, public ListWidget
 {
     Q_OBJECT
 

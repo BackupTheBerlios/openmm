@@ -22,6 +22,10 @@
 #include "QtWidget.h"
 
 
+namespace Omm {
+namespace Gui {
+
+
 WidgetImpl::WidgetImpl(QWidget* pParent) :
 QWidget(pParent)
 {
@@ -49,3 +53,7 @@ WidgetImpl::hideWidget()
 //    select();
 //    QWidget::mousePressEvent(pMouseEvent);
 //}
+
+
+}  // namespace Omm
+}  // namespace Gui

@@ -66,8 +66,9 @@ public:
     Icon* getIcon();
     Icon* getImageRepresentation();
 
-    void setListWidget(Omm::Gui::ListWidget* pWidget);
-    Omm::Gui::ListWidget* getListWidget();
+    // FIXME: CtlMediaObject should not contain gui code
+//    void setListWidget(Omm::Gui::ListWidget* pWidget);
+//    Omm::Gui::ListWidget* getListWidget();
 
 //    // WidgetListModel interface
 //    virtual int totalItemCount();
@@ -82,7 +83,7 @@ private:
     std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
-    Omm::Gui::ListWidget*           _pListWidget;
+//    Omm::Gui::ListWidget*           _pListWidget;
 };
 
 

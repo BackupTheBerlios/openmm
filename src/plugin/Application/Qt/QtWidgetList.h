@@ -23,11 +23,12 @@
 #define QtWidgetList_INCLUDED
 
 #include <QtGui>
-#include <Omm/Gui/Gui.h>
+
 #include "QtWidget.h"
+#include "AppGui.h"
 
 
-class QtWidgetList : public QScrollArea, public Omm::Gui::WidgetListView
+class QtWidgetList : public QScrollArea, public WidgetListView
 {
     Q_OBJECT
 
@@ -37,17 +38,17 @@ public:
 
 protected:
     virtual int visibleRows();
-    virtual void initWidget(Omm::Gui::ListWidget* pWidget);
-    virtual void moveWidget(int row, Omm::Gui::ListWidget* pWidget);
+    virtual void initWidget(ListWidget* pWidget);
+    virtual void moveWidget(int row, ListWidget* pWidget);
 
     virtual void updateScrollWidgetSize();
     virtual int getOffset();
 
 signals:
-    void moveWidgetSignal(int targetRow, Omm::Gui::ListWidget* pWidget);
+    void moveWidgetSignal(int targetRow, ListWidget* pWidget);
 
 private slots:
-    void moveWidgetSlot(int targetRow, Omm::Gui::ListWidget* pWidget);
+    void moveWidgetSlot(int targetRow, ListWidget* pWidget);
     void viewScrolledSlot(int value);
 
 private:
@@ -57,7 +58,7 @@ private:
 };
 
 
-class QtWidgetCanvas : public QGraphicsView, public Omm::Gui::Widget, public Omm::Gui::WidgetListView
+class QtWidgetCanvas : public QGraphicsView, public Widget, public WidgetListView
 {
     Q_OBJECT
 
@@ -67,22 +68,22 @@ public:
 
 protected:
     virtual int visibleRows();
-    virtual void initWidget(Omm::Gui::ListWidget* pWidget);
-    virtual void moveWidget(int row, Omm::Gui::ListWidget* pWidget);
+    virtual void initWidget(ListWidget* pWidget);
+    virtual void moveWidget(int row, ListWidget* pWidget);
 
     virtual void extendWidgetPool();
 
 signals:
-    void moveWidgetSignal(int targetRow, Omm::Gui::ListWidget* pWidget);
+    void moveWidgetSignal(int targetRow, ListWidget* pWidget);
     void extendPoolSignal();
 
 private slots:
-    void moveWidgetSlot(int targetRow, Omm::Gui::ListWidget* pWidget);
+    void moveWidgetSlot(int targetRow, ListWidget* pWidget);
     void extendPoolSlot();
 
 private:
     QGraphicsScene*                                             _pGraphicsScene;
-    std::map<Omm::Gui::ListWidget*, QGraphicsProxyWidget*>     _proxyWidgets;
+    std::map<ListWidget*, QGraphicsProxyWidget*>     _proxyWidgets;
     bool                                                        _movableWidgets;
 };
 

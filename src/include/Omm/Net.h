@@ -32,6 +32,9 @@
 namespace Omm {
 namespace Net {
 
+class NetworkInterfaceManagerImpl;
+
+
 class Log
 {
 public:
@@ -46,7 +49,6 @@ private:
     Poco::Logger*   _pNetLogger;
 };
 
-class NetworkInterfaceManagerImpl;
 
 class NetworkInterfaceManager
 {

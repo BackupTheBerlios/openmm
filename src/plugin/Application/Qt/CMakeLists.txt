@@ -53,6 +53,8 @@ QtMediaRendererControlPanel.h
 )
 
 set(OMMC_QTAPP_SRCS
+AppGui.cpp
+AppUpnpGui.cpp
 QtApplication.cpp
 QtMainWindow.cpp
 QtMediaRendererControlPanel.cpp
@@ -158,8 +160,6 @@ ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
 ${OMM_UTIL}
-${OMM_GUI}
-${OMM_UPNPGUI}
 ${QT_LIBRARIES}
 )
 

@@ -23,10 +23,10 @@
 #define QtWidget_INCLUDED
 
 #include <QtGui>
-#include <Omm/Gui/Gui.h>
+#include "AppGui.h"
 
 
-class QtWidget : public QWidget, public Omm::Gui::Widget
+class QtWidget : public QWidget, public Widget
 {
 public:
     QtWidget(QWidget* pParent = 0);

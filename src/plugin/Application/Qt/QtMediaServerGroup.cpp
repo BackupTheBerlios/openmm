@@ -57,7 +57,7 @@ QtMediaServerGroup::getBrowserTitle()
 }
 
 
-//Omm::Gui::Widget*
+//Widget*
 //QtMediaServerGroup::getDeviceGroupWidget()
 //{
 //    return _pNavigator;
@@ -106,14 +106,14 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
 }
 
 
-Omm::Gui::ListWidget*
+ListWidget*
 QtMediaServerGroup::createWidget()
 {
     return new QtMediaServerWidget;
 }
 
 
-Omm::Gui::ListWidget*
+ListWidget*
 QtMediaServerGroup::getChildWidget(int row)
 {
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));
@@ -122,7 +122,7 @@ QtMediaServerGroup::getChildWidget(int row)
 
 
 void
-QtMediaServerGroup::attachWidget(int row, Omm::Gui::ListWidget* pWidget)
+QtMediaServerGroup::attachWidget(int row, ListWidget* pWidget)
 {
 //    Omm::Av::Log::instance()->upnpav().debug("media server group attach widget");
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));

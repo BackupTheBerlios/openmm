@@ -1,16 +1,16 @@
-# FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
-# against debug and non-debug versions of Qt libs at the same time.
-if(WINDOWS)
-set(CMAKE_BUILD_TYPE "")
-endif(WINDOWS)
+## FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
+## against debug and non-debug versions of Qt libs at the same time.
+#if(WINDOWS)
+#set(CMAKE_BUILD_TYPE "")
+#endif(WINDOWS)
 
-find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
+#find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
 
-if(QT4_FOUND)
-message (STATUS "Qt4 use file: ${QT_USE_FILE}")
-include(
-${QT_USE_FILE}
-)
+#if(QT4_FOUND)
+#message (STATUS "Qt4 use file: ${QT_USE_FILE}")
+#include(
+#${QT_USE_FILE}
+#)
 
 set(OMMGUI_QT_RES
 QtGui.qrc
@@ -50,4 +50,4 @@ LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib
 )
 
-endif(QT4_FOUND)
+#endif(QT4_FOUND)
