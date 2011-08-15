@@ -22,8 +22,7 @@
 #ifndef ListModel_INCLUDED
 #define ListModel_INCLUDED
 
-#include "Widget.h"
-
+#include "ListWidget.h"
 
 namespace Omm {
 namespace Gui {

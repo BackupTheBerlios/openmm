@@ -12,14 +12,16 @@ include(
 ${QT_USE_FILE}
 )
 
-add_subdirectory(Qt)
-endif(QT4_FOUND)
-
-if(TARGET ommgui-qt)
-set(LIB_OMMGUI_PLATFORM ommgui-qt)
 add_definitions(
 -D__GUI_QT_PLATFORM__
 )
+
+add_subdirectory(Qt)
+endif(QT4_FOUND)
+
+
+if(TARGET ommgui-qt)
+set(LIB_OMMGUI_PLATFORM ommgui-qt)
 endif(TARGET ommgui-qt)
 
 if(LIB_OMMGUI_PLATFORM)

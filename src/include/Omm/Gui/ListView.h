@@ -26,12 +26,12 @@
 #include <stack>
 
 #include "Widget.h"
+#include "ListWidget.h"
 
 namespace Omm {
 namespace Gui {
 
 class ListModel;
-class ListWidget;
 
 
 class ListView

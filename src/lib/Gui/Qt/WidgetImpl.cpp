@@ -19,35 +19,47 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Navigator_INCLUDED
-#define Navigator_INCLUDED
-
-#include <stack>
-#include "Widget.h"
+#include "WidgetImpl.h"
+#include "Gui/Widget.h"
 
 namespace Omm {
 namespace Gui {
 
-class Navigable;
 
-
-class Navigator : public Widget
+WidgetImpl::WidgetImpl(Widget* pParent) :
+QWidget(static_cast<QWidget*>(pParent->getNativeWidget()))
 {
-public:
-    Navigator();
-    ~Navigator();
+}
 
-    void push(Navigable* pNavigable);
 
-protected:
-    virtual void pushImpl(Navigable* pNavigable) = 0;
+QWidget*
+WidgetImpl::getNativeWidget()
+{
+    return this;
+}
 
-private:
-    std::stack<Navigable*>    _navigableStack;
-};
+
+void
+WidgetImpl::showWidget()
+{
+    QWidget::show();
+}
+
+
+void
+WidgetImpl::hideWidget()
+{
+    QWidget::hide();
+}
+
+
+void
+WidgetImpl::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    _pWidget->select();
+    QWidget::mousePressEvent(pMouseEvent);
+}
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif

@@ -19,31 +19,32 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Navigator_INCLUDED
-#define Navigator_INCLUDED
+#ifndef WidgetImpl_INCLUDED
+#define WidgetImpl_INCLUDED
 
-#include <stack>
-#include "Widget.h"
+#include <QtGui>
 
 namespace Omm {
 namespace Gui {
 
-class Navigable;
+class Widget;
 
-
-class Navigator : public Widget
+class WidgetImpl : public QWidget
 {
+    friend class Widget;
+    
 public:
-    Navigator();
-    ~Navigator();
+    WidgetImpl(Widget* pParent = 0);
 
-    void push(Navigable* pNavigable);
+    QWidget* getNativeWidget();
 
-protected:
-    virtual void pushImpl(Navigable* pNavigable) = 0;
+    virtual void showWidget();
+    virtual void hideWidget();
 
 private:
-    std::stack<Navigable*>    _navigableStack;
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+
+    Widget*     _pWidget;
 };
 
 
@@ -51,3 +52,4 @@ private:
 }  // namespace Gui
 
 #endif
+

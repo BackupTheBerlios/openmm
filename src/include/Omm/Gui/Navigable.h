@@ -19,31 +19,34 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Navigator_INCLUDED
-#define Navigator_INCLUDED
+#ifndef Navigable_INCLUDED
+#define Navigable_INCLUDED
 
-#include <stack>
-#include "Widget.h"
 
 namespace Omm {
 namespace Gui {
 
-class Navigable;
+class Navigator;
 
 
-class Navigator : public Widget
+class Navigable
 {
+    friend class Navigator;
+
 public:
-    Navigator();
-    ~Navigator();
+    Navigable();
 
-    void push(Navigable* pNavigable);
-
-protected:
-    virtual void pushImpl(Navigable* pNavigable) = 0;
+    virtual std::string getBrowserTitle() { return ""; }
+    virtual Widget* getWidget() { return 0; }
+    /// If getWidget() returns not null but a valid widget, the widget
+    /// is pushed on QtNavigator::_pStackedWidget.
+    virtual void show() {}
+    /// Additionally, show() can be implemented if for example no widget
+    /// is pushed but some other action is necessary to show the correct view.
+    Navigator* getNavigator() const;
 
 private:
-    std::stack<Navigable*>    _navigableStack;
+    Navigator*    _pNavigator;
 };
 
 

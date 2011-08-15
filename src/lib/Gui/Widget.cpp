@@ -24,7 +24,7 @@
 #include "Gui/Widget.h"
 
 #ifdef __GUI_QT_PLATFORM__
-#include "Qt/QtWidget.h"
+#include "Qt/WidgetImpl.h"
 #endif
 
 
@@ -32,15 +32,23 @@ namespace Omm {
 namespace Gui {
 
 
-Widget::Widget()
+Widget::Widget(Widget* pParent)
 {
     _pImpl = new WidgetImpl;
+    _pImpl->_pWidget = this;
 }
 
 
 Widget::~Widget()
 {
     delete _pImpl;
+}
+
+
+Widget::NativeWidgetRef
+Widget::getNativeWidget()
+{
+    return _pImpl->getNativeWidget();
 }
 
 

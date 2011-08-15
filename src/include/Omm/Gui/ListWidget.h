@@ -19,31 +19,47 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Navigator_INCLUDED
-#define Navigator_INCLUDED
+#ifndef ListWidget_INCLUDED
+#define ListWidget_INCLUDED
 
-#include <stack>
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+
 #include "Widget.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class Navigable;
 
-
-class Navigator : public Widget
+class ListWidget : public Widget
 {
 public:
-    Navigator();
-    ~Navigator();
+    ListWidget();
 
-    void push(Navigable* pNavigable);
+    int getRow();
+    void setRow(int row);
+
+    class RowSelectNotification : public Poco::Notification
+    {
+    public:
+        RowSelectNotification(int row);
+
+        int _row;
+    };
 
 protected:
-    virtual void pushImpl(Navigable* pNavigable) = 0;
+    virtual void select();
 
 private:
-    std::stack<Navigable*>    _navigableStack;
+    int _row;
+};
+
+
+class ListWidgetFactory
+{
+public:
+    virtual ListWidget* createWidget() { return 0; }
 };
 
 

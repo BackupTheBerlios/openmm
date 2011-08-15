@@ -22,7 +22,6 @@
 #ifndef Widget_INCLUDED
 #define Widget_INCLUDED
 
-
 #include <Poco/NotificationCenter.h>
 #include <Poco/Observer.h>
 
@@ -33,12 +32,27 @@ namespace Gui {
 
 class WidgetImpl;
 
+//#ifdef __GUI_QT_PLATFORM__
+//#include <QtGui>
+//#endif
+
 
 class Widget
 {
+    friend class WidgetImpl;
+    
 public:
-    Widget();
+    Widget(Widget* pParent = 0);
     virtual ~Widget();
+
+//#ifdef __GUI_QT_PLATFORM__
+//    typedef QWidget* NativeWidgetRef;
+//#else
+//    typedef void* NativeWidgetRef;
+//#endif
+    typedef void* NativeWidgetRef;
+    
+    NativeWidgetRef getNativeWidget();
 
     virtual void showWidget();
     virtual void hideWidget();
@@ -66,37 +80,6 @@ private:
 //{
 //
 //};
-
-
-class ListWidget : public Widget
-{
-public:
-    ListWidget();
-
-    int getRow();
-    void setRow(int row);
-
-    class RowSelectNotification : public Poco::Notification
-    {
-    public:
-        RowSelectNotification(int row);
-
-        int _row;
-    };
-
-protected:
-    virtual void select();
-
-private:
-    int _row;
-};
-
-
-class ListWidgetFactory
-{
-public:
-    virtual ListWidget* createWidget() { return 0; }
-};
 
 
 }  // namespace Omm
