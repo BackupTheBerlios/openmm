@@ -77,40 +77,5 @@ Widget::select()
 }
 
 
-ListWidget::ListWidget() :
-_row(0)
-{
-
-}
-
-
-int
-ListWidget::getRow()
-{
-    return _row;
-}
-
-
-void
-ListWidget::setRow(int row)
-{
-    _row = row;
-}
-
-
-ListWidget::RowSelectNotification::RowSelectNotification(int row) :
-_row(row)
-{
-}
-
-
-void
-ListWidget::select()
-{
-    Widget::select();
-    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
-}
-
-
 } // namespace Gui
 } // namespace Omm

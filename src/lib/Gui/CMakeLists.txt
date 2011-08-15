@@ -31,6 +31,7 @@ endif(LIB_OMMGUI_PLATFORM)
 add_library(ommgui
 GuiLogger.cpp
 Widget.cpp
+ListWidget.cpp
 ListModel.cpp
 ListView.cpp
 Navigator.cpp

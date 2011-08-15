@@ -21,11 +21,10 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "Gui/Navigator.h"
-#include "Gui/Navigable.h"
+#include "Gui/ListWidget.h"
 
 //#ifdef __GUI_QT_PLATFORM__
-//#include "Qt/QtNavigator.h"
+//#include "Qt/QtListWidget.h"
 //#endif
 
 
@@ -33,45 +32,38 @@ namespace Omm {
 namespace Gui {
 
 
-Navigable::Navigable() :
-_pNavigator(0)
+ListWidget::ListWidget() :
+_row(0)
 {
 
 }
 
 
-Navigator*
-Navigable::getNavigator() const
+int
+ListWidget::getRow()
 {
-    return _pNavigator;
+    return _row;
 }
 
 
-Navigator::Navigator()
+void
+ListWidget::setRow(int row)
 {
+    _row = row;
 }
 
 
-Navigator::~Navigator()
+ListWidget::RowSelectNotification::RowSelectNotification(int row) :
+_row(row)
 {
 }
 
 
 void
-Navigator::push(Navigable* pNavigable)
+ListWidget::select()
 {
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
-
-    pNavigable->_pNavigator = this;
-    if (pNavigable->getWidget()) {
-//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
-        pushImpl(pNavigable);
-    }
-    _navigableStack.push(pNavigable);
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
-    pNavigable->show();
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
+    Widget::select();
+    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
 }
 
 
