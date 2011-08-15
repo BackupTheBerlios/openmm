@@ -19,34 +19,55 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#ifndef ListModel_INCLUDED
+#define ListModel_INCLUDED
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include "Widget.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+    
+class ListView;
+
+
+class ListModel
 {
+    friend class ListView;
+
 public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
+    ListModel();
 
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+    // item related
+    virtual int totalItemCount() { return 0; }
+    void insertItem(int row);
+    /// Ask the view to show an item at row. No data is created (cached), as
+    /// the whole data of the model is already present in the underlying implementation.
+    /// The model is only an abstraction layer on top of the data.
+    void removeItem(int row);
+    /// See insertItem().
+    virtual void selectItem(int row) {}
+    /// View should call selectItem() when the item in row is selected.
 
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
+    // lazy model related
+    virtual bool canFetchMore() { return false; }
+    virtual void fetchMore(bool forward = true) {}
+    virtual int fetch(int rowCount = 10, bool forward = true) { return 0; }
+    virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
 
-protected:
-    virtual void init() {}
+    // widget related
+    void setWidgetFactory(ListWidgetFactory* pWidgetFactory);
+    virtual ListWidget* createWidget();
+    virtual ListWidget* getChildWidget(int row) { return 0; }
+    virtual void attachWidget(int row, ListWidget* pWidget) {}
+    virtual void detachWidget(int row) {}
+
+private:
+    ListView*                     _pView;
+    ListWidgetFactory*            _pWidgetFactory;
 };
+
 
 
 }  // namespace Omm

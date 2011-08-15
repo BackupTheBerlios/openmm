@@ -27,7 +27,7 @@
 #include "QtWidget.h"
 
 
-class QtWidgetList : public QScrollArea, public Omm::Gui::WidgetListView
+class QtWidgetList : public QScrollArea, public Omm::Gui::ListView
 {
     Q_OBJECT
 
@@ -57,7 +57,7 @@ private:
 };
 
 
-class QtWidgetCanvas : public QGraphicsView, public Omm::Gui::Widget, public Omm::Gui::WidgetListView
+class QtWidgetCanvas : public QGraphicsView, public Omm::Gui::Widget, public Omm::Gui::ListView
 {
     Q_OBJECT
 

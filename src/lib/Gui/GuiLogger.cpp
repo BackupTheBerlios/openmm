@@ -19,37 +19,58 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#include <Poco/FormattingChannel.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/ConsoleChannel.h>
+#include <Poco/Environment.h>
+#include <Poco/NumberFormatter.h>
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include "Gui/GuiLogger.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+
+Log* Log::_pInstance = 0;
+
+// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
+
+Log::Log()
 {
-public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
-
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
-
-protected:
-    virtual void init() {}
-};
-
-
-}  // namespace Omm
-}  // namespace Gui
-
+    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
+    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
+    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
+    pSplitterChannel->addChannel(pConsoleChannel);
+//     pSplitterChannel->addChannel(pFileChannel);
+    pFormatLogger->setChannel(pSplitterChannel);
+    pFormatLogger->open();
+#ifdef NDEBUG
+    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, 0);
+#else
+    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
+}
+
+
+Log*
+Log::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Log;
+    }
+    return _pInstance;
+}
+
+
+Poco::Logger&
+Log::gui()
+{
+    return *_pGuiLogger;
+}
+
+
+} // namespace Gui
+} // namespace Omm

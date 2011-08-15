@@ -19,33 +19,83 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#ifndef Widget_INCLUDED
+#define Widget_INCLUDED
 
-#include "../Upnp.h"
-#include "ListModel.h"
+
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+
+class WidgetImpl;
+
+
+class Widget
 {
 public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
+    Widget();
+    virtual ~Widget();
 
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+    virtual void showWidget();
+    virtual void hideWidget();
 
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
+    class SelectNotification : public Poco::Notification
+    {
+    public:
+        SelectNotification();
+    };
+
+    void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
 
 protected:
-    virtual void init() {}
+    virtual void select();
+
+    Poco::NotificationCenter _eventNotificationCenter;
+
+private:
+    WidgetImpl*     _pImpl;
+};
+
+
+//template<class C>
+//class WidgetImpl : public Widget
+//{
+//
+//};
+
+
+class ListWidget : public Widget
+{
+public:
+    ListWidget();
+
+    int getRow();
+    void setRow(int row);
+
+    class RowSelectNotification : public Poco::Notification
+    {
+    public:
+        RowSelectNotification(int row);
+
+        int _row;
+    };
+
+protected:
+    virtual void select();
+
+private:
+    int _row;
+};
+
+
+class ListWidgetFactory
+{
+public:
+    virtual ListWidget* createWidget() { return 0; }
 };
 
 

@@ -28,7 +28,6 @@
 #include "Upnp.h"
 #include "UpnpInternal.h"
 #include "UpnpAvObject.h"
-#include "Gui/Gui.h"
 
 
 namespace Omm {

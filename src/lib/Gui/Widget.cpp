@@ -19,37 +19,98 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include "Gui/Widget.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/QtWidget.h"
+#endif
+
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+
+Widget::Widget()
 {
-public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
-
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
-
-protected:
-    virtual void init() {}
-};
+    _pImpl = new WidgetImpl;
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+Widget::~Widget()
+{
+    delete _pImpl;
+}
 
-#endif
+
+void
+Widget::showWidget()
+{
+    _pImpl->showWidget();
+}
+
+
+void
+Widget::hideWidget()
+{
+    _pImpl->hideWidget();
+}
+
+
+Widget::SelectNotification::SelectNotification()
+{
+}
+
+
+void
+Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
+{
+    _eventNotificationCenter.addObserver(observer);
+}
+
+
+void
+Widget::select()
+{
+    _eventNotificationCenter.postNotification(new SelectNotification);
+}
+
+
+ListWidget::ListWidget() :
+_row(0)
+{
+
+}
+
+
+int
+ListWidget::getRow()
+{
+    return _row;
+}
+
+
+void
+ListWidget::setRow(int row)
+{
+    _row = row;
+}
+
+
+ListWidget::RowSelectNotification::RowSelectNotification(int row) :
+_row(row)
+{
+}
+
+
+void
+ListWidget::select()
+{
+    Widget::select();
+    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
+}
+
+
+} // namespace Gui
+} // namespace Omm

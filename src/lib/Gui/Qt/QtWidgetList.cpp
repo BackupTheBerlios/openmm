@@ -181,5 +181,5 @@ QtWidgetCanvas::moveWidgetSlot(int row, Omm::Gui::ListWidget* pWidget)
 void
 QtWidgetCanvas::extendPoolSlot()
 {
-    Omm::Gui::WidgetListView::extendWidgetPool(visibleRows());
+    Omm::Gui::ListView::extendWidgetPool(visibleRows());
 }

@@ -19,33 +19,64 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#ifndef ListView_INCLUDED
+#define ListView_INCLUDED
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include <vector>
+#include <stack>
+
+#include "Widget.h"
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+class ListModel;
+class ListWidget;
+
+
+class ListView
 {
 public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
+    ListView(int widgetHeight, bool lazy = false);
 
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
+    void setModel(ListModel* pModel);
+    void insertItem(int row);
+    void removeItem(int row);
 
 protected:
-    virtual void init() {}
+    virtual int visibleRows() { return 0; }
+    virtual void initWidget(ListWidget* pWidget) {}
+    virtual void moveWidget(int row, ListWidget* pWidget) {}
+    void resize(int rows);
+
+    // non-lazy views only
+    virtual void extendWidgetPool() {}
+    void extendWidgetPool(int n);
+
+    // lazy views only
+    virtual int getOffset() { return 0; }
+    virtual void updateScrollWidgetSize() {}
+    void scrolledToRow(int rowOffset);
+
+    ListModel*                _pModel;
+    int                       _widgetHeight;
+
+private:
+    int widgetPoolSize();
+    /// The view has a widget pool which is large enough to fill the area of the view
+    /// with widgets (created by the model).
+    int visibleIndex(int row);
+    int countVisibleWidgets();
+    ListWidget* visibleWidget(int index);
+    bool itemIsVisible(int row);
+    void moveWidgetToRow(int row, ListWidget* pWidget);
+    void selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification);
+
+    bool                                _lazy;
+    std::vector<ListWidget*>            _widgetPool;
+    std::vector<ListWidget*>            _visibleWidgets;
+    std::stack<ListWidget*>             _freeWidgets;
+    int                                 _rowOffset;
 };
 
 

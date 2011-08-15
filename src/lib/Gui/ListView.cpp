@@ -19,198 +19,23 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/FormattingChannel.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/Environment.h>
 #include <Poco/NumberFormatter.h>
 
-#include "Gui/Gui.h"
+#include "Gui/ListView.h"
+#include "Gui/GuiLogger.h"
+#include "Gui/ListModel.h"
+#include "Gui/Widget.h"
 
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/GuiImpl.h"
-#endif
+//#ifdef __GUI_QT_PLATFORM__
+//#include "Qt/QtListView.h"
+//#endif
 
 
 namespace Omm {
 namespace Gui {
 
 
-Log* Log::_pInstance = 0;
-
-// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
-
-Log::Log()
-{
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
-#ifdef NDEBUG
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, 0);
-#else
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_DEBUG);
-#endif
-}
-
-
-Log*
-Log::instance()
-{
-    if (!_pInstance) {
-        _pInstance = new Log;
-    }
-    return _pInstance;
-}
-
-
-Poco::Logger&
-Log::gui()
-{
-    return *_pGuiLogger;
-}
-
-
-Widget::Widget()
-{
-    _pImpl = new WidgetImpl;
-}
-
-
-Widget::~Widget()
-{
-    delete _pImpl;
-}
-
-
-void
-Widget::showWidget()
-{
-    _pImpl->showWidget();
-}
-
-
-void
-Widget::hideWidget()
-{
-    _pImpl->hideWidget();
-}
-
-
-Widget::SelectNotification::SelectNotification()
-{
-}
-
-
-void
-Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
-{
-    _eventNotificationCenter.addObserver(observer);
-}
-
-
-void
-Widget::select()
-{
-    _eventNotificationCenter.postNotification(new SelectNotification);
-}
-
-
-ListWidget::ListWidget() :
-_row(0)
-{
-
-}
-
-
-int
-ListWidget::getRow()
-{
-    return _row;
-}
-
-
-void
-ListWidget::setRow(int row)
-{
-    _row = row;
-}
-
-
-ListWidget::RowSelectNotification::RowSelectNotification(int row) :
-_row(row)
-{
-}
-
-
-void
-ListWidget::select()
-{
-    Widget::select();
-    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
-}
-
-
-WidgetListModel::WidgetListModel() :
-_pView(0),
-_pWidgetFactory(0)
-{
-}
-
-
-void
-WidgetListModel::insertItem(int row)
-{
-    if (0 <= row && row < totalItemCount()) {
-        Log::instance()->gui().debug("widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        if (_pView) {
-            _pView->insertItem(row);
-        }
-    }
-    else {
-        Log::instance()->gui().error("widget list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
-    }
-}
-
-
-void
-WidgetListModel::removeItem(int row)
-{
-    if (0 <= row && row < totalItemCount()) {
-        Log::instance()->gui().debug("widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        if (_pView) {
-            _pView->removeItem(row);
-        }
-    }
-    else {
-        Log::instance()->gui().error("widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
-    }
-}
-
-
-void
-WidgetListModel::setWidgetFactory(ListWidgetFactory* pWidgetFactory)
-{
-    _pWidgetFactory = pWidgetFactory;
-}
-
-
-ListWidget*
-WidgetListModel::createWidget()
-{
-    if (_pWidgetFactory) {
-        return _pWidgetFactory->createWidget();
-    }
-    return 0;
-}
-
-
-WidgetListView::WidgetListView(int widgetHeight, bool lazy) :
+ListView::ListView(int widgetHeight, bool lazy) :
 _lazy(lazy),
 _pModel(0),
 _widgetHeight(widgetHeight),
@@ -220,7 +45,7 @@ _rowOffset(0)
 
 
 void
-WidgetListView::setModel(WidgetListModel* pModel)
+ListView::setModel(ListModel* pModel)
 {
     Log::instance()->gui().debug("widget list view set model ...");
 
@@ -252,7 +77,7 @@ WidgetListView::setModel(WidgetListModel* pModel)
 
 
 void
-WidgetListView::resize(int rows)
+ListView::resize(int rows)
 {
     int rowDelta = rows - widgetPoolSize();
     Log::instance()->gui().debug("widget list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
@@ -274,14 +99,14 @@ WidgetListView::resize(int rows)
 
 
 int
-WidgetListView::widgetPoolSize()
+ListView::widgetPoolSize()
 {
     return _widgetPool.size();
 }
 
 
 void
-WidgetListView::extendWidgetPool(int n)
+ListView::extendWidgetPool(int n)
 {
     Log::instance()->gui().debug("widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
 
@@ -295,28 +120,28 @@ WidgetListView::extendWidgetPool(int n)
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
-        pWidget->registerEventNotificationHandler(Poco::Observer<WidgetListView, ListWidget::RowSelectNotification>(*this, &WidgetListView::selectNotificationHandler));
+        pWidget->registerEventNotificationHandler(Poco::Observer<ListView, ListWidget::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
         Log::instance()->gui().debug("allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }
 
 
 int
-WidgetListView::visibleIndex(int row)
+ListView::visibleIndex(int row)
 {
     return row - _rowOffset;
 }
 
 
 int
-WidgetListView::countVisibleWidgets()
+ListView::countVisibleWidgets()
 {
     return _visibleWidgets.size();
 }
 
 
 ListWidget*
-WidgetListView::visibleWidget(int index)
+ListView::visibleWidget(int index)
 {
     if (0 <= index && index < _visibleWidgets.size()) {
         return _visibleWidgets[index];
@@ -329,7 +154,7 @@ WidgetListView::visibleWidget(int index)
 
 
 void
-WidgetListView::scrolledToRow(int rowOffset)
+ListView::scrolledToRow(int rowOffset)
 {
     int rowDelta = rowOffset - _rowOffset;
 
@@ -381,14 +206,14 @@ WidgetListView::scrolledToRow(int rowOffset)
 
 
 bool
-WidgetListView::itemIsVisible(int row)
+ListView::itemIsVisible(int row)
 {
     return _rowOffset <= row && row < _rowOffset + visibleRows();
 }
 
 
 void
-WidgetListView::moveWidgetToRow(int row, ListWidget* pWidget)
+ListView::moveWidgetToRow(int row, ListWidget* pWidget)
 {
     pWidget->setRow(row);
     moveWidget(row, pWidget);
@@ -396,14 +221,14 @@ WidgetListView::moveWidgetToRow(int row, ListWidget* pWidget)
 
 
 void
-WidgetListView::selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification)
+ListView::selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification)
 {
     _pModel->selectItem(pSelectNotification->_row);
 }
 
 
 void
-WidgetListView::insertItem(int row)
+ListView::insertItem(int row)
 {
     if (_lazy) {
         // resize view to the size with this item added
@@ -438,7 +263,7 @@ WidgetListView::insertItem(int row)
 
 
 void
-WidgetListView::removeItem(int row)
+ListView::removeItem(int row)
 {
     if (_lazy) {
         // resize view to the size with this item added
@@ -478,47 +303,6 @@ WidgetListView::removeItem(int row)
     }
 }
 
-
-Navigable::Navigable() :
-_pNavigator(0)
-{
-
-}
-
-
-Navigator*
-Navigable::getNavigator() const
-{
-    return _pNavigator;
-}
-
-
-Navigator::Navigator()
-{
-}
-
-
-Navigator::~Navigator()
-{
-}
-
-
-void
-Navigator::push(Navigable* pNavigable)
-{
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
-
-    pNavigable->_pNavigator = this;
-    if (pNavigable->getWidget()) {
-//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
-        pushImpl(pNavigable);
-    }
-    _navigableStack.push(pNavigable);
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
-    pNavigable->show();
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
-}
 
 
 } // namespace Gui

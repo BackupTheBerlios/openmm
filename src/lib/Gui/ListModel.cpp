@@ -19,37 +19,69 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include "Gui/ListModel.h"
+#include "Gui/GuiLogger.h"
+#include "Gui/ListView.h"
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+
+ListModel::ListModel() :
+_pView(0),
+_pWidgetFactory(0)
 {
-public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
-
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
-
-protected:
-    virtual void init() {}
-};
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+void
+ListModel::insertItem(int row)
+{
+    if (0 <= row && row < totalItemCount()) {
+        Log::instance()->gui().debug("widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
+        if (_pView) {
+            _pView->insertItem(row);
+        }
+    }
+    else {
+        Log::instance()->gui().error("widget list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
+    }
+}
 
-#endif
+
+void
+ListModel::removeItem(int row)
+{
+    if (0 <= row && row < totalItemCount()) {
+        Log::instance()->gui().debug("widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
+        if (_pView) {
+            _pView->removeItem(row);
+        }
+    }
+    else {
+        Log::instance()->gui().error("widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
+    }
+}
+
+
+void
+ListModel::setWidgetFactory(ListWidgetFactory* pWidgetFactory)
+{
+    _pWidgetFactory = pWidgetFactory;
+}
+
+
+ListWidget*
+ListModel::createWidget()
+{
+    if (_pWidgetFactory) {
+        return _pWidgetFactory->createWidget();
+    }
+    return 0;
+}
+
+
+} // namespace Gui
+} // namespace Omm

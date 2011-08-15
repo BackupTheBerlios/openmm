@@ -19,37 +19,60 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include "Gui/Navigator.h"
+
+//#ifdef __GUI_QT_PLATFORM__
+//#include "Qt/QtNavigator.h"
+//#endif
+
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+
+Navigable::Navigable() :
+_pNavigator(0)
 {
-public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
 
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
-
-protected:
-    virtual void init() {}
-};
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+Navigator*
+Navigable::getNavigator() const
+{
+    return _pNavigator;
+}
 
-#endif
+
+Navigator::Navigator()
+{
+}
+
+
+Navigator::~Navigator()
+{
+}
+
+
+void
+Navigator::push(Navigable* pNavigable)
+{
+//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
+//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
+
+    pNavigable->_pNavigator = this;
+    if (pNavigable->getWidget()) {
+//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
+        pushImpl(pNavigable);
+    }
+    _navigableStack.push(pNavigable);
+//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
+    pNavigable->show();
+//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
+}
+
+
+} // namespace Gui
+} // namespace Omm

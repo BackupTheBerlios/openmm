@@ -29,7 +29,11 @@ message(STATUS "Gui implementation for " ${BUILD_TARGET} " not available.")
 endif(LIB_OMMGUI_PLATFORM)
 
 add_library(ommgui
-Gui.cpp
+GuiLogger.cpp
+Widget.cpp
+ListModel.cpp
+ListView.cpp
+Navigator.cpp
 )
 
 target_link_libraries(ommgui

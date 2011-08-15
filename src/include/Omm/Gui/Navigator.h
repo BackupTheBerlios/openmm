@@ -19,33 +19,52 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef UpnpGui_INCLUDED
-#define UpnpGui_INCLUDED
+#ifndef Navigator_INCLUDED
+#define Navigator_INCLUDED
 
-#include "../Upnp.h"
-#include "ListModel.h"
+#include <stack>
+#include "Widget.h"
 
 namespace Omm {
 namespace Gui {
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+class Navigator;
+
+
+class Navigable
+{
+    friend class Navigator;
+
+public:
+    Navigable();
+
+    virtual std::string getBrowserTitle() { return ""; }
+    virtual Widget* getWidget() { return 0; }
+    /// If getWidget() returns not null but a valid widget, the widget
+    /// is pushed on QtNavigator::_pStackedWidget.
+    virtual void show() {}
+    /// Additionally, show() can be implemented if for example no widget
+    /// is pushed but some other action is necessary to show the correct view.
+    Navigator* getNavigator() const;
+
+private:
+    Navigator*    _pNavigator;
+};
+
+
+class Navigator : public Widget
 {
 public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
+    Navigator();
+    ~Navigator();
 
-    virtual void addDevice(Device* pDevice, int index, bool begin);
-    virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-
-    // WidgetListModel interface
-    virtual int totalItemCount();
-    virtual void selectItem(int row);
+    void push(Navigable* pNavigable);
 
 protected:
-    virtual void init() {}
+    virtual void pushImpl(Navigable* pNavigable) = 0;
+
+private:
+    std::stack<Navigable*>    _navigableStack;
 };
 
 
