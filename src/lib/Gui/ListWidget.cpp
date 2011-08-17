@@ -62,7 +62,7 @@ _row(row)
 void
 ListWidget::select()
 {
-    Widget::select();
+//    Widget::select();
     _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
 }
 

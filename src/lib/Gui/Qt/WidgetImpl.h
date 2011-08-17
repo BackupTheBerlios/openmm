@@ -23,27 +23,52 @@
 #define WidgetImpl_INCLUDED
 
 #include <QtGui>
+#include "Gui/Widget.h"
 
 namespace Omm {
 namespace Gui {
 
 class Widget;
 
-class WidgetImpl : public QWidget
+
+template<class C>
+class NativeWidget : public C
+{
+public:
+    NativeWidget(C* pC = 0) :
+    C(pC)
+    {
+        
+    }
+
+    C* getNativeWidget()
+    {
+        return this;
+    }
+
+    virtual void showWidget()
+    {
+        C::show();
+    }
+
+
+    virtual void hideWidget()
+    {
+        C::hide();
+    }
+};
+
+
+class WidgetImpl : public NativeWidget<QWidget>
 {
     friend class Widget;
+    WidgetImpl(Widget* pParent = 0) :
+    NativeWidget<QWidget>(static_cast<NativeWidget<QWidget>*>(pParent->getNativeWidget()))
+    {
+    }
     
-public:
-    WidgetImpl(Widget* pParent = 0);
-
-    QWidget* getNativeWidget();
-
-    virtual void showWidget();
-    virtual void hideWidget();
-
 private:
     virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-
     Widget*     _pWidget;
 };
 

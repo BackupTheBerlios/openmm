@@ -34,7 +34,7 @@ namespace Gui {
 
 Widget::Widget(Widget* pParent)
 {
-    _pImpl = new WidgetImpl;
+    _pImpl = new WidgetImpl(pParent);
     _pImpl->_pWidget = this;
 }
 
@@ -45,7 +45,7 @@ Widget::~Widget()
 }
 
 
-Widget::NativeWidgetRef
+void*
 Widget::getNativeWidget()
 {
     return _pImpl->getNativeWidget();

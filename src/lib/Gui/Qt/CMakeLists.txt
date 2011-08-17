@@ -4,10 +4,14 @@ QtGui.qrc
 
 set(OMMGUI_QT_SRC
 WidgetImpl.cpp
+ButtonImpl.cpp
+MainWindowImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
 #WidgetImpl.h
+ButtonImpl.h
+#MainWindowImpl.h
 )
 
 QT4_ADD_RESOURCES(

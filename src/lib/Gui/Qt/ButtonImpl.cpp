@@ -19,83 +19,33 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Widget_INCLUDED
-#define Widget_INCLUDED
-
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
-
+#include "ButtonImpl.h"
+#include "Gui/Button.h"
 
 namespace Omm {
 namespace Gui {
 
-class WidgetImpl;
 
-//template<class C>
-//class WidgetImpl : public C
-//{
-//    friend class Widget;
-//
-//public:
-//    WidgetImpl(Widget* pParent = 0) :
-//    C(static_cast<C*>(pParent->getNativeWidget()))
-//    {
-//    }
-//
-//    C* getNativeWidget()
-//    {
-//        return this;
-//    }
-//
-//    virtual void showWidget()
-//    {
-//        C::show();
-//    }
-//
-//
-//    virtual void hideWidget()
-//    {
-//        C::hide();
-//    }
-//
-//private:
-//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-//    Widget*     _pWidget;
-//};
-
-
-class Widget
+ButtonImpl::ButtonImpl(Widget* pParent) //:
+//QPushButton(static_cast<QWidget*>(pParent->getNativeWidget()))
 {
-    friend class WidgetImpl;
-    
-public:
-    Widget(Widget* pParent = 0);
-    virtual ~Widget();
+    connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
+}
 
-    void* getNativeWidget();
 
-    virtual void showWidget();
-    virtual void hideWidget();
+void
+ButtonImpl::setLabel(const std::string& label)
+{
+    QPushButton::setText(QString::fromStdString(label));
+}
 
-    class SelectNotification : public Poco::Notification
-    {
-    public:
-        SelectNotification();
-    };
 
-    void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
-
-protected:
-    virtual void select();
-
-    Poco::NotificationCenter    _eventNotificationCenter;
-
-private:
-    WidgetImpl*                 _pImpl;
-};
+void
+ButtonImpl::pushed()
+{
+    _pButton->_eventNotificationCenter.postNotification(new Button::PushNotification);
+}
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif

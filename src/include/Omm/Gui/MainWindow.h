@@ -19,79 +19,29 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Widget_INCLUDED
-#define Widget_INCLUDED
+#ifndef MainWindow_INCLUDED
+#define MainWindow_INCLUDED
 
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
-
+#include "Widget.h"
 
 namespace Omm {
 namespace Gui {
 
-class WidgetImpl;
-
-//template<class C>
-//class WidgetImpl : public C
-//{
-//    friend class Widget;
-//
-//public:
-//    WidgetImpl(Widget* pParent = 0) :
-//    C(static_cast<C*>(pParent->getNativeWidget()))
-//    {
-//    }
-//
-//    C* getNativeWidget()
-//    {
-//        return this;
-//    }
-//
-//    virtual void showWidget()
-//    {
-//        C::show();
-//    }
-//
-//
-//    virtual void hideWidget()
-//    {
-//        C::hide();
-//    }
-//
-//private:
-//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-//    Widget*     _pWidget;
-//};
+class MainWindowImpl;
 
 
-class Widget
+class MainWindow : public Widget
 {
-    friend class WidgetImpl;
+    friend class MainWindowImpl;
     
 public:
-    Widget(Widget* pParent = 0);
-    virtual ~Widget();
+    MainWindow();
+    virtual ~MainWindow();
 
-    void* getNativeWidget();
-
-    virtual void showWidget();
-    virtual void hideWidget();
-
-    class SelectNotification : public Poco::Notification
-    {
-    public:
-        SelectNotification();
-    };
-
-    void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
-
-protected:
-    virtual void select();
-
-    Poco::NotificationCenter    _eventNotificationCenter;
+    void setMainWidget(Widget* pWidget);
 
 private:
-    WidgetImpl*                 _pImpl;
+    MainWindowImpl*     _pImpl;
 };
 
 
