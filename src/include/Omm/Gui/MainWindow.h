@@ -40,8 +40,8 @@ public:
 
     void setMainWidget(Widget* pWidget);
 
-private:
-    MainWindowImpl*     _pImpl;
+//private:
+//    MainWindowImpl*     _pImpl;
 };
 
 

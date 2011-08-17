@@ -62,10 +62,7 @@ public:
 class WidgetImpl : public NativeWidget<QWidget>
 {
     friend class Widget;
-    WidgetImpl(Widget* pParent = 0) :
-    NativeWidget<QWidget>(static_cast<NativeWidget<QWidget>*>(pParent->getNativeWidget()))
-    {
-    }
+    WidgetImpl(Widget* pParent = 0);
     
 private:
     virtual void mousePressEvent(QMouseEvent* pMouseEvent);

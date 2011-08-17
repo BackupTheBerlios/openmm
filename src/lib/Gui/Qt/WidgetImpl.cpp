@@ -26,32 +26,10 @@ namespace Omm {
 namespace Gui {
 
 
-//WidgetImpl::WidgetImpl(Widget* pParent) :
-////QWidget(static_cast<QWidget*>(pParent->getNativeWidget()))
-//{
-//    C::setParent(pParent);
-//}
-
-
-//QWidget*
-//WidgetImpl::getNativeWidget()
-//{
-//    return this;
-//}
-
-
-//void
-//WidgetImpl::showWidget()
-//{
-//    QWidget::show();
-//}
-//
-//
-//void
-//WidgetImpl::hideWidget()
-//{
-//    QWidget::hide();
-//}
+WidgetImpl::WidgetImpl(Widget* pParent) :
+NativeWidget<QWidget>(static_cast<NativeWidget<QWidget>*>(pParent->getNativeWidget()))
+{
+}
 
 
 void

@@ -46,8 +46,8 @@ public:
         PushNotification();
     };
 
-private:
-    ButtonImpl*     _pImpl;
+//private:
+//    ButtonImpl*     _pImpl;
 };
 
 

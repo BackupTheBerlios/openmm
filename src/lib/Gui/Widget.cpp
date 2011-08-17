@@ -35,34 +35,34 @@ namespace Gui {
 Widget::Widget(Widget* pParent)
 {
     _pImpl = new WidgetImpl(pParent);
-    _pImpl->_pWidget = this;
+    static_cast<WidgetImpl*>(_pImpl)->_pWidget = this;
 }
 
 
 Widget::~Widget()
 {
-    delete _pImpl;
+    delete  static_cast<WidgetImpl*>(_pImpl);
 }
 
 
 void*
 Widget::getNativeWidget()
 {
-    return _pImpl->getNativeWidget();
+    return  static_cast<WidgetImpl*>(_pImpl)->getNativeWidget();
 }
 
 
 void
 Widget::showWidget()
 {
-    _pImpl->showWidget();
+     static_cast<WidgetImpl*>(_pImpl)->showWidget();
 }
 
 
 void
 Widget::hideWidget()
 {
-    _pImpl->hideWidget();
+     static_cast<WidgetImpl*>(_pImpl)->hideWidget();
 }
 
 

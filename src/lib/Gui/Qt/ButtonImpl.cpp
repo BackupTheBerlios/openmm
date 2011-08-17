@@ -26,8 +26,8 @@ namespace Omm {
 namespace Gui {
 
 
-ButtonImpl::ButtonImpl(Widget* pParent) //:
-//QPushButton(static_cast<QWidget*>(pParent->getNativeWidget()))
+ButtonImpl::ButtonImpl(Widget* pParent) :
+NativeWidget<QPushButton>(static_cast<NativeWidget<QPushButton>*>(pParent->getNativeWidget()))
 {
     connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
 }

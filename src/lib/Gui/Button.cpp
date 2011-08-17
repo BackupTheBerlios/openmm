@@ -35,7 +35,7 @@ namespace Gui {
 Button::Button(Widget* pParent)
 {
     _pImpl = new ButtonImpl(pParent);
-    _pImpl->_pButton = this;
+    static_cast<ButtonImpl*>(_pImpl)->_pButton = this;
 }
 
 
@@ -47,7 +47,7 @@ Button::~Button()
 void
 Button::setLabel(const std::string& label)
 {
-    _pImpl->setLabel(label);
+    static_cast<ButtonImpl*>(_pImpl)->setLabel(label);
 }
 
 

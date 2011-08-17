@@ -35,7 +35,7 @@ namespace Gui {
 MainWindow::MainWindow()
 {
     _pImpl = new MainWindowImpl;
-    _pImpl->_pMainWindow = this;
+    static_cast<MainWindowImpl*>(_pImpl)->_pMainWindow = this;
 }
 
 
@@ -47,7 +47,7 @@ MainWindow::~MainWindow()
 void
 MainWindow::setMainWidget(Widget* pWidget)
 {
-    _pImpl->setMainWidget(pWidget);
+    static_cast<MainWindowImpl*>(_pImpl)->setMainWidget(pWidget);
 }
 
 

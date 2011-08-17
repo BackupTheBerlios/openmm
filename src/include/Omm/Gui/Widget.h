@@ -30,39 +30,7 @@ namespace Omm {
 namespace Gui {
 
 class WidgetImpl;
-
-//template<class C>
-//class WidgetImpl : public C
-//{
-//    friend class Widget;
-//
-//public:
-//    WidgetImpl(Widget* pParent = 0) :
-//    C(static_cast<C*>(pParent->getNativeWidget()))
-//    {
-//    }
-//
-//    C* getNativeWidget()
-//    {
-//        return this;
-//    }
-//
-//    virtual void showWidget()
-//    {
-//        C::show();
-//    }
-//
-//
-//    virtual void hideWidget()
-//    {
-//        C::hide();
-//    }
-//
-//private:
-//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-//    Widget*     _pWidget;
-//};
-
+//template<class C> NativeWidget;
 
 class Widget
 {
@@ -90,8 +58,10 @@ protected:
 
     Poco::NotificationCenter    _eventNotificationCenter;
 
-private:
-    WidgetImpl*                 _pImpl;
+//private:
+    void*                       _pImpl;
+//    WidgetImpl*                 _pImpl;
+//    template<class C> NativeWidget* _pNative;
 };
 
 
