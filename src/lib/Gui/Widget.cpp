@@ -47,7 +47,7 @@ Widget::Widget(Widget* pParent)
 
 Widget::~Widget()
 {
-    delete _pImpl;
+//    delete _pImpl;
 }
 
 
