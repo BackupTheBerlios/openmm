@@ -37,6 +37,7 @@ Button::Button(Widget* pParent)
 {
     Omm::Gui::Log::instance()->gui().debug("button ctor ...");
     _pImpl = new ButtonImpl(pParent);
+    static_cast<WidgetImpl*>(_pImpl)->_pWidget = this;
     Omm::Gui::Log::instance()->gui().debug("button ctor finished.");
 }
 

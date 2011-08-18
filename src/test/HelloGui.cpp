@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     Omm::Gui::MainWindow mainWindow;
     Omm::Gui::Button button(&mainWindow);
 
-    button.setLabel("hello gui");
+    button.setLabel("Hello GUI");
     mainWindow.setMainWidget(&button);
     mainWindow.showWidget();
 

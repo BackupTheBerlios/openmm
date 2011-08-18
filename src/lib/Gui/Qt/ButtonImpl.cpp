@@ -19,8 +19,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/NumberFormatter.h>
+
 #include "ButtonImpl.h"
 #include "Gui/Button.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
@@ -44,7 +47,9 @@ ButtonImpl::setLabel(const std::string& label)
 void
 ButtonImpl::pushed()
 {
+    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, sending notification to widget: " + Poco::NumberFormatter::format(_pWidget) + "...");
     _pWidget->_eventNotificationCenter.postNotification(new Button::PushNotification);
+    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, notification sent.");
 }
 
 

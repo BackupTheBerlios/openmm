@@ -46,8 +46,9 @@ public:
     virtual void hideWidget();
     virtual void select();
 
-protected:
     Widget*                     _pWidget;
+
+protected:
     QWidget*                    _pNativeWidget;
 };
 

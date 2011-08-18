@@ -70,8 +70,7 @@ WidgetImpl::setNativeWidget(QWidget* pWidget)
 void
 WidgetImpl::showWidget()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget implementation show widget ...");
-    Omm::Gui::Log::instance()->gui().debug("widget implementation show widget _pNativeWidget: " + Poco::NumberFormatter::format(_pNativeWidget));
+    Omm::Gui::Log::instance()->gui().debug("widget implementation show widget _pNativeWidget: " + Poco::NumberFormatter::format(_pNativeWidget) + " ...");
     _pNativeWidget->show();
     Omm::Gui::Log::instance()->gui().debug("widget implementation show widget finished.");
 }
