@@ -22,6 +22,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/MainWindow.h"
+#include "Gui/GuiLogger.h"
 
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/MainWindowImpl.h"
@@ -34,8 +35,9 @@ namespace Gui {
 
 MainWindow::MainWindow()
 {
+    Omm::Gui::Log::instance()->gui().debug("main window ctor ...");
     _pImpl = new MainWindowImpl;
-    static_cast<MainWindowImpl*>(_pImpl)->_pMainWindow = this;
+    Omm::Gui::Log::instance()->gui().debug("main window ctor finished.");
 }
 
 

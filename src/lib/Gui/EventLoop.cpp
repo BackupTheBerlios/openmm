@@ -19,59 +19,39 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef WidgetImpl_INCLUDED
-#define WidgetImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <QtGui>
-#include "Gui/Widget.h"
+#include "Gui/EventLoop.h"
+#include "Gui/GuiLogger.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/EventLoopImpl.h"
+#endif
+
 
 namespace Omm {
 namespace Gui {
 
-class NativeWidget;
 
-
-class WidgetImpl
+EventLoop::EventLoop(int argc, char** argv)
 {
-    friend class Widget;
-    
-public:
-    WidgetImpl(Widget* pParent = 0);
-    WidgetImpl(QWidget* pNativeWidget);
-    virtual ~WidgetImpl();
-
-    QWidget* getNativeWidget();
-    void setNativeWidget(QWidget* pWidget);
-    virtual void showWidget();
-    virtual void hideWidget();
-    virtual void select();
-
-protected:
-    Widget*                     _pWidget;
-    QWidget*                    _pNativeWidget;
-};
+    Omm::Gui::Log::instance()->gui().debug("event loop ctor ...");
+    _pEventLoopImpl = new EventLoopImpl(argc, argv);
+    Omm::Gui::Log::instance()->gui().debug("event loop ctor finished.");
+}
 
 
-class NativeWidget : public QWidget
+EventLoop::~EventLoop()
 {
-    friend class WidgetImpl;
-    
-public:
-    NativeWidget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
-
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-
-    WidgetImpl*     _pWidgetImpl;
-};
+}
 
 
+void
+EventLoop::run()
+{
+    _pEventLoopImpl->run();
+}
 
 
-
-
-
-}  // namespace Omm
-}  // namespace Gui
-
-#endif
-
+} // namespace Gui
+} // namespace Omm

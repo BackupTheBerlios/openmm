@@ -22,6 +22,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/Button.h"
+#include "Gui/GuiLogger.h"
 
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ButtonImpl.h"
@@ -34,8 +35,9 @@ namespace Gui {
 
 Button::Button(Widget* pParent)
 {
+    Omm::Gui::Log::instance()->gui().debug("button ctor ...");
     _pImpl = new ButtonImpl(pParent);
-    static_cast<ButtonImpl*>(_pImpl)->_pButton = this;
+    Omm::Gui::Log::instance()->gui().debug("button ctor finished.");
 }
 
 
@@ -47,6 +49,7 @@ Button::~Button()
 void
 Button::setLabel(const std::string& label)
 {
+    Omm::Gui::Log::instance()->gui().debug("button set label");
     static_cast<ButtonImpl*>(_pImpl)->setLabel(label);
 }
 

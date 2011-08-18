@@ -31,7 +31,7 @@ namespace Gui {
 class Widget;
 class MainWindow;
 
-class MainWindowImpl : public NativeWidget<QMainWindow>
+class MainWindowImpl : public QMainWindow, public WidgetImpl
 {
 private:
     friend class MainWindow;
@@ -39,8 +39,6 @@ private:
     MainWindowImpl();
 
     void setMainWidget(Widget* pWidget);
-
-    MainWindow*     _pMainWindow;
 };
 
 

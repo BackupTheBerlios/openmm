@@ -19,59 +19,32 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef WidgetImpl_INCLUDED
-#define WidgetImpl_INCLUDED
+#ifndef EventLoop_INCLUDED
+#define EventLoop_INCLUDED
 
-#include <QtGui>
-#include "Gui/Widget.h"
 
 namespace Omm {
 namespace Gui {
 
-class NativeWidget;
+class EventLoopImpl;
 
 
-class WidgetImpl
+class EventLoop
 {
-    friend class Widget;
+    friend class EventLoopImpl;
     
 public:
-    WidgetImpl(Widget* pParent = 0);
-    WidgetImpl(QWidget* pNativeWidget);
-    virtual ~WidgetImpl();
+    EventLoop(int argc = 0, char** argv = 0);
+    virtual ~EventLoop();
 
-    QWidget* getNativeWidget();
-    void setNativeWidget(QWidget* pWidget);
-    virtual void showWidget();
-    virtual void hideWidget();
-    virtual void select();
+    void run();
 
-protected:
-    Widget*                     _pWidget;
-    QWidget*                    _pNativeWidget;
+private:
+    EventLoopImpl*      _pEventLoopImpl;
 };
-
-
-class NativeWidget : public QWidget
-{
-    friend class WidgetImpl;
-    
-public:
-    NativeWidget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
-
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-
-    WidgetImpl*     _pWidgetImpl;
-};
-
-
-
-
-
 
 
 }  // namespace Omm
 }  // namespace Gui
 
 #endif
-

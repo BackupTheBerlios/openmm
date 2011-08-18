@@ -27,7 +27,8 @@ namespace Gui {
 
 
 ButtonImpl::ButtonImpl(Widget* pParent) :
-NativeWidget<QPushButton>(static_cast<NativeWidget<QPushButton>*>(pParent->getNativeWidget()))
+QPushButton(static_cast<QWidget*>(pParent->getNativeWidget())),
+WidgetImpl(this)
 {
     connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
 }
@@ -43,7 +44,7 @@ ButtonImpl::setLabel(const std::string& label)
 void
 ButtonImpl::pushed()
 {
-    _pButton->_eventNotificationCenter.postNotification(new Button::PushNotification);
+    _pWidget->_eventNotificationCenter.postNotification(new Button::PushNotification);
 }
 
 

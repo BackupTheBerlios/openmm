@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,61 +17,24 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef WidgetImpl_INCLUDED
-#define WidgetImpl_INCLUDED
-
-#include <QtGui>
-#include "Gui/Widget.h"
-
-namespace Omm {
-namespace Gui {
-
-class NativeWidget;
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Button.h>
 
 
-class WidgetImpl
+
+int main(int argc, char** argv)
 {
-    friend class Widget;
-    
-public:
-    WidgetImpl(Widget* pParent = 0);
-    WidgetImpl(QWidget* pNativeWidget);
-    virtual ~WidgetImpl();
+    Omm::Gui::EventLoop loop(argc, argv);
+    Omm::Gui::MainWindow mainWindow;
+    Omm::Gui::Button button(&mainWindow);
 
-    QWidget* getNativeWidget();
-    void setNativeWidget(QWidget* pWidget);
-    virtual void showWidget();
-    virtual void hideWidget();
-    virtual void select();
+    button.setLabel("hello gui");
+    mainWindow.setMainWidget(&button);
+    mainWindow.showWidget();
 
-protected:
-    Widget*                     _pWidget;
-    QWidget*                    _pNativeWidget;
-};
-
-
-class NativeWidget : public QWidget
-{
-    friend class WidgetImpl;
-    
-public:
-    NativeWidget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
-
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-
-    WidgetImpl*     _pWidgetImpl;
-};
-
-
-
-
-
-
-
-}  // namespace Omm
-}  // namespace Gui
-
-#endif
+    loop.run();
+}
 

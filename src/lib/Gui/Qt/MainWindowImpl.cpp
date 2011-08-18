@@ -21,20 +21,23 @@
 
 #include "MainWindowImpl.h"
 #include "Gui/MainWindow.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
 
-MainWindowImpl::MainWindowImpl()
+MainWindowImpl::MainWindowImpl() :
+WidgetImpl(this)
 {
-//    connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
+    Omm::Gui::Log::instance()->gui().debug("main window implementation ctor");
 }
 
 
 void
 MainWindowImpl::setMainWidget(Widget* pWidget)
 {
+    Omm::Gui::Log::instance()->gui().debug("main window implementation set main widget");
     QMainWindow::setCentralWidget(static_cast<QWidget*>(pWidget->getNativeWidget()));
 }
 

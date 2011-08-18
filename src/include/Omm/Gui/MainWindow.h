@@ -27,8 +27,6 @@
 namespace Omm {
 namespace Gui {
 
-class MainWindowImpl;
-
 
 class MainWindow : public Widget
 {
@@ -39,9 +37,6 @@ public:
     virtual ~MainWindow();
 
     void setMainWidget(Widget* pWidget);
-
-//private:
-//    MainWindowImpl*     _pImpl;
 };
 
 

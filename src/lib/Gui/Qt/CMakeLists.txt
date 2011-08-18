@@ -6,12 +6,14 @@ set(OMMGUI_QT_SRC
 WidgetImpl.cpp
 ButtonImpl.cpp
 MainWindowImpl.cpp
+EventLoopImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
 #WidgetImpl.h
 ButtonImpl.h
 #MainWindowImpl.h
+#EventLoopImpl.h
 )
 
 QT4_ADD_RESOURCES(

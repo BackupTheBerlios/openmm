@@ -192,3 +192,11 @@ ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
 )
+
+add_executable(hellogui
+HelloGui.cpp
+)
+
+target_link_libraries(hellogui
+${OMM_GUI}
+)

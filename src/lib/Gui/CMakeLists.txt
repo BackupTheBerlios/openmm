@@ -35,6 +35,7 @@ GuiLogger.cpp
 Widget.cpp
 Button.cpp
 MainWindow.cpp
+EventLoop.cpp
 ListWidget.cpp
 ListModel.cpp
 ListView.cpp

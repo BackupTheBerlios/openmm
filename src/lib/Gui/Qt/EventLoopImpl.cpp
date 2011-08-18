@@ -19,59 +19,28 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef WidgetImpl_INCLUDED
-#define WidgetImpl_INCLUDED
-
-#include <QtGui>
-#include "Gui/Widget.h"
+#include "EventLoopImpl.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
-class NativeWidget;
 
-
-class WidgetImpl
+EventLoopImpl::EventLoopImpl(int argc, char** argv) :
+QApplication(argc, argv)
 {
-    friend class Widget;
-    
-public:
-    WidgetImpl(Widget* pParent = 0);
-    WidgetImpl(QWidget* pNativeWidget);
-    virtual ~WidgetImpl();
-
-    QWidget* getNativeWidget();
-    void setNativeWidget(QWidget* pWidget);
-    virtual void showWidget();
-    virtual void hideWidget();
-    virtual void select();
-
-protected:
-    Widget*                     _pWidget;
-    QWidget*                    _pNativeWidget;
-};
+    Omm::Gui::Log::instance()->gui().debug("event loop implementation ctor");
+}
 
 
-class NativeWidget : public QWidget
+void
+EventLoopImpl::run()
 {
-    friend class WidgetImpl;
-    
-public:
-    NativeWidget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
-
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-
-    WidgetImpl*     _pWidgetImpl;
-};
-
-
-
-
-
+    Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
+    QApplication::exec();
+    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+}
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif
-

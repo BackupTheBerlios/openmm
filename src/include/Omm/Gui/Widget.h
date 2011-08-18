@@ -30,7 +30,6 @@ namespace Omm {
 namespace Gui {
 
 class WidgetImpl;
-//template<class C> NativeWidget;
 
 class Widget
 {
@@ -52,16 +51,12 @@ public:
     };
 
     void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
+    Poco::NotificationCenter    _eventNotificationCenter;
 
 protected:
     virtual void select();
 
-    Poco::NotificationCenter    _eventNotificationCenter;
-
-//private:
-    void*                       _pImpl;
-//    WidgetImpl*                 _pImpl;
-//    template<class C> NativeWidget* _pNative;
+    WidgetImpl*                 _pImpl;
 };
 
 

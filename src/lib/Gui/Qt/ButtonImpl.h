@@ -31,21 +31,19 @@ namespace Gui {
 class Widget;
 class Button;
 
-class ButtonImpl : public NativeWidget<QPushButton>
+class ButtonImpl : public QPushButton, public WidgetImpl
 {
     Q_OBJECT
-    
+
+    friend class Button;
+
 private slots:
     void pushed();
 
 private:
-    friend class Button;
-    
     ButtonImpl(Widget* pParent = 0);
 
     void setLabel(const std::string& label);
-
-    Button*     _pButton;
 };
 
 

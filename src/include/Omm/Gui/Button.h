@@ -27,8 +27,6 @@
 namespace Omm {
 namespace Gui {
 
-class ButtonImpl;
-
 
 class Button : public Widget
 {
@@ -45,9 +43,6 @@ public:
     public:
         PushNotification();
     };
-
-//private:
-//    ButtonImpl*     _pImpl;
 };
 
 

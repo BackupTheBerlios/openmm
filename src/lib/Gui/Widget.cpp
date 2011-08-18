@@ -22,6 +22,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/Widget.h"
+#include "Gui/GuiLogger.h"
 
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/WidgetImpl.h"
@@ -34,35 +35,44 @@ namespace Gui {
 
 Widget::Widget(Widget* pParent)
 {
+    if (!pParent) {
+        return;
+    }
+    Omm::Gui::Log::instance()->gui().debug("widget ctor ...");
     _pImpl = new WidgetImpl(pParent);
     static_cast<WidgetImpl*>(_pImpl)->_pWidget = this;
+    Omm::Gui::Log::instance()->gui().debug("widget ctor finished.");
 }
 
 
 Widget::~Widget()
 {
-    delete  static_cast<WidgetImpl*>(_pImpl);
+    delete _pImpl;
 }
 
 
 void*
 Widget::getNativeWidget()
 {
-    return  static_cast<WidgetImpl*>(_pImpl)->getNativeWidget();
+    Omm::Gui::Log::instance()->gui().debug("widget get native widget.");
+    return _pImpl->getNativeWidget();
 }
 
 
 void
 Widget::showWidget()
 {
-     static_cast<WidgetImpl*>(_pImpl)->showWidget();
+    Omm::Gui::Log::instance()->gui().debug("widget show widget ...");
+     _pImpl->showWidget();
+    Omm::Gui::Log::instance()->gui().debug("widget show widget finished.");
 }
 
 
 void
 Widget::hideWidget()
 {
-     static_cast<WidgetImpl*>(_pImpl)->hideWidget();
+    Omm::Gui::Log::instance()->gui().debug("widget hide widget.");
+     _pImpl->hideWidget();
 }
 
 
@@ -74,6 +84,7 @@ Widget::SelectNotification::SelectNotification()
 void
 Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
 {
+    Omm::Gui::Log::instance()->gui().debug("widget register notification handler.");
     _eventNotificationCenter.addObserver(observer);
 }
 
@@ -81,6 +92,7 @@ Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
 void
 Widget::select()
 {
+    Omm::Gui::Log::instance()->gui().debug("widget select.");
     _eventNotificationCenter.postNotification(new SelectNotification);
 }
 
