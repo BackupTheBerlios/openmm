@@ -36,19 +36,22 @@ class WidgetImpl
     friend class Widget;
     
 public:
-    WidgetImpl(Widget* pParent = 0);
+    WidgetImpl(Widget* pWidget);
     WidgetImpl(QWidget* pNativeWidget);
+    WidgetImpl(Widget* pWidget, QWidget* pNativeWidget);
     virtual ~WidgetImpl();
 
+    Widget* getWidget();
     QWidget* getNativeWidget();
     void setNativeWidget(QWidget* pWidget);
     virtual void showWidget();
     virtual void hideWidget();
     virtual void select();
+ 
+protected:
+    void postNotification(Poco::Notification::Ptr pNotification);
 
     Widget*                     _pWidget;
-
-protected:
     QWidget*                    _pNativeWidget;
 };
 
@@ -62,7 +65,7 @@ public:
 
     virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 
-    WidgetImpl*     _pWidgetImpl;
+    WidgetImpl*                 _pWidgetImpl;
 };
 
 

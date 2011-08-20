@@ -40,6 +40,7 @@ public:
     virtual ~Widget();
 
     void* getNativeWidget();
+    Widget* getParent();
 
     virtual void showWidget();
     virtual void hideWidget();
@@ -51,12 +52,15 @@ public:
     };
 
     void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
-    Poco::NotificationCenter    _eventNotificationCenter;
 
 protected:
+    Widget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
+
     virtual void select();
 
+    Widget*                     _pParent;
     WidgetImpl*                 _pImpl;
+    Poco::NotificationCenter    _eventNotificationCenter;
 };
 
 

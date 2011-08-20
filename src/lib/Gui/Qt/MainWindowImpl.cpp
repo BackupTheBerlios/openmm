@@ -27,8 +27,8 @@ namespace Omm {
 namespace Gui {
 
 
-MainWindowImpl::MainWindowImpl() :
-WidgetImpl(this)
+MainWindowImpl::MainWindowImpl(Widget* pWidget) :
+WidgetImpl(pWidget, this)
 {
     Omm::Gui::Log::instance()->gui().debug("main window implementation ctor");
 }

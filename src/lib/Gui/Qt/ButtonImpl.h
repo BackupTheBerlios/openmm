@@ -41,7 +41,7 @@ private slots:
     void pushed();
 
 private:
-    ButtonImpl(Widget* pParent = 0);
+    ButtonImpl(Widget* pWidget, Widget* pParent = 0);
 
     void setLabel(const std::string& label);
 };

@@ -36,7 +36,7 @@ class MainWindowImpl : public QMainWindow, public WidgetImpl
 private:
     friend class MainWindow;
     
-    MainWindowImpl();
+    MainWindowImpl(Widget* pWidget);
 
     void setMainWidget(Widget* pWidget);
 };

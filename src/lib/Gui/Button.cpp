@@ -33,12 +33,10 @@ namespace Omm {
 namespace Gui {
 
 
-Button::Button(Widget* pParent)
+Button::Button(Widget* pParent) :
+Widget(new ButtonImpl(this, pParent), pParent)
 {
-    Omm::Gui::Log::instance()->gui().debug("button ctor ...");
-    _pImpl = new ButtonImpl(pParent);
-    static_cast<WidgetImpl*>(_pImpl)->_pWidget = this;
-    Omm::Gui::Log::instance()->gui().debug("button ctor finished.");
+    Omm::Gui::Log::instance()->gui().debug("button ctor.");
 }
 
 

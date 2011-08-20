@@ -33,15 +33,19 @@ namespace Omm {
 namespace Gui {
 
 
-Widget::Widget(Widget* pParent)
+Widget::Widget(Widget* pParent) :
+_pImpl(new WidgetImpl(this)),
+_pParent(pParent)
 {
-    if (!pParent) {
-        return;
-    }
-    Omm::Gui::Log::instance()->gui().debug("widget ctor ...");
-    _pImpl = new WidgetImpl(pParent);
-    static_cast<WidgetImpl*>(_pImpl)->_pWidget = this;
-    Omm::Gui::Log::instance()->gui().debug("widget ctor finished.");
+    Omm::Gui::Log::instance()->gui().debug("widget ctor (parent).");
+}
+
+
+Widget::Widget(WidgetImpl* pWidgetImpl, Widget* pParent) :
+_pImpl(pWidgetImpl),
+_pParent(pParent)
+{
+    Omm::Gui::Log::instance()->gui().debug("widget ctor (widget impl, parent).");
 }
 
 
@@ -54,8 +58,16 @@ Widget::~Widget()
 void*
 Widget::getNativeWidget()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget get native widget.");
+    Omm::Gui::Log::instance()->gui().debug("widget get native widget, impl:" + Poco::NumberFormatter::format(_pImpl));
     return _pImpl->getNativeWidget();
+}
+
+
+Widget*
+Widget::getParent()
+{
+    Omm::Gui::Log::instance()->gui().debug("widget get parent: " + Poco::NumberFormatter::format(_pParent));
+    return _pParent;
 }
 
 

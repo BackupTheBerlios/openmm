@@ -29,10 +29,11 @@ namespace Omm {
 namespace Gui {
 
 
-ButtonImpl::ButtonImpl(Widget* pParent) :
+ButtonImpl::ButtonImpl(Widget* pWidget, Widget* pParent) :
 QPushButton(static_cast<QWidget*>(pParent->getNativeWidget())),
-WidgetImpl(this)
+WidgetImpl(pWidget, this)
 {
+    Omm::Gui::Log::instance()->gui().debug("button implementation ctor");
     connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
 }
 
@@ -48,7 +49,7 @@ void
 ButtonImpl::pushed()
 {
     Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, sending notification to widget: " + Poco::NumberFormatter::format(_pWidget) + "...");
-    _pWidget->_eventNotificationCenter.postNotification(new Button::PushNotification);
+    postNotification(new Button::PushNotification);
     Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, notification sent.");
 }
 

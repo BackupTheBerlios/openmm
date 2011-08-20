@@ -29,21 +29,26 @@ namespace Omm {
 namespace Gui {
 
 
-
-WidgetImpl::WidgetImpl(Widget* pParent)
+WidgetImpl::WidgetImpl(Widget* pWidget) :
+_pNativeWidget(new NativeWidget(this, pWidget->getParent())),
+_pWidget(pWidget)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor (parent) ...");
-    _pNativeWidget = new NativeWidget(this, pParent);
-    static_cast<NativeWidget*>(_pNativeWidget)->_pWidgetImpl = this;
-    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor finished.");
+    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor (widget).");
 }
 
 
-WidgetImpl::WidgetImpl(QWidget* pNativeWidget)
+WidgetImpl::WidgetImpl(QWidget* pNativeWidget) :
+_pNativeWidget(pNativeWidget)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor (native widget) ...");
-    _pNativeWidget = pNativeWidget;
-    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor finished.");
+    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor (native widget).");
+}
+
+
+WidgetImpl::WidgetImpl(Widget* pWidget, QWidget* pNativeWidget) :
+_pWidget(pWidget),
+_pNativeWidget(pNativeWidget)
+{
+    Omm::Gui::Log::instance()->gui().debug("widget implementation ctor (widget, native widget)");
 }
 
 
@@ -53,9 +58,18 @@ WidgetImpl::~WidgetImpl()
 }
 
 
+Widget*
+WidgetImpl::getWidget()
+{
+    Omm::Gui::Log::instance()->gui().debug("widget implementation get widget: " + Poco::NumberFormatter::format(_pWidget));
+    return _pWidget;
+}
+
+
 QWidget*
 WidgetImpl::getNativeWidget()
 {
+    Omm::Gui::Log::instance()->gui().debug("widget implementation get native widget: " + Poco::NumberFormatter::format(_pNativeWidget));
     return _pNativeWidget;
 }
 
@@ -89,6 +103,13 @@ WidgetImpl::select()
 {
     Omm::Gui::Log::instance()->gui().debug("widget implementation select.");
     _pWidget->select();
+}
+
+
+void
+WidgetImpl::postNotification(Poco::Notification::Ptr pNotification)
+{
+    _pWidget->_eventNotificationCenter.postNotification(pNotification);
 }
 
 

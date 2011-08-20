@@ -33,11 +33,11 @@ namespace Omm {
 namespace Gui {
 
 
-MainWindow::MainWindow()
+MainWindow::MainWindow() :
+// FIXME: wrong ctor
+Widget(new MainWindowImpl(this))
 {
-    Omm::Gui::Log::instance()->gui().debug("main window ctor ...");
-    _pImpl = new MainWindowImpl;
-    Omm::Gui::Log::instance()->gui().debug("main window ctor finished.");
+    Omm::Gui::Log::instance()->gui().debug("main window ctor.");
 }
 
 
