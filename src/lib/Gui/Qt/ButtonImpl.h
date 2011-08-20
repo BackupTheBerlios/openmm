@@ -42,6 +42,7 @@ private slots:
 
 private:
     ButtonImpl(Widget* pWidget, Widget* pParent = 0);
+    virtual ~ButtonImpl();
 
     void setLabel(const std::string& label);
 };

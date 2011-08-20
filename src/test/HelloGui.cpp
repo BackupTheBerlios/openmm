@@ -19,20 +19,39 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include <Poco/Observer.h>
+
 #include <Omm/Gui/EventLoop.h>
 #include <Omm/Gui/MainWindow.h>
 #include <Omm/Gui/Button.h>
 
 
+class HelloGui : public Omm::Gui::MainWindow
+{
+public:
+    HelloGui()
+    {
+        _pButton = new Omm::Gui::Button(this);
+        _pButton->setLabel("Hello GUI");
+        _pButton->connect(Poco::Observer<HelloGui, Omm::Gui::Button::PushNotification>(*this, &HelloGui::onPush));
+        setMainWidget(_pButton);
+    }
+
+    void onPush(Omm::Gui::Button::PushNotification* pNotification)
+    {
+        _pButton->setLabel("works!");
+    }
+    
+private:
+    Omm::Gui::Button* _pButton;
+};
+
 
 int main(int argc, char** argv)
 {
     Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::Button button(&mainWindow);
+    HelloGui mainWindow;
 
-    button.setLabel("Hello GUI");
-    mainWindow.setMainWidget(&button);
     mainWindow.showWidget();
 
     loop.run();

@@ -37,6 +37,7 @@ private:
     friend class MainWindow;
     
     MainWindowImpl(Widget* pWidget);
+    virtual ~MainWindowImpl();
 
     void setMainWidget(Widget* pWidget);
 };

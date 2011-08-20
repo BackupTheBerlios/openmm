@@ -51,7 +51,7 @@ public:
         SelectNotification();
     };
 
-    void registerEventNotificationHandler(const Poco::AbstractObserver& observer);
+    void connect(const Poco::AbstractObserver& observer);
 
 protected:
     Widget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);

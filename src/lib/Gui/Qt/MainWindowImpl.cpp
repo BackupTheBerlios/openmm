@@ -34,6 +34,11 @@ WidgetImpl(pWidget, this)
 }
 
 
+MainWindowImpl::~MainWindowImpl()
+{
+}
+
+
 void
 MainWindowImpl::setMainWidget(Widget* pWidget)
 {

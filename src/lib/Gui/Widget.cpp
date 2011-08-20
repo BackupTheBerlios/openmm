@@ -51,7 +51,9 @@ _pParent(pParent)
 
 Widget::~Widget()
 {
-//    delete _pImpl;
+    if (_pImpl) {
+//        delete _pImpl;
+    }
 }
 
 
@@ -94,7 +96,7 @@ Widget::SelectNotification::SelectNotification()
 
 
 void
-Widget::registerEventNotificationHandler(const Poco::AbstractObserver& observer)
+Widget::connect(const Poco::AbstractObserver& observer)
 {
     Omm::Gui::Log::instance()->gui().debug("widget register notification handler.");
     _eventNotificationCenter.addObserver(observer);

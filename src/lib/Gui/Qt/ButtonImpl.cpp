@@ -38,6 +38,11 @@ WidgetImpl(pWidget, this)
 }
 
 
+ButtonImpl::~ButtonImpl()
+{
+}
+
+
 void
 ButtonImpl::setLabel(const std::string& label)
 {

@@ -120,7 +120,7 @@ ListView::extendWidgetPool(int n)
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
-        pWidget->registerEventNotificationHandler(Poco::Observer<ListView, ListWidget::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
+        pWidget->connect(Poco::Observer<ListView, ListWidget::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
         Log::instance()->gui().debug("allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }

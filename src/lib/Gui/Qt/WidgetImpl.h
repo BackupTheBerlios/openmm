@@ -37,8 +37,6 @@ class WidgetImpl
     
 public:
     WidgetImpl(Widget* pWidget);
-    WidgetImpl(QWidget* pNativeWidget);
-    WidgetImpl(Widget* pWidget, QWidget* pNativeWidget);
     virtual ~WidgetImpl();
 
     Widget* getWidget();
@@ -49,6 +47,9 @@ public:
     virtual void select();
  
 protected:
+    WidgetImpl(QWidget* pNativeWidget);
+    WidgetImpl(Widget* pWidget, QWidget* pNativeWidget);
+
     void postNotification(Poco::Notification::Ptr pNotification);
 
     Widget*                     _pWidget;
