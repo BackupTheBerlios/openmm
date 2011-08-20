@@ -104,6 +104,7 @@ private:
     const static QString CHAN_PLUGIN;
     const static QString CHAN_NET;
     const static QString CHAN_SYS;
+    const static QString CHAN_GUI;
 
     void getDebugLevelPosition(const QString& line);
     void getIsLogEntry(const QString& line);
