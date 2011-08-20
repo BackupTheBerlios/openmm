@@ -19,39 +19,38 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/Button.h>
+//#include <Omm/Gui/EventLoop.h>
+//#include <Omm/Gui/MainWindow.h>
 
 #include <Omm/UpnpApplication.h>
 #include <Omm/Util.h>
 
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-
-    mainWindow.showWidget();
-
-    loop.run();
-
-
-//    Omm::Util::PluginLoader<Omm::UpnpApplication> pluginLoader;
-//    Omm::UpnpApplication* pApp;
-//    try {
-//        pApp = pluginLoader.load("application-qt");
-//    }
-//    catch(Poco::NotFoundException) {
-//        Omm::Log::instance()->upnp().error("OMM application could not find Qt application plugin");
-//        return 1;
-//    }
+//    Omm::Gui::EventLoop loop(argc, argv);
+//    Omm::Gui::MainWindow mainWindow;
 //
-//    pApp->setApplicationName("New OMM");
-//    pApp->init();
-//    pApp->enableController();
-//    int ret = pApp->run(argc, argv);
-//    delete pApp;
+//    mainWindow.showWidget();
 //
-//    return ret;
+//    loop.run();
+
+
+    Omm::Util::PluginLoader<Omm::UpnpApplication> pluginLoader;
+    Omm::UpnpApplication* pApp;
+    try {
+        pApp = pluginLoader.load("application-gui");
+    }
+    catch(Poco::NotFoundException) {
+        Omm::Log::instance()->upnp().error("OMM application could not find gui application plugin");
+        return 1;
+    }
+
+    pApp->setApplicationName("New OMM");
+    pApp->init();
+    pApp->enableController();
+    int ret = pApp->run(argc, argv);
+    delete pApp;
+
+    return ret;
 }
 
