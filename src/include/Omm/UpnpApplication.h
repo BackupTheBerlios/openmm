@@ -51,7 +51,7 @@ public:
     UpnpApplication();
     virtual ~UpnpApplication();
 
-    virtual void init() {}
+    virtual void initApplication(int argc = 0, char** argv = 0) {}
     virtual void resize(int width, int height) {}
     virtual void setFullscreen(bool fullscreen) {}
     void setApplicationName(const std::string& name);

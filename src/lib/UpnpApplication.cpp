@@ -25,6 +25,8 @@
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
 
+#include <Omm/Util.h>
+
 #include "UpnpApplication.h"
 
 namespace Omm {
@@ -194,6 +196,8 @@ UpnpApplication::enableDevices(bool enable)
 void
 UpnpApplication::start()
 {
+    Omm::Util::Log::instance()->plugin().information("starting upnp application ...");
+
     if (_pController) {
         _pController->start();
     }

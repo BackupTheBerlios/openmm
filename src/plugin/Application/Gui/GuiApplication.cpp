@@ -35,12 +35,12 @@ GuiApplication::~GuiApplication()
 
 
 void
-GuiApplication::init()
+GuiApplication::initApplication(int argc, char** argv)
 {
     Omm::Log::instance()->upnp().debug("init gui application ...");
 
     // TODO: command line arguments can be passed after Poco::Application has processed them.
-    _pEventLoop = new Omm::Gui::EventLoop(0, 0);
+    _pEventLoop = new Omm::Gui::EventLoop(argc, argv);
     _pMainWindow = new Omm::Gui::MainWindow;
 
     _pMainWindow->showWidget();
@@ -80,7 +80,8 @@ GuiApplication::setWindowTitle(const std::string& title)
 void
 GuiApplication::eventLoop()
 {
-      _pEventLoop->run();
+    Omm::Log::instance()->upnp().debug("gui application entering event loop ...");
+    _pEventLoop->run();
 //    _pApp->exec();
 }
 

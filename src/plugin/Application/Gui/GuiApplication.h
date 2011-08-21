@@ -39,7 +39,7 @@ public:
 
 private:
     // UpnpApplication interface
-    virtual void init();
+    virtual void initApplication(int argc = 0, char** argv = 0);
     virtual void setWindowTitle(const std::string& title);
     virtual Omm::Controller* createController();
     virtual void addController();

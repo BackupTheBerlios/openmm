@@ -48,9 +48,9 @@ QtStdApplication::addToolBar(QToolBar* pToolBar)
 
 
 void
-QtStdApplication::init()
+QtStdApplication::initApplication(int argc, char** argv)
 {
-    Omm::Log::instance()->upnp().debug("init qt application ...");
+    Omm::Log::instance()->upnp().debug("init qt std application ...");
 
 //    setupUnixSignalHandlers();
     qRegisterMetaType<std::string>();

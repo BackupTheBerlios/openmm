@@ -48,7 +48,7 @@ QtApplication::addToolBar(QToolBar* pToolBar)
 
 
 void
-QtApplication::init()
+QtApplication::initApplication(int argc, char** argv)
 {
     Omm::Log::instance()->upnp().debug("init qt application ...");
 
