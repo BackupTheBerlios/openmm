@@ -39,7 +39,7 @@ class ListView : public Widget
     friend class ListViewImpl;
     
 public:
-    ListView(int widgetHeight, Widget* pParent = 0);
+    ListView(int widgetHeight, bool movableWidgets = true, Widget* pParent = 0);
 
     void setModel(ListModel* pModel);
     void insertItem(int row);

@@ -35,7 +35,7 @@ namespace Omm {
 namespace Gui {
 
 
-ListView::ListView(int widgetHeight, Widget* pParent) :
+ListView::ListView(int widgetHeight, bool movableWidgets, Widget* pParent) :
 Widget(new ListViewImpl(this, pParent), pParent),
 _pModel(0),
 _widgetHeight(widgetHeight),

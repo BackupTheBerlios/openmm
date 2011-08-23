@@ -66,8 +66,6 @@ ListViewImpl::visibleRows()
 void
 ListViewImpl::initWidget(ListWidget* pWidget)
 {
-//    QtListWidget* pQtWidget = static_cast<QtListWidget*>(pWidget);
-//    pQtWidget->resize(viewport()->width(), _widgetHeight);
     ListView* pListView =  static_cast<ListView*>(_pWidget);
     pWidget->resize(viewport()->width(), pListView->_widgetHeight);
 

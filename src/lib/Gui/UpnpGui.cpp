@@ -103,14 +103,32 @@ MediaRendererGroupView::MediaRendererGroupView() :
 DeviceGroupModel(new Av::MediaRendererGroupDelegate),
 ListView(50)
 {
+    // TODO: this populates the list view, need to fully implement renderer view first.
+//    setModel(this);
+}
+
+
+ListWidget*
+MediaRendererGroupView::createWidget()
+{
+    Log::instance()->gui().debug("media renderer group view create renderer view.");
+    return new MediaRendererView;
+}
+
+
+ListWidget*
+MediaRendererGroupView::getChildWidget(int row)
+{
+    MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(getDevice(row));
+//    return pRenderer->getDeviceWidget();
 }
 
 
 Device*
 MediaRendererGroupView::createDevice()
 {
-    Log::instance()->gui().debug("media renderer group view create renderer view.");
-    return new MediaRendererView;
+    Log::instance()->gui().debug("media renderer group view create renderer device.");
+    return new MediaRendererDevice;
 }
 
 

@@ -70,8 +70,8 @@ public:
     MediaRendererGroupView();
 
 //    // ListModel interface
-//    virtual ListWidget* createWidget();
-//    virtual ListWidget* getChildWidget(int row);
+    virtual ListWidget* createWidget();
+    virtual ListWidget* getChildWidget(int row);
 //    virtual void attachWidget(int row, ListWidget* pWidget);
 //    virtual void detachWidget(int row);
 
@@ -81,7 +81,19 @@ public:
 };
 
 
-class MediaRendererView : public Av::CtlMediaRenderer, public ListWidget
+class MediaRendererDevice : public Av::CtlMediaRenderer
+{
+//    void setDeviceWidget(QtMediaRendererWidget* pWidget);
+//    QtMediaRendererWidget* getDeviceWidget();
+//
+//    virtual void initController();
+//
+//private:
+//    QtMediaRendererWidget*            _pMediaRendererWidget;
+};
+
+
+class MediaRendererView : public ListWidget
 {
 
 };
