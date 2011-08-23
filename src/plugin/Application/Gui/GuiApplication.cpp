@@ -42,8 +42,7 @@ GuiApplication::initApplication(int argc, char** argv)
     _pEventLoop = new Omm::Gui::EventLoop(argc, argv);
     _pMainWindow = new Omm::Gui::MainWindow;
     _pMainWindow->resize(800, 480);
-
-    _pMainWindow->showWidget();
+    _pMainWindow->show();
 
     Omm::Log::instance()->upnp().debug("finished init gui application.");
 }

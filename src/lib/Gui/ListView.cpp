@@ -116,7 +116,7 @@ ListView::extendWidgetPool(int n)
             Log::instance()->gui().error("widget list view failed to create widget for pool (ignoring)");
             return;
         }
-        pWidget->hideWidget();
+        pWidget->hide();
         _widgetPool.push_back(pWidget);
         _freeWidgets.push(pWidget);
         initWidget(pWidget);

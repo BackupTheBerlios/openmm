@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     Omm::Gui::EventLoop loop(argc, argv);
     HelloGui mainWindow;
 
-    mainWindow.showWidget();
+    mainWindow.show();
 
     loop.run();
 }

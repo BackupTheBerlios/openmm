@@ -74,7 +74,7 @@ Widget::getParent()
 
 
 void
-Widget::showWidget()
+Widget::show()
 {
     Omm::Gui::Log::instance()->gui().debug("widget show widget ...");
      _pImpl->showWidget();
@@ -83,7 +83,7 @@ Widget::showWidget()
 
 
 void
-Widget::hideWidget()
+Widget::hide()
 {
     Omm::Gui::Log::instance()->gui().debug("widget hide widget.");
     _pImpl->hideWidget();
