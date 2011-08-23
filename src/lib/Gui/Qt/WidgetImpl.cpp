@@ -99,6 +99,14 @@ WidgetImpl::hideWidget()
 
 
 void
+WidgetImpl::resizeWidget(int width, int height)
+{
+    Omm::Gui::Log::instance()->gui().debug("widget implementation resize.");
+    _pNativeWidget->resize(width, height);
+}
+
+
+void
 WidgetImpl::select()
 {
     Omm::Gui::Log::instance()->gui().debug("widget implementation select.");

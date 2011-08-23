@@ -42,8 +42,10 @@ public:
     void* getNativeWidget();
     Widget* getParent();
 
-    virtual void showWidget();
-    virtual void hideWidget();
+    void showWidget();
+    void hideWidget();
+
+    void resize(int width, int height);
 
     class SelectNotification : public Poco::Notification
     {

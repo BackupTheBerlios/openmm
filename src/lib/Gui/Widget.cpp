@@ -86,7 +86,15 @@ void
 Widget::hideWidget()
 {
     Omm::Gui::Log::instance()->gui().debug("widget hide widget.");
-     _pImpl->hideWidget();
+    _pImpl->hideWidget();
+}
+
+
+void
+Widget::resize(int width, int height)
+{
+    Omm::Gui::Log::instance()->gui().debug("widget resize widget.");
+    _pImpl->resizeWidget(width, height);
 }
 
 

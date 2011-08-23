@@ -44,6 +44,7 @@ public:
     void setNativeWidget(QWidget* pWidget);
     virtual void showWidget();
     virtual void hideWidget();
+    virtual void resizeWidget(int width, int height);
     virtual void select();
  
 protected:
