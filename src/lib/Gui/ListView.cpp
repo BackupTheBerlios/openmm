@@ -27,7 +27,7 @@
 #include "Gui/Widget.h"
 
 //#ifdef __GUI_QT_PLATFORM__
-//#include "Qt/QtListView.h"
+//#include "Qt/ListViewImpl.h"
 //#endif
 
 

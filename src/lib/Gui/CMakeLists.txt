@@ -36,9 +36,10 @@ Widget.cpp
 Button.cpp
 MainWindow.cpp
 EventLoop.cpp
-ListWidget.cpp
+TabWidget.cpp
 ListModel.cpp
 ListView.cpp
+ListWidget.cpp
 Navigator.cpp
 )
 

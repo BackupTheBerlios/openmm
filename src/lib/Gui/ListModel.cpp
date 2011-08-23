@@ -24,6 +24,7 @@
 #include "Gui/ListModel.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/ListView.h"
+#include "Gui/ListWidget.h"
 
 namespace Omm {
 namespace Gui {

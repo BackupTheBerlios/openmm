@@ -19,36 +19,38 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef GuiApplication_INCLUDED
-#define GuiApplication_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/UpnpGui.h>
+#include "Gui/TabWidget.h"
+#include "Gui/GuiLogger.h"
 
-#include <Omm/Upnp.h>
-#include <Omm/UpnpApplication.h>
-
-
-class GuiApplication : public Omm::UpnpApplication
-{
-public:
-    GuiApplication();
-    virtual ~GuiApplication();
-
-    virtual void eventLoop();
-
-private:
-    // UpnpApplication interface
-    virtual void initApplication(int argc = 0, char** argv = 0);
-    virtual void setWindowTitle(const std::string& title);
-    virtual Omm::Controller* createController();
-    virtual void addController();
-    virtual void removeController();
-
-    Omm::Gui::EventLoop*     _pEventLoop;
-    Omm::Gui::MainWindow*    _pMainWindow;
-};
-
-
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/TabWidgetImpl.h"
 #endif
+
+
+namespace Omm {
+namespace Gui {
+
+
+TabWidget::TabWidget(Widget* pParent) :
+Widget(new TabWidgetImpl(this, pParent), pParent)
+{
+    Omm::Gui::Log::instance()->gui().debug("tab widget ctor.");
+}
+
+
+TabWidget::~TabWidget()
+{
+}
+
+
+void
+TabWidget::addWidget(Widget* pWidget, const std::string& tabName)
+{
+    static_cast<TabWidgetImpl*>(_pImpl)->addWidget(pWidget, tabName);
+}
+
+
+} // namespace Gui
+} // namespace Omm

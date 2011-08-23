@@ -32,9 +32,9 @@ namespace Omm {
 namespace Gui {
 
 class ListModel;
+class ListWidget;
 
-
-class ListView
+class ListView : public Widget
 {
 public:
     ListView(int widgetHeight, bool lazy = false);

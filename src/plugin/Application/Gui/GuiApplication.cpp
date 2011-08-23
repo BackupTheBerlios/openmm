@@ -39,7 +39,6 @@ GuiApplication::initApplication(int argc, char** argv)
 {
     Omm::Log::instance()->upnp().debug("init gui application ...");
 
-    // TODO: command line arguments can be passed after Poco::Application has processed them.
     _pEventLoop = new Omm::Gui::EventLoop(argc, argv);
     _pMainWindow = new Omm::Gui::MainWindow;
 
@@ -52,14 +51,17 @@ GuiApplication::initApplication(int argc, char** argv)
 Omm::Controller*
 GuiApplication::createController()
 {
-//    return new QtController(this);
+    Omm::Log::instance()->upnp().debug("application gui create controller ...");
+    return new Omm::Gui::ControllerGui;
+    Omm::Log::instance()->upnp().debug("application gui create controller finished.");
 }
 
 
 void
 GuiApplication::addController()
 {
-//    _pMainWidget->addWidget(static_cast<QtController*>(_pController));
+    Omm::Log::instance()->upnp().debug("application gui add controller");
+    _pMainWindow->setMainWidget(static_cast<Omm::Gui::ControllerGui*>(_pController));
 }
 
 
@@ -82,12 +84,11 @@ GuiApplication::eventLoop()
 {
     Omm::Log::instance()->upnp().debug("gui application entering event loop ...");
     _pEventLoop->run();
-//    _pApp->exec();
 }
 
 
 //void
-//GuiApplication::quit()
+//ApplicationGui::quit()
 //{
 ////    emit doQuit();
 //}

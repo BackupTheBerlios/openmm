@@ -30,7 +30,7 @@ namespace Gui {
 
 
 ButtonImpl::ButtonImpl(Widget* pWidget, Widget* pParent) :
-QPushButton(static_cast<QWidget*>(pParent->getNativeWidget())),
+QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeWidget() : 0)),
 WidgetImpl(pWidget, this)
 {
     Omm::Gui::Log::instance()->gui().debug("button implementation ctor");

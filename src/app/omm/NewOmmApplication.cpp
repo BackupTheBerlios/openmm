@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 
     pApp->setApplicationName("New OMM");
     pApp->initApplication(argc, argv);
-//    pApp->enableController();
+    pApp->enableController();
     int ret = pApp->run(argc, argv);
     delete pApp;
 

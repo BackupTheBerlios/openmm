@@ -22,13 +22,14 @@
 #ifndef ListModel_INCLUDED
 #define ListModel_INCLUDED
 
-#include "ListWidget.h"
 
 namespace Omm {
 namespace Gui {
 
     
 class ListView;
+class ListWidget;
+class ListWidgetFactory;
 
 
 class ListModel

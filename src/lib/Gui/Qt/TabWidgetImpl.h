@@ -19,36 +19,32 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef GuiApplication_INCLUDED
-#define GuiApplication_INCLUDED
+#ifndef TabWidgetImpl_INCLUDED
+#define TabWidgetImpl_INCLUDED
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/UpnpGui.h>
+#include <QtGui>
+#include "WidgetImpl.h"
 
-#include <Omm/Upnp.h>
-#include <Omm/UpnpApplication.h>
+namespace Omm {
+namespace Gui {
 
+class Widget;
+class TabWidget;
 
-class GuiApplication : public Omm::UpnpApplication
+class TabWidgetImpl : public QTabWidget, public WidgetImpl
 {
-public:
-    GuiApplication();
-    virtual ~GuiApplication();
-
-    virtual void eventLoop();
-
 private:
-    // UpnpApplication interface
-    virtual void initApplication(int argc = 0, char** argv = 0);
-    virtual void setWindowTitle(const std::string& title);
-    virtual Omm::Controller* createController();
-    virtual void addController();
-    virtual void removeController();
+    friend class TabWidget;
+    
+    TabWidgetImpl(Widget* pWidget, Widget* pParent = 0);
+    virtual ~TabWidgetImpl();
 
-    Omm::Gui::EventLoop*     _pEventLoop;
-    Omm::Gui::MainWindow*    _pMainWindow;
+    void addWidget(Widget* pWidget, const std::string& tabName);
 };
 
 
+}  // namespace Omm
+}  // namespace Gui
+
 #endif
+

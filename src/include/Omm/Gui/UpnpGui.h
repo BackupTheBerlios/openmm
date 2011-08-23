@@ -24,6 +24,7 @@
 
 #include "../Upnp.h"
 #include "ListModel.h"
+#include "TabWidget.h"
 
 namespace Omm {
 namespace Gui {
@@ -48,6 +49,11 @@ protected:
     virtual void init() {}
 };
 
+
+class ControllerGui : public Controller, public TabWidget
+{
+    
+};
 
 }  // namespace Omm
 }  // namespace Gui
