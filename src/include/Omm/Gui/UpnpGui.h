@@ -23,11 +23,24 @@
 #define UpnpGui_INCLUDED
 
 #include "../Upnp.h"
-#include "ListModel.h"
+#include "../UpnpAvCtlRenderer.h"
+
 #include "TabWidget.h"
+#include "ListModel.h"
+#include "ListView.h"
+#include "ListWidget.h"
+
 
 namespace Omm {
 namespace Gui {
+
+
+class ControllerGui : public Controller, public TabWidget
+{
+public:
+    ControllerGui();
+};
+
 
 class DeviceGroupModel : public DeviceGroup, public ListModel
 {
@@ -35,13 +48,14 @@ public:
     DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
     DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
 
+    // DeviceGroup interface
     virtual void addDevice(Device* pDevice, int index, bool begin);
     virtual void removeDevice(Device* pDevice, int index, bool begin);
     virtual void selectDevice(Device* pDevice, int index);
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
 
-    // WidgetListModel interface
+    // ListModel interface
     virtual int totalItemCount();
     virtual void selectItem(int row);
 
@@ -50,10 +64,28 @@ protected:
 };
 
 
-class ControllerGui : public Controller, public TabWidget
+class MediaRendererGroupView : public DeviceGroupModel, public ListView
 {
-    
+public:
+    MediaRendererGroupView();
+
+//    // ListModel interface
+//    virtual ListWidget* createWidget();
+//    virtual ListWidget* getChildWidget(int row);
+//    virtual void attachWidget(int row, ListWidget* pWidget);
+//    virtual void detachWidget(int row);
+
+    // Omm::DeviceGroup interface
+    virtual Device* createDevice();
+//    virtual void show();
 };
+
+
+class MediaRendererView : public Av::CtlMediaRenderer, public ListWidget
+{
+
+};
+
 
 }  // namespace Omm
 }  // namespace Gui

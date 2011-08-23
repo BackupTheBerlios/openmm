@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include "Gui/UpnpGui.h"
+#include "Gui/GuiLogger.h"
+
 
 namespace Omm {
 namespace Gui {
@@ -88,6 +90,27 @@ DeviceGroupModel::selectItem(int row)
 {
     Device* pDevice = getDevice(row);
     DeviceGroup::selectDevice(pDevice);
+}
+
+
+ControllerGui::ControllerGui()
+{
+    registerDeviceGroup(new MediaRendererGroupView);
+}
+
+
+MediaRendererGroupView::MediaRendererGroupView() :
+DeviceGroupModel(new Av::MediaRendererGroupDelegate),
+ListView(50)
+{
+}
+
+
+Device*
+MediaRendererGroupView::createDevice()
+{
+    Log::instance()->gui().debug("media renderer group view create renderer view.");
+    return new MediaRendererView;
 }
 
 

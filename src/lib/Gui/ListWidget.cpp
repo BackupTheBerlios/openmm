@@ -19,13 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
-
 #include "Gui/ListWidget.h"
-
-//#ifdef __GUI_QT_PLATFORM__
-//#include "Qt/QtListWidget.h"
-//#endif
 
 
 namespace Omm {

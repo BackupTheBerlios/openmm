@@ -36,32 +36,24 @@ class ListWidget;
 
 class ListView : public Widget
 {
+    friend class ListViewImpl;
+    
 public:
-    ListView(int widgetHeight, bool lazy = false);
+    ListView(int widgetHeight, Widget* pParent = 0);
 
     void setModel(ListModel* pModel);
     void insertItem(int row);
     void removeItem(int row);
 
-protected:
-    virtual int visibleRows() { return 0; }
-    virtual void initWidget(ListWidget* pWidget) {}
-    virtual void moveWidget(int row, ListWidget* pWidget) {}
+private:
+    int visibleRows();
+    void initWidget(ListWidget* pWidget);
+    void moveWidget(int row, ListWidget* pWidget);
     void resize(int rows);
 
-    // non-lazy views only
-    virtual void extendWidgetPool() {}
+    void extendWidgetPool();
     void extendWidgetPool(int n);
 
-    // lazy views only
-    virtual int getOffset() { return 0; }
-    virtual void updateScrollWidgetSize() {}
-    void scrolledToRow(int rowOffset);
-
-    ListModel*                _pModel;
-    int                       _widgetHeight;
-
-private:
     int widgetPoolSize();
     /// The view has a widget pool which is large enough to fill the area of the view
     /// with widgets (created by the model).
@@ -72,13 +64,23 @@ private:
     void moveWidgetToRow(int row, ListWidget* pWidget);
     void selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification);
 
-    bool                                _lazy;
+    ListModel*                          _pModel;
+//    bool                                _lazy;
     std::vector<ListWidget*>            _widgetPool;
     std::vector<ListWidget*>            _visibleWidgets;
     std::stack<ListWidget*>             _freeWidgets;
     int                                 _rowOffset;
+    int                                 _widgetHeight;
 };
 
+
+//class LazyListView : public ListView
+//{
+//public:
+//    virtual int getOffset() { return 0; }
+//    virtual void updateScrollWidgetSize() {}
+//    void scrolledToRow(int rowOffset);
+//};
 
 }  // namespace Omm
 }  // namespace Gui

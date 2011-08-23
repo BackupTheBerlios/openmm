@@ -26,20 +26,21 @@
 #include "Gui/ListModel.h"
 #include "Gui/Widget.h"
 
-//#ifdef __GUI_QT_PLATFORM__
-//#include "Qt/ListViewImpl.h"
-//#endif
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/ListViewImpl.h"
+#endif
 
 
 namespace Omm {
 namespace Gui {
 
 
-ListView::ListView(int widgetHeight, bool lazy) :
-_lazy(lazy),
+ListView::ListView(int widgetHeight, Widget* pParent) :
+Widget(new ListViewImpl(this, pParent), pParent),
 _pModel(0),
 _widgetHeight(widgetHeight),
 _rowOffset(0)
+//_lazy(false)
 {
 }
 
@@ -76,6 +77,27 @@ ListView::setModel(ListModel* pModel)
 }
 
 
+int
+ListView::visibleRows()
+{
+    return static_cast<ListViewImpl*>(_pImpl)->visibleRows();
+}
+
+
+void
+ListView::initWidget(ListWidget* pWidget)
+{
+    static_cast<ListViewImpl*>(_pImpl)->initWidget(pWidget);
+}
+
+
+void
+ListView::moveWidget(int row, ListWidget* pWidget)
+{
+    static_cast<ListViewImpl*>(_pImpl)->moveWidget(row, pWidget);
+}
+
+
 void
 ListView::resize(int rows)
 {
@@ -95,6 +117,13 @@ ListView::resize(int rows)
             _visibleWidgets.push_back(pWidget);
         }
     }
+}
+
+
+void
+ListView::extendWidgetPool()
+{
+    static_cast<ListViewImpl*>(_pImpl)->extendWidgetPool();
 }
 
 
@@ -153,56 +182,56 @@ ListView::visibleWidget(int index)
 }
 
 
-void
-ListView::scrolledToRow(int rowOffset)
-{
-    int rowDelta = rowOffset - _rowOffset;
-
-    if (rowDelta == 0) {
-        return;
-    }
-    if (rowOffset + _visibleWidgets.size() > _pModel->totalItemCount()) {
-        return;
-    }
-
-    int rowDeltaAbsolute = std::abs(rowDelta);
-
-    if (rowOffset + _visibleWidgets.size() + rowDeltaAbsolute >= _pModel->lastFetched()) {
-        _pModel->fetch(_visibleWidgets.size() + rowDeltaAbsolute);
-    }
-
-    Log::instance()->gui().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
-    while (rowDeltaAbsolute--) {
-        if (rowDelta > 0) {
-            // detach first visible widget
-            ListWidget* pWidget = _visibleWidgets.front();
-            _pModel->detachWidget(_rowOffset);
-            // move first widget to the end
-            int lastRow = _rowOffset + _visibleWidgets.size();
-            moveWidgetToRow(lastRow, pWidget);
-            // attach widget
-            _pModel->attachWidget(lastRow, pWidget);
-            // move widget to end of visible rows
-            _visibleWidgets.erase(_visibleWidgets.begin());
-            _visibleWidgets.push_back(pWidget);
-            _rowOffset++;
-        }
-        else if (rowDelta < 0) {
-            // detach last visible widget
-            ListWidget* pWidget = _visibleWidgets.back();
-            int lastRow = _rowOffset + _visibleWidgets.size() - 1;
-            _pModel->detachWidget(lastRow);
-            // move last widget to the beginning
-            moveWidgetToRow(_rowOffset - 1, pWidget);
-            // attach widget
-            _pModel->attachWidget(_rowOffset - 1, pWidget);
-            // move widget to beginning of visible rows
-            _visibleWidgets.erase(_visibleWidgets.end() - 1);
-            _visibleWidgets.insert(_visibleWidgets.begin(), pWidget);
-            _rowOffset--;
-        }
-    }
-}
+//void
+//ListView::scrolledToRow(int rowOffset)
+//{
+//    int rowDelta = rowOffset - _rowOffset;
+//
+//    if (rowDelta == 0) {
+//        return;
+//    }
+//    if (rowOffset + _visibleWidgets.size() > _pModel->totalItemCount()) {
+//        return;
+//    }
+//
+//    int rowDeltaAbsolute = std::abs(rowDelta);
+//
+//    if (rowOffset + _visibleWidgets.size() + rowDeltaAbsolute >= _pModel->lastFetched()) {
+//        _pModel->fetch(_visibleWidgets.size() + rowDeltaAbsolute);
+//    }
+//
+//    Log::instance()->gui().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+//    while (rowDeltaAbsolute--) {
+//        if (rowDelta > 0) {
+//            // detach first visible widget
+//            ListWidget* pWidget = _visibleWidgets.front();
+//            _pModel->detachWidget(_rowOffset);
+//            // move first widget to the end
+//            int lastRow = _rowOffset + _visibleWidgets.size();
+//            moveWidgetToRow(lastRow, pWidget);
+//            // attach widget
+//            _pModel->attachWidget(lastRow, pWidget);
+//            // move widget to end of visible rows
+//            _visibleWidgets.erase(_visibleWidgets.begin());
+//            _visibleWidgets.push_back(pWidget);
+//            _rowOffset++;
+//        }
+//        else if (rowDelta < 0) {
+//            // detach last visible widget
+//            ListWidget* pWidget = _visibleWidgets.back();
+//            int lastRow = _rowOffset + _visibleWidgets.size() - 1;
+//            _pModel->detachWidget(lastRow);
+//            // move last widget to the beginning
+//            moveWidgetToRow(_rowOffset - 1, pWidget);
+//            // attach widget
+//            _pModel->attachWidget(_rowOffset - 1, pWidget);
+//            // move widget to beginning of visible rows
+//            _visibleWidgets.erase(_visibleWidgets.end() - 1);
+//            _visibleWidgets.insert(_visibleWidgets.begin(), pWidget);
+//            _rowOffset--;
+//        }
+//    }
+//}
 
 
 bool
@@ -230,21 +259,21 @@ ListView::selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNo
 void
 ListView::insertItem(int row)
 {
-    if (_lazy) {
-        // resize view to the size with this item added
-        updateScrollWidgetSize();
-        // check if item is visible
-        if (!itemIsVisible(row)) {
-            Log::instance()->gui().debug("widget list view insert item that is not visible (ignoring)");
-            return;
-        }
-    }
-    else {
+//    if (_lazy) {
+//        // resize view to the size with this item added
+//        updateScrollWidgetSize();
+//        // check if item is visible
+//        if (!itemIsVisible(row)) {
+//            Log::instance()->gui().debug("widget list view insert item that is not visible (ignoring)");
+//            return;
+//        }
+//    }
+//    else {
         // if view is not lazy, widget pool has to be extended when too small and new widgets are inserted.
         if (_visibleWidgets.size() >= _widgetPool.size()) {
             extendWidgetPool();
         }
-    }
+//    }
 
     // attach item to a free (not visible) widget
     if (_freeWidgets.size()) {
@@ -265,15 +294,15 @@ ListView::insertItem(int row)
 void
 ListView::removeItem(int row)
 {
-    if (_lazy) {
-        // resize view to the size with this item added
-        updateScrollWidgetSize();
-        // check if item is visible
-        if (!itemIsVisible(row)) {
-            Log::instance()->gui().debug("widget list view remove item that is not visible (ignoring)");
-            return;
-        }
-    }
+//    if (_lazy) {
+//        // resize view to the size with this item added
+//        updateScrollWidgetSize();
+//        // check if item is visible
+//        if (!itemIsVisible(row)) {
+//            Log::instance()->gui().debug("widget list view remove item that is not visible (ignoring)");
+//            return;
+//        }
+//    }
 
     // detach item from visible widget
     ListWidget* pWidget = _pModel->getChildWidget(row);
