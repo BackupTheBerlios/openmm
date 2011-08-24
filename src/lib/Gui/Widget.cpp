@@ -98,11 +98,6 @@ Widget::resize(int width, int height)
 }
 
 
-Widget::SelectNotification::SelectNotification()
-{
-}
-
-
 void
 Widget::connect(const Poco::AbstractObserver& observer)
 {

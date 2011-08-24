@@ -53,10 +53,5 @@ Button::setLabel(const std::string& label)
 }
 
 
-Button::PushNotification::PushNotification()
-{
-}
-
-
 } // namespace Gui
 } // namespace Omm

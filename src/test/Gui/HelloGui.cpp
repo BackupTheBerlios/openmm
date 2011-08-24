@@ -19,8 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <Poco/Observer.h>
-
 #include <Omm/Gui/EventLoop.h>
 #include <Omm/Gui/MainWindow.h>
 #include <Omm/Gui/Button.h>

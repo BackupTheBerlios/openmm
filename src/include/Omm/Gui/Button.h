@@ -38,11 +38,7 @@ public:
 
     void setLabel(const std::string& label);
 
-    class PushNotification : public Poco::Notification
-    {
-    public:
-        PushNotification();
-    };
+    class PushNotification : public Poco::Notification {};
 };
 
 

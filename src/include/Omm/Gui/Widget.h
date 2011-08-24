@@ -30,6 +30,8 @@ namespace Omm {
 namespace Gui {
 
 class WidgetImpl;
+class Model;
+
 
 class Widget
 {
@@ -46,11 +48,7 @@ public:
     void hide();
     void resize(int width, int height);
 
-    class SelectNotification : public Poco::Notification
-    {
-    public:
-        SelectNotification();
-    };
+    class SelectNotification : public Poco::Notification {};
 
     void connect(const Poco::AbstractObserver& observer);
 
@@ -61,7 +59,14 @@ protected:
 
     Widget*                     _pParent;
     WidgetImpl*                 _pImpl;
+    Model*                      _pModel;
     Poco::NotificationCenter    _eventNotificationCenter;
+};
+
+
+class Model
+{
+    
 };
 
 
