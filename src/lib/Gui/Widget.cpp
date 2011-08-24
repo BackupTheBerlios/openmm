@@ -34,16 +34,17 @@ namespace Gui {
 
 
 Widget::Widget(Widget* pParent) :
+_pParent(pParent),
 _pImpl(new WidgetImpl(this)),
-_pParent(pParent)
+_pModel(0)
 {
     Omm::Gui::Log::instance()->gui().debug("widget ctor (parent).");
 }
 
 
 Widget::Widget(WidgetImpl* pWidgetImpl, Widget* pParent) :
-_pImpl(pWidgetImpl),
-_pParent(pParent)
+_pParent(pParent),
+_pImpl(pWidgetImpl)
 {
     Omm::Gui::Log::instance()->gui().debug("widget ctor (widget impl, parent).");
 }
@@ -103,6 +104,14 @@ Widget::connect(const Poco::AbstractObserver& observer)
 {
     Omm::Gui::Log::instance()->gui().debug("widget register notification handler.");
     _eventNotificationCenter.addObserver(observer);
+}
+
+
+void
+Widget::setModel(Model* pModel)
+{
+    _pModel = pModel;
+    _pModel->_pWidget = this;
 }
 
 

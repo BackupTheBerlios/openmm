@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,66 +17,41 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef Widget_INCLUDED
-#define Widget_INCLUDED
-
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Button.h>
 
 
-namespace Omm {
-namespace Gui {
-
-class WidgetImpl;
-class Model;
-
-
-class Widget
+class HelloGui : public Omm::Gui::MainWindow
 {
-    friend class WidgetImpl;
-    friend class Model;
-    
 public:
-    Widget(Widget* pParent = 0);
-    virtual ~Widget();
+    HelloGui()
+    {
+        _pButton = new Omm::Gui::Button(this);
+        _pButton->setLabel("Hello GUI");
+        _pButton->connect(Poco::Observer<HelloGui, Omm::Gui::Button::PushNotification>(*this, &HelloGui::onPush));
+        setMainWidget(_pButton);
+    }
 
-    void* getNativeWidget();
-    Widget* getParent();
-
-    void show();
-    void hide();
-    void resize(int width, int height);
-
-    class SelectNotification : public Poco::Notification {};
-
-    void connect(const Poco::AbstractObserver& observer);
-
-    virtual void setModel(Model* pModel);
-
-protected:
-    Widget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
-
-    virtual void select();
-
-    Widget*                     _pParent;
-    WidgetImpl*                 _pImpl;
-    Model*                      _pModel;
-    Poco::NotificationCenter    _eventNotificationCenter;
-};
-
-
-class Model
-{
-    friend class Widget;
+    void onPush(Omm::Gui::Button::PushNotification* pNotification)
+    {
+        _pButton->setLabel("works!");
+    }
     
-protected:
-    Widget*     _pWidget;
+private:
+    Omm::Gui::Button* _pButton;
 };
 
 
-}  // namespace Omm
-}  // namespace Gui
+int main(int argc, char** argv)
+{
+    Omm::Gui::EventLoop loop(argc, argv);
+    HelloGui mainWindow;
 
-#endif
+    mainWindow.show();
+
+    loop.run();
+}
+

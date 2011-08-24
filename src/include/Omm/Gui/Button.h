@@ -28,7 +28,15 @@ namespace Omm {
 namespace Gui {
 
 
-class Button : public Widget
+class ButtonModel : public Model
+{
+public:
+    void setLabel(const std::string& label);
+    virtual void pushed() {}
+};
+
+
+class Button : public Widget, public ButtonModel
 {
     friend class ButtonImpl;
     
@@ -37,6 +45,7 @@ public:
     virtual ~Button();
 
     void setLabel(const std::string& label);
+    virtual void pushed();
 
     class PushNotification : public Poco::Notification {};
 };

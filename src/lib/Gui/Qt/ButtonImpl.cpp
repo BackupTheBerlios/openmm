@@ -55,7 +55,9 @@ ButtonImpl::pushed()
 {
     Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, sending notification to widget: " + Poco::NumberFormatter::format(_pWidget) + "...");
     postNotification(new Button::PushNotification);
-    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, notification sent.");
+    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
+    static_cast<Button*>(_pWidget)->pushed();
+//    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, notification sent.");
 }
 
 

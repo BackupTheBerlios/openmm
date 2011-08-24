@@ -33,6 +33,14 @@ namespace Omm {
 namespace Gui {
 
 
+void
+ButtonModel::setLabel(const std::string& label)
+{
+    Omm::Gui::Log::instance()->gui().debug("button model set label");
+    static_cast<Button*>(_pWidget)->setLabel(label);
+}
+
+
 Button::Button(Widget* pParent) :
 Widget(new ButtonImpl(this, pParent), pParent)
 {
@@ -50,6 +58,15 @@ Button::setLabel(const std::string& label)
 {
     Omm::Gui::Log::instance()->gui().debug("button set label");
     static_cast<ButtonImpl*>(_pImpl)->setLabel(label);
+}
+
+
+void
+Button::pushed()
+{
+    if (_pModel) {
+        static_cast<ButtonModel*>(_pModel)->pushed();
+    }
 }
 
 

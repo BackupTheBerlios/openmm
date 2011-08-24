@@ -24,31 +24,25 @@
 #include <Omm/Gui/Button.h>
 
 
-class HelloGui : public Omm::Gui::MainWindow
+class HelloButtonModel : public Omm::Gui::ButtonModel
 {
-public:
-    HelloGui()
-    {
-        _pButton = new Omm::Gui::Button(this);
-        _pButton->setLabel("Hello GUI");
-        _pButton->connect(Poco::Observer<HelloGui, Omm::Gui::Button::PushNotification>(*this, &HelloGui::onPush));
-        setMainWidget(_pButton);
-    }
-
-    void onPush(Omm::Gui::Button::PushNotification* pNotification)
-    {
-        _pButton->setLabel("works!");
-    }
-    
 private:
-    Omm::Gui::Button* _pButton;
+    void pushed()
+    {
+        setLabel("works!");
+    }
 };
 
 
 int main(int argc, char** argv)
 {
     Omm::Gui::EventLoop loop(argc, argv);
-    HelloGui mainWindow;
+    Omm::Gui::MainWindow mainWindow;
+    Omm::Gui::Button button;
+    HelloButtonModel buttonModel;
+    button.setModel(&buttonModel);
+    buttonModel.setLabel("Hello GUI");
+    mainWindow.setMainWidget(&button);
 
     mainWindow.show();
 
