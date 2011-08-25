@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,40 +17,36 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef ButtonImpl_INCLUDED
-#define ButtonImpl_INCLUDED
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Button.h>
 
-#include <QtGui>
-#include "WidgetImpl.h"
 
-namespace Omm {
-namespace Gui {
-
-class Widget;
-class Button;
-
-class ButtonImpl : public QPushButton, public WidgetImpl
+class HelloButtonModel : public Omm::Gui::ButtonModel
 {
-    Q_OBJECT
-
-    friend class Button;
-    friend class ButtonModel;
-
-private slots:
-    void pushed();
-
 private:
-    ButtonImpl(Widget* pWidget, Widget* pParent = 0);
-    virtual ~ButtonImpl();
-
-    void setLabel(const std::string& label);
+    void pushed()
+    {
+        setLabel("works!");
+    }
 };
 
 
-}  // namespace Omm
-}  // namespace Gui
+int main(int argc, char** argv)
+{
+    Omm::Gui::EventLoop loop(argc, argv);
+    Omm::Gui::MainWindow mainWindow;
+    HelloButtonModel buttonModel;
+//    Omm::Gui::Button button(&buttonModel, 0);
+    Omm::Gui::Button button;
+    button.setModel(&buttonModel);
+    buttonModel.setLabel("Hello GUI");
+    mainWindow.setMainWidget(&button);
 
-#endif
+    mainWindow.show();
+
+    loop.run();
+}
 

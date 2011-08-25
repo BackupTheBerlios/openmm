@@ -31,23 +31,30 @@ namespace Gui {
 class ButtonModel : public Model
 {
 public:
+    virtual const std::string& getLabel() const;
     void setLabel(const std::string& label);
+    
     virtual void pushed() {}
+
+private:
+    std::string _label;
 };
 
 
 class Button : public Widget, public ButtonModel
 {
     friend class ButtonImpl;
+    friend class ButtonModel;
     
 public:
     Button(Widget* pParent = 0);
+    Button(ButtonModel* pModel, Widget* pParent = 0);
     virtual ~Button();
 
-    void setLabel(const std::string& label);
     virtual void pushed();
 
-    class PushNotification : public Poco::Notification {};
+private:
+    virtual void syncView();
 };
 
 

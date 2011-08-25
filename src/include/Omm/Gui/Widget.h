@@ -31,6 +31,7 @@ namespace Gui {
 
 class WidgetImpl;
 class Model;
+//class Controller;
 
 
 class Widget
@@ -54,6 +55,8 @@ public:
     void connect(const Poco::AbstractObserver& observer);
 
     virtual void setModel(Model* pModel);
+    virtual void syncView() {}
+//    void setController(Controller* pController);
 
 protected:
     Widget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
@@ -63,6 +66,7 @@ protected:
     Widget*                     _pParent;
     WidgetImpl*                 _pImpl;
     Model*                      _pModel;
+//    Controller*                 _pController;
     Poco::NotificationCenter    _eventNotificationCenter;
 };
 
@@ -74,6 +78,12 @@ class Model
 protected:
     Widget*     _pWidget;
 };
+
+
+//class Controller
+//{
+//    friend class Widget;
+//};
 
 
 }  // namespace Omm

@@ -78,7 +78,8 @@ void
 Widget::show()
 {
     Omm::Gui::Log::instance()->gui().debug("widget show widget ...");
-     _pImpl->showWidget();
+    syncView();
+    _pImpl->showWidget();
     Omm::Gui::Log::instance()->gui().debug("widget show widget finished.");
 }
 
@@ -113,6 +114,13 @@ Widget::setModel(Model* pModel)
     _pModel = pModel;
     _pModel->_pWidget = this;
 }
+
+
+//void
+//Widget::setController(Controller* pController)
+//{
+//    _pController = pController;
+//}
 
 
 void

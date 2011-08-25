@@ -1,8 +1,8 @@
-add_executable(hellogui
-HelloGui.cpp
+add_executable(hellogui_model
+HelloGuiModel.cpp
 )
 
-target_link_libraries(hellogui
+target_link_libraries(hellogui_model
 ${OMM_GUI}
 )
 
@@ -14,10 +14,10 @@ target_link_libraries(hellogui_subclass
 ${OMM_GUI}
 )
 
-add_executable(hellogui_notification
-HelloGuiNotification.cpp
-)
+#add_executable(hellogui_notification
+#HelloGuiNotification.cpp
+#)
 
-target_link_libraries(hellogui_notification
-${OMM_GUI}
-)
+#target_link_libraries(hellogui_notification
+#${OMM_GUI}
+#)
