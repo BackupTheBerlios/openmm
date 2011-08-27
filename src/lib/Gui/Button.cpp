@@ -49,48 +49,34 @@ ButtonModel::setLabel(const std::string& label)
 }
 
 
-Button::Button(Widget* pParent) :
+ButtonView::ButtonView(ButtonModel* pModel, Widget* pParent) :
 Widget(new ButtonImpl(this, pParent), pParent)
 {
-    Omm::Gui::Log::instance()->gui().debug("button ctor.");
-}
-
-
-Button::Button(ButtonModel* pModel, Widget* pParent) :
-Widget(new ButtonImpl(this, pParent), pParent)
-{
-    Omm::Gui::Log::instance()->gui().debug("button ctor with model.");
-    if (!pModel) {
-        setModel(this);
-    }
-    else {
+    Omm::Gui::Log::instance()->gui().debug("button view ctor with model.");
+    if (pModel) {
         setModel(pModel);
     }
 }
 
 
-Button::~Button()
-{
-}
-
-
 void
-Button::pushed()
+ButtonView::syncView()
 {
-    Omm::Gui::Log::instance()->gui().debug("button pushed.");
-    if (_pModel) {
-        static_cast<ButtonModel*>(_pModel)->pushed();
-    }
-    syncView();
-}
-
-
-void
-Button::syncView()
-{
-    Omm::Gui::Log::instance()->gui().debug("button sync view");
+    Omm::Gui::Log::instance()->gui().debug("button view sync view");
     ButtonModel* pModel = static_cast<ButtonModel*>(_pModel);
     static_cast<ButtonImpl*>(_pImpl)->setLabel(pModel->getLabel());
+}
+
+
+Button::Button(Widget* pParent) :
+ButtonView(this, pParent)
+{
+    Omm::Gui::Log::instance()->gui().debug("button ctor.");
+}
+
+
+Button::~Button()
+{
 }
 
 

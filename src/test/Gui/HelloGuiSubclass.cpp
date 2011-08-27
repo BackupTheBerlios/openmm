@@ -26,9 +26,6 @@
 
 class HelloButton : public Omm::Gui::Button
 {
-public:
-    HelloButton() : Button(0, 0) {}
-
 private:
     void pushed()
     {

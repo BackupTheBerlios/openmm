@@ -108,6 +108,13 @@ Widget::connect(const Poco::AbstractObserver& observer)
 }
 
 
+Model*
+Widget::getModel()
+{
+    return _pModel;
+}
+
+
 void
 Widget::setModel(Model* pModel)
 {

@@ -39,11 +39,11 @@ int main(int argc, char** argv)
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
     HelloButtonModel buttonModel;
-//    Omm::Gui::Button button(&buttonModel, 0);
-    Omm::Gui::Button button;
-    button.setModel(&buttonModel);
+//    Omm::Gui::ButtonView buttonView(&buttonModel);
+    Omm::Gui::ButtonView buttonView;
+    buttonView.setModel(&buttonModel);
     buttonModel.setLabel("Hello GUI");
-    mainWindow.setMainWidget(&button);
+    mainWindow.setMainWidget(&buttonView);
 
     mainWindow.show();
 

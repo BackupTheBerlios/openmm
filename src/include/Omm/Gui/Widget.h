@@ -54,13 +54,14 @@ public:
 
     void connect(const Poco::AbstractObserver& observer);
 
+    Model* getModel();
     virtual void setModel(Model* pModel);
-    virtual void syncView() {}
 //    void setController(Controller* pController);
 
 protected:
     Widget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
 
+    virtual void syncView() {}
     virtual void select();
 
     Widget*                     _pParent;

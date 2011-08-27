@@ -35,8 +35,7 @@ class ButtonImpl : public QPushButton, public WidgetImpl
 {
     Q_OBJECT
 
-    friend class Button;
-    friend class ButtonModel;
+    friend class ButtonView;
 
 private slots:
     void pushed();

@@ -41,20 +41,23 @@ private:
 };
 
 
-class Button : public Widget, public ButtonModel
+class ButtonView : public Widget
 {
-    friend class ButtonImpl;
     friend class ButtonModel;
     
 public:
-    Button(Widget* pParent = 0);
-    Button(ButtonModel* pModel, Widget* pParent = 0);
-    virtual ~Button();
-
-    virtual void pushed();
-
+    ButtonView(ButtonModel* pModel = 0, Widget* pParent = 0);
+    
 private:
     virtual void syncView();
+};
+
+
+class Button : public ButtonView, public ButtonModel
+{
+public:
+    Button(Widget* pParent = 0);
+    virtual ~Button();
 };
 
 
