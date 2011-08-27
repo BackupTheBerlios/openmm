@@ -100,14 +100,6 @@ View::resize(int width, int height)
 }
 
 
-//void
-//View::connect(const Poco::AbstractObserver& observer)
-//{
-//    Omm::Gui::Log::instance()->gui().debug("view register notification handler.");
-//    _eventNotificationCenter.addObserver(observer);
-//}
-
-
 Model*
 View::getModel()
 {
@@ -121,14 +113,6 @@ View::setModel(Model* pModel)
     _pModel = pModel;
     _pModel->_pView = this;
 }
-
-
-//void
-//View::select()
-//{
-//    Omm::Gui::Log::instance()->gui().debug("view select.");
-//    _eventNotificationCenter.postNotification(new SelectNotification);
-//}
 
 
 } // namespace Gui

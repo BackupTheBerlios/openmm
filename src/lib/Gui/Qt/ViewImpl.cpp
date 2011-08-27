@@ -114,15 +114,8 @@ ViewImpl::select()
 }
 
 
-//void
-//ViewImpl::postNotification(Poco::Notification::Ptr pNotification)
-//{
-//    _pView->_eventNotificationCenter.postNotification(pNotification);
-//}
-
-
 NativeView::NativeView(ViewImpl* pViewImpl, View* pParent) :
-QWidget(static_cast<QWidget*>(pParent->getNativeView())),
+QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
 _pViewImpl(pViewImpl)
 {
     Omm::Gui::Log::instance()->gui().debug("native view implementation ctor.");

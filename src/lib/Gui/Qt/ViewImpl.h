@@ -51,8 +51,6 @@ protected:
     ViewImpl(QWidget* pNativeWidget);
     ViewImpl(View* pView, QWidget* pNativeWidget);
 
-//    void postNotification(Poco::Notification::Ptr pNotification);
-
     View*                       _pView;
     QWidget*                    _pNativeView;
 };

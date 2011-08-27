@@ -22,6 +22,7 @@
 #ifndef Button_INCLUDED
 #define Button_INCLUDED
 
+#include <string>
 #include "View.h"
 
 namespace Omm {
