@@ -34,13 +34,15 @@ int main(int argc, char** argv)
     Omm::Gui::View compoundView;
     Omm::Gui::HorizontalLayout layout;
 
-    int buttonCount = 10;
+    int buttonCount = 5;
     for(int i = 0; i < buttonCount; i++) {
         Omm::Gui::Button* pButton = new Omm::Gui::Button(&compoundView);
         pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
     }
 
+    compoundView.resize(600, 100);
     compoundView.setLayout(&layout);
+    mainWindow.resize(600, 100);
     mainWindow.setMainView(&compoundView);
     mainWindow.show();
 

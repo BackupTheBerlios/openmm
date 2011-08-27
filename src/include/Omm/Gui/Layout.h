@@ -32,6 +32,8 @@ class View;
 class Layout
 {
     friend class View;
+
+    virtual void layoutView() {}
     
 protected:
     View*     _pView;

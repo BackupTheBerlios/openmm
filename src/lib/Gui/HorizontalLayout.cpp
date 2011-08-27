@@ -21,10 +21,28 @@
 
 #include "Gui/HorizontalLayout.h"
 #include "Gui/GuiLogger.h"
+#include "Gui/View.h"
 
 
 namespace Omm {
 namespace Gui {
+
+
+void
+HorizontalLayout::layoutView()
+{
+    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view ...");
+
+    int childWidth = _pView->width() / _pView->childCount();
+    int childHeight = _pView->height();
+
+    for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it) {
+        (*it)->resize(childWidth, childHeight);
+        (*it)->move((it - _pView->beginChild()) * (*it)->width(), 0);
+    }
+
+    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view finished.");
+}
 
 
 } // namespace Gui

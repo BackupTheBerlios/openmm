@@ -43,6 +43,7 @@ _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
     if (_pParent) {
+        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
         _pParent->_children.push_back(this);
     }
 }
@@ -53,6 +54,10 @@ _pParent(pParent),
 _pImpl(pViewImpl)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (view impl, parent).");
+    if (_pParent) {
+        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
+        _pParent->_children.push_back(this);
+    }
 }
 
 
@@ -155,6 +160,28 @@ View::setLayout(Layout* pLayout)
 {
     _pLayout = pLayout;
     _pLayout->_pView = this;
+    _pLayout->layoutView();
+}
+
+
+View::ChildIterator
+View::beginChild()
+{
+    return _children.begin();
+}
+
+
+View::ChildIterator
+View::endChild()
+{
+    return _children.end();
+}
+
+
+int
+View::childCount()
+{
+    return _children.size();
 }
 
 

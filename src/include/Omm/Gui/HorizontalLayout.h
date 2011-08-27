@@ -30,7 +30,8 @@ namespace Gui {
 
 class HorizontalLayout : public Layout
 {
-    
+public:
+    virtual void layoutView();
 };
 
 

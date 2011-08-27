@@ -58,6 +58,11 @@ public:
     Layout* getLayout();
     void setLayout(Layout* pLayout);
 
+    typedef std::vector<View*>::iterator ChildIterator;
+    ChildIterator beginChild();
+    ChildIterator endChild();
+    int childCount();
+
 protected:
     View(ViewImpl* pViewImpl, View* pParent = 0);
 
