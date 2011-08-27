@@ -48,7 +48,7 @@ class ButtonView : public View
     friend class ButtonModel;
     
 public:
-    ButtonView(ButtonModel* pModel = 0, View* pParent = 0);
+    ButtonView(View* pParent = 0);
     
 private:
     virtual void syncView();

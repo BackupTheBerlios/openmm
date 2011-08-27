@@ -22,6 +22,7 @@
 #ifndef Model_INCLUDED
 #define Model_INCLUDED
 
+#include <vector>
 
 namespace Omm {
 namespace Gui {
@@ -31,10 +32,17 @@ class View;
 
 class Model
 {
+public:
     friend class View;
-    
+
+    void attachView(View* pView);
+
 protected:
-    View*     _pView;
+    typedef std::vector<View*>::iterator ViewIterator;
+    ViewIterator beginView();
+    ViewIterator endView();
+
+    std::vector<View*>     _views;
 };
 
 

@@ -23,6 +23,7 @@
 #define View_INCLUDED
 
 #include <vector>
+#include <string>
 
 namespace Omm {
 namespace Gui {
@@ -58,6 +59,9 @@ public:
     Layout* getLayout();
     void setLayout(Layout* pLayout);
 
+    const std::string& getName() const;
+    void setName(const std::string& name);
+
     typedef std::vector<View*>::iterator ChildIterator;
     ChildIterator beginChild();
     ChildIterator endChild();
@@ -74,6 +78,7 @@ protected:
     ViewImpl*                   _pImpl;
     Model*                      _pModel;
     Layout*                     _pLayout;
+    std::string                 _name;
 };
 
 

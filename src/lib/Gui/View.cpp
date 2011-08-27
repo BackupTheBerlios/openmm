@@ -144,7 +144,7 @@ void
 View::setModel(Model* pModel)
 {
     _pModel = pModel;
-    _pModel->_pView = this;
+    _pModel->attachView(this);
 }
 
 
@@ -161,6 +161,20 @@ View::setLayout(Layout* pLayout)
     _pLayout = pLayout;
     _pLayout->_pView = this;
     _pLayout->layoutView();
+}
+
+
+const std::string&
+View::getName() const
+{
+    return _name;
+}
+
+
+void
+View::setName(const std::string& name)
+{
+    _name = name;
 }
 
 

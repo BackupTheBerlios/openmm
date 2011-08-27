@@ -26,6 +26,29 @@
 namespace Omm {
 namespace Gui {
 
+    
+void
+Model::attachView(View* pView)
+{
+    Omm::Gui::Log::instance()->gui().debug("model attach view ...");
+    _views.push_back(pView);
+    Omm::Gui::Log::instance()->gui().debug("model attach view finished.");
+}
+
+
+Model::ViewIterator
+Model::beginView()
+{
+    return _views.begin();
+}
+
+
+Model::ViewIterator
+Model::endView()
+{
+    return _views.end();
+}
+
 
 } // namespace Gui
 } // namespace Omm
