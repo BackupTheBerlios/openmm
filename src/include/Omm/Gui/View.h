@@ -44,7 +44,10 @@ public:
 
     void show();
     void hide();
+    int width();
+    int height();
     void resize(int width, int height);
+    void move(int x, int y);
 
     Model* getModel();
     virtual void setModel(Model* pModel);

@@ -98,11 +98,35 @@ ViewImpl::hideView()
 }
 
 
+int
+ViewImpl::widthView()
+{
+    Omm::Gui::Log::instance()->gui().debug("view implementation width.");
+    return _pNativeView->width();
+}
+
+
+int
+ViewImpl::heightView()
+{
+    Omm::Gui::Log::instance()->gui().debug("view implementation height.");
+    return _pNativeView->height();
+}
+
+
 void
 ViewImpl::resizeView(int width, int height)
 {
     Omm::Gui::Log::instance()->gui().debug("view implementation resize.");
     _pNativeView->resize(width, height);
+}
+
+
+void
+ViewImpl::moveView(int x, int y)
+{
+    Omm::Gui::Log::instance()->gui().debug("view implementation move.");
+    _pNativeView->move(x, y);
 }
 
 

@@ -44,7 +44,10 @@ public:
     void setNativeView(QWidget* pView);
     virtual void showView();
     virtual void hideView();
+    virtual int widthView();
+    virtual int heightView();
     virtual void resizeView(int width, int height);
+    virtual void moveView(int x, int y);
     virtual void select();
  
 protected:

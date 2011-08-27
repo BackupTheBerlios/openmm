@@ -77,26 +77,48 @@ View::getParent()
 void
 View::show()
 {
-    Omm::Gui::Log::instance()->gui().debug("view show view ...");
+    Omm::Gui::Log::instance()->gui().debug("view show ...");
     syncView();
     _pImpl->showView();
-    Omm::Gui::Log::instance()->gui().debug("view show view finished.");
+    Omm::Gui::Log::instance()->gui().debug("view show finished.");
 }
 
 
 void
 View::hide()
 {
-    Omm::Gui::Log::instance()->gui().debug("view hide view.");
+    Omm::Gui::Log::instance()->gui().debug("view hide.");
     _pImpl->hideView();
+}
+
+
+int
+View::width()
+{
+    return _pImpl->widthView();
+}
+
+
+int
+View::height()
+{
+    return _pImpl->heightView();
 }
 
 
 void
 View::resize(int width, int height)
 {
-    Omm::Gui::Log::instance()->gui().debug("view resize view.");
+    Omm::Gui::Log::instance()->gui().debug("view resize.");
     _pImpl->resizeView(width, height);
+}
+
+
+void
+View::move(int x, int y)
+{
+    Omm::Gui::Log::instance()->gui().debug("view move: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+    _pImpl->moveView(x, y);
 }
 
 

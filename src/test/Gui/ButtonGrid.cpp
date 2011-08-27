@@ -26,28 +26,24 @@
 #include <Omm/Gui/Button.h>
 
 
-//class HelloButtonModel : public Omm::Gui::ButtonModel
-//{
-//private:
-//    void pushed()
-//    {
-//        setLabel("works!");
-//    }
-//};
-
-
 int main(int argc, char** argv)
 {
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
     Omm::Gui::View compoundView;
 
+    int windowHeight = 0;
+    int windowWidth = 0;
     int buttonCount = 10;
     for(int i = 0; i < buttonCount; i++) {
         Omm::Gui::Button* pButton = new Omm::Gui::Button(&compoundView);
-        pButton->setLabel("Button " + Poco::NumberFormatter::format(i));
+        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+        pButton->move(pButton->width() * i, 0);
+        windowHeight = pButton->height();
+        windowWidth += pButton->width();
     }
 
+    mainWindow.resize(windowWidth, windowHeight);
     mainWindow.setMainView(&compoundView);
     mainWindow.show();
 
