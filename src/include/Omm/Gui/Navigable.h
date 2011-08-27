@@ -37,11 +37,11 @@ public:
     Navigable();
 
     virtual std::string getBrowserTitle() { return ""; }
-    virtual Widget* getWidget() { return 0; }
-    /// If getWidget() returns not null but a valid widget, the widget
+    virtual View* getView() { return 0; }
+    /// If getView() returns not null but a valid view, the view
     /// is pushed on QtNavigator::_pStackedWidget.
     virtual void show() {}
-    /// Additionally, show() can be implemented if for example no widget
+    /// Additionally, show() can be implemented if for example no view
     /// is pushed but some other action is necessary to show the correct view.
     Navigator* getNavigator() const;
 

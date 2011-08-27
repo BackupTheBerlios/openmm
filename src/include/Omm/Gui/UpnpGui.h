@@ -25,17 +25,17 @@
 #include "../Upnp.h"
 #include "../UpnpAvCtlRenderer.h"
 
-#include "TabWidget.h"
+#include "TabView.h"
 #include "ListModel.h"
 #include "ListView.h"
-#include "ListWidget.h"
+#include "ListItemView.h"
 
 
 namespace Omm {
 namespace Gui {
 
 
-class ControllerGui : public Controller, public TabWidget
+class ControllerGui : public Controller, public TabView
 {
 public:
     ControllerGui();
@@ -70,9 +70,9 @@ public:
     MediaRendererGroupView();
 
 //    // ListModel interface
-    virtual ListWidget* createWidget();
-    virtual ListWidget* getChildWidget(int row);
-//    virtual void attachWidget(int row, ListWidget* pWidget);
+    virtual ListItemView* createView();
+    virtual ListItemView* getChildView(int row);
+//    virtual void attachWidget(int row, ListWidget* pView);
 //    virtual void detachWidget(int row);
 
     // Omm::DeviceGroup interface
@@ -83,7 +83,7 @@ public:
 
 class MediaRendererDevice : public Av::CtlMediaRenderer
 {
-//    void setDeviceWidget(QtMediaRendererWidget* pWidget);
+//    void setDeviceWidget(QtMediaRendererWidget* pView);
 //    QtMediaRendererWidget* getDeviceWidget();
 //
 //    virtual void initController();
@@ -93,7 +93,7 @@ class MediaRendererDevice : public Av::CtlMediaRenderer
 };
 
 
-class MediaRendererView : public ListWidget
+class MediaRendererView : public ListItemView
 {
 
 };

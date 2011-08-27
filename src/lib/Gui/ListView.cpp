@@ -24,7 +24,7 @@
 #include "Gui/ListView.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/ListModel.h"
-#include "Gui/Widget.h"
+#include "Gui/View.h"
 
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ListViewImpl.h"
@@ -35,10 +35,10 @@ namespace Omm {
 namespace Gui {
 
 
-ListView::ListView(int widgetHeight, bool movableWidgets, Widget* pParent) :
-Widget(new ListViewImpl(this, pParent), pParent),
+ListView::ListView(int viewHeight, bool movableViews, View* pParent) :
+View(new ListViewImpl(this, pParent), pParent),
 _pModel(0),
-_widgetHeight(widgetHeight),
+_viewHeight(viewHeight),
 _rowOffset(0)
 //_lazy(false)
 {
@@ -48,7 +48,7 @@ _rowOffset(0)
 void
 ListView::setModel(ListModel* pModel)
 {
-    Log::instance()->gui().debug("widget list view set model ...");
+    Log::instance()->gui().debug("list view set model ...");
 
     // double link model and view.
     _pModel = pModel;
@@ -56,15 +56,15 @@ ListView::setModel(ListModel* pModel)
         _pModel->_pView = this;
     }
     else {
-        Log::instance()->gui().error("widget list view failed to set model (ignoring)");
+        Log::instance()->gui().error("list view failed to set model (ignoring)");
         return;
     }
 
-    // create an initial widget pool. This also retrieves the height of the widget.
+    // create an initial view pool. This also retrieves the height of the view.
     int rows = visibleRows();
     int rowsFetched = _pModel->fetch(std::min(_pModel->totalItemCount(), rows));
 
-    extendWidgetPool(rows);
+    extendViewPool(rows);
 
     // insert items that are already in the model.
     Log::instance()->gui().debug("inserting number of items: " + Poco::NumberFormatter::format(_pModel->totalItemCount()));
@@ -73,7 +73,7 @@ ListView::setModel(ListModel* pModel)
         insertItem(i);
     }
 
-    Log::instance()->gui().debug("widget list view set model finished.");
+    Log::instance()->gui().debug("list view set model finished.");
 }
 
 
@@ -85,72 +85,72 @@ ListView::visibleRows()
 
 
 void
-ListView::initWidget(ListWidget* pWidget)
+ListView::initView(ListItemView* pView)
 {
-    static_cast<ListViewImpl*>(_pImpl)->initWidget(pWidget);
+    static_cast<ListViewImpl*>(_pImpl)->initView(pView);
 }
 
 
 void
-ListView::moveWidget(int row, ListWidget* pWidget)
+ListView::moveView(int row, ListItemView* pView)
 {
-    static_cast<ListViewImpl*>(_pImpl)->moveWidget(row, pWidget);
+    static_cast<ListViewImpl*>(_pImpl)->moveView(row, pView);
 }
 
 
 void
 ListView::resize(int rows)
 {
-    int rowDelta = rows - widgetPoolSize();
-    Log::instance()->gui().debug("widget list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+    int rowDelta = rows - viewPoolSize();
+    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDelta > 0) {
-        if (_rowOffset + _visibleWidgets.size() + rowDelta >= _pModel->lastFetched()) {
-            _pModel->fetch(_visibleWidgets.size() + rowDelta);
+        if (_rowOffset + _visibleViews.size() + rowDelta >= _pModel->lastFetched()) {
+            _pModel->fetch(_visibleViews.size() + rowDelta);
         }
-        extendWidgetPool(rowDelta);
+        extendViewPool(rowDelta);
         for (int i = 0; i < rowDelta; i++) {
-            ListWidget* pWidget = _freeWidgets.top();
-            _freeWidgets.pop();
-            int lastRow = _rowOffset + _visibleWidgets.size();
-            moveWidgetToRow(lastRow, pWidget);
-            _pModel->attachWidget(lastRow, pWidget);
-            _visibleWidgets.push_back(pWidget);
+            ListItemView* pView = _freeViews.top();
+            _freeViews.pop();
+            int lastRow = _rowOffset + _visibleViews.size();
+            moveViewToRow(lastRow, pView);
+            _pModel->attachView(lastRow, pView);
+            _visibleViews.push_back(pView);
         }
     }
 }
 
 
 void
-ListView::extendWidgetPool()
+ListView::extendViewPool()
 {
-    static_cast<ListViewImpl*>(_pImpl)->extendWidgetPool();
+    static_cast<ListViewImpl*>(_pImpl)->extendViewPool();
 }
 
 
 int
-ListView::widgetPoolSize()
+ListView::viewPoolSize()
 {
-    return _widgetPool.size();
+    return _viewPool.size();
 }
 
 
 void
-ListView::extendWidgetPool(int n)
+ListView::extendViewPool(int n)
 {
-    Log::instance()->gui().debug("widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
+    Log::instance()->gui().debug("list view extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
     for (int i = 0; i < n; ++i) {
-        ListWidget* pWidget = _pModel->createWidget();
-        if (!pWidget) {
-            Log::instance()->gui().error("widget list view failed to create widget for pool (ignoring)");
+        ListItemView* pView = _pModel->createView();
+        if (!pView) {
+            Log::instance()->gui().error("list view failed to create view for pool (ignoring)");
             return;
         }
-        pWidget->hide();
-        _widgetPool.push_back(pWidget);
-        _freeWidgets.push(pWidget);
-        initWidget(pWidget);
-        pWidget->connect(Poco::Observer<ListView, ListWidget::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
-        Log::instance()->gui().debug("allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
+        pView->hide();
+        _viewPool.push_back(pView);
+        _freeViews.push(pView);
+        initView(pView);
+        pView->connect(Poco::Observer<ListView, ListItemView::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
+        Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
 
@@ -163,20 +163,20 @@ ListView::visibleIndex(int row)
 
 
 int
-ListView::countVisibleWidgets()
+ListView::countVisibleViews()
 {
-    return _visibleWidgets.size();
+    return _visibleViews.size();
 }
 
 
-ListWidget*
-ListView::visibleWidget(int index)
+ListItemView*
+ListView::visibleView(int index)
 {
-    if (0 <= index && index < _visibleWidgets.size()) {
-        return _visibleWidgets[index];
+    if (0 <= index && index < _visibleViews.size()) {
+        return _visibleViews[index];
     }
     else {
-        Log::instance()->gui().error("widget list view failed to retrieve visible widget, out of range (ignoring)");
+        Log::instance()->gui().error("list view failed to retrieve visible view, out of range (ignoring)");
         return 0;
     }
 }
@@ -200,34 +200,34 @@ ListView::visibleWidget(int index)
 //        _pModel->fetch(_visibleWidgets.size() + rowDeltaAbsolute);
 //    }
 //
-//    Log::instance()->gui().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+//    Log::instance()->gui().debug("scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
 //    while (rowDeltaAbsolute--) {
 //        if (rowDelta > 0) {
-//            // detach first visible widget
-//            ListWidget* pWidget = _visibleWidgets.front();
+//            // detach first visible view
+//            ListWidget* pView = _visibleWidgets.front();
 //            _pModel->detachWidget(_rowOffset);
-//            // move first widget to the end
+//            // move first view to the end
 //            int lastRow = _rowOffset + _visibleWidgets.size();
-//            moveWidgetToRow(lastRow, pWidget);
-//            // attach widget
-//            _pModel->attachWidget(lastRow, pWidget);
-//            // move widget to end of visible rows
+//            moveWidgetToRow(lastRow, pView);
+//            // attach view
+//            _pModel->attachWidget(lastRow, pView);
+//            // move view to end of visible rows
 //            _visibleWidgets.erase(_visibleWidgets.begin());
-//            _visibleWidgets.push_back(pWidget);
+//            _visibleWidgets.push_back(pView);
 //            _rowOffset++;
 //        }
 //        else if (rowDelta < 0) {
-//            // detach last visible widget
-//            ListWidget* pWidget = _visibleWidgets.back();
+//            // detach last visible view
+//            ListWidget* pView = _visibleWidgets.back();
 //            int lastRow = _rowOffset + _visibleWidgets.size() - 1;
 //            _pModel->detachWidget(lastRow);
-//            // move last widget to the beginning
-//            moveWidgetToRow(_rowOffset - 1, pWidget);
-//            // attach widget
-//            _pModel->attachWidget(_rowOffset - 1, pWidget);
-//            // move widget to beginning of visible rows
+//            // move last view to the beginning
+//            moveWidgetToRow(_rowOffset - 1, pView);
+//            // attach view
+//            _pModel->attachWidget(_rowOffset - 1, pView);
+//            // move view to beginning of visible rows
 //            _visibleWidgets.erase(_visibleWidgets.end() - 1);
-//            _visibleWidgets.insert(_visibleWidgets.begin(), pWidget);
+//            _visibleWidgets.insert(_visibleWidgets.begin(), pView);
 //            _rowOffset--;
 //        }
 //    }
@@ -242,15 +242,15 @@ ListView::itemIsVisible(int row)
 
 
 void
-ListView::moveWidgetToRow(int row, ListWidget* pWidget)
+ListView::moveViewToRow(int row, ListItemView* pView)
 {
-    pWidget->setRow(row);
-    moveWidget(row, pWidget);
+    pView->setRow(row);
+    moveView(row, pView);
 }
 
 
 void
-ListView::selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification)
+ListView::selectNotificationHandler(ListItemView::RowSelectNotification* pSelectNotification)
 {
     _pModel->selectItem(pSelectNotification->_row);
 }
@@ -264,29 +264,29 @@ ListView::insertItem(int row)
 //        updateScrollWidgetSize();
 //        // check if item is visible
 //        if (!itemIsVisible(row)) {
-//            Log::instance()->gui().debug("widget list view insert item that is not visible (ignoring)");
+//            Log::instance()->gui().debug("list view insert item that is not visible (ignoring)");
 //            return;
 //        }
 //    }
 //    else {
-        // if view is not lazy, widget pool has to be extended when too small and new widgets are inserted.
-        if (_visibleWidgets.size() >= _widgetPool.size()) {
-            extendWidgetPool();
+        // if view is not lazy, view pool has to be extended when too small and new views are inserted.
+        if (_visibleViews.size() >= _viewPool.size()) {
+            extendViewPool();
         }
 //    }
 
-    // attach item to a free (not visible) widget
-    if (_freeWidgets.size()) {
-        ListWidget* pWidget = _freeWidgets.top();
-        _freeWidgets.pop();
-        _visibleWidgets.insert(_visibleWidgets.begin() + visibleIndex(row), pWidget);
-        _pModel->attachWidget(row, pWidget);
-        // FIXME: move all widgets below one down
-        // FIXME: detach last widget if not visible anymore
-        moveWidgetToRow(row, pWidget);
+    // attach item to a free (not visible) view
+    if (_freeViews.size()) {
+        ListItemView* pView = _freeViews.top();
+        _freeViews.pop();
+        _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
+        _pModel->attachView(row, pView);
+        // FIXME: move all views below one down
+        // FIXME: detach last view if not visible anymore
+        moveViewToRow(row, pView);
     }
     else {
-        Log::instance()->gui().error("widget list view failed to attach widget to item, widget pool is empty (ignoring)");
+        Log::instance()->gui().error("list view failed to attach view to item, view pool is empty (ignoring)");
     }
 }
 
@@ -299,36 +299,36 @@ ListView::removeItem(int row)
 //        updateScrollWidgetSize();
 //        // check if item is visible
 //        if (!itemIsVisible(row)) {
-//            Log::instance()->gui().debug("widget list view remove item that is not visible (ignoring)");
+//            Log::instance()->gui().debug("list view remove item that is not visible (ignoring)");
 //            return;
 //        }
 //    }
 
-    // detach item from visible widget
-    ListWidget* pWidget = _pModel->getChildWidget(row);
+    // detach item from visible view
+    ListItemView* pView = _pModel->getChildView(row);
 
-    // remove widget from this position in visible widgets
+    // remove view from this position in visible views
     int index = visibleIndex(row);
-    int lastRow = _rowOffset + _visibleWidgets.size();
-    // move all widgets below one up
-    for (int i = index + 1; i < countVisibleWidgets(); i++) {
-        moveWidgetToRow(row + i - index - 1, visibleWidget(i));
+    int lastRow = _rowOffset + _visibleViews.size();
+    // move all views below one up
+    for (int i = index + 1; i < countVisibleViews(); i++) {
+        moveViewToRow(row + i - index - 1, visibleView(i));
     }
-    _pModel->detachWidget(row);
-    _visibleWidgets.erase(_visibleWidgets.begin() + visibleIndex(row));
+    _pModel->detachView(row);
+    _visibleViews.erase(_visibleViews.begin() + visibleIndex(row));
 
     if (_pModel->totalItemCount() - lastRow > 0) {
         // FIXME: something's going wrong with removal of rows, duplicate rows appear and crash
-        // reuse and attach widget below last widget cause it is now becoming visible
-        Log::instance()->gui().debug("widget list view reuse removed item widget");
-        _pModel->attachWidget(lastRow - 1, pWidget);
-        _visibleWidgets.push_back(pWidget);
-        moveWidgetToRow(lastRow - 1, pWidget);
+        // reuse and attach view below last view cause it is now becoming visible
+        Log::instance()->gui().debug("list view reuse removed item view");
+        _pModel->attachView(lastRow - 1, pView);
+        _visibleViews.push_back(pView);
+        moveViewToRow(lastRow - 1, pView);
     }
     else {
-        Log::instance()->gui().debug("widget list view free removed item widget");
-        // otherwise free widget
-        _freeWidgets.push(pWidget);
+        Log::instance()->gui().debug("list view free removed item view");
+        // otherwise free view
+        _freeViews.push(pView);
     }
 }
 

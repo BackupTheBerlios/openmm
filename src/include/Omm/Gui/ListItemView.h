@@ -19,24 +19,47 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef TabWidget_INCLUDED
-#define TabWidget_INCLUDED
+#ifndef ListItemView_INCLUDED
+#define ListItemView_INCLUDED
 
-#include "Widget.h"
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+
+#include "View.h"
+
 
 namespace Omm {
 namespace Gui {
 
 
-class TabWidget : public Widget
+class ListItemView : public View
 {
-    friend class TabWidgetImpl;
-    
 public:
-    TabWidget(Widget* pParent = 0);
-    virtual ~TabWidget();
+    ListItemView();
 
-    void addWidget(Widget* pWidget, const std::string& tabName = "");
+    int getRow();
+    void setRow(int row);
+
+    class RowSelectNotification : public Poco::Notification
+    {
+    public:
+        RowSelectNotification(int row);
+
+        int _row;
+    };
+
+protected:
+    virtual void select();
+
+private:
+    int _row;
+};
+
+
+class ListItemViewFactory
+{
+public:
+    virtual ListItemView* createItemView() { return 0; }
 };
 
 

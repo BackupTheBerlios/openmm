@@ -26,7 +26,7 @@
 #include <Omm/Gui.h>
 
 
-class QtListWidget : public QWidget, public Omm::Gui::ListWidget
+class QtListWidget : public QWidget, public Omm::Gui::ListItemView
 {
     Q_OBJECT
 

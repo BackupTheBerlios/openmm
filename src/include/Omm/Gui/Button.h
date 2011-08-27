@@ -22,7 +22,7 @@
 #ifndef Button_INCLUDED
 #define Button_INCLUDED
 
-#include "Widget.h"
+#include "View.h"
 
 namespace Omm {
 namespace Gui {
@@ -41,12 +41,12 @@ private:
 };
 
 
-class ButtonView : public Widget
+class ButtonView : public View
 {
     friend class ButtonModel;
     
 public:
-    ButtonView(ButtonModel* pModel = 0, Widget* pParent = 0);
+    ButtonView(ButtonModel* pModel = 0, View* pParent = 0);
     
 private:
     virtual void syncView();
@@ -56,7 +56,7 @@ private:
 class Button : public ButtonView, public ButtonModel
 {
 public:
-    Button(Widget* pParent = 0);
+    Button(View* pParent = 0);
     virtual ~Button();
 };
 

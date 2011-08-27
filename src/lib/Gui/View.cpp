@@ -21,11 +21,11 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "Gui/Widget.h"
+#include "Gui/View.h"
 #include "Gui/GuiLogger.h"
 
 #ifdef __GUI_QT_PLATFORM__
-#include "Qt/WidgetImpl.h"
+#include "Qt/ViewImpl.h"
 #endif
 
 
@@ -33,24 +33,24 @@ namespace Omm {
 namespace Gui {
 
 
-Widget::Widget(Widget* pParent) :
+View::View(View* pParent) :
 _pParent(pParent),
-_pImpl(new WidgetImpl(this)),
+_pImpl(new ViewImpl(this)),
 _pModel(0)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget ctor (parent).");
+    Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
 }
 
 
-Widget::Widget(WidgetImpl* pWidgetImpl, Widget* pParent) :
+View::View(ViewImpl* pViewImpl, View* pParent) :
 _pParent(pParent),
-_pImpl(pWidgetImpl)
+_pImpl(pViewImpl)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget ctor (widget impl, parent).");
+    Omm::Gui::Log::instance()->gui().debug("view ctor (view impl, parent).");
 }
 
 
-Widget::~Widget()
+View::~View()
 {
     if (_pImpl) {
 //        delete _pImpl;
@@ -59,81 +59,74 @@ Widget::~Widget()
 
 
 void*
-Widget::getNativeWidget()
+View::getNativeView()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget get native widget, impl:" + Poco::NumberFormatter::format(_pImpl));
-    return _pImpl->getNativeWidget();
+    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+    return _pImpl->getNativeView();
 }
 
 
-Widget*
-Widget::getParent()
+View*
+View::getParent()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget get parent: " + Poco::NumberFormatter::format(_pParent));
+    Omm::Gui::Log::instance()->gui().debug("view get parent: " + Poco::NumberFormatter::format(_pParent));
     return _pParent;
 }
 
 
 void
-Widget::show()
+View::show()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget show widget ...");
+    Omm::Gui::Log::instance()->gui().debug("view show view ...");
     syncView();
-    _pImpl->showWidget();
-    Omm::Gui::Log::instance()->gui().debug("widget show widget finished.");
+    _pImpl->showView();
+    Omm::Gui::Log::instance()->gui().debug("view show view finished.");
 }
 
 
 void
-Widget::hide()
+View::hide()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget hide widget.");
-    _pImpl->hideWidget();
+    Omm::Gui::Log::instance()->gui().debug("view hide view.");
+    _pImpl->hideView();
 }
 
 
 void
-Widget::resize(int width, int height)
+View::resize(int width, int height)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget resize widget.");
-    _pImpl->resizeWidget(width, height);
+    Omm::Gui::Log::instance()->gui().debug("view resize view.");
+    _pImpl->resizeView(width, height);
 }
 
 
 void
-Widget::connect(const Poco::AbstractObserver& observer)
+View::connect(const Poco::AbstractObserver& observer)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget register notification handler.");
+    Omm::Gui::Log::instance()->gui().debug("view register notification handler.");
     _eventNotificationCenter.addObserver(observer);
 }
 
 
 Model*
-Widget::getModel()
+View::getModel()
 {
     return _pModel;
 }
 
 
 void
-Widget::setModel(Model* pModel)
+View::setModel(Model* pModel)
 {
     _pModel = pModel;
-    _pModel->_pWidget = this;
+    _pModel->_pView = this;
 }
 
 
-//void
-//Widget::setController(Controller* pController)
-//{
-//    _pController = pController;
-//}
-
-
 void
-Widget::select()
+View::select()
 {
-    Omm::Gui::Log::instance()->gui().debug("widget select.");
+    Omm::Gui::Log::instance()->gui().debug("view select.");
     _eventNotificationCenter.postNotification(new SelectNotification);
 }
 

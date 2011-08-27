@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Widget_INCLUDED
-#define Widget_INCLUDED
+#ifndef View_INCLUDED
+#define View_INCLUDED
 
 #include <Poco/NotificationCenter.h>
 #include <Poco/Observer.h>
@@ -29,22 +29,21 @@
 namespace Omm {
 namespace Gui {
 
-class WidgetImpl;
+class ViewImpl;
 class Model;
-//class Controller;
 
 
-class Widget
+class View
 {
-    friend class WidgetImpl;
+    friend class ViewImpl;
     friend class Model;
     
 public:
-    Widget(Widget* pParent = 0);
-    virtual ~Widget();
+    View(View* pParent = 0);
+    virtual ~View();
 
-    void* getNativeWidget();
-    Widget* getParent();
+    void* getNativeView();
+    View* getParent();
 
     void show();
     void hide();
@@ -59,32 +58,25 @@ public:
 //    void setController(Controller* pController);
 
 protected:
-    Widget(WidgetImpl* pWidgetImpl, Widget* pParent = 0);
+    View(ViewImpl* pViewImpl, View* pParent = 0);
 
     virtual void syncView() {}
     virtual void select();
 
-    Widget*                     _pParent;
-    WidgetImpl*                 _pImpl;
+    View*                       _pParent;
+    ViewImpl*                   _pImpl;
     Model*                      _pModel;
-//    Controller*                 _pController;
     Poco::NotificationCenter    _eventNotificationCenter;
 };
 
 
 class Model
 {
-    friend class Widget;
+    friend class View;
     
 protected:
-    Widget*     _pWidget;
+    View*     _pView;
 };
-
-
-//class Controller
-//{
-//    friend class Widget;
-//};
 
 
 }  // namespace Omm

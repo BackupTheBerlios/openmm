@@ -19,32 +19,38 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef TabWidgetImpl_INCLUDED
-#define TabWidgetImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <QtGui>
-#include "WidgetImpl.h"
+#include "Gui/TabView.h"
+#include "Gui/GuiLogger.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/TabViewImpl.h"
+#endif
+
 
 namespace Omm {
 namespace Gui {
 
-class Widget;
-class TabWidget;
 
-class TabWidgetImpl : public QTabWidget, public WidgetImpl
+TabView::TabView(View* pParent) :
+View(new TabViewImpl(this, pParent), pParent)
 {
-private:
-    friend class TabWidget;
-    
-    TabWidgetImpl(Widget* pWidget, Widget* pParent = 0);
-    virtual ~TabWidgetImpl();
-
-    void addWidget(Widget* pWidget, const std::string& tabName);
-};
+    Omm::Gui::Log::instance()->gui().debug("tab view ctor.");
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+TabView::~TabView()
+{
+}
 
-#endif
 
+void
+TabView::addView(View* pView, const std::string& tabName)
+{
+    static_cast<TabViewImpl*>(_pImpl)->addView(pView, tabName);
+}
+
+
+} // namespace Gui
+} // namespace Omm

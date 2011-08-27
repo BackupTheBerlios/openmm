@@ -23,15 +23,15 @@
 #define ButtonImpl_INCLUDED
 
 #include <QtGui>
-#include "WidgetImpl.h"
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class Widget;
+class View;
 class Button;
 
-class ButtonImpl : public QPushButton, public WidgetImpl
+class ButtonImpl : public QPushButton, public ViewImpl
 {
     Q_OBJECT
 
@@ -41,7 +41,7 @@ private slots:
     void pushed();
 
 private:
-    ButtonImpl(Widget* pWidget, Widget* pParent = 0);
+    ButtonImpl(View* pView, View* pParent = 0);
     virtual ~ButtonImpl();
 
     void setLabel(const std::string& label);

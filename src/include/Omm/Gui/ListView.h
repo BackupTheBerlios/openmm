@@ -25,21 +25,21 @@
 #include <vector>
 #include <stack>
 
-#include "Widget.h"
-#include "ListWidget.h"
+#include "View.h"
+#include "ListItemView.h"
 
 namespace Omm {
 namespace Gui {
 
 class ListModel;
-class ListWidget;
+class ListItemView;
 
-class ListView : public Widget
+class ListView : public View
 {
     friend class ListViewImpl;
     
 public:
-    ListView(int widgetHeight, bool movableWidgets = true, Widget* pParent = 0);
+    ListView(int viewHeight, bool movableViews = true, View* pParent = 0);
 
     void setModel(ListModel* pModel);
     void insertItem(int row);
@@ -47,30 +47,30 @@ public:
 
 private:
     int visibleRows();
-    void initWidget(ListWidget* pWidget);
-    void moveWidget(int row, ListWidget* pWidget);
+    void initView(ListItemView* pView);
+    void moveView(int row, ListItemView* pView);
     void resize(int rows);
 
-    void extendWidgetPool();
-    void extendWidgetPool(int n);
+    void extendViewPool();
+    void extendViewPool(int n);
 
-    int widgetPoolSize();
+    int viewPoolSize();
     /// The view has a widget pool which is large enough to fill the area of the view
     /// with widgets (created by the model).
     int visibleIndex(int row);
-    int countVisibleWidgets();
-    ListWidget* visibleWidget(int index);
+    int countVisibleViews();
+    ListItemView* visibleView(int index);
     bool itemIsVisible(int row);
-    void moveWidgetToRow(int row, ListWidget* pWidget);
-    void selectNotificationHandler(ListWidget::RowSelectNotification* pSelectNotification);
+    void moveViewToRow(int row, ListItemView* pView);
+    void selectNotificationHandler(ListItemView::RowSelectNotification* pSelectNotification);
 
     ListModel*                          _pModel;
 //    bool                                _lazy;
-    std::vector<ListWidget*>            _widgetPool;
-    std::vector<ListWidget*>            _visibleWidgets;
-    std::stack<ListWidget*>             _freeWidgets;
+    std::vector<ListItemView*>          _viewPool;
+    std::vector<ListItemView*>          _visibleViews;
+    std::stack<ListItemView*>           _freeViews;
     int                                 _rowOffset;
-    int                                 _widgetHeight;
+    int                                 _viewHeight;
 };
 
 

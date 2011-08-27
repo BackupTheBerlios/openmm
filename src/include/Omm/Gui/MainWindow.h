@@ -22,13 +22,13 @@
 #ifndef MainWindow_INCLUDED
 #define MainWindow_INCLUDED
 
-#include "Widget.h"
+#include "View.h"
 
 namespace Omm {
 namespace Gui {
 
 
-class MainWindow : public Widget
+class MainWindow : public View
 {
     friend class MainWindowImpl;
     
@@ -36,7 +36,7 @@ public:
     MainWindow();
     virtual ~MainWindow();
 
-    void setMainWidget(Widget* pWidget);
+    void setMainView(View* pView);
 };
 
 

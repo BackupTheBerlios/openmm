@@ -29,9 +29,9 @@ namespace Omm {
 namespace Gui {
 
 
-ButtonImpl::ButtonImpl(Widget* pWidget, Widget* pParent) :
-QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeWidget() : 0)),
-WidgetImpl(pWidget, this)
+ButtonImpl::ButtonImpl(View* pView, View* pParent) :
+QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
+ViewImpl(pView, this)
 {
     Omm::Gui::Log::instance()->gui().debug("button implementation ctor");
     connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
@@ -53,11 +53,11 @@ ButtonImpl::setLabel(const std::string& label)
 void
 ButtonImpl::pushed()
 {
-//    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, sending notification to widget: " + Poco::NumberFormatter::format(_pWidget) + "...");
+//    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, sending notification to widget: " + Poco::NumberFormatter::format(_pView) + "...");
 //    postNotification(new Button::PushNotification);
 //    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, notification sent.");
     Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
-    static_cast<ButtonModel*>(_pWidget->getModel())->pushed();
+    static_cast<ButtonModel*>(_pView->getModel())->pushed();
 }
 
 

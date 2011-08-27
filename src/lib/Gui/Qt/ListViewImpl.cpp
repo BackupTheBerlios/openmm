@@ -27,23 +27,23 @@
 #include "ListViewImpl.h"
 #include "Gui/ListView.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/ListWidget.h"
+#include "Gui/ListItemView.h"
 
 namespace Omm {
 namespace Gui {
 
 
-ListViewImpl::ListViewImpl(Widget* pWidget, bool movableWidgets, Widget* pParent) :
-QGraphicsView(static_cast<QWidget*>(pParent ? pParent->getNativeWidget() : 0)),
-WidgetImpl(pWidget, this),
-_movableWidgets(movableWidgets)
+ListViewImpl::ListViewImpl(View* pView, bool movableViews, View* pParent) :
+QGraphicsView(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
+ViewImpl(pView, this),
+_movableViews(movableViews)
 {
     setAlignment((Qt::AlignLeft | Qt::AlignTop));
 
     _pGraphicsScene = new QGraphicsScene;
     setScene(_pGraphicsScene);
 
-    connect(this, SIGNAL(moveWidgetSignal(int, ListWidget*)), this, SLOT(moveWidgetSlot(int, ListWidget*)));
+    connect(this, SIGNAL(moveWidgetSignal(int, ListItemView*)), this, SLOT(moveWidgetSlot(int, ListItemView*)));
     connect(this, SIGNAL(extendPoolSignal()), this, SLOT(extendPoolSlot()));
 }
 
@@ -56,61 +56,61 @@ ListViewImpl::~ListViewImpl()
 int
 ListViewImpl::visibleRows()
 {
-    ListView* pListView =  static_cast<ListView*>(_pWidget);
-    int rows = viewport()->geometry().height() / pListView->_widgetHeight;
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    int rows = viewport()->geometry().height() / pListView->_viewHeight;
     Omm::Gui::Log::instance()->gui().debug("widget canvas number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
 
 void
-ListViewImpl::initWidget(ListWidget* pWidget)
+ListViewImpl::initView(ListItemView* pView)
 {
-    ListView* pListView =  static_cast<ListView*>(_pWidget);
-    pWidget->resize(viewport()->width(), pListView->_widgetHeight);
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    pView->resize(viewport()->width(), pListView->_viewHeight);
 
-    QWidget* pQWidget = static_cast<QWidget*>(pWidget->getNativeWidget());
-    if (_movableWidgets) {
-        _proxyWidgets[pWidget] = _pGraphicsScene->addWidget(pQWidget, Qt::Window);
+    QWidget* pQWidget = static_cast<QWidget*>(pView->getNativeView());
+    if (_movableViews) {
+        _proxyWidgets[pView] = _pGraphicsScene->addWidget(pQWidget, Qt::Window);
     }
     else {
-        _proxyWidgets[pWidget] = _pGraphicsScene->addWidget(pQWidget);
+        _proxyWidgets[pView] = _pGraphicsScene->addWidget(pQWidget);
    }
 }
 
 
 void
-ListViewImpl::moveWidget(int row, ListWidget* pWidget)
+ListViewImpl::moveView(int row, ListItemView* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
-    emit moveWidgetSignal(row, pWidget);
+    emit moveWidgetSignal(row, pView);
 }
 
 
 void
-ListViewImpl::extendWidgetPool()
+ListViewImpl::extendViewPool()
 {
     emit extendPoolSignal();
 }
 
 
 void
-ListViewImpl::moveWidgetSlot(int row, ListWidget* pWidget)
+ListViewImpl::moveWidgetSlot(int row, ListItemView* pView)
 {
-    ListView* pListView =  static_cast<ListView*>(_pWidget);
-    _proxyWidgets[pWidget]->setPos(0, pListView->_widgetHeight * row);
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    _proxyWidgets[pView]->setPos(0, pListView->_viewHeight * row);
 }
 
 
 void
 ListViewImpl::extendPoolSlot()
 {
-    ListView* pListView =  static_cast<ListView*>(_pWidget);
-    pListView->extendWidgetPool(visibleRows());
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    pListView->extendViewPool(visibleRows());
 }
 
 
-//LazyListViewImpl::LazyListViewImpl(Widget* pWidget, Widget* pParent) :
+//LazyListViewImpl::LazyListViewImpl(Widget* pView, Widget* pParent) :
 //QScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeWidget() : 0)),
 //_pScrollWidget(0)
 //{
@@ -138,18 +138,18 @@ ListViewImpl::extendPoolSlot()
 //
 //
 //void
-//LazyListViewImpl::initWidget(ListWidget* pWidget)
+//LazyListViewImpl::initWidget(ListWidget* pView)
 //{
-//    static_cast<QtListWidget*>(pWidget)->resize(viewport()->width(), _widgetHeight);
-//    static_cast<QtListWidget*>(pWidget)->setParent(_pScrollWidget);
+//    static_cast<QtListWidget*>(pView)->resize(viewport()->width(), _widgetHeight);
+//    static_cast<QtListWidget*>(pView)->setParent(_pScrollWidget);
 //}
 //
 //
 //void
-//LazyListViewImpl::moveWidget(int row, ListWidget* pWidget)
+//LazyListViewImpl::moveWidget(int row, ListWidget* pView)
 //{
 //    Omm::Gui::Log::instance()->gui().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
-//    emit moveWidgetSignal(row, pWidget);
+//    emit moveWidgetSignal(row, pView);
 //}
 //
 //
@@ -169,9 +169,9 @@ ListViewImpl::extendPoolSlot()
 //
 //
 //void
-//LazyListViewImpl::moveWidgetSlot(int row, ListWidget* pWidget)
+//LazyListViewImpl::moveWidgetSlot(int row, ListWidget* pView)
 //{
-//    static_cast<QtListWidget*>(pWidget)->move(0, _widgetHeight * row);
+//    static_cast<QtListWidget*>(pView)->move(0, _widgetHeight * row);
 //}
 //
 //

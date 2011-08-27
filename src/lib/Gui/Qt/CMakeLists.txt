@@ -3,20 +3,20 @@ QtGui.qrc
 )
 
 set(OMMGUI_QT_SRC
-WidgetImpl.cpp
+ViewImpl.cpp
 ButtonImpl.cpp
 MainWindowImpl.cpp
 EventLoopImpl.cpp
-TabWidgetImpl.cpp
+TabViewImpl.cpp
 ListViewImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
-#WidgetImpl.h
+#ViewImpl.h
 ButtonImpl.h
 #MainWindowImpl.h
 #EventLoopImpl.h
-#TabWidgetImpl.h
+#TabViewImpl.h
 ListViewImpl.h
 )
 

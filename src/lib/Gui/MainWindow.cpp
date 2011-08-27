@@ -34,8 +34,7 @@ namespace Gui {
 
 
 MainWindow::MainWindow() :
-// FIXME: wrong ctor
-Widget(new MainWindowImpl(this))
+View(new MainWindowImpl(this))
 {
     Omm::Gui::Log::instance()->gui().debug("main window ctor.");
 }
@@ -47,9 +46,9 @@ MainWindow::~MainWindow()
 
 
 void
-MainWindow::setMainWidget(Widget* pWidget)
+MainWindow::setMainView(View* pView)
 {
-    static_cast<MainWindowImpl*>(_pImpl)->setMainWidget(pWidget);
+    static_cast<MainWindowImpl*>(_pImpl)->setMainView(pView);
 }
 
 

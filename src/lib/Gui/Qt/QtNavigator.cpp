@@ -116,10 +116,10 @@ QtNavigator::push(QtNavigable* pNavigable)
 //    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
 
     pNavigable->_pNavigator = this;
-    if (pNavigable->getWidget()) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
-        _pStackedWidget->addWidget(pNavigable->getWidget());
-        _pStackedWidget->setCurrentWidget(pNavigable->getWidget());
+    if (pNavigable->getView()) {
+        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getView()));
+        _pStackedWidget->addWidget(pNavigable->getView());
+        _pStackedWidget->setCurrentWidget(pNavigable->getView());
         Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget finished.");
     }
     _pNavigatorPanel->push(pNavigable);
@@ -139,8 +139,8 @@ QtNavigator::expose(QtNavigable* pNavigable)
     pNavigable->show();
     while(!_navigableStack.empty() && _navigableStack.top() != pNavigable) {
         QtNavigable* pPoppedNavigable = _navigableStack.top();
-        if (pPoppedNavigable->getWidget()) {
-            _pStackedWidget->removeWidget(pPoppedNavigable->getWidget());
+        if (pPoppedNavigable->getView()) {
+            _pStackedWidget->removeWidget(pPoppedNavigable->getView());
         }
         // FIXME: crash when deleting popped navigable
 //        delete pPoppedNavigable;

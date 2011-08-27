@@ -19,36 +19,45 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
-
-#include "Gui/TabWidget.h"
-#include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/TabWidgetImpl.h"
-#endif
+#include "Gui/ListItemView.h"
 
 
 namespace Omm {
 namespace Gui {
 
 
-TabWidget::TabWidget(Widget* pParent) :
-Widget(new TabWidgetImpl(this, pParent), pParent)
+ListItemView::ListItemView() :
+_row(0)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab widget ctor.");
+
 }
 
 
-TabWidget::~TabWidget()
+int
+ListItemView::getRow()
+{
+    return _row;
+}
+
+
+void
+ListItemView::setRow(int row)
+{
+    _row = row;
+}
+
+
+ListItemView::RowSelectNotification::RowSelectNotification(int row) :
+_row(row)
 {
 }
 
 
 void
-TabWidget::addWidget(Widget* pWidget, const std::string& tabName)
+ListItemView::select()
 {
-    static_cast<TabWidgetImpl*>(_pImpl)->addWidget(pWidget, tabName);
+//    Widget::select();
+    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
 }
 
 

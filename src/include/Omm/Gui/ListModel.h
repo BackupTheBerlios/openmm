@@ -28,8 +28,8 @@ namespace Gui {
 
     
 class ListView;
-class ListWidget;
-class ListWidgetFactory;
+class ListItemView;
+class ListItemViewFactory;
 
 
 class ListModel
@@ -57,15 +57,15 @@ public:
     virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
 
     // widget related
-    void setWidgetFactory(ListWidgetFactory* pWidgetFactory);
-    virtual ListWidget* createWidget();
-    virtual ListWidget* getChildWidget(int row) { return 0; }
-    virtual void attachWidget(int row, ListWidget* pWidget) {}
-    virtual void detachWidget(int row) {}
+    void setItemViewFactory(ListItemViewFactory* pViewFactory);
+    virtual ListItemView* createView();
+    virtual ListItemView* getChildView(int row) { return 0; }
+    virtual void attachView(int row, ListItemView* pView) {}
+    virtual void detachView(int row) {}
 
 private:
     ListView*                     _pView;
-    ListWidgetFactory*            _pWidgetFactory;
+    ListItemViewFactory*          _pViewFactory;
 };
 
 

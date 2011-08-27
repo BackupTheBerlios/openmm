@@ -108,16 +108,16 @@ ListView(50)
 }
 
 
-ListWidget*
-MediaRendererGroupView::createWidget()
+ListItemView*
+MediaRendererGroupView::createView()
 {
     Log::instance()->gui().debug("media renderer group view create renderer view.");
     return new MediaRendererView;
 }
 
 
-ListWidget*
-MediaRendererGroupView::getChildWidget(int row)
+ListItemView*
+MediaRendererGroupView::getChildView(int row)
 {
     MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(getDevice(row));
 //    return pRenderer->getDeviceWidget();

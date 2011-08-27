@@ -32,7 +32,7 @@ public:
         _pButton = new Omm::Gui::Button(this);
         _pButton->setLabel("Hello GUI");
         _pButton->connect(Poco::Observer<HelloGui, Omm::Gui::Button::PushNotification>(*this, &HelloGui::onPush));
-        setMainWidget(_pButton);
+        setMainView(_pButton);
     }
 
     void onPush(Omm::Gui::Button::PushNotification* pNotification)

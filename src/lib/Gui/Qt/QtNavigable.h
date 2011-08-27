@@ -35,7 +35,7 @@ public:
     QtNavigable();
 
     virtual QString getBrowserTitle() { return ""; }
-    virtual QWidget* getWidget() { return 0; }
+    virtual QWidget* getView() { return 0; }
     /// If getWidget() returns not null but a valid widget, the widget
     /// is pushed on QtNavigator::_pStackedWidget.
     virtual void show() {}

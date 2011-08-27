@@ -19,47 +19,34 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "Gui/ListWidget.h"
-
+#include "TabViewImpl.h"
+#include "Gui/TabView.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
 
-ListWidget::ListWidget() :
-_row(0)
+TabViewImpl::TabViewImpl(View* pView, View* pParent) :
+QTabWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() :0)),
+ViewImpl(pView, this)
 {
-
+    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
 }
 
 
-int
-ListWidget::getRow()
-{
-    return _row;
-}
-
-
-void
-ListWidget::setRow(int row)
-{
-    _row = row;
-}
-
-
-ListWidget::RowSelectNotification::RowSelectNotification(int row) :
-_row(row)
+TabViewImpl::~TabViewImpl()
 {
 }
 
 
 void
-ListWidget::select()
+TabViewImpl::addView(View* pView, const std::string& tabName)
 {
-//    Widget::select();
-    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
+    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
+    QTabWidget::addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
 }
 
 
-} // namespace Gui
-} // namespace Omm
+}  // namespace Omm
+}  // namespace Gui

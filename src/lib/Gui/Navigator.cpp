@@ -64,7 +64,7 @@ Navigator::push(Navigable* pNavigable)
 //    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
 
     pNavigable->_pNavigator = this;
-    if (pNavigable->getWidget()) {
+    if (pNavigable->getView()) {
 //        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
         pushImpl(pNavigable);
     }

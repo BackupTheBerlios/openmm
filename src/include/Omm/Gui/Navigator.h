@@ -23,7 +23,7 @@
 #define Navigator_INCLUDED
 
 #include <stack>
-#include "Widget.h"
+#include "View.h"
 
 namespace Omm {
 namespace Gui {
@@ -31,7 +31,7 @@ namespace Gui {
 class Navigable;
 
 
-class Navigator : public Widget
+class Navigator : public View
 {
 public:
     Navigator();

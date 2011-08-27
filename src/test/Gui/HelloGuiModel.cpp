@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     Omm::Gui::ButtonView buttonView;
     buttonView.setModel(&buttonModel);
     buttonModel.setLabel("Hello GUI");
-    mainWindow.setMainWidget(&buttonView);
+    mainWindow.setMainView(&buttonView);
 
     mainWindow.show();
 

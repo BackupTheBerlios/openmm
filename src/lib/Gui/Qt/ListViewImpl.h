@@ -23,42 +23,42 @@
 #define ListViewImpl_INCLUDED
 
 #include <QtGui>
-#include "WidgetImpl.h"
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class Widget;
+class View;
 class ListView;
-class ListWidget;
+class ListItemView;
 
 
-class ListViewImpl : public QGraphicsView, public WidgetImpl
+class ListViewImpl : public QGraphicsView, public ViewImpl
 {
     Q_OBJECT
 
     friend class ListView;
 
 signals:
-    void moveWidgetSignal(int targetRow, ListWidget* pWidget);
+    void moveWidgetSignal(int targetRow, ListItemView* pView);
     void extendPoolSignal();
 
 private slots:
-    void moveWidgetSlot(int targetRow, ListWidget* pWidget);
+    void moveWidgetSlot(int targetRow, ListItemView* pView);
     void extendPoolSlot();
 
 private:
-    ListViewImpl(Widget* pWidget, bool movableWidgets = false, Widget* pParent = 0);
+    ListViewImpl(View* pView, bool movableViews = false, View* pParent = 0);
     virtual ~ListViewImpl();
 
     int visibleRows();
-    void initWidget(ListWidget* pWidget);
-    void moveWidget(int row, ListWidget* pWidget);
-    void extendWidgetPool();
+    void initView(ListItemView* pView);
+    void moveView(int row, ListItemView* pView);
+    void extendViewPool();
 
     QGraphicsScene*                                   _pGraphicsScene;
-    std::map<ListWidget*, QGraphicsProxyWidget*>      _proxyWidgets;
-    bool                                              _movableWidgets;
+    std::map<ListItemView*, QGraphicsProxyWidget*>    _proxyWidgets;
+    bool                                              _movableViews;
 };
 
 
@@ -67,22 +67,22 @@ private:
 //    Q_OBJECT
 //
 //public:
-//    LazyListViewImpl(Widget* pWidget, Widget* pParent = 0);
+//    LazyListViewImpl(Widget* pView, Widget* pParent = 0);
 //    virtual ~LazyListViewImpl();
 //
 //protected:
 //    virtual int visibleRows();
-//    virtual void initWidget(ListWidget* pWidget);
-//    virtual void moveWidget(int row, ListWidget* pWidget);
+//    virtual void initWidget(ListWidget* pView);
+//    virtual void moveWidget(int row, ListWidget* pView);
 //
 //    virtual void updateScrollWidgetSize();
 //    virtual int getOffset();
 //
 //signals:
-//    void moveWidgetSignal(int targetRow, ListWidget* pWidget);
+//    void moveWidgetSignal(int targetRow, ListWidget* pView);
 //
 //private slots:
-//    void moveWidgetSlot(int targetRow, ListWidget* pWidget);
+//    void moveWidgetSlot(int targetRow, ListWidget* pView);
 //    void viewScrolledSlot(int value);
 //
 //private:

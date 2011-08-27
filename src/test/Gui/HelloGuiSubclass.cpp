@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     Omm::Gui::MainWindow mainWindow;
     HelloButton button;
     button.setLabel("Hello GUI");
-    mainWindow.setMainWidget(&button);
+    mainWindow.setMainView(&button);
 
     mainWindow.show();
 

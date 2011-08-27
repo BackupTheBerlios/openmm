@@ -68,7 +68,7 @@ void
 GuiApplication::addController()
 {
     Omm::Log::instance()->upnp().debug("application gui add controller");
-    _pMainWindow->setMainWidget(static_cast<Omm::Gui::ControllerGui*>(_pController));
+    _pMainWindow->setMainView(static_cast<Omm::Gui::ControllerGui*>(_pController));
 }
 
 

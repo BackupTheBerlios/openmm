@@ -24,7 +24,7 @@
 #include "Gui/ListModel.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/ListView.h"
-#include "Gui/ListWidget.h"
+#include "Gui/ListItemView.h"
 
 namespace Omm {
 namespace Gui {
@@ -32,7 +32,7 @@ namespace Gui {
 
 ListModel::ListModel() :
 _pView(0),
-_pWidgetFactory(0)
+_pViewFactory(0)
 {
 }
 
@@ -41,13 +41,13 @@ void
 ListModel::insertItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
-        Log::instance()->gui().debug("widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
+        Log::instance()->gui().debug("list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
         if (_pView) {
             _pView->insertItem(row);
         }
     }
     else {
-        Log::instance()->gui().error("widget list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
+        Log::instance()->gui().error("list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
     }
 }
 
@@ -56,29 +56,29 @@ void
 ListModel::removeItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
-        Log::instance()->gui().debug("widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
+        Log::instance()->gui().debug("list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
         if (_pView) {
             _pView->removeItem(row);
         }
     }
     else {
-        Log::instance()->gui().error("widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
+        Log::instance()->gui().error("list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
     }
 }
 
 
 void
-ListModel::setWidgetFactory(ListWidgetFactory* pWidgetFactory)
+ListModel::setItemViewFactory(ListItemViewFactory* pViewFactory)
 {
-    _pWidgetFactory = pWidgetFactory;
+    _pViewFactory = pViewFactory;
 }
 
 
-ListWidget*
-ListModel::createWidget()
+ListItemView*
+ListModel::createView()
 {
-    if (_pWidgetFactory) {
-        return _pWidgetFactory->createWidget();
+    if (_pViewFactory) {
+        return _pViewFactory->createItemView();
     }
     return 0;
 }

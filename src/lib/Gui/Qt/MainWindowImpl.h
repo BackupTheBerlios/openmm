@@ -23,23 +23,23 @@
 #define ButtonImpl_INCLUDED
 
 #include <QtGui>
-#include "WidgetImpl.h"
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class Widget;
+class View;
 class MainWindow;
 
-class MainWindowImpl : public QMainWindow, public WidgetImpl
+class MainWindowImpl : public QMainWindow, public ViewImpl
 {
 private:
     friend class MainWindow;
     
-    MainWindowImpl(Widget* pWidget);
+    MainWindowImpl(View* pView);
     virtual ~MainWindowImpl();
 
-    void setMainWidget(Widget* pWidget);
+    void setMainView(View* pView);
 };
 
 

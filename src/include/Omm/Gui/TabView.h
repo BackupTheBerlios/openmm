@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,35 +17,30 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/Button.h>
+#ifndef TabView_INCLUDED
+#define TabView_INCLUDED
+
+#include "View.h"
+
+namespace Omm {
+namespace Gui {
 
 
-class HelloButtonModel : public Omm::Gui::ButtonModel
+class TabView : public View
 {
-private:
-    void pushed()
-    {
-        setLabel("works!");
-    }
+    friend class TabViewImpl;
+    
+public:
+    TabView(View* pParent = 0);
+    virtual ~TabView();
+
+    void addView(View* pView, const std::string& tabName = "");
 };
 
 
-int main(int argc, char** argv)
-{
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::Button button;
-    HelloButtonModel buttonModel;
-    button.setModel(&buttonModel);
-    buttonModel.setLabel("Hello GUI");
-    mainWindow.setMainWidget(&button);
+}  // namespace Omm
+}  // namespace Gui
 
-    mainWindow.show();
-
-    loop.run();
-}
-
+#endif

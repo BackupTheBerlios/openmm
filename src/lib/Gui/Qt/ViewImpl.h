@@ -19,51 +19,65 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListWidget_INCLUDED
-#define ListWidget_INCLUDED
+#ifndef ViewImpl_INCLUDED
+#define ViewImpl_INCLUDED
 
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
-
-#include "Widget.h"
-
+#include <QtGui>
+#include "Gui/View.h"
 
 namespace Omm {
 namespace Gui {
 
+class NativeView;
 
-class ListWidget : public Widget
+
+class ViewImpl
 {
+    friend class View;
+    
 public:
-    ListWidget();
+    ViewImpl(View* pView);
+    virtual ~ViewImpl();
 
-    int getRow();
-    void setRow(int row);
-
-    class RowSelectNotification : public Poco::Notification
-    {
-    public:
-        RowSelectNotification(int row);
-
-        int _row;
-    };
-
-protected:
+    View* getView();
+    QWidget* getNativeView();
+    void setNativeView(QWidget* pView);
+    virtual void showView();
+    virtual void hideView();
+    virtual void resizeView(int width, int height);
     virtual void select();
+ 
+protected:
+    ViewImpl(QWidget* pNativeWidget);
+    ViewImpl(View* pView, QWidget* pNativeWidget);
 
-private:
-    int _row;
+    void postNotification(Poco::Notification::Ptr pNotification);
+
+    View*                       _pView;
+    QWidget*                    _pNativeView;
 };
 
 
-class ListWidgetFactory
+class NativeView : public QWidget
 {
+    friend class ViewImpl;
+    
 public:
-    virtual ListWidget* createWidget() { return 0; }
+    NativeView(ViewImpl* pViewImpl, View* pParent = 0);
+
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+
+    ViewImpl*                 _pViewImpl;
 };
+
+
+
+
+
 
 
 }  // namespace Omm
 }  // namespace Gui
 
 #endif
+

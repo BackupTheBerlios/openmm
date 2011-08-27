@@ -27,8 +27,8 @@ namespace Omm {
 namespace Gui {
 
 
-MainWindowImpl::MainWindowImpl(Widget* pWidget) :
-WidgetImpl(pWidget, this)
+MainWindowImpl::MainWindowImpl(View* pView) :
+ViewImpl(pView, this)
 {
     Omm::Gui::Log::instance()->gui().debug("main window implementation ctor");
 }
@@ -40,10 +40,10 @@ MainWindowImpl::~MainWindowImpl()
 
 
 void
-MainWindowImpl::setMainWidget(Widget* pWidget)
+MainWindowImpl::setMainView(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("main window implementation set main widget");
-    QMainWindow::setCentralWidget(static_cast<QWidget*>(pWidget->getNativeWidget()));
+    QMainWindow::setCentralWidget(static_cast<QWidget*>(pView->getNativeView()));
 }
 
 
