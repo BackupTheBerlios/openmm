@@ -42,6 +42,8 @@ protected:
     ViewIterator beginView();
     ViewIterator endView();
 
+    void syncViews();
+
     std::vector<View*>     _views;
 };
 

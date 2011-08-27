@@ -69,7 +69,8 @@ int main(int argc, char** argv)
         std::string name = "Button " + Poco::NumberFormatter::format(i + 1);
         pButton->setName(name);
         pButton->setLabel(name);
-        pButton->setModel(masterButton.getModel());
+//        pButton->setModel(masterButton.getModel());
+        pButton->attachModel(masterButton.getModel());
     }
 
     compoundView.resize(600, 100);

@@ -53,8 +53,9 @@ public:
     void resize(int width, int height);
     void move(int x, int y);
 
-    Model* getModel();
+    Model* getModel(int n = 0);
     virtual void setModel(Model* pModel);
+    virtual void attachModel(Model* pModel);
 
     Layout* getLayout();
     void setLayout(Layout* pLayout);
@@ -70,13 +71,13 @@ public:
 protected:
     View(ViewImpl* pViewImpl, View* pParent = 0);
 
-    virtual void syncView() {}
+    virtual void syncView(Model* pModel = 0) {}
     virtual void select() {}
 
     View*                       _pParent;
     std::vector<View*>          _children;
     ViewImpl*                   _pImpl;
-    Model*                      _pModel;
+    std::vector<Model*>         _models;
     Layout*                     _pLayout;
     std::string                 _name;
 };

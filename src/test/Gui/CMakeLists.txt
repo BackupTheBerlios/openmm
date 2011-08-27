@@ -16,28 +16,28 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttongrid
-ButtonGrid.cpp
+add_executable(buttongroup
+ButtonGroup.cpp
 )
 
-target_link_libraries(buttongrid
+target_link_libraries(buttongroup
 ${OMM_GUI}
 )
 
 
-add_executable(buttongrid_layout
-ButtonGridLayout.cpp
+add_executable(buttongroup_layout
+ButtonGroupLayout.cpp
 )
 
-target_link_libraries(buttongrid_layout
+target_link_libraries(buttongroup_layout
 ${OMM_GUI}
 )
 
 
-add_executable(buttongrid_1tonmodel
-ButtonGrid1toNModel.cpp
+add_executable(buttongroup_1tonmodel
+ButtonGroup1toNModel.cpp
 )
 
-target_link_libraries(buttongrid_1tonmodel
+target_link_libraries(buttongroup_1tonmodel
 ${OMM_GUI}
 )

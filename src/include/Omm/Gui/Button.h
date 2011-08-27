@@ -51,7 +51,7 @@ public:
     ButtonView(View* pParent = 0);
     
 private:
-    virtual void syncView();
+    virtual void syncView(Model* pModel = 0);
 };
 
 

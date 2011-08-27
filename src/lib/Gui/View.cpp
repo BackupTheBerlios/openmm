@@ -38,7 +38,7 @@ namespace Gui {
 View::View(View* pParent) :
 _pParent(pParent),
 _pImpl(new ViewImpl(this)),
-_pModel(0),
+//_pModel(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
@@ -134,17 +134,26 @@ View::move(int x, int y)
 
 
 Model*
-View::getModel()
+View::getModel(int n)
 {
-    return _pModel;
+//    return _pModel;
+    return _models[n];
 }
 
 
 void
 View::setModel(Model* pModel)
 {
-    _pModel = pModel;
-    _pModel->attachView(this);
+    _models.clear();
+    attachModel(pModel);
+}
+
+
+void
+View::attachModel(Model* pModel)
+{
+    _models.push_back(pModel);
+    pModel->attachView(this);
 }
 
 

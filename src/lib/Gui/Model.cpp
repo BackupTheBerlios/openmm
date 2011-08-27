@@ -21,6 +21,7 @@
 
 #include "Gui/Model.h"
 #include "Gui/GuiLogger.h"
+#include "Gui/View.h"
 
 
 namespace Omm {
@@ -47,6 +48,16 @@ Model::ViewIterator
 Model::endView()
 {
     return _views.end();
+}
+
+
+void
+Model::syncViews()
+{
+    Omm::Gui::Log::instance()->gui().debug("model sync views");
+    for (ViewIterator it = beginView(); it != endView(); ++it) {
+       (*it)->syncView(this);
+    }
 }
 
 
