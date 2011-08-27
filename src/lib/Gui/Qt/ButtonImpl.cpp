@@ -53,9 +53,6 @@ ButtonImpl::setLabel(const std::string& label)
 void
 ButtonImpl::pushed()
 {
-//    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, sending notification to widget: " + Poco::NumberFormatter::format(_pView) + "...");
-//    postNotification(new Button::PushNotification);
-//    Omm::Gui::Log::instance()->gui().debug("button implementation, button pushed, notification sent.");
     Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
     static_cast<ButtonModel*>(_pView->getModel())->pushed();
 }

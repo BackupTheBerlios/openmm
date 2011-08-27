@@ -71,7 +71,7 @@ public:
 protected:
     View(ViewImpl* pViewImpl, View* pParent = 0);
 
-    virtual void syncView(Model* pModel = 0) {}
+    virtual void syncView(Model* pModel) {}
     virtual void select() {}
 
     View*                       _pParent;
@@ -80,6 +80,9 @@ protected:
     std::vector<Model*>         _models;
     Layout*                     _pLayout;
     std::string                 _name;
+
+private:
+    void syncViewWithModel(Model* pModel = 0);
 };
 
 

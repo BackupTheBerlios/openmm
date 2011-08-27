@@ -61,13 +61,7 @@ void
 ButtonView::syncView(Model* pModel)
 {
     Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
-    ButtonModel* pButtonModel;
-    if (pModel) {
-        pButtonModel = static_cast<ButtonModel*>(pModel);
-    }
-    else {
-        pButtonModel = static_cast<ButtonModel*>(getModel());
-    }
+    ButtonModel* pButtonModel = static_cast<ButtonModel*>(pModel);
     ButtonImpl* pImpl = static_cast<ButtonImpl*>(_pImpl);
     pImpl->setLabel(pButtonModel->getLabel());
 }

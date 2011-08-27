@@ -38,7 +38,6 @@ namespace Gui {
 View::View(View* pParent) :
 _pParent(pParent),
 _pImpl(new ViewImpl(this)),
-//_pModel(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
@@ -89,7 +88,6 @@ void
 View::show()
 {
     Omm::Gui::Log::instance()->gui().debug("view show ...");
-    syncView();
     _pImpl->showView();
     Omm::Gui::Log::instance()->gui().debug("view show finished.");
 }
@@ -136,7 +134,6 @@ View::move(int x, int y)
 Model*
 View::getModel(int n)
 {
-//    return _pModel;
     return _models[n];
 }
 
@@ -205,6 +202,18 @@ int
 View::childCount()
 {
     return _children.size();
+}
+
+
+void
+View::syncViewWithModel(Model* pModel)
+{
+    if (pModel) {
+        syncView(pModel);
+    }
+    else {
+        syncView(getModel());
+    }
 }
 
 
