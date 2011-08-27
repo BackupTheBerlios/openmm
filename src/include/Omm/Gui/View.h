@@ -49,24 +49,23 @@ public:
     void hide();
     void resize(int width, int height);
 
-    class SelectNotification : public Poco::Notification {};
+//    class SelectNotification : public Poco::Notification {};
 
-    void connect(const Poco::AbstractObserver& observer);
+//    void connect(const Poco::AbstractObserver& observer);
 
     Model* getModel();
     virtual void setModel(Model* pModel);
-//    void setController(Controller* pController);
 
 protected:
     View(ViewImpl* pViewImpl, View* pParent = 0);
 
     virtual void syncView() {}
-    virtual void select();
+    virtual void select() {}
 
     View*                       _pParent;
     ViewImpl*                   _pImpl;
     Model*                      _pModel;
-    Poco::NotificationCenter    _eventNotificationCenter;
+//    Poco::NotificationCenter    _eventNotificationCenter;
 };
 
 

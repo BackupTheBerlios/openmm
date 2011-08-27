@@ -149,7 +149,7 @@ ListView::extendViewPool(int n)
         _viewPool.push_back(pView);
         _freeViews.push(pView);
         initView(pView);
-        pView->connect(Poco::Observer<ListView, ListItemView::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
+//        pView->connect(Poco::Observer<ListView, ListItemView::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
         Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }

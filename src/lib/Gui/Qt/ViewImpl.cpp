@@ -114,11 +114,11 @@ ViewImpl::select()
 }
 
 
-void
-ViewImpl::postNotification(Poco::Notification::Ptr pNotification)
-{
-    _pView->_eventNotificationCenter.postNotification(pNotification);
-}
+//void
+//ViewImpl::postNotification(Poco::Notification::Ptr pNotification)
+//{
+//    _pView->_eventNotificationCenter.postNotification(pNotification);
+//}
 
 
 NativeView::NativeView(ViewImpl* pViewImpl, View* pParent) :
