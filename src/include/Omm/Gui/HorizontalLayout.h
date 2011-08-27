@@ -19,56 +19,18 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef View_INCLUDED
-#define View_INCLUDED
+#ifndef HorizontalLayout_INCLUDED
+#define HorizontalLayout_INCLUDED
 
-#include <vector>
+#include "Layout.h"
 
 namespace Omm {
 namespace Gui {
 
-class ViewImpl;
-class Model;
-class Layout;
 
-
-class View
+class HorizontalLayout : public Layout
 {
-    friend class ViewImpl;
-    friend class Model;
-    friend class Layout;
     
-public:
-    View(View* pParent = 0);
-    virtual ~View();
-
-    void* getNativeView();
-    View* getParent();
-
-    void show();
-    void hide();
-    int width();
-    int height();
-    void resize(int width, int height);
-    void move(int x, int y);
-
-    Model* getModel();
-    virtual void setModel(Model* pModel);
-
-    Layout* getLayout();
-    void setLayout(Layout* pLayout);
-
-protected:
-    View(ViewImpl* pViewImpl, View* pParent = 0);
-
-    virtual void syncView() {}
-    virtual void select() {}
-
-    View*                       _pParent;
-    std::vector<View*>          _children;
-    ViewImpl*                   _pImpl;
-    Model*                      _pModel;
-    Layout*                     _pLayout;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,62 +17,33 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef View_INCLUDED
-#define View_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <vector>
-
-namespace Omm {
-namespace Gui {
-
-class ViewImpl;
-class Model;
-class Layout;
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/HorizontalLayout.h>
+#include <Omm/Gui/Button.h>
 
 
-class View
+int main(int argc, char** argv)
 {
-    friend class ViewImpl;
-    friend class Model;
-    friend class Layout;
-    
-public:
-    View(View* pParent = 0);
-    virtual ~View();
+    Omm::Gui::EventLoop loop(argc, argv);
+    Omm::Gui::MainWindow mainWindow;
+    Omm::Gui::View compoundView;
+    Omm::Gui::HorizontalLayout layout;
 
-    void* getNativeView();
-    View* getParent();
+    int buttonCount = 10;
+    for(int i = 0; i < buttonCount; i++) {
+        Omm::Gui::Button* pButton = new Omm::Gui::Button(&compoundView);
+        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+    }
 
-    void show();
-    void hide();
-    int width();
-    int height();
-    void resize(int width, int height);
-    void move(int x, int y);
+    compoundView.setLayout(&layout);
+    mainWindow.setMainView(&compoundView);
+    mainWindow.show();
 
-    Model* getModel();
-    virtual void setModel(Model* pModel);
+    loop.run();
+}
 
-    Layout* getLayout();
-    void setLayout(Layout* pLayout);
-
-protected:
-    View(ViewImpl* pViewImpl, View* pParent = 0);
-
-    virtual void syncView() {}
-    virtual void select() {}
-
-    View*                       _pParent;
-    std::vector<View*>          _children;
-    ViewImpl*                   _pImpl;
-    Model*                      _pModel;
-    Layout*                     _pLayout;
-};
-
-
-}  // namespace Omm
-}  // namespace Gui
-
-#endif

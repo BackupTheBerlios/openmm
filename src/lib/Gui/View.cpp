@@ -24,6 +24,7 @@
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/Model.h"
+#include "Gui/Layout.h"
 
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ViewImpl.h"
@@ -37,9 +38,13 @@ namespace Gui {
 View::View(View* pParent) :
 _pParent(pParent),
 _pImpl(new ViewImpl(this)),
-_pModel(0)
+_pModel(0),
+_pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
+    if (_pParent) {
+        _pParent->_children.push_back(this);
+    }
 }
 
 
@@ -135,6 +140,21 @@ View::setModel(Model* pModel)
 {
     _pModel = pModel;
     _pModel->_pView = this;
+}
+
+
+Layout*
+View::getLayout()
+{
+    return _pLayout;
+}
+
+
+void
+View::setLayout(Layout* pLayout)
+{
+    _pLayout = pLayout;
+    _pLayout->_pView = this;
 }
 
 

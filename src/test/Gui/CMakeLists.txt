@@ -23,3 +23,12 @@ ButtonGrid.cpp
 target_link_libraries(buttongrid
 ${OMM_GUI}
 )
+
+
+add_executable(buttongrid_layout
+ButtonGridLayout.cpp
+)
+
+target_link_libraries(buttongrid_layout
+${OMM_GUI}
+)
