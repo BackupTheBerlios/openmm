@@ -19,51 +19,13 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Button_INCLUDED
-#define Button_INCLUDED
+#include "Gui/Model.h"
+#include "Gui/GuiLogger.h"
 
-#include <string>
-#include "View.h"
-#include "Model.h"
 
 namespace Omm {
 namespace Gui {
 
 
-class ButtonModel : public Model
-{
-public:
-    virtual const std::string& getLabel() const;
-    void setLabel(const std::string& label);
-    
-    virtual void pushed() {}
-
-private:
-    std::string _label;
-};
-
-
-class ButtonView : public View
-{
-    friend class ButtonModel;
-    
-public:
-    ButtonView(ButtonModel* pModel = 0, View* pParent = 0);
-    
-private:
-    virtual void syncView();
-};
-
-
-class Button : public ButtonView, public ButtonModel
-{
-public:
-    Button(View* pParent = 0);
-    virtual ~Button();
-};
-
-
-}  // namespace Omm
-}  // namespace Gui
-
-#endif
+} // namespace Gui
+} // namespace Omm

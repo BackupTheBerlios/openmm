@@ -64,15 +64,6 @@ protected:
 };
 
 
-class Model
-{
-    friend class View;
-    
-protected:
-    View*     _pView;
-};
-
-
 }  // namespace Omm
 }  // namespace Gui
 

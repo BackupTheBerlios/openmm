@@ -23,6 +23,7 @@
 
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
+#include "Gui/Model.h"
 
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ViewImpl.h"
