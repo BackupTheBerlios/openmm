@@ -95,19 +95,6 @@ MediaObjectTest.cpp
 # )
 
 
-add_executable(avstreamplay
-../plugin/Engine/AvStream/AvStreamEngine.cpp
-AvStreamPlay.cpp
-)
-
-target_link_libraries(avstreamplay
-${POCO_UTIL}
-${OMM_UTIL}
-${OMM}
-${OMM_AV}
-${OMM_AVSTREAM}
-)
-
 add_executable( avstreamstress
 ../plugin/Engine/AvStream/AvStreamEngine.cpp
 AvStreamStress.cpp
@@ -121,6 +108,7 @@ ${OMM_AV}
 ${OMM_AVSTREAM}
 )
 
+
 add_executable(bytequeuestress
 ByteQueueStress.cpp
 )
@@ -132,6 +120,7 @@ ${OMM}
 ${OMM_AV}
 ${OMM_AVSTREAM}
 )
+
 
 add_executable(tagtest
 TagTest.cpp
@@ -145,42 +134,6 @@ ${OMM_AV}
 ${OMM_AVSTREAM}
 )
 
-add_executable(tag
-Tag.cpp
-)
-
-target_link_libraries(tag
-${POCO_UTIL}
-${OMM_UTIL}
-${OMM}
-${OMM_AV}
-${OMM_AVSTREAM}
-)
-
-add_executable(streamtest
-StreamTest.cpp
-)
-
-target_link_libraries(streamtest
-${POCO_FOUNDATION}
-${POCO_NET}
-)
-
-SET( OMMTEST_AV_MUX_SRCS
-AvMux.cpp
-)
-
-add_executable(avmux
-${OMMTEST_AV_MUX_SRCS}
-)
-
-target_link_libraries(avmux
-${POCO_UTIL}
-${OMM_UTIL}
-${OMM}
-${OMM_AV}
-${OMM_AVSTREAM}
-)
 
 add_executable(upnpavstress
 UpnpAvStress.cpp
@@ -192,8 +145,3 @@ ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
 )
-
-add_subdirectory(
-Gui
-)
-
