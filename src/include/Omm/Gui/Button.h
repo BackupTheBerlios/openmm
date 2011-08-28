@@ -38,8 +38,6 @@ public:
     virtual const std::string& getLabel() const;
     void setLabel(const std::string& label);
     
-//    virtual void pushed() {}
-
 private:
     std::string _label;
 };
@@ -69,6 +67,12 @@ class Button : public ButtonView, public ButtonModel, public ButtonController
 public:
     Button(View* pParent = 0);
     virtual ~Button();
+};
+
+
+class ButtonControllerModel : public ControllerModel<ButtonModel, ButtonController>
+{
+
 };
 
 

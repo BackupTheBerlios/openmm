@@ -23,6 +23,8 @@
 #define Model_INCLUDED
 
 #include <vector>
+#include "Controller.h"
+
 
 namespace Omm {
 namespace Gui {
@@ -45,6 +47,12 @@ protected:
     void syncViews();
 
     std::vector<View*>     _views;
+};
+
+
+template <class C, class M>
+class ControllerModel : public C, public M
+{
 };
 
 

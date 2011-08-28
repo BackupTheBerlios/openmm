@@ -25,12 +25,15 @@
 #include <vector>
 #include <string>
 
+#include "Model.h"
+
 namespace Omm {
 namespace Gui {
 
 class ViewImpl;
 class Model;
 class Controller;
+//class ControllerModel;
 class Layout;
 
 
@@ -56,9 +59,13 @@ public:
 
     Model* getModel() const;
     virtual void setModel(Model* pModel);
-
     Controller* getController() const;
     void setController(Controller* pController);
+    template<class C, class M> void setControllerModel(ControllerModel<C,M>* pControllerModel)
+    {
+        setModel(pControllerModel);
+        setController(pControllerModel);
+    }
     Layout* getLayout() const;
     void setLayout(Layout* pLayout);
 

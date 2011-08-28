@@ -24,7 +24,7 @@
 #include <Omm/Gui/Button.h>
 
 
-class HelloButtonModel : public Omm::Gui::ButtonModel, public Omm::Gui::ButtonController
+class HelloButtonModel : public Omm::Gui::ButtonControllerModel
 {
 private:
     void pushed()
@@ -40,8 +40,7 @@ int main(int argc, char** argv)
     Omm::Gui::MainWindow mainWindow;
     HelloButtonModel buttonModel;
     Omm::Gui::ButtonView buttonView;
-    buttonView.setModel(&buttonModel);
-    buttonView.setController(&buttonModel);
+    buttonView.setControllerModel(&buttonModel);
     buttonModel.setLabel("Hello GUI");
     mainWindow.setMainView(&buttonView);
 
