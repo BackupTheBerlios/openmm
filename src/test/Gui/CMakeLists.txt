@@ -7,11 +7,11 @@ ${OMM_GUI}
 )
 
 
-add_executable(hellogui_model
-HelloGuiModel.cpp
+add_executable(hellogui_controller
+HelloGuiController.cpp
 )
 
-target_link_libraries(hellogui_model
+target_link_libraries(hellogui_controller
 ${OMM_GUI}
 )
 
