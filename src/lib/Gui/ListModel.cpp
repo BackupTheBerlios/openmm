@@ -31,7 +31,6 @@ namespace Gui {
 
 
 ListModel::ListModel() :
-_pView(0),
 _pViewFactory(0)
 {
 }
@@ -42,9 +41,8 @@ ListModel::insertItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Log::instance()->gui().debug("list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        if (_pView) {
-            _pView->insertItem(row);
-        }
+        // update all attached views
+        UPDATE(ListView, insertItem, row);
     }
     else {
         Log::instance()->gui().error("list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
@@ -57,9 +55,7 @@ ListModel::removeItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Log::instance()->gui().debug("list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        if (_pView) {
-            _pView->removeItem(row);
-        }
+        UPDATE(ListView, removeItem, row);
     }
     else {
         Log::instance()->gui().error("list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
