@@ -19,51 +19,54 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItemView_INCLUDED
-#define ListItemView_INCLUDED
+#include "Gui/ListItem.h"
+#include "Gui/GuiLogger.h"
 
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
 
-#include "View.h"
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/ListItemImpl.h"
+#endif
 
 
 namespace Omm {
 namespace Gui {
 
 
-class ListItemView : public View
+ListItemView::ListItemView(View* pParent) :
+View(new ListItemImpl(this, pParent), pParent),
+_row(0)
 {
-public:
-    ListItemView();
 
-    int getRow();
-    void setRow(int row);
-
-    class RowSelectNotification : public Poco::Notification
-    {
-    public:
-        RowSelectNotification(int row);
-
-        int _row;
-    };
-
-protected:
-    virtual void select();
-
-private:
-    int _row;
-};
+}
 
 
-class ListItemViewFactory
+int
+ListItemView::getRow()
 {
-public:
-    virtual ListItemView* createItemView() { return 0; }
-};
+    return _row;
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+void
+ListItemView::setRow(int row)
+{
+    _row = row;
+}
 
-#endif
+
+//ListItemView::RowSelectNotification::RowSelectNotification(int row) :
+//_row(row)
+//{
+//}
+
+
+//void
+//ListItemView::select()
+//{
+//    Widget::select();
+//    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
+//}
+
+
+} // namespace Gui
+} // namespace Omm

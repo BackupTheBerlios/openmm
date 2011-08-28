@@ -19,64 +19,36 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Button_INCLUDED
-#define Button_INCLUDED
+#ifndef ListItemImpl_INCLUDED
+#define ListItemImpl_INCLUDED
 
-#include <string>
-#include "View.h"
-#include "Model.h"
-#include "Controller.h"
-
+#include <QtGui>
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
+class View;
 
-class ButtonController : public Controller
+
+class ListItemImpl : public QWidget, public ViewImpl
 {
-    friend class ButtonImpl;
-    
-protected:
-    virtual void pushed() {}
-};
+    friend class ListItemView;
 
-
-class ButtonModel : public Model
-{
-public:
-    virtual const std::string& getLabel() const;
-    void setLabel(const std::string& label);
-    
 private:
-    std::string _label;
-};
+    ListItemImpl(View* pView, View* pParent = 0);
+    ~ListItemImpl();
 
+    void setLabel(const std::string& text);
 
-class ButtonView : public View
-{
-    friend class ButtonModel;
-    
-public:
-    ButtonView(View* pParent = 0);
-    
-private:
-    virtual void syncView(Model* pModel);
-};
-
-
-class ButtonControllerModel : public ControllerModel<ButtonController, ButtonModel>
-{
-};
-
-
-class Button : public Widget<ButtonView, ButtonController, ButtonModel>
-{
-public:
-    Button(View* pParent = 0) : Widget<ButtonView, ButtonController, ButtonModel>(pParent) {}
+    QHBoxLayout*                    _pLayout;
+    QLabel*                         _pNameLabel;
 };
 
 
 }  // namespace Omm
 }  // namespace Gui
 
+
 #endif
+

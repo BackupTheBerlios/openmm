@@ -23,8 +23,8 @@
 
 #include "Gui/ListModel.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/ListView.h"
-#include "Gui/ListItemView.h"
+#include "Gui/List.h"
+#include "Gui/ListItem.h"
 
 namespace Omm {
 namespace Gui {

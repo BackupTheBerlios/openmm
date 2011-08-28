@@ -22,6 +22,8 @@
 #ifndef ListModel_INCLUDED
 #define ListModel_INCLUDED
 
+#include "Model.h"
+
 
 namespace Omm {
 namespace Gui {
@@ -32,7 +34,7 @@ class ListItemView;
 class ListItemViewFactory;
 
 
-class ListModel
+class ListModel : public Model
 {
     friend class ListView;
 

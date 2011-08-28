@@ -27,8 +27,8 @@
 
 #include "TabView.h"
 #include "ListModel.h"
-#include "ListView.h"
-#include "ListItemView.h"
+#include "List.h"
+#include "ListItem.h"
 
 
 namespace Omm {

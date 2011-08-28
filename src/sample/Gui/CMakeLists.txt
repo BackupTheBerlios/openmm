@@ -41,3 +41,12 @@ ButtonGroup1toNModel.cpp
 target_link_libraries(buttongroup_1tonmodel
 ${OMM_GUI}
 )
+
+
+add_executable(stringlist
+StringList.cpp
+)
+
+target_link_libraries(stringlist
+${OMM_GUI}
+)

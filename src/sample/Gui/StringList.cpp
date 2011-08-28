@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,66 +17,59 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef Button_INCLUDED
-#define Button_INCLUDED
-
+#include <vector>
 #include <string>
-#include "View.h"
-#include "Model.h"
-#include "Controller.h"
+
+#include <Poco/NumberFormatter.h>
+
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/List.h>
+#include <Omm/Gui/ListModel.h>
 
 
-namespace Omm {
-namespace Gui {
-
-
-class ButtonController : public Controller
-{
-    friend class ButtonImpl;
-    
-protected:
-    virtual void pushed() {}
-};
-
-
-class ButtonModel : public Model
+class StringListModel : public Omm::Gui::ListModel
 {
 public:
-    virtual const std::string& getLabel() const;
-    void setLabel(const std::string& label);
+    StringListModel(int itemCount);
+
+    virtual int totalItemCount();
     
 private:
-    std::string _label;
+    std::vector<std::string>    _stringList;
 };
 
 
-class ButtonView : public View
+StringListModel::StringListModel(int itemCount)
 {
-    friend class ButtonModel;
-    
-public:
-    ButtonView(View* pParent = 0);
-    
-private:
-    virtual void syncView(Model* pModel);
-};
+    for (int i = 0; i < itemCount; i++) {
+        _stringList.push_back("list item " + Poco::NumberFormatter::format(i));
+    }
+}
 
 
-class ButtonControllerModel : public ControllerModel<ButtonController, ButtonModel>
+int
+StringListModel::totalItemCount()
 {
-};
+    return _stringList.size();
+}
 
 
-class Button : public Widget<ButtonView, ButtonController, ButtonModel>
+int main(int argc, char** argv)
 {
-public:
-    Button(View* pParent = 0) : Widget<ButtonView, ButtonController, ButtonModel>(pParent) {}
-};
+    StringListModel listModel(20);
 
+    Omm::Gui::EventLoop loop(argc, argv);
+    Omm::Gui::MainWindow mainWindow;
+    Omm::Gui::ListView list(50);
+    list.setModel(&listModel);
 
-}  // namespace Omm
-}  // namespace Gui
+    mainWindow.setMainView(&list);
+    mainWindow.resize(800, 480);
+    mainWindow.show();
 
-#endif
+    loop.run();
+}
+

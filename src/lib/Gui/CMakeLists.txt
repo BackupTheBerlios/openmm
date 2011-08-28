@@ -41,9 +41,9 @@ Button.cpp
 MainWindow.cpp
 EventLoop.cpp
 TabView.cpp
+List.cpp
 ListModel.cpp
-ListView.cpp
-ListItemView.cpp
+ListItem.cpp
 Navigator.cpp
 )
 

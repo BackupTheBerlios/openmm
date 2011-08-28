@@ -26,7 +26,7 @@
 #include <stack>
 
 #include "View.h"
-#include "ListItemView.h"
+#include "ListItem.h"
 
 namespace Omm {
 namespace Gui {
@@ -62,9 +62,9 @@ private:
     ListItemView* visibleView(int index);
     bool itemIsVisible(int row);
     void moveViewToRow(int row, ListItemView* pView);
-    void selectNotificationHandler(ListItemView::RowSelectNotification* pSelectNotification);
+//    void selectNotificationHandler(ListItemView::RowSelectNotification* pSelectNotification);
 
-    ListModel*                          _pModel;
+//    ListModel*                          _pModel;
 //    bool                                _lazy;
     std::vector<ListItemView*>          _viewPool;
     std::vector<ListItemView*>          _visibleViews;

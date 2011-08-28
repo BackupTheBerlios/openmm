@@ -24,10 +24,10 @@
 #include <Omm/Util.h>
 #include <Omm/UpnpAvLogger.h>
 
-#include "ListViewImpl.h"
-#include "Gui/ListView.h"
+#include "ListImpl.h"
+#include "Gui/List.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/ListItemView.h"
+#include "Gui/ListItem.h"
 
 namespace Omm {
 namespace Gui {

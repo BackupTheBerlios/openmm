@@ -29,7 +29,6 @@ namespace Omm {
 namespace Gui {
 
 class View;
-class Button;
 
 class ButtonImpl : public QPushButton, public ViewImpl
 {
@@ -42,7 +41,7 @@ private slots:
 
 private:
     ButtonImpl(View* pView, View* pParent = 0);
-    virtual ~ButtonImpl();
+    ~ButtonImpl();
 
     void setLabel(const std::string& label);
 };

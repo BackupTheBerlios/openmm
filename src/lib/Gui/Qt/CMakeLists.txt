@@ -8,7 +8,8 @@ ButtonImpl.cpp
 MainWindowImpl.cpp
 EventLoopImpl.cpp
 TabViewImpl.cpp
-ListViewImpl.cpp
+ListImpl.cpp
+ListItemImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
@@ -17,7 +18,8 @@ ButtonImpl.h
 #MainWindowImpl.h
 #EventLoopImpl.h
 #TabViewImpl.h
-ListViewImpl.h
+ListImpl.h
+#ListItemImpl.h
 )
 
 QT4_ADD_RESOURCES(

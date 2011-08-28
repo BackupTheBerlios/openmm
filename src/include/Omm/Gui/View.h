@@ -33,7 +33,6 @@ namespace Gui {
 class ViewImpl;
 class Model;
 class Controller;
-//class ControllerModel;
 class Layout;
 
 
@@ -93,6 +92,21 @@ protected:
 
 private:
     void syncViewWithModel(Model* pModel = 0);
+};
+
+
+template <class V, class C, class M>
+class Widget : public V, public C, public M
+{
+public:
+    Widget(View* pParent = 0) : V(pParent)
+    {
+        V::setModel(this);
+        V::setController(this);
+        C::attachModel(this);
+    }
+    
+    virtual ~Widget() {}
 };
 
 

@@ -67,20 +67,5 @@ ButtonView::syncView(Model* pModel)
 }
 
 
-Button::Button(View* pParent) :
-ButtonView(pParent)
-{
-    Omm::Gui::Log::instance()->gui().debug("button ctor.");
-    View::setModel(this);
-    View::setController(this);
-    Controller::attachModel(this);
-}
-
-
-Button::~Button()
-{
-}
-
-
 } // namespace Gui
 } // namespace Omm
