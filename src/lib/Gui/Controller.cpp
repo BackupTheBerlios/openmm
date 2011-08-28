@@ -52,19 +52,5 @@ Controller::endModel()
 }
 
 
-//Model::ViewIterator
-//Model::beginView()
-//{
-//    return _views.begin();
-//}
-//
-//
-//Model::ViewIterator
-//Model::endView()
-//{
-//    return _views.end();
-//}
-
-
 } // namespace Gui
 } // namespace Omm

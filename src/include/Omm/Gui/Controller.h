@@ -31,26 +31,20 @@ class View;
 class Model;
 
 
-#define NOTIFY(CLASS, METHOD, ARG) for (ModelIterator it = beginModel(); it != endModel(); ++it) { static_cast<CLASS*>(*it)->METHOD(ARG); }
+#define NOTIFY(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) { static_cast<CLASS*>(*it)->METHOD(__VA_ARGS__); }
 
 class Controller
 {
 public:
-//    friend class View;
     friend class Model;
 
     void attachModel(Model* pModel);
 
 protected:
-//    typedef std::vector<View*>::iterator ViewIterator;
-//    ViewIterator beginView();
-//    ViewIterator endView();
-
     typedef std::vector<Model*>::iterator ModelIterator;
     ModelIterator beginModel();
     ModelIterator endModel();
 
-//    std::vector<View*>     _views;
     std::vector<Model*>     _models;
 };
 
