@@ -34,6 +34,7 @@ add_library(ommgui
 GuiLogger.cpp
 View.cpp
 Model.cpp
+Controller.cpp
 Layout.cpp
 HorizontalLayout.cpp
 Button.cpp

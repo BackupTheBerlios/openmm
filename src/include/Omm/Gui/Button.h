@@ -25,6 +25,8 @@
 #include <string>
 #include "View.h"
 #include "Model.h"
+#include "Controller.h"
+
 
 namespace Omm {
 namespace Gui {
@@ -36,7 +38,7 @@ public:
     virtual const std::string& getLabel() const;
     void setLabel(const std::string& label);
     
-    virtual void pushed() {}
+//    virtual void pushed() {}
 
 private:
     std::string _label;
@@ -55,7 +57,14 @@ private:
 };
 
 
-class Button : public ButtonView, public ButtonModel
+class ButtonController : public Controller
+{
+public:
+    virtual void pushed() {}
+};
+
+
+class Button : public ButtonView, public ButtonModel, public ButtonController
 {
 public:
     Button(View* pParent = 0);

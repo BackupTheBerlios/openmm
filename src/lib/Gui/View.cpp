@@ -132,30 +132,36 @@ View::move(int x, int y)
 
 
 Model*
-View::getModel(int n)
+View::getModel() const
 {
-    return _models[n];
+    return _pModel;
 }
 
 
 void
 View::setModel(Model* pModel)
 {
-    _models.clear();
-    attachModel(pModel);
+    _pModel = pModel;
+    _pModel->attachView(this);
+}
+
+
+Controller*
+View::getController() const
+{
+    return _pController;
 }
 
 
 void
-View::attachModel(Model* pModel)
+View::setController(Controller* pController)
 {
-    _models.push_back(pModel);
-    pModel->attachView(this);
+    _pController = pController;
 }
 
 
 Layout*
-View::getLayout()
+View::getLayout() const
 {
     return _pLayout;
 }

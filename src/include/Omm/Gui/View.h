@@ -30,6 +30,7 @@ namespace Gui {
 
 class ViewImpl;
 class Model;
+class Controller;
 class Layout;
 
 
@@ -53,11 +54,12 @@ public:
     void resize(int width, int height);
     void move(int x, int y);
 
-    Model* getModel(int n = 0);
+    Model* getModel() const;
     virtual void setModel(Model* pModel);
-    virtual void attachModel(Model* pModel);
 
-    Layout* getLayout();
+    Controller* getController() const;
+    void setController(Controller* pController);
+    Layout* getLayout() const;
     void setLayout(Layout* pLayout);
 
     const std::string& getName() const;
@@ -77,7 +79,8 @@ protected:
     View*                       _pParent;
     std::vector<View*>          _children;
     ViewImpl*                   _pImpl;
-    std::vector<Model*>         _models;
+    Model*                      _pModel;
+    Controller*                 _pController;
     Layout*                     _pLayout;
     std::string                 _name;
 

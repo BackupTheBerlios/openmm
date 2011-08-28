@@ -27,15 +27,14 @@
 #include <Omm/Gui/Button.h>
 
 
-class MasterButton: public Omm::Gui::Button
+class MasterController: public Omm::Gui::ButtonController
 {
-public:
-    MasterButton(Omm::Gui::View* pParent = 0) : Button(pParent) {}
-
 private:
     virtual void pushed()
     {
-        setLabel("One for all!");
+        for (ModelIterator it = beginModel(); it != endModel(); ++it) {
+            static_cast<Omm::Gui::ButtonModel*>(*it)->setLabel("One for all!");
+        }
     }
 };
 
@@ -60,7 +59,9 @@ int main(int argc, char** argv)
     Omm::Gui::View compoundView;
     Omm::Gui::HorizontalLayout layout;
 
-    MasterButton masterButton(&compoundView);
+    Omm::Gui::Button masterButton(&compoundView);
+    MasterController masterController;
+    masterButton.setController(&masterController);
     masterButton.setLabel("Master Button");
     
     int buttonCount = 5;
@@ -69,8 +70,7 @@ int main(int argc, char** argv)
         std::string name = "Button " + Poco::NumberFormatter::format(i + 1);
         pButton->setName(name);
         pButton->setLabel(name);
-//        pButton->setModel(masterButton.getModel());
-        pButton->attachModel(masterButton.getModel());
+        masterController.attachModel(pButton);
     }
 
     compoundView.resize(600, 100);

@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,36 +17,43 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/Button.h>
+#ifndef Controller_INCLUDED
+#define Controller_INCLUDED
+
+#include <vector>
+
+namespace Omm {
+namespace Gui {
+
+class View;
+class Model;
 
 
-class HelloButtonModel : public Omm::Gui::ButtonModel, public Omm::Gui::ButtonController
+class Controller
 {
-private:
-    void pushed()
-    {
-        setLabel("works!");
-    }
+public:
+//    friend class View;
+    friend class Model;
+
+    void attachModel(Model* pModel);
+
+protected:
+//    typedef std::vector<View*>::iterator ViewIterator;
+//    ViewIterator beginView();
+//    ViewIterator endView();
+
+    typedef std::vector<Model*>::iterator ModelIterator;
+    ModelIterator beginModel();
+    ModelIterator endModel();
+
+//    std::vector<View*>     _views;
+    std::vector<Model*>     _models;
 };
 
 
-int main(int argc, char** argv)
-{
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    HelloButtonModel buttonModel;
-    Omm::Gui::ButtonView buttonView;
-    buttonView.setModel(&buttonModel);
-    buttonView.setController(&buttonModel);
-    buttonModel.setLabel("Hello GUI");
-    mainWindow.setMainView(&buttonView);
+}  // namespace Omm
+}  // namespace Gui
 
-    mainWindow.show();
-
-    loop.run();
-}
-
+#endif

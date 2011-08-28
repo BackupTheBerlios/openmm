@@ -35,7 +35,7 @@ namespace Omm {
 namespace Gui {
 
 
-class ControllerGui : public Controller, public TabView
+class ControllerGui : public Omm::Controller, public TabView
 {
 public:
     ControllerGui();

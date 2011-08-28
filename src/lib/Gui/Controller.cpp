@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,36 +17,54 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/Button.h>
+#include "Gui/Controller.h"
+#include "Gui/GuiLogger.h"
+#include "Gui/View.h"
+#include "Gui/Model.h"
 
 
-class HelloButtonModel : public Omm::Gui::ButtonModel, public Omm::Gui::ButtonController
+namespace Omm {
+namespace Gui {
+
+    
+void
+Controller::attachModel(Model* pModel)
 {
-private:
-    void pushed()
-    {
-        setLabel("works!");
-    }
-};
-
-
-int main(int argc, char** argv)
-{
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    HelloButtonModel buttonModel;
-    Omm::Gui::ButtonView buttonView;
-    buttonView.setModel(&buttonModel);
-    buttonView.setController(&buttonModel);
-    buttonModel.setLabel("Hello GUI");
-    mainWindow.setMainView(&buttonView);
-
-    mainWindow.show();
-
-    loop.run();
+    Omm::Gui::Log::instance()->gui().debug("controller attach model ...");
+    _models.push_back(pModel);
+    Omm::Gui::Log::instance()->gui().debug("controller attach model finished.");
 }
 
+
+Controller::ModelIterator
+Controller::beginModel()
+{
+    return _models.begin();
+}
+
+
+Controller::ModelIterator
+Controller::endModel()
+{
+    return _models.end();
+}
+
+
+//Model::ViewIterator
+//Model::beginView()
+//{
+//    return _views.begin();
+//}
+//
+//
+//Model::ViewIterator
+//Model::endView()
+//{
+//    return _views.end();
+//}
+
+
+} // namespace Gui
+} // namespace Omm

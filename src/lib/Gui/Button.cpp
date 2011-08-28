@@ -71,7 +71,9 @@ Button::Button(View* pParent) :
 ButtonView(pParent)
 {
     Omm::Gui::Log::instance()->gui().debug("button ctor.");
-    setModel(this);
+    View::setModel(this);
+    View::setController(this);
+    Controller::attachModel(this);
 }
 
 
