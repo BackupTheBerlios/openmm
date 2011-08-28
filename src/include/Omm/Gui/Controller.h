@@ -31,6 +31,8 @@ class View;
 class Model;
 
 
+#define NOTIFY(CLASS, METHOD, ARG) for (ModelIterator it = beginModel(); it != endModel(); ++it) { static_cast<CLASS*>(*it)->METHOD(ARG); }
+
 class Controller
 {
 public:

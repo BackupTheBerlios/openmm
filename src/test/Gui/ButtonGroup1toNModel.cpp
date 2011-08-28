@@ -32,9 +32,7 @@ class MasterController: public Omm::Gui::ButtonController
 private:
     virtual void pushed()
     {
-        for (ModelIterator it = beginModel(); it != endModel(); ++it) {
-            static_cast<Omm::Gui::ButtonModel*>(*it)->setLabel("One for all!");
-        }
+        NOTIFY(Omm::Gui::ButtonModel, setLabel, "One for all!");
     }
 };
 
