@@ -43,13 +43,15 @@ public:
 
     // item related
     virtual int totalItemCount() { return 0; }
+    virtual View* createItemView() { return 0; }
+    virtual Model* getItemModel(int row) { return 0; }
+
     void insertItem(int row);
     /// Ask the view to show an item at row. No data is created (cached), as
     /// the whole data of the model is already present in the underlying implementation.
     /// The model is only an abstraction layer on top of the data.
     void removeItem(int row);
     /// See insertItem().
-    virtual void selectItem(int row) {}
     /// View should call selectItem() when the item in row is selected.
 
     // lazy model related
@@ -59,17 +61,21 @@ public:
     virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
 
     // widget related
-    void setItemViewFactory(ListItemViewFactory* pViewFactory);
-    virtual ListItemView* createView();
-    virtual ListItemView* getChildView(int row) { return 0; }
-    virtual void attachView(int row, ListItemView* pView) {}
-    virtual void detachView(int row) {}
+//    void setItemViewFactory(ListItemViewFactory* pViewFactory);
+//    virtual void attachView(int row, ListItemView* pView) {}
+//    virtual void detachView(int row) {}
 
-private:
-    ListView*                     _pView;
-    ListItemViewFactory*          _pViewFactory;
+//private:
+//    ListView*                     _pView;
+//    ListItemViewFactory*          _pViewFactory;
 };
 
+
+class ListController : public Controller
+{
+protected:
+    virtual void selectItem(int row) {}
+};
 
 
 }  // namespace Omm

@@ -28,6 +28,7 @@
 #include <Omm/Gui/MainWindow.h>
 #include <Omm/Gui/List.h>
 #include <Omm/Gui/ListModel.h>
+#include <Omm/Gui/ListItem.h>
 
 
 class StringListModel : public Omm::Gui::ListModel
@@ -36,16 +37,22 @@ public:
     StringListModel(int itemCount);
 
     virtual int totalItemCount();
+    virtual Omm::Gui::View* createItemView();
+    virtual Omm::Gui::Model* getItemModel(int row);
     
 private:
-    std::vector<std::string>    _stringList;
+    std::vector<Omm::Gui::ListItemModel*>    _itemModels;
+    int                                      _viewCount;
 };
 
 
-StringListModel::StringListModel(int itemCount)
+StringListModel::StringListModel(int itemCount) :
+_viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
-        _stringList.push_back("list item " + Poco::NumberFormatter::format(i));
+        Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
+        pItemModel->setLabel("list item " + Poco::NumberFormatter::format(i));
+        _itemModels.push_back(pItemModel);
     }
 }
 
@@ -53,7 +60,23 @@ StringListModel::StringListModel(int itemCount)
 int
 StringListModel::totalItemCount()
 {
-    return _stringList.size();
+    return _itemModels.size();
+}
+
+
+Omm::Gui::View*
+StringListModel::createItemView()
+{
+    Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
+    pView->setName("list view " + Poco::NumberFormatter::format(_viewCount++));
+    return pView;
+}
+
+
+Omm::Gui::Model*
+StringListModel::getItemModel(int row)
+{
+    return _itemModels[row];
 }
 
 

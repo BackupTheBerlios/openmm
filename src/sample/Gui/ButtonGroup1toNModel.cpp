@@ -32,7 +32,7 @@ class MasterController: public Omm::Gui::ButtonController
 private:
     virtual void pushed()
     {
-        NOTIFY(Omm::Gui::ButtonModel, setLabel, "One for all!");
+        NOTIFY_MODELS(Omm::Gui::ButtonModel, setLabel, "One for all!");
     }
 };
 

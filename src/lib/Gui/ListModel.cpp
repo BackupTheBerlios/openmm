@@ -30,8 +30,8 @@ namespace Omm {
 namespace Gui {
 
 
-ListModel::ListModel() :
-_pViewFactory(0)
+ListModel::ListModel()
+//_pViewFactory(0)
 {
 }
 
@@ -42,7 +42,7 @@ ListModel::insertItem(int row)
     if (0 <= row && row < totalItemCount()) {
         Log::instance()->gui().debug("list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
         // update all attached views
-        UPDATE(ListView, insertItem, row);
+        UPDATE_VIEWS(ListView, insertItem, row);
     }
     else {
         Log::instance()->gui().error("list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
@@ -55,7 +55,7 @@ ListModel::removeItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
         Log::instance()->gui().debug("list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        UPDATE(ListView, removeItem, row);
+        UPDATE_VIEWS(ListView, removeItem, row);
     }
     else {
         Log::instance()->gui().error("list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
@@ -63,21 +63,21 @@ ListModel::removeItem(int row)
 }
 
 
-void
-ListModel::setItemViewFactory(ListItemViewFactory* pViewFactory)
-{
-    _pViewFactory = pViewFactory;
-}
-
-
-ListItemView*
-ListModel::createView()
-{
-    if (_pViewFactory) {
-        return _pViewFactory->createItemView();
-    }
-    return 0;
-}
+//void
+//ListModel::setItemViewFactory(ListItemViewFactory* pViewFactory)
+//{
+//    _pViewFactory = pViewFactory;
+//}
+//
+//
+//ListItemView*
+//ListModel::createView()
+//{
+//    if (_pViewFactory) {
+//        return _pViewFactory->createItemView();
+//    }
+//    return 0;
+//}
 
 
 } // namespace Gui

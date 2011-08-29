@@ -64,7 +64,10 @@ ListView::setModel(ListModel* pModel)
 
     // create an initial view pool. This also retrieves the height of the view.
     int rows = visibleRows();
-    int rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
+    int rowsFetched = pModel->totalItemCount();
+//    if (_lazy) {
+//        rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
+//    }
 
     extendViewPool(rows);
 
@@ -87,14 +90,14 @@ ListView::visibleRows()
 
 
 void
-ListView::initView(ListItemView* pView)
+ListView::initView(View* pView)
 {
     static_cast<ListViewImpl*>(_pImpl)->initView(pView);
 }
 
 
 void
-ListView::moveView(int row, ListItemView* pView)
+ListView::moveView(int row, View* pView)
 {
     static_cast<ListViewImpl*>(_pImpl)->moveView(row, pView);
 }
@@ -113,11 +116,12 @@ ListView::resize(int rows)
         }
         extendViewPool(rowDelta);
         for (int i = 0; i < rowDelta; i++) {
-            ListItemView* pView = _freeViews.top();
+            View* pView = _freeViews.top();
             _freeViews.pop();
             int lastRow = _rowOffset + _visibleViews.size();
             moveViewToRow(lastRow, pView);
-            pModel->attachView(lastRow, pView);
+//            pModel->attachView(lastRow, pView);
+            pView->setModel(pModel->getItemModel(lastRow));
             _visibleViews.push_back(pView);
         }
     }
@@ -146,7 +150,7 @@ ListView::extendViewPool(int n)
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     for (int i = 0; i < n; ++i) {
-        ListItemView* pView = pModel->createView();
+        View* pView = pModel->createItemView();
         if (!pView) {
             Log::instance()->gui().error("list view failed to create view for pool (ignoring)");
             return;
@@ -155,7 +159,7 @@ ListView::extendViewPool(int n)
         _viewPool.push_back(pView);
         _freeViews.push(pView);
         initView(pView);
-//        pView->connect(Poco::Observer<ListView, ListItemView::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
+//        pView->connect(Poco::Observer<ListView, View::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
         Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
@@ -175,7 +179,7 @@ ListView::countVisibleViews()
 }
 
 
-ListItemView*
+View*
 ListView::visibleView(int index)
 {
     if (0 <= index && index < _visibleViews.size()) {
@@ -248,15 +252,15 @@ ListView::itemIsVisible(int row)
 
 
 void
-ListView::moveViewToRow(int row, ListItemView* pView)
+ListView::moveViewToRow(int row, View* pView)
 {
-    pView->setRow(row);
+//    pView->setRow(row);
     moveView(row, pView);
 }
 
 
 //void
-//ListView::selectNotificationHandler(ListItemView::RowSelectNotification* pSelectNotification)
+//ListView::selectNotificationHandler(View::RowSelectNotification* pSelectNotification)
 //{
 //    _pModel->selectItem(pSelectNotification->_row);
 //}
@@ -265,6 +269,8 @@ ListView::moveViewToRow(int row, ListItemView* pView)
 void
 ListView::insertItem(int row)
 {
+    Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));
+    
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
 //    if (_lazy) {
@@ -285,13 +291,16 @@ ListView::insertItem(int row)
 
     // attach item to a free (not visible) view
     if (_freeViews.size()) {
-        ListItemView* pView = _freeViews.top();
+        View* pView = _freeViews.top();
+        Log::instance()->gui().debug("list view got free view: " + pView->getName());
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
-        pModel->attachView(row, pView);
+//        pModel->attachView(row, pView);
+        pView->setModel(pModel->getItemModel(row));
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);
+        pView->show();
     }
     else {
         Log::instance()->gui().error("list view failed to attach view to item, view pool is empty (ignoring)");
@@ -315,23 +324,27 @@ ListView::removeItem(int row)
 //    }
 
     // detach item from visible view
-    ListItemView* pView = pModel->getChildView(row);
+//    View* pView = pModel->getChildView(row);
+
 
     // remove view from this position in visible views
     int index = visibleIndex(row);
+    View* pView = _visibleViews[index];
     int lastRow = _rowOffset + _visibleViews.size();
     // move all views below one up
     for (int i = index + 1; i < countVisibleViews(); i++) {
         moveViewToRow(row + i - index - 1, visibleView(i));
     }
-    pModel->detachView(row);
+//    pModel->detachView(row);
+    pView->hide();
     _visibleViews.erase(_visibleViews.begin() + visibleIndex(row));
 
     if (pModel->totalItemCount() - lastRow > 0) {
         // FIXME: something's going wrong with removal of rows, duplicate rows appear and crash
         // reuse and attach view below last view cause it is now becoming visible
         Log::instance()->gui().debug("list view reuse removed item view");
-        pModel->attachView(lastRow - 1, pView);
+//        pModel->attachView(lastRow - 1, pView);
+        pView->setModel(pModel->getItemModel(lastRow - 1));
         _visibleViews.push_back(pView);
         moveViewToRow(lastRow - 1, pView);
     }

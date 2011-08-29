@@ -143,6 +143,7 @@ View::setModel(Model* pModel)
 {
     _pModel = pModel;
     _pModel->attachView(this);
+    syncView(pModel);
 }
 
 

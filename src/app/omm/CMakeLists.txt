@@ -28,7 +28,7 @@ ${OMM}
 ${OMM_UTIL}
 ${OMM_AV}
 ${OMM_GUI}
-${OMM_UPNPGUI}
+#${OMM_UPNPGUI}
 ommplugin-application-qt
 )
 

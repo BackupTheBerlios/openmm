@@ -32,7 +32,7 @@ namespace Omm {
 namespace Gui {
 
 class ListModel;
-class ListItemView;
+//class View;
 
 class ListView : public View
 {
@@ -47,8 +47,8 @@ public:
 
 private:
     int visibleRows();
-    void initView(ListItemView* pView);
-    void moveView(int row, ListItemView* pView);
+    void initView(View* pView);
+    void moveView(int row, View* pView);
     void resize(int rows);
 
     void extendViewPool();
@@ -59,18 +59,18 @@ private:
     /// with widgets (created by the model).
     int visibleIndex(int row);
     int countVisibleViews();
-    ListItemView* visibleView(int index);
+    View* visibleView(int index);
     bool itemIsVisible(int row);
-    void moveViewToRow(int row, ListItemView* pView);
-//    void selectNotificationHandler(ListItemView::RowSelectNotification* pSelectNotification);
+    void moveViewToRow(int row, View* pView);
+//    void selectNotificationHandler(View::RowSelectNotification* pSelectNotification);
 
 //    ListModel*                          _pModel;
 //    bool                                _lazy;
-    std::vector<ListItemView*>          _viewPool;
-    std::vector<ListItemView*>          _visibleViews;
-    std::stack<ListItemView*>           _freeViews;
-    int                                 _rowOffset;
-    int                                 _viewHeight;
+    std::vector<View*>          _viewPool;
+    std::vector<View*>          _visibleViews;
+    std::stack<View*>           _freeViews;
+    int                         _rowOffset;
+    int                         _viewHeight;
 };
 
 

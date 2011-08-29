@@ -30,7 +30,7 @@ namespace Gui {
 
 class View;
 class ListView;
-class ListItemView;
+//class View;
 
 
 class ListViewImpl : public QGraphicsView, public ViewImpl
@@ -40,11 +40,11 @@ class ListViewImpl : public QGraphicsView, public ViewImpl
     friend class ListView;
 
 signals:
-    void moveWidgetSignal(int targetRow, ListItemView* pView);
+    void moveWidgetSignal(int targetRow, View* pView);
     void extendPoolSignal();
 
 private slots:
-    void moveWidgetSlot(int targetRow, ListItemView* pView);
+    void moveWidgetSlot(int targetRow, View* pView);
     void extendPoolSlot();
 
 private:
@@ -52,12 +52,12 @@ private:
     virtual ~ListViewImpl();
 
     int visibleRows();
-    void initView(ListItemView* pView);
-    void moveView(int row, ListItemView* pView);
+    void initView(View* pView);
+    void moveView(int row, View* pView);
     void extendViewPool();
 
     QGraphicsScene*                                   _pGraphicsScene;
-    std::map<ListItemView*, QGraphicsProxyWidget*>    _proxyWidgets;
+    std::map<View*, QGraphicsProxyWidget*>            _proxyWidgets;
     bool                                              _movableViews;
 };
 

@@ -43,7 +43,7 @@ _movableViews(movableViews)
     _pGraphicsScene = new QGraphicsScene;
     setScene(_pGraphicsScene);
 
-    connect(this, SIGNAL(moveWidgetSignal(int, ListItemView*)), this, SLOT(moveWidgetSlot(int, ListItemView*)));
+    connect(this, SIGNAL(moveWidgetSignal(int, View*)), this, SLOT(moveWidgetSlot(int, View*)));
     connect(this, SIGNAL(extendPoolSignal()), this, SLOT(extendPoolSlot()));
 }
 
@@ -64,7 +64,7 @@ ListViewImpl::visibleRows()
 
 
 void
-ListViewImpl::initView(ListItemView* pView)
+ListViewImpl::initView(View* pView)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
     pView->resize(viewport()->width(), pListView->_viewHeight);
@@ -80,7 +80,7 @@ ListViewImpl::initView(ListItemView* pView)
 
 
 void
-ListViewImpl::moveView(int row, ListItemView* pView)
+ListViewImpl::moveView(int row, View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
@@ -95,7 +95,7 @@ ListViewImpl::extendViewPool()
 
 
 void
-ListViewImpl::moveWidgetSlot(int row, ListItemView* pView)
+ListViewImpl::moveWidgetSlot(int row, View* pView)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
     _proxyWidgets[pView]->setPos(0, pListView->_viewHeight * row);

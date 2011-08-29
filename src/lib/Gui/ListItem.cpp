@@ -32,40 +32,51 @@ namespace Omm {
 namespace Gui {
 
 
-ListItemView::ListItemView(View* pParent) :
-View(new ListItemImpl(this, pParent), pParent),
-_row(0)
+const std::string&
+ListItemModel::getLabel() const
 {
+    return _label;
+}
 
+
+void
+ListItemModel::setLabel(const std::string& label)
+{
+    Omm::Gui::Log::instance()->gui().debug("list item model set label");
+    _label = label;
+
+    syncViews();
+}
+
+
+ListItemView::ListItemView(View* pParent) :
+View(new ListItemImpl(this, pParent), pParent)
+{
+}
+
+
+void
+ListItemView::syncView(Model* pModel)
+{
+    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
+    ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
+    ListItemImpl* pImpl = static_cast<ListItemImpl*>(_pImpl);
+    pImpl->setLabel(pItemModel->getLabel());
 }
 
 
 int
-ListItemView::getRow()
+ListItemController::getRow()
 {
     return _row;
 }
 
 
 void
-ListItemView::setRow(int row)
+ListItemController::setRow(int row)
 {
     _row = row;
 }
-
-
-//ListItemView::RowSelectNotification::RowSelectNotification(int row) :
-//_row(row)
-//{
-//}
-
-
-//void
-//ListItemView::select()
-//{
-//    Widget::select();
-//    _eventNotificationCenter.postNotification(new RowSelectNotification(_row));
-//}
 
 
 } // namespace Gui

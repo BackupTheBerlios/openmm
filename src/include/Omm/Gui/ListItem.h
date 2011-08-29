@@ -34,14 +34,27 @@ namespace Gui {
 
 class ListItemController : public Controller
 {
+    friend class List;
+
 protected:
     virtual void selectedRow(int row);
+
+private:
+    int getRow();
+    void setRow(int row);
+
+    int _row;
 };
 
 
 class ListItemModel : public Model
 {
+public:
+    virtual const std::string& getLabel() const;
+    void setLabel(const std::string& text);
 
+private:
+    std::string _label;
 };
 
 
@@ -50,22 +63,8 @@ class ListItemView : public View
 public:
     ListItemView(View* pParent = 0);
 
-    int getRow();
-    void setRow(int row);
-
-//    class RowSelectNotification : public Poco::Notification
-//    {
-//    public:
-//        RowSelectNotification(int row);
-//
-//        int _row;
-//    };
-
-//protected:
-//    virtual void select();
-
 private:
-    int _row;
+    virtual void syncView(Model* pModel);
 };
 
 
@@ -73,13 +72,6 @@ class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
 {
 public:
     ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-};
-
-
-class ListItemViewFactory
-{
-public:
-    virtual ListItemView* createItemView() { return 0; }
 };
 
 
