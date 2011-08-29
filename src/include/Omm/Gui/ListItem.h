@@ -34,9 +34,11 @@ class ListItemController : public Controller
     friend class List;
 
 protected:
-    virtual void selectedRow(int row);
+    virtual void selectedRow(int row) {}
 
 private:
+    virtual void selected();
+
     int getRow();
     void setRow(int row);
 

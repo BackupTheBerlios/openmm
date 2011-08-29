@@ -37,10 +37,13 @@ class Controller
 {
 public:
     friend class Model;
+    friend class ViewImpl;
 
     void attachModel(Model* pModel);
 
 protected:
+    virtual void selected() {}
+
     typedef std::vector<Model*>::iterator ModelIterator;
     ModelIterator beginModel();
     ModelIterator endModel();

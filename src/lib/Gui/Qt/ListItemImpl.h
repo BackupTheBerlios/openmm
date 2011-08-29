@@ -41,6 +41,8 @@ private:
 
     void setLabel(const std::string& text);
 
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+
     QHBoxLayout*                    _pLayout;
     QLabel*                         _pNameLabel;
 };

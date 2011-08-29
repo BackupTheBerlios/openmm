@@ -48,7 +48,7 @@ public:
     virtual int heightView();
     virtual void resizeView(int width, int height);
     virtual void moveView(int x, int y);
-    virtual void select();
+    virtual void selected();
  
 protected:
     ViewImpl(QWidget* pNativeWidget);

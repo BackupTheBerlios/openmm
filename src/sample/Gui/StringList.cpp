@@ -86,8 +86,9 @@ int main(int argc, char** argv)
 
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::ListView list;
+    Omm::Gui::List list;
     list.setModel(&listModel);
+//    StringList list;
 
     mainWindow.setMainView(&list);
     mainWindow.resize(800, 480);

@@ -158,6 +158,7 @@ ListView::extendViewPool(int n)
         _viewPool.push_back(pView);
         _freeViews.push(pView);
         initView(pView);
+//        _controllerPool.push_back(new ListItemController);
         Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
@@ -287,6 +288,7 @@ ListView::insertItem(int row)
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
+//        pView->setController(new ListItemController);
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);

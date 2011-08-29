@@ -131,10 +131,14 @@ ViewImpl::moveView(int x, int y)
 
 
 void
-ViewImpl::select()
+ViewImpl::selected()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation select.");
-    _pView->select();
+    Omm::Gui::Log::instance()->gui().debug("view implementation selected event.");
+    Controller* pController = getView()->getController();
+    Omm::Gui::Log::instance()->gui().debug("view implementation selected event, controller: " + Poco::NumberFormatter::format(pController));
+    if (pController) {
+        pController->selected();
+    }
 }
 
 
@@ -145,10 +149,11 @@ _pViewImpl(pViewImpl)
     Omm::Gui::Log::instance()->gui().debug("native view implementation ctor.");
 }
 
+
 void
 NativeView::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    _pViewImpl->select();
+    _pViewImpl->selected();
     QWidget::mousePressEvent(pMouseEvent);
 }
 

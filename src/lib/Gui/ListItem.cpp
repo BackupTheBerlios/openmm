@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/NumberFormatter.h>
+
 #include "Gui/ListItem.h"
 #include "Gui/GuiLogger.h"
 
@@ -62,6 +64,14 @@ ListItemView::syncView(Model* pModel)
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
     ListItemImpl* pImpl = static_cast<ListItemImpl*>(_pImpl);
     pImpl->setLabel(pItemModel->getLabel());
+}
+
+
+void
+ListItemController::selected()
+{
+    Omm::Gui::Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
+    selectedRow(_row);
 }
 
 

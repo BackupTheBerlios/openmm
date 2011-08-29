@@ -38,6 +38,8 @@ namespace Gui {
 View::View(View* pParent) :
 _pParent(pParent),
 _pImpl(new ViewImpl(this)),
+_pModel(0),
+_pController(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
@@ -50,7 +52,10 @@ _pLayout(0)
 
 View::View(ViewImpl* pViewImpl, View* pParent) :
 _pParent(pParent),
-_pImpl(pViewImpl)
+_pImpl(pViewImpl),
+_pModel(0),
+_pController(0),
+_pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (view impl, parent).");
     if (_pParent) {

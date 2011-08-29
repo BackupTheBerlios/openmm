@@ -29,11 +29,6 @@ namespace Omm {
 namespace Gui {
 
     
-class ListView;
-class ListItemView;
-class ListItemViewFactory;
-
-
 class ListModel : public Model
 {
     friend class ListView;

@@ -80,7 +80,6 @@ protected:
     View(ViewImpl* pViewImpl, View* pParent = 0);
 
     virtual void syncView(Model* pModel) {}
-    virtual void select() {}
 
     View*                       _pParent;
     std::vector<View*>          _children;

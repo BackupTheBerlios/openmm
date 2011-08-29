@@ -58,5 +58,13 @@ ListItemImpl::setLabel(const std::string& text)
 }
 
 
+void
+ListItemImpl::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    selected();
+    QWidget::mousePressEvent(pMouseEvent);
+}
+
+
 }  // namespace Omm
 }  // namespace Gui
