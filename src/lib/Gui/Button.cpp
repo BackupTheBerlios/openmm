@@ -46,6 +46,7 @@ ButtonModel::setLabel(const std::string& label)
     Omm::Gui::Log::instance()->gui().debug("button model set label");
     _label = label;
 
+//    UPDATE_VIEWS(ButtonView, setLabel, label);
     syncViews();
 }
 

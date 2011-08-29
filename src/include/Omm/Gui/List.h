@@ -26,26 +26,33 @@
 #include <stack>
 
 #include "View.h"
+#include "ListModel.h"
 #include "ListItem.h"
 
 namespace Omm {
 namespace Gui {
 
-class ListModel;
-//class View;
+
+class ListController : public Controller
+{
+protected:
+    virtual void selectItem(int row) {}
+};
+
 
 class ListView : public View
 {
     friend class ListViewImpl;
+    friend class ListModel;
     
 public:
-    ListView(int viewHeight, bool movableViews = true, View* pParent = 0);
+    ListView(View* pParent = 0);
 
-    void setModel(ListModel* pModel);
+    virtual void setModel(ListModel* pModel);
+    
+private:
     void insertItem(int row);
     void removeItem(int row);
-
-private:
     int visibleRows();
     void initView(View* pView);
     void moveView(int row, View* pView);
@@ -55,22 +62,26 @@ private:
     void extendViewPool(int n);
 
     int viewPoolSize();
-    /// The view has a widget pool which is large enough to fill the area of the view
-    /// with widgets (created by the model).
+    /// The view has a view pool which is large enough to fill the area of the view port
     int visibleIndex(int row);
     int countVisibleViews();
     View* visibleView(int index);
     bool itemIsVisible(int row);
     void moveViewToRow(int row, View* pView);
-//    void selectNotificationHandler(View::RowSelectNotification* pSelectNotification);
 
-//    ListModel*                          _pModel;
 //    bool                                _lazy;
     std::vector<View*>          _viewPool;
     std::vector<View*>          _visibleViews;
     std::stack<View*>           _freeViews;
     int                         _rowOffset;
     int                         _viewHeight;
+};
+
+
+class List : public Widget<ListView, ListController, ListModel>
+{
+public:
+    List(View* pParent = 0) : Widget<ListView, ListController, ListModel>(pParent) {}
 };
 
 

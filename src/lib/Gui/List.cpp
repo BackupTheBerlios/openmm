@@ -35,13 +35,12 @@ namespace Omm {
 namespace Gui {
 
 
-ListView::ListView(int viewHeight, bool movableViews, View* pParent) :
+ListView::ListView(View* pParent) :
 View(new ListViewImpl(this, pParent), pParent),
-//_pModel(0),
-_viewHeight(viewHeight),
+_viewHeight(50),
 _rowOffset(0)
-//_lazy(false)
 {
+
 }
 
 
@@ -159,7 +158,6 @@ ListView::extendViewPool(int n)
         _viewPool.push_back(pView);
         _freeViews.push(pView);
         initView(pView);
-//        pView->connect(Poco::Observer<ListView, View::RowSelectNotification>(*this, &ListView::selectNotificationHandler));
         Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
@@ -259,13 +257,6 @@ ListView::moveViewToRow(int row, View* pView)
 }
 
 
-//void
-//ListView::selectNotificationHandler(View::RowSelectNotification* pSelectNotification)
-//{
-//    _pModel->selectItem(pSelectNotification->_row);
-//}
-
-
 void
 ListView::insertItem(int row)
 {
@@ -295,7 +286,6 @@ ListView::insertItem(int row)
         Log::instance()->gui().debug("list view got free view: " + pView->getName());
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
-//        pModel->attachView(row, pView);
         pView->setModel(pModel->getItemModel(row));
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore

@@ -37,8 +37,8 @@ public:
     StringListModel(int itemCount);
 
     virtual int totalItemCount();
-    virtual Omm::Gui::View* createItemView();
     virtual Omm::Gui::Model* getItemModel(int row);
+    virtual Omm::Gui::View* createItemView();
     
 private:
     std::vector<Omm::Gui::ListItemModel*>    _itemModels;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::ListView list(50);
+    Omm::Gui::ListView list;
     list.setModel(&listModel);
 
     mainWindow.setMainView(&list);

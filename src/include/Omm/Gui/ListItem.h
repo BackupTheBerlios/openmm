@@ -19,11 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItemView_INCLUDED
-#define ListItemView_INCLUDED
-
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
+#ifndef ListItem_INCLUDED
+#define ListItem_INCLUDED
 
 #include "View.h"
 

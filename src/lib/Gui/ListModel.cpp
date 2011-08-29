@@ -31,7 +31,6 @@ namespace Gui {
 
 
 ListModel::ListModel()
-//_pViewFactory(0)
 {
 }
 
@@ -61,23 +60,6 @@ ListModel::removeItem(int row)
         Log::instance()->gui().error("list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
     }
 }
-
-
-//void
-//ListModel::setItemViewFactory(ListItemViewFactory* pViewFactory)
-//{
-//    _pViewFactory = pViewFactory;
-//}
-//
-//
-//ListItemView*
-//ListModel::createView()
-//{
-//    if (_pViewFactory) {
-//        return _pViewFactory->createItemView();
-//    }
-//    return 0;
-//}
 
 
 } // namespace Gui
