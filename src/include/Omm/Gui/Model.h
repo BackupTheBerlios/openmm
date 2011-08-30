@@ -40,6 +40,7 @@ public:
     friend class View;
 
     void attachView(View* pView);
+    void detachView(View* pView);
 
 protected:
     typedef std::vector<View*>::iterator ViewIterator;

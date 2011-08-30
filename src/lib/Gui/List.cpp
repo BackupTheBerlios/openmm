@@ -49,16 +49,6 @@ ListView::setModel(ListModel* pModel)
 {
     Log::instance()->gui().debug("list view set model ...");
 
-//    // double link model and view.
-//    _pModel = pModel;
-//    if (_pModel) {
-//        _pModel->_pView = this;
-//    }
-//    else {
-//        Log::instance()->gui().error("list view failed to set model (ignoring)");
-//        return;
-//    }
-
     View::setModel(pModel);
 
     // create an initial view pool. This also retrieves the height of the view.
@@ -288,7 +278,9 @@ ListView::insertItem(int row)
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
-//        pView->setController(new ListItemController);
+//        ListItemController* pItemController = new ListItemController;
+//        pItemController->setRow(row);
+//        pView->attachController(pItemController);
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);

@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     Omm::Gui::MainWindow mainWindow;
     HelloButtonController buttonController;
     Omm::Gui::Button button;
-    button.setController(&buttonController);
+    button.attachController(&buttonController);
     buttonController.attachModel(&button);
     button.setLabel("Hello GUI");
     mainWindow.setMainView(&button);

@@ -36,6 +36,11 @@ class Controller;
 class Layout;
 
 
+// need a dynamic_cast, because different subclasses of Controller can be attached to View.
+#define NOTIFY_CONTROLLERS(CLASS, METHOD, ...) for (View::ControllerIterator it = _pView->beginController(); it != _pView->endController(); ++it) \
+{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
+
+
 class View
 {
     friend class ViewImpl;
@@ -57,13 +62,13 @@ public:
     void move(int x, int y);
 
     Model* getModel() const;
-    virtual void setModel(Model* pModel);
-    Controller* getController() const;
-    void setController(Controller* pController);
+    virtual void setModel(Model* pModel = 0);
+    void attachController(Controller* pController);
+    void detachController(Controller* pController);
     template<class C, class M> void setControllerModel(ControllerModel<C,M>* pControllerModel)
     {
         setModel(pControllerModel);
-        setController(pControllerModel);
+        attachController(pControllerModel);
     }
     Layout* getLayout() const;
     void setLayout(Layout* pLayout);
@@ -76,6 +81,10 @@ public:
     ChildIterator endChild();
     int childCount();
 
+    typedef std::vector<Controller*>::iterator ControllerIterator;
+    ControllerIterator beginController();
+    ControllerIterator endController();
+
 protected:
     View(ViewImpl* pViewImpl, View* pParent = 0);
 
@@ -85,7 +94,7 @@ protected:
     std::vector<View*>          _children;
     ViewImpl*                   _pImpl;
     Model*                      _pModel;
-    Controller*                 _pController;
+    std::vector<Controller*>    _controllers;
     Layout*                     _pLayout;
     std::string                 _name;
 
@@ -101,7 +110,7 @@ public:
     Widget(View* pParent = 0) : V(pParent)
     {
         V::setModel(this);
-        V::setController(this);
+        V::attachController(this);
         C::attachModel(this);
     }
     

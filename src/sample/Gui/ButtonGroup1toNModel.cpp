@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
     Omm::Gui::Button masterButton(&compoundView);
     MasterController masterController;
-    masterButton.setController(&masterController);
+    masterButton.attachController(&masterController);
     masterButton.setLabel("Master Button");
     
     int buttonCount = 5;

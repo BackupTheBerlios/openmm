@@ -40,6 +40,7 @@ public:
     friend class ViewImpl;
 
     void attachModel(Model* pModel);
+    void detachModel(Model* pModel);
 
 protected:
     virtual void selected() {}

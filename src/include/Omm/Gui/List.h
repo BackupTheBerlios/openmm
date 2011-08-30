@@ -70,12 +70,12 @@ private:
     void moveViewToRow(int row, View* pView);
 
 //    bool                                _lazy;
-    std::vector<View*>              _viewPool;
+    std::vector<View*>                  _viewPool;
 //    std::vector<ListItemController*>    _controllerPool;
-    std::vector<View*>              _visibleViews;
-    std::stack<View*>               _freeViews;
-    int                             _rowOffset;
-    int                             _viewHeight;
+    std::vector<View*>                  _visibleViews;
+    std::stack<View*>                   _freeViews;
+    int                                 _rowOffset;
+    int                                 _viewHeight;
 };
 
 

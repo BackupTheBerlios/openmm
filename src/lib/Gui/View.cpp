@@ -39,7 +39,6 @@ View::View(View* pParent) :
 _pParent(pParent),
 _pImpl(new ViewImpl(this)),
 _pModel(0),
-_pController(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
@@ -54,7 +53,6 @@ View::View(ViewImpl* pViewImpl, View* pParent) :
 _pParent(pParent),
 _pImpl(pViewImpl),
 _pModel(0),
-_pController(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (view impl, parent).");
@@ -146,23 +144,30 @@ View::getModel() const
 void
 View::setModel(Model* pModel)
 {
+    if (pModel) {
+        pModel->attachView(this);
+        syncView(pModel);
+    }
+    // if pModel == 0, detach the model from the view
+    else if (_pModel) {
+        // if there was a model attached previously, detach this view from it
+        _pModel->detachView(this);
+    }
     _pModel = pModel;
-    _pModel->attachView(this);
-    syncView(pModel);
-}
-
-
-Controller*
-View::getController() const
-{
-    return _pController;
 }
 
 
 void
-View::setController(Controller* pController)
+View::attachController(Controller* pController)
 {
-    _pController = pController;
+    _controllers.push_back(pController);
+}
+
+
+void
+View::detachController(Controller* pController)
+{
+    _controllers.erase(std::find(_controllers.begin(), _controllers.end(), pController));
 }
 
 
@@ -214,6 +219,20 @@ int
 View::childCount()
 {
     return _children.size();
+}
+
+
+View::ControllerIterator
+View::beginController()
+{
+    return _controllers.begin();
+}
+
+
+View::ControllerIterator
+View::endController()
+{
+    return _controllers.end();
 }
 
 

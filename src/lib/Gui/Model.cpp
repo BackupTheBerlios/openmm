@@ -37,6 +37,15 @@ Model::attachView(View* pView)
 }
 
 
+void
+Model::detachView(View* pView)
+{
+    Omm::Gui::Log::instance()->gui().debug("model detach view ...");
+    _views.erase(std::find(_views.begin(), _views.end(), pView));
+    Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
+}
+
+
 Model::ViewIterator
 Model::beginView()
 {

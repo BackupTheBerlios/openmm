@@ -38,6 +38,15 @@ Controller::attachModel(Model* pModel)
 }
 
 
+void
+Controller::detachModel(Model* pModel)
+{
+    Omm::Gui::Log::instance()->gui().debug("controller detach model ...");
+    _models.erase(std::find(_models.begin(), _models.end(), pModel));
+    Omm::Gui::Log::instance()->gui().debug("controller detach model finished.");
+}
+
+
 Controller::ModelIterator
 Controller::beginModel()
 {

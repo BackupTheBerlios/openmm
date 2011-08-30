@@ -134,11 +134,7 @@ void
 ViewImpl::selected()
 {
     Omm::Gui::Log::instance()->gui().debug("view implementation selected event.");
-    Controller* pController = getView()->getController();
-    Omm::Gui::Log::instance()->gui().debug("view implementation selected event, controller: " + Poco::NumberFormatter::format(pController));
-    if (pController) {
-        pController->selected();
-    }
+    NOTIFY_CONTROLLERS(Controller, selected);
 }
 
 
