@@ -29,10 +29,6 @@ namespace Omm {
 namespace Gui {
 
 
-ListModel::ListModel()
-{
-}
-
 
 void
 ListModel::insertItem(int row)

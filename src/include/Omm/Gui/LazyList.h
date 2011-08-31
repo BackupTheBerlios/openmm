@@ -19,37 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Controller_INCLUDED
-#define Controller_INCLUDED
+#ifndef LazyList_INCLUDED
+#define LazyList_INCLUDED
 
 #include <vector>
+#include <stack>
+
+#include "List.h"
+#include "ListModel.h"
+#include "ListItem.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class Model;
 
-#define NOTIFY_MODELS(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) { static_cast<CLASS*>(*it)->METHOD(__VA_ARGS__); }
-
-
-class Controller
+class LazyListView : public ListView
 {
 public:
-    friend class Model;
-    friend class ViewImpl;
+    LazyListView(View* pParent = 0);
 
-    void attachModel(Model* pModel);
-    void detachModel(Model* pModel);
+    virtual void setModel(LazyListModel* pModel);
 
-protected:
-    virtual void selected() {}
+    virtual int getOffset() { return 0; }
+    virtual void updateScrollWidgetSize() {}
+    void scrolledToRow(int rowOffset);
+};
 
-    typedef std::vector<Model*>::iterator ModelIterator;
-    ModelIterator beginModel();
-    ModelIterator endModel();
 
-    std::vector<Model*>     _models;
+class LazyList : public Widget<LazyListView, ListController, LazyListModel>
+{
+public:
+    LazyList(View* pParent = 0) : Widget<LazyListView, ListController, LazyListModel>(pParent) {}
 };
 
 

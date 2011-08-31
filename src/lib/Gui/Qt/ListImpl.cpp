@@ -22,12 +22,10 @@
 #include <Poco/NumberFormatter.h>
 
 #include <Omm/Util.h>
-#include <Omm/UpnpAvLogger.h>
 
 #include "ListImpl.h"
 #include "Gui/List.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/ListItem.h"
 
 namespace Omm {
 namespace Gui {
@@ -38,6 +36,7 @@ QGraphicsView(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
 ViewImpl(pView, this),
 _movableViews(movableViews)
 {
+    Omm::Gui::Log::instance()->gui().debug("list view impl ctor");
     setAlignment((Qt::AlignLeft | Qt::AlignTop));
 
     _pGraphicsScene = new QGraphicsScene;
@@ -64,7 +63,7 @@ ListViewImpl::visibleRows()
 
 
 void
-ListViewImpl::initView(View* pView)
+ListViewImpl::addItemView(View* pView)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
     pView->resize(viewport()->width(), pListView->_viewHeight);
@@ -80,7 +79,7 @@ ListViewImpl::initView(View* pView)
 
 
 void
-ListViewImpl::moveView(int row, View* pView)
+ListViewImpl::moveItemView(int row, View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
@@ -108,89 +107,6 @@ ListViewImpl::extendPoolSlot()
     ListView* pListView =  static_cast<ListView*>(_pView);
     pListView->extendViewPool(visibleRows());
 }
-
-
-//LazyListViewImpl::LazyListViewImpl(Widget* pView, Widget* pParent) :
-//QScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeWidget() : 0)),
-//_pScrollWidget(0)
-//{
-//    _pScrollWidget = new QWidget;
-//    _pScrollWidget->resize(viewport()->size());
-//    setWidget(_pScrollWidget);
-//
-//    connect(this, SIGNAL(moveWidgetSignal(int, ListWidget*)), this, SLOT(moveWidgetSlot(int, ListWidget*)));
-//    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledSlot(int)));
-//}
-//
-//
-//LazyListViewImpl::~LazyListViewImpl()
-//{
-//}
-//
-//
-//int
-//LazyListViewImpl::visibleRows()
-//{
-//    int rows = viewport()->geometry().height() / _widgetHeight;
-//    Omm::Gui::Log::instance()->gui().debug("widget list number of visible rows: " + Poco::NumberFormatter::format(rows));
-//    return rows;
-//}
-//
-//
-//void
-//LazyListViewImpl::initWidget(ListWidget* pView)
-//{
-//    static_cast<QtListWidget*>(pView)->resize(viewport()->width(), _widgetHeight);
-//    static_cast<QtListWidget*>(pView)->setParent(_pScrollWidget);
-//}
-//
-//
-//void
-//LazyListViewImpl::moveWidget(int row, ListWidget* pView)
-//{
-//    Omm::Gui::Log::instance()->gui().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
-//    emit moveWidgetSignal(row, pView);
-//}
-//
-//
-//void
-//LazyListViewImpl::updateScrollWidgetSize()
-//{
-//   _pScrollWidget->resize(geometry().width(), _pModel->totalItemCount() * _widgetHeight);
-//}
-//
-//
-//int
-//LazyListViewImpl::getOffset()
-//{
-////    Omm::Gui::Log::instance()->gui().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry().y()));
-//    return _pScrollWidget->geometry().y();
-//}
-//
-//
-//void
-//LazyListViewImpl::moveWidgetSlot(int row, ListWidget* pView)
-//{
-//    static_cast<QtListWidget*>(pView)->move(0, _widgetHeight * row);
-//}
-//
-//
-//void
-//LazyListViewImpl::viewScrolledSlot(int value)
-//{
-//    scrolledToRow(-getOffset() / _widgetHeight);
-//}
-//
-//
-//void
-//LazyListViewImpl::resizeEvent(QResizeEvent* pEvent)
-//{
-//    int rows = pEvent->size().height() / _widgetHeight;
-//    Omm::Gui::Log::instance()->gui().debug("Qt widget list resize: " + Poco::NumberFormatter::format(rows));
-//    if (pEvent->oldSize().height() > 0) {
-//        WidgetListView::resize(rows);
-//    }
-//}
 
 
 }  // namespace Omm

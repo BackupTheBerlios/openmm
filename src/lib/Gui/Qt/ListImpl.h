@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListViewImpl_INCLUDED
-#define ListViewImpl_INCLUDED
+#ifndef ListImpl_INCLUDED
+#define ListImpl_INCLUDED
 
 #include <QtGui>
 #include "ViewImpl.h"
@@ -30,7 +30,6 @@ namespace Gui {
 
 class View;
 class ListView;
-//class View;
 
 
 class ListViewImpl : public QGraphicsView, public ViewImpl
@@ -52,44 +51,14 @@ private:
     virtual ~ListViewImpl();
 
     int visibleRows();
-    void initView(View* pView);
-    void moveView(int row, View* pView);
+    void addItemView(View* pView);
+    void moveItemView(int row, View* pView);
     void extendViewPool();
 
     QGraphicsScene*                                   _pGraphicsScene;
     std::map<View*, QGraphicsProxyWidget*>            _proxyWidgets;
     bool                                              _movableViews;
 };
-
-
-//class LazyListViewImpl : public QScrollArea, public WidgetImpl
-//{
-//    Q_OBJECT
-//
-//public:
-//    LazyListViewImpl(Widget* pView, Widget* pParent = 0);
-//    virtual ~LazyListViewImpl();
-//
-//protected:
-//    virtual int visibleRows();
-//    virtual void initWidget(ListWidget* pView);
-//    virtual void moveWidget(int row, ListWidget* pView);
-//
-//    virtual void updateScrollWidgetSize();
-//    virtual int getOffset();
-//
-//signals:
-//    void moveWidgetSignal(int targetRow, ListWidget* pView);
-//
-//private slots:
-//    void moveWidgetSlot(int targetRow, ListWidget* pView);
-//    void viewScrolledSlot(int value);
-//
-//private:
-//    virtual void resizeEvent(QResizeEvent* event);
-//
-//    QWidget*                 _pScrollWidget;
-//};
 
 
 }  // namespace Omm

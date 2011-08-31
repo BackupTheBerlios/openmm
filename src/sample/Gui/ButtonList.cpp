@@ -28,53 +28,53 @@
 #include <Omm/Gui/MainWindow.h>
 #include <Omm/Gui/List.h>
 #include <Omm/Gui/ListModel.h>
-#include <Omm/Gui/ListItem.h>
+#include <Omm/Gui/Button.h>
 
 
-class StringListModel : public Omm::Gui::ListModel
+class ButtonListModel : public Omm::Gui::ListModel
 {
 public:
-    StringListModel(int itemCount);
+    ButtonListModel(int itemCount);
 
     virtual int totalItemCount();
     virtual Omm::Gui::Model* getItemModel(int row);
     virtual Omm::Gui::View* createItemView();
     
 private:
-    std::vector<Omm::Gui::ListItemModel*>    _itemModels;
-    int                                      _viewCount;
+    std::vector<Omm::Gui::ButtonModel*>    _itemModels;
+    int                                    _viewCount;
 };
 
 
-StringListModel::StringListModel(int itemCount) :
+ButtonListModel::ButtonListModel(int itemCount) :
 _viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
-        Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
-        pItemModel->setLabel("list item " + Poco::NumberFormatter::format(i));
+        Omm::Gui::ButtonModel* pItemModel = new Omm::Gui::ButtonModel;
+        pItemModel->setLabel("button model " + Poco::NumberFormatter::format(i));
         _itemModels.push_back(pItemModel);
     }
 }
 
 
 int
-StringListModel::totalItemCount()
+ButtonListModel::totalItemCount()
 {
     return _itemModels.size();
 }
 
 
 Omm::Gui::View*
-StringListModel::createItemView()
+ButtonListModel::createItemView()
 {
-    Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
-    pView->setName("string list view item " + Poco::NumberFormatter::format(_viewCount++));
+    Omm::Gui::ButtonView* pView = new Omm::Gui::ButtonView;
+    pView->setName("button view " + Poco::NumberFormatter::format(_viewCount++));
     return pView;
 }
 
 
 Omm::Gui::Model*
-StringListModel::getItemModel(int row)
+ButtonListModel::getItemModel(int row)
 {
     return _itemModels[row];
 }
@@ -82,7 +82,7 @@ StringListModel::getItemModel(int row)
 
 int main(int argc, char** argv)
 {
-    StringListModel listModel(1);
+    ButtonListModel listModel(1);
 
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;

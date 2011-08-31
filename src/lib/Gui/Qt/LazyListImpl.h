@@ -19,37 +19,45 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Controller_INCLUDED
-#define Controller_INCLUDED
+#ifndef LazyListImpl_INCLUDED
+#define LazyListImpl_INCLUDED
 
-#include <vector>
+#include <QtGui>
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
 class View;
-class Model;
-
-#define NOTIFY_MODELS(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) { static_cast<CLASS*>(*it)->METHOD(__VA_ARGS__); }
 
 
-class Controller
+class LazyListViewImpl : public QScrollArea, public ViewImpl
 {
-public:
-    friend class Model;
-    friend class ViewImpl;
+    Q_OBJECT
 
-    void attachModel(Model* pModel);
-    void detachModel(Model* pModel);
+public:
+    LazyListViewImpl(View* pView, View* pParent = 0);
+    virtual ~LazyListViewImpl();
 
 protected:
-    virtual void selected() {}
+    virtual int visibleRows();
+    void addItemView(View* pView);
+    void moveItemView(int row, View* pView);
 
-    typedef std::vector<Model*>::iterator ModelIterator;
-    ModelIterator beginModel();
-    ModelIterator endModel();
+    void updateScrollWidgetSize();
+    int getOffset();
 
-    std::vector<Model*>     _models;
+signals:
+    void moveWidgetSignal(int targetRow, View* pView);
+
+private slots:
+    void moveWidgetSlot(int targetRow, View* pView);
+    void viewScrolledSlot(int value);
+
+private:
+    virtual void resizeEvent(QResizeEvent* event);
+
+    QWidget*                 _pScrollWidget;
 };
 
 
@@ -57,3 +65,4 @@ protected:
 }  // namespace Gui
 
 #endif
+

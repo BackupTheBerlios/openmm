@@ -10,6 +10,7 @@ EventLoopImpl.cpp
 TabViewImpl.cpp
 ListImpl.cpp
 ListItemImpl.cpp
+LazyListImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
@@ -20,6 +21,7 @@ ButtonImpl.h
 #TabViewImpl.h
 ListImpl.h
 #ListItemImpl.h
+LazyListImpl.h
 )
 
 QT4_ADD_RESOURCES(

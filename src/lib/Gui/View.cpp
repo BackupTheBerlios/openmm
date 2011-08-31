@@ -38,7 +38,7 @@ namespace Gui {
 View::View(View* pParent) :
 _pParent(pParent),
 _pImpl(new ViewImpl(this)),
-_pModel(0),
+pModel(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
@@ -52,7 +52,7 @@ _pLayout(0)
 View::View(ViewImpl* pViewImpl, View* pParent) :
 _pParent(pParent),
 _pImpl(pViewImpl),
-_pModel(0),
+pModel(0),
 _pLayout(0)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (view impl, parent).");
@@ -90,7 +90,7 @@ View::getParent()
 void
 View::show()
 {
-    Omm::Gui::Log::instance()->gui().debug("view show ...");
+    Omm::Gui::Log::instance()->gui().debug("view show ... " + getName());
     _pImpl->showView();
     Omm::Gui::Log::instance()->gui().debug("view show finished.");
 }
@@ -137,7 +137,7 @@ View::move(int x, int y)
 Model*
 View::getModel() const
 {
-    return _pModel;
+    return pModel;
 }
 
 
@@ -149,11 +149,11 @@ View::setModel(Model* pModel)
         syncView(pModel);
     }
     // if pModel == 0, detach the model from the view
-    else if (_pModel) {
+    else if (pModel) {
         // if there was a model attached previously, detach this view from it
-        _pModel->detachView(this);
+        pModel->detachView(this);
     }
-    _pModel = pModel;
+    pModel = pModel;
 }
 
 

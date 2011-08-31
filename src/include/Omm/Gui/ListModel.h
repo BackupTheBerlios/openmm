@@ -31,25 +31,24 @@ namespace Gui {
     
 class ListModel : public Model
 {
-    friend class ListView;
-
 public:
-    ListModel();
-
-    // item related
     virtual int totalItemCount() { return 0; }
     virtual Model* getItemModel(int row) { return 0; }
     virtual View* createItemView() { return 0; }
 
-    // lazy model related
+protected:
+    void insertItem(int row);
+    void removeItem(int row);
+};
+
+
+class LazyListModel : public ListModel
+{
+public:
     virtual bool canFetchMore() { return false; }
     virtual void fetchMore(bool forward = true) {}
     virtual int fetch(int rowCount = 10, bool forward = true) { return 0; }
     virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
-
-protected:
-    void insertItem(int row);
-    void removeItem(int row);
 };
 
 

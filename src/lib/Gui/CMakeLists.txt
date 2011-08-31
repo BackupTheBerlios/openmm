@@ -40,11 +40,12 @@ HorizontalLayout.cpp
 Button.cpp
 MainWindow.cpp
 EventLoop.cpp
-TabView.cpp
+#TabView.cpp
 List.cpp
 ListModel.cpp
 ListItem.cpp
-Navigator.cpp
+LazyList.cpp
+#Navigator.cpp
 )
 
 target_link_libraries(ommgui

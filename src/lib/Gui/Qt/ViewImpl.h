@@ -51,7 +51,7 @@ public:
     virtual void selected();
  
 protected:
-    ViewImpl(QWidget* pNativeWidget);
+//    ViewImpl(QWidget* pNativeWidget);
     ViewImpl(View* pView, QWidget* pNativeWidget);
 
     View*                       _pView;

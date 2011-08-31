@@ -93,7 +93,7 @@ protected:
     View*                       _pParent;
     std::vector<View*>          _children;
     ViewImpl*                   _pImpl;
-    Model*                      _pModel;
+    Model*                      pModel;
     std::vector<Controller*>    _controllers;
     Layout*                     _pLayout;
     std::string                 _name;

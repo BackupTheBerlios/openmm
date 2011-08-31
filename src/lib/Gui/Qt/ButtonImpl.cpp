@@ -29,29 +29,29 @@ namespace Omm {
 namespace Gui {
 
 
-ButtonImpl::ButtonImpl(View* pView, View* pParent) :
+ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent) :
 QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
 ViewImpl(pView, this)
 {
-    Omm::Gui::Log::instance()->gui().debug("button implementation ctor");
+    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
     connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
 }
 
 
-ButtonImpl::~ButtonImpl()
+ButtonViewImpl::~ButtonViewImpl()
 {
 }
 
 
 void
-ButtonImpl::setLabel(const std::string& label)
+ButtonViewImpl::setLabel(const std::string& label)
 {
     QPushButton::setText(QString::fromStdString(label));
 }
 
 
 void
-ButtonImpl::pushed()
+ButtonViewImpl::pushed()
 {
     Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
 //    static_cast<ButtonController*>(_pView->getController())->pushed();

@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListView_INCLUDED
-#define ListView_INCLUDED
+#ifndef List_INCLUDED
+#define List_INCLUDED
 
 #include <vector>
 #include <stack>
@@ -43,20 +43,23 @@ protected:
 class ListView : public View
 {
     friend class ListViewImpl;
+    friend class LazyListViewImpl;
     friend class ListModel;
     
 public:
     ListView(View* pParent = 0);
 
     virtual void setModel(ListModel* pModel);
-    
-private:
+
+protected:
+    ListView(ViewImpl* pViewImpl, View* pParent = 0);
+
     void insertItem(int row);
     void removeItem(int row);
     int visibleRows();
     void initView(View* pView);
     void moveView(int row, View* pView);
-    void resize(int rows);
+//    void resize(int rows);
 
     void extendViewPool();
     void extendViewPool(int n);
@@ -85,14 +88,6 @@ public:
     List(View* pParent = 0) : Widget<ListView, ListController, ListModel>(pParent) {}
 };
 
-
-//class LazyListView : public ListView
-//{
-//public:
-//    virtual int getOffset() { return 0; }
-//    virtual void updateScrollWidgetSize() {}
-//    void scrolledToRow(int rowOffset);
-//};
 
 }  // namespace Omm
 }  // namespace Gui

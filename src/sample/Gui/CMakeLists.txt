@@ -50,3 +50,12 @@ StringList.cpp
 target_link_libraries(stringlist
 ${OMM_GUI}
 )
+
+
+add_executable(buttonlist
+ButtonList.cpp
+)
+
+target_link_libraries(buttonlist
+${OMM_GUI}
+)

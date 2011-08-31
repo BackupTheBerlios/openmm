@@ -30,7 +30,7 @@ namespace Gui {
 
 class View;
 
-class ButtonImpl : public QPushButton, public ViewImpl
+class ButtonViewImpl : public QPushButton, public ViewImpl
 {
     Q_OBJECT
 
@@ -40,8 +40,8 @@ private slots:
     void pushed();
 
 private:
-    ButtonImpl(View* pView, View* pParent = 0);
-    ~ButtonImpl();
+    ButtonViewImpl(View* pView, View* pParent = 0);
+    ~ButtonViewImpl();
 
     void setLabel(const std::string& label);
 };

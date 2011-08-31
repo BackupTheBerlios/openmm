@@ -31,17 +31,23 @@ namespace Gui {
 
 
 ListItemImpl::ListItemImpl(View* pView, View* pParent) :
-QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-ViewImpl(pView, this)
+//QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
+//ViewImpl(pView, this)
+_pWidget(new QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
+//ViewImpl(pView, _pWidget)
+ViewImpl(pView, 0)
 {
-    _pLayout = new QHBoxLayout(this);
+    setNativeView(_pWidget);
+    Omm::Gui::Log::instance()->gui().debug("list item impl ctor, _pWidget: " + Poco::NumberFormatter::format(_pWidget));
+//    _pLayout = new QHBoxLayout(this);
+    _pLayout = new QHBoxLayout(_pWidget);
     _pNameLabel = new QLabel;
     _pLayout->addWidget(_pNameLabel);
     _pLayout->setSpacing(0);
     _pLayout->setMargin(0);
     _pLayout->setContentsMargins(0, 0, 0, 0);
-    QWidget::setPalette(QPalette(Qt::white));
-    QWidget::setAutoFillBackground(true);
+//    QWidget::setPalette(QPalette(Qt::white));
+//    QWidget::setAutoFillBackground(true);
 }
 
 
@@ -58,12 +64,33 @@ ListItemImpl::setLabel(const std::string& text)
 }
 
 
-void
-ListItemImpl::mousePressEvent(QMouseEvent* pMouseEvent)
-{
-    selected();
-    QWidget::mousePressEvent(pMouseEvent);
-}
+//void
+//ListItemImpl::mousePressEvent(QMouseEvent* pMouseEvent)
+//{
+//    selected();
+//    QWidget::mousePressEvent(pMouseEvent);
+//}
+
+
+//void
+//ListItemImpl::showView()
+//{
+//    Omm::Gui::Log::instance()->gui().debug("list item impl show ... " + _pView->getName());
+////    QWidget::show();
+//    _pWidget->show();
+//    Omm::Gui::Log::instance()->gui().debug("list item impl show finished.");
+//}
+//
+//
+//void
+//ListItemImpl::hideView()
+//{
+//    Omm::Gui::Log::instance()->gui().debug("list item impl hide ... " + _pView->getName());
+////    QWidget::show();
+//    _pWidget->hide();
+//    Omm::Gui::Log::instance()->gui().debug("list item impl hide finished.");
+//}
+
 
 
 }  // namespace Omm

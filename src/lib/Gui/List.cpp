@@ -44,6 +44,15 @@ _rowOffset(0)
 }
 
 
+ListView::ListView(ViewImpl* pViewImpl, View* pParent) :
+View(pViewImpl, pParent),
+_viewHeight(50),
+_rowOffset(0)
+{
+
+}
+
+
 void
 ListView::setModel(ListModel* pModel)
 {
@@ -81,40 +90,40 @@ ListView::visibleRows()
 void
 ListView::initView(View* pView)
 {
-    static_cast<ListViewImpl*>(_pImpl)->initView(pView);
+    static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
 }
 
 
 void
 ListView::moveView(int row, View* pView)
 {
-    static_cast<ListViewImpl*>(_pImpl)->moveView(row, pView);
+    static_cast<ListViewImpl*>(_pImpl)->moveItemView(row, pView);
 }
 
 
-void
-ListView::resize(int rows)
-{
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
-
-    int rowDelta = rows - viewPoolSize();
-    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
-    if (rowDelta > 0) {
-        if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
-            pModel->fetch(_visibleViews.size() + rowDelta);
-        }
-        extendViewPool(rowDelta);
-        for (int i = 0; i < rowDelta; i++) {
-            View* pView = _freeViews.top();
-            _freeViews.pop();
-            int lastRow = _rowOffset + _visibleViews.size();
-            moveViewToRow(lastRow, pView);
-//            pModel->attachView(lastRow, pView);
-            pView->setModel(pModel->getItemModel(lastRow));
-            _visibleViews.push_back(pView);
-        }
-    }
-}
+//void
+//ListView::resize(int rows)
+//{
+//    ListModel* pModel = static_cast<ListModel*>(_pModel);
+//
+//    int rowDelta = rows - viewPoolSize();
+//    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+//    if (rowDelta > 0) {
+//        if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
+//            pModel->fetch(_visibleViews.size() + rowDelta);
+//        }
+//        extendViewPool(rowDelta);
+//        for (int i = 0; i < rowDelta; i++) {
+//            View* pView = _freeViews.top();
+//            _freeViews.pop();
+//            int lastRow = _rowOffset + _visibleViews.size();
+//            moveViewToRow(lastRow, pView);
+////            pModel->attachView(lastRow, pView);
+//            pView->setModel(pModel->getItemModel(lastRow));
+//            _visibleViews.push_back(pView);
+//        }
+//    }
+//}
 
 
 void
@@ -136,7 +145,7 @@ ListView::extendViewPool(int n)
 {
     Log::instance()->gui().debug("list view extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    ListModel* pModel = static_cast<ListModel*>(pModel);
 
     for (int i = 0; i < n; ++i) {
         View* pView = pModel->createItemView();
@@ -253,7 +262,7 @@ ListView::insertItem(int row)
 {
     Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));
     
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    ListModel* pModel = static_cast<ListModel*>(pModel);
 
 //    if (_lazy) {
 //        // resize view to the size with this item added
@@ -278,12 +287,23 @@ ListView::insertItem(int row)
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
-//        ListItemController* pItemController = new ListItemController;
+        Log::instance()->gui().debug("list view creating list item controller ...");
+//        ListItemController itemController;
+        ListItemController* pItemController = new ListItemController;
+//        ListItemModel* pItemModel = new ListItemModel;
+//        ListController* pLC = new ListController;
+
+//        int* pInt = new int;
+//        Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)
+//        + ", size: " + Poco::NumberFormatter::format(sizeof(*pItemController)));
+//        Controller* pItemController = new Controller;
 //        pItemController->setRow(row);
 //        pView->attachController(pItemController);
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);
+
+        // FIXME: allocation of List* makes pView->show() crash
         pView->show();
     }
     else {
@@ -295,7 +315,7 @@ ListView::insertItem(int row)
 void
 ListView::removeItem(int row)
 {
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    ListModel* pModel = static_cast<ListModel*>(pModel);
 
 //    if (_lazy) {
 //        // resize view to the size with this item added

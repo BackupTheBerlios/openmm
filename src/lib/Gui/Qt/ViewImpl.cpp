@@ -33,35 +33,36 @@ ViewImpl::ViewImpl(View* pView) :
 _pNativeView(new NativeView(this, pView->getParent())),
 _pView(pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation ctor (view).");
+    Omm::Gui::Log::instance()->gui().debug("view impl ctor (view).");
 }
 
 
-ViewImpl::ViewImpl(QWidget* pNativeView) :
-_pNativeView(pNativeView)
-{
-    Omm::Gui::Log::instance()->gui().debug("view implementation ctor (native view).");
-}
+//ViewImpl::ViewImpl(QWidget* pNativeView) :
+//_pNativeView(pNativeView)
+//{
+//    Omm::Gui::Log::instance()->gui().debug("view impl ctor (native view).");
+//}
 
 
 ViewImpl::ViewImpl(View* pView, QWidget* pNativeView) :
 _pView(pView),
 _pNativeView(pNativeView)
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation ctor (view, native view)");
+    Omm::Gui::Log::instance()->gui().debug("view impl ctor view: " + Poco::NumberFormatter::format(_pView) + ", native view: " + Poco::NumberFormatter::format(_pNativeView));
 }
 
 
 ViewImpl::~ViewImpl()
 {
-    delete _pNativeView;
+    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
+//    delete _pNativeView;
 }
 
 
 View*
 ViewImpl::getView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation get view: " + Poco::NumberFormatter::format(_pView));
+    Omm::Gui::Log::instance()->gui().debug("view impl get view: " + Poco::NumberFormatter::format(_pView));
     return _pView;
 }
 
@@ -69,7 +70,7 @@ ViewImpl::getView()
 QWidget*
 ViewImpl::getNativeView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation get native view: " + Poco::NumberFormatter::format(_pNativeView));
+    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
     return _pNativeView;
 }
 
@@ -77,6 +78,7 @@ ViewImpl::getNativeView()
 void
 ViewImpl::setNativeView(QWidget* pView)
 {
+    Omm::Gui::Log::instance()->gui().debug("view impl set native view: " + Poco::NumberFormatter::format(pView));
     _pNativeView = pView;
 }
 
@@ -84,24 +86,25 @@ ViewImpl::setNativeView(QWidget* pView)
 void
 ViewImpl::showView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation show view _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
     _pNativeView->show();
-    Omm::Gui::Log::instance()->gui().debug("view implementation show view finished.");
+    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
 
 void
 ViewImpl::hideView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation hide.");
+    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
     _pNativeView->hide();
+    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 
 
 int
 ViewImpl::widthView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation width.");
+    Omm::Gui::Log::instance()->gui().debug("view impl width.");
     return _pNativeView->width();
 }
 
@@ -109,7 +112,7 @@ ViewImpl::widthView()
 int
 ViewImpl::heightView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation height.");
+    Omm::Gui::Log::instance()->gui().debug("view impl height.");
     return _pNativeView->height();
 }
 
@@ -117,7 +120,7 @@ ViewImpl::heightView()
 void
 ViewImpl::resizeView(int width, int height)
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation resize.");
+    Omm::Gui::Log::instance()->gui().debug("view impl resize.");
     _pNativeView->resize(width, height);
 }
 
@@ -125,7 +128,7 @@ ViewImpl::resizeView(int width, int height)
 void
 ViewImpl::moveView(int x, int y)
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation move.");
+    Omm::Gui::Log::instance()->gui().debug("view impl move.");
     _pNativeView->move(x, y);
 }
 
@@ -133,7 +136,7 @@ ViewImpl::moveView(int x, int y)
 void
 ViewImpl::selected()
 {
-    Omm::Gui::Log::instance()->gui().debug("view implementation selected event.");
+    Omm::Gui::Log::instance()->gui().debug("view impl selected event.");
     NOTIFY_CONTROLLERS(Controller, selected);
 }
 
@@ -142,7 +145,7 @@ NativeView::NativeView(ViewImpl* pViewImpl, View* pParent) :
 QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
 _pViewImpl(pViewImpl)
 {
-    Omm::Gui::Log::instance()->gui().debug("native view implementation ctor.");
+    Omm::Gui::Log::instance()->gui().debug("native view impl ctor.");
 }
 
 
