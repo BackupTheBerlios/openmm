@@ -26,6 +26,8 @@
 #include "Gui/ListModel.h"
 #include "Gui/View.h"
 
+#include "Gui/Button.h"
+
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/LazyListImpl.h"
 #endif
@@ -33,6 +35,39 @@
 
 namespace Omm {
 namespace Gui {
+
+
+class LazyListItemController : public ButtonController
+{
+public:
+    LazyListItemController(int row);
+
+private:
+    virtual void selectedRow(int row);
+    virtual void pushed();
+
+    int _row;
+};
+
+
+LazyListItemController::LazyListItemController(int row) :
+_row(row)
+{
+}
+
+
+void
+LazyListItemController::pushed()
+{
+    selectedRow(_row);
+}
+
+
+void
+LazyListItemController::selectedRow(int row)
+{
+    Log::instance()->gui().debug("lazy list item controller selected row: " + Poco::NumberFormatter::format(row));
+}
 
 
 LazyListView::LazyListView(View* pParent) :
@@ -87,18 +122,12 @@ LazyListView::insertItem(int row)
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
+        
         Log::instance()->gui().debug("lazy list view creating list item controller ...");
-//        ListItemController itemController;
-        ListItemController* pItemController = new ListItemController;
-//        ListItemModel* pItemModel = new ListItemModel;
-//        ListController* pLC = new ListController;
-
-//        int* pInt = new int;
-//        Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)
-//        + ", size: " + Poco::NumberFormatter::format(sizeof(*pItemController)));
-//        Controller* pItemController = new Controller;
+        LazyListItemController* pItemController = new LazyListItemController(row);
+        Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController));
 //        pItemController->setRow(row);
-//        pView->attachController(pItemController);
+        pView->attachController(pItemController);
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);

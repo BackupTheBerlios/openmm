@@ -32,6 +32,7 @@ namespace Gui {
 class ListItemController : public Controller
 {
     friend class ListView;
+    friend class LazyListView;
 
 protected:
     virtual void selectedRow(int row) {}
