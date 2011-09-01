@@ -42,6 +42,8 @@ class LazyListItemController : public ButtonController
 public:
     LazyListItemController(int row);
 
+    void setRow(int row) { _row = row; }
+
 private:
     virtual void selectedRow(int row);
     virtual void pushed();
@@ -126,8 +128,8 @@ LazyListView::insertItem(int row)
         Log::instance()->gui().debug("lazy list view creating list item controller ...");
         LazyListItemController* pItemController = new LazyListItemController(row);
         Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController));
-//        pItemController->setRow(row);
         pView->attachController(pItemController);
+        _itemControllers[pView] = pItemController;
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);
@@ -254,6 +256,7 @@ LazyListView::scrolledToRow(int rowOffset)
             moveViewToRow(lastRow, pView);
             // attach model
             pView->setModel(pModel->getItemModel(lastRow));
+            _itemControllers[pView]->setRow(lastRow);
             // move view to end of visible rows
             _visibleViews.erase(_visibleViews.begin());
             _visibleViews.push_back(pView);
@@ -268,6 +271,7 @@ LazyListView::scrolledToRow(int rowOffset)
             moveViewToRow(_rowOffset - 1, pView);
             // attach model
             pView->setModel(pModel->getItemModel(_rowOffset - 1));
+            _itemControllers[pView]->setRow(_rowOffset - 1);
             // move view to beginning of visible rows
             _visibleViews.erase(_visibleViews.end() - 1);
             _visibleViews.insert(_visibleViews.begin(), pView);

@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <stack>
+#include <map>
 
 #include "List.h"
 #include "ListModel.h"
@@ -31,6 +32,9 @@
 
 namespace Omm {
 namespace Gui {
+
+
+class LazyListItemController;
 
 
 class LazyListView : public ListView
@@ -56,6 +60,9 @@ protected:
     void updateScrollWidgetSize();
     void scrolledToRow(int rowOffset);
     void resize(int rows);
+
+private:
+    std::map<View*, LazyListItemController*>    _itemControllers;
 };
 
 
