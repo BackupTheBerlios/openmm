@@ -35,13 +35,25 @@ namespace Gui {
 
 class LazyListView : public ListView
 {
+    friend class LazyListViewImpl;
+
 public:
     LazyListView(View* pParent = 0);
 
     virtual void setModel(LazyListModel* pModel);
 
-    virtual int getOffset() { return 0; }
-    virtual void updateScrollWidgetSize() {}
+protected:
+    // TODO implement syncView()
+    virtual void syncView() {}
+    
+    virtual void insertItem(int row);
+    virtual void removeItem(int row);
+    virtual int visibleRows();
+    virtual void addItemView(View* pView);
+    virtual void moveItemView(int row, View* pView);
+
+    int getOffset();
+    void updateScrollWidgetSize();
     void scrolledToRow(int rowOffset);
 };
 

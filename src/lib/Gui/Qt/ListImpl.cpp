@@ -57,7 +57,7 @@ ListViewImpl::visibleRows()
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = viewport()->geometry().height() / pListView->_viewHeight;
-    Omm::Gui::Log::instance()->gui().debug("widget canvas number of visible rows: " + Poco::NumberFormatter::format(rows));
+    Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -65,6 +65,7 @@ ListViewImpl::visibleRows()
 void
 ListViewImpl::addItemView(View* pView)
 {
+    Omm::Gui::Log::instance()->gui().debug("list view impl add item view");
     ListView* pListView =  static_cast<ListView*>(_pView);
     pView->resize(viewport()->width(), pListView->_viewHeight);
 
@@ -81,7 +82,7 @@ ListViewImpl::addItemView(View* pView)
 void
 ListViewImpl::moveItemView(int row, View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
+    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
 }
 

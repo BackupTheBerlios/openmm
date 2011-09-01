@@ -35,12 +35,14 @@ class LazyListViewImpl : public QScrollArea, public ViewImpl
 {
     Q_OBJECT
 
+    friend class LazyListView;
+
 public:
     LazyListViewImpl(View* pView, View* pParent = 0);
     virtual ~LazyListViewImpl();
 
 protected:
-    virtual int visibleRows();
+    int visibleRows();
     void addItemView(View* pView);
     void moveItemView(int row, View* pView);
 

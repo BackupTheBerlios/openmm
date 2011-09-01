@@ -43,7 +43,6 @@ protected:
 class ListView : public View
 {
     friend class ListViewImpl;
-    friend class LazyListViewImpl;
     friend class ListModel;
     
 public:
@@ -54,11 +53,14 @@ public:
 protected:
     ListView(ViewImpl* pViewImpl, View* pParent = 0);
 
-    void insertItem(int row);
-    void removeItem(int row);
-    int visibleRows();
-    void initView(View* pView);
-    void moveView(int row, View* pView);
+    // TODO implement syncView()
+    virtual void syncView() {}
+
+    virtual void insertItem(int row);
+    virtual void removeItem(int row);
+    virtual int visibleRows();
+    virtual void addItemView(View* pView);
+    virtual void moveItemView(int row, View* pView);
 //    void resize(int rows);
 
     void extendViewPool();
@@ -72,9 +74,7 @@ protected:
     bool itemIsVisible(int row);
     void moveViewToRow(int row, View* pView);
 
-//    bool                                _lazy;
     std::vector<View*>                  _viewPool;
-//    std::vector<ListItemController*>    _controllerPool;
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;

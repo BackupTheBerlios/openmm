@@ -59,3 +59,12 @@ ButtonList.cpp
 target_link_libraries(buttonlist
 ${OMM_GUI}
 )
+
+
+add_executable(lazybuttonlist
+LazyButtonList.cpp
+)
+
+target_link_libraries(lazybuttonlist
+${OMM_GUI}
+)

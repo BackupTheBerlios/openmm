@@ -55,7 +55,7 @@ LazyListViewImpl::visibleRows()
 {
     LazyListView* pListView =  static_cast<LazyListView*>(_pView);
     int rows = viewport()->geometry().height() / pListView->_viewHeight;
-    Omm::Gui::Log::instance()->gui().debug("widget list number of visible rows: " + Poco::NumberFormatter::format(rows));
+    Omm::Gui::Log::instance()->gui().debug("lazy list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -63,6 +63,7 @@ LazyListViewImpl::visibleRows()
 void
 LazyListViewImpl::addItemView(View* pView)
 {
+    Omm::Gui::Log::instance()->gui().debug("lazy list view impl add item view");
     LazyListView* pListView =  static_cast<LazyListView*>(_pView);
     static_cast<QWidget*>(pView->getNativeView())->resize(viewport()->width(), pListView->_viewHeight);
     static_cast<QWidget*>(pView->getNativeView())->setParent(_pScrollWidget);
@@ -72,7 +73,7 @@ LazyListViewImpl::addItemView(View* pView)
 void
 LazyListViewImpl::moveItemView(int row, View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
+    Omm::Gui::Log::instance()->gui().debug("lazy list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
 }
 
@@ -115,7 +116,7 @@ LazyListViewImpl::resizeEvent(QResizeEvent* pEvent)
 {
     LazyListView* pListView =  static_cast<LazyListView*>(_pView);
     int rows = pEvent->size().height() / pListView->_viewHeight;
-    Omm::Gui::Log::instance()->gui().debug("Qt widget list resize: " + Poco::NumberFormatter::format(rows));
+    Omm::Gui::Log::instance()->gui().debug("lazy list view impl resize: " + Poco::NumberFormatter::format(rows));
     if (pEvent->oldSize().height() > 0) {
 //        WidgetListView::resize(rows);
     }

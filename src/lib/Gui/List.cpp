@@ -63,9 +63,6 @@ ListView::setModel(ListModel* pModel)
     // create an initial view pool. This also retrieves the height of the view.
     int rows = visibleRows();
     int rowsFetched = pModel->totalItemCount();
-//    if (_lazy) {
-//        rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
-//    }
 
     extendViewPool(rows);
 
@@ -88,14 +85,15 @@ ListView::visibleRows()
 
 
 void
-ListView::initView(View* pView)
+ListView::addItemView(View* pView)
 {
+    Log::instance()->gui().debug("list view init view.");
     static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
 }
 
 
 void
-ListView::moveView(int row, View* pView)
+ListView::moveItemView(int row, View* pView)
 {
     static_cast<ListViewImpl*>(_pImpl)->moveItemView(row, pView);
 }
@@ -145,19 +143,20 @@ ListView::extendViewPool(int n)
 {
     Log::instance()->gui().debug("list view extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
-    ListModel* pModel = static_cast<ListModel*>(pModel);
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     for (int i = 0; i < n; ++i) {
+        Log::instance()->gui().debug("list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
         View* pView = pModel->createItemView();
         if (!pView) {
             Log::instance()->gui().error("list view failed to create view for pool (ignoring)");
             return;
         }
+        Log::instance()->gui().debug("list view extend view created item view " + pView->getName());
         pView->hide();
         _viewPool.push_back(pView);
         _freeViews.push(pView);
-        initView(pView);
-//        _controllerPool.push_back(new ListItemController);
+        addItemView(pView);
         Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
@@ -190,58 +189,6 @@ ListView::visibleView(int index)
 }
 
 
-//void
-//ListView::scrolledToRow(int rowOffset)
-//{
-//    int rowDelta = rowOffset - _rowOffset;
-//
-//    if (rowDelta == 0) {
-//        return;
-//    }
-//    if (rowOffset + _visibleWidgets.size() > _pModel->totalItemCount()) {
-//        return;
-//    }
-//
-//    int rowDeltaAbsolute = std::abs(rowDelta);
-//
-//    if (rowOffset + _visibleWidgets.size() + rowDeltaAbsolute >= _pModel->lastFetched()) {
-//        _pModel->fetch(_visibleWidgets.size() + rowDeltaAbsolute);
-//    }
-//
-//    Log::instance()->gui().debug("scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
-//    while (rowDeltaAbsolute--) {
-//        if (rowDelta > 0) {
-//            // detach first visible view
-//            ListWidget* pView = _visibleWidgets.front();
-//            _pModel->detachWidget(_rowOffset);
-//            // move first view to the end
-//            int lastRow = _rowOffset + _visibleWidgets.size();
-//            moveWidgetToRow(lastRow, pView);
-//            // attach view
-//            _pModel->attachWidget(lastRow, pView);
-//            // move view to end of visible rows
-//            _visibleWidgets.erase(_visibleWidgets.begin());
-//            _visibleWidgets.push_back(pView);
-//            _rowOffset++;
-//        }
-//        else if (rowDelta < 0) {
-//            // detach last visible view
-//            ListWidget* pView = _visibleWidgets.back();
-//            int lastRow = _rowOffset + _visibleWidgets.size() - 1;
-//            _pModel->detachWidget(lastRow);
-//            // move last view to the beginning
-//            moveWidgetToRow(_rowOffset - 1, pView);
-//            // attach view
-//            _pModel->attachWidget(_rowOffset - 1, pView);
-//            // move view to beginning of visible rows
-//            _visibleWidgets.erase(_visibleWidgets.end() - 1);
-//            _visibleWidgets.insert(_visibleWidgets.begin(), pView);
-//            _rowOffset--;
-//        }
-//    }
-//}
-
-
 bool
 ListView::itemIsVisible(int row)
 {
@@ -253,7 +200,7 @@ void
 ListView::moveViewToRow(int row, View* pView)
 {
 //    pView->setRow(row);
-    moveView(row, pView);
+    moveItemView(row, pView);
 }
 
 
@@ -262,23 +209,12 @@ ListView::insertItem(int row)
 {
     Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));
     
-    ListModel* pModel = static_cast<ListModel*>(pModel);
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
 
-//    if (_lazy) {
-//        // resize view to the size with this item added
-//        updateScrollWidgetSize();
-//        // check if item is visible
-//        if (!itemIsVisible(row)) {
-//            Log::instance()->gui().debug("list view insert item that is not visible (ignoring)");
-//            return;
-//        }
-//    }
-//    else {
-        // if view is not lazy, view pool has to be extended when too small and new views are inserted.
-        if (_visibleViews.size() >= _viewPool.size()) {
-            extendViewPool();
-        }
-//    }
+    // if view is not lazy, view pool has to be extended when too small and new views are inserted.
+    if (_visibleViews.size() >= _viewPool.size()) {
+        extendViewPool();
+    }
 
     // attach item to a free (not visible) view
     if (_freeViews.size()) {
@@ -315,17 +251,7 @@ ListView::insertItem(int row)
 void
 ListView::removeItem(int row)
 {
-    ListModel* pModel = static_cast<ListModel*>(pModel);
-
-//    if (_lazy) {
-//        // resize view to the size with this item added
-//        updateScrollWidgetSize();
-//        // check if item is visible
-//        if (!itemIsVisible(row)) {
-//            Log::instance()->gui().debug("list view remove item that is not visible (ignoring)");
-//            return;
-//        }
-//    }
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     // detach item from visible view
 //    View* pView = pModel->getChildView(row);
