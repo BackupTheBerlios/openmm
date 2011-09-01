@@ -99,31 +99,6 @@ ListView::moveItemView(int row, View* pView)
 }
 
 
-//void
-//ListView::resize(int rows)
-//{
-//    ListModel* pModel = static_cast<ListModel*>(_pModel);
-//
-//    int rowDelta = rows - viewPoolSize();
-//    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
-//    if (rowDelta > 0) {
-//        if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
-//            pModel->fetch(_visibleViews.size() + rowDelta);
-//        }
-//        extendViewPool(rowDelta);
-//        for (int i = 0; i < rowDelta; i++) {
-//            View* pView = _freeViews.top();
-//            _freeViews.pop();
-//            int lastRow = _rowOffset + _visibleViews.size();
-//            moveViewToRow(lastRow, pView);
-////            pModel->attachView(lastRow, pView);
-//            pView->setModel(pModel->getItemModel(lastRow));
-//            _visibleViews.push_back(pView);
-//        }
-//    }
-//}
-
-
 void
 ListView::extendViewPool()
 {

@@ -61,7 +61,6 @@ protected:
     virtual int visibleRows();
     virtual void addItemView(View* pView);
     virtual void moveItemView(int row, View* pView);
-//    void resize(int rows);
 
     void extendViewPool();
     void extendViewPool(int n);

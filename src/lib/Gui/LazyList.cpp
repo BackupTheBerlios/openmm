@@ -248,6 +248,29 @@ LazyListView::scrolledToRow(int rowOffset)
 }
 
 
+void
+LazyListView::resize(int rows)
+{
+    LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
+
+    int rowDelta = rows - viewPoolSize();
+    Log::instance()->gui().debug("lazy list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+    if (rowDelta > 0) {
+        if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
+            pModel->fetch(_visibleViews.size() + rowDelta);
+        }
+        extendViewPool(rowDelta);
+        for (int i = 0; i < rowDelta; i++) {
+            View* pView = _freeViews.top();
+            _freeViews.pop();
+            int lastRow = _rowOffset + _visibleViews.size();
+            moveViewToRow(lastRow, pView);
+            pView->setModel(pModel->getItemModel(lastRow));
+            pView->show();
+            _visibleViews.push_back(pView);
+        }
+    }
+}
 
 
 } // namespace Gui

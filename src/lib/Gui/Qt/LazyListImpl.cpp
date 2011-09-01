@@ -118,7 +118,7 @@ LazyListViewImpl::resizeEvent(QResizeEvent* pEvent)
     int rows = pEvent->size().height() / pListView->_viewHeight;
     Omm::Gui::Log::instance()->gui().debug("lazy list view impl resize: " + Poco::NumberFormatter::format(rows));
     if (pEvent->oldSize().height() > 0) {
-//        WidgetListView::resize(rows);
+        pListView->resize(rows);
     }
 }
 

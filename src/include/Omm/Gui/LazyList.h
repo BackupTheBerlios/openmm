@@ -55,6 +55,7 @@ protected:
     int getOffset();
     void updateScrollWidgetSize();
     void scrolledToRow(int rowOffset);
+    void resize(int rows);
 };
 
 
