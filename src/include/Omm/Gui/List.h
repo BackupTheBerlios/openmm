@@ -62,7 +62,11 @@ protected:
     virtual void addItemView(View* pView);
     virtual void moveItemView(int row, View* pView);
 
-    void extendViewPool();
+    int getOffset();
+    void updateScrollWidgetSize();
+    void scrolledToRow(int rowOffset);
+    void resize(int rows);
+
     void extendViewPool(int n);
 
     int viewPoolSize();

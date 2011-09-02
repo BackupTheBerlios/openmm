@@ -19,47 +19,72 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef LazyListImpl_INCLUDED
-#define LazyListImpl_INCLUDED
+#ifndef List_INCLUDED
+#define List_INCLUDED
 
-#include <QtGui>
-#include "ViewImpl.h"
+#include <vector>
+#include <stack>
+
+#include "View.h"
+#include "ListModel.h"
+#include "ListItem.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
 
-
-class LazyListViewImpl : public QScrollArea, public ViewImpl
+class ListController : public Controller
 {
-    Q_OBJECT
+protected:
+    virtual void selectedItem(int row) {}
+};
 
-    friend class LazyListView;
 
+class ListView : public View
+{
+    friend class ListViewImpl;
+    friend class ListModel;
+    
 public:
-    LazyListViewImpl(View* pView, View* pParent = 0);
-    virtual ~LazyListViewImpl();
+    ListView(View* pParent = 0);
+
+    virtual void setModel(ListModel* pModel);
 
 protected:
-    int visibleRows();
-    void addItemView(View* pView);
-    void moveItemView(int row, View* pView);
+    ListView(ViewImpl* pViewImpl, View* pParent = 0);
 
-    void updateScrollWidgetSize();
-    int getOffset();
+    // TODO implement syncView()
+    virtual void syncView() {}
 
-signals:
-    void moveWidgetSignal(int targetRow, View* pView);
+    virtual void insertItem(int row);
+    virtual void removeItem(int row);
+    virtual int visibleRows();
+    virtual void addItemView(View* pView);
+    virtual void moveItemView(int row, View* pView);
 
-private slots:
-    void moveWidgetSlot(int targetRow, View* pView);
-    void viewScrolledSlot(int value);
+    void extendViewPool();
+    void extendViewPool(int n);
 
-private:
-    virtual void resizeEvent(QResizeEvent* event);
+    int viewPoolSize();
+    /// The view has a view pool which is large enough to fill the area of the view port
+    int visibleIndex(int row);
+    int countVisibleViews();
+    View* visibleView(int index);
+    bool itemIsVisible(int row);
+    void moveViewToRow(int row, View* pView);
 
-    QWidget*                 _pScrollWidget;
+    std::vector<View*>                  _viewPool;
+    std::vector<View*>                  _visibleViews;
+    std::stack<View*>                   _freeViews;
+    int                                 _rowOffset;
+    int                                 _viewHeight;
+};
+
+
+class List : public Widget<ListView, ListController, ListModel>
+{
+public:
+    List(View* pParent = 0) : Widget<ListView, ListController, ListModel>(pParent) {}
 };
 
 
@@ -67,4 +92,3 @@ private:
 }  // namespace Gui
 
 #endif
-

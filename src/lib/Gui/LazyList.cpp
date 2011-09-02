@@ -29,7 +29,7 @@
 #include "Gui/Button.h"
 
 #ifdef __GUI_QT_PLATFORM__
-#include "Qt/LazyListImpl.h"
+#include "Qt/ListImpl.h"
 #endif
 
 
@@ -65,7 +65,7 @@ LazyListItemController::selectedRow(int row)
 
 
 LazyListView::LazyListView(View* pParent) :
-ListView(new LazyListViewImpl(this, pParent), pParent)
+ListView(new ListViewImpl(this, pParent), pParent)
 {
 
 }
@@ -78,10 +78,8 @@ LazyListView::setModel(LazyListModel* pModel)
 
     View::setModel(pModel);
 
-    // create an initial view pool. This also retrieves the height of the view.
     int rows = visibleRows();
     int rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
-
     extendViewPool(rows);
 
     // insert items that are already in the model.
@@ -184,7 +182,7 @@ LazyListView::removeItem(int row)
 int
 LazyListView::visibleRows()
 {
-    return static_cast<LazyListViewImpl*>(_pImpl)->visibleRows();
+    return static_cast<ListViewImpl*>(_pImpl)->visibleRows();
 }
 
 
@@ -192,7 +190,7 @@ void
 LazyListView::addItemView(View* pView)
 {
     Log::instance()->gui().debug("lazy list view add item view.");
-    static_cast<LazyListViewImpl*>(_pImpl)->addItemView(pView);
+    static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
 }
 
 
@@ -200,21 +198,21 @@ void
 LazyListView::moveItemView(int row, View* pView)
 {
     Log::instance()->gui().debug("lazy list view move item view.");
-    static_cast<LazyListViewImpl*>(_pImpl)->moveItemView(row, pView);
+    static_cast<ListViewImpl*>(_pImpl)->moveItemView(row, pView);
 }
 
 
 int
 LazyListView::getOffset()
 {
-    static_cast<LazyListViewImpl*>(_pImpl)->getOffset();
+    static_cast<ListViewImpl*>(_pImpl)->getOffset();
 }
 
 
 void
 LazyListView::updateScrollWidgetSize()
 {
-    static_cast<LazyListViewImpl*>(_pImpl)->updateScrollWidgetSize();
+    static_cast<ListViewImpl*>(_pImpl)->updateScrollWidgetSize();
 }
 
 

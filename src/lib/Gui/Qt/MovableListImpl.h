@@ -19,54 +19,50 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
+#ifndef ListImpl_INCLUDED
+#define ListImpl_INCLUDED
 
-#include "Gui/Button.h"
-#include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ButtonImpl.h"
-#endif
-
+#include <QtGui>
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
+class View;
+class ListView;
 
-const std::string&
-ButtonModel::getLabel() const
+
+class ListViewImpl : public QGraphicsView, public ViewImpl
 {
-    return _label;
-}
+    Q_OBJECT
+
+    friend class ListView;
+
+signals:
+    void moveWidgetSignal(int targetRow, View* pView);
+    void extendPoolSignal();
+
+private slots:
+    void moveWidgetSlot(int targetRow, View* pView);
+    void extendPoolSlot();
+
+private:
+    ListViewImpl(View* pView, bool movableViews = false, View* pParent = 0);
+    virtual ~ListViewImpl();
+
+    int visibleRows();
+    void addItemView(View* pView);
+    void moveItemView(int row, View* pView);
+    void extendViewPool();
+
+    QGraphicsScene*                                   _pGraphicsScene;
+    std::map<View*, QGraphicsProxyWidget*>            _proxyWidgets;
+    bool                                              _movableViews;
+};
 
 
-void
-ButtonModel::setLabel(const std::string& label)
-{
-//    Omm::Gui::Log::instance()->gui().debug("button model set label");
-    _label = label;
+}  // namespace Omm
+}  // namespace Gui
 
-//    UPDATE_VIEWS(ButtonView, setLabel, label);
-    syncViews();
-}
+#endif
 
-
-ButtonView::ButtonView(View* pParent) :
-View(new ButtonViewImpl(this, pParent), pParent)
-{
-    Omm::Gui::Log::instance()->gui().debug("button view ctor.");
-}
-
-
-void
-ButtonView::syncView(Model* pModel)
-{
-    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
-    ButtonModel* pButtonModel = static_cast<ButtonModel*>(pModel);
-    ButtonViewImpl* pImpl = static_cast<ButtonViewImpl*>(_pImpl);
-    pImpl->setLabel(pButtonModel->getLabel());
-}
-
-
-} // namespace Gui
-} // namespace Omm

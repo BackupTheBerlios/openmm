@@ -29,35 +29,38 @@ namespace Omm {
 namespace Gui {
 
 class View;
-class ListView;
 
 
-class ListViewImpl : public QGraphicsView, public ViewImpl
+class ListViewImpl : public QScrollArea, public ViewImpl
 {
     Q_OBJECT
 
     friend class ListView;
+    friend class LazyListView;
 
-signals:
-    void moveWidgetSignal(int targetRow, View* pView);
-    void extendPoolSignal();
-
-private slots:
-    void moveWidgetSlot(int targetRow, View* pView);
-    void extendPoolSlot();
-
-private:
-    ListViewImpl(View* pView, bool movableViews = false, View* pParent = 0);
+public:
+    ListViewImpl(View* pView, View* pParent = 0);
     virtual ~ListViewImpl();
 
+protected:
     int visibleRows();
     void addItemView(View* pView);
     void moveItemView(int row, View* pView);
-    void extendViewPool();
 
-    QGraphicsScene*                                   _pGraphicsScene;
-    std::map<View*, QGraphicsProxyWidget*>            _proxyWidgets;
-    bool                                              _movableViews;
+    void updateScrollWidgetSize();
+    int getOffset();
+
+signals:
+    void moveWidgetSignal(int targetRow, View* pView);
+
+private slots:
+    void moveWidgetSlot(int targetRow, View* pView);
+    void viewScrolledSlot(int value);
+
+private:
+    virtual void resizeEvent(QResizeEvent* event);
+
+    QWidget*                 _pScrollWidget;
 };
 
 

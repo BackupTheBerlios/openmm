@@ -82,7 +82,7 @@ ButtonListModel::getItemModel(int row)
 
 int main(int argc, char** argv)
 {
-    ButtonListModel listModel(1);
+    ButtonListModel listModel(100);
 
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
