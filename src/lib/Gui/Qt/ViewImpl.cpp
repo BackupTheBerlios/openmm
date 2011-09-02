@@ -137,7 +137,7 @@ void
 ViewImpl::selected()
 {
     Omm::Gui::Log::instance()->gui().debug("view impl selected event.");
-    NOTIFY_CONTROLLERS(Controller, selected);
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
 

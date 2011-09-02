@@ -37,7 +37,10 @@ class Layout;
 
 
 // need a dynamic_cast, because different subclasses of Controller can be attached to View.
-#define NOTIFY_CONTROLLERS(CLASS, METHOD, ...) for (View::ControllerIterator it = _pView->beginController(); it != _pView->endController(); ++it) \
+#define NOTIFY_CONTROLLER(CLASS, METHOD, ...) for (ControllerIterator it = beginController(); it != endController(); ++it) \
+{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
+
+#define IMPL_NOTIFY_CONTROLLER(CLASS, METHOD, ...) for (View::ControllerIterator it = _pView->beginController(); it != _pView->endController(); ++it) \
 { CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
 
 

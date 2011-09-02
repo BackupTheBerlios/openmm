@@ -37,6 +37,8 @@ namespace Gui {
 
 class ListItemController : public Controller
 {
+    friend class ListView;
+    
 public:
     void setRow(int row) { _row = row; }
 
@@ -44,7 +46,8 @@ private:
     virtual void selectedRow(int row);
     virtual void selected();
 
-    int _row;
+    ListView*     _pListView;
+    int           _row;
 };
 
 
@@ -59,6 +62,7 @@ void
 ListItemController::selectedRow(int row)
 {
     Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(row));
+    _pListView->selectedItem(row);
 }
 
 
@@ -239,6 +243,7 @@ ListView::extendViewPool(int n)
 
         Log::instance()->gui().debug("list view creating list item controller ...");
         ListItemController* pItemController = new ListItemController;
+        pItemController->_pListView = this;
         _itemControllers[pView] = pItemController;
         pView->attachController(pItemController);
 
@@ -285,6 +290,13 @@ void
 ListView::moveViewToRow(int row, View* pView)
 {
     moveItemView(row, pView);
+}
+
+
+void
+ListView::selectedItem(int row)
+{
+    NOTIFY_CONTROLLER(ListController, selectedItem, row);
 }
 
 

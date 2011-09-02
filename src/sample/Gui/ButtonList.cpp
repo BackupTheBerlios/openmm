@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include <Poco/NumberFormatter.h>
 
@@ -31,68 +32,71 @@
 #include <Omm/Gui/Button.h>
 
 
-class ButtonListModel : public Omm::Gui::ListModel
+class ButtonItem : public Omm::Gui::ButtonControllerView
 {
-public:
-    ButtonListModel(int itemCount);
-
-    virtual int totalItemCount();
-    virtual Omm::Gui::Model* getItemModel(int row);
-    virtual Omm::Gui::View* createItemView();
-    
 private:
-    std::vector<Omm::Gui::ButtonModel*>    _itemModels;
-    int                                    _viewCount;
+    virtual void pushed()
+    {
+        UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
+    }
 };
 
 
-ButtonListModel::ButtonListModel(int itemCount) :
-_viewCount(0)
+class ButtonListModel : public Omm::Gui::ListModel
 {
-    for (int i = 0; i < itemCount; i++) {
-        Omm::Gui::ButtonModel* pItemModel = new Omm::Gui::ButtonModel;
-        pItemModel->setLabel("button model " + Poco::NumberFormatter::format(i));
-        _itemModels.push_back(pItemModel);
+public:
+    ButtonListModel(int itemCount)
+    {
+        for (int i = 0; i < itemCount; i++) {
+            Omm::Gui::ButtonModel* pItemModel = new Omm::Gui::ButtonModel;
+            pItemModel->setLabel("button model " + Poco::NumberFormatter::format(i));
+            _itemModels.push_back(pItemModel);
+        }
     }
-}
+
+private:
+    virtual int totalItemCount()
+    {
+        return _itemModels.size();
+    }
+
+    virtual Omm::Gui::Model* getItemModel(int row)
+    {
+        return _itemModels[row];
+    }
+
+    virtual Omm::Gui::View* createItemView()
+    {
+        return new ButtonItem;
+    }
+    
+    std::vector<Omm::Gui::ButtonModel*>    _itemModels;
+};
 
 
-int
-ButtonListModel::totalItemCount()
+class ButtonListController : public Omm::Gui::ListController
 {
-    return _itemModels.size();
-}
-
-
-Omm::Gui::View*
-ButtonListModel::createItemView()
-{
-    Omm::Gui::ButtonView* pView = new Omm::Gui::ButtonView;
-    pView->setName("button view " + Poco::NumberFormatter::format(_viewCount++));
-    return pView;
-}
-
-
-Omm::Gui::Model*
-ButtonListModel::getItemModel(int row)
-{
-    return _itemModels[row];
-}
+    virtual void selectedItem(int row)
+    {
+        std::cout << "selected list item in row " << row << std::endl;
+    }
+};
 
 
 int main(int argc, char** argv)
 {
-    ButtonListModel listModel(100);
-
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
+
     Omm::Gui::ListView list;
+    ButtonListModel listModel(10000);
     list.setModel(&listModel);
+    ButtonListController listController;
+    list.attachController(&listController);
 
     mainWindow.setMainView(&list);
     mainWindow.resize(800, 480);
     mainWindow.show();
-
     loop.run();
 }
 

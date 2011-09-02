@@ -38,6 +38,8 @@ class ListItemController;
 
 class ListController : public Controller
 {
+    friend class ListView;
+    
 protected:
     virtual void selectedItem(int row) {}
 };
@@ -47,6 +49,7 @@ class ListView : public View
 {
     friend class ListViewImpl;
     friend class ListModel;
+    friend class ListItemController;
     
 public:
     ListView(View* pParent = 0);
@@ -87,6 +90,8 @@ protected:
     int                                 _viewHeight;
 
 private:
+    void selectedItem(int row);
+    
     std::map<View*, ListItemController*>    _itemControllers;
 };
 

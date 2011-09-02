@@ -30,7 +30,7 @@ namespace Gui {
 class View;
 class Model;
 
-#define UPDATE_MODELS(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) \
+#define UPDATE_MODEL(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) \
 { CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
 
 

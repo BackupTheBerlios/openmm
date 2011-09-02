@@ -30,7 +30,7 @@ private:
     void pushed()
     {
 //        setLabel("works!");
-        UPDATE_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
+        UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
     }
 };
 

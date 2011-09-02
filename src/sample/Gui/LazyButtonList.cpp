@@ -37,7 +37,7 @@ class ButtonItem : public Omm::Gui::ButtonControllerView
 private:
     virtual void pushed()
     {
-        UPDATE_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
+        UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
     }
 };
 

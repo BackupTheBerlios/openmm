@@ -31,7 +31,7 @@ namespace Gui {
 
 class View;
 
-#define UPDATE_VIEWS(CLASS, METHOD, ...) for (ViewIterator it = beginView(); it != endView(); ++it) \
+#define UPDATE_VIEW(CLASS, METHOD, ...) for (ViewIterator it = beginView(); it != endView(); ++it) \
 { CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
 
 
