@@ -42,7 +42,10 @@ void
 Controller::detachModel(Model* pModel)
 {
     Omm::Gui::Log::instance()->gui().debug("controller detach model ...");
-    _models.erase(std::find(_models.begin(), _models.end(), pModel));
+    ModelIterator pos = std::find(beginModel(), beginModel(), pModel);
+    if (pos != _models.end()) {
+        _models.erase(pos);
+    }
     Omm::Gui::Log::instance()->gui().debug("controller detach model finished.");
 }
 

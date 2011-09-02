@@ -37,8 +37,6 @@ class ButtonItem : public Omm::Gui::ButtonControllerView
 private:
     virtual void pushed()
     {
-        // attach model that is linked to view to this controller
-        attachModel(getModel());
         UPDATE_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
     }
 };
@@ -133,7 +131,7 @@ ButtonListModel::lastFetched(bool forward)
 
 int main(int argc, char** argv)
 {
-    ButtonListModel listModel(20);
+    ButtonListModel listModel(10000);
 
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;

@@ -41,7 +41,10 @@ void
 Model::detachView(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("model detach view ...");
-    _views.erase(std::find(_views.begin(), _views.end(), pView));
+    ViewIterator pos = std::find(beginView(), endView(), pView);
+    if (pos != _views.end()) {
+        _views.erase(pos);
+    }
     Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
 }
 

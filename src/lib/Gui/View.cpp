@@ -145,14 +145,19 @@ void
 View::setModel(Model* pModel)
 {
     Omm::Gui::Log::instance()->gui().debug("view set model: " + Poco::NumberFormatter::format(pModel));
+    if (_pModel) {
+        // if there was a model attached previously, detach this view from it
+        for(ControllerIterator it = beginController(); it != endController(); ++it) {
+            (*it)->detachModel(_pModel);
+        }
+        _pModel->detachView(this);
+    }
     if (pModel) {
         pModel->attachView(this);
+        for(ControllerIterator it = beginController(); it != endController(); ++it) {
+            (*it)->attachModel(pModel);
+        }
         syncView(pModel);
-    }
-    // if pModel == 0, detach the model from the view
-    else if (pModel) {
-        // if there was a model attached previously, detach this view from it
-        pModel->detachView(this);
     }
     _pModel = pModel;
 }
