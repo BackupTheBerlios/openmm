@@ -29,22 +29,22 @@ namespace Omm {
 namespace Gui {
 
 
-class ListItemController : public Controller
-{
-    friend class ListView;
-    friend class LazyListView;
-
-protected:
-    virtual void selectedRow(int row) {}
-
-private:
-    virtual void selected();
-
-    int getRow();
-    void setRow(int row);
-
-    int _row;
-};
+//class ListItemController : public Controller
+//{
+//    friend class ListView;
+//    friend class LazyListView;
+//
+//protected:
+//    virtual void selectedRow(int row) {}
+//
+//private:
+//    virtual void selected();
+//
+//    int getRow();
+//    void setRow(int row);
+//
+//    int _row;
+//};
 
 
 class ListItemModel : public Model
@@ -68,11 +68,11 @@ private:
 };
 
 
-class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
-{
-public:
-    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-};
+//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
+//{
+//public:
+//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
+//};
 
 
 }  // namespace Omm

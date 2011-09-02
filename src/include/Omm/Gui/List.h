@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <stack>
+#include <map>
 
 #include "View.h"
 #include "ListModel.h"
@@ -31,6 +32,8 @@
 
 namespace Omm {
 namespace Gui {
+
+class ListItemController;
 
 
 class ListController : public Controller
@@ -82,6 +85,9 @@ protected:
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;
     int                                 _viewHeight;
+
+private:
+    std::map<View*, ListItemController*>    _itemControllers;
 };
 
 

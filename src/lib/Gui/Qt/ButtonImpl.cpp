@@ -54,7 +54,7 @@ void
 ButtonViewImpl::pushed()
 {
     Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
-//    static_cast<ButtonController*>(_pView->getController())->pushed();
+    NOTIFY_CONTROLLERS(Controller, selected);
     NOTIFY_CONTROLLERS(ButtonController, pushed);
 }
 

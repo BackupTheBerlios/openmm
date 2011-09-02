@@ -39,6 +39,7 @@ class Controller
 public:
     friend class Model;
     friend class ViewImpl;
+    friend class ButtonViewImpl;
 
     void attachModel(Model* pModel);
     void detachModel(Model* pModel);

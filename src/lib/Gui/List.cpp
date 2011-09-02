@@ -35,6 +35,33 @@ namespace Omm {
 namespace Gui {
 
 
+class ListItemController : public Controller
+{
+public:
+    void setRow(int row) { _row = row; }
+
+private:
+    virtual void selectedRow(int row);
+    virtual void selected();
+
+    int _row;
+};
+
+
+void
+ListItemController::selected()
+{
+    selectedRow(_row);
+}
+
+
+void
+ListItemController::selectedRow(int row)
+{
+    Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(row));
+}
+
+
 ListView::ListView(View* pParent) :
 View(new ListViewImpl(this, pParent), pParent),
 _viewHeight(50),
@@ -66,7 +93,6 @@ ListView::setModel(ListModel* pModel)
     // insert items that are already in the model.
     Log::instance()->gui().debug("inserting number of items: " + Poco::NumberFormatter::format(pModel->totalItemCount()));
     for (int i = 0; i < std::min(pModel->totalItemCount(), rows); i++) {
-//    for (int i = 0; i < rowsFetched; i++) {
         insertItem(i);
     }
 
@@ -137,7 +163,7 @@ ListView::scrolledToRow(int rowOffset)
             moveViewToRow(lastRow, pView);
             // attach model
             pView->setModel(pModel->getItemModel(lastRow));
-//            _itemControllers[pView]->setRow(lastRow);
+            _itemControllers[pView]->setRow(lastRow);
             // move view to end of visible rows
             _visibleViews.erase(_visibleViews.begin());
             _visibleViews.push_back(pView);
@@ -152,7 +178,7 @@ ListView::scrolledToRow(int rowOffset)
             moveViewToRow(_rowOffset - 1, pView);
             // attach model
             pView->setModel(pModel->getItemModel(_rowOffset - 1));
-//            _itemControllers[pView]->setRow(_rowOffset - 1);
+            _itemControllers[pView]->setRow(_rowOffset - 1);
             // move view to beginning of visible rows
             _visibleViews.erase(_visibleViews.end() - 1);
             _visibleViews.insert(_visibleViews.begin(), pView);
@@ -210,6 +236,12 @@ ListView::extendViewPool(int n)
         _viewPool.push_back(pView);
         _freeViews.push(pView);
         addItemView(pView);
+
+        Log::instance()->gui().debug("list view creating list item controller ...");
+        ListItemController* pItemController = new ListItemController;
+        _itemControllers[pView] = pItemController;
+        pView->attachController(pItemController);
+
         Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
@@ -278,8 +310,8 @@ ListView::insertItem(int row)
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
-        Log::instance()->gui().debug("list view creating list item controller ...");
-        ListItemController* pItemController = new ListItemController;
+        _itemControllers[pView]->setRow(row);
+
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);

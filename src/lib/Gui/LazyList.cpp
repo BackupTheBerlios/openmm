@@ -37,33 +37,6 @@ namespace Omm {
 namespace Gui {
 
 
-class LazyListItemController : public ButtonController
-{
-public:
-    void setRow(int row) { _row = row; }
-
-private:
-    virtual void selectedRow(int row);
-    virtual void pushed();
-
-    int _row;
-};
-
-
-void
-LazyListItemController::pushed()
-{
-    selectedRow(_row);
-}
-
-
-void
-LazyListItemController::selectedRow(int row)
-{
-    Log::instance()->gui().debug("lazy list item controller selected row: " + Poco::NumberFormatter::format(row));
-}
-
-
 LazyListView::LazyListView(View* pParent) :
 ListView(new ListViewImpl(this, pParent), pParent)
 {
@@ -123,7 +96,6 @@ LazyListView::scrolledToRow(int rowOffset)
             moveViewToRow(lastRow, pView);
             // attach model
             pView->setModel(pModel->getItemModel(lastRow));
-            _itemControllers[pView]->setRow(lastRow);
             // move view to end of visible rows
             _visibleViews.erase(_visibleViews.begin());
             _visibleViews.push_back(pView);
@@ -138,7 +110,6 @@ LazyListView::scrolledToRow(int rowOffset)
             moveViewToRow(_rowOffset - 1, pView);
             // attach model
             pView->setModel(pModel->getItemModel(_rowOffset - 1));
-            _itemControllers[pView]->setRow(_rowOffset - 1);
             // move view to beginning of visible rows
             _visibleViews.erase(_visibleViews.end() - 1);
             _visibleViews.insert(_visibleViews.begin(), pView);

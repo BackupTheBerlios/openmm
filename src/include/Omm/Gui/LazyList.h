@@ -22,19 +22,12 @@
 #ifndef LazyList_INCLUDED
 #define LazyList_INCLUDED
 
-#include <vector>
-#include <stack>
-#include <map>
-
 #include "List.h"
 #include "ListModel.h"
 #include "ListItem.h"
 
 namespace Omm {
 namespace Gui {
-
-
-class LazyListItemController;
 
 
 class LazyListView : public ListView
@@ -52,9 +45,6 @@ protected:
     
     void scrolledToRow(int rowOffset);
     void resize(int rows);
-
-private:
-    std::map<View*, LazyListItemController*>    _itemControllers;
 };
 
 

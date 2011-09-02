@@ -67,26 +67,26 @@ ListItemView::syncView(Model* pModel)
 }
 
 
-void
-ListItemController::selected()
-{
-    Omm::Gui::Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
-    selectedRow(_row);
-}
-
-
-int
-ListItemController::getRow()
-{
-    return _row;
-}
-
-
-void
-ListItemController::setRow(int row)
-{
-    _row = row;
-}
+//void
+//ListItemController::selected()
+//{
+//    Omm::Gui::Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
+//    selectedRow(_row);
+//}
+//
+//
+//int
+//ListItemController::getRow()
+//{
+//    return _row;
+//}
+//
+//
+//void
+//ListItemController::setRow(int row)
+//{
+//    _row = row;
+//}
 
 
 } // namespace Gui
