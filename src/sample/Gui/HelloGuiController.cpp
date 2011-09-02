@@ -29,7 +29,7 @@ class HelloButtonController : public Omm::Gui::ButtonController
 private:
     void pushed()
     {
-        NOTIFY_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
+        UPDATE_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
     }
 };
 

@@ -31,7 +31,9 @@ namespace Gui {
 
 class View;
 
-#define UPDATE_VIEWS(CLASS, METHOD, ...) for (ViewIterator it = beginView(); it != endView(); ++it) { static_cast<CLASS*>(*it)->METHOD(__VA_ARGS__); }
+#define UPDATE_VIEWS(CLASS, METHOD, ...) for (ViewIterator it = beginView(); it != endView(); ++it) \
+{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
+
 
 
 class Model
@@ -47,7 +49,7 @@ protected:
     ViewIterator beginView();
     ViewIterator endView();
 
-    void syncViews();
+    virtual void syncViews();
 
     std::vector<View*>     _views;
 };
@@ -56,6 +58,13 @@ protected:
 template <class C, class M>
 class ControllerModel : public C, public M
 {
+public:
+    ControllerModel()
+    {
+        C::attachModel(this);
+    }
+
+    virtual ~ControllerModel() {}
 };
 
 

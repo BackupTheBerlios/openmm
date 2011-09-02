@@ -29,7 +29,8 @@ class HelloButtonModel : public Omm::Gui::ButtonControllerModel
 private:
     void pushed()
     {
-        setLabel("works!");
+//        setLabel("works!");
+        UPDATE_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
     }
 };
 

@@ -30,7 +30,8 @@ namespace Gui {
 class View;
 class Model;
 
-#define NOTIFY_MODELS(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) { static_cast<CLASS*>(*it)->METHOD(__VA_ARGS__); }
+#define UPDATE_MODELS(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) \
+{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
 
 
 class Controller

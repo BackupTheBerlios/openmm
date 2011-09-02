@@ -31,6 +31,19 @@
 #include <Omm/Gui/Button.h>
 
 
+
+class ButtonItem : public Omm::Gui::ButtonControllerView
+{
+private:
+    virtual void pushed()
+    {
+        // attach model that is linked to view to this controller
+        attachModel(getModel());
+        UPDATE_MODELS(Omm::Gui::ButtonModel, setLabel, "works!");
+    }
+};
+
+
 class ButtonListModel : public Omm::Gui::LazyListModel
 {
 public:
@@ -81,9 +94,9 @@ ButtonListModel::getItemModel(int row)
 Omm::Gui::View*
 ButtonListModel::createItemView()
 {
-    Omm::Gui::ButtonView* pView = new Omm::Gui::ButtonView;
-    pView->setName("button view " + Poco::NumberFormatter::format(_viewCount++));
-    return pView;
+    ButtonItem* pButtonItem = new ButtonItem;
+    pButtonItem->setName("button view " + Poco::NumberFormatter::format(_viewCount++));
+    return pButtonItem;
 }
 
 

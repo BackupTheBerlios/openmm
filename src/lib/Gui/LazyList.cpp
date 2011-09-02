@@ -40,8 +40,6 @@ namespace Gui {
 class LazyListItemController : public ButtonController
 {
 public:
-    LazyListItemController(int row);
-
     void setRow(int row) { _row = row; }
 
 private:
@@ -50,12 +48,6 @@ private:
 
     int _row;
 };
-
-
-LazyListItemController::LazyListItemController(int row) :
-_row(row)
-{
-}
 
 
 void
@@ -126,7 +118,8 @@ LazyListView::insertItem(int row)
         pView->setModel(pModel->getItemModel(row));
         
         Log::instance()->gui().debug("lazy list view creating list item controller ...");
-        LazyListItemController* pItemController = new LazyListItemController(row);
+        LazyListItemController* pItemController = new LazyListItemController;
+        pItemController->setRow(row);
         Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController));
         pView->attachController(pItemController);
         _itemControllers[pView] = pItemController;

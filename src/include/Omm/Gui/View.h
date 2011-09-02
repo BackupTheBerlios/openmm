@@ -103,6 +103,19 @@ private:
 };
 
 
+template <class C, class V>
+class ControllerView : public C, public V
+{
+public:
+    ControllerView(View* pParent = 0) : V(pParent)
+    {
+        V::attachController(this);
+    }
+
+    virtual ~ControllerView() {}
+};
+
+
 template <class V, class C, class M>
 class Widget : public V, public C, public M
 {

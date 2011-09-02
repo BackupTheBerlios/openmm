@@ -64,8 +64,17 @@ private:
 };
 
 
+class ButtonControllerView : public ControllerView<ButtonController, ButtonView>
+{
+public:
+    ButtonControllerView(View* pParent = 0) : ControllerView<ButtonController, ButtonView>(pParent) {}
+};
+
+
 class ButtonControllerModel : public ControllerModel<ButtonController, ButtonModel>
 {
+public:
+    ButtonControllerModel() : ControllerModel<ButtonController, ButtonModel>() {}
 };
 
 
