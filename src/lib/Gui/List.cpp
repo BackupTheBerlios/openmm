@@ -265,11 +265,11 @@ ListView::insertItem(int row)
 
     // resize view to the size with this item added
     updateScrollWidgetSize();
-
-    // if view is not lazy, view pool has to be extended when too small and new views are inserted.
-//    if (_visibleViews.size() >= _viewPool.size()) {
-//        extendViewPool();
-//    }
+    // check if item is visible
+    if (!itemIsVisible(row)) {
+        Log::instance()->gui().debug("lazy list view insert item that is not visible (ignoring)");
+        return;
+    }
 
     // attach item to a free (not visible) view
     if (_freeViews.size()) {
@@ -279,17 +279,7 @@ ListView::insertItem(int row)
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
         Log::instance()->gui().debug("list view creating list item controller ...");
-//        ListItemController itemController;
         ListItemController* pItemController = new ListItemController;
-//        ListItemModel* pItemModel = new ListItemModel;
-//        ListController* pLC = new ListController;
-
-//        int* pInt = new int;
-//        Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)
-//        + ", size: " + Poco::NumberFormatter::format(sizeof(*pItemController)));
-//        Controller* pItemController = new Controller;
-//        pItemController->setRow(row);
-//        pView->attachController(pItemController);
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);
@@ -308,9 +298,11 @@ ListView::removeItem(int row)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
-    // detach item from visible view
-//    View* pView = pModel->getChildView(row);
-
+    updateScrollWidgetSize();
+    if (!itemIsVisible(row)) {
+        Log::instance()->gui().debug("lazy list view remove item that is not visible (ignoring)");
+        return;
+    }
 
     // remove view from this position in visible views
     int index = visibleIndex(row);

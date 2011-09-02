@@ -50,14 +50,6 @@ protected:
     // TODO implement syncView()
     virtual void syncView() {}
     
-    virtual void insertItem(int row);
-    virtual void removeItem(int row);
-    virtual int visibleRows();
-    virtual void addItemView(View* pView);
-    virtual void moveItemView(int row, View* pView);
-
-    int getOffset();
-    void updateScrollWidgetSize();
     void scrolledToRow(int rowOffset);
     void resize(int rows);
 
