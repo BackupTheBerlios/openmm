@@ -25,7 +25,7 @@
 #include "../Upnp.h"
 #include "../UpnpAvCtlRenderer.h"
 
-#include "TabView.h"
+#include "Tab.h"
 #include "ListModel.h"
 #include "List.h"
 #include "ListItem.h"

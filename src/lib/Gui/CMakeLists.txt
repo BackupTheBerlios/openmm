@@ -37,14 +37,14 @@ Model.cpp
 Controller.cpp
 Layout.cpp
 HorizontalLayout.cpp
-Button.cpp
 MainWindow.cpp
 EventLoop.cpp
-#TabView.cpp
+Button.cpp
 List.cpp
 ListModel.cpp
 ListItem.cpp
 LazyList.cpp
+Tab.cpp
 #Navigator.cpp
 )
 

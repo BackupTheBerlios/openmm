@@ -19,34 +19,32 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "TabViewImpl.h"
-#include "Gui/TabView.h"
-#include "Gui/GuiLogger.h"
+#ifndef TabImpl_INCLUDED
+#define TabImpl_INCLUDED
+
+#include <QtGui>
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
+class View;
+class TabView;
 
-TabViewImpl::TabViewImpl(View* pView, View* pParent) :
-QTabWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() :0)),
-ViewImpl(pView, this)
+class TabViewImpl : public QTabWidget, public ViewImpl
 {
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
-}
+private:
+    friend class TabView;
+    
+    TabViewImpl(View* pView, View* pParent = 0);
+    virtual ~TabViewImpl();
 
-
-TabViewImpl::~TabViewImpl()
-{
-}
-
-
-void
-TabViewImpl::addView(View* pView, const std::string& tabName)
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
-    QTabWidget::addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
-}
+    void addView(View* pView, const std::string& tabName);
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif
+

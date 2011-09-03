@@ -4,22 +4,22 @@ QtGui.qrc
 
 set(OMMGUI_QT_SRC
 ViewImpl.cpp
-ButtonImpl.cpp
 MainWindowImpl.cpp
 EventLoopImpl.cpp
-TabViewImpl.cpp
+ButtonImpl.cpp
 ListImpl.cpp
 ListItemImpl.cpp
+TabImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
 #ViewImpl.h
-ButtonImpl.h
 #MainWindowImpl.h
 #EventLoopImpl.h
-#TabViewImpl.h
+ButtonImpl.h
 ListImpl.h
 #ListItemImpl.h
+#TabImpl.h
 )
 
 QT4_ADD_RESOURCES(

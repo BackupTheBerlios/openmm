@@ -19,27 +19,31 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef TabViewImpl_INCLUDED
-#define TabViewImpl_INCLUDED
+#ifndef Tab_INCLUDED
+#define Tab_INCLUDED
 
-#include <QtGui>
-#include "ViewImpl.h"
+#include "View.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class TabView;
 
-class TabViewImpl : public QTabWidget, public ViewImpl
+class TabView : public View
 {
-private:
-    friend class TabView;
+    friend class TabViewImpl;
     
-    TabViewImpl(View* pView, View* pParent = 0);
-    virtual ~TabViewImpl();
+public:
+    TabView(View* pParent = 0);
+    virtual ~TabView();
 
-    void addView(View* pView, const std::string& tabName);
+    void addView(View* pView, const std::string& tabName = "");
+};
+
+
+class Tab : public Widget<TabView, Controller, Model>
+{
+public:
+    Tab(View* pParent = 0) : Widget<TabView, Controller, Model>(pParent) {}
 };
 
 
@@ -47,4 +51,3 @@ private:
 }  // namespace Gui
 
 #endif
-

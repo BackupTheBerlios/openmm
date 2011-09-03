@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,40 +17,35 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
 
-#include "Gui/TabView.h"
-#include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/TabViewImpl.h"
-#endif
-
-
-namespace Omm {
-namespace Gui {
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/HorizontalLayout.h>
+#include <Omm/Gui/Button.h>
+#include <Omm/Gui/Tab.h>
 
 
-TabView::TabView(View* pParent) :
-View(new TabViewImpl(this, pParent), pParent)
+int main(int argc, char** argv)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab view ctor.");
+    Omm::Gui::EventLoop loop(argc, argv);
+    Omm::Gui::MainWindow mainWindow;
+    Omm::Gui::Tab tab;
+    Omm::Gui::HorizontalLayout layout;
+
+    int tabCount = 5;
+    for(int i = 0; i < tabCount; i++) {
+        Omm::Gui::Button* pButton = new Omm::Gui::Button;
+        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+        tab.addView(pButton, "Tab" + Poco::NumberFormatter::format(i + 1));
+    }
+
+    mainWindow.resize(800, 480);
+    mainWindow.setMainView(&tab);
+    mainWindow.show();
+
+    loop.run();
 }
 
-
-TabView::~TabView()
-{
-}
-
-
-void
-TabView::addView(View* pView, const std::string& tabName)
-{
-    static_cast<TabViewImpl*>(_pImpl)->addView(pView, tabName);
-}
-
-
-} // namespace Gui
-} // namespace Omm

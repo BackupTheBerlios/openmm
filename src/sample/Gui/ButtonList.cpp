@@ -49,7 +49,7 @@ public:
     {
         for (int i = 0; i < itemCount; i++) {
             Omm::Gui::ButtonModel* pItemModel = new Omm::Gui::ButtonModel;
-            pItemModel->setLabel("button model " + Poco::NumberFormatter::format(i));
+            pItemModel->setLabel("Button Model " + Poco::NumberFormatter::format(i));
             _itemModels.push_back(pItemModel);
         }
     }
