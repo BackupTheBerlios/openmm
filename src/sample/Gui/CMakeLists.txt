@@ -1,17 +1,17 @@
-add_executable(hellogui_subclass
-HelloGuiSubclass.cpp
+add_executable(buttonhellosubclass
+ButtonHelloSubclass.cpp
 )
 
-target_link_libraries(hellogui_subclass
+target_link_libraries(buttonhellosubclass
 ${OMM_GUI}
 )
 
 
-add_executable(hellogui_controller
-HelloGuiController.cpp
+add_executable(buttonhellocontroller
+ButtonHelloController.cpp
 )
 
-target_link_libraries(hellogui_controller
+target_link_libraries(buttonhellocontroller
 ${OMM_GUI}
 )
 
@@ -25,20 +25,20 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttongroup_layout
+add_executable(buttongrouplayout
 ButtonGroupLayout.cpp
 )
 
-target_link_libraries(buttongroup_layout
+target_link_libraries(buttongrouplayout
 ${OMM_GUI}
 )
 
 
-add_executable(buttongroup_1tonmodel
+add_executable(buttongroup1tonmodel
 ButtonGroup1toNModel.cpp
 )
 
-target_link_libraries(buttongroup_1tonmodel
+target_link_libraries(buttongroup1tonmodel
 ${OMM_GUI}
 )
 
@@ -61,11 +61,11 @@ ${OMM_GUI}
 )
 
 
-add_executable(lazybuttonlist
-LazyButtonList.cpp
+add_executable(buttonlazylist
+ButtonLazyList.cpp
 )
 
-target_link_libraries(lazybuttonlist
+target_link_libraries(buttonlazylist
 ${OMM_GUI}
 )
 
@@ -75,5 +75,14 @@ ButtonTab.cpp
 )
 
 target_link_libraries(buttontab
+${OMM_GUI}
+)
+
+
+add_executable(buttonnavigator
+ButtonNavigator.cpp
+)
+
+target_link_libraries(buttonnavigator
 ${OMM_GUI}
 )

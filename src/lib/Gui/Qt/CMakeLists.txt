@@ -10,6 +10,7 @@ ButtonImpl.cpp
 ListImpl.cpp
 ListItemImpl.cpp
 TabImpl.cpp
+NavigatorImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
@@ -20,6 +21,7 @@ ButtonImpl.h
 ListImpl.h
 #ListItemImpl.h
 #TabImpl.h
+NavigatorImpl.h
 )
 
 QT4_ADD_RESOURCES(

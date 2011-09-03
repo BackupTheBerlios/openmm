@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,52 +17,36 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef QtNavigatorPrivate_INCLUDED
-#define QtNavigatorPrivate_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <stack>
-#include <QtGui>
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Button.h>
+#include <Omm/Gui/Navigator.h>
 
-class QtNavigable;
 
-class QtNavigatorPanelButton : public QPushButton
+int main(int argc, char** argv)
 {
-    Q_OBJECT
+    Omm::Gui::EventLoop loop(argc, argv);
+    Omm::Gui::MainWindow mainWindow;
+    Omm::Gui::Navigator navigator;
 
-public:
-    QtNavigatorPanelButton(QtNavigable* pNavigable);
+    Omm::Gui::Button* pButton = new Omm::Gui::Button;
+    pButton->setLabel("Button 1");
+    navigator.push(pButton, "Button 1");
 
-    QtNavigable* getNavigable();
+//    for(int i = 0; i < tabCount; i++) {
+//        Omm::Gui::Button* pButton = new Omm::Gui::Button;
+//        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+//        tab.addView(pButton, "Tab" + Poco::NumberFormatter::format(i + 1));
+//    }
 
-private:
-    QtNavigable*    _pNavigable;
-};
+    mainWindow.resize(800, 480);
+    mainWindow.setMainView(&navigator);
+    mainWindow.show();
 
-
-class QtNavigatorPanel : public QWidget
-{
-    Q_OBJECT
-
-public:
-    QtNavigatorPanel(QWidget* pParent = 0);
-
-    void push(QtNavigable* pNavigable);
-    void pop(QtNavigable* pNavigable);
-
-signals:
-    void selectedNavigable(QtNavigable* pNavigable);
-
-private slots:
-    void buttonPushed();
-
-private:
-    std::stack<QtNavigatorPanelButton*>     _buttonStack;
-    QHBoxLayout*                            _pButtonLayout;
-    QSignalMapper*                          _pSignalMapper;
-};
-
-
-#endif
+    loop.run();
+}
 

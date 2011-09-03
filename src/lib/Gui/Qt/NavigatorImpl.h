@@ -19,38 +19,65 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtNavigator_INCLUDED
-#define QtNavigator_INCLUDED
+#ifndef NavigatorImpl_INCLUDED
+#define NavigatorImpl_INCLUDED
 
 #include <stack>
 #include <QtGui>
+#include "ViewImpl.h"
 
 
-class QtNavigable;
+namespace Omm {
+namespace Gui {
+
 class QtNavigatorPanel;
+class QtNavigatorPanelButton;
 
-class QtNavigator : public QWidget
+class NavigatorViewImpl : public QWidget, public ViewImpl
 {
-    Q_OBJECT
-
-public:
-    QtNavigator(QWidget* pParent = 0);
-    ~QtNavigator();
+    friend class QtNavigatorPanel;
     
-    void push(QtNavigable* pNavigable);
-
-private slots:
-    void expose(QtNavigable* pNavigable);
+public:
+    NavigatorViewImpl(View* pView, View* pParent = 0);
+    virtual ~NavigatorViewImpl();
+    
+    void pushView(View* pView, const std::string name);
 
 private:
+    void expose(View* pView);
+
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;
     QVBoxLayout*                _pNavigatorLayout;
-    std::stack<QtNavigable*>    _navigableStack;
+    std::stack<View*>           _views;
 };
 
 
+class QtNavigatorPanel : public QWidget
+{
+    Q_OBJECT
 
+    friend class NavigatorViewImpl;
+    
+public:
+    QtNavigatorPanel(NavigatorViewImpl* pNavigatorView = 0);
+
+    void push(View* pView, const std::string name);
+    void pop(View* pView);
+
+private slots:
+    void buttonPushed();
+
+private:
+    std::stack<QtNavigatorPanelButton*>     _buttonStack;
+    QHBoxLayout*                            _pButtonLayout;
+    NavigatorViewImpl*                      _pNavigatorView;
+//    QSignalMapper*                          _pSignalMapper;
+};
+
+
+} // namespace Gui
+} // namespace Omm
 
 
 #endif

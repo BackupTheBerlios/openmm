@@ -28,7 +28,7 @@ namespace Gui {
 
 
 TabViewImpl::TabViewImpl(View* pView, View* pParent) :
-QTabWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() :0)),
+QTabWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() : 0)),
 ViewImpl(pView, this)
 {
     Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");

@@ -22,56 +22,47 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/Navigator.h"
-#include "Gui/Navigable.h"
+#include "Gui/GuiLogger.h"
 
-//#ifdef __GUI_QT_PLATFORM__
-//#include "Qt/QtNavigator.h"
-//#endif
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/NavigatorImpl.h"
+#endif
 
 
 namespace Omm {
 namespace Gui {
 
 
-Navigable::Navigable() :
-_pNavigator(0)
+NavigatorView::NavigatorView(View* pParent) :
+View(new NavigatorViewImpl(this, pParent), pParent)
 {
-
+    Omm::Gui::Log::instance()->gui().debug("navigator view ctor.");
 }
 
 
-Navigator*
-Navigable::getNavigator() const
-{
-    return _pNavigator;
-}
-
-
-Navigator::Navigator()
-{
-}
-
-
-Navigator::~Navigator()
+NavigatorView::~NavigatorView()
 {
 }
 
 
 void
-Navigator::push(Navigable* pNavigable)
+NavigatorView::push(View* pView, const std::string& name)
 {
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
+    Log::instance()->gui().debug("Navigator push: " + name + " ...");
 
-    pNavigable->_pNavigator = this;
-    if (pNavigable->getView()) {
-//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
-        pushImpl(pNavigable);
-    }
-    _navigableStack.push(pNavigable);
+//    pNavigable->_pNavigator = this;
+//    if (pNavigable->getView()) {
+////        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
+//        pushImpl(pNavigable);
+//    }
+//    _navigableStack.push(pNavigable);
 //    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
-    pNavigable->show();
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
+
+    static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, name);
+
+//    pView->show();
+
+    Log::instance()->gui().debug("Navigator push: " + name + " finished.");
 }
 
 

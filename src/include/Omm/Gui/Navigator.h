@@ -22,28 +22,26 @@
 #ifndef Navigator_INCLUDED
 #define Navigator_INCLUDED
 
-#include <stack>
 #include "View.h"
 
 namespace Omm {
 namespace Gui {
 
-class Navigable;
 
-
-class Navigator : public View
+class NavigatorView : public View
 {
 public:
-    Navigator();
-    ~Navigator();
+    NavigatorView(View* pParent = 0);
+    virtual ~NavigatorView();
 
-    void push(Navigable* pNavigable);
+    void push(View* pView, const std::string& name = "");
+};
 
-protected:
-    virtual void pushImpl(Navigable* pNavigable) = 0;
 
-private:
-    std::stack<Navigable*>    _navigableStack;
+class Navigator : public Widget<NavigatorView, Controller, Model>
+{
+public:
+    Navigator(View* pParent = 0) : Widget<NavigatorView, Controller, Model>(pParent) {}
 };
 
 

@@ -23,7 +23,6 @@
 
 #include <Omm/Gui/EventLoop.h>
 #include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/HorizontalLayout.h>
 #include <Omm/Gui/Button.h>
 #include <Omm/Gui/Tab.h>
 
@@ -33,7 +32,6 @@ int main(int argc, char** argv)
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
     Omm::Gui::Tab tab;
-    Omm::Gui::HorizontalLayout layout;
 
     int tabCount = 5;
     for(int i = 0; i < tabCount; i++) {
