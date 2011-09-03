@@ -125,9 +125,9 @@ class Widget : public V, public C, public M
 public:
     Widget(View* pParent = 0) : V(pParent)
     {
-        V::setModel(this);
         V::attachController(this);
         C::attachModel(this);
+        V::setModel(this);
     }
     
     virtual ~Widget() {}

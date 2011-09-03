@@ -28,8 +28,7 @@ ${OMM}
 ${OMM_UTIL}
 ${OMM_AV}
 ${OMM_GUI}
-#${OMM_UPNPGUI}
-ommplugin-application-qt
+${OMM_UPNPGUI}
 )
 
 install(TARGETS omm stdomm newomm

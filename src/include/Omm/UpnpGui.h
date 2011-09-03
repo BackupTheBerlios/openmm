@@ -22,84 +22,79 @@
 #ifndef UpnpGui_INCLUDED
 #define UpnpGui_INCLUDED
 
-#include "../Upnp.h"
-#include "../UpnpAvCtlRenderer.h"
+#include "Upnp.h"
+#include "UpnpAvCtlRenderer.h"
 
-#include "Tab.h"
-#include "ListModel.h"
-#include "List.h"
-#include "ListItem.h"
+#include "Gui/Tab.h"
+#include "Gui/ListModel.h"
+#include "Gui/List.h"
+#include "Gui/ListItem.h"
+#include "Gui/Button.h"
 
 
 namespace Omm {
-namespace Gui {
 
 
-class ControllerGui : public Omm::Controller, public TabView
+class ControllerWidget : public Controller, public Gui::Tab
 {
 public:
-    ControllerGui();
+    ControllerWidget();
+
+//    virtual void addDeviceGroup(DeviceGroup* pDeviceGroup, bool begin);
 };
 
 
-class DeviceGroupModel : public DeviceGroup, public ListModel
+class DeviceGroupWidget : public DeviceGroup, public Gui::ListView, public Gui::ListController, public Gui::ListModel
 {
 public:
-    DeviceGroupModel(const std::string& deviceType, const std::string& shortName);
-    DeviceGroupModel(DeviceGroupDelegate* pDeviceGroupDelegate);
+    DeviceGroupWidget(const std::string& deviceType, const std::string& shortName);
+    DeviceGroupWidget(DeviceGroupDelegate* pDeviceGroupDelegate);
 
     // DeviceGroup interface
     virtual void addDevice(Device* pDevice, int index, bool begin);
     virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void selectDevice(Device* pDevice, int index);
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+    virtual void showDeviceGroup();
 
     // ListModel interface
     virtual int totalItemCount();
-    virtual void selectItem(int row);
+
+    // ListController interface
+    virtual void selectedItem(int row);
 
 protected:
     virtual void init() {}
 };
 
 
-class MediaRendererGroupView : public DeviceGroupModel, public ListView
+class MediaRendererGroupWidget : public DeviceGroupWidget
 {
 public:
-    MediaRendererGroupView();
-
-//    // ListModel interface
-    virtual ListItemView* createView();
-    virtual ListItemView* getChildView(int row);
-//    virtual void attachWidget(int row, ListWidget* pView);
-//    virtual void detachWidget(int row);
+    MediaRendererGroupWidget();
 
     // Omm::DeviceGroup interface
     virtual Device* createDevice();
-//    virtual void show();
+
+    // ListModel interface
+    virtual Gui::View* createItemView();
+    virtual Gui::Model* getItemModel(int row);
 };
 
 
-class MediaRendererDevice : public Av::CtlMediaRenderer
+class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::ButtonModel
 {
-//    void setDeviceWidget(QtMediaRendererWidget* pView);
-//    QtMediaRendererWidget* getDeviceWidget();
-//
-//    virtual void initController();
-//
-//private:
-//    QtMediaRendererWidget*            _pMediaRendererWidget;
+public:
+    virtual void initController();
 };
 
 
-class MediaRendererView : public ListItemView
+class MediaRendererView : public Gui::ButtonView
 {
 
 };
 
 
 }  // namespace Omm
-}  // namespace Gui
 
 #endif

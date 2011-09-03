@@ -51,7 +51,7 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-    virtual void show();
+    virtual void showDeviceGroup();
 
     virtual void addDevice(Omm::Device* pDevice, int index, bool begin);
     virtual void removeDevice(Omm::Device* pDevice, int index, bool begin);

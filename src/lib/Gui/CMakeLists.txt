@@ -59,22 +59,6 @@ ommgui
 CACHE INTERNAL libommgui
 )
 
-
-#add_library(ommupnpgui
-#UpnpGui.cpp
-#)
-
-#target_link_libraries(ommupnpgui
-#${POCO_FOUNDATION}
-#ommupnp
-#ommgui
-#)
-
-#set(OMM_UPNPGUI
-#ommupnpgui
-#CACHE INTERNAL ommupnpgui
-#)
-
 install(TARGETS ommgui # ommupnpgui
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib

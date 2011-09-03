@@ -19,22 +19,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-//#include <Omm/Gui/EventLoop.h>
-//#include <Omm/Gui/MainWindow.h>
-
 #include <Omm/UpnpApplication.h>
 #include <Omm/Util.h>
 
 int main(int argc, char** argv)
 {
-//    Omm::Gui::EventLoop loop(argc, argv);
-//    Omm::Gui::MainWindow mainWindow;
-//
-//    mainWindow.showWidget();
-//
-//    loop.run();
-
-
     Omm::Util::PluginLoader<Omm::UpnpApplication> pluginLoader;
     Omm::UpnpApplication* pApp;
     try {

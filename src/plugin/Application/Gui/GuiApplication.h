@@ -24,10 +24,10 @@
 
 #include <Omm/Gui/EventLoop.h>
 #include <Omm/Gui/MainWindow.h>
-#include <Omm/Gui/UpnpGui.h>
 
 #include <Omm/Upnp.h>
 #include <Omm/UpnpApplication.h>
+#include <Omm/UpnpGui.h>
 
 
 class GuiApplication : public Omm::UpnpApplication

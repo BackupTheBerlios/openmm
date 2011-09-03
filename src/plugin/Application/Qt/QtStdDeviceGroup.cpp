@@ -230,7 +230,7 @@ QtStdDeviceGroup::columnCount(const QModelIndex& parent) const
 
 
 void
-QtStdDeviceGroup::show()
+QtStdDeviceGroup::showDeviceGroup()
 {
     Omm::Log::instance()->upnp().debug("Qt standard device group show: " + getDeviceType());
 

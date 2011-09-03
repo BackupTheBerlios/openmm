@@ -3802,7 +3802,7 @@ Controller::registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show)
     pDeviceGroup->setVisible(show);
     if (show) {
 //        showDeviceGroup(pDeviceGroup);
-        pDeviceGroup->show();
+        pDeviceGroup->showDeviceGroup();
     }
 }
 
@@ -3934,7 +3934,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 pDeviceGroup->addDevice(pTypedDevice);
                 if (!pDeviceGroup->getVisible()) {
 //                    showDeviceGroup(pDeviceGroup);
-                    pDeviceGroup->show();
+                    pDeviceGroup->showDeviceGroup();
                 }
                 Log::instance()->upnp().debug("controller add device finished, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
             }
