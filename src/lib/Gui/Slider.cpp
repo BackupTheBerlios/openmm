@@ -19,34 +19,54 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef QtNavigable_INCLUDED
-#define QtNavigable_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <QtGui>
-class QtNavigator;
+#include "Gui/Slider.h"
+#include "Gui/GuiLogger.h"
 
-// NOTE: QtNavigable could go into CtlMediaObject as a generic Navigable, with a generic Navigator
-
-class QtNavigable
-{
-    friend class QtNavigator;
-    
-public:
-    QtNavigable();
-
-    virtual QString getBrowserTitle() { return ""; }
-    virtual QWidget* getView() { return 0; }
-    /// If getWidget() returns not null but a valid widget, the widget
-    /// is pushed on QtNavigator::_pStackedWidget.
-    virtual void show() {}
-    /// Additionally, show() can be implemented if for example no widget
-    /// is pushed but some other action is necessary to show the correct view.
-    QtNavigator* getNavigator() const;
-
-private:
-    QtNavigator*    _pNavigator;
-};
-
-
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/SliderImpl.h"
 #endif
 
+
+namespace Omm {
+namespace Gui {
+
+
+const int
+SliderModel::getValue() const
+{
+    return _value;
+}
+
+
+void
+SliderModel::setValue(int value)
+{
+//    Omm::Gui::Log::instance()->gui().debug("button model set label");
+    _value = value;
+
+//    UPDATE_VIEWS(SliderView, setLabel, label);
+    syncViews();
+}
+
+
+SliderView::SliderView(View* pParent) :
+View(new SliderViewImpl(this, pParent), pParent)
+{
+    Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
+}
+
+
+void
+SliderView::syncView(Model* pModel)
+{
+    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
+    SliderModel* pSliderModel = static_cast<SliderModel*>(pModel);
+    SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
+    pImpl->setValue(pSliderModel->getValue());
+}
+
+
+} // namespace Gui
+} // namespace Omm

@@ -46,6 +46,7 @@ ListItem.cpp
 LazyList.cpp
 Tab.cpp
 Navigator.cpp
+Slider.cpp
 )
 
 target_link_libraries(ommgui

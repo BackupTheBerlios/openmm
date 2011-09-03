@@ -19,18 +19,72 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "QtNavigable.h"
+#ifndef Slider_INCLUDED
+#define Slider_INCLUDED
+
+#include "View.h"
+#include "Model.h"
+#include "Controller.h"
 
 
-QtNavigable::QtNavigable() :
-_pNavigator(0)
+namespace Omm {
+namespace Gui {
+
+
+class SliderController : public Controller
 {
+    friend class SliderViewImpl;
+    
+protected:
+    virtual void valueChanged(int value) {}
+};
 
-}
 
-
-QtNavigator*
-QtNavigable::getNavigator() const
+class SliderModel : public Model
 {
-    return _pNavigator;
-}
+public:
+    virtual const int getValue() const;
+    void setValue(int value);
+    
+private:
+    int _value;
+};
+
+
+class SliderView : public View
+{
+    friend class SliderModel;
+    
+public:
+    SliderView(View* pParent = 0);
+    
+private:
+    virtual void syncView(Model* pModel);
+};
+
+
+class SliderControllerView : public ControllerView<SliderController, SliderView>
+{
+public:
+    SliderControllerView(View* pParent = 0) : ControllerView<SliderController, SliderView>(pParent) {}
+};
+
+
+class SliderControllerModel : public ControllerModel<SliderController, SliderModel>
+{
+public:
+    SliderControllerModel() : ControllerModel<SliderController, SliderModel>() {}
+};
+
+
+class Slider : public Widget<SliderView, SliderController, SliderModel>
+{
+public:
+    Slider(View* pParent = 0) : Widget<SliderView, SliderController, SliderModel>(pParent) {}
+};
+
+
+}  // namespace Omm
+}  // namespace Gui
+
+#endif

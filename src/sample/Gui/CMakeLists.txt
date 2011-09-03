@@ -86,3 +86,12 @@ ButtonNavigator.cpp
 target_link_libraries(buttonnavigator
 ${OMM_GUI}
 )
+
+
+add_executable(slider
+Slider.cpp
+)
+
+target_link_libraries(slider
+${OMM_GUI}
+)
