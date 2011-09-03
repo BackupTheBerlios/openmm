@@ -44,7 +44,8 @@ public:
     void pushView(View* pView, const std::string name);
 
 private:
-    void expose(View* pView);
+    void popView(View* pView);
+    void exposeView(View* pView);
 
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;
@@ -72,7 +73,6 @@ private:
     std::stack<QtNavigatorPanelButton*>     _buttonStack;
     QHBoxLayout*                            _pButtonLayout;
     NavigatorViewImpl*                      _pNavigatorView;
-//    QSignalMapper*                          _pSignalMapper;
 };
 
 

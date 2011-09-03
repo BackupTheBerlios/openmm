@@ -27,21 +27,37 @@
 #include <Omm/Gui/Navigator.h>
 
 
+class NavButton : public Omm::Gui::Button
+{
+public:
+    NavButton(Omm::Gui::Navigator* pNavigator) :
+    _pNavigator(pNavigator)
+    {
+        setLabel("Button " + Poco::NumberFormatter::format(_buttonCount++));
+    }
+
+private:
+    void pushed()
+    {
+        NavButton* pNavButton = new NavButton(_pNavigator);
+        _pNavigator->push(pNavButton, pNavButton->getLabel());
+    }
+
+    static int              _buttonCount;
+    Omm::Gui::Navigator*    _pNavigator;
+};
+
+int NavButton::_buttonCount = 0;
+
+
 int main(int argc, char** argv)
 {
     Omm::Gui::EventLoop loop(argc, argv);
     Omm::Gui::MainWindow mainWindow;
     Omm::Gui::Navigator navigator;
 
-    Omm::Gui::Button* pButton = new Omm::Gui::Button;
-    pButton->setLabel("Button 1");
-    navigator.push(pButton, "Button 1");
-
-//    for(int i = 0; i < tabCount; i++) {
-//        Omm::Gui::Button* pButton = new Omm::Gui::Button;
-//        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
-//        tab.addView(pButton, "Tab" + Poco::NumberFormatter::format(i + 1));
-//    }
+    NavButton* pButton = new NavButton(&navigator);
+    navigator.push(pButton, pButton->getLabel());
 
     mainWindow.resize(800, 480);
     mainWindow.setMainView(&navigator);

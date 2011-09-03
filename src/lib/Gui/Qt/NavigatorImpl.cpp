@@ -49,8 +49,6 @@ QWidget(pNavigatorView),
 _pNavigatorView(pNavigatorView)
 {
     _pButtonLayout = new QHBoxLayout(this);
-//    _pSignalMapper = new QSignalMapper(this);
-//    connect(_pSignalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonPushed()));
 }
 
 
@@ -60,7 +58,6 @@ QtNavigatorPanel::push(View* pView, const std::string name)
     QtNavigatorPanelButton* pButton = new QtNavigatorPanelButton(pView);
     pButton->_pView = pView;
     pButton->setText(QString::fromStdString(name));
-//    connect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
     connect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
     _pButtonLayout->addWidget(pButton);
     _buttonStack.push(pButton);
@@ -72,12 +69,13 @@ QtNavigatorPanel::pop(View* pView)
 {
     while(!_buttonStack.empty() && _buttonStack.top()->_pView != pView) {
         QtNavigatorPanelButton* pButton = _buttonStack.top();
-//        disconnect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
+        _pNavigatorView->popView(pButton->_pView);
         disconnect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
         _pButtonLayout->removeWidget(pButton);
         delete pButton;
         _buttonStack.pop();
     }
+    _pNavigatorView->exposeView(pView);
 }
 
 
@@ -85,12 +83,7 @@ void
 QtNavigatorPanel::buttonPushed()
 {
     QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
     pop(pButton->_pView);
-    _pNavigatorView->expose(pButton->_pView);
-//    emit selectedView(pButton->_pView);
-    
 }
 
 
@@ -103,8 +96,6 @@ ViewImpl(pView, this)
     _pNavigatorLayout = new QVBoxLayout(this);
     _pNavigatorLayout->addWidget(_pNavigatorPanel);
     _pNavigatorLayout->addWidget(_pStackedWidget);
-
-//    connect(_pNavigatorPanel, SIGNAL(selectedView(QtNavigable*)), this, SLOT(expose(QtNavigable*)));
 }
 
 
@@ -119,44 +110,28 @@ NavigatorViewImpl::~NavigatorViewImpl()
 void
 NavigatorViewImpl::pushView(View* pView, const std::string name)
 {
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
-
-//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getView()));
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
     _pStackedWidget->addWidget(pWidget);
     _pStackedWidget->setCurrentWidget(pWidget);
-//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget finished.");
     _pNavigatorPanel->push(pView, name);
-//    _navigableStack.push(pNavigable);
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
     pWidget->show();
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
 }
 
 
 void
-NavigatorViewImpl::expose(View* pView)
+NavigatorViewImpl::popView(View* pView)
 {
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
-
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    pWidget->show();
     _pStackedWidget->removeWidget(pWidget);
+}
 
-//    while(!_navigableStack.empty() && _navigableStack.top() != pNavigable) {
-//        QtNavigable* pPoppedNavigable = _navigableStack.top();
-//        if (pPoppedNavigable->getView()) {
-//            _pStackedWidget->removeWidget(pPoppedNavigable->getView());
-//        }
-//        // FIXME: crash when deleting popped navigable
-////        delete pPoppedNavigable;
-////        _navigableStack.pop();
-//    }
-//    if (!_navigableStack.empty()) {
-//        pNavigable->show();
-//    }
+
+void
+NavigatorViewImpl::exposeView(View* pView)
+{
+    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
+    _pStackedWidget->setCurrentWidget(pWidget);
+    pWidget->show();
 }
 
 
