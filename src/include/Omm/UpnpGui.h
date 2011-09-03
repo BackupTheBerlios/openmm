@@ -27,6 +27,7 @@
 #include "UpnpAvCtlServer.h"
 
 #include "Gui/Tab.h"
+#include "Gui/Navigator.h"
 #include "Gui/ListModel.h"
 #include "Gui/List.h"
 #include "Gui/ListItem.h"
@@ -40,12 +41,10 @@ class ControllerWidget : public Controller, public Gui::Tab
 {
 public:
     ControllerWidget();
-
-//    virtual void addDeviceGroup(DeviceGroup* pDeviceGroup, bool begin);
 };
 
 
-class DeviceGroupWidget : public DeviceGroup, public Gui::ListView, public Gui::ListController, public Gui::ListModel
+class DeviceGroupWidget : public DeviceGroup, public Gui::NavigatorView, public Gui::ListController, public Gui::ListModel
 {
 public:
     DeviceGroupWidget(const std::string& deviceType, const std::string& shortName);
@@ -66,6 +65,8 @@ public:
 
 protected:
     virtual void init() {}
+
+    Gui::ListView   _deviceGroupList;
 };
 
 

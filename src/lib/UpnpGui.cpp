@@ -34,13 +34,6 @@ ControllerWidget::ControllerWidget()
 }
 
 
-//void
-//ControllerWidget::addDeviceGroup(DeviceGroup* pDeviceGroup, bool begin)
-//{
-//    addView(static_cast<DeviceGroupWidget*>(pDeviceGroup));
-//}
-
-
 DeviceGroupWidget::DeviceGroupWidget(const std::string& deviceType, const std::string& shortName) :
 DeviceGroup(deviceType, shortName)
 {
@@ -89,7 +82,7 @@ DeviceGroupWidget::removeDeviceContainer(DeviceContainer* pDeviceContainer, int 
 void
 DeviceGroupWidget::showDeviceGroup()
 {
-    Gui::Log::instance()->gui().debug("device group widget show device Group");
+    Gui::Log::instance()->gui().debug("device group widget show device group");
     ControllerWidget* pController = static_cast<ControllerWidget*>(getController());
     pController->addView(this, shortName());
 }
@@ -116,7 +109,8 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
-    setModel(this);
+    _deviceGroupList.setModel(this);
+    push(&_deviceGroupList, ">");
 }
 
 
@@ -155,7 +149,8 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media server group widget ctor");
     View::setName("media server group view");
-    setModel(this);
+    _deviceGroupList.setModel(this);
+    push(&_deviceGroupList, ">");
 }
 
 

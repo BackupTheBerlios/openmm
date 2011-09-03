@@ -198,7 +198,7 @@ ListView::resize(int rows)
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     int rowDelta = rows - viewPoolSize();
-    Log::instance()->gui().debug("lazy list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDelta > 0) {
         extendViewPool(rowDelta);
         for (int i = 0; i < rowDelta; i++) {
@@ -311,7 +311,7 @@ ListView::insertItem(int row)
     updateScrollWidgetSize();
     // check if item is visible
     if (!itemIsVisible(row)) {
-        Log::instance()->gui().debug("lazy list view insert item that is not visible (ignoring)");
+        Log::instance()->gui().debug("list view insert item that is not visible (ignoring)");
         return;
     }
 
@@ -344,7 +344,7 @@ ListView::removeItem(int row)
 
     updateScrollWidgetSize();
     if (!itemIsVisible(row)) {
-        Log::instance()->gui().debug("lazy list view remove item that is not visible (ignoring)");
+        Log::instance()->gui().debug("list view remove item that is not visible (ignoring)");
         return;
     }
 
