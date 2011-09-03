@@ -29,6 +29,7 @@ namespace Omm {
 ControllerWidget::ControllerWidget()
 {
     Gui::Log::instance()->gui().debug("controller widget register device groups ...");
+    registerDeviceGroup(new MediaServerGroupWidget);
     registerDeviceGroup(new MediaRendererGroupWidget);
 }
 
@@ -119,6 +120,14 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 }
 
 
+Device*
+MediaRendererGroupWidget::createDevice()
+{
+    Gui::Log::instance()->gui().debug("media renderer group widget create renderer device.");
+    return new MediaRendererDevice;
+}
+
+
 Gui::View*
 MediaRendererGroupWidget::createItemView()
 {
@@ -134,16 +143,47 @@ MediaRendererGroupWidget::getItemModel(int row)
 }
 
 
-Device*
-MediaRendererGroupWidget::createDevice()
+void
+MediaRendererDevice::initController()
 {
-    Gui::Log::instance()->gui().debug("media renderer group widget create renderer device.");
-    return new MediaRendererDevice;
+    setLabel(getFriendlyName());
+}
+
+
+MediaServerGroupWidget::MediaServerGroupWidget() :
+DeviceGroupWidget(new Av::MediaServerGroupDelegate)
+{
+    Gui::Log::instance()->gui().debug("media server group widget ctor");
+    View::setName("media server group view");
+    setModel(this);
+}
+
+
+Device*
+MediaServerGroupWidget::createDevice()
+{
+    Gui::Log::instance()->gui().debug("media server group widget create server device.");
+    return new MediaServerDevice;
+}
+
+
+Gui::View*
+MediaServerGroupWidget::createItemView()
+{
+    Gui::Log::instance()->gui().debug("media server group widget create server view.");
+    return new MediaServerView;
+}
+
+
+Gui::Model*
+MediaServerGroupWidget::getItemModel(int row)
+{
+    return static_cast<MediaServerDevice*>(getDevice(row));
 }
 
 
 void
-MediaRendererDevice::initController()
+MediaServerDevice::initController()
 {
     setLabel(getFriendlyName());
 }

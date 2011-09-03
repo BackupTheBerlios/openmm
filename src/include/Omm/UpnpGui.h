@@ -24,6 +24,7 @@
 
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
+#include "UpnpAvCtlServer.h"
 
 #include "Gui/Tab.h"
 #include "Gui/ListModel.h"
@@ -90,6 +91,33 @@ public:
 
 
 class MediaRendererView : public Gui::ButtonView
+{
+
+};
+
+
+class MediaServerGroupWidget : public DeviceGroupWidget
+{
+public:
+    MediaServerGroupWidget();
+
+    // Omm::DeviceGroup interface
+    virtual Device* createDevice();
+
+    // ListModel interface
+    virtual Gui::View* createItemView();
+    virtual Gui::Model* getItemModel(int row);
+};
+
+
+class MediaServerDevice : public Av::CtlMediaServer, public Gui::ButtonModel
+{
+public:
+    virtual void initController();
+};
+
+
+class MediaServerView : public Gui::ButtonView
 {
 
 };
