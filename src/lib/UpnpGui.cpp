@@ -98,20 +98,13 @@ DeviceGroupWidget::totalItemCount()
 }
 
 
-void
-DeviceGroupWidget::selectedItem(int row)
-{
-    Device* pDevice = getDevice(row);
-    DeviceGroup::selectDevice(pDevice);
-}
-
-
 MediaRendererGroupWidget::MediaRendererGroupWidget() :
 DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
     _deviceGroupList.setModel(this);
+    _deviceGroupList.attachController(this);
     push(&_deviceGroupList, ">");
 }
 
@@ -136,6 +129,15 @@ Gui::Model*
 MediaRendererGroupWidget::getItemModel(int row)
 {
     return static_cast<MediaRendererDevice*>(getDevice(row));
+}
+
+
+void
+MediaRendererGroupWidget::selectedItem(int row)
+{
+    Gui::Log::instance()->gui().debug("media renderer group widget selected device");
+    MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(getDevice(row));
+    DeviceGroup::selectDevice(pRenderer);
 }
 
 
@@ -265,13 +267,17 @@ MediaContainerWidget::selectedItem(int row)
     Gui::Log::instance()->gui().debug("media container widget selected media object");
     MediaObjectModel* pChildObject = static_cast<MediaObjectModel*>(getItemModel(row));
     if (pChildObject->isContainer()) {
-        Gui::Log::instance()->gui().debug("media container widget selected container");
+        Gui::Log::instance()->gui().debug("media container widget selected media container");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->_pObjectModel = pChildObject;
         pContainer->_pServerGroup = _pServerGroup;
         pContainer->setModel(pContainer);
         pContainer->attachController(pContainer);
-        _pServerGroup->push(pContainer, _pObjectModel->getTitle());
+        _pServerGroup->push(pContainer, pChildObject->getTitle());
+    }
+    else {
+        Gui::Log::instance()->gui().debug("media container widget selected media item");
+        _pObjectModel->getServer()->selectMediaObject(pChildObject);
     }
 }
 

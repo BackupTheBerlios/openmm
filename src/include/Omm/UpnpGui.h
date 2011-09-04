@@ -63,8 +63,8 @@ public:
     // ListModel interface
     virtual int totalItemCount();
 
-    // ListController interface
-    virtual void selectedItem(int row);
+//    // ListController interface
+//    virtual void selectedItem(int row);
 
 protected:
     virtual void init() {}
@@ -84,6 +84,9 @@ public:
     // ListModel interface
     virtual Gui::View* createItemView();
     virtual Gui::Model* getItemModel(int row);
+
+    // ListController interface
+    virtual void selectedItem(int row);
 };
 
 
