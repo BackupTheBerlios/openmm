@@ -25,6 +25,7 @@
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvCtlServer.h"
+#include "UpnpAvCtlObject2.h"
 
 #include "Gui/Tab.h"
 #include "Gui/Navigator.h"
@@ -36,6 +37,7 @@
 
 namespace Omm {
 
+class MediaObjectModel;
 
 class ControllerWidget : public Controller, public Gui::Tab
 {
@@ -108,6 +110,9 @@ public:
     // ListModel interface
     virtual Gui::View* createItemView();
     virtual Gui::Model* getItemModel(int row);
+
+    // ListController interface
+    virtual void selectedItem(int row);
 };
 
 
@@ -115,12 +120,43 @@ class MediaServerDevice : public Av::CtlMediaServer, public Gui::ButtonModel
 {
 public:
     virtual void initController();
+    virtual Av::CtlMediaObject2* createMediaObject();
 };
 
 
 class MediaServerView : public Gui::ButtonView
 {
 
+};
+
+
+class MediaContainerWidget : public Gui::ListView, Gui::ListModel, Gui::ListController
+{
+    friend class MediaServerGroupWidget;
+    
+public:
+    virtual int totalItemCount();
+    virtual Gui::View* createItemView();
+    virtual Gui::Model* getItemModel(int row);
+
+private:
+    MediaObjectModel*       _pObjectModel;
+};
+
+
+class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ButtonModel
+{
+public:
+    virtual std::string getLabel();
+
+private:
+    MediaContainerWidget*     _pContainer;
+};
+
+
+class MediaObjectView : public Gui::ButtonView
+{
+    
 };
 
 

@@ -33,8 +33,15 @@ namespace Omm {
 namespace Gui {
 
 
-const std::string&
-ButtonModel::getLabel() const
+//const std::string&
+//ButtonModel::getLabel() const
+//{
+//    return _label;
+//}
+
+
+std::string
+ButtonModel::getLabel()
 {
     return _label;
 }

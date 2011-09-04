@@ -43,6 +43,13 @@ CtlMediaServer::addCtlDeviceCode()
 
 
 CtlMediaObject2*
+CtlMediaServer::createMediaObject()
+{
+    return new CtlMediaObject2;
+}
+
+
+CtlMediaObject2*
 CtlMediaServer::getRootObject() const
 {
     return _pRoot;
@@ -53,7 +60,7 @@ void
 CtlMediaServer::browseRootObject()
 {
     Log::instance()->upnpav().debug("browse root object ...");
-    _pRoot = new CtlMediaObject2;
+    _pRoot = createMediaObject();
     try {
         std::string rootMeta;
         ui4 numberReturned;

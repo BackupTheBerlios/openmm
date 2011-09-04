@@ -44,7 +44,8 @@ protected:
 class ButtonModel : public Model
 {
 public:
-    virtual const std::string& getLabel() const;
+//    virtual const std::string& getLabel() const;
+    virtual std::string getLabel();
     void setLabel(const std::string& label);
     
 private:

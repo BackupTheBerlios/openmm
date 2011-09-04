@@ -22,6 +22,8 @@
 #include "UpnpGui.h"
 #include "Gui/GuiLogger.h"
 
+#include "UpnpAvCtlServer.h"
+
 
 namespace Omm {
 
@@ -150,6 +152,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
     Gui::Log::instance()->gui().debug("media server group widget ctor");
     View::setName("media server group view");
     _deviceGroupList.setModel(this);
+    _deviceGroupList.attachController(this);
     push(&_deviceGroupList, ">");
 }
 
@@ -178,9 +181,63 @@ MediaServerGroupWidget::getItemModel(int row)
 
 
 void
+MediaServerGroupWidget::selectedItem(int row)
+{
+    Gui::Log::instance()->gui().debug("media server group widget selected device");
+    MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getDevice(row));
+    DeviceGroup::selectDevice(pServer);
+    pServer->browseRootObject();
+    MediaObjectModel* pRootObject = static_cast<MediaObjectModel*>(pServer->getRootObject());
+    if (pRootObject->isContainer()) {
+        Gui::Log::instance()->gui().debug("media server group widget selected device has container as root object");
+        MediaContainerWidget* pContainer = new MediaContainerWidget;
+        pContainer->_pObjectModel = pRootObject;
+        pRootObject->fetchChildren();
+        pContainer->setModel(pContainer);
+        push(pContainer, pServer->getFriendlyName());
+    }
+}
+
+
+void
 MediaServerDevice::initController()
 {
     setLabel(getFriendlyName());
+}
+
+
+Av::CtlMediaObject2*
+MediaServerDevice::createMediaObject()
+{
+    return new MediaObjectModel;
+}
+
+
+int
+MediaContainerWidget::totalItemCount()
+{
+    return _pObjectModel->getTotalChildCount();
+}
+
+
+Gui::View*
+MediaContainerWidget::createItemView()
+{
+    return new MediaObjectView;
+}
+
+
+Gui::Model*
+MediaContainerWidget::getItemModel(int row)
+{
+    return static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
+}
+
+
+std::string
+MediaObjectModel::getLabel()
+{
+    return getTitle();
 }
 
 

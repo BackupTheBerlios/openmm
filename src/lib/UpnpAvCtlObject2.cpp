@@ -24,6 +24,7 @@
 #include "UpnpAv.h"
 #include "UpnpAvCtlImpl.h"
 #include "UpnpAvCtlDevices.h"
+#include "UpnpAvCtlServer.h"
 
 
 namespace Omm {
@@ -41,7 +42,7 @@ _pServerCode(0)
 AbstractMediaObject*
 CtlMediaObject2::createChildObject()
 {
-    CtlMediaObject2* pChildObject = new CtlMediaObject2;
+    CtlMediaObject2* pChildObject = _pServer->createMediaObject();
     pChildObject->_pServer = _pServer;
     pChildObject->_pServerCode = _pServerCode;
     return pChildObject;
