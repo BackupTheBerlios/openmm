@@ -37,8 +37,8 @@ _pWidget(new QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 
 //ViewImpl(pView, _pWidget)
 ViewImpl(pView, 0)
 {
-    setNativeView(_pWidget);
     Omm::Gui::Log::instance()->gui().debug("list item impl ctor, _pWidget: " + Poco::NumberFormatter::format(_pWidget));
+    setNativeView(_pWidget);
 //    _pLayout = new QHBoxLayout(this);
     _pLayout = new QHBoxLayout(_pWidget);
     _pNameLabel = new QLabel;

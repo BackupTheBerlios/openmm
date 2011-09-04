@@ -34,14 +34,8 @@ _pNativeView(new NativeView(this, pView->getParent())),
 _pView(pView)
 {
     Omm::Gui::Log::instance()->gui().debug("view impl ctor (view).");
+    connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
 }
-
-
-//ViewImpl::ViewImpl(QWidget* pNativeView) :
-//_pNativeView(pNativeView)
-//{
-//    Omm::Gui::Log::instance()->gui().debug("view impl ctor (native view).");
-//}
 
 
 ViewImpl::ViewImpl(View* pView, QWidget* pNativeView) :
@@ -49,6 +43,9 @@ _pView(pView),
 _pNativeView(pNativeView)
 {
     Omm::Gui::Log::instance()->gui().debug("view impl ctor view: " + Poco::NumberFormatter::format(_pView) + ", native view: " + Poco::NumberFormatter::format(_pNativeView));
+    if (pNativeView) {
+        connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
+    }
 }
 
 
@@ -87,7 +84,8 @@ void
 ViewImpl::showView()
 {
     Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    _pNativeView->show();
+//    _pNativeView->show();
+    emit showViewSignal();
     Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 

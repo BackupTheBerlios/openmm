@@ -15,7 +15,7 @@ SliderImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
-#ViewImpl.h
+ViewImpl.h
 #MainWindowImpl.h
 #EventLoopImpl.h
 ButtonImpl.h

@@ -30,12 +30,15 @@ namespace Gui {
 
 
 SliderViewImpl::SliderViewImpl(View* pView, View* pParent) :
-QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-ViewImpl(pView, this)
+//QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
+//ViewImpl(pView, this)
+ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
 {
+    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
+
     Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-    setOrientation(Qt::Horizontal);
-    connect(this, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
+    pNativeView->setOrientation(Qt::Horizontal);
+    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
 
 
@@ -47,7 +50,9 @@ SliderViewImpl::~SliderViewImpl()
 void
 SliderViewImpl::setValue(int value)
 {
-    QSlider::setValue(value);
+    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
+
+    pNativeView->setValue(value);
 }
 
 

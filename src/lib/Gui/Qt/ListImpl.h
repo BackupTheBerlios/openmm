@@ -31,7 +31,8 @@ namespace Gui {
 class View;
 
 
-class ListViewImpl : public QScrollArea, public ViewImpl
+//class ListViewImpl : public QScrollArea, public ViewImpl
+class ListViewImpl : public ViewImpl
 {
     Q_OBJECT
 

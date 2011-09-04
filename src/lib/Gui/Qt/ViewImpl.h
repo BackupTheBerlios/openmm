@@ -31,8 +31,10 @@ namespace Gui {
 class NativeView;
 
 
-class ViewImpl
+class ViewImpl : public QObject
 {
+    Q_OBJECT
+    
     friend class View;
     
 public:
@@ -51,18 +53,20 @@ public:
     virtual void selected();
  
 protected:
-//    ViewImpl(QWidget* pNativeWidget);
     ViewImpl(View* pView, QWidget* pNativeWidget);
 
     View*                       _pView;
     QWidget*                    _pNativeView;
+
+signals:
+    void showViewSignal();
 };
 
 
 class NativeView : public QWidget
 {
     friend class ViewImpl;
-    
+
 public:
     NativeView(ViewImpl* pViewImpl, View* pParent = 0);
 

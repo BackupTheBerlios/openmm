@@ -30,7 +30,8 @@ namespace Gui {
 
 class View;
 
-class SliderViewImpl : public QSlider, public ViewImpl
+//class SliderViewImpl : public QSlider, public ViewImpl
+class SliderViewImpl : public ViewImpl
 {
     Q_OBJECT
 
