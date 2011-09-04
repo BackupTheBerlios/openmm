@@ -89,34 +89,7 @@ LazyListView::scrolledToRow(int rowOffset)
 
     Log::instance()->gui().debug("lazy list view scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
-        if (rowDelta > 0) {
-            // detach model from first visible view
-            View* pView = _visibleViews.front();
-            pModel->getItemModel(_rowOffset)->detachView(pView);
-            // move first view to the end
-            int lastRow = _rowOffset + _visibleViews.size();
-            moveViewToRow(lastRow, pView);
-            // attach model
-            pView->setModel(pModel->getItemModel(lastRow));
-            // move view to end of visible rows
-            _visibleViews.erase(_visibleViews.begin());
-            _visibleViews.push_back(pView);
-            _rowOffset++;
-        }
-        else if (rowDelta < 0) {
-            // detach model from last visible view
-            View* pView = _visibleViews.back();
-            int lastRow = _rowOffset + _visibleViews.size() - 1;
-            pModel->getItemModel(lastRow)->detachView(pView);
-            // move last view to the beginning
-            moveViewToRow(_rowOffset - 1, pView);
-            // attach model
-            pView->setModel(pModel->getItemModel(_rowOffset - 1));
-            // move view to beginning of visible rows
-            _visibleViews.erase(_visibleViews.end() - 1);
-            _visibleViews.insert(_visibleViews.begin(), pView);
-            _rowOffset--;
-        }
+        scrollDelta(rowDelta);
     }
 }
 

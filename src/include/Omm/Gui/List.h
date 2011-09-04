@@ -70,6 +70,7 @@ protected:
 
     int getOffset();
     void updateScrollWidgetSize();
+    void scrollDelta(int rowDelta);
     virtual void scrolledToRow(int rowOffset);
     virtual void resize(int rows);
 
