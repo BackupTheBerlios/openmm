@@ -72,8 +72,8 @@ protected:
     void updateScrollWidgetSize();
     void scrollDelta(int rowDelta);
     virtual void scrolledToRow(int rowOffset);
-    virtual void resize(int rows);
-    void resizeDelta(int rowDelta);
+    virtual void resize(int rows, int width);
+    void resizeDelta(int rowDelta, int width);
 
     void extendViewPool(int n);
 

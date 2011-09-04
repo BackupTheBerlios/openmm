@@ -131,8 +131,8 @@ ListViewImpl::resizeEvent(QResizeEvent* pEvent)
 //    int rows = viewport()->geometry().height() / pListView->_itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
     if (pEvent->oldSize().height() > 0) {
-        pListView->resize(rows);
         _pScrollWidget->resize(pEvent->size().width(), _pScrollWidget->height());
+        pListView->resize(rows, pEvent->size().width());
     }
 }
 

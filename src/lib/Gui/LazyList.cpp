@@ -95,7 +95,7 @@ LazyListView::scrolledToRow(int rowOffset)
 
 
 void
-LazyListView::resize(int rows)
+LazyListView::resize(int rows, int width)
 {
     LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
 
@@ -105,8 +105,8 @@ LazyListView::resize(int rows)
         if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
             pModel->fetch(_visibleViews.size() + rowDelta);
         }
-        resizeDelta(rowDelta);
     }
+    resizeDelta(rowDelta, width);
 }
 
 

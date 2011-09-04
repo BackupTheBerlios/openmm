@@ -205,23 +205,27 @@ ListView::scrolledToRow(int rowOffset)
 
 
 void
-ListView::resize(int rows)
+ListView::resize(int rows, int width)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     int rowDelta = rows - _viewPool.size();
     Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
-    if (rowDelta > 0) {
-        resizeDelta(rowDelta);
-    }
+    resizeDelta(rowDelta, width);
 }
 
 
 void
-ListView::resizeDelta(int rowDelta)
+ListView::resizeDelta(int rowDelta, int width)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     extendViewPool(rowDelta);
+    for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
+        (*it)->resize(width, _itemViewHeight);
+    }
+    if (rowDelta <= 0) {
+        return;
+    }
 //    if (_visibleViews.size() < _viewPool.size() - 1) {
 //        return;
 //    }
