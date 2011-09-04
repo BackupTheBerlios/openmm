@@ -49,6 +49,7 @@ protected:
 
     void updateScrollWidgetSize();
     int getOffset();
+    int getRowHeight();
 
 signals:
     void moveWidgetSignal(int targetRow, View* pView);

@@ -107,6 +107,14 @@ ListViewImpl::getOffset()
 }
 
 
+int
+ListViewImpl::getRowHeight()
+{
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    return viewport()->geometry().height() / pListView->_itemViewHeight;
+}
+
+
 void
 ListViewImpl::moveWidgetSlot(int row, View* pView)
 {

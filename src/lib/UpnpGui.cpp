@@ -106,9 +106,10 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
-    _deviceGroupListView.setModel(this);
-    _deviceGroupListView.attachController(this);
     push(&_deviceGroupListView, ">");
+
+    _deviceGroupListView.attachController(this);
+    _deviceGroupListView.setModel(this);
 }
 
 
@@ -148,6 +149,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
     Gui::Log::instance()->gui().debug("media server group widget ctor");
     View::setName("media server group view");
     push(&_deviceGroupListView, ">");
+    
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }
@@ -187,11 +189,11 @@ MediaServerGroupWidget::selectedItem(int row)
     if (pRootObject->isContainer()) {
         Gui::Log::instance()->gui().debug("media server group widget selected device has container as root object");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
+        push(pContainer, pServer->getFriendlyName());
+
         pContainer->_pObjectModel = pRootObject;
         pContainer->_pServerGroup = this;
         pContainer->attachController(pContainer);
-        push(pContainer, pServer->getFriendlyName());
-
         pContainer->setModel(pContainer);
     }
 }
@@ -261,10 +263,10 @@ MediaContainerWidget::selectedItem(int row)
     if (pChildObject->isContainer()) {
         Gui::Log::instance()->gui().debug("media container widget selected media container");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
-        pContainer->_pObjectModel = pChildObject;
-        pContainer->_pServerGroup = _pServerGroup;
         _pServerGroup->push(pContainer, pChildObject->getTitle());
 
+        pContainer->_pObjectModel = pChildObject;
+        pContainer->_pServerGroup = _pServerGroup;
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
     }

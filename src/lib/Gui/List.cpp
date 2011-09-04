@@ -209,7 +209,8 @@ ListView::resize(int rows, int width)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
-    int rowDelta = rows - _viewPool.size();
+//    int rowDelta = rows - _viewPool.size();
+    int rowDelta = rows - static_cast<ListViewImpl*>(_pImpl)->getRowHeight();
     Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     resizeDelta(rowDelta, width);
 }
