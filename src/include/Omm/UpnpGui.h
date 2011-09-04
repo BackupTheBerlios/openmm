@@ -47,7 +47,7 @@ public:
 };
 
 
-class DeviceGroupWidget : public DeviceGroup, public Gui::NavigatorView, public Gui::ListController, public Gui::ListModel
+class DeviceGroupWidget : public DeviceGroup, public Gui::NavigatorView, public Gui::ListModel, public Gui::ListController
 {
 public:
     DeviceGroupWidget(const std::string& deviceType, const std::string& shortName);
@@ -136,16 +136,22 @@ class MediaContainerWidget : public Gui::LazyListView, Gui::LazyListModel, Gui::
     friend class MediaServerGroupWidget;
     
 public:
+    // ListModel interface
     virtual int totalItemCount();
     virtual Gui::View* createItemView();
     virtual Gui::Model* getItemModel(int row);
 
+    // LazyListModel interface
     virtual bool canFetchMore();
     virtual int fetch(int rowCount = 10, bool forward = true);
     virtual int lastFetched(bool forward = true);
 
+    // ListController interface
+    virtual void selectedItem(int row);
+
 private:
-    MediaObjectModel*       _pObjectModel;
+    MediaObjectModel*           _pObjectModel;
+    MediaServerGroupWidget*     _pServerGroup;
 };
 
 
