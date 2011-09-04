@@ -68,7 +68,7 @@ public:
 protected:
     virtual void init() {}
 
-    Gui::ListView   _deviceGroupList;
+    Gui::ListView   _deviceGroupListView;
 };
 
 

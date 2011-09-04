@@ -31,7 +31,7 @@ namespace Omm {
 namespace Gui {
 
 
-ListViewImpl::ListViewImpl(View* pView, bool movableViews, View* pParent) :
+MovableListViewImpl::MovableListViewImpl(View* pView, bool movableViews, View* pParent) :
 QGraphicsView(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
 ViewImpl(pView, this),
 _movableViews(movableViews)
@@ -47,14 +47,16 @@ _movableViews(movableViews)
 }
 
 
-ListViewImpl::~ListViewImpl()
+MovableListViewImpl::~MovableListViewImpl()
 {
 }
 
 
 int
-ListViewImpl::visibleRows()
+MovableListViewImpl::visibleRows()
 {
+    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(viewport()->geometry().width())
+            + ", height: " Poco::NumberFormatter::format(viewport()->geometry().height()));
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = viewport()->geometry().height() / pListView->_viewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
@@ -63,7 +65,7 @@ ListViewImpl::visibleRows()
 
 
 void
-ListViewImpl::addItemView(View* pView)
+MovableListViewImpl::addItemView(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list view impl add item view");
     ListView* pListView =  static_cast<ListView*>(_pView);
@@ -80,7 +82,7 @@ ListViewImpl::addItemView(View* pView)
 
 
 void
-ListViewImpl::moveItemView(int row, View* pView)
+MovableListViewImpl::moveItemView(int row, View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
@@ -88,14 +90,14 @@ ListViewImpl::moveItemView(int row, View* pView)
 
 
 void
-ListViewImpl::extendViewPool()
+MovableListViewImpl::extendViewPool()
 {
     emit extendPoolSignal();
 }
 
 
 void
-ListViewImpl::moveWidgetSlot(int row, View* pView)
+MovableListViewImpl::moveWidgetSlot(int row, View* pView)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
     _proxyWidgets[pView]->setPos(0, pListView->_viewHeight * row);
@@ -103,7 +105,7 @@ ListViewImpl::moveWidgetSlot(int row, View* pView)
 
 
 void
-ListViewImpl::extendPoolSlot()
+MovableListViewImpl::extendPoolSlot()
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
     pListView->extendViewPool(visibleRows());

@@ -37,7 +37,7 @@ namespace Gui {
 
 ListView::ListView(View* pParent) :
 View(new ListViewImpl(this, pParent), pParent),
-_viewHeight(50),
+_itemViewHeight(50),
 _rowOffset(0)
 {
 
@@ -46,7 +46,7 @@ _rowOffset(0)
 
 ListView::ListView(ViewImpl* pViewImpl, View* pParent) :
 View(pViewImpl, pParent),
-_viewHeight(50),
+_itemViewHeight(50),
 _rowOffset(0)
 {
 

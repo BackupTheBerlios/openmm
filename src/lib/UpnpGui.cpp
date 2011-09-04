@@ -106,9 +106,9 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
-    _deviceGroupList.setModel(this);
-    _deviceGroupList.attachController(this);
-    push(&_deviceGroupList, ">");
+    _deviceGroupListView.setModel(this);
+    _deviceGroupListView.attachController(this);
+    push(&_deviceGroupListView, ">");
 }
 
 
@@ -147,9 +147,9 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media server group widget ctor");
     View::setName("media server group view");
-    _deviceGroupList.setModel(this);
-    _deviceGroupList.attachController(this);
-    push(&_deviceGroupList, ">");
+    push(&_deviceGroupListView, ">");
+    _deviceGroupListView.attachController(this);
+    _deviceGroupListView.setModel(this);
 }
 
 
@@ -189,9 +189,10 @@ MediaServerGroupWidget::selectedItem(int row)
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->_pObjectModel = pRootObject;
         pContainer->_pServerGroup = this;
-        pContainer->setModel(pContainer);
         pContainer->attachController(pContainer);
         push(pContainer, pServer->getFriendlyName());
+
+        pContainer->setModel(pContainer);
     }
 }
 
@@ -231,14 +232,6 @@ MediaContainerWidget::getItemModel(int row)
     Gui::Log::instance()->gui().debug("media container widget get item model in row: " + Poco::NumberFormatter::format(row));
     return static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
 }
-
-
-//bool
-//MediaContainerWidget::canFetchMore()
-//{
-//    Gui::Log::instance()->gui().debug("media container widget can fetch more");
-//    return _pObjectModel->getChildCount() < _pObjectModel->getTotalChildCount();
-//}
 
 
 int

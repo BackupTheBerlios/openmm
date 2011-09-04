@@ -50,14 +50,6 @@ NavigatorView::push(View* pView, const std::string& name)
 {
     Log::instance()->gui().debug("Navigator push: " + name + " ...");
 
-//    pNavigable->_pNavigator = this;
-//    if (pNavigable->getView()) {
-////        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
-//        pushImpl(pNavigable);
-//    }
-//    _navigableStack.push(pNavigable);
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
-
     static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, name);
 
 //    pView->show();

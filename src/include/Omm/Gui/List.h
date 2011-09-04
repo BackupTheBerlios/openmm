@@ -73,11 +73,10 @@ protected:
     void scrollDelta(int rowDelta);
     virtual void scrolledToRow(int rowOffset);
     virtual void resize(int rows);
+    void resizeDelta(int rowDelta);
 
     void extendViewPool(int n);
 
-    int viewPoolSize();
-    /// The view has a view pool which is large enough to fill the area of the view port
     int visibleIndex(int row);
     int countVisibleViews();
     View* visibleView(int index);
@@ -85,10 +84,11 @@ protected:
     void moveViewToRow(int row, View* pView);
 
     std::vector<View*>                  _viewPool;
+    /// The view has a view pool which is large enough to fill the area of the view port
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;
-    int                                 _viewHeight;
+    int                                 _itemViewHeight;
 
 private:
     void selectedItem(int row);

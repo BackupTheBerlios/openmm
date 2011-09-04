@@ -68,7 +68,7 @@ ListItemController::selectedRow(int row)
 
 ListView::ListView(View* pParent) :
 View(new ListViewImpl(this, pParent), pParent),
-_viewHeight(50),
+_itemViewHeight(50),
 _rowOffset(0)
 {
 
@@ -77,7 +77,7 @@ _rowOffset(0)
 
 ListView::ListView(ViewImpl* pViewImpl, View* pParent) :
 View(pViewImpl, pParent),
-_viewHeight(50),
+_itemViewHeight(50),
 _rowOffset(0)
 {
 
@@ -209,27 +209,32 @@ ListView::resize(int rows)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
-    int rowDelta = rows - viewPoolSize();
+    int rowDelta = rows - _viewPool.size();
     Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDelta > 0) {
-        extendViewPool(rowDelta);
-        for (int i = 0; i < rowDelta; i++) {
-            View* pView = _freeViews.top();
-            _freeViews.pop();
-            int lastRow = _rowOffset + _visibleViews.size();
-            moveViewToRow(lastRow, pView);
-            pView->setModel(pModel->getItemModel(lastRow));
-            pView->show();
-            _visibleViews.push_back(pView);
-        }
+        resizeDelta(rowDelta);
     }
 }
 
 
-int
-ListView::viewPoolSize()
+void
+ListView::resizeDelta(int rowDelta)
 {
-    return _viewPool.size();
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    extendViewPool(rowDelta);
+//    if (_visibleViews.size() < _viewPool.size() - 1) {
+//        return;
+//    }
+    for (int i = 0; i < rowDelta; i++) {
+        View* pView = _freeViews.top();
+        _freeViews.pop();
+        int lastRow = _rowOffset + _visibleViews.size();
+        moveViewToRow(lastRow, pView);
+        pView->setModel(pModel->getItemModel(lastRow));
+        _itemControllers[pView]->setRow(lastRow);
+        pView->show();
+        _visibleViews.push_back(pView);
+    }
 }
 
 
