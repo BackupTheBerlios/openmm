@@ -120,7 +120,7 @@ ViewImpl::heightView()
 void
 ViewImpl::resizeView(int width, int height)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl resize.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl resize.");
     _pNativeView->resize(width, height);
 }
 

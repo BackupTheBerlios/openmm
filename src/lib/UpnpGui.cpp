@@ -263,9 +263,10 @@ MediaContainerWidget::selectedItem(int row)
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->_pObjectModel = pChildObject;
         pContainer->_pServerGroup = _pServerGroup;
-        pContainer->setModel(pContainer);
-        pContainer->attachController(pContainer);
         _pServerGroup->push(pContainer, pChildObject->getTitle());
+
+        pContainer->attachController(pContainer);
+        pContainer->setModel(pContainer);
     }
     else {
         Gui::Log::instance()->gui().debug("media container widget selected media item");
