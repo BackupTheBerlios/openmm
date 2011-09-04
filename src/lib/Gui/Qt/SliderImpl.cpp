@@ -30,8 +30,6 @@ namespace Gui {
 
 
 SliderViewImpl::SliderViewImpl(View* pView, View* pParent) :
-//QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-//ViewImpl(pView, this)
 ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
 {
     QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);

@@ -30,13 +30,9 @@ namespace Gui {
 
 
 ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent) :
-//QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-//ViewImpl(pView, this)
-//_pNativeView(new QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
 ViewImpl(pView, new QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
 {
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
-//    connect(this, SIGNAL(pressed()), this, SLOT(pushed()));
     connect(_pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
 }
 
@@ -49,7 +45,6 @@ ButtonViewImpl::~ButtonViewImpl()
 void
 ButtonViewImpl::setLabel(const std::string& label)
 {
-//    QPushButton::setText(QString::fromStdString(label));
     static_cast<QPushButton*>(_pNativeView)->setText(QString::fromStdString(label));
 }
 

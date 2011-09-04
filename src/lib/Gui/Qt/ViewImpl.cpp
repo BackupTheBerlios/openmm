@@ -84,7 +84,6 @@ void
 ViewImpl::showView()
 {
     Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-//    _pNativeView->show();
     emit showViewSignal();
     Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }

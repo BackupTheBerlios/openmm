@@ -31,13 +31,13 @@ namespace Gui {
 class View;
 
 
-//class ListViewImpl : public QScrollArea, public ViewImpl
 class ListViewImpl : public ViewImpl
 {
     Q_OBJECT
 
     friend class ListView;
     friend class LazyListView;
+    friend class QtScrollArea;
 
 public:
     ListViewImpl(View* pView, View* pParent = 0);
@@ -59,7 +59,8 @@ private slots:
     void viewScrolledSlot(int value);
 
 private:
-    virtual void resizeEvent(QResizeEvent* event);
+//    virtual void resizeEvent(QResizeEvent* event);
+    void resized(int width, int height);
 
     QWidget*                 _pScrollWidget;
 };

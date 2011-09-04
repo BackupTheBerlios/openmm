@@ -31,13 +31,29 @@ namespace Omm {
 namespace Gui {
 
 
+class QtScrollArea : public QScrollArea
+{
+    friend class ListViewImpl;
+
+    QtScrollArea(QWidget* pParent = 0) : QScrollArea(pParent) {}
+    
+    void resizeEvent(QResizeEvent* pEvent)
+    {
+        if (pEvent->oldSize().height() > 0) {
+            _pListViewImpl->resized(pEvent->size().width(), pEvent->size().height());
+        }
+    }
+
+    ListViewImpl*   _pListViewImpl;
+};
+
+
 ListViewImpl::ListViewImpl(View* pView, View* pParent) :
-//QScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-//ViewImpl(pView, this),
-ViewImpl(pView, new QScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
+ViewImpl(pView, new QtScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
 _pScrollWidget(0)
 {
-    QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
+    QtScrollArea* pNativeView = static_cast<QtScrollArea*>(_pNativeView);
+    pNativeView->_pListViewImpl = this;
 
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
@@ -64,7 +80,6 @@ ListViewImpl::visibleRows()
     
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = pNativeView->viewport()->geometry().height() / pListView->_itemViewHeight + 2;
-//    int rows = viewport()->geometry().height() / pListView->_itemViewHeight
     Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
@@ -135,16 +150,13 @@ ListViewImpl::viewScrolledSlot(int value)
 
 
 void
-ListViewImpl::resizeEvent(QResizeEvent* pEvent)
+ListViewImpl::resized(int width, int height)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
-    int rows = pEvent->size().height() / pListView->_itemViewHeight;
-//    int rows = viewport()->geometry().height() / pListView->_itemViewHeight;
+    int rows = height / pListView->_itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
-    if (pEvent->oldSize().height() > 0) {
-        _pScrollWidget->resize(pEvent->size().width(), _pScrollWidget->height());
-        pListView->resize(rows, pEvent->size().width());
-    }
+    _pScrollWidget->resize(width, _pScrollWidget->height());
+    pListView->resize(rows, width);
 }
 
 

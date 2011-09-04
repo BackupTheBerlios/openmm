@@ -30,7 +30,6 @@ namespace Gui {
 
 class View;
 
-//class ButtonViewImpl : public QPushButton, public ViewImpl
 class ButtonViewImpl : public ViewImpl
 {
     Q_OBJECT
