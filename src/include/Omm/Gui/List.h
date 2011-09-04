@@ -88,6 +88,7 @@ protected:
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;
+    int                                 _lastVisibleRows;
     int                                 _itemViewHeight;
 
 private:

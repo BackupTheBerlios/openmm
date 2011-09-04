@@ -92,6 +92,7 @@ ListView::setModel(ListModel* pModel)
     View::setModel(pModel);
 
     int rows = visibleRows();
+    _lastVisibleRows = rows;
     extendViewPool(rows);
 
     // insert items that are already in the model.
@@ -209,8 +210,7 @@ ListView::resize(int rows, int width)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
-//    int rowDelta = rows - _viewPool.size();
-    int rowDelta = rows - static_cast<ListViewImpl*>(_pImpl)->getRowHeight();
+    int rowDelta = rows - _lastVisibleRows;
     Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     resizeDelta(rowDelta, width);
 }
@@ -219,6 +219,7 @@ ListView::resize(int rows, int width)
 void
 ListView::resizeDelta(int rowDelta, int width)
 {
+    _lastVisibleRows += rowDelta;
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     extendViewPool(rowDelta);
     for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
@@ -227,7 +228,7 @@ ListView::resizeDelta(int rowDelta, int width)
     if (rowDelta <= 0) {
         return;
     }
-//    if (_visibleViews.size() < _viewPool.size() - 1) {
+//    if (_visibleViews.size() < static_cast<ListViewImpl*>(_pImpl)->getRowHeight()) {
 //        return;
 //    }
     for (int i = 0; i < rowDelta; i++) {

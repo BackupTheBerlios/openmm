@@ -57,7 +57,8 @@ ListViewImpl::visibleRows()
     Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(viewport()->geometry().width())
             + ", height: " + Poco::NumberFormatter::format(viewport()->geometry().height()));
     ListView* pListView =  static_cast<ListView*>(_pView);
-    int rows = viewport()->geometry().height() / pListView->_itemViewHeight;
+    int rows = viewport()->geometry().height() / pListView->_itemViewHeight + 2;
+//    int rows = viewport()->geometry().height() / pListView->_itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
@@ -104,14 +105,6 @@ ListViewImpl::getOffset()
 {
 //    Omm::Gui::Log::instance()->gui().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry().y()));
     return _pScrollWidget->geometry().y();
-}
-
-
-int
-ListViewImpl::getRowHeight()
-{
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    return viewport()->geometry().height() / pListView->_itemViewHeight;
 }
 
 
