@@ -192,7 +192,6 @@ MediaServerGroupWidget::selectedItem(int row)
         Gui::Log::instance()->gui().debug("media server group widget selected device has container as root object");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->_pObjectModel = pRootObject;
-        pRootObject->fetchChildren();
         pContainer->setModel(pContainer);
         push(pContainer, pServer->getFriendlyName());
     }
@@ -231,6 +230,30 @@ Gui::Model*
 MediaContainerWidget::getItemModel(int row)
 {
     return static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
+}
+
+
+bool
+MediaContainerWidget::canFetchMore()
+{
+    return _pObjectModel->getChildCount() < _pObjectModel->getTotalChildCount();
+}
+
+
+int
+MediaContainerWidget::fetch(int rowCount, bool forward)
+{
+    if (!forward) {
+        return 0;
+    }
+    _pObjectModel->fetchChildren(rowCount);
+}
+
+
+int
+MediaContainerWidget::lastFetched(bool forward)
+{
+    return _pObjectModel->getChildCount();
 }
 
 

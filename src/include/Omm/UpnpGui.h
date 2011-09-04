@@ -31,6 +31,7 @@
 #include "Gui/Navigator.h"
 #include "Gui/ListModel.h"
 #include "Gui/List.h"
+#include "Gui/LazyList.h"
 #include "Gui/ListItem.h"
 #include "Gui/Button.h"
 
@@ -130,7 +131,7 @@ class MediaServerView : public Gui::ButtonView
 };
 
 
-class MediaContainerWidget : public Gui::ListView, Gui::ListModel, Gui::ListController
+class MediaContainerWidget : public Gui::LazyListView, Gui::LazyListModel, Gui::ListController
 {
     friend class MediaServerGroupWidget;
     
@@ -138,6 +139,10 @@ public:
     virtual int totalItemCount();
     virtual Gui::View* createItemView();
     virtual Gui::Model* getItemModel(int row);
+
+    virtual bool canFetchMore();
+    virtual int fetch(int rowCount = 10, bool forward = true);
+    virtual int lastFetched(bool forward = true);
 
 private:
     MediaObjectModel*       _pObjectModel;

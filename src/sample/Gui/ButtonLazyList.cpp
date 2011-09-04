@@ -52,7 +52,6 @@ public:
     virtual Omm::Gui::View* createItemView();
 
     virtual bool canFetchMore();
-    virtual void fetchMore(bool forward = true) {}
     virtual int fetch(int rowCount = 10, bool forward = true);
     virtual int lastFetched(bool forward = true);
     
