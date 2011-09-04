@@ -68,6 +68,8 @@ LazyListView::setModel(LazyListModel* pModel)
 void
 LazyListView::scrolledToRow(int rowOffset)
 {
+    Log::instance()->gui().debug("lazy list view scroll view ...");
+
     LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
     
     int rowDelta = rowOffset - _rowOffset;
@@ -85,7 +87,7 @@ LazyListView::scrolledToRow(int rowOffset)
         pModel->fetch(_visibleViews.size() + rowDeltaAbsolute);
     }
 
-    Log::instance()->gui().debug("scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+    Log::instance()->gui().debug("lazy list view scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {
             // detach model from first visible view

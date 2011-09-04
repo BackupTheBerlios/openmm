@@ -141,7 +141,6 @@ public:
     virtual Gui::Model* getItemModel(int row);
 
     // LazyListModel interface
-    virtual bool canFetchMore();
     virtual int fetch(int rowCount = 10, bool forward = true);
     virtual int lastFetched(bool forward = true);
 

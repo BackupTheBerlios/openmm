@@ -143,6 +143,8 @@ ListView::updateScrollWidgetSize()
 void
 ListView::scrolledToRow(int rowOffset)
 {
+    Log::instance()->gui().debug("list scroll view");
+    
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     int rowDelta = rowOffset - _rowOffset;
@@ -156,7 +158,7 @@ ListView::scrolledToRow(int rowOffset)
 
     int rowDeltaAbsolute = std::abs(rowDelta);
 
-    Log::instance()->gui().debug("scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {
             // detach model from first visible view

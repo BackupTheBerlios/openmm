@@ -51,7 +51,6 @@ public:
     virtual Omm::Gui::Model* getItemModel(int row);
     virtual Omm::Gui::View* createItemView();
 
-    virtual bool canFetchMore();
     virtual int fetch(int rowCount = 10, bool forward = true);
     virtual int lastFetched(bool forward = true);
     
@@ -94,13 +93,6 @@ ButtonListModel::createItemView()
     ButtonItem* pButtonItem = new ButtonItem;
     pButtonItem->setName("button view " + Poco::NumberFormatter::format(_viewCount++));
     return pButtonItem;
-}
-
-
-bool
-ButtonListModel::canFetchMore()
-{
-    return _rowsFetched < totalItemCount();
 }
 
 

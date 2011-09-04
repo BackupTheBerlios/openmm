@@ -45,7 +45,6 @@ protected:
 class LazyListModel : public ListModel
 {
 public:
-    virtual bool canFetchMore() { return false; }
     virtual int fetch(int rowCount = 10, bool forward = true) { return 0; }
     virtual int lastFetched(bool forward = true) { return (forward ? totalItemCount() : 0); }
 };

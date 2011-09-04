@@ -213,6 +213,7 @@ MediaServerDevice::createMediaObject()
 int
 MediaContainerWidget::totalItemCount()
 {
+    Gui::Log::instance()->gui().debug("media container widget total item count: " + Poco::NumberFormatter::format(_pObjectModel->getTotalChildCount()));
     return _pObjectModel->getTotalChildCount();
 }
 
@@ -227,20 +228,23 @@ MediaContainerWidget::createItemView()
 Gui::Model*
 MediaContainerWidget::getItemModel(int row)
 {
+    Gui::Log::instance()->gui().debug("media container widget get item model in row: " + Poco::NumberFormatter::format(row));
     return static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
 }
 
 
-bool
-MediaContainerWidget::canFetchMore()
-{
-    return _pObjectModel->getChildCount() < _pObjectModel->getTotalChildCount();
-}
+//bool
+//MediaContainerWidget::canFetchMore()
+//{
+//    Gui::Log::instance()->gui().debug("media container widget can fetch more");
+//    return _pObjectModel->getChildCount() < _pObjectModel->getTotalChildCount();
+//}
 
 
 int
 MediaContainerWidget::fetch(int rowCount, bool forward)
 {
+    Gui::Log::instance()->gui().debug("media container widget fetch count items: " + Poco::NumberFormatter::format(rowCount));
     if (!forward) {
         return 0;
     }
@@ -251,6 +255,7 @@ MediaContainerWidget::fetch(int rowCount, bool forward)
 int
 MediaContainerWidget::lastFetched(bool forward)
 {
+    Gui::Log::instance()->gui().debug("media container widget last fetched: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
     return _pObjectModel->getChildCount();
 }
 
