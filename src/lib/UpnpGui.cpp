@@ -36,17 +36,11 @@ ControllerWidget::ControllerWidget()
 }
 
 
-DeviceGroupWidget::DeviceGroupWidget(const std::string& deviceType, const std::string& shortName) :
-DeviceGroup(deviceType, shortName)
-{
-    Gui::Log::instance()->gui().debug("device group widget ctor (device type, short name)");
-}
-
-
 DeviceGroupWidget::DeviceGroupWidget(DeviceGroupDelegate* pDeviceGroupDelegate) :
 DeviceGroup(pDeviceGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("device group widget ctor (delegate)");
+    attachController(this);
 }
 
 
@@ -98,6 +92,15 @@ DeviceGroupWidget::totalItemCount()
 }
 
 
+void
+DeviceGroupWidget::selectedItem(int row)
+{
+    Gui::Log::instance()->gui().debug("device group widget selected device");
+    Device* pDevice = static_cast<Device*>(getDevice(row));
+    DeviceGroup::selectDevice(pDevice);
+}
+
+
 MediaRendererGroupWidget::MediaRendererGroupWidget() :
 DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
@@ -129,15 +132,6 @@ Gui::Model*
 MediaRendererGroupWidget::getItemModel(int row)
 {
     return static_cast<MediaRendererDevice*>(getDevice(row));
-}
-
-
-void
-MediaRendererGroupWidget::selectedItem(int row)
-{
-    Gui::Log::instance()->gui().debug("media renderer group widget selected device");
-    MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(getDevice(row));
-    DeviceGroup::selectDevice(pRenderer);
 }
 
 

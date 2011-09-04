@@ -38,7 +38,7 @@ class CtlMediaServerCode;
 class MediaItemNotification;
 
 
-class CtlMediaObject2 : public MemoryMediaObject //, public Util::WidgetListModel
+class CtlMediaObject2 : public MemoryMediaObject
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;
@@ -65,24 +65,10 @@ public:
     Icon* getIcon();
     Icon* getImageRepresentation();
 
-    // FIXME: CtlMediaObject should not contain gui code
-//    void setListWidget(Omm::Gui::ListWidget* pWidget);
-//    Omm::Gui::ListWidget* getListWidget();
-
-//    // WidgetListModel interface
-//    virtual int totalItemCount();
-//    virtual void selectItem(int row);
-//
-//    // lazy model related
-//    virtual bool canFetchMore();
-//    virtual void fetchMore(bool forward = true);
-//    virtual int lastFetched(bool forward = true);
-
 private:
     std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
-//    Omm::Gui::ListWidget*           _pListWidget;
 };
 
 

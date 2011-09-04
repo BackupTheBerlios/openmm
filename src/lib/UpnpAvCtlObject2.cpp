@@ -34,7 +34,6 @@ namespace Av {
 CtlMediaObject2::CtlMediaObject2() :
 _pServer(0),
 _pServerCode(0)
-//_pListWidget(0)
 {
 }
 
@@ -59,7 +58,6 @@ CtlMediaObject2::fetchChildren(ui4 count)
                                     + ", child offset: " + Poco::NumberFormatter::format(lastFetchedChild));
 
     Omm::ui4 numberReturned = 0;
-//    if (_pServerCode && !fetchedAllChildren()) {
     if (_pServerCode) {
         std::string result;
         Omm::ui4 totalMatches;
@@ -106,52 +104,6 @@ CtlMediaObject2::getImageRepresentation()
         return 0;
     }
 }
-
-
-//void
-//CtlMediaObject2::setListWidget(Omm::Gui::ListWidget* pWidget)
-//{
-//    Log::instance()->upnpav().debug("controller media object set list widget");
-//
-//    _pListWidget = pWidget;
-//}
-//
-//
-//Omm::Gui::ListWidget*
-//CtlMediaObject2::getListWidget()
-//{
-//    return _pListWidget;
-//}
-
-//
-//void
-//CtlMediaObject2::selectItem(int row)
-//{
-//    Log::instance()->upnpav().debug("controller media object select item in row: " + Poco::NumberFormatter::format(row));
-//
-//}
-//
-//
-//bool
-//CtlMediaObject2::canFetchMore()
-//{
-//    return false;
-//}
-//
-//
-//void
-//CtlMediaObject2::fetchMore(bool forward)
-//{
-//
-//}
-//
-//
-//int
-//CtlMediaObject2::lastFetched(bool forward)
-//{
-//
-//    return (forward ? totalItemCount() : 0);
-//}
 
 
 CtlMediaServer*
