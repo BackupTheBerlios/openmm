@@ -228,9 +228,9 @@ ListView::resizeDelta(int rowDelta, int width)
     if (rowDelta <= 0) {
         return;
     }
-//    if (_visibleViews.size() < static_cast<ListViewImpl*>(_pImpl)->getRowHeight()) {
-//        return;
-//    }
+    if (_lastVisibleRows < static_cast<ListViewImpl*>(_pImpl)->visibleRows()) {
+        return;
+    }
     for (int i = 0; i < rowDelta; i++) {
         View* pView = _freeViews.top();
         _freeViews.pop();
