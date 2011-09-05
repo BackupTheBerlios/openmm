@@ -105,6 +105,13 @@ ListView::setModel(ListModel* pModel)
 }
 
 
+void
+ListView::setItemViewHeight(int height)
+{
+    _itemViewHeight = height;
+}
+
+
 int
 ListView::visibleRows()
 {

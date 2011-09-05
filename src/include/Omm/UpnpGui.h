@@ -152,6 +152,8 @@ class MediaContainerWidget : public Gui::LazyListView, Gui::LazyListModel, Gui::
     friend class MediaServerGroupWidget;
     
 public:
+    MediaContainerWidget(View* pParent = 0);
+
     // ListModel interface
     virtual int totalItemCount();
     virtual Gui::View* createItemView();

@@ -39,6 +39,7 @@ ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeVi
     pNativeView->setTracking(true);
     pNativeView->setSingleStep(5);
     pNativeView->setPageStep(25);
+    pNativeView->setValue(0);
     connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
 

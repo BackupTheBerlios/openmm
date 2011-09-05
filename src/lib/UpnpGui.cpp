@@ -108,6 +108,7 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
     View::setName("media renderer group view");
     push(&_deviceGroupListView, ">");
 
+    _deviceGroupListView.setItemViewHeight(30);
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }
@@ -202,6 +203,20 @@ public:
 };
 
 
+class SeekSlider : public Gui::Slider
+{
+public:
+    SeekSlider(Gui::View* pParent = 0) : Gui::Slider(pParent) {}
+
+    virtual void valueChanged(int value)
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
+        pRenderer->positionMoved(value);
+    }
+
+};
+
+
 MediaRendererView::MediaRendererView()
 {
     _pBackButton = new Gui::Button(this);
@@ -210,12 +225,10 @@ MediaRendererView::MediaRendererView()
     _pForwButton = new Gui::Button(this);
 
     _pBackButton->setLabel("Back");
-    _pPlayButton->setLabel("Play");
-    _pStopButton->setLabel("Stop");
     _pForwButton->setLabel("Forw");
 
     _pVolSlider = new VolSlider(this);
-    _pSeekSlider = new Gui::Slider(this);
+    _pSeekSlider = new SeekSlider(this);
     
     _pRendererName = new RendererButton(this);
 
@@ -305,6 +318,13 @@ Av::CtlMediaObject2*
 MediaServerDevice::createMediaObject()
 {
     return new MediaObjectModel;
+}
+
+
+MediaContainerWidget::MediaContainerWidget(View* pParent) :
+LazyListView(pParent)
+{
+    setItemViewHeight(30);
 }
 
 

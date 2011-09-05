@@ -55,6 +55,7 @@ public:
     ListView(View* pParent = 0);
 
     virtual void setModel(ListModel* pModel);
+    void setItemViewHeight(int height);
 
 protected:
     ListView(ViewImpl* pViewImpl, View* pParent = 0);
