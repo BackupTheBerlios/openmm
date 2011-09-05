@@ -57,6 +57,10 @@ _pScrollWidget(0)
 
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
+//    _pNativeView->setBackgroundRole(QPalette(Qt::white));
+//    _pNativeView->setPalette(QPalette(Qt::white));
+//    _pNativeView->setAutoFillBackground(true);
+
     pNativeView->setWidget(_pScrollWidget);
 
     connect(this, SIGNAL(moveWidgetSignal(int, View*)), this, SLOT(moveWidgetSlot(int, View*)));

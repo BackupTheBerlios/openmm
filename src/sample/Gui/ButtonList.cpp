@@ -89,8 +89,8 @@ int main(int argc, char** argv)
     Omm::Gui::MainWindow mainWindow;
 
     Omm::Gui::ListView list;
-//    ButtonListModel listModel(10000);
-    ButtonListModel listModel(1);
+    ButtonListModel listModel(10000);
+//    ButtonListModel listModel(1);
     list.setModel(&listModel);
     ButtonListController listController;
     list.attachController(&listController);

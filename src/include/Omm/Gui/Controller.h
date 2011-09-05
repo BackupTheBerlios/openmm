@@ -44,7 +44,7 @@ public:
     void attachModel(Model* pModel);
     void detachModel(Model* pModel);
 
-protected:
+//protected:
     virtual void selected() {}
 
     typedef std::vector<Model*>::iterator ModelIterator;

@@ -36,6 +36,9 @@ ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeVi
 
     Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
     pNativeView->setOrientation(Qt::Horizontal);
+    pNativeView->setTracking(true);
+    pNativeView->setSingleStep(5);
+    pNativeView->setPageStep(25);
     connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
 

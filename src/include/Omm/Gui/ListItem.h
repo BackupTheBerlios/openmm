@@ -31,26 +31,17 @@ namespace Gui {
 
 //class ListItemController : public Controller
 //{
-//    friend class ListView;
-//    friend class LazyListView;
-//
 //protected:
-//    virtual void selectedRow(int row) {}
 //
 //private:
 //    virtual void selected();
-//
-//    int getRow();
-//    void setRow(int row);
-//
-//    int _row;
 //};
 
 
 class ListItemModel : public Model
 {
 public:
-    virtual const std::string& getLabel() const;
+    virtual std::string getLabel();
     void setLabel(const std::string& text);
 
 private:

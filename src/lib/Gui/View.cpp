@@ -123,6 +123,9 @@ View::resize(int width, int height)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view resize.");
     _pImpl->resizeView(width, height);
+    if (_pLayout) {
+        _pLayout->layoutView();
+    }
 }
 
 

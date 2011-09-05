@@ -34,8 +34,8 @@ namespace Omm {
 namespace Gui {
 
 
-const std::string&
-ListItemModel::getLabel() const
+std::string
+ListItemModel::getLabel()
 {
     return _label;
 }
@@ -71,22 +71,8 @@ ListItemView::syncView(Model* pModel)
 //ListItemController::selected()
 //{
 //    Omm::Gui::Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
-//    selectedRow(_row);
 //}
-//
-//
-//int
-//ListItemController::getRow()
-//{
-//    return _row;
-//}
-//
-//
-//void
-//ListItemController::setRow(int row)
-//{
-//    _row = row;
-//}
+
 
 
 } // namespace Gui

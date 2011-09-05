@@ -31,8 +31,7 @@ namespace Gui {
 class View;
 
 
-//class ListItemImpl : public QWidget, public ViewImpl
-class ListItemImpl : public ViewImpl
+class ListItemImpl : public QWidget, public ViewImpl
 {
     friend class ListItemView;
 
@@ -42,16 +41,8 @@ private:
 
     void setLabel(const std::string& text);
 
-//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-//    virtual void showView();
-//    virtual void hideView();
-//    virtual int widthView();
-//    virtual int heightView();
-//    virtual void resizeView(int width, int height);
-//    virtual void moveView(int x, int y);
-
-
-    QWidget*                        _pWidget;
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+    
     QHBoxLayout*                    _pLayout;
     QLabel*                         _pNameLabel;
 };

@@ -34,6 +34,8 @@
 #include "Gui/LazyList.h"
 #include "Gui/ListItem.h"
 #include "Gui/Button.h"
+#include "Gui/Slider.h"
+#include "Gui/HorizontalLayout.h"
 
 
 namespace Omm {
@@ -86,16 +88,31 @@ public:
 };
 
 
-class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::ButtonModel
+class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
 public:
     virtual void initController();
 };
 
 
-class MediaRendererView : public Gui::ButtonView
+class MediaRendererView : public Gui::View //, public Gui::Controller
 {
+public:
+    MediaRendererView();
 
+    void selectedRenderer();
+    
+private:
+    virtual void syncView(Gui::Model* pModel);
+
+    Gui::HorizontalLayout   _layout;
+    Gui::Button*            _pBackButton;
+    Gui::Button*            _pPlayButton;
+    Gui::Button*            _pStopButton;
+    Gui::Button*            _pForwButton;
+    Gui::Slider*            _pVolSlider;
+    Gui::Slider*            _pSeekSlider;
+    Gui::Button*            _pRendererName;
 };
 
 
@@ -116,7 +133,7 @@ public:
 };
 
 
-class MediaServerDevice : public Av::CtlMediaServer, public Gui::ButtonModel
+class MediaServerDevice : public Av::CtlMediaServer, public Gui::ListItemModel
 {
 public:
     virtual void initController();
@@ -124,7 +141,7 @@ public:
 };
 
 
-class MediaServerView : public Gui::ButtonView
+class MediaServerView : public Gui::ListItemView
 {
 
 };
@@ -153,7 +170,7 @@ private:
 };
 
 
-class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ButtonModel
+class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ListItemModel
 {
 public:
     virtual std::string getLabel();
@@ -163,7 +180,7 @@ private:
 };
 
 
-class MediaObjectView : public Gui::ButtonView
+class MediaObjectView : public Gui::ListItemView
 {
     
 };

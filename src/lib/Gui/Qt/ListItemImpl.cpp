@@ -31,23 +31,22 @@ namespace Gui {
 
 
 ListItemImpl::ListItemImpl(View* pView, View* pParent) :
-//QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-//ViewImpl(pView, this)
-_pWidget(new QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
-//ViewImpl(pView, _pWidget)
-ViewImpl(pView, 0)
+//ViewImpl(pView, new QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
+QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
+ViewImpl(pView, this)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item impl ctor, _pWidget: " + Poco::NumberFormatter::format(_pWidget));
-    setNativeView(_pWidget);
-//    _pLayout = new QHBoxLayout(this);
-    _pLayout = new QHBoxLayout(_pWidget);
+    Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
+//    _pLayout = new QHBoxLayout(_pNativeView);
+    _pLayout = new QHBoxLayout(this);
     _pNameLabel = new QLabel;
     _pLayout->addWidget(_pNameLabel);
     _pLayout->setSpacing(0);
     _pLayout->setMargin(0);
     _pLayout->setContentsMargins(0, 0, 0, 0);
-//    QWidget::setPalette(QPalette(Qt::white));
-//    QWidget::setAutoFillBackground(true);
+//    _pNativeView->setPalette(QPalette(Qt::white));
+//    _pNativeView->setAutoFillBackground(true);
+    QWidget::setPalette(QPalette(Qt::white));
+    QWidget::setAutoFillBackground(true);
 }
 
 
@@ -64,32 +63,13 @@ ListItemImpl::setLabel(const std::string& text)
 }
 
 
-//void
-//ListItemImpl::mousePressEvent(QMouseEvent* pMouseEvent)
-//{
-//    selected();
-//    QWidget::mousePressEvent(pMouseEvent);
-//}
+void
+ListItemImpl::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+    selected();
+    QWidget::mousePressEvent(pMouseEvent);
+}
 
-
-//void
-//ListItemImpl::showView()
-//{
-//    Omm::Gui::Log::instance()->gui().debug("list item impl show ... " + _pView->getName());
-////    QWidget::show();
-//    _pWidget->show();
-//    Omm::Gui::Log::instance()->gui().debug("list item impl show finished.");
-//}
-//
-//
-//void
-//ListItemImpl::hideView()
-//{
-//    Omm::Gui::Log::instance()->gui().debug("list item impl hide ... " + _pView->getName());
-////    QWidget::show();
-//    _pWidget->hide();
-//    Omm::Gui::Log::instance()->gui().debug("list item impl hide finished.");
-//}
 
 
 

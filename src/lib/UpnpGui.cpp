@@ -139,7 +139,102 @@ MediaRendererGroupWidget::getItemModel(int row)
 void
 MediaRendererDevice::initController()
 {
-    setLabel(getFriendlyName());
+//    setLabel(getFriendlyName());
+}
+
+
+class PlayButton : public Gui::Button
+{
+public:
+    PlayButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    {
+        setLabel("Play");
+    }
+
+    virtual void pushed()
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
+        pRenderer->playPressed();
+    }
+};
+
+
+class StopButton : public Gui::Button
+{
+public:
+    StopButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    {
+        setLabel("Stop");
+    }
+
+    virtual void pushed()
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
+        pRenderer->stopPressed();
+    }
+};
+
+
+class RendererButton : public Gui::Button
+{
+public:
+    RendererButton(Gui::View* pParent = 0) : Gui::Button(pParent) {}
+
+    virtual void pushed()
+    {
+        MediaRendererView* pRenderer = static_cast<MediaRendererView*>(_pParent);
+        pRenderer->selectedRenderer();
+    }
+};
+
+
+class VolSlider : public Gui::Slider
+{
+public:
+    VolSlider(Gui::View* pParent = 0) : Gui::Slider(pParent) {}
+
+    virtual void valueChanged(int value)
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
+        pRenderer->volumeChanged(value);
+    }
+
+};
+
+
+MediaRendererView::MediaRendererView()
+{
+    _pBackButton = new Gui::Button(this);
+    _pPlayButton = new PlayButton(this);
+    _pStopButton = new StopButton(this);
+    _pForwButton = new Gui::Button(this);
+
+    _pBackButton->setLabel("Back");
+    _pPlayButton->setLabel("Play");
+    _pStopButton->setLabel("Stop");
+    _pForwButton->setLabel("Forw");
+
+    _pVolSlider = new VolSlider(this);
+    _pSeekSlider = new Gui::Slider(this);
+    
+    _pRendererName = new RendererButton(this);
+
+    setLayout(&_layout);
+}
+
+
+void
+MediaRendererView::selectedRenderer()
+{
+    NOTIFY_CONTROLLER(Gui::Controller, selected);
+}
+
+
+void
+MediaRendererView::syncView(Gui::Model* pModel)
+{
+    MediaRendererDevice* pRendererModel = static_cast<MediaRendererDevice*>(pModel);
+    _pRendererName->setLabel(pRendererModel->getFriendlyName());
 }
 
 

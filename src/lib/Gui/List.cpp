@@ -219,7 +219,6 @@ ListView::resize(int rows, int width)
 void
 ListView::resizeDelta(int rowDelta, int width)
 {
-    _lastVisibleRows += rowDelta;
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     extendViewPool(rowDelta);
     for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
@@ -228,9 +227,12 @@ ListView::resizeDelta(int rowDelta, int width)
     if (rowDelta <= 0) {
         return;
     }
-    if (_lastVisibleRows < static_cast<ListViewImpl*>(_pImpl)->visibleRows()) {
+    Log::instance()->gui().debug("list view resize visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
+        + ", view height in rows: " + Poco::NumberFormatter::format(static_cast<ListViewImpl*>(_pImpl)->visibleRows()));
+    if (pModel->totalItemCount() < static_cast<ListViewImpl*>(_pImpl)->visibleRows()) {
         return;
     }
+    _lastVisibleRows += rowDelta;
     for (int i = 0; i < rowDelta; i++) {
         View* pView = _freeViews.top();
         _freeViews.pop();
