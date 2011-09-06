@@ -148,8 +148,8 @@ UpnpGui.cpp
 )
 
 target_link_libraries(ommupnpgui
-${POCO_FOUNDATION}
 ommupnp
+ommupnpav
 ommgui
 )
 

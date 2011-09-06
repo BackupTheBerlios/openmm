@@ -8,7 +8,7 @@ GuiApplication.cpp
 target_link_libraries(ommplugin-application-gui
 ${OMM}
 ${OMM_GUI}
-#${OMM_UPNPGUI}
+${OMM_UPNPGUI}
 )
 
 set_target_properties(ommplugin-application-gui
