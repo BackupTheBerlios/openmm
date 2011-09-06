@@ -43,7 +43,7 @@ void
 MainWindowImpl::setMainView(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("main window impl set main widget");
-    QMainWindow::setCentralWidget(static_cast<QWidget*>(pView->getNativeView()));
+//    QMainWindow::setCentralWidget(static_cast<QWidget*>(pView->getNativeView()));
 }
 
 

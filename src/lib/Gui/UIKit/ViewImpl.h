@@ -22,7 +22,6 @@
 #ifndef ViewImpl_INCLUDED
 #define ViewImpl_INCLUDED
 
-#include <QtGui>
 #include "Gui/View.h"
 
 namespace Omm {
@@ -30,11 +29,8 @@ namespace Gui {
 
 class NativeView;
 
-
-class ViewImpl : public QObject
+class ViewImpl
 {
-    Q_OBJECT
-    
     friend class View;
     
 public:
@@ -42,8 +38,8 @@ public:
     virtual ~ViewImpl();
 
     View* getView();
-    QWidget* getNativeView();
-    void setNativeView(QWidget* pView);
+    UIView* getNativeView();
+    void setNativeView(UIView* pView);
     virtual void showView();
     virtual void hideView();
     virtual int widthView();
@@ -53,24 +49,21 @@ public:
     virtual void selected();
  
 protected:
-    ViewImpl(View* pView, QWidget* pNativeWidget);
+    ViewImpl(View* pView, UIView* pNativeWidget);
 
     View*                       _pView;
-    QWidget*                    _pNativeView;
-
-signals:
-    void showViewSignal();
+    void*                       _pNativeView;
 };
 
 
-class NativeView : public QWidget
+class NativeView
 {
     friend class ViewImpl;
 
 public:
     NativeView(ViewImpl* pViewImpl, View* pParent = 0);
 
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
+//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 
     ViewImpl*                 _pViewImpl;
 };

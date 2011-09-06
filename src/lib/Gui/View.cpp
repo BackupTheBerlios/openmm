@@ -29,6 +29,9 @@
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ViewImpl.h"
 #endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ViewImpl.h"
+#endif
 
 
 namespace Omm {

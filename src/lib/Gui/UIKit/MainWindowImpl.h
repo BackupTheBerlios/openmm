@@ -19,10 +19,10 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ButtonImpl_INCLUDED
-#define ButtonImpl_INCLUDED
+#ifndef MainWindowImpl_INCLUDED
+#define MainWindowImpl_INCLUDED
 
-#include <QtGui>
+#import <UIKit/UIKit.h>
 #include "ViewImpl.h"
 
 namespace Omm {

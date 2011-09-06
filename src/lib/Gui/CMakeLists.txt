@@ -37,6 +37,10 @@ if(TARGET ommgui-qt)
 set(LIB_OMMGUI_PLATFORM ommgui-qt)
 endif(TARGET ommgui-qt)
 
+if(TARGET ommgui-uikit)
+set(LIB_OMMGUI_PLATFORM ommgui-uikit)
+endif(TARGET ommgui-uikit)
+
 if(LIB_OMMGUI_PLATFORM)
 message(STATUS "Gui implementation for " ${BUILD_TARGET} " is available, linking libommgui with " ${LIB_OMMGUI_PLATFORM})
 
@@ -47,21 +51,23 @@ Model.cpp
 Controller.cpp
 Layout.cpp
 HorizontalLayout.cpp
-MainWindow.cpp
-EventLoop.cpp
-Button.cpp
-List.cpp
-ListModel.cpp
-ListItem.cpp
-LazyList.cpp
-Tab.cpp
-Navigator.cpp
-Slider.cpp
+#MainWindow.cpp
+#EventLoop.cpp
+#Button.cpp
+#List.cpp
+#ListModel.cpp
+#ListItem.cpp
+#LazyList.cpp
+#Tab.cpp
+#Navigator.cpp
+#Slider.cpp
 )
 
 target_link_libraries(ommgui
 ${POCO_FOUNDATION}
 ${LIB_OMMGUI_PLATFORM}
+/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.1.2.sdk/System/Library/Frameworks/UIKit.framework/UIKit
+/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.2.sdk/System/Library/Frameworks/Foundation.framework/Foundation
 )
 
 set(OMM_GUI
