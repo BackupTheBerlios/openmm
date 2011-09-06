@@ -20,6 +20,19 @@ add_subdirectory(Qt)
 endif(QT4_FOUND)
 
 
+find_package(UIKit)
+
+if(UIKIT_FOUND)
+
+add_definitions(
+-D__GUI_UIKIT_PLATFORM__
+)
+
+add_subdirectory(UIKit)
+
+endif(UIKIT_FOUND)
+
+
 if(TARGET ommgui-qt)
 set(LIB_OMMGUI_PLATFORM ommgui-qt)
 endif(TARGET ommgui-qt)
