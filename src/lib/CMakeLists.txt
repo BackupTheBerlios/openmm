@@ -143,6 +143,7 @@ CACHE INTERNAL libommsys
 
 add_subdirectory(Gui)
 
+if(TARGET ommgui)
 add_library(ommupnpgui
 UpnpGui.cpp
 )
@@ -158,11 +159,19 @@ ommupnpgui
 CACHE INTERNAL ommupnpgui
 )
 
+install(TARGETS ommupnpgui
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+)
+
+endif(TARGET ommgui)
+
 
 add_subdirectory(Dvb)
 
 
-install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys ommupnpgui
+install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib

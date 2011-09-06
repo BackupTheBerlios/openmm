@@ -16,9 +16,9 @@ target_link_libraries(stdomm
 ${OMM}
 ${OMM_UTIL}
 ${OMM_AV}
-ommplugin-stdapplication-qt
 )
 
+if(OMMGUI)
 add_executable(newomm
 NewOmmApplication.cpp
 )
@@ -31,7 +31,13 @@ ${OMM_GUI}
 ${OMM_UPNPGUI}
 )
 
-install(TARGETS omm stdomm newomm
+install(TARGETS newomm
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+)
+endif(OMMGUI)
+
+install(TARGETS omm stdomm
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )

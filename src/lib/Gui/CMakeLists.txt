@@ -26,9 +26,6 @@ endif(TARGET ommgui-qt)
 
 if(LIB_OMMGUI_PLATFORM)
 message(STATUS "Gui implementation for " ${BUILD_TARGET} " is available, linking libommgui with " ${LIB_OMMGUI_PLATFORM})
-else(LIB_OMMGUI_PLATFORM)
-message(STATUS "Gui implementation for " ${BUILD_TARGET} " not available.")
-endif(LIB_OMMGUI_PLATFORM)
 
 add_library(ommgui
 GuiLogger.cpp
@@ -64,3 +61,7 @@ RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
+
+else(LIB_OMMGUI_PLATFORM)
+message(STATUS "Gui implementation for " ${BUILD_TARGET} " not available.")
+endif(LIB_OMMGUI_PLATFORM)
