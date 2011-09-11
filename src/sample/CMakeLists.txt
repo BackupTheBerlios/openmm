@@ -2,9 +2,9 @@ add_subdirectory(
 AvStream
 )
 
-if(OMMGUI)
+if(OMM_GUI)
 add_subdirectory(
 Gui
 )
-endif(OMMGUI)
+endif(OMM_GUI)
 

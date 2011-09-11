@@ -19,34 +19,16 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <iostream>
-
 #include <Omm/Gui/Application.h>
-#include <Omm/Gui/Slider.h>
-
-
-class SliderController : public Omm::Gui::SliderController
-{
-private:
-    void valueChanged(int value)
-    {
-        std::cout << "slider value: " << value << std::endl;
-//        UPDATE_MODEL(Omm::Gui::SliderModel, setValue, 0);
-    }
-};
+#include <Omm/Gui/View.h>
 
 
 class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        SliderController* pSliderController = new SliderController;
-        Omm::Gui::Slider* pSlider = new Omm::Gui::Slider;
-        pSlider->attachController(pSliderController);
-        pSliderController->attachModel(pSlider);
-        pSlider->resize(300, 30);
-        resize(300, 30);
-        return pSlider;
+        resize(100, 100);
+        return new Omm::Gui::View;
     }
 };
 

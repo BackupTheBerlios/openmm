@@ -34,6 +34,7 @@ Model.cpp
 Controller.cpp
 Layout.cpp
 HorizontalLayout.cpp
+Application.cpp
 MainWindow.cpp
 EventLoop.cpp
 Button.cpp

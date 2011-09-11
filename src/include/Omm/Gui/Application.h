@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,43 +17,38 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <iostream>
-
-#include <Omm/Gui/Application.h>
-#include <Omm/Gui/Slider.h>
+#ifndef Application_INCLUDED
+#define Application_INCLUDED
 
 
-class SliderController : public Omm::Gui::SliderController
+namespace Omm {
+namespace Gui {
+
+class View;
+class ApplicationImpl;
+
+
+class Application
 {
+    friend class ApplicationImpl;
+    
+public:
+    Application();
+    virtual ~Application();
+
+    void resize(int width, int height);
+    int run(int argc = 0, char** argv = 0);
+
+    virtual View* createMainView() = 0;
+
 private:
-    void valueChanged(int value)
-    {
-        std::cout << "slider value: " << value << std::endl;
-//        UPDATE_MODEL(Omm::Gui::SliderModel, setValue, 0);
-    }
+    ApplicationImpl*           _pImpl;
 };
 
 
-class Application : public Omm::Gui::Application
-{
-    virtual Omm::Gui::View* createMainView()
-    {
-        SliderController* pSliderController = new SliderController;
-        Omm::Gui::Slider* pSlider = new Omm::Gui::Slider;
-        pSlider->attachController(pSliderController);
-        pSliderController->attachModel(pSlider);
-        pSlider->resize(300, 30);
-        resize(300, 30);
-        return pSlider;
-    }
-};
+}  // namespace Omm
+}  // namespace Gui
 
-
-int main(int argc, char** argv)
-{
-    Application app;
-    return app.run(argc, argv);
-}
-
+#endif

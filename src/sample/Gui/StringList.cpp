@@ -24,8 +24,7 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/List.h>
 #include <Omm/Gui/ListModel.h>
 #include <Omm/Gui/ListItem.h>
@@ -80,19 +79,22 @@ StringListModel::getItemModel(int row)
 }
 
 
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        StringListModel* pListModel = new StringListModel(1);
+        Omm::Gui::ListView* pList = new Omm::Gui::ListView;
+        pList->setModel(pListModel);
+        resize(800, 480);
+        return pList;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    StringListModel listModel(1);
-
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::ListView list;
-    list.setModel(&listModel);
-
-    mainWindow.setMainView(&list);
-    mainWindow.resize(800, 480);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

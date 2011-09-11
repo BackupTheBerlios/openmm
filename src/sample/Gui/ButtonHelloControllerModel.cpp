@@ -19,8 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/Button.h>
 
 
@@ -29,24 +28,27 @@ class HelloButtonModel : public Omm::Gui::ButtonControllerModel
 private:
     void pushed()
     {
-//        setLabel("works!");
         UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
+    }
+};
+
+
+class HelloApplication : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        HelloButtonModel* pButtonModel = new HelloButtonModel;
+        Omm::Gui::ButtonView* pButtonView = new Omm::Gui::ButtonView;
+        pButtonView->setControllerModel(pButtonModel);
+        pButtonModel->setLabel("Hello GUI");
+        return pButtonView;
     }
 };
 
 
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    HelloButtonModel buttonModel;
-    Omm::Gui::ButtonView buttonView;
-    buttonView.setControllerModel(&buttonModel);
-    buttonModel.setLabel("Hello GUI");
-    mainWindow.setMainView(&buttonView);
-
-    mainWindow.show();
-
-    loop.run();
+    HelloApplication app;
+    return app.run(argc, argv);
 }
 

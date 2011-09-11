@@ -21,32 +21,35 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/Button.h>
+
+
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::View* pCompoundView = new Omm::Gui::View;
+
+        int windowHeight = 0;
+        int windowWidth = 0;
+        int buttonCount = 10;
+        for(int i = 0; i < buttonCount; i++) {
+            Omm::Gui::Button* pButton = new Omm::Gui::Button(pCompoundView);
+            pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+            pButton->move(pButton->width() * i, 0);
+            windowHeight = pButton->height();
+            windowWidth += pButton->width();
+        }
+        resize(windowWidth, windowHeight);
+        return pCompoundView;
+    }
+};
 
 
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::View compoundView;
-
-    int windowHeight = 0;
-    int windowWidth = 0;
-    int buttonCount = 10;
-    for(int i = 0; i < buttonCount; i++) {
-        Omm::Gui::Button* pButton = new Omm::Gui::Button(&compoundView);
-        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
-        pButton->move(pButton->width() * i, 0);
-        windowHeight = pButton->height();
-        windowWidth += pButton->width();
-    }
-
-    mainWindow.resize(windowWidth, windowHeight);
-    mainWindow.setMainView(&compoundView);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

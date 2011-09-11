@@ -18,7 +18,7 @@ ${OMM_UTIL}
 ${OMM_AV}
 )
 
-if(OMMGUI)
+if(OMM_GUI)
 add_executable(newomm
 NewOmmApplication.cpp
 )
@@ -35,7 +35,7 @@ install(TARGETS newomm
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )
-endif(OMMGUI)
+endif(OMM_GUI)
 
 install(TARGETS omm stdomm
 RUNTIME DESTINATION bin

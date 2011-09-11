@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,43 +17,50 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <iostream>
+#include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/Application.h>
-#include <Omm/Gui/Slider.h>
+#include "Gui/Application.h"
+#include "Gui/GuiLogger.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/ApplicationImpl.h"
+#endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ApplicationImpl.h"
+#endif
 
 
-class SliderController : public Omm::Gui::SliderController
+namespace Omm {
+namespace Gui {
+
+
+Application::Application() :
+_pImpl(new ApplicationImpl(this))
 {
-private:
-    void valueChanged(int value)
-    {
-        std::cout << "slider value: " << value << std::endl;
-//        UPDATE_MODEL(Omm::Gui::SliderModel, setValue, 0);
-    }
-};
-
-
-class Application : public Omm::Gui::Application
-{
-    virtual Omm::Gui::View* createMainView()
-    {
-        SliderController* pSliderController = new SliderController;
-        Omm::Gui::Slider* pSlider = new Omm::Gui::Slider;
-        pSlider->attachController(pSliderController);
-        pSliderController->attachModel(pSlider);
-        pSlider->resize(300, 30);
-        resize(300, 30);
-        return pSlider;
-    }
-};
-
-
-int main(int argc, char** argv)
-{
-    Application app;
-    return app.run(argc, argv);
+    Omm::Gui::Log::instance()->gui().debug("application ctor.");
 }
 
+
+Application::~Application()
+{
+}
+
+
+void
+Application::resize(int width, int height)
+{
+    _pImpl->resize(width, height);
+}
+
+
+int
+Application::run(int argc, char** argv)
+{
+    return _pImpl->run(argc, argv);
+}
+
+
+} // namespace Gui
+} // namespace Omm

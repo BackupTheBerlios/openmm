@@ -4,6 +4,7 @@ QtGui.qrc
 
 set(OMMGUI_QT_SRC
 ViewImpl.cpp
+ApplicationImpl.cpp
 MainWindowImpl.cpp
 EventLoopImpl.cpp
 ButtonImpl.cpp
