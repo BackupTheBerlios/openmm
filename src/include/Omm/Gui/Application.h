@@ -38,13 +38,11 @@ public:
     Application();
     virtual ~Application();
 
-    static Application* instance();
     int run(int argc = 0, char** argv = 0);
 
     virtual View* createMainView() = 0;
 
 private:
-    static Application*        _pInstance;
     ApplicationImpl*           _pImpl;
 };
 

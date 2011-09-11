@@ -33,7 +33,7 @@ class PrivateImpl;
 
 class ApplicationImpl
 {
-private:
+public:
     friend class Application;
     
     ApplicationImpl(Application* pApplication);
@@ -41,8 +41,8 @@ private:
 
     int run(int argc, char** argv);
 
-    Application*    _pApplication;
-    PrivateImpl*    _p;
+    static Application*    _pApplication;
+    PrivateImpl*           _p;
 };
 
 

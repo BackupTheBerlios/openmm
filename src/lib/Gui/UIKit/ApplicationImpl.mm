@@ -45,7 +45,7 @@
     window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 //    window.backgroundColor = [UIColor whiteColor];
 
-    UIView* pMainView = static_cast<UIView*>(Omm::Gui::Application::instance()->createMainView()->getNativeView());
+    UIView* pMainView = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pApplication->createMainView()->getNativeView());
     [window addSubview:pMainView];
 
     [window makeKeyAndVisible];
@@ -77,6 +77,8 @@ class PrivateImpl
     NSAutoreleasePool*  _pAutoreleasePool;
 };
 
+
+Application* ApplicationImpl::_pApplication = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {

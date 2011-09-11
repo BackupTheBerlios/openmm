@@ -35,29 +35,16 @@
 namespace Omm {
 namespace Gui {
 
-Application* Application::_pInstance = 0;
-
 
 Application::Application() :
 _pImpl(new ApplicationImpl(this))
 {
     Omm::Gui::Log::instance()->gui().debug("application ctor.");
-    _pInstance = this;
 }
 
 
 Application::~Application()
 {
-}
-
-
-Application*
-Application::instance()
-{
-//    if(!_pInstance) {
-//        _pInstance = new Application;
-//    }
-    return _pInstance;
 }
 
 
