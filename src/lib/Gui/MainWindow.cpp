@@ -27,6 +27,9 @@
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/MainWindowImpl.h"
 #endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/MainWindowImpl.h"
+#endif
 
 
 namespace Omm {

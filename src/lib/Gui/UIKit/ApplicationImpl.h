@@ -19,24 +19,29 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef EventLoopImpl_INCLUDED
-#define EventLoopImpl_INCLUDED
+#ifndef ApplicationImpl_INCLUDED
+#define ApplicationImpl_INCLUDED
+
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-
+class Application;
 class PrivateImpl;
 
-class EventLoopImpl
+
+class ApplicationImpl
 {
 private:
-    friend class EventLoop;
+    friend class Application;
     
-    EventLoopImpl(int argc, char** argv);
+    ApplicationImpl(Application* pApplication);
+    virtual ~ApplicationImpl();
 
-    void run();
+    int run(int argc, char** argv);
 
+    Application*    _pApplication;
     PrivateImpl*    _p;
 };
 

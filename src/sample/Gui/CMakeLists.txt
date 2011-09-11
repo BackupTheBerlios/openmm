@@ -43,55 +43,64 @@ ${OMM_GUI}
 )
 
 
-add_executable(stringlist
-StringList.cpp
+add_executable(plain
+Plain.cpp
 )
 
-target_link_libraries(stringlist
+target_link_libraries(plain
 ${OMM_GUI}
 )
 
 
-add_executable(buttonlist
-ButtonList.cpp
-)
+#add_executable(stringlist
+#StringList.cpp
+#)
 
-target_link_libraries(buttonlist
-${OMM_GUI}
-)
-
-
-add_executable(buttonlazylist
-ButtonLazyList.cpp
-)
-
-target_link_libraries(buttonlazylist
-${OMM_GUI}
-)
+#target_link_libraries(stringlist
+#${OMM_GUI}
+#)
 
 
-add_executable(buttontab
-ButtonTab.cpp
-)
+#add_executable(buttonlist
+#ButtonList.cpp
+#)
 
-target_link_libraries(buttontab
-${OMM_GUI}
-)
-
-
-add_executable(buttonnavigator
-ButtonNavigator.cpp
-)
-
-target_link_libraries(buttonnavigator
-${OMM_GUI}
-)
+#target_link_libraries(buttonlist
+#${OMM_GUI}
+#)
 
 
-add_executable(slider
-Slider.cpp
-)
+#add_executable(buttonlazylist
+#ButtonLazyList.cpp
+#)
 
-target_link_libraries(slider
-${OMM_GUI}
-)
+#target_link_libraries(buttonlazylist
+#${OMM_GUI}
+#)
+
+
+#add_executable(buttontab
+#ButtonTab.cpp
+#)
+
+#target_link_libraries(buttontab
+#${OMM_GUI}
+#)
+
+
+#add_executable(buttonnavigator
+#ButtonNavigator.cpp
+#)
+
+#target_link_libraries(buttonnavigator
+#${OMM_GUI}
+#)
+
+
+#add_executable(slider
+#Slider.cpp
+#)
+
+#target_link_libraries(slider
+#${OMM_GUI}
+#)

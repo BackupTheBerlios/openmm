@@ -27,6 +27,9 @@
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ButtonImpl.h"
 #endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ButtonImpl.h"
+#endif
 
 
 namespace Omm {

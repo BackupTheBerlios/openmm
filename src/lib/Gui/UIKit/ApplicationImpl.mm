@@ -19,30 +19,90 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef EventLoopImpl_INCLUDED
-#define EventLoopImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
+
+#import <UIKit/UIKit.h>
+
+#include "ApplicationImpl.h"
+#include "Gui/Application.h"
+#include "Gui/GuiLogger.h"
+
+
+@interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
+    UIWindow *window;
+}
+
+@property (nonatomic, retain) UIWindow *window;
+
+@end
+
+
+@implementation OmmGuiAppDelegate
+
+@synthesize window;
+
+-(void)applicationDidFinishLaunching:(UIApplication *)application {
+    window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+//    window.backgroundColor = [UIColor whiteColor];
+
+    UIView* pMainView = static_cast<UIView*>(Omm::Gui::Application::instance()->createMainView()->getNativeView());
+    [window addSubview:pMainView];
+
+    [window makeKeyAndVisible];
+}
+
+
+-(void)dealloc {
+    [window release];
+    [super dealloc];
+}
+
+@end
+
+
 
 namespace Omm {
 namespace Gui {
 
 
-class PrivateImpl;
-
-class EventLoopImpl
+class PrivateImpl
 {
-private:
-    friend class EventLoop;
-    
-    EventLoopImpl(int argc, char** argv);
+    friend class ApplicationImpl;
 
-    void run();
+    PrivateImpl()
+    {
+        _pAutoreleasePool = [[NSAutoreleasePool alloc] init];
+    }
 
-    PrivateImpl*    _p;
+    NSAutoreleasePool*  _pAutoreleasePool;
 };
+
+
+ApplicationImpl::ApplicationImpl(Application* pApplication)
+{
+    Omm::Gui::Log::instance()->gui().debug("application impl ctor");
+
+    _pApplication = pApplication;
+    _p = new PrivateImpl;
+}
+
+
+ApplicationImpl::~ApplicationImpl()
+{
+}
+
+
+int
+ApplicationImpl::run(int argc, char** argv)
+{
+    Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
+    int ret = UIApplicationMain(argc, argv, nil,@"OmmGuiAppDelegate");
+    [_p->_pAutoreleasePool release];
+    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+    return ret;
+}
+
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif
-

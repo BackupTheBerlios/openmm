@@ -22,7 +22,6 @@
 #ifndef MainWindowImpl_INCLUDED
 #define MainWindowImpl_INCLUDED
 
-#import <UIKit/UIKit.h>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -31,7 +30,7 @@ namespace Gui {
 class View;
 class MainWindow;
 
-class MainWindowImpl : public QMainWindow, public ViewImpl
+class MainWindowImpl : public ViewImpl
 {
 private:
     friend class MainWindow;

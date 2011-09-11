@@ -51,9 +51,10 @@ Model.cpp
 Controller.cpp
 Layout.cpp
 HorizontalLayout.cpp
-#MainWindow.cpp
-#EventLoop.cpp
-#Button.cpp
+MainWindow.cpp
+EventLoop.cpp
+Application.cpp
+Button.cpp
 #List.cpp
 #ListModel.cpp
 #ListItem.cpp

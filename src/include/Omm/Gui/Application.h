@@ -19,25 +19,33 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef EventLoopImpl_INCLUDED
-#define EventLoopImpl_INCLUDED
+#ifndef Application_INCLUDED
+#define Application_INCLUDED
+
 
 namespace Omm {
 namespace Gui {
 
+class View;
+class ApplicationImpl;
 
-class PrivateImpl;
 
-class EventLoopImpl
+class Application
 {
-private:
-    friend class EventLoop;
+    friend class ApplicationImpl;
     
-    EventLoopImpl(int argc, char** argv);
+public:
+    Application();
+    virtual ~Application();
 
-    void run();
+    static Application* instance();
+    int run(int argc = 0, char** argv = 0);
 
-    PrivateImpl*    _p;
+    virtual View* createMainView() = 0;
+
+private:
+    static Application*        _pInstance;
+    ApplicationImpl*           _pImpl;
 };
 
 
@@ -45,4 +53,3 @@ private:
 }  // namespace Gui
 
 #endif
-

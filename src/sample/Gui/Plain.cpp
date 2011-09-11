@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,32 +17,17 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef EventLoopImpl_INCLUDED
-#define EventLoopImpl_INCLUDED
-
-namespace Omm {
-namespace Gui {
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
 
 
-class PrivateImpl;
 
-class EventLoopImpl
+int main(int argc, char** argv)
 {
-private:
-    friend class EventLoop;
-    
-    EventLoopImpl(int argc, char** argv);
+    Omm::Gui::EventLoop loop(argc, argv);
 
-    void run();
-
-    PrivateImpl*    _p;
-};
-
-
-}  // namespace Omm
-}  // namespace Gui
-
-#endif
+    loop.run();
+}
 

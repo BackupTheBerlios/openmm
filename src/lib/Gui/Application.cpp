@@ -19,30 +19,54 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef EventLoopImpl_INCLUDED
-#define EventLoopImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
+
+#include "Gui/Application.h"
+#include "Gui/GuiLogger.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/ApplicationImpl.h"
+#endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ApplicationImpl.h"
+#endif
+
 
 namespace Omm {
 namespace Gui {
 
+Application* Application::_pInstance = 0;
 
-class PrivateImpl;
 
-class EventLoopImpl
+Application::Application() :
+_pImpl(new ApplicationImpl(this))
 {
-private:
-    friend class EventLoop;
-    
-    EventLoopImpl(int argc, char** argv);
-
-    void run();
-
-    PrivateImpl*    _p;
-};
+    Omm::Gui::Log::instance()->gui().debug("application ctor.");
+    _pInstance = this;
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+Application::~Application()
+{
+}
 
-#endif
 
+Application*
+Application::instance()
+{
+//    if(!_pInstance) {
+//        _pInstance = new Application;
+//    }
+    return _pInstance;
+}
+
+
+int
+Application::run(int argc, char** argv)
+{
+    return _pImpl->run(argc, argv);
+}
+
+
+} // namespace Gui
+} // namespace Omm

@@ -27,6 +27,9 @@
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/EventLoopImpl.h"
 #endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/EventLoopImpl.h"
+#endif
 
 
 namespace Omm {

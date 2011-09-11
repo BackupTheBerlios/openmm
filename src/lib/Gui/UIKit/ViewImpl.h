@@ -34,12 +34,13 @@ class ViewImpl
     friend class View;
     
 public:
+    ViewImpl() {}
     ViewImpl(View* pView);
     virtual ~ViewImpl();
 
     View* getView();
-    UIView* getNativeView();
-    void setNativeView(UIView* pView);
+    void* getNativeView();
+    void setNativeView(void* pView);
     virtual void showView();
     virtual void hideView();
     virtual int widthView();
@@ -49,7 +50,7 @@ public:
     virtual void selected();
  
 protected:
-    ViewImpl(View* pView, UIView* pNativeWidget);
+//    ViewImpl(View* pView, UIView* pNativeWidget);
 
     View*                       _pView;
     void*                       _pNativeView;

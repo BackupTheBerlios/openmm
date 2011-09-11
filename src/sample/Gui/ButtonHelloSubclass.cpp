@@ -19,13 +19,19 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/Button.h>
+
 
 
 class HelloButton : public Omm::Gui::Button
 {
+public:
+    HelloButton()
+    {
+        setLabel("Hello GUI");
+    }
+
 private:
     void pushed()
     {
@@ -34,16 +40,18 @@ private:
 };
 
 
+class HelloApplication : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        return new HelloButton;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    HelloButton button;
-    button.setLabel("Hello GUI");
-    mainWindow.setMainView(&button);
-
-    mainWindow.show();
-
-    loop.run();
+    HelloApplication app;
+    return app.run(argc, argv);
 }
 
