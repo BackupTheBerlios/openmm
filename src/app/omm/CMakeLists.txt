@@ -18,24 +18,24 @@ ${OMM_UTIL}
 ${OMM_AV}
 )
 
-if(OMMGUI)
-add_executable(newomm
-NewOmmApplication.cpp
-)
+#if(OMM_GUI)
+#add_executable(newomm
+#NewOmmApplication.cpp
+#)
 
-target_link_libraries(newomm
-${OMM}
-${OMM_UTIL}
-${OMM_AV}
-${OMM_GUI}
-${OMM_UPNPGUI}
-)
+#target_link_libraries(newomm
+#${OMM}
+#${OMM_UTIL}
+#${OMM_AV}
+#${OMM_GUI}
+#${OMM_UPNPGUI}
+#)
 
-install(TARGETS newomm
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib
-)
-endif(OMMGUI)
+#install(TARGETS newomm
+#RUNTIME DESTINATION bin
+#LIBRARY DESTINATION lib
+#)
+#endif(OMM_GUI)
 
 install(TARGETS omm stdomm
 RUNTIME DESTINATION bin

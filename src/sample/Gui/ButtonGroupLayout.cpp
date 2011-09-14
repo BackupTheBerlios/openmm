@@ -21,31 +21,35 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/HorizontalLayout.h>
 #include <Omm/Gui/Button.h>
 
 
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::View* pCompoundView = new Omm::Gui::View;
+        Omm::Gui::HorizontalLayout* pLayout = new Omm::Gui::HorizontalLayout;
+
+        int buttonCount = 5;
+        for(int i = 0; i < buttonCount; i++) {
+            Omm::Gui::Button* pButton = new Omm::Gui::Button(pCompoundView);
+            pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+        }
+
+        pCompoundView->resize(600, 100);
+        pCompoundView->setLayout(pLayout);
+        resize(600, 100);
+        return pCompoundView;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::View compoundView;
-    Omm::Gui::HorizontalLayout layout;
-
-    int buttonCount = 5;
-    for(int i = 0; i < buttonCount; i++) {
-        Omm::Gui::Button* pButton = new Omm::Gui::Button(&compoundView);
-        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
-    }
-
-    compoundView.resize(600, 100);
-    compoundView.setLayout(&layout);
-    mainWindow.resize(600, 100);
-    mainWindow.setMainView(&compoundView);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

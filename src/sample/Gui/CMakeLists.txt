@@ -1,3 +1,12 @@
+#add_executable(plain
+#Plain.cpp
+#)
+
+#target_link_libraries(plain
+#${OMM_GUI}
+#)
+
+
 add_executable(buttonhellosubclass
 ButtonHelloSubclass.cpp
 )
@@ -39,15 +48,6 @@ ButtonGroup1toNModel.cpp
 )
 
 target_link_libraries(buttongroup1tonmodel
-${OMM_GUI}
-)
-
-
-add_executable(plain
-Plain.cpp
-)
-
-target_link_libraries(plain
 ${OMM_GUI}
 )
 

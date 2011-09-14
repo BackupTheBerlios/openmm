@@ -19,28 +19,36 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef EventLoop_INCLUDED
-#define EventLoop_INCLUDED
+#ifndef ApplicationImpl_INCLUDED
+#define ApplicationImpl_INCLUDED
+
+#include "ViewImpl.h"
+
+class QMainWindow;
+class QApplication;
 
 
 namespace Omm {
 namespace Gui {
 
-class EventLoopImpl;
+class Application;
 
-
-class EventLoop
+class ApplicationImpl
 {
-    friend class EventLoopImpl;
-    
 public:
-    EventLoop(int argc = 0, char** argv = 0);
-    virtual ~EventLoop();
+    friend class Application;
+    
+    ApplicationImpl(Application* pApplication);
+    virtual ~ApplicationImpl();
 
-    void run();
+    void resize(int width, int height);
+    int run(int argc, char** argv);
 
-private:
-    EventLoopImpl*      _pEventLoopImpl;
+    Application*            _pApplication;
+    QMainWindow*            _pMainWindow;
+    QApplication*           _pQtApplication;
+    int                     _width;
+    int                     _height;
 };
 
 
@@ -48,3 +56,4 @@ private:
 }  // namespace Gui
 
 #endif
+

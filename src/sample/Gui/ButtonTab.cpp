@@ -21,29 +21,34 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
+
 #include <Omm/Gui/Button.h>
 #include <Omm/Gui/Tab.h>
 
 
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::Tab* pTab = new Omm::Gui::Tab;
+
+        int tabCount = 5;
+        for(int i = 0; i < tabCount; i++) {
+            Omm::Gui::Button* pButton = new Omm::Gui::Button;
+            pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
+            pTab->addView(pButton, "Tab" + Poco::NumberFormatter::format(i + 1));
+        }
+
+        resize(800, 480);
+        return pTab;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::Tab tab;
-
-    int tabCount = 5;
-    for(int i = 0; i < tabCount; i++) {
-        Omm::Gui::Button* pButton = new Omm::Gui::Button;
-        pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
-        tab.addView(pButton, "Tab" + Poco::NumberFormatter::format(i + 1));
-    }
-
-    mainWindow.resize(800, 480);
-    mainWindow.setMainView(&tab);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

@@ -94,6 +94,14 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
+void
+ApplicationImpl::resize(int width, int height)
+{
+    _width = width;
+    _height = height;
+}
+
+
 int
 ApplicationImpl::run(int argc, char** argv)
 {

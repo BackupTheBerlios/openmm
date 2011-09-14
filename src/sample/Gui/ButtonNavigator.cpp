@@ -21,8 +21,7 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/Button.h>
 #include <Omm/Gui/Navigator.h>
 
@@ -50,19 +49,24 @@ private:
 int NavButton::_buttonCount = 0;
 
 
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::Navigator* pNavigator = new Omm::Gui::Navigator;
+
+        NavButton* pButton = new NavButton(pNavigator);
+        pNavigator->push(pButton, pButton->getLabel());
+        resize(800, 480);
+
+        return pNavigator;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::Navigator navigator;
-
-    NavButton* pButton = new NavButton(&navigator);
-    navigator.push(pButton, pButton->getLabel());
-
-    mainWindow.resize(800, 480);
-    mainWindow.setMainView(&navigator);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

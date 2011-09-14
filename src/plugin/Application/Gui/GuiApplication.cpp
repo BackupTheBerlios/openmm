@@ -24,6 +24,15 @@
 #include "GuiApplication.h"
 
 
+//class GuiApp : public Omm::Gui::Application
+//{
+//    virtual Omm::Gui::View* createMainView()
+//    {
+//        return static_cast<Omm::ControllerWidget*>(_pController);
+//    }
+//};
+
+
 GuiApplication::GuiApplication()
 {
 }
@@ -39,10 +48,13 @@ GuiApplication::initApplication(int argc, char** argv)
 {
     Omm::Log::instance()->upnp().debug("init gui application ...");
 
-    _pEventLoop = new Omm::Gui::EventLoop(argc, argv);
-    _pMainWindow = new Omm::Gui::MainWindow;
-    _pMainWindow->resize(800, 480);
-    _pMainWindow->show();
+//    _pEventLoop = new Omm::Gui::EventLoop(argc, argv);
+//    _pMainWindow = new Omm::Gui::MainWindow;
+//    _pMainWindow->resize(800, 480);
+//    _pMainWindow->show();
+//    _pApplication = new GuiApp;
+    _argc = argc;
+    _argv = argv;
 
     Omm::Log::instance()->upnp().debug("finished init gui application.");
 }
@@ -51,7 +63,8 @@ GuiApplication::initApplication(int argc, char** argv)
 void
 GuiApplication::resize(int width, int height)
 {
-    _pMainWindow->resize(width, height);
+//    _pMainWindow->resize(width, height);
+    Omm::Gui::Application::resize(width, height);
 }
 
 
@@ -59,7 +72,7 @@ Omm::Controller*
 GuiApplication::createController()
 {
     Omm::Log::instance()->upnp().debug("application gui create controller ...");
-    return new Omm::ControllerWidget;
+//    return new Omm::ControllerWidget;
     Omm::Log::instance()->upnp().debug("application gui create controller finished.");
 }
 
@@ -68,7 +81,7 @@ void
 GuiApplication::addController()
 {
     Omm::Log::instance()->upnp().debug("application gui add controller");
-    _pMainWindow->setMainView(static_cast<Omm::ControllerWidget*>(_pController));
+//    _pMainWindow->setMainView(static_cast<Omm::ControllerWidget*>(_pController));
 }
 
 
@@ -90,15 +103,20 @@ void
 GuiApplication::eventLoop()
 {
     Omm::Log::instance()->upnp().debug("gui application entering event loop ...");
-    _pEventLoop->run();
+//    _pEventLoop->run();
+    Omm::Gui::Application::run(_argc, _argv);
 }
 
 
-//void
-//ApplicationGui::quit()
-//{
-////    emit doQuit();
-//}
+Omm::Gui::View*
+GuiApplication::createMainView()
+{
+//    return static_cast<Omm::ControllerWidget*>(_pController);
+    Omm::ControllerWidget* pController = new Omm::ControllerWidget;
+    _pController = pController;
+    pController->init();
+    return pController;
+}
 
 
 #ifdef OMMPLUGIN

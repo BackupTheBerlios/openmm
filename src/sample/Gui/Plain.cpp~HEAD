@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,30 +17,17 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#include "EventLoopImpl.h"
-#include "Gui/GuiLogger.h"
-
-namespace Omm {
-namespace Gui {
+#include <Omm/Gui/EventLoop.h>
+#include <Omm/Gui/MainWindow.h>
 
 
-EventLoopImpl::EventLoopImpl(int argc, char** argv) :
-QApplication(argc, argv)
+
+int main(int argc, char** argv)
 {
-    Omm::Gui::Log::instance()->gui().debug("event loop implementation ctor");
+    Omm::Gui::EventLoop loop(argc, argv);
+
+    loop.run();
 }
 
-
-void
-EventLoopImpl::run()
-{
-    Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
-    QApplication::exec();
-    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
-}
-
-
-}  // namespace Omm
-}  // namespace Gui

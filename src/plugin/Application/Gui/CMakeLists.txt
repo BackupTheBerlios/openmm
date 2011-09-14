@@ -1,6 +1,8 @@
+return()
+
 if(BUILD_PLUGINS)
 
-if(OMMGUI)
+if(OMM_GUI)
 add_library(ommplugin-application-gui
 SHARED
 GuiApplication.cpp
@@ -21,7 +23,7 @@ RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib
 )
-endif(OMMGUI)
+endif(OMM_GUI)
 
 endif(BUILD_PLUGINS)
 

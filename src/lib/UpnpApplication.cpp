@@ -167,7 +167,9 @@ UpnpApplication::enableController(bool enable)
     if (enable && !_pController) {
         _pController = createController();
         addController();
-        _pController->init();
+        if (_pController) {
+            _pController->init();
+        }
     }
     else if (!enable && _pController) {
         _pController->stop();

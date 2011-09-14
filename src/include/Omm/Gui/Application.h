@@ -40,6 +40,7 @@ public:
 
     int run(int argc = 0, char** argv = 0);
 
+    void resize(int width, int height);
     virtual View* createMainView() = 0;
 
 private:

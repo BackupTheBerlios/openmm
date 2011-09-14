@@ -21,8 +21,7 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/HorizontalLayout.h>
 #include <Omm/Gui/Button.h>
 
@@ -50,33 +49,38 @@ private:
 };
 
 
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::View* pCompoundView = new Omm::Gui::View;
+        Omm::Gui::HorizontalLayout* pLayout = new Omm::Gui::HorizontalLayout;
+
+        Omm::Gui::Button* pMasterButton = new Omm::Gui::Button(pCompoundView);
+        MasterController* pMasterController = new MasterController;
+        pMasterButton->attachController(pMasterController);
+        pMasterButton->setLabel("Master Button");
+
+        int buttonCount = 5;
+        for(int i = 0; i < buttonCount; i++) {
+            SlaveButton* pButton = new SlaveButton(pCompoundView);
+            std::string name = "Button " + Poco::NumberFormatter::format(i + 1);
+            pButton->setName(name);
+            pButton->setLabel(name);
+            pMasterController->attachModel(pButton);
+        }
+
+        pCompoundView->resize(600, 100);
+        pCompoundView->setLayout(pLayout);
+        resize(600, 100);
+        return pCompoundView;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-    Omm::Gui::View compoundView;
-    Omm::Gui::HorizontalLayout layout;
-
-    Omm::Gui::Button masterButton(&compoundView);
-    MasterController masterController;
-    masterButton.attachController(&masterController);
-    masterButton.setLabel("Master Button");
-    
-    int buttonCount = 5;
-    for(int i = 0; i < buttonCount; i++) {
-        SlaveButton* pButton = new SlaveButton(&compoundView);
-        std::string name = "Button " + Poco::NumberFormatter::format(i + 1);
-        pButton->setName(name);
-        pButton->setLabel(name);
-        masterController.attachModel(pButton);
-    }
-
-    compoundView.resize(600, 100);
-    compoundView.setLayout(&layout);
-    mainWindow.resize(600, 100);
-    mainWindow.setMainView(&compoundView);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

@@ -21,14 +21,14 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "Gui/MainWindow.h"
+#include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
 
 #ifdef __GUI_QT_PLATFORM__
-#include "Qt/MainWindowImpl.h"
+#include "Qt/ApplicationImpl.h"
 #endif
 #ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/MainWindowImpl.h"
+#include "UIKit/ApplicationImpl.h"
 #endif
 
 
@@ -36,22 +36,22 @@ namespace Omm {
 namespace Gui {
 
 
-MainWindow::MainWindow() :
-View(new MainWindowImpl(this))
+Application::Application() :
+_pImpl(new ApplicationImpl(this))
 {
-    Omm::Gui::Log::instance()->gui().debug("main window ctor.");
+    Omm::Gui::Log::instance()->gui().debug("application ctor.");
 }
 
 
-MainWindow::~MainWindow()
+Application::~Application()
 {
 }
 
 
-void
-MainWindow::setMainView(View* pView)
+int
+Application::run(int argc, char** argv)
 {
-    static_cast<MainWindowImpl*>(_pImpl)->setMainView(pView);
+    return _pImpl->run(argc, argv);
 }
 
 

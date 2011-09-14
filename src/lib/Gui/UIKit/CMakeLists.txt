@@ -1,7 +1,7 @@
 set(OMMGUI_UIKIT_SRC
 ViewImpl.mm
-MainWindowImpl.mm
-EventLoopImpl.mm
+#MainWindowImpl.mm
+#EventLoopImpl.mm
 ApplicationImpl.mm
 ButtonImpl.mm
 #ListImpl.mm

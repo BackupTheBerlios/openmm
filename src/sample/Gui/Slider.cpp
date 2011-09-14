@@ -21,12 +21,11 @@
 
 #include <iostream>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+#include <Omm/Gui/Application.h>
 #include <Omm/Gui/Slider.h>
 
 
-class HelloSliderController : public Omm::Gui::SliderController
+class SliderController : public Omm::Gui::SliderController
 {
 private:
     void valueChanged(int value)
@@ -37,20 +36,24 @@ private:
 };
 
 
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        SliderController* pSliderController = new SliderController;
+        Omm::Gui::Slider* pSlider = new Omm::Gui::Slider;
+        pSlider->attachController(pSliderController);
+        pSliderController->attachModel(pSlider);
+        pSlider->resize(300, 30);
+        resize(300, 30);
+        return pSlider;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
-    Omm::Gui::EventLoop loop(argc, argv);
-    Omm::Gui::MainWindow mainWindow;
-
-    HelloSliderController sliderController;
-    Omm::Gui::Slider slider;
-    slider.attachController(&sliderController);
-    sliderController.attachModel(&slider);
-    
-//    slider.setLabel("Hello GUI");
-    mainWindow.setMainView(&slider);
-    mainWindow.show();
-
-    loop.run();
+    Application app;
+    return app.run(argc, argv);
 }
 

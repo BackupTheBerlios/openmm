@@ -4,8 +4,7 @@ QtGui.qrc
 
 set(OMMGUI_QT_SRC
 ViewImpl.cpp
-MainWindowImpl.cpp
-EventLoopImpl.cpp
+ApplicationImpl.cpp
 ButtonImpl.cpp
 ListImpl.cpp
 ListItemImpl.cpp
@@ -16,8 +15,6 @@ SliderImpl.cpp
 
 set(OMMGUI_QT_MOC
 ViewImpl.h
-#MainWindowImpl.h
-#EventLoopImpl.h
 ButtonImpl.h
 ListImpl.h
 #ListItemImpl.h

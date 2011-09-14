@@ -19,33 +19,35 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "MainWindowImpl.h"
-#include "Gui/MainWindow.h"
-#include "Gui/GuiLogger.h"
+#ifndef Application_INCLUDED
+#define Application_INCLUDED
+
 
 namespace Omm {
 namespace Gui {
 
+class View;
+class ApplicationImpl;
 
-MainWindowImpl::MainWindowImpl(View* pView) :
-ViewImpl(pView, this)
+
+class Application
 {
-    Omm::Gui::Log::instance()->gui().debug("main window impl ctor");
-}
+    friend class ApplicationImpl;
+    
+public:
+    Application();
+    virtual ~Application();
 
+    int run(int argc = 0, char** argv = 0);
 
-MainWindowImpl::~MainWindowImpl()
-{
-}
+    virtual View* createMainView() = 0;
 
-
-void
-MainWindowImpl::setMainView(View* pView)
-{
-    Omm::Gui::Log::instance()->gui().debug("main window impl set main widget");
-    QMainWindow::setCentralWidget(static_cast<QWidget*>(pView->getNativeView()));
-}
+private:
+    ApplicationImpl*           _pImpl;
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif

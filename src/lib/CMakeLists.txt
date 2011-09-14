@@ -143,7 +143,7 @@ CACHE INTERNAL libommsys
 
 add_subdirectory(Gui)
 
-#if(TARGET ommgui)
+#if(OMM_GUI)
 #add_library(ommupnpgui
 #UpnpGui.cpp
 #)
@@ -165,7 +165,7 @@ add_subdirectory(Gui)
 #ARCHIVE DESTINATION lib
 #)
 
-#endif(TARGET ommgui)
+#endif(OMM_GUI)
 
 
 add_subdirectory(Dvb)

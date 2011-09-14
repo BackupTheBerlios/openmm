@@ -19,32 +19,57 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ButtonImpl_INCLUDED
-#define ButtonImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
 
 #include <QtGui>
-#include "ViewImpl.h"
+
+#include "ApplicationImpl.h"
+#include "Gui/Application.h"
+#include "Gui/GuiLogger.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class MainWindow;
 
-class MainWindowImpl : public QMainWindow, public ViewImpl
+
+ApplicationImpl::ApplicationImpl(Application* pApplication) :
+_pApplication(pApplication)
 {
-private:
-    friend class MainWindow;
-    
-    MainWindowImpl(View* pView);
-    virtual ~MainWindowImpl();
+    Omm::Gui::Log::instance()->gui().debug("application impl ctor");
+}
 
-    void setMainView(View* pView);
-};
+
+ApplicationImpl::~ApplicationImpl()
+{
+}
+
+
+void
+ApplicationImpl::resize(int width, int height)
+{
+    _width = width;
+    _height = height;
+}
+
+
+int
+ApplicationImpl::run(int argc, char** argv)
+{
+    Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
+    _pQtApplication = new QApplication(argc, argv);
+    _pMainWindow = new QMainWindow;
+    _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->createMainView()->getNativeView()));
+    _pMainWindow->resize(_width, _height);
+    _pMainWindow->show();
+    _pApplication->presentedMainView();
+    int ret = _pQtApplication->exec();
+    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+    _pApplication->finishedEventLoop();
+    return ret;
+}
+
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif
-

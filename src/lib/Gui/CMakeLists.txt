@@ -49,11 +49,9 @@ GuiLogger.cpp
 View.cpp
 Model.cpp
 Controller.cpp
+Application.cpp
 Layout.cpp
 HorizontalLayout.cpp
-MainWindow.cpp
-EventLoop.cpp
-Application.cpp
 Button.cpp
 #List.cpp
 #ListModel.cpp

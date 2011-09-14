@@ -39,10 +39,13 @@ public:
     ApplicationImpl(Application* pApplication);
     virtual ~ApplicationImpl();
 
+    void resize(int width, int height);
     int run(int argc, char** argv);
 
     static Application*    _pApplication;
     PrivateImpl*           _p;
+    int                    _width;
+    int                    _height;
 };
 
 
