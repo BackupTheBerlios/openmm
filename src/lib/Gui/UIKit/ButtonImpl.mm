@@ -43,7 +43,7 @@ ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent)
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor native view: " + Poco::NumberFormatter::format(_pNativeView));
 
     if (pParent) {
-        UIView* pParentView = static_cast<UIView*>(pView->getParent()->getNativeView());
+        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
         [pParentView addSubview:pNativeView];
     }
 //    connect(_pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
