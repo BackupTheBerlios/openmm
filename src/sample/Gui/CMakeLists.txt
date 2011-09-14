@@ -1,10 +1,10 @@
-#add_executable(plain
-#Plain.cpp
-#)
+add_executable(plain
+Plain.cpp
+)
 
-#target_link_libraries(plain
-#${OMM_GUI}
-#)
+target_link_libraries(plain
+${OMM_GUI}
+)
 
 
 add_executable(buttonhellosubclass

@@ -65,19 +65,6 @@ namespace Omm {
 namespace Gui {
 
 
-class PrivateImpl
-{
-    friend class ApplicationImpl;
-
-    PrivateImpl()
-    {
-        _pAutoreleasePool = [[NSAutoreleasePool alloc] init];
-    }
-
-    NSAutoreleasePool*  _pAutoreleasePool;
-};
-
-
 Application* ApplicationImpl::_pApplication = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
@@ -85,7 +72,6 @@ ApplicationImpl::ApplicationImpl(Application* pApplication)
     Omm::Gui::Log::instance()->gui().debug("application impl ctor");
 
     _pApplication = pApplication;
-    _p = new PrivateImpl;
 }
 
 
@@ -106,8 +92,9 @@ int
 ApplicationImpl::run(int argc, char** argv)
 {
     Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
+    NSAutoreleasePool* pAutoreleasePool = [[NSAutoreleasePool alloc] init];
     int ret = UIApplicationMain(argc, argv, nil,@"OmmGuiAppDelegate");
-    [_p->_pAutoreleasePool release];
+    [pAutoreleasePool release];
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     return ret;
 }

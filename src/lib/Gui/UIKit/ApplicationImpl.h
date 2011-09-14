@@ -28,7 +28,6 @@ namespace Omm {
 namespace Gui {
 
 class Application;
-class PrivateImpl;
 
 
 class ApplicationImpl
@@ -43,7 +42,6 @@ public:
     int run(int argc, char** argv);
 
     static Application*    _pApplication;
-    PrivateImpl*           _p;
     int                    _width;
     int                    _height;
 };

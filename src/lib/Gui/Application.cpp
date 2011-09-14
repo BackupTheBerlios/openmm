@@ -30,9 +30,6 @@
 #ifdef __GUI_UIKIT_PLATFORM__
 #include "UIKit/ApplicationImpl.h"
 #endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/MainWindowImpl.h"
-#endif
 
 
 namespace Omm {
