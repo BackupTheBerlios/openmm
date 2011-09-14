@@ -62,8 +62,10 @@ ApplicationImpl::run(int argc, char** argv)
     _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->createMainView()->getNativeView()));
     _pMainWindow->resize(_width, _height);
     _pMainWindow->show();
+    _pApplication->presentedMainView();
     int ret = _pQtApplication->exec();
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+    _pApplication->finishedEventLoop();
     return ret;
 }
 

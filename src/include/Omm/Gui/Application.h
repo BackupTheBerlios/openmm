@@ -42,6 +42,8 @@ public:
     int run(int argc = 0, char** argv = 0);
 
     virtual View* createMainView() = 0;
+    virtual void presentedMainView() {}
+    virtual void finishedEventLoop() {}
 
 private:
     ApplicationImpl*           _pImpl;

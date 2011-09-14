@@ -28,11 +28,22 @@ class Application : public Omm::Gui::Application
     virtual Omm::Gui::View* createMainView()
     {
         resize(800, 480);
-        Omm::ControllerWidget* pController = new Omm::ControllerWidget;
-        pController->init();
-        pController->start();
-        return pController;
+        _pController = new Omm::ControllerWidget;
+        return _pController;
     }
+
+    virtual void presentedMainView()
+    {
+        _pController->init();
+        _pController->start();
+    }
+
+    virtual void finishedEventLoop()
+    {
+        _pController->stop();
+    }
+
+    Omm::ControllerWidget* _pController;
 };
 
 
