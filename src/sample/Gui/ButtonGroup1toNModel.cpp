@@ -21,9 +21,6 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
-
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/HorizontalLayout.h>
 #include <Omm/Gui/Button.h>

@@ -19,27 +19,26 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpApplication.h>
-#include <Omm/Util.h>
+#include <Omm/Gui/Application.h>
+#include <Omm/UpnpGui.h>
+
+
+class Application : public Omm::Gui::Application
+{
+    virtual Omm::Gui::View* createMainView()
+    {
+        resize(800, 480);
+        Omm::ControllerWidget* pController = new Omm::ControllerWidget;
+        pController->init();
+        pController->start();
+        return pController;
+    }
+};
+
 
 int main(int argc, char** argv)
 {
-    Omm::Util::PluginLoader<Omm::UpnpApplication> pluginLoader;
-    Omm::UpnpApplication* pApp;
-    try {
-        pApp = pluginLoader.load("application-gui");
-    }
-    catch(Poco::NotFoundException) {
-        Omm::Log::instance()->upnp().error("OMM application could not find gui application plugin");
-        return 1;
-    }
-
-    pApp->setApplicationName("New OMM");
-    pApp->initApplication(argc, argv);
-    pApp->enableController();
-    int ret = pApp->run(argc, argv);
-    delete pApp;
-
-    return ret;
+    Application app;
+    return app.run(argc, argv);
 }
 

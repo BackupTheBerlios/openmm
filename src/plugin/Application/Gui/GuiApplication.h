@@ -22,15 +22,18 @@
 #ifndef GuiApplication_INCLUDED
 #define GuiApplication_INCLUDED
 
-#include <Omm/Gui/EventLoop.h>
-#include <Omm/Gui/MainWindow.h>
+//#include <Omm/Gui/EventLoop.h>
+//#include <Omm/Gui/MainWindow.h>
+
+#include <Omm/Gui/Application.h>
+#include <Omm/Gui/View.h>
 
 #include <Omm/Upnp.h>
 #include <Omm/UpnpApplication.h>
 #include <Omm/UpnpGui.h>
 
 
-class GuiApplication : public Omm::UpnpApplication
+class GuiApplication : public Omm::UpnpApplication, public Omm::Gui::Application
 {
 public:
     GuiApplication();
@@ -47,8 +50,14 @@ private:
     virtual void addController();
     virtual void removeController();
 
-    Omm::Gui::EventLoop*     _pEventLoop;
-    Omm::Gui::MainWindow*    _pMainWindow;
+    virtual Omm::Gui::View* createMainView();
+
+//    Omm::Gui::EventLoop*     _pEventLoop;
+//    Omm::Gui::MainWindow*    _pMainWindow;
+//    Omm::Gui::Application*    _pApplication;
+//    Omm::Gui::Application       _application;
+    int                       _argc;
+    char**                    _argv;
 };
 
 
