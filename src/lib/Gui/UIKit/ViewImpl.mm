@@ -36,7 +36,9 @@ _pView(pView)
 {
     Omm::Gui::Log::instance()->gui().debug("view impl ctor (view).");
 
-    UIView* pNativeView = [UIView alloc];
+//    UIView* pNativeView = [UIView alloc];
+    UIView* pNativeView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    pNativeView.backgroundColor = [UIColor grayColor];
     _pNativeView = pNativeView;
     if (pView->getParent()) {
         UIView* pParentView = static_cast<UIView*>(pView->getParent()->getNativeView());
@@ -155,7 +157,8 @@ NativeView::NativeView(ViewImpl* pViewImpl, View* pParent) :
 _pViewImpl(pViewImpl)
 {
     Omm::Gui::Log::instance()->gui().debug("native view impl ctor.");
-    UIView* pNativeView = [UIView alloc];
+    UIView* pNativeView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    pNativeView.backgroundColor = [UIColor grayColor];
 //    _pNativeView = pNativeView;
     if (pParent) {
         UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());

@@ -33,14 +33,12 @@ class ButtonViewImpl : public ViewImpl
 {
     friend class ButtonView;
 
-//private slots:
-//    void pushed();
-
-private:
+public:
     ButtonViewImpl(View* pView, View* pParent = 0);
     ~ButtonViewImpl();
 
     void setLabel(const std::string& label);
+    void pushed();
 };
 
 

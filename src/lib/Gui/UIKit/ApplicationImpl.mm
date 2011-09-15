@@ -29,7 +29,7 @@
 
 
 @interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
-    UIWindow *window;
+    UIWindow* window;
 }
 
 @property (nonatomic, retain) UIWindow *window;
@@ -41,9 +41,10 @@
 
 @synthesize window;
 
--(void)applicationDidFinishLaunching:(UIApplication *)application {
+-(void)applicationDidFinishLaunching:(UIApplication*)application
+{
     window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-//    window.backgroundColor = [UIColor whiteColor];
+    window.backgroundColor = [UIColor whiteColor];
 
     UIView* pMainView = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pApplication->createMainView()->getNativeView());
     [window addSubview:pMainView];
@@ -52,7 +53,8 @@
 }
 
 
--(void)dealloc {
+-(void)dealloc
+{
     [window release];
     [super dealloc];
 }

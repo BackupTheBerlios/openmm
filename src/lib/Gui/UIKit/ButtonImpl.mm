@@ -27,6 +27,37 @@
 #include "Gui/Button.h"
 #include "Gui/GuiLogger.h"
 
+
+@interface OmmGuiButton : UIButton {
+    Omm::Gui::ButtonViewImpl* _pButtonViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiButton
+
+- (void)setImpl:(Omm::Gui::ButtonViewImpl*)pImpl
+{
+    _pButtonViewImpl = pImpl;
+}
+
+
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+{
+    Omm::Gui::Log::instance()->gui().debug("button view impl touch began");
+    _pButtonViewImpl->pushed();
+}
+
+
+-(void)dealloc
+{
+    [super dealloc];
+}
+
+@end
+
+
 namespace Omm {
 namespace Gui {
 
@@ -36,8 +67,13 @@ ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent)
 {
     _pView = pView;
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
-//    UIButton* pNativeView = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 20.0)];
-    UIButton* pNativeView = [[UIButton alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+//    UIButton* pNativeView = [[UIButton buttonWithType:UIButtonTypeRoundedRect] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
+    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
+//    UIButton* pNativeView = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
+//    UIButton* pNativeView = [[UIButton alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    pNativeView.backgroundColor = [UIColor blueColor];
+    [pNativeView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [pNativeView setImpl:this];
 
     _pNativeView = pNativeView;
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor native view: " + Poco::NumberFormatter::format(_pNativeView));
@@ -64,13 +100,13 @@ ButtonViewImpl::setLabel(const std::string& label)
 }
 
 
-//void
-//ButtonViewImpl::pushed()
-//{
-//    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
-//    IMPL_NOTIFY_CONTROLLER(Controller, selected);
-//    IMPL_NOTIFY_CONTROLLER(ButtonController, pushed);
-//}
+void
+ButtonViewImpl::pushed()
+{
+    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+    IMPL_NOTIFY_CONTROLLER(ButtonController, pushed);
+}
 
 
 }  // namespace Omm
