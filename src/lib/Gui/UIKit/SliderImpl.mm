@@ -19,28 +19,67 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#import <UIKit/UIKit.h>
+
 #include <Poco/NumberFormatter.h>
 
 #include "SliderImpl.h"
 #include "Gui/Slider.h"
 #include "Gui/GuiLogger.h"
 
+
+@interface OmmGuiSlider : UISlider {
+    Omm::Gui::SliderViewImpl* _pSliderViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiSlider
+
+- (void)setImpl:(Omm::Gui::SliderViewImpl*)pImpl
+{
+    _pSliderViewImpl = pImpl;
+}
+
+
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
+{
+    Omm::Gui::Log::instance()->gui().debug("Slider view impl touch moved");
+    _pSliderViewImpl->valueChanged(self.value);
+    [super touchesMoved:touches withEvent:event];
+}
+
+@end
+
+
 namespace Omm {
 namespace Gui {
 
 
-SliderViewImpl::SliderViewImpl(View* pView, View* pParent) :
-ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
+SliderViewImpl::SliderViewImpl(View* pView, View* pParent) //:
+//ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
 {
-    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
+    _pView = pView;
+
+    OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] initWithFrame:CGRectMake(0.0, 50.0, 150.0, 50.0)];
+    [pNativeView setImpl:this];
+    pNativeView.maximumValue = 100.0;
+    
+    _pNativeView = pNativeView;
 
     Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-    pNativeView->setOrientation(Qt::Horizontal);
-    pNativeView->setTracking(true);
-    pNativeView->setSingleStep(5);
-    pNativeView->setPageStep(25);
-    pNativeView->setValue(0);
-    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
+
+    if (pParent) {
+        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
+        [pParentView addSubview:pNativeView];
+    }
+//    pNativeView->setOrientation(Qt::Horizontal);
+//    pNativeView->setTracking(true);
+//    pNativeView->setSingleStep(5);
+//    pNativeView->setPageStep(25);
+//    pNativeView->setValue(0);
+//    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
 
 
@@ -52,14 +91,14 @@ SliderViewImpl::~SliderViewImpl()
 void
 SliderViewImpl::setValue(int value)
 {
-    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
+    UISlider* pNativeView = static_cast<UISlider*>(_pNativeView);
 
-    pNativeView->setValue(value);
+    pNativeView.value = value;
 }
 
 
 void
-SliderViewImpl::valueChangedSlot(int value)
+SliderViewImpl::valueChanged(int value)
 {
     Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
     IMPL_NOTIFY_CONTROLLER(SliderController, valueChanged, value);

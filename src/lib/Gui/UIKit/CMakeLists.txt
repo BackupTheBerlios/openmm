@@ -1,14 +1,12 @@
 set(OMMGUI_UIKIT_SRC
 ViewImpl.mm
-#MainWindowImpl.mm
-#EventLoopImpl.mm
 ApplicationImpl.mm
 ButtonImpl.mm
 #ListImpl.mm
 #ListItemImpl.mm
 #TabImpl.mm
 #NavigatorImpl.mm
-#SliderImpl.mm
+SliderImpl.mm
 )
 
 

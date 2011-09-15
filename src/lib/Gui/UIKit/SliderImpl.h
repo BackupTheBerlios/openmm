@@ -22,7 +22,6 @@
 #ifndef SliderImpl_INCLUDED
 #define SliderImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -32,18 +31,14 @@ class View;
 
 class SliderViewImpl : public ViewImpl
 {
-    Q_OBJECT
-
     friend class SliderView;
 
-private slots:
-    void valueChangedSlot(int value);
-
-private:
+public:
     SliderViewImpl(View* pView, View* pParent = 0);
     ~SliderViewImpl();
 
     void setValue(int value);
+    void valueChanged(int value);
 };
 
 

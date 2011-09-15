@@ -49,12 +49,6 @@
     _pButtonViewImpl->pushed();
 }
 
-
--(void)dealloc
-{
-    [super dealloc];
-}
-
 @end
 
 
@@ -68,10 +62,10 @@ ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent)
     _pView = pView;
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
 //    UIButton* pNativeView = [[UIButton buttonWithType:UIButtonTypeRoundedRect] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
-    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
+    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 100.0, 50.0, 20.0)];
 //    UIButton* pNativeView = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
 //    UIButton* pNativeView = [[UIButton alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    pNativeView.backgroundColor = [UIColor blueColor];
+    pNativeView.backgroundColor = [UIColor yellowColor];
     [pNativeView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [pNativeView setImpl:this];
 

@@ -97,10 +97,10 @@ ${OMM_GUI}
 #)
 
 
-#add_executable(slider
-#Slider.cpp
-#)
+add_executable(slider
+Slider.cpp
+)
 
-#target_link_libraries(slider
-#${OMM_GUI}
-#)
+target_link_libraries(slider
+${OMM_GUI}
+)

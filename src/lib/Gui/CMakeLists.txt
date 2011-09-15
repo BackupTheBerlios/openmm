@@ -59,7 +59,7 @@ Button.cpp
 #LazyList.cpp
 #Tab.cpp
 #Navigator.cpp
-#Slider.cpp
+Slider.cpp
 )
 
 target_link_libraries(ommgui
