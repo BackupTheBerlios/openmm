@@ -4,7 +4,7 @@ ApplicationImpl.mm
 ButtonImpl.mm
 #ListImpl.mm
 #ListItemImpl.mm
-#TabImpl.mm
+TabImpl.mm
 #NavigatorImpl.mm
 SliderImpl.mm
 )

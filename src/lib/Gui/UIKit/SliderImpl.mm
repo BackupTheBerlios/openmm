@@ -74,12 +74,6 @@ SliderViewImpl::SliderViewImpl(View* pView, View* pParent) //:
         UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
         [pParentView addSubview:pNativeView];
     }
-//    pNativeView->setOrientation(Qt::Horizontal);
-//    pNativeView->setTracking(true);
-//    pNativeView->setSingleStep(5);
-//    pNativeView->setPageStep(25);
-//    pNativeView->setValue(0);
-//    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
 
 

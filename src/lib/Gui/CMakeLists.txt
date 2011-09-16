@@ -57,7 +57,7 @@ Button.cpp
 #ListModel.cpp
 #ListItem.cpp
 #LazyList.cpp
-#Tab.cpp
+Tab.cpp
 #Navigator.cpp
 Slider.cpp
 )

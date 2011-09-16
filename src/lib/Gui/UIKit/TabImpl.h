@@ -22,7 +22,6 @@
 #ifndef TabImpl_INCLUDED
 #define TabImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -31,7 +30,7 @@ namespace Gui {
 class View;
 class TabView;
 
-class TabViewImpl : public QTabWidget, public ViewImpl
+class TabViewImpl : public ViewImpl
 {
 private:
     friend class TabView;

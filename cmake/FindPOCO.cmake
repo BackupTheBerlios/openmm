@@ -52,7 +52,8 @@ add_definitions(
 )
 else(POCO_VERSION_HEADER)
 add_definitions(
--DPOCO_VERSION=0
+# FIXME: POCO_VERSION is in Foundation.h ??
+#-DPOCO_VERSION=0
 )
 endif(POCO_VERSION_HEADER)
 
