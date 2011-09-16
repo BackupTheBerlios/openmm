@@ -58,7 +58,7 @@ Button.cpp
 #ListItem.cpp
 #LazyList.cpp
 Tab.cpp
-#Navigator.cpp
+Navigator.cpp
 Slider.cpp
 )
 

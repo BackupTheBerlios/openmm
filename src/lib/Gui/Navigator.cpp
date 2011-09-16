@@ -27,6 +27,9 @@
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/NavigatorImpl.h"
 #endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/NavigatorImpl.h"
+#endif
 
 
 namespace Omm {

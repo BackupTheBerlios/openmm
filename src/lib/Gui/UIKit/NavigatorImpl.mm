@@ -19,119 +19,61 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#import <UIKit/UIKit.h>
+
 #include <Poco/NumberFormatter.h>
 
 #include "NavigatorImpl.h"
 #include "Gui/Navigator.h"
+#include "Gui/GuiLogger.h"
+
 
 namespace Omm {
 namespace Gui {
 
 
-class QtNavigatorPanelButton : public QPushButton
+NavigatorViewImpl::NavigatorViewImpl(View* pView, View* pParent)
+//QWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() : 0)),
+//ViewImpl(pView, this)
 {
-public:
-    QtNavigatorPanelButton(View* pView);
+    _pView = pView;
+    Omm::Gui::Log::instance()->gui().debug("navigator view implementation ctor");
 
-    View*    _pView;
-};
+    UINavigationController* pNativeView = [[UINavigationController alloc] init];
+//    [pNativeView setImpl:this];
 
+    _pNativeView = pNativeView;
 
-QtNavigatorPanelButton::QtNavigatorPanelButton(View* pView) :
-_pView(pView)
-{
-}
+    Omm::Gui::Log::instance()->gui().debug("navigator view impl ctor");
 
-
-
-QtNavigatorPanel::QtNavigatorPanel(NavigatorViewImpl* pNavigatorView) :
-QWidget(pNavigatorView),
-_pNavigatorView(pNavigatorView)
-{
-    _pButtonLayout = new QHBoxLayout(this);
-}
-
-
-void
-QtNavigatorPanel::push(View* pView, const std::string name)
-{
-    QtNavigatorPanelButton* pButton = new QtNavigatorPanelButton(pView);
-    pButton->_pView = pView;
-    pButton->setText(QString::fromStdString(name));
-    connect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
-    _pButtonLayout->addWidget(pButton);
-    _buttonStack.push(pButton);
-}
-
-
-void
-QtNavigatorPanel::pop(View* pView)
-{
-    while(!_buttonStack.empty() && _buttonStack.top()->_pView != pView) {
-        QtNavigatorPanelButton* pButton = _buttonStack.top();
-        _pNavigatorView->popView(pButton->_pView);
-        disconnect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
-        _pButtonLayout->removeWidget(pButton);
-        delete pButton;
-        _buttonStack.pop();
+    if (pParent) {
+        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
+        [pParentView addSubview:pNativeView.view];
     }
-    _pNavigatorView->exposeView(pView);
-}
-
-
-void
-QtNavigatorPanel::buttonPushed()
-{
-    QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
-    pop(pButton->_pView);
-}
-
-
-NavigatorViewImpl::NavigatorViewImpl(View* pView, View* pParent) :
-QWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() : 0)),
-ViewImpl(pView, this)
-{
-    _pNavigatorPanel = new QtNavigatorPanel(this);
-    _pStackedWidget = new QStackedWidget(this);
-    _pNavigatorLayout = new QVBoxLayout(this);
-    _pNavigatorLayout->addWidget(_pNavigatorPanel);
-    _pNavigatorLayout->addWidget(_pStackedWidget);
 }
 
 
 NavigatorViewImpl::~NavigatorViewImpl()
 {
-    delete _pNavigatorLayout;
-    delete _pStackedWidget;
-    delete _pNavigatorPanel;
 }
 
 
 void
 NavigatorViewImpl::pushView(View* pView, const std::string name)
 {
-    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    _pStackedWidget->addWidget(pWidget);
-    _pStackedWidget->setCurrentWidget(pWidget);
-    _pNavigatorPanel->push(pView, name);
-    pWidget->show();
-}
+    Omm::Gui::Log::instance()->gui().debug("navigator view implementation push view");
 
+    if ([static_cast<NSObject*>(pView->getNativeView()) isKindOfClass:[UIViewController class]]) {
+        UINavigationController* pNativeView = static_cast<UINavigationController*>(_pNativeView);
+        UIViewController* pViewController = static_cast<UIViewController*>(pView->getNativeView());
+        NSString* pName = [[NSString alloc] initWithUTF8String:name.c_str()];
+        pViewController.title = pName;
 
-void
-NavigatorViewImpl::popView(View* pView)
-{
-    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    _pStackedWidget->removeWidget(pWidget);
-}
-
-
-void
-NavigatorViewImpl::exposeView(View* pView)
-{
-    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    _pStackedWidget->setCurrentWidget(pWidget);
-    pWidget->show();
+        [pNativeView pushViewController:pViewController animated:YES];
+    }
+    else {
+        Omm::Gui::Log::instance()->gui().error("navigator view implementation cannot push view, must be a UIViewController.");
+    }
 }
 
 

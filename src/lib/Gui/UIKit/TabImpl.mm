@@ -65,6 +65,8 @@ TabViewImpl::addView(View* pView, const std::string& tabName)
     if ([static_cast<NSObject*>(pView->getNativeView()) isKindOfClass:[UIViewController class]]) {
         UITabBarController* pNativeView = static_cast<UITabBarController*>(_pNativeView);
         UIViewController* pViewController = static_cast<UIViewController*>(pView->getNativeView());
+        NSString* pTabName = [[NSString alloc] initWithUTF8String:tabName.c_str()];
+        pViewController.title = pTabName;
 
         pNativeView.viewControllers = [pNativeView.viewControllers arrayByAddingObject:pViewController];
     }

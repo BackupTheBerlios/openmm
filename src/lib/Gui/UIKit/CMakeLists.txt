@@ -5,7 +5,7 @@ ButtonImpl.mm
 #ListImpl.mm
 #ListItemImpl.mm
 TabImpl.mm
-#NavigatorImpl.mm
+NavigatorImpl.mm
 SliderImpl.mm
 )
 

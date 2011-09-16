@@ -23,56 +23,20 @@
 #define NavigatorImpl_INCLUDED
 
 #include <stack>
-#include <QtGui>
 #include "ViewImpl.h"
 
 
 namespace Omm {
 namespace Gui {
 
-class QtNavigatorPanel;
-class QtNavigatorPanelButton;
 
-class NavigatorViewImpl : public QWidget, public ViewImpl
+class NavigatorViewImpl : public ViewImpl
 {
-    friend class QtNavigatorPanel;
-    
 public:
     NavigatorViewImpl(View* pView, View* pParent = 0);
     virtual ~NavigatorViewImpl();
     
     void pushView(View* pView, const std::string name);
-
-private:
-    void popView(View* pView);
-    void exposeView(View* pView);
-
-    QtNavigatorPanel*           _pNavigatorPanel;
-    QStackedWidget*             _pStackedWidget;
-    QVBoxLayout*                _pNavigatorLayout;
-    std::stack<View*>           _views;
-};
-
-
-class QtNavigatorPanel : public QWidget
-{
-    Q_OBJECT
-
-    friend class NavigatorViewImpl;
-    
-public:
-    QtNavigatorPanel(NavigatorViewImpl* pNavigatorView = 0);
-
-    void push(View* pView, const std::string name);
-    void pop(View* pView);
-
-private slots:
-    void buttonPushed();
-
-private:
-    std::stack<QtNavigatorPanelButton*>     _buttonStack;
-    QHBoxLayout*                            _pButtonLayout;
-    NavigatorViewImpl*                      _pNavigatorView;
 };
 
 
