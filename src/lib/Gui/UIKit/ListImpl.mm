@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#import <UIKit/UIKit.h>
+
 #include <Poco/NumberFormatter.h>
 
 #include <Omm/Util.h>
@@ -27,44 +29,61 @@
 #include "Gui/List.h"
 #include "Gui/GuiLogger.h"
 
+
+//@interface OmmGuiListView : UIScrollView<UIScrollViewDelegate>
+//@interface OmmGuiListView : UIScrollView
+@interface OmmGuiListViewDelegate : NSObject<UIScrollViewDelegate>
+{
+    Omm::Gui::ListViewImpl* _pListViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiListViewDelegate
+
+- (void)setImpl:(Omm::Gui::ListViewImpl*)pImpl
+{
+    _pListViewImpl = pImpl;
+}
+
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+//    Omm::Gui::Log::instance()->gui().debug("list view impl scrolling ...");
+    _pListViewImpl->viewScrolled();
+}
+
+@end
+
+
 namespace Omm {
 namespace Gui {
 
 
-class QtScrollArea : public QScrollArea
+ListViewImpl::ListViewImpl(View* pView, View* pParent)
+//ViewImpl(pView, new QtScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
+//_pScrollWidget(0)
 {
-    friend class ListViewImpl;
+    _pView = pView;
 
-    QtScrollArea(QWidget* pParent = 0) : QScrollArea(pParent) {}
-    
-    void resizeEvent(QResizeEvent* pEvent)
-    {
-        if (pEvent->oldSize().height() > 0) {
-            _pListViewImpl->resized(pEvent->size().width(), pEvent->size().height());
-        }
+    UIScrollView* pNativeView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
+//    OmmGuiListView* pNativeView = [[OmmGuiListView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
+
+    OmmGuiListViewDelegate* pListViewDelegate = [[OmmGuiListViewDelegate alloc] init];
+    [pListViewDelegate setImpl:this];
+    pNativeView.delegate = pListViewDelegate;
+    _pNativeView = pNativeView;
+
+
+    pNativeView.backgroundColor = [UIColor blueColor];
+
+    Omm::Gui::Log::instance()->gui().debug("list view impl ctor");
+
+    if (pParent) {
+        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
+        [pParentView addSubview:pNativeView];
     }
-
-    ListViewImpl*   _pListViewImpl;
-};
-
-
-ListViewImpl::ListViewImpl(View* pView, View* pParent) :
-ViewImpl(pView, new QtScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
-_pScrollWidget(0)
-{
-    QtScrollArea* pNativeView = static_cast<QtScrollArea*>(_pNativeView);
-    pNativeView->_pListViewImpl = this;
-
-    _pScrollWidget = new QWidget;
-    _pScrollWidget->resize(pNativeView->viewport()->size());
-//    _pNativeView->setBackgroundRole(QPalette(Qt::white));
-//    _pNativeView->setPalette(QPalette(Qt::white));
-//    _pNativeView->setAutoFillBackground(true);
-
-    pNativeView->setWidget(_pScrollWidget);
-
-    connect(this, SIGNAL(moveWidgetSignal(int, View*)), this, SLOT(moveWidgetSlot(int, View*)));
-    connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledSlot(int)));
 }
 
 
@@ -76,14 +95,10 @@ ListViewImpl::~ListViewImpl()
 int
 ListViewImpl::visibleRows()
 {
-    QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
+    UIScrollView* pNativeView = static_cast<UIScrollView*>(_pNativeView);
 
-    Omm::Gui::Log::instance()->gui().debug("list view impl visible rows");
-    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().width())
-            + ", height: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().height()));
-    
     ListView* pListView =  static_cast<ListView*>(_pView);
-    int rows = pNativeView->viewport()->geometry().height() / pListView->_itemViewHeight + 2;
+    int rows = pNativeView.frame.size.height / pListView->_itemViewHeight + 2;
     Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
@@ -92,16 +107,11 @@ ListViewImpl::visibleRows()
 void
 ListViewImpl::addItemView(View* pView)
 {
-    QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
-
-    Omm::Gui::Log::instance()->gui().debug("list view impl add item view");
-    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: "
-            + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().width())
-            + ", height: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().height()));
+    UIScrollView* pNativeView = static_cast<UIScrollView*>(_pNativeView);
 
     ListView* pListView =  static_cast<ListView*>(_pView);
-    static_cast<QWidget*>(pView->getNativeView())->resize(pNativeView->viewport()->geometry().width(), pListView->_itemViewHeight);
-    static_cast<QWidget*>(pView->getNativeView())->setParent(_pScrollWidget);
+    pView->resize(pNativeView.frame.size.width, pListView->_itemViewHeight);
+    [pNativeView addSubview:static_cast<UIView*>(pView->getNativeView())];
 }
 
 
@@ -109,58 +119,45 @@ void
 ListViewImpl::moveItemView(int row, View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
-    emit moveWidgetSignal(row, pView);
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    pView->move(0, pListView->_itemViewHeight * row);
 }
 
 
 void
 ListViewImpl::updateScrollWidgetSize()
 {
-    QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
-
-    Omm::Gui::Log::instance()->gui().debug("list view impl update scroll widget size");
-    Omm::Gui::Log::instance()->gui().debug("list view impl width: "
-            + Poco::NumberFormatter::format(pNativeView->geometry().width())
-            + ", height: " + Poco::NumberFormatter::format(pNativeView->geometry().height()));
+    UIScrollView* pNativeView = static_cast<UIScrollView*>(_pNativeView);
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     ListModel* pListModel = static_cast<ListModel*>(_pView->getModel());
-   _pScrollWidget->resize(pNativeView->geometry().width(), pListModel->totalItemCount() * pListView->_itemViewHeight);
+    pNativeView.contentSize = CGSizeMake(pNativeView.frame.size.width, pListModel->totalItemCount() * pListView->_itemViewHeight);
 }
 
 
 int
 ListViewImpl::getOffset()
 {
-//    Omm::Gui::Log::instance()->gui().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry().y()));
-    return _pScrollWidget->geometry().y();
+    return static_cast<UIScrollView*>(_pNativeView).contentOffset.y;
 }
 
 
 void
-ListViewImpl::moveWidgetSlot(int row, View* pView)
+ListViewImpl::viewScrolled()
 {
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    static_cast<QWidget*>(pView->getNativeView())->move(0, pListView->_itemViewHeight * row);
-}
-
-
-void
-ListViewImpl::viewScrolledSlot(int value)
-{
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    pListView->scrolledToRow(-getOffset() / pListView->_itemViewHeight);
+    ListView* pListView = static_cast<ListView*>(_pView);
+    pListView->scrolledToRow(getOffset() / pListView->_itemViewHeight);
 }
 
 
 void
 ListViewImpl::resized(int width, int height)
 {
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    int rows = height / pListView->_itemViewHeight;
-    Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
-    _pScrollWidget->resize(width, _pScrollWidget->height());
-    pListView->resize(rows, width);
+//    ListView* pListView =  static_cast<ListView*>(_pView);
+//    int rows = height / pListView->_itemViewHeight;
+//    Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
+//    _pScrollWidget->resize(width, _pScrollWidget->height());
+//    pListView->resize(rows, width);
 }
 
 

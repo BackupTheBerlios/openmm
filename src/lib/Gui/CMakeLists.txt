@@ -53,8 +53,8 @@ Application.cpp
 Layout.cpp
 HorizontalLayout.cpp
 Button.cpp
-#List.cpp
-#ListModel.cpp
+List.cpp
+ListModel.cpp
 #ListItem.cpp
 #LazyList.cpp
 Tab.cpp

@@ -93,7 +93,7 @@ void
 ViewImpl::showView()
 {
     Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    [static_cast<UIView*>(_pNativeView) initWithFrame:CGRectMake(10.0, 10.0, 10.0, 10.0)];
+//    [static_cast<UIView*>(_pNativeView) initWithFrame:CGRectMake(10.0, 10.0, 10.0, 10.0)];
     Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
@@ -102,7 +102,7 @@ void
 ViewImpl::hideView()
 {
     Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    static_cast<UIView*>(_pNativeView).hidden = YES;
+//    static_cast<UIView*>(_pNativeView).hidden = YES;
     Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 

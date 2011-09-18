@@ -193,7 +193,7 @@ ListView::scrollDelta(int rowDelta)
 void
 ListView::scrolledToRow(int rowOffset)
 {
-    Log::instance()->gui().debug("list scroll view");
+//    Log::instance()->gui().debug("list scroll view");
     
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 

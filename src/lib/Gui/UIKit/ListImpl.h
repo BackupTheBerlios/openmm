@@ -22,7 +22,6 @@
 #ifndef ListImpl_INCLUDED
 #define ListImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -33,16 +32,14 @@ class View;
 
 class ListViewImpl : public ViewImpl
 {
-    Q_OBJECT
-
     friend class ListView;
     friend class LazyListView;
-    friend class QtScrollArea;
 
 public:
     ListViewImpl(View* pView, View* pParent = 0);
     virtual ~ListViewImpl();
 
+    void viewScrolled();
 protected:
     int visibleRows();
     void addItemView(View* pView);
@@ -51,18 +48,8 @@ protected:
     void updateScrollWidgetSize();
     int getOffset();
 
-signals:
-    void moveWidgetSignal(int targetRow, View* pView);
-
-private slots:
-    void moveWidgetSlot(int targetRow, View* pView);
-    void viewScrolledSlot(int value);
-
 private:
-//    virtual void resizeEvent(QResizeEvent* event);
     void resized(int width, int height);
-
-    QWidget*                 _pScrollWidget;
 };
 
 

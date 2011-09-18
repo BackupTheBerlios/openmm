@@ -28,7 +28,8 @@
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmGuiButton : UIButton {
+@interface OmmGuiButton : UIButton
+{
     Omm::Gui::ButtonViewImpl* _pButtonViewImpl;
 }
 
@@ -62,7 +63,7 @@ ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent)
     _pView = pView;
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
 //    UIButton* pNativeView = [[UIButton buttonWithType:UIButtonTypeRoundedRect] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
-    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 100.0, 50.0, 20.0)];
+    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 50.0, 100.0, 40.0)];
 //    UIButton* pNativeView = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
 //    UIButton* pNativeView = [[UIButton alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     pNativeView.backgroundColor = [UIColor yellowColor];
