@@ -32,15 +32,6 @@ namespace Omm {
 namespace Gui {
 
 
-class LabelController : public Controller
-{
-    friend class LabelViewImpl;
-    
-protected:
-    virtual void pushed() {}
-};
-
-
 class LabelModel : public Model
 {
 public:
@@ -65,24 +56,10 @@ private:
 };
 
 
-class LabelControllerView : public ControllerView<LabelController, LabelView>
+class Label : public Widget<LabelView, Controller, LabelModel>
 {
 public:
-    LabelControllerView(View* pParent = 0) : ControllerView<LabelController, LabelView>(pParent) {}
-};
-
-
-class LabelControllerModel : public ControllerModel<LabelController, LabelModel>
-{
-public:
-    LabelControllerModel() : ControllerModel<LabelController, LabelModel>() {}
-};
-
-
-class Label : public Widget<LabelView, LabelController, LabelModel>
-{
-public:
-    Label(View* pParent = 0) : Widget<LabelView, LabelController, LabelModel>(pParent) {}
+    Label(View* pParent = 0) : Widget<LabelView, Controller, LabelModel>(pParent) {}
 };
 
 

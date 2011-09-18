@@ -29,7 +29,6 @@
 
 
 @interface OmmGuiLabel : UILabel
-//@interface OmmGuiLabel : UIRoundedRectLabel
 {
     Omm::Gui::LabelViewImpl* _pLabelViewImpl;
 }
@@ -62,7 +61,6 @@ namespace Gui {
 LabelViewImpl::LabelViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
-//    OmmGuiLabel* pNativeView = [[OmmGuiLabel LabelWithType:UILabelTypeRoundedRect] init];
     OmmGuiLabel* pNativeView = [[OmmGuiLabel alloc] init];
     pNativeView.backgroundColor = [UIColor greenColor];
     [pNativeView setTextColor:[UIColor blackColor]];
@@ -82,7 +80,7 @@ LabelViewImpl::setLabel(const std::string& label)
 {
     Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
     NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
-    [static_cast<UILabel*>(_pNativeView) setText:pLabel];
+    [static_cast<UILabel*>(_pNativeView) performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
 }
 
 
@@ -91,7 +89,6 @@ LabelViewImpl::pushed()
 {
     Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
-    IMPL_NOTIFY_CONTROLLER(LabelController, pushed);
 }
 
 
