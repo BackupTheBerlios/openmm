@@ -63,12 +63,7 @@ namespace Gui {
 
 ListViewImpl::ListViewImpl(View* pView)
 {
-
-//    OmmGuiListView* pNativeView = [[OmmGuiListView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
-
     UIScrollView* pNativeView = [[UIScrollView alloc] init];
-//    UIScrollView* pNativeView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
-
     OmmGuiListViewDelegate* pListViewDelegate = [[OmmGuiListViewDelegate alloc] init];
     [pListViewDelegate setImpl:this];
     pNativeView.delegate = pListViewDelegate;
@@ -149,6 +144,14 @@ ListViewImpl::resized(int width, int height)
     Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
 //    _pScrollWidget->resize(width, _pScrollWidget->height());
     pListView->resize(rows, width);
+}
+
+
+void
+ListViewImpl::resizeView(int width, int height)
+{
+    ViewImpl::resizeView(width, height);
+    resized(width, height);
 }
 
 

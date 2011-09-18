@@ -48,6 +48,8 @@ protected:
     void updateScrollWidgetSize();
     int getOffset();
 
+    virtual void resizeView(int width, int height);
+
 private:
     void resized(int width, int height);
 };

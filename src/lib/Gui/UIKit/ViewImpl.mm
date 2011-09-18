@@ -65,7 +65,7 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
         [pParentView addSubview:pNativeView];
     }
     else {
-        pNativeView.frame = CGRectMake(0.0, 0.0, 200.0, 100.0);
+        pNativeView.frame = CGRectMake(0.0, 0.0, 250.0, 400.0);
     }
     _pNativeView = pNativeViewController.view;
     _pNativeViewController = pNativeViewController;
