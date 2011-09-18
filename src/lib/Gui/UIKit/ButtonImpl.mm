@@ -49,6 +49,7 @@
 {
     Omm::Gui::Log::instance()->gui().debug("button view impl touch began");
     _pButtonViewImpl->pushed();
+    [super touchesBegan:touches withEvent:event];
 }
 
 @end

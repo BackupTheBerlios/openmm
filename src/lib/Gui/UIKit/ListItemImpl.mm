@@ -42,23 +42,25 @@
 - (void)initWithImpl:(Omm::Gui::ListItemImpl*)pImpl
 {
     _pListItemImpl = pImpl;
-    _pLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 50.0, 100.0, 50.0)];
+    _pLabel = [[UILabel alloc] initWithFrame:self.frame];
 //    _pLabel = [[UILabel alloc] initWithFrame:superView.frame];
     [self addSubview:_pLabel];
-    _pLabel.frame = self.frame;
+//    _pLabel.frame = self.frame;
 }
 
 
 - (void)setLabel:(NSString*)pLabel
 {
-    _pLabel.text = pLabel;
+    [_pLabel performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
+//    _pLabel.text = pLabel;
 }
 
 
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl touch began");
+    Omm::Gui::Log::instance()->gui().debug("button view impl touch ended");
     _pListItemImpl->listItemSelected();
+    [super touchesEnded:touches withEvent:event];
 }
 
 
@@ -73,7 +75,8 @@ ListItemImpl::ListItemImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
 
-    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] init];
+//    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] init];
+    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
     [pNativeView initWithImpl:this];
     pNativeView.backgroundColor = [UIColor yellowColor];
 
