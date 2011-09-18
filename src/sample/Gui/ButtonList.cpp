@@ -91,7 +91,6 @@ class Application : public Omm::Gui::Application
         pList->setModel(pListModel);
         ButtonListController* pListController = new ButtonListController;
         pList->attachController(pListController);
-        resize(800, 480);
         return pList;
     }
 };

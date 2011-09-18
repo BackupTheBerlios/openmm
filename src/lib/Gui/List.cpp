@@ -185,7 +185,11 @@ void
 ListView::scrolledToRow(int rowOffset)
 {
 //    Log::instance()->gui().debug("list scroll view");
-    
+
+    if (rowOffset < 0) {
+        return;
+    }
+
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     int rowDelta = rowOffset - _rowOffset;

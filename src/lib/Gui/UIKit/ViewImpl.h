@@ -49,7 +49,7 @@ public:
     virtual void selected();
  
 protected:
-    void init(View* pView, void* pNative);
+    void initViewImpl(View* pView, void* pNative);
 
     View*                       _pView;
     void*                       _pNativeView;

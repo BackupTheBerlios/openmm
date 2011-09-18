@@ -46,8 +46,9 @@
     window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     window.backgroundColor = [UIColor whiteColor];
 
-    void* pNativeMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView()->getNativeView();
-    [window addSubview:static_cast<UIView*>(pNativeMainView)];
+    Omm::Gui::View* pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
+    pMainView->resize(window.frame.size.width, window.frame.size.height);
+    [window addSubview:static_cast<UIView*>(pMainView->getNativeView())];
     [window makeKeyAndVisible];
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
 }

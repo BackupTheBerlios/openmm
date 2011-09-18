@@ -72,7 +72,11 @@ LazyListView::setModel(LazyListModel* pModel)
 void
 LazyListView::scrolledToRow(int rowOffset)
 {
-    Log::instance()->gui().debug("lazy list view scroll view ...");
+//    Log::instance()->gui().debug("lazy list view scroll view ...");
+
+    if (rowOffset < 0) {
+        return;
+    }
 
     LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
     

@@ -37,9 +37,7 @@ NavigatorViewImpl::NavigatorViewImpl(View* pView)
     Omm::Gui::Log::instance()->gui().debug("navigator view impl ctor");
 
     UINavigationController* pNativeView = [[UINavigationController alloc] init];
-//    [pNativeView setImpl:this];
-
-    init(pView, pNativeView);
+    initViewImpl(pView, pNativeView);
 }
 
 
@@ -53,17 +51,12 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
 {
     Omm::Gui::Log::instance()->gui().debug("navigator view implementation push view");
 
-//    if ([static_cast<NSObject*>(pView->getNativeView()) isKindOfClass:[UIViewController class]]) {
-        UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
-        UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
-        NSString* pName = [[NSString alloc] initWithUTF8String:name.c_str()];
-        pViewController.title = pName;
+    UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
+    UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
+    NSString* pName = [[NSString alloc] initWithUTF8String:name.c_str()];
+    pViewController.title = pName;
 
-        [pNativeViewController pushViewController:pViewController animated:YES];
-//    }
-//    else {
-//        Omm::Gui::Log::instance()->gui().error("navigator view implementation cannot push view, must be a UIViewController.");
-//    }
+    [pNativeViewController pushViewController:pViewController animated:YES];
 }
 
 

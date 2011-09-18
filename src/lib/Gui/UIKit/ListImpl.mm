@@ -64,15 +64,17 @@ namespace Gui {
 ListViewImpl::ListViewImpl(View* pView)
 {
 
-    UIScrollView* pNativeView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
 //    OmmGuiListView* pNativeView = [[OmmGuiListView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
+
+    UIScrollView* pNativeView = [[UIScrollView alloc] init];
+//    UIScrollView* pNativeView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
 
     OmmGuiListViewDelegate* pListViewDelegate = [[OmmGuiListViewDelegate alloc] init];
     [pListViewDelegate setImpl:this];
     pNativeView.delegate = pListViewDelegate;
     pNativeView.backgroundColor = [UIColor blueColor];
 
-    init(pView, pNativeView);
+    initViewImpl(pView, pNativeView);
 }
 
 
@@ -142,11 +144,11 @@ ListViewImpl::viewScrolled()
 void
 ListViewImpl::resized(int width, int height)
 {
-//    ListView* pListView =  static_cast<ListView*>(_pView);
-//    int rows = height / pListView->_itemViewHeight;
-//    Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    int rows = height / pListView->_itemViewHeight;
+    Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
 //    _pScrollWidget->resize(width, _pScrollWidget->height());
-//    pListView->resize(rows, width);
+    pListView->resize(rows, width);
 }
 
 

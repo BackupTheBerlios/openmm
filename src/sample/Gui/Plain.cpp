@@ -27,7 +27,6 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        resize(100, 100);
         return new Omm::Gui::View;
     }
 };

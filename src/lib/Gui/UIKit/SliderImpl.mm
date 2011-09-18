@@ -61,11 +61,11 @@ SliderViewImpl::SliderViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
 
-    OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] initWithFrame:CGRectMake(0.0, 50.0, 150.0, 50.0)];
+    OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] init];
     [pNativeView setImpl:this];
     pNativeView.maximumValue = 100.0;
 
-    init(pView, pNativeView);
+    initViewImpl(pView, pNativeView);
 }
 
 

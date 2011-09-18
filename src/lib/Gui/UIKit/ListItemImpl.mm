@@ -73,11 +73,11 @@ ListItemImpl::ListItemImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
 
-    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] initWithFrame:CGRectMake(0.0, 50.0, 100.0, 50.0)];
+    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] init];
     [pNativeView initWithImpl:this];
     pNativeView.backgroundColor = [UIColor yellowColor];
 
-    init(pView, pNativeView);
+    initViewImpl(pView, pNativeView);
 }
 
 

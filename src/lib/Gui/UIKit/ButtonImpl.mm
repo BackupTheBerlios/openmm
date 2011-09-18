@@ -29,6 +29,7 @@
 
 
 @interface OmmGuiButton : UIButton
+//@interface OmmGuiButton : UIRoundedRectButton
 {
     Omm::Gui::ButtonViewImpl* _pButtonViewImpl;
 }
@@ -60,15 +61,13 @@ namespace Gui {
 ButtonViewImpl::ButtonViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
-//    UIButton* pNativeView = [[UIButton buttonWithType:UIButtonTypeRoundedRect] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
-    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 50.0, 100.0, 40.0)];
-//    UIButton* pNativeView = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
-//    UIButton* pNativeView = [[UIButton alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+//    OmmGuiButton* pNativeView = [[OmmGuiButton buttonWithType:UIButtonTypeRoundedRect] init];
+    OmmGuiButton* pNativeView = [[OmmGuiButton alloc] init];
     pNativeView.backgroundColor = [UIColor yellowColor];
     [pNativeView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [pNativeView setImpl:this];
 
-    init(pView, pNativeView);
+    initViewImpl(pView, pNativeView);
 }
 
 

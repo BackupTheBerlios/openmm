@@ -57,8 +57,6 @@ class Application : public Omm::Gui::Application
 
         NavButton* pButton = new NavButton(pNavigator);
         pNavigator->push(pButton, pButton->getLabel());
-        resize(800, 480);
-
         return pNavigator;
     }
 };

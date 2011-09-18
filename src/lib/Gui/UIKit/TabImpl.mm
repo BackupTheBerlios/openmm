@@ -33,12 +33,8 @@ TabViewImpl::TabViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("tab view impl ctor");
 
-//    OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] initWithFrame:CGRectMake(0.0, 50.0, 150.0, 50.0)];
-//    UITabBarController* pNativeView = [[UITabBarController alloc] initWithFrame:CGRectMake(0.0, 0.0, 300.0, 400.0)];
     UITabBarController* pNativeViewController = [[UITabBarController alloc] init];
-//    [pNativeView setImpl:this];
-
-    init(pView, pNativeViewController);
+    initViewImpl(pView, pNativeViewController);
 }
 
 

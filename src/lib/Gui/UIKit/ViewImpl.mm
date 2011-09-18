@@ -39,7 +39,7 @@ ViewImpl::~ViewImpl()
 
 
 void
-ViewImpl::init(View* pView, void* pNative)
+ViewImpl::initViewImpl(View* pView, void* pNative)
 {
     Omm::Gui::Log::instance()->gui().debug("init view impl view: " + Poco::NumberFormatter::format(pView) + ", native: " + Poco::NumberFormatter::format(pNative));
 
@@ -52,22 +52,25 @@ ViewImpl::init(View* pView, void* pNative)
         pNativeView = static_cast<UIView*>(pNative);
         pNativeViewController = [[UIViewController alloc] init];
         pNativeViewController.view = pNativeView;
-        _pNativeView = pNative;
-        _pNativeViewController = pNativeViewController;
     }
     else if ([static_cast<NSObject*>(pNative) isKindOfClass:[UIViewController class]]) {
         Omm::Gui::Log::instance()->gui().debug("init view impl native is of type UIViewController");
         pNativeViewController = static_cast<UIViewController*>(pNative);
-        _pNativeView = pNativeViewController.view;
-        _pNativeViewController = pNative;
+        pNativeView = pNativeViewController.view;
     }
-//    _pNativeView = pNativeViewController.view;
-//    _pNativeViewController = pNativeViewController;
 
     if (pView->getParent()) {
         UIView* pParentView = static_cast<UIView*>(pView->getParent()->getNativeView());
+        pNativeView.frame = pParentView.frame;
         [pParentView addSubview:pNativeView];
     }
+    else {
+        pNativeView.frame = CGRectMake(0.0, 0.0, 200.0, 100.0);
+    }
+    _pNativeView = pNativeViewController.view;
+    _pNativeViewController = pNativeViewController;
+
+    Omm::Gui::Log::instance()->gui().debug("init view impl view finished.");
 }
 
 
@@ -176,7 +179,7 @@ PlainViewImpl::PlainViewImpl(View* pView)
     UIView* pNativeView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     pNativeView.backgroundColor = [UIColor grayColor];
 
-    init(pView, pNativeView);
+    initViewImpl(pView, pNativeView);
 }
 
 

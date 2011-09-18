@@ -39,8 +39,6 @@ class Application : public Omm::Gui::Application
             pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
             pTab->addView(pButton, "Tab" + Poco::NumberFormatter::format(i + 1));
         }
-
-        resize(800, 480);
         return pTab;
     }
 };
