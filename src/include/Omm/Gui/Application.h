@@ -42,6 +42,8 @@ public:
 
     void resize(int width, int height);
     virtual View* createMainView() = 0;
+    virtual void presentedMainView() {}
+    virtual void finishedEventLoop() {}
 
 private:
     ApplicationImpl*           _pImpl;
