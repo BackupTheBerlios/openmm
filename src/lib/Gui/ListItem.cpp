@@ -28,6 +28,9 @@
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ListItemImpl.h"
 #endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ListItemImpl.h"
+#endif
 
 
 namespace Omm {

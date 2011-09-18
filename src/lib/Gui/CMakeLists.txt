@@ -55,7 +55,7 @@ HorizontalLayout.cpp
 Button.cpp
 List.cpp
 ListModel.cpp
-#ListItem.cpp
+ListItem.cpp
 LazyList.cpp
 Tab.cpp
 Navigator.cpp

@@ -22,7 +22,6 @@
 #ifndef ListItemImpl_INCLUDED
 #define ListItemImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -31,20 +30,18 @@ namespace Gui {
 class View;
 
 
-class ListItemImpl : public QWidget, public ViewImpl
+class ListItemImpl : public ViewImpl
 {
     friend class ListItemView;
-
+    
+public:
+    void listItemSelected();
+    
 private:
     ListItemImpl(View* pView, View* pParent = 0);
     ~ListItemImpl();
 
     void setLabel(const std::string& text);
-
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-    
-    QHBoxLayout*                    _pLayout;
-    QLabel*                         _pNameLabel;
 };
 
 

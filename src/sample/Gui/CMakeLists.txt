@@ -52,13 +52,13 @@ ${OMM_GUI}
 )
 
 
-#add_executable(stringlist
-#StringList.cpp
-#)
+add_executable(stringlist
+StringList.cpp
+)
 
-#target_link_libraries(stringlist
-#${OMM_GUI}
-#)
+target_link_libraries(stringlist
+${OMM_GUI}
+)
 
 
 add_executable(buttonlist

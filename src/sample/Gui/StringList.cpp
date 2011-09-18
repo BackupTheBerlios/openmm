@@ -83,7 +83,7 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        StringListModel* pListModel = new StringListModel(1);
+        StringListModel* pListModel = new StringListModel(10000);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setModel(pListModel);
         resize(800, 480);
