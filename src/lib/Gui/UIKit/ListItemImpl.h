@@ -38,7 +38,7 @@ public:
     void listItemSelected();
     
 private:
-    ListItemImpl(View* pView, View* pParent = 0);
+    ListItemImpl(View* pView);
     ~ListItemImpl();
 
     void setLabel(const std::string& text);

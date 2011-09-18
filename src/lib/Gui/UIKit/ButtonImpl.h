@@ -34,7 +34,7 @@ class ButtonViewImpl : public ViewImpl
     friend class ButtonView;
 
 public:
-    ButtonViewImpl(View* pView, View* pParent = 0);
+    ButtonViewImpl(View* pView);
     ~ButtonViewImpl();
 
     void setLabel(const std::string& label);

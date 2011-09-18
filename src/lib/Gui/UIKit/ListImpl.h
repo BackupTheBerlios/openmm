@@ -36,7 +36,7 @@ class ListViewImpl : public ViewImpl
     friend class LazyListView;
 
 public:
-    ListViewImpl(View* pView, View* pParent = 0);
+    ListViewImpl(View* pView);
     virtual ~ListViewImpl();
 
     void viewScrolled();

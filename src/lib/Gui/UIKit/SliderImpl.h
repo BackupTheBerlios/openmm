@@ -34,7 +34,7 @@ class SliderViewImpl : public ViewImpl
     friend class SliderView;
 
 public:
-    SliderViewImpl(View* pView, View* pParent = 0);
+    SliderViewImpl(View* pView);
     ~SliderViewImpl();
 
     void setValue(int value);

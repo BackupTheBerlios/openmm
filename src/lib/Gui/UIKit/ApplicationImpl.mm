@@ -47,17 +47,18 @@
     window.backgroundColor = [UIColor whiteColor];
 
     void* pNativeMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView()->getNativeView();
-    if ([static_cast<NSObject*>(pNativeMainView) isKindOfClass:[UIView class]]) {
-        UIView* pMainView = static_cast<UIView*>(pNativeMainView);
-        [window addSubview:pMainView];
-    }
-    else if ([static_cast<NSObject*>(pNativeMainView) isKindOfClass:[UIViewController class]]) {
-        UIViewController* pMainView = static_cast<UIViewController*>(pNativeMainView);
-        [window addSubview:pMainView.view];
-    }
-    else {
-        Omm::Gui::Log::instance()->gui().error("application implementation cannot add main view, must be a UIView or UIViewController.");
-    }
+    [window addSubview:static_cast<UIView*>(pNativeMainView)];
+//    if ([static_cast<NSObject*>(pNativeMainView) isKindOfClass:[UIView class]]) {
+//        UIView* pMainView = static_cast<UIView*>(pNativeMainView);
+//        [window addSubview:pMainView];
+//    }
+//    else if ([static_cast<NSObject*>(pNativeMainView) isKindOfClass:[UIViewController class]]) {
+//        UIViewController* pMainView = static_cast<UIViewController*>(pNativeMainView);
+//        [window addSubview:pMainView.view];
+//    }
+//    else {
+//        Omm::Gui::Log::instance()->gui().error("application implementation cannot add main view, must be a UIView or UIViewController.");
+//    }
 
     [window makeKeyAndVisible];
 }

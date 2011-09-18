@@ -37,9 +37,10 @@ namespace Gui {
 
 
 TabView::TabView(View* pParent) :
-View(new TabViewImpl(this, pParent), pParent)
+View(pParent, false)
 {
     Omm::Gui::Log::instance()->gui().debug("tab view ctor.");
+    _pImpl = new TabViewImpl(this);
 }
 
 

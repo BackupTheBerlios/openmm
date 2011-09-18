@@ -62,9 +62,10 @@ ButtonModel::setLabel(const std::string& label)
 
 
 ButtonView::ButtonView(View* pParent) :
-View(new ButtonViewImpl(this, pParent), pParent)
+View(pParent, false)
 {
     Omm::Gui::Log::instance()->gui().debug("button view ctor.");
+    _pImpl = new ButtonViewImpl(this);
 }
 
 

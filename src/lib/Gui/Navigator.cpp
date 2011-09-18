@@ -37,9 +37,10 @@ namespace Gui {
 
 
 NavigatorView::NavigatorView(View* pParent) :
-View(new NavigatorViewImpl(this, pParent), pParent)
+View(pParent, false)
 {
     Omm::Gui::Log::instance()->gui().debug("navigator view ctor.");
+    _pImpl = new NavigatorViewImpl(this);
 }
 
 

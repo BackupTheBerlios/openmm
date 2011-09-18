@@ -33,7 +33,7 @@ namespace Gui {
 class NavigatorViewImpl : public ViewImpl
 {
 public:
-    NavigatorViewImpl(View* pView, View* pParent = 0);
+    NavigatorViewImpl(View* pView);
     virtual ~NavigatorViewImpl();
     
     void pushView(View* pView, const std::string name);

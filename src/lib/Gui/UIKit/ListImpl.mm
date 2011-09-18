@@ -61,11 +61,8 @@ namespace Omm {
 namespace Gui {
 
 
-ListViewImpl::ListViewImpl(View* pView, View* pParent)
-//ViewImpl(pView, new QtScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
-//_pScrollWidget(0)
+ListViewImpl::ListViewImpl(View* pView)
 {
-    _pView = pView;
 
     UIScrollView* pNativeView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
 //    OmmGuiListView* pNativeView = [[OmmGuiListView alloc] initWithFrame:CGRectMake(0.0, 50.0, 300.0, 400.0)];
@@ -73,17 +70,9 @@ ListViewImpl::ListViewImpl(View* pView, View* pParent)
     OmmGuiListViewDelegate* pListViewDelegate = [[OmmGuiListViewDelegate alloc] init];
     [pListViewDelegate setImpl:this];
     pNativeView.delegate = pListViewDelegate;
-    _pNativeView = pNativeView;
-
-
     pNativeView.backgroundColor = [UIColor blueColor];
 
-    Omm::Gui::Log::instance()->gui().debug("list view impl ctor");
-
-    if (pParent) {
-        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
-        [pParentView addSubview:pNativeView];
-    }
+    init(pView, pNativeView);
 }
 
 
@@ -95,7 +84,7 @@ ListViewImpl::~ListViewImpl()
 int
 ListViewImpl::visibleRows()
 {
-    UIScrollView* pNativeView = static_cast<UIScrollView*>(_pNativeView);
+    UIScrollView* pNativeView = static_cast<UIScrollView*>(getNativeView());
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = pNativeView.frame.size.height / pListView->_itemViewHeight + 2;
@@ -107,7 +96,7 @@ ListViewImpl::visibleRows()
 void
 ListViewImpl::addItemView(View* pView)
 {
-    UIScrollView* pNativeView = static_cast<UIScrollView*>(_pNativeView);
+    UIScrollView* pNativeView = static_cast<UIScrollView*>(getNativeView());
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     pView->resize(pNativeView.frame.size.width, pListView->_itemViewHeight);
@@ -127,7 +116,7 @@ ListViewImpl::moveItemView(int row, View* pView)
 void
 ListViewImpl::updateScrollWidgetSize()
 {
-    UIScrollView* pNativeView = static_cast<UIScrollView*>(_pNativeView);
+    UIScrollView* pNativeView = static_cast<UIScrollView*>(getNativeView());
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     ListModel* pListModel = static_cast<ListModel*>(_pView->getModel());
@@ -138,7 +127,7 @@ ListViewImpl::updateScrollWidgetSize()
 int
 ListViewImpl::getOffset()
 {
-    return static_cast<UIScrollView*>(_pNativeView).contentOffset.y;
+    return static_cast<UIScrollView*>(getNativeView()).contentOffset.y;
 }
 
 

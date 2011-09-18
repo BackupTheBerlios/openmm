@@ -55,9 +55,10 @@ SliderModel::setValue(int value)
 
 
 SliderView::SliderView(View* pParent) :
-View(new SliderViewImpl(this, pParent), pParent)
+View(pParent, false)
 {
     Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
+    _pImpl = new SliderViewImpl(this);
 }
 
 

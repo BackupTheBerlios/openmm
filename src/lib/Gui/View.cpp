@@ -38,38 +38,44 @@ namespace Omm {
 namespace Gui {
 
 
-View::View(View* pParent) :
-_pParent(pParent),
-_pImpl(new ViewImpl(this)),
-_pModel(0),
-_pLayout(0)
+View::View(View* pParent)
 {
     Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
-    if (_pParent) {
-        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
-        _pParent->_children.push_back(this);
-    }
+
+    initView(pParent);
+    _pImpl = new PlainViewImpl(this);
 }
 
 
-View::View(ViewImpl* pViewImpl, View* pParent) :
-_pParent(pParent),
-_pImpl(pViewImpl),
-_pModel(0),
-_pLayout(0)
+View::View(View* pParent, bool createPlainView)
 {
-    Omm::Gui::Log::instance()->gui().debug("view ctor (view impl, parent).");
-    if (_pParent) {
-        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
-        _pParent->_children.push_back(this);
+    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
+
+    initView(pParent);
+    if (createPlainView) {
+        _pImpl = new PlainViewImpl(this);
     }
 }
 
 
 View::~View()
 {
-    if (_pImpl) {
+//    if (_pImpl) {
 //        delete _pImpl;
+//    }
+}
+
+
+void
+View::initView(View* pParent)
+{
+    _pParent = pParent;
+    _pModel = 0;
+    _pLayout = 0;
+
+    if (_pParent) {
+        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
+        _pParent->_children.push_back(this);
     }
 }
 
@@ -245,6 +251,13 @@ View::ControllerIterator
 View::endController()
 {
     return _controllers.end();
+}
+
+
+ViewImpl*
+View::getViewImpl()
+{
+    return _pImpl;
 }
 
 

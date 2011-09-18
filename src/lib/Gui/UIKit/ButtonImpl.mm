@@ -57,10 +57,8 @@ namespace Omm {
 namespace Gui {
 
 
-ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent)
-//ViewImpl(pView, new QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
+ButtonViewImpl::ButtonViewImpl(View* pView)
 {
-    _pView = pView;
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
 //    UIButton* pNativeView = [[UIButton buttonWithType:UIButtonTypeRoundedRect] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
     OmmGuiButton* pNativeView = [[OmmGuiButton alloc] initWithFrame:CGRectMake(0.0, 50.0, 100.0, 40.0)];
@@ -70,14 +68,7 @@ ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent)
     [pNativeView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [pNativeView setImpl:this];
 
-    _pNativeView = pNativeView;
-    Omm::Gui::Log::instance()->gui().debug("button view impl ctor native view: " + Poco::NumberFormatter::format(_pNativeView));
-
-    if (pParent) {
-        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
-        [pParentView addSubview:pNativeView];
-    }
-//    connect(_pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
+    init(pView, pNativeView);
 }
 
 

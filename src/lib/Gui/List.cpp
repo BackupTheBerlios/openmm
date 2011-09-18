@@ -70,20 +70,11 @@ ListItemController::selectedRow(int row)
 
 
 ListView::ListView(View* pParent) :
-View(new ListViewImpl(this, pParent), pParent),
+View(pParent, false),
 _itemViewHeight(50),
 _rowOffset(0)
 {
-
-}
-
-
-ListView::ListView(ViewImpl* pViewImpl, View* pParent) :
-View(pViewImpl, pParent),
-_itemViewHeight(50),
-_rowOffset(0)
-{
-
+    _pImpl = new ListViewImpl(this);
 }
 
 

@@ -41,7 +41,8 @@ namespace Gui {
 
 
 LazyListView::LazyListView(View* pParent) :
-ListView(new ListViewImpl(this, pParent), pParent)
+ListView(pParent)
+//ListView(new ListViewImpl(this, pParent), pParent)
 {
 
 }

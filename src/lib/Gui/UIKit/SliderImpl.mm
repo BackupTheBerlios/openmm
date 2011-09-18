@@ -57,23 +57,15 @@ namespace Omm {
 namespace Gui {
 
 
-SliderViewImpl::SliderViewImpl(View* pView, View* pParent) //:
-//ViewImpl(pView, new QSlider(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
+SliderViewImpl::SliderViewImpl(View* pView)
 {
-    _pView = pView;
+    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
 
     OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] initWithFrame:CGRectMake(0.0, 50.0, 150.0, 50.0)];
     [pNativeView setImpl:this];
     pNativeView.maximumValue = 100.0;
-    
-    _pNativeView = pNativeView;
 
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-
-    if (pParent) {
-        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
-        [pParentView addSubview:pNativeView];
-    }
+    init(pView, pNativeView);
 }
 
 

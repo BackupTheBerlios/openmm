@@ -55,8 +55,9 @@ ListItemModel::setLabel(const std::string& label)
 
 
 ListItemView::ListItemView(View* pParent) :
-View(new ListItemImpl(this, pParent), pParent)
+View(pParent, false)
 {
+    _pImpl = new ListItemImpl(this);
 }
 
 

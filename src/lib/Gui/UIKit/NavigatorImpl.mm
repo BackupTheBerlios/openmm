@@ -32,24 +32,14 @@ namespace Omm {
 namespace Gui {
 
 
-NavigatorViewImpl::NavigatorViewImpl(View* pView, View* pParent)
-//QWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() : 0)),
-//ViewImpl(pView, this)
+NavigatorViewImpl::NavigatorViewImpl(View* pView)
 {
-    _pView = pView;
-    Omm::Gui::Log::instance()->gui().debug("navigator view implementation ctor");
+    Omm::Gui::Log::instance()->gui().debug("navigator view impl ctor");
 
     UINavigationController* pNativeView = [[UINavigationController alloc] init];
 //    [pNativeView setImpl:this];
 
-    _pNativeView = pNativeView;
-
-    Omm::Gui::Log::instance()->gui().debug("navigator view impl ctor");
-
-    if (pParent) {
-        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
-        [pParentView addSubview:pNativeView.view];
-    }
+    init(pView, pNativeView);
 }
 
 
@@ -63,17 +53,17 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
 {
     Omm::Gui::Log::instance()->gui().debug("navigator view implementation push view");
 
-    if ([static_cast<NSObject*>(pView->getNativeView()) isKindOfClass:[UIViewController class]]) {
-        UINavigationController* pNativeView = static_cast<UINavigationController*>(_pNativeView);
-        UIViewController* pViewController = static_cast<UIViewController*>(pView->getNativeView());
+//    if ([static_cast<NSObject*>(pView->getNativeView()) isKindOfClass:[UIViewController class]]) {
+        UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
+        UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
         NSString* pName = [[NSString alloc] initWithUTF8String:name.c_str()];
         pViewController.title = pName;
 
-        [pNativeView pushViewController:pViewController animated:YES];
-    }
-    else {
-        Omm::Gui::Log::instance()->gui().error("navigator view implementation cannot push view, must be a UIViewController.");
-    }
+        [pNativeViewController pushViewController:pViewController animated:YES];
+//    }
+//    else {
+//        Omm::Gui::Log::instance()->gui().error("navigator view implementation cannot push view, must be a UIViewController.");
+//    }
 }
 
 

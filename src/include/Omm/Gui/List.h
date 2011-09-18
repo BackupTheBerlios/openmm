@@ -58,8 +58,6 @@ public:
     void setItemViewHeight(int height);
 
 protected:
-    ListView(ViewImpl* pViewImpl, View* pParent = 0);
-
     // TODO implement syncView()
     virtual void syncView() {}
 

@@ -69,30 +69,15 @@ namespace Omm {
 namespace Gui {
 
 
-ListItemImpl::ListItemImpl(View* pView, View* pParent)
-//ViewImpl(pView, new QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
-//QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-//ViewImpl(pView, this)
+ListItemImpl::ListItemImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
 
-
-    _pView = pView;
-
     OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] initWithFrame:CGRectMake(0.0, 50.0, 100.0, 50.0)];
-
     [pNativeView initWithImpl:this];
-    _pNativeView = pNativeView;
-
-
     pNativeView.backgroundColor = [UIColor yellowColor];
 
-    Omm::Gui::Log::instance()->gui().debug("list view impl ctor");
-
-    if (pParent) {
-        UIView* pParentView = static_cast<UIView*>(pParent->getNativeView());
-        [pParentView addSubview:pNativeView];
-    }
+    init(pView, pNativeView);
 }
 
 

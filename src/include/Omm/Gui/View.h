@@ -88,9 +88,12 @@ public:
     ControllerIterator beginController();
     ControllerIterator endController();
 
-protected:
-    View(ViewImpl* pViewImpl, View* pParent = 0);
+    ViewImpl* getViewImpl();
 
+protected:
+    View(View* pParent, bool createPlainView);
+
+    void initView(View* pParent);
     virtual void syncView(Model* pModel) {}
 
     View*                       _pParent;

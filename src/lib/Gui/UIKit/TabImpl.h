@@ -35,7 +35,7 @@ class TabViewImpl : public ViewImpl
 private:
     friend class TabView;
     
-    TabViewImpl(View* pView, View* pParent = 0);
+    TabViewImpl(View* pView);
     virtual ~TabViewImpl();
 
     void addView(View* pView, const std::string& tabName);
