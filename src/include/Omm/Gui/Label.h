@@ -19,57 +19,71 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItem_INCLUDED
-#define ListItem_INCLUDED
+#ifndef Label_INCLUDED
+#define Label_INCLUDED
 
+#include <string>
 #include "View.h"
+#include "Model.h"
+#include "Controller.h"
 
 
 namespace Omm {
 namespace Gui {
 
 
-class Label;
-class HorizontalLayout;
-
-//class ListItemController : public Controller
-//{
-//protected:
-//
-//private:
-//    virtual void selected();
-//};
+class LabelController : public Controller
+{
+    friend class LabelViewImpl;
+    
+protected:
+    virtual void pushed() {}
+};
 
 
-class ListItemModel : public Model
+class LabelModel : public Model
 {
 public:
+//    virtual const std::string& getLabel() const;
     virtual std::string getLabel();
-    void setLabel(const std::string& text);
-
+    void setLabel(const std::string& label);
+    
 private:
     std::string _label;
 };
 
 
-class ListItemView : public View
+class LabelView : public View
 {
+    friend class LabelModel;
+    
 public:
-    ListItemView(View* pParent = 0);
-
+    LabelView(View* pParent = 0);
+    
 private:
     virtual void syncView(Model* pModel);
-
-    Label*              _pLabel;
-    HorizontalLayout*   _pLayout;
 };
 
 
-//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
-//{
-//public:
-//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-//};
+class LabelControllerView : public ControllerView<LabelController, LabelView>
+{
+public:
+    LabelControllerView(View* pParent = 0) : ControllerView<LabelController, LabelView>(pParent) {}
+};
+
+
+class LabelControllerModel : public ControllerModel<LabelController, LabelModel>
+{
+public:
+    LabelControllerModel() : ControllerModel<LabelController, LabelModel>() {}
+};
+
+
+class Label : public Widget<LabelView, LabelController, LabelModel>
+{
+public:
+    Label(View* pParent = 0) : Widget<LabelView, LabelController, LabelModel>(pParent) {}
+};
 
 
 }  // namespace Omm

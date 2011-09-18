@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,38 +17,33 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <Omm/Gui/Application.h>
-#include <Omm/Gui/Button.h>
+#ifndef LabelImpl_INCLUDED
+#define LabelImpl_INCLUDED
 
+#include "ViewImpl.h"
 
-class HelloButtonModel : public Omm::Gui::ButtonControllerModel
+namespace Omm {
+namespace Gui {
+
+class View;
+
+class LabelViewImpl : public ViewImpl
 {
-private:
-    void pushed()
-    {
-        UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
-    }
+    friend class LabelView;
+
+public:
+    LabelViewImpl(View* pView);
+    ~LabelViewImpl();
+
+    void setLabel(const std::string& label);
+    void pushed();
 };
 
 
-class HelloApplication : public Omm::Gui::Application
-{
-    virtual Omm::Gui::View* createMainView()
-    {
-        HelloButtonModel* pButtonModel = new HelloButtonModel;
-        Omm::Gui::ButtonView* pButtonView = new Omm::Gui::ButtonView;
-        pButtonView->setControllerModel(pButtonModel);
-        pButtonModel->setLabel("Hello GUI");
-        return pButtonView;
-    }
-};
+}  // namespace Omm
+}  // namespace Gui
 
-
-int main(int argc, char** argv)
-{
-    HelloApplication app;
-    return app.run(argc, argv);
-}
+#endif
 

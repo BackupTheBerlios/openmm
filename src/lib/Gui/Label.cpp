@@ -19,60 +19,65 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItem_INCLUDED
-#define ListItem_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include "View.h"
+#include "Gui/Label.h"
+#include "Gui/GuiLogger.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/LabelImpl.h"
+#endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/LabelImpl.h"
+#endif
 
 
 namespace Omm {
 namespace Gui {
 
 
-class Label;
-class HorizontalLayout;
-
-//class ListItemController : public Controller
+//const std::string&
+//LabelModel::getLabel() const
 //{
-//protected:
-//
-//private:
-//    virtual void selected();
-//};
+//    return _label;
+//}
 
 
-class ListItemModel : public Model
+std::string
+LabelModel::getLabel()
 {
-public:
-    virtual std::string getLabel();
-    void setLabel(const std::string& text);
-
-private:
-    std::string _label;
-};
+    return _label;
+}
 
 
-class ListItemView : public View
+void
+LabelModel::setLabel(const std::string& label)
 {
-public:
-    ListItemView(View* pParent = 0);
+//    Omm::Gui::Log::instance()->gui().debug("Label model set label");
+    _label = label;
 
-private:
-    virtual void syncView(Model* pModel);
-
-    Label*              _pLabel;
-    HorizontalLayout*   _pLayout;
-};
+//    UPDATE_VIEWS(LabelView, setLabel, label);
+    syncViews();
+}
 
 
-//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
-//{
-//public:
-//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-//};
+LabelView::LabelView(View* pParent) :
+View(pParent, false)
+{
+    Omm::Gui::Log::instance()->gui().debug("Label view ctor.");
+    _pImpl = new LabelViewImpl(this);
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+void
+LabelView::syncView(Model* pModel)
+{
+    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
+    LabelModel* pLabelModel = static_cast<LabelModel*>(pModel);
+    LabelViewImpl* pImpl = static_cast<LabelViewImpl*>(_pImpl);
+    pImpl->setLabel(pLabelModel->getLabel());
+}
 
-#endif
+
+} // namespace Gui
+} // namespace Omm

@@ -52,6 +52,7 @@ Controller.cpp
 Application.cpp
 Layout.cpp
 HorizontalLayout.cpp
+Label.cpp
 Button.cpp
 List.cpp
 ListModel.cpp

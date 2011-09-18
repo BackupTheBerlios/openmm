@@ -23,46 +23,34 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "ListItemImpl.h"
-#include "Gui/ListItem.h"
+#include "LabelImpl.h"
+#include "Gui/Label.h"
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmGuiListItemView : UIView
+@interface OmmGuiLabel : UILabel
+//@interface OmmGuiLabel : UIRoundedRectLabel
 {
-    Omm::Gui::ListItemImpl* _pListItemImpl;
-    UILabel*                _pLabel;
+    Omm::Gui::LabelViewImpl* _pLabelViewImpl;
 }
 
 @end
 
 
-@implementation OmmGuiListItemView
+@implementation OmmGuiLabel
 
-- (void)initWithImpl:(Omm::Gui::ListItemImpl*)pImpl
+- (void)setImpl:(Omm::Gui::LabelViewImpl*)pImpl
 {
-    _pListItemImpl = pImpl;
-    _pLabel = [[UILabel alloc] initWithFrame:self.frame];
-//    _pLabel = [[UILabel alloc] initWithFrame:superView.frame];
-    [self addSubview:_pLabel];
-//    _pLabel.frame = self.frame;
+    _pLabelViewImpl = pImpl;
 }
 
 
-- (void)setLabel:(NSString*)pLabel
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-    [_pLabel performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
-//    _pLabel.text = pLabel;
+    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
+    _pLabelViewImpl->pushed();
+    [super touchesBegan:touches withEvent:event];
 }
-
-
-- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
-{
-    Omm::Gui::Log::instance()->gui().debug("button view impl touch ended");
-    _pListItemImpl->listItemSelected();
-    [super touchesEnded:touches withEvent:event];
-}
-
 
 @end
 
@@ -71,47 +59,40 @@ namespace Omm {
 namespace Gui {
 
 
-ListItemImpl::ListItemImpl(View* pView)
+LabelViewImpl::LabelViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
-
-    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] init];
-//    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
-    [pNativeView initWithImpl:this];
+    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
+//    OmmGuiLabel* pNativeView = [[OmmGuiLabel LabelWithType:UILabelTypeRoundedRect] init];
+    OmmGuiLabel* pNativeView = [[OmmGuiLabel alloc] init];
     pNativeView.backgroundColor = [UIColor greenColor];
+    [pNativeView setTextColor:[UIColor blackColor]];
+    [pNativeView setImpl:this];
 
     initViewImpl(pView, pNativeView);
 }
 
 
-ListItemImpl::~ListItemImpl()
+LabelViewImpl::~LabelViewImpl()
 {
-//    delete _pNameLabel;
 }
 
 
 void
-ListItemImpl::setLabel(const std::string& text)
+LabelViewImpl::setLabel(const std::string& label)
 {
-    NSString* pLabel = [[NSString alloc] initWithUTF8String:text.c_str()];
-    [static_cast<OmmGuiListItemView*>(_pNativeView) setLabel:pLabel];
+    Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
+    NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
+    [static_cast<UILabel*>(_pNativeView) setText:pLabel];
 }
-
-
-//void
-//ListItemImpl::resizeView(int width, int height)
-//{
-//
-//}
 
 
 void
-ListItemImpl::listItemSelected()
+LabelViewImpl::pushed()
 {
-    selected();
+    Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+    IMPL_NOTIFY_CONTROLLER(LabelController, pushed);
 }
-
-
 
 
 }  // namespace Omm

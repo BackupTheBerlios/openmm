@@ -7,20 +7,29 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttonhellosubclass
-ButtonHelloSubclass.cpp
+add_executable(label
+Label.cpp
 )
 
-target_link_libraries(buttonhellosubclass
+target_link_libraries(label
 ${OMM_GUI}
 )
 
 
-add_executable(buttonhellocontroller
-ButtonHelloController.cpp
+add_executable(buttonsubclass
+ButtonSubclass.cpp
 )
 
-target_link_libraries(buttonhellocontroller
+target_link_libraries(buttonsubclass
+${OMM_GUI}
+)
+
+
+add_executable(buttoncontroller
+ButtonController.cpp
+)
+
+target_link_libraries(buttoncontroller
 ${OMM_GUI}
 )
 

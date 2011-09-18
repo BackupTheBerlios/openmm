@@ -23,7 +23,7 @@
 
 #include "Gui/ListItem.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/Button.h"
+#include "Gui/Label.h"
 #include "Gui/HorizontalLayout.h"
 
 
@@ -51,7 +51,7 @@ ListItemModel::setLabel(const std::string& label)
 ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
-    _pButton = new Button(this);
+    _pLabel = new Label(this);
     _pLayout = new HorizontalLayout;
     setLayout(_pLayout);
 }
@@ -62,7 +62,7 @@ ListItemView::syncView(Model* pModel)
 {
     Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
-    _pButton->setLabel(pItemModel->getLabel());
+    _pLabel->setLabel(pItemModel->getLabel());
 }
 
 

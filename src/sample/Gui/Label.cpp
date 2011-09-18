@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,38 +17,27 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef ListItemImpl_INCLUDED
-#define ListItemImpl_INCLUDED
-
-#include "ViewImpl.h"
-
-namespace Omm {
-namespace Gui {
-
-class View;
+#include <Omm/Gui/Application.h>
+#include <Omm/Gui/Label.h>
 
 
-class ListItemImpl : public ViewImpl
+class Application : public Omm::Gui::Application
 {
-    friend class ListItemView;
-    
-public:
-    void listItemSelected();
-    
-private:
-    ListItemImpl(View* pView);
-    ~ListItemImpl();
-
-    void setLabel(const std::string& text);
-//    virtual void resizeView(int width, int height);
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::Label* pLabel = new Omm::Gui::Label;
+        pLabel->setLabel("Hello World");
+        return pLabel;
+    }
 };
 
 
-}  // namespace Omm
-}  // namespace Gui
+int main(int argc, char** argv)
+{
+    Application app;
+    return app.run(argc, argv);
+}
 
-
-#endif
 
