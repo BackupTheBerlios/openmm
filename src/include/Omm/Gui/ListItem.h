@@ -29,6 +29,9 @@ namespace Omm {
 namespace Gui {
 
 
+class Button;
+class HorizontalLayout;
+
 //class ListItemController : public Controller
 //{
 //protected:
@@ -56,6 +59,9 @@ public:
 
 private:
     virtual void syncView(Model* pModel);
+
+    Button*             _pButton;
+    HorizontalLayout*   _pLayout;
 };
 
 

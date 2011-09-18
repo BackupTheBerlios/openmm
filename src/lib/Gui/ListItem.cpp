@@ -23,14 +23,8 @@
 
 #include "Gui/ListItem.h"
 #include "Gui/GuiLogger.h"
-
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ListItemImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ListItemImpl.h"
-#endif
+#include "Gui/Button.h"
+#include "Gui/HorizontalLayout.h"
 
 
 namespace Omm {
@@ -55,9 +49,11 @@ ListItemModel::setLabel(const std::string& label)
 
 
 ListItemView::ListItemView(View* pParent) :
-View(pParent, false)
+View(pParent)
 {
-    _pImpl = new ListItemImpl(this);
+    _pButton = new Button(this);
+    _pLayout = new HorizontalLayout;
+    setLayout(_pLayout);
 }
 
 
@@ -66,8 +62,7 @@ ListItemView::syncView(Model* pModel)
 {
     Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
-    ListItemImpl* pImpl = static_cast<ListItemImpl*>(_pImpl);
-    pImpl->setLabel(pItemModel->getLabel());
+    _pButton->setLabel(pItemModel->getLabel());
 }
 
 

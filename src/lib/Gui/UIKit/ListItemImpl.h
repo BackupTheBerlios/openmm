@@ -42,6 +42,7 @@ private:
     ~ListItemImpl();
 
     void setLabel(const std::string& text);
+//    virtual void resizeView(int width, int height);
 };
 
 

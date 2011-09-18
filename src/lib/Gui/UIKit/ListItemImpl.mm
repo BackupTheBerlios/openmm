@@ -75,10 +75,10 @@ ListItemImpl::ListItemImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
 
-//    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] init];
-    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
+    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] init];
+//    OmmGuiListItemView* pNativeView = [[OmmGuiListItemView alloc] initWithFrame:CGRectMake(0.0, 0.0, 100.0, 100.0)];
     [pNativeView initWithImpl:this];
-    pNativeView.backgroundColor = [UIColor yellowColor];
+    pNativeView.backgroundColor = [UIColor greenColor];
 
     initViewImpl(pView, pNativeView);
 }
@@ -96,6 +96,13 @@ ListItemImpl::setLabel(const std::string& text)
     NSString* pLabel = [[NSString alloc] initWithUTF8String:text.c_str()];
     [static_cast<OmmGuiListItemView*>(_pNativeView) setLabel:pLabel];
 }
+
+
+//void
+//ListItemImpl::resizeView(int width, int height)
+//{
+//
+//}
 
 
 void
