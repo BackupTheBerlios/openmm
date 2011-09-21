@@ -47,7 +47,8 @@ public:
     virtual void resizeView(int width, int height);
     virtual void moveView(int x, int y);
     virtual void selected();
- 
+    void setBackgroundColor(const Color& color);
+
 protected:
     void initViewImpl(View* pView, void* pNative);
 

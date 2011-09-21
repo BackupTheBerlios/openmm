@@ -19,78 +19,35 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#import <UIKit/UIKit.h>
-
 #include <Poco/NumberFormatter.h>
 
-#include "LabelImpl.h"
-#include "Gui/Label.h"
+#include "Gui/Color.h"
 #include "Gui/GuiLogger.h"
 
-
-@interface OmmGuiLabel : UILabel
-{
-    Omm::Gui::LabelViewImpl* _pLabelViewImpl;
-}
-
-@end
-
-
-@implementation OmmGuiLabel
-
-- (void)setImpl:(Omm::Gui::LabelViewImpl*)pImpl
-{
-    _pLabelViewImpl = pImpl;
-}
-
-
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-{
-    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
-    _pLabelViewImpl->pushed();
-    [super touchesBegan:touches withEvent:event];
-}
-
-@end
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/ColorImpl.h"
+#endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ColorImpl.h"
+#endif
 
 
 namespace Omm {
 namespace Gui {
 
 
-LabelViewImpl::LabelViewImpl(View* pView)
+Color::Color(const std::string& colorName)
 {
-    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
-    OmmGuiLabel* pNativeView = [[OmmGuiLabel alloc] init];
-    pNativeView.backgroundColor = [[UIColor alloc] initWithWhite:1.0 alpha:0.0];
-//    [pNativeView setTextColor:[UIColor blackColor]];
-    [pNativeView setImpl:this];
-
-    initViewImpl(pView, pNativeView);
+    Omm::Gui::Log::instance()->gui().debug("color ctor.");
+    _pImpl = new ColorImpl(colorName);
 }
 
 
-LabelViewImpl::~LabelViewImpl()
+void*
+Color::getNativeColor() const
 {
+    return _pImpl->getNativeColor();
 }
 
-
-void
-LabelViewImpl::setLabel(const std::string& label)
-{
-    Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
-    NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
-    [static_cast<UILabel*>(_pNativeView) performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
-}
-
-
-void
-LabelViewImpl::pushed()
-{
-    Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
-}
-
-
-}  // namespace Omm
-}  // namespace Gui
+} // namespace Gui
+} // namespace Omm

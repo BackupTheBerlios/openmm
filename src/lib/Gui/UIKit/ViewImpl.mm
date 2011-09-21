@@ -235,12 +235,19 @@ ViewImpl::selected()
 }
 
 
+void
+ViewImpl::setBackgroundColor(const Color& color)
+{
+//    static_cast<UIView*>(getNativeView()).backgroundColor = [UIColor blueColor];
+    static_cast<UIView*>(getNativeView()).backgroundColor = static_cast<UIColor*>(color.getNativeColor());
+}
+
+
 PlainViewImpl::PlainViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("plain view impl ctor.");
-//    UIView* pNativeView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     OmmGuiPlainView* pNativeView = [[OmmGuiPlainView alloc] initWithImpl:this];
-    pNativeView.backgroundColor = [UIColor grayColor];
+    pNativeView.backgroundColor = [UIColor whiteColor];
 
     initViewImpl(pView, pNativeView);
 }

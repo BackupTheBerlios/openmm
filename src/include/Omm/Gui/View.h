@@ -26,6 +26,7 @@
 #include <string>
 
 #include "Model.h"
+#include "Color.h"
 
 namespace Omm {
 namespace Gui {
@@ -87,6 +88,8 @@ public:
     typedef std::vector<Controller*>::iterator ControllerIterator;
     ControllerIterator beginController();
     ControllerIterator endController();
+
+    void setBackgroundColor(const Color& color);
 
     ViewImpl* getViewImpl();
 

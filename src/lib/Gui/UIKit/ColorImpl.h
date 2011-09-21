@@ -19,78 +19,28 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#import <UIKit/UIKit.h>
-
-#include <Poco/NumberFormatter.h>
-
-#include "LabelImpl.h"
-#include "Gui/Label.h"
-#include "Gui/GuiLogger.h"
-
-
-@interface OmmGuiLabel : UILabel
-{
-    Omm::Gui::LabelViewImpl* _pLabelViewImpl;
-}
-
-@end
-
-
-@implementation OmmGuiLabel
-
-- (void)setImpl:(Omm::Gui::LabelViewImpl*)pImpl
-{
-    _pLabelViewImpl = pImpl;
-}
-
-
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-{
-    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
-    _pLabelViewImpl->pushed();
-    [super touchesBegan:touches withEvent:event];
-}
-
-@end
+#ifndef ColorImpl_INCLUDED
+#define ColorImpl_INCLUDED
 
 
 namespace Omm {
 namespace Gui {
 
 
-LabelViewImpl::LabelViewImpl(View* pView)
+class ColorImpl
 {
-    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
-    OmmGuiLabel* pNativeView = [[OmmGuiLabel alloc] init];
-    pNativeView.backgroundColor = [[UIColor alloc] initWithWhite:1.0 alpha:0.0];
-//    [pNativeView setTextColor:[UIColor blackColor]];
-    [pNativeView setImpl:this];
+public:
+    ColorImpl(const std::string& colorName);
 
-    initViewImpl(pView, pNativeView);
-}
+    void* getNativeColor() const;
 
-
-LabelViewImpl::~LabelViewImpl()
-{
-}
-
-
-void
-LabelViewImpl::setLabel(const std::string& label)
-{
-    Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
-    NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
-    [static_cast<UILabel*>(_pNativeView) performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
-}
-
-
-void
-LabelViewImpl::pushed()
-{
-    Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
-}
+private:
+    void*   _pUIColor;
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif
+

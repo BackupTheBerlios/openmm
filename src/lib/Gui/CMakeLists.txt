@@ -46,6 +46,7 @@ message(STATUS "Gui implementation for " ${BUILD_TARGET} " is available, linking
 
 add_library(ommgui
 GuiLogger.cpp
+Color.cpp
 View.cpp
 Model.cpp
 Controller.cpp

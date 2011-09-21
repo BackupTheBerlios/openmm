@@ -23,72 +23,61 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "LabelImpl.h"
-#include "Gui/Label.h"
+#include "ColorImpl.h"
+#include "Gui/Color.h"
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmGuiLabel : UILabel
-{
-    Omm::Gui::LabelViewImpl* _pLabelViewImpl;
-}
-
-@end
-
-
-@implementation OmmGuiLabel
-
-- (void)setImpl:(Omm::Gui::LabelViewImpl*)pImpl
-{
-    _pLabelViewImpl = pImpl;
-}
-
-
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-{
-    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
-    _pLabelViewImpl->pushed();
-    [super touchesBegan:touches withEvent:event];
-}
-
-@end
+//@interface OmmGuiColor : UIColor
+//{
+//    Omm::Gui::LabelViewImpl* _pLabelViewImpl;
+//}
+//
+//@end
+//
+//
+//@implementation OmmGuiLabel
+//
+//- (void)setImpl:(Omm::Gui::LabelViewImpl*)pImpl
+//{
+//    _pLabelViewImpl = pImpl;
+//}
+//
+//
+//- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+//{
+//    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
+//    _pLabelViewImpl->pushed();
+//    [super touchesBegan:touches withEvent:event];
+//}
+//
+//@end
 
 
 namespace Omm {
 namespace Gui {
 
 
-LabelViewImpl::LabelViewImpl(View* pView)
+ColorImpl::ColorImpl(const std::string& colorName)
 {
-    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
-    OmmGuiLabel* pNativeView = [[OmmGuiLabel alloc] init];
-    pNativeView.backgroundColor = [[UIColor alloc] initWithWhite:1.0 alpha:0.0];
-//    [pNativeView setTextColor:[UIColor blackColor]];
-    [pNativeView setImpl:this];
+    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
 
-    initViewImpl(pView, pNativeView);
+    if (colorName == "white") {
+        _pUIColor = [UIColor whiteColor];
+    }
+    else if (colorName == "blue") {
+        _pUIColor = [UIColor blueColor];
+    }
+    else if (colorName == "lightBlue") {
+        _pUIColor = [UIColor colorWithRed:0.5 green:0.8 blue:1.0 alpha:1.0];
+    }
 }
 
 
-LabelViewImpl::~LabelViewImpl()
+void*
+ColorImpl::getNativeColor() const
 {
-}
-
-
-void
-LabelViewImpl::setLabel(const std::string& label)
-{
-    Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
-    NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
-    [static_cast<UILabel*>(_pNativeView) performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
-}
-
-
-void
-LabelViewImpl::pushed()
-{
-    Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+    return _pUIColor;
 }
 
 

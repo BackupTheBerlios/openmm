@@ -72,7 +72,8 @@ ListItemController::selectedRow(int row)
 ListView::ListView(View* pParent) :
 View(pParent, false),
 _itemViewHeight(50),
-_rowOffset(0)
+_rowOffset(0),
+_lastSelectedRow(-1)
 {
     _pImpl = new ListViewImpl(this);
 }
@@ -326,7 +327,21 @@ ListView::moveViewToRow(int row, View* pView)
 void
 ListView::selectedItem(int row)
 {
+    Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
+
+    if (_lastSelectedRow >= 0) {
+        View* pLastSelectedView = visibleView(visibleIndex(_lastSelectedRow));
+        if (pLastSelectedView) {
+            pLastSelectedView->setBackgroundColor(Color("white"));
+        }
+    }
+
+    View* pSelectedView = visibleView(visibleIndex(row));
+    if (pSelectedView) {
+        pSelectedView->setBackgroundColor(Color("lightBlue"));
+    }
     NOTIFY_CONTROLLER(ListController, selectedItem, row);
+    _lastSelectedRow = row;
 }
 
 

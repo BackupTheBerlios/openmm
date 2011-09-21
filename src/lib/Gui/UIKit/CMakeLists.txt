@@ -1,4 +1,5 @@
 set(OMMGUI_UIKIT_SRC
+ColorImpl.mm
 ViewImpl.mm
 ApplicationImpl.mm
 LabelImpl.mm

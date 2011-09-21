@@ -254,6 +254,13 @@ View::endController()
 }
 
 
+void
+View::setBackgroundColor(const Color& color)
+{
+    _pImpl->setBackgroundColor(color);
+}
+
+
 ViewImpl*
 View::getViewImpl()
 {
