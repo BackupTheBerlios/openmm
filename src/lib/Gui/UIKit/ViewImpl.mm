@@ -27,6 +27,64 @@
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
 
+
+//@interface OmmGuiViewActionTarget : NSObject
+//{
+//    Omm::Gui::ViewImpl* _pViewImpl;
+//}
+//
+//@end
+//
+//
+//@implementation OmmGuiViewActionTarget
+//
+//- (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
+//{
+//    Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget initWithImpl ...");
+//    if (self = [super init]) {
+//        _pViewImpl = pImpl;
+//    }
+//    return self;
+//}
+//
+//
+//-(id)selectedAction
+//{
+//    _pViewImpl->selected();
+//}
+//
+//@end
+
+
+@interface OmmGuiPlainView : UIView
+{
+    Omm::Gui::ViewImpl* _pViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiPlainView
+
+- (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
+{
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView initWithImpl ...");
+    if (self = [super init]) {
+        _pViewImpl = pImpl;
+    }
+    return self;
+}
+
+
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+{
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView touch began");
+    _pViewImpl->selected();
+}
+
+@end
+
+
 namespace Omm {
 namespace Gui {
 
@@ -67,6 +125,10 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
     else {
         pNativeView.frame = CGRectMake(0.0, 0.0, 250.0, 400.0);
     }
+
+//    OmmGuiViewActionTarget* pActionTarget = [[OmmGuiViewActionTarget alloc] initWithImpl:this];
+//    [pNativeView addTarget:pActionTarget action:@selector(selectedAction) forControlEvents:UIControlEventTouchUpInside];
+
     _pNativeView = pNativeViewController.view;
     _pNativeViewController = pNativeViewController;
 
@@ -176,20 +238,12 @@ ViewImpl::selected()
 PlainViewImpl::PlainViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("plain view impl ctor.");
-    UIView* pNativeView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+//    UIView* pNativeView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    OmmGuiPlainView* pNativeView = [[OmmGuiPlainView alloc] initWithImpl:this];
     pNativeView.backgroundColor = [UIColor grayColor];
 
     initViewImpl(pView, pNativeView);
 }
-
-
-//void
-//NativeView::mousePressEvent(QMouseEvent* pMouseEvent)
-//{
-//    _pViewImpl->selected();
-//    UIView::mousePressEvent(pMouseEvent);
-//}
-
 
 }  // namespace Omm
 }  // namespace Gui

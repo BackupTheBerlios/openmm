@@ -44,12 +44,10 @@
 {
     Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl ...");
     if (self = [super init]) {
-        Omm::Gui::Log::instance()->gui().debug("OmmGuiListView set delegate ...");
         self.delegate = self;
         _pListViewImpl = pImpl;
         self.backgroundColor = [UIColor blueColor];
     }
-    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl finished.");
     return self;
 }
 
@@ -64,13 +62,6 @@
 {
     _pListViewImpl->resized(self.frame.size.width, self.frame.size.height);
 }
-
-
-//- (void) setFrame:(CGRect)frame
-//{
-//  [super setFrame:frame];
-//  _pListViewImpl->resized(frame.size.width, frame.size.height);
-//}
 
 @end
 

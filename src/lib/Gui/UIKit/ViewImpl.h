@@ -61,14 +61,7 @@ class PlainViewImpl : public ViewImpl
 {
 public:
     PlainViewImpl(View* pView);
-
-//    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
-
-
-
-
-
 
 
 }  // namespace Omm
