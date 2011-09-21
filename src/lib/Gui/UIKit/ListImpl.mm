@@ -30,9 +30,7 @@
 #include "Gui/GuiLogger.h"
 
 
-//@interface OmmGuiListView : UIScrollView<UIScrollViewDelegate>
-//@interface OmmGuiListView : UIScrollView
-@interface OmmGuiListViewDelegate : NSObject<UIScrollViewDelegate>
+@interface OmmGuiListView : UIScrollView<UIScrollViewDelegate>
 {
     Omm::Gui::ListViewImpl* _pListViewImpl;
 }
@@ -40,19 +38,39 @@
 @end
 
 
-@implementation OmmGuiListViewDelegate
+@implementation OmmGuiListView
 
-- (void)setImpl:(Omm::Gui::ListViewImpl*)pImpl
+- (id)initWithImpl:(Omm::Gui::ListViewImpl*)pImpl
 {
-    _pListViewImpl = pImpl;
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl ...");
+    if (self = [super init]) {
+        Omm::Gui::Log::instance()->gui().debug("OmmGuiListView set delegate ...");
+        self.delegate = self;
+        _pListViewImpl = pImpl;
+        self.backgroundColor = [UIColor blueColor];
+    }
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl finished.");
+    return self;
 }
 
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView
 {
 //    Omm::Gui::Log::instance()->gui().debug("list view impl scrolling ...");
     _pListViewImpl->viewScrolled();
 }
+
+
+- (void)layoutSubviews
+{
+    _pListViewImpl->resized(self.frame.size.width, self.frame.size.height);
+}
+
+
+//- (void) setFrame:(CGRect)frame
+//{
+//  [super setFrame:frame];
+//  _pListViewImpl->resized(frame.size.width, frame.size.height);
+//}
 
 @end
 
@@ -63,13 +81,11 @@ namespace Gui {
 
 ListViewImpl::ListViewImpl(View* pView)
 {
-    UIScrollView* pNativeView = [[UIScrollView alloc] init];
-    OmmGuiListViewDelegate* pListViewDelegate = [[OmmGuiListViewDelegate alloc] init];
-    [pListViewDelegate setImpl:this];
-    pNativeView.delegate = pListViewDelegate;
-    pNativeView.backgroundColor = [UIColor blueColor];
-
+    Omm::Gui::Log::instance()->gui().debug("list view impl ctor ...");
+    
+    OmmGuiListView* pNativeView = [[OmmGuiListView alloc] initWithImpl:this];
     initViewImpl(pView, pNativeView);
+    Omm::Gui::Log::instance()->gui().debug("list view impl ctor finished.");
 }
 
 
@@ -142,16 +158,7 @@ ListViewImpl::resized(int width, int height)
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = height / pListView->_itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
-//    _pScrollWidget->resize(width, _pScrollWidget->height());
     pListView->resize(rows, width);
-}
-
-
-void
-ListViewImpl::resizeView(int width, int height)
-{
-    ViewImpl::resizeView(width, height);
-    resized(width, height);
 }
 
 

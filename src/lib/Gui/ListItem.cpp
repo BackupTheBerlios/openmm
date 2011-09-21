@@ -41,7 +41,7 @@ ListItemModel::getLabel()
 void
 ListItemModel::setLabel(const std::string& label)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item model set label");
+//    Omm::Gui::Log::instance()->gui().debug("list item model set label");
     _label = label;
 
     syncViews();
@@ -60,7 +60,7 @@ View(pParent)
 void
 ListItemView::syncView(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
     _pLabel->setLabel(pItemModel->getLabel());
 }

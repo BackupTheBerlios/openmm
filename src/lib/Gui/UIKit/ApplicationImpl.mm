@@ -29,39 +29,37 @@
 
 
 @interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
-    UIWindow* window;
+    UIWindow* _pWindow;
 }
 
-@property (nonatomic, retain) UIWindow* window;
+@property (nonatomic, retain) UIWindow* _pWindow;
 
 @end
 
 
 @implementation OmmGuiAppDelegate
 
-@synthesize window;
+@synthesize _pWindow;
 
 -(void)applicationDidFinishLaunching:(UIApplication*)application
 {
-    window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    window.backgroundColor = [UIColor whiteColor];
-
+    _pWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    _pWindow.backgroundColor = [UIColor whiteColor];
     Omm::Gui::View* pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
-    pMainView->resize(window.frame.size.width, window.frame.size.height);
-    [window addSubview:static_cast<UIView*>(pMainView->getNativeView())];
-    [window makeKeyAndVisible];
+    pMainView->resize(_pWindow.frame.size.width, _pWindow.frame.size.height);
+    [_pWindow addSubview:static_cast<UIView*>(pMainView->getNativeView())];
+    [_pWindow makeKeyAndVisible];
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
 }
 
 
 -(void)dealloc
 {
-    [window release];
+    [_pWindow release];
     [super dealloc];
 }
 
 @end
-
 
 
 namespace Omm {
@@ -96,7 +94,7 @@ ApplicationImpl::run(int argc, char** argv)
 {
     Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
     NSAutoreleasePool* pAutoreleasePool = [[NSAutoreleasePool alloc] init];
-    int ret = UIApplicationMain(argc, argv, nil,@"OmmGuiAppDelegate");
+    int ret = UIApplicationMain(argc, argv, nil, @"OmmGuiAppDelegate");
     [pAutoreleasePool release];
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     _pApplication->finishedEventLoop();
