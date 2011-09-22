@@ -28,32 +28,6 @@
 #include "Gui/GuiLogger.h"
 
 
-//@interface OmmGuiColor : UIColor
-//{
-//    Omm::Gui::LabelViewImpl* _pLabelViewImpl;
-//}
-//
-//@end
-//
-//
-//@implementation OmmGuiLabel
-//
-//- (void)setImpl:(Omm::Gui::LabelViewImpl*)pImpl
-//{
-//    _pLabelViewImpl = pImpl;
-//}
-//
-//
-//- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-//{
-//    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
-//    _pLabelViewImpl->pushed();
-//    [super touchesBegan:touches withEvent:event];
-//}
-//
-//@end
-
-
 namespace Omm {
 namespace Gui {
 

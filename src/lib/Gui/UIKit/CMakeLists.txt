@@ -17,7 +17,7 @@ ${OMMGUI_UIKIT_SRC}
 )
 
 target_link_libraries(ommgui-uikit
-${UIKIT_LIBRARIES}
+${UIKit_LIBRARIES}
 )
 
 

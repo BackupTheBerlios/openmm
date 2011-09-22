@@ -67,9 +67,6 @@ Slider.cpp
 target_link_libraries(ommgui
 ${POCO_FOUNDATION}
 ${LIB_OMMGUI_PLATFORM}
-/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.2.sdk/System/Library/Frameworks/UIKit.framework/UIKit
-/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.2.sdk/System/Library/Frameworks/Foundation.framework/Foundation
-/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.2.sdk/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics
 )
 
 set(OMM_GUI
@@ -77,7 +74,7 @@ ommgui
 CACHE INTERNAL libommgui
 )
 
-install(TARGETS ommgui # ommupnpgui
+install(TARGETS ommgui
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
