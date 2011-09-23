@@ -64,7 +64,7 @@ LabelModel::setLabel(const std::string& label)
 LabelView::LabelView(View* pParent) :
 View(pParent, false)
 {
-    Omm::Gui::Log::instance()->gui().debug("Label view ctor.");
+//    Omm::Gui::Log::instance()->gui().debug("Label view ctor.");
     _pImpl = new LabelViewImpl(this);
 }
 
@@ -72,7 +72,7 @@ View(pParent, false)
 void
 LabelView::syncView(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
     LabelModel* pLabelModel = static_cast<LabelModel*>(pModel);
     LabelViewImpl* pImpl = static_cast<LabelViewImpl*>(_pImpl);
     pImpl->setLabel(pLabelModel->getLabel());

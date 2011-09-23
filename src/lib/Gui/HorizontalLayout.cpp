@@ -31,7 +31,7 @@ namespace Gui {
 void
 HorizontalLayout::layoutView()
 {
-    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view ...");
+//    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view ...");
 
     int childWidth = _pView->width() / _pView->childCount();
     int childHeight = _pView->height();
@@ -41,7 +41,7 @@ HorizontalLayout::layoutView()
         (*it)->move((it - _pView->beginChild()) * (*it)->width(), 0);
     }
 
-    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view finished.");
+//    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view finished.");
 }
 
 

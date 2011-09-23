@@ -70,7 +70,7 @@ Application* ApplicationImpl::_pApplication = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {
-    Omm::Gui::Log::instance()->gui().debug("application impl ctor");
+//    Omm::Gui::Log::instance()->gui().debug("application impl ctor");
 
     _pApplication = pApplication;
 }

@@ -39,7 +39,7 @@ namespace Gui {
 Application::Application() :
 _pImpl(new ApplicationImpl(this))
 {
-    Omm::Gui::Log::instance()->gui().debug("application ctor.");
+//    Omm::Gui::Log::instance()->gui().debug("application ctor.");
 }
 
 

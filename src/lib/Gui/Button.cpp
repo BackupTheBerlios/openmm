@@ -64,7 +64,7 @@ ButtonModel::setLabel(const std::string& label)
 ButtonView::ButtonView(View* pParent) :
 View(pParent, false)
 {
-    Omm::Gui::Log::instance()->gui().debug("button view ctor.");
+//    Omm::Gui::Log::instance()->gui().debug("button view ctor.");
     _pImpl = new ButtonViewImpl(this);
 }
 
@@ -72,7 +72,7 @@ View(pParent, false)
 void
 ButtonView::syncView(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
     ButtonModel* pButtonModel = static_cast<ButtonModel*>(pModel);
     ButtonViewImpl* pImpl = static_cast<ButtonViewImpl*>(_pImpl);
     pImpl->setLabel(pButtonModel->getLabel());

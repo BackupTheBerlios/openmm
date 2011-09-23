@@ -68,7 +68,7 @@
 
 - (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
 {
-    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView initWithImpl ...");
+//    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView initWithImpl ...");
     if (self = [super init]) {
         _pViewImpl = pImpl;
     }
@@ -78,7 +78,7 @@
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView touch began");
+//    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView touch began");
     _pViewImpl->selected();
 }
 
@@ -91,7 +91,7 @@ namespace Gui {
 
 ViewImpl::~ViewImpl()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
+//    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
 //    delete _pNativeView;
 }
 
@@ -99,20 +99,20 @@ ViewImpl::~ViewImpl()
 void
 ViewImpl::initViewImpl(View* pView, void* pNative)
 {
-    Omm::Gui::Log::instance()->gui().debug("init view impl view: " + Poco::NumberFormatter::format(pView) + ", native: " + Poco::NumberFormatter::format(pNative));
+//    Omm::Gui::Log::instance()->gui().debug("init view impl view: " + Poco::NumberFormatter::format(pView) + ", native: " + Poco::NumberFormatter::format(pNative));
 
     _pView = pView;
 
     UIView* pNativeView;
     UIViewController* pNativeViewController;
     if ([static_cast<NSObject*>(pNative) isKindOfClass:[UIView class]]) {
-        Omm::Gui::Log::instance()->gui().debug("init view impl native is of type UIView");
+//        Omm::Gui::Log::instance()->gui().debug("init view impl native is of type UIView");
         pNativeView = static_cast<UIView*>(pNative);
         pNativeViewController = [[UIViewController alloc] init];
         pNativeViewController.view = pNativeView;
     }
     else if ([static_cast<NSObject*>(pNative) isKindOfClass:[UIViewController class]]) {
-        Omm::Gui::Log::instance()->gui().debug("init view impl native is of type UIViewController");
+//        Omm::Gui::Log::instance()->gui().debug("init view impl native is of type UIViewController");
         pNativeViewController = static_cast<UIViewController*>(pNative);
         pNativeView = pNativeViewController.view;
     }
@@ -132,14 +132,14 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
     _pNativeView = pNativeViewController.view;
     _pNativeViewController = pNativeViewController;
 
-    Omm::Gui::Log::instance()->gui().debug("init view impl view finished.");
+//    Omm::Gui::Log::instance()->gui().debug("init view impl view finished.");
 }
 
 
 View*
 ViewImpl::getView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl get view: " + Poco::NumberFormatter::format(_pView));
+//    Omm::Gui::Log::instance()->gui().debug("view impl get view: " + Poco::NumberFormatter::format(_pView));
     return _pView;
 }
 
@@ -147,7 +147,7 @@ ViewImpl::getView()
 void*
 ViewImpl::getNativeView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
+//    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
 
     return _pNativeView;
 }
@@ -156,7 +156,7 @@ ViewImpl::getNativeView()
 void*
 ViewImpl::getNativeViewController()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl get native view controller: " + Poco::NumberFormatter::format(_pNativeViewController));
+//    Omm::Gui::Log::instance()->gui().debug("view impl get native view controller: " + Poco::NumberFormatter::format(_pNativeViewController));
 
     return _pNativeViewController;
 }
@@ -165,7 +165,7 @@ ViewImpl::getNativeViewController()
 void
 ViewImpl::setNativeView(void* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl set native view: " + Poco::NumberFormatter::format(pView));
+//    Omm::Gui::Log::instance()->gui().debug("view impl set native view: " + Poco::NumberFormatter::format(pView));
     _pNativeView = pView;
 }
 
@@ -173,25 +173,25 @@ ViewImpl::setNativeView(void* pView)
 void
 ViewImpl::showView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+//    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
 //    static_cast<UIView*>(_pNativeView).hidden = NO;
-    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
 
 void
 ViewImpl::hideView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+//    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
 //    static_cast<UIView*>(_pNativeView).hidden = YES;
-    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 
 
 int
 ViewImpl::widthView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl width.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl width.");
 
     return static_cast<UIView*>(getNativeView()).frame.size.width;
 }
@@ -200,7 +200,7 @@ ViewImpl::widthView()
 int
 ViewImpl::heightView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl height.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl height.");
     return static_cast<UIView*>(getNativeView()).frame.size.height;
 }
 
@@ -208,7 +208,7 @@ ViewImpl::heightView()
 void
 ViewImpl::resizeView(int width, int height)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl resize.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl resize.");
     CGRect frame = static_cast<UIView*>(getNativeView()).frame;
     frame.size.width = width;
     frame.size.height = height;
@@ -219,7 +219,7 @@ ViewImpl::resizeView(int width, int height)
 void
 ViewImpl::moveView(int x, int y)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl move.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl move.");
     CGRect frame = static_cast<UIView*>(getNativeView()).frame;
     frame.origin.x = x;
     frame.origin.y = y;
@@ -230,7 +230,7 @@ ViewImpl::moveView(int x, int y)
 void
 ViewImpl::selected()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl selected event.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl selected event.");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
@@ -245,7 +245,7 @@ ViewImpl::setBackgroundColor(const Color& color)
 
 PlainViewImpl::PlainViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("plain view impl ctor.");
+//    Omm::Gui::Log::instance()->gui().debug("plain view impl ctor.");
     OmmGuiPlainView* pNativeView = [[OmmGuiPlainView alloc] initWithImpl:this];
     pNativeView.backgroundColor = [UIColor whiteColor];
 

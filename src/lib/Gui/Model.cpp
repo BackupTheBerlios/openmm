@@ -31,21 +31,21 @@ namespace Gui {
 void
 Model::attachView(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("model attach view ...");
+//    Omm::Gui::Log::instance()->gui().debug("model attach view ...");
     _views.push_back(pView);
-    Omm::Gui::Log::instance()->gui().debug("model attach view finished.");
+//    Omm::Gui::Log::instance()->gui().debug("model attach view finished.");
 }
 
 
 void
 Model::detachView(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("model detach view ...");
+//    Omm::Gui::Log::instance()->gui().debug("model detach view ...");
     ViewIterator pos = std::find(beginView(), endView(), pView);
     if (pos != _views.end()) {
         _views.erase(pos);
     }
-    Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
+//    Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
 }
 
 

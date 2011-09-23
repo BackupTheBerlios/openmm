@@ -40,7 +40,7 @@ namespace Gui {
 
 View::View(View* pParent)
 {
-    Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
+//    Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
 
     initView(pParent);
     _pImpl = new PlainViewImpl(this);
@@ -49,7 +49,7 @@ View::View(View* pParent)
 
 View::View(View* pParent, bool createPlainView)
 {
-    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
+//    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
 
     initView(pParent);
     if (createPlainView) {
@@ -74,7 +74,7 @@ View::initView(View* pParent)
     _pLayout = 0;
 
     if (_pParent) {
-        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
+//        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
         _pParent->_children.push_back(this);
     }
 }
@@ -83,7 +83,7 @@ View::initView(View* pParent)
 void*
 View::getNativeView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+//    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
     return _pImpl->getNativeView();
 }
 
@@ -91,7 +91,7 @@ View::getNativeView()
 View*
 View::getParent()
 {
-    Omm::Gui::Log::instance()->gui().debug("view get parent: " + Poco::NumberFormatter::format(_pParent));
+//    Omm::Gui::Log::instance()->gui().debug("view get parent: " + Poco::NumberFormatter::format(_pParent));
     return _pParent;
 }
 
@@ -99,16 +99,16 @@ View::getParent()
 void
 View::show()
 {
-    Omm::Gui::Log::instance()->gui().debug("view show ... " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("view show ... " + getName());
     _pImpl->showView();
-    Omm::Gui::Log::instance()->gui().debug("view show finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view show finished.");
 }
 
 
 void
 View::hide()
 {
-    Omm::Gui::Log::instance()->gui().debug("view hide.");
+//    Omm::Gui::Log::instance()->gui().debug("view hide.");
     _pImpl->hideView();
 }
 
@@ -141,7 +141,7 @@ View::resize(int width, int height)
 void
 View::move(int x, int y)
 {
-    Omm::Gui::Log::instance()->gui().debug("view move: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+//    Omm::Gui::Log::instance()->gui().debug("view move: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
     _pImpl->moveView(x, y);
 }
 
@@ -156,7 +156,7 @@ View::getModel() const
 void
 View::setModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("view set model: " + Poco::NumberFormatter::format(pModel));
+//    Omm::Gui::Log::instance()->gui().debug("view set model: " + Poco::NumberFormatter::format(pModel));
     if (_pModel) {
         // if there was a model attached previously, detach this view from it
         for(ControllerIterator it = beginController(); it != endController(); ++it) {

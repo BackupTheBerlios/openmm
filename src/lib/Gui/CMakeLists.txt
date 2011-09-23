@@ -51,7 +51,7 @@ View.cpp
 Model.cpp
 Controller.cpp
 Application.cpp
-Layout.cpp
+#Layout.cpp
 HorizontalLayout.cpp
 Label.cpp
 Button.cpp

@@ -42,7 +42,7 @@
 
 - (id)initWithImpl:(Omm::Gui::ListViewImpl*)pImpl
 {
-    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl ...");
+//    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl ...");
     if (self = [super init]) {
         self.delegate = self;
         _pListViewImpl = pImpl;
@@ -72,11 +72,11 @@ namespace Gui {
 
 ListViewImpl::ListViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl ctor ...");
+//    Omm::Gui::Log::instance()->gui().debug("list view impl ctor ...");
     
     OmmGuiListView* pNativeView = [[OmmGuiListView alloc] initWithImpl:this];
     initViewImpl(pView, pNativeView);
-    Omm::Gui::Log::instance()->gui().debug("list view impl ctor finished.");
+//    Omm::Gui::Log::instance()->gui().debug("list view impl ctor finished.");
 }
 
 
@@ -92,7 +92,7 @@ ListViewImpl::visibleRows()
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = pNativeView.frame.size.height / pListView->_itemViewHeight + 2;
-    Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -111,7 +111,7 @@ ListViewImpl::addItemView(View* pView)
 void
 ListViewImpl::moveItemView(int row, View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
     ListView* pListView =  static_cast<ListView*>(_pView);
     pView->move(0, pListView->_itemViewHeight * row);
 }
@@ -125,6 +125,7 @@ ListViewImpl::updateScrollWidgetSize()
     ListView* pListView =  static_cast<ListView*>(_pView);
     ListModel* pListModel = static_cast<ListModel*>(_pView->getModel());
     pNativeView.contentSize = CGSizeMake(pNativeView.frame.size.width, pListModel->totalItemCount() * pListView->_itemViewHeight);
+    Omm::Gui::Log::instance()->gui().debug("list view impl update scroll widget size (rows): " + Poco::NumberFormatter::format(pListModel->totalItemCount()));
 }
 
 

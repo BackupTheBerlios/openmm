@@ -56,6 +56,9 @@ LazyListView::setModel(LazyListModel* pModel)
     View::setModel(pModel);
 
     int rows = visibleRows();
+    Log::instance()->gui().debug("std::min(" + Poco::NumberFormatter::format(pModel->totalItemCount()) + ", " +
+                                                Poco::NumberFormatter::format(rows) + ") = " +
+                                                Poco::NumberFormatter::format(std::min(pModel->totalItemCount(), rows)));
     int rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
     extendViewPool(rows);
 

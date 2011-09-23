@@ -117,7 +117,7 @@ ListView::visibleRows()
 void
 ListView::addItemView(View* pView)
 {
-    Log::instance()->gui().debug("list view init view.");
+//    Log::instance()->gui().debug("list view add item view.");
     static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
 }
 
@@ -146,7 +146,7 @@ ListView::updateScrollWidgetSize()
 void
 ListView::scrollDelta(int rowDelta)
 {
-   Log::instance()->gui().debug("list scroll delta view");
+//   Log::instance()->gui().debug("list scroll delta view");
     
    ListModel* pModel = static_cast<ListModel*>(_pModel);
    if (rowDelta > 0) {
@@ -204,7 +204,7 @@ ListView::scrolledToRow(int rowOffset)
 
     int rowDeltaAbsolute = std::abs(rowDelta);
 
-    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+//    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         scrollDelta(rowDelta);
     }
@@ -260,25 +260,25 @@ ListView::extendViewPool(int n)
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     for (int i = 0; i < n; ++i) {
-        Log::instance()->gui().debug("list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
+//        Log::instance()->gui().debug("list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
         View* pView = pModel->createItemView();
         if (!pView) {
             Log::instance()->gui().error("list view failed to create view for pool (ignoring)");
             return;
         }
-        Log::instance()->gui().debug("list view extend view created item view " + pView->getName());
+//        Log::instance()->gui().debug("list view extend view created item view " + pView->getName());
         pView->hide();
         _viewPool.push_back(pView);
         _freeViews.push(pView);
         addItemView(pView);
 
-        Log::instance()->gui().debug("list view creating list item controller ...");
+//        Log::instance()->gui().debug("list view creating list item controller ...");
         ListItemController* pItemController = new ListItemController;
         pItemController->_pListView = this;
         _itemControllers[pView] = pItemController;
         pView->attachController(pItemController);
 
-        Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
+//        Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
 

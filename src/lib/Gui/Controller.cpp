@@ -32,21 +32,21 @@ namespace Gui {
 void
 Controller::attachModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("controller attach model ...");
+//    Omm::Gui::Log::instance()->gui().debug("controller attach model ...");
     _models.push_back(pModel);
-    Omm::Gui::Log::instance()->gui().debug("controller attach model finished.");
+//    Omm::Gui::Log::instance()->gui().debug("controller attach model finished.");
 }
 
 
 void
 Controller::detachModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("controller detach model ...");
+//    Omm::Gui::Log::instance()->gui().debug("controller detach model ...");
     ModelIterator pos = std::find(beginModel(), beginModel(), pModel);
     if (pos != _models.end()) {
         _models.erase(pos);
     }
-    Omm::Gui::Log::instance()->gui().debug("controller detach model finished.");
+//    Omm::Gui::Log::instance()->gui().debug("controller detach model finished.");
 }
 
 

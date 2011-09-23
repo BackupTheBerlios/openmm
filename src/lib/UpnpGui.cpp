@@ -358,7 +358,7 @@ MediaContainerWidget::fetch(int rowCount, bool forward)
     if (!forward) {
         return 0;
     }
-    _pObjectModel->fetchChildren(rowCount);
+    return _pObjectModel->fetchChildren(rowCount);
 }
 
 

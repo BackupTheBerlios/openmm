@@ -47,7 +47,7 @@
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl touch began");
+//    Omm::Gui::Log::instance()->gui().debug("button view impl touch began");
     _pButtonViewImpl->pushed();
     [super touchesBegan:touches withEvent:event];
 }
@@ -61,7 +61,7 @@ namespace Gui {
 
 ButtonViewImpl::ButtonViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
+//    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
 //    OmmGuiButton* pNativeView = [[OmmGuiButton buttonWithType:UIButtonTypeRoundedRect] init];
     OmmGuiButton* pNativeView = [[OmmGuiButton alloc] init];
     pNativeView.backgroundColor = [UIColor yellowColor];
@@ -80,7 +80,7 @@ ButtonViewImpl::~ButtonViewImpl()
 void
 ButtonViewImpl::setLabel(const std::string& label)
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl set label");
+//    Omm::Gui::Log::instance()->gui().debug("button view impl set label");
     NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
     [static_cast<UIButton*>(_pNativeView) setTitle:pLabel forState:UIControlStateNormal];
 }
@@ -89,7 +89,7 @@ ButtonViewImpl::setLabel(const std::string& label)
 void
 ButtonViewImpl::pushed()
 {
-    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
+//    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
     IMPL_NOTIFY_CONTROLLER(ButtonController, pushed);
 }
