@@ -29,11 +29,13 @@ namespace Omm {
 namespace Gui {
 
 
-ButtonViewImpl::ButtonViewImpl(View* pView, View* pParent) :
-ViewImpl(pView, new QPushButton(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
+ButtonViewImpl::ButtonViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
-    connect(_pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
+    QPushButton* pNativeView = new QPushButton;
+    connect(pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
+
+    initViewImpl(pView, pNativeView);
 }
 
 

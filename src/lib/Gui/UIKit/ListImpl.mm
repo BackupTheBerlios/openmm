@@ -46,7 +46,7 @@
     if (self = [super init]) {
         self.delegate = self;
         _pListViewImpl = pImpl;
-        self.backgroundColor = [UIColor blueColor];
+//        self.backgroundColor = [UIColor blueColor];
     }
     return self;
 }

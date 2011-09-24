@@ -40,7 +40,7 @@ private slots:
     void pushed();
 
 private:
-    ButtonViewImpl(View* pView, View* pParent = 0);
+    ButtonViewImpl(View* pView);
     ~ButtonViewImpl();
 
     void setLabel(const std::string& label);

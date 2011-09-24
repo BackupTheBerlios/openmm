@@ -21,49 +21,35 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "SliderImpl.h"
-#include "Gui/Slider.h"
+#include "ColorImpl.h"
+#include "Gui/Color.h"
 #include "Gui/GuiLogger.h"
+
 
 namespace Omm {
 namespace Gui {
 
 
-SliderViewImpl::SliderViewImpl(View* pView)
+ColorImpl::ColorImpl(const std::string& colorName)
 {
-    QSlider* pNativeView = new QSlider;
+    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
 
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-    pNativeView->setOrientation(Qt::Horizontal);
-    pNativeView->setTracking(true);
-    pNativeView->setSingleStep(5);
-    pNativeView->setPageStep(25);
-    pNativeView->setValue(0);
-    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
-
-    initViewImpl(pView, pNativeView);
+    if (colorName == "white") {
+        _pQtColor = new QColor(255, 255, 255, 255);
+    }
+    else if (colorName == "blue") {
+        _pQtColor = new QColor(0, 0, 255, 255);
+    }
+    else if (colorName == "lightBlue") {
+        _pQtColor = new QColor(128, 204, 255, 255);
+    }
 }
 
 
-SliderViewImpl::~SliderViewImpl()
+QColor*
+ColorImpl::getNativeColor() const
 {
-}
-
-
-void
-SliderViewImpl::setValue(int value)
-{
-    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
-
-    pNativeView->setValue(value);
-}
-
-
-void
-SliderViewImpl::valueChangedSlot(int value)
-{
-    Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
-    IMPL_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
+    return _pQtColor;
 }
 
 

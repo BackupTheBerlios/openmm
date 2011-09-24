@@ -64,7 +64,7 @@ ButtonViewImpl::ButtonViewImpl(View* pView)
 //    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
 //    OmmGuiButton* pNativeView = [[OmmGuiButton buttonWithType:UIButtonTypeRoundedRect] init];
     OmmGuiButton* pNativeView = [[OmmGuiButton alloc] init];
-    pNativeView.backgroundColor = [UIColor yellowColor];
+//    pNativeView.backgroundColor = [UIColor yellowColor];
     [pNativeView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [pNativeView setImpl:this];
 

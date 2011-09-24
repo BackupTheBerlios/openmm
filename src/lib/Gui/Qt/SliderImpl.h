@@ -40,7 +40,7 @@ private slots:
     void valueChangedSlot(int value);
 
 private:
-    SliderViewImpl(View* pView, View* pParent = 0);
+    SliderViewImpl(View* pView);
     ~SliderViewImpl();
 
     void setValue(int value);

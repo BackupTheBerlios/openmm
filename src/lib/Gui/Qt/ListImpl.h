@@ -40,7 +40,7 @@ class ListViewImpl : public ViewImpl
     friend class QtScrollArea;
 
 public:
-    ListViewImpl(View* pView, View* pParent = 0);
+    ListViewImpl(View* pView);
     virtual ~ListViewImpl();
 
 protected:

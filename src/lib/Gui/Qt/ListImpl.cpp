@@ -48,11 +48,9 @@ class QtScrollArea : public QScrollArea
 };
 
 
-ListViewImpl::ListViewImpl(View* pView, View* pParent) :
-ViewImpl(pView, new QtScrollArea(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0))),
-_pScrollWidget(0)
+ListViewImpl::ListViewImpl(View* pView)
 {
-    QtScrollArea* pNativeView = static_cast<QtScrollArea*>(_pNativeView);
+    QtScrollArea* pNativeView = new QtScrollArea;
     pNativeView->_pListViewImpl = this;
 
     _pScrollWidget = new QWidget;
@@ -65,6 +63,8 @@ _pScrollWidget(0)
 
     connect(this, SIGNAL(moveWidgetSignal(int, View*)), this, SLOT(moveWidgetSlot(int, View*)));
     connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledSlot(int)));
+
+    initViewImpl(pView, pNativeView);
 }
 
 

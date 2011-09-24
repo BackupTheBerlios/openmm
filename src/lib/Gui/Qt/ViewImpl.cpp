@@ -29,30 +29,28 @@ namespace Omm {
 namespace Gui {
 
 
-ViewImpl::ViewImpl(View* pView) :
-_pNativeView(new NativeView(this, pView->getParent())),
-_pView(pView)
-{
-    Omm::Gui::Log::instance()->gui().debug("view impl ctor (view).");
-    connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
-}
-
-
-ViewImpl::ViewImpl(View* pView, QWidget* pNativeView) :
-_pView(pView),
-_pNativeView(pNativeView)
-{
-    Omm::Gui::Log::instance()->gui().debug("view impl ctor view: " + Poco::NumberFormatter::format(_pView) + ", native view: " + Poco::NumberFormatter::format(_pNativeView));
-    if (pNativeView) {
-        connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
-    }
-}
-
-
 ViewImpl::~ViewImpl()
 {
     Omm::Gui::Log::instance()->gui().debug("view impl dtor");
 //    delete _pNativeView;
+}
+
+
+void
+ViewImpl::initViewImpl(View* pView, QWidget* pNative)
+{
+    _pView = pView;
+    _pNativeView = pNative;
+    connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
+    
+    if (pView->getParent()) {
+        QWidget* pParentWidget = static_cast<QWidget*>(pView->getParent()->getNativeView());
+        _pNativeView->resize(pParentWidget->size());
+        _pNativeView->setParent(pParentWidget);
+    }
+    else {
+        _pNativeView->resize(250, 400);
+    }
 }
 
 
@@ -138,21 +136,26 @@ ViewImpl::selected()
 }
 
 
-NativeView::NativeView(ViewImpl* pViewImpl, View* pParent) :
-QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-_pViewImpl(pViewImpl)
+void
+ViewImpl::setBackgroundColor(const Color& color)
 {
-    Omm::Gui::Log::instance()->gui().debug("native view impl ctor.");
+//    _pNativeView->setPalette(QPalette(*static_cast<QColor*>(color.getNativeColor())));
+//    _pNativeView->setAutoFillBackground(true);
+}
+
+
+PlainViewImpl::PlainViewImpl(View* pView)
+{
+    initViewImpl(pView, this);
 }
 
 
 void
-NativeView::mousePressEvent(QMouseEvent* pMouseEvent)
+PlainViewImpl::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    _pViewImpl->selected();
+    selected();
     QWidget::mousePressEvent(pMouseEvent);
 }
-
 
 }  // namespace Omm
 }  // namespace Gui

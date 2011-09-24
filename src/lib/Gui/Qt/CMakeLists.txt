@@ -3,8 +3,10 @@ QtGui.qrc
 )
 
 set(OMMGUI_QT_SRC
+ColorImpl.cpp
 ViewImpl.cpp
 ApplicationImpl.cpp
+LabelImpl.cpp
 ButtonImpl.cpp
 ListImpl.cpp
 ListItemImpl.cpp

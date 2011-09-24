@@ -21,51 +21,33 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "SliderImpl.h"
-#include "Gui/Slider.h"
+#include "LabelImpl.h"
+#include "Gui/Label.h"
 #include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
 
-SliderViewImpl::SliderViewImpl(View* pView)
+LabelViewImpl::LabelViewImpl(View* pView)
 {
-    QSlider* pNativeView = new QSlider;
-
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-    pNativeView->setOrientation(Qt::Horizontal);
-    pNativeView->setTracking(true);
-    pNativeView->setSingleStep(5);
-    pNativeView->setPageStep(25);
-    pNativeView->setValue(0);
-    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
+    Omm::Gui::Log::instance()->gui().debug("label view impl ctor");
+    QLabel* pNativeView = new QLabel;
 
     initViewImpl(pView, pNativeView);
 }
 
 
-SliderViewImpl::~SliderViewImpl()
+LabelViewImpl::~LabelViewImpl()
 {
 }
 
 
 void
-SliderViewImpl::setValue(int value)
+LabelViewImpl::setLabel(const std::string& label)
 {
-    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
-
-    pNativeView->setValue(value);
+    static_cast<QLabel*>(_pNativeView)->setText(QString::fromStdString(label));
 }
-
-
-void
-SliderViewImpl::valueChangedSlot(int value)
-{
-    Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
-    IMPL_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
-}
-
 
 }  // namespace Omm
 }  // namespace Gui

@@ -27,7 +27,6 @@
 namespace Omm {
 namespace Gui {
 
-class NativeView;
 
 class ViewImpl
 {

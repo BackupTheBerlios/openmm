@@ -19,53 +19,30 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
+#ifndef ColorImpl_INCLUDED
+#define ColorImpl_INCLUDED
 
-#include "SliderImpl.h"
-#include "Gui/Slider.h"
-#include "Gui/GuiLogger.h"
+#include <QtGui>
+
 
 namespace Omm {
 namespace Gui {
 
 
-SliderViewImpl::SliderViewImpl(View* pView)
+class ColorImpl
 {
-    QSlider* pNativeView = new QSlider;
+public:
+    ColorImpl(const std::string& colorName);
 
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-    pNativeView->setOrientation(Qt::Horizontal);
-    pNativeView->setTracking(true);
-    pNativeView->setSingleStep(5);
-    pNativeView->setPageStep(25);
-    pNativeView->setValue(0);
-    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
+    QColor* getNativeColor() const;
 
-    initViewImpl(pView, pNativeView);
-}
-
-
-SliderViewImpl::~SliderViewImpl()
-{
-}
-
-
-void
-SliderViewImpl::setValue(int value)
-{
-    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
-
-    pNativeView->setValue(value);
-}
-
-
-void
-SliderViewImpl::valueChangedSlot(int value)
-{
-    Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
-    IMPL_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
-}
+private:
+    QColor*   _pQtColor;
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif
+

@@ -34,7 +34,9 @@ namespace Gui {
 
 
 ApplicationImpl::ApplicationImpl(Application* pApplication) :
-_pApplication(pApplication)
+_pApplication(pApplication),
+_width(800),
+_height(480)
 {
     Omm::Gui::Log::instance()->gui().debug("application impl ctor");
 }

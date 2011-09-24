@@ -30,13 +30,9 @@ namespace Omm {
 namespace Gui {
 
 
-ListItemImpl::ListItemImpl(View* pView, View* pParent) :
-//ViewImpl(pView, new QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)))
-QWidget(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
-ViewImpl(pView, this)
+ListItemImpl::ListItemImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
-//    _pLayout = new QHBoxLayout(_pNativeView);
     _pLayout = new QHBoxLayout(this);
     _pNameLabel = new QLabel;
     _pLayout->addWidget(_pNameLabel);
@@ -47,6 +43,8 @@ ViewImpl(pView, this)
 //    _pNativeView->setAutoFillBackground(true);
     QWidget::setPalette(QPalette(Qt::white));
     QWidget::setAutoFillBackground(true);
+
+    initViewImpl(pView, this);
 }
 
 
@@ -61,16 +59,6 @@ ListItemImpl::setLabel(const std::string& text)
 {
     _pNameLabel->setText(QString::fromStdString(text));
 }
-
-
-void
-ListItemImpl::mousePressEvent(QMouseEvent* pMouseEvent)
-{
-    selected();
-    QWidget::mousePressEvent(pMouseEvent);
-}
-
-
 
 
 }  // namespace Omm

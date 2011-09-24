@@ -36,13 +36,11 @@ class ListItemImpl : public QWidget, public ViewImpl
     friend class ListItemView;
 
 private:
-    ListItemImpl(View* pView, View* pParent = 0);
+    ListItemImpl(View* pView);
     ~ListItemImpl();
 
     void setLabel(const std::string& text);
 
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-    
     QHBoxLayout*                    _pLayout;
     QLabel*                         _pNameLabel;
 };

@@ -27,11 +27,11 @@ namespace Omm {
 namespace Gui {
 
 
-TabViewImpl::TabViewImpl(View* pView, View* pParent) :
-QTabWidget(static_cast<QWidget*>(pParent? pParent->getNativeView() : 0)),
-ViewImpl(pView, this)
+TabViewImpl::TabViewImpl(View* pView) 
 {
     Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
+
+    initViewImpl(pView, this);
 }
 
 

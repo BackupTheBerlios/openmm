@@ -28,8 +28,6 @@
 namespace Omm {
 namespace Gui {
 
-class NativeView;
-
 
 class ViewImpl : public QObject
 {
@@ -38,7 +36,6 @@ class ViewImpl : public QObject
     friend class View;
     
 public:
-    ViewImpl(View* pView);
     virtual ~ViewImpl();
 
     View* getView();
@@ -51,9 +48,10 @@ public:
     virtual void resizeView(int width, int height);
     virtual void moveView(int x, int y);
     virtual void selected();
- 
+    void setBackgroundColor(const Color& color);
+
 protected:
-    ViewImpl(View* pView, QWidget* pNativeWidget);
+    void initViewImpl(View* pView, QWidget* pNative);
 
     View*                       _pView;
     QWidget*                    _pNativeView;
@@ -63,16 +61,12 @@ signals:
 };
 
 
-class NativeView : public QWidget
+class PlainViewImpl : public QWidget, public ViewImpl
 {
-    friend class ViewImpl;
-
 public:
-    NativeView(ViewImpl* pViewImpl, View* pParent = 0);
+    PlainViewImpl(View* pView);
 
     virtual void mousePressEvent(QMouseEvent* pMouseEvent);
-
-    ViewImpl*                 _pViewImpl;
 };
 
 

@@ -19,53 +19,31 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
+#ifndef LabelImpl_INCLUDED
+#define LabelImpl_INCLUDED
 
-#include "SliderImpl.h"
-#include "Gui/Slider.h"
-#include "Gui/GuiLogger.h"
+#include <QtGui>
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
+class View;
 
-SliderViewImpl::SliderViewImpl(View* pView)
+class LabelViewImpl : public ViewImpl
 {
-    QSlider* pNativeView = new QSlider;
+    friend class LabelView;
 
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
-    pNativeView->setOrientation(Qt::Horizontal);
-    pNativeView->setTracking(true);
-    pNativeView->setSingleStep(5);
-    pNativeView->setPageStep(25);
-    pNativeView->setValue(0);
-    connect(pNativeView, SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
+private:
+    LabelViewImpl(View* pView);
+    ~LabelViewImpl();
 
-    initViewImpl(pView, pNativeView);
-}
-
-
-SliderViewImpl::~SliderViewImpl()
-{
-}
-
-
-void
-SliderViewImpl::setValue(int value)
-{
-    QSlider* pNativeView = static_cast<QSlider*>(_pNativeView);
-
-    pNativeView->setValue(value);
-}
-
-
-void
-SliderViewImpl::valueChangedSlot(int value)
-{
-    Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
-    IMPL_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
-}
+    void setLabel(const std::string& label);
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif
+
