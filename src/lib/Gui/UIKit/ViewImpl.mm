@@ -79,7 +79,7 @@
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
 //    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView touch began");
-    _pViewImpl->setSelected(true);
+    _pViewImpl->selected();
 }
 
 @end
@@ -228,16 +228,21 @@ ViewImpl::moveView(int x, int y)
 
 
 void
-ViewImpl::setSelected(bool selected)
+ViewImpl::selected()
 {
+    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
 
-    if (selected) {
-        Omm::Gui::Log::instance()->gui().debug("view impl set selected.");
+
+void
+ViewImpl::setHighlighted(bool highlighted)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
+    if (highlighted) {
         static_cast<UIView*>(getNativeView()).backgroundColor = [UIColor colorWithRed:0.5 green:0.8 blue:1.0 alpha:1.0];
-        IMPL_NOTIFY_CONTROLLER(Controller, selected);
     }
     else {
-        Omm::Gui::Log::instance()->gui().debug("view impl set unselected.");
         static_cast<UIView*>(getNativeView()).backgroundColor = [UIColor whiteColor];
     }
 }
