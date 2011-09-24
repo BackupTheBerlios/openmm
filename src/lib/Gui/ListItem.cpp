@@ -66,6 +66,13 @@ ListItemView::syncView(Model* pModel)
 }
 
 
+void
+ListItemView::setSelected(bool selected)
+{
+    Omm::Gui::Log::instance()->gui().debug("list item view set selected: " + (selected ? std::string("true") : std::string("false")));
+    _pLabel->setSelected(selected);
+}
+
 //void
 //ListItemController::selected()
 //{

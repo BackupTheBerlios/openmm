@@ -261,6 +261,13 @@ View::setBackgroundColor(const Color& color)
 }
 
 
+void
+View::setSelected(bool selected)
+{
+    _pImpl->setSelected(selected);
+}
+
+
 ViewImpl*
 View::getViewImpl()
 {

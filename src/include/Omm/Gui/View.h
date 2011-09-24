@@ -90,6 +90,7 @@ public:
     ControllerIterator endController();
 
     void setBackgroundColor(const Color& color);
+    virtual void setSelected(bool selected = true);
 
     ViewImpl* getViewImpl();
 

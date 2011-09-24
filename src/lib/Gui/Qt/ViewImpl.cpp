@@ -129,16 +129,27 @@ ViewImpl::moveView(int x, int y)
 
 
 void
-ViewImpl::selected()
+ViewImpl::setSelected(bool selected)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl selected event.");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+    if (selected) {
+        Omm::Gui::Log::instance()->gui().debug("view impl set selected.");
+        _pNativeView->setBackgroundRole(QPalette::Highlight);
+//        _pNativeView->update();
+        IMPL_NOTIFY_CONTROLLER(Controller, selected);
+    }
+    else {
+        Omm::Gui::Log::instance()->gui().debug("view impl set unselected.");
+        _pNativeView->setBackgroundRole(QPalette::Window);
+    }
 }
 
 
 void
 ViewImpl::setBackgroundColor(const Color& color)
 {
+//    QColor* pColor = static_cast<QColor*>(color.getNativeColor());
+//    _pNativeView->setBackgroundRole(QPalette::Highlight);
+//    _pNativeView->setBackgroundRole(QApplication::palette()->color(QPalette::Highlight));
 //    _pNativeView->setPalette(QPalette(*static_cast<QColor*>(color.getNativeColor())));
 //    _pNativeView->setAutoFillBackground(true);
 }
@@ -153,7 +164,7 @@ PlainViewImpl::PlainViewImpl(View* pView)
 void
 PlainViewImpl::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    selected();
+    setSelected(true);
     QWidget::mousePressEvent(pMouseEvent);
 }
 

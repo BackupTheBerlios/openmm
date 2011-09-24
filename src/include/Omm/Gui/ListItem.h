@@ -59,6 +59,7 @@ public:
 
 private:
     virtual void syncView(Model* pModel);
+    virtual void setSelected(bool selected = true);
 
     Label*              _pLabel;
     HorizontalLayout*   _pLayout;

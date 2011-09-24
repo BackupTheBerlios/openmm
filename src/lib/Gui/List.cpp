@@ -332,13 +332,15 @@ ListView::selectedItem(int row)
     if (_lastSelectedRow >= 0) {
         View* pLastSelectedView = visibleView(visibleIndex(_lastSelectedRow));
         if (pLastSelectedView) {
-            pLastSelectedView->setBackgroundColor(Color("white"));
+//            pLastSelectedView->setBackgroundColor(Color("white"));
+            pLastSelectedView->setSelected(false);
         }
     }
 
     View* pSelectedView = visibleView(visibleIndex(row));
     if (pSelectedView) {
-        pSelectedView->setBackgroundColor(Color("lightBlue"));
+//        pSelectedView->setBackgroundColor(Color("lightBlue"));
+        pSelectedView->setSelected(true);
     }
     NOTIFY_CONTROLLER(ListController, selectedItem, row);
     _lastSelectedRow = row;
