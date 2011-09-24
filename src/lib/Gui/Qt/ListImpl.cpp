@@ -58,6 +58,7 @@ ListViewImpl::ListViewImpl(View* pView)
 //    _pNativeView->setBackgroundRole(QPalette(Qt::white));
 //    _pNativeView->setPalette(QPalette(Qt::white));
 //    _pNativeView->setAutoFillBackground(true);
+//    _pScrollWidget->setBackgroundRole(QPalette::Highlight);
 
     pNativeView->setWidget(_pScrollWidget);
 

@@ -46,7 +46,6 @@ public:
     void setRow(int row) { _row = row; }
 
 private:
-    virtual void selectedRow(int row);
     virtual void selected();
 
     ListView*     _pListView;
@@ -57,15 +56,8 @@ private:
 void
 ListItemController::selected()
 {
-    selectedRow(_row);
-}
-
-
-void
-ListItemController::selectedRow(int row)
-{
-    Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(row));
-    _pListView->selectedItem(row);
+    Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
+    _pListView->selectedItem(_row);
 }
 
 
@@ -333,14 +325,14 @@ ListView::selectedItem(int row)
         View* pLastSelectedView = visibleView(visibleIndex(_lastSelectedRow));
         if (pLastSelectedView) {
 //            pLastSelectedView->setBackgroundColor(Color("white"));
-            pLastSelectedView->setSelected(false);
+            pLastSelectedView->setHighlighted(false);
         }
     }
 
     View* pSelectedView = visibleView(visibleIndex(row));
     if (pSelectedView) {
 //        pSelectedView->setBackgroundColor(Color("lightBlue"));
-        pSelectedView->setSelected(true);
+        pSelectedView->setHighlighted(true);
     }
     NOTIFY_CONTROLLER(ListController, selectedItem, row);
     _lastSelectedRow = row;

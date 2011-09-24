@@ -32,14 +32,6 @@ namespace Gui {
 class Label;
 class HorizontalLayout;
 
-//class ListItemController : public Controller
-//{
-//protected:
-//
-//private:
-//    virtual void selected();
-//};
-
 
 class ListItemModel : public Model
 {
@@ -59,7 +51,7 @@ public:
 
 private:
     virtual void syncView(Model* pModel);
-    virtual void setSelected(bool selected = true);
+    virtual void setHighlighted(bool highlighted = true);
 
     Label*              _pLabel;
     HorizontalLayout*   _pLayout;

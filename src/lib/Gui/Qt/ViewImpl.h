@@ -47,7 +47,8 @@ public:
     virtual int heightView();
     virtual void resizeView(int width, int height);
     virtual void moveView(int x, int y);
-    virtual void setSelected(bool selected);
+    virtual void selected();
+    virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);
 
 protected:

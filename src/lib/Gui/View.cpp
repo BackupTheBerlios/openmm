@@ -262,9 +262,9 @@ View::setBackgroundColor(const Color& color)
 
 
 void
-View::setSelected(bool selected)
+View::setHighlighted(bool highlighted)
 {
-    _pImpl->setSelected(selected);
+    _pImpl->setHighlighted(highlighted);
 }
 
 

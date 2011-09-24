@@ -67,18 +67,11 @@ ListItemView::syncView(Model* pModel)
 
 
 void
-ListItemView::setSelected(bool selected)
+ListItemView::setHighlighted(bool highlighted)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item view set selected: " + (selected ? std::string("true") : std::string("false")));
-    _pLabel->setSelected(selected);
+    Omm::Gui::Log::instance()->gui().debug("list item view set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
+    _pLabel->setHighlighted(highlighted);
 }
-
-//void
-//ListItemController::selected()
-//{
-//    Omm::Gui::Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
-//}
-
 
 
 } // namespace Gui

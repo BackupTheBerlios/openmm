@@ -42,7 +42,8 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     _pView = pView;
     _pNativeView = pNative;
     connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
-    
+        _pNativeView->setBackgroundRole(QPalette::Highlight);
+
     if (pView->getParent()) {
         QWidget* pParentWidget = static_cast<QWidget*>(pView->getParent()->getNativeView());
         _pNativeView->resize(pParentWidget->size());
@@ -129,16 +130,22 @@ ViewImpl::moveView(int x, int y)
 
 
 void
-ViewImpl::setSelected(bool selected)
+ViewImpl::selected()
 {
-    if (selected) {
-        Omm::Gui::Log::instance()->gui().debug("view impl set selected.");
+    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+void
+ViewImpl::setHighlighted(bool highlighted)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
+    if (highlighted) {
         _pNativeView->setBackgroundRole(QPalette::Highlight);
 //        _pNativeView->update();
-        IMPL_NOTIFY_CONTROLLER(Controller, selected);
     }
     else {
-        Omm::Gui::Log::instance()->gui().debug("view impl set unselected.");
         _pNativeView->setBackgroundRole(QPalette::Window);
     }
 }
@@ -164,7 +171,7 @@ PlainViewImpl::PlainViewImpl(View* pView)
 void
 PlainViewImpl::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    setSelected(true);
+    selected();
     QWidget::mousePressEvent(pMouseEvent);
 }
 
