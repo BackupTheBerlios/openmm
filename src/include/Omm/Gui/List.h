@@ -89,7 +89,8 @@ protected:
     int                                 _rowOffset;
     int                                 _lastVisibleRows;
     int                                 _itemViewHeight;
-    int                                 _lastSelectedRow;
+    View*                               _pSelectedView;
+    int                                 _selectedRow;
 
 private:
     void selectedItem(int row);

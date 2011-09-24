@@ -52,6 +52,7 @@ ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
     _pLabel = new Label(this);
+    _pLabel->setBackgroundColor(Color("white"));
     _pLayout = new HorizontalLayout;
     setLayout(_pLayout);
 }

@@ -65,7 +65,8 @@ ListView::ListView(View* pParent) :
 View(pParent, false),
 _itemViewHeight(50),
 _rowOffset(0),
-_lastSelectedRow(-1)
+_pSelectedView(0),
+_selectedRow(-1)
 {
     _pImpl = new ListViewImpl(this);
 }
@@ -195,10 +196,20 @@ ListView::scrolledToRow(int rowOffset)
     }
 
     int rowDeltaAbsolute = std::abs(rowDelta);
-
 //    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         scrollDelta(rowDelta);
+    }
+
+    if (!_pSelectedView) {
+        return;
+    }
+    
+    if (itemIsVisible(_selectedRow)) {
+        _pSelectedView->setHighlighted(true);
+    }
+    else {
+        _pSelectedView->setHighlighted(false);
     }
 }
 
@@ -321,21 +332,19 @@ ListView::selectedItem(int row)
 {
     Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
 
-    if (_lastSelectedRow >= 0) {
-        View* pLastSelectedView = visibleView(visibleIndex(_lastSelectedRow));
-        if (pLastSelectedView) {
-//            pLastSelectedView->setBackgroundColor(Color("white"));
-            pLastSelectedView->setHighlighted(false);
-        }
+    if (_selectedRow >= 0 && itemIsVisible(_selectedRow)) {
+        View* pLastSelectedView = visibleView(visibleIndex(_selectedRow));
+        pLastSelectedView->setHighlighted(false);
     }
 
     View* pSelectedView = visibleView(visibleIndex(row));
     if (pSelectedView) {
-//        pSelectedView->setBackgroundColor(Color("lightBlue"));
         pSelectedView->setHighlighted(true);
+        _pSelectedView = pSelectedView;
+        _selectedRow = row;
+//        _selectedRow = row;
+        NOTIFY_CONTROLLER(ListController, selectedItem, row);
     }
-    NOTIFY_CONTROLLER(ListController, selectedItem, row);
-    _lastSelectedRow = row;
 }
 
 
