@@ -42,7 +42,6 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     _pView = pView;
     _pNativeView = pNative;
     connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
-        _pNativeView->setBackgroundRole(QPalette::Highlight);
 
     if (pView->getParent()) {
         QWidget* pParentWidget = static_cast<QWidget*>(pView->getParent()->getNativeView());
@@ -134,11 +133,14 @@ ViewImpl::setHighlighted(bool highlighted)
 {
     Omm::Gui::Log::instance()->gui().debug("view impl set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
     if (highlighted) {
-        _pNativeView->setBackgroundRole(QPalette::Highlight);
+//        _pNativeView->setBackgroundRole(QPalette::Highlight);
 //        _pNativeView->update();
+        _pNativeView->setPalette(QPalette(QColor(128, 204, 255, 255)));
+        _pNativeView->setAutoFillBackground(true);
     }
     else {
-        _pNativeView->setBackgroundRole(QPalette::Window);
+//        _pNativeView->setBackgroundRole(QPalette::Window);
+        _pNativeView->setPalette(QApplication::palette());
     }
 }
 

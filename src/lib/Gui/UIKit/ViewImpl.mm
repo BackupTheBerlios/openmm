@@ -174,7 +174,7 @@ void
 ViewImpl::showView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-//    static_cast<UIView*>(_pNativeView).hidden = NO;
+    static_cast<UIView*>(_pNativeView).hidden = NO;
 //    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
@@ -183,7 +183,7 @@ void
 ViewImpl::hideView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-//    static_cast<UIView*>(_pNativeView).hidden = YES;
+    static_cast<UIView*>(_pNativeView).hidden = YES;
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 
@@ -243,7 +243,6 @@ ViewImpl::setHighlighted(bool highlighted)
 void
 ViewImpl::setBackgroundColor(const Color& color)
 {
-//    static_cast<UIView*>(getNativeView()).backgroundColor = [UIColor blueColor];
     static_cast<UIView*>(getNativeView()).backgroundColor = static_cast<UIColor*>(color.getNativeColor());
 }
 
