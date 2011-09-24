@@ -276,6 +276,14 @@ View::getViewImpl()
 
 
 void
+View::selected()
+{
+    Omm::Gui::Log::instance()->gui().debug("view selected.");
+    NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+void
 View::syncViewWithModel(Model* pModel)
 {
     if (pModel) {

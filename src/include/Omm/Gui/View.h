@@ -93,6 +93,7 @@ public:
     virtual void setHighlighted(bool highlighted = true);
 
     ViewImpl* getViewImpl();
+    void selected();
 
 protected:
     View(View* pParent, bool createPlainView);

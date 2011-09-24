@@ -79,7 +79,7 @@
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
 //    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView touch began");
-    _pViewImpl->selected();
+    _pViewImpl->_pView->selected();
 }
 
 @end
@@ -224,14 +224,6 @@ ViewImpl::moveView(int x, int y)
     frame.origin.x = x;
     frame.origin.y = y;
     static_cast<UIView*>(getNativeView()).frame = frame;
-}
-
-
-void
-ViewImpl::selected()
-{
-    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
 

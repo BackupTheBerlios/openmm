@@ -45,14 +45,13 @@ public:
     virtual int heightView();
     virtual void resizeView(int width, int height);
     virtual void moveView(int x, int y);
-    virtual void selected();
     virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);
 
+    View*                       _pView;
 protected:
     void initViewImpl(View* pView, void* pNative);
 
-    View*                       _pView;
     void*                       _pNativeView;
     void*                       _pNativeViewController;
 };

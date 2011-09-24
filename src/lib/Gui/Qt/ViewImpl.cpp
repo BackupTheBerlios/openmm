@@ -130,14 +130,6 @@ ViewImpl::moveView(int x, int y)
 
 
 void
-ViewImpl::selected()
-{
-    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
-}
-
-
-void
 ViewImpl::setHighlighted(bool highlighted)
 {
     Omm::Gui::Log::instance()->gui().debug("view impl set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
@@ -171,7 +163,7 @@ PlainViewImpl::PlainViewImpl(View* pView)
 void
 PlainViewImpl::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    selected();
+    _pView->selected();
     QWidget::mousePressEvent(pMouseEvent);
 }
 
