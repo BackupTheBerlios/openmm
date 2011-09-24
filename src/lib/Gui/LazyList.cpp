@@ -99,6 +99,8 @@ LazyListView::scrolledToRow(int rowOffset)
     while (rowDeltaAbsolute--) {
         scrollDelta(rowDelta);
     }
+
+    handleSelectionHighlight();
 }
 
 

@@ -81,6 +81,7 @@ protected:
     View* visibleView(int index);
     bool itemIsVisible(int row);
     void moveViewToRow(int row, View* pView);
+    void handleSelectionHighlight();
 
     std::vector<View*>                  _viewPool;
     /// The view has a view pool which is large enough to fill the area of the view port

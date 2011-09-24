@@ -201,16 +201,7 @@ ListView::scrolledToRow(int rowOffset)
         scrollDelta(rowDelta);
     }
 
-    if (!_pSelectedView) {
-        return;
-    }
-    
-    if (itemIsVisible(_selectedRow)) {
-        _pSelectedView->setHighlighted(true);
-    }
-    else {
-        _pSelectedView->setHighlighted(false);
-    }
+    handleSelectionHighlight();
 }
 
 
@@ -328,6 +319,21 @@ ListView::moveViewToRow(int row, View* pView)
 
 
 void
+ListView::handleSelectionHighlight()
+{
+    if (!_pSelectedView) {
+        return;
+    }
+    if (itemIsVisible(_selectedRow)) {
+        _pSelectedView->setHighlighted(true);
+    }
+    else {
+        _pSelectedView->setHighlighted(false);
+    }
+}
+
+
+void
 ListView::selectedItem(int row)
 {
     Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
@@ -342,7 +348,6 @@ ListView::selectedItem(int row)
         pSelectedView->setHighlighted(true);
         _pSelectedView = pSelectedView;
         _selectedRow = row;
-//        _selectedRow = row;
         NOTIFY_CONTROLLER(ListController, selectedItem, row);
     }
 }
