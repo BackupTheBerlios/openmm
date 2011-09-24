@@ -31,7 +31,7 @@ namespace Gui {
 
 ViewImpl::~ViewImpl()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
+//    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
 //    delete _pNativeView;
 }
 
@@ -42,6 +42,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     _pView = pView;
     _pNativeView = pNative;
     connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
+    connect(this, SIGNAL(hideViewSignal()), _pNativeView, SLOT(hide()));
     _pNativeView->setAutoFillBackground(true);
 
     if (pView->getParent()) {
@@ -58,7 +59,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
 View*
 ViewImpl::getView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl get view: " + Poco::NumberFormatter::format(_pView));
+//    Omm::Gui::Log::instance()->gui().debug("view impl get view: " + Poco::NumberFormatter::format(_pView));
     return _pView;
 }
 
@@ -66,7 +67,7 @@ ViewImpl::getView()
 QWidget*
 ViewImpl::getNativeView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
+//    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
     return _pNativeView;
 }
 
@@ -74,7 +75,7 @@ ViewImpl::getNativeView()
 void
 ViewImpl::setNativeView(QWidget* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl set native view: " + Poco::NumberFormatter::format(pView));
+//    Omm::Gui::Log::instance()->gui().debug("view impl set native view: " + Poco::NumberFormatter::format(pView));
     _pNativeView = pView;
 }
 
@@ -82,25 +83,25 @@ ViewImpl::setNativeView(QWidget* pView)
 void
 ViewImpl::showView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+//    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
     emit showViewSignal();
-    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
 
 void
 ViewImpl::hideView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    _pNativeView->hide();
-    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+    emit hideViewSignal();
+//    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 
 
 int
 ViewImpl::widthView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl width.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl width.");
     return _pNativeView->width();
 }
 
@@ -108,7 +109,7 @@ ViewImpl::widthView()
 int
 ViewImpl::heightView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl height.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl height.");
     return _pNativeView->height();
 }
 
@@ -124,7 +125,7 @@ ViewImpl::resizeView(int width, int height)
 void
 ViewImpl::moveView(int x, int y)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl move.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl move.");
     _pNativeView->move(x, y);
 }
 

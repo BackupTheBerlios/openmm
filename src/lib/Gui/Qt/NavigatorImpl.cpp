@@ -60,6 +60,7 @@ QtNavigatorPanel::push(View* pView, const std::string name)
     pButton->setText(QString::fromStdString(name));
     connect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
     _pButtonLayout->addWidget(pButton);
+//    pView->resize(_pNavigatorView->widthView(), _pNavigatorView->heightView());
     _buttonStack.push(pButton);
 }
 

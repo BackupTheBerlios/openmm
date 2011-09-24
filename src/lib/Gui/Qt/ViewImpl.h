@@ -58,6 +58,7 @@ protected:
 
 signals:
     void showViewSignal();
+    void hideViewSignal();
 };
 
 
