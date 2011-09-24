@@ -85,6 +85,37 @@
 @end
 
 
+@interface OmmGuiViewSelectorDispatcher : NSObject
+{
+    Omm::Gui::ViewImpl* _pViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiViewSelectorDispatcher
+
+- (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
+{
+    if (self = [super init]) {
+        _pViewImpl = pImpl;
+    }
+    return self;
+}
+
+- (void)showView
+{
+    static_cast<UIView*>(_pViewImpl->getNativeView()).hidden = NO;
+}
+
+- (void)hideView
+{
+    static_cast<UIView*>(_pViewImpl->getNativeView()).hidden = YES;
+}
+
+@end
+
+
 namespace Omm {
 namespace Gui {
 
@@ -128,6 +159,8 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
 
 //    OmmGuiViewActionTarget* pActionTarget = [[OmmGuiViewActionTarget alloc] initWithImpl:this];
 //    [pNativeView addTarget:pActionTarget action:@selector(selectedAction) forControlEvents:UIControlEventTouchUpInside];
+//    _pNativeViewSelectorDispatcher = [[OmmGuiViewSelectorDispatcher alloc] initWithImpl:this];
+    _pNativeViewSelectorDispatcher = [[OmmGuiViewSelectorDispatcher alloc] initWithImpl:this];
 
     _pNativeView = pNativeViewController.view;
     _pNativeViewController = pNativeViewController;
@@ -174,7 +207,7 @@ void
 ViewImpl::showView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    static_cast<UIView*>(_pNativeView).hidden = NO;
+    [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(showView) withObject:nil waitUntilDone:YES];
 //    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
@@ -183,7 +216,7 @@ void
 ViewImpl::hideView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    static_cast<UIView*>(_pNativeView).hidden = YES;
+    [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(hideView) withObject:nil waitUntilDone:YES];
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 

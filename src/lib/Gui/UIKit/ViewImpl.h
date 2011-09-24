@@ -54,6 +54,7 @@ protected:
 
     void*                       _pNativeView;
     void*                       _pNativeViewController;
+    void*                       _pNativeViewSelectorDispatcher;
 };
 
 
