@@ -40,10 +40,15 @@ class QtScrollArea : public QScrollArea
     void resizeEvent(QResizeEvent* pEvent)
     {
         if (pEvent->oldSize().height() > 0) {
-            _pListViewImpl->resized(pEvent->size().width(), pEvent->size().height());
+            _pListViewImpl->resized(_pListViewImpl->widthView(), _pListViewImpl->heightView());
         }
     }
 
+    void showEvent(QShowEvent* event)
+    {
+        _pListViewImpl->resized(_pListViewImpl->widthView(), _pListViewImpl->heightView());
+    }
+    
     ListViewImpl*   _pListViewImpl;
 };
 
@@ -55,10 +60,7 @@ ListViewImpl::ListViewImpl(View* pView)
 
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
-//    _pNativeView->setBackgroundRole(QPalette(Qt::white));
-//    _pNativeView->setPalette(QPalette(Qt::white));
-//    _pNativeView->setAutoFillBackground(true);
-//    _pScrollWidget->setBackgroundRole(QPalette::Highlight);
+    pNativeView->setBackgroundRole(QPalette::Base);
 
     pNativeView->setWidget(_pScrollWidget);
 
@@ -79,13 +81,13 @@ ListViewImpl::visibleRows()
 {
     QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
 
-    Omm::Gui::Log::instance()->gui().debug("list view impl visible rows");
-    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().width())
-            + ", height: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().height()));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl visible rows");
+//    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().width())
+//            + ", height: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().height()));
     
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = pNativeView->viewport()->geometry().height() / pListView->_itemViewHeight + 2;
-    Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -95,10 +97,10 @@ ListViewImpl::addItemView(View* pView)
 {
     QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
 
-    Omm::Gui::Log::instance()->gui().debug("list view impl add item view");
-    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: "
-            + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().width())
-            + ", height: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().height()));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl add item view");
+//    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: "
+//            + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().width())
+//            + ", height: " + Poco::NumberFormatter::format(pNativeView->viewport()->geometry().height()));
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     static_cast<QWidget*>(pView->getNativeView())->resize(pNativeView->viewport()->geometry().width(), pListView->_itemViewHeight);
@@ -109,7 +111,7 @@ ListViewImpl::addItemView(View* pView)
 void
 ListViewImpl::moveItemView(int row, View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
 }
 
@@ -119,10 +121,10 @@ ListViewImpl::updateScrollWidgetSize()
 {
     QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
 
-    Omm::Gui::Log::instance()->gui().debug("list view impl update scroll widget size");
-    Omm::Gui::Log::instance()->gui().debug("list view impl width: "
-            + Poco::NumberFormatter::format(pNativeView->geometry().width())
-            + ", height: " + Poco::NumberFormatter::format(pNativeView->geometry().height()));
+//    Omm::Gui::Log::instance()->gui().debug("list view impl update scroll widget size");
+//    Omm::Gui::Log::instance()->gui().debug("list view impl width: "
+//            + Poco::NumberFormatter::format(pNativeView->geometry().width())
+//            + ", height: " + Poco::NumberFormatter::format(pNativeView->geometry().height()));
 
     ListView* pListView =  static_cast<ListView*>(_pView);
     ListModel* pListModel = static_cast<ListModel*>(_pView->getModel());
@@ -158,10 +160,8 @@ void
 ListViewImpl::resized(int width, int height)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
-    int rows = height / pListView->_itemViewHeight;
-    Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
+    pListView->resized(width, height);
     _pScrollWidget->resize(width, _pScrollWidget->height());
-    pListView->resize(rows, width);
 }
 
 

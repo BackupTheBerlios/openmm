@@ -46,7 +46,6 @@
     if (self = [super init]) {
         self.delegate = self;
         _pListViewImpl = pImpl;
-//        self.backgroundColor = [UIColor blueColor];
     }
     return self;
 }
@@ -148,9 +147,7 @@ void
 ListViewImpl::resized(int width, int height)
 {
     ListView* pListView =  static_cast<ListView*>(_pView);
-    int rows = height / pListView->_itemViewHeight;
-    Omm::Gui::Log::instance()->gui().debug("list view impl resize: " + Poco::NumberFormatter::format(rows));
-    pListView->resize(rows, width);
+    pListView->resized(width, height);
 }
 
 

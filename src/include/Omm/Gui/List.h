@@ -95,6 +95,7 @@ protected:
 
 private:
     void selectedItem(int row);
+    void resized(int width, int height);
     
     std::map<View*, ListItemController*>    _itemControllers;
 };

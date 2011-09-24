@@ -354,6 +354,15 @@ ListView::selectedItem(int row)
 
 
 void
+ListView::resized(int width, int height)
+{
+    int rows = height / _itemViewHeight;
+    Omm::Gui::Log::instance()->gui().debug("list view resized: " + Poco::NumberFormatter::format(rows));
+    resize(rows, width);
+}
+
+
+void
 ListView::insertItem(int row)
 {
     Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));

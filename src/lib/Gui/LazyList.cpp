@@ -109,14 +109,16 @@ LazyListView::resize(int rows, int width)
 {
     LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
 
-    int rowDelta = rows - _viewPool.size();
+//    int rowDelta = rows - _viewPool.size();
+    int rowDelta = rows - _lastVisibleRows;
+
     Log::instance()->gui().debug("lazy list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
-    if (rowDelta > 0) {
+    if (rowDelta > 0 && pModel) {
         if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
             pModel->fetch(_visibleViews.size() + rowDelta);
         }
+        resizeDelta(rowDelta, width);
     }
-    resizeDelta(rowDelta, width);
 }
 
 
