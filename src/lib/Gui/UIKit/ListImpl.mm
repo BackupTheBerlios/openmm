@@ -108,15 +108,6 @@ ListViewImpl::addItemView(View* pView)
 
 
 void
-ListViewImpl::moveItemView(int row, View* pView)
-{
-//    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    pView->move(0, pListView->_itemViewHeight * row);
-}
-
-
-void
 ListViewImpl::updateScrollWidgetSize()
 {
     UIScrollView* pNativeView = static_cast<UIScrollView*>(getNativeView());

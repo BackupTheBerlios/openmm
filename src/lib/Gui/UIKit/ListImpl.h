@@ -44,7 +44,6 @@ public:
 protected:
     int visibleRows();
     void addItemView(View* pView);
-    void moveItemView(int row, View* pView);
 
     void updateScrollWidgetSize();
     int getOffset();

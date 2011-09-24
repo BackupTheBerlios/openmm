@@ -66,7 +66,8 @@ View(pParent, false),
 _itemViewHeight(50),
 _rowOffset(0),
 _pSelectedView(0),
-_selectedRow(-1)
+_selectedRow(-1),
+_lastVisibleRows(0)
 {
     _pImpl = new ListViewImpl(this);
 }
@@ -118,7 +119,7 @@ ListView::addItemView(View* pView)
 void
 ListView::moveItemView(int row, View* pView)
 {
-    static_cast<ListViewImpl*>(_pImpl)->moveItemView(row, pView);
+    pView->move(0, _itemViewHeight * row);
 }
 
 

@@ -51,11 +51,7 @@ protected:
     void updateScrollWidgetSize();
     int getOffset();
 
-signals:
-    void moveWidgetSignal(int targetRow, View* pView);
-
 private slots:
-    void moveWidgetSlot(int targetRow, View* pView);
     void viewScrolledSlot(int value);
 
 private:

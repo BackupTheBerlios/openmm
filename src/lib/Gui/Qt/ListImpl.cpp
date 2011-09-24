@@ -109,14 +109,6 @@ ListViewImpl::addItemView(View* pView)
 
 
 void
-ListViewImpl::moveItemView(int row, View* pView)
-{
-//    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
-    emit moveWidgetSignal(row, pView);
-}
-
-
-void
 ListViewImpl::updateScrollWidgetSize()
 {
     QScrollArea* pNativeView = static_cast<QScrollArea*>(_pNativeView);
@@ -137,14 +129,6 @@ ListViewImpl::getOffset()
 {
 //    Omm::Gui::Log::instance()->gui().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry().y()));
     return _pScrollWidget->geometry().y();
-}
-
-
-void
-ListViewImpl::moveWidgetSlot(int row, View* pView)
-{
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    static_cast<QWidget*>(pView->getNativeView())->move(0, pListView->_itemViewHeight * row);
 }
 
 
