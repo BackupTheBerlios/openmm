@@ -21,9 +21,47 @@
 
 #include <Poco/NumberFormatter.h>
 
+#import <UIKit/UIKit.h>
+
 #include "ScrollAreaImpl.h"
 #include "Gui/ScrollArea.h"
 #include "Gui/GuiLogger.h"
+
+
+@interface OmmGuiScrollView : UIScrollView<UIScrollViewDelegate>
+{
+    Omm::Gui::ScrollAreaViewImpl* _pViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiScrollView
+
+- (id)initWithImpl:(Omm::Gui::ScrollAreaViewImpl*)pImpl
+{
+//    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl ...");
+    if (self = [super init]) {
+        self.delegate = self;
+        _pViewImpl = pImpl;
+    }
+    return self;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView
+{
+//    Omm::Gui::Log::instance()->gui().debug("list view impl scrolling ...");
+    _pViewImpl->viewScrolled();
+}
+
+
+- (void)layoutSubviews
+{
+    _pViewImpl->resized(self.frame.size.width, self.frame.size.height);
+}
+
+@end
+
 
 namespace Omm {
 namespace Gui {
@@ -31,15 +69,7 @@ namespace Gui {
 
 ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 {
-    QScrollArea* pNativeView = new QtViewImpl<QScrollArea>(this);
-    
-    _pScrollWidget = new QWidget;
-    _pScrollWidget->resize(pNativeView->viewport()->size());
-    pNativeView->setWidget(_pScrollWidget);
-    pNativeView->setBackgroundRole(QPalette::Base);
-    connect(pNativeView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledXSlot(int)));
-    connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledYSlot(int)));
-
+    OmmGuiScrollView* pNativeView = [[OmmGuiScrollView alloc] initWithImpl:this];
     initViewImpl(pView, pNativeView);
 }
 
@@ -52,68 +82,54 @@ ScrollAreaViewImpl::~ScrollAreaViewImpl()
 int
 ScrollAreaViewImpl::getViewportWidth()
 {
-    return static_cast<QScrollArea*>(_pNativeView)->viewport()->geometry().width();
+    return static_cast<UIScrollView*>(getNativeView()).frame.size.width;
 }
 
 
 int
 ScrollAreaViewImpl::getViewportHeight()
 {
-    return static_cast<QScrollArea*>(_pNativeView)->viewport()->geometry().height();
+    return static_cast<UIScrollView*>(getNativeView()).frame.size.height;
 }
 
 
 int
 ScrollAreaViewImpl::getXOffset()
 {
-    return - _pScrollWidget->geometry().x();
+    return static_cast<UIScrollView*>(getNativeView()).contentOffset.x;
 }
 
 
 int
 ScrollAreaViewImpl::getYOffset()
 {
-    return - _pScrollWidget->geometry().y();
+    return static_cast<UIScrollView*>(getNativeView()).contentOffset.y;
 }
 
 
 int
 ScrollAreaViewImpl::getScrollAreaWidth()
 {
-    return _pScrollWidget->geometry().width();
+     return static_cast<UIScrollView*>(getNativeView()).contentSize.width;
 }
 
 
 int
 ScrollAreaViewImpl::getScrollAreaHeight()
 {
-    return _pScrollWidget->geometry().height();
+     return static_cast<UIScrollView*>(getNativeView()).contentSize.height;
 }
 
 
 void
 ScrollAreaViewImpl::resizeScrollArea(int width, int height)
 {
-    _pScrollWidget->resize(width, height);
+    static_cast<UIScrollView*>(getNativeView()).contentSize = CGSizeMake(width, height);
 }
 
 
 void
-ScrollAreaViewImpl::addSubview(View* pView)
-{
-    static_cast<QWidget*>(pView->getNativeView())->setParent(_pScrollWidget);
-}
-
-
-void
-ScrollAreaViewImpl::viewScrolledXSlot(int value)
-{
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
-}
-
-
-void
-ScrollAreaViewImpl::viewScrolledYSlot(int value)
+ScrollAreaViewImpl::viewScrolled()
 {
     IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
 }

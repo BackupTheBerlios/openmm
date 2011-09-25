@@ -39,6 +39,7 @@ public:
     void* getNativeView();
     void* getNativeViewController();
     void setNativeView(void* pView);
+    virtual void addSubview(View* pView);
     virtual void showView();
     virtual void hideView();
     virtual int widthView();
@@ -48,6 +49,9 @@ public:
     virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);
 
+    void presented();
+    void resized(int width, int height);
+    void selected();
     View*                       _pView;
 protected:
     void initViewImpl(View* pView, void* pNative);
@@ -55,6 +59,7 @@ protected:
     void*                       _pNativeView;
     void*                       _pNativeViewController;
     void*                       _pNativeViewSelectorDispatcher;
+
 };
 
 

@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListImpl_INCLUDED
-#define ListImpl_INCLUDED
+#ifndef ScrollAreaImpl_INCLUDED
+#define ScrollAreaImpl_INCLUDED
 
 #include "ViewImpl.h"
 
@@ -30,23 +30,22 @@ namespace Gui {
 class View;
 
 
-class ListViewImpl : public ViewImpl
+class ScrollAreaViewImpl : public ViewImpl
 {
-    friend class ListView;
-    friend class LazyListView;
+    friend class ScrollAreaView;
 
 public:
-    ListViewImpl(View* pView);
-    virtual ~ListViewImpl();
+    ScrollAreaViewImpl(View* pView);
+    virtual ~ScrollAreaViewImpl();
 
+    int getViewportWidth();
+    int getViewportHeight();
+    int getXOffset();
+    int getYOffset();
+    int getScrollAreaWidth();
+    int getScrollAreaHeight();
+    void resizeScrollArea(int width, int height);
     void viewScrolled();
-    void resized(int width, int height);
-protected:
-    int visibleRows();
-    void addItemView(View* pView);
-
-    void updateScrollWidgetSize();
-    int getOffset();
 };
 
 

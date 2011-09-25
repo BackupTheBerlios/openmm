@@ -79,7 +79,7 @@
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
 //    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView touch began");
-    _pViewImpl->_pView->selected();
+    _pViewImpl->selected();
 }
 
 @end
@@ -204,6 +204,13 @@ ViewImpl::setNativeView(void* pView)
 
 
 void
+ViewImpl::addSubview(View* pView)
+{
+    [static_cast<UIView*>(getNativeView()) addSubview:static_cast<UIView*>(pView->getNativeView())];
+}
+
+
+void
 ViewImpl::showView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
@@ -277,6 +284,30 @@ void
 ViewImpl::setBackgroundColor(const Color& color)
 {
     static_cast<UIView*>(getNativeView()).backgroundColor = static_cast<UIColor*>(color.getNativeColor());
+}
+
+
+void
+ViewImpl::presented()
+{
+//    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
+    IMPL_NOTIFY_CONTROLLER(Controller, presented);
+}
+
+
+void
+ViewImpl::resized(int width, int height)
+{
+//    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
+    IMPL_NOTIFY_CONTROLLER(Controller, resized, width, height);
+}
+
+
+void
+ViewImpl::selected()
+{
+//    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
 

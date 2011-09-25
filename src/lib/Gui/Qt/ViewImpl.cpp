@@ -160,7 +160,7 @@ ViewImpl::setBackgroundColor(const Color& color)
 void
 ViewImpl::presented()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
     IMPL_NOTIFY_CONTROLLER(Controller, presented);
 }
 
@@ -168,7 +168,7 @@ ViewImpl::presented()
 void
 ViewImpl::resized(int width, int height)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
     IMPL_NOTIFY_CONTROLLER(Controller, resized, width, height);
 }
 
@@ -176,7 +176,7 @@ ViewImpl::resized(int width, int height)
 void
 ViewImpl::selected()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
