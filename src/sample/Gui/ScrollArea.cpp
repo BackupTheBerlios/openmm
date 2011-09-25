@@ -32,8 +32,9 @@ public:
     ScrollArea()
     {
         resizeScrollArea(10000, 10000);
-        label.setLabel("Hello");
-        addSubview(&label);
+//        label.move(0, 0);
+//        label.setLabel("Hello");
+//        addSubview(&label);
     }
 
 

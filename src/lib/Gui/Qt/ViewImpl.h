@@ -34,6 +34,7 @@ class ViewImpl : public QObject
     Q_OBJECT
     
     friend class View;
+    template <class W> friend class QtViewImpl;
     
 public:
     virtual ~ViewImpl();
@@ -60,15 +61,46 @@ protected:
 signals:
     void showViewSignal();
     void hideViewSignal();
+
+private:
+    void presented();
+    void resized(int width, int height);
+    void selected();
 };
 
 
-class PlainViewImpl : public QWidget, public ViewImpl
+template<class W>
+class QtViewImpl : public W
+{
+public:
+    QtViewImpl(ViewImpl* pViewImpl, QWidget* pParent = 0) : W(pParent), _pViewImpl(pViewImpl) {}
+
+    void showEvent(QShowEvent* event)
+    {
+        _pViewImpl->presented();
+    }
+
+    void resizeEvent(QResizeEvent* pEvent)
+    {
+        if (pEvent->oldSize().height() > 0) {
+            _pViewImpl->resized(pEvent->size().width(), pEvent->size().height());
+        }
+    }
+
+    void mousePressEvent(QMouseEvent* pMouseEvent)
+    {
+        _pViewImpl->selected();
+//        W::mousePressEvent(pMouseEvent);
+    }
+
+    ViewImpl*   _pViewImpl;
+};
+
+
+class PlainViewImpl : public ViewImpl
 {
 public:
     PlainViewImpl(View* pView);
-
-    virtual void mousePressEvent(QMouseEvent* pMouseEvent);
 };
 
 

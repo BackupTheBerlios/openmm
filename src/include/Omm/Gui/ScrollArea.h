@@ -34,10 +34,6 @@ class ScrollAreaController : public Controller
 
 protected:
     virtual void scrolled(int xOffset, int yOffset) {}
-
-    // TODO: if possible, put this in ViewController
-    virtual void resized(int width, int height) {}
-    virtual void presented() {}
 };
 
 

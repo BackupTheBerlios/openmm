@@ -31,32 +31,9 @@ namespace Omm {
 namespace Gui {
 
 
-class QtScrollArea : public QScrollArea
-{
-    friend class ScrollAreaViewImpl;
-
-    QtScrollArea(QWidget* pParent = 0) : QScrollArea(pParent) {}
-
-    void resizeEvent(QResizeEvent* pEvent)
-    {
-        if (pEvent->oldSize().height() > 0) {
-            _pViewImpl->resized(pEvent->size().width(), pEvent->size().height());
-        }
-    }
-
-    void showEvent(QShowEvent* event)
-    {
-        _pViewImpl->presented();
-    }
-
-    ScrollAreaViewImpl*   _pViewImpl;
-};
-
-
 ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 {
-    QtScrollArea* pNativeView = new QtScrollArea;
-    pNativeView->_pViewImpl = this;
+    QScrollArea* pNativeView = new QtViewImpl<QScrollArea>(this);
     
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
@@ -77,14 +54,14 @@ ScrollAreaViewImpl::~ScrollAreaViewImpl()
 int
 ScrollAreaViewImpl::getViewportWidth()
 {
-    return static_cast<QtScrollArea*>(_pNativeView)->viewport()->geometry().width();
+    return static_cast<QScrollArea*>(_pNativeView)->viewport()->geometry().width();
 }
 
 
 int
 ScrollAreaViewImpl::getViewportHeight()
 {
-    return static_cast<QtScrollArea*>(_pNativeView)->viewport()->geometry().height();
+    return static_cast<QScrollArea*>(_pNativeView)->viewport()->geometry().height();
 }
 
 
@@ -124,6 +101,13 @@ ScrollAreaViewImpl::resizeScrollArea(int width, int height)
 
 
 void
+ScrollAreaViewImpl::addSubview(View* pView)
+{
+    static_cast<QWidget*>(pView->getNativeView())->setParent(_pScrollWidget);
+}
+
+
+void
 ScrollAreaViewImpl::viewScrolledXSlot(int value)
 {
     IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
@@ -134,20 +118,6 @@ void
 ScrollAreaViewImpl::viewScrolledYSlot(int value)
 {
     IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
-}
-
-
-void
-ScrollAreaViewImpl::resized(int width, int height)
-{
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, resized, width, height);
-}
-
-
-void
-ScrollAreaViewImpl::presented()
-{
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, presented);
 }
 
 

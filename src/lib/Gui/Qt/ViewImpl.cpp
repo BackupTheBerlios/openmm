@@ -157,18 +157,35 @@ ViewImpl::setBackgroundColor(const Color& color)
 }
 
 
-PlainViewImpl::PlainViewImpl(View* pView)
+void
+ViewImpl::presented()
 {
-    initViewImpl(pView, this);
+    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
+    IMPL_NOTIFY_CONTROLLER(Controller, presented);
 }
 
 
 void
-PlainViewImpl::mousePressEvent(QMouseEvent* pMouseEvent)
+ViewImpl::resized(int width, int height)
 {
-    _pView->selected();
-    QWidget::mousePressEvent(pMouseEvent);
+    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
+    IMPL_NOTIFY_CONTROLLER(Controller, resized, width, height);
 }
+
+
+void
+ViewImpl::selected()
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
+    IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+PlainViewImpl::PlainViewImpl(View* pView)
+{
+    initViewImpl(pView, new QtViewImpl<QWidget>(this));
+}
+
 
 }  // namespace Omm
 }  // namespace Gui

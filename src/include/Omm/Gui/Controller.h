@@ -47,6 +47,8 @@ public:
     void detachModel(Model* pModel);
 
 //protected:
+    virtual void presented() {}
+    virtual void resized(int width, int height) {}
     virtual void selected() {}
 
     typedef std::vector<Model*>::iterator ModelIterator;

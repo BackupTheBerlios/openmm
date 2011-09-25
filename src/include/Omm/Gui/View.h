@@ -57,7 +57,7 @@ public:
 
     void* getNativeView();
     View* getParent();
-    virtual void addSubview(View* pView);
+    void addSubview(View* pView);
 
     void show();
     void hide();
