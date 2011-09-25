@@ -33,7 +33,7 @@ class ScrollAreaController : public Controller
     friend class ScrollAreaViewImpl;
 
 protected:
-    virtual void scrolled(int value) {}
+    virtual void scrolled(int xOffset, int yOffset) {}
 
     // TODO: if possible, put this in ViewController
     virtual void resized(int width, int height) {}
@@ -46,7 +46,8 @@ class ScrollAreaView : public View
 public:
     ScrollAreaView(View* pParent = 0);
 
-    int getOffset();
+    int getXOffset();
+    int getYOffset();
     int getViewportWidth();
     int getViewportHeight();
     int getScrollAreaWidth();

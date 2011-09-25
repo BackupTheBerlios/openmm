@@ -43,7 +43,8 @@ public:
     virtual ~ScrollAreaViewImpl();
 
 protected:
-    int getOffset();
+    int getXOffset();
+    int getYOffset();
     int getViewportWidth();
     int getViewportHeight();
     int getScrollAreaWidth();
@@ -52,7 +53,8 @@ protected:
     void addSubview(View* pView);
 
 private slots:
-    void viewScrolledSlot(int value);
+    void viewScrolledXSlot(int value);
+    void viewScrolledYSlot(int value);
 
 private:
     void resized(int width, int height);

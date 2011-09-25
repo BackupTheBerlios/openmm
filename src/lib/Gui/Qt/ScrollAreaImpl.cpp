@@ -62,7 +62,8 @@ ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
     _pScrollWidget->resize(pNativeView->viewport()->size());
     pNativeView->setWidget(_pScrollWidget);
     pNativeView->setBackgroundRole(QPalette::Base);
-    connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledSlot(int)));
+    connect(pNativeView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledXSlot(int)));
+    connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledYSlot(int)));
 
     initViewImpl(pView, pNativeView);
 }
@@ -74,9 +75,16 @@ ScrollAreaViewImpl::~ScrollAreaViewImpl()
 
 
 int
-ScrollAreaViewImpl::getOffset()
+ScrollAreaViewImpl::getXOffset()
 {
-    return _pScrollWidget->geometry().y();
+    return -_pScrollWidget->geometry().x();
+}
+
+
+int
+ScrollAreaViewImpl::getYOffset()
+{
+    return -_pScrollWidget->geometry().y();
 }
 
 
@@ -124,9 +132,16 @@ ScrollAreaViewImpl::addSubview(View* pView)
 
 
 void
-ScrollAreaViewImpl::viewScrolledSlot(int value)
+ScrollAreaViewImpl::viewScrolledXSlot(int value)
 {
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, value);
+    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
+}
+
+
+void
+ScrollAreaViewImpl::viewScrolledYSlot(int value)
+{
+    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
 }
 
 

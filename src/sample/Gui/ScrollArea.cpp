@@ -28,9 +28,9 @@
 class ScrollAreaController : public Omm::Gui::ScrollAreaController
 {
 private:
-    void scrolled(int value)
+    void scrolled(int xOffset, int yOffset)
     {
-        std::cout << "scrolled by value: " << value << std::endl;
+        std::cout << "scrolled to offset x: " << xOffset << ", y: " << yOffset << std::endl;
     }
 
     void resized(int width, int height)
@@ -46,7 +46,7 @@ class Application : public Omm::Gui::Application
     {
         Omm::Gui::ScrollArea* pScrollArea = new Omm::Gui::ScrollArea;
         pScrollArea->attachController(new ScrollAreaController);
-        pScrollArea->resizeScrollArea(pScrollArea->getViewportWidth(), 10000);
+        pScrollArea->resizeScrollArea(10000, 10000);
         return pScrollArea;
     }
 };

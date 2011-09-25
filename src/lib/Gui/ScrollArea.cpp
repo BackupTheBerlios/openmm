@@ -45,9 +45,16 @@ View(pParent, false)
 
 
 int
-ScrollAreaView::getOffset()
+ScrollAreaView::getXOffset()
 {
-    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getOffset();
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getXOffset();
+}
+
+
+int
+ScrollAreaView::getYOffset()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getYOffset();
 }
 
 
