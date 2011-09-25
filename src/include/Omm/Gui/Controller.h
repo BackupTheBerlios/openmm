@@ -36,6 +36,8 @@ class Model;
 
 class Controller
 {
+    friend class View;
+    
 public:
     friend class Model;
     friend class ViewImpl;
@@ -52,6 +54,7 @@ public:
     ModelIterator endModel();
 
     std::vector<Model*>     _models;
+    View*                   _pView;
 };
 
 

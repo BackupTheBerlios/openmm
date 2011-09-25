@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,38 +17,53 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
 
-#include <iostream>
+#ifndef ScrollAreaImpl_INCLUDED
+#define ScrollAreaImpl_INCLUDED
 
-#include <Omm/Gui/Application.h>
-#include <Omm/Gui/Slider.h>
+#include <QtGui>
+#include "ViewImpl.h"
+
+namespace Omm {
+namespace Gui {
+
+class View;
 
 
-class SliderController : public Omm::Gui::SliderController
+class ScrollAreaViewImpl : public ViewImpl
 {
+    Q_OBJECT
+
+    friend class ScrollAreaView;
+    friend class QtScrollArea;
+
+public:
+    ScrollAreaViewImpl(View* pView);
+    virtual ~ScrollAreaViewImpl();
+
+protected:
+    int getOffset();
+    int getViewportWidth();
+    int getViewportHeight();
+    int getScrollAreaWidth();
+    int getScrollAreaHeight();
+    void resizeScrollArea(int width, int height);
+    void addSubview(View* pView);
+
+private slots:
+    void viewScrolledSlot(int value);
+
 private:
-    void valueChanged(int value)
-    {
-        std::cout << "slider value: " << value << std::endl;
-    }
+    void resized(int width, int height);
+    void presented();
+
+    QWidget*                 _pScrollWidget;
 };
 
 
-class Application : public Omm::Gui::Application
-{
-    virtual Omm::Gui::View* createMainView()
-    {
-        Omm::Gui::Slider* pSlider = new Omm::Gui::Slider;
-        pSlider->attachController(new SliderController);
-        return pSlider;
-    }
-};
+}  // namespace Omm
+}  // namespace Gui
 
-
-int main(int argc, char** argv)
-{
-    Application app;
-    return app.run(argc, argv);
-}
+#endif
 

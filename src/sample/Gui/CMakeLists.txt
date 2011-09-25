@@ -113,3 +113,12 @@ Slider.cpp
 target_link_libraries(slider
 ${OMM_GUI}
 )
+
+
+add_executable(scrollarea
+ScrollArea.cpp
+)
+
+target_link_libraries(scrollarea
+${OMM_GUI}
+)

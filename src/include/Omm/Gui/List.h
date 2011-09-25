@@ -29,11 +29,20 @@
 #include "View.h"
 #include "ListModel.h"
 #include "ListItem.h"
+#include "ScrollArea.h"
 
 namespace Omm {
 namespace Gui {
 
 class ListItemController;
+
+
+class ListScrollAreaController : public ScrollAreaController
+{
+    virtual void scrolled(int value);
+    virtual void resized(int width, int height);
+    virtual void presented();
+};
 
 
 class ListController : public Controller
@@ -50,11 +59,13 @@ class ListView : public View
     friend class ListViewImpl;
     friend class ListModel;
     friend class ListItemController;
+    friend class ListScrollAreaController;
     
 public:
     ListView(View* pParent = 0);
 
     virtual void setModel(ListModel* pModel);
+    int getItemViewHeight();
     void setItemViewHeight(int height);
 
 protected:

@@ -8,8 +8,8 @@ ViewImpl.cpp
 ApplicationImpl.cpp
 LabelImpl.cpp
 ButtonImpl.cpp
+ScrollAreaImpl.cpp
 ListImpl.cpp
-ListItemImpl.cpp
 TabImpl.cpp
 NavigatorImpl.cpp
 SliderImpl.cpp
@@ -18,9 +18,8 @@ SliderImpl.cpp
 set(OMMGUI_QT_MOC
 ViewImpl.h
 ButtonImpl.h
+ScrollAreaImpl.h
 ListImpl.h
-#ListItemImpl.h
-#TabImpl.h
 NavigatorImpl.h
 SliderImpl.h
 )

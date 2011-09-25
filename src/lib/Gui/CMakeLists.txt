@@ -55,6 +55,7 @@ Application.cpp
 HorizontalLayout.cpp
 Label.cpp
 Button.cpp
+ScrollArea.cpp
 List.cpp
 ListModel.cpp
 ListItem.cpp

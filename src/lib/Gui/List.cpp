@@ -61,6 +61,29 @@ ListItemController::selected()
 }
 
 
+void
+ListScrollAreaController::scrolled(int value)
+{
+    ListView* pListView =  static_cast<ListView*>(_pView);
+    pListView->scrolledToRow(-pListView->getOffset() / pListView->getItemViewHeight());
+}
+
+
+void
+ListScrollAreaController::resized(int width, int height)
+{
+//    ListView* pListView =  static_cast<ListView*>(_pView);
+//    pListView->resized(width, height);
+//    pListView->resizeScrollArea(width, pListView->getScrollAreaHeight());
+}
+
+
+void
+ListScrollAreaController::presented()
+{
+}
+
+
 ListView::ListView(View* pParent) :
 View(pParent, false),
 _itemViewHeight(50),
@@ -70,6 +93,7 @@ _selectedRow(-1),
 _lastVisibleRows(0)
 {
     _pImpl = new ListViewImpl(this);
+    attachController(new ListScrollAreaController);
 }
 
 
@@ -94,6 +118,13 @@ ListView::setModel(ListModel* pModel)
 }
 
 
+int
+ListView::getItemViewHeight()
+{
+    return _itemViewHeight;
+}
+
+
 void
 ListView::setItemViewHeight(int height)
 {
@@ -104,7 +135,8 @@ ListView::setItemViewHeight(int height)
 int
 ListView::visibleRows()
 {
-    return static_cast<ListViewImpl*>(_pImpl)->visibleRows();
+    return static_cast<ListViewImpl*>(_pImpl)->getViewportHeight() / _itemViewHeight + 2;
+//    return static_cast<ListViewImpl*>(_pImpl)->visibleRows();
 }
 
 
@@ -112,7 +144,11 @@ void
 ListView::addItemView(View* pView)
 {
 //    Log::instance()->gui().debug("list view add item view.");
-    static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
+
+    pView->resize(static_cast<ListViewImpl*>(_pImpl)->getViewportWidth(), _itemViewHeight);
+    static_cast<ListViewImpl*>(_pImpl)->addSubview(pView);
+
+//    static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
 }
 
 
@@ -133,7 +169,10 @@ ListView::getOffset()
 void
 ListView::updateScrollWidgetSize()
 {
-    static_cast<ListViewImpl*>(_pImpl)->updateScrollWidgetSize();
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    ListViewImpl* pImpl = static_cast<ListViewImpl*>(_pImpl);
+    pImpl->resizeScrollArea(pImpl->getViewportWidth(), pModel->totalItemCount() * _itemViewHeight);
+//    static_cast<ListViewImpl*>(_pImpl)->updateScrollWidgetSize();
 }
 
 
@@ -228,9 +267,10 @@ ListView::resizeDelta(int rowDelta, int width)
     if (rowDelta <= 0) {
         return;
     }
-    Log::instance()->gui().debug("list view resize visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
-        + ", view height in rows: " + Poco::NumberFormatter::format(static_cast<ListViewImpl*>(_pImpl)->visibleRows()));
-    if (pModel->totalItemCount() < static_cast<ListViewImpl*>(_pImpl)->visibleRows()) {
+//    Log::instance()->gui().debug("list view resize visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
+//        + ", view height in rows: " + Poco::NumberFormatter::format(static_cast<ListViewImpl*>(_pImpl)->visibleRows()));
+//    if (pModel->totalItemCount() < visibleRows()) {
+    if (pModel->totalItemCount() < visibleRows()) {
         return;
     }
     _lastVisibleRows += rowDelta;

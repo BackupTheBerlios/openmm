@@ -19,56 +19,79 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListImpl_INCLUDED
-#define ListImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <QtGui>
-#include "ViewImpl.h"
+#include "Gui/ScrollArea.h"
+#include "Gui/GuiLogger.h"
+#include "Gui/View.h"
+
+#ifdef __GUI_QT_PLATFORM__
+#include "Qt/ScrollAreaImpl.h"
+#endif
+#ifdef __GUI_UIKIT_PLATFORM__
+#include "UIKit/ScrollAreaImpl.h"
+#endif
+
 
 namespace Omm {
 namespace Gui {
 
-class View;
 
-
-class ListViewImpl : public ViewImpl
+ScrollAreaView::ScrollAreaView(View* pParent) :
+View(pParent, false)
 {
-    Q_OBJECT
-
-    friend class ListView;
-    friend class LazyListView;
-    friend class QtScrollArea;
-
-public:
-    ListViewImpl(View* pView);
-    virtual ~ListViewImpl();
-
-protected:
-//    int visibleRows();
-//    void addItemView(View* pView);
-//    void updateScrollWidgetSize();
-    
-    int getOffset();
-    int getViewportWidth();
-    int getViewportHeight();
-    int getScrollAreaWidth();
-    int getScrollAreaHeight();
-    void resizeScrollArea(int width, int height);
-    virtual void addSubview(View* pView);
-
-private slots:
-    void viewScrolledSlot(int value);
-
-private:
-//    virtual void resizeEvent(QResizeEvent* event);
-    void resized(int width, int height);
-
-    QWidget*                 _pScrollWidget;
-};
+    _pImpl = new ScrollAreaViewImpl(this);
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+int
+ScrollAreaView::getOffset()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getOffset();
+}
 
-#endif
 
+int
+ScrollAreaView::getViewportWidth()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getViewportWidth();
+}
+
+
+int
+ScrollAreaView::getViewportHeight()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getViewportHeight();
+}
+
+
+int
+ScrollAreaView::getScrollAreaWidth()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getScrollAreaWidth();
+}
+
+
+int
+ScrollAreaView::getScrollAreaHeight()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getScrollAreaHeight();
+}
+
+
+void
+ScrollAreaView::resizeScrollArea(int width, int height)
+{
+    static_cast<ScrollAreaViewImpl*>(_pImpl)->resizeScrollArea(width, height);
+}
+
+
+void
+ScrollAreaView::addSubview(View* pView)
+{
+    static_cast<ScrollAreaViewImpl*>(_pImpl)->addSubview(pView);
+}
+
+
+} // namespace Gui
+} // namespace Omm

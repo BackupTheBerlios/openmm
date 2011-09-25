@@ -179,6 +179,7 @@ void
 View::attachController(Controller* pController)
 {
     _controllers.push_back(pController);
+    pController->_pView = this;
 }
 
 

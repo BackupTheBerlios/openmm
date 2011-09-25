@@ -19,47 +19,54 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
+#ifndef ScrollArea_INCLUDED
+#define ScrollArea_INCLUDED
 
-#include "ListItemImpl.h"
-#include "Gui/ListItem.h"
-#include "Gui/GuiLogger.h"
-
+#include "View.h"
 
 namespace Omm {
 namespace Gui {
 
 
-ListItemImpl::ListItemImpl(View* pView)
+class ScrollAreaController : public Controller
 {
-    Omm::Gui::Log::instance()->gui().debug("list item impl ctor");
-    _pLayout = new QHBoxLayout(this);
-    _pNameLabel = new QLabel;
-    _pLayout->addWidget(_pNameLabel);
-    _pLayout->setSpacing(0);
-    _pLayout->setMargin(0);
-    _pLayout->setContentsMargins(0, 0, 0, 0);
-//    _pNativeView->setPalette(QPalette(Qt::white));
-//    _pNativeView->setAutoFillBackground(true);
-    QWidget::setPalette(QPalette(Qt::white));
-    QWidget::setAutoFillBackground(true);
+    friend class ScrollAreaViewImpl;
 
-    initViewImpl(pView, this);
-}
+protected:
+    virtual void scrolled(int value) {}
+
+    // TODO: if possible, put this in ViewController
+    virtual void resized(int width, int height) {}
+    virtual void presented() {}
+};
 
 
-ListItemImpl::~ListItemImpl()
+class ScrollAreaView : public View
 {
-    delete _pNameLabel;
-}
+public:
+    ScrollAreaView(View* pParent = 0);
+
+    int getOffset();
+    int getViewportWidth();
+    int getViewportHeight();
+    int getScrollAreaWidth();
+    int getScrollAreaHeight();
+    void resizeScrollArea(int width, int height);
+
+    // TODO: put this in View
+    virtual void addSubview(View* pView);
+};
 
 
-void
-ListItemImpl::setLabel(const std::string& text)
+class ScrollArea : public Widget<ScrollAreaView, ScrollAreaController, Model>
 {
-    _pNameLabel->setText(QString::fromStdString(text));
-}
+public:
+    ScrollArea(View* pParent = 0) : Widget<ScrollAreaView, ScrollAreaController, Model>(pParent) {}
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif
+

@@ -26,8 +26,6 @@
 #include "Gui/ListModel.h"
 #include "Gui/View.h"
 
-#include "Gui/Button.h"
-
 #ifdef __GUI_QT_PLATFORM__
 #include "Qt/ListImpl.h"
 #endif
@@ -42,7 +40,6 @@ namespace Gui {
 
 LazyListView::LazyListView(View* pParent) :
 ListView(pParent)
-//ListView(new ListViewImpl(this, pParent), pParent)
 {
 
 }

@@ -31,7 +31,7 @@ namespace Gui {
 
 ButtonViewImpl::ButtonViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
+//    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
     QPushButton* pNativeView = new QPushButton;
     connect(pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
 
