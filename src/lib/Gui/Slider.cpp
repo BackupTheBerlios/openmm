@@ -58,6 +58,7 @@ SliderView::SliderView(View* pParent) :
 View(pParent, false)
 {
     Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
+    _minWidth = 200;
     _pImpl = new SliderViewImpl(this);
 }
 

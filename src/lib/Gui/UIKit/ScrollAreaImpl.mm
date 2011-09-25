@@ -110,14 +110,14 @@ ScrollAreaViewImpl::getYOffset()
 int
 ScrollAreaViewImpl::getScrollAreaWidth()
 {
-     return static_cast<UIScrollView*>(getNativeView()).contentSize.width;
+    return static_cast<UIScrollView*>(getNativeView()).contentSize.width;
 }
 
 
 int
 ScrollAreaViewImpl::getScrollAreaHeight()
 {
-     return static_cast<UIScrollView*>(getNativeView()).contentSize.height;
+    return static_cast<UIScrollView*>(getNativeView()).contentSize.height;
 }
 
 

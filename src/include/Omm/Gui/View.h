@@ -52,6 +52,8 @@ class View
     friend class Layout;
     
 public:
+    typedef enum {Current, Min, Pref, Max} SizeConstraint;
+
     View(View* pParent = 0);
     virtual ~View();
 
@@ -61,8 +63,10 @@ public:
 
     void show();
     void hide();
-    int width();
-    int height();
+    
+    int width(SizeConstraint size = Current);
+    int height(SizeConstraint size = Current);
+    void resize(SizeConstraint size = Pref);
     void resize(int width, int height);
     void move(int x, int y);
 
@@ -108,6 +112,12 @@ protected:
     std::vector<Controller*>    _controllers;
     Layout*                     _pLayout;
     std::string                 _name;
+    int                         _minWidth;
+    int                         _minHeight;
+    int                         _prefWidth;
+    int                         _prefHeight;
+    int                         _maxWidth;
+    int                         _maxHeight;
 
 private:
     void syncViewWithModel(Model* pModel = 0);

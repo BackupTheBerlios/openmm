@@ -38,7 +38,13 @@ namespace Omm {
 namespace Gui {
 
 
-View::View(View* pParent)
+View::View(View* pParent) :
+_minWidth(50),
+_minHeight(35),
+_prefWidth(100),
+_prefHeight(70),
+_maxWidth(200),
+_maxHeight(140)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
 
@@ -47,7 +53,13 @@ View::View(View* pParent)
 }
 
 
-View::View(View* pParent, bool createPlainView)
+View::View(View* pParent, bool createPlainView) :
+_minWidth(50),
+_minHeight(35),
+_prefWidth(100),
+_prefHeight(70),
+_maxWidth(200),
+_maxHeight(140)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
 
@@ -121,16 +133,45 @@ View::hide()
 
 
 int
-View::width()
+View::width(SizeConstraint size)
 {
-    return _pImpl->widthView();
+    switch(size) {
+        case Current:
+            return _pImpl->widthView();
+        case Min:
+            return _minWidth;
+        case Pref:
+            return _prefWidth;
+        case Max:
+            return _maxWidth;
+    }
 }
 
 
 int
-View::height()
+View::height(SizeConstraint size)
 {
-    return _pImpl->heightView();
+    switch(size) {
+        case Current:
+            return _pImpl->heightView();
+        case Min:
+            return _minHeight;
+        case Pref:
+            return _prefHeight;
+        case Max:
+            return _maxHeight;
+    }
+}
+
+
+void
+View::resize(SizeConstraint size)
+{
+//    Omm::Gui::Log::instance()->gui().debug("view resize.");
+    _pImpl->resizeView(width(size), height(size));
+    if (_pLayout) {
+        _pLayout->layoutView();
+    }
 }
 
 

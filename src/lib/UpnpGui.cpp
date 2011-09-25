@@ -108,7 +108,7 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
     View::setName("media renderer group view");
     push(&_deviceGroupListView, ">");
 
-    _deviceGroupListView.setItemViewHeight(30);
+    _deviceGroupListView.setItemViewHeight(80);
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }

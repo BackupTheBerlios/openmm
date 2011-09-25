@@ -65,6 +65,7 @@ ButtonView::ButtonView(View* pParent) :
 View(pParent, false)
 {
 //    Omm::Gui::Log::instance()->gui().debug("button view ctor.");
+    _minWidth = 100;
     _pImpl = new ButtonViewImpl(this);
 }
 
