@@ -19,7 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
-#include <iostream>
+#include <Poco/NumberFormatter.h>
 
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/ScrollArea.h>
@@ -32,21 +32,17 @@ public:
     ScrollArea()
     {
         resizeScrollArea(10000, 10000);
-//        label.move(0, 0);
-//        label.setLabel("Hello");
-//        addSubview(&label);
+        label.setLabel("offset x: 0, y: 0");
+        label.resize(200, 40);
+        addSubview(&label);
     }
 
 
 private:
     void scrolled(int xOffset, int yOffset)
     {
-        std::cout << "scrolled to offset x: " << xOffset << ", y: " << yOffset << std::endl;
-    }
-
-    void resized(int width, int height)
-    {
-        std::cout << "resized width: " << width << ", height: " << height << std::endl;
+        label.setLabel("offset x: " + Poco::NumberFormatter::format(xOffset) + ", y: " + Poco::NumberFormatter::format(yOffset));
+        label.move(xOffset, yOffset);
     }
 
     Omm::Gui::Label label;

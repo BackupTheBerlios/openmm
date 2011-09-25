@@ -56,7 +56,6 @@ public:
     ModelIterator endModel();
 
     std::vector<Model*>     _models;
-    View*                   _pView;
 };
 
 

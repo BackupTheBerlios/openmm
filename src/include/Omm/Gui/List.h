@@ -27,22 +27,14 @@
 #include <map>
 
 #include "View.h"
+#include "ScrollArea.h"
 #include "ListModel.h"
 #include "ListItem.h"
-#include "ScrollArea.h"
 
 namespace Omm {
 namespace Gui {
 
 class ListItemController;
-
-
-class ListScrollAreaController : public ScrollAreaController
-{
-    virtual void scrolled(int value);
-    virtual void resized(int width, int height);
-    virtual void presented();
-};
 
 
 class ListController : public Controller
@@ -54,7 +46,7 @@ protected:
 };
 
 
-class ListView : public View
+class ListView : public ScrollAreaView
 {
     friend class ListViewImpl;
     friend class ListModel;
@@ -106,8 +98,8 @@ protected:
 
 private:
     void selectedItem(int row);
-    void resized(int width, int height);
-    
+    virtual void resized(int width, int height);
+
     std::map<View*, ListItemController*>    _itemControllers;
 };
 

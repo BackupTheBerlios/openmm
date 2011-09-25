@@ -26,13 +26,6 @@
 #include "Gui/ListModel.h"
 #include "Gui/View.h"
 
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ListImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ListImpl.h"
-#endif
-
 
 namespace Omm {
 namespace Gui {

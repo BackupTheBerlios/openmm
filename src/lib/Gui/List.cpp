@@ -23,15 +23,7 @@
 
 #include "Gui/List.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/ListModel.h"
 #include "Gui/View.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ListImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ListImpl.h"
-#endif
 
 
 namespace Omm {
@@ -61,39 +53,51 @@ ListItemController::selected()
 }
 
 
-void
-ListScrollAreaController::scrolled(int value)
+class ListScrollAreaController : public ScrollAreaController
 {
-    ListView* pListView =  static_cast<ListView*>(_pView);
-    pListView->scrolledToRow(-pListView->getOffset() / pListView->getItemViewHeight());
+    friend class ListView;
+
+    ListScrollAreaController(ListView* pListView) : _pListView(pListView) {}
+
+    virtual void scrolled(int xOffset, int yOffset);
+    virtual void resized(int width, int height);
+    virtual void presented();
+
+    ListView*   _pListView;
+};
+
+
+void
+ListScrollAreaController::scrolled(int xOffset, int yOffset)
+{
+    _pListView->scrolledToRow(yOffset / _pListView->getItemViewHeight());
 }
 
 
 void
 ListScrollAreaController::resized(int width, int height)
 {
-//    ListView* pListView =  static_cast<ListView*>(_pView);
-//    pListView->resized(width, height);
-//    pListView->resizeScrollArea(width, pListView->getScrollAreaHeight());
+    _pListView->resizeScrollArea(width, _pListView->getScrollAreaHeight());
+    _pListView->resized(width, height);
 }
 
 
 void
 ListScrollAreaController::presented()
 {
+    resized(_pListView->width(), _pListView->height());
 }
 
 
 ListView::ListView(View* pParent) :
-View(pParent, false),
+ScrollAreaView(pParent),
 _itemViewHeight(50),
 _rowOffset(0),
 _pSelectedView(0),
 _selectedRow(-1),
 _lastVisibleRows(0)
 {
-    _pImpl = new ListViewImpl(this);
-    attachController(new ListScrollAreaController);
+    attachController(new ListScrollAreaController(this));
 }
 
 
@@ -135,8 +139,7 @@ ListView::setItemViewHeight(int height)
 int
 ListView::visibleRows()
 {
-    return static_cast<ListViewImpl*>(_pImpl)->getViewportHeight() / _itemViewHeight + 2;
-//    return static_cast<ListViewImpl*>(_pImpl)->visibleRows();
+    return getViewportHeight() / _itemViewHeight + 2;
 }
 
 
@@ -145,10 +148,8 @@ ListView::addItemView(View* pView)
 {
 //    Log::instance()->gui().debug("list view add item view.");
 
-    pView->resize(static_cast<ListViewImpl*>(_pImpl)->getViewportWidth(), _itemViewHeight);
-    static_cast<ListViewImpl*>(_pImpl)->addSubview(pView);
-
-//    static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
+    pView->resize(getViewportWidth(), _itemViewHeight);
+    addSubview(pView);
 }
 
 
@@ -162,7 +163,7 @@ ListView::moveItemView(int row, View* pView)
 int
 ListView::getOffset()
 {
-    static_cast<ListViewImpl*>(_pImpl)->getOffset();
+    return getYOffset();
 }
 
 
@@ -170,9 +171,7 @@ void
 ListView::updateScrollWidgetSize()
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    ListViewImpl* pImpl = static_cast<ListViewImpl*>(_pImpl);
-    pImpl->resizeScrollArea(pImpl->getViewportWidth(), pModel->totalItemCount() * _itemViewHeight);
-//    static_cast<ListViewImpl*>(_pImpl)->updateScrollWidgetSize();
+    resizeScrollArea(getViewportWidth(), pModel->totalItemCount() * _itemViewHeight);
 }
 
 
@@ -478,7 +477,6 @@ ListView::removeItem(int row)
         _freeViews.push(pView);
     }
 }
-
 
 
 } // namespace Gui

@@ -186,7 +186,6 @@ void
 View::attachController(Controller* pController)
 {
     _controllers.push_back(pController);
-    pController->_pView = this;
 }
 
 
@@ -280,14 +279,6 @@ ViewImpl*
 View::getViewImpl()
 {
     return _pImpl;
-}
-
-
-void
-View::selected()
-{
-    Omm::Gui::Log::instance()->gui().debug("view selected.");
-    NOTIFY_CONTROLLER(Controller, selected);
 }
 
 
