@@ -97,6 +97,13 @@ View::getParent()
 
 
 void
+View::addSubview(View* pView)
+{
+    _pImpl->addSubview(pView);
+}
+
+
+void
 View::show()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view show ... " + getName());

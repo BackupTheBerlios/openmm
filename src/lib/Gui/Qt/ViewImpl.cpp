@@ -81,6 +81,13 @@ ViewImpl::setNativeView(QWidget* pView)
 
 
 void
+ViewImpl::addSubview(View* pView)
+{
+    static_cast<QWidget*>(pView->getNativeView())->setParent(_pNativeView);
+}
+
+
+void
 ViewImpl::showView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");

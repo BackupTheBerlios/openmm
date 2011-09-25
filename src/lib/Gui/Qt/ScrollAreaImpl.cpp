@@ -75,20 +75,6 @@ ScrollAreaViewImpl::~ScrollAreaViewImpl()
 
 
 int
-ScrollAreaViewImpl::getXOffset()
-{
-    return -_pScrollWidget->geometry().x();
-}
-
-
-int
-ScrollAreaViewImpl::getYOffset()
-{
-    return -_pScrollWidget->geometry().y();
-}
-
-
-int
 ScrollAreaViewImpl::getViewportWidth()
 {
     return static_cast<QtScrollArea*>(_pNativeView)->viewport()->geometry().width();
@@ -99,6 +85,20 @@ int
 ScrollAreaViewImpl::getViewportHeight()
 {
     return static_cast<QtScrollArea*>(_pNativeView)->viewport()->geometry().height();
+}
+
+
+int
+ScrollAreaViewImpl::getXOffset()
+{
+    return - _pScrollWidget->geometry().x();
+}
+
+
+int
+ScrollAreaViewImpl::getYOffset()
+{
+    return - _pScrollWidget->geometry().y();
 }
 
 
@@ -120,14 +120,6 @@ void
 ScrollAreaViewImpl::resizeScrollArea(int width, int height)
 {
     _pScrollWidget->resize(width, height);
-}
-
-
-
-void
-ScrollAreaViewImpl::addSubview(View* pView)
-{
-    static_cast<QWidget*>(pView->getNativeView())->setParent(_pScrollWidget);
 }
 
 

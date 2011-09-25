@@ -45,20 +45,6 @@ View(pParent, false)
 
 
 int
-ScrollAreaView::getXOffset()
-{
-    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getXOffset();
-}
-
-
-int
-ScrollAreaView::getYOffset()
-{
-    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getYOffset();
-}
-
-
-int
 ScrollAreaView::getViewportWidth()
 {
     return static_cast<ScrollAreaViewImpl*>(_pImpl)->getViewportWidth();
@@ -69,6 +55,20 @@ int
 ScrollAreaView::getViewportHeight()
 {
     return static_cast<ScrollAreaViewImpl*>(_pImpl)->getViewportHeight();
+}
+
+
+int
+ScrollAreaView::getXOffset()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getXOffset();
+}
+
+
+int
+ScrollAreaView::getYOffset()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getYOffset();
 }
 
 
@@ -90,13 +90,6 @@ void
 ScrollAreaView::resizeScrollArea(int width, int height)
 {
     static_cast<ScrollAreaViewImpl*>(_pImpl)->resizeScrollArea(width, height);
-}
-
-
-void
-ScrollAreaView::addSubview(View* pView)
-{
-    static_cast<ScrollAreaViewImpl*>(_pImpl)->addSubview(pView);
 }
 
 

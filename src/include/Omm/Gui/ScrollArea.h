@@ -46,16 +46,13 @@ class ScrollAreaView : public View
 public:
     ScrollAreaView(View* pParent = 0);
 
-    int getXOffset();
-    int getYOffset();
     int getViewportWidth();
     int getViewportHeight();
+    int getXOffset();
+    int getYOffset();
     int getScrollAreaWidth();
     int getScrollAreaHeight();
     void resizeScrollArea(int width, int height);
-
-    // TODO: put this in View
-    virtual void addSubview(View* pView);
 };
 
 

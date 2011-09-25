@@ -131,7 +131,7 @@ ListViewImpl::addSubview(View* pView)
 void
 ListViewImpl::viewScrolledSlot(int value)
 {
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, value);
+//    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, value);
 
 //    ListView* pListView =  static_cast<ListView*>(_pView);
 //    pListView->scrolledToRow(-getOffset() / pListView->_itemViewHeight);

@@ -23,10 +23,20 @@
 
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/ScrollArea.h>
+#include <Omm/Gui/Label.h>
 
 
-class ScrollAreaController : public Omm::Gui::ScrollAreaController
+class ScrollArea : public Omm::Gui::ScrollArea
 {
+public:
+    ScrollArea()
+    {
+        resizeScrollArea(10000, 10000);
+        label.setLabel("Hello");
+        addSubview(&label);
+    }
+
+
 private:
     void scrolled(int xOffset, int yOffset)
     {
@@ -37,6 +47,8 @@ private:
     {
         std::cout << "resized width: " << width << ", height: " << height << std::endl;
     }
+
+    Omm::Gui::Label label;
 };
 
 
@@ -44,10 +56,7 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        Omm::Gui::ScrollArea* pScrollArea = new Omm::Gui::ScrollArea;
-        pScrollArea->attachController(new ScrollAreaController);
-        pScrollArea->resizeScrollArea(10000, 10000);
-        return pScrollArea;
+        return new ScrollArea;
     }
 };
 
