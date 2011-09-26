@@ -53,6 +53,7 @@ class View
     
 public:
     typedef enum {Current, Min, Pref, Max} SizeConstraint;
+    typedef enum {AlignLeft, AlignCenter, AlignRight} Alignment;
 
     View(View* pParent = 0);
     virtual ~View();

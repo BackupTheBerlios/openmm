@@ -50,6 +50,8 @@ class LabelView : public View
     
 public:
     LabelView(View* pParent = 0);
+
+    void setAlignment(Alignment alignment);
     
 private:
     virtual void syncView(Model* pModel);

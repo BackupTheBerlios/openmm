@@ -231,6 +231,7 @@ MediaRendererView::MediaRendererView()
 //    _pSeekSlider = new SeekSlider(this);
     
     _pRendererName = new Gui::Label(this);
+    _pRendererName->setAlignment(Gui::View::AlignCenter);
 
     setLayout(&_layout);
 }

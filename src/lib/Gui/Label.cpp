@@ -72,6 +72,13 @@ View(pParent, false)
 
 
 void
+LabelView::setAlignment(Alignment alignment)
+{
+    static_cast<LabelViewImpl*>(_pImpl)->setAlignment(alignment);
+}
+
+
+void
 LabelView::syncView(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
