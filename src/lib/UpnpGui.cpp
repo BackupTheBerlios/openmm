@@ -106,7 +106,7 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
-    push(&_deviceGroupListView, ">");
+    push(&_deviceGroupListView, "Player");
 
     _deviceGroupListView.setItemViewHeight(80);
     _deviceGroupListView.attachController(this);
@@ -228,9 +228,9 @@ MediaRendererView::MediaRendererView()
     _pForwButton->setLabel("Forw");
 
     _pVolSlider = new VolSlider(this);
-    _pSeekSlider = new SeekSlider(this);
+//    _pSeekSlider = new SeekSlider(this);
     
-    _pRendererName = new RendererButton(this);
+    _pRendererName = new Gui::Label(this);
 
     setLayout(&_layout);
 }
@@ -256,7 +256,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 {
     Gui::Log::instance()->gui().debug("media server group widget ctor");
     View::setName("media server group view");
-    push(&_deviceGroupListView, ">");
+    push(&_deviceGroupListView, "Media");
     
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);

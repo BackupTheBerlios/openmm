@@ -34,6 +34,7 @@
 #include "Gui/LazyList.h"
 #include "Gui/ListItem.h"
 #include "Gui/Button.h"
+#include "Gui/Label.h"
 #include "Gui/Slider.h"
 #include "Gui/HorizontalLayout.h"
 
@@ -112,7 +113,7 @@ private:
     Gui::Button*            _pForwButton;
     Gui::Slider*            _pVolSlider;
     Gui::Slider*            _pSeekSlider;
-    Gui::Button*            _pRendererName;
+    Gui::Label*             _pRendererName;
 };
 
 

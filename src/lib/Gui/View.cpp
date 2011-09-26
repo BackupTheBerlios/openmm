@@ -44,7 +44,8 @@ _minHeight(35),
 _prefWidth(100),
 _prefHeight(70),
 _maxWidth(200),
-_maxHeight(140)
+_maxHeight(140),
+_stretchFactor(1.0)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
 
@@ -59,7 +60,8 @@ _minHeight(35),
 _prefWidth(100),
 _prefHeight(70),
 _maxWidth(200),
-_maxHeight(140)
+_maxHeight(140),
+_stretchFactor(1.0)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
 
@@ -161,6 +163,13 @@ View::height(SizeConstraint size)
         case Max:
             return _maxHeight;
     }
+}
+
+
+float
+View::stretchFactor()
+{
+    return _stretchFactor;
 }
 
 

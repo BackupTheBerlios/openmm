@@ -66,6 +66,7 @@ public:
     
     int width(SizeConstraint size = Current);
     int height(SizeConstraint size = Current);
+    float stretchFactor();
     void resize(SizeConstraint size = Pref);
     void resize(int width, int height);
     void move(int x, int y);
@@ -118,6 +119,7 @@ protected:
     int                         _prefHeight;
     int                         _maxWidth;
     int                         _maxHeight;
+    float                       _stretchFactor;
 
 private:
     void syncViewWithModel(Model* pModel = 0);

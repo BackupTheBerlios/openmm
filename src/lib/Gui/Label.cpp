@@ -65,7 +65,8 @@ LabelView::LabelView(View* pParent) :
 View(pParent, false)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Label view ctor.");
-    _minWidth = 250;
+    _minWidth = 50;
+    _prefWidth = 250;
     _pImpl = new LabelViewImpl(this);
 }
 
