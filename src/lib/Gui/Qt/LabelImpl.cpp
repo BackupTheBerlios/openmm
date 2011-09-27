@@ -46,7 +46,7 @@ LabelViewImpl::~LabelViewImpl()
 void
 LabelViewImpl::setLabel(const std::string& label)
 {
-    static_cast<QLabel*>(_pNativeView)->setText(QString::fromStdString(label));
+    static_cast<QLabel*>(_pNativeView)->setText(QTextCodec::codecForName("UTF-8")->toUnicode(label.c_str()));
 }
 
 
