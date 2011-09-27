@@ -396,7 +396,13 @@ MediaContainerWidget::selectedItem(int row)
 std::string
 MediaObjectModel::getLabel()
 {
-    return getTitle();
+    Av::AbstractProperty* pArtist = getProperty(Av::AvProperty::ARTIST);
+    if (pArtist) {
+        return  pArtist->getValue() + " - " + getTitle();
+    }
+    else {
+        return getTitle();
+    }
 }
 
 
