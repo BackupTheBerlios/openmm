@@ -33,6 +33,8 @@ class QtNavigatorPanelButton : public QPushButton
 public:
     QtNavigatorPanelButton(View* pView);
 
+//    void paintEvent(QPaintEvent* event);
+    
     View*    _pView;
 };
 
@@ -40,8 +42,27 @@ public:
 QtNavigatorPanelButton::QtNavigatorPanelButton(View* pView) :
 _pView(pView)
 {
+    setFlat(true);
+    setIcon(QIcon(QString(":/images/right_arrow.gif")));
+//    setStyle(new QCleanlooksStyle);
+//    setStyle(new QPlastiqueStyle);
+//    setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
+//    setIcon(style()->standardIcon(QStyle::SP_ArrowForward));
+//    setIcon(style()->standardIcon(QStyle::PE_IndicatorArrowRight));
 }
 
+
+//void
+//QtNavigatorPanelButton::paintEvent(QPaintEvent* event)
+//{
+//    QPainter painter(this);
+//
+//    QStyleOptionFocusRect option;
+//    option.initFrom(this);
+//    option.backgroundColor = palette().color(QPalette::Background);
+//
+//    style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
+//}
 
 
 QtNavigatorPanel::QtNavigatorPanel(NavigatorViewImpl* pNavigatorView) :
@@ -49,6 +70,12 @@ QWidget(pNavigatorView),
 _pNavigatorView(pNavigatorView)
 {
     _pButtonLayout = new QHBoxLayout(this);
+    _pButtonLayout->setAlignment(Qt::AlignLeft);
+    _pButtonLayout->setSpacing(0);
+    _pButtonLayout->setMargin(0);
+    _pButtonLayout->setContentsMargins(0, 0, 0, 0);
+
+    _pIconProvider = new QFileIconProvider;
 }
 
 

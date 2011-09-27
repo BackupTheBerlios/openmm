@@ -72,6 +72,7 @@ private slots:
 private:
     std::stack<QtNavigatorPanelButton*>     _buttonStack;
     QHBoxLayout*                            _pButtonLayout;
+    QFileIconProvider*                      _pIconProvider;
     NavigatorViewImpl*                      _pNavigatorView;
 };
 
