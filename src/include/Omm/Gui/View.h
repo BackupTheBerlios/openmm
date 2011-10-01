@@ -69,7 +69,7 @@ public:
     int height(SizeConstraint size = Current);
     float stretchFactor();
     void resize(SizeConstraint size = Pref);
-    void resize(int width, int height);
+    virtual void resize(int width, int height);
     void move(int x, int y);
 
     Model* getModel() const;

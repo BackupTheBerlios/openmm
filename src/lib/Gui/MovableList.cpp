@@ -21,13 +21,13 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "Gui/List.h"
+#include "Gui/MovableList.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/ListModel.h"
 #include "Gui/View.h"
 
 #ifdef __GUI_QT_PLATFORM__
-#include "Qt/ListImpl.h"
+#include "Qt/MovableListImpl.h"
 #endif
 
 
@@ -35,8 +35,8 @@ namespace Omm {
 namespace Gui {
 
 
-ListView::ListView(View* pParent) :
-View(new ListViewImpl(this, pParent), pParent),
+MovableListView::MovableMovableListView(View* pParent) :
+View(new MovableListViewImpl(this, pParent), pParent),
 _itemViewHeight(50),
 _rowOffset(0)
 {
@@ -44,7 +44,7 @@ _rowOffset(0)
 }
 
 
-ListView::ListView(ViewImpl* pViewImpl, View* pParent) :
+MovableListView::MovableListView(ViewImpl* pViewImpl, View* pParent) :
 View(pViewImpl, pParent),
 _itemViewHeight(50),
 _rowOffset(0)
@@ -54,9 +54,9 @@ _rowOffset(0)
 
 
 void
-ListView::setModel(ListModel* pModel)
+MovableListView::setModel(MovableListModel* pModel)
 {
-    Log::instance()->gui().debug("list view set model ...");
+    Log::instance()->gui().debug("MovableList view set model ...");
 
     View::setModel(pModel);
 
@@ -73,61 +73,61 @@ ListView::setModel(ListModel* pModel)
         insertItem(i);
     }
 
-    Log::instance()->gui().debug("list view set model finished.");
+    Log::instance()->gui().debug("MovableList view set model finished.");
 }
 
 
 int
-ListView::visibleRows()
+MovableListView::visibleRows()
 {
-    return static_cast<ListViewImpl*>(_pImpl)->visibleRows();
+    return static_cast<MovableListViewImpl*>(_pImpl)->visibleRows();
 }
 
 
 void
-ListView::addItemView(View* pView)
+MovableListView::addItemView(View* pView)
 {
-    Log::instance()->gui().debug("list view init view.");
-    static_cast<ListViewImpl*>(_pImpl)->addItemView(pView);
+    Log::instance()->gui().debug("MovableList view init view.");
+    static_cast<MovableListViewImpl*>(_pImpl)->addItemView(pView);
 }
 
 
 void
-ListView::moveItemView(int row, View* pView)
+MovableListView::moveItemView(int row, View* pView)
 {
-    static_cast<ListViewImpl*>(_pImpl)->moveItemView(row, pView);
+    static_cast<MovableListViewImpl*>(_pImpl)->moveItemView(row, pView);
 }
 
 
 void
-ListView::extendViewPool()
+MovableListView::extendViewPool()
 {
-    static_cast<ListViewImpl*>(_pImpl)->extendViewPool();
+    static_cast<MovableListViewImpl*>(_pImpl)->extendViewPool();
 }
 
 
 int
-ListView::viewPoolSize()
+MovableListView::viewPoolSize()
 {
     return _viewPool.size();
 }
 
 
 void
-ListView::extendViewPool(int n)
+MovableListView::extendViewPool(int n)
 {
-    Log::instance()->gui().debug("list view extend view pool by number of views: " + Poco::NumberFormatter::format(n));
+    Log::instance()->gui().debug("MovableList view extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    MovableListModel* pModel = static_cast<MovableListModel*>(_pModel);
 
     for (int i = 0; i < n; ++i) {
-        Log::instance()->gui().debug("list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
+        Log::instance()->gui().debug("MovableList view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
         View* pView = pModel->createItemView();
         if (!pView) {
-            Log::instance()->gui().error("list view failed to create view for pool (ignoring)");
+            Log::instance()->gui().error("MovableList view failed to create view for pool (ignoring)");
             return;
         }
-        Log::instance()->gui().debug("list view extend view created item view " + pView->getName());
+        Log::instance()->gui().debug("MovableList view extend view created item view " + pView->getName());
         pView->hide();
         _viewPool.push_back(pView);
         _freeViews.push(pView);
@@ -138,41 +138,41 @@ ListView::extendViewPool(int n)
 
 
 int
-ListView::visibleIndex(int row)
+MovableListView::visibleIndex(int row)
 {
     return row - _rowOffset;
 }
 
 
 int
-ListView::countVisibleViews()
+MovableListView::countVisibleViews()
 {
     return _visibleViews.size();
 }
 
 
 View*
-ListView::visibleView(int index)
+MovableListView::visibleView(int index)
 {
     if (0 <= index && index < _visibleViews.size()) {
         return _visibleViews[index];
     }
     else {
-        Log::instance()->gui().error("list view failed to retrieve visible view, out of range (ignoring)");
+        Log::instance()->gui().error("MovableList view failed to retrieve visible view, out of range (ignoring)");
         return 0;
     }
 }
 
 
 bool
-ListView::itemIsVisible(int row)
+MovableListView::itemIsVisible(int row)
 {
     return _rowOffset <= row && row < _rowOffset + visibleRows();
 }
 
 
 void
-ListView::moveViewToRow(int row, View* pView)
+MovableListView::moveViewToRow(int row, View* pView)
 {
 //    pView->setRow(row);
     moveItemView(row, pView);
@@ -180,11 +180,11 @@ ListView::moveViewToRow(int row, View* pView)
 
 
 void
-ListView::insertItem(int row)
+MovableListView::insertItem(int row)
 {
-    Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));
+    Log::instance()->gui().debug("MovableList view insert item: " + Poco::NumberFormatter::format(row));
     
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    MovableListModel* pModel = static_cast<MovableListModel*>(_pModel);
 
     // if view is not lazy, view pool has to be extended when too small and new views are inserted.
     if (_visibleViews.size() >= _viewPool.size()) {
@@ -194,18 +194,18 @@ ListView::insertItem(int row)
     // attach item to a free (not visible) view
     if (_freeViews.size()) {
         View* pView = _freeViews.top();
-        Log::instance()->gui().debug("list view got free view: " + pView->getName());
+        Log::instance()->gui().debug("MovableList view got free view: " + pView->getName());
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
         pView->setModel(pModel->getItemModel(row));
-        Log::instance()->gui().debug("list view creating list item controller ...");
-//        ListItemController itemController;
-        ListItemController* pItemController = new ListItemController;
-//        ListItemModel* pItemModel = new ListItemModel;
-//        ListController* pLC = new ListController;
+        Log::instance()->gui().debug("MovableList view creating MovableList item controller ...");
+//        MovableListItemController itemController;
+        MovableListItemController* pItemController = new MovableListItemController;
+//        MovableListItemModel* pItemModel = new MovableListItemModel;
+//        MovableListController* pLC = new MovableListController;
 
 //        int* pInt = new int;
-//        Log::instance()->gui().debug("list view creating list item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)
+//        Log::instance()->gui().debug("MovableList view creating MovableList item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)
 //        + ", size: " + Poco::NumberFormatter::format(sizeof(*pItemController)));
 //        Controller* pItemController = new Controller;
 //        pItemController->setRow(row);
@@ -214,19 +214,19 @@ ListView::insertItem(int row)
         // FIXME: detach last view if not visible anymore
         moveViewToRow(row, pView);
 
-        // FIXME: allocation of List* makes pView->show() crash
+        // FIXME: allocation of MovableList* makes pView->show() crash
         pView->show();
     }
     else {
-        Log::instance()->gui().error("list view failed to attach view to item, view pool is empty (ignoring)");
+        Log::instance()->gui().error("MovableList view failed to attach view to item, view pool is empty (ignoring)");
     }
 }
 
 
 void
-ListView::removeItem(int row)
+MovableListView::removeItem(int row)
 {
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    MovableListModel* pModel = static_cast<MovableListModel*>(_pModel);
 
     // detach item from visible view
 //    View* pView = pModel->getChildView(row);
@@ -247,14 +247,14 @@ ListView::removeItem(int row)
     if (pModel->totalItemCount() - lastRow > 0) {
         // FIXME: something's going wrong with removal of rows, duplicate rows appear and crash
         // reuse and attach view below last view cause it is now becoming visible
-        Log::instance()->gui().debug("list view reuse removed item view");
+        Log::instance()->gui().debug("MovableList view reuse removed item view");
 //        pModel->attachView(lastRow - 1, pView);
         pView->setModel(pModel->getItemModel(lastRow - 1));
         _visibleViews.push_back(pView);
         moveViewToRow(lastRow - 1, pView);
     }
     else {
-        Log::instance()->gui().debug("list view free removed item view");
+        Log::instance()->gui().debug("MovableList view free removed item view");
         // otherwise free view
         _freeViews.push(pView);
     }

@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListImpl_INCLUDED
-#define ListImpl_INCLUDED
+#ifndef MovableListImpl_INCLUDED
+#define MovableListImpl_INCLUDED
 
 #include <QtGui>
 #include "ViewImpl.h"
@@ -29,14 +29,14 @@ namespace Omm {
 namespace Gui {
 
 class View;
-class ListView;
+class MovableListView;
 
 
-class ListViewImpl : public QGraphicsView, public ViewImpl
+class MovableListViewImpl : public QGraphicsView, public ViewImpl
 {
     Q_OBJECT
 
-    friend class ListView;
+    friend class MovableListView;
 
 signals:
     void moveWidgetSignal(int targetRow, View* pView);
@@ -47,8 +47,8 @@ private slots:
     void extendPoolSlot();
 
 private:
-    ListViewImpl(View* pView, bool movableViews = false, View* pParent = 0);
-    virtual ~ListViewImpl();
+    MovableListViewImpl(View* pView, bool movableViews = false, View* pParent = 0);
+    virtual ~MovableListViewImpl();
 
     int visibleRows();
     void addItemView(View* pView);

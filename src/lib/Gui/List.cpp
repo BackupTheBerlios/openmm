@@ -78,7 +78,7 @@ void
 ListScrollAreaController::resized(int width, int height)
 {
     _pListView->resizeScrollArea(width, _pListView->getScrollAreaHeight());
-    _pListView->resized(width, height);
+    _pListView->resize(width, height);
 }
 
 
@@ -245,17 +245,6 @@ ListView::scrolledToRow(int rowOffset)
 
 
 void
-ListView::resize(int rows, int width)
-{
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
-
-    int rowDelta = rows - _lastVisibleRows;
-    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
-    resizeDelta(rowDelta, width);
-}
-
-
-void
 ListView::resizeDelta(int rowDelta, int width)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
@@ -394,11 +383,13 @@ ListView::selectedItem(int row)
 
 
 void
-ListView::resized(int width, int height)
+ListView::resize(int width, int height)
 {
     int rows = height / _itemViewHeight;
-    Omm::Gui::Log::instance()->gui().debug("list view resized: " + Poco::NumberFormatter::format(rows));
-    resize(rows, width);
+    Omm::Gui::Log::instance()->gui().debug("list view resize rows: " + Poco::NumberFormatter::format(rows));
+    int rowDelta = rows - _lastVisibleRows;
+    Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+    resizeDelta(rowDelta, width);
 }
 
 

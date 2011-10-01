@@ -95,13 +95,13 @@ LazyListView::scrolledToRow(int rowOffset)
 
 
 void
-LazyListView::resize(int rows, int width)
+LazyListView::resize(int width, int height)
 {
     LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
 
-    // FIXME: _lastVisibleRows 
-//    int rowDelta = rows - _viewPool.size();
-    
+    int rows = height / _itemViewHeight;
+    Omm::Gui::Log::instance()->gui().debug("lazy list view resize rows: " + Poco::NumberFormatter::format(rows));
+
     int rowDelta = rows;
     if (_lastVisibleRows > 0) {
         rowDelta -= _lastVisibleRows;

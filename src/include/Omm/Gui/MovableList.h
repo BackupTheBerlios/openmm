@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef List_INCLUDED
-#define List_INCLUDED
+#ifndef MovableList_INCLUDED
+#define MovableList_INCLUDED
 
 #include <vector>
 #include <stack>
@@ -33,25 +33,25 @@ namespace Omm {
 namespace Gui {
 
 
-class ListController : public Controller
+class MovableListController : public Controller
 {
 protected:
     virtual void selectedItem(int row) {}
 };
 
 
-class ListView : public View
+class MovableListView : public View
 {
-    friend class ListViewImpl;
-    friend class ListModel;
+    friend class MovableListViewImpl;
+    friend class MovableListModel;
     
 public:
-    ListView(View* pParent = 0);
+    MovableListView(View* pParent = 0);
 
-    virtual void setModel(ListModel* pModel);
+    virtual void setModel(MovableListModel* pModel);
 
 protected:
-    ListView(ViewImpl* pViewImpl, View* pParent = 0);
+    MovableListView(ViewImpl* pViewImpl, View* pParent = 0);
 
     // TODO implement syncView()
     virtual void syncView() {}
@@ -81,10 +81,10 @@ protected:
 };
 
 
-class List : public Widget<ListView, ListController, ListModel>
+class MovableList : public Widget<MovableListView, MovableListController, MovableListModel>
 {
 public:
-    List(View* pParent = 0) : Widget<ListView, ListController, ListModel>(pParent) {}
+    MovableList(View* pParent = 0) : Widget<MovableListView, MovableListController, MovableListModel>(pParent) {}
 };
 
 

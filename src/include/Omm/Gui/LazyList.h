@@ -44,7 +44,7 @@ protected:
     virtual void syncView() {}
     
     virtual void scrolledToRow(int rowOffset);
-    virtual void resize(int rows, int width);
+    virtual void resize(int width, int height);
 };
 
 

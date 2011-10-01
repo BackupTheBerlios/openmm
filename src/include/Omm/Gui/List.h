@@ -74,7 +74,7 @@ protected:
     void updateScrollWidgetSize();
     void scrollDelta(int rowDelta);
     virtual void scrolledToRow(int rowOffset);
-    virtual void resize(int rows, int width);
+    virtual void resize(int width, int height);
     void resizeDelta(int rowDelta, int width);
 
     void extendViewPool(int n);
@@ -98,7 +98,6 @@ protected:
 
 private:
     void selectedItem(int row);
-    virtual void resized(int width, int height);
 
     std::map<View*, ListItemController*>    _itemControllers;
 };
