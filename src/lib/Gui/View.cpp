@@ -174,6 +174,26 @@ View::stretchFactor()
 
 
 void
+View::setWidth(int width)
+{
+    _pImpl->resizeView(width, height());
+    if (_pLayout) {
+        _pLayout->layoutView();
+    }
+}
+
+
+void
+View::setHeight(int height)
+{
+    _pImpl->resizeView(width(), height);
+    if (_pLayout) {
+        _pLayout->layoutView();
+    }
+}
+
+
+void
 View::resize(SizeConstraint size)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view resize.");
@@ -329,6 +349,13 @@ ViewImpl*
 View::getViewImpl()
 {
     return _pImpl;
+}
+
+
+void
+View::resizeNoLayout(int width, int height)
+{
+    _pImpl->resizeView(width, height);
 }
 
 

@@ -50,6 +50,7 @@ class View
     friend class ViewImpl;
     friend class Model;
     friend class Layout;
+//    friend class HorizontalLayout;
     
 public:
     typedef enum {Current, Min, Pref, Max} SizeConstraint;
@@ -68,7 +69,9 @@ public:
     int width(SizeConstraint size = Current);
     int height(SizeConstraint size = Current);
     float stretchFactor();
-    void resize(SizeConstraint size = Pref);
+    virtual void setWidth(int width);
+    virtual void setHeight(int height);
+    virtual void resize(SizeConstraint size = Pref);
     virtual void resize(int width, int height);
     void move(int x, int y);
 
@@ -100,6 +103,7 @@ public:
     virtual void setHighlighted(bool highlighted = true);
 
     ViewImpl* getViewImpl();
+    void resizeNoLayout(int width, int height);
 
 protected:
     View(View* pParent, bool createPlainView);

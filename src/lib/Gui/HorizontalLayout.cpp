@@ -48,11 +48,11 @@ HorizontalLayout::layoutView()
 
     for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it) {
         minChildWidth += (*it)->width(View::Min);
-        minChildHeight += (*it)->height(View::Min);
+        minChildHeight = std::max((*it)->height(View::Min), minChildHeight);
         prefChildWidth += (*it)->width(View::Pref);
-        prefChildHeight += (*it)->height(View::Pref);
+        prefChildHeight = std::max((*it)->height(View::Pref), prefChildHeight);
         maxChildWidth += (*it)->width(View::Max);
-        maxChildHeight += (*it)->height(View::Max);
+        maxChildHeight = std::max((*it)->height(View::Max), maxChildHeight);
 
 //        if (minChildWidth > _pView->width()) {
 //            currentRow++;
@@ -79,9 +79,14 @@ HorizontalLayout::layoutView()
     }
     stretchFactor.push_back(_pView->width() / childWidthSum);
 
-    // layout the subviews by moving and resizing them
     int childWidth = 0;
-    int childHeight = _pView->height() / (currentRow + 1);
+//    int childHeight = _pView->height() / (currentRow + 1);
+    int childHeight = prefChildHeight;
+
+    // resize super view
+    _pView->resizeNoLayout(_pView->width(), (currentRow + 1) * childHeight);
+
+    // layout the subviews by moving and resizing them
     i = 0;
     for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it, ++i) {
         int width = (*it)->width(View::Pref) * (1 + (*it)->stretchFactor()) * stretchFactor[childRow[i]];

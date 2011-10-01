@@ -66,7 +66,9 @@ View(pParent, false)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Label view ctor.");
     _minWidth = 50;
+    _minHeight = 10;
     _prefWidth = 250;
+    _prefHeight = 20;
     _pImpl = new LabelViewImpl(this);
 }
 
