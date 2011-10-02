@@ -166,6 +166,23 @@ View::height(SizeConstraint size)
 }
 
 
+void
+View::setSizeConstraint(int width, int height, SizeConstraint size)
+{
+    switch(size) {
+        case Min:
+            _minWidth = width;
+            _minHeight = height;
+        case Pref:
+            _prefWidth = width;
+            _prefHeight = height;
+        case Max:
+            _maxWidth = width;
+            _maxHeight = height;
+    }
+}
+
+
 float
 View::stretchFactor()
 {

@@ -67,8 +67,8 @@ View(pParent, false)
 //    Omm::Gui::Log::instance()->gui().debug("button view ctor.");
     _minWidth = 30;
     _minHeight = 10;
-    _prefWidth = 50;
-    _prefHeight = 20;
+    _prefWidth = 40;
+    _prefHeight = 30;
     _pImpl = new ButtonViewImpl(this);
 }
 

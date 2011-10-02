@@ -144,12 +144,34 @@ MediaRendererDevice::initController()
 }
 
 
+class BackButton : public Gui::Button
+{
+public:
+    BackButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    {
+        Gui::Image image;
+        image.setFile("media-skip-backward.png");
+        setImage(&image);
+        setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+    }
+
+    virtual void pushed()
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
+//        pRenderer->playPressed();
+    }
+};
+
+
 class PlayButton : public Gui::Button
 {
 public:
     PlayButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
-        setLabel("Play");
+        Gui::Image image;
+        image.setFile("media-start.png");
+        setImage(&image);
+        setSizeConstraint(30, height(Gui::View::Pref), Gui::View::Pref);
     }
 
     virtual void pushed()
@@ -165,13 +187,35 @@ class StopButton : public Gui::Button
 public:
     StopButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
-        setLabel("Stop");
+        Gui::Image image;
+        image.setFile("media-stop.png");
+        setImage(&image);
+        setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
     }
 
     virtual void pushed()
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->stopPressed();
+    }
+};
+
+
+class ForwButton : public Gui::Button
+{
+public:
+    ForwButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    {
+        Gui::Image image;
+        image.setFile("media-skip-forward.png");
+        setImage(&image);
+        setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+    }
+
+    virtual void pushed()
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
+//        pRenderer->playPressed();
     }
 };
 
@@ -219,13 +263,10 @@ public:
 
 MediaRendererView::MediaRendererView()
 {
-    _pBackButton = new Gui::Button(this);
+    _pBackButton = new BackButton(this);
     _pPlayButton = new PlayButton(this);
     _pStopButton = new StopButton(this);
-    _pForwButton = new Gui::Button(this);
-
-    _pBackButton->setLabel("Back");
-    _pForwButton->setLabel("Forw");
+    _pForwButton = new ForwButton(this);
 
     _pVolSlider = new VolSlider(this);
 //    _pSeekSlider = new SeekSlider(this);

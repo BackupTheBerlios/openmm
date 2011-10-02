@@ -68,6 +68,7 @@ public:
     
     int width(SizeConstraint size = Current);
     int height(SizeConstraint size = Current);
+    void setSizeConstraint(int width, int height, SizeConstraint size = Current);
     float stretchFactor();
     virtual void setWidth(int width);
     virtual void setHeight(int height);
