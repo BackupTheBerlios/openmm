@@ -43,6 +43,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     _pNativeView = pNative;
     connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
     connect(this, SIGNAL(hideViewSignal()), _pNativeView, SLOT(hide()));
+    connect(this, SIGNAL(triggerViewSyncSignal(Model*)), this, SLOT(triggerViewSyncSlot(Model*)));
     _pNativeView->setAutoFillBackground(true);
 
     if (pView->getParent()) {
@@ -53,6 +54,22 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     else {
         _pNativeView->resize(250, 400);
     }
+}
+
+
+void
+ViewImpl::triggerViewSync(Model* pModel)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
+    emit triggerViewSyncSignal(pModel);
+}
+
+
+void
+ViewImpl::triggerViewSyncSlot(Model* pModel)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync slot");
+    _pView->syncView(pModel);
 }
 
 

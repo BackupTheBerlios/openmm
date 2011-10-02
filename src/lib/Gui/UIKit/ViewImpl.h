@@ -23,6 +23,7 @@
 #define ViewImpl_INCLUDED
 
 #include "Gui/View.h"
+#include "Gui/Model.h"
 
 namespace Omm {
 namespace Gui {

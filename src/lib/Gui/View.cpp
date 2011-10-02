@@ -263,7 +263,7 @@ View::setModel(Model* pModel)
         for(ControllerIterator it = beginController(); it != endController(); ++it) {
             (*it)->attachModel(pModel);
         }
-        syncView(pModel);
+        syncViewWithModel(pModel);
     }
     _pModel = pModel;
 }
@@ -380,10 +380,10 @@ void
 View::syncViewWithModel(Model* pModel)
 {
     if (pModel) {
-        syncView(pModel);
+        _pImpl->triggerViewSync(pModel);
     }
     else {
-        syncView(getModel());
+        _pImpl->triggerViewSync(getModel());
     }
 }
 

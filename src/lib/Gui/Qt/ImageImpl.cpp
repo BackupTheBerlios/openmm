@@ -69,5 +69,14 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
     }
 }
 
+
+//void
+//ImageViewImpl::resizeView(int width, int height)
+//{
+//    static_cast<QLabel*>(_pNativeView)->resize(width, height);
+//    _pImage->resize(width, height);
+//}
+
+
 }  // namespace Omm
 }  // namespace Gui

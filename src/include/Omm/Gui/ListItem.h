@@ -38,7 +38,7 @@ class ListItemModel : public Model
     
 public:
     void setLabelModel(LabelModel* pLabelModel);
-    void setImage(ImageModel* pImageModel);
+    void setImageModel(ImageModel* pImageModel);
 
 private:
     ImageModel*     _pImageModel;

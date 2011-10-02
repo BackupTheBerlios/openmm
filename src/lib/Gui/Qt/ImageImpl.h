@@ -41,6 +41,7 @@ private:
 
     void setData(const std::string& data);
     void setAlignment(View::Alignment alignment);
+//    virtual void resizeView(int width, int height);
 
     QPixmap*     _pImage;
 };

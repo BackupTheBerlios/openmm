@@ -355,6 +355,10 @@ MediaServerDevice::initController()
     Gui::LabelModel* pLabelModel = new Gui::LabelModel;
     pLabelModel->setLabel(getFriendlyName());
     setLabelModel(pLabelModel);
+
+    Gui::ImageModel* pImageModel = new Gui::ImageModel;
+    pImageModel->setFile("media-server.png");
+    setImageModel(pImageModel);
 }
 
 
@@ -436,9 +440,27 @@ MediaContainerWidget::selectedItem(int row)
 }
 
 
+Gui::ImageModel*   MediaObjectModel::_pContainerImageModel = 0;
+Gui::ImageModel*   MediaObjectModel::_pItemImageModel = 0;
+
 MediaObjectModel::MediaObjectModel()
 {
     setLabelModel(new MediaObjectLabelModel(this));
+
+    if (!_pContainerImageModel) {
+        _pContainerImageModel = new Gui::Image;
+        _pContainerImageModel->setFile("media-pause.png");
+    }
+    if (!_pItemImageModel) {
+        _pItemImageModel = new Gui::Image;
+        _pItemImageModel->setFile("media-pause.png");
+    }
+    if (isContainer()) {
+        setImageModel(_pContainerImageModel);
+    }
+    else {
+        setImageModel(_pItemImageModel);
+    }
 }
 
 

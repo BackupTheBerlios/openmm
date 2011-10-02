@@ -190,6 +190,8 @@ private:
     };
 
     MediaContainerWidget*     _pContainer;
+    static Gui::ImageModel*   _pContainerImageModel;
+    static Gui::ImageModel*   _pItemImageModel;
 };
 
 

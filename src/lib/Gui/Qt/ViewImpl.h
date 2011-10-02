@@ -54,6 +54,7 @@ public:
 
 protected:
     void initViewImpl(View* pView, QWidget* pNative);
+    void triggerViewSync(Model* pModel);
 
     View*                       _pView;
     QWidget*                    _pNativeView;
@@ -61,6 +62,10 @@ protected:
 signals:
     void showViewSignal();
     void hideViewSignal();
+    void triggerViewSyncSignal(Model* pModel);
+
+private slots:
+    void triggerViewSyncSlot(Model* pModel);
 
 private:
     void presented();

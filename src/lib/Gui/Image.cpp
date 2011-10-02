@@ -94,7 +94,7 @@ ImageView::setAlignment(Alignment alignment)
 void
 ImageView::syncView(Model* pModel)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Image view sync view: " + getName());
+    Omm::Gui::Log::instance()->gui().debug("Image view sync view: " + getName());
     ImageModel* pImageModel = static_cast<ImageModel*>(pModel);
     ImageViewImpl* pImpl = static_cast<ImageViewImpl*>(_pImpl);
     pImpl->setData(pImageModel->getData());

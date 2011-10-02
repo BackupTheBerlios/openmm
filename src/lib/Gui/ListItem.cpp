@@ -38,7 +38,7 @@ ListItemModel::setLabelModel(LabelModel* pLabelModel)
 
 
 void
-ListItemModel::setImage(ImageModel* pImageModel)
+ListItemModel::setImageModel(ImageModel* pImageModel)
 {
     _pImageModel = pImageModel;
 }
@@ -62,6 +62,7 @@ ListItemView::syncView(Model* pModel)
 //    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
     _pLabelView->syncView(pItemModel->_pLabelModel);
+    _pImageView->syncView(pItemModel->_pImageModel);
 }
 
 
