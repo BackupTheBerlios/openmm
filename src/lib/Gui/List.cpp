@@ -187,7 +187,7 @@ ListView::scrollDelta(int rowDelta)
         pModel->getItemModel(_rowOffset)->detachView(pView);
         // move first view to the end
         int lastRow = _rowOffset + _visibleViews.size();
-        moveViewToRow(lastRow, pView);
+        moveItemView(lastRow, pView);
         // attach model
         pView->setModel(pModel->getItemModel(lastRow));
         _itemControllers[pView]->setRow(lastRow);
@@ -202,7 +202,7 @@ ListView::scrollDelta(int rowDelta)
         int lastRow = _rowOffset + _visibleViews.size() - 1;
         pModel->getItemModel(lastRow)->detachView(pView);
         // move last view to the beginning
-        moveViewToRow(_rowOffset - 1, pView);
+        moveItemView(_rowOffset - 1, pView);
         // attach model
         pView->setModel(pModel->getItemModel(_rowOffset - 1));
         _itemControllers[pView]->setRow(_rowOffset - 1);
@@ -266,7 +266,7 @@ ListView::resizeDelta(int rowDelta, int width)
         View* pView = _freeViews.top();
         _freeViews.pop();
         int lastRow = _rowOffset + _visibleViews.size();
-        moveViewToRow(lastRow, pView);
+        moveItemView(lastRow, pView);
 
         Model* pViewModel = pModel->getItemModel(lastRow);
         if (pViewModel) {
@@ -346,13 +346,6 @@ bool
 ListView::itemIsVisible(int row)
 {
     return _rowOffset <= row && row < _rowOffset + visibleRows();
-}
-
-
-void
-ListView::moveViewToRow(int row, View* pView)
-{
-    moveItemView(row, pView);
 }
 
 
@@ -458,7 +451,7 @@ ListView::insertItem(int row)
 
         // FIXME: move all views below one down
         // FIXME: detach last view if not visible anymore
-        moveViewToRow(row, pView);
+        moveItemView(row, pView);
 
         // FIXME: allocation of List* makes pView->show() crash
         pView->show();
@@ -486,7 +479,7 @@ ListView::removeItem(int row)
     int lastRow = _rowOffset + _visibleViews.size();
     // move all views below one up
     for (int i = index + 1; i < countVisibleViews(); i++) {
-        moveViewToRow(row + i - index - 1, visibleView(i));
+        moveItemView(row + i - index - 1, visibleView(i));
     }
 //    pModel->detachView(row);
     pView->hide();
@@ -499,7 +492,7 @@ ListView::removeItem(int row)
 //        pModel->attachView(lastRow - 1, pView);
         pView->setModel(pModel->getItemModel(lastRow - 1));
         _visibleViews.push_back(pView);
-        moveViewToRow(lastRow - 1, pView);
+        moveItemView(lastRow - 1, pView);
     }
     else {
         Log::instance()->gui().debug("list view free removed item view");

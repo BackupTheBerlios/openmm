@@ -69,7 +69,7 @@ protected:
     virtual void removeItem(int row);
     virtual int visibleRows();
     virtual void addItemView(View* pView);
-    virtual void moveItemView(int row, View* pView);
+    void moveItemView(int row, View* pView);
 
     int getOffset();
     void updateScrollWidgetSize();
@@ -84,7 +84,6 @@ protected:
     int countVisibleViews();
     View* visibleView(int index);
     bool itemIsVisible(int row);
-    void moveViewToRow(int row, View* pView);
     void handleSelectionHighlight();
 
     std::vector<View*>                  _viewPool;
