@@ -33,7 +33,7 @@ ImageViewImpl::ImageViewImpl(View* pView)
 {
 //    Omm::Gui::Log::instance()->gui().debug("image view impl ctor");
     QLabel* pNativeView = new QLabel;
-    _pImage = new QImage;
+    _pImage = new QPixmap;
 
     initViewImpl(pView, pNativeView);
 }
@@ -47,9 +47,9 @@ ImageViewImpl::~ImageViewImpl()
 void
 ImageViewImpl::setData(const std::string& data)
 {
-    QImage* pImage = static_cast<QImage*>(_pImage);
+    QPixmap* pImage = static_cast<QPixmap*>(_pImage);
     pImage->loadFromData((const uchar*)data.data(), data.size(), 0);
-    static_cast<QLabel*>(_pNativeView)->setPixmap(QPixmap::fromImage(*pImage));
+    static_cast<QLabel*>(_pNativeView)->setPixmap(*pImage);
 }
 
 
