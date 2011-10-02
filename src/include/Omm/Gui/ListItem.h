@@ -23,24 +23,26 @@
 #define ListItem_INCLUDED
 
 #include "View.h"
-
+#include "Image.h"
+#include "Label.h"
 
 namespace Omm {
 namespace Gui {
 
-
-class Label;
 class HorizontalLayout;
 
 
 class ListItemModel : public Model
 {
+    friend class ListItemView;
+    
 public:
-    virtual std::string getLabel();
-    void setLabel(const std::string& text);
+    void setLabelModel(LabelModel* pLabelModel);
+    void setImage(ImageModel* pImageModel);
 
 private:
-    std::string _label;
+    ImageModel*     _pImageModel;
+    LabelModel*     _pLabelModel;
 };
 
 
@@ -53,7 +55,8 @@ private:
     virtual void syncView(Model* pModel);
     virtual void setHighlighted(bool highlighted = true);
 
-    Label*              _pLabel;
+    ImageView*          _pImageView;
+    LabelView*          _pLabelView;
     HorizontalLayout*   _pLayout;
 };
 

@@ -176,9 +176,19 @@ private:
 class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ListItemModel
 {
 public:
-    virtual std::string getLabel();
+    MediaObjectModel();
 
 private:
+    class MediaObjectLabelModel : public Gui::LabelModel
+    {
+    public:
+        MediaObjectLabelModel(MediaObjectModel* pSuperModel) : _pSuperModel(pSuperModel) {}
+        
+        virtual std::string getLabel();
+
+        MediaObjectModel*   _pSuperModel;
+    };
+
     MediaContainerWidget*     _pContainer;
 };
 

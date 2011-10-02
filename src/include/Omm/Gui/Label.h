@@ -53,7 +53,7 @@ public:
 
     void setAlignment(Alignment alignment);
     
-private:
+//private:
     virtual void syncView(Model* pModel);
 };
 

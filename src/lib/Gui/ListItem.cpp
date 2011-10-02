@@ -23,7 +23,6 @@
 
 #include "Gui/ListItem.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/Label.h"
 #include "Gui/HorizontalLayout.h"
 
 
@@ -31,28 +30,27 @@ namespace Omm {
 namespace Gui {
 
 
-std::string
-ListItemModel::getLabel()
+void
+ListItemModel::setLabelModel(LabelModel* pLabelModel)
 {
-    return _label;
+    _pLabelModel = pLabelModel;
 }
 
 
 void
-ListItemModel::setLabel(const std::string& label)
+ListItemModel::setImage(ImageModel* pImageModel)
 {
-//    Omm::Gui::Log::instance()->gui().debug("list item model set label");
-    _label = label;
-
-    syncViews();
+    _pImageModel = pImageModel;
 }
 
 
 ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
-    _pLabel = new Label(this);
-    _pLabel->setBackgroundColor(Color("white"));
+    _pImageView = new ImageView(this);
+    _pLabelView = new LabelView(this);
+    _pLabelView->setBackgroundColor(Color("white"));
+
     _pLayout = new HorizontalLayout;
     setLayout(_pLayout);
 }
@@ -63,7 +61,7 @@ ListItemView::syncView(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
-    _pLabel->setLabel(pItemModel->getLabel());
+    _pLabelView->syncView(pItemModel->_pLabelModel);
 }
 
 
@@ -71,7 +69,7 @@ void
 ListItemView::setHighlighted(bool highlighted)
 {
     Omm::Gui::Log::instance()->gui().debug("list item view set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
-    _pLabel->setHighlighted(highlighted);
+    _pLabelView->setHighlighted(highlighted);
 }
 
 

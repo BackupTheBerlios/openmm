@@ -352,7 +352,9 @@ MediaServerGroupWidget::selectedItem(int row)
 void
 MediaServerDevice::initController()
 {
-    setLabel(getFriendlyName());
+    Gui::LabelModel* pLabelModel = new Gui::LabelModel;
+    pLabelModel->setLabel(getFriendlyName());
+    setLabelModel(pLabelModel);
 }
 
 
@@ -434,15 +436,21 @@ MediaContainerWidget::selectedItem(int row)
 }
 
 
-std::string
-MediaObjectModel::getLabel()
+MediaObjectModel::MediaObjectModel()
 {
-    Av::AbstractProperty* pArtist = getProperty(Av::AvProperty::ARTIST);
+    setLabelModel(new MediaObjectLabelModel(this));
+}
+
+
+std::string
+MediaObjectModel::MediaObjectLabelModel::getLabel()
+{
+    Av::AbstractProperty* pArtist = _pSuperModel->getProperty(Av::AvProperty::ARTIST);
     if (pArtist) {
-        return  pArtist->getValue() + " - " + getTitle();
+        return  pArtist->getValue() + " - " + _pSuperModel->getTitle();
     }
     else {
-        return getTitle();
+        return _pSuperModel->getTitle();
     }
 }
 

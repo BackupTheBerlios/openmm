@@ -50,7 +50,9 @@ _viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
         Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
-        pItemModel->setLabel("list item " + Poco::NumberFormatter::format(i));
+        Omm::Gui::LabelModel* pLabelModel = new Omm::Gui::LabelModel;
+        pLabelModel->setLabel("list item " + Poco::NumberFormatter::format(i));
+        pItemModel->setLabelModel(pLabelModel);
         _itemModels.push_back(pItemModel);
     }
 }
