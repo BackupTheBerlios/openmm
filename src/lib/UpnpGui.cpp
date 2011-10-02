@@ -395,7 +395,14 @@ Gui::Model*
 MediaContainerWidget::getItemModel(int row)
 {
     Gui::Log::instance()->gui().debug("media container widget get item model in row: " + Poco::NumberFormatter::format(row));
-    return static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
+    MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
+    if (pModel->isContainer()) {
+        pModel->setImageModel(MediaObjectModel::_pContainerImageModel);
+    }
+    else {
+        pModel->setImageModel(MediaObjectModel::_pItemImageModel);
+    }
+    return pModel;
 }
 
 
@@ -449,18 +456,18 @@ MediaObjectModel::MediaObjectModel()
 
     if (!_pContainerImageModel) {
         _pContainerImageModel = new Gui::Image;
-        _pContainerImageModel->setFile("media-pause.png");
+        _pContainerImageModel->setFile("media-container.png");
     }
     if (!_pItemImageModel) {
         _pItemImageModel = new Gui::Image;
-        _pItemImageModel->setFile("media-pause.png");
+        _pItemImageModel->setFile("media-item.png");
     }
-    if (isContainer()) {
-        setImageModel(_pContainerImageModel);
-    }
-    else {
-        setImageModel(_pItemImageModel);
-    }
+//    if (isContainer()) {
+//        setImageModel(_pContainerImageModel);
+//    }
+//    else {
+//        setImageModel(_pItemImageModel);
+//    }
 }
 
 

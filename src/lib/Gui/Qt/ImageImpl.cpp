@@ -33,6 +33,7 @@ ImageViewImpl::ImageViewImpl(View* pView)
 {
 //    Omm::Gui::Log::instance()->gui().debug("image view impl ctor");
     QLabel* pNativeView = new QLabel;
+//    pNativeView->resize(30, 30);
     _pImage = new QPixmap;
 
     initViewImpl(pView, pNativeView);

@@ -48,6 +48,8 @@ ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
     _pImageView = new ImageView(this);
+//    _pImageView->resize(30, 30);
+    _pImageView->setSizeConstraint(35, 35, View::Pref);
     _pLabelView = new LabelView(this);
     _pLabelView->setBackgroundColor(Color("white"));
 

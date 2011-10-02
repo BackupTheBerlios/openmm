@@ -60,7 +60,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
 void
 ViewImpl::triggerViewSync(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
+//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
     emit triggerViewSyncSignal(pModel);
 }
 
@@ -68,7 +68,7 @@ ViewImpl::triggerViewSync(Model* pModel)
 void
 ViewImpl::triggerViewSyncSlot(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync slot");
+//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync slot");
     _pView->syncView(pModel);
 }
 

@@ -175,6 +175,8 @@ private:
 
 class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ListItemModel
 {
+    friend class MediaContainerWidget;
+    
 public:
     MediaObjectModel();
 
