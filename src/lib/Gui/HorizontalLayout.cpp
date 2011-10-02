@@ -54,10 +54,6 @@ HorizontalLayout::layoutView()
         maxChildWidth += (*it)->width(View::Max);
         maxChildHeight = std::max((*it)->height(View::Max), maxChildHeight);
 
-//        if (minChildWidth > _pView->width()) {
-//            currentRow++;
-//            minChildWidth = (*it)->width(View::Min);
-//        }
         if (prefChildWidth > _pView->width()) {
             currentRow++;
             prefChildWidth = (*it)->width(View::Pref);
@@ -80,7 +76,6 @@ HorizontalLayout::layoutView()
     stretchFactor.push_back(_pView->width() / childWidthSum);
 
     int childWidth = 0;
-//    int childHeight = _pView->height() / (currentRow + 1);
     int childHeight = prefChildHeight;
 
     // resize super view

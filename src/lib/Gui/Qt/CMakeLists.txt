@@ -12,6 +12,7 @@ ScrollAreaImpl.cpp
 TabImpl.cpp
 NavigatorImpl.cpp
 SliderImpl.cpp
+ImageImpl.cpp
 )
 
 set(OMMGUI_QT_MOC

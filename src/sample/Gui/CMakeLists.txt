@@ -122,3 +122,12 @@ ScrollArea.cpp
 target_link_libraries(scrollarea
 ${OMM_GUI}
 )
+
+
+add_executable(image
+Image.cpp
+)
+
+target_link_libraries(image
+${OMM_GUI}
+)

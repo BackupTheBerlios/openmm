@@ -63,6 +63,7 @@ LazyList.cpp
 Tab.cpp
 Navigator.cpp
 Slider.cpp
+Image.cpp
 )
 
 target_link_libraries(ommgui
