@@ -57,7 +57,7 @@ SliderModel::setValue(int value)
 SliderView::SliderView(View* pParent) :
 View(pParent, false)
 {
-    Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
+//    Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
     _minWidth = 50;
     _minHeight = 10;
     _prefWidth = 150;
@@ -70,7 +70,7 @@ View(pParent, false)
 void
 SliderView::syncView(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
     SliderModel* pSliderModel = static_cast<SliderModel*>(pModel);
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
     pImpl->setValue(pSliderModel->getValue());

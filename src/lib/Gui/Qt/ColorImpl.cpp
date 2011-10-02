@@ -32,7 +32,7 @@ namespace Gui {
 
 ColorImpl::ColorImpl(const std::string& colorName)
 {
-    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
+//    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
 
     if (colorName == "white") {
         _pQtColor = new QColor(255, 255, 255, 255);

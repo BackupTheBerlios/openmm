@@ -33,7 +33,7 @@ SliderViewImpl::SliderViewImpl(View* pView)
 {
     QSlider* pNativeView = new QSlider;
 
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
+//    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
     pNativeView->setOrientation(Qt::Horizontal);
     pNativeView->setTracking(true);
     pNativeView->setSingleStep(5);

@@ -58,6 +58,7 @@ public:
 
     virtual void setModel(ListModel* pModel);
     int getItemViewHeight();
+    void setItemViewWidth(int width);
     void setItemViewHeight(int height);
 
 protected:
@@ -91,7 +92,7 @@ protected:
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;
-    int                                 _lastVisibleRows;
+    int                                 _lastVisibleRow;
     int                                 _itemViewHeight;
     View*                               _pSelectedView;
     int                                 _selectedRow;

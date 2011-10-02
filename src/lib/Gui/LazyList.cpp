@@ -97,16 +97,17 @@ LazyListView::scrolledToRow(int rowOffset)
 void
 LazyListView::resize(int width, int height)
 {
-    LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
-
+    setItemViewWidth(width);
+    
     int rows = height / _itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("lazy list view resize rows: " + Poco::NumberFormatter::format(rows));
 
     int rowDelta = rows;
-    if (_lastVisibleRows > 0) {
-        rowDelta -= _lastVisibleRows;
+    if (_lastVisibleRow > 0) {
+        rowDelta -= _lastVisibleRow;
     }
 
+    LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
     Log::instance()->gui().debug("lazy list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDelta > 0 && pModel) {
         if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {

@@ -104,7 +104,7 @@ DeviceGroupWidget::selectedItem(int row)
 MediaRendererGroupWidget::MediaRendererGroupWidget() :
 DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 {
-    Gui::Log::instance()->gui().debug("media renderer group widget ctor");
+//    Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
     push(&_deviceGroupListView, "Player");
 
@@ -117,7 +117,7 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
 Device*
 MediaRendererGroupWidget::createDevice()
 {
-    Gui::Log::instance()->gui().debug("media renderer group widget create renderer device.");
+//    Gui::Log::instance()->gui().debug("media renderer group widget create renderer device.");
     return new MediaRendererDevice;
 }
 
@@ -125,7 +125,7 @@ MediaRendererGroupWidget::createDevice()
 Gui::View*
 MediaRendererGroupWidget::createItemView()
 {
-    Gui::Log::instance()->gui().debug("media renderer group widget create renderer view.");
+//    Gui::Log::instance()->gui().debug("media renderer group widget create renderer view.");
     return new MediaRendererView;
 }
 
@@ -255,7 +255,7 @@ MediaRendererView::syncView(Gui::Model* pModel)
 MediaServerGroupWidget::MediaServerGroupWidget() :
 DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 {
-    Gui::Log::instance()->gui().debug("media server group widget ctor");
+//    Gui::Log::instance()->gui().debug("media server group widget ctor");
     View::setName("media server group view");
     push(&_deviceGroupListView, "Media");
     
@@ -267,7 +267,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 Device*
 MediaServerGroupWidget::createDevice()
 {
-    Gui::Log::instance()->gui().debug("media server group widget create server device.");
+//    Gui::Log::instance()->gui().debug("media server group widget create server device.");
     return new MediaServerDevice;
 }
 
@@ -275,7 +275,7 @@ MediaServerGroupWidget::createDevice()
 Gui::View*
 MediaServerGroupWidget::createItemView()
 {
-    Gui::Log::instance()->gui().debug("media server group widget create server view.");
+//    Gui::Log::instance()->gui().debug("media server group widget create server view.");
     return new MediaServerView;
 }
 

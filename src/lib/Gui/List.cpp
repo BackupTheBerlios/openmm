@@ -95,7 +95,7 @@ _itemViewHeight(50),
 _rowOffset(0),
 _pSelectedView(0),
 _selectedRow(-1),
-_lastVisibleRows(0)
+_lastVisibleRow(0)
 {
     attachController(new ListScrollAreaController(this));
 }
@@ -109,7 +109,7 @@ ListView::setModel(ListModel* pModel)
     View::setModel(pModel);
 
     int rows = visibleRows();
-    _lastVisibleRows = rows;
+    _lastVisibleRow = rows;
     extendViewPool(rows);
 
     // insert items that are already in the model.
@@ -261,13 +261,22 @@ ListView::resizeDelta(int rowDelta, int width)
     if (pModel->totalItemCount() < visibleRows()) {
         return;
     }
-    _lastVisibleRows += rowDelta;
+    _lastVisibleRow += rowDelta;
     for (int i = 0; i < rowDelta; i++) {
         View* pView = _freeViews.top();
         _freeViews.pop();
         int lastRow = _rowOffset + _visibleViews.size();
         moveViewToRow(lastRow, pView);
-        pView->setModel(pModel->getItemModel(lastRow));
+
+        Model* pViewModel = pModel->getItemModel(lastRow);
+        if (pViewModel) {
+            pView->setModel(pViewModel);
+        }
+        else {
+            Log::instance()->gui().warning("list view resize could not get item model in last row: " + Poco::NumberFormatter::format(lastRow));
+            return;
+        }
+        
         _itemControllers[pView]->setRow(lastRow);
         pView->show();
         _visibleViews.push_back(pView);
@@ -363,6 +372,25 @@ ListView::handleSelectionHighlight()
 
 
 void
+ListView::setItemViewWidth(int width)
+{
+    Omm::Gui::Log::instance()->gui().debug("list view set item view width: " + Poco::NumberFormatter::format(width) + " ...");
+    if (!_viewPool.size()) {
+        return;
+    }
+    for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
+        (*it)->setWidth(width);
+    }
+    _itemViewHeight = _viewPool[0]->height();
+    int row = 0;
+    for (std::vector<View*>::iterator it = _visibleViews.begin(); it != _visibleViews.end(); ++it, ++row) {
+        (*it)->move(0, _itemViewHeight * row);
+    }
+    Omm::Gui::Log::instance()->gui().debug("list view set item view width finished.");
+}
+
+
+void
 ListView::selectedItem(int row)
 {
     Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
@@ -385,9 +413,10 @@ ListView::selectedItem(int row)
 void
 ListView::resize(int width, int height)
 {
+    setItemViewWidth(width);
     int rows = height / _itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view resize rows: " + Poco::NumberFormatter::format(rows));
-    int rowDelta = rows - _lastVisibleRows;
+    int rowDelta = rows - _lastVisibleRow;
     Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     resizeDelta(rowDelta, width);
 }
@@ -414,7 +443,17 @@ ListView::insertItem(int row)
         Log::instance()->gui().debug("list view got free view: " + pView->getName());
         _freeViews.pop();
         _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
-        pView->setModel(pModel->getItemModel(row));
+//        pView->setModel(pModel->getItemModel(row));
+
+        Model* pViewModel = pModel->getItemModel(row);
+        if (pViewModel) {
+            pView->setModel(pViewModel);
+        }
+        else {
+            Log::instance()->gui().warning("list view insert item could not get item model in last row: " + Poco::NumberFormatter::format(row));
+            return;
+        }
+
         _itemControllers[pView]->setRow(row);
 
         // FIXME: move all views below one down

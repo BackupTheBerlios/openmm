@@ -38,7 +38,7 @@ namespace Gui {
 
 Color::Color(const std::string& colorName)
 {
-    Omm::Gui::Log::instance()->gui().debug("color ctor.");
+//    Omm::Gui::Log::instance()->gui().debug("color ctor.");
     _pImpl = new ColorImpl(colorName);
 }
 
