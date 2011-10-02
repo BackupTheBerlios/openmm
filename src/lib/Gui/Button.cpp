@@ -74,6 +74,13 @@ View(pParent, false)
 
 
 void
+ButtonView::setImage(Image* pImage)
+{
+    static_cast<ButtonViewImpl*>(_pImpl)->setImage(pImage);
+}
+
+
+void
 ButtonView::syncView(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());

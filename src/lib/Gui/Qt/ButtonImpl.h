@@ -29,6 +29,7 @@ namespace Omm {
 namespace Gui {
 
 class View;
+class Image;
 
 class ButtonViewImpl : public ViewImpl
 {
@@ -44,6 +45,7 @@ private:
     ~ButtonViewImpl();
 
     void setLabel(const std::string& label);
+    void setImage(Image* pImage);
 };
 
 

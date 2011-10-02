@@ -24,6 +24,7 @@
 #include "ButtonImpl.h"
 #include "Gui/Button.h"
 #include "Gui/GuiLogger.h"
+#include "ImageImpl.h"
 
 namespace Omm {
 namespace Gui {
@@ -48,6 +49,14 @@ void
 ButtonViewImpl::setLabel(const std::string& label)
 {
     static_cast<QPushButton*>(_pNativeView)->setText(QString::fromStdString(label));
+}
+
+
+void
+ButtonViewImpl::setImage(Image* pImage)
+{
+    ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());
+    static_cast<QPushButton*>(_pNativeView)->setIcon(QIcon(*pImageImpl->_pImage));
 }
 
 

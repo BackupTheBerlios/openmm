@@ -26,6 +26,7 @@
 #include "View.h"
 #include "Model.h"
 #include "Controller.h"
+#include "Image.h"
 
 
 namespace Omm {
@@ -59,7 +60,9 @@ class ButtonView : public View
     
 public:
     ButtonView(View* pParent = 0);
-    
+
+    void setImage(Image* pImage);
+
 private:
     virtual void syncView(Model* pModel);
 };

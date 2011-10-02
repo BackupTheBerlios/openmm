@@ -33,6 +33,7 @@ class View;
 class ImageViewImpl : public ViewImpl
 {
     friend class ImageView;
+    friend class ButtonViewImpl;
 
 private:
     ImageViewImpl(View* pView);
