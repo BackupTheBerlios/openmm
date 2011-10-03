@@ -416,6 +416,13 @@ ListView::resize(int width, int height)
 
 
 void
+ListView::scale(float factor)
+{
+    _itemViewHeight *= factor;
+    View::scale(factor);
+}
+
+void
 ListView::insertItem(int row)
 {
     Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));

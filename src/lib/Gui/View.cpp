@@ -116,6 +116,7 @@ View::addSubview(View* pView)
 {
     _pImpl->addSubview(pView);
     _subviews.push_back(pView);
+    pView->_scaleFactor = _scaleFactor;
 }
 
 
@@ -143,11 +144,11 @@ View::width(SizeConstraint size)
         case Current:
             return _pImpl->widthView();
         case Min:
-            return _minWidth;
+            return _minWidth * _scaleFactor;
         case Pref:
-            return _prefWidth;
+            return _prefWidth * _scaleFactor;
         case Max:
-            return _maxWidth;
+            return _maxWidth * _scaleFactor;
     }
 }
 
@@ -159,11 +160,11 @@ View::height(SizeConstraint size)
         case Current:
             return _pImpl->heightView();
         case Min:
-            return _minHeight;
+            return _minHeight * _scaleFactor;
         case Pref:
-            return _prefHeight;
+            return _prefHeight * _scaleFactor;
         case Max:
-            return _maxHeight;
+            return _maxHeight * _scaleFactor;
     }
 }
 
