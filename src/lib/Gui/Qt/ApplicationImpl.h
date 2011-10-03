@@ -42,6 +42,7 @@ public:
     virtual ~ApplicationImpl();
 
     void resize(int width, int height);
+    void setFullscreen(bool fullscreen);
     int run(int argc, char** argv);
 
     Application*            _pApplication;

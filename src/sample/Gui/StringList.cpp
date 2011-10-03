@@ -88,7 +88,7 @@ class Application : public Omm::Gui::Application
         StringListModel* pListModel = new StringListModel(10000);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setModel(pListModel);
-        resize(800, 480);
+        resizeMainView(800, 480);
         return pList;
     }
 };

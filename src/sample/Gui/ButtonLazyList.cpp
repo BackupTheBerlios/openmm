@@ -126,7 +126,7 @@ class Application : public Omm::Gui::Application
         ButtonListModel* pListModel = new ButtonListModel(10000);
         Omm::Gui::LazyListView* pList = new Omm::Gui::LazyListView;
         pList->setModel(pListModel);
-        resize(800, 480);
+        resizeMainView(800, 480);
         return pList;
     }
 };

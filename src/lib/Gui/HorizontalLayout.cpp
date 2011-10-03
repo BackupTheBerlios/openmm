@@ -46,7 +46,7 @@ HorizontalLayout::layoutView()
     int currentRow = 0;
     std::vector<int> childRow;
 
-    for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it) {
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
         minChildWidth += (*it)->width(View::Min);
         minChildHeight = std::max((*it)->height(View::Min), minChildHeight);
         prefChildWidth += (*it)->width(View::Pref);
@@ -65,7 +65,7 @@ HorizontalLayout::layoutView()
     float childWidthSum = 0.0;
     std::vector<float> stretchFactor;
     int i = 0;
-    for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it, ++i) {
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
         if (i > 0 && (childRow[i] != childRow[i-1])) {
             stretchFactor.push_back(_pView->width() / childWidthSum);
             // "newline"
@@ -83,7 +83,7 @@ HorizontalLayout::layoutView()
 
     // layout the subviews by moving and resizing them
     i = 0;
-    for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it, ++i) {
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
         int width = (*it)->width(View::Pref) * (1 + (*it)->stretchFactor()) * stretchFactor[childRow[i]];
         if (i > 0 && (childRow[i] != childRow[i-1])) {
             // "newline"
@@ -100,12 +100,12 @@ HorizontalLayout::layoutView()
 void
 HorizontalLayout::layoutViewEquiDistant()
 {
-    int childWidth = _pView->width() / _pView->childCount();
+    int childWidth = _pView->width() / _pView->subviewCount();
     int childHeight = _pView->height();
 
-    for (View::ChildIterator it = _pView->beginChild(); it != _pView->endChild(); ++it) {
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
         (*it)->resize(childWidth, childHeight);
-        (*it)->move((it - _pView->beginChild()) * (*it)->width(), 0);
+        (*it)->move((it - _pView->beginSubview()) * (*it)->width(), 0);
     }
 
     Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view finished.");

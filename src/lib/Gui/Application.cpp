@@ -37,7 +37,9 @@ namespace Gui {
 
 
 Application::Application() :
-_pImpl(new ApplicationImpl(this))
+_pImpl(new ApplicationImpl(this)),
+_pMainView(0),
+_scaleFactor(1.0)
 {
 //    Omm::Gui::Log::instance()->gui().debug("application ctor.");
 }
@@ -49,9 +51,23 @@ Application::~Application()
 
 
 void
-Application::resize(int width, int height)
+Application::resizeMainView(int width, int height)
 {
     _pImpl->resize(width, height);
+}
+
+
+void
+Application::scaleMainView(float factor)
+{
+    _scaleFactor = factor;
+}
+
+
+void
+Application::setFullscreen(bool fullscreen)
+{
+    _pImpl->setFullscreen(fullscreen);
 }
 
 
@@ -59,6 +75,13 @@ int
 Application::run(int argc, char** argv)
 {
     return _pImpl->run(argc, argv);
+}
+
+
+void
+Application::createdMainView()
+{
+    _pMainView->scale(_scaleFactor);
 }
 
 

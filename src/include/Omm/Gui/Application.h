@@ -40,13 +40,20 @@ public:
 
     int run(int argc = 0, char** argv = 0);
 
-    void resize(int width, int height);
+    void resizeMainView(int width, int height);
+    void scaleMainView(float factor);
+    void setFullscreen(bool fullscreen);
+
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}
     virtual void finishedEventLoop() {}
 
 private:
+    void createdMainView();
+
     ApplicationImpl*           _pImpl;
+    View*                      _pMainView;
+    float                      _scaleFactor;
 };
 
 

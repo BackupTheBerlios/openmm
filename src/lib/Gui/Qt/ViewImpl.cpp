@@ -147,6 +147,12 @@ ViewImpl::resizeView(int width, int height)
 
 
 void
+ViewImpl::setFontSize(float fontSize)
+{
+}
+
+
+void
 ViewImpl::moveView(int x, int y)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl move.");

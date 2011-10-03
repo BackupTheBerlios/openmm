@@ -70,10 +70,12 @@ public:
     int height(SizeConstraint size = Current);
     void setSizeConstraint(int width, int height, SizeConstraint size = Current);
     float stretchFactor();
+    void setStretchFactor(float stretch = 1.0);
     virtual void setWidth(int width);
     virtual void setHeight(int height);
     virtual void resize(SizeConstraint size = Pref);
     virtual void resize(int width, int height);
+    virtual void scale(float factor);
     void move(int x, int y);
 
     Model* getModel() const;
@@ -91,10 +93,10 @@ public:
     const std::string& getName() const;
     void setName(const std::string& name);
 
-    typedef std::vector<View*>::iterator ChildIterator;
-    ChildIterator beginChild();
-    ChildIterator endChild();
-    int childCount();
+    typedef std::vector<View*>::iterator SubviewIterator;
+    SubviewIterator beginSubview();
+    SubviewIterator endSubview();
+    int subviewCount();
 
     typedef std::vector<Controller*>::iterator ControllerIterator;
     ControllerIterator beginController();
@@ -113,7 +115,7 @@ protected:
     virtual void syncView(Model* pModel) {}
 
     View*                       _pParent;
-    std::vector<View*>          _children;
+    std::vector<View*>          _subviews;
     ViewImpl*                   _pImpl;
     Model*                      _pModel;
     std::vector<Controller*>    _controllers;
@@ -126,6 +128,7 @@ protected:
     int                         _maxWidth;
     int                         _maxHeight;
     float                       _stretchFactor;
+    float                       _scaleFactor;
 
 private:
     void syncViewWithModel(Model* pModel = 0);

@@ -48,6 +48,7 @@ public:
     virtual int widthView();
     virtual int heightView();
     virtual void resizeView(int width, int height);
+    virtual void setFontSize(float fontSize);
     virtual void moveView(int x, int y);
     virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);

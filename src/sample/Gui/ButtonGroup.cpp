@@ -41,7 +41,7 @@ class Application : public Omm::Gui::Application
             windowHeight = pButton->height();
             windowWidth += pButton->width();
         }
-        resize(windowWidth, windowHeight);
+        resizeMainView(windowWidth, windowHeight);
         return pCompoundView;
     }
 };

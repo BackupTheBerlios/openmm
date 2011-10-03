@@ -41,7 +41,7 @@ class Application : public Omm::Gui::Application
 
         pCompoundView->resize(600, 100);
         pCompoundView->setLayout(pLayout);
-        resize(600, 100);
+        resizeMainView(600, 100);
         return pCompoundView;
     }
 };

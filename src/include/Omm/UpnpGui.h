@@ -194,6 +194,11 @@ private:
     MediaContainerWidget*     _pContainer;
     static Gui::ImageModel*   _pContainerImageModel;
     static Gui::ImageModel*   _pItemImageModel;
+    static Gui::ImageModel*   _pItemAudioItemModel;
+    static Gui::ImageModel*   _pItemImageItemModel;
+    static Gui::ImageModel*   _pItemVideoItemModel;
+    static Gui::ImageModel*   _pItemAudioBroadcastModel;
+    static Gui::ImageModel*   _pItemVideoBroadcastModel;
 };
 
 

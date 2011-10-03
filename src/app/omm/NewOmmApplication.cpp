@@ -27,7 +27,9 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        resize(800, 480);
+//        setFullscreen(true);
+//        resize(800, 480);
+        scaleMainView(2.0);
         _pController = new Omm::ControllerWidget;
         return _pController;
     }

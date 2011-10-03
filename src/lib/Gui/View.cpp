@@ -61,7 +61,8 @@ _prefWidth(100),
 _prefHeight(70),
 _maxWidth(200),
 _maxHeight(140),
-_stretchFactor(1.0)
+_stretchFactor(1.0),
+_scaleFactor(1.0)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
 
@@ -89,7 +90,7 @@ View::initView(View* pParent)
 
     if (_pParent) {
 //        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
-        _pParent->_children.push_back(this);
+        _pParent->_subviews.push_back(this);
     }
 }
 
@@ -114,6 +115,7 @@ void
 View::addSubview(View* pView)
 {
     _pImpl->addSubview(pView);
+    _subviews.push_back(pView);
 }
 
 
@@ -191,6 +193,13 @@ View::stretchFactor()
 
 
 void
+View::setStretchFactor(float stretch)
+{
+    _stretchFactor = stretch;
+}
+
+
+void
 View::setWidth(int width)
 {
     _pImpl->resizeView(width, height());
@@ -229,6 +238,16 @@ View::resize(int width, int height)
     if (_pLayout) {
         _pLayout->layoutView();
     }
+}
+
+
+void
+View::scale(float factor)
+{
+    // resize view and font (recursively with all subviews)
+    int newWidth = factor * width();
+    int newHeight = factor * height();
+    resize(newWidth, newHeight);
 }
 
 
@@ -313,24 +332,24 @@ View::setName(const std::string& name)
 }
 
 
-View::ChildIterator
-View::beginChild()
+View::SubviewIterator
+View::beginSubview()
 {
-    return _children.begin();
+    return _subviews.begin();
 }
 
 
-View::ChildIterator
-View::endChild()
+View::SubviewIterator
+View::endSubview()
 {
-    return _children.end();
+    return _subviews.end();
 }
 
 
 int
-View::childCount()
+View::subviewCount()
 {
-    return _children.size();
+    return _subviews.size();
 }
 
 

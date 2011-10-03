@@ -55,14 +55,48 @@ ApplicationImpl::resize(int width, int height)
 }
 
 
+void
+ApplicationImpl::setFullscreen(bool fullscreen)
+{
+//                 font-size: 32pt; 
+    QString fullscreenStyleSheet =
+            "* { \
+                 background-color: #afafaf;\
+                 color: darkred; \
+                 selection-color: white; \
+                 selection-background-color: darkblue; \
+            } \
+            QScrollArea { \
+                 background-color: #1f1f1f; \
+                 color: #afafaf; \
+            } \
+            QLabel { \
+                 background-color: #1f1f1f; \
+                 color: #afafaf; \
+            } \
+            QSlider { \
+                 background-color: #1f1f1f; \
+                 color: #afafaf; \
+            } \
+            QButton { \
+                 background-color: #1f1f1f; \
+                 color: #afafaf; \
+            }";
+
+    _pQtApplication->setStyleSheet(fullscreenStyleSheet);
+}
+
+
 int
 ApplicationImpl::run(int argc, char** argv)
 {
     Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
     _pQtApplication = new QApplication(argc, argv);
     _pMainWindow = new QMainWindow;
-    _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->createMainView()->getNativeView()));
+    _pApplication->_pMainView = _pApplication->createMainView();
+    _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->_pMainView->getNativeView()));
     _pMainWindow->resize(_width, _height);
+    _pApplication->createdMainView();
     _pMainWindow->show();
     _pApplication->presentedMainView();
     int ret = _pQtApplication->exec();

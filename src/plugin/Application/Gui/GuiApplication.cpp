@@ -64,7 +64,7 @@ void
 GuiApplication::resize(int width, int height)
 {
 //    _pMainWindow->resize(width, height);
-    Omm::Gui::Application::resize(width, height);
+    Omm::Gui::Application::resizeMainView(width, height);
 }
 
 

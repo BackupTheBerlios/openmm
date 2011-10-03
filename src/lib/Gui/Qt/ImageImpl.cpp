@@ -33,7 +33,6 @@ ImageViewImpl::ImageViewImpl(View* pView)
 {
 //    Omm::Gui::Log::instance()->gui().debug("image view impl ctor");
     QLabel* pNativeView = new QLabel;
-//    pNativeView->resize(30, 30);
     _pImage = new QPixmap;
 
     initViewImpl(pView, pNativeView);
@@ -69,14 +68,6 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
             break;
     }
 }
-
-
-//void
-//ImageViewImpl::resizeView(int width, int height)
-//{
-//    static_cast<QLabel*>(_pNativeView)->resize(width, height);
-//    _pImage->resize(width, height);
-//}
 
 
 }  // namespace Omm

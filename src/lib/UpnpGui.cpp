@@ -396,8 +396,25 @@ MediaContainerWidget::getItemModel(int row)
 {
     Gui::Log::instance()->gui().debug("media container widget get item model in row: " + Poco::NumberFormatter::format(row));
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
-    if (pModel->isContainer()) {
+    // FIXME: this can be done once, when the model is created.
+    Av::AbstractProperty* pClass = pModel->getProperty(Av::AvProperty::CLASS);
+    if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::CONTAINER)) {
         pModel->setImageModel(MediaObjectModel::_pContainerImageModel);
+    }
+    else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::AUDIO_ITEM)) {
+        pModel->setImageModel(MediaObjectModel::_pItemAudioItemModel);
+    }
+    else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::IMAGE_ITEM)) {
+        pModel->setImageModel(MediaObjectModel::_pItemImageItemModel);
+    }
+    else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)) {
+        pModel->setImageModel(MediaObjectModel::_pItemVideoItemModel);
+    }
+    else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::AUDIO_BROADCAST)) {
+        pModel->setImageModel(MediaObjectModel::_pItemAudioBroadcastModel);
+    }
+    else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)) {
+        pModel->setImageModel(MediaObjectModel::_pItemVideoBroadcastModel);
     }
     else {
         pModel->setImageModel(MediaObjectModel::_pItemImageModel);
@@ -449,6 +466,11 @@ MediaContainerWidget::selectedItem(int row)
 
 Gui::ImageModel*   MediaObjectModel::_pContainerImageModel = 0;
 Gui::ImageModel*   MediaObjectModel::_pItemImageModel = 0;
+Gui::ImageModel*   MediaObjectModel::_pItemAudioItemModel = 0;
+Gui::ImageModel*   MediaObjectModel::_pItemImageItemModel = 0;
+Gui::ImageModel*   MediaObjectModel::_pItemVideoItemModel = 0;
+Gui::ImageModel*   MediaObjectModel::_pItemAudioBroadcastModel = 0;
+Gui::ImageModel*   MediaObjectModel::_pItemVideoBroadcastModel = 0;
 
 MediaObjectModel::MediaObjectModel()
 {
@@ -462,12 +484,26 @@ MediaObjectModel::MediaObjectModel()
         _pItemImageModel = new Gui::Image;
         _pItemImageModel->setFile("media-item.png");
     }
-//    if (isContainer()) {
-//        setImageModel(_pContainerImageModel);
-//    }
-//    else {
-//        setImageModel(_pItemImageModel);
-//    }
+    if (!_pItemAudioItemModel) {
+        _pItemAudioItemModel = new Gui::Image;
+        _pItemAudioItemModel->setFile("media-audio-item.png");
+    }
+    if (!_pItemImageItemModel) {
+        _pItemImageItemModel = new Gui::Image;
+        _pItemImageItemModel->setFile("media-image-item.png");
+    }
+    if (!_pItemVideoItemModel) {
+        _pItemVideoItemModel = new Gui::Image;
+        _pItemVideoItemModel->setFile("media-video-item.png");
+    }
+    if (!_pItemAudioBroadcastModel) {
+        _pItemAudioBroadcastModel = new Gui::Image;
+        _pItemAudioBroadcastModel->setFile("media-audio-broadcast.png");
+    }
+    if (!_pItemVideoBroadcastModel) {
+        _pItemVideoBroadcastModel = new Gui::Image;
+        _pItemVideoBroadcastModel->setFile("media-video-broadcast.png");
+    }
 }
 
 
