@@ -247,6 +247,7 @@ View::scale(float factor)
 {
     // resize view and font (recursively with all subviews)
     _scaleFactor = factor;
+    _pImpl->setFontSize(_scaleFactor * _pImpl->getFontSize());
     for (SubviewIterator it = beginSubview(); it != endSubview(); ++it) {
         (*it)->scale(factor);
     }

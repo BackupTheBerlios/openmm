@@ -146,9 +146,19 @@ ViewImpl::resizeView(int width, int height)
 }
 
 
+float
+ViewImpl::getFontSize()
+{
+    return _pNativeView->font().pointSizeF();
+}
+
+
 void
 ViewImpl::setFontSize(float fontSize)
 {
+    QFont font = _pNativeView->font();
+    font.setPointSizeF(fontSize);
+    _pNativeView->setFont(font);
 }
 
 
