@@ -245,9 +245,13 @@ void
 View::scale(float factor)
 {
     // resize view and font (recursively with all subviews)
-    int newWidth = factor * width();
-    int newHeight = factor * height();
-    resize(newWidth, newHeight);
+    _scaleFactor = factor;
+    for (SubviewIterator it = beginSubview(); it != endSubview(); ++it) {
+        (*it)->scale(factor);
+    }
+    if (_pLayout) {
+        _pLayout->layoutView();
+    }
 }
 
 
