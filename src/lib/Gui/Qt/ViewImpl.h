@@ -73,6 +73,7 @@ private:
     void presented();
     void resized(int width, int height);
     void selected();
+    void keyPressed(int key);
 };
 
 
@@ -98,6 +99,11 @@ public:
     {
         _pViewImpl->selected();
 //        W::mousePressEvent(pMouseEvent);
+    }
+
+    void keyPressEvent(QKeyEvent* pKeyEvent)
+    {
+        _pViewImpl->keyPressed(pKeyEvent->key());
     }
 
     ViewImpl*   _pViewImpl;

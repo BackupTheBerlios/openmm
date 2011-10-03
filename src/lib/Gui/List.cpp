@@ -62,6 +62,7 @@ class ListScrollAreaController : public ScrollAreaController
     virtual void scrolled(int xOffset, int yOffset);
     virtual void resized(int width, int height);
     virtual void presented();
+    virtual void keyPressed(KeyCode key);
 
     ListView*   _pListView;
 };
@@ -86,6 +87,24 @@ void
 ListScrollAreaController::presented()
 {
     resized(_pListView->width(), _pListView->height());
+}
+
+
+void
+ListScrollAreaController::keyPressed(KeyCode key)
+{
+    Log::instance()->gui().debug("list scroll area controller key pressed");
+    switch (key) {
+        case Controller::KeyUp:
+            _pListView->highlightItem(_pListView->_selectedRow - 1);
+            break;
+        case Controller::KeyDown:
+            _pListView->highlightItem(_pListView->_selectedRow + 1);
+            break;
+        case Controller::KeyReturn:
+            _pListView->selectedItemNotify();
+            break;
+    }
 }
 
 
@@ -388,6 +407,22 @@ ListView::selectedItem(int row)
 {
     Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
 
+//    if (row < _rowOffset || row >= _lastVisibleRow) {
+//        return;
+//    }
+
+    highlightItem(row);
+    NOTIFY_CONTROLLER(ListController, selectedItem, row);
+}
+
+
+void
+ListView::highlightItem(int row)
+{
+//    if (row < _rowOffset || row > _lastVisibleRow) {
+//        return;
+//    }
+    
     if (_selectedRow >= 0 && itemIsVisible(_selectedRow)) {
         View* pLastSelectedView = visibleView(visibleIndex(_selectedRow));
         pLastSelectedView->setHighlighted(false);
@@ -397,8 +432,16 @@ ListView::selectedItem(int row)
     if (pSelectedView) {
         pSelectedView->setHighlighted(true);
         _pSelectedView = pSelectedView;
-        _selectedRow = row;
-        NOTIFY_CONTROLLER(ListController, selectedItem, row);
+    }
+    _selectedRow = row;
+}
+
+
+void
+ListView::selectedItemNotify()
+{
+    if (_selectedRow >= 0) {
+        NOTIFY_CONTROLLER(ListController, selectedItem, _selectedRow);
     }
 }
 

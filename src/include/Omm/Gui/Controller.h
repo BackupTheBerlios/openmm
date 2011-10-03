@@ -37,11 +37,16 @@ class Model;
 class Controller
 {
     friend class View;
-    
-public:
     friend class Model;
     friend class ViewImpl;
     friend class ButtonViewImpl;
+    
+public:
+    typedef enum {KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
+            KeyMenu, KeyVolUp, KeyVolDown, KeyChanUp, KeyChanDown,
+            KeyForward, KeyBackward, KeyPlay, KeyStop, KeyPause,
+            KeyPlayPause, KeyMute, KeyRecord,
+            KeyPowerOff, KeyWakeUp, KeyEject, KeyLast} KeyCode;
 
     void attachModel(Model* pModel);
     void detachModel(Model* pModel);
@@ -50,6 +55,7 @@ public:
     virtual void presented() {}
     virtual void resized(int width, int height) {}
     virtual void selected() {}
+    virtual void keyPressed(KeyCode key) {}
 
     typedef std::vector<Model*>::iterator ModelIterator;
     ModelIterator beginModel();

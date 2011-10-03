@@ -29,7 +29,7 @@ class Application : public Omm::Gui::Application
     {
 //        setFullscreen(true);
 //        resize(800, 480);
-        scaleMainView(2.0);
+//        scaleMainView(2.0);
         _pController = new Omm::ControllerWidget;
         return _pController;
     }

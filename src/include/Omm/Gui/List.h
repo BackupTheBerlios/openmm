@@ -99,6 +99,8 @@ protected:
 
 private:
     void selectedItem(int row);
+    void highlightItem(int row);
+    void selectedItemNotify();
 
     std::map<View*, ListItemController*>    _itemControllers;
 };

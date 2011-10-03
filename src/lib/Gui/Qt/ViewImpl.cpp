@@ -29,6 +29,9 @@ namespace Omm {
 namespace Gui {
 
 
+
+
+
 ViewImpl::~ViewImpl()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
@@ -211,6 +214,94 @@ ViewImpl::selected()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+void
+ViewImpl::keyPressed(int key)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl key pressed: " + Poco::NumberFormatter::format(key));
+    switch (key) {
+        case Qt::Key_M:
+        case Qt::Key_Menu:
+        case Qt::Key_HomePage:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyMenu);
+            break;
+        case Qt::Key_Backspace:
+        case Qt::Key_Backtab:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyBack);
+            break;
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+        case Qt::Key_Select:
+        case Qt::Key_Yes:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyReturn);
+            break;
+        case Qt::Key_Left:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyLeft);
+            break;
+        case Qt::Key_Right:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyRight);
+            break;
+        case Qt::Key_Up:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyUp);
+            break;
+        case Qt::Key_Down:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyDown);
+            break;
+        case Qt::Key_Back:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyBack);
+            break;
+        case Qt::Key_Forward:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyForward);
+            break;
+        case Qt::Key_Stop:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyStop);
+            break;
+        case Qt::Key_VolumeDown:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyVolDown);
+            break;
+        case Qt::Key_VolumeMute:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyMute);
+            break;
+        case Qt::Key_VolumeUp:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyVolUp);
+            break;
+        case Qt::Key_MediaPlay:
+        case Qt::Key_Play:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPlay);
+            break;
+        case Qt::Key_MediaStop:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyStop);
+            break;
+        case Qt::Key_MediaPrevious:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyBackward);
+            break;
+        case Qt::Key_MediaNext:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyForward);
+            break;
+        case Qt::Key_MediaRecord:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyRecord);
+            break;
+        case Qt::Key_MediaPause:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPause);
+            break;
+        case Qt::Key_MediaTogglePlayPause:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPlayPause);
+            break;
+        case Qt::Key_PowerOff:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPowerOff);
+            break;
+        case Qt::Key_WakeUp:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyWakeUp);
+            break;
+        case Qt::Key_Eject:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyEject);
+            break;
+        case Qt::Key_MediaLast:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyLast);
+            break;
+    }
 }
 
 
