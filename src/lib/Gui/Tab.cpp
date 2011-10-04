@@ -56,5 +56,12 @@ TabView::addView(View* pView, const std::string& tabName)
 }
 
 
+void
+TabView::setTabBarHidden(bool hidden)
+{
+    static_cast<TabViewImpl*>(_pImpl)->setTabBarHidden(hidden);
+}
+
+
 } // namespace Gui
 } // namespace Omm
