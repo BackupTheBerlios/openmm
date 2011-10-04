@@ -39,7 +39,18 @@ namespace Gui {
 Color::Color(const std::string& colorName)
 {
 //    Omm::Gui::Log::instance()->gui().debug("color ctor.");
-    _pImpl = new ColorImpl(colorName);
+    if (colorName == "white") {
+        _pImpl = new ColorImpl(255, 255, 255, 255);
+    }
+    else if (colorName == "blue") {
+        _pImpl = new ColorImpl(0, 0, 255, 255);
+    }
+    else if (colorName == "lightBlue") {
+        _pImpl = new ColorImpl(128, 204, 255, 255);
+    }
+    else if (colorName == "black") {
+        _pImpl = new ColorImpl(0, 0, 0, 255);
+    }
 }
 
 

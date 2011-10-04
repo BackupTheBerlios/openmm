@@ -32,7 +32,7 @@ namespace Gui {
 class ColorImpl
 {
 public:
-    ColorImpl(const std::string& colorName);
+    ColorImpl(int red, int green, int blue, int alpha);
 
     QColor* getNativeColor() const;
 

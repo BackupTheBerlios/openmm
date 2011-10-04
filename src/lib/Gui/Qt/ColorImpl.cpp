@@ -30,19 +30,10 @@ namespace Omm {
 namespace Gui {
 
 
-ColorImpl::ColorImpl(const std::string& colorName)
+ColorImpl::ColorImpl(int red, int green, int blue, int alpha)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
-
-    if (colorName == "white") {
-        _pQtColor = new QColor(255, 255, 255, 255);
-    }
-    else if (colorName == "blue") {
-        _pQtColor = new QColor(0, 0, 255, 255);
-    }
-    else if (colorName == "lightBlue") {
-        _pQtColor = new QColor(128, 204, 255, 255);
-    }
+    _pQtColor = new QColor(red, green, blue, alpha);
 }
 
 

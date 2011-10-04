@@ -531,6 +531,7 @@ MediaObjectModel::MediaObjectLabelModel::getLabel()
 
 GuiVisual::GuiVisual(Gui::View* pParent)
 {
+    setBackgroundColor(Gui::Color("black"));
 }
 
 
