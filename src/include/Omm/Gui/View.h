@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 #include "Model.h"
 #include "Color.h"
@@ -60,6 +61,7 @@ public:
     virtual ~View();
 
     void* getNativeView();
+    uint32_t getNativeWindowId();
     View* getParent();
     void addSubview(View* pView);
 

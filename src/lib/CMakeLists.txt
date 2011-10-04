@@ -149,6 +149,7 @@ UpnpGui.cpp
 )
 
 target_link_libraries(ommupnpgui
+ommsys
 ommupnp
 ommupnpav
 ommgui

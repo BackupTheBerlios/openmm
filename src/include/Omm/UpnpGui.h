@@ -26,6 +26,7 @@
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvCtlServer.h"
 #include "UpnpAvCtlObject2.h"
+#include "Sys.h"
 
 #include "Gui/Tab.h"
 #include "Gui/Navigator.h"
@@ -42,11 +43,17 @@
 namespace Omm {
 
 class MediaObjectModel;
+class GuiVisual;
 
 class ControllerWidget : public Controller, public Gui::Tab
 {
 public:
     ControllerWidget();
+
+    GuiVisual* getLocalRendererVisual();
+
+private:
+    GuiVisual*      _pVisual;
 };
 
 
@@ -207,6 +214,21 @@ class MediaObjectView : public Gui::ListItemView
     
 };
 
+
+class GuiVisual : public Gui::Image, public Sys::Visual
+{
+public:
+    GuiVisual(Gui::View* pParent = 0);
+    virtual ~GuiVisual();
+
+    virtual void show();
+    virtual void hide();
+
+    virtual WindowHandle getWindow();
+    virtual VisualType getType();
+    virtual void renderImage(const std::string& imageData);
+    virtual void blank();
+};
 
 }  // namespace Omm
 

@@ -103,6 +103,14 @@ View::getNativeView()
 }
 
 
+uint32_t
+View::getNativeWindowId()
+{
+//    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+    return _pImpl->getNativeWindowId();
+}
+
+
 View*
 View::getParent()
 {

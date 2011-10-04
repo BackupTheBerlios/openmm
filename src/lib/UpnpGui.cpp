@@ -33,6 +33,15 @@ ControllerWidget::ControllerWidget()
     Gui::Log::instance()->gui().debug("controller widget register device groups ...");
     registerDeviceGroup(new MediaServerGroupWidget);
     registerDeviceGroup(new MediaRendererGroupWidget);
+    _pVisual = new GuiVisual;
+    addView(_pVisual, "Video");
+}
+
+
+GuiVisual*
+ControllerWidget::getLocalRendererVisual()
+{
+    return _pVisual;
 }
 
 
@@ -517,6 +526,66 @@ MediaObjectModel::MediaObjectLabelModel::getLabel()
     else {
         return _pSuperModel->getTitle();
     }
+}
+
+
+GuiVisual::GuiVisual(Gui::View* pParent)
+{
+}
+
+
+GuiVisual::~GuiVisual()
+{
+}
+
+
+void
+GuiVisual::show()
+{
+    Gui::View::show();
+}
+
+
+void
+GuiVisual::hide()
+{
+    Gui::View::hide();
+}
+
+
+GuiVisual::WindowHandle
+GuiVisual::getWindow()
+{
+    return (GuiVisual::WindowHandle)Gui::View::getNativeWindowId();
+//    return winId();
+}
+
+
+Sys::Visual::VisualType
+GuiVisual::getType()
+{
+    // GuiVisual is multi-platform, and type of visual is platform dependent.
+#ifdef __LINUX__
+    return Omm::Sys::Visual::VTX11;
+#elif __DARWIN__
+    return Omm::Sys::Visual::VTOSX;
+#elif __WINDOWS__
+    return Omm::Sys::Visual::VTWin;
+#else
+    return Omm::Sys::Visual::VTNone;
+#endif
+}
+
+
+void
+GuiVisual::renderImage(const std::string& imageData)
+{
+}
+
+
+void
+GuiVisual::blank()
+{
 }
 
 

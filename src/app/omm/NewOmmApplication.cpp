@@ -21,7 +21,9 @@
 
 #include <Omm/Gui/Application.h>
 #include <Omm/UpnpGui.h>
-
+#include <Omm/UpnpAvRenderer.h>
+#include <Omm/UpnpAvServer.h>
+#include <Omm/Util.h>
 
 class Application : public Omm::Gui::Application
 {
@@ -38,14 +40,47 @@ class Application : public Omm::Gui::Application
     {
         _pController->init();
         _pController->start();
+        addLocalRenderer();
+        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
+        _localDeviceServer.init();
+        _localDeviceServer.start();
     }
 
     virtual void finishedEventLoop()
     {
+        _localDeviceServer.stop();
         _pController->stop();
     }
 
-    Omm::ControllerWidget* _pController;
+    void addLocalRenderer()
+    {
+        Omm::Av::Log::instance()->upnpav().debug("controller application add local renderer ...");
+        Omm::Av::Engine* pEngine;
+        Omm::Util::PluginLoader<Omm::Av::Engine> enginePluginLoader;
+        try {
+            pEngine = enginePluginLoader.load("engine-vlc");
+        }
+        catch(Poco::NotFoundException) {
+            Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
+            return;
+        }
+
+        pEngine->setVisual(_pController->getLocalRendererVisual());
+        pEngine->createPlayer();
+
+        _mediaRenderer.addEngine(pEngine);
+        Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
+        _mediaRenderer.addIcon(pRendererIcon);
+        _mediaRenderer.setFriendlyName("OMM Renderer");
+        _localDeviceContainer.addDevice(&_mediaRenderer);
+        _localDeviceContainer.setRootDevice(&_mediaRenderer);
+        Omm::Av::Log::instance()->upnpav().debug("controller application add local renderer finished.");
+    }
+    
+    Omm::ControllerWidget*  _pController;
+    Omm::Av::MediaRenderer  _mediaRenderer;
+    Omm::DeviceContainer    _localDeviceContainer;
+    Omm::DeviceServer       _localDeviceServer;
 };
 
 

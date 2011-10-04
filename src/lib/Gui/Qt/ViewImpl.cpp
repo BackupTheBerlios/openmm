@@ -92,6 +92,14 @@ ViewImpl::getNativeView()
 }
 
 
+WId
+ViewImpl::getNativeWindowId()
+{
+//    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+    return _pNativeView->winId();
+}
+
+
 void
 ViewImpl::setNativeView(QWidget* pView)
 {
