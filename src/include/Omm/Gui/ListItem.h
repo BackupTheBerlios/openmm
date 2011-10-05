@@ -37,6 +37,8 @@ class ListItemModel : public Model
     friend class ListItemView;
     
 public:
+    ListItemModel();
+
     void setLabelModel(LabelModel* pLabelModel);
     void setImageModel(ImageModel* pImageModel);
 

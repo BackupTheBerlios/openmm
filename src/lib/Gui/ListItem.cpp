@@ -30,6 +30,13 @@ namespace Omm {
 namespace Gui {
 
 
+ListItemModel::ListItemModel() :
+_pLabelModel(0),
+_pImageModel(0)
+{
+}
+
+
 void
 ListItemModel::setLabelModel(LabelModel* pLabelModel)
 {
@@ -49,7 +56,6 @@ View(pParent)
 {
     _pImageView = new ImageView(this);
     _pImageView->setStretchFactor(-1.0);
-//    _pImageView->setSizeConstraint(35, 35, View::Pref);
     _pLabelView = new LabelView(this);
     _pLabelView->setBackgroundColor(Color("white"));
 
@@ -63,8 +69,12 @@ ListItemView::syncView(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
-    _pLabelView->syncView(pItemModel->_pLabelModel);
-    _pImageView->syncView(pItemModel->_pImageModel);
+    if (pItemModel->_pLabelModel) {
+        _pLabelView->syncView(pItemModel->_pLabelModel);
+    }
+    if (pItemModel->_pImageModel) {
+        _pImageView->syncView(pItemModel->_pImageModel);
+    }
 }
 
 
