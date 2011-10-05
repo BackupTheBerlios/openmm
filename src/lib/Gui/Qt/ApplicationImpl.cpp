@@ -69,19 +69,19 @@ ApplicationImpl::setFullscreen(bool fullscreen)
                  selection-background-color: darkblue; \
             } \
             QScrollArea { \
-                 background-color: #1f1f1f; \
+                 background-color: black; \
                  color: #afafaf; \
             } \
             QLabel { \
-                 background-color: #1f1f1f; \
+                 background-color: black; \
                  color: #afafaf; \
             } \
             QSlider { \
-                 background-color: #1f1f1f; \
+                 background-color: black; \
                  color: #afafaf; \
             } \
             QButton { \
-                 background-color: #1f1f1f; \
+                 background-color: black; \
                  color: #afafaf; \
             }";
     }
@@ -93,10 +93,11 @@ ApplicationImpl::run(int argc, char** argv)
 {
     Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
     _pQtApplication = new QApplication(argc, argv);
+    _pMainWindow = new QMainWindow;
     if (_fullscreenStyleSheet != "") {
         _pQtApplication->setStyleSheet(_fullscreenStyleSheet);
+        _pMainWindow->setCursor(QCursor(Qt::BlankCursor));
     }
-    _pMainWindow = new QMainWindow;
     _pApplication->_pMainView = _pApplication->createMainView();
     _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->_pMainView->getNativeView()));
     _pMainWindow->resize(_width, _height);
