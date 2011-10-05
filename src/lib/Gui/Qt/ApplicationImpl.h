@@ -48,6 +48,7 @@ public:
     Application*            _pApplication;
     QMainWindow*            _pMainWindow;
     QApplication*           _pQtApplication;
+    QString                 _fullscreenStyleSheet;
     int                     _width;
     int                     _height;
 };

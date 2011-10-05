@@ -36,7 +36,8 @@ namespace Gui {
 ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
 _width(800),
-_height(480)
+_height(480),
+_fullscreenStyleSheet("")
 {
     Omm::Gui::Log::instance()->gui().debug("application impl ctor");
 }
@@ -58,10 +59,11 @@ ApplicationImpl::resize(int width, int height)
 void
 ApplicationImpl::setFullscreen(bool fullscreen)
 {
-//                 font-size: 32pt; 
-    QString fullscreenStyleSheet =
+    if (fullscreen) {
+        _fullscreenStyleSheet =
             "* { \
-                 background-color: #afafaf;\
+                 font-size: 28pt; \
+                 background-color: #afafaf; \
                  color: darkred; \
                  selection-color: white; \
                  selection-background-color: darkblue; \
@@ -82,8 +84,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
                  background-color: #1f1f1f; \
                  color: #afafaf; \
             }";
-
-    _pQtApplication->setStyleSheet(fullscreenStyleSheet);
+    }
 }
 
 
@@ -92,6 +93,9 @@ ApplicationImpl::run(int argc, char** argv)
 {
     Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
     _pQtApplication = new QApplication(argc, argv);
+    if (_fullscreenStyleSheet != "") {
+        _pQtApplication->setStyleSheet(_fullscreenStyleSheet);
+    }
     _pMainWindow = new QMainWindow;
     _pApplication->_pMainView = _pApplication->createMainView();
     _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->_pMainView->getNativeView()));

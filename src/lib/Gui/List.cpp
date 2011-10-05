@@ -374,12 +374,7 @@ ListView::handleSelectionHighlight()
     if (!_pSelectedView) {
         return;
     }
-    if (itemIsVisible(_selectedRow)) {
-        _pSelectedView->setHighlighted(true);
-    }
-    else {
-        _pSelectedView->setHighlighted(false);
-    }
+    _pSelectedView->setHighlighted(itemIsVisible(_selectedRow));
 }
 
 
@@ -419,10 +414,13 @@ ListView::selectedItem(int row)
 void
 ListView::highlightItem(int row)
 {
-//    if (row < _rowOffset || row > _lastVisibleRow) {
-//        return;
-//    }
-    
+    if (row < _rowOffset) {
+        scrolledToRow(row);
+    }
+    if (row > _lastVisibleRow) {
+        scrolledToRow(row);
+    }
+
     if (_selectedRow >= 0 && itemIsVisible(_selectedRow)) {
         View* pLastSelectedView = visibleView(visibleIndex(_selectedRow));
         pLastSelectedView->setHighlighted(false);
