@@ -28,6 +28,7 @@
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/NotificationQueue.h>
 #include <Poco/NotificationCenter.h>

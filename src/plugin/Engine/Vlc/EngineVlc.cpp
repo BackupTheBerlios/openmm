@@ -101,7 +101,9 @@ VlcEngine::createPlayer()
         Omm::Av::Log::instance()->upnpav().debug("vlc engine: set visual ...");
 #ifdef __LINUX__
             Omm::Av::Log::instance()->upnpav().debug("vlc engine: set X11 visual ...");
-#if LIBVLC_VERSION_INT < 0x110
+#if LIBVLC_VERSION_INT < 0x100
+            libvlc_media_player_set_drawable(_pVlcPlayer, _pVisual->getWindow(), &_exception);
+#elif LIBVLC_VERSION_INT < 0x110
             libvlc_media_player_set_xwindow(_pVlcPlayer, _pVisual->getWindow(), &_exception);
 #else
             libvlc_media_player_set_xwindow(_pVlcPlayer, _pVisual->getWindow());

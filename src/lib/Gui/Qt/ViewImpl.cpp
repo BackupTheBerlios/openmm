@@ -291,6 +291,7 @@ ViewImpl::keyPressed(int key)
         case Qt::Key_MediaRecord:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyRecord);
             break;
+#if (QT_VERSION & 0xFFFFFFFF) > 0x040500
         case Qt::Key_MediaPause:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPause);
             break;
@@ -309,6 +310,7 @@ ViewImpl::keyPressed(int key)
         case Qt::Key_MediaLast:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyLast);
             break;
+#endif
     }
 }
 

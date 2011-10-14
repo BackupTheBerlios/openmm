@@ -26,6 +26,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
+#include <Poco/Net/HTTPServerParams.h>
 #include <Poco/Exception.h>
 
 #include "UpnpAvServer.h"

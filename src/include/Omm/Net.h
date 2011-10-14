@@ -23,6 +23,7 @@
 
 #include <Poco/Logger.h>
 #include <Poco/NotificationCenter.h>
+#include <Poco/Notification.h>
 #include <Poco/SingletonHolder.h>
 #include <Poco/Net/IPAddress.h>
 #include <Poco/Net/NetworkInterface.h>

@@ -25,7 +25,9 @@
 #include <QWidget>
 #include <QTimer>
 #include <QMutex>
-#include <QSvgRenderer>
+// Bug in old cmake find file for qt: though package Svg is selected, include path is missing
+#include <qt4/QtSvg/QSvgRenderer>
+//#include <QSvgRenderer>
 
 
 class QtActivityIndicator : public QWidget

@@ -20,7 +20,9 @@
  ***************************************************************************/
 
 #include <iostream>
-#include <QtXml>
+// Bug in old cmake find file for qt: though package Xml is selected, include path is missing
+#include <qt4/QtXml/QtXml>
+//#include <QtXml>
 #include "logan.h"
 
 

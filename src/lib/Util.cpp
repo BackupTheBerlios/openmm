@@ -100,7 +100,9 @@ Home::getHomePath()
 void
 Startable::startAsThread()
 {
+#if (POCO_VERSION & 0xFFFFFFFF) >= 0x01350000
     _thread.setOSPriority(Poco::Thread::getMinOSPriority());
+#endif
     _thread.start(*this);
 }
 
