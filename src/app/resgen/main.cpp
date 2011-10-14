@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <iostream>
+#include <fstream>
+#include <Poco/NumberFormatter.h>
 
 #include "Poco/Util/Application.h"
 #include "Poco/Util/Option.h"
@@ -27,8 +29,8 @@
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/LineEndingConverter.h"
 #include "Poco/Exception.h"
+#include "Poco/Path.h"
 
-#include "ommgen.h"
 
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -36,17 +38,17 @@ using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
 
-class OmmGenApplication : public Poco::Util::Application
+class ResGenApplication : public Poco::Util::Application
 {
 public:
-    OmmGenApplication() :
+    ResGenApplication() :
         _helpRequested(false),
         _outputPath("./")
     {
         setUnixOptions(true);
     }
     
-    ~OmmGenApplication()
+    ~ResGenApplication()
     {
     }
     
@@ -90,10 +92,10 @@ protected:
     {
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
-        helpFormatter.setUsage("[-o OUTPUT_DIRECTORY] DEVICE_DESCRIPTION_FILE_PATH" + Poco::LineEnding::NEWLINE_DEFAULT
-                                + "SCPDURLs in device description file must be relative to device description file path"
+        helpFormatter.setUsage("[-o OUTPUT_DIRECTORY] FILE_NAME_1 FILE_NAME_2 ..." + Poco::LineEnding::NEWLINE_DEFAULT
+                                + "resource header file is put into OUTPUT_DIRECTORY, files can be any type of file"
                                 );
-        helpFormatter.setHeader("A stub generator for OMM UPnP.");
+        helpFormatter.setHeader("A resource generator.");
         helpFormatter.format(std::cout);
     }
     
@@ -106,26 +108,20 @@ protected:
         }
         else
         {
-            std::string descriptionPath = args[0];
-
-            Omm::UriDescriptionReader descriptionReader;
-            descriptionReader.getDeviceDescription("file:" + descriptionPath);
-            Omm::DeviceContainer* pDeviceContainer = descriptionReader.deviceContainer();
-            pDeviceContainer->rewriteDescriptions();
-
-            _stubWriters.push_back(new DevDeviceH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DevDeviceCpp(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DevDeviceImplH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DevDeviceImplCpp(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DeviceDescH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new DeviceDescCpp(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new CtlDeviceImplH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new CtlDeviceImplCpp(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new CtlDeviceH(pDeviceContainer, _outputPath));
-            _stubWriters.push_back(new CtlDeviceCpp(pDeviceContainer, _outputPath));
-
-            for (std::vector<StubWriter*>::iterator i = _stubWriters.begin(); i != _stubWriters.end(); ++i) {
-                (*i)->write();
+            for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it) {
+                std::ifstream ifs((*it).c_str());
+                std::string fileName = Poco::Path(*it).getFileName();
+                std::string data = "char " + fileName + "[] = {";
+                const int bufSize = 512;
+                char buf[bufSize];
+                while(ifs) {
+                    ifs.read(buf, bufSize);
+                    for (int c = 0; c < ifs.gcount(); c++) {
+                        data += "0x" + Poco::NumberFormatter::formatHex(buf[c]) + (c == ifs.gcount() - 1 ? "" : ", ");
+                    }
+                }
+                data += "};" + Poco::LineEnding::NEWLINE_DEFAULT;
+                std::cout << data << std::endl;
             }
         }
         return Application::EXIT_OK;
@@ -133,15 +129,13 @@ protected:
     
 private:
     bool                        _helpRequested;
-    std::string                 _descriptionPath;
     std::string                 _outputPath;
-    std::vector<StubWriter*>    _stubWriters;
 };
 
 
 int main(int argc, char** argv)
 {
-    OmmGenApplication app;
+    ResGenApplication app;
     app.init(argc, argv);
     return app.run();
 }
