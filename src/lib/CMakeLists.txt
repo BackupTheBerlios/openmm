@@ -140,10 +140,15 @@ ommsys
 CACHE INTERNAL libommsys
 )
 
+add_subdirectory(resgen)
 
 add_subdirectory(Gui)
 
 if(OMM_GUI)
+
+include(AddResources)
+add_resources("img/media-container.png" "img/media-item.png")
+
 add_library(ommupnpgui
 UpnpGui.cpp
 )
