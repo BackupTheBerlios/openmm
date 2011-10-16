@@ -3,6 +3,7 @@ main.cpp
 )
 
 target_link_libraries(resgen
+${POCO_FOUNDATION}
 ${POCO_UTIL}
 )
 
