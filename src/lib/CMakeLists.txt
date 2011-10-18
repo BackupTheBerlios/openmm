@@ -147,10 +147,16 @@ add_subdirectory(Gui)
 if(OMM_GUI)
 
 include(AddResources)
-add_resources("img/media-container.png" "img/media-item.png")
+set(MEDIA_IMAGE_RESOURCE
+MediaImages
+)
+
+add_resources(${MEDIA_IMAGE_RESOURCE}
+"img/media-container.png" "img/media-item.png")
 
 add_library(ommupnpgui
 UpnpGui.cpp
+${MEDIA_IMAGE_RESOURCE}
 )
 
 target_link_libraries(ommupnpgui

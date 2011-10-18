@@ -168,6 +168,9 @@ protected:
         }
         else
         {
+            char foo[] = {0x00, 0x01};
+            std::string test(foo);
+            
             std::cout << "resgen writing header to: " + _outputDirectory + "/" + _resourceName + ".h" << std::endl;
             std::ofstream resourceHFile((_outputDirectory + "/" + _resourceName + ".h").c_str());
             resourceHFile << writeResourceHeader();
@@ -177,18 +180,27 @@ protected:
                     + "{" + Poco::LineEnding::NEWLINE_DEFAULT
                     ;
             
-            for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it) {
+            int i = 0;
+            for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it, ++i) {
                 std::ifstream ifs((*it).c_str());
                 std::string fileName = Poco::Path(*it).getFileName();
-                resourceCpp += "    _resources[\"" + fileName + "\"] = std::string(";
+                
+                resourceCpp += Poco::LineEnding::NEWLINE_DEFAULT;
+                std::string charStringName = "string" + Poco::NumberFormatter::format(i);
+                resourceCpp += "    char " + charStringName + "[] = {";
                 const int bufSize = 512;
                 char buf[bufSize];
                 while(ifs) {
                     ifs.read(buf, bufSize);
-//                    for (int c = 0; c < ifs.gcount(); c++) {
-//                        resourceCpp += "0x" + Poco::NumberFormatter::formatHex(buf[c]) + (c == ifs.gcount() - 1 ? "" : ", ");
-//                    }
+                    int bytesRead = ifs.gcount();
+                    for (int c = 0; c < bytesRead; c++) {
+//                        resourceCpp += "0x" + Poco::NumberFormatter::formatHex((unsigned char)buf[c]) + (c == bytesRead - 1 ? "" : ", ");
+                        resourceCpp += "0x" + Poco::NumberFormatter::formatHex((unsigned char)buf[c]) + ", ";
+                    }
                 }
+                resourceCpp += "};" + Poco::LineEnding::NEWLINE_DEFAULT;
+                resourceCpp += "    _resources[\"" + fileName + "\"] = std::string(";
+                resourceCpp += charStringName;
                 resourceCpp += ");" + Poco::LineEnding::NEWLINE_DEFAULT;
             }
             resourceCpp += "}" + Poco::LineEnding::NEWLINE_DEFAULT;
