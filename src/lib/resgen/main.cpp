@@ -43,7 +43,8 @@ class ResGenApplication : public Poco::Util::Application
 public:
     ResGenApplication() :
         _helpRequested(false),
-        _outputDirectory("./")
+        _outputDirectory("./"),
+        _resourceName("OmmResources")
     {
         setUnixOptions(true);
     }
@@ -74,6 +75,10 @@ protected:
                           .required(false)
                           .repeatable(false)
                           .argument("output directory", true));
+        options.addOption(Option("resource-name", "r", "name of resource, used for class and source file names")
+                          .required(false)
+                          .repeatable(false)
+                          .argument("resource name", true));
     }
     
     void handleOption(const std::string& name, const std::string& value)
@@ -86,18 +91,73 @@ protected:
         else if (name == "output-directory") {
             _outputDirectory = value;
         }
+        else if (name == "resource-name") {
+            _resourceName = value;
+        }
     }
     
     void displayHelp()
     {
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
-        helpFormatter.setUsage("[-o OUTPUT_DIRECTORY] FILE_NAME_1 FILE_NAME_2 ..." + Poco::LineEnding::NEWLINE_DEFAULT
-                                + "resource header file is put into OUTPUT_DIRECTORY, files can be any type of file"
+        helpFormatter.setUsage("[-o OUTPUT_DIRECTORY] [-r RESOURCE_NAME] FILE_NAME_1 FILE_NAME_2 ..." + Poco::LineEnding::NEWLINE_DEFAULT
+                                + "resource header file is put into OUTPUT_DIRECTORY, files can be any type of file" + Poco::LineEnding::NEWLINE_DEFAULT
+                                + "resource name is used for class name and names of generated source and header files."
                                 );
         helpFormatter.setHeader("A resource generator.");
         helpFormatter.format(std::cout);
     }
+    
+    std::string writeResourceHeader()
+    {
+        std::string resourceH =
+                "#include <string>" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "#include <map>" + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + "class " + _resourceName + Poco::LineEnding::NEWLINE_DEFAULT
+                + "{" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "public:" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    " + _resourceName + "* instance();" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    const std::string& getResource(const std::string& resourceName);" + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + "private:" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    " + _resourceName + "();" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    static " + _resourceName + "* _pInstance;" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    std::map<std::string, std::string> _resources;" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "};" + Poco::LineEnding::NEWLINE_DEFAULT
+                ;
+        return resourceH;
+    }
+    
+    
+    std::string writeResourceProlog()
+    {
+        std::string prolog =
+                "#include \"" + _resourceName + ".h\"" + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + _resourceName + "* " + _resourceName + "::_pInstance = 0;" + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + _resourceName + "*" + Poco::LineEnding::NEWLINE_DEFAULT
+                + _resourceName + "::instance()" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "{" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    if (!_pInstance) {" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "        _pInstance = new " + _resourceName + ";" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    }" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    return _pInstance;" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "}" + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + "const std::string&" + Poco::LineEnding::NEWLINE_DEFAULT
+                + _resourceName + "::getResource(const std::string& resourceName)" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "{" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "    return _resources[resourceName];" + Poco::LineEnding::NEWLINE_DEFAULT
+                + "}" + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                + Poco::LineEnding::NEWLINE_DEFAULT
+                ;
+        return prolog;
+    }
+    
     
     int main(const std::vector<std::string>& args)
     {
@@ -108,21 +168,34 @@ protected:
         }
         else
         {
+            std::cout << "resgen writing header to: " + _outputDirectory + "/" + _resourceName + ".h" << std::endl;
+            std::ofstream resourceHFile((_outputDirectory + "/" + _resourceName + ".h").c_str());
+            resourceHFile << writeResourceHeader();
+            
+            std::string resourceCpp = 
+                    _resourceName + "::" + _resourceName + "()" + Poco::LineEnding::NEWLINE_DEFAULT
+                    + "{" + Poco::LineEnding::NEWLINE_DEFAULT
+                    ;
+            
             for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it) {
                 std::ifstream ifs((*it).c_str());
                 std::string fileName = Poco::Path(*it).getFileName();
-                std::string data = "char " + fileName + "[] = {";
+                resourceCpp += "    _resources[\"" + fileName + "\"] = std::string(";
                 const int bufSize = 512;
                 char buf[bufSize];
                 while(ifs) {
                     ifs.read(buf, bufSize);
-                    for (int c = 0; c < ifs.gcount(); c++) {
-                        data += "0x" + Poco::NumberFormatter::formatHex(buf[c]) + (c == ifs.gcount() - 1 ? "" : ", ");
-                    }
+//                    for (int c = 0; c < ifs.gcount(); c++) {
+//                        resourceCpp += "0x" + Poco::NumberFormatter::formatHex(buf[c]) + (c == ifs.gcount() - 1 ? "" : ", ");
+//                    }
                 }
-                data += "};" + Poco::LineEnding::NEWLINE_DEFAULT;
-                std::cout << data << std::endl;
+                resourceCpp += ");" + Poco::LineEnding::NEWLINE_DEFAULT;
             }
+            resourceCpp += "}" + Poco::LineEnding::NEWLINE_DEFAULT;
+                    
+            std::cout << "resgen writing source to: " + _outputDirectory + "/" + _resourceName + ".cpp" << std::endl;
+            std::ofstream resourceCppFile((_outputDirectory + "/" + _resourceName + ".cpp").c_str());
+            resourceCppFile << writeResourceProlog() << resourceCpp;
         }
         return Application::EXIT_OK;
     }
@@ -130,6 +203,7 @@ protected:
 private:
     bool                        _helpRequested;
     std::string                 _outputDirectory;
+    std::string                 _resourceName;
 };
 
 
