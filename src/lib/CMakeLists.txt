@@ -140,11 +140,9 @@ ommsys
 CACHE INTERNAL libommsys
 )
 
-add_subdirectory(resgen)
-
 add_subdirectory(Gui)
 
-if(OMM_GUI)
+if(OMM_GUI AND RESGEN)
 
 include(AddResources)
 set(MEDIA_IMAGE_RESOURCE
@@ -152,7 +150,19 @@ MediaImages
 )
 
 add_resources(${MEDIA_IMAGE_RESOURCE}
-"img/media-container.png" "img/media-item.png")
+"img/media-server.png"
+"img/media-container.png"
+"img/media-item.png"
+"img/media-audio-item.png"
+"img/media-image-item.png"
+"img/media-video-item.png"
+"img/media-audio-broadcast.png"
+"img/media-video-broadcast.png"
+"img/media-skip-backward.png"
+"img/media-start.png"
+"img/media-stop.png"
+"img/media-skip-forward.png"
+)
 
 add_library(ommupnpgui
 UpnpGui.cpp
@@ -177,7 +187,7 @@ LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 )
 
-endif(OMM_GUI)
+endif(OMM_GUI AND RESGEN)
 
 
 add_subdirectory(Dvb)

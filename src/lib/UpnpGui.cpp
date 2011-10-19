@@ -21,9 +21,8 @@
 
 #include "UpnpGui.h"
 #include "Gui/GuiLogger.h"
-
 #include "UpnpAvCtlServer.h"
-
+#include "MediaImages.h"
 
 namespace Omm {
 
@@ -159,7 +158,7 @@ public:
     BackButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
         Gui::Image image;
-        image.setFile("media-skip-backward.png");
+        image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
         setImage(&image);
         setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
     }
@@ -178,7 +177,7 @@ public:
     PlayButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
         Gui::Image image;
-        image.setFile("media-start.png");
+        image.setData(MediaImages::instance()->getResource("media-start.png"));
         setImage(&image);
         setSizeConstraint(30, height(Gui::View::Pref), Gui::View::Pref);
     }
@@ -197,7 +196,7 @@ public:
     StopButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
         Gui::Image image;
-        image.setFile("media-stop.png");
+        image.setData(MediaImages::instance()->getResource("media-stop.png"));
         setImage(&image);
         setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
     }
@@ -216,7 +215,7 @@ public:
     ForwButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
         Gui::Image image;
-        image.setFile("media-skip-forward.png");
+        image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
         setImage(&image);
         setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
     }
@@ -366,7 +365,7 @@ MediaServerDevice::initController()
     setLabelModel(pLabelModel);
 
     Gui::ImageModel* pImageModel = new Gui::ImageModel;
-    pImageModel->setFile("media-server.png");
+    pImageModel->setData(MediaImages::instance()->getResource("media-server.png"));
     setImageModel(pImageModel);
 }
 
@@ -487,31 +486,31 @@ MediaObjectModel::MediaObjectModel()
 
     if (!_pContainerImageModel) {
         _pContainerImageModel = new Gui::Image;
-        _pContainerImageModel->setFile("media-container.png");
+        _pContainerImageModel->setData(MediaImages::instance()->getResource("media-container.png"));
     }
     if (!_pItemImageModel) {
         _pItemImageModel = new Gui::Image;
-        _pItemImageModel->setFile("media-item.png");
+        _pItemImageModel->setData(MediaImages::instance()->getResource("media-item.png"));
     }
     if (!_pItemAudioItemModel) {
         _pItemAudioItemModel = new Gui::Image;
-        _pItemAudioItemModel->setFile("media-audio-item.png");
+        _pItemAudioItemModel->setData(MediaImages::instance()->getResource("media-audio-item.png"));
     }
     if (!_pItemImageItemModel) {
         _pItemImageItemModel = new Gui::Image;
-        _pItemImageItemModel->setFile("media-image-item.png");
+        _pItemImageItemModel->setData(MediaImages::instance()->getResource("media-image-item.png"));
     }
     if (!_pItemVideoItemModel) {
         _pItemVideoItemModel = new Gui::Image;
-        _pItemVideoItemModel->setFile("media-video-item.png");
+        _pItemVideoItemModel->setData(MediaImages::instance()->getResource("media-video-item.png"));
     }
     if (!_pItemAudioBroadcastModel) {
         _pItemAudioBroadcastModel = new Gui::Image;
-        _pItemAudioBroadcastModel->setFile("media-audio-broadcast.png");
+        _pItemAudioBroadcastModel->setData(MediaImages::instance()->getResource("media-audio-broadcast.png"));
     }
     if (!_pItemVideoBroadcastModel) {
         _pItemVideoBroadcastModel = new Gui::Image;
-        _pItemVideoBroadcastModel->setFile("media-video-broadcast.png");
+        _pItemVideoBroadcastModel->setData(MediaImages::instance()->getResource("media-video-broadcast.png"));
     }
 }
 

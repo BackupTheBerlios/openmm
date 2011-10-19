@@ -1,5 +1,6 @@
 # order of subdirectories matters here, hence no call to descend_directories()
 set(subdirs
+util
 lib
 plugin
 app
