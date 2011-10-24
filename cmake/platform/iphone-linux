@@ -13,7 +13,7 @@ SET (CMAKE_CXX_COMPILER "${DEVROOT}/usr/bin/arm-apple-darwin-llvm-g++")
 #SET (CMAKE_C_FLAGS "-miphoneos-version-min=${SDKVER}" CACHE STRING "additional cross compiling c flags" FORCE)
 #SET (CMAKE_CXX_FLAGS "-isysroot ${SDKROOT} -I${DEVROOT}/usr/include/c++/4.2.1 -miphoneos-version-min=${SDKVER}" CACHE STRING "additional cross compiling cxx flags" FORCE)
 #SET (CMAKE_CXX_FLAGS "-I${DEVROOT}/usr/include/c++/4.2.1 -miphoneos-version-min=${SDKVER}" CACHE STRING "additional cross compiling cxx flags" FORCE)
-SET (CMAKE_CXX_FLAGS "-I${DEVROOT}/usr/include/c++/4.2.1" CACHE STRING "additional cross compiling cxx flags" FORCE)
+SET (CMAKE_CXX_FLAGS "-I${DEVROOT}/usr/include/c++/4.2.1 -w" CACHE STRING "additional cross compiling cxx flags" FORCE)
 
 SET (CMAKE_FIND_ROOT_PATH "${SDKROOT}" "${CMAKE_INSTALL_PREFIX}" "/opt/iphone-${SDKVER}/" "/usr/local/iphone-${SDKVER}/")
 SET (CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)

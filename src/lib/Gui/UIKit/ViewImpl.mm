@@ -173,7 +173,8 @@ void
 ViewImpl::triggerViewSync(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
-    // FIXME: implement triggerViewSync with UIKit
+    // FIXME: implement asynchronous triggerViewSync with UIKit
+    _pView->syncView(pModel);
 }
 
 

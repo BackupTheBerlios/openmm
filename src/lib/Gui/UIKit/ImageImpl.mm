@@ -28,9 +28,10 @@
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmGuiImage : UIImage
+@interface OmmGuiImage : UIView
 {
-    Omm::Gui::ImageViewImpl* _pImageViewImpl;
+    Omm::Gui::ImageViewImpl*    _pImageViewImpl;
+    UIImageView*                _pImageView;
 }
 
 @end
@@ -38,16 +39,33 @@
 
 @implementation OmmGuiImage
 
-- (void)setImpl:(Omm::Gui::ImageViewImpl*)pImpl
+
+- (id)initWithImpl:(Omm::Gui::ImageViewImpl*)pImpl
 {
-    _pImageViewImpl = pImpl;
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiImage initWithImpl ...");
+    if (self = [super init]) {
+        _pImageViewImpl = pImpl;
+        _pImageView = [UIImageView alloc];
+    }
+    return self;
+}
+
+
+- (id)setData:(NSData*)pImageData
+{
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiImage setData ...");
+    UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
+    [_pImageView initWithImage:pImage];
+    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
+//    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
+    [self addSubview:_pImageView];
 }
 
 
 //- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 //{
 ////    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
-//    _pLabelViewImpl->pushed();
+//    _pImageViewImpl->pushed();
 //    [super touchesBegan:touches withEvent:event];
 //}
 
@@ -60,9 +78,8 @@ namespace Gui {
 
 ImageViewImpl::ImageViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("image view impl ctor");
-    OmmGuiImage* pNativeView = [[OmmGuiImage alloc] init];
-    [pNativeView setImpl:this];
+    Log::instance()->gui().debug("image view impl ctor");
+    OmmGuiImage* pNativeView = [[OmmGuiImage alloc] initWithImpl:this];
 
     initViewImpl(pView, pNativeView);
 }
@@ -76,10 +93,13 @@ ImageViewImpl::~ImageViewImpl()
 void
 ImageViewImpl::setData(const std::string& data)
 {
-    // FIXME: implement setData() with UIImage
-//    QPixmap* pImage = static_cast<QPixmap*>(_pImage);
-//    pImage->loadFromData((const uchar*)data.data(), data.size(), 0);
-//    static_cast<QLabel*>(_pNativeView)->setPixmap(*pImage);
+    Log::instance()->gui().debug("image view impl set data");
+    NSData* pImageData = [NSData dataWithBytes:data.data() length:data.size()];
+    if (pImageData == nil) {
+        Log::instance()->gui().error("no image data");
+        return;
+    }
+    [static_cast<OmmGuiImage*>(_pNativeView) setData:pImageData];
 }
 
 
