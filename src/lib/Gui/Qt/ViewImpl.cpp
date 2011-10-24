@@ -29,7 +29,24 @@ namespace Omm {
 namespace Gui {
 
 
+class QtEventFilter : public QObject
+{
+public:
+    QtEventFilter(ViewImpl* pViewImpl) : _pViewImpl(pViewImpl)
+    {
+    }
 
+private:
+    virtual bool eventFilter(QObject* object, QEvent* event)
+    {
+        if (event->type() == QEvent::KeyPress) {
+            QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
+            _pViewImpl->keyPressed(pKeyEvent->key());
+        }
+    }
+
+    ViewImpl*      _pViewImpl;
+};
 
 
 ViewImpl::~ViewImpl()
@@ -48,6 +65,9 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     connect(this, SIGNAL(hideViewSignal()), _pNativeView, SLOT(hide()));
     connect(this, SIGNAL(triggerViewSyncSignal(Model*)), this, SLOT(triggerViewSyncSlot(Model*)));
     _pNativeView->setAutoFillBackground(true);
+
+    _pEventFilter = new QtEventFilter(this);
+    _pNativeView->installEventFilter(_pEventFilter);
 
     if (pView->getParent()) {
         QWidget* pParentWidget = static_cast<QWidget*>(pView->getParent()->getNativeView());

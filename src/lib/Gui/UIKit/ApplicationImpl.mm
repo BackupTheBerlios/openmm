@@ -89,6 +89,13 @@ ApplicationImpl::resize(int width, int height)
 }
 
 
+void
+ApplicationImpl::setFullscreen(bool fullscreen)
+{
+    // Do nothing on UIKit, all apps are fullscreen by default
+}
+
+
 int
 ApplicationImpl::run(int argc, char** argv)
 {

@@ -38,6 +38,7 @@ public:
 
     View* getView();
     void* getNativeView();
+    uint32_t getNativeWindowId();
     void* getNativeViewController();
     void setNativeView(void* pView);
     virtual void addSubview(View* pView);
@@ -46,6 +47,8 @@ public:
     virtual int widthView();
     virtual int heightView();
     virtual void resizeView(int width, int height);
+    virtual float getFontSize();
+    virtual void setFontSize(float fontSize);
     virtual void moveView(int x, int y);
     virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);
@@ -56,6 +59,7 @@ public:
     View*                       _pView;
 protected:
     void initViewImpl(View* pView, void* pNative);
+    void triggerViewSync(Model* pModel);
 
     void*                       _pNativeView;
     void*                       _pNativeViewController;

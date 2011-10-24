@@ -177,6 +177,9 @@ protected:
             Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
             mediaRenderer.addIcon(pRendererIcon);
             if (_name != "") {
+                mediaRenderer.setFriendlyName(_name);
+            }
+            else {
                 mediaRenderer.setFriendlyName("OMM Renderer");
             }
 
@@ -186,46 +189,46 @@ protected:
             // set media renderer device as root device
             rendererContainer.setRootDevice(&mediaRenderer);
 
-            ///////// add a file server /////////
-            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> serverPluginLoader;
-            Omm::Av::AbstractMediaObject* pContainerPlugin;
-            try {
-                pContainerPlugin = serverPluginLoader.load("server-file");
-            }
-            catch(Poco::NotFoundException) {
-                std::cerr << "Error could not find server plugin: " << "server-file" << std::endl;
-                return 1;
-            }
-
-            pContainerPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/music");
-            pContainerPlugin->setTitle("Music");
-            // create a media server device
-            Omm::Av::MediaServer mediaServer;
-            mediaServer.setRoot(pContainerPlugin);
-            mediaServer.setFriendlyName("OMM Music Collection");
-            Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
-            mediaServer.addIcon(pServerIcon);
-            rendererContainer.addDevice(&mediaServer);
-
-            ///////// add a webradio server /////////
-            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> webradioPluginLoader;
-            Omm::Av::AbstractMediaObject* pWebradioPlugin;
-            try {
-                pWebradioPlugin = webradioPluginLoader.load("server-webradio");
-            }
-            catch(Poco::NotFoundException) {
-                std::cerr << "Error could not find server plugin: " << "server-webradio" << std::endl;
-                return 1;
-            }
-
-            pWebradioPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/.omm/webradio.conf");
-            pWebradioPlugin->setTitle("Web Radio");
-            Omm::Av::MediaServer webradioServer;
-            webradioServer.setRoot(pWebradioPlugin);
-            webradioServer.setFriendlyName("OMM Webradio");
-            Omm::Icon* pWebradioIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
-            webradioServer.addIcon(pWebradioIcon);
-            rendererContainer.addDevice(&webradioServer);
+//            ///////// add a file server /////////
+//            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> serverPluginLoader;
+//            Omm::Av::AbstractMediaObject* pContainerPlugin;
+//            try {
+//                pContainerPlugin = serverPluginLoader.load("server-file");
+//            }
+//            catch(Poco::NotFoundException) {
+//                std::cerr << "Error could not find server plugin: " << "server-file" << std::endl;
+//                return 1;
+//            }
+//
+//            pContainerPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/music");
+//            pContainerPlugin->setTitle("Music");
+//            // create a media server device
+//            Omm::Av::MediaServer mediaServer;
+//            mediaServer.setRoot(pContainerPlugin);
+//            mediaServer.setFriendlyName("OMM Music Collection");
+//            Omm::Icon* pServerIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
+//            mediaServer.addIcon(pServerIcon);
+//            rendererContainer.addDevice(&mediaServer);
+//
+//            ///////// add a webradio server /////////
+//            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> webradioPluginLoader;
+//            Omm::Av::AbstractMediaObject* pWebradioPlugin;
+//            try {
+//                pWebradioPlugin = webradioPluginLoader.load("server-webradio");
+//            }
+//            catch(Poco::NotFoundException) {
+//                std::cerr << "Error could not find server plugin: " << "server-webradio" << std::endl;
+//                return 1;
+//            }
+//
+//            pWebradioPlugin->setOption("basePath", Poco::Environment::get("HOME") + "/.omm/webradio.conf");
+//            pWebradioPlugin->setTitle("Web Radio");
+//            Omm::Av::MediaServer webradioServer;
+//            webradioServer.setRoot(pWebradioPlugin);
+//            webradioServer.setFriendlyName("OMM Webradio");
+//            Omm::Icon* pWebradioIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
+//            webradioServer.addIcon(pWebradioIcon);
+//            rendererContainer.addDevice(&webradioServer);
 
             ///////// create a runnable device server and add container with local devices /////////
             Omm::DeviceServer localDevices;

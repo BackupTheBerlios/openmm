@@ -111,6 +111,10 @@ elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
     ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} ${SRC_DIR}
+    # first make resgen, which is needed for building the libraries
+    make ${VERBOSE} resgen
+    # the configure again to honor resgen's presence
+    ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} ${SRC_DIR}
 # build targets in out of source tree
 else
     cd ${BIN_DIR}

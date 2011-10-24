@@ -1,3 +1,7 @@
+set(CMAKE_FIND_FRAMEWORK
+"FIRST"
+)
+
 find_path(UIKit_INCLUDE_DIR
 UIKit.h
 #PATHS ${CMAKE_INCLUDE_PATH}
@@ -8,7 +12,9 @@ PATHS ${SDKROOT}/System/Library/Frameworks/UIKit.framework/Headers
 find_library(UIKit
 NAME UIKit
 #PATHS ${CMAKE_LIBRARY_PATH}
-PATHS ${SDKROOT}/System/Library
+PATHS ${SDKROOT}/System/Library ${SDKROOT}/System/Library/Frameworks/UIKit.framework
+#CMAKE_SYSTEM_FRAMEWORK_PATH
+CMAKE_FRAMEWORK_PATH ${SDKROOT}/System/Library
 PATH_SUFFIXES Frameworks
 )
 
@@ -19,7 +25,8 @@ ${UIKit}/UIKit
 find_library(Foundation
 NAME Foundation
 #PATHS ${CMAKE_LIBRARY_PATH}
-PATHS ${SDKROOT}/System/Library
+PATHS ${SDKROOT}/System/Library ${SDKROOT}/System/Library/Frameworks/Foundation.framework
+CMAKE_FRAMEWORK_PATH ${SDKROOT}/System/Library
 PATH_SUFFIXES Frameworks
 )
 
@@ -30,7 +37,8 @@ ${Foundation}/Foundation
 find_library(CoreGraphics
 NAME CoreGraphics
 #PATHS ${CMAKE_LIBRARY_PATH}
-PATHS ${SDKROOT}/System/Library
+PATHS ${SDKROOT}/System/Library ${SDKROOT}/System/Library/Frameworks/CoreGraphics.framework
+CMAKE_FRAMEWORK_PATH ${SDKROOT}/System/Library
 PATH_SUFFIXES Frameworks
 )
 

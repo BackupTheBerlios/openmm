@@ -55,10 +55,10 @@ public:
         _pController->setTabBarHidden(_fullscreen);
         _pController->init();
         _pController->start();
-        addLocalRenderer();
-        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
-        _localDeviceServer.init();
-        _localDeviceServer.start();
+//        addLocalRenderer();
+//        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
+//        _localDeviceServer.init();
+//        _localDeviceServer.start();
     }
 
     virtual void finishedEventLoop()

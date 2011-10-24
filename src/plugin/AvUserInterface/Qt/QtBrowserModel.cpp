@@ -222,7 +222,7 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
             return _charEncoding->toUnicode(object->getTitle().c_str());
         }
         else {
-            return _charEncoding->toUnicode(artist.c_str());
+            return _charEncoding->toUnicode((artist + " - " + object->getTitle()).c_str());
         }
         break;
     case Qt::DecorationRole:

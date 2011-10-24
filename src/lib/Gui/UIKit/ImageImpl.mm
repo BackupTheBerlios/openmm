@@ -23,26 +23,81 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "ColorImpl.h"
-#include "Gui/Color.h"
+#include "ImageImpl.h"
+#include "Gui/Image.h"
 #include "Gui/GuiLogger.h"
+
+
+@interface OmmGuiImage : UIImage
+{
+    Omm::Gui::ImageViewImpl* _pImageViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiImage
+
+- (void)setImpl:(Omm::Gui::ImageViewImpl*)pImpl
+{
+    _pImageViewImpl = pImpl;
+}
+
+
+//- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+//{
+////    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
+//    _pLabelViewImpl->pushed();
+//    [super touchesBegan:touches withEvent:event];
+//}
+
+@end
 
 
 namespace Omm {
 namespace Gui {
 
 
-ColorImpl::ColorImpl(int red, int green, int blue, int alpha)
+ImageViewImpl::ImageViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
-    _pUIColor = [UIColor colorWithRed:red/255.0 green:green/255.0 blue:blue/255.0 alpha:alpha/255.0];
+//    Omm::Gui::Log::instance()->gui().debug("image view impl ctor");
+    OmmGuiImage* pNativeView = [[OmmGuiImage alloc] init];
+    [pNativeView setImpl:this];
+
+    initViewImpl(pView, pNativeView);
 }
 
 
-void*
-ColorImpl::getNativeColor() const
+ImageViewImpl::~ImageViewImpl()
 {
-    return _pUIColor;
+}
+
+
+void
+ImageViewImpl::setData(const std::string& data)
+{
+    // FIXME: implement setData() with UIImage
+//    QPixmap* pImage = static_cast<QPixmap*>(_pImage);
+//    pImage->loadFromData((const uchar*)data.data(), data.size(), 0);
+//    static_cast<QLabel*>(_pNativeView)->setPixmap(*pImage);
+}
+
+
+void
+ImageViewImpl::setAlignment(View::Alignment alignment)
+{
+    // FIXME: implement setAlignment() with UIImage
+    switch(alignment) {
+        case View::AlignLeft:
+//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignLeft);
+            break;
+        case View::AlignCenter:
+//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignCenter);
+            break;
+        case View::AlignRight:
+//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignRight);
+            break;
+    }
 }
 
 

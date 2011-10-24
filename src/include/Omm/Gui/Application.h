@@ -43,6 +43,7 @@ public:
     void resizeMainView(int width, int height);
     void scaleMainView(float factor);
     void setFullscreen(bool fullscreen);
+    View* getMainView();
 
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}

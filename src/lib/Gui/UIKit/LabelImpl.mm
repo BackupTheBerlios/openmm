@@ -85,6 +85,24 @@ LabelViewImpl::setLabel(const std::string& label)
 
 
 void
+LabelViewImpl::setAlignment(View::Alignment alignment)
+{
+    // FIXME: set label alignment with UIKit
+    switch(alignment) {
+        case View::AlignLeft:
+//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignLeft);
+            break;
+        case View::AlignCenter:
+//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignCenter);
+            break;
+        case View::AlignRight:
+//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignRight);
+            break;
+    }
+}
+
+
+void
 LabelViewImpl::pushed()
 {
 //    Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");

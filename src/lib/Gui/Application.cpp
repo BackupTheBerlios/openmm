@@ -71,6 +71,13 @@ Application::setFullscreen(bool fullscreen)
 }
 
 
+View*
+Application::getMainView()
+{
+    return _pMainView;
+}
+
+
 int
 Application::run(int argc, char** argv)
 {

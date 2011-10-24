@@ -28,12 +28,16 @@
 namespace Omm {
 namespace Gui {
 
+class QtEventFilter;
+
 
 class ViewImpl : public QObject
 {
     Q_OBJECT
     
     friend class View;
+    friend class QtEventFilter;
+
     template <class W> friend class QtViewImpl;
     
 public:
@@ -75,6 +79,8 @@ private:
     void resized(int width, int height);
     void selected();
     void keyPressed(int key);
+    
+    QtEventFilter*              _pEventFilter;
 };
 
 
@@ -104,7 +110,7 @@ public:
 
     void keyPressEvent(QKeyEvent* pKeyEvent)
     {
-        _pViewImpl->keyPressed(pKeyEvent->key());
+//        _pViewImpl->keyPressed(pKeyEvent->key());
     }
 
     ViewImpl*   _pViewImpl;

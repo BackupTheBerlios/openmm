@@ -32,7 +32,6 @@ namespace Omm {
 namespace Gui {
 
 
-
 ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
 _width(800),

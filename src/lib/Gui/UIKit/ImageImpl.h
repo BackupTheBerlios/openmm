@@ -19,32 +19,27 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ApplicationImpl_INCLUDED
-#define ApplicationImpl_INCLUDED
+#ifndef ImageImpl_INCLUDED
+#define ImageImpl_INCLUDED
 
 #include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class Application;
+class View;
 
-
-class ApplicationImpl
+class ImageViewImpl : public ViewImpl
 {
-public:
-    friend class Application;
-    
-    ApplicationImpl(Application* pApplication);
-    virtual ~ApplicationImpl();
+    friend class ImageView;
+    friend class ButtonViewImpl;
 
-    void resize(int width, int height);
-    void setFullscreen(bool fullscreen);
-    int run(int argc, char** argv);
+private:
+    ImageViewImpl(View* pView);
+    ~ImageViewImpl();
 
-    static Application*    _pApplication;
-    int                    _width;
-    int                    _height;
+    void setData(const std::string& data);
+    void setAlignment(View::Alignment alignment);
 };
 
 

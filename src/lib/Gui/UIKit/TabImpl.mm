@@ -57,5 +57,12 @@ TabViewImpl::addView(View* pView, const std::string& tabName)
 }
 
 
+void
+TabViewImpl::setTabBarHidden(bool hidden)
+{
+    // FIXME: implement setTabBarHidden() with UIKit.
+}
+
+
 }  // namespace Omm
 }  // namespace Gui

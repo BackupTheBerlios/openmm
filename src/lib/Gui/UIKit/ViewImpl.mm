@@ -169,6 +169,14 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
 }
 
 
+void
+ViewImpl::triggerViewSync(Model* pModel)
+{
+//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
+    // FIXME: implement triggerViewSync with UIKit
+}
+
+
 View*
 ViewImpl::getView()
 {
@@ -183,6 +191,14 @@ ViewImpl::getNativeView()
 //    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
 
     return _pNativeView;
+}
+
+
+uint32_t
+ViewImpl::getNativeWindowId()
+{
+    // FIXME: return window id on UIKit?
+    return 0;
 }
 
 
@@ -253,6 +269,21 @@ ViewImpl::resizeView(int width, int height)
     frame.size.width = width;
     frame.size.height = height;
     static_cast<UIView*>(getNativeView()).frame = frame;
+}
+
+
+float
+ViewImpl::getFontSize()
+{
+    // FIXME: get font size with UIKit
+    return 0.0;
+}
+
+
+void
+ViewImpl::setFontSize(float fontSize)
+{
+    // FIXME: set font size with UIKit
 }
 
 

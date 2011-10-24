@@ -38,6 +38,8 @@ public:
     ~LabelViewImpl();
 
     void setLabel(const std::string& label);
+    void setAlignment(View::Alignment alignment);
+
     void pushed();
 };
 

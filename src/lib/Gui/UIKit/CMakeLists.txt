@@ -8,6 +8,7 @@ ScrollAreaImpl.mm
 TabImpl.mm
 NavigatorImpl.mm
 SliderImpl.mm
+ImageImpl.mm
 )
 
 

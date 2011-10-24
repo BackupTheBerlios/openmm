@@ -166,7 +166,7 @@ add_resources(${MEDIA_IMAGE_RESOURCE}
 
 add_library(ommupnpgui
 UpnpGui.cpp
-${MEDIA_IMAGE_RESOURCE}
+${OMM_RESOURCES}
 )
 
 target_link_libraries(ommupnpgui
