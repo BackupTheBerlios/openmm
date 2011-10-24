@@ -40,6 +40,8 @@ private:
 
     void setData(const std::string& data);
     void setAlignment(View::Alignment alignment);
+    
+    void* getImage();
 };
 
 

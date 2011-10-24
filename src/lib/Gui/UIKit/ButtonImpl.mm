@@ -26,7 +26,7 @@
 #include "ButtonImpl.h"
 #include "Gui/Button.h"
 #include "Gui/GuiLogger.h"
-//#include "ImageImpl.h"
+#include "ImageImpl.h"
 
 
 @interface OmmGuiButton : UIButton
@@ -90,9 +90,8 @@ ButtonViewImpl::setLabel(const std::string& label)
 void
 ButtonViewImpl::setImage(Image* pImage)
 {
-    // FIXME: set image of button with UIKit
-//    ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());
-//    [static_cast<UIButton*>(_pNativeView) setImage:*pImageImpl->_pImage forState:UIControlStateNormal];
+    ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());
+    [static_cast<UIButton*>(_pNativeView) setImage:(UIImage*)pImageImpl->getImage() forState:UIControlStateNormal];
 }
 
 

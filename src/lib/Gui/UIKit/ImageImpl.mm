@@ -56,11 +56,16 @@
     Omm::Gui::Log::instance()->gui().debug("OmmGuiImage setData ...");
     UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
     [_pImageView initWithImage:pImage];
-    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
+//    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
 //    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     [self addSubview:_pImageView];
 }
 
+
+- (UIImage*)getImage
+{
+    return _pImageView.image;
+}
 
 //- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 //{
@@ -120,6 +125,12 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
     }
 }
 
+
+void*
+ImageViewImpl::getImage()
+{
+    return [static_cast<OmmGuiImage*>(_pNativeView) getImage];
+}
 
 }  // namespace Omm
 }  // namespace Gui
