@@ -45,6 +45,7 @@
     Omm::Gui::Log::instance()->gui().debug("OmmGuiImage initWithImpl ...");
     if (self = [super init]) {
         _pImageViewImpl = pImpl;
+//        self.contentMode = UIViewContentModeCenter;
         _pImageView = [UIImageView alloc];
     }
     return self;
@@ -56,6 +57,11 @@
     Omm::Gui::Log::instance()->gui().debug("OmmGuiImage setData ...");
     UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
     [_pImageView initWithImage:pImage];
+//    [[_pImageView alloc] initWithImage:pImage];
+//    _pImageView.contentMode = UIViewContentModeCenter;
+//    _pImageView.frame = self.frame;
+    _pImageView.center = self.center;
+//    _pImageView.backgroundColor = [UIColor greenColor];
 //    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
 //    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     [self addSubview:_pImageView];

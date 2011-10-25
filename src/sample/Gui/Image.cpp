@@ -24,6 +24,7 @@
 
 #include "ImageData.h"
 
+
 class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()

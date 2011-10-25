@@ -379,7 +379,7 @@ void
 SsdpSocket::stopListen()
 {
     if (_mode == NotConfigured) {
-        Log::instance()->ssdp().error("failed to start SSDP socket, not configured.");
+        Log::instance()->ssdp().error("failed to stop SSDP socket, not configured.");
         return;
     }
     else {
