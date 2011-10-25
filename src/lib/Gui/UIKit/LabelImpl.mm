@@ -81,7 +81,6 @@ LabelViewImpl::setLabel(const std::string& label)
 //    Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
     NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
     [static_cast<UILabel*>(_pNativeView) setText:pLabel];
-//    [static_cast<UILabel*>(_pNativeView) performSelectorOnMainThread:@selector(setText:) withObject:pLabel waitUntilDone:YES];
 }
 
 

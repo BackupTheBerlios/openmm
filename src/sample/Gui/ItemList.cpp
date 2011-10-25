@@ -27,53 +27,62 @@
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/List.h>
 #include <Omm/Gui/ListModel.h>
-#include <Omm/Gui/Label.h>
+#include <Omm/Gui/ListItem.h>
 
+#include "ImageData.h"
 
-class StringListModel : public Omm::Gui::ListModel
+class ItemListModel : public Omm::Gui::ListModel
 {
 public:
-    StringListModel(int itemCount);
+    ItemListModel(int itemCount);
 
     virtual int totalItemCount();
     virtual Omm::Gui::Model* getItemModel(int row);
     virtual Omm::Gui::View* createItemView();
     
 private:
-    std::vector<Omm::Gui::LabelModel*>    _itemModels;
-    int                                   _viewCount;
+    std::vector<Omm::Gui::ListItemModel*>    _itemModels;
+    int                                      _viewCount;
 };
 
 
-StringListModel::StringListModel(int itemCount) :
+ItemListModel::ItemListModel(int itemCount) :
 _viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
-        Omm::Gui::LabelModel* pItemModel = new Omm::Gui::LabelModel;
-        pItemModel->setLabel("string " + Poco::NumberFormatter::format(i));
+        Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
+        
+        Omm::Gui::ImageModel* pImageModel = new Omm::Gui::ImageModel;
+        pImageModel->setData(std::string(ImageData, ImageSize));
+        pItemModel->setImageModel(pImageModel);
+        
+        Omm::Gui::LabelModel* pLabelModel = new Omm::Gui::LabelModel;
+        pLabelModel->setLabel("list item " + Poco::NumberFormatter::format(i));
+        pItemModel->setLabelModel(pLabelModel);
+        
         _itemModels.push_back(pItemModel);
     }
 }
 
 
 int
-StringListModel::totalItemCount()
+ItemListModel::totalItemCount()
 {
     return _itemModels.size();
 }
 
 
 Omm::Gui::View*
-StringListModel::createItemView()
+ItemListModel::createItemView()
 {
-    Omm::Gui::LabelView* pView = new Omm::Gui::LabelView;
-    pView->setName("string list view item " + Poco::NumberFormatter::format(_viewCount++));
+    Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
+    pView->setName("item list view item " + Poco::NumberFormatter::format(_viewCount++));
     return pView;
 }
 
 
 Omm::Gui::Model*
-StringListModel::getItemModel(int row)
+ItemListModel::getItemModel(int row)
 {
     return _itemModels[row];
 }
@@ -83,7 +92,7 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        StringListModel* pListModel = new StringListModel(10000);
+        ItemListModel* pListModel = new ItemListModel(10000);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setModel(pListModel);
         resizeMainView(800, 480);
