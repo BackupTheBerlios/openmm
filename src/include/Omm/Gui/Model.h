@@ -31,6 +31,7 @@ namespace Gui {
 
 class View;
 
+// FIXME: this should be unnecessary, view should pull all changes from its model.
 #define UPDATE_VIEW(CLASS, METHOD, ...) for (ViewIterator it = beginView(); it != endView(); ++it) \
 { CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
 

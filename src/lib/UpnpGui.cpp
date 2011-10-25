@@ -145,13 +145,6 @@ MediaRendererGroupWidget::getItemModel(int row)
 }
 
 
-void
-MediaRendererDevice::initController()
-{
-//    setLabel(getFriendlyName());
-}
-
-
 class BackButton : public Gui::Button
 {
 public:
@@ -269,8 +262,24 @@ public:
 };
 
 
+class RendererName : public Gui::Label
+{
+public:
+    RendererName(Gui::View* pParent = 0) : Gui::Label(pParent) {}
+    
+    virtual std::string getLabel()
+    {
+//        Gui::Log::instance()->gui().debug("media renderer name get label");
+        return static_cast<MediaRendererDevice*>(static_cast<MediaRendererView*>(_pParent)->getModel())->getFriendlyName();
+    }
+    
+};
+
+
 MediaRendererView::MediaRendererView()
 {
+    setName("media renderer view");
+    
     _pBackButton = new BackButton(this);
     _pPlayButton = new PlayButton(this);
     _pStopButton = new StopButton(this);
@@ -279,7 +288,7 @@ MediaRendererView::MediaRendererView()
     _pVolSlider = new VolSlider(this);
 //    _pSeekSlider = new SeekSlider(this);
     
-    _pRendererName = new Gui::Label(this);
+    _pRendererName = new RendererName(this);
     _pRendererName->setAlignment(Gui::View::AlignCenter);
 
     setLayout(&_layout);
@@ -294,10 +303,10 @@ MediaRendererView::selectedRenderer()
 
 
 void
-MediaRendererView::syncView()
+MediaRendererView::syncViewImpl()
 {
-    MediaRendererDevice* pRendererModel = static_cast<MediaRendererDevice*>(_pModel);
-    _pRendererName->setLabel(pRendererModel->getFriendlyName());
+//    Gui::Log::instance()->gui().debug("media renderer view sync view impl");
+    _pRendererName->syncViewImpl();
 }
 
 

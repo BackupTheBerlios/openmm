@@ -54,6 +54,8 @@ ListItemModel::setImageModel(ImageModel* pImageModel)
 ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
+    setName("list item view");
+    
     _pImageView = new ImageView(this);
     _pImageView->setStretchFactor(-1.0);
     _pLabelView = new LabelView(this);

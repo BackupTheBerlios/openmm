@@ -98,12 +98,10 @@ public:
 
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
-public:
-    virtual void initController();
 };
 
 
-class MediaRendererView : public Gui::View //, public Gui::Controller
+class MediaRendererView : public Gui::View
 {
 public:
     MediaRendererView();
@@ -111,7 +109,7 @@ public:
     void selectedRenderer();
     
 private:
-    virtual void syncView();
+    virtual void syncViewImpl();
 
     Gui::HorizontalLayout   _layout;
     Gui::Button*            _pBackButton;

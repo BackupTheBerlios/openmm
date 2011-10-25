@@ -71,6 +71,8 @@ ImageView::ImageView(View* pParent) :
 View(pParent, false)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Image view ctor.");
+    setName("image view");
+
     _minWidth = 20;
     _minHeight = 20;
     _prefWidth = 50;

@@ -178,7 +178,7 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
 void
 ViewImpl::triggerViewSync()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
+//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
     [_pNativeViewSelectorDispatcher performSelectorOnMainThread:@selector(syncView) withObject:nil waitUntilDone:YES];
 }
 
