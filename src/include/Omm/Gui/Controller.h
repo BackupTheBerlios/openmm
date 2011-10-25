@@ -50,6 +50,8 @@ public:
 
     void attachModel(Model* pModel);
     void detachModel(Model* pModel);
+    
+    void syncModelViews();
 
 //protected:
     virtual void presented() {}

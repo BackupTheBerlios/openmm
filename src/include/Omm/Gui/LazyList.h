@@ -41,7 +41,7 @@ public:
 
 protected:
     // TODO implement syncView()
-    virtual void syncView() {}
+    virtual void syncViewImpl() {}
     
     virtual void scrolledToRow(int rowOffset);
     virtual void resize(int width, int height);

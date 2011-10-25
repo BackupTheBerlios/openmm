@@ -65,15 +65,26 @@ View(pParent)
 
 
 void
-ListItemView::syncView(Model* pModel)
+ListItemView::setModel(Model* pModel)
 {
-//    Omm::Gui::Log::instance()->gui().debug("list item view sync view: " + getName());
-    ListItemModel* pItemModel = static_cast<ListItemModel*>(pModel);
+    Omm::Gui::Log::instance()->gui().debug("list item view set model");
+    ListItemModel* pListItemModel = static_cast<ListItemModel*>(pModel);
+    _pImageView->setModel(pListItemModel->_pImageModel);
+    _pLabelView->setModel(pListItemModel->_pLabelModel);
+    View::setModel(pModel);
+}
+
+
+void
+ListItemView::syncViewImpl()
+{
+    Omm::Gui::Log::instance()->gui().debug("list item view sync view impl: " + getName());
+    ListItemModel* pItemModel = static_cast<ListItemModel*>(_pModel);
     if (pItemModel->_pLabelModel) {
-        _pLabelView->syncView(pItemModel->_pLabelModel);
+        _pLabelView->syncViewImpl();
     }
     if (pItemModel->_pImageModel) {
-        _pImageView->syncView(pItemModel->_pImageModel);
+        _pImageView->syncViewImpl();
     }
 }
 

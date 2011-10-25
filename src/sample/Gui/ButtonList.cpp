@@ -37,6 +37,7 @@ private:
     virtual void pushed()
     {
         UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
+        syncModelViews();        
     }
 };
 

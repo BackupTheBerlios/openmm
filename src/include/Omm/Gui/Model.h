@@ -40,6 +40,7 @@ class Model
 {
 public:
     friend class View;
+    friend class Controller;
 
     void attachView(View* pView);
     void detachView(View* pView);

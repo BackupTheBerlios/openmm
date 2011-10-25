@@ -54,7 +54,7 @@ public:
     void setAlignment(Alignment alignment);
 
 //private:
-    virtual void syncView(Model* pModel);
+    virtual void syncViewImpl();
 };
 
 
@@ -62,6 +62,9 @@ class Image : public Widget<ImageView, Controller, ImageModel>
 {
 public:
     Image(View* pParent = 0) : Widget<ImageView, Controller, ImageModel>(pParent) {}
+    
+    void setData(const std::string& data);
+    void setFile(const std::string& fileName);
 };
 
 

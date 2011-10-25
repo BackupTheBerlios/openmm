@@ -110,6 +110,7 @@ then
 elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
+    # FIXME: resgen needs to build and executed on host platform, not target platform
     ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} ${SRC_DIR}
     # first make resgen, which is needed for building the libraries
     make ${VERBOSE} resgen

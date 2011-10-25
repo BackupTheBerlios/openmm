@@ -111,7 +111,7 @@ public:
     void selectedRenderer();
     
 private:
-    virtual void syncView(Gui::Model* pModel);
+    virtual void syncView();
 
     Gui::HorizontalLayout   _layout;
     Gui::Button*            _pBackButton;

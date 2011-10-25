@@ -50,6 +50,17 @@ Controller::detachModel(Model* pModel)
 }
 
 
+void
+Controller::syncModelViews()
+{
+    for (ModelIterator it = beginModel(); it != endModel(); ++it) {
+        for (Model::ViewIterator viewIt = (*it)->beginView(); viewIt != (*it)->endView(); ++viewIt) {
+            (*viewIt)->syncView();
+        }
+    }
+}
+
+
 Controller::ModelIterator
 Controller::beginModel()
 {

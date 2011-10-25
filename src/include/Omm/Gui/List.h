@@ -63,7 +63,7 @@ public:
 
 protected:
     // TODO implement syncView()
-    virtual void syncView() {}
+    virtual void syncViewImpl() {}
 
     virtual void insertItem(int row);
     virtual void removeItem(int row);

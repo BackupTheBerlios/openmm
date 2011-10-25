@@ -36,6 +36,12 @@ namespace Omm {
 namespace Gui {
 
 
+ButtonModel::ButtonModel() :
+_pImage(0)
+{
+}
+
+
 //const std::string&
 //ButtonModel::getLabel() const
 //{
@@ -55,9 +61,20 @@ ButtonModel::setLabel(const std::string& label)
 {
 //    Omm::Gui::Log::instance()->gui().debug("button model set label");
     _label = label;
+}
 
-//    UPDATE_VIEWS(ButtonView, setLabel, label);
-    syncViews();
+
+Image*
+ButtonModel::getImage()
+{
+    return _pImage;
+}
+
+
+void
+ButtonModel::setImage(Image* pImage)
+{
+    _pImage = pImage;
 }
 
 
@@ -74,18 +91,33 @@ View(pParent, false)
 
 
 void
-ButtonView::setImage(Image* pImage)
+ButtonView::syncViewImpl()
 {
-    static_cast<ButtonViewImpl*>(_pImpl)->setImage(pImage);
+//    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
+    if (!_pModel) {
+        return;
+    }
+    ButtonModel* pButtonModel = static_cast<ButtonModel*>(_pModel);
+    static_cast<ButtonViewImpl*>(_pImpl)->setLabel(pButtonModel->getLabel());
+    if (pButtonModel->getImage()) {
+        static_cast<ButtonViewImpl*>(_pImpl)->setImage(pButtonModel->getImage());
+    }
 }
 
 
 void
-ButtonView::syncView(Model* pModel)
+Button::setLabel(const std::string& label)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
-    ButtonModel* pButtonModel = static_cast<ButtonModel*>(pModel);
-    static_cast<ButtonViewImpl*>(_pImpl)->setLabel(pButtonModel->getLabel());
+    ButtonModel::setLabel(label);
+    syncView();
+}
+
+
+void
+Button::setImage(Image* pImage)
+{
+    ButtonModel::setImage(pImage);
+    syncView();
 }
 
 

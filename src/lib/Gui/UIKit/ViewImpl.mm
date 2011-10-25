@@ -113,6 +113,12 @@
     static_cast<UIView*>(_pViewImpl->getNativeView()).hidden = YES;
 }
 
+- (void)syncView
+{
+    _pViewImpl->getView()->syncViewImpl();
+}
+
+
 @end
 
 
@@ -170,11 +176,10 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
 
 
 void
-ViewImpl::triggerViewSync(Model* pModel)
+ViewImpl::triggerViewSync()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
-    // FIXME: implement asynchronous triggerViewSync with UIKit
-    _pView->syncView(pModel);
+    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
+    [_pNativeViewSelectorDispatcher performSelectorOnMainThread:@selector(syncView) withObject:nil waitUntilDone:YES];
 }
 
 

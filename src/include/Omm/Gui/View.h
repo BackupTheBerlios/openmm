@@ -110,11 +110,13 @@ public:
     ViewImpl* getViewImpl();
     void resizeNoLayout(int width, int height);
 
+    void syncView();
+    virtual void syncViewImpl() {}
+
 protected:
     View(View* pParent, bool createPlainView);
 
     void initView(View* pParent);
-    virtual void syncView(Model* pModel) {}
 
     View*                       _pParent;
     std::vector<View*>          _subviews;
@@ -133,7 +135,7 @@ protected:
     float                       _scaleFactor;
 
 private:
-    void syncViewWithModel(Model* pModel = 0);
+//    void triggerViewSync();
 };
 
 

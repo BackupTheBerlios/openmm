@@ -50,9 +50,6 @@ ImageModel::setData(const std::string& data)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Image model set data");
     _data = data;
-
-//    UPDATE_VIEWS(ImageView, setData, data);
-    syncViews();
 }
 
 
@@ -67,7 +64,6 @@ ImageModel::setFile(const std::string& fileName)
         ifs.read(data, bufSize);
         _data += std::string(data, ifs.gcount());
     }
-    syncViews();
 }
 
 
@@ -92,12 +88,28 @@ ImageView::setAlignment(Alignment alignment)
 
 
 void
-ImageView::syncView(Model* pModel)
+ImageView::syncViewImpl()
 {
 //    Omm::Gui::Log::instance()->gui().debug("Image view sync view: " + getName());
-    ImageModel* pImageModel = static_cast<ImageModel*>(pModel);
+    ImageModel* pImageModel = static_cast<ImageModel*>(_pModel);
     ImageViewImpl* pImpl = static_cast<ImageViewImpl*>(_pImpl);
     pImpl->setData(pImageModel->getData());
+}
+
+
+void
+Image::setData(const std::string& data)
+{
+    ImageModel::setData(data);
+    syncView();
+}
+
+
+void
+Image::setFile(const std::string& fileName)
+{
+    ImageModel::setFile(fileName);
+    syncView();
 }
 
 

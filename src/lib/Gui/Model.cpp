@@ -68,7 +68,7 @@ Model::syncViews()
 {
 //    Omm::Gui::Log::instance()->gui().debug("model sync views");
     for (ViewIterator it = beginView(); it != endView(); ++it) {
-       (*it)->syncViewWithModel(this);
+       (*it)->syncView();
     }
 }
 

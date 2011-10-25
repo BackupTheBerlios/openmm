@@ -54,7 +54,7 @@ public:
     void setAlignment(Alignment alignment);
     
 //private:
-    virtual void syncView(Model* pModel);
+    virtual void syncViewImpl();
 };
 
 
@@ -62,6 +62,8 @@ class Label : public Widget<LabelView, Controller, LabelModel>
 {
 public:
     Label(View* pParent = 0) : Widget<LabelView, Controller, LabelModel>(pParent) {}
+
+    void setLabel(const std::string& label);
 };
 
 

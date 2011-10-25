@@ -29,6 +29,7 @@
 #include <Omm/Gui/ListModel.h>
 #include <Omm/Gui/ListItem.h>
 
+#include "ImageData.h"
 
 class StringListModel : public Omm::Gui::ListModel
 {
@@ -50,9 +51,15 @@ _viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
         Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
+        
+        Omm::Gui::ImageModel* pImageModel = new Omm::Gui::ImageModel;
+        pImageModel->setData(std::string(ImageData, ImageSize));
+        pItemModel->setImageModel(pImageModel);
+        
         Omm::Gui::LabelModel* pLabelModel = new Omm::Gui::LabelModel;
         pLabelModel->setLabel("list item " + Poco::NumberFormatter::format(i));
         pItemModel->setLabelModel(pLabelModel);
+        
         _itemModels.push_back(pItemModel);
     }
 }

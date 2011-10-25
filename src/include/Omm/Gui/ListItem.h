@@ -52,9 +52,10 @@ class ListItemView : public View
 {
 public:
     ListItemView(View* pParent = 0);
+    virtual void setModel(Model* pModel = 0);
 
 private:
-    virtual void syncView(Model* pModel);
+    virtual void syncViewImpl();
     virtual void setHighlighted(bool highlighted = true);
 
     ImageView*          _pImageView;

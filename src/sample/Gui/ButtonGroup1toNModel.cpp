@@ -32,6 +32,7 @@ private:
     virtual void pushed()
     {
         UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "One for all!");
+        syncModelViews();
     }
 };
 

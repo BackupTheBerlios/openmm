@@ -54,7 +54,7 @@ protected:
     MovableListView(ViewImpl* pViewImpl, View* pParent = 0);
 
     // TODO implement syncView()
-    virtual void syncView() {}
+    virtual void syncViewImpl() {}
 
     virtual void insertItem(int row);
     virtual void removeItem(int row);

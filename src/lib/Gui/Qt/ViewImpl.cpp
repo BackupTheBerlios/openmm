@@ -63,7 +63,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
     _pNativeView = pNative;
     connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
     connect(this, SIGNAL(hideViewSignal()), _pNativeView, SLOT(hide()));
-    connect(this, SIGNAL(triggerViewSyncSignal(Model*)), this, SLOT(triggerViewSyncSlot(Model*)));
+    connect(this, SIGNAL(triggerViewSyncSignal()), this, SLOT(triggerViewSyncSlot()));
     _pNativeView->setAutoFillBackground(true);
 
     _pEventFilter = new QtEventFilter(this);
@@ -81,18 +81,18 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative)
 
 
 void
-ViewImpl::triggerViewSync(Model* pModel)
+ViewImpl::triggerViewSync()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
-    emit triggerViewSyncSignal(pModel);
+    emit triggerViewSyncSignal();
 }
 
 
 void
-ViewImpl::triggerViewSyncSlot(Model* pModel)
+ViewImpl::triggerViewSyncSlot()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync slot");
-    _pView->syncView(pModel);
+    _pView->syncViewImpl();
 }
 
 

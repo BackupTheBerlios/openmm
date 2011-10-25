@@ -294,9 +294,9 @@ MediaRendererView::selectedRenderer()
 
 
 void
-MediaRendererView::syncView(Gui::Model* pModel)
+MediaRendererView::syncView()
 {
-    MediaRendererDevice* pRendererModel = static_cast<MediaRendererDevice*>(pModel);
+    MediaRendererDevice* pRendererModel = static_cast<MediaRendererDevice*>(_pModel);
     _pRendererName->setLabel(pRendererModel->getFriendlyName());
 }
 

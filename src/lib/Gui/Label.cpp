@@ -55,9 +55,6 @@ LabelModel::setLabel(const std::string& label)
 {
 //    Omm::Gui::Log::instance()->gui().debug("Label model set label");
     _label = label;
-
-//    UPDATE_VIEWS(LabelView, setLabel, label);
-    syncViews();
 }
 
 
@@ -81,12 +78,21 @@ LabelView::setAlignment(Alignment alignment)
 
 
 void
-LabelView::syncView(Model* pModel)
+LabelView::syncViewImpl()
 {
 //    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
-    LabelModel* pLabelModel = static_cast<LabelModel*>(pModel);
+    LabelModel* pLabelModel = static_cast<LabelModel*>(_pModel);
     LabelViewImpl* pImpl = static_cast<LabelViewImpl*>(_pImpl);
     pImpl->setLabel(pLabelModel->getLabel());
+}
+
+
+void
+Label::setLabel(const std::string& label)
+{
+//    Omm::Gui::Log::instance()->gui().debug("Label model set label");
+    LabelModel::setLabel(label);
+    syncView();
 }
 
 

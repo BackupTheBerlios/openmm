@@ -59,7 +59,7 @@ public:
     View*                       _pView;
 protected:
     void initViewImpl(View* pView, void* pNative);
-    void triggerViewSync(Model* pModel);
+    void triggerViewSync();
 
     void*                       _pNativeView;
     void*                       _pNativeViewController;

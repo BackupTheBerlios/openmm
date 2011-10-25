@@ -45,12 +45,18 @@ protected:
 class ButtonModel : public Model
 {
 public:
+    ButtonModel();
+    
 //    virtual const std::string& getLabel() const;
     virtual std::string getLabel();
     void setLabel(const std::string& label);
+
+    virtual Image* getImage();
+    void setImage(Image* pImage);
     
 private:
     std::string _label;
+    Image*      _pImage;
 };
 
 
@@ -61,10 +67,8 @@ class ButtonView : public View
 public:
     ButtonView(View* pParent = 0);
 
-    void setImage(Image* pImage);
-
 private:
-    virtual void syncView(Model* pModel);
+    virtual void syncViewImpl();
 };
 
 
@@ -86,6 +90,9 @@ class Button : public Widget<ButtonView, ButtonController, ButtonModel>
 {
 public:
     Button(View* pParent = 0) : Widget<ButtonView, ButtonController, ButtonModel>(pParent) {}
+    
+    void setLabel(const std::string& label);
+    void setImage(Image* pImage);    
 };
 
 
