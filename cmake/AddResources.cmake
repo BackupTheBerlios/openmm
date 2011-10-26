@@ -19,9 +19,9 @@ ${RES_NAME}.cpp
 PATHS ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-if(NOT ${OMM_RESOURCES})
-message(WARNING "Rerun make.sh config to generate resource code")
-endif(NOT ${OMM_RESOURCES})
+#if(NOT ${OMM_RESOURCES})
+#message(WARNING "Rerun make.sh config to generate resource code")
+#endif(NOT ${OMM_RESOURCES})
 
 execute_process(COMMAND
 ${RESGEN} --output-directory=${CMAKE_CURRENT_BINARY_DIR} --resource-name=${RES_NAME} ${ARGN}

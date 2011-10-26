@@ -45,6 +45,7 @@ CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 if [ ${STAGING_DIR} ]
 then
     CMAKE_OPTS="${CMAKE_OPTS} -DCMAKE_INSTALL_PREFIX=${STAGING_DIR} -DCMAKE_PREFIX_PATH=${STAGING_DIR}"
+    CMAKE_NATIVE_OPTS=CMAKE_OPTS
 fi
 
 # setup cross compile
@@ -60,7 +61,7 @@ echo
 
 if [ ${PRINT_USAGE} ]
 then
-    echo "usage: $0 [-h] [-v] [-s staging_dir] [-t platform_target] [build_target]"
+    echo "usage: $0 [-h] [-v] [-r] [-s staging_dir] [-t platform_target] [build_target]"
     echo
 fi
 
@@ -110,12 +111,18 @@ then
 elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
-    # FIXME: resgen needs to build and executed on host platform, not target platform
-    ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} ${SRC_DIR}
-    # first make resgen, which is needed for building the libraries
-    make ${VERBOSE} resgen
-    # the configure again to honor resgen's presence
-    ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} ${SRC_DIR}
+ 
+   # resgen needs to be build first and executed on host platform, not target platform
+    ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_NATIVE_OPTS} -DCMAKE_MODULE_PATH=${SRC_DIR}/cmake ${SRC_DIR}/src/util/resgen
+    # make resgen, which is needed for building the libraries
+    make ${VERBOSE} resgen && \
+    RESGEN=${BIN_DIR}/resgen; \
+    echo "resgen for host platform should be available: ${RESGEN}"
+    # remove native cmake config needed only for resgen
+    rm -rf ${BIN_DIR}/CMakeFiles/ ${BIN_DIR}/CMakeCache.txt ${BIN_DIR}/cmake_install.cmake
+
+    # configure again to honor resgen's presence
+    ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_OPTS} -DRESGEN=${RESGEN} ${SRC_DIR}
 # build targets in out of source tree
 else
     cd ${BIN_DIR}

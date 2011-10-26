@@ -44,6 +44,8 @@
     if (self = [super init]) {
         self.delegate = self;
         _pViewImpl = pImpl;
+        self.backgroundColor = [UIColor greenColor];
+//        self.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     }
     return self;
 }

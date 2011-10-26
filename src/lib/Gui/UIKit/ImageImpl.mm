@@ -47,6 +47,7 @@
         _pImageViewImpl = pImpl;
 //        self.contentMode = UIViewContentModeCenter;
         _pImageView = [UIImageView alloc];
+        self.backgroundColor = [UIColor greenColor];
     }
     return self;
 }

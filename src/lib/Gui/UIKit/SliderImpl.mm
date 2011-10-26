@@ -40,6 +40,7 @@
 - (void)setImpl:(Omm::Gui::SliderViewImpl*)pImpl
 {
     _pSliderViewImpl = pImpl;
+    self.backgroundColor = [UIColor greenColor];
 }
 
 
