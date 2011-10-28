@@ -73,13 +73,14 @@ protected:
     virtual void scrolledToRow(int rowOffset);
     virtual void resize(int width, int height);
     virtual void scale(float factor);
-    void resizeDelta(int rowDelta, int width);
 
-    void extendViewPool(int n);
+    void extendViewPool();
+    View* getFreeView();
+    void putFreeView(View* pView);
 
     int visibleIndex(int row);
     int countVisibleViews();
-    int visibleViews();
+    int viewPortHeightInRows();
     View* visibleView(int index);
     bool itemIsVisible(int row);
     void handleSelectionHighlight();

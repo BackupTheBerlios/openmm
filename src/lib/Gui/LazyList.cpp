@@ -45,7 +45,7 @@ LazyListView::setModel(LazyListModel* pModel)
 
     View::setModel(pModel);
 
-    int rows = visibleViews();
+    int rows = viewPortHeightInRows();
     int rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
 //    extendViewPool(rows);
 //
@@ -97,23 +97,15 @@ LazyListView::scrolledToRow(int rowOffset)
 void
 LazyListView::resize(int width, int height)
 {
-    setItemViewWidth(width);
-    
-    int rows = height / _itemViewHeight;
-    Omm::Gui::Log::instance()->gui().debug("lazy list view resize rows: " + Poco::NumberFormatter::format(rows));
-
-    int rowDelta = rows;
-    if (lastVisibleRow() >= 0) {
-        rowDelta -= lastVisibleRow();
-    }
+    int rowDelta = viewPortHeightInRows() - _viewPool.size();
     Log::instance()->gui().debug("lazy list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
 
     LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
     if (rowDelta > 0 && pModel) {
-        if (_rowOffset + _visibleViews.size() + rowDelta >= pModel->lastFetched()) {
+        if (lastVisibleRow() + rowDelta >= pModel->lastFetched()) {
             pModel->fetch(_visibleViews.size() + rowDelta);
         }
-        resizeDelta(rowDelta, width);
+        ListView::resize(width, height);
     }
 }
 
