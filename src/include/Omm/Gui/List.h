@@ -56,18 +56,14 @@ class ListView : public ScrollAreaView
 public:
     ListView(View* pParent = 0);
 
-    virtual void setModel(ListModel* pModel);
+//    virtual void setModel(ListModel* pModel);
     int getItemViewHeight();
     void setItemViewWidth(int width);
     void setItemViewHeight(int height);
 
 protected:
-    // TODO implement syncView()
-    virtual void syncViewImpl() {}
+    virtual void syncViewImpl();
 
-    virtual void insertItem(int row);
-    virtual void removeItem(int row);
-    virtual int visibleRows();
     virtual void addItemView(View* pView);
     void moveItemView(int row, View* pView);
 
@@ -83,16 +79,17 @@ protected:
 
     int visibleIndex(int row);
     int countVisibleViews();
+    int visibleViews();
     View* visibleView(int index);
     bool itemIsVisible(int row);
     void handleSelectionHighlight();
+    int lastVisibleRow();
 
     std::vector<View*>                  _viewPool;
     /// The view has a view pool which is large enough to fill the area of the view port
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
-    int                                 _rowOffset;
-    int                                 _lastVisibleRow;
+    int                                 _rowOffset;  // FIXME: int may be not enough for row offset on some platforms
     int                                 _itemViewHeight;
     View*                               _pSelectedView;
     int                                 _selectedRow;

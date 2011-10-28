@@ -40,7 +40,7 @@ public:
     virtual void setModel(LazyListModel* pModel);
 
 protected:
-    // TODO implement syncView()
+    // TODO implement syncViewImpl()
     virtual void syncViewImpl() {}
     
     virtual void scrolledToRow(int rowOffset);

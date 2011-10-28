@@ -71,6 +71,8 @@ class ListScrollAreaController : public ScrollAreaController
 void
 ListScrollAreaController::scrolled(int xOffset, int yOffset)
 {
+    Log::instance()->gui().debug("list scroll area scrolled xOffset: " + Poco::NumberFormatter::format(xOffset) + ", yOffset: " + Poco::NumberFormatter::format(yOffset));
+    Log::instance()->gui().debug("list scroll area scrolled row offset: " + Poco::NumberFormatter::format(yOffset / _pListView->getItemViewHeight()));
     _pListView->scrolledToRow(yOffset / _pListView->getItemViewHeight());
 }
 
@@ -78,6 +80,7 @@ ListScrollAreaController::scrolled(int xOffset, int yOffset)
 void
 ListScrollAreaController::resized(int width, int height)
 {
+    Log::instance()->gui().debug("list scroll area resized width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
     _pListView->resizeScrollArea(width, _pListView->getScrollAreaHeight());
     _pListView->resize(width, height);
 }
@@ -86,6 +89,7 @@ ListScrollAreaController::resized(int width, int height)
 void
 ListScrollAreaController::presented()
 {
+    Log::instance()->gui().debug("list scroll area presented");
     resized(_pListView->width(), _pListView->height());
 }
 
@@ -93,7 +97,7 @@ ListScrollAreaController::presented()
 void
 ListScrollAreaController::keyPressed(KeyCode key)
 {
-    Log::instance()->gui().debug("list scroll area controller key pressed");
+    Log::instance()->gui().debug("list scroll area key pressed");
     switch (key) {
         case Controller::KeyUp:
             _pListView->highlightItem(_pListView->_selectedRow - 1);
@@ -113,31 +117,9 @@ ScrollAreaView(pParent),
 _itemViewHeight(50),
 _rowOffset(0),
 _pSelectedView(0),
-_selectedRow(-1),
-_lastVisibleRow(0)
+_selectedRow(-1)
 {
     attachController(new ListScrollAreaController(this));
-}
-
-
-void
-ListView::setModel(ListModel* pModel)
-{
-    Log::instance()->gui().debug("list view set model ...");
-
-    View::setModel(pModel);
-
-    int rows = visibleRows();
-    _lastVisibleRow = rows;
-    extendViewPool(rows);
-
-    // insert items that are already in the model.
-    Log::instance()->gui().debug("inserting number of items: " + Poco::NumberFormatter::format(pModel->totalItemCount()));
-    for (int i = 0; i < std::min(pModel->totalItemCount(), rows); i++) {
-        insertItem(i);
-    }
-
-    Log::instance()->gui().debug("list view set model finished.");
 }
 
 
@@ -156,7 +138,7 @@ ListView::setItemViewHeight(int height)
 
 
 int
-ListView::visibleRows()
+ListView::visibleViews()
 {
     return getViewportHeight() / _itemViewHeight + 2;
 }
@@ -197,7 +179,7 @@ ListView::updateScrollWidgetSize()
 void
 ListView::scrollDelta(int rowDelta)
 {
-//   Log::instance()->gui().debug("list scroll delta view");
+   Log::instance()->gui().debug("list view scroll delta: " + Poco::NumberFormatter::format(rowDelta));
     
    ListModel* pModel = static_cast<ListModel*>(_pModel);
    if (rowDelta > 0) {
@@ -236,7 +218,7 @@ ListView::scrollDelta(int rowDelta)
 void
 ListView::scrolledToRow(int rowOffset)
 {
-//    Log::instance()->gui().debug("list scroll view");
+    Log::instance()->gui().debug("list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset));
 
     if (rowOffset < 0) {
         return;
@@ -254,7 +236,7 @@ ListView::scrolledToRow(int rowOffset)
     }
 
     int rowDeltaAbsolute = std::abs(rowDelta);
-//    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
     while (rowDeltaAbsolute--) {
         scrollDelta(rowDelta);
     }
@@ -266,6 +248,9 @@ ListView::scrolledToRow(int rowOffset)
 void
 ListView::resizeDelta(int rowDelta, int width)
 {
+    Log::instance()->gui().debug("list view resize visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
+        + ", view height in rows: " + Poco::NumberFormatter::format(visibleViews()));
+
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     extendViewPool(rowDelta);
     for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
@@ -274,13 +259,10 @@ ListView::resizeDelta(int rowDelta, int width)
     if (rowDelta <= 0) {
         return;
     }
-//    Log::instance()->gui().debug("list view resize visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
-//        + ", view height in rows: " + Poco::NumberFormatter::format(static_cast<ListViewImpl*>(_pImpl)->visibleRows()));
-//    if (pModel->totalItemCount() < visibleRows()) {
-    if (pModel->totalItemCount() < visibleRows()) {
+    if (pModel->totalItemCount() < visibleViews()) {
         return;
     }
-    _lastVisibleRow += rowDelta;
+//    _lastVisibleRow += rowDelta;
     for (int i = 0; i < rowDelta; i++) {
         View* pView = _freeViews.top();
         _freeViews.pop();
@@ -306,7 +288,7 @@ ListView::resizeDelta(int rowDelta, int width)
 void
 ListView::extendViewPool(int n)
 {
-    Log::instance()->gui().debug("list view extend view pool by number of views: " + Poco::NumberFormatter::format(n));
+    Log::instance()->gui().debug("list view \"" + getName() + "\" extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
@@ -364,7 +346,7 @@ ListView::visibleView(int index)
 bool
 ListView::itemIsVisible(int row)
 {
-    return _rowOffset <= row && row < _rowOffset + visibleRows();
+    return _rowOffset <= row && row < _rowOffset + visibleViews();
 }
 
 
@@ -375,6 +357,13 @@ ListView::handleSelectionHighlight()
         return;
     }
     _pSelectedView->setHighlighted(itemIsVisible(_selectedRow));
+}
+
+
+int
+ListView::lastVisibleRow()
+{
+    return _rowOffset + _visibleViews.size();
 }
 
 
@@ -402,7 +391,7 @@ ListView::selectedItem(int row)
 {
     Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
 
-//    if (row < _rowOffset || row >= _lastVisibleRow) {
+//    if (row < _rowOffset || row > lastVisibleRow()) {
 //        return;
 //    }
 
@@ -417,7 +406,7 @@ ListView::highlightItem(int row)
     if (row < _rowOffset) {
         scrolledToRow(row);
     }
-    if (row > _lastVisibleRow) {
+    if (row > lastVisibleRow()) {
         scrolledToRow(row);
     }
 
@@ -450,7 +439,7 @@ ListView::resize(int width, int height)
     setItemViewWidth(width);
     int rows = height / _itemViewHeight;
     Omm::Gui::Log::instance()->gui().debug("list view resize rows: " + Poco::NumberFormatter::format(rows));
-    int rowDelta = rows - _lastVisibleRow;
+    int rowDelta = rows - lastVisibleRow();
     Log::instance()->gui().debug("list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     resizeDelta(rowDelta, width);
 }
@@ -463,89 +452,39 @@ ListView::scale(float factor)
     View::scale(factor);
 }
 
-void
-ListView::insertItem(int row)
-{
-    Log::instance()->gui().debug("list view insert item: " + Poco::NumberFormatter::format(row));
-    
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
 
+void
+ListView::syncViewImpl()
+{
+    Log::instance()->gui().debug("list view sync view impl of \"" + getName() + "\"");
+
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
     // resize view to the size with this item added
     updateScrollWidgetSize();
-    // check if item is visible
-    if (!itemIsVisible(row)) {
-        Log::instance()->gui().debug("list view insert item that is not visible (ignoring)");
-        return;
-    }
 
-    // attach item to a free (not visible) view
-    if (_freeViews.size()) {
-        View* pView = _freeViews.top();
-        Log::instance()->gui().debug("list view got free view: " + pView->getName());
-        _freeViews.pop();
-        _visibleViews.insert(_visibleViews.begin() + visibleIndex(row), pView);
-//        pView->setModel(pModel->getItemModel(row));
+    int lastRow = std::min(pModel->totalItemCount(), _rowOffset + visibleViews()) - 1;
+    for (int row = _rowOffset; row <= lastRow; row++) {
+        if (_freeViews.size()) {
+            View* pView = _freeViews.top();
+            Log::instance()->gui().debug("list view got free view: " + pView->getName());
+            _freeViews.pop();
+            _visibleViews.push_back(pView);
 
-        Model* pViewModel = pModel->getItemModel(row);
-        if (pViewModel) {
-            pView->setModel(pViewModel);
+            Model* pViewModel = pModel->getItemModel(row);
+            if (pViewModel) {
+                pView->setModel(pViewModel);
+            }
+            else {
+                Log::instance()->gui().warning("list view insert item could not get item model in last row: " + Poco::NumberFormatter::format(row));
+                return;
+            }
+            _itemControllers[pView]->setRow(row);
+            moveItemView(row, pView);
+            pView->show();
         }
         else {
-            Log::instance()->gui().warning("list view insert item could not get item model in last row: " + Poco::NumberFormatter::format(row));
-            return;
-        }
-
-        _itemControllers[pView]->setRow(row);
-
-        // FIXME: move all views below one down
-        // FIXME: detach last view if not visible anymore
-        moveItemView(row, pView);
-
-        // FIXME: allocation of List* makes pView->show() crash
-        pView->show();
-    }
-    else {
-        Log::instance()->gui().error("list view failed to attach view to item, view pool is empty (ignoring)");
-    }
-}
-
-
-void
-ListView::removeItem(int row)
-{
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
-
-    updateScrollWidgetSize();
-    if (!itemIsVisible(row)) {
-        Log::instance()->gui().debug("list view remove item that is not visible (ignoring)");
-        return;
-    }
-
-    // remove view from this position in visible views
-    int index = visibleIndex(row);
-    View* pView = _visibleViews[index];
-    int lastRow = _rowOffset + _visibleViews.size();
-    // move all views below one up
-    for (int i = index + 1; i < countVisibleViews(); i++) {
-        moveItemView(row + i - index - 1, visibleView(i));
-    }
-//    pModel->detachView(row);
-    pView->hide();
-    _visibleViews.erase(_visibleViews.begin() + visibleIndex(row));
-
-    if (pModel->totalItemCount() - lastRow > 0) {
-        // FIXME: something's going wrong with removal of rows, duplicate rows appear and crash
-        // reuse and attach view below last view cause it is now becoming visible
-        Log::instance()->gui().debug("list view reuse removed item view");
-//        pModel->attachView(lastRow - 1, pView);
-        pView->setModel(pModel->getItemModel(lastRow - 1));
-        _visibleViews.push_back(pView);
-        moveItemView(lastRow - 1, pView);
-    }
-    else {
-        Log::instance()->gui().debug("list view free removed item view");
-        // otherwise free view
-        _freeViews.push(pView);
+            Log::instance()->gui().error("list view failed to attach view to item, view pool of \"" + getName() + "\" is empty (ignoring)");
+        }        
     }
 }
 

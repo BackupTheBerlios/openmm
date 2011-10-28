@@ -29,33 +29,5 @@ namespace Omm {
 namespace Gui {
 
 
-
-void
-ListModel::insertItem(int row)
-{
-    if (0 <= row && row < totalItemCount()) {
-//        Log::instance()->gui().debug("list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        // update all attached views
-        UPDATE_VIEW(ListView, insertItem, row);
-    }
-    else {
-        Log::instance()->gui().error("list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
-    }
-}
-
-
-void
-ListModel::removeItem(int row)
-{
-    if (0 <= row && row < totalItemCount()) {
-//        Log::instance()->gui().debug("list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
-        UPDATE_VIEW(ListView, removeItem, row);
-    }
-    else {
-        Log::instance()->gui().error("list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
-    }
-}
-
-
 } // namespace Gui
 } // namespace Omm

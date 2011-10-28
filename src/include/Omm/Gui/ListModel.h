@@ -35,10 +35,6 @@ public:
     virtual int totalItemCount() { return 0; }
     virtual Model* getItemModel(int row) { return 0; }
     virtual View* createItemView() { return 0; }
-
-protected:
-    void insertItem(int row);
-    void removeItem(int row);
 };
 
 

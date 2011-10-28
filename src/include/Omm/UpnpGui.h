@@ -63,10 +63,13 @@ public:
     DeviceGroupWidget(DeviceGroupDelegate* pDeviceGroupDelegate);
 
     // DeviceGroup interface
+    // explicit add / remove is not necessary, view pulls any changes done in the model via syncViewImpl()
+    // TODO: only locking of model should be done, when updating the model or pulling data from the model.
     virtual void addDevice(Device* pDevice, int index, bool begin);
     virtual void removeDevice(Device* pDevice, int index, bool begin);
-    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
-    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin);
+    virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+    virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
+    
     virtual void showDeviceGroup();
 
     // ListModel interface
