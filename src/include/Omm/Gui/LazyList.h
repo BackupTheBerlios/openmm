@@ -43,7 +43,7 @@ protected:
     // TODO implement syncViewImpl()
     virtual void syncViewImpl() {}
     
-    virtual void scrolledToRow(int rowOffset);
+    virtual void scrollToRow(int rowOffset);
     virtual void resize(int width, int height);
 };
 

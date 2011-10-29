@@ -60,7 +60,7 @@ LazyListView::setModel(LazyListModel* pModel)
 
 
 void
-LazyListView::scrolledToRow(int rowOffset)
+LazyListView::scrollToRow(int rowOffset)
 {
     Log::instance()->gui().debug("lazy list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", visible views: " + Poco::NumberFormatter::format(_visibleViews.size()));
 

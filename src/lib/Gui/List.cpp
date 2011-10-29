@@ -73,7 +73,7 @@ ListScrollAreaController::scrolled(int xOffset, int yOffset)
 {
     Log::instance()->gui().debug("list scroll area scrolled xOffset: " + Poco::NumberFormatter::format(xOffset) + ", yOffset: " + Poco::NumberFormatter::format(yOffset));
     Log::instance()->gui().debug("list scroll area scrolled row offset: " + Poco::NumberFormatter::format(yOffset / _pListView->getItemViewHeight()));
-    _pListView->scrolledToRow(yOffset / _pListView->getItemViewHeight());
+    _pListView->scrollToRow(yOffset / _pListView->getItemViewHeight());
 }
 
 
@@ -139,7 +139,7 @@ ListView::setItemViewHeight(int height)
 int
 ListView::viewPortHeightInRows()
 {
-    return getViewportHeight() / _itemViewHeight;
+    return getViewportHeight() / getItemViewHeight() + 2;
 }
 
 
@@ -148,7 +148,7 @@ ListView::addItemView(View* pView)
 {
 //    Log::instance()->gui().debug("list view add item view.");
 
-    pView->resize(getViewportWidth(), _itemViewHeight);
+    pView->resize(getViewportWidth(), getItemViewHeight());
     addSubview(pView);
 }
 
@@ -156,7 +156,7 @@ ListView::addItemView(View* pView)
 void
 ListView::moveItemView(int row, View* pView)
 {
-    pView->move(0, _itemViewHeight * row);
+    pView->move(0, getItemViewHeight() * row);
 }
 
 
@@ -171,17 +171,21 @@ void
 ListView::updateScrollWidgetSize()
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    resizeScrollArea(getViewportWidth(), pModel->totalItemCount() * _itemViewHeight);
+    resizeScrollArea(getViewportWidth(), pModel->totalItemCount() * getItemViewHeight());
 }
 
 
 void
 ListView::scrollDelta(int rowDelta)
 {
-   Log::instance()->gui().debug("list view scroll delta: " + Poco::NumberFormatter::format(rowDelta));
+    Log::instance()->gui().debug("list view scroll delta: " + Poco::NumberFormatter::format(rowDelta) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
     
-   ListModel* pModel = static_cast<ListModel*>(_pModel);
-   if (rowDelta > 0) {
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    Log::instance()->gui().debug("total item count: " + Poco::NumberFormatter::format(pModel->totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
+    if (rowDelta > 0) {
+        if (pModel->totalItemCount() <= lastVisibleRow() + 1) {
+            return;
+        }
         // detach model from first visible view
         View* pView = _visibleViews.front();
         pModel->getItemModel(_rowOffset)->detachView(pView);
@@ -213,25 +217,18 @@ ListView::scrollDelta(int rowDelta)
 
 
 void
-ListView::scrolledToRow(int rowOffset)
+ListView::scrollToRow(int rowOffset)
 {
     Log::instance()->gui().debug("list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset));
 
     if (rowOffset < 0) {
         return;
     }
-
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-
     int rowDelta = rowOffset - _rowOffset;
-
     if (rowDelta == 0) {
         return;
     }
-    if (rowOffset + _visibleViews.size() > pModel->totalItemCount()) {
-        return;
-    }
-
     int rowDeltaAbsolute = std::abs(rowDelta);
     Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
     while (rowDeltaAbsolute--) {
@@ -257,11 +254,11 @@ ListView::resize(int width, int height)
     setItemViewWidth(width);
     // finish if all item views fit into viewport
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    if (pModel->totalItemCount() < viewPortHeightInRows()) {
+    if (pModel->totalItemCount() < viewPortHeightInRows() && _visibleViews.size() != 0) {
         return;
     }
     
-    int rowDelta = viewPortHeightInRows() - _visibleViews.size();
+    int rowDelta = std::min(viewPortHeightInRows(), pModel->totalItemCount()) - _visibleViews.size();
     if (rowDelta >= 0) {
         for (int i = 0; i < rowDelta; i++) {
             Log::instance()->gui().debug("growing view");
@@ -417,10 +414,10 @@ void
 ListView::highlightItem(int row)
 {
     if (row < _rowOffset) {
-        scrolledToRow(row);
+        scrollToRow(row);
     }
     if (row > lastVisibleRow()) {
-        scrolledToRow(row);
+        scrollToRow(row);
     }
 
     if (_selectedRow >= 0 && itemIsVisible(_selectedRow)) {
@@ -449,7 +446,7 @@ ListView::selectedItemNotify()
 void
 ListView::scale(float factor)
 {
-    _itemViewHeight *= factor;
+    setItemViewHeight(factor * getItemViewHeight());
     View::scale(factor);
 }
 
