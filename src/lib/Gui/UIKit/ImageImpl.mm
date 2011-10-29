@@ -47,7 +47,6 @@
         _pImageViewImpl = pImpl;
 //        self.contentMode = UIViewContentModeCenter;
         _pImageView = [UIImageView alloc];
-        self.backgroundColor = [UIColor greenColor];
     }
     return self;
 }
@@ -62,7 +61,6 @@
 //    _pImageView.contentMode = UIViewContentModeCenter;
 //    _pImageView.frame = self.frame;
     _pImageView.center = self.center;
-//    _pImageView.backgroundColor = [UIColor greenColor];
 //    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
 //    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     [self addSubview:_pImageView];

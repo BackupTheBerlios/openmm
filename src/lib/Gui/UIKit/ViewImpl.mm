@@ -160,7 +160,8 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
         [pParentView addSubview:pNativeView];
     }
     else {
-        pNativeView.frame = CGRectMake(0.0, 0.0, 250.0, 400.0);
+//        pNativeView.frame = CGRectMake(0.0, 0.0, 250.0, 400.0);
+        pNativeView.frame = CGRectMake(0.0, 0.0, 320.0, 480.0);
     }
 
 //    OmmGuiViewActionTarget* pActionTarget = [[OmmGuiViewActionTarget alloc] initWithImpl:this];
