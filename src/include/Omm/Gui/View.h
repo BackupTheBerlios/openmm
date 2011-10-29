@@ -109,6 +109,7 @@ public:
 
     ViewImpl* getViewImpl();
     void resizeNoLayout(int width, int height);
+    void updateLayout();
 
     void syncView();
     virtual void syncViewImpl() {}

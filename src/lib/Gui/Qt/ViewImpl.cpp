@@ -232,7 +232,8 @@ ViewImpl::presented()
 void
 ViewImpl::resized(int width, int height)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
+    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
+    _pView->updateLayout();
     IMPL_NOTIFY_CONTROLLER(Controller, resized, width, height);
 }
 

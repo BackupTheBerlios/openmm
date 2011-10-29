@@ -212,9 +212,7 @@ void
 View::setWidth(int width)
 {
     _pImpl->resizeView(width, height());
-    if (_pLayout) {
-        _pLayout->layoutView();
-    }
+    updateLayout();
 }
 
 
@@ -222,9 +220,7 @@ void
 View::setHeight(int height)
 {
     _pImpl->resizeView(width(), height);
-    if (_pLayout) {
-        _pLayout->layoutView();
-    }
+    updateLayout();
 }
 
 
@@ -233,9 +229,7 @@ View::resize(SizeConstraint size)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view resize.");
     _pImpl->resizeView(width(size), height(size));
-    if (_pLayout) {
-        _pLayout->layoutView();
-    }
+    updateLayout();
 }
 
 
@@ -244,9 +238,7 @@ View::resize(int width, int height)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view resize.");
     _pImpl->resizeView(width, height);
-    if (_pLayout) {
-        _pLayout->layoutView();
-    }
+    updateLayout();
 }
 
 
@@ -406,6 +398,15 @@ void
 View::resizeNoLayout(int width, int height)
 {
     _pImpl->resizeView(width, height);
+}
+
+
+void
+View::updateLayout()
+{
+    if (_pLayout) {
+        _pLayout->layoutView();
+    }    
 }
 
 
