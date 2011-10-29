@@ -22,7 +22,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include <Omm/Gui/Application.h>
-#include <Omm/Gui/HorizontalLayout.h>
+#include <Omm/Gui/VerticalLayout.h>
 #include <Omm/Gui/Button.h>
 
 
@@ -31,17 +31,14 @@ class Application : public Omm::Gui::Application
     virtual Omm::Gui::View* createMainView()
     {
         Omm::Gui::View* pCompoundView = new Omm::Gui::View;
-        Omm::Gui::HorizontalLayout* pLayout = new Omm::Gui::HorizontalLayout;
+        Omm::Gui::VerticalLayout* pLayout = new Omm::Gui::VerticalLayout;
 
         int buttonCount = 5;
         for(int i = 0; i < buttonCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button(pCompoundView);
             pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
         }
-
-        pCompoundView->resize(600, 100);
         pCompoundView->setLayout(pLayout);
-        resizeMainView(600, 100);
         return pCompoundView;
     }
 };

@@ -22,7 +22,6 @@
 #include <Poco/NumberFormatter.h>
 
 #include <Omm/Gui/Application.h>
-#include <Omm/Gui/HorizontalLayout.h>
 #include <Omm/Gui/VerticalLayout.h>
 #include <Omm/Gui/Button.h>
 
@@ -56,9 +55,7 @@ class Application : public Omm::Gui::Application
     virtual Omm::Gui::View* createMainView()
     {
         Omm::Gui::View* pCompoundView = new Omm::Gui::View;
-//        pCompoundView->resize(width(), height());
         Omm::Gui::VerticalLayout* pLayout = new Omm::Gui::VerticalLayout;
-//        Omm::Gui::HorizontalLayout* pLayout = new Omm::Gui::HorizontalLayout;
 
         Omm::Gui::Button* pMasterButton = new Omm::Gui::Button(pCompoundView);
         MasterController* pMasterController = new MasterController;
