@@ -133,9 +133,6 @@ protected:
     int                         _maxHeight;
     float                       _stretchFactor;
     float                       _scaleFactor;
-
-private:
-//    void triggerViewSync();
 };
 
 

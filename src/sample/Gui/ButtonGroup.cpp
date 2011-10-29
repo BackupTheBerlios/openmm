@@ -36,10 +36,11 @@ class Application : public Omm::Gui::Application
         int buttonCount = 10;
         for(int i = 0; i < buttonCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button(pCompoundView);
+            pButton->resize(80, 40);
             pButton->setLabel("Button " + Poco::NumberFormatter::format(i + 1));
-            pButton->move(pButton->width() * i, 0);
-            windowHeight = pButton->height();
-            windowWidth += pButton->width();
+            pButton->move(0, pButton->height() * i);
+            windowHeight += pButton->height();
+            windowWidth = pButton->width();
         }
         resizeMainView(windowWidth, windowHeight);
         return pCompoundView;

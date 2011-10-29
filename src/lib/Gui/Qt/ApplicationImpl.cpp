@@ -55,6 +55,20 @@ ApplicationImpl::resize(int width, int height)
 }
 
 
+int
+ApplicationImpl::width()
+{
+    return _width;
+}
+
+
+int
+ApplicationImpl::height()
+{
+    return _height;
+}
+
+
 void
 ApplicationImpl::setFullscreen(bool fullscreen)
 {

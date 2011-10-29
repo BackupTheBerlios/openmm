@@ -44,6 +44,8 @@ public:
     void scaleMainView(float factor);
     void setFullscreen(bool fullscreen);
     View* getMainView();
+    int width();
+    int height();
 
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}

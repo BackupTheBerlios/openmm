@@ -19,40 +19,20 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ApplicationImpl_INCLUDED
-#define ApplicationImpl_INCLUDED
+#ifndef VerticalLayout_INCLUDED
+#define VerticalLayout_INCLUDED
 
-#include "ViewImpl.h"
-
-class QMainWindow;
-class QApplication;
-
+#include "Layout.h"
 
 namespace Omm {
 namespace Gui {
 
-class Application;
 
-class ApplicationImpl
+class VerticalLayout : public Layout
 {
 public:
-    friend class Application;
-    
-    ApplicationImpl(Application* pApplication);
-    virtual ~ApplicationImpl();
-
-    void resize(int width, int height);
-    int width();
-    int height();
-    void setFullscreen(bool fullscreen);
-    int run(int argc, char** argv);
-
-    Application*            _pApplication;
-    QMainWindow*            _pMainWindow;
-    QApplication*           _pQtApplication;
-    QString                 _fullscreenStyleSheet;
-    int                     _width;
-    int                     _height;
+    virtual void layoutView();
+    virtual void layoutViewEquiDistant();
 };
 
 
@@ -60,4 +40,3 @@ public:
 }  // namespace Gui
 
 #endif
-

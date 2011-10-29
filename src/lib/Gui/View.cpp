@@ -417,11 +417,5 @@ View::syncView()
 }
 
 
-//void
-//View::triggerViewSync()
-//{
-//}
-
-
 } // namespace Gui
 } // namespace Omm

@@ -79,6 +79,20 @@ Application::getMainView()
 
 
 int
+Application::width()
+{
+    return _pImpl->width();
+}
+
+
+int
+Application::height()
+{
+    return _pImpl->height();
+}
+
+
+int
 Application::run(int argc, char** argv)
 {
     return _pImpl->run(argc, argv);

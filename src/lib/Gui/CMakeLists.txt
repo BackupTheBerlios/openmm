@@ -53,6 +53,7 @@ Controller.cpp
 Application.cpp
 #Layout.cpp
 HorizontalLayout.cpp
+VerticalLayout.cpp
 Label.cpp
 Button.cpp
 ScrollArea.cpp

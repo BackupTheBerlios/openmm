@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include "Gui/HorizontalLayout.h"
+#include "Gui/VerticalLayout.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
 
@@ -31,9 +31,9 @@ namespace Gui {
 
 
 void
-HorizontalLayout::layoutView()
+VerticalLayout::layoutView()
 {
-    Omm::Gui::Log::instance()->gui().debug("horizontal layout, lay out view ...");
+    Omm::Gui::Log::instance()->gui().debug("vertical layout, lay out view ...");
     
     int minSubviewWidth = 0;
     int minSubviewHeight = 0;
@@ -43,8 +43,8 @@ HorizontalLayout::layoutView()
     int maxSubviewHeight = 0;
 
     // assign subviews to rows
-    int currentRow = 0;
-    std::vector<int> subviewRow;
+    int currentCol = 0;
+    std::vector<int> subviewCol;
 
     for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
         minSubviewWidth += (*it)->width(View::Min);
@@ -54,64 +54,64 @@ HorizontalLayout::layoutView()
         maxSubviewWidth += (*it)->width(View::Max);
         maxSubviewHeight = std::max((*it)->height(View::Max), maxSubviewHeight);
 
-        if (prefSubviewWidth > _pView->width()) {
-            currentRow++;
-            prefSubviewWidth = (*it)->width(View::Pref);
+        if (prefSubviewHeight > _pView->height()) {
+            currentCol++;
+            prefSubviewHeight = (*it)->height(View::Pref);
         }
-        subviewRow.push_back(currentRow);
+        subviewCol.push_back(currentCol);
     }
 
-    // stretch subviews, so that they fit exactly into each row
-    float subviewWidthSum = 0.0;
+    // stretch subviews, so that they fit exactly into each col
+    float subviewHeightSum = 0.0;
     std::vector<float> stretchFactor;
     int i = 0;
     for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
-        if (i > 0 && (subviewRow[i] != subviewRow[i-1])) {
-            stretchFactor.push_back(_pView->width() / subviewWidthSum);
+        if (i > 0 && (subviewCol[i] != subviewCol[i-1])) {
+            stretchFactor.push_back(_pView->height() / subviewHeightSum);
             // "newline"
-            subviewWidthSum = 0.0;
+            subviewHeightSum = 0.0;
         }
-        subviewWidthSum += (*it)->width(View::Pref) * (1 + (*it)->stretchFactor());
+        subviewHeightSum += (*it)->height(View::Pref) * (1 + (*it)->stretchFactor());
     }
-    stretchFactor.push_back(_pView->width() / subviewWidthSum);
+    stretchFactor.push_back(_pView->height() / subviewHeightSum);
 
-    int subviewWidth = 0;
-    int subviewHeight = prefSubviewHeight;
+    int subviewWidth = prefSubviewWidth;
+    int subviewHeight = 0;
 
     // resize super view
-    _pView->resizeNoLayout(_pView->width(), (currentRow + 1) * subviewHeight);
+    _pView->resizeNoLayout((currentCol + 1) * subviewWidth, _pView->height());
 
     // layout the subviews by moving and resizing them
     i = 0;
     for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
-        int width = (*it)->width(View::Pref) * (1 + (*it)->stretchFactor()) * stretchFactor[subviewRow[i]];
+        int height = (*it)->height(View::Pref) * (1 + (*it)->stretchFactor()) * stretchFactor[subviewCol[i]];
         if ((*it)->stretchFactor() == -1.0) {
-            width = (*it)->width(View::Pref);
+            height = (*it)->height(View::Pref);
         }
-        if (i > 0 && (subviewRow[i] != subviewRow[i-1])) {
+        if (i > 0 && (subviewCol[i] != subviewCol[i-1])) {
             // "newline"
-            subviewWidth = 0;
+            subviewHeight = 0;
         }
-        (*it)->move(subviewWidth, subviewRow[i] * subviewHeight);
-        (*it)->resize(width, subviewHeight);
-        subviewWidth += width;
+        (*it)->move(subviewCol[i] * subviewWidth, subviewHeight);
+        (*it)->resize(subviewWidth, height);
+        subviewHeight += height;
     }
-//    Omm::Gui::Log::instance()->gui().debug("horizontal layout, lay out view finished.");
+//    Omm::Gui::Log::instance()->gui().debug("vertical layout, lay out view finished.");
 }
 
 
 void
-HorizontalLayout::layoutViewEquiDistant()
+VerticalLayout::layoutViewEquiDistant()
 {
-    int subviewWidth = _pView->width() / _pView->subviewCount();
-    int subviewHeight = _pView->height();
+    int subviewWidth = _pView->width();
+    int subviewHeight = _pView->height() / _pView->subviewCount();
 
     for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
         (*it)->resize(subviewWidth, subviewHeight);
-        (*it)->move((it - _pView->beginSubview()) * (*it)->width(), 0);
+        (*it)->move(0, (it - _pView->beginSubview()) * (*it)->height());
     }
 
-    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view finished.");
+    Omm::Gui::Log::instance()->gui().debug("vertical layout, laying out view finished.");
 }
 
 
