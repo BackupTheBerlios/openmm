@@ -183,7 +183,7 @@ ListView::scrollDelta(int rowDelta)
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     Log::instance()->gui().debug("total item count: " + Poco::NumberFormatter::format(pModel->totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
     if (rowDelta > 0) {
-        if (pModel->totalItemCount() <= lastVisibleRow() + 1) {
+        if (pModel->totalItemCount() <= lastVisibleRow()) {
             return;
         }
         // detach model from first visible view
@@ -463,19 +463,15 @@ ListView::syncViewImpl()
     int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
     for (int row = _rowOffset; row <= lastRow; row++) {
         if (_freeViews.size()) {
-            View* pView = _freeViews.top();
-            Log::instance()->gui().debug("list view got free view: " + pView->getName());
-            _freeViews.pop();
-            _visibleViews.push_back(pView);
-
-            Model* pViewModel = pModel->getItemModel(row);
-            if (pViewModel) {
-                pView->setModel(pViewModel);
+            View* pView;
+            if (row - _rowOffset >= _visibleViews.size()) {
+                pView = getFreeView();
+                _visibleViews.push_back(pView);
             }
             else {
-                Log::instance()->gui().warning("list view insert item could not get item model in last row: " + Poco::NumberFormatter::format(row));
-                return;
+                pView = _visibleViews[row - _rowOffset];
             }
+            pView->setModel(pModel->getItemModel(row));
             _itemControllers[pView]->setRow(row);
             moveItemView(row, pView);
             pView->show();

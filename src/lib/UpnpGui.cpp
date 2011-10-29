@@ -384,7 +384,7 @@ MediaServerDevice::createMediaObject()
 MediaContainerWidget::MediaContainerWidget(View* pParent) :
 LazyListView(pParent)
 {
-    setItemViewHeight(30);
+//    setItemViewHeight(30);
 }
 
 
