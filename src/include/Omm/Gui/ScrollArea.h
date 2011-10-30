@@ -31,6 +31,7 @@ namespace Gui {
 class ScrollAreaController : public Controller
 {
     friend class ScrollAreaViewImpl;
+    friend class ScrollAreaSignalProxy;
 
 protected:
     virtual void scrolled(int xOffset, int yOffset) {}

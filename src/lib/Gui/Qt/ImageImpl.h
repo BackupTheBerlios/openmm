@@ -22,8 +22,10 @@
 #ifndef ImageImpl_INCLUDED
 #define ImageImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
+
+class QPixmap;
+
 
 namespace Omm {
 namespace Gui {

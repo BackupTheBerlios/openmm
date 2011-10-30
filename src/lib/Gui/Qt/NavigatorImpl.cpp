@@ -19,24 +19,15 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <QtGui>
 #include <Poco/NumberFormatter.h>
 
 #include "NavigatorImpl.h"
+#include "QtNavigatorPanel.h"
 #include "Gui/Navigator.h"
 
 namespace Omm {
 namespace Gui {
-
-
-class QtNavigatorPanelButton : public QPushButton
-{
-public:
-    QtNavigatorPanelButton(View* pView);
-
-//    void paintEvent(QPaintEvent* event);
-    
-    View*    _pView;
-};
 
 
 QtNavigatorPanelButton::QtNavigatorPanelButton(View* pView) :
@@ -66,7 +57,7 @@ _pView(pView)
 
 
 QtNavigatorPanel::QtNavigatorPanel(NavigatorViewImpl* pNavigatorView) :
-QWidget(pNavigatorView),
+QWidget(pNavigatorView->getNativeView()),
 _pNavigatorView(pNavigatorView)
 {
     _pButtonLayout = new QHBoxLayout(this);
@@ -116,13 +107,15 @@ QtNavigatorPanel::buttonPushed()
 
 NavigatorViewImpl::NavigatorViewImpl(View* pView) 
 {
+    QWidget* pNativeView = new QWidget;
+    initViewImpl(pView, pNativeView);
+
     _pNavigatorPanel = new QtNavigatorPanel(this);
-    _pStackedWidget = new QStackedWidget(this);
-    _pNavigatorLayout = new QVBoxLayout(this);
+    _pStackedWidget = new QStackedWidget(pNativeView);
+    _pNavigatorLayout = new QVBoxLayout(pNativeView);
     _pNavigatorLayout->addWidget(_pNavigatorPanel);
     _pNavigatorLayout->addWidget(_pStackedWidget);
 
-    initViewImpl(pView, this);
 }
 
 

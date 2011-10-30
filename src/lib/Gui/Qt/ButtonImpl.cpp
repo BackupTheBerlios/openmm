@@ -19,24 +19,26 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <QtGui>
 #include <Poco/NumberFormatter.h>
 
 #include "ButtonImpl.h"
+#include "QtButtonImpl.h"
 #include "Gui/Button.h"
 #include "Gui/GuiLogger.h"
 #include "ImageImpl.h"
 
 namespace Omm {
 namespace Gui {
-
-
+    
+    
 ButtonViewImpl::ButtonViewImpl(View* pView)
 {
 //    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
     QPushButton* pNativeView = new QPushButton;
-    connect(pNativeView, SIGNAL(pressed()), this, SLOT(pushed()));
-
-    initViewImpl(pView, pNativeView);
+    ButtonSignalProxy* pSignalProxy = new ButtonSignalProxy(this);
+    
+    initViewImpl(pView, pNativeView, pSignalProxy);
 }
 
 
@@ -61,11 +63,19 @@ ButtonViewImpl::setImage(Image* pImage)
 
 
 void
-ButtonViewImpl::pushed()
+ButtonSignalProxy::init()
 {
-    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
-    IMPL_NOTIFY_CONTROLLER(Controller, selected);
-    IMPL_NOTIFY_CONTROLLER(ButtonController, pushed);
+    SignalProxy::init();
+    connect(_pViewImpl->getNativeView(), SIGNAL(pressed()), this, SLOT(pushed()));
+}
+
+
+void
+ButtonSignalProxy::pushed()
+{
+    Omm::Gui::Log::instance()->gui().debug("button view impl, calling pushed virtual method");
+    PROXY_NOTIFY_CONTROLLER(Controller, selected);
+    PROXY_NOTIFY_CONTROLLER(ButtonController, pushed);
 }
 
 

@@ -19,9 +19,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <QtGui>
 #include <Poco/NumberFormatter.h>
 
 #include "ScrollAreaImpl.h"
+#include "QtScrollAreaImpl.h"
 #include "Gui/ScrollArea.h"
 #include "Gui/GuiLogger.h"
 
@@ -32,15 +34,14 @@ namespace Gui {
 ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 {
     QScrollArea* pNativeView = new QtViewImpl<QScrollArea>(this);
-    
+    ScrollAreaSignalProxy* pSignalProxy = new ScrollAreaSignalProxy(this);
+
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
     pNativeView->setWidget(_pScrollWidget);
     pNativeView->setBackgroundRole(QPalette::Base);
-    connect(pNativeView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledXSlot(int)));
-    connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledYSlot(int)));
 
-    initViewImpl(pView, pNativeView);
+    initViewImpl(pView, pNativeView, pSignalProxy);
 }
 
 
@@ -106,16 +107,29 @@ ScrollAreaViewImpl::addSubview(View* pView)
 
 
 void
-ScrollAreaViewImpl::viewScrolledXSlot(int value)
+ScrollAreaSignalProxy::init()
 {
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
+    Omm::Gui::Log::instance()->gui().debug("button view impl, init signal proxy");
+    SignalProxy::init();
+    QScrollArea* pNativeView = static_cast<QScrollArea*>(_pViewImpl->getNativeView());
+    connect(pNativeView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledXSlot(int)));
+    connect(pNativeView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledYSlot(int)));
 }
 
 
 void
-ScrollAreaViewImpl::viewScrolledYSlot(int value)
+ScrollAreaSignalProxy::viewScrolledXSlot(int value)
 {
-    IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());
+    ScrollAreaViewImpl* pViewImpl = static_cast<ScrollAreaViewImpl*>(_pViewImpl);
+    PROXY_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, pViewImpl->getXOffset(), pViewImpl->getYOffset());
+}
+
+
+void
+ScrollAreaSignalProxy::viewScrolledYSlot(int value)
+{
+    ScrollAreaViewImpl* pViewImpl = static_cast<ScrollAreaViewImpl*>(_pViewImpl);
+    PROXY_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, pViewImpl->getXOffset(), pViewImpl->getYOffset());
 }
 
 

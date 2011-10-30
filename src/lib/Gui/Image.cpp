@@ -25,13 +25,7 @@
 
 #include "Gui/Image.h"
 #include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ImageImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ImageImpl.h"
-#endif
+#include "ImageImpl.h"
 
 
 namespace Omm {

@@ -36,6 +36,7 @@ namespace Gui {
 class ButtonController : public Controller
 {
     friend class ButtonViewImpl;
+    friend class ButtonSignalProxy;
     
 protected:
     virtual void pushed() {}

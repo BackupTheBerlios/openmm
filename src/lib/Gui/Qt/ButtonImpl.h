@@ -22,7 +22,6 @@
 #ifndef ButtonImpl_INCLUDED
 #define ButtonImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -33,12 +32,7 @@ class Image;
 
 class ButtonViewImpl : public ViewImpl
 {
-    Q_OBJECT
-
     friend class ButtonView;
-
-private slots:
-    void pushed();
 
 private:
     ButtonViewImpl(View* pView);

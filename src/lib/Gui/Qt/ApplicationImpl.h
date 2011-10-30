@@ -26,6 +26,7 @@
 
 class QMainWindow;
 class QApplication;
+class QString;
 
 
 namespace Omm {
@@ -50,7 +51,7 @@ public:
     Application*            _pApplication;
     QMainWindow*            _pMainWindow;
     QApplication*           _pQtApplication;
-    QString                 _fullscreenStyleSheet;
+    QString*                _pFullscreenStyleSheet;
     int                     _width;
     int                     _height;
 };

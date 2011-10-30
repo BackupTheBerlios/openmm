@@ -19,56 +19,53 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#ifndef QtNavigatorPanel_INCLUDED
+#define QtNavigatorPanel_INCLUDED
+
+#include <stack>
 #include <QtGui>
 
-#include "TabImpl.h"
-#include "Gui/Tab.h"
-#include "Gui/GuiLogger.h"
+#include "NavigatorImpl.h"
 
 namespace Omm {
 namespace Gui {
 
     
-class QtTabWidget : public QTabWidget
+class QtNavigatorPanelButton : public QPushButton
 {
-    friend class TabViewImpl;
+public:
+    QtNavigatorPanelButton(View* pView);
+
+//    void paintEvent(QPaintEvent* event);
     
-    void setHidden(bool hidden)
-    {
-        tabBar()->setHidden(hidden);
-    }
+    View*    _pView;
 };
 
+
+class QtNavigatorPanel : public QWidget
+{
+    Q_OBJECT
+
+    friend class NavigatorViewImpl;
     
-TabViewImpl::TabViewImpl(View* pView) 
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
+public:
+    QtNavigatorPanel(NavigatorViewImpl* pNavigatorView = 0);
 
-    QtTabWidget* pNativeView = new QtTabWidget;
-    
-    initViewImpl(pView, pNativeView);
-}
+    void push(View* pView, const std::string name);
+    void pop(View* pView);
 
+private slots:
+    void buttonPushed();
 
-TabViewImpl::~TabViewImpl()
-{
-}
-
-
-void
-TabViewImpl::addView(View* pView, const std::string& tabName)
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
-    static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
-}
+private:
+    std::stack<QtNavigatorPanelButton*>     _buttonStack;
+    QHBoxLayout*                            _pButtonLayout;
+    QFileIconProvider*                      _pIconProvider;
+    NavigatorViewImpl*                      _pNavigatorView;
+};
 
 
-void
-TabViewImpl::setTabBarHidden(bool hidden)
-{
-    static_cast<QtTabWidget*>(_pNativeView)->setHidden(hidden);
-}
+} // namespace Gui
+} // namespace Omm
 
-
-}  // namespace Omm
-}  // namespace Gui
+#endif

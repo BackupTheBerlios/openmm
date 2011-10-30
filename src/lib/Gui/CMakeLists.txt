@@ -1,48 +1,12 @@
-find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
-
-if(QT4_FOUND)
-# FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
-# against debug and non-debug versions of Qt libs at the same time.
-if(WINDOWS)
-set(CMAKE_BUILD_TYPE "")
-endif(WINDOWS)
-
-message (STATUS "Qt4 use file: ${QT_USE_FILE}")
-include(
-${QT_USE_FILE}
-)
-
-add_definitions(
--D__GUI_QT_PLATFORM__
-)
-
-add_subdirectory(Qt)
-endif(QT4_FOUND)
-
-
-find_package(UIKit)
-
-if(UIKIT_FOUND)
-
-add_definitions(
--D__GUI_UIKIT_PLATFORM__
-)
-
-add_subdirectory(UIKit)
-
-endif(UIKIT_FOUND)
-
-
-if(TARGET ommgui-qt)
-set(LIB_OMMGUI_PLATFORM ommgui-qt)
-endif(TARGET ommgui-qt)
-
-if(TARGET ommgui-uikit)
-set(LIB_OMMGUI_PLATFORM ommgui-uikit)
-endif(TARGET ommgui-uikit)
+include(DescendDirectories)
+descend_directories()
 
 if(LIB_OMMGUI_PLATFORM)
-message(STATUS "Gui implementation for " ${BUILD_TARGET} " is available, linking libommgui with " ${LIB_OMMGUI_PLATFORM})
+message(STATUS "Gui implementation for " ${BUILD_TARGET} " is available, linking libommgui with lib" ${LIB_OMMGUI_PLATFORM})
+
+include_directories(
+${LIB_OMMGUI_PLATFORM_DIR}
+)
 
 add_library(ommgui
 GuiLogger.cpp
@@ -58,7 +22,7 @@ Label.cpp
 Button.cpp
 ScrollArea.cpp
 List.cpp
-ListModel.cpp
+#ListModel.cpp
 ListItem.cpp
 LazyList.cpp
 Tab.cpp

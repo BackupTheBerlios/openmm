@@ -22,20 +22,21 @@
 #ifndef ViewImpl_INCLUDED
 #define ViewImpl_INCLUDED
 
-#include <QtGui>
 #include "Gui/View.h"
+
+
+class QWidget;
 
 namespace Omm {
 namespace Gui {
 
+class SignalProxy;
 class QtEventFilter;
 
-
-class ViewImpl : public QObject
+class ViewImpl
 {
-    Q_OBJECT
-    
     friend class View;
+    friend class SignalProxy;
     friend class QtEventFilter;
 
     template <class W> friend class QtViewImpl;
@@ -45,7 +46,7 @@ public:
 
     View* getView();
     QWidget* getNativeView();
-    WId getNativeWindowId();
+    uint32_t getNativeWindowId();
     void setNativeView(QWidget* pView);
     virtual void addSubview(View* pView);
     virtual void showView();
@@ -60,19 +61,12 @@ public:
     void setBackgroundColor(const Color& color);
 
 protected:
-    void initViewImpl(View* pView, QWidget* pNative);
+    void initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy = 0);
     void triggerViewSync();
 
     View*                       _pView;
     QWidget*                    _pNativeView;
-
-signals:
-    void showViewSignal();
-    void hideViewSignal();
-    void triggerViewSyncSignal();
-
-private slots:
-    void triggerViewSyncSlot();
+    SignalProxy*                _pSignalProxy;
 
 private:
     void presented();
@@ -81,39 +75,6 @@ private:
     void keyPressed(int key);
     
     QtEventFilter*              _pEventFilter;
-};
-
-
-template<class W>
-class QtViewImpl : public W
-{
-public:
-    QtViewImpl(ViewImpl* pViewImpl, QWidget* pParent = 0) : W(pParent), _pViewImpl(pViewImpl) {}
-
-    void showEvent(QShowEvent* event)
-    {
-        _pViewImpl->presented();
-    }
-
-    void resizeEvent(QResizeEvent* pEvent)
-    {
-        if (pEvent->oldSize().height() > 0) {
-            _pViewImpl->resized(pEvent->size().width(), pEvent->size().height());
-        }
-    }
-
-    void mousePressEvent(QMouseEvent* pMouseEvent)
-    {
-        _pViewImpl->selected();
-//        W::mousePressEvent(pMouseEvent);
-    }
-
-    void keyPressEvent(QKeyEvent* pKeyEvent)
-    {
-//        _pViewImpl->keyPressed(pKeyEvent->key());
-    }
-
-    ViewImpl*   _pViewImpl;
 };
 
 

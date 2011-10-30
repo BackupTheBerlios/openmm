@@ -23,13 +23,7 @@
 
 #include "Gui/Tab.h"
 #include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/TabImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/TabImpl.h"
-#endif
+#include "TabImpl.h"
 
 
 namespace Omm {

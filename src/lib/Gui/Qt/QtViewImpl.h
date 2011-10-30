@@ -19,56 +19,80 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QtGui>
+#ifndef QtViewImpl_INCLUDED
+#define QtViewImpl_INCLUDED
 
-#include "TabImpl.h"
-#include "Gui/Tab.h"
-#include "Gui/GuiLogger.h"
+#include <QtGui>
+#include "ViewImpl.h"
+
 
 namespace Omm {
 namespace Gui {
 
-    
-class QtTabWidget : public QTabWidget
+
+class SignalProxy : public QObject
 {
-    friend class TabViewImpl;
+    Q_OBJECT
     
-    void setHidden(bool hidden)
-    {
-        tabBar()->setHidden(hidden);
-    }
+public:
+    SignalProxy(ViewImpl* pViewImpl);
+    
+    virtual void init();
+    
+    void showView();
+    void hideView();
+    void syncView();
+    
+signals:
+    void showViewSignal();
+    void hideViewSignal();
+    void syncViewSignal();
+
+private slots:
+    void syncViewSlot();
+    
+protected:
+    ViewImpl*   _pViewImpl;    
 };
 
-    
-TabViewImpl::TabViewImpl(View* pView) 
+
+// template classes are not supported by Q_OBJECT, so we have to separate events
+// that come through a signal or by callback.
+template<class W>
+class QtViewImpl : public W
 {
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
+public:
+    QtViewImpl(ViewImpl* pViewImpl, QWidget* pParent = 0) : W(pParent), _pViewImpl(pViewImpl) {}
 
-    QtTabWidget* pNativeView = new QtTabWidget;
-    
-    initViewImpl(pView, pNativeView);
-}
+    void showEvent(QShowEvent* event)
+    {
+        _pViewImpl->presented();
+    }
 
+    void resizeEvent(QResizeEvent* pEvent)
+    {
+        if (pEvent->oldSize().height() > 0) {
+            _pViewImpl->resized(pEvent->size().width(), pEvent->size().height());
+        }
+    }
 
-TabViewImpl::~TabViewImpl()
-{
-}
+    void mousePressEvent(QMouseEvent* pMouseEvent)
+    {
+        _pViewImpl->selected();
+//        W::mousePressEvent(pMouseEvent);
+    }
 
+    void keyPressEvent(QKeyEvent* pKeyEvent)
+    {
+//        _pViewImpl->keyPressed(pKeyEvent->key());
+    }
 
-void
-TabViewImpl::addView(View* pView, const std::string& tabName)
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
-    static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
-}
+    ViewImpl*   _pViewImpl;
+};
 
-
-void
-TabViewImpl::setTabBarHidden(bool hidden)
-{
-    static_cast<QtTabWidget*>(_pNativeView)->setHidden(hidden);
-}
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif

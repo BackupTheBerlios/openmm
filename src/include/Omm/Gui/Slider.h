@@ -34,6 +34,7 @@ namespace Gui {
 class SliderController : public Controller
 {
     friend class SliderViewImpl;
+    friend class SliderSignalProxy;
     
 protected:
     virtual void valueChanged(int value) {}

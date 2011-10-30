@@ -19,9 +19,11 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <QtGui>
 #include <Poco/NumberFormatter.h>
 
 #include "ViewImpl.h"
+#include "QtViewImpl.h"
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
 
@@ -57,13 +59,21 @@ ViewImpl::~ViewImpl()
 
 
 void
-ViewImpl::initViewImpl(View* pView, QWidget* pNative)
+ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
 {
+    Omm::Gui::Log::instance()->gui().debug("view impl init");
+
     _pView = pView;
     _pNativeView = pNative;
-    connect(this, SIGNAL(showViewSignal()), _pNativeView, SLOT(show()));
-    connect(this, SIGNAL(hideViewSignal()), _pNativeView, SLOT(hide()));
-    connect(this, SIGNAL(triggerViewSyncSignal()), this, SLOT(triggerViewSyncSlot()));
+    
+    if (!pSignalProxy) {
+        _pSignalProxy = new SignalProxy(this);
+    }
+    else {
+        _pSignalProxy = pSignalProxy;
+    }
+    _pSignalProxy->init();
+    
     _pNativeView->setAutoFillBackground(true);
 
     _pEventFilter = new QtEventFilter(this);
@@ -84,15 +94,7 @@ void
 ViewImpl::triggerViewSync()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
-    emit triggerViewSyncSignal();
-}
-
-
-void
-ViewImpl::triggerViewSyncSlot()
-{
-//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync slot");
-    _pView->syncViewImpl();
+    _pSignalProxy->syncView();
 }
 
 
@@ -112,7 +114,7 @@ ViewImpl::getNativeView()
 }
 
 
-WId
+uint32_t
 ViewImpl::getNativeWindowId()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
@@ -139,7 +141,7 @@ void
 ViewImpl::showView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    emit showViewSignal();
+    _pSignalProxy->showView();
 //    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
@@ -148,7 +150,7 @@ void
 ViewImpl::hideView()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    emit hideViewSignal();
+    _pSignalProxy->hideView();
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 

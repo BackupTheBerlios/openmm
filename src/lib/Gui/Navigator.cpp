@@ -23,13 +23,7 @@
 
 #include "Gui/Navigator.h"
 #include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/NavigatorImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/NavigatorImpl.h"
-#endif
+#include "NavigatorImpl.h"
 
 
 namespace Omm {

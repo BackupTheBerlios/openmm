@@ -22,8 +22,7 @@
 #ifndef ColorImpl_INCLUDED
 #define ColorImpl_INCLUDED
 
-#include <QtGui>
-
+class QColor;
 
 namespace Omm {
 namespace Gui {

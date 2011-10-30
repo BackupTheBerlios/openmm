@@ -25,13 +25,7 @@
 #include "Gui/GuiLogger.h"
 #include "Gui/Model.h"
 #include "Gui/Layout.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ViewImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ViewImpl.h"
-#endif
+#include "ViewImpl.h"
 
 
 namespace Omm {

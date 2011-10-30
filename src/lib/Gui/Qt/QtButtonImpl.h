@@ -19,56 +19,30 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QtGui>
+#ifndef QtButtonImpl_INCLUDED
+#define QtButtonImpl_INCLUDED
 
-#include "TabImpl.h"
-#include "Gui/Tab.h"
-#include "Gui/GuiLogger.h"
+#include "QtViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-    
-class QtTabWidget : public QTabWidget
+
+class ButtonSignalProxy : public SignalProxy
 {
-    friend class TabViewImpl;
+    Q_OBJECT
+
+public:
+    ButtonSignalProxy(ViewImpl* pViewImpl) : SignalProxy(pViewImpl) {}
     
-    void setHidden(bool hidden)
-    {
-        tabBar()->setHidden(hidden);
-    }
+    virtual void init();
+    
+private slots:
+    void pushed();
 };
-
-    
-TabViewImpl::TabViewImpl(View* pView) 
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
-
-    QtTabWidget* pNativeView = new QtTabWidget;
-    
-    initViewImpl(pView, pNativeView);
-}
-
-
-TabViewImpl::~TabViewImpl()
-{
-}
-
-
-void
-TabViewImpl::addView(View* pView, const std::string& tabName)
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
-    static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
-}
-
-
-void
-TabViewImpl::setTabBarHidden(bool hidden)
-{
-    static_cast<QtTabWidget*>(_pNativeView)->setHidden(hidden);
-}
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif

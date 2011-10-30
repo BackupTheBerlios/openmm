@@ -1,3 +1,7 @@
+find_package(UIKit)
+
+if(UIKIT_FOUND)
+
 set(OMMGUI_UIKIT_SRC
 ColorImpl.mm
 ViewImpl.mm
@@ -27,3 +31,15 @@ RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib
 )
+
+endif(UIKIT_FOUND)
+
+
+if(TARGET ommgui-uikit)
+set(LIB_OMMGUI_PLATFORM ommgui-uikit
+CACHE INTERNAL lib_ommgui_platform
+)
+set(LIB_OMMGUI_PLATFORM_DIR UIKit
+CACHE INTERNAL lib_ommgui_platform_dir
+)
+endif(TARGET ommgui-uikit)

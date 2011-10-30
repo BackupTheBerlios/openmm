@@ -22,7 +22,6 @@
 #ifndef ScrollAreaImpl_INCLUDED
 #define ScrollAreaImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -33,10 +32,9 @@ class View;
 
 class ScrollAreaViewImpl : public ViewImpl
 {
-    Q_OBJECT
-
     friend class ScrollAreaView;
     friend class QtScrollArea;
+    friend class ScrollAreaSignalProxy;
 
 public:
     ScrollAreaViewImpl(View* pView);
@@ -52,10 +50,6 @@ protected:
     void resizeScrollArea(int width, int height);
     // need to override addSubview to operate on widget inside QScrollArea
     virtual void addSubview(View* pView);
-
-private slots:
-    void viewScrolledXSlot(int value);
-    void viewScrolledYSlot(int value);
 
 private:
     QWidget*                 _pScrollWidget;

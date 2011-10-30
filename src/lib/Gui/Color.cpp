@@ -23,13 +23,7 @@
 
 #include "Gui/Color.h"
 #include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ColorImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ColorImpl.h"
-#endif
+#include "ColorImpl.h"
 
 
 namespace Omm {

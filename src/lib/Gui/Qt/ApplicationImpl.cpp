@@ -36,7 +36,7 @@ ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
 _width(800),
 _height(480),
-_fullscreenStyleSheet("")
+_pFullscreenStyleSheet(0)
 {
     Omm::Gui::Log::instance()->gui().debug("application impl ctor");
 }
@@ -73,7 +73,7 @@ void
 ApplicationImpl::setFullscreen(bool fullscreen)
 {
     if (fullscreen) {
-        _fullscreenStyleSheet =
+        _pFullscreenStyleSheet = new QString(
             "* { \
                  font-size: 28pt; \
                  background-color: #afafaf; \
@@ -96,7 +96,8 @@ ApplicationImpl::setFullscreen(bool fullscreen)
             QButton { \
                  background-color: black; \
                  color: #afafaf; \
-            }";
+            }"
+            );
     }
 }
 
@@ -107,8 +108,8 @@ ApplicationImpl::run(int argc, char** argv)
     Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
     _pQtApplication = new QApplication(argc, argv);
     _pMainWindow = new QMainWindow;
-    if (_fullscreenStyleSheet != "") {
-        _pQtApplication->setStyleSheet(_fullscreenStyleSheet);
+    if (_pFullscreenStyleSheet) {
+        _pQtApplication->setStyleSheet(*_pFullscreenStyleSheet);
         _pMainWindow->setCursor(QCursor(Qt::BlankCursor));
     }
     _pApplication->_pMainView = _pApplication->createMainView();

@@ -23,13 +23,7 @@
 
 #include "Gui/Slider.h"
 #include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/SliderImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/SliderImpl.h"
-#endif
+#include "SliderImpl.h"
 
 
 namespace Omm {

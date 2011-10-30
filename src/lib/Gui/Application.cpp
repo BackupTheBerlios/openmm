@@ -23,14 +23,7 @@
 
 #include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ApplicationImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ApplicationImpl.h"
-#endif
-
+#include "ApplicationImpl.h"
 
 namespace Omm {
 namespace Gui {

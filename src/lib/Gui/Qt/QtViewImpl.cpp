@@ -19,56 +19,57 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QtGui>
-
-#include "TabImpl.h"
-#include "Gui/Tab.h"
+#include "ViewImpl.h"
+#include "QtViewImpl.h"
 #include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
-    
-class QtTabWidget : public QTabWidget
-{
-    friend class TabViewImpl;
-    
-    void setHidden(bool hidden)
-    {
-        tabBar()->setHidden(hidden);
-    }
-};
 
     
-TabViewImpl::TabViewImpl(View* pView) 
-{
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
-
-    QtTabWidget* pNativeView = new QtTabWidget;
-    
-    initViewImpl(pView, pNativeView);
-}
-
-
-TabViewImpl::~TabViewImpl()
+SignalProxy::SignalProxy(ViewImpl* pViewImpl):
+ _pViewImpl(pViewImpl)
 {
 }
 
 
 void
-TabViewImpl::addView(View* pView, const std::string& tabName)
+SignalProxy::init()
 {
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
-    static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
+    connect(this, SIGNAL(showViewSignal()), _pViewImpl->_pNativeView, SLOT(show()));
+    connect(this, SIGNAL(hideViewSignal()), _pViewImpl->_pNativeView, SLOT(hide()));
+    connect(this, SIGNAL(syncViewSignal()), this, SLOT(syncViewSlot()));    
 }
 
 
 void
-TabViewImpl::setTabBarHidden(bool hidden)
+SignalProxy::showView()
 {
-    static_cast<QtTabWidget*>(_pNativeView)->setHidden(hidden);
+    emit showViewSignal();
 }
 
 
+void
+SignalProxy::hideView()
+{
+    emit hideViewSignal();
+}
+
+
+void
+SignalProxy::syncView()
+{
+    emit syncViewSignal();
+}
+
+
+void
+SignalProxy::syncViewSlot()
+{
+    _pViewImpl->_pView->syncViewImpl();
+}
+        
+        
 }  // namespace Omm
 }  // namespace Gui

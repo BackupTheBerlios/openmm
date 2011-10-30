@@ -24,13 +24,7 @@
 #include "Gui/ScrollArea.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
-
-#ifdef __GUI_QT_PLATFORM__
-#include "Qt/ScrollAreaImpl.h"
-#endif
-#ifdef __GUI_UIKIT_PLATFORM__
-#include "UIKit/ScrollAreaImpl.h"
-#endif
+#include "ScrollAreaImpl.h"
 
 
 namespace Omm {

@@ -22,7 +22,6 @@
 #ifndef LabelImpl_INCLUDED
 #define LabelImpl_INCLUDED
 
-#include <QtGui>
 #include "ViewImpl.h"
 
 namespace Omm {
