@@ -101,6 +101,15 @@ public:
 
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
+public:
+    MediaRendererDevice() : _transportState("") {}
+    
+    std::string getTransportState();
+    
+private:
+    virtual void newTransportState(const std::string& transportState);
+    
+    std::string _transportState;
 };
 
 

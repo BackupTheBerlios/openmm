@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include "UpnpAv.h"
 #include "UpnpAvPrivate.h"
-
 #include "UpnpAvCtlImpl.h"
 
 namespace Omm {
@@ -137,9 +137,24 @@ CtlAVTransportImpl::_ansPrevious(const ui4& InstanceID)
 void
 CtlAVTransportImpl::_changedLastChange(const std::string& val)
 {
-// begin of your own code
+    Log::instance()->upnpav().debug("controller avtransport got last change: " + val);
 
-// end of your own code
+    LastChangeReader lastChangeReader;
+    lastChangeReader.read(val);
+
+    // dispatcher code for last change state var
+    for (LastChangeReader::ChangeSetIterator instanceIdIt = lastChangeReader.beginChangeSet(); instanceIdIt != lastChangeReader.endChangeSet(); ++instanceIdIt) {
+        for (LastChangeSet::StateVarIterator it = (*instanceIdIt).beginStateVar(); it != (*instanceIdIt).endStateVar(); ++it) {
+            std::string stateVarName = (*it).first;
+            std::string val = (*it).second["val"];
+            if (stateVarName == AvTransportEventedStateVar::TRANSPORT_STATE) {
+                Log::instance()->upnpav().debug("controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
+                if (_pMediaRenderer) {
+                    _pMediaRenderer->newTransportState(val);
+                }
+            }
+        }
+    }
 }
 
 
@@ -536,7 +551,7 @@ CtlRenderingControlImpl::_changedLastChange(const std::string& val)
             std::string val = (*it).second["val"];
             // FIXME: InstanceID and Channel are not honored when storing the new evented value, device tree has only one instance (and one channel).
 //            _pService->setStateVar<std::string>(stateVarName, val);
-            if (stateVarName == "Volume") {
+            if (stateVarName == RenderingControlEventedStateVar::VOLUME) {
                 // set volume only when this renderer is selected.
                 Log::instance()->upnpav().debug("controller, volume changed on device: " + _pService->getDevice()->getUuid());
                 if (_pAvUserInterface && _pAvUserInterface->selectedRendererUuid() == _pService->getDevice()->getUuid()) {

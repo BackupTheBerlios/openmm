@@ -33,7 +33,7 @@ namespace Gui {
 void
 HorizontalLayout::layoutView()
 {
-    Omm::Gui::Log::instance()->gui().debug("horizontal layout, lay out view ...");
+//    Omm::Gui::Log::instance()->gui().debug("horizontal layout, lay out view ...");
     
     int minSubviewWidth = 0;
     int minSubviewHeight = 0;

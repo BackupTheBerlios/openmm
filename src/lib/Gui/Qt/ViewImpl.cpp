@@ -61,7 +61,7 @@ ViewImpl::~ViewImpl()
 void
 ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl init");
+//    Omm::Gui::Log::instance()->gui().debug("view impl init");
 
     _pView = pView;
     _pNativeView = pNative;

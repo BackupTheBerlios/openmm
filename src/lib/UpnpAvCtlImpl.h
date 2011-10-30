@@ -33,7 +33,7 @@ namespace Av {
 class CtlAVTransportImpl : public CtlAVTransport
 {
 public:
-    CtlAVTransportImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+    CtlAVTransportImpl(AvUserInterface* pAvUserInterface, CtlMediaRenderer* pMediaRenderer = 0) : _pAvUserInterface(pAvUserInterface), _pMediaRenderer(pMediaRenderer) {}
 
 private:
     virtual void _ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -52,6 +52,7 @@ private:
     virtual void _changedLastChange(const std::string& val);
 
     AvUserInterface*    _pAvUserInterface;
+    CtlMediaRenderer*   _pMediaRenderer;
 };
 
 

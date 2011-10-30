@@ -39,7 +39,7 @@ CtlMediaRenderer::addCtlDeviceCode()
     _pCtlMediaRendererCode = new CtlMediaRendererCode(this,
         new CtlRenderingControlImpl(0, this),
         new CtlConnectionManagerImpl(0),
-        new CtlAVTransportImpl(0));
+        new CtlAVTransportImpl(0, this));
     setCtlDeviceCode(_pCtlMediaRendererCode);
 }
 

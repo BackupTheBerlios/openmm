@@ -31,6 +31,7 @@ namespace Gui {
 
 
 ButtonModel::ButtonModel() :
+_enabled(true),
 _pImage(0)
 {
 }
@@ -55,6 +56,20 @@ ButtonModel::setLabel(const std::string& label)
 {
 //    Omm::Gui::Log::instance()->gui().debug("button model set label");
     _label = label;
+}
+
+
+bool
+ButtonModel::getEnabled()
+{
+    return _enabled;
+}
+
+
+void
+ButtonModel::setEnabled(bool enabled)
+{
+    _enabled = enabled;
 }
 
 
@@ -89,14 +104,16 @@ View(pParent, false)
 void
 ButtonView::syncViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName() + " ...");
     if (!_pModel) {
         return;
     }
+    ButtonViewImpl* pImpl = static_cast<ButtonViewImpl*>(_pImpl);
     ButtonModel* pButtonModel = static_cast<ButtonModel*>(_pModel);
-    static_cast<ButtonViewImpl*>(_pImpl)->setLabel(pButtonModel->getLabel());
+    pImpl->setLabel(pButtonModel->getLabel());
+    pImpl->setEnabled(pButtonModel->getEnabled());
     if (pButtonModel->getImage()) {
-        static_cast<ButtonViewImpl*>(_pImpl)->setImage(pButtonModel->getImage());
+        pImpl->setImage(pButtonModel->getImage());
     }
 }
 
@@ -105,6 +122,14 @@ void
 Button::setLabel(const std::string& label)
 {
     ButtonModel::setLabel(label);
+    syncView();
+}
+
+
+void
+Button::setEnabled(bool enabled)
+{
+    ButtonModel::setEnabled(enabled);
     syncView();
 }
 

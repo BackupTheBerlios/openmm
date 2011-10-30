@@ -21,6 +21,7 @@
 
 #include "UpnpGui.h"
 #include "Gui/GuiLogger.h"
+#include "UpnpAv.h"
 #include "UpnpAvCtlServer.h"
 #include "MediaImages.h"
 
@@ -110,7 +111,7 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
     _deviceGroupListView.setName("media renderer group view");
     push(&_deviceGroupListView, "Player");
 
-    _deviceGroupListView.setItemViewHeight(80);
+    _deviceGroupListView.setItemViewHeight(50);
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }
@@ -139,15 +140,31 @@ MediaRendererGroupWidget::getItemModel(int row)
 }
 
 
+void
+MediaRendererDevice::newTransportState(const std::string& transportState)
+{
+    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
+    _transportState = transportState;
+    syncViews();
+}
+
+
+std::string
+MediaRendererDevice::getTransportState()
+{
+    return _transportState;
+}
+
+
 class BackButton : public Gui::Button
 {
 public:
     BackButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
-        Gui::Image image;
-        image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
-        setImage(&image);
+        _image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
+        setImage(&_image);
         setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+        setEnabled(false);
     }
 
     virtual void pushed()
@@ -155,6 +172,8 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
 //        pRenderer->playPressed();
     }
+    
+    Gui::Image _image;
 };
 
 
@@ -163,9 +182,8 @@ class PlayButton : public Gui::Button
 public:
     PlayButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
-        Gui::Image image;
-        image.setData(MediaImages::instance()->getResource("media-start.png"));
-        setImage(&image);
+        _image.setData(MediaImages::instance()->getResource("media-start.png"));
+        setImage(&_image);
         setSizeConstraint(30, height(Gui::View::Pref), Gui::View::Pref);
     }
 
@@ -174,6 +192,21 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->playPressed();
     }
+
+    virtual bool getEnabled()
+    {
+        Gui::Log::instance()->gui().debug("media renderer play button get enabled");
+        if (_pParent && _pParent->getModel()) {
+            std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
+            Gui::Log::instance()->gui().debug("media renderer play button get enabled, transport state: " + transportState);
+            return (transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
+        }
+        else {
+            return Button::getEnabled();
+        }
+    }
+    
+    Gui::Image _image;
 };
 
 
@@ -182,9 +215,8 @@ class StopButton : public Gui::Button
 public:
     StopButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
-        Gui::Image image;
-        image.setData(MediaImages::instance()->getResource("media-stop.png"));
-        setImage(&image);
+        _image.setData(MediaImages::instance()->getResource("media-stop.png"));
+        setImage(&_image);
         setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
     }
 
@@ -193,6 +225,21 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->stopPressed();
     }
+    
+    virtual bool getEnabled()
+    {
+        Gui::Log::instance()->gui().debug("media renderer stop button get enabled");
+        if (_pParent && _pParent->getModel()) {
+            std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
+            Gui::Log::instance()->gui().debug("media renderer stop button get enabled, transport state: " + transportState);
+            return (transportState != Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
+        }
+        else {
+            return Button::getEnabled();
+        }
+    }
+    
+    Gui::Image _image;
 };
 
 
@@ -201,10 +248,10 @@ class ForwButton : public Gui::Button
 public:
     ForwButton(Gui::View* pParent = 0) : Gui::Button(pParent)
     {
-        Gui::Image image;
-        image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
-        setImage(&image);
+        _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
+        setImage(&_image);
         setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+        setEnabled(false);
     }
 
     virtual void pushed()
@@ -212,6 +259,8 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
 //        pRenderer->playPressed();
     }
+
+    Gui::Image _image;
 };
 
 
@@ -238,7 +287,6 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->volumeChanged(value);
     }
-
 };
 
 
@@ -252,7 +300,6 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->positionMoved(value);
     }
-
 };
 
 
@@ -266,7 +313,6 @@ public:
 //        Gui::Log::instance()->gui().debug("media renderer name get label");
         return static_cast<MediaRendererDevice*>(static_cast<MediaRendererView*>(_pParent)->getModel())->getFriendlyName();
     }
-    
 };
 
 
@@ -299,8 +345,10 @@ MediaRendererView::selectedRenderer()
 void
 MediaRendererView::syncViewImpl()
 {
-//    Gui::Log::instance()->gui().debug("media renderer view sync view impl");
+    Gui::Log::instance()->gui().debug("media renderer view sync view impl");
     _pRendererName->syncViewImpl();
+    _pPlayButton->syncViewImpl();
+    _pStopButton->syncViewImpl();
 }
 
 

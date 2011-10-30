@@ -52,10 +52,14 @@ public:
     virtual std::string getLabel();
     void setLabel(const std::string& label);
 
+    virtual bool getEnabled();
+    void setEnabled(bool enabled = true);
+    
     virtual Image* getImage();
     void setImage(Image* pImage);
     
 private:
+    bool        _enabled;
     std::string _label;
     Image*      _pImage;
 };
@@ -68,7 +72,7 @@ class ButtonView : public View
 public:
     ButtonView(View* pParent = 0);
 
-private:
+//private:
     virtual void syncViewImpl();
 };
 
@@ -93,6 +97,7 @@ public:
     Button(View* pParent = 0) : Widget<ButtonView, ButtonController, ButtonModel>(pParent) {}
     
     void setLabel(const std::string& label);
+    void setEnabled(bool enabled = true);
     void setImage(Image* pImage);    
 };
 
