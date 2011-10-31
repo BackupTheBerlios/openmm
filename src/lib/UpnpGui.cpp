@@ -54,9 +54,10 @@ ControllerWidget::getLocalRendererVisual()
 
 
 void
-ControllerWidget::setLocalRendererUuid(const std::string& uuid)
+ControllerWidget::setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer)
 {
-    _localRendererUuid = uuid;
+    _localRendererUuid = pRenderer->getUuid();
+    _pMediaRendererGroupWidget->setDefaultDevice(pRenderer);
 }
 
 
@@ -135,11 +136,11 @@ DeviceGroup(pDeviceGroupDelegate)
 void
 DeviceGroupWidget::addDevice(Device* pDevice, int index, bool begin)
 {
-    if (begin) {
-
-    }
-    else {
+    if (!begin) {
         syncViews();
+        if (pDevice->getUuid() == _defaultDeviceUuid) {
+            selectDevice(pDevice);
+        }
     }
 }
 
@@ -147,10 +148,7 @@ DeviceGroupWidget::addDevice(Device* pDevice, int index, bool begin)
 void
 DeviceGroupWidget::removeDevice(Device* pDevice, int index, bool begin)
 {
-    if (begin) {
-
-    }
-    else {
+    if (!begin) {
         syncViews();
     }
 }
@@ -179,6 +177,13 @@ DeviceGroupWidget::selectedItem(int row)
     Gui::Log::instance()->gui().debug("device group widget selected device");
     Device* pDevice = static_cast<Device*>(getDevice(row));
     DeviceGroup::selectDevice(pDevice);
+}
+
+
+void
+DeviceGroupWidget::setDefaultDevice(Device* pDevice)
+{
+    _defaultDeviceUuid = pDevice->getUuid();
 }
 
 

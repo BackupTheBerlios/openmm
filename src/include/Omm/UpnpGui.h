@@ -26,6 +26,7 @@
 
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
+#include "UpnpAvRenderer.h"
 #include "UpnpAvCtlServer.h"
 #include "UpnpAvCtlObject2.h"
 #include "Sys.h"
@@ -66,7 +67,7 @@ public:
     ControllerWidget();
 
     GuiVisual* getLocalRendererVisual();
-    void setLocalRendererUuid(const std::string& uuid);
+    void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
     void newTransportState(TransportStateNotification* pNotification);
     void showMainMenu();
     void navigateListWithKey(Gui::Controller::KeyCode key);
@@ -113,10 +114,13 @@ public:
     // ListController interface
     virtual void selectedItem(int row);
 
+    void setDefaultDevice(Device* pDevice);
+
 protected:
     virtual void init() {}
 
     Gui::ListView   _deviceGroupListView;
+    std::string     _defaultDeviceUuid;
 };
 
 

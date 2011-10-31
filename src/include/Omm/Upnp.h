@@ -78,17 +78,17 @@ class Log
 {
 public:
     static Log* instance();
-    
+
     Poco::Logger& upnp();
     Poco::Logger& ssdp();
     Poco::Logger& http();
     Poco::Logger& desc();
     Poco::Logger& ctrl();
     Poco::Logger& event();
-    
+
 private:
     Log();
-    
+
     static Log*     _pInstance;
     Poco::Logger*   _pUpnpLogger;
     Poco::Logger*   _pSsdpLogger;
@@ -106,7 +106,7 @@ class Icon
     friend class DeviceContainer;
     friend class Device;
     friend class DescriptionWriter;
-    
+
 public:
     Icon(int width, int height, int depth, const std::string& mime, const std::string& uri = "");
     ~Icon();
@@ -114,10 +114,10 @@ public:
     const std::string& getBuffer();
     std::string getIconRequestPath();
     void setIconRequestPath(const std::string& path);
-    
+
 private:
     void retrieve(const std::string& uri);
-    
+
     int                     _width;
     int                     _height;
     int                     _depth;
@@ -220,7 +220,7 @@ public:
     typedef typename std::map<std::string, E*>::iterator KeyIterator;
     typedef typename std::vector<E*>::iterator Iterator;
     typedef typename std::vector<std::string>::iterator PosIterator;
-    
+
     E& get(std::string key)
     {
         KeyIterator it = _elementMap.find(key);
@@ -232,12 +232,12 @@ public:
             throw Poco::Exception("");
         }
     }
-    
+
     E& get(int index) const
     {
         return *_elementVector[index];
     }
-    
+
     void append(std::string key, E* pElement)
     {
         KeyIterator it = _elementMap.find(key);
@@ -286,7 +286,7 @@ public:
             throw Poco::Exception("");
         }
     }
-        
+
     void replace(const std::string& key, E* pElement)
     {
         KeyIterator it = _elementMap.find(key);
@@ -313,7 +313,7 @@ public:
             return T();
         }
     }
-    
+
     template<typename T> void setValue(const std::string& key, const T& val)
     {
         if (_elementMap.find(key) == _elementMap.end()) {
@@ -333,29 +333,29 @@ public:
     {
         return _elementVector.begin();
     }
-    
+
     Iterator end()
     {
         return _elementVector.end();
     }
-    
+
     KeyIterator beginKey()
     {
         return _elementMap.begin();
     }
-        
+
     KeyIterator endKey()
     {
         return _elementMap.end();
     }
-    
+
     void clear()
     {
         _elementMap.clear();
         _elementVector.clear();
         _keyVector.clear();
     }
-    
+
 private:
     std::map<std::string, E*>   _elementMap;
     std::vector<E*>             _elementVector;
@@ -631,10 +631,11 @@ public:
 
     int getDeviceCount() const;
     Device* getDevice(int index) const;
+//    Device* getDevice(const std::string& uuid);
     Controller* getController() const;
     void selectDevice(Device* pDevice);
     Device* getSelectedDevice() const;
-    
+
     virtual std::string getDeviceType();
     virtual std::string shortName();
     virtual Icon* groupIcon();
@@ -642,7 +643,7 @@ public:
     virtual Device* createDevice();
     /// factory method to create a device of a certain type.
     virtual void showDeviceGroup() {}
-    
+
     virtual void addDevice(Device* pDevice, int index, bool begin) {}
     virtual void removeDevice(Device* pDevice, int index, bool begin) {}
     virtual void selectDevice(Device* pDevice, int index) {}

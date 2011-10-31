@@ -57,7 +57,7 @@ public:
         _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
         _localDeviceServer.init();
         _localDeviceServer.start();
-        _pController->setLocalRendererUuid(_mediaRenderer.getUuid());
+        _pController->setDefaultRenderer(&_mediaRenderer);
     }
 
     virtual void finishedEventLoop()

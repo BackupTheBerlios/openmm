@@ -155,7 +155,7 @@ _searchPath(":/usr/lib/omm:/usr/local/lib/omm")
     }
     catch (Poco::NotFoundException) {
     }
-    
+
     if (uri != "") {
         try {
             retrieve(uri);
@@ -198,7 +198,7 @@ void
 Icon::retrieve(const std::string& uri)
 {
     Poco::URI iconUri(uri);
-    
+
     if (iconUri.getScheme() == "file") {
         Poco::File f(iconUri.getPath());
         if (!f.exists()) {
@@ -459,7 +459,7 @@ SsdpSocket::setupSockets()
     setMode(Multicast);
     Log::instance()->ssdp().debug("setting up SSDP sockets in multicast mode finished.");
 
-    
+
 //#ifndef __DARWIN__
 //    if (Net::NetworkInterfaceManager::instance()->loopbackOnly()) {
 //        Log::instance()->ssdp().warning("loopback is the only network interface, forcing broadcast mode.");
@@ -713,7 +713,7 @@ Service*
 DescriptionReader::service(Poco::XML::Node* pNode)
 {
     Service* pRes = new Service();
-    
+
     while (pNode)
     {
         if (pNode->nodeName() == "serviceType" && pNode->hasChildNodes()) {
@@ -766,7 +766,7 @@ DescriptionReader::service(Poco::XML::Node* pNode)
             std::string eventPath = pNode->innerText();
             pRes->setEventSubscriptionPath(eventPath);
         }
-        
+
         pNode = pNode->nextSibling();
     }
     return pRes;
@@ -777,7 +777,7 @@ Action*
 DescriptionReader::action(Poco::XML::Node* pNode)
 {
     Action* pRes = new Action();
-    
+
     while (pNode)
     {
         if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
@@ -802,7 +802,7 @@ Argument*
 DescriptionReader::argument(Poco::XML::Node* pNode)
 {
     Argument* pRes = new Argument();
-    
+
     while (pNode)
     {
         if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
@@ -814,10 +814,10 @@ DescriptionReader::argument(Poco::XML::Node* pNode)
         else if (pNode->nodeName() == "direction" && pNode->hasChildNodes()) {
             pRes->setDirection(pNode->innerText());
         }
-        
+
         pNode = pNode->nextSibling();
     }
-    
+
     return pRes;
 }
 
@@ -826,7 +826,7 @@ StateVar*
 DescriptionReader::stateVar(Poco::XML::Node* pNode)
 {
     StateVar* pRes = new StateVar();
-    
+
     while (pNode)
     {
         if (pNode->nodeName() == "name" && pNode->hasChildNodes()) {
@@ -839,7 +839,7 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
             Log::instance()->desc().debug("set default value for state variable \"" + pRes->getName() + "\" to: " + val);
-            
+
             pRes->setValue(val);
         }
         pNode = pNode->nextSibling();
@@ -917,7 +917,7 @@ MemoryDescriptionReader::retrieveDescription(const std::string& descriptionKey)
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : _pActionTemplate(pActionTemplate)
 {
     Log::instance()->ctrl().debug("action request:" + Poco::LineEnding::NEWLINE_DEFAULT + requestBody);
-    
+
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
@@ -943,17 +943,17 @@ ActionRequestReader::action()
 {
     Action* pRes = _pActionTemplate;
     Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
-    
+
     while(pNode && (pNode->nodeName() != pNode->prefix() + ":Body")) {
         pNode = pNode->nextSibling();
     }
     Poco::XML::Node* pBody = pNode;
     if (pBody && pBody->hasChildNodes()) {
         Poco::XML::Node* pAction = pBody->firstChild();
-        
+
         if (pAction->hasChildNodes()) {
             Poco::XML::Node* pArgument = pAction->firstChild();
-    
+
             while (pArgument) {
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
                 pArgument = pArgument->nextSibling();
@@ -1007,7 +1007,7 @@ ActionResponseReader::action()
     // TODO: same code as in ActionRequestReader
     Action* pRes = _pActionTemplate;
     Poco::XML::Node* pNode = _pDoc->documentElement()->firstChild();
-    
+
     while(pNode && (pNode->nodeName() != pNode->prefix() + ":Body")) {
         pNode = pNode->nextSibling();
     }
@@ -1016,7 +1016,7 @@ ActionResponseReader::action()
         Poco::XML::Node* pAction = pBody->firstChild();
         if (pAction->hasChildNodes()) {
             Poco::XML::Node* pArgument = pAction->firstChild();
-            
+
             while (pArgument) {
                 Log::instance()->ctrl().debug("action response arg: " + pArgument->nodeName() + " = " + pArgument->innerText());
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
@@ -1119,7 +1119,7 @@ DescriptionWriter::deviceContainer(DeviceContainer& deviceContainer)
     pRoot->appendChild(pRootDevice);
     _pDoc->appendChild(pRoot);
     // end root device
-    
+
     if (deviceContainer.getDeviceCount() > 1) {
         // if there are embedded devices open a deviceList
         Poco::AutoPtr<Poco::XML::Element> pDeviceList = _pDoc->createElement("deviceList");
@@ -1133,7 +1133,7 @@ DescriptionWriter::deviceContainer(DeviceContainer& deviceContainer)
         }
     }
     // end embedded devices
-    
+
     // end DeviceContainer
 }
 
@@ -1142,7 +1142,7 @@ Poco::XML::Element*
 DescriptionWriter::device(Device& device)
 {
     Poco::XML::Element* pDevice = _pDoc->createElement("device");
-    
+
     // device type
     Poco::AutoPtr<Poco::XML::Element> pDeviceType = _pDoc->createElement("deviceType");
     Poco::AutoPtr<Poco::XML::Text> pDeviceTypeVal = _pDoc->createTextNode(device.getDeviceType());
@@ -1153,7 +1153,7 @@ DescriptionWriter::device(Device& device)
     Poco::AutoPtr<Poco::XML::Text> pUuidVal = _pDoc->createTextNode("uuid:" + device.getUuid());
     pUuid->appendChild(pUuidVal);
     pDevice->appendChild(pUuid);
-    
+
     // Properties
     for (Device::PropertyIterator it = device.beginProperty(); it != device.endProperty(); ++it) {
         Poco::AutoPtr<Poco::XML::Element> pProp = _pDoc->createElement((*it).first);
@@ -1162,7 +1162,7 @@ DescriptionWriter::device(Device& device)
         pDevice->appendChild(pProp);
         Log::instance()->desc().debug("writer added property: " + (*it).first + " = " + *(*it).second);
     }
-    
+
     // Icons
     Poco::AutoPtr<Poco::XML::Element> pIconList = _pDoc->createElement("iconList");
     pDevice->appendChild(pIconList);
@@ -1173,15 +1173,15 @@ DescriptionWriter::device(Device& device)
             Log::instance()->desc().debug("writer added icon: " + (*it)->_requestPath);
         }
     }
-    
+
     // Services
     Poco::AutoPtr<Poco::XML::Element> pServiceList = _pDoc->createElement("serviceList");
-    pDevice->appendChild(pServiceList);    
+    pDevice->appendChild(pServiceList);
     for (Device::ServiceIterator it = device.beginService(); it != device.endService(); ++it) {
         pServiceList->appendChild(service(*it));
         Log::instance()->desc().debug("writer added service: " + (*it)->getServiceType());
     }
-    
+
     return pDevice;
 }
 
@@ -1190,7 +1190,7 @@ Poco::XML::Element*
 DescriptionWriter::service(Service* pService)
 {
     Poco::XML::Element* pServiceElement = _pDoc->createElement("service");
-    
+
     // serviceType
     Poco::AutoPtr<Poco::XML::Element> pServiceType = _pDoc->createElement("serviceType");
     Poco::AutoPtr<Poco::XML::Text> pServiceTypeVal = _pDoc->createTextNode(pService->getServiceType());
@@ -1216,7 +1216,7 @@ DescriptionWriter::service(Service* pService)
     Poco::AutoPtr<Poco::XML::Text> pEventVal = _pDoc->createTextNode(pService->getEventSubscriptionPath());
     pEvent->appendChild(pEventVal);
     pServiceElement->appendChild(pEvent);
-    
+
     return pServiceElement;
 }
 
@@ -1225,7 +1225,7 @@ Poco::XML::Element*
 DescriptionWriter::icon(Icon* pIcon)
 {
     Poco::XML::Element* pIconElement = _pDoc->createElement("icon");
-    
+
     // mimetype
     Poco::AutoPtr<Poco::XML::Element> pMimetype = _pDoc->createElement("mimetype");
     Poco::AutoPtr<Poco::XML::Text> pMimetypeVal = _pDoc->createTextNode(pIcon->_mime.toString());
@@ -1251,7 +1251,7 @@ DescriptionWriter::icon(Icon* pIcon)
     Poco::AutoPtr<Poco::XML::Text> pUrlVal = _pDoc->createTextNode(pIcon->_requestPath);
     pUrl->appendChild(pUrlVal);
     pIconElement->appendChild(pUrl);
-    
+
     return pIconElement;
 }
 
@@ -1262,7 +1262,7 @@ DescriptionWriter::write()
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
-    
+
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     Log::instance()->desc().debug("rewrote device description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
@@ -1335,7 +1335,7 @@ ServiceDescriptionWriter::action(Action* pAction)
     Poco::AutoPtr<Poco::XML::Text> pActionNameVal = _pDoc->createTextNode(pAction->getName());
     pActionName->appendChild(pActionNameVal);
     pActionElement->appendChild(pActionName);
-    
+
     // argumentList
     Poco::AutoPtr<Poco::XML::Element> pArgumentList = _pDoc->createElement("argumentList");
     pActionElement->appendChild(pArgumentList);
@@ -1358,13 +1358,13 @@ ServiceDescriptionWriter::argument(Argument* pArgument)
     Poco::AutoPtr<Poco::XML::Text> pArgumentNameVal = _pDoc->createTextNode(pArgument->getName());
     pArgumentName->appendChild(pArgumentNameVal);
     pArgumentElement->appendChild(pArgumentName);
-    
+
     // direction
     Poco::AutoPtr<Poco::XML::Element> pDirection = _pDoc->createElement("direction");
     Poco::AutoPtr<Poco::XML::Text> pDirectionNameVal = _pDoc->createTextNode(pArgument->getDirection());
     pDirection->appendChild(pDirectionNameVal);
     pArgumentElement->appendChild(pDirection);
-    
+
     // relatedStateVariable
     Poco::AutoPtr<Poco::XML::Element> pRelatedStateVar = _pDoc->createElement("relatedStateVariable");
     Poco::AutoPtr<Poco::XML::Text> pRelatedStateVarVal = _pDoc->createTextNode(pArgument->getRelatedStateVarName());
@@ -1411,14 +1411,14 @@ ActionRequestWriter::action(Action* action)
     pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
     Poco::AutoPtr<Poco::XML::Element> pBody = _pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
     Poco::AutoPtr<Poco::XML::Element> pActionRequest = _pDoc->createElementNS(action->getService()->getServiceType(), action->getName());
-    
+
     for(Action::ArgumentIterator i = action->beginInArgument(); i != action->endInArgument(); ++i) {
         Poco::AutoPtr<Poco::XML::Element> pArgument = _pDoc->createElement((*i)->getName());
         Poco::AutoPtr<Poco::XML::Text> pArgumentValue = _pDoc->createTextNode(action->getArgument<std::string>((*i)->getName()));
         pArgument->appendChild(pArgumentValue);
         pActionRequest->appendChild(pArgument);
     }
-    
+
     pBody->appendChild(pActionRequest);
     pEnvelope->appendChild(pBody);
     _pDoc->appendChild(pEnvelope);
@@ -1431,7 +1431,7 @@ ActionRequestWriter::write(std::string& actionMessage)
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
-    
+
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     actionMessage = ss.str();
@@ -1452,22 +1452,22 @@ ActionResponseWriter::action(Action& action)
     pEnvelope->setAttributeNS("http://schemas.xmlsoap.org/soap/envelope/", "encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
     Poco::AutoPtr<Poco::XML::Element> pBody = pDoc->createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "Body");
     Poco::AutoPtr<Poco::XML::Element> pActionResponse = pDoc->createElementNS(action.getService()->getServiceType(), action.getName() + "Response");
-    
+
     for(Action::ArgumentIterator i = action.beginOutArgument(); i != action.endOutArgument(); ++i) {
         Poco::AutoPtr<Poco::XML::Element> pArgument = pDoc->createElement((*i)->getName());
         Poco::AutoPtr<Poco::XML::Text> pArgumentValue = pDoc->createTextNode(action.getArgument<std::string>((*i)->getName()));
         pArgument->appendChild(pArgumentValue);
         pActionResponse->appendChild(pArgument);
     }
-    
+
     pBody->appendChild(pActionResponse);
     pEnvelope->appendChild(pBody);
     pDoc->appendChild(pEnvelope);
-    
+
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
-    
+
     std::stringstream ss;
     writer.writeNode(ss, pDoc);
     *_responseBody = ss.str();
@@ -1496,7 +1496,7 @@ EventMessageWriter::write(std::string& eventMessage)
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION);
-    
+
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     eventMessage = ss.str();
@@ -1508,7 +1508,7 @@ void
 EventMessageWriter::stateVar(const StateVar& stateVar)
 {
     Log::instance()->event().debug("event message writer for state var: " + stateVar.getName());
-    
+
     Poco::AutoPtr<Poco::XML::Element> pProperty = _pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "property");
     Poco::AutoPtr<Poco::XML::Element> pStateVar = _pDoc->createElement(stateVar.getName());
     Poco::AutoPtr<Poco::XML::Text> pStateVarValue = _pDoc->createTextNode(stateVar.getValue());
@@ -1591,13 +1591,13 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     request.set("NT", "upnp:event");
     request.set("NTS", "upnp:propchange");
     request.set("SID", "uuid:" + _uuid);
-    
+
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
     Log::instance()->event().debug("sending event notification request to: " + _pSessionUri->toString());
     std::stringstream ss;
     request.write(ss);
-    
+
     // set request body and send request
     std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
@@ -1645,7 +1645,7 @@ void
 EventMessageQueue::queueStateVar(StateVar& stateVar)
 {
     Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
-    
+
     //Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     _stateVars.insert(&stateVar);
@@ -1678,7 +1678,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
     }
     _stateVars.clear();
     //_lock.unlock();
-    
+
     messageWriter.write(eventMessage);
 
     for (Service::SubscriptionIterator i = _pService->beginEventSubscription(); i != _pService->endEventSubscription(); ++i) {
@@ -1990,7 +1990,7 @@ void
 Service::addStateVar(StateVar* pStateVar)
 {
 //     Log::instance()->upnp().debug("Service::addStateVar() name: " + pStateVar->getName() + " is evented: " << pStateVar->getSendEvents());
-    
+
     _stateVars.append(pStateVar->getName(), pStateVar);
     if(pStateVar->getSendEvents()) {
         _eventedStateVars.append(pStateVar->getName(), pStateVar);
@@ -2166,7 +2166,7 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     if (!renew) {
         _pControllerSubscriptionData->setSid(response.get("SID"));
     }
-    
+
     Log::instance()->event().debug("subscription request completed");
 }
 
@@ -2272,7 +2272,7 @@ Service::sendEventMessage(StateVar& stateVar)
     EventMessageWriter messageWriter;
     messageWriter.stateVar(stateVar);
     messageWriter.write(eventMessage);
-    
+
     for (SubscriptionIterator i = beginEventSubscription(); i != endEventSubscription(); ++i) {
         (*i)->sendEventMessage(eventMessage);
     }
@@ -2420,14 +2420,14 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
     if (response.sent()) {
         Log::instance()->desc().debug("description (header) successfully sent");
     }
-    
+
     /*
     mediatomb needs this for SAMSUNGs:
-    <custom-http-headers> 
-    <!-- Samsung needs it --> 
-    <add header="transferMode.dlna.org: Streaming"/> 
-    <add header="contentFeatures.dlna.org: DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01500000000000000000000000000000"/> 
-    </custom-http-headers> 
+    <custom-http-headers>
+    <!-- Samsung needs it -->
+    <add header="transferMode.dlna.org: Streaming"/>
+    <add header="contentFeatures.dlna.org: DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01500000000000000000000000000000"/>
+    </custom-http-headers>
     */
 }
 
@@ -2455,14 +2455,14 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     char buf[length];
     request.stream().read(buf, length);
     std::string requestBody(buf, length);
-    
+
     std::string soap = request.get("SOAPACTION");
     std::string soapAction = soap.substr(1, soap.size()-2);
     std::string::size_type hash = soapAction.find('#');
     std::string serviceType = soapAction.substr(0, hash);
     std::string actionName = soapAction.substr(hash+1);
     Log::instance()->ctrl().debug("action received: \"" + actionName + "\" (service type " + serviceType + ")");
-    
+
 //     std::clog << "ControlRequestHandler for ServiceType: " << _pService->getServiceType() << std::endl;
     // TODO: make getAction() robust against wrong action names
     Action* pAction = _pService->getAction(actionName);
@@ -2479,7 +2479,7 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     std::string responseBody;
     ActionResponseWriter responseWriter(responseBody);
     responseWriter.action(*pAction);
-    
+
     response.setContentType("text/xml");
         // TODO: set EXT header
         // TODO: set SERVER header
@@ -2527,7 +2527,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
 //         Poco::Timestamp t;
 //         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
         response.setDate(Poco::Timestamp());
-        response.set("SERVER", 
+        response.set("SERVER",
                      Poco::Environment::osName() + "/"
                      + Poco::Environment::osVersion() + ", "
                     + "UPnP/" + UPNP_VERSION + ", "
@@ -2612,7 +2612,7 @@ void
 IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
     Log::instance()->upnp().debug("icon request from: " + request.getHost());
-    
+
     response.sendBuffer(_pIcon->_buffer.data(), _pIcon->_buffer.size());
 }
 
@@ -3731,7 +3731,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
     int r = _repeat;
     while (r--) {
         Log::instance()->ssdp().debug("#message sets left to send: " + Poco::NumberFormatter::format(r+1));
-        
+
         for (std::vector<SsdpMessage*>::const_iterator i = _ssdpMessages.begin(); i != _ssdpMessages.end(); ++i) {
             _pSsdpSocket->sendMessage(**i, _receiver);
         }
@@ -3770,7 +3770,7 @@ Controller::start()
 
     DeviceManager::start();
     sendMSearch();
-    
+
     Log::instance()->upnp().debug("controller started.");
 }
 
@@ -3861,7 +3861,7 @@ void
 Controller::discoverDevice(const std::string& location)
 {
     Log::instance()->upnp().debug("controller discovers device location: " + location);
-    
+
     UriDescriptionReader descriptionReader;
     descriptionReader.getDeviceDescription(location);
     DeviceContainer* pDeviceContainer = descriptionReader.deviceContainer();
@@ -3874,13 +3874,13 @@ void
 Controller::handleSsdpMessage(SsdpMessage* pMessage)
 {
     // we load all device descriptions, regardless of service types contained in the device
-    
+
     // get UUID from USN
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
     Log::instance()->ssdp().debug("controller received message:" + Poco::LineEnding::NEWLINE_DEFAULT + pMessage->toString());
-    
+
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
         switch(pMessage->getNotificationSubtype()) {
@@ -3936,7 +3936,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 pTypedDevice->addCtlDeviceCode();
                 pTypedDevice->initControllerEventing();
                 pTypedDevice->initController();
-                
+
                 pDeviceGroup->addDevice(pTypedDevice);
                 if (!pDeviceGroup->getVisible()) {
 //                    showDeviceGroup(pDeviceGroup);
@@ -4165,7 +4165,7 @@ SsdpMessage::SsdpMessage(TRequestMethod requestMethod)
 {
     initMessageMap();
     setRequestMethod(requestMethod);
-    
+
     if (requestMethod == REQUEST_NOTIFY ||
         requestMethod == REQUEST_NOTIFY_ALIVE ||
         requestMethod == REQUEST_NOTIFY_BYEBYE) {
@@ -4173,7 +4173,7 @@ SsdpMessage::SsdpMessage(TRequestMethod requestMethod)
             setServer("Omm/" + OMM_VERSION);
             setCacheControl();
         }
-    
+
     switch (requestMethod) {
     case REQUEST_NOTIFY_ALIVE:
         _requestMethod = REQUEST_NOTIFY;
@@ -4191,29 +4191,29 @@ SsdpMessage::SsdpMessage(const std::string& buf, const Poco::Net::SocketAddress&
 {
     // FIXME: this shouldn't be executed on every SsdpMessage ctor
     initMessageMap();
-    
+
     for (std::map<TRequestMethod,std::string>::iterator i = _messageMap.begin(); i != _messageMap.end(); i++) {
         _messageConstMap[(*i).second] = (*i).first;
     }
-    
+
     // FIXME: what about Poco::Message header for retrieving the request method?
     std::istringstream is(buf);
     // get first line and check request method type
     std::string line;
     getline(is, line);
     Poco::trimInPlace(line);
-    
+
     // TODO: must be case-insensitive map?!
     _requestMethod = _messageConstMap[line];
     _sender = sender;
-    
+
     while(getline(is, line)) {
         std::string::size_type col = line.find(":");
         if (col != std::string::npos) {
             _messageHeader[line.substr(0, col)] = Poco::trim(line.substr(col + 1));
         }
     }
-    
+
 //     if (getNotificationSubtype() == SsdpMessage::SUBTYPE_ALIVE) {
 //             _requestMethod = REQUEST_NOTIFY_ALIVE;
 //     }
@@ -4253,18 +4253,18 @@ SsdpMessage::~SsdpMessage()
 }
 
 
-std::string 
+std::string
 SsdpMessage::toString()
 {
     std::ostringstream os;
-    
+
     os << _messageMap[_requestMethod] << "\r\n";
     for (std::map<std::string,std::string>::iterator i = _messageHeader.begin(); i != _messageHeader.end(); ++i) {
         os << (*i).first << ": " << (*i).second << "\r\n";
     }
 //     _messageHeader.write(os);
     os << "\r\n";
-    
+
     return os.str();
 }
 
@@ -4428,13 +4428,13 @@ SsdpMessage::getHttpExtensionConfirmed()
 
 void
 SsdpMessage::setServer(const std::string& productNameVersion)
-{   
-//     _messageHeader.set("SERVER", 
+{
+//     _messageHeader.set("SERVER",
 //                         Environment::osName() + "/"
 //                         + Environment::osVersion() + ", "
 //                         + "UPnP/" + UPNP_VERSION + ", "
 //                         + productNameVersion);
-    _messageHeader["SERVER"] = 
+    _messageHeader["SERVER"] =
         Poco::Environment::osName() + "/"
         + Poco::Environment::osVersion() + ", "
         + "UPnP/" + UPNP_VERSION + ", "
@@ -4489,7 +4489,7 @@ SsdpMessage::getMaximumWaitTime()
     }
     catch (Poco::NotFoundException) {
         Log::instance()->ssdp().error("missing MX in SSDP header");
-        
+
     }
     catch (Poco::SyntaxException) {
         Log::instance()->ssdp().error("wrong number format of MX in SSDP header");
@@ -4590,9 +4590,16 @@ DeviceGroup::getDeviceCount() const
 Device*
 DeviceGroup::getDevice(int index) const
 {
-    
+
     return &_devices.get(index);
 }
+
+
+//Device*
+//DeviceGroup::getDevice(const std::string& uuid)
+//{
+//    return &_devices.get(uuid);
+//}
 
 
 Controller*
@@ -4685,10 +4692,15 @@ DeviceGroup::getVisible()
 void
 DeviceGroup::selectDevice(Device* pDevice)
 {
-    Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
-    _pSelectedDevice = pDevice;
-    pDevice->selected();
-    selectDevice(pDevice, _devices.position(pDevice->getUuid()));
+    if (pDevice) {
+        Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
+        _pSelectedDevice = pDevice;
+        pDevice->selected();
+        selectDevice(pDevice, _devices.position(pDevice->getUuid()));
+    }
+    else {
+        Omm::Log::instance()->upnp().warning("can not select null device");
+    }
 }
 
 
