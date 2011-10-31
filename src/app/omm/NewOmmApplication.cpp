@@ -35,8 +35,6 @@
 
 class OmmApplication : public Omm::Gui::Application
 {
-    friend class Application;
-
 public:
 
     OmmApplication() :

@@ -33,12 +33,14 @@ namespace Omm {
 namespace Gui {
 
 class Application;
+class QtEventFilter;
+
 
 class ApplicationImpl
 {
 public:
     friend class Application;
-    
+
     ApplicationImpl(Application* pApplication);
     virtual ~ApplicationImpl();
 
@@ -51,9 +53,11 @@ public:
     Application*            _pApplication;
     QMainWindow*            _pMainWindow;
     QApplication*           _pQtApplication;
+    QtEventFilter*          _pEventFilter;
     QString*                _pFullscreenStyleSheet;
     int                     _width;
     int                     _height;
+    bool                    _fullscreen;
 };
 
 

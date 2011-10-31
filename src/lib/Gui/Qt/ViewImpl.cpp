@@ -31,26 +31,6 @@ namespace Omm {
 namespace Gui {
 
 
-class QtEventFilter : public QObject
-{
-public:
-    QtEventFilter(ViewImpl* pViewImpl) : _pViewImpl(pViewImpl)
-    {
-    }
-
-private:
-    virtual bool eventFilter(QObject* object, QEvent* event)
-    {
-        if (event->type() == QEvent::KeyPress) {
-            QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
-            _pViewImpl->keyPressed(pKeyEvent->key());
-        }
-    }
-
-    ViewImpl*      _pViewImpl;
-};
-
-
 ViewImpl::~ViewImpl()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
@@ -65,7 +45,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
 
     _pView = pView;
     _pNativeView = pNative;
-    
+
     if (!pSignalProxy) {
         _pSignalProxy = new SignalProxy(this);
     }
@@ -73,11 +53,11 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
         _pSignalProxy = pSignalProxy;
     }
     _pSignalProxy->init();
-    
+
     _pNativeView->setAutoFillBackground(true);
 
-    _pEventFilter = new QtEventFilter(this);
-    _pNativeView->installEventFilter(_pEventFilter);
+//    _pEventFilter = new QtEventFilter(this);
+//    _pNativeView->installEventFilter(_pEventFilter);
 
     if (pView->getParent()) {
         QWidget* pParentWidget = static_cast<QWidget*>(pView->getParent()->getNativeView());

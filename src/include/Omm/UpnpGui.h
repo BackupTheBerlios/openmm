@@ -52,7 +52,7 @@ class TransportStateNotification : public Poco::Notification
 {
 public:
     TransportStateNotification(const std::string& uuid, const std::string& transportState) : _uuid(uuid), _transportState(transportState) {}
-    
+
     std::string         _uuid;
     std::string         _transportState;
 };
@@ -85,7 +85,7 @@ public:
     virtual void removeDevice(Device* pDevice, int index, bool begin);
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
-    
+
     virtual void showDeviceGroup();
 
     // ListModel interface
@@ -119,12 +119,12 @@ class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
 public:
     MediaRendererDevice() : _transportState("") {}
-    
+
     std::string getTransportState();
-    
+
 private:
     virtual void newTransportState(const std::string& transportState);
-    
+
     std::string _transportState;
 };
 
@@ -135,7 +135,7 @@ public:
     MediaRendererView();
 
     void selectedRenderer();
-    
+
 private:
     virtual void syncViewImpl();
 
@@ -184,7 +184,7 @@ class MediaServerView : public Gui::ListItemView
 class MediaContainerWidget : public Gui::LazyListView, Gui::LazyListModel, Gui::ListController
 {
     friend class MediaServerGroupWidget;
-    
+
 public:
     MediaContainerWidget(View* pParent = 0);
 
@@ -209,7 +209,7 @@ private:
 class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ListItemModel
 {
     friend class MediaContainerWidget;
-    
+
 public:
     MediaObjectModel();
 
@@ -218,7 +218,7 @@ private:
     {
     public:
         MediaObjectLabelModel(MediaObjectModel* pSuperModel) : _pSuperModel(pSuperModel) {}
-        
+
         virtual std::string getLabel();
 
         MediaObjectModel*   _pSuperModel;
@@ -237,7 +237,7 @@ private:
 
 class MediaObjectView : public Gui::ListItemView
 {
-    
+
 };
 
 

@@ -33,16 +33,16 @@ namespace Gui {
 class SignalProxy : public QObject
 {
     Q_OBJECT
-    
+
 public:
     SignalProxy(ViewImpl* pViewImpl);
-    
+
     virtual void init();
-    
+
     void showView();
     void hideView();
     void syncView();
-    
+
 signals:
     void showViewSignal();
     void hideViewSignal();
@@ -50,9 +50,9 @@ signals:
 
 private slots:
     void syncViewSlot();
-    
+
 protected:
-    ViewImpl*   _pViewImpl;    
+    ViewImpl*   _pViewImpl;
 };
 
 
@@ -84,12 +84,31 @@ public:
 
     void keyPressEvent(QKeyEvent* pKeyEvent)
     {
-//        _pViewImpl->keyPressed(pKeyEvent->key());
+        _pViewImpl->keyPressed(pKeyEvent->key());
     }
 
     ViewImpl*   _pViewImpl;
 };
 
+
+class QtEventFilter : public QObject
+{
+public:
+    QtEventFilter(ViewImpl* pViewImpl) : _pViewImpl(pViewImpl)
+    {
+    }
+
+private:
+    virtual bool eventFilter(QObject* object, QEvent* event)
+    {
+        if (event->type() == QEvent::KeyPress) {
+            QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
+            _pViewImpl->keyPressed(pKeyEvent->key());
+        }
+    }
+
+    ViewImpl*      _pViewImpl;
+};
 
 
 }  // namespace Omm

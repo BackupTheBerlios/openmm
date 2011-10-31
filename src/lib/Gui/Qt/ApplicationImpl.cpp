@@ -24,6 +24,7 @@
 #include <QtGui>
 
 #include "ApplicationImpl.h"
+#include "QtViewImpl.h"
 #include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
 
@@ -36,7 +37,8 @@ ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
 _width(800),
 _height(480),
-_pFullscreenStyleSheet(0)
+_pFullscreenStyleSheet(0),
+_fullscreen(false)
 {
     Omm::Gui::Log::instance()->gui().debug("application impl ctor");
 }
@@ -72,6 +74,7 @@ ApplicationImpl::height()
 void
 ApplicationImpl::setFullscreen(bool fullscreen)
 {
+    _fullscreen = fullscreen;
     if (fullscreen) {
         _pFullscreenStyleSheet = new QString(
             "* { \
@@ -119,6 +122,13 @@ ApplicationImpl::run(int argc, char** argv)
     _pMainWindow->resize(width(), height());
     _pApplication->_pMainView->resize(width(), height());
     _pApplication->presentedMainView();
+
+    _pEventFilter = new QtEventFilter(_pApplication->_pMainView->getViewImpl());
+    _pQtApplication->installEventFilter(_pEventFilter);
+    if (_fullscreen && QApplication::focusWidget()) {
+        QApplication::focusWidget()->clearFocus();
+    }
+
     int ret = _pQtApplication->exec();
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     _pApplication->finishedEventLoop();
