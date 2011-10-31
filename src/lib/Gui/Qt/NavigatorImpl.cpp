@@ -105,7 +105,7 @@ QtNavigatorPanel::buttonPushed()
 }
 
 
-NavigatorViewImpl::NavigatorViewImpl(View* pView) 
+NavigatorViewImpl::NavigatorViewImpl(View* pView)
 {
     QWidget* pNativeView = new QWidget;
     initViewImpl(pView, pNativeView);
@@ -113,6 +113,7 @@ NavigatorViewImpl::NavigatorViewImpl(View* pView)
     _pNavigatorPanel = new QtNavigatorPanel(this);
     _pStackedWidget = new QStackedWidget(pNativeView);
     _pNavigatorLayout = new QVBoxLayout(pNativeView);
+    _pNavigatorLayout->setContentsMargins(0, 0, 0, 0);
     _pNavigatorLayout->addWidget(_pNavigatorPanel);
     _pNavigatorLayout->addWidget(_pStackedWidget);
 

@@ -79,7 +79,10 @@ ApplicationImpl::setFullscreen(bool fullscreen)
         _pFullscreenStyleSheet = new QString(
             "* { \
                  font-size: 28pt; \
-                 background-color: #afafaf; \
+                 background-color: black; \
+                 foreground-color: black; \
+                 border-color: black; \
+                 border-width: 0; \
                  color: darkred; \
                  selection-color: white; \
                  selection-background-color: darkblue; \
