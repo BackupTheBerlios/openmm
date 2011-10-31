@@ -62,10 +62,10 @@ View(pParent, false)
 
 
 void
-SliderView::syncView(Model* pModel)
+SliderView::syncViewImpl()
 {
 //    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
-    SliderModel* pSliderModel = static_cast<SliderModel*>(pModel);
+    SliderModel* pSliderModel = static_cast<SliderModel*>(_pModel);
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
     pImpl->setValue(pSliderModel->getValue());
 }

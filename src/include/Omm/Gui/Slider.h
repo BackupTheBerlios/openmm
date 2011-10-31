@@ -35,7 +35,7 @@ class SliderController : public Controller
 {
     friend class SliderViewImpl;
     friend class SliderSignalProxy;
-    
+
 protected:
     virtual void valueChanged(int value) {}
 };
@@ -46,7 +46,7 @@ class SliderModel : public Model
 public:
     virtual const int getValue() const;
     void setValue(int value);
-    
+
 private:
     int _value;
 };
@@ -55,12 +55,12 @@ private:
 class SliderView : public View
 {
     friend class SliderModel;
-    
+
 public:
     SliderView(View* pParent = 0);
-    
-private:
-    virtual void syncView(Model* pModel);
+
+//private:
+    virtual void syncViewImpl();
 };
 
 

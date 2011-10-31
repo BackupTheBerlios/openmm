@@ -40,7 +40,7 @@ class ListItemController;
 class ListController : public Controller
 {
     friend class ListView;
-    
+
 protected:
     virtual void selectedItem(int row) {}
 };
@@ -52,7 +52,7 @@ class ListView : public ScrollAreaView
     friend class ListModel;
     friend class ListItemController;
     friend class ListScrollAreaController;
-    
+
 public:
     ListView(View* pParent = 0);
 
@@ -70,7 +70,7 @@ protected:
     int getOffset();
     void updateScrollWidgetSize();
     void scrollDelta(int rowDelta);
-    virtual void scrollToRow(int rowOffset);
+    virtual void scrollToRowOffset(int rowOffset);
     virtual void resize(int width, int height);
     virtual void scale(float factor);
 

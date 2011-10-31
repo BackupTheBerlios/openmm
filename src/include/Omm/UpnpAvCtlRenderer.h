@@ -55,6 +55,7 @@ public:
     void pausePressed();
     void positionMoved(int position);
     void volumeChanged(int value);
+    ui2 getVolume();
 
     virtual void newPosition(int duration, int position) {}
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album) {}

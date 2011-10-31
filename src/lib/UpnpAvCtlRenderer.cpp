@@ -145,6 +145,20 @@ CtlMediaRenderer::volumeChanged(int value)
 }
 
 
+ui2
+CtlMediaRenderer::getVolume()
+{
+    ui2 value;
+    try {
+        _pCtlMediaRendererCode->RenderingControl()->GetVolume(0, "Master", value);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+    return value;
+}
+
+
 std::string
 MediaRendererGroupDelegate::getDeviceType()
 {

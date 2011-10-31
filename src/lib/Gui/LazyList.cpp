@@ -51,7 +51,7 @@ LazyListView::setModel(LazyListModel* pModel)
 
 
 void
-LazyListView::scrollToRow(int rowOffset)
+LazyListView::scrollToRowOffset(int rowOffset)
 {
     Log::instance()->gui().debug("lazy list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", visible views: " + Poco::NumberFormatter::format(_visibleViews.size()));
 
@@ -61,7 +61,7 @@ LazyListView::scrollToRow(int rowOffset)
     if (rowOffset + _visibleViews.size() + rowDeltaAbsolute >= pModel->lastFetched()) {
         pModel->fetch(_visibleViews.size() + rowDeltaAbsolute);
     }
-    ListView::scrollToRow(rowOffset);
+    ListView::scrollToRowOffset(rowOffset);
 }
 
 

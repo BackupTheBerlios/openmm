@@ -372,6 +372,12 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->volumeChanged(value);
     }
+
+    virtual const int getValue() const
+    {
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(static_cast<MediaRendererView*>(_pParent)->getModel());
+        return pRenderer->getVolume();
+    }
 };
 
 
@@ -434,6 +440,7 @@ MediaRendererView::syncViewImpl()
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();
     _pStopButton->syncViewImpl();
+    _pVolSlider->syncViewImpl();
 }
 
 

@@ -73,7 +73,7 @@ ListScrollAreaController::scrolled(int xOffset, int yOffset)
 {
     Log::instance()->gui().debug("list scroll area scrolled xOffset: " + Poco::NumberFormatter::format(xOffset) + ", yOffset: " + Poco::NumberFormatter::format(yOffset));
     Log::instance()->gui().debug("list scroll area scrolled row offset: " + Poco::NumberFormatter::format(yOffset / _pListView->getItemViewHeight()));
-    _pListView->scrollToRow(yOffset / _pListView->getItemViewHeight());
+    _pListView->scrollToRowOffset(yOffset / _pListView->getItemViewHeight());
 }
 
 
@@ -221,7 +221,7 @@ ListView::scrollDelta(int rowDelta)
 
 
 void
-ListView::scrollToRow(int rowOffset)
+ListView::scrollToRowOffset(int rowOffset)
 {
     Log::instance()->gui().debug("list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset));
 
@@ -418,10 +418,12 @@ void
 ListView::highlightItem(int row)
 {
     if (row < _rowOffset) {
-        scrollToRow(row);
+        return;
+        scrollToRowOffset(row);
     }
     if (row > lastVisibleRow()) {
-        scrollToRow(row);
+        return;
+//        scrollToRowOffset(row - countVisibleViews());
     }
 
     if (_selectedRow >= 0 && itemIsVisible(_selectedRow)) {
