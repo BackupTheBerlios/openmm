@@ -46,6 +46,8 @@ namespace Omm {
 
 class MediaObjectModel;
 class GuiVisual;
+class MediaServerGroupWidget;
+class MediaRendererGroupWidget;
 
 
 class TransportStateNotification : public Poco::Notification
@@ -66,10 +68,25 @@ public:
     GuiVisual* getLocalRendererVisual();
     void setLocalRendererUuid(const std::string& uuid);
     void newTransportState(TransportStateNotification* pNotification);
+    void showMainMenu();
 
 private:
-    GuiVisual*      _pVisual;
-    std::string     _localRendererUuid;
+    MediaServerGroupWidget*     _pMediaServerGroupWidget;
+    MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
+    GuiVisual*                  _pVisual;
+    std::string                 _localRendererUuid;
+};
+
+
+class KeyController : public Gui::Controller
+{
+public:
+    KeyController(ControllerWidget* pControllerWidget) : _pControllerWidget(pControllerWidget) {}
+
+private:
+    virtual void keyPressed(KeyCode key);
+
+    ControllerWidget*   _pControllerWidget;
 };
 
 

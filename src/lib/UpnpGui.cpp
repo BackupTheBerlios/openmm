@@ -34,12 +34,15 @@ namespace Omm {
 ControllerWidget::ControllerWidget()
 {
     Gui::Log::instance()->gui().debug("controller widget register device groups ...");
-    registerDeviceGroup(new MediaServerGroupWidget);
-    registerDeviceGroup(new MediaRendererGroupWidget);
+    _pMediaServerGroupWidget = new MediaServerGroupWidget;
+    registerDeviceGroup(_pMediaServerGroupWidget);
+    _pMediaRendererGroupWidget = new MediaRendererGroupWidget;
+    registerDeviceGroup(_pMediaRendererGroupWidget);
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
+    attachController(new KeyController(this));
 }
 
 
@@ -64,6 +67,35 @@ ControllerWidget::newTransportState(TransportStateNotification* pNotification)
     Gui::Log::instance()->gui().debug("local renderer uuid: " + _localRendererUuid);
     if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING && pNotification->_uuid == _localRendererUuid) {
         setCurrentView(_pVisual);
+    }
+}
+
+
+void
+ControllerWidget::showMainMenu()
+{
+    setCurrentView(_pMediaServerGroupWidget);
+}
+
+
+void
+KeyController::keyPressed(KeyCode key)
+{
+    Gui::Log::instance()->gui().debug("key controller, key pressed: " + Poco::NumberFormatter::format(key));
+    switch (key) {
+        case Gui::Controller::KeyMenu:
+            _pControllerWidget->showMainMenu();
+            break;
+        case Gui::Controller::KeyLeft:
+            if (_pControllerWidget->getCurrentTab()) {
+                _pControllerWidget->setCurrentTab(_pControllerWidget->getCurrentTab() - 1);
+            }
+            break;
+        case Gui::Controller::KeyRight:
+            if (_pControllerWidget->getCurrentTab() < _pControllerWidget->getTabCount() - 1) {
+                _pControllerWidget->setCurrentTab(_pControllerWidget->getCurrentTab() + 1);
+            }
+            break;
     }
 }
 

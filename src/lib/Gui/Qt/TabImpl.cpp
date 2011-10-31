@@ -63,6 +63,13 @@ TabViewImpl::addView(View* pView, const std::string& tabName)
 }
 
 
+int
+TabViewImpl::getCurrentTab()
+{
+    static_cast<QtTabWidget*>(_pNativeView)->currentIndex();
+}
+
+
 void
 TabViewImpl::setTabBarHidden(bool hidden)
 {
@@ -74,6 +81,13 @@ void
 TabViewImpl::setCurrentView(View* pView)
 {
     static_cast<QtTabWidget*>(_pNativeView)->setCurrentWidget(static_cast<QWidget*>(pView->getNativeView()));
+}
+
+
+void
+TabViewImpl::setCurrentTab(int index)
+{
+    static_cast<QtTabWidget*>(_pNativeView)->setCurrentIndex(index);
 }
 
 

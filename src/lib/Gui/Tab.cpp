@@ -31,7 +31,8 @@ namespace Gui {
 
 
 TabView::TabView(View* pParent) :
-View(pParent, false)
+View(pParent, false),
+_tabCount(0)
 {
     Omm::Gui::Log::instance()->gui().debug("tab view ctor.");
     _pImpl = new TabViewImpl(this);
@@ -47,6 +48,21 @@ void
 TabView::addView(View* pView, const std::string& tabName)
 {
     static_cast<TabViewImpl*>(_pImpl)->addView(pView, tabName);
+    _tabCount++;
+}
+
+
+int
+TabView::getTabCount()
+{
+    return _tabCount;
+}
+
+
+int
+TabView::getCurrentTab()
+{
+    return static_cast<TabViewImpl*>(_pImpl)->getCurrentTab();
 }
 
 
@@ -61,6 +77,13 @@ void
 TabView::setCurrentView(View* pView)
 {
     static_cast<TabViewImpl*>(_pImpl)->setCurrentView(pView);
+}
+
+
+void
+TabView::setCurrentTab(int index)
+{
+    static_cast<TabViewImpl*>(_pImpl)->setCurrentTab(index);
 }
 
 
