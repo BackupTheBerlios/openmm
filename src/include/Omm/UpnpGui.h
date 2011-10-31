@@ -70,6 +70,7 @@ public:
     void newTransportState(TransportStateNotification* pNotification);
     void showMainMenu();
     void navigateListWithKey(Gui::Controller::KeyCode key);
+    void back();
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;

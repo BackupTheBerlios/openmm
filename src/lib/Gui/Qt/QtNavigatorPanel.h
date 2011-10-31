@@ -30,14 +30,14 @@
 namespace Omm {
 namespace Gui {
 
-    
+
 class QtNavigatorPanelButton : public QPushButton
 {
 public:
     QtNavigatorPanelButton(View* pView);
 
 //    void paintEvent(QPaintEvent* event);
-    
+
     View*    _pView;
 };
 
@@ -47,12 +47,13 @@ class QtNavigatorPanel : public QWidget
     Q_OBJECT
 
     friend class NavigatorViewImpl;
-    
+
 public:
     QtNavigatorPanel(NavigatorViewImpl* pNavigatorView = 0);
 
     void push(View* pView, const std::string name);
     void pop(View* pView);
+    void pop();
 
 private slots:
     void buttonPushed();

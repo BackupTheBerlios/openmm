@@ -98,6 +98,19 @@ QtNavigatorPanel::pop(View* pView)
 
 
 void
+QtNavigatorPanel::pop()
+{
+    QtNavigatorPanelButton* pButton = _buttonStack.top();
+    _pNavigatorView->popView(pButton->_pView);
+    disconnect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
+    _pButtonLayout->removeWidget(pButton);
+    delete pButton;
+    _buttonStack.pop();
+    _pNavigatorView->exposeView(_buttonStack.top()->_pView);
+}
+
+
+void
 QtNavigatorPanel::buttonPushed()
 {
     QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
@@ -138,6 +151,13 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
     pWidget->show();
 //    pWidget->resize(_pStackedWidget->size());
 //    pView->resize(700, 400);
+}
+
+
+void
+NavigatorViewImpl::popView()
+{
+    _pNavigatorPanel->pop();
 }
 
 

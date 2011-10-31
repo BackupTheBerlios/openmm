@@ -22,6 +22,7 @@
 #ifndef Navigator_INCLUDED
 #define Navigator_INCLUDED
 
+#include <stack>
 #include "View.h"
 
 namespace Omm {
@@ -35,10 +36,11 @@ public:
     virtual ~NavigatorView();
 
     void push(View* pView, const std::string& name = "");
+    void pop();
     View* getVisibleView();
 
 private:
-    View*       _pVisibleView;
+    std::stack<View*>       _pViewStack;
 };
 
 

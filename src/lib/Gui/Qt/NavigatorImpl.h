@@ -22,7 +22,7 @@
 #ifndef NavigatorImpl_INCLUDED
 #define NavigatorImpl_INCLUDED
 
-#include <stack>
+//#include <stack>
 #include "ViewImpl.h"
 
 
@@ -38,12 +38,13 @@ class QtNavigatorPanel;
 class NavigatorViewImpl : public ViewImpl
 {
     friend class QtNavigatorPanel;
-    
+
 public:
     NavigatorViewImpl(View* pView);
     virtual ~NavigatorViewImpl();
-    
+
     void pushView(View* pView, const std::string name);
+    void popView();
 
 private:
     void popView(View* pView);
@@ -52,7 +53,7 @@ private:
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;
     QVBoxLayout*                _pNavigatorLayout;
-    std::stack<View*>           _views;
+//    std::stack<View*>           _views;
 };
 
 

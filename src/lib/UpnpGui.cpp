@@ -88,6 +88,13 @@ ControllerWidget::navigateListWithKey(Gui::Controller::KeyCode key)
 
 
 void
+ControllerWidget::back()
+{
+    _pMediaServerGroupWidget->pop();
+}
+
+
+void
 KeyController::keyPressed(KeyCode key)
 {
     Gui::Log::instance()->gui().debug("key controller, key pressed: " + Poco::NumberFormatter::format(key));
@@ -109,6 +116,9 @@ KeyController::keyPressed(KeyCode key)
         case Gui::Controller::KeyDown:
         case Gui::Controller::KeyReturn:
             _pControllerWidget->navigateListWithKey(key);
+            break;
+        case Gui::Controller::KeyBack:
+            _pControllerWidget->back();
             break;
     }
 }
