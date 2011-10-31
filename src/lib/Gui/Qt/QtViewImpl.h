@@ -82,10 +82,10 @@ public:
 //        W::mousePressEvent(pMouseEvent);
     }
 
-    void keyPressEvent(QKeyEvent* pKeyEvent)
-    {
-        _pViewImpl->keyPressed(pKeyEvent->key());
-    }
+//    void keyPressEvent(QKeyEvent* pKeyEvent)
+//    {
+//        _pViewImpl->keyPressed(pKeyEvent->key());
+//    }
 
     ViewImpl*   _pViewImpl;
 };
@@ -104,6 +104,7 @@ private:
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
             _pViewImpl->keyPressed(pKeyEvent->key());
+            return true;
         }
     }
 

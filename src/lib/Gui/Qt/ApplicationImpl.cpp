@@ -128,9 +128,9 @@ ApplicationImpl::run(int argc, char** argv)
 
     _pEventFilter = new QtEventFilter(_pApplication->_pMainView->getViewImpl());
     _pQtApplication->installEventFilter(_pEventFilter);
-    if (_fullscreen && QApplication::focusWidget()) {
-        QApplication::focusWidget()->clearFocus();
-    }
+//    if (_fullscreen && QApplication::focusWidget()) {
+//        QApplication::focusWidget()->clearFocus();
+//    }
 
     int ret = _pQtApplication->exec();
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
