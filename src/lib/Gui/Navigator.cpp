@@ -31,7 +31,8 @@ namespace Gui {
 
 
 NavigatorView::NavigatorView(View* pParent) :
-View(pParent, false)
+View(pParent, false),
+_pVisibleView(0)
 {
     Omm::Gui::Log::instance()->gui().debug("navigator view ctor.");
     _pImpl = new NavigatorViewImpl(this);
@@ -48,9 +49,17 @@ NavigatorView::push(View* pView, const std::string& name)
 {
     Log::instance()->gui().debug("navigator push: " + name + " ...");
     static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, name);
+    _pVisibleView = pView;
 //    pView->resize(width(), height());
 //    pView->show();
     Log::instance()->gui().debug("navigator push: " + name + " finished.");
+}
+
+
+View*
+NavigatorView::getVisibleView()
+{
+    return _pVisibleView;
 }
 
 

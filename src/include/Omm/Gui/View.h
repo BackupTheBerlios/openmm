@@ -116,6 +116,8 @@ public:
     void syncView();
     virtual void syncViewImpl() {}
 
+    void triggerKeyEvent(Controller::KeyCode key);
+
 protected:
     View(View* pParent, bool createPlainView);
 

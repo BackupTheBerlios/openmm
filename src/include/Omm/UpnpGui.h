@@ -69,6 +69,7 @@ public:
     void setLocalRendererUuid(const std::string& uuid);
     void newTransportState(TransportStateNotification* pNotification);
     void showMainMenu();
+    void navigateListWithKey(Gui::Controller::KeyCode key);
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;

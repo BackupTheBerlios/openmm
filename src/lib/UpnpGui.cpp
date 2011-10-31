@@ -79,6 +79,15 @@ ControllerWidget::showMainMenu()
 
 
 void
+ControllerWidget::navigateListWithKey(Gui::Controller::KeyCode key)
+{
+    if (_pMediaServerGroupWidget->getVisibleView()) {
+        _pMediaServerGroupWidget->getVisibleView()->triggerKeyEvent(key);
+    }
+}
+
+
+void
 KeyController::keyPressed(KeyCode key)
 {
     Gui::Log::instance()->gui().debug("key controller, key pressed: " + Poco::NumberFormatter::format(key));
@@ -95,6 +104,11 @@ KeyController::keyPressed(KeyCode key)
             if (_pControllerWidget->getCurrentTab() < _pControllerWidget->getTabCount() - 1) {
                 _pControllerWidget->setCurrentTab(_pControllerWidget->getCurrentTab() + 1);
             }
+            break;
+        case Gui::Controller::KeyUp:
+        case Gui::Controller::KeyDown:
+        case Gui::Controller::KeyReturn:
+            _pControllerWidget->navigateListWithKey(key);
             break;
     }
 }

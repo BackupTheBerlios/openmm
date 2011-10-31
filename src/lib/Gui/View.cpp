@@ -412,5 +412,12 @@ View::syncView()
 }
 
 
+void
+View::triggerKeyEvent(Controller::KeyCode key)
+{
+    NOTIFY_CONTROLLER(Controller, keyPressed, key);
+}
+
+
 } // namespace Gui
 } // namespace Omm

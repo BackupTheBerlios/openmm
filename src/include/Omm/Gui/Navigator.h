@@ -35,6 +35,10 @@ public:
     virtual ~NavigatorView();
 
     void push(View* pView, const std::string& name = "");
+    View* getVisibleView();
+
+private:
+    View*       _pVisibleView;
 };
 
 
