@@ -40,7 +40,7 @@ class ViewImpl
     friend class QtEventFilter;
 
     template <class W> friend class QtViewImpl;
-    
+
 public:
     virtual ~ViewImpl();
 
@@ -49,8 +49,8 @@ public:
     uint32_t getNativeWindowId();
     void setNativeView(QWidget* pView);
     virtual void addSubview(View* pView);
-    virtual void showView();
-    virtual void hideView();
+    virtual void showView(bool async);
+    virtual void hideView(bool async);
     virtual int widthView();
     virtual int heightView();
     virtual void resizeView(int width, int height);
@@ -73,7 +73,7 @@ private:
     void resized(int width, int height);
     void selected();
     void keyPressed(int key);
-    
+
     QtEventFilter*              _pEventFilter;
 };
 

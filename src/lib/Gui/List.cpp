@@ -33,7 +33,7 @@ namespace Gui {
 class ListItemController : public Controller
 {
     friend class ListView;
-    
+
 public:
     void setRow(int row) { _row = row; }
 
@@ -179,7 +179,7 @@ void
 ListView::scrollDelta(int rowDelta)
 {
     Log::instance()->gui().debug("list view scroll delta: " + Poco::NumberFormatter::format(rowDelta) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
-    
+
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     Log::instance()->gui().debug("total item count: " + Poco::NumberFormatter::format(pModel->totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
     if (rowDelta > 0) {
@@ -188,11 +188,13 @@ ListView::scrollDelta(int rowDelta)
         }
         // detach model from first visible view
         View* pView = _visibleViews.front();
+        pView->hide(false);
         pModel->getItemModel(_rowOffset)->detachView(pView);
         // move first view to the end
         moveItemView(lastVisibleRow(), pView);
         // attach model
         pView->setModel(pModel->getItemModel(lastVisibleRow()));
+        pView->show(false);
         _itemControllers[pView]->setRow(lastVisibleRow());
         // move view to end of visible rows
         _visibleViews.erase(_visibleViews.begin());
@@ -202,11 +204,13 @@ ListView::scrollDelta(int rowDelta)
     else if (rowDelta < 0) {
         // detach model from last visible view
         View* pView = _visibleViews.back();
+        pView->hide(false);
         pModel->getItemModel(lastVisibleRow() - 1)->detachView(pView);
         // move last view to the beginning
         moveItemView(_rowOffset - 1, pView);
         // attach model
         pView->setModel(pModel->getItemModel(_rowOffset - 1));
+        pView->show(false);
         _itemControllers[pView]->setRow(_rowOffset - 1);
         // move view to beginning of visible rows
         _visibleViews.erase(_visibleViews.end() - 1);
@@ -257,7 +261,7 @@ ListView::resize(int width, int height)
     if (pModel->totalItemCount() < viewPortHeightInRows() && _visibleViews.size() != 0) {
         return;
     }
-    
+
     int rowDelta = std::min(viewPortHeightInRows(), pModel->totalItemCount()) - _visibleViews.size();
     if (rowDelta >= 0) {
         for (int i = 0; i < rowDelta; i++) {
@@ -287,7 +291,7 @@ ListView::extendViewPool()
     int n = viewPortHeightInRows() - _viewPool.size();
     if (n <= 0) {
         return;
-    }    
+    }
     Log::instance()->gui().debug("list view \"" + getName() + "\" extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
@@ -328,7 +332,7 @@ ListView::getFreeView()
 void
 ListView::putFreeView(View* pView)
 {
-    _freeViews.push(pView);    
+    _freeViews.push(pView);
 }
 
 
@@ -478,7 +482,7 @@ ListView::syncViewImpl()
         }
         else {
             Log::instance()->gui().error("list view failed to attach view to item, view pool of \"" + getName() + "\" is empty (ignoring)");
-        }        
+        }
     }
 }
 

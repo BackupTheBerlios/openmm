@@ -54,7 +54,7 @@ class View
     friend class Model;
     friend class Layout;
 //    friend class HorizontalLayout;
-    
+
 public:
     typedef enum {Current, Min, Pref, Max} SizeConstraint;
     typedef enum {AlignLeft, AlignCenter, AlignRight} Alignment;
@@ -67,9 +67,9 @@ public:
     View* getParent();
     void addSubview(View* pView);
 
-    void show();
-    void hide();
-    
+    void show(bool async = true);
+    void hide(bool async = true);
+
     int width(SizeConstraint size = Current);
     int height(SizeConstraint size = Current);
     void setSizeConstraint(int width, int height, SizeConstraint size = Current);
@@ -162,7 +162,7 @@ public:
         C::attachModel(this);
         V::setModel(this);
     }
-    
+
     virtual ~Widget() {}
 };
 

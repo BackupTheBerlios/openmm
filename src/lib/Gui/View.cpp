@@ -123,19 +123,19 @@ View::addSubview(View* pView)
 
 
 void
-View::show()
+View::show(bool async)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view show ... " + getName());
-    _pImpl->showView();
+    _pImpl->showView(async);
 //    Omm::Gui::Log::instance()->gui().debug("view show finished.");
 }
 
 
 void
-View::hide()
+View::hide(bool async)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view hide.");
-    _pImpl->hideView();
+    _pImpl->hideView(async);
 }
 
 
@@ -400,7 +400,7 @@ View::updateLayout()
 {
     if (_pLayout) {
         _pLayout->layoutView();
-    }    
+    }
 }
 
 

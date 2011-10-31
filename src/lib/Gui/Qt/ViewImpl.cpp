@@ -118,19 +118,29 @@ ViewImpl::addSubview(View* pView)
 
 
 void
-ViewImpl::showView()
+ViewImpl::showView(bool async)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    _pSignalProxy->showView();
+    if (async) {
+        _pSignalProxy->showView();
+    }
+    else {
+        _pNativeView->show();
+    }
 //    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
 
 void
-ViewImpl::hideView()
+ViewImpl::hideView(bool async)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    _pSignalProxy->hideView();
+    if (async) {
+        _pSignalProxy->hideView();
+    }
+    else {
+        _pNativeView->hide();
+    }
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 
