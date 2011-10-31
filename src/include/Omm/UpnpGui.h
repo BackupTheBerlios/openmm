@@ -22,6 +22,8 @@
 #ifndef UpnpGui_INCLUDED
 #define UpnpGui_INCLUDED
 
+#include <Poco/Notification.h>
+
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvCtlServer.h"
@@ -45,15 +47,29 @@ namespace Omm {
 class MediaObjectModel;
 class GuiVisual;
 
+
+class TransportStateNotification : public Poco::Notification
+{
+public:
+    TransportStateNotification(const std::string& uuid, const std::string& transportState) : _uuid(uuid), _transportState(transportState) {}
+    
+    std::string         _uuid;
+    std::string         _transportState;
+};
+
+
 class ControllerWidget : public Controller, public Gui::Tab
 {
 public:
     ControllerWidget();
 
     GuiVisual* getLocalRendererVisual();
+    void setLocalRendererUuid(const std::string& uuid);
+    void newTransportState(TransportStateNotification* pNotification);
 
 private:
     GuiVisual*      _pVisual;
+    std::string     _localRendererUuid;
 };
 
 
@@ -239,6 +255,7 @@ public:
     virtual void renderImage(const std::string& imageData);
     virtual void blank();
 };
+
 
 }  // namespace Omm
 

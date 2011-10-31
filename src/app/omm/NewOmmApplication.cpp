@@ -36,14 +36,14 @@
 class OmmApplication : public Omm::Gui::Application
 {
     friend class Application;
-    
+
 public:
 
     OmmApplication() :
     _fullscreen(false)
     {
     }
-    
+
     virtual Omm::Gui::View* createMainView()
     {
         _pController = new Omm::ControllerWidget;
@@ -59,6 +59,7 @@ public:
         _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
         _localDeviceServer.init();
         _localDeviceServer.start();
+        _pController->setLocalRendererUuid(_mediaRenderer.getUuid());
     }
 
     virtual void finishedEventLoop()

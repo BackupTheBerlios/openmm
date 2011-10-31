@@ -19,6 +19,9 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+
 #include "UpnpGui.h"
 #include "Gui/GuiLogger.h"
 #include "UpnpAv.h"
@@ -35,6 +38,8 @@ ControllerWidget::ControllerWidget()
     registerDeviceGroup(new MediaRendererGroupWidget);
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
+
+    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
 }
 
 
@@ -42,6 +47,24 @@ GuiVisual*
 ControllerWidget::getLocalRendererVisual()
 {
     return _pVisual;
+}
+
+
+void
+ControllerWidget::setLocalRendererUuid(const std::string& uuid)
+{
+    _localRendererUuid = uuid;
+}
+
+
+void
+ControllerWidget::newTransportState(TransportStateNotification* pNotification)
+{
+    Gui::Log::instance()->gui().debug("controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
+    Gui::Log::instance()->gui().debug("local renderer uuid: " + _localRendererUuid);
+    if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING && pNotification->_uuid == _localRendererUuid) {
+        setCurrentView(_pVisual);
+    }
 }
 
 
@@ -57,7 +80,7 @@ void
 DeviceGroupWidget::addDevice(Device* pDevice, int index, bool begin)
 {
     if (begin) {
-        
+
     }
     else {
         syncViews();
@@ -69,7 +92,7 @@ void
 DeviceGroupWidget::removeDevice(Device* pDevice, int index, bool begin)
 {
     if (begin) {
-        
+
     }
     else {
         syncViews();
@@ -146,6 +169,7 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
     _transportState = transportState;
     syncViews();
+    Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
 }
 
 
@@ -172,7 +196,7 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
 //        pRenderer->playPressed();
     }
-    
+
     Gui::Image _image;
 };
 
@@ -205,7 +229,7 @@ public:
             return Button::getEnabled();
         }
     }
-    
+
     Gui::Image _image;
 };
 
@@ -225,7 +249,7 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->stopPressed();
     }
-    
+
     virtual bool getEnabled()
     {
         Gui::Log::instance()->gui().debug("media renderer stop button get enabled");
@@ -238,7 +262,7 @@ public:
             return Button::getEnabled();
         }
     }
-    
+
     Gui::Image _image;
 };
 
@@ -307,7 +331,7 @@ class RendererName : public Gui::Label
 {
 public:
     RendererName(Gui::View* pParent = 0) : Gui::Label(pParent) {}
-    
+
     virtual std::string getLabel()
     {
 //        Gui::Log::instance()->gui().debug("media renderer name get label");
@@ -319,7 +343,7 @@ public:
 MediaRendererView::MediaRendererView()
 {
     setName("media renderer view");
-    
+
     _pBackButton = new BackButton(this);
     _pPlayButton = new PlayButton(this);
     _pStopButton = new StopButton(this);
@@ -327,7 +351,7 @@ MediaRendererView::MediaRendererView()
 
     _pVolSlider = new VolSlider(this);
 //    _pSeekSlider = new SeekSlider(this);
-    
+
     _pRendererName = new RendererName(this);
     _pRendererName->setAlignment(Gui::View::AlignCenter);
 
@@ -359,7 +383,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
     View::setName("media server group view");
     _deviceGroupListView.setName("media server group view");
     push(&_deviceGroupListView, "Media");
-    
+
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }

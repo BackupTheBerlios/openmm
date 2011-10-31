@@ -57,5 +57,12 @@ TabView::setTabBarHidden(bool hidden)
 }
 
 
+void
+TabView::setCurrentView(View* pView)
+{
+    static_cast<TabViewImpl*>(_pImpl)->setCurrentView(pView);
+}
+
+
 } // namespace Gui
 } // namespace Omm

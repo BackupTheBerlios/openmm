@@ -31,13 +31,14 @@ namespace Gui {
 class TabView : public View
 {
     friend class TabViewImpl;
-    
+
 public:
     TabView(View* pParent = 0);
     virtual ~TabView();
 
     void addView(View* pView, const std::string& tabName = "");
     void setTabBarHidden(bool hidden = true);
+    void setCurrentView(View* pView);
 };
 
 

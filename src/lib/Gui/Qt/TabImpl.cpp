@@ -28,24 +28,24 @@
 namespace Omm {
 namespace Gui {
 
-    
+
 class QtTabWidget : public QTabWidget
 {
     friend class TabViewImpl;
-    
+
     void setHidden(bool hidden)
     {
         tabBar()->setHidden(hidden);
     }
 };
 
-    
-TabViewImpl::TabViewImpl(View* pView) 
+
+TabViewImpl::TabViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
 
     QtTabWidget* pNativeView = new QtTabWidget;
-    
+
     initViewImpl(pView, pNativeView);
 }
 
@@ -67,6 +67,13 @@ void
 TabViewImpl::setTabBarHidden(bool hidden)
 {
     static_cast<QtTabWidget*>(_pNativeView)->setHidden(hidden);
+}
+
+
+void
+TabViewImpl::setCurrentView(View* pView)
+{
+    static_cast<QtTabWidget*>(_pNativeView)->setCurrentWidget(static_cast<QWidget*>(pView->getNativeView()));
 }
 
 
