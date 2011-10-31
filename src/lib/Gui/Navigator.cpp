@@ -58,8 +58,9 @@ NavigatorView::push(View* pView, const std::string& name)
 void
 NavigatorView::pop()
 {
-    if (!_pViewStack.empty()) {
+    if (_pViewStack.size() > 1) {
         static_cast<NavigatorViewImpl*>(_pImpl)->popView();
+        _pViewStack.pop();
     }
 }
 
