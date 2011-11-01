@@ -225,6 +225,22 @@ MediaRendererGroupWidget::getItemModel(int row)
 
 
 void
+MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album)
+{
+    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album);
+}
+
+
+void
+MediaRendererDevice::newVolume(const int volume)
+{
+    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new volume: " + Poco::NumberFormatter::format(volume));
+    _volume = volume;
+    syncViews();
+}
+
+
+void
 MediaRendererDevice::newTransportState(const std::string& transportState)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
@@ -238,6 +254,18 @@ std::string
 MediaRendererDevice::getTransportState()
 {
     return _transportState;
+}
+
+
+ui2
+MediaRendererDevice::getVolume()
+{
+    if (_volume == -1) {
+        return Av::CtlMediaRenderer::getVolume();
+    }
+    else {
+        return _volume;
+    }
 }
 
 

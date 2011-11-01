@@ -141,14 +141,19 @@ public:
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
 public:
-    MediaRendererDevice() : _transportState("") {}
+    MediaRendererDevice() : _transportState(""), _volume(-1) {}
 
     std::string getTransportState();
+    ui2 getVolume();
 
 private:
+    virtual void newPosition(int duration, int position) {}
+    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
+    virtual void newVolume(const int volume);
     virtual void newTransportState(const std::string& transportState);
 
     std::string _transportState;
+    int         _volume;
 };
 
 

@@ -22,6 +22,7 @@
 #include "UpnpAv.h"
 #include "UpnpAvPrivate.h"
 #include "UpnpAvCtlImpl.h"
+#include "UpnpAvCtlObject2.h"
 
 namespace Omm {
 namespace Av {
@@ -151,6 +152,14 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 Log::instance()->upnpav().debug("controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newTransportState(val);
+                }
+            }
+            else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_META_DATA) {
+                CtlMediaObject2 object;
+                MediaObjectReader reader(&object);
+                reader.read(val);
+                if (_pMediaRenderer) {
+                    _pMediaRenderer->newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST)->getValue(), object.getProperty(AvProperty::ALBUM)->getValue());
                 }
             }
         }
