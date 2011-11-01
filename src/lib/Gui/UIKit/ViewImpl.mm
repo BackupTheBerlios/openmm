@@ -234,19 +234,29 @@ ViewImpl::addSubview(View* pView)
 
 
 void
-ViewImpl::showView()
+ViewImpl::showView(bool async)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(showView) withObject:nil waitUntilDone:YES];
+    if (async) {
+        [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(showView) withObject:nil waitUntilDone:YES];
+    }
+    else {
+        static_cast<UIView*>(getNativeView()).hidden = NO;
+    }
 //    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
 }
 
 
 void
-ViewImpl::hideView()
+ViewImpl::hideView(bool async)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
-    [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(hideView) withObject:nil waitUntilDone:YES];
+    if (async) {
+        [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(hideView) withObject:nil waitUntilDone:YES];
+    }
+    else {
+        static_cast<UIView*>(getNativeView()).hidden = YES;
+    }
 //    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
 }
 

@@ -32,7 +32,7 @@ namespace Gui {
 class ViewImpl
 {
     friend class View;
-    
+
 public:
     virtual ~ViewImpl();
 
@@ -42,8 +42,8 @@ public:
     void* getNativeViewController();
     void setNativeView(void* pView);
     virtual void addSubview(View* pView);
-    virtual void showView();
-    virtual void hideView();
+    virtual void showView(bool async);
+    virtual void hideView(bool async);
     virtual int widthView();
     virtual int heightView();
     virtual void resizeView(int width, int height);

@@ -35,8 +35,9 @@ class NavigatorViewImpl : public ViewImpl
 public:
     NavigatorViewImpl(View* pView);
     virtual ~NavigatorViewImpl();
-    
+
     void pushView(View* pView, const std::string name);
+    void popView();
 };
 
 

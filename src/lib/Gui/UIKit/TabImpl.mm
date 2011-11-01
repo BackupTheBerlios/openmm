@@ -57,10 +57,32 @@ TabViewImpl::addView(View* pView, const std::string& tabName)
 }
 
 
+int
+TabViewImpl::getCurrentTab()
+{
+    return static_cast<UITabBarController*>(getNativeViewController()).selectedIndex;
+}
+
+
 void
 TabViewImpl::setTabBarHidden(bool hidden)
 {
-    // FIXME: implement setTabBarHidden() with UIKit.
+    static_cast<UITabBarController*>(getNativeViewController()).tabBar.hidden = hidden;
+}
+
+
+void
+TabViewImpl::setCurrentView(View* pView)
+{
+    UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
+    static_cast<UITabBarController*>(getNativeViewController()).selectedViewController = pViewController;
+}
+
+
+void
+TabViewImpl::setCurrentTab(int index)
+{
+    static_cast<UITabBarController*>(getNativeViewController()).selectedIndex = index;
 }
 
 

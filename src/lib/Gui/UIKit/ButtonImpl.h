@@ -39,6 +39,7 @@ public:
     ~ButtonViewImpl();
 
     void setLabel(const std::string& label);
+    void setEnabled(bool enabled);
     void setImage(Image* pImage);
 
     void pushed();

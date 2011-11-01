@@ -34,12 +34,15 @@ class TabViewImpl : public ViewImpl
 {
 private:
     friend class TabView;
-    
+
     TabViewImpl(View* pView);
     virtual ~TabViewImpl();
 
     void addView(View* pView, const std::string& tabName);
+    int getCurrentTab();
     void setTabBarHidden(bool hidden);
+    void setCurrentView(View* pView);
+    void setCurrentTab(int index);
 };
 
 

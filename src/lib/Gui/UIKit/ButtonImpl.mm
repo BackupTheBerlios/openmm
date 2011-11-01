@@ -88,6 +88,13 @@ ButtonViewImpl::setLabel(const std::string& label)
 
 
 void
+ButtonViewImpl::setEnabled(bool enabled)
+{
+    static_cast<UIButton*>(_pNativeView).enabled = enabled;
+}
+
+
+void
 ButtonViewImpl::setImage(Image* pImage)
 {
     ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());

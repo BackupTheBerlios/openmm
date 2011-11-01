@@ -60,5 +60,13 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
 }
 
 
+void
+NavigatorViewImpl::popView()
+{
+    UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
+    [pNativeViewController popViewControllerAnimated:YES];
+}
+
+
 } // namespace Gui
 } // namespace Omm
