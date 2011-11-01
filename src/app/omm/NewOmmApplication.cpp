@@ -31,7 +31,11 @@
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/UpnpAvServer.h>
 #include <Omm/Util.h>
+#ifdef __IPHONE__
+#include <Omm/X/EngineMPMoviePlayer.h>
+#else
 #include <Omm/X/EngineVlc.h>
+#endif
 
 
 class OmmApplication : public Omm::Gui::Application
@@ -81,16 +85,11 @@ public:
     void addLocalRenderer()
     {
         Omm::Av::Log::instance()->upnpav().debug("controller application add local renderer ...");
+#ifdef __IPHONE__
+        Omm::Av::Engine* pEngine = new MPMoviePlayerEngine;
+#else
         Omm::Av::Engine* pEngine = new VlcEngine;
-//        Omm::Util::PluginLoader<Omm::Av::Engine> enginePluginLoader;
-//        try {
-//            pEngine = enginePluginLoader.load("engine-vlc");
-//        }
-//        catch(Poco::NotFoundException) {
-//            Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
-//            return;
-//        }
-
+#endif
         pEngine->setVisual(_pController->getLocalRendererVisual());
         pEngine->createPlayer();
 

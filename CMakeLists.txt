@@ -34,6 +34,7 @@ endif(LINUX OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 if("${BUILD_TARGET}" MATCHES "iphone")
 set(IPHONE 1)
 add_definitions(-D__DARWIN__)
+add_definitions(-D__IPHONE__)
 endif("${BUILD_TARGET}" MATCHES "iphone")
 
 message(STATUS "Build target is: " ${BUILD_TARGET})
