@@ -119,7 +119,11 @@ public:
     _argc(argc),
     _argv(argv),
     _helpRequested(false),
+#ifdef __IPHONE__
+    _rendererName("iPhone Renderer"),
+#else
     _rendererName("OMM Renderer"),
+#endif
     _fullscreen(false),
     _width(800),
     _height(480),

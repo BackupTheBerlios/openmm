@@ -141,10 +141,11 @@ public:
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
 public:
-    MediaRendererDevice() : _transportState(""), _volume(-1) {}
+    MediaRendererDevice() : _transportState(""), _volume(-1), _volumeSliderPassiveMode(false) {}
 
     std::string getTransportState();
     ui2 getVolume();
+    bool getVolumeSliderPassiveMode();
 
 private:
     virtual void newPosition(int duration, int position) {}
@@ -154,6 +155,7 @@ private:
 
     std::string _transportState;
     int         _volume;
+    bool        _volumeSliderPassiveMode;
 };
 
 

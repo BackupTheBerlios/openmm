@@ -76,11 +76,11 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 {
     _fullscreen = fullscreen;
     if (fullscreen) {
+//                 foreground-color: black; 
         _pFullscreenStyleSheet = new QString(
             "* { \
                  font-size: 28pt; \
                  background-color: black; \
-                 foreground-color: black; \
                  border-color: black; \
                  border-width: 0; \
                  color: darkred; \
