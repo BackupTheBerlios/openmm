@@ -31,6 +31,7 @@
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/UpnpAvServer.h>
 #include <Omm/Util.h>
+#include <Omm/X/EngineVlc.h>
 
 
 class OmmApplication : public Omm::Gui::Application
@@ -53,11 +54,11 @@ public:
         _pController->setTabBarHidden(_fullscreen);
         _pController->init();
         _pController->start();
-//        addLocalRenderer();
-//        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
-//        _localDeviceServer.init();
-//        _localDeviceServer.start();
-//        _pController->setDefaultRenderer(&_mediaRenderer);
+        addLocalRenderer();
+        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
+        _localDeviceServer.init();
+        _localDeviceServer.start();
+        _pController->setDefaultRenderer(&_mediaRenderer);
     }
 
     virtual void finishedEventLoop()
@@ -80,15 +81,15 @@ public:
     void addLocalRenderer()
     {
         Omm::Av::Log::instance()->upnpav().debug("controller application add local renderer ...");
-        Omm::Av::Engine* pEngine;
-        Omm::Util::PluginLoader<Omm::Av::Engine> enginePluginLoader;
-        try {
-            pEngine = enginePluginLoader.load("engine-vlc");
-        }
-        catch(Poco::NotFoundException) {
-            Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
-            return;
-        }
+        Omm::Av::Engine* pEngine = new VlcEngine;
+//        Omm::Util::PluginLoader<Omm::Av::Engine> enginePluginLoader;
+//        try {
+//            pEngine = enginePluginLoader.load("engine-vlc");
+//        }
+//        catch(Poco::NotFoundException) {
+//            Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
+//            return;
+//        }
 
         pEngine->setVisual(_pController->getLocalRendererVisual());
         pEngine->createPlayer();

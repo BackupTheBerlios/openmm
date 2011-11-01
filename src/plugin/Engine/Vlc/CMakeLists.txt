@@ -30,4 +30,27 @@ ARCHIVE DESTINATION lib
 )
 
 endif(BUILD_PLUGINS)
+
+add_library(ommx-engine-vlc
+EngineVlc.cpp
+)
+
+target_link_libraries(ommx-engine-vlc
+${OMM}
+${OMM_AV}
+${OMM_SYS}
+${VLC_LIBRARIES}
+)
+
+set(OMMX_ENGINE_VLC
+ommx-engine-vlc
+CACHE INTERNAL ommx-engine-vlc
+)
+
+install(TARGETS ommx-engine-vlc
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+)
+
 endif(VLC_FOUND)
