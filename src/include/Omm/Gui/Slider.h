@@ -56,6 +56,7 @@ private:
 class SliderView : public View
 {
     friend class SliderModel;
+    friend class SliderViewImpl;
     friend class SliderSignalProxy;
 
 public:
@@ -68,6 +69,7 @@ private:
     virtual void valueChangedView(int value);
 
     bool        _passiveMode;
+    bool        _activeMode;
 };
 
 

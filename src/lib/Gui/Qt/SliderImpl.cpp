@@ -64,7 +64,7 @@ SliderViewImpl::setValue(int value)
 void
 SliderSignalProxy::init()
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl, init signal proxy");
+//    Omm::Gui::Log::instance()->gui().debug("slider view impl, init signal proxy");
     SignalProxy::init();
     connect(_pViewImpl->getNativeView(), SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
@@ -73,11 +73,7 @@ SliderSignalProxy::init()
 void
 SliderSignalProxy::valueChangedSlot(int value)
 {
-//    if (static_cast<SliderView*>(_pViewImpl->getView())->_passiveMode) {
-//        return;
-//    }
-    Omm::Gui::Log::instance()->gui().debug("slider view impl, calling value changed");
-//    PROXY_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
+//    Omm::Gui::Log::instance()->gui().debug("slider view impl, calling value changed");
     static_cast<SliderView*>(_pViewImpl->getView())->valueChangedView(value);
 }
 

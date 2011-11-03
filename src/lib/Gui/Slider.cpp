@@ -49,7 +49,8 @@ SliderModel::setValue(int value)
 
 SliderView::SliderView(View* pParent) :
 View(pParent, false),
-_passiveMode(false)
+_passiveMode(false),
+_activeMode(false)
 {
 //    Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
     _minWidth = 50;
@@ -64,12 +65,15 @@ _passiveMode(false)
 void
 SliderView::syncViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
+    if (_activeMode) {
+        _activeMode = false;
+        return;
+    }
+    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
     SliderModel* pSliderModel = static_cast<SliderModel*>(_pModel);
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
     _passiveMode = true;
     pImpl->setValue(pSliderModel->getValue());
-    _passiveMode = false;
 }
 
 
@@ -77,8 +81,10 @@ void
 SliderView::valueChangedView(int value)
 {
     if (_passiveMode) {
+        _passiveMode = false;
         return;
     }
+    _activeMode = true;
     Omm::Gui::Log::instance()->gui().debug("slider view, calling value changed virtual method");
     NOTIFY_CONTROLLER(SliderController, valueChanged, value);
 }
