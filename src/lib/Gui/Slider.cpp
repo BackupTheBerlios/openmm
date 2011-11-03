@@ -43,13 +43,13 @@ SliderModel::setValue(int value)
 //    Omm::Gui::Log::instance()->gui().debug("button model set label");
     _value = value;
 
-//    UPDATE_VIEWS(SliderView, setLabel, label);
     syncViews();
 }
 
 
 SliderView::SliderView(View* pParent) :
-View(pParent, false)
+View(pParent, false),
+_passiveMode(false)
 {
 //    Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
     _minWidth = 50;
@@ -67,8 +67,22 @@ SliderView::syncViewImpl()
 //    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
     SliderModel* pSliderModel = static_cast<SliderModel*>(_pModel);
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
+    _passiveMode = true;
     pImpl->setValue(pSliderModel->getValue());
+    _passiveMode = false;
 }
+
+
+void
+SliderView::valueChangedView(int value)
+{
+    if (_passiveMode) {
+        return;
+    }
+    Omm::Gui::Log::instance()->gui().debug("slider view, calling value changed virtual method");
+    NOTIFY_CONTROLLER(SliderController, valueChanged, value);
+}
+
 
 
 } // namespace Gui

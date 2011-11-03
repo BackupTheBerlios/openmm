@@ -33,6 +33,7 @@ namespace Gui {
 
 class SliderController : public Controller
 {
+    friend class SliderView;
     friend class SliderViewImpl;
     friend class SliderSignalProxy;
 
@@ -55,12 +56,18 @@ private:
 class SliderView : public View
 {
     friend class SliderModel;
+    friend class SliderSignalProxy;
 
 public:
     SliderView(View* pParent = 0);
 
 //private:
     virtual void syncViewImpl();
+
+private:
+    virtual void valueChangedView(int value);
+
+    bool        _passiveMode;
 };
 
 

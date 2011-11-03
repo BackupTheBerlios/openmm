@@ -73,8 +73,12 @@ SliderSignalProxy::init()
 void
 SliderSignalProxy::valueChangedSlot(int value)
 {
-    Omm::Gui::Log::instance()->gui().debug("slider view impl, calling value changed virtual method");
-    PROXY_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
+//    if (static_cast<SliderView*>(_pViewImpl->getView())->_passiveMode) {
+//        return;
+//    }
+    Omm::Gui::Log::instance()->gui().debug("slider view impl, calling value changed");
+//    PROXY_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
+    static_cast<SliderView*>(_pViewImpl->getView())->valueChangedView(value);
 }
 
 

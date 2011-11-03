@@ -236,9 +236,7 @@ MediaRendererDevice::newVolume(const int volume)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new volume: " + Poco::NumberFormatter::format(volume));
     _volume = volume;
-    _volumeSliderPassiveMode = true;
     syncViews();
-    _volumeSliderPassiveMode = false;
 }
 
 
@@ -268,13 +266,6 @@ MediaRendererDevice::getVolume()
     else {
         return _volume;
     }
-}
-
-
-bool
-MediaRendererDevice::getVolumeSliderPassiveMode()
-{
-    return _volumeSliderPassiveMode;
 }
 
 
@@ -407,9 +398,6 @@ public:
     virtual void valueChanged(int value)
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        if (pRenderer->getVolumeSliderPassiveMode()) {
-            return;
-        }
         pRenderer->volumeChanged(value);
     }
 
