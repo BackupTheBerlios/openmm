@@ -45,7 +45,7 @@
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
-    Omm::Gui::Log::instance()->gui().debug("Slider view impl touch moved");
+//    Omm::Gui::Log::instance()->gui().debug("Slider view impl touch moved");
     _pSliderViewImpl->valueChanged(self.value);
     [super touchesMoved:touches withEvent:event];
 }
@@ -87,7 +87,6 @@ void
 SliderViewImpl::valueChanged(int value)
 {
 //    Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
-//    IMPL_NOTIFY_CONTROLLER(SliderController, valueChanged, value);
     static_cast<SliderView*>(getView())->valueChangedView(value);
 }
 

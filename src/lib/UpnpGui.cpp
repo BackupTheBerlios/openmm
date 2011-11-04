@@ -195,7 +195,7 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
     _deviceGroupListView.setName("media renderer group view");
     push(&_deviceGroupListView, "Player");
 
-    _deviceGroupListView.setItemViewHeight(50);
+    _deviceGroupListView.setItemViewHeight(80);
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }
@@ -276,7 +276,7 @@ public:
     {
         _image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
         setImage(&_image);
-        setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+        setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
         setEnabled(false);
     }
 
@@ -297,7 +297,7 @@ public:
     {
         _image.setData(MediaImages::instance()->getResource("media-start.png"));
         setImage(&_image);
-        setSizeConstraint(30, height(Gui::View::Pref), Gui::View::Pref);
+        setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
     }
 
     virtual void pushed()
@@ -330,7 +330,7 @@ public:
     {
         _image.setData(MediaImages::instance()->getResource("media-stop.png"));
         setImage(&_image);
-        setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+        setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
     }
 
     virtual void pushed()
@@ -363,7 +363,7 @@ public:
     {
         _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
         setImage(&_image);
-        setSizeConstraint(25, height(Gui::View::Pref), Gui::View::Pref);
+        setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
         setEnabled(false);
     }
 

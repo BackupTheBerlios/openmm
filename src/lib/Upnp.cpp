@@ -1646,7 +1646,7 @@ EventMessageQueue::queueStateVar(StateVar& stateVar)
 {
     Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
 
-    //Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     _stateVars.insert(&stateVar);
     if (!_timerIsRunning) {
@@ -1669,7 +1669,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
 {
     Log::instance()->event().debug("event message queue sends event notifications ...");
 
-    //_lock.lock();
+    _lock.lock();
     _timerIsRunning = false;
     std::string eventMessage;
     EventMessageWriter messageWriter;
@@ -1677,9 +1677,8 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
         messageWriter.stateVar(**it);
     }
     _stateVars.clear();
-    //_lock.unlock();
-
     messageWriter.write(eventMessage);
+    _lock.unlock();
 
     for (Service::SubscriptionIterator i = _pService->beginEventSubscription(); i != _pService->endEventSubscription(); ++i) {
         (*i)->sendEventMessage(eventMessage);
