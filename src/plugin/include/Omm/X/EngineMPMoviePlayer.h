@@ -76,6 +76,7 @@ public:
     virtual void setVolume(const std::string& channel, float vol);
     virtual float getVolume(const std::string& channel);
     virtual TransportState getTransportState();
+    void transportStateChangedNotification();
 
 //    void setParentView(UIView* parentView);
 

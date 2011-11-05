@@ -32,22 +32,30 @@
 
 @interface MediaPlayerController : MPMoviePlayerController
 {
+    MPMoviePlayerEngine*        _pEngine;
 }
 @end
 
 
 @implementation MediaPlayerController
 
-- (void)playbackFinished:(NSNotification*)notification
-{
-    NSLog(@"ENGINE sending notification: stopped");
-//    [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
+//- (void)playbackFinished:(NSNotification*)notification
+//{
+//    NSLog(@"ENGINE sending notification: stopped");
+////    [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
+//
+//    // FIXME: only remove video subview, if we played video and not audio
+//    //if (_mime.isVideo()) {
+////        [self.view removeFromSuperview];
+//        [self release];
+//    //}
+//}
 
-    // FIXME: only remove video subview, if we played video and not audio
-    //if (_mime.isVideo()) {
-//        [self.view removeFromSuperview];
-        [self release];
-    //}
+
+- (void)playbackStateChanged:(NSNotification*)notification
+{
+    Omm::Av::Log::instance()->upnpav().debug("ENGINE sending notification playback state did change");
+    _pEngine->transportStateChangedNotification();
 }
 
 
@@ -57,15 +65,20 @@
 }
 
 
-- (id)initWithContentURL:(NSURL *)contentURL
+- (void)setEngine:(MPMoviePlayerEngine*)pEngine
+{
+    _pEngine = pEngine;
+}
+
+
+- (id)initWithContentURL:(NSURL*)contentURL
 {
     if (self = [super initWithContentURL:contentURL]) {
         self.controlStyle = MPMovieControlStyleNone;
-//        self.moviePlayer.controlStyle = MPMovieControlStyleNone;
-//       [[NSNotificationCenter defaultCenter] addObserver:self
-//                    selector:@selector(playbackFinished:)
-//                    name:MPMoviePlayerPlaybackDidFinishNotification
-//                    object:self.moviePlayer];
+       [[NSNotificationCenter defaultCenter] addObserver:self
+                    selector:@selector(playbackStateChanged:)
+                    name:MPMoviePlayerPlaybackStateDidChangeNotification
+                    object:self];
     }
     return self;
 }
@@ -141,6 +154,7 @@ MPMoviePlayerEngine::play()
        Omm::Av::Log::instance()->upnpav().debug("ENGINE alloc media player ...");
        MediaPlayerController* pPlayer = [MediaPlayerController alloc];
        _player = pPlayer;
+       [pPlayer setEngine:this];
 
        Omm::Av::Log::instance()->upnpav().debug("ENGINE init media player ...");
        [pPlayer performSelectorOnMainThread:@selector(initWithContentURL:) withObject:url waitUntilDone:YES];
@@ -148,13 +162,10 @@ MPMoviePlayerEngine::play()
        if (pPlayer) {
            Omm::Av::Log::instance()->upnpav().debug("ENGINE playing URL: " + _urlString);
            [pPlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
-//           [pPlayer.moviePlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
        }
        if (_mime.isVideo()) {
            Omm::Av::Log::instance()->upnpav().debug("ENGINE adding media player view ...");
 //           [_parentView performSelectorOnMainThread:@selector(addSubview:) withObject:_player.view waitUntilDone:YES];
-//           Omm::Av::Log::instance()->upnpav().debug("ENGINE sending notification: started");
-//           [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStarted" object:nil];
        }
     }
 
@@ -218,15 +229,11 @@ MPMoviePlayerEngine::stop()
         MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
         [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
-//        [pPlayer.moviePlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
         if (_mime.isVideo()) {
             //[_player.view removeFromSuperview];
             [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
         }
-        [_player release];
-
-        NSLog(@"ENGINE sending notification: stopped");
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
+        [pPlayer release];
     }
 
     [pool release];
@@ -329,6 +336,12 @@ MPMoviePlayerEngine::getTransportState()
     }
 }
 
+
+void
+MPMoviePlayerEngine::transportStateChangedNotification()
+{
+    transportStateChanged();
+}
 
 //void
 //MPMoviePlayerEngine::setParentView(UIView* parentView)
