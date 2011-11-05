@@ -1,9 +1,11 @@
 find_package(MediaPlayer)
+find_package(AVFoundation)
 
 if(MEDIAPLAYER_FOUND)
 
 include_directories(
 ${MEDIAPLAYER_INCLUDE_DIRS}
+${AVFOUNDATION_INCLUDE_DIRS}
 )
 
 if(BUILD_PLUGINS)
@@ -17,6 +19,7 @@ ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
 ${MediaPlayer_LIBRARIES}
+${AVFoundation_LIBRARIES}
 )
 
 set_target_properties(ommplugin-engine-mpmovieplayer
@@ -40,6 +43,7 @@ ${OMM}
 ${OMM_AV}
 ${OMM_SYS}
 ${MediaPlayer_LIBRARIES}
+${AVFoundation_LIBRARIES}
 )
 
 set(OMMX_ENGINE_MPMOVIEPLAYER

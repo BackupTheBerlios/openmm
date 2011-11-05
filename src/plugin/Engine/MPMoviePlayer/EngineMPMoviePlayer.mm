@@ -28,6 +28,7 @@
 #import <MediaPlayer/MPMoviePlayerController.h>
 // iOS 3.2 and later, only
 #import <MediaPlayer/MPMoviePlayerViewController.h>
+#import <AVFoundation/AVAudioSession.h>
 
 
 @interface MediaPlayerController : MPMoviePlayerController
@@ -41,14 +42,6 @@
 
 //- (void)playbackFinished:(NSNotification*)notification
 //{
-//    NSLog(@"ENGINE sending notification: stopped");
-////    [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
-//
-//    // FIXME: only remove video subview, if we played video and not audio
-//    //if (_mime.isVideo()) {
-////        [self.view removeFromSuperview];
-//        [self release];
-//    //}
 //}
 
 
@@ -59,9 +52,18 @@
 }
 
 
+- (void)volumeChanged:(NSNotification *)notification
+{
+    float volume = [[[notification userInfo]
+                        objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"]
+                        floatValue];
+    _pEngine->volumeChangedNotification(volume);
+}
+
+
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-//    [[CocoaAvInterface instance] stopPressed];
+    // stop playback?
 }
 
 
@@ -75,10 +77,16 @@
 {
     if (self = [super initWithContentURL:contentURL]) {
         self.controlStyle = MPMovieControlStyleNone;
-       [[NSNotificationCenter defaultCenter] addObserver:self
-                    selector:@selector(playbackStateChanged:)
-                    name:MPMoviePlayerPlaybackStateDidChangeNotification
-                    object:self];
+        [[NSNotificationCenter defaultCenter]
+            addObserver:self
+            selector:@selector(playbackStateChanged:)
+            name:MPMoviePlayerPlaybackStateDidChangeNotification
+            object:self];
+        [[NSNotificationCenter defaultCenter]
+            addObserver:self
+            selector:@selector(volumeChanged:)
+            name:@"AVSystemController_SystemVolumeDidChangeNotification"
+            object:nil];
     }
     return self;
 }
@@ -314,7 +322,7 @@ MPMoviePlayerEngine::setVolume(const std::string& channel, float vol)
 float
 MPMoviePlayerEngine::getVolume(const std::string& channel)
 {
-
+    AVAudioSession *session = [AVAudioSession sharedInstance];
 }
 
 
@@ -351,38 +359,38 @@ MPMoviePlayerEngine::transportStateChangedNotification()
     transportStateChanged();
 }
 
-//void
-//MPMoviePlayerEngine::setParentView(UIView* parentView)
-//{
-//    _parentView = parentView;
-//    [_parentView retain];
-//}
-
 
 void
-MPMoviePlayerEngine::downloadImage()
+MPMoviePlayerEngine::volumeChangedNotification(float volume)
 {
-    Omm::Av::Log::instance()->upnpav().debug("download image: " + _urlString);
-    Poco::Net::HTTPStreamFactory streamOpener;
-
-    _imageBuffer.clear();
-    try {
-        std::istream* pInStream = streamOpener.open(Poco::URI(_urlString));
-        if (pInStream) {
-            _imageLength = Poco::StreamCopier::copyToString(*pInStream, _imageBuffer);
-        }
-    }
-    catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("download failed: " + e.displayText());
-    }
-    if (_imageLength == 0) {
-        Omm::Av::Log::instance()->upnpav().error("download failed, no bytes received.");
-        return;
-    }
-    else {
-        Omm::Av::Log::instance()->upnpav().debug("download success, bytes: " + Poco::NumberFormatter::format(_imageLength));
-    }
+    Omm::Av::Log::instance()->upnpav().debug("ENGINE volume changed on media player engine");
 }
+
+
+//void
+//MPMoviePlayerEngine::downloadImage()
+//{
+//    Omm::Av::Log::instance()->upnpav().debug("download image: " + _urlString);
+//    Poco::Net::HTTPStreamFactory streamOpener;
+//
+//    _imageBuffer.clear();
+//    try {
+//        std::istream* pInStream = streamOpener.open(Poco::URI(_urlString));
+//        if (pInStream) {
+//            _imageLength = Poco::StreamCopier::copyToString(*pInStream, _imageBuffer);
+//        }
+//    }
+//    catch (Poco::Exception& e) {
+//        Omm::Av::Log::instance()->upnpav().error("download failed: " + e.displayText());
+//    }
+//    if (_imageLength == 0) {
+//        Omm::Av::Log::instance()->upnpav().error("download failed, no bytes received.");
+//        return;
+//    }
+//    else {
+//        Omm::Av::Log::instance()->upnpav().debug("download success, bytes: " + Poco::NumberFormatter::format(_imageLength));
+//    }
+//}
 
 
 //void

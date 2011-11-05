@@ -31,7 +31,6 @@
 class MPMoviePlayerEngine : public Omm::Av::Engine
 {
 public:
-//     MPMoviePlayerEngine(int argc, char **argv);
     MPMoviePlayerEngine();
     ~MPMoviePlayerEngine();
 
@@ -71,17 +70,14 @@ public:
     /*
       Rendering Control
     */
-//    virtual void setVolume(int channel, float vol);
-//    virtual float getVolume(int channel);
     virtual void setVolume(const std::string& channel, float vol);
     virtual float getVolume(const std::string& channel);
     virtual TransportState getTransportState();
     void transportStateChangedNotification();
-
-//    void setParentView(UIView* parentView);
+    void volumeChangedNotification(float volume);
 
 private:
-    void downloadImage();
+//    void downloadImage();
 //    void showImage();
 
     void*                       _player;
