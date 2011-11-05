@@ -57,6 +57,7 @@ public:
     void resized(int width, int height);
     void selected();
     View*                       _pView;
+//    unsigned int                _backgroundTask;
 protected:
     void initViewImpl(View* pView, void* pNative);
     void triggerViewSync();
@@ -64,7 +65,6 @@ protected:
     void*                       _pNativeView;
     void*                       _pNativeViewController;
     void*                       _pNativeViewSelectorDispatcher;
-
 };
 
 
