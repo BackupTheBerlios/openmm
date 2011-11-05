@@ -40,7 +40,7 @@ X11Visual::~X11Visual()
 
 
 X11Visual::WindowHandle
-X11Visual::getWindow()
+X11Visual::getWindowId()
 {
     return _x11Window;
 }
@@ -64,7 +64,7 @@ X11Visual::createWindow()
     }
     _x11Window = XCreateSimpleWindow(xDisplay, XDefaultRootWindow(xDisplay),
                                   xPos, yPos, getWidth(), getHeight(), 1, 0, 0);
-    
+
     XMapRaised(xDisplay, _x11Window);
 //     res_h = (DisplayWidth(xDisplay, xScreen) * 1000 / DisplayWidthMM(xDisplay, xScreen));
 //     res_v = (DisplayHeight(xDisplay, xScreen) * 1000 / DisplayHeightMM(xDisplay, xScreen));

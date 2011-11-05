@@ -28,8 +28,8 @@ class X11Visual : public Omm::Sys::Visual
 public:
     X11Visual();
     ~X11Visual();
-    
-    WindowHandle getWindow();
+
+    WindowHandle getWindowId();
     void show();
     void hide();
     Omm::Sys::Visual::VisualType getType();

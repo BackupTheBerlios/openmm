@@ -54,7 +54,7 @@ QtVisual::hide()
 
 
 QtVisual::WindowHandle
-QtVisual::getWindow()
+QtVisual::getWindowId()
 {
     return winId();
 }

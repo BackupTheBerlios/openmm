@@ -725,8 +725,15 @@ GuiVisual::hide()
 }
 
 
-GuiVisual::WindowHandle
+void*
 GuiVisual::getWindow()
+{
+    return Gui::View::getNativeView();
+}
+
+
+GuiVisual::WindowHandle
+GuiVisual::getWindowId()
 {
     return (GuiVisual::WindowHandle)Gui::View::getNativeWindowId();
 //    return winId();

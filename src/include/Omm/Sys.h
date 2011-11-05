@@ -33,12 +33,12 @@ class Log
 {
 public:
     static Log* instance();
-    
+
     Poco::Logger& sys();
-    
+
 private:
     Log();
-    
+
     static Log*     _pInstance;
     Poco::Logger*   _pSysLogger;
 };
@@ -50,7 +50,7 @@ class Visual
 {
 public:
     enum VisualType {VTNone, VTX11, VTFB, VTOSX, VTWin};
-    
+
 #ifdef __LINUX__
     typedef Poco::UInt32 WindowHandle;
 #elif __DARWIN__
@@ -65,7 +65,8 @@ public:
     virtual void show() {}
     virtual void hide() {}
 
-    virtual WindowHandle getWindow() { return 0; }
+    virtual void* getWindow() { return 0; }
+    virtual WindowHandle getWindowId() { return 0; }
     virtual VisualType getType() { return VTNone; }
     virtual void renderImage(const std::string& imageData) {}
     virtual void blank() {}

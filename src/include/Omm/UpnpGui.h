@@ -278,7 +278,8 @@ public:
     virtual void show();
     virtual void hide();
 
-    virtual WindowHandle getWindow();
+    virtual void* getWindow();
+    virtual WindowHandle getWindowId();
     virtual VisualType getType();
     virtual void renderImage(const std::string& imageData);
     virtual void blank();

@@ -166,6 +166,9 @@ MPMoviePlayerEngine::play()
        if (_mime.isVideo()) {
            Omm::Av::Log::instance()->upnpav().debug("ENGINE adding media player view ...");
 //           [_parentView performSelectorOnMainThread:@selector(addSubview:) withObject:_player.view waitUntilDone:YES];
+           [static_cast<UIView*>(_pVisual->getWindow()) performSelectorOnMainThread:@selector(addSubview:) withObject:pPlayer.view waitUntilDone:YES];
+           pPlayer.view.frame = static_cast<UIView*>(_pVisual->getWindow()).frame;
+           Omm::Av::Log::instance()->upnpav().debug("ENGINE adding media player view finished.");
        }
     }
 
@@ -229,10 +232,10 @@ MPMoviePlayerEngine::stop()
         MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
         [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
-        if (_mime.isVideo()) {
+//        if (_mime.isVideo()) {
             //[_player.view removeFromSuperview];
-            [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
-        }
+//            [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
+//        }
         [pPlayer release];
     }
 
@@ -323,14 +326,15 @@ MPMoviePlayerEngine::getTransportState()
     switch (playbackState) {
         case MPMoviePlaybackStateInterrupted:
         case MPMoviePlaybackStateStopped:
+        case MPMoviePlaybackStatePaused:
             return Stopped;
         case MPMoviePlaybackStatePlaying:
             return Playing;
         case MPMoviePlaybackStateSeekingForward:
         case MPMoviePlaybackStateSeekingBackward:
             return Transitioning;
-        case MPMoviePlaybackStatePaused:
-            return PausedPlayback;
+//        case MPMoviePlaybackStatePaused:
+//            return PausedPlayback;
         default:
             return Stopped;
     }
@@ -340,6 +344,10 @@ MPMoviePlayerEngine::getTransportState()
 void
 MPMoviePlayerEngine::transportStateChangedNotification()
 {
+    MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
+    if ([pPlayer playbackState] == MPMoviePlaybackStateStopped && _mime.isVideo()) {
+        [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
+    }
     transportStateChanged();
 }
 

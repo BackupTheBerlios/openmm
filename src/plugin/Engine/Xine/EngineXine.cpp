@@ -59,7 +59,7 @@ XineEngine::~XineEngine()
 
 void
 XineEngine::createPlayer()
-{    
+{
 //    Omm::Util::PluginLoader<XineVideo> pluginLoader;
 //    std::string videoPlugin("xinevideo-x11");
 ////     std::string videoPlugin("xinevideo-fb");
@@ -80,7 +80,7 @@ XineEngine::createPlayer()
     _pVisual->show();
 
 
-    
+
     //xine_engine_set_param(xineEngine, XINE_ENGINE_PARAM_VERBOSITY, 99);
 //     char* configFile = "/etc/omm/xineconfig";
 /*    struct stat s;
@@ -111,7 +111,7 @@ XineEngine::createPlayer()
     if (_pVisual->getType() == Omm::Sys::Visual::VTX11) {
         driverName = "xv";
         _x11Visual.frame_output_cb = FrameOutputCallback;
-        _x11Visual.d = *(Poco::UInt32*)_pVisual->getWindow();
+        _x11Visual.d = *(Poco::UInt32*)_pVisual->getWindowId();
 //        _x11Visual.display = XOpenDisplay(NULL);
 //        _x11Visual.screen = x11Screen;
         _videoDriver = xine_open_video_driver(_xineEngine,
@@ -141,7 +141,7 @@ XineEngine::createPlayer()
     set audio device for OSS through config option: audio.device.oss_device_name  (/dev/dsp  /dev/sound/dsp)
         or audio.device.oss_device_number
 */
-/* 
+/*
     xine_cfg_entry_t entry;
     xine_config_lookup_entry(xineEngine, "audio.device.oss_device_name", &entry);
     TRACE("StreamPlayerXine::initStream() current audio device: %s", entry.str_value);
@@ -157,7 +157,7 @@ XineEngine::createPlayer()
     {
 //        std::cerr << "XineEngine::init() can't init audio driver " << _audioDriverName << std::endl;
     }
-    
+
     _xineStream = xine_stream_new(_xineEngine, _audioDriver, _videoDriver);
 }
 
@@ -170,7 +170,7 @@ XineEngine::close()
     xine_close_audio_driver(_xineEngine, _audioDriver);
     xine_close_video_driver(_xineEngine, _videoDriver);
     xine_exit(_xineEngine);
-    
+
 //    _pVideo->closeVisual();
 }
 
@@ -312,7 +312,7 @@ XineEngine::savePosition()
     if (xine_get_pos_length(_xineStream, &_posStream, &_posTime, &_lengthStream) == 0) {
 //         TRACE("XineEngine::savePosition() could not get position");
     }
-//     TRACE("XineEngine::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i", 
+//     TRACE("XineEngine::savePosition() at _posStream: %i, _posTime: %i, _lengthStream: %i",
 //             _posStream, _posTime, _lengthStream);
 }
 
