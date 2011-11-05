@@ -50,6 +50,7 @@ public:
     virtual Omm::Gui::View* createMainView()
     {
         _pController = new Omm::ControllerWidget;
+        addToolBar(_pController->getControlPanel());
         return _pController;
     }
 

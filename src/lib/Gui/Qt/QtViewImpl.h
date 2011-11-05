@@ -87,6 +87,13 @@ public:
 //        _pViewImpl->keyPressed(pKeyEvent->key());
 //    }
 
+    QSize sizeHint() const
+    {
+//        return QSize(800, 40);
+//        return QSize(_pViewImpl->getView()->width(View::Pref), _pViewImpl->getView()->height(View::Pref));
+        return QSize(_pViewImpl->getView()->width(), _pViewImpl->getView()->height());
+    }
+
     ViewImpl*   _pViewImpl;
 };
 

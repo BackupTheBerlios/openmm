@@ -62,6 +62,13 @@ SliderViewImpl::setValue(int value)
 
 
 void
+SliderViewImpl::setEnabled(bool enabled)
+{
+   static_cast<QSlider*>(_pNativeView)->setEnabled(enabled);
+}
+
+
+void
 SliderSignalProxy::init()
 {
 //    Omm::Gui::Log::instance()->gui().debug("slider view impl, init signal proxy");

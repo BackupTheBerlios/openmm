@@ -37,7 +37,7 @@ class ButtonController : public Controller
 {
     friend class ButtonViewImpl;
     friend class ButtonSignalProxy;
-    
+
 protected:
     virtual void pushed() {}
 };
@@ -47,17 +47,17 @@ class ButtonModel : public Model
 {
 public:
     ButtonModel();
-    
+
 //    virtual const std::string& getLabel() const;
     virtual std::string getLabel();
     void setLabel(const std::string& label);
 
     virtual bool getEnabled();
     void setEnabled(bool enabled = true);
-    
+
     virtual Image* getImage();
     void setImage(Image* pImage);
-    
+
 private:
     bool        _enabled;
     std::string _label;
@@ -68,7 +68,7 @@ private:
 class ButtonView : public View
 {
     friend class ButtonModel;
-    
+
 public:
     ButtonView(View* pParent = 0);
 
@@ -95,10 +95,10 @@ class Button : public Widget<ButtonView, ButtonController, ButtonModel>
 {
 public:
     Button(View* pParent = 0) : Widget<ButtonView, ButtonController, ButtonModel>(pParent) {}
-    
+
     void setLabel(const std::string& label);
     void setEnabled(bool enabled = true);
-    void setImage(Image* pImage);    
+    void setImage(Image* pImage);
 };
 
 

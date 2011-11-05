@@ -45,11 +45,17 @@ protected:
 class SliderModel : public Model
 {
 public:
+    SliderModel();
+    
     virtual const int getValue() const;
     void setValue(int value);
 
+    virtual bool getEnabled();
+    void setEnabled(bool enabled = true);
+
 private:
-    int _value;
+    bool        _enabled;
+    int         _value;
 };
 
 

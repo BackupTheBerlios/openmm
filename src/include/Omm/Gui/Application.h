@@ -33,7 +33,7 @@ class ApplicationImpl;
 class Application
 {
     friend class ApplicationImpl;
-    
+
 public:
     Application();
     virtual ~Application();
@@ -46,6 +46,7 @@ public:
     View* getMainView();
     int width();
     int height();
+    void addToolBar(View* pView);
 
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}

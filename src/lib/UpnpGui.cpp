@@ -40,6 +40,9 @@ ControllerWidget::ControllerWidget()
     registerDeviceGroup(_pMediaRendererGroupWidget);
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
+//    _pControlPanel = new Gui::Button;
+//    _pControlPanel = new Gui::View;
+    _pControlPanel = new MediaRendererView;
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
     attachController(new KeyController(this));
@@ -50,6 +53,13 @@ GuiVisual*
 ControllerWidget::getLocalRendererVisual()
 {
     return _pVisual;
+}
+
+
+MediaRendererView*
+ControllerWidget::getControlPanel()
+{
+    return _pControlPanel;
 }
 
 
@@ -298,6 +308,7 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-start.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
+        setEnabled(false);
     }
 
     virtual void pushed()
@@ -331,6 +342,7 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-stop.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
+        setEnabled(false);
     }
 
     virtual void pushed()
@@ -393,7 +405,10 @@ public:
 class VolSlider : public Gui::Slider
 {
 public:
-    VolSlider(Gui::View* pParent = 0) : Gui::Slider(pParent) {}
+    VolSlider(Gui::View* pParent = 0) : Gui::Slider(pParent)
+    {
+        setEnabled(false);
+    }
 
     virtual void valueChanged(int value)
     {
@@ -406,13 +421,26 @@ public:
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(static_cast<MediaRendererView*>(_pParent)->getModel());
         return pRenderer->getVolume();
     }
+
+    virtual bool getEnabled()
+    {
+        if (_pModel) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 };
 
 
 class SeekSlider : public Gui::Slider
 {
 public:
-    SeekSlider(Gui::View* pParent = 0) : Gui::Slider(pParent) {}
+    SeekSlider(Gui::View* pParent = 0) : Gui::Slider(pParent)
+    {
+        setEnabled(false);
+    }
 
     virtual void valueChanged(int value)
     {
@@ -450,6 +478,8 @@ MediaRendererView::MediaRendererView()
     _pRendererName = new RendererName(this);
     _pRendererName->setAlignment(Gui::View::AlignCenter);
 
+    setSizeConstraint(800, 40, Gui::View::Pref);
+    resize(800, 40);
     setLayout(&_layout);
 }
 

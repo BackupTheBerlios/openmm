@@ -30,6 +30,14 @@ namespace Omm {
 namespace Gui {
 
 
+
+SliderModel::SliderModel() :
+_enabled(true)
+{
+
+}
+
+
 const int
 SliderModel::getValue() const
 {
@@ -44,6 +52,20 @@ SliderModel::setValue(int value)
     _value = value;
 
     syncViews();
+}
+
+
+bool
+SliderModel::getEnabled()
+{
+    return _enabled;
+}
+
+
+void
+SliderModel::setEnabled(bool enabled)
+{
+    _enabled = enabled;
 }
 
 
@@ -74,6 +96,7 @@ SliderView::syncViewImpl()
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
     _passiveMode = true;
     pImpl->setValue(pSliderModel->getValue());
+    pImpl->setEnabled(pSliderModel->getEnabled());
 }
 
 

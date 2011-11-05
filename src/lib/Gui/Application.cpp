@@ -85,6 +85,13 @@ Application::height()
 }
 
 
+void
+Application::addToolBar(View* pView)
+{
+    _pImpl->addToolBar(pView);
+}
+
+
 int
 Application::run(int argc, char** argv)
 {

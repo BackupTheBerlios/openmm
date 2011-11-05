@@ -49,6 +49,7 @@ class MediaObjectModel;
 class GuiVisual;
 class MediaServerGroupWidget;
 class MediaRendererGroupWidget;
+class MediaRendererView;
 
 
 class TransportStateNotification : public Poco::Notification
@@ -67,6 +68,7 @@ public:
     ControllerWidget();
 
     GuiVisual* getLocalRendererVisual();
+    MediaRendererView* getControlPanel();
     void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
     void newTransportState(TransportStateNotification* pNotification);
     void showMainMenu();
@@ -77,6 +79,7 @@ private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
     MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
     GuiVisual*                  _pVisual;
+    MediaRendererView*          _pControlPanel;
     std::string                 _localRendererUuid;
 };
 

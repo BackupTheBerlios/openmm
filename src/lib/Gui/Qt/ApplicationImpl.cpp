@@ -76,7 +76,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 {
     _fullscreen = fullscreen;
     if (fullscreen) {
-//                 foreground-color: black; 
+//                 foreground-color: black;
         _pFullscreenStyleSheet = new QString(
             "* { \
                  font-size: 28pt; \
@@ -105,6 +105,17 @@ ApplicationImpl::setFullscreen(bool fullscreen)
             }"
             );
     }
+}
+
+
+void
+ApplicationImpl::addToolBar(View* pView)
+{
+    QToolBar* pToolBar = new QToolBar;
+    pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
+    pToolBar->addWidget(pWidget);
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, pToolBar);
 }
 
 

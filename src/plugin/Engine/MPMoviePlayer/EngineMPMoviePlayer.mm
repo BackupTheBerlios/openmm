@@ -322,7 +322,7 @@ MPMoviePlayerEngine::setVolume(const std::string& channel, float vol)
 float
 MPMoviePlayerEngine::getVolume(const std::string& channel)
 {
-    AVAudioSession *session = [AVAudioSession sharedInstance];
+//    AVAudioSession *session = [AVAudioSession sharedInstance];
 }
 
 
