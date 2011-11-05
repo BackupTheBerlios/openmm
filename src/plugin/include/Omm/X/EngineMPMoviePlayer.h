@@ -41,7 +41,7 @@ public:
     /*
       AVTransport
     */
-    virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo);
+    virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo());
     virtual void play();
 
     /**

@@ -116,9 +116,6 @@
 - (void)syncView
 {
     _pViewImpl->getView()->syncViewImpl();
-//    UIApplication* app = [UIApplication sharedApplication];
-//    [app endBackgroundTask:_pViewImpl->_backgroundTask];
-//    _pViewImpl->_backgroundTask = UIBackgroundTaskInvalid;
 }
 
 
@@ -182,16 +179,9 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
 void
 ViewImpl::triggerViewSync()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync, view \"" + _pView->getName() + "\" ...");
-//    [_pNativeViewSelectorDispatcher performSelectorOnMainThread:@selector(syncView) withObject:nil waitUntilDone:YES];
-//    UIApplication* app = [UIApplication sharedApplication];
-//    _backgroundTask = [app beginBackgroundTaskWithExpirationHandler:^{
-//        [app endBackgroundTask:_backgroundTask];
-//        _backgroundTask = UIBackgroundTaskInvalid;
-//    }];
-//    [_pNativeViewSelectorDispatcher performSelectorOnMainThread:@selector(syncView) withObject:nil waitUntilDone:NO];
+//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync, view \"" + _pView->getName() + "\" ...");
     [_pNativeViewSelectorDispatcher performSelectorOnMainThread:@selector(syncView) withObject:nil waitUntilDone:[NSThread isMainThread]];
-    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync, view \"" + _pView->getName() + "\" finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync, view \"" + _pView->getName() + "\" finished.");
 }
 
 

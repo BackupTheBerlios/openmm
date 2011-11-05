@@ -1644,8 +1644,7 @@ EventMessageQueue::~EventMessageQueue()
 void
 EventMessageQueue::queueStateVar(StateVar& stateVar)
 {
-    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
-    // FIXME: on iphone timeout of 5 secs occures here.
+//    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     _stateVars.insert(&stateVar);
@@ -1654,22 +1653,20 @@ EventMessageQueue::queueStateVar(StateVar& stateVar)
         _timerIsRunning = true;
         if (_pModeratorTimer) {
             delete _pModeratorTimer;
-//            Log::instance()->event().debug("deleted old timer.");
         }
         // need to create a new Poco::Timer, because same timer can't be reused (works perhaps twice, but not the third time).
         _pModeratorTimer = new Poco::Timer(_maxEventRate);
         _pModeratorTimer->start(Poco::TimerCallback<EventMessageQueue> (*this, &EventMessageQueue::sendEventMessage));
         Log::instance()->event().debug("timer started.");
     }
-    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " finished.");
+//    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " finished.");
 }
 
 
 void
 EventMessageQueue::sendEventMessage(Poco::Timer& timer)
 {
-    Log::instance()->event().debug("event message queue sends event notifications ...");
-    // FIXME: sendEventMessage() doesn't finish, resulting in a dead lock (which times out after 5 secs?!)
+//    Log::instance()->event().debug("event message queue sends event notifications ...");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
 //    _lock.lock();
@@ -1686,8 +1683,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
     for (Service::SubscriptionIterator i = _pService->beginEventSubscription(); i != _pService->endEventSubscription(); ++i) {
         (*i)->sendEventMessage(eventMessage);
     }
-//    timer.restart(0);
-    Log::instance()->event().debug("event message queue sends event notifications finished.");
+//    Log::instance()->event().debug("event message queue sends event notifications finished.");
 }
 
 

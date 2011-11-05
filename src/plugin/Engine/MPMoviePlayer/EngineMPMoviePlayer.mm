@@ -30,22 +30,22 @@
 #import <MediaPlayer/MPMoviePlayerViewController.h>
 
 
-@interface MediaPlayerViewController : MPMoviePlayerViewController
+@interface MediaPlayerController : MPMoviePlayerController
 {
 }
 @end
 
 
-@implementation MediaPlayerViewController
+@implementation MediaPlayerController
 
 - (void)playbackFinished:(NSNotification*)notification
 {
     NSLog(@"ENGINE sending notification: stopped");
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
 
     // FIXME: only remove video subview, if we played video and not audio
     //if (_mime.isVideo()) {
-        [self.view removeFromSuperview];
+//        [self.view removeFromSuperview];
         [self release];
     //}
 }
@@ -60,11 +60,12 @@
 - (id)initWithContentURL:(NSURL *)contentURL
 {
     if (self = [super initWithContentURL:contentURL]) {
-        self.moviePlayer.controlStyle = MPMovieControlStyleNone;
-       [[NSNotificationCenter defaultCenter] addObserver:self
-                    selector:@selector(playbackFinished:)
-                    name:MPMoviePlayerPlaybackDidFinishNotification
-                    object:self.moviePlayer];
+        self.controlStyle = MPMovieControlStyleNone;
+//        self.moviePlayer.controlStyle = MPMovieControlStyleNone;
+//       [[NSNotificationCenter defaultCenter] addObserver:self
+//                    selector:@selector(playbackFinished:)
+//                    name:MPMoviePlayerPlaybackDidFinishNotification
+//                    object:self.moviePlayer];
     }
     return self;
 }
@@ -73,6 +74,7 @@
 
 
 MPMoviePlayerEngine::MPMoviePlayerEngine() :
+_player(0),
 _imageLength(0)
 {
     _engineId = "iphone MediaPlayer engine " + Omm::OMM_VERSION;
@@ -88,7 +90,6 @@ MPMoviePlayerEngine::~MPMoviePlayerEngine()
 void
 MPMoviePlayerEngine::createPlayer()
 {
-    //_player = [MPMoviePlayerController alloc];
 //    _imageBackgroundView = [[UIView alloc] init];
 //    _imageBackgroundView.backgroundColor = [UIColor blackColor];
 }
@@ -118,7 +119,7 @@ MPMoviePlayerEngine::play()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
-    Omm::Av::Log::instance()->upnpav().debug("media player engine, load");
+    Omm::Av::Log::instance()->upnpav().debug("media player engine, play");
 
     // NOTE: this is called from another thread, so we need a new memory pool.
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
@@ -138,20 +139,22 @@ MPMoviePlayerEngine::play()
        _length = 0.0;
 
        Omm::Av::Log::instance()->upnpav().debug("ENGINE alloc media player ...");
-       _player = [MediaPlayerViewController alloc];
-       MediaPlayerViewController* pPlayer = static_cast<MediaPlayerViewController*>(_player);
+       MediaPlayerController* pPlayer = [MediaPlayerController alloc];
+       _player = pPlayer;
+
        Omm::Av::Log::instance()->upnpav().debug("ENGINE init media player ...");
        [pPlayer performSelectorOnMainThread:@selector(initWithContentURL:) withObject:url waitUntilDone:YES];
 
-       if (_player) {
-           NSLog(@"ENGINE playing URL: %@", url);
-           [pPlayer.moviePlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
+       if (pPlayer) {
+           Omm::Av::Log::instance()->upnpav().debug("ENGINE playing URL: " + _urlString);
+           [pPlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
+//           [pPlayer.moviePlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
        }
        if (_mime.isVideo()) {
            Omm::Av::Log::instance()->upnpav().debug("ENGINE adding media player view ...");
 //           [_parentView performSelectorOnMainThread:@selector(addSubview:) withObject:_player.view waitUntilDone:YES];
-           NSLog(@"ENGINE sending notification: started");
-           [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStarted" object:nil];
+//           Omm::Av::Log::instance()->upnpav().debug("ENGINE sending notification: started");
+//           [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStarted" object:nil];
        }
     }
 
@@ -170,15 +173,20 @@ MPMoviePlayerEngine::pause()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
-   // NOTE: this is called from another thread, so we need a new memory pool.
+    if (!_player) {
+        return;
+    }
+
+    // NOTE: this is called from another thread, so we need a new memory pool.
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    MediaPlayerViewController* pPlayer = static_cast<MediaPlayerViewController*>(_player);
+    MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
     if (_mime.isImage()) {
 
     }
     else {
-        [pPlayer.moviePlayer performSelectorOnMainThread:@selector(pause) withObject:nil waitUntilDone:YES];
+        [pPlayer performSelectorOnMainThread:@selector(pause) withObject:nil waitUntilDone:YES];
+//        [pPlayer.moviePlayer performSelectorOnMainThread:@selector(pause) withObject:nil waitUntilDone:YES];
     }
 
     [pool release];
@@ -189,6 +197,10 @@ void
 MPMoviePlayerEngine::stop()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+
+    if (!_player) {
+        return;
+    }
 
     // NOTE: this is called from another thread, so we need a new memory pool.
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
@@ -203,14 +215,15 @@ MPMoviePlayerEngine::stop()
     else {
         // FIXME: after stream finished, player view is removed and clicking stop crashes
         Omm::Av::Log::instance()->upnpav().debug("ENGINE stopping media player engine ...");
-        MediaPlayerViewController* pPlayer = static_cast<MediaPlayerViewController*>(_player);
+        MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
-        [pPlayer.moviePlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
+        [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
+//        [pPlayer.moviePlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
         if (_mime.isVideo()) {
             //[_player.view removeFromSuperview];
             [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
         }
-        [pPlayer release];
+        [_player release];
 
         NSLog(@"ENGINE sending notification: stopped");
         [[NSNotificationCenter defaultCenter] postNotificationName:@"EngineStopped" object:nil];
@@ -298,7 +311,22 @@ MPMoviePlayerEngine::getVolume(const std::string& channel)
 MPMoviePlayerEngine::TransportState
 MPMoviePlayerEngine::getTransportState()
 {
-
+    MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
+    MPMoviePlaybackState playbackState = [pPlayer playbackState];
+    switch (playbackState) {
+        case MPMoviePlaybackStateInterrupted:
+        case MPMoviePlaybackStateStopped:
+            return Stopped;
+        case MPMoviePlaybackStatePlaying:
+            return Playing;
+        case MPMoviePlaybackStateSeekingForward:
+        case MPMoviePlaybackStateSeekingBackward:
+            return Transitioning;
+        case MPMoviePlaybackStatePaused:
+            return PausedPlayback;
+        default:
+            return Stopped;
+    }
 }
 
 

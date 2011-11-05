@@ -57,7 +57,6 @@ public:
     void resized(int width, int height);
     void selected();
     View*                       _pView;
-//    unsigned int                _backgroundTask;
 protected:
     void initViewImpl(View* pView, void* pNative);
     void triggerViewSync();
