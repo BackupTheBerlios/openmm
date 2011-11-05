@@ -36,7 +36,7 @@ ControllerWidget::ControllerWidget()
     Gui::Log::instance()->gui().debug("controller widget register device groups ...");
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
     registerDeviceGroup(_pMediaServerGroupWidget);
-    _pMediaRendererGroupWidget = new MediaRendererGroupWidget;
+    _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
@@ -197,8 +197,9 @@ DeviceGroupWidget::setDefaultDevice(Device* pDevice)
 }
 
 
-MediaRendererGroupWidget::MediaRendererGroupWidget() :
-DeviceGroupWidget(new Av::MediaRendererGroupDelegate)
+MediaRendererGroupWidget::MediaRendererGroupWidget(ControllerWidget* pControllerWidget) :
+DeviceGroupWidget(new Av::MediaRendererGroupDelegate),
+_pControllerWidget(pControllerWidget)
 {
 //    Gui::Log::instance()->gui().debug("media renderer group widget ctor");
     View::setName("media renderer group view");
@@ -231,6 +232,14 @@ Gui::Model*
 MediaRendererGroupWidget::getItemModel(int row)
 {
     return static_cast<MediaRendererDevice*>(getDevice(row));
+}
+
+
+void
+MediaRendererGroupWidget::selectedItem(int row)
+{
+    DeviceGroupWidget::selectedItem(row);
+    _pControllerWidget->getControlPanel()->setModel(static_cast<MediaRendererDevice*>(getDevice(row)));
 }
 
 

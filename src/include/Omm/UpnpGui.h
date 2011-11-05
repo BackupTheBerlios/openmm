@@ -130,7 +130,7 @@ protected:
 class MediaRendererGroupWidget : public DeviceGroupWidget
 {
 public:
-    MediaRendererGroupWidget();
+    MediaRendererGroupWidget(ControllerWidget* pControllerWidget);
 
     // Omm::DeviceGroup interface
     virtual Device* createDevice();
@@ -138,6 +138,10 @@ public:
     // ListModel interface
     virtual Gui::View* createItemView();
     virtual Gui::Model* getItemModel(int row);
+    virtual void selectedItem(int row);
+
+private:
+    ControllerWidget*   _pControllerWidget;
 };
 
 
