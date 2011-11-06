@@ -26,6 +26,7 @@
 
 class QMainWindow;
 class QApplication;
+class QToolBar;
 class QString;
 
 
@@ -49,11 +50,13 @@ public:
     int height();
     void setFullscreen(bool fullscreen);
     void addToolBar(View* pView);
+    void showToolBar(bool show);
     int run(int argc, char** argv);
 
     Application*            _pApplication;
     QMainWindow*            _pMainWindow;
     QApplication*           _pQtApplication;
+    QToolBar*               _pToolBar;
     QtEventFilter*          _pEventFilter;
     QString*                _pFullscreenStyleSheet;
     int                     _width;

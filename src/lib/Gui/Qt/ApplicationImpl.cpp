@@ -35,6 +35,7 @@ namespace Gui {
 
 ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
+_pToolBar(0),
 _width(800),
 _height(480),
 _pFullscreenStyleSheet(0),
@@ -105,17 +106,27 @@ ApplicationImpl::setFullscreen(bool fullscreen)
             }"
             );
     }
+    if (_pToolBar) {
+        showToolBar(!fullscreen);
+    }
 }
 
 
 void
 ApplicationImpl::addToolBar(View* pView)
 {
-    QToolBar* pToolBar = new QToolBar;
-    pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    _pToolBar = new QToolBar;
+    _pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    pToolBar->addWidget(pWidget);
-    _pMainWindow->addToolBar(Qt::BottomToolBarArea, pToolBar);
+    _pToolBar->addWidget(pWidget);
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pToolBar);
+}
+
+
+void
+ApplicationImpl::showToolBar(bool show)
+{
+    _pToolBar->setVisible(show);
 }
 
 
@@ -132,6 +143,9 @@ ApplicationImpl::run(int argc, char** argv)
     _pApplication->_pMainView = _pApplication->createMainView();
     _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->_pMainView->getNativeView()));
     _pApplication->createdMainView();
+    if (_pToolBar && _fullscreen) {
+        showToolBar(!_fullscreen);
+    }
     _pMainWindow->show();
     _pMainWindow->resize(width(), height());
     _pApplication->_pMainView->resize(width(), height());

@@ -92,6 +92,13 @@ Application::addToolBar(View* pView)
 }
 
 
+void
+Application::showToolBar(bool show)
+{
+    _pImpl->showToolBar(show);
+}
+
+
 int
 Application::run(int argc, char** argv)
 {
