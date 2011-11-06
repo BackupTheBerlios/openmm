@@ -59,7 +59,7 @@ namespace Gui {
 
 SliderViewImpl::SliderViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
+//    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
 
     OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] init];
     [pNativeView setImpl:this];
@@ -80,6 +80,13 @@ SliderViewImpl::setValue(int value)
     UISlider* pNativeView = static_cast<UISlider*>(_pNativeView);
 
     pNativeView.value = value;
+}
+
+
+void
+SliderViewImpl::setEnabled(bool enabled)
+{
+    static_cast<UISlider*>(_pNativeView).enabled = enabled;
 }
 
 

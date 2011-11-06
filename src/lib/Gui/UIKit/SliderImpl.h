@@ -38,6 +38,7 @@ public:
     ~SliderViewImpl();
 
     void setValue(int value);
+    void setEnabled(bool enabled);
     void valueChanged(int value);
 };
 

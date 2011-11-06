@@ -34,7 +34,7 @@ class ApplicationImpl
 {
 public:
     friend class Application;
-    
+
     ApplicationImpl(Application* pApplication);
     virtual ~ApplicationImpl();
 
@@ -42,6 +42,8 @@ public:
     int width();
     int height();
     void setFullscreen(bool fullscreen);
+    void addToolBar(View* pView);
+    void showToolBar(bool show);
     int run(int argc, char** argv);
 
     static Application*    _pApplication;

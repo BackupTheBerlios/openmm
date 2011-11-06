@@ -64,7 +64,7 @@ SliderViewImpl::setValue(int value)
 void
 SliderViewImpl::setEnabled(bool enabled)
 {
-   static_cast<QSlider*>(_pNativeView)->setEnabled(enabled);
+    static_cast<QSlider*>(_pNativeView)->setEnabled(enabled);
 }
 
 

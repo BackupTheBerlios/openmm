@@ -112,6 +112,18 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 }
 
 
+void
+ApplicationImpl::addToolBar(View* pView)
+{
+}
+
+
+void
+ApplicationImpl::showToolBar(bool show)
+{
+}
+
+
 int
 ApplicationImpl::run(int argc, char** argv)
 {
