@@ -117,7 +117,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     request.write(requestHeader);
     Log::instance()->upnpav().debug("request method: " + request.getMethod());
     Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
-    
+
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
     Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
@@ -177,7 +177,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         }
     }
 
-    
+
     if (request.getMethod() == "GET") {
         std::streamoff start = 0;
         std::streamoff end = -1;
@@ -186,7 +186,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_PARTIAL_CONTENT, "Partial Content");
             std::string rangeValue = request.get("Range");
             parseRange(rangeValue, start, end);
-            response.set("Content-Range", "bytes " 
+            response.set("Content-Range", "bytes "
                         + Poco::NumberFormatter::format((long)start) + "-"
                         + (end == -1 ? "" : Poco::NumberFormatter::format((long)end)) + "/"
                         + Poco::NumberFormatter::format(pResource->getSize()));
@@ -215,6 +215,9 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
                 Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
                 delete pIstr;
             }
+            else {
+                throw Poco::Exception("no stream available");
+            }
         }
         catch(Poco::Exception& e) {
             Log::instance()->upnpav().debug("streaming aborted: " + e.displayText());
@@ -229,7 +232,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
         response.send();
     }
-    
+
     if (response.sent()) {
         Log::instance()->upnpav().debug("media item request finished: " + request.getURI());
     }
@@ -540,7 +543,7 @@ TorchServer::getChildForIndex(ui4 numChild)
         pTorchChild->_pIconProp->setValue(icon);
         pTorchChild->_optionalProps.push_back(pTorchChild->_pIconProp);
     }
-    
+
     return _pChild;
 }
 
@@ -808,7 +811,7 @@ int
 TorchItem::getPropertyCount(const std::string& name)
 {
     Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
-    
+
     if (name == "") {
         return 3 + _optionalProps.size();
     }
@@ -827,7 +830,7 @@ AbstractProperty*
 TorchItem::getProperty(int index)
 {
     Log::instance()->upnpav().debug("TorchItem::getProperty(index), index: " + Poco::NumberFormatter::format(index));
-    
+
     if (index == 0) {
         return _pClassProp;
     }

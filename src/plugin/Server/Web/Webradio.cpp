@@ -39,11 +39,11 @@ class WebradioDataModel : public Omm::Av::AbstractDataModel
 {
 public:
     WebradioDataModel(const std::string& stationConfig);
-    
+
     virtual Omm::ui4 getChildCount();
     virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
-    
+
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index);
@@ -51,7 +51,7 @@ public:
 
 private:
     void scanStationConfig(const std::string& stationConfig);
-    
+
     std::vector<std::string>             _stationNames;
     std::vector<std::string>             _stationUris;
 };
@@ -105,9 +105,14 @@ WebradioDataModel::getStream(Omm::ui4 index)
 
     Poco::Net::HTTPResponse proxyResponse;
     std::istream& istr = pSession->receiveResponse(proxyResponse);
+    if (proxyResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
+        Omm::Av::Log::instance()->upnpav().error("error web radio resource not available");
+        return 0;
+    }
 
     if (istr.peek() == EOF) {
         Omm::Av::Log::instance()->upnpav().error("error web radio reading data from web resource");
+        return 0;
     }
     else {
         Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from web resource");
@@ -206,7 +211,7 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
         Omm::Av::Log::instance()->upnpav().error("webradio config not found and scanning of stations not yet supported, giving up.");
         return;
     }
-    
+
     Poco::XML::Node* pStationList = pDoc->firstChild();
     if (pStationList->nodeName() != "stationlist") {
         Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, wrong file format");
