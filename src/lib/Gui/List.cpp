@@ -136,6 +136,13 @@ ListView::setItemViewHeight(int height)
 }
 
 
+void
+ListView::selectRow(int row)
+{
+    selectedItem(row);
+}
+
+
 int
 ListView::viewPortHeightInRows()
 {

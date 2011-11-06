@@ -60,6 +60,7 @@ public:
     int getItemViewHeight();
     void setItemViewWidth(int width);
     void setItemViewHeight(int height);
+    void selectRow(int row);
 
 protected:
     virtual void syncViewImpl();

@@ -149,7 +149,7 @@ DeviceGroupWidget::addDevice(Device* pDevice, int index, bool begin)
     if (!begin) {
         syncViews();
         if (pDevice->getUuid() == _defaultDeviceUuid) {
-            selectDevice(pDevice);
+            _deviceGroupListView.selectRow(index);
         }
     }
 }
