@@ -29,7 +29,8 @@
 
 
 @interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
-    UIWindow* _pWindow;
+    UIWindow*           _pWindow;
+    Omm::Gui::View*     _pMainView;
 }
 
 @property (nonatomic, retain) UIWindow* _pWindow;
@@ -46,12 +47,39 @@
     _pWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     _pWindow.backgroundColor = [UIColor whiteColor];
     CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
-    Omm::Gui::View* pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
-    pMainView->resize(appFrame.size.width, appFrame.size.height);
-    pMainView->move(appFrame.origin.x, appFrame.origin.y);
-    [_pWindow addSubview:static_cast<UIView*>(pMainView->getNativeView())];
+    _pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
+//    if (Omm::Gui::ApplicationImpl::_pToolBar) {
+//        _pMainView->addSubview(Omm::Gui::ApplicationImpl::_pToolBar);
+//        Omm::Gui::ApplicationImpl::_pToolBar->resize(_pMainView->width(), _pMainView->height() / 3);
+//        Omm::Gui::ApplicationImpl::_pToolBar->move(0, 2 * _pMainView->height() / 3);
+//        UIPanGestureRecognizer* pPanGesture = [[UIPanGestureRecognizer alloc]
+//                initWithTarget:self action:@selector(handlePanGesture:)];
+//        pPanGesture.minimumNumberOfTouches = 2;
+//        [_pMainView->getNativeView() addGestureRecognizer:pPanGesture];
+//        [pPanGesture release];
+//    }
+    _pMainView->resize(appFrame.size.width, appFrame.size.height);
+    _pMainView->move(appFrame.origin.x, appFrame.origin.y);
+    [_pWindow addSubview:static_cast<UIView*>(_pMainView->getNativeView())];
     [_pWindow makeKeyAndVisible];
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
+}
+
+
+- (void)handlePanGesture:(UIPanGestureRecognizer*)sender
+{
+    UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
+    UIView* pToolBarView = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar->getNativeView());
+    CGPoint translate = [sender translationInView:pMainView];
+
+    CGRect newFrame = pToolBarView.frame;
+    newFrame.origin.y += translate.y;
+    pToolBarView.frame = newFrame;
+
+//    if (sender.state == UIGestureRecognizerStateEnded) {
+//        pToolBarView.frame = newFrame;
+//        pMainView.frame = newFrame;
+//    }
 }
 
 
@@ -69,6 +97,7 @@ namespace Gui {
 
 
 Application* ApplicationImpl::_pApplication = 0;
+View* ApplicationImpl::_pToolBar = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {
@@ -115,6 +144,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 void
 ApplicationImpl::addToolBar(View* pView)
 {
+    _pToolBar = pView;
 }
 
 

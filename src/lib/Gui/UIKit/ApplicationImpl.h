@@ -47,6 +47,7 @@ public:
     int run(int argc, char** argv);
 
     static Application*    _pApplication;
+    static View*           _pToolBar;
     int                    _width;
     int                    _height;
 };
