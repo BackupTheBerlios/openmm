@@ -40,10 +40,10 @@ VlcEngine::~VlcEngine()
 {
     libvlc_release(_pVlcInstance);
 
-    if (_pVisual) {
-        _pVisual->hide();
-        delete _pVisual;
-    }
+//    if (_pVisual) {
+//        _pVisual->hide();
+//        delete _pVisual;
+//    }
 }
 
 
@@ -207,9 +207,9 @@ VlcEngine::play()
     handleException();
     }
 
-    if (!_mime.isAudio()) {
-        _pVisual->show();
-    }
+//    if (!_mime.isAudio()) {
+//        _pVisual->show();
+//    }
 
     Omm::Av::Log::instance()->upnpav().debug("vlc engine: play media finished.");
 }
@@ -348,10 +348,10 @@ VlcEngine::stop()
 #endif
     handleException();
 
-    if (!_mime.isAudio()) {
-        _pVisual->blank();
-        _pVisual->hide();
-    }
+//    if (!_mime.isAudio()) {
+//        _pVisual->blank();
+//        _pVisual->hide();
+//    }
 }
 
 

@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ENGINEVLC_H
-#define ENGINEVLC_H
+#ifndef EngineVlc_INCLUDED
+#define EngineVlc_INCLUDED
 
 #include <Omm/UpnpAvRenderer.h>
 

@@ -35,6 +35,7 @@
 #include <Omm/X/EngineMPMoviePlayer.h>
 #else
 #include <Omm/X/EngineVlc.h>
+#include <Omm/X/EnginePhonon.h>
 #endif
 
 
@@ -90,6 +91,7 @@ public:
         Omm::Av::Engine* pEngine = new MPMoviePlayerEngine;
 #else
         Omm::Av::Engine* pEngine = new VlcEngine;
+//        Omm::Av::Engine* pEngine = new PhononEngine;
 #endif
         pEngine->setVisual(_pController->getLocalRendererVisual());
         pEngine->createPlayer();
