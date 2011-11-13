@@ -77,7 +77,12 @@
 {
     int offset = _toolBarVisible ? 0 : Omm::Gui::ApplicationImpl::_pToolBar->height();
     _toolBarVisible = !_toolBarVisible;
+    UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar->getNativeView());
+    [UIView beginAnimations:@"pToolBar" context:nil];
+    [UIView setAnimationDuration:0.4];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
     Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height() - offset);
+    [UIView commitAnimations];
 }
 
 
