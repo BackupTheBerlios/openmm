@@ -31,6 +31,7 @@
 @interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow*           _pWindow;
     Omm::Gui::View*     _pMainView;
+    bool                _toolBarVisible;
 }
 
 @property (nonatomic, retain) UIWindow* _pWindow;
@@ -48,38 +49,35 @@
     _pWindow.backgroundColor = [UIColor whiteColor];
     CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
     _pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
-//    if (Omm::Gui::ApplicationImpl::_pToolBar) {
-//        _pMainView->addSubview(Omm::Gui::ApplicationImpl::_pToolBar);
-//        Omm::Gui::ApplicationImpl::_pToolBar->resize(_pMainView->width(), _pMainView->height() / 3);
-//        Omm::Gui::ApplicationImpl::_pToolBar->move(0, 2 * _pMainView->height() / 3);
-//        UIPanGestureRecognizer* pPanGesture = [[UIPanGestureRecognizer alloc]
-//                initWithTarget:self action:@selector(handlePanGesture:)];
-//        pPanGesture.minimumNumberOfTouches = 2;
-//        [_pMainView->getNativeView() addGestureRecognizer:pPanGesture];
-//        [pPanGesture release];
-//    }
     _pMainView->resize(appFrame.size.width, appFrame.size.height);
     _pMainView->move(appFrame.origin.x, appFrame.origin.y);
+    if (Omm::Gui::ApplicationImpl::_pToolBar) {
+        _pMainView->addSubview(Omm::Gui::ApplicationImpl::_pToolBar);
+        int toolBarHeight = _pMainView->height() / 4;
+        Omm::Gui::ApplicationImpl::_pToolBar->resize(_pMainView->width(), toolBarHeight);
+        Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height());
+        _toolBarVisible = false;
+
+        UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
+        UIButton* pToolBarButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
+        [pMainView addSubview:pToolBarButton];
+        CGRect buttonFrame = pToolBarButton.frame;
+        buttonFrame.origin.x = _pMainView->width() - buttonFrame.size.width;
+        buttonFrame.origin.y = _pMainView->height() - buttonFrame.size.height;
+        pToolBarButton.frame = buttonFrame;
+        [pToolBarButton addTarget:self action:@selector(handleToolBarButtonPressed) forControlEvents:UIControlEventTouchDown];
+    }
     [_pWindow addSubview:static_cast<UIView*>(_pMainView->getNativeView())];
     [_pWindow makeKeyAndVisible];
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
 }
 
 
-- (void)handlePanGesture:(UIPanGestureRecognizer*)sender
+- (void)handleToolBarButtonPressed
 {
-    UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
-    UIView* pToolBarView = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar->getNativeView());
-    CGPoint translate = [sender translationInView:pMainView];
-
-    CGRect newFrame = pToolBarView.frame;
-    newFrame.origin.y += translate.y;
-    pToolBarView.frame = newFrame;
-
-//    if (sender.state == UIGestureRecognizerStateEnded) {
-//        pToolBarView.frame = newFrame;
-//        pMainView.frame = newFrame;
-//    }
+    int offset = _toolBarVisible ? 0 : Omm::Gui::ApplicationImpl::_pToolBar->height();
+    _toolBarVisible = !_toolBarVisible;
+    Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height() - offset);
 }
 
 

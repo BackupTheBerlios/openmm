@@ -40,8 +40,6 @@ ControllerWidget::ControllerWidget()
     registerDeviceGroup(_pMediaRendererGroupWidget);
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
-//    _pControlPanel = new Gui::Button;
-//    _pControlPanel = new Gui::View;
     _pControlPanel = new MediaRendererView;
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
