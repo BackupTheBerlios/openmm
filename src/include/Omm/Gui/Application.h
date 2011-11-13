@@ -46,7 +46,7 @@ public:
     View* getMainView();
     int width();
     int height();
-    void addToolBar(View* pView);
+    void setToolBar(View* pView);
     void showToolBar(bool show = true);
 
     virtual View* createMainView() = 0;

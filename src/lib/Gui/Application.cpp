@@ -86,7 +86,7 @@ Application::height()
 
 
 void
-Application::addToolBar(View* pView)
+Application::setToolBar(View* pView)
 {
     _pImpl->addToolBar(pView);
 }
