@@ -622,7 +622,16 @@ MediaContainerWidget::getItemModel(int row)
         pModel->setImageModel(MediaObjectModel::_pItemAudioItemModel);
     }
     else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::IMAGE_ITEM)) {
-        pModel->setImageModel(MediaObjectModel::_pItemImageItemModel);
+        Omm::Icon* pIcon = pModel->getIcon();
+//        Omm::Icon* pIcon = pModel->getImageRepresentation();
+        if (pIcon) {
+            Omm::Gui::ImageModel* pImage = new Omm::Gui::ImageModel;
+            pImage->setData(pIcon->getBuffer());
+            pModel->setImageModel(pImage);
+        }
+        else {
+            pModel->setImageModel(MediaObjectModel::_pItemImageItemModel);
+        }
     }
     else if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)) {
         pModel->setImageModel(MediaObjectModel::_pItemVideoItemModel);
