@@ -161,6 +161,12 @@ ApplicationImpl::run(int argc, char** argv)
 }
 
 
+void
+ApplicationImpl::quit()
+{
+    _pQtApplication->quit();
+}
+
 
 }  // namespace Omm
 }  // namespace Gui

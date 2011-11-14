@@ -52,6 +52,7 @@ public:
     void addToolBar(View* pView);
     void showToolBar(bool show);
     int run(int argc, char** argv);
+    void quit();
 
     Application*            _pApplication;
     QMainWindow*            _pMainWindow;

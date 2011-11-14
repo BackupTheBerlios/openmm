@@ -25,6 +25,7 @@
 #include "Gui/GuiLogger.h"
 #include "ApplicationImpl.h"
 
+
 namespace Omm {
 namespace Gui {
 
@@ -107,9 +108,30 @@ Application::run(int argc, char** argv)
 
 
 void
+Application::quit()
+{
+    _pImpl->quit();
+}
+
+
+void
 Application::createdMainView()
 {
     _pMainView->scale(_scaleFactor);
+}
+
+
+void
+Application::receivedSignal(SignalType signal)
+{
+    Omm::Gui::Log::instance()->gui().debug("application signal received.");
+    switch (signal) {
+        case Sys::SignalHandler::SigInt:
+        case Sys::SignalHandler::SigQuit:
+        case Sys::SignalHandler::SigTerm:
+        quit();
+        break;
+    }
 }
 
 

@@ -36,7 +36,8 @@ UpnpApplication::UpnpApplication() :
 _pController(0),
 _pDevices(0),
 _helpRequested(false),
-_applicationName("OMM")
+_applicationName("OMM"),
+_sigHandler(*this, &UpnpApplication::signalHandler)
 {
     setUnixOptions(true);
 }
@@ -71,9 +72,7 @@ UpnpApplication::signalHandler()
 void
 UpnpApplication::installSignalHandler()
 {
-    Poco::RunnableAdapter<UpnpApplication> sighandler(*this, &UpnpApplication::signalHandler);
-    Poco::Thread thread;
-    thread.start(sighandler);
+    _sigThread.start(_sigHandler);
 }
 
 
@@ -104,7 +103,7 @@ void
 UpnpApplication::defineOptions(Poco::Util::OptionSet& options)
 {
     ServerApplication::defineOptions(options);
-    
+
     options.addOption(
         Poco::Util::Option("help", "h", "display help information on command line arguments")
         .required(false)
@@ -121,7 +120,7 @@ void
 UpnpApplication::handleOption(const std::string& name, const std::string& value)
 {
     ServerApplication::handleOption(name, value);
-    
+
     if (name == "help") {
         _helpRequested = true;
     }

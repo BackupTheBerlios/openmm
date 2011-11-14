@@ -120,5 +120,40 @@ Visual::setFullscreen(bool fullscreen)
 }
 
 
+SignalHandler::SignalHandler() :
+_signalHandler(*this, &SignalHandler::signalHandlerListener)
+{
+#ifdef __LINUX__
+    sigemptyset(&_sset);
+    sigaddset(&_sset, SIGINT);
+    sigaddset(&_sset, SIGQUIT);
+    sigaddset(&_sset, SIGTERM);
+    sigprocmask(SIG_BLOCK, &_sset, NULL);
+#endif
+    _signalListenerThread.start(_signalHandler);
+}
+
+
+void
+SignalHandler::signalHandlerListener()
+{
+#ifdef __LINUX__
+    int sig;
+    sigwait(&_sset, &sig);
+    switch (sig) {
+        case SIGINT:
+            receivedSignal(SigInt);
+            break;
+        case SIGQUIT:
+            receivedSignal(SigQuit);
+            break;
+        case SIGTERM:
+            receivedSignal(SigTerm);
+            break;
+    }
+#endif
+}
+
+
 }  // namespace Sys
 }  // namespace Omm

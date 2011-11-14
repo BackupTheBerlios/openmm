@@ -89,9 +89,11 @@ private:
     void start();
     void stop();
     void signalHandler();
-    
-    bool                    _helpRequested;
-    std::string             _applicationName;
+
+    bool                                        _helpRequested;
+    std::string                                 _applicationName;
+    Poco::RunnableAdapter<UpnpApplication>      _sigHandler;
+    Poco::Thread                                _sigThread;
 };
 
 

@@ -21,8 +21,14 @@
 #ifndef Sys_INCLUDED
 #define Sys_INCLUDED
 
+#ifdef __LINUX__
+#include <signal.h>
+#endif
+
 #include <Poco/Logger.h>
 #include <Poco/NotificationCenter.h>
+#include <Poco/Thread.h>
+#include <Poco/RunnableAdapter.h>
 #include <vector>
 #include <string>
 
@@ -83,6 +89,28 @@ private:
     int             _height;
     bool            _fullscreen;
 };
+
+
+class SignalHandler
+{
+public:
+    enum SignalType {SigInt, SigQuit, SigTerm};
+
+    SignalHandler();
+
+    virtual void receivedSignal(SignalType signal) {}
+
+private:
+    void signalHandlerListener();
+
+    Poco::RunnableAdapter<SignalHandler>        _signalHandler;
+    Poco::Thread                                _signalListenerThread;
+
+#ifdef __LINUX__
+    sigset_t _sset;
+#endif
+};
+
 
 
 }  // namespace Sys

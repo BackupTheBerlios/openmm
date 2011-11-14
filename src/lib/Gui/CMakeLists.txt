@@ -32,6 +32,7 @@ Image.cpp
 )
 
 target_link_libraries(ommgui
+${OMM_SYS}
 ${POCO_FOUNDATION}
 ${LIB_OMMGUI_PLATFORM}
 )

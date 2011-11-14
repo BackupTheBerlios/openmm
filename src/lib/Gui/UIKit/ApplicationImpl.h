@@ -45,6 +45,7 @@ public:
     void addToolBar(View* pView);
     void showToolBar(bool show);
     int run(int argc, char** argv);
+    void quit() {}
 
     static Application*    _pApplication;
     static View*           _pToolBar;

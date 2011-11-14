@@ -22,6 +22,8 @@
 #ifndef Application_INCLUDED
 #define Application_INCLUDED
 
+#include <Omm/Sys.h>
+
 
 namespace Omm {
 namespace Gui {
@@ -30,7 +32,7 @@ class View;
 class ApplicationImpl;
 
 
-class Application
+class Application : public Sys::SignalHandler
 {
     friend class ApplicationImpl;
 
@@ -39,6 +41,7 @@ public:
     virtual ~Application();
 
     int run(int argc = 0, char** argv = 0);
+    void quit();
 
     void resizeMainView(int width, int height);
     void scaleMainView(float factor);
@@ -55,6 +58,7 @@ public:
 
 private:
     void createdMainView();
+    virtual void receivedSignal(SignalType signal);
 
     ApplicationImpl*           _pImpl;
     View*                      _pMainView;
