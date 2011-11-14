@@ -72,6 +72,18 @@
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
 }
 
+- (void)applicationWillTerminate:(UIApplication *)application
+{
+    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+    Omm::Gui::ApplicationImpl::_pApplication->finishedEventLoop();
+}
+
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+}
+
 
 - (void)handleToolBarButtonPressed
 {
@@ -164,8 +176,6 @@ ApplicationImpl::run(int argc, char** argv)
     NSAutoreleasePool* pAutoreleasePool = [[NSAutoreleasePool alloc] init];
     int ret = UIApplicationMain(argc, argv, nil, @"OmmGuiAppDelegate");
     [pAutoreleasePool release];
-    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
-    _pApplication->finishedEventLoop();
     return ret;
 }
 
