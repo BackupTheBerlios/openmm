@@ -150,6 +150,7 @@ ApplicationImpl::run(int argc, char** argv)
     _pMainWindow->resize(width(), height());
     _pApplication->_pMainView->resize(width(), height());
     _pApplication->presentedMainView();
+    _pApplication->start();
 
     _pEventFilter = new QtEventFilter(_pApplication->_pMainView->getViewImpl());
     _pQtApplication->installEventFilter(_pEventFilter);
@@ -157,6 +158,7 @@ ApplicationImpl::run(int argc, char** argv)
     int ret = _pQtApplication->exec();
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     _pApplication->finishedEventLoop();
+    _pApplication->stop();
     return ret;
 }
 

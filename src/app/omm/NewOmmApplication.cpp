@@ -59,18 +59,27 @@ public:
     {
         _pController->setTabBarHidden(_fullscreen);
         _pController->init();
-        _pController->start();
         addLocalRenderer();
         _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
         _localDeviceServer.init();
-        _localDeviceServer.start();
         _pController->setDefaultRenderer(&_mediaRenderer);
     }
 
     virtual void finishedEventLoop()
     {
+        stop();
+    }
+
+    virtual void stop()
+    {
         _localDeviceServer.stop();
         _pController->stop();
+    }
+
+    virtual void start()
+    {
+        _pController->start();
+        _localDeviceServer.start();
     }
 
     void setRendererName(const std::string& rendererName)

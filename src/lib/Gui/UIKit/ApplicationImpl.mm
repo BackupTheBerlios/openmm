@@ -74,8 +74,34 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+//    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     Omm::Gui::ApplicationImpl::_pApplication->finishedEventLoop();
+}
+
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    // return from suspend
+    Omm::Gui::ApplicationImpl::_pApplication->start();
+}
+
+
+- (void)applicationWillResignActive:(UIApplication *)application
+{
+    // suspend application
+    Omm::Gui::ApplicationImpl::_pApplication->stop();
+}
+
+
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+
+}
+
+
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+
 }
 
 

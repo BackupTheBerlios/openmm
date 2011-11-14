@@ -55,6 +55,8 @@ public:
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}
     virtual void finishedEventLoop() {}
+    virtual void start() {}
+    virtual void stop() {}
 
 private:
     void createdMainView();
