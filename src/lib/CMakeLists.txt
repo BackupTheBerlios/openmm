@@ -13,7 +13,7 @@ ${OMM_INCLUDE_DIRS}
 )
 
 add_library(ommutil
-Util.cpp
+Util/Util.cpp
 )
 
 target_link_libraries(ommutil
