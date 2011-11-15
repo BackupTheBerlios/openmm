@@ -66,8 +66,8 @@ CACHE INTERNAL libommnet
 
 
 add_library(ommupnp
-Upnp.cpp
-UpnpApplication.cpp
+Upnp/Upnp.cpp
+Upnp/UpnpApplication.cpp
 )
 
 target_link_libraries(ommupnp
@@ -85,22 +85,22 @@ CACHE INTERNAL libommupnp
 
 add_library(ommupnpav
 #SHARED
-UpnpAvLogger.cpp
-UpnpAv.cpp
-UpnpAvDescriptions.cpp
-UpnpAvController.cpp # depricated
-UpnpAvCtlDevices.cpp
-UpnpAvCtlRenderer.cpp
-UpnpAvCtlServer.cpp
-UpnpAvCtlObject.cpp
-UpnpAvCtlObject2.cpp
-UpnpAvCtlImpl.cpp
-UpnpAvDevices.cpp
-UpnpAvRenderer.cpp
-UpnpAvRendererImpl.cpp
-UpnpAvServer.cpp
-UpnpAvServerImpl.cpp
-UpnpAvObject.cpp
+Upnp/Av/UpnpAvLogger.cpp
+Upnp/Av/UpnpAv.cpp
+Upnp/Av/UpnpAvDescriptions.cpp
+Upnp/Av/UpnpAvController.cpp # depricated
+Upnp/Av/UpnpAvCtlDevices.cpp
+Upnp/Av/UpnpAvCtlRenderer.cpp
+Upnp/Av/UpnpAvCtlServer.cpp
+Upnp/Av/UpnpAvCtlObject.cpp
+Upnp/Av/UpnpAvCtlObject2.cpp
+Upnp/Av/UpnpAvCtlImpl.cpp
+Upnp/Av/UpnpAvDevices.cpp
+Upnp/Av/UpnpAvRenderer.cpp
+Upnp/Av/UpnpAvRendererImpl.cpp
+Upnp/Av/UpnpAvServer.cpp
+Upnp/Av/UpnpAvServerImpl.cpp
+Upnp/Av/UpnpAvObject.cpp
 )
 
 target_link_libraries(ommupnpav
@@ -165,7 +165,7 @@ add_resources(${MEDIA_IMAGE_RESOURCE}
 )
 
 add_library(ommupnpgui
-UpnpGui.cpp
+Upnp/UpnpGui.cpp
 ${OMM_RESOURCES}
 )
 

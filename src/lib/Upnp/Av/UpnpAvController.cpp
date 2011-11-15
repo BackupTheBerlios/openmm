@@ -19,9 +19,9 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include "../UpnpPrivate.h"
 #include "UpnpAvController.h"
 #include "UpnpAvControllerPrivate.h"
-#include "UpnpPrivate.h"
 #include "UpnpAv.h"
 #include "UpnpAvCtlImpl.h"
 #include "UpnpAvCtlDevices.h"
@@ -451,7 +451,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     i4 AbsCount;
     _pSelectedRenderer->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
 //    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
-    
+
     try {
         r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
         r8 absTime = AvTypeConverter::readDuration(AbsTime);
@@ -460,7 +460,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     catch (Poco::Exception& e) {
         //Log::instance()->upnpav().warning("could not read current track position: " + e.displayText());
     }
-    
+
     if (TrackMetaData == "") {
         newTrack("", "", "");
     }
@@ -478,7 +478,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
             Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
         }
     }
-    
+
     // FIXME: don't poll volume, use eventing through LastChange state variable.
     ui2 vol;
     _pSelectedRenderer->RenderingControl()->GetVolume(0, "Master", vol);

@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include "../UpnpPrivate.h"
 #include "UpnpAvCtlRenderer.h"
-#include "UpnpPrivate.h"
 #include "UpnpAv.h"
 #include "UpnpAvCtlImpl.h"
 #include "UpnpAvCtlDevices.h"
