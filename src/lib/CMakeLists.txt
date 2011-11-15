@@ -114,7 +114,7 @@ CACHE INTERNAL libommupnpav
 
 
 add_library(ommavstream
-AvStream.cpp
+AvStream/AvStream.cpp
 )
 
 target_link_libraries(ommavstream
