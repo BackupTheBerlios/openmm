@@ -76,6 +76,7 @@
 {
 //    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     Omm::Gui::ApplicationImpl::_pApplication->finishedEventLoop();
+    Omm::Gui::ApplicationImpl::_pApplication->stop();
 }
 
 
