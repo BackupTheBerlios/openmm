@@ -40,17 +40,19 @@ class Controller
     friend class Model;
     friend class ViewImpl;
     friend class ButtonViewImpl;
-    
+
 public:
     typedef enum {KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
             KeyMenu, KeyVolUp, KeyVolDown, KeyChanUp, KeyChanDown,
             KeyForward, KeyBackward, KeyPlay, KeyStop, KeyPause,
             KeyPlayPause, KeyMute, KeyRecord,
-            KeyPowerOff, KeyWakeUp, KeyEject, KeyLast} KeyCode;
+            KeyPowerOff, KeyWakeUp, KeyEject, KeyLast,
+            KeyX
+    } KeyCode;
 
     void attachModel(Model* pModel);
     void detachModel(Model* pModel);
-    
+
     void syncModelViews();
 
 //protected:

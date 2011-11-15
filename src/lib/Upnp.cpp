@@ -2693,6 +2693,7 @@ void
 Socket::initSockets()
 {
     _ssdpSocket.init();
+    _ssdpSocket.setupSockets();
     _httpSocket.init();
 }
 
@@ -2722,7 +2723,6 @@ Socket::registerSsdpMessageHandler(const Poco::AbstractObserver& observer)
 void
 Socket::startSsdp()
 {
-    _ssdpSocket.setupSockets();
     _ssdpSocket.startListen();
 }
 

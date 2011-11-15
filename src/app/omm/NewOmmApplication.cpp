@@ -27,6 +27,7 @@
 #include <Poco/Util/HelpFormatter.h>
 
 #include <Omm/Gui/Application.h>
+#include <Omm/Gui/Controller.h>
 #include <Omm/UpnpGui.h>
 #include <Omm/UpnpAvRenderer.h>
 #include <Omm/UpnpAvServer.h>
@@ -37,6 +38,21 @@
 #include <Omm/X/EngineVlc.h>
 #include <Omm/X/EnginePhonon.h>
 #endif
+
+
+class OmmApplication;
+
+class OmmKeyController : public Omm::Gui::Controller
+{
+public:
+    OmmKeyController(OmmApplication* pOmmApplication) : _pOmmApplication(pOmmApplication), _appStarted(true) {}
+
+private:
+    virtual void keyPressed(KeyCode key);
+
+    OmmApplication*     _pOmmApplication;
+    bool                _appStarted;
+};
 
 
 class OmmApplication : public Omm::Gui::Application
@@ -52,6 +68,7 @@ public:
     {
         _pController = new Omm::ControllerWidget;
         setToolBar(_pController->getControlPanel());
+        _pController->attachController(new OmmKeyController(this));
         return _pController;
     }
 
@@ -67,17 +84,18 @@ public:
 
     virtual void finishedEventLoop()
     {
-        stop();
     }
 
     virtual void stop()
     {
+        Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
         _localDeviceServer.stop();
         _pController->stop();
     }
 
     virtual void start()
     {
+        Omm::Av::Log::instance()->upnpav().debug("omm application starting ...");
         _pController->start();
         _localDeviceServer.start();
     }
@@ -95,7 +113,7 @@ public:
 
     void addLocalRenderer()
     {
-        Omm::Av::Log::instance()->upnpav().debug("controller application add local renderer ...");
+        Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer ...");
 #ifdef __IPHONE__
         Omm::Av::Engine* pEngine = new MPMoviePlayerEngine;
 #else
@@ -111,7 +129,7 @@ public:
         _mediaRenderer.setFriendlyName(_rendererName);
         _localDeviceContainer.addDevice(&_mediaRenderer);
         _localDeviceContainer.setRootDevice(&_mediaRenderer);
-        Omm::Av::Log::instance()->upnpav().debug("controller application add local renderer finished.");
+        Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer finished.");
     }
 
     Omm::ControllerWidget*  _pController;
@@ -121,6 +139,16 @@ public:
     bool                    _fullscreen;
     std::string             _rendererName;
 };
+
+
+void
+OmmKeyController::keyPressed(KeyCode key)
+{
+    if (key == Omm::Gui::Controller::KeyX) {
+        _appStarted ? _pOmmApplication->stop() : _pOmmApplication->start();
+        _appStarted = !_appStarted;
+    }
+}
 
 
 class Application :  public Poco::Util::Application
