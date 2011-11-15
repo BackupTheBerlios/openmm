@@ -50,7 +50,7 @@ add_definitions(
 endif(LIB_OMMNET_PLATFORM)
 
 add_library(ommnet
-Net.cpp
+Net/Net.cpp
 )
 
 target_link_libraries(ommnet
@@ -128,7 +128,7 @@ CACHE STRING libommavstream
 
 
 add_library(ommsys
-Sys.cpp
+Sys/Sys.cpp
 )
 
 target_link_libraries(ommsys
