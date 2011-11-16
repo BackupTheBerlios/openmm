@@ -162,6 +162,8 @@ add_resources(${MEDIA_IMAGE_RESOURCE}
 "img/media-start.png"
 "img/media-stop.png"
 "img/media-skip-forward.png"
+"img/activity-off.png"
+"img/activity-on.png"
 )
 
 add_library(ommupnpgui

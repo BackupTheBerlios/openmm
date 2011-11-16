@@ -41,6 +41,8 @@ ControllerWidget::ControllerWidget()
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
     _pControlPanel = new MediaRendererView;
+    _pActivityIndicator = new ActivityIndicator;
+//    _pStatusBar->resize(20, 20);
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
     attachController(new KeyController(this));
@@ -64,7 +66,7 @@ ControllerWidget::getControlPanel()
 Gui::View*
 ControllerWidget::getStatusBar()
 {
-    return new Gui::View;
+    return _pActivityIndicator;
 }
 
 
@@ -107,6 +109,13 @@ void
 ControllerWidget::back()
 {
     _pMediaServerGroupWidget->pop();
+}
+
+
+void
+ControllerWidget::signalNetworkActivity(bool on)
+{
+    on ? _pActivityIndicator->startActivity() : _pActivityIndicator->stopActivity();
 }
 
 
@@ -819,6 +828,122 @@ void
 GuiVisual::blank()
 {
 }
+
+
+ActivityIndicator::ActivityIndicator(Gui::View* pParent) :
+Gui::ImageView(pParent),
+_indicateDuration(250),
+_activityInProgress(false),
+_indicatorOn(false),
+_offTimerIsActive(false),
+_stopIndicatorCallback(*this, &ActivityIndicator::stopIndicator)
+{
+    _offTimer.setStartInterval(_indicateDuration);
+    _pActivityOffModel = new Gui::ImageModel;
+    _pActivityOffModel->setData(MediaImages::instance()->getResource("activity-off.png"));
+    _pActivityOnModel = new Gui::ImageModel;
+    _pActivityOnModel->setData(MediaImages::instance()->getResource("activity-on.png"));
+//    resize(15, 15);
+    setModel(_pActivityOffModel);
+}
+
+
+ActivityIndicator::~ActivityIndicator()
+{
+}
+
+
+void
+ActivityIndicator::startActivity()
+{
+    Gui::Log::instance()->gui().debug("activity indicator start activity");
+
+    setActivityInProgress(true);
+    if (!indicatorOn()) {
+        setIndicatorOn(true);
+        setModel(_pActivityOnModel);
+    }
+    else {
+//        Omm::Av::Log::instance()->upnpav().trace("indicator already on, do nothing");
+    }
+}
+
+
+void
+ActivityIndicator::stopActivity()
+{
+    Gui::Log::instance()->gui().debug("activity indicator stop activity");
+
+    setActivityInProgress(false);
+    if (indicatorOn() && !_offTimerIsActive) {
+//        Omm::Av::Log::instance()->upnpav().trace("turn off indicator after short delay ...");
+        _offTimerIsActive = true;
+        _offTimer.start(_stopIndicatorCallback);
+    }
+    else {
+//        Omm::Av::Log::instance()->upnpav().trace("indicator already off or timer running, do nothing");
+    }
+}
+
+
+void
+ActivityIndicator::stopIndicator(Poco::Timer& timer)
+{
+    if (!activityInProgress() && indicatorOn()) {
+        setModel(_pActivityOffModel);
+        setIndicatorOn(false);
+//        Omm::Av::Log::instance()->upnpav().trace("INDICATOR TURNED OFF, no activity in progress anymore");
+    }
+    else {
+//        Omm::Av::Log::instance()->upnpav().trace("turn off indicator ignored, activity still in progress or indicator already off");
+    }
+    _offTimerIsActive = false;
+}
+
+
+void
+ActivityIndicator::setActivityInProgress(bool set)
+{
+    Poco::ScopedLock<Poco::FastMutex> locker(_activityInProgressLock);
+    if (set) {
+//        Omm::Av::Log::instance()->upnpav().trace("flag \"activity in progress\" set to true");
+    }
+    else {
+//        Omm::Av::Log::instance()->upnpav().trace("flag \"activity in progress\" set to false");
+    }
+    _activityInProgress = set;
+}
+
+
+bool
+ActivityIndicator::activityInProgress()
+{
+    Poco::ScopedLock<Poco::FastMutex> locker(_activityInProgressLock);
+    return _activityInProgress;
+}
+
+
+void
+ActivityIndicator::setIndicatorOn(bool set)
+{
+    Poco::ScopedLock<Poco::FastMutex> locker(_indicatorOnLock);
+    if (set) {
+//        Omm::Av::Log::instance()->upnpav().trace("flag \"indicator on\" set to true");
+    }
+    else {
+//        Omm::Av::Log::instance()->upnpav().trace("flag \"indicator on\" set to false");
+    }
+    _indicatorOn = set;
+}
+
+
+bool
+ActivityIndicator::indicatorOn()
+{
+    Poco::ScopedLock<Poco::FastMutex> locker(_indicatorOnLock);
+    return _indicatorOn;
+}
+
 
 
 } // namespace Omm

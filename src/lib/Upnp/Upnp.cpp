@@ -2022,6 +2022,7 @@ Service::actionNetworkActivity(bool begin)
 {
     Controller* pController = getDevice()->getDeviceContainer()->getController();
     if (pController) {
+        pController->signalNetworkActivity(begin);
         ControllerUserInterface* pUserInterface = pController->getUserInterface();
         if (pUserInterface) {
             if (begin) {

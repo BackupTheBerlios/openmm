@@ -428,6 +428,8 @@ public:
     void setUserInterface(ControllerUserInterface* pUserInterface);
     // deprecated
     ControllerUserInterface* getUserInterface();
+    
+    virtual void signalNetworkActivity(bool on) {}
 
 protected:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
@@ -442,6 +444,7 @@ protected:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
     /// adds device container if not already added before (checks for uuid of root device).
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
+
 
     // deprecated
     ControllerUserInterface*                      _pUserInterface;

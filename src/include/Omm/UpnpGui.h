@@ -41,6 +41,7 @@
 #include "Gui/Label.h"
 #include "Gui/Slider.h"
 #include "Gui/HorizontalLayout.h"
+#include "Gui/Image.h"
 
 
 namespace Omm {
@@ -50,6 +51,7 @@ class GuiVisual;
 class MediaServerGroupWidget;
 class MediaRendererGroupWidget;
 class MediaRendererView;
+class ActivityIndicator;
 
 
 class TransportStateNotification : public Poco::Notification
@@ -75,13 +77,14 @@ public:
     void showMainMenu();
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
+    virtual void signalNetworkActivity(bool on);
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
     MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
     GuiVisual*                  _pVisual;
     MediaRendererView*          _pControlPanel;
-
+    ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;
 };
 
@@ -295,6 +298,37 @@ public:
 };
 
 
+class ActivityIndicator : public Gui::ImageView
+{
+public:
+    ActivityIndicator(Gui::View* pParent = 0);
+    ~ActivityIndicator();
+
+public:
+    void startActivity();
+    void stopActivity();
+
+private:
+    void stopIndicator(Poco::Timer& timer);
+    void setActivityInProgress(bool set);
+    bool activityInProgress();
+    void setIndicatorOn(bool set);
+    bool indicatorOn();
+
+    const int                                   _indicateDuration;
+    Gui::ImageModel*                            _pActivityOffModel;
+    Gui::ImageModel*                            _pActivityOnModel;
+    bool                                        _activityInProgress;
+    Poco::FastMutex                             _activityInProgressLock;
+    bool                                        _indicatorOn;
+    Poco::FastMutex                             _indicatorOnLock;
+    Poco::Timer                                 _offTimer;
+    bool                                        _offTimerIsActive;
+    Poco::TimerCallback<ActivityIndicator>      _stopIndicatorCallback;
+};
+
+
 }  // namespace Omm
+
 
 #endif
