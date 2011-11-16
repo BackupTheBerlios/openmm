@@ -61,6 +61,13 @@ ControllerWidget::getControlPanel()
 }
 
 
+Gui::View*
+ControllerWidget::getStatusBar()
+{
+    return new Gui::View;
+}
+
+
 void
 ControllerWidget::setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer)
 {

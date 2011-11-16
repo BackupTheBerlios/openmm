@@ -69,6 +69,7 @@ public:
 
     GuiVisual* getLocalRendererVisual();
     MediaRendererView* getControlPanel();
+    Gui::View* getStatusBar();
     void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
     void newTransportState(TransportStateNotification* pNotification);
     void showMainMenu();
@@ -80,6 +81,7 @@ private:
     MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
     GuiVisual*                  _pVisual;
     MediaRendererView*          _pControlPanel;
+
     std::string                 _localRendererUuid;
 };
 

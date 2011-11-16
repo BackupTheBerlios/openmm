@@ -113,7 +113,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 
 
 void
-ApplicationImpl::addToolBar(View* pView)
+ApplicationImpl::setToolBar(View* pView)
 {
     _pToolBar = new QToolBar;
     _pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -127,6 +127,23 @@ void
 ApplicationImpl::showToolBar(bool show)
 {
     _pToolBar->setVisible(show);
+}
+
+
+void
+ApplicationImpl::setStatusBar(View* pView)
+{
+    _pStatusBar = new QStatusBar;
+    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
+    _pStatusBar->addWidget(pWidget);
+    _pMainWindow->setStatusBar(_pStatusBar);
+}
+
+
+void
+ApplicationImpl::showStatusBar(bool show)
+{
+    _pStatusBar->setVisible(show);
 }
 
 

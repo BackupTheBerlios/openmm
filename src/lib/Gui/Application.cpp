@@ -89,7 +89,7 @@ Application::height()
 void
 Application::setToolBar(View* pView)
 {
-    _pImpl->addToolBar(pView);
+    _pImpl->setToolBar(pView);
 }
 
 
@@ -97,6 +97,20 @@ void
 Application::showToolBar(bool show)
 {
     _pImpl->showToolBar(show);
+}
+
+
+void
+Application::setStatusBar(View* pView)
+{
+    _pImpl->setStatusBar(pView);
+}
+
+
+void
+Application::showStatusBar(bool show)
+{
+    _pImpl->showStatusBar(show);
 }
 
 

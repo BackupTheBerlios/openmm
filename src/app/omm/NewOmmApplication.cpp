@@ -68,6 +68,7 @@ public:
     {
         _pController = new Omm::ControllerWidget;
         setToolBar(_pController->getControlPanel());
+        setStatusBar(_pController->getStatusBar());
         _pController->attachController(new OmmKeyController(this));
         return _pController;
     }

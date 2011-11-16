@@ -42,7 +42,7 @@ public:
     int width();
     int height();
     void setFullscreen(bool fullscreen);
-    void addToolBar(View* pView);
+    void setToolBar(View* pView);
     void showToolBar(bool show);
     int run(int argc, char** argv);
     void quit() {}

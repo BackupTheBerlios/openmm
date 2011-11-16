@@ -51,6 +51,8 @@ public:
     int height();
     void setToolBar(View* pView);
     void showToolBar(bool show = true);
+    void setStatusBar(View* pView);
+    void showStatusBar(bool show = true);
 
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}
