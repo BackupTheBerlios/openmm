@@ -84,11 +84,20 @@ include_directories(${POCO_INCLUDE_DIRS})
 # build what is available in the source tree (libs, plugins, apps, tests)
 add_subdirectory(src)
 
-include(CPack)
+# CPack related for creating binary distribution packages
+
 #include(InstallRequiredSystemLibraries)
 set(CPACK_GENERATOR
-TGZ STGZ DEB
+"TGZ;STGZ;DEB"
 )
 set(CPACK_INSTALL_CMAKE_PROJECTS
-"omm" omm newomm ""
+"/home/jb/devel/ommbin;omm;ALL;/"
+#"${CMAKE_CURRENT_BIN_DIR};omm;ALL;/"
 )
+set(CPACK_PACKAGE_CONTACT
+"jb@open-multimedia.org"
+)
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER
+"jb@open-multimedia.org"
+)
+include(CPack)

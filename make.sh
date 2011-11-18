@@ -111,6 +111,7 @@ then
 elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
+    rm -f CMakeCache.txt
 
    # resgen needs to be build first and executed on host platform, not target platform
     ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_NATIVE_OPTS} -DCMAKE_MODULE_PATH=${SRC_DIR}/cmake ${SRC_DIR}/src/util/resgen
