@@ -835,7 +835,7 @@ Gui::ImageView(pParent),
 _indicateDuration(250),
 _activityInProgress(false),
 _indicatorOn(false),
-_offTimerIsActive(false),
+_timerActive(false),
 _pOffTimer(0),
 _stopIndicatorCallback(*this, &ActivityIndicator::stopIndicator)
 {
@@ -876,9 +876,9 @@ ActivityIndicator::stopActivity()
     Gui::Log::instance()->gui().debug("activity indicator stop activity");
 
     setActivityInProgress(false);
-    if (indicatorOn() && !_offTimerIsActive) {
+    if (indicatorOn() && !timerActive()) {
         Gui::Log::instance()->gui().debug("turn off indicator after short delay ...");
-        _offTimerIsActive = true;
+        setTimerActive(true);
         if (_pOffTimer) {
             delete _pOffTimer;
         }
@@ -906,7 +906,7 @@ ActivityIndicator::stopIndicator(Poco::Timer& timer)
     else {
         Gui::Log::instance()->gui().debug("turn off indicator ignored, activity still in progress or indicator already off");
     }
-    _offTimerIsActive = false;
+    setTimerActive(false);
     Gui::Log::instance()->gui().debug("activity indicator stop timer callback finished.");
 }
 
@@ -952,6 +952,22 @@ ActivityIndicator::indicatorOn()
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_indicatorOnLock);
     return _indicatorOn;
+}
+
+
+bool
+ActivityIndicator::timerActive()
+{
+    Poco::ScopedLock<Poco::FastMutex> locker(_timerActiveLock);
+    return _timerActive;
+}
+
+
+void
+ActivityIndicator::setTimerActive(bool set)
+{
+    Poco::ScopedLock<Poco::FastMutex> locker(_timerActiveLock);
+    _timerActive = set;
 }
 
 

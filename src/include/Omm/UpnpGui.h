@@ -314,6 +314,8 @@ private:
     bool activityInProgress();
     void setIndicatorOn(bool set);
     bool indicatorOn();
+    bool timerActive();
+    void setTimerActive(bool set);
 
     const int                                   _indicateDuration;
     Gui::ImageModel*                            _pActivityOffModel;
@@ -324,7 +326,8 @@ private:
     Poco::FastMutex                             _indicatorOnLock;
 //    Poco::Timer                                 _offTimer;
     Poco::Timer*                                _pOffTimer;
-    bool                                        _offTimerIsActive;
+    bool                                        _timerActive;
+    Poco::FastMutex                             _timerActiveLock;
     Poco::TimerCallback<ActivityIndicator>      _stopIndicatorCallback;
 };
 
