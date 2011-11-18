@@ -106,9 +106,8 @@ ApplicationImpl::setFullscreen(bool fullscreen)
             }"
             );
     }
-    if (_pToolBar) {
-        showToolBar(!fullscreen);
-    }
+//    showToolBar(!fullscreen);
+//    showStatusBar(!fullscreen);
 }
 
 
@@ -126,7 +125,9 @@ ApplicationImpl::setToolBar(View* pView)
 void
 ApplicationImpl::showToolBar(bool show)
 {
-    _pToolBar->setVisible(show);
+    if (_pToolBar) {
+        _pToolBar->setVisible(show);
+    }
 }
 
 
@@ -143,7 +144,9 @@ ApplicationImpl::setStatusBar(View* pView)
 void
 ApplicationImpl::showStatusBar(bool show)
 {
-    _pStatusBar->setVisible(show);
+    if (_pStatusBar) {
+        _pStatusBar->setVisible(show);
+    }
 }
 
 
@@ -160,18 +163,20 @@ ApplicationImpl::run(int argc, char** argv)
     _pApplication->_pMainView = _pApplication->createMainView();
     _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->_pMainView->getNativeView()));
     _pApplication->createdMainView();
-    if (_pToolBar && _fullscreen) {
-        showToolBar(!_fullscreen);
-    }
     _pMainWindow->show();
     _pMainWindow->resize(width(), height());
     _pApplication->_pMainView->resize(width(), height());
     _pApplication->presentedMainView();
-    _pApplication->start();
 
     _pEventFilter = new QtEventFilter(_pApplication->_pMainView->getViewImpl());
     _pQtApplication->installEventFilter(_pEventFilter);
 
+    if (_fullscreen) {
+        showToolBar(false);
+        showStatusBar(false);
+    }
+
+    _pApplication->start();
     int ret = _pQtApplication->exec();
     Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
     _pApplication->finishedEventLoop();
