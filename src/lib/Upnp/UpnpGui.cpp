@@ -839,7 +839,6 @@ _timerActive(false),
 _pOffTimer(0),
 _stopIndicatorCallback(*this, &ActivityIndicator::stopIndicator)
 {
-//    _offTimer.setStartInterval(_indicateDuration);
     _pActivityOffModel = new Gui::ImageModel;
     _pActivityOffModel->setData(MediaImages::instance()->getResource("activity-off.png"));
     _pActivityOnModel = new Gui::ImageModel;
@@ -885,7 +884,6 @@ ActivityIndicator::stopActivity()
         _pOffTimer = new Poco::Timer;
         _pOffTimer->setStartInterval(_indicateDuration);
         _pOffTimer->start(_stopIndicatorCallback);
-//        _offTimer.start(_stopIndicatorCallback);
     }
     else {
         Gui::Log::instance()->gui().debug("indicator already off or timer running, do nothing");

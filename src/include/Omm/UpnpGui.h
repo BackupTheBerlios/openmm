@@ -324,7 +324,6 @@ private:
     Poco::FastMutex                             _activityInProgressLock;
     bool                                        _indicatorOn;
     Poco::FastMutex                             _indicatorOnLock;
-//    Poco::Timer                                 _offTimer;
     Poco::Timer*                                _pOffTimer;
     bool                                        _timerActive;
     Poco::FastMutex                             _timerActiveLock;
