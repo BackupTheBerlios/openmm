@@ -83,3 +83,12 @@ include_directories(${POCO_INCLUDE_DIRS})
 
 # build what is available in the source tree (libs, plugins, apps, tests)
 add_subdirectory(src)
+
+include(CPack)
+#include(InstallRequiredSystemLibraries)
+set(CPACK_GENERATOR
+TGZ STGZ DEB
+)
+set(CPACK_INSTALL_CMAKE_PROJECTS
+"omm" omm newomm ""
+)

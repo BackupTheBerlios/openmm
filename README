@@ -7,24 +7,25 @@ Contents
 
 -------------------------------------------------------------------------------------------------------
 
-1. Introduction
+1. Introduction (outdated)
 
-Omm is a set of applications and libraries for easily making your multimedia content available 
+Omm is a set of applications and libraries for easily making your multimedia content available
 to your local network. It aims to be compatible to the UPnP V1.0 and UPnP-AV V1.0 specification.
 
 Omm currently includes the following components:
 
-OmmC - a UPnP-AV Media Controller
-OmmC is the "remote control" of your multimedia system.
+omm - the main application, providing a sensible mix of Omm components.
+ommcontrolontrol - a UPnP-AV Media Controller
+ommcontrolontrol is the "remote control" of your multimedia system.
 It lets you select your media source (UPnP-AV Server), browse the content of the server, select a media object
 (song, video, tv-channel, ...), select a media output (UPnP-AV Renderer) and control the transport of the media
-from Server to Renderer (start, stop, seek, ...). 
+from Server to Renderer (start, stop, seek, ...).
 
-OmmR - a UPnP-AV Media Renderer
-OmmR is the "set-top box" for you TV. It renders the media streams
+ommrenderender - a UPnP-AV Media Renderer
+ommrender is the "set-top box" for you TV. It renders the media streams
 coming from the UPnP-AV Server to a screen and a sound system.
 
-OmmS - a set of UPnP-AV Media Servers
+ommserve - a set of UPnP-AV Media Servers
 Currently only a plugin for VDR (Video Disc Recorder - http://www.cadsoft.de/vdr/) is available.
 It gives you access to digital television provided by VDR (DVB-S, DVB-C or DVB-T). The plugin
 exposes the TV channels, you can watch live-TV and the recordings. Seeking in recordings is
@@ -38,8 +39,8 @@ UPnP 1.0 implementation
 libommav
 UPnP AV 1.0 implementation
 
-OmmSession
-A set of images, ready to boot and to provide you with the capabilities of OmmC, OmmR and/or OmmS.
+ommserveession
+A set of images, ready to boot and to provide you with the capabilities of ommcontrol, ommrender and/or ommserve.
 
 -------------------------------------------------------------------------------------------------------
 
@@ -48,37 +49,25 @@ A set of images, ready to boot and to provide you with the capabilities of OmmC,
 To build Omm from source you need CMake as of version 2.6 or later. In the top-level directory
 just run:
 
-$ ./cmake
-$ make
-$ sudo make install
+$ ./make.sh config
+$ ./make.sh
+$ sudo ./make.sh install
 
 and you should be done.
 
-Alternatively you can run
-
-$ ./cmake.sh install
-
-in the top-level directory. This will create the directory
-../ommbin and does an out-of-tree build in it.
-
-You can also build each sub-project seperately by changing into the sub-project's directory 
-(for example omm/controller/) and doing the (cmake; make; sudo make install) triple.
-
 -------------------------------------------------------------------------------------------------------
 
-3. Dependencies
+3. Dependencies (somewhat outdated)
 
-Currently, all Omm components depend on the Platinum UPnP library 0.4.6 or later 
-(http://sourceforge.net/projects/platinum/). A tar-ball with a CMake build script is provided
-on Omm's website for convenience. You can build a shared library called libplatinum-upnp.so with
-it, just as Omm expects it to find on your system. Further dependencies are:
+Currently, all Omm components depend on the Poco libraries (http://pocoproject.org/).
+Further dependencies are:
 
-OmmC: Qt 4.4.3 or later
-OmmR: X with support for xvideo is currently recommended
-OmmR VLC engine: libvlc (as of vlc 0.9.4 or later)
-OmmR mplayer engine: mplayer at least 1.0 pre-something installed as a runtime dependency
-OmmR xine engine: libxine 1.1.15 or later
-OmmS-vdr: VDR 1.6.0 with streamdev-server plugin
+ommcontrol: Qt 4.4.3 or later
+ommrender: X with support for xvideo is currently recommended
+ommrender VLC engine: libvlc (as of vlc 0.9.4 or later)
+ommrender mplayer engine: mplayer at least 1.0 pre-something installed as a runtime dependency
+ommrender xine engine: libxine 1.1.15 or later
+ommserve-vdr: VDR 1.6.0 with streamdev-server plugin
 
 The mplayer engine has an incredible good seek performance on http streams, but has some flaws when
 it comes to controlling it via IPC.
@@ -93,16 +82,16 @@ So, currently I recommend the VLC engine.
 
 -------------------------------------------------------------------------------------------------------
 
-4. Running the Applications
+4. Running the Applications (outdated)
 
-This is pretty straight forward: just run ommc or ommr on a single or on several different machines.
+This is pretty straight forward: just run ommcontrol or ommrender on a single or on several different machines.
 No configuration is needed, in the first place. All UPnP-AV Servers and UPnP-AV Renderers announce
-themselves on the local network and then pop up in OmmC. You can quit or start a second OmmC while
-some media is rendered, so different instances of OmmC can concurrently control one playing media.
-On the other hand, one instance of OmmC can control different instances of OmmR, for example one
+themselves on the local network and then pop up in ommcontrol. You can quit or start a second ommcontrol while
+some media is rendered, so different instances of ommcontrol can concurrently control one playing media.
+On the other hand, one instance of ommcontrol can control different instances of ommrender, for example one
 in the living-room and one in the kitchen. Your mileage may vary.
 
-OmmS-vdr must be installed as a vdr-plugin, usually in /usr/lib/vdr/plugins. The streamdev-plugin must be
+ommserve-vdr must be installed as a vdr-plugin, usually in /usr/lib/vdr/plugins. The streamdev-plugin must be
 configured and working on the standard ports. Don't forget to add:
 
 streamdev-server.AllowSuspend = 1
@@ -112,7 +101,7 @@ to vdr's setup.conf, to enable changing of transponders on the stream's request.
 
 -------------------------------------------------------------------------------------------------------
 
-5. Compatibility
+5. Compatibility (outdated)
 
 Currently, only Mediatomb (http://mediatomb.cc) has been tested to work nicely with the Omm applications. Please give
 feedback, if you have tested others.

@@ -104,14 +104,14 @@ then
     if [ ${STAGING_DIR} ]
     then
         echo "removing staging files:"
-        rm -rvf ${STAGING_DIR}/lib/omm ${STAGING_DIR}/include/Omm 
+        rm -rvf ${STAGING_DIR}/lib/omm ${STAGING_DIR}/include/Omm
         rm -vf ${STAGING_DIR}/lib/libomm* ${STAGING_DIR}/bin/omm* ${STAGING_DIR}/bin/libomm*
     fi
 # configure build system
 elif [ "${1}" = "config" ]
 then
     cd ${BIN_DIR}
- 
+
    # resgen needs to be build first and executed on host platform, not target platform
     ${CMAKE_CMD} -G"${CMAKE_GENERATOR}" ${CMAKE_NATIVE_OPTS} -DCMAKE_MODULE_PATH=${SRC_DIR}/cmake ${SRC_DIR}/src/util/resgen
     # make resgen, which is needed for building the libraries
