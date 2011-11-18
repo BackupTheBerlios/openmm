@@ -44,15 +44,15 @@ public:
 
     virtual CtlMediaObject2* createMediaObject();
     CtlMediaObject2* getRootObject() const;
-    
+
     void selectMediaObject(CtlMediaObject2* pObject);
 
 //protected:
     void browseRootObject();
 
-private:    
+private:
     CtlMediaServerCode*   _pCtlMediaServerCode;
-    CtlMediaObject2*       _pRoot;
+    CtlMediaObject2*      _pRoot;
 };
 
 

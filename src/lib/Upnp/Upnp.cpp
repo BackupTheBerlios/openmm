@@ -46,6 +46,8 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/URI.h>
 
 #include "Upnp.h"
 #include "UpnpPrivate.h"
@@ -74,16 +76,16 @@ Log::Log()
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, 0);
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, 0);
 #else
-//    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_ERROR);
 #endif
@@ -698,6 +700,47 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
             }
         }
         else if (pNode->nodeName() == "iconList") {
+            if (pNode->hasChildNodes()) {
+                Poco::XML::Node* pChild = pNode->firstChild();
+                while (pChild) {
+                    if (pChild->nodeName() == "icon") {
+                        int width = 0;
+                        int height = 0;
+                        int depth = 0;
+                        std::string mime;
+                        std::string uri;
+                        Poco::URI targetUri(_deviceDescriptionUri);
+                        if (pChild->hasChildNodes()) {
+                            Poco::XML::Node* pIconAttr = pChild->firstChild();
+                            while (pIconAttr) {
+                                if (pIconAttr->nodeName() == "mimetype") {
+                                    mime = pIconAttr->innerText();
+                                }
+                                else if (pIconAttr->nodeName() == "width") {
+                                    width = Poco::NumberParser::parse(pIconAttr->innerText());
+                                }
+                                else if (pIconAttr->nodeName() == "height") {
+                                    height = Poco::NumberParser::parse(pIconAttr->innerText());
+                                }
+                                else if (pIconAttr->nodeName() == "depth") {
+                                    depth = Poco::NumberParser::parse(pIconAttr->innerText());
+                                }
+                                else if (pIconAttr->nodeName() == "url") {
+                                    targetUri.resolve(pIconAttr->innerText());
+                                    uri = targetUri.toString();
+                                }
+                                pIconAttr = pIconAttr->nextSibling();
+                            }
+                        Icon* pIcon = new Icon(width, height, depth, mime, uri);
+                        pRes->addIcon(pIcon);
+                        }
+                        else {
+                            Log::instance()->desc().error("empty icon specification");
+                        }
+                    }
+                    pChild = pChild->nextSibling();
+                }
+            }
         }
         else {
             pRes->addProperty(pNode->nodeName(), pNode->innerText());
@@ -2904,6 +2947,13 @@ DeviceManager::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 }
 
 
+int
+DeviceManager::getDeviceContainerCount()
+{
+    return _deviceContainers.size();
+}
+
+
 void
 DeviceManager::init()
 {
@@ -3259,7 +3309,7 @@ DeviceContainer::initDevice()
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         for(Device::IconIterator i = (*d)->beginIcon(); i != (*d)->endIcon(); ++i) {
             // prepend the already assigned icon request path with the device uuid.
-            (*i)->setIconRequestPath((*d)->getUuid() + "/" + (*i)->getIconRequestPath());
+            (*i)->setIconRequestPath("/" + (*d)->getUuid() + "/" + (*i)->getIconRequestPath());
         }
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             std::string servicePathPrefix = "/" + (*d)->getUuid() + "/" + (*s)->getServiceType();
@@ -3363,8 +3413,7 @@ Device::setRandomUuid()
 void
 Device::addIcon(Icon* pIcon)
 {
-    _pDeviceData->_iconList.push_back(pIcon);
-    pIcon->_requestPath = "DeviceIcon" + Poco::NumberFormatter::format(_pDeviceData->_iconList.size());
+    _pDeviceData->addIcon(pIcon);
 }
 
 
@@ -3625,6 +3674,14 @@ DeviceData::addService(Service* pService)
 {
     _services.append(pService->getServiceType(), pService);
     pService->setDeviceData(this);
+}
+
+
+void
+DeviceData::addIcon(Icon* pIcon)
+{
+    _iconList.push_back(pIcon);
+    pIcon->_requestPath = "DeviceIcon" + Poco::NumberFormatter::format(_iconList.size());
 }
 
 

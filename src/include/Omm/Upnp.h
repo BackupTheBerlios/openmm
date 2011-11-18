@@ -105,6 +105,7 @@ class Icon
     friend class DeviceServer;
     friend class DeviceContainer;
     friend class Device;
+    friend class DeviceData;
     friend class DescriptionWriter;
 
 public:
@@ -379,6 +380,7 @@ public:
 
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
+    int getDeviceContainerCount();
 
     void init();
     void start();
@@ -428,7 +430,7 @@ public:
     void setUserInterface(ControllerUserInterface* pUserInterface);
     // deprecated
     ControllerUserInterface* getUserInterface();
-    
+
     virtual void signalNetworkActivity(bool on) {}
 
 protected:

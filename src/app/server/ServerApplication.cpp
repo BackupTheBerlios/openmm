@@ -48,11 +48,11 @@ public:
     {
         setUnixOptions(true);
     }
-    
+
     ~UpnpAvServerApplication()
     {
     }
-    
+
 protected:
     void initialize(Application& self)
     {
@@ -62,16 +62,16 @@ protected:
 //        Poco::Logger::setLevel("", 0);
 //        self.logger().setLevel(0);
     }
-    
+
     void uninitialize()
     {
         ServerApplication::uninitialize();
     }
-    
+
     void defineOptions(OptionSet& options)
     {
         ServerApplication::defineOptions(options);
-        
+
         options.addOption(
                            Option("help", "h", "display help information on command line arguments")
                            .required(false)
@@ -92,11 +92,11 @@ protected:
                            .repeatable(false)
                            .argument("friendly name", true));
     }
-    
+
     void handleOption(const std::string& name, const std::string& value)
     {
         ServerApplication::handleOption(name, value);
-        
+
         if (name == "help") {
             _helpRequested = true;
         }
@@ -110,7 +110,7 @@ protected:
             _name = value;
         }
     }
-    
+
     void displayHelp()
     {
         HelpFormatter helpFormatter(options());
@@ -119,7 +119,7 @@ protected:
         helpFormatter.setHeader("A UPnP Device that implements a UPnP-AV Media Server.");
         helpFormatter.format(std::cout);
     }
-    
+
     int main(const std::vector<std::string>& args)
     {
         if (_helpRequested)
@@ -138,7 +138,7 @@ protected:
                 return 1;
             }
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
-            
+
             std::string home = Poco::Environment::get("HOME");
             if (_containerPlugin == "server-dvb") {
                 if (_name == "") {
@@ -174,7 +174,7 @@ protected:
             Omm::Av::MediaServer mediaServer;
             mediaServer.setRoot(pContainerPlugin);
             mediaServer.setFriendlyName(_name);
-            Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "device.png");
+            Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
             mediaServer.addIcon(pIcon);
 
             // create a device container and put media server device in it.
@@ -191,12 +191,12 @@ protected:
             server.start();
 
             waitForTerminationRequest();
-            
+
             server.stop();
         }
         return Application::EXIT_OK;
     }
-    
+
 private:
     bool            _helpRequested;
     std::string     _containerPlugin;

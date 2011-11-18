@@ -589,8 +589,17 @@ MediaServerDevice::initController()
     pLabelModel->setLabel(getFriendlyName());
     setLabelModel(pLabelModel);
 
+    Icon* pIcon = 0;
+    for (IconIterator it = beginIcon(); it != endIcon(); ++it) {
+        pIcon = *it;
+    }
     Gui::ImageModel* pImageModel = new Gui::ImageModel;
-    pImageModel->setData(MediaImages::instance()->getResource("media-server.png"));
+    if (pIcon) {
+        pImageModel->setData(pIcon->getBuffer());
+    }
+    else {
+        pImageModel->setData(MediaImages::instance()->getResource("media-server.png"));
+    }
     setImageModel(pImageModel);
 }
 
