@@ -856,7 +856,7 @@ ActivityIndicator::~ActivityIndicator()
 void
 ActivityIndicator::startActivity()
 {
-    Gui::Log::instance()->gui().debug("activity indicator start activity");
+//    Gui::Log::instance()->gui().debug("activity indicator start activity");
 
     setActivityInProgress(true);
     if (!indicatorOn()) {
@@ -864,7 +864,7 @@ ActivityIndicator::startActivity()
         setModel(_pActivityOnModel);
     }
     else {
-        Gui::Log::instance()->gui().debug("indicator already on, do nothing");
+//        Gui::Log::instance()->gui().debug("indicator already on, do nothing");
     }
 }
 
@@ -872,11 +872,11 @@ ActivityIndicator::startActivity()
 void
 ActivityIndicator::stopActivity()
 {
-    Gui::Log::instance()->gui().debug("activity indicator stop activity");
+//    Gui::Log::instance()->gui().debug("activity indicator stop activity");
 
     setActivityInProgress(false);
     if (indicatorOn() && !timerActive()) {
-        Gui::Log::instance()->gui().debug("turn off indicator after short delay ...");
+//        Gui::Log::instance()->gui().debug("turn off indicator after short delay ...");
         setTimerActive(true);
         if (_pOffTimer) {
             delete _pOffTimer;
@@ -886,7 +886,7 @@ ActivityIndicator::stopActivity()
         _pOffTimer->start(_stopIndicatorCallback);
     }
     else {
-        Gui::Log::instance()->gui().debug("indicator already off or timer running, do nothing");
+//        Gui::Log::instance()->gui().debug("indicator already off or timer running, do nothing");
     }
 }
 
@@ -894,18 +894,18 @@ ActivityIndicator::stopActivity()
 void
 ActivityIndicator::stopIndicator(Poco::Timer& timer)
 {
-    Gui::Log::instance()->gui().debug("activity indicator stop timer callback ...");
+//    Gui::Log::instance()->gui().debug("activity indicator stop timer callback ...");
 
     if (!activityInProgress() && indicatorOn()) {
         setModel(_pActivityOffModel);
         setIndicatorOn(false);
-        Gui::Log::instance()->gui().debug("indicator turned off, no activity in progress anymore");
+//        Gui::Log::instance()->gui().debug("indicator turned off, no activity in progress anymore");
     }
     else {
-        Gui::Log::instance()->gui().debug("turn off indicator ignored, activity still in progress or indicator already off");
+//        Gui::Log::instance()->gui().debug("turn off indicator ignored, activity still in progress or indicator already off");
     }
     setTimerActive(false);
-    Gui::Log::instance()->gui().debug("activity indicator stop timer callback finished.");
+//    Gui::Log::instance()->gui().debug("activity indicator stop timer callback finished.");
 }
 
 
@@ -914,10 +914,10 @@ ActivityIndicator::setActivityInProgress(bool set)
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_activityInProgressLock);
     if (set) {
-        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to true");
+//        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to true");
     }
     else {
-        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to false");
+//        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to false");
     }
     _activityInProgress = set;
 }
@@ -936,10 +936,10 @@ ActivityIndicator::setIndicatorOn(bool set)
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_indicatorOnLock);
     if (set) {
-        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to true");
+//        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to true");
     }
     else {
-        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to false");
+//        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to false");
     }
     _indicatorOn = set;
 }
