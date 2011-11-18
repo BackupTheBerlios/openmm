@@ -836,9 +836,10 @@ _indicateDuration(250),
 _activityInProgress(false),
 _indicatorOn(false),
 _offTimerIsActive(false),
+_pOffTimer(0),
 _stopIndicatorCallback(*this, &ActivityIndicator::stopIndicator)
 {
-    _offTimer.setStartInterval(_indicateDuration);
+//    _offTimer.setStartInterval(_indicateDuration);
     _pActivityOffModel = new Gui::ImageModel;
     _pActivityOffModel->setData(MediaImages::instance()->getResource("activity-off.png"));
     _pActivityOnModel = new Gui::ImageModel;
@@ -864,7 +865,7 @@ ActivityIndicator::startActivity()
         setModel(_pActivityOnModel);
     }
     else {
-//        Omm::Av::Log::instance()->upnpav().trace("indicator already on, do nothing");
+        Gui::Log::instance()->gui().debug("indicator already on, do nothing");
     }
 }
 
@@ -876,12 +877,18 @@ ActivityIndicator::stopActivity()
 
     setActivityInProgress(false);
     if (indicatorOn() && !_offTimerIsActive) {
-//        Omm::Av::Log::instance()->upnpav().trace("turn off indicator after short delay ...");
+        Gui::Log::instance()->gui().debug("turn off indicator after short delay ...");
         _offTimerIsActive = true;
-        _offTimer.start(_stopIndicatorCallback);
+        if (_pOffTimer) {
+            delete _pOffTimer;
+        }
+        _pOffTimer = new Poco::Timer;
+        _pOffTimer->setStartInterval(_indicateDuration);
+        _pOffTimer->start(_stopIndicatorCallback);
+//        _offTimer.start(_stopIndicatorCallback);
     }
     else {
-//        Omm::Av::Log::instance()->upnpav().trace("indicator already off or timer running, do nothing");
+        Gui::Log::instance()->gui().debug("indicator already off or timer running, do nothing");
     }
 }
 
@@ -889,15 +896,18 @@ ActivityIndicator::stopActivity()
 void
 ActivityIndicator::stopIndicator(Poco::Timer& timer)
 {
+    Gui::Log::instance()->gui().debug("activity indicator stop timer callback ...");
+
     if (!activityInProgress() && indicatorOn()) {
         setModel(_pActivityOffModel);
         setIndicatorOn(false);
-//        Omm::Av::Log::instance()->upnpav().trace("INDICATOR TURNED OFF, no activity in progress anymore");
+        Gui::Log::instance()->gui().debug("indicator turned off, no activity in progress anymore");
     }
     else {
-//        Omm::Av::Log::instance()->upnpav().trace("turn off indicator ignored, activity still in progress or indicator already off");
+        Gui::Log::instance()->gui().debug("turn off indicator ignored, activity still in progress or indicator already off");
     }
     _offTimerIsActive = false;
+    Gui::Log::instance()->gui().debug("activity indicator stop timer callback finished.");
 }
 
 
@@ -906,10 +916,10 @@ ActivityIndicator::setActivityInProgress(bool set)
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_activityInProgressLock);
     if (set) {
-//        Omm::Av::Log::instance()->upnpav().trace("flag \"activity in progress\" set to true");
+        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to true");
     }
     else {
-//        Omm::Av::Log::instance()->upnpav().trace("flag \"activity in progress\" set to false");
+        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to false");
     }
     _activityInProgress = set;
 }
@@ -928,10 +938,10 @@ ActivityIndicator::setIndicatorOn(bool set)
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_indicatorOnLock);
     if (set) {
-//        Omm::Av::Log::instance()->upnpav().trace("flag \"indicator on\" set to true");
+        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to true");
     }
     else {
-//        Omm::Av::Log::instance()->upnpav().trace("flag \"indicator on\" set to false");
+        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to false");
     }
     _indicatorOn = set;
 }
