@@ -46,12 +46,21 @@ QT4_WRAP_CPP(
 OMMGUI_QT_MOC_CPP ${OMMGUI_QT_MOC}
 )
 
+# Workaround, linux linker can't link Qt gui backend statically
+if(LINUX)
+add_library(ommgui-qt
+${OMMGUI_QT_SRC}
+${OMMGUI_QT_MOC_CPP}
+${OMMGUI_RES_SRC}
+)
+else(LINUX)
 add_library(ommgui-qt
 STATIC
 ${OMMGUI_QT_SRC}
 ${OMMGUI_QT_MOC_CPP}
 ${OMMGUI_RES_SRC}
 )
+endif(LINUX)
 
 target_link_libraries(ommgui-qt
 ${QT_LIBRARIES}

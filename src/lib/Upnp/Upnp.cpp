@@ -703,6 +703,7 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
             }
         }
         else if (pNode->nodeName() == "iconList") {
+            // FIXME: exception under windows with icon support
             if (false && pNode->hasChildNodes()) {
                 Poco::XML::Node* pChild = pNode->firstChild();
                 while (pChild) {
