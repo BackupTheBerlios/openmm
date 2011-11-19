@@ -77,13 +77,13 @@ Log::Log()
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, 0);
 #else
     _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
@@ -437,26 +437,29 @@ SsdpSocket::setupSockets()
     try {
         _pSsdpLocalSenderSocket->setBroadcast(true);
     }
-    catch(Poco::Net::NetException& e) {
+    catch(Poco::Exception& e) {
         Log::instance()->ssdp().error("failed to set local SSDP socket to broadcast : " + e.message());
     }
     setMode(Broadcast);
     try {
         _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     }
-    catch(Poco::Net::NetException& e) {
+    catch(Poco::Exception& e) {
         Log::instance()->ssdp().error("failed to join multicast group: " + e.message());
         Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
         Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
         Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
         return;
     }
+#ifndef __WINDOWS__
+    // set TTL on windows raises Poco::InvalidArgumentException.
     try {
         _pSsdpSenderSocket->setTimeToLive(4);
     }
-    catch(Poco::Net::NetException& e) {
+    catch(Poco::Exception& e) {
         Log::instance()->ssdp().error("failed to set TTL of SSDP socket: " + e.message());
     }
+#endif
     // switch to multicast was succesfull, so we turn on multicast flag.
     setMode(Multicast);
     Log::instance()->ssdp().debug("setting up SSDP sockets in multicast mode finished.");
@@ -700,7 +703,7 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
             }
         }
         else if (pNode->nodeName() == "iconList") {
-            if (pNode->hasChildNodes()) {
+            if (false && pNode->hasChildNodes()) {
                 Poco::XML::Node* pChild = pNode->firstChild();
                 while (pChild) {
                     if (pChild->nodeName() == "icon") {

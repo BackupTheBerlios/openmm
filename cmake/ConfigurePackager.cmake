@@ -16,7 +16,8 @@ set(CMAKE_INSTALL_DEBUG_LIBRARIES
 )
 include(InstallRequiredSystemLibraries)
 set(CPACK_GENERATOR
-"TGZ;NSIS"
+"TGZ"
+#"TGZ;NSIS"
 )
 endif(LINUX)
 
