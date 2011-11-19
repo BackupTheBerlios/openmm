@@ -7,7 +7,7 @@ Contents
 
 -------------------------------------------------------------------------------------------------------
 
-1. Introduction (outdated)
+1. Introduction (outdated, incomplete)
 
 Omm is a set of applications and libraries for easily making your multimedia content available
 to your local network. It aims to be compatible to the UPnP V1.0 and UPnP-AV V1.0 specification.
@@ -15,13 +15,14 @@ to your local network. It aims to be compatible to the UPnP V1.0 and UPnP-AV V1.
 Omm currently includes the following components:
 
 omm - the main application, providing a sensible mix of Omm components.
-ommcontrolontrol - a UPnP-AV Media Controller
-ommcontrolontrol is the "remote control" of your multimedia system.
+
+ommcontrol - a UPnP-AV Media Controller
+ommcontrol is the "remote control" of your multimedia system.
 It lets you select your media source (UPnP-AV Server), browse the content of the server, select a media object
 (song, video, tv-channel, ...), select a media output (UPnP-AV Renderer) and control the transport of the media
 from Server to Renderer (start, stop, seek, ...).
 
-ommrenderender - a UPnP-AV Media Renderer
+ommrender - a UPnP-AV Media Renderer
 ommrender is the "set-top box" for you TV. It renders the media streams
 coming from the UPnP-AV Server to a screen and a sound system.
 
@@ -33,14 +34,11 @@ supported. For browsing the EPG or setting timers you need a web based interface
 For delivering other content, such as music and video files (mp3, avi, ...) you can use one
 of the UPnP-AV servers out there (see compatibility list below).
 
-libomm
+libommupnp
 UPnP 1.0 implementation
 
-libommav
+libommupnpav
 UPnP AV 1.0 implementation
-
-ommserveession
-A set of images, ready to boot and to provide you with the capabilities of ommcontrol, ommrender and/or ommserve.
 
 -------------------------------------------------------------------------------------------------------
 
@@ -51,15 +49,20 @@ just run:
 
 $ ./make.sh config
 $ ./make.sh
-$ sudo ./make.sh install
 
 and you should be done.
+
+Install the binaries directly from the build tree
+$ sudo ./make.sh install
+
+or create packages:
+$ ./make.sh package
 
 -------------------------------------------------------------------------------------------------------
 
 3. Dependencies (somewhat outdated)
 
-Currently, all Omm components depend on the Poco libraries (http://pocoproject.org/).
+All Omm components depend on the Poco libraries (http://pocoproject.org/).
 Further dependencies are:
 
 ommcontrol: Qt 4.4.3 or later

@@ -63,7 +63,11 @@ public:
     virtual ~View();
 
     void* getNativeView();
+#ifdef __WINDOWS__
+    void* getNativeWindowId();
+#else
     uint32_t getNativeWindowId();
+#endif
     View* getParent();
     void addSubview(View* pView);
 

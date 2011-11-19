@@ -46,7 +46,11 @@ public:
 
     View* getView();
     QWidget* getNativeView();
+#ifdef __WINDOWS__
+    void* getNativeWindowId();
+#else
     uint32_t getNativeWindowId();
+#endif
     void setNativeView(QWidget* pView);
     virtual void addSubview(View* pView);
     virtual void showView(bool async);

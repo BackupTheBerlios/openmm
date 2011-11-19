@@ -21,8 +21,8 @@
 
 #include <iostream>
 // Bug in old cmake find file for qt: though package Xml is selected, include path is missing
-#include <qt4/QtXml/QtXml>
-//#include <QtXml>
+//#include <qt4/QtXml/QtXml>
+#include <QtXml>
 #include "logan.h"
 
 
@@ -97,7 +97,7 @@ void
 LoganFileWatcher::closeFile()
 {
     std::clog << "close file " << _fileInfo.absoluteFilePath().toStdString() << std::endl;
-    
+
     disconnect(&_fileSystemWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
     _fileSystemWatcher.removePath(_fileInfo.absoluteFilePath());
     _file.close();
@@ -564,6 +564,6 @@ main(int argc, char** argv)
     delete pMainWindow;
 
     LoganSettings::release();
-    
+
     return ret;
 }

@@ -85,19 +85,5 @@ include_directories(${POCO_INCLUDE_DIRS})
 add_subdirectory(src)
 
 # CPack related for creating binary distribution packages
-
-#include(InstallRequiredSystemLibraries)
-set(CPACK_GENERATOR
-"TGZ;STGZ;DEB"
-)
-set(CPACK_INSTALL_CMAKE_PROJECTS
-"/home/jb/devel/ommbin;omm;ALL;/"
-#"${CMAKE_CURRENT_BIN_DIR};omm;ALL;/"
-)
-set(CPACK_PACKAGE_CONTACT
-"jb@open-multimedia.org"
-)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER
-"jb@open-multimedia.org"
-)
+include(ConfigurePackager)
 include(CPack)
