@@ -71,8 +71,8 @@ Upnp/UpnpApplication.cpp
 )
 
 target_link_libraries(ommupnp
-${POCO_XML}
-${POCO_UTIL}
+#${POCO_XML}
+#${POCO_UTIL}
 ommnet
 ommutil
 )

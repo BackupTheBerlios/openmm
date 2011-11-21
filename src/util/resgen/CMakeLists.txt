@@ -9,9 +9,9 @@ main.cpp
 )
 
 target_link_libraries(resgen
-${POCO_FOUNDATION}
 ${POCO_UTIL}
 ${POCO_XML}
+${POCO_FOUNDATION}
 )
 
 if(NOT RESGEN)

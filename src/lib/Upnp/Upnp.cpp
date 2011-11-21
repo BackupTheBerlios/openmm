@@ -152,6 +152,7 @@ _mime(mime),
 _requestPath(""),
 _searchPath(":/usr/lib/omm:/usr/local/lib/omm")
 {
+    Log::instance()->upnp().debug("search default icon path and OMM_ICON_PATH for icon: " + uri);
     try {
         _searchPath = Poco::Environment::get("OMM_ICON_PATH") + _searchPath;
     }
@@ -199,6 +200,7 @@ Icon::setIconRequestPath(const std::string& path)
 void
 Icon::retrieve(const std::string& uri)
 {
+    Log::instance()->upnp().debug("retrieve icon: " + uri);
     Poco::URI iconUri(uri);
 
     if (iconUri.getScheme() == "file") {
@@ -451,7 +453,6 @@ SsdpSocket::setupSockets()
         Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
         return;
     }
-#ifndef __WINDOWS__
     // set TTL on windows raises Poco::InvalidArgumentException.
     try {
         _pSsdpSenderSocket->setTimeToLive(4);
@@ -459,7 +460,6 @@ SsdpSocket::setupSockets()
     catch(Poco::Exception& e) {
         Log::instance()->ssdp().error("failed to set TTL of SSDP socket: " + e.message());
     }
-#endif
     // switch to multicast was succesfull, so we turn on multicast flag.
     setMode(Multicast);
     Log::instance()->ssdp().debug("setting up SSDP sockets in multicast mode finished.");
@@ -704,7 +704,7 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
         }
         else if (pNode->nodeName() == "iconList") {
             // FIXME: exception under windows with icon support
-            if (false && pNode->hasChildNodes()) {
+            if (pNode->hasChildNodes()) {
                 Poco::XML::Node* pChild = pNode->firstChild();
                 while (pChild) {
                     if (pChild->nodeName() == "icon") {
