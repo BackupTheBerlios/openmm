@@ -44,6 +44,8 @@ public:
     void setFullscreen(bool fullscreen);
     void setToolBar(View* pView);
     void showToolBar(bool show);
+    void setStatusBar(View* pView);
+    void showStatusBar(bool show);
     int run(int argc, char** argv);
     void quit() {}
 

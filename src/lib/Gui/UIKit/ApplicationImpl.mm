@@ -184,7 +184,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 
 
 void
-ApplicationImpl::addToolBar(View* pView)
+ApplicationImpl::setToolBar(View* pView)
 {
     _pToolBar = pView;
 }
@@ -193,6 +193,20 @@ ApplicationImpl::addToolBar(View* pView)
 void
 ApplicationImpl::showToolBar(bool show)
 {
+}
+
+
+void
+ApplicationImpl::setStatusBar(View* pView)
+{
+    // TODO: implement UIKit status bar
+}
+
+
+void
+ApplicationImpl::showStatusBar(bool show)
+{
+    // TODO: implement UIKit status bar
 }
 
 
