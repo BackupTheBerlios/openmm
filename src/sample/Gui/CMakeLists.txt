@@ -1,3 +1,6 @@
+# FIXME: temporarily disabled because of mingw static linking issues
+return()
+
 add_executable(plain
 Plain.cpp
 )

@@ -1,3 +1,7 @@
+if(WINDOWS)
+set(BUILD_SHARED_LIBS FALSE)
+endif(WINDOWS)
+
 set(OMM_INCLUDE_DIR
 ${omm_SOURCE_DIR}/src/include/Omm
 CACHE INTERNAL ommincludedir
