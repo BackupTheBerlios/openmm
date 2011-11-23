@@ -23,6 +23,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "ViewImpl.h"
+#include "ColorImpl.h"
 #include "QtViewImpl.h"
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
@@ -213,7 +214,7 @@ ViewImpl::setHighlighted(bool highlighted)
 void
 ViewImpl::setBackgroundColor(const Color& color)
 {
-    _pNativeView->setPalette(QPalette(*static_cast<QColor*>(color.getNativeColor())));
+    _pNativeView->setPalette(QPalette(*static_cast<QColor*>(color._pImpl->getNativeColor())));
 }
 
 

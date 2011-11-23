@@ -1,7 +1,3 @@
-# FIXME: temporarily disabled because of mingw static linking issues
-return()
-
-
 SET( OMMTEST_SSDP_SRCS
 ssdp.cpp
 )

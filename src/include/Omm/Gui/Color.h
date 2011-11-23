@@ -33,6 +33,8 @@ class ColorImpl;
 
 class Color
 {
+    friend class ViewImpl;
+    
 public:
     Color(const std::string& colorName);
 

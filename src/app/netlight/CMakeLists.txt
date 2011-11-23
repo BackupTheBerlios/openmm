@@ -13,15 +13,11 @@ DimmableLightCtrlAppl.cpp
 target_link_libraries(ommlight
 ${POCO_UTIL}
 ${OMM}
-# FIXME: libommgui not needed, only for mingw static linking (order of Poco libs changes)
-${OMM_GUI}
 )
 
 target_link_libraries(ommlightctrl
 ${POCO_UTIL}
 ${OMM}
-# FIXME: libommgui not needed, only for mingw static linking (order of Poco libs changes)
-${OMM_GUI}
 )
 
 install(TARGETS ommlight ommlightctrl

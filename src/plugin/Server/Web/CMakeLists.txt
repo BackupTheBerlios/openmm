@@ -5,8 +5,6 @@ Webradio.cpp
 )
 
 target_link_libraries(ommplugin-server-webradio
-${POCO_UTIL}
-${POCO_XML}
 ${OMM}
 ${OMM_AV}
 )
@@ -27,8 +25,6 @@ Webradio.cpp
 )
 
 target_link_libraries(ommx-server-webradio
-${POCO_UTIL}
-${POCO_XML}
 ${OMM}
 ${OMM_AV}
 )

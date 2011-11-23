@@ -58,9 +58,9 @@ Net/Net.cpp
 )
 
 target_link_libraries(ommnet
-${POCO_FOUNDATION}
-${POCO_NET}
 ${LIB_OMMNET_PLATFORM}
+${POCO_NET}
+${POCO_FOUNDATION}
 )
 
 set(OMM_NET
@@ -79,6 +79,8 @@ ommnet
 ommutil
 ${POCO_UTIL}
 ${POCO_XML}
+${POCO_NET}
+${POCO_FOUNDATION}
 )
 
 set(OMM
