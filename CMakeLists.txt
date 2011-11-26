@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 2.6.2)
 
 project(omm)
 
+set(OMM_VERSION_MAJOR 0)
+set(OMM_VERSION_MINOR 1)
+set(OMM_VERSION_PATCH 0)
+set(OMM_VERSION "${OMM_VERSION_MAJOR}.${OMM_VERSION_MINOR}.${OMM_VERSION_PATCH}")
+add_definitions(-D__OMM_VERSION_STRING__="${OMM_VERSION}")
+
 # determine build and target system and set variables for cross compiling
 if(CMAKE_CROSSCOMPILING)
 message(STATUS "Host system: " ${CMAKE_HOST_SYSTEM_NAME})

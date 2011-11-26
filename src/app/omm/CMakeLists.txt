@@ -19,7 +19,13 @@ ${OMM_AV}
 )
 
 if(OMM_GUI)
+
+if(WINDOWS)
+set(OMM_RC_FILE omm.rc)
+endif(WINDOWS)
+
 add_executable(newomm
+${OMM_RC_FILE}
 NewOmmApplication.cpp
 )
 

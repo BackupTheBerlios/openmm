@@ -50,8 +50,8 @@
 
 namespace Omm {
 
+static const std::string    OMM_VERSION         = __OMM_VERSION_STRING__;
 static const std::string    UPNP_VERSION        = "1.0";
-static const std::string    OMM_VERSION         = "0.1.0";
 static const std::string    SSDP_FULL_ADDRESS   = "239.255.255.250:1900";
 
 class DescriptionProvider;
