@@ -37,7 +37,7 @@ private:
     virtual void pushed()
     {
         UPDATE_MODEL(Omm::Gui::ButtonModel, setLabel, "works!");
-        syncModelViews();        
+        syncModelViews();
     }
 };
 
@@ -69,7 +69,7 @@ private:
     {
         return new ButtonItem;
     }
-    
+
     std::vector<Omm::Gui::ButtonModel*>    _itemModels;
 };
 

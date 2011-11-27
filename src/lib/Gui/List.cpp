@@ -269,7 +269,7 @@ ListView::resize(int width, int height)
         return;
     }
 
-    int rowDelta = std::min(viewPortHeightInRows(), pModel->totalItemCount()) - _visibleViews.size();
+    int rowDelta = std::min(viewPortHeightInRows(), pModel->totalItemCount() - _rowOffset) - _visibleViews.size();
     if (rowDelta >= 0) {
         for (int i = 0; i < rowDelta; i++) {
             Log::instance()->gui().debug("growing view");
