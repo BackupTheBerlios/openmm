@@ -578,6 +578,7 @@ MediaServerGroupWidget::selectedItem(int row)
         pContainer->_pServerGroup = this;
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
+        pContainer->resize(width(), height());
     }
 }
 

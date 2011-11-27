@@ -47,6 +47,8 @@ LazyListView::setModel(LazyListModel* pModel)
 
     int rows = viewPortHeightInRows();
     int rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
+
+    Log::instance()->gui().debug("lazy list view set model finished.");
 }
 
 
