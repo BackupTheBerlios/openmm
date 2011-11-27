@@ -87,7 +87,11 @@ CtlMediaObject2::getIcon()
 {
     // icon property is a lower resolution thumb nail of the original picture (but should be displayable on a handheld device).
     // TODO: adapt icon to new media object implementataion
-    return new Icon(0, 0, 0, Mime::IMAGE_JPEG, getProperty(AvProperty::ICON)->getValue());
+    AbstractProperty* pProperty = getProperty(AvProperty::ICON);
+    if (pProperty) {
+        return new Icon(0, 0, 0, Mime::IMAGE_JPEG, pProperty->getValue());
+    }
+    return 0;
 }
 
 
