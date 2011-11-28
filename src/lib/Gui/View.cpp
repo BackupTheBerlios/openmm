@@ -234,7 +234,7 @@ View::resize(SizeConstraint size)
 void
 View::resize(int width, int height)
 {
-//    Log::instance()->gui().debug("view resize width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
+    Log::instance()->gui().debug("view resize width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
     _pImpl->resizeView(width, height);
     updateLayout();
 }

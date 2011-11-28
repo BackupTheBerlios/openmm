@@ -178,6 +178,9 @@ void
 ListView::updateScrollWidgetSize()
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (!_pModel) {
+        return;
+    }
     resizeScrollArea(getViewportWidth(), pModel->totalItemCount() * getItemViewHeight());
 }
 
@@ -265,6 +268,10 @@ ListView::resize(int width, int height)
     setItemViewWidth(width);
     // finish if all item views fit into viewport
     ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (!pModel) {
+        return;
+    }
+
     if (pModel->totalItemCount() < viewPortHeightInRows() && _visibleViews.size() != 0) {
         return;
     }
@@ -302,6 +309,9 @@ ListView::extendViewPool()
     Log::instance()->gui().debug("list view \"" + getName() + "\" extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (!pModel) {
+        return;
+    }
 
     for (int i = 0; i < n; ++i) {
 //        Log::instance()->gui().debug("list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));

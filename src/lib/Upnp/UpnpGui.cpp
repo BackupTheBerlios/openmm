@@ -572,13 +572,11 @@ MediaServerGroupWidget::selectedItem(int row)
     if (pRootObject->isContainer()) {
         Gui::Log::instance()->gui().debug("media server group widget selected device has container as root object");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
-        push(pContainer, pServer->getFriendlyName());
-
         pContainer->_pObjectModel = pRootObject;
         pContainer->_pServerGroup = this;
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
-        pContainer->resize(width(), height());
+        push(pContainer, pServer->getFriendlyName());
     }
 }
 
@@ -702,12 +700,11 @@ MediaContainerWidget::selectedItem(int row)
     if (pChildObject->isContainer()) {
         Gui::Log::instance()->gui().debug("media container widget selected media container");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
-        _pServerGroup->push(pContainer, pChildObject->getTitle());
-
         pContainer->_pObjectModel = pChildObject;
         pContainer->_pServerGroup = _pServerGroup;
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
+        _pServerGroup->push(pContainer, pChildObject->getTitle());
     }
     else {
         Gui::Log::instance()->gui().debug("media container widget selected media item");

@@ -49,8 +49,7 @@ NavigatorView::push(View* pView, const std::string& name)
     Log::instance()->gui().debug("navigator push: " + name + " ...");
     static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, name);
     _pViewStack.push(pView);
-//    pView->resize(width(), height());
-//    pView->show();
+    pView->resize(width(), height());
     Log::instance()->gui().debug("navigator push: " + name + " finished.");
 }
 
