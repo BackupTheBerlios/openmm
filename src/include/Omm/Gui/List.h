@@ -70,8 +70,9 @@ protected:
 
     int getOffset();
     void updateScrollWidgetSize();
-    void scrollDelta(int rowDelta);
+    void scrollOneRow(int direction);
     virtual void scrollToRowOffset(int rowOffset);
+
     virtual void resize(int width, int height);
     virtual void scale(float factor);
 
@@ -84,7 +85,6 @@ protected:
     int viewPortHeightInRows();
     View* visibleView(int index);
     bool itemIsVisible(int row);
-    void handleSelectionHighlight();
     int lastVisibleRow();
 
     std::vector<View*>                  _viewPool;
@@ -92,14 +92,15 @@ protected:
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;  // FIXME: int may be not enough for row offset on some platforms
+    int                                 _bottomRows;
     int                                 _itemViewHeight;
-    View*                               _pSelectedView;
-    int                                 _selectedRow;
+    View*                               _pHighlightedView;
+    int                                 _highlightedRow;
 
 private:
     void selectedItem(int row);
     void highlightItem(int row);
-    void selectedItemNotify();
+    void selectHighlightedItem();
 
     std::map<View*, ListItemController*>    _itemControllers;
 };

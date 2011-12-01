@@ -45,6 +45,7 @@ public:
     int getScrollAreaWidth();
     int getScrollAreaHeight();
     void resizeScrollArea(int width, int height);
+    void scrollContentsTo(int x, int y);
     void viewScrolled();
 };
 

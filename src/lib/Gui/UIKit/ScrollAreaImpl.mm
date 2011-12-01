@@ -129,6 +129,13 @@ ScrollAreaViewImpl::resizeScrollArea(int width, int height)
 
 
 void
+ScrollAreaViewImpl::scrollContentsTo(int x, int y)
+{
+    // TODO: implement UIKit scroll area to point
+}
+
+
+void
 ScrollAreaViewImpl::viewScrolled()
 {
     IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());

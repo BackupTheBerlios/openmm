@@ -87,5 +87,14 @@ ScrollAreaView::resizeScrollArea(int width, int height)
 }
 
 
+void
+ScrollAreaView::scrollContentsTo(int x, int y)
+{
+    Log::instance()->gui().debug("scroll area scroll content to: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+
+    static_cast<ScrollAreaViewImpl*>(_pImpl)->scrollContentsTo(x, y);
+}
+
+
 } // namespace Gui
 } // namespace Omm

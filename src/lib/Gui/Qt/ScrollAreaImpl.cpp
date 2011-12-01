@@ -21,6 +21,7 @@
 
 #include <QtGui>
 #include <Poco/NumberFormatter.h>
+#include <qt4/QtGui/qabstractslider.h>
 
 #include "ScrollAreaImpl.h"
 #include "QtScrollAreaImpl.h"
@@ -29,6 +30,16 @@
 
 namespace Omm {
 namespace Gui {
+
+
+//class QtScrollArea : public QScrollArea
+//{
+//public:
+//    virtual void scrollContentsBy(int dx, int dy)
+//    {
+//        QScrollArea::sc
+//    }
+//};
 
 
 ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
@@ -96,6 +107,17 @@ void
 ScrollAreaViewImpl::resizeScrollArea(int width, int height)
 {
     _pScrollWidget->resize(width, height);
+}
+
+
+void
+ScrollAreaViewImpl::scrollContentsTo(int x, int y)
+{
+    static_cast<QScrollArea*>(_pNativeView)->horizontalScrollBar()->setSliderPosition(x);
+    static_cast<QScrollArea*>(_pNativeView)->verticalScrollBar()->setSliderPosition(y);
+//    static_cast<QScrollArea*>(_pNativeView)->scroll(x, y);
+//    static_cast<QScrollArea*>(_pNativeView)->scrollContentsBy(x, y);
+//    static_cast<QScrollArea*>(_pNativeView)->ensureVisible(x, y);
 }
 
 

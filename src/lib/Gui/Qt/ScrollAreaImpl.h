@@ -48,6 +48,7 @@ protected:
     int getScrollAreaWidth();
     int getScrollAreaHeight();
     void resizeScrollArea(int width, int height);
+    void scrollContentsTo(int x, int y);
     // need to override addSubview to operate on widget inside QScrollArea
     virtual void addSubview(View* pView);
 

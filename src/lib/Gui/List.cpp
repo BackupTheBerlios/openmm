@@ -99,13 +99,13 @@ ListScrollAreaController::keyPressed(KeyCode key)
     Log::instance()->gui().debug("list scroll area key pressed");
     switch (key) {
         case Controller::KeyUp:
-            _pListView->highlightItem(_pListView->_selectedRow - 1);
+            _pListView->highlightItem(_pListView->_highlightedRow - 1);
             break;
         case Controller::KeyDown:
-            _pListView->highlightItem(_pListView->_selectedRow + 1);
+            _pListView->highlightItem(_pListView->_highlightedRow + 1);
             break;
         case Controller::KeyReturn:
-            _pListView->selectedItemNotify();
+            _pListView->selectHighlightedItem();
             break;
     }
 }
@@ -115,8 +115,9 @@ ListView::ListView(View* pParent) :
 ScrollAreaView(pParent),
 _itemViewHeight(50),
 _rowOffset(0),
-_pSelectedView(0),
-_selectedRow(-1)
+_bottomRows(2),
+_pHighlightedView(0),
+_highlightedRow(-1)
 {
     attachController(new ListScrollAreaController(this));
 }
@@ -146,7 +147,7 @@ ListView::selectRow(int row)
 int
 ListView::viewPortHeightInRows()
 {
-    return getViewportHeight() / getItemViewHeight() + 2;
+    return getViewportHeight() / getItemViewHeight() + _bottomRows;
 }
 
 
@@ -186,13 +187,13 @@ ListView::updateScrollWidgetSize()
 
 
 void
-ListView::scrollDelta(int rowDelta)
+ListView::scrollOneRow(int direction)
 {
-    Log::instance()->gui().debug("list view scroll delta: " + Poco::NumberFormatter::format(rowDelta) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
+    Log::instance()->gui().debug("list view scroll direction: " + Poco::NumberFormatter::format(direction) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     Log::instance()->gui().debug("total item count: " + Poco::NumberFormatter::format(pModel->totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
-    if (rowDelta > 0) {
+    if (direction > 0) {
         if (pModel->totalItemCount() <= lastVisibleRow()) {
             return;
         }
@@ -211,7 +212,7 @@ ListView::scrollDelta(int rowDelta)
         _visibleViews.push_back(pView);
         _rowOffset++;
     }
-    else if (rowDelta < 0) {
+    else if (direction < 0) {
         // detach model from last visible view
         View* pView = _visibleViews.back();
         pView->hide(false);
@@ -246,10 +247,11 @@ ListView::scrollToRowOffset(int rowOffset)
     int rowDeltaAbsolute = std::abs(rowDelta);
     Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
     while (rowDeltaAbsolute--) {
-        scrollDelta(rowDelta);
+        scrollOneRow(rowDelta);
     }
-
-    handleSelectionHighlight();
+    if (_pHighlightedView) {
+        _pHighlightedView->setHighlighted(itemIsVisible(_highlightedRow));
+    }
 }
 
 
@@ -387,16 +389,6 @@ ListView::itemIsVisible(int row)
 }
 
 
-void
-ListView::handleSelectionHighlight()
-{
-    if (!_pSelectedView) {
-        return;
-    }
-    _pSelectedView->setHighlighted(itemIsVisible(_selectedRow));
-}
-
-
 int
 ListView::lastVisibleRow()
 {
@@ -434,34 +426,49 @@ ListView::selectedItem(int row)
 void
 ListView::highlightItem(int row)
 {
+    Log::instance()->gui().debug("list view highlight row: " + Poco::NumberFormatter::format(row)
+                                + ", _rowOffset: " + Poco::NumberFormatter::format(_rowOffset)
+                                + ", lastVisibleRow: " + Poco::NumberFormatter::format(lastVisibleRow())
+                                + ", last _highlightedRow: " + Poco::NumberFormatter::format(_highlightedRow)
+                                + ", viewport height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows())
+                                + ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight())
+    );
+    if (row < 0) {
+        return;
+    }
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (row >= pModel->totalItemCount()) {
+        return;
+    }
+
     if (row < _rowOffset) {
-        return;
-        scrollToRowOffset(row);
+        Log::instance()->gui().debug("list view scroll backward");
+        scrollContentsTo(0, row * getItemViewHeight());
     }
-    if (row > lastVisibleRow()) {
-        return;
-//        scrollToRowOffset(row - countVisibleViews());
-    }
-
-    if (_selectedRow >= 0 && itemIsVisible(_selectedRow)) {
-        View* pLastSelectedView = visibleView(visibleIndex(_selectedRow));
-        pLastSelectedView->setHighlighted(false);
+    if (row >= lastVisibleRow() - _bottomRows) {
+        Log::instance()->gui().debug("list view scroll forward");
+        scrollContentsTo(0, (row - viewPortHeightInRows() + _bottomRows) * getItemViewHeight());
     }
 
-    View* pSelectedView = visibleView(visibleIndex(row));
-    if (pSelectedView) {
-        pSelectedView->setHighlighted(true);
-        _pSelectedView = pSelectedView;
+    if (_highlightedRow >= 0 && itemIsVisible(_highlightedRow)) {
+        View* pLastHighlightedView = visibleView(visibleIndex(_highlightedRow));
+        pLastHighlightedView->setHighlighted(false);
     }
-    _selectedRow = row;
+
+    View* pHighlightedView = visibleView(visibleIndex(row));
+    if (pHighlightedView) {
+        pHighlightedView->setHighlighted(true);
+        _pHighlightedView = pHighlightedView;
+    }
+    _highlightedRow = row;
 }
 
 
 void
-ListView::selectedItemNotify()
+ListView::selectHighlightedItem()
 {
-    if (_selectedRow >= 0) {
-        NOTIFY_CONTROLLER(ListController, selectedItem, _selectedRow);
+    if (_highlightedRow >= 0) {
+        NOTIFY_CONTROLLER(ListController, selectedItem, _highlightedRow);
     }
 }
 
