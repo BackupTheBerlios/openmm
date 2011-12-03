@@ -39,7 +39,7 @@ public:
     virtual int totalItemCount();
     virtual Omm::Gui::Model* getItemModel(int row);
     virtual Omm::Gui::View* createItemView();
-    
+
 private:
     std::vector<Omm::Gui::ListItemModel*>    _itemModels;
     int                                      _viewCount;
@@ -51,15 +51,15 @@ _viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
         Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
-        
+
         Omm::Gui::ImageModel* pImageModel = new Omm::Gui::ImageModel;
         pImageModel->setData(std::string(ImageData, ImageSize));
         pItemModel->setImageModel(pImageModel);
-        
+
         Omm::Gui::LabelModel* pLabelModel = new Omm::Gui::LabelModel;
         pLabelModel->setLabel("list item " + Poco::NumberFormatter::format(i));
         pItemModel->setLabelModel(pLabelModel);
-        
+
         _itemModels.push_back(pItemModel);
     }
 }
