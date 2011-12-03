@@ -32,6 +32,12 @@ namespace Omm {
 namespace Av {
 
 
+CtlMediaRenderer::CtlMediaRenderer() :
+_pCurrentMediaObject(0)
+{
+}
+
+
 void
 CtlMediaRenderer::addCtlDeviceCode()
 {
@@ -78,7 +84,15 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject)
 //            error(e.message());
             return;
         }
+        _pCurrentMediaObject = pObject;
     }
+}
+
+
+CtlMediaObject2*
+CtlMediaRenderer::getObject()
+{
+    return _pCurrentMediaObject;
 }
 
 

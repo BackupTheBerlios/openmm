@@ -4656,11 +4656,11 @@ DeviceGroup::getDevice(int index) const
 }
 
 
-//Device*
-//DeviceGroup::getDevice(const std::string& uuid)
-//{
-//    return &_devices.get(uuid);
-//}
+Device*
+DeviceGroup::getDevice(const std::string& uuid)
+{
+    return &_devices.get(uuid);
+}
 
 
 Controller*

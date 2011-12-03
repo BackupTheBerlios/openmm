@@ -84,7 +84,19 @@ ControllerWidget::newTransportState(TransportStateNotification* pNotification)
     Gui::Log::instance()->gui().debug("controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
     Gui::Log::instance()->gui().debug("local renderer uuid: " + _localRendererUuid);
     if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING && pNotification->_uuid == _localRendererUuid) {
-        setCurrentView(_pVisual);
+        Av::CtlMediaRenderer* pRenderer = static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getDevice(pNotification->_uuid));
+        if (pRenderer) {
+            Av::CtlMediaObject2* pObject = pRenderer->getObject();
+            if (pObject) {
+                Gui::Log::instance()->gui().debug("local renderer plays object: " + pObject->getTitle() + ", class: " + pObject->getClass());
+                if (Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)) {
+                    setCurrentView(_pVisual);
+                }
+            }
+        }
+    }
+    else if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
+        showMainMenu();
     }
 }
 

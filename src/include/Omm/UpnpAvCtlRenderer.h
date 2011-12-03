@@ -46,10 +46,13 @@ class MediaItemNotification2;
 class CtlMediaRenderer : public Device
 {
 public:
+    CtlMediaRenderer();
+
     virtual void addCtlDeviceCode();
 
     void setObject(CtlMediaObject* pObject);
     void setObject2(CtlMediaObject2* pObject);
+    CtlMediaObject2* getObject();
     void playPressed();
     void stopPressed();
     void pausePressed();
@@ -65,6 +68,7 @@ public:
 private:
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
     CtlMediaRendererCode*   _pCtlMediaRendererCode;
+    CtlMediaObject2*        _pCurrentMediaObject;
 };
 
 

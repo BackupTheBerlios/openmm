@@ -636,7 +636,7 @@ public:
 
     int getDeviceCount() const;
     Device* getDevice(int index) const;
-//    Device* getDevice(const std::string& uuid);
+    Device* getDevice(const std::string& uuid);
     Controller* getController() const;
     void selectDevice(Device* pDevice);
     Device* getSelectedDevice() const;
