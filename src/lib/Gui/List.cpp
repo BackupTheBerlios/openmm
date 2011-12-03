@@ -442,12 +442,10 @@ ListView::highlightItem(int row)
     }
 
     if (row < _rowOffset) {
-        Log::instance()->gui().debug("list view scroll backward");
         scrollContentsTo(0, row * getItemViewHeight());
     }
     if (row >= lastVisibleRow() - _bottomRows || (row >= lastVisibleRow() && row < pModel->totalItemCount())) {
-        Log::instance()->gui().debug("list view scroll forward");
-        scrollContentsTo(0, (row - viewPortHeightInRows() + _bottomRows) * getItemViewHeight());
+        scrollContentsTo(0, (row - viewPortHeightInRows() + _bottomRows + 1) * getItemViewHeight() - (getViewportHeight() % getItemViewHeight()));
     }
 
     if (_highlightedRow >= 0 && itemIsVisible(_highlightedRow)) {
