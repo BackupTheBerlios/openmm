@@ -240,14 +240,23 @@ ListView::scrollToRowOffset(int rowOffset)
         return;
     }
     ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (rowOffset > pModel->totalItemCount() - viewPortHeightInRows()) {
+        rowOffset = pModel->totalItemCount() - viewPortHeightInRows();
+    }
     int rowDelta = rowOffset - _rowOffset;
     if (rowDelta == 0) {
         return;
     }
     int rowDeltaAbsolute = std::abs(rowDelta);
     Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
-    while (rowDeltaAbsolute--) {
-        scrollOneRow(rowDelta);
+    if (rowDeltaAbsolute > viewPortHeightInRows()) {
+        _rowOffset = rowOffset;
+        syncViewImpl();
+    }
+    else {
+        while (rowDeltaAbsolute--) {
+            scrollOneRow(rowDelta);
+        }
     }
     if (_pHighlightedView) {
         _pHighlightedView->setHighlighted(itemIsVisible(_highlightedRow));
@@ -426,13 +435,13 @@ ListView::selectedItem(int row)
 void
 ListView::highlightItem(int row)
 {
-    Log::instance()->gui().debug("list view highlight row: " + Poco::NumberFormatter::format(row)
-                                + ", _rowOffset: " + Poco::NumberFormatter::format(_rowOffset)
-                                + ", lastVisibleRow: " + Poco::NumberFormatter::format(lastVisibleRow())
-                                + ", last _highlightedRow: " + Poco::NumberFormatter::format(_highlightedRow)
-                                + ", viewport height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows())
-                                + ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight())
-    );
+//    Log::instance()->gui().debug("list view highlight row: " + Poco::NumberFormatter::format(row)
+//                                + ", _rowOffset: " + Poco::NumberFormatter::format(_rowOffset)
+//                                + ", lastVisibleRow: " + Poco::NumberFormatter::format(lastVisibleRow())
+//                                + ", last _highlightedRow: " + Poco::NumberFormatter::format(_highlightedRow)
+//                                + ", viewport height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows())
+//                                + ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight())
+//    );
     if (row < 0) {
         return;
     }
@@ -490,23 +499,21 @@ ListView::syncViewImpl()
 
     int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
     for (int row = _rowOffset; row <= lastRow; row++) {
-        if (_freeViews.size()) {
-            View* pView;
-            if (row - _rowOffset >= _visibleViews.size()) {
-                pView = getFreeView();
-                _visibleViews.push_back(pView);
-            }
-            else {
-                pView = _visibleViews[row - _rowOffset];
-            }
-            pView->setModel(pModel->getItemModel(row));
-            _itemControllers[pView]->setRow(row);
-            moveItemView(row, pView);
-            pView->show();
+        View* pView;
+        if (row - _rowOffset >= _visibleViews.size() && _freeViews.size()) {
+            pView = getFreeView();
+            _visibleViews.push_back(pView);
+        }
+        else if (_visibleViews.size() > row - _rowOffset) {
+            pView = _visibleViews[row - _rowOffset];
         }
         else {
-            Log::instance()->gui().error("list view failed to attach view to item, view pool of \"" + getName() + "\" is empty (ignoring)");
+            return;
         }
+        pView->setModel(pModel->getItemModel(row));
+        _itemControllers[pView]->setRow(row);
+        moveItemView(row, pView);
+        pView->show();
     }
 }
 
