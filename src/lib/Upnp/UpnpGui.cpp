@@ -624,7 +624,6 @@ MediaServerDevice::createMediaObject()
 
 
 MediaContainerWidget::MediaContainerWidget(View* pParent) :
-//LazyListView(pParent)
 ListView(pParent)
 {
 //    setItemViewHeight(30);
@@ -685,25 +684,6 @@ MediaContainerWidget::getItemModel(int row)
     }
     return pModel;
 }
-
-
-//int
-//MediaContainerWidget::fetch(int rowCount, bool forward)
-//{
-//    Gui::Log::instance()->gui().debug("media container widget fetch count items: " + Poco::NumberFormatter::format(rowCount));
-//    if (!forward) {
-//        return 0;
-//    }
-//    return _pObjectModel->fetchChildren(rowCount);
-//}
-
-
-//int
-//MediaContainerWidget::lastFetched(bool forward)
-//{
-//    Gui::Log::instance()->gui().debug("media container widget last fetched: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
-//    return _pObjectModel->getChildCount();
-//}
 
 
 void

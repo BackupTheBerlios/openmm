@@ -273,7 +273,7 @@ View::getModel() const
 void
 View::setModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
+//    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     if (_pModel) {
         // if there was a model attached previously, detach this view from it
         for(ControllerIterator it = beginController(); it != endController(); ++it) {
@@ -289,7 +289,7 @@ View::setModel(Model* pModel)
     }
     _pModel = pModel;
     syncView();
-    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model finished.");
+//    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model finished.");
 }
 
 
@@ -420,7 +420,7 @@ View::updateLayout()
 void
 View::syncView()
 {
-    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" sync view");
+//    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" sync view");
     _pImpl->triggerViewSync();
 }
 

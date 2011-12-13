@@ -253,6 +253,7 @@ ListView::scrollToRowOffset(int rowOffset)
         // far jump
         _rowOffset = rowOffset;
         for (int i = 0; i < countVisibleViews(); i++) {
+            _visibleViews[i]->hide();
             _visibleViews[i]->detachModel();
         }
         syncViewImpl();

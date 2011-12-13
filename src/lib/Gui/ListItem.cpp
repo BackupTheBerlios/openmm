@@ -69,19 +69,19 @@ View(pParent)
 void
 ListItemView::setModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item view set model: " + Poco::NumberFormatter::format(pModel) + " ...");
+//    Omm::Gui::Log::instance()->gui().debug("list item view set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     ListItemModel* pListItemModel = static_cast<ListItemModel*>(pModel);
     _pImageView->setModel(pListItemModel->_pImageModel);
     _pLabelView->setModel(pListItemModel->_pLabelModel);
     View::setModel(pModel);
-    Omm::Gui::Log::instance()->gui().debug("list item view set model finished.");
+//    Omm::Gui::Log::instance()->gui().debug("list item view set model finished.");
 }
 
 
 void
 ListItemView::syncViewImpl()
 {
-    Omm::Gui::Log::instance()->gui().debug("list item view sync view impl: " + getName());
+//    Omm::Gui::Log::instance()->gui().debug("list item view sync view impl: " + getName());
     ListItemModel* pItemModel = static_cast<ListItemModel*>(_pModel);
     if (pItemModel->_pLabelModel) {
         _pLabelView->syncViewImpl();

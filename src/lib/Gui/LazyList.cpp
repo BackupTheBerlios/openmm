@@ -52,23 +52,23 @@ LazyListView::setModel(LazyListModel* pModel)
 }
 
 
-void
-LazyListView::syncViewImpl()
-{
-    LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
-
-    int rows = viewPortHeightInRows();
-    int rowsToFetch = std::min(pModel->totalItemCount() - _rowOffset, rows);
-
-    if (_rowOffset + rowsToFetch > pModel->lastFetched(true)) {
-        int rowsFetched = pModel->fetch(rowsToFetch, true);
-    }
-    else if (_rowOffset < pModel->lastFetched(false)) {
-        int rowsFetched = pModel->fetch(rowsToFetch, false);
-    }
-
-    ListView::syncViewImpl();
-}
+//void
+//LazyListView::syncViewImpl()
+//{
+//    LazyListModel* pModel = static_cast<LazyListModel*>(_pModel);
+//
+//    int rows = viewPortHeightInRows();
+//    int rowsToFetch = std::min(pModel->totalItemCount() - _rowOffset, rows);
+//
+//    if (_rowOffset + rowsToFetch > pModel->lastFetched(true)) {
+//        int rowsFetched = pModel->fetch(rowsToFetch, true);
+//    }
+//    else if (_rowOffset < pModel->lastFetched(false)) {
+//        int rowsFetched = pModel->fetch(rowsToFetch, false);
+//    }
+//
+//    ListView::syncViewImpl();
+//}
 
 
 void
@@ -82,9 +82,9 @@ LazyListView::scrollToRowOffset(int rowOffset)
     if (rowDelta > 0 && rowOffset + _visibleViews.size() + rowDeltaAbsolute >= pModel->lastFetched(true)) {
         pModel->fetch(_visibleViews.size() + rowDeltaAbsolute, true);
     }
-    else if (rowDelta < 0 && rowOffset < pModel->lastFetched(false)) {
-        pModel->fetch(rowDeltaAbsolute, false);
-    }
+//    else if (rowDelta < 0 && rowOffset < pModel->lastFetched(false)) {
+//        pModel->fetch(rowDeltaAbsolute, false);
+//    }
     ListView::scrollToRowOffset(rowOffset);
 }
 
