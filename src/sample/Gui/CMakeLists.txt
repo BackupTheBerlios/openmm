@@ -97,6 +97,15 @@ ${OMM_GUI}
 )
 
 
+add_executable(buttonlazylistbidir
+ButtonLazyListBidir.cpp
+)
+
+target_link_libraries(buttonlazylistbidir
+${OMM_GUI}
+)
+
+
 add_executable(buttontab
 ButtonTab.cpp
 )

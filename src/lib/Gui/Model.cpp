@@ -27,7 +27,7 @@
 namespace Omm {
 namespace Gui {
 
-    
+
 void
 Model::attachView(View* pView)
 {
@@ -40,12 +40,12 @@ Model::attachView(View* pView)
 void
 Model::detachView(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("model detach view ...");
+    Omm::Gui::Log::instance()->gui().debug("model detach view ...");
     ViewIterator pos = std::find(beginView(), endView(), pView);
     if (pos != _views.end()) {
         _views.erase(pos);
     }
-//    Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
+    Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
 }
 
 
@@ -66,7 +66,7 @@ Model::endView()
 void
 Model::syncViews()
 {
-//    Omm::Gui::Log::instance()->gui().debug("model sync views");
+    Omm::Gui::Log::instance()->gui().debug("model sync views");
     for (ViewIterator it = beginView(); it != endView(); ++it) {
        (*it)->syncView();
     }

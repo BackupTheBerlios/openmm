@@ -32,29 +32,30 @@ TestServer::TestServer() //:
 {
     setTitle("Test Server");
     setIsContainer(true);    // could also use convenience class MemoryContainer
-    
+    setClass(Omm::Av::AvClass::CONTAINER);
+
     /*----------- media object with meta data completely hold in memory, streaming directly from internet ------------*/
     std::string protInfoMp3 = "http-get:*:audio/mpeg:*";
     std::string subClass = "audioItem.audioBroadcast";
-    
+
     Omm::Av::AbstractMediaObject* pGrooveSalad = createChildObject();
     pGrooveSalad->setIsContainer(false);
     pGrooveSalad->setTitle("SOMA FM - Groove Salad (mp3)");
-    
+
     Omm::Av::AbstractResource* pGrooveSaladRes = pGrooveSalad->createResource();
     pGrooveSaladRes->setProtInfo(protInfoMp3);
     pGrooveSaladRes->setSize(0);
     pGrooveSaladRes->setUri("http://streamer-dtc-aa04.somafm.com:80/stream/1018");
-    
+
     Omm::Av::AbstractMediaObject* pLush = createChildObject();
     pLush->setIsContainer(false);
     pLush->setTitle("SOMA FM - Lush (mp3)");
-    
+
     Omm::Av::AbstractResource* pLushRes = pLush->createResource();
     pLushRes->setProtInfo(protInfoMp3);
     pLushRes->setSize(0);
     pLushRes->setUri("http://streamer-ntc-aa02.somafm.com:80/stream/1073");
-    
+
     /*----------- media object with meta data completely hold in memory, streaming through local proxy ------------*/
 // //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::StreamingMemoryMediaObject;
 // //     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::AbstractMediaObject<MemoryObject,MemoryProperty,WebResource>;
@@ -63,7 +64,7 @@ TestServer::TestServer() //:
 
     /*----------- media object with meta data dynamically loaded for each media item, streaming through local proxy ------------*/
     std::string pluginName("server-file");
-    
+
     Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> videoFileServerLoader;
     Omm::Av::AbstractMediaObject* pVideos;
     try {
@@ -77,10 +78,10 @@ TestServer::TestServer() //:
 
     pVideos->setTitle("Videos");
 //    pVideos->setOption("basePath", "/Users/jb/Videos");
-    pVideos->setOption("basePath", "/home/jb/Videos");
-    appendChild(pVideos);
-    
-    
+    pVideos->setOption("basePath", "/home/jb/video");
+    appendChildWithAutoIndex(pVideos);
+
+
     Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> mp3FileServerLoader;
     Omm::Av::AbstractMediaObject* pMusic;
     try {
@@ -93,12 +94,12 @@ TestServer::TestServer() //:
     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
 
     pMusic->setTitle("Music");
-    pMusic->setOption("basePath", "/home/jb/mp3");
+    pMusic->setOption("basePath", "/home/jb/music");
 //    pMusic->setOption("basePath", "/Users/jb/mp3");
 //     pMusic->setOption("basePath", "/media/mydata/mp3");
-    appendChild(pMusic);
-    
-    
+    appendChildWithAutoIndex(pMusic);
+
+
 //     pluginName = "server-dvb";
 //     Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> DvbServerLoader;
 //     Omm::Av::AbstractMediaObject* pDvb;
@@ -110,7 +111,7 @@ TestServer::TestServer() //:
 //         return;
 //     }
 //     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
-// 
+//
 //     pDvb->setTitle("Digital TV");
 //     pDvb->setOption("basePath", "/home/jb/.omm/channels.conf");
 //     appendChild(pDvb);

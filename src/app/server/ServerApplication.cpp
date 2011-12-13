@@ -167,6 +167,9 @@ protected:
                     _pluginOption = home + "/.omm/webradio.conf";
                 }
             }
+            else if (_name == "") {
+                _name = "OMM Server";
+            }
             pContainerPlugin->setOption("basePath", _pluginOption);
             pContainerPlugin->setTitle(_name);
 

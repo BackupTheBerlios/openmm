@@ -28,26 +28,26 @@ WebradiosimpleServer::WebradiosimpleServer()
     setTitle("Simple Web Radio");
     setIsContainer(true);
  //   setObjectId("0");
-    
+
     std::string protInfoMp3 = "http-get:*:audio/mpeg:*";
     std::string subClass = "audioItem.audioBroadcast";
-    
-    
+
+
     /*----------- media object with meta data completely hold in memory, streaming directly from internet ------------*/
-    
+
     Omm::Av::AbstractMediaObject* pGrooveSalad = new Omm::Av::MemoryMediaObject;
     pGrooveSalad->setIsContainer(false);
 //    pGrooveSalad->setObjectId("1");
     pGrooveSalad->setTitle("SOMA FM - Groove Salad");
-    
+
     Omm::Av::AbstractResource* pGrooveSaladRes = pGrooveSalad->createResource();
     pGrooveSaladRes->setProtInfo(protInfoMp3);
     pGrooveSaladRes->setSize(0);
     pGrooveSaladRes->setUri("http://streamer-dtc-aa04.somafm.com:80/stream/1018");
     pGrooveSalad->addResource(pGrooveSaladRes);
-    appendChild(pGrooveSalad);
-    
-    
+    insertChild(pGrooveSalad);
+
+
     /*----------- media object with meta data completely hold in memory, streaming through local proxy ------------*/
 
     Omm::Av::AbstractMediaObject* pLush = new Omm::Av::MemoryMediaObject;
@@ -63,8 +63,8 @@ WebradiosimpleServer::WebradiosimpleServer()
     pLushRes->setSize(0);
     pLushRes->setUri("http://streamer-ntc-aa02.somafm.com:80/stream/1073");
     pLush->addResource(pLushRes);
-    appendChild(pLush);
-    
+    insertChild(pLush);
+
     Omm::Av::AbstractMediaObject* pStation = new Omm::Av::MemoryMediaObject;
     pStation->setIsContainer(false);
     Omm::Av::AbstractResource* pStationResource = pStation->createResource();
@@ -74,8 +74,8 @@ WebradiosimpleServer::WebradiosimpleServer()
     pStation->setTitle("SOMA FM - Drone Zone");
     pStationResource->setUri("http://streamer-dtc-aa01.somafm.com:80/stream/1032");
     pStation->addResource(pStationResource);
-    appendChild(pStation);
-    
+    insertChild(pStation);
+
     Omm::Av::AbstractMediaObject* pStation2 = new Omm::Av::MemoryMediaObject;
     pStation2->setIsContainer(false);
     Omm::Av::AbstractResource* pStationResource2 = pStation2->createResource();
@@ -84,7 +84,7 @@ WebradiosimpleServer::WebradiosimpleServer()
     pStation2->setTitle("Digitally Imported - Chillout");
     pStationResource2->setUri("http://scfire-ntc-aa01.stream.aol.com:80/stream/1035");
     pStation2->addResource(pStationResource2);
-    appendChild(pStation2);
+    insertChild(pStation2);
 };
 
 POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)

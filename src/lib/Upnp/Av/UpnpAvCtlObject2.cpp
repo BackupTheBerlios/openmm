@@ -49,13 +49,15 @@ CtlMediaObject2::createChildObject()
 
 
 int
-CtlMediaObject2::fetchChildren(ui4 count)
+CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
 {
     std::string objectId = getId();
-    ui4 lastFetchedChild = getChildCount();
+    if (offset == -1) {
+        offset = getChildCount();
+    }
     Log::instance()->upnpav().debug("controller media object fetch children of object with id: " + objectId
                                     + ", number of requested children: " + Poco::NumberFormatter::format(count)
-                                    + ", child offset: " + Poco::NumberFormatter::format(lastFetchedChild));
+                                    + ", child offset: " + Poco::NumberFormatter::format(offset));
 
     Omm::ui4 numberReturned = 0;
     if (_pServerCode) {
@@ -63,7 +65,7 @@ CtlMediaObject2::fetchChildren(ui4 count)
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
         try {
-            _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", lastFetchedChild, count, "", result, numberReturned, totalMatches, updateId);
+            _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, count, "", result, numberReturned, totalMatches, updateId);
         }
         catch (Poco::Exception& e){
             Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
@@ -79,6 +81,13 @@ CtlMediaObject2::fetchChildren(ui4 count)
         Log::instance()->upnpav().error("controller media object fetch children failed");
     }
     return numberReturned;
+}
+
+
+AbstractMediaObject*
+CtlMediaObject2::getChildForRow(ui4 row)
+{
+    return getMediaObject(row);
 }
 
 
@@ -106,6 +115,38 @@ CtlMediaObject2::getImageRepresentation()
     else {
         // for any other object type, we currently don't supply any icon.
         return 0;
+    }
+}
+
+
+void
+CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size)
+{
+    std::string objectId = getId();
+    Log::instance()->upnpav().debug("controller media object get block of children of object with id: " + objectId
+                                    + ", number of requested children: " + Poco::NumberFormatter::format(size)
+                                    + ", child offset: " + Poco::NumberFormatter::format(offset));
+
+    Omm::ui4 numberReturned = 0;
+    if (_pServerCode) {
+        std::string result;
+        Omm::ui4 totalMatches;
+        Omm::ui4 updateId;
+        try {
+            _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+        }
+        catch (Poco::Exception& e){
+            Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
+            return;
+        }
+        // _totalMatches is the number of items in the browse result, that matches
+        // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
+        setTotalChildCount(totalMatches);
+        MediaObjectReader reader(this);
+        reader.readChildren(result, &block);
+    }
+    else {
+        Log::instance()->upnpav().error("controller media object fetch children failed");
     }
 }
 

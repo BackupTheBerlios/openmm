@@ -1,14 +1,3 @@
-add_library(ommserver-test
-SHARED
-TestServer.cpp
-)
-
-target_link_libraries(ommserver-test
-${OMM_UTIL}
-${OMM}
-${OMM_AV}
-)
-
 add_executable(ommserve
 ServerApplication.cpp
 )

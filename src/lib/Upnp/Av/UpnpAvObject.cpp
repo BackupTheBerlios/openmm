@@ -470,6 +470,151 @@ AbstractProperty::getAttributeCount()
 }
 
 
+AbstractMediaObjectCache::AbstractMediaObjectCache(ui4 maxCacheSize) :
+_maxCacheSize(maxCacheSize),
+_scan(false)
+{
+
+}
+
+
+void
+AbstractMediaObjectCache::setMaxCacheSize(ui4 size)
+{
+    _maxCacheSize = size;
+}
+
+
+ui4
+AbstractMediaObjectCache::getMaxCacheSize()
+{
+    return _maxCacheSize;
+}
+
+
+void
+AbstractMediaObjectCache::scan(bool on)
+{
+    if (on && _scan) {
+        return;
+    }
+    _scan = on;
+    if (on && (_maxCacheSize < getCacheSize())) {
+        doScan();
+    }
+}
+
+
+BlockCache::BlockCache(ui4 blockSize) :
+_offset(0),
+_blockSize(blockSize)
+{
+}
+
+
+AbstractMediaObject*
+BlockCache::getMediaObject(ui4 row)
+{
+    Log::instance()->upnpav().debug("block cache get media object in row: " + Poco::NumberFormatter::format(row) + " ...");
+
+    if (_offset <= row && row < _offset + getCacheSize()) {
+        // cache hit, do nothing
+        Log::instance()->upnpav().debug("block cache get media object cache hit");
+    }
+    else if (_offset - row < _blockSize && _offset - row > 0) {
+        // near cache miss, insert block before current cache
+        Log::instance()->upnpav().debug("block cache get media object cache near miss before");
+        if (getCacheSize() + _blockSize > getMaxCacheSize()) {
+            Log::instance()->upnpav().debug("block cache get media object deleting block at back");
+            erase(_cache.end() - _blockSize, _cache.end());
+        }
+        std::vector<AbstractMediaObject*> block;
+        getBlock(block, _offset - _blockSize, _blockSize);
+        insertBlock(block, true);
+        _offset -= _blockSize;
+    }
+    else if (row - (_offset + getCacheSize()) < _blockSize && row - (_offset + getCacheSize()) >= 0) {
+        // near cache miss, insert block after current cache
+        Log::instance()->upnpav().debug("block cache get media object cache near miss after");
+        if (getCacheSize() + _blockSize > getMaxCacheSize()) {
+            Log::instance()->upnpav().debug("block cache get media object deleting block at front");
+            erase(_cache.begin(), _cache.begin() + _blockSize);
+            _offset += _blockSize;
+        }
+        std::vector<AbstractMediaObject*> block;
+        getBlock(block, _offset + getCacheSize(), _blockSize);
+        insertBlock(block, false);
+    }
+    else {
+        // far cache miss, rebuild whole cache
+        Log::instance()->upnpav().debug("block cache get media object cache far miss");
+        clear();
+        std::vector<AbstractMediaObject*> block;
+        getBlock(block, row, _blockSize);
+        insertBlock(block);
+        _offset = row;
+//      scan(on);
+    }
+    Log::instance()->upnpav().debug("block cache get media object finished.");
+    return _cache[row - _offset];
+}
+
+
+void
+BlockCache::erase(std::vector<AbstractMediaObject*>::iterator begin, std::vector<AbstractMediaObject*>::iterator end)
+{
+    for (std::vector<AbstractMediaObject*>::iterator it = begin; it != end; ++it) {
+        delete *it;
+    }
+    _cache.erase(begin, end);
+}
+
+
+void
+BlockCache::clear()
+{
+    for (std::vector<AbstractMediaObject*>::iterator it = _cache.begin(); it != _cache.end(); ++it) {
+        delete *it;
+    }
+    _cache.clear();
+}
+
+
+void
+BlockCache::setBlockSize(ui4 blockSize)
+{
+    _blockSize = blockSize;
+}
+
+
+void
+BlockCache::insertBlock(std::vector<AbstractMediaObject*>& block, bool prepend)
+{
+    Log::instance()->upnpav().debug(std::string("block cache inserting block at ") + (prepend ? "front" : "back") + "...");
+    if (prepend) {
+        _cache.insert(_cache.begin(), block.begin(), block.begin() + block.size());
+    }
+    else {
+        _cache.insert(_cache.end(), block.begin(), block.begin() + block.size());
+    }
+    Log::instance()->upnpav().debug("block cache inserting block finished.");
+}
+
+
+ui4
+BlockCache::getCacheSize()
+{
+    return _cache.size();
+}
+
+
+void
+BlockCache::doScan(bool on)
+{
+
+}
+
+
 AbstractMediaObject::AbstractMediaObject() :
 _index(0),
 _pParent(0)
@@ -507,9 +652,18 @@ AbstractMediaObject::setParent(AbstractMediaObject* pParent)
 void
 AbstractMediaObject::appendChild(AbstractMediaObject* pChild)
 {
-    pChild->setIndex(getChildCount());
+//    pChild->setIndex(getChildCount());
+//    pChild->setIndex(index);
     pChild->setParent(this);
     appendChildImpl(pChild);
+}
+
+
+void
+AbstractMediaObject::appendChildWithAutoIndex(AbstractMediaObject* pChild)
+{
+    pChild->setIndex(getChildCount());
+    appendChild(pChild);
 }
 
 
@@ -790,6 +944,7 @@ MemoryMediaObject::MemoryMediaObject() :
 _restricted(true),
 _isContainer(false),
 _totalChildCount(0)
+//_rowOffset(0)
 {
 }
 
@@ -858,6 +1013,7 @@ MemoryMediaObject::getChildCount()
 //    Log::instance()->upnpav().debug("MemoryMediaObject::getChildCount()");
 
     return _childVec.size();
+//    return _rowOffset + _childVec.size();
 }
 
 
@@ -882,7 +1038,14 @@ MemoryMediaObject::getChildForRow(ui4 row)
 {
 //    Log::instance()->upnpav().debug("MemoryMediaObject::getChild() number: " + Poco::NumberFormatter::format(numChild));
 
-    return _childVec[row];
+//    ui4 childRow = row - _rowOffset;
+    ui4 childRow = row;
+    if (childRow < _childVec.size() && childRow >= 0) {
+        return _childVec[childRow];
+    }
+    else {
+        Log::instance()->upnpav().error("MemoryMediaObject::getChildForRow() row out of range: " + Poco::NumberFormatter::format(row));
+    }
 }
 
 
@@ -960,8 +1123,9 @@ _pMediaObject(pMediaObject)
 
 
 void
-MediaObjectReader::readChildren(const std::string& metaData)
+MediaObjectReader::readChildren(const std::string& metaData, std::vector<AbstractMediaObject*>* pChildren)
 {
+    Log::instance()->upnpav().debug("read children of media object ...");
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
@@ -970,10 +1134,19 @@ MediaObjectReader::readChildren(const std::string& metaData)
         if (pObjectNode->hasChildNodes()) {
             AbstractMediaObject* pChildObject = _pMediaObject->createChildObject();
             readNode(pChildObject, pObjectNode);
-            _pMediaObject->appendChild(pChildObject);
+            // append child at end of already fetched children
+            if (pChildren) {
+                Log::instance()->upnpav().debug("push child to back of vector");
+                pChildren->push_back(pChildObject);
+            }
+            else {
+                Log::instance()->upnpav().debug("append child to media object");
+                _pMediaObject->appendChild(pChildObject);
+            }
         }
         pObjectNode = pObjectNode->nextSibling();
     }
+    Log::instance()->upnpav().debug("read children of media object finished.");
 }
 
 

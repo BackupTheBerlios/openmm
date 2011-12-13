@@ -21,7 +21,7 @@
 
 #include <QtGui>
 #include <Poco/NumberFormatter.h>
-#include <qt4/QtGui/qabstractslider.h>
+//include <qt4/QtGui/qabstractslider.h>
 
 #include "ScrollAreaImpl.h"
 #include "QtScrollAreaImpl.h"

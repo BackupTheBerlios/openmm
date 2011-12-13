@@ -89,7 +89,8 @@ ControllerWidget::newTransportState(TransportStateNotification* pNotification)
             Av::CtlMediaObject2* pObject = pRenderer->getObject();
             if (pObject) {
                 Gui::Log::instance()->gui().debug("local renderer plays object: " + pObject->getTitle() + ", class: " + pObject->getClass());
-                if (Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)) {
+                if (Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)
+                    || Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)) {
                     setCurrentView(_pVisual);
                 }
             }
@@ -623,7 +624,8 @@ MediaServerDevice::createMediaObject()
 
 
 MediaContainerWidget::MediaContainerWidget(View* pParent) :
-LazyListView(pParent)
+//LazyListView(pParent)
+ListView(pParent)
 {
 //    setItemViewHeight(30);
 }
@@ -685,23 +687,23 @@ MediaContainerWidget::getItemModel(int row)
 }
 
 
-int
-MediaContainerWidget::fetch(int rowCount, bool forward)
-{
-    Gui::Log::instance()->gui().debug("media container widget fetch count items: " + Poco::NumberFormatter::format(rowCount));
-    if (!forward) {
-        return 0;
-    }
-    return _pObjectModel->fetchChildren(rowCount);
-}
+//int
+//MediaContainerWidget::fetch(int rowCount, bool forward)
+//{
+//    Gui::Log::instance()->gui().debug("media container widget fetch count items: " + Poco::NumberFormatter::format(rowCount));
+//    if (!forward) {
+//        return 0;
+//    }
+//    return _pObjectModel->fetchChildren(rowCount);
+//}
 
 
-int
-MediaContainerWidget::lastFetched(bool forward)
-{
-    Gui::Log::instance()->gui().debug("media container widget last fetched: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
-    return _pObjectModel->getChildCount();
-}
+//int
+//MediaContainerWidget::lastFetched(bool forward)
+//{
+//    Gui::Log::instance()->gui().debug("media container widget last fetched: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
+//    return _pObjectModel->getChildCount();
+//}
 
 
 void

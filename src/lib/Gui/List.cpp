@@ -250,7 +250,11 @@ ListView::scrollToRowOffset(int rowOffset)
     int rowDeltaAbsolute = std::abs(rowDelta);
     Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDeltaAbsolute > viewPortHeightInRows()) {
+        // far jump
         _rowOffset = rowOffset;
+        for (int i = 0; i < countVisibleViews(); i++) {
+            _visibleViews[i]->detachModel();
+        }
         syncViewImpl();
     }
     else {

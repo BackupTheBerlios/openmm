@@ -88,6 +88,7 @@ public:
 
     Model* getModel() const;
     virtual void setModel(Model* pModel = 0);
+    void detachModel();
     void attachController(Controller* pController);
     void detachController(Controller* pController);
     template<class C, class M> void setControllerModel(ControllerModel<C,M>* pControllerModel)

@@ -55,7 +55,7 @@ ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
     setName("list item view");
-    
+
     _pImageView = new ImageView(this);
     _pImageView->setStretchFactor(-1.0);
     _pLabelView = new LabelView(this);
@@ -69,11 +69,12 @@ View(pParent)
 void
 ListItemView::setModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("list item view set model");
+    Omm::Gui::Log::instance()->gui().debug("list item view set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     ListItemModel* pListItemModel = static_cast<ListItemModel*>(pModel);
     _pImageView->setModel(pListItemModel->_pImageModel);
     _pLabelView->setModel(pListItemModel->_pLabelModel);
     View::setModel(pModel);
+    Omm::Gui::Log::instance()->gui().debug("list item view set model finished.");
 }
 
 

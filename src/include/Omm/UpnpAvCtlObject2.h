@@ -38,7 +38,7 @@ class CtlMediaServerCode;
 class MediaItemNotification;
 
 
-class CtlMediaObject2 : public MemoryMediaObject
+class CtlMediaObject2 : public MemoryMediaObject, public BlockCache
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;
@@ -60,12 +60,16 @@ public:
     virtual std::string getId();
     virtual void setId(const std::string& id);
 
-    int fetchChildren(ui4 count = 10);
+    int fetchChildren(ui4 count = 10, ui4 offset = -1);
+    /// offset -1 means fetch from offset = childCount()
+    virtual AbstractMediaObject* getChildForRow(ui4 row);
 
     Icon* getIcon();
     Icon* getImageRepresentation();
 
 private:
+    virtual void getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size);
+
     std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;

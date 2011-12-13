@@ -31,7 +31,7 @@
 #include "UpnpAvLogger.h"
 #include "Util.h"
 
-// NOTE: for media object ids only use non-reserved characters for segments 
+// NOTE: for media object ids only use non-reserved characters for segments
 // (according to RFC 3986), because object ids may be used in resource URIs.
 // These characters are alphanumerics, digits, "-", ".", "_", "!", ";", ",", "="
 
@@ -41,6 +41,7 @@ class StateVar;
 
 namespace Av {
 
+class AbstractMediaObject;
 
 // TODO: generate const strings for allowed values for action arguments with ommgen stub generator.
 
@@ -75,7 +76,7 @@ public:
     const static std::string PHOTO_ALBUM;
     const static std::string MUSIC_GENRE;
     const static std::string MOVIE_GENRE;
-    
+
     static std::string className(const std::string& c1 = "",
         const std::string& c2 = "",
         const std::string& c3 = "",
@@ -219,7 +220,7 @@ public:
     virtual void setName(const std::string& name) {}
     virtual void setValue(const std::string& value) {}
     virtual void setAttribute(const std::string& name, const std::string& value) {}
-    
+
     virtual std::string getName() = 0;
     virtual std::string getValue() = 0;
     virtual std::string getAttributeName(int index) { return ""; }
@@ -233,11 +234,11 @@ class AbstractProperty
 {
 public:
     AbstractProperty(PropertyImpl* pPropertyImpl);
-    
+
     virtual void setName(const std::string& name);
     virtual void setValue(const std::string& value);
     virtual void setAttribute(const std::string& name, const std::string& value);
-    
+
     virtual std::string getName();
     virtual std::string getValue();
     virtual std::string getAttributeName(int index);
@@ -256,16 +257,67 @@ public:
 //     AbstractResource(const std::string& uri, const std::string& protInfo, ui4 size);
     AbstractResource(PropertyImpl* pPropertyImpl);
     virtual ~AbstractResource() {}
-    
+
     virtual void setName(const std::string& name) {}
     void setUri(const std::string& uri);
     void setProtInfo(const std::string& protInfo);
     void setSize(ui4 size);
-    
+
     virtual std::string getName() { return "res"; }
     virtual std::string getUri();
     virtual std::string getProtInfo();
     virtual std::streamsize getSize();
+};
+
+
+class AbstractMediaObjectCache
+{
+public:
+    AbstractMediaObjectCache(ui4 maxCacheSize = 100);
+
+    virtual ui4 getTotalCount() { return 0; }
+    virtual void clear() {}
+    virtual AbstractMediaObject* getMediaObject(ui4 index) { return 0; }
+
+    void setMaxCacheSize(ui4 size);
+    ui4 getMaxCacheSize();
+    void scan(bool on);
+
+protected:
+    virtual ui4 getCacheSize() { return 0; }
+    virtual void doScan() {}
+
+private:
+    ui4         _maxCacheSize;
+    bool        _scan;
+};
+
+
+class BlockCache : public AbstractMediaObjectCache
+/// BlockCache guarantees to have maxCacheSize number of adjacent objects in the
+/// cache, if they are all accessed via getMediaObject().
+/// Index has semantics of a row, that means, no gaps and range is 0 .. getTotalCount().
+{
+public:
+    BlockCache(ui4 blockSize = 10);
+
+    virtual AbstractMediaObject* getMediaObject(ui4 row);
+    virtual void erase(std::vector<AbstractMediaObject*>::iterator begin, std::vector<AbstractMediaObject*>::iterator end);
+    virtual void clear();
+
+    void setBlockSize(ui4 blockSize);
+
+protected:
+    virtual void getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size) {}
+    void insertBlock(std::vector<AbstractMediaObject*>& block, bool prepend = false);
+
+private:
+    virtual ui4 getCacheSize();
+    virtual void doScan(bool on);
+
+    std::vector<AbstractMediaObject*>   _cache;
+    ui4                                 _offset;
+    ui4                                 _blockSize;
 };
 
 
@@ -281,6 +333,9 @@ public:
     virtual AbstractResource* createResource() { return 0; }
 
     // id and index
+    // index: fixed number for a child object, needed only on server side
+    // id: path to object made of indices (index1/index2/ ...)
+    // row: contiguous number of a child of an object container (see "parent and descendants")
     virtual std::string getId();                                                                // server object, write meta data
     virtual void setId(const std::string& id) {}
     std::string getParentId();                                                                  // server object, write meta data
@@ -310,7 +365,9 @@ public:
 
     // parent and descendants
     void setParent(AbstractMediaObject* pParent);
-    void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
+//    void insertChild(AbstractMediaObject* pChild, ui4 index);                                   // controller object, read from xml into memory
+    void appendChild(AbstractMediaObject* pChild);                                   // controller object, read from xml into memory
+    void appendChildWithAutoIndex(AbstractMediaObject* pChild);
     virtual bool isContainer() { return false; }                                                // server object, write meta data
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
     virtual ui4 getChildCount() { return 0; }                                                   // server object, cds browse / write meta data
@@ -320,9 +377,10 @@ public:
     virtual AbstractMediaObject* getChildForIndex(const std::string& index);
     virtual AbstractMediaObject* getChildForIndex(ui4 index) { return 0; }                      // server object, write meta data
     virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                          // server object, write meta data
-    // TODO: next two methods are only for a special form of lazy browsing
+    // simple lazy browsing
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
+    // bidirectional lazy browsing (none so far ...)
 
 protected:
     virtual void appendChildImpl(AbstractMediaObject* pChild) {}
@@ -331,6 +389,7 @@ private:
     // TODO: put these private members in MediaObject (aka ServerObject)
     ui4                         _index;
     AbstractMediaObject*        _pParent;
+//    AbstractMediaObjectCache*   _pChildren;
 };
 
 
@@ -341,14 +400,14 @@ public:
     virtual void setName(const std::string& name);
     virtual void setValue(const std::string& value);
     virtual void setAttribute(const std::string& name, const std::string& value);
-    
+
     virtual std::string getName();
     virtual std::string getValue();
     virtual std::string getAttributeName(int index);
     virtual std::string getAttributeValue(int index);
     virtual std::string getAttributeValue(const std::string& name);
     virtual int getAttributeCount();
-    
+
 private:
     std::string                                         _name;
     std::string                                         _value;
@@ -367,7 +426,7 @@ public:
     virtual AbstractMediaObject* createChildObject();
     virtual AbstractProperty* createProperty();
     virtual AbstractResource* createResource();
-    
+
     // properties
     virtual bool isRestricted();                                                // server object, write meta data
     virtual int getPropertyCount(const std::string& name = "");
@@ -381,12 +440,12 @@ public:
     virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
     virtual ui4 getTotalChildCount();
     virtual void setTotalChildCount(ui4 childCount);                            // controller object, read from xml into memory
-    virtual AbstractMediaObject* getChildForRow(ui4 row);                      // server object, write meta data
-    
+    virtual AbstractMediaObject* getChildForRow(ui4 row);                       // server object, write meta data
+
 private:
     typedef std::multimap<std::string,AbstractProperty*>::iterator      PropertyIterator;
 
-    virtual void appendChildImpl(AbstractMediaObject* pChild);                  // controller object, read from xml into memory
+    virtual void appendChildImpl(AbstractMediaObject* pChild);       // controller object, read from xml into memory
 
     bool                                                                _restricted;
     bool                                                                _isContainer;
@@ -394,6 +453,7 @@ private:
     std::vector<AbstractProperty*>                                      _propertyVec;
     std::multimap<std::string,AbstractProperty*>                        _propertyMap;
     ui4                                                                 _totalChildCount;
+//    ui4                                                                 _rowOffset;
 };
 
 
@@ -401,13 +461,13 @@ class MediaObjectReader
 {
 public:
     MediaObjectReader(AbstractMediaObject* pMediaObject);
-    
+
     void read(const std::string& metaData);
-    void readChildren(const std::string& metaData);
-    
+    void readChildren(const std::string& metaData, std::vector<AbstractMediaObject*>* pChildren = 0);
+
 private:
     void readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode);
-    
+
     AbstractMediaObject*                    _pMediaObject;
 };
 
@@ -416,15 +476,15 @@ class MediaObjectWriter2
 {
 public:
     MediaObjectWriter2(AbstractMediaObject* pMediaObject);
-    
+
     void write(std::string& metaData);
     ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
-    
+
 private:
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
-    
+
     AbstractMediaObject*                    _pMediaObject;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;
@@ -452,17 +512,17 @@ public:
 class Resource
 {
     friend class MediaObjectOld;
-    
+
 public:
     Resource(const std::string& uri, const std::string& protInfo, ui4 size);
-    
+
     const std::string& getUri();
     const std::string& getProtInfo();
     std::streamsize getSize();
-    
+
     void setUri(const std::string& uri);
     void setProtInfo(const std::string& protInfo);
-    
+
 private:
     std::string     _uri;
     std::string     _protInfo;
@@ -473,46 +533,46 @@ private:
 class MediaObjectOld
 {
     friend class MediaObjectWriter;
-    
+
 public:
     MediaObjectOld();
-    
+
     typedef std::map<std::string,std::string>::iterator PropertyIterator;
     PropertyIterator beginProperty();
     PropertyIterator endProperty();
-    
+
     typedef std::vector<MediaObjectOld*>::iterator ChildIterator;
     ChildIterator beginChildren();
     ChildIterator endChildren();
-    
+
     typedef std::vector<Resource*>::iterator ResourceIterator;
     ResourceIterator beginResource();
     ResourceIterator endResource();
-    
+
     void appendChild(MediaObjectOld* pChild);
     void addResource(Resource* pResource);
     virtual std::string getObjectId() const;
     MediaObjectOld* getChild(ui4 num);
     std::string getParentId();
     ui4 getChildCount();
-    
+
     std::string objectId();
     std::string getTitle();
 
     bool isContainer();
     bool isRestricted();
-    
+
     void setIsContainer(bool isContainer=true);
     void setObjectId(const std::string& objectId);
     void setTitle(const std::string& title);
     void setProperty(const std::string& name, const std::string& value);
-    
+
 protected:
-    
+
     std::string                             _objectId;
     bool                                    _restricted;
     std::map<std::string,std::string>       _properties;
-    
+
     bool                                    _isContainer;
     // is Container:
     MediaObjectOld*                            _parent;
@@ -526,15 +586,15 @@ class MediaObjectWriter
 {
 public:
     MediaObjectWriter(MediaObjectOld* pMediaObject);
-    
+
     void write(std::string& metaData);
     ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
-    
+
 private:
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
     void writeMetaData(Poco::XML::Element* pDidl);
-    
+
     MediaObjectOld*                            _pMediaObject;
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;

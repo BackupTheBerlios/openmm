@@ -221,7 +221,8 @@ class MediaServerView : public Gui::ListItemView
 };
 
 
-class MediaContainerWidget : public Gui::LazyListView, Gui::LazyListModel, Gui::ListController
+//class MediaContainerWidget : public Gui::LazyListView, Gui::LazyListModel, Gui::ListController
+class MediaContainerWidget : public Gui::ListView, Gui::ListModel, Gui::ListController
 {
     friend class MediaServerGroupWidget;
 
@@ -234,8 +235,8 @@ public:
     virtual Gui::Model* getItemModel(int row);
 
     // LazyListModel interface
-    virtual int fetch(int rowCount = 10, bool forward = true);
-    virtual int lastFetched(bool forward = true);
+//    virtual int fetch(int rowCount = 10, bool forward = true);
+//    virtual int lastFetched(bool forward = true);
 
     // ListController interface
     virtual void selectedItem(int row);
