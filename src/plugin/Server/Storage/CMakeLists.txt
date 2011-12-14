@@ -15,7 +15,23 @@ set_target_properties(ommplugin-server-file
 PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
 )
 
-install(TARGETS ommplugin-server-file
+add_library(ommplugin-server-filecached
+SHARED
+FilesystemCached.cpp
+)
+
+target_link_libraries(ommplugin-server-filecached
+${OMM_UTIL}
+${OMM}
+${OMM_AV}
+${OMM_AVSTREAM}
+)
+
+set_target_properties(ommplugin-server-filecached
+PROPERTIES COMPILE_DEFINITIONS OMMPLUGIN
+)
+
+install(TARGETS ommplugin-server-file ommplugin-server-filecached
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib/omm
 ARCHIVE DESTINATION lib

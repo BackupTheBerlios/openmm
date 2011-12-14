@@ -37,6 +37,7 @@ namespace Av {
 class MediaItemServer;
 class StreamingMediaObject;
 class DevContentDirectoryServerImpl;
+class ServerContainer;
 
 
 class MediaItemServer
@@ -209,22 +210,67 @@ private:
 class AbstractDataModel
 {
 public:
-    virtual ui4 getChildCount() { return 0; }
+    AbstractDataModel();
+
+    void setServerContainer(ServerContainer* pServerContainer);
+
+    // class property of container media object itself
     virtual std::string getContainerClass() { return AvClass::CONTAINER; }
+
+    // child media object creation / deletion
+    virtual void scan(bool on) {}
+
+    void addIndices(const std::vector<ui4>& indices);
+    void removeIndices(const std::vector<ui4>& indices);
+
+    // number of child media objects in container at one point in time
+    // (synchronized with child object creation / deletion)
+    virtual ui4 getChildCount() { return 0; }
+
+    // properties
     virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
     virtual std::string getTitle(ui4 index) { return ""; }
     virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
 
+    // resource(s), currently data model only supports one resource
     virtual std::streamsize getSize(ui4 index) { return -1; }
     virtual std::string getMime(ui4 index) { return "*"; }
     virtual std::string getDlna(ui4 index) { return "*"; }
     virtual bool isSeekable(ui4 index) { return false; }
     virtual std::istream* getStream(ui4 index) { return 0; }
     virtual std::istream* getIconStream(ui4 index) { return 0; }
+
+private:
+    ServerContainer*    _pServerContainer;
 };
 
 
-class TorchServer : public StreamingMediaObject
+class ServerContainer : public StreamingMediaObject
+{
+public:
+    ServerContainer(int port = 0);
+
+    void setDataModel(AbstractDataModel* pDataModel);
+
+    virtual bool isContainer();
+    virtual int getPropertyCount(const std::string& name = "");
+    virtual AbstractProperty* getProperty(int index);
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);
+    virtual void addProperty(AbstractProperty* pProperty);
+    virtual AbstractProperty* createProperty();
+
+    virtual void addIndices(const std::vector<ui4>& indices) {}
+    virtual void removeIndices(const std::vector<ui4>& indices) {}
+
+protected:
+    AbstractDataModel*              _pDataModel;
+
+    AbstractProperty*               _pTitleProperty;
+    AbstractProperty*               _pClassProperty;
+};
+
+
+class TorchServer : public ServerContainer
 {
     friend class TorchItemResource;
     friend class TorchItemPropertyImpl;
@@ -233,32 +279,22 @@ public:
     TorchServer(int port = 0);
     virtual ~TorchServer();
 
-    void setDataModel(AbstractDataModel* pDataModel);
-
-protected:
-    AbstractDataModel*          _pDataModel;
-
 private:
-    virtual bool isContainer();
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual AbstractProperty* getProperty(int index);
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);
-    virtual void addProperty(AbstractProperty* pProperty);
-    virtual AbstractProperty* createProperty();
-
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual AbstractMediaObject* getChildForRow(ui4 row);
     virtual ui4 getChildCount();
 
-    AbstractProperty*               _pTitleProperty;
-    AbstractProperty*               _pClassProperty;
     AbstractMediaObject*            _pChild;
 };
 
 
-class ServerContainer : public StreamingMediaObject, public DiskCache
+class CachedServer : public ServerContainer, public DiskCache
 {
+public:
+    bool hasIndex(ui4 index);
 
+    virtual void addIndices(const std::vector<ui4>& indices) {}
+    virtual void removeIndices(const std::vector<ui4>& indices) {}
 };
 
 

@@ -483,8 +483,126 @@ StreamingMediaObject::getIconStream()
 }
 
 
+AbstractDataModel::AbstractDataModel() :
+_pServerContainer(0)
+{
+}
+
+
+void
+AbstractDataModel::setServerContainer(ServerContainer* pServerContainer)
+{
+    _pServerContainer = pServerContainer;
+}
+
+
+void
+AbstractDataModel::addIndices(const std::vector<ui4>& indices)
+{
+    if (_pServerContainer) {
+        _pServerContainer->addIndices(indices);
+    }
+}
+
+
+void
+AbstractDataModel::removeIndices(const std::vector<ui4>& indices)
+{
+    if (_pServerContainer) {
+        _pServerContainer->removeIndices(indices);
+    }
+}
+
+
+ServerContainer::ServerContainer(int port) :
+StreamingMediaObject(port)
+{
+}
+
+
+void
+ServerContainer::setDataModel(AbstractDataModel* pDataModel)
+{
+    _pDataModel = pDataModel;
+    _pDataModel->setServerContainer(this);
+}
+
+
+bool
+ServerContainer::isContainer()
+{
+    return true;
+}
+
+
+int
+ServerContainer::getPropertyCount(const std::string& name)
+{
+    // the server itself (not the media items) has two properties overall
+    if (name == "") {
+        return 2;
+    }
+    // and one property for title and class
+    else if (name == AvProperty::TITLE || name == AvProperty::CLASS) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+AbstractProperty*
+ServerContainer::getProperty(int index)
+{
+    if (index == 0) {
+        return _pTitleProperty;
+    }
+    else if (index == 1) {
+        return _pClassProperty;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+AbstractProperty*
+ServerContainer::getProperty(const std::string& name, int index)
+{
+    if (name == AvProperty::TITLE) {
+        return _pTitleProperty;
+    }
+    else if (name == AvProperty::CLASS) {
+        return _pClassProperty;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+ServerContainer::addProperty(AbstractProperty* pProperty)
+{
+    if (pProperty->getName() == AvProperty::TITLE) {
+        _pTitleProperty = pProperty;
+    }
+    else if (pProperty->getName() == AvProperty::CLASS) {
+        _pClassProperty = pProperty;
+    }
+}
+
+
+AbstractProperty*
+ServerContainer::createProperty()
+{
+    return new MemoryProperty;
+}
+
+
 TorchServer::TorchServer(int port) :
-StreamingMediaObject(port),
+ServerContainer(port),
 _pChild(new TorchItem(this))
 {
     _pChild->setParent(this);
@@ -497,13 +615,6 @@ TorchServer::~TorchServer()
     delete _pChild;
     delete _pTitleProperty;
     delete _pClassProperty;
-}
-
-
-void
-TorchServer::setDataModel(AbstractDataModel* pDataModel)
-{
-    _pDataModel = pDataModel;
 }
 
 
@@ -565,79 +676,6 @@ TorchServer::getChildCount()
     else {
         return 0;
     }
-}
-
-
-bool
-TorchServer::isContainer()
-{
-    return true;
-}
-
-
-int
-TorchServer::getPropertyCount(const std::string& name)
-{
-    // the server itself (not the media items) has two properties overall
-    if (name == "") {
-        return 2;
-    }
-    // and one property for title and class
-    else if (name == AvProperty::TITLE || name == AvProperty::CLASS) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-
-AbstractProperty*
-TorchServer::getProperty(int index)
-{
-    if (index == 0) {
-        return _pTitleProperty;
-    }
-    else if (index == 1) {
-        return _pClassProperty;
-    }
-    else {
-        return 0;
-    }
-}
-
-
-AbstractProperty*
-TorchServer::getProperty(const std::string& name, int index)
-{
-    if (name == AvProperty::TITLE) {
-        return _pTitleProperty;
-    }
-    else if (name == AvProperty::CLASS) {
-        return _pClassProperty;
-    }
-    else {
-        return 0;
-    }
-}
-
-
-void
-TorchServer::addProperty(AbstractProperty* pProperty)
-{
-    if (pProperty->getName() == AvProperty::TITLE) {
-        _pTitleProperty = pProperty;
-    }
-    else if (pProperty->getName() == AvProperty::CLASS) {
-        _pClassProperty = pProperty;
-    }
-}
-
-
-AbstractProperty*
-TorchServer::createProperty()
-{
-    return new MemoryProperty;
 }
 
 

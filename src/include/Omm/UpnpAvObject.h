@@ -545,7 +545,7 @@ public:
 };
 
 
-/*--------------- depricated classes ------------------*/
+/*--------------- obsolete classes ------------------*/
 
 class Resource
 {
