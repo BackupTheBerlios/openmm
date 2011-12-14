@@ -41,6 +41,7 @@ class StateVar;
 
 namespace Av {
 
+class AbstractProperty;
 class AbstractMediaObject;
 
 // TODO: generate const strings for allowed values for action arguments with ommgen stub generator.
@@ -214,6 +215,37 @@ private:
 };
 
 
+class SearchCriteria
+{
+public:
+    SearchCriteria(const std::string& searchString = "");
+
+    std::string toString();
+};
+
+
+class SortCriteria
+{
+    SortCriteria(const std::string& sortString = "");
+
+    void appendProperty(AbstractProperty* pProperty, bool ascending = true);
+    void removeProperty(AbstractProperty* pProperty);
+
+    std::string toString();
+};
+
+
+class PropertyList
+/// list of properties for storing search and sort capabilities
+{
+    PropertyList(const std::string& propertyListString = "");
+
+    void appendProperty(AbstractProperty* pProperty);
+
+    std::string toString();
+};
+
+
 class PropertyImpl
 {
 public:
@@ -371,8 +403,8 @@ public:
 
     // parent and descendants
     void setParent(AbstractMediaObject* pParent);
-//    void insertChild(AbstractMediaObject* pChild, ui4 index);                                   // controller object, read from xml into memory
-    void appendChild(AbstractMediaObject* pChild);                                   // controller object, read from xml into memory
+//    void insertChild(AbstractMediaObject* pChild, ui4 index);                                 // controller object, read from xml into memory
+    void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
     void appendChildWithAutoIndex(AbstractMediaObject* pChild);
     virtual bool isContainer() { return false; }                                                // server object, write meta data
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
@@ -382,7 +414,7 @@ public:
     AbstractMediaObject* getDescendant(const std::string& objectId);                            // server object, cds browse
     virtual AbstractMediaObject* getChildForIndex(const std::string& index);
     virtual AbstractMediaObject* getChildForIndex(ui4 index) { return 0; }                      // server object, write meta data
-    virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                          // server object, write meta data
+    virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                          // server object, write meta data, controller object browse
     // simple lazy browsing
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
