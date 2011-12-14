@@ -523,15 +523,16 @@ BlockCache::getMediaObject(ui4 row)
     }
     else if (_offset - row < _blockSize && _offset - row > 0) {
         // near cache miss, insert block before current cache
+        int blockSize = std::min(_blockSize, _offset);
         Log::instance()->upnpav().debug("block cache get media object cache near miss before");
-        if (getCacheSize() + _blockSize > getMaxCacheSize()) {
+        if (getCacheSize() + blockSize > getMaxCacheSize()) {
             Log::instance()->upnpav().debug("block cache get media object deleting block at back");
-            erase(_cache.end() - _blockSize, _cache.end());
+            erase(_cache.end() - blockSize, _cache.end());
         }
         std::vector<AbstractMediaObject*> block;
-        getBlock(block, _offset - _blockSize, _blockSize);
+        getBlock(block, _offset - blockSize, blockSize);
         insertBlock(block, true);
-        _offset -= _blockSize;
+        _offset -= blockSize;
     }
     else if (row - (_offset + getCacheSize()) < _blockSize && row - (_offset + getCacheSize()) >= 0) {
         // near cache miss, insert block after current cache
