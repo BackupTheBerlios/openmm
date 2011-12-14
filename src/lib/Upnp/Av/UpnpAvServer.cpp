@@ -496,6 +496,20 @@ AbstractDataModel::setServerContainer(ServerContainer* pServerContainer)
 }
 
 
+ui4
+AbstractDataModel::getIndex(const std::string path)
+{
+    // TODO: get index from path, if path is not in the cache create a new index
+}
+
+
+std::string
+AbstractDataModel::getPath(ui4 index)
+{
+    // TODO: get path from index
+}
+
+
 void
 AbstractDataModel::addIndices(const std::vector<ui4>& indices)
 {
@@ -511,6 +525,28 @@ AbstractDataModel::removeIndices(const std::vector<ui4>& indices)
     if (_pServerContainer) {
         _pServerContainer->removeIndices(indices);
     }
+}
+
+
+void
+AbstractDataModel::writeCache()
+{
+    // TODO: write index and path caches
+}
+
+
+void
+AbstractDataModel::readCache()
+{
+    // TODO: read index and path caches
+
+}
+
+
+AbstractMediaObject*
+SimpleDataModel::getMediaObject(ui4 index)
+{
+    // TODO: build media object from information retrieved by methods of SimpleDataModel
 }
 
 

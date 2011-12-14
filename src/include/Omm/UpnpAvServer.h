@@ -220,13 +220,17 @@ public:
     // child media object creation / deletion
     virtual void scan(bool on) {}
 
+    ui4 getIndex(const std::string path);
+    std::string getPath(ui4 index);
     void addIndices(const std::vector<ui4>& indices);
     void removeIndices(const std::vector<ui4>& indices);
 
     // number of child media objects in container at one point in time
     // (synchronized with child object creation / deletion)
     virtual ui4 getChildCount() { return 0; }
+    virtual AbstractMediaObject* getMediaObject(ui4 index) { return 0; }
 
+    // TODO: remove property and resource methods from AbstractDataModel, should only be in SimpleDataModel
     // properties
     virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
     virtual std::string getTitle(ui4 index) { return ""; }
@@ -241,7 +245,32 @@ public:
     virtual std::istream* getIconStream(ui4 index) { return 0; }
 
 private:
-    ServerContainer*    _pServerContainer;
+    void writeCache();
+    void readCache();
+
+    ServerContainer*            _pServerContainer;
+    std::map<ui4, std::string>  _indexCache;
+    std::map<std::string, ui4>  _pathCache;
+};
+
+
+class SimpleDataModel : public AbstractDataModel
+{
+public:
+    virtual AbstractMediaObject* getMediaObject(ui4 index);
+
+     // properties
+    virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
+    virtual std::string getTitle(ui4 index) { return ""; }
+    virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
+
+    // resource(s), currently data model only supports one resource
+    virtual std::streamsize getSize(ui4 index) { return -1; }
+    virtual std::string getMime(ui4 index) { return "*"; }
+    virtual std::string getDlna(ui4 index) { return "*"; }
+    virtual bool isSeekable(ui4 index) { return false; }
+    virtual std::istream* getStream(ui4 index) { return 0; }
+    virtual std::istream* getIconStream(ui4 index) { return 0; }
 };
 
 
