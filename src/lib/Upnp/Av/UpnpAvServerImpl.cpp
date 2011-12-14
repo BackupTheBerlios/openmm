@@ -233,6 +233,8 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
     MediaObjectWriter2 writer(object);
     if (BrowseFlag == "BrowseMetadata") {
         writer.write(Result);
+        NumberReturned = 1;
+        TotalMatches = 1;
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
         // get child objects via row
