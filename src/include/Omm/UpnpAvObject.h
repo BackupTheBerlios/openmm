@@ -321,6 +321,12 @@ private:
 };
 
 
+class DiskCache : public AbstractMediaObjectCache
+{
+
+};
+
+
 class AbstractMediaObject : public Util::ConfigurablePlugin
 {
 public:

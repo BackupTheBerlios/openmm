@@ -226,14 +226,16 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
         object = _pRoot;
     }
     else {
+        // get object via object id and index
         object = _pRoot->getDescendant(ObjectID.substr(2));
     }
-    
+
     MediaObjectWriter2 writer(object);
     if (BrowseFlag == "BrowseMetadata") {
         writer.write(Result);
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
+        // get child objects via row
         NumberReturned = writer.writeChildren(StartingIndex, RequestedCount, Result);
         TotalMatches = object->getTotalChildCount();
     }

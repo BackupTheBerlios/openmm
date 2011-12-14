@@ -1,3 +1,6 @@
+# Disabled as it is obsolete code
+return()
+
 # FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
 # against debug and non-debug versions of Qt libs at the same time.
 if(WINDOWS)

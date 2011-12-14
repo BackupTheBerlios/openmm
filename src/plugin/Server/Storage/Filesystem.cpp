@@ -61,7 +61,7 @@ public:
     std::string         _genre;
     std::string         _mime;
     std::string         _icon;
-    
+
     const static std::string FILE_ITEM_LIST;
     const static std::string FILE_ITEM_CONTAINER_CLASS_PROPERTY;
     const static std::string FILE_ITEM;
@@ -124,7 +124,7 @@ FileItem::writeXml(Poco::XML::Node* pNode)
     Poco::XML::Document* pDoc = pNode->ownerDocument();
     Poco::AutoPtr<Poco::XML::Element> pFileItem = pDoc->createElement(FILE_ITEM);
     pNode->appendChild(pFileItem);
-    
+
     Poco::AutoPtr<Poco::XML::Element> pPath = pDoc->createElement(FILE_ITEM_PATH);
     Poco::AutoPtr<Poco::XML::Text> pPathValue = pDoc->createTextNode(_path);
     pPath->appendChild(pPathValue);
@@ -134,27 +134,27 @@ FileItem::writeXml(Poco::XML::Node* pNode)
     Poco::AutoPtr<Poco::XML::Text> pClassValue = pDoc->createTextNode(_class);
     pClass->appendChild(pClassValue);
     pFileItem->appendChild(pClass);
-    
+
     Poco::AutoPtr<Poco::XML::Element> pTitle = pDoc->createElement(FILE_ITEM_TITLE);
     Poco::AutoPtr<Poco::XML::Text> pTitleValue = pDoc->createTextNode(_title);
     pTitle->appendChild(pTitleValue);
     pFileItem->appendChild(pTitle);
-    
+
     Poco::AutoPtr<Poco::XML::Element> pArtist = pDoc->createElement(FILE_ITEM_ARTIST);
     Poco::AutoPtr<Poco::XML::Text> pArtistValue = pDoc->createTextNode(_artist);
     pArtist->appendChild(pArtistValue);
     pFileItem->appendChild(pArtist);
-    
+
     Poco::AutoPtr<Poco::XML::Element> pAlbum = pDoc->createElement(FILE_ITEM_ALBUM);
     Poco::AutoPtr<Poco::XML::Text> pAlbumValue = pDoc->createTextNode(_album);
     pAlbum->appendChild(pAlbumValue);
     pFileItem->appendChild(pAlbum);
-    
+
     Poco::AutoPtr<Poco::XML::Element> pTrack = pDoc->createElement(FILE_ITEM_TRACK);
     Poco::AutoPtr<Poco::XML::Text> pTrackValue = pDoc->createTextNode(_track);
     pTrack->appendChild(pTrackValue);
     pFileItem->appendChild(pTrack);
-    
+
     Poco::AutoPtr<Poco::XML::Element> pGenre = pDoc->createElement(FILE_ITEM_GENRE);
     Poco::AutoPtr<Poco::XML::Text> pGenreValue = pDoc->createTextNode(_genre);
     pGenre->appendChild(pGenreValue);
@@ -177,20 +177,20 @@ class FileDataModel : public Omm::Av::AbstractDataModel, public Poco::XML::Conte
 public:
     FileDataModel(const std::string& basePath);
     ~FileDataModel();
-    
+
     virtual Omm::ui4 getChildCount();
     virtual std::string getContainerClass();
     virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
     virtual std::string getOptionalProperty(Omm::ui4 index, const std::string& property);
-    
+
     virtual std::streamsize getSize(Omm::ui4 index);
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index);
     virtual std::istream* getStream(Omm::ui4 index);
     virtual std::istream* getIconStream(Omm::ui4 index);
-    
+
     // SAX parser interface
     virtual void setDocumentLocator(const Poco::XML::Locator* loc) {}
     virtual void startDocument() {}
@@ -212,7 +212,7 @@ private:
     bool cacheExists();
     void readCache();
     void writeCache();
-    
+
     std::string                         _basePath;
     std::string                         _cachePath;
     std::string                         _containerClass;
@@ -262,8 +262,9 @@ FileDataModel::getContainerClass()
 std::string
 FileDataModel::getClass(Omm::ui4 index)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get class of item with index " + Poco::NumberFormatter::format(index) + ": " + _items[index]->_class);
-    
+    Omm::Av::Log::instance()->upnpav().debug("get class of item with index " + Poco::NumberFormatter::format(index) + ": ");
+    Omm::Av::Log::instance()->upnpav().debug(_items[index]->_class);
+
     return _items[index]->_class;
 }
 
@@ -280,7 +281,7 @@ std::string
 FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
 {
     Omm::Av::Log::instance()->upnpav().debug("get property: " + property);
-    
+
     if (property == Omm::Av::AvProperty::ARTIST) {
         return _items[index]->_artist;
     }
@@ -475,11 +476,11 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
                     pItem->_genre = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
                     pItem->_mime = pMeta->getMime();
                     pItem->_icon = pItem->_path;
-                    
+
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_title);
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_artist);
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_album);
-                    
+
                     _items.push_back(pItem);
                     delete pMeta;
                 }
@@ -528,7 +529,7 @@ FileDataModel::readCache()
 {
     Poco::XML::SAXParser parser;
     parser.setContentHandler(this);
-    
+
     try {
         parser.parse(_cachePath);
     }
@@ -542,7 +543,7 @@ void
 FileDataModel::writeCache()
 {
     Omm::Av::Log::instance()->upnpav().debug("writing cache to disk ...");
-    
+
     Poco::XML::Document* pCacheDoc= new Poco::XML::Document;
     Poco::AutoPtr<Poco::XML::Element> pFileItemList = pCacheDoc->createElement(FileItem::FILE_ITEM_LIST);
     pFileItemList->setAttribute("class", Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
@@ -551,12 +552,12 @@ FileDataModel::writeCache()
     for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
         (*it)->writeXml(pFileItemList);
     }
-    
+
     Poco::XML::DOMWriter writer;
     writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
     std::ofstream ostr(_cachePath.c_str());
     writer.writeNode(ostr, pCacheDoc);
-    
+
     Omm::Av::Log::instance()->upnpav().debug("cache written to disk.");
 }
 

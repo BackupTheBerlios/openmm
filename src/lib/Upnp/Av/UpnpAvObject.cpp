@@ -1272,7 +1272,9 @@ MediaObjectWriter2::writeChildren(ui4 startingIndex, ui4 requestedCount, std::st
     ui4 c;
     ui4 childCount = _pMediaObject->getChildCount();
     for (c = 0; (c < requestedCount) && (c < childCount - startingIndex); ++c) {
-        MediaObjectWriter2 writer(_pMediaObject->getChildForIndex(startingIndex + c));
+        // FIXME: should be getChildForRow here
+//        MediaObjectWriter2 writer(_pMediaObject->getChildForIndex(startingIndex + c));
+        MediaObjectWriter2 writer(_pMediaObject->getChildForRow(startingIndex + c));
         writer.writeMetaData(_pDidl);
     }
 

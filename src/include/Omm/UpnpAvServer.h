@@ -43,11 +43,11 @@ class MediaItemServer
 {
     friend class ItemRequestHandler;
     friend class StreamingMediaObject;
-    
+
 public:
     MediaItemServer(int port = 0);
     ~MediaItemServer();
-    
+
     void start();
     void stop();
     // TODO: set a data model here. Initialization of data model should be
@@ -60,7 +60,7 @@ protected:
     // virtual bool initItemServer() { return true; }
     /// will be executed at start. If initializion takes a while, start(true)
     /// may be used for asynchronous initialization.
-    
+
 private:
     StreamingMediaObject*                       _pServerContainer;
     Poco::Net::ServerSocket                     _socket;
@@ -72,9 +72,9 @@ class ItemRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
     ItemRequestHandler(MediaItemServer* pItemServer);
-    
+
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-    
+
 private:
     std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::streamoff start = 0, std::streamoff end = -1);
     void parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end);
@@ -88,10 +88,10 @@ class ItemRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
     ItemRequestHandlerFactory(MediaItemServer* pItemServer);
-    
-    
+
+
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
-    
+
 private:
     MediaItemServer*  _pItemServer;
 };
@@ -125,10 +125,10 @@ public:
 class StreamingPropertyImpl : public PropertyImpl
 {
     friend class ItemRequestHandler;
-    
+
 public:
     StreamingPropertyImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem);
-    
+
     virtual std::string getValue();
     // some properties can stream: icon, album art
     virtual std::istream* getStream() { return 0; }
@@ -143,10 +143,10 @@ protected:
 class StreamingResource : public AbstractResource
 {
     friend class ItemRequestHandler;
-    
+
 public:
     StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem);
-    
+
     virtual std::string getValue();
     virtual std::string getAttributeName(int index);
     virtual std::string getAttributeValue(int index);
@@ -157,10 +157,10 @@ protected:
     virtual std::streamsize getSize() { return -1; }
     virtual std::string getMime() { return "*"; }
     virtual std::string getDlna() { return "*"; }
-    
+
     virtual bool isSeekable() = 0;
     virtual std::istream* getStream() = 0;
-    
+
 protected:
     StreamingMediaObject*       _pServer;
     AbstractMediaObject*        _pItem;
@@ -176,7 +176,7 @@ class StreamingMediaItem : public MemoryMediaObject
 {
 public:
     StreamingMediaItem(StreamingMediaObject* pServer);
-    
+
 private:
     StreamingMediaObject*       _pServer;
 };
@@ -187,16 +187,16 @@ class StreamingMediaObject : public AbstractMediaObject
     friend class ItemRequestHandler;
     friend class StreamingResource;
     friend class StreamingPropertyImpl;
-    
+
 public:
     StreamingMediaObject(int port = 0);
     ~StreamingMediaObject();
-    
+
     virtual AbstractMediaObject* createChildObject();
 
 protected:
     virtual std::istream* getIconStream();
-    
+
 private:
     std::string getServerAddress();
     std::string getServerProtocol();
@@ -214,7 +214,7 @@ public:
     virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
     virtual std::string getTitle(ui4 index) { return ""; }
     virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
-    
+
     virtual std::streamsize getSize(ui4 index) { return -1; }
     virtual std::string getMime(ui4 index) { return "*"; }
     virtual std::string getDlna(ui4 index) { return "*"; }
@@ -228,19 +228,17 @@ class TorchServer : public StreamingMediaObject
 {
     friend class TorchItemResource;
     friend class TorchItemPropertyImpl;
-    
+
 public:
     TorchServer(int port = 0);
     virtual ~TorchServer();
-    
+
     void setDataModel(AbstractDataModel* pDataModel);
-    
+
 protected:
     AbstractDataModel*          _pDataModel;
-    
+
 private:
-    virtual AbstractMediaObject* getChildForIndex(ui4 numChild);
-    virtual ui4 getChildCount();
     virtual bool isContainer();
     virtual int getPropertyCount(const std::string& name = "");
     virtual AbstractProperty* getProperty(int index);
@@ -248,9 +246,19 @@ private:
     virtual void addProperty(AbstractProperty* pProperty);
     virtual AbstractProperty* createProperty();
 
+    virtual AbstractMediaObject* getChildForIndex(ui4 index);
+    virtual AbstractMediaObject* getChildForRow(ui4 row);
+    virtual ui4 getChildCount();
+
     AbstractProperty*               _pTitleProperty;
     AbstractProperty*               _pClassProperty;
     AbstractMediaObject*            _pChild;
+};
+
+
+class ServerContainer : public StreamingMediaObject, public DiskCache
+{
+
 };
 
 
@@ -263,28 +271,28 @@ public:
     virtual ServerObject* getObject(const std::string& id) = 0;
     // count = 0 means fetch all children
     virtual std::vector<ServerObject*> getChildren(const std::string& id, ui4 start = 0, ui4 count = 0) = 0;
-    
+
     // deliver media stream for renderer
     virtual void stream(const std::string& id, const std::string& res, std::ostream& stream) = 0;
-    
+
     // ------- optional interface to be implemented --------
     // scan control
     virtual void startScan() {}
     virtual void stopScan() {}
-    
+
     // cache control (size == 0 means unlimited cache size)
     virtual void activateCache(bool = true, ui4 size = 0) {}
-    
+
     // filter
     virtual void filter(std::vector<std::string> properties) {};
-    
+
     // sort
     virtual void sort(const std::string& property) {};
-    
+
     // search for metadata
     // count = 0 means return all found objects
     virtual std::vector<ServerObject*> search(const std::string& name, const std::vector<std::string>& properties, ui4 start = 0, ui4 count = 0) {};
-    
+
     // ------- callbacks  --------
     // update notification events are moderated by the server and not the data model
     // if no objectsHaveChanged notification appeared inbetween update events, only a system update event is triggered

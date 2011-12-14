@@ -508,36 +508,79 @@ TorchServer::setDataModel(AbstractDataModel* pDataModel)
 
 
 AbstractMediaObject*
-TorchServer::getChildForIndex(ui4 numChild)
+TorchServer::getChildForIndex(ui4 index)
 {
-    _pChild->setIndex(numChild);
+    // TODO: special case here, row == index, no search, sort, add/remove items or similar possible
+    _pChild->setIndex(index);
     TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
     pTorchChild->_optionalProps.clear();
 
     // FIXME: title property of child item should get it's title based on item's object number
-    pTorchChild->_pClassProp->setValue(_pDataModel->getClass(numChild));
-    pTorchChild->_pTitleProp->setValue(_pDataModel->getTitle(numChild));
-    std::string artist = _pDataModel->getOptionalProperty(numChild, AvProperty::ARTIST);
+    pTorchChild->_pClassProp->setValue(_pDataModel->getClass(index));
+    pTorchChild->_pTitleProp->setValue(_pDataModel->getTitle(index));
+    std::string artist = _pDataModel->getOptionalProperty(index, AvProperty::ARTIST);
     if (artist != "") {
         pTorchChild->_pArtistProp->setValue(artist);
         pTorchChild->_optionalProps.push_back(pTorchChild->_pArtistProp);
     }
-    std::string album = _pDataModel->getOptionalProperty(numChild, AvProperty::ALBUM);
+    std::string album = _pDataModel->getOptionalProperty(index, AvProperty::ALBUM);
     if (album != "") {
         pTorchChild->_pAlbumProp->setValue(album);
         pTorchChild->_optionalProps.push_back(pTorchChild->_pAlbumProp);
     }
-    std::string track = _pDataModel->getOptionalProperty(numChild, AvProperty::ORIGINAL_TRACK_NUMBER);
+    std::string track = _pDataModel->getOptionalProperty(index, AvProperty::ORIGINAL_TRACK_NUMBER);
     if (track != "") {
         pTorchChild->_pTrackProp->setValue(track);
         pTorchChild->_optionalProps.push_back(pTorchChild->_pTrackProp);
     }
-    std::string genre = _pDataModel->getOptionalProperty(numChild, AvProperty::GENRE);
+    std::string genre = _pDataModel->getOptionalProperty(index, AvProperty::GENRE);
     if (genre != "") {
         pTorchChild->_pGenreProp->setValue(genre);
         pTorchChild->_optionalProps.push_back(pTorchChild->_pGenreProp);
     }
-    std::string icon = _pDataModel->getOptionalProperty(numChild, AvProperty::ICON);
+    std::string icon = _pDataModel->getOptionalProperty(index, AvProperty::ICON);
+    if (icon != "") {
+        Log::instance()->upnpav().debug("torch server adds icon property: " + icon);
+        pTorchChild->_pIconProp->setValue(icon);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pIconProp);
+    }
+
+    return _pChild;
+}
+
+
+AbstractMediaObject*
+TorchServer::getChildForRow(ui4 row)
+{
+    // TODO: special case here, row == index, no search, sort, add/remove items or similar possible
+    _pChild->setIndex(row);
+    TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
+    pTorchChild->_optionalProps.clear();
+
+    // FIXME: title property of child item should get it's title based on item's object number
+    pTorchChild->_pClassProp->setValue(_pDataModel->getClass(row));
+    pTorchChild->_pTitleProp->setValue(_pDataModel->getTitle(row));
+    std::string artist = _pDataModel->getOptionalProperty(row, AvProperty::ARTIST);
+    if (artist != "") {
+        pTorchChild->_pArtistProp->setValue(artist);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pArtistProp);
+    }
+    std::string album = _pDataModel->getOptionalProperty(row, AvProperty::ALBUM);
+    if (album != "") {
+        pTorchChild->_pAlbumProp->setValue(album);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pAlbumProp);
+    }
+    std::string track = _pDataModel->getOptionalProperty(row, AvProperty::ORIGINAL_TRACK_NUMBER);
+    if (track != "") {
+        pTorchChild->_pTrackProp->setValue(track);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pTrackProp);
+    }
+    std::string genre = _pDataModel->getOptionalProperty(row, AvProperty::GENRE);
+    if (genre != "") {
+        pTorchChild->_pGenreProp->setValue(genre);
+        pTorchChild->_optionalProps.push_back(pTorchChild->_pGenreProp);
+    }
+    std::string icon = _pDataModel->getOptionalProperty(row, AvProperty::ICON);
     if (icon != "") {
         Log::instance()->upnpav().debug("torch server adds icon property: " + icon);
         pTorchChild->_pIconProp->setValue(icon);
