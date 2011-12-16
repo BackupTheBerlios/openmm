@@ -26,25 +26,25 @@
 #include "DvbServer.h"
 
 
-class DvbDataModel : public Omm::Av::AbstractDataModel
+class DvbDataModel : public Omm::Av::SimpleDataModel
 {
     friend class DvbServer;
-    
+
 public:
     DvbDataModel(const std::string& channelConfig);
-    
+
     virtual Omm::ui4 getChildCount();
     virtual std::string getClass(Omm::ui4 index);
     virtual std::string getTitle(Omm::ui4 index);
-    
+
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index);
-    virtual std::istream* getStream(Omm::ui4 index);
+    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
+    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
 
 private:
     void scanChannelConfig(const std::string& channelConfig);
-    
+
     std::vector<std::string>             _channelNames;
     std::vector<Omm::Dvb::DvbChannel*>   _channels;
 };
@@ -80,14 +80,14 @@ DvbDataModel::getTitle(Omm::ui4 index)
 
 
 bool
-DvbDataModel::isSeekable(Omm::ui4 index)
+DvbDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
 {
     return false;
 }
 
 
 std::istream*
-DvbDataModel::getStream(Omm::ui4 index)
+DvbDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 {
     Omm::Dvb::DvbDevice::instance()->tune(_channels[index]);
 
@@ -166,7 +166,7 @@ DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::
     Poco::DateTime nowDate;
     Omm::Dvb::Log::instance()->dvb().debug("set timer, channel: " + Poco::NumberFormatter::format(index)
                 + ", start:" + Poco::NumberFormatter::format((startDate - nowDate).milliseconds()));
-                
+
     // FIXME: startInterval is wrong (too short)
     _timer.setStartInterval((startDate - nowDate).milliseconds());
     Poco::TimerCallback<DvbServer> callback(*this, &DvbServer::timerCallback);
@@ -178,7 +178,7 @@ void
 DvbServer::timerCallback(Poco::Timer& timer)
 {
     Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
-    
+
     Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
     std::ifstream istr("/dev/dvb/adapter0/dvr0");
     std::ofstream ostr("/var/local/ommrec.mpg");
@@ -191,8 +191,8 @@ DvbServer::timerCallback(Poco::Timer& timer)
 // _pChannel(0)
 // {
 // }
-// 
-// 
+//
+//
 // void
 // RecTimer::setChannel(Omm::Dvb::DvbChannel* pChannel)
 // {

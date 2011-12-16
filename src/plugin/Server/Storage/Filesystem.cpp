@@ -172,7 +172,7 @@ FileItem::writeXml(Poco::XML::Node* pNode)
 }
 
 
-class FileDataModel : public Omm::Av::AbstractDataModel, public Poco::XML::ContentHandler
+class FileDataModel : public Omm::Av::SimpleDataModel, public Poco::XML::ContentHandler
 {
 public:
     FileDataModel(const std::string& basePath);
@@ -187,8 +187,8 @@ public:
     virtual std::streamsize getSize(Omm::ui4 index);
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index);
-    virtual std::istream* getStream(Omm::ui4 index);
+    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
+    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
     virtual std::istream* getIconStream(Omm::ui4 index);
 
     // SAX parser interface
@@ -304,14 +304,14 @@ FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
 
 
 bool
-FileDataModel::isSeekable(Omm::ui4 index)
+FileDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
 {
     return true;
 }
 
 
 std::istream*
-FileDataModel::getStream(Omm::ui4 index)
+FileDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 {
     std::string filePath = _basePath + _items[index]->_path;
     std::istream* pRes = new std::ifstream(filePath.c_str());
@@ -506,7 +506,7 @@ FileDataModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().warning("Error could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
+        Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
         _pTagger = taggerPluginLoader.load("tagger-simple");
     }
 }

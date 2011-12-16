@@ -37,7 +37,7 @@ tagUri(std::vector<std::string>& uris)
 {
     for(std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
         std::clog << "tagging uri: " << *it << std::endl;
-        
+
         Omm::AvStream::Tagger* pTagger;
         std::string taggerPlugin("tagger-ffmpeg");
         Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
@@ -45,7 +45,7 @@ tagUri(std::vector<std::string>& uris)
             pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
         }
         catch(Poco::NotFoundException) {
-            Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+            Omm::AvStream::Log::instance()->avstream().error("could not find avstream tagger plugin: " + taggerPlugin);
             return;
         }
         Omm::AvStream::Meta* pMeta = pTagger->tag(*it);
@@ -71,7 +71,7 @@ tagStream(std::vector<std::string>& uris)
             pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
         }
         catch(Poco::NotFoundException) {
-            Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+            Omm::AvStream::Log::instance()->avstream().error("could not find avstream tagger plugin: " + taggerPlugin);
             return;
         }
         std::ifstream ifs((*it).c_str());
@@ -98,7 +98,7 @@ main(int argc, char** argv)
         videoFiles.push_back(videoPath + "/" + videoDir.name());
         ++videoDir;
     }
-    
+
     std::vector<std::string> audioFiles;
     std::string audioPath = basePath + "/audio";
     Poco::DirectoryIterator audioDir(audioPath);
@@ -106,12 +106,12 @@ main(int argc, char** argv)
         audioFiles.push_back(audioPath + "/" + audioDir.name());
         ++audioDir;
     }
-    
+
     std::vector<std::string> liveTv;
     for (int i = 0; i < 10; ++i) {
         liveTv.push_back(liveStreamAddress + Poco::NumberFormatter::format(i) + "$0");
     }
-    
+
     std::vector<std::string> allStreams;
     for (std::vector<std::string>::iterator it = audioFiles.begin(); it != audioFiles.end(); ++it) {
         allStreams.push_back(*it);
@@ -119,7 +119,7 @@ main(int argc, char** argv)
     for (std::vector<std::string>::iterator it = videoFiles.begin(); it != videoFiles.end(); ++it) {
         allStreams.push_back(*it);
     }
-    
+
 //     tagUri(allStreams);
     tagStream(allStreams);
 }

@@ -35,7 +35,7 @@
 #include "Webradio.h"
 
 
-class WebradioDataModel : public Omm::Av::AbstractDataModel
+class WebradioDataModel : public Omm::Av::SimpleDataModel
 {
 public:
     WebradioDataModel(const std::string& stationConfig);
@@ -46,8 +46,8 @@ public:
 
     virtual std::string getMime(Omm::ui4 index);
     virtual std::string getDlna(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index);
-    virtual std::istream* getStream(Omm::ui4 index);
+    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
+    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
 
 private:
     void scanStationConfig(const std::string& stationConfig);
@@ -85,14 +85,14 @@ WebradioDataModel::getTitle(Omm::ui4 index)
 
 
 bool
-WebradioDataModel::isSeekable(Omm::ui4 index)
+WebradioDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
 {
     return false;
 }
 
 
 std::istream*
-WebradioDataModel::getStream(Omm::ui4 index)
+WebradioDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 {
     Poco::URI uri(_stationUris[index]);
 

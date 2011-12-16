@@ -134,7 +134,7 @@ protected:
                 pContainerPlugin = pluginLoader.load(_containerPlugin);
             }
             catch(Poco::NotFoundException) {
-                std::cerr << "Error could not find server plugin: " << _containerPlugin << std::endl;
+                std::cerr << "error could not find server plugin: " << _containerPlugin << std::endl;
                 return 1;
             }
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;

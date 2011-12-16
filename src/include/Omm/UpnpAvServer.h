@@ -22,6 +22,8 @@
 #ifndef OMMUPNPAV_SERVER_H
 #define OMMUPNPAV_SERVER_H
 
+#include <stack>
+
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
@@ -218,39 +220,43 @@ public:
     virtual std::string getContainerClass() { return AvClass::CONTAINER; }
 
     // child media object creation / deletion
-    virtual void scan(bool on) {}
+    virtual void scan(bool on = true) {}
 
-    ui4 getIndex(const std::string path);
-    std::string getPath(ui4 index);
+    // index and path
+    // depending on the data domain, the bijective mapping between index and path
+    // can be trivial and should override getIndex(), getPath(), and hasIndex().
+    // otherwise a standard mapping is implemented here.
+    virtual bool hasIndex(ui4 index);
+    virtual ui4 getIndex(const std::string& path);
+    virtual std::string getPath(ui4 index);
     void addIndices(const std::vector<ui4>& indices);
     void removeIndices(const std::vector<ui4>& indices);
+    void flushIndexBuffer();
+    void bufferIndex(Omm::ui4 index);
 
     // number of child media objects in container at one point in time
     // (synchronized with child object creation / deletion)
-    virtual ui4 getChildCount() { return 0; }
+    virtual ui4 getChildCount();
+    // meta data of object
     virtual AbstractMediaObject* getMediaObject(ui4 index) { return 0; }
+    // stream data of object
+    virtual bool isSeekable(ui4 index, const std::string& resourcePath = "") { return false; }
+    virtual std::istream* getStream(ui4 index, const std::string& resourcePath = "") { return 0; }
 
-    // TODO: remove property and resource methods from AbstractDataModel, should only be in SimpleDataModel
-    // properties
-    virtual std::string getClass(ui4 index) { return AvClass::OBJECT; }
-    virtual std::string getTitle(ui4 index) { return ""; }
-    virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
+protected:
+    void readIndexCache();
+    void writeIndexCache();
 
-    // resource(s), currently data model only supports one resource
-    virtual std::streamsize getSize(ui4 index) { return -1; }
-    virtual std::string getMime(ui4 index) { return "*"; }
-    virtual std::string getDlna(ui4 index) { return "*"; }
-    virtual bool isSeekable(ui4 index) { return false; }
-    virtual std::istream* getStream(ui4 index) { return 0; }
-    virtual std::istream* getIconStream(ui4 index) { return 0; }
+    std::string                 _cacheFile;
 
 private:
-    void writeCache();
-    void readCache();
-
     ServerContainer*            _pServerContainer;
     std::map<ui4, std::string>  _indexCache;
     std::map<std::string, ui4>  _pathCache;
+    std::stack<ui4>             _freeIndices;
+    ui4                         _maxIndex;
+    std::vector<Omm::ui4>       _indexBuffer;
+    Omm::ui4                    _indexBufferSize;
 };
 
 
@@ -268,8 +274,7 @@ public:
     virtual std::streamsize getSize(ui4 index) { return -1; }
     virtual std::string getMime(ui4 index) { return "*"; }
     virtual std::string getDlna(ui4 index) { return "*"; }
-    virtual bool isSeekable(ui4 index) { return false; }
-    virtual std::istream* getStream(ui4 index) { return 0; }
+
     virtual std::istream* getIconStream(ui4 index) { return 0; }
 };
 
@@ -308,6 +313,9 @@ public:
     TorchServer(int port = 0);
     virtual ~TorchServer();
 
+    void setDataModel(SimpleDataModel* pDataModel);
+    SimpleDataModel* getDataModel();
+
 private:
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual AbstractMediaObject* getChildForRow(ui4 row);
@@ -317,13 +325,18 @@ private:
 };
 
 
-class CachedServer : public ServerContainer, public DiskCache
+class CachedServer : public ServerContainer, public DatabaseCache
 {
 public:
-    bool hasIndex(ui4 index);
+    CachedServer();
+    
+    virtual void addIndices(const std::vector<ui4>& indices);
+    virtual void removeIndices(const std::vector<ui4>& indices);
 
-    virtual void addIndices(const std::vector<ui4>& indices) {}
-    virtual void removeIndices(const std::vector<ui4>& indices) {}
+private:
+    virtual AbstractMediaObject* getChildForIndex(ui4 index);
+    virtual AbstractMediaObject* getChildForRow(ui4 row);
+    virtual ui4 getChildCount();
 };
 
 

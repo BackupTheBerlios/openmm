@@ -43,13 +43,13 @@ class Log
 {
 public:
     static Log* instance();
-    
+
     Poco::Logger& util();
     Poco::Logger& plugin();
-    
+
 private:
     Log();
-    
+
     static Log*     _pInstance;
     Poco::Logger*   _pUtilLogger;
     Poco::Logger*   _pPluginLogger;
@@ -60,9 +60,13 @@ class Home
 {
 public:
     static const std::string getHomePath();
-    
+    static const std::string getCachePath();
+    static const std::string getConfigPath();
+
 private:
     static std::string          _home;
+    static std::string          _cache;
+    static std::string          _config;
     static const std::string    _defaultHome;
     static Poco::FastMutex      _lock;
 };
@@ -81,21 +85,21 @@ public:
 #endif
     {
     }
-    
-    
+
+
     ~PluginLoader()
     {
         delete _pPluginLoader;
     }
-    
-    
+
+
     C* load(const std::string& objectName, const std::string& className = "", const std::string& prefixName = "")
     {
         Log::instance()->util().information("plugin loader trying to load " + objectName);
-        
+
         loadPlugin(objectName);
         Poco::StringTokenizer nameSplitter(objectName, "-");
-        
+
         std::string classBase = className;
         if (className == "") {
             classBase = nameSplitter[0];
@@ -104,7 +108,7 @@ public:
             Log::instance()->util().error("wrong plugin library base class: " + className);
             throw Poco::NotFoundException();
         }
-        
+
         std::string classPrefix = prefixName;
         if (prefixName == "") {
             try {
@@ -116,13 +120,13 @@ public:
             }
         }
         Log::instance()->util().information("plugin loader successfully loaded " + objectName);
-        
+
         return create(classPrefix, classBase);
     }
-    
-    
+
+
 private:
-    
+
     void loadPlugin(const std::string& name)
     {
         try {
@@ -153,8 +157,8 @@ private:
             throw Poco::NotFoundException();
         }
     }
-    
-    
+
+
     C* create(const std::string& classPrefix, const std::string& classBase)
     {
         C* pRes;
@@ -168,14 +172,14 @@ private:
         }
         return pRes;
     }
-    
-    
+
+
     std::string camelCase(const std::string& name)
     {
         return Poco::toUpper(name.substr(0, 1)) + name.substr(1);
     }
-    
-    
+
+
     Poco::ClassLoader<C>*    _pPluginLoader;
     std::string              _pluginPath;
 };

@@ -111,6 +111,9 @@ Upnp/Av/UpnpAvObject.cpp
 
 target_link_libraries(ommupnpav
 ${OMM}
+${POCO_SQLITE}
+${POCO_DATA}
+${POCO_FOUNDATION}
 )
 
 set(OMM_AV

@@ -81,19 +81,43 @@ Log::plugin()
 
 
 std::string Home::_home = "";
-const std::string Home::_defaultHome("/var/omm");
+const std::string Home::_defaultHome("/var");
 Poco::FastMutex Home::_lock;
 
 const std::string
 Home::getHomePath()
 {
     Poco::FastMutex::ScopedLock lock(_lock);
-    
+
     if (_home == "") {
         _home = Poco::Environment::get("OMM_HOME", Poco::Environment::get("HOME", _defaultHome));
         Log::instance()->util().information("OMM HOME: " + _home);
     }
+    if (_home == Poco::Environment::get("HOME")) {
+        _home += ".omm";
+    }
+    else {
+        _home += "omm";
+    }
     return _home;
+}
+
+
+const std::string
+Home::getCachePath()
+{
+    Poco::FastMutex::ScopedLock lock(_lock);
+
+    return Poco::Environment::get("OMM_CACHE", getHomePath() + "/" + "cache");
+}
+
+
+const std::string
+Home::getConfigPath()
+{
+    Poco::FastMutex::ScopedLock lock(_lock);
+
+    return Poco::Environment::get("OMM_CONFIG", getHomePath() + "/" + "config");
 }
 
 

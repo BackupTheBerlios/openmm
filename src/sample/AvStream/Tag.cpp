@@ -34,7 +34,7 @@ int
 main(int argc, char** argv)
 {
     std::clog << "tagging uri: " << argv[1] << std::endl;
-    
+
     Omm::AvStream::Tagger* pTagger;
     std::string taggerPlugin("tagger-ffmpeg");
     Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
@@ -42,7 +42,7 @@ main(int argc, char** argv)
         pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().error("Error could not find avstream tagger plugin: " + taggerPlugin);
+        Omm::AvStream::Log::instance()->avstream().error("could not find avstream tagger plugin: " + taggerPlugin);
         return 1;
     }
     Omm::AvStream::Meta* pMeta = pTagger->tag(std::string(argv[1]));
@@ -69,7 +69,7 @@ main(int argc, char** argv)
     std::clog << "Track: " << pMeta->getTag(Omm::AvStream::Meta::TK_TRACK) << std::endl;
     std::clog << "Genre: " << pMeta->getTag(Omm::AvStream::Meta::TK_GENRE) << std::endl;
     std::clog << std::endl;
-    
+
     delete pMeta;
     delete pTagger;
     return 0;

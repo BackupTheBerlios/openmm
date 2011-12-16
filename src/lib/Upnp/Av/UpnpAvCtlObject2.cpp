@@ -87,7 +87,7 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
 AbstractMediaObject*
 CtlMediaObject2::getChildForRow(ui4 row)
 {
-    return getMediaObject(row);
+    return BlockCache::getMediaObjectForRow(row);
 }
 
 

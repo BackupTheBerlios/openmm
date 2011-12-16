@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <sstream>
+#include <iostream>
 
 #ifdef POCO_VERSION_HEADER_FOUND
 #include <Poco/Version.h>
@@ -46,6 +47,9 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
+#include <Poco/Data/Session.h>
+#include "Poco/Data/SQLite/Connector.h"
+#include "Poco/Data/RecordSet.h"
 
 #include "UpnpAvObject.h"
 
@@ -513,7 +517,7 @@ _blockSize(blockSize)
 
 
 AbstractMediaObject*
-BlockCache::getMediaObject(ui4 row)
+BlockCache::getMediaObjectForRow(ui4 row)
 {
     Log::instance()->upnpav().debug("block cache get media object in row: " + Poco::NumberFormatter::format(row) + " ...");
 
@@ -613,6 +617,118 @@ void
 BlockCache::doScan(bool on)
 {
 
+}
+
+
+DatabaseCache::DatabaseCache(const std::string& databaseFile)
+{
+    Poco::Data::SQLite::Connector::registerConnector();
+    _pSession = new Poco::Data::Session("SQLite", databaseFile);
+    try {
+        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, xml VARCHAR)",
+                Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache creating object cache table failed: " + e.displayText());
+    }
+    try {
+        *_pSession << "CREATE UNIQUE INDEX idx ON objcache (idx)", Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache creating index on object cache table failed: " + e.displayText());
+    }
+}
+
+
+DatabaseCache::~DatabaseCache()
+{
+    delete _pSession;
+    Poco::Data::SQLite::Connector::unregisterConnector();
+}
+
+
+AbstractMediaObject*
+DatabaseCache::getMediaObjectForRow(ui4 row)
+{
+    Log::instance()->upnpav().debug("database cache get object for row: " + Poco::NumberFormatter::format(row));
+
+    std::string xml;
+    try {
+        Poco::Data::Statement select(*_pSession);
+        select << "SELECT xml FROM objcache";
+        select.execute();
+        Poco::Data::RecordSet recordSet(select);
+        recordSet.moveFirst();
+        for (ui4 r = 0; r < row; r++) {
+            recordSet.moveNext();
+        }
+        xml = recordSet["xml"].convert<std::string>();
+        // NOTE: use recordSet.rowCount() for number of rows in query result
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get object for row failed: " + e.displayText());
+    }
+    MemoryMediaObject* pObject = new MemoryMediaObject;
+    MediaObjectReader xmlReader(pObject);
+    xmlReader.read(xml);
+    return pObject;
+}
+
+
+AbstractMediaObject*
+DatabaseCache::getMediaObjectForIndex(ui4 index)
+{
+    Log::instance()->upnpav().debug("database cache get object for index: " + Poco::NumberFormatter::format(index));
+
+    std::vector<std::string> xml;
+    try {
+        *_pSession << "SELECT xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(xml), Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
+    }
+    if (xml.size() == 1) {
+        MemoryMediaObject* pObject = new MemoryMediaObject;
+        MediaObjectReader xmlReader(pObject);
+        xmlReader.read(xml[0]);
+        return pObject;
+    }
+    else {
+        Log::instance()->upnpav().warning("database cache get object for index reading meta data failed.");
+        return 0;
+    }
+}
+
+
+void
+DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
+{
+    Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
+    std::string xml;
+    MediaObjectWriter2 xmlWriter(pObject);
+    xmlWriter.write(xml);
+    try {
+//        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, xml) VALUES(:idx, :class, :title, :artist, :album, :xml)",
+//                Poco::Data::use(pObject->getIndex()),
+//                Poco::Data::use(pObject->getClass()),
+//                Poco::Data::use(pObject->getTitle()),
+//                "",
+//                "",
+////                Poco::Data::use(pObject->getProperty(AvProperty::ARTIST)->getValue()),
+////                Poco::Data::use(pObject->getProperty(AvProperty::ALBUM)->getValue()),
+//                "",
+//                Poco::Data::now;
+//        *_pSession << "INSERT INTO objcache (idx) VALUES(:idx)", Poco::Data::use(pObject->getIndex()), Poco::Data::now;
+        *_pSession << "INSERT INTO objcache (idx, class, title, xml) VALUES(:idx, :class, :title, :xml)",
+                Poco::Data::use(pObject->getIndex()),
+                Poco::Data::use(pObject->getClass()),
+                Poco::Data::use(pObject->getTitle()),
+                Poco::Data::use(xml),
+                Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
+    }
 }
 
 

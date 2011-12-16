@@ -26,6 +26,7 @@
 #include <Poco/Net/MediaType.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
+#include "Poco/Data/Common.h"
 
 #include "UpnpTypes.h"
 #include "UpnpAvLogger.h"
@@ -309,7 +310,8 @@ public:
 
     virtual ui4 getTotalCount() { return 0; }
     virtual void clear() {}
-    virtual AbstractMediaObject* getMediaObject(ui4 index) { return 0; }
+    virtual AbstractMediaObject* getMediaObjectForRow(ui4 row) { return 0; }
+    virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index) { return 0; }
 
     void setMaxCacheSize(ui4 size);
     ui4 getMaxCacheSize();
@@ -333,7 +335,7 @@ class BlockCache : public AbstractMediaObjectCache
 public:
     BlockCache(ui4 blockSize = 10);
 
-    virtual AbstractMediaObject* getMediaObject(ui4 row);
+    virtual AbstractMediaObject* getMediaObjectForRow(ui4 row);
     virtual void erase(std::vector<AbstractMediaObject*>::iterator begin, std::vector<AbstractMediaObject*>::iterator end);
     virtual void clear();
 
@@ -353,9 +355,20 @@ private:
 };
 
 
-class DiskCache : public AbstractMediaObjectCache
+class DatabaseCache : public AbstractMediaObjectCache
 {
+public:
+    DatabaseCache(const std::string& databaseFile);
+    ~DatabaseCache();
 
+    virtual AbstractMediaObject* getMediaObjectForRow(ui4 row);
+    virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index);
+
+protected:
+    void insertMediaObject(AbstractMediaObject* pObject);
+
+private:
+    Poco::Data::Session*        _pSession;
 };
 
 
