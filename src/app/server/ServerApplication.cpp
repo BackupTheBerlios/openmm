@@ -128,8 +128,8 @@ protected:
         }
         else
         {
-            Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> pluginLoader;
-            Omm::Av::AbstractMediaObject* pContainerPlugin;
+            Omm::Util::PluginLoader<Omm::Av::ServerContainer> pluginLoader;
+            Omm::Av::ServerContainer* pContainerPlugin;
             try {
                 pContainerPlugin = pluginLoader.load(_containerPlugin);
             }

@@ -374,7 +374,7 @@ private:
 };
 
 
-class AbstractMediaObject : public Util::ConfigurablePlugin
+class AbstractMediaObject
 {
 public:
     AbstractMediaObject();

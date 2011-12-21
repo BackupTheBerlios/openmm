@@ -65,8 +65,8 @@ TestServer::TestServer() //:
     /*----------- media object with meta data dynamically loaded for each media item, streaming through local proxy ------------*/
     std::string pluginName("server-file");
 
-    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> videoFileServerLoader;
-    Omm::Av::AbstractMediaObject* pVideos;
+    Omm::Util::PluginLoader<Omm::Av::ServerContainer> videoFileServerLoader;
+    Omm::Av::ServerContainer* pVideos;
     try {
         pVideos = videoFileServerLoader.load(pluginName);
     }
@@ -82,8 +82,8 @@ TestServer::TestServer() //:
     appendChildWithAutoIndex(pVideos);
 
 
-    Omm::Util::PluginLoader<Omm::Av::AbstractMediaObject> mp3FileServerLoader;
-    Omm::Av::AbstractMediaObject* pMusic;
+    Omm::Util::PluginLoader<Omm::Av::ServerContainer> mp3FileServerLoader;
+    Omm::Av::ServerContainer* pMusic;
     try {
         pMusic = mp3FileServerLoader.load(pluginName);
     }

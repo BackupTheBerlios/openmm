@@ -29,10 +29,7 @@ class FilecachedServer : public Omm::Av::CachedServerContainer
 {
 public:
     virtual void setOption(const std::string& key, const std::string& value);
-    virtual std::string getOption(const std::string& key);
-
-private:
-    std::string         _basePath;
+    virtual std::string getPluginType();
 };
 
 #endif

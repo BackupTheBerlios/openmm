@@ -581,7 +581,7 @@ FileServer::setOption(const std::string& key, const std::string& value)
 
 
 #ifdef OMMPLUGIN
-POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
+POCO_BEGIN_MANIFEST(Omm::Av::ServerContainer)
 POCO_EXPORT_CLASS(FileServer)
 POCO_END_MANIFEST
 #endif

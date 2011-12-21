@@ -748,6 +748,13 @@ ServerContainer::createProperty()
 }
 
 
+void
+ServerContainer::setBasePath(const std::string& basePath)
+{
+    _basePath = basePath;
+}
+
+
 TorchServerContainer::TorchServerContainer(int port) :
 ServerContainer(port),
 _pChild(new TorchItem(this))
@@ -1102,14 +1109,11 @@ CachedServerContainer::removeIndices(const std::vector<ui4>& indices)
 }
 
 
-//AbstractResource*
-//CachedServer::createResource()
-//{
-//    Log::instance()->upnpav().debug("cached server create resource");
-//
-//    return new MemoryResource;
-////    return new CachedItemResource(this, 0);
-//}
+void
+CachedServerContainer::scan(bool on)
+{
+    DatabaseCache::doScan(on);
+}
 
 
 AbstractMediaObject*

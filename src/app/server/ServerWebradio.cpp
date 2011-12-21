@@ -47,27 +47,27 @@ public:
     {
         setUnixOptions(true);
     }
-    
+
     ~UpnpAvServerApplication()
     {
     }
-    
+
 protected:
     void initialize(Application& self)
     {
         loadConfiguration(); // load default configuration files, if present
         ServerApplication::initialize(self);
     }
-    
+
     void uninitialize()
     {
         ServerApplication::uninitialize();
     }
-    
+
     void defineOptions(OptionSet& options)
     {
         ServerApplication::defineOptions(options);
-        
+
         options.addOption(
                            Option("help", "h", "display help information on command line arguments")
                            .required(false)
@@ -83,11 +83,11 @@ protected:
                            .repeatable(false)
                            .argument("friendly name", true));
     }
-    
+
     void handleOption(const std::string& name, const std::string& value)
     {
         ServerApplication::handleOption(name, value);
-        
+
         if (name == "help") {
             _helpRequested = true;
         }
@@ -98,7 +98,7 @@ protected:
             _name = value;
         }
     }
-    
+
     void displayHelp()
     {
         HelpFormatter helpFormatter(options());
@@ -107,7 +107,7 @@ protected:
         helpFormatter.setHeader("A UPnP Device that implements a UPnP-AV Media Webradio Server.");
         helpFormatter.format(std::cout);
     }
-    
+
     int main(const std::vector<std::string>& args)
     {
         if (_helpRequested)
@@ -116,8 +116,8 @@ protected:
         }
         else
         {
-            Omm::Av::AbstractMediaObject* pObject = new WebradioServer;
-            
+            Omm::Av::ServerContainer* pObject = new WebradioServer;
+
             std::string home = Poco::Environment::get("HOME");
             _name = "Web Radio";
             if (_pluginOption == "") {
@@ -148,14 +148,14 @@ protected:
             // start runnable server
             server.init();
             server.start();
-            
+
             waitForTerminationRequest();
 
             server.stop();
         }
         return Application::EXIT_OK;
     }
-    
+
 private:
     bool            _helpRequested;
     std::string     _pluginOption;

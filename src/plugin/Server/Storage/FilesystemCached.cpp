@@ -262,7 +262,6 @@ FilecachedServer::setOption(const std::string& key, const std::string& value)
 {
     if (key == "basePath") {
         Omm::Av::Log::instance()->upnpav().debug("file cached server set option: " + key + " to: " + value);
-        _basePath = value;
         FileDataModel* pDataModel = new FileDataModel(value);
         setDataModel(pDataModel);
         setTitle(value);
@@ -274,17 +273,14 @@ FilecachedServer::setOption(const std::string& key, const std::string& value)
 
 
 std::string
-FilecachedServer::getOption(const std::string& key)
+FilecachedServer::getPluginType()
 {
-    if (key == "basePath") {
-        return _basePath;
-    }
+    return "FileServerContainer";
 }
 
 
-
 #ifdef OMMPLUGIN
-POCO_BEGIN_MANIFEST(Omm::Av::AbstractMediaObject)
+POCO_BEGIN_MANIFEST(Omm::Av::ServerContainer)
 POCO_EXPORT_CLASS(FilecachedServer)
 POCO_END_MANIFEST
 #endif

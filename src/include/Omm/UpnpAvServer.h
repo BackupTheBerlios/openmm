@@ -280,7 +280,7 @@ public:
 };
 
 
-class ServerContainer : public StreamingMediaObject
+class ServerContainer : public StreamingMediaObject, public Util::ConfigurablePlugin
 {
 public:
     ServerContainer(int port = 0);
@@ -298,7 +298,11 @@ public:
     virtual void addIndices(const std::vector<ui4>& indices) {}
     virtual void removeIndices(const std::vector<ui4>& indices) {}
 
+    virtual void setBasePath(const std::string& basePath);
+    virtual void scan(bool on = true) {}
+
 protected:
+    std::string                     _basePath;
     AbstractDataModel*              _pDataModel;
 
     AbstractProperty*               _pTitleProperty;
@@ -335,7 +339,7 @@ public:
     virtual void addIndices(const std::vector<ui4>& indices);
     virtual void removeIndices(const std::vector<ui4>& indices);
 
-//    virtual AbstractResource* createResource();
+    virtual void scan(bool on = true);
 
 private:
     // abstract media object cache interface

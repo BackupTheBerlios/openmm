@@ -189,8 +189,9 @@ class ConfigurablePlugin
     /// interface for plugins, that can be parametrized with options
 {
 public:
+    virtual std::string getOption(const std::string& key) { return ""; }
     virtual void setOption(const std::string& key, const std::string& value) {}
-    virtual std::string getOption(const std::string& key) {}
+    virtual std::string getPluginType() { return ""; }
 };
 
 
