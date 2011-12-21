@@ -180,7 +180,7 @@ class StreamingMediaItem : public MemoryMediaObject
 public:
     StreamingMediaItem(StreamingMediaObject* pServer);
 
-private:
+protected:
     StreamingMediaObject*       _pServer;
 };
 
@@ -215,6 +215,7 @@ public:
     AbstractDataModel();
 
     void setServerContainer(ServerContainer* pServerContainer);
+    ServerContainer* getServerContainer();
 
     // class property of container media object itself
     virtual std::string getContainerClass() { return AvClass::CONTAINER; }
@@ -241,6 +242,7 @@ public:
     virtual AbstractMediaObject* getMediaObject(ui4 index) { return 0; }
     // stream data of object
     virtual bool isSeekable(ui4 index, const std::string& resourcePath = "") { return false; }
+    virtual std::streamsize getSize(ui4 index) { return -1; }
     virtual std::istream* getStream(ui4 index, const std::string& resourcePath = "") { return 0; }
 
 protected:
@@ -271,7 +273,6 @@ public:
     virtual std::string getOptionalProperty(ui4 index, const std::string& property) { return ""; }
 
     // resource(s), currently data model only supports one resource
-    virtual std::streamsize getSize(ui4 index) { return -1; }
     virtual std::string getMime(ui4 index) { return "*"; }
     virtual std::string getDlna(ui4 index) { return "*"; }
 
@@ -285,6 +286,7 @@ public:
     ServerContainer(int port = 0);
 
     void setDataModel(AbstractDataModel* pDataModel);
+    AbstractDataModel* getDataModel();
 
     virtual bool isContainer();
     virtual int getPropertyCount(const std::string& name = "");
@@ -329,11 +331,16 @@ class CachedServer : public ServerContainer, public DatabaseCache
 {
 public:
     CachedServer();
-    
+
     virtual void addIndices(const std::vector<ui4>& indices);
     virtual void removeIndices(const std::vector<ui4>& indices);
 
+//    virtual AbstractResource* createResource();
+
 private:
+    // abstract media object cache interface
+    virtual AbstractMediaObject* createMediaObject();
+    // abstract media object interface
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual AbstractMediaObject* getChildForRow(ui4 row);
     virtual ui4 getChildCount();

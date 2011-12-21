@@ -72,6 +72,7 @@ CtlMediaRenderer::setObject(CtlMediaObject* pObject)
 void
 CtlMediaRenderer::setObject2(CtlMediaObject2* pObject)
 {
+    // TODO: select the best resource, not the first one
     AbstractResource* pRes = pObject->getResource();
     if (pRes) {
         std::string metaData;
@@ -85,6 +86,9 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject)
             return;
         }
         _pCurrentMediaObject = pObject;
+    }
+    else {
+        Log::instance()->upnpav().warning("selected object has no resource");
     }
 }
 

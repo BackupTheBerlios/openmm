@@ -401,6 +401,8 @@ AbstractResource::setProtInfo(const std::string& protInfo)
 void
 AbstractResource::setSize(ui4 size)
 {
+    Log::instance()->upnpav().debug("abstract resource set size: " + Poco::NumberFormatter::format(size));
+
     setAttribute(AvProperty::SIZE, Poco::NumberFormatter::format(size));
 }
 
@@ -561,7 +563,13 @@ BlockCache::getMediaObjectForRow(ui4 row)
 //      scan(on);
     }
     Log::instance()->upnpav().debug("block cache get media object finished.");
-    return _cache[row - _offset];
+    if (_cache.size() > row - _offset) {
+        return _cache[row - _offset];
+    }
+    else {
+        Log::instance()->upnpav().error("block cache get media object failed, cache not large enough.");
+        return 0;
+    }
 }
 
 
@@ -652,25 +660,28 @@ DatabaseCache::getMediaObjectForRow(ui4 row)
 {
     Log::instance()->upnpav().debug("database cache get object for row: " + Poco::NumberFormatter::format(row));
 
+    ui4 index;
     std::string xml;
     try {
         Poco::Data::Statement select(*_pSession);
-        select << "SELECT xml FROM objcache";
+        select << "SELECT idx, xml FROM objcache";
         select.execute();
         Poco::Data::RecordSet recordSet(select);
         recordSet.moveFirst();
         for (ui4 r = 0; r < row; r++) {
             recordSet.moveNext();
         }
+        index = recordSet["idx"].convert<ui4>();
         xml = recordSet["xml"].convert<std::string>();
         // NOTE: use recordSet.rowCount() for number of rows in query result
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache get object for row failed: " + e.displayText());
     }
-    MemoryMediaObject* pObject = new MemoryMediaObject;
+    AbstractMediaObject* pObject = createMediaObject();
     MediaObjectReader xmlReader(pObject);
     xmlReader.read(xml);
+    pObject->setIndex(index);
     return pObject;
 }
 
@@ -688,9 +699,10 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
         Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
     }
     if (xml.size() == 1) {
-        MemoryMediaObject* pObject = new MemoryMediaObject;
+        AbstractMediaObject* pObject = createMediaObject();
         MediaObjectReader xmlReader(pObject);
         xmlReader.read(xml[0]);
+        pObject->setIndex(index);
         return pObject;
     }
     else {
@@ -709,27 +721,27 @@ DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
     xmlWriter.write(xml);
     try {
 //        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, xml) VALUES(:idx, :class, :title, :artist, :album, :xml)",
-//                Poco::Data::use(pObject->getIndex()),
-//                Poco::Data::use(pObject->getClass()),
-//                Poco::Data::use(pObject->getTitle()),
-//                "",
-//                "",
-////                Poco::Data::use(pObject->getProperty(AvProperty::ARTIST)->getValue()),
-////                Poco::Data::use(pObject->getProperty(AvProperty::ALBUM)->getValue()),
-//                "",
-//                Poco::Data::now;
-//        *_pSession << "INSERT INTO objcache (idx) VALUES(:idx)", Poco::Data::use(pObject->getIndex()), Poco::Data::now;
         *_pSession << "INSERT INTO objcache (idx, class, title, xml) VALUES(:idx, :class, :title, :xml)",
                 Poco::Data::use(pObject->getIndex()),
                 Poco::Data::use(pObject->getClass()),
                 Poco::Data::use(pObject->getTitle()),
+//                Poco::Data::use(pObject->getProperty(AvProperty::ARTIST)->getValue()),
+//                Poco::Data::use(pObject->getProperty(AvProperty::ALBUM)->getValue()),
                 Poco::Data::use(xml),
                 Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
     }
+    delete pObject;
 }
+
+
+//AbstractMediaObject*
+//DatabaseCache::createMediaObject()
+//{
+//    return new Me
+//}
 
 
 AbstractMediaObject::AbstractMediaObject() :
@@ -889,7 +901,7 @@ AbstractMediaObject::getDescendant(const std::string& objectId)
 ui4
 AbstractMediaObject::getIndex()
 {
-//    Log::instance()->upnpav().debug("AbstractMediaObject::getObjectNumber id: " + Poco::NumberFormatter::format(_id));
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getIndex index: " + Poco::NumberFormatter::format(_index));
 
     return _index;
 }

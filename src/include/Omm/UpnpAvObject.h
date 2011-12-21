@@ -320,6 +320,7 @@ public:
 protected:
     virtual ui4 getCacheSize() { return 0; }
     virtual void doScan() {}
+    virtual AbstractMediaObject* createMediaObject() { return 0; }
 
 private:
     ui4         _maxCacheSize;
@@ -366,6 +367,7 @@ public:
 
 protected:
     void insertMediaObject(AbstractMediaObject* pObject);
+//    virtual AbstractMediaObject* createMediaObject();
 
 private:
     Poco::Data::Session*        _pSession;

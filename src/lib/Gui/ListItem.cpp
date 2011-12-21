@@ -70,6 +70,10 @@ void
 ListItemView::setModel(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("list item view set model: " + Poco::NumberFormatter::format(pModel) + " ...");
+    if (!pModel) {
+        Omm::Gui::Log::instance()->gui().error("list item view set model failed, model is null");
+        return;
+    }
     ListItemModel* pListItemModel = static_cast<ListItemModel*>(pModel);
     _pImageView->setModel(pListItemModel->_pImageModel);
     _pLabelView->setModel(pListItemModel->_pLabelModel);

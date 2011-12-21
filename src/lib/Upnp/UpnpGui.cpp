@@ -650,6 +650,10 @@ MediaContainerWidget::getItemModel(int row)
 {
     Gui::Log::instance()->gui().debug("media container widget get item model in row: " + Poco::NumberFormatter::format(row));
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
+    if (!pModel) {
+        Gui::Log::instance()->gui().error("media container widget failed to get item model in row: " + Poco::NumberFormatter::format(row));
+        return 0;
+    }
     // FIXME: this can be done once, when the model is created.
     Av::AbstractProperty* pClass = pModel->getProperty(Av::AvProperty::CLASS);
     if (Av::AvClass::matchClass(pClass->getValue(), Av::AvClass::CONTAINER)) {

@@ -43,6 +43,10 @@ LazyListView::setModel(LazyListModel* pModel)
 {
     Log::instance()->gui().debug("lazy list view set model ...");
 
+    if (!pModel) {
+        Omm::Gui::Log::instance()->gui().error("lazy list view set model failed, model is null");
+        return;
+    }
     int rows = viewPortHeightInRows();
     int rowsFetched = pModel->fetch(std::min(pModel->totalItemCount(), rows));
 

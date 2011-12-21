@@ -48,7 +48,7 @@ public:
 
     // some properties can stream: icon, album art
     virtual std::istream* getStream();
-    
+
 private:
     std::string         _name;
     std::string         _value;
@@ -59,11 +59,11 @@ class TorchItemResource : public Omm::Av::StreamingResource
 {
 public:
     TorchItemResource(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
-    
+
     virtual std::streamsize getSize();
     virtual std::string getMime();
     virtual std::string getDlna();
-    
+
     virtual bool isSeekable();
     virtual std::istream* getStream();
 };
@@ -72,11 +72,11 @@ public:
 class TorchItem : public Omm::Av::StreamingMediaItem
 {
     friend class TorchServer;
-    
+
 public:
     TorchItem(TorchServer* pServer);
     virtual ~TorchItem();
-    
+
     virtual int getPropertyCount(const std::string& name = "");
     virtual Omm::Av::AbstractProperty* getProperty(int index);
     virtual Omm::Av::AbstractProperty* getProperty(const std::string& name, int index = 0);
@@ -93,6 +93,30 @@ private:
     TorchItemProperty*                   _pGenreProp;
     TorchItemProperty*                   _pIconProp;
 };
+
+
+class CachedItemResource : public Omm::Av::StreamingResource
+{
+public:
+    CachedItemResource(CachedServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+
+    virtual bool isSeekable();
+    virtual std::streamsize getSize();
+    virtual std::istream* getStream();
+};
+
+
+class CachedItem : public Omm::Av::StreamingMediaItem
+{
+    friend class CachedServer;
+
+public:
+    CachedItem(CachedServer* pServer);
+    virtual ~CachedItem();
+
+    virtual AbstractResource* createResource();
+};
+
 
 } // namespace Av
 } // namespace Omm

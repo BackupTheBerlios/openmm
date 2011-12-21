@@ -363,6 +363,8 @@ _pItem(pItem)
 std::string
 StreamingPropertyImpl::getValue()
 {
+//    Log::instance()->upnpav().debug("streaming property get resource string");
+
     std::string serverAddress = _pServer->getServerAddress();
     std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length()+1);
     std::string resourceId = "i";
@@ -382,9 +384,16 @@ _id(0)
 std::string
 StreamingResource::getValue()
 {
+//    Log::instance()->upnpav().debug("streaming resource get resource string ...");
+
     std::string serverAddress = _pServer->getServerAddress();
+
+//    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
     std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length()+1);
+//    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
     std::string resourceId = Poco::NumberFormatter::format(_id);
+
+//    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
     return serverAddress + "/" + relativeObjectId + "$" + resourceId;
 }
 
@@ -464,8 +473,11 @@ StreamingMediaObject::createChildObject()
 std::string
 StreamingMediaObject::getServerAddress()
 {
+//    Log::instance()->upnpav().debug("streaming media object get server address ...");
+
     std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
     int port = _pItemServer->_socket.address().port();
+//    Log::instance()->upnpav().debug("streaming media object g et server address returns: http://" + address + ":" + Poco::NumberFormatter::format(port));
     return "http://" + address + ":" + Poco::NumberFormatter::format(port);
 }
 
@@ -497,6 +509,13 @@ void
 AbstractDataModel::setServerContainer(ServerContainer* pServerContainer)
 {
     _pServerContainer = pServerContainer;
+}
+
+
+ServerContainer*
+AbstractDataModel::getServerContainer()
+{
+    return _pServerContainer;
 }
 
 
@@ -646,6 +665,13 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
 {
     _pDataModel = pDataModel;
     _pDataModel->setServerContainer(this);
+}
+
+
+AbstractDataModel*
+ServerContainer::getDataModel()
+{
+    return _pDataModel;
 }
 
 
@@ -909,7 +935,7 @@ TorchItemPropertyImpl::setValue(const std::string& value)
 std::string
 TorchItemPropertyImpl::getName()
 {
-    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getName() returns: " + _name);
+//    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getName() returns: " + _name);
 
     return _name;
 }
@@ -918,7 +944,7 @@ TorchItemPropertyImpl::getName()
 std::string
 TorchItemPropertyImpl::getValue()
 {
-    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getValue() returns: " + _value);
+//    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getValue() returns: " + _value);
 
     if (_name == AvProperty::CLASS || _name == AvProperty::TITLE
         || _name == AvProperty::ARTIST || _name == AvProperty::ALBUM || _name == AvProperty::ORIGINAL_TRACK_NUMBER
@@ -934,7 +960,7 @@ TorchItemPropertyImpl::getValue()
 std::istream*
 TorchItemPropertyImpl::getStream()
 {
-    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getStream()");
+//    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getStream()");
 
     SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
     if (pDataModel) {
@@ -992,7 +1018,7 @@ TorchItem::~TorchItem()
 int
 TorchItem::getPropertyCount(const std::string& name)
 {
-    Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
+//    Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
 
     if (name == "") {
         return 3 + _optionalProps.size();
@@ -1011,7 +1037,7 @@ TorchItem::getPropertyCount(const std::string& name)
 AbstractProperty*
 TorchItem::getProperty(int index)
 {
-    Log::instance()->upnpav().debug("TorchItem::getProperty(index), index: " + Poco::NumberFormatter::format(index));
+//    Log::instance()->upnpav().debug("TorchItem::getProperty(index), index: " + Poco::NumberFormatter::format(index));
 
     if (index == 0) {
         return _pClassProp;
@@ -1031,7 +1057,7 @@ TorchItem::getProperty(int index)
 AbstractProperty*
 TorchItem::getProperty(const std::string& name, int index)
 {
-    Log::instance()->upnpav().debug("TorchItem::getProperty(name, index), name: " + name + ", index: " + Poco::NumberFormatter::format(index));
+//    Log::instance()->upnpav().debug("TorchItem::getProperty(name, index), name: " + name + ", index: " + Poco::NumberFormatter::format(index));
 
     if (name == AvProperty::CLASS) {
         return _pClassProp;
@@ -1076,6 +1102,27 @@ CachedServer::removeIndices(const std::vector<ui4>& indices)
 }
 
 
+//AbstractResource*
+//CachedServer::createResource()
+//{
+//    Log::instance()->upnpav().debug("cached server create resource");
+//
+//    return new MemoryResource;
+////    return new CachedItemResource(this, 0);
+//}
+
+
+AbstractMediaObject*
+CachedServer::createMediaObject()
+{
+//    Log::instance()->upnpav().debug("cached server create media object");
+
+    AbstractMediaObject* pItem = new CachedItem(this);
+    pItem->setParent(this);
+    return pItem;
+}
+
+
 AbstractMediaObject*
 CachedServer::getChildForIndex(ui4 index)
 {
@@ -1101,6 +1148,77 @@ CachedServer::getChildCount()
     else {
         return 0;
     }
+}
+
+
+CachedItemResource::CachedItemResource(CachedServer* pServer, AbstractMediaObject* pItem) :
+StreamingResource(new MemoryPropertyImpl, pServer, pItem)
+{
+}
+
+
+bool
+CachedItemResource::isSeekable()
+{
+//    Log::instance()->upnpav().debug("cached item is seekable");
+
+    AbstractDataModel* pDataModel = static_cast<CachedServer*>(_pServer)->getDataModel();
+    if (pDataModel) {
+        return pDataModel->isSeekable(_pItem->getIndex());
+    }
+    else {
+        return false;
+    }
+}
+
+
+std::streamsize
+CachedItemResource::getSize()
+{
+//    Log::instance()->upnpav().debug("cached item get size");
+
+    AbstractDataModel* pDataModel = static_cast<CachedServer*>(_pServer)->getDataModel();
+    if (pDataModel) {
+        return pDataModel->getSize(_pItem->getIndex());
+    }
+    else {
+        return 0;
+    }
+}
+
+
+std::istream*
+CachedItemResource::getStream()
+{
+//    Log::instance()->upnpav().debug("cached item get stream");
+
+    AbstractDataModel* pDataModel = static_cast<CachedServer*>(_pServer)->getDataModel();
+    if (pDataModel) {
+        return pDataModel->getStream(_pItem->getIndex());
+    }
+    else {
+        return 0;
+    }
+}
+
+
+CachedItem::CachedItem(CachedServer* pServer) :
+StreamingMediaItem(pServer)
+{
+}
+
+
+CachedItem::~CachedItem()
+{
+}
+
+
+AbstractResource*
+CachedItem::createResource()
+{
+//    Log::instance()->upnpav().debug("cached item create resource");
+
+    return new CachedItemResource(static_cast<CachedServer*>(_pServer), this);
 }
 
 

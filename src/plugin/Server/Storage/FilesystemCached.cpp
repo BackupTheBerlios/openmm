@@ -39,6 +39,7 @@ public:
 //    virtual std::string getContainerClass();
     virtual Omm::Av::AbstractMediaObject* getMediaObject(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
+    virtual std::streamsize getSize(Omm::ui4 index);
     virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
 
 private:
@@ -46,6 +47,7 @@ private:
     void loadTagger();
     void setClass(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta::ContainerFormat format);
     void setProperty(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta* pMeta, Omm::AvStream::Meta::TagKey);
+    void addResource(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta* pMeta, Omm::AvStream::Meta::TagKey);
 
     std::string                         _basePath;
     std::string                         _cachePath;
@@ -117,7 +119,10 @@ FileDataModel::getMediaObject(Omm::ui4 index)
         setProperty(pItem, pMeta, Omm::AvStream::Meta::TK_TRACK);
         setProperty(pItem, pMeta, Omm::AvStream::Meta::TK_GENRE);
 
-//        pItem->_path = dir->path().substr(_basePath.length());
+        Omm::Av::MemoryResource* pResource = new Omm::Av::MemoryResource;
+        pResource->setSize(getSize(index));
+        pItem->addResource(pResource);
+
 //        pItem->_mime = pMeta->getMime();
 //        pItem->_icon = pItem->_path;
 
@@ -132,6 +137,22 @@ bool
 FileDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
 {
     return true;
+}
+
+
+std::streamsize
+FileDataModel::getSize(Omm::ui4 index)
+{
+    std::streamsize res;
+    std::string filePath = _basePath + getPath(index);
+    try {
+        res = Poco::File(filePath).getSize();
+    }
+    catch (Poco::Exception& e) {
+        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + filePath);
+        res = 0;
+    }
+    return res;
 }
 
 
@@ -249,186 +270,6 @@ FilecachedServer::setOption(const std::string& key, const std::string& value)
         pDataModel->scan();
     }
 }
-
-
-//std::string
-//FileDataModel::getClass(Omm::ui4 index)
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("get class of item with index " + Poco::NumberFormatter::format(index) + ": ");
-//
-//    return "";
-//}
-//
-//
-//std::string
-//FileDataModel::getTitle(Omm::ui4 index)
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("get title: ");
-////    return _items[index]->_title;
-//}
-//
-//
-//std::string
-//FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("get property: " + property);
-//
-//    if (property == Omm::Av::AvProperty::ARTIST) {
-////        return _items[index]->_artist;
-//    }
-//    else if (property == Omm::Av::AvProperty::ALBUM) {
-////        return _items[index]->_album;
-//    }
-//    else if (property == Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER) {
-////        return _items[index]->_track;
-//    }
-//    else if (property == Omm::Av::AvProperty::GENRE) {
-////        return _items[index]->_genre;
-//    }
-//    else if (property == Omm::Av::AvProperty::ICON) {
-////        return _items[index]->_icon;
-//    }
-//    else {
-//        return "";
-//    }
-//}
-//
-//
-//
-//
-//std::istream*
-//FileDataModel::getStream(Omm::ui4 index)
-//{
-////    std::string filePath = _basePath + _items[index]->_path;
-//    std::string filePath = _basePath;
-//    std::istream* pRes = new std::ifstream(filePath.c_str());
-//    if (!*pRes) {
-//        Omm::AvStream::Log::instance()->avstream().error("could not open file for streaming: " + filePath);
-//        return 0;
-//    }
-//    return pRes;
-//}
-//
-//
-//std::istream*
-//FileDataModel::getIconStream(Omm::ui4 index)
-//{
-////    std::string iconPath = _basePath + "/.omm/cache/icons" + _items[index]->_path;
-//    std::string iconPath = _basePath + "/.omm/cache/icons";
-//    std::istream* pRes = new std::ifstream(iconPath.c_str());
-//    if (!*pRes) {
-//        Omm::AvStream::Log::instance()->avstream().error("could not open icon for streaming: " + iconPath);
-//        return 0;
-//    }
-//    return pRes;
-//}
-//
-//
-//std::streamsize
-//FileDataModel::getSize(Omm::ui4 index)
-//{
-//    Omm::ui4 res;
-//    try {
-////        res = Poco::File((_basePath + _items[index]->_path)).getSize();
-//    }
-//    catch (Poco::Exception& e) {
-////        Omm::AvStream::Log::instance()->avstream().error("could not get size of file: " + _basePath + _items[index]->_path);
-//        res = 0;
-//    }
-//    return res;
-//}
-//
-//
-//std::string
-//FileDataModel::getMime(Omm::ui4 index)
-//{
-////    Omm::Av::Log::instance()->upnpav().debug("get mime: " + _items[index]->_mime);
-////    return _items[index]->_mime;
-//}
-//
-//
-//std::string
-//FileDataModel::getDlna(Omm::ui4 index)
-//{
-//    // TODO: Tagger should determine the dlna string
-//    return "*";
-//}
-
-
-//void
-//FileDataModel::scanDirectory(const std::string& basePath)
-//{
-    // read media items from cache (if already there), otherwise scan the disk for media items.
-//    if (cacheExists()) {
-//        readCache();
-//    }
-//    else {
-//        loadTagger();
-//        Poco::File baseDir(basePath);
-//        scanDirectoryRecursively(baseDir);
-        // sort items
-//        for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
-//            _itemMap[(*it)->sortKey()] = *it;
-//        }
-//        _items.clear();
-//        for (std::map<std::string,FileItem*>::iterator it = _itemMap.begin(); it != _itemMap.end(); ++it) {
-//            _items.push_back((*it).second);
-//        }
-//        _itemMap.clear();
-//        writeCache();
-//    }
-//    Omm::AvStream::Log::instance()->avstream().debug("file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
-//}
-
-
-//bool
-//FileDataModel::cacheExists()
-//{
-//    if (Poco::File(_cachePath).exists()) {
-//        return true;
-//    }
-//    else {
-//        return false;
-//    }
-//}
-
-
-//void
-//FileDataModel::readCache()
-//{
-//    Poco::XML::SAXParser parser;
-//    parser.setContentHandler(this);
-//
-//    try {
-//        parser.parse(_cachePath);
-//    }
-//    catch (Poco::Exception& e) {
-//        Omm::Av::Log::instance()->upnpav().warning("cache parser error: " + e.displayText());
-//    }
-//}
-
-
-//void
-//FileDataModel::writeCache()
-//{
-//    Omm::Av::Log::instance()->upnpav().debug("writing cache to disk ...");
-//
-//    Poco::XML::Document* pCacheDoc= new Poco::XML::Document;
-//    Poco::AutoPtr<Poco::XML::Element> pFileItemList = pCacheDoc->createElement(FileItem::FILE_ITEM_LIST);
-//    pFileItemList->setAttribute("class", Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
-//    pCacheDoc->appendChild(pFileItemList);
-//
-//    for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
-//        (*it)->writeXml(pFileItemList);
-//    }
-//
-//    Poco::XML::DOMWriter writer;
-//    writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
-//    std::ofstream ostr(_cachePath.c_str());
-//    writer.writeNode(ostr, pCacheDoc);
-//
-//    Omm::Av::Log::instance()->upnpav().debug("cache written to disk.");
-//}
 
 
 #ifdef OMMPLUGIN
