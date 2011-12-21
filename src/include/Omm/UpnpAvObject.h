@@ -359,8 +359,10 @@ private:
 class DatabaseCache : public AbstractMediaObjectCache
 {
 public:
-    DatabaseCache(const std::string& databaseFile);
+    DatabaseCache();
     ~DatabaseCache();
+
+    void setCacheFilePath(const std::string& cacheFilePath);
 
     virtual AbstractMediaObject* getMediaObjectForRow(ui4 row);
     virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index);
@@ -371,6 +373,7 @@ protected:
 
 private:
     Poco::Data::Session*        _pSession;
+    std::string                 _cacheFilePath;
 };
 
 

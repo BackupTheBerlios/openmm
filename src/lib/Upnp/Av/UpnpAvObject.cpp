@@ -628,10 +628,28 @@ BlockCache::doScan(bool on)
 }
 
 
-DatabaseCache::DatabaseCache(const std::string& databaseFile)
+DatabaseCache::DatabaseCache() :
+_pSession(0)
 {
     Poco::Data::SQLite::Connector::registerConnector();
-    _pSession = new Poco::Data::Session("SQLite", databaseFile);
+
+}
+
+
+DatabaseCache::~DatabaseCache()
+{
+    if (_pSession) {
+        delete _pSession;
+    }
+    Poco::Data::SQLite::Connector::unregisterConnector();
+}
+
+
+void
+DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
+{
+    _cacheFilePath = cacheFilePath;
+    _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
     try {
         *_pSession << "CREATE TABLE objcache (idx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, xml VARCHAR)",
                 Poco::Data::now;
@@ -645,13 +663,6 @@ DatabaseCache::DatabaseCache(const std::string& databaseFile)
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache creating index on object cache table failed: " + e.displayText());
     }
-}
-
-
-DatabaseCache::~DatabaseCache()
-{
-    delete _pSession;
-    Poco::Data::SQLite::Connector::unregisterConnector();
 }
 
 

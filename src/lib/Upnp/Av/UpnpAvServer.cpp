@@ -1086,8 +1086,8 @@ TorchItem::getProperty(const std::string& name, int index)
 }
 
 
-CachedServerContainer::CachedServerContainer() :
-DatabaseCache("/home/jb/tmp/objectCache")
+CachedServerContainer::CachedServerContainer()
+//DatabaseCache("/home/jb/tmp/objectCache")
 {
 }
 

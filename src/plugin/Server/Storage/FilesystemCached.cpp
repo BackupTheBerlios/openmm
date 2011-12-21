@@ -261,6 +261,7 @@ void
 FilecachedServer::setBasePath(const std::string& basePath)
 {
     ServerContainer::setBasePath(basePath);
+    setCacheFilePath(basePath + "/.omm/cache/objectCache");
     FileDataModel* pDataModel = new FileDataModel(basePath);
     setDataModel(pDataModel);
     setTitle(basePath);
