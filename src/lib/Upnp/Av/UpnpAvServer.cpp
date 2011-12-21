@@ -595,6 +595,10 @@ AbstractDataModel::getChildCount()
 void
 AbstractDataModel::readIndexCache()
 {
+    if (Poco::File(_cacheFile).exists()) {
+        // TODO: check if index cache needs update
+        return;
+    }
     std::ifstream indexCache(_cacheFile.c_str());
     std::string line;
     ui4 index = 0;
@@ -619,6 +623,10 @@ AbstractDataModel::readIndexCache()
 void
 AbstractDataModel::writeIndexCache()
 {
+    if (Poco::File(_cacheFile).exists()) {
+        // TODO: check if index cache needs update
+        return;
+    }
     Log::instance()->upnpav().debug("abstract data model write index cache to: " + _cacheFile + " ...");
     std::ofstream indexCache(_cacheFile.c_str());
     for (std::map<ui4, std::string>::iterator it = _indexCache.begin(); it != _indexCache.end(); ++it) {
@@ -632,6 +640,7 @@ AbstractDataModel::writeIndexCache()
 void
 AbstractDataModel::flushIndexBuffer()
 {
+    // TODO: don't add indices to server cache, server shall retrieve the media objects from the data model
     addIndices(_indexBuffer);
     _indexBuffer.clear();
 }
@@ -1087,7 +1096,6 @@ TorchItem::getProperty(const std::string& name, int index)
 
 
 CachedServerContainer::CachedServerContainer()
-//DatabaseCache("/home/jb/tmp/objectCache")
 {
 }
 

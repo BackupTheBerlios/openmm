@@ -737,14 +737,23 @@ DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
     std::string xml;
     MediaObjectWriter2 xmlWriter(pObject);
     xmlWriter.write(xml);
+    std::string artist;
+    std::string album;
+    AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
+    if (pProperty) {
+        artist = pProperty->getValue();
+    }
+    pProperty = pObject->getProperty(AvProperty::ALBUM);
+    if (pProperty) {
+        album = pProperty->getValue();
+    }
     try {
-//        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, xml) VALUES(:idx, :class, :title, :artist, :album, :xml)",
-        *_pSession << "INSERT INTO objcache (idx, class, title, xml) VALUES(:idx, :class, :title, :xml)",
+        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, xml) VALUES(:idx, :class, :title, :artist, :album, :xml)",
                 Poco::Data::use(pObject->getIndex()),
                 Poco::Data::use(pObject->getClass()),
                 Poco::Data::use(pObject->getTitle()),
-//                Poco::Data::use(pObject->getProperty(AvProperty::ARTIST)->getValue()),
-//                Poco::Data::use(pObject->getProperty(AvProperty::ALBUM)->getValue()),
+                Poco::Data::use(artist),
+                Poco::Data::use(album),
                 Poco::Data::use(xml),
                 Poco::Data::now;
     }
