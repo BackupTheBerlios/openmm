@@ -245,8 +245,14 @@ FileDataModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
-        _pTagger = taggerPluginLoader.load("tagger-simple");
+        Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
+        try {
+            _pTagger = taggerPluginLoader.load("tagger-vlc");
+        }
+        catch(Poco::NotFoundException) {
+            Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
+            _pTagger = taggerPluginLoader.load("tagger-simple");
+        }
     }
 }
 
