@@ -145,13 +145,12 @@ TorchServerContainer(8888)
 
 
 void
-DvbServer::setOption(const std::string& key, const std::string& value)
+DvbServer::setBasePath(const std::string& basePath)
 {
-    if (key == "basePath") {
-        setDataModel(new DvbDataModel(value));
-        setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::VIDEO_BROADCAST));
-        //setTimer("ProSieben", Poco::DateTime(2011, 1, 9, 18, 27), Poco::DateTime(2011, 1, 9, 18, 8));
-    }
+    ServerContainer::setBasePath(basePath);
+    setDataModel(new DvbDataModel(basePath));
+    setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::VIDEO_BROADCAST));
+    //setTimer("ProSieben", Poco::DateTime(2011, 1, 9, 18, 27), Poco::DateTime(2011, 1, 9, 18, 8));
 }
 
 

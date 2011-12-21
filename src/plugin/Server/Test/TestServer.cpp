@@ -77,8 +77,7 @@ TestServer::TestServer() //:
     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
 
     pVideos->setTitle("Videos");
-//    pVideos->setOption("basePath", "/Users/jb/Videos");
-    pVideos->setOption("basePath", "/home/jb/video");
+    pVideos->setBasePath("/home/jb/video");
     appendChildWithAutoIndex(pVideos);
 
 
@@ -94,9 +93,7 @@ TestServer::TestServer() //:
     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
 
     pMusic->setTitle("Music");
-    pMusic->setOption("basePath", "/home/jb/music");
-//    pMusic->setOption("basePath", "/Users/jb/mp3");
-//     pMusic->setOption("basePath", "/media/mydata/mp3");
+    pMusic->setBasePath("/home/jb/music");
     appendChildWithAutoIndex(pMusic);
 
 
@@ -113,7 +110,7 @@ TestServer::TestServer() //:
 //     std::clog << "server plugin: " << pluginName << " loaded successfully" << std::endl;
 //
 //     pDvb->setTitle("Digital TV");
-//     pDvb->setOption("basePath", "/home/jb/.omm/channels.conf");
+//     pDvb->setBasePath("/home/jb/.omm/channels.conf");
 //     appendChild(pDvb);
 };
 

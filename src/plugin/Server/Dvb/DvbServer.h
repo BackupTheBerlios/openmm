@@ -46,7 +46,7 @@ class DvbServer : public Omm::Av::TorchServerContainer
 public:
     DvbServer();
 
-    virtual void setOption(const std::string& key, const std::string& value);
+    virtual void setBasePath(const std::string& basePath);
 
 private:
     void setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate);

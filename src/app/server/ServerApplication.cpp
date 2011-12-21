@@ -170,7 +170,7 @@ protected:
             else if (_name == "") {
                 _name = "OMM Server";
             }
-            pContainerPlugin->setOption("basePath", _pluginOption);
+            pContainerPlugin->setBasePath(_pluginOption);
             pContainerPlugin->setTitle(_name);
 
             // create a media server device

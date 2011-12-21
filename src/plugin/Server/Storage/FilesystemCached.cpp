@@ -258,17 +258,15 @@ FileDataModel::loadTagger()
 
 
 void
-FilecachedServer::setOption(const std::string& key, const std::string& value)
+FilecachedServer::setBasePath(const std::string& basePath)
 {
-    if (key == "basePath") {
-        Omm::Av::Log::instance()->upnpav().debug("file cached server set option: " + key + " to: " + value);
-        FileDataModel* pDataModel = new FileDataModel(value);
-        setDataModel(pDataModel);
-        setTitle(value);
-        setClass(pDataModel->getContainerClass());
+    ServerContainer::setBasePath(basePath);
+    FileDataModel* pDataModel = new FileDataModel(basePath);
+    setDataModel(pDataModel);
+    setTitle(basePath);
+    setClass(pDataModel->getContainerClass());
 
-        pDataModel->scan();
-    }
+    pDataModel->scan();
 }
 
 

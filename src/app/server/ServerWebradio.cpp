@@ -123,7 +123,7 @@ protected:
             if (_pluginOption == "") {
                 _pluginOption = home + "/.omm/webradio.conf";
             }
-            pObject->setOption("basePath", _pluginOption);
+            pObject->setBasePath(_pluginOption);
             pObject->setTitle(_name);
 
             // create a media server device

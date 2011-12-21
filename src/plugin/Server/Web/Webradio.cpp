@@ -248,13 +248,13 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
 
 
 void
-WebradioServer::setOption(const std::string& key, const std::string& value)
+WebradioServer::setBasePath(const std::string& basePath)
 {
-    if (key == "basePath") {
-        setDataModel(new WebradioDataModel(value));
-        setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::AUDIO_BROADCAST));
-    }
+    ServerContainer::setBasePath(basePath);
+    setDataModel(new WebradioDataModel(basePath));
+    setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::AUDIO_BROADCAST));
 }
+
 
 
 #ifdef OMMPLUGIN

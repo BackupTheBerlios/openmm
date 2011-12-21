@@ -569,14 +569,13 @@ FileDataModel::writeCache()
 
 
 void
-FileServer::setOption(const std::string& key, const std::string& value)
+FileServer::setBasePath(const std::string& basePath)
 {
-    if (key == "basePath") {
-        FileDataModel* pDataModel = new FileDataModel(value);
-        setDataModel(pDataModel);
-        setTitle(value);
-        setClass(pDataModel->getContainerClass());
-    }
+    ServerContainer::setBasePath(basePath);
+    FileDataModel* pDataModel = new FileDataModel(basePath);
+    setDataModel(pDataModel);
+    setTitle(basePath);
+    setClass(pDataModel->getContainerClass());
 }
 
 

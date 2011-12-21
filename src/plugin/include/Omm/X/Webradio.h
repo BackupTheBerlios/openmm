@@ -28,7 +28,7 @@
 class WebradioServer : public Omm::Av::TorchServerContainer
 {
 public:
-    virtual void setOption(const std::string& key, const std::string& value);
+    virtual void setBasePath(const std::string& basePath);
 };
 
 
