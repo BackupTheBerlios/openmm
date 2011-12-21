@@ -262,6 +262,7 @@ FilecachedServer::setOption(const std::string& key, const std::string& value)
 {
     if (key == "basePath") {
         Omm::Av::Log::instance()->upnpav().debug("file cached server set option: " + key + " to: " + value);
+        _basePath = value;
         FileDataModel* pDataModel = new FileDataModel(value);
         setDataModel(pDataModel);
         setTitle(value);
@@ -270,6 +271,16 @@ FilecachedServer::setOption(const std::string& key, const std::string& value)
         pDataModel->scan();
     }
 }
+
+
+std::string
+FilecachedServer::getOption(const std::string& key)
+{
+    if (key == "basePath") {
+        return _basePath;
+    }
+}
+
 
 
 #ifdef OMMPLUGIN

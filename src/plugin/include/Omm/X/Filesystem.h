@@ -25,11 +25,11 @@
 #include <Omm/UpnpAvServer.h>
 
 
-class FileServer : public Omm::Av::TorchServer
+class FileServer : public Omm::Av::TorchServerContainer
 {
 public:
 //     FileServer();
-    
+
     virtual void setOption(const std::string& key, const std::string& value);
 };
 

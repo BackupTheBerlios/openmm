@@ -366,8 +366,8 @@ public:
     virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index);
 
 protected:
+    virtual void doScan(bool on);
     void insertMediaObject(AbstractMediaObject* pObject);
-//    virtual AbstractMediaObject* createMediaObject();
 
 private:
     Poco::Data::Session*        _pSession;

@@ -748,7 +748,7 @@ ServerContainer::createProperty()
 }
 
 
-TorchServer::TorchServer(int port) :
+TorchServerContainer::TorchServerContainer(int port) :
 ServerContainer(port),
 _pChild(new TorchItem(this))
 {
@@ -756,7 +756,7 @@ _pChild(new TorchItem(this))
 }
 
 
-TorchServer::~TorchServer()
+TorchServerContainer::~TorchServerContainer()
 {
     delete _pDataModel;
     delete _pChild;
@@ -766,21 +766,21 @@ TorchServer::~TorchServer()
 
 
 void
-TorchServer::setDataModel(SimpleDataModel* pDataModel)
+TorchServerContainer::setDataModel(SimpleDataModel* pDataModel)
 {
     ServerContainer::setDataModel(pDataModel);
 }
 
 
 SimpleDataModel*
-TorchServer::getDataModel()
+TorchServerContainer::getDataModel()
 {
     return static_cast<SimpleDataModel*>(_pDataModel);
 }
 
 
 AbstractMediaObject*
-TorchServer::getChildForIndex(ui4 index)
+TorchServerContainer::getChildForIndex(ui4 index)
 {
     _pChild->setIndex(index);
     TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
@@ -822,7 +822,7 @@ TorchServer::getChildForIndex(ui4 index)
 
 
 AbstractMediaObject*
-TorchServer::getChildForRow(ui4 row)
+TorchServerContainer::getChildForRow(ui4 row)
 {
     // TODO: special case here, row == index, no search, sort, add/remove items or similar possible
     return getChildForIndex(row);
@@ -830,7 +830,7 @@ TorchServer::getChildForRow(ui4 row)
 
 
 ui4
-TorchServer::getChildCount()
+TorchServerContainer::getChildCount()
 {
     if (_pDataModel) {
         return _pDataModel->getChildCount();
@@ -841,7 +841,7 @@ TorchServer::getChildCount()
 }
 
 
-TorchItemResource::TorchItemResource(TorchServer* pServer, AbstractMediaObject* pItem) :
+TorchItemResource::TorchItemResource(TorchServerContainer* pServer, AbstractMediaObject* pItem) :
 StreamingResource(new MemoryPropertyImpl, pServer, pItem)
 {
 }
@@ -850,7 +850,7 @@ StreamingResource(new MemoryPropertyImpl, pServer, pItem)
 bool
 TorchItemResource::isSeekable()
 {
-    SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
+    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->isSeekable(_pItem->getIndex());
     }
@@ -863,7 +863,7 @@ TorchItemResource::isSeekable()
 std::istream*
 TorchItemResource::getStream()
 {
-    SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
+    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getStream(_pItem->getIndex());
     }
@@ -876,7 +876,7 @@ TorchItemResource::getStream()
 std::streamsize
 TorchItemResource::getSize()
 {
-    SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
+    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getSize(_pItem->getIndex());
     }
@@ -889,7 +889,7 @@ TorchItemResource::getSize()
 std::string
 TorchItemResource::getMime()
 {
-    SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
+    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getMime(_pItem->getIndex());
     }
@@ -902,7 +902,7 @@ TorchItemResource::getMime()
 std::string
 TorchItemResource::getDlna()
 {
-    SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
+    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getDlna(_pItem->getIndex());
     }
@@ -912,7 +912,7 @@ TorchItemResource::getDlna()
 }
 
 
-TorchItemPropertyImpl::TorchItemPropertyImpl(TorchServer* pServer, AbstractMediaObject* pItem) :
+TorchItemPropertyImpl::TorchItemPropertyImpl(TorchServerContainer* pServer, AbstractMediaObject* pItem) :
 StreamingPropertyImpl(pServer, pItem)
 {
 }
@@ -962,7 +962,7 @@ TorchItemPropertyImpl::getStream()
 {
 //    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getStream()");
 
-    SimpleDataModel* pDataModel = static_cast<TorchServer*>(_pServer)->getDataModel();
+    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getIconStream(_pItem->getIndex());
     }
@@ -972,13 +972,13 @@ TorchItemPropertyImpl::getStream()
 }
 
 
-TorchItemProperty::TorchItemProperty(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+TorchItemProperty::TorchItemProperty(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem) :
 AbstractProperty(new TorchItemPropertyImpl(pServer, pItem))
 {
 }
 
 
-TorchItem::TorchItem(TorchServer* pServer) :
+TorchItem::TorchItem(TorchServerContainer* pServer) :
 StreamingMediaItem(pServer),
 _pClassProp(new TorchItemProperty(pServer, this)),
 _pTitleProp(new TorchItemProperty(pServer, this)),
@@ -1079,14 +1079,14 @@ TorchItem::getProperty(const std::string& name, int index)
 }
 
 
-CachedServer::CachedServer() :
+CachedServerContainer::CachedServerContainer() :
 DatabaseCache("/home/jb/tmp/objectCache")
 {
 }
 
 
 void
-CachedServer::addIndices(const std::vector<ui4>& indices)
+CachedServerContainer::addIndices(const std::vector<ui4>& indices)
 {
     // insert indices and meta data into database cache
     for (std::vector<ui4>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
@@ -1096,7 +1096,7 @@ CachedServer::addIndices(const std::vector<ui4>& indices)
 
 
 void
-CachedServer::removeIndices(const std::vector<ui4>& indices)
+CachedServerContainer::removeIndices(const std::vector<ui4>& indices)
 {
     // TODO: implement removing of indices and meta data from database cache
 }
@@ -1113,7 +1113,7 @@ CachedServer::removeIndices(const std::vector<ui4>& indices)
 
 
 AbstractMediaObject*
-CachedServer::createMediaObject()
+CachedServerContainer::createMediaObject()
 {
 //    Log::instance()->upnpav().debug("cached server create media object");
 
@@ -1124,7 +1124,7 @@ CachedServer::createMediaObject()
 
 
 AbstractMediaObject*
-CachedServer::getChildForIndex(ui4 index)
+CachedServerContainer::getChildForIndex(ui4 index)
 {
     // get media object out of data base cache (column xml)
     return DatabaseCache::getMediaObjectForIndex(index);
@@ -1132,7 +1132,7 @@ CachedServer::getChildForIndex(ui4 index)
 
 
 AbstractMediaObject*
-CachedServer::getChildForRow(ui4 row)
+CachedServerContainer::getChildForRow(ui4 row)
 {
     // get media object in row of query result of data base
     return DatabaseCache::getMediaObjectForRow(row);
@@ -1140,7 +1140,7 @@ CachedServer::getChildForRow(ui4 row)
 
 
 ui4
-CachedServer::getChildCount()
+CachedServerContainer::getChildCount()
 {
     if (_pDataModel) {
         return _pDataModel->getChildCount();
@@ -1151,7 +1151,7 @@ CachedServer::getChildCount()
 }
 
 
-CachedItemResource::CachedItemResource(CachedServer* pServer, AbstractMediaObject* pItem) :
+CachedItemResource::CachedItemResource(CachedServerContainer* pServer, AbstractMediaObject* pItem) :
 StreamingResource(new MemoryPropertyImpl, pServer, pItem)
 {
 }
@@ -1162,7 +1162,7 @@ CachedItemResource::isSeekable()
 {
 //    Log::instance()->upnpav().debug("cached item is seekable");
 
-    AbstractDataModel* pDataModel = static_cast<CachedServer*>(_pServer)->getDataModel();
+    AbstractDataModel* pDataModel = static_cast<CachedServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->isSeekable(_pItem->getIndex());
     }
@@ -1177,7 +1177,7 @@ CachedItemResource::getSize()
 {
 //    Log::instance()->upnpav().debug("cached item get size");
 
-    AbstractDataModel* pDataModel = static_cast<CachedServer*>(_pServer)->getDataModel();
+    AbstractDataModel* pDataModel = static_cast<CachedServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getSize(_pItem->getIndex());
     }
@@ -1192,7 +1192,7 @@ CachedItemResource::getStream()
 {
 //    Log::instance()->upnpav().debug("cached item get stream");
 
-    AbstractDataModel* pDataModel = static_cast<CachedServer*>(_pServer)->getDataModel();
+    AbstractDataModel* pDataModel = static_cast<CachedServerContainer*>(_pServer)->getDataModel();
     if (pDataModel) {
         return pDataModel->getStream(_pItem->getIndex());
     }
@@ -1202,7 +1202,7 @@ CachedItemResource::getStream()
 }
 
 
-CachedItem::CachedItem(CachedServer* pServer) :
+CachedItem::CachedItem(CachedServerContainer* pServer) :
 StreamingMediaItem(pServer)
 {
 }
@@ -1218,7 +1218,7 @@ CachedItem::createResource()
 {
 //    Log::instance()->upnpav().debug("cached item create resource");
 
-    return new CachedItemResource(static_cast<CachedServer*>(_pServer), this);
+    return new CachedItemResource(static_cast<CachedServerContainer*>(_pServer), this);
 }
 
 

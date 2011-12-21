@@ -32,14 +32,14 @@ namespace Av {
 class TorchItemProperty : public Omm::Av::AbstractProperty
 {
 public:
-    TorchItemProperty(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    TorchItemProperty(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
 };
 
 
 class TorchItemPropertyImpl : public Omm::Av::StreamingPropertyImpl
 {
 public:
-    TorchItemPropertyImpl(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    TorchItemPropertyImpl(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
 
     virtual void setName(const std::string& name);
     virtual void setValue(const std::string& value);
@@ -58,7 +58,7 @@ private:
 class TorchItemResource : public Omm::Av::StreamingResource
 {
 public:
-    TorchItemResource(TorchServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    TorchItemResource(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
 
     virtual std::streamsize getSize();
     virtual std::string getMime();
@@ -71,10 +71,10 @@ public:
 
 class TorchItem : public Omm::Av::StreamingMediaItem
 {
-    friend class TorchServer;
+    friend class TorchServerContainer;
 
 public:
-    TorchItem(TorchServer* pServer);
+    TorchItem(TorchServerContainer* pServer);
     virtual ~TorchItem();
 
     virtual int getPropertyCount(const std::string& name = "");
@@ -98,7 +98,7 @@ private:
 class CachedItemResource : public Omm::Av::StreamingResource
 {
 public:
-    CachedItemResource(CachedServer* pServer, Omm::Av::AbstractMediaObject* pItem);
+    CachedItemResource(CachedServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
 
     virtual bool isSeekable();
     virtual std::streamsize getSize();
@@ -108,10 +108,10 @@ public:
 
 class CachedItem : public Omm::Av::StreamingMediaItem
 {
-    friend class CachedServer;
+    friend class CachedServerContainer;
 
 public:
-    CachedItem(CachedServer* pServer);
+    CachedItem(CachedServerContainer* pServer);
     virtual ~CachedItem();
 
     virtual AbstractResource* createResource();

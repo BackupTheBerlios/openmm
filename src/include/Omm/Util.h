@@ -190,6 +190,7 @@ class ConfigurablePlugin
 {
 public:
     virtual void setOption(const std::string& key, const std::string& value) {}
+    virtual std::string getOption(const std::string& key) {}
 };
 
 

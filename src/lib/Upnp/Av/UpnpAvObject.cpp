@@ -713,6 +713,13 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
 
 
 void
+DatabaseCache::doScan(bool on)
+{
+
+}
+
+
+void
 DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
 {
     Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
@@ -735,13 +742,6 @@ DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
     }
     delete pObject;
 }
-
-
-//AbstractMediaObject*
-//DatabaseCache::createMediaObject()
-//{
-//    return new Me
-//}
 
 
 AbstractMediaObject::AbstractMediaObject() :

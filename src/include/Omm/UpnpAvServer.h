@@ -306,14 +306,14 @@ protected:
 };
 
 
-class TorchServer : public ServerContainer
+class TorchServerContainer : public ServerContainer
 {
     friend class TorchItemResource;
     friend class TorchItemPropertyImpl;
 
 public:
-    TorchServer(int port = 0);
-    virtual ~TorchServer();
+    TorchServerContainer(int port = 0);
+    virtual ~TorchServerContainer();
 
     void setDataModel(SimpleDataModel* pDataModel);
     SimpleDataModel* getDataModel();
@@ -327,10 +327,10 @@ private:
 };
 
 
-class CachedServer : public ServerContainer, public DatabaseCache
+class CachedServerContainer : public ServerContainer, public DatabaseCache
 {
 public:
-    CachedServer();
+    CachedServerContainer();
 
     virtual void addIndices(const std::vector<ui4>& indices);
     virtual void removeIndices(const std::vector<ui4>& indices);

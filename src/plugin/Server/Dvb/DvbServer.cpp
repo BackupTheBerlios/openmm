@@ -139,7 +139,7 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
 
 
 DvbServer::DvbServer() :
-TorchServer(8888)
+TorchServerContainer(8888)
 {
 }
 

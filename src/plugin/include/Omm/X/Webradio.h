@@ -25,7 +25,7 @@
 #include <Omm/UpnpAvServer.h>
 
 
-class WebradioServer : public Omm::Av::TorchServer
+class WebradioServer : public Omm::Av::TorchServerContainer
 {
 public:
     virtual void setOption(const std::string& key, const std::string& value);
