@@ -49,6 +49,7 @@ public:
 private:
     void popView(View* pView);
     void exposeView(View* pView);
+    void changedSearchText(const std::string& searchText);
 
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;

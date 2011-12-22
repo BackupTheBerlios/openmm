@@ -29,6 +29,15 @@ namespace Omm {
 namespace Gui {
 
 
+class NavigatorController : public Controller
+{
+    friend class NavigatorViewImpl;
+
+protected:
+    virtual void changedSearchText(const std::string& searchText) {}
+};
+
+
 class NavigatorView : public View
 {
 public:

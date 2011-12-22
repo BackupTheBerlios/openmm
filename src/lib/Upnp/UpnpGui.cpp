@@ -224,6 +224,19 @@ DeviceGroupWidget::setDefaultDevice(Device* pDevice)
 }
 
 
+DeviceGroupNavigatorController::DeviceGroupNavigatorController(DeviceGroupWidget* pDeviceGroupWidget) :
+_pDeviceGroupWidget(pDeviceGroupWidget)
+{
+}
+
+
+void
+DeviceGroupNavigatorController::changedSearchText(const std::string& searchText)
+{
+    _pDeviceGroupWidget->changedSearchText(searchText);
+}
+
+
 MediaRendererGroupWidget::MediaRendererGroupWidget(ControllerWidget* pControllerWidget) :
 DeviceGroupWidget(new Av::MediaRendererGroupDelegate),
 _pControllerWidget(pControllerWidget)
@@ -548,6 +561,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
+    attachController(new DeviceGroupNavigatorController(this));
 }
 
 
@@ -590,6 +604,23 @@ MediaServerGroupWidget::selectedItem(int row)
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
         push(pContainer, pServer->getFriendlyName());
+    }
+}
+
+
+void
+MediaServerGroupWidget::changedSearchText(const std::string& searchText)
+{
+    Gui::Log::instance()->gui().debug("media server group widget changed search text: " + searchText);
+    MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getSelectedDevice());
+    if (pServer) {
+        // get (object id of) container, that is on top of navigator
+        MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(getVisibleView());
+        Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
+        pObject->setSearch(searchText);
+        // reset model
+        // sync view
+        pContainer->syncViewImpl();
     }
 }
 

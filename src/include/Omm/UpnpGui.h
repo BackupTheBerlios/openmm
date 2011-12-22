@@ -122,6 +122,9 @@ public:
     // ListController interface
     virtual void selectedItem(int row);
 
+    // NavigatorController delegate interface
+    virtual void changedSearchText(const std::string& searchText) {}
+
     void setDefaultDevice(Device* pDevice);
 
 protected:
@@ -129,6 +132,18 @@ protected:
 
     Gui::ListView   _deviceGroupListView;
     std::string     _defaultDeviceUuid;
+};
+
+
+class DeviceGroupNavigatorController : public Gui::NavigatorController
+{
+public:
+    DeviceGroupNavigatorController(DeviceGroupWidget* pDeviceGroupWidget);
+
+    virtual void changedSearchText(const std::string& searchText);
+
+private:
+    DeviceGroupWidget*  _pDeviceGroupWidget;
 };
 
 
@@ -204,6 +219,9 @@ public:
 
     // ListController interface
     virtual void selectedItem(int row);
+
+    // NavigatorController delegate
+    virtual void changedSearchText(const std::string& searchText);
 };
 
 

@@ -133,8 +133,12 @@ CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, 
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
         try {
-//            _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
-            _pServerCode->ContentDirectory()->Search(objectId, "title like \"r%\"", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+            if (_searchText.size()) {
+                _pServerCode->ContentDirectory()->Search(objectId, _searchText, "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+            }
+            else {
+                _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+            }
         }
         catch (Poco::Exception& e){
             Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
@@ -184,6 +188,13 @@ void
 CtlMediaObject2::setId(const std::string& id)
 {
     _id = id;
+}
+
+
+void
+CtlMediaObject2::setSearch(const std::string& searchText)
+{
+    _searchText = "artist like \"" + searchText + "%\"";
 }
 
 

@@ -169,9 +169,10 @@ ApplicationImpl::run(int argc, char** argv)
     _pApplication->presentedMainView();
 
     _pEventFilter = new QtEventFilter(_pApplication->_pMainView->getViewImpl());
-    _pQtApplication->installEventFilter(_pEventFilter);
-
+    // FIXME: search field needs focus or global keys must be enabled
+    // for now key navigation is only enabled in fullscreen mode
     if (_fullscreen) {
+        _pQtApplication->installEventFilter(_pEventFilter);
         showToolBar(false);
         showStatusBar(false);
     }

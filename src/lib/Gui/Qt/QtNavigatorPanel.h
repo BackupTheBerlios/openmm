@@ -57,10 +57,14 @@ public:
 
 private slots:
     void buttonPushed();
+    void textEdited(const QString& text);
 
 private:
     std::stack<QtNavigatorPanelButton*>     _buttonStack;
+    QHBoxLayout*                            _pPanelLayout;
+    QWidget*                                _pButtonWidget;
     QHBoxLayout*                            _pButtonLayout;
+    QLineEdit*                              _pSearchWidget;
     QFileIconProvider*                      _pIconProvider;
     NavigatorViewImpl*                      _pNavigatorView;
 };

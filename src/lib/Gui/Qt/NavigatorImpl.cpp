@@ -25,6 +25,8 @@
 #include "NavigatorImpl.h"
 #include "QtNavigatorPanel.h"
 #include "Gui/Navigator.h"
+#include "Gui/GuiLogger.h"
+
 
 namespace Omm {
 namespace Gui {
@@ -60,13 +62,20 @@ QtNavigatorPanel::QtNavigatorPanel(NavigatorViewImpl* pNavigatorView) :
 QWidget(pNavigatorView->getNativeView()),
 _pNavigatorView(pNavigatorView)
 {
-    _pButtonLayout = new QHBoxLayout(this);
+    _pPanelLayout = new QHBoxLayout(this);
+    _pButtonWidget = new QWidget(this);
+    _pPanelLayout->addWidget(_pButtonWidget);
+    _pSearchWidget = new QLineEdit(this);
+    _pPanelLayout->addWidget(_pSearchWidget);
+    _pButtonLayout = new QHBoxLayout(_pButtonWidget);
     _pButtonLayout->setAlignment(Qt::AlignLeft);
     _pButtonLayout->setSpacing(0);
     _pButtonLayout->setMargin(0);
     _pButtonLayout->setContentsMargins(0, 0, 0, 0);
 
     _pIconProvider = new QFileIconProvider;
+
+    connect(_pSearchWidget, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
 }
 
 
@@ -115,6 +124,14 @@ QtNavigatorPanel::buttonPushed()
 {
     QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
     pop(pButton->_pView);
+}
+
+
+void
+QtNavigatorPanel::textEdited(const QString& text)
+{
+    Omm::Gui::Log::instance()->gui().debug("search text changed: " + text.toStdString());
+    _pNavigatorView->changedSearchText(text.toStdString());
 }
 
 
@@ -175,6 +192,13 @@ NavigatorViewImpl::exposeView(View* pView)
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
     _pStackedWidget->setCurrentWidget(pWidget);
     pWidget->show();
+}
+
+
+void
+NavigatorViewImpl::changedSearchText(const std::string& searchText)
+{
+    IMPL_NOTIFY_CONTROLLER(NavigatorController, changedSearchText, searchText);
 }
 
 

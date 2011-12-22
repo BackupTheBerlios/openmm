@@ -59,6 +59,7 @@ public:
 
     virtual std::string getId();
     virtual void setId(const std::string& id);
+    void setSearch(const std::string& searchText);
 
     int fetchChildren(ui4 count = 10, ui4 offset = -1);
     /// offset -1 means fetch from offset = childCount()
@@ -73,6 +74,7 @@ private:
     std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
+    std::string                      _searchText;
 };
 
 
