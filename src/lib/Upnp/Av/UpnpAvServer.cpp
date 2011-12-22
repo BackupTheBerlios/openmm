@@ -1097,6 +1097,17 @@ TorchItem::getProperty(const std::string& name, int index)
 
 CachedServerContainer::CachedServerContainer()
 {
+    _searchCaps.append(AvProperty::CLASS);
+    _searchCaps.append(AvProperty::TITLE);
+    _searchCaps.append(AvProperty::ARTIST);
+    _searchCaps.append(AvProperty::ALBUM);
+    _searchCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
+
+    _sortCaps.append(AvProperty::CLASS);
+    _sortCaps.append(AvProperty::TITLE);
+    _sortCaps.append(AvProperty::ARTIST);
+    _sortCaps.append(AvProperty::ALBUM);
+    _sortCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
 }
 
 
@@ -1121,6 +1132,20 @@ void
 CachedServerContainer::scan(bool on)
 {
     DatabaseCache::doScan(on);
+}
+
+
+CsvList*
+CachedServerContainer::getSearchCaps()
+{
+    return &_searchCaps;
+}
+
+
+CsvList*
+CachedServerContainer::getSortCaps()
+{
+    return &_sortCaps;
 }
 
 
@@ -1197,20 +1222,6 @@ CachedItemResource::getSize()
         return 0;
     }
 }
-
-
-//std::string
-//CachedItemResource::getMime()
-//{
-//
-//}
-//
-//
-//std::string
-//CachedItemResource::getDlna()
-//{
-//    return "*";
-//}
 
 
 std::istream*

@@ -48,6 +48,7 @@
 #include <Poco/DOM/DocumentFragment.h>
 #include <Poco/XML/XMLWriter.h>
 #include <Poco/Data/Session.h>
+#include <list>
 #include "Poco/Data/SQLite/Connector.h"
 #include "Poco/Data/RecordSet.h"
 
@@ -354,6 +355,50 @@ std::string
 ProtocolInfo::getDlnaString() const
 {
     return _dlna;
+}
+
+
+CsvList::CsvList(const std::string& csvListString)
+{
+    Poco::StringTokenizer items(csvListString, ",");
+    for (Poco::StringTokenizer::Iterator it = items.begin(); it != items.end(); ++it) {
+        _items.push_back(*it);
+    }
+}
+
+
+std::size_t
+CsvList::getSize()
+{
+    return _items.size();
+}
+
+
+void
+CsvList::append(const std::string& item)
+{
+    _items.push_back(item);
+}
+
+
+void
+CsvList::remove(const std::string& item)
+{
+    std::list<std::string>::iterator pos = std::find(_items.begin(), _items.end(), item);
+    if (pos != _items.end()) {
+        _items.erase(pos);
+    }
+}
+
+
+std::string
+CsvList::toString()
+{
+    std::string res;
+    for (std::list<std::string>::iterator it = _items.begin(); it != _items.end(); ++it) {
+        res.append(*it);
+    }
+    return res;
 }
 
 

@@ -341,6 +341,9 @@ public:
 
     virtual void scan(bool on = true);
 
+    virtual CsvList* getSortCaps();
+    virtual CsvList* getSearchCaps();
+
 private:
     // abstract media object cache interface
     virtual AbstractMediaObject* createMediaObject();
@@ -348,6 +351,9 @@ private:
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual AbstractMediaObject* getChildForRow(ui4 row);
     virtual ui4 getChildCount();
+
+    CsvList        _searchCaps;
+    CsvList        _sortCaps;
 };
 
 

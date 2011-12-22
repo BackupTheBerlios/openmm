@@ -194,18 +194,18 @@ DevContentDirectoryServerImpl::initStateVars()
 void
 DevContentDirectoryServerImpl::GetSearchCapabilities(std::string& SearchCaps)
 {
-// begin of your own code
-
-// end of your own code
+    if (!_pRoot->getSearchCaps()) {
+        SearchCaps = "";
+    }
 }
 
 
 void
 DevContentDirectoryServerImpl::GetSortCapabilities(std::string& SortCaps)
 {
-// begin of your own code
-
-// end of your own code
+    if (!_pRoot->getSortCaps()) {
+        SortCaps = "";
+    }
 }
 
 

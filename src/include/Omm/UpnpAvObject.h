@@ -216,6 +216,22 @@ private:
 };
 
 
+class CsvList
+{
+public:
+    CsvList(const std::string& csvListString = "");
+
+    std::size_t getSize();
+    void append(const std::string& item);
+    void remove(const std::string& item);
+
+    virtual std::string toString();
+
+private:
+    std::list<std::string>      _items;
+};
+
+
 class SearchCriteria
 {
 public:
@@ -229,19 +245,8 @@ class SortCriteria
 {
     SortCriteria(const std::string& sortString = "");
 
-    void appendProperty(AbstractProperty* pProperty, bool ascending = true);
-    void removeProperty(AbstractProperty* pProperty);
-
-    std::string toString();
-};
-
-
-class PropertyList
-/// list of properties for storing search and sort capabilities
-{
-    PropertyList(const std::string& propertyListString = "");
-
-    void appendProperty(AbstractProperty* pProperty);
+    void append(AbstractProperty* pProperty, bool ascending = true);
+    void remove(AbstractProperty* pProperty);
 
     std::string toString();
 };
@@ -433,6 +438,8 @@ public:
     virtual AbstractMediaObject* getChildForIndex(const std::string& index);
     virtual AbstractMediaObject* getChildForIndex(ui4 index) { return 0; }                      // server object, write meta data
     virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                          // server object, write meta data, controller object browse
+    virtual CsvList* getSortCaps() { return 0; }
+    virtual CsvList* getSearchCaps() { return 0; }
     // simple lazy browsing
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
