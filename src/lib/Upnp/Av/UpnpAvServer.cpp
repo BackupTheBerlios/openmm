@@ -1199,6 +1199,20 @@ CachedItemResource::getSize()
 }
 
 
+//std::string
+//CachedItemResource::getMime()
+//{
+//
+//}
+//
+//
+//std::string
+//CachedItemResource::getDlna()
+//{
+//    return "*";
+//}
+
+
 std::istream*
 CachedItemResource::getStream()
 {

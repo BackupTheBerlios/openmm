@@ -121,9 +121,10 @@ FileDataModel::getMediaObject(Omm::ui4 index)
 
         Omm::Av::MemoryResource* pResource = new Omm::Av::MemoryResource;
         pResource->setSize(getSize(index));
+        // FIXME: add some parts of protinfo in server container / media server.
+        pResource->setProtInfo("http-get:*:" + pMeta->getMime() + ":*");
         pItem->addResource(pResource);
-
-//        pItem->_mime = pMeta->getMime();
+        // TODO: add icon property
 //        pItem->_icon = pItem->_path;
 
         delete pMeta;

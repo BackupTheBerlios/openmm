@@ -651,7 +651,7 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
     _cacheFilePath = cacheFilePath;
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
     try {
-        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, xml VARCHAR)",
+        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
                 Poco::Data::now;
     }
     catch (Poco::Exception& e) {
@@ -738,22 +738,28 @@ DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
     MediaObjectWriter2 xmlWriter(pObject);
     xmlWriter.write(xml);
     std::string artist;
-    std::string album;
     AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
     if (pProperty) {
         artist = pProperty->getValue();
     }
+    std::string album;
     pProperty = pObject->getProperty(AvProperty::ALBUM);
     if (pProperty) {
         album = pProperty->getValue();
     }
+    std::string track;
+    pProperty = pObject->getProperty(AvProperty::ORIGINAL_TRACK_NUMBER);
+    if (pProperty) {
+        track = pProperty->getValue();
+    }
     try {
-        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, xml) VALUES(:idx, :class, :title, :artist, :album, :xml)",
+        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, track, xml) VALUES(:idx, :class, :title, :artist, :album, :track, :xml)",
                 Poco::Data::use(pObject->getIndex()),
                 Poco::Data::use(pObject->getClass()),
                 Poco::Data::use(pObject->getTitle()),
                 Poco::Data::use(artist),
                 Poco::Data::use(album),
+                Poco::Data::use(track),
                 Poco::Data::use(xml),
                 Poco::Data::now;
     }

@@ -103,6 +103,9 @@ public:
     virtual bool isSeekable();
     virtual std::streamsize getSize();
     virtual std::istream* getStream();
+    
+//    virtual std::string getMime();
+//    virtual std::string getDlna();
 };
 
 
