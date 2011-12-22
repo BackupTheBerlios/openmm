@@ -350,6 +350,7 @@ private:
     // abstract media object interface
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual AbstractMediaObject* getChildForRow(ui4 row);
+    virtual ui4 getChildrenAtRow(std::vector<AbstractMediaObject*>& objects, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
     virtual ui4 getChildCount();
 
     CsvList        _searchCaps;

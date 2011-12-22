@@ -1138,14 +1138,24 @@ CachedServerContainer::scan(bool on)
 CsvList*
 CachedServerContainer::getSearchCaps()
 {
-    return &_searchCaps;
+    if (_searchCaps.getSize()) {
+        return &_searchCaps;
+    }
+    else {
+        return 0;
+    }
 }
 
 
 CsvList*
 CachedServerContainer::getSortCaps()
 {
-    return &_sortCaps;
+    if (_sortCaps.getSize()) {
+        return &_sortCaps;
+    }
+    else {
+        return 0;
+    }
 }
 
 
@@ -1173,6 +1183,13 @@ CachedServerContainer::getChildForRow(ui4 row)
 {
     // get media object in row of query result of data base
     return DatabaseCache::getMediaObjectForRow(row);
+}
+
+
+ui4
+CachedServerContainer::getChildrenAtRow(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+{
+    return DatabaseCache::getBlockAtRow(children, offset, count, sort, search);
 }
 
 

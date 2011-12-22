@@ -238,8 +238,7 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
         // get child objects via row
-        NumberReturned = writer.writeChildren(StartingIndex, RequestedCount, Result);
-        TotalMatches = object->getTotalChildCount();
+        NumberReturned = writer.writeChildren(TotalMatches, Result, StartingIndex, RequestedCount, Filter, SortCriteria);
     }
     else {
         Log::instance()->upnpav().error("Error in Browse: unkown BrowseFlag");
@@ -251,9 +250,19 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
 void
 DevContentDirectoryServerImpl::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
-// begin of your own code
+    AbstractMediaObject* object;
+    if (ContainerID == "0") {
+        object = _pRoot;
+    }
+    else {
+        // get object via object id and index
+        object = _pRoot->getDescendant(ContainerID.substr(2));
+    }
 
-// end of your own code
+    MediaObjectWriter2 writer(object);
+    // get child objects via row
+    NumberReturned = writer.writeChildren(TotalMatches, Result, StartingIndex, RequestedCount, Filter, SortCriteria, SearchCriteria);
+    UpdateID = 0;
 }
 
 

@@ -712,6 +712,32 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
 
 
 AbstractMediaObject*
+DatabaseCache::getMediaObjectForIndex(ui4 index)
+{
+    Log::instance()->upnpav().debug("database cache get object for index: " + Poco::NumberFormatter::format(index));
+
+    std::vector<std::string> xml;
+    try {
+        *_pSession << "SELECT xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(xml), Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
+    }
+    if (xml.size() == 1) {
+        AbstractMediaObject* pObject = createMediaObject();
+        MediaObjectReader xmlReader(pObject);
+        xmlReader.read(xml[0]);
+        pObject->setIndex(index);
+        return pObject;
+    }
+    else {
+        Log::instance()->upnpav().warning("database cache get object for index reading meta data failed.");
+        return 0;
+    }
+}
+
+
+AbstractMediaObject*
 DatabaseCache::getMediaObjectForRow(ui4 row)
 {
     Log::instance()->upnpav().debug("database cache get object for row: " + Poco::NumberFormatter::format(row));
@@ -742,29 +768,48 @@ DatabaseCache::getMediaObjectForRow(ui4 row)
 }
 
 
-AbstractMediaObject*
-DatabaseCache::getMediaObjectForIndex(ui4 index)
+ui4
+DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
-    Log::instance()->upnpav().debug("database cache get object for index: " + Poco::NumberFormatter::format(index));
+    Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count));
 
-    std::vector<std::string> xml;
+    ui4 index;
+    std::string xml;
+    Poco::Data::Statement select(*_pSession);
+    std::string statement = "SELECT idx, xml FROM objcache";
+    if (search != "*") {
+        statement += " WHERE " + search;
+    }
+    select << statement;
+    Poco::Data::RecordSet recordSet(select);
     try {
-        *_pSession << "SELECT xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(xml), Poco::Data::now;
+        select.execute();
+        // move to offset
+        recordSet.moveFirst();
+        for (ui4 r = 0; r < offset; r++) {
+            recordSet.moveNext();
+        }
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
+        Log::instance()->upnpav().warning("database cache get block executing query and moving to offset failed: " + e.displayText());
     }
-    if (xml.size() == 1) {
-        AbstractMediaObject* pObject = createMediaObject();
-        MediaObjectReader xmlReader(pObject);
-        xmlReader.read(xml[0]);
-        pObject->setIndex(index);
-        return pObject;
+    for (ui4 r = 0; r < count; r++) {
+        // get block
+        try {
+            index = recordSet["idx"].convert<ui4>();
+            xml = recordSet["xml"].convert<std::string>();
+            AbstractMediaObject* pObject = createMediaObject();
+            MediaObjectReader xmlReader(pObject);
+            xmlReader.read(xml);
+            pObject->setIndex(index);
+            block.push_back(pObject);
+            recordSet.moveNext();
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnpav().error("database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
+        }
     }
-    else {
-        Log::instance()->upnpav().warning("database cache get object for index reading meta data failed.");
-        return 0;
-    }
+    return recordSet.rowCount();
 }
 
 
@@ -1464,20 +1509,32 @@ MediaObjectWriter2::write(std::string& metaData)
 
 
 ui4
-MediaObjectWriter2::writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData)
+MediaObjectWriter2::writeChildren(ui4& totalCount, std::string& meta, ui4 offset, ui4 count, const std::string& filter, const std::string& sort, const std::string& search)
 {
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeChildren()");
     writeMetaDataHeader();
 
-    ui4 c;
-    ui4 childCount = _pMediaObject->getChildCount();
-    for (c = 0; (c < requestedCount) && (c < childCount - startingIndex); ++c) {
-        MediaObjectWriter2 writer(_pMediaObject->getChildForRow(startingIndex + c));
-        writer.writeMetaData(_pDidl);
+    ui4 childrenWritten;
+    if (search == "*") {
+        totalCount = _pMediaObject->getTotalChildCount();
+        ui4 childCount = _pMediaObject->getChildCount();
+        for (childrenWritten = 0; (childrenWritten < count) && (childrenWritten < childCount - offset); childrenWritten++) {
+            MediaObjectWriter2 writer(_pMediaObject->getChildForRow(offset + childrenWritten));
+            writer.writeMetaData(_pDidl);
+        }
+    }
+    else {
+        std::vector<AbstractMediaObject*> objects;
+        totalCount = _pMediaObject->getChildrenAtRow(objects, offset, count, sort, search);
+        childrenWritten = objects.size();
+        for (std::vector<AbstractMediaObject*>::iterator it = objects.begin(); it != objects.end(); ++it) {
+            MediaObjectWriter2 writer(*it);
+            writer.writeMetaData(_pDidl);
+        }
     }
 
-    writeMetaDataClose(metaData);
-    return c;
+    writeMetaDataClose(meta);
+    return childrenWritten;
 }
 
 

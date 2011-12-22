@@ -133,7 +133,8 @@ CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, 
         Omm::ui4 totalMatches;
         Omm::ui4 updateId;
         try {
-            _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+//            _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+            _pServerCode->ContentDirectory()->Search(objectId, "title like \"r%\"", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
         }
         catch (Poco::Exception& e){
             Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
