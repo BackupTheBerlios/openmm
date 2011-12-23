@@ -148,7 +148,10 @@ void
 ListView::resetListView()
 {
     _rowOffset = 0;
-    _pHighlightedView = 0;
+    if (_pHighlightedView) {
+        _pHighlightedView->setHighlighted(false);
+        _pHighlightedView = 0;
+    }
     _highlightedRow = -1;
     scrollContentsTo(0, 0);
 }
