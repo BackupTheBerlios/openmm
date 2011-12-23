@@ -275,11 +275,12 @@ View::setModel(Model* pModel)
 {
 //    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     if (_pModel) {
-        // if there was a model attached previously, detach this view from it
+        // if there was a model attached previously, detach controllers (and this view) from it
         for(ControllerIterator it = beginController(); it != endController(); ++it) {
             (*it)->detachModel(_pModel);
         }
-        _pModel->detachView(this);
+    // FIXME: detaching the view segfaults if old model is already deleted !!!
+//        _pModel->detachView(this);
     }
     if (pModel) {
         pModel->attachView(this);

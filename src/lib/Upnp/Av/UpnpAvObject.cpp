@@ -631,10 +631,12 @@ BlockCache::erase(std::vector<AbstractMediaObject*>::iterator begin, std::vector
 void
 BlockCache::clear()
 {
+    Log::instance()->upnpav().debug("block cache clear ...");
     for (std::vector<AbstractMediaObject*>::iterator it = _cache.begin(); it != _cache.end(); ++it) {
         delete *it;
     }
     _cache.clear();
+    Log::instance()->upnpav().debug("block cache clear finished.");
 }
 
 

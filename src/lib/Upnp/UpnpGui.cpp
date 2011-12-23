@@ -618,9 +618,9 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
         MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(getVisibleView());
         Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
         pObject->setSearch(searchText);
-        // reset model
+        // clear cache (reset data model)
         pObject->clear();
-        // sync view
+//        // sync view
         pContainer->syncViewImpl();
     }
 }

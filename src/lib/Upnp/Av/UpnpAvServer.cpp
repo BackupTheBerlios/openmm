@@ -609,7 +609,7 @@ AbstractDataModel::readIndexCache()
     while(getline(indexCache, line)) {
         std::string::size_type pos = line.find(' ');
         index = Poco::NumberParser::parse(line.substr(0, pos));
-        path = line.substr(pos);
+        path = line.substr(pos + 1);
         _indexCache[index] = path;
         _pathCache[path] = index;
         for (ui4 i = lastIndex + 1; i < index; i++) {
