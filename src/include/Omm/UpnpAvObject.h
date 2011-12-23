@@ -370,7 +370,6 @@ public:
     void setCacheFilePath(const std::string& cacheFilePath);
 
     virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index);
-    virtual AbstractMediaObject* getMediaObjectForRow(ui4 row);
     virtual ui4 getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
 protected:
@@ -431,6 +430,7 @@ public:
     void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
     void appendChildWithAutoIndex(AbstractMediaObject* pChild);
     virtual bool isSearchable() { return false; }
+    virtual bool singleRowInterface() { return true; }
     virtual bool isContainer() { return false; }                                                // server object, write meta data
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
     virtual ui4 getChildCount() { return 0; }                                                   // server object, cds browse / write meta data

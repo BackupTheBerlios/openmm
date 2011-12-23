@@ -743,37 +743,6 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
 }
 
 
-AbstractMediaObject*
-DatabaseCache::getMediaObjectForRow(ui4 row)
-{
-    Log::instance()->upnpav().debug("database cache get object for row: " + Poco::NumberFormatter::format(row));
-
-    ui4 index;
-    std::string xml;
-    try {
-        Poco::Data::Statement select(*_pSession);
-        select << "SELECT idx, xml FROM objcache";
-        select.execute();
-        Poco::Data::RecordSet recordSet(select);
-        recordSet.moveFirst();
-        for (ui4 r = 0; r < row; r++) {
-            recordSet.moveNext();
-        }
-        index = recordSet["idx"].convert<ui4>();
-        xml = recordSet["xml"].convert<std::string>();
-        // NOTE: use recordSet.rowCount() for number of rows in query result
-    }
-    catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache get object for row failed: " + e.displayText());
-    }
-    AbstractMediaObject* pObject = createMediaObject();
-    MediaObjectReader xmlReader(pObject);
-    xmlReader.read(xml);
-    pObject->setIndex(index);
-    return pObject;
-}
-
-
 ui4
 DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
@@ -1521,7 +1490,8 @@ MediaObjectWriter2::writeChildren(ui4& totalCount, std::string& meta, ui4 offset
     writeMetaDataHeader();
 
     ui4 childrenWritten;
-    if (search == "*") {
+
+    if (_pMediaObject->singleRowInterface()) {
         totalCount = _pMediaObject->getTotalChildCount();
         ui4 childCount = _pMediaObject->getChildCount();
         for (childrenWritten = 0; (childrenWritten < count) && (childrenWritten < childCount - offset); childrenWritten++) {

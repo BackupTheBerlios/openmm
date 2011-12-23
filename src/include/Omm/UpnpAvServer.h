@@ -336,6 +336,8 @@ class CachedServerContainer : public ServerContainer, public DatabaseCache
 public:
     CachedServerContainer();
 
+    virtual bool singleRowInterface() { return false; }
+
     virtual void addIndices(const std::vector<ui4>& indices);
     virtual void removeIndices(const std::vector<ui4>& indices);
 
@@ -349,7 +351,6 @@ private:
     virtual AbstractMediaObject* createMediaObject();
     // abstract media object interface
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
-    virtual AbstractMediaObject* getChildForRow(ui4 row);
     virtual ui4 getChildrenAtRow(std::vector<AbstractMediaObject*>& objects, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
     virtual ui4 getChildCount();
 

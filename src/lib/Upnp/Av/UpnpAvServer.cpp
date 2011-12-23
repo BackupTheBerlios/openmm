@@ -1180,14 +1180,6 @@ CachedServerContainer::getChildForIndex(ui4 index)
 }
 
 
-AbstractMediaObject*
-CachedServerContainer::getChildForRow(ui4 row)
-{
-    // get media object in row of query result of data base
-    return DatabaseCache::getMediaObjectForRow(row);
-}
-
-
 ui4
 CachedServerContainer::getChildrenAtRow(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
