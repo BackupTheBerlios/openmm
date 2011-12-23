@@ -568,7 +568,11 @@ BlockCache::getMediaObjectForRow(ui4 row)
 {
     Log::instance()->upnpav().debug("block cache get media object in row: " + Poco::NumberFormatter::format(row) + " ...");
 
-    if (_offset <= row && row < _offset + getCacheSize()) {
+    if (row < 0) {
+        Log::instance()->upnpav().error("block cache get media object failed, negative row.");
+        return 0;
+    }
+    else if (_offset <= row && row < _offset + getCacheSize()) {
         // cache hit, do nothing
         Log::instance()->upnpav().debug("block cache get media object cache hit");
     }

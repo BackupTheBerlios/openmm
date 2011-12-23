@@ -620,7 +620,10 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
         pObject->setSearch(searchText);
         // clear cache (reset data model)
         pObject->clear();
-//        // sync view
+        // if total item count of list model is 0, no items are fetched and thus total item count is not updated
+        // so we need to fetch first child in the current search context
+        pObject->getChildForRow(0);
+        // sync view
         pContainer->syncViewImpl();
     }
 }
