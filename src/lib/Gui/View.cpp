@@ -279,7 +279,7 @@ View::setModel(Model* pModel)
         for(ControllerIterator it = beginController(); it != endController(); ++it) {
             (*it)->detachModel(_pModel);
         }
-    // FIXME: detaching the view segfaults if old model is already deleted !!!
+    // FIXME: detaching the view segfaults if old model is already deleted (responsibility of model?)
 //        _pModel->detachView(this);
     }
     if (pModel) {

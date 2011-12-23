@@ -808,7 +808,7 @@ DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offse
             recordSet.moveNext();
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnpav().error("database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
+            Log::instance()->upnpav().warning("database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
         }
     }
     return recordSet.rowCount();

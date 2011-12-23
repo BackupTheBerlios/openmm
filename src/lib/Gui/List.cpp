@@ -499,8 +499,6 @@ ListView::syncViewImpl()
     Log::instance()->gui().debug("list view sync view impl of \"" + getName() + "\"");
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    // resize view to the size with this item added
-    updateScrollWidgetSize();
 
     int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
     for (int row = _rowOffset; row <= lastRow; row++) {
@@ -520,6 +518,8 @@ ListView::syncViewImpl()
         moveItemView(row, pView);
         pView->show();
     }
+    // resize view to the size with this item added
+    updateScrollWidgetSize();
 }
 
 
