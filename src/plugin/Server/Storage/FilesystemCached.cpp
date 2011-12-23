@@ -64,6 +64,8 @@ _pTagger(0)
 //    Omm::Av::Log::instance()->upnpav().debug("file data model ctor ...");
     _cacheFile = _cachePath + "/indexCache";
     loadTagger();
+    readIndexCache();
+
 //    Omm::Av::Log::instance()->upnpav().debug("file data model ctor finished.");
 }
 
@@ -246,12 +248,12 @@ FileDataModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
+        Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading vlc tagger ...");
         try {
             _pTagger = taggerPluginLoader.load("tagger-vlc");
         }
         catch(Poco::NotFoundException) {
-            Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
+            Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
             _pTagger = taggerPluginLoader.load("tagger-simple");
         }
     }
@@ -274,7 +276,10 @@ FilecachedServer::setBasePath(const std::string& basePath)
     setTitle(basePath);
     setClass(pDataModel->getContainerClass());
 
-    pDataModel->scan();
+    if (!Poco::File(basePath + "/.omm/cache/objectCache").exists()) {
+        Omm::Av::Log::instance()->upnpav().debug("object cache already present, skipping scan");
+        pDataModel->scan();
+    }
 }
 
 

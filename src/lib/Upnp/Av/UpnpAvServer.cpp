@@ -595,10 +595,11 @@ AbstractDataModel::getChildCount()
 void
 AbstractDataModel::readIndexCache()
 {
-    if (Poco::File(_cacheFile).exists()) {
-        // TODO: check if index cache needs update
+    if (!Poco::File(_cacheFile).exists()) {
+        Omm::Av::Log::instance()->upnpav().debug("index cache not present, not reading it");
         return;
     }
+    Omm::Av::Log::instance()->upnpav().debug("index cache present, reading ...");
     std::ifstream indexCache(_cacheFile.c_str());
     std::string line;
     ui4 index = 0;
@@ -617,6 +618,7 @@ AbstractDataModel::readIndexCache()
         lastIndex = index;
     }
     _maxIndex = index;
+    Omm::Av::Log::instance()->upnpav().debug("index cache reading finished.");
 }
 
 

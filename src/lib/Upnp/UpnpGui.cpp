@@ -619,6 +619,7 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
         Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
         pObject->setSearch(searchText);
         // reset model
+        pObject->clear();
         // sync view
         pContainer->syncViewImpl();
     }
