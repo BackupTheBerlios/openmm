@@ -623,6 +623,8 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
         // if total item count of list model is 0, no items are fetched and thus total item count is not updated
         // so we need to fetch first child in the current search context
         pObject->getChildForRow(0);
+//        pContainer->scrollToRowOffset(0);
+        pContainer->resetListView();
         // sync view
         pContainer->syncViewImpl();
     }

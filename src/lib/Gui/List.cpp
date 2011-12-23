@@ -144,6 +144,16 @@ ListView::selectRow(int row)
 }
 
 
+void
+ListView::resetListView()
+{
+    _rowOffset = 0;
+    _pHighlightedView = 0;
+    _highlightedRow = -1;
+    scrollContentsTo(0, 0);
+}
+
+
 int
 ListView::viewPortHeightInRows()
 {

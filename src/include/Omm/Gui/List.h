@@ -62,6 +62,8 @@ public:
     void setItemViewHeight(int height);
     void selectRow(int row);
 
+    void resetListView();
+    
 protected:
     virtual void syncViewImpl();
 
