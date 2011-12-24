@@ -47,6 +47,7 @@ public:
     void push(View* pView, const std::string& name = "");
     void pop();
     View* getVisibleView();
+    void showSearchBox(bool show = true);
 
 private:
     std::stack<View*>       _pViewStack;

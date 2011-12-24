@@ -177,7 +177,7 @@ public:
     void getValue(std::string& val) {
         val = _val;
     }
-    void getValue(bool& val) { val = (_val == "1" || _val == "true") ? true : false; }
+    void getValue(bool& val) { val = (_val == "1" || _val == "true" || _val == "yes") ? true : false; }
     void getValue(ui1& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(ui2& val) { val = Poco::NumberParser::parse(_val); }
     void getValue(ui4& val) {

@@ -35,7 +35,7 @@ public:
     FileDataModel(const std::string& basePath);
     ~FileDataModel();
 
-    virtual void scan(bool on = true);
+    virtual void createIndex();
 //    virtual std::string getContainerClass();
     virtual Omm::Av::AbstractMediaObject* getMediaObject(Omm::ui4 index);
     virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
@@ -276,10 +276,10 @@ FilecachedServer::setBasePath(const std::string& basePath)
     setTitle(basePath);
     setClass(pDataModel->getContainerClass());
 
-    if (!Poco::File(basePath + "/.omm/cache/objectCache").exists()) {
-        Omm::Av::Log::instance()->upnpav().debug("object cache already present, skipping scan");
+//    if (!Poco::File(basePath + "/.omm/cache/objectCache").exists()) {
+//        Omm::Av::Log::instance()->upnpav().debug("object cache already present, skipping scan");
         pDataModel->scan();
-    }
+//    }
 }
 
 

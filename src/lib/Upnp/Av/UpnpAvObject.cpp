@@ -55,6 +55,7 @@
 #include "UpnpAvObject.h"
 
 #include "utf8.h"
+#include "Upnp.h"
 
 
 namespace Omm {
@@ -755,6 +756,7 @@ DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offse
     if (search != "*") {
         statement += " WHERE " + search;
     }
+    statement += " ORDER BY artist, album, track, title";
     select << statement;
     Poco::Data::RecordSet recordSet(select);
     try {
@@ -1163,8 +1165,8 @@ MemoryPropertyImpl::getAttributeCount()
 MemoryMediaObject::MemoryMediaObject() :
 _restricted(true),
 _isContainer(false),
+_searchable(false),
 _totalChildCount(0)
-//_rowOffset(0)
 {
 }
 
@@ -1275,6 +1277,20 @@ MemoryMediaObject::isRestricted()
 //    Log::instance()->upnpav().debug("MemoryMediaObject::isRestricted()");
 
     return _restricted;
+}
+
+
+bool
+MemoryMediaObject::isSearchable()
+{
+    return _searchable;
+}
+
+
+void
+MemoryMediaObject::setIsSearchable(bool searchable)
+{
+    _searchable = searchable;
 }
 
 
@@ -1391,15 +1407,33 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
     Poco::XML::NamedNodeMap* attr = 0;
     if (pNode->hasAttributes()) {
         attr = pNode->attributes();
-        try {
-            // FIXME: object number is the full object path, take only the last segment here ...? Otherwise, Poco::NumberParser will crash.
-//            pObject->setIndex(attr->getNamedItem(AvProperty::ID)->nodeValue());
-            pObject->setId(attr->getNamedItem(AvProperty::ID)->nodeValue());
+        Poco::XML::Node* pAttrNode = attr->getNamedItem(AvProperty::ID);
+        if (pAttrNode) {
+            pObject->setId(pAttrNode->nodeValue());
         }
-        catch (...) {
-            Log::instance()->upnpav().error("setting object number in media object reader failed");
+        else {
+            Log::instance()->upnpav().error("setting mandatory object id in media object reader failed");
         }
-//        pObject->setObjectId(attr->getNamedItem(AvProperty::ID)->nodeValue());
+        pAttrNode = attr->getNamedItem(AvProperty::RESTRICTED);
+        if (pAttrNode) {
+            Variant restricted(pAttrNode->nodeValue());
+            bool isRestricted;
+            restricted.getValue(isRestricted);
+            pObject->setIsRestricted(isRestricted);
+        }
+        else {
+            Log::instance()->upnpav().error("setting mandatory object restricted attribute in media object reader failed");
+        }
+        pAttrNode = attr->getNamedItem(AvProperty::CONTAINER_SEARCHABLE);
+        if (pAttrNode) {
+            Variant searchable(pAttrNode->nodeValue());
+            bool isSearchable;
+            searchable.getValue(isSearchable);
+            pObject->setIsSearchable(isSearchable);
+        }
+        else {
+            Log::instance()->upnpav().warning("media object reader searchable attribute not present");
+        }
     }
     if (pNode->nodeName() == AvClass::CONTAINER) {
         pObject->setIsContainer(true);
@@ -1571,8 +1605,11 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl)
     pObject->setAttribute(AvProperty::PARENT_ID, parentId);
     // restricted (Boolean, required)
     pObject->setAttribute(AvProperty::RESTRICTED, (_pMediaObject->isRestricted() ? "1" : "0"));
-
     // searchable (Boolean)
+    if (_pMediaObject->isSearchable()) {
+        pObject->setAttribute(AvProperty::CONTAINER_SEARCHABLE, "1");
+    }
+
     // refID (String)
 
     // properties

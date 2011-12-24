@@ -566,23 +566,23 @@ AbstractDataModel::getPath(ui4 index)
 }
 
 
-void
-AbstractDataModel::addIndices(const std::vector<ui4>& indices)
-{
-    // server container may insert index and meta data into its cache
-    if (_pServerContainer) {
-        _pServerContainer->addIndices(indices);
-    }
-}
-
-
-void
-AbstractDataModel::removeIndices(const std::vector<ui4>& indices)
-{
-    if (_pServerContainer) {
-        _pServerContainer->removeIndices(indices);
-    }
-}
+//void
+//AbstractDataModel::addIndices(const std::vector<ui4>& indices)
+//{
+//    // server container may insert index and meta data into its cache
+//    if (_pServerContainer) {
+//        _pServerContainer->addIndices(indices);
+//    }
+//}
+//
+//
+//void
+//AbstractDataModel::removeIndices(const std::vector<ui4>& indices)
+//{
+//    if (_pServerContainer) {
+//        _pServerContainer->removeIndices(indices);
+//    }
+//}
 
 
 ui4
@@ -643,7 +643,7 @@ void
 AbstractDataModel::flushIndexBuffer()
 {
     // TODO: don't add indices to server cache, server shall retrieve the media objects from the data model
-    addIndices(_indexBuffer);
+//    addIndices(_indexBuffer);
     _indexBuffer.clear();
 }
 

@@ -221,19 +221,20 @@ public:
     virtual std::string getContainerClass() { return AvClass::CONTAINER; }
 
     // child media object creation / deletion
-    virtual void scan(bool on = true) {}
-
     // index and path
     // depending on the data domain, the bijective mapping between index and path
     // can be trivial and should override getIndex(), getPath(), and hasIndex().
     // otherwise a standard mapping is implemented here.
+//    virtual void createIndexCache() {}
+    void addIndex(ui4 index);
+    void removeIndex(ui4 index);
     virtual bool hasIndex(ui4 index);
     virtual ui4 getIndex(const std::string& path);
     virtual std::string getPath(ui4 index);
-    void addIndices(const std::vector<ui4>& indices);
-    void removeIndices(const std::vector<ui4>& indices);
-    void flushIndexBuffer();
-    void bufferIndex(Omm::ui4 index);
+//    void addIndices(const std::vector<ui4>& indices);
+//    void removeIndices(const std::vector<ui4>& indices);
+//    void flushIndexBuffer();
+//    void bufferIndex(Omm::ui4 index);
 
     // number of child media objects in container at one point in time
     // (synchronized with child object creation / deletion)
@@ -325,6 +326,7 @@ public:
 private:
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual AbstractMediaObject* getChildForRow(ui4 row);
+    // TODO: does getChildCount() make sense on server side? Is this total child count?
     virtual ui4 getChildCount();
 
     AbstractMediaObject*            _pChild;
@@ -337,6 +339,7 @@ public:
     CachedServerContainer();
 
     virtual bool singleRowInterface() { return false; }
+    virtual bool isSearchable() { return true; }
 
     virtual void addIndices(const std::vector<ui4>& indices);
     virtual void removeIndices(const std::vector<ui4>& indices);

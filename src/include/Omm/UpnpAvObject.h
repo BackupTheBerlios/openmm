@@ -405,13 +405,17 @@ public:
     void setIndex(ui4 index);                                                                   // controller object, read from xml into memory
     AbstractMediaObject* getParent();                                                           // controller object, browse
 
+    // attributes
+    virtual bool isRestricted() { return true; }                                                // server object, write meta data
+    virtual void setIsRestricted(bool isRestricted) {}                                          // controller object, read from xml into memory
+    virtual bool isSearchable() { return false; }
+    virtual void setIsSearchable(bool isSearchable = true) {}                                   // controller object, read from xml into memory
+
     // properties
     std::string getTitle();                                                                     // controller object, browse
     void setTitle(const std::string& title);
     std::string getClass();
     void setClass(const std::string& subclass);
-    virtual bool isRestricted() { return true; }                                                // server object, write meta data
-    virtual void setIsRestricted(bool isRestricted) {}                                          // controller object, read from xml into memory
     virtual void addProperty(AbstractProperty* pProperty) {}                                    // controller object, read from xml into memory
      // TODO: title and class are mandatory properties
     virtual int getPropertyCount(const std::string& name = "") = 0;
@@ -429,8 +433,6 @@ public:
 //    void insertChild(AbstractMediaObject* pChild, ui4 index);                                 // controller object, read from xml into memory
     void appendChild(AbstractMediaObject* pChild);                                              // controller object, read from xml into memory
     void appendChildWithAutoIndex(AbstractMediaObject* pChild);
-    virtual bool isSearchable() { return false; }
-    virtual bool singleRowInterface() { return true; }
     virtual bool isContainer() { return false; }                                                // server object, write meta data
     virtual void setIsContainer(bool isContainer) {}                                            // controller object, read from xml into memory
     virtual ui4 getChildCount() { return 0; }                                                   // server object, cds browse / write meta data
@@ -449,6 +451,8 @@ public:
     // simple lazy browsing with fetchChildren() and fetchedAllChildren(), only for sample Qt gui, for now
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
+    // choose between getting one child at a time or a block of children starting at row.
+    virtual bool singleRowInterface() { return true; }
 
 protected:
     virtual void appendChildImpl(AbstractMediaObject* pChild) {}
@@ -494,8 +498,12 @@ public:
     virtual AbstractProperty* createProperty();
     virtual AbstractResource* createResource();
 
-    // properties
+    // attributes
     virtual bool isRestricted();                                                // server object, write meta data
+    virtual bool isSearchable();
+    void setIsSearchable(bool searchable = true);
+
+    // properties
     virtual int getPropertyCount(const std::string& name = "");
     void addProperty(AbstractProperty* pProperty);                              // controller object, read from xml into memory
     virtual AbstractProperty* getProperty(int index);
@@ -516,11 +524,11 @@ private:
 
     bool                                                                _restricted;
     bool                                                                _isContainer;
+    bool                                                                _searchable;
     std::vector<AbstractMediaObject*>                                   _childVec;
     std::vector<AbstractProperty*>                                      _propertyVec;
     std::multimap<std::string,AbstractProperty*>                        _propertyMap;
     ui4                                                                 _totalChildCount;
-//    ui4                                                                 _rowOffset;
 };
 
 

@@ -67,6 +67,7 @@ _pNavigatorView(pNavigatorView)
     _pPanelLayout->addWidget(_pButtonWidget);
     _pSearchWidget = new QLineEdit(this);
     _pPanelLayout->addWidget(_pSearchWidget);
+    _pSearchWidget->setHidden(true);
     _pButtonLayout = new QHBoxLayout(_pButtonWidget);
     _pButtonLayout->setAlignment(Qt::AlignLeft);
     _pButtonLayout->setSpacing(0);
@@ -175,6 +176,13 @@ void
 NavigatorViewImpl::popView()
 {
     _pNavigatorPanel->pop();
+}
+
+
+void
+NavigatorViewImpl::showSearchBox(bool show)
+{
+    _pNavigatorPanel->_pSearchWidget->setHidden(!show);
 }
 
 

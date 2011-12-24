@@ -71,5 +71,12 @@ NavigatorView::getVisibleView()
 }
 
 
+void
+NavigatorView::showSearchBox(bool show)
+{
+    static_cast<NavigatorViewImpl*>(_pImpl)->showSearchBox(show);
+}
+
+
 } // namespace Gui
 } // namespace Omm
