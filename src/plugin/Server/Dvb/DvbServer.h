@@ -41,7 +41,7 @@
 // };
 
 
-class DvbServer : public Omm::Av::TorchServerContainer
+class DvbServer : public Omm::Av::ServerContainer
 {
 public:
     DvbServer();

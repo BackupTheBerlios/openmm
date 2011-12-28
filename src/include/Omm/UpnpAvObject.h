@@ -313,6 +313,9 @@ class AbstractMediaObjectCache
 public:
     AbstractMediaObjectCache(ui4 maxCacheSize = 100);
 
+    void setContainer(AbstractMediaObject* pContainer);
+    AbstractMediaObject* getContainer();
+
     virtual ui4 getTotalCount() { return 0; }
     virtual void clear() {}
     virtual AbstractMediaObject* getMediaObjectForRow(ui4 row) { return 0; }
@@ -320,16 +323,13 @@ public:
 
     void setMaxCacheSize(ui4 size);
     ui4 getMaxCacheSize();
-    void scan(bool on);
 
 protected:
     virtual ui4 getCacheSize() { return 0; }
-    virtual void doScan() {}
-    virtual AbstractMediaObject* createMediaObject() { return 0; }
+    AbstractMediaObject*        _pContainer;
 
 private:
-    ui4         _maxCacheSize;
-    bool        _scan;
+    ui4                         _maxCacheSize;
 };
 
 
@@ -353,7 +353,6 @@ protected:
 
 private:
     virtual ui4 getCacheSize();
-    virtual void doScan(bool on);
 
     std::vector<AbstractMediaObject*>   _cache;
     ui4                                 _offset;
@@ -369,12 +368,14 @@ public:
 
     void setCacheFilePath(const std::string& cacheFilePath);
 
+    ui4 rowCount();
+
     virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index);
     virtual ui4 getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
 protected:
-    virtual void doScan(bool on);
     void insertMediaObject(AbstractMediaObject* pObject);
+    void insertBlock(std::vector<AbstractMediaObject*>& block);
 
 private:
     Poco::Data::Session*        _pSession;
@@ -417,7 +418,7 @@ public:
     std::string getClass();
     void setClass(const std::string& subclass);
     virtual void addProperty(AbstractProperty* pProperty) {}                                    // controller object, read from xml into memory
-     // TODO: title and class are mandatory properties
+    // TODO: title and class are mandatory properties
     virtual int getPropertyCount(const std::string& name = "") = 0;
     virtual AbstractProperty* getProperty(int index) = 0;
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;          // server object, write meta data
@@ -444,7 +445,7 @@ public:
     // TODO: getChildForRow() along with getChildCount() and getTotalChildCount() on controller side only?
     virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }                          // server object, write meta data, controller object browse
     // TODO: getChildrenAtRow() on server side only?
-    virtual ui4 getChildrenAtRow(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") {}
+    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") {}
     /// getChildrenAtRow returns total number of children in the context of the search request.
     virtual CsvList* getSortCaps() { return 0; }
     virtual CsvList* getSearchCaps() { return 0; }

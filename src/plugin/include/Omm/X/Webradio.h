@@ -25,7 +25,7 @@
 #include <Omm/UpnpAvServer.h>
 
 
-class WebradioServer : public Omm::Av::TorchServerContainer
+class WebradioServer : public Omm::Av::ServerContainer
 {
 public:
     virtual void setBasePath(const std::string& basePath);

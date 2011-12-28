@@ -95,28 +95,6 @@ private:
 };
 
 
-class CachedItemResource : public Omm::Av::StreamingResource
-{
-public:
-    CachedItemResource(CachedServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
-
-    virtual bool isSeekable();
-    virtual std::streamsize getSize();
-    virtual std::istream* getStream();
-};
-
-
-class CachedItem : public Omm::Av::StreamingMediaItem
-{
-    friend class CachedServerContainer;
-
-public:
-    CachedItem(CachedServerContainer* pServer);
-    virtual ~CachedItem();
-
-    virtual AbstractResource* createResource();
-};
-
 
 } // namespace Av
 } // namespace Omm

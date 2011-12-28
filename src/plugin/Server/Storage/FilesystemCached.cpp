@@ -35,21 +35,25 @@ public:
     FileDataModel(const std::string& basePath);
     ~FileDataModel();
 
+    virtual bool preserveIndexCache() { return true; }
+    virtual bool useObjectCache() { return true; }
+
     virtual void createIndex();
 //    virtual std::string getContainerClass();
-    virtual Omm::Av::AbstractMediaObject* getMediaObject(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
-    virtual std::streamsize getSize(Omm::ui4 index);
-    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
+
+    virtual std::string getParentPath(const std::string& path);
+
+    virtual Omm::Av::AbstractMediaObject* getMediaObject(const std::string& path);
+    virtual std::streamsize getSize(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
 
 private:
     void scanDirectoryRecursively(Poco::File& directory);
     void loadTagger();
-    void setClass(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta::ContainerFormat format);
-    void setProperty(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta* pMeta, Omm::AvStream::Meta::TagKey);
-    void addResource(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta* pMeta, Omm::AvStream::Meta::TagKey);
+    void setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format);
 
-    std::string                         _basePath;
+    Poco::Path                          _basePath;
     std::string                         _cachePath;
     std::string                         _containerClass;
     Omm::AvStream::Tagger*              _pTagger;
@@ -64,7 +68,7 @@ _pTagger(0)
 //    Omm::Av::Log::instance()->upnpav().debug("file data model ctor ...");
     _cacheFile = _cachePath + "/indexCache";
     loadTagger();
-    readIndexCache();
+    createIndex();
 
 //    Omm::Av::Log::instance()->upnpav().debug("file data model ctor finished.");
 }
@@ -77,16 +81,18 @@ FileDataModel::~FileDataModel()
 
 
 void
-FileDataModel::scan(bool on)
+FileDataModel::createIndex()
 {
-    Omm::Av::Log::instance()->upnpav().debug("file data model starting scan ...");
-    if (on) {
-        Poco::File baseDir(_basePath);
-        scanDirectoryRecursively(baseDir);
-        flushIndexBuffer();
+    Omm::Av::Log::instance()->upnpav().debug("file data model starting index scan ...");
+//    if (preserveIndexCache()) {
+//        readIndexCache();
+//    }
+    Poco::File baseDir(_basePath);
+    scanDirectoryRecursively(baseDir);
+    if (preserveIndexCache()) {
         writeIndexCache();
     }
-    Omm::Av::Log::instance()->upnpav().debug("file data model scan finished.");
+    Omm::Av::Log::instance()->upnpav().debug("file data model index scan finished.");
 }
 
 
@@ -97,32 +103,62 @@ FileDataModel::scan(bool on)
 //}
 
 
-Omm::Av::AbstractMediaObject*
-FileDataModel::getMediaObject(Omm::ui4 index)
+std::string
+FileDataModel::getParentPath(const std::string& path)
 {
-    std::string path = _basePath + getPath(index);
-    Omm::Av::Log::instance()->upnpav().debug("file data model tagging:" + path);
-    Omm::AvStream::Meta* pMeta = _pTagger->tag(path);
-    if (pMeta) {
-        Omm::Av::MemoryMediaObject* pItem = new Omm::Av::MemoryMediaObject;
+    std::string::size_type pos = path.rfind("/");
+    Omm::Av::Log::instance()->upnpav().debug("file data model path: " + path + ", parent path: " + path.substr(0, pos));
+    if (pos == std::string::npos) {
+        return "";
+    }
+    else {
+        return path.substr(0, pos);
+    }
+}
 
-        pItem->setIndex(index);
+
+Omm::Av::AbstractMediaObject*
+FileDataModel::getMediaObject(const std::string& path)
+{
+    Poco::Path fullPath(_basePath, path);
+    if (Poco::File(fullPath).isDirectory()) {
+        Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString(Poco::Path::PATH_UNIX));
+        Omm::Av::AbstractMediaObject* pContainer = getServerContainer()->createMediaContainer();
+        pContainer->setTitle(fullPath.getFileName());
+        return pContainer;
+    }
+    Omm::Av::Log::instance()->upnpav().debug("file data model tagging: " + fullPath.toString(Poco::Path::PATH_UNIX));
+    Omm::AvStream::Meta* pMeta = _pTagger->tag(fullPath.toString(Poco::Path::PATH_UNIX));
+    if (pMeta) {
+        Omm::Av::ServerItem* pItem = getServerContainer()->createMediaItem();
+
         setClass(pItem, pMeta->getContainerFormat());
 
         std::string title = pMeta->getTag(Omm::AvStream::Meta::TK_TITLE);
         Omm::Av::AvTypeConverter::replaceNonUtf8(title);
         if (title == "") {
-            title = Poco::Path(path).getFileName();
+            title = fullPath.getFileName();
         }
         pItem->setTitle(title);
 
-        setProperty(pItem, pMeta, Omm::AvStream::Meta::TK_ARTIST);
-        setProperty(pItem, pMeta, Omm::AvStream::Meta::TK_ALBUM);
-        setProperty(pItem, pMeta, Omm::AvStream::Meta::TK_TRACK);
-        setProperty(pItem, pMeta, Omm::AvStream::Meta::TK_GENRE);
+        std::string propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_ARTIST);
+        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
+        pItem->setUniqueProperty(Omm::Av::AvProperty::ARTIST, propertyValue);
 
-        Omm::Av::MemoryResource* pResource = new Omm::Av::MemoryResource;
-        pResource->setSize(getSize(index));
+        propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM);
+        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
+        pItem->setUniqueProperty(Omm::Av::AvProperty::ALBUM, propertyValue);
+
+        propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_TRACK);
+        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
+        pItem->setUniqueProperty(Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER, propertyValue);
+
+        propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
+        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
+        pItem->setUniqueProperty(Omm::Av::AvProperty::GENRE, propertyValue);
+
+        Omm::Av::ServerItemResource* pResource = pItem->createResource();
+        pResource->setSize(getSize(path));
         // FIXME: add some parts of protinfo in server container / media server.
         pResource->setProtInfo("http-get:*:" + pMeta->getMime() + ":*");
         pItem->addResource(pResource);
@@ -136,36 +172,36 @@ FileDataModel::getMediaObject(Omm::ui4 index)
 }
 
 
-bool
-FileDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
-{
-    return true;
-}
-
-
 std::streamsize
-FileDataModel::getSize(Omm::ui4 index)
+FileDataModel::getSize(const std::string& path)
 {
     std::streamsize res;
-    std::string filePath = _basePath + getPath(index);
+    Poco::Path fullPath(_basePath, path);
     try {
-        res = Poco::File(filePath).getSize();
+        res = Poco::File(fullPath).getSize();
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + filePath);
+        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + fullPath.toString(Poco::Path::PATH_UNIX));
         res = 0;
     }
     return res;
 }
 
 
-std::istream*
-FileDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
+bool
+FileDataModel::isSeekable(const std::string& path, const std::string& resourcePath)
 {
-    std::string filePath = _basePath + getPath(index);
-    std::istream* pRes = new std::ifstream(filePath.c_str());
+    return true;
+}
+
+
+std::istream*
+FileDataModel::getStream(const std::string& path, const std::string& resourcePath)
+{
+    Poco::Path fullPath(_basePath, path);
+    std::istream* pRes = new std::ifstream(fullPath.toString(Poco::Path::PATH_UNIX).c_str());
     if (!*pRes) {
-        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + filePath);
+        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + _basePath.append(path).toString(Poco::Path::PATH_UNIX));
         return 0;
     }
     return pRes;
@@ -173,7 +209,7 @@ FileDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 
 
 void
-FileDataModel::setClass(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta::ContainerFormat format)
+FileDataModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format)
 {
     switch (format) {
         case Omm::AvStream::Meta::CF_UNKNOWN:
@@ -193,42 +229,18 @@ FileDataModel::setClass(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta::
 
 
 void
-FileDataModel::setProperty(Omm::Av::MemoryMediaObject* pItem, Omm::AvStream::Meta* pMeta, Omm::AvStream::Meta::TagKey key)
-{
-    Omm::Av::AbstractProperty* pProperty = pItem->createProperty();
-    switch (key) {
-        case Omm::AvStream::Meta::TK_ARTIST:
-            pProperty->setName(Omm::Av::AvProperty::ARTIST);
-            break;
-        case Omm::AvStream::Meta::TK_ALBUM:
-            pProperty->setName(Omm::Av::AvProperty::ALBUM);
-            break;
-        case Omm::AvStream::Meta::TK_TRACK:
-            pProperty->setName(Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER);
-            break;
-        case Omm::AvStream::Meta::TK_GENRE:
-            pProperty->setName(Omm::Av::AvProperty::GENRE);
-            break;
-    }
-    std::string value = pMeta->getTag(key);
-    Omm::Av::AvTypeConverter::replaceNonUtf8(value);
-    pProperty->setValue(value);
-    pItem->addProperty(pProperty);
-}
-
-
-void
 FileDataModel::scanDirectoryRecursively(Poco::File& directory)
 {
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
     while(dir != end) {
         try {
-            if (dir->isFile()) {
-                bufferIndex(getIndex(dir->path().substr(_basePath.length())));
-            }
-            else if (dir->isDirectory()) {
+//            addPath(dir->path().substr(_basePath.toString(Poco::Path::PATH_UNIX).length()));
+            if (dir->isDirectory()) {
                 scanDirectoryRecursively(*dir);
+            }
+            else {
+                addPath(dir->path().substr(_basePath.toString(Poco::Path::PATH_UNIX).length()));
             }
         }
         catch(...) {
@@ -275,11 +287,7 @@ FilecachedServer::setBasePath(const std::string& basePath)
     setDataModel(pDataModel);
     setTitle(basePath);
     setClass(pDataModel->getContainerClass());
-
-//    if (!Poco::File(basePath + "/.omm/cache/objectCache").exists()) {
-//        Omm::Av::Log::instance()->upnpav().debug("object cache already present, skipping scan");
-        pDataModel->scan();
-//    }
+    scan();
 }
 
 

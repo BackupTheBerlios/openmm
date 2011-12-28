@@ -524,9 +524,23 @@ AbstractProperty::getAttributeCount()
 
 AbstractMediaObjectCache::AbstractMediaObjectCache(ui4 maxCacheSize) :
 _maxCacheSize(maxCacheSize),
-_scan(false)
+_pContainer(0)
 {
 
+}
+
+
+void
+AbstractMediaObjectCache::setContainer(AbstractMediaObject* pContainer)
+{
+    _pContainer = pContainer;
+}
+
+
+AbstractMediaObject*
+AbstractMediaObjectCache::getContainer()
+{
+    return _pContainer;
 }
 
 
@@ -544,17 +558,17 @@ AbstractMediaObjectCache::getMaxCacheSize()
 }
 
 
-void
-AbstractMediaObjectCache::scan(bool on)
-{
-    if (on && _scan) {
-        return;
-    }
-    _scan = on;
-    if (on && (_maxCacheSize < getCacheSize())) {
-        doScan();
-    }
-}
+//void
+//AbstractMediaObjectCache::scan(bool on)
+//{
+//    if (on && _scan) {
+//        return;
+//    }
+//    _scan = on;
+//    if (on && (_maxCacheSize < getCacheSize())) {
+//        doScan();
+//    }
+//}
 
 
 BlockCache::BlockCache(ui4 blockSize) :
@@ -673,11 +687,11 @@ BlockCache::getCacheSize()
 }
 
 
-void
-BlockCache::doScan(bool on)
-{
-
-}
+//void
+//BlockCache::doScan(bool on)
+//{
+//
+//}
 
 
 DatabaseCache::DatabaseCache() :
@@ -718,6 +732,23 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
 }
 
 
+ui4
+DatabaseCache::rowCount()
+{
+    Poco::Data::Statement select(*_pSession);
+    std::string statement = "SELECT idx FROM objcache";
+    select << statement;
+    Poco::Data::RecordSet recordSet(select);
+    try {
+        select.execute();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get row count failed: " + e.displayText());
+    }
+    return recordSet.rowCount();
+}
+
+
 AbstractMediaObject*
 DatabaseCache::getMediaObjectForIndex(ui4 index)
 {
@@ -731,10 +762,17 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
         Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
     }
     if (xml.size() == 1) {
-        AbstractMediaObject* pObject = createMediaObject();
+        AbstractMediaObject* pObject = _pContainer->createChildObject();
+        if (_pContainer) {
+            AbstractMediaObject* pObject = _pContainer->createChildObject();
+        }
+        else {
+            Log::instance()->upnpav().error("database cache could not create child object");
+            return 0;
+        }
         MediaObjectReader xmlReader(pObject);
         xmlReader.read(xml[0]);
-        pObject->setIndex(index);
+//        pObject->setIndex(index);
         return pObject;
     }
     else {
@@ -756,7 +794,7 @@ DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offse
     if (search != "*") {
         statement += " WHERE " + search;
     }
-    statement += " ORDER BY artist, album, track, title";
+//    statement += " ORDER BY artist, album, track, title";
     select << statement;
     Poco::Data::RecordSet recordSet(select);
     try {
@@ -775,11 +813,23 @@ DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offse
         try {
             index = recordSet["idx"].convert<ui4>();
             xml = recordSet["xml"].convert<std::string>();
-            AbstractMediaObject* pObject = createMediaObject();
+            AbstractMediaObject* pObject;
+            if (_pContainer) {
+                pObject = _pContainer->createChildObject();
+            }
+            else {
+                Log::instance()->upnpav().error("database cache could not create child object");
+                return recordSet.rowCount();
+            }
             MediaObjectReader xmlReader(pObject);
             xmlReader.read(xml);
-            pObject->setIndex(index);
-            block.push_back(pObject);
+//            if (!pObject->isContainer()) {
+                pObject->setIndex(index);
+                block.push_back(pObject);
+//            }
+//            else {
+//                delete pObject;
+//            }
             recordSet.moveNext();
         }
         catch (Poco::Exception& e) {
@@ -790,11 +840,11 @@ DatabaseCache::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offse
 }
 
 
-void
-DatabaseCache::doScan(bool on)
-{
-
-}
+//void
+//DatabaseCache::doScan(bool on)
+//{
+//
+//}
 
 
 void
@@ -833,7 +883,49 @@ DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
     }
-    delete pObject;
+}
+
+
+void
+DatabaseCache::insertBlock(std::vector<AbstractMediaObject*>& block)
+{
+    Log::instance()->upnpav().debug("database cache inserting media object block");
+    typedef Poco::Tuple<ui4, std::string, std::string, std::string, std::string, int, std::string> MediaObject;
+    std::vector<MediaObject> tupleBlock;
+    for (std::vector<AbstractMediaObject*>::iterator it = block.begin(); it != block.end(); ++it) {
+        AbstractMediaObject* pObject = *it;
+        std::string xml;
+        MediaObjectWriter2 xmlWriter(pObject);
+        xmlWriter.write(xml);
+        std::string artist;
+        AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
+        if (pProperty) {
+            artist = pProperty->getValue();
+        }
+        std::string album;
+        pProperty = pObject->getProperty(AvProperty::ALBUM);
+        if (pProperty) {
+            album = pProperty->getValue();
+        }
+        Variant trackVariant;
+        pProperty = pObject->getProperty(AvProperty::ORIGINAL_TRACK_NUMBER);
+        if (pProperty) {
+            trackVariant.setValue(pProperty->getValue());
+        }
+        int track;
+        trackVariant.getValue(track);
+
+        tupleBlock.push_back(MediaObject(pObject->getIndex(), pObject->getClass(), pObject->getTitle(), artist, album, track, xml));
+    }
+
+    try {
+        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, track, xml) VALUES(:idx, :class, :title, :artist, :album, :track, :xml)",
+                Poco::Data::use(tupleBlock),
+                Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
+    }
 }
 
 
@@ -948,7 +1040,7 @@ AbstractMediaObject::getChildForIndex(const std::string& index)
 AbstractMediaObject*
 AbstractMediaObject::getDescendant(const std::string& objectId)
 {
-//    Log::instance()->upnpav().debug("AbstractMediaObject::setObject() objectId: " + objectId);
+    Log::instance()->upnpav().debug("abstract media object get descendant with (relative) objectId: " + objectId);
 
     // TODO: what about this object, not only child objects?
 
@@ -977,6 +1069,7 @@ AbstractMediaObject::getDescendant(const std::string& objectId)
     }
     else {
         // child is an item
+        Log::instance()->upnpav().debug("abstract media object get descendant is a child with index: " + objectId);
         pChild = getChildForIndex(objectId);
         if (pChild == 0) {
             // child item is not a child of this container
@@ -1535,7 +1628,7 @@ MediaObjectWriter2::writeChildren(ui4& totalCount, std::string& meta, ui4 offset
     }
     else {
         std::vector<AbstractMediaObject*> objects;
-        totalCount = _pMediaObject->getChildrenAtRow(objects, offset, count, sort, search);
+        totalCount = _pMediaObject->getChildrenAtRowOffset(objects, offset, count, sort, search);
         childrenWritten = objects.size();
         for (std::vector<AbstractMediaObject*>::iterator it = objects.begin(); it != objects.end(); ++it) {
             MediaObjectWriter2 writer(*it);

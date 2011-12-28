@@ -34,7 +34,7 @@
 #include "UpnpInternal.h"
 #include "UpnpAvDevices.h"
 #include "UpnpAvDescriptions.h"
-#include "UpnpAvServerPrivate.h"
+//#include "UpnpAvServerPrivate.h"
 #include "UpnpAvServerImpl.h"
 
 namespace Omm {
@@ -123,6 +123,10 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     std::string objectId = uri[0].substr(1);
     Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
     AbstractMediaObject* pItem = _pItemServer->_pServerContainer->getDescendant(objectId);
+    if (!pItem) {
+        Log::instance()->upnpav().error("item request handler could not find object with id: " + objectId);
+        return;
+    }
 
     StreamingResource* pResource;
     StreamingProperty* pProperty;
@@ -496,6 +500,8 @@ StreamingMediaObject::getIconStream()
 }
 
 
+const ui4 AbstractDataModel::INVALID_INDEX = 0xffffffff;
+
 AbstractDataModel::AbstractDataModel() :
 _pServerContainer(0),
 _maxIndex(0),
@@ -519,6 +525,13 @@ AbstractDataModel::getServerContainer()
 }
 
 
+ui4
+AbstractDataModel::getIndexCount()
+{
+    return _indexCache.size();
+}
+
+
 bool
 AbstractDataModel::hasIndex(ui4 index)
 {
@@ -535,19 +548,8 @@ AbstractDataModel::getIndex(const std::string& path)
         return (*pos).second;
     }
     else {
-        ui4 index;
-        // got a free index lying around?
-        if (!_freeIndices.empty()) {
-            index = _freeIndices.top();
-            _freeIndices.pop();
-        }
-        else {
-            index = _maxIndex++;
-        }
-        // create a new index
-        _pathCache[path] = index;
-        _indexCache[index] = path;
-        return index;
+        Log::instance()->upnpav().error("abstract data model, could not retrieve index from path: " + path);
+        return INVALID_INDEX;
     }
 }
 
@@ -562,6 +564,74 @@ AbstractDataModel::getPath(ui4 index)
     else {
         Log::instance()->upnpav().error("abstract data model, could not retrieve path from index: " + Poco::NumberFormatter::format(index));
         return "";
+    }
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::beginIndex()
+{
+    return _indexCache.begin();
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::endIndex()
+{
+    return _indexCache.end();
+}
+
+
+//ui4
+//AbstractDataModel::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+//{
+//
+//}
+
+//ui4
+//AbstractDataModel::getIndex(ui4 indexNumber)
+//{
+//    if (indexNumber >= _indexCache.size()) {
+//        return INVALID_INDEX;
+//    }
+//    // return the indexNumber'th element in _indexCache
+//    return (*_indexCache[indexNumber]).first;
+//}
+
+
+void
+AbstractDataModel::addPath(const std::string& path)
+{
+    ui4 index;
+    // got a free index lying around?
+    if (!_freeIndices.empty()) {
+        index = _freeIndices.top();
+        _freeIndices.pop();
+    }
+    else {
+        index = _maxIndex++;
+        if (index == INVALID_INDEX) {
+            Log::instance()->upnpav().error("abstract data model max index reached, can not add path: " + path);
+            return;
+        }
+//        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
+    }
+    // create a new index
+    _pathCache[path] = index;
+    _indexCache[index] = path;
+}
+
+
+void
+AbstractDataModel::removePath(const std::string& path)
+{
+    std::map<std::string, ui4>::iterator pos = _pathCache.find(path);
+    if (pos  != _pathCache.end()) {
+        _indexCache.erase((*pos).second);
+        _pathCache.erase(pos);
+    }
+    else {
+        Log::instance()->upnpav().error("abstract data model, could not erase path from index cache: " + path);
     }
 }
 
@@ -585,11 +655,11 @@ AbstractDataModel::getPath(ui4 index)
 //}
 
 
-ui4
-AbstractDataModel::getChildCount()
-{
-    return _indexCache.size();
-}
+//ui4
+//AbstractDataModel::getChildCount()
+//{
+//    return _indexCache.size();
+//}
 
 
 void
@@ -639,29 +709,105 @@ AbstractDataModel::writeIndexCache()
 }
 
 
-void
-AbstractDataModel::flushIndexBuffer()
-{
-    // TODO: don't add indices to server cache, server shall retrieve the media objects from the data model
-//    addIndices(_indexBuffer);
-    _indexBuffer.clear();
-}
+//void
+//AbstractDataModel::flushIndexBuffer()
+//{
+//    // TODO: don't add indices to server cache, server shall retrieve the media objects from the data model
+////    addIndices(_indexBuffer);
+//    _indexBuffer.clear();
+//}
 
 
-void
-AbstractDataModel::bufferIndex(Omm::ui4 index)
-{
-    _indexBuffer.push_back(index);
-    if (_indexBuffer.size() > _indexBufferSize) {
-        flushIndexBuffer();
-    }
-}
+//void
+//AbstractDataModel::bufferIndex(Omm::ui4 index)
+//{
+//    _indexBuffer.push_back(index);
+//    if (_indexBuffer.size() > _indexBufferSize) {
+//        flushIndexBuffer();
+//    }
+//}
 
 
 AbstractMediaObject*
 SimpleDataModel::getMediaObject(ui4 index)
 {
-    // TODO: build media object from information retrieved by methods of SimpleDataModel
+    Log::instance()->upnpav().debug("simple data model get media object for index: " + Poco::NumberFormatter::format(index) + " ...");
+
+    std::string path = getPath(index);
+    ServerItem* pItem = getServerContainer()->createMediaItem();
+
+    pItem->setClass(getClass(path));
+    pItem->setTitle(getTitle(path));
+
+    std::string artist = getOptionalProperty(path, AvProperty::ARTIST);
+    if (artist != "") {
+        pItem->setUniqueProperty(AvProperty::ARTIST, artist);
+    }
+    std::string album = getOptionalProperty(path, AvProperty::ALBUM);
+    if (album != "") {
+        pItem->setUniqueProperty(AvProperty::ALBUM, album);
+    }
+    std::string track = getOptionalProperty(path, AvProperty::ORIGINAL_TRACK_NUMBER);
+    if (track != "") {
+        pItem->setUniqueProperty(AvProperty::ORIGINAL_TRACK_NUMBER, track);
+    }
+    std::string genre = getOptionalProperty(path, AvProperty::GENRE);
+    if (genre != "") {
+        pItem->setUniqueProperty(AvProperty::GENRE, genre);
+    }
+
+    ServerItemResource* pResource = pItem->createResource();
+    pResource->setSize(getSize(path));
+    // FIXME: add some parts of protinfo in server container / media server.
+    pResource->setProtInfo("http-get:*:" + getMime(path) + ":" + getDlna(path));
+    pItem->addResource(pResource);
+    // TODO: add icon property
+//        pItem->_icon = pItem->_path;
+
+    return pItem;
+}
+
+
+AbstractMediaObject*
+SimpleDataModel::getMediaObject(const std::string& path)
+{
+//    Log::instance()->upnpav().debug("simple data model get media object for index: " + Poco::NumberFormatter::format(index) + " ...");
+    Log::instance()->upnpav().debug("simple data model get media object for path: " + path + " ...");
+
+//    Omm::Av::MemoryMediaObject* pItem = new Omm::Av::MemoryMediaObject;
+//    std::string path = getPath(index);
+    ServerItem* pItem = getServerContainer()->createMediaItem();
+
+    pItem->setClass(getClass(path));
+    pItem->setTitle(getTitle(path));
+
+    std::string artist = getOptionalProperty(path, AvProperty::ARTIST);
+    if (artist != "") {
+        pItem->setUniqueProperty(AvProperty::ARTIST, artist);
+    }
+    std::string album = getOptionalProperty(path, AvProperty::ALBUM);
+    if (album != "") {
+        pItem->setUniqueProperty(AvProperty::ALBUM, album);
+    }
+    std::string track = getOptionalProperty(path, AvProperty::ORIGINAL_TRACK_NUMBER);
+    if (track != "") {
+        pItem->setUniqueProperty(AvProperty::ORIGINAL_TRACK_NUMBER, track);
+    }
+    std::string genre = getOptionalProperty(path, AvProperty::GENRE);
+    if (genre != "") {
+        pItem->setUniqueProperty(AvProperty::GENRE, genre);
+    }
+
+    ServerItemResource* pResource = pItem->createResource();
+//    Omm::Av::MemoryResource* pResource = new Omm::Av::MemoryResource;
+    pResource->setSize(getSize(path));
+    // FIXME: add some parts of protinfo in server container / media server.
+    pResource->setProtInfo("http-get:*:" + getMime(path) + ":" + getDlna(path));
+    pItem->addResource(pResource);
+    // TODO: add icon property
+//        pItem->_icon = pItem->_path;
+
+    return pItem;
 }
 
 
@@ -683,6 +829,44 @@ AbstractDataModel*
 ServerContainer::getDataModel()
 {
     return _pDataModel;
+}
+
+
+AbstractMediaObject*
+ServerContainer::createMediaContainer()
+{
+    Log::instance()->upnpav().debug("server container create media container");
+
+    Omm::Av::MemoryMediaObject* pContainer = new Omm::Av::MemoryMediaObject;
+    pContainer->setIsContainer(true);
+    pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
+
+    return pContainer;
+}
+
+
+ServerItem*
+ServerContainer::createMediaItem()
+{
+    Log::instance()->upnpav().debug("server container create media item");
+
+    ServerItem* pItem = new ServerItem(this);
+    pItem->setParent(this);
+    return pItem;
+}
+
+
+AbstractMediaObject*
+ServerContainer::createChildObject()
+{
+    Log::instance()->upnpav().debug("server container create child object");
+
+    // FIXME: doesn't work for containers stored in the data base cache.
+    // for now, file server does add only indices from files, not directories
+    ServerItem* pItem = new ServerItem(this);
+    pItem->setParent(this);
+    return pItem;
+//    return new Omm::Av::MemoryMediaObject;
 }
 
 
@@ -759,6 +943,64 @@ ServerContainer::createProperty()
 }
 
 
+ui4
+ServerContainer::getChildCount()
+{
+    if (!_pDataModel) {
+        return 0;
+    }
+    return _pDataModel->getIndexCount();
+}
+
+
+//ui4
+//ServerContainer::getIndexForRow(ui4 row, const std::string& sort, const std::string& search)
+//{
+//    // TODO: getIndexForRow handles only special case for now without sort and search queries
+////    return _pDataModel->getIndex(row);
+//}
+
+
+AbstractMediaObject*
+ServerContainer::getChildForIndex(ui4 index)
+{
+    std::string path = _pDataModel->getPath(index);
+    AbstractMediaObject* pObject = _pDataModel->getMediaObject(path);
+    initObject(pObject, index);
+    return pObject;
+}
+
+
+ui4
+ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+{
+    ui4 totalChildCount = 0;
+    if (sort == "" && search == "*") {
+        ui4 r = 0;
+        // TODO: should be faster with method getIndexBlock() in AbstractDataModel, implemented there with an additional std::vector<ui4>
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); (it != _pDataModel->endIndex()) && (r < offset + count); ++it) {
+            if (r >= offset) {
+                AbstractMediaObject* pObject = _pDataModel->getMediaObject((*it).second);
+//                if (!pObject->isContainer()) {
+                    initObject(pObject, (*it).first);
+    //                pObject->setIndex((*it).first);
+                    children.push_back(pObject);
+//                }
+//                else {
+//                    delete pObject;
+//                }
+            }
+            r++;
+        }
+        totalChildCount = _pDataModel->getIndexCount();
+    }
+    else {
+        // TODO: implement building sort indices and row filtering in memory without data base.
+    }
+    return totalChildCount;
+}
+
+
 void
 ServerContainer::setBasePath(const std::string& basePath)
 {
@@ -766,339 +1008,30 @@ ServerContainer::setBasePath(const std::string& basePath)
 }
 
 
-TorchServerContainer::TorchServerContainer(int port) :
-ServerContainer(port),
-_pChild(new TorchItem(this))
-{
-    _pChild->setParent(this);
-}
-
-
-TorchServerContainer::~TorchServerContainer()
-{
-    delete _pDataModel;
-    delete _pChild;
-    delete _pTitleProperty;
-    delete _pClassProperty;
-}
-
-
 void
-TorchServerContainer::setDataModel(SimpleDataModel* pDataModel)
+ServerContainer::initObject(AbstractMediaObject* pObject, ui4 index)
 {
-    ServerContainer::setDataModel(pDataModel);
-}
-
-
-SimpleDataModel*
-TorchServerContainer::getDataModel()
-{
-    return static_cast<SimpleDataModel*>(_pDataModel);
-}
-
-
-AbstractMediaObject*
-TorchServerContainer::getChildForIndex(ui4 index)
-{
-    _pChild->setIndex(index);
-    TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
-    pTorchChild->_optionalProps.clear();
-    SimpleDataModel* pDataModel = getDataModel();
-
-    // FIXME: title property of child item should get it's title based on item's object number
-    pTorchChild->_pClassProp->setValue(pDataModel->getClass(index));
-    pTorchChild->_pTitleProp->setValue(pDataModel->getTitle(index));
-    std::string artist = pDataModel->getOptionalProperty(index, AvProperty::ARTIST);
-    if (artist != "") {
-        pTorchChild->_pArtistProp->setValue(artist);
-        pTorchChild->_optionalProps.push_back(pTorchChild->_pArtistProp);
-    }
-    std::string album = pDataModel->getOptionalProperty(index, AvProperty::ALBUM);
-    if (album != "") {
-        pTorchChild->_pAlbumProp->setValue(album);
-        pTorchChild->_optionalProps.push_back(pTorchChild->_pAlbumProp);
-    }
-    std::string track = pDataModel->getOptionalProperty(index, AvProperty::ORIGINAL_TRACK_NUMBER);
-    if (track != "") {
-        pTorchChild->_pTrackProp->setValue(track);
-        pTorchChild->_optionalProps.push_back(pTorchChild->_pTrackProp);
-    }
-    std::string genre = pDataModel->getOptionalProperty(index, AvProperty::GENRE);
-    if (genre != "") {
-        pTorchChild->_pGenreProp->setValue(genre);
-        pTorchChild->_optionalProps.push_back(pTorchChild->_pGenreProp);
-    }
-    std::string icon = pDataModel->getOptionalProperty(index, AvProperty::ICON);
-    if (icon != "") {
-        Log::instance()->upnpav().debug("torch server adds icon property: " + icon);
-        pTorchChild->_pIconProp->setValue(icon);
-        pTorchChild->_optionalProps.push_back(pTorchChild->_pIconProp);
-    }
-
-    return _pChild;
-}
-
-
-AbstractMediaObject*
-TorchServerContainer::getChildForRow(ui4 row)
-{
-    // TODO: special case here, row == index, no search, sort, add/remove items or similar possible
-    return getChildForIndex(row);
-}
-
-
-ui4
-TorchServerContainer::getChildCount()
-{
-    if (_pDataModel) {
-        return _pDataModel->getChildCount();
+    pObject->setIndex(index);
+    std::string path = _pDataModel->getPath(index);
+    std::string parentPath = _pDataModel->getParentPath(path);
+    AbstractMediaObject* pParent;
+    if (parentPath == "") {
+        pParent = this;
     }
     else {
-        return 0;
+        pParent = _pDataModel->getMediaObject(parentPath);
     }
+    pObject->setParent(pParent);
+//    pObject->setParent(this);
 }
 
 
-TorchItemResource::TorchItemResource(TorchServerContainer* pServer, AbstractMediaObject* pItem) :
-StreamingResource(new MemoryPropertyImpl, pServer, pItem)
+CachedServerContainer::CachedServerContainer() :
+_scanThreadRunnable(*this, &CachedServerContainer::scanThread),
+_scanThreadRunning(false)
 {
-}
+    setContainer(this);
 
-
-bool
-TorchItemResource::isSeekable()
-{
-    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->isSeekable(_pItem->getIndex());
-    }
-    else {
-        return false;
-    }
-}
-
-
-std::istream*
-TorchItemResource::getStream()
-{
-    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getStream(_pItem->getIndex());
-    }
-    else {
-        return 0;
-    }
-}
-
-
-std::streamsize
-TorchItemResource::getSize()
-{
-    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getSize(_pItem->getIndex());
-    }
-    else {
-        return 0;
-    }
-}
-
-
-std::string
-TorchItemResource::getMime()
-{
-    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getMime(_pItem->getIndex());
-    }
-    else {
-        return "*";
-    }
-}
-
-
-std::string
-TorchItemResource::getDlna()
-{
-    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getDlna(_pItem->getIndex());
-    }
-    else {
-        return "*";
-    }
-}
-
-
-TorchItemPropertyImpl::TorchItemPropertyImpl(TorchServerContainer* pServer, AbstractMediaObject* pItem) :
-StreamingPropertyImpl(pServer, pItem)
-{
-}
-
-
-void
-TorchItemPropertyImpl::setName(const std::string& name)
-{
-    _name = name;
-}
-
-
-void
-TorchItemPropertyImpl::setValue(const std::string& value)
-{
-    _value = value;
-}
-
-
-std::string
-TorchItemPropertyImpl::getName()
-{
-//    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getName() returns: " + _name);
-
-    return _name;
-}
-
-
-std::string
-TorchItemPropertyImpl::getValue()
-{
-//    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getValue() returns: " + _value);
-
-    if (_name == AvProperty::CLASS || _name == AvProperty::TITLE
-        || _name == AvProperty::ARTIST || _name == AvProperty::ALBUM || _name == AvProperty::ORIGINAL_TRACK_NUMBER
-        || _name == AvProperty::GENRE) {
-        return _value;
-    }
-    else if (_name == AvProperty::ICON) {
-        return StreamingPropertyImpl::getValue();
-    }
-}
-
-
-std::istream*
-TorchItemPropertyImpl::getStream()
-{
-//    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getStream()");
-
-    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getIconStream(_pItem->getIndex());
-    }
-    else {
-        return 0;
-    }
-}
-
-
-TorchItemProperty::TorchItemProperty(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem) :
-AbstractProperty(new TorchItemPropertyImpl(pServer, pItem))
-{
-}
-
-
-TorchItem::TorchItem(TorchServerContainer* pServer) :
-StreamingMediaItem(pServer),
-_pClassProp(new TorchItemProperty(pServer, this)),
-_pTitleProp(new TorchItemProperty(pServer, this)),
-_pResource(new TorchItemResource(pServer, this)),
-_pArtistProp(new TorchItemProperty(pServer, this)),
-_pAlbumProp(new TorchItemProperty(pServer, this)),
-_pTrackProp(new TorchItemProperty(pServer, this)),
-_pGenreProp(new TorchItemProperty(pServer, this)),
-_pIconProp(new TorchItemProperty(pServer, this))
-{
-//     std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
-    _pClassProp->setName(AvProperty::CLASS);
-    _pTitleProp->setName(AvProperty::TITLE);
-
-    _pArtistProp->setName(AvProperty::ARTIST);
-    _pAlbumProp->setName(AvProperty::ALBUM);
-    _pTrackProp->setName(AvProperty::ORIGINAL_TRACK_NUMBER);
-    _pGenreProp->setName(AvProperty::GENRE);
-    _pIconProp->setName(AvProperty::ICON);
-}
-
-
-TorchItem::~TorchItem()
-{
-    delete _pClassProp;
-    delete _pTitleProp;
-    delete _pResource;
-
-    delete _pArtistProp;
-    delete _pAlbumProp;
-    delete _pTrackProp;
-    delete _pGenreProp;
-    delete _pIconProp;
-}
-
-
-int
-TorchItem::getPropertyCount(const std::string& name)
-{
-//    Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
-
-    if (name == "") {
-        return 3 + _optionalProps.size();
-    }
-    else if (name == AvProperty::CLASS || name == AvProperty::TITLE || name == AvProperty::RES
-        || name == AvProperty::ARTIST || name == AvProperty::ALBUM || name == AvProperty::ORIGINAL_TRACK_NUMBER
-        || name == AvProperty::GENRE || name == AvProperty::ICON) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-
-AbstractProperty*
-TorchItem::getProperty(int index)
-{
-//    Log::instance()->upnpav().debug("TorchItem::getProperty(index), index: " + Poco::NumberFormatter::format(index));
-
-    if (index == 0) {
-        return _pClassProp;
-    }
-    else if (index == 1) {
-        return _pTitleProp;
-    }
-    else if (index == 2) {
-        return _pResource;
-    }
-    else {
-        return _optionalProps[index - 3];
-    }
-}
-
-
-AbstractProperty*
-TorchItem::getProperty(const std::string& name, int index)
-{
-//    Log::instance()->upnpav().debug("TorchItem::getProperty(name, index), name: " + name + ", index: " + Poco::NumberFormatter::format(index));
-
-    if (name == AvProperty::CLASS) {
-        return _pClassProp;
-    }
-    else if (name == AvProperty::TITLE) {
-        return _pTitleProp;
-    }
-    else if (name == AvProperty::RES) {
-        return _pResource;
-    }
-    else {
-        for (int i = 0; i < _optionalProps.size(); i++) {
-            if (_optionalProps[i]->getName() == name) {
-                return _optionalProps[i];
-            }
-        }
-        return 0;
-    }
-}
-
-
-CachedServerContainer::CachedServerContainer()
-{
     _searchCaps.append(AvProperty::CLASS);
     _searchCaps.append(AvProperty::TITLE);
     _searchCaps.append(AvProperty::ARTIST);
@@ -1113,28 +1046,21 @@ CachedServerContainer::CachedServerContainer()
 }
 
 
-void
-CachedServerContainer::addIndices(const std::vector<ui4>& indices)
-{
-    // insert indices and meta data into database cache
-    for (std::vector<ui4>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
-        insertMediaObject(_pDataModel->getMediaObject(*it));
-    }
-}
+//void
+//CachedServerContainer::addIndices(const std::vector<ui4>& indices)
+//{
+//    // insert indices and meta data into database cache
+//    for (std::vector<ui4>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
+//        insertMediaObject(_pDataModel->getMediaObject(*it));
+//    }
+//}
 
 
-void
-CachedServerContainer::removeIndices(const std::vector<ui4>& indices)
-{
-    // TODO: implement removing of indices and meta data from database cache
-}
-
-
-void
-CachedServerContainer::scan(bool on)
-{
-    DatabaseCache::doScan(on);
-}
+//void
+//CachedServerContainer::removeIndices(const std::vector<ui4>& indices)
+//{
+//    // TODO: implement removing of indices and meta data from database cache
+//}
 
 
 CsvList*
@@ -1161,113 +1087,519 @@ CachedServerContainer::getSortCaps()
 }
 
 
-AbstractMediaObject*
-CachedServerContainer::createMediaObject()
+void
+CachedServerContainer::scan(bool on)
 {
-//    Log::instance()->upnpav().debug("cached server create media object");
+    _scanThreadLock.lock();
+    _scanThreadRunning = on;
+    _scanThreadLock.unlock();
+    if (on) {
+        _scanThread.start(_scanThreadRunnable);
+    }
+    else {
+        _scanThread.join();
+    }
+}
 
-    AbstractMediaObject* pItem = new CachedItem(this);
-    pItem->setParent(this);
-    return pItem;
+
+void
+CachedServerContainer::scanThread()
+{
+    Log::instance()->upnpav().debug("cached server container, database scan thread started ...");
+    if (!cacheNeedsUpdate()) {
+        Log::instance()->upnpav().debug("cached server container, database cache is updated");
+    }
+    else {
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
+            if (!scanThreadIsRunning()) {
+                break;
+            }
+            DatabaseCache::insertMediaObject(ServerContainer::getChildForIndex((*it).first));
+        }
+    }
+    Log::instance()->upnpav().debug("cached server container, database scan thread finished.");
 }
 
 
 AbstractMediaObject*
 CachedServerContainer::getChildForIndex(ui4 index)
 {
-    // get media object out of data base cache (column xml)
-    return DatabaseCache::getMediaObjectForIndex(index);
-}
-
-
-ui4
-CachedServerContainer::getChildrenAtRow(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
-{
-    return DatabaseCache::getBlockAtRow(children, offset, count, sort, search);
-}
-
-
-ui4
-CachedServerContainer::getChildCount()
-{
-    if (_pDataModel) {
-        return _pDataModel->getChildCount();
-    }
-    else {
+    if (!_pDataModel) {
         return 0;
     }
+    if (_pDataModel->useObjectCache()) {
+        // get media object out of data base cache (column xml)
+         AbstractMediaObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
+         if (pObject) {
+             initObject(pObject, index);
+//             pObject->setIndex(index);
+//             pObject->setParent(this);
+         }
+         else {
+             // media object is not yet in the data base cache
+             pObject = ServerContainer::getChildForIndex(index);
+//             DatabaseCache::insertMediaObject(pObject);
+         }
+         return pObject;
+    }
+    else {
+        return ServerContainer::getChildForIndex(index);
+    }
 }
 
 
-CachedItemResource::CachedItemResource(CachedServerContainer* pServer, AbstractMediaObject* pItem) :
-StreamingResource(new MemoryPropertyImpl, pServer, pItem)
+ui4
+CachedServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+{
+    if (!_pDataModel) {
+        return 0;
+    }
+    ui4 totalChildCount = 0;
+    if (_pDataModel->useObjectCache()) {
+        if (cacheNeedsUpdate() && sort == "" && search == "*") {
+            // if no query result and no sort or search queries, we can serve a block from the index cache of size "count" starting at "offset"
+            totalChildCount = ServerContainer::getChildrenAtRowOffset(children, offset, count);
+            // fill the cache at little bit at this occasion (... too slow, left out)
+//            for (std::vector<AbstractMediaObject*>::iterator it = children.begin(); it != children.end(); ++it) {
+//                DatabaseCache::insertMediaObject(*it);
+//            }
+            // block insertion seems to be even slower than single object insertion
+//            DatabaseCache::insertBlock(children);
+        }
+        else {
+            totalChildCount = DatabaseCache::getBlockAtRow(children, offset, count, sort, search);
+            for (std::vector<AbstractMediaObject*>::iterator it = children.begin(); it != children.end(); ++it) {
+                initObject(*it, (*it)->getIndex());
+            }
+        }
+    }
+    else {
+        totalChildCount = ServerContainer::getChildrenAtRowOffset(children, offset, count, sort, search);
+    }
+    return totalChildCount;
+}
+
+
+bool
+CachedServerContainer::cacheNeedsUpdate()
+{
+    ui4 rows = rowCount();
+    if (rows > _pDataModel->getIndexCount()) {
+        Log::instance()->upnpav().error("cached server container, database cache not coherent.");
+        return true;
+    }
+    else if (rows == _pDataModel->getIndexCount()) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+
+bool
+CachedServerContainer::scanThreadIsRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_scanThreadLock);
+    return _scanThreadRunning;
+}
+
+
+ServerItemResource::ServerItemResource(ServerContainer* pServerContainer, AbstractMediaObject* pItem) :
+StreamingResource(new MemoryPropertyImpl, pServerContainer, pItem)
 {
 }
 
 
 bool
-CachedItemResource::isSeekable()
+ServerItemResource::isSeekable()
 {
 //    Log::instance()->upnpav().debug("cached item is seekable");
-
-    AbstractDataModel* pDataModel = static_cast<CachedServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->isSeekable(_pItem->getIndex());
-    }
-    else {
+    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+    if (!pDataModel) {
         return false;
     }
+    return pDataModel->isSeekable(pDataModel->getPath(_pItem->getIndex()));
 }
 
 
 std::streamsize
-CachedItemResource::getSize()
+ServerItemResource::getSize()
 {
 //    Log::instance()->upnpav().debug("cached item get size");
-
-    AbstractDataModel* pDataModel = static_cast<CachedServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getSize(_pItem->getIndex());
-    }
-    else {
+    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+    if (!pDataModel) {
         return 0;
     }
+    return pDataModel->getSize(pDataModel->getPath(_pItem->getIndex()));
 }
 
 
 std::istream*
-CachedItemResource::getStream()
+ServerItemResource::getStream()
 {
 //    Log::instance()->upnpav().debug("cached item get stream");
-
-    AbstractDataModel* pDataModel = static_cast<CachedServerContainer*>(_pServer)->getDataModel();
-    if (pDataModel) {
-        return pDataModel->getStream(_pItem->getIndex());
-    }
-    else {
+    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+    if (!pDataModel) {
         return 0;
     }
+    return pDataModel->getStream(pDataModel->getPath(_pItem->getIndex()));
 }
 
 
-CachedItem::CachedItem(CachedServerContainer* pServer) :
+ServerItem::ServerItem(ServerContainer* pServer) :
 StreamingMediaItem(pServer)
 {
 }
 
 
-CachedItem::~CachedItem()
+ServerItem::~ServerItem()
 {
 }
 
 
-AbstractResource*
-CachedItem::createResource()
+ServerItemResource*
+ServerItem::createResource()
 {
-//    Log::instance()->upnpav().debug("cached item create resource");
+    Log::instance()->upnpav().debug("server item create resource");
 
-    return new CachedItemResource(static_cast<CachedServerContainer*>(_pServer), this);
+    return new ServerItemResource(static_cast<ServerContainer*>(_pServer), this);
 }
+
+
+//TorchServerContainer::TorchServerContainer(int port) :
+//ServerContainer(port),
+//_pChild(new TorchItem(this))
+//{
+//    _pChild->setParent(this);
+//}
+//
+//
+//TorchServerContainer::~TorchServerContainer()
+//{
+//    delete _pDataModel;
+//    delete _pChild;
+//    delete _pTitleProperty;
+//    delete _pClassProperty;
+//}
+//
+//
+//void
+//TorchServerContainer::setDataModel(SimpleDataModel* pDataModel)
+//{
+//    ServerContainer::setDataModel(pDataModel);
+//}
+//
+//
+//SimpleDataModel*
+//TorchServerContainer::getDataModel()
+//{
+//    return static_cast<SimpleDataModel*>(_pDataModel);
+//}
+//
+//
+//AbstractMediaObject*
+//TorchServerContainer::getChildForIndex(ui4 index)
+//{
+//    _pChild->setIndex(index);
+//    TorchItem* pTorchChild = static_cast<TorchItem*>(_pChild);
+//    pTorchChild->_optionalProps.clear();
+//    SimpleDataModel* pDataModel = getDataModel();
+//
+//    // FIXME: title property of child item should get it's title based on item's object number
+//    pTorchChild->_pClassProp->setValue(pDataModel->getClass(index));
+//    pTorchChild->_pTitleProp->setValue(pDataModel->getTitle(index));
+//    std::string artist = pDataModel->getOptionalProperty(index, AvProperty::ARTIST);
+//    if (artist != "") {
+//        pTorchChild->_pArtistProp->setValue(artist);
+//        pTorchChild->_optionalProps.push_back(pTorchChild->_pArtistProp);
+//    }
+//    std::string album = pDataModel->getOptionalProperty(index, AvProperty::ALBUM);
+//    if (album != "") {
+//        pTorchChild->_pAlbumProp->setValue(album);
+//        pTorchChild->_optionalProps.push_back(pTorchChild->_pAlbumProp);
+//    }
+//    std::string track = pDataModel->getOptionalProperty(index, AvProperty::ORIGINAL_TRACK_NUMBER);
+//    if (track != "") {
+//        pTorchChild->_pTrackProp->setValue(track);
+//        pTorchChild->_optionalProps.push_back(pTorchChild->_pTrackProp);
+//    }
+//    std::string genre = pDataModel->getOptionalProperty(index, AvProperty::GENRE);
+//    if (genre != "") {
+//        pTorchChild->_pGenreProp->setValue(genre);
+//        pTorchChild->_optionalProps.push_back(pTorchChild->_pGenreProp);
+//    }
+//    std::string icon = pDataModel->getOptionalProperty(index, AvProperty::ICON);
+//    if (icon != "") {
+//        Log::instance()->upnpav().debug("torch server adds icon property: " + icon);
+//        pTorchChild->_pIconProp->setValue(icon);
+//        pTorchChild->_optionalProps.push_back(pTorchChild->_pIconProp);
+//    }
+//
+//    return _pChild;
+//}
+//
+//
+//AbstractMediaObject*
+//TorchServerContainer::getChildForRow(ui4 row)
+//{
+//    // TODO: special case here, row == index, no search, sort, add/remove items or similar possible
+//    return getChildForIndex(row);
+//}
+//
+//
+//ui4
+//TorchServerContainer::getChildCount()
+//{
+//    if (_pDataModel) {
+//        return _pDataModel->getIndexCount();
+//    }
+//    else {
+//        return 0;
+//    }
+//}
+//
+//
+//TorchItemResource::TorchItemResource(TorchServerContainer* pServer, AbstractMediaObject* pItem) :
+//StreamingResource(new MemoryPropertyImpl, pServer, pItem)
+//{
+//}
+//
+//
+//bool
+//TorchItemResource::isSeekable()
+//{
+//    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
+//    if (pDataModel) {
+////        return pDataModel->isSeekable(_pItem->getIndex());
+//        return pDataModel->isSeekable(pDataModel->getPath(_pItem->getIndex()));
+//    }
+//    else {
+//        return false;
+//    }
+//}
+//
+//
+//std::istream*
+//TorchItemResource::getStream()
+//{
+//    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
+//    if (pDataModel) {
+////        return pDataModel->getStream(_pItem->getIndex());
+//        return pDataModel->getStream(pDataModel->getPath(_pItem->getIndex()));
+//    }
+//    else {
+//        return 0;
+//    }
+//}
+//
+//
+//std::streamsize
+//TorchItemResource::getSize()
+//{
+//    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
+//    if (pDataModel) {
+////        return pDataModel->getSize(_pItem->getIndex());
+//        return pDataModel->getSize(pDataModel->getPath(_pItem->getIndex()));
+//    }
+//    else {
+//        return 0;
+//    }
+//}
+//
+//
+//std::string
+//TorchItemResource::getMime()
+//{
+//    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
+//    if (pDataModel) {
+////        return pDataModel->getMime(_pItem->getIndex());
+//        return pDataModel->getMime(pDataModel->getPath(_pItem->getIndex()));
+//    }
+//    else {
+//        return "*";
+//    }
+//}
+//
+//
+//std::string
+//TorchItemResource::getDlna()
+//{
+//    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
+//    if (pDataModel) {
+//        return pDataModel->getDlna(_pItem->getIndex());
+//    }
+//    else {
+//        return "*";
+//    }
+//}
+//
+//
+//TorchItemPropertyImpl::TorchItemPropertyImpl(TorchServerContainer* pServer, AbstractMediaObject* pItem) :
+//StreamingPropertyImpl(pServer, pItem)
+//{
+//}
+//
+//
+//void
+//TorchItemPropertyImpl::setName(const std::string& name)
+//{
+//    _name = name;
+//}
+//
+//
+//void
+//TorchItemPropertyImpl::setValue(const std::string& value)
+//{
+//    _value = value;
+//}
+//
+//
+//std::string
+//TorchItemPropertyImpl::getName()
+//{
+////    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getName() returns: " + _name);
+//
+//    return _name;
+//}
+//
+//
+//std::string
+//TorchItemPropertyImpl::getValue()
+//{
+////    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getValue() returns: " + _value);
+//
+//    if (_name == AvProperty::CLASS || _name == AvProperty::TITLE
+//        || _name == AvProperty::ARTIST || _name == AvProperty::ALBUM || _name == AvProperty::ORIGINAL_TRACK_NUMBER
+//        || _name == AvProperty::GENRE) {
+//        return _value;
+//    }
+//    else if (_name == AvProperty::ICON) {
+//        return StreamingPropertyImpl::getValue();
+//    }
+//}
+//
+//
+//std::istream*
+//TorchItemPropertyImpl::getStream()
+//{
+////    Log::instance()->upnpav().debug("TorchItemPropertyImpl::getStream()");
+//
+//    SimpleDataModel* pDataModel = static_cast<TorchServerContainer*>(_pServer)->getDataModel();
+//    if (pDataModel) {
+//        return pDataModel->getIconStream(_pItem->getIndex());
+//    }
+//    else {
+//        return 0;
+//    }
+//}
+//
+//
+//TorchItemProperty::TorchItemProperty(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem) :
+//AbstractProperty(new TorchItemPropertyImpl(pServer, pItem))
+//{
+//}
+//
+//
+//TorchItem::TorchItem(TorchServerContainer* pServer) :
+//StreamingMediaItem(pServer),
+//_pClassProp(new TorchItemProperty(pServer, this)),
+//_pTitleProp(new TorchItemProperty(pServer, this)),
+//_pResource(new TorchItemResource(pServer, this)),
+//_pArtistProp(new TorchItemProperty(pServer, this)),
+//_pAlbumProp(new TorchItemProperty(pServer, this)),
+//_pTrackProp(new TorchItemProperty(pServer, this)),
+//_pGenreProp(new TorchItemProperty(pServer, this)),
+//_pIconProp(new TorchItemProperty(pServer, this))
+//{
+////     std::clog << "TorchItem::TorchItem(pServer), pServer: " << pServer << std::endl;
+//    _pClassProp->setName(AvProperty::CLASS);
+//    _pTitleProp->setName(AvProperty::TITLE);
+//
+//    _pArtistProp->setName(AvProperty::ARTIST);
+//    _pAlbumProp->setName(AvProperty::ALBUM);
+//    _pTrackProp->setName(AvProperty::ORIGINAL_TRACK_NUMBER);
+//    _pGenreProp->setName(AvProperty::GENRE);
+//    _pIconProp->setName(AvProperty::ICON);
+//}
+//
+//
+//TorchItem::~TorchItem()
+//{
+//    delete _pClassProp;
+//    delete _pTitleProp;
+//    delete _pResource;
+//
+//    delete _pArtistProp;
+//    delete _pAlbumProp;
+//    delete _pTrackProp;
+//    delete _pGenreProp;
+//    delete _pIconProp;
+//}
+//
+//
+//int
+//TorchItem::getPropertyCount(const std::string& name)
+//{
+////    Log::instance()->upnpav().debug("TorchItem::getPropertyCount(), name: " + name);
+//
+//    if (name == "") {
+//        return 3 + _optionalProps.size();
+//    }
+//    else if (name == AvProperty::CLASS || name == AvProperty::TITLE || name == AvProperty::RES
+//        || name == AvProperty::ARTIST || name == AvProperty::ALBUM || name == AvProperty::ORIGINAL_TRACK_NUMBER
+//        || name == AvProperty::GENRE || name == AvProperty::ICON) {
+//        return 1;
+//    }
+//    else {
+//        return 0;
+//    }
+//}
+//
+//
+//AbstractProperty*
+//TorchItem::getProperty(int index)
+//{
+////    Log::instance()->upnpav().debug("TorchItem::getProperty(index), index: " + Poco::NumberFormatter::format(index));
+//
+//    if (index == 0) {
+//        return _pClassProp;
+//    }
+//    else if (index == 1) {
+//        return _pTitleProp;
+//    }
+//    else if (index == 2) {
+//        return _pResource;
+//    }
+//    else {
+//        return _optionalProps[index - 3];
+//    }
+//}
+//
+//
+//AbstractProperty*
+//TorchItem::getProperty(const std::string& name, int index)
+//{
+////    Log::instance()->upnpav().debug("TorchItem::getProperty(name, index), name: " + name + ", index: " + Poco::NumberFormatter::format(index));
+//
+//    if (name == AvProperty::CLASS) {
+//        return _pClassProp;
+//    }
+//    else if (name == AvProperty::TITLE) {
+//        return _pTitleProp;
+//    }
+//    else if (name == AvProperty::RES) {
+//        return _pResource;
+//    }
+//    else {
+//        for (int i = 0; i < _optionalProps.size(); i++) {
+//            if (_optionalProps[i]->getName() == name) {
+//                return _optionalProps[i];
+//            }
+//        }
+//        return 0;
+//    }
+//}
 
 
 } // namespace Av

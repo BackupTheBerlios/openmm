@@ -41,9 +41,6 @@
 
 #include "Filesystem.h"
 
-// TODO: store UPnP AV media items in item cache, not own format of XML item description
-// parse it with a DOM parser into memory and build an array of pointers to the item Nodes
-// remove "private" nodes, such as path to file on filesystem.
 
 class FileItem
 {
@@ -178,18 +175,18 @@ public:
     FileDataModel(const std::string& basePath);
     ~FileDataModel();
 
-    virtual Omm::ui4 getChildCount();
+//    virtual Omm::ui4 getChildCount();
     virtual std::string getContainerClass();
-    virtual std::string getClass(Omm::ui4 index);
-    virtual std::string getTitle(Omm::ui4 index);
-    virtual std::string getOptionalProperty(Omm::ui4 index, const std::string& property);
+    virtual std::string getClass(const std::string& path);
+    virtual std::string getTitle(const std::string& path);
+    virtual std::string getOptionalProperty(const std::string& path, const std::string& name);
 
-    virtual std::streamsize getSize(Omm::ui4 index);
-    virtual std::string getMime(Omm::ui4 index);
-    virtual std::string getDlna(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
-    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
-    virtual std::istream* getIconStream(Omm::ui4 index);
+    virtual std::streamsize getSize(const std::string& path);
+    virtual std::string getMime(const std::string& path);
+    virtual std::string getDlna(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getIconStream(const std::string& path);
 
     // SAX parser interface
     virtual void setDocumentLocator(const Poco::XML::Locator* loc) {}
@@ -217,8 +214,9 @@ private:
     std::string                         _cachePath;
     std::string                         _containerClass;
     Omm::AvStream::Tagger*              _pTagger;
-    std::vector<FileItem*>              _items;
-    std::map<std::string,FileItem*>     _itemMap;
+    std::vector<FileItem*>              _itemList;
+    std::map<std::string, FileItem*>    _items;
+//    std::map<std::string, FileItem*>    _itemMap;
     FileItem*                           _pParseItem;
     std::string                         _parseElement;
 };
@@ -231,25 +229,27 @@ _pTagger(0),
 _pParseItem(0),
 _parseElement("")
 {
-//     Poco::File baseDir(basePath);
     scanDirectory(basePath);
 }
 
 
 FileDataModel::~FileDataModel()
 {
-    for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
-        delete *it;
+//    for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
+//        delete *it;
+//    }
+    for (std::map<std::string, FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
+        delete (*it).second;
     }
     delete _pTagger;
 }
 
 
-Omm::ui4
-FileDataModel::getChildCount()
-{
-    return _items.size();
-}
+//Omm::ui4
+//FileDataModel::getChildCount()
+//{
+//    return _items.size();
+//}
 
 
 std::string
@@ -260,42 +260,42 @@ FileDataModel::getContainerClass()
 
 
 std::string
-FileDataModel::getClass(Omm::ui4 index)
+FileDataModel::getClass(const std::string& path)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get class of item with index " + Poco::NumberFormatter::format(index) + ": ");
-    Omm::Av::Log::instance()->upnpav().debug(_items[index]->_class);
+    Omm::Av::Log::instance()->upnpav().debug("get class of item with path " + path + ": ");
+    Omm::Av::Log::instance()->upnpav().debug(_items[path]->_class);
 
-    return _items[index]->_class;
+    return _items[path]->_class;
 }
 
 
 std::string
-FileDataModel::getTitle(Omm::ui4 index)
+FileDataModel::getTitle(const std::string& path)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get title: " + _items[index]->_title);
-    return _items[index]->_title;
+    Omm::Av::Log::instance()->upnpav().debug("get title: " + _items[path]->_title);
+    return _items[path]->_title;
 }
 
 
 std::string
-FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
+FileDataModel::getOptionalProperty(const std::string& path, const std::string& name)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get property: " + property);
+    Omm::Av::Log::instance()->upnpav().debug("get property: " + name);
 
-    if (property == Omm::Av::AvProperty::ARTIST) {
-        return _items[index]->_artist;
+    if (name == Omm::Av::AvProperty::ARTIST) {
+        return _items[path]->_artist;
     }
-    else if (property == Omm::Av::AvProperty::ALBUM) {
-        return _items[index]->_album;
+    else if (name == Omm::Av::AvProperty::ALBUM) {
+        return _items[path]->_album;
     }
-    else if (property == Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER) {
-        return _items[index]->_track;
+    else if (name == Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER) {
+        return _items[path]->_track;
     }
-    else if (property == Omm::Av::AvProperty::GENRE) {
-        return _items[index]->_genre;
+    else if (name == Omm::Av::AvProperty::GENRE) {
+        return _items[path]->_genre;
     }
-    else if (property == Omm::Av::AvProperty::ICON) {
-        return _items[index]->_icon;
+    else if (name == Omm::Av::AvProperty::ICON) {
+        return _items[path]->_icon;
     }
     else {
         return "";
@@ -304,19 +304,19 @@ FileDataModel::getOptionalProperty(Omm::ui4 index, const std::string& property)
 
 
 bool
-FileDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
+FileDataModel::isSeekable(const std::string& path, const std::string& resourcePath)
 {
     return true;
 }
 
 
 std::istream*
-FileDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
+FileDataModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    std::string filePath = _basePath + _items[index]->_path;
+    std::string filePath = _basePath + path;
     std::istream* pRes = new std::ifstream(filePath.c_str());
     if (!*pRes) {
-        Omm::AvStream::Log::instance()->avstream().error("could not open file for streaming: " + _basePath + _items[index]->_path);
+        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + _basePath + path);
         return 0;
     }
     return pRes;
@@ -324,12 +324,12 @@ FileDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 
 
 std::istream*
-FileDataModel::getIconStream(Omm::ui4 index)
+FileDataModel::getIconStream(const std::string& path)
 {
-    std::string iconPath = _basePath + "/.omm/cache/icons" + _items[index]->_path;
+    std::string iconPath = _basePath + "/.omm/cache/icons" + path;
     std::istream* pRes = new std::ifstream(iconPath.c_str());
     if (!*pRes) {
-        Omm::AvStream::Log::instance()->avstream().error("could not open icon for streaming: " + iconPath);
+        Omm::Av::Log::instance()->upnpav().error("could not open icon for streaming: " + iconPath);
         return 0;
     }
     return pRes;
@@ -337,14 +337,14 @@ FileDataModel::getIconStream(Omm::ui4 index)
 
 
 std::streamsize
-FileDataModel::getSize(Omm::ui4 index)
+FileDataModel::getSize(const std::string& path)
 {
     Omm::ui4 res;
     try {
-        res = Poco::File((_basePath + _items[index]->_path)).getSize();
+        res = Poco::File((_basePath + path)).getSize();
     }
     catch (Poco::Exception& e) {
-        Omm::AvStream::Log::instance()->avstream().error("could not get size of file: " + _basePath + _items[index]->_path);
+        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + _basePath + path);
         res = 0;
     }
     return res;
@@ -352,15 +352,15 @@ FileDataModel::getSize(Omm::ui4 index)
 
 
 std::string
-FileDataModel::getMime(Omm::ui4 index)
+FileDataModel::getMime(const std::string& path)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get mime: " + _items[index]->_mime);
-    return _items[index]->_mime;
+    Omm::Av::Log::instance()->upnpav().debug("get mime: " + _items[path]->_mime);
+    return _items[path]->_mime;
 }
 
 
 std::string
-FileDataModel::getDlna(Omm::ui4 index)
+FileDataModel::getDlna(const std::string& path)
 {
     // TODO: Tagger should determine the dlna string
     return "*";
@@ -370,7 +370,7 @@ FileDataModel::getDlna(Omm::ui4 index)
 void
 FileDataModel::endDocument()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("parsed items: " + Poco::NumberFormatter::format(_items.size()));
+    Omm::Av::Log::instance()->upnpav().debug("parsed items: " + Poco::NumberFormatter::format(_items.size()));
 }
 
 
@@ -379,12 +379,12 @@ FileDataModel::startElement(const Poco::XML::XMLString& uri, const Poco::XML::XM
 {
     if (localName == FileItem::FILE_ITEM) {
         _pParseItem = new FileItem;
-        _items.push_back(_pParseItem);
+        _itemList.push_back(_pParseItem);
     }
     else if (localName == FileItem::FILE_ITEM_LIST) {
         //_containerClass = attributes.getValue(FileItem::FILE_ITEM_CONTAINER_CLASS_PROPERTY);
         _containerClass = attributes.getValue(0);
-        Omm::AvStream::Log::instance()->avstream().debug("local name: " + localName + " number of attributes: " + Poco::NumberFormatter::format(attributes.getLength()) + " parsing attribute container class: " + _containerClass);
+        Omm::Av::Log::instance()->upnpav().debug("local name: " + localName + " number of attributes: " + Poco::NumberFormatter::format(attributes.getLength()) + " parsing attribute container class: " + _containerClass);
     }
     else {
         _parseElement = localName;
@@ -437,18 +437,19 @@ FileDataModel::scanDirectory(const std::string& basePath)
         loadTagger();
         Poco::File baseDir(basePath);
         scanDirectoryRecursively(baseDir);
+
         // sort items
-        for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
-            _itemMap[(*it)->sortKey()] = *it;
-        }
-        _items.clear();
-        for (std::map<std::string,FileItem*>::iterator it = _itemMap.begin(); it != _itemMap.end(); ++it) {
-            _items.push_back((*it).second);
-        }
-        _itemMap.clear();
+//        for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
+//            _itemMap[(*it)->sortKey()] = *it;
+//        }
+//        _items.clear();
+//        for (std::map<std::string,FileItem*>::iterator it = _itemMap.begin(); it != _itemMap.end(); ++it) {
+//            _items.push_back((*it).second);
+//        }
+//        _itemMap.clear();
         writeCache();
     }
-    Omm::AvStream::Log::instance()->avstream().debug("file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
+    Omm::Av::Log::instance()->upnpav().debug("file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
 }
 
 
@@ -460,7 +461,7 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
     while(dir != end) {
 //         if (dir->isFile() && dir->exists() && dir->canRead() && !dir->isLink()) {
         try {
-            if (dir->isFile()) {
+            if (dir->isFile() && !dir->isHidden()) {
                 Omm::AvStream::Meta* pMeta = _pTagger->tag(dir->path());
                 if (pMeta) {
                     FileItem* pItem = new FileItem;
@@ -481,7 +482,10 @@ FileDataModel::scanDirectoryRecursively(Poco::File& directory)
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_artist);
                     Omm::Av::AvTypeConverter::replaceNonUtf8(pItem->_album);
 
-                    _items.push_back(pItem);
+//                    _items.push_back(pItem);
+                    _items[pItem->_path] = pItem;
+                    addPath(pItem->_path);
+
                     delete pMeta;
                 }
             }
@@ -506,12 +510,12 @@ FileDataModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
+        Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
         try {
             _pTagger = taggerPluginLoader.load("tagger-vlc");
         }
         catch(Poco::NotFoundException) {
-            Omm::AvStream::Log::instance()->avstream().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
+            Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
             _pTagger = taggerPluginLoader.load("tagger-simple");
         }
     }
@@ -542,6 +546,11 @@ FileDataModel::readCache()
     catch (Poco::Exception& e) {
         Omm::Av::Log::instance()->upnpav().warning("cache parser error: " + e.displayText());
     }
+    for (std::vector<FileItem*>::iterator it = _itemList.begin(); it != _itemList.end(); ++it) {
+        addPath((*it)->_path);
+        _items[(*it)->_path] = *it;
+    }
+    _itemList.clear();
 }
 
 
@@ -555,8 +564,11 @@ FileDataModel::writeCache()
     pFileItemList->setAttribute("class", Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
     pCacheDoc->appendChild(pFileItemList);
 
-    for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
-        (*it)->writeXml(pFileItemList);
+//    for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
+//        (*it)->writeXml(pFileItemList);
+//    }
+    for (std::map<std::string, FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
+        (*it).second->writeXml(pFileItemList);
     }
 
     Poco::XML::DOMWriter writer;

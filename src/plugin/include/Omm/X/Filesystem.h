@@ -25,7 +25,7 @@
 #include <Omm/UpnpAvServer.h>
 
 
-class FileServer : public Omm::Av::TorchServerContainer
+class FileServer : public Omm::Av::ServerContainer
 {
 public:
     virtual void setBasePath(const std::string& basePath);

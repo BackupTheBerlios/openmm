@@ -33,20 +33,21 @@ class DvbDataModel : public Omm::Av::SimpleDataModel
 public:
     DvbDataModel(const std::string& channelConfig);
 
-    virtual Omm::ui4 getChildCount();
-    virtual std::string getClass(Omm::ui4 index);
-    virtual std::string getTitle(Omm::ui4 index);
+    virtual std::string getClass(const std::string& path);
+    virtual std::string getTitle(const std::string& path);
 
-    virtual std::string getMime(Omm::ui4 index);
-    virtual std::string getDlna(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
-    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
+    virtual std::string getMime(const std::string& path);
+    virtual std::string getDlna(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
 
 private:
     void scanChannelConfig(const std::string& channelConfig);
 
-    std::vector<std::string>             _channelNames;
-    std::vector<Omm::Dvb::DvbChannel*>   _channels;
+    std::map<std::string, std::string>                  _channelNames;
+//    std::vector<std::string>                            _channelNames;
+    std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
+//    std::vector<Omm::Dvb::DvbChannel*>   _channels;
 };
 
 
@@ -58,38 +59,31 @@ DvbDataModel::DvbDataModel(const std::string& channelConfig)
 }
 
 
-Omm::ui4
-DvbDataModel::getChildCount()
-{
-    return _channelNames.size();
-}
-
-
 std::string
-DvbDataModel::getClass(Omm::ui4 index)
+DvbDataModel::getClass(const std::string& path)
 {
     return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::VIDEO_BROADCAST);
 }
 
 
 std::string
-DvbDataModel::getTitle(Omm::ui4 index)
+DvbDataModel::getTitle(const std::string& path)
 {
-    return _channelNames[index];
+    return _channelNames[path];
 }
 
 
 bool
-DvbDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
+DvbDataModel::isSeekable(const std::string& path, const std::string& resourcePath)
 {
     return false;
 }
 
 
 std::istream*
-DvbDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
+DvbDataModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    Omm::Dvb::DvbDevice::instance()->tune(_channels[index]);
+    Omm::Dvb::DvbDevice::instance()->tune(_channels[path]);
 
     Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
     std::ifstream* pIstr = new std::ifstream("/dev/dvb/adapter0/dvr0");
@@ -98,14 +92,14 @@ DvbDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 
 
 std::string
-DvbDataModel::getMime(Omm::ui4 index)
+DvbDataModel::getMime(const std::string& path)
 {
     return "video/mpeg";
 }
 
 
 std::string
-DvbDataModel::getDlna(Omm::ui4 index)
+DvbDataModel::getDlna(const std::string& path)
 {
     return "DLNA.ORG_PN=MPEG_PS_PAL";
 }
@@ -119,7 +113,8 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
     while (getline(channels, line)) {
         Poco::StringTokenizer channelParams(line, ":");
         Poco::StringTokenizer channelName(channelParams[0], ";");
-        _channelNames.push_back(channelName[0]);
+        _channelNames[line] = channelName[0];
+//        _channelNames.push_back(channelName[0]);
         unsigned int freq = Poco::NumberParser::parseUnsigned(channelParams[1]) * 1000;
         Omm::Dvb::DvbChannel::Polarization pol = (channelParams[2][0] == 'h') ? Omm::Dvb::DvbChannel::HORIZ : Omm::Dvb::DvbChannel::VERT;
         unsigned int symbolRate = Poco::NumberParser::parseUnsigned(channelParams[4]) * 1000;
@@ -133,13 +128,15 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
         Poco::StringTokenizer audioPid(audioChannel[0], "=");
         unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
         int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
-        _channels.push_back(new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid));
+        _channels[line] = new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid);
+        addPath(line);
+//        _channels.push_back(new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid));
     }
 }
 
 
 DvbServer::DvbServer() :
-TorchServerContainer(8888)
+ServerContainer(8888)
 {
 }
 
@@ -157,19 +154,20 @@ DvbServer::setBasePath(const std::string& basePath)
 void
 DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate)
 {
-    DvbDataModel* pDvbDataModel = static_cast<DvbDataModel*>(_pDataModel);
-    Omm::ui4 index = std::find(pDvbDataModel->_channelNames.begin(), pDvbDataModel->_channelNames.end(), channel)
-                    - pDvbDataModel->_channelNames.begin();
-
-    _pChannel = pDvbDataModel->_channels[index];
-    Poco::DateTime nowDate;
-    Omm::Dvb::Log::instance()->dvb().debug("set timer, channel: " + Poco::NumberFormatter::format(index)
-                + ", start:" + Poco::NumberFormatter::format((startDate - nowDate).milliseconds()));
-
-    // FIXME: startInterval is wrong (too short)
-    _timer.setStartInterval((startDate - nowDate).milliseconds());
-    Poco::TimerCallback<DvbServer> callback(*this, &DvbServer::timerCallback);
-    _timer.start(callback);
+    // TODO: need to convert to new path based data model.
+//    DvbDataModel* pDvbDataModel = static_cast<DvbDataModel*>(_pDataModel);
+//    Omm::ui4 index = std::find(pDvbDataModel->_channelNames.begin(), pDvbDataModel->_channelNames.end(), channel)
+//                    - pDvbDataModel->_channelNames.begin();
+//
+//    _pChannel = pDvbDataModel->_channels[index];
+//    Poco::DateTime nowDate;
+//    Omm::Dvb::Log::instance()->dvb().debug("set timer, channel: " + Poco::NumberFormatter::format(index)
+//                + ", start:" + Poco::NumberFormatter::format((startDate - nowDate).milliseconds()));
+//
+//    // FIXME: startInterval is wrong (too short)
+//    _timer.setStartInterval((startDate - nowDate).milliseconds());
+//    Poco::TimerCallback<DvbServer> callback(*this, &DvbServer::timerCallback);
+//    _timer.start(callback);
 }
 
 

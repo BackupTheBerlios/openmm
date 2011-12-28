@@ -40,20 +40,18 @@ class WebradioDataModel : public Omm::Av::SimpleDataModel
 public:
     WebradioDataModel(const std::string& stationConfig);
 
-    virtual Omm::ui4 getChildCount();
-    virtual std::string getClass(Omm::ui4 index);
-    virtual std::string getTitle(Omm::ui4 index);
+    virtual std::string getClass(const std::string& path);
+    virtual std::string getTitle(const std::string& path);
 
-    virtual std::string getMime(Omm::ui4 index);
-    virtual std::string getDlna(Omm::ui4 index);
-    virtual bool isSeekable(Omm::ui4 index, const std::string& resourcePath = "");
-    virtual std::istream* getStream(Omm::ui4 index, const std::string& resourcePath = "");
+    virtual std::string getMime(const std::string& path);
+    virtual std::string getDlna(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
 
 private:
     void scanStationConfig(const std::string& stationConfig);
 
-    std::vector<std::string>             _stationNames;
-    std::vector<std::string>             _stationUris;
+    std::map<std::string, std::string>     _stationNames;
 };
 
 
@@ -63,38 +61,31 @@ WebradioDataModel::WebradioDataModel(const std::string& stationConfig)
 }
 
 
-Omm::ui4
-WebradioDataModel::getChildCount()
-{
-    return _stationNames.size();
-}
-
-
 std::string
-WebradioDataModel::getClass(Omm::ui4 index)
+WebradioDataModel::getClass(const std::string& path)
 {
     return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::AUDIO_BROADCAST);
 }
 
 
 std::string
-WebradioDataModel::getTitle(Omm::ui4 index)
+WebradioDataModel::getTitle(const std::string& path)
 {
-    return _stationNames[index];
+    return _stationNames[path];
 }
 
 
 bool
-WebradioDataModel::isSeekable(Omm::ui4 index, const std::string& resourcePath)
+WebradioDataModel::isSeekable(const std::string& path, const std::string& resourcePath)
 {
     return false;
 }
 
 
 std::istream*
-WebradioDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
+WebradioDataModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    Poco::URI uri(_stationUris[index]);
+    Poco::URI uri(path);
 
     Poco::Net::HTTPClientSession* pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
     Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
@@ -180,14 +171,14 @@ WebradioDataModel::getStream(Omm::ui4 index, const std::string& resourcePath)
 
 
 std::string
-WebradioDataModel::getMime(Omm::ui4 index)
+WebradioDataModel::getMime(const std::string& path)
 {
     return "audio/mpeg";
 }
 
 
 std::string
-WebradioDataModel::getDlna(Omm::ui4 index)
+WebradioDataModel::getDlna(const std::string& path)
 {
     return "DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
 }
@@ -217,6 +208,8 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
         Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, wrong file format");
         return;
     }
+
+    std::string currentStationName;
     if (pStationList->hasChildNodes()) {
         Poco::XML::Node* pStation = pStationList->firstChild();
         Omm::Av::Log::instance()->upnpav().debug("stationlist first child: " + pStation->nodeName());
@@ -228,11 +221,12 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
             Poco::XML::Node* pProp = pStation->firstChild();
             while (pProp) {
                 if (pProp->nodeName() == "name") {
-                    _stationNames.push_back(pProp->innerText());
+                    currentStationName = pProp->innerText();
                     Omm::Av::Log::instance()->upnpav().debug("added web radio station with name: " + pProp->innerText());
                 }
                 else if (pProp->nodeName() == "uri") {
-                    _stationUris.push_back(pProp->innerText());
+                    addPath(pProp->innerText());
+                    _stationNames[pProp->innerText()] = currentStationName;
                     Omm::Av::Log::instance()->upnpav().debug("added web radio station with uri: " + pProp->innerText());
                 }
                 else {
