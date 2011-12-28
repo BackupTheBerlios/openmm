@@ -964,6 +964,8 @@ ServerContainer::getChildCount()
 AbstractMediaObject*
 ServerContainer::getChildForIndex(ui4 index)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
+
     std::string path = _pDataModel->getPath(index);
     AbstractMediaObject* pObject = _pDataModel->getMediaObject(path);
     initObject(pObject, index);
@@ -974,6 +976,8 @@ ServerContainer::getChildForIndex(ui4 index)
 ui4
 ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
+
     ui4 totalChildCount = 0;
     if (sort == "" && search == "*") {
         ui4 r = 0;
@@ -1107,11 +1111,12 @@ CachedServerContainer::scanThread()
 {
     Log::instance()->upnpav().debug("cached server container, database scan thread started ...");
     if (!cacheNeedsUpdate()) {
-        Log::instance()->upnpav().debug("cached server container, database cache is updated");
+        Log::instance()->upnpav().debug("database cache is current, nothing to do");
     }
     else {
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
             if (!scanThreadIsRunning()) {
+                Log::instance()->upnpav().debug("stopping scan thread");
                 break;
             }
             DatabaseCache::insertMediaObject(ServerContainer::getChildForIndex((*it).first));
@@ -1127,7 +1132,7 @@ CachedServerContainer::getChildForIndex(ui4 index)
     if (!_pDataModel) {
         return 0;
     }
-    if (_pDataModel->useObjectCache()) {
+    if (_pDataModel->useObjectCache() && !scanThreadIsRunning()) {
         // get media object out of data base cache (column xml)
          AbstractMediaObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
          if (pObject) {
@@ -1155,7 +1160,7 @@ CachedServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>&
         return 0;
     }
     ui4 totalChildCount = 0;
-    if (_pDataModel->useObjectCache()) {
+    if (_pDataModel->useObjectCache() && !scanThreadIsRunning()) {
         if (cacheNeedsUpdate() && sort == "" && search == "*") {
             // if no query result and no sort or search queries, we can serve a block from the index cache of size "count" starting at "offset"
             totalChildCount = ServerContainer::getChildrenAtRowOffset(children, offset, count);

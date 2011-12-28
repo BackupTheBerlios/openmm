@@ -387,6 +387,9 @@ protected:
 
     AbstractProperty*               _pTitleProperty;
     AbstractProperty*               _pClassProperty;
+
+private:
+    Poco::FastMutex                 _serverLock;
 };
 
 
