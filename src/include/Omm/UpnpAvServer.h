@@ -24,6 +24,7 @@
 
 #include <stack>
 
+#include <Poco/Path.h>
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
@@ -221,6 +222,7 @@ public:
     void setServerContainer(ServerContainer* pServerContainer);
     ServerContainer* getServerContainer();
 
+    virtual void setBasePath(const std::string& basePath);
     // class property of container media object itself
     virtual std::string getContainerClass() { return AvClass::CONTAINER; }
 
@@ -285,6 +287,8 @@ protected:
     void writeIndexCache();
 
     std::string                 _cacheFile;
+//    std::string                 _basePath;
+    Poco::Path                  _basePath;
 
 private:
     ServerContainer*            _pServerContainer;
@@ -382,7 +386,7 @@ public:
 protected:
     void initObject(AbstractMediaObject* pObject, ui4 index);
 
-    std::string                     _basePath;
+//    std::string                     _basePath;
     AbstractDataModel*              _pDataModel;
 
     AbstractProperty*               _pTitleProperty;

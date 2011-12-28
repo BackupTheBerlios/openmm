@@ -525,6 +525,13 @@ AbstractDataModel::getServerContainer()
 }
 
 
+void
+AbstractDataModel::setBasePath(const std::string& basePath)
+{
+    _basePath = basePath;
+}
+
+
 ui4
 AbstractDataModel::getIndexCount()
 {
@@ -1008,7 +1015,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& child
 void
 ServerContainer::setBasePath(const std::string& basePath)
 {
-    _basePath = basePath;
+//    _basePath = basePath;
+    _pDataModel->setBasePath(basePath);
 }
 
 

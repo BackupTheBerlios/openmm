@@ -19,17 +19,21 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef FilesystemCached_INCLUDED
-#define FilesystemCached_INCLUDED
+#ifndef Filesystem_INCLUDED
+#define Filesystem_INCLUDED
 
 #include <Omm/UpnpAvServer.h>
 
 
-class FilecachedServer : public Omm::Av::CachedServerContainer
+class FileServer : public Omm::Av::AbstractDataModel
 {
-public:
-    virtual void setBasePath(const std::string& basePath);
-    virtual std::string getPluginType();
 };
+
+
+//class FileServer : public Omm::Av::ServerContainer
+//{
+//public:
+//    virtual void setBasePath(const std::string& basePath);
+//};
 
 #endif

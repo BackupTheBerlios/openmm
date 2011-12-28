@@ -128,16 +128,27 @@ protected:
         }
         else
         {
-            Omm::Util::PluginLoader<Omm::Av::ServerContainer> pluginLoader;
-            Omm::Av::ServerContainer* pContainerPlugin;
+            Omm::Av::AbstractDataModel* pDataModel;
+            Omm::Util::PluginLoader<Omm::Av::AbstractDataModel> pluginLoader;
             try {
-                pContainerPlugin = pluginLoader.load(_containerPlugin);
+                pDataModel = pluginLoader.load(_containerPlugin);
             }
             catch(Poco::NotFoundException) {
                 std::cerr << "error could not find server plugin: " << _containerPlugin << std::endl;
                 return 1;
             }
             std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
+
+//            Omm::Util::PluginLoader<Omm::Av::ServerContainer> pluginLoader;
+//            Omm::Av::ServerContainer* pContainerPlugin;
+//            try {
+//                pContainerPlugin = pluginLoader.load(_containerPlugin);
+//            }
+//            catch(Poco::NotFoundException) {
+//                std::cerr << "error could not find server plugin: " << _containerPlugin << std::endl;
+//                return 1;
+//            }
+//            std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
 
             std::string home = Poco::Environment::get("HOME");
             if (_containerPlugin == "server-dvb") {
@@ -170,8 +181,21 @@ protected:
             else if (_name == "") {
                 _name = "OMM Server";
             }
-            pContainerPlugin->setBasePath(_pluginOption);
+            else if (_name == "datamodel-file") {
+                if (_name == "") {
+                    _name = "Collection";
+                }
+                if (_pluginOption == "") {
+                    _pluginOption = home + "/music";
+                }
+            }
+
+            Omm::Av::ServerContainer* pContainerPlugin = new Omm::Av::ServerContainer;
             pContainerPlugin->setTitle(_name);
+            pContainerPlugin->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
+            pContainerPlugin->setDataModel(pDataModel);
+            pContainerPlugin->setBasePath(_pluginOption);
+            pContainerPlugin->scan();
 
             // create a media server device
             Omm::Av::MediaServer mediaServer;

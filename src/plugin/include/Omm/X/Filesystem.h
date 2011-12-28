@@ -23,12 +23,38 @@
 #define Filesystem_INCLUDED
 
 #include <Omm/UpnpAvServer.h>
+#include <Omm/AvStream.h>
 
 
-class FileServer : public Omm::Av::ServerContainer
+class FileModel : public Omm::Av::AbstractDataModel
 {
 public:
+    FileModel();
+    ~FileModel();
+
     virtual void setBasePath(const std::string& basePath);
+    virtual bool preserveIndexCache() { return true; }
+    virtual bool useObjectCache() { return true; }
+
+    virtual void createIndex();
+//    virtual std::string getContainerClass();
+
+    virtual std::string getParentPath(const std::string& path);
+
+    virtual Omm::Av::AbstractMediaObject* getMediaObject(const std::string& path);
+    virtual std::streamsize getSize(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+
+private:
+    void scanDirectoryRecursively(Poco::File& directory);
+    void loadTagger();
+    void setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format);
+
+    std::string                         _cachePath;
+    std::string                         _containerClass;
+    Omm::AvStream::Tagger*              _pTagger;
 };
+
 
 #endif
