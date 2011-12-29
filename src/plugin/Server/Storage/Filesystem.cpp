@@ -32,6 +32,7 @@
 FileModel::FileModel() :
 _pTagger(0)
 {
+    loadTagger();
 }
 
 
@@ -42,37 +43,11 @@ FileModel::~FileModel()
 
 
 void
-FileModel::setBasePath(const std::string& basePath)
+FileModel::init()
 {
-    AbstractDataModel::setBasePath(basePath);
-    _cachePath = _basePath.toString(Poco::Path::PATH_UNIX) + "/.omm/cache";
-    _cacheFile = _cachePath + "/indexCache";
-    loadTagger();
-    createIndex();
-}
-
-
-void
-FileModel::createIndex()
-{
-    Omm::Av::Log::instance()->upnpav().debug("file data model starting index scan ...");
-//    if (preserveIndexCache()) {
-//        readIndexCache();
-//    }
-    Poco::File baseDir(_basePath);
+    Poco::File baseDir(getBasePath());
     scanDirectoryRecursively(baseDir);
-    if (preserveIndexCache()) {
-        writeIndexCache();
-    }
-    Omm::Av::Log::instance()->upnpav().debug("file data model index scan finished.");
 }
-
-
-//std::string
-//FileDataModel::getContainerClass()
-//{
-//    return _containerClass;
-//}
 
 
 std::string
@@ -92,15 +67,15 @@ FileModel::getParentPath(const std::string& path)
 Omm::Av::AbstractMediaObject*
 FileModel::getMediaObject(const std::string& path)
 {
-    Poco::Path fullPath(_basePath, path);
+    Poco::Path fullPath(getBasePath(), path);
     if (Poco::File(fullPath).isDirectory()) {
-        Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString(Poco::Path::PATH_UNIX));
+        Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString());
         Omm::Av::AbstractMediaObject* pContainer = getServerContainer()->createMediaContainer();
         pContainer->setTitle(fullPath.getFileName());
         return pContainer;
     }
-    Omm::Av::Log::instance()->upnpav().debug("file data model tagging: " + fullPath.toString(Poco::Path::PATH_UNIX));
-    Omm::AvStream::Meta* pMeta = _pTagger->tag(fullPath.toString(Poco::Path::PATH_UNIX));
+    Omm::Av::Log::instance()->upnpav().debug("file data model tagging: " + fullPath.toString());
+    Omm::AvStream::Meta* pMeta = _pTagger->tag(fullPath.toString());
     if (pMeta) {
         Omm::Av::ServerItem* pItem = getServerContainer()->createMediaItem();
 
@@ -148,12 +123,12 @@ std::streamsize
 FileModel::getSize(const std::string& path)
 {
     std::streamsize res;
-    Poco::Path fullPath(_basePath, path);
+    Poco::Path fullPath(getBasePath(), path);
     try {
         res = Poco::File(fullPath).getSize();
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + fullPath.toString(Poco::Path::PATH_UNIX));
+        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + fullPath.toString());
         res = 0;
     }
     return res;
@@ -170,10 +145,10 @@ FileModel::isSeekable(const std::string& path, const std::string& resourcePath)
 std::istream*
 FileModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    Poco::Path fullPath(_basePath, path);
-    std::istream* pRes = new std::ifstream(fullPath.toString(Poco::Path::PATH_UNIX).c_str());
+    Poco::Path fullPath(getBasePath(), path);
+    std::istream* pRes = new std::ifstream(fullPath.toString().c_str());
     if (!*pRes) {
-        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + _basePath.append(path).toString(Poco::Path::PATH_UNIX));
+        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + fullPath.toString());
         return 0;
     }
     return pRes;
@@ -207,12 +182,12 @@ FileModel::scanDirectoryRecursively(Poco::File& directory)
     Poco::DirectoryIterator end;
     while(dir != end) {
         try {
-//            addPath(dir->path().substr(_basePath.toString(Poco::Path::PATH_UNIX).length()));
+//            addPath(dir->path().substr(getBasePath().length()));
             if (dir->isDirectory()) {
                 scanDirectoryRecursively(*dir);
             }
             else {
-                addPath(dir->path().substr(_basePath.toString(Poco::Path::PATH_UNIX).length()));
+                addPath(dir->path().substr(getBasePath().length()));
             }
         }
         catch(...) {

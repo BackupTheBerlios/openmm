@@ -504,10 +504,9 @@ const ui4 AbstractDataModel::INVALID_INDEX = 0xffffffff;
 
 AbstractDataModel::AbstractDataModel() :
 _pServerContainer(0),
-_maxIndex(0),
-_indexBufferSize(50)
+_maxIndex(0)
+//_indexBufferSize(50)
 {
-//    _cacheFile = Util::Home::getCachePath() + "/indexCache";
 }
 
 
@@ -528,21 +527,40 @@ AbstractDataModel::getServerContainer()
 void
 AbstractDataModel::setBasePath(const std::string& basePath)
 {
+//    _cacheFile = Util::Home::getCachePath() + "/indexMap";
     _basePath = basePath;
+    _cacheDirPath = Poco::Path(_basePath, "/.omm/cache");
+//    Poco::File(_cacheDirPath).createDirectories();
+    _configDirPath = Poco::Path(_basePath, "/.omm/config");
+//    Poco::File(_configDirPath).createDirectories();
+    _metaDirPath = Poco::Path(_basePath, "/.omm/meta");
+//    Poco::File(_metaDirPath).createDirectories();
+    _indexFilePath = Poco::Path(_metaDirPath, "index");
+    Omm::Av::Log::instance()->upnpav().debug("data model init ...");
+    init();
+    Omm::Av::Log::instance()->upnpav().debug("data model init finished.");
+    getServerContainer()->scan();
+}
+
+
+std::string
+AbstractDataModel::getBasePath()
+{
+    return _basePath.toString();
 }
 
 
 ui4
 AbstractDataModel::getIndexCount()
 {
-    return _indexCache.size();
+    return _indexMap.size();
 }
 
 
 bool
 AbstractDataModel::hasIndex(ui4 index)
 {
-    return _indexCache.find(index) != _indexCache.end();
+    return _indexMap.find(index) != _indexMap.end();
 }
 
 
@@ -550,8 +568,8 @@ ui4
 AbstractDataModel::getIndex(const std::string& path)
 {
     // check if path is not in the cache
-    std::map<std::string, ui4>::const_iterator pos = _pathCache.find(path);
-    if (pos  != _pathCache.end()) {
+    std::map<std::string, ui4>::const_iterator pos = _pathMap.find(path);
+    if (pos  != _pathMap.end()) {
         return (*pos).second;
     }
     else {
@@ -564,8 +582,8 @@ AbstractDataModel::getIndex(const std::string& path)
 std::string
 AbstractDataModel::getPath(ui4 index)
 {
-    std::map<ui4, std::string>::const_iterator pos = _indexCache.find(index);
-    if (pos  != _indexCache.end()) {
+    std::map<ui4, std::string>::const_iterator pos = _indexMap.find(index);
+    if (pos  != _indexMap.end()) {
         return (*pos).second;
     }
     else {
@@ -578,14 +596,14 @@ AbstractDataModel::getPath(ui4 index)
 AbstractDataModel::IndexIterator
 AbstractDataModel::beginIndex()
 {
-    return _indexCache.begin();
+    return _indexMap.begin();
 }
 
 
 AbstractDataModel::IndexIterator
 AbstractDataModel::endIndex()
 {
-    return _indexCache.end();
+    return _indexMap.end();
 }
 
 
@@ -624,18 +642,18 @@ AbstractDataModel::addPath(const std::string& path)
 //        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
     }
     // create a new index
-    _pathCache[path] = index;
-    _indexCache[index] = path;
+    _pathMap[path] = index;
+    _indexMap[index] = path;
 }
 
 
 void
 AbstractDataModel::removePath(const std::string& path)
 {
-    std::map<std::string, ui4>::iterator pos = _pathCache.find(path);
-    if (pos  != _pathCache.end()) {
-        _indexCache.erase((*pos).second);
-        _pathCache.erase(pos);
+    std::map<std::string, ui4>::iterator pos = _pathMap.find(path);
+    if (pos  != _pathMap.end()) {
+        _indexMap.erase((*pos).second);
+        _pathMap.erase(pos);
     }
     else {
         Log::instance()->upnpav().error("abstract data model, could not erase path from index cache: " + path);
@@ -643,41 +661,15 @@ AbstractDataModel::removePath(const std::string& path)
 }
 
 
-//void
-//AbstractDataModel::addIndices(const std::vector<ui4>& indices)
-//{
-//    // server container may insert index and meta data into its cache
-//    if (_pServerContainer) {
-//        _pServerContainer->addIndices(indices);
-//    }
-//}
-//
-//
-//void
-//AbstractDataModel::removeIndices(const std::vector<ui4>& indices)
-//{
-//    if (_pServerContainer) {
-//        _pServerContainer->removeIndices(indices);
-//    }
-//}
-
-
-//ui4
-//AbstractDataModel::getChildCount()
-//{
-//    return _indexCache.size();
-//}
-
-
 void
 AbstractDataModel::readIndexCache()
 {
-    if (!Poco::File(_cacheFile).exists()) {
+    if (!Poco::File(_indexFilePath).exists()) {
         Omm::Av::Log::instance()->upnpav().debug("index cache not present, not reading it");
         return;
     }
     Omm::Av::Log::instance()->upnpav().debug("index cache present, reading ...");
-    std::ifstream indexCache(_cacheFile.c_str());
+    std::ifstream indexCache(_indexFilePath.toString().c_str());
     std::string line;
     ui4 index = 0;
     ui4 lastIndex = 0;
@@ -687,8 +679,8 @@ AbstractDataModel::readIndexCache()
         std::string::size_type pos = line.find(' ');
         index = Poco::NumberParser::parse(line.substr(0, pos));
         path = line.substr(pos + 1);
-        _indexCache[index] = path;
-        _pathCache[path] = index;
+        _indexMap[index] = path;
+        _pathMap[path] = index;
         for (ui4 i = lastIndex + 1; i < index; i++) {
             _freeIndices.push(i);
         }
@@ -702,13 +694,13 @@ AbstractDataModel::readIndexCache()
 void
 AbstractDataModel::writeIndexCache()
 {
-    if (Poco::File(_cacheFile).exists()) {
+    if (Poco::File(_indexFilePath).exists()) {
         // TODO: check if index cache needs update
         return;
     }
-    Log::instance()->upnpav().debug("abstract data model write index cache to: " + _cacheFile + " ...");
-    std::ofstream indexCache(_cacheFile.c_str());
-    for (std::map<ui4, std::string>::iterator it = _indexCache.begin(); it != _indexCache.end(); ++it) {
+    Log::instance()->upnpav().debug("abstract data model write index cache to: " + _indexFilePath.toString() + " ...");
+    std::ofstream indexCache(_indexFilePath.toString().c_str());
+    for (std::map<ui4, std::string>::iterator it = _indexMap.begin(); it != _indexMap.end(); ++it) {
 //        Log::instance()->upnpav().debug("abstract data model write index: " + Poco::NumberFormatter::format((*it).first) + ", path: " + (*it).second);
         indexCache << (*it).first << ' ' << (*it).second << std::endl;
     }

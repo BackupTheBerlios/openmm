@@ -42,8 +42,8 @@ class UpnpAvServerApplication: public Poco::Util::ServerApplication
 public:
     UpnpAvServerApplication():
         _helpRequested(false),
-        _containerPlugin("server-file"),
-        _pluginOption(""),
+        _pluginName("model-file"),
+        _basePath(""),
         _name("")
     {
         setUnixOptions(true);
@@ -58,9 +58,6 @@ protected:
     {
         loadConfiguration(); // load default configuration files, if present
         ServerApplication::initialize(self);
-//        Poco::Logger::root().setLevel(0);
-//        Poco::Logger::setLevel("", 0);
-//        self.logger().setLevel(0);
     }
 
     void uninitialize()
@@ -82,10 +79,10 @@ protected:
                            .repeatable(false)
                            .argument("plugin name", true));
         options.addOption(
-                           Option("option", "o", "option passed to plugin")
+                           Option("basepath", "b", "base path for data (directory / meta data file depending on type of server)")
                            .required(false)
                            .repeatable(false)
-                           .argument("plugin option", true));
+                           .argument("base path", true));
         options.addOption(
                            Option("name", "n", "friendly name of UPnP device")
                            .required(false)
@@ -101,10 +98,10 @@ protected:
             _helpRequested = true;
         }
         else if (name == "plugin") {
-            _containerPlugin = value;
+            _pluginName = value;
         }
-        else if (name == "option") {
-            _pluginOption = value;
+        else if (name == "basepath") {
+            _basePath = value;
         }
         else if (name == "name") {
             _name = value;
@@ -131,13 +128,13 @@ protected:
             Omm::Av::AbstractDataModel* pDataModel;
             Omm::Util::PluginLoader<Omm::Av::AbstractDataModel> pluginLoader;
             try {
-                pDataModel = pluginLoader.load(_containerPlugin);
+                pDataModel = pluginLoader.load(_pluginName);
             }
             catch(Poco::NotFoundException) {
-                std::cerr << "error could not find server plugin: " << _containerPlugin << std::endl;
+                std::cerr << "error could not find server plugin: " << _pluginName << std::endl;
                 return 1;
             }
-            std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
+            std::clog << "container plugin: " << _pluginName << " loaded successfully" << std::endl;
 
 //            Omm::Util::PluginLoader<Omm::Av::ServerContainer> pluginLoader;
 //            Omm::Av::ServerContainer* pContainerPlugin;
@@ -151,55 +148,54 @@ protected:
 //            std::clog << "container plugin: " << _containerPlugin << " loaded successfully" << std::endl;
 
             std::string home = Poco::Environment::get("HOME");
-            if (_containerPlugin == "server-dvb") {
+            if (_pluginName == "model-dvb") {
                 if (_name == "") {
                     _name = "Digital TV";
                 }
-                if (_pluginOption == "") {
-                    _pluginOption = home + "/.omm/channels.conf";
+                if (_basePath == "") {
+                    _basePath = home + "/.omm/channels.conf";
                 }
             }
-            else if (_containerPlugin == "server-file") {
-                if (_name == "") {
-                    _name = "Collection";
-                }
-                if (_pluginOption == "") {
-                    _pluginOption = home + "/music";
-//                     _pluginOption = home;
-                }
-            }
-            else if (_containerPlugin == "server-webradio") {
+//            else if (_containerPlugin == "server-file") {
+//                if (_name == "") {
+//                    _name = "Collection";
+//                }
+//                if (_pluginOption == "") {
+//                    _pluginOption = home + "/music";
+////                     _pluginOption = home;
+//                }
+//            }
+            else if (_pluginName == "model-webradio") {
                 // FIXME: only start web radio server, if internet is available
                 // check this in AvServer::setRoot() by calling for example MediaObject::isAvailable()
                 if (_name == "") {
                     _name = "Web Radio";
                 }
-                if (_pluginOption == "") {
-                    _pluginOption = home + "/.omm/webradio.conf";
+                if (_basePath == "") {
+                    _basePath = home + "/.omm/webradio.conf";
+                }
+            }
+            else if (_pluginName == "model-file") {
+                if (_name == "") {
+                    _name = "Collection";
+                }
+                if (_basePath == "") {
+                    _basePath = home + "/music";
                 }
             }
             else if (_name == "") {
                 _name = "OMM Server";
             }
-            else if (_name == "datamodel-file") {
-                if (_name == "") {
-                    _name = "Collection";
-                }
-                if (_pluginOption == "") {
-                    _pluginOption = home + "/music";
-                }
-            }
 
-            Omm::Av::ServerContainer* pContainerPlugin = new Omm::Av::ServerContainer;
-            pContainerPlugin->setTitle(_name);
-            pContainerPlugin->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
-            pContainerPlugin->setDataModel(pDataModel);
-            pContainerPlugin->setBasePath(_pluginOption);
-            pContainerPlugin->scan();
+            Omm::Av::ServerContainer* pContainer = new Omm::Av::ServerContainer;
+            pContainer->setTitle(_name);
+            pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
+            pContainer->setDataModel(pDataModel);
+            pContainer->setBasePath(_basePath);
 
             // create a media server device
             Omm::Av::MediaServer mediaServer;
-            mediaServer.setRoot(pContainerPlugin);
+            mediaServer.setRoot(pContainer);
             mediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
             mediaServer.addIcon(pIcon);
@@ -226,8 +222,8 @@ protected:
 
 private:
     bool            _helpRequested;
-    std::string     _containerPlugin;
-    std::string     _pluginOption;
+    std::string     _pluginName;
+    std::string     _basePath;
     std::string     _name;
 };
 

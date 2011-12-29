@@ -26,62 +26,43 @@
 #include "DvbServer.h"
 
 
-class DvbDataModel : public Omm::Av::SimpleDataModel
+DvbModel::DvbModel()
 {
-    friend class DvbServer;
-
-public:
-    DvbDataModel(const std::string& channelConfig);
-
-    virtual std::string getClass(const std::string& path);
-    virtual std::string getTitle(const std::string& path);
-
-    virtual std::string getMime(const std::string& path);
-    virtual std::string getDlna(const std::string& path);
-    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
-    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
-
-private:
-    void scanChannelConfig(const std::string& channelConfig);
-
-    std::map<std::string, std::string>                  _channelNames;
-//    std::vector<std::string>                            _channelNames;
-    std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
-//    std::vector<Omm::Dvb::DvbChannel*>   _channels;
-};
+}
 
 
-DvbDataModel::DvbDataModel(const std::string& channelConfig)
+void
+DvbModel::init()
 {
-    scanChannelConfig(channelConfig);
+    scanChannelConfig(getBasePath());
     Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
     Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
 }
 
 
 std::string
-DvbDataModel::getClass(const std::string& path)
+DvbModel::getClass(const std::string& path)
 {
     return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::VIDEO_BROADCAST);
 }
 
 
 std::string
-DvbDataModel::getTitle(const std::string& path)
+DvbModel::getTitle(const std::string& path)
 {
     return _channelNames[path];
 }
 
 
 bool
-DvbDataModel::isSeekable(const std::string& path, const std::string& resourcePath)
+DvbModel::isSeekable(const std::string& path, const std::string& resourcePath)
 {
     return false;
 }
 
 
 std::istream*
-DvbDataModel::getStream(const std::string& path, const std::string& resourcePath)
+DvbModel::getStream(const std::string& path, const std::string& resourcePath)
 {
     Omm::Dvb::DvbDevice::instance()->tune(_channels[path]);
 
@@ -92,21 +73,21 @@ DvbDataModel::getStream(const std::string& path, const std::string& resourcePath
 
 
 std::string
-DvbDataModel::getMime(const std::string& path)
+DvbModel::getMime(const std::string& path)
 {
     return "video/mpeg";
 }
 
 
 std::string
-DvbDataModel::getDlna(const std::string& path)
+DvbModel::getDlna(const std::string& path)
 {
     return "DLNA.ORG_PN=MPEG_PS_PAL";
 }
 
 
 void
-DvbDataModel::scanChannelConfig(const std::string& channelConfig)
+DvbModel::scanChannelConfig(const std::string& channelConfig)
 {
     std::ifstream channels(channelConfig.c_str());
     std::string line;
@@ -114,7 +95,6 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
         Poco::StringTokenizer channelParams(line, ":");
         Poco::StringTokenizer channelName(channelParams[0], ";");
         _channelNames[line] = channelName[0];
-//        _channelNames.push_back(channelName[0]);
         unsigned int freq = Poco::NumberParser::parseUnsigned(channelParams[1]) * 1000;
         Omm::Dvb::DvbChannel::Polarization pol = (channelParams[2][0] == 'h') ? Omm::Dvb::DvbChannel::HORIZ : Omm::Dvb::DvbChannel::VERT;
         unsigned int symbolRate = Poco::NumberParser::parseUnsigned(channelParams[4]) * 1000;
@@ -130,30 +110,14 @@ DvbDataModel::scanChannelConfig(const std::string& channelConfig)
         int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
         _channels[line] = new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid);
         addPath(line);
-//        _channels.push_back(new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid));
     }
 }
 
 
-DvbServer::DvbServer() :
-ServerContainer(8888)
-{
-}
-
-
-void
-DvbServer::setBasePath(const std::string& basePath)
-{
-    ServerContainer::setBasePath(basePath);
-    setDataModel(new DvbDataModel(basePath));
-    setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::VIDEO_BROADCAST));
-    //setTimer("ProSieben", Poco::DateTime(2011, 1, 9, 18, 27), Poco::DateTime(2011, 1, 9, 18, 8));
-}
-
-
-void
-DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate)
-{
+//    //setTimer("ProSieben", Poco::DateTime(2011, 1, 9, 18, 27), Poco::DateTime(2011, 1, 9, 18, 8));
+//void
+//DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate)
+//{
     // TODO: need to convert to new path based data model.
 //    DvbDataModel* pDvbDataModel = static_cast<DvbDataModel*>(_pDataModel);
 //    Omm::ui4 index = std::find(pDvbDataModel->_channelNames.begin(), pDvbDataModel->_channelNames.end(), channel)
@@ -168,20 +132,20 @@ DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::
 //    _timer.setStartInterval((startDate - nowDate).milliseconds());
 //    Poco::TimerCallback<DvbServer> callback(*this, &DvbServer::timerCallback);
 //    _timer.start(callback);
-}
+//}
 
 
-void
-DvbServer::timerCallback(Poco::Timer& timer)
-{
-    Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
-
-    Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
-    std::ifstream istr("/dev/dvb/adapter0/dvr0");
-    std::ofstream ostr("/var/local/ommrec.mpg");
-    // TODO: stop StreamCopier::copyStream() in the timerCallback thread by closing istr and/or ostr
-    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
-}
+//void
+//DvbServer::timerCallback(Poco::Timer& timer)
+//{
+//    Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
+//
+//    Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
+//    std::ifstream istr("/dev/dvb/adapter0/dvr0");
+//    std::ofstream ostr("/var/local/ommrec.mpg");
+//    // TODO: stop StreamCopier::copyStream() in the timerCallback thread by closing istr and/or ostr
+//    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
+//}
 
 
 // RecTimer::RecTimer() :
@@ -198,7 +162,7 @@ DvbServer::timerCallback(Poco::Timer& timer)
 
 
 #ifdef OMMPLUGIN
-POCO_BEGIN_MANIFEST(Omm::Av::ServerContainer)
-POCO_EXPORT_CLASS(DvbServer)
+POCO_BEGIN_MANIFEST(Omm::Av::AbstractDataModel)
+POCO_EXPORT_CLASS(DvbModel)
 POCO_END_MANIFEST
 #endif

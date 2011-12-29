@@ -32,12 +32,9 @@ public:
     FileModel();
     ~FileModel();
 
-    virtual void setBasePath(const std::string& basePath);
+    virtual void init();
     virtual bool preserveIndexCache() { return true; }
     virtual bool useObjectCache() { return true; }
-
-    virtual void createIndex();
-//    virtual std::string getContainerClass();
 
     virtual std::string getParentPath(const std::string& path);
 

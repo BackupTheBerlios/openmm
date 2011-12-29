@@ -42,7 +42,7 @@ class UpnpAvServerApplication: public Poco::Util::ServerApplication
 public:
     UpnpAvServerApplication():
         _helpRequested(false),
-        _pluginOption(""),
+        _basePath(""),
         _name("")
     {
         setUnixOptions(true);
@@ -92,7 +92,7 @@ protected:
             _helpRequested = true;
         }
         else if (name == "option") {
-            _pluginOption = value;
+            _basePath = value;
         }
         else if (name == "name") {
             _name = value;
@@ -120,10 +120,10 @@ protected:
 
             std::string home = Poco::Environment::get("HOME");
             _name = "Collection";
-            if (_pluginOption == "") {
-                _pluginOption = home + "/mp3";
+            if (_basePath == "") {
+                _basePath = home + "/mp3";
             }
-            pObject->setBasePath(_pluginOption);
+            pObject->setBasePath(_basePath);
             pObject->setTitle(_name);
 
             // create a media server device
@@ -155,7 +155,7 @@ protected:
 
 private:
     bool            _helpRequested;
-    std::string     _pluginOption;
+    std::string     _basePath;
     std::string     _name;
 };
 

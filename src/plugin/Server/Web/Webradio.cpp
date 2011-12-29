@@ -35,55 +35,41 @@
 #include "Webradio.h"
 
 
-class WebradioDataModel : public Omm::Av::SimpleDataModel
+WebradioModel::WebradioModel()
 {
-public:
-    WebradioDataModel(const std::string& stationConfig);
-
-    virtual std::string getClass(const std::string& path);
-    virtual std::string getTitle(const std::string& path);
-
-    virtual std::string getMime(const std::string& path);
-    virtual std::string getDlna(const std::string& path);
-    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
-    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
-
-private:
-    void scanStationConfig(const std::string& stationConfig);
-
-    std::map<std::string, std::string>     _stationNames;
-};
+}
 
 
-WebradioDataModel::WebradioDataModel(const std::string& stationConfig)
+void
+WebradioModel::init()
 {
-    scanStationConfig(stationConfig);
+    scanStationConfig(getBasePath());
 }
 
 
 std::string
-WebradioDataModel::getClass(const std::string& path)
+WebradioModel::getClass(const std::string& path)
 {
     return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::AUDIO_BROADCAST);
 }
 
 
 std::string
-WebradioDataModel::getTitle(const std::string& path)
+WebradioModel::getTitle(const std::string& path)
 {
     return _stationNames[path];
 }
 
 
 bool
-WebradioDataModel::isSeekable(const std::string& path, const std::string& resourcePath)
+WebradioModel::isSeekable(const std::string& path, const std::string& resourcePath)
 {
     return false;
 }
 
 
 std::istream*
-WebradioDataModel::getStream(const std::string& path, const std::string& resourcePath)
+WebradioModel::getStream(const std::string& path, const std::string& resourcePath)
 {
     Poco::URI uri(path);
 
@@ -171,21 +157,21 @@ WebradioDataModel::getStream(const std::string& path, const std::string& resourc
 
 
 std::string
-WebradioDataModel::getMime(const std::string& path)
+WebradioModel::getMime(const std::string& path)
 {
     return "audio/mpeg";
 }
 
 
 std::string
-WebradioDataModel::getDlna(const std::string& path)
+WebradioModel::getDlna(const std::string& path)
 {
     return "DLNA.ORG_PN=MP3;DLNA.ORG_OP=01";
 }
 
 
 void
-WebradioDataModel::scanStationConfig(const std::string& stationConfig)
+WebradioModel::scanStationConfig(const std::string& stationConfig)
 {
     Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file: " + stationConfig + " ...");
     Poco::XML::DOMParser parser;
@@ -241,18 +227,8 @@ WebradioDataModel::scanStationConfig(const std::string& stationConfig)
 }
 
 
-void
-WebradioServer::setBasePath(const std::string& basePath)
-{
-    ServerContainer::setBasePath(basePath);
-    setDataModel(new WebradioDataModel(basePath));
-    setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER, Omm::Av::AvClass::AUDIO_BROADCAST));
-}
-
-
-
 #ifdef OMMPLUGIN
-POCO_BEGIN_MANIFEST(Omm::Av::ServerContainer)
-POCO_EXPORT_CLASS(WebradioServer)
+POCO_BEGIN_MANIFEST(Omm::Av::AbstractDataModel)
+POCO_EXPORT_CLASS(WebradioModel)
 POCO_END_MANIFEST
 #endif

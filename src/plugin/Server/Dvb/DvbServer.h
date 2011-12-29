@@ -28,6 +28,32 @@
 #include <Omm/Dvb.h>
 
 
+class DvbModel : public Omm::Av::SimpleDataModel
+{
+    friend class DvbServer;
+
+public:
+    DvbModel();
+
+    virtual void init();
+    
+    virtual std::string getClass(const std::string& path);
+    virtual std::string getTitle(const std::string& path);
+
+    virtual std::string getMime(const std::string& path);
+    virtual std::string getDlna(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+
+private:
+    void scanChannelConfig(const std::string& channelConfig);
+
+    std::map<std::string, std::string>                  _channelNames;
+    std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
+};
+
+
+
 // class RecTimer : public Poco::Timer
 // {
 // public:
@@ -41,21 +67,21 @@
 // };
 
 
-class DvbServer : public Omm::Av::ServerContainer
-{
-public:
-    DvbServer();
-
-    virtual void setBasePath(const std::string& basePath);
-
-private:
-    void setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate);
-    void timerCallback(Poco::Timer& timer);
-    void stopCallback(Poco::Timer& timer);
-
-    Poco::Timer _timer;
-    Omm::Dvb::DvbChannel* _pChannel;
-};
+//class DvbServer : public Omm::Av::ServerContainer
+//{
+//public:
+//    DvbServer();
+//
+//    virtual void setBasePath(const std::string& basePath);
+//
+//private:
+//    void setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate);
+//    void timerCallback(Poco::Timer& timer);
+//    void stopCallback(Poco::Timer& timer);
+//
+//    Poco::Timer _timer;
+//    Omm::Dvb::DvbChannel* _pChannel;
+//};
 
 
 #endif

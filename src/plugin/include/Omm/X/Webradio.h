@@ -25,10 +25,25 @@
 #include <Omm/UpnpAvServer.h>
 
 
-class WebradioServer : public Omm::Av::ServerContainer
+class WebradioModel : public Omm::Av::SimpleDataModel
 {
 public:
-    virtual void setBasePath(const std::string& basePath);
+    WebradioModel();
+
+    virtual void init();
+
+    virtual std::string getClass(const std::string& path);
+    virtual std::string getTitle(const std::string& path);
+
+    virtual std::string getMime(const std::string& path);
+    virtual std::string getDlna(const std::string& path);
+    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
+    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+
+private:
+    void scanStationConfig(const std::string& stationConfig);
+
+    std::map<std::string, std::string>     _stationNames;
 };
 
 
