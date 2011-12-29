@@ -536,10 +536,10 @@ AbstractDataModel::setBasePath(const std::string& basePath)
     _metaDirPath = Poco::Path(_basePath, "/.omm/meta");
 //    Poco::File(_metaDirPath).createDirectories();
     _indexFilePath = Poco::Path(_metaDirPath, "index");
-    Omm::Av::Log::instance()->upnpav().debug("data model init ...");
-    init();
-    Omm::Av::Log::instance()->upnpav().debug("data model init finished.");
-    getServerContainer()->scan();
+    Omm::Av::Log::instance()->upnpav().debug("data model scan ...");
+    scan();
+    Omm::Av::Log::instance()->upnpav().debug("data model scan finished.");
+    getServerContainer()->updateCache();
 }
 
 
@@ -1033,8 +1033,8 @@ ServerContainer::initObject(AbstractMediaObject* pObject, ui4 index)
 
 
 CachedServerContainer::CachedServerContainer() :
-_scanThreadRunnable(*this, &CachedServerContainer::scanThread),
-_scanThreadRunning(false)
+_updateCacheThreadRunnable(*this, &CachedServerContainer::updateCacheThread),
+_updateCacheThreadRunning(false)
 {
     setContainer(this);
 
@@ -1094,22 +1094,22 @@ CachedServerContainer::getSortCaps()
 
 
 void
-CachedServerContainer::scan(bool on)
+CachedServerContainer::updateCache(bool on)
 {
-    _scanThreadLock.lock();
-    _scanThreadRunning = on;
-    _scanThreadLock.unlock();
+    _updateCacheThreadLock.lock();
+    _updateCacheThreadRunning = on;
+    _updateCacheThreadLock.unlock();
     if (on) {
-        _scanThread.start(_scanThreadRunnable);
+        _updateCacheThread.start(_updateCacheThreadRunnable);
     }
     else {
-        _scanThread.join();
+        _updateCacheThread.join();
     }
 }
 
 
 void
-CachedServerContainer::scanThread()
+CachedServerContainer::updateCacheThread()
 {
     Log::instance()->upnpav().debug("cached server container, database scan thread started ...");
     if (!cacheNeedsUpdate()) {
@@ -1117,7 +1117,7 @@ CachedServerContainer::scanThread()
     }
     else {
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
-            if (!scanThreadIsRunning()) {
+            if (!updateCacheThreadIsRunning()) {
                 Log::instance()->upnpav().debug("stopping scan thread");
                 break;
             }
@@ -1134,7 +1134,7 @@ CachedServerContainer::getChildForIndex(ui4 index)
     if (!_pDataModel) {
         return 0;
     }
-    if (_pDataModel->useObjectCache() && !scanThreadIsRunning()) {
+    if (_pDataModel->useObjectCache() && !updateCacheThreadIsRunning()) {
         // get media object out of data base cache (column xml)
          AbstractMediaObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
          if (pObject) {
@@ -1162,7 +1162,7 @@ CachedServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>&
         return 0;
     }
     ui4 totalChildCount = 0;
-    if (_pDataModel->useObjectCache() && !scanThreadIsRunning()) {
+    if (_pDataModel->useObjectCache() && !updateCacheThreadIsRunning()) {
         if (cacheNeedsUpdate() && sort == "" && search == "*") {
             // if no query result and no sort or search queries, we can serve a block from the index cache of size "count" starting at "offset"
             totalChildCount = ServerContainer::getChildrenAtRowOffset(children, offset, count);
@@ -1205,10 +1205,10 @@ CachedServerContainer::cacheNeedsUpdate()
 
 
 bool
-CachedServerContainer::scanThreadIsRunning()
+CachedServerContainer::updateCacheThreadIsRunning()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_scanThreadLock);
-    return _scanThreadRunning;
+    Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
+    return _updateCacheThreadRunning;
 }
 
 

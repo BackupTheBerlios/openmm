@@ -32,7 +32,7 @@ public:
     FileModel();
     ~FileModel();
 
-    virtual void init();
+    virtual void scan(bool recurse = true);
     virtual bool preserveIndexCache() { return true; }
     virtual bool useObjectCache() { return true; }
 
@@ -44,7 +44,7 @@ public:
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
 
 private:
-    void scanDirectoryRecursively(Poco::File& directory);
+    void scanDirectory(Poco::File& directory, bool recurse = true);
     void loadTagger();
     void setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format);
 

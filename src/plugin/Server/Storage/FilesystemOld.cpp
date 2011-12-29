@@ -204,7 +204,7 @@ public:
 private:
 //     void setBasePath(const std::string& basePath);
     void scanDirectory(const std::string& basePath);
-    void scanDirectoryRecursively(Poco::File& directory);
+    void scanDirectory(Poco::File& directory);
     void loadTagger();
     bool cacheExists();
     void readCache();
@@ -436,7 +436,7 @@ FileModel::scanDirectory(const std::string& basePath)
     else {
         loadTagger();
         Poco::File baseDir(basePath);
-        scanDirectoryRecursively(baseDir);
+        scanDirectory(baseDir);
 
         // sort items
 //        for (std::vector<FileItem*>::iterator it = _items.begin(); it != _items.end(); ++it) {
@@ -454,7 +454,7 @@ FileModel::scanDirectory(const std::string& basePath)
 
 
 void
-FileModel::scanDirectoryRecursively(Poco::File& directory)
+FileModel::scanDirectory(Poco::File& directory)
 {
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
@@ -490,7 +490,7 @@ FileModel::scanDirectoryRecursively(Poco::File& directory)
                 }
             }
             else if (dir->isDirectory()) {
-                scanDirectoryRecursively(*dir);
+                scanDirectory(*dir);
             }
         }
         catch(...) {

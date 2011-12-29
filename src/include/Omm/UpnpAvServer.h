@@ -225,7 +225,7 @@ public:
     void setBasePath(const std::string& basePath);
     std::string getBasePath();
 
-    virtual void init() {}
+    virtual void scan(bool recurse = true) {}
     // class property of container media object itself
 //    virtual std::string getContainerClass() { return AvClass::CONTAINER; }
 
@@ -353,7 +353,7 @@ public:
     virtual bool singleRowInterface() { return false; }
 
     virtual void setBasePath(const std::string& basePath);
-    virtual void scan(bool on = true) {}
+    virtual void updateCache(bool on = true) {}
 
 protected:
     void initObject(AbstractMediaObject* pObject, ui4 index);
@@ -379,22 +379,22 @@ public:
     virtual CsvList* getSortCaps();
     virtual CsvList* getSearchCaps();
 
-    virtual void scan(bool on = true);
+    virtual void updateCache(bool on = true);
 
 private:
-    void scanThread();
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
     bool cacheNeedsUpdate();
-    bool scanThreadIsRunning();
+    void updateCacheThread();
+    bool updateCacheThreadIsRunning();
 
     CsvList             _searchCaps;
     CsvList             _sortCaps;
 
-    Poco::Thread                                        _scanThread;
-    Poco::RunnableAdapter<CachedServerContainer>        _scanThreadRunnable;
-    bool                                                _scanThreadRunning;
-    Poco::FastMutex                                     _scanThreadLock;
+    Poco::Thread                                        _updateCacheThread;
+    Poco::RunnableAdapter<CachedServerContainer>        _updateCacheThreadRunnable;
+    bool                                                _updateCacheThreadRunning;
+    Poco::FastMutex                                     _updateCacheThreadLock;
 };
 
 
@@ -423,50 +423,6 @@ private:
 //
 //    AbstractMediaObject*            _pChild;
 //};
-
-
-/*
-class AbstractDataModel
-{
-public:
-    // ------- mandatory interface to be implemented --------
-    // deliver meta data for controller
-    virtual ServerObject* getObject(const std::string& id) = 0;
-    // count = 0 means fetch all children
-    virtual std::vector<ServerObject*> getChildren(const std::string& id, ui4 start = 0, ui4 count = 0) = 0;
-
-    // deliver media stream for renderer
-    virtual void stream(const std::string& id, const std::string& res, std::ostream& stream) = 0;
-
-    // ------- optional interface to be implemented --------
-    // scan control
-    virtual void startScan() {}
-    virtual void stopScan() {}
-
-    // cache control (size == 0 means unlimited cache size)
-    virtual void activateCache(bool = true, ui4 size = 0) {}
-
-    // filter
-    virtual void filter(std::vector<std::string> properties) {};
-
-    // sort
-    virtual void sort(const std::string& property) {};
-
-    // search for metadata
-    // count = 0 means return all found objects
-    virtual std::vector<ServerObject*> search(const std::string& name, const std::vector<std::string>& properties, ui4 start = 0, ui4 count = 0) {};
-
-    // ------- callbacks  --------
-    // update notification events are moderated by the server and not the data model
-    // if no objectsHaveChanged notification appeared inbetween update events, only a system update event is triggered
-    // also, changes on the same object inbetween events are handled by the server
-    //
-    // system data update notifications
-    virtual void hasChanged() {}
-    // container based update notifications
-    virtual  std::vector<ServerObject*> objectsHaveChanged() {}
-};
-*/
 
 
 } // namespace Av

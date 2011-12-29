@@ -32,7 +32,7 @@ DvbModel::DvbModel()
 
 
 void
-DvbModel::init()
+DvbModel::scan(bool recurse)
 {
     scanChannelConfig(getBasePath());
     Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);

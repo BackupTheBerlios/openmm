@@ -43,10 +43,10 @@ FileModel::~FileModel()
 
 
 void
-FileModel::init()
+FileModel::scan(bool recurse)
 {
     Poco::File baseDir(getBasePath());
-    scanDirectoryRecursively(baseDir);
+    scanDirectory(baseDir, recurse);
 }
 
 
@@ -176,15 +176,14 @@ FileModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFo
 
 
 void
-FileModel::scanDirectoryRecursively(Poco::File& directory)
+FileModel::scanDirectory(Poco::File& directory, bool recurse)
 {
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
     while(dir != end) {
         try {
-//            addPath(dir->path().substr(getBasePath().length()));
-            if (dir->isDirectory()) {
-                scanDirectoryRecursively(*dir);
+            if (recurse && dir->isDirectory()) {
+                scanDirectory(*dir);
             }
             else {
                 addPath(dir->path().substr(getBasePath().length()));

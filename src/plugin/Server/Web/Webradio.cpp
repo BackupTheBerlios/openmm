@@ -41,7 +41,7 @@ WebradioModel::WebradioModel()
 
 
 void
-WebradioModel::init()
+WebradioModel::scan(bool recurse)
 {
     scanStationConfig(getBasePath());
 }
