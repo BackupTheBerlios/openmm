@@ -330,23 +330,14 @@ MediaServer::MediaServer()
 
 MediaServer::~MediaServer()
 {
-//    delete _pRoot;
 }
 
 
 void
 MediaServer::setRoot(AbstractMediaObject* pRoot)
 {
-//    _pRoot = pRoot;
     _pDevContentDirectoryServerImpl->_pRoot = pRoot;
 }
-
-
-//AbstractMediaObject*
-//AvServer::getRoot()
-//{
-//    return _pRoot;
-//}
 
 
 std::istream*
@@ -460,10 +451,19 @@ StreamingMediaObject::StreamingMediaObject(int port)
 }
 
 
+StreamingMediaObject::StreamingMediaObject(const StreamingMediaObject& object) :
+_pItemServer(object._pItemServer)
+{
+}
+
+
 StreamingMediaObject::~StreamingMediaObject()
 {
-    _pItemServer->stop();
-    delete _pItemServer;
+    if (_pItemServer) {
+        _pItemServer->stop();
+        delete _pItemServer;
+        _pItemServer = 0;
+    }
 }
 
 
@@ -836,9 +836,11 @@ ServerContainer::createMediaContainer()
 {
     Log::instance()->upnpav().debug("server container create media container");
 
-    Omm::Av::MemoryMediaObject* pContainer = new Omm::Av::MemoryMediaObject;
+//    ServerContainer* pContainer = new ServerContainer(this);
+    MemoryMediaObject* pContainer = new MemoryMediaObject;
+
     pContainer->setIsContainer(true);
-    pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
+    pContainer->setClass(AvClass::className(AvClass::CONTAINER));
 
     return pContainer;
 }

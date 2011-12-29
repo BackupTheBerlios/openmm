@@ -112,12 +112,9 @@ public:
     virtual ~MediaServer();
 
     void setRoot(AbstractMediaObject* pRoot);
-//    AbstractMediaObject* getRoot();
 
 private:
     DevContentDirectoryServerImpl* _pDevContentDirectoryServerImpl;
-
-//    AbstractMediaObject* _pRoot;
 };
 
 
@@ -196,18 +193,22 @@ class StreamingMediaObject : public AbstractMediaObject
 
 public:
     StreamingMediaObject(int port = 0);
+    StreamingMediaObject(const StreamingMediaObject& object);
+
     ~StreamingMediaObject();
 
+    // this really is createChildItem(), not createChildObject()
     virtual AbstractMediaObject* createChildObject();
 
 protected:
     virtual std::istream* getIconStream();
 
+    MediaItemServer*        _pItemServer;
+
 private:
     std::string getServerAddress();
     std::string getServerProtocol();
 
-    MediaItemServer*        _pItemServer;
 //     AvStream::Transcoder*   _pTranscoder;
 };
 

@@ -16,17 +16,17 @@ Omm currently includes the following components:
 
 omm - the main application, providing a sensible mix of Omm components.
 
-ommcontrol - a UPnP-AV Media Controller
-ommcontrol is the "remote control" of your multimedia system.
+ommcontroller - a UPnP-AV Media Controller
+ommcontroller is the "remote control" of your multimedia system.
 It lets you select your media source (UPnP-AV Server), browse the content of the server, select a media object
 (song, video, tv-channel, ...), select a media output (UPnP-AV Renderer) and control the transport of the media
 from Server to Renderer (start, stop, seek, ...).
 
-ommrender - a UPnP-AV Media Renderer
-ommrender is the "set-top box" for you TV. It renders the media streams
+ommrenderer - a UPnP-AV Media Renderer
+ommrenderer is the "set-top box" for you TV. It renders the media streams
 coming from the UPnP-AV Server to a screen and a sound system.
 
-ommserve - a set of UPnP-AV Media Servers
+ommserver - a set of UPnP-AV Media Servers
 Currently only a plugin for VDR (Video Disc Recorder - http://www.cadsoft.de/vdr/) is available.
 It gives you access to digital television provided by VDR (DVB-S, DVB-C or DVB-T). The plugin
 exposes the TV channels, you can watch live-TV and the recordings. Seeking in recordings is
@@ -65,12 +65,12 @@ $ ./make.sh package
 All Omm components depend on the Poco libraries (http://pocoproject.org/).
 Further dependencies are:
 
-ommcontrol: Qt 4.4.3 or later
-ommrender: X with support for xvideo is currently recommended
-ommrender VLC engine: libvlc (as of vlc 0.9.4 or later)
-ommrender mplayer engine: mplayer at least 1.0 pre-something installed as a runtime dependency
-ommrender xine engine: libxine 1.1.15 or later
-ommserve-vdr: VDR 1.6.0 with streamdev-server plugin
+ommcontroller: Qt 4.4.3 or later
+ommrenderer: X with support for xvideo is currently recommended
+ommrenderer VLC engine: libvlc (as of vlc 0.9.4 or later)
+ommrenderer mplayer engine: mplayer at least 1.0 pre-something installed as a runtime dependency
+ommrenderer xine engine: libxine 1.1.15 or later
+ommserver-vdr: VDR 1.6.0 with streamdev-server plugin
 
 The mplayer engine has an incredible good seek performance on http streams, but has some flaws when
 it comes to controlling it via IPC.
@@ -87,14 +87,14 @@ So, currently I recommend the VLC engine.
 
 4. Running the Applications (outdated)
 
-This is pretty straight forward: just run ommcontrol or ommrender on a single or on several different machines.
+This is pretty straight forward: just run ommcontroller or ommrenderer on a single or on several different machines.
 No configuration is needed, in the first place. All UPnP-AV Servers and UPnP-AV Renderers announce
-themselves on the local network and then pop up in ommcontrol. You can quit or start a second ommcontrol while
-some media is rendered, so different instances of ommcontrol can concurrently control one playing media.
-On the other hand, one instance of ommcontrol can control different instances of ommrender, for example one
+themselves on the local network and then pop up in ommcontroller. You can quit or start a second ommcontroller while
+some media is rendered, so different instances of ommcontroller can concurrently control one playing media.
+On the other hand, one instance of ommcontroller can control different instances of ommrenderer, for example one
 in the living-room and one in the kitchen. Your mileage may vary.
 
-ommserve-vdr must be installed as a vdr-plugin, usually in /usr/lib/vdr/plugins. The streamdev-plugin must be
+ommserver-vdr must be installed as a vdr-plugin, usually in /usr/lib/vdr/plugins. The streamdev-plugin must be
 configured and working on the standard ports. Don't forget to add:
 
 streamdev-server.AllowSuspend = 1
