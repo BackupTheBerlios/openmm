@@ -185,7 +185,8 @@ protected:
 };
 
 
-class StreamingMediaObject : public AbstractMediaObject
+//class StreamingMediaObject : public AbstractMediaObject
+class StreamingMediaObject : public MemoryMediaObject
 {
     friend class ItemRequestHandler;
     friend class StreamingResource;
@@ -193,7 +194,8 @@ class StreamingMediaObject : public AbstractMediaObject
 
 public:
     StreamingMediaObject(int port = 0);
-    StreamingMediaObject(const StreamingMediaObject& object);
+//    StreamingMediaObject(const StreamingMediaObject& object);
+    StreamingMediaObject(bool foo);
 
     ~StreamingMediaObject();
 
@@ -331,11 +333,13 @@ class ServerContainer : public StreamingMediaObject, public Util::ConfigurablePl
 {
 public:
     ServerContainer(int port = 0);
+//    ServerContainer(const ServerContainer& container);
+    ServerContainer(bool foo);
 
     void setDataModel(AbstractDataModel* pDataModel);
     AbstractDataModel* getDataModel();
 
-    virtual AbstractMediaObject* createMediaContainer();
+    virtual ServerContainer* createMediaContainer();
     virtual ServerItem* createMediaItem();
     virtual AbstractMediaObject* createChildObject();
 

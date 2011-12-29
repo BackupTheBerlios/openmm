@@ -451,8 +451,13 @@ StreamingMediaObject::StreamingMediaObject(int port)
 }
 
 
-StreamingMediaObject::StreamingMediaObject(const StreamingMediaObject& object) :
-_pItemServer(object._pItemServer)
+//StreamingMediaObject::StreamingMediaObject(const StreamingMediaObject& object) :
+//_pItemServer(object._pItemServer)
+//{
+//}
+
+
+StreamingMediaObject::StreamingMediaObject(bool foo)
 {
 }
 
@@ -537,9 +542,8 @@ AbstractDataModel::setBasePath(const std::string& basePath)
 //    Poco::File(_metaDirPath).createDirectories();
     _indexFilePath = Poco::Path(_metaDirPath, "index");
     Omm::Av::Log::instance()->upnpav().debug("data model scan ...");
-    scan();
+    scan(false);
     Omm::Av::Log::instance()->upnpav().debug("data model scan finished.");
-    getServerContainer()->updateCache();
 }
 
 
@@ -816,6 +820,18 @@ StreamingMediaObject(port)
 }
 
 
+//ServerContainer::ServerContainer(const ServerContainer& container) :
+//StreamingMediaObject(container)
+//{
+//}
+
+
+ServerContainer::ServerContainer(bool foo) :
+StreamingMediaObject(foo)
+{
+}
+
+
 void
 ServerContainer::setDataModel(AbstractDataModel* pDataModel)
 {
@@ -831,13 +847,15 @@ ServerContainer::getDataModel()
 }
 
 
-AbstractMediaObject*
+ServerContainer*
 ServerContainer::createMediaContainer()
 {
     Log::instance()->upnpav().debug("server container create media container");
 
-//    ServerContainer* pContainer = new ServerContainer(this);
-    MemoryMediaObject* pContainer = new MemoryMediaObject;
+//    ServerContainer* pContainer = new ServerContainer(*this);
+    ServerContainer* pContainer = new ServerContainer;
+    pContainer->_pItemServer = _pItemServer;
+//    MemoryMediaObject* pContainer = new MemoryMediaObject;
 
     pContainer->setIsContainer(true);
     pContainer->setClass(AvClass::className(AvClass::CONTAINER));
@@ -1009,8 +1027,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& child
 void
 ServerContainer::setBasePath(const std::string& basePath)
 {
-//    _basePath = basePath;
     _pDataModel->setBasePath(basePath);
+    updateCache();
 }
 
 

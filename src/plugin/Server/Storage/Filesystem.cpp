@@ -70,7 +70,9 @@ FileModel::getMediaObject(const std::string& path)
     Poco::Path fullPath(getBasePath(), path);
     if (Poco::File(fullPath).isDirectory()) {
         Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString());
-        Omm::Av::AbstractMediaObject* pContainer = getServerContainer()->createMediaContainer();
+        Omm::Av::ServerContainer* pContainer = getServerContainer()->createMediaContainer();
+        pContainer->setDataModel(new FileModel);
+        pContainer->setBasePath(fullPath.toString());
         pContainer->setTitle(fullPath.getFileName());
         return pContainer;
     }

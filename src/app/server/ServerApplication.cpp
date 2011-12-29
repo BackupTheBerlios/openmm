@@ -187,6 +187,7 @@ protected:
                 _name = "OMM Server";
             }
 
+//            Omm::Av::ServerContainer* pContainer = new Omm::Av::CachedServerContainer;
             Omm::Av::ServerContainer* pContainer = new Omm::Av::ServerContainer;
             pContainer->setTitle(_name);
             pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
