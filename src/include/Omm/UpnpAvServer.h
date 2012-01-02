@@ -227,6 +227,7 @@ public:
     void setBasePath(const std::string& basePath);
     std::string getBasePath();
 
+    virtual std::string getServerClass() { return ""; }
     virtual void scan(bool recurse = true) {}
     // class property of container media object itself
 //    virtual std::string getContainerClass() { return AvClass::CONTAINER; }
@@ -351,10 +352,8 @@ public:
     virtual AbstractProperty* createProperty();
 
     virtual ui4 getChildCount();
-//    virtual ui4 getIndexForRow(ui4 row, const std::string& sort = "", const std::string& search = "");
     virtual AbstractMediaObject* getChildForIndex(ui4 index);
     virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
-    virtual bool singleRowInterface() { return false; }
 
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true) {}
@@ -377,12 +376,12 @@ class CachedServerContainer : public ServerContainer, public DatabaseCache
 public:
     CachedServerContainer();
 
-    virtual bool singleRowInterface() { return false; }
     virtual bool isSearchable() { return true; }
 
     virtual CsvList* getSortCaps();
     virtual CsvList* getSearchCaps();
 
+    virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true);
 
 private:
@@ -392,8 +391,8 @@ private:
     void updateCacheThread();
     bool updateCacheThreadIsRunning();
 
-    CsvList             _searchCaps;
-    CsvList             _sortCaps;
+    CsvList                                             _searchCaps;
+    CsvList                                             _sortCaps;
 
     Poco::Thread                                        _updateCacheThread;
     Poco::RunnableAdapter<CachedServerContainer>        _updateCacheThreadRunnable;

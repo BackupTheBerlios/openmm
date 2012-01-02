@@ -54,11 +54,12 @@ std::string
 FileModel::getParentPath(const std::string& path)
 {
     std::string::size_type pos = path.rfind("/");
-    Omm::Av::Log::instance()->upnpav().debug("file data model path: " + path + ", parent path: " + path.substr(0, pos));
     if (pos == std::string::npos) {
+        Omm::Av::Log::instance()->upnpav().debug("file data model path: " + path + ", parent path: \"\"");
         return "";
     }
     else {
+        Omm::Av::Log::instance()->upnpav().debug("file data model path: " + path + ", parent path: " + path.substr(0, pos));
         return path.substr(0, pos);
     }
 }
@@ -71,8 +72,10 @@ FileModel::getMediaObject(const std::string& path)
     if (Poco::File(fullPath).isDirectory()) {
         Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString());
         Omm::Av::ServerContainer* pContainer = getServerContainer()->createMediaContainer();
-        pContainer->setDataModel(new FileModel);
-        pContainer->setBasePath(fullPath.toString());
+//        pContainer->setDataModel(new FileModel);
+        pContainer->setDataModel(this);
+//        pContainer->setBasePath(fullPath.toString());
+//        pContainer->setBasePath(getBasePath());
         pContainer->setTitle(fullPath.getFileName());
         return pContainer;
     }

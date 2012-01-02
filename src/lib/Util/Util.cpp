@@ -25,6 +25,8 @@
 #include <Poco/ConsoleChannel.h>
 #include <Poco/Environment.h>
 #include <Poco/NumberFormatter.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include "Util.h"
 
@@ -80,44 +82,96 @@ Log::plugin()
 }
 
 
-std::string Home::_home = "";
-const std::string Home::_defaultHome("/var");
-Poco::FastMutex Home::_lock;
+Home* Home::_pInstance = 0;
+Poco::Mutex Home::_lock;
 
-const std::string
-Home::getHomePath()
+Home*
+Home::instance()
 {
-    Poco::FastMutex::ScopedLock lock(_lock);
+    Poco::Mutex::ScopedLock lock(_lock);
 
-    if (_home == "") {
-        _home = Poco::Environment::get("OMM_HOME", Poco::Environment::get("HOME", _defaultHome));
-        Log::instance()->util().information("OMM HOME: " + _home);
+    if (!_pInstance) {
+        _pInstance = new Home;
     }
-    if (_home == Poco::Environment::get("HOME")) {
-        _home += ".omm";
+    return _pInstance;
+}
+
+
+Home::Home()
+{
+    _homeDirPath = Poco::Environment::get("OMM_HOME", Poco::Environment::get("HOME", "/var"));
+    if (_homeDirPath == Poco::Environment::get("HOME")) {
+        _homeDirPath += "/.omm";
     }
     else {
-        _home += "omm";
+        _homeDirPath += "/omm";
     }
-    return _home;
+    Log::instance()->util().information("OMM HOME: " + _homeDirPath);
+    try {
+        Poco::File(_homeDirPath).createDirectories();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->util().error("can not create OMM HOME: " + _homeDirPath);
+    }
 }
 
 
 const std::string
-Home::getCachePath()
+Home::getHomeDirPath()
 {
-    Poco::FastMutex::ScopedLock lock(_lock);
+    Poco::Mutex::ScopedLock lock(_lock);
 
-    return Poco::Environment::get("OMM_CACHE", getHomePath() + "/" + "cache");
+    return _homeDirPath;
+}
+
+
+
+const std::string
+Home::getCacheDirPath(const std::string& relPath)
+{
+    Poco::Mutex::ScopedLock lock(_lock);
+//    Log::instance()->util().debug("get cache dir path: " + _homeDirPath);
+
+    std::string fullPath = Poco::Environment::get("OMM_CACHE", getHomeDirPath() + "/cache/") + relPath;
+    try {
+        Poco::File(fullPath).createDirectories();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->util().error("can not create cache directory path: " + fullPath);
+    }
+    return fullPath;
 }
 
 
 const std::string
-Home::getConfigPath()
+Home::getConfigDirPath(const std::string& relPath)
 {
-    Poco::FastMutex::ScopedLock lock(_lock);
+    Poco::Mutex::ScopedLock lock(_lock);
 
-    return Poco::Environment::get("OMM_CONFIG", getHomePath() + "/" + "config");
+    std::string fullPath = Poco::Environment::get("OMM_CONFIG", getHomeDirPath() + "/config/") + relPath;
+    try {
+        Poco::File(fullPath).createDirectories();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->util().error("can not create config directory path: " + fullPath);
+    }
+    return fullPath;
+}
+
+
+const std::string
+Home::getMetaDirPath(const std::string& relPath)
+{
+    Poco::Mutex::ScopedLock lock(_lock);
+
+    std::string fullPath = Poco::Environment::get("OMM_META", getHomeDirPath() + "/meta/") + relPath;
+    try {
+        Poco::File(fullPath).createDirectories();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->util().error("can not create meta directory path: " + fullPath);
+    }
+    return fullPath;
 }
 
 

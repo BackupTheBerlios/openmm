@@ -452,8 +452,6 @@ public:
     // simple lazy browsing with fetchChildren() and fetchedAllChildren(), only for sample Qt gui, for now
     virtual int fetchChildren();                                                                // controller object, lazy browse
     bool fetchedAllChildren();                                                                  // controller object, lazy browse
-    // choose between getting one child at a time or a block of children starting at row.
-    virtual bool singleRowInterface() { return true; }
 
 protected:
     virtual void appendChildImpl(AbstractMediaObject* pChild) {}

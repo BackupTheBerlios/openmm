@@ -59,16 +59,20 @@ private:
 class Home
 {
 public:
-    static const std::string getHomePath();
-    static const std::string getCachePath();
-    static const std::string getConfigPath();
+    static Home* instance();
+
+    const std::string getHomeDirPath();
+    const std::string getCacheDirPath(const std::string& relPath);
+    const std::string getConfigDirPath(const std::string& relPath);
+    const std::string getMetaDirPath(const std::string& relPath);
 
 private:
-    static std::string          _home;
-    static std::string          _cache;
-    static std::string          _config;
-    static const std::string    _defaultHome;
-    static Poco::FastMutex      _lock;
+    Home();
+
+    static Home*                _pInstance;
+    static Poco::Mutex          _lock;
+
+    std::string                 _homeDirPath;
 };
 
 

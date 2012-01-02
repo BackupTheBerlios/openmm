@@ -532,17 +532,10 @@ AbstractDataModel::getServerContainer()
 void
 AbstractDataModel::setBasePath(const std::string& basePath)
 {
-//    _cacheFile = Util::Home::getCachePath() + "/indexMap";
     _basePath = basePath;
-    _cacheDirPath = Poco::Path(_basePath, "/.omm/cache");
-//    Poco::File(_cacheDirPath).createDirectories();
-    _configDirPath = Poco::Path(_basePath, "/.omm/config");
-//    Poco::File(_configDirPath).createDirectories();
-    _metaDirPath = Poco::Path(_basePath, "/.omm/meta");
-//    Poco::File(_metaDirPath).createDirectories();
-    _indexFilePath = Poco::Path(_metaDirPath, "index");
+    _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(basePath), "index");
     Omm::Av::Log::instance()->upnpav().debug("data model scan ...");
-    scan(false);
+    scan(true);
     Omm::Av::Log::instance()->upnpav().debug("data model scan finished.");
 }
 
@@ -611,23 +604,6 @@ AbstractDataModel::endIndex()
 }
 
 
-//ui4
-//AbstractDataModel::getBlockAtRow(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
-//{
-//
-//}
-
-//ui4
-//AbstractDataModel::getIndex(ui4 indexNumber)
-//{
-//    if (indexNumber >= _indexCache.size()) {
-//        return INVALID_INDEX;
-//    }
-//    // return the indexNumber'th element in _indexCache
-//    return (*_indexCache[indexNumber]).first;
-//}
-
-
 void
 AbstractDataModel::addPath(const std::string& path)
 {
@@ -643,7 +619,7 @@ AbstractDataModel::addPath(const std::string& path)
             Log::instance()->upnpav().error("abstract data model max index reached, can not add path: " + path);
             return;
         }
-//        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
+        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
     }
     // create a new index
     _pathMap[path] = index;
@@ -997,6 +973,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& child
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
+    Log::instance()->upnpav().debug("server container, get children at row offset.");
+
     ui4 totalChildCount = 0;
     if (sort == "" && search == "*") {
         ui4 r = 0;
@@ -1112,6 +1090,15 @@ CachedServerContainer::getSortCaps()
 
 
 void
+CachedServerContainer::setBasePath(const std::string& basePath)
+{
+    Log::instance()->upnpav().debug("cached server container, set base path to: " + basePath);
+    setCacheFilePath(Util::Home::instance()->getCacheDirPath(basePath) + _pDataModel->getServerClass() + "/objects");
+    ServerContainer::setBasePath(basePath);
+}
+
+
+void
 CachedServerContainer::updateCache(bool on)
 {
     _updateCacheThreadLock.lock();
@@ -1129,7 +1116,7 @@ CachedServerContainer::updateCache(bool on)
 void
 CachedServerContainer::updateCacheThread()
 {
-    Log::instance()->upnpav().debug("cached server container, database scan thread started ...");
+    Log::instance()->upnpav().debug("cached server container, update cache thread started ...");
     if (!cacheNeedsUpdate()) {
         Log::instance()->upnpav().debug("database cache is current, nothing to do");
     }
@@ -1142,7 +1129,10 @@ CachedServerContainer::updateCacheThread()
             DatabaseCache::insertMediaObject(ServerContainer::getChildForIndex((*it).first));
         }
     }
-    Log::instance()->upnpav().debug("cached server container, database scan thread finished.");
+    _updateCacheThreadLock.lock();
+    _updateCacheThreadRunning = false;
+    _updateCacheThreadLock.unlock();
+    Log::instance()->upnpav().debug("cached server container, update cache thread finished.");
 }
 
 
@@ -1214,9 +1204,11 @@ CachedServerContainer::cacheNeedsUpdate()
         return true;
     }
     else if (rows == _pDataModel->getIndexCount()) {
+        Log::instance()->upnpav().debug("cached server container, database cache is current.");
         return false;
     }
     else {
+        Log::instance()->upnpav().debug("cached server container, database cache needs update.");
         return true;
     }
 }
@@ -1226,6 +1218,7 @@ bool
 CachedServerContainer::updateCacheThreadIsRunning()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
+    Log::instance()->upnpav().debug("cached server container, update cache thread is running: " + std::string(_updateCacheThreadRunning ? "yes" : "no"));
     return _updateCacheThreadRunning;
 }
 

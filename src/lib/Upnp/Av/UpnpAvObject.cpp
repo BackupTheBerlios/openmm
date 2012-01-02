@@ -1618,22 +1618,12 @@ MediaObjectWriter2::writeChildren(ui4& totalCount, std::string& meta, ui4 offset
 
     ui4 childrenWritten;
 
-    if (_pMediaObject->singleRowInterface()) {
-        totalCount = _pMediaObject->getTotalChildCount();
-        ui4 childCount = _pMediaObject->getChildCount();
-        for (childrenWritten = 0; (childrenWritten < count) && (childrenWritten < childCount - offset); childrenWritten++) {
-            MediaObjectWriter2 writer(_pMediaObject->getChildForRow(offset + childrenWritten));
-            writer.writeMetaData(_pDidl);
-        }
-    }
-    else {
-        std::vector<AbstractMediaObject*> objects;
-        totalCount = _pMediaObject->getChildrenAtRowOffset(objects, offset, count, sort, search);
-        childrenWritten = objects.size();
-        for (std::vector<AbstractMediaObject*>::iterator it = objects.begin(); it != objects.end(); ++it) {
-            MediaObjectWriter2 writer(*it);
-            writer.writeMetaData(_pDidl);
-        }
+    std::vector<AbstractMediaObject*> objects;
+    totalCount = _pMediaObject->getChildrenAtRowOffset(objects, offset, count, sort, search);
+    childrenWritten = objects.size();
+    for (std::vector<AbstractMediaObject*>::iterator it = objects.begin(); it != objects.end(); ++it) {
+        MediaObjectWriter2 writer(*it);
+        writer.writeMetaData(_pDidl);
     }
 
     writeMetaDataClose(meta);
