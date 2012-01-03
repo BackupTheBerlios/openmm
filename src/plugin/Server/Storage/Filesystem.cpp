@@ -72,10 +72,7 @@ FileModel::getMediaObject(const std::string& path)
     if (Poco::File(fullPath).isDirectory()) {
         Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString());
         Omm::Av::ServerContainer* pContainer = getServerContainer()->createMediaContainer();
-//        pContainer->setDataModel(new FileModel);
         pContainer->setDataModel(this);
-//        pContainer->setBasePath(fullPath.toString());
-//        pContainer->setBasePath(getBasePath());
         pContainer->setTitle(fullPath.getFileName());
         return pContainer;
     }
@@ -187,6 +184,7 @@ FileModel::scanDirectory(Poco::File& directory, bool recurse)
     Poco::DirectoryIterator end;
     while(dir != end) {
         try {
+//            addPath(dir->path().substr(getBasePath().length()));
             if (recurse && dir->isDirectory()) {
                 scanDirectory(*dir);
             }

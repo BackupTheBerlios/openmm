@@ -43,6 +43,7 @@ class MediaItemServer;
 class StreamingMediaObject;
 class DevContentDirectoryServerImpl;
 class ServerContainer;
+class AbstractDataModel;
 
 
 class MediaItemServer
@@ -56,16 +57,9 @@ public:
 
     void start();
     void stop();
-    // TODO: set a data model here. Initialization of data model should be
-    // asynchronous, using update mechanism of UPnP AV directory service.
 
     Poco::UInt16 getPort() const;
     std::string getProtocol();
-
-protected:
-    // virtual bool initItemServer() { return true; }
-    /// will be executed at start. If initializion takes a while, start(true)
-    /// may be used for asynchronous initialization.
 
 private:
     StreamingMediaObject*                       _pServerContainer;
@@ -85,8 +79,8 @@ private:
     std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::streamoff start = 0, std::streamoff end = -1);
     void parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end);
 
-    unsigned int _bufferSize;
-    MediaItemServer*  _pItemServer;
+    unsigned int        _bufferSize;
+    MediaItemServer*    _pItemServer;
 };
 
 
@@ -99,7 +93,7 @@ public:
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
 
 private:
-    MediaItemServer*  _pItemServer;
+    MediaItemServer*    _pItemServer;
 };
 
 
@@ -111,7 +105,7 @@ public:
     MediaServer();
     virtual ~MediaServer();
 
-    void setRoot(AbstractMediaObject* pRoot);
+    void setRoot(StreamingMediaObject* pRoot);
 
 private:
     DevContentDirectoryServerImpl* _pDevContentDirectoryServerImpl;
@@ -171,21 +165,6 @@ protected:
 };
 
 
-// TODO: this should be a ServerObject (automatic id assignment) with
-// arbitrary implementation for accessing properties (see next todo brigde pattern)
-// TODO: use bridge pattern for AbstractMediaObject, similar to AbstractProperty (really do so?)
-// class StreamingMediaItem : public AbstractMediaObject
-class StreamingMediaItem : public MemoryMediaObject
-{
-public:
-    StreamingMediaItem(StreamingMediaObject* pServer);
-
-protected:
-    StreamingMediaObject*       _pServer;
-};
-
-
-//class StreamingMediaObject : public AbstractMediaObject
 class StreamingMediaObject : public MemoryMediaObject
 {
     friend class ItemRequestHandler;
@@ -194,10 +173,11 @@ class StreamingMediaObject : public MemoryMediaObject
 
 public:
     StreamingMediaObject(int port = 0);
+    StreamingMediaObject(StreamingMediaObject* pServer);
 //    StreamingMediaObject(const StreamingMediaObject& object);
-    StreamingMediaObject(bool foo);
-
     ~StreamingMediaObject();
+
+    void startStreamingServer();
 
     // this really is createChildItem(), not createChildObject()
     virtual AbstractMediaObject* createChildObject();
@@ -206,12 +186,97 @@ protected:
     virtual std::istream* getIconStream();
 
     MediaItemServer*        _pItemServer;
+    StreamingMediaObject*       _pServer;
 
 private:
     std::string getServerAddress();
     std::string getServerProtocol();
 
 //     AvStream::Transcoder*   _pTranscoder;
+};
+
+
+class ServerItemResource : public Omm::Av::StreamingResource
+{
+public:
+    ServerItemResource(ServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
+
+    virtual bool isSeekable();
+    virtual std::streamsize getSize();
+    virtual std::istream* getStream();
+};
+
+
+class ServerItem : public Omm::Av::StreamingMediaObject
+{
+    friend class ServerContainer;
+
+public:
+    ServerItem(ServerContainer* pServer);
+    virtual ~ServerItem();
+
+    virtual ServerItemResource* createResource();
+};
+
+
+class ServerContainer : public StreamingMediaObject, public Util::ConfigurablePlugin
+{
+public:
+    ServerContainer(int port = 0);
+
+    void setDataModel(AbstractDataModel* pDataModel);
+    AbstractDataModel* getDataModel();
+
+    virtual ServerContainer* createMediaContainer();
+    virtual ServerItem* createMediaItem();
+    virtual AbstractMediaObject* createChildObject();
+
+    virtual ui4 getChildCount();
+    virtual AbstractMediaObject* getChildForIndex(ui4 index);
+    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+
+    virtual void setBasePath(const std::string& basePath);
+    virtual void updateCache(bool on = true) {}
+
+protected:
+    virtual void initObject(AbstractMediaObject* pObject, ui4 index);
+
+    AbstractDataModel*              _pDataModel;
+
+private:
+    Poco::FastMutex                 _serverLock;
+};
+
+
+class CachedServerContainer : public ServerContainer, public DatabaseCache
+{
+public:
+    CachedServerContainer();
+
+    virtual bool isSearchable() { return true; }
+
+    // TODO: sort and search caps should be moved to data model
+    virtual CsvList* getSortCaps();
+    virtual CsvList* getSearchCaps();
+
+    virtual void setBasePath(const std::string& basePath);
+    virtual void updateCache(bool on = true);
+
+private:
+    virtual AbstractMediaObject* getChildForIndex(ui4 index);
+    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    bool cacheNeedsUpdate();
+    void updateCacheThread();
+    bool updateCacheThreadIsRunning();
+    virtual void initObject(AbstractMediaObject* pObject, ui4 index);
+
+    CsvList                                             _searchCaps;
+    CsvList                                             _sortCaps;
+
+    Poco::Thread                                        _updateCacheThread;
+    Poco::RunnableAdapter<CachedServerContainer>        _updateCacheThreadRunnable;
+    bool                                                _updateCacheThreadRunning;
+    Poco::FastMutex                                     _updateCacheThreadLock;
 };
 
 
@@ -236,7 +301,6 @@ public:
     // buffering / caching / optimized access is done internally at next layers
     // child media object creation / deletion
     // index and path
-//    virtual void createIndexCache() {}
     virtual bool preserveIndexCache() { return false; }
     virtual bool useObjectCache() { return false; }
     // decide if to use index cache, if no, implement next four methods
@@ -257,7 +321,6 @@ public:
     void addPath(const std::string& path);
     void removePath(const std::string& path);
 
-    virtual bool isContainer(const std::string& path) { return false; }
     virtual std::string getParentPath(const std::string& path) { return ""; }
 
     // meta data of object
@@ -291,7 +354,6 @@ private:
 class SimpleDataModel : public AbstractDataModel
 {
 public:
-    virtual AbstractMediaObject* getMediaObject(ui4 index);
     virtual AbstractMediaObject* getMediaObject(const std::string& path);
 
      // properties
@@ -305,127 +367,6 @@ public:
 
     virtual std::istream* getIconStream(const std::string& path) { return 0; }
 };
-
-
-class ServerItemResource : public Omm::Av::StreamingResource
-{
-public:
-    ServerItemResource(ServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
-
-    virtual bool isSeekable();
-    virtual std::streamsize getSize();
-    virtual std::istream* getStream();
-};
-
-
-class ServerItem : public Omm::Av::StreamingMediaItem
-{
-    friend class ServerContainer;
-
-public:
-    ServerItem(ServerContainer* pServer);
-    virtual ~ServerItem();
-
-    virtual ServerItemResource* createResource();
-};
-
-
-class ServerContainer : public StreamingMediaObject, public Util::ConfigurablePlugin
-{
-public:
-    ServerContainer(int port = 0);
-//    ServerContainer(const ServerContainer& container);
-    ServerContainer(bool foo);
-
-    void setDataModel(AbstractDataModel* pDataModel);
-    AbstractDataModel* getDataModel();
-
-    virtual ServerContainer* createMediaContainer();
-    virtual ServerItem* createMediaItem();
-    virtual AbstractMediaObject* createChildObject();
-
-    virtual bool isContainer();
-    virtual int getPropertyCount(const std::string& name = "");
-    virtual AbstractProperty* getProperty(int index);
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);
-    virtual void addProperty(AbstractProperty* pProperty);
-    virtual AbstractProperty* createProperty();
-
-    virtual ui4 getChildCount();
-    virtual AbstractMediaObject* getChildForIndex(ui4 index);
-    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
-
-    virtual void setBasePath(const std::string& basePath);
-    virtual void updateCache(bool on = true) {}
-
-protected:
-    void initObject(AbstractMediaObject* pObject, ui4 index);
-
-    AbstractDataModel*              _pDataModel;
-
-    AbstractProperty*               _pTitleProperty;
-    AbstractProperty*               _pClassProperty;
-
-private:
-    Poco::FastMutex                 _serverLock;
-};
-
-
-class CachedServerContainer : public ServerContainer, public DatabaseCache
-{
-public:
-    CachedServerContainer();
-
-    virtual bool isSearchable() { return true; }
-
-    virtual CsvList* getSortCaps();
-    virtual CsvList* getSearchCaps();
-
-    virtual void setBasePath(const std::string& basePath);
-    virtual void updateCache(bool on = true);
-
-private:
-    virtual AbstractMediaObject* getChildForIndex(ui4 index);
-    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
-    bool cacheNeedsUpdate();
-    void updateCacheThread();
-    bool updateCacheThreadIsRunning();
-
-    CsvList                                             _searchCaps;
-    CsvList                                             _sortCaps;
-
-    Poco::Thread                                        _updateCacheThread;
-    Poco::RunnableAdapter<CachedServerContainer>        _updateCacheThreadRunnable;
-    bool                                                _updateCacheThreadRunning;
-    Poco::FastMutex                                     _updateCacheThreadLock;
-};
-
-
-
-
-
-// --------------- deprecated --------------- //
-
-//class TorchServerContainer : public ServerContainer
-//{
-//    friend class TorchItemResource;
-//    friend class TorchItemPropertyImpl;
-//
-//public:
-//    TorchServerContainer(int port = 0);
-//    virtual ~TorchServerContainer();
-//
-//    void setDataModel(SimpleDataModel* pDataModel);
-//    SimpleDataModel* getDataModel();
-//
-//private:
-//    virtual AbstractMediaObject* getChildForIndex(ui4 index);
-//    virtual AbstractMediaObject* getChildForRow(ui4 row);
-//    // TODO: does getChildCount() make sense on server side? Is this total child count?
-//    virtual ui4 getChildCount();
-//
-//    AbstractMediaObject*            _pChild;
-//};
 
 
 } // namespace Av

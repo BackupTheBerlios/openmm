@@ -404,6 +404,8 @@ public:
     virtual ui4 getIndex();
     void setIndex(const std::string& index);                                                    // controller object, read from xml into memory
     void setIndex(ui4 index);                                                                   // controller object, read from xml into memory
+    virtual ui4 getParentIndex();
+    void setParentIndex(ui4 index);                                                                   // controller object, read from xml into memory
     AbstractMediaObject* getParent();                                                           // controller object, browse
 
     // attributes
@@ -459,6 +461,7 @@ protected:
 private:
     // TODO: put these private members in MediaObject (aka ServerObject)
     ui4                         _index;
+    ui4                         _parentIndex;
     AbstractMediaObject*        _pParent;
 };
 

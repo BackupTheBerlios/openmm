@@ -717,7 +717,7 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
     _cacheFilePath = cacheFilePath;
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
     try {
-        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
+        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), paridx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
                 Poco::Data::now;
     }
     catch (Poco::Exception& e) {
@@ -870,8 +870,9 @@ DatabaseCache::insertMediaObject(AbstractMediaObject* pObject)
         track = pProperty->getValue();
     }
     try {
-        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, track, xml) VALUES(:idx, :class, :title, :artist, :album, :track, :xml)",
+        *_pSession << "INSERT INTO objcache (idx, paridx, class, title, artist, album, track, xml) VALUES(:idx, :paridx, :class, :title, :artist, :album, :track, :xml)",
                 Poco::Data::use(pObject->getIndex()),
+                Poco::Data::use(pObject->getParentIndex()),
                 Poco::Data::use(pObject->getClass()),
                 Poco::Data::use(pObject->getTitle()),
                 Poco::Data::use(artist),
@@ -890,7 +891,7 @@ void
 DatabaseCache::insertBlock(std::vector<AbstractMediaObject*>& block)
 {
     Log::instance()->upnpav().debug("database cache inserting media object block");
-    typedef Poco::Tuple<ui4, std::string, std::string, std::string, std::string, int, std::string> MediaObject;
+    typedef Poco::Tuple<ui4, ui4, std::string, std::string, std::string, std::string, int, std::string> MediaObject;
     std::vector<MediaObject> tupleBlock;
     for (std::vector<AbstractMediaObject*>::iterator it = block.begin(); it != block.end(); ++it) {
         AbstractMediaObject* pObject = *it;
@@ -915,11 +916,11 @@ DatabaseCache::insertBlock(std::vector<AbstractMediaObject*>& block)
         int track;
         trackVariant.getValue(track);
 
-        tupleBlock.push_back(MediaObject(pObject->getIndex(), pObject->getClass(), pObject->getTitle(), artist, album, track, xml));
+        tupleBlock.push_back(MediaObject(pObject->getIndex(), pObject->getParentIndex(), pObject->getClass(), pObject->getTitle(), artist, album, track, xml));
     }
 
     try {
-        *_pSession << "INSERT INTO objcache (idx, class, title, artist, album, track, xml) VALUES(:idx, :class, :title, :artist, :album, :track, :xml)",
+        *_pSession << "INSERT INTO objcache (idx, paridx, class, title, artist, album, track, xml) VALUES(:idx, :paridx, :class, :title, :artist, :album, :track, :xml)",
                 Poco::Data::use(tupleBlock),
                 Poco::Data::now;
     }
@@ -951,6 +952,24 @@ AbstractMediaObject::setIndex(const std::string& index)
 //    Log::instance()->upnpav().debug("AbstractMediaObject::setObjectId() from string: " + id);
 
     _index = Poco::NumberParser::parseUnsigned(index);
+}
+
+
+ui4
+AbstractMediaObject::getParentIndex()
+{
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+
+    return _parentIndex;
+}
+
+
+void
+AbstractMediaObject::setParentIndex(ui4 index)
+{
+//    Log::instance()->upnpav().debug("AbstractMediaObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+
+    _parentIndex = index;
 }
 
 
