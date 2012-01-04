@@ -55,7 +55,7 @@ private:
 };
 
 
-class TorchItemResource : public Omm::Av::ServerResource
+class TorchItemResource : public Omm::Av::ServerObjectResource
 {
 public:
     TorchItemResource(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);

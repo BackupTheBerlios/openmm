@@ -106,7 +106,7 @@ FileModel::getMediaObject(const std::string& path)
         Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
         pItem->setUniqueProperty(Omm::Av::AvProperty::GENRE, propertyValue);
 
-        Omm::Av::ServerResource* pResource = pItem->createResource();
+        Omm::Av::ServerObjectResource* pResource = pItem->createResource();
         pResource->setSize(getSize(path));
         // FIXME: add some parts of protinfo in server container / media server.
         pResource->setProtInfo("http-get:*:" + pMeta->getMime() + ":*");

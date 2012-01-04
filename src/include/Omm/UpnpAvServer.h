@@ -67,7 +67,7 @@ public:
 
 //    std::string getProtocol();
 
-    Poco::UInt16 getPort() const;
+    Poco::UInt16 getServerPort() const;
     std::string getServerAddress();
     std::string getServerProtocol();
 
@@ -78,26 +78,6 @@ private:
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
 };
-
-
-//class MediaItemServer
-//{
-//
-//public:
-//    MediaItemServer(int port = 0);
-//    ~MediaItemServer();
-//
-//    void start();
-//    void stop();
-//
-//    Poco::UInt16 getPort() const;
-//    std::string getProtocol();
-//
-//private:
-//    StreamingMediaObject*                       _pServerContainer;
-//    Poco::Net::ServerSocket                     _socket;
-//    Poco::Net::HTTPServer*                      _pHttpServer;
-//};
 
 
 class ItemRequestHandler : public Poco::Net::HTTPRequestHandler
@@ -112,7 +92,7 @@ private:
     void parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end);
 
     unsigned int        _bufferSize;
-    MediaServer*        _pItemServer;
+    MediaServer*        _pServer;
 };
 
 
@@ -125,66 +105,35 @@ public:
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
 
 private:
-    MediaServer*        _pItemServer;
+    MediaServer*        _pServer;
 };
 
 
-class ServerObjectProperty : public AbstractProperty
+class ServerObjectProperty : public MemoryProperty
 {
 public:
-    std::istream* getStream();
-};
+    ServerObjectProperty(ServerItem* pItem, AbstractDataModel* pDataModel);
 
-
-class ServerObjectPropertyImpl : public PropertyImpl
-{
-    friend class ItemRequestHandler;
-
-public:
-    ServerObjectPropertyImpl(MediaServer* pServer, ServerObject* pItem);
-
-    virtual std::string getValue();
-    // some properties can stream: icon, album art
-    virtual std::istream* getStream() { return 0; }
-
+    virtual std::istream* getStream();
 
 protected:
-//    StreamingMediaObject*       _pServer;
-    MediaServer*                _pServer;
-    ServerObject*               _pItem;
+    ServerItem*                 _pItem;
+    AbstractDataModel*          _pDataModel;
 };
 
 
-//class ServerResource : public AbstractResource
-class ServerResource : public MemoryResource
+class ServerObjectResource : public MemoryResource
 {
     friend class ItemRequestHandler;
 
 public:
-//    ServerResource(MediaServer* pServer, AbstractMediaObject* pItem, AbstractDataModel* pDataModel);
-    ServerResource(ServerItem* pItem, AbstractDataModel* pDataModel);
-
-//    virtual std::string getValue();
-//    virtual std::string getAttributeName(int index);
-//    virtual std::string getAttributeValue(int index);
-//    virtual std::string getAttributeValue(const std::string& name);
-//    virtual int getAttributeCount();
-
-//protected:
-//    virtual std::string getMime() { return "*"; }
-//    virtual std::string getDlna() { return "*"; }
-
-//    virtual bool isSeekable() = 0;
-//    virtual std::streamsize getSize() { return -1; }
-//    virtual std::istream* getStream() = 0;
+    ServerObjectResource(ServerItem* pItem, AbstractDataModel* pDataModel);
 
     virtual bool isSeekable();
     virtual std::streamsize getSize();
     virtual std::istream* getStream();
 
 private:
-//    StreamingMediaObject*       _pServer;
-//    MediaServer*                _pServer;
     ServerItem*                 _pItem;
     AbstractDataModel*          _pDataModel;
     int                         _id;
@@ -194,17 +143,13 @@ private:
 class ServerObject : public MemoryMediaObject
 {
     friend class ItemRequestHandler;
-    friend class ServerResource;
+    friend class ServerObjectResource;
     friend class ServerObjectPropertyImpl;
 
 public:
     ServerObject(MediaServer* pServer);
-//    StreamingMediaObject(int port = 0);
-//    StreamingMediaObject(StreamingMediaObject* pServer);
-//    StreamingMediaObject(const StreamingMediaObject& object);
     ~ServerObject();
 
-//    void startStreamingServer();
     virtual std::string getId();
     virtual std::string getParentId();
     virtual ui4 getIndex();
@@ -226,25 +171,8 @@ protected:
     ui4                         _parentIndex;
     ServerObject*               _pParent;
     MediaServer*                _pServer;
-//    StreamingMediaObject*       _pServer;
-
-//private:
-//    std::string getServerAddress();
-//    std::string getServerProtocol();
-
 //     AvStream::Transcoder*   _pTranscoder;
 };
-
-
-//class ServerResource : public Omm::Av::StreamingResource
-//{
-//public:
-//    ServerResource(ServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
-//
-//    virtual bool isSeekable();
-//    virtual std::streamsize getSize();
-//    virtual std::istream* getStream();
-//};
 
 
 class ServerItem : public Omm::Av::ServerObject
@@ -252,11 +180,10 @@ class ServerItem : public Omm::Av::ServerObject
     friend class ServerContainer;
 
 public:
-//    ServerItem(ServerContainer* pServer);
     ServerItem(MediaServer* pServer, ServerContainer* pContainer = 0);
     virtual ~ServerItem();
 
-    virtual ServerResource* createResource();
+    virtual ServerObjectResource* createResource();
 
 private:
     ServerContainer*    _pContainer;
@@ -266,7 +193,6 @@ private:
 class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 {
 public:
-//    ServerContainer(int port = 0);
     ServerContainer(MediaServer* pServer);
 
     void setDataModel(AbstractDataModel* pDataModel);
@@ -410,6 +336,7 @@ public:
     virtual std::streamsize getSize(const std::string& path) { return -1; }
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "") { return false; }
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "") { return 0; }
+    virtual std::istream* getIconStream(const std::string& path) { return 0; }
 
 protected:
     void readIndexCache();
@@ -444,8 +371,6 @@ public:
     // resource(s), currently data model only supports one resource
     virtual std::string getMime(const std::string& path) { return "*"; }
     virtual std::string getDlna(const std::string& path) { return "*"; }
-
-    virtual std::istream* getIconStream(const std::string& path) { return 0; }
 };
 
 

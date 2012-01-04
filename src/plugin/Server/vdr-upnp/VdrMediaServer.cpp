@@ -27,14 +27,14 @@
 #include "VdrMediaServer.h"
 
 
-class VdrChannelResource : public Omm::Av::ServerResource
+class VdrChannelResource : public Omm::Av::ServerObjectResource
 {
 public:
     VdrChannelResource(const std::string& resourceId, const std::string& protInfo, cChannel* pChannel);
-    
+
     virtual bool isSeekable() { return false; }
     virtual std::streamsize stream(std::ostream& ostr, std::iostream::pos_type seek);
-    
+
 private:
     cChannel*         _pChannel;
 };
@@ -47,13 +47,13 @@ MediaServerContainer("VDR Channels")
         if (pChan->Vpid() == 0 || pChan->GetChannelID().ToString() == "0-0-0-0") {
             continue;
         }
-        
+
         std::string objectId(pChan->GetChannelID().ToString());
         std::string title(pChan->Name());
-        
+
         Omm::Av::MediaItem* pChanItem = new Omm::Av::MediaItem(objectId, title, "videoItem.movie");
         pChanItem->addResource(new VdrChannelResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL", pChan));
-        
+
 //         pChanItem->addResource(new Omm::Av::WebResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
 //             "http://localhost:3000/TS/" + objectId));
         appendChild(pChanItem);
@@ -68,7 +68,7 @@ MediaServerContainer("VDR Recordings")
         std::string objectId(pRec->Info()->ChannelID().ToString());
         objectId += "_" + Poco::NumberFormatter::format(pRec->start);
         std::string title(pRec->Name());
-        
+
         Omm::Av::MediaItem* pRecItem = new Omm::Av::MediaItem(objectId, title, "videoItem.movie");
         pRecItem->addResource(new Omm::Av::FileResource("r1", "video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL",
             0, std::string(pRec->FileName()) + "/001.vdr"));
@@ -81,10 +81,10 @@ class VdrChannelReceiver : public cReceiver
 {
 public:
     VdrChannelReceiver(std::ostream& ostr, tChannelID ChannelID, int Priority, int Pid, const int *Pids1 = NULL, const int *Pids2 = NULL, const int *Pids3 = NULL);
-    
+
     virtual void Receive(uchar *Data, int Length);
     std::streamsize bytesReceived() { return _bytesReceived; }
-    
+
 private:
     std::ostream& _ostr;
     std::streamsize _bytesReceived;
@@ -127,7 +127,7 @@ VdrChannelResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
     Omm::Av::Log::instance()->upnpav().debug("grabbed device");
     pDevice->SwitchChannel(_pChannel, false);
     Omm::Av::Log::instance()->upnpav().debug(Poco::format("switched to channel %s", _pChannel->Name()));
-    
+
     int pids[3] = {_pChannel->Vpid(), _pChannel->Apid(0), 0};
     VdrChannelReceiver receiver(ostr, _pChannel->GetChannelID(), 0, 0, pids);
     pDevice->AttachReceiver(&receiver);

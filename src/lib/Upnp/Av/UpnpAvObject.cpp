@@ -900,8 +900,6 @@ MemoryMediaObject::createResource()
 //    Log::instance()->upnpav().debug("MemoryMediaObject::createResource()");
 
     AbstractResource* pResource = new MemoryResource;
-    // FIXME: createResouce() should only create a resource and not add it.
-    addResource(pResource);
     return pResource;
 }
 
