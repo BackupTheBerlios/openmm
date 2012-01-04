@@ -40,38 +40,70 @@ namespace Omm {
 namespace Av {
 
 class MediaItemServer;
-class StreamingMediaObject;
+class ServerObject;
+class ServerItem;
 class DevContentDirectoryServerImpl;
 class ServerContainer;
 class AbstractDataModel;
 
 
-class MediaItemServer
+class MediaServer : public Device
+/// Used by ServerApplication
+/// Provides a meta data server that can be browsed by CDS implementation through root media object,
+/// and a http server for streaming server item resources
 {
     friend class ItemRequestHandler;
-    friend class StreamingMediaObject;
+    friend class ServerObject;
+    friend class ServerContainer;
 
 public:
-    MediaItemServer(int port = 0);
-    ~MediaItemServer();
+    MediaServer(int port = 0);
+    virtual ~MediaServer();
+
+    void setRoot(ServerContainer* pRoot);
 
     void start();
     void stop();
 
+//    std::string getProtocol();
+
     Poco::UInt16 getPort() const;
-    std::string getProtocol();
+    std::string getServerAddress();
+    std::string getServerProtocol();
 
 private:
-    StreamingMediaObject*                       _pServerContainer;
+    DevContentDirectoryServerImpl*              _pDevContentDirectoryServerImpl;
+
+    ServerContainer*                            _pServerContainer;
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
 };
 
 
+//class MediaItemServer
+//{
+//
+//public:
+//    MediaItemServer(int port = 0);
+//    ~MediaItemServer();
+//
+//    void start();
+//    void stop();
+//
+//    Poco::UInt16 getPort() const;
+//    std::string getProtocol();
+//
+//private:
+//    StreamingMediaObject*                       _pServerContainer;
+//    Poco::Net::ServerSocket                     _socket;
+//    Poco::Net::HTTPServer*                      _pHttpServer;
+//};
+
+
 class ItemRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    ItemRequestHandler(MediaItemServer* pItemServer);
+    ItemRequestHandler(MediaServer* pItemServer);
 
     void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
 
@@ -80,51 +112,36 @@ private:
     void parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end);
 
     unsigned int        _bufferSize;
-    MediaItemServer*    _pItemServer;
+    MediaServer*        _pItemServer;
 };
 
 
 class ItemRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    ItemRequestHandlerFactory(MediaItemServer* pItemServer);
+    ItemRequestHandlerFactory(MediaServer* pItemServer);
 
 
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
 
 private:
-    MediaItemServer*    _pItemServer;
+    MediaServer*        _pItemServer;
 };
 
 
-class MediaServer : public Device
-    /// Used by ServerApplication
-    /// Provides a meta data server that can be browsed by CDS implementation through root media object
-{
-public:
-    MediaServer();
-    virtual ~MediaServer();
-
-    void setRoot(StreamingMediaObject* pRoot);
-
-private:
-    DevContentDirectoryServerImpl* _pDevContentDirectoryServerImpl;
-};
-
-
-class StreamingProperty : public AbstractProperty
+class ServerObjectProperty : public AbstractProperty
 {
 public:
     std::istream* getStream();
 };
 
 
-class StreamingPropertyImpl : public PropertyImpl
+class ServerObjectPropertyImpl : public PropertyImpl
 {
     friend class ItemRequestHandler;
 
 public:
-    StreamingPropertyImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem);
+    ServerObjectPropertyImpl(MediaServer* pServer, ServerObject* pItem);
 
     virtual std::string getValue();
     // some properties can stream: icon, album art
@@ -132,97 +149,125 @@ public:
 
 
 protected:
-    StreamingMediaObject*       _pServer;
-    AbstractMediaObject*        _pItem;
+//    StreamingMediaObject*       _pServer;
+    MediaServer*                _pServer;
+    ServerObject*               _pItem;
 };
 
 
-class StreamingResource : public AbstractResource
+//class ServerResource : public AbstractResource
+class ServerResource : public MemoryResource
 {
     friend class ItemRequestHandler;
 
 public:
-    StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem);
+//    ServerResource(MediaServer* pServer, AbstractMediaObject* pItem, AbstractDataModel* pDataModel);
+    ServerResource(ServerItem* pItem, AbstractDataModel* pDataModel);
 
-    virtual std::string getValue();
-    virtual std::string getAttributeName(int index);
-    virtual std::string getAttributeValue(int index);
-    virtual std::string getAttributeValue(const std::string& name);
-    virtual int getAttributeCount();
+//    virtual std::string getValue();
+//    virtual std::string getAttributeName(int index);
+//    virtual std::string getAttributeValue(int index);
+//    virtual std::string getAttributeValue(const std::string& name);
+//    virtual int getAttributeCount();
 
-protected:
-    virtual std::streamsize getSize() { return -1; }
-    virtual std::string getMime() { return "*"; }
-    virtual std::string getDlna() { return "*"; }
+//protected:
+//    virtual std::string getMime() { return "*"; }
+//    virtual std::string getDlna() { return "*"; }
 
-    virtual bool isSeekable() = 0;
-    virtual std::istream* getStream() = 0;
+//    virtual bool isSeekable() = 0;
+//    virtual std::streamsize getSize() { return -1; }
+//    virtual std::istream* getStream() = 0;
 
-protected:
-    StreamingMediaObject*       _pServer;
-    AbstractMediaObject*        _pItem;
+    virtual bool isSeekable();
+    virtual std::streamsize getSize();
+    virtual std::istream* getStream();
+
+private:
+//    StreamingMediaObject*       _pServer;
+//    MediaServer*                _pServer;
+    ServerItem*                 _pItem;
+    AbstractDataModel*          _pDataModel;
     int                         _id;
 };
 
 
-class StreamingMediaObject : public MemoryMediaObject
+class ServerObject : public MemoryMediaObject
 {
     friend class ItemRequestHandler;
-    friend class StreamingResource;
-    friend class StreamingPropertyImpl;
+    friend class ServerResource;
+    friend class ServerObjectPropertyImpl;
 
 public:
-    StreamingMediaObject(int port = 0);
-    StreamingMediaObject(StreamingMediaObject* pServer);
+    ServerObject(MediaServer* pServer);
+//    StreamingMediaObject(int port = 0);
+//    StreamingMediaObject(StreamingMediaObject* pServer);
 //    StreamingMediaObject(const StreamingMediaObject& object);
-    ~StreamingMediaObject();
+    ~ServerObject();
 
-    void startStreamingServer();
+//    void startStreamingServer();
+    virtual std::string getId();
+    virtual std::string getParentId();
+    virtual ui4 getIndex();
+    void setIndex(const std::string& index);
+    void setIndex(ui4 index);
+    virtual ui4 getParentIndex();
+    void setParentIndex(ui4 index);
+    ServerObject* getParent();
+    void setParent(ServerObject* pParent);
+    virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
 
     // this really is createChildItem(), not createChildObject()
     virtual AbstractMediaObject* createChildObject();
 
 protected:
-    virtual std::istream* getIconStream();
+    virtual std::istream* getIconStream() {}
 
-    MediaItemServer*        _pItemServer;
-    StreamingMediaObject*       _pServer;
+    ui4                         _index;
+    ui4                         _parentIndex;
+    ServerObject*               _pParent;
+    MediaServer*                _pServer;
+//    StreamingMediaObject*       _pServer;
 
-private:
-    std::string getServerAddress();
-    std::string getServerProtocol();
+//private:
+//    std::string getServerAddress();
+//    std::string getServerProtocol();
 
 //     AvStream::Transcoder*   _pTranscoder;
 };
 
 
-class ServerItemResource : public Omm::Av::StreamingResource
-{
-public:
-    ServerItemResource(ServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
+//class ServerResource : public Omm::Av::StreamingResource
+//{
+//public:
+//    ServerResource(ServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
+//
+//    virtual bool isSeekable();
+//    virtual std::streamsize getSize();
+//    virtual std::istream* getStream();
+//};
 
-    virtual bool isSeekable();
-    virtual std::streamsize getSize();
-    virtual std::istream* getStream();
-};
 
-
-class ServerItem : public Omm::Av::StreamingMediaObject
+class ServerItem : public Omm::Av::ServerObject
 {
     friend class ServerContainer;
 
 public:
-    ServerItem(ServerContainer* pServer);
+//    ServerItem(ServerContainer* pServer);
+    ServerItem(MediaServer* pServer, ServerContainer* pContainer = 0);
     virtual ~ServerItem();
 
-    virtual ServerItemResource* createResource();
+    virtual ServerResource* createResource();
+
+private:
+    ServerContainer*    _pContainer;
 };
 
 
-class ServerContainer : public StreamingMediaObject, public Util::ConfigurablePlugin
+class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 {
 public:
-    ServerContainer(int port = 0);
+//    ServerContainer(int port = 0);
+    ServerContainer(MediaServer* pServer);
 
     void setDataModel(AbstractDataModel* pDataModel);
     AbstractDataModel* getDataModel();
@@ -231,15 +276,21 @@ public:
     virtual ServerItem* createMediaItem();
     virtual AbstractMediaObject* createChildObject();
 
+    void appendChild(AbstractMediaObject* pChild);
+    void appendChildWithAutoIndex(AbstractMediaObject* pChild);
+
+    ServerObject* getDescendant(const std::string& objectId);
+
     virtual ui4 getChildCount();
-    virtual AbstractMediaObject* getChildForIndex(ui4 index);
-    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    virtual ServerObject* getChildForIndex(const std::string& index);
+    virtual ServerObject* getChildForIndex(ui4 index);
+    virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true) {}
 
 protected:
-    virtual void initObject(AbstractMediaObject* pObject, ui4 index);
+    virtual void initObject(ServerObject* pObject, ui4 index);
 
     AbstractDataModel*              _pDataModel;
 
@@ -248,10 +299,40 @@ private:
 };
 
 
+class ServerObjectWriter : public MediaObjectWriter2
+{
+public:
+    void writeChildren(std::string& meta, const std::vector<ServerObject*>& children, const std::string& filter = "*");
+};
+
+
+class DatabaseCache : public AbstractMediaObjectCache
+{
+public:
+    DatabaseCache();
+    ~DatabaseCache();
+
+    void setCacheFilePath(const std::string& cacheFilePath);
+
+    ui4 rowCount();
+
+    virtual ServerObject* getMediaObjectForIndex(ui4 index);
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+
+protected:
+    void insertMediaObject(ServerObject* pObject);
+    void insertBlock(std::vector<ServerObject*>& block);
+
+private:
+    Poco::Data::Session*        _pSession;
+    std::string                 _cacheFilePath;
+};
+
+
 class CachedServerContainer : public ServerContainer, public DatabaseCache
 {
 public:
-    CachedServerContainer();
+    CachedServerContainer(MediaServer* pServer);
 
     virtual bool isSearchable() { return true; }
 
@@ -263,12 +344,12 @@ public:
     virtual void updateCache(bool on = true);
 
 private:
-    virtual AbstractMediaObject* getChildForIndex(ui4 index);
-    virtual ui4 getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    virtual ServerObject* getChildForIndex(ui4 index);
+    virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
     bool cacheNeedsUpdate();
     void updateCacheThread();
     bool updateCacheThreadIsRunning();
-    virtual void initObject(AbstractMediaObject* pObject, ui4 index);
+    virtual void initObject(ServerObject* pObject, ui4 index);
 
     CsvList                                             _searchCaps;
     CsvList                                             _sortCaps;
@@ -316,15 +397,15 @@ public:
     IndexIterator beginIndex();
     IndexIterator endIndex();
 
-    // add / remove path tells server about change of data
-    // propagated via moderated event mechanism to controller
-    void addPath(const std::string& path);
+    // add / remove path tells server about existence of objects
+    // any change is propagated via moderated event mechanism to controller
+    void addPath(const std::string& path, const std::string& resourcePath = "");
     void removePath(const std::string& path);
 
     virtual std::string getParentPath(const std::string& path) { return ""; }
 
     // meta data of object
-    virtual AbstractMediaObject* getMediaObject(const std::string& path) { return 0; }
+    virtual ServerObject* getMediaObject(const std::string& path) { return 0; }
     // stream data of object
     virtual std::streamsize getSize(const std::string& path) { return -1; }
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "") { return false; }
@@ -334,27 +415,26 @@ protected:
     void readIndexCache();
     void writeIndexCache();
 
-    Poco::Path                  _basePath;
-    Poco::Path                  _cacheDirPath;
-    Poco::Path                  _configDirPath;
-    Poco::Path                  _metaDirPath;
-    Poco::Path                  _indexFilePath;
+    Poco::Path                                  _basePath;
+    Poco::Path                                  _cacheDirPath;
+    Poco::Path                                  _configDirPath;
+    Poco::Path                                  _metaDirPath;
+    Poco::Path                                  _indexFilePath;
 
 private:
-    ServerContainer*            _pServerContainer;
-    std::map<ui4, std::string>  _indexMap;
-    std::map<std::string, ui4>  _pathMap;
-    std::stack<ui4>             _freeIndices;
-    ui4                         _maxIndex;
-//    std::vector<Omm::ui4>       _indexBuffer;
-//    Omm::ui4                    _indexBufferSize;
+    ServerContainer*                            _pServerContainer;
+    std::map<ui4, std::string>                  _indexMap;
+    std::map<std::string, ui4>                  _pathMap;
+    std::multimap<ui4, std::string>             _resourceMap;
+    std::stack<ui4>                             _freeIndices;
+    ui4                                         _maxIndex;
 };
 
 
 class SimpleDataModel : public AbstractDataModel
 {
 public:
-    virtual AbstractMediaObject* getMediaObject(const std::string& path);
+    virtual ServerObject* getMediaObject(const std::string& path);
 
      // properties
     virtual std::string getClass(const std::string& path) { return AvClass::OBJECT; }

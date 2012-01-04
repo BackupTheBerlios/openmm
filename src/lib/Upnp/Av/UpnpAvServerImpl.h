@@ -68,7 +68,7 @@ class DevContentDirectoryServerImpl : public DevContentDirectory
 {
     friend class MediaServer;
     friend class DevMediaServer;
-    
+
 private:
     virtual void GetSearchCapabilities(std::string& SearchCaps);
     virtual void GetSortCapabilities(std::string& SortCaps);
@@ -84,8 +84,8 @@ private:
     virtual void CreateReference(const std::string& ContainerID, const std::string& ObjectID, std::string& NewID);
 
     virtual void initStateVars();
-    
-    AbstractMediaObject* _pRoot;
+
+    ServerContainer* _pRoot;
 };
 
 } // namespace Av

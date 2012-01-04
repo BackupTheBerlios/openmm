@@ -187,14 +187,16 @@ protected:
                 _name = "OMM Server";
             }
 
-            Omm::Av::CachedServerContainer* pContainer = new Omm::Av::CachedServerContainer;
+            // create a media server device
+            Omm::Av::MediaServer mediaServer;
+
+            // create root server container
+            Omm::Av::CachedServerContainer* pContainer = new Omm::Av::CachedServerContainer(&mediaServer);
             pContainer->setTitle(_name);
             pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
             pContainer->setDataModel(pDataModel);
             pContainer->setBasePath(_basePath);
 
-            // create a media server device
-            Omm::Av::MediaServer mediaServer;
             mediaServer.setRoot(pContainer);
             mediaServer.setFriendlyName(_name);
             Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");

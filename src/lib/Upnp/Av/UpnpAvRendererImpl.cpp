@@ -38,7 +38,7 @@ DevAVTransportRendererImpl::initStateVars()
     // two implementations for URIs:
     // 1. gapless play in engine and engine stores the URIs and transitions between them (e.g. in a playlist).
     // 2. keep track of each engine URIs in renderer implementation.
-    
+
 //    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
 //    _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
 //    _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
@@ -75,7 +75,7 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
 {
     std::string transportState = _engines[InstanceID]->transportState();
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI enters in state: " + transportState);
-    
+
     if (transportState == AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
     }
@@ -98,8 +98,8 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
     std::string protInfoString;
     try {
         MemoryMediaObject obj;
-        MediaObjectReader objReader(&obj);
-        objReader.read(CurrentURIMetaData);
+        MediaObjectReader objReader;
+        objReader.read(&obj, CurrentURIMetaData);
 
         if (obj.getResource()) {
             protInfoString = obj.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
@@ -114,7 +114,7 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
         Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data: " + e.message());
     }
     ProtocolInfo protInfo(protInfoString);
-    
+
     Omm::Av::Log::instance()->upnpav().debug("engine: " + _engines[InstanceID]->getEngineId() + " set uri: " + CurrentURI);
     if (_engines[InstanceID]->preferStdStream()) {
         Poco::URI uri(CurrentURI);
@@ -174,14 +174,14 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 {
     std::string transportState = _engines[InstanceID]->transportState();
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
-    
+
     if (transportState != AvTransportArgument::TRANSPORT_STATE_PLAYING && transportState != AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
         // TODO: return an UPnP error
         return;
     }
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
     Track = _getCurrentTrack();
-    
+
     float engineTrackDuration = _engines[InstanceID]->getLengthSeconds();
 //    Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
@@ -192,21 +192,21 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 
     TrackMetaData = _getCurrentTrackMetaData();
     TrackURI = _getCurrentTrackURI();
-    
+
     Poco::UInt64 enginePositionByte = _engines[InstanceID]->getPositionByte();
 //    Omm::Av::Log::instance()->upnpav().debug("engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
     float enginePosition = _engines[InstanceID]->getPositionPercentage();
 //    Omm::Av::Log::instance()->upnpav().debug("engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
     float engineTimePosition = _engines[InstanceID]->getPositionSecond();
 //    Omm::Av::Log::instance()->upnpav().debug("engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
-    
+
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
 //    Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);
     _setRelativeTimePosition(timePosition);
     _setAbsoluteTimePosition(timePosition);
     RelTime = _getRelativeTimePosition();
     AbsTime = _getAbsoluteTimePosition();
-    
+
     RelCount = _getRelativeCounterPosition();
     AbsCount = _getAbsoluteCounterPosition();
 }
@@ -234,7 +234,7 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
 {
     std::string transportState = _engines[InstanceID]->transportState();
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() enters in state: " + transportState);
-    
+
     if (transportState != AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         // be nice to the engine and don't stop when already in stopped or paused state
         // TODO: when in PAUSED_PLAYBACK we should actually stop (according to AVTransport 1.0 specs
@@ -247,10 +247,10 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
                 _pSession = 0;
             }
         }
-        
+
         if (transportState == "PLAYING" || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
         // TODO: reset positions and speed (this is not mentioned in the AVTransport 1.0 specs ...)?
-        //       what does Stop() mean when in TRANSITIONING state? 
+        //       what does Stop() mean when in TRANSITIONING state?
         //       -> stop transitioning and start playback at current position?
             _setAbsoluteTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
             _setRelativeTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
@@ -302,9 +302,9 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
         // TODO: handle fractions of speed ('1/2', ...)
         // TODO: If start playing takes considerable amount of time (do this in Engine)
         //       set state to "TRANSITIONING" (-> 2.4.9.3. Effect on State, AVTransport spec)
-        
+
         _setTransportPlaySpeed(speed);
-        
+
         _lastCurrentTrackUri = _getCurrentTrackURI();
     }
 }
@@ -315,7 +315,7 @@ DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
     std::string transportState = _engines[InstanceID]->transportState();
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + transportState);
-    
+
     if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
         || transportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
         _engines[InstanceID]->pause();
@@ -336,12 +336,12 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
 {
     std::string transportState = _engines[InstanceID]->transportState();
     Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() enters in state: " + transportState);
-    
+
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
         // TODO: does it make sense to handle "PAUSED_PLAYBACK", too?
         Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() seek mode: " + Unit + ", seek target: " + Target);
-        
+
         ui4 position;
         if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
             position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
@@ -414,7 +414,7 @@ void
 DevConnectionManagerRendererImpl::ConnectionComplete(const i4& ConnectionID)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -441,7 +441,7 @@ void
 DevRenderingControlRendererImpl::initStateVars()
 {
     // FIXME: init all engine instances instead of the state vars in the service tree.
-    
+
 //    _setPresetNameList("");
 //    _setBrightness(0);
 //    _setContrast(0);
@@ -466,7 +466,7 @@ void
 DevRenderingControlRendererImpl::ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -475,7 +475,7 @@ void
 DevRenderingControlRendererImpl::SelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -484,7 +484,7 @@ void
 DevRenderingControlRendererImpl::GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -493,7 +493,7 @@ void
 DevRenderingControlRendererImpl::SetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -502,7 +502,7 @@ void
 DevRenderingControlRendererImpl::GetContrast(const ui4& InstanceID, ui2& CurrentContrast)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -511,7 +511,7 @@ void
 DevRenderingControlRendererImpl::SetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -520,7 +520,7 @@ void
 DevRenderingControlRendererImpl::GetSharpness(const ui4& InstanceID, ui2& CurrentSharpness)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -529,7 +529,7 @@ void
 DevRenderingControlRendererImpl::SetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -538,7 +538,7 @@ void
 DevRenderingControlRendererImpl::GetRedVideoGain(const ui4& InstanceID, ui2& CurrentRedVideoGain)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -547,7 +547,7 @@ void
 DevRenderingControlRendererImpl::SetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -556,7 +556,7 @@ void
 DevRenderingControlRendererImpl::GetGreenVideoGain(const ui4& InstanceID, ui2& CurrentGreenVideoGain)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -565,7 +565,7 @@ void
 DevRenderingControlRendererImpl::SetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -574,7 +574,7 @@ void
 DevRenderingControlRendererImpl::GetBlueVideoGain(const ui4& InstanceID, ui2& CurrentBlueVideoGain)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -583,7 +583,7 @@ void
 DevRenderingControlRendererImpl::SetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -592,7 +592,7 @@ void
 DevRenderingControlRendererImpl::GetRedVideoBlackLevel(const ui4& InstanceID, ui2& CurrentRedVideoBlackLevel)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -601,7 +601,7 @@ void
 DevRenderingControlRendererImpl::SetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -610,7 +610,7 @@ void
 DevRenderingControlRendererImpl::GetGreenVideoBlackLevel(const ui4& InstanceID, ui2& CurrentGreenVideoBlackLevel)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -619,7 +619,7 @@ void
 DevRenderingControlRendererImpl::SetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -628,7 +628,7 @@ void
 DevRenderingControlRendererImpl::GetBlueVideoBlackLevel(const ui4& InstanceID, ui2& CurrentBlueVideoBlackLevel)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -637,7 +637,7 @@ void
 DevRenderingControlRendererImpl::SetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -646,7 +646,7 @@ void
 DevRenderingControlRendererImpl::GetColorTemperature (const ui4& InstanceID, ui2& CurrentColorTemperature)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -655,7 +655,7 @@ void
 DevRenderingControlRendererImpl::SetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -664,7 +664,7 @@ void
 DevRenderingControlRendererImpl::GetHorizontalKeystone(const ui4& InstanceID, i2& CurrentHorizontalKeystone)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -673,7 +673,7 @@ void
 DevRenderingControlRendererImpl::SetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -682,7 +682,7 @@ void
 DevRenderingControlRendererImpl::GetVerticalKeystone(const ui4& InstanceID, i2& CurrentVerticalKeystone)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -691,7 +691,7 @@ void
 DevRenderingControlRendererImpl::SetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -700,7 +700,7 @@ void
 DevRenderingControlRendererImpl::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -709,7 +709,7 @@ void
 DevRenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -721,7 +721,7 @@ DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::str
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    CurrentVolume = _getVolume();
     Log::instance()->upnpav().debug("get volume of engine instance: " + Poco::NumberFormatter::format(InstanceID));
-    
+
     CurrentVolume = _engines[InstanceID]->getVolume(Channel);
 }
 
@@ -730,9 +730,9 @@ void
 DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
     Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() instance: " + Poco::NumberFormatter::format(InstanceID) + ", channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
-    
+
     _engines[InstanceID]->setVolume(Channel, DesiredVolume);
-    
+
     // we don't cache values in the state vars but retreive them directly from the engine.
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    _setVolume(DesiredVolume);
@@ -754,7 +754,7 @@ void
 DevRenderingControlRendererImpl::SetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -763,7 +763,7 @@ void
 DevRenderingControlRendererImpl::GetVolumeDBRange(const ui4& InstanceID, const std::string& Channel, i2& MinValue, i2& MaxValue)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -772,7 +772,7 @@ void
 DevRenderingControlRendererImpl::GetLoudness(const ui4& InstanceID, const std::string& Channel, bool& CurrentLoudness)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 
@@ -781,7 +781,7 @@ void
 DevRenderingControlRendererImpl::SetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
 // begin of your own code
-    
+
 // end of your own code
 }
 

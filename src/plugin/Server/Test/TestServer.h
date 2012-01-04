@@ -24,7 +24,7 @@
 
 #include <Omm/UpnpAvServer.h>
 
-class TestServer : public Omm::Av::MemoryMediaObject
+class TestServer : public Omm::Av::ServerContainer
 // class TestServer : public Omm::Av::AbstractMediaObject    // could also use convenience class MemoryContainer
 {
 public:

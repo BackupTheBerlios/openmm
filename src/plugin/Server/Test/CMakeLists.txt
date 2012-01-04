@@ -1,3 +1,6 @@
+# TODO: test server plugin temporarily disabled because of server side API changes
+return()
+
 if(BUILD_PLUGINS)
 add_library(ommplugin-server-test
 SHARED

@@ -29,6 +29,10 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/HTTPServerParams.h>
 #include <Poco/Exception.h>
+#include "Poco/Data/SQLite/Connector.h"
+#include "Poco/Data/RecordSet.h"
+
+#include <map>
 
 #include "UpnpAvServer.h"
 #include "UpnpInternal.h"
@@ -41,15 +45,32 @@ namespace Omm {
 namespace Av {
 
 
-MediaItemServer::MediaItemServer(int port) :
+MediaServer::MediaServer(int port) :
 _socket(Poco::Net::ServerSocket(port))
 {
+    MediaServerDescriptions mediaServerDescriptions;
+    MemoryDescriptionReader descriptionReader(mediaServerDescriptions);
+    descriptionReader.getDeviceDescription();
+    setDeviceData(descriptionReader.rootDeviceData());
+
+    // service implementations are owned by DevMediaServer (DevDeviceCode)
+    // DevDeviceCode should be owned by super class Device
+
+    // store a pointer to content directory implementation, so that the
+    // root object can be set later.
+    _pDevContentDirectoryServerImpl = new DevContentDirectoryServerImpl;
+
+    setDevDeviceCode(new DevMediaServer(
+        _pDevContentDirectoryServerImpl,
+        new DevConnectionManagerServerImpl,
+        new DevAVTransportServerImpl)
+    );
 }
 
 
-MediaItemServer::~MediaItemServer()
+MediaServer::~MediaServer()
 {
-    Log::instance()->upnpav().information("stopping media item server ...");
+    Log::instance()->upnpav().information("stopping media server ...");
     _pHttpServer->stop();
     delete _pHttpServer;
     Log::instance()->upnpav().information("done");
@@ -57,7 +78,15 @@ MediaItemServer::~MediaItemServer()
 
 
 void
-MediaItemServer::start()
+MediaServer::setRoot(ServerContainer* pRoot)
+{
+    _pDevContentDirectoryServerImpl->_pRoot = pRoot;
+    start();
+}
+
+
+void
+MediaServer::start()
 {
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
@@ -67,27 +96,93 @@ MediaItemServer::start()
 
 
 void
-MediaItemServer::stop()
+MediaServer::stop()
 {
     _pHttpServer->stop();
 }
 
 
 Poco::UInt16
-MediaItemServer::getPort() const
+MediaServer::getPort() const
 {
     return _socket.address().port();
 }
 
 
+//std::string
+//MediaServer::getProtocol()
+//{
+//    return "http-get:*";
+//}
+
+
 std::string
-MediaItemServer::getProtocol()
+MediaServer::getServerAddress()
 {
-    return "http-get:*";
+//    Log::instance()->upnpav().debug("streaming media object get server address ...");
+
+    std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
+//    int port = _pItemServer->_socket.address().port();
+//    Log::instance()->upnpav().debug("streaming media object g et server address returns: http://" + address + ":" + Poco::NumberFormatter::format(port));
+    return "http://" + address + ":" + Poco::NumberFormatter::format(getPort());
 }
 
 
-ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaItemServer* pItemServer) :
+std::string
+MediaServer::getServerProtocol()
+{
+    return "http-get:*";
+//    return getProtocol();
+}
+
+
+//MediaItemServer::MediaItemServer(int port) :
+//_socket(Poco::Net::ServerSocket(port))
+//{
+//}
+
+
+//MediaItemServer::~MediaItemServer()
+//{
+//    Log::instance()->upnpav().information("stopping media item server ...");
+//    _pHttpServer->stop();
+//    delete _pHttpServer;
+//    Log::instance()->upnpav().information("done");
+//}
+
+
+//void
+//MediaItemServer::start()
+//{
+//    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+//    _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
+//    _pHttpServer->start();
+//    Log::instance()->upnpav().information("media item server listening on: " + _socket.address().toString());
+//}
+//
+//
+//void
+//MediaItemServer::stop()
+//{
+//    _pHttpServer->stop();
+//}
+//
+//
+//Poco::UInt16
+//MediaItemServer::getPort() const
+//{
+//    return _socket.address().port();
+//}
+//
+//
+//std::string
+//MediaItemServer::getProtocol()
+//{
+//    return "http-get:*";
+//}
+
+
+ItemRequestHandlerFactory::ItemRequestHandlerFactory(MediaServer* pItemServer) :
 _pItemServer(pItemServer)
 {
 }
@@ -100,7 +195,7 @@ ItemRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 }
 
 
-ItemRequestHandler::ItemRequestHandler(MediaItemServer* pItemServer) :
+ItemRequestHandler::ItemRequestHandler(MediaServer* pItemServer) :
 _bufferSize(8192),
 _pItemServer(pItemServer)
 {
@@ -128,13 +223,13 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         return;
     }
 
-    StreamingResource* pResource;
-    StreamingProperty* pProperty;
+    ServerResource* pResource;
+    ServerObjectProperty* pProperty;
     std::streamsize resSize = 0;
     if (uri[1] == "i") {
         // object icon requested by controller
         Log::instance()->upnpav().debug("icon request: server creates icon property");
-        pProperty = static_cast<StreamingProperty*>(pItem->getProperty(AvProperty::ICON));
+        pProperty = static_cast<ServerObjectProperty*>(pItem->getProperty(AvProperty::ICON));
         Log::instance()->upnpav().debug("icon request: server icon property created");
         // deliver icon
         if (pProperty) {
@@ -158,7 +253,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     else {
         // resource requested by controller
         int resourceId = Poco::NumberParser::parse(uri[1]);
-        pResource = static_cast<StreamingResource*>(pItem->getResource(resourceId));
+        pResource = static_cast<ServerResource*>(pItem->getResource(resourceId));
         resSize = pResource->getSize();
 
         std::string protInfoString = pResource->getProtInfo();
@@ -306,49 +401,14 @@ ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& st
 }
 
 
-MediaServer::MediaServer()
-{
-    MediaServerDescriptions mediaServerDescriptions;
-    MemoryDescriptionReader descriptionReader(mediaServerDescriptions);
-    descriptionReader.getDeviceDescription();
-    setDeviceData(descriptionReader.rootDeviceData());
-
-    // service implementations are owned by DevMediaServer (DevDeviceCode)
-    // DevDeviceCode should be owned by super class Device
-
-    // store a pointer to content directory implementation, so that the
-    // root object can be set later.
-    _pDevContentDirectoryServerImpl = new DevContentDirectoryServerImpl;
-
-    setDevDeviceCode(new DevMediaServer(
-        _pDevContentDirectoryServerImpl,
-        new DevConnectionManagerServerImpl,
-        new DevAVTransportServerImpl)
-    );
-}
-
-
-MediaServer::~MediaServer()
-{
-}
-
-
-void
-MediaServer::setRoot(StreamingMediaObject* pRoot)
-{
-    _pDevContentDirectoryServerImpl->_pRoot = pRoot;
-    pRoot->startStreamingServer();
-}
-
-
 std::istream*
-StreamingProperty::getStream()
+ServerObjectProperty::getStream()
 {
-    return static_cast<StreamingPropertyImpl*>(_pPropertyImpl)->getStream();
+    return static_cast<ServerObjectPropertyImpl*>(_pPropertyImpl)->getStream();
 }
 
 
-StreamingPropertyImpl::StreamingPropertyImpl(StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
+ServerObjectPropertyImpl::ServerObjectPropertyImpl(MediaServer* pServer, ServerObject* pItem) :
 _pServer(pServer),
 _pItem(pItem)
 {
@@ -357,93 +417,143 @@ _pItem(pItem)
 
 
 std::string
-StreamingPropertyImpl::getValue()
+ServerObjectPropertyImpl::getValue()
 {
 //    Log::instance()->upnpav().debug("streaming property get resource string");
 
     std::string serverAddress = _pServer->getServerAddress();
-    std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length()+1);
+//    std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length() + 1);
     std::string resourceId = "i";
-    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+    return serverAddress + "/" + _pItem->getId() + "$" + resourceId;
+//    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
 }
 
 
-StreamingResource::StreamingResource(PropertyImpl* pPropertyImpl, StreamingMediaObject* pServer, AbstractMediaObject* pItem) :
-AbstractResource(pPropertyImpl),
-_pServer(pServer),
+ServerResource::ServerResource(ServerItem* pItem, AbstractDataModel* pDataModel) :
+//ServerResource::ServerResource(MediaServer* pServer, AbstractMediaObject* pItem, AbstractDataModel* pDataModel) :
+//AbstractResource(pPropertyImpl),
+//_pServer(pServer),
 _pItem(pItem),
+_pDataModel(pDataModel),
 _id(0)
 {
 }
 
 
-std::string
-StreamingResource::getValue()
+//std::string
+//ServerResource::getValue()
+//{
+////    Log::instance()->upnpav().debug("streaming resource get resource string ...");
+//
+//    std::string serverAddress = _pServer->getServerAddress();
+//
+////    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
+////    std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length() + 1);
+////    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
+//    std::string resourceId = Poco::NumberFormatter::format(_id);
+//
+////    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
+//    return serverAddress + "/" + _pItem->getId() + "$" + resourceId;
+////    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+//}
+//
+//
+//std::string
+//ServerResource::getAttributeName(int index)
+//{
+//    if (index == 0) {
+//        return AvProperty::PROTOCOL_INFO;
+//    }
+//    else if (index == 1) {
+//        return AvProperty::SIZE;
+//    }
+//}
+//
+//
+//std::string
+//ServerResource::getAttributeValue(int index)
+//{
+//    if (index == 0) {
+////        return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
+//        return _pServer->getServerProtocol() + ":" + _pItem->getMime() + ":" + _pItem->getDlna();
+//    }
+//    else if (index == 1) {
+//        return Poco::NumberFormatter::format(getSize());
+//    }
+//}
+//
+//
+//std::string
+//ServerResource::getAttributeValue(const std::string& name)
+//{
+//    if (name == AvProperty::PROTOCOL_INFO) {
+//        return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
+//    }
+//    else if (name == AvProperty::SIZE) {
+//        return Poco::NumberFormatter::format(getSize());
+//    }
+//}
+//
+//
+//int
+//ServerResource::getAttributeCount()
+//{
+//    // protocolInfo and size
+//    return 2;
+//}
+
+
+bool
+ServerResource::isSeekable()
 {
-//    Log::instance()->upnpav().debug("streaming resource get resource string ...");
-
-    std::string serverAddress = _pServer->getServerAddress();
-
-//    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
-    std::string relativeObjectId = _pItem->getId().substr(_pServer->getId().length()+1);
-//    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
-    std::string resourceId = Poco::NumberFormatter::format(_id);
-
-//    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
-    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+//    Log::instance()->upnpav().debug("cached item is seekable");
+//    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+//    if (!pDataModel) {
+//        return false;
+//    }
+    return _pDataModel->isSeekable(_pDataModel->getPath(_pItem->getIndex()));
 }
 
 
-std::string
-StreamingResource::getAttributeName(int index)
+std::streamsize
+ServerResource::getSize()
 {
-    if (index == 0) {
-        return AvProperty::PROTOCOL_INFO;
-    }
-    else if (index == 1) {
-        return AvProperty::SIZE;
-    }
+//    Log::instance()->upnpav().debug("cached item get size");
+//    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+//    if (!pDataModel) {
+//        return 0;
+//    }
+    return _pDataModel->getSize(_pDataModel->getPath(_pItem->getIndex()));
 }
 
 
-std::string
-StreamingResource::getAttributeValue(int index)
+std::istream*
+ServerResource::getStream()
 {
-    if (index == 0) {
-        return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
-    }
-    else if (index == 1) {
-        return Poco::NumberFormatter::format(getSize());
-    }
+//    Log::instance()->upnpav().debug("cached item get stream");
+//    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+//    if (!pDataModel) {
+//        return 0;
+//    }
+    return _pDataModel->getStream(_pDataModel->getPath(_pItem->getIndex()));
 }
 
 
-std::string
-StreamingResource::getAttributeValue(const std::string& name)
+ServerObject::ServerObject(MediaServer* pServer) :
+_index(0),
+_pParent(0),
+_pServer(pServer)
 {
-    if (name == AvProperty::PROTOCOL_INFO) {
-        return _pServer->getServerProtocol() + ":" + getMime() + ":" + getDlna();
-    }
-    else if (name == AvProperty::SIZE) {
-        return Poco::NumberFormatter::format(getSize());
-    }
+//    _pServer->_pServerContainer = this;
 }
 
 
-int
-StreamingResource::getAttributeCount()
-{
-    // protocolInfo and size
-    return 2;
-}
-
-
-StreamingMediaObject::StreamingMediaObject(int port)
-{
-    _pItemServer = new MediaItemServer(port);
-    _pItemServer->_pServerContainer = this;
-//    _pItemServer->start();
-}
+//StreamingMediaObject::StreamingMediaObject(int port)
+//{
+//    _pItemServer = new MediaServer(port);
+//    _pItemServer->_pServerContainer = this;
+////    _pItemServer->start();
+//}
 
 
 //StreamingMediaObject::StreamingMediaObject(const StreamingMediaObject& object) :
@@ -452,106 +562,196 @@ StreamingMediaObject::StreamingMediaObject(int port)
 //}
 
 
-StreamingMediaObject::StreamingMediaObject(StreamingMediaObject* pServer)
+//StreamingMediaObject::StreamingMediaObject(StreamingMediaObject* pServer)
+//{
+//    _pServer = pServer;
+//}
+
+
+ServerObject::~ServerObject()
 {
-    _pServer = pServer;
+//    if (_pItemServer) {
+//        _pItemServer->stop();
+//        delete _pItemServer;
+//        _pItemServer = 0;
+//    }
 }
 
 
-StreamingMediaObject::~StreamingMediaObject()
+//void
+//StreamingMediaObject::startStreamingServer()
+//{
+//    _pItemServer->start();
+//}
+
+
+std::string
+ServerObject::getId()
 {
-    if (_pItemServer) {
-        _pItemServer->stop();
-        delete _pItemServer;
-        _pItemServer = 0;
+//    Log::instance()->upnpav().debug("ServerObject::getObjectId()");
+
+    ServerObject* pParent = getParent();
+    if (pParent == 0) {
+        return "0";
     }
+    else {
+        return pParent->getId() + "/" + Poco::NumberFormatter::format(getIndex());
+    }
+}
+
+
+std::string
+ServerObject::getParentId()
+{
+//    Log::instance()->upnpav().debug("ServerObject::getParentObjectId()");
+
+    AbstractMediaObject* pParent = getParent();
+    if (pParent) {
+        return pParent->getId();
+    }
+    else {
+        return "";
+    }
+}
+
+
+ui4
+ServerObject::getIndex()
+{
+//    Log::instance()->upnpav().debug("ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+    return _index;
 }
 
 
 void
-StreamingMediaObject::startStreamingServer()
+ServerObject::setIndex(ui4 index)
 {
-    _pItemServer->start();
+//    Log::instance()->upnpav().debug("ServerObject::setObjectNumber() objectId: " + Poco::NumberFormatter::format(id));
+    _index = index;
+}
+
+
+void
+ServerObject::setIndex(const std::string& index)
+{
+//    Log::instance()->upnpav().debug("ServerObject::setObjectId() from string: " + id);
+    _index = Poco::NumberParser::parseUnsigned(index);
+}
+
+
+ui4
+ServerObject::getParentIndex()
+{
+//    Log::instance()->upnpav().debug("ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+    return _parentIndex;
+}
+
+
+ServerObject*
+ServerObject::getParent()
+{
+//    Log::instance()->upnpav().debug("ServerObject::getParent()");
+    return _pParent;
+}
+
+
+void
+ServerObject::setParentIndex(ui4 index)
+{
+//    Log::instance()->upnpav().debug("ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+    _parentIndex = index;
+}
+
+
+void
+ServerObject::setParent(ServerObject* pParent)
+{
+//    Log::instance()->upnpav().debug("ServerObject::setParent()");
+    _pParent = pParent;
 }
 
 
 AbstractMediaObject*
-StreamingMediaObject::createChildObject()
+ServerObject::createChildObject()
 {
-    return new StreamingMediaObject(this);
+    ServerObject* pObject = new ServerObject(_pServer);
+    pObject->setParent(this);
+    return pObject;
+//    return new StreamingMediaObject(this);
 }
 
 
-std::string
-StreamingMediaObject::getServerAddress()
-{
-//    Log::instance()->upnpav().debug("streaming media object get server address ...");
-
-    std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
-    int port = _pItemServer->_socket.address().port();
-//    Log::instance()->upnpav().debug("streaming media object g et server address returns: http://" + address + ":" + Poco::NumberFormatter::format(port));
-    return "http://" + address + ":" + Poco::NumberFormatter::format(port);
-}
-
-
-std::string
-StreamingMediaObject::getServerProtocol()
-{
-    return _pItemServer->getProtocol();
-}
-
-
-std::istream*
-StreamingMediaObject::getIconStream()
-{
-
-}
+//std::string
+//StreamingMediaObject::getServerAddress()
+//{
+////    Log::instance()->upnpav().debug("streaming media object get server address ...");
+//
+//    std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
+//    int port = _pItemServer->_socket.address().port();
+////    Log::instance()->upnpav().debug("streaming media object g et server address returns: http://" + address + ":" + Poco::NumberFormatter::format(port));
+//    return "http://" + address + ":" + Poco::NumberFormatter::format(port);
+//}
+//
+//
+//std::string
+//StreamingMediaObject::getServerProtocol()
+//{
+//    return _pItemServer->getProtocol();
+//}
 
 
-ServerItemResource::ServerItemResource(ServerContainer* pServerContainer, AbstractMediaObject* pItem) :
-StreamingResource(new MemoryPropertyImpl, pServerContainer, pItem)
-{
-}
+//std::istream*
+//StreamingMediaObject::getIconStream()
+//{
+//
+//}
 
 
-bool
-ServerItemResource::isSeekable()
-{
-//    Log::instance()->upnpav().debug("cached item is seekable");
-    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
-    if (!pDataModel) {
-        return false;
-    }
-    return pDataModel->isSeekable(pDataModel->getPath(_pItem->getIndex()));
-}
+//ServerResource::ServerResource(ServerContainer* pServer, AbstractMediaObject* pItem) :
+//StreamingResource(new MemoryPropertyImpl, pServer, pItem)
+//{
+//}
 
 
-std::streamsize
-ServerItemResource::getSize()
-{
-//    Log::instance()->upnpav().debug("cached item get size");
-    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
-    if (!pDataModel) {
-        return 0;
-    }
-    return pDataModel->getSize(pDataModel->getPath(_pItem->getIndex()));
-}
+//bool
+//ServerResource::isSeekable()
+//{
+////    Log::instance()->upnpav().debug("cached item is seekable");
+//    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+//    if (!pDataModel) {
+//        return false;
+//    }
+//    return pDataModel->isSeekable(pDataModel->getPath(_pItem->getIndex()));
+//}
+//
+//
+//std::streamsize
+//ServerResource::getSize()
+//{
+////    Log::instance()->upnpav().debug("cached item get size");
+//    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+//    if (!pDataModel) {
+//        return 0;
+//    }
+//    return pDataModel->getSize(pDataModel->getPath(_pItem->getIndex()));
+//}
+//
+//
+//std::istream*
+//ServerResource::getStream()
+//{
+////    Log::instance()->upnpav().debug("cached item get stream");
+//    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
+//    if (!pDataModel) {
+//        return 0;
+//    }
+//    return pDataModel->getStream(pDataModel->getPath(_pItem->getIndex()));
+//}
 
 
-std::istream*
-ServerItemResource::getStream()
-{
-//    Log::instance()->upnpav().debug("cached item get stream");
-    AbstractDataModel* pDataModel = static_cast<ServerContainer*>(_pServer)->getDataModel();
-    if (!pDataModel) {
-        return 0;
-    }
-    return pDataModel->getStream(pDataModel->getPath(_pItem->getIndex()));
-}
-
-
-ServerItem::ServerItem(ServerContainer* pServer) :
-StreamingMediaObject(pServer)
+ServerItem::ServerItem(MediaServer* pServer, ServerContainer* pContainer) :
+ServerObject(pServer),
+_pContainer(pContainer)
 {
 }
 
@@ -561,19 +761,21 @@ ServerItem::~ServerItem()
 }
 
 
-ServerItemResource*
+ServerResource*
 ServerItem::createResource()
 {
     Log::instance()->upnpav().debug("server item create resource");
 
-    return new ServerItemResource(static_cast<ServerContainer*>(_pServer), this);
+    return new ServerResource(this, _pContainer->getDataModel());
+//    return new ServerResource(static_cast<ServerContainer*>(_pServer), this);
 }
 
 
-ServerContainer::ServerContainer(int port) :
-StreamingMediaObject(port)
+ServerContainer::ServerContainer(MediaServer* pServer) :
+ServerObject(pServer)
 {
     setIsContainer(true);
+    _pServer->_pServerContainer = this;
 }
 
 
@@ -598,8 +800,8 @@ ServerContainer::createMediaContainer()
     Log::instance()->upnpav().debug("server container create media container");
 
 //    ServerContainer* pContainer = new ServerContainer(*this);
-    ServerContainer* pContainer = new ServerContainer;
-    pContainer->_pItemServer = _pItemServer;
+    ServerContainer* pContainer = new ServerContainer(_pServer);
+    pContainer->_pServer = _pServer;
 //    MemoryMediaObject* pContainer = new MemoryMediaObject;
 
     pContainer->setIsContainer(true);
@@ -614,7 +816,7 @@ ServerContainer::createMediaItem()
 {
     Log::instance()->upnpav().debug("server container create media item");
 
-    ServerItem* pItem = new ServerItem(this);
+    ServerItem* pItem = new ServerItem(_pServer, this);
     pItem->setParent(this);
     return pItem;
 }
@@ -629,6 +831,26 @@ ServerContainer::createChildObject()
 }
 
 
+void
+ServerContainer::appendChild(AbstractMediaObject* pChild)
+{
+// TODO: server implementation of appendChild()
+////    pChild->setIndex(getChildCount());
+////    pChild->setIndex(index);
+//    pChild->setParent(this);
+//    appendChildImpl(pChild);
+}
+
+
+void
+ServerContainer::appendChildWithAutoIndex(AbstractMediaObject* pChild)
+{
+// TODO: server implementation of appendChild(), replace appendChildWithAutoIndex()
+//    pChild->setIndex(getChildCount());
+//    appendChild(pChild);
+}
+
+
 ui4
 ServerContainer::getChildCount()
 {
@@ -639,20 +861,73 @@ ServerContainer::getChildCount()
 }
 
 
-AbstractMediaObject*
+ServerObject*
+ServerContainer::getDescendant(const std::string& objectId)
+{
+    Log::instance()->upnpav().debug("abstract media object get descendant with (relative) objectId: " + objectId);
+
+    // TODO: what about this object, not only child objects?
+
+    std::string::size_type slashPos = objectId.find('/');
+    if (slashPos != std::string::npos) {
+        // child is a container
+        ServerContainer* pChild = static_cast<ServerContainer*>(getChildForIndex(objectId.substr(0, slashPos)));
+        if (pChild == 0) {
+            // child container is not a child of this container, we try the full path
+            pChild = static_cast<ServerContainer*>(getChildForIndex(objectId));
+            if (pChild == 0) {
+                // child container is not a child of this container
+                Log::instance()->upnpav().error("retrieving child objectId of container, but no child container found");
+                return 0;
+            }
+            else {
+                // object id of child contains slashes (subtree's implementation is a faked tree with only item objects).
+                return pChild;
+            }
+        }
+        else {
+            // recurse into child container
+            return pChild->getDescendant(objectId.substr(slashPos + 1));
+        }
+    }
+    else {
+        // child is an item
+        Log::instance()->upnpav().debug("abstract media object get descendant is a child with index: " + objectId);
+        ServerItem* pChild = static_cast<ServerItem*>(getChildForIndex(objectId));
+        if (pChild == 0) {
+            // child item is not a child of this container
+            Log::instance()->upnpav().error("no child item found");
+            return 0;
+        }
+        else {
+            // return child item and stop recursion
+            return pChild;
+        }
+    }
+}
+
+
+ServerObject*
+ServerContainer::getChildForIndex(const std::string& index)
+{
+    return getChildForIndex(Poco::NumberParser::parseUnsigned(index));
+}
+
+
+ServerObject*
 ServerContainer::getChildForIndex(ui4 index)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
     std::string path = _pDataModel->getPath(index);
-    AbstractMediaObject* pObject = _pDataModel->getMediaObject(path);
+    ServerObject* pObject = _pDataModel->getMediaObject(path);
     initObject(pObject, index);
     return pObject;
 }
 
 
 ui4
-ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
@@ -664,7 +939,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& child
         // TODO: should be faster with method getIndexBlock() in AbstractDataModel, implemented there with an additional std::vector<ui4>
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); (it != _pDataModel->endIndex()) && (r < offset + count); ++it) {
             if (r >= offset) {
-                AbstractMediaObject* pObject = _pDataModel->getMediaObject((*it).second);
+                ServerObject* pObject = _pDataModel->getMediaObject((*it).second);
 //                if (!pObject->isContainer()) {
                     initObject(pObject, (*it).first);
     //                pObject->setIndex((*it).first);
@@ -694,7 +969,7 @@ ServerContainer::setBasePath(const std::string& basePath)
 
 
 void
-ServerContainer::initObject(AbstractMediaObject* pObject, ui4 index)
+ServerContainer::initObject(ServerObject * pObject, ui4 index)
 {
     pObject->setIndex(index);
     std::string path = _pDataModel->getPath(index);
@@ -716,11 +991,261 @@ ServerContainer::initObject(AbstractMediaObject* pObject, ui4 index)
 }
 
 
-CachedServerContainer::CachedServerContainer() :
+void
+ServerObjectWriter::writeChildren(std::string& meta, const std::vector<ServerObject*>& children, const std::string& filter)
+{
+    Log::instance()->upnpav().debug("ServerObjectWriter::writeChildren()");
+    writeMetaDataHeader();
+    for (std::vector<ServerObject*>::const_iterator it = children.begin(); it != children.end(); ++it) {
+        ServerObjectWriter writer;
+        writer.writeMetaData(_pDidl, *it);
+    }
+    writeMetaDataClose(meta);
+}
+
+
+DatabaseCache::DatabaseCache() :
+_pSession(0)
+{
+    Poco::Data::SQLite::Connector::registerConnector();
+
+}
+
+
+DatabaseCache::~DatabaseCache()
+{
+    if (_pSession) {
+        delete _pSession;
+    }
+    Poco::Data::SQLite::Connector::unregisterConnector();
+}
+
+
+void
+DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
+{
+    _cacheFilePath = cacheFilePath;
+    _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
+    try {
+        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), paridx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
+                Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache creating object cache table failed: " + e.displayText());
+    }
+    try {
+        *_pSession << "CREATE UNIQUE INDEX idx ON objcache (idx)", Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache creating index on object cache table failed: " + e.displayText());
+    }
+}
+
+
+ui4
+DatabaseCache::rowCount()
+{
+    Poco::Data::Statement select(*_pSession);
+    std::string statement = "SELECT idx FROM objcache";
+    select << statement;
+    Poco::Data::RecordSet recordSet(select);
+    try {
+        select.execute();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get row count failed: " + e.displayText());
+    }
+    return recordSet.rowCount();
+}
+
+
+ServerObject*
+DatabaseCache::getMediaObjectForIndex(ui4 index)
+{
+    Log::instance()->upnpav().debug("database cache get object for index: " + Poco::NumberFormatter::format(index));
+
+    std::vector<std::string> xml;
+    try {
+        *_pSession << "SELECT xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(xml), Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
+    }
+    if (xml.size() == 1) {
+        ServerObject* pObject = new ServerObject(0);
+//        if (_pContainer) {
+//            pObject = _pContainer->createChildObject();
+//        }
+//        else {
+//            Log::instance()->upnpav().error("database cache could not create child object");
+//            return 0;
+//        }
+        MediaObjectReader xmlReader;
+        xmlReader.read(pObject, xml[0]);
+//        pObject->setIndex(index);
+        return pObject;
+    }
+    else {
+        Log::instance()->upnpav().warning("database cache get object for index reading meta data failed.");
+        return 0;
+    }
+}
+
+
+ui4
+DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+{
+    Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count));
+
+    ui4 index;
+    std::string xml;
+    Poco::Data::Statement select(*_pSession);
+    std::string statement = "SELECT idx, xml FROM objcache";
+    if (search != "*") {
+        statement += " WHERE " + search;
+    }
+//    statement += " ORDER BY artist, album, track, title";
+    select << statement;
+    Poco::Data::RecordSet recordSet(select);
+    try {
+        select.execute();
+        // move to offset
+        recordSet.moveFirst();
+        for (ui4 r = 0; r < offset; r++) {
+            recordSet.moveNext();
+        }
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("database cache get block executing query and moving to offset failed: " + e.displayText());
+    }
+    for (ui4 r = 0; r < count; r++) {
+        // get block
+        try {
+            index = recordSet["idx"].convert<ui4>();
+            xml = recordSet["xml"].convert<std::string>();
+            ServerObject* pObject = new ServerObject(0);
+//            if (_pContainer) {
+//                pObject = _pContainer->createChildObject();
+//            }
+//            else {
+//                Log::instance()->upnpav().error("database cache could not create child object");
+//                return recordSet.rowCount();
+//            }
+            MediaObjectReader xmlReader;
+            xmlReader.read(pObject, xml);
+//            if (!pObject->isContainer()) {
+                pObject->setIndex(index);
+                block.push_back(pObject);
+//            }
+//            else {
+//                delete pObject;
+//            }
+            recordSet.moveNext();
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnpav().warning("database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
+        }
+    }
+    return recordSet.rowCount();
+}
+
+
+//void
+//DatabaseCache::doScan(bool on)
+//{
+//
+//}
+
+
+void
+DatabaseCache::insertMediaObject(ServerObject* pObject)
+{
+    Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
+    std::string xml;
+    MediaObjectWriter2 xmlWriter;
+    xmlWriter.write(xml, pObject);
+    std::string artist;
+    AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
+    if (pProperty) {
+        artist = pProperty->getValue();
+    }
+    std::string album;
+    pProperty = pObject->getProperty(AvProperty::ALBUM);
+    if (pProperty) {
+        album = pProperty->getValue();
+    }
+    std::string track;
+    pProperty = pObject->getProperty(AvProperty::ORIGINAL_TRACK_NUMBER);
+    if (pProperty) {
+        track = pProperty->getValue();
+    }
+    try {
+        *_pSession << "INSERT INTO objcache (idx, paridx, class, title, artist, album, track, xml) VALUES(:idx, :paridx, :class, :title, :artist, :album, :track, :xml)",
+                Poco::Data::use(pObject->getIndex()),
+                Poco::Data::use(pObject->getParentIndex()),
+                Poco::Data::use(pObject->getClass()),
+                Poco::Data::use(pObject->getTitle()),
+                Poco::Data::use(artist),
+                Poco::Data::use(album),
+                Poco::Data::use(track),
+                Poco::Data::use(xml),
+                Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
+    }
+}
+
+
+void
+DatabaseCache::insertBlock(std::vector<ServerObject*>& block)
+{
+    Log::instance()->upnpav().debug("database cache inserting media object block");
+    typedef Poco::Tuple<ui4, ui4, std::string, std::string, std::string, std::string, int, std::string> MediaObject;
+    std::vector<MediaObject> tupleBlock;
+    for (std::vector<ServerObject*>::iterator it = block.begin(); it != block.end(); ++it) {
+        ServerObject* pObject = *it;
+        std::string xml;
+        MediaObjectWriter2 xmlWriter;
+        xmlWriter.write(xml, pObject);
+        std::string artist;
+        AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
+        if (pProperty) {
+            artist = pProperty->getValue();
+        }
+        std::string album;
+        pProperty = pObject->getProperty(AvProperty::ALBUM);
+        if (pProperty) {
+            album = pProperty->getValue();
+        }
+        Variant trackVariant;
+        pProperty = pObject->getProperty(AvProperty::ORIGINAL_TRACK_NUMBER);
+        if (pProperty) {
+            trackVariant.setValue(pProperty->getValue());
+        }
+        int track;
+        trackVariant.getValue(track);
+
+        tupleBlock.push_back(MediaObject(pObject->getIndex(), pObject->getParentIndex(), pObject->getClass(), pObject->getTitle(), artist, album, track, xml));
+    }
+
+    try {
+        *_pSession << "INSERT INTO objcache (idx, paridx, class, title, artist, album, track, xml) VALUES(:idx, :paridx, :class, :title, :artist, :album, :track, :xml)",
+                Poco::Data::use(tupleBlock),
+                Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
+    }
+}
+
+
+CachedServerContainer::CachedServerContainer(MediaServer* pServer) :
+ServerContainer(pServer),
 _updateCacheThreadRunnable(*this, &CachedServerContainer::updateCacheThread),
 _updateCacheThreadRunning(false)
 {
-    setContainer(this);
+//    setContainer(this);
 
     _searchCaps.append(AvProperty::CLASS);
     _searchCaps.append(AvProperty::TITLE);
@@ -807,7 +1332,7 @@ CachedServerContainer::updateCacheThread()
 }
 
 
-AbstractMediaObject*
+ServerObject*
 CachedServerContainer::getChildForIndex(ui4 index)
 {
     if (!_pDataModel) {
@@ -815,7 +1340,7 @@ CachedServerContainer::getChildForIndex(ui4 index)
     }
     if (_pDataModel->useObjectCache() && !updateCacheThreadIsRunning()) {
         // get media object out of data base cache (column xml)
-         AbstractMediaObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
+         ServerObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
          if (pObject) {
              initObject(pObject, index);
 //             pObject->setIndex(index);
@@ -835,7 +1360,7 @@ CachedServerContainer::getChildForIndex(ui4 index)
 
 
 ui4
-CachedServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+CachedServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
     if (!_pDataModel) {
         return 0;
@@ -854,7 +1379,7 @@ CachedServerContainer::getChildrenAtRowOffset(std::vector<AbstractMediaObject*>&
         }
         else {
             totalChildCount = DatabaseCache::getBlockAtRow(children, offset, count, sort, search);
-            for (std::vector<AbstractMediaObject*>::iterator it = children.begin(); it != children.end(); ++it) {
+            for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
                 initObject(*it, (*it)->getIndex());
             }
         }
@@ -895,7 +1420,7 @@ CachedServerContainer::updateCacheThreadIsRunning()
 
 
 void
-CachedServerContainer::initObject(AbstractMediaObject* pObject, ui4 index)
+CachedServerContainer::initObject(ServerObject* pObject, ui4 index)
 {
     pObject->setIndex(index);
     std::string path = _pDataModel->getPath(index);
@@ -906,7 +1431,7 @@ CachedServerContainer::initObject(AbstractMediaObject* pObject, ui4 index)
 //    else {
 //        pObject->setParentIndex(_pDataModel->getIndex(parentPath));
 //    }
-    AbstractMediaObject* pParent;
+    ServerObject* pParent;
     if (parentPath == "") {
         pParent = this;
     }
@@ -1017,7 +1542,7 @@ AbstractDataModel::endIndex()
 
 
 void
-AbstractDataModel::addPath(const std::string& path)
+AbstractDataModel::addPath(const std::string& path, const std::string& resourcePath)
 {
     ui4 index;
     // got a free index lying around?
@@ -1036,6 +1561,9 @@ AbstractDataModel::addPath(const std::string& path)
     // create a new index
     _pathMap[path] = index;
     _indexMap[index] = path;
+    if (resourcePath != "") {
+        _resourceMap.insert(std::pair<ui4, std::string>(index, resourcePath));
+    }
 }
 
 
@@ -1046,6 +1574,7 @@ AbstractDataModel::removePath(const std::string& path)
     if (pos  != _pathMap.end()) {
         _indexMap.erase((*pos).second);
         _pathMap.erase(pos);
+        _resourceMap.erase((*pos).second);
     }
     else {
         Log::instance()->upnpav().error("abstract data model, could not erase path from index cache: " + path);
@@ -1079,6 +1608,7 @@ AbstractDataModel::readIndexCache()
         lastIndex = index;
     }
     _maxIndex = index;
+    // TODO: read resource map
     Omm::Av::Log::instance()->upnpav().debug("index cache reading finished.");
 }
 
@@ -1096,11 +1626,12 @@ AbstractDataModel::writeIndexCache()
 //        Log::instance()->upnpav().debug("abstract data model write index: " + Poco::NumberFormatter::format((*it).first) + ", path: " + (*it).second);
         indexCache << (*it).first << ' ' << (*it).second << std::endl;
     }
+    // TODO: write resource map
     Log::instance()->upnpav().debug("abstract data model write index cache finished.");
 }
 
 
-AbstractMediaObject*
+ServerObject*
 SimpleDataModel::getMediaObject(const std::string& path)
 {
 //    Log::instance()->upnpav().debug("simple data model get media object for index: " + Poco::NumberFormatter::format(index) + " ...");
@@ -1130,7 +1661,7 @@ SimpleDataModel::getMediaObject(const std::string& path)
         pItem->setUniqueProperty(AvProperty::GENRE, genre);
     }
 
-    ServerItemResource* pResource = pItem->createResource();
+    ServerResource* pResource = pItem->createResource();
 //    Omm::Av::MemoryResource* pResource = new Omm::Av::MemoryResource;
     pResource->setSize(getSize(path));
     // FIXME: add some parts of protinfo in server container / media server.

@@ -221,24 +221,28 @@ DevContentDirectoryServerImpl::GetSystemUpdateID(ui4& Id)
 void
 DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
-    AbstractMediaObject* object;
+    ServerObject* pObject;
     if (ObjectID == "0") {
-        object = _pRoot;
+        pObject = _pRoot;
     }
     else {
         // get object via object id and index
-        object = _pRoot->getDescendant(ObjectID.substr(2));
+        pObject = _pRoot->getDescendant(ObjectID.substr(2));
     }
 
-    MediaObjectWriter2 writer(object);
+    ServerObjectWriter writer;
     if (BrowseFlag == "BrowseMetadata") {
-        writer.write(Result);
+        writer.write(Result, pObject);
         NumberReturned = 1;
         TotalMatches = 1;
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
         // get child objects via row
-        NumberReturned = writer.writeChildren(TotalMatches, Result, StartingIndex, RequestedCount, Filter, SortCriteria);
+        Log::instance()->upnpav().debug("browse direct children of: " + pObject->getTitle());
+        std::vector<ServerObject*> children;
+        TotalMatches = pObject->getChildrenAtRowOffset(children, StartingIndex, RequestedCount, SortCriteria);
+        NumberReturned = children.size();
+        writer.writeChildren(Result, children);
     }
     else {
         Log::instance()->upnpav().error("Error in Browse: unkown BrowseFlag");
@@ -250,18 +254,21 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
 void
 DevContentDirectoryServerImpl::Search(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria, std::string& Result, ui4& NumberReturned, ui4& TotalMatches, ui4& UpdateID)
 {
-    AbstractMediaObject* object;
+    ServerObject* pObject;
     if (ContainerID == "0") {
-        object = _pRoot;
+        pObject = _pRoot;
     }
     else {
         // get object via object id and index
-        object = _pRoot->getDescendant(ContainerID.substr(2));
+        pObject = _pRoot->getDescendant(ContainerID.substr(2));
     }
 
-    MediaObjectWriter2 writer(object);
+    ServerObjectWriter writer;
     // get child objects via row
-    NumberReturned = writer.writeChildren(TotalMatches, Result, StartingIndex, RequestedCount, Filter, SortCriteria, SearchCriteria);
+    std::vector<ServerObject*> children;
+    TotalMatches = pObject->getChildrenAtRowOffset(children, StartingIndex, RequestedCount, SortCriteria, SearchCriteria);
+    NumberReturned = children.size();
+    writer.writeChildren(Result, children);
     UpdateID = 0;
 }
 

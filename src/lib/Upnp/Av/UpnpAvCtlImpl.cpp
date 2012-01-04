@@ -156,8 +156,8 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
             }
             else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_META_DATA) {
                 CtlMediaObject2 object;
-                MediaObjectReader reader(&object);
-                reader.read(val);
+                MediaObjectReader reader;
+                reader.read(&object, val);
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST)->getValue(), object.getProperty(AvProperty::ALBUM)->getValue());
                 }

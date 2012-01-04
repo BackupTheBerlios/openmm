@@ -38,7 +38,7 @@ public:
 
     virtual std::string getParentPath(const std::string& path);
 
-    virtual Omm::Av::AbstractMediaObject* getMediaObject(const std::string& path);
+    virtual Omm::Av::ServerObject* getMediaObject(const std::string& path);
     virtual std::streamsize getSize(const std::string& path);
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");

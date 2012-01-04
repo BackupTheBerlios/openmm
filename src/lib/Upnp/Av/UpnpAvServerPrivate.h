@@ -36,7 +36,7 @@ public:
 };
 
 
-class TorchItemPropertyImpl : public Omm::Av::StreamingPropertyImpl
+class TorchItemPropertyImpl : public Omm::Av::ServerObjectPropertyImpl
 {
 public:
     TorchItemPropertyImpl(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);
@@ -55,7 +55,7 @@ private:
 };
 
 
-class TorchItemResource : public Omm::Av::StreamingResource
+class TorchItemResource : public Omm::Av::ServerResource
 {
 public:
     TorchItemResource(TorchServerContainer* pServer, Omm::Av::AbstractMediaObject* pItem);

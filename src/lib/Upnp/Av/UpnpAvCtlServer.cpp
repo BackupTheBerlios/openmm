@@ -67,8 +67,8 @@ CtlMediaServer::browseRootObject()
         ui4 totalMatches;
         ui4 updateId;
         _pCtlMediaServerCode->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
-        MediaObjectReader reader(_pRoot);
-        reader.read(rootMeta);
+        MediaObjectReader reader;
+        reader.read(_pRoot, rootMeta);
         Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS)->getValue());
     }
     catch (Poco::Exception& e) {

@@ -76,8 +76,8 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject)
     AbstractResource* pRes = pObject->getResource();
     if (pRes) {
         std::string metaData;
-        MediaObjectWriter2 writer(pObject);
-        writer.write(metaData);
+        MediaObjectWriter2 writer;
+        writer.write(metaData, pObject);
         try {
             _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
         }
