@@ -65,8 +65,6 @@ public:
     void start();
     void stop();
 
-//    std::string getProtocol();
-
     Poco::UInt16 getServerPort() const;
     std::string getServerAddress();
     std::string getServerProtocol();
@@ -150,6 +148,10 @@ public:
     ServerObject(MediaServer* pServer);
     ~ServerObject();
 
+    // id and index
+    // index: fixed number for a child object, needed only on server side
+    // id: path to object made of indices (index1/index2/ ...)
+    // row: contiguous number of a child of an object container (see "parent and descendants")
     virtual std::string getId();
     virtual std::string getParentId();
     virtual ui4 getIndex();
