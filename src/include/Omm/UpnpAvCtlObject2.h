@@ -62,6 +62,7 @@ public:
     void setSearch(const std::string& searchText);
 
     int fetchChildren(ui4 count = 10, ui4 offset = -1);
+    bool fetchedAllChildren();
     /// offset -1 means fetch from offset = childCount()
     virtual AbstractMediaObject* getChildForRow(ui4 row);
 

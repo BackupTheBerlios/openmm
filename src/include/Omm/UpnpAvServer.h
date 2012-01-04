@@ -150,19 +150,20 @@ public:
 
     // id and index
     // index: fixed number for a child object, needed only on server side
-    // id: path to object made of indices (index1/index2/ ...)
+    // object id: path to object consisting of server root object id and child indices (0/index1/index2/ ...)
     // row: contiguous number of a child of an object container (see "parent and descendants")
     virtual std::string getId();
     virtual std::string getParentId();
     virtual ui4 getIndex();
     void setIndex(const std::string& index);
     void setIndex(ui4 index);
+
+    // parent and descendants
     virtual ui4 getParentIndex();
     void setParentIndex(ui4 index);
     ServerObject* getParent();
     void setParent(ServerObject* pParent);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
-
     // this really is createChildItem(), not createChildObject()
     virtual AbstractMediaObject* createChildObject();
 

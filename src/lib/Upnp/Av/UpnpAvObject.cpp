@@ -569,30 +569,6 @@ AbstractMediaObject::getClass()
 }
 
 
-bool
-AbstractMediaObject::fetchedAllChildren()
-{
-//    Log::instance()->upnpav().debug("AbstractMediaObject::fetchedAllChildren()");
-    return getChildCount() >= getTotalChildCount();
-}
-
-
-int
-AbstractMediaObject::fetchChildren()
-{
-    return 0;
-}
-
-
-ui4
-AbstractMediaObject::getTotalChildCount()
-{
-//    Log::instance()->upnpav().debug("AbstractMediaObject::getTotalChildCount()");
-
-    return getChildCount();
-}
-
-
 AbstractResource*
 AbstractMediaObject::getResource(int index)
 {
@@ -738,14 +714,14 @@ MemoryMediaObject::setIsContainer(bool isContainer)
 
 
 void
-MemoryMediaObject::setTotalChildCount(ui4 childCount)
+MemoryMediaObject::setChildCount(ui4 childCount)
 {
     _totalChildCount = childCount;
 }
 
 
 ui4
-MemoryMediaObject::getChildCount()
+MemoryMediaObject::getFetchedChildCount()
 {
 //    Log::instance()->upnpav().debug("MemoryMediaObject::getChildCount()");
     return _childVec.size();
@@ -753,7 +729,7 @@ MemoryMediaObject::getChildCount()
 
 
 ui4
-MemoryMediaObject::getTotalChildCount()
+MemoryMediaObject::getChildCount()
 {
     return _totalChildCount;
 }
@@ -942,7 +918,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
             catch (Poco::Exception &e) {
                 Log::instance()->upnpav().error("parsing child count in media object reader failed");
             }
-            pObject->setTotalChildCount(childCount);
+            pObject->setChildCount(childCount);
         }
     }
     if (attr != 0) {

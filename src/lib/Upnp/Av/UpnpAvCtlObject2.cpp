@@ -73,7 +73,7 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
         }
         // _totalMatches is the number of items in the browse result, that matches
         // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
-        setTotalChildCount(totalMatches);
+        setChildCount(totalMatches);
         MediaObjectReader reader;
         reader.readChildren(_childVec, result, this);
     }
@@ -81,6 +81,14 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
         Log::instance()->upnpav().error("controller media object fetch children failed");
     }
     return numberReturned;
+}
+
+
+bool
+CtlMediaObject2::fetchedAllChildren()
+{
+//    Log::instance()->upnpav().debug("AbstractMediaObject::fetchedAllChildren()");
+    return getChildCount() >= getFetchedChildCount();
 }
 
 
@@ -146,7 +154,7 @@ CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, 
         }
         // _totalMatches is the number of items in the browse result, that matches
         // the filter criterion (see examples, 2.8.2, 2.8.3 in AV-CD 1.0)
-        setTotalChildCount(totalMatches);
+        setChildCount(totalMatches);
         MediaObjectReader reader;
         reader.readChildren(block, result, this);
     }

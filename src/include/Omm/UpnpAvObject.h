@@ -350,15 +350,9 @@ public:
     virtual bool isContainer() { return false; }
     virtual void setIsContainer(bool isContainer) {}
     virtual ui4 getChildCount() { return 0; }
-    virtual ui4 getTotalChildCount();
-    virtual void setTotalChildCount(ui4 childCount) {}
-    // TODO: getChildForRow() along with getChildCount() and getTotalChildCount() on controller side only?
-    virtual AbstractMediaObject* getChildForRow(ui4 row) { return 0; }
+    virtual void setChildCount(ui4 childCount) {}
     virtual CsvList* getSortCaps() { return 0; }
     virtual CsvList* getSearchCaps() { return 0; }
-    // simple lazy browsing with fetchChildren() and fetchedAllChildren(), only for sample Qt gui, for now
-    virtual int fetchChildren();
-    bool fetchedAllChildren();
 };
 
 
@@ -397,23 +391,23 @@ public:
     virtual AbstractResource* createResource();
 
     // attributes
-    virtual bool isRestricted();                                                // server object, write meta data
+    virtual bool isRestricted();
     virtual bool isSearchable();
     void setIsSearchable(bool searchable = true);
 
     // properties
     virtual int getPropertyCount(const std::string& name = "");
-    void addProperty(AbstractProperty* pProperty);                              // controller object, read from xml into memory
+    void addProperty(AbstractProperty* pProperty);
     virtual AbstractProperty* getProperty(int index);
-    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);             // server object, write meta data
+    virtual AbstractProperty* getProperty(const std::string& name, int index = 0);
 
     // descendants
-    virtual bool isContainer();                                                 // server object, write meta data
+    virtual bool isContainer();
     virtual void setIsContainer(bool isContainer);
-    virtual ui4 getChildCount();                                                // server object, cds browse / write meta data
-    virtual ui4 getTotalChildCount();
-    virtual void setTotalChildCount(ui4 childCount);                            // controller object, read from xml into memory
-    virtual AbstractMediaObject* getChildForRow(ui4 row);                       // server object, write meta data
+    virtual ui4 getFetchedChildCount();
+    virtual ui4 getChildCount();
+    virtual void setChildCount(ui4 childCount);
+    virtual AbstractMediaObject* getChildForRow(ui4 row);
 
 protected:
     typedef std::multimap<std::string,AbstractProperty*>::iterator      PropertyIterator;

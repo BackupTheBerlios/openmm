@@ -71,10 +71,10 @@ QtMediaObject::totalItemCount()
     }
     if (_pObject->isContainer()) {
 //        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
-        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getTotalChildCount()));
+        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
 //        return getChildCount();
 //        return _pObject->getChildCount();
-        return _pObject->getTotalChildCount();
+        return _pObject->getChildCount();
     }
     return 0;
 }
@@ -119,7 +119,7 @@ QtMediaObject::selectItem(int row)
 bool
 QtMediaObject::canFetchMore()
 {
-    return _lastFetched >= _pObject->getTotalChildCount();
+    return _lastFetched >= _pObject->getChildCount();
 }
 
 
@@ -151,7 +151,7 @@ ListWidget*
 QtMediaObject::createWidget()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object create object widget");
-    
+
     return new QtMediaObject;
 }
 
@@ -235,7 +235,7 @@ void
 QtMediaObject::configure()
 {
     Omm::Av::Log::instance()->upnpav().debug("Qt media object configure");
-    
+
     if (!_pObject) {
         Omm::Av::Log::instance()->upnpav().error("Qt media object failed to configure object (ignoring)");
         return;

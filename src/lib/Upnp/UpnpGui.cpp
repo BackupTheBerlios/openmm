@@ -674,8 +674,8 @@ ListView(pParent)
 int
 MediaContainerWidget::totalItemCount()
 {
-    Gui::Log::instance()->gui().debug("media container widget total item count: " + Poco::NumberFormatter::format(_pObjectModel->getTotalChildCount()));
-    return _pObjectModel->getTotalChildCount();
+    Gui::Log::instance()->gui().debug("media container widget total item count: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
+    return _pObjectModel->getChildCount();
 }
 
 
