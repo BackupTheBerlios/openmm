@@ -864,7 +864,7 @@ ServerContainer::getChildCount()
 ServerObject*
 ServerContainer::getDescendant(const std::string& objectId)
 {
-    Log::instance()->upnpav().debug("abstract media object get descendant with (relative) objectId: " + objectId);
+    Log::instance()->upnpav().debug("server container get descendant with (relative) objectId: " + objectId);
 
     // TODO: what about this object, not only child objects?
 
@@ -892,7 +892,7 @@ ServerContainer::getDescendant(const std::string& objectId)
     }
     else {
         // child is an item
-        Log::instance()->upnpav().debug("abstract media object get descendant is a child with index: " + objectId);
+        Log::instance()->upnpav().debug("server container get descendant is a child with index: " + objectId);
         ServerItem* pChild = static_cast<ServerItem*>(getChildForIndex(objectId));
         if (pChild == 0) {
             // child item is not a child of this container
@@ -920,8 +920,9 @@ ServerContainer::getChildForIndex(ui4 index)
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
     std::string path = _pDataModel->getPath(index);
+    Log::instance()->upnpav().debug("server container, get children for index: " + Poco::NumberFormatter::format(index) + ", path: " + path);
     ServerObject* pObject = _pDataModel->getMediaObject(path);
-    initObject(pObject, index);
+    initChild(pObject, index);
     return pObject;
 }
 
@@ -941,7 +942,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
             if (r >= offset) {
                 ServerObject* pObject = _pDataModel->getMediaObject((*it).second);
 //                if (!pObject->isContainer()) {
-                    initObject(pObject, (*it).first);
+                    initChild(pObject, (*it).first);
     //                pObject->setIndex((*it).first);
                     children.push_back(pObject);
 //                }
@@ -969,8 +970,10 @@ ServerContainer::setBasePath(const std::string& basePath)
 
 
 void
-ServerContainer::initObject(ServerObject * pObject, ui4 index)
+ServerContainer::initChild(ServerObject * pObject, ui4 index)
 {
+    Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle());
+
     pObject->setIndex(index);
     std::string path = _pDataModel->getPath(index);
     std::string parentPath = _pDataModel->getParentPath(path);
@@ -988,6 +991,22 @@ ServerContainer::initObject(ServerObject * pObject, ui4 index)
 //        pParent = _pDataModel->getMediaObject(parentPath);
 //    }
 //    pObject->setParent(pParent);
+
+//    Log::instance()->upnpav().debug("streaming resource get resource string ...");
+
+    std::string serverAddress = _pServer->getServerAddress();
+
+//    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
+    std::string relativeObjectId = pObject->getId().substr(getId().length() + 1);
+//    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
+//    std::string resourceId = Poco::NumberFormatter::format(_id);
+
+//    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
+//    std::string resourceUri = serverAddress + "/" + pObject->getId() + "$0";
+    std::string resourceUri = serverAddress + "/" + relativeObjectId + "$0";
+//    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+
+    pObject->getResource(0)->setUri(resourceUri);
 }
 
 
@@ -1335,6 +1354,8 @@ CachedServerContainer::updateCacheThread()
 ServerObject*
 CachedServerContainer::getChildForIndex(ui4 index)
 {
+    Log::instance()->upnpav().debug("cached server container, get children for index: " + Poco::NumberFormatter::format(index));
+
     if (!_pDataModel) {
         return 0;
     }
@@ -1342,7 +1363,7 @@ CachedServerContainer::getChildForIndex(ui4 index)
         // get media object out of data base cache (column xml)
          ServerObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
          if (pObject) {
-             initObject(pObject, index);
+             initChild(pObject, index);
 //             pObject->setIndex(index);
 //             pObject->setParent(this);
          }
@@ -1380,7 +1401,7 @@ CachedServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& childr
         else {
             totalChildCount = DatabaseCache::getBlockAtRow(children, offset, count, sort, search);
             for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
-                initObject(*it, (*it)->getIndex());
+                initChild(*it, (*it)->getIndex());
             }
         }
     }
@@ -1420,8 +1441,9 @@ CachedServerContainer::updateCacheThreadIsRunning()
 
 
 void
-CachedServerContainer::initObject(ServerObject* pObject, ui4 index)
+CachedServerContainer::initChild(ServerObject* pObject, ui4 index)
 {
+    Log::instance()->upnpav().debug("cached server container, init child with title: " + pObject->getTitle());
     pObject->setIndex(index);
     std::string path = _pDataModel->getPath(index);
     std::string parentPath = _pDataModel->getParentPath(path);
@@ -1439,6 +1461,22 @@ CachedServerContainer::initObject(ServerObject* pObject, ui4 index)
         pParent = _pDataModel->getMediaObject(parentPath);
     }
     pObject->setParent(pParent);
+
+//    Log::instance()->upnpav().debug("streaming resource get resource string ...");
+
+    std::string serverAddress = _pServer->getServerAddress();
+
+//    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
+    std::string relativeObjectId = pObject->getId().substr(getId().length() + 1);
+//    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
+//    std::string resourceId = Poco::NumberFormatter::format(_id);
+
+//    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
+//    std::string resourceUri = serverAddress + "/" + pObject->getId() + "$0";
+    std::string resourceUri = serverAddress + "/" + relativeObjectId + "$0";
+//    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
+
+    pObject->getResource(0)->setUri(resourceUri);
 }
 
 

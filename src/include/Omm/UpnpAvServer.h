@@ -290,7 +290,7 @@ public:
     virtual void updateCache(bool on = true) {}
 
 protected:
-    virtual void initObject(ServerObject* pObject, ui4 index);
+    virtual void initChild(ServerObject* pObject, ui4 index);
 
     AbstractDataModel*              _pDataModel;
 
@@ -349,7 +349,7 @@ private:
     bool cacheNeedsUpdate();
     void updateCacheThread();
     bool updateCacheThreadIsRunning();
-    virtual void initObject(ServerObject* pObject, ui4 index);
+    virtual void initChild(ServerObject* pObject, ui4 index);
 
     CsvList                                             _searchCaps;
     CsvList                                             _sortCaps;
