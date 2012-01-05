@@ -42,6 +42,7 @@ namespace Av {
 class MediaItemServer;
 class ServerObject;
 class ServerItem;
+class ServerObjectCache;
 class DevContentDirectoryServerImpl;
 class ServerContainer;
 class AbstractDataModel;
@@ -142,16 +143,17 @@ class ServerObject : public MemoryMediaObject
 {
     friend class ItemRequestHandler;
     friend class ServerObjectResource;
-    friend class ServerObjectPropertyImpl;
+    friend class ServerObjectCache;
 
 public:
     ServerObject(MediaServer* pServer);
     ~ServerObject();
 
-    // id and index
-    // index: fixed number for a child object, needed only on server side
+    // object id, index, row and path
+    // index: fixed number and unique identifier for a server object
     // object id: path to object consisting of server root object id and child indices (0/index1/index2/ ...)
-    // row: contiguous number of a child of an object container (see "parent and descendants")
+    // row: contiguous number of a child in an object container in the context of search and sort criteria
+    // path: unique string to identify an object in the servers domain (e.g. path to file, url to webradio station)
     virtual std::string getId();
     virtual std::string getParentId();
     virtual ui4 getIndex();
@@ -198,13 +200,25 @@ class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 public:
     ServerContainer(MediaServer* pServer);
 
-    void setDataModel(AbstractDataModel* pDataModel);
     AbstractDataModel* getDataModel();
+    void setDataModel(AbstractDataModel* pDataModel);
+    ServerObjectCache* getObjectCache();
+    void setObjectCache(ServerObjectCache* pObjectCache);
 
     virtual ServerContainer* createMediaContainer();
     virtual ServerItem* createMediaItem();
-    virtual AbstractMediaObject* createChildObject();
+    virtual ServerObject* createChildObject();
 
+    // TODO: sort and search caps should be moved to data model
+    virtual bool isSearchable() { return true; }
+    virtual CsvList* getSortCaps();
+    virtual CsvList* getSearchCaps();
+
+    virtual void setBasePath(const std::string& basePath);
+    virtual void updateCache(bool on = true);
+    bool cacheNeedsUpdate();
+
+    // appendChild*() methods are only needed for server containers without data model
     void appendChild(AbstractMediaObject* pChild);
     void appendChildWithAutoIndex(AbstractMediaObject* pChild);
 
@@ -212,19 +226,28 @@ public:
 
     virtual ui4 getChildCount();
     virtual ServerObject* getChildForIndex(const std::string& index);
-    virtual ServerObject* getChildForIndex(ui4 index);
+    virtual ServerObject* getChildForIndex(ui4 index, bool init = true);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
-    virtual void setBasePath(const std::string& basePath);
-    virtual void updateCache(bool on = true) {}
 
 protected:
-    virtual void initChild(ServerObject* pObject, ui4 index);
+    virtual void initChild(ServerObject* pObject, ui4 index, bool init = true);
 
-    AbstractDataModel*              _pDataModel;
+    AbstractDataModel*                                  _pDataModel;
+    ServerObjectCache*                                  _pObjectCache;
 
 private:
-    Poco::FastMutex                 _serverLock;
+    void updateCacheThread();
+    bool updateCacheThreadIsRunning();
+
+    Poco::FastMutex                                     _serverLock;
+    CsvList                                             _searchCaps;
+    CsvList                                             _sortCaps;
+
+    Poco::Thread                                        _updateCacheThread;
+    Poco::RunnableAdapter<ServerContainer>              _updateCacheThreadRunnable;
+    bool                                                _updateCacheThreadRunning;
+    Poco::FastMutex                                     _updateCacheThreadLock;
 };
 
 
@@ -235,58 +258,44 @@ public:
 };
 
 
-class DatabaseCache : public AbstractMediaObjectCache
+class ServerObjectCache : public AbstractMediaObjectCache
+{
+    friend class ServerContainer;
+
+public:
+    virtual ui4 rowCount() { return 0; }
+
+    virtual void setCacheFilePath(const std::string& cacheFilePath) {}
+    virtual void insertMediaObject(ServerObject* pObject) {}
+    virtual void insertBlock(std::vector<ServerObject*>& block) {}
+
+    virtual ServerObject* getMediaObjectForIndex(ui4 index) { return 0; }
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
+
+protected:
+    ServerContainer*            _pServerContainer;
+};
+
+
+class DatabaseCache : public ServerObjectCache
 {
 public:
     DatabaseCache();
     ~DatabaseCache();
 
-    void setCacheFilePath(const std::string& cacheFilePath);
+    virtual void setCacheFilePath(const std::string& cacheFilePath);
 
-    ui4 rowCount();
+    virtual ui4 rowCount();
 
     virtual ServerObject* getMediaObjectForIndex(ui4 index);
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
-protected:
-    void insertMediaObject(ServerObject* pObject);
-    void insertBlock(std::vector<ServerObject*>& block);
+    virtual void insertMediaObject(ServerObject* pObject);
+    virtual void insertBlock(std::vector<ServerObject*>& block);
 
 private:
     Poco::Data::Session*        _pSession;
     std::string                 _cacheFilePath;
-};
-
-
-class CachedServerContainer : public ServerContainer, public DatabaseCache
-{
-public:
-    CachedServerContainer(MediaServer* pServer);
-
-    virtual bool isSearchable() { return true; }
-
-    // TODO: sort and search caps should be moved to data model
-    virtual CsvList* getSortCaps();
-    virtual CsvList* getSearchCaps();
-
-    virtual void setBasePath(const std::string& basePath);
-    virtual void updateCache(bool on = true);
-
-private:
-    virtual ServerObject* getChildForIndex(ui4 index);
-    virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
-    bool cacheNeedsUpdate();
-    void updateCacheThread();
-    bool updateCacheThreadIsRunning();
-    virtual void initChild(ServerObject* pObject, ui4 index);
-
-    CsvList                                             _searchCaps;
-    CsvList                                             _sortCaps;
-
-    Poco::Thread                                        _updateCacheThread;
-    Poco::RunnableAdapter<CachedServerContainer>        _updateCacheThreadRunnable;
-    bool                                                _updateCacheThreadRunning;
-    Poco::FastMutex                                     _updateCacheThreadLock;
 };
 
 

@@ -530,10 +530,33 @@ ServerItem::createResource()
 
 
 ServerContainer::ServerContainer(MediaServer* pServer) :
-ServerObject(pServer)
+ServerObject(pServer),
+_pDataModel(0),
+_pObjectCache(0),
+_updateCacheThreadRunnable(*this, &ServerContainer::updateCacheThread),
+_updateCacheThreadRunning(false)
 {
     setIsContainer(true);
     _pServer->_pServerContainer = this;
+
+    _searchCaps.append(AvProperty::CLASS);
+    _searchCaps.append(AvProperty::TITLE);
+    _searchCaps.append(AvProperty::ARTIST);
+    _searchCaps.append(AvProperty::ALBUM);
+    _searchCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
+
+    _sortCaps.append(AvProperty::CLASS);
+    _sortCaps.append(AvProperty::TITLE);
+    _sortCaps.append(AvProperty::ARTIST);
+    _sortCaps.append(AvProperty::ALBUM);
+    _sortCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
+}
+
+
+AbstractDataModel*
+ServerContainer::getDataModel()
+{
+    return _pDataModel;
 }
 
 
@@ -542,13 +565,24 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
 {
     _pDataModel = pDataModel;
     _pDataModel->setServerContainer(this);
+    if (_pDataModel->useObjectCache()) {
+        _pObjectCache = new DatabaseCache;
+        _pObjectCache->_pServerContainer = this;
+    }
 }
 
 
-AbstractDataModel*
-ServerContainer::getDataModel()
+ServerObjectCache*
+ServerContainer::getObjectCache()
 {
-    return _pDataModel;
+    return _pObjectCache;
+}
+
+
+void
+ServerContainer::setObjectCache(ServerObjectCache* pObjectCache)
+{
+    _pObjectCache = pObjectCache;
 }
 
 
@@ -578,12 +612,112 @@ ServerContainer::createMediaItem()
 }
 
 
-AbstractMediaObject*
+ServerObject*
 ServerContainer::createChildObject()
 {
     Log::instance()->upnpav().debug("server container create child object");
 
     return createMediaItem();
+}
+
+
+CsvList*
+ServerContainer::getSearchCaps()
+{
+    if (_searchCaps.getSize()) {
+        return &_searchCaps;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+CsvList*
+ServerContainer::getSortCaps()
+{
+    if (_sortCaps.getSize()) {
+        return &_sortCaps;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void
+ServerContainer::setBasePath(const std::string& basePath)
+{
+    Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
+    _pObjectCache->setCacheFilePath(Util::Home::instance()->getCacheDirPath(basePath) + _pDataModel->getServerClass() + "/objects");
+    _pDataModel->setBasePath(basePath);
+    updateCache();
+}
+
+
+void
+ServerContainer::updateCache(bool on)
+{
+    _updateCacheThreadLock.lock();
+    _updateCacheThreadRunning = on;
+    _updateCacheThreadLock.unlock();
+    if (on) {
+        _updateCacheThread.start(_updateCacheThreadRunnable);
+    }
+    else {
+        _updateCacheThread.join();
+    }
+}
+
+
+void
+ServerContainer::updateCacheThread()
+{
+    Log::instance()->upnpav().debug("server container, update cache thread started ...");
+    if (!cacheNeedsUpdate()) {
+        Log::instance()->upnpav().debug("database cache is current, nothing to do");
+    }
+    else {
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
+            if (!updateCacheThreadIsRunning()) {
+                Log::instance()->upnpav().debug("stopping scan thread");
+                break;
+            }
+            _pObjectCache->insertMediaObject(ServerContainer::getChildForIndex((*it).first, false));
+        }
+    }
+    _updateCacheThreadLock.lock();
+    _updateCacheThreadRunning = false;
+    _updateCacheThreadLock.unlock();
+    Log::instance()->upnpav().debug("server container, update cache thread finished.");
+}
+
+
+bool
+ServerContainer::updateCacheThreadIsRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
+    Log::instance()->upnpav().debug("server container, update cache thread is running: " + std::string(_updateCacheThreadRunning ? "yes" : "no"));
+    return _updateCacheThreadRunning;
+}
+
+
+bool
+ServerContainer::cacheNeedsUpdate()
+{
+    ui4 rows = _pObjectCache->rowCount();
+    if (rows > _pDataModel->getIndexCount()) {
+        Log::instance()->upnpav().error("server container, database cache not coherent.");
+        return true;
+    }
+    else if (rows == _pDataModel->getIndexCount()) {
+        Log::instance()->upnpav().debug("server container, database cache is current.");
+        return false;
+    }
+    else {
+        Log::instance()->upnpav().debug("server container, database cache needs update.");
+        return true;
+    }
 }
 
 
@@ -669,14 +803,32 @@ ServerContainer::getChildForIndex(const std::string& index)
 
 
 ServerObject*
-ServerContainer::getChildForIndex(ui4 index)
+ServerContainer::getChildForIndex(ui4 index, bool init)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
-    std::string path = _pDataModel->getPath(index);
-    Log::instance()->upnpav().debug("server container, get children for index: " + Poco::NumberFormatter::format(index) + ", path: " + path);
-    ServerObject* pObject = _pDataModel->getMediaObject(path);
-    initChild(pObject, index);
+    if (!_pDataModel) {
+        // currently, only server containers with data models are handled
+        Log::instance()->upnpav().error("server container without data model, can not retrieve child objects");
+        return 0;
+    }
+
+    ServerObject* pObject = 0;
+    if (_pObjectCache && !updateCacheThreadIsRunning()) {
+        // get media object out of data base cache (column xml)
+         pObject = _pObjectCache->getMediaObjectForIndex(index);
+    }
+    else {
+        std::string path = _pDataModel->getPath(index);
+        Log::instance()->upnpav().debug("server container, get child from data model with index: " + Poco::NumberFormatter::format(index) + ", path: " + path);
+        pObject = _pDataModel->getMediaObject(path);
+//        if (pObject) {
+//            _pObjectCache->insertMediaObject(pObject);
+//        }
+    }
+    if (pObject) {
+        initChild(pObject, index, init);
+    }
     return pObject;
 }
 
@@ -686,10 +838,14 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
-    Log::instance()->upnpav().debug("server container, get children at row offset.");
+     if (!_pDataModel) {
+        // currently, only server containers with data models are handled
+        Log::instance()->upnpav().error("server container without data model, can not retrieve child objects");
+        return 0;
+    }
 
-    ui4 totalChildCount = 0;
-    if (sort == "" && search == "*") {
+    ui4 childCount = 0;
+    if (_pDataModel && cacheNeedsUpdate() && sort == "" && search == "*") {
         ui4 r = 0;
         // TODO: should be faster with method getIndexBlock() in AbstractDataModel, implemented there with an additional std::vector<ui4>
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); (it != _pDataModel->endIndex()) && (r < offset + count); ++it) {
@@ -700,38 +856,43 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
             }
             r++;
         }
-        totalChildCount = _pDataModel->getIndexCount();
+        childCount = _pDataModel->getIndexCount();
+    }
+    else if (_pDataModel) {
+        childCount = _pObjectCache->getBlockAtRow(children, offset, count, sort, search);
     }
     else {
         // TODO: implement building sort indices and row filtering in memory without data base.
     }
-    return totalChildCount;
+    for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
+        initChild(*it, (*it)->getIndex());
+    }
+    return childCount;
 }
 
 
 void
-ServerContainer::setBasePath(const std::string& basePath)
-{
-    _pDataModel->setBasePath(basePath);
-    updateCache();
-}
-
-
-void
-ServerContainer::initChild(ServerObject * pObject, ui4 index)
+ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
 {
     Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle());
 
     pObject->setIndex(index);
-    std::string path = _pDataModel->getPath(index);
-    std::string parentPath = _pDataModel->getParentPath(path);
-    if (parentPath == "") {
-        pObject->setParentIndex(AbstractDataModel::INVALID_INDEX);
+
+    if (!init) {
+        return;
     }
-    else {
-        pObject->setParentIndex(_pDataModel->getIndex(parentPath));
-    }
-//    AbstractMediaObject* pParent;
+
+//    std::string path = _pDataModel->getPath(index);
+
+//    std::string parentPath = _pDataModel->getParentPath(path);
+//    if (parentPath == "") {
+//        pObject->setParentIndex(AbstractDataModel::INVALID_INDEX);
+//    }
+//    else {
+//        pObject->setParentIndex(_pDataModel->getIndex(parentPath));
+//    }
+
+//    ServerObject* pParent;
 //    if (parentPath == "") {
 //        pParent = this;
 //    }
@@ -740,20 +901,17 @@ ServerContainer::initChild(ServerObject * pObject, ui4 index)
 //    }
 //    pObject->setParent(pParent);
 
-//    Log::instance()->upnpav().debug("streaming resource get resource string ...");
-
     std::string serverAddress = _pServer->getServerAddress();
 
-//    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
-    std::string relativeObjectId = pObject->getId().substr(getId().length() + 1);
+    std::string relativeObjectId = Poco::NumberFormatter::format(index);
+//    std::string relativeObjectId = pObject->getId().substr(getId().length() + 1);
+
 //    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
 //    std::string resourceId = Poco::NumberFormatter::format(_id);
-
 //    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
 //    std::string resourceUri = serverAddress + "/" + pObject->getId() + "$0";
     std::string resourceUri = serverAddress + "/" + relativeObjectId + "$0";
-//    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
-
+//    std::string resourceUri = serverAddress + "/" + relativeObjectId + "$" + resourceId;
     pObject->getResource(0)->setUri(resourceUri);
 }
 
@@ -774,8 +932,8 @@ ServerObjectWriter::writeChildren(std::string& meta, const std::vector<ServerObj
 DatabaseCache::DatabaseCache() :
 _pSession(0)
 {
+    Log::instance()->upnpav().debug("database cache ctor");
     Poco::Data::SQLite::Connector::registerConnector();
-
 }
 
 
@@ -791,6 +949,7 @@ DatabaseCache::~DatabaseCache()
 void
 DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
 {
+    Log::instance()->upnpav().debug("database cache set cache file path: " + cacheFilePath);
     _cacheFilePath = cacheFilePath;
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
     try {
@@ -838,19 +997,12 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
     }
+    Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
     if (xml.size() == 1) {
-        // FIXME: ServerObject(0) ?
-        ServerObject* pObject = new ServerObject(0);
-//        if (_pContainer) {
-//            pObject = _pContainer->createChildObject();
-//        }
-//        else {
-//            Log::instance()->upnpav().error("database cache could not create child object");
-//            return 0;
-//        }
+        Log::instance()->upnpav().debug("database cache got xml: " + xml[0]);
+        ServerObject* pObject = _pServerContainer->createChildObject();
         MediaObjectReader xmlReader;
         xmlReader.read(pObject, xml[0]);
-//        pObject->setIndex(index);
         return pObject;
     }
     else {
@@ -891,24 +1043,11 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 
         try {
             index = recordSet["idx"].convert<ui4>();
             xml = recordSet["xml"].convert<std::string>();
-            // FIXME: ServerObject(0) ?
-            ServerObject* pObject = new ServerObject(0);
-//            if (_pContainer) {
-//                pObject = _pContainer->createChildObject();
-//            }
-//            else {
-//                Log::instance()->upnpav().error("database cache could not create child object");
-//                return recordSet.rowCount();
-//            }
+            ServerObject* pObject = _pServerContainer->createChildObject();
             MediaObjectReader xmlReader;
             xmlReader.read(pObject, xml);
-//            if (!pObject->isContainer()) {
-                pObject->setIndex(index);
-                block.push_back(pObject);
-//            }
-//            else {
-//                delete pObject;
-//            }
+            pObject->setIndex(index);
+            block.push_back(pObject);
             recordSet.moveNext();
         }
         catch (Poco::Exception& e) {
@@ -917,13 +1056,6 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 
     }
     return recordSet.rowCount();
 }
-
-
-//void
-//DatabaseCache::doScan(bool on)
-//{
-//
-//}
 
 
 void
@@ -1006,225 +1138,6 @@ DatabaseCache::insertBlock(std::vector<ServerObject*>& block)
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
     }
-}
-
-
-CachedServerContainer::CachedServerContainer(MediaServer* pServer) :
-ServerContainer(pServer),
-_updateCacheThreadRunnable(*this, &CachedServerContainer::updateCacheThread),
-_updateCacheThreadRunning(false)
-{
-//    setContainer(this);
-
-    _searchCaps.append(AvProperty::CLASS);
-    _searchCaps.append(AvProperty::TITLE);
-    _searchCaps.append(AvProperty::ARTIST);
-    _searchCaps.append(AvProperty::ALBUM);
-    _searchCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
-
-    _sortCaps.append(AvProperty::CLASS);
-    _sortCaps.append(AvProperty::TITLE);
-    _sortCaps.append(AvProperty::ARTIST);
-    _sortCaps.append(AvProperty::ALBUM);
-    _sortCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
-}
-
-
-CsvList*
-CachedServerContainer::getSearchCaps()
-{
-    if (_searchCaps.getSize()) {
-        return &_searchCaps;
-    }
-    else {
-        return 0;
-    }
-}
-
-
-CsvList*
-CachedServerContainer::getSortCaps()
-{
-    if (_sortCaps.getSize()) {
-        return &_sortCaps;
-    }
-    else {
-        return 0;
-    }
-}
-
-
-void
-CachedServerContainer::setBasePath(const std::string& basePath)
-{
-    Log::instance()->upnpav().debug("cached server container, set base path to: " + basePath);
-    setCacheFilePath(Util::Home::instance()->getCacheDirPath(basePath) + _pDataModel->getServerClass() + "/objects");
-    ServerContainer::setBasePath(basePath);
-}
-
-
-void
-CachedServerContainer::updateCache(bool on)
-{
-    _updateCacheThreadLock.lock();
-    _updateCacheThreadRunning = on;
-    _updateCacheThreadLock.unlock();
-    if (on) {
-        _updateCacheThread.start(_updateCacheThreadRunnable);
-    }
-    else {
-        _updateCacheThread.join();
-    }
-}
-
-
-void
-CachedServerContainer::updateCacheThread()
-{
-    Log::instance()->upnpav().debug("cached server container, update cache thread started ...");
-    if (!cacheNeedsUpdate()) {
-        Log::instance()->upnpav().debug("database cache is current, nothing to do");
-    }
-    else {
-        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
-            if (!updateCacheThreadIsRunning()) {
-                Log::instance()->upnpav().debug("stopping scan thread");
-                break;
-            }
-            DatabaseCache::insertMediaObject(ServerContainer::getChildForIndex((*it).first));
-        }
-    }
-    _updateCacheThreadLock.lock();
-    _updateCacheThreadRunning = false;
-    _updateCacheThreadLock.unlock();
-    Log::instance()->upnpav().debug("cached server container, update cache thread finished.");
-}
-
-
-ServerObject*
-CachedServerContainer::getChildForIndex(ui4 index)
-{
-    Log::instance()->upnpav().debug("cached server container, get children for index: " + Poco::NumberFormatter::format(index));
-
-    if (!_pDataModel) {
-        return 0;
-    }
-    if (_pDataModel->useObjectCache() && !updateCacheThreadIsRunning()) {
-        // get media object out of data base cache (column xml)
-         ServerObject* pObject = DatabaseCache::getMediaObjectForIndex(index);
-         if (pObject) {
-             initChild(pObject, index);
-         }
-         else {
-             // media object is not yet in the data base cache
-             pObject = ServerContainer::getChildForIndex(index);
-//             DatabaseCache::insertMediaObject(pObject);
-         }
-         return pObject;
-    }
-    else {
-        return ServerContainer::getChildForIndex(index);
-    }
-}
-
-
-ui4
-CachedServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
-{
-    if (!_pDataModel) {
-        return 0;
-    }
-    ui4 totalChildCount = 0;
-    if (_pDataModel->useObjectCache() && !updateCacheThreadIsRunning()) {
-        if (cacheNeedsUpdate() && sort == "" && search == "*") {
-            // if no query result and no sort or search queries, we can serve a block from the index cache of size "count" starting at "offset"
-            totalChildCount = ServerContainer::getChildrenAtRowOffset(children, offset, count);
-            // fill the cache at little bit at this occasion (... too slow, left out)
-//            for (std::vector<AbstractMediaObject*>::iterator it = children.begin(); it != children.end(); ++it) {
-//                DatabaseCache::insertMediaObject(*it);
-//            }
-            // block insertion seems to be even slower than single object insertion
-//            DatabaseCache::insertBlock(children);
-        }
-        else {
-            totalChildCount = DatabaseCache::getBlockAtRow(children, offset, count, sort, search);
-            for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
-                initChild(*it, (*it)->getIndex());
-            }
-        }
-    }
-    else {
-        totalChildCount = ServerContainer::getChildrenAtRowOffset(children, offset, count, sort, search);
-    }
-    return totalChildCount;
-}
-
-
-bool
-CachedServerContainer::cacheNeedsUpdate()
-{
-    ui4 rows = rowCount();
-    if (rows > _pDataModel->getIndexCount()) {
-        Log::instance()->upnpav().error("cached server container, database cache not coherent.");
-        return true;
-    }
-    else if (rows == _pDataModel->getIndexCount()) {
-        Log::instance()->upnpav().debug("cached server container, database cache is current.");
-        return false;
-    }
-    else {
-        Log::instance()->upnpav().debug("cached server container, database cache needs update.");
-        return true;
-    }
-}
-
-
-bool
-CachedServerContainer::updateCacheThreadIsRunning()
-{
-    Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
-    Log::instance()->upnpav().debug("cached server container, update cache thread is running: " + std::string(_updateCacheThreadRunning ? "yes" : "no"));
-    return _updateCacheThreadRunning;
-}
-
-
-void
-CachedServerContainer::initChild(ServerObject* pObject, ui4 index)
-{
-    Log::instance()->upnpav().debug("cached server container, init child with title: " + pObject->getTitle());
-    pObject->setIndex(index);
-    std::string path = _pDataModel->getPath(index);
-    std::string parentPath = _pDataModel->getParentPath(path);
-//    if (parentPath == "") {
-//        pObject->setParentIndex(AbstractDataModel::INVALID_INDEX);
-//    }
-//    else {
-//        pObject->setParentIndex(_pDataModel->getIndex(parentPath));
-//    }
-    ServerObject* pParent;
-    if (parentPath == "") {
-        pParent = this;
-    }
-    else {
-        pParent = _pDataModel->getMediaObject(parentPath);
-    }
-    pObject->setParent(pParent);
-
-//    Log::instance()->upnpav().debug("streaming resource get resource string ...");
-
-    std::string serverAddress = _pServer->getServerAddress();
-
-//    Log::instance()->upnpav().debug("streaming resource get relative object id ...");
-    std::string relativeObjectId = pObject->getId().substr(getId().length() + 1);
-//    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
-//    std::string resourceId = Poco::NumberFormatter::format(_id);
-
-//    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
-//    std::string resourceUri = serverAddress + "/" + pObject->getId() + "$0";
-    std::string resourceUri = serverAddress + "/" + relativeObjectId + "$0";
-//    return serverAddress + "/" + relativeObjectId + "$" + resourceId;
-
-    pObject->getResource(0)->setUri(resourceUri);
 }
 
 
