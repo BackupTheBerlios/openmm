@@ -587,6 +587,13 @@ ServerContainer::setObjectCache(ServerObjectCache* pObjectCache)
 }
 
 
+ServerContainer::Layout
+ServerContainer::getLayout()
+{
+    return _layout;
+}
+
+
 ServerContainer*
 ServerContainer::createMediaContainer()
 {
@@ -1004,16 +1011,24 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
 ui4
 DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
-    Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count));
+    Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
 
     ui4 index;
     std::string xml;
     Poco::Data::Statement select(*_pSession);
     std::string statement = "SELECT idx, xml FROM objcache";
+    std::string whereClause = "";
     if (search != "*") {
-        statement += " WHERE " + search;
+        whereClause += search;
+    }
+    if (_pServerContainer->getLayout() == ServerContainer::Flat) {
+        whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"object.container\"";
+    }
+    if (whereClause != "") {
+        statement += " WHERE " + whereClause;
     }
 //    statement += " ORDER BY artist, album, track, title";
+    Log::instance()->upnpav().debug("database cache execute query: " + statement);
     select << statement;
     Poco::Data::RecordSet recordSet(select);
     try {

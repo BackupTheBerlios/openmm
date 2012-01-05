@@ -206,6 +206,7 @@ public:
     void setDataModel(AbstractDataModel* pDataModel);
     ServerObjectCache* getObjectCache();
     void setObjectCache(ServerObjectCache* pObjectCache);
+    Layout getLayout();
 
     virtual ServerContainer* createMediaContainer();
     virtual ServerItem* createMediaItem();
