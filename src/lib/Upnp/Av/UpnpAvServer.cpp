@@ -533,6 +533,7 @@ ServerContainer::ServerContainer(MediaServer* pServer) :
 ServerObject(pServer),
 _pDataModel(0),
 _pObjectCache(0),
+_layout(Flat),
 _updateCacheThreadRunnable(*this, &ServerContainer::updateCacheThread),
 _updateCacheThreadRunning(false)
 {
@@ -819,7 +820,7 @@ ServerContainer::getChildForIndex(ui4 index, bool init)
     }
 
     ServerObject* pObject = 0;
-    if (_pObjectCache && !updateCacheThreadIsRunning()) {
+    if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
         // get media object out of data base cache (column xml)
          pObject = _pObjectCache->getMediaObjectForIndex(index);
     }
@@ -827,9 +828,6 @@ ServerContainer::getChildForIndex(ui4 index, bool init)
         std::string path = _pDataModel->getPath(index);
         Log::instance()->upnpav().debug("server container, get child from data model with index: " + Poco::NumberFormatter::format(index) + ", path: " + path);
         pObject = _pDataModel->getMediaObject(path);
-//        if (pObject) {
-//            _pObjectCache->insertMediaObject(pObject);
-//        }
     }
     if (pObject) {
         initChild(pObject, index, init);
@@ -855,17 +853,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
         childCount = _pObjectCache->getBlockAtRow(children, offset, count, sort, search);
     }
     else if ((updateCache || !_pObjectCache) && sort == "" && search == "*") {
-        ui4 r = 0;
-        // TODO: should be faster with method getIndexBlock() in AbstractDataModel, implemented there with an additional std::vector<ui4>
-        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); (it != _pDataModel->endIndex()) && (r < offset + count); ++it) {
-            if (r >= offset) {
-                ServerObject* pObject = _pDataModel->getMediaObject((*it).second);
-                initChild(pObject, (*it).first);
-                children.push_back(pObject);
-            }
-            r++;
-        }
-        childCount = _pDataModel->getIndexCount();
+        childCount = _pDataModel->getBlockAtOffset(children, offset, count);
     }
     else {
         // TODO: implement building sort indices and row filtering in memory without data base.
@@ -883,20 +871,18 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
     Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle());
 
     pObject->setIndex(index);
+    std::string path = _pDataModel->getPath(index);
+    std::string parentPath = _pDataModel->getParentPath(path);
+    if (parentPath == "") {
+        pObject->setParentIndex(AbstractDataModel::INVALID_INDEX);
+    }
+    else {
+        pObject->setParentIndex(_pDataModel->getIndex(parentPath));
+    }
 
     if (!init) {
         return;
     }
-
-//    std::string path = _pDataModel->getPath(index);
-
-//    std::string parentPath = _pDataModel->getParentPath(path);
-//    if (parentPath == "") {
-//        pObject->setParentIndex(AbstractDataModel::INVALID_INDEX);
-//    }
-//    else {
-//        pObject->setParentIndex(_pDataModel->getIndex(parentPath));
-//    }
 
 //    ServerObject* pParent;
 //    if (parentPath == "") {
@@ -907,18 +893,17 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
 //    }
 //    pObject->setParent(pParent);
 
-    std::string serverAddress = _pServer->getServerAddress();
-
-    std::string relativeObjectId = Poco::NumberFormatter::format(index);
-//    std::string relativeObjectId = pObject->getId().substr(getId().length() + 1);
-
-//    Log::instance()->upnpav().debug("streaming resource relative object id: " + relativeObjectId);
-//    std::string resourceId = Poco::NumberFormatter::format(_id);
-//    Log::instance()->upnpav().debug("streaming resource get resource string returns: " + serverAddress + "/" + relativeObjectId + "$" + resourceId);
-//    std::string resourceUri = serverAddress + "/" + pObject->getId() + "$0";
-    std::string resourceUri = serverAddress + "/" + relativeObjectId + "$0";
-//    std::string resourceUri = serverAddress + "/" + relativeObjectId + "$" + resourceId;
-    pObject->getResource(0)->setUri(resourceUri);
+    if (!pObject->isContainer()) {
+        std::string serverAddress = _pServer->getServerAddress();
+        std::string relativeObjectId = Poco::NumberFormatter::format(index);
+        std::string resourceUri = serverAddress + "/" + relativeObjectId;
+        for (int r = 0; r < pObject->getResourceCount(); r++) {
+            AbstractResource* pResource = pObject->getResource(r);
+            if (pResource) {
+                pResource->setUri(resourceUri + "$" + Poco::NumberFormatter::format(r));
+            }
+        }
+    }
 }
 
 
@@ -959,7 +944,8 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
     _cacheFilePath = cacheFilePath;
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
     try {
-        *_pSession << "CREATE TABLE objcache (idx INTEGER(4), paridx INTEGER(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
+//        *_pSession << "CREATE TABLE objcache (idx UNSIGNED INT(4), paridx UNSIGNED INT(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
+        *_pSession << "CREATE TABLE objcache (idx INTEGER(8), paridx INTEGER(8), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
                 Poco::Data::now;
     }
     catch (Poco::Exception& e) {
@@ -1284,6 +1270,22 @@ AbstractDataModel::removePath(const std::string& path)
     else {
         Log::instance()->upnpav().error("abstract data model, could not erase path from index cache: " + path);
     }
+}
+
+
+ui4
+AbstractDataModel::getBlockAtOffset(std::vector<ServerObject*>& block, ui4 offset, ui4 count)
+{
+    ui4 r = 0;
+    // TODO: should be faster with a method getIndexBlock(), implemented with an additional std::vector<ui4> as a sorted index list
+    for (IndexIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
+        if (r >= offset) {
+            ServerObject* pObject = getMediaObject((*it).second);
+            block.push_back(pObject);
+        }
+        r++;
+    }
+    return getIndexCount();
 }
 
 

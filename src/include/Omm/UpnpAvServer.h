@@ -200,6 +200,8 @@ class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 public:
     ServerContainer(MediaServer* pServer);
 
+    enum Layout {Flat, NativeDirs, ObjectClass};
+
     AbstractDataModel* getDataModel();
     void setDataModel(AbstractDataModel* pDataModel);
     ServerObjectCache* getObjectCache();
@@ -230,15 +232,15 @@ public:
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
 
-protected:
+private:
     virtual void initChild(ServerObject* pObject, ui4 index, bool init = true);
+
+    void updateCacheThread();
+    bool updateCacheThreadIsRunning();
 
     AbstractDataModel*                                  _pDataModel;
     ServerObjectCache*                                  _pObjectCache;
-
-private:
-    void updateCacheThread();
-    bool updateCacheThreadIsRunning();
+    Layout                                              _layout;
 
     Poco::FastMutex                                     _serverLock;
     CsvList                                             _searchCaps;
@@ -342,8 +344,10 @@ public:
 
     virtual std::string getParentPath(const std::string& path) { return ""; }
 
-    // meta data of object
+    // meta data of objects
     virtual ServerObject* getMediaObject(const std::string& path) { return 0; }
+    virtual ui4 getBlockAtOffset(std::vector<ServerObject*>& block, ui4 offset, ui4 count);
+
     // stream data of object
     virtual std::streamsize getSize(const std::string& path) { return -1; }
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "") { return false; }
