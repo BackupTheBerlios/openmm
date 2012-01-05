@@ -649,9 +649,11 @@ void
 ServerContainer::setBasePath(const std::string& basePath)
 {
     Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
-    _pObjectCache->setCacheFilePath(Util::Home::instance()->getCacheDirPath(basePath) + _pDataModel->getServerClass() + "/objects");
     _pDataModel->setBasePath(basePath);
-    updateCache();
+    if (_pObjectCache) {
+        _pObjectCache->setCacheFilePath(Util::Home::instance()->getCacheDirPath(basePath) + _pDataModel->getServerClass() + "/objects");
+        updateCache();
+    }
 }
 
 
@@ -705,6 +707,9 @@ ServerContainer::updateCacheThreadIsRunning()
 bool
 ServerContainer::cacheNeedsUpdate()
 {
+    if (!_pObjectCache) {
+        return false;
+    }
     ui4 rows = _pObjectCache->rowCount();
     if (rows > _pDataModel->getIndexCount()) {
         Log::instance()->upnpav().error("server container, database cache not coherent.");
@@ -845,7 +850,11 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     }
 
     ui4 childCount = 0;
-    if (_pDataModel && cacheNeedsUpdate() && sort == "" && search == "*") {
+    bool updateCache = cacheNeedsUpdate();
+    if (_pObjectCache && !updateCache) {
+        childCount = _pObjectCache->getBlockAtRow(children, offset, count, sort, search);
+    }
+    else if ((updateCache || !_pObjectCache) && sort == "" && search == "*") {
         ui4 r = 0;
         // TODO: should be faster with method getIndexBlock() in AbstractDataModel, implemented there with an additional std::vector<ui4>
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); (it != _pDataModel->endIndex()) && (r < offset + count); ++it) {
@@ -857,9 +866,6 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
             r++;
         }
         childCount = _pDataModel->getIndexCount();
-    }
-    else if (_pDataModel) {
-        childCount = _pObjectCache->getBlockAtRow(children, offset, count, sort, search);
     }
     else {
         // TODO: implement building sort indices and row filtering in memory without data base.
