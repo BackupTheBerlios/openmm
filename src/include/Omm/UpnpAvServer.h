@@ -346,7 +346,7 @@ public:
 
     // meta data of objects
     virtual ServerObject* getMediaObject(const std::string& path) { return 0; }
-    virtual ui4 getBlockAtOffset(std::vector<ServerObject*>& block, ui4 offset, ui4 count);
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     // stream data of object
     virtual std::streamsize getSize(const std::string& path) { return -1; }

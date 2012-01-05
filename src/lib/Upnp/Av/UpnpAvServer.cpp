@@ -852,11 +852,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     if (_pObjectCache && !updateCache) {
         childCount = _pObjectCache->getBlockAtRow(children, offset, count, sort, search);
     }
-    else if ((updateCache || !_pObjectCache) && sort == "" && search == "*") {
-        childCount = _pDataModel->getBlockAtOffset(children, offset, count);
-    }
     else {
-        // TODO: implement building sort indices and row filtering in memory without data base.
+        childCount = _pDataModel->getBlockAtRow(children, offset, count, sort, search);
     }
     for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
         initChild(*it, (*it)->getIndex());
@@ -1274,10 +1271,14 @@ AbstractDataModel::removePath(const std::string& path)
 
 
 ui4
-AbstractDataModel::getBlockAtOffset(std::vector<ServerObject*>& block, ui4 offset, ui4 count)
+AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
-    ui4 r = 0;
     // TODO: should be faster with a method getIndexBlock(), implemented with an additional std::vector<ui4> as a sorted index list
+    // TODO: implement building sort indices and row filtering in memory without data base, currently sort and search are ignored
+    if (sort != "" || search != "*") {
+        return 0;
+    }
+    ui4 r = 0;
     for (IndexIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
         if (r >= offset) {
             ServerObject* pObject = getMediaObject((*it).second);
