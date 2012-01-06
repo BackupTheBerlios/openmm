@@ -223,6 +223,10 @@ public:
     CsvList(const std::string& item1, const std::string& item2, const std::string& item3 = "", const std::string& item4 = "", const std::string& item5 = "");
     CsvList(const CsvList& csvList);
 
+    typedef std::list<std::string>::iterator Iterator;
+    Iterator begin();
+    Iterator end();
+
     std::size_t getSize();
     void append(const std::string& item);
     void remove(const std::string& item);

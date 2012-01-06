@@ -33,6 +33,8 @@
 #include "Poco/Data/RecordSet.h"
 
 #include <map>
+#include <list>
+#include <vector>
 
 #include "UpnpAvServer.h"
 #include "UpnpInternal.h"
@@ -627,6 +629,7 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
     if (_pDataModel->useObjectCache()) {
         _pObjectCache = new DatabaseCache;
         _pObjectCache->_pServerContainer = this;
+        _pObjectCache->addPropertiesForQuery(_pDataModel->getQueryProperties());
     }
 }
 
@@ -983,10 +986,19 @@ ServerObjectWriter::writeChildren(std::string& meta, const std::vector<ServerObj
 
 
 DatabaseCache::DatabaseCache() :
-_pSession(0)
+_pSession(0),
+_cacheTableName("objcache"),
+_maxQueryPropertyCount(5)
 {
     Log::instance()->upnpav().debug("database cache ctor");
     Poco::Data::SQLite::Connector::registerConnector();
+
+    _propertyNames.push_back(AvProperty::CLASS);
+    _propertyColumnNames[AvProperty::CLASS] = "class";
+    _propertyNames.push_back(AvProperty::TITLE);
+    _propertyColumnNames[AvProperty::TITLE] = "title";
+
+    _propertyColumnTypes[AvProperty::ORIGINAL_TRACK_NUMBER] = "INTEGER(2)";
 }
 
 
@@ -1005,16 +1017,22 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
     Log::instance()->upnpav().debug("database cache set cache file path: " + cacheFilePath);
     _cacheFilePath = cacheFilePath;
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
+
+    // FIXME: UNSIGNED INT(4) for index and parent index doesn't work with SQLite.
+    std::string createTableString = "CREATE TABLE " + _cacheTableName + " (" + "idx INTEGER(8), paridx INTEGER(8)";
+    for (std::list<std::string>::iterator it = _propertyNames.begin(); it != _propertyNames.end(); ++it) {
+        createTableString += ", " + getColumnName(*it) + " " + getColumnType(*it);
+    }
+    createTableString += ", xml VARCHAR)";
+
     try {
-//        *_pSession << "CREATE TABLE objcache (idx UNSIGNED INT(4), paridx UNSIGNED INT(4), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
-        *_pSession << "CREATE TABLE objcache (idx INTEGER(8), paridx INTEGER(8), class VARCHAR(30), title VARCHAR, artist VARCHAR, album VARCHAR, track INTEGER(2), xml VARCHAR)",
-                Poco::Data::now;
+        *_pSession << createTableString, Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache creating object cache table failed: " + e.displayText());
     }
     try {
-        *_pSession << "CREATE UNIQUE INDEX idx ON objcache (idx)", Poco::Data::now;
+        *_pSession << "CREATE UNIQUE INDEX idx ON " + _cacheTableName + " (idx)", Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache creating index on object cache table failed: " + e.displayText());
@@ -1026,7 +1044,7 @@ ui4
 DatabaseCache::rowCount()
 {
     Poco::Data::Statement select(*_pSession);
-    std::string statement = "SELECT idx FROM objcache";
+    std::string statement = "SELECT idx FROM " + _cacheTableName;
     select << statement;
     Poco::Data::RecordSet recordSet(select);
     try {
@@ -1047,10 +1065,10 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
     std::vector<std::string> objectClass;
     std::vector<std::string> xml;
     try {
-        *_pSession << "SELECT class, xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(objectClass), Poco::Data::into(xml), Poco::Data::now;
+        *_pSession << "SELECT class, xml FROM " + _cacheTableName + " WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(objectClass), Poco::Data::into(xml), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
+        Log::instance()->upnpav().error("database cache get object for index failed: " + e.displayText());
     }
     Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
     if (xml.size() == 1) {
@@ -1068,7 +1086,7 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
         return pObject;
     }
     else {
-        Log::instance()->upnpav().warning("database cache get object for index reading meta data failed.");
+        Log::instance()->upnpav().error("database cache get object for index reading meta data failed.");
         return 0;
     }
 }
@@ -1080,14 +1098,14 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex,
     Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
 
     Poco::Data::Statement select(*_pSession);
-    std::string statement = "SELECT idx, class, xml FROM objcache";
+    std::string statement = "SELECT idx, class, xml FROM " + _cacheTableName;
     std::string whereClause = "";
     bool useParentIndex = false;
     if (search != "*") {
         whereClause += search;
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
-        whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"object.container\"";
+        whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"";
     }
     else if (_pServerContainer->getLayout() == ServerContainer::DirStruct && search == "*") {
         useParentIndex = true;
@@ -1155,32 +1173,41 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
     std::string xml;
     MediaObjectWriter2 xmlWriter;
     xmlWriter.write(xml, pObject);
-    std::string artist;
-    AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
-    if (pProperty) {
-        artist = pProperty->getValue();
+
+    std::string insertString = "INSERT INTO " + _cacheTableName + " (";
+    std::string propColString = "idx, paridx";
+    std::string propValString = ":idx, :paridx";
+    std::vector<std::string> props;
+    for (std::list<std::string>::iterator it = _propertyNames.begin(); it != _propertyNames.end(); ++it) {
+        propColString += ", " + getColumnName(*it);
+        propValString += ", :" + getColumnName(*it);
+        AbstractProperty* pProperty = pObject->getProperty(*it);
+        props.push_back(pProperty ? pProperty->getValue() : "");
     }
-    std::string album;
-    pProperty = pObject->getProperty(AvProperty::ALBUM);
-    if (pProperty) {
-        album = pProperty->getValue();
-    }
-    std::string track;
-    pProperty = pObject->getProperty(AvProperty::ORIGINAL_TRACK_NUMBER);
-    if (pProperty) {
-        track = pProperty->getValue();
-    }
+    insertString += propColString + ", xml) VALUES(" + propValString + ", :xml)";
+
+    // this is somehow ugly and limits the number of properties, that can be queried.
     try {
-        *_pSession << "INSERT INTO objcache (idx, paridx, class, title, artist, album, track, xml) VALUES(:idx, :paridx, :class, :title, :artist, :album, :track, :xml)",
-                Poco::Data::use(pObject->getIndex()),
-                Poco::Data::use(pObject->getParentIndex()),
-                Poco::Data::use(pObject->getClass()),
-                Poco::Data::use(pObject->getTitle()),
-                Poco::Data::use(artist),
-                Poco::Data::use(album),
-                Poco::Data::use(track),
-                Poco::Data::use(xml),
-                Poco::Data::now;
+        switch (props.size()) {
+            case 2:
+                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                        Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(xml), Poco::Data::now;
+                break;
+            case 3:
+                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                        Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(props[2]), Poco::Data::use(xml), Poco::Data::now;
+                break;
+            case 4:
+                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                        Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(props[2]), Poco::Data::use(props[3]),
+                        Poco::Data::use(xml), Poco::Data::now;
+                break;
+            case 5:
+                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                        Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(props[2]), Poco::Data::use(props[3]),
+                        Poco::Data::use(props[4]), Poco::Data::use(xml), Poco::Data::now;
+                break;
+        }
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
@@ -1189,44 +1216,45 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
 
 
 void
-DatabaseCache::insertBlock(std::vector<ServerObject*>& block)
+DatabaseCache::addPropertiesForQuery(CsvList propertyList)
 {
-    Log::instance()->upnpav().debug("database cache inserting media object block");
-    typedef Poco::Tuple<ui4, ui4, std::string, std::string, std::string, std::string, int, std::string> MediaObject;
-    std::vector<MediaObject> tupleBlock;
-    for (std::vector<ServerObject*>::iterator it = block.begin(); it != block.end(); ++it) {
-        ServerObject* pObject = *it;
-        std::string xml;
-        MediaObjectWriter2 xmlWriter;
-        xmlWriter.write(xml, pObject);
-        std::string artist;
-        AbstractProperty* pProperty = pObject->getProperty(AvProperty::ARTIST);
-        if (pProperty) {
-            artist = pProperty->getValue();
-        }
-        std::string album;
-        pProperty = pObject->getProperty(AvProperty::ALBUM);
-        if (pProperty) {
-            album = pProperty->getValue();
-        }
-        Variant trackVariant;
-        pProperty = pObject->getProperty(AvProperty::ORIGINAL_TRACK_NUMBER);
-        if (pProperty) {
-            trackVariant.setValue(pProperty->getValue());
-        }
-        int track;
-        trackVariant.getValue(track);
-
-        tupleBlock.push_back(MediaObject(pObject->getIndex(), pObject->getParentIndex(), pObject->getClass(), pObject->getTitle(), artist, album, track, xml));
+    std::size_t defaultPropCount = _propertyColumnNames.size();
+    if (propertyList.getSize() > _maxQueryPropertyCount) {
+        Log::instance()->upnpav().warning("database cache can only handle up to " + Poco::NumberFormatter::format(_maxQueryPropertyCount) +
+                " properties for query (except for class and title, ignoring the rest. Adapt your data model respectively." );
     }
-
-    try {
-        *_pSession << "INSERT INTO objcache (idx, paridx, class, title, artist, album, track, xml) VALUES(:idx, :paridx, :class, :title, :artist, :album, :track, :xml)",
-                Poco::Data::use(tupleBlock),
-                Poco::Data::now;
+    std::size_t p = 0;
+    for (CsvList::Iterator it = propertyList.begin(); it != propertyList.end() && p < _maxQueryPropertyCount - defaultPropCount; ++it, ++p) {
+        _propertyNames.push_back(*it);
+        _propertyColumnNames[*it] = "prop" + Poco::NumberFormatter::format(p);
     }
-    catch (Poco::Exception& e) {
-        Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
+}
+
+
+std::string
+DatabaseCache::getColumnName(const std::string& propertyName)
+{
+    if (propertyName == Omm::Av::AvProperty::CLASS) {
+        return "class";
+    }
+    else if (propertyName == Omm::Av::AvProperty::TITLE) {
+        return "title";
+    }
+    else {
+        return _propertyColumnNames[propertyName];
+    }
+}
+
+
+std::string
+DatabaseCache::getColumnType(const std::string& propertyName)
+{
+    std::map<std::string, std::string>::iterator pos = _propertyColumnTypes.find(propertyName);
+    if (pos != _propertyColumnTypes.end()) {
+        return _propertyColumnTypes[propertyName];
+    }
+    else {
+        return "VARCHAR";
     }
 }
 

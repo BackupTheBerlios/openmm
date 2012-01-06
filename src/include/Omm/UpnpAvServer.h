@@ -269,14 +269,17 @@ class ServerObjectCache : public AbstractMediaObjectCache
     friend class ServerContainer;
 
 public:
-    virtual ui4 rowCount() { return 0; }
-
     virtual void setCacheFilePath(const std::string& cacheFilePath) {}
-    virtual void insertMediaObject(ServerObject* pObject) {}
-    virtual void insertBlock(std::vector<ServerObject*>& block) {}
+
+    virtual ui4 rowCount() { return 0; }
 
     virtual ServerObject* getMediaObjectForIndex(ui4 index) { return 0; }
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
+
+    virtual void insertMediaObject(ServerObject* pObject) {}
+    virtual void insertBlock(std::vector<ServerObject*>& block) {}
+
+    virtual void addPropertiesForQuery(CsvList propertyList) {}
 
 protected:
     ServerContainer*            _pServerContainer;
@@ -297,11 +300,20 @@ public:
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     virtual void insertMediaObject(ServerObject* pObject);
-    virtual void insertBlock(std::vector<ServerObject*>& block);
+
+    virtual void addPropertiesForQuery(CsvList propertyList);
 
 private:
-    Poco::Data::Session*        _pSession;
-    std::string                 _cacheFilePath;
+    std::string getColumnName(const std::string& propertyName);
+    std::string getColumnType(const std::string& propertyName);
+
+    Poco::Data::Session*                _pSession;
+    std::string                         _cacheFilePath;
+    std::string                         _cacheTableName;
+    int                                 _maxQueryPropertyCount;
+    std::list<std::string>              _propertyNames;
+    std::map<std::string, std::string>  _propertyColumnNames;
+    std::map<std::string, std::string>  _propertyColumnTypes;
 };
 
 

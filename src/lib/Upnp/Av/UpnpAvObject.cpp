@@ -390,6 +390,20 @@ CsvList::CsvList(const CsvList& csvList)
 }
 
 
+CsvList::Iterator
+CsvList::begin()
+{
+    return _items.begin();
+}
+
+
+CsvList::Iterator
+CsvList::end()
+{
+    return _items.end();
+}
+
+
 std::size_t
 CsvList::getSize()
 {
