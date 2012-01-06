@@ -281,8 +281,11 @@ public:
 
     virtual void addPropertiesForQuery(CsvList propertyList) {}
 
+    std::list<std::string>& getPropertiesForQuery();
+
 protected:
-    ServerContainer*            _pServerContainer;
+    ServerContainer*                    _pServerContainer;
+    std::list<std::string>              _queryPropertyNames;
 };
 
 
@@ -311,7 +314,6 @@ private:
     std::string                         _cacheFilePath;
     std::string                         _cacheTableName;
     int                                 _maxQueryPropertyCount;
-    std::list<std::string>              _propertyNames;
     std::map<std::string, std::string>  _propertyColumnNames;
     std::map<std::string, std::string>  _propertyColumnTypes;
 };

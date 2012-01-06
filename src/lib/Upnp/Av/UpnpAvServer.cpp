@@ -617,9 +617,8 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
     if (_pDataModel->useObjectCache()) {
         _pObjectCache = new DatabaseCache;
         _pObjectCache->_pServerContainer = this;
-        CsvList queryProperties = _pDataModel->getQueryProperties();
-        _pObjectCache->addPropertiesForQuery(queryProperties);
-        for (CsvList::Iterator it = queryProperties.begin(); it != queryProperties.end(); ++it) {
+        _pObjectCache->addPropertiesForQuery(_pDataModel->getQueryProperties());
+        for (std::list<std::string>::iterator it = _pObjectCache->getPropertiesForQuery().begin(); it != _pObjectCache->getPropertiesForQuery().end(); ++it) {
             _searchCaps.append(*it);
             _sortCaps.append(*it);
         }
@@ -985,6 +984,13 @@ ServerObjectWriter::writeChildren(std::string& meta, const std::vector<ServerObj
 }
 
 
+std::list<std::string>&
+ServerObjectCache::getPropertiesForQuery()
+{
+    return _queryPropertyNames;
+}
+
+
 DatabaseCache::DatabaseCache() :
 _pSession(0),
 _cacheTableName("objcache"),
@@ -993,9 +999,9 @@ _maxQueryPropertyCount(5)
     Log::instance()->upnpav().debug("database cache ctor");
     Poco::Data::SQLite::Connector::registerConnector();
 
-    _propertyNames.push_back(AvProperty::CLASS);
+    _queryPropertyNames.push_back(AvProperty::CLASS);
     _propertyColumnNames[AvProperty::CLASS] = "class";
-    _propertyNames.push_back(AvProperty::TITLE);
+    _queryPropertyNames.push_back(AvProperty::TITLE);
     _propertyColumnNames[AvProperty::TITLE] = "title";
 
     _propertyColumnTypes[AvProperty::ORIGINAL_TRACK_NUMBER] = "INTEGER(2)";
@@ -1020,7 +1026,7 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
 
     // FIXME: UNSIGNED INT(4) for index and parent index doesn't work with SQLite.
     std::string createTableString = "CREATE TABLE " + _cacheTableName + " (" + "idx INTEGER(8), paridx INTEGER(8)";
-    for (std::list<std::string>::iterator it = _propertyNames.begin(); it != _propertyNames.end(); ++it) {
+    for (std::list<std::string>::iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         createTableString += ", " + getColumnName(*it) + " " + getColumnType(*it);
     }
     createTableString += ", xml VARCHAR)";
@@ -1178,7 +1184,7 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
     std::string propColString = "idx, paridx";
     std::string propValString = ":idx, :paridx";
     std::vector<std::string> props;
-    for (std::list<std::string>::iterator it = _propertyNames.begin(); it != _propertyNames.end(); ++it) {
+    for (std::list<std::string>::iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         propColString += ", " + getColumnName(*it);
         propValString += ", :" + getColumnName(*it);
         AbstractProperty* pProperty = pObject->getProperty(*it);
@@ -1225,7 +1231,7 @@ DatabaseCache::addPropertiesForQuery(CsvList propertyList)
     }
     std::size_t p = 0;
     for (CsvList::Iterator it = propertyList.begin(); it != propertyList.end() && p < _maxQueryPropertyCount - defaultPropCount; ++it, ++p) {
-        _propertyNames.push_back(*it);
+        _queryPropertyNames.push_back(*it);
         _propertyColumnNames[*it] = "prop" + Poco::NumberFormatter::format(p);
     }
 }
