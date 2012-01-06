@@ -191,7 +191,6 @@ protected:
             Omm::Av::MediaServer mediaServer;
 
             // create root server container
-//            Omm::Av::CachedServerContainer* pContainer = new Omm::Av::CachedServerContainer(&mediaServer);
             Omm::Av::ServerContainer* pContainer = new Omm::Av::ServerContainer(&mediaServer);
             pContainer->setTitle(_name);
             pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));

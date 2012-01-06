@@ -149,6 +149,9 @@ public:
     ServerObject(MediaServer* pServer);
     ~ServerObject();
 
+    // factory method
+    virtual ServerObject* createChildObject();
+
     // object id, index, row and path
     // index: fixed number and unique identifier for a server object
     // object id: path to object consisting of server root object id and child indices (0/index1/index2/ ...)
@@ -167,7 +170,7 @@ public:
     void setParent(ServerObject* pParent);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
     // this really is createChildItem(), not createChildObject()
-    virtual AbstractMediaObject* createChildObject();
+//    virtual AbstractMediaObject* createChildObject();
 
 protected:
     virtual std::istream* getIconStream() {}
@@ -176,6 +179,7 @@ protected:
     ui4                         _parentIndex;
     ServerObject*               _pParent;
     MediaServer*                _pServer;
+    AbstractDataModel*          _pDataModel;
 //     AvStream::Transcoder*   _pTranscoder;
 };
 
@@ -185,32 +189,31 @@ class ServerItem : public Omm::Av::ServerObject
     friend class ServerContainer;
 
 public:
-    ServerItem(MediaServer* pServer, ServerContainer* pContainer = 0);
+    ServerItem(MediaServer* pServer);
     virtual ~ServerItem();
 
     virtual ServerObjectResource* createResource();
-
-private:
-    ServerContainer*    _pContainer;
 };
 
 
 class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 {
+    friend class DatabaseCache;
+
 public:
     ServerContainer(MediaServer* pServer);
 
-    enum Layout {Flat, NativeDirs, ObjectClass};
+    enum Layout {Flat, DirStruct, ObjectClass};
+
+    // factory methods
+    virtual ServerContainer* createMediaContainer();
+    virtual ServerItem* createMediaItem();
 
     AbstractDataModel* getDataModel();
     void setDataModel(AbstractDataModel* pDataModel);
     ServerObjectCache* getObjectCache();
     void setObjectCache(ServerObjectCache* pObjectCache);
     Layout getLayout();
-
-    virtual ServerContainer* createMediaContainer();
-    virtual ServerItem* createMediaItem();
-    virtual ServerObject* createChildObject();
 
     // TODO: sort and search caps should be moved to data model
     virtual bool isSearchable() { return true; }
@@ -239,7 +242,7 @@ private:
     void updateCacheThread();
     bool updateCacheThreadIsRunning();
 
-    AbstractDataModel*                                  _pDataModel;
+//    AbstractDataModel*                                  _pDataModel;
     ServerObjectCache*                                  _pObjectCache;
     Layout                                              _layout;
 
@@ -273,7 +276,7 @@ public:
     virtual void insertBlock(std::vector<ServerObject*>& block) {}
 
     virtual ServerObject* getMediaObjectForIndex(ui4 index) { return 0; }
-    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
 
 protected:
     ServerContainer*            _pServerContainer;
@@ -291,7 +294,7 @@ public:
     virtual ui4 rowCount();
 
     virtual ServerObject* getMediaObjectForIndex(ui4 index);
-    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     virtual void insertMediaObject(ServerObject* pObject);
     virtual void insertBlock(std::vector<ServerObject*>& block);

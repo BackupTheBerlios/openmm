@@ -396,9 +396,10 @@ ServerObjectResource::getStream()
 
 
 ServerObject::ServerObject(MediaServer* pServer) :
-_index(0),
+_index(AbstractDataModel::INVALID_INDEX),
 _pParent(0),
-_pServer(pServer)
+_pServer(pServer),
+_pDataModel(0)
 {
 }
 
@@ -413,18 +414,51 @@ ServerObject::~ServerObject()
 }
 
 
+ServerObject*
+ServerObject::createChildObject()
+{
+    Log::instance()->upnpav().debug("server container create child object");
+
+    ServerObject* pObject = new ServerObject(_pServer);
+    pObject->_pDataModel = _pDataModel;
+
+    return pObject;
+}
+
+
 std::string
 ServerObject::getId()
 {
-//    Log::instance()->upnpav().debug("ServerObject::getObjectId()");
-
-    ServerObject* pParent = getParent();
-    if (pParent == 0) {
-        return "0";
+    // flat model
+    std::string objectId;
+    if (_index == AbstractDataModel::INVALID_INDEX) {
+        objectId = "0";
     }
     else {
-        return pParent->getId() + "/" + Poco::NumberFormatter::format(getIndex());
+        objectId = "0/" + Poco::NumberFormatter::format(_index);
     }
+    Log::instance()->upnpav().debug("server object id: " + objectId);
+    return objectId;
+
+    // data model based relationship between media objects
+//    std::string objectId;
+//    if (_index == AbstractDataModel::INVALID_INDEX) {
+//        objectId = "0";
+//    }
+//    else {
+//        objectId = getParentId() + "/" + Poco::NumberFormatter::format(_index);
+//    }
+//    Log::instance()->upnpav().debug("server object id: " + objectId);
+//    return objectId;
+
+    // media object tree based relationship
+//    ServerObject* pParent = getParent();
+//    if (pParent == 0) {
+//        return "0";
+//    }
+//    else {
+//        return pParent->getId() + "/" + Poco::NumberFormatter::format(getIndex());
+//    }
 }
 
 
@@ -433,13 +467,36 @@ ServerObject::getParentId()
 {
 //    Log::instance()->upnpav().debug("ServerObject::getParentObjectId()");
 
-    AbstractMediaObject* pParent = getParent();
-    if (pParent) {
-        return pParent->getId();
+    std::string parentId;
+    if (_index == AbstractDataModel::INVALID_INDEX) {
+        parentId = "";
     }
     else {
-        return "";
+        parentId = "0";
     }
+    Log::instance()->upnpav().debug("server parent id: " + parentId);
+    return parentId;
+
+    // data model based relationship between media objects
+//    std::string parentPath = _pDataModel->getParentPath(_pDataModel->getPath(_index));
+//    std::string parentId = "0";
+//    while (parentPath != "") {
+////        ui4 parentIndex = _pDataModel->getIndex(parentPath);
+////        parentId += "/" + Poco::NumberFormatter::format(parentIndex);
+//        parentId += "/" + Poco::NumberFormatter::format(_parentIndex);
+//        parentPath = _pDataModel->getParentPath(parentPath);
+//    }
+//    Log::instance()->upnpav().debug("server object parent id: " + parentId);
+//    return parentId;
+
+    // media object tree based relationship
+//    AbstractMediaObject* pParent = getParent();
+//    if (pParent) {
+//        return pParent->getId();
+//    }
+//    else {
+//        return "";
+//    }
 }
 
 
@@ -499,18 +556,17 @@ ServerObject::setParent(ServerObject* pParent)
 }
 
 
-AbstractMediaObject*
-ServerObject::createChildObject()
-{
-    ServerObject* pObject = new ServerObject(_pServer);
-    pObject->setParent(this);
-    return pObject;
-}
+//AbstractMediaObject*
+//ServerObject::createChildObject()
+//{
+//    ServerObject* pObject = new ServerObject(_pServer);
+//    pObject->setParent(this);
+//    return pObject;
+//}
 
 
-ServerItem::ServerItem(MediaServer* pServer, ServerContainer* pContainer) :
-ServerObject(pServer),
-_pContainer(pContainer)
+ServerItem::ServerItem(MediaServer* pServer) :
+ServerObject(pServer)
 {
 }
 
@@ -525,15 +581,16 @@ ServerItem::createResource()
 {
     Log::instance()->upnpav().debug("server item create resource");
 
-    return new ServerObjectResource(this, _pContainer->getDataModel());
+    return new ServerObjectResource(this, _pDataModel);
 }
 
 
 ServerContainer::ServerContainer(MediaServer* pServer) :
 ServerObject(pServer),
-_pDataModel(0),
+//_pDataModel(0),
 _pObjectCache(0),
-_layout(Flat),
+//_layout(Flat),
+_layout(DirStruct),
 _updateCacheThreadRunnable(*this, &ServerContainer::updateCacheThread),
 _updateCacheThreadRunning(false)
 {
@@ -600,8 +657,8 @@ ServerContainer::createMediaContainer()
     Log::instance()->upnpav().debug("server container create media container");
 
     ServerContainer* pContainer = new ServerContainer(_pServer);
-    pContainer->_pServer = _pServer;
-
+    pContainer->_pDataModel = _pDataModel;
+    pContainer->_pObjectCache = _pObjectCache;
     pContainer->setIsContainer(true);
     pContainer->setClass(AvClass::className(AvClass::CONTAINER));
 
@@ -614,18 +671,10 @@ ServerContainer::createMediaItem()
 {
     Log::instance()->upnpav().debug("server container create media item");
 
-    ServerItem* pItem = new ServerItem(_pServer, this);
-    pItem->setParent(this);
+    ServerItem* pItem = new ServerItem(_pServer);
+    pItem->_pDataModel = _pDataModel;
+
     return pItem;
-}
-
-
-ServerObject*
-ServerContainer::createChildObject()
-{
-    Log::instance()->upnpav().debug("server container create child object");
-
-    return createMediaItem();
 }
 
 
@@ -857,7 +906,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     ui4 childCount = 0;
     bool updateCache = cacheNeedsUpdate();
     if (_pObjectCache && !updateCache) {
-        childCount = _pObjectCache->getBlockAtRow(children, offset, count, sort, search);
+        childCount = _pObjectCache->getBlockAtRow(children, getIndex(), offset, count, sort, search);
+//        childCount = _pObjectCache->getBlockAtRow(children, 1, offset, count, sort, search);
     }
     else {
         childCount = _pDataModel->getBlockAtRow(children, offset, count, sort, search);
@@ -872,7 +922,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
 void
 ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
 {
-    Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle());
+    Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index));
 
     pObject->setIndex(index);
     std::string path = _pDataModel->getPath(index);
@@ -888,18 +938,14 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
         return;
     }
 
-//    ServerObject* pParent;
-//    if (parentPath == "") {
-//        pParent = this;
-//    }
-//    else {
-//        pParent = _pDataModel->getMediaObject(parentPath);
-//    }
-//    pObject->setParent(pParent);
-
-    if (!pObject->isContainer()) {
+    if (pObject->isContainer()) {
+        // FIXME: set correct child count for container
+        pObject->setChildCount(1);
+    }
+    else {
         std::string serverAddress = _pServer->getServerAddress();
         std::string relativeObjectId = Poco::NumberFormatter::format(index);
+//        std::string relativeObjectId = pObject->getId().substr(2);
         std::string resourceUri = serverAddress + "/" + relativeObjectId;
         for (int r = 0; r < pObject->getResourceCount(); r++) {
             AbstractResource* pResource = pObject->getResource(r);
@@ -908,6 +954,18 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
             }
         }
     }
+
+
+//    pObject->setId(pObject->getId());
+
+//    ServerObject* pParent;
+//    if (parentPath == "") {
+//        pParent = this;
+//    }
+//    else {
+//        pParent = _pDataModel->getMediaObject(parentPath);
+//    }
+//    pObject->setParent(pParent);
 }
 
 
@@ -986,9 +1044,10 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
 {
     Log::instance()->upnpav().debug("database cache get object for index: " + Poco::NumberFormatter::format(index));
 
+    std::vector<std::string> objectClass;
     std::vector<std::string> xml;
     try {
-        *_pSession << "SELECT xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(xml), Poco::Data::now;
+        *_pSession << "SELECT class, xml FROM objcache WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(objectClass), Poco::Data::into(xml), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache get object for index failed: " + e.displayText());
@@ -996,7 +1055,14 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
     Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
     if (xml.size() == 1) {
         Log::instance()->upnpav().debug("database cache got xml: " + xml[0]);
-        ServerObject* pObject = _pServerContainer->createChildObject();
+        // FIXME: if child object is a container, we need to create a ServerContainer, otherwise getChildAtRowOffset() does nothing
+        ServerObject* pObject;
+        if (AvClass::matchClass(objectClass[0], AvClass::CONTAINER)) {
+            pObject = _pServerContainer->createMediaContainer();
+        }
+        else {
+            pObject = _pServerContainer->createMediaItem();
+        }
         MediaObjectReader xmlReader;
         xmlReader.read(pObject, xml[0]);
         return pObject;
@@ -1009,27 +1075,42 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
 
 
 ui4
-DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
     Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
 
-    ui4 index;
-    std::string xml;
     Poco::Data::Statement select(*_pSession);
-    std::string statement = "SELECT idx, xml FROM objcache";
+    std::string statement = "SELECT idx, class, xml FROM objcache";
     std::string whereClause = "";
+    bool useParentIndex = false;
     if (search != "*") {
         whereClause += search;
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
         whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"object.container\"";
     }
+    else if (_pServerContainer->getLayout() == ServerContainer::DirStruct) {
+        useParentIndex = true;
+        whereClause += std::string(whereClause == "" ? "" : " AND") + " paridx = :paridx";
+    }
     if (whereClause != "") {
         statement += " WHERE " + whereClause;
     }
 //    statement += " ORDER BY artist, album, track, title";
     Log::instance()->upnpav().debug("database cache execute query: " + statement);
-    select << statement;
+//    ui4 parentIndex = _pServerContainer->getIndex();
+    Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
+//    if (parentIndex == AbstractDataModel::INVALID_INDEX) {
+    if (parentIndex == 0) {
+        parentIndex = -1;
+    }
+//    ui4 parentIndex = 1;
+    if (useParentIndex) {
+        select << statement, Poco::Data::use(parentIndex);
+    }
+    else {
+        select << statement;
+    }
     Poco::Data::RecordSet recordSet(select);
     try {
         select.execute();
@@ -1045,9 +1126,20 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 
     for (ui4 r = 0; r < count; r++) {
         // get block
         try {
+            ui4 index;
+            std::string objectClass;
+            std::string xml;
             index = recordSet["idx"].convert<ui4>();
+            objectClass = recordSet["class"].convert<std::string>();
             xml = recordSet["xml"].convert<std::string>();
-            ServerObject* pObject = _pServerContainer->createChildObject();
+            // FIXME: if child object is a container, we need to create a ServerContainer, otherwise getChildAtRowOffset() does nothing
+            ServerObject* pObject;
+            if (AvClass::matchClass(objectClass, AvClass::CONTAINER)) {
+                pObject = _pServerContainer->createMediaContainer();
+            }
+            else {
+                pObject = _pServerContainer->createMediaItem();
+            }
             MediaObjectReader xmlReader;
             xmlReader.read(pObject, xml);
             pObject->setIndex(index);

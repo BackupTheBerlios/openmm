@@ -321,7 +321,7 @@ public:
 
     virtual std::string getId() { return ""; }
     virtual void setId(const std::string& id) {}
-    std::string getParentId() { return ""; }
+    virtual std::string getParentId() { return ""; }
 
     // attributes
     virtual bool isRestricted() { return true; }
