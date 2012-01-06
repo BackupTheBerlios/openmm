@@ -1089,7 +1089,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex,
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
         whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"object.container\"";
     }
-    else if (_pServerContainer->getLayout() == ServerContainer::DirStruct) {
+    else if (_pServerContainer->getLayout() == ServerContainer::DirStruct && search == "*") {
         useParentIndex = true;
         whereClause += std::string(whereClause == "" ? "" : " AND") + " paridx = :paridx";
     }
@@ -1101,9 +1101,9 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex,
 //    ui4 parentIndex = _pServerContainer->getIndex();
     Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
 //    if (parentIndex == AbstractDataModel::INVALID_INDEX) {
-    if (parentIndex == 0) {
-        parentIndex = -1;
-    }
+//    if (parentIndex == 0) {
+//        parentIndex = -1;
+//    }
 //    ui4 parentIndex = 1;
     if (useParentIndex) {
         select << statement, Poco::Data::use(parentIndex);
