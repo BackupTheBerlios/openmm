@@ -220,6 +220,8 @@ class CsvList
 {
 public:
     CsvList(const std::string& csvListString = "");
+    CsvList(const std::string& item1, const std::string& item2, const std::string& item3 = "", const std::string& item4 = "", const std::string& item5 = "");
+    CsvList(const CsvList& csvList);
 
     std::size_t getSize();
     void append(const std::string& item);

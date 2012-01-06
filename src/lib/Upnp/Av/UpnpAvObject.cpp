@@ -366,6 +366,30 @@ CsvList::CsvList(const std::string& csvListString)
 }
 
 
+CsvList::CsvList(const std::string& item1, const std::string& item2, const std::string& item3, const std::string& item4, const std::string& item5)
+{
+    _items.push_back(item1);
+    _items.push_back(item2);
+    if (item3 != "") {
+        _items.push_back(item3);
+    }
+    if (item4 != "") {
+        _items.push_back(item4);
+    }
+    if (item5 != "") {
+        _items.push_back(item5);
+    }
+}
+
+
+CsvList::CsvList(const CsvList& csvList)
+{
+    for (std::list<std::string>::const_iterator it = csvList._items.begin(); it != csvList._items.end(); ++it) {
+        append(*it);
+    }
+}
+
+
 std::size_t
 CsvList::getSize()
 {

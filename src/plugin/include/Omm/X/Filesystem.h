@@ -22,6 +22,7 @@
 #ifndef Filesystem_INCLUDED
 #define Filesystem_INCLUDED
 
+#include <Omm/UpnpAvObject.h>
 #include <Omm/UpnpAvServer.h>
 #include <Omm/AvStream.h>
 
@@ -32,6 +33,8 @@ public:
     FileModel();
     ~FileModel();
 
+    virtual std::string getModelClass();
+    virtual Omm::Av::CsvList getQueryProperties();
     virtual void scan(bool recurse = true);
     virtual bool preserveIndexCache() { return true; }
     virtual bool useObjectCache() { return true; }

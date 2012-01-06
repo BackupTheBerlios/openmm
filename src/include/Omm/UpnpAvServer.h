@@ -203,7 +203,7 @@ class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 public:
     ServerContainer(MediaServer* pServer);
 
-    enum Layout {Flat, DirStruct, ObjectClass};
+    enum Layout {Flat, DirStruct, PropertyGroups};
 
     // factory methods
     virtual ServerContainer* createMediaContainer();
@@ -314,18 +314,17 @@ public:
 
     void setServerContainer(ServerContainer* pServerContainer);
     ServerContainer* getServerContainer();
+
     void setBasePath(const std::string& basePath);
     std::string getBasePath();
-
-    virtual std::string getServerClass() { return ""; }
-    virtual void scan(bool recurse = true) {}
-    // class property of container media object itself
-//    virtual std::string getContainerClass() { return AvClass::CONTAINER; }
+    virtual std::string getModelClass() { return ""; }
+    virtual CsvList getQueryProperties() { return CsvList(""); }
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
     // child media object creation / deletion
     // index and path
+    virtual void scan(bool recurse = true) {}
     virtual bool preserveIndexCache() { return false; }
     virtual bool useObjectCache() { return false; }
     // decide if to use index cache, if no, implement next four methods

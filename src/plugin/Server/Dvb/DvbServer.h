@@ -35,6 +35,7 @@ class DvbModel : public Omm::Av::SimpleDataModel
 public:
     DvbModel();
 
+    virtual std::string getModelClass();
     virtual void scan(bool recurse = true);
 
     virtual std::string getClass(const std::string& path);

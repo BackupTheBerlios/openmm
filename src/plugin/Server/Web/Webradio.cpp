@@ -40,6 +40,13 @@ WebradioModel::WebradioModel()
 }
 
 
+std::string
+WebradioModel::getModelClass()
+{
+    return "WebradioModel";
+}
+
+
 void
 WebradioModel::scan(bool recurse)
 {

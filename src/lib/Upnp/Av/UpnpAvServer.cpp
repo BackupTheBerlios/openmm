@@ -589,8 +589,9 @@ ServerContainer::ServerContainer(MediaServer* pServer) :
 ServerObject(pServer),
 //_pDataModel(0),
 _pObjectCache(0),
-//_layout(Flat),
-_layout(DirStruct),
+_layout(Flat),
+//_layout(DirStruct),
+//_layout(PropertyGroups),
 _updateCacheThreadRunnable(*this, &ServerContainer::updateCacheThread),
 _updateCacheThreadRunning(false)
 {
@@ -708,7 +709,7 @@ ServerContainer::setBasePath(const std::string& basePath)
     Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
     _pDataModel->setBasePath(basePath);
     if (_pObjectCache) {
-        _pObjectCache->setCacheFilePath(Util::Home::instance()->getCacheDirPath(basePath) + _pDataModel->getServerClass() + "/objects");
+        _pObjectCache->setCacheFilePath(Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects");
         updateCache();
     }
 }
@@ -907,7 +908,6 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     bool updateCache = cacheNeedsUpdate();
     if (_pObjectCache && !updateCache) {
         childCount = _pObjectCache->getBlockAtRow(children, getIndex(), offset, count, sort, search);
-//        childCount = _pObjectCache->getBlockAtRow(children, 1, offset, count, sort, search);
     }
     else {
         childCount = _pDataModel->getBlockAtRow(children, offset, count, sort, search);
@@ -1098,13 +1098,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex,
     }
 //    statement += " ORDER BY artist, album, track, title";
     Log::instance()->upnpav().debug("database cache execute query: " + statement);
-//    ui4 parentIndex = _pServerContainer->getIndex();
     Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
-//    if (parentIndex == AbstractDataModel::INVALID_INDEX) {
-//    if (parentIndex == 0) {
-//        parentIndex = -1;
-//    }
-//    ui4 parentIndex = 1;
     if (useParentIndex) {
         select << statement, Poco::Data::use(parentIndex);
     }
@@ -1265,7 +1259,7 @@ void
 AbstractDataModel::setBasePath(const std::string& basePath)
 {
     _basePath = basePath;
-    _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(basePath), "index");
+    _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(getModelClass() + "/" + basePath), "index");
     Omm::Av::Log::instance()->upnpav().debug("data model scan ...");
     scan(true);
     Omm::Av::Log::instance()->upnpav().debug("data model scan finished.");
@@ -1389,6 +1383,7 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, 
     for (IndexIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
         if (r >= offset) {
             ServerObject* pObject = getMediaObject((*it).second);
+            pObject->setIndex((*it).first);
             block.push_back(pObject);
         }
         r++;

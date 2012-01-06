@@ -30,6 +30,7 @@ class WebradioModel : public Omm::Av::SimpleDataModel
 public:
     WebradioModel();
 
+    virtual std::string getModelClass();
     virtual void scan(bool recurse = true);
 
     virtual std::string getClass(const std::string& path);

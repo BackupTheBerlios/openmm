@@ -31,6 +31,13 @@ DvbModel::DvbModel()
 }
 
 
+std::string
+DvbModel::getModelClass()
+{
+    return "DvbModel";
+}
+
+
 void
 DvbModel::scan(bool recurse)
 {
