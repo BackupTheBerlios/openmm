@@ -599,18 +599,6 @@ _updateCacheThreadRunning(false)
 {
     setIsContainer(true);
     _pServer->_pServerContainer = this;
-
-    _searchCaps.append(AvProperty::CLASS);
-    _searchCaps.append(AvProperty::TITLE);
-    _searchCaps.append(AvProperty::ARTIST);
-    _searchCaps.append(AvProperty::ALBUM);
-    _searchCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
-
-    _sortCaps.append(AvProperty::CLASS);
-    _sortCaps.append(AvProperty::TITLE);
-    _sortCaps.append(AvProperty::ARTIST);
-    _sortCaps.append(AvProperty::ALBUM);
-    _sortCaps.append(AvProperty::ORIGINAL_TRACK_NUMBER);
 }
 
 
@@ -629,7 +617,12 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
     if (_pDataModel->useObjectCache()) {
         _pObjectCache = new DatabaseCache;
         _pObjectCache->_pServerContainer = this;
-        _pObjectCache->addPropertiesForQuery(_pDataModel->getQueryProperties());
+        CsvList queryProperties = _pDataModel->getQueryProperties();
+        _pObjectCache->addPropertiesForQuery(queryProperties);
+        for (CsvList::Iterator it = queryProperties.begin(); it != queryProperties.end(); ++it) {
+            _searchCaps.append(*it);
+            _sortCaps.append(*it);
+        }
     }
 }
 
@@ -679,6 +672,13 @@ ServerContainer::createMediaItem()
     pItem->_pDataModel = _pDataModel;
 
     return pItem;
+}
+
+
+bool
+ServerContainer::isSearchable()
+{
+    return (_pObjectCache != 0);
 }
 
 

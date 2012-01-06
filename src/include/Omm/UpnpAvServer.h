@@ -215,8 +215,8 @@ public:
     void setObjectCache(ServerObjectCache* pObjectCache);
     Layout getLayout();
 
-    // TODO: sort and search caps should be moved to data model
-    virtual bool isSearchable() { return true; }
+    // sort and search caps
+    virtual bool isSearchable();
     virtual CsvList* getSortCaps();
     virtual CsvList* getSearchCaps();
 
@@ -224,7 +224,7 @@ public:
     virtual void updateCache(bool on = true);
     bool cacheNeedsUpdate();
 
-    // appendChild*() methods are only needed for server containers without data model
+    // appendChild*() methods are only needed for server containers without data model (not supported right now)
     void appendChild(AbstractMediaObject* pChild);
     void appendChildWithAutoIndex(AbstractMediaObject* pChild);
 
