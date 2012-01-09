@@ -1052,6 +1052,7 @@ MediaObjectWriter2::writeMetaDataHeader()
     _pDidl->setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
     _pDidl->setAttribute("xmlns:upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
     _pDidl->setAttribute("xmlns", "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
+    _pDidl->setAttribute("xmlns:omm", "http://open.multimedia.org/xmlns/");
 
     _pDoc->appendChild(_pDidl);
 }

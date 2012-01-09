@@ -162,6 +162,8 @@ public:
     virtual ui4 getIndex();
     void setIndex(const std::string& index);
     void setIndex(ui4 index);
+    bool isVirtual();
+    void setIsVirtual(bool isVirtual = true);
 
     // parent and descendants
     virtual ui4 getParentIndex();
@@ -180,6 +182,7 @@ protected:
     ServerObject*               _pParent;
     MediaServer*                _pServer;
     AbstractDataModel*          _pDataModel;
+    bool                        _isVirtual;
 //     AvStream::Transcoder*   _pTranscoder;
 };
 
@@ -204,6 +207,8 @@ public:
     ServerContainer(MediaServer* pServer);
 
     enum Layout {Flat, DirStruct, PropertyGroups};
+    static const std::string  PROPERTY_GROUP_PROPERTY_NAME;
+    static const std::string  PROPERTY_GROUP_PROPERTY_VALUE;
 
     // factory methods
     virtual ServerContainer* createMediaContainer();
@@ -211,8 +216,10 @@ public:
 
     AbstractDataModel* getDataModel();
     void setDataModel(AbstractDataModel* pDataModel);
+
     ServerObjectCache* getObjectCache();
     void setObjectCache(ServerObjectCache* pObjectCache);
+
     Layout getLayout();
 
     // sort and search caps
@@ -231,8 +238,8 @@ public:
     ServerObject* getDescendant(const std::string& objectId);
 
     virtual ui4 getChildCount();
-    virtual ServerObject* getChildForIndex(const std::string& index);
-    virtual ServerObject* getChildForIndex(ui4 index, bool init = true);
+    virtual ServerObject* getChildForIndex(const std::string& indexString);
+    virtual ServerObject* getChildForIndex(ui4 index, bool init = true, bool isVirtual = false);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
 
@@ -244,7 +251,9 @@ private:
 
 //    AbstractDataModel*                                  _pDataModel;
     ServerObjectCache*                                  _pObjectCache;
+    ServerObjectCache*                                  _pVirtualContainerCache;
     Layout                                              _layout;
+    std::string                                         _groupPropertyName;
 
     Poco::FastMutex                                     _serverLock;
     CsvList                                             _searchCaps;
@@ -273,38 +282,40 @@ public:
 
     virtual ui4 rowCount() { return 0; }
 
-    virtual ServerObject* getMediaObjectForIndex(ui4 index) { return 0; }
-    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
+    virtual ServerObject* getMediaObjectForIndex(ui4 index, bool isVirtual = false) { return 0; }
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
 
     virtual void insertMediaObject(ServerObject* pObject) {}
     virtual void insertBlock(std::vector<ServerObject*>& block) {}
 
     virtual void addPropertiesForQuery(CsvList propertyList) {}
+    virtual void updateVirtualObjects(ServerObjectCache* pVirtualObjectCache) {}
 
-    std::list<std::string>& getPropertiesForQuery();
+    CsvList& getPropertiesForQuery();
 
 protected:
     ServerContainer*                    _pServerContainer;
-    std::list<std::string>              _queryPropertyNames;
+    CsvList                             _queryPropertyNames;
 };
 
 
 class DatabaseCache : public ServerObjectCache
 {
 public:
-    DatabaseCache();
+    DatabaseCache(const std::string& cacheTableName);
     ~DatabaseCache();
 
     virtual void setCacheFilePath(const std::string& cacheFilePath);
 
     virtual ui4 rowCount();
 
-    virtual ServerObject* getMediaObjectForIndex(ui4 index);
-    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    virtual ServerObject* getMediaObjectForIndex(ui4 index, bool isVirtual = false);
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     virtual void insertMediaObject(ServerObject* pObject);
 
     virtual void addPropertiesForQuery(CsvList propertyList);
+    virtual void updateVirtualObjects(ServerObjectCache* pVirtualObjectCache);
 
 private:
     std::string getColumnName(const std::string& propertyName);

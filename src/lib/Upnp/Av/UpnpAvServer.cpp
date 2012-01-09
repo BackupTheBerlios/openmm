@@ -401,7 +401,8 @@ ServerObject::ServerObject(MediaServer* pServer) :
 _index(AbstractDataModel::INVALID_INDEX),
 _pParent(0),
 _pServer(pServer),
-_pDataModel(0)
+_pDataModel(0),
+_isVirtual(false)
 {
 }
 
@@ -437,7 +438,7 @@ ServerObject::getId()
         objectId = "0";
     }
     else {
-        objectId = "0/" + Poco::NumberFormatter::format(_index);
+        objectId = (_isVirtual ? "0/v" : "0/") + Poco::NumberFormatter::format(_index);
     }
     Log::instance()->upnpav().debug("server object id: " + objectId);
     return objectId;
@@ -526,6 +527,20 @@ ServerObject::setIndex(const std::string& index)
 }
 
 
+bool
+ServerObject::isVirtual()
+{
+    return _isVirtual;
+}
+
+
+void
+ServerObject::setIsVirtual(bool isVirtual)
+{
+    _isVirtual = isVirtual;
+}
+
+
 ui4
 ServerObject::getParentIndex()
 {
@@ -587,13 +602,19 @@ ServerItem::createResource()
 }
 
 
+const std::string ServerContainer::PROPERTY_GROUP_PROPERTY_NAME = "omm:groupPropName";
+const std::string ServerContainer::PROPERTY_GROUP_PROPERTY_VALUE = "omm:groupPropValue";
+
+
 ServerContainer::ServerContainer(MediaServer* pServer) :
 ServerObject(pServer),
 //_pDataModel(0),
 _pObjectCache(0),
-_layout(Flat),
+//_layout(Flat),
 //_layout(DirStruct),
-//_layout(PropertyGroups),
+_layout(PropertyGroups),
+//_groupPropertyName(AvProperty::CLASS),
+_groupPropertyName(AvProperty::ARTIST),
 _updateCacheThreadRunnable(*this, &ServerContainer::updateCacheThread),
 _updateCacheThreadRunning(false)
 {
@@ -615,13 +636,17 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
     _pDataModel = pDataModel;
     _pDataModel->setServerContainer(this);
     if (_pDataModel->useObjectCache()) {
-        _pObjectCache = new DatabaseCache;
+        _pObjectCache = new DatabaseCache("objcache");
         _pObjectCache->_pServerContainer = this;
         _pObjectCache->addPropertiesForQuery(_pDataModel->getQueryProperties());
-        for (std::list<std::string>::iterator it = _pObjectCache->getPropertiesForQuery().begin(); it != _pObjectCache->getPropertiesForQuery().end(); ++it) {
-            _searchCaps.append(*it);
-            _sortCaps.append(*it);
-        }
+
+        // object cache may modify the proposed list of properties that can be queried (due to cache limitations)
+        _searchCaps = _pObjectCache->getPropertiesForQuery();
+        _sortCaps = _pObjectCache->getPropertiesForQuery();
+
+        _pVirtualContainerCache = new DatabaseCache("vconcache");
+        _pVirtualContainerCache->_pServerContainer = this;
+        _pVirtualContainerCache->addPropertiesForQuery(CsvList(PROPERTY_GROUP_PROPERTY_NAME, PROPERTY_GROUP_PROPERTY_VALUE));
     }
 }
 
@@ -711,7 +736,9 @@ ServerContainer::setBasePath(const std::string& basePath)
     Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
     _pDataModel->setBasePath(basePath);
     if (_pObjectCache) {
-        _pObjectCache->setCacheFilePath(Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects");
+        std::string cacheFilePath = Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
+        _pObjectCache->setCacheFilePath(cacheFilePath);
+        _pVirtualContainerCache->setCacheFilePath(cacheFilePath);
         updateCache();
     }
 }
@@ -747,6 +774,7 @@ ServerContainer::updateCacheThread()
             }
             _pObjectCache->insertMediaObject(ServerContainer::getChildForIndex((*it).first, false));
         }
+        _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
     }
     _updateCacheThreadLock.lock();
     _updateCacheThreadRunning = false;
@@ -861,14 +889,27 @@ ServerContainer::getDescendant(const std::string& objectId)
 
 
 ServerObject*
-ServerContainer::getChildForIndex(const std::string& index)
+ServerContainer::getChildForIndex(const std::string& indexString)
 {
-    return getChildForIndex(Poco::NumberParser::parseUnsigned(index));
+    if (indexString == "") {
+        return 0;
+    }
+    else {
+        ui4 index = AbstractDataModel::INVALID_INDEX;
+        bool isVirtual = (indexString.at(0) == 'v');
+        try {
+            index = Poco::NumberParser::parseUnsigned(isVirtual ? indexString.substr(1) : indexString);
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnpav().error("server container could no parse index string");
+        }
+        return getChildForIndex(index, true, isVirtual);
+    }
 }
 
 
 ServerObject*
-ServerContainer::getChildForIndex(ui4 index, bool init)
+ServerContainer::getChildForIndex(ui4 index, bool init, bool isVirtual)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
@@ -879,9 +920,13 @@ ServerContainer::getChildForIndex(ui4 index, bool init)
     }
 
     ServerObject* pObject = 0;
-    if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
+    if (isVirtual && _pVirtualContainerCache) {
+        pObject = _pVirtualContainerCache->getMediaObjectForIndex(index);
+    }
+    else if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
         // get media object out of data base cache (column xml)
          pObject = _pObjectCache->getMediaObjectForIndex(index);
+         pObject->setIsVirtual(true);
     }
     else {
         std::string path = _pDataModel->getPath(index);
@@ -908,8 +953,12 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
 
     ui4 childCount = 0;
     bool updateCache = cacheNeedsUpdate();
-    if (_pObjectCache && !updateCache) {
-        childCount = _pObjectCache->getBlockAtRow(children, getIndex(), offset, count, sort, search);
+    if (_index == AbstractDataModel::INVALID_INDEX && _layout == PropertyGroups && _pVirtualContainerCache) {
+        // parent container is root and we want to browse virtual child containers
+        childCount = _pVirtualContainerCache->getBlockAtRow(children, this, offset, count, sort, search);
+    }
+    else if (_pObjectCache && !updateCache) {
+        childCount = _pObjectCache->getBlockAtRow(children, this, offset, count, sort, search);
     }
     else {
         childCount = _pDataModel->getBlockAtRow(children, offset, count, sort, search);
@@ -927,6 +976,12 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool init)
     Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index));
 
     pObject->setIndex(index);
+
+    if (_isVirtual) {
+        pObject->setParentIndex(_index);
+        return;
+    }
+
     std::string path = _pDataModel->getPath(index);
     std::string parentPath = _pDataModel->getParentPath(path);
     if (parentPath == "") {
@@ -984,24 +1039,24 @@ ServerObjectWriter::writeChildren(std::string& meta, const std::vector<ServerObj
 }
 
 
-std::list<std::string>&
+CsvList&
 ServerObjectCache::getPropertiesForQuery()
 {
     return _queryPropertyNames;
 }
 
 
-DatabaseCache::DatabaseCache() :
+DatabaseCache::DatabaseCache(const std::string& cacheTableName) :
 _pSession(0),
-_cacheTableName("objcache"),
+_cacheTableName(cacheTableName),
 _maxQueryPropertyCount(5)
 {
     Log::instance()->upnpav().debug("database cache ctor");
     Poco::Data::SQLite::Connector::registerConnector();
 
-    _queryPropertyNames.push_back(AvProperty::CLASS);
+    _queryPropertyNames.append(AvProperty::CLASS);
     _propertyColumnNames[AvProperty::CLASS] = "class";
-    _queryPropertyNames.push_back(AvProperty::TITLE);
+    _queryPropertyNames.append(AvProperty::TITLE);
     _propertyColumnNames[AvProperty::TITLE] = "title";
 
     _propertyColumnTypes[AvProperty::ORIGINAL_TRACK_NUMBER] = "INTEGER(2)";
@@ -1026,7 +1081,7 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
 
     // FIXME: UNSIGNED INT(4) for index and parent index doesn't work with SQLite.
     std::string createTableString = "CREATE TABLE " + _cacheTableName + " (" + "idx INTEGER(8), paridx INTEGER(8)";
-    for (std::list<std::string>::iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
+    for (CsvList::Iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         createTableString += ", " + getColumnName(*it) + " " + getColumnType(*it);
     }
     createTableString += ", xml VARCHAR)";
@@ -1038,7 +1093,7 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
         Log::instance()->upnpav().warning("database cache creating object cache table failed: " + e.displayText());
     }
     try {
-        *_pSession << "CREATE UNIQUE INDEX idx ON " + _cacheTableName + " (idx)", Poco::Data::now;
+        *_pSession << "CREATE UNIQUE INDEX " + _cacheTableName + "_idx ON " + _cacheTableName + " (idx)", Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache creating index on object cache table failed: " + e.displayText());
@@ -1064,9 +1119,9 @@ DatabaseCache::rowCount()
 
 
 ServerObject*
-DatabaseCache::getMediaObjectForIndex(ui4 index)
+DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
 {
-    Log::instance()->upnpav().debug("database cache get object for index: " + Poco::NumberFormatter::format(index));
+    Log::instance()->upnpav().debug("database cache table " + _cacheTableName + " get object for index: " + Poco::NumberFormatter::format(index));
 
     std::vector<std::string> objectClass;
     std::vector<std::string> xml;
@@ -1079,7 +1134,6 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
     Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
     if (xml.size() == 1) {
         Log::instance()->upnpav().debug("database cache got xml: " + xml[0]);
-        // FIXME: if child object is a container, we need to create a ServerContainer, otherwise getChildAtRowOffset() does nothing
         ServerObject* pObject;
         if (AvClass::matchClass(objectClass[0], AvClass::CONTAINER)) {
             pObject = _pServerContainer->createMediaContainer();
@@ -1099,28 +1153,60 @@ DatabaseCache::getMediaObjectForIndex(ui4 index)
 
 
 ui4
-DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
-    Log::instance()->upnpav().debug("database cache get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
+    Log::instance()->upnpav().debug("database cache table " + _cacheTableName + " get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
+
+
+    ui4 parentIndex = AbstractDataModel::INVALID_INDEX;
+    bool parentIsVirtual = false;
+    if (pParentContainer) {
+        parentIndex = pParentContainer->_index;
+        parentIsVirtual = pParentContainer->isVirtual();
+    }
+
+    Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
 
     Poco::Data::Statement select(*_pSession);
     std::string statement = "SELECT idx, class, xml FROM " + _cacheTableName;
     std::string whereClause = "";
     bool useParentIndex = false;
+    bool virtualChildObjects = false;
+
     if (search != "*") {
         whereClause += search;
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
+        Log::instance()->upnpav().debug("database cache server container layout: Flat");
         whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"";
     }
     else if (_pServerContainer->getLayout() == ServerContainer::DirStruct && search == "*") {
+        Log::instance()->upnpav().debug("database cache server container layout: DirStruct");
         useParentIndex = true;
         whereClause += std::string(whereClause == "" ? "" : " AND") + " paridx = :paridx";
+    }
+    else if (_pServerContainer->getLayout() == ServerContainer::PropertyGroups) {
+        Log::instance()->upnpav().debug("database cache server container layout: PropertyGroups");
+        if (parentIndex == AbstractDataModel::INVALID_INDEX) {
+            Log::instance()->upnpav().debug("database cache parent container is root container");
+            virtualChildObjects = true;
+//            statement = "SELECT idx, class, xml FROM " + _cacheTableName + " WHERE prop0 = \"upnp:class\"";
+            statement = "SELECT idx, class, xml FROM " + _cacheTableName + " WHERE prop0 = \"" + pParentContainer->_groupPropertyName + "\"";
+        }
+//        else if (pParentContainer->isVirtual()) {
+        else {
+            Log::instance()->upnpav().debug("database cache parent container is virtual");
+            AbstractProperty* pGroupPropertyName = pParentContainer->getProperty(ServerContainer::PROPERTY_GROUP_PROPERTY_NAME);
+            AbstractProperty* pGroupPropertyValue = pParentContainer->getProperty(ServerContainer::PROPERTY_GROUP_PROPERTY_VALUE);
+            if (pGroupPropertyName && pGroupPropertyValue) {
+                Log::instance()->upnpav().debug("database cache parent container group property name: " + pGroupPropertyName->getValue());
+                whereClause += std::string(whereClause == "" ? "" : " AND") + " " + getColumnName(pGroupPropertyName->getValue()) + " = \"" + pGroupPropertyValue->getValue() + "\"";
+            }
+        }
     }
     if (whereClause != "") {
         statement += " WHERE " + whereClause;
     }
-//    statement += " ORDER BY artist, album, track, title";
     Log::instance()->upnpav().debug("database cache execute query: " + statement);
     Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
     if (useParentIndex) {
@@ -1129,6 +1215,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex,
     else {
         select << statement;
     }
+
     Poco::Data::RecordSet recordSet(select);
     try {
         select.execute();
@@ -1153,14 +1240,17 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ui4 parentIndex,
             // FIXME: if child object is a container, we need to create a ServerContainer, otherwise getChildAtRowOffset() does nothing
             ServerObject* pObject;
             if (AvClass::matchClass(objectClass, AvClass::CONTAINER)) {
-                pObject = _pServerContainer->createMediaContainer();
+                pObject = pParentContainer->createMediaContainer();
             }
             else {
-                pObject = _pServerContainer->createMediaItem();
+                pObject = pParentContainer->createMediaItem();
             }
             MediaObjectReader xmlReader;
             xmlReader.read(pObject, xml);
             pObject->setIndex(index);
+            if (virtualChildObjects) {
+                pObject->setIsVirtual(true);
+            }
             block.push_back(pObject);
             recordSet.moveNext();
         }
@@ -1184,7 +1274,7 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
     std::string propColString = "idx, paridx";
     std::string propValString = ":idx, :paridx";
     std::vector<std::string> props;
-    for (std::list<std::string>::iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
+    for (CsvList::Iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         propColString += ", " + getColumnName(*it);
         propValString += ", :" + getColumnName(*it);
         AbstractProperty* pProperty = pObject->getProperty(*it);
@@ -1231,8 +1321,54 @@ DatabaseCache::addPropertiesForQuery(CsvList propertyList)
     }
     std::size_t p = 0;
     for (CsvList::Iterator it = propertyList.begin(); it != propertyList.end() && p < _maxQueryPropertyCount - defaultPropCount; ++it, ++p) {
-        _queryPropertyNames.push_back(*it);
+        _queryPropertyNames.append(*it);
         _propertyColumnNames[*it] = "prop" + Poco::NumberFormatter::format(p);
+    }
+}
+
+
+void
+DatabaseCache::updateVirtualObjects(ServerObjectCache* pVirtualObjectCache)
+{
+    ui4 index = 0;
+    for (CsvList::Iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
+        if (*it == AvProperty::TITLE) {
+            continue;
+        }
+        std::string columnName = getColumnName(*it);
+        std::string statement = "SELECT " + columnName + " FROM " + _cacheTableName + " GROUP BY " + columnName + " ORDER BY " + columnName;
+        Log::instance()->upnpav().debug("database cache execute query: " + statement);
+        Poco::Data::Statement select(*_pSession);
+        select << statement;
+
+        Poco::Data::RecordSet recordSet(select);
+        try {
+            select.execute();
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnpav().warning("database cache update virtual objects executing query failed: " + e.displayText());
+        }
+        bool more = recordSet.moveFirst();
+        while (more) {
+            std::string propVal = recordSet[columnName].convert<std::string>();
+            ServerContainer* pContainer = _pServerContainer->createMediaContainer();
+            pContainer->setTitle(propVal);
+            pContainer->setIndex(index);
+            pContainer->setIsVirtual(true);
+            pContainer->setParentIndex(AbstractDataModel::INVALID_INDEX);
+            MemoryProperty* pGroupPropertyName = new MemoryProperty;
+            pGroupPropertyName->setName(ServerContainer::PROPERTY_GROUP_PROPERTY_NAME);
+            pGroupPropertyName->setValue(*it);
+            pContainer->addProperty(pGroupPropertyName);
+            MemoryProperty* pGroupPropertyValue = new MemoryProperty;
+            pGroupPropertyValue->setName(ServerContainer::PROPERTY_GROUP_PROPERTY_VALUE);
+            pGroupPropertyValue->setValue(propVal);
+            pContainer->addProperty(pGroupPropertyValue);
+
+            pVirtualObjectCache->insertMediaObject(pContainer);
+            more = recordSet.moveNext();
+            index++;
+        }
     }
 }
 
@@ -1247,7 +1383,14 @@ DatabaseCache::getColumnName(const std::string& propertyName)
         return "title";
     }
     else {
-        return _propertyColumnNames[propertyName];
+        std::map<std::string, std::string>::iterator pos = _propertyColumnNames.find(propertyName);
+        if (pos == _propertyColumnNames.end()) {
+            // leave the property name as is
+            return propertyName;
+        }
+        else {
+            return _propertyColumnNames[propertyName];
+        }
     }
 }
 
