@@ -69,7 +69,7 @@ CtlMediaServer::browseRootObject()
         _pCtlMediaServerCode->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
         MediaObjectReader reader;
         reader.read(_pRoot, rootMeta);
-        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS)->getValue());
+        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getClass());
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().error("controller could not fetch root object, setting default replacement object: " + e.displayText());
@@ -79,6 +79,11 @@ CtlMediaServer::browseRootObject()
     _pRoot->setServer(this);
     _pRoot->setServerController(_pCtlMediaServerCode);
 //    _pRoot->setFetchedAllChildren(false);
+    if (_pRoot->isContainer()) {
+        // don't rely on childCount attribute being present in root container, so we have to fetch some children to get total child count.
+        Log::instance()->upnpav().debug("controller root object is container, fetching children ...");
+        _pRoot->getChildForRow(0);
+    }
     Log::instance()->upnpav().debug("browse root object finished.");
 }
 

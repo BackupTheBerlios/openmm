@@ -237,7 +237,7 @@ public:
 
     ServerObject* getDescendant(const std::string& objectId);
 
-    virtual ui4 getChildCount();
+//    virtual ui4 getChildCount();
     virtual ServerObject* getChildForIndex(const std::string& indexString);
     virtual ServerObject* getChildForIndex(ui4 index, bool init = true, bool isVirtual = false);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");

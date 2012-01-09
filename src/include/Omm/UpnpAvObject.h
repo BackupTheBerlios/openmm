@@ -424,7 +424,7 @@ protected:
     std::vector<AbstractMediaObject*>                                   _childVec;
     std::vector<AbstractProperty*>                                      _propertyVec;
     std::multimap<std::string,AbstractProperty*>                        _propertyMap;
-    ui4                                                                 _totalChildCount;
+    ui4                                                                 _childCount;
 };
 
 

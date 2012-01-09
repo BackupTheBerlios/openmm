@@ -834,14 +834,14 @@ ServerContainer::appendChildWithAutoIndex(AbstractMediaObject* pChild)
 }
 
 
-ui4
-ServerContainer::getChildCount()
-{
-    if (!_pDataModel) {
-        return 0;
-    }
-    return _pDataModel->getIndexCount();
-}
+//ui4
+//ServerContainer::getChildCount()
+//{
+//    if (!_pDataModel) {
+//        return 0;
+//    }
+//    return _pDataModel->getIndexCount();
+//}
 
 
 ServerObject*

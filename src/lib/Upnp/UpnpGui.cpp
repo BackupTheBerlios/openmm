@@ -743,6 +743,8 @@ MediaContainerWidget::selectedItem(int row)
         pContainer->_pServerGroup = _pServerGroup;
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
+        // don't rely on childCount attribute being present and fetch first children to get total child count
+        pChildObject->getChildForRow(0);
         _pServerGroup->push(pContainer, pChildObject->getTitle());
     }
     else {

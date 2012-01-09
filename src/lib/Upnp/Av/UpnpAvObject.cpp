@@ -709,7 +709,7 @@ MemoryMediaObject::MemoryMediaObject() :
 _restricted(true),
 _isContainer(false),
 _searchable(false),
-_totalChildCount(0)
+_childCount(0)
 {
 }
 
@@ -754,7 +754,7 @@ MemoryMediaObject::setIsContainer(bool isContainer)
 void
 MemoryMediaObject::setChildCount(ui4 childCount)
 {
-    _totalChildCount = childCount;
+    _childCount = childCount;
 }
 
 
@@ -769,7 +769,7 @@ MemoryMediaObject::getFetchedChildCount()
 ui4
 MemoryMediaObject::getChildCount()
 {
-    return _totalChildCount;
+    return _childCount;
 }
 
 
@@ -951,10 +951,13 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
         if (attr != 0) {
             ui4 childCount = 0;
             try {
-                childCount = Poco::NumberParser::parseUnsigned(attr->getNamedItem(AvProperty::CHILD_COUNT)->nodeValue());
+                Poco::XML::Node* pChildAttr = attr->getNamedItem(AvProperty::CHILD_COUNT);
+                if (pChildAttr) {
+                    childCount = Poco::NumberParser::parseUnsigned(pChildAttr->nodeValue());
+                }
             }
             catch (Poco::Exception &e) {
-                Log::instance()->upnpav().error("parsing child count in media object reader failed");
+                Log::instance()->upnpav().warning("parsing child count in media object reader failed");
             }
             pObject->setChildCount(childCount);
         }
@@ -1080,9 +1083,9 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject
     Poco::AutoPtr<Poco::XML::Element> pXmlObject;
     if (pObject->isContainer()) {
         pXmlObject = pDoc->createElement(AvClass::CONTAINER);
-        Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
-        pChildCount->setValue(Poco::NumberFormatter::format(pObject->getChildCount()));
-        pXmlObject->setAttributeNode(pChildCount);
+//        Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
+//        pChildCount->setValue(Poco::NumberFormatter::format(pObject->getChildCount()));
+//        pXmlObject->setAttributeNode(pChildCount);
     }
     else {
         pXmlObject = pDoc->createElement(AvClass::ITEM);
