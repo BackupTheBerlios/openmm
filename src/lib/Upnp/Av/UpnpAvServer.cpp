@@ -472,7 +472,7 @@ ServerObject::getParentId()
 
     std::string parentId;
     if (_index == AbstractDataModel::INVALID_INDEX) {
-        parentId = "";
+        parentId = "-1";
     }
     else {
         parentId = "0";
@@ -832,16 +832,6 @@ ServerContainer::appendChildWithAutoIndex(AbstractMediaObject* pChild)
 //    pChild->setIndex(getChildCount());
 //    appendChild(pChild);
 }
-
-
-//ui4
-//ServerContainer::getChildCount()
-//{
-//    if (!_pDataModel) {
-//        return 0;
-//    }
-//    return _pDataModel->getIndexCount();
-//}
 
 
 ServerObject*
