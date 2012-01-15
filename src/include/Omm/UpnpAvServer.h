@@ -116,7 +116,7 @@ public:
     virtual std::istream* getStream();
 
 protected:
-    ServerItem*                 _pItem;
+    ServerObject*               _pObject;
     AbstractDataModel*          _pDataModel;
 };
 
@@ -126,14 +126,14 @@ class ServerObjectResource : public MemoryResource
     friend class ItemRequestHandler;
 
 public:
-    ServerObjectResource(ServerItem* pItem, AbstractDataModel* pDataModel);
+    ServerObjectResource(ServerObject* pItem, AbstractDataModel* pDataModel);
 
     virtual bool isSeekable();
     virtual std::streamsize getSize();
     virtual std::istream* getStream();
 
 private:
-    ServerItem*                 _pItem;
+    ServerObject*               _pObject;
     AbstractDataModel*          _pDataModel;
     int                         _id;
 };
@@ -144,6 +144,7 @@ class ServerObject : public MemoryMediaObject
     friend class ItemRequestHandler;
     friend class ServerObjectResource;
     friend class ServerObjectCache;
+    friend class ServerContainer;
 
 public:
     ServerObject(MediaServer* pServer);
@@ -151,6 +152,7 @@ public:
 
     // factory method
     virtual ServerObject* createChildObject();
+    virtual ServerObjectResource* createResource();
 
     // object id, index, row and path
     // index: fixed number and unique identifier for a server object
@@ -202,6 +204,7 @@ public:
 class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 {
     friend class DatabaseCache;
+    friend class ServerObjectResource;
 
 public:
     ServerContainer(MediaServer* pServer);
@@ -237,13 +240,14 @@ public:
 
     ServerObject* getDescendant(const std::string& objectId);
 
-    virtual ServerObject* getChildForIndex(const std::string& indexString);
+    virtual ServerObject* getChildForIndexString(const std::string& indexString);
     virtual ServerObject* getChildForIndex(ui4 index, bool init = true, bool isVirtual = false);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
+    std::stringstream* getChildrenPlaylist();
 
 private:
-    virtual void initChild(ServerObject* pObject, ui4 index, bool init = true);
+    virtual void initChild(ServerObject* pObject, ui4 index, bool fullInit = true);
 
     void updateCacheThread();
     bool updateCacheThreadIsRunning();
@@ -253,6 +257,8 @@ private:
     ServerObjectCache*                                  _pVirtualContainerCache;
     Layout                                              _layout;
     std::string                                         _groupPropertyName;
+    std::stringstream                                   _childrenPlaylist;
+    std::size_t                                         _childrenPlaylistSize;
 
     Poco::FastMutex                                     _serverLock;
     CsvList                                             _searchCaps;
