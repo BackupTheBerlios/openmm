@@ -193,6 +193,7 @@ public:
     const static std::string VIDEO_QUICKTIME;
     const static std::string VIDEO_AVI;
     const static std::string IMAGE_JPEG;
+    const static std::string PLAYLIST;
 
     bool isAudio();
     bool isVideo();

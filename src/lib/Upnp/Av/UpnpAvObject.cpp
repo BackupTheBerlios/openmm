@@ -170,6 +170,7 @@ const std::string Mime::VIDEO_MPEG = Mime::TYPE_VIDEO + "/mpeg";
 const std::string Mime::VIDEO_QUICKTIME = Mime::TYPE_VIDEO + "/quicktime";
 const std::string Mime::VIDEO_AVI = Mime::TYPE_VIDEO + "/avi";
 const std::string Mime::IMAGE_JPEG = Mime::TYPE_IMAGE + "/jpeg";
+const std::string Mime::PLAYLIST = Mime::TYPE_AUDIO + "/m3u";
 
 std::string
 AvClass::className(const std::string& c1, const std::string& c2, const std::string& c3, const std::string& c4)

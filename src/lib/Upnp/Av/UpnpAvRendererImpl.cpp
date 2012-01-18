@@ -116,30 +116,7 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
     ProtocolInfo protInfo(protInfoString);
 
     Omm::Av::Log::instance()->upnpav().debug("engine: " + _engines[InstanceID]->getEngineId() + " set uri: " + CurrentURI);
-    if (_engines[InstanceID]->preferStdStream()) {
-        Poco::URI uri(CurrentURI);
-        if (_pSession) {
-            delete _pSession;
-        }
-        _pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-        Poco::Net::HTTPRequest request("GET", uri.getPath());
-        _pSession->sendRequest(request);
-        std::stringstream requestHeader;
-        request.write(requestHeader);
-        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
-
-        Poco::Net::HTTPResponse response;
-        std::istream& istr = _pSession->receiveResponse(response);
-
-        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
-        std::stringstream responseHeader;
-        response.write(responseHeader);
-        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
-        _engines[InstanceID]->setUri(istr, protInfo);
-    }
-    else {
-        _engines[InstanceID]->setUri(CurrentURI, protInfo);
-    }
+    _engines[InstanceID]->setUriEngine(CurrentURI, protInfo);
 
     Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + _getTransportState());
 }

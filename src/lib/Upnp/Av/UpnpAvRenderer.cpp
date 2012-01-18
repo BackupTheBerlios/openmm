@@ -32,7 +32,8 @@ Engine::Engine() :
 _instanceId(0),
 _pAVTransportImpl(0),
 _pRenderingControlImpl(0),
-_pVisual(0)
+_pVisual(0),
+_trackNumberInPlaylist(0)
 {
 }
 
@@ -61,6 +62,58 @@ Engine::setVisual(Sys::Visual* pVisual)
 void
 Engine::setOption(const std::string& key, const std::string& value)
 {
+}
+
+
+void
+Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
+{
+    Poco::URI uriParsed(uri);
+    if (protInfo.getMimeString() == Mime::PLAYLIST) {
+        Poco::Net::HTTPClientSession session(uriParsed.getHost(), uriParsed.getPort());
+
+        Poco::Net::HTTPRequest request("GET", uriParsed.getPath());
+        session.sendRequest(request);
+        std::stringstream requestHeader;
+        request.write(requestHeader);
+        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+
+        Poco::Net::HTTPResponse response;
+        std::istream& istr = session.receiveResponse(response);
+
+        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+
+        std::string line;
+        while(std::getline(istr, line)) {
+            _playlist.push_back(line);
+        }
+        setUri(_playlist[_trackNumberInPlaylist]);
+    }
+    else if (preferStdStream()) {
+        _playlist.clear();
+        Poco::Net::HTTPClientSession session(uriParsed.getHost(), uriParsed.getPort());
+        Poco::Net::HTTPRequest request("GET", uriParsed.getPath());
+        session.sendRequest(request);
+        std::stringstream requestHeader;
+        request.write(requestHeader);
+        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+
+        Poco::Net::HTTPResponse response;
+        std::istream& istr = session.receiveResponse(response);
+
+        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        std::stringstream responseHeader;
+        response.write(responseHeader);
+        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        setUri(istr, protInfo);
+    }
+    else {
+        _playlist.clear();
+        setUri(uri, protInfo);
+    }
 }
 
 
@@ -94,6 +147,11 @@ Engine::transportStateChanged()
     val.setValue(newTransportState);
     _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
     Omm::Av::Log::instance()->upnpav().debug("new transport state: " + newTransportState);
+    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
+        _trackNumberInPlaylist++;
+        setUri(_playlist[_trackNumberInPlaylist]);
+        play();
+    }
 }
 
 
@@ -141,7 +199,7 @@ MediaRenderer::addEngine(Engine* pEngine)
     pEngine->_pAVTransportImpl = _pAVTransportImpl;
     _pRenderingControlImpl->addEngine(pEngine);
     pEngine->_pRenderingControlImpl = _pRenderingControlImpl;
-    
+
     Log::instance()->upnpav().information("add renderer engine: " + pEngine->getEngineId());
 }
 

@@ -39,12 +39,12 @@ class ProtocolInfo;
 class Engine : public Util::ConfigurablePlugin
 {
     friend class MediaRenderer;
-    
+
 public:
     enum TransportState {Stopped, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent};
-    
+
     Engine();
-    
+
     std::string getEngineId();
     void setInstancedId(Omm::ui4 instanceId);
     void setVisual(Sys::Visual* pVisual);
@@ -57,12 +57,14 @@ public:
       AVTransport
     */
     virtual bool preferStdStream() { return false; }
-    virtual void setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo()) = 0;
+
+    void setUriEngine(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo());
+    virtual void setUri(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo()) = 0;
     /// Set uri and protocol info of media item.
-    virtual void setUri(std::istream& istr, const Omm::Av::ProtocolInfo& protInfo = Omm::Av::ProtocolInfo()) {}
+    virtual void setUri(std::istream& istr, const ProtocolInfo& protInfo = ProtocolInfo()) {}
     /// Set stream and protocol info of media item.
     virtual void play() = 0;
-    
+
     virtual void setSpeed(int nom, int denom) = 0;
     virtual void pause() = 0;
     virtual void stop() = 0;
@@ -74,7 +76,7 @@ public:
     virtual Poco::UInt64 getPositionByte() = 0;
     virtual float getPositionPercentage() = 0;
     virtual float getPositionSecond() = 0;
-    
+
     virtual float getLengthSeconds() = 0;
 
     const std::string& transportState();
@@ -84,12 +86,12 @@ public:
     */
     virtual void setVolume(const std::string& channel, float vol) = 0;
     virtual float getVolume(const std::string& channel) = 0;
-    
+
 protected:
     virtual TransportState getTransportState() = 0;
 
     void transportStateChanged();
-    /// When engine generates a "play", "stop", "pause" or "end of stream event", 
+    /// When engine generates a "play", "stop", "pause" or "end of stream event",
     /// transportStateChanged() is triggered and generates the corresponding UPnP event
     /// via the LastChange mechanism.
 
@@ -102,6 +104,8 @@ protected:
     Sys::Visual*                        _pVisual;
     DevAVTransportRendererImpl*         _pAVTransportImpl;
     DevRenderingControlRendererImpl*    _pRenderingControlImpl;
+    std::vector<std::string>            _playlist;
+    Omm::ui4                            _trackNumberInPlaylist;
 };
 
 
@@ -112,7 +116,7 @@ public:
     ~MediaRenderer();
 
     void addEngine(Engine* pEngine);
-    
+
 private:
     // these pointers to service implementations are only temporarily needed when setting them in the engine.
     DevAVTransportRendererImpl*         _pAVTransportImpl;
