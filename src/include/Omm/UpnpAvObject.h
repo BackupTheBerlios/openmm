@@ -450,6 +450,8 @@ public:
     void write(std::string& meta, AbstractMediaObject* pObject, const std::string& filter = "*");
     void writeChildren(std::string& meta, const std::vector<AbstractMediaObject*>& children, const std::string& filter = "*");
 
+    static const std::string& getXmlProlog();
+
 protected:
     void writeMetaDataHeader();
     void writeMetaDataClose(std::string& metaData);
@@ -458,6 +460,7 @@ protected:
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;
     bool                                    _full;
+    static const std::string                _xmlProlog;
 };
 
 

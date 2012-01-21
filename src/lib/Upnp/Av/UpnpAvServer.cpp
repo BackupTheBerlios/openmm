@@ -656,7 +656,12 @@ _updateCacheThreadRunning(false)
 {
     setIsContainer(true);
     _pServer->_pServerContainer = this;
-    // add playlist resource
+}
+
+
+void
+ServerContainer::addPlaylistResource()
+{
     std::string resourceUri = _pServer->getServerAddress() + "/0";
     AbstractResource* pResource = createResource();
     pResource->setUri(resourceUri + "$0");
@@ -1051,14 +1056,13 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         }
     }
 
-    // for caching only stop decorating media object
+    // for storing the object only in cache, stop decorating media object
     if (!fullInit) {
         return;
     }
 
     // add resources
     std::string objectId = pObject->getId();
-//    std::string resourceUri = _pServer->getServerAddress() + "/" + relativeObjectId.substr(2);
     std::string resourceUri = _pServer->getServerAddress() + "/" + objectId;
     if (pObject->isContainer()) {
         Log::instance()->upnpav().debug("server container, init child create container resource");
@@ -1208,7 +1212,7 @@ DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
             pObject = _pServerContainer->createMediaItem();
         }
         MediaObjectReader xmlReader;
-        xmlReader.read(pObject, xml[0]);
+        xmlReader.read(pObject, MediaObjectWriter2::getXmlProlog() + xml[0]);
         return pObject;
     }
     else {
@@ -1302,7 +1306,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             std::string xml;
             index = recordSet["idx"].convert<ui4>();
             objectClass = recordSet["class"].convert<std::string>();
-            xml = recordSet["xml"].convert<std::string>();
+            xml = MediaObjectWriter2::getXmlProlog() + recordSet["xml"].convert<std::string>();
             // FIXME: if child object is a container, we need to create a ServerContainer, otherwise getChildAtRowOffset() does nothing
             ServerObject* pObject;
             if (AvClass::matchClass(objectClass, AvClass::CONTAINER)) {
@@ -1335,6 +1339,8 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
     std::string xml;
     MediaObjectWriter2 xmlWriter(false);
     xmlWriter.write(xml, pObject);
+    // chop off xml prolog:
+    xml = xml.substr(MediaObjectWriter2::getXmlProlog().size());
 
     std::string insertString = "INSERT INTO " + _cacheTableName + " (";
     std::string propColString = "idx, paridx";

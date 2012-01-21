@@ -69,6 +69,7 @@ private:
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
     CtlMediaRendererCode*   _pCtlMediaRendererCode;
     CtlMediaObject2*        _pCurrentMediaObject;
+    bool                    _usePlaylistResource;
 };
 
 

@@ -223,6 +223,8 @@ public:
     virtual ServerContainer* createMediaContainer();
     virtual ServerItem* createMediaItem();
 
+    void addPlaylistResource();
+
     AbstractDataModel* getDataModel();
     void setDataModel(AbstractDataModel* pDataModel);
 

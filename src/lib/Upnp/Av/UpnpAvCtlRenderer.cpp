@@ -33,7 +33,8 @@ namespace Av {
 
 
 CtlMediaRenderer::CtlMediaRenderer() :
-_pCurrentMediaObject(0)
+_pCurrentMediaObject(0),
+_usePlaylistResource(false)
 {
 }
 
@@ -75,7 +76,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
     // TODO: select the best resource, not the first one
     AbstractResource* pRes = pObject->getResource();
     AbstractResource* pContainerRes = pParentObject->getResource();
-    if (pContainerRes) {
+    if (_usePlaylistResource && pContainerRes) {
         Log::instance()->upnpav().debug("selected object is child of a container with playlist resource");
         std::string metaData;
         MediaObjectWriter2 writer;

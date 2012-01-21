@@ -1013,6 +1013,8 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
 }
 
 
+const std::string MediaObjectWriter2::_xmlProlog = "<DIDL-Lite xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:omm=\"http://open.multimedia.org/xmlns/\" xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\">";
+
 MediaObjectWriter2::MediaObjectWriter2(bool full) :
 _pDoc(0),
 _pDidl(0),
@@ -1042,6 +1044,13 @@ MediaObjectWriter2::writeChildren(std::string& meta, const std::vector<AbstractM
         writer.writeMetaData(_pDidl, *it);
     }
     writeMetaDataClose(meta);
+}
+
+
+const std::string&
+MediaObjectWriter2::getXmlProlog()
+{
+    return _xmlProlog;
 }
 
 

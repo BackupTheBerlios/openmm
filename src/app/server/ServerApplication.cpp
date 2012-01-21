@@ -196,6 +196,7 @@ protected:
             pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
             pContainer->setDataModel(pDataModel);
             pContainer->setBasePath(_basePath);
+            pContainer->addPlaylistResource();
 
             mediaServer.setRoot(pContainer);
             mediaServer.setFriendlyName(_name);
