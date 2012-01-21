@@ -215,17 +215,19 @@ CtlMediaObject2::setSearch(const std::string& searchText)
 }
 
 
-MediaItemNotification2::MediaItemNotification2(CtlMediaObject2* pObject) :
-_pItem(pObject)
+MediaObjectSelectedNotification::MediaObjectSelectedNotification(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row) :
+_pObject(pObject),
+_pParentObject(pParentObject),
+_row(row)
 {
 }
 
 
-CtlMediaObject2*
-MediaItemNotification2::getMediaItem() const
-{
-    return _pItem;
-}
+//CtlMediaObject2*
+//MediaObjectSelectedNotification::getMediaItem() const
+//{
+//    return _pObject;
+//}
 
 
 } // namespace Av

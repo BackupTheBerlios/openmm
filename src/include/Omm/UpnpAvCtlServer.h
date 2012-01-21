@@ -45,7 +45,7 @@ public:
     virtual CtlMediaObject2* createMediaObject();
     CtlMediaObject2* getRootObject() const;
 
-    void selectMediaObject(CtlMediaObject2* pObject);
+    void selectMediaObject(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject = 0, ui4 row = 0);
 
 //protected:
     void browseRootObject();

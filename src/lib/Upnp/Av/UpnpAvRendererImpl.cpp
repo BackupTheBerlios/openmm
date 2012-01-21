@@ -320,17 +320,23 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
         Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() seek mode: " + Unit + ", seek target: " + Target);
 
         ui4 position;
-        if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
-            position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
+        if (Unit == AvTransportArgument::SEEK_MODE_TRACK_NR) {
+            Variant track(Target);
+            ui4 trackNumber;
+            track.getValue(trackNumber);
+            _engines[InstanceID]->seekTrack(trackNumber);
         }
-        _engines[InstanceID]->seekSecond(position);
-        // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
-        //       TransportState should be set to TRANSITIONING, but only while seeking.
-        //       OnSeek() should return immediately! So we are not conform here.
-        // _setTransportState("TRANSITIONING");
-        //       For now, we just keep the transportState to make life easier.
-        _setRelativeTimePosition(Target);
-        _setAbsoluteTimePosition(Target);
+        else if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
+            position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
+            _engines[InstanceID]->seekSecond(position);
+            // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
+            //       TransportState should be set to TRANSITIONING, but only while seeking.
+            //       OnSeek() should return immediately! So we are not conform here.
+            // _setTransportState("TRANSITIONING");
+            //       For now, we just keep the transportState to make life easier.
+            _setRelativeTimePosition(Target);
+            _setAbsoluteTimePosition(Target);
+        }
     }
 }
 

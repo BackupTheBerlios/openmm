@@ -70,11 +70,27 @@ CtlMediaRenderer::setObject(CtlMediaObject* pObject)
 
 
 void
-CtlMediaRenderer::setObject2(CtlMediaObject2* pObject)
+CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row)
 {
     // TODO: select the best resource, not the first one
     AbstractResource* pRes = pObject->getResource();
-    if (pRes) {
+    AbstractResource* pContainerRes = pParentObject->getResource();
+    if (pContainerRes) {
+        Log::instance()->upnpav().debug("selected object is child of a container with playlist resource");
+        std::string metaData;
+        MediaObjectWriter2 writer;
+        writer.write(metaData, pParentObject);
+        try {
+            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pContainerRes->getUri(), metaData);
+            // TODO: skip to row with AVTransport()->Seek()
+        }
+        catch (Poco::Exception e) {
+//            error(e.message());
+            return;
+        }
+        _pCurrentMediaObject = pObject;
+    }
+    else if (pRes) {
         std::string metaData;
         MediaObjectWriter2 writer;
         writer.write(metaData, pObject);
@@ -197,7 +213,7 @@ MediaRendererGroupDelegate::init()
     Log::instance()->upnpav().debug("media renderer delegate init");
     Controller* pController = _pDeviceGroup->getController();
     pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
-    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification2>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler2));
+    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaObjectSelectedNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler2));
 }
 
 
@@ -215,13 +231,13 @@ MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaItemNotification* pMed
 
 
 void
-MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaItemNotification2* pMediaItemNotification)
+MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification)
 {
-    CtlMediaObject2* pItem = pMediaItemNotification->getMediaItem();
-    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pItem->getTitle());
+//    CtlMediaObject2* pItem = pMediaItemNotification->getMediaItem();
+    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pMediaItemNotification->_pObject->getTitle());
     CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
     if (pRenderer) {
-        pRenderer->setObject2(pItem);
+        pRenderer->setObject2(pMediaItemNotification->_pObject, pMediaItemNotification->_pParentObject, pMediaItemNotification->_row);
         pRenderer->playPressed();
     }
 }

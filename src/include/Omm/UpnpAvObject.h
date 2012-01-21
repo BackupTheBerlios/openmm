@@ -445,7 +445,7 @@ private:
 class MediaObjectWriter2
 {
 public:
-    MediaObjectWriter2();
+    MediaObjectWriter2(bool full = true);
 
     void write(std::string& meta, AbstractMediaObject* pObject, const std::string& filter = "*");
     void writeChildren(std::string& meta, const std::vector<AbstractMediaObject*>& children, const std::string& filter = "*");
@@ -457,6 +457,7 @@ protected:
 
     Poco::AutoPtr<Poco::XML::Document>      _pDoc;
     Poco::AutoPtr<Poco::XML::Element>       _pDidl;
+    bool                                    _full;
 };
 
 
@@ -504,7 +505,6 @@ private:
 class BlockCache : public AbstractMediaObjectCache
 /// BlockCache guarantees to have maxCacheSize number of adjacent objects in the
 /// cache, if they are all accessed via getMediaObject().
-/// Index has semantics of a row, that means, no gaps and range is 0 .. getTotalCount().
 {
 public:
     BlockCache(ui4 blockSize = 10);

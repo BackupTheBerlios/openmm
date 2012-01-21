@@ -472,7 +472,7 @@ ServerObject::getId()
         objectId = "0";
     }
     else {
-        objectId = (_isVirtual ? "0/v" : "0/") + Poco::NumberFormatter::format(_index);
+        objectId = (_isVirtual ? "v" : "") + Poco::NumberFormatter::format(_index);
     }
     Log::instance()->upnpav().debug("server object id: " + objectId);
     return objectId;
@@ -645,9 +645,9 @@ ServerObject(pServer),
 //_pDataModel(0),
 _pObjectCache(0),
 _pVirtualContainerCache(0),
-//_layout(Flat),
+_layout(Flat),
 //_layout(DirStruct),
-_layout(PropertyGroups),
+//_layout(PropertyGroups),
 //_groupPropertyName(AvProperty::CLASS),
 _groupPropertyName(AvProperty::ARTIST),
 _childrenPlaylistSize(0),
@@ -656,6 +656,12 @@ _updateCacheThreadRunning(false)
 {
     setIsContainer(true);
     _pServer->_pServerContainer = this;
+    // add playlist resource
+    std::string resourceUri = _pServer->getServerAddress() + "/0";
+    AbstractResource* pResource = createResource();
+    pResource->setUri(resourceUri + "$0");
+    pResource->setProtInfo("http-get:*:audio/m3u:*");
+    addResource(pResource);
 }
 
 
@@ -901,6 +907,9 @@ ServerContainer::getDescendant(const std::string& objectId)
     else {
         // child is an item
         Log::instance()->upnpav().debug("server container get descendant is a child with index: " + objectId);
+        if (objectId == "0") {
+            return this;
+        }
 //        ServerItem* pChild = static_cast<ServerItem*>(getChildForIndexString(objectId));
         ServerObject* pChild = getChildForIndexString(objectId);
         if (pChild == 0) {
@@ -1048,8 +1057,9 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
     }
 
     // add resources
-    std::string relativeObjectId = pObject->getId();
-    std::string resourceUri = _pServer->getServerAddress() + "/" + relativeObjectId.substr(2);
+    std::string objectId = pObject->getId();
+//    std::string resourceUri = _pServer->getServerAddress() + "/" + relativeObjectId.substr(2);
+    std::string resourceUri = _pServer->getServerAddress() + "/" + objectId;
     if (pObject->isContainer()) {
         Log::instance()->upnpav().debug("server container, init child create container resource");
         // add playlist resource
@@ -1323,7 +1333,7 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
 {
     Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
     std::string xml;
-    MediaObjectWriter2 xmlWriter;
+    MediaObjectWriter2 xmlWriter(false);
     xmlWriter.write(xml, pObject);
 
     std::string insertString = "INSERT INTO " + _cacheTableName + " (";
@@ -1468,7 +1478,7 @@ const ui4 AbstractDataModel::INVALID_INDEX = 0xffffffff;
 
 AbstractDataModel::AbstractDataModel() :
 _pServerContainer(0),
-_maxIndex(0)
+_maxIndex(1)
 //_indexBufferSize(50)
 {
 }

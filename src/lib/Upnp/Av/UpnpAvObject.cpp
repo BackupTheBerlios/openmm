@@ -924,7 +924,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
             pObject->setId(pAttrNode->nodeValue());
         }
         else {
-            Log::instance()->upnpav().error("setting mandatory object id in media object reader failed");
+            Log::instance()->upnpav().warning("setting mandatory object id in media object reader failed, object incomplete");
         }
         pAttrNode = attr->getNamedItem(AvProperty::RESTRICTED);
         if (pAttrNode) {
@@ -1013,9 +1013,10 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
 }
 
 
-MediaObjectWriter2::MediaObjectWriter2() :
+MediaObjectWriter2::MediaObjectWriter2(bool full) :
 _pDoc(0),
-_pDidl(0)
+_pDidl(0),
+_full(full)
 {
     Log::instance()->upnpav().debug("MediaObjectWriter2::MediaObjectWriter2()");
 }
@@ -1084,9 +1085,11 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject
     Poco::AutoPtr<Poco::XML::Element> pXmlObject;
     if (pObject->isContainer()) {
         pXmlObject = pDoc->createElement(AvClass::CONTAINER);
-//        Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
-//        pChildCount->setValue(Poco::NumberFormatter::format(pObject->getChildCount()));
-//        pXmlObject->setAttributeNode(pChildCount);
+        if (_full) {
+            Poco::AutoPtr<Poco::XML::Attr> pChildCount = pDoc->createAttribute("childCount");
+            pChildCount->setValue(Poco::NumberFormatter::format(pObject->getChildCount()));
+            pXmlObject->setAttributeNode(pChildCount);
+        }
     }
     else {
         pXmlObject = pDoc->createElement(AvClass::ITEM);
@@ -1095,11 +1098,13 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() writing attributes ...");
     // write attributes:
     // id (String, required)
-    std::string parentId = pObject->getParentId();
-    std::string objectId = pObject->getId();
-    pXmlObject->setAttribute(AvProperty::ID, objectId);
-    // parentID (String, required)
-    pXmlObject->setAttribute(AvProperty::PARENT_ID, parentId);
+    if (_full) {
+        std::string parentId = pObject->getParentId();
+        std::string objectId = pObject->getId();
+        pXmlObject->setAttribute(AvProperty::ID, objectId);
+        // parentID (String, required)
+        pXmlObject->setAttribute(AvProperty::PARENT_ID, parentId);
+    }
     // restricted (Boolean, required)
     pXmlObject->setAttribute(AvProperty::RESTRICTED, (pObject->isRestricted() ? "1" : "0"));
     // searchable (Boolean)
@@ -1130,7 +1135,9 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject
             pProperty->setAttribute(pProp->getAttributeName(attrNum), pProp->getAttributeValue(attrNum));
         }
 
-        pXmlObject->appendChild(pProperty);
+        if (value != "" || attrCount > 0) {
+            pXmlObject->appendChild(pProperty);
+        }
     }
 
     pDidl->appendChild(pXmlObject);

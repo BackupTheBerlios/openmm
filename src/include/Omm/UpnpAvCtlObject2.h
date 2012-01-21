@@ -79,15 +79,17 @@ private:
 };
 
 
-class MediaItemNotification2 : public Poco::Notification
+class MediaObjectSelectedNotification : public Poco::Notification
 {
 public:
-    MediaItemNotification2(CtlMediaObject2* pItem);
+    MediaObjectSelectedNotification(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row);
 
-    CtlMediaObject2* getMediaItem() const;
+//    CtlMediaObject2* getMediaItem() const;
 
-private:
-    CtlMediaObject2*     _pItem;
+//private:
+    CtlMediaObject2*     _pObject;
+    CtlMediaObject2*     _pParentObject;
+    ui4                  _row;
 };
 
 

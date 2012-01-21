@@ -89,14 +89,14 @@ CtlMediaServer::browseRootObject()
 
 
 void
-CtlMediaServer::selectMediaObject(CtlMediaObject2* pObject)
+CtlMediaServer::selectMediaObject(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row)
 {
     Log::instance()->upnpav().debug("media server object selected: " + pObject->getTitle());
 
     if (pObject->isContainer()) {
     }
     else {
-        MediaItemNotification2* pNotification = new MediaItemNotification2(pObject);
+        MediaObjectSelectedNotification* pNotification = new MediaObjectSelectedNotification(pObject, pParentObject, row);
         getDeviceContainer()->getDeviceManager()->postDeviceNotification(pNotification);
     }
 }

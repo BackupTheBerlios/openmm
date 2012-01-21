@@ -1,0 +1,21 @@
+set (CMAKE_SYSTEM_NAME Generic)
+set (CMAKE_SYSTEM_PROCESSOR i686)
+set_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
+set (SDKVER "11")
+set (DEVROOT "/home/jb/work/macos/i686-apple-darwin11")
+set (SDKROOT "${DEVROOT}")
+
+set (CMAKE_C_COMPILER "${DEVROOT}/usr/bin/i686-apple-darwin11-gcc")
+set (CMAKE_CXX_COMPILER "${DEVROOT}/usr/bin/i686-apple-darwin11-g++")
+
+#set (CMAKE_C_FLAGS "-isysroot ${SDKROOT} -miphoneos-version-min=${SDKVER} -std=c99" CACHE STRING "additional cross compiling c flags" FORCE)
+#set (CMAKE_C_FLAGS "-miphoneos-version-min=${SDKVER}" CACHE STRING "additional cross compiling c flags" FORCE)
+#set (CMAKE_CXX_FLAGS "-isysroot ${SDKROOT} -I${DEVROOT}/usr/include/c++/4.2.1 -miphoneos-version-min=${SDKVER}" CACHE STRING "additional cross compiling cxx flags" FORCE)
+#set (CMAKE_CXX_FLAGS "-I${DEVROOT}/usr/include/c++/4.2.1 -miphoneos-version-min=${SDKVER}" CACHE STRING "additional cross compiling cxx flags" FORCE)
+#set (CMAKE_CXX_FLAGS "-I${DEVROOT}/usr/include/c++/4.2.1 -w" CACHE STRING "additional cross compiling cxx flags" FORCE)
+
+set (CMAKE_FIND_ROOT_PATH "${SDKROOT}" "${CMAKE_INSTALL_PREFIX}")
+set (CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+set (CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

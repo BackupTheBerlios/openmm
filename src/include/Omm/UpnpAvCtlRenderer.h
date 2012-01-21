@@ -40,7 +40,7 @@ class CtlMediaRendererCode;
 class CtlMediaObject;
 class CtlMediaObject2;
 class MediaItemNotification;
-class MediaItemNotification2;
+class MediaObjectSelectedNotification;
 
 
 class CtlMediaRenderer : public Device
@@ -51,7 +51,7 @@ public:
     virtual void addCtlDeviceCode();
 
     void setObject(CtlMediaObject* pObject);
-    void setObject2(CtlMediaObject2* pObject);
+    void setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row);
     CtlMediaObject2* getObject();
     void playPressed();
     void stopPressed();
@@ -82,7 +82,7 @@ private:
     virtual void init();
 
     void mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification);
-    void mediaItemSelectedHandler2(MediaItemNotification2* pMediaItemNotification);
+    void mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification);
 };
 
 

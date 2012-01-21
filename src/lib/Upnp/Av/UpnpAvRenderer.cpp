@@ -117,6 +117,14 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 }
 
 
+void
+Engine::seekTrack(ui4 trackNumber)
+{
+    _trackNumberInPlaylist = trackNumber;
+    setUri(_playlist[_trackNumberInPlaylist]);
+}
+
+
 const std::string&
 Engine::transportState()
 {
@@ -145,13 +153,16 @@ Engine::transportStateChanged()
     std::string newTransportState = transportState();
     Variant val;
     val.setValue(newTransportState);
-    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
-    Omm::Av::Log::instance()->upnpav().debug("new transport state: " + newTransportState);
     if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
+        Omm::Av::Log::instance()->upnpav().debug("engine skips to next track in playlist");
         _trackNumberInPlaylist++;
         setUri(_playlist[_trackNumberInPlaylist]);
-        play();
+//        play();
     }
+//    else {
+        Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
+        _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+//    }
 }
 
 

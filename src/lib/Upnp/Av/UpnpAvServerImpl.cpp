@@ -227,7 +227,8 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
     }
     else {
         // get object via object id and index, cut off leading "0/" because index name space begins after "0/"
-        pObject = _pRoot->getDescendant(ObjectID.substr(2));
+//        pObject = _pRoot->getDescendant(ObjectID.substr(2));
+        pObject = _pRoot->getDescendant(ObjectID);
     }
 
     ServerObjectWriter writer;
@@ -260,7 +261,8 @@ DevContentDirectoryServerImpl::Search(const std::string& ContainerID, const std:
     }
     else {
         // get object via object id and index, cut off leading "0/" because index name space begins after "0/"
-        pObject = _pRoot->getDescendant(ContainerID.substr(2));
+//        pObject = _pRoot->getDescendant(ContainerID.substr(2));
+        pObject = _pRoot->getDescendant(ContainerID);
     }
 
     ServerObjectWriter writer;

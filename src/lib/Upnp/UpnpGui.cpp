@@ -749,7 +749,7 @@ MediaContainerWidget::selectedItem(int row)
     }
     else {
         Gui::Log::instance()->gui().debug("media container widget selected media item");
-        _pObjectModel->getServer()->selectMediaObject(pChildObject);
+        _pObjectModel->getServer()->selectMediaObject(pChildObject, _pObjectModel, row);
     }
 }
 

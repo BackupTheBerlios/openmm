@@ -145,6 +145,7 @@ void
 VlcEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 {
 //     _uri = uri.substr(0, 4) + "/ffmpeg" + uri.substr(4);
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine set uri: " + uri);
     _uri = uri;
     _mime = Omm::Av::Mime(protInfo.getMimeString());
 }
@@ -179,7 +180,7 @@ VlcEngine::play()
 //        }
 //    }
 
-    Omm::Av::Log::instance()->upnpav().debug("vlc engine: create new media ...");
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: create new media with uri: " + _uri + " ...");
 #if LIBVLC_VERSION_INT < 0x110
     _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), _pException);
 #else

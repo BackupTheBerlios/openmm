@@ -156,9 +156,15 @@ public:
 
     // object id, index, row and path
     // index: fixed number and unique identifier for a server object
-    // object id: path to object consisting of server root object id and child indices (0/index1/index2/ ...)
+    // object id: 1. object path to object consisting of object ids of parent containers (index1/index1/ ...) (fixed hierarchical parent relationship, not flat)
+    //            2. id within a server container's name space (index = 0 and relative object id = "0") with child objects (index = 1, 2, ... or for virtual objects v0, v1, ...)
+    //            within a server container's (flat) name space, all objects have a unique index, no paths (i.e. no slashes),
+    //            a child object of a subcontainer object (which can be virtual or not) has always the same and unique object id (no relative object path)
+    //
+    //            resource of an object has the same object path + resource suffix (e.g. "$resource number")
+    //            reserved object id "-1" for parent id when there's no parent
     // row: contiguous number of a child in an object container in the context of search and sort criteria
-    // path: unique string to identify an object in the servers domain (e.g. path to file, url to webradio station)
+    // path: unique string to identify an object in the servers domain (e.g. path to file, url to webradio station), don't confuse with object path above.
     virtual std::string getId();
     virtual std::string getParentId();
     virtual ui4 getIndex();
