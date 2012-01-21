@@ -414,7 +414,7 @@ ServerObjectResource::getStream()
 {
     // TODO: create playlist stream for container resources
     if (_pObject->isContainer()) {
-        return static_cast<ServerContainer*>(_pObject)->getChildrenPlaylist();
+        return static_cast<ServerContainer*>(_pObject)->generateChildrenPlaylist();
     }
     else {
         return _pDataModel->getStream(_pDataModel->getPath(_pObject->getIndex()));
@@ -1014,21 +1014,65 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
 
 
 std::stringstream*
-ServerContainer::getChildrenPlaylist()
+ServerContainer::generateChildrenPlaylist()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
-    if (!_pDataModel) {
-        // currently, only server containers with data models are handled
-        Log::instance()->upnpav().error("server container without data model, can not retrieve child objects");
+    if (!_pObjectCache) {
+        // currently, only server containers with object caches are handled
+        Log::instance()->upnpav().error("server container without data model, can not generate playlist");
         return 0;
     }
 
-    for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
-        std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format((*it).first) + "$0" + Poco::LineEnding::NEWLINE_LF;
+    int i = 0;
+    int maxLogEntries = 5;
+    std::string playlistLog;
+    std::vector<ui4> indices;
+    _pObjectCache->getIndices(indices);
+    for (std::vector<ui4>::iterator it = indices.begin(); it != indices.end(); ++it, ++i) {
+        std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format(*it) + "$0" + Poco::LineEnding::NEWLINE_LF;
         _childrenPlaylist << playlistEntry;
         _childrenPlaylistSize += playlistEntry.size();
+
+        if (i == maxLogEntries) {
+            playlistLog += "..." + Poco::LineEnding::NEWLINE_DEFAULT;
+        }
+        if (indices.size() < maxLogEntries || i < maxLogEntries) {
+            playlistLog += playlistEntry;
+        }
+        else if (i >= indices.size() - maxLogEntries) {
+            playlistLog += playlistEntry;
+        }
     }
+    Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+
+
+//    if (!_pDataModel) {
+//        // currently, only server containers with data models are handled
+//        Log::instance()->upnpav().error("server container without data model, can not generate playlist");
+//        return 0;
+//    }
+//
+//    int i = 0;
+//    int maxLogEntries = 5;
+//    std::string playlistLog;
+//    for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it, ++i) {
+//        std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format((*it).first) + "$0" + Poco::LineEnding::NEWLINE_LF;
+//        _childrenPlaylist << playlistEntry;
+//        _childrenPlaylistSize += playlistEntry.size();
+//
+//        if (i == maxLogEntries) {
+//            playlistLog += "..." + Poco::LineEnding::NEWLINE_DEFAULT;
+//        }
+//        if (_pDataModel->getIndexCount() < maxLogEntries || i < maxLogEntries) {
+//            playlistLog += playlistEntry;
+//        }
+//        else if (i >= _pDataModel->getIndexCount() - maxLogEntries) {
+//            playlistLog += playlistEntry;
+//        }
+//    }
+//    Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+
     return &_childrenPlaylist;
 }
 
@@ -1329,6 +1373,18 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         }
     }
     return recordSet.rowCount();
+}
+
+
+void
+DatabaseCache::getIndices(std::vector<ui4>& indices, const std::string& sort)
+{
+    try {
+        *_pSession << "SELECT idx FROM " + _cacheTableName + " WHERE class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"", Poco::Data::into(indices), Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("database cache get indices failed: " + e.displayText());
+    }
 }
 
 

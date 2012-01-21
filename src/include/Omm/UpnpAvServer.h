@@ -252,7 +252,7 @@ public:
     virtual ServerObject* getChildForIndex(ui4 index, bool init = true, bool isVirtual = false);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
-    std::stringstream* getChildrenPlaylist();
+    std::stringstream* generateChildrenPlaylist();
 
 private:
     virtual void initChild(ServerObject* pObject, ui4 index, bool fullInit = true);
@@ -297,6 +297,7 @@ public:
 
     virtual ServerObject* getMediaObjectForIndex(ui4 index, bool isVirtual = false) { return 0; }
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
+    virtual void getIndices(std::vector<ui4>& indices, const std::string& sort = "") {}
 
     virtual void insertMediaObject(ServerObject* pObject) {}
     virtual void insertBlock(std::vector<ServerObject*>& block) {}
@@ -324,6 +325,7 @@ public:
 
     virtual ServerObject* getMediaObjectForIndex(ui4 index, bool isVirtual = false);
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    virtual void getIndices(std::vector<ui4>& indices, const std::string& sort = "");
 
     virtual void insertMediaObject(ServerObject* pObject);
 
