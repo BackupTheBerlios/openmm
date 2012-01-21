@@ -1594,7 +1594,7 @@ AbstractDataModel::addPath(const std::string& path, const std::string& resourceP
             Log::instance()->upnpav().error("abstract data model max index reached, can not add path: " + path);
             return;
         }
-        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
+//        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
     }
     // create a new index
     _pathMap[path] = index;

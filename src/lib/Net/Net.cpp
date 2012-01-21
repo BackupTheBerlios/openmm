@@ -86,8 +86,8 @@ Poco::FastMutex NetworkInterfaceManager::_instanceLock;
 
 NetworkInterfaceManager::NetworkInterfaceManager()
 {
-    Log::instance()->net().debug("installing network interface manager");
-    
+//    Log::instance()->net().debug("installing network interface manager");
+
     scanInterfaces();
     findValidIpAddress();
 
@@ -100,8 +100,8 @@ NetworkInterfaceManager::NetworkInterfaceManager()
 NetworkInterfaceManager*
 NetworkInterfaceManager::instance()
 {
-    Log::instance()->net().debug("getting instance of network interface manager");
-    
+//    Log::instance()->net().debug("getting instance of network interface manager");
+
     Poco::FastMutex::ScopedLock lock(_instanceLock);
     if (!_pInstance) {
         _pInstance = new NetworkInterfaceManager;
@@ -164,7 +164,7 @@ bool
 NetworkInterfaceManager::isLoopback(const Poco::Net::NetworkInterface& interface)
 {
     Poco::Net::IPAddress address = interface.address();
-    
+
     return address.isLoopback();
 }
 
@@ -232,7 +232,7 @@ void
 NetworkInterfaceManager::removeInterface(const std::string& name)
 {
     Poco::ScopedLock<Poco::Mutex> lock(_lock);
-    
+
     Log::instance()->net().information("removing network interface: " + name);
 
     // FIXME: erase interface from interface list.

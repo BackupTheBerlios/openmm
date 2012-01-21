@@ -51,7 +51,7 @@ class AbstractDataModel;
 class MediaServer : public Device
 /// Used by ServerApplication
 /// Provides a meta data server that can be browsed by CDS implementation through root media object,
-/// and a http server for streaming server item resources
+/// and a http server for streaming server object resources
 {
     friend class ItemRequestHandler;
     friend class ServerObject;

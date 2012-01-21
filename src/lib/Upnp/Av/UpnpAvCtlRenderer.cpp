@@ -34,7 +34,8 @@ namespace Av {
 
 CtlMediaRenderer::CtlMediaRenderer() :
 _pCurrentMediaObject(0),
-_usePlaylistResource(false)
+//_usePlaylistResource(false)
+_usePlaylistResource(true)
 {
 }
 
@@ -83,7 +84,9 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
         writer.write(metaData, pParentObject);
         try {
             _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pContainerRes->getUri(), metaData);
-            // TODO: skip to row with AVTransport()->Seek()
+            Variant seekTarget;
+            seekTarget.setValue(row);
+            _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_TRACK_NR, seekTarget.getValue());
         }
         catch (Poco::Exception e) {
 //            error(e.message());
