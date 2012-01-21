@@ -319,7 +319,6 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
         // TODO: does it make sense to handle "PAUSED_PLAYBACK", too?
         Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() seek mode: " + Unit + ", seek target: " + Target);
 
-        ui4 position;
         if (Unit == AvTransportArgument::SEEK_MODE_TRACK_NR) {
             Variant track(Target);
             ui4 trackNumber;
@@ -327,7 +326,7 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
             _engines[InstanceID]->seekTrack(trackNumber);
         }
         else if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
-            position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
+            ui4 position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
             _engines[InstanceID]->seekSecond(position);
             // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
             //       TransportState should be set to TRANSITIONING, but only while seeking.
@@ -344,18 +343,26 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
 void
 DevAVTransportRendererImpl::Next(const ui4& InstanceID)
 {
-// begin of your own code
+    std::string transportState = _engines[InstanceID]->transportState();
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Next() enters in state: " + transportState);
 
-// end of your own code
+    if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
+        || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        _engines[InstanceID]->nextTrack();
+    }
 }
 
 
 void
 DevAVTransportRendererImpl::Previous(const ui4& InstanceID)
 {
-// begin of your own code
+    std::string transportState = _engines[InstanceID]->transportState();
+    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Previous() enters in state: " + transportState);
 
-// end of your own code
+    if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
+        || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        _engines[InstanceID]->previousTrack();
+    }
 }
 
 

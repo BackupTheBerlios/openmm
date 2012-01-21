@@ -1046,7 +1046,7 @@ ServerContainer::generateChildrenPlaylist()
     }
     Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
 
-
+// solely AbstractDataModel based retrieval of indices:
 //    if (!_pDataModel) {
 //        // currently, only server containers with data models are handled
 //        Log::instance()->upnpav().error("server container without data model, can not generate playlist");
@@ -1379,6 +1379,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
 void
 DatabaseCache::getIndices(std::vector<ui4>& indices, const std::string& sort)
 {
+    // TODO: execute same query as in getBlockAtRow(), depending on _layout and sort.
     try {
         *_pSession << "SELECT idx FROM " + _cacheTableName + " WHERE class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"", Poco::Data::into(indices), Poco::Data::now;
     }

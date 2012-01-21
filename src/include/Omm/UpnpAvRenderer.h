@@ -70,6 +70,8 @@ public:
     virtual void stop() = 0;
 
     void seekTrack(ui4 trackNumber);
+    void nextTrack();
+    void previousTrack();
     virtual void seekByte(Poco::UInt64 byte) = 0;
     virtual void seekPercentage(float percentage) = 0;
     virtual void seekSecond(float second) = 0;

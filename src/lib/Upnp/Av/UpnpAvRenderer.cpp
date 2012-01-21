@@ -126,6 +126,28 @@ Engine::seekTrack(ui4 trackNumber)
 }
 
 
+void
+Engine::nextTrack()
+{
+    if (_trackNumberInPlaylist + 1 < _playlist.size()) {
+        _trackNumberInPlaylist++;
+        Omm::Av::Log::instance()->upnpav().debug("engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
+        setUri(_playlist[_trackNumberInPlaylist]);
+    }
+}
+
+
+void
+Engine::previousTrack()
+{
+    if (_trackNumberInPlaylist - 1 >= 0) {
+        _trackNumberInPlaylist--;
+        Omm::Av::Log::instance()->upnpav().debug("engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
+        setUri(_playlist[_trackNumberInPlaylist]);
+    }
+}
+
+
 const std::string&
 Engine::transportState()
 {
