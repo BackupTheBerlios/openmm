@@ -1018,60 +1018,56 @@ ServerContainer::generateChildrenPlaylist()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
-    if (!_pObjectCache) {
+    if (_pObjectCache) {
+        int i = 0;
+        int maxLogEntries = 5;
+        std::string playlistLog;
+        std::vector<ui4> indices;
+        _pObjectCache->getIndices(indices);
+        for (std::vector<ui4>::iterator it = indices.begin(); it != indices.end(); ++it, ++i) {
+            std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format(*it) + "$0" + Poco::LineEnding::NEWLINE_LF;
+            _childrenPlaylist << playlistEntry;
+            _childrenPlaylistSize += playlistEntry.size();
+
+            if (i == maxLogEntries) {
+                playlistLog += "..." + Poco::LineEnding::NEWLINE_DEFAULT;
+            }
+            if (indices.size() < maxLogEntries || i < maxLogEntries) {
+                playlistLog += playlistEntry;
+            }
+            else if (i >= indices.size() - maxLogEntries) {
+                playlistLog += playlistEntry;
+            }
+        }
+        Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+    }
+    else if (_pDataModel) {
+// solely AbstractDataModel based retrieval of indices:
+        int i = 0;
+        int maxLogEntries = 5;
+        std::string playlistLog;
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it, ++i) {
+            std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format((*it).first) + "$0" + Poco::LineEnding::NEWLINE_LF;
+            _childrenPlaylist << playlistEntry;
+            _childrenPlaylistSize += playlistEntry.size();
+
+            if (i == maxLogEntries) {
+                playlistLog += "..." + Poco::LineEnding::NEWLINE_DEFAULT;
+            }
+            if (_pDataModel->getIndexCount() < maxLogEntries || i < maxLogEntries) {
+                playlistLog += playlistEntry;
+            }
+            else if (i >= _pDataModel->getIndexCount() - maxLogEntries) {
+                playlistLog += playlistEntry;
+            }
+        }
+        Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+    }
+    else {
         // currently, only server containers with object caches are handled
-        Log::instance()->upnpav().error("server container without data model, can not generate playlist");
+        Log::instance()->upnpav().error("server container without object cache or data model, can not generate playlist");
         return 0;
     }
-
-    int i = 0;
-    int maxLogEntries = 5;
-    std::string playlistLog;
-    std::vector<ui4> indices;
-    _pObjectCache->getIndices(indices);
-    for (std::vector<ui4>::iterator it = indices.begin(); it != indices.end(); ++it, ++i) {
-        std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format(*it) + "$0" + Poco::LineEnding::NEWLINE_LF;
-        _childrenPlaylist << playlistEntry;
-        _childrenPlaylistSize += playlistEntry.size();
-
-        if (i == maxLogEntries) {
-            playlistLog += "..." + Poco::LineEnding::NEWLINE_DEFAULT;
-        }
-        if (indices.size() < maxLogEntries || i < maxLogEntries) {
-            playlistLog += playlistEntry;
-        }
-        else if (i >= indices.size() - maxLogEntries) {
-            playlistLog += playlistEntry;
-        }
-    }
-    Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
-
-// solely AbstractDataModel based retrieval of indices:
-//    if (!_pDataModel) {
-//        // currently, only server containers with data models are handled
-//        Log::instance()->upnpav().error("server container without data model, can not generate playlist");
-//        return 0;
-//    }
-//
-//    int i = 0;
-//    int maxLogEntries = 5;
-//    std::string playlistLog;
-//    for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it, ++i) {
-//        std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format((*it).first) + "$0" + Poco::LineEnding::NEWLINE_LF;
-//        _childrenPlaylist << playlistEntry;
-//        _childrenPlaylistSize += playlistEntry.size();
-//
-//        if (i == maxLogEntries) {
-//            playlistLog += "..." + Poco::LineEnding::NEWLINE_DEFAULT;
-//        }
-//        if (_pDataModel->getIndexCount() < maxLogEntries || i < maxLogEntries) {
-//            playlistLog += playlistEntry;
-//        }
-//        else if (i >= _pDataModel->getIndexCount() - maxLogEntries) {
-//            playlistLog += playlistEntry;
-//        }
-//    }
-//    Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
 
     return &_childrenPlaylist;
 }

@@ -34,8 +34,8 @@ namespace Av {
 
 CtlMediaRenderer::CtlMediaRenderer() :
 _pCurrentMediaObject(0),
-//_usePlaylistResource(false)
-_usePlaylistResource(true)
+_usePlaylistResource(false)
+//_usePlaylistResource(true)
 {
 }
 
