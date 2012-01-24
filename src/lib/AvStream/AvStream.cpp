@@ -180,13 +180,13 @@ ByteQueue::readSome(char* buffer, int num)
         _readCondition.wait<Poco::FastMutex>(_lock);
         Log::instance()->avstream().trace("byte queue readSome() wait over, now reading " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     }
-    
+
     int bytesRead = (_level < num) ? _level : num;
     _ringBuffer.read(buffer, bytesRead);
     _level -= bytesRead;
-    
+
     Log::instance()->avstream().trace("byte queue readSome() read " + Poco::NumberFormatter::format(bytesRead) + " bytes, level: " + Poco::NumberFormatter::format(_level));
-    
+
     // we've read some bytes, so we can put something in, again
     if (_level < _size) {
         _writeCondition.broadcast();
@@ -206,13 +206,13 @@ ByteQueue::writeSome(const char* buffer, int num)
         _writeCondition.wait<Poco::FastMutex>(_lock);
         Log::instance()->avstream().trace("byte queue writeSome() wait over, now writing " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     }
-    
+
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
     _ringBuffer.write(buffer, bytesWritten);
     _level += bytesWritten;
-    
+
     Log::instance()->avstream().trace("byte queue writeSome() wrote " + Poco::NumberFormatter::format(bytesWritten) + " bytes, level: " + Poco::NumberFormatter::format(_level));
-    
+
     // we've written some bytes, so we can get something out, again
     if (_level > 0) {
         _readCondition.broadcast();
@@ -383,7 +383,7 @@ Stream::getFrame()
 void
 Stream::putFrame(Frame* pFrame)
 {
-    if (!pFrame) { 
+    if (!pFrame) {
         Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] put null frame, discarding frame");
     }
     else if (!_pStreamQueue) {
@@ -448,7 +448,7 @@ StreamInfo::decodeFrame(Frame* pFrame)
         Log::instance()->avstream().warning("input frame broken while decoding stream " + getName() + ", discarding frame.");
         return 0;
     }
-    
+
     Frame* pDecodedFrame = 0;
     if (isAudio()) {
         pDecodedFrame = decodeAudioFrame(pFrame);
@@ -524,10 +524,10 @@ void
 Node::stop()
 {
     Log::instance()->avstream().debug(getName() + " stopping run thread ...");
-    
+
     initiateStop();
     waitForStop();
-    
+
     Log::instance()->avstream().debug(getName() + " run thread stopped.");
 }
 
@@ -580,7 +580,7 @@ Node::waitForStop()
     }
     setStop(false);
     Log::instance()->avstream().debug(getName() + " run thread joined.");
-    
+
     // then wait for all nodes downstream to stop
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
@@ -605,7 +605,7 @@ Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
         Log::instance()->avstream().warning(getName() + ": could not attach null node");
         return;
     }
-    
+
     // entwine StreamInfo and StreamQueue of inStream and outStream
     // TODO: improve warning messages
     if (!_outStreams[outStreamNumber]) {
@@ -624,12 +624,12 @@ Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
         Log::instance()->avstream().warning(getName() + ": could not attach ..., downstream node input stream has no queue");
         return;
     }
-    
+
     _outStreams[outStreamNumber]->setQueue(node->_inStreams[inStreamNumber]->getQueue());
     node->_inStreams[inStreamNumber]->setInfo(_outStreams[outStreamNumber]->getInfo());
-    
+
     Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] attached node " + node->getName() + " [" + Poco::NumberFormatter::format(inStreamNumber) + "]");
-    
+
     Log::instance()->avstream().debug("calling init() of " + node->getName());
     bool initSuccess = node->init();
     if (initSuccess) {
@@ -650,7 +650,7 @@ Node::detach(int outStreamNumber)
         return;
     }
     Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] detached node " + _outStreams[outStreamNumber]->getQueue()->getNode()->getName());
-    
+
     // lazy strategie: only set queue of outStream to 0, so no frames are put into the queue anymore
     // the attached node empties the queue with a valid stream context (StreamInfo) and blocks
     // without being connected to anything
@@ -810,9 +810,9 @@ void
 Frame::writePpm(const std::string& fileName)
 {
     Log::instance()->avstream().debug("write video frame to PPM file name: " + fileName);
-    
+
     Frame* pRes = convert(Meta::CC_RGB24);
-    
+
     std::ofstream ppmFile(fileName.c_str());
     // write PPM header
     ppmFile << "P6\n" << getStreamInfo()->width() << " " << getStreamInfo()->height() << "\n" << 255 << "\n";
@@ -864,7 +864,7 @@ Demuxer::init()
         pStream->setInfo(_pMeta->streamInfo(streamNr));
 //         pStream->setNode(this);
         pStream->setQueue(0);
-        
+
         //////////// find first audio and video stream ////////////
         if (pStream->getInfo()->isAudio()) {
             Log::instance()->avstream().information("found audio stream #" + Poco::NumberFormatter::format(streamNr));
@@ -896,7 +896,7 @@ Demuxer::reset()
         delete _pMeta;
     }
     _pMeta = 0;
-    
+
     for(std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
         delete *it;
     }
@@ -912,21 +912,21 @@ void
 Demuxer::run()
 {
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread started.");
-    
+
     std::vector<Poco::Int64> lastPtsVec(_outStreams.size(), Meta::invalidPts);
     std::vector<int> lastDurationVec(_outStreams.size(), 0);
-    
+
     while (!getStop()) {
         Frame* pFrame = _pMeta->readFrame();
         int streamIndex = pFrame->streamIndex();
-        
+
         if (pFrame->isEndOfStream()) {
             for(std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it) {
                 (*it)->putFrame(pFrame);
             }
             break;
         }
-        
+
         if (!_outStreams[streamIndex]->getQueue()) {
             Log::instance()->avstream().warning(getName() + " stream " + Poco::NumberFormatter::format(streamIndex) + " not connected, discarding packet");
             delete pFrame;
@@ -937,7 +937,7 @@ Demuxer::run()
         // create means: make a copy of the data buffer and delete the packet
 //         Frame* pFrame = new Frame(frameNumber, _outStreams[packet.stream_index], &packet);
 //         pFrame->setPts(packet.pts);
-        
+
         // try to correct wrong packet.pts
         // this relies on a correct packet.duration
         // (pts or duration, one of them must be right, otherwise we are lost, especially with variable frame rate)
@@ -950,7 +950,7 @@ Demuxer::run()
         pFrame->setPts(correctedPts);
         lastPtsVec[streamIndex] = correctedPts;
         lastDurationVec[streamIndex] = pFrame->duration();
-        
+
         _outStreams[streamIndex]->putFrame(pFrame);
     }
     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
@@ -974,15 +974,15 @@ Demuxer::firstVideoStream()
 Poco::Int64
 Demuxer::correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration)
 {
-    // OK, this is the place for black magic. 
+    // OK, this is the place for black magic.
     // Everything would be fine, if pts and duration
     // would be in perfect harmony and pts would always be monotone ...
     // but this isn't the case, and we rely on two assumptions here:
     // 1. all frames are in correct order
     // 2. duration of frames is correct
-    // 
+    //
     //     In general, there seem to be "seven symptoms of sick streams"
-    //     
+    //
     //     pts related (all corrected in synchronizer):
     //     1a. pts number overflow
     //     ->  set flag Frame::numberOverflow = true
@@ -996,16 +996,16 @@ Demuxer::correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration)
     //     -> discard packets until max_of_streams(pts first packet of stream)
     //     5. packet loss (pts not linear) (-> 1b pts jump)
     //     -> inject blank frame (set Frame::_display = false)
-    //     
+    //
     //     not pts related:
     //     6. decoding error
     //     -> set flag Frame::_display = false
     //     7. clock drift
     //     -> correct drift or one clock source (watch for cumulating drift when using timers)
-    //     
-    
+    //
+
     Poco::Int64 correctedPts;
-    
+
     if (lastPts != Meta::invalidPts && pts != Meta::invalidPts) {
         if (lastDuration > 0 && pts != lastPts + lastDuration) {
             correctedPts = lastPts + lastDuration;
@@ -1013,7 +1013,7 @@ Demuxer::correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration)
         else {
             correctedPts = pts;
         }
-        
+
     }
     else if (lastPts == Meta::invalidPts && pts != Meta::invalidPts) {
         correctedPts = pts;
@@ -1029,7 +1029,7 @@ Demuxer::correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration)
     else { // lastPts && packet.pts == Meta::invalidPts
         correctedPts = pts;
     }
-    
+
     return correctedPts;
 }
 
@@ -1043,13 +1043,13 @@ Demuxer::correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration)
 //     _inStreams.push_back(new Stream(this));
 //     _inStreams[0]->setInfo(0);
 //     _inStreams[0]->setQueue(new StreamQueue(this));
-//     
+//
 //     _inStreams.push_back(new Stream(this));
 //     _inStreams[1]->setInfo(0);
 //     _inStreams[1]->setQueue(new StreamQueue(this));
-//     
+//
 //     // and no output stream
-//     
+//
 //     Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::avformat_alloc_context()");
 //     _pMeta->_pFormatContext = avformat_alloc_context();
 // }
@@ -1070,7 +1070,7 @@ Muxer::~Muxer()
 //     // TODO: check for max uri length supported by ffmpeg (currently 1024 ...?)
 //     _uri.copy(_pMeta->_pFormatContext->filename, _uri.size());
 //     _pMeta->_pFormatContext->filename[_uri.size()] = '\0';
-//     
+//
 //     if (av_set_parameters(_pMeta->_pFormatContext, 0) < 0) {
 //         Omm::AvStream::Log::instance()->avstream().error("invalid output format parameters");
 //         return;
@@ -1102,9 +1102,9 @@ Muxer::reset()
 //         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, could not find codec");
 //         return false;
 //     }
-//     
+//
 //     _inStreams[streamNumber]->setInfo(_inStreams[streamNumber]->getInfo()->cloneOutStreamInfo(_pMeta, streamNumber));
-//     
+//
 //     if (!_inStreams[streamNumber]->getInfo()->findEncoder()) {
 //         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, could not find encoder");
 //         return false;
@@ -1120,7 +1120,7 @@ Muxer::reset()
 //         Log::instance()->avstream().warning(getName() + " init failed, two input streams must be connected");
 //         return false;
 //     }
-//     
+//
 //     if (_inStreams[0]->getInfo() && _inStreams[1]->getInfo()) {
 //         if (!prepareOutStream(0)) {
 //             return false;
@@ -1128,16 +1128,16 @@ Muxer::reset()
 //         if (!prepareOutStream(1)) {
 //             return false;
 //         }
-//         
+//
 //         _pMeta->print(true);
-//         
+//
 //         Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::url_fopen()");
 //         url_fopen(&_pMeta->_pFormatContext->pb, _uri.c_str(), URL_WRONLY);
-//         
+//
 //         Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::av_write_header()");
 //         av_write_header(_pMeta->_pFormatContext);
 //     }
-//     
+//
 //     return true;
 // }
 
@@ -1146,12 +1146,12 @@ Muxer::reset()
 // Muxer::run()
 // {
 //     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread started.");
-//     
+//
 //     while (!getStop()) {
 //         // FIXME: handle packet number wrap in muxer
 //         Frame* pFirstStreamFrame = _inStreams[0]->getFrame();
 //         Frame* pSecondStreamFrame = _inStreams[1]->getFrame();
-//         
+//
 //         while (pSecondStreamFrame->getNumber() < pFirstStreamFrame->getNumber())
 //         {
 //             // FIXME: segfault (floating point exception) in av_write_frame()
@@ -1162,7 +1162,7 @@ Muxer::reset()
 // //             delete pSecondStreamFrame;
 //             pSecondStreamFrame = _inStreams[1]->getFrame();
 //         }
-//         
+//
 //         while (pFirstStreamFrame->getNumber() < pSecondStreamFrame->getNumber())
 //         {
 //             Log::instance()->avstream().debug(getName() + " write frame " + pFirstStreamFrame->getName());
@@ -1180,7 +1180,8 @@ Muxer::reset()
 
 const Poco::Int64 Meta::invalidPts = INT64_C(0x8000000000000000);
 
-Meta::Meta()
+Meta::Meta() :
+_isPlaylist(false)
 {
 }
 
@@ -1200,6 +1201,9 @@ Meta::~Meta()
 Meta::ContainerFormat
 Meta::getContainerFormat()
 {
+    if (_isPlaylist) {
+        return Omm::AvStream::Meta::CF_PLAYLIST;
+    }
     bool hasAudio = false;
     bool hasVideo = false;
     for (int i = 0; i < numberStreams(); i++) {
@@ -1372,6 +1376,13 @@ Meta::streamInfo(int streamNumber)
 }
 
 
+void
+Meta::setIsPlaylist(bool isPlaylist)
+{
+    _isPlaylist = isPlaylist;
+}
+
+
 Sink::Sink(const std::string& name) :
 Node(name),
 _timeQueue(name + " timer", 10),
@@ -1381,7 +1392,7 @@ _firstDecodeSuccess(false)
     _inStreams.push_back(new Omm::AvStream::Stream(this));
     _inStreams[0]->setInfo(0);
     _inStreams[0]->setQueue(new Omm::AvStream::StreamQueue(this));
-    
+
     // and no output stream
 }
 
@@ -1397,7 +1408,7 @@ Sink::init()
         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, could not find codec");
         return false;
     }
-    
+
     return checkInStream() && initDevice();
 }
 
@@ -1406,7 +1417,7 @@ void
 Sink::run()
 {
     Log::instance()->avstream().debug(getName() + " run thread started.");
-    
+
     if (!_inStreams[0]->getQueue()) {
         Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
         return;
@@ -1455,7 +1466,7 @@ void
 Sink::currentTime(Poco::Int64 time)
 {
     Log::instance()->avstream().trace(getName() + " received current time: " + Poco::NumberFormatter::format(time));
-    
+
     _timeQueue.put(time);
 }
 
@@ -1489,7 +1500,7 @@ AudioSink::checkInStream()
         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, input stream is not an audio stream");
         return false;
     }
-    
+
     return true;
 }
 
@@ -1654,7 +1665,7 @@ void
 AudioSink::setStartTime(Poco::Int64 startTime, bool toFirstFrame)
 {
     Log::instance()->avstream().debug(getName() + " audio start time: " + Poco::NumberFormatter::format(_startTime) + ", clock start time: " + Poco::NumberFormatter::format(startTime) + ".");
-    
+
     if (startTime < _startTime) {
         // TODO: insert silence until _startTime ...?
         Log::instance()->avstream().warning(getName() + " start time is later than CLOCK start time, should insert silence.");
@@ -1665,7 +1676,7 @@ AudioSink::setStartTime(Poco::Int64 startTime, bool toFirstFrame)
         // round discardSize to a multiple of sample size
         discardSize = (discardSize >> 2) << 2;
         char discardBuffer[discardSize];
-        
+
         Log::instance()->avstream().debug(getName() + " start time is earlier than CLOCK start time, discarding " + Poco::NumberFormatter::format(discardSize) + " bytes.");
         audioReadBlocking(discardBuffer, discardSize);
     }
@@ -1705,7 +1716,7 @@ VideoSink::checkInStream()
         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, input stream is not a video stream");
         return false;
     }
-    
+
     return true;
 }
 
@@ -1720,7 +1731,7 @@ void
 VideoSink::startPresentation()
 {
     Log::instance()->avstream().debug(getName() + " starting timer thread ...");
-    
+
     _timerThread.start(_timerThreadRunnable);
 }
 
@@ -1729,7 +1740,7 @@ void
 VideoSink::stopPresentation()
 {
     Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
-    
+
     setTimerStop(true);
 
     if (_timeQueue.full()) {
@@ -1783,7 +1794,7 @@ VideoSink::timerThread()
                                           Poco::NumberFormatter::format(time));
         onTick(time);
     }
-    
+
     Log::instance()->avstream().debug(getName() + " timer thread finished.");
 }
 
@@ -1860,7 +1871,7 @@ VideoSink::displayRect(int& x, int& y, int& w, int& h)
     }
     x = (displayWidth() - w) / 2;
     y = (displayHeight() - h) / 2;
-    
+
     if (_lastAspectRatio != ar) {
         blankDisplay();
     }
@@ -1901,12 +1912,12 @@ void
 VideoSink::onTick(Poco::Int64 time)
 {
     Overlay* pOverlay = _overlayQueue.front();
-    
+
     if (!pOverlay) {
         Omm::AvStream::Log::instance()->avstream().warning("null video frame in overlay queue, ignoring");
         return;
     }
-    
+
     Poco::Int64 framePts = pOverlay->_pts;
     Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format((framePts - time)));
 
@@ -1966,7 +1977,7 @@ Clock::attachAudioSink(AudioSink* pAudioSink)
 {
     _audioSinkVec.push_back(pAudioSink);
     pAudioSink->_pClock = this,
-    
+
     Log::instance()->avstream().debug("CLOCK attached " +
         pAudioSink->getName());
 }
@@ -1976,7 +1987,7 @@ void
 Clock::attachVideoSink(VideoSink* pVideoSink)
 {
     _videoSinkVec.push_back(pVideoSink);
-    
+
     Log::instance()->avstream().debug("CLOCK attached " +
         pVideoSink->getName());
 }
@@ -1986,7 +1997,7 @@ void
 Clock::setStartTime(bool toFirstFrame)
 {
     Poco::Int64 startTime = Meta::invalidPts;
-    
+
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         Poco::Int64 time = (*it)->_timeQueue.get();
         Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
@@ -2012,7 +2023,7 @@ Clock::setStartTime(bool toFirstFrame)
         }
     }
     Log::instance()->avstream().debug("CLOCK setting start time to: " + Poco::NumberFormatter::format(startTime));
-    
+
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->setStartTime(startTime, toFirstFrame);
     }
@@ -2021,7 +2032,7 @@ Clock::setStartTime(bool toFirstFrame)
     }
     _streamTime = startTime;
     _systemTime.update();
-    
+
     Log::instance()->avstream().debug("CLOCK start time set.");
 }
 
@@ -2055,7 +2066,7 @@ Clock::clockTick(Poco::Timer& timer)
 
         Log::instance()->avstream().debug("CLOCK TICK " + Poco::NumberFormatter::format(_streamTime) + ", since last tick: " +
              Poco::NumberFormatter::format((_streamTime - lastTick)));
-        
+
         for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
             (*it)->currentTime(_streamTime);
         }

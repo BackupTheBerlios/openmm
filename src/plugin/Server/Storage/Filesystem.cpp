@@ -186,6 +186,9 @@ FileModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFo
         case Omm::AvStream::Meta::CF_IMAGE:
             pItem->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::IMAGE_ITEM));
             break;
+        case Omm::AvStream::Meta::CF_PLAYLIST:
+            pItem->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::PLAYLIST_ITEM));
+            break;
     }
 }
 

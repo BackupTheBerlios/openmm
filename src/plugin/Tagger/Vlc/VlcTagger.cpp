@@ -33,6 +33,7 @@
 #endif
 
 #include <Omm/AvStream.h>
+#include <Poco/String.h>
 
 #include "VlcTagger.h"
 #include "Omm/UpnpAvObject.h"
@@ -150,7 +151,7 @@ VlcTagger::tag(const std::string& uri)
     // thus we make a simple filename based media type detection
     Poco::Path path(uri);
     // try to get a filename extension for type of media
-    std::string extension = path.getExtension();
+    std::string extension = Poco::toLower(path.getExtension());
 //    Omm::Av::Log::instance()->upnpav().debug("vlc tagger extension: " + extension);
 
     Omm::AvStream::Meta::ContainerFormat containerFormat = Omm::AvStream::Meta::CF_UNKNOWN;
@@ -174,6 +175,10 @@ VlcTagger::tag(const std::string& uri)
         pMeta->_mime = Omm::Av::Mime::TYPE_IMAGE;
         containerFormat = Omm::AvStream::Meta::CF_IMAGE;
     }
+    else if (extension == "m3u") {
+        pMeta->_mime = Omm::Av::Mime::PLAYLIST;
+        containerFormat = Omm::AvStream::Meta::CF_PLAYLIST;
+    }
 
     if (containerFormat == Omm::AvStream::Meta::CF_AUDIO) {
         pMeta->_isStillImage = false;
@@ -195,6 +200,9 @@ VlcTagger::tag(const std::string& uri)
         pStreamInfo->_isAudio = false;
         pStreamInfo->_isVideo = false;
         pMeta->addStream(pStreamInfo);
+    }
+    else if (containerFormat == Omm::AvStream::Meta::CF_PLAYLIST) {
+        pMeta->setIsPlaylist(true);
     }
 
     return pMeta;

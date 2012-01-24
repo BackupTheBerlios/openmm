@@ -63,12 +63,12 @@ class Log
 {
 public:
     static Log* instance();
-    
+
     Poco::Logger& avstream();
-    
+
 private:
     Log();
-    
+
     static Log*     _pInstance;
     Poco::Logger*   _pAvStreamLogger;
 };
@@ -79,7 +79,7 @@ class RingBuffer
 public:
     RingBuffer(int size);
     ~RingBuffer();
-    
+
     /**
     NOTE: this is no generic implemenation of a ring buffer:
     1. read() and write() don't check if num > size
@@ -88,9 +88,9 @@ public:
     **/
     void read(char* buffer, int num);
     void write(const char* buffer, int num);
-    
+
     void clear();
-    
+
 private:
     char*                   _ringBuffer;
     char*                   _readPos;
@@ -106,27 +106,27 @@ class ByteQueue
 {
 public:
     ByteQueue(int size);
-    
+
     /**
     read() and write() block until num bytes have been read or written
     **/
     void read(char* buffer, int num);
     void write(const char* buffer, int num);
-    
+
     /**
     readSome() and writeSome() read upto num bytes, return the number of bytes read
     and block if queue is empty / full
     **/
     int readSome(char* buffer, int num);
     int writeSome(const char* buffer, int num);
-    
+
     int size();
     int level();
     void clear();
-    
+
     bool full();
     bool empty();
-    
+
 private:
     RingBuffer              _ringBuffer;
     int                     _size;
@@ -146,8 +146,8 @@ public:
         _size(size)
     {
     }
-    
-    
+
+
     void put(T element)
     {
         _queueLock.lock();
@@ -158,8 +158,8 @@ public:
         _getCondition.broadcast();
         _queueLock.unlock();
     }
-    
-    
+
+
     T get()
     {
         _queueLock.lock();
@@ -172,8 +172,8 @@ public:
         _queueLock.unlock();
         return ret;
     }
-    
-    
+
+
     T front()
     {
         Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
@@ -182,50 +182,50 @@ public:
         }
         return _queue.front();
     }
-    
-    
+
+
     const int count()
     {
         Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
         return _queue.size();
     }
-    
-    
+
+
     const bool full()
     {
         Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
         return _queue.size() == _size;
     }
-    
-    
+
+
     const bool empty()
     {
         Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
         return _queue.size() == 0;
     }
-    
-    
+
+
     const std::string& getName()
     {
         Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
         return _name;
     }
-    
-    
+
+
     void clear()
     {
         while (_queue.size()) {
             get();
         }
     }
-    
+
 private:
     std::string             _name;
     Poco::FastMutex         _nameLock;
     std::queue<T>           _queue;
     Poco::FastMutex         _queueLock;
     int                     _size;
-    
+
     Poco::Condition         _putCondition;
     Poco::Condition         _getCondition;
 };
@@ -235,9 +235,9 @@ class StreamQueue : public Queue<Frame*>
 {
 public:
     StreamQueue(Node* pNode, int size = 100);
-    
+
     Node* getNode();
-    
+
 private:
     Node*       _pNode;
 };
@@ -249,17 +249,18 @@ class Meta
     friend class StreamInfo;
     friend class Demuxer;
     friend class Muxer;
-    
+
 public:
     virtual ~Meta();
-    
+
     enum ContainerFormat {
         CF_UNKNOWN = 0,
         CF_AUDIO,
         CF_VIDEO,
-        CF_IMAGE
+        CF_IMAGE,
+        CF_PLAYLIST
     };
-    
+
     enum TagKey {
         TK_TITLE = 0,
         TK_ALBUM,
@@ -268,7 +269,7 @@ public:
         TK_GENRE,
         TK_TRACK
     };
-    
+
     enum ColorCoding {
         CC_NONE = -1,
         CC_YUV420P,   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
@@ -325,9 +326,9 @@ public:
         CC_VAAPI_VLD,  ///< HW decoding through VA API, Picture.data[0] contains a vaapi_render_state struct which contains the bitstream of the slices as well as various fields extracted from headers
         CC_NB,        ///< number of pixel formats, DO NOT USE THIS if you want to link with shared libav* because the number of formats might differ between versions
     };
-    
+
     static const Poco::Int64 invalidPts;
-    
+
     virtual Frame* readFrame() {}
     // FIXME: this should be generic code, using the tags determined by Tagger::tag() and stored in Meta
     virtual void print(bool isOutFormat = false) {}
@@ -339,10 +340,11 @@ public:
     int numberStreams();
     void addStream(StreamInfo* pStreamInfo);
     StreamInfo* streamInfo(int streamNumber);
-    
+    void setIsPlaylist(bool isPlaylist = true);
+
 protected:
     Meta();
-    
+
     std::string getTag(const std::string& key1);
     std::string getTag(const std::string& key1, const std::string& key2);
     std::string getTag(const std::string& key1, const std::string& key2, const std::string& key3);
@@ -353,6 +355,7 @@ protected:
 private:
     std::vector<StreamInfo*>            _streamInfos;
     std::map<std::string,std::string>   _tags;
+    bool                                _isPlaylist;
 };
 
 
@@ -371,10 +374,10 @@ class StreamInfo
     friend class Muxer;
     friend class Frame;
     friend class Sink;
-    
+
 public:
     virtual ~StreamInfo();
-    
+
     virtual bool isAudio() = 0;
     virtual bool isVideo() = 0;
     virtual bool findCodec() = 0;
@@ -385,7 +388,7 @@ public:
     virtual int sampleSize() = 0;
     virtual unsigned int sampleRate() = 0;
     virtual int channels() = 0;
-    
+
     // video parameters
     virtual int width() = 0;
     virtual int height() = 0;
@@ -399,7 +402,7 @@ public:
     void printInfo();
     Poco::Int64 newFrameNumber();
     Frame* decodeFrame(Frame* pFrame);
-    
+
 protected:
     StreamInfo(const std::string name = "avstream");
 
@@ -418,7 +421,7 @@ class Stream
     friend class Demuxer;
     friend class Frame;
     friend class Sink;
-    
+
 public:
     // TODO: in and out stream ctors (only in streams allocate a queue)
     virtual ~Stream();
@@ -426,10 +429,10 @@ public:
     Frame* firstFrame();
     Frame* getFrame();
     void putFrame(Frame* pFrame);
-    
+
     void setNode(Node* pNode);
     Node* getNode();
-    
+
     // TODO: extend this to handle more than one queue (tee stream)
     // getQueue(int queueNumber = 0)
     // addQueue(StreamQueue* pQueue, int queueNumber = 0)
@@ -450,7 +453,7 @@ private:
     StreamInfo*         _pStreamInfo;
     // _pStreamQueue always belongs to the input stream of a node
     StreamQueue*        _pStreamQueue;
-    
+
     Poco::FastMutex     _lock;
 };
 
@@ -459,33 +462,33 @@ class Node : Poco::Runnable
 {
 public:
     Node(const std::string& name = "avstream node");
-    
+
     std::string getName();
     void setName(const std::string& name);
-    
+
     void start();
     void stop();
-    
+
     void attach(Node* node, int outStreamNumber = 0, int inStreamNumber = 0);
     void detach(int outStreamNumber = 0);
-    
+
     Node* getDownstreamNode(int outStreamNumber = 0);
-    
-    
+
+
     Stream* getInStream(int inStreamNumber);
     Stream* getOutStream(int outStreamNumber);
-    
+
 protected:
     virtual bool init() { return true; }
     virtual void run() {}
-    
+
     void initiateStop();
     void waitForStop();
 
     bool getStop();
     void setStop(bool stop);
     void reset();
-    
+
     std::string                     _name;
     Poco::FastMutex                 _nameLock;
     std::vector<Stream*>            _inStreams;
@@ -504,16 +507,16 @@ public:
     Demuxer();
     void set(Meta* pMeta);
     void reset();
-    
+
     int firstAudioStream();
     int firstVideoStream();
 
 private:
     virtual bool init();
     virtual void run();
-    
+
     Poco::Int64 correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration);
-    
+
     Meta*       _pMeta;
     int         _firstAudioStream;
     int         _firstVideoStream;
@@ -530,17 +533,17 @@ class Muxer : public Node
 public:
 //     Muxer();
     ~Muxer();
-    
+
 //     void set(const std::string& uri = "mux.ts", const std::string& format = "mpegts");
     void set(std::ostream& ostr, const std::string& format = "mpegts");
     void reset();
-    
+
 private:
 //     virtual bool init();
 //     virtual void run();
-    
+
 //     bool prepareOutStream(int streamNumber);
-    
+
     Meta*           _pMeta;
     std::string     _uri;
 };
@@ -551,11 +554,11 @@ class Frame
     friend class Stream;
     friend class StreamInfo;
     friend class Muxer;
-    
+
 public:
     Frame(Poco::Int64 number, StreamInfo* pStreamInfo, bool endOfStream = false);
     virtual ~Frame();
-    
+
     virtual const char* data() { return 0; }
     virtual const int size() { return 0; }
     virtual char* planeData(int plane) { return 0; }
@@ -566,18 +569,18 @@ public:
     virtual void printInfo() {}
     virtual int streamIndex() { return -1; }
     virtual int duration() { return -1; }
-    
+
     bool isEndOfStream();
     std::string getName();
     const Poco::Int64 getNumber();
     void setNumber(Poco::Int64 frameNumber);
     const Poco::Int64 getPts();
     void setPts(Poco::Int64 pts);
-    
+
     StreamInfo* getStreamInfo();
-    
+
     void writePpm(const std::string& fileName);
-    
+
 private:
     // Frame must be a dynamic structure with three different "faces", determined at runtime.
     // because the stream type is dynamic: audio streams decode audio packets, same goes for video.
@@ -608,15 +611,15 @@ sinks in running phase:
 class Sink : public Node
 {
     friend class Clock;
-    
+
 public:
     Sink(const std::string& name = "sink");
     virtual ~Sink() {}
-    
+
     virtual void startPresentation() {}
     virtual void stopPresentation() {}
     virtual void waitPresentationStop() {}
-    
+
     void currentTime(Poco::Int64 time);
 
     void registerStreamEventObserver(const Poco::AbstractObserver* pObserver);
@@ -628,17 +631,17 @@ protected:
     virtual bool closeDevice() {}
     virtual void writeDecodedFrame(Frame* pDecodedFrame) {}
     virtual void stopSinkPresentation() {}
-    
+
     void reset();
 
     Queue<Poco::Int64>      _timeQueue;
     bool                    _firstDecodeSuccess;
     Poco::Int64             _startTime;
-    
+
 private:
     virtual bool init();
     virtual void run();
-    
+
     Poco::NotificationCenter    _streamEventNotifier;
 };
 
@@ -646,13 +649,13 @@ private:
 class AudioSink : public Sink
 {
     friend class Clock;
-    
+
 public:
     AudioSink(const std::string& name = "audio sink");
     virtual ~AudioSink();
-    
+
     void setStartTime(Poco::Int64 startTime, bool toFirstFrame);
-    
+
     // methods for the audio driver (public, so it can be called form C callbacks)
     bool audioAvailable();
     int audioRead(char* buffer, int size);
@@ -660,7 +663,7 @@ public:
     void initSilence(char* buffer, int size);
     void setVolume(float vol);
     virtual void setVolume(int channel, float vol) {}
-    
+
     void halfByteQueue();
     void clearByteQueue();
     void reset();
@@ -672,7 +675,7 @@ protected:
     int frameCount(int bytes);
     int byteCount(int frames);
     int silence();
-    
+
     ByteQueue                   _byteQueue;
 
 private:
@@ -681,7 +684,7 @@ private:
     virtual void stopSinkPresentation();
     void setVolume(char* buffer, int size);
     Poco::Int64 audioLength(Poco::Int64 bytes);
-    
+
     Poco::Int64                 _audioTime;
     float                       _volume;
     Poco::FastMutex             _volumeLock;
@@ -695,38 +698,38 @@ class VideoSink : public Sink
 {
     friend class Clock;
     friend class Overlay;
-    
+
 public:
     VideoSink(const std::string& name = "video sink",
          int width = 720, int height = 576, Meta::ColorCoding pixelFormat = Meta::CC_YUV420P,
          int overlayCount = 5, bool fullScreen = false);
-    
+
     virtual void openWindow(bool fullScreen, int width, int height) {}
     void reset();
-    
+
 protected:
     virtual void displayFrame(Overlay* pOverlay) {}
     virtual void blankDisplay() {}
     int getWidth();
     int getHeight();
     Meta::ColorCoding getFormat();
-    
+
     virtual int displayWidth();
     virtual int displayHeight();
-    
+
     void displayRect(int& x, int& y, int& w, int& h);
-    
-    
+
+
     int                         _overlayCount;
     std::vector<Overlay*>       _overlayVector;
     Queue<Overlay*>             _overlayQueue;
-    
+
     bool                        _timerQuit;
     bool                        _fullScreen;
     int                         _width;
     int                         _height;
     Meta::ColorCoding           _pixelFormat;
-    
+
 private:
     virtual bool checkInStream();
     void setStartTime(Poco::Int64 startTime);
@@ -735,17 +738,17 @@ private:
     virtual void waitPresentationStop();
     virtual void stopPresentation();
     virtual void stopSinkPresentation();
-    
+
     void onTick(Poco::Int64 time);
     void timerThread();
     void setTimerStop(bool stop);
     bool getTimerStop();
-    
+
     Poco::Thread                        _timerThread;
     Poco::RunnableAdapter<VideoSink>    _timerThreadRunnable;
     Poco::FastMutex                     _sinkLock;
     Poco::FastMutex                     _timerLock;
-    
+
     int                                 _writeOverlayNumber;
     float                               _lastAspectRatio;
 };
@@ -755,14 +758,14 @@ class Overlay
 {
 public:
     Overlay(VideoSink* pVideoSink, int width, int height);
-    
+
     int getWidth();
     int getHeight();
     Meta::ColorCoding getFormat();
-    
+
     uint8_t*        _data[4];
     int             _pitch[4];
-    
+
     VideoSink*      _pVideoSink;
     Poco::Int64     _pts;
     int             _width;
@@ -775,41 +778,41 @@ class Clock
 {
 public:
     Clock();
-    
+
     /** attachAudioSink() / attachVideoSink()
         pSink: pointer to sink, that receives the timing signals
     **/
     void attachAudioSink(AudioSink* pAudioSink);
     void attachVideoSink(VideoSink* pVideoSink);
-    
+
     void setStartTime(bool toFirstFrame = true);
-    
+
     /** setTime()
         sets clock's current stream time to currentTime and notifies sinks
     **/
     void setTime(Poco::Int64 currentTime);
-    
+
     // start clock
     void start();
     void stop();
     void reset();
-    
+
 private:
     void clockTick(Poco::Timer& timer);
-    
+
     // TODO: should Clock be able to sync more than one stream?
     // -> store a stream time for each stream
     Poco::Int64             _streamTime;  // stream current time in stream time base units [sec]
     float                   _streamBase;  // stream refresh rate in kHz ( = 1 / (time base * 1000))
     Poco::Timestamp         _systemTime;
-    
+
     Poco::Timer             _clockTimer;
     long                    _clockTick;
     long                    _clockTickStreamBase;
-    
+
     std::vector<AudioSink*> _audioSinkVec;
     std::vector<VideoSink*> _videoSinkVec;
-    
+
     Poco::FastMutex         _clockLock;
 };
 
