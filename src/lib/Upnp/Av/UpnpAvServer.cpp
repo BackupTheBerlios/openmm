@@ -1101,6 +1101,10 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         return;
     }
 
+    if (AvClass::matchClass(pObject->getClass(), AvClass::PLAYLIST_ITEM)) {
+        // create playlist container with list of indices that match the paths of m3u file (read in via getStream())
+    }
+
     // add resources
     std::string objectId = pObject->getId();
     std::string resourceUri = _pServer->getServerAddress() + "/" + objectId;
@@ -1337,6 +1341,10 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().warning("database cache get block executing query and moving to offset failed: " + e.displayText());
+    }
+    if (count == 0) {
+        // UPnP AV CDS specs, count == 0 then request all children
+        count = recordSet.rowCount();
     }
     for (ui4 r = 0; r < count; r++) {
         // get block
@@ -1682,6 +1690,10 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, 
         return 0;
     }
     ui4 r = 0;
+    if (count == 0) {
+        // UPnP AV CDS specs, count == 0 then request all children
+        count = getIndexCount();
+    }
     for (IndexIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
         if (r >= offset) {
             ServerObject* pObject = getMediaObject((*it).second);
