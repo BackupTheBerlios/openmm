@@ -255,7 +255,7 @@ public:
     std::stringstream* generateChildrenPlaylist();
 
 private:
-    virtual void initChild(ServerObject* pObject, ui4 index, bool fullInit = true);
+    virtual ServerObject* initChild(ServerObject* pObject, ui4 index, bool fullInit = true);
 
     void updateCacheThread();
     bool updateCacheThreadIsRunning();
@@ -267,6 +267,7 @@ private:
     std::string                                         _groupPropertyName;
     std::stringstream                                   _childrenPlaylist;
     std::size_t                                         _childrenPlaylistSize;
+    std::vector<ui4>                                    _childrenPlaylistIndices;
 
     Poco::FastMutex                                     _serverLock;
     CsvList                                             _searchCaps;

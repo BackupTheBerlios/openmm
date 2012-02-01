@@ -977,7 +977,7 @@ ServerContainer::getChildForIndex(ui4 index, bool init, bool isVirtual)
         pObject = _pDataModel->getMediaObject(path);
     }
     if (pObject) {
-        initChild(pObject, index, init);
+        pObject = initChild(pObject, index, init);
     }
     return pObject;
 }
@@ -1007,7 +1007,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
         childCount = _pDataModel->getBlockAtRow(children, offset, count, sort, search);
     }
     for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
-        initChild(*it, (*it)->getIndex());
+        *it = initChild(*it, (*it)->getIndex());
     }
     return childCount;
 }
@@ -1073,7 +1073,7 @@ ServerContainer::generateChildrenPlaylist()
 }
 
 
-void
+ServerObject*
 ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
 {
     Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index));
@@ -1098,11 +1098,37 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
 
     // for storing the object only in cache, stop decorating media object
     if (!fullInit) {
-        return;
+        return pObject;
     }
 
-    if (AvClass::matchClass(pObject->getClass(), AvClass::PLAYLIST_ITEM)) {
+    if (AvClass::matchClass(pObject->getClass(), AvClass::ITEM, AvClass::PLAYLIST_ITEM)) {
+        Log::instance()->upnpav().debug("server container, init child convert playlist item to playlist container");
         // create playlist container with list of indices that match the paths of m3u file (read in via getStream())
+        ServerContainer* pContainer = createMediaContainer();
+        pContainer->setTitle(pObject->getTitle());
+        pContainer->setIndex(pObject->getIndex());
+        ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pObject->getResource());
+        if (pResource) {
+            std::istream* pStream = pResource->getStream();
+            if (pStream) {
+                std::string parentPath = _pDataModel->getPath(pObject->getIndex());
+                if (parentPath != "") {
+                    parentPath = parentPath.substr(0, parentPath.size() - pObject->getTitle().size());
+                }
+                std::string line;
+                while (std::getline(*pStream, line)) {
+                    if (line[0] != '#') {
+                        std::string path = parentPath == "" ? line : parentPath + line;
+                        ui4 index = _pDataModel->getIndex(path);
+                        pContainer->_childrenPlaylistIndices.push_back(index);
+                        Log::instance()->upnpav().debug("index: " + Poco::NumberFormatter::format(index) + ", path: " + line);
+                    }
+                }
+            }
+        }
+
+        delete pObject;
+        pObject = pContainer;
     }
 
     // add resources
@@ -1125,6 +1151,8 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
             }
         }
     }
+
+    return pObject;
 
 
 //    pObject->setId(pObject->getId());
@@ -1286,6 +1314,33 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     std::string whereClause = "";
     bool useParentIndex = false;
     bool virtualChildObjects = false;
+
+    if (pParentContainer->_childrenPlaylistIndices.size()) {
+        Log::instance()->upnpav().debug("database cache parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
+        for (ui4 r = offset; r < offset + count && r < pParentContainer->_childrenPlaylistIndices.size(); r++) {
+            std::vector<std::string> xml;
+            ui4 index = pParentContainer->_childrenPlaylistIndices[r];
+            try {
+                *_pSession << "SELECT xml FROM " + _cacheTableName + " WHERE idx = " + Poco::NumberFormatter::format(index),
+                        Poco::Data::into(xml), Poco::Data::now;
+            }
+            catch (Poco::Exception& e) {
+                Log::instance()->upnpav().error("database cache get object for index failed: " + e.displayText());
+            }
+            Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
+            if (xml.size() == 1) {
+                ServerObject* pObject = _pServerContainer->createMediaItem();
+                MediaObjectReader xmlReader;
+                xmlReader.read(pObject, MediaObjectWriter2::getXmlProlog() + xml[0]);
+                block.push_back(pObject);
+            }
+            else {
+                Log::instance()->upnpav().error("database cache get object for index reading meta data failed.");
+                break;
+            }
+        }
+        return pParentContainer->_childrenPlaylistIndices.size();
+    }
 
     if (search != "*") {
         whereClause += search;
