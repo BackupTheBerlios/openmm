@@ -1332,6 +1332,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
                 ServerObject* pObject = _pServerContainer->createMediaItem();
                 MediaObjectReader xmlReader;
                 xmlReader.read(pObject, MediaObjectWriter2::getXmlProlog() + xml[0]);
+                pObject->setIndex(index);
                 block.push_back(pObject);
             }
             else {
