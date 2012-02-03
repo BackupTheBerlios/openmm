@@ -645,9 +645,9 @@ ServerObject(pServer),
 //_pDataModel(0),
 _pObjectCache(0),
 _pVirtualContainerCache(0),
-_layout(Flat),
+//_layout(Flat),
 //_layout(DirStruct),
-//_layout(PropertyGroups),
+_layout(PropertyGroups),
 //_groupPropertyName(AvProperty::CLASS),
 _groupPropertyName(AvProperty::ARTIST),
 _childrenPlaylistSize(0),
@@ -694,6 +694,9 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
         _pVirtualContainerCache = new DatabaseCache("vconcache");
         _pVirtualContainerCache->_pServerContainer = this;
         _pVirtualContainerCache->addPropertiesForQuery(CsvList(PROPERTY_GROUP_PROPERTY_NAME, PROPERTY_GROUP_PROPERTY_VALUE));
+
+        _pUserObjectCache = new DatabaseCache("usrobj");
+        _pUserObjectCache->_pServerContainer = this;
     }
 }
 
@@ -787,6 +790,8 @@ ServerContainer::setBasePath(const std::string& basePath)
         std::string cacheFilePath = Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
         _pObjectCache->setCacheFilePath(cacheFilePath);
         _pVirtualContainerCache->setCacheFilePath(cacheFilePath);
+        std::string metaFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
+        _pUserObjectCache->setCacheFilePath(metaFilePath);
         updateCache();
     }
 }
@@ -938,20 +943,29 @@ ServerContainer::getChildForIndexString(const std::string& indexString)
     }
     else {
         ui4 index = AbstractDataModel::INVALID_INDEX;
-        bool isVirtual = (indexString.at(0) == 'v');
+        IndexNamespace indexNamespace = Data;
+        switch (indexString.at(0)) {
+            case 'v':
+                indexNamespace = Virtual;
+                break;
+            case 'u':
+                indexNamespace = User;
+                break;
+        }
+
         try {
-            index = Poco::NumberParser::parseUnsigned(isVirtual ? indexString.substr(1) : indexString);
+            index = Poco::NumberParser::parseUnsigned(indexNamespace == Data ? indexString : indexString.substr(1));
         }
         catch (Poco::Exception& e) {
             Log::instance()->upnpav().error("server container could no parse index string");
         }
-        return getChildForIndex(index, true, isVirtual);
+        return getChildForIndex(index, true, indexNamespace);
     }
 }
 
 
 ServerObject*
-ServerContainer::getChildForIndex(ui4 index, bool init, bool isVirtual)
+ServerContainer::getChildForIndex(ui4 index, bool init, IndexNamespace indexNamespace)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
@@ -962,7 +976,7 @@ ServerContainer::getChildForIndex(ui4 index, bool init, bool isVirtual)
     }
 
     ServerObject* pObject = 0;
-    if (isVirtual && _pVirtualContainerCache) {
+    if (indexNamespace == Virtual && _pVirtualContainerCache) {
         pObject = _pVirtualContainerCache->getMediaObjectForIndex(index);
         pObject->_isVirtual = true;
     }

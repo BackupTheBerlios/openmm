@@ -213,6 +213,8 @@ class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
     friend class ServerObjectResource;
 
 public:
+    enum IndexNamespace {Data, Virtual, User};
+
     ServerContainer(MediaServer* pServer);
 
     enum Layout {Flat, DirStruct, PropertyGroups};
@@ -249,7 +251,7 @@ public:
     ServerObject* getDescendant(const std::string& objectId);
 
     virtual ServerObject* getChildForIndexString(const std::string& indexString);
-    virtual ServerObject* getChildForIndex(ui4 index, bool init = true, bool isVirtual = false);
+    virtual ServerObject* getChildForIndex(ui4 index, bool init = true, IndexNamespace indexNamespace = Data);
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     std::stringstream* generateChildrenPlaylist();
@@ -263,6 +265,7 @@ private:
 //    AbstractDataModel*                                  _pDataModel;
     ServerObjectCache*                                  _pObjectCache;
     ServerObjectCache*                                  _pVirtualContainerCache;
+    ServerObjectCache*                                  _pUserObjectCache;
     Layout                                              _layout;
     std::string                                         _groupPropertyName;
     std::stringstream                                   _childrenPlaylist;
