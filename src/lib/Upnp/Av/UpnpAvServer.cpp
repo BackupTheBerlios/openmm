@@ -427,7 +427,8 @@ _index(AbstractDataModel::INVALID_INDEX),
 _pParent(0),
 _pServer(pServer),
 _pDataModel(0),
-_isVirtual(false)
+_indexNamespace(Data)
+//_isVirtual(false)
 {
 }
 
@@ -472,7 +473,16 @@ ServerObject::getId()
         objectId = "0";
     }
     else {
-        objectId = (_isVirtual ? "v" : "") + Poco::NumberFormatter::format(_index);
+        std::string prefix("");
+        switch (_indexNamespace) {
+            case Virtual:
+                prefix = "v";
+                break;
+            case User:
+                prefix = "u";
+                break;
+        }
+        objectId = prefix + Poco::NumberFormatter::format(_index);
     }
     Log::instance()->upnpav().debug("server object id: " + objectId);
     return objectId;
@@ -561,18 +571,18 @@ ServerObject::setIndex(const std::string& index)
 }
 
 
-bool
-ServerObject::isVirtual()
-{
-    return _isVirtual;
-}
-
-
-void
-ServerObject::setIsVirtual(bool isVirtual)
-{
-    _isVirtual = isVirtual;
-}
+//bool
+//ServerObject::isVirtual()
+//{
+//    return _isVirtual;
+//}
+//
+//
+//void
+//ServerObject::setIsVirtual(bool isVirtual)
+//{
+//    _isVirtual = isVirtual;
+//}
 
 
 ui4
@@ -645,9 +655,10 @@ ServerObject(pServer),
 //_pDataModel(0),
 _pObjectCache(0),
 _pVirtualContainerCache(0),
-//_layout(Flat),
+_pUserObjectCache(0),
+_layout(Flat),
 //_layout(DirStruct),
-_layout(PropertyGroups),
+//_layout(PropertyGroups),
 //_groupPropertyName(AvProperty::CLASS),
 _groupPropertyName(AvProperty::ARTIST),
 _childrenPlaylistSize(0),
@@ -683,7 +694,7 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
     _pDataModel = pDataModel;
     _pDataModel->setServerContainer(this);
     if (_pDataModel->useObjectCache()) {
-        _pObjectCache = new DatabaseCache("objcache");
+        _pObjectCache = new DatabaseCache("objcache", Data);
         _pObjectCache->_pServerContainer = this;
         _pObjectCache->addPropertiesForQuery(_pDataModel->getQueryProperties());
 
@@ -691,11 +702,11 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
         _searchCaps = _pObjectCache->getPropertiesForQuery();
         _sortCaps = _pObjectCache->getPropertiesForQuery();
 
-        _pVirtualContainerCache = new DatabaseCache("vconcache");
+        _pVirtualContainerCache = new DatabaseCache("vconcache", Virtual);
         _pVirtualContainerCache->_pServerContainer = this;
         _pVirtualContainerCache->addPropertiesForQuery(CsvList(PROPERTY_GROUP_PROPERTY_NAME, PROPERTY_GROUP_PROPERTY_VALUE));
 
-        _pUserObjectCache = new DatabaseCache("usrobj");
+        _pUserObjectCache = new DatabaseCache("usrobj", User);
         _pUserObjectCache->_pServerContainer = this;
     }
 }
@@ -978,12 +989,16 @@ ServerContainer::getChildForIndex(ui4 index, bool init, IndexNamespace indexName
     ServerObject* pObject = 0;
     if (indexNamespace == Virtual && _pVirtualContainerCache) {
         pObject = _pVirtualContainerCache->getMediaObjectForIndex(index);
-        pObject->_isVirtual = true;
+        pObject->_indexNamespace = Virtual;
+    }
+    else if (indexNamespace == User && _pUserObjectCache) {
+        pObject = _pUserObjectCache->getMediaObjectForIndex(index);
+        pObject->_indexNamespace = User;
     }
     else if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
         // get media object out of data base cache (column xml)
          pObject = _pObjectCache->getMediaObjectForIndex(index);
-         pObject->setIsVirtual(true);
+         pObject->_indexNamespace = Virtual;
     }
     else {
         std::string path = _pDataModel->getPath(index);
@@ -1009,16 +1024,20 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     }
 
     ui4 childCount = 0;
+    if (_pUserObjectCache) {
+        childCount += _pUserObjectCache->getBlockAtRow(children, this, 0, 0);
+    }
+
     bool updateCache = cacheNeedsUpdate();
     if (_index == AbstractDataModel::INVALID_INDEX && _layout == PropertyGroups && _pVirtualContainerCache) {
         // parent container is root and we want to browse virtual child containers
-        childCount = _pVirtualContainerCache->getBlockAtRow(children, this, offset, count, sort, search);
+        childCount += _pVirtualContainerCache->getBlockAtRow(children, this, offset, count, sort, search);
     }
     else if (_pObjectCache && !updateCache) {
-        childCount = _pObjectCache->getBlockAtRow(children, this, offset, count, sort, search);
+        childCount += _pObjectCache->getBlockAtRow(children, this, offset, count, sort, search);
     }
     else {
-        childCount = _pDataModel->getBlockAtRow(children, offset, count, sort, search);
+        childCount += _pDataModel->getBlockAtRow(children, offset, count, sort, search);
     }
     for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
         *it = initChild(*it, (*it)->getIndex());
@@ -1096,7 +1115,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
     pObject->setIndex(index);
 
     // set parent index
-    if (_isVirtual) {
+    if (_indexNamespace == Virtual || _indexNamespace == User) {
         pObject->setParentIndex(_index);
     }
     else {
@@ -1121,22 +1140,37 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         ServerContainer* pContainer = createMediaContainer();
         pContainer->setTitle(pObject->getTitle());
         pContainer->setIndex(pObject->getIndex());
+        pContainer->_indexNamespace = pObject->_indexNamespace;
         ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pObject->getResource());
         if (pResource) {
-            std::istream* pStream = pResource->getStream();
-            if (pStream) {
-                std::string parentPath = _pDataModel->getPath(pObject->getIndex());
-                if (parentPath != "") {
-                    parentPath = parentPath.substr(0, parentPath.size() - pObject->getTitle().size());
-                }
-                std::string line;
-                while (std::getline(*pStream, line)) {
-                    if (line[0] != '#') {
-                        std::string path = parentPath == "" ? line : parentPath + line;
-                        ui4 index = _pDataModel->getIndex(path);
-                        pContainer->_childrenPlaylistIndices.push_back(index);
-                        Log::instance()->upnpav().debug("index: " + Poco::NumberFormatter::format(index) + ", path: " + line);
+            std::string uri = pResource->getUri();
+            if (uri == "") {
+                std::istream* pStream = pResource->getStream();
+                if (pStream) {
+                    std::string parentPath = _pDataModel->getPath(pObject->getIndex());
+                    if (parentPath != "") {
+                        parentPath = parentPath.substr(0, parentPath.size() - pObject->getTitle().size());
                     }
+                    std::string line;
+                    while (std::getline(*pStream, line)) {
+                        if (line[0] != '#') {
+                            std::string path = parentPath == "" ? line : parentPath + line;
+                            ui4 index = _pDataModel->getIndex(path);
+                            pContainer->_childrenPlaylistIndices.push_back(index);
+                            Log::instance()->upnpav().debug("index: " + Poco::NumberFormatter::format(index) + ", path: " + line);
+                        }
+                    }
+                }
+            }
+            else {
+                std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + uri;
+                Log::instance()->upnpav().debug("server container, init child get playlist indices from file: " + indexFileName);
+                std::ifstream indexFile(indexFileName.c_str());
+                std::string line;
+                while (std::getline(indexFile, line)) {
+                    ui4 index = Poco::NumberParser::parse(line);
+                    pContainer->_childrenPlaylistIndices.push_back(index);
+                    Log::instance()->upnpav().debug("index: " + Poco::NumberFormatter::format(index));
                 }
             }
         }
@@ -1202,10 +1236,11 @@ ServerObjectCache::getPropertiesForQuery()
 }
 
 
-DatabaseCache::DatabaseCache(const std::string& cacheTableName) :
+DatabaseCache::DatabaseCache(const std::string& cacheTableName, ServerObject::IndexNamespace indexNamespace) :
 _pSession(0),
 _cacheTableName(cacheTableName),
-_maxQueryPropertyCount(5)
+_maxQueryPropertyCount(5),
+_indexNamespace(indexNamespace)
 {
     Log::instance()->upnpav().debug("database cache ctor");
     Poco::Data::SQLite::Connector::registerConnector();
@@ -1315,10 +1350,10 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
 
 
     ui4 parentIndex = AbstractDataModel::INVALID_INDEX;
-    bool parentIsVirtual = false;
+    ServerObject::IndexNamespace parentIndexNamespace = ServerObject::Data;
     if (pParentContainer) {
         parentIndex = pParentContainer->_index;
-        parentIsVirtual = pParentContainer->isVirtual();
+        parentIndexNamespace = pParentContainer->_indexNamespace;
     }
 
     Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
@@ -1329,6 +1364,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     bool useParentIndex = false;
     bool virtualChildObjects = false;
 
+    // present playlist item as playlist container
     if (pParentContainer->_childrenPlaylistIndices.size()) {
         Log::instance()->upnpav().debug("database cache parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
         for (ui4 r = offset; r < offset + count && r < pParentContainer->_childrenPlaylistIndices.size(); r++) {
@@ -1437,7 +1473,10 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             xmlReader.read(pObject, xml);
             pObject->setIndex(index);
             if (virtualChildObjects) {
-                pObject->setIsVirtual(true);
+                pObject->_indexNamespace = ServerObject::Virtual;
+            }
+            if (_indexNamespace == ServerObject::User) {
+                pObject->_indexNamespace = ServerObject::User;
             }
             block.push_back(pObject);
             recordSet.moveNext();
@@ -1557,7 +1596,7 @@ DatabaseCache::updateVirtualObjects(ServerObjectCache* pVirtualObjectCache)
             ServerContainer* pContainer = _pServerContainer->createMediaContainer();
             pContainer->setTitle(propVal);
             pContainer->setIndex(index);
-            pContainer->setIsVirtual(true);
+            pContainer->_indexNamespace = ServerObject::Virtual;
             pContainer->setParentIndex(AbstractDataModel::INVALID_INDEX);
             MemoryProperty* pGroupPropertyName = new MemoryProperty;
             pGroupPropertyName->setName(ServerContainer::PROPERTY_GROUP_PROPERTY_NAME);

@@ -145,8 +145,11 @@ class ServerObject : public MemoryMediaObject
     friend class ServerObjectResource;
     friend class ServerObjectCache;
     friend class ServerContainer;
+    friend class DatabaseCache;
 
 public:
+    enum IndexNamespace {Data, Virtual, User};
+
     ServerObject(MediaServer* pServer);
     ~ServerObject();
 
@@ -170,8 +173,8 @@ public:
     virtual ui4 getIndex();
     void setIndex(const std::string& index);
     void setIndex(ui4 index);
-    bool isVirtual();
-    void setIsVirtual(bool isVirtual = true);
+//    bool isVirtual();
+//    void setIsVirtual(bool isVirtual = true);
 
     // parent and descendants
     virtual ui4 getParentIndex();
@@ -190,7 +193,8 @@ protected:
     ServerObject*               _pParent;
     MediaServer*                _pServer;
     AbstractDataModel*          _pDataModel;
-    bool                        _isVirtual;
+    IndexNamespace              _indexNamespace;
+//    bool                        _isVirtual;
 //     AvStream::Transcoder*   _pTranscoder;
 };
 
@@ -213,8 +217,6 @@ class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
     friend class ServerObjectResource;
 
 public:
-    enum IndexNamespace {Data, Virtual, User};
-
     ServerContainer(MediaServer* pServer);
 
     enum Layout {Flat, DirStruct, PropertyGroups};
@@ -320,7 +322,7 @@ protected:
 class DatabaseCache : public ServerObjectCache
 {
 public:
-    DatabaseCache(const std::string& cacheTableName);
+    DatabaseCache(const std::string& cacheTableName, ServerObject::IndexNamespace indexNamespace = ServerObject::Data);
     ~DatabaseCache();
 
     virtual void setCacheFilePath(const std::string& cacheFilePath);
@@ -346,6 +348,7 @@ private:
     int                                 _maxQueryPropertyCount;
     std::map<std::string, std::string>  _propertyColumnNames;
     std::map<std::string, std::string>  _propertyColumnTypes;
+    ServerObject::IndexNamespace        _indexNamespace;
 };
 
 
