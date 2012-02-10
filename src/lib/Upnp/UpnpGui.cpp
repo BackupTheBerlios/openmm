@@ -799,6 +799,15 @@ MediaObjectModel::MediaObjectModel()
 }
 
 
+MediaObjectModel::MediaObjectModel(const MediaObjectModel& objectModel) :
+Av::CtlMediaObject2(objectModel),
+Gui::ListItemModel(objectModel),
+_pContainer(objectModel._pContainer)
+{
+
+}
+
+
 std::string
 MediaObjectModel::MediaObjectLabelModel::getLabel()
 {
@@ -823,9 +832,9 @@ MediaObjectViewPlaylistButtonController::pushed()
 {
     Gui::Log::instance()->gui().debug("media object playlist button pushed.");
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
-    Gui::Image* pImage = new Gui::Image;
-    pImage->setData(MediaImages::instance()->getResource("media-container.png"));
-    pModel->setImageModel(pImage);
+//    Gui::Image* pImage = new Gui::Image;
+//    pImage->setData(MediaImages::instance()->getResource("media-container.png"));
+//    pModel->setImageModel(pImage);
     Poco::NotificationCenter::defaultCenter().postNotification(new PlaylistNotification(pModel));
 }
 
@@ -886,13 +895,14 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
         Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
         for (int r = 0; r < pModel->getChildCount(); r++) {
             Gui::Log::instance()->gui().debug("title: " + pModel->getChildForRow(r)->getTitle());
-            _playlistItems.push_back(static_cast<MediaObjectModel*>(pModel->getChildForRow(r)));
+            _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
         }
-//        this->syncViewImpl();
     }
     else {
         Gui::Log::instance()->gui().debug("media object playlist button pushed, item with title: " + pModel->getTitle());
+        _playlistItems.push_back(new MediaObjectModel(*pModel));
     }
+    this->syncViewImpl();
 }
 
 

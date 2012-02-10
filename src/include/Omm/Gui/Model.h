@@ -37,6 +37,9 @@ public:
     friend class View;
     friend class Controller;
 
+    Model();
+    Model(const Model& model);
+
     void attachView(View* pView);
     void detachView(View* pView);
 

@@ -38,6 +38,7 @@ class ListItemModel : public Model
 
 public:
     ListItemModel();
+    ListItemModel(const ListItemModel& model);
 
     void setLabelModel(LabelModel* pLabelModel);
     void setImageModel(ImageModel* pImageModel);

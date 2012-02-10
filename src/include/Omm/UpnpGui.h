@@ -269,6 +269,7 @@ class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ListItemModel
 
 public:
     MediaObjectModel();
+    MediaObjectModel(const MediaObjectModel& objectModel);
 
 private:
     class MediaObjectLabelModel : public Gui::LabelModel

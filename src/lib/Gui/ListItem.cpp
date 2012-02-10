@@ -37,6 +37,14 @@ _pImageModel(0)
 }
 
 
+ListItemModel::ListItemModel(const ListItemModel& model) :
+Model(model),
+_pLabelModel(model._pLabelModel),
+_pImageModel(model._pImageModel)
+{
+}
+
+
 void
 ListItemModel::setLabelModel(LabelModel* pLabelModel)
 {

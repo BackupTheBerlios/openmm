@@ -318,7 +318,6 @@ public:
 class AbstractMediaObject
 {
 public:
-    AbstractMediaObject();
     virtual ~AbstractMediaObject() {};
 
     // factory methods
@@ -390,6 +389,7 @@ class MemoryMediaObject : public AbstractMediaObject
 {
 public:
     MemoryMediaObject();
+    MemoryMediaObject(const MemoryMediaObject& mediaObject);
     virtual ~MemoryMediaObject();
 
     // factory methods

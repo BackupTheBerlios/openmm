@@ -49,6 +49,7 @@ class CtlMediaObject2 : public MemoryMediaObject, public BlockCache
 
 public:
     CtlMediaObject2();
+    CtlMediaObject2(const CtlMediaObject2& mediaObject);
 
     // factory methods
     virtual AbstractMediaObject* createChildObject();

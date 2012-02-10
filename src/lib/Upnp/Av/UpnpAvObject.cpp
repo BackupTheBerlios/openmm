@@ -559,11 +559,6 @@ AbstractProperty::getAttributeCount()
 }
 
 
-AbstractMediaObject::AbstractMediaObject()
-{
-}
-
-
 void
 AbstractMediaObject::setUniqueProperty(const std::string& name, const std::string& value)
 {
@@ -711,6 +706,18 @@ _restricted(true),
 _isContainer(false),
 _searchable(false),
 _childCount(0)
+{
+}
+
+
+MemoryMediaObject::MemoryMediaObject(const MemoryMediaObject& mediaObject) :
+_restricted(mediaObject._restricted),
+_isContainer(mediaObject._isContainer),
+_searchable(mediaObject._searchable),
+_childVec(mediaObject._childVec),
+_propertyVec(mediaObject._propertyVec),
+_propertyMap(mediaObject._propertyMap),
+_childCount(mediaObject._childCount)
 {
 }
 

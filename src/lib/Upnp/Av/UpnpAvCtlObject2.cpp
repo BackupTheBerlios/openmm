@@ -38,6 +38,17 @@ _pServerCode(0)
 }
 
 
+CtlMediaObject2::CtlMediaObject2(const CtlMediaObject2& mediaObject) :
+MemoryMediaObject(mediaObject),
+_id(mediaObject._id),
+_pServer(mediaObject._pServer),
+_pServerCode(mediaObject._pServerCode),
+_searchText(mediaObject._searchText)
+{
+
+}
+
+
 AbstractMediaObject*
 CtlMediaObject2::createChildObject()
 {

@@ -28,6 +28,17 @@ namespace Omm {
 namespace Gui {
 
 
+Model::Model()
+{
+}
+
+
+Model::Model(const Model& model) :
+_views(model._views)
+{
+}
+
+
 void
 Model::attachView(View* pView)
 {
