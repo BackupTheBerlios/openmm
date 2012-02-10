@@ -51,6 +51,8 @@ class GuiVisual;
 class MediaServerGroupWidget;
 class MediaRendererGroupWidget;
 class MediaRendererView;
+class MediaObjectView;
+class PlaylistEditor;
 class ActivityIndicator;
 
 
@@ -82,6 +84,7 @@ public:
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
     MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
+    PlaylistEditor*             _pPlaylistEditor;
     GuiVisual*                  _pVisual;
     MediaRendererView*          _pControlPanel;
     ActivityIndicator*          _pActivityIndicator;
@@ -289,9 +292,53 @@ private:
 };
 
 
+class MediaObjectViewPlaylistButtonController : public Gui::ButtonController
+{
+public:
+    MediaObjectViewPlaylistButtonController(MediaObjectView* pMediaObjectView);
+
+private:
+    // ButtonController interface
+    virtual void pushed();
+
+    MediaObjectView*    _pMediaObjectView;
+};
+
+
 class MediaObjectView : public Gui::ListItemView
 {
+public:
+    MediaObjectView(View* pParent = 0);
 
+private:
+    Gui::Button*         _pPlaylistButton;
+
+};
+
+
+class PlaylistNotification : public Poco::Notification
+{
+public:
+    PlaylistNotification(MediaObjectModel* pMediaObject);
+
+    MediaObjectModel*   _pMediaObject;
+};
+
+
+class PlaylistEditor : public Gui::ListView, Gui::ListModel, Gui::ListController
+{
+public:
+    PlaylistEditor();
+
+    // ListModel interface
+    virtual int totalItemCount();
+    virtual Gui::View* createItemView();
+    virtual Gui::Model* getItemModel(int row);
+
+    void playlistNotification(PlaylistNotification* pNotification);
+
+private:
+    std::vector<MediaObjectModel*>      _playlistItems;
 };
 
 

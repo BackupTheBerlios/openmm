@@ -1024,7 +1024,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     }
 
     ui4 childCount = 0;
-    if (_pUserObjectCache) {
+    // TODO: better criteria for blending in user objects at beginning of list
+    if (offset == 0 && _pUserObjectCache) {
         childCount += _pUserObjectCache->getBlockAtRow(children, this, 0, 0);
     }
 

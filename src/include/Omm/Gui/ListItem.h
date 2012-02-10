@@ -35,7 +35,7 @@ class HorizontalLayout;
 class ListItemModel : public Model
 {
     friend class ListItemView;
-    
+
 public:
     ListItemModel();
 

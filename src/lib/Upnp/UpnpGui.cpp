@@ -38,6 +38,8 @@ ControllerWidget::ControllerWidget()
     registerDeviceGroup(_pMediaServerGroupWidget);
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
+    _pPlaylistEditor = new PlaylistEditor;
+    addView(_pPlaylistEditor, "Playlist Editor");
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
     _pControlPanel = new MediaRendererView;
@@ -806,6 +808,90 @@ MediaObjectModel::MediaObjectLabelModel::getLabel()
     }
     else {
         return _pSuperModel->getTitle();
+    }
+}
+
+
+MediaObjectViewPlaylistButtonController::MediaObjectViewPlaylistButtonController(MediaObjectView* pMediaObjectView) :
+_pMediaObjectView(pMediaObjectView)
+{
+}
+
+
+void
+MediaObjectViewPlaylistButtonController::pushed()
+{
+    Gui::Log::instance()->gui().debug("media object playlist button pushed.");
+    MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
+    Gui::Image* pImage = new Gui::Image;
+    pImage->setData(MediaImages::instance()->getResource("media-container.png"));
+    pModel->setImageModel(pImage);
+    Poco::NotificationCenter::defaultCenter().postNotification(new PlaylistNotification(pModel));
+}
+
+
+MediaObjectView::MediaObjectView(View* pParent)
+{
+    _pPlaylistButton = new Gui::Button(this);
+    _pPlaylistButton->setLabel("P");
+    _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
+}
+
+
+PlaylistNotification::PlaylistNotification(MediaObjectModel* pMediaObject) :
+_pMediaObject(pMediaObject)
+{
+}
+
+
+PlaylistEditor::PlaylistEditor()
+{
+    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditor,
+            PlaylistNotification>(*this, &PlaylistEditor::playlistNotification));
+    setModel(this);
+    attachController(this);
+}
+
+
+int
+PlaylistEditor::totalItemCount()
+{
+    Gui::Log::instance()->gui().debug("playlist editor total item count: " + Poco::NumberFormatter::format(_playlistItems.size()));
+    return _playlistItems.size();
+}
+
+
+Gui::View*
+PlaylistEditor::createItemView()
+{
+    return new MediaObjectView;
+}
+
+
+Gui::Model*
+PlaylistEditor::getItemModel(int row)
+{
+    Gui::Log::instance()->gui().debug("playlist editor get item model in row: " + Poco::NumberFormatter::format(row));
+    Gui::Log::instance()->gui().debug("playlist editor get item with title: " + _playlistItems[row]->getTitle());
+    return _playlistItems[row];
+}
+
+
+void
+PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
+{
+    MediaObjectModel* pModel = pNotification->_pMediaObject;
+    if (pModel->isContainer()) {
+        Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
+        Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
+        for (int r = 0; r < pModel->getChildCount(); r++) {
+            Gui::Log::instance()->gui().debug("title: " + pModel->getChildForRow(r)->getTitle());
+            _playlistItems.push_back(static_cast<MediaObjectModel*>(pModel->getChildForRow(r)));
+        }
+//        this->syncViewImpl();
+    }
+    else {
+        Gui::Log::instance()->gui().debug("media object playlist button pushed, item with title: " + pModel->getTitle());
     }
 }
 

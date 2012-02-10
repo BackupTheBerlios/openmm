@@ -87,6 +87,9 @@ void
 ImageView::syncViewImpl()
 {
 //    Omm::Gui::Log::instance()->gui().debug("Image view sync view: " + getName());
+    if (!_pModel) {
+        return;
+    }
     ImageModel* pImageModel = static_cast<ImageModel*>(_pModel);
     ImageViewImpl* pImpl = static_cast<ImageViewImpl*>(_pImpl);
     pImpl->setData(pImageModel->getData());
