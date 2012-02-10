@@ -873,7 +873,7 @@ PlaylistEditor::totalItemCount()
 Gui::View*
 PlaylistEditor::createItemView()
 {
-    return new MediaObjectView;
+    return new Gui::ListItemView;
 }
 
 
