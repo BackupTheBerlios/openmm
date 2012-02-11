@@ -253,6 +253,9 @@ ListView::scrollToRowOffset(int rowOffset)
         return;
     }
     ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (pModel->totalItemCount() < viewPortHeightInRows()) {
+        return;
+    }
     if (rowOffset > pModel->totalItemCount() - viewPortHeightInRows()) {
         rowOffset = pModel->totalItemCount() - viewPortHeightInRows();
     }
