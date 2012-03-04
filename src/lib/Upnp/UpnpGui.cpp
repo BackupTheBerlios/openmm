@@ -134,6 +134,13 @@ ControllerWidget::signalNetworkActivity(bool on)
 }
 
 
+std::stringstream*
+ControllerWidget::getPlaylistResource()
+{
+    return _pPlaylistEditor->getPlaylistResource();
+}
+
+
 void
 KeyController::keyPressed(KeyCode key)
 {
@@ -902,7 +909,19 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
         Gui::Log::instance()->gui().debug("media object playlist button pushed, item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
     }
-    this->syncViewImpl();
+    pModel->writeResource("");
+    syncViewImpl();
+}
+
+
+std::stringstream*
+PlaylistEditor::getPlaylistResource()
+{
+    std::stringstream* pPlaylistResource = new std::stringstream;
+    for (std::vector<MediaObjectModel*>::iterator it = _playlistItems.begin(); it != _playlistItems.end(); ++it) {
+        *pPlaylistResource << (*it)->getResource()->getUri() << std::endl;
+    }
+    return pPlaylistResource;
 }
 
 

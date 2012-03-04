@@ -2664,6 +2664,33 @@ IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 }
 
 
+void
+ControllerRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+{
+    Log::instance()->upnp().debug("controller request from: " + request.getHost());
+
+    std::stringstream* pPlaylistResource = _pController->getPlaylistResource();
+    if (pPlaylistResource) {
+        std::ostream& outStream = response.send();
+        Poco::StreamCopier::copyStream(*pPlaylistResource, outStream);
+        delete pPlaylistResource;
+    }
+}
+
+
+ControllerRequestHandlerFactory::ControllerRequestHandlerFactory(Controller* pController) :
+_pController(pController)
+{
+}
+
+
+Poco::Net::HTTPRequestHandler*
+ControllerRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
+{
+    return new ControllerRequestHandler(_pController);
+}
+
+
 HttpSocket::HttpSocket()
 //:
 //_isRunning(false)
@@ -3812,8 +3839,9 @@ CtlDeviceCode::init()
 }
 
 
-Controller::Controller() :
+Controller::Controller(int port) :
 DeviceManager(new Socket),
+_socket(Poco::Net::ServerSocket(port)),
 _pUserInterface(0)
 {
 }
@@ -3831,6 +3859,11 @@ Controller::start()
 
     DeviceManager::start();
     sendMSearch();
+
+    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+    _pHttpServer = new Poco::Net::HTTPServer(new ControllerRequestHandlerFactory(this), _socket, pParams);
+    _pHttpServer->start();
+    Log::instance()->upnp().information("controller http server listening on: " + _socket.address().toString());
 
     Log::instance()->upnp().debug("controller started.");
 }
@@ -3854,6 +3887,8 @@ Controller::stop()
         }
     }
     DeviceManager::stop();
+
+    _pHttpServer->stop();
 
     Log::instance()->upnp().debug("controller stopped.");
 }

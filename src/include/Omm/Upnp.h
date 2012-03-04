@@ -41,6 +41,9 @@
 #include <Poco/FileChannel.h>
 #include <Poco/SplitterChannel.h>
 #include <Poco/Net/MediaType.h>
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include <Poco/NotificationCenter.h>
 
 #include "UpnpTypes.h"
@@ -415,7 +418,7 @@ private:
 class Controller : public DeviceManager
 {
 public:
-    Controller();
+    Controller(int port = 0);
     virtual ~Controller();
 
     void start();
@@ -425,6 +428,8 @@ public:
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
 //    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
+
+    virtual std::stringstream* getPlaylistResource() { return 0; }
 
     // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);
@@ -459,6 +464,8 @@ private:
     void update();
 
     std::map<std::string, DeviceGroup*>        _deviceGroups;
+    Poco::Net::ServerSocket                    _socket;
+    Poco::Net::HTTPServer*                     _pHttpServer;
 };
 
 

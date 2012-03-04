@@ -70,6 +70,8 @@ public:
     Icon* getIcon();
     Icon* getImageRepresentation();
 
+    void writeResource(const std::string& sourceUri, int index = 0);
+
 private:
     virtual void getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size);
 

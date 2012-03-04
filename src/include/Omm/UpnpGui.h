@@ -80,6 +80,7 @@ public:
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
     virtual void signalNetworkActivity(bool on);
+    virtual std::stringstream* getPlaylistResource();
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
@@ -337,6 +338,8 @@ public:
     virtual Gui::Model* getItemModel(int row);
 
     void playlistNotification(PlaylistNotification* pNotification);
+
+    std::stringstream* getPlaylistResource();
 
 private:
     std::vector<MediaObjectModel*>      _playlistItems;

@@ -139,6 +139,15 @@ CtlMediaObject2::getImageRepresentation()
 
 
 void
+CtlMediaObject2::writeResource(const std::string& sourceUri, int index)
+{
+    Log::instance()->upnpav().debug("writing resource: " + getResource(index)->getUri() + ", from uri: " + sourceUri);
+    ui4 transferId;
+    _pServerCode->ContentDirectory()->ImportResource(uri(sourceUri), uri(getResource(index)->getUri()), transferId);
+}
+
+
+void
 CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size)
 {
     std::string objectId = getId();

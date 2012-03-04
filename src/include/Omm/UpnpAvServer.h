@@ -100,7 +100,6 @@ class ItemRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 public:
     ItemRequestHandlerFactory(MediaServer* pItemServer);
 
-
     Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
 
 private:
