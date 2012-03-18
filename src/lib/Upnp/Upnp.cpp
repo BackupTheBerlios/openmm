@@ -3922,6 +3922,14 @@ Controller::getDeviceGroup(const std::string& deviceType)
 }
 
 
+std::string
+Controller::getControllerHttpUri()
+{
+    std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
+    return "http://" + address + ":" + Poco::NumberFormatter::format(_socket.address().port());
+}
+
+
 void
 Controller::setUserInterface(ControllerUserInterface* pUserInterface)
 {

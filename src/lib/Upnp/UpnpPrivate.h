@@ -121,7 +121,7 @@ public:
 private:
     Poco::Net::HTTPServer*                _pHttpServer;
     Poco::UInt16                          _httpServerPort;
-    UpnpRequestHandlerFactory*          _pDeviceRequestHandlerFactory;
+    UpnpRequestHandlerFactory*            _pDeviceRequestHandlerFactory;
     Poco::NotificationCenter              _notificationCenter;
 };
 

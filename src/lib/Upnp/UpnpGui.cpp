@@ -47,6 +47,7 @@ ControllerWidget::ControllerWidget()
 //    _pStatusBar->resize(20, 20);
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
+    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
     attachController(new KeyController(this));
 }
 
@@ -101,6 +102,15 @@ ControllerWidget::newTransportState(TransportStateNotification* pNotification)
     else if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
         showMainMenu();
     }
+}
+
+
+void
+ControllerWidget::newPlaylist(PlaylistNotification* pNotification)
+{
+    // write resource of playlist container
+    // TODO: move this to playlist editor, assign a playlist container to playlist editor.
+//    pModel->writeResource(getControllerHttpUri());
 }
 
 
@@ -839,6 +849,9 @@ MediaObjectViewPlaylistButtonController::pushed()
 {
     Gui::Log::instance()->gui().debug("media object playlist button pushed.");
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
+    std::string objectClass = pModel->getClass();
+    Gui::Log::instance()->gui().debug("media object has class: " + objectClass);
+
 //    Gui::Image* pImage = new Gui::Image;
 //    pImage->setData(MediaImages::instance()->getResource("media-container.png"));
 //    pModel->setImageModel(pImage);
@@ -909,7 +922,6 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
         Gui::Log::instance()->gui().debug("media object playlist button pushed, item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
     }
-    pModel->writeResource("");
     syncViewImpl();
 }
 

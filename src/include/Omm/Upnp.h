@@ -429,6 +429,7 @@ public:
 
 //    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
 
+    std::string getControllerHttpUri();
     virtual std::stringstream* getPlaylistResource() { return 0; }
 
     // deprecated

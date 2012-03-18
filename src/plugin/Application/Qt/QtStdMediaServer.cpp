@@ -107,7 +107,7 @@ _pItemDelegate(0)
         setItemsExpandable(false);
     }
     // activated() is return, click or double click, selected() is click or double click on it.
-    connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));    
+    connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
 }
 
 
@@ -331,11 +331,15 @@ QtStdMediaServer::parent(const QModelIndex &index) const
     if (!pObject) {
         return QModelIndex();
     }
-    Omm::Av::CtlMediaObject2* pParentObject = static_cast<Omm::Av::CtlMediaObject2*>(pObject->getParent());
+    // FIXME: getParent() removed from CtlMediaObject2
+//    Omm::Av::CtlMediaObject2* pParentObject = static_cast<Omm::Av::CtlMediaObject2*>(pObject->getParent());
+    Omm::Av::CtlMediaObject2* pParentObject;
     if (!pParentObject) {
         return QModelIndex();
     }
-    Omm::Av::CtlMediaObject2* pGrandParentObject = static_cast<Omm::Av::CtlMediaObject2*>(pParentObject->getParent());
+    // FIXME: getParent() removed from CtlMediaObject2
+//    Omm::Av::CtlMediaObject2* pGrandParentObject = static_cast<Omm::Av::CtlMediaObject2*>(pParentObject->getParent());
+    Omm::Av::CtlMediaObject2* pGrandParentObject;
     if (!pGrandParentObject) {
         return createIndex(0, 0, getRootObject());
     }

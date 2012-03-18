@@ -640,6 +640,7 @@ MemoryPropertyImpl::setName(const std::string& name)
 void
 MemoryPropertyImpl::setValue(const std::string& value)
 {
+//    Log::instance()->upnpav().debug("memory property set value to: " + value);
     _value = value;
 }
 

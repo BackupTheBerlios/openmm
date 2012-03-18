@@ -1139,6 +1139,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         Log::instance()->upnpav().debug("server container, init child convert playlist item to playlist container");
         // create playlist container with list of indices that match the paths of m3u file (read in via getStream())
         ServerContainer* pContainer = createMediaContainer();
+        pContainer->getProperty(AvProperty::CLASS)->setValue(AvClass::className(AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER));
         pContainer->setTitle(pObject->getTitle());
         pContainer->setIndex(pObject->getIndex());
         pContainer->_indexNamespace = pObject->_indexNamespace;
@@ -1189,6 +1190,8 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         AbstractResource* pResource = pObject->createResource();
         pResource->setUri(resourceUri + "$0");
         pResource->setProtInfo("http-get:*:audio/m3u:*");
+        // resource is writable, set import URI to resource URI
+        pResource->setAttribute(AvProperty::IMPORT_URI, pResource->getUri());
         pObject->addResource(pResource);
     }
     else {

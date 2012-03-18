@@ -66,6 +66,15 @@ public:
 };
 
 
+class PlaylistNotification : public Poco::Notification
+{
+public:
+    PlaylistNotification(MediaObjectModel* pMediaObject);
+
+    MediaObjectModel*   _pMediaObject;
+};
+
+
 class ControllerWidget : public Controller, public Gui::Tab
 {
 public:
@@ -76,6 +85,7 @@ public:
     Gui::View* getStatusBar();
     void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
     void newTransportState(TransportStateNotification* pNotification);
+    void newPlaylist(PlaylistNotification* pNotification);
     void showMainMenu();
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
@@ -315,15 +325,6 @@ public:
 private:
     Gui::Button*         _pPlaylistButton;
 
-};
-
-
-class PlaylistNotification : public Poco::Notification
-{
-public:
-    PlaylistNotification(MediaObjectModel* pMediaObject);
-
-    MediaObjectModel*   _pMediaObject;
 };
 
 
