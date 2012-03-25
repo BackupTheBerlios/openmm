@@ -873,7 +873,8 @@ _pMediaObject(pMediaObject)
 }
 
 
-PlaylistEditor::PlaylistEditor()
+PlaylistEditor::PlaylistEditor() :
+_pPlaylistContainer(0)
 {
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditor,
             PlaylistNotification>(*this, &PlaylistEditor::playlistNotification));
@@ -911,14 +912,20 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
 {
     MediaObjectModel* pModel = pNotification->_pMediaObject;
     if (pModel->isContainer()) {
-        Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
-        Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
-        for (int r = 0; r < pModel->getChildCount(); r++) {
-            Gui::Log::instance()->gui().debug("title: " + pModel->getChildForRow(r)->getTitle());
-            _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
+        if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+            if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
+                Gui::Log::instance()->gui().debug("playlist editor loads playlist: " + pModel->getTitle());
+                _pPlaylistContainer = pModel;
+                Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
+//                Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
+                for (int r = 0; r < pModel->getChildCount(); r++) {
+                    Gui::Log::instance()->gui().debug("title: " + pModel->getChildForRow(r)->getTitle());
+                    _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
+                }
+            }
         }
     }
-    else {
+    else if (_pPlaylistContainer) {
         Gui::Log::instance()->gui().debug("media object playlist button pushed, item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
     }

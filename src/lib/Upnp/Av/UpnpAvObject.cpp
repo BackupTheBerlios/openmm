@@ -548,6 +548,7 @@ AbstractProperty::getAttributeValue(int index)
 std::string
 AbstractProperty::getAttributeValue(const std::string& name)
 {
+//    Log::instance()->upnpav().debug("AbstractProperty::getAttributeValue() name: " +  name + ", value: " + _pPropertyImpl->getAttributeValue(name));
     return _pPropertyImpl->getAttributeValue(name);
 }
 
@@ -984,6 +985,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                 Poco::XML::NamedNodeMap* attr = 0;
                 std::string protInfo = "";
                 std::streamsize size = 0;
+                std::string importUri = "";
                 if (childNode->hasAttributes()) {
                     attr = childNode->attributes();
                     Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
@@ -999,11 +1001,16 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                             Log::instance()->upnpav().error("parsing size in media object reader failed");
                         }
                     }
+                    attrNode = attr->getNamedItem(AvProperty::IMPORT_URI);
+                    if (attrNode) {
+                        importUri = attrNode->nodeValue();
+                    }
                 }
                 AbstractResource* pResource = pObject->createResource();
                 pResource->setUri(childNode->innerText());
                 pResource->setProtInfo(protInfo);
                 pResource->setSize(size);
+                pResource->setAttribute(AvProperty::IMPORT_URI, importUri);
                 pObject->addResource(pResource);
                 if (attr != 0) {
                     attr->release();

@@ -343,6 +343,7 @@ public:
     std::stringstream* getPlaylistResource();
 
 private:
+    MediaObjectModel*                   _pPlaylistContainer;
     std::vector<MediaObjectModel*>      _playlistItems;
 };
 
