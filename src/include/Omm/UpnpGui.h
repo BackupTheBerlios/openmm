@@ -331,7 +331,7 @@ private:
 class PlaylistEditor : public Gui::ListView, Gui::ListModel, Gui::ListController
 {
 public:
-    PlaylistEditor();
+    PlaylistEditor(ControllerWidget* pControllerWidget);
 
     // ListModel interface
     virtual int totalItemCount();
@@ -343,6 +343,7 @@ public:
     std::stringstream* getPlaylistResource();
 
 private:
+    ControllerWidget*                   _pControllerWidget;
     MediaObjectModel*                   _pPlaylistContainer;
     std::vector<MediaObjectModel*>      _playlistItems;
 };

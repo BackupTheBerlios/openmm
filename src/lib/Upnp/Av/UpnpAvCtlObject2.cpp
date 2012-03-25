@@ -141,9 +141,15 @@ CtlMediaObject2::getImageRepresentation()
 void
 CtlMediaObject2::writeResource(const std::string& sourceUri, int index)
 {
-    Log::instance()->upnpav().debug("writing resource: " + getResource(index)->getUri() + ", from uri: " + sourceUri);
     ui4 transferId;
-    _pServerCode->ContentDirectory()->ImportResource(uri(sourceUri), uri(getResource(index)->getUri()), transferId);
+    std::string importUri = getResource(index)->getAttributeValue(AvProperty::IMPORT_URI);
+    if (importUri != "") {
+        Log::instance()->upnpav().debug("writing resource: " + importUri + ", from uri: " + sourceUri);
+        _pServerCode->ContentDirectory()->ImportResource(uri(sourceUri), uri(importUri), transferId);
+    }
+    else {
+        Log::instance()->upnpav().warning("resource read only, writing failed");
+    }
 }
 
 

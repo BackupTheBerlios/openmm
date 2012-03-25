@@ -38,7 +38,7 @@ ControllerWidget::ControllerWidget()
     registerDeviceGroup(_pMediaServerGroupWidget);
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
-    _pPlaylistEditor = new PlaylistEditor;
+    _pPlaylistEditor = new PlaylistEditor(this);
     addView(_pPlaylistEditor, "Playlist Editor");
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
@@ -873,7 +873,8 @@ _pMediaObject(pMediaObject)
 }
 
 
-PlaylistEditor::PlaylistEditor() :
+PlaylistEditor::PlaylistEditor(ControllerWidget* pControllerWidget) :
+_pControllerWidget(pControllerWidget),
 _pPlaylistContainer(0)
 {
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditor,
@@ -914,7 +915,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     if (pModel->isContainer()) {
         if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
             if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
-                Gui::Log::instance()->gui().debug("playlist editor loads playlist: " + pModel->getTitle());
+                Gui::Log::instance()->gui().debug("playlist editor load playlist: " + pModel->getTitle());
                 _pPlaylistContainer = pModel;
                 Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
 //                Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
@@ -926,8 +927,9 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
         }
     }
     else if (_pPlaylistContainer) {
-        Gui::Log::instance()->gui().debug("media object playlist button pushed, item with title: " + pModel->getTitle());
+        Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
+        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri());
     }
     syncViewImpl();
 }
