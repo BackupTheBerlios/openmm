@@ -18,6 +18,8 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
+#include <Poco/URI.h>
+
 #include "UpnpAvServerImpl.h"
 
 namespace Omm {
@@ -301,9 +303,24 @@ DevContentDirectoryServerImpl::UpdateObject(const std::string& ObjectID, const s
 void
 DevContentDirectoryServerImpl::ImportResource(const uri& SourceURI, const uri& DestinationURI, ui4& TransferID)
 {
-// begin of your own code
+    // get resource of object in DestinationURI
+    Poco::StringTokenizer uri(DestinationURI.getPath(), "$");
+    std::string objectId = uri[0].substr(1);
+    Log::instance()->upnpav().debug("import resource to objectId: " + objectId + ", resourceId: " + uri[1]);
+    ServerObject* pObject = _pRoot->getDescendant(objectId);
+    if (!pObject) {
+        Log::instance()->upnpav().error("import resource, could not find object with id: " + objectId);
+        return;
+    }
+    int resourceId = Poco::NumberParser::parse(uri[1]);
+    ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pObject->getResource(resourceId));
 
-// end of your own code
+    if (pResource) {
+        pResource->writeResource(SourceURI);
+    }
+    else {
+        Log::instance()->upnpav().error("import resource, no resource for object with id: " + objectId);
+    }
 }
 
 

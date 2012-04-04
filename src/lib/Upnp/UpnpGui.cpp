@@ -929,7 +929,9 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     else if (_pPlaylistContainer) {
         Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
-        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri());
+        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + "/Playlist");
+        // FIXME: why does this crash?
+//        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
     }
     syncViewImpl();
 }
@@ -943,6 +945,13 @@ PlaylistEditor::getPlaylistResource()
         *pPlaylistResource << (*it)->getResource()->getUri() << std::endl;
     }
     return pPlaylistResource;
+}
+
+
+std::string
+PlaylistEditor::getPlaylistResourceUri()
+{
+    _pControllerWidget->getControllerHttpUri() + "/Playlist";
 }
 
 

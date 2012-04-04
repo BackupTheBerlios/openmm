@@ -341,6 +341,7 @@ public:
     void playlistNotification(PlaylistNotification* pNotification);
 
     std::stringstream* getPlaylistResource();
+    std::string getPlaylistResourceUri();
 
 private:
     ControllerWidget*                   _pControllerWidget;

@@ -28,6 +28,7 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/HTTPServerParams.h>
+#include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Exception.h>
 #include "Poco/Data/SQLite/Connector.h"
 #include "Poco/Data/RecordSet.h"
@@ -418,6 +419,43 @@ ServerObjectResource::getStream()
     }
     else {
         return _pDataModel->getStream(_pDataModel->getPath(_pObject->getIndex()));
+    }
+}
+
+
+void
+ServerObjectResource::writeResource(const uri& sourceUri)
+{
+    Log::instance()->upnpav().debug("write resource of object with index name space: " + Poco::NumberFormatter::format(_pObject->_indexNamespace));
+    if (_pObject->_indexNamespace == ServerObject::User) {
+        // FIXME: always access the resource stream via getStream(), even on write operations (same in ServerContainer::initChild())
+//        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + getUri();
+        // FIXME: get internal resource URI, not http address for playlist download
+//        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + "foo";
+        // FIXME URGENT: path to playlist is hardcoded
+        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + "playlist";
+//        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + _pObject->_indexFileName);
+        Log::instance()->upnpav().debug("server container, write resource to playlist index file: " + indexFileName);
+        std::ofstream indexFile(indexFileName.c_str());
+
+        Log::instance()->upnpav().debug("write resource, retrieve source from uri: " + sourceUri.toString());
+        Poco::Net::HTTPClientSession session(sourceUri.getHost(), sourceUri.getPort());
+        Poco::Net::HTTPRequest request("GET", sourceUri.getPath());
+        session.sendRequest(request);
+        std::stringstream requestHeader;
+        request.write(requestHeader);
+        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+
+        Poco::Net::HTTPResponse response;
+        std::istream& istr = session.receiveResponse(response);
+
+        // extract indices from resource URIs in playlist and write them to server stored playlist
+        std::string resourceUri;
+        while (std::getline(istr, resourceUri)) {
+            Poco::URI res(resourceUri);
+            std::string path = res.getPath();
+            indexFile << path.substr(1, path.find("$") - 1) << std::endl;
+        }
     }
 }
 

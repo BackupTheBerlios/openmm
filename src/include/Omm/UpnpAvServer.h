@@ -131,6 +131,8 @@ public:
     virtual std::streamsize getSize();
     virtual std::istream* getStream();
 
+    void writeResource(const uri& sourceUri);
+
 private:
     ServerObject*               _pObject;
     AbstractDataModel*          _pDataModel;
@@ -183,6 +185,8 @@ public:
     virtual ui4 getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
     // this really is createChildItem(), not createChildObject()
 //    virtual AbstractMediaObject* createChildObject();
+
+
 
 protected:
     virtual std::istream* getIconStream() {}
