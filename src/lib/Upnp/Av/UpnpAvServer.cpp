@@ -429,12 +429,7 @@ ServerObjectResource::writeResource(const uri& sourceUri)
     Log::instance()->upnpav().debug("write resource of object with index name space: " + Poco::NumberFormatter::format(_pObject->_indexNamespace));
     if (_pObject->_indexNamespace == ServerObject::User) {
         // FIXME: always access the resource stream via getStream(), even on write operations (same in ServerContainer::initChild())
-//        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + getUri();
-        // FIXME: get internal resource URI, not http address for playlist download
-//        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + "foo";
-        // FIXME URGENT: path to playlist is hardcoded
-        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + "playlist";
-//        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + _pObject->_indexFileName);
+        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + getPrivateResourceUri());
         Log::instance()->upnpav().debug("server container, write resource to playlist index file: " + indexFileName);
         std::ofstream indexFile(indexFileName.c_str());
 
@@ -457,6 +452,20 @@ ServerObjectResource::writeResource(const uri& sourceUri)
             indexFile << path.substr(1, path.find("$") - 1) << std::endl;
         }
     }
+}
+
+
+std::string
+ServerObjectResource::getPrivateResourceUri()
+{
+    return _privateUri;
+}
+
+
+void
+ServerObjectResource::setPrivateResourceUri(const std::string& uri)
+{
+    _privateUri = uri;
 }
 
 
@@ -1173,6 +1182,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         return pObject;
     }
 
+    std::string privateResourceUri;
     if (AvClass::matchClass(pObject->getClass(), AvClass::ITEM, AvClass::PLAYLIST_ITEM)) {
         Log::instance()->upnpav().debug("server container, init child convert playlist item to playlist container");
         // create playlist container with list of indices that match the paths of m3u file (read in via getStream())
@@ -1182,6 +1192,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         pContainer->setIndex(pObject->getIndex());
         pContainer->_indexNamespace = pObject->_indexNamespace;
         ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pObject->getResource());
+        privateResourceUri = pResource->getUri();
         if (pResource) {
             std::string uri = pResource->getUri();
             if (uri == "") {
@@ -1225,7 +1236,8 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
     if (pObject->isContainer()) {
         Log::instance()->upnpav().debug("server container, init child create container resource");
         // add playlist resource
-        AbstractResource* pResource = pObject->createResource();
+        ServerObjectResource* pResource = pObject->createResource();
+        pResource->setPrivateResourceUri(privateResourceUri);
         pResource->setUri(resourceUri + "$0");
         pResource->setProtInfo("http-get:*:audio/m3u:*");
         // resource is writable, set import URI to resource URI

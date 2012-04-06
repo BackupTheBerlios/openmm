@@ -132,11 +132,14 @@ public:
     virtual std::istream* getStream();
 
     void writeResource(const uri& sourceUri);
+    std::string getPrivateResourceUri();
+    void setPrivateResourceUri(const std::string& uri);
 
 private:
     ServerObject*               _pObject;
     AbstractDataModel*          _pDataModel;
     int                         _id;
+    std::string                 _privateUri;
 };
 
 
