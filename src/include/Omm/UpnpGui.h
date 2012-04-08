@@ -53,6 +53,7 @@ class MediaRendererGroupWidget;
 class MediaRendererView;
 class MediaObjectView;
 class PlaylistEditor;
+class PlaylistEditorObjectView;
 class ActivityIndicator;
 
 
@@ -324,12 +325,13 @@ public:
 
 private:
     Gui::Button*         _pPlaylistButton;
-
 };
 
 
 class PlaylistEditor : public Gui::ListView, Gui::ListModel, Gui::ListController
 {
+    friend class PlaylistEditorDeleteObjectController;
+
 public:
     PlaylistEditor(ControllerWidget* pControllerWidget);
 
@@ -343,10 +345,38 @@ public:
     std::stringstream* getPlaylistResource();
     std::string getPlaylistResourceUri();
 
+    void deleteItem(MediaObjectModel* pModel);
+
 private:
     ControllerWidget*                   _pControllerWidget;
     MediaObjectModel*                   _pPlaylistContainer;
     std::vector<MediaObjectModel*>      _playlistItems;
+};
+
+
+class PlaylistEditorDeleteObjectController : public Gui::ButtonController
+{
+public:
+    PlaylistEditorDeleteObjectController(PlaylistEditorObjectView* pPlaylistEditorObjectView);
+
+private:
+    // ButtonController interface
+    virtual void pushed();
+
+    PlaylistEditorObjectView*    _pPlaylistEditorObjectView;
+};
+
+
+class PlaylistEditorObjectView : public Gui::ListItemView
+{
+    friend class PlaylistEditorDeleteObjectController;
+    
+public:
+    PlaylistEditorObjectView(PlaylistEditor* pPlaylistEditor, View* pParent = 0);
+
+private:
+    PlaylistEditor*      _pPlaylistEditor;
+    Gui::Button*         _pDeleteButton;
 };
 
 

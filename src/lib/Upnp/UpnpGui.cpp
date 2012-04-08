@@ -898,7 +898,8 @@ PlaylistEditor::totalItemCount()
 Gui::View*
 PlaylistEditor::createItemView()
 {
-    return new Gui::ListItemView;
+//    return new Gui::ListItemView;
+    return new PlaylistEditorObjectView(this);
 }
 
 
@@ -955,6 +956,47 @@ std::string
 PlaylistEditor::getPlaylistResourceUri()
 {
     _pControllerWidget->getControllerHttpUri() + "/Playlist";
+}
+
+
+void
+PlaylistEditor::deleteItem(MediaObjectModel* pModel)
+{
+    Gui::Log::instance()->gui().debug("delete media object from playlist with title: " + pModel->getTitle());
+    std::vector<MediaObjectModel*>::iterator pos = std::find(_playlistItems.begin(), _playlistItems.end(), pModel);
+    if (pos != _playlistItems.end()) {
+        _playlistItems.erase(pos);
+        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + "/Playlist");
+        delete pModel;
+        syncViewImpl();
+    }
+}
+
+
+PlaylistEditorDeleteObjectController::PlaylistEditorDeleteObjectController(PlaylistEditorObjectView* pPlaylistEditorObjectView) :
+_pPlaylistEditorObjectView(pPlaylistEditorObjectView)
+{
+}
+
+
+void
+PlaylistEditorDeleteObjectController::pushed()
+{
+    Gui::Log::instance()->gui().debug("playlist editor delete button pushed.");
+    MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pPlaylistEditorObjectView->getModel());
+    _pPlaylistEditorObjectView->_pPlaylistEditor->deleteItem(pModel);
+}
+
+
+PlaylistEditorObjectView::PlaylistEditorObjectView(PlaylistEditor* pPlaylistEditor, View* pParent) :
+_pPlaylistEditor(pPlaylistEditor)
+{
+    _pDeleteButton = new Gui::Button(this);
+    _pDeleteButton->setLabel("D");
+    _pDeleteButton->setBackgroundColor(Gui::Color("blue"));
+    _pDeleteButton->setStretchFactor(-1.0);
+    _pDeleteButton->resize(20, 15);
+    _pDeleteButton->attachController(new PlaylistEditorDeleteObjectController(this));
 }
 
 
