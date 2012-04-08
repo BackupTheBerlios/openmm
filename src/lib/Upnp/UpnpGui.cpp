@@ -863,6 +863,9 @@ MediaObjectView::MediaObjectView(View* pParent)
 {
     _pPlaylistButton = new Gui::Button(this);
     _pPlaylistButton->setLabel("P");
+    _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));
+    _pPlaylistButton->setStretchFactor(-1.0);
+    _pPlaylistButton->resize(20, 15);
     _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
 }
 

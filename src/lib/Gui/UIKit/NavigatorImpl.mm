@@ -68,5 +68,12 @@ NavigatorViewImpl::popView()
 }
 
 
+void
+NavigatorViewImpl::showSearchBox(bool show)
+{
+// TODO: implement showSearchBox for UiKit
+}
+
+
 } // namespace Gui
 } // namespace Omm

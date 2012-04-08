@@ -38,6 +38,8 @@ public:
 
     void pushView(View* pView, const std::string name);
     void popView();
+    void showSearchBox(bool show = true);
+
 };
 
 
