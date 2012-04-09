@@ -663,10 +663,11 @@ public:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
+    void setVisible(bool visible = true);
+
 protected:
     virtual void init() {}
 
-    void setVisible(bool visible = true);
     void addDevice(Device* pDevice);
     void removeDevice(Device* pDevice);
 

@@ -76,6 +76,7 @@ public:
     virtual void presentedMainView()
     {
         _pController->setTabBarHidden(_fullscreen);
+        _pController->showOnlyBasicDeviceGroups(_fullscreen);
         _pController->init();
 #ifndef __IPHONE__
         addLocalRenderer();

@@ -122,6 +122,14 @@ ControllerWidget::showMainMenu()
 
 
 void
+ControllerWidget::showOnlyBasicDeviceGroups(bool show)
+{
+    addView(_pMediaRendererGroupWidget, "Player", !show);
+    addView(_pPlaylistEditor, "Playlist Editor", !show);
+}
+
+
+void
 ControllerWidget::navigateListWithKey(Gui::Controller::KeyCode key)
 {
     if (_pMediaServerGroupWidget->getVisibleView()) {

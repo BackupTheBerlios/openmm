@@ -55,11 +55,23 @@ TabViewImpl::~TabViewImpl()
 }
 
 
-void
-TabViewImpl::addView(View* pView, const std::string& tabName)
+int
+TabViewImpl::addView(View* pView, const std::string& tabName, bool show)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
-    static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
+    int tabIndex = static_cast<QtTabWidget*>(_pNativeView)->indexOf(static_cast<QWidget*>(pView->getNativeView()));
+    if (tabIndex != -1) {
+        if (!show) {
+            Omm::Gui::Log::instance()->gui().debug("tab widget implementation remove widget");
+            static_cast<QtTabWidget*>(_pNativeView)->removeTab(tabIndex);
+            return -1;
+        }
+    }
+    else {
+        Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
+        static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -89,7 +101,6 @@ TabViewImpl::setCurrentTab(int index)
 {
     static_cast<QtTabWidget*>(_pNativeView)->setCurrentIndex(index);
 }
-
 
 }  // namespace Omm
 }  // namespace Gui

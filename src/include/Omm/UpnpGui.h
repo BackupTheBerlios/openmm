@@ -88,6 +88,7 @@ public:
     void newTransportState(TransportStateNotification* pNotification);
     void newPlaylist(PlaylistNotification* pNotification);
     void showMainMenu();
+    void showOnlyBasicDeviceGroups(bool show = false);
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
     virtual void signalNetworkActivity(bool on);
@@ -101,6 +102,7 @@ private:
     MediaRendererView*          _pControlPanel;
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;
+    bool                        _fullscreen;
 };
 
 
@@ -370,7 +372,7 @@ private:
 class PlaylistEditorObjectView : public Gui::ListItemView
 {
     friend class PlaylistEditorDeleteObjectController;
-    
+
 public:
     PlaylistEditorObjectView(PlaylistEditor* pPlaylistEditor, View* pParent = 0);
 

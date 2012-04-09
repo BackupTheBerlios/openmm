@@ -45,10 +45,9 @@ TabView::~TabView()
 
 
 void
-TabView::addView(View* pView, const std::string& tabName)
+TabView::addView(View* pView, const std::string& tabName, bool show)
 {
-    static_cast<TabViewImpl*>(_pImpl)->addView(pView, tabName);
-    _tabCount++;
+    _tabCount += static_cast<TabViewImpl*>(_pImpl)->addView(pView, tabName, show);
 }
 
 

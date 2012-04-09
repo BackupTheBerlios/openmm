@@ -43,8 +43,8 @@ TabViewImpl::~TabViewImpl()
 }
 
 
-void
-TabViewImpl::addView(View* pView, const std::string& tabName)
+int
+TabViewImpl::addView(View* pView, const std::string& tabName, bool show)
 {
     Omm::Gui::Log::instance()->gui().debug("tab view implementation add view");
 
@@ -53,7 +53,17 @@ TabViewImpl::addView(View* pView, const std::string& tabName)
     NSString* pTabName = [[NSString alloc] initWithUTF8String:tabName.c_str()];
     pViewController.title = pTabName;
 
-    pNativeViewController.viewControllers = [pNativeViewController.viewControllers arrayByAddingObject:pViewController];
+    if ([pNativeViewController.viewControllers containsObject:pViewController]) {
+        if (!show) {
+            // TODO: implement removing a tab
+        }
+        return -1;
+    }
+    else if (show) {
+        pNativeViewController.viewControllers = [pNativeViewController.viewControllers arrayByAddingObject:pViewController];
+        return 1;
+    }
+    return 0;
 }
 
 

@@ -36,7 +36,7 @@ public:
     TabView(View* pParent = 0);
     virtual ~TabView();
 
-    void addView(View* pView, const std::string& tabName = "");
+    void addView(View* pView, const std::string& tabName = "", bool show = true);
     int getTabCount();
     int getCurrentTab();
     void setTabBarHidden(bool hidden = true);
