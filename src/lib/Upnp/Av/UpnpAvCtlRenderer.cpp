@@ -34,8 +34,8 @@ namespace Av {
 
 CtlMediaRenderer::CtlMediaRenderer() :
 _pCurrentMediaObject(0),
-_usePlaylistResource(false)
-//_usePlaylistResource(true)
+//_usePlaylistResource(false)
+_usePlaylistResource(true)
 {
 }
 
@@ -84,9 +84,9 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
         writer.write(metaData, pParentObject);
         try {
             _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pContainerRes->getUri(), metaData);
-            Variant seekTarget;
-            seekTarget.setValue(row);
-            _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_TRACK_NR, seekTarget.getValue());
+//            Variant seekTarget;
+//            seekTarget.setValue(row);
+//            _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_TRACK_NR, seekTarget.getValue());
         }
         catch (Poco::Exception e) {
 //            error(e.message());
@@ -151,6 +151,30 @@ CtlMediaRenderer::pausePressed()
 {
     try {
         _pCtlMediaRendererCode->AVTransport()->Pause(0);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+}
+
+
+void
+CtlMediaRenderer::forwardPressed()
+{
+    try {
+        _pCtlMediaRendererCode->AVTransport()->Next(0);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+}
+
+
+void
+CtlMediaRenderer::backPressed()
+{
+    try {
+        _pCtlMediaRendererCode->AVTransport()->Previous(0);
     }
     catch (Poco::Exception e){
 //        error(e.message());

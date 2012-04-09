@@ -355,13 +355,15 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
-        setEnabled(false);
+//        setEnabled(false);
     }
 
     virtual void pushed()
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-//        pRenderer->playPressed();
+        pRenderer->backPressed();
+        pRenderer->stopPressed();
+        pRenderer->playPressed();
     }
 
     Gui::Image _image;
@@ -376,7 +378,7 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-start.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
-        setEnabled(false);
+//        setEnabled(false);
     }
 
     virtual void pushed()
@@ -387,6 +389,8 @@ public:
 
     virtual bool getEnabled()
     {
+        return true;
+
         Gui::Log::instance()->gui().debug("media renderer play button get enabled");
         if (_pParent && _pParent->getModel()) {
             std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
@@ -410,7 +414,7 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-stop.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
-        setEnabled(false);
+//        setEnabled(false);
     }
 
     virtual void pushed()
@@ -421,6 +425,8 @@ public:
 
     virtual bool getEnabled()
     {
+        return true;
+
         Gui::Log::instance()->gui().debug("media renderer stop button get enabled");
         if (_pParent && _pParent->getModel()) {
             std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
@@ -444,13 +450,15 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
-        setEnabled(false);
+//        setEnabled(false);
     }
 
     virtual void pushed()
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-//        pRenderer->playPressed();
+        pRenderer->forwardPressed();
+        pRenderer->stopPressed();
+        pRenderer->playPressed();
     }
 
     Gui::Image _image;
@@ -475,7 +483,7 @@ class VolSlider : public Gui::Slider
 public:
     VolSlider(Gui::View* pParent = 0) : Gui::Slider(pParent)
     {
-        setEnabled(false);
+//        setEnabled(false);
     }
 
     virtual void valueChanged(int value)
@@ -507,7 +515,7 @@ class SeekSlider : public Gui::Slider
 public:
     SeekSlider(Gui::View* pParent = 0) : Gui::Slider(pParent)
     {
-        setEnabled(false);
+//        setEnabled(false);
     }
 
     virtual void valueChanged(int value)

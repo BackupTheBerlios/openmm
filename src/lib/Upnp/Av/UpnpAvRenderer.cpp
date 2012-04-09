@@ -70,6 +70,8 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 {
     Poco::URI uriParsed(uri);
     if (protInfo.getMimeString() == Mime::PLAYLIST) {
+        Omm::Av::Log::instance()->upnpav().debug("renderer engine got playlist");
+
         Poco::Net::HTTPClientSession session(uriParsed.getHost(), uriParsed.getPort());
 
         Poco::Net::HTTPRequest request("GET", uriParsed.getPath());
@@ -176,16 +178,16 @@ Engine::transportStateChanged()
     std::string newTransportState = transportState();
     Variant val;
     val.setValue(newTransportState);
-//    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
+    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
 //        Omm::Av::Log::instance()->upnpav().debug("engine skips to next track in playlist");
 //        _trackNumberInPlaylist++;
 //        setUri(_playlist[_trackNumberInPlaylist]);
 //        play();
-//    }
-//    else {
+    }
+    else {
         Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
         _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
-//    }
+    }
 }
 
 

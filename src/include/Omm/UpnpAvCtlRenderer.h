@@ -56,6 +56,8 @@ public:
     void playPressed();
     void stopPressed();
     void pausePressed();
+    void forwardPressed();
+    void backPressed();
     void positionMoved(int position);
     void volumeChanged(int value);
     ui2 getVolume();
