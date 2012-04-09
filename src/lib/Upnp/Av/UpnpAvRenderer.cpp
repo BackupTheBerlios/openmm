@@ -149,12 +149,17 @@ Engine::previousTrack()
 }
 
 
-const std::string&
+const std::string
 Engine::transportState()
 {
     switch (getTransportState()) {
         case Stopped:
             return AvTransportArgument::TRANSPORT_STATE_STOPPED;
+        case Ended:
+            // end of track must be distinguished within the engine from stopping a track.
+            // there is no UPnP transport state ended, so we have to add it.
+            // TODO: just pass playlists to the engine and don't handle them separately.
+            return "Ended";
         case Playing:
             return AvTransportArgument::TRANSPORT_STATE_PLAYING;
         case Transitioning:
@@ -175,24 +180,32 @@ void
 Engine::transportStateChanged()
 {
     std::string newTransportState = transportState();
+
+    if (newTransportState == "Ended") {
+        newTransportState = AvTransportArgument::TRANSPORT_STATE_STOPPED;
+        _pEndOfStreamTimer = new Poco::Timer(10);
+        _pEndOfStreamTimer->start(Poco::TimerCallback<Engine> (*this, &Engine::endOfStream));
+    }
+
     Variant val;
     val.setValue(newTransportState);
-    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
-//        Omm::Av::Log::instance()->upnpav().debug("engine skips to next track in playlist");
-//        _trackNumberInPlaylist++;
-//        setUri(_playlist[_trackNumberInPlaylist]);
-//        play();
-    }
-    else {
-        Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
-        _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
-    }
+    Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
+    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 }
 
 
-//void
-//Engine::endOfStream()
-//{
+void
+Engine::endOfStream(Poco::Timer& timer)
+{
+    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size()) {
+//    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
+        Omm::Av::Log::instance()->upnpav().debug("engine skips to next track in playlist");
+        _trackNumberInPlaylist++;
+        stop();
+        setUri(_playlist[_trackNumberInPlaylist]);
+        play();
+    }
+
 //    // position state vars are not evented via LastChange state var (and not evented at all).
 //    _pAVTransportImpl->_setAbsoluteTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
 //    _pAVTransportImpl->_setRelativeTimePosition(AvTransportArgument::CURRENT_TRACK_DURATION_0);
@@ -201,7 +214,7 @@ Engine::transportStateChanged()
 //    Variant val;
 //    val.setValue(AvTransportArgument::TRANSPORT_STATE_STOPPED);
 //    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
-//}
+}
 
 
 MediaRenderer::MediaRenderer()

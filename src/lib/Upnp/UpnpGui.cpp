@@ -529,7 +529,9 @@ public:
     virtual void valueChanged(int value)
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->positionMoved(value);
+//        pRenderer->positionMoved(value);
+        // TODO: seek position value should be multiplied with lenght of track
+        pRenderer->positionMoved(value*2);
     }
 };
 
@@ -557,7 +559,7 @@ MediaRendererView::MediaRendererView()
     _pForwButton = new ForwButton(this);
 
     _pVolSlider = new VolSlider(this);
-//    _pSeekSlider = new SeekSlider(this);
+    _pSeekSlider = new SeekSlider(this);
 
     _pRendererName = new RendererName(this);
     _pRendererName->setAlignment(Gui::View::AlignCenter);

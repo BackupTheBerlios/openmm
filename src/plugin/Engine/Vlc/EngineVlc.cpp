@@ -342,6 +342,8 @@ VlcEngine::pause()
 void
 VlcEngine::stop()
 {
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine: stop ...");
+
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_stop(_pVlcPlayer, _pException);
 #else
@@ -494,7 +496,7 @@ VlcEngine::getLengthSeconds()
 }
 
 
-VlcEngine::TransportState
+Omm::Av::Engine::TransportState
 VlcEngine::getTransportState()
 {
     libvlc_state_t res;
@@ -509,6 +511,7 @@ VlcEngine::getTransportState()
 
     switch (res) {
         case libvlc_Ended:
+            return Ended;
         case libvlc_Stopped:
             return Stopped;
         case libvlc_Playing:

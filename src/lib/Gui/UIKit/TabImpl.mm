@@ -55,9 +55,12 @@ TabViewImpl::addView(View* pView, const std::string& tabName, bool show)
 
     if ([pNativeViewController.viewControllers containsObject:pViewController]) {
         if (!show) {
-            // TODO: implement removing a tab
+            NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
+            [array removeObject:pViewController];
+            pNativeViewController.viewControllers = array;
+//            pNativeViewController.viewControllers = [NSArray arrayWithArray:array];
+            return -1;
         }
-        return -1;
     }
     else if (show) {
         pNativeViewController.viewControllers = [pNativeViewController.viewControllers arrayByAddingObject:pViewController];

@@ -22,6 +22,8 @@
 #ifndef UpnpAvRenderer_INCLUDED
 #define UpnpAvRenderer_INCLUDED
 
+#include <Poco/Timer.h>
+
 #include "Upnp.h"
 #include "UpnpAvObject.h"
 #include "Util.h"
@@ -41,7 +43,7 @@ class Engine : public Util::ConfigurablePlugin
     friend class MediaRenderer;
 
 public:
-    enum TransportState {Stopped, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent};
+    enum TransportState {Stopped, Ended, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent};
 
     Engine();
 
@@ -82,7 +84,7 @@ public:
 
     virtual float getLengthSeconds() = 0;
 
-    const std::string& transportState();
+    const std::string transportState();
 
     /*
       Rendering Control
@@ -98,9 +100,9 @@ protected:
     /// transportStateChanged() is triggered and generates the corresponding UPnP event
     /// via the LastChange mechanism.
 
-//    void endOfStream();
+    void endOfStream(Poco::Timer& timer);
     /// endOfStream is called by the engine implementation on end of track.
-    /// depricated, replaced by transportStateChanged().
+    /// this is different to entering transport state stopped, which is triggered by the user.
 
     std::string                         _engineId;
     Omm::ui4                            _instanceId;
@@ -109,6 +111,7 @@ protected:
     DevRenderingControlRendererImpl*    _pRenderingControlImpl;
     std::vector<std::string>            _playlist;
     Omm::ui4                            _trackNumberInPlaylist;
+    Poco::Timer*                        _pEndOfStreamTimer;
 };
 
 
