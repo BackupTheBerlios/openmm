@@ -930,7 +930,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
                 Gui::Log::instance()->gui().debug("playlist editor load playlist: " + pModel->getTitle());
                 _pPlaylistContainer = pModel;
                 Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
-//                Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
+                Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
                 for (int r = 0; r < pModel->getChildCount(); r++) {
                     Gui::Log::instance()->gui().debug("title: " + pModel->getChildForRow(r)->getTitle());
                     _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));

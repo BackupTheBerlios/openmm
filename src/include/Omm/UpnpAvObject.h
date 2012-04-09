@@ -489,7 +489,7 @@ class AbstractMediaObjectCache
 public:
     AbstractMediaObjectCache(ui4 maxCacheSize = 100);
 
-    virtual ui4 getTotalCount() { return 0; }
+//    virtual ui4 getTotalCount() { return 0; }
     virtual void clear() {}
     virtual AbstractMediaObject* getMediaObjectForRow(ui4 row) { return 0; }
     virtual AbstractMediaObject* getMediaObjectForIndex(ui4 index) { return 0; }

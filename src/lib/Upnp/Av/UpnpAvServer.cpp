@@ -1075,8 +1075,8 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     }
 
     ui4 childCount = 0;
-    // TODO: better criteria for blending in user objects at beginning of list
-    if (offset == 0 && _pUserObjectCache) {
+    // TODO: better criteria for blending in user objects at beginning of list (depending on number of user objects)
+    if (getId() == "0" && offset == 0 && _pUserObjectCache) {
         childCount += _pUserObjectCache->getBlockAtRow(children, this, 0, 0);
     }
 
@@ -1227,8 +1227,8 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         pContainer->setIndex(pObject->getIndex());
         pContainer->_indexNamespace = pObject->_indexNamespace;
         ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pObject->getResource());
-        privateResourceUri = pResource->getUri();
         if (pResource) {
+            privateResourceUri = pResource->getUri();
             std::string uri = pResource->getUri();
             if (uri == "") {
                 std::istream* pStream = pResource->getStream();
