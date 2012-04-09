@@ -77,10 +77,14 @@ public:
     {
         _pController->setTabBarHidden(_fullscreen);
         _pController->init();
+#ifndef __IPHONE__
         addLocalRenderer();
         _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
+#endif
         _localDeviceServer.init();
+#ifndef __IPHONE__
         _pController->setDefaultRenderer(&_mediaRenderer);
+#endif
     }
 
     virtual void finishedEventLoop()
@@ -115,11 +119,12 @@ public:
     void addLocalRenderer()
     {
         Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer ...");
+        Omm::Av::Engine* pEngine;
 #ifdef __IPHONE__
-        Omm::Av::Engine* pEngine = new MPMoviePlayerEngine;
+//        pEngine = new MPMoviePlayerEngine;
 #else
-        Omm::Av::Engine* pEngine = new VlcEngine;
-//        Omm::Av::Engine* pEngine = new PhononEngine;
+        pEngine = new VlcEngine;
+//        pEngine = new PhononEngine;
 #endif
         pEngine->setVisual(_pController->getLocalRendererVisual());
         pEngine->createPlayer();
