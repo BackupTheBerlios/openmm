@@ -1268,8 +1268,9 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
     // add resources
     std::string objectId = pObject->getId();
     std::string resourceUri = _pServer->getServerAddress() + "/" + objectId;
-    if (pObject->isContainer()) {
-        Log::instance()->upnpav().debug("server container, init child create container resource");
+//    if (pObject->isContainer()) {
+    if (AvClass::matchClass(pObject->getClass(), AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER)) {
+        Log::instance()->upnpav().debug("server container, init child create container playlist resource");
         // add playlist resource
         ServerObjectResource* pResource = pObject->createResource();
         pResource->setPrivateResourceUri(privateResourceUri);
@@ -1279,7 +1280,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         pResource->setAttribute(AvProperty::IMPORT_URI, pResource->getUri());
         pObject->addResource(pResource);
     }
-    else {
+    else if (!pObject->isContainer()) {
         Log::instance()->upnpav().debug("server container, init child create item resources");
         for (int r = 0; r < pObject->getResourceCount(); r++) {
             AbstractResource* pResource = pObject->getResource(r);
