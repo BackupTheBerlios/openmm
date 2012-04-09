@@ -892,7 +892,14 @@ MediaObjectReader::readChildren(std::vector<AbstractMediaObject*>& children, con
 {
     Log::instance()->upnpav().debug("read children of media object ...");
     Poco::XML::DOMParser parser;
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
+    try {
+        pDoc = parser.parseString(metaData.substr(0, metaData.rfind('>') + 1));
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().warning("read children of media object failed, could not parse xml representation of media object: " + e.displayText());
+        return;
+    }
     Poco::XML::Node* pObjectNode = pDoc->documentElement()->firstChild();
     while (pObjectNode)
     {
@@ -966,7 +973,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                     childCount = Poco::NumberParser::parseUnsigned(pChildAttr->nodeValue());
                 }
             }
-            catch (Poco::Exception &e) {
+            catch (Poco::Exception& e) {
                 Log::instance()->upnpav().warning("parsing child count in media object reader failed");
             }
             pObject->setChildCount(childCount);
