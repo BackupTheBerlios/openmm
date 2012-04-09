@@ -69,6 +69,7 @@ void
 Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 {
     Poco::URI uriParsed(uri);
+    _playlist.clear();
     if (protInfo.getMimeString() == Mime::PLAYLIST) {
         Omm::Av::Log::instance()->upnpav().debug("renderer engine got playlist");
 
@@ -95,7 +96,6 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
         setUri(_playlist[_trackNumberInPlaylist]);
     }
     else if (preferStdStream()) {
-        _playlist.clear();
         Poco::Net::HTTPClientSession session(uriParsed.getHost(), uriParsed.getPort());
         Poco::Net::HTTPRequest request("GET", uriParsed.getPath());
         session.sendRequest(request);
@@ -113,7 +113,6 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
         setUri(istr, protInfo);
     }
     else {
-        _playlist.clear();
         setUri(uri, protInfo);
     }
 }
