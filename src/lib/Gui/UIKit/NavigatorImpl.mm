@@ -72,6 +72,22 @@ void
 NavigatorViewImpl::showSearchBox(bool show)
 {
 // TODO: implement showSearchBox for UiKit
+    UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
+
+    UISearchBar* searchBar = [[UISearchBar alloc] init];
+//    UISearchBar* searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 10.0)];
+    [searchBar sizeToFit];
+    searchBar.delegate = pNativeViewController;
+//    pNativeViewController.topViewController;
+    UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
+//    buttonItem.frame = CGRectMake(0.0, 0.0, 30.0, 10.0);
+    pNativeViewController.topViewController.navigationItem.rightBarButtonItem = buttonItem;
+//    pNativeViewController.topViewController.navigationItem.rightBarButtonItem = searchBar;
+
+//    [pNativeViewController.navigationBar pushNavigationItem:searchBar];
+//    [pNativeViewController.navigationBar pushNavigationItem:searchBar];
+//    pNativeViewController.navigationItem.titleView = searchBar;
+//    [pNativeViewController setRightBarButtonItem:[[UISearchBar alloc] init]];
 }
 
 

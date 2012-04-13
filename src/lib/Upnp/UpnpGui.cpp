@@ -641,10 +641,10 @@ MediaServerGroupWidget::selectedItem(int row)
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
         // TODO: hide search box when view is popped
+        push(pContainer, pServer->getFriendlyName());
         if (pRootObject->isSearchable()) {
             showSearchBox();
         }
-        push(pContainer, pServer->getFriendlyName());
     }
 }
 
