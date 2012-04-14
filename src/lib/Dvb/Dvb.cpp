@@ -92,7 +92,7 @@ DvbAdapter::DvbAdapter(int num)
     _deviceName = "/dev/dvb/adapter" + Poco::NumberFormatter::format(num);
     _pLnb = DvbDevice::instance()->_lnbs["UNIVERSAL"];
     _recPsi = true;
-    
+
     _pFrontend = new DvbFrontend(this, 0);
     _pDemux = new DvbDemux(this, 0);
     _pDvr = new DvbDvr(this, 0);
@@ -129,11 +129,11 @@ bool
 DvbLnb::isHiBand(unsigned int freq, unsigned int& ifreq)
 {
     bool hiBand = false;
-    
+
     if (_switchVal && _highVal && freq >= _switchVal) {
         hiBand = true;
     }
-    
+
     if (hiBand)
         ifreq = freq - _highVal;
     else {
@@ -142,7 +142,7 @@ DvbLnb::isHiBand(unsigned int freq, unsigned int& ifreq)
         else
             ifreq = freq - _lowVal;
     }
-    
+
     return hiBand;
 }
 
@@ -190,18 +190,18 @@ void
 DvbFrontend::openFrontend()
 {
     Log::instance()->dvb().debug("opening frontend");
-    
+
     if ((_fileDesc = open(_deviceName.c_str(), O_RDWR | O_NONBLOCK)) < 0) {
         Log::instance()->dvb().error("opening frontend failed");
     }
-    
+
     int result = ioctl(_fileDesc, FE_GET_INFO, &_feInfo);
-    
+
     if (result < 0) {
         Log::instance()->dvb().error("ioctl FE_GET_INFO failed");
         close(_fileDesc);
     }
-    
+
     if (_feInfo.type != FE_QPSK) {
         Log::instance()->dvb().error("frontend device is not a QPSK (DVB-S) device");
         close(_fileDesc);
@@ -213,12 +213,12 @@ bool
 DvbFrontend::tune(DvbChannel* pChannel)
 {
     Log::instance()->dvb().debug("frontend tuning to channel");
-    
+
     bool success = false;
     unsigned int ifreq;
     bool hiBand = _pAdapter->_pLnb->isHiBand(pChannel->_freq, ifreq);
     diseqc(pChannel->_satNum, pChannel->_pol, hiBand);
-    
+
     if (tuneFrontend(ifreq, pChannel->_symbolRate)) {
         if (_pAdapter->_pDemux->setVideoPid(pChannel->_vpid) &&
             _pAdapter->_pDemux->setAudioPid(pChannel->_apid) &&
@@ -231,14 +231,15 @@ DvbFrontend::tune(DvbChannel* pChannel)
                         success = false;
                     }
                     else if (!_pAdapter->_pDemux->setPatPid(0) ||
-                             !_pAdapter->_pDemux->setPmtPid(pmtPid)) {
-                                success = false;
-                             }
+                             !_pAdapter->_pDemux->setPmtPid(pmtPid))
+                    {
+                        success = false;
+                    }
                 }
         }
     }
-    
-    Log::instance()->dvb().debug("frontend tuning success.");
+
+    Log::instance()->dvb().debug("frontend tuning " + std::string(success ? "success." : "failed."));
     return success;
 }
 
@@ -258,17 +259,17 @@ DvbFrontend::diseqc(unsigned int satNum, DvbChannel::Polarization pol, bool hiBa
         struct dvb_diseqc_master_cmd cmd;
         uint32_t wait;
     } cmd = { {{0xe0, 0x10, 0x38, 0xf0, 0x00, 0x00}, 4}, 0 };
-    
+
     // param: high nibble: reset bits, low nibble set bits,
     // bits are: option, position, polarization, band
-    
+
     cmd.cmd.msg[3] =
         0xf0 | (((satNum * 4) & 0x0f) | (hiBand ? 1 : 0) | (pol ? 0 : 2));
-    
+
     fe_sec_voltage_t voltage = pol ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
     fe_sec_tone_mode_t tone = hiBand ? SEC_TONE_ON : SEC_TONE_OFF;
     fe_sec_mini_cmd_t burst = satNum % 2 ? SEC_MINI_B : SEC_MINI_A;
-    
+
     if (ioctl(_fileDesc, FE_SET_TONE, SEC_TONE_OFF) == -1) {
         Log::instance()->dvb().error("FE_SET_TONE failed");
     }
@@ -296,23 +297,23 @@ DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
 {
     struct dvb_frontend_parameters tuneto;
     struct dvb_frontend_event event;
-    
+
     // discard stale QPSK events
     while (1) {
         if (ioctl(_fileDesc, FE_GET_EVENT, &event) == -1)
             break;
     }
-    
+
     tuneto.frequency = freq;
     tuneto.inversion = INVERSION_AUTO;
     tuneto.u.qpsk.symbol_rate = symbolRate;
     tuneto.u.qpsk.fec_inner = FEC_AUTO;
-    
+
     if (ioctl(_fileDesc, FE_SET_FRONTEND, &tuneto) == -1) {
         Log::instance()->dvb().error("FE_SET_FRONTEND failed");
         return false;
     }
-    
+
     return true;
 }
 
@@ -324,7 +325,7 @@ DvbFrontend::checkFrontend()
     uint16_t snr, signal;
     uint32_t ber, uncorrected_blocks;
 //     int timeout = 0;
-    
+
     if (ioctl(_fileDesc, FE_READ_STATUS, &status) == -1) {
         Log::instance()->dvb().error("FE_READ_STATUS failed");
     }
@@ -342,7 +343,7 @@ DvbFrontend::checkFrontend()
     if (ioctl(_fileDesc, FE_READ_UNCORRECTED_BLOCKS, &uncorrected_blocks) == -1) {
         uncorrected_blocks = -2;
     }
-    
+
     /*
     if (human_readable) {
         printf ("status %02x | signal %3u%% | snr %3u%% | ber %d | unc %d | ",
@@ -352,7 +353,7 @@ DvbFrontend::checkFrontend()
                 status, signal, snr, ber, uncorrected_blocks);
     }
     */
-    
+
     if (status & FE_HAS_LOCK) {
         Log::instance()->dvb().debug("FE_HAS_LOCK");
     }
@@ -383,7 +384,7 @@ void
 DvbDemux::openDemux()
 {
     Log::instance()->dvb().debug("opening demuxer");
-    
+
     if ((_fileDescVideo = open(_deviceName.c_str(), O_RDWR)) < 0) {
         Log::instance()->dvb().error("opening video demux failed");
     }
@@ -393,7 +394,7 @@ DvbDemux::openDemux()
     if ((_fileDescPcr = open(_deviceName.c_str(), O_RDWR)) < 0) {
         Log::instance()->dvb().error("opening pcr demux failed");
     }
-    
+
     if (_pAdapter->_recPsi){
         if ((_fileDescPat = open(_deviceName.c_str(), O_RDWR)) < 0) {
             Log::instance()->dvb().error("opening pat demux failed");
@@ -452,12 +453,12 @@ DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
     if (pid >= 0x1fff) {  // ignore this pid to allow radio services
         return true;
     }
-    
+
     int buffersize = 64 * 1024;
     if (ioctl(fileDesc, DMX_SET_BUFFER_SIZE, buffersize) == -1) {
         Log::instance()->dvb().error("DMX_SET_BUFFER_SIZE failed");
     }
-    
+
     struct dmx_pes_filter_params pesfilter;
     pesfilter.pid = pid;
     pesfilter.input = DMX_IN_FRONTEND;
@@ -465,14 +466,14 @@ DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
     pesfilter.output = DMX_OUT_TS_TAP;
     pesfilter.pes_type = pesType;
     pesfilter.flags = DMX_IMMEDIATE_START;
-    
+
     if (ioctl(fileDesc, DMX_SET_PES_FILTER, &pesfilter) == -1) {
 //         fprintf(stderr, "DMX_SET_PES_FILTER failed "
 //                 "(PID = 0x%04x): %d %m\n", pid, errno);
         Log::instance()->dvb().error("DMX_SET_PES_FILTER failed");
         return false;
     }
-    
+
     return true;
 }
 
@@ -486,19 +487,19 @@ DvbDemux::getPmtPid(int sid)
     unsigned char buft[4096];
     unsigned char *buf = buft;
     struct dmx_sct_filter_params f;
-    
+
     memset(&f, 0, sizeof(f));
     f.pid = 0;
     f.filter.filter[0] = 0x00;
     f.filter.mask[0] = 0xff;
     f.timeout = 0;
     f.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-    
+
     if (ioctl(_fileDescPat, DMX_SET_FILTER, &f) == -1) {
         Log::instance()->dvb().error("DMX_SET_FILTER failed");
         return 0;
     }
-    
+
     int patread = 0;
     while (!patread){
         if (((count = read(_fileDescPat, buf, sizeof(buft))) < 0) && errno == EOVERFLOW)
@@ -507,14 +508,14 @@ DvbDemux::getPmtPid(int sid)
             Log::instance()->dvb().error("read_sections: read error");
             return 0;
         }
-        
+
         section_length = ((buf[1] & 0x0f) << 8) | buf[2];
         if (count != section_length + 3)
             continue;
-        
+
         buf += 8;
         section_length -= 8;
-        
+
         patread = 1;    // assumes one section contains the whole pat
         while (section_length > 0) {
             int service_id = (buf[0] << 8) | buf[1];
@@ -526,7 +527,7 @@ DvbDemux::getPmtPid(int sid)
             section_length -= 4;
         }
     }
-    
+
     return pmt_pid;
 }
 
@@ -548,6 +549,9 @@ void
 DvbDvr::openDvr()
 {
     _dvrStream.open(_deviceName.c_str());
+    if (!_dvrStream) {
+        Log::instance()->dvb().error("failed to open dvb rec device.");
+    }
 }
 
 

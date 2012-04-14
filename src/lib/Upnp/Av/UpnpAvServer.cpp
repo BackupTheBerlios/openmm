@@ -264,9 +264,13 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             pIstr = pResource->getStream();
             if (pIstr) {
                 Log::instance()->upnpav().debug("sending stream ...");
+//                std::streamsize numBytes = Poco::StreamCopier::copyStream(*pIstr, ostr);
                 std::streamsize numBytes = copyStream(*pIstr, ostr, start, end);
                 Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
-//                delete pIstr;
+                // TODO: define different server resource streaming models:
+                // exclusive access (interruptable by second request or not), unlimited number of streams per resource, ...
+                // resource stream should always be deleted by model and freed by separate method in interface of model (freeStream(std::istream*))?
+                delete pIstr;
             }
             else {
                 throw Poco::Exception("no stream available");
@@ -312,6 +316,9 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
     else {
         istr.read(buffer, _bufferSize);
     }
+    if( istr.bad() ) {
+       Log::instance()->upnpav().error("reading resource stream failed");
+    }
     std::streamsize n = istr.gcount();
     while (n > 0)
     {
@@ -327,6 +334,9 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
             }
             else {
                 istr.read(buffer, _bufferSize);
+            }
+            if( istr.bad() ) {
+                Log::instance()->upnpav().error("reading resource stream failed");
             }
             n = istr.gcount();
         }
