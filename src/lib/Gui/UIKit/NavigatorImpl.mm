@@ -28,6 +28,30 @@
 #include "Gui/GuiLogger.h"
 
 
+@interface OmmNavigationController : UINavigationController<UISearchBarDelegate>
+{
+    Omm::Gui::NavigatorViewImpl* _pNavigatorViewImpl;
+}
+
+@end
+
+
+@implementation OmmNavigationController
+
+- (void)setImpl:(Omm::Gui::NavigatorViewImpl*)pImpl
+{
+    _pNavigatorViewImpl = pImpl;
+}
+
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
+{
+    _pNavigatorViewImpl->textEdited(std::string([searchText UTF8String]));
+}
+
+@end
+
+
 namespace Omm {
 namespace Gui {
 
@@ -36,7 +60,9 @@ NavigatorViewImpl::NavigatorViewImpl(View* pView)
 {
     Omm::Gui::Log::instance()->gui().debug("navigator view impl ctor");
 
-    UINavigationController* pNativeView = [[UINavigationController alloc] init];
+    OmmNavigationController* pNativeView = [[OmmNavigationController alloc] init];
+    [pNativeView setImpl:this];
+
     initViewImpl(pView, pNativeView);
 }
 
@@ -75,19 +101,32 @@ NavigatorViewImpl::showSearchBox(bool show)
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
 
     UISearchBar* searchBar = [[UISearchBar alloc] init];
+//    searchBar.showsCancelButton = YES;
+//    searchBar.showsSearchResultsButton = YES;
+    searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
 //    UISearchBar* searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 10.0)];
     [searchBar sizeToFit];
     searchBar.delegate = pNativeViewController;
+
 //    pNativeViewController.topViewController;
     UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
 //    buttonItem.frame = CGRectMake(0.0, 0.0, 30.0, 10.0);
+
+    // FIXME: adding a search bar slows down scrolling
     pNativeViewController.topViewController.navigationItem.rightBarButtonItem = buttonItem;
-//    pNativeViewController.topViewController.navigationItem.rightBarButtonItem = searchBar;
 
 //    [pNativeViewController.navigationBar pushNavigationItem:searchBar];
 //    [pNativeViewController.navigationBar pushNavigationItem:searchBar];
 //    pNativeViewController.navigationItem.titleView = searchBar;
 //    [pNativeViewController setRightBarButtonItem:[[UISearchBar alloc] init]];
+}
+
+
+void
+NavigatorViewImpl::textEdited(const std::string& searchText)
+{
+    Omm::Gui::Log::instance()->gui().debug("search text changed: " + searchText);
+    IMPL_NOTIFY_CONTROLLER(NavigatorController, changedSearchText, searchText);
 }
 
 

@@ -40,6 +40,7 @@ public:
     void popView();
     void showSearchBox(bool show = true);
 
+    void textEdited(const std::string& searchText);
 };
 
 
