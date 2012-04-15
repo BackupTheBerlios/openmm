@@ -435,7 +435,8 @@ ListView::lastVisibleRow()
 void
 ListView::clearVisibleViews()
 {
-    for (int i = 0; i < _visibleViews.size(); i++) {
+    int visibleViewCount = _visibleViews.size();
+    for (int i = 0; i < visibleViewCount; i++) {
         _visibleViews.back()->hide();
         putFreeView(_visibleViews.back());
         _visibleViews.pop_back();
@@ -536,7 +537,6 @@ ListView::syncViewImpl()
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     clearVisibleViews();
-
     int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
     for (int row = _rowOffset; row <= lastRow; row++) {
         View* pView = getFreeView();
@@ -549,6 +549,9 @@ ListView::syncViewImpl()
         moveItemView(row, pView);
         pView->show();
     }
+
+    // resize view to the size with this item added
+    updateScrollWidgetSize();
 
 //    int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
 //    for (int row = _rowOffset; row <= lastRow; row++) {
@@ -569,7 +572,7 @@ ListView::syncViewImpl()
 //        pView->show();
 //    }
     // resize view to the size with this item added
-    updateScrollWidgetSize();
+//    updateScrollWidgetSize();
 }
 
 
