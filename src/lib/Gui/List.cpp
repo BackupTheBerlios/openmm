@@ -297,7 +297,6 @@ ListView::resize(int width, int height)
         + ", visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
         + ", view pool size: " + Poco::NumberFormatter::format(_viewPool.size())
     );
-    setItemViewWidth(width);
     // finish if all item views fit into viewport
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     if (!pModel) {
@@ -313,6 +312,9 @@ ListView::resize(int width, int height)
         for (int i = 0; i < rowDelta; i++) {
             Log::instance()->gui().debug("growing view");
             View* pView = getFreeView();
+            if (!pView) {
+                return;
+            }
             moveItemView(lastVisibleRow(), pView);
             pView->setModel(pModel->getItemModel(lastVisibleRow()));
             _itemControllers[pView]->setRow(lastVisibleRow());
@@ -372,6 +374,10 @@ ListView::extendViewPool()
 View*
 ListView::getFreeView()
 {
+    if (_freeViews.empty()) {
+        Log::instance()->gui().error("list view, could not get free view");
+        return 0;
+    }
     View* pView = _freeViews.top();
     _freeViews.pop();
     return pView;
@@ -423,6 +429,17 @@ int
 ListView::lastVisibleRow()
 {
     return _rowOffset + _visibleViews.size();
+}
+
+
+void
+ListView::clearVisibleViews()
+{
+    for (int i = 0; i < _visibleViews.size(); i++) {
+        _visibleViews.back()->hide();
+        putFreeView(_visibleViews.back());
+        _visibleViews.pop_back();
+    }
 }
 
 
@@ -480,7 +497,9 @@ ListView::highlightItem(int row)
 
     if (_highlightedRow >= 0 && itemIsVisible(_highlightedRow)) {
         View* pLastHighlightedView = visibleView(visibleIndex(_highlightedRow));
-        pLastHighlightedView->setHighlighted(false);
+        if (pLastHighlightedView) {
+            pLastHighlightedView->setHighlighted(false);
+        }
     }
 
     View* pHighlightedView = visibleView(visibleIndex(row));
@@ -516,24 +535,39 @@ ListView::syncViewImpl()
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
+    clearVisibleViews();
+
     int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
     for (int row = _rowOffset; row <= lastRow; row++) {
-        View* pView;
-        if (row - _rowOffset >= _visibleViews.size() && _freeViews.size()) {
-            pView = getFreeView();
-            _visibleViews.push_back(pView);
-        }
-        else if (_visibleViews.size() > row - _rowOffset) {
-            pView = _visibleViews[row - _rowOffset];
-        }
-        else {
+        View* pView = getFreeView();
+        if (!pView) {
             return;
         }
+        _visibleViews.push_back(pView);
         pView->setModel(pModel->getItemModel(row));
         _itemControllers[pView]->setRow(row);
         moveItemView(row, pView);
         pView->show();
     }
+
+//    int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
+//    for (int row = _rowOffset; row <= lastRow; row++) {
+//        View* pView;
+//        if (row - _rowOffset >= _visibleViews.size() && _freeViews.size()) {
+//            pView = getFreeView();
+//            _visibleViews.push_back(pView);
+//        }
+//        else if (_visibleViews.size() > row - _rowOffset) {
+//            pView = _visibleViews[row - _rowOffset];
+//        }
+//        else {
+//            return;
+//        }
+//        pView->setModel(pModel->getItemModel(row));
+//        _itemControllers[pView]->setRow(row);
+//        moveItemView(row, pView);
+//        pView->show();
+//    }
     // resize view to the size with this item added
     updateScrollWidgetSize();
 }

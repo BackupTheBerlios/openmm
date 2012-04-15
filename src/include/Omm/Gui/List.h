@@ -63,7 +63,7 @@ public:
     void selectRow(int row);
 
     void resetListView();
-    
+
 protected:
     virtual void syncViewImpl();
 
@@ -88,6 +88,7 @@ protected:
     View* visibleView(int index);
     bool itemIsVisible(int row);
     int lastVisibleRow();
+    void clearVisibleViews();
 
     std::vector<View*>                  _viewPool;
     /// The view has a view pool which is large enough to fill the area of the view port
