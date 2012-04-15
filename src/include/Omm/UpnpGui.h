@@ -344,6 +344,7 @@ public:
 
     void playlistNotification(PlaylistNotification* pNotification);
 
+    void setPlaylistContainer(MediaObjectModel* pPlaylistContainer);
     std::stringstream* getPlaylistResource();
     std::string getPlaylistResourceUri();
 

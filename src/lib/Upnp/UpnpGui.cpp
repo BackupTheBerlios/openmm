@@ -938,7 +938,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
         if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
             if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
                 Gui::Log::instance()->gui().debug("playlist editor load playlist: " + pModel->getTitle());
-                _pPlaylistContainer = pModel;
+                setPlaylistContainer(pModel);
                 Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
                 Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
                 for (int r = 0; r < pModel->getChildCount(); r++) {
@@ -952,10 +952,19 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
         Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
         _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + "/Playlist");
+
         // FIXME: why does this crash?
 //        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
     }
     syncViewImpl();
+}
+
+
+void
+PlaylistEditor::setPlaylistContainer(MediaObjectModel* pPlaylistContainer)
+{
+    Gui::Log::instance()->gui().debug("set playlist container with title: " + pPlaylistContainer->getTitle());
+    _pPlaylistContainer = new MediaObjectModel(*pPlaylistContainer);
 }
 
 
