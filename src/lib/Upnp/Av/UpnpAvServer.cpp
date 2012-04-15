@@ -1176,9 +1176,10 @@ ServerContainer::generateChildrenPlaylist()
                 int i = 0;
                 int maxLogEntries = 5;
                 std::string playlistLog;
+                std::stringstream* pChildrenPlaylist = new std::stringstream;
                 for (std::vector<ui4>::iterator it = _childrenPlaylistIndices.begin(); it != _childrenPlaylistIndices.end(); ++it, ++i) {
                     std::string playlistEntry = _pServer->getServerAddress() + "/" + Poco::NumberFormatter::format(*it) + "$0" + Poco::LineEnding::NEWLINE_LF;
-                    _childrenPlaylist << playlistEntry;
+                    *pChildrenPlaylist << playlistEntry;
                     _childrenPlaylistSize += playlistEntry.size();
 
                     if (i == maxLogEntries) {
@@ -1195,7 +1196,7 @@ ServerContainer::generateChildrenPlaylist()
 //            break;
 //    }
 
-    return &_childrenPlaylist;
+    return pChildrenPlaylist;
 }
 
 

@@ -276,7 +276,6 @@ private:
     ServerObjectCache*                                  _pUserObjectCache;
     Layout                                              _layout;
     std::string                                         _groupPropertyName;
-    std::stringstream                                   _childrenPlaylist;
     std::size_t                                         _childrenPlaylistSize;
     std::vector<ui4>                                    _childrenPlaylistIndices;
 
