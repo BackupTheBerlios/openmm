@@ -49,6 +49,12 @@
     _pNavigatorViewImpl->textEdited(std::string([searchText UTF8String]));
 }
 
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+    [searchBar resignFirstResponder];
+}
+
 @end
 
 
@@ -101,7 +107,7 @@ NavigatorViewImpl::showSearchBox(bool show)
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
 
     UISearchBar* searchBar = [[UISearchBar alloc] init];
-//    searchBar.showsCancelButton = YES;
+    searchBar.showsCancelButton = YES;
 //    searchBar.showsSearchResultsButton = YES;
     searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
 //    UISearchBar* searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 10.0)];
