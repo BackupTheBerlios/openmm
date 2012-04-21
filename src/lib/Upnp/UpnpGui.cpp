@@ -839,7 +839,7 @@ Av::CtlMediaObject2(objectModel),
 Gui::ListItemModel(objectModel),
 _pContainer(objectModel._pContainer)
 {
-
+    setLabelModel(new MediaObjectLabelModel(this));
 }
 
 

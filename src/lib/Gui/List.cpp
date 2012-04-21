@@ -544,7 +544,13 @@ ListView::syncViewImpl()
             return;
         }
         _visibleViews.push_back(pView);
-        pView->setModel(pModel->getItemModel(row));
+        Model* pItemModel = pModel->getItemModel(row);
+        if (!pItemModel) {
+            Log::instance()->gui().warning("list view sync view impl could not get item in row: " + Poco::NumberFormatter::format(row));
+            putFreeView(pView);
+            continue;
+        }
+        pView->setModel(pItemModel);
         _itemControllers[pView]->setRow(row);
         moveItemView(row, pView);
         pView->show();

@@ -76,7 +76,8 @@ LabelView::setAlignment(Alignment alignment)
 void
 LabelView::syncViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
+    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
+    Omm::Gui::Log::instance()->gui().debug("Label view sync view with model: " + Poco::NumberFormatter::format(_pModel));
     LabelModel* pLabelModel = static_cast<LabelModel*>(_pModel);
     LabelViewImpl* pImpl = static_cast<LabelViewImpl*>(_pImpl);
     pImpl->setLabel(pLabelModel->getLabel());
