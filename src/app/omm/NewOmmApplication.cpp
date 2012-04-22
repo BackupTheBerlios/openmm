@@ -25,6 +25,8 @@
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
+#include <Poco/Util/XMLConfiguration.h>
+#include <Poco/Util/PropertyFileConfiguration.h>
 
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/Controller.h>
@@ -42,17 +44,17 @@
 
 class OmmApplication;
 
-class OmmKeyController : public Omm::Gui::Controller
-{
-public:
-    OmmKeyController(OmmApplication* pOmmApplication) : _pOmmApplication(pOmmApplication), _appStarted(true) {}
-
-private:
-    virtual void keyPressed(KeyCode key);
-
-    OmmApplication*     _pOmmApplication;
-    bool                _appStarted;
-};
+//class OmmKeyController : public Omm::Gui::Controller
+//{
+//public:
+//    OmmKeyController(OmmApplication* pOmmApplication) : _pOmmApplication(pOmmApplication), _appStarted(true) {}
+//
+//private:
+//    virtual void keyPressed(KeyCode key);
+//
+//    OmmApplication*     _pOmmApplication;
+//    bool                _appStarted;
+//};
 
 
 class OmmApplication : public Omm::Gui::Application
@@ -66,25 +68,25 @@ public:
 
     virtual Omm::Gui::View* createMainView()
     {
-        _pController = new Omm::ControllerWidget;
-        setToolBar(_pController->getControlPanel());
-        setStatusBar(_pController->getStatusBar());
-        _pController->attachController(new OmmKeyController(this));
-        return _pController;
+        _pControllerWidget = new Omm::ControllerWidget;
+        setToolBar(_pControllerWidget->getControlPanel());
+        setStatusBar(_pControllerWidget->getStatusBar());
+//        _pControllerWidget->attachController(new OmmKeyController(this));
+        return _pControllerWidget;
     }
 
     virtual void presentedMainView()
     {
-        _pController->setTabBarHidden(_fullscreen);
-        _pController->showOnlyBasicDeviceGroups(_fullscreen);
-        _pController->init();
+        _pControllerWidget->setTabBarHidden(_fullscreen);
+        _pControllerWidget->showOnlyBasicDeviceGroups(_fullscreen);
+        _pControllerWidget->init();
 #ifndef __IPHONE__
         addLocalRenderer();
         _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
 #endif
         _localDeviceServer.init();
 #ifndef __IPHONE__
-        _pController->setDefaultRenderer(&_mediaRenderer);
+        _pControllerWidget->setDefaultRenderer(&_mediaRenderer);
 #endif
     }
 
@@ -96,13 +98,13 @@ public:
     {
         Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
         _localDeviceServer.stop();
-        _pController->stop();
+        _pControllerWidget->stop();
     }
 
     virtual void start()
     {
         Omm::Av::Log::instance()->upnpav().debug("omm application starting ...");
-        _pController->start();
+        _pControllerWidget->start();
         _localDeviceServer.start();
     }
 
@@ -127,7 +129,7 @@ public:
         pEngine = new VlcEngine;
 //        pEngine = new PhononEngine;
 #endif
-        pEngine->setVisual(_pController->getLocalRendererVisual());
+        pEngine->setVisual(_pControllerWidget->getLocalRendererVisual());
         pEngine->createPlayer();
 
         _mediaRenderer.addEngine(pEngine);
@@ -139,7 +141,7 @@ public:
         Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer finished.");
     }
 
-    Omm::ControllerWidget*  _pController;
+    Omm::ControllerWidget*  _pControllerWidget;
     Omm::Av::MediaRenderer  _mediaRenderer;
     Omm::DeviceContainer    _localDeviceContainer;
     Omm::DeviceServer       _localDeviceServer;
@@ -148,14 +150,14 @@ public:
 };
 
 
-void
-OmmKeyController::keyPressed(KeyCode key)
-{
-    if (key == Omm::Gui::Controller::KeyX) {
-        _appStarted ? _pOmmApplication->stop() : _pOmmApplication->start();
-        _appStarted = !_appStarted;
-    }
-}
+//void
+//OmmKeyController::keyPressed(KeyCode key)
+//{
+//    if (key == Omm::Gui::Controller::KeyX) {
+//        _appStarted ? _pOmmApplication->stop() : _pOmmApplication->start();
+//        _appStarted = !_appStarted;
+//    }
+//}
 
 
 class Application :  public Poco::Util::Application
@@ -181,13 +183,27 @@ public:
 
     void initialize(Application& self)
     {
-        loadConfiguration();
         Poco::Util::Application::initialize(self);
+
+        _confFilePath = Omm::Util::Home::instance()->getConfigDirPath("/") + "omm.properties";
+        _pConf = new Poco::Util::PropertyFileConfiguration;
+        try {
+            _pConf->load(_confFilePath);
+        }
+        catch (Poco::Exception& e) {
+            Omm::Av::Log::instance()->upnpav().debug("no config file present");
+        }
+//        config().addWriteable(_pConf, -200);
+        config().addWriteable(_pConf, 0);
+
+        printConfig();
     }
 
     void uninitialize()
     {
         Poco::Util::Application::uninitialize();
+
+        _pConf->save(_confFilePath);
     }
 
     void defineOptions(Poco::Util::OptionSet& options)
@@ -209,11 +225,13 @@ public:
                            .repeatable(false));
         options.addOption(
                            Poco::Util::Option("width", "w", "width of application window")
+                           .binding("width")
                            .required(false)
                            .repeatable(false)
                            .argument("width", true));
         options.addOption(
                            Poco::Util::Option("height", "h", "height of application window")
+                           .binding("height")
                            .required(false)
                            .repeatable(false)
                            .argument("height", true));
@@ -237,12 +255,12 @@ public:
         else if (name == "fullscreen") {
             _fullscreen = true;
         }
-        else if (name == "width") {
-            _width = Poco::NumberParser::parse(value);
-        }
-        else if (name == "height") {
-            _height = Poco::NumberParser::parse(value);
-        }
+//        else if (name == "width") {
+//            _width = Poco::NumberParser::parse(value);
+//        }
+//        else if (name == "height") {
+//            _height = Poco::NumberParser::parse(value);
+//        }
         else if (name == "scale") {
             _scale = Poco::NumberParser::parseFloat(value);
         }
@@ -257,6 +275,33 @@ public:
         helpFormatter.format(std::cout);
     }
 
+    void printConfig()
+    {
+        std::vector<std::string> rootKeys;
+        config().keys(rootKeys);
+        for (std::vector<std::string>::iterator it = rootKeys.begin(); it != rootKeys.end(); ++it) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, root keys: " + *it);
+        }
+
+        std::vector<std::string> confKeys;
+        _pConf->keys(confKeys);
+        for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+        }
+
+        std::vector<std::string> appKeys;
+        config().keys("application", appKeys);
+        for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, application keys: " + *it + ", value: " + config().getString("application." + *it, ""));
+        }
+
+        std::vector<std::string> sysKeys;
+        config().keys("system", sysKeys);
+        for (std::vector<std::string>::iterator it = sysKeys.begin(); it != sysKeys.end(); ++it) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, system keys: " + *it + ", value: " + config().getString("system." + *it, ""));
+        }
+    }
+
     int main(const std::vector<std::string>& args)
     {
         if (_helpRequested)
@@ -265,24 +310,40 @@ public:
         }
         else
         {
+            initialize(*this);
+
+            _width = config().getInt("width", 800);
+            _height = config().getInt("height", 480);
+
             OmmApplication app;
             app.setRendererName(_rendererName);
             app.setFullscreen(_fullscreen);
             app.resizeMainView(_width, _height);
             app.scaleMainView(_scale);
             app.run(_argc, _argv);
+
+//            _pConf->setInt("width", app.width());
+//            _pConf->setInt("height", app.height());
+            _pConf->setInt("width", app.getMainView()->width());
+            _pConf->setInt("height", app.getMainView()->height());
+//            config().setInt("width", app.getMainView()->width());
+//            config().setInt("height", app.getMainView()->height());
+
+            uninitialize();
         }
         return Application::EXIT_OK;
     }
 
-    int                     _argc;
-    char**                  _argv;
-    bool                    _helpRequested;
-    std::string             _rendererName;
-    bool                    _fullscreen;
-    int                     _width;
-    int                     _height;
-    float                   _scale;
+    int                                         _argc;
+    char**                                      _argv;
+    bool                                        _helpRequested;
+    Poco::Util::PropertyFileConfiguration*      _pConf;
+    std::string                                 _confFilePath;
+    std::string                                 _rendererName;
+    bool                                        _fullscreen;
+    int                                         _width;
+    int                                         _height;
+    float                                       _scale;
 };
 
 
