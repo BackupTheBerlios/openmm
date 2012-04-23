@@ -65,7 +65,8 @@ public:
 
     OmmApplication() :
     _fullscreen(false),
-    _enableRenderer(false)
+    _enableRenderer(false),
+    _enableServer(false)
     {
     }
 
@@ -102,6 +103,8 @@ public:
 //#ifndef __IPHONE__
         if (_enableRenderer) {
             addLocalRenderer();
+        }
+        if (_enableRenderer || _enableServer) {
             _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
         }
 //#endif
@@ -120,6 +123,13 @@ public:
     {
         Omm::Gui::Application::setFullscreen(fullscreen);
         _fullscreen = fullscreen;
+    }
+
+    void addLocalRenderer(const std::string& name, const std::string& uuid)
+    {
+        _enableRenderer = true;
+        _rendererName = name;
+        _rendererUuid = uuid;
     }
 
     void addLocalRenderer()
@@ -145,12 +155,47 @@ public:
         Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer finished.");
     }
 
+    void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath)
+    {
+        Omm::Av::Log::instance()->upnpav().debug("omm application add local server ...");
+
+        Omm::Av::AbstractDataModel* pDataModel;
+        Omm::Util::PluginLoader<Omm::Av::AbstractDataModel> pluginLoader;
+        try {
+            pDataModel = pluginLoader.load(pluginName);
+        }
+        catch(Poco::NotFoundException) {
+            Omm::Av::Log::instance()->upnpav().error("could not find server plugin: " + pluginName);
+            return;
+        }
+        Omm::Av::Log::instance()->upnpav().information("container plugin: " + pluginName + " loaded successfully");
+
+        _enableServer = true;
+        Omm::Av::MediaServer* pMediaServer = new Omm::Av::MediaServer;
+
+        Omm::Av::ServerContainer* pContainer = new Omm::Av::ServerContainer(pMediaServer);
+        pContainer->setTitle(name);
+        pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
+        pContainer->setDataModel(pDataModel);
+        pContainer->setBasePath(basePath);
+
+        pMediaServer->setRoot(pContainer);
+        pMediaServer->setFriendlyName(name);
+        Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
+        pMediaServer->addIcon(pIcon);
+
+        _localDeviceContainer.addDevice(pMediaServer);
+
+        Omm::Av::Log::instance()->upnpav().debug("omm application add local server finished.");
+    }
+
     Omm::ControllerWidget*  _pControllerWidget;
     Omm::Av::MediaRenderer  _mediaRenderer;
     Omm::DeviceContainer    _localDeviceContainer;
     Omm::DeviceServer       _localDeviceServer;
     bool                    _fullscreen;
     bool                    _enableRenderer;
+    bool                    _enableServer;
     std::string             _rendererName;
     std::string             _rendererUuid;
 };
@@ -230,13 +275,13 @@ public:
                            .repeatable(false));
         options.addOption(
                            Poco::Util::Option("width", "w", "width of application window")
-                           .binding("width")
+                           .binding("application.width")
                            .required(false)
                            .repeatable(false)
                            .argument("width", true));
         options.addOption(
                            Poco::Util::Option("height", "h", "height of application window")
-                           .binding("height")
+                           .binding("application.height")
                            .required(false)
                            .repeatable(false)
                            .argument("height", true));
@@ -314,19 +359,30 @@ public:
             initialize(*this);
 
             OmmApplication app;
-            app._enableRenderer = config().getBool("renderer.enable", false);
-            app._rendererName = config().getString("renderer.friendlyName", "OMM Renderer");
-            app._rendererUuid = config().getString("renderer.uuid", "");
+
+            if (config().getBool("renderer.enable", false)) {
+                app.addLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
+                        config().getString("renderer.uuid", ""));
+            }
+
+            if (config().getBool("server.enable", false)) {
+                app.addLocalServer(config().getString("server.friendlyName", "OMM Server"),
+                        config().getString("server.uuid", ""),
+                        config().getString("server.plugin", "model-webradio"),
+                        config().getString("server.basePath", Omm::Util::Home::instance()->getConfigDirPath("/") + "webradio.conf"));
+            }
+
             app.setFullscreen(_fullscreen);
-            app.resizeMainView(config().getInt("width", 800), config().getInt("height", 480));
+            app.resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
             app.scaleMainView(_scale);
+
             app.run(_argc, _argv);
 
 //            _pConf->setInt("width", app.width());
 //            _pConf->setInt("height", app.height());
             // FIXME: main view is smaller than app window
-            _pConf->setInt("width", app.getMainView()->width());
-            _pConf->setInt("height", app.getMainView()->height());
+            _pConf->setInt("application.width", app.getMainView()->width());
+            _pConf->setInt("application.height", app.getMainView()->height());
 //            config().setInt("width", app.getMainView()->width());
 //            config().setInt("height", app.getMainView()->height());
 
