@@ -3285,8 +3285,10 @@ void
 DeviceContainer::initUuid()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        Log::instance()->upnp().debug("init device container: setting random uuid for device");
-        (*d)->setRandomUuid();
+        if ((*d)->getUuid() == "") {
+            Log::instance()->upnp().debug("init device container: setting random uuid for device");
+            (*d)->setRandomUuid();
+        }
         // FIXME: this should override a base uri, if already present in the device description
 //         (*d)->addProperty("URLBase", _httpSocket.getServerUri());
     }

@@ -59,10 +59,13 @@ class OmmApplication;
 
 class OmmApplication : public Omm::Gui::Application
 {
+    friend class Application;
+
 public:
 
     OmmApplication() :
-    _fullscreen(false)
+    _fullscreen(false),
+    _enableRenderer(false)
     {
     }
 
@@ -80,14 +83,6 @@ public:
         _pControllerWidget->setTabBarHidden(_fullscreen);
         _pControllerWidget->showOnlyBasicDeviceGroups(_fullscreen);
         _pControllerWidget->init();
-#ifndef __IPHONE__
-        addLocalRenderer();
-        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
-#endif
-        _localDeviceServer.init();
-#ifndef __IPHONE__
-        _pControllerWidget->setDefaultRenderer(&_mediaRenderer);
-#endif
     }
 
     virtual void finishedEventLoop()
@@ -104,13 +99,21 @@ public:
     virtual void start()
     {
         Omm::Av::Log::instance()->upnpav().debug("omm application starting ...");
+//#ifndef __IPHONE__
+        if (_enableRenderer) {
+            addLocalRenderer();
+            _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
+        }
+//#endif
+        _localDeviceServer.init();
+//#ifndef __IPHONE__
+        if (_enableRenderer) {
+            _pControllerWidget->setDefaultRenderer(&_mediaRenderer);
+        }
+//#endif
+
         _pControllerWidget->start();
         _localDeviceServer.start();
-    }
-
-    void setRendererName(const std::string& rendererName)
-    {
-        _rendererName = rendererName;
     }
 
     void setFullscreen(bool fullscreen)
@@ -136,6 +139,7 @@ public:
         Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
         _mediaRenderer.addIcon(pRendererIcon);
         _mediaRenderer.setFriendlyName(_rendererName);
+        _mediaRenderer.setUuid(_rendererUuid);
         _localDeviceContainer.addDevice(&_mediaRenderer);
         _localDeviceContainer.setRootDevice(&_mediaRenderer);
         Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer finished.");
@@ -146,7 +150,9 @@ public:
     Omm::DeviceContainer    _localDeviceContainer;
     Omm::DeviceServer       _localDeviceServer;
     bool                    _fullscreen;
+    bool                    _enableRenderer;
     std::string             _rendererName;
+    std::string             _rendererUuid;
 };
 
 
@@ -168,14 +174,12 @@ public:
     _argc(argc),
     _argv(argv),
     _helpRequested(false),
-#ifdef __IPHONE__
-    _rendererName("iPhone Renderer"),
-#else
-    _rendererName("OMM Renderer"),
-#endif
+//#ifdef __IPHONE__
+//    _rendererName("iPhone Renderer"),
+//#else
+//    _rendererName("OMM Renderer"),
+//#endif
     _fullscreen(false),
-    _width(800),
-    _height(480),
     _scale(1.0)
     {
         setUnixOptions(true);
@@ -216,6 +220,7 @@ public:
                            .repeatable(false));
         options.addOption(
                            Poco::Util::Option("renderername", "r", "friendly name of UPnP-AV renderer")
+                           .binding("renderer.friendlyName")
                            .required(false)
                            .repeatable(false)
                            .argument("renderername", true));
@@ -249,18 +254,9 @@ public:
         if (name == "help") {
             _helpRequested = true;
         }
-        else if (name == "renderername") {
-            _rendererName = value;
-        }
         else if (name == "fullscreen") {
             _fullscreen = true;
         }
-//        else if (name == "width") {
-//            _width = Poco::NumberParser::parse(value);
-//        }
-//        else if (name == "height") {
-//            _height = Poco::NumberParser::parse(value);
-//        }
         else if (name == "scale") {
             _scale = Poco::NumberParser::parseFloat(value);
         }
@@ -286,7 +282,12 @@ public:
         std::vector<std::string> confKeys;
         _pConf->keys(confKeys);
         for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+            if (*it == "renderer") {
+                Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString("renderer." + *it, ""));
+            }
+            else {
+                Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+            }
         }
 
         std::vector<std::string> appKeys;
@@ -312,18 +313,18 @@ public:
         {
             initialize(*this);
 
-            _width = config().getInt("width", 800);
-            _height = config().getInt("height", 480);
-
             OmmApplication app;
-            app.setRendererName(_rendererName);
+            app._enableRenderer = config().getBool("renderer.enable", false);
+            app._rendererName = config().getString("renderer.friendlyName", "OMM Renderer");
+            app._rendererUuid = config().getString("renderer.uuid", "");
             app.setFullscreen(_fullscreen);
-            app.resizeMainView(_width, _height);
+            app.resizeMainView(config().getInt("width", 800), config().getInt("height", 480));
             app.scaleMainView(_scale);
             app.run(_argc, _argv);
 
 //            _pConf->setInt("width", app.width());
 //            _pConf->setInt("height", app.height());
+            // FIXME: main view is smaller than app window
             _pConf->setInt("width", app.getMainView()->width());
             _pConf->setInt("height", app.getMainView()->height());
 //            config().setInt("width", app.getMainView()->width());
