@@ -177,10 +177,16 @@ public:
         pContainer->setTitle(name);
         pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
         pContainer->setDataModel(pDataModel);
-        pContainer->setBasePath(basePath);
+        std::string path = basePath;
+        // if relative path then search file in config directory
+        if (basePath[0] != '/') {
+            path = Omm::Util::Home::instance()->getConfigDirPath("/") + basePath;
+        }
+        pContainer->setBasePath(path);
 
         pMediaServer->setRoot(pContainer);
         pMediaServer->setFriendlyName(name);
+        pMediaServer->setUuid(uuid);
         Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
         pMediaServer->addIcon(pIcon);
 
@@ -327,12 +333,7 @@ public:
         std::vector<std::string> confKeys;
         _pConf->keys(confKeys);
         for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
-            if (*it == "renderer") {
-                Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString("renderer." + *it, ""));
-            }
-            else {
-                Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
-            }
+            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
         }
 
         std::vector<std::string> appKeys;
@@ -365,12 +366,24 @@ public:
                         config().getString("renderer.uuid", ""));
             }
 
-            if (config().getBool("server.enable", false)) {
-                app.addLocalServer(config().getString("server.friendlyName", "OMM Server"),
-                        config().getString("server.uuid", ""),
-                        config().getString("server.plugin", "model-webradio"),
-                        config().getString("server.basePath", Omm::Util::Home::instance()->getConfigDirPath("/") + "webradio.conf"));
+            std::vector<std::string> servers;
+            config().keys("server", servers);
+            for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+                Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+                if (config().getBool("server." + *it + ".enable", false)) {
+                    app.addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
+                            config().getString("server." + *it + ".uuid", ""),
+                            config().getString("server." + *it + ".plugin", "model-webradio"),
+                            config().getString("server." + *it + ".basePath", "webradio.conf"));
+                }
             }
+
+//            if (config().getBool("server.enable", false)) {
+//                app.addLocalServer(config().getString("server.friendlyName", "OMM Server"),
+//                        config().getString("server.uuid", ""),
+//                        config().getString("server.plugin", "model-webradio"),
+//                        config().getString("server.basePath", "webradio.conf"));
+//            }
 
             app.setFullscreen(_fullscreen);
             app.resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
