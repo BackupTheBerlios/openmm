@@ -410,6 +410,7 @@ class DevDeviceCode
     friend class DeviceContainer;
     friend class DeviceServer;
     friend class Device;
+    friend class ControlRequestHandler;
 
 public:
     DevDeviceCode();
@@ -449,7 +450,7 @@ protected:
 class DeviceGroupDelegate
 {
     friend class DeviceGroup;
-    
+
 public:
     DeviceGroupDelegate();
 
@@ -460,7 +461,7 @@ protected:
     void setDeviceGroup(DeviceGroup* pDeviceGroup);
 
     virtual void init() {}
-    
+
     DeviceGroup*    _pDeviceGroup;
 };
 

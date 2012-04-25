@@ -122,7 +122,6 @@ private:
     Poco::Net::HTTPServer*                _pHttpServer;
     Poco::UInt16                          _httpServerPort;
     UpnpRequestHandlerFactory*            _pDeviceRequestHandlerFactory;
-    Poco::NotificationCenter              _notificationCenter;
 };
 
 
@@ -134,7 +133,6 @@ public:
 
     void initSockets();
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
-    void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerSsdpMessageHandler(const Poco::AbstractObserver& observer);
 
     void startSsdp();
@@ -144,7 +142,6 @@ public:
     void stopHttp();
 
     std::string getHttpServerUri();
-    void postAction(Action* pAction);
     void sendSsdpMessage(SsdpMessage& ssdpMessage, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void sendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet, int repeat = 1, long delay = 0, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
     void startSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);

@@ -2521,7 +2521,14 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     pAction = requestReader.action();
     // the corresponding Service should register as a Notification Handler
 //    _pService->getDevice()->getDeviceContainer()->postAction(pAction);
-    _pService->getDevice()->getDeviceContainer()->getDeviceManager()->postAction(pAction);
+
+    // FIXME: Action is posted (via Poco::Notification) to all Devices in a DeviceContainer and thus looped over and executed by all devices.
+    //        use _pService->getDevice() to post it directly to the Device?
+//    Log::instance()->ctrl().debug("dispatch action to device with uuid: " + _pService->getDevice()->getUuid());
+//    _pService->getDevice()->getDeviceContainer()->getDeviceManager()->postAction(pAction);
+//    _pService->getDevice()->getDevDeviceCode()->actionHandler(pAction);
+    _pService->getDevice()->postAction(pAction);
+
     // return Action response with out arguments filled in by Notification Handler
     std::string responseBody;
     ActionResponseWriter responseWriter(responseBody);
@@ -2782,13 +2789,6 @@ Socket::registerHttpRequestHandler(std::string path, UpnpRequestHandler* request
 
 
 void
-Socket::registerActionHandler(const Poco::AbstractObserver& observer)
-{
-    _httpSocket._notificationCenter.addObserver(observer);
-}
-
-
-void
 Socket::registerSsdpMessageHandler(const Poco::AbstractObserver& observer)
 {
     _ssdpSocket.addObserver(observer);
@@ -2827,13 +2827,6 @@ std::string
 Socket::getHttpServerUri()
 {
     return _httpSocket.getServerUri();
-}
-
-
-void
-Socket::postAction(Action* pAction)
-{
-    _httpSocket._notificationCenter.postNotification(pAction);
 }
 
 
@@ -2920,13 +2913,6 @@ void
 DeviceManager::registerDeviceNotificationHandler(const Poco::AbstractObserver& observer)
 {
     _deviceNotificationCenter.addObserver(observer);
-}
-
-
-void
-DeviceManager::registerActionHandler(const Poco::AbstractObserver& observer)
-{
-    _pSocket->registerActionHandler(observer);
 }
 
 
@@ -3054,13 +3040,6 @@ DeviceManager::stopHttp()
     Log::instance()->http().information("stopping socket...");
     _pSocket->stopHttp();
     Log::instance()->http().information("socket stopped.");
-}
-
-
-void
-DeviceManager::postAction(Action* pAction)
-{
-    _pSocket->postAction(pAction);
 }
 
 
@@ -3370,10 +3349,8 @@ DeviceContainer::initDevice()
             _pDeviceManager->registerHttpRequestHandler((*s)->getEventSubscriptionPath(), new EventSubscriptionRequestHandler((*s)));
             (*s)->enableEventing();
         }
-        _pDeviceManager->registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
+        (*d)->registerActionHandler(Poco::Observer<DevDeviceCode, Action>(*(*d)->_pDevDeviceCode, &DevDeviceCode::actionHandler));
     }
-
-
 }
 
 
@@ -3657,6 +3634,20 @@ Device::addService(Service* pService)
 {
     _pDeviceData->addService(pService);
     _pDeviceData->setDevice(this);
+}
+
+
+void
+Device::postAction(Action* pAction)
+{
+    _notificationCenter.postNotification(pAction);
+}
+
+
+void
+Device::registerActionHandler(const Poco::AbstractObserver& observer)
+{
+    _notificationCenter.addObserver(observer);
 }
 
 

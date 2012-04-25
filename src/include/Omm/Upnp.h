@@ -395,7 +395,6 @@ public:
     void registerDeviceNotificationHandler(const Poco::AbstractObserver& observer);
 
 protected:
-    void registerActionHandler(const Poco::AbstractObserver& observer);
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
 
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
@@ -409,9 +408,6 @@ protected:
     Container<DeviceContainer> _deviceContainers;
     Poco::NotificationCenter   _deviceNotificationCenter;
     Socket*                    _pSocket;
-
-private:
-    void postAction(Action* pAction);
 };
 
 
@@ -480,6 +476,7 @@ class Device
     friend class DeviceGroup;
     friend class EventMessageReader;
     friend class Controller;
+    friend class ControlRequestHandler;
 
 public:
     Device();
@@ -525,6 +522,7 @@ public:
 protected:
     virtual void initController() {}
     virtual void selected() {}
+    void postAction(Action* pAction);
 
 private:
     void addProperty(const std::string& name, const std::string& val);
@@ -532,11 +530,13 @@ private:
     DeviceData* getDeviceData() const;
     DevDeviceCode* getDevDeviceCode() const;
     CtlDeviceCode* getCtlDeviceCode() const;
+    void registerActionHandler(const Poco::AbstractObserver& observer);
 
     DeviceContainer*                    _pDeviceContainer;
     DeviceData*                         _pDeviceData;
     DevDeviceCode*                      _pDevDeviceCode;
     CtlDeviceCode*                      _pCtlDeviceCode;
+    Poco::NotificationCenter            _notificationCenter;
 };
 
 
