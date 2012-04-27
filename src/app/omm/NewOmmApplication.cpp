@@ -84,6 +84,7 @@ public:
         _pControllerWidget->setTabBarHidden(_fullscreen);
         _pControllerWidget->showOnlyBasicDeviceGroups(_fullscreen);
         _pControllerWidget->init();
+        _pControllerWidget->setLocalDeviceServer(&_localDeviceServer);
     }
 
     virtual void finishedEventLoop()

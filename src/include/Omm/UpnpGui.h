@@ -92,7 +92,10 @@ public:
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
     virtual void signalNetworkActivity(bool on);
+
+    void setLocalDeviceServer(DeviceServer* pDeviceServer) { _pDeviceServer = pDeviceServer; }
     virtual std::stringstream* getPlaylistResource();
+    virtual std::stringstream* getConfigForm(const Poco::Net::HTMLForm& form);
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
@@ -103,6 +106,7 @@ private:
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;
     bool                        _fullscreen;
+    DeviceServer*               _pDeviceServer;
 };
 
 

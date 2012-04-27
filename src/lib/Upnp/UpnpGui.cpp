@@ -21,6 +21,7 @@
 
 #include <Poco/NotificationCenter.h>
 #include <Poco/Observer.h>
+#include <Poco/Util/Application.h>
 
 #include "UpnpGui.h"
 #include "Gui/GuiLogger.h"
@@ -156,6 +157,82 @@ std::stringstream*
 ControllerWidget::getPlaylistResource()
 {
     return _pPlaylistEditor->getPlaylistResource();
+}
+
+
+std::stringstream*
+ControllerWidget::getConfigForm(const Poco::Net::HTMLForm& form)
+{
+    std::stringstream* pOutStream = new std::stringstream;
+    *pOutStream << "<html>\n"
+                    "<head>\n"
+                    "<title>OMM Controller Configuration</title>\n"
+                    "</head>\n"
+                    "<body>\n"
+                    "<h1>OMM Controller Configuration</h1>\n";
+
+//    *pOutStream << "<h2>Application Config</h2><p>\n";
+//    std::vector<std::string> appKeys;
+//    Poco::Util::Application::instance().config().keys("application", appKeys);
+//    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
+//        *pOutStream << "application key: " + *it + ", value: " + Poco::Util::Application::instance().config().getString("application." + *it, "") << "<br>\n";
+//    }
+//    *pOutStream << "</p>";
+
+
+    *pOutStream << "<h2>Renderer</h2>\n";
+    std::string rendererName = Poco::Util::Application::instance().config().getString("renderer.friendlyName", "");
+    bool rendererEnable = Poco::Util::Application::instance().config().getBool("renderer.enable", false);
+    *pOutStream << "<form method=\"POST\" action=\"/Config\">\n"
+        "<input type=\"text\" name=\"renderer.friendlyName\" size=\"31\" value=\"" + rendererName +  "\">\n"
+        "<input type=\"checkbox\" name=\"renderer.enable\" value=\"true\"" +  (rendererEnable ? "checked" : "") + " >Enable\n"
+        "<input type=\"submit\" value=\"Save\">\n"
+        "</form>\n";
+
+
+
+//    *pOutStream << "</p>";
+
+//    std::vector<std::string> servers;
+//    Poco::Util::Application::instance().config().keys("server", servers);
+//    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+//        *pOutStream << Poco::Util::Application::instance().config().getString("server." + *it + ".friendlyName", "") << "<br>\n";
+//    }
+//    *pOutStream << "</p>";
+
+//    *pOutStream  << "<h2>Local Device Container</h2><p>\n";
+//    for (DeviceManager::DeviceContainerIterator it = _pDeviceServer->beginDeviceContainer(); it != _pDeviceServer->endDeviceContainer(); ++it) {
+//        for (DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+//            *pOutStream << "device: " + (*d)->getFriendlyName() << "<br>\n";
+//        }
+//    }
+//    *pOutStream << "</p>";
+
+    if (!form.empty()) {
+//        Device* pRenderer = (*_pDeviceServer->beginDeviceContainer())->getRootDevice();
+//        DeviceContainer* pDeviceContainer = *_pDeviceServer->beginDeviceContainer();
+//        pDeviceContainer->
+        _pDeviceServer->stop();
+
+        *pOutStream  << "<h2>Form</h2><p>\n";
+
+        if (form.get("renderer.enable", "false") == "false") {
+            // remove renderer from container
+        }
+
+        _pDeviceServer->start();
+
+        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
+        {
+//            Gui::Log::instance()->gui().debug("form key: " + it->first + "form value: " + it->second);
+            *pOutStream << it->first << ": " << it->second << "<br>\n";
+        }
+        *pOutStream << "</p>";
+    }
+
+    *pOutStream << "</body>\n";
+
+    return pOutStream;
 }
 
 
@@ -951,7 +1028,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     else if (_pPlaylistContainer) {
         Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
-        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + "/Playlist");
+        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + Omm::Controller::PLAYLIST_URI);
 
         // FIXME: why does this crash?
 //        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
@@ -982,7 +1059,7 @@ PlaylistEditor::getPlaylistResource()
 std::string
 PlaylistEditor::getPlaylistResourceUri()
 {
-    _pControllerWidget->getControllerHttpUri() + "/Playlist";
+    _pControllerWidget->getControllerHttpUri() + Omm::Controller::PLAYLIST_URI;
 }
 
 
@@ -993,7 +1070,7 @@ PlaylistEditor::deleteItem(MediaObjectModel* pModel)
     std::vector<MediaObjectModel*>::iterator pos = std::find(_playlistItems.begin(), _playlistItems.end(), pModel);
     if (pos != _playlistItems.end()) {
         _playlistItems.erase(pos);
-        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + "/Playlist");
+        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + Omm::Controller::PLAYLIST_URI);
         delete pModel;
         syncViewImpl();
     }

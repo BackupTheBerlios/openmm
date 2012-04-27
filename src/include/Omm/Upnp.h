@@ -44,6 +44,7 @@
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
+#include <Poco/Net/HTMLForm.h>
 #include <Poco/NotificationCenter.h>
 
 #include "UpnpTypes.h"
@@ -414,6 +415,9 @@ protected:
 class Controller : public DeviceManager
 {
 public:
+    static const std::string PLAYLIST_URI;
+    static const std::string CONFIG_URI;
+
     Controller(int port = 0);
     virtual ~Controller();
 
@@ -427,6 +431,7 @@ public:
 
     std::string getControllerHttpUri();
     virtual std::stringstream* getPlaylistResource() { return 0; }
+    virtual std::stringstream* getConfigForm(const Poco::Net::HTMLForm& form) { return 0; }
 
     // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);

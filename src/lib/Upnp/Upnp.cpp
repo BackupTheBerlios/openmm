@@ -2519,14 +2519,6 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     // TODO: introduce ActionRequestReader::write(Action*) to get rid of confusing pAction stuff
     ActionRequestReader requestReader(requestBody, pAction);
     pAction = requestReader.action();
-    // the corresponding Service should register as a Notification Handler
-//    _pService->getDevice()->getDeviceContainer()->postAction(pAction);
-
-    // FIXME: Action is posted (via Poco::Notification) to all Devices in a DeviceContainer and thus looped over and executed by all devices.
-    //        use _pService->getDevice() to post it directly to the Device?
-//    Log::instance()->ctrl().debug("dispatch action to device with uuid: " + _pService->getDevice()->getUuid());
-//    _pService->getDevice()->getDeviceContainer()->getDeviceManager()->postAction(pAction);
-//    _pService->getDevice()->getDevDeviceCode()->actionHandler(pAction);
     _pService->getDevice()->postAction(pAction);
 
     // return Action response with out arguments filled in by Notification Handler
@@ -2535,8 +2527,8 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     responseWriter.action(*pAction);
 
     response.setContentType("text/xml");
-        // TODO: set EXT header
-        // TODO: set SERVER header
+    // TODO: set EXT header
+    // TODO: set SERVER header
     response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
@@ -2676,11 +2668,27 @@ ControllerRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, P
 {
     Log::instance()->upnp().debug("controller request from: " + request.getHost());
 
-    std::stringstream* pPlaylistResource = _pController->getPlaylistResource();
-    if (pPlaylistResource) {
-        std::ostream& outStream = response.send();
-        Poco::StreamCopier::copyStream(*pPlaylistResource, outStream);
-        delete pPlaylistResource;
+    if (request.getURI() == Controller::PLAYLIST_URI) {
+        std::stringstream* pPlaylistResource = _pController->getPlaylistResource();
+        if (pPlaylistResource) {
+            std::ostream& outStream = response.send();
+            Poco::StreamCopier::copyStream(*pPlaylistResource, outStream);
+            delete pPlaylistResource;
+        }
+    }
+    else if (request.getURI() == Controller::CONFIG_URI) {
+//        response.setChunkedTransferEncoding(true);
+        Poco::Net::HTMLForm htmlForm(request, request.stream());
+        response.setContentType("text/html");
+        std::stringstream* pConfigForm = _pController->getConfigForm(htmlForm);
+        if (pConfigForm) {
+            std::ostream& outStream = response.send();
+            Poco::StreamCopier::copyStream(*pConfigForm, outStream);
+            delete pConfigForm;
+        }
+    }
+    else {
+        response.send();
     }
 }
 
@@ -3832,9 +3840,13 @@ CtlDeviceCode::init()
 }
 
 
+const std::string Controller::PLAYLIST_URI = "/Playlist";
+const std::string Controller::CONFIG_URI = "/Config";
+
 Controller::Controller(int port) :
 DeviceManager(new Socket),
-_socket(Poco::Net::ServerSocket(port)),
+//_socket(Poco::Net::ServerSocket(port)),
+_socket(Poco::Net::ServerSocket(4009)),
 _pUserInterface(0)
 {
 }
