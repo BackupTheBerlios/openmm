@@ -72,6 +72,8 @@ class UpnpApplication :  public Poco::Util::Application, public Gui::Application
 public:
 
     UpnpApplication(int argc, char** argv);
+    
+    void setIgnoreConfig(bool ignore = true);
 
 private:
     // Poco::Util::Application interface
@@ -98,6 +100,7 @@ private:
     int                                         _argc;
     char**                                      _argv;
     bool                                        _helpRequested;
+    bool                                        _ignoreConfig;
     Poco::Util::PropertyFileConfiguration*      _pConf;
     std::string                                 _confFilePath;
     std::string                                 _rendererName;

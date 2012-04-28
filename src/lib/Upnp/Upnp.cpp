@@ -1948,7 +1948,7 @@ Service::getControlRequestHandler() const
 Device*
 Service::getDevice() const
 {
-    Log::instance()->upnp().debug("service, get device pointer: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
+//    Log::instance()->upnp().debug("service, get device pointer: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
     return _pDeviceData->getDevice();
 }
 
@@ -3530,7 +3530,7 @@ Device::getDevDeviceCode() const
 CtlDeviceCode*
 Device::getCtlDeviceCode() const
 {
-    Log::instance()->upnp().debug("get device ctl code: " + Poco::NumberFormatter::format(_pCtlDeviceCode));
+//    Log::instance()->upnp().debug("get device ctl code: " + Poco::NumberFormatter::format(_pCtlDeviceCode));
     return _pCtlDeviceCode;
 }
 

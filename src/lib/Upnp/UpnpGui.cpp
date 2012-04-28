@@ -31,6 +31,8 @@
 #include "UpnpAvCtlServer.h"
 #include "MediaImages.h"
 
+// FIXME: make engines also loadable, so that ommcontroller executable
+//        doesn't need to link against an engine.
 #ifdef __IPHONE__
 #include <Omm/X/EngineMPMoviePlayer.h>
 #else
@@ -47,6 +49,7 @@ UpnpApplication::UpnpApplication(int argc, char** argv) :
 _argc(argc),
 _argv(argv),
 _helpRequested(false),
+_ignoreConfig(false),
 //#ifdef __IPHONE__
 //    _rendererName("iPhone Renderer"),
 //#else
@@ -56,7 +59,6 @@ _enableRenderer(false),
 _enableServer(false)
 {
     setUnixOptions(true);
-    Poco::Util::Application::init(argc, argv);
 }
 
 
@@ -65,18 +67,25 @@ UpnpApplication::initialize(Poco::Util::Application& self)
 {
     Poco::Util::Application::initialize(self);
 
-    _confFilePath = Omm::Util::Home::instance()->getConfigDirPath("/") + "omm.properties";
-    _pConf = new Poco::Util::PropertyFileConfiguration;
-    try {
-        _pConf->load(_confFilePath);
+    if (_ignoreConfig) {
+        Omm::Av::Log::instance()->upnpav().information("ignoring config file");
     }
-    catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().debug("no config file present");
-    }
-//        config().addWriteable(_pConf, -200);
-    config().addWriteable(_pConf, 0);
+    else {
+        Omm::Av::Log::instance()->upnpav().information("reading config file ...");
 
-//    printConfig();
+        _confFilePath = Omm::Util::Home::instance()->getConfigDirPath("/") + "omm.properties";
+        _pConf = new Poco::Util::PropertyFileConfiguration;
+        try {
+            _pConf->load(_confFilePath);
+        }
+        catch (Poco::Exception& e) {
+            Omm::Av::Log::instance()->upnpav().debug("no config file present");
+        }
+    //        config().addWriteable(_pConf, -200);
+        config().addWriteable(_pConf, 0);
+
+    //    printConfig();
+    }
 }
 
 
@@ -84,6 +93,10 @@ void
 UpnpApplication::uninitialize()
 {
     Poco::Util::Application::uninitialize();
+
+    if (_ignoreConfig) {
+        return;
+    }
 
     _pConf->save(_confFilePath);
 }
@@ -147,6 +160,13 @@ UpnpApplication::displayHelp()
 
 
 void
+UpnpApplication::setIgnoreConfig(bool ignore)
+{
+    _ignoreConfig = ignore;
+}
+
+
+void
 UpnpApplication::printConfig()
 {
     std::vector<std::string> rootKeys;
@@ -184,7 +204,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
     }
     else
     {
-        initialize(*this);
+        Poco::Util::Application::init(_argc, _argv);
 
         if (config().getBool("renderer.enable", false)) {
             addLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),

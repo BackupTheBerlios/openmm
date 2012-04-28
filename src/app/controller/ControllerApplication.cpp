@@ -19,35 +19,12 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/Exception.h>
-
-#include <Omm/UpnpAvController.h>
-#include <Omm/Util.h>
+#include <Omm/UpnpGui.h>
 
 
 int main(int argc, char** argv)
 {
-    Omm::Util::PluginLoader<Omm::Av::AvUserInterface> pluginLoader;
-    Omm::Av::AvUserInterface* pUserInterface;
-    try {
-        pUserInterface = pluginLoader.load("avinterface-qt", "AvInterface");
-    }
-    catch(Poco::NotFoundException) {
-        Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for user interface");
-        return 1;
-    }
-
-    Omm::Av::AvController controller;
-
-    controller.setUserInterface(pUserInterface);
-    pUserInterface->initGui();
-    pUserInterface->showMainWindow();
-    controller.init();
-    controller.start();
-
-    Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
-    int ret =  pUserInterface->eventLoop();
-    
-    controller.stop();
-    return ret;
+    Omm::UpnpApplication app(argc, argv);
+    app.setIgnoreConfig();
+    return app.run();
 }
