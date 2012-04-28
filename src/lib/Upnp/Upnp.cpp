@@ -2019,7 +2019,7 @@ Service::setEventSubscriptionPath(std::string eventPath)
 void
 Service::setDeviceData(DeviceData* pDeviceData)
 {
-    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
+//    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
 }
 
@@ -3588,7 +3588,7 @@ Device::setDeviceContainer(DeviceContainer* pDeviceContainer)
 void
 Device::setDeviceData(DeviceData* pDeviceData)
 {
-    Log::instance()->upnp().debug("device, set device data to: " + Poco::NumberFormatter::format(pDeviceData));
+//    Log::instance()->upnp().debug("device, set device data to: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
     pDeviceData->setDevice(this);
 }
@@ -3604,7 +3604,7 @@ Device::setDevDeviceCode(DevDeviceCode* pDevDevice)
 void
 Device::setCtlDeviceCode(CtlDeviceCode* pCtlDevice)
 {
-    Log::instance()->upnp().debug("device, set device controller code to: " + Poco::NumberFormatter::format(pCtlDevice));
+//    Log::instance()->upnp().debug("device, set device controller code to: " + Poco::NumberFormatter::format(pCtlDevice));
     _pCtlDeviceCode = pCtlDevice;
 }
 

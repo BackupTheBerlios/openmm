@@ -52,5 +52,5 @@ class HelloApplication : public Omm::Gui::Application
 int main(int argc, char** argv)
 {
     HelloApplication app;
-    return app.run(argc, argv);
+    return app.runEventLoop(argc, argv);
 }

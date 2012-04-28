@@ -23,14 +23,23 @@
 #define UpnpGui_INCLUDED
 
 #include <Poco/Notification.h>
+#include <Poco/Util/Application.h>
+#include <Poco/Util/Option.h>
+#include <Poco/Util/OptionSet.h>
+#include <Poco/Util/HelpFormatter.h>
+#include <Poco/Util/XMLConfiguration.h>
+#include <Poco/Util/PropertyFileConfiguration.h>
 
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvCtlServer.h"
 #include "UpnpAvCtlObject2.h"
+#include "UpnpAvRenderer.h"
+#include "UpnpAvServer.h"
 #include "Sys.h"
 
+#include "Gui/Application.h"
 #include "Gui/Tab.h"
 #include "Gui/Navigator.h"
 #include "Gui/ListModel.h"
@@ -46,6 +55,7 @@
 
 namespace Omm {
 
+class ControllerWidget;
 class MediaObjectModel;
 class GuiVisual;
 class MediaServerGroupWidget;
@@ -55,6 +65,51 @@ class MediaObjectView;
 class PlaylistEditor;
 class PlaylistEditorObjectView;
 class ActivityIndicator;
+
+
+class UpnpApplication :  public Poco::Util::Application, public Gui::Application
+{
+public:
+
+    UpnpApplication(int argc, char** argv);
+
+private:
+    // Poco::Util::Application interface
+    virtual void initialize(Poco::Util::Application& self);
+    virtual void uninitialize();
+    virtual void defineOptions(Poco::Util::OptionSet& options);
+    virtual void handleOption(const std::string& name, const std::string& value);
+    virtual int main(const std::vector<std::string>& args);
+
+    void displayHelp();
+    void printConfig();
+
+    // Omm::Gui::Application interface
+    virtual Omm::Gui::View* createMainView();
+    virtual void presentedMainView();
+    virtual void finishedEventLoop();
+    virtual void stop();
+    virtual void start();
+
+    void addLocalRenderer(const std::string& name, const std::string& uuid);
+    void addLocalRenderer();
+    void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath);
+
+    int                                         _argc;
+    char**                                      _argv;
+    bool                                        _helpRequested;
+    Poco::Util::PropertyFileConfiguration*      _pConf;
+    std::string                                 _confFilePath;
+    std::string                                 _rendererName;
+
+    ControllerWidget*                           _pControllerWidget;
+    Av::MediaRenderer                           _mediaRenderer;
+    DeviceContainer                             _localDeviceContainer;
+    DeviceServer                                _localDeviceServer;
+    bool                                        _enableRenderer;
+    bool                                        _enableServer;
+    std::string                                 _rendererUuid;
+};
 
 
 class TransportStateNotification : public Poco::Notification

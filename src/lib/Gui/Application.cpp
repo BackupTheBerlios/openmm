@@ -115,7 +115,7 @@ Application::showStatusBar(bool show)
 
 
 int
-Application::run(int argc, char** argv)
+Application::runEventLoop(int argc, char** argv)
 {
     return _pImpl->run(argc, argv);
 }

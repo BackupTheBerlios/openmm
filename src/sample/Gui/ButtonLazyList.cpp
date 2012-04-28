@@ -53,7 +53,7 @@ public:
 
     virtual int fetch(int rowCount = 10, bool forward = true);
     virtual int lastFetched(bool forward = true);
-    
+
 private:
     std::vector<Omm::Gui::ButtonModel*>    _itemModels;
     int                                    _viewCount;
@@ -136,6 +136,6 @@ class Application : public Omm::Gui::Application
 int main(int argc, char** argv)
 {
     Application app;
-    return app.run(argc, argv);
+    return app.runEventLoop(argc, argv);
 }
 

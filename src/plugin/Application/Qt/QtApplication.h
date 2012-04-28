@@ -58,7 +58,7 @@ signals:
 
 private:
     virtual void initApplication(int argc = 0, char** argv = 0);
-    
+
     virtual Omm::Controller* createController();
     virtual void addController();
     virtual void removeController();

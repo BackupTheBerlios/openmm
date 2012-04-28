@@ -104,7 +104,7 @@ GuiApplication::eventLoop()
 {
     Omm::Log::instance()->upnp().debug("gui application entering event loop ...");
 //    _pEventLoop->run();
-    Omm::Gui::Application::run(_argc, _argv);
+    Omm::Gui::Application::runEventLoop(_argc, _argv);
 }
 
 

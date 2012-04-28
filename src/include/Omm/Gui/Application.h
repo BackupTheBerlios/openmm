@@ -40,7 +40,7 @@ public:
     Application();
     virtual ~Application();
 
-    int run(int argc = 0, char** argv = 0);
+    int runEventLoop(int argc = 0, char** argv = 0);
     void quit();
 
     void resizeMainView(int width, int height);

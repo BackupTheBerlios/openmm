@@ -1,22 +1,22 @@
-add_executable(ommold
-OmmApplication.cpp
-)
+#add_executable(ommold
+#OldOmmApplication.cpp
+#)
 
-target_link_libraries(ommold
-${OMM_AV}
-${OMM}
-${OMM_UTIL}
-)
+#target_link_libraries(ommold
+#${OMM_AV}
+#${OMM}
+#${OMM_UTIL}
+#)
 
-add_executable(stdomm
-NewOmmStdApplication.cpp
-)
+#add_executable(stdomm
+#OmmStdApplication.cpp
+#)
 
-target_link_libraries(stdomm
-${OMM}
-${OMM_UTIL}
-${OMM_AV}
-)
+#target_link_libraries(stdomm
+#${OMM}
+#${OMM_UTIL}
+#${OMM_AV}
+#)
 
 if(OMM_GUI)
 
@@ -26,7 +26,7 @@ endif(WINDOWS)
 
 add_executable(omm
 ${OMM_RC_FILE}
-NewOmmApplication.cpp
+OmmApplication.cpp
 )
 
 target_link_libraries(omm
@@ -46,7 +46,7 @@ LIBRARY DESTINATION lib
 )
 endif(OMM_GUI)
 
-install(TARGETS omm stdomm
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib
-)
+#install(TARGETS stdomm
+#RUNTIME DESTINATION bin
+#LIBRARY DESTINATION lib
+#)
