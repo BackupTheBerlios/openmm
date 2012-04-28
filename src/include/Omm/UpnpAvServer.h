@@ -130,6 +130,7 @@ public:
     virtual bool isSeekable();
     virtual std::streamsize getSize();
     virtual std::istream* getStream();
+    void freeStream(std::istream* pIstream);
 
     void writeResource(const uri& sourceUri);
     std::string getPrivateResourceUri();
@@ -407,6 +408,7 @@ public:
     virtual std::streamsize getSize(const std::string& path) { return -1; }
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "") { return false; }
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "") { return 0; }
+    virtual void freeStream(std::istream* pIstream) {}
     virtual std::istream* getIconStream(const std::string& path) { return 0; }
 
 protected:

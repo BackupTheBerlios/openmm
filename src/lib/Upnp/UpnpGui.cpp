@@ -166,10 +166,10 @@ ControllerWidget::getConfigForm(const Poco::Net::HTMLForm& form)
     std::stringstream* pOutStream = new std::stringstream;
     *pOutStream << "<html>\n"
                     "<head>\n"
-                    "<title>OMM Controller Configuration</title>\n"
+                    "<title>OMM Configuration</title>\n"
                     "</head>\n"
                     "<body>\n"
-                    "<h1>OMM Controller Configuration</h1>\n";
+                    "<h1>OMM Configuration</h1>\n";
 
 //    *pOutStream << "<h2>Application Config</h2><p>\n";
 //    std::vector<std::string> appKeys;

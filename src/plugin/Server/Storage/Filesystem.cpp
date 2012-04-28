@@ -171,6 +171,14 @@ FileModel::getStream(const std::string& path, const std::string& resourcePath)
 
 
 void
+FileModel::freeStream(std::istream* pIstream)
+{
+    Omm::Av::Log::instance()->upnpav().debug("deleting file stream");
+    delete pIstream;
+}
+
+
+void
 FileModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format)
 {
     switch (format) {

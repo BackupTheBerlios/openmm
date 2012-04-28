@@ -163,6 +163,14 @@ WebradioModel::getStream(const std::string& path, const std::string& resourcePat
 }
 
 
+void
+WebradioModel::freeStream(std::istream* pIstream)
+{
+    Omm::Av::Log::instance()->upnpav().debug("deleting webradio stream");
+    delete pIstream;
+}
+
+
 std::string
 WebradioModel::getMime(const std::string& path)
 {

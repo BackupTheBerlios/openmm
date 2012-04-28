@@ -45,6 +45,7 @@ public:
     virtual std::streamsize getSize(const std::string& path);
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+    virtual void freeStream(std::istream* pIstream);
 
 private:
     void scanDirectory(Poco::File& directory, bool recurse = true);

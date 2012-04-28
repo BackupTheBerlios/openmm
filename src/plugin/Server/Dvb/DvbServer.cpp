@@ -21,12 +21,15 @@
 #include <Poco/ClassLibrary.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/Timer.h>
+#include <fstream>
 
 
 #include "DvbServer.h"
 
 
-DvbModel::DvbModel()
+DvbModel::DvbModel() :
+//_pRecDevice(0)
+_pRecDevice(new std::ifstream("/dev/dvb/adapter0/dvr0"))
 {
 }
 
@@ -71,11 +74,40 @@ DvbModel::isSeekable(const std::string& path, const std::string& resourcePath)
 std::istream*
 DvbModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    Omm::Dvb::DvbDevice::instance()->tune(_channels[path]);
+    // FIXME: two subsequent getStream() without stopping the stream may lead to
+    //        a blocked dvr device: engine stops reading the previous stream
+    //        when receiving the new stream. This may overlap and the file
+    //        handle is still open. Even if the engine is stopped right before
+    //        playing a new stream, it could take a while until reading of stream
+    //        is stopped, too (stop() and play() are typically async calls into
+    //        the engine).
+    //        DvbModel needs a way to interrupt current stream and close file
+    //        handles.
+    //        UPDATE: this only happens when renderer and dvb server run in the
+    //        same process.
+    if (_pRecDevice) {
+        Omm::Dvb::Log::instance()->dvb().debug("releasing dvr device");
+        _pRecDevice->close();
+//        delete _pRecDevice;
+//        _pRecDevice = 0;
+    }
 
+    bool tuneSuccess = Omm::Dvb::DvbDevice::instance()->tune(_channels[path]);
+    if (!tuneSuccess) {
+        return 0;
+    }
+
+//    Poco::Thread::sleep(250);
     Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
-    std::ifstream* pIstr = new std::ifstream("/dev/dvb/adapter0/dvr0");
-    return pIstr;
+//    std::ifstream* pIstr = new std::ifstream("/dev/dvb/adapter0/dvr0");
+//    _pRecDevice = new std::ifstream("/dev/dvb/adapter0/dvr0");
+    _pRecDevice->open("/dev/dvb/adapter0/dvr0");
+    if (!*_pRecDevice) {
+        Omm::Dvb::Log::instance()->dvb().error("dvr device busy");
+//        delete _pRecDevice;
+//        _pRecDevice = 0;
+    }
+    return _pRecDevice;
 }
 
 

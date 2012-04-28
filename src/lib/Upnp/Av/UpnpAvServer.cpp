@@ -270,7 +270,8 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
                 // TODO: define different server resource streaming models:
                 // exclusive access (interruptable by second request or not), unlimited number of streams per resource, ...
                 // resource stream should always be deleted by model and freed by separate method in interface of model (freeStream(std::istream*))?
-                delete pIstr;
+//                delete pIstr;
+                pResource->freeStream(pIstr);
             }
             else {
                 throw Poco::Exception("no stream available");
@@ -429,6 +430,15 @@ ServerObjectResource::getStream()
     }
     else {
         return _pDataModel->getStream(_pDataModel->getPath(_pObject->getIndex()));
+    }
+}
+
+
+void
+ServerObjectResource::freeStream(std::istream* pIstream)
+{
+    if (_pDataModel) {
+        _pDataModel->freeStream(pIstream);
     }
 }
 

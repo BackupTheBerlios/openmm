@@ -40,6 +40,7 @@ public:
     virtual std::string getDlna(const std::string& path);
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+    virtual void freeStream(std::istream* pIstream);
 
 private:
     void scanStationConfig(const std::string& stationConfig);

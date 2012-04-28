@@ -51,6 +51,7 @@ private:
 
     std::map<std::string, std::string>                  _channelNames;
     std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
+    std::ifstream*                                      _pRecDevice;
 };
 
 
