@@ -3,9 +3,12 @@ ServerApplication.cpp
 )
 
 target_link_libraries(ommserver
-${OMM_UTIL}
 ${OMM}
+${OMM_UTIL}
 ${OMM_AV}
+${OMM_GUI}
+${OMM_UPNPGUI}
+${OMMX_ENGINE_VLC}
 )
 install(TARGETS ommserver
 RUNTIME DESTINATION bin

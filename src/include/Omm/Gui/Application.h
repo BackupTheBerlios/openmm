@@ -43,6 +43,7 @@ public:
     int runEventLoop(int argc = 0, char** argv = 0);
     void quit();
 
+    void showMainView(bool show = true);
     void resizeMainView(int width, int height);
     void scaleMainView(float factor);
     void setFullscreen(bool fullscreen);

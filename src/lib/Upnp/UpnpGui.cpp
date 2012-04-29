@@ -23,6 +23,7 @@
 
 #include <Poco/NotificationCenter.h>
 #include <Poco/Observer.h>
+#include <Poco/UUIDGenerator.h>
 #include <Poco/Util/Application.h>
 
 #include "UpnpGui.h"
@@ -38,6 +39,7 @@
 #else
 #include <Omm/X/EngineVlc.h>
 #include <Omm/X/EnginePhonon.h>
+#include <Poco/StringTokenizer.h>
 #endif
 
 
@@ -56,7 +58,10 @@ _ignoreConfig(false),
 //    _rendererName("OMM Renderer"),
 //#endif
 _enableRenderer(false),
-_enableServer(false)
+_enableServer(false),
+_enableController(true),
+_pControllerWidget(0),
+_pConf(0)
 {
     setUnixOptions(true);
 }
@@ -83,9 +88,8 @@ UpnpApplication::initialize(Poco::Util::Application& self)
         }
     //        config().addWriteable(_pConf, -200);
         config().addWriteable(_pConf, 0);
-
-    //    printConfig();
     }
+    printConfig();
 }
 
 
@@ -110,15 +114,6 @@ UpnpApplication::defineOptions(Poco::Util::OptionSet& options)
     options.addOption(Poco::Util::Option("help", "", "display help information on command line arguments")
                       .required(false)
                       .repeatable(false));
-    options.addOption(Poco::Util::Option("renderername", "r", "friendly name of UPnP-AV renderer")
-                      .binding("renderer.friendlyName")
-                      .required(false)
-                      .repeatable(false)
-                      .argument("renderername", true));
-    options.addOption(Poco::Util::Option("fullscreen", "f", "option passed to plugin")
-                      .binding("application.fullscreen")
-                      .required(false)
-                      .repeatable(false));
     options.addOption(Poco::Util::Option("width", "w", "width of application window")
                       .binding("application.width")
                       .required(false)
@@ -129,11 +124,23 @@ UpnpApplication::defineOptions(Poco::Util::OptionSet& options)
                       .required(false)
                       .repeatable(false)
                       .argument("height", true));
-    options.addOption(Poco::Util::Option("scale", "s", "application window scale factor")
+    options.addOption(Poco::Util::Option("fullscreen", "f", "option passed to plugin")
+                      .binding("application.fullscreen")
+                      .required(false)
+                      .repeatable(false));
+    options.addOption(Poco::Util::Option("zoom", "z", "application window scale factor")
                       .binding("application.scale")
                       .required(false)
                       .repeatable(false)
                       .argument("scale", true));
+    options.addOption(Poco::Util::Option("renderer", "r", "enable renderer  \"name:uuid:engine\"")
+                      .required(false)
+                      .repeatable(false)
+                      .argument("renderername", true));
+    options.addOption(Poco::Util::Option("server", "s", "add server \"name:uuid:datamodel:basepath\"")
+                      .required(false)
+                      .repeatable(true)
+                      .argument("device", true));
 }
 
 
@@ -144,6 +151,27 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
 
     if (name == "help") {
         _helpRequested = true;
+    }
+    else if (name == "renderer") {
+        // bind to commandline config "renderer"
+    }
+    else if (name == "server") {
+        Poco::StringTokenizer serverSpec(value, ":");
+        if (serverSpec.count() < 4) {
+            Omm::Av::Log::instance()->upnpav().information("server spec \"" + value + "\" needs four parameters, \"name:uuid:datamodel:basepath\", ignoring");
+        }
+        else {
+            std::string uuid = serverSpec[1];
+            // uuid may be a valid uuid or empty, when empty assign a random uuid
+            if (uuid == "") {
+                uuid = Poco::UUIDGenerator().createRandom().toString();
+            }
+            config().setString("server." + uuid + ".enable", "true");
+            config().setString("server." + uuid + ".friendlyName", serverSpec[0]);
+            config().setString("server." + uuid + ".uuid", uuid);
+            config().setString("server." + uuid + ".plugin", "model-" + serverSpec[2]);
+            config().setString("server." + uuid + ".basePath", serverSpec[3]);
+        }
     }
 }
 
@@ -175,10 +203,22 @@ UpnpApplication::printConfig()
         Omm::Av::Log::instance()->upnpav().debug("omm config, root keys: " + *it);
     }
 
-    std::vector<std::string> confKeys;
-    _pConf->keys(confKeys);
-    for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+    std::vector<std::string> serverKeys;
+    config().keys("server", serverKeys);
+    for (std::vector<std::string>::iterator it = serverKeys.begin(); it != serverKeys.end(); ++it) {
+        std::vector<std::string> serverConfigKeys;
+        config().keys("server." + *it, serverConfigKeys);
+        for (std::vector<std::string>::iterator cit = serverConfigKeys.begin(); cit != serverConfigKeys.end(); ++cit) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, server keys: " + *it + "." + *cit + ", value: " + config().getString("server." + *it + "." + *cit, ""));
+        }
+    }
+
+    if (_pConf) {
+        std::vector<std::string> confKeys;
+        _pConf->keys(confKeys);
+        for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+        }
     }
 
     std::vector<std::string> appKeys;
@@ -274,7 +314,10 @@ UpnpApplication::stop()
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
     _localDeviceServer.stop();
-    _pControllerWidget->stop();
+    if (_enableController) {
+        _pControllerWidget->stop();
+    }
+    Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
 }
 
 
@@ -297,8 +340,20 @@ UpnpApplication::start()
     }
 //#endif
 
-    _pControllerWidget->start();
+    if (_enableController) {
+        _pControllerWidget->start();
+    }
     _localDeviceServer.start();
+}
+
+
+void
+UpnpApplication::enableController(bool enable)
+{
+//    if (_pControllerWidget) {
+//        enable ? _pControllerWidget->start() : _pControllerWidget->stop();
+//    }
+    _enableController = enable;
 }
 
 
@@ -373,6 +428,9 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
     pMediaServer->addIcon(pIcon);
 
     _localDeviceContainer.addDevice(pMediaServer);
+    if (!_enableRenderer) {
+        _localDeviceContainer.setRootDevice(pMediaServer);
+    }
 
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server finished.");
 }

@@ -3845,8 +3845,8 @@ const std::string Controller::CONFIG_URI = "/Config";
 
 Controller::Controller(int port) :
 DeviceManager(new Socket),
-//_socket(Poco::Net::ServerSocket(port)),
-_socket(Poco::Net::ServerSocket(4009)),
+_socket(Poco::Net::ServerSocket(port)),
+//_socket(Poco::Net::ServerSocket(4009)),
 _pUserInterface(0)
 {
 }

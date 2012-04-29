@@ -46,6 +46,7 @@ public:
     ApplicationImpl(Application* pApplication);
     virtual ~ApplicationImpl();
 
+    void show(bool show);
     void resize(int width, int height);
     int width();
     int height();
@@ -64,6 +65,7 @@ public:
     QStatusBar*             _pStatusBar;
     QtEventFilter*          _pEventFilter;
     QString*                _pFullscreenStyleSheet;
+    bool                    _visible;
     int                     _width;
     int                     _height;
     bool                    _fullscreen;

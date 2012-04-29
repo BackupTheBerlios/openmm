@@ -72,8 +72,9 @@ class UpnpApplication :  public Poco::Util::Application, public Gui::Application
 public:
 
     UpnpApplication(int argc, char** argv);
-    
+
     void setIgnoreConfig(bool ignore = true);
+    void enableController(bool enable = true);
 
 private:
     // Poco::Util::Application interface
@@ -111,6 +112,7 @@ private:
     DeviceServer                                _localDeviceServer;
     bool                                        _enableRenderer;
     bool                                        _enableServer;
+    bool                                        _enableController;
     std::string                                 _rendererUuid;
 };
 

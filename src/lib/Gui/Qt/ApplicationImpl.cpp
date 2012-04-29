@@ -35,7 +35,9 @@ namespace Gui {
 
 ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
+_pMainWindow(0),
 _pToolBar(0),
+_visible(true),
 _width(800),
 _height(480),
 _pFullscreenStyleSheet(0),
@@ -47,6 +49,18 @@ _fullscreen(false)
 
 ApplicationImpl::~ApplicationImpl()
 {
+}
+
+
+void
+ApplicationImpl::show(bool show)
+{
+    if (_pMainWindow) {
+        _pMainWindow->setVisible(show);
+    }
+    else {
+        _visible = show;
+    }
 }
 
 
@@ -163,7 +177,9 @@ ApplicationImpl::run(int argc, char** argv)
     _pApplication->_pMainView = _pApplication->createMainView();
     _pMainWindow->setCentralWidget(static_cast<QWidget*>(_pApplication->_pMainView->getNativeView()));
     _pApplication->createdMainView();
-    _pMainWindow->show();
+    if (_visible) {
+        _pMainWindow->show();
+    }
     _pMainWindow->resize(width(), height());
     _pApplication->_pMainView->resize(width(), height());
     _pApplication->presentedMainView();
