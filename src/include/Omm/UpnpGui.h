@@ -118,20 +118,22 @@ private:
     virtual void handleOption(const std::string& name, const std::string& value);
     virtual int main(const std::vector<std::string>& args);
 
-    void displayHelp();
-    void printConfig();
-    void loadConfig();
-    void saveConfig();
-    std::stringstream* getConfigForm(const Poco::Net::HTMLForm& form);
-
     // Omm::Gui::Application interface
     virtual Omm::Gui::View* createMainView();
     virtual void presentedMainView();
     virtual void start();
     virtual void stop();
 
-    void addLocalRenderer(const std::string& name, const std::string& uuid);
-    void addLocalRenderer();
+    // application configuration
+    void displayHelp();
+    void printConfig();
+    void loadConfig();
+    void initConfig();
+    void saveConfig();
+    std::stringstream* generateConfigForm(const Poco::Net::HTMLForm& form);
+
+    void setLocalRenderer(const std::string& name, const std::string& uuid, const std::string& pluginName);
+    void setLocalRenderer();
     void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath);
 
     int                                         _argc;
@@ -150,6 +152,7 @@ private:
     bool                                        _enableRenderer;
     std::string                                 _rendererName;
     std::string                                 _rendererUuid;
+    std::string                                 _rendererPlugin;
     bool                                        _showRendererVisualOnly;
     std::map<std::string, Av::MediaServer*>     _mediaServers;
     bool                                        _enableServer;

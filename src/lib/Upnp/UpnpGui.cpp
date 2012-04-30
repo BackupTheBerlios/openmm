@@ -64,7 +64,7 @@ ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 //        response.setChunkedTransferEncoding(true);
         Poco::Net::HTMLForm htmlForm(request, request.stream());
         response.setContentType("text/html");
-        std::stringstream* pConfigForm = _pApp->getConfigForm(htmlForm);
+        std::stringstream* pConfigForm = _pApp->generateConfigForm(htmlForm);
         if (pConfigForm) {
             std::ostream& outStream = response.send();
             Poco::StreamCopier::copyStream(*pConfigForm, outStream);
@@ -193,6 +193,96 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
 }
 
 
+int
+UpnpApplication::main(const std::vector<std::string>& args)
+{
+    if (_helpRequested)
+    {
+        displayHelp();
+    }
+    else
+    {
+        Poco::Util::Application::init(_argc, _argv);
+        loadConfig();
+        initConfig();
+
+        Gui::Application::runEventLoop(_argc, _argv);
+
+        saveConfig();
+        uninitialize();
+    }
+    return Poco::Util::Application::EXIT_OK;
+}
+
+
+Omm::Gui::View*
+UpnpApplication::createMainView()
+{
+    _pControllerWidget = new Omm::ControllerWidget(this);
+    if (!_showRendererVisualOnly) {
+        setToolBar(_pControllerWidget->getControlPanel());
+        setStatusBar(_pControllerWidget->getStatusBar());
+    }
+    return _pControllerWidget;
+}
+
+
+void
+UpnpApplication::presentedMainView()
+{
+    _pControllerWidget->setTabBarHidden(config().getBool("application.fullscreen", false));
+    _pControllerWidget->showOnlyBasicDeviceGroups(config().getBool("application.fullscreen", false));
+    _pControllerWidget->showOnlyRendererVisual(_showRendererVisualOnly);
+    _pControllerWidget->setTabBarHidden(_showRendererVisualOnly);
+    _pControllerWidget->init();
+}
+
+
+void
+UpnpApplication::start()
+{
+    Omm::Av::Log::instance()->upnpav().debug("omm application starting ...");
+//#ifndef __IPHONE__
+    if (_enableRenderer) {
+        setLocalRenderer();
+    }
+    if (_enableRenderer || _enableServer) {
+        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
+    }
+//#endif
+    _localDeviceServer.init();
+//#ifndef __IPHONE__
+    if (_enableRenderer) {
+        _pControllerWidget->setDefaultRenderer(&_mediaRenderer);
+    }
+//#endif
+
+    if (_enableController) {
+        _pControllerWidget->start();
+    }
+    _localDeviceServer.start();
+
+    _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
+    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+    _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
+    _pHttpServer->start();
+    Log::instance()->upnp().information("omm application http server listening on: " + _socket.address().toString());
+}
+
+
+void
+UpnpApplication::stop()
+{
+    Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
+    _pHttpServer->stop();
+    _localDeviceServer.stop();
+    if (_enableController) {
+        _pControllerWidget->stop();
+    }
+    Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
+}
+
+
 void
 UpnpApplication::displayHelp()
 {
@@ -280,6 +370,35 @@ UpnpApplication::loadConfig()
 
 
 void
+UpnpApplication::initConfig()
+{
+    if (!_ignoreConfig) {
+        if (config().getBool("renderer.enable", false)) {
+            setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
+                    config().getString("renderer.uuid", ""),
+                    config().getString("renderer.plugin", ""));
+        }
+
+        std::vector<std::string> servers;
+        config().keys("server", servers);
+        for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+            if (config().getBool("server." + *it + ".enable", false)) {
+                addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
+                        config().getString("server." + *it + ".uuid", ""),
+                        config().getString("server." + *it + ".plugin", "model-webradio"),
+                        config().getString("server." + *it + ".basePath", "webradio.conf"));
+            }
+        }
+
+        setFullscreen(config().getBool("application.fullscreen", false));
+        resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
+        scaleMainView(config().getDouble("application.scale", 1.0));
+    }
+}
+
+
+void
 UpnpApplication::saveConfig()
 {
     if (!_ignoreConfig) {
@@ -296,7 +415,7 @@ UpnpApplication::saveConfig()
 
 
 std::stringstream*
-UpnpApplication::getConfigForm(const Poco::Net::HTMLForm& form)
+UpnpApplication::generateConfigForm(const Poco::Net::HTMLForm& form)
 {
     std::stringstream* pOutStream = new std::stringstream;
     *pOutStream << "<html>\n"
@@ -306,47 +425,44 @@ UpnpApplication::getConfigForm(const Poco::Net::HTMLForm& form)
                     "<body>\n"
                     "<h1>OMM Configuration</h1>\n";
 
-//    *pOutStream << "<h2>Application Config</h2><p>\n";
-//    std::vector<std::string> appKeys;
-//    Poco::Util::Application::instance().config().keys("application", appKeys);
-//    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
-//        *pOutStream << "application key: " + *it + ", value: " + Poco::Util::Application::instance().config().getString("application." + *it, "") << "<br>\n";
-//    }
-//    *pOutStream << "</p>";
-
-
-    *pOutStream << "<h2>Media Renderer</h2>\n";
+    bool rendererEnable = Poco::Util::Application::instance().config().getBool("renderer.enable", false);
     std::string rendererName = Poco::Util::Application::instance().config().getString("renderer.friendlyName", "");
     std::string rendererUuid = Poco::Util::Application::instance().config().getString("renderer.uuid", "");
-    bool rendererEnable = Poco::Util::Application::instance().config().getBool("renderer.enable", false);
-    *pOutStream << "<form method=\"POST\" action=\"/Config\">\n"
-        "friendly name: <input type=\"text\" name=\"renderer.friendlyName\" size=\"32\" value=\"" + rendererName +  "\"><br>\n"
-        "uuid: <input type=\"text\" name=\"renderer.uuid\" size=\"32\" value=\"" + rendererUuid +  "\"><br>\n"
-        "<input type=\"checkbox\" name=\"renderer.enable\" value=\"true\"" +  (rendererEnable ? "checked" : "") + " >Enable\n";
+    std::string rendererPlugin = Poco::Util::Application::instance().config().getString("renderer.plugin", "");
+
+    *pOutStream << "<form method=\"POST\" action=\"/Config\">\n";
+
+    *pOutStream << "<h2>Media Renderer</h2>\n";
+    *pOutStream << "<fieldset><legend>" + rendererName + "</legend>"
+        "<table>"
+        "<tr><td>friendly name</td><td><input type=\"text\" name=\"renderer.friendlyName\" size=\"32\" value=\"" + rendererName +  "\"></td></tr>\n"
+        "<tr><td>uuid</td><td><input type=\"text\" name=\"renderer.uuid\" size=\"32\" value=\"" + rendererUuid +  "\"></td></tr>\n"
+        "<tr><td>plugin</td><td><input type=\"text\" name=\"renderer.plugin\" size=\"32\" value=\"" + rendererPlugin +  "\"></td></tr>\n"
+        "<tr><td>enable</td><td><input type=\"checkbox\" name=\"renderer.enable\" value=\"true\"" +  (rendererEnable ? "checked" : "") + " ></td></tr>\n"
+        "</table>"
+        "</fieldset>";
 
     *pOutStream << "<h2>Media Servers</h2>\n";
+    for (std::map<std::string, Av::MediaServer*>::iterator it = _mediaServers.begin(); it != _mediaServers.end(); ++it) {
+        std::string serverKey = "server." + (*it).second->getUuid();
+        bool serverEnable = Poco::Util::Application::instance().config().getBool(serverKey + ".enable", false);
+        std::string serverName = (*it).second->getFriendlyName();
+        std::string serverPlugin = Poco::Util::Application::instance().config().getString(serverKey + ".plugin", "");
+        std::string basePath = Poco::Util::Application::instance().config().getString(serverKey + ".basePath", "");
 
+        *pOutStream << "<fieldset><legend>" + serverName + "</legend>"
+            "<table>"
+            "<tr><td>friendly name</td><td><input type=\"text\" name=\"" + serverKey + ".friendlyName\" size=\"32\" value=\"" + serverName +  "\"></td></tr>\n"
+            "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + (*it).second->getUuid() +  "\"></td></tr>\n"
+            "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
+            "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
+            "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
+            "</table>"
+            "</fieldset><br>";
+    }
 
-        "<input type=\"submit\" value=\"Save\">\n"
+    *pOutStream << "<input type=\"submit\" value=\"Save\">\n"
         "</form>\n";
-
-
-//    *pOutStream << "</p>";
-
-//    std::vector<std::string> servers;
-//    Poco::Util::Application::instance().config().keys("server", servers);
-//    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
-//        *pOutStream << Poco::Util::Application::instance().config().getString("server." + *it + ".friendlyName", "") << "<br>\n";
-//    }
-//    *pOutStream << "</p>";
-
-//    *pOutStream  << "<h2>Local Device Container</h2><p>\n";
-//    for (DeviceManager::DeviceContainerIterator it = _pDeviceServer->beginDeviceContainer(); it != _pDeviceServer->endDeviceContainer(); ++it) {
-//        for (DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-//            *pOutStream << "device: " + (*d)->getFriendlyName() << "<br>\n";
-//        }
-//    }
-//    *pOutStream << "</p>";
 
     if (!form.empty()) {
 //        Device* pRenderer = (*_pDeviceServer->beginDeviceContainer())->getRootDevice();
@@ -370,119 +486,9 @@ UpnpApplication::getConfigForm(const Poco::Net::HTMLForm& form)
         *pOutStream << "</p>";
     }
 
-    *pOutStream << "</body>\n";
+    *pOutStream << "</body></html>\n";
 
     return pOutStream;
-}
-
-
-int
-UpnpApplication::main(const std::vector<std::string>& args)
-{
-    if (_helpRequested)
-    {
-        displayHelp();
-    }
-    else
-    {
-        Poco::Util::Application::init(_argc, _argv);
-        loadConfig();
-
-        if (config().getBool("renderer.enable", false)) {
-            addLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
-                    config().getString("renderer.uuid", ""));
-        }
-
-        std::vector<std::string> servers;
-        config().keys("server", servers);
-        for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
-            if (config().getBool("server." + *it + ".enable", false)) {
-                addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
-                        config().getString("server." + *it + ".uuid", ""),
-                        config().getString("server." + *it + ".plugin", "model-webradio"),
-                        config().getString("server." + *it + ".basePath", "webradio.conf"));
-            }
-        }
-
-        setFullscreen(config().getBool("application.fullscreen", false));
-        resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
-        scaleMainView(config().getDouble("application.scale", 1.0));
-
-        Gui::Application::runEventLoop(_argc, _argv);
-
-        saveConfig();
-        uninitialize();
-    }
-    return Poco::Util::Application::EXIT_OK;
-}
-
-
-Omm::Gui::View*
-UpnpApplication::createMainView()
-{
-    _pControllerWidget = new Omm::ControllerWidget(this);
-    if (!_showRendererVisualOnly) {
-        setToolBar(_pControllerWidget->getControlPanel());
-        setStatusBar(_pControllerWidget->getStatusBar());
-    }
-    return _pControllerWidget;
-}
-
-
-void
-UpnpApplication::presentedMainView()
-{
-    _pControllerWidget->setTabBarHidden(config().getBool("application.fullscreen", false));
-    _pControllerWidget->showOnlyBasicDeviceGroups(config().getBool("application.fullscreen", false));
-    _pControllerWidget->showOnlyRendererVisual(_showRendererVisualOnly);
-    _pControllerWidget->setTabBarHidden(_showRendererVisualOnly);
-    _pControllerWidget->init();
-}
-
-
-void
-UpnpApplication::start()
-{
-    Omm::Av::Log::instance()->upnpav().debug("omm application starting ...");
-//#ifndef __IPHONE__
-    if (_enableRenderer) {
-        addLocalRenderer();
-    }
-    if (_enableRenderer || _enableServer) {
-        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
-    }
-//#endif
-    _localDeviceServer.init();
-//#ifndef __IPHONE__
-    if (_enableRenderer) {
-        _pControllerWidget->setDefaultRenderer(&_mediaRenderer);
-    }
-//#endif
-
-    if (_enableController) {
-        _pControllerWidget->start();
-    }
-    _localDeviceServer.start();
-
-    _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
-    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-    _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
-    _pHttpServer->start();
-    Log::instance()->upnp().information("omm application http server listening on: " + _socket.address().toString());
-}
-
-
-void
-UpnpApplication::stop()
-{
-    Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
-    _pHttpServer->stop();
-    _localDeviceServer.stop();
-    if (_enableController) {
-        _pControllerWidget->stop();
-    }
-    Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
 }
 
 
@@ -508,25 +514,35 @@ UpnpApplication::showRendererVisualOnly(bool show)
 
 
 void
-UpnpApplication::addLocalRenderer(const std::string& name, const std::string& uuid)
+UpnpApplication::setLocalRenderer(const std::string& name, const std::string& uuid, const std::string& pluginName)
 {
     _enableRenderer = true;
     _rendererName = name;
     _rendererUuid = uuid;
+    _rendererPlugin = pluginName;
 }
 
 
 void
-UpnpApplication::addLocalRenderer()
+UpnpApplication::setLocalRenderer()
 {
-    Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer ...");
+    Omm::Av::Log::instance()->upnpav().debug("omm application set local renderer ...");
+
     Omm::Av::Engine* pEngine;
 #ifdef __IPHONE__
 //        pEngine = new MPMoviePlayerEngine;
 #else
-    pEngine = new VlcEngine;
-//        pEngine = new PhononEngine;
+    Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
+    try {
+        pEngine = pluginLoader.load(_rendererPlugin);
+    }
+    catch(Poco::NotFoundException) {
+        Omm::Av::Log::instance()->upnpav().error("could not find engine plugin: " + _rendererPlugin);
+        pEngine = new VlcEngine;
+    }
+    Omm::Av::Log::instance()->upnpav().information("engine plugin: " + _rendererPlugin + " loaded successfully");
 #endif
+
     pEngine->setVisual(_pControllerWidget->getLocalRendererVisual());
     pEngine->createPlayer();
 
@@ -537,7 +553,7 @@ UpnpApplication::addLocalRenderer()
     _mediaRenderer.setUuid(_rendererUuid);
     _localDeviceContainer.addDevice(&_mediaRenderer);
     _localDeviceContainer.setRootDevice(&_mediaRenderer);
-    Omm::Av::Log::instance()->upnpav().debug("omm application add local renderer finished.");
+    Omm::Av::Log::instance()->upnpav().debug("omm application set local renderer finished.");
 }
 
 
@@ -559,6 +575,7 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
 
     _enableServer = true;
     Omm::Av::MediaServer* pMediaServer = new Av::MediaServer;
+    _mediaServers[uuid] = pMediaServer;
 
     Omm::Av::ServerContainer* pContainer = new Av::ServerContainer(pMediaServer);
     pContainer->setTitle(name);
