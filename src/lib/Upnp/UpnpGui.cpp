@@ -190,6 +190,9 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
             config().setString("server." + uuid + ".basePath", serverSpec[3]);
         }
     }
+    else if (name == "fullscreen") {
+        config().setString("application.fullscreen", "true");
+    }
 }
 
 
