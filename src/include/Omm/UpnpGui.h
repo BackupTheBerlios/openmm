@@ -75,22 +75,22 @@ public:
 
     void setIgnoreConfig(bool ignore = true);
     void enableController(bool enable = true);
+    void showRendererVisualOnly(bool show = true);
 
 private:
     // Poco::Util::Application interface
-    virtual void initialize(Poco::Util::Application& self);
-    virtual void uninitialize();
     virtual void defineOptions(Poco::Util::OptionSet& options);
     virtual void handleOption(const std::string& name, const std::string& value);
     virtual int main(const std::vector<std::string>& args);
 
     void displayHelp();
     void printConfig();
+    void loadConfig();
+    void saveConfig();
 
     // Omm::Gui::Application interface
     virtual Omm::Gui::View* createMainView();
     virtual void presentedMainView();
-    virtual void finishedEventLoop();
     virtual void stop();
     virtual void start();
 
@@ -113,6 +113,7 @@ private:
     bool                                        _enableRenderer;
     bool                                        _enableServer;
     bool                                        _enableController;
+    bool                                        _showRendererVisualOnly;
     std::string                                 _rendererUuid;
 };
 
@@ -149,6 +150,7 @@ public:
     void newPlaylist(PlaylistNotification* pNotification);
     void showMainMenu();
     void showOnlyBasicDeviceGroups(bool show = false);
+    void showOnlyRendererVisual(bool show = false);
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
     virtual void signalNetworkActivity(bool on);

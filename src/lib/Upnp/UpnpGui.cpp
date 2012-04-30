@@ -60,49 +60,11 @@ _ignoreConfig(false),
 _enableRenderer(false),
 _enableServer(false),
 _enableController(true),
+_showRendererVisualOnly(false),
 _pControllerWidget(0),
 _pConf(0)
 {
     setUnixOptions(true);
-}
-
-
-void
-UpnpApplication::initialize(Poco::Util::Application& self)
-{
-    Poco::Util::Application::initialize(self);
-
-    if (_ignoreConfig) {
-        Omm::Av::Log::instance()->upnpav().information("ignoring config file");
-    }
-    else {
-        Omm::Av::Log::instance()->upnpav().information("reading config file ...");
-
-        _confFilePath = Omm::Util::Home::instance()->getConfigDirPath("/") + "omm.properties";
-        _pConf = new Poco::Util::PropertyFileConfiguration;
-        try {
-            _pConf->load(_confFilePath);
-        }
-        catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().debug("no config file present");
-        }
-    //        config().addWriteable(_pConf, -200);
-        config().addWriteable(_pConf, 0);
-    }
-    printConfig();
-}
-
-
-void
-UpnpApplication::uninitialize()
-{
-    Poco::Util::Application::uninitialize();
-
-    if (_ignoreConfig) {
-        return;
-    }
-
-    _pConf->save(_confFilePath);
 }
 
 
@@ -153,7 +115,21 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
         _helpRequested = true;
     }
     else if (name == "renderer") {
-        // bind to commandline config "renderer"
+        Poco::StringTokenizer rendererSpec(value, ":");
+        if (rendererSpec.count() < 3) {
+            Omm::Av::Log::instance()->upnpav().information("renderer spec \"" + value + "\" needs four parameters, \"name:uuid:engine\", ignoring");
+        }
+        else {
+            std::string uuid = rendererSpec[1];
+            // uuid may be a valid uuid or empty, when empty assign a random uuid
+            if (uuid == "") {
+                uuid = Poco::UUIDGenerator().createRandom().toString();
+            }
+            config().setString("renderer.enable", "true");
+            config().setString("renderer.friendlyName", rendererSpec[0]);
+            config().setString("renderer.uuid", uuid);
+            config().setString("renderer.plugin", "engine-" + rendererSpec[2]);
+        }
     }
     else if (name == "server") {
         Poco::StringTokenizer serverSpec(value, ":");
@@ -203,6 +179,12 @@ UpnpApplication::printConfig()
         Omm::Av::Log::instance()->upnpav().debug("omm config, root keys: " + *it);
     }
 
+    std::vector<std::string> rendererKeys;
+    config().keys("renderer", rendererKeys);
+    for (std::vector<std::string>::iterator it = rendererKeys.begin(); it != rendererKeys.end(); ++it) {
+        Omm::Av::Log::instance()->upnpav().debug("omm config, renderer keys: " + *it + ", value: " + config().getString("renderer." + *it, ""));
+    }
+
     std::vector<std::string> serverKeys;
     config().keys("server", serverKeys);
     for (std::vector<std::string>::iterator it = serverKeys.begin(); it != serverKeys.end(); ++it) {
@@ -235,6 +217,43 @@ UpnpApplication::printConfig()
 }
 
 
+void
+UpnpApplication::loadConfig()
+{
+    if (!_ignoreConfig) {
+        Omm::Av::Log::instance()->upnpav().information("reading config file ...");
+
+        _confFilePath = Omm::Util::Home::instance()->getConfigDirPath("/") + "omm.properties";
+        _pConf = new Poco::Util::PropertyFileConfiguration;
+        try {
+            _pConf->load(_confFilePath);
+        }
+        catch (Poco::Exception& e) {
+            Omm::Av::Log::instance()->upnpav().debug("no config file present");
+        }
+    //        config().addWriteable(_pConf, -200);
+        config().addWriteable(_pConf, 0);
+    }
+    printConfig();
+}
+
+
+void
+UpnpApplication::saveConfig()
+{
+    if (!_ignoreConfig) {
+//            _pConf->setInt("width", app.width());
+//            _pConf->setInt("height", app.height());
+    // FIXME: main view is smaller than app window
+        _pConf->setInt("application.width", getMainView()->width());
+        _pConf->setInt("application.height", getMainView()->height());
+//            config().setInt("width", app.getMainView()->width());
+//            config().setInt("height", app.getMainView()->height());
+        _pConf->save(_confFilePath);
+    }
+}
+
+
 int
 UpnpApplication::main(const std::vector<std::string>& args)
 {
@@ -245,6 +264,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
     else
     {
         Poco::Util::Application::init(_argc, _argv);
+        loadConfig();
 
         if (config().getBool("renderer.enable", false)) {
             addLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
@@ -269,14 +289,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
 
         Gui::Application::runEventLoop(_argc, _argv);
 
-//            _pConf->setInt("width", app.width());
-//            _pConf->setInt("height", app.height());
-        // FIXME: main view is smaller than app window
-        _pConf->setInt("application.width", getMainView()->width());
-        _pConf->setInt("application.height", getMainView()->height());
-//            config().setInt("width", app.getMainView()->width());
-//            config().setInt("height", app.getMainView()->height());
-
+        saveConfig();
         uninitialize();
     }
     return Poco::Util::Application::EXIT_OK;
@@ -287,8 +300,10 @@ Omm::Gui::View*
 UpnpApplication::createMainView()
 {
     _pControllerWidget = new Omm::ControllerWidget;
-    setToolBar(_pControllerWidget->getControlPanel());
-    setStatusBar(_pControllerWidget->getStatusBar());
+    if (!_showRendererVisualOnly) {
+        setToolBar(_pControllerWidget->getControlPanel());
+        setStatusBar(_pControllerWidget->getStatusBar());
+    }
     return _pControllerWidget;
 }
 
@@ -298,14 +313,10 @@ UpnpApplication::presentedMainView()
 {
     _pControllerWidget->setTabBarHidden(config().getBool("application.fullscreen", false));
     _pControllerWidget->showOnlyBasicDeviceGroups(config().getBool("application.fullscreen", false));
+    _pControllerWidget->showOnlyRendererVisual(_showRendererVisualOnly);
+    _pControllerWidget->setTabBarHidden(_showRendererVisualOnly);
     _pControllerWidget->init();
     _pControllerWidget->setLocalDeviceServer(&_localDeviceServer);
-}
-
-
-void
-UpnpApplication::finishedEventLoop()
-{
 }
 
 
@@ -354,6 +365,17 @@ UpnpApplication::enableController(bool enable)
 //        enable ? _pControllerWidget->start() : _pControllerWidget->stop();
 //    }
     _enableController = enable;
+}
+
+
+void
+UpnpApplication::showRendererVisualOnly(bool show)
+{
+//    _pControllerWidget->setTabBarHidden(!show);
+//    _pControllerWidget->showOnlyRendererVisual(show);
+    _showRendererVisualOnly = show;
+    showToolBar(false);
+    showStatusBar(false);
 }
 
 
@@ -529,6 +551,15 @@ ControllerWidget::showMainMenu()
 void
 ControllerWidget::showOnlyBasicDeviceGroups(bool show)
 {
+    addView(_pMediaRendererGroupWidget, "Player", !show);
+    addView(_pPlaylistEditor, "Playlist Editor", !show);
+}
+
+
+void
+ControllerWidget::showOnlyRendererVisual(bool show)
+{
+    addView(_pMediaServerGroupWidget, "Media", !show);
     addView(_pMediaRendererGroupWidget, "Player", !show);
     addView(_pPlaylistEditor, "Playlist Editor", !show);
 }

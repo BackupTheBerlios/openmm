@@ -3,11 +3,12 @@ RendererApplication.cpp
 )
 
 target_link_libraries(ommrenderer
-${POCO_UTIL}
-${OMM_UTIL}
-${OMM_SYS}
 ${OMM}
+${OMM_UTIL}
 ${OMM_AV}
+${OMM_GUI}
+${OMM_UPNPGUI}
+${OMMX_ENGINE_VLC}
 )
 
 install(TARGETS ommrenderer
