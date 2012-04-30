@@ -415,10 +415,7 @@ protected:
 class Controller : public DeviceManager
 {
 public:
-    static const std::string PLAYLIST_URI;
-    static const std::string CONFIG_URI;
-
-    Controller(int port = 0);
+    Controller();
     virtual ~Controller();
 
     void start();
@@ -428,10 +425,6 @@ public:
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
 //    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
-
-    std::string getControllerHttpUri();
-    virtual std::stringstream* getPlaylistResource() { return 0; }
-    virtual std::stringstream* getConfigForm(const Poco::Net::HTMLForm& form) { return 0; }
 
     // deprecated
     void setUserInterface(ControllerUserInterface* pUserInterface);
@@ -466,8 +459,6 @@ private:
     void update();
 
     std::map<std::string, DeviceGroup*>        _deviceGroups;
-    Poco::Net::ServerSocket                    _socket;
-    Poco::Net::HTTPServer*                     _pHttpServer;
 };
 
 

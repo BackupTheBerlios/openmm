@@ -29,6 +29,11 @@
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/XMLConfiguration.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
+#include <Poco/Net/SocketAddress.h>
+#include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
+#include <Poco/Net/HTTPServerRequest.h>
+#include <Poco/Net/HTTPServerResponse.h>
 
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
@@ -55,6 +60,7 @@
 
 namespace Omm {
 
+class UpnpApplication;
 class ControllerWidget;
 class MediaObjectModel;
 class GuiVisual;
@@ -67,15 +73,44 @@ class PlaylistEditorObjectView;
 class ActivityIndicator;
 
 
-class UpnpApplication :  public Poco::Util::Application, public Gui::Application
+class ConfigRequestHandler: public Poco::Net::HTTPRequestHandler
 {
 public:
+    ConfigRequestHandler(UpnpApplication* pApp) : _pApp(pApp) {}
+
+    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
+
+private:
+    UpnpApplication*        _pApp;
+};
+
+
+class ConfigRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
+{
+public:
+    ConfigRequestHandlerFactory(UpnpApplication* pApp) : _pApp(pApp) {}
+
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
+
+private:
+    UpnpApplication*        _pApp;
+};
+
+
+class UpnpApplication :  public Poco::Util::Application, public Gui::Application
+{
+    friend class ConfigRequestHandler;
+
+public:
+    static const std::string PLAYLIST_URI;
+    static const std::string CONFIG_URI;
 
     UpnpApplication(int argc, char** argv);
 
     void setIgnoreConfig(bool ignore = true);
     void enableController(bool enable = true);
     void showRendererVisualOnly(bool show = true);
+    std::string getConfigHttpUri();
 
 private:
     // Poco::Util::Application interface
@@ -91,8 +126,8 @@ private:
     // Omm::Gui::Application interface
     virtual Omm::Gui::View* createMainView();
     virtual void presentedMainView();
-    virtual void stop();
     virtual void start();
+    virtual void stop();
 
     void addLocalRenderer(const std::string& name, const std::string& uuid);
     void addLocalRenderer();
@@ -115,6 +150,9 @@ private:
     bool                                        _enableController;
     bool                                        _showRendererVisualOnly;
     std::string                                 _rendererUuid;
+
+    Poco::Net::ServerSocket                     _socket;
+    Poco::Net::HTTPServer*                      _pHttpServer;
 };
 
 
@@ -139,8 +177,10 @@ public:
 
 class ControllerWidget : public Controller, public Gui::Tab
 {
+friend class PlaylistEditor;
+
 public:
-    ControllerWidget();
+    ControllerWidget(UpnpApplication* pApplication);
 
     GuiVisual* getLocalRendererVisual();
     MediaRendererView* getControlPanel();
@@ -169,6 +209,7 @@ private:
     std::string                 _localRendererUuid;
     bool                        _fullscreen;
     DeviceServer*               _pDeviceServer;
+    UpnpApplication*            _pApplication;
 };
 
 

@@ -24,6 +24,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/Observer.h>
 #include <Poco/UUIDGenerator.h>
+#include <Poco/StreamCopier.h>
 #include <Poco/Util/Application.h>
 
 #include "UpnpGui.h"
@@ -45,6 +46,46 @@
 
 namespace Omm {
 
+
+void
+ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+{
+    Log::instance()->upnp().debug("config request from: " + request.getHost());
+
+    if (request.getURI() == UpnpApplication::PLAYLIST_URI) {
+        std::stringstream* pPlaylistResource = _pApp->_pControllerWidget->getPlaylistResource();
+        if (pPlaylistResource) {
+            std::ostream& outStream = response.send();
+            Poco::StreamCopier::copyStream(*pPlaylistResource, outStream);
+            delete pPlaylistResource;
+        }
+    }
+    else if (request.getURI() == UpnpApplication::CONFIG_URI) {
+//        response.setChunkedTransferEncoding(true);
+        Poco::Net::HTMLForm htmlForm(request, request.stream());
+        response.setContentType("text/html");
+        std::stringstream* pConfigForm = _pApp->_pControllerWidget->getConfigForm(htmlForm);
+        if (pConfigForm) {
+            std::ostream& outStream = response.send();
+            Poco::StreamCopier::copyStream(*pConfigForm, outStream);
+            delete pConfigForm;
+        }
+    }
+    else {
+        response.send();
+    }
+}
+
+
+Poco::Net::HTTPRequestHandler*
+ConfigRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
+{
+    return new ConfigRequestHandler(_pApp);
+}
+
+
+const std::string UpnpApplication::PLAYLIST_URI = "/Playlist";
+const std::string UpnpApplication::CONFIG_URI = "/Config";
 
 UpnpApplication::UpnpApplication(int argc, char** argv) :
 //Poco::Util::Application(argc, argv),
@@ -299,7 +340,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
 Omm::Gui::View*
 UpnpApplication::createMainView()
 {
-    _pControllerWidget = new Omm::ControllerWidget;
+    _pControllerWidget = new Omm::ControllerWidget(this);
     if (!_showRendererVisualOnly) {
         setToolBar(_pControllerWidget->getControlPanel());
         setStatusBar(_pControllerWidget->getStatusBar());
@@ -317,18 +358,6 @@ UpnpApplication::presentedMainView()
     _pControllerWidget->setTabBarHidden(_showRendererVisualOnly);
     _pControllerWidget->init();
     _pControllerWidget->setLocalDeviceServer(&_localDeviceServer);
-}
-
-
-void
-UpnpApplication::stop()
-{
-    Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
-    _localDeviceServer.stop();
-    if (_enableController) {
-        _pControllerWidget->stop();
-    }
-    Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
 }
 
 
@@ -355,6 +384,25 @@ UpnpApplication::start()
         _pControllerWidget->start();
     }
     _localDeviceServer.start();
+
+    _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
+    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+    _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
+    _pHttpServer->start();
+    Log::instance()->upnp().information("omm application http server listening on: " + _socket.address().toString());
+}
+
+
+void
+UpnpApplication::stop()
+{
+    Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
+    _pHttpServer->stop();
+    _localDeviceServer.stop();
+    if (_enableController) {
+        _pControllerWidget->stop();
+    }
+    Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
 }
 
 
@@ -458,7 +506,16 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
 }
 
 
-ControllerWidget::ControllerWidget()
+std::string
+UpnpApplication::getConfigHttpUri()
+{
+    std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
+    return "http://" + address + ":" + Poco::NumberFormatter::format(_socket.address().port());
+}
+
+
+ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
+_pApplication(pApplication)
 {
     Gui::Log::instance()->gui().debug("controller widget register device groups ...");
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
@@ -1463,7 +1520,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     else if (_pPlaylistContainer) {
         Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
-        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + Omm::Controller::PLAYLIST_URI);
+        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getConfigHttpUri() + UpnpApplication::PLAYLIST_URI);
 
         // FIXME: why does this crash?
 //        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
@@ -1494,7 +1551,7 @@ PlaylistEditor::getPlaylistResource()
 std::string
 PlaylistEditor::getPlaylistResourceUri()
 {
-    _pControllerWidget->getControllerHttpUri() + Omm::Controller::PLAYLIST_URI;
+    _pControllerWidget->_pApplication->getConfigHttpUri() + UpnpApplication::PLAYLIST_URI;
 }
 
 
@@ -1505,7 +1562,7 @@ PlaylistEditor::deleteItem(MediaObjectModel* pModel)
     std::vector<MediaObjectModel*>::iterator pos = std::find(_playlistItems.begin(), _playlistItems.end(), pModel);
     if (pos != _playlistItems.end()) {
         _playlistItems.erase(pos);
-        _pPlaylistContainer->writeResource(_pControllerWidget->getControllerHttpUri() + Omm::Controller::PLAYLIST_URI);
+        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getConfigHttpUri() + UpnpApplication::PLAYLIST_URI);
         delete pModel;
         syncViewImpl();
     }

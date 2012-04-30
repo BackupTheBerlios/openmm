@@ -511,30 +511,6 @@ private:
 };
 
 
-class ControllerRequestHandler: public Poco::Net::HTTPRequestHandler
-{
-public:
-    ControllerRequestHandler(Controller* pController) : _pController(pController) {}
-
-    void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response);
-
-private:
-    Controller*        _pController;
-};
-
-
-class ControllerRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
-{
-public:
-    ControllerRequestHandlerFactory(Controller* pController);
-
-    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request);
-
-private:
-    Controller*        _pController;
-};
-
-
 class VariableQuery : public Poco::Notification
 {
 };
