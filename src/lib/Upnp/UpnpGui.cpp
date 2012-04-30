@@ -64,7 +64,7 @@ ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 //        response.setChunkedTransferEncoding(true);
         Poco::Net::HTMLForm htmlForm(request, request.stream());
         response.setContentType("text/html");
-        std::stringstream* pConfigForm = _pApp->_pControllerWidget->getConfigForm(htmlForm);
+        std::stringstream* pConfigForm = _pApp->getConfigForm(htmlForm);
         if (pConfigForm) {
             std::ostream& outStream = response.send();
             Poco::StreamCopier::copyStream(*pConfigForm, outStream);
@@ -295,6 +295,87 @@ UpnpApplication::saveConfig()
 }
 
 
+std::stringstream*
+UpnpApplication::getConfigForm(const Poco::Net::HTMLForm& form)
+{
+    std::stringstream* pOutStream = new std::stringstream;
+    *pOutStream << "<html>\n"
+                    "<head>\n"
+                    "<title>OMM Configuration</title>\n"
+                    "</head>\n"
+                    "<body>\n"
+                    "<h1>OMM Configuration</h1>\n";
+
+//    *pOutStream << "<h2>Application Config</h2><p>\n";
+//    std::vector<std::string> appKeys;
+//    Poco::Util::Application::instance().config().keys("application", appKeys);
+//    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
+//        *pOutStream << "application key: " + *it + ", value: " + Poco::Util::Application::instance().config().getString("application." + *it, "") << "<br>\n";
+//    }
+//    *pOutStream << "</p>";
+
+
+    *pOutStream << "<h2>Media Renderer</h2>\n";
+    std::string rendererName = Poco::Util::Application::instance().config().getString("renderer.friendlyName", "");
+    std::string rendererUuid = Poco::Util::Application::instance().config().getString("renderer.uuid", "");
+    bool rendererEnable = Poco::Util::Application::instance().config().getBool("renderer.enable", false);
+    *pOutStream << "<form method=\"POST\" action=\"/Config\">\n"
+        "friendly name: <input type=\"text\" name=\"renderer.friendlyName\" size=\"32\" value=\"" + rendererName +  "\"><br>\n"
+        "uuid: <input type=\"text\" name=\"renderer.uuid\" size=\"32\" value=\"" + rendererUuid +  "\"><br>\n"
+        "<input type=\"checkbox\" name=\"renderer.enable\" value=\"true\"" +  (rendererEnable ? "checked" : "") + " >Enable\n";
+
+    *pOutStream << "<h2>Media Servers</h2>\n";
+
+
+        "<input type=\"submit\" value=\"Save\">\n"
+        "</form>\n";
+
+
+//    *pOutStream << "</p>";
+
+//    std::vector<std::string> servers;
+//    Poco::Util::Application::instance().config().keys("server", servers);
+//    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+//        *pOutStream << Poco::Util::Application::instance().config().getString("server." + *it + ".friendlyName", "") << "<br>\n";
+//    }
+//    *pOutStream << "</p>";
+
+//    *pOutStream  << "<h2>Local Device Container</h2><p>\n";
+//    for (DeviceManager::DeviceContainerIterator it = _pDeviceServer->beginDeviceContainer(); it != _pDeviceServer->endDeviceContainer(); ++it) {
+//        for (DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+//            *pOutStream << "device: " + (*d)->getFriendlyName() << "<br>\n";
+//        }
+//    }
+//    *pOutStream << "</p>";
+
+    if (!form.empty()) {
+//        Device* pRenderer = (*_pDeviceServer->beginDeviceContainer())->getRootDevice();
+//        DeviceContainer* pDeviceContainer = *_pDeviceServer->beginDeviceContainer();
+//        pDeviceContainer->
+        _localDeviceServer.stop();
+
+        *pOutStream  << "<h2>Form</h2><p>\n";
+
+        if (form.get("renderer.enable", "false") == "false") {
+            // remove renderer from container
+        }
+
+        _localDeviceServer.start();
+
+        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
+        {
+//            Gui::Log::instance()->gui().debug("form key: " + it->first + "form value: " + it->second);
+            *pOutStream << it->first << ": " << it->second << "<br>\n";
+        }
+        *pOutStream << "</p>";
+    }
+
+    *pOutStream << "</body>\n";
+
+    return pOutStream;
+}
+
+
 int
 UpnpApplication::main(const std::vector<std::string>& args)
 {
@@ -357,7 +438,6 @@ UpnpApplication::presentedMainView()
     _pControllerWidget->showOnlyRendererVisual(_showRendererVisualOnly);
     _pControllerWidget->setTabBarHidden(_showRendererVisualOnly);
     _pControllerWidget->init();
-    _pControllerWidget->setLocalDeviceServer(&_localDeviceServer);
 }
 
 
@@ -478,9 +558,9 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
     Omm::Av::Log::instance()->upnpav().information("container plugin: " + pluginName + " loaded successfully");
 
     _enableServer = true;
-    Omm::Av::MediaServer* pMediaServer = new Omm::Av::MediaServer;
+    Omm::Av::MediaServer* pMediaServer = new Av::MediaServer;
 
-    Omm::Av::ServerContainer* pContainer = new Omm::Av::ServerContainer(pMediaServer);
+    Omm::Av::ServerContainer* pContainer = new Av::ServerContainer(pMediaServer);
     pContainer->setTitle(name);
     pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
     pContainer->setDataModel(pDataModel);
@@ -649,82 +729,6 @@ std::stringstream*
 ControllerWidget::getPlaylistResource()
 {
     return _pPlaylistEditor->getPlaylistResource();
-}
-
-
-std::stringstream*
-ControllerWidget::getConfigForm(const Poco::Net::HTMLForm& form)
-{
-    std::stringstream* pOutStream = new std::stringstream;
-    *pOutStream << "<html>\n"
-                    "<head>\n"
-                    "<title>OMM Configuration</title>\n"
-                    "</head>\n"
-                    "<body>\n"
-                    "<h1>OMM Configuration</h1>\n";
-
-//    *pOutStream << "<h2>Application Config</h2><p>\n";
-//    std::vector<std::string> appKeys;
-//    Poco::Util::Application::instance().config().keys("application", appKeys);
-//    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
-//        *pOutStream << "application key: " + *it + ", value: " + Poco::Util::Application::instance().config().getString("application." + *it, "") << "<br>\n";
-//    }
-//    *pOutStream << "</p>";
-
-
-    *pOutStream << "<h2>Renderer</h2>\n";
-    std::string rendererName = Poco::Util::Application::instance().config().getString("renderer.friendlyName", "");
-    bool rendererEnable = Poco::Util::Application::instance().config().getBool("renderer.enable", false);
-    *pOutStream << "<form method=\"POST\" action=\"/Config\">\n"
-        "<input type=\"text\" name=\"renderer.friendlyName\" size=\"31\" value=\"" + rendererName +  "\">\n"
-        "<input type=\"checkbox\" name=\"renderer.enable\" value=\"true\"" +  (rendererEnable ? "checked" : "") + " >Enable\n"
-        "<input type=\"submit\" value=\"Save\">\n"
-        "</form>\n";
-
-
-
-//    *pOutStream << "</p>";
-
-//    std::vector<std::string> servers;
-//    Poco::Util::Application::instance().config().keys("server", servers);
-//    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
-//        *pOutStream << Poco::Util::Application::instance().config().getString("server." + *it + ".friendlyName", "") << "<br>\n";
-//    }
-//    *pOutStream << "</p>";
-
-//    *pOutStream  << "<h2>Local Device Container</h2><p>\n";
-//    for (DeviceManager::DeviceContainerIterator it = _pDeviceServer->beginDeviceContainer(); it != _pDeviceServer->endDeviceContainer(); ++it) {
-//        for (DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-//            *pOutStream << "device: " + (*d)->getFriendlyName() << "<br>\n";
-//        }
-//    }
-//    *pOutStream << "</p>";
-
-    if (!form.empty()) {
-//        Device* pRenderer = (*_pDeviceServer->beginDeviceContainer())->getRootDevice();
-//        DeviceContainer* pDeviceContainer = *_pDeviceServer->beginDeviceContainer();
-//        pDeviceContainer->
-        _pDeviceServer->stop();
-
-        *pOutStream  << "<h2>Form</h2><p>\n";
-
-        if (form.get("renderer.enable", "false") == "false") {
-            // remove renderer from container
-        }
-
-        _pDeviceServer->start();
-
-        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
-        {
-//            Gui::Log::instance()->gui().debug("form key: " + it->first + "form value: " + it->second);
-            *pOutStream << it->first << ": " << it->second << "<br>\n";
-        }
-        *pOutStream << "</p>";
-    }
-
-    *pOutStream << "</body>\n";
-
-    return pOutStream;
 }
 
 

@@ -122,6 +122,7 @@ private:
     void printConfig();
     void loadConfig();
     void saveConfig();
+    std::stringstream* getConfigForm(const Poco::Net::HTMLForm& form);
 
     // Omm::Gui::Application interface
     virtual Omm::Gui::View* createMainView();
@@ -139,17 +140,19 @@ private:
     bool                                        _ignoreConfig;
     Poco::Util::PropertyFileConfiguration*      _pConf;
     std::string                                 _confFilePath;
-    std::string                                 _rendererName;
 
     ControllerWidget*                           _pControllerWidget;
-    Av::MediaRenderer                           _mediaRenderer;
-    DeviceContainer                             _localDeviceContainer;
-    DeviceServer                                _localDeviceServer;
-    bool                                        _enableRenderer;
-    bool                                        _enableServer;
     bool                                        _enableController;
-    bool                                        _showRendererVisualOnly;
+
+    DeviceServer                                _localDeviceServer;
+    DeviceContainer                             _localDeviceContainer;
+    Av::MediaRenderer                           _mediaRenderer;
+    bool                                        _enableRenderer;
+    std::string                                 _rendererName;
     std::string                                 _rendererUuid;
+    bool                                        _showRendererVisualOnly;
+    std::map<std::string, Av::MediaServer*>     _mediaServers;
+    bool                                        _enableServer;
 
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
@@ -195,9 +198,7 @@ public:
     void back();
     virtual void signalNetworkActivity(bool on);
 
-    void setLocalDeviceServer(DeviceServer* pDeviceServer) { _pDeviceServer = pDeviceServer; }
     virtual std::stringstream* getPlaylistResource();
-    virtual std::stringstream* getConfigForm(const Poco::Net::HTMLForm& form);
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
@@ -208,7 +209,6 @@ private:
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;
     bool                        _fullscreen;
-    DeviceServer*               _pDeviceServer;
     UpnpApplication*            _pApplication;
 };
 
