@@ -130,8 +130,10 @@ private:
     void loadConfig();
     void initConfig();
     void saveConfig();
-    std::stringstream* generateConfigForm(const Poco::Net::HTMLForm& form);
+    std::stringstream* generateConfigForm();
+    std::stringstream* handleConfigRequest(const Poco::Net::HTMLForm& form);
 
+    void initLocalDevices();
     void setLocalRenderer(const std::string& name, const std::string& uuid, const std::string& pluginName);
     void setLocalRenderer();
     void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath);
@@ -146,15 +148,13 @@ private:
     ControllerWidget*                           _pControllerWidget;
     bool                                        _enableController;
 
-    DeviceServer                                _localDeviceServer;
-    DeviceContainer                             _localDeviceContainer;
-    Av::MediaRenderer                           _mediaRenderer;
+    DeviceServer*                               _pLocalDeviceServer;
+    DeviceContainer*                            _pLocalDeviceContainer;
     bool                                        _enableRenderer;
     std::string                                 _rendererName;
     std::string                                 _rendererUuid;
     std::string                                 _rendererPlugin;
     bool                                        _showRendererVisualOnly;
-    std::map<std::string, Av::MediaServer*>     _mediaServers;
     bool                                        _enableServer;
 
     Poco::Net::ServerSocket                     _socket;

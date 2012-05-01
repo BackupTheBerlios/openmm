@@ -41,6 +41,7 @@
 #include <Omm/X/EngineVlc.h>
 #include <Omm/X/EnginePhonon.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/Net/NameValueCollection.h>
 #endif
 
 
@@ -64,7 +65,7 @@ ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 //        response.setChunkedTransferEncoding(true);
         Poco::Net::HTMLForm htmlForm(request, request.stream());
         response.setContentType("text/html");
-        std::stringstream* pConfigForm = _pApp->generateConfigForm(htmlForm);
+        std::stringstream* pConfigForm = _pApp->handleConfigRequest(htmlForm);
         if (pConfigForm) {
             std::ostream& outStream = response.send();
             Poco::StreamCopier::copyStream(*pConfigForm, outStream);
@@ -103,6 +104,8 @@ _enableServer(false),
 _enableController(true),
 _showRendererVisualOnly(false),
 _pControllerWidget(0),
+_pLocalDeviceServer(new DeviceServer),
+_pLocalDeviceContainer(new DeviceContainer),
 _pConf(0)
 {
     setUnixOptions(true);
@@ -233,10 +236,14 @@ UpnpApplication::createMainView()
 void
 UpnpApplication::presentedMainView()
 {
-    _pControllerWidget->setTabBarHidden(config().getBool("application.fullscreen", false));
-    _pControllerWidget->showOnlyBasicDeviceGroups(config().getBool("application.fullscreen", false));
-    _pControllerWidget->showOnlyRendererVisual(_showRendererVisualOnly);
-    _pControllerWidget->setTabBarHidden(_showRendererVisualOnly);
+    if (config().getBool("application.fullscreen", false)) {
+        _pControllerWidget->setTabBarHidden(true);
+        _pControllerWidget->showOnlyBasicDeviceGroups(true);
+    }
+    else if (_showRendererVisualOnly) {
+        _pControllerWidget->showOnlyRendererVisual(true);
+        _pControllerWidget->setTabBarHidden(true);
+    }
     _pControllerWidget->init();
 }
 
@@ -244,26 +251,12 @@ UpnpApplication::presentedMainView()
 void
 UpnpApplication::start()
 {
-    Omm::Av::Log::instance()->upnpav().debug("omm application starting ...");
-//#ifndef __IPHONE__
-    if (_enableRenderer) {
-        setLocalRenderer();
-    }
-    if (_enableRenderer || _enableServer) {
-        _localDeviceServer.addDeviceContainer(&_localDeviceContainer);
-    }
-//#endif
-    _localDeviceServer.init();
-//#ifndef __IPHONE__
-    if (_enableRenderer) {
-        _pControllerWidget->setDefaultRenderer(&_mediaRenderer);
-    }
-//#endif
+    initLocalDevices();
 
     if (_enableController) {
         _pControllerWidget->start();
     }
-    _localDeviceServer.start();
+    _pLocalDeviceServer->start();
 
     _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
@@ -278,7 +271,7 @@ UpnpApplication::stop()
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
     _pHttpServer->stop();
-    _localDeviceServer.stop();
+    _pLocalDeviceServer->stop();
     if (_enableController) {
         _pControllerWidget->stop();
     }
@@ -307,16 +300,16 @@ UpnpApplication::setIgnoreConfig(bool ignore)
 void
 UpnpApplication::printConfig()
 {
-    std::vector<std::string> rootKeys;
-    config().keys(rootKeys);
-    for (std::vector<std::string>::iterator it = rootKeys.begin(); it != rootKeys.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, root keys: " + *it);
-    }
+//    std::vector<std::string> rootKeys;
+//    config().keys(rootKeys);
+//    for (std::vector<std::string>::iterator it = rootKeys.begin(); it != rootKeys.end(); ++it) {
+//        Omm::Av::Log::instance()->upnpav().debug("omm config, root keys: " + *it);
+//    }
 
     std::vector<std::string> rendererKeys;
     config().keys("renderer", rendererKeys);
     for (std::vector<std::string>::iterator it = rendererKeys.begin(); it != rendererKeys.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, renderer keys: " + *it + ", value: " + config().getString("renderer." + *it, ""));
+        Omm::Av::Log::instance()->upnpav().debug("omm config renderer." + *it + ": " + config().getString("renderer." + *it, ""));
     }
 
     std::vector<std::string> serverKeys;
@@ -325,29 +318,29 @@ UpnpApplication::printConfig()
         std::vector<std::string> serverConfigKeys;
         config().keys("server." + *it, serverConfigKeys);
         for (std::vector<std::string>::iterator cit = serverConfigKeys.begin(); cit != serverConfigKeys.end(); ++cit) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config, server keys: " + *it + "." + *cit + ", value: " + config().getString("server." + *it + "." + *cit, ""));
+            Omm::Av::Log::instance()->upnpav().debug("omm config server." + *it + "." + *cit + ": " + config().getString("server." + *it + "." + *cit, ""));
         }
     }
 
-    if (_pConf) {
-        std::vector<std::string> confKeys;
-        _pConf->keys(confKeys);
-        for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
-        }
-    }
+//    if (_pConf) {
+//        std::vector<std::string> confKeys;
+//        _pConf->keys(confKeys);
+//        for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
+//            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+//        }
+//    }
 
-    std::vector<std::string> appKeys;
-    config().keys("application", appKeys);
-    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, application keys: " + *it + ", value: " + config().getString("application." + *it, ""));
-    }
-
-    std::vector<std::string> sysKeys;
-    config().keys("system", sysKeys);
-    for (std::vector<std::string>::iterator it = sysKeys.begin(); it != sysKeys.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, system keys: " + *it + ", value: " + config().getString("system." + *it, ""));
-    }
+//    std::vector<std::string> appKeys;
+//    config().keys("application", appKeys);
+//    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
+//        Omm::Av::Log::instance()->upnpav().debug("omm config, application keys: " + *it + ", value: " + config().getString("application." + *it, ""));
+//    }
+//
+//    std::vector<std::string> sysKeys;
+//    config().keys("system", sysKeys);
+//    for (std::vector<std::string>::iterator it = sysKeys.begin(); it != sysKeys.end(); ++it) {
+//        Omm::Av::Log::instance()->upnpav().debug("omm config, system keys: " + *it + ", value: " + config().getString("system." + *it, ""));
+//    }
 }
 
 
@@ -375,29 +368,27 @@ UpnpApplication::loadConfig()
 void
 UpnpApplication::initConfig()
 {
-    if (!_ignoreConfig) {
-        if (config().getBool("renderer.enable", false)) {
-            setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
-                    config().getString("renderer.uuid", ""),
-                    config().getString("renderer.plugin", ""));
-        }
-
-        std::vector<std::string> servers;
-        config().keys("server", servers);
-        for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
-            if (config().getBool("server." + *it + ".enable", false)) {
-                addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
-                        config().getString("server." + *it + ".uuid", ""),
-                        config().getString("server." + *it + ".plugin", "model-webradio"),
-                        config().getString("server." + *it + ".basePath", "webradio.conf"));
-            }
-        }
-
-        setFullscreen(config().getBool("application.fullscreen", false));
-        resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
-        scaleMainView(config().getDouble("application.scale", 1.0));
+    if (config().getBool("renderer.enable", false)) {
+        setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
+                config().getString("renderer.uuid", ""),
+                config().getString("renderer.plugin", ""));
     }
+
+    std::vector<std::string> servers;
+    config().keys("server", servers);
+    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+        Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+        if (config().getBool("server." + *it + ".enable", false)) {
+            addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
+                    config().getString("server." + *it + ".uuid", ""),
+                    config().getString("server." + *it + ".plugin", "model-webradio"),
+                    config().getString("server." + *it + ".basePath", "webradio.conf"));
+        }
+    }
+
+    setFullscreen(config().getBool("application.fullscreen", false));
+    resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
+    scaleMainView(config().getDouble("application.scale", 1.0));
 }
 
 
@@ -417,8 +408,9 @@ UpnpApplication::saveConfig()
 }
 
 
+
 std::stringstream*
-UpnpApplication::generateConfigForm(const Poco::Net::HTMLForm& form)
+UpnpApplication::generateConfigForm()
 {
     std::stringstream* pOutStream = new std::stringstream;
     *pOutStream << "<html>\n"
@@ -428,10 +420,10 @@ UpnpApplication::generateConfigForm(const Poco::Net::HTMLForm& form)
                     "<body>\n"
                     "<h1>OMM Configuration</h1>\n";
 
-    bool rendererEnable = Poco::Util::Application::instance().config().getBool("renderer.enable", false);
-    std::string rendererName = Poco::Util::Application::instance().config().getString("renderer.friendlyName", "");
-    std::string rendererUuid = Poco::Util::Application::instance().config().getString("renderer.uuid", "");
-    std::string rendererPlugin = Poco::Util::Application::instance().config().getString("renderer.plugin", "");
+    bool rendererEnable = _pConf->getBool("renderer.enable", false);
+    std::string rendererName = _pConf->getString("renderer.friendlyName", "");
+    std::string rendererUuid = _pConf->getString("renderer.uuid", "");
+    std::string rendererPlugin = _pConf->getString("renderer.plugin", "");
 
     *pOutStream << "<form method=\"POST\" action=\"/Config\">\n";
 
@@ -446,17 +438,20 @@ UpnpApplication::generateConfigForm(const Poco::Net::HTMLForm& form)
         "</fieldset>";
 
     *pOutStream << "<h2>Media Servers</h2>\n";
-    for (std::map<std::string, Av::MediaServer*>::iterator it = _mediaServers.begin(); it != _mediaServers.end(); ++it) {
-        std::string serverKey = "server." + (*it).second->getUuid();
-        bool serverEnable = Poco::Util::Application::instance().config().getBool(serverKey + ".enable", false);
-        std::string serverName = (*it).second->getFriendlyName();
-        std::string serverPlugin = Poco::Util::Application::instance().config().getString(serverKey + ".plugin", "");
-        std::string basePath = Poco::Util::Application::instance().config().getString(serverKey + ".basePath", "");
+    std::vector<std::string> servers;
+    _pConf->keys("server", servers);
+    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+        std::string serverKey = "server." + *it;
+        bool serverEnable = _pConf->getBool(serverKey + ".enable", false);
+        std::string serverName = _pConf->getString(serverKey + ".friendlyName", "");
+        std::string serverUuid = _pConf->getString(serverKey + ".uuid", "");
+        std::string serverPlugin = _pConf->getString(serverKey + ".plugin", "");
+        std::string basePath = _pConf->getString(serverKey + ".basePath", "");
 
         *pOutStream << "<fieldset><legend>" + serverName + "</legend>"
             "<table>"
             "<tr><td>friendly name</td><td><input type=\"text\" name=\"" + serverKey + ".friendlyName\" size=\"32\" value=\"" + serverName +  "\"></td></tr>\n"
-            "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + (*it).second->getUuid() +  "\"></td></tr>\n"
+            "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + serverUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
             "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
@@ -466,32 +461,68 @@ UpnpApplication::generateConfigForm(const Poco::Net::HTMLForm& form)
 
     *pOutStream << "<input type=\"submit\" value=\"Save\">\n"
         "</form>\n";
-
-    if (!form.empty()) {
-//        Device* pRenderer = (*_pDeviceServer->beginDeviceContainer())->getRootDevice();
-//        DeviceContainer* pDeviceContainer = *_pDeviceServer->beginDeviceContainer();
-//        pDeviceContainer->
-        _localDeviceServer.stop();
-
-        *pOutStream  << "<h2>Form</h2><p>\n";
-
-        if (form.get("renderer.enable", "false") == "false") {
-            // remove renderer from container
-        }
-
-        _localDeviceServer.start();
-
-        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
-        {
-//            Gui::Log::instance()->gui().debug("form key: " + it->first + "form value: " + it->second);
-            *pOutStream << it->first << ": " << it->second << "<br>\n";
-        }
-        *pOutStream << "</p>";
-    }
-
     *pOutStream << "</body></html>\n";
 
     return pOutStream;
+}
+
+
+std::stringstream*
+UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
+{
+    if (!form.empty()) {
+        Av::Log::instance()->upnpav().debug("omm config update ...");
+        _pLocalDeviceServer->stop();
+        _pLocalDeviceServer = new DeviceServer;
+//        _pLocalDeviceServer->removeDeviceContainer(_pLocalDeviceContainer);
+        // delete local devices
+//        delete _pLocalDeviceContainer;
+        _pLocalDeviceContainer = new DeviceContainer;
+
+        // synchronize config with form data
+        // config data:
+        printConfig();
+        // form data:
+        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
+        {
+            Av::Log::instance()->upnpav().debug("form " + it->first + ": " + it->second);
+        }
+
+        // save keys that are not handled by the form
+        Av::Log::instance()->upnpav().debug("omm config save application keys ...");
+        std::map<std::string, std::string> nonMutableConfig;
+        std::vector<std::string> nonMutableKeys;
+        _pConf->keys("application", nonMutableKeys);
+        for (std::vector<std::string>::iterator it = nonMutableKeys.begin(); it != nonMutableKeys.end(); ++it) {
+            nonMutableConfig["application." + *it] = _pConf->getString("application." + *it);
+        }
+
+        // clear file config
+        Av::Log::instance()->upnpav().debug("omm config clear file config ...");
+        _pConf->clear();
+
+        // write back keys that are not handled by the form
+        Av::Log::instance()->upnpav().debug("omm config write back application keys ...");
+        for (std::map<std::string, std::string>::iterator it = nonMutableConfig.begin(); it != nonMutableConfig.end(); ++it) {
+            _pConf->setString(it->first, it->second);
+        }
+
+        // read in form config
+        Av::Log::instance()->upnpav().debug("omm config read in form config ...");
+        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
+        {
+            _pConf->setString(it->first, it->second);
+        }
+
+        // update local device container and all devices contained
+        Av::Log::instance()->upnpav().debug("omm config update local devices ...");
+        initConfig();
+        initLocalDevices();
+        _pLocalDeviceServer->start();
+        Av::Log::instance()->upnpav().debug("omm config update done.");
+    }
+
+    return generateConfigForm();
 }
 
 
@@ -513,6 +544,29 @@ UpnpApplication::showRendererVisualOnly(bool show)
     _showRendererVisualOnly = show;
     showToolBar(false);
     showStatusBar(false);
+}
+
+
+void
+UpnpApplication::initLocalDevices()
+{
+   Omm::Av::Log::instance()->upnpav().debug("omm application init local devices ...");
+//#ifndef __IPHONE__
+    if (_enableRenderer) {
+        setLocalRenderer();
+    }
+    if (_enableRenderer || _enableServer) {
+        _pLocalDeviceServer->addDeviceContainer(_pLocalDeviceContainer);
+    }
+//#endif
+    _pLocalDeviceServer->init();
+//#ifndef __IPHONE__
+    if (_enableRenderer) {
+        // TODO: get default renderer from config file via uuid
+//        _pControllerWidget->setDefaultRenderer(_pMediaRenderer);
+    }
+//#endif
+   Omm::Av::Log::instance()->upnpav().debug("omm application init local devices done.");
 }
 
 
@@ -549,13 +603,21 @@ UpnpApplication::setLocalRenderer()
     pEngine->setVisual(_pControllerWidget->getLocalRendererVisual());
     pEngine->createPlayer();
 
-    _mediaRenderer.addEngine(pEngine);
+    Av::MediaRenderer* pMediaRenderer = new Av::MediaRenderer;
+    pMediaRenderer->addEngine(pEngine);
     Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
-    _mediaRenderer.addIcon(pRendererIcon);
-    _mediaRenderer.setFriendlyName(_rendererName);
-    _mediaRenderer.setUuid(_rendererUuid);
-    _localDeviceContainer.addDevice(&_mediaRenderer);
-    _localDeviceContainer.setRootDevice(&_mediaRenderer);
+    pMediaRenderer->addIcon(pRendererIcon);
+    pMediaRenderer->setFriendlyName(_rendererName);
+    pMediaRenderer->setUuid(_rendererUuid);
+    if (_enableRenderer) {
+        _pLocalDeviceContainer->addDevice(pMediaRenderer);
+        _pLocalDeviceContainer->setRootDevice(pMediaRenderer);
+    }
+    else {
+        if (_pLocalDeviceContainer->getDeviceCount()) {
+            _pLocalDeviceContainer->setRootDevice((*_pLocalDeviceContainer->beginDevice()));
+        }
+    }
     Omm::Av::Log::instance()->upnpav().debug("omm application set local renderer finished.");
 }
 
@@ -578,7 +640,7 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
 
     _enableServer = true;
     Omm::Av::MediaServer* pMediaServer = new Av::MediaServer;
-    _mediaServers[uuid] = pMediaServer;
+//    _mediaServers[uuid] = pMediaServer;
 
     Omm::Av::ServerContainer* pContainer = new Av::ServerContainer(pMediaServer);
     pContainer->setTitle(name);
@@ -597,9 +659,9 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
     Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
     pMediaServer->addIcon(pIcon);
 
-    _localDeviceContainer.addDevice(pMediaServer);
+    _pLocalDeviceContainer->addDevice(pMediaServer);
     if (!_enableRenderer) {
-        _localDeviceContainer.setRootDevice(pMediaServer);
+        _pLocalDeviceContainer->setRootDevice(pMediaServer);
     }
 
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server finished.");

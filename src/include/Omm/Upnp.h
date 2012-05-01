@@ -576,6 +576,7 @@ public:
     ServiceTypeIterator endServiceType();
 
     void addDevice(Device* pDevice);
+    void clear();
     void replaceDevice(Device* pOldDevice, Device* pNewDevice);
     /// replaces pOldDevice with pNewDevice in device tree (data only, code is not touched).
 

@@ -3028,6 +3028,9 @@ _pSsdpNotifyByebyeMessages(new SsdpMessageSet)
 DeviceContainer::~DeviceContainer()
 {
     // TODO: free all Devices, Services, Actions, ...
+    for (DeviceIterator it = beginDevice(); it != endDevice(); ++it) {
+        delete *it;
+    }
 //     delete _descriptionRequestHandler;
     delete _pSsdpNotifyAliveMessages;
     delete _pSsdpNotifyByebyeMessages;
@@ -3053,6 +3056,28 @@ DeviceContainer::addDevice(Device* pDevice)
     pDevice->setDeviceContainer(this);
     for (Device::ServiceIterator it = pDevice->beginService(); it != pDevice->endService(); ++it) {
         addServiceType(*it);
+    }
+}
+
+
+void
+DeviceContainer::clear()
+{
+    // TODO: this is incomplete and currently not usable
+    _devices.clear();
+    _serviceTypes.clear();
+    _pRootDevice = 0;
+    if (_pDeviceDescription) {
+        delete _pDeviceDescription;
+        _pDeviceDescription = 0;
+    }
+    if (_pSsdpNotifyAliveMessages) {
+        delete _pSsdpNotifyByebyeMessages;
+        _pSsdpNotifyByebyeMessages = 0;
+    }
+    if (_pSsdpNotifyAliveMessages) {
+        delete _pSsdpNotifyAliveMessages;
+        _pSsdpNotifyAliveMessages = 0;
     }
 }
 
