@@ -107,7 +107,8 @@ _pControllerWidget(0),
 _pLocalDeviceServer(new DeviceServer),
 _pLocalDeviceContainer(new DeviceContainer),
 _pLocalMediaRenderer(0),
-_pConf(0)
+_pConf(0),
+_newServerUuid(Poco::UUIDGenerator().createRandom().toString())
 {
     setUnixOptions(true);
 }
@@ -460,6 +461,17 @@ UpnpApplication::generateConfigForm()
             "</table>"
             "</fieldset><br>";
     }
+    std::string newServerKey = "server." + _newServerUuid;
+    *pOutStream << "<fieldset><legend>New Server</legend>"
+            "<table>"
+            "<tr><td>friendly name</td><td><input type=\"text\" name=\"" + newServerKey + ".friendlyName\" size=\"32\" value=\"\"></td></tr>\n"
+            "<tr><td>uuid</td><td><input type=\"text\" name=\"" + newServerKey + ".uuid\" size=\"32\" value=\"" + _newServerUuid +  "\"></td></tr>\n"
+            "<tr><td>plugin</td><td><input type=\"text\" name=\"" + newServerKey + ".plugin\" size=\"32\" value=\"\"></td></tr>\n"
+            "<tr><td>base path</td><td><input type=\"text\" name=\"" + newServerKey + ".basePath\" size=\"32\" value=\"\"></td></tr>\n"
+            "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + newServerKey + ".enable\" value=\"true\"></td></tr>\n"
+            "<tr><td><input type=\"submit\" name=\"create." + _newServerUuid + "\" value=\"New\"></td></tr>\n"
+            "</table>"
+            "</fieldset><br>";
 
     *pOutStream << "<input type=\"submit\" value=\"Save\">\n"
         "</form>\n";
@@ -512,6 +524,7 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
         // read in form config
         Av::Log::instance()->upnpav().debug("omm config read in form config ...");
         std::string deleteUuid;
+        bool newServer = false;
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
         {
             Poco::StringTokenizer keyParts(it->first, ".");
@@ -521,8 +534,14 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
                 deleteUuid = keyParts[1];
                 Av::Log::instance()->upnpav().debug("omm config delete uuid: " + deleteUuid);
             }
-            if (deleteUuid != keyParts[1]) {
+            else if (keyParts[0] == "create") {
+                newServer = true;
+            }
+            if ((keyParts[1] != deleteUuid && keyParts[1] != _newServerUuid) || (newServer && keyParts[1] == _newServerUuid))  {
                 _pConf->setString(it->first, it->second);
+            }
+            if (newServer) {
+                _newServerUuid = Poco::UUIDGenerator().createRandom().toString();
             }
         }
 

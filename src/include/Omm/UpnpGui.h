@@ -157,6 +157,7 @@ private:
     std::string                                 _rendererPlugin;
     bool                                        _showRendererVisualOnly;
     bool                                        _enableServer;
+    std::string                                 _newServerUuid;
 
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
