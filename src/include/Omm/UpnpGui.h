@@ -150,6 +150,7 @@ private:
 
     DeviceServer*                               _pLocalDeviceServer;
     DeviceContainer*                            _pLocalDeviceContainer;
+    Av::MediaRenderer*                          _pLocalMediaRenderer;
     bool                                        _enableRenderer;
     std::string                                 _rendererName;
     std::string                                 _rendererUuid;

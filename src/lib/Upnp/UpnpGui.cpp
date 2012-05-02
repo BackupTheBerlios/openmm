@@ -106,6 +106,7 @@ _showRendererVisualOnly(false),
 _pControllerWidget(0),
 _pLocalDeviceServer(new DeviceServer),
 _pLocalDeviceContainer(new DeviceContainer),
+_pLocalMediaRenderer(0),
 _pConf(0)
 {
     setUnixOptions(true);
@@ -455,6 +456,7 @@ UpnpApplication::generateConfigForm()
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
             "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
+            "<tr><td><input type=\"submit\" name=\"delete." + *it + "\" value=\"Delete\"></td></tr>\n"
             "</table>"
             "</fieldset><br>";
     }
@@ -509,9 +511,19 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
 
         // read in form config
         Av::Log::instance()->upnpav().debug("omm config read in form config ...");
+        std::string deleteUuid;
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
         {
-            _pConf->setString(it->first, it->second);
+            Poco::StringTokenizer keyParts(it->first, ".");
+            // NOTE: deleteUuid must be found before the server config entry that will be deleted.
+            //       This relies on the form list being sorted.
+            if (keyParts[0] == "delete") {
+                deleteUuid = keyParts[1];
+                Av::Log::instance()->upnpav().debug("omm config delete uuid: " + deleteUuid);
+            }
+            if (deleteUuid != keyParts[1]) {
+                _pConf->setString(it->first, it->second);
+            }
         }
 
         // update local device container and all devices contained
@@ -561,9 +573,9 @@ UpnpApplication::initLocalDevices()
 //#endif
     _pLocalDeviceServer->init();
 //#ifndef __IPHONE__
-    if (_enableRenderer) {
+    if (_enableRenderer && _pLocalMediaRenderer) {
         // TODO: get default renderer from config file via uuid
-//        _pControllerWidget->setDefaultRenderer(_pMediaRenderer);
+        _pControllerWidget->setDefaultRenderer(_pLocalMediaRenderer);
     }
 //#endif
    Omm::Av::Log::instance()->upnpav().debug("omm application init local devices done.");
@@ -604,6 +616,7 @@ UpnpApplication::setLocalRenderer()
     pEngine->createPlayer();
 
     Av::MediaRenderer* pMediaRenderer = new Av::MediaRenderer;
+    _pLocalMediaRenderer = pMediaRenderer;
     pMediaRenderer->addEngine(pEngine);
     Omm::Icon* pRendererIcon = new Omm::Icon(22, 22, 8, "image/png", "renderer.png");
     pMediaRenderer->addIcon(pRendererIcon);
