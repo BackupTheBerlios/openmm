@@ -1,4 +1,4 @@
-find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
+find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg QtWebKit)
 
 if(QT4_FOUND)
 # FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
@@ -28,6 +28,7 @@ TabImpl.cpp
 NavigatorImpl.cpp
 SliderImpl.cpp
 ImageImpl.cpp
+WebBrowserImpl.cpp
 )
 
 set(OMMGUI_QT_MOC

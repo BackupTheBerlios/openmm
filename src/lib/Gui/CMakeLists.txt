@@ -29,6 +29,7 @@ Tab.cpp
 Navigator.cpp
 Slider.cpp
 Image.cpp
+WebBrowser.cpp
 )
 
 target_link_libraries(ommgui

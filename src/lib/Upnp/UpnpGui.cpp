@@ -461,6 +461,7 @@ UpnpApplication::generateConfigForm()
             "</table>"
             "</fieldset><br>";
     }
+
     std::string newServerKey = "server." + _newServerUuid;
     *pOutStream << "<fieldset><legend>New Server</legend>"
             "<table>"
@@ -473,8 +474,8 @@ UpnpApplication::generateConfigForm()
             "</table>"
             "</fieldset><br>";
 
-    *pOutStream << "<input type=\"submit\" value=\"Save\">\n"
-        "</form>\n";
+    *pOutStream << "<input type=\"submit\" value=\"Save\">\n";
+    *pOutStream << "</form>\n";
     *pOutStream << "</body></html>\n";
 
     return pOutStream;

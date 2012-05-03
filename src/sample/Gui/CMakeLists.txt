@@ -149,3 +149,12 @@ Image.cpp
 target_link_libraries(image
 ${OMM_GUI}
 )
+
+
+add_executable(web
+Web.cpp
+)
+
+target_link_libraries(web
+${OMM_GUI}
+)
