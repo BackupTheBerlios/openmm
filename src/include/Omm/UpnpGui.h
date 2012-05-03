@@ -56,6 +56,7 @@
 #include "Gui/Slider.h"
 #include "Gui/HorizontalLayout.h"
 #include "Gui/Image.h"
+#include "Gui/WebBrowser.h"
 
 
 namespace Omm {
@@ -210,6 +211,7 @@ private:
     MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
     PlaylistEditor*             _pPlaylistEditor;
     GuiVisual*                  _pVisual;
+    Gui::WebBrowser*            _pConfigBrowser;
     MediaRendererView*          _pControlPanel;
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;

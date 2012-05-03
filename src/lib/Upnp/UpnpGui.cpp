@@ -721,6 +721,9 @@ _pApplication(pApplication)
     addView(_pPlaylistEditor, "Playlist Editor");
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
+    _pConfigBrowser = new Gui::WebBrowser;
+    addView(_pConfigBrowser, "Setup");
+    _pConfigBrowser->setUri("http://localhost:4009/Config");
     _pControlPanel = new MediaRendererView;
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
