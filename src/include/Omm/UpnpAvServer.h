@@ -327,6 +327,8 @@ protected:
 
 class DatabaseCache : public ServerObjectCache
 {
+    friend class DatabaseCacheSearchCriteria;
+    
 public:
     DatabaseCache(const std::string& cacheTableName, ServerObject::IndexNamespace indexNamespace = ServerObject::Data);
     ~DatabaseCache();
@@ -355,6 +357,19 @@ private:
     std::map<std::string, std::string>  _propertyColumnNames;
     std::map<std::string, std::string>  _propertyColumnTypes;
     ServerObject::IndexNamespace        _indexNamespace;
+};
+
+
+class DatabaseCacheSearchCriteria : public SqlSearchCriteria
+{
+public:
+    DatabaseCacheSearchCriteria(DatabaseCache* pDatabaseCache);
+
+protected:
+    virtual std::string translateProperty(const std::string& property);
+
+private:
+    DatabaseCache*      _pDatabaseCache;
 };
 
 

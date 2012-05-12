@@ -29,20 +29,24 @@
 
 int
 main(int argc, char** argv) {
-    Omm::Av::SearchCriteria search;
+    Omm::Av::SqlSearchCriteria search;
     std::vector<std::string> searchStrings;
 
     if (argc > 1) {
         searchStrings.push_back(std::string(argv[1]));
     }
     else {
+        searchStrings.push_back("*");
         searchStrings.push_back("upnp:artist = \"foo\"");
+        searchStrings.push_back("upnp:artist contains \"foo\"");
         searchStrings.push_back("upnp:artist = \"foo\" and dc:title = \"bar\"");
         searchStrings.push_back("upnp:artist = \"foo\" and (dc:title = \"bar\" or dc:title = \"foobar\")");
+        searchStrings.push_back("upnp:artist contains \"foo\" and (dc:title doesNotContain \"bar\" or dc:title derivedfrom \"foobar\")");
+        searchStrings.push_back("upnp:artist contains \"foo\" and ((dc:title doesNotContain \"bar\") or (dc:title derivedfrom \"foobar\"))");
     }
 
     for (std::vector<std::string>::iterator it = searchStrings.begin(); it != searchStrings.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test search criteria: " + *it);
+        Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test search: " + *it);
         std::string translatedString;
         try {
             translatedString = search.parse(*it);
@@ -50,7 +54,7 @@ main(int argc, char** argv) {
         catch (Poco::Exception& e) {
             Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test error parsing search criteria: " + e.displayText());
         }
-        Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test translated: " + translatedString + Poco::LineEnding::NEWLINE_DEFAULT);
+        Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test transl: " + translatedString + Poco::LineEnding::NEWLINE_DEFAULT);
     }
 
     return 0;

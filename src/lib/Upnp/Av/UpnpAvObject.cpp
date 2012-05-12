@@ -524,17 +524,17 @@ SearchCriteria::translateLogOp(const std::string& logOp)
 }
 
 
-//std::string
-//SearchCriteria::translateProperty(const std::string& property)
-//{
-//    return property;
-//}
+std::string
+SearchCriteria::translateProperty(const std::string& property)
+{
+    return property;
+}
 
 
 void
 SearchCriteria::searchExp()
 {
-    Log::instance()->upnpav().debug("search criteria, searchExp: " + Poco::NumberFormatter::format(_scanPos));
+//    Log::instance()->upnpav().debug("search criteria, searchExp: " + Poco::NumberFormatter::format(_scanPos));
 
     skipBlanks();
     if (isOpeningBracket(peek())) {
@@ -566,21 +566,21 @@ SearchCriteria::searchExp()
     }
     skipBlanks();
 
-    Log::instance()->upnpav().debug("search criteria, searchExp finished: " + Poco::NumberFormatter::format(_scanPos));
+//    Log::instance()->upnpav().debug("search criteria, searchExp finished: " + Poco::NumberFormatter::format(_scanPos));
 }
 
 
 void
 SearchCriteria::relExp()
 {
-    Log::instance()->upnpav().debug("search criteria, relExp: " + Poco::NumberFormatter::format(_scanPos));
+//    Log::instance()->upnpav().debug("search criteria, relExp: " + Poco::NumberFormatter::format(_scanPos));
 
     std::string prop = getToken();
     std::string op = getToken();
     std::string val = getToken();
-    if (isBinOp(op)) {
+    if (isRelOp(op)) {
         if (isQuotedVal(val)) {
-            _translatedString += translateCompareExp(prop, op, val);
+            _translatedString += translateCompareExp(translateProperty(prop), op, val);
         }
         else {
             throw Poco::Exception("search criteria quoted value expected");
@@ -588,7 +588,7 @@ SearchCriteria::relExp()
     }
     else if (isStringOp(op)) {
         if (isQuotedVal(val)) {
-            _translatedString += translateStringExp(prop, op, val);
+            _translatedString += translateStringExp(translateProperty(prop), op, val);
         }
         else {
             throw Poco::Exception("search criteria quoted value expected");
@@ -605,10 +605,10 @@ SearchCriteria::relExp()
         else {
             throw Poco::Exception("search criteria boolean value expected");
         }
-        _translatedString += translateExistsExp(prop, op, boolVal);
+        _translatedString += translateExistsExp(translateProperty(prop), op, boolVal);
     }
 
-    Log::instance()->upnpav().debug("search criteria, relExp finished: " + Poco::NumberFormatter::format(_scanPos));
+//    Log::instance()->upnpav().debug("search criteria, relExp finished: " + Poco::NumberFormatter::format(_scanPos));
 }
 
 
@@ -625,7 +625,7 @@ SearchCriteria::getToken()
             step();
         }
     }
-    Log::instance()->upnpav().debug("search criteria, getToken returns: " + _searchString.substr(stringBegin, _scanPos - stringBegin));
+//    Log::instance()->upnpav().debug("search criteria, getToken returns: " + _searchString.substr(stringBegin, _scanPos - stringBegin));
     return _searchString.substr(stringBegin, _scanPos - stringBegin);
 }
 
@@ -652,7 +652,7 @@ SearchCriteria::step()
 void
 SearchCriteria::skipBlanks()
 {
-    Log::instance()->upnpav().debug("search criteria, skipBlanks: " + Poco::NumberFormatter::format(_scanPos));
+//    Log::instance()->upnpav().debug("search criteria, skipBlanks: " + Poco::NumberFormatter::format(_scanPos));
 
     while (!endOfString() && isWChar(peek())) {
         step();
@@ -687,9 +687,6 @@ SearchCriteria::isWChar(char ch)
 bool
 SearchCriteria::isOpeningBracket(char ch)
 {
-    if (ch == openingBracket) {
-        Log::instance()->upnpav().debug("search criteria, found opening bracket");
-    }
     return ch == openingBracket;
 }
 
@@ -697,9 +694,6 @@ SearchCriteria::isOpeningBracket(char ch)
 bool
 SearchCriteria::isClosingBracket(char ch)
 {
-    if (ch == closingBracket) {
-        Log::instance()->upnpav().debug("search criteria, found closing bracket");
-    }
     return ch == closingBracket;
 }
 
@@ -768,6 +762,43 @@ bool
 SearchCriteria::isBoolVal(const std::string& token)
 {
     return (token == boolValTrue || token == boolValFalse);
+}
+
+
+std::string
+SqlSearchCriteria::translateAsterisk()
+{
+    return "";
+}
+
+
+std::string
+SqlSearchCriteria::translateStringExp(const std::string& property, const std::string& op, const std::string& val)
+{
+    std::string translatedOp = op;
+    std::string unquotedVal = val.substr(1, val.length() - 2);
+    std::string translatedVal;
+    if (op == stringOpContains) {
+        translatedOp = "like";
+        translatedVal = "\"%" + unquotedVal + "%\"";
+    }
+    else if (op == stringOpContainsNot) {
+        translatedOp = "not like";
+        translatedVal = "\"%" + unquotedVal + "%\"";
+    }
+    else if (op == stringOpDerived) {
+        translatedOp = "like";
+        translatedVal = "\"" + unquotedVal + "%\"";
+    }
+
+    return property + space + translatedOp + space + translatedVal;
+}
+
+
+std::string
+SqlSearchCriteria::translateExistsExp(const std::string& property, const std::string& op, bool val)
+{
+    return property + space + op + space + (val ? "true" : "false");
 }
 
 

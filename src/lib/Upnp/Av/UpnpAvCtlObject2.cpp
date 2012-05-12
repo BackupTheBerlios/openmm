@@ -232,13 +232,9 @@ CtlMediaObject2::setSearch(const std::string& searchText)
         _searchText = "*";
     }
     else {
-        _searchText = "title like \"%" + searchText + "%\"";
-//        _searchText = "(artist like \"%" + searchText + "%\" OR title like \"%" + searchText + "%\")";
-//    _searchText = "artist like \"%" + searchText + "%\" OR album like \"%" + searchText + "%\" OR title like \"%" + searchText + "%\"";
-        
+        _searchText = "dc:title contains \"" + searchText + "\"";
 //    _searchText = "upnp:artist contains \"" + searchText + "\" or upnp:album contains \"" + searchText + "\" or dc:title contains \"" + searchText + "\"";
 //    _searchText = "upnp:artist contains \"" + searchText + "\" or dc:title contains \"" + searchText + "\"";
-//    _searchText = "dc:title contains \"" + searchText + "\"";
     }
 }
 

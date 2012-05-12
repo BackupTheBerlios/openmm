@@ -1505,7 +1505,13 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     }
 
     if (search != "*") {
-        whereClause += search;
+        DatabaseCacheSearchCriteria searchCrit(this);
+        try {
+            whereClause += searchCrit.parse(search);
+        }
+        catch (Poco::Exception& e) {
+            Omm::Av::Log::instance()->upnpav().debug("database cache search error parsing search criteria: " + e.displayText());
+        }
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
         Log::instance()->upnpav().debug("database cache server container layout: Flat");
@@ -1758,6 +1764,20 @@ DatabaseCache::getColumnType(const std::string& propertyName)
     else {
         return "VARCHAR";
     }
+}
+
+
+DatabaseCacheSearchCriteria::DatabaseCacheSearchCriteria(DatabaseCache* pDatabaseCache) :
+_pDatabaseCache(pDatabaseCache)
+{
+
+}
+
+
+std::string
+DatabaseCacheSearchCriteria::translateProperty(const std::string& property)
+{
+    return _pDatabaseCache->getColumnName(property);
 }
 
 

@@ -280,7 +280,7 @@ protected:
     virtual std::string translateStringExp(const std::string& property, const std::string& op, const std::string& val);
     virtual std::string translateExistsExp(const std::string& property, const std::string& op, bool val);
     virtual std::string translateLogOp(const std::string& logOp);
-//    virtual std::string translateProperty(const std::string& property);
+    virtual std::string translateProperty(const std::string& property);
 
 private:
     void searchExp();
@@ -308,6 +308,15 @@ private:
     std::string                 _searchString;
     std::string::size_type      _scanPos;
     std::string                 _translatedString;
+};
+
+
+class SqlSearchCriteria : public SearchCriteria
+{
+    virtual std::string translateAsterisk();
+    virtual std::string translateStringExp(const std::string& property, const std::string& op, const std::string& val);
+    // TODO: translateExistsExp is not handled in SqlSearchCriteria
+    virtual std::string translateExistsExp(const std::string& property, const std::string& op, bool val);
 };
 
 
