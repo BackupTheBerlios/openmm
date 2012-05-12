@@ -145,3 +145,13 @@ ${OMM_UTIL}
 ${OMM}
 ${OMM_AV}
 )
+
+
+add_executable(search
+SearchCriteria.cpp
+)
+
+target_link_libraries(search
+${OMM}
+${OMM_AV}
+)

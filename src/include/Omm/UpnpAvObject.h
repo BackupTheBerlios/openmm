@@ -242,9 +242,72 @@ private:
 class SearchCriteria
 {
 public:
-    SearchCriteria(const std::string& searchString = "");
+    SearchCriteria();
 
-    std::string toString();
+    std::string parse(const std::string& searchString);
+    /// provide a sublcass of SearchCriteria to convert search string into for example a usefull SQL string
+    /// without that, parse returns the original searchString (after parsing it).
+
+protected:
+    static const std::string logOpAnd;
+    static const std::string logOpOr;
+    static const std::string relOpEqual;
+    static const std::string relOpUnequal;
+    static const std::string relOpLess;
+    static const std::string relOpLessEqual;
+    static const std::string relOpGreater;
+    static const std::string relOpGreaterEqual;
+    static const std::string stringOpContains;
+    static const std::string stringOpContainsNot;
+    static const std::string stringOpDerived;
+    static const std::string existsOp;
+    static const std::string boolValTrue;
+    static const std::string boolValFalse;
+    static const char hTab;
+    static const char lineFeed;
+    static const char vTab;
+    static const char formFeed;
+    static const char returnChar;
+    static const char space;
+    static const char dQuote;
+    static const char asterisk;
+    static const char openingBracket;
+    static const char closingBracket;
+    static const char escape;
+
+    virtual std::string translateAsterisk();
+    virtual std::string translateCompareExp(const std::string& property, const std::string& op, const std::string& val);
+    virtual std::string translateStringExp(const std::string& property, const std::string& op, const std::string& val);
+    virtual std::string translateExistsExp(const std::string& property, const std::string& op, bool val);
+    virtual std::string translateLogOp(const std::string& logOp);
+//    virtual std::string translateProperty(const std::string& property);
+
+private:
+    void searchExp();
+    void relExp();
+
+    char peek();
+    void step();
+    std::string getToken();
+    void skipBlanks();
+    bool endOfString();
+
+    bool isWChar(char ch);
+    bool isOpeningBracket(char ch);
+    bool isClosingBracket(char ch);
+    bool isBracket(char ch);
+
+    bool isLogOp(const std::string& token);
+    bool isBinOp(const std::string& token);
+    bool isRelOp(const std::string& token);
+    bool isStringOp(const std::string& token);
+    bool isExistsOp(const std::string& token);
+    bool isQuotedVal(const std::string& token);
+    bool isBoolVal(const std::string& token);
+
+    std::string                 _searchString;
+    std::string::size_type      _scanPos;
+    std::string                 _translatedString;
 };
 
 

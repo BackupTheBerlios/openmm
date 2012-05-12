@@ -440,6 +440,337 @@ CsvList::toString()
 }
 
 
+const std::string SearchCriteria::logOpAnd = "and";
+const std::string SearchCriteria::logOpOr = "or";
+const std::string SearchCriteria::relOpEqual = "=";
+const std::string SearchCriteria::relOpUnequal = "!=";
+const std::string SearchCriteria::relOpLess = "<";
+const std::string SearchCriteria::relOpLessEqual = "<=";
+const std::string SearchCriteria::relOpGreater = ">";
+const std::string SearchCriteria::relOpGreaterEqual = ">=";
+const std::string SearchCriteria::stringOpContains = "contains";
+const std::string SearchCriteria::stringOpContainsNot = "doesNotContain";
+const std::string SearchCriteria::stringOpDerived = "derivedfrom";
+const std::string SearchCriteria::existsOp = "exists";
+const std::string SearchCriteria::boolValTrue = "true";
+const std::string SearchCriteria::boolValFalse = "false";
+const char SearchCriteria::hTab = '\x09';
+const char SearchCriteria::lineFeed = '\x0A';
+const char SearchCriteria::vTab = '\x0B';
+const char SearchCriteria::formFeed = '\x0C';
+const char SearchCriteria::returnChar = '\x0D';
+const char SearchCriteria::space = ' ';
+const char SearchCriteria::dQuote = '\"';
+const char SearchCriteria::asterisk = '*';
+const char SearchCriteria::openingBracket = '(';
+const char SearchCriteria::closingBracket = ')';
+const char SearchCriteria::escape = '\\';
+
+
+SearchCriteria::SearchCriteria()
+{
+}
+
+
+std::string
+SearchCriteria::parse(const std::string& searchString)
+{
+    _searchString = searchString;
+    _scanPos = 0;
+    _translatedString = "";
+
+    if (searchString == std::string(1, asterisk)) {
+        _translatedString += translateAsterisk();
+    }
+    else {
+        searchExp();
+    }
+    return _translatedString;
+}
+
+
+std::string
+SearchCriteria::translateAsterisk()
+{
+    return std::string(1, asterisk);
+}
+
+
+std::string
+SearchCriteria::translateCompareExp(const std::string& property, const std::string& op, const std::string& val)
+{
+    return property + space + op + space + val;
+}
+
+
+std::string
+SearchCriteria::translateStringExp(const std::string& property, const std::string& op, const std::string& val)
+{
+    return property + space + op + space + val;
+}
+
+
+std::string
+SearchCriteria::translateExistsExp(const std::string& property, const std::string& op, bool val)
+{
+    return property + space + op + space + (val ? "true" : "false");
+}
+
+
+std::string
+SearchCriteria::translateLogOp(const std::string& logOp)
+{
+    return space + logOp + space;
+}
+
+
+//std::string
+//SearchCriteria::translateProperty(const std::string& property)
+//{
+//    return property;
+//}
+
+
+void
+SearchCriteria::searchExp()
+{
+    Log::instance()->upnpav().debug("search criteria, searchExp: " + Poco::NumberFormatter::format(_scanPos));
+
+    skipBlanks();
+    if (isOpeningBracket(peek())) {
+        _translatedString += openingBracket;
+        step();
+        searchExp();
+        if (isClosingBracket(peek())) {
+            _translatedString += closingBracket;
+            step();
+        }
+        else {
+            throw Poco::Exception("search criteria missing closing bracket");
+        }
+    }
+    else {
+        relExp();
+    }
+
+    skipBlanks();
+    if (!endOfString() && !isClosingBracket(peek())) {
+        std::string tok = getToken();
+        if (isLogOp(tok)) {
+            _translatedString += translateLogOp(tok);
+            searchExp();
+        }
+        else {
+            throw Poco::Exception("search criteria garbage at end of expression");
+        }
+    }
+    skipBlanks();
+
+    Log::instance()->upnpav().debug("search criteria, searchExp finished: " + Poco::NumberFormatter::format(_scanPos));
+}
+
+
+void
+SearchCriteria::relExp()
+{
+    Log::instance()->upnpav().debug("search criteria, relExp: " + Poco::NumberFormatter::format(_scanPos));
+
+    std::string prop = getToken();
+    std::string op = getToken();
+    std::string val = getToken();
+    if (isBinOp(op)) {
+        if (isQuotedVal(val)) {
+            _translatedString += translateCompareExp(prop, op, val);
+        }
+        else {
+            throw Poco::Exception("search criteria quoted value expected");
+        }
+    }
+    else if (isStringOp(op)) {
+        if (isQuotedVal(val)) {
+            _translatedString += translateStringExp(prop, op, val);
+        }
+        else {
+            throw Poco::Exception("search criteria quoted value expected");
+        }
+    }
+    else if (isExistsOp(op)) {
+        bool boolVal;
+        if (val == boolValTrue) {
+            boolVal = true;
+        }
+        else if (val == boolValFalse) {
+            boolVal = false;
+        }
+        else {
+            throw Poco::Exception("search criteria boolean value expected");
+        }
+        _translatedString += translateExistsExp(prop, op, boolVal);
+    }
+
+    Log::instance()->upnpav().debug("search criteria, relExp finished: " + Poco::NumberFormatter::format(_scanPos));
+}
+
+
+std::string
+SearchCriteria::getToken()
+{
+    skipBlanks();
+    std::string::size_type stringBegin = _scanPos;
+    if (isBracket(peek())) {
+        step();
+    }
+    else {
+        while (!endOfString() && !isWChar(peek()) && !isBracket(peek())) {
+            step();
+        }
+    }
+    Log::instance()->upnpav().debug("search criteria, getToken returns: " + _searchString.substr(stringBegin, _scanPos - stringBegin));
+    return _searchString.substr(stringBegin, _scanPos - stringBegin);
+}
+
+
+char
+SearchCriteria::peek()
+{
+    try {
+        return _searchString.at(_scanPos);
+    }
+    catch (...) {
+        throw Poco::Exception("search criteria scanner reached end of string");
+    }
+}
+
+
+void
+SearchCriteria::step()
+{
+    _scanPos++;
+}
+
+
+void
+SearchCriteria::skipBlanks()
+{
+    Log::instance()->upnpav().debug("search criteria, skipBlanks: " + Poco::NumberFormatter::format(_scanPos));
+
+    while (!endOfString() && isWChar(peek())) {
+        step();
+    }
+}
+
+
+bool
+SearchCriteria::endOfString()
+{
+    return _scanPos >= _searchString.length();
+}
+
+
+bool
+SearchCriteria::isWChar(char ch)
+{
+    if (ch == space ||
+        ch == hTab ||
+        ch == lineFeed ||
+        ch == vTab ||
+        ch == formFeed ||
+        ch == returnChar) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
+bool
+SearchCriteria::isOpeningBracket(char ch)
+{
+    if (ch == openingBracket) {
+        Log::instance()->upnpav().debug("search criteria, found opening bracket");
+    }
+    return ch == openingBracket;
+}
+
+
+bool
+SearchCriteria::isClosingBracket(char ch)
+{
+    if (ch == closingBracket) {
+        Log::instance()->upnpav().debug("search criteria, found closing bracket");
+    }
+    return ch == closingBracket;
+}
+
+
+bool
+SearchCriteria::isBracket(char ch)
+{
+    return isOpeningBracket(ch) || isClosingBracket(ch);
+}
+
+
+bool
+SearchCriteria::isLogOp(const std::string& token)
+{
+    return (token == logOpAnd || token == logOpOr);
+}
+
+
+bool
+SearchCriteria::isBinOp(const std::string& token)
+{
+    return (isRelOp(token) || isStringOp(token));
+
+}
+
+
+bool
+SearchCriteria::isRelOp(const std::string& token)
+{
+    return (token == relOpEqual ||
+            token == relOpUnequal ||
+            token == relOpLess  ||
+            token == relOpLessEqual ||
+            token == relOpGreater ||
+            token == relOpGreaterEqual
+            );
+}
+
+
+bool
+SearchCriteria::isStringOp(const std::string& token)
+{
+    return (token == stringOpContains ||
+            token == stringOpContainsNot ||
+            token == stringOpDerived);
+}
+
+
+bool
+SearchCriteria::isExistsOp(const std::string& token)
+{
+    return token == existsOp;
+}
+
+
+bool
+SearchCriteria::isQuotedVal(const std::string& token)
+{
+    return (token.length() >= 2 &&
+            token.at(0) == dQuote &&
+            token.at(token.length() - 1) == dQuote);
+}
+
+
+bool
+SearchCriteria::isBoolVal(const std::string& token)
+{
+    return (token == boolValTrue || token == boolValFalse);
+}
+
+
 AbstractResource::AbstractResource(PropertyImpl* pPropertyImpl) :
 AbstractProperty(pPropertyImpl)
 {
