@@ -30,6 +30,9 @@
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
+#include <Poco/TextEncoding.h>
+#include <Poco/UTF8Encoding.h>
+#include <Poco/TextConverter.h>
 
 // #include "AvStream.h"
 #include "Upnp.h"
@@ -157,6 +160,9 @@ public:
 
     ServerObject(MediaServer* pServer);
     ~ServerObject();
+
+    // AbstractMediaObject
+    virtual void setUniqueProperty(const std::string& name, const std::string& value);
 
     // factory method
     virtual ServerObject* createChildObject();
@@ -328,7 +334,7 @@ protected:
 class DatabaseCache : public ServerObjectCache
 {
     friend class DatabaseCacheSearchCriteria;
-    
+
 public:
     DatabaseCache(const std::string& cacheTableName, ServerObject::IndexNamespace indexNamespace = ServerObject::Data);
     ~DatabaseCache();
@@ -426,6 +432,10 @@ public:
     virtual void freeStream(std::istream* pIstream) {}
     virtual std::istream* getIconStream(const std::string& path) { return 0; }
 
+    const Poco::TextEncoding* getSourceTextEncoding();
+    void setSourceTextEncoding(const std::string& encoding);
+    Poco::TextConverter* getTextConverter();
+
 protected:
     void readIndexCache();
     void writeIndexCache();
@@ -443,6 +453,10 @@ private:
     std::multimap<ui4, std::string>             _resourceMap;
     std::stack<ui4>                             _freeIndices;
     ui4                                         _maxIndex;
+
+    Poco::TextEncoding::Ptr                     _pSourceEncoding;
+    Poco::UTF8Encoding                          _targetEncoding;
+    Poco::TextConverter*                        _pTextConverter;
 };
 
 

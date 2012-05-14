@@ -174,7 +174,6 @@ public:
     static std::string writeDuration(const r8& duration);
     static time readTime(const std::string& timeString);
     static std::string writeTime(const time& timeVal);
-    static void replaceNonUtf8(std::string& str);
 };
 
 
@@ -417,7 +416,7 @@ public:
     virtual int getPropertyCount(const std::string& name = "") = 0;
     virtual AbstractProperty* getProperty(int index) = 0;
     virtual AbstractProperty* getProperty(const std::string& name, int index = 0) = 0;
-    void setUniqueProperty(const std::string& name, const std::string& value);
+    virtual void setUniqueProperty(const std::string& name, const std::string& value);
 
     // resources
     int getResourceCount();

@@ -33,6 +33,7 @@ FileModel::FileModel() :
 _pTagger(0)
 {
     loadTagger();
+    setSourceTextEncoding("UTF8");
 }
 
 
@@ -97,27 +98,14 @@ FileModel::getMediaObject(const std::string& path)
         setClass(pItem, pMeta->getContainerFormat());
 
         std::string title = pMeta->getTag(Omm::AvStream::Meta::TK_TITLE);
-        Omm::Av::AvTypeConverter::replaceNonUtf8(title);
         if (title == "") {
             title = fullPath.getFileName();
         }
         pItem->setTitle(title);
-
-        std::string propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_ARTIST);
-        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
-        pItem->setUniqueProperty(Omm::Av::AvProperty::ARTIST, propertyValue);
-
-        propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM);
-        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
-        pItem->setUniqueProperty(Omm::Av::AvProperty::ALBUM, propertyValue);
-
-        propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_TRACK);
-        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
-        pItem->setUniqueProperty(Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER, propertyValue);
-
-        propertyValue = pMeta->getTag(Omm::AvStream::Meta::TK_GENRE);
-        Omm::Av::AvTypeConverter::replaceNonUtf8(propertyValue);
-        pItem->setUniqueProperty(Omm::Av::AvProperty::GENRE, propertyValue);
+        pItem->setUniqueProperty(Omm::Av::AvProperty::ARTIST, pMeta->getTag(Omm::AvStream::Meta::TK_ARTIST));
+        pItem->setUniqueProperty(Omm::Av::AvProperty::ALBUM, pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM));
+        pItem->setUniqueProperty(Omm::Av::AvProperty::ORIGINAL_TRACK_NUMBER, pMeta->getTag(Omm::AvStream::Meta::TK_TRACK));
+        pItem->setUniqueProperty(Omm::Av::AvProperty::GENRE, pMeta->getTag(Omm::AvStream::Meta::TK_GENRE));
 
         Omm::Av::ServerObjectResource* pResource = pItem->createResource();
         pResource->setSize(getSize(path));

@@ -33,6 +33,8 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
+#include <Poco/TextConverter.h>
+#include <Poco/UTF8Encoding.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeIterator.h>
@@ -51,8 +53,6 @@
 #include <list>
 
 #include "UpnpAvObject.h"
-
-#include "utf8.h"
 #include "Upnp.h"
 
 
@@ -258,15 +258,6 @@ std::string
 AvTypeConverter::writeTime(const time& timeVal)
 {
     return Poco::DateTimeFormatter::format(timeVal, Poco::DateTimeFormat::ISO8601_FORMAT, 0).substr(11);
-}
-
-
-void
-AvTypeConverter::replaceNonUtf8(std::string& str)
-{
-    std::string temp;
-    utf8::replace_invalid(str.begin(), str.end(), std::back_inserter(temp));
-    str = temp;
 }
 
 
@@ -1463,7 +1454,13 @@ MediaObjectWriter2::writeMetaDataClose(std::string& metaData)
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     std::stringstream ss;
-    writer.writeNode(ss, _pDoc);
+    try {
+        writer.writeNode(ss, _pDoc);
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("MediaObjectWriter2::writeMetaDataClose() could not write meta data xml: " + e.displayText());
+        return;
+    }
     metaData = ss.str();
     Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaDataClose() returns: \n" + metaData);
 }
@@ -1515,8 +1512,6 @@ MediaObjectWriter2::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject
         AbstractProperty* pProp = pObject->getProperty(propNum);
         std::string name = pProp->getName();
         std::string value = pProp->getValue();
-        // non UTF-8 characters cause the DOM writer to stop and leave an unfinished XML fragment.
-        AvTypeConverter::replaceNonUtf8(value);
         Log::instance()->upnpav().debug("MediaObjectWriter2::writeMetaData() property: " + name + ", " + value);
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement(name);
         Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(value);

@@ -24,12 +24,12 @@
 
 #include <Poco/File.h>
 #include <Poco/StreamCopier.h>
+#include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/HTTPServerParams.h>
 #include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Exception.h>
 #include "Poco/Data/SQLite/Connector.h"
 #include "Poco/Data/RecordSet.h"
 
@@ -37,6 +37,8 @@
 #include <list>
 #include <vector>
 #include <Poco/LineEndingConverter.h>
+#include <Poco/UTF8Encoding.h>
+#include <Poco/TextConverter.h>
 
 #include "UpnpAvServer.h"
 #include "UpnpInternal.h"
@@ -507,6 +509,27 @@ ServerObject::~ServerObject()
 //        delete _pItemServer;
 //        _pItemServer = 0;
 //    }
+}
+
+
+void
+ServerObject::setUniqueProperty(const std::string& name, const std::string& value)
+{
+    if (_pDataModel && _pDataModel->getTextConverter()) {
+        std::string recodedValue;
+        _pDataModel->getTextConverter()->convert(value, recodedValue);
+        // replace control characters (ASCII < 32) with space to prevent Poco::XMLWriter throwing
+        // Poco::XMLException("invalid character token")
+        for (std::string::iterator it = recodedValue.begin(); it != recodedValue.end(); ++it) {
+            if (*it < 32) {
+                *it = ' ';
+            }
+        }
+        MemoryMediaObject::setUniqueProperty(name, recodedValue);
+    }
+    else {
+        MemoryMediaObject::setUniqueProperty(name, value);
+    }
 }
 
 
@@ -1785,8 +1808,10 @@ const ui4 AbstractDataModel::INVALID_INDEX = 0xffffffff;
 
 AbstractDataModel::AbstractDataModel() :
 _pServerContainer(0),
-_maxIndex(1)
-//_indexBufferSize(50)
+_maxIndex(1),
+//_indexBufferSize(50),
+_pSourceEncoding(0),
+_pTextConverter(0)
 {
 }
 
@@ -1943,6 +1968,28 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, 
         r++;
     }
     return getIndexCount();
+}
+
+
+const Poco::TextEncoding*
+AbstractDataModel::getSourceTextEncoding()
+{
+    return _pSourceEncoding;
+}
+
+
+void
+AbstractDataModel::setSourceTextEncoding(const std::string& encoding)
+{
+    _pSourceEncoding = Poco::TextEncoding::find(encoding);
+    _pTextConverter = new Poco::TextConverter(*_pSourceEncoding, _targetEncoding);
+}
+
+
+Poco::TextConverter*
+AbstractDataModel::getTextConverter()
+{
+    return _pTextConverter;
 }
 
 
