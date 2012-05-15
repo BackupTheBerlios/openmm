@@ -429,6 +429,8 @@ UpnpApplication::generateConfigForm()
                     "<body>\n"
                     "<h1>OMM Configuration</h1>\n";
 
+    *pOutStream << "Address of this page is " << getConfigHttpUri() << "/Config<br>\n";
+
     bool rendererEnable = _pConf->getBool("renderer.enable", false);
     std::string rendererName = _pConf->getString("renderer.friendlyName", "");
     std::string rendererUuid = _pConf->getString("renderer.uuid", "");
@@ -740,6 +742,7 @@ _pApplication(pApplication)
     _pConfigBrowser = new Gui::WebBrowser;
     addView(_pConfigBrowser, "Setup");
     _pConfigBrowser->setUri("http://localhost:4009/Config");
+//    _pConfigBrowser->setUri(_pApplication->getConfigHttpUri() + "/Config");
     _pControlPanel = new MediaRendererView;
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
