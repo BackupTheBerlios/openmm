@@ -111,6 +111,7 @@ public:
     void setIgnoreConfig(bool ignore = true);
     void enableController(bool enable = true);
     void showRendererVisualOnly(bool show = true);
+    std::string getAppHttpUri();
     std::string getConfigHttpUri();
 
 private:
@@ -141,6 +142,8 @@ private:
     void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath);
 
     // other stuff
+    void startAppHttpServer();
+    void stopAppHttpServer();
     bool instanceRunning();
 
     int                                         _argc;
@@ -169,6 +172,7 @@ private:
     // 1. playlist editor resource imports
     // 2. configuration of app
     // and in the future for playing partial playlist from the editor?
+    int                                         _appStandardPort;
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
 };

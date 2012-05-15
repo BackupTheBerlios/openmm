@@ -110,7 +110,8 @@ _pLocalDeviceContainer(new DeviceContainer),
 _pLocalMediaRenderer(0),
 _pConf(0),
 _newServerUuid(Poco::UUIDGenerator().createRandom().toString()),
-_instanceMutexName("OmmApplicationMutex")
+_instanceMutexName("OmmApplicationMutex"),
+_appStandardPort(4009)
 {
     setUnixOptions(true);
 }
@@ -220,10 +221,13 @@ UpnpApplication::main(const std::vector<std::string>& args)
 
         loadConfig();
         initConfig();
+        startAppHttpServer();
 
         Gui::Application::runEventLoop(_argc, _argv);
 
+        stopAppHttpServer();
         saveConfig();
+
         uninitialize();
     }
     return Poco::Util::Application::EXIT_OK;
@@ -266,12 +270,6 @@ UpnpApplication::start()
         _pControllerWidget->start();
     }
     _pLocalDeviceServer->start();
-
-    _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
-    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
-    _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
-    _pHttpServer->start();
-    Log::instance()->upnp().information("omm application http server listening on: " + _socket.address().toString());
 }
 
 
@@ -279,7 +277,6 @@ void
 UpnpApplication::stop()
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
-    _pHttpServer->stop();
     _pLocalDeviceServer->stop();
     if (_enableController) {
         _pControllerWidget->stop();
@@ -429,7 +426,7 @@ UpnpApplication::generateConfigForm()
                     "<body>\n"
                     "<h1>OMM Configuration</h1>\n";
 
-    *pOutStream << "Address of this page is " << getConfigHttpUri() << "/Config<br>\n";
+    *pOutStream << "Address of this page is " << getAppHttpUri() << "/Config<br>\n";
 
     bool rendererEnable = _pConf->getBool("renderer.enable", false);
     std::string rendererName = _pConf->getString("renderer.friendlyName", "");
@@ -710,6 +707,25 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
 }
 
 
+void
+UpnpApplication::startAppHttpServer()
+{
+    _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
+    Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
+    _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
+    _pHttpServer->start();
+    Log::instance()->upnp().information("omm application http server listening on: " + _socket.address().toString());
+}
+
+
+void
+UpnpApplication::stopAppHttpServer()
+{
+    _pHttpServer->stop();
+    Log::instance()->upnp().information("omm application http server stopped on port: " + Poco::NumberFormatter::format(_socket.address().port()));
+}
+
+
 bool
 UpnpApplication::instanceRunning()
 {
@@ -720,10 +736,23 @@ UpnpApplication::instanceRunning()
 
 
 std::string
-UpnpApplication::getConfigHttpUri()
+UpnpApplication::getAppHttpUri()
 {
     std::string address = Net::NetworkInterfaceManager::instance()->getValidIpAddress().toString();
     return "http://" + address + ":" + Poco::NumberFormatter::format(_socket.address().port());
+}
+
+
+std::string
+UpnpApplication::getConfigHttpUri()
+{
+    // FIXME: on second process instance, configuration is ignored, but config page of first process instance
+    // should be displayed. If standard port is used, this works, but not if another port is configured.
+    // However, getting the configured port doesn't solve the problem, as it may be in use when first instance was started,
+    // and so first instance chose a random port.
+    return "http://localhost:" + config().getString("application.configPort", Poco::NumberFormatter::format(_appStandardPort)) + "/Config";
+//    return "http://localhost:" + config().getString("application.configPort", Poco::NumberFormatter::format(_socket.address().port())) + "/Config";
+//    return "http://localhost:" + Poco::NumberFormatter::format(_socket.address().port()) + "/Config";
 }
 
 
@@ -741,8 +770,7 @@ _pApplication(pApplication)
     addView(_pVisual, "Video");
     _pConfigBrowser = new Gui::WebBrowser;
     addView(_pConfigBrowser, "Setup");
-    _pConfigBrowser->setUri("http://localhost:4009/Config");
-//    _pConfigBrowser->setUri(_pApplication->getConfigHttpUri() + "/Config");
+    _pConfigBrowser->setUri(_pApplication->getConfigHttpUri());
     _pControlPanel = new MediaRendererView;
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
@@ -1661,7 +1689,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     else if (_pPlaylistContainer) {
         Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
-        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getConfigHttpUri() + UpnpApplication::PLAYLIST_URI);
+        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getAppHttpUri() + UpnpApplication::PLAYLIST_URI);
 
         // FIXME: why does this crash?
 //        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
@@ -1692,7 +1720,7 @@ PlaylistEditor::getPlaylistResource()
 std::string
 PlaylistEditor::getPlaylistResourceUri()
 {
-    _pControllerWidget->_pApplication->getConfigHttpUri() + UpnpApplication::PLAYLIST_URI;
+    _pControllerWidget->_pApplication->getAppHttpUri() + UpnpApplication::PLAYLIST_URI;
 }
 
 
@@ -1703,7 +1731,7 @@ PlaylistEditor::deleteItem(MediaObjectModel* pModel)
     std::vector<MediaObjectModel*>::iterator pos = std::find(_playlistItems.begin(), _playlistItems.end(), pModel);
     if (pos != _playlistItems.end()) {
         _playlistItems.erase(pos);
-        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getConfigHttpUri() + UpnpApplication::PLAYLIST_URI);
+        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getAppHttpUri() + UpnpApplication::PLAYLIST_URI);
         delete pModel;
         syncViewImpl();
     }
