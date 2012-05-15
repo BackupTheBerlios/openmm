@@ -451,7 +451,7 @@ ServerObjectResource::writeResource(const uri& sourceUri)
     Log::instance()->upnpav().debug("write resource of object with index name space: " + Poco::NumberFormatter::format(_pObject->_indexNamespace));
     if (_pObject->_indexNamespace == ServerObject::User) {
         // FIXME: always access the resource stream via getStream(), even on write operations (same in ServerContainer::initChild())
-        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + getPrivateResourceUri());
+        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + "/" + getPrivateResourceUri());
         Log::instance()->upnpav().debug("server container, write resource to playlist index file: " + indexFileName);
         std::ofstream indexFile(indexFileName.c_str());
 
