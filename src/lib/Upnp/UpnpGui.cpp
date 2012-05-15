@@ -25,6 +25,7 @@
 #include <Poco/Observer.h>
 #include <Poco/UUIDGenerator.h>
 #include <Poco/StreamCopier.h>
+#include <Poco/NamedMutex.h>
 #include <Poco/Util/Application.h>
 
 #include "UpnpGui.h"
@@ -108,7 +109,8 @@ _pLocalDeviceServer(new DeviceServer),
 _pLocalDeviceContainer(new DeviceContainer),
 _pLocalMediaRenderer(0),
 _pConf(0),
-_newServerUuid(Poco::UUIDGenerator().createRandom().toString())
+_newServerUuid(Poco::UUIDGenerator().createRandom().toString()),
+_instanceMutexName("OmmApplicationMutex")
 {
     setUnixOptions(true);
 }
@@ -211,6 +213,11 @@ UpnpApplication::main(const std::vector<std::string>& args)
     else
     {
         Poco::Util::Application::init(_argc, _argv);
+
+        if (instanceRunning()) {
+            setIgnoreConfig(true);
+        }
+
         loadConfig();
         initConfig();
 
@@ -698,6 +705,15 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
     }
 
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server finished.");
+}
+
+
+bool
+UpnpApplication::instanceRunning()
+{
+    Poco::NamedMutex mutex(_instanceMutexName);
+
+    return !mutex.tryLock();
 }
 
 

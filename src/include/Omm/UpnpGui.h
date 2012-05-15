@@ -134,10 +134,14 @@ private:
     std::stringstream* generateConfigForm();
     std::stringstream* handleConfigRequest(const Poco::Net::HTMLForm& form);
 
+    // local devices
     void initLocalDevices();
     void setLocalRenderer(const std::string& name, const std::string& uuid, const std::string& pluginName);
     void setLocalRenderer();
     void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath);
+
+    // other stuff
+    bool instanceRunning();
 
     int                                         _argc;
     char**                                      _argv;
@@ -159,7 +163,12 @@ private:
     bool                                        _showRendererVisualOnly;
     bool                                        _enableServer;
     std::string                                 _newServerUuid;
+    std::string                                 _instanceMutexName;
 
+    // socket is needed for
+    // 1. playlist editor resource imports
+    // 2. configuration of app
+    // and in the future for playing partial playlist from the editor?
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
 };
