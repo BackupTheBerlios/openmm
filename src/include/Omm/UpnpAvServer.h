@@ -438,8 +438,8 @@ public:
     virtual void freeStream(std::istream* pIstream) {}
     virtual std::istream* getIconStream(const std::string& path) { return 0; }
 
-    const Poco::TextEncoding* getSourceTextEncoding();
-    void setSourceTextEncoding(const std::string& encoding);
+    const Poco::TextEncoding* getTextEncoding();
+    void setTextEncoding(const std::string& encoding);
     Poco::TextConverter* getTextConverter();
 
 protected:

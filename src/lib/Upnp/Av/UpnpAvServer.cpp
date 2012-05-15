@@ -1996,14 +1996,14 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, 
 
 
 const Poco::TextEncoding*
-AbstractDataModel::getSourceTextEncoding()
+AbstractDataModel::getTextEncoding()
 {
     return _pSourceEncoding;
 }
 
 
 void
-AbstractDataModel::setSourceTextEncoding(const std::string& encoding)
+AbstractDataModel::setTextEncoding(const std::string& encoding)
 {
     _pSourceEncoding = Poco::TextEncoding::find(encoding);
     _pTextConverter = new Poco::TextConverter(*_pSourceEncoding, _targetEncoding);

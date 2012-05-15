@@ -33,7 +33,6 @@ FileModel::FileModel() :
 _pTagger(0)
 {
     loadTagger();
-    setSourceTextEncoding("UTF8");
 }
 
 
