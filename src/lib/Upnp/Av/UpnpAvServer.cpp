@@ -1293,7 +1293,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
                 }
             }
             else {
-                std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + uri;
+                std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + "/" + uri;
                 Log::instance()->upnpav().debug("server container, init child get playlist indices from file: " + indexFileName);
                 std::ifstream indexFile(indexFileName.c_str());
                 std::string line;
