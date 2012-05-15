@@ -233,6 +233,10 @@ public:
     ServerContainer(MediaServer* pServer);
 
     enum Layout {Flat, DirStruct, PropertyGroups};
+    static const std::string  LAYOUT_FLAT;
+    static const std::string  LAYOUT_DIR_STRUCT;
+    static const std::string  LAYOUT_PROPERTY_GROUPS;
+
     static const std::string  PROPERTY_GROUP_PROPERTY_NAME;
     static const std::string  PROPERTY_GROUP_PROPERTY_VALUE;
 
@@ -249,6 +253,8 @@ public:
     void setObjectCache(ServerObjectCache* pObjectCache);
 
     Layout getLayout();
+    void setLayout(Layout layout);
+    void setLayout(const std::string& layout);
 
     // sort and search caps
     virtual bool isSearchable();

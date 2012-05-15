@@ -388,7 +388,8 @@ UpnpApplication::initConfig()
             addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
                     config().getString("server." + *it + ".uuid", ""),
                     config().getString("server." + *it + ".plugin", "model-webradio"),
-                    config().getString("server." + *it + ".basePath", "webradio.conf"));
+                    config().getString("server." + *it + ".basePath", "webradio.conf"),
+                    config().getString("server." + *it + ".layout", "Flat"));
         }
     }
 
@@ -455,6 +456,7 @@ UpnpApplication::generateConfigForm()
         std::string serverUuid = _pConf->getString(serverKey + ".uuid", "");
         std::string serverPlugin = _pConf->getString(serverKey + ".plugin", "");
         std::string basePath = _pConf->getString(serverKey + ".basePath", "");
+        std::string layout = _pConf->getString(serverKey + ".layout", "");
 
         *pOutStream << "<fieldset><legend>" + serverName + "</legend>"
             "<table>"
@@ -462,6 +464,7 @@ UpnpApplication::generateConfigForm()
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + serverUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
+            "<tr><td>layout</td><td><input type=\"text\" name=\"" + serverKey + ".layout\" size=\"32\" value=\"" + layout +  "\"></td></tr>\n"
             "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
             "<tr><td><input type=\"submit\" name=\"delete." + *it + "\" value=\"Delete\"></td></tr>\n"
             "</table>"
@@ -475,6 +478,7 @@ UpnpApplication::generateConfigForm()
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + newServerKey + ".uuid\" size=\"32\" value=\"" + _newServerUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + newServerKey + ".plugin\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + newServerKey + ".basePath\" size=\"32\" value=\"\"></td></tr>\n"
+            "<tr><td>layout</td><td><input type=\"text\" name=\"" + newServerKey + ".layout\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + newServerKey + ".enable\" value=\"true\"></td></tr>\n"
             "<tr><td><input type=\"submit\" name=\"create." + _newServerUuid + "\" value=\"New\"></td></tr>\n"
             "</table>"
@@ -662,7 +666,8 @@ UpnpApplication::setLocalRenderer()
 
 
 void
-UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath)
+UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName,
+        const std::string& basePath, const std::string& layout)
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server ...");
 
@@ -691,6 +696,7 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
         path = Omm::Util::Home::instance()->getConfigDirPath("/") + basePath;
     }
     pContainer->setBasePath(path);
+    pContainer->setLayout(layout);
 
     pMediaServer->setRoot(pContainer);
     pMediaServer->setFriendlyName(name);

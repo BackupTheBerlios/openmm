@@ -736,6 +736,10 @@ ServerItem::createResource()
 }
 
 
+const std::string ServerContainer::LAYOUT_FLAT = "Flat";
+const std::string ServerContainer::LAYOUT_DIR_STRUCT = "DirStruct";
+const std::string ServerContainer::LAYOUT_PROPERTY_GROUPS = "PropertyGroups";
+
 const std::string ServerContainer::PROPERTY_GROUP_PROPERTY_NAME = "omm:groupPropName";
 const std::string ServerContainer::PROPERTY_GROUP_PROPERTY_VALUE = "omm:groupPropValue";
 
@@ -747,8 +751,6 @@ _pObjectCache(0),
 _pVirtualContainerCache(0),
 _pUserObjectCache(0),
 _layout(Flat),
-//_layout(DirStruct),
-//_layout(PropertyGroups),
 //_groupPropertyName(AvProperty::CLASS),
 _groupPropertyName(AvProperty::ARTIST),
 _childrenPlaylistSize(0),
@@ -820,6 +822,28 @@ ServerContainer::Layout
 ServerContainer::getLayout()
 {
     return _layout;
+}
+
+
+void
+ServerContainer::setLayout(ServerContainer::Layout layout)
+{
+    _layout = layout;
+}
+
+
+void
+ServerContainer::setLayout(const std::string& layout)
+{
+    if (layout == LAYOUT_FLAT) {
+        _layout = Flat;
+    }
+    else if (layout == LAYOUT_DIR_STRUCT) {
+        _layout = DirStruct;
+    }
+    else if (layout == LAYOUT_PROPERTY_GROUPS) {
+        _layout = PropertyGroups;
+    }
 }
 
 
