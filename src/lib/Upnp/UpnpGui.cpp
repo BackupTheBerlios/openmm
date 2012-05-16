@@ -1345,6 +1345,9 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
     attachController(new DeviceGroupNavigatorController(this));
+
+    // TODO: get search capabilities
+    _searchString = Poco::Util::Application::instance().config().getString("controller.searchString", "dc:title contains \"%s\"");
 }
 
 
@@ -1399,12 +1402,21 @@ void
 MediaServerGroupWidget::changedSearchText(const std::string& searchText)
 {
     Gui::Log::instance()->gui().debug("media server group widget changed search text: " + searchText);
+
+    if (searchText == "") {
+        return;
+    }
+
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getSelectedDevice());
     if (pServer) {
         // get (object id of) container, that is on top of navigator
         MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(getVisibleView());
         Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
-        pObject->setSearch(searchText);
+
+        std::string searchExp = Poco::replace(_searchString, std::string("%s"), "\"" + searchText + "\"");
+        Gui::Log::instance()->gui().debug("search expression: " + searchExp);
+        pObject->setSearch(searchExp);
+
         // clear cache (reset data model)
         pObject->clear();
         // if total item count of list model is 0, no items are fetched and thus total item count is not updated

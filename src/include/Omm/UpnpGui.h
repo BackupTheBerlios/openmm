@@ -367,6 +367,9 @@ public:
 
     // NavigatorController delegate
     virtual void changedSearchText(const std::string& searchText);
+
+private:
+    std::string         _searchString;
 };
 
 
