@@ -1356,6 +1356,7 @@ MediaRendererView::syncViewImpl()
     _pPlayButton->syncViewImpl();
     _pStopButton->syncViewImpl();
     _pVolSlider->syncViewImpl();
+    _pTrackName->syncViewImpl();
 }
 
 
