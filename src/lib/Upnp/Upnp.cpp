@@ -1552,7 +1552,7 @@ EventMessageWriter::write(std::string& eventMessage)
 
 
 void
-EventMessageWriter::stateVar(const StateVar& stateVar)
+EventMessageWriter::stateVar(StateVar& stateVar)
 {
     Log::instance()->event().debug("event message writer for state var: " + stateVar.getName());
 

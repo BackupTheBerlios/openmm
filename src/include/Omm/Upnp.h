@@ -175,7 +175,7 @@ public:
     void setValue(double val) { _val = Poco::NumberFormatter::format(val); }
     void setValue(Poco::URI val) { _val = val.toString(); }
 
-    const std::string& getValue() const {
+    virtual const std::string& getValue() {
         return _val;
     }
     void getValue(std::string& val) {

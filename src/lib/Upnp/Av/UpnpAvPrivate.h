@@ -29,6 +29,7 @@
 #include <Poco/DOM/Element.h>
 
 #include "Upnp.h"
+#include "UpnpInternal.h"
 
 namespace Omm {
 namespace Av {
@@ -45,7 +46,7 @@ public:
     StateVarValIterator beginStateVarVal(const std::string& stateVar);
     StateVarValIterator endStateVarVal(const std::string& stateVar);
 
-    void setStateVarAttribute(const std::string& name, const std::string& attr, const Variant& val);
+    void setStateVarAttribute(const std::string& name, const std::string& attr, Variant& val);
     void writeStateVar(Poco::XML::Node* pNode);
     void clear();
 
@@ -71,14 +72,16 @@ private:
 };
 
 
-class LastChange
+class LastChange : public StateVar
 {
 public:
-    LastChange(Service*& pService);
+    LastChange(Service*& pServiceRef);
     virtual ~LastChange();
 
     void addInstance();
-    void setStateVar(const ui4& InstanceID, const std::string& name, const Variant& val);
+
+    virtual const std::string& getValue();
+    void setStateVar(const ui4& InstanceID, const std::string& name, Variant& val);
 
 protected:
     void notify();
@@ -90,12 +93,12 @@ protected:
 
     virtual void writeSchemeAttribute() = 0;
 
-    void setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, const Variant& val);
+    void setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, Variant& val);
 
     Poco::AutoPtr<Poco::XML::Element>                                           _pMessage;
 
 private:
-    Service*&                                                                   _pService;
+    Service*&                                                                   _pServiceRef;
     std::string                                                                 _message;
     Poco::AutoPtr<Poco::XML::Document>                                          _pDoc;
     std::vector<LastChangeSet>                                                  _changeSet;
@@ -106,7 +109,7 @@ private:
 class AvTransportLastChange : public LastChange
 {
 public:
-    AvTransportLastChange(Service*& pService);
+    AvTransportLastChange(Service*& pServiceRef);
 
 private:
     virtual void writeSchemeAttribute();
@@ -116,9 +119,9 @@ private:
 class RenderingControlLastChange : public LastChange
 {
 public:
-    RenderingControlLastChange(Service*& pService);
+    RenderingControlLastChange(Service*& pServiceRef);
 
-    void setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, const Variant& val);
+    void setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, Variant& val);
 
 private:
     virtual void writeSchemeAttribute();

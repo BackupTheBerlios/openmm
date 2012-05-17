@@ -203,7 +203,7 @@ Engine::transportStateChanged()
     Variant val;
     val.setValue(newTransportState);
     Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
-//    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 }
 
 

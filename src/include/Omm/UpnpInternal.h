@@ -167,6 +167,7 @@ public:
     StateVar() {};
     template<typename T> StateVar(const T& val) : Variant(val) {}
 
+//    virtual const std::string& getValue() { return Variant::getValue(); };
     std::string getName() const;
     Service* getService();
     const std::string& getType() const;

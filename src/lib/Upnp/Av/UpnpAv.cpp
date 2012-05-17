@@ -219,7 +219,7 @@ LastChangeSet::endStateVarVal(const std::string& stateVar)
 
 
 void
-LastChangeSet::setStateVarAttribute(const std::string& name, const std::string& attr, const Variant& val)
+LastChangeSet::setStateVarAttribute(const std::string& name, const std::string& attr, Variant& val)
 {
     _stateVars[name][attr] = val.getValue();
 }
@@ -331,11 +331,12 @@ LastChangeReader::read(const std::string& message)
 }
 
 
-LastChange::LastChange(Service*& pService) :
-_pService(pService),
+LastChange::LastChange(Service*& pServiceRef) :
+_pServiceRef(pServiceRef),
 _pDoc(0),
 _pMessage(0)
 {
+    setName("LastChange");
 //    addInstance();
 }
 
@@ -354,20 +355,32 @@ LastChange::addInstance()
 }
 
 
+const std::string&
+LastChange::getValue()
+{
+    write();
+    clear();
+    Log::instance()->upnpav().debug("last change, get state var value: " + _message);
+    return _message;
+}
+
+
 void
-LastChange::setStateVar(const ui4& InstanceID, const std::string& name, const Variant& val)
+LastChange::setStateVar(const ui4& InstanceID, const std::string& name, Variant& val)
 {
     setStateVarAttribute(InstanceID, name, "val", val);
-//    notify();
+    notify();
 }
 
 
 void
 LastChange::notify()
 {
-    write();
-    _pService->setStateVar<std::string>("LastChange", _message);
-    clear();
+//    write();
+//    _pService->setStateVar<std::string>("LastChange", _message);
+//    clear();
+
+    _pServiceRef->queueEventMessage(*this);
 }
 
 
@@ -442,14 +455,14 @@ LastChange::clear()
 
 
 void
-LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, const Variant& val)
+LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, Variant& val)
 {
     _changeSet[InstanceID].setStateVarAttribute(name, attr, val);
 }
 
 
-AvTransportLastChange::AvTransportLastChange(Service*& pService) :
-LastChange(pService)
+AvTransportLastChange::AvTransportLastChange(Service*& pServiceRef) :
+LastChange(pServiceRef)
 {
 }
 
@@ -461,8 +474,8 @@ AvTransportLastChange::writeSchemeAttribute()
 }
 
 
-RenderingControlLastChange::RenderingControlLastChange(Service*& pService) :
-LastChange(pService)
+RenderingControlLastChange::RenderingControlLastChange(Service*& pServiceRef) :
+LastChange(pServiceRef)
 {
 }
 
@@ -475,12 +488,12 @@ RenderingControlLastChange::writeSchemeAttribute()
 
 
 void
-RenderingControlLastChange::setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, const Variant& val)
+RenderingControlLastChange::setChannelStateVar(const ui4& InstanceID, const std::string& channel, const std::string& name, Variant& val)
 {
     setStateVarAttribute(InstanceID, name, "val", val);
     Variant chan(channel);
     setStateVarAttribute(InstanceID, name, "channel", chan);
-//    notify();
+    notify();
 }
 
 

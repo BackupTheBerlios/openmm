@@ -401,7 +401,7 @@ class EventMessageWriter
 public:
     EventMessageWriter();
     void write(std::string& eventMessage);
-    void stateVar(const StateVar& stateVar);
+    void stateVar(StateVar& stateVar);
 
 private:
     Poco::AutoPtr<Poco::XML::Document>   _pDoc;
